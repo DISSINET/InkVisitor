@@ -4,32 +4,6 @@ import { Connection, r, RDatum, RStream } from "rethinkdb-ts";
 import { Results, SearchEdge } from ".";
 import Edge, { getEdgeInstance } from "./edge";
 
-type Validation = Record<Query.EdgeType, [Query.NodeType, Query.NodeType]>;
-
-/**
- * validationRules should be applicable for each node - between open node and close node
- */
-const validationRules: Validation = {
-  [Query.EdgeType.XHasPropType]: [Query.NodeType.X, Query.NodeType.C],
-  [Query.EdgeType.XHasPropValue]: [Query.NodeType.X, Query.NodeType.X],
-  [Query.EdgeType.XIsInS]: [Query.NodeType.X, Query.NodeType.S],
-  [Query.EdgeType.AIsActionInS]: [Query.NodeType.A, Query.NodeType.S],
-  [Query.EdgeType.XIsSubjectInS]: [Query.NodeType.X, Query.NodeType.S],
-  [Query.EdgeType.XIsActant1InS]: [Query.NodeType.X, Query.NodeType.S],
-  [Query.EdgeType.XIsActant2InS]: [Query.NodeType.X, Query.NodeType.S],
-  [Query.EdgeType.SUnderT]: [Query.NodeType.S, Query.NodeType.T],
-  [Query.EdgeType.XHasReferenceR]: [Query.NodeType.X, Query.NodeType.R],
-  [Query.EdgeType.THasChildT]: [Query.NodeType.T, Query.NodeType.T],
-  [Query.EdgeType.XHasSPropTypeC]: [Query.NodeType.X, Query.NodeType.C],
-  [Query.EdgeType.XHasSPropValue]: [Query.NodeType.X, Query.NodeType.X],
-  [Query.EdgeType.XHasSIdentification]: [Query.NodeType.X, Query.NodeType.X],
-  [Query.EdgeType.XHasSClassification]: [Query.NodeType.X, Query.NodeType.C],
-  [Query.EdgeType.XHasRelation]: [Query.NodeType.X, Query.NodeType.X],
-  [Query.EdgeType.XHasClassification]: [Query.NodeType.X, Query.NodeType.C],
-  [Query.EdgeType.CHasSuperclass]: [Query.NodeType.C, Query.NodeType.C],
-  [Query.EdgeType.SUnderChildrenT]: [Query.NodeType.S, Query.NodeType.T],
-};
-
 export default class SearchNode implements Query.INode {
   type: Query.NodeType;
   params: Query.INodeParams;
@@ -118,14 +92,14 @@ export default class SearchNode implements Query.INode {
    */
   isValid(): boolean {
     for (const edge of this.edges) {
-      const rule = validationRules[edge.type];
+      const rule = Query.EdgeTypeNodeRules[edge.type];
       if (!rule) {
         return false;
       }
 
-      if (rule[0] === Query.NodeType.X && rule[1] === Query.NodeType.X) {
-        // X-X is always ok
-      } else if (rule[0] !== this.type || rule[1] !== edge.node.type) {
+      if (rule[0] === Query.NodeType.X || this.type === Query.NodeType.X) {
+        // if source is X or node is X
+      } else if (rule[0] !== this.type) {
         return false;
       }
     }

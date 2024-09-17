@@ -16,6 +16,8 @@ import {
 } from "./Explorer/state";
 import { MemoizedQueryBox } from "./Query/QueryBox";
 import { queryDiff, queryReducer, queryStateInitial } from "./Query/state";
+import { getAllEdges, getAllNodes } from "./Query/utils";
+import { QueryValidity, QueryValidityProblem } from "./types";
 
 interface QueryPage {}
 export const QueryPage: React.FC<QueryPage> = ({}) => {
@@ -33,6 +35,47 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     queryStateInitial
   );
 
+  /**
+   * Collects all problems with the query state
+   */
+
+  const queryStateValidity = useMemo<QueryValidity>(() => {
+    let isValid = true;
+    let problems: QueryValidityProblem[] = [];
+
+    const allEdges = getAllEdges(queryState);
+    const allNodes = getAllNodes(queryState);
+
+    allNodes.forEach((node) => {
+      // if edge is invalid for the source node
+      node.edges.forEach((edge) => {
+        if (!Query.isSourceNodeValid(node.type, edge.type)) {
+          isValid = false;
+          problems.push({
+            source: edge.id,
+            text: "Invalid edge",
+          });
+        }
+      });
+    });
+
+    // if edge has an invalid target node
+    allEdges.forEach((edge) => {
+      if (!Query.isTargetNodeValid(edge.node.type, edge.type)) {
+        isValid = false;
+        problems.push({
+          source: edge.node.id,
+          text: "Invalid target node",
+        });
+      }
+    });
+
+    return {
+      problems,
+      isValid,
+    };
+  }, [queryState]);
+
   const [exploreState, exploreStateDispatch] = useReducer(
     exploreReducer,
     exploreStateInitial
@@ -43,19 +86,19 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
 
   useEffect(() => {
     if (queryDiff(prevQueryState.current, queryState)) {
-      invalidateQuery();
+      handleInvalidateQuery();
       prevQueryState.current = queryState;
     }
   }, [queryState]);
 
   useEffect(() => {
     if (exploreDiff(prevExploreState.current, exploreState)) {
-      invalidateQuery();
+      handleInvalidateQuery();
       prevExploreState.current = exploreState;
     }
   }, [exploreState]);
 
-  const invalidateQuery = () => {
+  const handleInvalidateQuery = () => {
     queryClient.invalidateQueries({
       queryKey: ["query"],
     });
@@ -68,14 +111,16 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
   } = useQuery({
     queryKey: ["query", queryState, exploreState],
     queryFn: async () => {
-      console.log("sort", exploreState.sort);
-      const res = await api.query({
-        query: queryState,
-        explore: exploreState,
-      });
-      return res.data;
+      if (queryStateValidity.isValid && api.isLoggedIn()) {
+        const res = await api.query({
+          query: queryState,
+          explore: exploreState,
+        });
+        return res.data;
+      }
     },
-    enabled: api.isLoggedIn(),
+
+    enabled: queryStateValidity.isValid && api.isLoggedIn(),
   });
 
   console.log("response", queryData);
@@ -149,6 +194,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
             data={queryData}
             isQueryFetching={queryIsFetching}
             queryError={queryError}
+            queryStateValidity={queryStateValidity}
           />
         </Box>
       </Panel>

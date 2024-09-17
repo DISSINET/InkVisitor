@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 
-import { IResponseQuery, IResponseQueryEntity } from "@shared/types";
+import { IResponseQuery } from "@shared/types";
 import { Explore } from "@shared/types/query";
-import { useQueryClient } from "@tanstack/react-query";
 import { useAppSelector } from "redux/hooks";
 import { ExplorerTable } from "./ExplorerTable/ExplorerTable";
 import { ExploreAction } from "./state";

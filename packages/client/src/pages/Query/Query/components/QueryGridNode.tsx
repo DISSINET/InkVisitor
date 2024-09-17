@@ -1,23 +1,37 @@
 import { Query } from "@shared/types";
-import { useQueryClient } from "@tanstack/react-query";
-import React, { useMemo } from "react";
-import { useAppSelector } from "redux/hooks";
-import { INodeItem } from "../types";
 import { Button } from "components";
-import { FaPlus, FaPlusCircle, FaTrash } from "react-icons/fa";
+import React from "react";
+import { FaPlus, FaTrash } from "react-icons/fa";
+import { INodeItem, QueryValidityProblem } from "../../types";
 import { QueryAction, QueryActionType } from "../state";
+import Dropdown from "components/advanced";
+import { StyledGraphNode } from "./QueryStyles";
 
 interface QueryGridNodeProps {
   node: INodeItem;
   edge: Query.IEdge | undefined;
   dispatch: React.Dispatch<QueryAction>;
+  problems: QueryValidityProblem[];
 }
 
 export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
   node,
   edge,
   dispatch,
+  problems,
 }) => {
+  console.log("node", node, edge);
+
+  const validSourceEdges = Query.findValidEdgeTypesForTarget(node.type);
+
+  const isValid = problems.length === 0;
+
+  const nodeTypeOptions = Object.values(Query.NodeType).map((type) => ({
+    value: type,
+    label: type.toString()[0],
+    info: type.toString(),
+  }));
+
   return (
     <div
       style={{
@@ -30,23 +44,28 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
         height: "100%",
       }}
     >
-      <div
+      <StyledGraphNode
         style={{
-          borderRadius: "20px",
-          backgroundColor: "darkgrey",
-          color: "white",
-          width: "35px",
-          height: "35px",
-          padding: 0,
-          fontWeight: "bold",
-          textAlign: "center",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
+          backgroundColor: isValid ? "dimgray" : "red",
         }}
       >
-        {node.type.substring(0, 1)}
-      </div>
+        <Dropdown.Single.Basic
+          options={nodeTypeOptions}
+          value={node.type}
+          tooltipLabel="node type"
+          width={45}
+          noDropDownIndicator
+          onChange={(newValue) => {
+            dispatch({
+              type: QueryActionType.updateNodeType,
+              payload: {
+                nodeId: node.id,
+                newType: newValue,
+              },
+            });
+          }}
+        />
+      </StyledGraphNode>
       <div>
         <Button
           icon={<FaPlus style={{ fontSize: "16px", padding: "2px" }} />}
@@ -56,7 +75,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
             dispatch({
               type: QueryActionType.addNode,
               payload: {
-                parentId: node.id,
+                parentId: edge?.node.id,
               },
             });
           }}

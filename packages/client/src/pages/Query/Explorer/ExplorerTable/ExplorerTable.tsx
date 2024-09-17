@@ -1,11 +1,18 @@
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
+import { classesAll } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
 import { IEntity, IResponseQuery, IResponseQueryEntity } from "@shared/types";
 import { Explore } from "@shared/types/query";
 import { Button, ButtonGroup, Checkbox, Input } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 import { FaTrashAlt } from "react-icons/fa";
+import {
+  LuChevronFirst,
+  LuChevronLast,
+  LuChevronLeft,
+  LuChevronRight,
+} from "react-icons/lu";
 import { MdOutlineEdit } from "react-icons/md";
 import { TbColumnInsertRight } from "react-icons/tb";
 import { v4 as uuidv4 } from "uuid";
@@ -21,14 +28,6 @@ import {
   StyledNewColumnValue,
   StyledTableHeader,
 } from "./ExplorerTableStyles";
-import { FaSort, FaSortDown, FaSortUp } from "react-icons/fa6";
-import { classesAll } from "@shared/dictionaries/entity";
-import {
-  LuChevronFirst,
-  LuChevronLast,
-  LuChevronLeft,
-  LuChevronRight,
-} from "react-icons/lu";
 
 const initialNewColumn: Explore.IExploreColumn = {
   id: uuidv4(),
@@ -51,21 +50,19 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   isQueryFetching,
   queryError,
 }) => {
-  const { entities: incomingEntities, total: incomingTotal } = data ?? {
+  const { entities, total: incomingTotal } = data ?? {
     entities: [],
     total: 0,
   };
   const { columns, filters, limit, offset, sort, view } = state;
 
-  const [entities, setEntities] = useState<IResponseQueryEntity[]>([]);
   const [total, setTotal] = useState(0);
 
   useEffect(() => {
     if (!isQueryFetching) {
-      setEntities(incomingEntities);
       setTotal(incomingTotal);
     }
-  }, [incomingEntities, total, isQueryFetching]);
+  }, [incomingTotal, isQueryFetching]);
 
   const [columnName, setColumnName] = useState(initialNewColumn.name);
   const [columnType, setColumnType] = useState(initialNewColumn.type);

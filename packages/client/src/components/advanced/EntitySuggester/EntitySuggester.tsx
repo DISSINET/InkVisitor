@@ -15,7 +15,7 @@ import api from "api";
 import { Suggester } from "components";
 import { CEntity, InstTemplate } from "constructors";
 import { useDebounce, useSearchParams } from "hooks";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { FaHome } from "react-icons/fa";
 import {
   EntityDragItem,
@@ -107,8 +107,8 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   const [selectedCategory, setSelectedCategory] = useState<
     EntityEnums.Class | EntityEnums.Extension.Any
   >();
-  const [allCategories, setAllCategories] =
-    useState<EntitySingleDropdownItem[]>();
+  // const [allCategories, setAllCategories] =
+  //   useState<EntitySingleDropdownItem[]>();
 
   useEffect(() => {
     if (externalTyped !== undefined) {
@@ -116,29 +116,32 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     }
   }, [externalTyped]);
 
-  // initial load of categories
+  const allCategories = useMemo<EntitySingleDropdownItem[]>(() => {
+    return categoryTypes.map((c) => {
+      return {
+        value: c,
+        label: c,
+        info: entitiesDictKeys[c]?.info,
+      };
+    });
+  }, [categoryTypes]);
+
   useEffect(() => {
-    if (categoryTypes.length) {
-      setAllCategories(
-        categoryTypes.map((c) => {
-          return {
-            value: c,
-            label: c,
-            info: entitiesDictKeys[c]?.info,
-          };
-        })
-      );
-      if (initCategory) {
+    if (initCategory) {
+      if (selectedCategory !== initCategory) {
         setSelectedCategory(initCategory);
-      } else {
-        setSelectedCategory(
-          !disableWildCard && categoryTypes.length > 1
-            ? EntityEnums.Extension.Any
-            : categoryTypes[0]
-        );
+      }
+    } else {
+      const firstValidCategory =
+        !disableWildCard && categoryTypes.length > 1
+          ? EntityEnums.Extension.Any
+          : categoryTypes[0];
+
+      if (selectedCategory !== firstValidCategory) {
+        setSelectedCategory(firstValidCategory);
       }
     }
-  }, [categoryTypes]);
+  }, [initCategory, categoryTypes]);
 
   const { appendDetailId } = useSearchParams();
 

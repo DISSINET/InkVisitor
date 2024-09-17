@@ -5,7 +5,12 @@ import { useAppSelector } from "redux/hooks";
 import { QueryGridEdge } from "./components/QueryGridEdge";
 import { QueryGridNode } from "./components/QueryGridNode";
 import { QueryAction } from "./state";
-import { INodeItem, QUERY_GRID_HEIGHT, QUERY_GRID_WIDTH } from "./types";
+import {
+  INodeItem,
+  QUERY_GRID_HEIGHT,
+  QUERY_GRID_WIDTH,
+  QueryValidity,
+} from "../types";
 import { getAllEdges, getAllNodes } from "./utils";
 
 interface QueryBoxProps {
@@ -14,6 +19,7 @@ interface QueryBoxProps {
   data: IResponseQuery | undefined;
   isQueryFetching: boolean;
   queryError: Error | null;
+  queryStateValidity: QueryValidity;
 }
 
 export const QueryBox: React.FC<QueryBoxProps> = ({
@@ -22,6 +28,7 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
   data,
   isQueryFetching,
   queryError,
+  queryStateValidity,
 }) => {
   const queryClient = useQueryClient();
 
@@ -113,6 +120,9 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
                     node={thisCellNode}
                     dispatch={dispatch}
                     edge={associatedEdge}
+                    problems={queryStateValidity.problems.filter(
+                      (problem) => problem.source === thisCellNode.id
+                    )}
                   />
                 )}
                 {nextCellAssociatedEdge && (
@@ -120,6 +130,9 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
                     node={nextCellNode}
                     dispatch={dispatch}
                     edge={nextCellAssociatedEdge}
+                    problems={queryStateValidity.problems.filter(
+                      (problem) => problem.source === nextCellAssociatedEdge.id
+                    )}
                   />
                 )}
               </div>
