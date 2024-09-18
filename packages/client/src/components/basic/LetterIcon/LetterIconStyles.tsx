@@ -31,8 +31,3 @@ export const StyledLetter = styled.p<StyledLetter>`
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
   color: ${({ theme, $color }) => theme.color[$color]};
 `;
-
-export const StyledFlexCenter = styled.div`
-  display: flex;
-  align-items: center;
-`;
