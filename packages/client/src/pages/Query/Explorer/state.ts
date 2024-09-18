@@ -4,22 +4,22 @@ import { Explore } from "@shared/types/query";
 const exploreStateInitial: Explore.IExplore = {
   view: { mode: Explore.EViewMode.Table },
   columns: [
-    {
-      id: "sex_value",
-      name: "Sex",
-      type: Explore.EExploreColumnType.EPV,
-      editable: true,
-      params: {
-        propertyType: "4ce5e669-d421-40c9-b1ce-f476fdd171fe",
-      },
-    },
-    {
-      id: "editor",
-      name: "Editor",
-      editable: false,
-      type: Explore.EExploreColumnType.EUC,
-      params: {},
-    },
+    // {
+    //   id: "sex_value",
+    //   name: "Sex",
+    //   type: Explore.EExploreColumnType.EPV,
+    //   editable: true,
+    //   params: {
+    //     propertyType: "4ce5e669-d421-40c9-b1ce-f476fdd171fe",
+    //   },
+    // },
+    // {
+    //   id: "editor",
+    //   name: "Editor",
+    //   editable: false,
+    //   type: Explore.EExploreColumnType.EUC,
+    //   params: {},
+    // },
   ],
   sort: undefined,
   filters: [],

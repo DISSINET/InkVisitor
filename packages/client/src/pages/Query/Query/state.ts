@@ -2,6 +2,7 @@ import { EntityEnums } from "@shared/enums";
 import { Query } from "@shared/types";
 import { v4 as uuidv4 } from "uuid";
 import { getAllEdges, getAllNodes } from "./utils";
+import { update } from "@react-spring/web";
 
 const queryStateInitial: Query.INode = {
   type: Query.NodeType.X,
@@ -12,23 +13,23 @@ const queryStateInitial: Query.INode = {
   },
   operator: Query.NodeOperator.And,
   edges: [
-    {
-      type: Query.EdgeType.XHasPropType,
-      params: {},
-      logic: Query.EdgeLogic.Positive,
-      id: "e1",
-      node: {
-        id: "n1",
-        type: Query.NodeType.C,
-        params: {
-          id: "4ce5e669-d421-40c9-b1ce-f476fdd171fe", //sex
-          classes: [],
-          label: "",
-        },
-        operator: Query.NodeOperator.And,
-        edges: [],
-      },
-    },
+    // {
+    //   type: Query.EdgeType.XHasPropType,
+    //   params: {},
+    //   logic: Query.EdgeLogic.Positive,
+    //   id: "e1",
+    //   node: {
+    //     id: "n1",
+    //     type: Query.NodeType.C,
+    //     params: {
+    //       id: "4ce5e669-d421-40c9-b1ce-f476fdd171fe", //sex
+    //       classes: [],
+    //       label: "",
+    //     },
+    //     operator: Query.NodeOperator.And,
+    //     edges: [],
+    //   },
+    // },
   ],
 };
 
@@ -41,39 +42,14 @@ enum QueryActionType {
   removeEdge,
   updateEdgeType,
   updateNodeType,
+  updateNodeClass,
+  updateNodeEntityId,
 }
 
 const queryReducer = (state: Query.INode, action: QueryAction) => {
   switch (action.type) {
     case QueryActionType.addNode:
-      const parentNodeId = action.payload.parentId;
-
-      const newEdge: Query.IEdge = {
-        type: Query.EdgeType.XHasPropType,
-        id: uuidv4(),
-        params: {},
-        logic: Query.EdgeLogic.Positive,
-        node: {
-          type: Query.NodeType.X,
-          id: uuidv4(),
-          params: {
-            classes: [EntityEnums.Class.Person],
-            label: "",
-          },
-          operator: Query.NodeOperator.And,
-          edges: [],
-        },
-      };
-      const updatedState = { ...state };
-
-      const parentNode = getAllNodes(updatedState).find(
-        (node) => node.id === parentNodeId
-      );
-      if (!parentNode) {
-        return updatedState;
-      }
-      parentNode.edges.push(newEdge);
-      return updatedState;
+      return addNode(state, action.payload.parentId);
 
     case QueryActionType.removeEdge:
       const edgeToRemove = action.payload.edgeId;
@@ -119,9 +95,64 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
         action.payload.newType
       );
 
+    case QueryActionType.updateNodeClass:
+      return updateNodeClass(
+        state,
+        action.payload.nodeId,
+        action.payload.newClasses
+      );
+
+    case QueryActionType.updateNodeEntityId:
+      return updateNodeEntityId(
+        state,
+        action.payload.nodeId,
+        action.payload.newId
+      );
+
     default:
       return state;
   }
+};
+
+const updateNodeClass = (
+  state: Query.INode,
+  nodeId: string,
+  newClasses: EntityEnums.Class[]
+): Query.INode => {
+  const updatedState = { ...state };
+
+  const nodeToUpdate = getAllNodes(updatedState).find(
+    (node) => node.id === nodeId
+  );
+  if (!nodeToUpdate) {
+    return updatedState;
+  }
+  nodeToUpdate.params.classes = newClasses;
+
+  return updatedState;
+};
+
+const updateNodeEntityId = (
+  state: Query.INode,
+  nodeId: string,
+  newId: string | undefined
+): Query.INode => {
+  const updatedState = { ...state };
+
+  const nodeToUpdate = getAllNodes(updatedState).find(
+    (node) => node.id === nodeId
+  );
+  if (!nodeToUpdate) {
+    return updatedState;
+  }
+  if (newId === undefined) {
+    delete nodeToUpdate.params.id;
+  } else {
+    nodeToUpdate.params.id = newId;
+    nodeToUpdate.params.classes = [];
+  }
+
+  return updatedState;
 };
 
 const updateNodeType = (
@@ -139,6 +170,35 @@ const updateNodeType = (
   }
   nodeToUpdate.type = newType;
 
+  return updatedState;
+};
+
+const addNode = (state: Query.INode, parentId: string): Query.INode => {
+  const newEdge: Query.IEdge = {
+    type: Query.EdgeType.XHasPropType,
+    id: uuidv4(),
+    params: {},
+    logic: Query.EdgeLogic.Positive,
+    node: {
+      type: Query.NodeType.X,
+      id: uuidv4(),
+      params: {
+        classes: [],
+        label: "",
+      },
+      operator: Query.NodeOperator.And,
+      edges: [],
+    },
+  };
+  const updatedState = { ...state };
+
+  const parentNode = getAllNodes(updatedState).find(
+    (node) => node.id === parentId
+  );
+  if (!parentNode) {
+    return updatedState;
+  }
+  parentNode.edges.push(newEdge);
   return updatedState;
 };
 

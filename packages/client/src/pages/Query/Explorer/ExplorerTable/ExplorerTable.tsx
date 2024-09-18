@@ -2,7 +2,12 @@ import React, { useEffect, useMemo, useState } from "react";
 
 import { classesAll } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
-import { IEntity, IResponseQuery, IResponseQueryEntity } from "@shared/types";
+import {
+  IEntity,
+  IResponseQuery,
+  IResponseQueryEntity,
+  IUser,
+} from "@shared/types";
 import { Explore } from "@shared/types/query";
 import { Button, ButtonGroup, Checkbox, Input } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
@@ -63,6 +68,53 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       setTotal(incomingTotal);
     }
   }, [incomingTotal, isQueryFetching]);
+
+  const renderCell = (
+    cellData:
+      | IEntity
+      | IEntity[]
+      | number
+      | number[]
+      | string
+      | string[]
+      | IUser
+      | IUser[]
+  ) => {
+    if (Array.isArray(cellData)) {
+      return cellData.map((entity, key) => {
+        return (
+          <React.Fragment key={key}>
+            <span style={{ marginBottom: "0.3rem" }}>
+              <EntityTag
+                entity={entity as IEntity}
+                unlinkButton={{
+                  onClick: () => {
+                    // TODO
+                  },
+                }}
+              />
+            </span>
+          </React.Fragment>
+        );
+      });
+    } else if (typeof cellData === "object") {
+      return (
+        <div>
+          <span
+            style={{
+              backgroundColor: "lime",
+              padding: "0.3rem",
+              display: "flex",
+            }}
+          >
+            {(cellData as IUser).name}
+          </span>
+        </div>
+      );
+    }
+
+    return <StyledEmpty>{"empty"}</StyledEmpty>;
+  };
 
   const [columnName, setColumnName] = useState(initialNewColumn.name);
   const [columnType, setColumnType] = useState(initialNewColumn.type);
@@ -308,29 +360,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                 {columns.map((column, key) => {
                   return (
                     <StyledGridColumn key={key}>
-                      {record.columnData[column.id] ? (
-                        (record.columnData[column.id] as Array<IEntity>).map(
-                          (entity, key) => {
-                            return (
-                              <React.Fragment key={key}>
-                                <span style={{ marginBottom: "0.3rem" }}>
-                                  <EntityTag
-                                    entity={entity}
-                                    unlinkButton={{
-                                      onClick: () => {
-                                        // TODO: unlink on BE
-                                      },
-                                    }}
-                                  />
-                                </span>
-                              </React.Fragment>
-                            );
-                          }
-                        )
-                      ) : (
-                        <StyledEmpty>{"empty"}</StyledEmpty>
-                      )}
-
+                      {renderCell(record.columnData[column.id])}
                       {column.editable && (
                         <EntitySuggester
                           categoryTypes={classesAll}
