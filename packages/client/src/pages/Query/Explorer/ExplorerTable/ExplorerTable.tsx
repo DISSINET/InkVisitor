@@ -1,11 +1,24 @@
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
+import { classesAll } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
-import { IEntity, IResponseQuery, IResponseQueryEntity } from "@shared/types";
+import {
+  IEntity,
+  IProp,
+  IResponseQuery,
+  IResponseQueryEntity,
+} from "@shared/types";
 import { Explore } from "@shared/types/query";
 import { Button, ButtonGroup, Checkbox, Input } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
+import { CMetaProp } from "constructors";
 import { FaTrashAlt } from "react-icons/fa";
+import {
+  LuChevronFirst,
+  LuChevronLast,
+  LuChevronLeft,
+  LuChevronRight,
+} from "react-icons/lu";
 import { MdOutlineEdit } from "react-icons/md";
 import { TbColumnInsertRight } from "react-icons/tb";
 import { v4 as uuidv4 } from "uuid";
@@ -21,14 +34,8 @@ import {
   StyledNewColumnValue,
   StyledTableHeader,
 } from "./ExplorerTableStyles";
-import { FaSort, FaSortDown, FaSortUp } from "react-icons/fa6";
-import { classesAll } from "@shared/dictionaries/entity";
-import {
-  LuChevronFirst,
-  LuChevronLast,
-  LuChevronLeft,
-  LuChevronRight,
-} from "react-icons/lu";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import api from "api";
 
 const initialNewColumn: Explore.IExploreColumn = {
   id: uuidv4(),
@@ -149,6 +156,21 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     }
     return "asc";
   };
+
+  const queryClient = useQueryClient();
+
+  const updateEntityMutation = useMutation({
+    mutationFn: async (variables: {
+      entityId: string;
+      changes: Partial<IEntity>;
+    }) => await api.entityUpdate(variables.entityId, variables.changes),
+
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["query"],
+      });
+    },
+  });
 
   return (
     <div style={{ padding: "1rem" }}>
@@ -311,7 +333,8 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                 {columns.map((column, key) => {
                   return (
                     <StyledGridColumn key={key}>
-                      {record.columnData[column.id] ? (
+                      {record.columnData[column.id] &&
+                      Array.isArray(record.columnData[column.id]) ? (
                         (record.columnData[column.id] as Array<IEntity>).map(
                           (entity, key) => {
                             return (
@@ -334,14 +357,24 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                         <StyledEmpty>{"empty"}</StyledEmpty>
                       )}
 
-                      {column.editable && (
-                        <EntitySuggester
-                          categoryTypes={classesAll}
-                          onPicked={(entity) => {
-                            // TODO: add to explore state
-                          }}
-                        />
-                      )}
+                      {column.editable &&
+                        column.type === Explore.EExploreColumnType.EPV && (
+                          <EntitySuggester
+                            categoryTypes={classesAll}
+                            onPicked={(entity) => {
+                              const newProp: IProp = CMetaProp({
+                                typeEntityId: column.params.propertyType,
+                                valueEntityId: entity.id,
+                              });
+                              const newProps =
+                                record.entity.props.concat(newProp);
+                              updateEntityMutation.mutate({
+                                entityId: entity.id,
+                                changes: { props: newProps },
+                              });
+                            }}
+                          />
+                        )}
                     </StyledGridColumn>
                   );
                 })}
