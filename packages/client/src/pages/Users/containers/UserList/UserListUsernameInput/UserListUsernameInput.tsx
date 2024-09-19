@@ -2,13 +2,13 @@ import { IResponseGeneric, IResponseUser, IUser } from "@shared/types";
 import { UseMutationResult } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import { Input } from "components";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Row } from "react-table";
 import { toast } from "react-toastify";
 
 interface UserListUsernameInput {
   user: IResponseUser;
-  usernameList?: string[];
+  rows: Row<IResponseUser>[];
   userMutation: UseMutationResult<
     AxiosResponse<IResponseGeneric<any>, any>,
     Error,
@@ -18,17 +18,23 @@ interface UserListUsernameInput {
 }
 export const UserListUsernameInput: React.FC<UserListUsernameInput> = ({
   user,
-  usernameList,
+  rows,
   userMutation,
 }) => {
   const { id, name } = user;
+
   const [localUsername, setLocalUsername] = useState(name);
+  useEffect(() => {
+    setLocalUsername(name);
+  }, [name]);
 
   return (
     <Input
       value={localUsername}
       changeOnType
       onBlur={async () => {
+        const usernameList = rows?.map((row) => row.original.name);
+
         if (localUsername !== name) {
           if (localUsername.length < 4) {
             toast.warning("Minimum length of username is 4 characters");

@@ -102,6 +102,7 @@ export const DocumentsPage: React.FC = ({}) => {
       id: uuidv4(),
       title: filename.substring(0, filename.lastIndexOf(".")) || filename,
       content: text,
+      entityIds: [],
     };
     uploadDocumentMutation.mutate(document);
     if (inputRef.current) inputRef.current.value = "";
