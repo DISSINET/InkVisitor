@@ -344,7 +344,23 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                                     entity={entity}
                                     unlinkButton={{
                                       onClick: () => {
-                                        // TODO: unlink on BE
+                                        const foundEntity =
+                                          record.entity.props.find(
+                                            (prop) =>
+                                              prop.value?.entityId === entity.id
+                                          );
+                                        console.log(foundEntity);
+                                        if (foundEntity) {
+                                          updateEntityMutation.mutate({
+                                            entityId: record.entity.id,
+                                            changes: {
+                                              props: record.entity.props.filter(
+                                                (prop) =>
+                                                  prop.id !== foundEntity.id
+                                              ),
+                                            },
+                                          });
+                                        }
                                       },
                                     }}
                                   />
@@ -366,11 +382,12 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                                 typeEntityId: column.params.propertyType,
                                 valueEntityId: entity.id,
                               });
-                              const newProps =
-                                record.entity.props.concat(newProp);
+
                               updateEntityMutation.mutate({
-                                entityId: entity.id,
-                                changes: { props: newProps },
+                                entityId: record.entity.id,
+                                changes: {
+                                  props: [...record.entity.props, newProp],
+                                },
                               });
                             }}
                           />

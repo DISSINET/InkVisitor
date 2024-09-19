@@ -68,7 +68,6 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
   } = useQuery({
     queryKey: ["query", queryState, exploreState],
     queryFn: async () => {
-      console.log("sort", exploreState.sort);
       const res = await api.query({
         query: queryState,
         explore: exploreState,
