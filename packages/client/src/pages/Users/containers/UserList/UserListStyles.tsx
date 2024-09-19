@@ -1,6 +1,7 @@
 import styled from "styled-components";
 
 export const StyledTableWrapper = styled.div`
+  position: relative;
   display: flex;
   width: 100%;
   overflow: auto;

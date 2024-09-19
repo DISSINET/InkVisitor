@@ -9,7 +9,7 @@ import {
   EntitySuggester,
   EntityTag,
 } from "components/advanced";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   FaEnvelopeOpenText,
   FaKey,
@@ -66,6 +66,14 @@ export const UserList: React.FC<UserList> = React.memo(() => {
     },
     enabled: api.isLoggedIn(),
   });
+
+  // const localUsers = useMemo(() => users || [], [users]);
+  const [localUsers, setLocalUsers] = useState<IResponseUser[]>([]);
+  useEffect(() => {
+    if (users) {
+      setLocalUsers(users);
+    }
+  }, [users]);
 
   const removingUser = useMemo(() => {
     return removingUserId ? users?.find((d) => d.id === removingUserId) : false;
@@ -134,8 +142,6 @@ export const UserList: React.FC<UserList> = React.memo(() => {
     return row.id;
   }, []);
 
-  const usernameList = useMemo(() => users?.map((u) => u.name) || [], [users]);
-
   const columns = useMemo<Column<IResponseUser>[]>(
     () => [
       {
@@ -177,7 +183,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
       {
         Header: "Username",
         id: "Username",
-        Cell: ({ row }: CellType) => {
+        Cell: ({ row, rows }: CellType) => {
           const { verified } = row.original;
 
           return (
@@ -186,7 +192,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                 <UserListUsernameInput
                   user={row.original}
                   userMutation={userMutation}
-                  usernameList={usernameList}
+                  rows={rows}
                 />
               )}
             </>
@@ -500,7 +506,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
         },
       },
     ],
-    [usernameList]
+    []
   );
 
   const {
@@ -512,45 +518,39 @@ export const UserList: React.FC<UserList> = React.memo(() => {
     visibleColumns,
   } = useTable({
     columns,
-    data: useMemo(() => users || [], [users]),
+    data: localUsers,
     getRowId,
   });
 
   return (
     <>
-      {users && (
-        <>
-          <StyledTableWrapper>
-            <StyledTable {...getTableProps()}>
-              <StyledTHead>
-                {headerGroups.map((headerGroup, key) => (
-                  <tr {...headerGroup.getHeaderGroupProps()} key={key}>
-                    {headerGroup.headers.map((column, key) => (
-                      <StyledTh {...column.getHeaderProps()} key={key}>
-                        {column.render("Header")}
-                      </StyledTh>
-                    ))}
-                  </tr>
+      <StyledTableWrapper>
+        <StyledTable {...getTableProps()}>
+          <StyledTHead>
+            {headerGroups.map((headerGroup, key) => (
+              <tr {...headerGroup.getHeaderGroupProps()} key={key}>
+                {headerGroup.headers.map((column, key) => (
+                  <StyledTh {...column.getHeaderProps()} key={key}>
+                    {column.render("Header")}
+                  </StyledTh>
                 ))}
-              </StyledTHead>
-              <tbody {...getTableBodyProps()}>
-                {rows.map((row: Row<IResponseUser>, i: number) => {
-                  prepareRow(row);
-                  return (
-                    <UserListTableRow
-                      index={i}
-                      row={row}
-                      {...row.getRowProps()}
-                    />
-                  );
-                })}
-              </tbody>
-            </StyledTable>
-          </StyledTableWrapper>
-          {/* NEW USER | TEST EMAIL */}
-          <UsersUtils users={users} />
-        </>
-      )}
+              </tr>
+            ))}
+          </StyledTHead>
+          <tbody {...getTableBodyProps()}>
+            {rows.map((row: Row<IResponseUser>, i: number) => {
+              prepareRow(row);
+              return (
+                <UserListTableRow index={i} row={row} {...row.getRowProps()} />
+              );
+            })}
+          </tbody>
+        </StyledTable>
+        <Loader show={isFetching} />
+      </StyledTableWrapper>
+
+      {/* NEW USER | TEST EMAIL */}
+      <UsersUtils users={localUsers} />
 
       <Submit
         title={`Deleting user ${removingUser ? removingUser.name : ""}`}
@@ -564,7 +564,6 @@ export const UserList: React.FC<UserList> = React.memo(() => {
         }}
         loading={removeUserMutation.isPending}
       />
-      <Loader show={isFetching} />
     </>
   );
 });
