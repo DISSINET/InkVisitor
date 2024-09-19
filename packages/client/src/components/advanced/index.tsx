@@ -26,6 +26,7 @@ import { LeftHeader, RightHeader } from "./PageHeader/PageHeader";
 import { PanelSeparator } from "./PanelSeparator/PanelSeparator";
 import { TerritoryActionModal } from "./TerritoryActionModal/TerritoryActionModal";
 import { UserCustomizationModal } from "./UserCustomizationModal/UserCustomizationModal";
+import { PanelSeparatorHorizontal } from "./PanelSeparator/PanelSeparatorHorizontal";
 
 const Dropdown = {
   Single: {
@@ -59,6 +60,7 @@ export {
   LeftHeader,
   RightHeader,
   PanelSeparator,
+  PanelSeparatorHorizontal,
   TerritoryActionModal,
   UserCustomizationModal,
   ElvlButtonGroup,

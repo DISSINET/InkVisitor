@@ -3,59 +3,59 @@ import React, { useEffect, useState } from "react";
 import { setDisableUserSelect } from "redux/features/layout/disableUserSelectSlice";
 import { useAppDispatch } from "redux/hooks";
 import { springConfig } from "Theme/constants";
-import { StyledPanelSeparatorVertical } from "./PanelSeparatorStyles";
+import { StyledPanelSeparatorHorizontal } from "./PanelSeparatorStyles";
 
-interface PanelSeparator {
+interface PanelSeparatorHorizontal {
   leftSideMinWidth: number;
   leftSideMaxWidth: number;
   // set custom one related to specific page
-  separatorXPosition: number;
-  setSeparatorXPosition: (xPosition: number) => void;
+  separatorYPosition: number;
+  setSeparatorYPosition: (xPosition: number) => void;
 }
-export const PanelSeparator: React.FC<PanelSeparator> = ({
+export const PanelSeparatorHorizontal: React.FC<PanelSeparatorHorizontal> = ({
   leftSideMinWidth,
   leftSideMaxWidth,
-  separatorXPosition,
-  setSeparatorXPosition,
+  separatorYPosition,
+  setSeparatorYPosition,
 }) => {
   const dispatch = useAppDispatch();
 
   const [separatorXTempPosition, setSeparatorXTempPosition] = useState<
     undefined | number
   >(undefined);
-  const [leftWidth, setLeftWidth] = useState<number>(separatorXPosition);
+  const [leftWidth, setLeftWidth] = useState<number>(separatorYPosition);
   const [dragging, setDragging] = useState(false);
   const [hovered, setHovered] = useState(false);
 
-  const animatedVerticalSeparator = useSpring({
-    left: `${(leftWidth - 1) / 10}rem`,
-    config: springConfig.separatorXPosition,
+  const animatedHorizontalSeparator = useSpring({
+    top: `${(leftWidth - 1) / 10}rem`,
+    config: springConfig.separatorYPosition,
   });
 
   useEffect(() => {
-    if (leftWidth !== separatorXPosition) {
-      setLeftWidth(separatorXPosition);
+    if (leftWidth !== separatorYPosition) {
+      setLeftWidth(separatorYPosition);
     }
 
     window.getSelection()?.removeAllRanges();
-  }, [separatorXPosition]);
+  }, [separatorYPosition]);
 
   useEffect(() => {
-    if (!dragging && leftWidth !== separatorXPosition) {
-      setSeparatorXPosition(leftWidth);
+    if (!dragging && leftWidth !== separatorYPosition) {
+      setSeparatorYPosition(leftWidth);
     }
   }, [leftWidth, dragging]);
 
   const onMouseDown = (e: React.MouseEvent) => {
-    setSeparatorXTempPosition(e.clientX);
+    setSeparatorXTempPosition(e.clientY);
     setDragging(true);
     dispatch(setDisableUserSelect(true));
   };
 
-  const onMove = (clientX: number) => {
+  const onMove = (clientY: number) => {
     if (dragging && leftWidth && separatorXTempPosition) {
-      const newLeftWidth = leftWidth + clientX - separatorXTempPosition;
-      setSeparatorXTempPosition(clientX);
+      const newLeftWidth = leftWidth + clientY - separatorXTempPosition;
+      setSeparatorXTempPosition(clientY);
       if (newLeftWidth < leftSideMinWidth) {
         setLeftWidth(leftSideMinWidth);
         return;
@@ -71,7 +71,7 @@ export const PanelSeparator: React.FC<PanelSeparator> = ({
 
   const onMouseMove = (e: MouseEvent) => {
     e.preventDefault();
-    onMove(e.clientX);
+    onMove(e.clientY);
   };
 
   const onMouseUp = () => {
@@ -92,11 +92,11 @@ export const PanelSeparator: React.FC<PanelSeparator> = ({
   }, [hovered, dragging]);
 
   return (
-    <StyledPanelSeparatorVertical
+    <StyledPanelSeparatorHorizontal
       onMouseDown={onMouseDown}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      style={animatedVerticalSeparator}
+      style={animatedHorizontalSeparator}
       $show={hovered || dragging}
     />
   );
