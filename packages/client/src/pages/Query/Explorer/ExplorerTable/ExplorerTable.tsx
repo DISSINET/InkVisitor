@@ -2,15 +2,13 @@ import React, { useEffect, useMemo, useState } from "react";
 
 import { classesAll } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
-import {
-  IEntity,
-  IResponseQuery,
-  IResponseQueryEntity,
-  IUser,
-} from "@shared/types";
+import { IEntity, IProp, IResponseQuery, IUser } from "@shared/types";
 import { Explore } from "@shared/types/query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import api from "api";
 import { Button, ButtonGroup, Checkbox, Input } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
+import { CMetaProp } from "constructors";
 import { FaTrashAlt } from "react-icons/fa";
 import {
   LuChevronFirst,
@@ -78,39 +76,69 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       | string
       | string[]
       | IUser
-      | IUser[]
+      | IUser[],
+    column: Explore.IExploreColumn
   ) => {
     if (Array.isArray(cellData)) {
-      return cellData.map((entity, key) => {
+      if (
+        cellData.length > 0 &&
+        typeof (cellData[0] as IEntity).class !== "undefined"
+      ) {
+        // is type IEntity[]
+        return cellData.map((entity, key) => {
+          return (
+            <React.Fragment key={key}>
+              <span style={{ marginBottom: "0.3rem" }}>
+                <EntityTag
+                  entity={entity as IEntity}
+                  unlinkButton={
+                    column.editable && {
+                      onClick: () => {
+                        const { id, props } = entity as IEntity;
+                        const foundEntity = props.find(
+                          (prop) => prop.value?.entityId === id
+                        );
+                        if (foundEntity) {
+                          updateEntityMutation.mutate({
+                            entityId: id,
+                            changes: {
+                              props: props.filter(
+                                (prop) => prop.id !== foundEntity.id
+                              ),
+                            },
+                          });
+                        }
+                      },
+                    }
+                  }
+                />
+              </span>
+            </React.Fragment>
+          );
+        });
+      } else if (
+        cellData.length > 0 &&
+        typeof (cellData[0] as IUser).email !== "undefined"
+      ) {
+        // is type IUser[]
         return (
-          <React.Fragment key={key}>
-            <span style={{ marginBottom: "0.3rem" }}>
-              <EntityTag
-                entity={entity as IEntity}
-                unlinkButton={{
-                  onClick: () => {
-                    // TODO
-                  },
-                }}
-              />
+          <div>
+            <span
+              style={{
+                backgroundColor: "lime",
+                padding: "0.3rem",
+                display: "flex",
+              }}
+            >
+              {(cellData as IUser[]).map((user) => {
+                return user.name;
+              })}
             </span>
-          </React.Fragment>
+          </div>
         );
-      });
-    } else if (typeof cellData === "object") {
-      return (
-        <div>
-          <span
-            style={{
-              backgroundColor: "lime",
-              padding: "0.3rem",
-              display: "flex",
-            }}
-          >
-            {(cellData as IUser).name}
-          </span>
-        </div>
-      );
+      }
+    } else {
+      // TODO: not an array - IEntity, IUser, number, string
     }
 
     return <StyledEmpty>{"empty"}</StyledEmpty>;
@@ -198,6 +226,21 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     }
     return "asc";
   };
+
+  const queryClient = useQueryClient();
+
+  const updateEntityMutation = useMutation({
+    mutationFn: async (variables: {
+      entityId: string;
+      changes: Partial<IEntity>;
+    }) => await api.entityUpdate(variables.entityId, variables.changes),
+
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["query"],
+      });
+    },
+  });
 
   return (
     <div style={{ padding: "1rem" }}>
@@ -360,15 +403,71 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                 {columns.map((column, key) => {
                   return (
                     <StyledGridColumn key={key}>
-                      {renderCell(record.columnData[column.id])}
-                      {column.editable && (
-                        <EntitySuggester
-                          categoryTypes={classesAll}
-                          onPicked={(entity) => {
-                            // TODO: add to explore state
-                          }}
-                        />
+                      {record.columnData[column.id] &&
+                      Array.isArray(record.columnData[column.id]) ? (
+                        (record.columnData[column.id] as Array<IEntity>).map(
+                          (entity, key) => {
+                            return (
+                              <React.Fragment key={key}>
+                                <span style={{ marginBottom: "0.3rem" }}>
+                                  <EntityTag
+                                    entity={entity}
+                                    unlinkButton={
+                                      column.editable && {
+                                        onClick: () => {
+                                          const foundEntity =
+                                            record.entity.props.find(
+                                              (prop) =>
+                                                prop.value?.entityId ===
+                                                entity.id
+                                            );
+                                          if (foundEntity) {
+                                            updateEntityMutation.mutate({
+                                              entityId: record.entity.id,
+                                              changes: {
+                                                props:
+                                                  record.entity.props.filter(
+                                                    (prop) =>
+                                                      prop.id !== foundEntity.id
+                                                  ),
+                                              },
+                                            });
+                                          }
+                                        },
+                                      }
+                                    }
+                                  />
+                                </span>
+                              </React.Fragment>
+                            );
+                          }
+                        )
+                      ) : (
+                        <StyledEmpty>{"empty"}</StyledEmpty>
                       )}
+                      {renderCell(record.columnData[column.id], column)}
+                      {column.editable &&
+                        column.type === Explore.EExploreColumnType.EPV && (
+                          <EntitySuggester
+                            categoryTypes={classesAll}
+                            onPicked={(entity) => {
+                              const params =
+                                column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.EPV>;
+
+                              const newProp: IProp = CMetaProp({
+                                typeEntityId: params.propertyType,
+                                valueEntityId: entity.id,
+                              });
+
+                              updateEntityMutation.mutate({
+                                entityId: record.entity.id,
+                                changes: {
+                                  props: [...record.entity.props, newProp],
+                                },
+                              });
+                            }}
+                          />
+                        )}
                     </StyledGridColumn>
                   );
                 })}

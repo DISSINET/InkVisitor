@@ -1,3 +1,4 @@
+import { MdOutlineEdit } from "react-icons/md";
 import styled from "styled-components";
 
 interface StyledGrid {
@@ -5,6 +6,7 @@ interface StyledGrid {
 }
 export const StyledGrid = styled.div<StyledGrid>`
   display: grid;
+  align-content: start;
   grid-template-columns: ${({ $columns }) => `repeat(${$columns}, auto)`};
   color: ${({ theme }) => theme.color["black"]};
   width: 100%;
