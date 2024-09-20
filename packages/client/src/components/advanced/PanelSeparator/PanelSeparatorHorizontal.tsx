@@ -6,15 +6,15 @@ import { springConfig } from "Theme/constants";
 import { StyledPanelSeparatorHorizontal } from "./PanelSeparatorStyles";
 
 interface PanelSeparatorHorizontal {
-  leftSideMinWidth: number;
-  leftSideMaxWidth: number;
+  topPositionMin: number;
+  topPositionMax: number;
   // set custom one related to specific page
   separatorYPosition: number;
   setSeparatorYPosition: (xPosition: number) => void;
 }
 export const PanelSeparatorHorizontal: React.FC<PanelSeparatorHorizontal> = ({
-  leftSideMinWidth,
-  leftSideMaxWidth,
+  topPositionMin,
+  topPositionMax,
   separatorYPosition,
   setSeparatorYPosition,
 }) => {
@@ -23,28 +23,28 @@ export const PanelSeparatorHorizontal: React.FC<PanelSeparatorHorizontal> = ({
   const [separatorXTempPosition, setSeparatorXTempPosition] = useState<
     undefined | number
   >(undefined);
-  const [leftWidth, setLeftWidth] = useState<number>(separatorYPosition);
+  const [topPosition, setTopPosition] = useState<number>(separatorYPosition);
   const [dragging, setDragging] = useState(false);
   const [hovered, setHovered] = useState(false);
 
   const animatedHorizontalSeparator = useSpring({
-    top: `${(leftWidth - 1) / 10}rem`,
+    top: `${(topPosition - 3) / 10}rem`,
     config: springConfig.separatorYPosition,
   });
 
   useEffect(() => {
-    if (leftWidth !== separatorYPosition) {
-      setLeftWidth(separatorYPosition);
+    if (topPosition !== separatorYPosition) {
+      setTopPosition(separatorYPosition);
     }
 
     window.getSelection()?.removeAllRanges();
   }, [separatorYPosition]);
 
   useEffect(() => {
-    if (!dragging && leftWidth !== separatorYPosition) {
-      setSeparatorYPosition(leftWidth);
+    if (!dragging && topPosition !== separatorYPosition) {
+      setSeparatorYPosition(topPosition);
     }
-  }, [leftWidth, dragging]);
+  }, [topPosition, dragging]);
 
   const onMouseDown = (e: React.MouseEvent) => {
     setSeparatorXTempPosition(e.clientY);
@@ -53,19 +53,19 @@ export const PanelSeparatorHorizontal: React.FC<PanelSeparatorHorizontal> = ({
   };
 
   const onMove = (clientY: number) => {
-    if (dragging && leftWidth && separatorXTempPosition) {
-      const newLeftWidth = leftWidth + clientY - separatorXTempPosition;
+    if (dragging && topPosition && separatorXTempPosition) {
+      const newtopPosition = topPosition + clientY - separatorXTempPosition;
       setSeparatorXTempPosition(clientY);
-      if (newLeftWidth < leftSideMinWidth) {
-        setLeftWidth(leftSideMinWidth);
+      if (newtopPosition < topPositionMin) {
+        setTopPosition(topPositionMin);
         return;
       }
 
-      if (newLeftWidth > leftSideMaxWidth) {
-        setLeftWidth(leftSideMaxWidth);
+      if (newtopPosition > topPositionMax) {
+        setTopPosition(topPositionMax);
         return;
       }
-      setLeftWidth(newLeftWidth);
+      setTopPosition(newtopPosition);
     }
   };
 
