@@ -125,54 +125,6 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
 
   // console.log("response", queryData);
 
-  // const handleSeparatorXPositionChange = (xPosition: number) => {
-  //   if (querySeparatorXPosition !== xPosition) {
-  //     setquerySeparatorXPosition(xPosition);
-
-  //     const separatorXPercentPosition = floorNumberToOneDecimal(
-  //       xPosition / onePercentOfLayoutWidth
-  //     );
-  //     localStorage.setItem(
-  //       "querySeparatorXPosition",
-  //       separatorXPercentPosition.toString()
-  //     );
-  //   }
-  // };
-
-  // const onePercentOfLayoutWidth = useMemo(
-  //   () => layoutWidth / 100,
-  //   [layoutWidth]
-  // );
-
-  // const localStorageSeparatorXPosition = localStorage.getItem(
-  //   "querySeparatorXPosition"
-  // );
-  // const [querySeparatorXPosition, setquerySeparatorXPosition] =
-  //   useState<number>(
-  //     localStorageSeparatorXPosition
-  //       ? floorNumberToOneDecimal(
-  //           Number(localStorageSeparatorXPosition) * onePercentOfLayoutWidth
-  //         )
-  //       : layoutWidth / 2
-  //   );
-
-  // const [currentLayoutWidth, setCurrentLayoutWidth] = useState(layoutWidth);
-
-  // useEffect(() => {
-  //   const onePercentOfLastLayoutWidth = currentLayoutWidth / 100;
-  //   const separatorXPercentPosition = floorNumberToOneDecimal(
-  //     querySeparatorXPosition / onePercentOfLastLayoutWidth
-  //   );
-  //   setquerySeparatorXPosition(
-  //     separatorXPercentPosition * onePercentOfLayoutWidth
-  //   );
-  //   localStorage.setItem(
-  //     "querySeparatorXPosition",
-  //     separatorXPercentPosition.toString()
-  //   );
-  //   setCurrentLayoutWidth(layoutWidth);
-  // }, [layoutWidth]);
-
   const onePercentOfContentHeight = useMemo(
     () => contentHeight / 100,
     [contentHeight]
@@ -226,8 +178,8 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     <>
       {querySeparatorYPosition > 0 && (
         <PanelSeparatorHorizontal
-          leftSideMinWidth={30}
-          leftSideMaxWidth={contentHeight - 30}
+          topPositionMin={30}
+          topPositionMax={contentHeight - 30}
           separatorYPosition={querySeparatorYPosition}
           setSeparatorYPosition={(yPosition) =>
             handleSeparatorYPositionChange(yPosition)

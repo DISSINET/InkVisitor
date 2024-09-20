@@ -25,7 +25,7 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   );
 
   return (
-    <div>
+    <>
       <ExplorerTable
         state={state}
         dispatch={dispatch}
@@ -33,7 +33,7 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
         isQueryFetching={isQueryFetching}
         queryError={queryError}
       />
-    </div>
+    </>
   );
 };
 
