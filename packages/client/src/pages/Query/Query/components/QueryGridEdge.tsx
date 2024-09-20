@@ -2,19 +2,52 @@ import { Query } from "@shared/types";
 import Dropdown from "components/advanced";
 import React from "react";
 import { QueryAction, QueryActionType } from "../state";
-import { INodeItem, QUERY_GRID_HEIGHT, QUERY_GRID_WIDTH } from "../types";
+import {
+  edgeTypesImplemented,
+  INodeItem,
+  QUERY_GRID_HEIGHT,
+  QUERY_GRID_WIDTH,
+  QueryValidityProblem,
+} from "../../types";
+import theme from "Theme/theme";
 
 interface QueryGridEdgeProps {
   node: INodeItem;
   edge: Query.IEdge;
   dispatch: React.Dispatch<QueryAction>;
+  problems: QueryValidityProblem[];
 }
 
 export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
   node,
   edge,
   dispatch,
+  problems,
 }) => {
+  const validEdgesTypes = Query.findValidEdgeTypesForSource(node.type);
+
+  const edgeTypeOptions = validEdgesTypes.map((type) => ({
+    value: type,
+    label: Query.EdgeTypeLabels[type],
+    isDisabled: !edgeTypesImplemented.includes(type),
+  }));
+
+  const isValid = problems.length === 0;
+
+  const color = isValid ? "dimgray" : "red";
+
+  edgeTypeOptions.sort((a, b) => {
+    if (a.isDisabled && !b.isDisabled) {
+      return 1;
+    }
+
+    if (!a.isDisabled && b.isDisabled) {
+      return -1;
+    }
+
+    return a.label.localeCompare(b.label);
+  });
+
   return (
     <div
       style={{
@@ -26,13 +59,20 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
         height={QUERY_GRID_HEIGHT}
         style={{ position: "absolute", top: 0, left: 0 }}
       >
-        <g style={{ stroke: "rgb(0,0,0)", strokeWidth: 2 }}>
-          <line x1={20} x2={20} y1={0} y2={QUERY_GRID_HEIGHT / 2} />
+        <g style={{ stroke: color, strokeWidth: 3 }}>
+          <line
+            x1={20}
+            x2={20}
+            y1={0}
+            y2={QUERY_GRID_HEIGHT / 2}
+            strokeLinecap="round"
+          />
           <line
             x1={20}
             x2={QUERY_GRID_WIDTH}
             y1={QUERY_GRID_HEIGHT / 2}
             y2={QUERY_GRID_HEIGHT / 2}
+            strokeLinecap="round"
           />
         </g>
       </svg>
@@ -46,29 +86,28 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
           justifyContent: "center",
         }}
       >
-        <Dropdown.Single.Basic
-          options={[
-            { value: Query.EdgeType.XHasPropType, label: "XHasPropType" },
-            {
-              value: Query.EdgeType.XHasClassification,
-              label: "XHasClassification",
-            },
-            { value: Query.EdgeType.XHasRelation, label: "XHasRelation" },
-            { value: Query.EdgeType.SUnderT, label: "SUnderT" },
-            { value: Query.EdgeType.XHasSuperclass, label: "XHasSuperclass" },
-          ]}
-          width={200}
-          value={edge?.type}
-          onChange={(newValue) => {
-            dispatch({
-              type: QueryActionType.updateEdgeType,
-              payload: {
-                edgeId: edge?.id,
-                newType: newValue,
-              },
-            });
+        <div
+          style={{
+            backgroundColor: color,
+            padding: theme.space[1],
           }}
-        />
+        >
+          <Dropdown.Single.Basic
+            options={edgeTypeOptions}
+            width={200}
+            noDropDownIndicator
+            value={edge?.type}
+            onChange={(newValue) => {
+              dispatch({
+                type: QueryActionType.updateEdgeType,
+                payload: {
+                  edgeId: edge?.id,
+                  newType: newValue,
+                },
+              });
+            }}
+          />
+        </div>
       </div>
     </div>
   );

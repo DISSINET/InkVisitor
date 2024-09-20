@@ -2,12 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 
 import { classesAll } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
-import {
-  IEntity,
-  IProp,
-  IResponseQuery,
-  IResponseQueryEntity,
-} from "@shared/types";
+import { IEntity, IProp, IResponseQuery, IUser } from "@shared/types";
 import { Explore } from "@shared/types/query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
@@ -58,21 +53,96 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   isQueryFetching,
   queryError,
 }) => {
-  const { entities: incomingEntities, total: incomingTotal } = data ?? {
+  const { entities, total: incomingTotal } = data ?? {
     entities: [],
     total: 0,
   };
   const { columns, filters, limit, offset, sort, view } = state;
 
-  const [entities, setEntities] = useState<IResponseQueryEntity[]>([]);
   const [total, setTotal] = useState(0);
 
   useEffect(() => {
     if (!isQueryFetching) {
-      setEntities(incomingEntities);
       setTotal(incomingTotal);
     }
-  }, [incomingEntities, total, isQueryFetching]);
+  }, [incomingTotal, isQueryFetching]);
+
+  const renderCell = (
+    cellData:
+      | IEntity
+      | IEntity[]
+      | number
+      | number[]
+      | string
+      | string[]
+      | IUser
+      | IUser[],
+    column: Explore.IExploreColumn
+  ) => {
+    if (Array.isArray(cellData)) {
+      if (
+        cellData.length > 0 &&
+        typeof (cellData[0] as IEntity).class !== "undefined"
+      ) {
+        // is type IEntity[]
+        return cellData.map((entity, key) => {
+          return (
+            <React.Fragment key={key}>
+              <span style={{ marginBottom: "0.3rem" }}>
+                <EntityTag
+                  entity={entity as IEntity}
+                  unlinkButton={
+                    column.editable && {
+                      onClick: () => {
+                        const { id, props } = entity as IEntity;
+                        const foundEntity = props.find(
+                          (prop) => prop.value?.entityId === id
+                        );
+                        if (foundEntity) {
+                          updateEntityMutation.mutate({
+                            entityId: id,
+                            changes: {
+                              props: props.filter(
+                                (prop) => prop.id !== foundEntity.id
+                              ),
+                            },
+                          });
+                        }
+                      },
+                    }
+                  }
+                />
+              </span>
+            </React.Fragment>
+          );
+        });
+      } else if (
+        cellData.length > 0 &&
+        typeof (cellData[0] as IUser).email !== "undefined"
+      ) {
+        // is type IUser[]
+        return (
+          <div>
+            <span
+              style={{
+                backgroundColor: "lime",
+                padding: "0.3rem",
+                display: "flex",
+              }}
+            >
+              {(cellData as IUser[]).map((user) => {
+                return user.name;
+              })}
+            </span>
+          </div>
+        );
+      }
+    } else {
+      // TODO: not an array - IEntity, IUser, number, string
+    }
+
+    return <StyledEmpty>{"empty"}</StyledEmpty>;
+  };
 
   const [columnName, setColumnName] = useState(initialNewColumn.name);
   const [columnType, setColumnType] = useState(initialNewColumn.type);
@@ -375,7 +445,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                       ) : (
                         <StyledEmpty>{"empty"}</StyledEmpty>
                       )}
-
+                      {renderCell(record.columnData[column.id], column)}
                       {column.editable &&
                         column.type === Explore.EExploreColumnType.EPV && (
                           <EntitySuggester

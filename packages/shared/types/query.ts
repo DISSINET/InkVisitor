@@ -41,6 +41,7 @@ export namespace Query {
     XIsActant1InS = "X_is_actant_1_in_S",
     XIsActant2InS = "X_is_actant_2_in_S",
     SUnderT = "S_under_T",
+    SUnderChildrenT = "S_under_children_T",
     XHasReferenceR = "X_has_reference_R",
     THasChildT = "T_has_child_T",
     XHasSPropTypeC = "X_has_S_proptype_C",
@@ -50,7 +51,6 @@ export namespace Query {
     XHasRelation = "X_has_relation",
     XHasClassification = "X_has_classification",
     CHasSuperclass = "C_has_superclass",
-    CHasClassification = "C_has_classification",
   }
   export enum NodeOperator {
     And = "and",
@@ -60,6 +60,91 @@ export namespace Query {
     Positive = "positive",
     Negative = "negative",
   }
+  export const EdgeTypeNodeRules: Record<EdgeType, [NodeType, NodeType]> = {
+    [EdgeType.XHasPropType]: [NodeType.X, NodeType.C],
+    [EdgeType.XHasPropValue]: [NodeType.X, NodeType.X],
+    [EdgeType.XIsInS]: [NodeType.X, NodeType.S],
+    [EdgeType.AIsActionInS]: [NodeType.A, NodeType.S],
+    [EdgeType.XIsSubjectInS]: [NodeType.X, NodeType.S],
+    [EdgeType.XIsActant1InS]: [NodeType.X, NodeType.S],
+    [EdgeType.XIsActant2InS]: [NodeType.X, NodeType.S],
+    [EdgeType.SUnderT]: [NodeType.S, NodeType.T],
+    [EdgeType.XHasReferenceR]: [NodeType.X, NodeType.R],
+    [EdgeType.THasChildT]: [NodeType.T, NodeType.T],
+    [EdgeType.XHasSPropTypeC]: [NodeType.X, NodeType.C],
+    [EdgeType.XHasSPropValue]: [NodeType.X, NodeType.X],
+    [EdgeType.XHasSIdentification]: [NodeType.X, NodeType.X],
+    [EdgeType.XHasSClassification]: [NodeType.X, NodeType.C],
+    [EdgeType.XHasRelation]: [NodeType.X, NodeType.X],
+    [EdgeType.XHasClassification]: [NodeType.X, NodeType.C],
+    [EdgeType.CHasSuperclass]: [NodeType.C, NodeType.C],
+    [EdgeType.SUnderChildrenT]: [NodeType.S, NodeType.T],
+  };
+  export const EdgeTypeLabels: Record<EdgeType, string> = {
+    [EdgeType.XHasPropType]: "has property type",
+    [EdgeType.XHasPropValue]: "has property value",
+    [EdgeType.XIsInS]: "is in statement",
+    [EdgeType.AIsActionInS]: "is action in statement",
+    [EdgeType.XIsSubjectInS]: "is subject in statement",
+    [EdgeType.XIsActant1InS]: "is actant 1 in statement",
+    [EdgeType.XIsActant2InS]: "is actant 2 in statement",
+    [EdgeType.SUnderT]: "under territory",
+    [EdgeType.XHasReferenceR]: "has reference",
+    [EdgeType.THasChildT]: "has child territory",
+    [EdgeType.XHasSPropTypeC]: "has statement property type",
+    [EdgeType.XHasSPropValue]: "has statement property value",
+    [EdgeType.XHasSIdentification]: "has statement identification",
+    [EdgeType.XHasSClassification]: "has statement classification",
+    [EdgeType.XHasRelation]: "has relation",
+    [EdgeType.XHasClassification]: "has classification",
+    [EdgeType.CHasSuperclass]: "has superclass",
+    [EdgeType.SUnderChildrenT]: "under children territory",
+  };
+
+  export const findValidEdgeTypesForSource = (
+    nodeType: NodeType
+  ): EdgeType[] => {
+    const validEdges = Object.entries(EdgeTypeNodeRules)
+      .filter(
+        ([, [from, to]]) =>
+          nodeType === NodeType.X || from === nodeType || from === NodeType.X
+      )
+      .map(([type]) => type as EdgeType);
+    return validEdges;
+  };
+
+  export const findValidEdgeTypesForTarget = (
+    nodeType: NodeType
+  ): EdgeType[] => {
+    const validEdges = Object.entries(EdgeTypeNodeRules)
+      .filter(
+        ([, [from, to]]) =>
+          nodeType === NodeType.X || to === nodeType || to === NodeType.X
+      )
+      .map(([type]) => type as EdgeType);
+    return validEdges;
+  };
+
+  export const isSourceNodeValid = (
+    nodeType: NodeType,
+    edgeType: EdgeType
+  ): boolean => {
+    if (nodeType === NodeType.X) {
+      return true;
+    }
+    const edgeRule = EdgeTypeNodeRules[edgeType];
+    return edgeRule[0] === NodeType.X || edgeRule[0] === nodeType;
+  };
+  export const isTargetNodeValid = (
+    nodeType: NodeType,
+    edgeType: EdgeType
+  ): boolean => {
+    if (nodeType === NodeType.X) {
+      return true;
+    }
+    const edgeRule = EdgeTypeNodeRules[edgeType];
+    return edgeRule[1] === NodeType.X || edgeRule[1] === nodeType;
+  };
 }
 
 export namespace Explore {
