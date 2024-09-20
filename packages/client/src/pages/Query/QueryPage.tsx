@@ -5,7 +5,7 @@ import { Query } from "@shared/types";
 import { Explore } from "@shared/types/query";
 import api from "api";
 import { Box, Panel } from "components";
-import { PanelSeparator, PanelSeparatorHorizontal } from "components/advanced";
+import { PanelSeparatorHorizontal } from "components/advanced";
 import { useAppSelector } from "redux/hooks";
 import { floorNumberToOneDecimal } from "utils/utils";
 import { MemoizedExplorerBox } from "./Explorer/ExplorerBox";
@@ -178,8 +178,8 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     <>
       {querySeparatorYPosition > 0 && (
         <PanelSeparatorHorizontal
-          topPositionMin={30}
-          topPositionMax={contentHeight - 30}
+          topPositionMin={34}
+          topPositionMax={contentHeight - 34}
           separatorYPosition={querySeparatorYPosition}
           setSeparatorYPosition={(yPosition) =>
             handleSeparatorYPositionChange(yPosition)

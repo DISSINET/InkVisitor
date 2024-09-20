@@ -111,15 +111,15 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                     column.editable && {
                       onClick: () => {
                         const { id } = entity as IEntity;
-                        const { props } = recordEntity as IEntity;
+                        const { id: recordEntityId, props } =
+                          recordEntity as IEntity;
 
                         const foundEntity = props.find(
                           (prop) => prop.value?.entityId === id
                         );
                         if (foundEntity) {
-                          // TODO: doesn't work
                           updateEntityMutation.mutate({
-                            entityId: id,
+                            entityId: recordEntityId,
                             changes: {
                               props: props.filter(
                                 (prop) => prop.id !== foundEntity.id
