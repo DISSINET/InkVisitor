@@ -9,6 +9,8 @@ import {
   IResponseQueryEntity,
 } from "@shared/types";
 import { Explore } from "@shared/types/query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import api from "api";
 import { Button, ButtonGroup, Checkbox, Input } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 import { CMetaProp } from "constructors";
@@ -34,8 +36,6 @@ import {
   StyledNewColumnValue,
   StyledTableHeader,
 } from "./ExplorerTableStyles";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import api from "api";
 
 const initialNewColumn: Explore.IExploreColumn = {
   id: uuidv4(),
@@ -342,27 +342,30 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                                 <span style={{ marginBottom: "0.3rem" }}>
                                   <EntityTag
                                     entity={entity}
-                                    unlinkButton={{
-                                      onClick: () => {
-                                        const foundEntity =
-                                          record.entity.props.find(
-                                            (prop) =>
-                                              prop.value?.entityId === entity.id
-                                          );
-                                        console.log(foundEntity);
-                                        if (foundEntity) {
-                                          updateEntityMutation.mutate({
-                                            entityId: record.entity.id,
-                                            changes: {
-                                              props: record.entity.props.filter(
-                                                (prop) =>
-                                                  prop.id !== foundEntity.id
-                                              ),
-                                            },
-                                          });
-                                        }
-                                      },
-                                    }}
+                                    unlinkButton={
+                                      column.editable && {
+                                        onClick: () => {
+                                          const foundEntity =
+                                            record.entity.props.find(
+                                              (prop) =>
+                                                prop.value?.entityId ===
+                                                entity.id
+                                            );
+                                          if (foundEntity) {
+                                            updateEntityMutation.mutate({
+                                              entityId: record.entity.id,
+                                              changes: {
+                                                props:
+                                                  record.entity.props.filter(
+                                                    (prop) =>
+                                                      prop.id !== foundEntity.id
+                                                  ),
+                                              },
+                                            });
+                                          }
+                                        },
+                                      }
+                                    }
                                   />
                                 </span>
                               </React.Fragment>
@@ -378,8 +381,11 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                           <EntitySuggester
                             categoryTypes={classesAll}
                             onPicked={(entity) => {
+                              const params =
+                                column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.EPV>;
+
                               const newProp: IProp = CMetaProp({
-                                typeEntityId: column.params.propertyType,
+                                typeEntityId: params.propertyType,
                                 valueEntityId: entity.id,
                               });
 
