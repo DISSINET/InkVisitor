@@ -67,7 +67,23 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     }
   }, [incomingTotal, isQueryFetching]);
 
+  const queryClient = useQueryClient();
+
+  const updateEntityMutation = useMutation({
+    mutationFn: async (variables: {
+      entityId: string;
+      changes: Partial<IEntity>;
+    }) => await api.entityUpdate(variables.entityId, variables.changes),
+
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["query"],
+      });
+    },
+  });
+
   const renderCell = (
+    recordEntity: IEntity,
     cellData:
       | IEntity
       | IEntity[]
@@ -94,11 +110,14 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                   unlinkButton={
                     column.editable && {
                       onClick: () => {
-                        const { id, props } = entity as IEntity;
+                        const { id } = entity as IEntity;
+                        const { props } = recordEntity as IEntity;
+
                         const foundEntity = props.find(
                           (prop) => prop.value?.entityId === id
                         );
                         if (foundEntity) {
+                          // TODO: doesn't work
                           updateEntityMutation.mutate({
                             entityId: id,
                             changes: {
@@ -226,21 +245,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     }
     return "asc";
   };
-
-  const queryClient = useQueryClient();
-
-  const updateEntityMutation = useMutation({
-    mutationFn: async (variables: {
-      entityId: string;
-      changes: Partial<IEntity>;
-    }) => await api.entityUpdate(variables.entityId, variables.changes),
-
-    onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: ["query"],
-      });
-    },
-  });
 
   return (
     <div style={{ padding: "1rem" }}>
@@ -403,7 +407,11 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                 {columns.map((column, key) => {
                   return (
                     <StyledGridColumn key={key}>
-                      {renderCell(record.columnData[column.id], column)}
+                      {renderCell(
+                        record.entity,
+                        record.columnData[column.id],
+                        column
+                      )}
 
                       {column.editable &&
                         column.type === Explore.EExploreColumnType.EPV && (
