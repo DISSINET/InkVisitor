@@ -123,80 +123,124 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     enabled: queryStateValidity.isValid && api.isLoggedIn(),
   });
 
-  console.log("response", queryData);
+  // console.log("response", queryData);
 
-  const handleSeparatorXPositionChange = (xPosition: number) => {
-    if (querySeparatorXPosition !== xPosition) {
-      setquerySeparatorXPosition(xPosition);
+  // const handleSeparatorXPositionChange = (xPosition: number) => {
+  //   if (querySeparatorXPosition !== xPosition) {
+  //     setquerySeparatorXPosition(xPosition);
 
-      const separatorXPercentPosition = floorNumberToOneDecimal(
-        xPosition / onePercentOfLayoutWidth
+  //     const separatorXPercentPosition = floorNumberToOneDecimal(
+  //       xPosition / onePercentOfLayoutWidth
+  //     );
+  //     localStorage.setItem(
+  //       "querySeparatorXPosition",
+  //       separatorXPercentPosition.toString()
+  //     );
+  //   }
+  // };
+
+  // const onePercentOfLayoutWidth = useMemo(
+  //   () => layoutWidth / 100,
+  //   [layoutWidth]
+  // );
+
+  // const localStorageSeparatorXPosition = localStorage.getItem(
+  //   "querySeparatorXPosition"
+  // );
+  // const [querySeparatorXPosition, setquerySeparatorXPosition] =
+  //   useState<number>(
+  //     localStorageSeparatorXPosition
+  //       ? floorNumberToOneDecimal(
+  //           Number(localStorageSeparatorXPosition) * onePercentOfLayoutWidth
+  //         )
+  //       : layoutWidth / 2
+  //   );
+
+  // const [currentLayoutWidth, setCurrentLayoutWidth] = useState(layoutWidth);
+
+  // useEffect(() => {
+  //   const onePercentOfLastLayoutWidth = currentLayoutWidth / 100;
+  //   const separatorXPercentPosition = floorNumberToOneDecimal(
+  //     querySeparatorXPosition / onePercentOfLastLayoutWidth
+  //   );
+  //   setquerySeparatorXPosition(
+  //     separatorXPercentPosition * onePercentOfLayoutWidth
+  //   );
+  //   localStorage.setItem(
+  //     "querySeparatorXPosition",
+  //     separatorXPercentPosition.toString()
+  //   );
+  //   setCurrentLayoutWidth(layoutWidth);
+  // }, [layoutWidth]);
+
+  const onePercentOfContentHeight = useMemo(
+    () => contentHeight / 100,
+    [contentHeight]
+  );
+
+  const handleSeparatorYPositionChange = (xPosition: number) => {
+    if (querySeparatorYPosition !== xPosition) {
+      setQuerySeparatorYPosition(xPosition);
+
+      const separatorYPercentPosition = floorNumberToOneDecimal(
+        xPosition / onePercentOfContentHeight
       );
       localStorage.setItem(
-        "querySeparatorXPosition",
-        separatorXPercentPosition.toString()
+        "querySeparatorYPosition",
+        separatorYPercentPosition.toString()
       );
     }
   };
 
-  const onePercentOfLayoutWidth = useMemo(
-    () => layoutWidth / 100,
-    [layoutWidth]
+  const localStorageSeparatorYPosition = localStorage.getItem(
+    "querySeparatorYPosition"
   );
-
-  const localStorageSeparatorXPosition = localStorage.getItem(
-    "querySeparatorXPosition"
-  );
-  const [querySeparatorXPosition, setquerySeparatorXPosition] =
+  const [querySeparatorYPosition, setQuerySeparatorYPosition] =
     useState<number>(
-      localStorageSeparatorXPosition
+      localStorageSeparatorYPosition
         ? floorNumberToOneDecimal(
-            Number(localStorageSeparatorXPosition) * onePercentOfLayoutWidth
+            Number(localStorageSeparatorYPosition) * onePercentOfContentHeight
           )
-        : layoutWidth / 2
+        : contentHeight / 2
     );
 
-  const [currentLayoutWidth, setcurrentLayoutWidth] = useState(layoutWidth);
+  const [currentContentHeight, setCurrentContentHeight] =
+    useState(contentHeight);
 
   useEffect(() => {
-    const onePercentOfLastLayoutWidth = currentLayoutWidth / 100;
+    const onePercentOfLastContentHeight = currentContentHeight / 100;
     const separatorXPercentPosition = floorNumberToOneDecimal(
-      querySeparatorXPosition / onePercentOfLastLayoutWidth
+      querySeparatorYPosition / onePercentOfLastContentHeight
     );
-    setquerySeparatorXPosition(
-      separatorXPercentPosition * onePercentOfLayoutWidth
+    setQuerySeparatorYPosition(
+      separatorXPercentPosition * onePercentOfContentHeight
     );
     localStorage.setItem(
-      "querySeparatorXPosition",
+      "querySeparatorYPosition",
       separatorXPercentPosition.toString()
     );
-    setcurrentLayoutWidth(layoutWidth);
-  }, [layoutWidth]);
+    setCurrentContentHeight(contentHeight);
+  }, [contentHeight]);
 
   return (
     <>
-      {querySeparatorXPosition > 0 && (
-        <PanelSeparator
-          leftSideMinWidth={400}
-          leftSideMaxWidth={layoutWidth - 400}
-          separatorXPosition={querySeparatorXPosition}
-          setSeparatorXPosition={(xPosition) =>
-            handleSeparatorXPositionChange(xPosition)
+      {querySeparatorYPosition > 0 && (
+        <PanelSeparatorHorizontal
+          leftSideMinWidth={30}
+          leftSideMaxWidth={contentHeight - 30}
+          separatorYPosition={querySeparatorYPosition}
+          setSeparatorYPosition={(yPosition) =>
+            handleSeparatorYPositionChange(yPosition)
           }
         />
       )}
-      <PanelSeparatorHorizontal
-        leftSideMinWidth={100}
-        leftSideMaxWidth={contentHeight - 100}
-        separatorYPosition={200}
-        setSeparatorYPosition={
-          (yPosition) => console.log(yPosition)
-          // handleSeparatorXPositionChange(xPosition)
-        }
-      />
 
-      <Panel width={querySeparatorXPosition}>
-        <Box borderColor="white" height={contentHeight} label="Search">
+      <Panel width={layoutWidth}>
+        <Box
+          borderColor="white"
+          height={querySeparatorYPosition}
+          label="Search"
+        >
           <MemoizedQueryBox
             state={queryState}
             dispatch={queryStateDispatch}
@@ -206,9 +250,11 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
             queryStateValidity={queryStateValidity}
           />
         </Box>
-      </Panel>
-      <Panel width={layoutWidth - querySeparatorXPosition}>
-        <Box borderColor="white" height={contentHeight} label="Explorer">
+        <Box
+          borderColor="white"
+          height={contentHeight - querySeparatorYPosition}
+          label="Explorer"
+        >
           <MemoizedExplorerBox
             state={exploreState}
             dispatch={exploreStateDispatch}
