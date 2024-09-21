@@ -113,6 +113,12 @@ export const TextAnnotator = ({
 
   const [annotatorMode, setAnnotatorMode] = useState<Modes>(Modes.HIGHLIGHT);
 
+  useEffect(() => {
+    if (annotator) {
+      annotator.setMode(annotatorMode);
+    }
+  }, [annotatorMode]);
+
   const [selectedText, setSelectedText] = useState<string>("");
   const [selectedAnchors, setSelectedAnchors] = useState<string[]>([]);
   const storedEntities = useRef<Record<string, IEntity | false>>({});
@@ -281,7 +287,7 @@ export const TextAnnotator = ({
       setScrollAfterRefresh(undefined);
     }
 
-    setAnnotatorMode(originalMode);
+    newAnnotator.setMode(originalMode);
   };
 
   useEffect(() => {
