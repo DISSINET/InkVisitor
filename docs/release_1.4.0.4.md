@@ -7,6 +7,7 @@
 
 ### Bug Fixes and Improvements:
 
+- Improved annotator menu
 - Fixed change detection in annotator text (#2213)
 - Added user page detection for emails/usernames already in use (#1949)
 - Fixed alignment of relation icon for inverted relations (#2001)
@@ -15,7 +16,7 @@
 - Allowed closing modal for editing full-text (#2312)
 - Fixed selection on anchor adding in annotator (#2313)
 - Added check on deletion of an anchored entity (#2227)
-- FIxed document unlinking (#2309)
+- Fixed document unlinking (#2309)
 
 ### Code Refactor:
 
