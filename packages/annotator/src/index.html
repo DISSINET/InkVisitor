@@ -88,6 +88,11 @@
         <input type="text" id="scrollToAnchorText" />
         <button id="scrollToAnchor">scroll</button>
       </fieldset>
+      <fieldset>
+        <label>update text</label>
+        <textarea id="newText" cols="100" rows="10"></textarea>
+        <button id="scrollToAnchor">Update</button>
+      </fieldset>
     </div>
 
     <p>Text from textfile.txt:</p>
@@ -168,6 +173,10 @@
           document.getElementById("scrollToAnchorText").value,
           1
         );
+      };
+
+      document.getElementById("newText").onchange = () => {
+        annotator.updateText(document.getElementById("newText").value);
       };
 
       window.addEventListener("resize", resizeAnnotator);
