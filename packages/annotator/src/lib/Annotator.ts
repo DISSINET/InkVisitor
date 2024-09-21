@@ -1020,11 +1020,10 @@ export class Annotator {
     this.text.value = newText;
     this.text.prepareSegments();
     this.text.calculateLines();
-    this.draw();
 
-    this.viewport.scrollTo(positionBeforeChange, this.text.noLines);
-
-    if (this.viewport.lineEnd > this.text.noLines) {
+    if (positionBeforeChange < this.text.noLines) {
+      this.scrollToLine(positionBeforeChange);
+    } else {
       this.scrollToLine(this.text.noLines - 1);
     }
   }

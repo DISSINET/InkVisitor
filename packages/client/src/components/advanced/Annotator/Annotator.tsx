@@ -54,13 +54,15 @@ export const TextAnnotator = ({
   thisTerritoryEntityId = undefined,
 
   storedAnnotatorScroll,
-  forwardAnnotator = (undefined) => { },
-  setStoredAnnotatorScroll = () => { },
+  forwardAnnotator = (undefined) => {},
+  setStoredAnnotatorScroll = () => {},
 }: TextAnnotatorProps) => {
   const queryClient = useQueryClient();
   const theme = useContext(ThemeContext);
 
   const { annotator, setAnnotator } = useAnnotator();
+
+  const [localTextContent, setLocalTextContent] = useState<string>("");
 
   useEffect(() => {
     return forwardAnnotator(undefined);
@@ -120,8 +122,8 @@ export const TextAnnotator = ({
   >(undefined);
 
   const handleSaveNewContent = (quiet: boolean) => {
-    const scrollBeforeUpdate = annotator?.viewport?.lineStart;
-    setScrollAfterRefresh(scrollBeforeUpdate);
+    const scrollBeforeUpdated = annotator?.viewport?.lineStart;
+    setScrollAfterRefresh(scrollBeforeUpdated);
 
     if (annotator && documentId) {
       if (quiet) {
@@ -197,6 +199,8 @@ export const TextAnnotator = ({
       return;
     }
 
+    const originalMode = annotatorMode;
+
     const newAnnotator = new Annotator(
       mainCanvas?.current,
       dataDocument?.content ?? "no text",
@@ -205,7 +209,6 @@ export const TextAnnotator = ({
 
     newAnnotator.scrollToLine(0);
 
-    newAnnotator.setMode(Modes.HIGHLIGHT);
     if (scroller?.current) {
       newAnnotator.addScroller(scroller.current);
     }
@@ -241,7 +244,10 @@ export const TextAnnotator = ({
       }
     });
 
-    newAnnotator.onTextChanged((text) => { });
+    newAnnotator.onTextChanged((text) => {
+      // console.log("text changed", text);
+      setLocalTextContent(text);
+    });
     newAnnotator.draw();
 
     setAnnotator(newAnnotator);
@@ -274,6 +280,8 @@ export const TextAnnotator = ({
       );
       setScrollAfterRefresh(undefined);
     }
+
+    setAnnotatorMode(originalMode);
   };
 
   useEffect(() => {
@@ -389,7 +397,7 @@ export const TextAnnotator = ({
 
   const isChangeMade = useMemo<boolean>(() => {
     return annotator?.text?.value !== dataDocument?.content;
-  }, [annotator?.text?.value, dataDocument?.content]);
+  }, [annotator?.text?.value, dataDocument?.content, localTextContent]);
 
   const onCreateTerritory = () => {
     if (handleCreateTerritory && selectedText) {
@@ -559,7 +567,9 @@ export const TextAnnotator = ({
             icon={<FaTrash />}
             disabled={!isChangeMade}
             onClick={() => {
-              refreshAnnotator();
+              if (dataDocument?.content) {
+                annotator?.updateText(dataDocument?.content);
+              }
             }}
           />
         </ButtonGroup>
