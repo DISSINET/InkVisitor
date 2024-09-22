@@ -349,7 +349,10 @@ export default Router()
       }
 
       if (!user.verified) {
-        throw new UserNotActiveError(UserNotActiveError.messageVerified, user.email);
+        throw new UserNotActiveError(
+          UserNotActiveError.messageVerified,
+          user.email
+        );
       }
 
       if (!checkPassword(rawPassword, user.password || "")) {
@@ -610,14 +613,22 @@ export default Router()
         await req.db.lock();
 
         if (data.email) {
-          const existingEmail = await User.findUserByLogin(req.db, data.email, true);
+          const existingEmail = await User.findUserByLogin(
+            req.db,
+            data.email,
+            true
+          );
           if (existingEmail && existingEmail.id !== existingUser.id) {
             throw new UserNotUnique("email is in use");
           }
         }
 
         if (data.name) {
-          const existingName = await User.findUserByLogin(req.db, data.name, true);
+          const existingName = await User.findUserByLogin(
+            req.db,
+            data.name,
+            true
+          );
           if (existingName && existingName.id !== existingUser.id) {
             throw new UserNotUnique("username is already used");
           }
