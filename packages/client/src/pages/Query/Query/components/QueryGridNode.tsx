@@ -47,7 +47,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
     },
   });
 
-  console.log(dataEntity);
+  // console.log(dataEntity);
 
   return (
     <div

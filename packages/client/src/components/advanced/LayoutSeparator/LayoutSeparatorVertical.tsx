@@ -3,16 +3,16 @@ import React, { useEffect, useState } from "react";
 import { setDisableUserSelect } from "redux/features/layout/disableUserSelectSlice";
 import { useAppDispatch } from "redux/hooks";
 import { springConfig } from "Theme/constants";
-import { StyledPanelSeparator } from "./PanelSeparatorStyles";
+import { StyledLayoutSeparatorVertical } from "./SeparatorStyles";
 
-interface PanelSeparator {
+interface LayoutSeparatorVertical {
   leftSideMinWidth: number;
   leftSideMaxWidth: number;
   // set custom one related to specific page
   separatorXPosition: number;
   setSeparatorXPosition: (xPosition: number) => void;
 }
-export const PanelSeparator: React.FC<PanelSeparator> = ({
+export const LayoutSeparatorVertical: React.FC<LayoutSeparatorVertical> = ({
   leftSideMinWidth,
   leftSideMaxWidth,
   separatorXPosition,
@@ -27,7 +27,7 @@ export const PanelSeparator: React.FC<PanelSeparator> = ({
   const [dragging, setDragging] = useState(false);
   const [hovered, setHovered] = useState(false);
 
-  const animatedSeparator = useSpring({
+  const animatedVerticalSeparator = useSpring({
     left: `${(leftWidth - 1) / 10}rem`,
     config: springConfig.separatorXPosition,
   });
@@ -92,11 +92,11 @@ export const PanelSeparator: React.FC<PanelSeparator> = ({
   }, [hovered, dragging]);
 
   return (
-    <StyledPanelSeparator
+    <StyledLayoutSeparatorVertical
       onMouseDown={onMouseDown}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      style={animatedSeparator}
+      style={animatedVerticalSeparator}
       $show={hovered || dragging}
     />
   );

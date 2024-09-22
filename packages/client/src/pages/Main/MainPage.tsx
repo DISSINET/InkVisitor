@@ -12,7 +12,10 @@ import {
 } from "Theme/constants";
 import api from "api";
 import { Box, Button, Panel } from "components";
-import { EntityCreateModal, PanelSeparator } from "components/advanced";
+import {
+  EntityCreateModal,
+  LayoutSeparatorVertical,
+} from "components/advanced";
 import { CStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import ScrollHandler from "hooks/ScrollHandler";
@@ -432,7 +435,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
         <>
           <ScrollHandler />
           {mainPageSeparatorXPosition > 0 && (
-            <PanelSeparator
+            <LayoutSeparatorVertical
               leftSideMinWidth={panelWidths[0] + SECOND_PANEL_MIN_WIDTH}
               leftSideMaxWidth={
                 layoutWidth - panelWidths[3] - THIRD_PANEL_MIN_WIDTH

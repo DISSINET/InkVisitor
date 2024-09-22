@@ -67,7 +67,23 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     }
   }, [incomingTotal, isQueryFetching]);
 
+  const queryClient = useQueryClient();
+
+  const updateEntityMutation = useMutation({
+    mutationFn: async (variables: {
+      entityId: string;
+      changes: Partial<IEntity>;
+    }) => await api.entityUpdate(variables.entityId, variables.changes),
+
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["query"],
+      });
+    },
+  });
+
   const renderCell = (
+    recordEntity: IEntity,
     cellData:
       | IEntity
       | IEntity[]
@@ -94,13 +110,16 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                   unlinkButton={
                     column.editable && {
                       onClick: () => {
-                        const { id, props } = entity as IEntity;
+                        const { id } = entity as IEntity;
+                        const { id: recordEntityId, props } =
+                          recordEntity as IEntity;
+
                         const foundEntity = props.find(
                           (prop) => prop.value?.entityId === id
                         );
                         if (foundEntity) {
                           updateEntityMutation.mutate({
-                            entityId: id,
+                            entityId: recordEntityId,
                             changes: {
                               props: props.filter(
                                 (prop) => prop.id !== foundEntity.id
@@ -141,7 +160,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       // TODO: not an array - IEntity, IUser, number, string
     }
 
-    return <StyledEmpty>{"empty"}</StyledEmpty>;
+    // return <StyledEmpty>{"empty"}</StyledEmpty>;
   };
 
   const [columnName, setColumnName] = useState(initialNewColumn.name);
@@ -226,21 +245,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     }
     return "asc";
   };
-
-  const queryClient = useQueryClient();
-
-  const updateEntityMutation = useMutation({
-    mutationFn: async (variables: {
-      entityId: string;
-      changes: Partial<IEntity>;
-    }) => await api.entityUpdate(variables.entityId, variables.changes),
-
-    onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: ["query"],
-      });
-    },
-  });
 
   return (
     <div style={{ padding: "1rem" }}>
@@ -403,49 +407,12 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                 {columns.map((column, key) => {
                   return (
                     <StyledGridColumn key={key}>
-                      {record.columnData[column.id] &&
-                      Array.isArray(record.columnData[column.id]) ? (
-                        (record.columnData[column.id] as Array<IEntity>).map(
-                          (entity, key) => {
-                            return (
-                              <React.Fragment key={key}>
-                                <span style={{ marginBottom: "0.3rem" }}>
-                                  <EntityTag
-                                    entity={entity}
-                                    unlinkButton={
-                                      column.editable && {
-                                        onClick: () => {
-                                          const foundEntity =
-                                            record.entity.props.find(
-                                              (prop) =>
-                                                prop.value?.entityId ===
-                                                entity.id
-                                            );
-                                          if (foundEntity) {
-                                            updateEntityMutation.mutate({
-                                              entityId: record.entity.id,
-                                              changes: {
-                                                props:
-                                                  record.entity.props.filter(
-                                                    (prop) =>
-                                                      prop.id !== foundEntity.id
-                                                  ),
-                                              },
-                                            });
-                                          }
-                                        },
-                                      }
-                                    }
-                                  />
-                                </span>
-                              </React.Fragment>
-                            );
-                          }
-                        )
-                      ) : (
-                        <StyledEmpty>{"empty"}</StyledEmpty>
+                      {renderCell(
+                        record.entity,
+                        record.columnData[column.id],
+                        column
                       )}
-                      {renderCell(record.columnData[column.id], column)}
+
                       {column.editable &&
                         column.type === Explore.EExploreColumnType.EPV && (
                           <EntitySuggester
