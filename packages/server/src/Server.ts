@@ -1,6 +1,6 @@
 import morgan from "morgan";
 import helmet from "helmet";
-import express, { Router } from "express";
+import express, { NextFunction, Router } from "express";
 import cors from "cors";
 import { apiPath } from "@common/constants";
 import EntitiesRouter from "@modules/entities";
@@ -22,7 +22,13 @@ import errorsMiddleware, { catchAll } from "@middlewares/errors";
 import { validateJwt } from "@common/auth";
 import compression from "compression";
 import * as path from "path";
+import rateLimit from "express-rate-limit";
 import "@models/events/register";
+import { Request, RequestHandler, Response } from "express";
+import {
+  BadCredentialsError,
+  TooManyRequestsError,
+} from "@shared/types/errors";
 
 const server = express();
 
@@ -37,12 +43,24 @@ server.use(cors());
 if (!!process.env.STATIC_PATH) {
   if (process.env.STATIC_PATH === "/") {
     server.use((req, res, next) => {
-      // allow all requests not starting with /api and that are pointed to wanted static path 
+      // allow all requests not starting with /api and that are pointed to wanted static path
       // relative to the root like domain.com/<static path>/...
-      if (!req.path.startsWith('/api') && req.path.startsWith(process.env.STATIC_PATH as string)) {
+      if (
+        !req.path.startsWith("/api") &&
+        req.path.startsWith(process.env.STATIC_PATH as string)
+      ) {
         if (req.path.indexOf(".") === -1) {
           // replacement for react(client) router that should process only pages alone (/, /login etc)
-          res.sendFile(path.join(__dirname, "..", "..", "..", "..", "client/dist/index.html"));
+          res.sendFile(
+            path.join(
+              __dirname,
+              "..",
+              "..",
+              "..",
+              "..",
+              "client/dist/index.html"
+            )
+          );
         } else {
           // everythink else will go here
           express.static("../client/dist")(req, res, next);
@@ -77,6 +95,22 @@ if (process.env.NODE_ENV === "production") {
 server.get("/health", function (req, res) {
   res.send("ok");
 });
+
+// Rate limited for signin
+server.use(
+  `${apiPath}/users/signin`,
+  rateLimit({
+    windowMs: 5 * 60 * 1000, // 5 minutes window
+    max: 5, // Limit each IP to 5 requests per windowMs
+    handler: (req: Request, res: Response, next: NextFunction, options) => {
+      throw new TooManyRequestsError(
+        `${TooManyRequestsError.title}: try again in 5 minutes`
+      );
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+  })
+);
 
 server.use(profilerMiddleware);
 
