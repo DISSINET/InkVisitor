@@ -15,13 +15,13 @@ export const StyledPanelSeparator = styled(animated.div)<StyledPanelSeparator>`
   transition: opacity 0.3s ease;
 `;
 
-export const StyledPanelSeparatorVertical = styled(StyledPanelSeparator)`
+export const StyledLayoutSeparatorVertical = styled(StyledPanelSeparator)`
   width: ${({ $show, theme }) =>
     $show ? theme.borderWidth[4] : theme.borderWidth[2]};
   height: ${({ theme }) => `calc(100% - ${theme.borderWidth[2]})`};
   cursor: col-resize;
 `;
-export const StyledPanelSeparatorHorizontal = styled(StyledPanelSeparator)`
+export const StyledLayoutSeparatorHorizontal = styled(StyledPanelSeparator)`
   height: ${({ $show, theme }) =>
     $show ? theme.borderWidth[4] : theme.borderWidth[2]};
   width: ${({ theme }) => `calc(100% - ${theme.borderWidth[2]})`};

@@ -3,16 +3,16 @@ import React, { useEffect, useState } from "react";
 import { setDisableUserSelect } from "redux/features/layout/disableUserSelectSlice";
 import { useAppDispatch } from "redux/hooks";
 import { springConfig } from "Theme/constants";
-import { StyledPanelSeparatorHorizontal } from "./PanelSeparatorStyles";
+import { StyledLayoutSeparatorHorizontal } from "./SeparatorStyles";
 
-interface PanelSeparatorHorizontal {
+interface LayoutSeparatorHorizontal {
   topPositionMin: number;
   topPositionMax: number;
   // set custom one related to specific page
   separatorYPosition: number;
   setSeparatorYPosition: (xPosition: number) => void;
 }
-export const PanelSeparatorHorizontal: React.FC<PanelSeparatorHorizontal> = ({
+export const LayoutSeparatorHorizontal: React.FC<LayoutSeparatorHorizontal> = ({
   topPositionMin,
   topPositionMax,
   separatorYPosition,
@@ -92,7 +92,7 @@ export const PanelSeparatorHorizontal: React.FC<PanelSeparatorHorizontal> = ({
   }, [hovered, dragging]);
 
   return (
-    <StyledPanelSeparatorHorizontal
+    <StyledLayoutSeparatorHorizontal
       onMouseDown={onMouseDown}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
