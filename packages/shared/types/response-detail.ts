@@ -4,11 +4,11 @@
 
 import {
   IEntity,
-  Relation,
+  IResponseDocument,
   IResponseEntity,
   IStatement,
   IWarning,
-  IDocument,
+  Relation,
 } from ".";
 import { EntityEnums } from "../enums";
 import {
@@ -35,7 +35,7 @@ export interface IResponseDetail extends IResponseEntity {
 }
 
 export interface IResponseUsedInDocument {
-  document: IDocument;
+  document: IResponseDocument;
   anchorText: string[];
   resourceId: string;
 }
