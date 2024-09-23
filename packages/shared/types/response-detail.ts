@@ -36,6 +36,7 @@ export interface IResponseDetail extends IResponseEntity {
 
 export interface IResponseUsedInDocument {
   document: IDocument;
+  anchorText: string[];
   resourceId: string;
 }
 
