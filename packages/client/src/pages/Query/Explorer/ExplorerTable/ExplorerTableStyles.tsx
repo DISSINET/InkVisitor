@@ -6,17 +6,19 @@ interface StyledGrid {
 }
 export const StyledGrid = styled.div<StyledGrid>`
   display: grid;
+  border: 1px solid ${({ theme }) => theme.color["black"]};
   align-content: start;
-  grid-template-columns: ${({ $columns }) => `repeat(${$columns}, auto)`};
+  grid-template-columns: ${({ $columns }) => `auto repeat(${$columns}, 1fr)`};
   color: ${({ theme }) => theme.color["black"]};
   width: 100%;
 `;
 export const StyledGridColumn = styled.div`
   display: grid;
   border-right: 1px solid ${({ theme }) => theme.color["black"]};
-  border-bottom: 1px solid ${({ theme }) => theme.color["blue"][300]};
+  border-top: 1px solid ${({ theme }) => theme.color["blue"][300]};
   padding: 0.3rem;
   padding-left: 1rem;
+  background-color: ${({ theme }) => theme.color["white"]};
 `;
 
 interface StyledGridHeader {
@@ -70,4 +72,14 @@ export const StyledTableHeader = styled.div`
 `;
 export const StyledEmpty = styled.span`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
+`;
+interface StyledExpandedRow {
+  $columnsSpan: number;
+}
+export const StyledExpandedRow = styled.div<StyledExpandedRow>`
+  grid-column: ${({ $columnsSpan }) => `span ${$columnsSpan}`};
+  padding: 0.5rem;
+  padding-left: 4rem;
+  min-height: 5rem;
+  border-right: 1px solid ${({ theme }) => theme.color["black"]};
 `;

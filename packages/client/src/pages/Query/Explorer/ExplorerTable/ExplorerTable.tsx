@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 
 import { classesAll } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
@@ -9,7 +9,14 @@ import api from "api";
 import { Button, ButtonGroup, Checkbox, Input } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 import { CMetaProp } from "constructors";
-import { FaTrashAlt } from "react-icons/fa";
+import {
+  FaChevronCircleDown,
+  FaChevronCircleUp,
+  FaSort,
+  FaSortDown,
+  FaSortUp,
+  FaTrashAlt,
+} from "react-icons/fa";
 import {
   LuChevronFirst,
   LuChevronLast,
@@ -22,6 +29,7 @@ import { v4 as uuidv4 } from "uuid";
 import { ExploreAction, ExploreActionType } from "../state";
 import {
   StyledEmpty,
+  StyledExpandedRow,
   StyledGrid,
   StyledGridColumn,
   StyledGridHeader,
@@ -31,6 +39,7 @@ import {
   StyledNewColumnValue,
   StyledTableHeader,
 } from "./ExplorerTableStyles";
+import { ThemeContext } from "styled-components";
 
 const initialNewColumn: Explore.IExploreColumn = {
   id: uuidv4(),
@@ -81,87 +90,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       });
     },
   });
-
-  const renderCell = (
-    recordEntity: IEntity,
-    cellData:
-      | IEntity
-      | IEntity[]
-      | number
-      | number[]
-      | string
-      | string[]
-      | IUser
-      | IUser[],
-    column: Explore.IExploreColumn
-  ) => {
-    if (Array.isArray(cellData)) {
-      if (
-        cellData.length > 0 &&
-        typeof (cellData[0] as IEntity).class !== "undefined"
-      ) {
-        // is type IEntity[]
-        return cellData.map((entity, key) => {
-          return (
-            <React.Fragment key={key}>
-              <span style={{ marginBottom: "0.3rem" }}>
-                <EntityTag
-                  entity={entity as IEntity}
-                  unlinkButton={
-                    column.editable && {
-                      onClick: () => {
-                        const { id } = entity as IEntity;
-                        const { id: recordEntityId, props } =
-                          recordEntity as IEntity;
-
-                        const foundEntity = props.find(
-                          (prop) => prop.value?.entityId === id
-                        );
-                        if (foundEntity) {
-                          updateEntityMutation.mutate({
-                            entityId: recordEntityId,
-                            changes: {
-                              props: props.filter(
-                                (prop) => prop.id !== foundEntity.id
-                              ),
-                            },
-                          });
-                        }
-                      },
-                    }
-                  }
-                />
-              </span>
-            </React.Fragment>
-          );
-        });
-      } else if (
-        cellData.length > 0 &&
-        typeof (cellData[0] as IUser).email !== "undefined"
-      ) {
-        // is type IUser[]
-        return (
-          <div>
-            <span
-              style={{
-                backgroundColor: "lime",
-                padding: "0.3rem",
-                display: "flex",
-              }}
-            >
-              {(cellData as IUser[]).map((user) => {
-                return user.name;
-              })}
-            </span>
-          </div>
-        );
-      }
-    } else {
-      // TODO: not an array - IEntity, IUser, number, string
-    }
-
-    // return <StyledEmpty>{"empty"}</StyledEmpty>;
-  };
 
   const [columnName, setColumnName] = useState(initialNewColumn.name);
   const [columnType, setColumnType] = useState(initialNewColumn.type);
@@ -246,8 +174,8 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     return "asc";
   };
 
-  return (
-    <div style={{ padding: "1rem" }}>
+  const renderTableHeader = () => {
+    return (
       <StyledTableHeader>
         <div>
           <span
@@ -324,10 +252,102 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           />
         </div>
       </StyledTableHeader>
+    );
+  };
+
+  const renderCell = (
+    recordEntity: IEntity,
+    cellData:
+      | IEntity
+      | IEntity[]
+      | number
+      | number[]
+      | string
+      | string[]
+      | IUser
+      | IUser[],
+    column: Explore.IExploreColumn
+  ) => {
+    if (Array.isArray(cellData)) {
+      if (
+        cellData.length > 0 &&
+        typeof (cellData[0] as IEntity).class !== "undefined"
+      ) {
+        // is type IEntity[]
+        return cellData.map((entity, key) => {
+          return (
+            <React.Fragment key={key}>
+              <span style={{ marginBottom: "0.3rem" }}>
+                <EntityTag
+                  entity={entity as IEntity}
+                  unlinkButton={
+                    column.editable && {
+                      onClick: () => {
+                        const { id } = entity as IEntity;
+                        const { id: recordEntityId, props } =
+                          recordEntity as IEntity;
+
+                        const foundEntity = props.find(
+                          (prop) => prop.value?.entityId === id
+                        );
+                        if (foundEntity) {
+                          updateEntityMutation.mutate({
+                            entityId: recordEntityId,
+                            changes: {
+                              props: props.filter(
+                                (prop) => prop.id !== foundEntity.id
+                              ),
+                            },
+                          });
+                        }
+                      },
+                    }
+                  }
+                />
+              </span>
+            </React.Fragment>
+          );
+        });
+      } else if (
+        cellData.length > 0 &&
+        typeof (cellData[0] as IUser).email !== "undefined"
+      ) {
+        // is type IUser[]
+        return (
+          <div>
+            <span
+              style={{
+                backgroundColor: "lime",
+                padding: "0.3rem",
+                display: "flex",
+              }}
+            >
+              {(cellData as IUser[]).map((user) => {
+                return user.name;
+              })}
+            </span>
+          </div>
+        );
+      }
+    } else {
+      // TODO: not an array - IEntity, IUser, number, string
+    }
+
+    // return <StyledEmpty>{"empty"}</StyledEmpty>;
+  };
+
+  const [rowsExpanded, setRowsExpanded] = useState<string[]>([]);
+
+  const themeContext = useContext(ThemeContext);
+
+  return (
+    <div style={{ padding: "1rem" }}>
+      {renderTableHeader()}
 
       <div style={{ display: "flex", overflow: "auto" }}>
         <StyledGrid $columns={columns.length + 1}>
           {/* HEADER */}
+          <StyledGridHeader>{/* actions */}</StyledGridHeader>
           <StyledGridHeader>{/* entities */}</StyledGridHeader>
           {columns.map((column, key) => {
             return (
@@ -340,6 +360,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                     />
                   )}
                   {column.name}
+
                   {/* SORT */}
                   {/* <span style={{ marginLeft: "0.5rem" }}>
                     <Button
@@ -375,6 +396,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                       tooltipLabel="sort"
                     />
                   </span> */}
+
                   <span style={{ marginLeft: "0.5rem" }}>
                     <Button
                       noBorder
@@ -398,47 +420,87 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           {entities.map((record, key) => {
             return (
               // ROW
-              <div style={{ display: "contents" }} key={key}>
-                <StyledGridColumn>
-                  <span>
-                    <EntityTag entity={record.entity} />
-                  </span>
-                </StyledGridColumn>
-                {columns.map((column, key) => {
-                  return (
-                    <StyledGridColumn key={key}>
-                      {renderCell(
-                        record.entity,
-                        record.columnData[column.id],
-                        column
+              <>
+                <div style={{ display: "contents" }} key={key}>
+                  {/* ROW EXPANDER */}
+                  <StyledGridColumn>
+                    <span
+                      style={{
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                      onClick={(e: React.MouseEvent) => {
+                        e.stopPropagation();
+                        const rowId = record.entity.id;
+                        if (!rowsExpanded.includes(rowId)) {
+                          setRowsExpanded(rowsExpanded.concat(rowId));
+                        } else {
+                          setRowsExpanded(
+                            rowsExpanded.filter((r) => r !== rowId)
+                          );
+                        }
+                      }}
+                    >
+                      {rowsExpanded.includes(record.entity.id) ? (
+                        <FaChevronCircleUp
+                          color={themeContext?.color.warning}
+                        />
+                      ) : (
+                        <FaChevronCircleDown />
                       )}
+                    </span>
+                  </StyledGridColumn>
 
-                      {column.editable &&
-                        column.type === Explore.EExploreColumnType.EPV && (
-                          <EntitySuggester
-                            categoryTypes={classesAll}
-                            onPicked={(entity) => {
-                              const params =
-                                column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.EPV>;
-
-                              const newProp: IProp = CMetaProp({
-                                typeEntityId: params.propertyType,
-                                valueEntityId: entity.id,
-                              });
-
-                              updateEntityMutation.mutate({
-                                entityId: record.entity.id,
-                                changes: {
-                                  props: [...record.entity.props, newProp],
-                                },
-                              });
-                            }}
-                          />
+                  <StyledGridColumn>
+                    <span>
+                      <EntityTag entity={record.entity} />
+                    </span>
+                  </StyledGridColumn>
+                  {columns.map((column, key) => {
+                    return (
+                      <StyledGridColumn key={key}>
+                        {renderCell(
+                          record.entity,
+                          record.columnData[column.id],
+                          column
                         )}
-                    </StyledGridColumn>
-                  );
-                })}
-              </div>
+
+                        {column.editable &&
+                          column.type === Explore.EExploreColumnType.EPV && (
+                            <EntitySuggester
+                              categoryTypes={classesAll}
+                              onPicked={(entity) => {
+                                const params =
+                                  column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.EPV>;
+
+                                const newProp: IProp = CMetaProp({
+                                  typeEntityId: params.propertyType,
+                                  valueEntityId: entity.id,
+                                });
+
+                                updateEntityMutation.mutate({
+                                  entityId: record.entity.id,
+                                  changes: {
+                                    props: [...record.entity.props, newProp],
+                                  },
+                                });
+                              }}
+                            />
+                          )}
+                      </StyledGridColumn>
+                    );
+                  })}
+                </div>
+
+                {rowsExpanded.includes(record.entity.id) && (
+                  <div style={{ display: "contents" }}>
+                    <StyledExpandedRow $columnsSpan={columns.length + 2}>
+                      expanded row
+                    </StyledExpandedRow>
+                  </div>
+                )}
+              </>
             );
           })}
         </StyledGrid>
