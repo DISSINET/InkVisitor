@@ -53,7 +53,9 @@ if (process.argv.length > 3) {
   secret += process.env.BUILD_TIMESTAMP;
 }
 
-console.log(`SECRET set to ${secret}`);
+if (secret) {
+  console.log(`SECRET set to ${secret}`);
+}
 
 /**
  * Function thats creates signed jwt token for user
