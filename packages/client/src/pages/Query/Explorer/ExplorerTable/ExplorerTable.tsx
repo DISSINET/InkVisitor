@@ -37,7 +37,9 @@ import {
   StyledNewColumnGrid,
   StyledNewColumnLabel,
   StyledNewColumnValue,
+  StyledPagination,
   StyledTableHeader,
+  StyledTableWrapper,
 } from "./ExplorerTableStyles";
 import { ThemeContext } from "styled-components";
 
@@ -174,75 +176,81 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     return "asc";
   };
 
+  const renderPaging = () => {
+    return (
+      <StyledPagination style={{ display: "flex", alignItems: "center" }}>
+        <span
+          style={{ marginRight: "1rem" }}
+        >{`page ${pageNumber} of ${totalPages}`}</span>
+        <span
+          style={{ marginRight: "1rem" }}
+        >{`records ${startRecord}-${endRecord} of ${total}`}</span>
+        {state.limit < total && (
+          <span
+            style={{
+              display: "inline-grid",
+              gap: "0.5rem",
+              gridTemplateColumns: "repeat(4,auto)",
+              marginRight: "1rem",
+            }}
+          >
+            <Button
+              onClick={handleFirstPage}
+              disabled={!canGoToPreviousPage}
+              icon={<LuChevronFirst size={13} />}
+              inverted
+              color="greyer"
+              radiusLeft
+              radiusRight
+            />
+            <Button
+              onClick={handlePreviousPage}
+              disabled={!canGoToPreviousPage}
+              icon={<LuChevronLeft size={13} />}
+              inverted
+              color="greyer"
+              radiusLeft
+              radiusRight
+            />
+            <Button
+              onClick={handleNextPage}
+              disabled={!canGoToNextPage}
+              icon={<LuChevronRight size={13} />}
+              inverted
+              color="greyer"
+              radiusLeft
+              radiusRight
+            />
+            <Button
+              onClick={handleLastPage}
+              disabled={!canGoToNextPage}
+              icon={<LuChevronLast size={13} />}
+              inverted
+              color="greyer"
+              radiusLeft
+              radiusRight
+            />
+          </span>
+        )}
+        <Dropdown.Single.Basic
+          width={50}
+          value={limit.toString()}
+          options={[5, 10, 20, 50, 100].map((number) => {
+            return {
+              value: number.toString(),
+              label: number.toString(),
+            };
+          })}
+          onChange={(value) => handleChangeLimit(Number(value))}
+        />
+      </StyledPagination>
+    );
+  };
+
   const renderTableHeader = () => {
     return (
       <StyledTableHeader>
-        <div>
-          <span
-            style={{ marginRight: "1rem" }}
-          >{`page ${pageNumber} of ${totalPages}`}</span>
-          <span
-            style={{ marginRight: "1rem" }}
-          >{`records ${startRecord}-${endRecord} of ${total}`}</span>
-          {state.limit < total && (
-            <span
-              style={{
-                display: "inline-grid",
-                gap: "0.5rem",
-                gridTemplateColumns: "repeat(4,auto)",
-                marginRight: "1rem",
-              }}
-            >
-              <Button
-                onClick={handleFirstPage}
-                disabled={!canGoToPreviousPage}
-                icon={<LuChevronFirst size={13} />}
-                inverted
-                color="greyer"
-                radiusLeft
-                radiusRight
-              />
-              <Button
-                onClick={handlePreviousPage}
-                disabled={!canGoToPreviousPage}
-                icon={<LuChevronLeft size={13} />}
-                inverted
-                color="greyer"
-                radiusLeft
-                radiusRight
-              />
-              <Button
-                onClick={handleNextPage}
-                disabled={!canGoToNextPage}
-                icon={<LuChevronRight size={13} />}
-                inverted
-                color="greyer"
-                radiusLeft
-                radiusRight
-              />
-              <Button
-                onClick={handleLastPage}
-                disabled={!canGoToNextPage}
-                icon={<LuChevronLast size={13} />}
-                inverted
-                color="greyer"
-                radiusLeft
-                radiusRight
-              />
-            </span>
-          )}
-          <Dropdown.Single.Basic
-            width={50}
-            value={limit.toString()}
-            options={[5, 10, 20, 50, 100].map((number) => {
-              return {
-                value: number.toString(),
-                label: number.toString(),
-              };
-            })}
-            onChange={(value) => handleChangeLimit(Number(value))}
-          />
-        </div>
+        {renderPaging()}
         <div>
           <Button
             icon={<TbColumnInsertRight size={17} />}
@@ -253,6 +261,10 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
         </div>
       </StyledTableHeader>
     );
+  };
+
+  const renderTableFooter = () => {
+    return <StyledTableHeader>{renderPaging()}</StyledTableHeader>;
   };
 
   const renderCell = (
@@ -277,7 +289,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
         return cellData.map((entity, key) => {
           return (
             <React.Fragment key={key}>
-              <span style={{ marginBottom: "0.3rem" }}>
+              <span>
                 <EntityTag
                   entity={entity as IEntity}
                   unlinkButton={
@@ -341,169 +353,173 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   const themeContext = useContext(ThemeContext);
 
   return (
-    <div style={{ padding: "1rem" }}>
-      {renderTableHeader()}
+    <>
+      <div style={{ display: "flex", overflow: "auto", padding: "1rem" }}>
+        <StyledTableWrapper>
+          {renderTableHeader()}
+          <StyledGrid $columns={columns.length + 1}>
+            {/* HEADER */}
+            <StyledGridHeader>{/* actions */}</StyledGridHeader>
+            <StyledGridHeader>{/* entities */}</StyledGridHeader>
+            {columns.map((column, key) => {
+              return (
+                <StyledGridHeader key={key}>
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    {column.editable && (
+                      <MdOutlineEdit
+                        size={14}
+                        style={{ marginRight: "0.3rem" }}
+                      />
+                    )}
+                    {column.name}
 
-      <div style={{ display: "flex", overflow: "auto" }}>
-        <StyledGrid $columns={columns.length + 1}>
-          {/* HEADER */}
-          <StyledGridHeader>{/* actions */}</StyledGridHeader>
-          <StyledGridHeader>{/* entities */}</StyledGridHeader>
-          {columns.map((column, key) => {
-            return (
-              <StyledGridHeader key={key}>
-                <div style={{ display: "flex", alignItems: "center" }}>
-                  {column.editable && (
-                    <MdOutlineEdit
-                      size={14}
-                      style={{ marginRight: "0.3rem" }}
-                    />
-                  )}
-                  {column.name}
-
-                  {/* SORT */}
-                  {/* <span style={{ marginLeft: "0.5rem" }}>
-                    <Button
-                      noBorder
-                      noBackground
-                      inverted
-                      icon={
-                        sort && sort.columnId === column.id ? (
-                          sort.direction === "asc" ? (
-                            <FaSortUp color={"white"} />
-                          ) : sort.direction === "desc" ? (
-                            <FaSortDown color={"white"} />
+                    {/* SORT */}
+                    {/* <span style={{ marginLeft: "0.5rem" }}>
+                      <Button
+                        noBorder
+                        noBackground
+                        inverted
+                        icon={
+                          sort && sort.columnId === column.id ? (
+                            sort.direction === "asc" ? (
+                              <FaSortUp color={"white"} />
+                            ) : sort.direction === "desc" ? (
+                              <FaSortDown color={"white"} />
+                            ) : (
+                              <FaSort color={"white"} />
+                            )
                           ) : (
                             <FaSort color={"white"} />
                           )
-                        ) : (
-                          <FaSort color={"white"} />
-                        )
-                      }
-                      onClick={() => {
-                        const newDirection = toggleSortDirection(column.id);
-                        dispatch({
-                          type: ExploreActionType.sort,
-                          payload:
-                            newDirection === undefined
-                              ? undefined
-                              : {
-                                  columnId: column.id,
-                                  direction: newDirection,
-                                },
-                        });
-                      }}
-                      tooltipLabel="sort"
-                    />
-                  </span> */}
-
-                  <span style={{ marginLeft: "0.5rem" }}>
-                    <Button
-                      noBorder
-                      noBackground
-                      inverted
-                      icon={<FaTrashAlt color={"white"} />}
-                      onClick={() =>
-                        dispatch({
-                          type: ExploreActionType.removeColumn,
-                          payload: { id: column.id },
-                        })
-                      }
-                      tooltipLabel="remove column"
-                    />
-                  </span>
-                </div>
-              </StyledGridHeader>
-            );
-          })}
-
-          {entities.map((record, key) => {
-            return (
-              // ROW
-              <>
-                <div style={{ display: "contents" }} key={key}>
-                  {/* ROW EXPANDER */}
-                  <StyledGridColumn>
-                    <span
-                      style={{
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                      }}
-                      onClick={(e: React.MouseEvent) => {
-                        e.stopPropagation();
-                        const rowId = record.entity.id;
-                        if (!rowsExpanded.includes(rowId)) {
-                          setRowsExpanded(rowsExpanded.concat(rowId));
-                        } else {
-                          setRowsExpanded(
-                            rowsExpanded.filter((r) => r !== rowId)
-                          );
                         }
-                      }}
-                    >
-                      {rowsExpanded.includes(record.entity.id) ? (
-                        <FaChevronCircleUp
-                          color={themeContext?.color.warning}
-                        />
-                      ) : (
-                        <FaChevronCircleDown />
-                      )}
-                    </span>
-                  </StyledGridColumn>
-
-                  <StyledGridColumn>
-                    <span>
-                      <EntityTag entity={record.entity} />
-                    </span>
-                  </StyledGridColumn>
-                  {columns.map((column, key) => {
-                    return (
-                      <StyledGridColumn key={key}>
-                        {renderCell(
-                          record.entity,
-                          record.columnData[column.id],
-                          column
-                        )}
-
-                        {column.editable &&
-                          column.type === Explore.EExploreColumnType.EPV && (
-                            <EntitySuggester
-                              categoryTypes={classesAll}
-                              onPicked={(entity) => {
-                                const params =
-                                  column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.EPV>;
-
-                                const newProp: IProp = CMetaProp({
-                                  typeEntityId: params.propertyType,
-                                  valueEntityId: entity.id,
-                                });
-
-                                updateEntityMutation.mutate({
-                                  entityId: record.entity.id,
-                                  changes: {
-                                    props: [...record.entity.props, newProp],
+                        onClick={() => {
+                          const newDirection = toggleSortDirection(column.id);
+                          dispatch({
+                            type: ExploreActionType.sort,
+                            payload:
+                              newDirection === undefined
+                                ? undefined
+                                : {
+                                    columnId: column.id,
+                                    direction: newDirection,
                                   },
-                                });
-                              }}
-                            />
-                          )}
-                      </StyledGridColumn>
-                    );
-                  })}
-                </div>
+                          });
+                        }}
+                        tooltipLabel="sort"
+                      />
+                    </span> */}
 
-                {rowsExpanded.includes(record.entity.id) && (
-                  <div style={{ display: "contents" }}>
-                    <StyledExpandedRow $columnsSpan={columns.length + 2}>
-                      expanded row
-                    </StyledExpandedRow>
+                    <span style={{ marginLeft: "0.5rem" }}>
+                      <Button
+                        noBorder
+                        noBackground
+                        inverted
+                        icon={<FaTrashAlt color={"white"} />}
+                        onClick={() =>
+                          dispatch({
+                            type: ExploreActionType.removeColumn,
+                            payload: { id: column.id },
+                          })
+                        }
+                        tooltipLabel="remove column"
+                      />
+                    </span>
                   </div>
-                )}
-              </>
-            );
-          })}
-        </StyledGrid>
+                </StyledGridHeader>
+              );
+            })}
+
+            {entities.map((record, key) => {
+              return (
+                // ROW
+                <>
+                  <div style={{ display: "contents" }} key={key}>
+                    {/* ROW EXPANDER */}
+                    <StyledGridColumn>
+                      <span
+                        style={{
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                        onClick={(e: React.MouseEvent) => {
+                          e.stopPropagation();
+                          const rowId = record.entity.id;
+                          if (!rowsExpanded.includes(rowId)) {
+                            setRowsExpanded(rowsExpanded.concat(rowId));
+                          } else {
+                            setRowsExpanded(
+                              rowsExpanded.filter((r) => r !== rowId)
+                            );
+                          }
+                        }}
+                      >
+                        {rowsExpanded.includes(record.entity.id) ? (
+                          <FaChevronCircleUp
+                            color={themeContext?.color.warning}
+                          />
+                        ) : (
+                          <FaChevronCircleDown />
+                        )}
+                      </span>
+                    </StyledGridColumn>
+
+                    <StyledGridColumn>
+                      <span>
+                        <EntityTag entity={record.entity} fullWidth />
+                      </span>
+                    </StyledGridColumn>
+                    {columns.map((column, key) => {
+                      return (
+                        <StyledGridColumn key={key}>
+                          {renderCell(
+                            record.entity,
+                            record.columnData[column.id],
+                            column
+                          )}
+
+                          {column.editable &&
+                            column.type === Explore.EExploreColumnType.EPV && (
+                              <EntitySuggester
+                                categoryTypes={classesAll}
+                                onPicked={(entity) => {
+                                  const params =
+                                    column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.EPV>;
+
+                                  const newProp: IProp = CMetaProp({
+                                    typeEntityId: params.propertyType,
+                                    valueEntityId: entity.id,
+                                  });
+
+                                  updateEntityMutation.mutate({
+                                    entityId: record.entity.id,
+                                    changes: {
+                                      props: [...record.entity.props, newProp],
+                                    },
+                                  });
+                                }}
+                              />
+                            )}
+                        </StyledGridColumn>
+                      );
+                    })}
+                  </div>
+
+                  {rowsExpanded.includes(record.entity.id) && (
+                    <div style={{ display: "contents" }}>
+                      <StyledExpandedRow $columnsSpan={columns.length + 2}>
+                        expanded row
+                      </StyledExpandedRow>
+                    </div>
+                  )}
+                </>
+              );
+            })}
+          </StyledGrid>
+          {renderTableFooter()}
+        </StyledTableWrapper>
+
+        {/* NEW COLUMN */}
         {isNewColumnDisplayed && (
           <StyledNewColumn>
             <StyledGridHeader $greyBackground>
@@ -605,6 +621,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           </StyledNewColumn>
         )}
       </div>
-    </div>
+    </>
   );
 };

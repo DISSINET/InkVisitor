@@ -1,6 +1,10 @@
-import { MdOutlineEdit } from "react-icons/md";
 import styled from "styled-components";
 
+export const StyledTableWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+`;
 interface StyledGrid {
   $columns: number;
 }
@@ -19,6 +23,11 @@ export const StyledGridColumn = styled.div`
   padding: 0.3rem;
   padding-left: 1rem;
   background-color: ${({ theme }) => theme.color["white"]};
+  align-items: center;
+
+  > :not(:last-child) {
+    margin-bottom: 0.3rem;
+  }
 `;
 
 interface StyledGridHeader {
@@ -64,8 +73,6 @@ export const StyledNewColumnValue = styled.div`
 `;
 export const StyledTableHeader = styled.div`
   display: flex;
-  color: ${({ theme }) => theme.color["black"]};
-  font-size: ${({ theme }) => theme.fontSize["sm"]};
   padding: ${({ theme }) => theme.space[2]};
   align-items: center;
   justify-content: space-between;
@@ -82,4 +89,10 @@ export const StyledExpandedRow = styled.div<StyledExpandedRow>`
   padding-left: 4rem;
   min-height: 5rem;
   border-right: 1px solid ${({ theme }) => theme.color["black"]};
+`;
+export const StyledPagination = styled.div`
+  display: flex;
+  align-items: center;
+  color: ${({ theme }) => theme.color["black"]};
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
