@@ -174,6 +174,7 @@ export const App: React.FC = () => {
       <Helmet>
         <meta charSet="utf-8" />
         <title>InkVisitor</title>
+        <link rel="stylesheet" type="text/css" href="/custom.css" />
       </Helmet>
       <ThemeProvider theme={themeConfig}>
         <GlobalStyle
