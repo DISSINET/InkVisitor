@@ -196,7 +196,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
     },
     {
       value: BatchOption.relate_to_SOE,
-      label: `relate to superordinate event`,
+      label: `relate to superordinate entity`,
       info: EntityEnums.Class.Event,
     },
     {
