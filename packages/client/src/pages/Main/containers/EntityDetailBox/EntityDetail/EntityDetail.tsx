@@ -885,6 +885,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                     entities={entity.entities}
                     useCases={entity.usedInMetaProps}
                     key="MetaProp"
+                    perPage={10}
                   />
                 )}
 
@@ -895,6 +896,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                     entities={entity.entities}
                     useCases={entity.usedInStatements}
                     key="Statement"
+                    perPage={10}
                   />
                 )}
 
@@ -908,6 +910,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                     entities={entity.entities}
                     useCases={entity.usedInStatementProps}
                     key="StatementProp"
+                    perPage={10}
                   />
                 )}
 
@@ -921,6 +924,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                     entities={entity.entities}
                     useCases={entity.usedInStatementIdentifications}
                     key="StatementIdentification"
+                    perPage={10}
                   />
                 )}
 
@@ -934,6 +938,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                     entities={entity.entities}
                     useCases={entity.usedInStatementClassifications}
                     key="StatementClassification"
+                    perPage={10}
                   />
                 )}
               </StyledDetailSection>
