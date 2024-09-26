@@ -101,5 +101,5 @@ export const StyledUsedInTitle = styled.div`
 `;
 export const StyledTableContainer = styled.div`
   position: relative;
-  margin-bottom: ${({ theme }) => theme.space[4]};
+  margin-bottom: ${({ theme }) => theme.space[8]};
 `;
