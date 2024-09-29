@@ -22,7 +22,7 @@ export const annotatorHighlight = (
       mode: "background",
       style: {
         fillColor: theme?.color.warning,
-        fillOpacity: 0.8,
+        fillOpacity: 0.7,
       },
     };
   }
@@ -40,7 +40,7 @@ export const annotatorHighlight = (
       mode: "background",
       style: {
         fillColor: color,
-        fillOpacity: 0.3,
+        fillOpacity: 0.2,
       },
     };
   }
