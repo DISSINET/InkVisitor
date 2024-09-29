@@ -174,13 +174,19 @@ class Api {
         // Do something with response data
         return response;
       },
-      (error) => {
-        if (!error.config.ignoreErrorToast) {
+      (error: AxiosError) => {
+        //@ts-ignore
+        if (!error.config?.ignoreErrorToast) {
           // Any status codes that falls outside the range of 2xx cause this function to trigger
           // Do something with response error
           if (this.shouldShowErrorToast(error)) {
             this.showErrorToast(error);
           }
+        }
+
+        if (error.status === 401) {
+          // if handled by react router, then the toast could be visible
+          window.location.pathname = "/login"
         }
 
         return Promise.reject(error);

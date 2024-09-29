@@ -11,6 +11,7 @@ import {
   Relation,
 } from ".";
 import { EntityEnums } from "../enums";
+import { IDocumentMeta } from "./document";
 import {
   IStatementClassification,
   IStatementIdentification,
@@ -28,6 +29,7 @@ export interface IResponseDetail extends IResponseEntity {
   usedInStatementClassifications: IResponseUsedInStatementClassification[]; // statement.data.actants[].classifications + from usedInStatements field if actant.entityId = detailId
 
   usedAsTemplate?: string[];
+  usedInDocuments: IDocumentMeta[];
 
   relations: Relation.IUsedRelations;
 

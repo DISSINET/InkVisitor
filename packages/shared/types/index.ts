@@ -65,6 +65,7 @@ import {
   IDocument,
   IResponseDocument,
   IResponseDocumentDetail,
+  IDocumentMeta,
 } from "./document";
 
 import {
@@ -138,6 +139,7 @@ export type {
   IDocument,
   IResponseDocument,
   IResponseDocumentDetail,
+  IDocumentMeta,
   IRequestPasswordReset,
   IRequestPasswordResetData,
   IRequestActivationData,

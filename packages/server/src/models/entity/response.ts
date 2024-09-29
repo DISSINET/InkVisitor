@@ -9,6 +9,7 @@ import {
   IResponseUsedInStatement,
   IStatement,
   IWarning,
+  IResponseDocument,
 } from "@shared/types";
 import Entity from "./entity";
 import Statement from "@models/statement/statement";
@@ -26,6 +27,8 @@ import {
 } from "@shared/types/statement";
 import { UsedRelations } from "@models/relation/relations";
 import EntityWarnings from "./warnings";
+import Document from "@models/document/document";
+import { IDocumentMeta } from "@shared/types/document";
 
 export class ResponseEntity extends Entity implements IResponseEntity {
   // map of entity ids that should be populated in subsequent methods and used in fetching
@@ -115,6 +118,7 @@ export class ResponseEntityDetail
   usedInStatementProps: IResponseUsedInStatementProps[];
   usedInMetaProps: IResponseUsedInMetaProp[];
   usedAsTemplate?: string[] | undefined;
+  usedInDocuments: IDocumentMeta[];
   usedInStatementIdentifications: IResponseUsedInStatementIdentification[];
   usedInStatementClassifications: IResponseUsedInStatementClassification[];
 
@@ -131,6 +135,7 @@ export class ResponseEntityDetail
     this.usedInStatementIdentifications = [];
     this.relations = new UsedRelations(entity.id, entity.class);
     this.warnings = [];
+    this.usedInDocuments = [];
 
     this.addLinkedEntities(this.getEntitiesIds());
   }
@@ -193,6 +198,8 @@ export class ResponseEntityDetail
     this.warnings = await new EntityWarnings(this.id, this.class).getWarnings(
       req.db.connection
     );
+
+    this.usedInDocuments = await Document.findByEntityId(conn, this.id);
   }
 
   /**

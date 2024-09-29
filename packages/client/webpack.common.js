@@ -1,7 +1,8 @@
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
-const createStyledComponentsTransformer = require("typescript-plugin-styled-components")
-  .default;
+const CopyPlugin = require("copy-webpack-plugin");
+const createStyledComponentsTransformer =
+  require("typescript-plugin-styled-components").default;
 const styledComponentsTransformer = createStyledComponentsTransformer();
 
 const path = require("path");
@@ -12,7 +13,7 @@ module.exports = {
     rules: [
       {
         test: /\.txt$/,
-        use: 'raw-loader'
+        use: "raw-loader",
       },
       {
         test: /\.m?js$/,
@@ -42,9 +43,9 @@ module.exports = {
         test: /\.(png|jp(e*)g|svg|gif)$/,
         use: [
           {
-            loader: 'file-loader',
+            loader: "file-loader",
             options: {
-              name: 'images/[hash]-[name].[ext]',
+              name: "images/[hash]-[name].[ext]",
             },
           },
         ],
@@ -67,6 +68,9 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: "./public/index.html",
       favicon: "./public/favicon.ico",
+    }),
+    new CopyPlugin({
+      patterns: [{ from: "src/assets", to: "." }],
     }),
   ],
 };
