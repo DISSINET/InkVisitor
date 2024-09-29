@@ -875,6 +875,7 @@ class Api {
       throw this.handleError(err);
     }
   }
+
   /**
    * Audit
    */
