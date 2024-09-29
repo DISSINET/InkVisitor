@@ -454,7 +454,14 @@ export const TextAnnotator = ({
   }
 
   return (
-    <div style={{ width: width, position: "absolute" }}>
+    <div
+      style={{ width: width, position: "absolute" }}
+      onKeyDown={(e) => {
+        if (e.key === "Escape") {
+          setSelectedText("");
+        }
+      }}
+    >
       <StyledCanvasWrapper>
         {isMenuDisplayed && (
           <StyledAnnotatorMenu
