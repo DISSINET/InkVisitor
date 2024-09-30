@@ -200,7 +200,7 @@ export const TextAnnotator = ({
     handleSaveNewContent(true);
   };
 
-  const refreshAnnotator = () => {
+  const refreshAnnotator = (scrollTo: { line?: number; anchor?: string }) => {
     if (!mainCanvas.current) {
       return;
     }
@@ -212,8 +212,6 @@ export const TextAnnotator = ({
       dataDocument?.content ?? "no text",
       RATIO
     );
-
-    newAnnotator.scrollToLine(0);
 
     if (scroller?.current) {
       newAnnotator.addScroller(scroller.current);
@@ -251,7 +249,6 @@ export const TextAnnotator = ({
     });
 
     newAnnotator.onTextChanged((text) => {
-      // console.log("text changed", text);
       setLocalTextContent(text);
     });
     newAnnotator.draw();
@@ -259,47 +256,56 @@ export const TextAnnotator = ({
     setAnnotator(newAnnotator);
     forwardAnnotator(newAnnotator);
 
-    if (newAnnotator && newAnnotator.viewport) {
-      if (!isInitialized) {
-        newAnnotator?.scrollToLine(storedAnnotatorScroll);
-        if (initialScrollEntityId) {
-          newAnnotator.scrollToAnchor(initialScrollEntityId);
-
-          // rescroll if the scroll stored
-          if (storedAnnotatorScroll) {
-            newAnnotator?.scrollToLine(storedAnnotatorScroll);
-          }
-        }
-
-        setIsInitialized(true);
-      }
-    }
-
     newAnnotator.onScroll(() => {
       setStoredAnnotatorScroll(newAnnotator.viewport.lineStart);
     });
 
-    if (scrollAfterRefresh) {
-      newAnnotator.viewport.scrollTo(
-        scrollAfterRefresh,
-        newAnnotator.text.lines.length
-      );
-      setScrollAfterRefresh(undefined);
-    }
+    setTimeout(() => {
+      if (scrollTo.line) {
+        newAnnotator.scrollToLine(scrollTo.line);
+      } else if (scrollTo.anchor) {
+        newAnnotator.scrollToAnchor(scrollTo.anchor);
+      }
+    }, 200);
 
     newAnnotator.setMode(originalMode);
   };
 
   useEffect(() => {
     if (!isFetchingDocument) {
-      refreshAnnotator();
+      if (scrollAfterRefresh) {
+        refreshAnnotator({
+          line: scrollAfterRefresh,
+        });
+      } else {
+        refreshAnnotator({
+          line: storedAnnotatorScroll,
+        });
+      }
     }
-  }, [isFetchingDocument, dataDocument, theme]);
+  }, [isFetchingDocument, dataDocument]);
 
   useEffect(() => {
-    setIsInitialized(false);
-    refreshAnnotator();
-  }, [initialScrollEntityId]);
+    if (!isFetchingDocument) {
+      refreshAnnotator({
+        line: storedAnnotatorScroll,
+      });
+    }
+  }, [theme, isFetchingDocument]);
+
+  useEffect(() => {
+    if (mainCanvas.current) {
+      if (storedAnnotatorScroll) {
+        refreshAnnotator({
+          line: storedAnnotatorScroll,
+        });
+      } else if (initialScrollEntityId) {
+        refreshAnnotator({
+          anchor: initialScrollEntityId,
+        });
+      }
+    }
+  }, [initialScrollEntityId, mainCanvas.current]);
 
   // check if the selection is in the first half of the viewportr
   const menuSelectionPosition = useMemo<"top" | "bottom" | "both">(() => {
@@ -448,7 +454,14 @@ export const TextAnnotator = ({
   }
 
   return (
-    <div style={{ width: width, position: "absolute" }}>
+    <div
+      style={{ width: width, position: "absolute" }}
+      onKeyDown={(e) => {
+        if (e.key === "Escape") {
+          setSelectedText("");
+        }
+      }}
+    >
       <StyledCanvasWrapper>
         {isMenuDisplayed && (
           <StyledAnnotatorMenu
