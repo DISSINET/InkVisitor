@@ -1,9 +1,10 @@
 import { IDbModel } from "@models/common";
 import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
-import { IDocument } from "@shared/types";
+import { IDocument, IResponseDocument } from "@shared/types";
 import { UserEnums } from "@shared/enums";
 import { InternalServerError, ModelNotValidError } from "@shared/types/errors";
 import User from "@models/user/user";
+import { IDocumentMeta } from "@shared/types/document";
 
 export default class Document implements IDocument, IDbModel {
   static table = "documents";
@@ -191,18 +192,25 @@ export default class Document implements IDocument, IDbModel {
     return entries && entries.length ? entries.map((d) => new Document(d)) : [];
   }
 
+  /**
+   *
+   * @param db
+   * @param entityId
+   * @returns
+   */
   static async findByEntityId(
     db: Connection,
     entityId: string
-  ): Promise<Document[]> {
+  ): Promise<IDocumentMeta[]> {
     const entries = await rethink
       .table(Document.table)
       .filter(function (row: RDatum) {
         return row("entityIds").contains(entityId);
       })
+      .without("content")
       .run(db);
 
-    return entries && entries.length ? entries.map((d) => new Document(d)) : [];
+    return entries && entries.length ? (entries as IDocumentMeta[]) : [];
   }
 
   /**

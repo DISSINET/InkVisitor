@@ -526,20 +526,18 @@ export default Router()
             continue;
           }
 
-          const docsIds = await Document.findByEntityId(
+          const docs = await Document.findByEntityId(
             req.db.connection,
             entity.id
           );
-          if (docsIds.length) {
+          if (docs.length) {
             out.result = false;
             out.data[entity.id] = new InvalidDeleteError(
               `Cannot be deleted while anchored to documents (${
-                docsIds[0].id +
-                (docsIds.length > 1
-                  ? " + " + (docsIds.length - 1) + " others"
-                  : "")
+                docs[0].id +
+                (docs.length > 1 ? " + " + (docs.length - 1) + " others" : "")
               })`
-            ).withData(docsIds.map((d) => d.id));
+            ).withData(docs.map((d) => d.id));
             continue;
           }
 

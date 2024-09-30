@@ -9,6 +9,7 @@ import { getEntityClass } from "@models/factory";
 import { IRequest } from "src/custom_typings/request";
 import Territory from "@models/territory/territory";
 import Audit from "@models/audit/audit";
+import Document from "@models/document/document";
 
 /**
  * SearchQuery is customized builder for search queries, allowing to build query by chaining prepared filters
@@ -145,7 +146,8 @@ export class SearchQuery {
       return r.and(
         row("class").eq(EntityEnums.Class.Resource),
         row.hasFields({ data: { documentId: true } }),
-        row("data")("documentId").ne("")
+        row("data")("documentId").ne(""),
+        r.table(Document.table).get(row("data")("documentId")).ne(null)
       );
     });
     return this;
@@ -399,7 +401,7 @@ export class SearchQuery {
     if (req.haveReferenceTo) {
       this.whereHaveReferenceTo(req.haveReferenceTo);
     }
-  //  console.log(this.query.toString());
+    //  console.log(this.query.toString());
   }
 
   /**

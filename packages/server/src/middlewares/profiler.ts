@@ -12,7 +12,8 @@ export default function profilerMiddleware(
     const elapsed = Date.now() - start;
     if (req.baseUrl && req.route.path && elapsed > threshold) {
       console.log(
-        `[${new Date().toUTCString()}] Slow query(${elapsed}ms): ${req.baseUrl + req.route.path
+        `[${new Date().toUTCString()}] Slow query(${elapsed}ms): ${
+          req.baseUrl + req.route.path
         }`
       );
     }

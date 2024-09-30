@@ -1,7 +1,5 @@
 import { IDocument, IResponseDocument } from "@shared/types";
 import Document from "./document";
-import { IRequest } from "src/custom_typings/request";
-import Entity from "@models/entity/entity";
 import { findEntityById } from "@service/shorthands";
 import { EntityEnums } from "@shared/enums";
 import { Connection } from "rethinkdb-ts";
@@ -11,7 +9,6 @@ export default class ResponseDocument
   implements IResponseDocument
 {
   referencedEntityIds: Record<EntityEnums.Class, string[]>;
-  entityIds: string[];
 
   constructor(data: Partial<IDocument>) {
     super(data);

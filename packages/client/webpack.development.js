@@ -10,6 +10,10 @@ module.exports = merge(common, {
     hot: true,
     historyApiFallback: true,
     port: 8000,
+    static: {
+      directory: path.resolve(__dirname, "./src/assets"),
+      publicPath: "/",
+    },
   },
   plugins: [
     new Dotenv({

@@ -43,6 +43,15 @@ export class CustomError extends Error {
 /**
  * BadCredentialsError is an error associated with invalid combination of login & password credentials
  */
+class TooManyRequestsError extends CustomError {
+  public static code = 429;
+  public static title = "Too many requests";
+  public static message = "Try again in a few minutes";
+}
+
+/**
+ * BadCredentialsError is an error associated with invalid combination of login & password credentials
+ */
 class BadCredentialsError extends CustomError {
   public static code = 401;
   public static title = "Bad credentials";
@@ -497,6 +506,7 @@ const allErrors: Record<string, any> = {
   UsernameTooShortError,
   UsernameTooLongError,
   InvalidEmailError,
+  TooManyRequestsError,
 };
 
 export interface IErrorSignature {
@@ -547,4 +557,5 @@ export {
   UsernameTooShortError,
   UsernameTooLongError,
   InvalidEmailError,
+  TooManyRequestsError,
 };
