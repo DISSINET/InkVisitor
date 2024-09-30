@@ -49,7 +49,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     allNodes.forEach((node) => {
       // if edge is invalid for the source node
       node.edges.forEach((edge) => {
-        if (!Query.isSourceNodeValid(node.type, edge.type)) {
+        if (!Query.isEdgeValidity(node, edge)) {
           isValid = false;
           problems.push({
             source: edge.id,
@@ -59,16 +59,16 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
       });
     });
 
-    // if edge has an invalid target node
-    allEdges.forEach((edge) => {
-      if (!Query.isTargetNodeValid(edge.node.type, edge.type)) {
-        isValid = false;
-        problems.push({
-          source: edge.node.id,
-          text: "Invalid target node",
-        });
-      }
-    });
+    // // if edge has an invalid target node
+    // allEdges.forEach((edge) => {
+    //   if (!Query.isTargetNodeValid(edge.node.type, edge.type)) {
+    //     isValid = false;
+    //     problems.push({
+    //       source: edge.node.id,
+    //       text: "Invalid target node",
+    //     });
+    //   }
+    // });
 
     return {
       problems,

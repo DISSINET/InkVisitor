@@ -5,7 +5,7 @@ import { getAllEdges, getAllNodes } from "./utils";
 import { update } from "@react-spring/web";
 
 const queryStateInitial: Query.INode = {
-  type: Query.NodeType.X,
+  type: Query.NodeType.E,
   id: "root",
   params: {
     classes: [],
@@ -175,12 +175,12 @@ const updateNodeType = (
 
 const addNode = (state: Query.INode, parentId: string): Query.INode => {
   const newEdge: Query.IEdge = {
-    type: Query.EdgeType.XHasPropType,
+    type: Query.EdgeType["EP:T"],
     id: uuidv4(),
     params: {},
     logic: Query.EdgeLogic.Positive,
     node: {
-      type: Query.NodeType.X,
+      type: Query.NodeType.E,
       id: uuidv4(),
       params: {
         classes: [],

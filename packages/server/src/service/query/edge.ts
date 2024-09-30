@@ -29,7 +29,7 @@ export default class SearchEdge implements Query.IEdge {
 export class EdgeXHasClassification extends SearchEdge {
   constructor(data: Partial<Query.IEdge>) {
     super(data);
-    this.type = Query.EdgeType.XHasClassification;
+    this.type = Query.EdgeType["R:CLA"];
   }
 
   run(q: RStream): RStream {
@@ -53,7 +53,7 @@ export class EdgeXHasClassification extends SearchEdge {
 export class EdgeSUnderT extends SearchEdge {
   constructor(data: Partial<Query.IEdge>) {
     super(data);
-    this.type = Query.EdgeType.SUnderT;
+    this.type = Query.EdgeType["SUT:"];
   }
 
   run(q: RStream): RStream {
@@ -64,7 +64,7 @@ export class EdgeSUnderT extends SearchEdge {
 export class EdgeHasRelation extends SearchEdge {
   constructor(data: Partial<Query.IEdge>) {
     super(data);
-    this.type = Query.EdgeType.XHasRelation;
+    this.type = Query.EdgeType["R:"];
   }
 
   run(q: RStream): RStream {
@@ -82,7 +82,7 @@ export class EdgeHasRelation extends SearchEdge {
 export class EdgeCHasSuperclass extends SearchEdge {
   constructor(data: Partial<Query.IEdge>) {
     super(data);
-    this.type = Query.EdgeType.CHasSuperclass;
+    this.type = Query.EdgeType["R:SCL"];
   }
 
   run(q: RStream): RStream {
@@ -106,7 +106,7 @@ export class EdgeCHasSuperclass extends SearchEdge {
 export class EdgeHasPropType extends SearchEdge {
   constructor(data: Partial<Query.IEdge>) {
     super(data);
-    this.type = Query.EdgeType.XHasPropType;
+    this.type = Query.EdgeType["EP:T"];
   }
 
   run(q: RStream): RStream {
@@ -126,15 +126,15 @@ export class EdgeHasPropType extends SearchEdge {
 
 export function getEdgeInstance(data: Partial<Query.IEdge>): SearchEdge {
   switch (data.type) {
-    case Query.EdgeType.XHasPropType:
+    case Query.EdgeType["EP:T"]:
       return new EdgeHasPropType(data);
-    case Query.EdgeType.XHasClassification:
-      return new EdgeXHasClassification(data);
-    case Query.EdgeType.XHasRelation:
+    case Query.EdgeType["R:"]:
       return new EdgeHasRelation(data);
-    case Query.EdgeType.CHasSuperclass:
+    case Query.EdgeType["R:CLA"]:
+      return new EdgeXHasClassification(data);
+    case Query.EdgeType["R:SCL"]:
       return new EdgeCHasSuperclass(data);
-    case Query.EdgeType.SUnderT:
+    case Query.EdgeType["SUT:"]:
       return new EdgeSUnderT(data);
     default:
       throw new InternalServerError(`unknown edge type: ${data.type}`);

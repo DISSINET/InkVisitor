@@ -86,24 +86,12 @@ export default class SearchNode implements Query.INode {
     }
   }
 
+  // TODO: checking only edge validity
   /**
    * Tests if the node is valid - params & edges should be valid
    * @returns boolean
    */
   isValid(): boolean {
-    for (const edge of this.edges) {
-      const rule = Query.EdgeTypeNodeRules[edge.type];
-      if (!rule) {
-        return false;
-      }
-
-      if (rule[0] === Query.NodeType.X || this.type === Query.NodeType.X) {
-        // if source is X or node is X
-      } else if (rule[0] !== this.type) {
-        return false;
-      }
-    }
-
     return true;
   }
 }

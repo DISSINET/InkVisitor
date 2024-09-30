@@ -25,33 +25,79 @@ export namespace Query {
   export interface IEdgeParams {}
 
   export enum NodeType {
-    X = "Entity",
-    C = "Concept",
-    A = "Action",
-    S = "Statement",
-    R = "Resource",
-    T = "Territory",
+    E = "Entity",
   }
   export enum EdgeType {
-    XHasPropType = "X_has_proptype",
-    XHasPropValue = "X_has_propvalue",
-    XIsInS = "X_is_in_S",
-    AIsActionInS = "A_is_action_in_S",
-    XIsSubjectInS = "X_is_subject_in_S",
-    XIsActant1InS = "X_is_actant_1_in_S",
-    XIsActant2InS = "X_is_actant_2_in_S",
-    SUnderT = "S_under_T",
-    SUnderChildrenT = "S_under_children_T",
-    XHasReferenceR = "X_has_reference_R",
-    THasChildT = "T_has_child_T",
-    XHasSPropTypeC = "X_has_S_proptype_C",
-    XHasSPropValue = "X_has_S_propvalue",
-    XHasSIdentification = "X_has_S_identification",
-    XHasSClassification = "X_has_S_classification",
-    XHasRelation = "X_has_relation",
-    XHasClassification = "X_has_classification",
-    CHasSuperclass = "C_has_superclass",
+    "HP:V" = "HP:V",
+    "I_HP:V" = "I_HP:V",
+    "EP:T" = "EP:T",
+    "IS:" = "IS:",
+    "I_IS:" = "I_IS:",
+    "IS:A" = "IS:A",
+    "I_IS:A" = "I_IS:A",
+    "IS:S" = "IS:S",
+    "I_IS:S" = "I_IS:S",
+    "IS:A1" = "IS:A1",
+    "I_IS:A1" = "I_IS:A1",
+    "IS:A2" = "IS:A2",
+    "I_IS:A2" = "I_IS:A2",
+    "IS:PS" = "IS:PS",
+    "I_IS:PS" = "I_IS:PS",
+    "SUT:" = "SUT:",
+    "I_SUT:" = "I_SUT:",
+    "SUT:D" = "SUT:D",
+    "I_SUT:D" = "I_SUT:D",
+    "SUT:C" = "SUT:C",
+    "I_SUT:C" = "I_SUT:C",
+    "HR:R" = "HR:R",
+    "I_HR:R" = "I_HR:R",
+    "HR:V" = "HR:V",
+    "CT:" = "CT:",
+    "I_CT:" = "I_CT:",
+    "CT:D" = "CT:D",
+    "I_CT:D" = "I_CT:D",
+    "CT:G" = "CT:G",
+    "I_CT:G" = "I_CT:G",
+    "SP:T" = "SP:T",
+    "I_SP:T" = "I_SP:T",
+    "SP:V" = "SP:V",
+    "I_SP:V" = "I_SP:V",
+    "SI" = "SI",
+    "I_SI" = "I_SI",
+    "SC" = "SC",
+    "I_SC" = "I_SC",
+    "R:" = "R:",
+    "R:SCL" = "R:SCL",
+    "I_R:SCL" = "I_R:SCL",
+    "R:SYN" = "R:SYN",
+    "R:ANT" = "R:ANT",
+    "I_R:ANT" = "I_R:ANT",
+    "R:HOL" = "R:HOL",
+    "I_R:HOL" = "I_R:HOL",
+    "R:PRR" = "R:PRR",
+    "I_R:PRR" = "I_R:PRR",
+    "R:SAR" = "R:SAR",
+    "I_R:SAR" = "I_R:SAR",
+    "R:AEE" = "R:AEE",
+    "I_R:AEE" = "I_R:AEE",
+    "R:CLA" = "R:CLA",
+    "I_R:CLA" = "I_R:CLA",
+    "R:IDE" = "R:IDE",
+    "I_R:IDE" = "I_R:IDE",
+    "R:IMP" = "R:IMP",
+    "I_R:IMP" = "I_R:IMP",
+    "R:SOE" = "R:SOE",
+    "I_R:SOE" = "I_R:SOE",
+    "R:SUS" = "R:SUS",
+    "I_R:SUS" = "I_R:SUS",
+    "R:A1S" = "R:A1S",
+    "I_R:A1S" = "I_R:A1S",
+    "R:A2S" = "R:A2S",
+    "I_R:A2S" = "I_R:A2S",
+    "R:REL" = "R:REL",
+    "I_R:REL" = "I_R:REL",
   }
+
   export enum NodeOperator {
     And = "and",
     Or = "or",
@@ -60,90 +106,732 @@ export namespace Query {
     Positive = "positive",
     Negative = "negative",
   }
-  export const EdgeTypeNodeRules: Record<EdgeType, [NodeType, NodeType]> = {
-    [EdgeType.XHasPropType]: [NodeType.X, NodeType.C],
-    [EdgeType.XHasPropValue]: [NodeType.X, NodeType.X],
-    [EdgeType.XIsInS]: [NodeType.X, NodeType.S],
-    [EdgeType.AIsActionInS]: [NodeType.A, NodeType.S],
-    [EdgeType.XIsSubjectInS]: [NodeType.X, NodeType.S],
-    [EdgeType.XIsActant1InS]: [NodeType.X, NodeType.S],
-    [EdgeType.XIsActant2InS]: [NodeType.X, NodeType.S],
-    [EdgeType.SUnderT]: [NodeType.S, NodeType.T],
-    [EdgeType.XHasReferenceR]: [NodeType.X, NodeType.R],
-    [EdgeType.THasChildT]: [NodeType.T, NodeType.T],
-    [EdgeType.XHasSPropTypeC]: [NodeType.X, NodeType.C],
-    [EdgeType.XHasSPropValue]: [NodeType.X, NodeType.X],
-    [EdgeType.XHasSIdentification]: [NodeType.X, NodeType.X],
-    [EdgeType.XHasSClassification]: [NodeType.X, NodeType.C],
-    [EdgeType.XHasRelation]: [NodeType.X, NodeType.X],
-    [EdgeType.XHasClassification]: [NodeType.X, NodeType.C],
-    [EdgeType.CHasSuperclass]: [NodeType.C, NodeType.C],
-    [EdgeType.SUnderChildrenT]: [NodeType.S, NodeType.T],
+  // emtpy entityClass means it could be any class
+  export type EdgeRule = {
+    nodeType: NodeType;
+    params: { entityClass?: EntityEnums.Class[] };
+  };
+
+  export const EdgeTypeNodeRules: Record<EdgeType, [EdgeRule, EdgeRule]> = {
+    "HP:V": [
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Concept] },
+      },
+      { nodeType: NodeType.E, params: {} },
+    ],
+    "I_HP:V": [
+      { nodeType: NodeType.E, params: {} },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Concept] },
+      },
+    ],
+    "EP:T": [
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Concept] },
+      },
+    ],
+    "IS:": [
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Statement] },
+      },
+    ],
+    "I_IS:": [
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Statement] },
+      },
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+    ],
+    "IS:A": [
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Action] },
+      },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Statement] },
+      },
+    ],
+    "I_IS:A": [
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Statement] },
+      },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Action] },
+      },
+    ],
+    "IS:S": [
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Statement] },
+      },
+    ],
+    "I_IS:S": [
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Statement] },
+      },
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+    ],
+    "IS:A1": [
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Statement] },
+      },
+    ],
+    "I_IS:A1": [
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Statement] },
+      },
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+    ],
+    "IS:A2": [
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Statement] },
+      },
+    ],
+    "I_IS:A2": [
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Statement] },
+      },
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+    ],
+    "IS:PS": [
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Statement] },
+      },
+    ],
+    "I_IS:PS": [
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Statement] },
+      },
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+    ],
+    "SUT:": [
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Statement] },
+      },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Territory] },
+      },
+    ],
+    "I_SUT:": [
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Territory] },
+      },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Statement] },
+      },
+    ],
+    "SUT:D": [
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Statement] },
+      },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Territory] },
+      },
+    ],
+    "I_SUT:D": [
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Territory] },
+      },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Statement] },
+      },
+    ],
+    "SUT:C": [
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Statement] },
+      },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Territory] },
+      },
+    ],
+    "I_SUT:C": [
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Territory] },
+      },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Statement] },
+      },
+    ],
+    "HR:R": [
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Resource] },
+      },
+    ],
+    "I_HR:R": [
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Resource] },
+      },
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+    ],
+    "HR:V": [
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Value] },
+      },
+    ],
+    "CT:": [
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Territory] },
+      },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Territory] },
+      },
+    ],
+    "I_CT:": [
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Territory] },
+      },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Territory] },
+      },
+    ],
+    "CT:D": [
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Territory] },
+      },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Territory] },
+      },
+    ],
+    "I_CT:D": [
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Territory] },
+      },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Territory] },
+      },
+    ],
+    "CT:G": [
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Territory] },
+      },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Territory] },
+      },
+    ],
+    "I_CT:G": [
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Territory] },
+      },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Territory] },
+      },
+    ],
+    "SP:T": [
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Concept] },
+      },
+    ],
+    "I_SP:T": [
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+    ],
+    "SP:V": [
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+    ],
+    "I_SP:V": [
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+    ],
+    SI: [
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+    ],
+    I_SI: [
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+    ],
+    SC: [
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Concept] },
+      },
+    ],
+    I_SC: [
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Concept] },
+      },
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+    ],
+    "R:": [
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+    ],
+    "R:SCL": [
+      {
+        nodeType: NodeType.E,
+        params: {
+          entityClass: [EntityEnums.Class.Action, EntityEnums.Class.Concept],
+        },
+      },
+      {
+        nodeType: NodeType.E,
+        params: {
+          entityClass: [EntityEnums.Class.Action, EntityEnums.Class.Concept],
+        },
+      },
+    ],
+    "I_R:SCL": [
+      {
+        nodeType: NodeType.E,
+        params: {
+          entityClass: [EntityEnums.Class.Action, EntityEnums.Class.Concept],
+        },
+      },
+      {
+        nodeType: NodeType.E,
+        params: {
+          entityClass: [EntityEnums.Class.Action, EntityEnums.Class.Concept],
+        },
+      },
+    ],
+    "R:SYN": [
+      {
+        nodeType: NodeType.E,
+        params: {
+          entityClass: [EntityEnums.Class.Action, EntityEnums.Class.Concept],
+        },
+      },
+      {
+        nodeType: NodeType.E,
+        params: {
+          entityClass: [EntityEnums.Class.Action, EntityEnums.Class.Concept],
+        },
+      },
+    ],
+    "R:ANT": [
+      {
+        nodeType: NodeType.E,
+        params: {
+          entityClass: [EntityEnums.Class.Action, EntityEnums.Class.Concept],
+        },
+      },
+      {
+        nodeType: NodeType.E,
+        params: {
+          entityClass: [EntityEnums.Class.Action, EntityEnums.Class.Concept],
+        },
+      },
+    ],
+    "I_R:ANT": [
+      {
+        nodeType: NodeType.E,
+        params: {
+          entityClass: [EntityEnums.Class.Action, EntityEnums.Class.Concept],
+        },
+      },
+      {
+        nodeType: NodeType.E,
+        params: {
+          entityClass: [EntityEnums.Class.Action, EntityEnums.Class.Concept],
+        },
+      },
+    ],
+    "R:HOL": [
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Concept] },
+      },
+    ],
+    "I_R:HOL": [
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Concept] },
+      },
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+    ],
+    "R:PRR": [
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Concept] },
+      },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Concept] },
+      },
+    ],
+    "I_R:PRR": [
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Concept] },
+      },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Concept] },
+      },
+    ],
+    "R:SAR": [
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Action] },
+      },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Action] },
+      },
+    ],
+    "I_R:SAR": [
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Action] },
+      },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Action] },
+      },
+    ],
+    "R:AEE": [
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Action] },
+      },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Event] },
+      },
+    ],
+    "I_R:AEE": [
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Event] },
+      },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Action] },
+      },
+    ],
+    "R:CLA": [
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Concept] },
+      },
+    ],
+    "I_R:CLA": [
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Concept] },
+      },
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+    ],
+    "R:IDE": [
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Action] },
+      },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Concept] },
+      },
+    ],
+    "I_R:IDE": [
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Concept] },
+      },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Action] },
+      },
+    ],
+    "R:IMP": [
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Action] },
+      },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Action] },
+      },
+    ],
+    "I_R:IMP": [
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Action] },
+      },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Action] },
+      },
+    ],
+    "R:SOE": [
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+    ],
+    "I_R:SOE": [
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+    ],
+    "R:SUS": [
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Action] },
+      },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Concept] },
+      },
+    ],
+    "I_R:SUS": [
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Concept] },
+      },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Action] },
+      },
+    ],
+    "R:A1S": [
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Action] },
+      },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Concept] },
+      },
+    ],
+    "I_R:A1S": [
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Concept] },
+      },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Action] },
+      },
+    ],
+    "R:A2S": [
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Action] },
+      },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Concept] },
+      },
+    ],
+    "I_R:A2S": [
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Concept] },
+      },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Action] },
+      },
+    ],
+    "R:REL": [
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+    ],
+    "I_R:REL": [
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+    ],
   };
   export const EdgeTypeLabels: Record<EdgeType, string> = {
-    [EdgeType.XHasPropType]: "has property type",
-    [EdgeType.XHasPropValue]: "has property value",
-    [EdgeType.XIsInS]: "is in statement",
-    [EdgeType.AIsActionInS]: "is action in statement",
-    [EdgeType.XIsSubjectInS]: "is subject in statement",
-    [EdgeType.XIsActant1InS]: "is actant 1 in statement",
-    [EdgeType.XIsActant2InS]: "is actant 2 in statement",
-    [EdgeType.SUnderT]: "under territory",
-    [EdgeType.XHasReferenceR]: "has reference",
-    [EdgeType.THasChildT]: "has child territory",
-    [EdgeType.XHasSPropTypeC]: "has statement property type",
-    [EdgeType.XHasSPropValue]: "has statement property value",
-    [EdgeType.XHasSIdentification]: "has statement identification",
-    [EdgeType.XHasSClassification]: "has statement classification",
-    [EdgeType.XHasRelation]: "has relation",
-    [EdgeType.XHasClassification]: "has classification",
-    [EdgeType.CHasSuperclass]: "has superclass",
-    [EdgeType.SUnderChildrenT]: "under children territory",
+    "HP:V": "has property: value",
+    "I_HP:V": "property origin",
+    "EP:T": "has property: type",
+    "IS:": "is in S: any position",
+    "I_IS:": "S has: in any position",
+    "IS:A": "is in S: as action",
+    "I_IS:A": "S has: actant",
+    "IS:S": "is in S: as subject",
+    "I_IS:S": "S has: subject",
+    "IS:A1": "is in S: as actant1",
+    "I_IS:A1": "S has: actant1",
+    "IS:A2": "is in S: as actant2",
+    "I_IS:A2": "S has: actant2",
+    "IS:PS": "is in S: as pseudoactant",
+    "I_IS:PS": "S has: pseudoactant",
+    "SUT:": "S under T: any",
+    "I_SUT:": "T has S: any",
+    "SUT:D": "S under T: direct",
+    "I_SUT:D": "T has S: direct",
+    "SUT:C": "S under T: children",
+    "I_SUT:C": "T has S: children",
+    "HR:R": "has reference: resource",
+    "I_HR:R": "R references",
+    "HR:V": "Has reference: value",
+    "CT:": "T has child T: any",
+    "I_CT:": "T has parent T: any",
+    "CT:D": "T has child T: direct child",
+    "I_CT:D": "T has parent T: direct parent",
+    "CT:G": "T has child T: any",
+    "I_CT:G": "T has parent T: any",
+    "SP:T": "has S prop: type",
+    "I_SP:T": "is S prop: type",
+    "SP:V": "has S prop: value",
+    "I_SP:V": "is S prop:value",
+    SI: "has S identification",
+    I_SI: "is S identification",
+    SC: "has S classification",
+    I_SC: "is S clasification",
+    "R:": "has relation: any",
+    "R:SCL": "has relation: Superclass",
+    "I_R:SCL": "is related to: as Superclass",
+    "R:SYN": "has relation: Synonym",
+    "R:ANT": "has relation: Antonym",
+    "I_R:ANT": "is related to: as Antonym",
+    "R:HOL": "has relation: Holonym",
+    "I_R:HOL": "is related to: as Holonym",
+    "R:PRR": "has relation: PropertyReciprocal",
+    "I_R:PRR": "is related to: as PropertyReciprocal",
+    "R:SAR": "has relation: SubjectActant1Reciprocal",
+    "I_R:SAR": "is related to: as SubjectActant1Reciprocal",
+    "R:AEE": "has relation: ActionEventEquivalent",
+    "I_R:AEE": "is related to: as ActionEventEquivalent",
+    "R:CLA": "has relation: Classification",
+    "I_R:CLA": "is related to: as Classification",
+    "R:IDE": "has relation: Identification",
+    "I_R:IDE": "is related to: as Identification",
+    "R:IMP": "has relation: Implication",
+    "I_R:IMP": "is related to: as Implication",
+    "R:SOE": "has relation: SuperordinateEntity",
+    "I_R:SOE": "is related to: as SuperordinateEntity",
+    "R:SUS": "has relation: SubjectSemantics",
+    "I_R:SUS": "is related to: as SubjectSemantics",
+    "R:A1S": "has relation: Actant1Semantics",
+    "I_R:A1S": "is related to: as Actant1Semantics",
+    "R:A2S": "has relation: Actant2Semantics",
+    "I_R:A2S": "is related to: as Actant2Semantics",
+    "R:REL": "has relation: Related",
+    "I_R:REL": "is related to: as Related",
   };
 
-  export const findValidEdgeTypesForSource = (
-    nodeType: NodeType
-  ): EdgeType[] => {
+  export const findValidEdgeTypesForSourceNode = (node: INode): EdgeType[] => {
     const validEdges = Object.entries(EdgeTypeNodeRules)
-      .filter(
-        ([, [from, to]]) =>
-          nodeType === NodeType.X || from === nodeType || from === NodeType.X
-      )
+      .filter(([, [ruleFrom, ruleTo]]) => {
+        // TODO
+        return node.type === ruleFrom.nodeType;
+      })
       .map(([type]) => type as EdgeType);
     return validEdges;
   };
 
-  export const findValidEdgeTypesForTarget = (
-    nodeType: NodeType
-  ): EdgeType[] => {
+  export const findValidEdgeTypesForTargetNode = (node: INode): EdgeType[] => {
     const validEdges = Object.entries(EdgeTypeNodeRules)
-      .filter(
-        ([, [from, to]]) =>
-          nodeType === NodeType.X || to === nodeType || to === NodeType.X
-      )
+      .filter(([, [from, to]]) => {
+        // TODO
+        return (
+          node.type === to.nodeType &&
+          to.params.entityClass?.includes(node.params.classes![0])
+        );
+      })
       .map(([type]) => type as EdgeType);
     return validEdges;
   };
 
-  export const isSourceNodeValid = (
-    nodeType: NodeType,
-    edgeType: EdgeType
-  ): boolean => {
-    if (nodeType === NodeType.X) {
-      return true;
-    }
-    const edgeRule = EdgeTypeNodeRules[edgeType];
-    return edgeRule[0] === NodeType.X || edgeRule[0] === nodeType;
+  export enum EdgeProblemSource {
+    Source = "source",
+    Target = "target",
+  }
+
+  export type EdgeValidity = {
+    valid: boolean;
+    problems: EdgeProblemSource[];
   };
-  export const isTargetNodeValid = (
-    nodeType: NodeType,
-    edgeType: EdgeType
-  ): boolean => {
-    if (nodeType === NodeType.X) {
+
+  export const isEdgeValidity = (
+    sourceNode: INode,
+    edge: IEdge
+  ): EdgeValidity => {
+    const targetNode = edge.node;
+    const edgeRule = EdgeTypeNodeRules[edge.type];
+    const [ruleFrom, ruleTo] = edgeRule;
+
+    const sourceValid = isNodeValid(sourceNode, ruleFrom);
+    const targetValid = isNodeValid(targetNode, ruleTo);
+    const edgeValid = sourceValid && targetValid;
+
+    const problems: EdgeProblemSource[] = [];
+    if (!sourceValid) {
+      problems.push(EdgeProblemSource.Source);
+    }
+    if (!targetValid) {
+      problems.push(EdgeProblemSource.Target);
+    }
+
+    return {
+      valid: edgeValid,
+      problems,
+    };
+  };
+
+  export const isNodeValid = (node: INode, rule: EdgeRule): boolean => {
+    if (node.type !== rule.nodeType) {
+      return false;
+    }
+    if (
+      rule.params.entityClass === undefined ||
+      rule.params.entityClass.length === 0
+    ) {
       return true;
     }
-    const edgeRule = EdgeTypeNodeRules[edgeType];
-    return edgeRule[1] === NodeType.X || edgeRule[1] === nodeType;
+    if (node.params.classes === undefined || node.params.classes.length === 0) {
+      return false;
+    }
+
+    return node.params.classes.every((nodeClass) => {
+      return rule.params.entityClass?.includes(nodeClass) || false;
+    });
   };
 }
 

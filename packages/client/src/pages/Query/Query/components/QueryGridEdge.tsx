@@ -24,7 +24,7 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
   dispatch,
   problems,
 }) => {
-  const validEdgesTypes = Query.findValidEdgeTypesForSource(node.type);
+  const validEdgesTypes = Query.findValidEdgeTypesForSourceNode(node);
 
   const edgeTypeOptions = validEdgesTypes.map((type) => ({
     value: type,

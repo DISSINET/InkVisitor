@@ -1,5 +1,5 @@
 export enum Modes {
-    RAW = "raw",
-    HIGHLIGHT = "highlight",
-    SEMI = "semi"
+  RAW = "raw",
+  HIGHLIGHT = "highlight",
+  SEMI = "semi",
 }

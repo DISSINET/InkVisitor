@@ -25,8 +25,6 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
   dispatch,
   problems,
 }) => {
-  const validSourceEdges = Query.findValidEdgeTypesForTarget(node.type);
-
   const isValid = problems.length === 0;
 
   const nodeTypeOptions = Object.values(Query.NodeType).map((type) => ({
