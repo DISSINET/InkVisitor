@@ -5,12 +5,14 @@ import { ISetting, SettingsKey } from "@shared/types/settings";
 export class Setting implements ISetting, IDbModel {
   id: SettingsKey;
   value: unknown;
+  public: boolean;
 
   static table = "settings";
 
   constructor(data: ISetting) {
     this.id = data.id;
     this.value = data.value;
+    this.public = !!data.public;
   }
 
   isValid(): boolean {
@@ -23,6 +25,7 @@ export class Setting implements ISetting, IDbModel {
       .insert({
         id: this.id,
         value: this.value,
+        public: this.public,
       })
       .run(dbInstance);
 
@@ -31,7 +34,7 @@ export class Setting implements ISetting, IDbModel {
 
   update(
     dbInstance: Connection | undefined,
-    updateData: { value: unknown }
+    updateData: { value: unknown; public: boolean }
   ): Promise<WriteResult> {
     return rethink
       .table(Setting.table)
@@ -42,5 +45,13 @@ export class Setting implements ISetting, IDbModel {
 
   delete(dbInstance: Connection): Promise<WriteResult> {
     throw new Error("Setting cannot be removed");
+  }
+
+  static async getSetting(
+    conn: Connection,
+    key: SettingsKey
+  ): Promise<Setting | null> {
+    const result = await rethink.table(Setting.table).get(key).run(conn);
+    return result ? new Setting(result as ISetting) : null;
   }
 }

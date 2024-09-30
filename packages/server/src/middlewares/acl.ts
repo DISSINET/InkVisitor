@@ -44,13 +44,13 @@ class Acl {
       .filter((part) => !!part)
       .join("/");
     const method = req.method as HttpMethods;
-
     const permissions = await AclPermission.findByRoute(
       req.db.connection,
       controller,
       method,
       route
     );
+    console.log(permissions);
 
     if (!permissions.length) {
       // if permission does not exist yet, create one that only admin can access

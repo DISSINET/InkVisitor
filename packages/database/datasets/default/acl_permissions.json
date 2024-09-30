@@ -19,8 +19,7 @@
   },
   {
     "controller": "statements",
-    "route": ":statementId",
-    "method": "GET",
+    "route": ":statementId","method": "GET",
     "roles": ["*"]
   },
   {
@@ -250,5 +249,12 @@
     "route": "",
     "method": "DELETE",
     "roles": ["*"]
+  },
+  {
+    "controller": "settings",
+    "route": ":key",
+    "method": "GET",
+    "roles": ["*"],
+    "public": true
   }
 ]
