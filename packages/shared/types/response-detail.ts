@@ -2,14 +2,7 @@
  * Very extensive object showing all the details about one actant
  */
 
-import {
-  IEntity,
-  IResponseDocument,
-  IResponseEntity,
-  IStatement,
-  IWarning,
-  Relation,
-} from ".";
+import { IEntity, IResponseEntity, IStatement, IWarning, Relation } from ".";
 import { EntityEnums } from "../enums";
 import { IDocumentMeta } from "./document";
 import {
@@ -29,7 +22,6 @@ export interface IResponseDetail extends IResponseEntity {
   usedInStatementClassifications: IResponseUsedInStatementClassification[]; // statement.data.actants[].classifications + from usedInStatements field if actant.entityId = detailId
 
   usedAsTemplate?: string[];
-  usedInDocuments: IDocumentMeta[];
 
   relations: Relation.IUsedRelations;
 
@@ -37,7 +29,7 @@ export interface IResponseDetail extends IResponseEntity {
 }
 
 export interface IResponseUsedInDocument {
-  document: IResponseDocument;
+  document: IDocumentMeta;
   anchorText: string[];
   resourceId: string;
 }

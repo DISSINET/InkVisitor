@@ -1,10 +1,9 @@
 import { IDbModel } from "@models/common";
 import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
-import { IDocument, IResponseDocument } from "@shared/types";
+import { IDocument } from "@shared/types";
 import { UserEnums } from "@shared/enums";
 import { InternalServerError, ModelNotValidError } from "@shared/types/errors";
 import User from "@models/user/user";
-import { IDocumentMeta } from "@shared/types/document";
 
 export default class Document implements IDocument, IDbModel {
   static table = "documents";
@@ -32,7 +31,7 @@ export default class Document implements IDocument, IDbModel {
    * @returns
    */
   findEntities(): string[] {
-    const regex = /<([\w-]+)>/g;
+    const regex = /<([\w-\.]+)>/g;
     let match;
 
     const entities = [];
@@ -44,6 +43,25 @@ export default class Document implements IDocument, IDbModel {
     const uEntities = [...new Set(entities)];
 
     return uEntities;
+  }
+
+  /**
+   * Finds content inside anchor-tags specified by entity id(tag)
+   * @param tag
+   * @returns
+   */
+  findAnchors(tag: string): string[] {
+    const regex = new RegExp(`<${tag}>(.*?)<\/${tag}>`, "g");
+
+    const result: string[] = [];
+
+    let match;
+    while ((match = regex.exec(this.content)) !== null) {
+      // match[1] contains the text inside the tag
+      result.push(match[1]);
+    }
+
+    return result;
   }
 
   /**
@@ -201,16 +219,15 @@ export default class Document implements IDocument, IDbModel {
   static async findByEntityId(
     db: Connection,
     entityId: string
-  ): Promise<IDocumentMeta[]> {
+  ): Promise<IDocument[]> {
     const entries = await rethink
       .table(Document.table)
       .filter(function (row: RDatum) {
         return row("entityIds").contains(entityId);
       })
-      .without("content")
       .run(db);
 
-    return entries && entries.length ? (entries as IDocumentMeta[]) : [];
+    return entries && entries.length ? (entries as IDocument[]) : [];
   }
 
   /**
