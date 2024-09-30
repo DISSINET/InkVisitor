@@ -23,6 +23,7 @@ import {
   RequestPermissionUpdate,
   IRequestStats,
 } from "@shared/types";
+import { ISetting } from "@shared/types/settings";
 import * as errors from "@shared/types/errors";
 import { NetworkError } from "@shared/types/errors";
 import { IRequestSearch } from "@shared/types/request-search";
@@ -1255,6 +1256,27 @@ class Api {
       const response = await this.connection.put(
         `/documents/${documentId}`,
         document,
+        options
+      );
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  /**
+   * Setting get
+   * @param settingId 
+   * @param options 
+   * @returns 
+   */
+  async settingGet(
+    settingId: string,
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseGeneric<ISetting>>> {
+    try {
+      const response = await this.connection.get(
+        `/settings/${settingId}`,
         options
       );
       return response;
