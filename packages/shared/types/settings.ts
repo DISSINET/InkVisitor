@@ -1,9 +1,7 @@
 export interface ISetting {
-  id: SettingsKey;
+  id: string;
   value: unknown;
   public: boolean;
 }
 
-export enum SettingsKey {
-  OWNER = "owner",
-}
+export enum SettingsKey {}

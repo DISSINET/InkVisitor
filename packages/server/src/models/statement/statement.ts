@@ -255,7 +255,7 @@ class Statement extends Entity implements IStatement {
    */
   canBeEditedByUser(user: User): boolean {
     // admin role has always the right
-    if (user.role === UserEnums.Role.Admin) {
+    if (user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin])) {
       return true;
     }
 
@@ -296,7 +296,7 @@ class Statement extends Entity implements IStatement {
    */
   canBeViewedByUser(user: User): boolean {
     // admin role has always the right
-    if (user.role === UserEnums.Role.Admin) {
+    if (user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin])) {
       return true;
     }
 
@@ -322,7 +322,7 @@ class Statement extends Entity implements IStatement {
    */
   canBeDeletedByUser(user: User): boolean {
     // only admin has the right, no matter the territory
-    if (user.role === UserEnums.Role.Admin) {
+    if (user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin])) {
       return true;
     }
 

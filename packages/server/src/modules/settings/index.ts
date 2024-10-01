@@ -13,6 +13,7 @@ export default Router().get(
       const key = request.params.key as SettingsKey;
       if (
         !key ||
+        // @ts-ignore
         !new Setting({ id: key, public: false, value: null }).isValid()
       ) {
         throw new BadParams("invalid settings key");

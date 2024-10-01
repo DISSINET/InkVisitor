@@ -3,7 +3,7 @@ import { IDbModel } from "@models/common";
 import { ISetting, SettingsKey } from "@shared/types/settings";
 
 export class Setting implements ISetting, IDbModel {
-  id: SettingsKey;
+  id: string;
   value: unknown;
   public: boolean;
 
