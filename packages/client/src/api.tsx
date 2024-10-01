@@ -1284,6 +1284,26 @@ class Api {
       throw this.handleError(err);
     }
   }
+
+  /**
+   * Get owner's info
+   * @param settingId 
+   * @param options 
+   * @returns 
+   */
+  async usersGetOwner(
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseGeneric<string>>> {
+    try {
+      const response = await this.connection.get(
+        `/users/owner`,
+        options
+      );
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
 }
 
 const apiSingleton = new Api();
