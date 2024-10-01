@@ -122,6 +122,7 @@ server.use(
       /api\/v1\/users\/signin/,
       /api\/v1\/users\/activation/,
       /api\/v1\/users\/password/,
+      /api\/v1\/users\/owner/,
       /api\/v1\/pythondata/,
       /api\/v1\/settings\/*/,
     ],

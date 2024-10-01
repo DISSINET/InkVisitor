@@ -7,6 +7,7 @@ import {
   EmailError,
   InternalServerError,
   ModelNotValidError,
+  NotFound,
   PasswordResetHashError,
   PermissionDeniedError,
   UserAlreadyActivated,
@@ -35,6 +36,20 @@ import { ResponseUser } from "@models/user/response";
 import { IRequest } from "src/custom_typings/request";
 
 export default Router()
+  .get(
+    "/owner",
+    asyncRouteHandler<IResponseGeneric<string>>(async (request: IRequest) => {
+      const owner = await User.getOwner(request.db.connection);
+      if (!owner) {
+        throw new NotFound("owner not found");
+      }
+
+      return {
+        result: true,
+        data: owner.email,
+      };
+    })
+  )
   /**
    * @openapi
    * /users/activation

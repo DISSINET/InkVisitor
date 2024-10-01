@@ -1,5 +1,12 @@
 [
   {
+    "controller": "users",
+    "route": "owner",
+    "method": "GET",
+    "roles": ["*"],
+    "public": true
+  },
+  {
     "controller": "acls",
     "route": "",
     "method": "GET",
