@@ -51,7 +51,10 @@ export const StyledNewColumn = styled.div`
   display: flex;
   flex-shrink: 0;
   flex-direction: column;
-  border-left: 2px solid ${({ theme }) => theme.color["gray"][400]};
+  /* border-left: 2px solid ${({ theme }) => theme.color["gray"][400]}; */
+
+  position: sticky;
+  top: 0;
 `;
 export const StyledNewColumnGrid = styled.div`
   display: grid;
