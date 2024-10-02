@@ -76,50 +76,115 @@ const MainPage: React.FC<MainPage> = ({}) => {
   const fourthPanelBoxesOpened: { [key: string]: boolean } = useAppSelector(
     (state) => state.layout.mainPage.fourthPanelBoxesOpened
   );
-  const firstPanelExpanded: boolean = useAppSelector(
-    (state) => state.layout.mainPage.firstPanelExpanded
-  );
-  const fourthPanelExpanded: boolean = useAppSelector(
-    (state) => state.layout.mainPage.fourthPanelExpanded
-  );
+  // const firstPanelExpanded: boolean = useAppSelector(
+  //   (state) => state.layout.mainPage.firstPanelExpanded
+  // );
+  // const fourthPanelExpanded: boolean = useAppSelector(
+  //   (state) => state.layout.mainPage.fourthPanelExpanded
+  // );
   const statementListOpened: boolean = useAppSelector(
     (state) => state.layout.mainPage.statementListOpened
   );
 
-  const toggleFirstPanel = () => {
-    if (firstPanelExpanded) {
-      dispatch(setFirstPanelExpanded(false));
-      localStorage.setItem("firstPanelExpanded", "false");
-    } else {
-      dispatch(setFirstPanelExpanded(true));
-      localStorage.setItem("firstPanelExpanded", "true");
-    }
+  const [collapsedPanels, setCollapsedPanels] = useState([
+    false,
+    false,
+    false,
+    false,
+  ]);
+
+  const togglePanel = (index: number) => {
+    const newCollapsedPanels = [...collapsedPanels];
+    newCollapsedPanels[index] = !newCollapsedPanels[index];
+    setCollapsedPanels(newCollapsedPanels);
   };
 
-  const firstPanelButton = () => (
-    <Button
-      onClick={toggleFirstPanel}
-      inverted
-      icon={firstPanelExpanded ? <RiMenuFoldFill /> : <RiMenuUnfoldFill />}
-    />
-  );
+  const calculatePanelWidths = () => {
+    // Calculate total available width minus collapsed panels
+    const totalCollapsedWidth = collapsedPanels.reduce(
+      (sum, isCollapsed) => sum + (isCollapsed ? collapsedPanelWidth : 0),
+      0
+    );
 
-  const toggleFourthPanel = () => {
-    if (fourthPanelExpanded) {
-      dispatch(setFourthPanelExpanded(false));
-      localStorage.setItem("fourthPanelExpanded", "false");
-    } else {
-      dispatch(setFourthPanelExpanded(true));
-      localStorage.setItem("fourthPanelExpanded", "true");
-    }
+    const totalExpandedWidth = layoutWidth - totalCollapsedWidth; // Remaining width for expanded panels
+
+    // Calculate the total percentage of expanded panels
+    const totalExpandedPercent = panelWidthsPercent.reduce(
+      (sum, percent, index) => sum + (collapsedPanels[index] ? 0 : percent),
+      0
+    );
+
+    // Calculate width in pixels for each panel
+    return panelWidthsPercent.map((percentWidth, index) => {
+      if (collapsedPanels[index]) {
+        return collapsedPanelWidth; // Collapsed panel width in px
+      }
+      // Calculate the expanded width based on the remaining width and proportion
+      return (percentWidth / totalExpandedPercent) * totalExpandedWidth;
+    });
   };
 
-  const hideFourthPanelButton = () => (
+  const panelWidthsLocal = calculatePanelWidths();
+  // const [panelWidthsLocal, setPanelWidthsLocal] = useState<number[]>([]);
+
+  useEffect(() => {
+    // setPanelWidthsLocal(calculatePanelWidths());
+  }, []);
+
+  // const toggleFirstPanel = () => {
+  //   if (firstPanelExpanded) {
+  //     dispatch(setFirstPanelExpanded(false));
+  //     localStorage.setItem("firstPanelExpanded", "false");
+  //   } else {
+  //     dispatch(setFirstPanelExpanded(true));
+  //     localStorage.setItem("firstPanelExpanded", "true");
+  //   }
+  // };
+
+  // const firstPanelButton = () => (
+  //   <Button
+  //     onClick={toggleFirstPanel}
+  //     inverted
+  //     icon={firstPanelExpanded ? <RiMenuFoldFill /> : <RiMenuUnfoldFill />}
+  //   />
+  // );
+
+  // const toggleFourthPanel = () => {
+  //   if (fourthPanelExpanded) {
+  //     dispatch(setFourthPanelExpanded(false));
+  //     localStorage.setItem("fourthPanelExpanded", "false");
+  //   } else {
+  //     dispatch(setFourthPanelExpanded(true));
+  //     localStorage.setItem("fourthPanelExpanded", "true");
+  //   }
+  // };
+
+  // const hideFourthPanelButton = () => (
+  //   <Button
+  //     key="hide"
+  //     onClick={toggleFourthPanel}
+  //     inverted
+  //     icon={fourthPanelExpanded ? <RiMenuUnfoldFill /> : <RiMenuFoldFill />}
+  //   />
+  // );
+
+  const togglePanelButton = (index: number) => (
     <Button
-      key="hide"
-      onClick={toggleFourthPanel}
+      onClick={() => togglePanel(index)}
       inverted
-      icon={fourthPanelExpanded ? <RiMenuUnfoldFill /> : <RiMenuFoldFill />}
+      icon={
+        index === 2 || index === 3 ? (
+          collapsedPanels[index] ? (
+            <RiMenuFoldFill />
+          ) : (
+            <RiMenuUnfoldFill />
+          )
+        ) : collapsedPanels[index] ? (
+          <RiMenuUnfoldFill />
+        ) : (
+          <RiMenuFoldFill />
+        )
+      }
     />
   );
 
@@ -148,7 +213,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
     const isThisBoxHidden = !fourthPanelBoxesOpened[boxToHide];
     return (
       <>
-        {fourthPanelExpanded && (
+        {!collapsedPanels[3] && (
           <Button
             key={boxToHide}
             inverted
@@ -192,7 +257,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
       (b) => b === true
     );
 
-    if (!fourthPanelExpanded) {
+    if (collapsedPanels[3]) {
       // Hidden panel state
       return contentHeight / 3;
     } else if (isThisBoxHidden) {
@@ -310,6 +375,12 @@ const MainPage: React.FC<MainPage> = ({}) => {
           panelWidths[3],
         ])
       );
+      // setPanelWidthsLocal([
+      //   panelWidths[0],
+      //   xPosition - panelWidths[0],
+      //   layoutWidth - panelWidths[3] - xPosition,
+      //   panelWidths[3],
+      // ]);
     }
   };
 
@@ -434,46 +505,40 @@ const MainPage: React.FC<MainPage> = ({}) => {
       {panelWidths.length && (
         <>
           <ScrollHandler />
-          {mainPageSeparatorXPosition > 0 && (
-            <LayoutSeparatorVertical
-              leftSideMinWidth={panelWidths[0] + SECOND_PANEL_MIN_WIDTH}
-              leftSideMaxWidth={
-                layoutWidth - panelWidths[3] - THIRD_PANEL_MIN_WIDTH
-              }
-              separatorXPosition={mainPageSeparatorXPosition}
-              setSeparatorXPosition={(xPosition) => {
-                handleSeparatorXPositionChange(xPosition);
-              }}
-            />
-          )}
+          {mainPageSeparatorXPosition > 0 &&
+            !collapsedPanels[1] &&
+            !collapsedPanels[2] && (
+              <LayoutSeparatorVertical
+                leftSideMinWidth={panelWidths[0] + SECOND_PANEL_MIN_WIDTH}
+                leftSideMaxWidth={
+                  layoutWidth - panelWidths[3] - THIRD_PANEL_MIN_WIDTH
+                }
+                separatorXPosition={mainPageSeparatorXPosition}
+                setSeparatorXPosition={(xPosition) => {
+                  handleSeparatorXPositionChange(xPosition);
+                }}
+              />
+            )}
 
           {/* FIRST PANEL */}
-          <Panel
-            width={firstPanelExpanded ? panelWidths[0] : collapsedPanelWidth}
-          >
+          <Panel width={panelWidthsLocal[0]}>
             <Box
               height={contentHeight}
               label="Territories"
-              isExpanded={firstPanelExpanded}
+              isExpanded={!collapsedPanels[0]}
               buttons={[
-                refreshBoxButton(["tree", "user"], !firstPanelExpanded),
-                firstPanelButton(),
+                refreshBoxButton(["tree", "user"], collapsedPanels[0]),
+                togglePanelButton(0),
               ]}
               noPadding
-              onHeaderClick={toggleFirstPanel}
+              onHeaderClick={() => togglePanel(0)}
             >
               <MemoizedTerritoryTreeBox />
             </Box>
           </Panel>
 
           {/* SECOND PANEL */}
-          <Panel
-            width={
-              firstPanelExpanded
-                ? panelWidths[1]
-                : panelWidths[1] + panelWidths[0] - collapsedPanelWidth
-            }
-          >
+          <Panel width={panelWidthsLocal[1]}>
             <Box
               label="Statements"
               borderColor="white"
@@ -588,36 +653,34 @@ const MainPage: React.FC<MainPage> = ({}) => {
           </Panel>
 
           {/* THIRD PANEL */}
-          <Panel
-            width={
-              fourthPanelExpanded
-                ? panelWidths[2]
-                : panelWidths[2] + panelWidths[3] - collapsedPanelWidth
-            }
-          >
-            <Box borderColor="white" height={contentHeight} label="Editor">
+          <Panel width={panelWidthsLocal[2]}>
+            <Box
+              buttons={[togglePanelButton(2)]}
+              isExpanded={!collapsedPanels[2]}
+              borderColor="white"
+              height={contentHeight}
+              label="Editor"
+            >
               <MemoizedStatementEditorBox />
             </Box>
           </Panel>
 
           {/* FOURTH PANEL */}
-          <Panel
-            width={fourthPanelExpanded ? panelWidths[3] : collapsedPanelWidth}
-          >
+          <Panel width={panelWidthsLocal[3]}>
             <Box
               height={getFourthPanelBoxHeight("search")}
               label="Search"
               color="white"
-              isExpanded={fourthPanelExpanded}
+              isExpanded={!collapsedPanels[3]}
               buttons={[
                 refreshBoxButton(
                   ["search-templates", "search"],
-                  !fourthPanelExpanded
+                  collapsedPanels[3]
                 ),
                 hideBoxButton("search"),
-                hideFourthPanelButton(),
+                togglePanelButton(3),
               ]}
-              onHeaderClick={toggleFourthPanel}
+              onHeaderClick={() => togglePanel(3)}
               disableOpenBoxHeaderClick
             >
               <MemoizedEntitySearchBox />
@@ -626,13 +689,13 @@ const MainPage: React.FC<MainPage> = ({}) => {
               height={getFourthPanelBoxHeight("bookmarks")}
               label="Bookmarks"
               color="white"
-              isExpanded={fourthPanelExpanded}
+              isExpanded={!collapsedPanels[3]}
               buttons={[
-                refreshBoxButton(["bookmarks"], !fourthPanelExpanded),
+                refreshBoxButton(["bookmarks"], collapsedPanels[3]),
                 hideBoxButton("bookmarks"),
-                hideFourthPanelButton(),
+                togglePanelButton(3),
               ]}
-              onHeaderClick={toggleFourthPanel}
+              onHeaderClick={() => togglePanel(3)}
               disableOpenBoxHeaderClick
             >
               <MemoizedEntityBookmarkBox />
@@ -641,13 +704,13 @@ const MainPage: React.FC<MainPage> = ({}) => {
               height={getFourthPanelBoxHeight("templates")}
               label="Templates"
               color="white"
-              isExpanded={fourthPanelExpanded}
+              isExpanded={!collapsedPanels[3]}
               buttons={[
-                refreshBoxButton(["templates"], !fourthPanelExpanded),
+                refreshBoxButton(["templates"], collapsedPanels[3]),
                 hideBoxButton("templates"),
-                hideFourthPanelButton(),
+                togglePanelButton(3),
               ]}
-              onHeaderClick={toggleFourthPanel}
+              onHeaderClick={() => togglePanel(3)}
               disableOpenBoxHeaderClick
             >
               <MemoizedTemplateListBox />
