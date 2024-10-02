@@ -12,9 +12,6 @@ import { CMetaProp } from "constructors";
 import {
   FaChevronCircleDown,
   FaChevronCircleUp,
-  FaSort,
-  FaSortDown,
-  FaSortUp,
   FaTrashAlt,
 } from "react-icons/fa";
 import {
@@ -25,10 +22,10 @@ import {
 } from "react-icons/lu";
 import { MdOutlineEdit } from "react-icons/md";
 import { TbColumnInsertRight } from "react-icons/tb";
+import { ThemeContext } from "styled-components";
 import { v4 as uuidv4 } from "uuid";
 import { ExploreAction, ExploreActionType } from "../state";
 import {
-  StyledEmpty,
   StyledExpandedRow,
   StyledGrid,
   StyledGridColumn,
@@ -38,10 +35,10 @@ import {
   StyledNewColumnLabel,
   StyledNewColumnValue,
   StyledPagination,
+  StyledTableFooter,
   StyledTableHeader,
   StyledTableWrapper,
 } from "./ExplorerTableStyles";
-import { ThemeContext } from "styled-components";
 
 const initialNewColumn: Explore.IExploreColumn = {
   id: uuidv4(),
@@ -264,7 +261,19 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   };
 
   const renderTableFooter = () => {
-    return <StyledTableHeader>{renderPaging()}</StyledTableHeader>;
+    return (
+      <StyledTableFooter>
+        {renderPaging()}
+        <div>
+          <Button
+            icon={<TbColumnInsertRight size={17} />}
+            label="new column"
+            color={isNewColumnDisplayed ? "info" : "primary"}
+            onClick={() => setIsNewColumnDisplayed(!isNewColumnDisplayed)}
+          />
+        </div>
+      </StyledTableFooter>
+    );
   };
 
   const renderCell = (

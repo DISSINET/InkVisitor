@@ -3,6 +3,7 @@ import styled from "styled-components";
 export const StyledTableWrapper = styled.div`
   display: flex;
   flex-direction: column;
+  overflow: auto;
   width: 100%;
 `;
 interface StyledGrid {
@@ -74,11 +75,18 @@ export const StyledNewColumnValue = styled.div`
   display: grid;
   align-items: center;
 `;
-export const StyledTableHeader = styled.div`
+export const StyledSpaceBetween = styled.div`
   display: flex;
-  padding: ${({ theme }) => theme.space[2]};
   align-items: center;
   justify-content: space-between;
+`;
+export const StyledTableHeader = styled(StyledSpaceBetween)`
+  padding: ${({ theme }) => theme.space[2]};
+  padding-top: 0.2rem;
+`;
+export const StyledTableFooter = styled(StyledSpaceBetween)`
+  padding: ${({ theme }) => theme.space[2]};
+  padding-bottom: 0.2rem;
 `;
 export const StyledEmpty = styled.span`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
