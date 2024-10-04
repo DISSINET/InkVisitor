@@ -474,7 +474,9 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                     </StyledGridColumn>
 
                     <StyledGridColumn>
-                      <span>
+                      <span
+                        style={{ display: "inline-flex", overflow: "hidden" }}
+                      >
                         <EntityTag entity={record.entity} fullWidth />
                       </span>
                     </StyledGridColumn>

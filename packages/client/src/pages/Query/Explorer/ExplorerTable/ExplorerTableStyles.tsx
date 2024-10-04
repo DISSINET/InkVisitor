@@ -13,7 +13,10 @@ export const StyledGrid = styled.div<StyledGrid>`
   display: grid;
   border: 1px solid ${({ theme }) => theme.color["black"]};
   align-content: start;
-  grid-template-columns: ${({ $columns }) => `auto repeat(${$columns}, 1fr)`};
+  /* grid-template-columns: ${({ $columns }) =>
+    `auto repeat(${$columns}, 1fr)`}; */
+  grid-template-columns: ${({ $columns }) =>
+    `3.5rem repeat(${$columns}, auto)`};
   color: ${({ theme }) => theme.color["black"]};
   width: 100%;
 `;
