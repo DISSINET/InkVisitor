@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
 
+import { languageDict } from "@shared/dictionaries";
 import { classesAll } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
 import { IEntity, IProp, IResponseQuery, IUser } from "@shared/types";
@@ -27,6 +28,8 @@ import { v4 as uuidv4 } from "uuid";
 import { ExploreAction, ExploreActionType } from "../state";
 import {
   StyledExpandedRow,
+  StyledExpRowFormGrid,
+  StyledExpRowFormGridColumnLabel,
   StyledGrid,
   StyledGridColumn,
   StyledGridHeader,
@@ -361,6 +364,95 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
 
   const themeContext = useContext(ThemeContext);
 
+  const renderExpandedRow = (rowEntity: IEntity) => {
+    const {
+      label,
+      detail,
+      language,
+      notes,
+      references,
+      props,
+      updatedAt,
+      data,
+    } = rowEntity;
+    return (
+      <StyledExpandedRow $columnsSpan={columns.length + 2}>
+        {/* expanded row  */}
+        <StyledExpRowFormGrid>
+          <StyledExpRowFormGridColumnLabel>
+            label:
+          </StyledExpRowFormGridColumnLabel>
+          <div>
+            <Input width="full" value={label} disabled onChangeFn={() => {}} />
+          </div>
+          <StyledExpRowFormGridColumnLabel>
+            detail:
+          </StyledExpRowFormGridColumnLabel>
+          <div>
+            <Input width="full" value={detail} disabled onChangeFn={() => {}} />
+          </div>
+          <StyledExpRowFormGridColumnLabel>
+            language:
+          </StyledExpRowFormGridColumnLabel>
+          <div>
+            <Dropdown.Single.Basic
+              disabled
+              width="full"
+              options={languageDict}
+              value={language}
+              onChange={(selectedOption) => {}}
+            />
+          </div>
+          <StyledExpRowFormGridColumnLabel>
+            notes:
+          </StyledExpRowFormGridColumnLabel>
+          <div>
+            {notes.map((note, key) => {
+              return (
+                <span key={key}>
+                  <Input
+                    value={note}
+                    width="full"
+                    disabled
+                    type="textarea"
+                    onChangeFn={() => {}}
+                  />
+                </span>
+              );
+            })}
+          </div>
+          <StyledExpRowFormGridColumnLabel>
+            references:
+          </StyledExpRowFormGridColumnLabel>
+          <div>
+            {references.map((reference, key) => {
+              return (
+                <span key={key}>
+                  <p>resource: {reference.resource}</p>
+                  <p>value: {reference.value}</p>
+                </span>
+              );
+            })}
+          </div>
+          <StyledExpRowFormGridColumnLabel>
+            props:
+          </StyledExpRowFormGridColumnLabel>
+          <div>
+            {props.map((prop, key) => {
+              return (
+                <div>
+                  all kind of readonly attrs..
+                  <p>type: {prop.type.entityId}</p>
+                  <p>value: {prop.type.entityId}</p>
+                </div>
+              );
+            })}
+          </div>
+        </StyledExpRowFormGrid>
+      </StyledExpandedRow>
+    );
+  };
+
   return (
     <>
       <div style={{ display: "flex", overflow: "auto", padding: "1rem" }}>
@@ -438,7 +530,8 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
               );
             })}
 
-            {entities.map((record, key) => {
+            {entities.map((row, key) => {
+              const { entity: rowEntity, columnData } = row;
               return (
                 // ROW
                 <>
@@ -453,7 +546,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                         }}
                         onClick={(e: React.MouseEvent) => {
                           e.stopPropagation();
-                          const rowId = record.entity.id;
+                          const rowId = rowEntity.id;
                           if (!rowsExpanded.includes(rowId)) {
                             setRowsExpanded(rowsExpanded.concat(rowId));
                           } else {
@@ -463,7 +556,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                           }
                         }}
                       >
-                        {rowsExpanded.includes(record.entity.id) ? (
+                        {rowsExpanded.includes(rowEntity.id) ? (
                           <FaChevronCircleUp
                             color={themeContext?.color.warning}
                           />
@@ -477,17 +570,13 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                       <span
                         style={{ display: "inline-flex", overflow: "hidden" }}
                       >
-                        <EntityTag entity={record.entity} fullWidth />
+                        <EntityTag entity={rowEntity} fullWidth />
                       </span>
                     </StyledGridColumn>
                     {columns.map((column, key) => {
                       return (
                         <StyledGridColumn key={key}>
-                          {renderCell(
-                            record.entity,
-                            record.columnData[column.id],
-                            column
-                          )}
+                          {renderCell(rowEntity, columnData[column.id], column)}
 
                           {column.editable &&
                             column.type === Explore.EExploreColumnType.EPV && (
@@ -503,9 +592,9 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                                   });
 
                                   updateEntityMutation.mutate({
-                                    entityId: record.entity.id,
+                                    entityId: rowEntity.id,
                                     changes: {
-                                      props: [...record.entity.props, newProp],
+                                      props: [...rowEntity.props, newProp],
                                     },
                                   });
                                 }}
@@ -516,11 +605,9 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                     })}
                   </div>
 
-                  {rowsExpanded.includes(record.entity.id) && (
+                  {rowsExpanded.includes(rowEntity.id) && (
                     <div style={{ display: "contents" }}>
-                      <StyledExpandedRow $columnsSpan={columns.length + 2}>
-                        expanded row
-                      </StyledExpandedRow>
+                      {renderExpandedRow(rowEntity)}
                     </div>
                   )}
                 </>

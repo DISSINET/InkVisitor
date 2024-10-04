@@ -104,6 +104,19 @@ export const StyledExpandedRow = styled.div<StyledExpandedRow>`
   min-height: 5rem;
   border-right: 1px solid ${({ theme }) => theme.color["black"]};
 `;
+export const StyledExpRowFormGrid = styled.div`
+  display: inline-grid;
+  grid-template-columns: auto auto;
+  gap: 0.5rem;
+`;
+export const StyledExpRowFormGridColumnLabel = styled.div`
+  display: grid;
+  justify-content: end;
+  margin-top: 0.5rem;
+  /* align-items: center; */
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  color: ${({ theme }) => theme.color["success"]};
+`;
 export const StyledPagination = styled.div`
   display: flex;
   align-items: center;
