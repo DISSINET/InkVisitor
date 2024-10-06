@@ -1,17 +1,16 @@
 import { EntityEnums } from "@shared/enums";
 
 // just meta information + title...without content
-export interface IDocumentMeta {
+export type IDocumentMeta = Omit<IDocument, "content">;
+
+// added content for completion
+export interface IDocument {
   id: string;
   title: string;
+  content: string;
   entityIds: string[];
   createdAt?: Date;
   updatedAt?: Date;
-}
-
-// added content for completion
-export interface IDocument extends IDocumentMeta {
-  content: string;
 }
 
 // lookup -> getAll

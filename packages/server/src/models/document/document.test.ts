@@ -83,3 +83,32 @@ describe("test Document.findByEntityId", function () {
     expect(shouldFindDocs).toHaveLength(0);
   });
 });
+
+describe("Document.removeAnchors", () => {
+  test("should remove only tags entities from document", () => {
+    const document = new Document({
+      content:
+        "some text <id123>other text</id123> additional <id342>blah </id342>ds>> >>?!<@>hello",
+      entityIds: ["id123", "id342"],
+    });
+    document.removeAnchors(["id123"]);
+    expect(document.content).toEqual(
+      "some text other text additional <id342>blah </id342>ds>> >>?!<@>hello"
+    );
+    expect(document.entityIds.find((e) => e === "id123")).toBeFalsy();
+    expect(document.entityIds.find((e) => e === "id342")).toBeTruthy();
+  });
+
+  test("should remove all anchors", () => {
+    const document = new Document({
+      content:
+        "some text <id123>other text</id123> <id123>other text</id123> additional <id342>blah </id342>ds>> >>?!<@>hello",
+      entityIds: ["id123", "id342"],
+    });
+    document.removeAnchors(["id123", "id342"]);
+    expect(document.content).toEqual(
+      "some text other text other text additional blah ds>> >>?!<@>hello"
+    );
+    expect(document.entityIds).toHaveLength(0);
+  });
+});

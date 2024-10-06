@@ -188,7 +188,7 @@ export default class Entity implements IEntity, IDbModel {
    * @returns
    */
   getUserRoleMode(user: User): UserEnums.RoleMode {
-    if (user.role === UserEnums.Role.Admin) {
+    if (user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin])) {
       return UserEnums.RoleMode.Admin;
     }
 

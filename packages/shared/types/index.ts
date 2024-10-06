@@ -1,8 +1,8 @@
-import { IWarning, IWarningPosition } from "./warning";
 import { IAudit } from "./audit";
 import { ILabel } from "./label";
 import { IReference } from "./reference";
 import { IValue, IValueData } from "./value";
+import { IWarning, IWarningPosition } from "./warning";
 
 import { IAction, IActionData } from "./action";
 import { IBeing, IBeingData } from "./being";
@@ -52,6 +52,13 @@ import {
 } from "./response-tree";
 import { IResponseStoredTerritory, IResponseUser } from "./response-user";
 
+import {
+  IDocument,
+  IDocumentMeta,
+  IResponseDocument,
+  IResponseDocumentDetail,
+} from "./document";
+import { IRequestStats } from "./request-stats";
 import { IResponseEntity } from "./response-entity";
 import { IResponseStats } from "./response-stats";
 import {
@@ -61,12 +68,6 @@ import {
   IUserOptions,
   IUserRight,
 } from "./user";
-import {
-  IDocument,
-  IResponseDocument,
-  IResponseDocumentDetail,
-  IDocumentMeta,
-} from "./document";
 
 import {
   IRequestPasswordReset,
@@ -76,73 +77,74 @@ import {
 import { IRequestActivationData } from "./request-activation";
 
 export type {
-  IAudit,
-  IEntity,
+  ClassificationOrder,
+  EntityOrder,
+  EntityTooltip,
   IAction,
   IActionData,
-  ITerritory,
-  ITerritoryData,
-  IParentTerritory,
-  IStatement,
-  IStatementData,
-  IStatementAction,
-  IStatementActant,
-  IStatementDataTerritory,
-  IResource,
-  IResourceData,
-  IPerson,
-  IPersonData,
+  IAudit,
   IBeing,
   IBeingData,
-  IGroup,
-  IGroupData,
-  IObject,
-  IObjectData,
+  IBookmarkFolder,
   IConcept,
-  ILocation,
-  ILocationData,
-  IValue,
-  IValueData,
+  IdentificationOrder,
+  IDocument,
+  IDocumentMeta,
+  IEntity,
   IEvent,
   IEventData,
+  IGroup,
+  IGroupData,
   ILabel,
+  ILocation,
+  ILocationData,
+  IObject,
+  IObjectData,
+  IParentTerritory,
+  IPerson,
+  IPersonData,
   IProp,
   IPropSpec,
   IReference,
-  IUser,
-  IUserOptions,
-  IUserRight,
-  IBookmarkFolder,
-  IStoredTerritory,
+  IRequestActivationData,
+  IRequestPasswordReset,
+  IRequestPasswordResetData,
+  IRequestStats,
+  IResource,
+  IResourceData,
   IResponseAudit,
-  IResponseEntity,
-  IResponseDetail,
-  IResponseUsedInMetaProp,
-  IResponseUsedInStatement,
   IResponseBookmarkFolder,
+  IResponseDetail,
+  IResponseDocument,
+  IResponseDocumentDetail,
+  IResponseEntity,
+  IResponseGeneric,
+  IResponsePermission,
   IResponseStatement,
+  IResponseStats,
+  IResponseStoredTerritory,
   IResponseTerritory,
   IResponseTree,
   IResponseTreeTerritoryComponent,
+  IResponseUsedInMetaProp,
+  IResponseUsedInStatement,
   IResponseUser,
-  IResponseStoredTerritory,
-  IResponseGeneric,
-  IResponsePermission,
-  IResponseStats,
-  EntityTooltip,
-  EntityOrder,
-  PropOrder,
+  IStatement,
+  IStatementActant,
+  IStatementAction,
+  IStatementData,
+  IStatementDataTerritory,
+  IStoredTerritory,
+  ITerritory,
+  ITerritoryData,
+  IUser,
+  IUserOptions,
+  IUserRight,
+  IValue,
+  IValueData,
   IWarning,
   IWarningPosition,
-  ClassificationOrder,
-  IdentificationOrder,
-  IDocument,
-  IResponseDocument,
-  IResponseDocumentDetail,
-  IDocumentMeta,
-  IRequestPasswordReset,
-  IRequestPasswordResetData,
-  IRequestActivationData,
+  PropOrder,
 };
 
-export { RequestSearch, RequestPermissionUpdate, Relation };
+export { Relation, RequestPermissionUpdate, RequestSearch };

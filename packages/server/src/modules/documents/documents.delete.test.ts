@@ -49,7 +49,7 @@ describe("modules/documents DELETE", function () {
         .expect("Content-Type", /json/)
         .expect(200)
         .expect(async () => {
-          const deleted = await Document.findDocumentById(
+          const deleted = await Document.getDocumentById(
             db.connection,
             document.id
           );

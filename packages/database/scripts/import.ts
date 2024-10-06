@@ -17,32 +17,39 @@ import { SshHelper } from "./import/ssh";
 import colors from "colors/safe";
 import jobs from "./jobs/index";
 
+const defaultSettingsTable: TableSchema = {
+  tableName: "settings",
+  data: require("../datasets/default/settings.json"),
+  transform: function () {},
+};
+
 const datasets: Record<string, DbSchema> = {
   dissinet_documents: {
+    settings: defaultSettingsTable,
     users: {
       tableName: "users",
       data: null,
-      transform: function () {}
+      transform: function () {},
     },
     aclPermissions: {
       tableName: "acl_permissions",
       data: null,
-      transform: function () {}
+      transform: function () {},
     },
     entities: {
       tableName: "entities",
       data: null,
-      transform: function () {}
+      transform: function () {},
     },
     audits: {
       tableName: "audits",
       data: null,
-      transform: function () {}
+      transform: function () {},
     },
     relations: {
       tableName: "relations",
       data: null,
-      transform: function () {}
+      transform: function () {},
     },
     documents: {
       tableName: "documents",
@@ -51,6 +58,7 @@ const datasets: Record<string, DbSchema> = {
     },
   },
   empty: {
+    settings: defaultSettingsTable,
     users: {
       tableName: "users",
       data: require("../datasets/default/users.json"),
@@ -102,8 +110,8 @@ const datasets: Record<string, DbSchema> = {
       transform: function () {},
     },
   },
-
   relationstest: {
+    settings: defaultSettingsTable,
     users: {
       tableName: "users",
       data: require("../datasets/default/users.json"),
@@ -178,8 +186,8 @@ const datasets: Record<string, DbSchema> = {
       transform: function () {},
     },
   },
-
   allparsed: {
+    settings: defaultSettingsTable,
     users: {
       tableName: "users",
       data: require("../datasets/all-parsed/users.json"),
@@ -252,6 +260,7 @@ const datasets: Record<string, DbSchema> = {
     },
   },
   initial_c: {
+    settings: defaultSettingsTable,
     users: {
       tableName: "users",
       data: null,
@@ -287,6 +296,7 @@ const datasets: Record<string, DbSchema> = {
     },
   },
   initial_a: {
+    settings: defaultSettingsTable,
     users: {
       tableName: "users",
       data: null,
@@ -322,6 +332,7 @@ const datasets: Record<string, DbSchema> = {
     },
   },
   acr: {
+    settings: defaultSettingsTable,
     users: {
       tableName: "users",
       data: null,
@@ -357,6 +368,7 @@ const datasets: Record<string, DbSchema> = {
     },
   },
   production: {
+    settings: defaultSettingsTable,
     users: {
       tableName: "users",
       data: require("../datasets/default/users.json"),
@@ -740,8 +752,8 @@ class Importer {
       ""
     );
 
-   // await this.db.dropTable(chosenTable);
-   // await this.db.createTable(this.dataset[chosenTable as keyof DbSchema]);
+    // await this.db.dropTable(chosenTable);
+    // await this.db.createTable(this.dataset[chosenTable as keyof DbSchema]);
     await this.db.importData(this.dataset[chosenTable as keyof DbSchema]);
   }
 }

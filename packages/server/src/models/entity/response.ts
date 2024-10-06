@@ -2,20 +2,20 @@ import { EntityEnums, RelationEnums, UserEnums } from "@shared/enums";
 import {
   IEntity,
   IProp,
-  Relation as RelationTypes,
   IResponseDetail,
+  IResponseDocument,
   IResponseEntity,
   IResponseUsedInMetaProp,
   IResponseUsedInStatement,
   IStatement,
   IWarning,
-  IResponseDocument,
 } from "@shared/types";
 import Entity from "./entity";
 import Statement from "@models/statement/statement";
 import { nonenumerable } from "@common/decorators";
 import { Connection } from "rethinkdb-ts";
 import {
+  IResponseUsedInDocument,
   IResponseUsedInStatementClassification,
   IResponseUsedInStatementIdentification,
   IResponseUsedInStatementProps,
@@ -28,7 +28,8 @@ import {
 import { UsedRelations } from "@models/relation/relations";
 import EntityWarnings from "./warnings";
 import Document from "@models/document/document";
-import { IDocumentMeta } from "@shared/types/document";
+import { clean } from "@modules/common.test";
+import Resource from "@models/resource/resource";
 
 export class ResponseEntity extends Entity implements IResponseEntity {
   // map of entity ids that should be populated in subsequent methods and used in fetching
@@ -118,7 +119,7 @@ export class ResponseEntityDetail
   usedInStatementProps: IResponseUsedInStatementProps[];
   usedInMetaProps: IResponseUsedInMetaProp[];
   usedAsTemplate?: string[] | undefined;
-  usedInDocuments: IDocumentMeta[];
+  usedInDocuments: IResponseUsedInDocument[];
   usedInStatementIdentifications: IResponseUsedInStatementIdentification[];
   usedInStatementClassifications: IResponseUsedInStatementClassification[];
 
@@ -199,9 +200,38 @@ export class ResponseEntityDetail
       req.db.connection
     );
 
-    this.usedInDocuments = await Document.findByEntityId(conn, this.id);
+    // get all documents data in IResponseUsedInDocument format
+    this.usedInDocuments = await this.findUsedInDocuments(conn);
   }
 
+  /**
+   * returns data for usedInDocuments(IResponseUsedInDocument[]) field
+   * @param conn
+   * @returns
+   */
+  async findUsedInDocuments(
+    conn: Connection
+  ): Promise<IResponseUsedInDocument[]> {
+    return Promise.all(
+      (await Document.findByEntityId(conn, this.id)).map(async (docData) => {
+        const cleanDocument = new Document({});
+        cleanDocument.content = docData.content;
+        const resource = await Resource.findByDocumentId(conn, docData.id);
+
+        return {
+          anchorText: cleanDocument.findAnchors(this.id),
+          document: {
+            id: docData.id,
+            title: docData.title,
+            entityIds: docData.entityIds,
+            createdAt: docData.createdAt,
+            updatedAt: docData.updatedAt,
+          },
+          resourceId: resource?.id || "",
+        };
+      })
+    );
+  }
   /**
    * Loads entries for usedInStatementIdentifications and usedInStatementClassifications fields
    * Needs to be called after walkStatementsDataEntities, since it uses also populated

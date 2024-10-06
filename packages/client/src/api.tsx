@@ -21,7 +21,10 @@ import {
   IUser,
   Relation,
   RequestPermissionUpdate,
+  IRequestStats,
+  IAudit,
 } from "@shared/types";
+import { ISetting } from "@shared/types/settings";
 import * as errors from "@shared/types/errors";
 import { NetworkError } from "@shared/types/errors";
 import { IRequestSearch } from "@shared/types/request-search";
@@ -186,7 +189,7 @@ class Api {
 
         if (error.status === 401) {
           // if handled by react router, then the toast could be visible
-          window.location.pathname = "/login"
+          window.location.pathname = "/login";
         }
 
         return Promise.reject(error);
@@ -674,7 +677,8 @@ class Api {
     entityIds: string[],
     options?: IApiOptions
   ): Promise<(EntitiesDeleteSuccessResponse | EntitiesDeleteErrorResponse)[]> {
-    const out: (EntitiesDeleteSuccessResponse | EntitiesDeleteErrorResponse)[] = [];
+    const out: (EntitiesDeleteSuccessResponse | EntitiesDeleteErrorResponse)[] =
+      [];
     try {
       const response = await this.connection.delete(`/entities/`, {
         data: {
@@ -682,13 +686,21 @@ class Api {
         },
         ...options,
       });
-      const data = (response.data as IResponseGeneric<Record<string, errors.CustomError | true>>).data;
+      const data = (
+        response.data as IResponseGeneric<
+          Record<string, errors.CustomError | true>
+        >
+      ).data;
       if (data) {
         for (const errorEntityId of Object.keys(data)) {
           if (data[errorEntityId] === true) {
             out.push({ entityId: errorEntityId, details: data[errorEntityId] });
           } else {
-            out.push({ entityId: errorEntityId, error: true, details: data[errorEntityId] });
+            out.push({
+              entityId: errorEntityId,
+              error: true,
+              details: data[errorEntityId],
+            });
           }
         }
       }
@@ -852,6 +864,21 @@ class Api {
   }
 
   /**
+   * Stats
+   */
+  async statsGet(
+    data: IRequestStats,
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseAudit>> {
+    try {
+      const response = await this.connection.post(`/stats`, data, options);
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  /**
    * Audit
    */
   async auditGet(
@@ -861,6 +888,19 @@ class Api {
     try {
       const response = await this.connection.get(
         `/entities/${entityId}/audits`,
+        options
+      );
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  async auditGetFirst(options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseGeneric<IAudit>>> {
+    try {
+      const response = await this.connection.get(
+        `/audits?skip=0&take=1&from=1970`,
         options
       );
       return response;
@@ -1218,6 +1258,23 @@ class Api {
     }
   }
 
+  async documentRemoveAnchors(
+    documentId: string,
+    entityId: string,
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      const response = await this.connection.patch(
+        `/documents/${documentId}/removeAnchors?entityId=${entityId}`,
+        document,
+        options
+      );
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
   /**
    * Document update
    */
@@ -1230,6 +1287,47 @@ class Api {
       const response = await this.connection.put(
         `/documents/${documentId}`,
         document,
+        options
+      );
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  /**
+   * Setting get
+   * @param settingId 
+   * @param options 
+   * @returns 
+   */
+  async settingGet(
+    settingId: string,
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseGeneric<ISetting>>> {
+    try {
+      const response = await this.connection.get(
+        `/settings/${settingId}`,
+        options
+      );
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  /**
+   * Get owner's info
+   * @param settingId 
+   * @param options 
+   * @returns 
+   */
+  async usersGetOwner(
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseGeneric<string>>> {
+    try {
+      const response = await this.connection.get(
+        `/users/owner`,
         options
       );
       return response;

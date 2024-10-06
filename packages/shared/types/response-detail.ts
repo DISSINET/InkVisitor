@@ -2,7 +2,7 @@
  * Very extensive object showing all the details about one actant
  */
 
-import { IEntity, Relation, IResponseEntity, IStatement, IWarning } from ".";
+import { IEntity, IResponseEntity, IStatement, IWarning, Relation } from ".";
 import { EntityEnums } from "../enums";
 import { IDocumentMeta } from "./document";
 import {
@@ -16,15 +16,22 @@ export interface IResponseDetail extends IResponseEntity {
   usedInStatementProps: IResponseUsedInStatementProps[]; // all statements, where the detail id is used in props
   usedInMetaProps: IResponseUsedInMetaProp[]; // all entities, where the detail id is used in props (entity.props[])
 
+  usedInDocuments: IResponseUsedInDocument[]; // all documents, where the detail id is used
+
   usedInStatementIdentifications: IResponseUsedInStatementIdentification[]; // statement.data.actants[].identifications + from usedInStatements field if actant.entityId = detailId
   usedInStatementClassifications: IResponseUsedInStatementClassification[]; // statement.data.actants[].classifications + from usedInStatements field if actant.entityId = detailId
 
   usedAsTemplate?: string[];
-  usedInDocuments: IDocumentMeta[];
 
   relations: Relation.IUsedRelations;
 
   warnings: IWarning[];
+}
+
+export interface IResponseUsedInDocument {
+  document: IDocumentMeta;
+  anchorText: string[];
+  resourceId: string;
 }
 
 export interface IResponseUsedInStatement<PositionEnum> {
