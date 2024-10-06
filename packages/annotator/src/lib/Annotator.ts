@@ -440,8 +440,7 @@ export class Annotator {
           const segment = this.text.cursorToIndex(this.viewport, this.cursor);
 
           if (segment) {
-            const line =
-              this.text.segments[segment.segmentIndex].lines[segment.lineIndex];
+            const line = this.text.getLineInFromPosition(segment);
             let backupXLine = this.cursor.xLine;
             let backupYLine = this.cursor.yLine;
 
@@ -561,6 +560,7 @@ export class Annotator {
           this.cursor.xLine = line.length;
         }
         break;
+
       default:
         if (e.ctrlKey || e.metaKey) {
           if (e.key === "c") {

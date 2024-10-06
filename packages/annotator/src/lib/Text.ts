@@ -181,7 +181,6 @@ class Text {
       const tokens = text.split(regex).filter((t) => !!t);
       let currentLine: string[] = [];
       let currentLineLength = 0;
-
       for (let iToken = 0; iToken < tokens.length; iToken++) {
         const token = tokens[iToken];
         const tokenLength = token.length;
@@ -202,7 +201,7 @@ class Text {
           }
         }
       }
-      segment.lineEnd = segment.lineStart + segment.lines.length;
+      segment.lineEnd = segment.lineStart + (segment.lines.length || 1);
     }
 
     // Performance check
@@ -250,6 +249,10 @@ class Text {
     return absIndex;
   }
 
+  getLineInFromPosition(segment: SegmentPosition): string {
+    return this.segments[segment.segmentIndex].lines[segment.lineIndex] || "";
+  }
+
   getSegmentPosition(
     absLineIndex: number,
     charInLineIndex: number = 0
@@ -263,10 +266,9 @@ class Text {
 
     const segment = this.segments[segmentIndex];
     const lineIndex = absLineIndex - segment.lineStart;
-    charInLineIndex = Math.min(
-      charInLineIndex,
-      segment.lines[lineIndex].length
-    );
+    charInLineIndex = segment.lines[lineIndex]
+      ? Math.min(charInLineIndex, segment.lines[lineIndex].length)
+      : 0;
     let parsedTextIndex = charInLineIndex;
     for (let i = 0; i < lineIndex; i++) {
       parsedTextIndex += segment.lines[i].length;
@@ -332,8 +334,10 @@ class Text {
         out.push(...this.segments[i].lines.slice(posStart.lineIndex));
       } else if (i === posEnd.segmentIndex) {
         out.push(...this.segments[i].lines.slice(0, posEnd.lineIndex + 1));
-      } else {
+      } else if (this.segments[i].lines.length > 0) {
         out.push(...this.segments[i].lines);
+      } else {
+        out.push("");
       }
     }
     return out;
