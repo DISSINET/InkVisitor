@@ -1258,6 +1258,23 @@ class Api {
     }
   }
 
+  async documentRemoveAnchors(
+    documentId: string,
+    entityId: string,
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      const response = await this.connection.patch(
+        `/documents/${documentId}/removeAnchors?entityId=${entityId}`,
+        document,
+        options
+      );
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
   /**
    * Document update
    */

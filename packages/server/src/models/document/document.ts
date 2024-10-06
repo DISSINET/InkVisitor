@@ -177,13 +177,22 @@ export default class Document implements IDocument, IDbModel {
     return true;
   }
 
+  removeAnchors(entityIds: string[]) {
+    for (const entityId of entityIds) {
+      const tagRegex = new RegExp(`<\\/?${entityId}(>|$)`, "g");
+      const updatedContent = this.content.replace(tagRegex, "");
+      this.content = updatedContent;
+      this.entityIds = this.entityIds.filter((id) => id !== entityId);
+    }
+  }
+
   /**
    * search for single document by ids
    * @param db Connection database connection
    * @param documentId string id
    * @returns Promise<Document> wanted document
    */
-  static async findDocumentById(
+  static async getDocumentById(
     db: Connection,
     documentId: string
   ): Promise<Document | null> {
