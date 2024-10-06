@@ -117,6 +117,18 @@ export default class Results<T extends { id: string }> {
           }
           break;
         }
+        case Explore.EExploreColumnType.ERR: {
+          const referenceIds = entity.references.reduce<string[]>(
+            (acc, curr) => {
+              acc.push(curr.resource);
+              return acc;
+            },
+            []
+          );
+          const resources = await Entity.findEntitiesByIds(db, referenceIds);
+          out[column.id] = resources;
+          break;
+        }
       }
     }
 

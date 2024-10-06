@@ -250,5 +250,11 @@
     "route": "",
     "method": "DELETE",
     "roles": ["*"]
+  },
+  {
+    "controller": "users",
+    "route": "query",
+    "method": "POST",
+    "roles": ["*"]
   }
 ]
