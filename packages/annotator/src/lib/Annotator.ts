@@ -407,9 +407,9 @@ export class Annotator {
 
       case "ArrowRight":
         if (e.shiftKey && e.ctrlKey) {
-          let offsetRight, offsetLeft;
+          let offsetRight;
           while (!offsetRight) {
-            [offsetLeft, offsetRight] = this.text.getCursorWordOffsets(
+            [, offsetRight] = this.text.getCursorWordOffsets(
               this.viewport,
               this.cursor
             );
@@ -555,6 +555,12 @@ export class Annotator {
         this.cursor.move(0, 0);
         break;
 
+      case "End":
+        const line = this.text.getCurrentLine(this.viewport, this.cursor);
+        if (line) {
+          this.cursor.xLine = line.length;
+        }
+        break;
       default:
         if (e.ctrlKey || e.metaKey) {
           if (e.key === "c") {

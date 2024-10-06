@@ -224,6 +224,15 @@ class Text {
     return pos;
   }
 
+  getCurrentLine(viewport: Viewport, cursor: Cursor): string | null {
+    const segment = this.cursorToIndex(viewport, cursor);
+    if (!segment) {
+      return null;
+    }
+
+    return this.segments[segment.segmentIndex].lines[segment.lineIndex];
+  }
+
   cursorToAbsIndex(viewport: Viewport, cursor: Cursor): number {
     const pos = this.getSegmentPosition(
       cursor.yLine + viewport.lineStart,
