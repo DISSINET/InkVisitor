@@ -22,6 +22,7 @@ import {
   Relation,
   RequestPermissionUpdate,
   IRequestStats,
+  IAudit,
 } from "@shared/types";
 import { ISetting } from "@shared/types/settings";
 import * as errors from "@shared/types/errors";
@@ -887,6 +888,19 @@ class Api {
     try {
       const response = await this.connection.get(
         `/entities/${entityId}/audits`,
+        options
+      );
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  async auditGetFirst(options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseGeneric<IAudit>>> {
+    try {
+      const response = await this.connection.get(
+        `/audits?skip=0&take=1&from=1970`,
         options
       );
       return response;
