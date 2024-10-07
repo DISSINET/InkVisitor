@@ -130,7 +130,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                       },
                     }
                   }
-                  disableDoubleClick
                 />
               </span>
             </React.Fragment>
@@ -402,7 +401,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
               <div style={{ display: "contents" }} key={key}>
                 <StyledGridColumn>
                   <span>
-                    <EntityTag entity={record.entity} disableDoubleClick />
+                    <EntityTag entity={record.entity} />
                   </span>
                 </StyledGridColumn>
                 {columns.map((column, key) => {
@@ -495,7 +494,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                         unlinkButton={{
                           onClick: () => setPropertyType(undefined),
                         }}
-                        disableDoubleClick
                       />
                     ) : (
                       <EntitySuggester
