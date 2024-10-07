@@ -14,7 +14,7 @@
     "noImplicitAny": true,
     "outDir": "./dist/",
     "paths": {
-      "@dictionaries": ["./../../shared/dictionaries/index.ts"],
+      // "@dictionaries": ["./../../shared/dictionaries/index.ts"],
       "@shared/*": ["./../../shared/*"]
     },
     "resolveJsonModule": true,

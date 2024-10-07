@@ -42,6 +42,7 @@ import {
   StyledTableHeader,
   StyledTableWrapper,
 } from "./ExplorerTableStyles";
+import { ExplorerTableExpandedRow } from "./ExplorerTableExpandedRow";
 
 const initialNewColumn: Explore.IExploreColumn = {
   id: uuidv4(),
@@ -365,95 +366,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
 
   const themeContext = useContext(ThemeContext);
 
-  const renderExpandedRow = (rowEntity: IEntity) => {
-    const {
-      label,
-      detail,
-      language,
-      notes,
-      references,
-      props,
-      updatedAt,
-      data,
-    } = rowEntity;
-    return (
-      <StyledExpandedRow $columnsSpan={columns.length + 2}>
-        {/* expanded row  */}
-        <StyledExpRowFormGrid>
-          <StyledExpRowFormGridColumnLabel>
-            label:
-          </StyledExpRowFormGridColumnLabel>
-          <div>
-            <Input width="full" value={label} disabled onChangeFn={() => {}} />
-          </div>
-          <StyledExpRowFormGridColumnLabel>
-            detail:
-          </StyledExpRowFormGridColumnLabel>
-          <div>
-            <Input width="full" value={detail} disabled onChangeFn={() => {}} />
-          </div>
-          <StyledExpRowFormGridColumnLabel>
-            language:
-          </StyledExpRowFormGridColumnLabel>
-          <div>
-            <Dropdown.Single.Basic
-              disabled
-              width="full"
-              options={languageDict}
-              value={language}
-              onChange={(selectedOption) => {}}
-            />
-          </div>
-          <StyledExpRowFormGridColumnLabel>
-            notes:
-          </StyledExpRowFormGridColumnLabel>
-          <div>
-            {notes.map((note, key) => {
-              return (
-                <span key={key}>
-                  <Input
-                    value={note}
-                    width="full"
-                    disabled
-                    type="textarea"
-                    onChangeFn={() => {}}
-                  />
-                </span>
-              );
-            })}
-          </div>
-          <StyledExpRowFormGridColumnLabel>
-            references:
-          </StyledExpRowFormGridColumnLabel>
-          <div>
-            {references.map((reference, key) => {
-              return (
-                <span key={key}>
-                  <p>resource: {reference.resource}</p>
-                  <p>value: {reference.value}</p>
-                </span>
-              );
-            })}
-          </div>
-          <StyledExpRowFormGridColumnLabel>
-            props:
-          </StyledExpRowFormGridColumnLabel>
-          <div>
-            {props.map((prop, key) => {
-              return (
-                <div>
-                  all kind of readonly attrs..
-                  <p>type: {prop.type.entityId}</p>
-                  <p>value: {prop.type.entityId}</p>
-                </div>
-              );
-            })}
-          </div>
-        </StyledExpRowFormGrid>
-      </StyledExpandedRow>
-    );
-  };
-
   return (
     <>
       <div style={{ display: "flex", overflow: "auto", padding: "1rem" }}>
@@ -612,7 +524,10 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
 
                   {rowsExpanded.includes(rowEntity.id) && (
                     <div style={{ display: "contents" }}>
-                      {renderExpandedRow(rowEntity)}
+                      <ExplorerTableExpandedRow
+                        rowEntity={rowEntity}
+                        columns={columns}
+                      />
                     </div>
                   )}
                 </>

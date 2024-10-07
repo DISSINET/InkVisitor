@@ -113,9 +113,13 @@ export const StyledExpRowFormGridColumnLabel = styled.div`
   display: grid;
   justify-content: end;
   margin-top: 0.5rem;
-  /* align-items: center; */
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   color: ${({ theme }) => theme.color["success"]};
+`;
+export const StyledExpRowFormGridColumnValue = styled.div`
+  display: grid;
+  align-items: end;
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
 `;
 export const StyledPagination = styled.div`
   display: flex;
