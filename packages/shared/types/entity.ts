@@ -9,6 +9,7 @@ export interface IEntity {
   status: EntityEnums.Status;
   data: any;
   label: string;
+  spellingVariants?: string[];
   detail: string;
   language: EntityEnums.Language;
   notes: string[];
@@ -28,6 +29,7 @@ export const entityAllowedFields: Record<keyof IEntity, boolean> = {
   status: true,
   data: true,
   label: true,
+  spellingVariants: true,
   detail: true,
   language: true,
   notes: true,
