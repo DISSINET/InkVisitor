@@ -24,6 +24,9 @@ import { FaRegCopy } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { EntityEnums } from "@shared/enums";
 import { EntityDetailRelations } from "pages/Main/containers/EntityDetailBox/EntityDetail/EntityDetailRelations/EntityDetailRelations";
+import { EntityDetailProtocol } from "pages/Main/containers/EntityDetailBox/EntityDetail/EntityDetailProtocol/EntityDetailProtocol";
+import { EntityDetailValidationSection } from "pages/Main/containers/EntityDetailBox/EntityDetail/EntityDetailValidationSection/EntityDetailValidationSection";
+import { ITerritoryValidation } from "@shared/types/territory";
 
 interface ExplorerTableRowExpanded {
   rowEntity: IEntity;
@@ -147,7 +150,15 @@ export const ExplorerTableRowExpanded: React.FC<ExplorerTableRowExpanded> = ({
               {/* Protocol */}
               <StyledExpRowSection>
                 <StyledExpRowSectionHeader>Protocol</StyledExpRowSectionHeader>
-                <StyledExpRowSectionContent></StyledExpRowSectionContent>
+                <StyledExpRowSectionContent>
+                  <EntityDetailProtocol
+                    territory={entity}
+                    // to make it editable, this needs to be implemented
+                    // updateEntityMutation={updateEntityMutation}
+                    // isInsideTemplate={isInsideTemplate}
+                    userCanEdit={false}
+                  />
+                </StyledExpRowSectionContent>
               </StyledExpRowSection>
 
               {/* Validation rules */}
@@ -155,7 +166,22 @@ export const ExplorerTableRowExpanded: React.FC<ExplorerTableRowExpanded> = ({
                 <StyledExpRowSectionHeader>
                   Validation rules
                 </StyledExpRowSectionHeader>
-                <StyledExpRowSectionContent></StyledExpRowSectionContent>
+                <StyledExpRowSectionContent>
+                  <EntityDetailValidationSection
+                    validations={
+                      entity.data.validations as
+                        | ITerritoryValidation[]
+                        | undefined
+                    }
+                    entities={entity.entities}
+                    userCanEdit={false}
+                    entity={entity}
+                    // updateEntityMutation={updateEntityMutation}
+                    // isInsideTemplate={isInsideTemplate}
+                    // territoryParentId={getTerritoryId(entity)}
+                    // setLoadingValidations={setLoadingValidations}
+                  />
+                </StyledExpRowSectionContent>
               </StyledExpRowSection>
             </>
           )}

@@ -28,19 +28,19 @@ const initialProtocol: ITerritoryProtocol = {
 
 interface EntityDetailProtocol {
   territory: IResponseDetail;
-  updateEntityMutation: UseMutationResult<
+  updateEntityMutation?: UseMutationResult<
     AxiosResponse<IResponseGeneric<any>, any>,
     Error,
     Partial<IEntity>,
     unknown
   >;
-  isInsideTemplate: boolean;
+  isInsideTemplate?: boolean;
   userCanEdit: boolean;
 }
 export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
   territory,
   updateEntityMutation,
-  isInsideTemplate,
+  isInsideTemplate = false,
   userCanEdit,
 }) => {
   const { entities } = territory;
@@ -49,7 +49,7 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
   useEffect(() => {
     // TODO: discover which attributes are missing and init them
     if (!protocol || (protocol && Object.entries(protocol).length === 0)) {
-      updateEntityMutation.mutate({
+      updateEntityMutation?.mutate({
         data: {
           protocol: initialProtocol,
         },
@@ -73,7 +73,7 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
   } = protocol;
 
   const updateProtocol = (changes: Partial<ITerritoryProtocol>) => {
-    updateEntityMutation.mutate({ data: { protocol: changes } });
+    updateEntityMutation?.mutate({ data: { protocol: changes } });
   };
 
   return (

@@ -34,17 +34,17 @@ const initValidation: ITerritoryValidation = {
 interface EntityDetailValidationSection {
   validations?: ITerritoryValidation[];
   entities: Record<string, IEntity>;
-  updateEntityMutation: UseMutationResult<
+  updateEntityMutation?: UseMutationResult<
     AxiosResponse<IResponseGeneric<any>, any>,
     Error,
     Partial<IEntity>,
     unknown
   >;
   userCanEdit: boolean;
-  isInsideTemplate: boolean;
-  territoryParentId: string | undefined;
+  isInsideTemplate?: boolean;
+  territoryParentId?: string | undefined;
   entity: IResponseDetail;
-  setLoadingValidations: React.Dispatch<React.SetStateAction<boolean>>;
+  setLoadingValidations?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 export const EntityDetailValidationSection: React.FC<
   EntityDetailValidationSection
@@ -53,17 +53,17 @@ export const EntityDetailValidationSection: React.FC<
   entities,
   updateEntityMutation,
   userCanEdit,
-  isInsideTemplate,
+  isInsideTemplate = false,
   territoryParentId,
   entity,
-  setLoadingValidations,
+  setLoadingValidations = () => {},
 }) => {
   const [tempIndexToRemove, setTempIndexToRemove] = useState<false | number>(
     false
   );
 
   const initValidationRule = () => {
-    updateEntityMutation.mutate({
+    updateEntityMutation?.mutate({
       data: {
         validations: validations
           ? [...validations, initValidation]
@@ -73,7 +73,7 @@ export const EntityDetailValidationSection: React.FC<
   };
 
   const removeValidationRule = (indexToRemove: number) => {
-    updateEntityMutation.mutate({
+    updateEntityMutation?.mutate({
       data: {
         validations: validations?.filter((_, index) => index !== indexToRemove),
       },
@@ -95,7 +95,7 @@ export const EntityDetailValidationSection: React.FC<
       updatedObject,
       ...validationsCopy.slice(key + 1),
     ];
-    updateEntityMutation.mutate({
+    updateEntityMutation?.mutate({
       data: {
         validations: newValidation,
       },
@@ -137,20 +137,20 @@ export const EntityDetailValidationSection: React.FC<
                   .validations;
                 if (otherValidations && otherValidations.length > 0) {
                   if (replace) {
-                    updateEntityMutation.mutate({
+                    updateEntityMutation?.mutate({
                       data: {
                         validations: otherValidations,
                       },
                     });
                   } else {
                     if (validations) {
-                      updateEntityMutation.mutate({
+                      updateEntityMutation?.mutate({
                         data: {
                           validations: [...validations, ...otherValidations],
                         },
                       });
                     } else {
-                      updateEntityMutation.mutate({
+                      updateEntityMutation?.mutate({
                         data: {
                           validations: otherValidations,
                         },
@@ -207,7 +207,7 @@ export const EntityDetailValidationSection: React.FC<
         title="Remove validation rules"
         text="Do you really want to remove all validation rules?"
         onSubmit={() => {
-          updateEntityMutation.mutate({
+          updateEntityMutation?.mutate({
             data: {
               validations: [],
             },
