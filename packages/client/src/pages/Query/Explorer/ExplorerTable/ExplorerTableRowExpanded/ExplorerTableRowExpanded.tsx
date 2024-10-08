@@ -1,6 +1,10 @@
 import { IEntity, IResponseDetail } from "@shared/types";
 import { Button, Input } from "components";
-import Dropdown, { EntityTag } from "components/advanced";
+import Dropdown, {
+  AuditTable,
+  EntityTag,
+  JSONExplorer,
+} from "components/advanced";
 import React, { Component, useEffect, useState } from "react";
 import {
   StyledExpandedRow,
@@ -18,6 +22,8 @@ import { useQuery } from "@tanstack/react-query";
 import api from "api";
 import { FaRegCopy } from "react-icons/fa";
 import { toast } from "react-toastify";
+import { EntityEnums } from "@shared/enums";
+import { EntityDetailRelations } from "pages/Main/containers/EntityDetailBox/EntityDetail/EntityDetailRelations/EntityDetailRelations";
 
 interface ExplorerTableRowExpanded {
   rowEntity: IEntity;
@@ -36,6 +42,21 @@ export const ExplorerTableRowExpanded: React.FC<ExplorerTableRowExpanded> = ({
     queryKey: ["entity", rowEntity.id],
     queryFn: async () => {
       const res = await api.detailGet(rowEntity.id);
+      return res.data;
+    },
+    enabled: !!rowEntity.id && api.isLoggedIn(),
+  });
+
+  // Audit query
+  const {
+    status: statusAudit,
+    data: audit,
+    error: auditError,
+    isFetching: isFetchingAudit,
+  } = useQuery({
+    queryKey: ["audit", rowEntity.id],
+    queryFn: async () => {
+      const res = await api.auditGet(rowEntity.id);
       return res.data;
     },
     enabled: !!rowEntity.id && api.isLoggedIn(),
@@ -121,24 +142,34 @@ export const ExplorerTableRowExpanded: React.FC<ExplorerTableRowExpanded> = ({
 
       {entity && (
         <>
-          {/* Protocol */}
-          <StyledExpRowSection>
-            <StyledExpRowSectionHeader>Protocol</StyledExpRowSectionHeader>
-            <StyledExpRowSectionContent></StyledExpRowSectionContent>
-          </StyledExpRowSection>
+          {rowEntity.class === EntityEnums.Class.Territory && (
+            <>
+              {/* Protocol */}
+              <StyledExpRowSection>
+                <StyledExpRowSectionHeader>Protocol</StyledExpRowSectionHeader>
+                <StyledExpRowSectionContent></StyledExpRowSectionContent>
+              </StyledExpRowSection>
 
-          {/* Validation rules */}
-          <StyledExpRowSection>
-            <StyledExpRowSectionHeader>
-              Validation rules
-            </StyledExpRowSectionHeader>
-            <StyledExpRowSectionContent></StyledExpRowSectionContent>
-          </StyledExpRowSection>
+              {/* Validation rules */}
+              <StyledExpRowSection>
+                <StyledExpRowSectionHeader>
+                  Validation rules
+                </StyledExpRowSectionHeader>
+                <StyledExpRowSectionContent></StyledExpRowSectionContent>
+              </StyledExpRowSection>
+            </>
+          )}
 
           {/* Relations */}
           <StyledExpRowSection>
             <StyledExpRowSectionHeader>Relations</StyledExpRowSectionHeader>
-            <StyledExpRowSectionContent></StyledExpRowSectionContent>
+            <StyledExpRowSectionContent>
+              <EntityDetailRelations
+                entity={entity}
+                // to switch userCanEdit={true}, mutations needs to be sent to props
+                userCanEdit={false}
+              />
+            </StyledExpRowSectionContent>
           </StyledExpRowSection>
 
           {/* Metaproperties */}
@@ -172,13 +203,18 @@ export const ExplorerTableRowExpanded: React.FC<ExplorerTableRowExpanded> = ({
             <StyledExpRowSectionContent>
               {references.map((reference, key) => {
                 return (
-                  <div key={key}>
+                  <div
+                    style={{
+                      display: "inline-grid",
+                      gridTemplateColumns: "auto auto",
+                      gap: "0.5rem",
+                    }}
+                    key={key}
+                  >
                     <span>
-                      resource:
                       <EntityTag entity={entity.entities[reference.resource]} />
                     </span>
                     <span>
-                      value:
                       <EntityTag entity={entity.entities[reference.value]} />
                     </span>
                   </div>
@@ -196,13 +232,17 @@ export const ExplorerTableRowExpanded: React.FC<ExplorerTableRowExpanded> = ({
           {/* Audits */}
           <StyledExpRowSection>
             <StyledExpRowSectionHeader>Audits</StyledExpRowSectionHeader>
-            <StyledExpRowSectionContent></StyledExpRowSectionContent>
+            <StyledExpRowSectionContent>
+              {audit && <AuditTable {...audit} />}
+            </StyledExpRowSectionContent>
           </StyledExpRowSection>
 
           {/* JSON */}
           <StyledExpRowSection>
             <StyledExpRowSectionHeader>JSON</StyledExpRowSectionHeader>
-            <StyledExpRowSectionContent></StyledExpRowSectionContent>
+            <StyledExpRowSectionContent>
+              {entity && <JSONExplorer data={entity} />}
+            </StyledExpRowSectionContent>
           </StyledExpRowSection>
         </>
       )}

@@ -12,22 +12,22 @@ import { BsInfoCircle } from "react-icons/bs";
 
 interface EntityDetailRelations {
   entity: IResponseDetail;
-  relationCreateMutation: UseMutationResult<
+  relationCreateMutation?: UseMutationResult<
     AxiosResponse<IResponseGeneric>,
     unknown,
     Relation.IRelation,
     unknown
   >;
-  relationUpdateMutation: UseMutationResult<
+  relationUpdateMutation?: UseMutationResult<
     AxiosResponse<IResponseGeneric>,
     unknown,
     {
       relationId: string;
-      changes: Partial<Relation.IRelation>;
+      changes: Partial<Relation.IRelation | Relation.IIdentification>;
     },
     unknown
   >;
-  relationDeleteMutation: UseMutationResult<
+  relationDeleteMutation?: UseMutationResult<
     AxiosResponse<IResponseGeneric>,
     unknown,
     string,

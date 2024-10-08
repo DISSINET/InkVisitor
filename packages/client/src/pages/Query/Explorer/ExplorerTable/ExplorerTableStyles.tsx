@@ -94,12 +94,17 @@ export const StyledTableFooter = styled(StyledSpaceBetween)`
 export const StyledEmpty = styled.span`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
 `;
+
 interface StyledExpandedRow {
   $columnsSpan: number;
 }
 export const StyledExpandedRow = styled.div<StyledExpandedRow>`
   display: flex;
   flex-wrap: wrap;
+
+  /* display: grid; */
+  /* grid-template-columns: repeat(auto-fill, minmax(38rem, 1fr)); */
+
   gap: 1rem;
 
   grid-column: ${({ $columnsSpan }) => `span ${$columnsSpan}`};
@@ -108,17 +113,21 @@ export const StyledExpandedRow = styled.div<StyledExpandedRow>`
   min-height: 5rem;
   border-right: 1px solid ${({ theme }) => theme.color["black"]};
 `;
-export const StyledExpRowFormGrid = styled.div`
-  display: inline-grid;
-  grid-template-columns: auto auto;
-  gap: 0.5rem;
-`;
 export const StyledExpRowSection = styled.div`
   display: inline-flex;
   flex-direction: column;
-  width: 40rem;
+  flex: 1 1 38rem;
   border: 1px dashed ${({ theme }) => theme.color["black"]};
+  min-height: 20rem;
+  padding-right: 2rem;
 `;
+
+export const StyledExpRowFormGrid = styled.div`
+  display: inline-grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.5rem;
+`;
+
 export const StyledExpRowSectionHeader = styled.div`
   display: flex;
   align-items: center;
