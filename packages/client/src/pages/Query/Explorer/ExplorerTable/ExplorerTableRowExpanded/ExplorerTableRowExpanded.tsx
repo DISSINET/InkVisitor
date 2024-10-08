@@ -195,7 +195,7 @@ export const ExplorerTableRowExpanded: React.FC<ExplorerTableRowExpanded> = ({
                       }
                       entities={entity.entities}
                       userCanEdit={false}
-                      entity={entity}
+                      // entity={entity}
                       // updateEntityMutation={updateEntityMutation}
                       // isInsideTemplate={isInsideTemplate}
                       // territoryParentId={getTerritoryId(entity)}

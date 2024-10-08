@@ -133,13 +133,12 @@ export const StyledExpRowSection = styled.div`
 
   display: inline-flex;
   flex-direction: column;
-  flex: 1 1 38rem;
-  /* height: auto; */
+  /* flex: 1 1 38rem; */
 
-  /* min-height: 20rem; */
-  border: 1px dashed ${({ theme }) => theme.color["black"]};
-  padding-right: 2rem;
-  padding-bottom: 2rem;
+  border: 1px dotted ${({ theme }) => theme.color["grey"]};
+  padding: 0.5rem 2rem 2rem 0.5rem;
+  /* padding-right: 2rem; */
+  /* padding-bottom: 2rem; */
 `;
 
 export const ColumnsContainer = styled.div`
