@@ -29,6 +29,7 @@ import {
   StyledGrid,
   StyledGridColumn,
   StyledGridHeader,
+  StyledGridHeaderColumn,
   StyledNewColumn,
   StyledNewColumnGrid,
   StyledNewColumnLabel,
@@ -369,75 +370,78 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           {renderTableHeader()}
           <StyledGrid $columns={columns.length + 1}>
             {/* HEADER */}
-            <StyledGridHeader>{/* actions */}</StyledGridHeader>
-            <StyledGridHeader>{/* entities */}</StyledGridHeader>
-            {columns.map((column, key) => {
-              return (
-                <StyledGridHeader key={key}>
-                  <div style={{ display: "flex", alignItems: "center" }}>
-                    {column.editable && (
-                      <MdOutlineEdit
-                        size={14}
-                        style={{ marginRight: "0.3rem" }}
-                      />
-                    )}
-                    {column.name}
+            {/* TODO: sticky doesn't work */}
+            <StyledGridHeader>
+              <StyledGridHeaderColumn>{/* actions */}</StyledGridHeaderColumn>
+              <StyledGridHeaderColumn>{/* entities */}</StyledGridHeaderColumn>
+              {columns.map((column, key) => {
+                return (
+                  <StyledGridHeaderColumn key={key}>
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      {column.editable && (
+                        <MdOutlineEdit
+                          size={14}
+                          style={{ marginRight: "0.3rem" }}
+                        />
+                      )}
+                      {column.name}
 
-                    {/* SORT */}
-                    {/* <span style={{ marginLeft: "0.5rem" }}>
-                      <Button
-                        noBorder
-                        noBackground
-                        inverted
-                        icon={
-                          sort && sort.columnId === column.id ? (
-                            sort.direction === "asc" ? (
-                              <FaSortUp color={"white"} />
-                            ) : sort.direction === "desc" ? (
-                              <FaSortDown color={"white"} />
+                      {/* SORT */}
+                      {/* <span style={{ marginLeft: "0.5rem" }}>
+                        <Button
+                          noBorder
+                          noBackground
+                          inverted
+                          icon={
+                            sort && sort.columnId === column.id ? (
+                              sort.direction === "asc" ? (
+                                <FaSortUp color={"white"} />
+                              ) : sort.direction === "desc" ? (
+                                <FaSortDown color={"white"} />
+                              ) : (
+                                <FaSort color={"white"} />
+                              )
                             ) : (
                               <FaSort color={"white"} />
                             )
-                          ) : (
-                            <FaSort color={"white"} />
-                          )
-                        }
-                        onClick={() => {
-                          const newDirection = toggleSortDirection(column.id);
-                          dispatch({
-                            type: ExploreActionType.sort,
-                            payload:
-                              newDirection === undefined
-                                ? undefined
-                                : {
-                                    columnId: column.id,
-                                    direction: newDirection,
-                                  },
-                          });
-                        }}
-                        tooltipLabel="sort"
-                      />
-                    </span> */}
+                          }
+                          onClick={() => {
+                            const newDirection = toggleSortDirection(column.id);
+                            dispatch({
+                              type: ExploreActionType.sort,
+                              payload:
+                                newDirection === undefined
+                                  ? undefined
+                                  : {
+                                      columnId: column.id,
+                                      direction: newDirection,
+                                    },
+                            });
+                          }}
+                          tooltipLabel="sort"
+                        />
+                      </span> */}
 
-                    <span style={{ marginLeft: "0.5rem" }}>
-                      <Button
-                        noBorder
-                        noBackground
-                        inverted
-                        icon={<FaTrashAlt color={"white"} />}
-                        onClick={() =>
-                          dispatch({
-                            type: ExploreActionType.removeColumn,
-                            payload: { id: column.id },
-                          })
-                        }
-                        tooltipLabel="remove column"
-                      />
-                    </span>
-                  </div>
-                </StyledGridHeader>
-              );
-            })}
+                      <span style={{ marginLeft: "0.5rem" }}>
+                        <Button
+                          noBorder
+                          noBackground
+                          inverted
+                          icon={<FaTrashAlt color={"white"} />}
+                          onClick={() =>
+                            dispatch({
+                              type: ExploreActionType.removeColumn,
+                              payload: { id: column.id },
+                            })
+                          }
+                          tooltipLabel="remove column"
+                        />
+                      </span>
+                    </div>
+                  </StyledGridHeaderColumn>
+                );
+              })}
+            </StyledGridHeader>
 
             {entities.map((row, key) => {
               const { entity: rowEntity, columnData } = row;
@@ -530,18 +534,18 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
               );
             })}
           </StyledGrid>
-          {renderTableFooter()}
+          {/* {renderTableFooter()} */}
         </StyledTableWrapper>
 
         {/* NEW COLUMN */}
         {showNewColumn && (
           <StyledNewColumn>
-            <StyledGridHeader $greyBackground>
+            <StyledGridHeaderColumn $greyBackground>
               <span style={{ display: "flex", alignItems: "center" }}>
                 <TbColumnInsertRight size={17} />
                 <p style={{ marginLeft: "0.5rem" }}>New column</p>
               </span>
-            </StyledGridHeader>
+            </StyledGridHeaderColumn>
             <StyledNewColumnGrid>
               <StyledNewColumnLabel>Column name</StyledNewColumnLabel>
               <StyledNewColumnValue>

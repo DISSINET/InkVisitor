@@ -13,8 +13,6 @@ export const StyledGrid = styled.div<StyledGrid>`
   display: grid;
   border: 1px solid ${({ theme }) => theme.color["black"]};
   align-content: start;
-  /* grid-template-columns: ${({ $columns }) =>
-    `auto repeat(${$columns}, 1fr)`}; */
   grid-template-columns: ${({ $columns }) =>
     `3.5rem repeat(${$columns}, auto)`};
   color: ${({ theme }) => theme.color["black"]};
@@ -34,10 +32,19 @@ export const StyledGridColumn = styled.div`
   }
 `;
 
-interface StyledGridHeader {
+export const StyledGridHeader = styled.div`
+  display: contents;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);
+`;
+interface StyledGridHeaderColumn {
   $greyBackground?: boolean;
 }
-export const StyledGridHeader = styled(StyledGridColumn)<StyledGridHeader>`
+export const StyledGridHeaderColumn = styled(
+  StyledGridColumn
+)<StyledGridHeaderColumn>`
   background-color: ${({ theme, $greyBackground }) =>
     $greyBackground ? theme.color["gray"][600] : theme.color["success"]};
   color: ${({ theme, $greyBackground }) =>
@@ -86,6 +93,12 @@ export const StyledSpaceBetween = styled.div`
 export const StyledTableHeader = styled(StyledSpaceBetween)`
   padding: ${({ theme }) => theme.space[2]};
   padding-top: 0.2rem;
+
+  position: sticky;
+  top: 0;
+  background-color: ${({ theme }) => theme.color["gray"][200]};
+  box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);
+  z-index: 20;
 `;
 export const StyledTableFooter = styled(StyledSpaceBetween)`
   padding: ${({ theme }) => theme.space[2]};
@@ -99,8 +112,9 @@ interface StyledExpandedRow {
   $columnsSpan: number;
 }
 export const StyledExpandedRow = styled.div<StyledExpandedRow>`
-  display: flex;
-  flex-wrap: wrap;
+  /* display: flex; */
+  /* flex-wrap: wrap; */
+  /* align-items: flex-start; */
 
   /* display: grid; */
   /* grid-template-columns: repeat(auto-fill, minmax(38rem, 1fr)); */
@@ -114,12 +128,39 @@ export const StyledExpandedRow = styled.div<StyledExpandedRow>`
   border-right: 1px solid ${({ theme }) => theme.color["black"]};
 `;
 export const StyledExpRowSection = styled.div`
+  width: 100%;
+  margin-bottom: 1rem;
+
   display: inline-flex;
   flex-direction: column;
   flex: 1 1 38rem;
+  /* height: auto; */
+
+  /* min-height: 20rem; */
   border: 1px dashed ${({ theme }) => theme.color["black"]};
-  min-height: 20rem;
   padding-right: 2rem;
+  padding-bottom: 2rem;
+`;
+
+export const ColumnsContainer = styled.div`
+  column-count: 1;
+  column-gap: 1rem;
+
+  @media (min-width: 900px) {
+    column-count: 2;
+  }
+
+  @media (min-width: 1080px) {
+    column-count: 3;
+  }
+
+  @media (min-width: 1450px) {
+    column-count: 4;
+  }
+`;
+export const StyledColumnItem = styled.div`
+  display: inline-block;
+  width: 100%;
 `;
 
 export const StyledExpRowFormGrid = styled.div`
