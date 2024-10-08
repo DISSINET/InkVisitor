@@ -150,9 +150,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
   const [querySeparatorYPosition, setQuerySeparatorYPosition] =
     useState<number>(
       localStorageSeparatorYPosition
-        ? floorNumberToOneDecimal(
-            Number(localStorageSeparatorYPosition) * onePercentOfContentHeight
-          )
+        ? Number(localStorageSeparatorYPosition) * onePercentOfContentHeight
         : contentHeight / 2
     );
 

@@ -98,6 +98,10 @@ interface StyledExpandedRow {
   $columnsSpan: number;
 }
 export const StyledExpandedRow = styled.div<StyledExpandedRow>`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+
   grid-column: ${({ $columnsSpan }) => `span ${$columnsSpan}`};
   padding: 0.5rem;
   padding-left: 4rem;
@@ -108,6 +112,29 @@ export const StyledExpRowFormGrid = styled.div`
   display: inline-grid;
   grid-template-columns: auto auto;
   gap: 0.5rem;
+`;
+export const StyledExpRowSection = styled.div`
+  display: inline-flex;
+  flex-direction: column;
+  width: 40rem;
+  border: 1px dashed ${({ theme }) => theme.color["black"]};
+`;
+export const StyledExpRowSectionHeader = styled.div`
+  display: flex;
+  align-items: center;
+  font-weight: ${({ theme }) => theme.fontWeight.regular};
+  font-size: ${({ theme }) => theme.fontSize.lg};
+  margin-bottom: ${({ theme }) => theme.space[4]};
+  color: ${({ theme }) => theme.color["primary"]};
+`;
+interface StyledExpRowSectionContent {
+  $firstSection?: boolean;
+}
+export const StyledExpRowSectionContent = styled.div<StyledExpRowSectionContent>`
+  padding-left: ${({ theme, $firstSection = false }) =>
+    $firstSection ? "" : theme.space[4]};
+  padding-top: ${({ theme, $firstSection }) =>
+    $firstSection ? 0 : theme.space[4]};
 `;
 export const StyledExpRowFormGridColumnLabel = styled.div`
   display: grid;
@@ -121,6 +148,18 @@ export const StyledExpRowFormGridColumnValue = styled.div`
   align-items: end;
   font-size: ${({ theme }) => theme.fontSize["xs"]};
 `;
+export const StyledExpRowFormGridColumnValueID = styled.div`
+  color: ${({ theme }) => theme.color["primary"]};
+  display: inline-flex;
+  align-items: flex-end;
+  font-style: italic;
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+
+  button {
+    margin-left: ${({ theme }) => theme.space["2"]};
+  }
+`;
+
 export const StyledPagination = styled.div`
   display: flex;
   align-items: center;

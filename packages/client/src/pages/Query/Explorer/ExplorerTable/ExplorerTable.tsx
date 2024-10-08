@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
 
-import { languageDict } from "@shared/dictionaries";
 import { classesAll } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
 import { IEntity, IProp, IResponseQuery, IUser } from "@shared/types";
@@ -27,9 +26,6 @@ import { ThemeContext } from "styled-components";
 import { v4 as uuidv4 } from "uuid";
 import { ExploreAction, ExploreActionType } from "../state";
 import {
-  StyledExpandedRow,
-  StyledExpRowFormGrid,
-  StyledExpRowFormGridColumnLabel,
   StyledGrid,
   StyledGridColumn,
   StyledGridHeader,
@@ -42,7 +38,7 @@ import {
   StyledTableHeader,
   StyledTableWrapper,
 } from "./ExplorerTableStyles";
-import { ExplorerTableExpandedRow } from "./ExplorerTableExpandedRow";
+import { ExplorerTableRowExpanded } from "./ExplorerTableRowExpanded/ExplorerTableRowExpanded";
 
 const initialNewColumn: Explore.IExploreColumn = {
   id: uuidv4(),
@@ -105,7 +101,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     return propertyType?.id || "";
   }, [propertyType]);
 
-  const [isNewColumnDisplayed, setIsNewColumnDisplayed] = useState(true);
+  const [showNewColumn, setShowNewColumn] = useState(false);
 
   const getNewColumn = (): Explore.IExploreColumn => {
     return {
@@ -256,8 +252,8 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           <Button
             icon={<TbColumnInsertRight size={17} />}
             label="new column"
-            color={isNewColumnDisplayed ? "info" : "primary"}
-            onClick={() => setIsNewColumnDisplayed(!isNewColumnDisplayed)}
+            color={showNewColumn ? "info" : "primary"}
+            onClick={() => setShowNewColumn(!showNewColumn)}
           />
         </div>
       </StyledTableHeader>
@@ -272,8 +268,8 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           <Button
             icon={<TbColumnInsertRight size={17} />}
             label="new column"
-            color={isNewColumnDisplayed ? "info" : "primary"}
-            onClick={() => setIsNewColumnDisplayed(!isNewColumnDisplayed)}
+            color={showNewColumn ? "info" : "primary"}
+            onClick={() => setShowNewColumn(!showNewColumn)}
           />
         </div>
       </StyledTableFooter>
@@ -524,7 +520,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
 
                   {rowsExpanded.includes(rowEntity.id) && (
                     <div style={{ display: "contents" }}>
-                      <ExplorerTableExpandedRow
+                      <ExplorerTableRowExpanded
                         rowEntity={rowEntity}
                         columns={columns}
                       />
@@ -538,7 +534,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
         </StyledTableWrapper>
 
         {/* NEW COLUMN */}
-        {isNewColumnDisplayed && (
+        {showNewColumn && (
           <StyledNewColumn>
             <StyledGridHeader $greyBackground>
               <span style={{ display: "flex", alignItems: "center" }}>
@@ -624,7 +620,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                 <Button
                   color="warning"
                   label="cancel"
-                  onClick={() => setIsNewColumnDisplayed(false)}
+                  onClick={() => setShowNewColumn(false)}
                 />
                 <Button
                   label="create column"
