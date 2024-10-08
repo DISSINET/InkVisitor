@@ -128,6 +128,7 @@ export const StyledExpandedRow = styled.div<StyledExpandedRow>`
   border-right: 1px solid ${({ theme }) => theme.color["black"]};
 `;
 export const StyledExpRowSection = styled.div`
+  position: relative;
   width: 100%;
   margin-bottom: 1rem;
 

@@ -5,7 +5,7 @@ import { Explore } from "@shared/types/query";
 import { ITerritoryValidation } from "@shared/types/territory";
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
-import { Button, Input } from "components";
+import { Button, Input, Loader } from "components";
 import Dropdown, {
   AuditTable,
   EntityTag,
@@ -160,94 +160,98 @@ export const ExplorerTableRowExpanded: React.FC<ExplorerTableRowExpanded> = ({
             </div>
           </StyledExpRowFormGrid>
         </StyledExpRowSection>
-
-        {entity && (
+        {rowEntity.class === EntityEnums.Class.Territory && (
           <>
-            {rowEntity.class === EntityEnums.Class.Territory && (
-              <>
-                {/* Protocol */}
-                <StyledExpRowSection>
-                  <StyledExpRowSectionHeader>
-                    Protocol
-                  </StyledExpRowSectionHeader>
-                  <StyledExpRowSectionContent>
-                    <EntityDetailProtocol
-                      territory={entity}
-                      // to make it editable, this needs to be implemented
-                      // updateEntityMutation={updateEntityMutation}
-                      // isInsideTemplate={isInsideTemplate}
-                      userCanEdit={false}
-                    />
-                  </StyledExpRowSectionContent>
-                </StyledExpRowSection>
-
-                {/* Validation rules */}
-                <StyledExpRowSection>
-                  <StyledExpRowSectionHeader>
-                    Validation rules
-                  </StyledExpRowSectionHeader>
-                  <StyledExpRowSectionContent>
-                    <EntityDetailValidationSection
-                      validations={
-                        entity.data.validations as
-                          | ITerritoryValidation[]
-                          | undefined
-                      }
-                      entities={entity.entities}
-                      userCanEdit={false}
-                      // entity={entity}
-                      // updateEntityMutation={updateEntityMutation}
-                      // isInsideTemplate={isInsideTemplate}
-                      // territoryParentId={getTerritoryId(entity)}
-                      // setLoadingValidations={setLoadingValidations}
-                    />
-                  </StyledExpRowSectionContent>
-                </StyledExpRowSection>
-              </>
-            )}
-
-            {/* Relations */}
+            {/* Protocol */}
             <StyledExpRowSection>
-              <StyledExpRowSectionHeader>Relations</StyledExpRowSectionHeader>
+              <StyledExpRowSectionHeader>Protocol</StyledExpRowSectionHeader>
               <StyledExpRowSectionContent>
-                <EntityDetailRelations
-                  entity={entity}
-                  // to switch userCanEdit={true}, mutations needs to be sent to props
-                  userCanEdit={false}
-                />
+                {entity && (
+                  <EntityDetailProtocol
+                    territory={entity}
+                    // to make it editable, this needs to be implemented
+                    // updateEntityMutation={updateEntityMutation}
+                    // isInsideTemplate={isInsideTemplate}
+                    userCanEdit={false}
+                  />
+                )}
+                <Loader show={isFetching} />
               </StyledExpRowSectionContent>
             </StyledExpRowSection>
 
-            {/* Metaproperties */}
+            {/* Validation rules */}
             <StyledExpRowSection>
               <StyledExpRowSectionHeader>
-                Metaproperties
+                Validation rules
               </StyledExpRowSectionHeader>
               <StyledExpRowSectionContent>
-                {props.map((prop, key) => {
-                  return (
-                    <div>
-                      <span>
-                        <EntityTag
-                          entity={entity.entities[prop.type.entityId]}
-                        />
-                      </span>
-                      <span>
-                        <EntityTag
-                          entity={entity.entities[prop.value.entityId]}
-                        />
-                      </span>
-                    </div>
-                  );
-                })}
+                {entity && (
+                  <EntityDetailValidationSection
+                    validations={
+                      entity.data.validations as
+                        | ITerritoryValidation[]
+                        | undefined
+                    }
+                    entities={entity.entities}
+                    userCanEdit={false}
+                    // entity={entity}
+                    // updateEntityMutation={updateEntityMutation}
+                    // isInsideTemplate={isInsideTemplate}
+                    // territoryParentId={getTerritoryId(entity)}
+                    // setLoadingValidations={setLoadingValidations}
+                  />
+                )}
+                <Loader show={isFetching} />
               </StyledExpRowSectionContent>
             </StyledExpRowSection>
+          </>
+        )}
+        {/* Relations */}
+        <StyledExpRowSection>
+          <StyledExpRowSectionHeader>Relations</StyledExpRowSectionHeader>
+          <StyledExpRowSectionContent>
+            {entity && (
+              <EntityDetailRelations
+                entity={entity}
+                // to switch userCanEdit={true}, mutations needs to be sent to props
+                userCanEdit={false}
+              />
+            )}
+            <Loader show={isFetching} />
+          </StyledExpRowSectionContent>
+        </StyledExpRowSection>
 
-            {/* References */}
-            <StyledExpRowSection>
-              <StyledExpRowSectionHeader>References</StyledExpRowSectionHeader>
-              <StyledExpRowSectionContent>
-                {references.map((reference, key) => {
+        {/* Metaproperties */}
+        <StyledExpRowSection>
+          <StyledExpRowSectionHeader>Metaproperties</StyledExpRowSectionHeader>
+          <StyledExpRowSectionContent>
+            {entity &&
+              props.map((prop, key) => {
+                return (
+                  <div>
+                    <span>
+                      <EntityTag entity={entity.entities[prop.type.entityId]} />
+                    </span>
+                    <span>
+                      <EntityTag
+                        entity={entity.entities[prop.value.entityId]}
+                      />
+                    </span>
+                  </div>
+                );
+              })}
+
+            <Loader show={isFetching} />
+          </StyledExpRowSectionContent>
+        </StyledExpRowSection>
+
+        <>
+          {/* References */}
+          <StyledExpRowSection>
+            <StyledExpRowSectionHeader>References</StyledExpRowSectionHeader>
+            <StyledExpRowSectionContent>
+              {entity &&
+                references.map((reference, key) => {
                   return (
                     <div
                       style={{
@@ -268,98 +272,107 @@ export const ExplorerTableRowExpanded: React.FC<ExplorerTableRowExpanded> = ({
                     </div>
                   );
                 })}
-              </StyledExpRowSectionContent>
-            </StyledExpRowSection>
 
-            {/* Used in */}
-            <StyledExpRowSection>
-              <StyledExpRowSectionHeader>Used In:</StyledExpRowSectionHeader>
-              <StyledExpRowSectionContent>
-                {/* usedIn props */}
-                {!entity.isTemplate && (
-                  <EntityDetailMetaPropsTable
-                    title={{
-                      singular: "Metaproperty",
-                      plural: "Metaproperties",
-                    }}
-                    entities={entity.entities}
-                    useCases={entity.usedInMetaProps}
-                    key="MetaProp"
-                    perPage={10}
-                  />
-                )}
-                {/* usedIn statements */}
-                {!entity.isTemplate && (
-                  <EntityDetailStatementsTable
-                    title={{ singular: "Statement", plural: "Statements" }}
-                    entities={entity.entities}
-                    useCases={entity.usedInStatements}
-                    key="Statement"
-                    perPage={10}
-                  />
-                )}
+              <Loader show={isFetching} />
+            </StyledExpRowSectionContent>
+          </StyledExpRowSection>
 
-                {/* usedIn statement props */}
-                {!entity.isTemplate && (
-                  <EntityDetailStatementPropsTable
-                    title={{
-                      singular: "In-statement Property",
-                      plural: "In-statement Properties",
-                    }}
-                    entities={entity.entities}
-                    useCases={entity.usedInStatementProps}
-                    key="StatementProp"
-                    perPage={10}
-                  />
-                )}
+          {/* Used in */}
+          <StyledExpRowSection>
+            <StyledExpRowSectionHeader>Used In:</StyledExpRowSectionHeader>
+            <StyledExpRowSectionContent>
+              {entity && (
+                <>
+                  {/* usedIn props */}
+                  {!entity.isTemplate && (
+                    <EntityDetailMetaPropsTable
+                      title={{
+                        singular: "Metaproperty",
+                        plural: "Metaproperties",
+                      }}
+                      entities={entity.entities}
+                      useCases={entity.usedInMetaProps}
+                      key="MetaProp"
+                      perPage={10}
+                    />
+                  )}
+                  {/* usedIn statements */}
+                  {!entity.isTemplate && (
+                    <EntityDetailStatementsTable
+                      title={{ singular: "Statement", plural: "Statements" }}
+                      entities={entity.entities}
+                      useCases={entity.usedInStatements}
+                      key="Statement"
+                      perPage={10}
+                    />
+                  )}
 
-                {/* usedIn statement identification */}
-                {!entity.isTemplate && (
-                  <EntityDetailIdentificationTable
-                    title={{
-                      singular: "In-statement Identification",
-                      plural: "In-statement Identifications",
-                    }}
-                    entities={entity.entities}
-                    useCases={entity.usedInStatementIdentifications}
-                    key="StatementIdentification"
-                    perPage={10}
-                  />
-                )}
+                  {/* usedIn statement props */}
+                  {!entity.isTemplate && (
+                    <EntityDetailStatementPropsTable
+                      title={{
+                        singular: "In-statement Property",
+                        plural: "In-statement Properties",
+                      }}
+                      entities={entity.entities}
+                      useCases={entity.usedInStatementProps}
+                      key="StatementProp"
+                      perPage={10}
+                    />
+                  )}
 
-                {/* usedIn statement classification */}
-                {!entity.isTemplate && (
-                  <EntityDetailClassificationTable
-                    title={{
-                      singular: "In-statement Classification",
-                      plural: "In-statement Classifications",
-                    }}
-                    entities={entity.entities}
-                    useCases={entity.usedInStatementClassifications}
-                    key="StatementClassification"
-                    perPage={10}
-                  />
-                )}
-              </StyledExpRowSectionContent>
-            </StyledExpRowSection>
+                  {/* usedIn statement identification */}
+                  {!entity.isTemplate && (
+                    <EntityDetailIdentificationTable
+                      title={{
+                        singular: "In-statement Identification",
+                        plural: "In-statement Identifications",
+                      }}
+                      entities={entity.entities}
+                      useCases={entity.usedInStatementIdentifications}
+                      key="StatementIdentification"
+                      perPage={10}
+                    />
+                  )}
 
-            {/* Audits */}
-            <StyledExpRowSection>
-              <StyledExpRowSectionHeader>Audits</StyledExpRowSectionHeader>
-              <StyledExpRowSectionContent>
-                {audit && <AuditTable {...audit} />}
-              </StyledExpRowSectionContent>
-            </StyledExpRowSection>
+                  {/* usedIn statement classification */}
+                  {!entity.isTemplate && (
+                    <EntityDetailClassificationTable
+                      title={{
+                        singular: "In-statement Classification",
+                        plural: "In-statement Classifications",
+                      }}
+                      entities={entity.entities}
+                      useCases={entity.usedInStatementClassifications}
+                      key="StatementClassification"
+                      perPage={10}
+                    />
+                  )}
+                </>
+              )}
 
-            {/* JSON */}
-            <StyledExpRowSection>
-              <StyledExpRowSectionHeader>JSON</StyledExpRowSectionHeader>
-              <StyledExpRowSectionContent>
-                {entity && <JSONExplorer data={entity} />}
-              </StyledExpRowSectionContent>
-            </StyledExpRowSection>
-          </>
-        )}
+              <Loader show={isFetching} />
+            </StyledExpRowSectionContent>
+          </StyledExpRowSection>
+
+          {/* Audits */}
+          <StyledExpRowSection>
+            <StyledExpRowSectionHeader>Audits</StyledExpRowSectionHeader>
+            <StyledExpRowSectionContent>
+              {audit && <AuditTable {...audit} />}
+              <Loader show={isFetchingAudit} />
+            </StyledExpRowSectionContent>
+          </StyledExpRowSection>
+
+          {/* JSON */}
+          <StyledExpRowSection>
+            <StyledExpRowSectionHeader>JSON</StyledExpRowSectionHeader>
+            <StyledExpRowSectionContent>
+              {entity && <JSONExplorer data={entity} />}
+              <Loader show={isFetching} />
+            </StyledExpRowSectionContent>
+          </StyledExpRowSection>
+        </>
       </ColumnsContainer>
     </StyledExpandedRow>
   );
