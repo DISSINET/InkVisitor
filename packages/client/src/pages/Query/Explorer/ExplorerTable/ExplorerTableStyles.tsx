@@ -190,7 +190,7 @@ export const StyledExpRowFormGridColumnLabel = styled.div`
   display: grid;
   justify-content: end;
   margin-top: 0.5rem;
-  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
   color: ${({ theme }) => theme.color["success"]};
 `;
 export const StyledExpRowFormGridColumnValue = styled.div`

@@ -138,6 +138,7 @@ export const ExplorerTableRowExpanded: React.FC<ExplorerTableRowExpanded> = ({
     <StyledExpandedRow $columnsSpan={columns.length + 2}>
       <ColumnsContainer>
         <StyledExpRowSection>
+          <StyledExpRowSectionHeader>Information</StyledExpRowSectionHeader>
           <StyledExpRowFormGrid>
             <StyledExpRowFormGridColumnLabel>
               ID:
@@ -157,7 +158,7 @@ export const ExplorerTableRowExpanded: React.FC<ExplorerTableRowExpanded> = ({
               />
             </StyledExpRowFormGridColumnValueID>
             <StyledExpRowFormGridColumnLabel>
-              label:
+              Label:
             </StyledExpRowFormGridColumnLabel>
             <div>
               <Input
@@ -168,7 +169,7 @@ export const ExplorerTableRowExpanded: React.FC<ExplorerTableRowExpanded> = ({
               />
             </div>
             <StyledExpRowFormGridColumnLabel>
-              detail:
+              Detail:
             </StyledExpRowFormGridColumnLabel>
             <div>
               <Input
@@ -179,7 +180,7 @@ export const ExplorerTableRowExpanded: React.FC<ExplorerTableRowExpanded> = ({
               />
             </div>
             <StyledExpRowFormGridColumnLabel>
-              language:
+              Language:
             </StyledExpRowFormGridColumnLabel>
             <div>
               <Dropdown.Single.Basic
@@ -191,7 +192,7 @@ export const ExplorerTableRowExpanded: React.FC<ExplorerTableRowExpanded> = ({
               />
             </div>
             <StyledExpRowFormGridColumnLabel>
-              notes:
+              Notes:
             </StyledExpRowFormGridColumnLabel>
             <div>
               {notes.map((note, key) => {
@@ -392,22 +393,22 @@ export const ExplorerTableRowExpanded: React.FC<ExplorerTableRowExpanded> = ({
           </StyledExpRowSection>
 
           {/* Audits */}
-          <StyledExpRowSection>
+          {/* <StyledExpRowSection>
             <StyledExpRowSectionHeader>Audits</StyledExpRowSectionHeader>
             <StyledExpRowSectionContent>
               {audit && <AuditTable {...audit} />}
               <Loader show={isFetchingAudit} />
             </StyledExpRowSectionContent>
-          </StyledExpRowSection>
+          </StyledExpRowSection> */}
 
           {/* JSON */}
-          <StyledExpRowSection>
+          {/* <StyledExpRowSection>
             <StyledExpRowSectionHeader>JSON</StyledExpRowSectionHeader>
             <StyledExpRowSectionContent>
               {entity && <JSONExplorer data={entity} />}
               <Loader show={isFetching} />
             </StyledExpRowSectionContent>
-          </StyledExpRowSection>
+          </StyledExpRowSection> */}
         </>
       </ColumnsContainer>
     </StyledExpandedRow>
