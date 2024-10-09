@@ -29,8 +29,6 @@ export const LoginScreen: React.FC<LoginScreen> = ({
   const dispatch = useAppDispatch();
   const [error, setError] = useState<string | false>(false);
 
-  const formRef = React.createRef<HTMLFormElement>();
-
   const handleLogIn = async () => {
     try {
       const res = await api.signIn(usernameLocal, password, {
@@ -47,7 +45,7 @@ export const LoginScreen: React.FC<LoginScreen> = ({
 
   return (
     <>
-      <form ref={formRef}>
+      <form>
         <StyledInputRow>
           <StyledTbMailFilled size={14} $isError={error !== false} />
           <Input
