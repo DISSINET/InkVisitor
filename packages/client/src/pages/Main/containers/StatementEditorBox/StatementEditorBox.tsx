@@ -226,7 +226,7 @@ export const StatementEditorBox: React.FC = () => {
 
         if (userLanguage !== entityLanguage) {
           toast.info(
-            `Linked Entity language (${entityLanguage}) does not correspondent tothe user statement language (${userLanguage}). Entity involvement epistemic level changed to "inferential".`
+            `Linked Entity language (${entityLanguage}) does not correspondent with the user statement language (${userLanguage}). Entity involvement epistemic level changed to "inferential".`
           );
           if (newData.actants) {
             newData.actants = newData.actants?.map((actant) => {
