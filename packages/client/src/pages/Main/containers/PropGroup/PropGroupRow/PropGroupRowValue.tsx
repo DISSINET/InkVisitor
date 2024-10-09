@@ -23,7 +23,8 @@ interface PropGroupRowValue {
   updateProp: (
     propId: string,
     changes: Partial<IProp>,
-    instantUpdate?: true
+    instantUpdate?: boolean,
+    languageCheck?: boolean
   ) => void;
   userCanEdit: boolean;
   isInsideTemplate: boolean;
@@ -66,6 +67,7 @@ export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
                       entityId: newSelectedId,
                     },
                   },
+                  true,
                   true
                 );
               }}
@@ -97,12 +99,17 @@ export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
                     <ElvlButtonGroup
                       value={prop.value.elvl}
                       onChange={(elvl) =>
-                        updateProp(prop.id, {
-                          value: {
-                            ...prop.value,
-                            elvl: elvl,
+                        updateProp(
+                          prop.id,
+                          {
+                            value: {
+                              ...prop.value,
+                              elvl: elvl,
+                            },
                           },
-                        })
+                          false,
+                          false
+                        )
                       }
                       disabled={!userCanEdit}
                     />
@@ -134,6 +141,7 @@ export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
                     entityId: newSelectedId,
                   },
                 },
+                true,
                 true
               );
             }}

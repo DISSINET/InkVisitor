@@ -21,6 +21,23 @@ export const StatementEditorBox: React.FC = () => {
     (state) => state.layout.contentHeight
   );
 
+  const userId = localStorage.getItem("userid");
+  const {
+    status: statusUser,
+    data: user,
+    error: errorUser,
+    isFetching: isFetchingUser,
+  } = useQuery({
+    queryKey: ["user", userId],
+    queryFn: async () => {
+      if (userId) {
+        const res = await api.usersGet(userId);
+        return res.data;
+      }
+    },
+    enabled: !!userId && api.isLoggedIn(),
+  });
+
   // Statement query
   const {
     status: statusStatement,
@@ -162,6 +179,79 @@ export const StatementEditorBox: React.FC = () => {
     }
   };
 
+  const checkValidActantLanguage = async (
+    newData: Partial<IStatementData>
+  ): Promise<Partial<IStatementData>> => {
+    const oldActants = statement?.data.actants ?? [];
+
+    // check only the actantId that was added
+    const newActant = newData.actants?.find((newA, newAI) => {
+      //check if the actant is completely new
+      if (!newA.entityId) {
+        return false;
+      }
+      if (oldActants[newAI]) {
+        return newA.entityId !== oldActants[newAI].entityId;
+      } else {
+        return true;
+      }
+    });
+    const oldActions = statement?.data.actions ?? [];
+    const newAction = newData.actions?.find((newA, newAI) => {
+      //check if the actant is completely new
+      if (!newA.actionId) {
+        return false;
+      }
+      if (oldActions[newAI]) {
+        return newA.actionId !== oldActions[newAI].actionId;
+      } else {
+        return true;
+      }
+    });
+
+    if (newActant || newAction) {
+      let entity = null;
+      if (newActant) {
+        entity = await api.entitiesGet(newActant.entityId);
+      } else if (newAction) {
+        entity = await api.entitiesGet(newAction.actionId);
+      }
+
+      if (!entity) {
+        return newData;
+      } else {
+        // check if Actant involvement elvl for normal actants in any role (s, a1, pa...)
+        const userLanguage = user?.options.defaultStatementLanguage;
+        const entityLanguage = entity.data.language;
+
+        if (userLanguage !== entityLanguage) {
+          toast.info(
+            `Linked Entity language (${entityLanguage}) does not correspondent with the user statement language (${userLanguage}). Entity involvement epistemic level changed to "inferential".`
+          );
+          if (newData.actants) {
+            newData.actants = newData.actants?.map((actant) => {
+              if (actant.entityId === newActant?.entityId) {
+                actant.elvl = EntityEnums.Elvl.Inferential;
+              }
+              return actant;
+            });
+          }
+          if (newData.actions) {
+            newData.actions = newData.actions?.map((action) => {
+              if (action.actionId === newAction?.actionId) {
+                action.elvl = EntityEnums.Elvl.Inferential;
+              }
+              return action;
+            });
+          }
+        }
+      }
+
+      return newData;
+    }
+    return newData;
+  };
+
   const checkValidActantPosition = async (
     changes: Partial<IStatementData>
   ): Promise<Partial<IStatementData>> => {
@@ -256,12 +346,13 @@ export const StatementEditorBox: React.FC = () => {
       });
 
       const validatedData = await checkValidActantPosition(changes);
+      const validatedData2 = await checkValidActantLanguage(validatedData);
 
       const newData: IResponseStatement = {
         ...tempObject,
         data: {
           ...tempObject.data,
-          ...validatedData,
+          ...validatedData2,
         },
       };
       setTempObject(newData);
