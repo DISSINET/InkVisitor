@@ -70,21 +70,6 @@ export const Input: React.FC<Input> = ({
     setDisplayValue(value);
   }, [value]);
 
-  const testRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    setTimeout(() => {
-      if (testRef.current && autoFocus) {
-        console.log("testing ref");
-        testRef.current.focus();
-        testRef.current.click();
-        // testRef.current.blur();
-
-        console.log(testRef.current);
-      }
-    }, 500);
-  }, []);
-
   return (
     <StyledWrapper
       width={width}
@@ -93,7 +78,6 @@ export const Input: React.FC<Input> = ({
       {label && <Label className="label">{label}</Label>}
       {(type === "text" || type === "password") && (
         <StyledInput
-          ref={testRef}
           disabled={disabled}
           type={type}
           width={width}

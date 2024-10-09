@@ -2,7 +2,7 @@ import { IErrorSignature, getErrorByCode } from "@shared/types/errors";
 import api from "api";
 import { Button, Input } from "components";
 import { StyledButtonWrap, StyledErrorText } from "pages/AuthModalSharedStyles";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FiLogIn } from "react-icons/fi";
 import { setUsername } from "redux/features/usernameSlice";
 import { useAppDispatch } from "redux/hooks";
@@ -29,6 +29,8 @@ export const LoginScreen: React.FC<LoginScreen> = ({
   const dispatch = useAppDispatch();
   const [error, setError] = useState<string | false>(false);
 
+  const formRef = React.createRef<HTMLFormElement>();
+
   const handleLogIn = async () => {
     try {
       const res = await api.signIn(usernameLocal, password, {
@@ -45,7 +47,7 @@ export const LoginScreen: React.FC<LoginScreen> = ({
 
   return (
     <>
-      <form>
+      <form ref={formRef}>
         <StyledInputRow>
           <StyledTbMailFilled size={14} $isError={error !== false} />
           <Input
@@ -78,7 +80,6 @@ export const LoginScreen: React.FC<LoginScreen> = ({
 
       <StyledButtonWrap>
         <Button
-          disabled={usernameLocal.length === 0 || password.length === 0}
           icon={<FiLogIn />}
           label="Log In"
           color="success"
