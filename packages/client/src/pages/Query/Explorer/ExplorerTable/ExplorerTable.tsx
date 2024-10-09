@@ -158,6 +158,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   const handleChangeLimit = (newLimit: number) => {
     dispatch({ type: ExploreActionType.setLimit, payload: newLimit });
     dispatch({ type: ExploreActionType.setOffset, payload: 0 });
+    setRowsExpanded([]);
   };
 
   const startRecord = offset + 1;

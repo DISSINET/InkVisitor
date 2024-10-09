@@ -1,6 +1,6 @@
 import { languageDict } from "@shared/dictionaries";
 import { EntityEnums } from "@shared/enums";
-import { IEntity } from "@shared/types";
+import { IEntity, IProp } from "@shared/types";
 import { Explore } from "@shared/types/query";
 import { ITerritoryValidation } from "@shared/types/territory";
 import { useQuery } from "@tanstack/react-query";
@@ -32,6 +32,7 @@ import {
   StyledExpRowSectionContent,
   StyledExpRowSectionHeader,
 } from "../ExplorerTableStyles";
+import { StatementListRowExpandedPropGroup } from "pages/Main/containers/StatementsListBox/StatementListTable/StatementListRowExpanded/StatementListRowExpandedPropGroup";
 
 interface ExplorerTableRowExpanded {
   rowEntity: IEntity;
@@ -82,7 +83,56 @@ export const ExplorerTableRowExpanded: React.FC<ExplorerTableRowExpanded> = ({
     data,
   } = rowEntity;
 
-  // const { entities, relations } = entity;
+  const renderFirstLevelProps = (
+    props: IProp[],
+    entities: Record<string, IEntity>
+  ) => {
+    return (
+      <div style={{ display: "grid" }}>
+        <StatementListRowExpandedPropGroup
+          level={1}
+          props={props}
+          entities={entities}
+          renderChildrenPropRow={(childProps) =>
+            renderSecondLevelProps(childProps, entities)
+          }
+        />
+      </div>
+    );
+  };
+
+  const renderSecondLevelProps = (
+    props: IProp[],
+    entities: Record<string, IEntity>
+  ) => {
+    return (
+      <div style={{ display: "grid" }}>
+        <StatementListRowExpandedPropGroup
+          level={2}
+          props={props}
+          entities={entities}
+          renderChildrenPropRow={(childProps) =>
+            renderThirdLevelProps(childProps, entities)
+          }
+        />
+      </div>
+    );
+  };
+
+  const renderThirdLevelProps = (
+    props: IProp[],
+    entities: Record<string, IEntity>
+  ) => {
+    return (
+      <div style={{ display: "grid" }}>
+        <StatementListRowExpandedPropGroup
+          level={3}
+          props={props}
+          entities={entities}
+        />
+      </div>
+    );
+  };
 
   return (
     <StyledExpandedRow $columnsSpan={columns.length + 2}>
@@ -225,21 +275,7 @@ export const ExplorerTableRowExpanded: React.FC<ExplorerTableRowExpanded> = ({
         <StyledExpRowSection>
           <StyledExpRowSectionHeader>Metaproperties</StyledExpRowSectionHeader>
           <StyledExpRowSectionContent>
-            {entity &&
-              props.map((prop, key) => {
-                return (
-                  <div>
-                    <span>
-                      <EntityTag entity={entity.entities[prop.type.entityId]} />
-                    </span>
-                    <span>
-                      <EntityTag
-                        entity={entity.entities[prop.value.entityId]}
-                      />
-                    </span>
-                  </div>
-                );
-              })}
+            {entity && renderFirstLevelProps(entity.props, entity.entities)}
 
             <Loader show={isFetching} />
           </StyledExpRowSectionContent>
