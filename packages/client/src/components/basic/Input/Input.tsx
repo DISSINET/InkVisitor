@@ -1,5 +1,5 @@
 import { ThemeColor, ThemeFontSize } from "Theme/theme";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Label,
   StyledInput,

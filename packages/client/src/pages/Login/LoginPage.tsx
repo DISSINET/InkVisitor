@@ -1,14 +1,13 @@
-import api from "api";
-import { Button, ContactAdminFooting, Modal } from "components";
+import { ContactAdminFooting, Modal } from "components";
 import { AttributeButtonGroup } from "components/advanced";
 import React, { useMemo, useState } from "react";
 import { FiLogIn } from "react-icons/fi";
 import { IoEnter, IoReloadCircle } from "react-icons/io5";
 import { Navigate } from "react-router";
 import { StyledAttrBtnGroupWrap, StyledContentWrap } from "./LoginPageStyles";
+import { GuestScreen } from "./screens/GuestScreen";
 import { LoginScreen } from "./screens/LoginScreen";
 import { PasswordRecoverScreen } from "./screens/PasswordRecoverScreen";
-import { GuestScreen } from "./screens/GuestScreen";
 
 enum LoginMode {
   "login",

@@ -2,7 +2,7 @@ import { IErrorSignature, getErrorByCode } from "@shared/types/errors";
 import api from "api";
 import { Button, Input } from "components";
 import { StyledButtonWrap, StyledErrorText } from "pages/AuthModalSharedStyles";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { FiLogIn } from "react-icons/fi";
 import { setUsername } from "redux/features/usernameSlice";
 import { useAppDispatch } from "redux/hooks";
