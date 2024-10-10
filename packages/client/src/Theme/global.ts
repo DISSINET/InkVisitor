@@ -84,7 +84,7 @@ const GlobalStyle = createGlobalStyle<GlobalStyle>`
       font-weight: bold;
       color: ${({ theme }) => theme.color["black"]};
       background-color: ${({ theme }) => theme.color["white"]};
-      :hover {
+      &:hover {
         background-color: ${({ theme }) =>
           theme.color["invertedBg"]["primary"]};
       }

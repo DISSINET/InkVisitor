@@ -55,7 +55,7 @@ export const StyledEditorSection = styled.div<StyledEditorSection>`
   margin: ${({ theme, $firstSection = false }) =>
     $firstSection ? "0 0 0 0.7rem" : "0.2rem 0 0 2rem"};
   margin-right: ${({ $marginRight }) => ($marginRight ? "0.5rem" : "")};
-  :hover {
+  &:hover {
     background-color: ${({ theme }) => theme.color["gray"][100]};
   }
 `;

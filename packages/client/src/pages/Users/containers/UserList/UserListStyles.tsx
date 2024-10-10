@@ -58,7 +58,7 @@ export const StyledTr = styled.tr<StyledTr>`
     padding-left: ${({ theme }) => theme.space[3]};
     padding-right: ${({ theme }) => theme.space[3]};
   }
-  :hover {
+  &:hover {
     background-color: ${({ theme }) => theme.color["gray"][100]};
   }
 `;

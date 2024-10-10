@@ -71,7 +71,7 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
   white-space: nowrap;
 
   transition: border-color 0.2s, color 0.2s, background-color 0.2s;
-  :focus {
+  &:focus {
     outline: 0;
   }
 `;
