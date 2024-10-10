@@ -1,46 +1,44 @@
 [
-  [
-    {
-      "id": "1",
-      "name": "admin",
-      "email": "admin@admin.com",
-      "password": "admin",
-      "active": true,
-      "verified": true,
-      "options": {
-        "defaultTerritory": "",
-        "defaultLanguage": "",
-        "searchLanguages": []
-      },
-      "bookmarks": null,
-      "role": "admin",
-      "rights": [
-        {
-          "territory": "T0",
-          "mode": "admin"
-        }
-      ]
+  {
+    "id": "1",
+    "name": "admin",
+    "email": "admin@admin.com",
+    "password": "admin",
+    "active": true,
+    "verified": true,
+    "options": {
+      "defaultTerritory": "",
+      "defaultLanguage": "",
+      "searchLanguages": []
     },
-    {
-      "id": "2",
-      "name": "guest",
-      "email": "guest@guest.com",
-      "password": "abc123",
-      "active": true,
-      "verified": true,
-      "options": {
-        "defaultTerritory": "",
-        "defaultLanguage": "",
-        "searchLanguages": []
-      },
-      "bookmarks": null,
-      "role": "viewer",
-      "rights": [
-        {
-          "territory": "36f5a334-4611-4da3-81c0-a7ec8d600a59",
-          "mode": "read"
-        }
-      ]
-    }
-  ]
+    "bookmarks": null,
+    "role": "admin",
+    "rights": [
+      {
+        "territory": "T0",
+        "mode": "admin"
+      }
+    ]
+  },
+  {
+    "id": "2",
+    "name": "guest",
+    "email": "guest@guest.com",
+    "password": "abc123",
+    "active": true,
+    "verified": true,
+    "options": {
+      "defaultTerritory": "",
+      "defaultLanguage": "",
+      "searchLanguages": []
+    },
+    "bookmarks": null,
+    "role": "viewer",
+    "rights": [
+      {
+        "territory": "36f5a334-4611-4da3-81c0-a7ec8d600a59",
+        "mode": "read"
+      }
+    ]
+  }
 ]

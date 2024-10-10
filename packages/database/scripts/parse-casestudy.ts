@@ -258,50 +258,48 @@ const parseUseCase = async () => {
     );
 
     const users = [
-      [
-        {
-          id: "1",
-          name: "admin",
-          email: "admin@admin.com",
-          password: "admin",
-          active: true,
-          verified: true,
-          options: {
-            defaultTerritory: "",
-            defaultLanguage: "",
-            searchLanguages: [],
-          },
-          bookmarks: null,
-          role: "admin",
-          rights: [
-            {
-              territory: "T0",
-              mode: "admin",
-            },
-          ],
+      {
+        id: "1",
+        name: "admin",
+        email: "admin@admin.com",
+        password: "admin",
+        active: true,
+        verified: true,
+        options: {
+          defaultTerritory: "",
+          defaultLanguage: "",
+          searchLanguages: [],
         },
-        {
-          id: "2",
-          name: "guest",
-          email: "guest@guest.com",
-          password: "abc123",
-          active: true,
-          verified: true,
-          options: {
-            defaultTerritory: "",
-            defaultLanguage: "",
-            searchLanguages: [],
+        bookmarks: null,
+        role: "admin",
+        rights: [
+          {
+            territory: "T0",
+            mode: "admin",
           },
-          bookmarks: null,
-          role: "viewer",
-          rights: [
-            {
-              territory: territoryId,
-              mode: "read",
-            },
-          ],
+        ],
+      },
+      {
+        id: "2",
+        name: "guest",
+        email: "guest@guest.com",
+        password: "abc123",
+        active: true,
+        verified: true,
+        options: {
+          defaultTerritory: "",
+          defaultLanguage: "",
+          searchLanguages: [],
         },
-      ],
+        bookmarks: null,
+        role: "viewer",
+        rights: [
+          {
+            territory: territoryId,
+            mode: "read",
+          },
+        ],
+      },
     ];
 
     fs.writeFileSync(
