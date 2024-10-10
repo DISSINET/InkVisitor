@@ -18,9 +18,21 @@ export const StyledGrid = styled.div<StyledGrid>`
   color: ${({ theme }) => theme.color["black"]};
   width: 100%;
 `;
+export const StyledGridRow = styled.div`
+  display: contents;
+
+  &:nth-child(odd) > div {
+    background-color: #f0f8ff; /* Light blue for odd rows */
+  }
+
+  &:nth-child(even) > div {
+    background-color: #f5f5f5; /* Light gray for even rows */
+  }
+`;
+interface StyledGridColumn {}
 export const StyledGridColumn = styled.div`
   display: grid;
-  border-right: 1px solid ${({ theme }) => theme.color["black"]};
+  /* border-right: 1px solid ${({ theme }) => theme.color["black"]}; */
   border-top: 1px solid ${({ theme }) => theme.color["blue"][300]};
   padding: 0.3rem;
   padding-left: 1rem;
@@ -112,18 +124,10 @@ interface StyledExpandedRow {
   $columnsSpan: number;
 }
 export const StyledExpandedRow = styled.div<StyledExpandedRow>`
-  /* display: flex; */
-  /* flex-wrap: wrap; */
-  /* align-items: flex-start; */
-
-  /* display: grid; */
-  /* grid-template-columns: repeat(auto-fill, minmax(38rem, 1fr)); */
-
-  gap: 1rem;
-
   grid-column: ${({ $columnsSpan }) => `span ${$columnsSpan}`};
+  gap: 1rem;
   padding: 0.5rem;
-  padding-left: 4rem;
+  padding-left: 1rem;
   min-height: 5rem;
   border-right: 1px solid ${({ theme }) => theme.color["black"]};
 `;
@@ -134,28 +138,27 @@ export const StyledExpRowSection = styled.div`
 
   display: inline-flex;
   flex-direction: column;
-  /* flex: 1 1 38rem; */
 
   border: 1px dotted ${({ theme }) => theme.color["grey"]};
   padding: 0.5rem 2rem 2rem 0.5rem;
-  /* padding-right: 2rem; */
-  /* padding-bottom: 2rem; */
 `;
 
 export const ColumnsContainer = styled.div`
   column-count: 1;
   column-gap: 1rem;
+  column-width: 100px;
 
   @media (min-width: 900px) {
     column-count: 2;
   }
 
   @media (min-width: 1080px) {
-    column-count: 3;
+    column-count: 2;
+    column-width: 100px;
   }
 
   @media (min-width: 1450px) {
-    column-count: 4;
+    column-count: 3;
   }
 `;
 export const StyledColumnItem = styled.div`

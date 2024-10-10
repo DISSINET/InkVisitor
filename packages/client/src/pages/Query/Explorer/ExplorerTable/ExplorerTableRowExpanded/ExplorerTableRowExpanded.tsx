@@ -226,7 +226,7 @@ export const ExplorerTableRowExpanded: React.FC<ExplorerTableRowExpanded> = ({
                     userCanEdit={false}
                   />
                 )}
-                <Loader show={isFetching} />
+                <Loader show={isFetching} size={40} />
               </StyledExpRowSectionContent>
             </StyledExpRowSection>
 
@@ -252,7 +252,7 @@ export const ExplorerTableRowExpanded: React.FC<ExplorerTableRowExpanded> = ({
                     // setLoadingValidations={setLoadingValidations}
                   />
                 )}
-                <Loader show={isFetching} />
+                <Loader show={isFetching} size={40} />
               </StyledExpRowSectionContent>
             </StyledExpRowSection>
           </>
@@ -268,7 +268,7 @@ export const ExplorerTableRowExpanded: React.FC<ExplorerTableRowExpanded> = ({
                 userCanEdit={false}
               />
             )}
-            <Loader show={isFetching} />
+            <Loader show={isFetching} size={40} />
           </StyledExpRowSectionContent>
         </StyledExpRowSection>
 
@@ -278,7 +278,7 @@ export const ExplorerTableRowExpanded: React.FC<ExplorerTableRowExpanded> = ({
           <StyledExpRowSectionContent>
             {entity && renderFirstLevelProps(entity.props, entity.entities)}
 
-            <Loader show={isFetching} />
+            <Loader show={isFetching} size={40} />
           </StyledExpRowSectionContent>
         </StyledExpRowSection>
 
@@ -310,7 +310,7 @@ export const ExplorerTableRowExpanded: React.FC<ExplorerTableRowExpanded> = ({
                   );
                 })}
 
-              <Loader show={isFetching} />
+              <Loader show={isFetching} size={40} />
             </StyledExpRowSectionContent>
           </StyledExpRowSection>
 
@@ -388,7 +388,7 @@ export const ExplorerTableRowExpanded: React.FC<ExplorerTableRowExpanded> = ({
                 </>
               )}
 
-              <Loader show={isFetching} />
+              <Loader show={isFetching} size={40} />
             </StyledExpRowSectionContent>
           </StyledExpRowSection>
 
@@ -397,7 +397,7 @@ export const ExplorerTableRowExpanded: React.FC<ExplorerTableRowExpanded> = ({
             <StyledExpRowSectionHeader>Audits</StyledExpRowSectionHeader>
             <StyledExpRowSectionContent>
               {audit && <AuditTable {...audit} />}
-              <Loader show={isFetchingAudit} />
+              <Loader show={isFetchingAudit} size={40} />
             </StyledExpRowSectionContent>
           </StyledExpRowSection> */}
 
@@ -406,7 +406,7 @@ export const ExplorerTableRowExpanded: React.FC<ExplorerTableRowExpanded> = ({
             <StyledExpRowSectionHeader>JSON</StyledExpRowSectionHeader>
             <StyledExpRowSectionContent>
               {entity && <JSONExplorer data={entity} />}
-              <Loader show={isFetching} />
+              <Loader show={isFetching} size={40} />
             </StyledExpRowSectionContent>
           </StyledExpRowSection> */}
         </>

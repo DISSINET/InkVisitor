@@ -30,6 +30,7 @@ import {
   StyledGridColumn,
   StyledGridHeader,
   StyledGridHeaderColumn,
+  StyledGridRow,
   StyledNewColumn,
   StyledNewColumnGrid,
   StyledNewColumnLabel,
@@ -449,7 +450,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
               return (
                 // ROW
                 <>
-                  <div style={{ display: "contents" }} key={key}>
+                  <StyledGridRow key={key}>
                     {/* ROW EXPANDER */}
                     <StyledGridColumn>
                       <span
@@ -521,7 +522,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                         </StyledGridColumn>
                       );
                     })}
-                  </div>
+                  </StyledGridRow>
 
                   {rowsExpanded.includes(rowEntity.id) && (
                     <div style={{ display: "contents" }}>
