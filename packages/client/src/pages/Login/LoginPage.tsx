@@ -1,67 +1,117 @@
 import { ContactAdminFooting, Modal } from "components";
 import { AttributeButtonGroup } from "components/advanced";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { FiLogIn } from "react-icons/fi";
-import { IoReloadCircle } from "react-icons/io5";
+import { IoEnter, IoReloadCircle } from "react-icons/io5";
 import { Navigate } from "react-router";
 import { StyledAttrBtnGroupWrap, StyledContentWrap } from "./LoginPageStyles";
+import { GuestScreen } from "./screens/GuestScreen";
 import { LoginScreen } from "./screens/LoginScreen";
 import { PasswordRecoverScreen } from "./screens/PasswordRecoverScreen";
 
+enum LoginMode {
+  "login",
+  "password",
+  "guest",
+}
+
 export const LoginPage: React.FC = () => {
+  const isGuestAccess = process.env.GUEST_MODE === "true";
+
   const [usernameLocal, setUsernameLocal] = useState("");
   const [password, setPassword] = useState("");
   const [emailLocal, setEmailLocal] = useState("");
-  const [logInPage, setLogInPage] = useState(true);
+
+  const [loginMode, setLoginMode] = useState<LoginMode>(
+    isGuestAccess ? LoginMode.guest : LoginMode.login
+  );
   const [restartScreen, setRestartScreen] = useState(false);
   const [redirectToMain, setRedirectToMain] = useState(false);
+
+  const pageOptions = useMemo(() => {
+    const options = [
+      {
+        icon: <FiLogIn />,
+        longValue: "Log In",
+        shortValue: "Log In",
+        optionDisabled: false,
+        onClick: () => {
+          setLoginMode(LoginMode.login);
+        },
+        selected: loginMode === LoginMode.login,
+      },
+      {
+        icon: <IoReloadCircle />,
+        longValue: "Password reset",
+        shortValue: "Password reset",
+        optionDisabled: false,
+        onClick: () => {
+          setLoginMode(LoginMode.password);
+        },
+        selected: loginMode === LoginMode.password,
+      },
+    ];
+
+    if (isGuestAccess) {
+      options.push({
+        icon: <IoEnter />,
+        longValue: "Guest enter",
+        shortValue: "Password reset",
+        optionDisabled: false,
+        onClick: () => {
+          setLoginMode(LoginMode.guest);
+        },
+        selected: loginMode === LoginMode.guest,
+      });
+    }
+    return options;
+  }, [loginMode, isGuestAccess]);
+
+  const loginTitle = process.env.LOGIN_TITLE;
+  const loginText = process.env.LOGIN_TEXT;
 
   return redirectToMain ? (
     <Navigate to="/" />
   ) : (
     <Modal showModal disableBgClick width={320}>
       <StyledContentWrap>
-        <StyledAttrBtnGroupWrap>
-          <AttributeButtonGroup
-            options={[
-              {
-                icon: <FiLogIn />,
-                longValue: "Log In",
-                shortValue: "Log In",
-                onClick: () => {
-                  setLogInPage(true);
-                },
-                selected: logInPage,
-              },
-              {
-                icon: <IoReloadCircle />,
-                longValue: "Password reset",
-                shortValue: "Password reset",
-                onClick: () => {
-                  setLogInPage(false);
-                },
-                selected: !logInPage,
-              },
-            ]}
-            paddingX
-          />
-        </StyledAttrBtnGroupWrap>
-        {logInPage ? (
-          <LoginScreen
-            usernameLocal={usernameLocal}
-            setUsernameLocal={setUsernameLocal}
-            password={password}
-            setPassword={setPassword}
-            setRedirectToMain={setRedirectToMain}
-          />
-        ) : (
-          <PasswordRecoverScreen
-            emailLocal={emailLocal}
-            setEmailLocal={setEmailLocal}
-            restartScreen={restartScreen}
-            setRestartScreen={setRestartScreen}
-          />
+        {loginTitle && <h2>{loginTitle}</h2>}
+        {loginText && (
+          <p
+            style={{
+              fontSize: "1.8rem",
+              color: "var(--color-greyer)",
+              marginBottom: "0.5rem",
+            }}
+          >
+            {loginText}
+          </p>
         )}
+        <StyledAttrBtnGroupWrap>
+          <AttributeButtonGroup options={pageOptions} paddingX />
+        </StyledAttrBtnGroupWrap>
+        <div>
+          {loginMode === LoginMode.login && (
+            <LoginScreen
+              usernameLocal={usernameLocal}
+              setUsernameLocal={setUsernameLocal}
+              password={password}
+              setPassword={setPassword}
+              setRedirectToMain={setRedirectToMain}
+            />
+          )}
+          {loginMode === LoginMode.guest && (
+            <GuestScreen setRedirectToMain={setRedirectToMain} />
+          )}
+          {loginMode === LoginMode.password && (
+            <PasswordRecoverScreen
+              emailLocal={emailLocal}
+              setEmailLocal={setEmailLocal}
+              restartScreen={restartScreen}
+              setRestartScreen={setRestartScreen}
+            />
+          )}
+        </div>
         <ContactAdminFooting />
       </StyledContentWrap>
     </Modal>

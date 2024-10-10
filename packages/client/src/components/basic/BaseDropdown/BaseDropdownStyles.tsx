@@ -53,7 +53,7 @@ export const StyledSelect = styled(Select)<StyledSelect>`
       entityDropdown && suggester
         ? theme.color["gray"][200]
         : theme.color["white"]};
-    :hover {
+    &:hover {
       border-color: ${({ theme }) => theme.color["info"]};
       border-width: 1px;
     }

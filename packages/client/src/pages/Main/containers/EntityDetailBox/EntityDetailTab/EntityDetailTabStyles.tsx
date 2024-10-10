@@ -53,7 +53,7 @@ export const StyledIconWrap = styled.span`
 export const StyledCgClose = styled(CgClose)`
   border-radius: 10px;
   padding: 1px;
-  :hover {
+  &:hover {
     background-color: ${({ theme }) => theme.color["gray"][300]};
   }
 `;

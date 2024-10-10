@@ -57,7 +57,7 @@ export const StyledTr = styled.tr<StyledTr>`
   border-top: ${({ theme, $noBorder }) =>
     $noBorder ? "" : `1px solid ${theme.color["gray"][500]}`};
 
-  :hover {
+  &:hover {
     background-color: ${({ theme, $noBorder }) =>
       $noBorder ? "" : theme.color["gray"][100]};
   }

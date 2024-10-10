@@ -22,27 +22,27 @@ const datasets: Record<string, DbSchema> = {
     users: {
       tableName: "users",
       data: null,
-      transform: function () {}
+      transform: function () {},
     },
     aclPermissions: {
       tableName: "acl_permissions",
       data: null,
-      transform: function () {}
+      transform: function () {},
     },
     entities: {
       tableName: "entities",
       data: null,
-      transform: function () {}
+      transform: function () {},
     },
     audits: {
       tableName: "audits",
       data: null,
-      transform: function () {}
+      transform: function () {},
     },
     relations: {
       tableName: "relations",
       data: null,
-      transform: function () {}
+      transform: function () {},
     },
     documents: {
       tableName: "documents",
@@ -347,6 +347,41 @@ const datasets: Record<string, DbSchema> = {
     relations: {
       tableName: "relations",
       data: require("../datasets/acr/relations.json"),
+      transform: function () {},
+      indexes: relationsIndexes,
+    },
+    documents: {
+      tableName: "documents",
+      data: null,
+      transform: function () {},
+    },
+  },
+  niort: {
+    users: {
+      tableName: "users",
+      data: require("../datasets/niort/users.json"),
+      transform: function () {},
+    },
+    aclPermissions: {
+      tableName: "acl_permissions",
+      data: null,
+      transform: function () {},
+    },
+    entities: {
+      tableName: "entities",
+      data: require("../datasets/niort/entities.json"),
+      transform: function () {},
+      indexes: entitiesIndexes,
+    },
+    audits: {
+      tableName: "audits",
+      data: null,
+      transform: function () {},
+      indexes: auditsIndexes,
+    },
+    relations: {
+      tableName: "relations",
+      data: require("../datasets/niort/relatoins.json"),
       transform: function () {},
       indexes: relationsIndexes,
     },
@@ -740,8 +775,8 @@ class Importer {
       ""
     );
 
-   // await this.db.dropTable(chosenTable);
-   // await this.db.createTable(this.dataset[chosenTable as keyof DbSchema]);
+    // await this.db.dropTable(chosenTable);
+    // await this.db.createTable(this.dataset[chosenTable as keyof DbSchema]);
     await this.db.importData(this.dataset[chosenTable as keyof DbSchema]);
   }
 }

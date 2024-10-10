@@ -7,5 +7,6 @@ export const StyledContentWrap = styled.div`
   margin: 2rem 3rem;
 `;
 export const StyledAttrBtnGroupWrap = styled.div`
-  margin-bottom: 1rem;
+  margin-bottom: 2rem;
+  margin-top: 2rem;
 `;

@@ -407,9 +407,9 @@ export class Annotator {
 
       case "ArrowRight":
         if (e.shiftKey && e.ctrlKey) {
-          let offsetRight, offsetLeft;
+          let offsetRight;
           while (!offsetRight) {
-            [offsetLeft, offsetRight] = this.text.getCursorWordOffsets(
+            [, offsetRight] = this.text.getCursorWordOffsets(
               this.viewport,
               this.cursor
             );
@@ -440,8 +440,7 @@ export class Annotator {
           const segment = this.text.cursorToIndex(this.viewport, this.cursor);
 
           if (segment) {
-            const line =
-              this.text.segments[segment.segmentIndex].lines[segment.lineIndex];
+            const line = this.text.getLineInFromPosition(segment);
             let backupXLine = this.cursor.xLine;
             let backupYLine = this.cursor.yLine;
 
@@ -553,6 +552,13 @@ export class Annotator {
         }
         this.text.deleteText(this.viewport, this.cursor, -1);
         this.cursor.move(0, 0);
+        break;
+
+      case "End":
+        const line = this.text.getCurrentLine(this.viewport, this.cursor);
+        if (line) {
+          this.cursor.xLine = line.length;
+        }
         break;
 
       default:
