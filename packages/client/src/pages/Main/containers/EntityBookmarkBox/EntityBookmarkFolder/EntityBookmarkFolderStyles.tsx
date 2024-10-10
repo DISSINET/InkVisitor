@@ -8,7 +8,7 @@ export const StyledFolderWrapper = styled.div`
   border-color: ${({ theme }) => theme.color["gray"][400]};
   box-shadow: ${({ theme }) => theme.boxShadow["subtle"]};
   background-color: ${({ theme }) => theme.color["white"]};
-  :hover {
+  &:hover {
     background-color: ${({ theme }) => theme.color["gray"][100]};
   }
 `;

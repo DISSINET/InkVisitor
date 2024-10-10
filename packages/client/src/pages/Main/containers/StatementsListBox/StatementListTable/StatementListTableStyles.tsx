@@ -58,7 +58,7 @@ export const StyledTr = styled.tr<StyledTr>`
   td:last-child {
     padding-right: ${({ theme }) => theme.space[4]};
   }
-  :hover {
+  &:hover {
     background-color: ${({ theme, $isSelected }) =>
       $isSelected
         ? theme.color["tableSelectionHover"]
