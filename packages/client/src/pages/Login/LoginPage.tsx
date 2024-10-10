@@ -56,7 +56,7 @@ export const LoginPage: React.FC = () => {
       options.push({
         icon: <IoEnter />,
         longValue: "Guest enter",
-        shortValue: "Password reset",
+        shortValue: "Guest enter",
         optionDisabled: false,
         onClick: () => {
           setLoginMode(LoginMode.guest);
