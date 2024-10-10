@@ -22,11 +22,11 @@ export const StyledGridRow = styled.div`
   display: contents;
 
   &:nth-child(odd) > div {
-    background-color: #f0f8ff; /* Light blue for odd rows */
+    /* background-color: #f0f8ff; */
   }
 
   &:nth-child(even) > div {
-    background-color: #f5f5f5; /* Light gray for even rows */
+    /* background-color: #f5f5f5; */
   }
 `;
 interface StyledGridColumn {}
@@ -131,6 +131,13 @@ export const StyledExpandedRow = styled.div<StyledExpandedRow>`
   min-height: 5rem;
   border-right: 1px solid ${({ theme }) => theme.color["black"]};
 `;
+export const StyledPagination = styled.div`
+  display: flex;
+  align-items: center;
+  color: ${({ theme }) => theme.color["black"]};
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+`;
+
 export const StyledExpRowSection = styled.div`
   position: relative;
   width: 100%;
@@ -141,6 +148,10 @@ export const StyledExpRowSection = styled.div`
 
   border: 1px dotted ${({ theme }) => theme.color["grey"]};
   padding: 0.5rem 2rem 2rem 0.5rem;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.color["gray"][100]};
+  }
 `;
 
 export const ColumnsContainer = styled.div`
@@ -211,11 +222,4 @@ export const StyledExpRowFormGridColumnValueID = styled.div`
   button {
     margin-left: ${({ theme }) => theme.space["2"]};
   }
-`;
-
-export const StyledPagination = styled.div`
-  display: flex;
-  align-items: center;
-  color: ${({ theme }) => theme.color["black"]};
-  font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
