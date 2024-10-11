@@ -110,7 +110,10 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
         ref={setReferenceElement}
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
-        onClick={() => setShowTooltip(false)}
+        onClick={(e) => {
+          e.stopPropagation();
+          setShowTooltip(false);
+        }}
       >
         <StyledSelect
           // menuIsOpen={loggerId === ""}

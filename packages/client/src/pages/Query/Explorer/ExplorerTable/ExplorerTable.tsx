@@ -447,10 +447,20 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
 
             {entities.map((row, key) => {
               const { entity: rowEntity, columnData } = row;
+              const rowId = rowEntity.id;
               return (
                 // ROW
                 <>
-                  <StyledGridRow key={key}>
+                  <StyledGridRow
+                    key={key}
+                    onClick={() =>
+                      rowsExpanded.includes(rowId)
+                        ? setRowsExpanded(
+                            rowsExpanded.filter((r) => r !== rowId)
+                          )
+                        : setRowsExpanded(rowsExpanded.concat(rowId))
+                    }
+                  >
                     {/* ROW EXPANDER */}
                     <StyledGridColumn>
                       <span
@@ -459,9 +469,8 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                           display: "flex",
                           alignItems: "center",
                         }}
-                        onClick={(e: React.MouseEvent) => {
+                        onClick={(e) => {
                           e.stopPropagation();
-                          const rowId = rowEntity.id;
                           if (!rowsExpanded.includes(rowId)) {
                             setRowsExpanded(rowsExpanded.concat(rowId));
                           } else {

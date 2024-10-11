@@ -6,11 +6,7 @@ import { ITerritoryValidation } from "@shared/types/territory";
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
 import { Button, Input, Loader } from "components";
-import Dropdown, {
-  AuditTable,
-  EntityTag,
-  JSONExplorer,
-} from "components/advanced";
+import Dropdown, { EntityTag } from "components/advanced";
 import { EntityDetailProtocol } from "pages/Main/containers/EntityDetailBox/EntityDetail/EntityDetailProtocol/EntityDetailProtocol";
 import { EntityDetailRelations } from "pages/Main/containers/EntityDetailBox/EntityDetail/EntityDetailRelations/EntityDetailRelations";
 import { EntityDetailClassificationTable } from "pages/Main/containers/EntityDetailBox/EntityDetail/EntityDetailUsedInTable/EntityDetailClassificationTable/EntityDetailClassificationTable";
@@ -19,6 +15,7 @@ import { EntityDetailMetaPropsTable } from "pages/Main/containers/EntityDetailBo
 import { EntityDetailStatementPropsTable } from "pages/Main/containers/EntityDetailBox/EntityDetail/EntityDetailUsedInTable/EntityDetailStatementPropsTable/EntityDetailStatementPropsTable";
 import { EntityDetailStatementsTable } from "pages/Main/containers/EntityDetailBox/EntityDetail/EntityDetailUsedInTable/EntityDetailStatementsTable/EntityDetailStatementsTable";
 import { EntityDetailValidationSection } from "pages/Main/containers/EntityDetailBox/EntityDetail/EntityDetailValidationSection/EntityDetailValidationSection";
+import { StatementListRowExpandedPropGroup } from "pages/Main/containers/StatementsListBox/StatementListTable/StatementListRowExpanded/StatementListRowExpandedPropGroup";
 import React from "react";
 import { FaRegCopy } from "react-icons/fa";
 import { toast } from "react-toastify";
@@ -31,8 +28,7 @@ import {
   StyledExpRowSection,
   StyledExpRowSectionContent,
   StyledExpRowSectionHeader,
-} from "../ExplorerTableStyles";
-import { StatementListRowExpandedPropGroup } from "pages/Main/containers/StatementsListBox/StatementListTable/StatementListRowExpanded/StatementListRowExpandedPropGroup";
+} from "./ExplorerTableRowExpandedStyles";
 
 interface ExplorerTableRowExpanded {
   rowEntity: IEntity;
