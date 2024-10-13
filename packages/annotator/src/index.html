@@ -126,6 +126,17 @@
         if (!highlightEnabled) {
           return null;
         }
+
+        if (entityId !== "T40-000-002") {
+          return {
+          mode: "background",
+          style: {
+            fillColor: "white",
+            fillOpacity: 1,
+          },
+        };
+        }
+
         let color = "black";
         if (entityId[0] === "a") {
           color = "red";
