@@ -9,7 +9,8 @@
   },
   "scripts": {
     "start": "npx ts-node -r tsconfig-paths/register scripts/import.ts",
-    "benchmark": "npx ts-node -r tsconfig-paths/register scripts/index-benchmark.ts"
+    "benchmark": "npx ts-node -r tsconfig-paths/register scripts/index-benchmark.ts",
+    "fix-labels": "npx ts-node -r tsconfig-paths/register scripts/fix-labels.ts"
   },
   "author": "",
   "license": "ISC",
