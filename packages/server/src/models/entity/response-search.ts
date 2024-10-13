@@ -459,7 +459,7 @@ export function sort(entities: IEntity[], label = ""): IEntity[] {
 
   // sort by distance from the start
   entities.forEach((e) => {
-    let index = e.label.indexOf(label);
+    let index = e.labels[0].indexOf(label);
     if (index === -1) {
       index = 99999;
     }
@@ -475,7 +475,7 @@ export function sort(entities: IEntity[], label = ""): IEntity[] {
     .sort((a, b) => a - b);
 
   for (const key of sortedDistances) {
-    indexMap[key].sort((a, b) => a.label.length - b.label.length);
+    indexMap[key].sort((a, b) => a.labels[0].length - b.labels[0].length);
     out = out.concat(indexMap[key]);
   }
 
@@ -488,7 +488,7 @@ export function sort(entities: IEntity[], label = ""): IEntity[] {
  * @returns sorted entities list
  */
 export function sortByLength(entities: IEntity[]) {
-  return entities.sort((a, b) => a.label.length - b.label.length);
+  return entities.sort((a, b) => a.labels[0].length - b.labels[0].length);
 }
 
 /**
@@ -510,7 +510,8 @@ export function sortByWordMatch(
 
   for (const entity of entities) {
     if (
-      entity.label
+      entity.labels.length > 0 &&
+      entity.labels[0]
         .toLowerCase()
         .match(/[\w]+/g)
         ?.indexOf(usedLabel.toLowerCase()) !== -1
