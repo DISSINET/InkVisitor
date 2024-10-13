@@ -5,7 +5,7 @@ import {
   IResource,
   IValue,
 } from "@shared/types";
-import { Connection, r as rethink, RDatum, WriteResult } from "rethinkdb-ts";
+import { Connection, r as rethink } from "rethinkdb-ts";
 import { IJob } from ".";
 import { DbEnums, EntityEnums, RelationEnums } from "@shared/enums";
 import Generator from "./Generator";
@@ -60,7 +60,7 @@ const originResource = new Resource({
     partValueLabel: "",
     url: "https://dissinet.cz/",
   },
-  label: "DISSINET Database (DDB1)",
+  labels: ["DISSINET Database (DDB1)"],
   language: EntityEnums.Language.English,
   notes: [],
   status: EntityEnums.Status.Approved,
@@ -113,7 +113,7 @@ const exportACR: IJob = async (db: Connection): Promise<void> => {
   ).map((a) => {
     const v = new Value({
       id: uuidv4(),
-      label: a.id,
+      labels: [a.id],
     });
     a.references.push({
       id: uuidv4(),
@@ -132,7 +132,7 @@ const exportACR: IJob = async (db: Connection): Promise<void> => {
   ).map((a) => {
     const v = new Value({
       id: uuidv4(),
-      label: a.id,
+      labels: [a.id],
     });
     values.push(v);
     a.references.push({
