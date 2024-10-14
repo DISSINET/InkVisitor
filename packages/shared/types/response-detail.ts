@@ -28,11 +28,13 @@ export interface IResponseDetail extends IResponseEntity {
   warnings: IWarning[];
 }
 
+// model is reapeated for each anchor in each document,
+// so e.g., when the entity is used in 2 documents, and in one document it is used in 3 anchors, in the second is used in 1 anchor, model will be repeated 4 times
 export interface IResponseUsedInDocument {
   document: IDocumentMeta;
   anchorText: string; // content of the anchor
   resourceId: string; // resource linked to the document
-  parentTerritoryId: string; // id of the closest territory anchor in the document
+  parentTerritoryId: string; // id of the closest territory anchor in the document, "" if no territory is found
 }
 
 export interface IResponseUsedInStatement<PositionEnum> {
