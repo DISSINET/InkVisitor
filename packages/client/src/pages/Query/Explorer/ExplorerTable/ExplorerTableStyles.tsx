@@ -18,28 +18,25 @@ export const StyledGrid = styled.div<StyledGrid>`
   color: ${({ theme }) => theme.color["black"]};
   width: 100%;
 `;
-export const StyledGridRow = styled.div`
+interface StyledGridRow {
+  $isOdd: boolean;
+}
+export const StyledGridRow = styled.div<StyledGridRow>`
   display: contents;
   cursor: pointer;
 
-  &:nth-child(even) > div {
-    background-color: #f0f8ff;
-  }
-  &:nth-child(odd) > div {
-    background-color: ${({ theme }) => theme.color["white"]};
-  }
-  &:hover > div {
-    background-color: ${({ theme }) => theme.color["gray"][100]};
+  & > div {
+    background-color: ${({ theme, $isOdd }) =>
+      $isOdd ? theme.color["white"] : theme.color["tableOddRow"]};
   }
 `;
 interface StyledGridColumn {}
 export const StyledGridColumn = styled.div`
   display: grid;
-  /* border-right: 1px solid ${({ theme }) => theme.color["black"]}; */
-  border-top: 1px solid ${({ theme }) => theme.color["blue"][300]};
+  border-top: 0.5px solid ${({ theme }) => theme.color["gray"][600]};
   padding: 0.3rem;
   padding-left: 1rem;
-  background-color: ${({ theme }) => theme.color["white"]};
+  /* background-color: ${({ theme }) => theme.color["white"]}; */
   align-items: center;
 
   > :not(:last-child) {
@@ -49,10 +46,7 @@ export const StyledGridColumn = styled.div`
 
 export const StyledGridHeader = styled.div`
   display: contents;
-  position: sticky;
-  top: 0;
   z-index: 1;
-  box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);
 `;
 interface StyledGridHeaderColumn {
   $greyBackground?: boolean;
@@ -112,7 +106,7 @@ export const StyledTableHeader = styled(StyledSpaceBetween)`
   position: sticky;
   top: 0;
   background-color: ${({ theme }) => theme.color["gray"][200]};
-  box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 2px 3px -1px rgba(0, 0, 0, 0.3);
   z-index: 20;
 `;
 export const StyledTableFooter = styled(StyledSpaceBetween)`

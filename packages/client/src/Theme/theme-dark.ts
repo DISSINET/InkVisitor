@@ -62,6 +62,7 @@ const darkTheme = {
     treeNodeRead: "#718096",
     treeNodeWrite: "#f7fafc",
 
+    tableOddRow: "#0A1B2E",
     tableOpened: "#0b3a59",
     tableSelection: "#4c82a1",
     tableSelectionHover: "#2c638c",

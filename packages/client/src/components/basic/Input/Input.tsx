@@ -130,15 +130,13 @@ export const Input: React.FC<Input> = ({
           rows={rows}
           cols={cols}
           width={width}
-          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+          onChange={(e) => {
             setDisplayValue(e.target.value);
             if (changeOnType) {
               onChangeFn(e.currentTarget.value);
             }
           }}
-          onFocus={(event: React.FocusEvent<HTMLTextAreaElement>) =>
-            onFocus(event)
-          }
+          onFocus={(e) => onFocus(e)}
           onBlur={() => {
             if (displayValue !== value && !changeOnType) {
               onChangeFn(displayValue);

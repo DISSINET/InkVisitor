@@ -448,6 +448,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
             {entities.map((row, key) => {
               const { entity: rowEntity, columnData } = row;
               const rowId = rowEntity.id;
+              const isOdd = Boolean(key % 2);
               return (
                 // ROW
                 <>
@@ -460,6 +461,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                           )
                         : setRowsExpanded(rowsExpanded.concat(rowId))
                     }
+                    $isOdd={isOdd}
                   >
                     {/* ROW EXPANDER */}
                     <StyledGridColumn>
@@ -538,6 +540,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                       <ExplorerTableRowExpanded
                         rowEntity={rowEntity}
                         columns={columns}
+                        isOdd={isOdd}
                       />
                     </div>
                   )}

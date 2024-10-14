@@ -33,10 +33,12 @@ import {
 interface ExplorerTableRowExpanded {
   rowEntity: IEntity;
   columns: Explore.IExploreColumn[];
+  isOdd: boolean;
 }
 export const ExplorerTableRowExpanded: React.FC<ExplorerTableRowExpanded> = ({
   rowEntity,
   columns,
+  isOdd,
 }) => {
   const {
     status,
@@ -131,7 +133,7 @@ export const ExplorerTableRowExpanded: React.FC<ExplorerTableRowExpanded> = ({
   };
 
   return (
-    <StyledExpandedRow $columnsSpan={columns.length + 2}>
+    <StyledExpandedRow $columnsSpan={columns.length + 2} $isOdd={isOdd}>
       <ColumnsContainer>
         <StyledExpRowSection>
           <StyledExpRowSectionHeader>Information</StyledExpRowSectionHeader>

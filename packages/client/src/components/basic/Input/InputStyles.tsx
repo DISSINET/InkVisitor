@@ -61,8 +61,10 @@ export const StyledInput = styled.input<IValueStyle>`
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "")};
   resize: none;
   &:hover {
-    border-color: ${({ theme }) => theme.color["info"]};
-    border-width: ${({ theme }) => theme.borderWidth[1]};
+    border-color: ${({ theme, disabled }) =>
+      !disabled ? theme.color["info"] : ""};
+    border-width: ${({ theme, disabled }) =>
+      !disabled ? theme.borderWidth[1] : ""};
   }
   &:focus {
     outline: 0;

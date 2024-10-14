@@ -2,6 +2,7 @@ import styled from "styled-components";
 
 interface StyledExpandedRow {
   $columnsSpan: number;
+  $isOdd: boolean;
 }
 export const StyledExpandedRow = styled.div<StyledExpandedRow>`
   grid-column: ${({ $columnsSpan }) => `span ${$columnsSpan}`};
@@ -10,14 +11,17 @@ export const StyledExpandedRow = styled.div<StyledExpandedRow>`
   padding-left: 1rem;
   min-height: 5rem;
   border-right: 1px solid ${({ theme }) => theme.color["black"]};
+  /* background-color: ${({ theme }) => theme.color["white"]}; */
+
+  background-color: ${({ theme, $isOdd }) =>
+    $isOdd ? theme.color["white"] : theme.color["tableOddRow"]};
 `;
 export const StyledExpRowSection = styled.div`
   position: relative;
-  width: 100%;
-  margin-bottom: 1rem;
-
   display: inline-flex;
   flex-direction: column;
+  width: 100%;
+  margin-bottom: 1rem;
 
   border: 1px dotted ${({ theme }) => theme.color["grey"]};
   padding: 0.5rem 2rem 2rem 0.5rem;
@@ -26,7 +30,6 @@ export const StyledExpRowSection = styled.div`
 
   &:hover {
     background-color: ${({ theme }) => theme.color["gray"][100]};
-    box-shadow: 1px 1px 8px rgba(0, 0, 0, 0.1);
   }
 `;
 
