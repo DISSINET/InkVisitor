@@ -16,7 +16,7 @@ enum LoginMode {
 }
 
 export const LoginPage: React.FC = () => {
-  const isGuestAccess = process.env.GUEST_MODE === "true";
+  const isGuestAccess = process.env.GUEST_MODE === "1";
 
   const [usernameLocal, setUsernameLocal] = useState("");
   const [password, setPassword] = useState("");
@@ -55,8 +55,8 @@ export const LoginPage: React.FC = () => {
     if (isGuestAccess) {
       options.push({
         icon: <IoEnter />,
-        longValue: "Guest enter",
-        shortValue: "Guest enter",
+        longValue: "Guest access",
+        shortValue: "Guest access",
         optionDisabled: false,
         onClick: () => {
           setLoginMode(LoginMode.guest);
@@ -75,7 +75,7 @@ export const LoginPage: React.FC = () => {
   ) : (
     <Modal showModal disableBgClick width={320}>
       <StyledContentWrap>
-        {loginTitle && <h2>{loginTitle}</h2>}
+        {loginTitle && <h4>{loginTitle}</h4>}
         {loginText && (
           <p
             style={{

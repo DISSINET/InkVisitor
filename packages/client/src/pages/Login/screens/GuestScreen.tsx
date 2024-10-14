@@ -1,6 +1,10 @@
 import api from "api";
 import { Button } from "components";
-import { StyledButtonWrap, StyledErrorText } from "pages/AuthModalSharedStyles";
+import {
+  StyledButtonWrap,
+  StyledDescription,
+  StyledErrorText,
+} from "pages/AuthModalSharedStyles";
 import React, { useState } from "react";
 import { IoEnter } from "react-icons/io5";
 import { useAppDispatch } from "redux/hooks";
@@ -16,7 +20,6 @@ export const GuestScreen: React.FC<GuestScreen> = ({ setRedirectToMain }) => {
     const autoUsername = process.env.GUEST_MODE_USER ?? "";
     const autoPassword = process.env.GUEST_MODE_PASS ?? "";
 
-    console.log("auto login", autoUsername, autoPassword);
     try {
       const res = await api.signIn(autoUsername, autoPassword, {
         ignoreErrorToast: true,
@@ -31,6 +34,9 @@ export const GuestScreen: React.FC<GuestScreen> = ({ setRedirectToMain }) => {
 
   return (
     <>
+      <StyledDescription>
+        Enter the application as a guest user.
+      </StyledDescription>
       <StyledButtonWrap>
         <div
           style={{
