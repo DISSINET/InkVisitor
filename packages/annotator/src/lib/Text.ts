@@ -236,9 +236,9 @@ class Text {
     return this.segments[segment.segmentIndex].lines[segment.lineIndex];
   }
 
-  cursorToAbsIndex(viewport: Viewport, cursor: Cursor): number {
+  cursorToAbsIndex(cursor: Cursor, viewport?: Viewport): number {
     const pos = this.getSegmentPosition(
-      cursor.yLine + viewport.lineStart,
+      cursor.yLine + (viewport?.lineStart || 0),
       cursor.xLine
     );
     if (!pos) {
@@ -550,6 +550,29 @@ class Text {
     rangeLines[linesSize - 1] = rangeLines[linesSize - 1].slice(0, end.xLine);
     rangeLines[0] = rangeLines[0].slice(start.xLine, rangeLines[0].length + 1);
     return rangeLines.join("\n");
+  }
+
+  deleteRangeText(
+    start: IAbsCoordinates,
+    end: IAbsCoordinates,
+    viewport: Viewport
+  ): void {
+    // swap in case start is after end
+    if (
+      start.yLine > end.yLine ||
+      (start.yLine === end.yLine && start.xLine > end.xLine)
+    ) {
+      const tempStart = start;
+      start = end;
+      end = tempStart;
+    }
+
+    const startI = this.cursorToAbsIndex(Cursor.fromPosition(start));
+    const endI = this.cursorToAbsIndex(Cursor.fromPosition(end));
+    this.value = this.value.substring(0, startI) + this.value.substring(endI);
+
+    this.prepareSegments();
+    this.calculateLines();
   }
 
   getTagPosition(tag: string, occurrence: number = 1): IAbsCoordinates[] {
