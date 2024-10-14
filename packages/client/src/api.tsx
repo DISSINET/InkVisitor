@@ -21,6 +21,8 @@ import {
   IUser,
   Relation,
   RequestPermissionUpdate,
+  IRequestQuery,
+  IResponseQuery,
 } from "@shared/types";
 import * as errors from "@shared/types/errors";
 import { NetworkError } from "@shared/types/errors";
@@ -106,9 +108,6 @@ class Api {
 
     this.tokenKey = `${process.env.NODE_ENV}-token`;
     this.token = "";
-
-    // TODO: remove after release - only needed once to clean up previous localStorage token usage
-    localStorage.removeItem("token");
   }
 
   /**
@@ -674,7 +673,8 @@ class Api {
     entityIds: string[],
     options?: IApiOptions
   ): Promise<(EntitiesDeleteSuccessResponse | EntitiesDeleteErrorResponse)[]> {
-    const out: (EntitiesDeleteSuccessResponse | EntitiesDeleteErrorResponse)[] = [];
+    const out: (EntitiesDeleteSuccessResponse | EntitiesDeleteErrorResponse)[] =
+      [];
     try {
       const response = await this.connection.delete(`/entities/`, {
         data: {
@@ -682,13 +682,21 @@ class Api {
         },
         ...options,
       });
-      const data = (response.data as IResponseGeneric<Record<string, errors.CustomError | true>>).data;
+      const data = (
+        response.data as IResponseGeneric<
+          Record<string, errors.CustomError | true>
+        >
+      ).data;
       if (data) {
         for (const errorEntityId of Object.keys(data)) {
           if (data[errorEntityId] === true) {
             out.push({ entityId: errorEntityId, details: data[errorEntityId] });
           } else {
-            out.push({ entityId: errorEntityId, error: true, details: data[errorEntityId] });
+            out.push({
+              entityId: errorEntityId,
+              error: true,
+              details: data[errorEntityId],
+            });
           }
         }
       }
@@ -745,6 +753,25 @@ class Api {
   async treeGet(options?: IApiOptions): Promise<AxiosResponse<IResponseTree>> {
     try {
       const response = await this.connection.get(`/tree`, options);
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  /**
+   * Query
+   */
+  async query(
+    queryData: IRequestQuery,
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseQuery>> {
+    try {
+      const response = await this.connection.post(
+        `/entities/query`,
+        queryData,
+        options
+      );
       return response;
     } catch (err) {
       throw this.handleError(err);

@@ -15,6 +15,7 @@ import { IRequest } from "../../custom_typings/request";
 import { sanitizeText } from "@common/functions";
 import Reference from "./reference";
 import { entityAllowedFields } from "@shared/types/entity";
+import { PropSpecKind } from "@shared/types/prop";
 
 export default class Entity implements IEntity, IDbModel {
   static table = "entities";
@@ -293,14 +294,15 @@ export default class Entity implements IEntity, IDbModel {
 
   static extractIdsFromProps(
     props: IProp[] = [],
+    kind?: PropSpecKind,
     cb?: (prop: IProp) => void
   ): string[] {
     let out: string[] = [];
     for (const prop of props) {
-      if (prop.type) {
+      if ((!kind || kind === PropSpecKind.TypeKind) && prop.type) {
         out.push(prop.type.entityId);
       }
-      if (prop.value) {
+      if ((!kind || kind === PropSpecKind.ValueKind) && prop.value) {
         out.push(prop.value.entityId);
       }
 
@@ -308,7 +310,7 @@ export default class Entity implements IEntity, IDbModel {
         cb(prop);
       }
 
-      out = out.concat(Entity.extractIdsFromProps(prop.children, cb));
+      out = out.concat(Entity.extractIdsFromProps(prop.children, kind, cb));
     }
 
     return out;
