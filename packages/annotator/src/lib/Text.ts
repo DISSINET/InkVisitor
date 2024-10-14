@@ -202,6 +202,10 @@ class Text {
         }
       }
       segment.lineEnd = segment.lineStart + (segment.lines.length || 1);
+
+      if (!segment.lines.length) {
+        segment.lines = [""];
+      }
     }
 
     // Performance check
@@ -330,14 +334,16 @@ class Text {
 
     const out: string[] = [];
     for (let i = posStart.segmentIndex; i <= posEnd.segmentIndex; i++) {
-      if (i === posStart.segmentIndex) {
-        out.push(...this.segments[i].lines.slice(posStart.lineIndex));
-      } else if (i === posEnd.segmentIndex) {
-        out.push(...this.segments[i].lines.slice(0, posEnd.lineIndex + 1));
-      } else if (this.segments[i].lines.length > 0) {
-        out.push(...this.segments[i].lines);
-      } else {
-        out.push("");
+      if (this.segments[i].lines.length) {
+        if (i === posStart.segmentIndex) {
+          out.push(...this.segments[i].lines.slice(posStart.lineIndex));
+        } else if (i === posEnd.segmentIndex) {
+          out.push(...this.segments[i].lines.slice(0, posEnd.lineIndex + 1));
+        } else if (this.segments[i].lines.length > 0) {
+          out.push(...this.segments[i].lines);
+        } else {
+          console.warn("Should not happen");
+        }
       }
     }
     return out;
