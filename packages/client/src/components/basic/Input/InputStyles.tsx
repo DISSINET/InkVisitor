@@ -98,6 +98,7 @@ export const StyledTextArea = styled.textarea<StyledTextArea>`
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "default")};
   resize: none;
   line-height: 1.2;
+
   &:focus {
     outline: 0;
     border-color: ${({ theme }) => theme.color["success"]};
@@ -105,6 +106,7 @@ export const StyledTextArea = styled.textarea<StyledTextArea>`
       $noBorder ? 0 : theme.borderWidth[1]};
   }
   &:hover {
-    border-color: ${({ theme }) => theme.color["info"]};
+    border-color: ${({ theme, disabled }) =>
+      !disabled ? theme.color["info"] : ""};
   }
 `;

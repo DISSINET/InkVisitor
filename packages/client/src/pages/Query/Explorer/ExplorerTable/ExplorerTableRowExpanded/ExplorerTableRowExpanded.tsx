@@ -192,7 +192,13 @@ export const ExplorerTableRowExpanded: React.FC<ExplorerTableRowExpanded> = ({
             <StyledExpRowFormGridColumnLabel>
               Notes:
             </StyledExpRowFormGridColumnLabel>
-            <div>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.5rem",
+              }}
+            >
               {notes.map((note, key) => {
                 return (
                   <span key={key}>
