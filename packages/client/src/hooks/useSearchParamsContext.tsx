@@ -29,7 +29,7 @@ const INITIAL_CONTEXT = {
   clearAllDetailIds: UNINITIALISED,
   cleanAllParams: UNINITIALISED,
 
-  annotatorOpened: true,
+  annotatorOpened: false,
   setAnnotatorOpened: UNINITIALISED,
 };
 interface SearchParamsContext {

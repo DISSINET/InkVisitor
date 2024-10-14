@@ -475,50 +475,60 @@ export class Annotator {
         if (this.text.mode === Modes.HIGHLIGHT) {
           return;
         }
-        const segmentBefore = this.text.cursorToIndex(
-          this.viewport,
-          this.cursor
-        );
-        let upSegmentEmpty = false;
-        if (segmentBefore && segmentBefore.segmentIndex > 0) {
-          upSegmentEmpty =
-            !this.text.segments[segmentBefore?.segmentIndex - 1].raw;
-        }
-        this.text.deleteText(this.viewport, this.cursor, 1);
-        const segmentAfter = this.text.cursorToIndex(
-          this.viewport,
-          this.cursor
-        );
 
-        const xDiff =
-          (segmentAfter?.rawTextIndex || 0) -
-          (segmentBefore?.rawTextIndex || 0);
+        const area = this.cursor.getSelectedArea();
+        if (area) {
+          this.text.deleteRangeText(area[0], area[1], this.viewport);
+          this.cursor.reset();
+          this.cursor.setPosition(
+            area[0].xLine,
+            area[0].yLine - this.viewport.lineStart
+          );
+        } else {
+          const segmentBefore = this.text.cursorToIndex(
+            this.viewport,
+            this.cursor
+          );
+          let upSegmentEmpty = false;
+          if (segmentBefore && segmentBefore.segmentIndex > 0) {
+            upSegmentEmpty =
+              !this.text.segments[segmentBefore?.segmentIndex - 1].raw;
+          }
+          this.text.deleteText(this.viewport, this.cursor, 1);
+          const segmentAfter = this.text.cursorToIndex(
+            this.viewport,
+            this.cursor
+          );
 
-        if (xDiff < 0) {
-          this.cursor.move((xDiff + 1) * -1, 0);
-        } else if (xDiff > 0) {
-          if (segmentBefore?.segmentIndex !== segmentAfter?.segmentIndex) {
-            if (upSegmentEmpty) {
-              this.cursor.move(0, -1);
+          const xDiff =
+            (segmentAfter?.rawTextIndex || 0) -
+            (segmentBefore?.rawTextIndex || 0);
+
+          if (xDiff < 0) {
+            this.cursor.move((xDiff + 1) * -1, 0);
+          } else if (xDiff > 0) {
+            if (segmentBefore?.segmentIndex !== segmentAfter?.segmentIndex) {
+              if (upSegmentEmpty) {
+                this.cursor.move(0, -1);
+              } else {
+                this.cursor.move(Infinity, -1);
+              }
             } else {
-              this.cursor.move(Infinity, -1);
+              this.cursor.move(-xDiff, 0);
             }
           } else {
-            this.cursor.move(-xDiff, 0);
+            if (segmentAfter!.rawTextIndex > 0) {
+              this.cursor.move(-1, 0);
+            } else {
+              this.cursor.move(-1, -1);
+            }
           }
-        } else {
-          if (segmentAfter!.rawTextIndex > 0) {
-            this.cursor.move(-1, 0);
-          } else {
-            this.cursor.move(-1, -1);
+
+          if (this.cursor.xLine < 0) {
+            this.cursor.move(Infinity, 0);
           }
-        }
 
-        if (this.cursor.xLine < 0) {
-          this.cursor.move(Infinity, 0);
-        }
-
-        /*const segmentAfter = this.text.cursorToIndex(
+          /*const segmentAfter = this.text.cursorToIndex(
           this.viewport,
           this.cursor
         );
@@ -533,8 +543,9 @@ export class Annotator {
           this.cursor.move(-xDiff, 0);
         }
 */
-        if (this.onTextChangeCb) {
-          this.onTextChangeCb(this.text.value);
+          if (this.onTextChangeCb) {
+            this.onTextChangeCb(this.text.value);
+          }
         }
         break;
 
@@ -550,6 +561,8 @@ export class Annotator {
         if (this.text.mode === Modes.HIGHLIGHT) {
           return;
         }
+        console.log(this.cursor.getSelected());
+        return;
         this.text.deleteText(this.viewport, this.cursor, -1);
         this.cursor.move(0, 0);
         break;
@@ -959,22 +972,22 @@ export class Annotator {
 
     if (start && end) {
       const indexPositionStart = this.text.cursorToAbsIndex(
-        this.viewport,
         new Cursor(
           this.ratio,
           start.xLine,
           start.yLine - this.viewport.lineStart,
           {}
-        )
+        ),
+        this.viewport
       );
       const indexPositionEnd = this.text.cursorToAbsIndex(
-        this.viewport,
         new Cursor(
           this.ratio,
           end.xLine,
           end.yLine - this.viewport.lineStart,
           {}
-        )
+        ),
+        this.viewport
       );
 
       // this.text.value =
