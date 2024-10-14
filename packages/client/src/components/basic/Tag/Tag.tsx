@@ -276,13 +276,13 @@ export const Tag: React.FC<TagProps> = ({
         $status={status}
         $ltype={ltype}
         $borderStyle={borderStyle}
-        onClick={(e: React.MouseEvent) => {
+        onClick={(e) => {
           e.stopPropagation();
           if (!disableCopyLabel) {
             setClickedOnce(true);
           }
         }}
-        onDoubleClick={(e: React.MouseEvent) => onDoubleClick(e)}
+        onDoubleClick={(e) => onDoubleClick(e)}
       >
         {showOnly ? <>{renderShortTag()}</> : <>{renderFullTag()}</>}
       </StyledTagWrapper>
