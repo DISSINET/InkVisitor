@@ -30,8 +30,9 @@ export interface IResponseDetail extends IResponseEntity {
 
 export interface IResponseUsedInDocument {
   document: IDocumentMeta;
-  anchorText: string[];
-  resourceId: string;
+  anchorText: string; // content of the anchor
+  resourceId: string; // resource linked to the document
+  parentTerritoryId: string; // id of the closest territory anchor in the document
 }
 
 export interface IResponseUsedInStatement<PositionEnum> {
