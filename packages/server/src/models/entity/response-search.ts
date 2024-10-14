@@ -3,7 +3,7 @@ import { IEntity, RequestSearch } from "@shared/types";
 import { regExpEscape } from "@common/functions";
 import Entity from "./entity";
 import Statement from "@models/statement/statement";
-import { Connection, r, RDatum, RTable } from "rethinkdb-ts";
+import { Connection, ContainsArgType, r, RDatum, RTable } from "rethinkdb-ts";
 import { ResponseEntity } from "./response";
 import { getEntityClass } from "@models/factory";
 import { IRequest } from "src/custom_typings/request";
@@ -265,7 +265,9 @@ export class SearchQuery {
 
     const regexp = `${left}${label}${right}`;
 
-    return row("label").downcase().match(regexp);
+    return row("labels").contains<string>((label) =>
+      label.downcase().match(regexp)
+    );
   }
 
   /**
