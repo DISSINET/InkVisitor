@@ -29,6 +29,9 @@ export const StyledGridRow = styled.div<StyledGridRow>`
     background-color: ${({ theme, $isOdd }) =>
       $isOdd ? theme.color["white"] : theme.color["tableOddRow"]};
   }
+  &:hover > div {
+    background-color: ${({ theme }) => theme.color["gray"][100]};
+  }
 `;
 interface StyledGridColumn {}
 export const StyledGridColumn = styled.div`
@@ -36,7 +39,6 @@ export const StyledGridColumn = styled.div`
   border-top: 0.5px solid ${({ theme }) => theme.color["gray"][600]};
   padding: 0.3rem;
   padding-left: 1rem;
-  /* background-color: ${({ theme }) => theme.color["white"]}; */
   align-items: center;
 
   > :not(:last-child) {
