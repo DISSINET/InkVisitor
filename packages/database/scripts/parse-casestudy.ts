@@ -147,7 +147,7 @@ const getTlineage = async (
     for (const chi in childrenTs) {
       const childT = childrenTs[chi];
       ts.push(childT);
-      getChildrenT(childT);
+      await getChildrenT(childT);
     }
   };
 
@@ -200,7 +200,7 @@ const parseUseCase = async () => {
     console.log(`Found ${allSs.length} Statements`);
 
     const sEntities = [];
-    for (var si in allSs.slice(0, 2)) {
+    for (var si in allSs) {
       const sId = allSs[si];
       sEntities.push(...(await getSEntities(sId, conn)));
     }
@@ -212,7 +212,7 @@ const parseUseCase = async () => {
     console.log("All unique entities to buffer:", isolatedIds.length);
 
     const buffered = [];
-    for (var ii in isolatedIds.slice(0, 5)) {
+    for (var ii in isolatedIds) {
       const entityId = isolatedIds[ii];
       const buffer = await getEntityBuffer(entityId, conn);
       buffered.push(...buffer);
@@ -237,10 +237,47 @@ const parseUseCase = async () => {
       .getAll(...idsToTake)
       .run(conn);
 
+    const fixedEntities = entities.map((entity) => {
+      const newE = { ...entity };
+      if (newE.statementOrder) {
+        delete newE.statementOrder;
+      }
+      newE.props.forEach((prop: any) => {
+        if (prop.statementOrder) {
+          delete prop.statementOrder;
+          if (prop.children) {
+            prop.children.forEach((child: any) => {
+              if (child.statementOrder) {
+                delete child.statementOrder;
+                if (child.children) {
+                  child.children.forEach((c: any) => {
+                    if (c.statementOrder) {
+                      delete c.statementOrder;
+                    }
+                  });
+                }
+              }
+            });
+          }
+        }
+      });
+      newE.actants?.forEach((actant: any) => {
+        if (actant.statementOrder) {
+          delete actant.statementOrder;
+        }
+      });
+      newE.actions?.forEach((action: any) => {
+        if (action.statementOrder) {
+          delete action.statementOrder;
+        }
+      });
+      return newE;
+    });
+
     const relations = await rethink
       .table("relations")
       .filter((relation: RDatum<Relation>) => {
-        return relation("entityIds").setIntersection(idsToTake).count().gt(0);
+        return relation("newEIds").setIntersection(idsToTake).count().gt(0);
       })
       .run(conn);
 
@@ -249,65 +286,63 @@ const parseUseCase = async () => {
     fs.writeFileSync(
       `./datasets/${usecase}/relations.json`,
       JSON.stringify(relations, null, 2),
-      { encoding: "utf8" }
+      { encoding: "utf8", flag: "w" }
     );
     fs.writeFileSync(
       `./datasets/${usecase}/entities.json`,
-      JSON.stringify(entities, null, 2),
-      { encoding: "utf8" }
+      JSON.stringify(fixedEntities, null, 2),
+      { encoding: "utf8", flag: "w" }
     );
 
     const users = [
-      [
-        {
-          id: "1",
-          name: "admin",
-          email: "admin@admin.com",
-          password: "admin",
-          active: true,
-          verified: true,
-          options: {
-            defaultTerritory: "",
-            defaultLanguage: "",
-            searchLanguages: [],
-          },
-          bookmarks: null,
-          role: "admin",
-          rights: [
-            {
-              territory: "T0",
-              mode: "admin",
-            },
-          ],
+      {
+        id: "1",
+        name: "admin",
+        email: "admin@admin.com",
+        password: "qYZrrj2EtTpH9aL93T",
+        active: true,
+        verified: true,
+        options: {
+          defaultTerritory: "",
+          defaultLanguage: "",
+          searchLanguages: [],
         },
-        {
-          id: "2",
-          name: "guest",
-          email: "guest@guest.com",
-          password: "abc123",
-          active: true,
-          verified: true,
-          options: {
-            defaultTerritory: "",
-            defaultLanguage: "",
-            searchLanguages: [],
+        bookmarks: null,
+        role: "admin",
+        rights: [
+          {
+            territory: "T0",
+            mode: "admin",
           },
-          bookmarks: null,
-          role: "viewer",
-          rights: [
-            {
-              territory: territoryId,
-              mode: "read",
-            },
-          ],
+        ],
+      },
+      {
+        id: "2",
+        name: "guest",
+        email: "guest@guest.com",
+        password: "abc123",
+        active: true,
+        verified: true,
+        options: {
+          defaultTerritory: "",
+          defaultLanguage: "",
+          searchLanguages: [],
         },
-      ],
+        bookmarks: null,
+        role: "viewer",
+        rights: [
+          {
+            territory: territoryId,
+            mode: "read",
+          },
+        ],
+      },
     ];
 
     fs.writeFileSync(
       `./datasets/${usecase}/users.json`,
       JSON.stringify(users, null, 2),
-      { encoding: "utf8" }
+      { encoding: "utf8", flag: "w" }
     );
 
     process.exit(0);

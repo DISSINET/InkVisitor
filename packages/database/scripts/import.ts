@@ -356,15 +356,21 @@ const datasets: Record<string, DbSchema> = {
       transform: function () {},
     },
   },
+
   niort: {
     users: {
       tableName: "users",
       data: require("../datasets/niort/users.json"),
-      transform: function () {},
+      transform: function () {
+        this.data = this.data.map((user: IUser) => {
+          user.password = hashPassword(user.password ? user.password : "");
+          return user;
+        });
+      },
     },
     aclPermissions: {
       tableName: "acl_permissions",
-      data: null,
+      data: require("../datasets/default/acl_permissions.json"),
       transform: function () {},
     },
     entities: {
@@ -375,22 +381,23 @@ const datasets: Record<string, DbSchema> = {
     },
     audits: {
       tableName: "audits",
-      data: null,
+      data: [],
       transform: function () {},
       indexes: auditsIndexes,
     },
     relations: {
       tableName: "relations",
-      data: require("../datasets/niort/relatoins.json"),
+      data: require("../datasets/niort/relations.json"),
       transform: function () {},
       indexes: relationsIndexes,
     },
     documents: {
       tableName: "documents",
-      data: null,
+      data: [],
       transform: function () {},
     },
   },
+
   production: {
     users: {
       tableName: "users",
@@ -636,7 +643,7 @@ class Importer {
     console.log(
       `Databases: ${[
         "",
-        ...dbNames.map((name, i) => `${name} (${i + 1})}`),
+        ...dbNames.map((name, i) => `${name} (${i + 1})`),
       ].join("\n- ")}`
     );
 
