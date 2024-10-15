@@ -60,11 +60,11 @@ export const StyledInput = styled.input<IValueStyle>`
     disabled ? theme.background["stripes"] : ""};
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "")};
   resize: none;
-  :hover {
+  &:hover {
     border-color: ${({ theme }) => theme.color["info"]};
     border-width: ${({ theme }) => theme.borderWidth[1]};
   }
-  :focus {
+  &:focus {
     outline: 0;
     border-color: ${({ theme }) => theme.color["info"]};
     border-width: ${({ theme }) => theme.borderWidth[1]};
@@ -96,13 +96,13 @@ export const StyledTextArea = styled.textarea<StyledTextArea>`
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "default")};
   resize: none;
   line-height: 1.2;
-  :focus {
+  &:focus {
     outline: 0;
     border-color: ${({ theme }) => theme.color["success"]};
     border-width: ${({ theme, $noBorder }) =>
       $noBorder ? 0 : theme.borderWidth[1]};
   }
-  :hover {
+  &:hover {
     border-color: ${({ theme }) => theme.color["info"]};
   }
 `;

@@ -1,6 +1,5 @@
 import { animated } from "@react-spring/web";
-import { FaUserAlt, FaLock } from "react-icons/fa";
-import { IoReloadCircle } from "react-icons/io5";
+import { FaLock, FaUserAlt } from "react-icons/fa";
 import { TbMailFilled } from "react-icons/tb";
 import styled from "styled-components";
 
@@ -9,6 +8,7 @@ export const StyledDescription = styled.p`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   margin-bottom: 1rem;
 `;
+
 export const StyledInputRow = styled.div`
   display: flex;
   flex-direction: row;

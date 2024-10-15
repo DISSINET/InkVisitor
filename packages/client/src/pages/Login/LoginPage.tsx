@@ -1,14 +1,13 @@
-import api from "api";
-import { Button, ContactAdminFooting, Modal } from "components";
+import { ContactAdminFooting, Modal } from "components";
 import { AttributeButtonGroup } from "components/advanced";
 import React, { useMemo, useState } from "react";
 import { FiLogIn } from "react-icons/fi";
 import { IoEnter, IoReloadCircle } from "react-icons/io5";
 import { Navigate } from "react-router";
 import { StyledAttrBtnGroupWrap, StyledContentWrap } from "./LoginPageStyles";
+import { GuestScreen } from "./screens/GuestScreen";
 import { LoginScreen } from "./screens/LoginScreen";
 import { PasswordRecoverScreen } from "./screens/PasswordRecoverScreen";
-import { GuestScreen } from "./screens/GuestScreen";
 
 enum LoginMode {
   "login",
@@ -17,7 +16,7 @@ enum LoginMode {
 }
 
 export const LoginPage: React.FC = () => {
-  const isGuestAccess = process.env.GUEST_MODE === "true";
+  const isGuestAccess = process.env.GUEST_MODE === "1";
 
   const [usernameLocal, setUsernameLocal] = useState("");
   const [password, setPassword] = useState("");
@@ -56,8 +55,8 @@ export const LoginPage: React.FC = () => {
     if (isGuestAccess) {
       options.push({
         icon: <IoEnter />,
-        longValue: "Guest enter",
-        shortValue: "Password reset",
+        longValue: "Guest access",
+        shortValue: "Guest access",
         optionDisabled: false,
         onClick: () => {
           setLoginMode(LoginMode.guest);
@@ -76,7 +75,7 @@ export const LoginPage: React.FC = () => {
   ) : (
     <Modal showModal disableBgClick width={320}>
       <StyledContentWrap>
-        {loginTitle && <h2>{loginTitle}</h2>}
+        {loginTitle && <h4>{loginTitle}</h4>}
         {loginText && (
           <p
             style={{

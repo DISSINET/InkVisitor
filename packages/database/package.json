@@ -10,7 +10,8 @@
   "scripts": {
     "start": "npx ts-node -r tsconfig-paths/register scripts/import.ts",
     "benchmark": "npx ts-node -r tsconfig-paths/register scripts/index-benchmark.ts",
-    "fix-labels": "npx ts-node -r tsconfig-paths/register scripts/fix-labels.ts"
+    "fix-labels": "npx ts-node -r tsconfig-paths/register scripts/fix-labels.ts",
+    "parse-niort": "npx ts-node -r tsconfig-paths/register scripts/parse-casestudy.ts niort 36f5a334-4611-4da3-81c0-a7ec8d600a59 production tunnel"
   },
   "author": "",
   "license": "ISC",
