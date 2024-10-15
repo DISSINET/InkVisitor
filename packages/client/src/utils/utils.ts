@@ -11,8 +11,11 @@ import {
 import { DropTargetMonitor, XYCoord } from "react-dnd";
 import { DragItem, EntityDragItem } from "types";
 
+export const isFirstLabelEmpty = (labels: string[]) =>
+  labels.length === 0 || labels[0] === "";
+
 export const getEntityLabel = (entity?: IResponseEntity) =>
-  entity?.label || entity?.data.text || "no label";
+  entity?.labels[0] || entity?.data.text || "no label";
 
 export const getShortLabelByLetterCount = (
   label: string,
