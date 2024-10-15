@@ -31,7 +31,7 @@ interface EntityDetailRelationRow {
     unknown,
     {
       relationId: string;
-      changes: Partial<Relation.IRelation>;
+      changes: Partial<Relation.IRelation | Relation.IIdentification>;
     },
     unknown
   >;
