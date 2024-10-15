@@ -100,11 +100,11 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
     return entity.data.documentId ?? noDocumentLinkedItem.value;
   }, [documentOptions, entity.data.documentId]);
 
-  const [newLabel, setNewLabel] = useState<string>(entity.label);
+  const [newLabel, setNewLabel] = useState<string>(entity.labels[0]);
 
   useEffect(() => {
-    setNewLabel(entity.label);
-  }, [entity.label]);
+    setNewLabel(entity.labels[0]);
+  }, [entity.labels[0]]);
 
   return (
     <>
@@ -220,11 +220,11 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                     newLabel.length < 1
                   ) {
                     toast.info(MIN_LABEL_LENGTH_MESSAGE);
-                    setNewLabel(entity.label);
+                    setNewLabel(entity.labels[0]);
                   } else {
-                    if (newLabel !== entity.label) {
+                    if (newLabel !== entity.labels[0]) {
                       updateEntityMutation.mutate({
-                        label: newLabel,
+                        labels: [newLabel, ...entity.labels.slice(1)],
                       });
                     }
                   }
