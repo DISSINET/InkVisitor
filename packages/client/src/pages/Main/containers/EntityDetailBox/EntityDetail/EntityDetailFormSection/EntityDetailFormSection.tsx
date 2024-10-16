@@ -21,7 +21,7 @@ import { AxiosResponse } from "axios";
 import { Button, Input, MultiInput, TypeBar } from "components";
 import Dropdown, { AttributeButtonGroup, EntityTag } from "components/advanced";
 import React, { useEffect, useMemo, useState } from "react";
-import { FaExternalLinkAlt, FaRegCopy } from "react-icons/fa";
+import { FaExternalLinkAlt, FaPlus, FaRegCopy } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { DropdownItem } from "types";
 import {
@@ -34,6 +34,10 @@ import {
   StyledRelativePosition,
   StyledTagWrap,
 } from "../EntityDetailStyles";
+import {
+  StyledAlternativeLabel,
+  StyledAlternativeLabels,
+} from "./EntityDetailFormSectionStyles";
 
 interface EntityDetailFormSection {
   entity: IResponseDetail;
@@ -105,6 +109,8 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
   useEffect(() => {
     setNewLabel(entity.labels[0]);
   }, [entity.labels[0]]);
+
+  const [newAltLabel, setNewAltLabel] = useState("");
 
   return (
     <>
@@ -390,6 +396,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
               </StyledDetailContentRowLabel>
               <StyledDetailContentRowValue>
                 <AttributeButtonGroup
+                  noMargin
                   disabled={!userCanEdit}
                   options={[
                     {
@@ -586,6 +593,63 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                   updateEntityMutation.mutate({ notes: newValues });
                 }}
               />
+            </StyledDetailContentRowValue>
+          </StyledDetailContentRow>
+
+          <StyledDetailContentRow>
+            <StyledDetailContentRowLabel>
+              Alternative labels
+            </StyledDetailContentRowLabel>
+            <StyledDetailContentRowValue>
+              <StyledAlternativeLabels>
+                {entity.labels.slice(1).map((label, key) => {
+                  return (
+                    <StyledAlternativeLabel key={key}>
+                      {label}
+
+                      <Button
+                        noBorder
+                        noBackground
+                        label="X"
+                        onClick={() => {
+                          updateEntityMutation.mutate({
+                            labels: entity.labels.filter((l) => l !== label),
+                          });
+                        }}
+                      />
+                    </StyledAlternativeLabel>
+                  );
+                })}
+              </StyledAlternativeLabels>
+
+              <div
+                style={{
+                  display: "flex",
+                  gap: "0.5rem",
+                  alignItems: "center",
+                  marginTop: entity.labels.length > 1 ? "1.5rem" : "",
+                }}
+              >
+                <Input
+                  disabled={!userCanEdit}
+                  changeOnType
+                  // width="full"
+                  value={newAltLabel}
+                  onChangeFn={(newLabel: string) => setNewAltLabel(newLabel)}
+                />
+                <span>
+                  <Button
+                    color="black"
+                    icon={<FaPlus />}
+                    onClick={() => {
+                      updateEntityMutation.mutate({
+                        labels: [...entity.labels, newAltLabel],
+                      });
+                      setNewAltLabel("");
+                    }}
+                  />
+                </span>
+              </div>
             </StyledDetailContentRowValue>
           </StyledDetailContentRow>
         </StyledDetailForm>
