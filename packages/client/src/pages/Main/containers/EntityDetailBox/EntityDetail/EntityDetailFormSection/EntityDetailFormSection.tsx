@@ -37,6 +37,9 @@ import {
 import {
   StyledAlternativeLabel,
   StyledAlternativeLabels,
+  StyledAlternativeLabelWrap,
+  StyledCloseIcon,
+  StyledGreyBar,
 } from "./EntityDetailFormSectionStyles";
 
 interface EntityDetailFormSection {
@@ -582,6 +585,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
           <StyledDetailContentRow>
             <br />
           </StyledDetailContentRow>
+
           <StyledDetailContentRow>
             <StyledDetailContentRowLabel>Notes</StyledDetailContentRowLabel>
             <StyledDetailContentRowValue>
@@ -597,6 +601,10 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
           </StyledDetailContentRow>
 
           <StyledDetailContentRow>
+            <br />
+          </StyledDetailContentRow>
+
+          <StyledDetailContentRow>
             <StyledDetailContentRowLabel>
               Alternative labels
             </StyledDetailContentRowLabel>
@@ -604,20 +612,21 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
               <StyledAlternativeLabels>
                 {entity.labels.slice(1).map((label, key) => {
                   return (
-                    <StyledAlternativeLabel key={key}>
-                      {label}
+                    <StyledAlternativeLabelWrap key={key}>
+                      <StyledGreyBar />
+                      <StyledAlternativeLabel>{label}</StyledAlternativeLabel>
 
-                      <Button
-                        noBorder
-                        noBackground
-                        label="X"
-                        onClick={() => {
-                          updateEntityMutation.mutate({
-                            labels: entity.labels.filter((l) => l !== label),
-                          });
-                        }}
-                      />
-                    </StyledAlternativeLabel>
+                      <div>
+                        <StyledCloseIcon
+                          size={14}
+                          onClick={() => {
+                            updateEntityMutation.mutate({
+                              labels: entity.labels.filter((l) => l !== label),
+                            });
+                          }}
+                        />
+                      </div>
+                    </StyledAlternativeLabelWrap>
                   );
                 })}
               </StyledAlternativeLabels>
@@ -631,9 +640,9 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                 }}
               >
                 <Input
+                  placeholder="add label"
                   disabled={!userCanEdit}
                   changeOnType
-                  // width="full"
                   value={newAltLabel}
                   onChangeFn={(newLabel: string) => setNewAltLabel(newLabel)}
                 />
