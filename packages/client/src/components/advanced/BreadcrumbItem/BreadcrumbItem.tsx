@@ -21,7 +21,7 @@ const initialData: IEntity = {
   id: "",
   class: EntityEnums.Class.Territory,
   data: {},
-  label: "",
+  labels: [],
   detail: "",
   status: EntityEnums.Status.Approved,
   language: EntityEnums.Language.Empty,

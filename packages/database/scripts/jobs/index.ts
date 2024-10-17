@@ -8,6 +8,7 @@ import exportACR from "./export-a-c-r";
 import fixACR from "./fix-acr";
 import addAuditType from "./add-audit-type";
 import iterateDataset from "./iterate-dataset";
+import fixLabels from "./fix-labels";
 
 export type IJob = (db: Connection) => Promise<void>;
 
@@ -20,6 +21,7 @@ const alljobs: Record<string, IJob> = {
   exportACR,
   fixACR,
   addAuditType,
+  fixLabels,
   iterateDataset,
 };
 

@@ -80,7 +80,7 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
     onSuccess: (data, variables) => {
       toast.info(
         `Template [${variables.class}]: "${getShortLabelByLetterCount(
-          variables.label,
+          variables.labels[0],
           120
         )}" was created`
       );

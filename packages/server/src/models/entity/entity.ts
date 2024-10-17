@@ -24,13 +24,12 @@ export default class Entity implements IEntity, IDbModel {
   class: EntityEnums.Class = EntityEnums.Class.Person;
   status: EntityEnums.Status = EntityEnums.Status.Approved;
   data: any = {};
-  label = "";
   detail = "";
   language: EntityEnums.Language = EntityEnums.Language.Empty;
   notes: string[] = [];
   props: Prop[] = [];
   references: Reference[] = [];
-
+  labels: string[] = [];
   isTemplate?: boolean;
   usedTemplate?: string;
   templateData?: object;
@@ -43,6 +42,7 @@ export default class Entity implements IEntity, IDbModel {
     fillArray<Reference>(this.references, Reference, data.references);
     fillArray<Prop>(this.props, Prop, data.props);
 
+    this.labels = data.labels || [];
     if (data.notes !== undefined) {
       this.notes = data.notes.map(sanitizeText);
     }
@@ -258,6 +258,10 @@ export default class Entity implements IEntity, IDbModel {
     return Object.keys(entityIds);
   }
 
+  getMainLabel(): string | null {
+    return this.labels && this.labels.length > 0 ? this.labels[0] : null;
+  }
+
   /**
    * Applies the template for entity.
    * @param db
@@ -271,13 +275,13 @@ export default class Entity implements IEntity, IDbModel {
 
     this.usedTemplate = tplId;
     this.isTemplate = false;
-    if (!this.label) {
-      this.label = `${template.label} (from template)`;
+    if (!this.getMainLabel() && template.labels && template.labels.length > 0) {
+      this.labels = [`${template.labels[0]} (from template)`];
     }
     await this.update(req.db.connection, {
       usedTemplate: this.usedTemplate,
       isTemplate: this.isTemplate,
-      label: this.label,
+      labels: this.labels,
     });
   }
 

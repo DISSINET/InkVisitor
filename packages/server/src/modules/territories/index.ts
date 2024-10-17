@@ -152,7 +152,10 @@ export default Router()
           request.db,
           territoryId
         );
-        if (!territoryData || territoryData.class !== EntityEnums.Class.Territory) {
+        if (
+          !territoryData ||
+          territoryData.class !== EntityEnums.Class.Territory
+        ) {
           throw new TerritoryDoesNotExits(
             `territory ${territoryId} was not found`,
             territoryId
@@ -190,7 +193,7 @@ export default Router()
           const newT = new Territory({
             ...original,
             id: undefined,
-            label: `COPY OF ${original.label}`,
+            labels: [`COPY OF ${original.labels[0]}`],
             data: {
               parent: {
                 order: lastOrder + 1,
@@ -202,14 +205,24 @@ export default Router()
 
           if (withChildren) {
             for (const child of childs) {
-              const nestedChilds = await child.findChilds(request.db.connection);
-              await copyUnderTarget(newT.id, child, Object.values(nestedChilds).map(data => new Territory(data)));
+              const nestedChilds = await child.findChilds(
+                request.db.connection
+              );
+              await copyUnderTarget(
+                newT.id,
+                child,
+                Object.values(nestedChilds).map((data) => new Territory(data))
+              );
             }
           }
         };
 
         for (const target of tgts) {
-          await copyUnderTarget(target.id, territory, Object.values(childs).map(data => new Territory(data)));
+          await copyUnderTarget(
+            target.id,
+            territory,
+            Object.values(childs).map((data) => new Territory(data))
+          );
         }
 
         return {

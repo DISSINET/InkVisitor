@@ -1,12 +1,18 @@
 [
-  {
-    "id": "T0",
-    "class": "T",
-    "data": { "parent": false },
-    "label": "root",
-    "detail": "",
-    "status": "1",
-    "language": ["eng"],
-    "notes": []
-  }
+    {
+        "id": "T0",
+        "class": "T",
+        "data": {
+            "parent": false
+        },
+        "detail": "",
+        "status": "1",
+        "language": [
+            "eng"
+        ],
+        "notes": [],
+        "labels": [
+            "root"
+        ]
+    }
 ]

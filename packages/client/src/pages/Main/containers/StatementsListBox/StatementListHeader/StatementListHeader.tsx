@@ -370,7 +370,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   return (
     <>
       <Tooltip
-        label={territory.label}
+        label={territory.labels[0]}
         visible={headingHovered}
         referenceElement={referenceElement}
       />
@@ -401,7 +401,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                 ref={setReferenceElement}
                 onMouseEnter={() => setHeadingHovered(true)}
                 onMouseLeave={() => setHeadingHovered(false)}
-              >{`T:\xa0${territory.label}`}</StyledHeading>
+              >{`T:\xa0${territory.labels[0]}`}</StyledHeading>
             ) : (
               <StyledHeading>{"no territory selected"}</StyledHeading>
             )}

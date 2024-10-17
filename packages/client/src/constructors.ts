@@ -240,9 +240,9 @@ export const InstTemplate = async (
     if (iEntity) {
       // #1554
       if (templateEntity.class === EntityEnums.Class.Statement) {
-        iEntity.label = "";
+        iEntity.labels[0] = "";
       } else {
-        iEntity.label = `[INSTANCE OF] ${templateEntity.label}`;
+        iEntity.labels[0] = `[INSTANCE OF] ${templateEntity.labels[0]}`;
       }
       iEntity.usedTemplate = templateEntity.id;
       iEntity.props = await InstProps(templateEntity.props);
@@ -292,11 +292,11 @@ export const applyTemplate = async (
       newEntity.id = entity.id;
 
       // #1554
-      if (!entity.label) {
+      if (!entity.labels[0]) {
         if (templateEntity.class === EntityEnums.Class.Statement) {
-          newEntity.label = "";
+          newEntity.labels[0] = "";
         } else {
-          newEntity.label = `[INSTANCE OF] ${templateEntity.label}`;
+          newEntity.labels[0] = `[INSTANCE OF] ${templateEntity.labels[0]}`;
         }
       }
       newEntity.usedTemplate = templateEntity.id;
@@ -319,7 +319,11 @@ export const DStatement = (
     id: uuidv4(),
     class: EntityEnums.Class.Statement,
     data: { ...statement.data },
-    label: "",
+    // TODO: first label could be COPY OF labels[0] if has first label
+    labels:
+      statement.labels.length > 0 && statement.labels[0] !== ""
+        ? [`[COPY OF] ${statement.labels[0]}`]
+        : statement.labels,
     detail: statement.detail,
     language: statement.language,
     notes: statement.notes,
@@ -417,7 +421,7 @@ export const DEntity = (entity: IEntity, userRole: UserEnums.Role): IEntity => {
     id: uuidv4(),
     class: entity.class,
     data: entity.data,
-    label: `[COPY OF] ${entity.label}`,
+    labels: [`[COPY OF] ${entity.labels[0]}`, ...entity.labels.slice(1)],
     detail: entity.detail,
     language: entity.language,
     notes: entity.notes,
@@ -450,7 +454,7 @@ export const DTerritory = (
         order: EntityEnums.Order.Last,
       },
     },
-    label: `[COPY OF] ${entity.label}`,
+    labels: [`[COPY OF] ${entity.labels[0]}`, ...entity.labels.slice(1)],
     detail: entity.detail,
     language: entity.language,
     notes: entity.notes,
@@ -523,7 +527,7 @@ export const CStatement = (
   const newStatement: IStatement = {
     id: id ?? uuidv4(),
     class: EntityEnums.Class.Statement,
-    label: label ? label : "",
+    labels: label ? [label] : [""],
     detail: detail ? detail : "",
     language: userOptions.defaultLanguage,
     notes: [],
@@ -561,7 +565,7 @@ export const CTerritory = (
 ): ITerritory => ({
   id: id ?? uuidv4(),
   class: EntityEnums.Class.Territory,
-  label: label,
+  labels: [label],
   detail: detail,
   language: userOptions.defaultLanguage,
   notes: [],
@@ -587,7 +591,7 @@ export const CEntity = (
   return {
     id: uuidv4(),
     class: entityClass,
-    label: label,
+    labels: [label],
     detail: detail ? detail : "",
     data: {},
     status:
@@ -612,7 +616,7 @@ export const CAction = (
   return {
     id: uuidv4(),
     class: EntityEnums.Class.Action,
-    label: label,
+    labels: [label],
     detail: detail ? detail : "",
     data: {
       pos: partOfSpeech,
@@ -637,7 +641,7 @@ export const CConcept = (
   return {
     id: uuidv4(),
     class: EntityEnums.Class.Concept,
-    label: label,
+    labels: [label],
     detail: detail ? detail : "",
     data: { pos: partOfSpeech },
     status: EntityEnums.Status.Pending,
@@ -689,7 +693,7 @@ export const CTemplateEntity = (
 
   templateEntity.isTemplate = true;
   templateEntity.usedTemplate = "";
-  templateEntity.label = templateLabel;
+  templateEntity.labels = [templateLabel];
 
   if (templateDetail) {
     templateEntity.detail = templateDetail;

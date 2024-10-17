@@ -96,7 +96,7 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
           ref={setReferenceElement}
           $isSelected={isSelected}
           $isItalic={
-            entity?.class === EntityEnums.Class.Statement && !entity?.label
+            entity?.class === EntityEnums.Class.Statement && !entity?.labels[0]
           }
           onClick={onClick}
         >

@@ -391,7 +391,7 @@ export const StatementListBox: React.FC = () => {
       const newTerritory: ITerritory = CTerritory(
         localStorage.getItem("userrole") as UserEnums.Role,
         userData.options,
-        `subT of ${data.label}`,
+        `subT of ${data.labels[0]}`,
         data.detail,
         territoryId,
         Infinity,
@@ -658,8 +658,8 @@ export const StatementListBox: React.FC = () => {
           <Submit
             title="Delete statement"
             text={`Do you really want to delete statement [${
-              statementToDelete?.label
-                ? statementToDelete.label
+              statementToDelete?.labels[0]
+                ? statementToDelete.labels[0]
                 : statementToDelete?.id
             }]?`}
             show={showSubmit}

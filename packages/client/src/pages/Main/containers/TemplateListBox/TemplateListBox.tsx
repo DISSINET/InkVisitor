@@ -63,7 +63,9 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
 
       const templates = res.data;
       templates.sort((a: IEntity, b: IEntity) =>
-        a.label.toLocaleLowerCase() > b.label.toLocaleLowerCase() ? 1 : -1
+        a.labels[0].toLocaleLowerCase() > b.labels[0].toLocaleLowerCase()
+          ? 1
+          : -1
       );
       return templates;
     },
