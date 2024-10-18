@@ -617,11 +617,12 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
               <StyledAlternativeLabels>
                 {alternativeLabels.map((label, key) => {
                   return (
-                    <StyledAlternativeLabelWrap key={key}>
+                    <StyledAlternativeLabelWrap
+                      key={key}
+                      onClick={() => setCurrentlyEditedAltLabel(key)}
+                    >
                       <StyledGreyBar />
-                      <StyledAlternativeLabel
-                        onClick={() => setCurrentlyEditedAltLabel(key)}
-                      >
+                      <StyledAlternativeLabel>
                         {currentlyEditedAltLabel === key ? (
                           <Input
                             autoFocus
