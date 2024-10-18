@@ -36,7 +36,7 @@ export const ContextMenuSubmitDelete: React.FC<ContextMenuSubmitDelete> = ({
       toast.info(
         <ToastWithLink
           children={`Territory [${getShortLabelByLetterCount(
-            territoryActant.label,
+            territoryActant.labels[0],
             120
           )}] deleted!`}
           linkText="Restore"

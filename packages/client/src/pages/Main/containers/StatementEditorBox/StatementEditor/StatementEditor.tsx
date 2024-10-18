@@ -205,7 +205,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
       const templates = res.data;
       templates.sort((a: IEntity, b: IEntity) =>
-        a.label.toLocaleLowerCase() > b.label.toLocaleLowerCase() ? 1 : -1
+        a.labels[0].toLocaleLowerCase() > b.labels[0].toLocaleLowerCase()
+          ? 1
+          : -1
       );
       return templates;
     },
@@ -639,9 +641,16 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 <StyledEditorHeaderInputWrap>
                   <Input
                     type="text"
-                    value={statement.label}
+                    value={statement.labels[0] || ""}
                     onChangeFn={(newValue: string) => {
-                      handleAttributeChange({ label: newValue }, true);
+                      handleAttributeChange(
+                        {
+                          labels: statement.labels
+                            ? [newValue, ...statement.labels.slice(1)]
+                            : [],
+                        },
+                        true
+                      );
                     }}
                   />
                 </StyledEditorHeaderInputWrap>
