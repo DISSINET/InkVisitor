@@ -49,6 +49,7 @@ interface StyledTr {
   $fullWidthColumn: number;
   $firstColumnMinWidth: boolean;
   $lastColumnMinWidth: boolean;
+  $hasOnClick?: boolean;
 }
 export const StyledTr = styled.tr<StyledTr>`
   background-color: ${({ theme }) => theme.color["white"]};
@@ -56,6 +57,7 @@ export const StyledTr = styled.tr<StyledTr>`
   opacity: ${({ opacity }) => (opacity ? opacity : 1)};
   border-top: ${({ theme, $noBorder }) =>
     $noBorder ? "" : `1px solid ${theme.color["gray"][500]}`};
+  cursor: ${({ $hasOnClick }) => ($hasOnClick ? "pointer" : "")};
 
   &:hover {
     background-color: ${({ theme, $noBorder }) =>
