@@ -133,6 +133,8 @@ export const ExplorerTableRowExpanded: React.FC<ExplorerTableRowExpanded> = ({
     );
   };
 
+  const alternativeLabels = entity?.labels.slice(1);
+
   return (
     <StyledExpandedRow $columnsSpan={columns.length + 2} $isOdd={isOdd}>
       <ColumnsContainer>
@@ -214,6 +216,12 @@ export const ExplorerTableRowExpanded: React.FC<ExplorerTableRowExpanded> = ({
                 );
               })}
             </div>
+            <StyledExpRowFormGridColumnLabel>
+              Alternative labels:
+            </StyledExpRowFormGridColumnLabel>
+            {alternativeLabels?.map((label, key) => {
+              return <>{label}</>;
+            })}
           </StyledExpRowFormGrid>
         </StyledExpRowSection>
         {rowEntity.class === EntityEnums.Class.Territory && (
