@@ -78,7 +78,7 @@ const fixACRLabels: IJob = async (db: Connection): Promise<void> => {
       }
 
       const v = new Value({
-        label: item.id,
+        labels: [item.id],
       });
 
       await save(db, v);

@@ -1,6 +1,6 @@
 import { Button, Loader } from "components";
 import React, { ReactNode } from "react";
-import { Column, usePagination, useSortBy, useTable } from "react-table";
+import { Column, Row, usePagination, useSortBy, useTable } from "react-table";
 import {
   StyledHeading,
   StyledPageNumber,
@@ -30,6 +30,7 @@ interface Table<TData extends object> {
   // Don't combine with fullWidthColumn (see CSS)
   firstColumnMinWidth?: boolean;
   lastColumnMinWidth?: boolean;
+  onRowClick?: (row: Row<TData>) => void;
 }
 
 export const Table: React.FC<Table<any>> = ({
@@ -46,6 +47,8 @@ export const Table: React.FC<Table<any>> = ({
   fullWidthColumn = 0,
   firstColumnMinWidth = false,
   lastColumnMinWidth = false,
+
+  onRowClick,
 }) => {
   const {
     getTableProps,
@@ -171,6 +174,8 @@ export const Table: React.FC<Table<any>> = ({
                   $fullWidthColumn={fullWidthColumn}
                   $firstColumnMinWidth={firstColumnMinWidth}
                   $lastColumnMinWidth={lastColumnMinWidth}
+                  $hasOnClick={onRowClick !== undefined}
+                  onClick={() => onRowClick && onRowClick(row)}
                 >
                   {row.cells.map((cell, key) => {
                     return (

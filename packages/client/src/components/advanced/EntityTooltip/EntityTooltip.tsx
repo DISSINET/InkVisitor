@@ -196,7 +196,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
 
               return (
                 <React.Fragment key={key}>
-                  {`${relationEntity?.label}${
+                  {`${relationEntity?.labels[0]}${
                     key !== filteredCloudRelationIds.length - 1
                       ? tooltipLabelSeparator
                       : ""
@@ -281,7 +281,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                                       return (
                                         <React.Fragment key={key}>
                                           {getShortLabelByLetterCount(
-                                            entity?.label,
+                                            entity?.labels[0],
                                             40
                                           )}
                                           {certainty

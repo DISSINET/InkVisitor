@@ -234,7 +234,11 @@ describe("test Entity.update", function () {
     it("should not have unwanted field in final object", async () => {
       const entity = new Statement({});
       await entity.save(db.connection);
-      const updateData = { unwanted: 1, label: "newtitle", legacyId: "legacy" };
+      const updateData = {
+        unwanted: 1,
+        labels: ["newtitle"],
+        legacyId: "legacy",
+      };
       await entity.update(db.connection, { ...updateData });
 
       const updatedEntity = await findEntityById<
@@ -242,7 +246,7 @@ describe("test Entity.update", function () {
       >(db, entity.id);
 
       // required field
-      expect(updatedEntity.label).toEqual(updateData.label);
+      expect(updatedEntity.labels).toEqual(updateData.labels);
       // optional field
       expect(updatedEntity.legacyId).toEqual(updateData.legacyId);
       // unwanted field
@@ -387,7 +391,7 @@ describe("test Entity.resetIds", function () {
         logicalType: EntityEnums.LogicalType.Definite,
       },
       status: EntityEnums.Status.Approved,
-      label: "",
+      labels: [],
       detail: "",
       language: EntityEnums.Language.Empty,
       notes: [],

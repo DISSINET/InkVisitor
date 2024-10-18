@@ -13,12 +13,14 @@
             },
             "entities": {}
         },
-        "label": "Action 1",
         "detail": "",
         "language": "",
         "notes": [],
         "props": [],
-        "references": []
+        "references": [],
+        "labels": [
+            "Action 1"
+        ]
     },
     {
         "id": "0.14773065892513793",
@@ -34,12 +36,14 @@
             },
             "entities": {}
         },
-        "label": "Action 2",
         "detail": "",
         "language": "",
         "notes": [],
         "props": [],
-        "references": []
+        "references": [],
+        "labels": [
+            "Action 2"
+        ]
     },
     {
         "id": "0.9198268479493097",
@@ -55,12 +59,14 @@
             },
             "entities": {}
         },
-        "label": "Action 3",
         "detail": "",
         "language": "",
         "notes": [],
         "props": [],
-        "references": []
+        "references": [],
+        "labels": [
+            "Action 3"
+        ]
     },
     {
         "id": "0.36838502478796054",
@@ -76,12 +82,14 @@
             },
             "entities": {}
         },
-        "label": "Action 4",
         "detail": "",
         "language": "",
         "notes": [],
         "props": [],
-        "references": []
+        "references": [],
+        "labels": [
+            "Action 4"
+        ]
     },
     {
         "id": "0.43562994650453146",
@@ -97,12 +105,14 @@
             },
             "entities": {}
         },
-        "label": "Action 5",
         "detail": "",
         "language": "",
         "notes": [],
         "props": [],
-        "references": []
+        "references": [],
+        "labels": [
+            "Action 5"
+        ]
     },
     {
         "id": "0.9785122627887828",
@@ -118,12 +128,14 @@
             },
             "entities": {}
         },
-        "label": "Action 6",
         "detail": "",
         "language": "",
         "notes": [],
         "props": [],
-        "references": []
+        "references": [],
+        "labels": [
+            "Action 6"
+        ]
     },
     {
         "id": "T0",
@@ -132,12 +144,14 @@
         "data": {
             "parent": false
         },
-        "label": "Territory root",
         "detail": "",
         "language": "",
         "notes": [],
         "props": [],
-        "references": []
+        "references": [],
+        "labels": [
+            "Territory root"
+        ]
     },
     {
         "id": "0.6803061625862785",
@@ -153,12 +167,14 @@
                 "order": -1
             }
         },
-        "label": "Statement 1",
         "detail": "",
         "language": "",
         "notes": [],
         "props": [],
-        "references": []
+        "references": [],
+        "labels": [
+            "Statement 1"
+        ]
     },
     {
         "id": "0.2806822650387928",
@@ -174,12 +190,14 @@
                 "order": -1
             }
         },
-        "label": "Statement 2",
         "detail": "",
         "language": "",
         "notes": [],
         "props": [],
-        "references": []
+        "references": [],
+        "labels": [
+            "Statement 2"
+        ]
     },
     {
         "id": "0.8586537029736159",
@@ -190,11 +208,13 @@
             "partValueLabel": "",
             "partValueBaseURL": ""
         },
-        "label": "Resource 1",
         "detail": "",
         "language": "",
         "notes": [],
         "props": [],
-        "references": []
+        "references": [],
+        "labels": [
+            "Resource 1"
+        ]
     }
 ]
