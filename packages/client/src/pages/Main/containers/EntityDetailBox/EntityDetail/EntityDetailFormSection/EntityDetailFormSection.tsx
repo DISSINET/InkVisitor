@@ -114,6 +114,10 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
   }, [entity.labels[0]]);
 
   const [newAltLabel, setNewAltLabel] = useState("");
+  const [currentlyEditedAltLabel, setCurrentlyEditedAltLabel] = useState<
+    false | number
+  >(false);
+  const alternativeLabels = entity.labels.slice(1);
 
   return (
     <>
@@ -610,11 +614,35 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
             </StyledDetailContentRowLabel>
             <StyledDetailContentRowValue>
               <StyledAlternativeLabels>
-                {entity.labels.slice(1).map((label, key) => {
+                {alternativeLabels.map((label, key) => {
                   return (
                     <StyledAlternativeLabelWrap key={key}>
                       <StyledGreyBar />
-                      <StyledAlternativeLabel>{label}</StyledAlternativeLabel>
+                      <StyledAlternativeLabel
+                        onClick={() => setCurrentlyEditedAltLabel(key)}
+                      >
+                        {currentlyEditedAltLabel === key ? (
+                          <Input
+                            autoFocus
+                            value={label}
+                            onChangeFn={(newLabel) => {
+                              updateEntityMutation.mutate({
+                                labels: [
+                                  newLabel,
+                                  ...alternativeLabels.map((label, index) =>
+                                    index === key ? newLabel : label
+                                  ),
+                                ],
+                              });
+                            }}
+                            onBlur={() => {
+                              setCurrentlyEditedAltLabel(false);
+                            }}
+                          />
+                        ) : (
+                          <>{label}</>
+                        )}
+                      </StyledAlternativeLabel>
 
                       <div>
                         <StyledCloseIcon
