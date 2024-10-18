@@ -145,7 +145,7 @@ export const EntityTag: React.FC<EntityTag> = ({
           <EntityTooltip
             entityId={entity.id}
             entityClass={entity.class}
-            label={entity.labels[0] || <i>{"no label"}</i>}
+            label={(entity.labels && entity.labels[0]) || <i>{"no label"}</i>}
             language={entity.language}
             detail={entity.detail}
             text={

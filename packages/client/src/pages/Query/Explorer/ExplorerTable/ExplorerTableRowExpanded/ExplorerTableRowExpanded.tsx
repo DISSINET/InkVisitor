@@ -162,7 +162,7 @@ export const ExplorerTableRowExpanded: React.FC<ExplorerTableRowExpanded> = ({
             <div>
               <Input
                 width="full"
-                value={getEntityLabel(entity)}
+                value={entity?.labels ? entity?.labels[0] : ""}
                 disabled
                 onChangeFn={() => {}}
               />
