@@ -27,7 +27,7 @@ export const EntityTooltipRelationTreeTable: React.FC<
             <StyledGridRowThird key={key} $onlyTwoLevels={treeDepth === 2}>
               {/* First level */}
               <StyledTreeBlock>
-                {getShortLabelByLetterCount(entity?.label, 40)}
+                {getShortLabelByLetterCount(entity?.labels[0], 40)}
               </StyledTreeBlock>
               <StyledFlexColumn>
                 {relation.subtrees.length > 0 ? (
@@ -38,7 +38,7 @@ export const EntityTooltipRelationTreeTable: React.FC<
                         <StyledGridRowHalf key={key}>
                           {/* Second level */}
                           <StyledTreeBlock>
-                            {getShortLabelByLetterCount(entity?.label, 40)}
+                            {getShortLabelByLetterCount(entity?.labels[0], 40)}
                           </StyledTreeBlock>
                           <StyledFlexColumn>
                             {subtree.subtrees.length > 0 ? (
@@ -52,7 +52,7 @@ export const EntityTooltipRelationTreeTable: React.FC<
                                   return (
                                     <StyledTreeBlock key={key}>
                                       {getShortLabelByLetterCount(
-                                        entity?.label,
+                                        entity?.labels[0],
                                         40
                                       )}
                                     </StyledTreeBlock>

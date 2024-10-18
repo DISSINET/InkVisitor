@@ -155,7 +155,9 @@ export const EntityDetail: React.FC<EntityDetail> = ({
 
         const templates = res.data;
         templates.sort((a: IEntity, b: IEntity) =>
-          a.label.toLocaleLowerCase() > b.label.toLocaleLowerCase() ? 1 : -1
+          a.labels[0].toLocaleLowerCase() > b.labels[0].toLocaleLowerCase()
+            ? 1
+            : -1
         );
         return templates;
       }
@@ -251,7 +253,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
       if (
         variables.references !== undefined ||
         variables.detail !== undefined ||
-        variables.label !== undefined ||
+        variables.labels !== undefined ||
         variables.status ||
         variables.language !== undefined ||
         variables.data?.logicalType
@@ -264,7 +266,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
         queryClient.invalidateQueries({ queryKey: ["territory"] });
         queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
       }
-      if (variables.label !== undefined) {
+      if (variables.labels !== undefined) {
         queryClient.invalidateQueries({ queryKey: ["detail-tab-entities"] });
       }
       if (entity?.isTemplate) {

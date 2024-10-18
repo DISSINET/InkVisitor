@@ -6,7 +6,7 @@ import { Submit } from "components";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { getShortLabelByLetterCount } from "utils/utils";
+import { getEntityLabel, getShortLabelByLetterCount } from "utils/utils";
 
 interface TemplateListRemoveModal {
   removeEntityId: string;
@@ -38,7 +38,7 @@ export const TemplateListRemoveModal: React.FC<TemplateListRemoveModal> = ({
       entityToRemove &&
         toast.warning(
           `Template [${entityToRemove.class}]: "${getShortLabelByLetterCount(
-            entityToRemove.label,
+            getEntityLabel(entityToRemove),
             120
           )}" was removed`
         );
