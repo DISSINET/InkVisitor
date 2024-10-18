@@ -70,7 +70,7 @@ export function getITerritoryMock(): ITerritory {
     detail: "detail",
     language: EntityEnums.Language.Latin,
     notes: [],
-    label: "label",
+    labels: ["label"],
     data: {
       parent: false,
     },
@@ -100,7 +100,7 @@ export function getIStatementMock(): IStatement {
   return {
     id: "id",
     class: EntityEnums.Class.Statement,
-    label: "label",
+    labels: ["label"],
     data: {
       actions: [],
       actants: [],

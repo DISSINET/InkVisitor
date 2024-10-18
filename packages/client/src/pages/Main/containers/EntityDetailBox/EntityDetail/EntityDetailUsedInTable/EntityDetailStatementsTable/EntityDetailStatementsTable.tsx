@@ -144,37 +144,6 @@ export const EntityDetailStatementsTable: React.FC<
         Header: "Position",
         accessor: "position",
       },
-      {
-        id: "edit",
-        Cell: ({ row }: CellType) => {
-          const useCase = row.original;
-          const entityId = useCase.statement?.id;
-          const entity = entityId ? entities[entityId] : false;
-
-          return (
-            <>
-              {entity && (
-                <Button
-                  icon={<FaEdit size={14} />}
-                  color="primary"
-                  inverted
-                  noBorder
-                  tooltipLabel="edit statement"
-                  onClick={async () => {
-                    if (entity.class === EntityEnums.Class.Statement) {
-                      const statement = entity as IStatement;
-                      if (statement.data.territory) {
-                        setStatementId(statement.id);
-                        setTerritoryId(statement.data.territory.territoryId);
-                      }
-                    }
-                  }}
-                />
-              )}
-            </>
-          );
-        },
-      },
     ],
     [entities]
   );
@@ -187,6 +156,18 @@ export const EntityDetailStatementsTable: React.FC<
         entityTitle={title}
         perPage={perPage}
         fullWidthColumn={5}
+        onRowClick={(row) => {
+          const statementId = row.original.statement?.id;
+          const entity = statementId ? entities[statementId] : false;
+
+          if (entity && entity.class === EntityEnums.Class.Statement) {
+            const statement = entity as IStatement;
+            if (statement.data.territory) {
+              setStatementId(statement.id);
+              setTerritoryId(statement.data.territory.territoryId);
+            }
+          }
+        }}
       />
     </>
   );

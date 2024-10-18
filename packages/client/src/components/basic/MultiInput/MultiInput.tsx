@@ -76,7 +76,7 @@ export const MultiInput: React.FC<MultiInput> = ({
       })}
 
       {!disabled && (
-        <div style={{ paddingTop: "1.5rem" }}>
+        <div style={{ paddingTop: displayValues.length > 0 ? "0.5rem" : "" }}>
           <Button
             icon={<FaPlus />}
             label={"new note"}

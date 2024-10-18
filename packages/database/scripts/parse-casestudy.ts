@@ -2,19 +2,15 @@
  * This node script takes id of one Territory, a case study name, and source of data and prepares a dataset specifically taking the given T structure, usually for a purpose of a case study
  */
 
-import { Connection, r as rethink, RDatum, WriteResult } from "rethinkdb-ts";
-import * as fs from "fs";
-import { Db } from "@service/rethink";
-import { getEnv } from "./import/common";
-import { connect } from "http2";
-import dotevn from "dotenv";
-import { IEntity, IStatement } from "@shared/types";
-import { EntityEnums } from "@shared/enums";
 import Entity from "@models/entity/entity";
 import { getEntityClass } from "@models/factory";
+import { EntityEnums } from "@shared/enums";
+import { IEntity, IProp, IStatement, Relation } from "@shared/types";
+import dotevn from "dotenv";
+import * as fs from "fs";
+import { Connection, RDatum, r as rethink } from "rethinkdb-ts";
 
 import treeCache from "@service/treeCache";
-import Relation from "@models/relation/relation";
 
 // take CLI parameters name, territory and source
 const args = process.argv.slice(2);
@@ -27,6 +23,10 @@ const env = args[3];
 
 const envFile = `env/.env${env ? "." + env : ""}`;
 const envData = dotevn.config({ path: envFile }).parsed;
+
+const entitiesAll: Record<string, IEntity> = {};
+const relationsAll: Record<string, Relation.IRelation> = {};
+const entityRelationsMap: Record<string, Relation.IRelation[]> = {};
 
 const connectToDb = async () => {
   console.log("Connecting to production DB...");
@@ -46,60 +46,103 @@ const connectToDb = async () => {
   }
 };
 
-const getEntityBuffer = async (eId: string, conn: Connection) => {
-  const entityData = await rethink.table("entities").get(eId).run(conn);
-  const entityModel = await getEntityClass({ ...entityData });
+const processProp = (prop: IProp): [string[], boolean] => {
+  const typeId = prop.type.entityId;
+  const valueId = prop.value.entityId;
 
-  const entity = await new Entity(entityModel);
+  const typeE = entitiesAll[typeId];
+  const valueE = entitiesAll[valueId];
 
-  const buffferEntities = await entity.getEntitiesIds();
-
-  return buffferEntities;
+  if (!typeE || !valueE) {
+    return [[], false];
+  } else if (
+    typeE.class === EntityEnums.Class.Territory ||
+    valueE.class === EntityEnums.Class.Territory
+  ) {
+    return [[], false];
+  } else {
+    return [[typeId, valueId], false];
+  }
 };
 
-const getSEntities = async (sId: string, conn: Connection) => {
-  const entitiesIds: Record<string, string | null> = {};
-  const statement: IStatement = await rethink
-    .table("entities")
-    .get(sId)
-    .run(conn);
+const getPropEntities = (props: IProp[] | undefined): string[] => {
+  if (!props) {
+    return [];
+  }
+  const eids: string[] = [];
 
-  statement.data.actions?.forEach((a) => {
-    entitiesIds[a.actionId] = null;
-    if (a.props) {
-      Entity.extractIdsFromProps(a.props).forEach((element) => {
-        entitiesIds[element] = null;
+  props.forEach((p1) => {
+    const [es, isOk] = processProp(p1);
+    eids.push(...es);
+    if (isOk) {
+      p1.children?.forEach((p2) => {
+        const [es2, isOk2] = processProp(p2);
+        eids.push(...es2);
+        if (isOk2) {
+          p2.children?.forEach((p3) => {
+            const [es3, isOk3] = processProp(p3);
+            eids.push(...es3);
+          });
+        }
       });
     }
+  });
+  return [...new Set(eids)];
+};
+
+const getDetailEntities = (eId: string): string[] => {
+  const entity: IEntity = entitiesAll[eId];
+  if (!entity) {
+    console.log(`Entity ${eId} not found`);
+    return [];
+  }
+
+  const detailIds: string[] = [];
+  detailIds.push(...getPropEntities(entity.props));
+
+  entity.references?.forEach((r) => {
+    detailIds.push(r.resource);
+    detailIds.push(r.value);
+  });
+
+  const relations: Relation.IRelation[] = entityRelationsMap[eId] || [];
+
+  relations.forEach((r) => {
+    detailIds.push(...r.entityIds);
+  });
+
+  const eSet = new Set(detailIds);
+  // remove itself
+  eSet.delete(eId);
+  return [...eSet];
+};
+
+const getSEntities = async (
+  sId: string,
+  conn: Connection
+): Promise<string[]> => {
+  const entitiesIds: string[] = [];
+  const statement: IStatement = entitiesAll[sId] as IStatement;
+
+  if (!statement) {
+    return [];
+  }
+
+  statement.data.actions?.forEach((a) => {
+    entitiesIds.push(a.actionId);
+    entitiesIds.push(...getPropEntities(a.props));
   });
 
   statement.data.actants.forEach((a) => {
-    entitiesIds[a.entityId] = null;
-    a.classifications?.forEach((ca) => (entitiesIds[ca.entityId] = null));
-    a.identifications?.forEach((ci) => (entitiesIds[ci.entityId] = null));
+    entitiesIds.push(a.entityId);
+    a.classifications?.forEach((ca) => entitiesIds.push(ca.entityId));
+    a.identifications?.forEach((ci) => entitiesIds.push(ci.entityId));
 
-    Entity.extractIdsFromProps(a.props).forEach((element) => {
-      entitiesIds[element] = null;
-    });
+    entitiesIds.push(...getPropEntities(a.props));
   });
 
-  // append territory lineage to the root T
-  const parentT = statement.data.territory?.territoryId;
-  if (parentT) {
-    const treeCacheInstance = treeCache.tree.idMap[parentT];
-    const lineageTIds = [
-      parentT,
-      ...(treeCacheInstance ? treeCacheInstance.path : []),
-    ];
-    if (lineageTIds) {
-      lineageTIds.forEach((tid) => {
-        entitiesIds[tid] = null;
-      });
-    }
-  }
-
-  statement.data.tags.forEach((t) => (entitiesIds[t] = null));
-  return Object.keys(entitiesIds).filter((id) => !!id);
+  entitiesIds.push(...statement.data.tags);
+  return [...new Set(entitiesIds)];
 };
 
 const getTStatements = async (
@@ -173,25 +216,31 @@ const parseUseCase = async () => {
     }
     conn.use("inkvisitor");
 
-    const mainT = await rethink.table("entities").get(territoryId).run(conn);
+    const entityList: IEntity[] = await rethink.table("entities").run(conn);
+    entityList.forEach((e: IEntity) => {
+      entitiesAll[e.id as string] = e;
+    });
+    console.log("Entities loaded");
 
-    const allAs = await rethink
-      .table("entities")
-      .filter({
-        class: EntityEnums.Class.Action,
-      })
-      .getField("id")
+    const relationsList: Relation.IRelation[] = await rethink
+      .table("relations")
       .run(conn);
-    console.log(`Found ${allAs.length} Actions`);
 
-    const allCs = await rethink
-      .table("entities")
-      .filter({
-        class: EntityEnums.Class.Concept,
-      })
-      .getField("id")
-      .run(conn);
-    console.log(`Found ${allCs.length} Concepts`);
+    relationsList.forEach((r: Relation.IRelation) => {
+      relationsAll[r.id as string] = r;
+    });
+
+    // entityRelationsMap
+    Object.values(relationsAll).forEach((r) => {
+      r.entityIds.forEach((eid) => {
+        if (!entityRelationsMap[eid]) {
+          entityRelationsMap[eid] = [];
+        }
+        entityRelationsMap[eid].push(r);
+      });
+    });
+
+    console.log("Relations loaded");
 
     const allTs = ["T0", ...(await getTlineage(territoryId, conn))];
     console.log(`Found ${allTs.length} Territories`);
@@ -206,78 +255,58 @@ const parseUseCase = async () => {
     }
     console.log(`Found ${sEntities.length} Entities in Statements`);
 
-    const isolatedIds = [
-      ...new Set([...allAs, ...allCs, ...allTs, ...allSs, ...sEntities]),
+    const caseIds = [
+      ...new Set([...sEntities, ...allSs, ...allTs, territoryId]),
     ];
-    console.log("All unique entities to buffer:", isolatedIds.length);
+    console.log("All unique entities to buffer:", caseIds.length);
 
-    const buffered = [];
-    for (var ii in isolatedIds) {
-      const entityId = isolatedIds[ii];
-      const buffer = await getEntityBuffer(entityId, conn);
-      buffered.push(...buffer);
-      if ((ii as unknown as number) % 100 === 0) {
-        console.log(
-          `Buffered ${ii} / ${isolatedIds.length} (${(
-            ((ii as unknown as number) / isolatedIds.length) *
-            100
-          ).toPrecision(2)}%)`
-        );
+    const processed: Record<string, boolean> = {};
+    const buffered: string[] = [];
+
+    let processedCount = 0;
+    const processEntity = (eId: string) => {
+      // console.log("processing ", eId);
+      if (processed[eId]) {
+        return;
       }
+
+      const detailIds = getDetailEntities(eId);
+      buffered.push(...detailIds);
+
+      if (processedCount % 1000 === 0) {
+        console.log(`Mined ${buffered.length} entities`);
+      }
+      processed[eId] = true;
+
+      for (var di in detailIds) {
+        processEntity(detailIds[di]);
+      }
+
+      processedCount++;
+    };
+
+    for (var ci in caseIds) {
+      processEntity(caseIds[ci]);
+      // console.log(
+      //   `Processed ${parseInt(ci) + 1} Entities [${
+      //     ((parseInt(ci) + 1) / caseIds.length) * 100
+      //   }%]`
+      // );
     }
+
     console.log(`Found ${buffered.length} Entities in buffer`);
 
-    const idsToTake = [...new Set([...isolatedIds, ...buffered])];
+    const idsToTake = [...new Set([...caseIds, ...buffered])];
 
     console.log(`Total ${idsToTake.length} unique Entities to process`);
 
     // get all the entities
-    const entities = await rethink
-      .table("entities")
-      .getAll(...idsToTake)
-      .run(conn);
-
-    const fixedEntities = entities.map((entity) => {
-      const newE = { ...entity };
-      if (newE.statementOrder) {
-        delete newE.statementOrder;
-      }
-      newE.props.forEach((prop: any) => {
-        if (prop.statementOrder) {
-          delete prop.statementOrder;
-          if (prop.children) {
-            prop.children.forEach((child: any) => {
-              if (child.statementOrder) {
-                delete child.statementOrder;
-                if (child.children) {
-                  child.children.forEach((c: any) => {
-                    if (c.statementOrder) {
-                      delete c.statementOrder;
-                    }
-                  });
-                }
-              }
-            });
-          }
-        }
-      });
-      newE.actants?.forEach((actant: any) => {
-        if (actant.statementOrder) {
-          delete actant.statementOrder;
-        }
-      });
-      newE.actions?.forEach((action: any) => {
-        if (action.statementOrder) {
-          delete action.statementOrder;
-        }
-      });
-      return newE;
-    });
+    const entities = idsToTake.map((id) => entitiesAll[id]);
 
     const relations = await rethink
       .table("relations")
-      .filter((relation: RDatum<Relation>) => {
-        return relation("newEIds").setIntersection(idsToTake).count().gt(0);
+      .filter((relation: RDatum<Relation.IRelation>) => {
+        return relation("entityIds").setIntersection(idsToTake).count().gt(0);
       })
       .run(conn);
 
@@ -290,7 +319,7 @@ const parseUseCase = async () => {
     );
     fs.writeFileSync(
       `./datasets/${usecase}/entities.json`,
-      JSON.stringify(fixedEntities, null, 2),
+      JSON.stringify(entities, null, 2),
       { encoding: "utf8", flag: "w" }
     );
 
