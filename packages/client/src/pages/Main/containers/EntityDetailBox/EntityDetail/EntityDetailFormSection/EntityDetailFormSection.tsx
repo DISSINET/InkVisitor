@@ -625,12 +625,12 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                           <Input
                             autoFocus
                             value={label}
-                            onChangeFn={(newLabel) => {
+                            onChangeFn={(value) => {
                               updateEntityMutation.mutate({
                                 labels: [
                                   newLabel,
                                   ...alternativeLabels.map((label, index) =>
-                                    index === key ? newLabel : label
+                                    index === key ? value : label
                                   ),
                                 ],
                               });
