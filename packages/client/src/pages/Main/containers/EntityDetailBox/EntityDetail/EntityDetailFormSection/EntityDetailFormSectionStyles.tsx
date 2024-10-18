@@ -36,3 +36,12 @@ export const StyledCloseIcon = styled(IoClose)`
   cursor: pointer;
   color: ${({ theme }) => theme.color["black"]};
 `;
+interface StyledAddLabel {
+  marginTop: boolean;
+}
+export const StyledAddLabel = styled.div<StyledAddLabel>`
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: ${({ marginTop }) => (marginTop ? "1.5rem" : "")};
+`;

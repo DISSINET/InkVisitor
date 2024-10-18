@@ -35,6 +35,7 @@ import {
   StyledTagWrap,
 } from "../EntityDetailStyles";
 import {
+  StyledAddLabel,
   StyledAlternativeLabel,
   StyledAlternativeLabels,
   StyledAlternativeLabelWrap,
@@ -659,14 +660,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                 })}
               </StyledAlternativeLabels>
 
-              <div
-                style={{
-                  display: "flex",
-                  gap: "0.5rem",
-                  alignItems: "center",
-                  marginTop: entity.labels.length > 1 ? "1.5rem" : "",
-                }}
-              >
+              <StyledAddLabel marginTop={entity.labels.length > 1}>
                 <Input
                   placeholder="add label"
                   disabled={!userCanEdit}
@@ -676,6 +670,10 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                 />
                 <span>
                   <Button
+                    disabled={
+                      newAltLabel.length === 0 ||
+                      entity.labels.includes(newAltLabel)
+                    }
                     color="black"
                     icon={<FaPlus />}
                     onClick={() => {
@@ -686,7 +684,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                     }}
                   />
                 </span>
-              </div>
+              </StyledAddLabel>
             </StyledDetailContentRowValue>
           </StyledDetailContentRow>
         </StyledDetailForm>
