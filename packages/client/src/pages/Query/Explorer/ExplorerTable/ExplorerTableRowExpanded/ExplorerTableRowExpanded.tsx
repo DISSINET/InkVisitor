@@ -29,6 +29,7 @@ import {
   StyledExpRowSectionContent,
   StyledExpRowSectionHeader,
 } from "./ExplorerTableRowExpandedStyles";
+import { getEntityLabel } from "utils/utils";
 
 interface ExplorerTableRowExpanded {
   rowEntity: IEntity;
@@ -71,7 +72,7 @@ export const ExplorerTableRowExpanded: React.FC<ExplorerTableRowExpanded> = ({
 
   const {
     id,
-    label,
+    labels,
     detail,
     language,
     notes,
@@ -161,7 +162,7 @@ export const ExplorerTableRowExpanded: React.FC<ExplorerTableRowExpanded> = ({
             <div>
               <Input
                 width="full"
-                value={label}
+                value={getEntityLabel(entity)}
                 disabled
                 onChangeFn={() => {}}
               />
