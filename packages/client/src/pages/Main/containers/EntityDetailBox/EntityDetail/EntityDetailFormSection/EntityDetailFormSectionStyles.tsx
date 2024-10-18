@@ -37,11 +37,11 @@ export const StyledCloseIcon = styled(IoClose)`
   color: ${({ theme }) => theme.color["black"]};
 `;
 interface StyledAddLabel {
-  marginTop: boolean;
+  $marginTop: boolean;
 }
 export const StyledAddLabel = styled.div<StyledAddLabel>`
   display: flex;
   gap: 0.5rem;
   align-items: center;
-  margin-top: ${({ marginTop }) => (marginTop ? "1.5rem" : "")};
+  margin-top: ${({ $marginTop }) => ($marginTop ? "1.5rem" : "")};
 `;
