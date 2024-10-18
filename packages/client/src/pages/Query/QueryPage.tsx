@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { Query } from "@shared/types";
 import { Explore } from "@shared/types/query";
 import api from "api";
-import { Box, Panel } from "components";
+import { Box, Button, Loader, Panel } from "components";
 import { LayoutSeparatorHorizontal } from "components/advanced";
 import { useAppSelector } from "redux/hooks";
 import { floorNumberToOneDecimal } from "utils/utils";
@@ -18,6 +18,7 @@ import { MemoizedQueryBox } from "./Query/QueryBox";
 import { queryDiff, queryReducer, queryStateInitial } from "./Query/state";
 import { getAllEdges, getAllNodes } from "./Query/utils";
 import { QueryValidity, QueryValidityProblem } from "./types";
+import { BiRefresh } from "react-icons/bi";
 
 interface QueryPage {}
 export const QueryPage: React.FC<QueryPage> = ({}) => {
@@ -150,9 +151,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
   const [querySeparatorYPosition, setQuerySeparatorYPosition] =
     useState<number>(
       localStorageSeparatorYPosition
-        ? floorNumberToOneDecimal(
-            Number(localStorageSeparatorYPosition) * onePercentOfContentHeight
-          )
+        ? Number(localStorageSeparatorYPosition) * onePercentOfContentHeight
         : contentHeight / 2
     );
 
@@ -206,6 +205,16 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
           borderColor="white"
           height={contentHeight - querySeparatorYPosition}
           label="Explorer"
+          buttons={[
+            // doesn't refresh the detail data for individual entities
+            <Button
+              key="refresh queries"
+              tooltipLabel="refresh data"
+              inverted
+              icon={<BiRefresh />}
+              onClick={handleInvalidateQuery}
+            />,
+          ]}
         >
           <MemoizedExplorerBox
             state={exploreState}
@@ -214,6 +223,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
             isQueryFetching={queryIsFetching}
             queryError={queryError}
           />
+          <Loader show={queryIsFetching} />
         </Box>
       </Panel>
     </>
