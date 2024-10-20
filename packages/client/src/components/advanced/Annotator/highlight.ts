@@ -19,10 +19,10 @@ export const annotatorHighlight = (
 
   if (entityId === data.thisTerritoryEntityId) {
     return {
-      mode: "background",
+      mode: "focus",
       style: {
-        fillColor: theme?.color.warning,
-        fillOpacity: 0.7,
+        color: "darkgrey",
+        opacity: 0.7,
       },
     };
   }
@@ -32,6 +32,19 @@ export const annotatorHighlight = (
   );
 
   if (entityClass) {
+    if (entityClass === EntityEnums.Class.Statement) {
+      return {
+        mode: "underline",
+        style: {
+          color: theme?.color.entityS as string,
+          opacity: 1,
+        },
+      };
+    }
+    if (entityClass === EntityEnums.Class.Territory) {
+      return undefined;
+    }
+
     const classItem = EntityColors[entityClass];
     const colorName = classItem?.color ?? "transparent";
     const color = theme?.color[colorName] as string;
@@ -39,8 +52,8 @@ export const annotatorHighlight = (
     return {
       mode: "background",
       style: {
-        fillColor: color,
-        fillOpacity: 0.2,
+        color: color,
+        opacity: 0.2,
       },
     };
   }
