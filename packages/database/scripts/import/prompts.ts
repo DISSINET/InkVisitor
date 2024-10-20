@@ -1,6 +1,10 @@
 import readline from "readline";
 
-export const question = async <T>(questionString: string, predicate: (input: string) => T | undefined, defaultVal: T): Promise<T> => {
+export const question = async <T>(
+  questionString: string,
+  predicate: (input: string) => T | undefined,
+  defaultVal: T
+): Promise<T> => {
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -22,7 +26,6 @@ export const question = async <T>(questionString: string, predicate: (input: str
     });
   };
 
-
   do {
     try {
       defaultVal = await poll();
@@ -33,18 +36,21 @@ export const question = async <T>(questionString: string, predicate: (input: str
     }
   } while (1);
 
-
   return defaultVal;
 };
 
 export const confirm = async (questionString: string): Promise<boolean> => {
-  return question<boolean>(questionString + " (y/n)", (input: string): boolean | undefined => {
-    if (input.toLowerCase() === 'y') {
-      return true;
-    } else if (input.toLowerCase() === 'n') {
-      return false;
-    } else {
-      return undefined;
-    }
-  }, false);
+  return question<boolean>(
+    questionString + " (y/n)",
+    (input: string): boolean | undefined => {
+      if (input.toLowerCase() === "y") {
+        return true;
+      } else if (input.toLowerCase() === "n") {
+        return false;
+      } else {
+        return undefined;
+      }
+    },
+    false
+  );
 };
