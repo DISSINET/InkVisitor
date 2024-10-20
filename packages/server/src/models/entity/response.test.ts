@@ -529,23 +529,23 @@ describe("models/entity/response", function () {
       expect(usedInDocs).toHaveLength(0);
     });
 
-    it("should return array with 2 docs", () => {
-      expect(usedInDocs).toHaveLength(2);
+    it("should return array with 3 instances", () => {
+      expect(usedInDocs).toHaveLength(3);
     });
 
     it("should have both anchors from first document", () => {
-      const doc1Results = usedInDocs.find((d) => d.document.id === doc1.id);
-      expect(doc1Results).toBeTruthy();
+      const doc1Results = usedInDocs.filter((d) => d.document.id === doc1.id);
+      expect(doc1Results).toHaveLength(2);
 
-      expect(doc1Results?.anchorText[0] === "some anchor").toBeTruthy();
-      expect(doc1Results?.anchorText[1] === "some anchor 2").toBeTruthy();
+      expect(doc1Results[0].anchorText === "some anchor").toBeTruthy();
+      expect(doc1Results[1].anchorText === "some anchor 2").toBeTruthy();
     });
 
     it("should have one anchor from second document", () => {
-      const doc2Results = usedInDocs.find((d) => d.document.id === doc2.id);
-      expect(doc2Results).toBeTruthy();
+      const doc2Results = usedInDocs.filter((d) => d.document.id === doc2.id);
+      expect(doc2Results).toHaveLength(1);
 
-      expect(doc2Results?.anchorText[0] === "anchor").toBeTruthy();
+      expect(doc2Results[0].anchorText === "anchor").toBeTruthy();
     });
 
     it("should find both resource ids", () => {

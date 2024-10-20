@@ -5,6 +5,33 @@ import { UserEnums } from "@shared/enums";
 import { InternalServerError, ModelNotValidError } from "@shared/types/errors";
 import User from "@models/user/user";
 
+class TreeNode {
+  tag: string;
+  content: string;
+  children: TreeNode[];
+
+  constructor(tag: string, content: string) {
+      this.tag = tag;
+      this.content = content;
+      this.children = [];
+  }
+
+      // Method to return all unique tags as a string array
+      getAllUniqueTags(): string[] {
+        const tags: string[] = [];
+        this.collectTags(tags);
+        return [...new Set(tags)]; // Filter out duplicates by using a Set to ensure uniqueness
+    }
+
+    // Helper method to recursively collect tags
+    private collectTags(tags: string[]) {
+        tags.push(this.tag); // Add the current tag
+        for (const child of this.children) {
+            child.collectTags(tags); // Recursively collect from children
+        }
+    }
+}
+
 export default class Document implements IDocument, IDbModel {
   static table = "documents";
 
@@ -63,6 +90,26 @@ export default class Document implements IDocument, IDbModel {
 
     return result;
   }
+
+  buildTagTree(content: string): TreeNode[] {
+    const tree: TreeNode[] = [];
+    const regex = /<([\w\-.]+)>([\s\S]*?)<\/\1>/g; // Regex to find tags with content (without 's' flag)
+
+    let match;
+    while ((match = regex.exec(content)) !== null) {
+        const [fullMatch, tag, innerContent] = match;
+        
+        // Create a TreeNode for this tag
+        const node = new TreeNode(tag, innerContent.trim());
+
+        // Recursively parse children in inner content
+        node.children = this.buildTagTree(innerContent);
+        
+        tree.push(node);
+    }
+
+    return tree;
+}
 
   /**
    * Stores the document in the db
