@@ -13,23 +13,23 @@ const queryStateInitial: Query.INode = {
   },
   operator: Query.NodeOperator.And,
   edges: [
-    {
-      type: Query.EdgeType["EP:T"],
-      params: {},
-      logic: Query.EdgeLogic.Positive,
-      id: "e1",
-      node: {
-        id: "n1",
-        type: Query.NodeType.E,
-        params: {
-          id: "4ce5e669-d421-40c9-b1ce-f476fdd171fe", //sex
-          classes: [],
-          label: "",
-        },
-        operator: Query.NodeOperator.And,
-        edges: [],
-      },
-    },
+    // {
+    //   type: Query.EdgeType["EP:T"],
+    //   params: {},
+    //   logic: Query.EdgeLogic.Positive,
+    //   id: "e1",
+    //   node: {
+    //     id: "n1",
+    //     type: Query.NodeType.E,
+    //     params: {
+    //       id: "4ce5e669-d421-40c9-b1ce-f476fdd171fe", //sex
+    //       classes: [],
+    //       label: "",
+    //     },
+    //     operator: Query.NodeOperator.And,
+    //     edges: [],
+    //   },
+    // },
   ],
 };
 
