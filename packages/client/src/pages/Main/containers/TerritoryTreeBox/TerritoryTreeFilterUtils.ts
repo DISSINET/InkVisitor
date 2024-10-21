@@ -137,12 +137,16 @@ export function filterTreeByLabel(
   );
 
   if (
-    node.territory.label.toLowerCase().includes(targetLabel.toLowerCase()) ||
+    node.territory.labels[0]
+      .toLowerCase()
+      .includes(targetLabel.toLowerCase()) ||
     hasLabelDescendant
   ) {
     const filteredChildren = node.children
       .map((child) =>
-        child.territory.label.toLowerCase().includes(targetLabel.toLowerCase())
+        child.territory.labels[0]
+          .toLowerCase()
+          .includes(targetLabel.toLowerCase())
           ? child
           : filterTreeByLabel(child, targetLabel)
       )
@@ -162,7 +166,9 @@ function hasLabelRecursively(
     return false;
   }
 
-  if (node.territory.label.toLowerCase().includes(targetLabel.toLowerCase())) {
+  if (
+    node.territory.labels[0].toLowerCase().includes(targetLabel.toLowerCase())
+  ) {
     return true;
   }
 
@@ -213,7 +219,7 @@ function isNodeMatchingFilters(
     : true;
   const meetsFilterCondition =
     targetLabel.length === 0 ||
-    node.territory.label.toLowerCase().includes(targetLabel.toLowerCase());
+    node.territory.labels[0].toLowerCase().includes(targetLabel.toLowerCase());
 
   return (
     meetsNonEmptyCondition &&

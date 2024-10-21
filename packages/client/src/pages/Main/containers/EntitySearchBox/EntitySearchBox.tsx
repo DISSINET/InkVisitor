@@ -173,7 +173,9 @@ export const EntitySearchBox: React.FC = () => {
     if (entities) {
       const sorted = [...entities];
       sorted.sort((a: IEntity, b: IEntity) =>
-        a.label.toLocaleLowerCase() > b.label.toLocaleLowerCase() ? 1 : -1
+        a.labels[0].toLocaleLowerCase() > b.labels[0].toLocaleLowerCase()
+          ? 1
+          : -1
       );
       return entities;
     }

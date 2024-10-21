@@ -90,7 +90,7 @@ export const StatementEditorBox: React.FC = () => {
       }
       queryClient.invalidateQueries({ queryKey: ["statement"] });
       queryClient.invalidateQueries({ queryKey: ["territory"] });
-      if (variables.label !== undefined) {
+      if (variables.labels[0] !== undefined) {
         queryClient.invalidateQueries({ queryKey: ["detail-tab-entities"] });
       }
       if (statement && statement.isTemplate) {
@@ -328,7 +328,7 @@ export const StatementEditorBox: React.FC = () => {
 
       if (newPosition !== false) {
         toast.info(
-          `Statement Actions valency rules do not allow Actant position "${actantPosition}" for ${newActantEntity.data.label}. It was moved to "${newPosition}".`
+          `Statement Actions valency rules do not allow Actant position "${actantPosition}" for ${newActantEntity.data.labels[0]}. It was moved to "${newPosition}".`
         );
         newActant.position = newPosition;
       }
