@@ -1,40 +1,44 @@
 import { mergeDeep } from "@common/functions";
-import { ResponseEntity, ResponseEntityDetail } from "@models/entity/response";
 import Audit from "@models/audit/audit";
+import Entity from "@models/entity/entity";
+import { ResponseEntity, ResponseEntityDetail } from "@models/entity/response";
+import { ResponseSearch } from "@models/entity/response-search";
+import { ResponseTooltip } from "@models/entity/response-tooltip";
 import { getEntityClass, getRelationClass } from "@models/factory";
+import { copyRelations } from "@models/relation/functions";
+import Relation from "@models/relation/relation";
+import { getAuditByEntityId } from "@modules/audits";
+import QuerySearch from "@service/query/search";
 import { findEntityById } from "@service/shorthands";
+import { RelationEnums } from "@shared/enums";
 import {
-  IEntity,
-  IResponseEntity,
-  IResponseDetail,
-  IResponseGeneric,
-  RequestSearch,
   EntityTooltip,
+  IEntity,
+  IResponseDetail,
+  IResponseEntity,
+  IResponseGeneric,
+  Relation as RelationType,
+  RequestSearch,
 } from "@shared/types";
 import {
-  EntityDoesNotExist,
+  AuditDoesNotExist,
   BadParams,
+  CustomError,
+  EntityDoesNotExist,
   InternalServerError,
+  InvalidDeleteError,
   ModelNotValidError,
   PermissionDeniedError,
-  AuditDoesNotExist,
-  InvalidDeleteError,
-  CustomError,
 } from "@shared/types/errors";
-import { Router } from "express";
-import { asyncRouteHandler } from "../index";
-import { ResponseSearch } from "@models/entity/response-search";
+import { IRequestQuery } from "@shared/types/request-query";
 import { IRequestSearch } from "@shared/types/request-search";
-import { getAuditByEntityId } from "@modules/audits";
-import { ResponseTooltip } from "@models/entity/response-tooltip";
-import { IRequest } from "src/custom_typings/request";
-import Relation from "@models/relation/relation";
-import { RelationEnums } from "@shared/enums";
-import { Relation as RelationType } from "@shared/types";
 import Document from "@models/document/document";
-import { copyRelations } from "@models/relation/functions";
-import Entity from "@models/entity/entity";
+import { IResponseQuery } from "@shared/types/response-query";
+
 import { EventType } from "@shared/types/stats";
+import { Router } from "express";
+import { IRequest } from "src/custom_typings/request";
+import { asyncRouteHandler } from "../index";
 
 export default Router()
   /**
@@ -704,4 +708,25 @@ export default Router()
 
       return response;
     })
+  )
+  .post(
+    "/query",
+    asyncRouteHandler<IResponseQuery>(
+      async (request: IRequest<undefined, IRequestQuery>) => {
+        const querySearch = new QuerySearch(
+          request.body.query,
+          request.body.explore
+        );
+
+        const ids = await querySearch.run(request.db.connection);
+        const results = await querySearch.getResults(request.db.connection);
+
+        return {
+          query: request.body.query,
+          entities: results,
+          explore: querySearch.explore,
+          total: ids.length,
+        };
+      }
+    )
   );
