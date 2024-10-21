@@ -1,10 +1,14 @@
 import styled from "styled-components";
 
-export const StyledTableWrapper = styled.div`
+interface StyledTableWrapper {
+  // $height: number;
+}
+export const StyledTableWrapper = styled.div<StyledTableWrapper>`
   display: flex;
   flex-direction: column;
-  overflow: auto;
-  width: 100%;
+  /* overflow: auto; */
+  flex-shrink: 0;
+  flex-grow: 1;
 `;
 interface StyledGrid {
   $columns: number;
@@ -105,8 +109,8 @@ export const StyledTableHeader = styled(StyledSpaceBetween)`
   padding: ${({ theme }) => theme.space[2]};
   padding-top: 0.2rem;
 
-  position: sticky;
-  top: 0;
+  /* position: sticky; */
+  /* top: 0; */
   background-color: ${({ theme }) => theme.color["gray"][200]};
   box-shadow: 0 2px 3px -1px rgba(0, 0, 0, 0.3);
   z-index: 20;
