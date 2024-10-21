@@ -71,10 +71,10 @@ export const EntityDetailCreateTemplateModal: React.FC<
 
       toast.info(
         `Template [${variables.class}]: "${getShortLabelByLetterCount(
-          variables.label,
+          variables.labels[0],
           120
         )}" created from entity "${getShortLabelByLetterCount(
-          entity.label,
+          entity.labels[0],
           120
         )}"`
       );
