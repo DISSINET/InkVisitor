@@ -53,7 +53,7 @@ export const GuestScreen: React.FC<GuestScreen> = ({ setRedirectToMain }) => {
           label="Enter"
           color="success"
           onClick={() => handleEnter()}
-          size={ButtonSize.Medium}
+          size={ButtonSize.Large}
         />
       </StyledButtonWrap>
       {error !== false && <StyledErrorText>{error}</StyledErrorText>}

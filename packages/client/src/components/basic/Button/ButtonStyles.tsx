@@ -19,9 +19,29 @@ const getFontSize = ($size: ButtonSize) => {
     case ButtonSize.Small:
       return "xs";
     case ButtonSize.Medium:
-      return "sm";
-    case ButtonSize.Large:
       return "base";
+    case ButtonSize.Large:
+      return "lg";
+  }
+};
+const getVerticalMargin = ($size: ButtonSize) => {
+  switch ($size) {
+    case ButtonSize.Small:
+      return "0.25rem";
+    case ButtonSize.Medium:
+      return "0.3rem";
+    case ButtonSize.Large:
+      return "0.45rem";
+  }
+};
+const getHorizontalMargin = ($size: ButtonSize, $iconButton?: boolean) => {
+  switch ($size) {
+    case ButtonSize.Small:
+      return $iconButton ? "0.25rem" : "0.5rem";
+    case ButtonSize.Medium:
+      return $iconButton ? "0.3rem" : "0.55rem";
+    case ButtonSize.Large:
+      return $iconButton ? "0.45rem" : "0.7rem";
   }
 };
 interface IButtonStyle {
@@ -47,7 +67,8 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
   font-size: ${({ theme, $size }) => theme.fontSize[getFontSize($size)]};
   font-weight: ${({ $disabled, $textRegular }) =>
     $disabled ? 400 : $textRegular ? 500 : 900};
-  padding: ${space1} ${({ $iconButton }) => ($iconButton ? space1 : space2)};
+  padding: ${({ $iconButton, $size }) =>
+    `${getVerticalMargin($size)} ${getHorizontalMargin($size, $iconButton)}`};
   border-color: ${({ theme, $disabled, $color }) =>
     $disabled ? theme.color["gray"][400] : theme.color[$color]};
   border-width: ${({ $noBorder }) => ($noBorder ? 0 : "thin")};
