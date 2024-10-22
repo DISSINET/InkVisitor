@@ -15,6 +15,7 @@ import {
   StyledInputRow,
   StyledTbMailFilled,
 } from "./LoginScreensStyles";
+import useKeypress from "hooks/useKeyPress";
 
 interface LoginScreen {
   usernameLocal: string;
@@ -52,6 +53,14 @@ export const LoginScreen: React.FC<LoginScreen> = ({
       }
     }
   };
+
+  useKeypress(
+    "Enter",
+    () => {
+      handleLogIn();
+    },
+    [usernameLocal, password]
+  );
 
   return (
     <>

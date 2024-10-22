@@ -19,6 +19,7 @@ import {
   StyledErrorText,
   StyledInputRow,
 } from "pages/AuthModalSharedStyles";
+import useKeypress from "hooks/useKeyPress";
 
 interface PasswordRecoverScreen {
   emailLocal: string;
@@ -58,6 +59,14 @@ export const PasswordRecoverScreen: React.FC<PasswordRecoverScreen> = ({
       setError(false);
     }
   }, [emailLocal]);
+
+  useKeypress(
+    "Enter",
+    () => {
+      handlePasswordReset();
+    },
+    [emailLocal]
+  );
 
   return (
     <>
