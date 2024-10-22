@@ -13,13 +13,6 @@ const exploreStateInitial: Explore.IExplore = {
     //     propertyType: "4ce5e669-d421-40c9-b1ce-f476fdd171fe",
     //   },
     // },
-    // {
-    //   id: "editor",
-    //   name: "Editor",
-    //   editable: false,
-    //   type: Explore.EExploreColumnType.EUC,
-    //   params: {},
-    // },
   ],
   sort: undefined,
   filters: [],

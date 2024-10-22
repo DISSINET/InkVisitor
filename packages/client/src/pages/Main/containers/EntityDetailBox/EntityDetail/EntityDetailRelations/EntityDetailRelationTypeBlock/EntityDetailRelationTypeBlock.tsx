@@ -30,22 +30,22 @@ interface EntityDetailRelationTypeBlock {
   selectedRelations?: Relation.IRelation[];
   relationType: RelationEnums.Type;
   entities: Record<string, IEntity>;
-  relationCreateMutation: UseMutationResult<
+  relationCreateMutation?: UseMutationResult<
     AxiosResponse<IResponseGeneric>,
     unknown,
     Relation.IRelation,
     unknown
   >;
-  relationUpdateMutation: UseMutationResult<
+  relationUpdateMutation?: UseMutationResult<
     AxiosResponse<IResponseGeneric>,
     unknown,
     {
       relationId: string;
-      changes: Partial<Relation.IRelation>;
+      changes: Partial<Relation.IRelation | Relation.IIdentification>;
     },
     unknown
   >;
-  relationDeleteMutation: UseMutationResult<
+  relationDeleteMutation?: UseMutationResult<
     AxiosResponse<IResponseGeneric>,
     unknown,
     string,
@@ -115,14 +115,14 @@ export const EntityDetailRelationTypeBlock: React.FC<
         type: RelationEnums.Type.Identification,
         certainty: EntityEnums.Certainty.Certain,
       };
-      relationCreateMutation.mutate(newRelation);
+      relationCreateMutation?.mutate(newRelation);
     } else {
       const newRelation: Relation.IRelation = {
         id: uuidv4(),
         entityIds: [entity.id, selectedId],
         type: relationType,
       };
-      relationCreateMutation.mutate(newRelation);
+      relationCreateMutation?.mutate(newRelation);
     }
   };
 
@@ -164,7 +164,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
       const changes = {
         entityIds: [...selectedEntityRelation[0].entityIds, entity.id],
       };
-      relationUpdateMutation.mutate({
+      relationUpdateMutation?.mutate({
         relationId: selectedEntityRelation[0].id,
         changes: changes,
       });
@@ -175,7 +175,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
         entityIds: [entity.id, cloudEntity.id],
         type: relationType as RelationEnums.Type,
       };
-      relationCreateMutation.mutate(newRelation);
+      relationCreateMutation?.mutate(newRelation);
     }
   };
 
@@ -230,7 +230,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
         finalOrder = allOrders[newOrder - 1];
       }
     }
-    relationUpdateMutation.mutate({
+    relationUpdateMutation?.mutate({
       relationId: relationId,
       changes: { order: finalOrder },
     });

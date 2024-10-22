@@ -7,7 +7,11 @@ import {
   IResponseDetail,
   Relation,
 } from "@shared/types";
-import { ITerritoryValidation } from "@shared/types/territory";
+import {
+  EProtocolTieType,
+  ITerritory,
+  ITerritoryValidation,
+} from "@shared/types/territory";
 import { IWarningPositionSection } from "@shared/types/warning";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
@@ -74,6 +78,15 @@ const allowedEntityChangeClasses = [
   EntityEnums.Class.Location,
   EntityEnums.Class.Object,
 ];
+const initValidation: ITerritoryValidation = {
+  detail: "",
+  entityClasses: [],
+  classifications: [],
+  allowedEntities: [],
+  allowedClasses: [],
+  propType: [],
+  tieType: EProtocolTieType.Property,
+};
 
 interface EntityDetail {
   detailId: string;
@@ -597,6 +610,22 @@ export const EntityDetail: React.FC<EntityDetail> = ({
     useState(false);
   const [loadingValidations, setLoadingValidations] = useState(false);
 
+  const [
+    showValidationsBatchRemoveSubmit,
+    setShowValidationsBatchRemoveSubmit,
+  ] = useState(false);
+
+  const initValidationRule = () => {
+    const { validations } = entity.data;
+    updateEntityMutation?.mutate({
+      data: {
+        validations: validations
+          ? [...validations, initValidation]
+          : [initValidation],
+      },
+    });
+  };
+
   return (
     <>
       {entity && (
@@ -664,20 +693,91 @@ export const EntityDetail: React.FC<EntityDetail> = ({
               {/* Validation rules */}
               {entity.class === EntityEnums.Class.Territory && (
                 <StyledDetailSection>
-                  <EntityDetailValidationSection
-                    validations={
-                      entity.data.validations as
-                        | ITerritoryValidation[]
-                        | undefined
-                    }
-                    entities={entity.entities}
-                    updateEntityMutation={updateEntityMutation}
-                    userCanEdit={userCanEdit}
-                    isInsideTemplate={isInsideTemplate}
-                    territoryParentId={getTerritoryId(entity)}
-                    entity={entity}
-                    setLoadingValidations={setLoadingValidations}
-                  />
+                  <StyledDetailSectionHeader>
+                    Validation rules
+                    {userCanEdit && (
+                      <span style={{ marginLeft: "1rem", marginRight: "1rem" }}>
+                        <Button
+                          color="primary"
+                          label="rule"
+                          icon={<FaPlus />}
+                          onClick={initValidationRule}
+                        />
+                      </span>
+                    )}
+                    {userCanEdit && (
+                      <EntityDetailSectionButtons
+                        entityId={entity.id}
+                        suggesterCategoryTypes={[EntityEnums.Class.Territory]}
+                        setShowSubmit={setShowValidationsBatchRemoveSubmit}
+                        removeBtnTooltip="remove all validations from entity"
+                        removeBtnDisabled={
+                          entity.data.validations
+                            ? entity.data.validations.length === 0
+                            : true
+                        }
+                        handleCopyFromEntity={(pickedEntity, replace) => {
+                          setLoadingValidations(true);
+                          api.detailGet(pickedEntity.id).then((data) => {
+                            setLoadingValidations(false);
+                            const otherValidations = (data.data as ITerritory)
+                              .data.validations;
+                            if (
+                              otherValidations &&
+                              otherValidations.length > 0
+                            ) {
+                              if (replace) {
+                                updateEntityMutation?.mutate({
+                                  data: {
+                                    validations: otherValidations,
+                                  },
+                                });
+                              } else {
+                                if (entity.data.validations) {
+                                  updateEntityMutation?.mutate({
+                                    data: {
+                                      validations: [
+                                        ...entity.data.validations,
+                                        ...otherValidations,
+                                      ],
+                                    },
+                                  });
+                                } else {
+                                  updateEntityMutation?.mutate({
+                                    data: {
+                                      validations: otherValidations,
+                                    },
+                                  });
+                                }
+                              }
+                            } else {
+                              toast.info("no validations");
+                            }
+                          });
+                        }}
+                      />
+                    )}
+                  </StyledDetailSectionHeader>
+                  <StyledDetailSectionContent>
+                    <EntityDetailValidationSection
+                      validations={
+                        entity.data.validations as
+                          | ITerritoryValidation[]
+                          | undefined
+                      }
+                      entities={entity.entities}
+                      updateEntityMutation={updateEntityMutation}
+                      userCanEdit={userCanEdit}
+                      isInsideTemplate={isInsideTemplate}
+                      territoryParentId={getTerritoryId(entity)}
+                      showValidationsBatchRemoveSubmit={
+                        showValidationsBatchRemoveSubmit
+                      }
+                      setShowValidationsBatchRemoveSubmit={
+                        setShowValidationsBatchRemoveSubmit
+                      }
+                    />
+                  </StyledDetailSectionContent>
                 </StyledDetailSection>
               )}
 
