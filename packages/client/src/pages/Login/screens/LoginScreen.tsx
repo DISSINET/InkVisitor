@@ -16,6 +16,7 @@ import {
   StyledTbMailFilled,
 } from "./LoginScreensStyles";
 import useKeypress from "hooks/useKeyPress";
+import { ButtonSize } from "types";
 
 interface LoginScreen {
   usernameLocal: string;
@@ -101,6 +102,7 @@ export const LoginScreen: React.FC<LoginScreen> = ({
           label="Log In"
           color="success"
           onClick={() => handleLogIn()}
+          size={ButtonSize.Medium}
         />
       </StyledButtonWrap>
     </>
