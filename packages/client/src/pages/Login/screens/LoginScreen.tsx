@@ -1,4 +1,8 @@
-import { IErrorSignature, getErrorByCode } from "@shared/types/errors";
+import {
+  IErrorSignature,
+  NetworkError,
+  getErrorByCode,
+} from "@shared/types/errors";
 import api from "api";
 import { Button, Input } from "components";
 import { StyledButtonWrap, StyledErrorText } from "pages/AuthModalSharedStyles";
@@ -33,7 +37,7 @@ export const LoginScreen: React.FC<LoginScreen> = ({
 
   const handleLogIn = async () => {
     if (ping === -1 || ping === -2) {
-      setError("Server is down");
+      setError(NetworkError.message);
     } else {
       try {
         const res = await api.signIn(usernameLocal, password, {
