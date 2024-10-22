@@ -1,5 +1,6 @@
 import api from "api";
 import { Button } from "components";
+import useKeypress from "hooks/useKeyPress";
 import {
   StyledButtonWrap,
   StyledDescription,
@@ -31,6 +32,14 @@ export const GuestScreen: React.FC<GuestScreen> = ({ setRedirectToMain }) => {
       setError("Auto login failed");
     }
   };
+
+  useKeypress(
+    "Enter",
+    () => {
+      handleEnter();
+    },
+    []
+  );
 
   return (
     <>
