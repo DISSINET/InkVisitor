@@ -354,6 +354,7 @@ export const ExplorerTableRowExpanded: React.FC<ExplorerTableRowExpanded> = ({
                       useCases={entity.usedInStatements}
                       key="Statement"
                       perPage={10}
+                      disableRowClick
                     />
                   )}
 

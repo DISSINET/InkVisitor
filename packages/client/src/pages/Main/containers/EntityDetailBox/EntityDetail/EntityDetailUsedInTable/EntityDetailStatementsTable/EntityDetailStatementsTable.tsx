@@ -24,10 +24,11 @@ interface EntityDetailStatementsTable {
   entities: { [key: string]: IEntity };
   useCases: IResponseUsedInStatement<EntityEnums.UsedInPosition>[];
   perPage?: number;
+  disableRowClick?: boolean;
 }
 export const EntityDetailStatementsTable: React.FC<
   EntityDetailStatementsTable
-> = ({ title, entities, useCases, perPage = 5 }) => {
+> = ({ title, entities, useCases, perPage = 5, disableRowClick }) => {
   const { setStatementId, setTerritoryId } = useSearchParams();
 
   const data = useMemo(() => (useCases ? useCases : []), [useCases]);
@@ -156,18 +157,22 @@ export const EntityDetailStatementsTable: React.FC<
         entityTitle={title}
         perPage={perPage}
         fullWidthColumn={5}
-        onRowClick={(row) => {
-          const statementId = row.original.statement?.id;
-          const entity = statementId ? entities[statementId] : false;
+        onRowClick={
+          !disableRowClick
+            ? (row) => {
+                const statementId = row.original.statement?.id;
+                const entity = statementId ? entities[statementId] : false;
 
-          if (entity && entity.class === EntityEnums.Class.Statement) {
-            const statement = entity as IStatement;
-            if (statement.data.territory) {
-              setStatementId(statement.id);
-              setTerritoryId(statement.data.territory.territoryId);
-            }
-          }
-        }}
+                if (entity && entity.class === EntityEnums.Class.Statement) {
+                  const statement = entity as IStatement;
+                  if (statement.data.territory) {
+                    setStatementId(statement.id);
+                    setTerritoryId(statement.data.territory.territoryId);
+                  }
+                }
+              }
+            : undefined
+        }
       />
     </>
   );
