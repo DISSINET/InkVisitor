@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import { space1, space2 } from "Theme/constants";
 import { ThemeColor } from "Theme/theme";
+import { ButtonSize } from "types";
 
 const getRadius = ($radiusLeft?: boolean, $radiusRight?: boolean) => {
   if ($radiusLeft && $radiusRight) {
@@ -13,8 +14,19 @@ const getRadius = ($radiusLeft?: boolean, $radiusRight?: boolean) => {
     return "0";
   }
 };
+const getFontSize = ($size: ButtonSize) => {
+  switch ($size) {
+    case ButtonSize.Small:
+      return "xs";
+    case ButtonSize.Medium:
+      return "sm";
+    case ButtonSize.Large:
+      return "base";
+  }
+};
 interface IButtonStyle {
-  $hasIcon?: boolean;
+  $size: ButtonSize;
+  $iconButton?: boolean;
   $fullWidth?: boolean;
   $noBorder?: boolean;
   $noBackground?: boolean;
@@ -24,7 +36,6 @@ interface IButtonStyle {
   $disabled?: boolean;
   $radiusLeft?: boolean;
   $radiusRight?: boolean;
-  $paddingX: boolean;
 }
 export const StyledButton = styled.button.attrs(({ ref }) => ({
   ref: ref,
@@ -33,12 +44,10 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
   align-items: center;
   justify-content: center;
   width: ${({ $fullWidth }) => ($fullWidth ? "100%" : "auto")};
-  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  font-size: ${({ theme, $size }) => theme.fontSize[getFontSize($size)]};
   font-weight: ${({ $disabled, $textRegular }) =>
     $disabled ? 400 : $textRegular ? 500 : 900};
-  padding: ${space1} ${({ $hasIcon }) => ($hasIcon ? space1 : space2)};
-  padding-left: ${({ $paddingX }) => ($paddingX ? "0.5rem" : "")};
-  padding-right: ${({ $paddingX }) => ($paddingX ? "0.5rem" : "")};
+  padding: ${space1} ${({ $iconButton }) => ($iconButton ? space1 : space2)};
   border-color: ${({ theme, $disabled, $color }) =>
     $disabled ? theme.color["gray"][400] : theme.color[$color]};
   border-width: ${({ $noBorder }) => ($noBorder ? 0 : "thin")};
@@ -81,6 +90,6 @@ export const StyledButtonLabel = styled.span<{
   $noIconMargin?: boolean;
 }>`
   margin-left: ${({ theme, $hasIcon = false, $noIconMargin = false }) =>
-    $hasIcon ? ($noIconMargin ? 0 : "0.3rem") : 0};
+    $hasIcon ? ($noIconMargin ? 0 : "0.4rem") : 0};
   text-transform: lowercase;
 `;
