@@ -507,14 +507,14 @@ class Statement extends Entity implements IStatement {
 
   walkObjects(cb: (o: StatementObject) => void) {
     // statement.props
-    Entity.extractIdsFromProps(this.props, cb);
+    Entity.extractIdsFromProps(this.props, undefined, cb);
 
     // statement.actions
     for (const action of this.data.actions) {
       cb(action);
 
       // statement.actions.props
-      Entity.extractIdsFromProps(action.props, cb);
+      Entity.extractIdsFromProps(action.props, undefined, cb);
     }
 
     // statement.actants
@@ -522,7 +522,7 @@ class Statement extends Entity implements IStatement {
       cb(actant);
 
       // statement.actants.props
-      Entity.extractIdsFromProps(actant.props, cb);
+      Entity.extractIdsFromProps(actant.props, undefined, cb);
 
       // statement.actants.classifications
       for (const classification of actant.classifications) {

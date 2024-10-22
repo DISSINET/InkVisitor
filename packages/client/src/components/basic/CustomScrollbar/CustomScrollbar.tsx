@@ -34,7 +34,7 @@ export const CustomScrollbar: React.FC<CustomScrollbar> = ({
       removeTrackXWhenNotUsed={true}
       removeTrackYWhenNotUsed={true}
       permanentTracks={false}
-      style={{ width: contentWidth }}
+      style={{ width: contentWidth || "" }}
     >
       {children}
     </StyledScrollbar>
