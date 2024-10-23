@@ -3,7 +3,6 @@ import {
   IEntity,
   IProp,
   IResponseDetail,
-  IResponseDocument,
   IResponseEntity,
   IResponseUsedInMetaProp,
   IResponseUsedInStatement,
@@ -27,8 +26,7 @@ import {
 } from "@shared/types/statement";
 import { UsedRelations } from "@models/relation/relations";
 import EntityWarnings from "./warnings";
-import Document from "@models/document/document";
-import { clean } from "@modules/common.test";
+import Document, { TreeNode } from "@models/document/document";
 import Resource from "@models/resource/resource";
 
 export class ResponseEntity extends Entity implements IResponseEntity {
@@ -214,26 +212,48 @@ export class ResponseEntityDetail
   ): Promise<IResponseUsedInDocument[]> {
     const out: IResponseUsedInDocument[] = [];
     await Promise.all(
-      (await Document.findByEntityId(conn, this.id)).map(async (docData) => {
-        const cleanDocument = new Document({});
-        cleanDocument.content = docData.content;
-        const anchors = cleanDocument.findAnchors(this.id);
+      (
+        await Document.findByEntityId(conn, this.id)
+      ).map(async (docData) => {
+        // construct document and tree node filled with entities data
+        const doc = new Document({
+          content: docData.content,
+        });
+        const anchors = doc.buildAnchorsTree();
+        const anchoredEntities = await Entity.findEntitiesByIds(
+          conn,
+          doc.collectAnchors(anchors)
+        );
+        doc.assignClassesBasedOnEntities(anchors, anchoredEntities);
+
         const resource = await Resource.findByDocumentId(conn, docData.id);
 
-        for (const anchor of anchors) {
-          out.push({
-            document: {
-              id: docData.id,
-              title: docData.title,
-              entityIds: docData.entityIds,
-              createdAt: docData.createdAt,
-              updatedAt: docData.updatedAt,
-            },
-            anchorText: anchor,
-            resourceId: resource?.id || "",
-            parentTerritoryId: "",
-          })
-        }
+        // traverse the tree, search for anchor that === this.id
+        const traverse = (nodes: TreeNode[], parentT?: string) => {
+          for (const node of nodes) {
+            if (node.anchor === this.id) {
+              out.push({
+                document: {
+                  id: docData.id,
+                  title: docData.title,
+                  entityIds: docData.entityIds,
+                  createdAt: docData.createdAt,
+                  updatedAt: docData.updatedAt,
+                },
+                anchorText: node.getShortContent(),
+                resourceId: resource?.id || "",
+                parentTerritoryId: parentT || "",
+              });
+            }
+
+            traverse(
+              node.children,
+              node.class === EntityEnums.Class.Territory ? node.anchor : parentT
+            );
+          }
+        };
+
+        traverse(anchors);
       })
     );
 
