@@ -146,6 +146,11 @@ export const EntityTag: React.FC<EntityTag> = ({
             entityId={entity.id}
             entityClass={entity.class}
             label={(entity.labels && entity.labels[0]) || <i>{"no label"}</i>}
+            alternativeLabels={
+              entity.labels && entity.labels.length > 1
+                ? entity.labels.slice(1)
+                : undefined
+            }
             language={entity.language}
             detail={entity.detail}
             text={
