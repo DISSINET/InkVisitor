@@ -177,7 +177,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
             {alternativeLabels && alternativeLabels.length > 0 && (
               <StyledRow>
                 <StyledIconWrap>
-                  <AiOutlineTags />
+                  <AiOutlineTags size={12} />
                 </StyledIconWrap>
                 <StyledDetail>
                   {alternativeLabels.map((altLabel, key) => {
