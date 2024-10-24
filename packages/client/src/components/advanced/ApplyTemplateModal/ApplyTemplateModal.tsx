@@ -40,34 +40,30 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModal> = ({
   templateToApply,
   setTemplateToApply,
 }) => {
-  console.log(templateToApply.labels[0]);
   const handleApplyTemplate = async (templateToApply: IEntity) => {
-    if (templateToApply) {
-      try {
-        const entityAfterTemplateApplied: IEntity = await applyTemplate(
-          templateToApply,
-          entity,
-          localStorage.getItem("userrole") as UserEnums.Role
+    try {
+      const entityAfterTemplateApplied: IEntity = await applyTemplate(
+        templateToApply,
+        entity,
+        localStorage.getItem("userrole") as UserEnums.Role
+      );
+
+      if (entityAfterTemplateApplied) {
+        toast.info(
+          `Template "${getShortLabelByLetterCount(
+            templateToApply.labels[0],
+            120
+          )}" applied to ${
+            entitiesDictKeys[entity.class].label
+          } "${getShortLabelByLetterCount(entity.labels[0], 120)}"`
         );
 
-        if (entityAfterTemplateApplied) {
-          console.log(templateToApply.labels[0]);
-          toast.info(
-            `Template "${getShortLabelByLetterCount(
-              templateToApply.labels[0],
-              120
-            )}" applied to ${
-              entitiesDictKeys[entity.class].label
-            } "${getShortLabelByLetterCount(entity.labels[0], 120)}"`
-          );
-
-          updateEntityMutation.mutate(entityAfterTemplateApplied);
-        }
-      } catch (e) {
-        toast.error("Template was not applied");
+        updateEntityMutation.mutate(entityAfterTemplateApplied);
       }
-      setTemplateToApply(false);
+    } catch (e) {
+      toast.error("Template was not applied");
     }
+    setTemplateToApply(false);
   };
 
   return (
@@ -86,9 +82,7 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModal> = ({
       <ModalContent>
         <ModalInputForm>{`Apply template?`}</ModalInputForm>
         <div style={{ marginLeft: "0.5rem" }}>
-          {templateToApply && (
-            <EntityTag disableDrag entity={templateToApply} />
-          )}
+          <EntityTag disableDrag entity={templateToApply} />
         </div>
         {/* here goes the info about template #951 */}
       </ModalContent>
