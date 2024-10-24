@@ -51,11 +51,11 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModal> = ({
       if (entityAfterTemplateApplied) {
         toast.info(
           `Template "${getShortLabelByLetterCount(
-            templateToApply.labels[0],
+            templateToApply.labels[0] || "",
             120
           )}" applied to ${
             entitiesDictKeys[entity.class].label
-          } "${getShortLabelByLetterCount(entity.labels[0], 120)}"`
+          } "${getShortLabelByLetterCount(entity.labels[0] || "", 120)}"`
         );
 
         updateEntityMutation.mutate(entityAfterTemplateApplied);
