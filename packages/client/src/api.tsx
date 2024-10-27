@@ -186,7 +186,7 @@ class Api {
 
         if (error.status === 401) {
           // if handled by react router, then the toast could be visible
-          window.location.pathname = "/login"
+          window.location.pathname = (process.env.ROOT_URL || "") + "/login";
         }
 
         return Promise.reject(error);

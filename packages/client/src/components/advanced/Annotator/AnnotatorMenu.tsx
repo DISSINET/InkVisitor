@@ -49,7 +49,6 @@ export const TextAnnotatorMenu = ({
           <Button
             icon={<BsSegmentedNav size={22} />}
             color="primary"
-            paddingX={true}
             onClick={() => {
               console.log("Segment selection into Statements");
             }}
@@ -66,14 +65,9 @@ export const TextAnnotatorMenu = ({
             entities[thisTerritoryEntityId] && (
               <div style={{ display: "flex", gap: theme.space[2] }}>
                 <Button
-                  icon={
-                    <>
-                      <TbAnchor size={15} style={{ marginRight: 2 }} />
-                      Active territory
-                    </>
-                  }
+                  label="Active territory"
+                  icon={<TbAnchor size={15} />}
                   color="primary"
-                  paddingX={true}
                   onClick={() => {
                     onAnchorAdd(thisTerritoryEntityId);
                   }}
@@ -91,11 +85,10 @@ export const TextAnnotatorMenu = ({
               icon={
                 <>
                   <FaPlus size={12} style={{}} />
-                  <TbAnchor size={15} style={{ marginRight: 2 }} />
+                  <TbAnchor size={15} />
                 </>
               }
               color="primary"
-              paddingX={true}
               onClick={() => {
                 handleCreateStatement();
               }}
@@ -108,11 +101,10 @@ export const TextAnnotatorMenu = ({
               icon={
                 <>
                   <FaPlus size={12} style={{}} />
-                  <TbAnchor size={15} style={{ marginRight: 2 }} />
+                  <TbAnchor size={15} />
                 </>
               }
               color="primary"
-              paddingX={true}
               onClick={() => {
                 handleCreateTerritory();
               }}

@@ -1,16 +1,22 @@
-import { IErrorSignature, getErrorByCode } from "@shared/types/errors";
+import {
+  IErrorSignature,
+  NetworkError,
+  getErrorByCode,
+} from "@shared/types/errors";
 import api from "api";
 import { Button, Input } from "components";
 import { StyledButtonWrap, StyledErrorText } from "pages/AuthModalSharedStyles";
 import React, { useState } from "react";
 import { FiLogIn } from "react-icons/fi";
 import { setUsername } from "redux/features/usernameSlice";
-import { useAppDispatch } from "redux/hooks";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
 import {
   StyledFaLock,
   StyledInputRow,
   StyledTbMailFilled,
 } from "./LoginScreensStyles";
+import useKeypress from "hooks/useKeyPress";
+import { ButtonSize } from "types";
 
 interface LoginScreen {
   usernameLocal: string;
@@ -29,19 +35,33 @@ export const LoginScreen: React.FC<LoginScreen> = ({
   const dispatch = useAppDispatch();
   const [error, setError] = useState<string | false>(false);
 
+  const ping: number = useAppSelector((state) => state.ping);
+
   const handleLogIn = async () => {
-    try {
-      const res = await api.signIn(usernameLocal, password, {
-        ignoreErrorToast: true,
-      });
-      if (res?.token) {
-        await dispatch(setUsername(usernameLocal));
-        setRedirectToMain(true);
+    if (ping === -1 || ping === -2) {
+      setError(NetworkError.message);
+    } else {
+      try {
+        const res = await api.signIn(usernameLocal, password, {
+          ignoreErrorToast: true,
+        });
+        if (res?.token) {
+          await dispatch(setUsername(usernameLocal));
+          setRedirectToMain(true);
+        }
+      } catch (err) {
+        setError(getErrorByCode(err as IErrorSignature).message);
       }
-    } catch (err) {
-      setError(getErrorByCode(err as IErrorSignature).message);
     }
   };
+
+  useKeypress(
+    "Enter",
+    () => {
+      handleLogIn();
+    },
+    [usernameLocal, password]
+  );
 
   return (
     <>
@@ -82,6 +102,7 @@ export const LoginScreen: React.FC<LoginScreen> = ({
           label="Log In"
           color="success"
           onClick={() => handleLogIn()}
+          size={ButtonSize.Medium}
         />
       </StyledButtonWrap>
     </>
