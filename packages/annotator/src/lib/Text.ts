@@ -224,6 +224,7 @@ class Text {
       cursor.yLine + viewport.lineStart,
       cursor.xLine
     );
+
     return pos;
   }
 
@@ -264,6 +265,7 @@ class Text {
     const segmentIndex = this.segments.findIndex(
       (s) => s.lineStart <= absLineIndex && s.lineEnd > absLineIndex
     );
+
     if (segmentIndex === -1) {
       return null;
     }

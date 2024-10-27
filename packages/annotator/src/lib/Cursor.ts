@@ -215,19 +215,26 @@ export default class Cursor implements IRelativeCoordinates {
     xEnd: number,
     options: DrawingOptions
   ) {
-    const mode = options.schema?.mode;
+    const hlMode = options.schema?.mode;
     const { charWidth, lineHeight } = options;
     const width = (xEnd - xStart) * charWidth;
-    const height = mode === "underline" ? 2 : lineHeight;
+    const height = hlMode === "underline" ? 2 : lineHeight;
 
-    if (mode === "focus") {
+    if (hlMode === "focus") {
       ctx.globalCompositeOperation = "xor";
-    } else {
+      ctx.fillRect(xStart * charWidth, relLine * lineHeight, width, height);
+    } else if (hlMode === "underline") {
       ctx.globalCompositeOperation = "multiply";
+      ctx.fillRect(
+        xStart * charWidth,
+        (relLine + 1) * lineHeight,
+        width,
+        height
+      );
+    } else if (hlMode === "background") {
+      ctx.globalCompositeOperation = "multiply";
+      ctx.fillRect(xStart * charWidth, relLine * lineHeight, width, height);
     }
-
-    ctx.fillRect(xStart * charWidth, relLine * lineHeight, width, height);
-    ctx.globalCompositeOperation = "hue";
   }
 
   /**
@@ -241,7 +248,7 @@ export default class Cursor implements IRelativeCoordinates {
   draw(
     ctx: CanvasRenderingContext2D,
     viewport: Viewport,
-    text: Text,
+    textLines: string[],
     options: DrawingOptions
   ) {
     if (this.xLine === -1 && this.yLine === -1) {
@@ -282,10 +289,14 @@ export default class Cursor implements IRelativeCoordinates {
             rowsToDraw.push({ rowI: i, start: 0, end: charsAtLine });
           }
           if (absY === hStart.yLine) {
-            rowsToDraw.push({ rowI: i, start: 0, end: hStart.xLine });
+            rowsToDraw.push({ rowI: i, start: 0, end: charsAtLine });
           }
           if (absY === hEnd.yLine) {
-            rowsToDraw.push({ rowI: i, start: hEnd.xLine, end: charsAtLine });
+            rowsToDraw.push({
+              rowI: i,
+              start: hEnd.xLine,
+              end: charsAtLine,
+            });
           }
         } else {
           if (hStart.yLine <= absY && hEnd.yLine >= absY) {
@@ -293,7 +304,10 @@ export default class Cursor implements IRelativeCoordinates {
               rowsToDraw.push({
                 rowI: i,
                 start: hStart.xLine,
-                end: hStart.yLine === hEnd.yLine ? hEnd.xLine : charsAtLine,
+                end:
+                  hStart.yLine === hEnd.yLine
+                    ? hEnd.xLine
+                    : textLines[absY].length,
               });
             } else if (hEnd.yLine === absY) {
               rowsToDraw.push({ rowI: i, start: 0, end: hEnd.xLine });
@@ -301,7 +315,7 @@ export default class Cursor implements IRelativeCoordinates {
               rowsToDraw.push({
                 rowI: i,
                 start: 0,
-                end: text.lines[absY].length,
+                end: textLines[absY].length,
               });
             }
           }

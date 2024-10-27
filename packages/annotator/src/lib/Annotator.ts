@@ -1,4 +1,4 @@
-import Cursor from "./Cursor";
+import Cursor, { IAbsCoordinates } from "./Cursor";
 import { Lines } from "./Lines";
 import Scroller from "./Scroller";
 import Text, { SegmentPosition } from "./Text";
@@ -561,7 +561,6 @@ export class Annotator {
         if (this.text.mode === Modes.HIGHLIGHT) {
           return;
         }
-        console.log(this.cursor.getSelected());
         return;
         this.text.deleteText(this.viewport, this.cursor, -1);
         this.cursor.move(0, 0);
@@ -831,7 +830,7 @@ export class Annotator {
       // fix cursor position to end of the line (cursor.xLine could be virtually infinity)
       this.cursor.xLine = textSegment.charInLineIndex;
 
-      this.cursor.draw(this.ctx, this.viewport, this.text, {
+      this.cursor.draw(this.ctx, this.viewport, this.text.lines, {
         lineHeight: this.lineHeight,
         charWidth: this.charWidth,
         charsAtLine: this.text.charsAtLine,
@@ -866,6 +865,7 @@ export class Annotator {
         });
       }
     }
+
     if (this.text.mode === Modes.HIGHLIGHT && this.onHighlightCb) {
       const startPos = this.text.getSegmentPosition(this.viewport.lineStart, 0);
       const endPos = this.text.getSegmentPosition(
@@ -873,26 +873,53 @@ export class Annotator {
         this.text.charsAtLine
       );
 
-      const textSegment = this.text.cursorToIndex(this.viewport, this.cursor);
-
       const annotated: string[] = this.getAnnotations(startPos, endPos);
 
-      for (const tag of annotated) {
-        const highlight = this.onHighlightCb(tag);
-        if (highlight && textSegment) {
-          const [startLine, endLine] = this.text.getTagPosition(tag);
-          const highlighter = new Cursor(this.ratio, 0, 0, {});
-          highlighter.selectStart = startLine;
-          highlighter.selectEnd = endLine;
-          highlighter.draw(this.ctx, this.viewport, this.text, {
-            lineHeight: this.lineHeight,
-            charWidth: this.charWidth,
-            charsAtLine: this.text.charsAtLine,
-            mode: this.text.mode,
-            schema: highlight,
-          });
+      const higlightItems: {
+        schema: HighlightSchema;
+        start: IAbsCoordinates;
+        end: IAbsCoordinates;
+      }[] = [];
 
-          /*
+      for (const tag of annotated) {
+        const hlSchema = this.onHighlightCb(tag);
+        const [startLine, endLine] = this.text.getTagPosition(tag);
+
+        if (hlSchema) {
+          higlightItems.push({
+            schema: hlSchema,
+            start: startLine,
+            end: endLine,
+          });
+        }
+      }
+
+      // the focus mode goes to the end, underline mode goes to start
+      higlightItems.sort((a, b) => {
+        if (a.schema.mode === "focus") {
+          return 1;
+        }
+        if (a.schema.mode === "underline") {
+          return -1;
+        }
+        return 0;
+      });
+
+      for (const item of higlightItems) {
+        const highlighter = new Cursor(this.ratio, 0, 0, {});
+
+        highlighter.selectStart = item.start;
+        highlighter.selectEnd = item.end;
+
+        highlighter.draw(this.ctx, this.viewport, this.text.lines, {
+          lineHeight: this.lineHeight,
+          charWidth: this.charWidth,
+          charsAtLine: this.text.charsAtLine,
+          mode: this.text.mode,
+          schema: item.schema,
+        });
+
+        /*
             if (startLine && endLine) {
               this.ctx.underlineStyle = "green"; //highlight.style.color;
               for (
@@ -929,7 +956,6 @@ export class Annotator {
               }
             }
             */
-        }
       }
     }
 
