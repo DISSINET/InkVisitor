@@ -65,13 +65,13 @@
         <label>mode</label>
         <select id="mode">
           <option value="raw">raw</option>
-          <option value="highlight">highlight</option>
+          <option value="highlight" checked>highlight</option>
           <option value="semi">semi</option>
         </select>
       </fieldset>
       <fieldset>
         <label>toggle highlight</label>
-        <input type="checkbox" id="highlightToggle" />
+        <input type="checkbox" id="highlightToggle" checked />
       </fieldset>
       <fieldset>
         <label>add anchor </label>
@@ -109,12 +109,14 @@
       const exampleResponse = await fetch("example.txt");
       const exampleTxt = await exampleResponse.text();
 
-      let highlightEnabled = false;
+      let highlightEnabled = true;
       const annotator = new Annotator(
         document.getElementById("canvas"),
         exampleTxt,
         ratio
       );
+
+      annotator.setMode("highlight");
 
       annotator.fontColor = "black";
       annotator.bgColor = "transparent";
@@ -152,8 +154,8 @@
           return {
             mode: "focus",
             style: {
-              color: "darkgrey",
-              opacity: 1,
+              color: "#181C14",
+              opacity: 0.65,
             },
           };
         }

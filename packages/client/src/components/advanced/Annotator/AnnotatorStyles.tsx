@@ -3,7 +3,7 @@ import styled from "styled-components";
 export const StyledScrollerViewport = styled.div`
   background: #ccc;
   position: relative;
-  width: 14px;
+  width: 16px;
   border-radius: ${({ theme }) => theme.borderRadius["default"]};
 `;
 

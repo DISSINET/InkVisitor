@@ -1,4 +1,5 @@
 import { DrawingOptions } from "./Annotator";
+import Text from "./Text";
 import Viewport from "./Viewport";
 import { Modes } from "./constants";
 
@@ -214,31 +215,42 @@ export default class Cursor implements IRelativeCoordinates {
     xEnd: number,
     options: DrawingOptions
   ) {
+    const mode = options.schema?.mode;
     const { charWidth, lineHeight } = options;
     const width = (xEnd - xStart) * charWidth;
-    const height = options.schema?.mode === "underline" ? 2 : lineHeight;
+    const height = mode === "underline" ? 2 : lineHeight;
+
+    if (mode === "focus") {
+      ctx.globalCompositeOperation = "xor";
+    } else {
+      ctx.globalCompositeOperation = "multiply";
+    }
 
     ctx.fillRect(xStart * charWidth, relLine * lineHeight, width, height);
+    ctx.globalCompositeOperation = "hue";
   }
 
   /**
    * draw places cursor and optionally highlighted area into the canvas
    * @param ctx
    * @param viewport
+   * @param text
    * @param options
    * @returns
    */
   draw(
     ctx: CanvasRenderingContext2D,
     viewport: Viewport,
+    text: Text,
     options: DrawingOptions
   ) {
-    ctx.globalCompositeOperation = "multiply";
     if (this.xLine === -1 && this.yLine === -1) {
       return;
     }
 
-    const { charWidth, lineHeight, charsAtLine } = options;
+    const { charWidth, lineHeight, charsAtLine, schema } = options;
+
+    const hlMode = schema?.mode;
 
     ctx.fillStyle =
       options.mode === Modes.HIGHLIGHT
@@ -265,7 +277,7 @@ export default class Cursor implements IRelativeCoordinates {
       for (let i = 0; i <= viewport.lineEnd - viewport.lineStart; i++) {
         const absY = viewport.lineStart + i;
 
-        if (options.schema?.mode === "focus") {
+        if (hlMode === "focus") {
           if (absY < hStart.yLine || absY > hEnd.yLine) {
             rowsToDraw.push({ rowI: i, start: 0, end: charsAtLine });
           }
@@ -286,13 +298,15 @@ export default class Cursor implements IRelativeCoordinates {
             } else if (hEnd.yLine === absY) {
               rowsToDraw.push({ rowI: i, start: 0, end: hEnd.xLine });
             } else {
-              rowsToDraw.push({ rowI: i, start: 0, end: charsAtLine });
+              rowsToDraw.push({
+                rowI: i,
+                start: 0,
+                end: text.lines[absY].length,
+              });
             }
           }
         }
       }
-
-      console.log(rowsToDraw);
 
       ctx.fillStyle = options.schema?.style.color || this.style.selection.fill;
 

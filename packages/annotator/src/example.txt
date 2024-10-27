@@ -3,16 +3,16 @@
 </T40-000-000>
 <T40-000-001>In Dei nomine, Amen. Nos, Willelmus, permissione divina Cantuariensis archiepiscopus, totius Anglie primas et apostolice sedis legatus, tibi, Roberto Harryson de Northgate nostre Cantuariensis diocesis ac nostre iurisdictioni notorie subdito et subiecto, ad meram anime tue correctionem necnon ad omne iuris effectum qui exinde sequi poterit aut debebit, obiicimus et articulamur coniunctim et divisim omnes et singulos articulos infrascriptos ac quamlibet partem et particulam eorumdem: mandantes et precipientes quatinus eisdem omnibus et singulis singulariterque in eisdem contentis plenam, meram et nudam respondeas veritatem sub pena iuris.
 In primis tibi obiicimus et articulamur quod tu fuisti et es nostre Cantuariensis diocesis et nostre iurisdictioni notorie subditus et subiectus.
-Item quod tu per plures annos elapsos omnes et singulos hereses, errores et damnatas opiniones subsequentes seu saltem eorum aliquos credidisti, docuisti, tenuisti, affirmasti et predicasti, videlicet.
-Quod in sacramento altaris sive eucharistie non est verum corpus Christi.
+Item quod tu per <b>plures annos elapsos omnes et singulos hereses, errores et damnatas opiniones subsequentes seu saltem eorum aliquos credidisti, docuisti, tenuisti, affirmasti et predicasti, videlicet.
+Quod <a>in sacramento altaris</a> sive eucharistie non est verum corpus Christi.
 Item quod sacramenta baptismi et confirmationis non sunt necessaria ad salutem anime.
-Item quod vocalis, auricularis sive verbalis confessio peccatorum non est facienda sacerdoti.
+Item quod vocalis,</b> auricularis sive verbalis confessio peccatorum non est facienda sacerdoti.
 Item quod nulla potestas fuit aut est sacerdotibus a Deo collata magis quam laicis in sacramentis ecclesie ministrandis, missis celebrandis aut aliis divinis officiis exequendis.
 Item quod matrimonii solemnisatio non est necessaria ad anime salutem nec a iure divino instituta.
-Item quod sacramentum extreme unctionis non est utile aut necessarium ad anime salutem.
+<1f>Item quod sacramentum extreme unctionis non est utile aut necessarium ad anime salutem.
 Item’ quod ymagines sancte crucis et crucifixi ac beate Marie virginis et aliorum sanctorum nullo modo sunt venerande, sed quod venerantes huiusmodi ymagines committunt idolatriam.
 Item quod peregrinationes ad loca sancta et devota, ubi solet populus Christianus sanctos et reliquias sanctorum venerari, non sunt necessarie sive meritorie ad salutem anime sed damnabiles, detestando huiusmodi peregrinationes et peregrinantes ad huiusmodi loca reprehendendo, dicendo huiusmodi peregrinantes sic peregrinando committere idolatriam.
-Item quod oraciones non sunt effundende ad sanctos sed ad solum Deum, qui solus audit orantes.
+Item quod oraciones non sunt effundende ad sanctos sed ad solum Deum, qui solus audit orantes.</1f>
 Item quod panis benedictus et aqua benedicta non sunt maioris virtutis aut efficacie post benedictionem factam a sacerdote quam ante benedictionem.
 Item quod tu omnes et singulos hereses, errores et damnatas opiniones supradictos seu eorum aliquos credis, doces, tenes, affirmas et predicas etiam in presenti.
 Item quod tu omnia et singula premissa timore probationum solum et ad evadendam penam es confessus. Et si detecta per alios non fuissent nec timeres te posse convinci per testes, casu quo illa negares premissa numquam sponte confessus fuisses. Nec ea nunc sponte sed timore probationum confiteris.

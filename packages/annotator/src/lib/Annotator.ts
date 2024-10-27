@@ -831,7 +831,7 @@ export class Annotator {
       // fix cursor position to end of the line (cursor.xLine could be virtually infinity)
       this.cursor.xLine = textSegment.charInLineIndex;
 
-      this.cursor.draw(this.ctx, this.viewport, {
+      this.cursor.draw(this.ctx, this.viewport, this.text, {
         lineHeight: this.lineHeight,
         charWidth: this.charWidth,
         charsAtLine: this.text.charsAtLine,
@@ -873,16 +873,18 @@ export class Annotator {
         this.text.charsAtLine
       );
 
+      const textSegment = this.text.cursorToIndex(this.viewport, this.cursor);
+
       const annotated: string[] = this.getAnnotations(startPos, endPos);
 
       for (const tag of annotated) {
         const highlight = this.onHighlightCb(tag);
-        if (highlight) {
+        if (highlight && textSegment) {
           const [startLine, endLine] = this.text.getTagPosition(tag);
           const highlighter = new Cursor(this.ratio, 0, 0, {});
           highlighter.selectStart = startLine;
           highlighter.selectEnd = endLine;
-          highlighter.draw(this.ctx, this.viewport, {
+          highlighter.draw(this.ctx, this.viewport, this.text, {
             lineHeight: this.lineHeight,
             charWidth: this.charWidth,
             charsAtLine: this.text.charsAtLine,
