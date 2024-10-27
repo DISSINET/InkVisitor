@@ -1,5 +1,6 @@
 import api from "api";
 import { Button } from "components";
+import useKeypress from "hooks/useKeyPress";
 import {
   StyledButtonWrap,
   StyledDescription,
@@ -8,6 +9,7 @@ import {
 import React, { useState } from "react";
 import { IoEnter } from "react-icons/io5";
 import { useAppDispatch } from "redux/hooks";
+import { ButtonSize } from "types";
 
 interface GuestScreen {
   setRedirectToMain: React.Dispatch<React.SetStateAction<boolean>>;
@@ -32,24 +34,27 @@ export const GuestScreen: React.FC<GuestScreen> = ({ setRedirectToMain }) => {
     }
   };
 
+  useKeypress(
+    "Enter",
+    () => {
+      handleEnter();
+    },
+    []
+  );
+
   return (
     <>
       <StyledDescription>
         Enter the application as a guest user.
       </StyledDescription>
       <StyledButtonWrap>
-        <div
-          style={{
-            fontSize: "5rem !important",
-          }}
-        >
-          <Button
-            icon={<IoEnter />}
-            label="Enter"
-            color="success"
-            onClick={() => handleEnter()}
-          />
-        </div>
+        <Button
+          icon={<IoEnter />}
+          label="Enter"
+          color="success"
+          onClick={() => handleEnter()}
+          size={ButtonSize.Large}
+        />
       </StyledButtonWrap>
       {error !== false && <StyledErrorText>{error}</StyledErrorText>}
     </>

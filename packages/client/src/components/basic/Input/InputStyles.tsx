@@ -8,7 +8,7 @@ interface IValueStyle {
   disabled?: boolean;
   width?: number | "full";
   $noBorder?: boolean;
-  borderColor?: keyof ThemeColor;
+  $borderColor?: keyof ThemeColor;
   $autocomplete?: string;
 }
 const getWidth = (width?: number | "full") => {
@@ -46,11 +46,11 @@ export const StyledInput = styled.input<IValueStyle>`
     $inverted ? theme.color["primary"] : theme.color["white"]};
   border-width: ${({ theme, $inverted }) =>
     $inverted ? 0 : theme.borderWidth[1]};
-  border-color: ${({ theme, $suggester, borderColor }) =>
+  border-color: ${({ theme, $suggester, $borderColor }) =>
     $suggester
       ? theme.color["primary"]
-      : borderColor
-      ? theme.color[borderColor]
+      : $borderColor
+      ? theme.color[$borderColor]
       : theme.color["gray"]["400"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   padding-left: ${({ theme }) => theme.space[2]};
@@ -83,8 +83,8 @@ export const StyledTextArea = styled.textarea<StyledTextArea>`
     $inverted ? theme.color["white"] : theme.color["primary"]};
   background-color: ${({ $inverted, theme }) =>
     $inverted ? theme.color["primary"] : theme.color["white"]};
-  border-color: ${({ theme, borderColor }) =>
-    borderColor ? theme.color[borderColor] : theme.color["gray"]["400"]};
+  border-color: ${({ theme, $borderColor }) =>
+    $borderColor ? theme.color[$borderColor] : theme.color["gray"]["400"]};
   border-width: ${({ theme, $inverted, $noBorder }) =>
     $inverted || $noBorder ? 0 : theme.borderWidth[1]};
   font-size: ${({ theme, $fontSizeTextArea }) =>

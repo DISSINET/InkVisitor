@@ -609,85 +609,88 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
             <br />
           </StyledDetailContentRow>
 
-          <StyledDetailContentRow>
-            <StyledDetailContentRowLabel>
-              Alternative labels
-            </StyledDetailContentRowLabel>
-            <StyledDetailContentRowValue>
-              <StyledAlternativeLabels>
-                {alternativeLabels.map((label, key) => {
-                  return (
-                    <StyledAlternativeLabelWrap
-                      key={key}
-                      onClick={() => setCurrentlyEditedAltLabel(key)}
-                    >
-                      <StyledGreyBar />
-                      <StyledAlternativeLabel>
-                        {currentlyEditedAltLabel === key ? (
-                          <Input
-                            autoFocus
-                            value={label}
-                            onChangeFn={(value) => {
+          {entity.class !== EntityEnums.Class.Statement && (
+            <StyledDetailContentRow>
+              <StyledDetailContentRowLabel>
+                Alternative labels
+              </StyledDetailContentRowLabel>
+              <StyledDetailContentRowValue>
+                <StyledAlternativeLabels>
+                  {alternativeLabels.map((label, key) => {
+                    return (
+                      <StyledAlternativeLabelWrap key={key}>
+                        <StyledGreyBar />
+                        <StyledAlternativeLabel
+                          onClick={() => setCurrentlyEditedAltLabel(key)}
+                        >
+                          {currentlyEditedAltLabel === key ? (
+                            <Input
+                              autoFocus
+                              value={label}
+                              onChangeFn={(value) => {
+                                updateEntityMutation.mutate({
+                                  labels: [
+                                    newLabel,
+                                    ...alternativeLabels.map((label, index) =>
+                                      index === key ? value : label
+                                    ),
+                                  ],
+                                });
+                              }}
+                              onBlur={() => {
+                                setCurrentlyEditedAltLabel(false);
+                              }}
+                            />
+                          ) : (
+                            <>{label}</>
+                          )}
+                        </StyledAlternativeLabel>
+
+                        <div>
+                          <StyledCloseIcon
+                            size={14}
+                            onClick={() => {
                               updateEntityMutation.mutate({
-                                labels: [
-                                  newLabel,
-                                  ...alternativeLabels.map((label, index) =>
-                                    index === key ? value : label
-                                  ),
-                                ],
+                                labels: entity.labels.filter(
+                                  (l) => l !== label
+                                ),
                               });
                             }}
-                            onBlur={() => {
-                              setCurrentlyEditedAltLabel(false);
-                            }}
                           />
-                        ) : (
-                          <>{label}</>
-                        )}
-                      </StyledAlternativeLabel>
+                        </div>
+                      </StyledAlternativeLabelWrap>
+                    );
+                  })}
+                </StyledAlternativeLabels>
 
-                      <div>
-                        <StyledCloseIcon
-                          size={14}
-                          onClick={() => {
-                            updateEntityMutation.mutate({
-                              labels: entity.labels.filter((l) => l !== label),
-                            });
-                          }}
-                        />
-                      </div>
-                    </StyledAlternativeLabelWrap>
-                  );
-                })}
-              </StyledAlternativeLabels>
-
-              <StyledAddLabel $marginTop={entity.labels.length > 1}>
-                <Input
-                  placeholder="add label"
-                  disabled={!userCanEdit}
-                  changeOnType
-                  value={newAltLabel}
-                  onChangeFn={(newLabel: string) => setNewAltLabel(newLabel)}
-                />
-                <span>
-                  <Button
-                    disabled={
-                      newAltLabel.length === 0 ||
-                      entity.labels.includes(newAltLabel)
-                    }
-                    color="black"
-                    icon={<FaPlus />}
-                    onClick={() => {
-                      updateEntityMutation.mutate({
-                        labels: [...entity.labels, newAltLabel],
-                      });
-                      setNewAltLabel("");
-                    }}
+                <StyledAddLabel $marginTop={entity.labels.length > 1}>
+                  <Input
+                    placeholder="add label"
+                    disabled={!userCanEdit}
+                    changeOnType
+                    value={newAltLabel}
+                    onChangeFn={(newLabel: string) => setNewAltLabel(newLabel)}
                   />
-                </span>
-              </StyledAddLabel>
-            </StyledDetailContentRowValue>
-          </StyledDetailContentRow>
+                  <span>
+                    <Button
+                      disabled={
+                        newAltLabel.length === 0 ||
+                        entity.labels.includes(newAltLabel)
+                      }
+                      color="black"
+                      icon={<FaPlus />}
+                      onClick={() => {
+                        updateEntityMutation.mutate({
+                          labels: [...entity.labels, newAltLabel],
+                        });
+                        setNewAltLabel("");
+                      }}
+                    />
+                  </span>
+                </StyledAddLabel>
+              </StyledDetailContentRowValue>
+            </StyledDetailContentRow>
+          )}
         </StyledDetailForm>
       </StyledFormWrapper>
     </>
