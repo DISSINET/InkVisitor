@@ -217,16 +217,16 @@ export const TextAnnotator = ({
       newAnnotator.addScroller(scroller.current);
     }
 
-    newAnnotator.cursor.setStyle({
-      selection: {
-        fill: theme?.color.success,
-        fillOpacity: 0.3,
-      },
-      cursor: {
-        highlightFill: theme?.color.primary,
-        defaultFill: theme?.color.primary,
-      },
-    });
+    // newAnnotator.cursor.setStyle({
+    //   selection: {
+    //     fill: "red",
+    //     fillOpacity: 0.3,
+    //   },
+    //   cursor: {
+    //     highlightFill: theme?.color.primary,
+    //     defaultFill: theme?.color.primary,
+    //   },
+    // });
 
     if (displayLineNumbers && lines.current) {
       newAnnotator.addLines(lines.current);
