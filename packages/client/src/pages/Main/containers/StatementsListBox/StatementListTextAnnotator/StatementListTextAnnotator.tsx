@@ -40,6 +40,9 @@ interface StatementListTextAnnotator {
   storedAnnotatorScroll: number;
   setStoredAnnotatorScroll?: React.Dispatch<React.SetStateAction<number>>;
 
+  hlEntities: EntityEnums.Class[];
+  setHlEntities: React.Dispatch<React.SetStateAction<EntityEnums.Class[]>>;
+
   contentHeight: number;
   contentWidth: number;
 }
@@ -64,6 +67,9 @@ export const StatementListTextAnnotator: React.FC<
   storedAnnotatorScroll,
   setStoredAnnotatorScroll = () => {},
 
+  hlEntities,
+  setHlEntities,
+
   contentHeight,
   contentWidth,
 }) => {
@@ -74,22 +80,6 @@ export const StatementListTextAnnotator: React.FC<
   }, []);
 
   const [annotator, setAnnotator] = useState<Annotator | undefined>(undefined);
-
-  const [hlEntities, setHlEntities] = useState<EntityEnums.Class[]>([
-    EntityEnums.Class.Action,
-    EntityEnums.Class.Person,
-    EntityEnums.Class.Being,
-    EntityEnums.Class.Concept,
-    EntityEnums.Class.Group,
-    EntityEnums.Class.Location,
-    EntityEnums.Class.Object,
-    EntityEnums.Class.Event,
-    EntityEnums.Class.Resource,
-    EntityEnums.Class.Person,
-    EntityEnums.Class.Statement,
-    EntityEnums.Class.Value,
-    EntityEnums.Class.Territory,
-  ]);
 
   const animatedStyle = useSpring({
     opacity: showAnnotator ? 1 : 0,
