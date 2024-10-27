@@ -200,7 +200,7 @@ export default class Relation implements IRelationModel {
             request.db.connection,
             this.entityIds[1]
           );
-          message = `'${entity.labels[0]}', that you attempted to use as superclass, is set as a subclass.`;
+          message = `'${entity.labels[0]}', that you attempted to use as superclass, is set as a subclass. Relation not created.`;
         }
 
         throw new RelationAsymetricalPathExist(message);
