@@ -19,6 +19,8 @@ import {
   StyledErrorText,
   StyledInputRow,
 } from "pages/AuthModalSharedStyles";
+import useKeypress from "hooks/useKeyPress";
+import { ButtonSize } from "types";
 
 interface PasswordRecoverScreen {
   emailLocal: string;
@@ -58,6 +60,14 @@ export const PasswordRecoverScreen: React.FC<PasswordRecoverScreen> = ({
       setError(false);
     }
   }, [emailLocal]);
+
+  useKeypress(
+    "Enter",
+    () => {
+      handlePasswordReset();
+    },
+    [emailLocal]
+  );
 
   return (
     <>
@@ -100,6 +110,7 @@ export const PasswordRecoverScreen: React.FC<PasswordRecoverScreen> = ({
                   }
                 }}
                 disabled={emailLocal.length === 0}
+                size={ButtonSize.Medium}
               />
             </div>
           </StyledButtonWrap>

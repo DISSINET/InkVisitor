@@ -423,3 +423,8 @@ export interface RelationsCreateErrorResponse {
   relation: Relation.IRelation;
   details: any;
 }
+export enum ButtonSize {
+  Small = "S",
+  Medium = "M",
+  Large = "L",
+}

@@ -114,7 +114,7 @@ export const Input: React.FC<Input> = ({
           }}
           $inverted={inverted}
           $suggester={suggester}
-          borderColor={borderColor}
+          $borderColor={borderColor}
           $autocomplete={autocomplete}
           required={required}
         />
@@ -147,7 +147,7 @@ export const Input: React.FC<Input> = ({
           $noBorder={noBorder}
           $suggester={suggester}
           $fontSizeTextArea={fontSizeTextArea}
-          borderColor={borderColor}
+          $borderColor={borderColor}
         />
       )}
     </StyledWrapper>
