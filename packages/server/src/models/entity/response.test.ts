@@ -21,6 +21,7 @@ import { prepareEntity } from "./entity.test";
 import { Db } from "@service/rethink";
 import Document from "@models/document/document";
 import Resource from "@models/resource/resource";
+import Territory from "@models/territory/territory";
 
 describe("models/entity/response", function () {
   describe("test ResponseEntityDetail.walkEntityProps", function () {
@@ -473,8 +474,16 @@ describe("models/entity/response", function () {
     });
   });
 
-  describe("test ResponseEntityDetail.findUsedInDocuments", function () {
+  describe("ResponseEntityDetail.findUsedInDocuments", function () {
     let db: Db;
+    const territory1 = new Territory({
+      id: Math.random().toString(),
+      data: { parent: { territoryId: "T0", order: 0 } },
+    });
+    const territory2 = new Territory({
+      id: Math.random().toString(),
+      data: { parent: { territoryId: "T0", order: 1 } },
+    });
     const entityWithoutDoc = new Entity({ id: Math.random().toString() });
     const entityWithDoc = new Entity({ id: Math.random().toString() });
     const doc1 = new Document({
@@ -483,7 +492,7 @@ describe("models/entity/response", function () {
     });
     const doc2 = new Document({
       id: Math.random().toString(),
-      content: `text<${entityWithDoc.id}>anchor</${entityWithDoc.id}>`,
+      content: `<${territory1.id}>text <${territory2.id}><${entityWithDoc.id}>anchor</${entityWithDoc.id}></${territory2.id}></${territory1.id}>`,
     });
     const resource1 = new Resource({
       id: Math.random().toString(),
@@ -508,6 +517,8 @@ describe("models/entity/response", function () {
     beforeAll(async () => {
       db = new Db();
       await db.initDb();
+      await territory1.save(db.connection);
+      await territory2.save(db.connection);
       await doc1.save(db.connection);
       await doc2.save(db.connection);
       await entityWithDoc.save(db.connection);
@@ -529,23 +540,21 @@ describe("models/entity/response", function () {
       expect(usedInDocs).toHaveLength(0);
     });
 
-    it("should return array with 2 docs", () => {
-      expect(usedInDocs).toHaveLength(2);
+    it("should return array with 3 instances", () => {
+      expect(usedInDocs).toHaveLength(3);
     });
 
     it("should have both anchors from first document", () => {
-      const doc1Results = usedInDocs.find((d) => d.document.id === doc1.id);
-      expect(doc1Results).toBeTruthy();
-
-      expect(doc1Results?.anchorText[0] === "some anchor").toBeTruthy();
-      expect(doc1Results?.anchorText[1] === "some anchor 2").toBeTruthy();
+      const doc1Results = usedInDocs.filter((d) => d.document.id === doc1.id);
+      expect(doc1Results).toHaveLength(2);
+      expect(doc1Results[0].anchorText === "some anchor").toBeTruthy();
+      expect(doc1Results[1].anchorText === "some anchor 2").toBeTruthy();
     });
 
     it("should have one anchor from second document", () => {
-      const doc2Results = usedInDocs.find((d) => d.document.id === doc2.id);
-      expect(doc2Results).toBeTruthy();
-
-      expect(doc2Results?.anchorText[0] === "anchor").toBeTruthy();
+      const doc2Results = usedInDocs.filter((d) => d.document.id === doc2.id);
+      expect(doc2Results).toHaveLength(1);
+      expect(doc2Results[0].anchorText === "anchor").toBeTruthy();
     });
 
     it("should find both resource ids", () => {
@@ -555,6 +564,18 @@ describe("models/entity/response", function () {
       expect(
         usedInDocs.find((d) => d.resourceId === resource2.id)
       ).toBeTruthy();
+    });
+
+    it("test parent territory in resource 1 occurence", () => {
+      expect(
+        usedInDocs.find((d) => d.resourceId === resource1.id)?.parentTerritoryId
+      ).toBeFalsy();
+    });
+
+    it("test parent territory in resource2 occurence", () => {
+      expect(
+        usedInDocs.find((d) => d.resourceId === resource2.id)?.parentTerritoryId
+      ).toEqual(territory2.id);
     });
   });
 });

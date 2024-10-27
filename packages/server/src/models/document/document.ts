@@ -1,9 +1,34 @@
 import { IDbModel } from "@models/common";
 import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
-import { IDocument } from "@shared/types";
-import { UserEnums } from "@shared/enums";
+import { IDocument, IEntity } from "@shared/types";
+import { EntityEnums, UserEnums } from "@shared/enums";
 import { InternalServerError, ModelNotValidError } from "@shared/types/errors";
 import User from "@models/user/user";
+
+export class TreeNode {
+  anchor: string; // The tag name (entity id)
+  children: TreeNode[] = []; // Nested children (other nodes)
+  content: string = ""; // Text content within the tag
+  class?: EntityEnums.Class; // will be populated in Document.assignClassesBasedOnEntities
+
+  static MAX_CONTENT_LENGTH = 20;
+
+  constructor(anchor: string, content: string = "") {
+    this.anchor = anchor;
+    this.content = content;
+  }
+
+  /**
+   * Returns sanitized content - shortened to MAX_CONTENT_LENGTH chars
+   * @returns
+   */
+  getShortContent(): string {
+    if (this.content.length > TreeNode.MAX_CONTENT_LENGTH) {
+      return this.content.slice(0, TreeNode.MAX_CONTENT_LENGTH) + "...";
+    }
+    return this.content;
+  }
+}
 
 export default class Document implements IDocument, IDbModel {
   static table = "documents";
@@ -62,6 +87,109 @@ export default class Document implements IDocument, IDbModel {
     }
 
     return result;
+  }
+
+  buildAnchorsTree(): TreeNode[] {
+    const tagPattern = /<\/?([\w\-.]+)>/g; // Regex to match <tag> or </tag>
+    const rootNodes: TreeNode[] = [];
+    const nodeStack: TreeNode[] = [];
+
+    let lastIndex = 0;
+    let match: RegExpExecArray | null;
+
+    while ((match = tagPattern.exec(this.content)) !== null) {
+      const tag = match[1];
+      const isClosingTag = this.content[match.index + 1] === "/";
+
+      if (match.index > lastIndex) {
+        const text = this.content.slice(lastIndex, match.index);
+        if (text.length > 0 && nodeStack.length > 0) {
+          nodeStack[nodeStack.length - 1].content += text;
+        }
+      }
+
+      if (!isClosingTag) {
+        // Open tag: Create a new node for the tag
+        const newNode = new TreeNode(tag);
+        if (nodeStack.length > 0) {
+          nodeStack[nodeStack.length - 1].children.push(newNode);
+        } else {
+          // Root level node
+          rootNodes.push(newNode);
+        }
+        // Push the new node onto the stack (start processing its children)
+        nodeStack.push(newNode);
+      } else {
+        // Close tag: Pop the node off the stack
+        const closedNode = nodeStack.pop();
+
+        // If there's a parent node, merge the content of the closed node into its parent (remove tag, keep content)
+        if (closedNode && nodeStack.length > 0) {
+          nodeStack[nodeStack.length - 1].content += closedNode.content;
+        }
+      }
+
+      lastIndex = tagPattern.lastIndex;
+    }
+
+    // Handle any remaining text after the last tag
+    if (lastIndex < this.content.length) {
+      const remainingText = this.content.slice(lastIndex).trim();
+      if (remainingText.length > 0 && nodeStack.length > 0) {
+        nodeStack[nodeStack.length - 1].content += remainingText;
+      }
+    }
+
+    return rootNodes;
+  }
+
+  flattenTree(nodes: TreeNode[]): TreeNode[] {
+    const flatList: TreeNode[] = [];
+
+    function recurse(node: TreeNode) {
+      flatList.push(node); // Add current node to flat list
+      // Recurse through each child and flatten them
+      node.children.forEach((child) => recurse(child));
+    }
+
+    // Start recursion for each root node
+    nodes.forEach((node) => recurse(node));
+
+    return flatList;
+  }
+
+  collectAnchors(nodes: TreeNode[]): string[] {
+    const result: string[] = [];
+
+    nodes.forEach((node) => {
+      result.push(node.anchor); // Add the anchor of the current node
+
+      // Recursively collect anchors from the children
+      if (node.children.length > 0) {
+        result.push(...this.collectAnchors(node.children));
+      }
+    });
+
+    return result;
+  }
+
+  assignClassesBasedOnEntities(tree: TreeNode[], entities: IEntity[]): void {
+    const entityMap = new Map(
+      entities.map((entity) => [entity.id, entity.class])
+    ); // Create a map for faster lookup
+
+    function recurse(nodes: TreeNode[]) {
+      nodes.forEach((node) => {
+        // Check if the anchor matches any entity id
+        if (entityMap.has(node.anchor)) {
+          node.class = entityMap.get(node.anchor) || undefined; // Assign class if a match is found
+        }
+        // Recursively process children
+        recurse(node.children);
+      });
+    }
+
+    recurse(tree); // Start recursion
   }
 
   /**

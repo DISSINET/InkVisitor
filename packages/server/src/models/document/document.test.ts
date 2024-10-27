@@ -112,3 +112,39 @@ describe("Document.removeAnchors", () => {
     expect(document.entityIds).toHaveLength(0);
   });
 });
+
+describe("Document.buildAnchorsTree", () => {
+  const content = `header: /,/.
+    <tag1>
+        Hello, this is <tag2>some <tag3>deeply nested</tag3> text</tag2> 
+        within <tag4>multiple <tag5>levels</tag5> of tags</tag4>.
+    </tag1>
+    <tag6>Another root tag</tag6>
+    <tag7>
+        <tag8>More nested <tag9>content</tag9></tag8>
+    </tag7>
+
+    // footer //
+`;
+  const document = new Document({
+    content: content,
+  });
+
+  const tree = document.buildAnchorsTree();
+  it("should contain 3 root anchors", () => {
+    expect(tree).toHaveLength(3);
+  });
+
+  it("should have tag1 as first anchor", () => {
+    expect(tree[0].anchor).toEqual("tag1");
+  });
+
+  it("should have tag1 with 2 childs", () => {
+    expect(tree[0].children).toHaveLength(2);
+  });
+
+  it("should have tag1's first nested child tag2 and content valid", () => {
+    expect(tree[0].children[0].anchor).toEqual("tag2");
+    expect(tree[0].children[0].content).toEqual("some deeply nested text");
+  });
+});
