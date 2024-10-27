@@ -208,7 +208,7 @@ export default class Cursor implements IRelativeCoordinates {
   ) {
     const { charWidth, lineHeight } = options;
     const width = (xEnd - xStart) * charWidth;
-    const height = this.hlMode === HighlightMode.UNDERLINE ? 2 : lineHeight;
+    const height = this.hlMode === HighlightMode.UNDERLINE ? 3 : lineHeight;
 
     ctx.fillStyle = this.style.color;
     ctx.globalAlpha = this.style.opacity;
