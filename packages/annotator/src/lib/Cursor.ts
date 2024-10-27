@@ -214,7 +214,7 @@ export default class Cursor implements IRelativeCoordinates {
     ctx.globalAlpha = this.style.opacity;
 
     if (this.hlMode === "focus") {
-      ctx.globalCompositeOperation = "multiply";
+      ctx.globalCompositeOperation = "xor";
       ctx.fillRect(xStart * charWidth, relLine * lineHeight, width, height);
     } else if (this.hlMode === "underline") {
       ctx.globalCompositeOperation = "multiply";
