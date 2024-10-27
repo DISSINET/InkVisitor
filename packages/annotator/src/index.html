@@ -39,6 +39,7 @@
                 outline: none;
                 background-color: white;
                 border: 1px solid black;
+                cursor: text;
               "
             >
             </canvas>
@@ -120,6 +121,8 @@
 
       annotator.fontColor = "black";
       annotator.bgColor = "transparent";
+
+      annotator.setSelectStyle("turquoise", 0.6);
 
       annotator.addScroller(document.getElementById("scroller"));
       annotator.addLines(document.getElementById("lines"));

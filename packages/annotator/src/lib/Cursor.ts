@@ -66,7 +66,7 @@ export default class Cursor implements IRelativeCoordinates {
   }
 
   yToLineI(y: number, lineHeight: number): number {
-    return Math.floor((y / lineHeight) * this.ratio);
+    return Math.round((y / lineHeight) * this.ratio - 1);
   }
 
   xToCharI(x: number, charWidth: number): number {
@@ -227,6 +227,9 @@ export default class Cursor implements IRelativeCoordinates {
     } else if (this.hlMode === "background") {
       ctx.globalCompositeOperation = "multiply";
       ctx.fillRect(xStart * charWidth, relLine * lineHeight, width, height);
+    } else if (this.hlMode === "select") {
+      ctx.globalCompositeOperation = "overlay";
+      ctx.fillRect(xStart * charWidth, relLine * lineHeight, width, height);
     }
   }
 
@@ -249,7 +252,7 @@ export default class Cursor implements IRelativeCoordinates {
       return;
     }
 
-    const { charWidth, lineHeight, charsAtLine } = drawingOptions;
+    const { charsAtLine } = drawingOptions;
 
     let [hStart, hEnd] = this.getSelected();
     if (hStart && hEnd) {

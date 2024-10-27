@@ -141,6 +141,16 @@ export class Annotator {
     this.draw();
   }
 
+  setSelectStyle(selectColor: string, selectOpacity: number) {
+    this.selectColor = selectColor;
+    this.selectOpacity = selectOpacity;
+
+    this.cursor.style = {
+      color: this.selectColor,
+      opacity: this.selectOpacity,
+    };
+  }
+
   /**
    * removeAnchorFromSelection removes anchor from selected text
    * @param anchor
@@ -829,6 +839,7 @@ export class Annotator {
     }
 
     const textSegment = this.text.cursorToIndex(this.viewport, this.cursor);
+
     if (textSegment) {
       // fix cursor position to end of the line (cursor.xLine could be virtually infinity)
       this.cursor.xLine = textSegment.charInLineIndex;
