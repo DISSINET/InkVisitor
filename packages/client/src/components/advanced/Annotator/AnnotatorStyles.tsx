@@ -25,6 +25,7 @@ export const StyledCanvasWrapper = styled.div`
   border: 1px solid black;
   padding: 2px;
   display: flex;
+  flex-direction: row;
 `;
 
 export const StyledMainCanvas = styled.canvas`

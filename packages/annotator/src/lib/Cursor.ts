@@ -262,8 +262,13 @@ export default class Cursor implements IRelativeCoordinates {
 
       const rowsToDraw: { rowI: number; start: number; end: number }[] = [];
 
-      for (let i = 0; i <= viewport.lineEnd - viewport.lineStart; i++) {
+      for (
+        let i = 0;
+        i <= Math.min(viewport.lineEnd, textLines.length) - viewport.lineStart;
+        i++
+      ) {
         const currY = viewport.lineStart + i;
+
         const lastCharX = textLines[currY].length;
 
         if (this.hlMode === "focus") {
