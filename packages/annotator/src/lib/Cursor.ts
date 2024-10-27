@@ -200,7 +200,7 @@ export default class Cursor implements IRelativeCoordinates {
   }
 
   /**
-   * drawLine is shorthand around drawing highlighted ares simply by providing relative coordinates
+   * drawLine is shorthand around drawing highlighted areas simply by providing relative coordinates
    * @param ctx
    * @param relLine
    * @param xStart
@@ -215,25 +215,10 @@ export default class Cursor implements IRelativeCoordinates {
     options: DrawingOptions
   ) {
     const { charWidth, lineHeight } = options;
+    const width = (xEnd - xStart) * charWidth;
+    const height = options.schema?.mode === "underline" ? 2 : lineHeight;
 
-    switch (options.schema?.mode) {
-      case "stroke":
-        ctx.strokeRect(
-          xStart * charWidth,
-          relLine * lineHeight,
-          (xEnd - xStart) * charWidth,
-          1
-        );
-        break;
-
-      default:
-        ctx.fillRect(
-          xStart * charWidth,
-          relLine * lineHeight,
-          (xEnd - xStart) * charWidth,
-          lineHeight
-        );
-    }
+    ctx.fillRect(xStart * charWidth, relLine * lineHeight, width, height);
   }
 
   /**
@@ -248,6 +233,7 @@ export default class Cursor implements IRelativeCoordinates {
     viewport: Viewport,
     options: DrawingOptions
   ) {
+    ctx.globalCompositeOperation = "multiply";
     if (this.xLine === -1 && this.yLine === -1) {
       return;
     }
@@ -271,44 +257,53 @@ export default class Cursor implements IRelativeCoordinates {
     let [hStart, hEnd] = this.getSelected();
     if (hStart && hEnd) {
       if (hStart.yLine > hEnd.yLine) {
-        const tmpSwitch = hStart;
-        hStart = hEnd;
-        hEnd = tmpSwitch;
+        [hStart, hEnd] = [hEnd, hStart];
       }
 
-      ctx.fillStyle =
-        options.schema?.style.fillColor ||
-        (this.style.selection.fill as string);
-      ctx.globalAlpha =
-        options.schema?.style.fillOpacity ||
-        (this.style.selection.fillOpacity as number);
-      ctx.globalCompositeOperation = "multiply";
+      const rowsToDraw: { rowI: number; start: number; end: number }[] = [];
 
       for (let i = 0; i <= viewport.lineEnd - viewport.lineStart; i++) {
         const absY = viewport.lineStart + i;
-        if (hStart.yLine <= absY && hEnd.yLine >= absY) {
-          // first line
-          if (hStart.yLine === absY) {
-            if (hStart.yLine === hEnd.yLine) {
-              // ending line === starting line - fill only from start X -> end X
-              this.drawLine(ctx, i, hStart.xLine, hEnd.xLine, options);
+
+        if (options.schema?.mode === "focus") {
+          if (absY < hStart.yLine || absY > hEnd.yLine) {
+            rowsToDraw.push({ rowI: i, start: 0, end: charsAtLine });
+          }
+          if (absY === hStart.yLine) {
+            rowsToDraw.push({ rowI: i, start: 0, end: hStart.xLine });
+          }
+          if (absY === hEnd.yLine) {
+            rowsToDraw.push({ rowI: i, start: hEnd.xLine, end: charsAtLine });
+          }
+        } else {
+          if (hStart.yLine <= absY && hEnd.yLine >= absY) {
+            if (hStart.yLine === absY) {
+              rowsToDraw.push({
+                rowI: i,
+                start: hStart.xLine,
+                end: hStart.yLine === hEnd.yLine ? hEnd.xLine : charsAtLine,
+              });
+            } else if (hEnd.yLine === absY) {
+              rowsToDraw.push({ rowI: i, start: 0, end: hEnd.xLine });
             } else {
-              // not ending line - fill from up to the last character in the line
-              this.drawLine(ctx, i, hStart.xLine, charsAtLine, options);
+              rowsToDraw.push({ rowI: i, start: 0, end: charsAtLine });
             }
-            // last line
-          } else if (hEnd.yLine === absY) {
-            // fill from start to X position
-            this.drawLine(ctx, i, 0, hEnd.xLine, options);
-          } else {
-            // not first/last line - fill completely
-            this.drawLine(ctx, i, 0, charsAtLine, options);
           }
         }
       }
 
-      ctx.globalAlpha = 1;
+      console.log(rowsToDraw);
+
+      ctx.fillStyle = options.schema?.style.color || this.style.selection.fill;
+
+      ctx.globalAlpha =
+        options.schema?.style.opacity || this.style.selection.fillOpacity;
+
+      for (const row of rowsToDraw) {
+        this.drawLine(ctx, row.rowI, row.start, row.end, options);
+      }
     }
+    ctx.globalAlpha = 1;
   }
 
   /**

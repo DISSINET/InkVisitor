@@ -6,10 +6,10 @@ import Viewport from "./Viewport";
 import { Modes } from "./constants";
 
 export interface HighlightSchema {
-  mode: "background" | "stroke";
+  mode: "select" | "background" | "underline" | "focus";
   style: {
-    fillColor: string;
-    fillOpacity: number;
+    color: string;
+    opacity: number;
   };
 }
 
@@ -892,7 +892,7 @@ export class Annotator {
 
           /*
             if (startLine && endLine) {
-              this.ctx.strokeStyle = "green"; //highlight.style.color;
+              this.ctx.underlineStyle = "green"; //highlight.style.color;
               for (
                 let currentYLine = startLine.yLine;
                 currentYLine <= endLine.yLine;
@@ -922,7 +922,7 @@ export class Annotator {
                     this.ctx.lineTo(endLine.xLine * this.charWidth, yPos);
                   }
 
-                  this.ctx.stroke();
+                  this.ctx.underline();
                 }
               }
             }
