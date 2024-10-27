@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import { space1, space2 } from "Theme/constants";
 import { ThemeColor } from "Theme/theme";
+import { ButtonSize } from "types";
 
 const getRadius = ($radiusLeft?: boolean, $radiusRight?: boolean) => {
   if ($radiusLeft && $radiusRight) {
@@ -13,8 +14,39 @@ const getRadius = ($radiusLeft?: boolean, $radiusRight?: boolean) => {
     return "0";
   }
 };
+const getFontSize = ($size: ButtonSize) => {
+  switch ($size) {
+    case ButtonSize.Small:
+      return "xs";
+    case ButtonSize.Medium:
+      return "base";
+    case ButtonSize.Large:
+      return "lg";
+  }
+};
+const getVerticalMargin = ($size: ButtonSize) => {
+  switch ($size) {
+    case ButtonSize.Small:
+      return "0.25rem";
+    case ButtonSize.Medium:
+      return "0.3rem";
+    case ButtonSize.Large:
+      return "0.45rem";
+  }
+};
+const getHorizontalMargin = ($size: ButtonSize, $iconButton?: boolean) => {
+  switch ($size) {
+    case ButtonSize.Small:
+      return $iconButton ? "0.25rem" : "0.5rem";
+    case ButtonSize.Medium:
+      return $iconButton ? "0.3rem" : "0.55rem";
+    case ButtonSize.Large:
+      return $iconButton ? "0.45rem" : "0.7rem";
+  }
+};
 interface IButtonStyle {
-  $hasIcon?: boolean;
+  $size: ButtonSize;
+  $iconButton?: boolean;
   $fullWidth?: boolean;
   $noBorder?: boolean;
   $noBackground?: boolean;
@@ -24,7 +56,6 @@ interface IButtonStyle {
   $disabled?: boolean;
   $radiusLeft?: boolean;
   $radiusRight?: boolean;
-  $paddingX: boolean;
 }
 export const StyledButton = styled.button.attrs(({ ref }) => ({
   ref: ref,
@@ -33,12 +64,11 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
   align-items: center;
   justify-content: center;
   width: ${({ $fullWidth }) => ($fullWidth ? "100%" : "auto")};
-  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  font-size: ${({ theme, $size }) => theme.fontSize[getFontSize($size)]};
   font-weight: ${({ $disabled, $textRegular }) =>
     $disabled ? 400 : $textRegular ? 500 : 900};
-  padding: ${space1} ${({ $hasIcon }) => ($hasIcon ? space1 : space2)};
-  padding-left: ${({ $paddingX }) => ($paddingX ? "0.5rem" : "")};
-  padding-right: ${({ $paddingX }) => ($paddingX ? "0.5rem" : "")};
+  padding: ${({ $iconButton, $size }) =>
+    `${getVerticalMargin($size)} ${getHorizontalMargin($size, $iconButton)}`};
   border-color: ${({ theme, $disabled, $color }) =>
     $disabled ? theme.color["gray"][400] : theme.color[$color]};
   border-width: ${({ $noBorder }) => ($noBorder ? 0 : "thin")};
@@ -71,7 +101,7 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
   white-space: nowrap;
 
   transition: border-color 0.2s, color 0.2s, background-color 0.2s;
-  :focus {
+  &:focus {
     outline: 0;
   }
 `;
@@ -81,6 +111,6 @@ export const StyledButtonLabel = styled.span<{
   $noIconMargin?: boolean;
 }>`
   margin-left: ${({ theme, $hasIcon = false, $noIconMargin = false }) =>
-    $hasIcon ? ($noIconMargin ? 0 : "0.3rem") : 0};
+    $hasIcon ? ($noIconMargin ? 0 : "0.4rem") : 0};
   text-transform: lowercase;
 `;

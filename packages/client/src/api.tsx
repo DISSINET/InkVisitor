@@ -189,7 +189,7 @@ class Api {
 
         if (error.status === 401) {
           // if handled by react router, then the toast could be visible
-          window.location.pathname = "/login";
+          window.location.pathname = (process.env.ROOT_URL || "") + "/login";
         }
 
         return Promise.reject(error);
@@ -896,7 +896,8 @@ class Api {
     }
   }
 
-  async auditGetFirst(options?: IApiOptions
+  async auditGetFirst(
+    options?: IApiOptions
   ): Promise<AxiosResponse<IResponseGeneric<IAudit>>> {
     try {
       const response = await this.connection.get(
@@ -1297,9 +1298,9 @@ class Api {
 
   /**
    * Setting get
-   * @param settingId 
-   * @param options 
-   * @returns 
+   * @param settingId
+   * @param options
+   * @returns
    */
   async settingGet(
     settingId: string,
@@ -1318,18 +1319,15 @@ class Api {
 
   /**
    * Get owner's info
-   * @param settingId 
-   * @param options 
-   * @returns 
+   * @param settingId
+   * @param options
+   * @returns
    */
   async usersGetOwner(
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseGeneric<string>>> {
     try {
-      const response = await this.connection.get(
-        `/users/owner`,
-        options
-      );
+      const response = await this.connection.get(`/users/owner`, options);
       return response;
     } catch (err) {
       throw this.handleError(err);

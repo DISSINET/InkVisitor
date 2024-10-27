@@ -1,16 +1,22 @@
+import {
+  IErrorSignature,
+  NetworkError,
+  getErrorByCode,
+} from "@shared/types/errors";
 import api from "api";
 import { Button, Input } from "components";
+import { StyledButtonWrap, StyledErrorText } from "pages/AuthModalSharedStyles";
 import React, { useState } from "react";
 import { FiLogIn } from "react-icons/fi";
 import { setUsername } from "redux/features/usernameSlice";
-import { useAppDispatch } from "redux/hooks";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
 import {
   StyledFaLock,
   StyledInputRow,
   StyledTbMailFilled,
 } from "./LoginScreensStyles";
-import { IErrorSignature, getErrorByCode } from "@shared/types/errors";
-import { StyledButtonWrap, StyledErrorText } from "pages/AuthModalSharedStyles";
+import useKeypress from "hooks/useKeyPress";
+import { ButtonSize } from "types";
 
 interface LoginScreen {
   usernameLocal: string;
@@ -29,58 +35,74 @@ export const LoginScreen: React.FC<LoginScreen> = ({
   const dispatch = useAppDispatch();
   const [error, setError] = useState<string | false>(false);
 
+  const ping: number = useAppSelector((state) => state.ping);
+
   const handleLogIn = async () => {
-    try {
-      const res = await api.signIn(usernameLocal, password, {
-        ignoreErrorToast: true,
-      });
-      if (res?.token) {
-        await dispatch(setUsername(usernameLocal));
-        setRedirectToMain(true);
+    if (ping === -1 || ping === -2) {
+      setError(NetworkError.message);
+    } else {
+      try {
+        const res = await api.signIn(usernameLocal, password, {
+          ignoreErrorToast: true,
+        });
+        if (res?.token) {
+          await dispatch(setUsername(usernameLocal));
+          setRedirectToMain(true);
+        }
+      } catch (err) {
+        setError(getErrorByCode(err as IErrorSignature).message);
       }
-    } catch (err) {
-      setError(getErrorByCode(err as IErrorSignature).message);
     }
   };
 
+  useKeypress(
+    "Enter",
+    () => {
+      handleLogIn();
+    },
+    [usernameLocal, password]
+  );
+
   return (
     <>
-      <StyledInputRow>
-        <StyledTbMailFilled size={14} $isError={error !== false} />
-        <Input
-          width={200}
-          placeholder="email or username"
-          onChangeFn={(text: string) => setUsernameLocal(text)}
-          value={usernameLocal}
-          changeOnType
-          autoFocus
-          borderColor={error !== false ? "danger" : undefined}
-        />
-      </StyledInputRow>
-      <StyledInputRow>
-        <StyledFaLock size={14} $isError={error !== false} />
-        <Input
-          width={200}
-          type="password"
-          placeholder="password"
-          onChangeFn={(text: string) => setPassword(text)}
-          value={password}
-          changeOnType
-          borderColor={error !== false ? "danger" : undefined}
-        />
-      </StyledInputRow>
+      <form>
+        <StyledInputRow>
+          <StyledTbMailFilled size={14} $isError={error !== false} />
+          <Input
+            width={200}
+            autocomplete="username"
+            placeholder="email or username"
+            onChangeFn={(text: string) => setUsernameLocal(text)}
+            value={usernameLocal}
+            changeOnType
+            autoFocus
+            borderColor={error !== false ? "danger" : undefined}
+          />
+        </StyledInputRow>
+        <StyledInputRow>
+          <StyledFaLock size={14} $isError={error !== false} />
+          <Input
+            width={200}
+            autocomplete="current-password"
+            type="password"
+            placeholder="password"
+            onChangeFn={(text: string) => setPassword(text)}
+            value={password}
+            changeOnType
+            borderColor={error !== false ? "danger" : undefined}
+          />
+        </StyledInputRow>
+      </form>
 
-      <div style={{ minHeight: "2em" }}>
-        {error !== false && <StyledErrorText>{error}</StyledErrorText>}
-      </div>
+      {error !== false && <StyledErrorText>{error}</StyledErrorText>}
 
       <StyledButtonWrap>
         <Button
-          disabled={usernameLocal.length === 0 || password.length === 0}
           icon={<FiLogIn />}
           label="Log In"
           color="success"
           onClick={() => handleLogIn()}
+          size={ButtonSize.Medium}
         />
       </StyledButtonWrap>
     </>

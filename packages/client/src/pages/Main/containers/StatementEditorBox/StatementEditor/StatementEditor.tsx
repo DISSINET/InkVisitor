@@ -205,7 +205,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
       const templates = res.data;
       templates.sort((a: IEntity, b: IEntity) =>
-        a.label.toLocaleLowerCase() > b.label.toLocaleLowerCase() ? 1 : -1
+        a.labels[0].toLocaleLowerCase() > b.labels[0].toLocaleLowerCase()
+          ? 1
+          : -1
       );
       return templates;
     },
@@ -376,19 +378,21 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     languageCheck?: boolean
   ) => {
     if (propId) {
+      const isTypeOrValueChange =
+        (changes.type &&
+          changes.type.entityId &&
+          changes.type.elvl !== EntityEnums.Elvl.Inferential) ||
+        (changes.value &&
+          changes.value.entityId &&
+          changes.value.elvl !== EntityEnums.Elvl.Inferential);
+
       if (
         languageCheck &&
-        changes.type &&
-        changes.type.entityId &&
-        changes.type.elvl !== EntityEnums.Elvl.Inferential &&
+        isTypeOrValueChange &&
         user &&
         user.options.defaultStatementLanguage
       ) {
-        checkTypeEntityLanguage(
-          propId,
-          changes as Partial<Omit<IProp, "type">> & { type: IProp["type"] },
-          instantUpdate
-        );
+        checkTypeEntityLanguage(propId, changes, instantUpdate);
       } else {
         applyPropChanges(propId, changes, instantUpdate);
       }
@@ -398,23 +402,39 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   // checking if the language is not different from user.options.defaultStatementLanguage -> in that case, switch elvl to EntityEnums.Elvl.Inferential
   const checkTypeEntityLanguage = (
     propId: string,
-    changes: Partial<Omit<IProp, "type">> & { type: IProp["type"] },
+    changes: any,
     instantUpdate?: boolean
   ) => {
     if (user) {
       const statementLanguage = user.options.defaultStatementLanguage;
-      api.entitiesGet(changes.type.entityId).then((typeEntity) => {
-        if (typeEntity.data) {
-          const entityLanguage = typeEntity.data.language;
-          if (entityLanguage !== statementLanguage) {
-            changes.type.elvl = EntityEnums.Elvl.Inferential;
-            applyPropChanges(propId, changes, instantUpdate);
-            toast.info(
-              `The epistemic level of property type's involvement changed to "inferential"`
-            );
+      if (changes.type) {
+        api.entitiesGet(changes.type?.entityId).then((typeEntity) => {
+          if (typeEntity.data) {
+            const entityLanguage = typeEntity.data.language;
+            if (entityLanguage !== statementLanguage && changes.type) {
+              changes.type.elvl = EntityEnums.Elvl.Inferential;
+              applyPropChanges(propId, changes, instantUpdate);
+              toast.info(
+                `The language of the entity (${entityLanguage}) assigned to the property type slot does not correspondent with the user statement language (${user.options.defaultStatementLanguage}) .Epistemic level of property type's involvement changed to "inferential"`
+              );
+            }
           }
-        }
-      });
+        });
+      }
+      if (changes.value) {
+        api.entitiesGet(changes.value.entityId).then((valueEntity) => {
+          if (valueEntity.data) {
+            const entityLanguage = valueEntity.data.language;
+            if (entityLanguage !== statementLanguage && changes.value) {
+              changes.value.elvl = EntityEnums.Elvl.Inferential;
+              applyPropChanges(propId, changes, instantUpdate);
+              toast.info(
+                `The language of the entity (${entityLanguage}) assigned to the property value slot does not correspondent with the user statement language (${user.options.defaultStatementLanguage}) .Epistemic level of property type's involvement changed to "inferential"`
+              );
+            }
+          }
+        });
+      }
     }
     applyPropChanges(propId, changes);
   };
@@ -621,9 +641,16 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 <StyledEditorHeaderInputWrap>
                   <Input
                     type="text"
-                    value={statement.label}
+                    value={statement.labels[0] || ""}
                     onChangeFn={(newValue: string) => {
-                      handleAttributeChange({ label: newValue }, true);
+                      handleAttributeChange(
+                        {
+                          labels: statement.labels
+                            ? [newValue, ...statement.labels.slice(1)]
+                            : [],
+                        },
+                        true
+                      );
                     }}
                   />
                 </StyledEditorHeaderInputWrap>
@@ -991,14 +1018,16 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         </StyledEditorSection>
       </React.Fragment>
 
-      <ApplyTemplateModal
-        showModal={showApplyTemplateModal}
-        setShowApplyTemplateModal={setShowApplyTemplateModal}
-        updateEntityMutation={updateStatementMutation}
-        templateToApply={templateToApply}
-        setTemplateToApply={setTemplateToApply}
-        entity={statement}
-      />
+      {templateToApply && (
+        <ApplyTemplateModal
+          showModal={showApplyTemplateModal}
+          setShowApplyTemplateModal={setShowApplyTemplateModal}
+          updateEntityMutation={updateStatementMutation}
+          templateToApply={templateToApply}
+          setTemplateToApply={setTemplateToApply}
+          entity={statement}
+        />
+      )}
 
       <Submit
         show={showSubmitSection !== false}

@@ -168,7 +168,7 @@ export default Router()
 
       return {
         result: true,
-        message: `${statementsCount} statements has been moved under '${territory.label}'`,
+        message: `${statementsCount} statements has been moved under '${territory.labels[0]}'`,
       };
     })
   )
@@ -276,7 +276,7 @@ export default Router()
         }
       }
 
-      let msg = `${statementsCount} statements have been copied under '${territory.label}'`;
+      let msg = `${statementsCount} statements have been copied under '${territory.labels[0]}'`;
       if (relsErr) {
         msg += ", but without complete relations";
       }

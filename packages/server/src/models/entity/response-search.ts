@@ -3,7 +3,7 @@ import { IEntity, RequestSearch } from "@shared/types";
 import { regExpEscape } from "@common/functions";
 import Entity from "./entity";
 import Statement from "@models/statement/statement";
-import { Connection, r, RDatum, RTable } from "rethinkdb-ts";
+import { Connection, ContainsArgType, r, RDatum, RTable } from "rethinkdb-ts";
 import { ResponseEntity } from "./response";
 import { getEntityClass } from "@models/factory";
 import { IRequest } from "src/custom_typings/request";
@@ -265,7 +265,9 @@ export class SearchQuery {
 
     const regexp = `${left}${label}${right}`;
 
-    return row("label").downcase().match(regexp);
+    return row("labels").contains<string>((label) =>
+      label.downcase().match(regexp)
+    );
   }
 
   /**
@@ -459,7 +461,7 @@ export function sort(entities: IEntity[], label = ""): IEntity[] {
 
   // sort by distance from the start
   entities.forEach((e) => {
-    let index = e.label.indexOf(label);
+    let index = e.labels[0].indexOf(label);
     if (index === -1) {
       index = 99999;
     }
@@ -475,7 +477,7 @@ export function sort(entities: IEntity[], label = ""): IEntity[] {
     .sort((a, b) => a - b);
 
   for (const key of sortedDistances) {
-    indexMap[key].sort((a, b) => a.label.length - b.label.length);
+    indexMap[key].sort((a, b) => a.labels[0].length - b.labels[0].length);
     out = out.concat(indexMap[key]);
   }
 
@@ -488,7 +490,7 @@ export function sort(entities: IEntity[], label = ""): IEntity[] {
  * @returns sorted entities list
  */
 export function sortByLength(entities: IEntity[]) {
-  return entities.sort((a, b) => a.label.length - b.label.length);
+  return entities.sort((a, b) => a.labels[0].length - b.labels[0].length);
 }
 
 /**
@@ -510,7 +512,8 @@ export function sortByWordMatch(
 
   for (const entity of entities) {
     if (
-      entity.label
+      entity.labels.length > 0 &&
+      entity.labels[0]
         .toLowerCase()
         .match(/[\w]+/g)
         ?.indexOf(usedLabel.toLowerCase()) !== -1

@@ -11,8 +11,12 @@ import {
 import { DropTargetMonitor, XYCoord } from "react-dnd";
 import { DragItem, EntityDragItem } from "types";
 
+// is used to render italic for S, could be handled other way when first label "" is obligatory
+export const isFirstLabelEmpty = (labels: string[]) =>
+  labels ? labels.length === 0 || labels[0] === "" : true;
+
 export const getEntityLabel = (entity?: IResponseEntity) =>
-  entity?.label || entity?.data.text || "no label";
+  (entity?.labels && entity?.labels[0]) || entity?.data.text || "no label";
 
 export const getShortLabelByLetterCount = (
   label: string,

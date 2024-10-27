@@ -62,7 +62,7 @@ export const StatementEditorActantTable: React.FC<
 
   const updateActantsOrder = () => {
     if (userCanEdit) {
-      const actants: IStatementActant[] = filteredActants.map(
+      const actants: IStatementActant[] = filteredActants?.map(
         (filteredActant) => filteredActant.data.sActant
       );
       if (JSON.stringify(statement.data.actants) !== JSON.stringify(actants)) {

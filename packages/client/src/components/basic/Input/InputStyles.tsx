@@ -8,7 +8,7 @@ interface IValueStyle {
   disabled?: boolean;
   width?: number | "full";
   $noBorder?: boolean;
-  borderColor?: keyof ThemeColor;
+  $borderColor?: keyof ThemeColor;
   $autocomplete?: string;
 }
 const getWidth = (width?: number | "full") => {
@@ -46,11 +46,11 @@ export const StyledInput = styled.input<IValueStyle>`
     $inverted ? theme.color["primary"] : theme.color["white"]};
   border-width: ${({ theme, $inverted }) =>
     $inverted ? 0 : theme.borderWidth[1]};
-  border-color: ${({ theme, $suggester, borderColor }) =>
+  border-color: ${({ theme, $suggester, $borderColor }) =>
     $suggester
       ? theme.color["primary"]
-      : borderColor
-      ? theme.color[borderColor]
+      : $borderColor
+      ? theme.color[$borderColor]
       : theme.color["gray"]["400"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   padding-left: ${({ theme }) => theme.space[2]};
@@ -60,11 +60,11 @@ export const StyledInput = styled.input<IValueStyle>`
     disabled ? theme.background["stripes"] : ""};
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "")};
   resize: none;
-  :hover {
+  &:hover {
     border-color: ${({ theme }) => theme.color["info"]};
     border-width: ${({ theme }) => theme.borderWidth[1]};
   }
-  :focus {
+  &:focus {
     outline: 0;
     border-color: ${({ theme }) => theme.color["info"]};
     border-width: ${({ theme }) => theme.borderWidth[1]};
@@ -83,8 +83,8 @@ export const StyledTextArea = styled.textarea<StyledTextArea>`
     $inverted ? theme.color["white"] : theme.color["primary"]};
   background-color: ${({ $inverted, theme }) =>
     $inverted ? theme.color["primary"] : theme.color["white"]};
-  border-color: ${({ theme, borderColor }) =>
-    borderColor ? theme.color[borderColor] : theme.color["gray"]["400"]};
+  border-color: ${({ theme, $borderColor }) =>
+    $borderColor ? theme.color[$borderColor] : theme.color["gray"]["400"]};
   border-width: ${({ theme, $inverted, $noBorder }) =>
     $inverted || $noBorder ? 0 : theme.borderWidth[1]};
   font-size: ${({ theme, $fontSizeTextArea }) =>
@@ -96,13 +96,13 @@ export const StyledTextArea = styled.textarea<StyledTextArea>`
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "default")};
   resize: none;
   line-height: 1.2;
-  :focus {
+  &:focus {
     outline: 0;
     border-color: ${({ theme }) => theme.color["success"]};
     border-width: ${({ theme, $noBorder }) =>
       $noBorder ? 0 : theme.borderWidth[1]};
   }
-  :hover {
+  &:hover {
     border-color: ${({ theme }) => theme.color["info"]};
   }
 `;

@@ -8,7 +8,11 @@ import React, { ReactNode, useCallback, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
 import { useAppSelector } from "redux/hooks";
 import { DraggedEntityReduxItem, EntityDragItem } from "types";
-import { getEntityLabel, isValidEntityClass } from "utils/utils";
+import {
+  getEntityLabel,
+  isFirstLabelEmpty,
+  isValidEntityClass,
+} from "utils/utils";
 import { StyledEntityTagWrap } from "./EntityTagStyles";
 
 interface UnlinkButton {
@@ -102,12 +106,13 @@ export const EntityTag: React.FC<EntityTag> = ({
   }, []);
 
   if (!isValidEntityClass(entity.class)) {
+    // labels needs to have length and first label needs to be non-empty
     return (
       <Tag
         propId={entity.id}
         entityClass={EntityEnums.Extension.Invalid}
         label={getEntityLabel(entity)}
-        labelItalic={entity.label === ""}
+        labelItalic={isFirstLabelEmpty(entity.labels)}
         // button={unlinkButton && renderUnlinkButton(unlinkButton)}
         disableDrag
         disableDoubleClick
@@ -140,7 +145,12 @@ export const EntityTag: React.FC<EntityTag> = ({
           <EntityTooltip
             entityId={entity.id}
             entityClass={entity.class}
-            label={entity.label || <i>{"no label"}</i>}
+            label={(entity.labels && entity.labels[0]) || <i>{"no label"}</i>}
+            alternativeLabels={
+              entity.labels && entity.labels.length > 1
+                ? entity.labels.slice(1)
+                : undefined
+            }
             language={entity.language}
             detail={entity.detail}
             text={
@@ -164,7 +174,7 @@ export const EntityTag: React.FC<EntityTag> = ({
         <Tag
           propId={entity.id}
           label={getEntityLabel(entity)}
-          labelItalic={entity.label === ""}
+          labelItalic={isFirstLabelEmpty(entity.labels)}
           status={entity.status}
           ltype={entity?.data?.logicalType ?? "1"}
           isTemplate={entity.isTemplate}

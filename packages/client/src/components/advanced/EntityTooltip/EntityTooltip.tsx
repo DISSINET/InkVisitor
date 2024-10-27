@@ -20,7 +20,7 @@ import { ThemeColor } from "Theme/theme";
 import api from "api";
 import { LetterIcon, Tooltip } from "components";
 import React, { useEffect, useMemo, useState } from "react";
-import { AiOutlineTag } from "react-icons/ai";
+import { AiOutlineTag, AiOutlineTags } from "react-icons/ai";
 import { BiCommentDetail } from "react-icons/bi";
 import { BsCardText } from "react-icons/bs";
 import { ImListNumbered } from "react-icons/im";
@@ -46,6 +46,7 @@ interface EntityTooltip {
   entityId: string;
   entityClass: EntityEnums.Class;
   label?: string | JSX.Element;
+  alternativeLabels?: string[];
   language: EntityEnums.Language;
   detail?: string;
   text?: string;
@@ -69,6 +70,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
   entityId,
   entityClass,
   label,
+  alternativeLabels,
   language,
   detail,
   text,
@@ -161,7 +163,6 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                 <StyledIconWrap>
                   <BiCommentDetail />
                 </StyledIconWrap>
-
                 <StyledDetail>{detail}</StyledDetail>
               </StyledRow>
             )}
@@ -171,6 +172,23 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                   <ImListNumbered />
                 </StyledIconWrap>
                 <StyledDetail>{itemsCount}</StyledDetail>
+              </StyledRow>
+            )}
+            {alternativeLabels && alternativeLabels.length > 0 && (
+              <StyledRow>
+                <StyledIconWrap>
+                  <AiOutlineTags size={12} />
+                </StyledIconWrap>
+                <StyledDetail>
+                  {alternativeLabels.map((altLabel, key) => {
+                    return (
+                      <React.Fragment key={key}>
+                        {altLabel}
+                        {key !== alternativeLabels.length - 1 ? ", " : ""}
+                      </React.Fragment>
+                    );
+                  })}
+                </StyledDetail>
               </StyledRow>
             )}
           </>
@@ -196,7 +214,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
 
               return (
                 <React.Fragment key={key}>
-                  {`${relationEntity?.label}${
+                  {`${relationEntity?.labels[0]}${
                     key !== filteredCloudRelationIds.length - 1
                       ? tooltipLabelSeparator
                       : ""
@@ -281,7 +299,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                                       return (
                                         <React.Fragment key={key}>
                                           {getShortLabelByLetterCount(
-                                            entity?.label,
+                                            entity?.labels[0],
                                             40
                                           )}
                                           {certainty

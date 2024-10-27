@@ -1,3 +1,8 @@
+import {
+  AutoPlacement,
+  BasePlacement,
+  VariationPlacement,
+} from "@popperjs/core";
 import { EntityEnums } from "@shared/enums";
 import { ThemeColor } from "Theme/theme";
 import { Tooltip } from "components";
@@ -7,14 +12,11 @@ import React, {
   ReactElement,
   useState,
 } from "react";
+import { ButtonSize } from "types";
 import { StyledButton, StyledButtonLabel } from "./ButtonStyles";
-import {
-  AutoPlacement,
-  BasePlacement,
-  VariationPlacement,
-} from "@popperjs/core";
 
 interface ButtonProps {
+  size?: ButtonSize;
   tooltipLabel?: string;
   tooltipContent?: ReactElement[] | ReactElement;
   label?: string;
@@ -33,10 +35,10 @@ interface ButtonProps {
   fullWidth?: boolean;
   tooltipPosition?: AutoPlacement | BasePlacement | VariationPlacement;
   hideTooltipOnClick?: boolean;
-  paddingX?: boolean;
 }
 
 export const Button: React.FC<ButtonProps> = ({
+  size = ButtonSize.Small,
   tooltipLabel,
   tooltipContent,
   label = "",
@@ -57,7 +59,6 @@ export const Button: React.FC<ButtonProps> = ({
   fullWidth = false,
   tooltipPosition = "bottom",
   hideTooltipOnClick = false,
-  paddingX = false,
 }) => {
   const [referenceElement, setReferenceElement] =
     useState<HTMLButtonElement | null>(null);
@@ -74,7 +75,8 @@ export const Button: React.FC<ButtonProps> = ({
             onClick(e);
           }
         }}
-        $hasIcon={icon && true}
+        $size={size}
+        $iconButton={icon !== undefined && label?.length === 0}
         $color={color}
         $inverted={inverted}
         $textRegular={textRegular}
@@ -87,7 +89,6 @@ export const Button: React.FC<ButtonProps> = ({
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
         onKeyPress={(e: KeyboardEvent<HTMLButtonElement>) => e.preventDefault()}
-        $paddingX={paddingX}
       >
         {icon}
         {label && (

@@ -89,11 +89,11 @@ export const StatementEditorSectionButtons: React.FC<
   const hasEntities = () => {
     switch (section) {
       case "actions":
-        return statement.data.actions.length > 0;
+        return statement.data.actions?.length > 0;
       case "actants":
-        return statement.data.actants.length > 0;
+        return statement.data.actants?.length > 0;
       case "references":
-        return statement.references.length > 0;
+        return statement.references?.length > 0;
     }
   };
 

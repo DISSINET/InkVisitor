@@ -108,6 +108,24 @@ export default class Cursor implements IRelativeCoordinates {
   }
 
   /**
+   * getSelectedArea return null if area is empty (no char selected)
+   * @returns
+   */
+  getSelectedArea(): [IAbsCoordinates, IAbsCoordinates] | null {
+    const selected = this.getSelected();
+    if (
+      selected[0] === undefined ||
+      selected[1] === undefined ||
+      (selected[0].xLine === selected[1].xLine &&
+        selected[0].yLine === selected[1].yLine)
+    ) {
+      return null;
+    }
+
+    return [selected[0], selected[1]];
+  }
+
+  /**
    * getSelected is getter for absolute selected coordinates
    * @returns
    */
@@ -301,5 +319,9 @@ export default class Cursor implements IRelativeCoordinates {
     this.selectEnd = undefined;
     this.xLine = -1;
     this.yLine = -1;
+  }
+
+  static fromPosition(pos: IAbsCoordinates): Cursor {
+    return new Cursor(0, pos.xLine, pos.yLine);
   }
 }
