@@ -10,11 +10,9 @@ export const StyledAlternativeLabelWrap = styled.div`
   position: relative;
   display: flex;
   align-items: center;
-  gap: 0.3rem;
   color: ${({ theme }) => theme.color["black"]};
   border: 1px solid ${({ theme }) => theme.color["black"]};
   background-color: ${({ theme }) => theme.color["white"]};
-  padding: 0.1rem 0.2rem 0.1rem 0.7rem;
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
 `;
@@ -31,10 +29,13 @@ export const StyledAlternativeLabel = styled.div`
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 1;
+  padding: 0.1rem 0.3rem 0.1rem 0.7rem;
+  z-index: 1;
 `;
 export const StyledCloseIcon = styled(IoClose)`
   cursor: pointer;
   color: ${({ theme }) => theme.color["black"]};
+  padding-right: 0.2rem;
 `;
 interface StyledAddLabel {
   $marginTop: boolean;
