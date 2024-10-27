@@ -39,6 +39,7 @@
                 outline: none;
                 background-color: white;
                 border: 1px solid black;
+                cursor: text;
               "
             >
             </canvas>
@@ -65,13 +66,13 @@
         <label>mode</label>
         <select id="mode">
           <option value="raw">raw</option>
-          <option value="highlight">highlight</option>
+          <option value="highlight" selected>highlight</option>
           <option value="semi">semi</option>
         </select>
       </fieldset>
       <fieldset>
         <label>toggle highlight</label>
-        <input type="checkbox" id="highlightToggle" />
+        <input type="checkbox" id="highlightToggle" checked />
       </fieldset>
       <fieldset>
         <label>add anchor </label>
@@ -109,15 +110,19 @@
       const exampleResponse = await fetch("example.txt");
       const exampleTxt = await exampleResponse.text();
 
-      let highlightEnabled = false;
+      let highlightEnabled = true;
       const annotator = new Annotator(
         document.getElementById("canvas"),
         exampleTxt,
         ratio
       );
 
+      annotator.setMode("highlight");
+
       annotator.fontColor = "black";
       annotator.bgColor = "transparent";
+
+      annotator.setSelectStyle("turquoise", 0.6);
 
       annotator.addScroller(document.getElementById("scroller"));
       annotator.addLines(document.getElementById("lines"));
@@ -152,8 +157,8 @@
           return {
             mode: "focus",
             style: {
-              color: "darkgrey",
-              opacity: 1,
+              color: "#181C14",
+              opacity: 0.65,
             },
           };
         }
@@ -204,7 +209,7 @@
 
       function resizeAnnotator() {
         const newW = document.body.clientWidth;
-        const canvasW = `${newW - 50 - 40 - 10 - 6}px`;
+        const canvasW = `${newW - 50 - 40 - 10 - 11}px`;
 
         document.getElementById("canvas").style.width = canvasW;
       }

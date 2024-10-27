@@ -5,7 +5,7 @@ import { FaPen, FaRegSave, FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 
-import { Annotator, Modes } from "@inkvisitor/annotator/src/lib";
+import { Annotator, EditMode } from "@inkvisitor/annotator/src/lib";
 import { IDocument, IEntity, IResponseDocumentDetail } from "@shared/types";
 import { Button } from "components/basic/Button/Button";
 import { ButtonGroup } from "components/basic/ButtonGroup/ButtonGroup";
@@ -88,7 +88,7 @@ export const TextAnnotator = ({
       queryClient.invalidateQueries({ queryKey: ["document"] });
       queryClient.invalidateQueries({ queryKey: ["documents"] });
       toast.info("Document content saved");
-      setAnnotatorMode(Modes.HIGHLIGHT);
+      setAnnotatorMode(EditMode.HIGHLIGHT);
     },
   });
 
@@ -111,7 +111,9 @@ export const TextAnnotator = ({
   const scroller = useRef<HTMLDivElement>(null);
   const lines = useRef<HTMLCanvasElement>(null);
 
-  const [annotatorMode, setAnnotatorMode] = useState<Modes>(Modes.HIGHLIGHT);
+  const [annotatorMode, setAnnotatorMode] = useState<EditMode>(
+    EditMode.HIGHLIGHT
+  );
 
   useEffect(() => {
     if (annotator) {
@@ -178,7 +180,7 @@ export const TextAnnotator = ({
   };
 
   const handleTextSelection = async (text: string, anchors: string[]) => {
-    if (annotatorMode === Modes.HIGHLIGHT) {
+    if (annotatorMode === EditMode.HIGHLIGHT) {
       setSelectedText(text);
       setSelectedAnchors(anchors);
 
@@ -213,20 +215,14 @@ export const TextAnnotator = ({
       RATIO
     );
 
+    newAnnotator.fontColor = "black";
+    newAnnotator.bgColor = "transparent";
+
+    newAnnotator.setSelectStyle("turquoise", 0.8);
+
     if (scroller?.current) {
       newAnnotator.addScroller(scroller.current);
     }
-
-    newAnnotator.cursor.setStyle({
-      selection: {
-        fill: theme?.color.success,
-        fillOpacity: 0.3,
-      },
-      cursor: {
-        highlightFill: theme?.color.primary,
-        defaultFill: theme?.color.primary,
-      },
-    });
 
     if (displayLineNumbers && lines.current) {
       newAnnotator.addLines(lines.current);
@@ -438,7 +434,7 @@ export const TextAnnotator = ({
 
   const isMenuDisplayed = useMemo<boolean>(() => {
     return (
-      annotatorMode === Modes.HIGHLIGHT &&
+      annotatorMode === EditMode.HIGHLIGHT &&
       selectedText !== "" &&
       !isSelectingText &&
       dataDocument !== undefined
@@ -532,40 +528,40 @@ export const TextAnnotator = ({
       {annotator && (
         <ButtonGroup>
           <Button
-            key={Modes.HIGHLIGHT}
+            key={EditMode.HIGHLIGHT}
             icon={<FaPen size={11} />}
-            label={Modes.HIGHLIGHT}
+            label={EditMode.HIGHLIGHT}
             color="success"
-            inverted={annotatorMode !== Modes.HIGHLIGHT}
+            inverted={annotatorMode !== EditMode.HIGHLIGHT}
             onClick={() => {
-              annotator.setMode(Modes.HIGHLIGHT);
-              setAnnotatorMode(Modes.HIGHLIGHT);
+              annotator.setMode(EditMode.HIGHLIGHT);
+              setAnnotatorMode(EditMode.HIGHLIGHT);
               annotator.draw();
             }}
             tooltipLabel="activate syntax highlighting mode"
           />
           <Button
-            key={Modes.SEMI}
+            key={EditMode.SEMI}
             icon={<BsFileTextFill size={11} />}
             color="success"
             label="text edit"
-            inverted={annotatorMode !== Modes.SEMI}
+            inverted={annotatorMode !== EditMode.SEMI}
             onClick={() => {
-              annotator.setMode(Modes.SEMI);
-              setAnnotatorMode(Modes.SEMI);
+              annotator.setMode(EditMode.SEMI);
+              setAnnotatorMode(EditMode.SEMI);
               annotator.draw();
             }}
             tooltipLabel="activate semi mode"
           />
           <Button
-            key={Modes.RAW}
+            key={EditMode.RAW}
             icon={<HiCodeBracket size={11} />}
             color="success"
             label="XML"
-            inverted={annotatorMode !== Modes.RAW}
+            inverted={annotatorMode !== EditMode.RAW}
             onClick={() => {
-              annotator.setMode(Modes.RAW);
-              setAnnotatorMode(Modes.RAW);
+              annotator.setMode(EditMode.RAW);
+              setAnnotatorMode(EditMode.RAW);
               annotator.draw();
             }}
             tooltipLabel="activate edit mode"

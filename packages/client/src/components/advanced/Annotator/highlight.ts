@@ -1,4 +1,4 @@
-import { HighlightSchema } from "@inkvisitor/annotator";
+import { HighlightSchema, HighlightMode } from "@inkvisitor/annotator";
 import { EntityEnums } from "@shared/enums";
 import { IResponseDocumentDetail } from "@shared/types";
 import { DefaultTheme } from "styled-components";
@@ -19,10 +19,10 @@ export const annotatorHighlight = (
 
   if (entityId === data.thisTerritoryEntityId) {
     return {
-      mode: "focus",
+      mode: HighlightMode.FOCUS,
       style: {
-        color: "darkgrey",
-        opacity: 0.7,
+        color: "black",
+        opacity: 0.6,
       },
     };
   }
@@ -34,7 +34,7 @@ export const annotatorHighlight = (
   if (entityClass) {
     if (entityClass === EntityEnums.Class.Statement) {
       return {
-        mode: "underline",
+        mode: HighlightMode.UNDERLINE,
         style: {
           color: theme?.color.entityS as string,
           opacity: 1,
@@ -50,10 +50,10 @@ export const annotatorHighlight = (
     const color = theme?.color[colorName] as string;
 
     return {
-      mode: "background",
+      mode: HighlightMode.BACKGROUND,
       style: {
         color: color,
-        opacity: 0.2,
+        opacity: 0.4,
       },
     };
   }

@@ -1,6 +1,6 @@
 import { DrawingOptions } from "./Annotator";
 import Viewport from "./Viewport";
-import { Modes } from "./constants";
+import { EditMode, HighlightMode } from "./constants";
 
 // Absolute coordinates point to virtual position not limited by viewport - first line is first line of input
 export interface IAbsCoordinates {
@@ -9,25 +9,13 @@ export interface IAbsCoordinates {
 }
 
 export interface CursorStyle {
-  selection: {
-    fill: string;
-    fillOpacity: number;
-  };
-  cursor: {
-    highlightFill: string;
-    defaultFill: string;
-  };
+  color: string;
+  opacity: number;
 }
 
 const defaultStyle: CursorStyle = {
-  selection: {
-    fill: "blue",
-    fillOpacity: 0.2,
-  },
-  cursor: {
-    highlightFill: "black",
-    defaultFill: "blue",
-  },
+  color: "black",
+  opacity: 0.7,
 };
 
 // Relative coordinates point to position relative to viewport - first line is topmost rendered line
@@ -44,6 +32,8 @@ export default class Cursor implements IRelativeCoordinates {
 
   style: CursorStyle;
 
+  hlMode: HighlightMode;
+
   // highlighted area must use absolute coordinates - highlighted area stays in position while scrolling
   private selecting: boolean = false;
   selectStart?: IAbsCoordinates;
@@ -56,9 +46,11 @@ export default class Cursor implements IRelativeCoordinates {
     ratio: number,
     xLine: number = -1,
     yLine: number = -1,
-    style: Partial<CursorStyle> = defaultStyle
+    style: Partial<CursorStyle> = defaultStyle,
+    hlMode: HighlightMode = HighlightMode.SELECT
   ) {
     this.style = { ...defaultStyle, ...style };
+    this.hlMode = hlMode;
 
     this.ratio = ratio;
     this.xLine = xLine;
@@ -74,7 +66,7 @@ export default class Cursor implements IRelativeCoordinates {
   }
 
   yToLineI(y: number, lineHeight: number): number {
-    return Math.floor((y / lineHeight) * this.ratio);
+    return Math.round((y / lineHeight) * this.ratio - 1);
   }
 
   xToCharI(x: number, charWidth: number): number {
@@ -216,43 +208,51 @@ export default class Cursor implements IRelativeCoordinates {
   ) {
     const { charWidth, lineHeight } = options;
     const width = (xEnd - xStart) * charWidth;
-    const height = options.schema?.mode === "underline" ? 2 : lineHeight;
+    const height = this.hlMode === HighlightMode.UNDERLINE ? 2 : lineHeight;
 
-    ctx.fillRect(xStart * charWidth, relLine * lineHeight, width, height);
+    ctx.fillStyle = this.style.color;
+    ctx.globalAlpha = this.style.opacity;
+
+    if (this.hlMode === "focus") {
+      ctx.globalCompositeOperation = "xor";
+      ctx.fillRect(xStart * charWidth, relLine * lineHeight, width, height);
+    } else if (this.hlMode === "underline") {
+      ctx.globalCompositeOperation = "multiply";
+      ctx.fillRect(
+        xStart * charWidth,
+        (relLine + 1) * lineHeight,
+        width,
+        height
+      );
+    } else if (this.hlMode === "background") {
+      ctx.globalCompositeOperation = "multiply";
+      ctx.fillRect(xStart * charWidth, relLine * lineHeight, width, height);
+    } else if (this.hlMode === "select") {
+      ctx.globalCompositeOperation = "overlay";
+      ctx.fillRect(xStart * charWidth, relLine * lineHeight, width, height);
+    }
   }
 
   /**
    * draw places cursor and optionally highlighted area into the canvas
    * @param ctx
    * @param viewport
+   * @param text
    * @param options
    * @returns
    */
   draw(
     ctx: CanvasRenderingContext2D,
     viewport: Viewport,
-    options: DrawingOptions
+    textLines: string[],
+    drawingOptions: DrawingOptions,
+    editMode: EditMode
   ) {
-    ctx.globalCompositeOperation = "multiply";
     if (this.xLine === -1 && this.yLine === -1) {
       return;
     }
 
-    const { charWidth, lineHeight, charsAtLine } = options;
-
-    ctx.fillStyle =
-      options.mode === Modes.HIGHLIGHT
-        ? this.style.cursor.highlightFill
-        : this.style.cursor.defaultFill;
-
-    if (!options.schema) {
-      ctx.fillRect(
-        this.xLine * charWidth,
-        this.yLine * lineHeight + 2,
-        Cursor.Width,
-        lineHeight
-      );
-    }
+    const { charsAtLine } = drawingOptions;
 
     let [hStart, hEnd] = this.getSelected();
     if (hStart && hEnd) {
@@ -262,45 +262,52 @@ export default class Cursor implements IRelativeCoordinates {
 
       const rowsToDraw: { rowI: number; start: number; end: number }[] = [];
 
-      for (let i = 0; i <= viewport.lineEnd - viewport.lineStart; i++) {
-        const absY = viewport.lineStart + i;
+      for (
+        let i = 0;
+        i <= Math.min(viewport.lineEnd, textLines.length) - viewport.lineStart;
+        i++
+      ) {
+        const currY = viewport.lineStart + i;
 
-        if (options.schema?.mode === "focus") {
-          if (absY < hStart.yLine || absY > hEnd.yLine) {
+        const lastCharX = textLines[currY].length;
+
+        if (this.hlMode === "focus") {
+          if (currY < hStart.yLine || currY > hEnd.yLine) {
             rowsToDraw.push({ rowI: i, start: 0, end: charsAtLine });
           }
-          if (absY === hStart.yLine) {
+          if (currY === hStart.yLine) {
             rowsToDraw.push({ rowI: i, start: 0, end: hStart.xLine });
           }
-          if (absY === hEnd.yLine) {
-            rowsToDraw.push({ rowI: i, start: hEnd.xLine, end: charsAtLine });
+          if (currY === hEnd.yLine) {
+            rowsToDraw.push({
+              rowI: i,
+              start: lastCharX,
+              end: hEnd.xLine,
+            });
           }
         } else {
-          if (hStart.yLine <= absY && hEnd.yLine >= absY) {
-            if (hStart.yLine === absY) {
+          if (hStart.yLine <= currY && hEnd.yLine >= currY) {
+            if (hStart.yLine === currY) {
               rowsToDraw.push({
                 rowI: i,
                 start: hStart.xLine,
-                end: hStart.yLine === hEnd.yLine ? hEnd.xLine : charsAtLine,
+                end: hStart.yLine === hEnd.yLine ? hEnd.xLine : lastCharX,
               });
-            } else if (hEnd.yLine === absY) {
+            } else if (hEnd.yLine === currY) {
               rowsToDraw.push({ rowI: i, start: 0, end: hEnd.xLine });
             } else {
-              rowsToDraw.push({ rowI: i, start: 0, end: charsAtLine });
+              rowsToDraw.push({
+                rowI: i,
+                start: 0,
+                end: lastCharX,
+              });
             }
           }
         }
       }
 
-      console.log(rowsToDraw);
-
-      ctx.fillStyle = options.schema?.style.color || this.style.selection.fill;
-
-      ctx.globalAlpha =
-        options.schema?.style.opacity || this.style.selection.fillOpacity;
-
       for (const row of rowsToDraw) {
-        this.drawLine(ctx, row.rowI, row.start, row.end, options);
+        this.drawLine(ctx, row.rowI, row.start, row.end, drawingOptions);
       }
     }
     ctx.globalAlpha = 1;

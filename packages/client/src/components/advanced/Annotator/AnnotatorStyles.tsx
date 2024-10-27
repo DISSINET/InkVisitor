@@ -3,7 +3,7 @@ import styled from "styled-components";
 export const StyledScrollerViewport = styled.div`
   background: #ccc;
   position: relative;
-  width: 14px;
+  width: 16px;
   border-radius: ${({ theme }) => theme.borderRadius["default"]};
 `;
 
@@ -25,6 +25,7 @@ export const StyledCanvasWrapper = styled.div`
   border: 1px solid black;
   padding: 2px;
   display: flex;
+  flex-direction: row;
 `;
 
 export const StyledMainCanvas = styled.canvas`

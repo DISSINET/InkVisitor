@@ -1,12 +1,12 @@
-import Cursor from "./Cursor";
+import Cursor, { IAbsCoordinates } from "./Cursor";
 import { Lines } from "./Lines";
 import Scroller from "./Scroller";
 import Text, { SegmentPosition } from "./Text";
 import Viewport from "./Viewport";
-import { Modes } from "./constants";
+import { EditMode, HighlightMode } from "./constants";
 
 export interface HighlightSchema {
-  mode: "select" | "background" | "underline" | "focus";
+  mode: HighlightMode;
   style: {
     color: string;
     opacity: number;
@@ -18,8 +18,6 @@ export interface DrawingOptions {
   charWidth: number;
   lineHeight: number;
   charsAtLine: number;
-  mode: Modes;
-  schema?: HighlightSchema;
 }
 
 export interface Selected {
@@ -41,6 +39,8 @@ export class Annotator {
 
   fontColor: string = "black";
   bgColor: string = "white";
+  selectColor: string = "rgba(0, 0, 0)";
+  selectOpacity: number = 0.5;
 
   charWidth: number = 0;
   lineHeight: number = 15;
@@ -115,7 +115,10 @@ export class Annotator {
     this.inputText = inputText;
     this.text = new Text(this.inputText, charsAtLine);
 
-    this.cursor = new Cursor(this.ratio, 0, 0, {});
+    this.cursor = new Cursor(this.ratio, 0, 0, {
+      color: this.selectColor,
+      opacity: this.selectOpacity,
+    });
 
     this.bgColor = this.element.style.backgroundColor || "white";
     this.fontColor = this.element.style.color || "black";
@@ -136,6 +139,16 @@ export class Annotator {
     this.previousRenderViewportLineStart = 0;
 
     this.draw();
+  }
+
+  setSelectStyle(selectColor: string, selectOpacity: number) {
+    this.selectColor = selectColor;
+    this.selectOpacity = selectOpacity;
+
+    this.cursor.style = {
+      color: this.selectColor,
+      opacity: this.selectOpacity,
+    };
   }
 
   /**
@@ -320,7 +333,7 @@ export class Annotator {
 
     switch (e.key) {
       case "Enter":
-        if (this.text.mode === Modes.HIGHLIGHT) {
+        if (this.text.mode === EditMode.HIGHLIGHT) {
           return;
         }
         this.text.insertNewline(this.viewport, this.cursor);
@@ -472,7 +485,7 @@ export class Annotator {
         break;
 
       case "Backspace":
-        if (this.text.mode === Modes.HIGHLIGHT) {
+        if (this.text.mode === EditMode.HIGHLIGHT) {
           return;
         }
 
@@ -558,10 +571,9 @@ export class Annotator {
         break;
 
       case "Delete":
-        if (this.text.mode === Modes.HIGHLIGHT) {
+        if (this.text.mode === EditMode.HIGHLIGHT) {
           return;
         }
-        console.log(this.cursor.getSelected());
         return;
         this.text.deleteText(this.viewport, this.cursor, -1);
         this.cursor.move(0, 0);
@@ -589,7 +601,7 @@ export class Annotator {
         }
 
         if (!nonCharKeys.includes(key)) {
-          if (this.text.mode === Modes.HIGHLIGHT) {
+          if (this.text.mode === EditMode.HIGHLIGHT) {
             return;
           }
 
@@ -827,16 +839,22 @@ export class Annotator {
     }
 
     const textSegment = this.text.cursorToIndex(this.viewport, this.cursor);
+
     if (textSegment) {
       // fix cursor position to end of the line (cursor.xLine could be virtually infinity)
       this.cursor.xLine = textSegment.charInLineIndex;
 
-      this.cursor.draw(this.ctx, this.viewport, {
-        lineHeight: this.lineHeight,
-        charWidth: this.charWidth,
-        charsAtLine: this.text.charsAtLine,
-        mode: this.text.mode,
-      });
+      this.cursor.draw(
+        this.ctx,
+        this.viewport,
+        this.text.lines,
+        {
+          lineHeight: this.lineHeight,
+          charWidth: this.charWidth,
+          charsAtLine: this.text.charsAtLine,
+        },
+        this.text.mode
+      );
     }
 
     if (this.onSelectTextCb && this.cursor.isSelected()) {
@@ -866,7 +884,8 @@ export class Annotator {
         });
       }
     }
-    if (this.text.mode === Modes.HIGHLIGHT && this.onHighlightCb) {
+
+    if (this.text.mode === EditMode.HIGHLIGHT && this.onHighlightCb) {
       const startPos = this.text.getSegmentPosition(this.viewport.lineStart, 0);
       const endPos = this.text.getSegmentPosition(
         this.viewport.lineEnd,
@@ -875,59 +894,62 @@ export class Annotator {
 
       const annotated: string[] = this.getAnnotations(startPos, endPos);
 
+      const higlightItems: {
+        schema: HighlightSchema;
+        start: IAbsCoordinates;
+        end: IAbsCoordinates;
+      }[] = [];
+
       for (const tag of annotated) {
-        const highlight = this.onHighlightCb(tag);
-        if (highlight) {
-          const [startLine, endLine] = this.text.getTagPosition(tag);
-          const highlighter = new Cursor(this.ratio, 0, 0, {});
-          highlighter.selectStart = startLine;
-          highlighter.selectEnd = endLine;
-          highlighter.draw(this.ctx, this.viewport, {
+        const hlSchema = this.onHighlightCb(tag);
+        const [startLine, endLine] = this.text.getTagPosition(tag);
+
+        if (hlSchema) {
+          higlightItems.push({
+            schema: hlSchema,
+            start: startLine,
+            end: endLine,
+          });
+        }
+      }
+
+      // the focus mode goes to the end, underline mode goes to start
+      higlightItems.sort((a, b) => {
+        if (a.schema.mode === "focus") {
+          return 1;
+        }
+        if (a.schema.mode === "underline") {
+          return -1;
+        }
+        return 0;
+      });
+
+      for (const item of higlightItems) {
+        const highlighter = new Cursor(
+          this.ratio,
+          0,
+          0,
+          {
+            color: item.schema.style.color,
+            opacity: item.schema.style.opacity,
+          },
+          item.schema.mode
+        );
+
+        highlighter.selectStart = item.start;
+        highlighter.selectEnd = item.end;
+
+        highlighter.draw(
+          this.ctx,
+          this.viewport,
+          this.text.lines,
+          {
             lineHeight: this.lineHeight,
             charWidth: this.charWidth,
             charsAtLine: this.text.charsAtLine,
-            mode: this.text.mode,
-            schema: highlight,
-          });
-
-          /*
-            if (startLine && endLine) {
-              this.ctx.underlineStyle = "green"; //highlight.style.color;
-              for (
-                let currentYLine = startLine.yLine;
-                currentYLine <= endLine.yLine;
-                currentYLine++
-              ) {
-                if (
-                  this.viewport.lineStart <= currentYLine &&
-                  this.viewport.lineEnd >= currentYLine
-                ) {
-                  this.ctx.beginPath();
-
-                  const yPos =
-                    currentYLine - this.viewport.lineStart + this.lineHeight;
-                  if (currentYLine === startLine.yLine) {
-                    this.ctx.moveTo(startLine.xLine, yPos);
-                  } else if (currentYLine === endLine.yLine) {
-                    this.ctx.moveTo(endLine.xLine, yPos);
-                  } else {
-                    this.ctx.moveTo(0, yPos);
-                  }
-
-                  if (startLine.yLine === endLine.yLine) {
-                    this.ctx.lineTo(endLine.xLine * this.charWidth, yPos);
-                  } else if (currentYLine === startLine.yLine) {
-                    this.ctx.lineTo(this.charWidth, yPos);
-                  } else if (currentYLine === endLine.yLine) {
-                    this.ctx.lineTo(endLine.xLine * this.charWidth, yPos);
-                  }
-
-                  this.ctx.underline();
-                }
-              }
-            }
-            */
-        }
+          },
+          this.text.mode
+        );
       }
     }
 
@@ -953,7 +975,7 @@ export class Annotator {
    * change display mode and recalculate drawn lines
    * @param mode
    */
-  setMode(mode: Modes) {
+  setMode(mode: EditMode) {
     this.element.classList.remove(this.text.mode);
     this.element.classList.add(mode);
 
