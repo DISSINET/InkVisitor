@@ -2,15 +2,11 @@
  * This node script takes id of one Territory, a case study name, and source of data and prepares a dataset specifically taking the given T structure, usually for a purpose of a case study
  */
 
-import Entity from "@models/entity/entity";
-import { getEntityClass } from "@models/factory";
-import { EntityEnums } from "@shared/enums";
-import { IEntity, IProp, IStatement, Relation } from "@shared/types";
+import { EntityEnums, RelationEnums } from "@shared/enums";
+import { IAction, IEntity, IProp, IStatement, Relation } from "@shared/types";
 import dotevn from "dotenv";
 import * as fs from "fs";
 import { Connection, RDatum, r as rethink } from "rethinkdb-ts";
-
-import treeCache from "@service/treeCache";
 
 // take CLI parameters name, territory and source
 const args = process.argv.slice(2);
@@ -98,18 +94,45 @@ const getDetailEntities = (eId: string): string[] => {
   }
 
   const detailIds: string[] = [];
+
+  // all entities in their meta props,
   detailIds.push(...getPropEntities(entity.props));
 
+  // all entities used in all relations but for CLA+SCL and AEE+SCL only the "paths up",
+  const relations: Relation.IRelation[] = entityRelationsMap[eId] || [];
+  relations.forEach((r) => {
+    if (
+      r.type === RelationEnums.Type.Classification ||
+      r.type === RelationEnums.Type.Superclass ||
+      r.type === RelationEnums.Type.ActionEventEquivalent
+    ) {
+      if (r.entityIds[0] === eId) {
+        detailIds.push(r.entityIds[1]);
+      }
+    } else {
+      detailIds.push(...r.entityIds);
+    }
+  });
+
+  // all entities in references,
   entity.references?.forEach((r) => {
     detailIds.push(r.resource);
     detailIds.push(r.value);
   });
 
-  const relations: Relation.IRelation[] = entityRelationsMap[eId] || [];
-
-  relations.forEach((r) => {
-    detailIds.push(...r.entityIds);
-  });
+  // (if A) all entities in actant semantics section
+  if (entity.class === EntityEnums.Class.Action) {
+    const valEntities = (entity as IAction).data?.entities;
+    valEntities?.s?.forEach((v) => {
+      detailIds.push(v);
+    });
+    valEntities?.a1?.forEach((v) => {
+      detailIds.push(v);
+    });
+    valEntities?.a2?.forEach((v) => {
+      detailIds.push(v);
+    });
+  }
 
   const eSet = new Set(detailIds);
   // remove itself
