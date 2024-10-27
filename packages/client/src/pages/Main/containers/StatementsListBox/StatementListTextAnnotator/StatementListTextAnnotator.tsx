@@ -1,5 +1,6 @@
 import { Annotator } from "@inkvisitor/annotator/src/lib";
 import { animated, useSpring } from "@react-spring/web";
+import { entitiesDict } from "@shared/dictionaries";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import { IEntity, IResponseEntity, IResponseStatement } from "@shared/types";
 import { useQuery } from "@tanstack/react-query";
@@ -9,23 +10,16 @@ import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 import TextAnnotator from "components/advanced/Annotator/Annotator";
 import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
 import React, { useEffect, useMemo, useState } from "react";
-import {
-  FaLocationArrow,
-  FaLongArrowAltRight,
-  FaSearchLocation,
-  FaUnlink,
-} from "react-icons/fa";
+import { FaLongArrowAltRight, FaUnlink } from "react-icons/fa";
 import { GrDocumentMissing } from "react-icons/gr";
-import { TbAnchor, TbAnchorOff } from "react-icons/tb";
-import { TiDocumentText, TiRadar } from "react-icons/ti";
+import { TbAnchorOff } from "react-icons/tb";
+import { TiDocumentText } from "react-icons/ti";
 import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
+import { StyledModeSwitcher } from "../StatementListHeader/StatementListHeaderStyles";
 import {
   StyledDocumentTag,
   StyledDocumentTitle,
 } from "../StatementLitBoxStyles";
-import { EntityMultiDropdown } from "components/advanced/Dropdowns/EntityMultiDropdown";
-import { entitiesDict } from "@shared/dictionaries";
-import { StyledModeSwitcher } from "../StatementListHeader/StatementListHeaderStyles";
 
 interface StatementListTextAnnotator {
   statements: IResponseStatement[];
@@ -80,6 +74,22 @@ export const StatementListTextAnnotator: React.FC<
   }, []);
 
   const [annotator, setAnnotator] = useState<Annotator | undefined>(undefined);
+
+  const [hlEntities, setHlEntities] = useState<EntityEnums.Class[]>([
+    EntityEnums.Class.Action,
+    EntityEnums.Class.Person,
+    EntityEnums.Class.Being,
+    EntityEnums.Class.Concept,
+    EntityEnums.Class.Group,
+    EntityEnums.Class.Location,
+    EntityEnums.Class.Object,
+    EntityEnums.Class.Event,
+    EntityEnums.Class.Resource,
+    EntityEnums.Class.Person,
+    EntityEnums.Class.Statement,
+    EntityEnums.Class.Value,
+    EntityEnums.Class.Territory,
+  ]);
 
   const animatedStyle = useSpring({
     opacity: showAnnotator ? 1 : 0,
@@ -306,7 +316,14 @@ export const StatementListTextAnnotator: React.FC<
       </div>
 
       {selectedResource !== false && selectedResource?.data?.documentId && (
-        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "4px",
+            marginBottom: "5px",
+          }}
+        >
           <StyledModeSwitcher style={{ textWrap: "nowrap" }}>
             Highlight
           </StyledModeSwitcher>
@@ -315,11 +332,15 @@ export const StatementListTextAnnotator: React.FC<
             disableEmpty={true}
             disableAny={true}
             onChange={(newValues) => {
-              console.log(newValues);
-              // const oldData = { ...entity.data };
+              setHlEntities(newValues);
             }}
-            value={}
-            width="full"
+            value={hlEntities}
+            width={
+              statements.length > 0
+                ? contentWidth - COLLAPSED_TABLE_WIDTH - 70
+                : contentWidth - 70
+            }
+            noOptionsMessage="No entity classes to highlight"
           />
         </div>
       )}
@@ -334,6 +355,7 @@ export const StatementListTextAnnotator: React.FC<
                   ? contentWidth - COLLAPSED_TABLE_WIDTH
                   : contentWidth
               }
+              hlEntities={hlEntities}
               forwardAnnotator={(newAnnotator) => {
                 setAnnotator(newAnnotator);
               }}

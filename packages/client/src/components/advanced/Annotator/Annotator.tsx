@@ -23,11 +23,13 @@ import {
   StyledScrollerViewport,
 } from "./AnnotatorStyles";
 import { annotatorHighlight } from "./highlight";
+import { EntityEnums } from "@shared/enums";
 
 interface TextAnnotatorProps {
   width: number;
   height: number;
   displayLineNumbers: boolean;
+  hlEntities: EntityEnums.Class[];
   documentId: string;
   handleCreateStatement?: Function | undefined;
   handleCreateTerritory?: Function | undefined;
@@ -47,6 +49,7 @@ export const TextAnnotator = ({
   width = 400,
   height = 500,
   displayLineNumbers = true,
+  hlEntities,
   documentId,
   handleCreateStatement = undefined,
   handleCreateTerritory = undefined,
@@ -239,6 +242,7 @@ export const TextAnnotator = ({
             thisTerritoryEntityId,
             dataDocument,
           },
+          hlEntities,
           theme
         );
       }
@@ -288,6 +292,14 @@ export const TextAnnotator = ({
       });
     }
   }, [theme, isFetchingDocument]);
+
+  useEffect(() => {
+    if (!isFetchingDocument) {
+      refreshAnnotator({
+        line: storedAnnotatorScroll,
+      });
+    }
+  }, [hlEntities]);
 
   useEffect(() => {
     if (mainCanvas.current) {
