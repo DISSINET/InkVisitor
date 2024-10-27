@@ -263,40 +263,38 @@ export default class Cursor implements IRelativeCoordinates {
       const rowsToDraw: { rowI: number; start: number; end: number }[] = [];
 
       for (let i = 0; i <= viewport.lineEnd - viewport.lineStart; i++) {
-        const absY = viewport.lineStart + i;
+        const currY = viewport.lineStart + i;
+        const lastCharX = textLines[currY].length;
 
         if (this.hlMode === "focus") {
-          if (absY < hStart.yLine || absY > hEnd.yLine) {
+          if (currY < hStart.yLine || currY > hEnd.yLine) {
             rowsToDraw.push({ rowI: i, start: 0, end: charsAtLine });
           }
-          if (absY === hStart.yLine) {
-            rowsToDraw.push({ rowI: i, start: 0, end: charsAtLine });
+          if (currY === hStart.yLine) {
+            rowsToDraw.push({ rowI: i, start: 0, end: hStart.xLine });
           }
-          if (absY === hEnd.yLine) {
+          if (currY === hEnd.yLine) {
             rowsToDraw.push({
               rowI: i,
-              start: hEnd.xLine,
-              end: charsAtLine,
+              start: lastCharX,
+              end: hEnd.xLine,
             });
           }
         } else {
-          if (hStart.yLine <= absY && hEnd.yLine >= absY) {
-            if (hStart.yLine === absY) {
+          if (hStart.yLine <= currY && hEnd.yLine >= currY) {
+            if (hStart.yLine === currY) {
               rowsToDraw.push({
                 rowI: i,
                 start: hStart.xLine,
-                end:
-                  hStart.yLine === hEnd.yLine
-                    ? hEnd.xLine
-                    : textLines[absY].length,
+                end: hStart.yLine === hEnd.yLine ? hEnd.xLine : lastCharX,
               });
-            } else if (hEnd.yLine === absY) {
+            } else if (hEnd.yLine === currY) {
               rowsToDraw.push({ rowI: i, start: 0, end: hEnd.xLine });
             } else {
               rowsToDraw.push({
                 rowI: i,
                 start: 0,
-                end: textLines[absY].length,
+                end: lastCharX,
               });
             }
           }
