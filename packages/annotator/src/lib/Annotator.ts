@@ -893,7 +893,6 @@ export class Annotator {
       );
 
       const annotated: string[] = this.getAnnotations(startPos, endPos);
-
       const higlightItems: {
         schema: HighlightSchema;
         start: IAbsCoordinates;
@@ -902,14 +901,20 @@ export class Annotator {
 
       for (const tag of annotated) {
         const hlSchema = this.onHighlightCb(tag);
-        const [startLine, endLine] = this.text.getTagPosition(tag);
-
         if (hlSchema) {
-          higlightItems.push({
-            schema: hlSchema,
-            start: startLine,
-            end: endLine,
-          });
+
+          // iterate over all tag occurrences
+          let occurence: IAbsCoordinates[];
+          let i = 1;
+          do {
+            occurence = this.text.getTagPosition(tag, i);
+            higlightItems.push({
+              schema: hlSchema,
+              start: occurence[0],
+              end: occurence[1],
+            });
+            i++;
+          } while (!!occurence.length);
         }
       }
 
