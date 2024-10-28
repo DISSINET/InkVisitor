@@ -228,8 +228,17 @@ export default class Cursor implements IRelativeCoordinates {
       ctx.globalCompositeOperation = "multiply";
       ctx.fillRect(xStart * charWidth, relLine * lineHeight, width, height);
     } else if (this.hlMode === "select") {
-      ctx.globalCompositeOperation = "overlay";
+      ctx.globalCompositeOperation = "color";
       ctx.fillRect(xStart * charWidth, relLine * lineHeight, width, height);
+
+      ctx.fillStyle = "black";
+      ctx.globalAlpha = 1;
+      ctx.fillRect(
+        xStart * charWidth,
+        relLine * lineHeight,
+        Cursor.Width,
+        lineHeight
+      );
     }
   }
 
