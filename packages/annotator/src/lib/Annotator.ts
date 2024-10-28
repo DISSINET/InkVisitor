@@ -670,7 +670,7 @@ export class Annotator {
 
   onMouseDoubleClick(e: MouseEvent) {
     this.cursor.setPositionFromEvent(e, this.lineHeight, this.charWidth);
-    const [offsetLeft, offssetRight] = this.text.getCursorWordOffsets(
+    const [offsetLeft, offsetRight] = this.text.getCursorWordOffsets(
       this.viewport,
       this.cursor
     );
@@ -679,7 +679,7 @@ export class Annotator {
       yLine: this.cursor.yLine + this.viewport.lineStart,
     };
     this.cursor.selectEnd = {
-      xLine: this.cursor.xLine + offssetRight,
+      xLine: this.cursor.xLine + offsetRight,
       yLine: this.cursor.yLine + this.viewport.lineStart,
     };
     this.draw();

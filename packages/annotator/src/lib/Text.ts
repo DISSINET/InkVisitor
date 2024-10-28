@@ -262,7 +262,7 @@ class Text {
     absLineIndex: number,
     charInLineIndex: number = 0
   ): SegmentPosition | null {
-    const segmentIndex = this.segments.findIndex(
+    const segmentIndex = this.segments.findLastIndex(
       (s) => s.lineStart <= absLineIndex && s.lineEnd >= absLineIndex
     );
 
