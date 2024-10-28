@@ -277,7 +277,6 @@ export default class Cursor implements IRelativeCoordinates {
         i++
       ) {
         const currY = viewport.lineStart + i;
-
         const lastCharX = textLines[currY].length;
 
         if (this.hlMode === "focus") {

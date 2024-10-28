@@ -65,7 +65,7 @@ export class Segment {
   }
 
   findTagParsedPosition(tag: ITag): { x: number; y: number } {
-    // find abs position right after the <tag>
+    // find abs position right after the <tag> in segment's text
     let parsedTextOpenPosition = this.openingTags
       .filter((t) => t.position < tag.position)
       .reduce((acc, cur) => {
@@ -77,13 +77,14 @@ export class Segment {
         return acc - cur.tag.length - 3;
       }, parsedTextOpenPosition);
 
+    // fold text-lines to get line-based positon (2d instead of 1d coordinates)
     let y = this.lineStart;
     let x = parsedTextOpenPosition;
     for (const line of this.lines) {
       if (x - line.length <= 0) {
         break;
       }
-      x -= line.length + 1;
+      x -= line.length;
       y++;
     }
 
@@ -262,6 +263,13 @@ class Text {
     absLineIndex: number,
     charInLineIndex: number = 0
   ): SegmentPosition | null {
+    // sanitize bounds
+    if (absLineIndex < 0) {
+      absLineIndex = 0;
+    } else if (absLineIndex > this.lines.length) {
+      absLineIndex = this.lines.length;
+    }
+
     const segmentIndex = this.segments.findLastIndex(
       (s) => s.lineStart <= absLineIndex && s.lineEnd >= absLineIndex
     );
