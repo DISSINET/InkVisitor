@@ -264,7 +264,7 @@ export default class Cursor implements IRelativeCoordinates {
 
       for (
         let i = 0;
-        i <= Math.min(viewport.lineEnd, textLines.length) - viewport.lineStart;
+        i < Math.min(viewport.lineEnd, textLines.length) - viewport.lineStart;
         i++
       ) {
         const currY = viewport.lineStart + i;
