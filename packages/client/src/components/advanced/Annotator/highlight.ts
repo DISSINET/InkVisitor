@@ -32,7 +32,7 @@ export const annotatorHighlight = (
     dReferenceEntityIds[key as EntityEnums.Class].includes(entityId)
   );
 
-  if (entityClass && hlEntities.includes(entityClass as EntityEnums.Class)) {
+  if (entityClass && hlEntities && hlEntities.includes(entityClass as EntityEnums.Class)) {
     if (entityClass === EntityEnums.Class.Statement) {
       return {
         mode: HighlightMode.UNDERLINE,
