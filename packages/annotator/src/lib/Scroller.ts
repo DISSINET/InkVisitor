@@ -55,7 +55,7 @@ class Scroller {
    */
   update(startLine: number, endLine: number, totalLines: number) {
     const viewportLines = endLine - startLine + 1;
-    const percentage = (startLine * 100) / (totalLines - viewportLines);
+    const percentage = Math.min(100, (startLine * 100) / (totalLines - viewportLines));
 
     const availableHeight =
       this.element.clientHeight - this.runner.clientHeight;
