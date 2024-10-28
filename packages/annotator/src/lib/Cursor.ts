@@ -234,7 +234,7 @@ export default class Cursor implements IRelativeCoordinates {
       ctx.fillStyle = "black";
       ctx.globalAlpha = 1;
       ctx.fillRect(
-        xStart * charWidth,
+        xEnd * charWidth,
         relLine * lineHeight,
         Cursor.Width,
         lineHeight
@@ -317,6 +317,8 @@ export default class Cursor implements IRelativeCoordinates {
 
       for (const row of rowsToDraw) {
         this.drawLine(ctx, row.rowI, row.start, row.end, drawingOptions);
+        this.xLine = row.end
+        this.yLine = row.rowI
       }
     }
     ctx.globalAlpha = 1;
