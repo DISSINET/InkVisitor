@@ -213,15 +213,6 @@ jobs:
       - name: Run docker build task
         run: docker build -f Dockerfile.cached -t inkvisitor:staging .
 
-      - name: Save docker-compose stack
-        run: docker save inkvisitor:staging | gzip > inkvisitor-staging.tar.gz
-
-      - name: Cache image.tar
-        uses: actions/cache@v2
-        with:
-          path: inkvisitor-staging.tar.gz
-          key: inkvisitor-staging-${{ github.sha }}.tar.gz
-
   build-data-import:
     needs: [build-client-data-import]
     name: Build the data-import docker image
@@ -245,15 +236,6 @@ jobs:
       
       - name: Run docker build task
         run: docker build -f Dockerfile.cached -t inkvisitor:data-import .
-
-      - name: Save docker-compose stack
-        run: docker save inkvisitor:data-import | gzip > inkvisitor-data-import.tar.gz
-
-      - name: Cache image.tar
-        uses: actions/cache@v2
-        with:
-          path: inkvisitor-data-import.tar.gz
-          key: inkvisitor-data-import-${{ github.sha }}.tar.gz
           
   build-sandbox:
     needs: [build-client-sandbox]
@@ -278,95 +260,3 @@ jobs:
       
       - name: Run docker build task
         run: docker build -f Dockerfile.cached -t inkvisitor:sandbox .
-
-      - name: Save docker-compose stack
-        run: docker save inkvisitor:sandbox | gzip > inkvisitor-sandbox.tar.gz
-
-      - name: Cache image.tar
-        uses: actions/cache@v2
-        with:
-          path: inkvisitor-sandbox.tar.gz
-          key: inkvisitor-sandbox-${{ github.sha }}.tar.gz
-          
-  deploy:
-    needs: [build-staging, build-data-import, build-sandbox]
-    name: Deploy
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: Checkout InkVisitor
-        uses: actions/checkout@v2
-
-      - name: Restore cached staging
-        uses: actions/cache@v2
-        with:
-          path: inkvisitor-staging.tar.gz
-          key: inkvisitor-staging-${{ github.sha }}.tar.gz
-
-      - name: Restore cached data-import
-        uses: actions/cache@v2
-        with:
-          path: inkvisitor-data-import.tar.gz
-          key: inkvisitor-data-import-${{ github.sha }}.tar.gz
-          
-      - name: Restore cached sandbox
-        uses: actions/cache@v2
-        with:
-          path: inkvisitor-sandbox.tar.gz
-          key: inkvisitor-sandbox-${{ github.sha }}.tar.gz
-          
-      - name: Install SSH Key
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          known_hosts: ${{ secrets.KNOWN_HOSTS }}
-
-      - name: Update packages
-        run: |
-          sudo apt-get update
-
-      - name: Install OpenVPN
-        run: |
-          sudo apt install -y openvpn openvpn-systemd-resolved
-
-      - name: Prepare OpenVPN creds file
-        run: |
-          touch pass.txt
-          echo ${{ secrets.VPN_USER }} >> pass.txt
-          echo ${{ secrets.VPN_PASS }} >> pass.txt
-
-      - name: Pull OpenVPN Config
-        run: curl https://it.muni.cz/media/3404274/muni-main-linux.ovpn -o muni-linux.ovpn
-
-      - name: Connect to VPN and deploy
-        run: sudo openvpn --config muni-linux.ovpn --auth-user-pass pass.txt --daemon
-
-      - name: Wait for a VPN connection
-        timeout-minutes: 5
-        run: until ping -w 5 ${{ secrets.SSH_HOST }}; do sleep 2; done
-
-      - name: Upload image staging
-        run: scp inkvisitor-staging.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/html/apps
-        
-      - name: Upload image data-import
-        run: scp inkvisitor-data-import.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/html/apps
-              
-      - name: Upload image sandbox
-        run: scp inkvisitor-sandbox.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/html/apps
-                              
-      - name: Restart containers
-        run: |
-          ssh -tt ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}  -- "sh -c '
-          podman container prune -f &&
-          podman image prune -f &&
-          rm -rf /var/tmp/docker-tar* &&
-          podman rm inkvisitor-staging --force || true && 
-          podman rm inkvisitor-data-import --force || true && 
-          podman rm inkvisitor-sandbox --force || true && 
-          podman load -i /var/www/html/apps/inkvisitor-staging.tar.gz && 
-          podman load -i /var/www/html/apps/inkvisitor-data-import.tar.gz && 
-          podman load -i /var/www/html/apps/inkvisitor-sandbox.tar.gz && 
-          podman-compose -f /var/www/html/apps/docker-compose.yml up -d inkvisitor-staging &&
-          podman-compose -f /var/www/html/apps/docker-compose.yml up -d inkvisitor-data-import &&
-          podman-compose -f /var/www/html/apps/docker-compose.yml up -d inkvisitor-sandbox
-          '"
