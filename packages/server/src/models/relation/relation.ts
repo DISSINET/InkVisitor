@@ -3,7 +3,11 @@ import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
 import { IEntity, Relation as RelationTypes } from "@shared/types";
 import { DbEnums, EntityEnums, RelationEnums, UserEnums } from "@shared/enums";
 import { EnumValidators } from "@shared/enums";
-import { InternalServerError, ModelNotValidError, RelationAsymetricalPathExist } from "@shared/types/errors";
+import {
+  InternalServerError,
+  ModelNotValidError,
+  RelationAsymetricalPathExist,
+} from "@shared/types/errors";
 import User from "@models/user/user";
 import { IRequest } from "../../custom_typings/request";
 import { nonenumerable } from "@common/decorators";
@@ -181,8 +185,10 @@ export default class Relation implements IRelationModel {
   async beforeSave(request: IRequest): Promise<void> {
     if (RelationTypes.RelationRules[this.type]?.asymmetrical) {
       const pathHelper = new Path(this.type);
-      await pathHelper.build(await Relation.getByType(request.db.connection, this.type))
-    
+      await pathHelper.build(
+        await Relation.getByType(request.db.connection, this.type)
+      );
+
       if (pathHelper.pathExists(this.entityIds[1], this.entityIds[0])) {
         throw new RelationAsymetricalPathExist();
       }
@@ -387,28 +393,34 @@ export default class Relation implements IRelationModel {
     return data ? new Relation(data) : null;
   }
 
-  static async getByType<T extends RelationTypes.IRelation>(db: Connection, relType: RelationEnums.Type): Promise<T[]> {
+  static async getByType<T extends RelationTypes.IRelation>(
+    db: Connection,
+    relType: RelationEnums.Type
+  ): Promise<T[]> {
     const items: T[] = await rethink
       .table(Relation.table)
       .filter({ type: relType })
-      .run(db)
+      .run(db);
 
     return items;
   }
 
   /**
    * searches for relations with specific entity ids and returns both relation ids and connected entity ids
-   * @param request IRequest
+   * @param db Connection
    * @param entityIds string[]
+   * @param relType RelationEnums.Type?
    * @returns promise with both entity/relation ids
    */
   static async getLinkedForEntities(
-    request: IRequest,
-    entityIds: string[]
+    db: Connection,
+    entityIds: string[],
+    relType?: RelationEnums.Type
   ): Promise<[string[], string[]]> {
     const linkedRelations = await Relation.findForEntities(
-      request.db.connection,
-      entityIds
+      db,
+      entityIds,
+      relType
     );
     let linkedEntitiyIds: string[], linkedRelationIds: string[];
 
@@ -429,7 +441,7 @@ export default class Relation implements IRelationModel {
 
     return [linkedEntitiyIds, linkedRelationIds];
   }
-  
+
   /**
    * Searches for relations assigned for multiple entity ids, filtered by optional relation type
    * @param db

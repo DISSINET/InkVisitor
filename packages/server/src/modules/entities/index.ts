@@ -510,9 +510,10 @@ export default Router()
         // check for any blocking reasons for not deleting the entity + construct dependency map
         for (const entity of existing) {
           // if relations are linked to this entity, the delete should not be allowed
-          const [linkIds, relIds] = await Relation.getLinkedForEntities(req, [
-            entity.id,
-          ]);
+          const [linkIds, relIds] = await Relation.getLinkedForEntities(
+            req.db.connection,
+            [entity.id]
+          );
           if (relIds.length) {
             out.result = false;
             out.data[entity.id] = new InvalidDeleteError(

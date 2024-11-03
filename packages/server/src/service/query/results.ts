@@ -1,5 +1,6 @@
 import Audit from "@models/audit/audit";
 import Entity from "@models/entity/entity";
+import Relation from "@models/relation/relation";
 import User from "@models/user/user";
 import { IEntity, IUser } from "@shared/types";
 import { PropSpecKind } from "@shared/types/prop";
@@ -133,6 +134,24 @@ export default class Results<T extends { id: string }> {
           const entities = await Entity.findEntitiesByIds(
             db,
             Entity.extractIdsFromProps(entity.props)
+          );
+          out[column.id] = entities;
+          break;
+        }
+        case Explore.EExploreColumnType.ER: {
+          const params =
+            column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.ER>;
+          // first - retrieve all entity ids that are in some relation with entity.id
+          const [entityIds] = await Relation.getLinkedForEntities(
+            db,
+            [entity.id],
+            params.relationType
+          );
+
+          // second - get repsective entities from db - omit entity.id
+          const entities = await Entity.findEntitiesByIds(
+            db,
+            entityIds.filter((e) => e !== entity.id)
           );
           out[column.id] = entities;
           break;

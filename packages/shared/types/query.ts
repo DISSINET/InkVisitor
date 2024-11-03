@@ -1,4 +1,4 @@
-import { EntityEnums } from "../enums";
+import { EntityEnums, RelationEnums } from "../enums";
 
 export namespace Query {
   export interface INode {
@@ -918,7 +918,7 @@ export namespace Explore {
   };
 
   export type ExploreColumnParamsMap = {
-    [EExploreColumnType.ER]: {};
+    [EExploreColumnType.ER]: { relationType: RelationEnums.Type };
     [EExploreColumnType.EPV]: { propertyType: string };
     [EExploreColumnType.EPT]: {};
     [EExploreColumnType.ERR]: {};
