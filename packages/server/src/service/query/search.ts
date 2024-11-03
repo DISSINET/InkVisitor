@@ -59,6 +59,7 @@ export default class QuerySearch {
     ) {
       return [];
     }
+
     this.results = await this.root.run(db);
     return this.results.items || [];
   }
@@ -70,6 +71,7 @@ export default class QuerySearch {
 
     const filteredIds = this.results.filter(this.explore);
     const filtered = await Entity.findEntitiesByIds(db, filteredIds);
+
     const out: IResponseQueryEntity[] = [];
     for (const entity of filtered) {
       out.push({

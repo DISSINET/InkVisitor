@@ -75,9 +75,7 @@ export default class SearchNode implements Query.INode {
       q = edge.run(q);
     }
 
-    console.log(q.toString());
-
-    const edgeResults = await q.distinct().run(db);
+    const edgeResults = await q.getField("id").distinct().run(db);
 
     if (this.operator === Query.NodeOperator.And) {
       this.results.addAnd(edgeResults);
