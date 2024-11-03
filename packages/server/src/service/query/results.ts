@@ -129,6 +129,14 @@ export default class Results<T extends { id: string }> {
           out[column.id] = resources;
           break;
         }
+        case Explore.EExploreColumnType.EPT: {
+          const entities = await Entity.findEntitiesByIds(
+            db,
+            Entity.extractIdsFromProps(entity.props)
+          );
+          out[column.id] = entities;
+          break;
+        }
       }
     }
 
