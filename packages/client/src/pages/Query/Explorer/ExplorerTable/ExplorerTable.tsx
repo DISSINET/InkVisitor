@@ -469,9 +469,8 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                 const isOdd = Boolean(key % 2);
                 return (
                   // ROW
-                  <>
+                  <React.Fragment key={key}>
                     <StyledGridRow
-                      key={key}
                       onClick={() =>
                         rowsExpanded.includes(rowId)
                           ? setRowsExpanded(
@@ -570,7 +569,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                         />
                       </div>
                     )}
-                  </>
+                  </React.Fragment>
                 );
               })}
             </StyledGrid>
