@@ -903,9 +903,9 @@ export namespace Explore {
     EExploreColumnType,
     { disabled: boolean }
   > = {
-    [EExploreColumnType.ER]: { disabled: true },
+    [EExploreColumnType.ER]: { disabled: false },
     [EExploreColumnType.EPV]: { disabled: false },
-    [EExploreColumnType.EPT]: { disabled: true },
+    [EExploreColumnType.EPT]: { disabled: false },
     [EExploreColumnType.ERR]: { disabled: true },
     [EExploreColumnType.ERV]: { disabled: true },
     [EExploreColumnType.ES]: { disabled: true },
