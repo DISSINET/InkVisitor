@@ -52,6 +52,22 @@ export const StatementListBox: React.FC = () => {
     (state) => state.statementList.isLoading
   );
 
+  const [hlEntities, setHlEntities] = useState<EntityEnums.Class[]>([
+    EntityEnums.Class.Action,
+    EntityEnums.Class.Person,
+    EntityEnums.Class.Being,
+    EntityEnums.Class.Concept,
+    EntityEnums.Class.Group,
+    EntityEnums.Class.Location,
+    EntityEnums.Class.Object,
+    EntityEnums.Class.Event,
+    EntityEnums.Class.Resource,
+    EntityEnums.Class.Person,
+    EntityEnums.Class.Statement,
+    EntityEnums.Class.Value,
+    EntityEnums.Class.Territory,
+  ]);
+
   const {
     territoryId,
     setTerritoryId,
@@ -645,6 +661,8 @@ export const StatementListBox: React.FC = () => {
                     setStoredAnnotatorScroll(newScroll);
                   }
                 }}
+                hlEntities={hlEntities}
+                setHlEntities={setHlEntities}
                 entities={entities}
                 right={right}
                 setShowSubmit={setShowSubmit}

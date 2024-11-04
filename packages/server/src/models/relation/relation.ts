@@ -13,6 +13,7 @@ import { IRequest } from "../../custom_typings/request";
 import { nonenumerable } from "@common/decorators";
 import Entity from "@models/entity/entity";
 import Path from "./path";
+import { findEntityById } from "@service/shorthands";
 
 export interface IRelationModel extends RelationTypes.IRelation, IDbModel {
   beforeSave(request: IRequest): Promise<void>;
@@ -190,7 +191,19 @@ export default class Relation implements IRelationModel {
       );
 
       if (pathHelper.pathExists(this.entityIds[1], this.entityIds[0])) {
-        throw new RelationAsymetricalPathExist();
+        // default message for asymetrical path err
+        let message = RelationAsymetricalPathExist.message;
+
+        // custom message if superclass
+        if (this.type === RelationEnums.Type.Superclass) {
+          const entity = await findEntityById(
+            request.db.connection,
+            this.entityIds[1]
+          );
+          message = `'${entity.labels[0]}', that you attempted to use as superclass, is set as a subclass. Relation not created.`;
+        }
+
+        throw new RelationAsymetricalPathExist(message);
       }
     }
 

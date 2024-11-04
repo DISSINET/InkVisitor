@@ -1,19 +1,21 @@
 import { Annotator } from "@inkvisitor/annotator/src/lib";
 import { animated, useSpring } from "@react-spring/web";
+import { entitiesDict } from "@shared/dictionaries";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import { IEntity, IResponseEntity, IResponseStatement } from "@shared/types";
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
 import { Button, Loader } from "components";
-import { EntitySuggester, EntityTag } from "components/advanced";
+import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 import TextAnnotator from "components/advanced/Annotator/Annotator";
 import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
 import React, { useEffect, useMemo, useState } from "react";
-import { FaUnlink } from "react-icons/fa";
+import { FaLongArrowAltRight, FaUnlink } from "react-icons/fa";
 import { GrDocumentMissing } from "react-icons/gr";
-import { TbAnchor, TbAnchorOff } from "react-icons/tb";
-import { TiDocumentText, TiRadar } from "react-icons/ti";
+import { TbAnchorOff } from "react-icons/tb";
+import { TiDocumentText } from "react-icons/ti";
 import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
+import { StyledModeSwitcher } from "../StatementListHeader/StatementListHeaderStyles";
 import {
   StyledDocumentTag,
   StyledDocumentTitle,
@@ -38,6 +40,9 @@ interface StatementListTextAnnotator {
   storedAnnotatorScroll: number;
   setStoredAnnotatorScroll?: React.Dispatch<React.SetStateAction<number>>;
 
+  hlEntities: EntityEnums.Class[];
+  setHlEntities: React.Dispatch<React.SetStateAction<EntityEnums.Class[]>>;
+
   contentHeight: number;
   contentWidth: number;
 }
@@ -61,6 +66,9 @@ export const StatementListTextAnnotator: React.FC<
 
   storedAnnotatorScroll,
   setStoredAnnotatorScroll = () => {},
+
+  hlEntities,
+  setHlEntities,
 
   contentHeight,
   contentWidth,
@@ -204,7 +212,7 @@ export const StatementListTextAnnotator: React.FC<
         style={{
           display: "flex",
           alignItems: "center",
-          padding: "0.2rem 1rem",
+          padding: "0.2rem 0.5rem",
         }}
       >
         {!selectedResource && (
@@ -266,46 +274,64 @@ export const StatementListTextAnnotator: React.FC<
               <i>This Resource does not have any document</i>
             </>
           )}
-      </div>
 
-      {/* T anchor line */}
-      {selectedResource !== false && selectedResource?.data?.documentId && (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "end",
-            padding: "0.2rem 1rem",
-            gap: "0.2rem",
-          }}
-        >
-          {activeTHasAnchor ? (
-            <>
-              <span style={{ display: "flex", gap: "0.4rem" }}>
-                <span>Territory</span>
-                <TbAnchor />
-                <span>found</span>
-              </span>
-
+        {selectedResource !== false && selectedResource?.data?.documentId && (
+          <div
+            className="annotator-menu-bar"
+            style={{
+              gap: "0.2rem",
+            }}
+          >
+            {/* T anchor line */}
+            {activeTHasAnchor ? (
               <Button
-                icon={<TiRadar size={22} />}
+                label="Locate territory"
+                iconRight={<FaLongArrowAltRight />}
                 tooltipLabel="localize anchor in document"
                 inverted
-                noIconMargin
-                noBorder
-                noBackground
                 onClick={() => {
                   annotator?.scrollToAnchor(territoryId);
                 }}
                 color="warning"
               />
-            </>
-          ) : (
-            <span style={{ display: "flex", gap: "0.4rem" }}>
-              <i>No </i>
-              <TbAnchorOff />
-              <i>for Territory</i>
-            </span>
-          )}
+            ) : (
+              <div style={{ display: "flex", gap: "0.4rem" }}>
+                <i>No </i>
+                <TbAnchorOff />
+                <i>for Territory</i>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {selectedResource !== false && selectedResource?.data?.documentId && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "4px",
+            marginBottom: "5px",
+          }}
+        >
+          <StyledModeSwitcher style={{ textWrap: "nowrap" }}>
+            Highlight
+          </StyledModeSwitcher>
+          <Dropdown.Multi.Entity
+            options={entitiesDict}
+            disableEmpty={true}
+            disableAny={true}
+            onChange={(newValues) => {
+              setHlEntities(newValues);
+            }}
+            value={hlEntities}
+            width={
+              statements.length > 0
+                ? contentWidth - COLLAPSED_TABLE_WIDTH - 70
+                : contentWidth - 70
+            }
+            noOptionsMessage="No entity classes to highlight"
+          />
         </div>
       )}
 
@@ -319,6 +345,7 @@ export const StatementListTextAnnotator: React.FC<
                   ? contentWidth - COLLAPSED_TABLE_WIDTH
                   : contentWidth
               }
+              hlEntities={hlEntities}
               forwardAnnotator={(newAnnotator) => {
                 setAnnotator(newAnnotator);
               }}

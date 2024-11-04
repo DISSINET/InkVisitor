@@ -363,8 +363,8 @@ class SearchEdgeTypesInvalid extends CustomError {
  */
 class RelationAsymetricalPathExist extends CustomError {
   public static code = 400;
-  public static title = "Asymetrical constraint check failed";
-  public static message = "Relation cannot be created";
+  public static title = "Relation not created";
+  public static message = "Asymetrical constraint check failed";
 
   static forId(id: string): RelationAsymetricalPathExist {
     return new RelationAsymetricalPathExist(
