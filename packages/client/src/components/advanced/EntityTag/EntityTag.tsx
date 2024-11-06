@@ -72,6 +72,9 @@ export const EntityTag: React.FC<EntityTag> = ({
   const draggedEntity: DraggedEntityReduxItem = useAppSelector(
     (state) => state.draggedEntity
   );
+  if (entity === undefined) {
+    return null;
+  }
 
   const classId = entity.class;
   const [buttonHovered, setButtonHovered] = useState(false);
