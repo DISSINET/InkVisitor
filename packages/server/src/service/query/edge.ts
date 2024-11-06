@@ -111,15 +111,16 @@ export class EdgeHasPropType extends SearchEdge {
 
   run(q: RStream): RStream {
     const that = this;
-    return q.filter(function (e: RDatum<IEntity>) {
-      // some of the e.[props].type.entityId is entity.id
-      return e("props").filter(function (prop1) {
-        return prop1("type")("entityId").eq(that.node.params.id);
+    return q
+      .filter(function (e: RDatum<IEntity>) {
+        // some of the e.[props].type.entityId is entity.id
+        return e("props").filter(function (prop1) {
+          return prop1("type")("entityId").eq(that.node.params.id);
+        });
+      })
+      .map(function (e) {
+        return e("id");
       });
-    });
-    // .map(function (e) {
-    //   return e("id");
-    // });
   }
 }
 
