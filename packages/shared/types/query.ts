@@ -759,8 +759,15 @@ export namespace Query {
   export const findValidEdgeTypesForSourceNode = (node: INode): EdgeType[] => {
     const validEdges = Object.entries(EdgeTypeNodeRules)
       .filter(([, [ruleFrom, ruleTo]]) => {
-        // TODO
-        return node.type === ruleFrom.nodeType;
+        const validType = ruleFrom.nodeType === node.type;
+        console.log(node);
+        const validClass =
+          node.params?.classes?.length && ruleFrom.params.entityClass?.length
+            ? node.params.classes.some((cl) =>
+                ruleFrom.params.entityClass?.includes(cl)
+              )
+            : true;
+        return validType && validClass;
       })
       .map(([type]) => type as EdgeType);
     return validEdges;

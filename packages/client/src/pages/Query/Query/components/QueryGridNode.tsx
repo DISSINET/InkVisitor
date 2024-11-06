@@ -51,6 +51,8 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
     if (isValid) {
       if (isRoot) {
         return theme.color.query4;
+      } else {
+        return theme.color.query2;
       }
     }
     return "none";
@@ -58,7 +60,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
 
   const nodeColor = useMemo(() => {
     if (isValid) {
-      return theme.color.query2;
+      return theme.color.query1;
     } else {
       return theme.color.queryInvalid;
     }

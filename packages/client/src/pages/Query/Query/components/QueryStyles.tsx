@@ -20,7 +20,7 @@ export const StyledGraphNode = styled.div`
     text-align: center;
   }
   .react-select__single-value {
-    color: white;
+    color: ${({ theme }) => theme.color.primary};
     font-weight: 900 !important;
     font-size: large;
   }
