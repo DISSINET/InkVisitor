@@ -9,11 +9,11 @@ export type INodeItem = Query.INode & {
 };
 
 export const edgeTypesImplemented: Query.EdgeType[] = [
-  Query.EdgeType.XHasPropType,
-  Query.EdgeType.XHasClassification,
-  Query.EdgeType.XHasRelation,
-  Query.EdgeType.CHasSuperclass,
-  Query.EdgeType.SUnderT,
+  Query.EdgeType["EP:T"],
+  Query.EdgeType["R:"],
+  Query.EdgeType["R:CLA"],
+  Query.EdgeType["R:SCL"],
+  Query.EdgeType["SUT:"],
 ];
 
 export type QueryValidity = {
