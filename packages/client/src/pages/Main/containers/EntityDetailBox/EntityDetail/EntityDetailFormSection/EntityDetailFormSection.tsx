@@ -670,6 +670,12 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                     changeOnType
                     value={newAltLabel}
                     onChangeFn={(newLabel: string) => setNewAltLabel(newLabel)}
+                    onEnterPressFn={() => {
+                      updateEntityMutation.mutate({
+                        labels: [...entity.labels, newAltLabel],
+                      });
+                      setNewAltLabel("");
+                    }}
                   />
                   <span>
                     <Button
