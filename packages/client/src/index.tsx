@@ -11,6 +11,11 @@ ensureBasename();
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
+
+if (module.hot) {
+  module.hot.accept();
+}
+
 root.render(
   <Provider store={store}>
     <App />
