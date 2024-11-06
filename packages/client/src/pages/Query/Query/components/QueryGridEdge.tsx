@@ -34,7 +34,7 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
 
   const isValid = problems.length === 0;
 
-  const color = isValid ? "dimgray" : "red";
+  const color = isValid ? theme.color.query2 : theme.color.queryInvalid;
 
   edgeTypeOptions.sort((a, b) => {
     if (a.isDisabled && !b.isDisabled) {

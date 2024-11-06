@@ -47,15 +47,20 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
     },
   });
 
-  const nodeColor = useMemo(() => {
+  const nodeBorder = useMemo(() => {
     if (isValid) {
       if (isRoot) {
-        return theme.color.greyer;
-      } else {
-        return theme.color.primary;
+        return theme.color.query4;
       }
+    }
+    return "none";
+  }, [isValid, isRoot]);
+
+  const nodeColor = useMemo(() => {
+    if (isValid) {
+      return theme.color.query2;
     } else {
-      return "red";
+      return theme.color.queryInvalid;
     }
   }, [isValid, isRoot]);
 
@@ -74,6 +79,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
       <StyledGraphNode
         style={{
           backgroundColor: nodeColor,
+          border: `3px solid ${nodeBorder}`,
         }}
       >
         <Dropdown.Single.Basic

@@ -60,6 +60,12 @@ const theme = {
     tagSelectedColor: "#fff",
     tagItalic: "#4a5568",
 
+    query1: "#FFFCF2",
+    query2: "#CCC5B9",
+    query3: "#403D39",
+    query4: "#252422",
+    queryInvalid: "#EB5E28",
+
     iconButtonGroupColor: "#C4C4C4",
 
     treeNodeRead: "#718096",
