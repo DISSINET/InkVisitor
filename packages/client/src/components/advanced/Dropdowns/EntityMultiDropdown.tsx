@@ -27,6 +27,7 @@ interface EntityMultiDropdown<T = string> {
   placeholder?: string;
   noOptionsMessage?: string;
 
+  disableAny?: boolean;
   disableEmpty?: boolean;
   disableTyping?: boolean;
   disabled?: boolean;
@@ -41,6 +42,7 @@ export const EntityMultiDropdown = <T extends string>({
   placeholder,
   noOptionsMessage,
 
+  disableAny = false,
   disableEmpty = false,
   disableTyping = false,
   disabled,
@@ -49,7 +51,13 @@ export const EntityMultiDropdown = <T extends string>({
 }: EntityMultiDropdown<T>) => {
   const getValues = (items: DropdownItem[]) => items.map((i) => i.value as T);
 
-  const generalValues = disableEmpty ? [allEntities] : [empty, allEntities];
+  const generalValues = [];
+  if (!disableEmpty) {
+    generalValues.push(empty);
+  }
+  if (!disableAny) {
+    generalValues.push(allEntities);
+  }
 
   return (
     <BaseDropdown

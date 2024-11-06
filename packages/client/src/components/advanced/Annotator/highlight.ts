@@ -1,4 +1,4 @@
-import { HighlightSchema } from "@inkvisitor/annotator";
+import { HighlightSchema, HighlightMode } from "@inkvisitor/annotator";
 import { EntityEnums } from "@shared/enums";
 import { IResponseDocumentDetail } from "@shared/types";
 import { DefaultTheme } from "styled-components";
@@ -12,6 +12,7 @@ interface annotatorHighlightData {
 export const annotatorHighlight = (
   entityId: string,
   data: annotatorHighlightData,
+  hlEntities: EntityEnums.Class[],
   theme: DefaultTheme | undefined
 ): HighlightSchema | undefined => {
   const dReferenceEntityIds: Record<EntityEnums.Class, string[]> =
@@ -19,10 +20,10 @@ export const annotatorHighlight = (
 
   if (entityId === data.thisTerritoryEntityId) {
     return {
-      mode: "background",
+      mode: HighlightMode.FOCUS,
       style: {
-        fillColor: theme?.color.warning,
-        fillOpacity: 0.7,
+        color: "black",
+        opacity: 0.6,
       },
     };
   }
@@ -31,16 +32,29 @@ export const annotatorHighlight = (
     dReferenceEntityIds[key as EntityEnums.Class].includes(entityId)
   );
 
-  if (entityClass) {
+  if (entityClass && hlEntities && hlEntities.includes(entityClass as EntityEnums.Class)) {
+    if (entityClass === EntityEnums.Class.Statement) {
+      return {
+        mode: HighlightMode.UNDERLINE,
+        style: {
+          color: theme?.color.entityS as string,
+          opacity: 1,
+        },
+      };
+    }
+    if (entityClass === EntityEnums.Class.Territory) {
+      return undefined;
+    }
+
     const classItem = EntityColors[entityClass];
     const colorName = classItem?.color ?? "transparent";
     const color = theme?.color[colorName] as string;
 
     return {
-      mode: "background",
+      mode: HighlightMode.BACKGROUND,
       style: {
-        fillColor: color,
-        fillOpacity: 0.2,
+        color: color,
+        opacity: 0.4,
       },
     };
   }

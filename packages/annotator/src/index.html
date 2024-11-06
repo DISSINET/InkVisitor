@@ -39,6 +39,7 @@
                 outline: none;
                 background-color: white;
                 border: 1px solid black;
+                cursor: text;
               "
             >
             </canvas>
@@ -65,13 +66,13 @@
         <label>mode</label>
         <select id="mode">
           <option value="raw">raw</option>
-          <option value="highlight">highlight</option>
+          <option value="highlight" selected>highlight</option>
           <option value="semi">semi</option>
         </select>
       </fieldset>
       <fieldset>
         <label>toggle highlight</label>
-        <input type="checkbox" id="highlightToggle" />
+        <input type="checkbox" id="highlightToggle" checked />
       </fieldset>
       <fieldset>
         <label>add anchor </label>
@@ -109,15 +110,19 @@
       const exampleResponse = await fetch("example.txt");
       const exampleTxt = await exampleResponse.text();
 
-      let highlightEnabled = false;
+      let highlightEnabled = true;
       const annotator = new Annotator(
         document.getElementById("canvas"),
         exampleTxt,
         ratio
       );
 
+      annotator.setMode("highlight");
+
       annotator.fontColor = "black";
       annotator.bgColor = "transparent";
+
+      annotator.setSelectStyle("turquoise", 0.6);
 
       annotator.addScroller(document.getElementById("scroller"));
       annotator.addLines(document.getElementById("lines"));
@@ -125,16 +130,6 @@
       annotator.onHighlight((entityId) => {
         if (!highlightEnabled) {
           return null;
-        }
-
-        if (entityId !== "T40-000-002") {
-          return {
-          mode: "background",
-          style: {
-            fillColor: "white",
-            fillOpacity: 1,
-          },
-        };
         }
 
         let color = "black";
@@ -148,16 +143,36 @@
           color = "yellow";
         }
 
+        if (entityId.startsWith("T")) {
+          return {
+            mode: "underline",
+            style: {
+              color: color,
+              opacity: 1,
+            },
+          };
+        }
+
+        if (entityId.endsWith("f")) {
+          return {
+            mode: "focus",
+            style: {
+              color: "#181C14",
+              opacity: 0.65,
+            },
+          };
+        }
+
         return {
           mode: "background",
           style: {
-            fillColor: color,
-            fillOpacity: 0.3,
+            color: color,
+            opacity: 0.3,
           },
         };
       });
       annotator.onSelectText((text) => {
-       // console.log("onSelectText", text);
+        // console.log("onSelectText", text);
       });
 
       document.getElementById("highlightToggle").onclick = (e) => {
@@ -194,7 +209,7 @@
 
       function resizeAnnotator() {
         const newW = document.body.clientWidth;
-        const canvasW = `${newW - 50 - 40 - 10 - 6}px`;
+        const canvasW = `${newW - 50 - 40 - 10 - 11}px`;
 
         document.getElementById("canvas").style.width = canvasW;
       }

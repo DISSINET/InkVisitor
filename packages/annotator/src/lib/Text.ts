@@ -1,6 +1,6 @@
 import Viewport from "./Viewport";
 import Cursor, { IAbsCoordinates, IRelativeCoordinates } from "./Cursor";
-import { Modes } from "./constants";
+import { EditMode } from "./constants";
 
 export interface ITag {
   position: number;
@@ -65,7 +65,7 @@ export class Segment {
   }
 
   findTagParsedPosition(tag: ITag): { x: number; y: number } {
-    // find abs position right after the <tag>
+    // find abs position right after the <tag> in segment's text
     let parsedTextOpenPosition = this.openingTags
       .filter((t) => t.position < tag.position)
       .reduce((acc, cur) => {
@@ -77,13 +77,14 @@ export class Segment {
         return acc - cur.tag.length - 3;
       }, parsedTextOpenPosition);
 
+    // fold text-lines to get line-based positon (2d instead of 1d coordinates)
     let y = this.lineStart;
     let x = parsedTextOpenPosition;
     for (const line of this.lines) {
       if (x - line.length <= 0) {
         break;
       }
-      x -= line.length + 1;
+      x -= line.length;
       y++;
     }
 
@@ -103,7 +104,7 @@ export interface SegmentPosition {
  * Text provides more abstract control over the provided raw text
  */
 class Text {
-  mode: Modes = Modes.RAW;
+  mode: EditMode = EditMode.RAW;
   segments: Segment[];
   dirtySegment?: number;
   value: string;
@@ -173,7 +174,7 @@ class Text {
       segment.lines = [];
 
       let text = segment.raw;
-      if (this.mode === Modes.HIGHLIGHT || this.mode === Modes.SEMI) {
+      if (this.mode === EditMode.HIGHLIGHT || this.mode === EditMode.SEMI) {
         text = segment.parsed;
       }
 
@@ -224,6 +225,7 @@ class Text {
       cursor.yLine + viewport.lineStart,
       cursor.xLine
     );
+
     return pos;
   }
 
@@ -261,9 +263,17 @@ class Text {
     absLineIndex: number,
     charInLineIndex: number = 0
   ): SegmentPosition | null {
-    const segmentIndex = this.segments.findIndex(
-      (s) => s.lineStart <= absLineIndex && s.lineEnd > absLineIndex
+    // sanitize bounds
+    if (absLineIndex < 0) {
+      absLineIndex = 0;
+    } else if (absLineIndex > this.lines.length) {
+      absLineIndex = this.lines.length;
+    }
+
+    const segmentIndex = this.segments.findLastIndex(
+      (s) => s.lineStart <= absLineIndex && s.lineEnd >= absLineIndex
     );
+
     if (segmentIndex === -1) {
       return null;
     }
@@ -280,7 +290,7 @@ class Text {
 
     let rawTextIndex = parsedTextIndex;
 
-    if (this.mode !== Modes.RAW) {
+    if (this.mode !== EditMode.RAW) {
       for (const tag of segment.openingTags) {
         if (tag.position <= rawTextIndex) {
           rawTextIndex += tag.tag.length + 2;
@@ -395,7 +405,7 @@ class Text {
     let text = this.segments[position.segmentIndex].parsed;
     let textIndex = position.parsedTextIndex;
 
-    if (this.mode === Modes.RAW) {
+    if (this.mode === EditMode.RAW) {
       text = this.segments[position.segmentIndex].raw;
       textIndex = position.rawTextIndex;
     }
@@ -422,7 +432,7 @@ class Text {
     let indexPosition = segmentPosition.rawTextIndex;
     const segment = this.segments[segmentPosition.segmentIndex];
 
-    if (this.mode !== Modes.RAW) {
+    if (this.mode !== EditMode.RAW) {
       for (const tag of segment.closingTags) {
         if (tag.position < segmentPosition.rawTextIndex) {
           indexPosition -= tag.tag.length + 3;

@@ -798,14 +798,9 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                       category={DraggedPropRowCategory.META_PROP}
                       disabledAttributes={
                         {
-                          statement: [
-                            "elvl",
-                            "moodvariant",
-                            "mood",
-                            "bundleOperator",
-                          ],
-                          type: ["elvl", "logic", "virtuality", "partitivity"],
-                          value: ["elvl", "logic", "virtuality", "partitivity"],
+                          statement: ["moodvariant", "mood", "bundleOperator"],
+                          type: ["logic", "virtuality", "partitivity"],
+                          value: ["logic", "virtuality", "partitivity"],
                         } as PropAttributeFilter
                       }
                       isInsideTemplate={isInsideTemplate}
