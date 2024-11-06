@@ -487,7 +487,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
               section: IWarningPositionSection.Statement,
               subSection: `${position}`,
               actantId: stActant.id,
-              entityId: stActant.entityId,
+              entityId: action.id,
             })
           );
         } else if (!actionRules.includes(actant.class)) {
@@ -496,7 +496,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
               section: IWarningPositionSection.Statement,
               subSection: `${position}`,
               actantId: stActant.id,
-              entityId: stActant.entityId,
+              entityId: action.id,
             })
           );
         }
