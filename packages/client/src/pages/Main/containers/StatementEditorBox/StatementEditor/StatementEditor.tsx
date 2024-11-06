@@ -1,4 +1,4 @@
-import { EntityEnums, UserEnums } from "@shared/enums";
+import { EntityEnums, UserEnums, WarningTypeEnums } from "@shared/enums";
 import {
   IEntity,
   IProp,
@@ -75,6 +75,14 @@ import {
 import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
 import { StatementEditorSectionButtons } from "./StatementEditorSectionButtons/StatementEditorSectionButtons";
+
+const valencyErrorTypes: WarningTypeEnums[] = [
+  WarningTypeEnums.MA,
+  WarningTypeEnums.WA,
+  WarningTypeEnums.ANA,
+  WarningTypeEnums.WAC,
+  WarningTypeEnums.AVU,
+];
 
 interface StatementEditor {
   statement: IResponseStatement;
@@ -599,11 +607,21 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   );
   const dispatch = useAppDispatch();
 
+  // display
   useEffect(() => {
-    if (showWarnings && statement.data.actions.length > 0) {
-      appendMultipleDetailIds(
-        Array.from(new Set(statement.data.actions.map((a) => a.actionId)))
+    if (showWarnings) {
+      // check the action valency errors
+      const valencyWarnings = statement.warnings.filter((w) =>
+        valencyErrorTypes.includes(w.type)
       );
+
+      const valencyWarningActions = statement.data.actions.filter((a) =>
+        valencyWarnings.some((w) => w.position?.entityId === a.actionId)
+      );
+
+      if (valencyWarningActions.length > 0) {
+        appendMultipleDetailIds(valencyWarningActions.map((a) => a.actionId));
+      }
     }
   }, [showWarnings, statementId]);
 
