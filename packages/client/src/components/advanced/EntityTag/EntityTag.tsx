@@ -73,6 +73,10 @@ export const EntityTag: React.FC<EntityTag> = ({
     (state) => state.draggedEntity
   );
 
+  if (!entity) {
+    return null;
+  }
+
   const classId = entity.class;
   const [buttonHovered, setButtonHovered] = useState(false);
   const [elvlHovered, setElvlHovered] = useState(false);
