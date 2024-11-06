@@ -1,22 +1,23 @@
-import { Query } from "@shared/types";
-import { Button } from "components";
-import React from "react";
-import { FaPlus, FaTrash } from "react-icons/fa";
-import { INodeItem, QueryValidityProblem } from "../../types";
-import { QueryAction, QueryActionType } from "../state";
-import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
-import { StyledGraphNode } from "./QueryStyles";
 import { entitiesDict } from "@shared/dictionaries";
 import { classesAll } from "@shared/dictionaries/entity";
-import { EntityEnums } from "@shared/enums";
+import { Query } from "@shared/types";
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
+import { Button } from "components";
+import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
+import React, { useMemo } from "react";
+import { FaPlus, FaTrash } from "react-icons/fa";
+import theme from "Theme/theme";
+import { INodeItem, QueryValidityProblem } from "../../types";
+import { QueryAction, QueryActionType } from "../state";
+import { StyledGraphNode } from "./QueryStyles";
 
 interface QueryGridNodeProps {
   node: INodeItem;
   edge: Query.IEdge | undefined;
   dispatch: React.Dispatch<QueryAction>;
   problems: QueryValidityProblem[];
+  isRoot: boolean;
 }
 
 export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
@@ -24,6 +25,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
   edge,
   dispatch,
   problems,
+  isRoot = false,
 }) => {
   const isValid = problems.length === 0;
 
@@ -45,7 +47,17 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
     },
   });
 
-  // console.log(dataEntity);
+  const nodeColor = useMemo(() => {
+    if (isValid) {
+      if (isRoot) {
+        return theme.color.greyer;
+      } else {
+        return theme.color.primary;
+      }
+    } else {
+      return "red";
+    }
+  }, [isValid, isRoot]);
 
   return (
     <div
@@ -61,7 +73,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
     >
       <StyledGraphNode
         style={{
-          backgroundColor: isValid ? "dimgray" : "red",
+          backgroundColor: nodeColor,
         }}
       >
         <Dropdown.Single.Basic
@@ -99,36 +111,37 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
       />
 
       <div>
-        {dataEntity !== undefined ? (
-          <EntityTag
-            entity={dataEntity}
-            unlinkButton={{
-              onClick: () => {
+        {isRoot === false &&
+          (dataEntity !== undefined ? (
+            <EntityTag
+              entity={dataEntity}
+              unlinkButton={{
+                onClick: () => {
+                  dispatch({
+                    type: QueryActionType.updateNodeEntityId,
+                    payload: {
+                      nodeId: node.id,
+                      newType: undefined,
+                    },
+                  });
+                },
+              }}
+            />
+          ) : (
+            <EntitySuggester
+              inputWidth={100}
+              categoryTypes={classesAll}
+              onSelected={(entityId: string) => {
                 dispatch({
                   type: QueryActionType.updateNodeEntityId,
                   payload: {
                     nodeId: node.id,
-                    newType: undefined,
+                    newId: entityId,
                   },
                 });
-              },
-            }}
-          />
-        ) : (
-          <EntitySuggester
-            inputWidth={100}
-            categoryTypes={classesAll}
-            onSelected={(entityId: string) => {
-              dispatch({
-                type: QueryActionType.updateNodeEntityId,
-                payload: {
-                  nodeId: node.id,
-                  newId: entityId,
-                },
-              });
-            }}
-          />
-        )}
+              }}
+            />
+          ))}
       </div>
 
       <div>

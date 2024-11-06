@@ -76,7 +76,7 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
       <div
         id="query-header"
         style={{
-          height: "50px",
+          height: "40px",
         }}
       ></div>
       <div
@@ -118,6 +118,7 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
                 {thisCellNode && (
                   <QueryGridNode
                     node={thisCellNode}
+                    isRoot={wi === 0}
                     dispatch={dispatch}
                     edge={associatedEdge}
                     problems={queryStateValidity.problems.filter(
