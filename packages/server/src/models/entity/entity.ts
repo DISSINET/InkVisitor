@@ -1,20 +1,35 @@
-import { IDbModel, fillFlatObject, fillArray } from "@models/common";
-import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
-import { IEntity, IProp, IReference } from "@shared/types";
-import { DbEnums, EntityEnums, UserEnums } from "@shared/enums";
+import { sanitizeText } from "@common/functions";
+import { IDbModel, fillArray, fillFlatObject } from "@models/common";
+import Prop from "@models/prop/prop";
+import User from "@models/user/user";
+import { findEntityById } from "@service/shorthands";
+import {
+  DbEnums,
+  EntityEnums,
+  UserEnums,
+  WarningTypeEnums,
+} from "@shared/enums";
+import {
+  IConcept,
+  IEntity,
+  IProp,
+  IReference,
+  ITerritory,
+  IWarning,
+} from "@shared/types";
+import { entityAllowedFields } from "@shared/types/entity";
 import {
   EntityDoesNotExist,
   InternalServerError,
-  InvalidDeleteError,
   ModelNotValidError,
 } from "@shared/types/errors";
-import User from "@models/user/user";
-import Prop from "@models/prop/prop";
-import { findEntityById } from "@service/shorthands";
+import {
+  EProtocolTieType,
+  ITerritoryValidation,
+} from "@shared/types/territory";
+import { Connection, RDatum, WriteResult, r as rethink } from "rethinkdb-ts";
 import { IRequest } from "../../custom_typings/request";
-import { sanitizeText } from "@common/functions";
 import Reference from "./reference";
-import { entityAllowedFields } from "@shared/types/entity";
 
 export default class Entity implements IEntity, IDbModel {
   static table = "entities";
@@ -331,6 +346,192 @@ export default class Entity implements IEntity, IDbModel {
       .getAll(rethink.args(ids))
       .run(con);
     return data;
+  }
+
+  getTBasedWarnings(
+    territoryEs: ITerritory[],
+    classificationEs: IConcept[],
+    propValueEs: IEntity[]
+  ): any[] {
+    const warnings: IWarning[] = [];
+
+    const validations: [string, ITerritoryValidation][] = [];
+    territoryEs.forEach((territory) =>
+      territory.data.validations
+        ?.filter((v) => v.active !== false)
+        .forEach((v) => validations.push([territory.id, v]))
+    );
+
+    const addNewValidationWarning = (
+      warningType: WarningTypeEnums,
+      teritoryId: string,
+      tValidation: ITerritoryValidation
+    ) => {
+      warnings.push({
+        type: warningType,
+        origin: this.id,
+        validation: tValidation,
+        position: {
+          entityId: this.id,
+        },
+      });
+    };
+
+    validations.forEach(([tId, validation]) => {
+      const {
+        entityClasses,
+        classifications,
+        tieType,
+        propType,
+        allowedClasses,
+        allowedEntities,
+      } = validation;
+
+      // check if entity falls into the allowed classes
+      const entityCheck =
+        !entityClasses.length || entityClasses.includes(this.class);
+
+      // check if entity has the allowed classifications
+      const classificationCheck =
+        !classifications.length ||
+        classifications.some((c) =>
+          classificationEs.map((cla) => cla.id)?.includes(c)
+        );
+
+      if (entityCheck && classificationCheck) {
+        // CLASSIFICATION TIE
+        if (tieType === EProtocolTieType.Classification) {
+          if (!allowedEntities || !allowedEntities.length) {
+            // no condition set, so we need at least one classification
+            if (!classificationEs.length) {
+              addNewValidationWarning(WarningTypeEnums.TVEC, tId, validation);
+            }
+          } else {
+            // classifications of the entity
+            if (
+              !allowedEntities.some((classCondition) =>
+                classificationEs.map((cla) => cla.id)?.includes(classCondition)
+              )
+            ) {
+              addNewValidationWarning(WarningTypeEnums.TVECE, tId, validation);
+            }
+          }
+        }
+
+        // REFERENCE TIE
+        else if (tieType === EProtocolTieType.Reference) {
+          const eReferences = this.references.filter(
+            (r) => r.resource && r.value
+          );
+          // at least one reference (any) needs to be assigned to the E
+          if (!allowedEntities || !allowedEntities.length) {
+            if (eReferences.length === 0) {
+              addNewValidationWarning(WarningTypeEnums.TVER, tId, validation);
+            }
+          } else {
+            // at least one reference needs to be of the allowed entity
+            if (
+              !eReferences.some((r) => allowedEntities?.includes(r.resource))
+            ) {
+              addNewValidationWarning(WarningTypeEnums.TVERE, tId, validation);
+            }
+          }
+        }
+
+        // PROPERTY TIE
+        else if (tieType === EProtocolTieType.Property) {
+          const eProps = this.props.filter(
+            (p) => p.value.entityId && p.type.entityId
+          );
+
+          // at least one property needs to be assigned to the E
+          if (
+            !propType ||
+            (!propType.length &&
+              !allowedEntities?.length &&
+              !allowedClasses?.length)
+          ) {
+            if (eProps.length === 0) {
+              addNewValidationWarning(WarningTypeEnums.TVEP, tId, validation);
+            }
+
+            // type is defined but value is empty
+          } else if (
+            propType?.length &&
+            !allowedEntities?.length &&
+            !allowedClasses?.length
+          ) {
+            if (
+              eProps.length === 0 ||
+              !eProps.some((p) => propType?.includes(p.type.entityId))
+            ) {
+              addNewValidationWarning(WarningTypeEnums.TVEPT, tId, validation);
+            }
+          } else if (allowedEntities?.length || allowedClasses?.length) {
+            const validProps = eProps.filter((p) =>
+              propType?.length ? propType.includes(p.type.entityId) : true
+            );
+            if (!validProps?.length) {
+              addNewValidationWarning(WarningTypeEnums.TVEPV, tId, validation);
+            } else if (allowedClasses?.length) {
+              // class is required
+
+              // no valid props
+              if (validProps.length === 0) {
+                addNewValidationWarning(
+                  WarningTypeEnums.TVEPV,
+                  tId,
+                  validation
+                );
+              } else {
+                let passed = true;
+                for (const pi in eProps) {
+                  const p = eProps[pi];
+                  const propValueEntity = propValueEs.find(
+                    (e) => e.id === p.value.entityId
+                  );
+                  if (
+                    propValueEntity &&
+                    propType?.includes(p.type.entityId) &&
+                    !allowedClasses?.includes(propValueEntity.class)
+                  ) {
+                    passed = false;
+                  }
+                }
+                if (!passed) {
+                  addNewValidationWarning(
+                    WarningTypeEnums.TVEPV,
+                    tId,
+                    validation
+                  );
+                }
+              }
+            } else if (allowedEntities?.length) {
+              // entity is required
+              if (validProps.length === 0) {
+                addNewValidationWarning(
+                  WarningTypeEnums.TVEPV,
+                  tId,
+                  validation
+                );
+              } else if (
+                !validProps.some((p) =>
+                  allowedEntities.includes(p.value.entityId)
+                )
+              ) {
+                addNewValidationWarning(
+                  WarningTypeEnums.TVEPV,
+                  tId,
+                  validation
+                );
+              }
+            }
+          }
+        }
+      }
+    });
+
+    return warnings;
   }
 
   async getEntities(db: Connection): Promise<IEntity[]> {
