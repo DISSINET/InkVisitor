@@ -1,8 +1,9 @@
 import Entity from "@models/entity/entity";
-import { IEntity, Query } from "@shared/types";
+import { IEntity } from "@shared/types";
 import { Connection, r, RDatum, RStream } from "rethinkdb-ts";
 import { Results, SearchEdge } from ".";
 import Edge, { getEdgeInstance } from "./edge";
+import { Query } from "@shared/types/query";
 
 export default class SearchNode implements Query.INode {
   type: Query.NodeType;

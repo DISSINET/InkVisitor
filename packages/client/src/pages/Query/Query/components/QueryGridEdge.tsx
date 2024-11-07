@@ -1,4 +1,3 @@
-import { Query } from "@shared/types";
 import Dropdown from "components/advanced";
 import React from "react";
 import { QueryAction, QueryActionType } from "../state";
@@ -10,6 +9,7 @@ import {
   QueryValidityProblem,
 } from "../../types";
 import theme from "Theme/theme";
+import { Query } from "@shared/types/query";
 
 interface QueryGridEdgeProps {
   node: INodeItem;

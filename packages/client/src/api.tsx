@@ -4,6 +4,7 @@ import {
   IDocument,
   IEntity,
   IReference,
+  IRequestQuery,
   IResponseAudit,
   IResponseBookmarkFolder,
   IResponseDetail,
@@ -12,6 +13,7 @@ import {
   IResponseEntity,
   IResponseGeneric,
   IResponsePermission,
+  IResponseQuery,
   IResponseStatement,
   IResponseTerritory,
   IResponseTree,
@@ -21,8 +23,6 @@ import {
   IUser,
   Relation,
   RequestPermissionUpdate,
-  IRequestQuery,
-  IResponseQuery,
 } from "@shared/types";
 import * as errors from "@shared/types/errors";
 import { NetworkError } from "@shared/types/errors";

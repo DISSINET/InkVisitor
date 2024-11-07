@@ -1,6 +1,5 @@
 import { entitiesDict } from "@shared/dictionaries";
 import { classesAll } from "@shared/dictionaries/entity";
-import { Query } from "@shared/types";
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
 import { Button } from "components";
@@ -11,6 +10,7 @@ import theme from "Theme/theme";
 import { INodeItem, QueryValidityProblem } from "../../types";
 import { QueryAction, QueryActionType } from "../state";
 import { StyledGraphNode } from "./QueryStyles";
+import { Query } from "@shared/types/query";
 
 interface QueryGridNodeProps {
   node: INodeItem;

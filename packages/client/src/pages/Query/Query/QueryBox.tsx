@@ -1,16 +1,17 @@
-import { IResponseQuery, Query } from "@shared/types";
+import { IResponseQuery } from "@shared/types";
+import { Query } from "@shared/types/query";
 import { useQueryClient } from "@tanstack/react-query";
 import React, { useMemo } from "react";
 import { useAppSelector } from "redux/hooks";
-import { QueryGridEdge } from "./components/QueryGridEdge";
-import { QueryGridNode } from "./components/QueryGridNode";
-import { QueryAction } from "./state";
 import {
   INodeItem,
   QUERY_GRID_HEIGHT,
   QUERY_GRID_WIDTH,
   QueryValidity,
 } from "../types";
+import { QueryGridEdge } from "./components/QueryGridEdge";
+import { QueryGridNode } from "./components/QueryGridNode";
+import { QueryAction } from "./state";
 import { getAllEdges, getAllNodes } from "./utils";
 
 interface QueryBoxProps {
