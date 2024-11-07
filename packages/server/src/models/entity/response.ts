@@ -28,6 +28,7 @@ import { UsedRelations } from "@models/relation/relations";
 import EntityWarnings from "./warnings";
 import Document, { TreeNode } from "@models/document/document";
 import Resource from "@models/resource/resource";
+import treeCache from "@service/treeCache";
 
 export class ResponseEntity extends Entity implements IResponseEntity {
   // map of entity ids that should be populated in subsequent methods and used in fetching
@@ -194,9 +195,16 @@ export class ResponseEntityDetail
 
     await this.processTemplateData(conn);
 
-    this.warnings = await new EntityWarnings(this.id, this.class).getWarnings(
-      req.db.connection
-    );
+    // get warnings - bound to entity & from root territory
+    const entityWarnings = new EntityWarnings(this.id, this.class);
+    this.warnings = [
+      ...(await entityWarnings.getWarnings(req.db.connection)),
+      ...(await entityWarnings.getTBasedWarnings(
+        req.db.connection,
+        this,
+        treeCache.tree.getRootTerritory()
+      )),
+    ];
 
     // get all documents data in IResponseUsedInDocument format
     this.usedInDocuments = await this.findUsedInDocuments(conn);

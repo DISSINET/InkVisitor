@@ -1,12 +1,21 @@
+import Classification from "@models/relation/classification";
 import Relation from "@models/relation/relation";
 import Superclass from "@models/relation/superclass";
-import { findEntityById } from "@service/shorthands";
+import { findEntityById, getEntitiesByIds } from "@service/shorthands";
 import { EntityEnums, RelationEnums, WarningTypeEnums } from "@shared/enums";
-import { IAction, IConcept, IWarning } from "@shared/types";
+import {
+  IAction,
+  IConcept,
+  IEntity,
+  ITerritory,
+  IWarning,
+} from "@shared/types";
 import { IActionValency } from "@shared/types/action";
 import { InternalServerError } from "@shared/types/errors";
+import { PropSpecKind } from "@shared/types/prop";
 import { IWarningPositionSection } from "@shared/types/warning";
 import { Connection } from "rethinkdb-ts";
+import Entity from "./entity";
 
 export default class EntityWarnings {
   entityId: string;
@@ -87,6 +96,34 @@ export default class EntityWarnings {
     }
 
     return warnings;
+  }
+
+  async getTBasedWarnings(
+    conn: Connection,
+    entity: Entity,
+    rootTerritory: ITerritory
+  ): Promise<IWarning[]> {
+    const classificationRels =
+      await Classification.getClassificationForwardConnections(
+        conn,
+        entity.id,
+        entity.class,
+        1,
+        0
+      );
+    const classificationEs: IConcept[] = await getEntitiesByIds<IConcept>(
+      conn,
+      classificationRels.map((c) => c.entityIds[1])
+    );
+    const propValueEs = await getEntitiesByIds<IEntity>(
+      conn,
+      Entity.extractIdsFromProps(entity.props, [PropSpecKind.VALUE])
+    );
+    return entity.getTBasedWarnings(
+      [rootTerritory],
+      classificationEs,
+      propValueEs
+    );
   }
 
   /**
