@@ -5,7 +5,7 @@ import { EntityEnums, UserEnums } from "@shared/enums";
 import { IEntity, IResponseEntity, IResponseStatement } from "@shared/types";
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
-import { Button, Loader } from "components";
+import { Button, DocumentTitle, Loader } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 import TextAnnotator from "components/advanced/Annotator/Annotator";
 import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
@@ -13,13 +13,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import { FaLongArrowAltRight, FaUnlink } from "react-icons/fa";
 import { GrDocumentMissing } from "react-icons/gr";
 import { TbAnchorOff } from "react-icons/tb";
-import { TiDocumentText } from "react-icons/ti";
 import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
 import { StyledModeSwitcher } from "../StatementListHeader/StatementListHeaderStyles";
-import {
-  StyledDocumentTag,
-  StyledDocumentTitle,
-} from "../StatementLitBoxStyles";
 
 interface StatementListTextAnnotator {
   statements: IResponseStatement[];
@@ -250,18 +245,7 @@ export const StatementListTextAnnotator: React.FC<
         {!selectedDocumentIsFetching && (
           <>
             {selectedDocument && (
-              <>
-                <StyledDocumentTag>
-                  <TiDocumentText
-                    style={{ marginRight: "0.2rem", flexShrink: "0" }}
-                  />
-                  <div style={{ display: "grid" }}>
-                    <StyledDocumentTitle>
-                      {selectedDocument?.title}
-                    </StyledDocumentTitle>
-                  </div>
-                </StyledDocumentTag>
-              </>
+              <DocumentTitle title={selectedDocument.title} />
             )}
           </>
         )}
