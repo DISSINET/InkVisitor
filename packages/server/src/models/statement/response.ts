@@ -25,6 +25,7 @@ import { IRequest } from "src/custom_typings/request";
 import Entity from "../entity/entity";
 import { PositionRules } from "./PositionRules";
 import Statement from "./statement";
+import { PropSpecKind } from "@shared/types/prop";
 
 export class ResponseStatement extends Statement implements IResponseStatement {
   entities: { [key: string]: IEntity };
@@ -214,19 +215,9 @@ export class ResponseStatement extends Statement implements IResponseStatement {
           req.db.connection,
           classificationRels.map((c) => c.entityIds[1])
         );
-        const entityPropValueIds: string[] = [];
-        entity.props.forEach((p1) => {
-          entityPropValueIds.push(p1.value.entityId);
-          p1.children.forEach((p2) => {
-            entityPropValueIds.push(p2.value.entityId);
-            p2.children.forEach((p3) => {
-              entityPropValueIds.push(p3.value.entityId);
-            });
-          });
-        });
         const propValueEs = await getEntitiesByIds<IEntity>(
           req.db.connection,
-          entityPropValueIds
+          Entity.extractIdsFromProps(entity.props, [PropSpecKind.VALUE])
         );
         const eWarnings = entity.getTBasedWarnings(
           territoryEs,

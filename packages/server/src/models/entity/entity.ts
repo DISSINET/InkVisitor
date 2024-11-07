@@ -30,6 +30,7 @@ import {
 import { Connection, RDatum, WriteResult, r as rethink } from "rethinkdb-ts";
 import { IRequest } from "../../custom_typings/request";
 import Reference from "./reference";
+import { PropSpecKind } from "@shared/types/prop";
 
 export default class Entity implements IEntity, IDbModel {
   static table = "entities";
@@ -312,14 +313,15 @@ export default class Entity implements IEntity, IDbModel {
 
   static extractIdsFromProps(
     props: IProp[] = [],
+    accepted: PropSpecKind[] = [PropSpecKind.TYPE, PropSpecKind.VALUE],
     cb?: (prop: IProp) => void
   ): string[] {
     let out: string[] = [];
     for (const prop of props) {
-      if (prop.type) {
+      if (prop.type && accepted.includes(PropSpecKind.TYPE)) {
         out.push(prop.type.entityId);
       }
-      if (prop.value) {
+      if (prop.value && accepted.includes(PropSpecKind.VALUE)) {
         out.push(prop.value.entityId);
       }
 
@@ -327,7 +329,7 @@ export default class Entity implements IEntity, IDbModel {
         cb(prop);
       }
 
-      out = out.concat(Entity.extractIdsFromProps(prop.children, cb));
+      out = out.concat(Entity.extractIdsFromProps(prop.children, accepted, cb));
     }
 
     return out;
@@ -352,7 +354,7 @@ export default class Entity implements IEntity, IDbModel {
     territoryEs: ITerritory[],
     classificationEs: IConcept[],
     propValueEs: IEntity[]
-  ): any[] {
+  ): IWarning[] {
     const warnings: IWarning[] = [];
 
     const validations: [string, ITerritoryValidation][] = [];
