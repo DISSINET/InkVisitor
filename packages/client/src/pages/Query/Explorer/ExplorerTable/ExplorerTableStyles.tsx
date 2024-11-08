@@ -17,8 +17,7 @@ export const StyledGrid = styled.div<StyledGrid>`
   display: grid;
   border: 1px solid ${({ theme }) => theme.color["black"]};
   align-content: start;
-  grid-template-columns: ${({ $columns }) =>
-    `3.5rem repeat(${$columns}, auto)`};
+  grid-template-columns: ${({ $columns }) => `5rem repeat(${$columns}, auto)`};
   color: ${({ theme }) => theme.color["black"]};
   width: 100%;
 `;
@@ -40,13 +39,15 @@ export const StyledGridRow = styled.div<StyledGridRow>`
 interface StyledGridColumn {}
 export const StyledGridColumn = styled.div`
   display: grid;
+  gap: 0.3rem;
+  grid-template-columns: auto auto;
   border-top: 0.5px solid ${({ theme }) => theme.color["gray"][600]};
   padding: 0.3rem;
   padding-left: 1rem;
   align-items: center;
 
   > :not(:last-child) {
-    margin-bottom: 0.3rem;
+    /* margin-bottom: 0.3rem; */
   }
 `;
 
@@ -127,4 +128,27 @@ export const StyledPagination = styled.div`
   align-items: center;
   color: ${({ theme }) => theme.color["black"]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
+`;
+
+interface StyledFocusedCircle {
+  checked: boolean;
+}
+export const StyledFocusedCircle = styled.span<StyledFocusedCircle>`
+  position: absolute;
+  background-color: ${({ theme }) => theme.color.focusedCheckbox};
+  width: 3.2rem;
+  height: 3.2rem;
+  border-radius: 50%;
+  border: 1px solid ${({ theme }) => theme.color.focusedCheckbox};
+  transform: translate(-50%, -50%);
+  top: 50%;
+  left: 50%;
+`;
+export const StyledCheckboxWrapper = styled.div`
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: ${({ theme }) => theme.color["black"]};
+  cursor: pointer;
 `;

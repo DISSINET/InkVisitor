@@ -1,8 +1,20 @@
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 import { classesAll } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
-import { IEntity, IProp, IResponseQuery, IUser } from "@shared/types";
+import {
+  IEntity,
+  IProp,
+  IResponseQuery,
+  IResponseQueryEntity,
+  IUser,
+} from "@shared/types";
 import { Explore } from "@shared/types/query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
@@ -26,13 +38,19 @@ import {
   LuChevronLeft,
   LuChevronRight,
 } from "react-icons/lu";
-import { MdOutlineEdit } from "react-icons/md";
+import {
+  MdOutlineCheckBox,
+  MdOutlineCheckBoxOutlineBlank,
+  MdOutlineEdit,
+} from "react-icons/md";
 import { TbColumnInsertRight } from "react-icons/tb";
 import { ThemeContext } from "styled-components";
 import { v4 as uuidv4 } from "uuid";
 import { ExploreAction, ExploreActionType } from "../state";
 import { ExplorerTableRowExpanded } from "./ExplorerTableRowExpanded/ExplorerTableRowExpanded";
 import {
+  StyledCheckboxWrapper,
+  StyledFocusedCircle,
   StyledGrid,
   StyledGridColumn,
   StyledGridHeader,
@@ -374,6 +392,96 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
 
   const { ref: contentRef, width: contentWidth } = useResizeObserver();
 
+  const [selectedRows, setSelectedRows] = useState<string[]>([]);
+  const [lastClickedIndex, setLastClickedIndex] = useState<number>(-1);
+
+  const handleRowSelect = (rowId: string) => {
+    if (selectedRows.includes(rowId)) {
+      setSelectedRows(
+        selectedRows.filter((selectedRow) => selectedRow !== rowId)
+      );
+    } else {
+      setSelectedRows([...selectedRows, rowId]);
+    }
+  };
+
+  const handleSelection = (
+    lastClickedIndex: number,
+    rowIndex: number
+  ): string[] => {
+    let selectedQueryEntities: IResponseQueryEntity[] = [];
+    if (lastClickedIndex < rowIndex) {
+      selectedQueryEntities = entities.slice(lastClickedIndex, rowIndex + 1);
+    } else {
+      // is bigger than - oposite direction of selection
+      selectedQueryEntities = entities.slice(rowIndex, lastClickedIndex + 1);
+    }
+    return selectedQueryEntities.map((queryEntity) => queryEntity.entity.id);
+  };
+
+  const RenderCheckbox = useCallback(
+    (id: string, index: number) => {
+      const size = 18;
+      const checked = selectedRows.includes(id);
+      const isFocused = lastClickedIndex === index;
+
+      return (
+        <StyledCheckboxWrapper>
+          {isFocused && <StyledFocusedCircle checked={checked} />}
+          {checked ? (
+            <MdOutlineCheckBox
+              size={size}
+              style={{ zIndex: 2 }}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (
+                  e.shiftKey &&
+                  lastClickedIndex !== -1 &&
+                  lastClickedIndex !== index
+                ) {
+                  // unset all between
+                  const mappedIds = handleSelection(lastClickedIndex, index);
+                  const filteredIds = selectedRows.filter(
+                    (id) => !mappedIds.includes(id)
+                  );
+                  setSelectedRows(filteredIds);
+                } else {
+                  handleRowSelect(id);
+                }
+                // dispatch(
+                setLastClickedIndex(index);
+                // );
+              }}
+            />
+          ) : (
+            <MdOutlineCheckBoxOutlineBlank
+              size={size}
+              style={{ zIndex: 2 }}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (
+                  e.shiftKey &&
+                  lastClickedIndex !== -1 &&
+                  lastClickedIndex !== index
+                ) {
+                  // set all between
+                  const mappedIds = handleSelection(lastClickedIndex, index);
+                  setSelectedRows([...new Set(selectedRows.concat(mappedIds))]);
+                } else {
+                  handleRowSelect(id);
+                }
+                // dispatch(
+                setLastClickedIndex(index);
+                // );
+              }}
+            />
+          )}
+        </StyledCheckboxWrapper>
+      );
+    },
+    [selectedRows, lastClickedIndex]
+  );
+
   return (
     <>
       <div
@@ -463,6 +571,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                 })}
               </StyledGridHeader>
 
+              {/* ROWS */}
               {entities.map((row, key) => {
                 const { entity: rowEntity, columnData } = row;
                 const rowId = rowEntity.id;
@@ -480,8 +589,10 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                       }
                       $isOdd={isOdd}
                     >
-                      {/* ROW EXPANDER */}
+                      {/* ACTIONS */}
                       <StyledGridColumn>
+                        {RenderCheckbox(row.entity.id, key)}
+
                         <span
                           style={{
                             cursor: "pointer",
