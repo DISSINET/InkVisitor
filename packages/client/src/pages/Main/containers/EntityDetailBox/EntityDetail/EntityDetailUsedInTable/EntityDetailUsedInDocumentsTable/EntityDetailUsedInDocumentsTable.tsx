@@ -1,5 +1,7 @@
 import { IEntity } from "@shared/types";
 import { IResponseUsedInDocument } from "@shared/types/response-detail";
+import { useMutation } from "@tanstack/react-query";
+import api from "api";
 import { Button, DocumentTitle, Table } from "components";
 import { EntityTag } from "components/advanced";
 import React, { useMemo } from "react";
@@ -18,6 +20,12 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
   EntityDetailUsedInDocumentsTable
 > = ({ title, entities, useCases = [], perPage }) => {
   const data = useMemo(() => useCases, [useCases]);
+
+  const removeAnchorMutation = useMutation({
+    mutationFn: (data: { documentId: string; entityId: string }) =>
+      api.documentRemoveAnchors(data.documentId, data.entityId),
+    onSuccess(data, variables, context) {},
+  });
 
   const columns = useMemo<Column<IResponseUsedInDocument>[]>(
     () => [
@@ -74,7 +82,13 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
           return (
             <Button
               icon={<FaTrashAlt />}
-              onClick={() => console.log("remove anchor")}
+              onClick={() =>
+                removeAnchorMutation.mutate({
+                  documentId: row.original.document.id,
+                  // TODO: which entity id to remove
+                  entityId: row.original.document.entityIds[0],
+                })
+              }
             />
           );
         },
