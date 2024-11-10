@@ -9,8 +9,9 @@ import { FaPlus, FaTrash } from "react-icons/fa";
 import theme from "Theme/theme";
 import { INodeItem, QueryValidityProblem } from "../../types";
 import { QueryAction, QueryActionType } from "../state";
-import { StyledGraphNode } from "./QueryStyles";
+import { StyledGraphNode, StyledNodeTypeSelect } from "./QueryStyles";
 import { Query } from "@shared/types/query";
+import { EntityEnums } from "@shared/enums";
 
 interface QueryGridNodeProps {
   node: INodeItem;
@@ -50,7 +51,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
   const nodeBorder = useMemo(() => {
     if (isValid) {
       if (isRoot) {
-        return theme.color.query4;
+        return theme.color.query2;
       } else {
         return theme.color.query2;
       }
@@ -60,6 +61,9 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
 
   const nodeColor = useMemo(() => {
     if (isValid) {
+      if (isRoot) {
+        return theme.color.query2;
+      }
       return theme.color.query1;
     } else {
       return theme.color.queryInvalid;
@@ -84,73 +88,80 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
           border: `3px solid ${nodeBorder}`,
         }}
       >
-        <Dropdown.Single.Basic
-          options={nodeTypeOptions}
-          value={node.type}
-          tooltipLabel="node type"
-          width={45}
-          noDropDownIndicator
+        <StyledNodeTypeSelect>
+          <Dropdown.Single.Basic
+            options={nodeTypeOptions}
+            value={node.type}
+            tooltipLabel="node type"
+            width={30}
+            noDropDownIndicator
+            onChange={(newValue) => {
+              dispatch({
+                type: QueryActionType.updateNodeType,
+                payload: {
+                  nodeId: node.id,
+                  newType: newValue,
+                },
+              });
+            }}
+          />
+        </StyledNodeTypeSelect>
+        <Dropdown.Multi.Entity
+          value={node.params.classes ?? [entitiesDict[0].value]}
+          disableEmpty
           onChange={(newValue) => {
             dispatch({
-              type: QueryActionType.updateNodeType,
+              type: QueryActionType.updateNodeClass,
               payload: {
                 nodeId: node.id,
-                newType: newValue,
+                newClasses: newValue,
               },
             });
           }}
+          options={entitiesDict}
+          width={150}
+          noOptionsMessage="entity class"
+          disabled={node.params.id !== undefined}
         />
-      </StyledGraphNode>
-      <Dropdown.Multi.Entity
-        value={node.params.classes ?? [entitiesDict[0].value]}
-        disableEmpty
-        onChange={(newValue) => {
-          dispatch({
-            type: QueryActionType.updateNodeClass,
-            payload: {
-              nodeId: node.id,
-              newClasses: newValue,
-            },
-          });
-        }}
-        options={entitiesDict}
-        width={100}
-        disabled={node.params.id !== undefined}
-      />
-
-      <div>
-        {isRoot === false &&
-          (dataEntity !== undefined ? (
-            <EntityTag
-              entity={dataEntity}
-              unlinkButton={{
-                onClick: () => {
+        <div>
+          {isRoot === false &&
+            (dataEntity !== undefined ? (
+              <EntityTag
+                entity={dataEntity}
+                unlinkButton={{
+                  onClick: () => {
+                    dispatch({
+                      type: QueryActionType.updateNodeEntityId,
+                      payload: {
+                        nodeId: node.id,
+                        newType: undefined,
+                      },
+                    });
+                  },
+                }}
+              />
+            ) : (
+              <EntitySuggester
+                inputWidth={100}
+                categoryTypes={classesAll}
+                placeholder="entity"
+                disableCreate
+                initCategory={
+                  node.params.classes?.[0] ?? EntityEnums.Class.Concept
+                }
+                onSelected={(entityId: string) => {
                   dispatch({
                     type: QueryActionType.updateNodeEntityId,
                     payload: {
                       nodeId: node.id,
-                      newType: undefined,
+                      newId: entityId,
                     },
                   });
-                },
-              }}
-            />
-          ) : (
-            <EntitySuggester
-              inputWidth={100}
-              categoryTypes={classesAll}
-              onSelected={(entityId: string) => {
-                dispatch({
-                  type: QueryActionType.updateNodeEntityId,
-                  payload: {
-                    nodeId: node.id,
-                    newId: entityId,
-                  },
-                });
-              }}
-            />
-          ))}
-      </div>
+                }}
+              />
+            ))}
+        </div>
+      </StyledGraphNode>
 
       <div>
         <Button
