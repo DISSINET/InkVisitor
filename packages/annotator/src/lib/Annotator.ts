@@ -669,7 +669,7 @@ export class Annotator {
         this.cursor.xLine = line.length;
       }
     }
-    
+
     this.cursor.endHighlight();
     this.draw();
   }
