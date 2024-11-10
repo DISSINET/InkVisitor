@@ -453,7 +453,7 @@ export class Annotator {
           const segment = this.text.cursorToIndex(this.viewport, this.cursor);
 
           if (segment) {
-            const line = this.text.getLineInFromPosition(segment);
+            const line = this.text.getLineFromPosition(segment);
             let backupXLine = this.cursor.xLine;
             let backupYLine = this.cursor.yLine;
 
@@ -635,7 +635,16 @@ export class Annotator {
    * @param e
    */
   onMouseDown(e: MouseEvent) {
+    // move the cursor to selected position, but dont allow to move over the line boundaries (x axis)
     this.cursor.setPositionFromEvent(e, this.lineHeight, this.charWidth);
+    const segment = this.text.cursorToIndex(this.viewport, this.cursor);
+    if (segment) {
+      const line = this.text.getLineFromPosition(segment);
+      if (line.length < this.cursor.xLine) {
+        this.cursor.xLine = line.length;
+      }
+    }
+
     this.cursor.selectArea(this.viewport.lineStart);
 
     this.annotatedPosition = this.text.cursorToIndex(
@@ -651,7 +660,16 @@ export class Annotator {
    * @param e
    */
   onMouseUp(e: MouseEvent) {
+    // move the cursor to selected position, but dont allow to move over the line boundaries (x axis)
     this.cursor.setPositionFromEvent(e, this.lineHeight, this.charWidth);
+    const segment = this.text.cursorToIndex(this.viewport, this.cursor);
+    if (segment) {
+      const line = this.text.getLineFromPosition(segment);
+      if (line.length < this.cursor.xLine) {
+        this.cursor.xLine = line.length;
+      }
+    }
+    
     this.cursor.endHighlight();
     this.draw();
   }
@@ -669,7 +687,16 @@ export class Annotator {
   }
 
   onMouseDoubleClick(e: MouseEvent) {
+    // move the cursor to selected position, but dont allow to move over the line boundaries (x axis)
     this.cursor.setPositionFromEvent(e, this.lineHeight, this.charWidth);
+    const segment = this.text.cursorToIndex(this.viewport, this.cursor);
+    if (segment) {
+      const line = this.text.getLineFromPosition(segment);
+      if (line.length < this.cursor.xLine) {
+        this.cursor.xLine = line.length;
+      }
+    }
+
     const [offsetLeft, offsetRight] = this.text.getCursorWordOffsets(
       this.viewport,
       this.cursor
