@@ -680,7 +680,16 @@ export class Annotator {
    */
   onMouseMove(e: MouseEvent) {
     if (this.cursor.isSelecting()) {
+      // move the cursor to selected position, but dont allow to move over the line boundaries (x axis)
       this.cursor.setPositionFromEvent(e, this.lineHeight, this.charWidth);
+      const segment = this.text.cursorToIndex(this.viewport, this.cursor);
+      if (segment) {
+        const line = this.text.getLineFromPosition(segment);
+        if (line.length < this.cursor.xLine) {
+          this.cursor.xLine = line.length;
+        }
+      }
+
       this.cursor.selectArea(this.viewport.lineStart);
       this.draw();
     }
@@ -928,7 +937,6 @@ export class Annotator {
       for (const tag of annotated) {
         const hlSchema = this.onHighlightCb(tag);
         if (hlSchema) {
-
           // iterate over all tag occurrences
           let occurence: IAbsCoordinates[];
           let i = 1;
