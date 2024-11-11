@@ -191,10 +191,6 @@ export class ResponseEntityDetail
       this.addLinkedEntities(this.relations.getEntityIdsFromType(type));
     }
 
-    this.entities = await this.populateEntitiesMap(conn);
-
-    await this.processTemplateData(conn);
-
     // get warnings - bound to entity & from root territory
     const entityWarnings = new EntityWarnings(this.id, this.class);
     this.warnings = [
@@ -208,6 +204,16 @@ export class ResponseEntityDetail
 
     // get all documents data in IResponseUsedInDocument format
     this.usedInDocuments = await this.findUsedInDocuments(conn);
+    this.usedInDocuments.forEach(ud => {
+      this.addLinkedEntities(ud.parentTerritoryId);
+      this.addLinkedEntities(ud.resourceId);
+    });
+
+    // fill all collected entities
+    this.entities = await this.populateEntitiesMap(conn);
+
+    // apply casts from templates - must be done after populateEntitiesMap
+    await this.processTemplateData(conn);
   }
 
   /**
