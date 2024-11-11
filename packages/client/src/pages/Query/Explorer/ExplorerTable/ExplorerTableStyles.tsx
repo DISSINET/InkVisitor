@@ -118,7 +118,7 @@ export const StyledTableHeader = styled(StyledSpaceBetween)`
   /* position: sticky; */
   /* top: 0; */
   background-color: ${({ theme }) => theme.color["gray"][200]};
-  box-shadow: 0 2px 3px -1px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 3px -2px rgba(0, 0, 0, 0.3);
   z-index: 20;
 `;
 export const StyledTableFooter = styled(StyledSpaceBetween)`
@@ -156,4 +156,8 @@ export const StyledCheckboxWrapper = styled.div`
   align-items: center;
   color: ${({ theme }) => theme.color["black"]};
   cursor: pointer;
+`;
+export const StyledCounter = styled.div`
+  white-space: nowrap;
+  color: ${({ theme }) => theme.color["black"]};
 `;
