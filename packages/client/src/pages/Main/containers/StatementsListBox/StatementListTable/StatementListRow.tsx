@@ -7,7 +7,11 @@ import {
   useDrag,
   useDrop,
 } from "react-dnd";
-import { FaGripVertical } from "react-icons/fa";
+import {
+  FaChevronCircleDown,
+  FaChevronCircleUp,
+  FaGripVertical,
+} from "react-icons/fa";
 import { BeatLoader } from "react-spinners";
 import { Cell, ColumnInstance, Row } from "react-table";
 import { setDraggedRowId } from "redux/features/statementList/draggedRowIdSlice";
@@ -18,6 +22,7 @@ import { dndHoverFn } from "utils/utils";
 import { StatementListRowExpanded } from "./StatementListRowExpanded/StatementListRowExpanded";
 import { StyledTd, StyledTdMove, StyledTr } from "./StatementListTableStyles";
 import useIsRowVisible from "./useRowIsVisible";
+import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 
 interface StatementListRow {
   row: Row<IResponseStatement>;
@@ -103,25 +108,58 @@ export const StatementListRow: React.FC<StatementListRow> = ({
         id={`statement${row.original.id}`}
       >
         {isVisible ? (
-          row.cells.map((cell: Cell<IResponseStatement>) => {
-            if (cell.column.id === "move") {
-              return (
-                <StyledTdMove
-                  key="move"
-                  ref={dragRef}
-                  onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                >
-                  <FaGripVertical color={themeContext?.color.black} />
-                </StyledTdMove>
-              );
-            } else {
-              return (
-                <StyledTd {...cell.getCellProps()}>
-                  {cell.render("Cell")}
-                </StyledTd>
-              );
-            }
-          })
+          <React.Fragment>
+            {row.cells.map((cell: Cell<IResponseStatement>) => {
+              if (cell.column.id === "move") {
+                return (
+                  <StyledTdMove
+                    key="move"
+                    ref={dragRef}
+                    onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                  >
+                    <FaGripVertical color={themeContext?.color.black} />
+                  </StyledTdMove>
+                );
+              } else {
+                return (
+                  <StyledTd {...cell.getCellProps()}>
+                    {cell.render("Cell")}
+                  </StyledTd>
+                );
+              }
+            })}
+            <StyledTd
+              style={{
+                justifyContent: "center",
+              }}
+            >
+              <span
+                {...row.getToggleRowExpandedProps()}
+                style={{
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+                onClick={(e: React.MouseEvent) => {
+                  e.stopPropagation();
+                  const rowId = row.original.id;
+                  if (!rowsExpanded.includes(rowId)) {
+                    dispatch(setRowsExpanded(rowsExpanded.concat(rowId)));
+                  } else {
+                    dispatch(
+                      setRowsExpanded(rowsExpanded.filter((r) => r !== rowId))
+                    );
+                  }
+                }}
+              >
+                {rowsExpanded.includes(row.original.id) ? (
+                  <FaChevronCircleUp size={18} />
+                ) : (
+                  <FaChevronCircleDown size={18} />
+                )}
+              </span>
+            </StyledTd>
+          </React.Fragment>
         ) : (
           <StyledTd colSpan={visibleColumns.length + 1}>
             <div
