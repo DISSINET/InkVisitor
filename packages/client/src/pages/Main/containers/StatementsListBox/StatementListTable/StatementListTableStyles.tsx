@@ -38,6 +38,7 @@ interface StyledTr {
   opacity?: number;
 }
 export const StyledTr = styled.tr<StyledTr>`
+  height: ${({ theme }) => theme.space[16]};
   background-color: ${({ theme, $isOpened, $isSelected }) =>
     $isOpened
       ? theme.color["tableOpened"]
@@ -71,8 +72,9 @@ export const StyledTd = styled.td<StyledTd>`
   padding: ${({ theme }) => theme.space[2]};
   padding-left: ${({ theme }) => theme.space[4]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
-  height: 4rem;
+  height: ${({ theme }) => theme.space[16]};
 `;
+
 export const StyledTdMove = styled.td`
   cursor: move;
   width: 1%;

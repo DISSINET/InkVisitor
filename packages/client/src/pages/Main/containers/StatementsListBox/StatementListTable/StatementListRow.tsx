@@ -1,6 +1,6 @@
 import { IEntity, IResponseStatement, IStatement } from "@shared/types";
 import { useSearchParams } from "hooks";
-import React, { useContext, useEffect, useRef } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import {
   DragSourceMonitor,
   DropTargetMonitor,
@@ -8,6 +8,7 @@ import {
   useDrop,
 } from "react-dnd";
 import { FaGripVertical } from "react-icons/fa";
+import { BeatLoader } from "react-spinners";
 import { Cell, ColumnInstance, Row } from "react-table";
 import { setDraggedRowId } from "redux/features/statementList/draggedRowIdSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
@@ -16,6 +17,7 @@ import { DragItem, ItemTypes, StatementListDisplayMode } from "types";
 import { dndHoverFn } from "utils/utils";
 import { StatementListRowExpanded } from "./StatementListRowExpanded/StatementListRowExpanded";
 import { StyledTd, StyledTdMove, StyledTr } from "./StatementListTableStyles";
+import useIsRowVisible from "./useRowIsVisible";
 
 interface StatementListRow {
   row: Row<IResponseStatement>;
@@ -52,6 +54,8 @@ export const StatementListRow: React.FC<StatementListRow> = ({
 
   const dropRef = useRef<HTMLTableRowElement>(null);
   const dragRef = useRef<HTMLTableCellElement>(null);
+
+  const isVisible = useIsRowVisible(dropRef);
 
   const [, drop] = useDrop<DragItem>({
     accept: ItemTypes.STATEMENT_ROW,
@@ -98,25 +102,44 @@ export const StatementListRow: React.FC<StatementListRow> = ({
         // for scrollTo fn
         id={`statement${row.original.id}`}
       >
-        {row.cells.map((cell: Cell<IResponseStatement>) => {
-          if (cell.column.id === "move") {
-            return (
-              <StyledTdMove
-                key="move"
-                ref={dragRef}
-                onClick={(e: React.MouseEvent) => e.stopPropagation()}
-              >
-                <FaGripVertical color={themeContext?.color.black} />
-              </StyledTdMove>
-            );
-          } else {
-            return (
-              <StyledTd {...cell.getCellProps()}>
-                {cell.render("Cell")}
-              </StyledTd>
-            );
-          }
-        })}
+        {isVisible ? (
+          row.cells.map((cell: Cell<IResponseStatement>) => {
+            if (cell.column.id === "move") {
+              return (
+                <StyledTdMove
+                  key="move"
+                  ref={dragRef}
+                  onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                >
+                  <FaGripVertical color={themeContext?.color.black} />
+                </StyledTdMove>
+              );
+            } else {
+              return (
+                <StyledTd {...cell.getCellProps()}>
+                  {cell.render("Cell")}
+                </StyledTd>
+              );
+            }
+          })
+        ) : (
+          <StyledTd colSpan={visibleColumns.length + 1}>
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                justifyContent: "center",
+              }}
+            >
+              <BeatLoader
+                size={7}
+                margin={4}
+                style={{ marginLeft: "0.3rem", marginTop: "0.1rem" }}
+                color="black"
+              />
+            </div>
+          </StyledTd>
+        )}
       </StyledTr>
       {rowsExpanded.includes(row.original.id) &&
       !draggedRowId &&
