@@ -42,6 +42,7 @@ import {
   MdOutlineCheckBox,
   MdOutlineCheckBoxOutlineBlank,
   MdOutlineEdit,
+  MdOutlineIndeterminateCheckBox,
 } from "react-icons/md";
 import { TbColumnInsertRight } from "react-icons/tb";
 import { ThemeContext } from "styled-components";
@@ -50,6 +51,7 @@ import { ExploreAction, ExploreActionType } from "../state";
 import { ExplorerTableRowExpanded } from "./ExplorerTableRowExpanded/ExplorerTableRowExpanded";
 import {
   StyledCheckboxWrapper,
+  StyledCounter,
   StyledFocusedCircle,
   StyledGrid,
   StyledGridColumn,
@@ -66,6 +68,18 @@ import {
   StyledTableWrapper,
 } from "./ExplorerTableStyles";
 import useResizeObserver from "use-resize-observer";
+import { DropdownItem } from "types";
+
+enum BatchOption {
+  fill_empty = "fill_empty",
+}
+
+const batchOptions = [
+  {
+    value: BatchOption.fill_empty,
+    label: `fill empty`,
+  },
+];
 
 const initialNewColumn: Explore.IExploreColumn = {
   id: uuidv4(),
@@ -272,10 +286,72 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     );
   };
 
+  const handleSelectAll = (checked: boolean) =>
+    checked
+      ? setSelectedRows(entities.map((queryEntity) => queryEntity.entity.id))
+      : setSelectedRows([]);
+
+  const renderHeaderCheckBox = () => {
+    const size = 18;
+    const isAllSelected =
+      entities.length > 0 && selectedRows.length === entities.length;
+
+    if (isAllSelected) {
+      return (
+        <MdOutlineCheckBox
+          size={size}
+          onClick={() => {
+            handleSelectAll(false);
+            setLastClickedIndex(-1);
+          }}
+        />
+      );
+    } else if (selectedRows.length > 0) {
+      // some rows selected
+      return (
+        <MdOutlineIndeterminateCheckBox
+          size={size}
+          onClick={() => {
+            handleSelectAll(false);
+            setLastClickedIndex(-1);
+          }}
+        />
+      );
+    } else {
+      return (
+        <MdOutlineCheckBoxOutlineBlank
+          size={size}
+          onClick={() => handleSelectAll(true)}
+        />
+      );
+    }
+  };
+
+  const [batchAction, setBatchAction] = useState<DropdownItem>(batchOptions[0]);
+
   const renderTableHeader = () => {
     return (
       <StyledTableHeader>
-        {renderPaging()}
+        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            {renderHeaderCheckBox()}
+            {selectedRows.length > 0 && (
+              <StyledCounter>{`${selectedRows.length}/${entities.length}`}</StyledCounter>
+            )}
+            <Dropdown.Single.Basic
+              width={98}
+              disabled={selectedRows.length === 0}
+              value={batchAction.value}
+              onChange={(selectedOption) =>
+                setBatchAction(
+                  batchOptions.find((o) => o.value === selectedOption)!
+                )
+              }
+              options={batchOptions}
+            />
+          </div>
+          {renderPaging()}
+        </div>
         <div>
           <Button
             icon={<TbColumnInsertRight size={17} />}
@@ -588,6 +664,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                           : setRowsExpanded(rowsExpanded.concat(rowId))
                       }
                       $isOdd={isOdd}
+                      $isSelected={selectedRows.includes(row.entity.id)}
                     >
                       {/* ACTIONS */}
                       <StyledGridColumn>
