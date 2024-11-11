@@ -7,3 +7,10 @@ export const StyledAnchorText = styled.div`
   /* justify-content: center; */
   font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
+
+export const StyledAbbreviatedLabel = styled.div`
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+`;

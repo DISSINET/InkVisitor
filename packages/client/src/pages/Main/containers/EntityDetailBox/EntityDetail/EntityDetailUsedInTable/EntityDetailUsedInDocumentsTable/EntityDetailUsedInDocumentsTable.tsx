@@ -8,7 +8,10 @@ import React, { useMemo } from "react";
 import { FaTrashAlt } from "react-icons/fa";
 import { HiClipboardList } from "react-icons/hi";
 import { CellProps, Column } from "react-table";
-import { StyledAnchorText } from "./EntityDetailUsedInDocumentsTableStyles";
+import {
+  StyledAbbreviatedLabel,
+  StyledAnchorText,
+} from "./EntityDetailUsedInDocumentsTableStyles";
 
 type CellType = CellProps<IResponseUsedInDocument>;
 interface EntityDetailUsedInDocumentsTable {
@@ -43,7 +46,9 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
                       window.navigator.clipboard.writeText(anchorText)
                     }
                   />
-                  {anchorText || ""}
+                  <StyledAbbreviatedLabel>
+                    {anchorText || ""}
+                  </StyledAbbreviatedLabel>
                 </StyledAnchorText>
               ) : (
                 <></>
@@ -82,6 +87,8 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
           return (
             <Button
               icon={<FaTrashAlt />}
+              color="danger"
+              inverted
               onClick={
                 () => {}
                 // removeAnchorMutation.mutate({
