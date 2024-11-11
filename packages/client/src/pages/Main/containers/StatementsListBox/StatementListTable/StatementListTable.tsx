@@ -165,8 +165,9 @@ export const StatementListTable: React.FC<StatementListTable> = ({
     return selectedStatements.map((statement) => statement.id);
   };
 
-  const columns = useMemo<Column<IResponseStatement>[]>(
-    () => [
+  const columns = useMemo<Column<IResponseStatement>[]>(() => {
+    console.log("calculating columns");
+    return [
       {
         Header: "ID",
         accessor: "id",
@@ -449,9 +450,8 @@ export const StatementListTable: React.FC<StatementListTable> = ({
           );
         },
       },
-    ],
-    [statementsLocal, rowsExpanded, right, selectedRows, lastClickedIndex]
-  );
+    ];
+  }, [statementsLocal, rowsExpanded, right, selectedRows, lastClickedIndex]);
 
   const {
     setHiddenColumns,

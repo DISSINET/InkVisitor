@@ -1,32 +1,13 @@
-import { EntityEnums, InterfaceEnums } from "@shared/enums";
+import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import { useSearchParams } from "hooks";
-import React, {
-  ReactNode,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import {
-  DragSourceMonitor,
-  DropTargetMonitor,
-  useDrag,
-  useDrop,
-} from "react-dnd";
+import React, { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { FaStar } from "react-icons/fa";
 import { toast } from "react-toastify";
-import { setDraggedEntity } from "redux/features/territoryTree/draggedEntitySlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { ThemeContext } from "styled-components";
-import {
-  DraggedEntityReduxItem,
-  EntityColors,
-  EntityDragItem,
-  ItemTypes,
-} from "types";
-import { dndHoverFn, getShortLabelByLetterCount } from "utils/utils";
+import theme from "Theme/theme";
+import { DraggedEntityReduxItem, EntityColors, EntityDragItem } from "types";
+import { getShortLabelByLetterCount } from "utils/utils";
 import {
   StyledButtonWrapper,
   StyledElvlWrapper,
@@ -36,6 +17,7 @@ import {
   StyledStarWrap,
   StyledTagWrapper,
 } from "./TagStyles";
+import useDragDrop from "./useDragDrop";
 
 interface TagProps {
   propId: string;
@@ -106,61 +88,25 @@ export const Tag: React.FC<TagProps> = ({
   const draggedEntity: DraggedEntityReduxItem = useAppSelector(
     (state) => state.draggedEntity
   );
-  const selectedThemeId: InterfaceEnums.Theme = useAppSelector(
-    (state) => state.theme
-  );
-
-  const ref = useRef<HTMLDivElement>(null);
-
-  const [, drop] = useDrop<EntityDragItem>({
-    accept: ItemTypes.TAG,
-    hover(item: EntityDragItem, monitor: DropTargetMonitor) {
-      // TODO: debounce?
-      if (moveFn && draggedEntity && draggedEntity.lvl === lvl) {
-        dndHoverFn(item, index, monitor, ref, moveFn);
-      }
-    },
-  });
-
-  const canDrag = useMemo(
-    () => entityClass !== EntityEnums.Extension.Empty && !disableDrag,
-    [entityClass, disableDrag]
-  );
-
-  const [{ isDragging }, drag] = useDrag<
-    EntityDragItem,
-    unknown,
-    { isDragging: boolean }
-  >({
-    type: ItemTypes.TAG,
-    item: {
-      id: propId,
-      index,
-      entityClass: entityClass as EntityEnums.Class,
-      isTemplate,
-      isDiscouraged,
-      entity: entity || false,
-    },
-    collect: (monitor: DragSourceMonitor) => ({
-      isDragging: monitor.isDragging(),
-    }),
-    end: (item: EntityDragItem | undefined, monitor: DragSourceMonitor) => {
-      if (item && item.index !== index) updateOrderFn(item);
-    },
-    canDrag: canDrag,
-  });
-
-  useEffect(() => {
-    if (isDragging) {
-      dispatch(setDraggedEntity({ id: propId, parentId, index, lvl }));
-    } else {
-      dispatch(setDraggedEntity({}));
-    }
-  }, [isDragging]);
-
-  drag(drop(ref));
 
   const [clickedOnce, setClickedOnce] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  const [isDragging, canDrag, drag, drop] = useDragDrop({
+    entity,
+    isTemplate,
+    isDiscouraged,
+    propId,
+    entityClass,
+    disableDrag,
+    index,
+    lvl,
+    updateOrderFn,
+    draggedEntity,
+    dispatch,
+    moveFn,
+    ref,
+  });
 
   useEffect(() => {
     if (clickedOnce) {
@@ -174,56 +120,35 @@ export const Tag: React.FC<TagProps> = ({
         );
         setClickedOnce(false);
       }, 500);
-
       return () => clearTimeout(timeout);
     }
   }, [clickedOnce]);
 
-  const renderEntityTag = () => (
-    <StyledEntityTag
-      $color={
-        entityClass !== EntityEnums.Extension.Invalid
-          ? EntityColors[entityClass].color
-          : "white"
-      }
-      $isTemplate={isTemplate}
-      $darkTheme={selectedThemeId === InterfaceEnums.Theme.Dark}
-    >
-      {entityClass}
-    </StyledEntityTag>
-  );
+  const renderTag = useMemo(() => {
+    const entityTag = (
+      <StyledEntityTag
+        $color={
+          entityClass !== EntityEnums.Extension.Invalid
+            ? EntityColors[entityClass].color
+            : "white"
+        }
+        $isTemplate={isTemplate}
+        $darkTheme={true}
+      >
+        {entityClass}
+      </StyledEntityTag>
+    );
 
-  const renderElvl = () => (
-    <StyledElvlWrapper>{elvlButtonGroup}</StyledElvlWrapper>
-  );
+    const elvlWrapper = elvlButtonGroup && (
+      <StyledElvlWrapper>{elvlButtonGroup}</StyledElvlWrapper>
+    );
 
-  const renderButton = () => (
-    <StyledButtonWrapper
-      $status={status}
-      onMouseEnter={onButtonOver}
-      onMouseLeave={onButtonOut}
-      onClick={onBtnClick}
-    >
-      {button}
-    </StyledButtonWrapper>
-  );
-
-  const onDoubleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setClickedOnce(false);
-
-    !disableDoubleClick && appendDetailId(propId);
-  };
-
-  const themeContext = useContext(ThemeContext);
-
-  const renderLabel = (labelOnly: boolean = false) => {
-    return (
+    const labelWrap = (
       <StyledLabelWrap $invertedLabel={invertedLabel}>
         {isFavorited && (
           <StyledStarWrap>
             <FaStar
-              color={themeContext?.color.warning}
+              color={theme.color.warning}
               style={{ marginBottom: "0.1rem" }}
             />
           </StyledStarWrap>
@@ -231,61 +156,77 @@ export const Tag: React.FC<TagProps> = ({
         <StyledLabel
           $invertedLabel={invertedLabel}
           $status={status}
+          $labelOnly={showOnly === "label"}
           $borderStyle={borderStyle}
           $fullWidth={fullWidth}
           $isFavorited={isFavorited}
-          $labelOnly={labelOnly}
           $isItalic={labelItalic}
         >
           {label}
         </StyledLabel>
       </StyledLabelWrap>
     );
-  };
 
-  const renderShortTag = () => {
-    return (
+    const buttonWrap = button && (
+      <StyledButtonWrapper
+        $status={status}
+        onMouseEnter={onButtonOver}
+        onMouseLeave={onButtonOut}
+        onClick={onBtnClick}
+      >
+        {button}
+      </StyledButtonWrapper>
+    );
+
+    return showOnly ? (
       <>
-        {showOnly === "entity" ? (
-          <>{renderEntityTag()}</>
-        ) : (
-          <>{renderLabel(true)}</>
-        )}
-        {button && renderButton()}
+        {showOnly === "entity" ? entityTag : labelWrap}
+        {buttonWrap}
+      </>
+    ) : (
+      <>
+        {entityTag}
+        {labelWrap}
+        {elvlWrapper}
+        {buttonWrap}
       </>
     );
-  };
-
-  const renderFullTag = () => {
-    return (
-      <>
-        {renderEntityTag()}
-        {renderLabel()}
-        {elvlButtonGroup && renderElvl()}
-        {button && renderButton()}
-      </>
-    );
-  };
+  }, [
+    entityClass,
+    isFavorited,
+    invertedLabel,
+    label,
+    labelItalic,
+    elvlButtonGroup,
+    borderStyle,
+    fullWidth,
+    showOnly,
+    status,
+    button,
+    isTemplate,
+    onButtonOver,
+    onButtonOut,
+    onBtnClick,
+  ]);
 
   return (
-    <>
-      <StyledTagWrapper
-        className="tag"
-        ref={ref}
-        $dragDisabled={!canDrag}
-        $status={status}
-        $ltype={ltype}
-        $borderStyle={borderStyle}
-        onClick={(e: React.MouseEvent) => {
-          e.stopPropagation();
-          if (!disableCopyLabel) {
-            setClickedOnce(true);
-          }
-        }}
-        onDoubleClick={(e: React.MouseEvent) => onDoubleClick(e)}
-      >
-        {showOnly ? <>{renderShortTag()}</> : <>{renderFullTag()}</>}
-      </StyledTagWrapper>
-    </>
+    <StyledTagWrapper
+      className="tag"
+      ref={ref}
+      $dragDisabled={!canDrag}
+      $status={status}
+      $ltype={ltype}
+      $borderStyle={borderStyle}
+      onClick={(e) => {
+        e.stopPropagation();
+        if (!disableCopyLabel) setClickedOnce(true);
+      }}
+      onDoubleClick={(e) => {
+        e.stopPropagation();
+        !disableDoubleClick && appendDetailId(propId);
+      }}
+    >
+      {renderTag}
+    </StyledTagWrapper>
   );
 };
