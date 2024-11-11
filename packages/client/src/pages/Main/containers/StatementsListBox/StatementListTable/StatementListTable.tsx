@@ -57,7 +57,7 @@ const MINIFIED_HIDDEN_COLUMNS = [
   "text",
   "warnings",
   "lastEdit",
-  "expander",
+  "menu",
 ];
 type CellType = CellProps<IResponseStatement>;
 
@@ -510,7 +510,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
     <StyledTable
       {...getTableProps()}
       $contentWidth={contentWidth - 10}
-      $isExpanded={displayMode === StatementListDisplayMode.LIST}
+      $isListMode={displayMode === StatementListDisplayMode.LIST}
     >
       <StyledTHead>
         {headerGroups.map((headerGroup, key) => (
@@ -524,7 +524,9 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                 <th key={key}></th>
               )
             )}
-            <StyledTh style={{ width: "50px" }} key={"expander"}></StyledTh>
+            {displayMode !== StatementListDisplayMode.TEXT && (
+              <StyledTh style={{ width: "50px" }} key={"expander"}></StyledTh>
+            )}
           </tr>
         ))}
       </StyledTHead>

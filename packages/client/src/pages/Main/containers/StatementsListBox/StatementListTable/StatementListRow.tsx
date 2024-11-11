@@ -128,37 +128,39 @@ export const StatementListRow: React.FC<StatementListRow> = ({
                 );
               }
             })}
-            <StyledTd
-              style={{
-                justifyContent: "center",
-              }}
-            >
-              <span
-                {...row.getToggleRowExpandedProps()}
+            {displayMode !== StatementListDisplayMode.TEXT && (
+              <StyledTd
                 style={{
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                }}
-                onClick={(e: React.MouseEvent) => {
-                  e.stopPropagation();
-                  const rowId = row.original.id;
-                  if (!rowsExpanded.includes(rowId)) {
-                    dispatch(setRowsExpanded(rowsExpanded.concat(rowId)));
-                  } else {
-                    dispatch(
-                      setRowsExpanded(rowsExpanded.filter((r) => r !== rowId))
-                    );
-                  }
+                  justifyContent: "center",
                 }}
               >
-                {rowsExpanded.includes(row.original.id) ? (
-                  <FaChevronCircleUp size={18} />
-                ) : (
-                  <FaChevronCircleDown size={18} />
-                )}
-              </span>
-            </StyledTd>
+                <span
+                  {...row.getToggleRowExpandedProps()}
+                  style={{
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                  onClick={(e: React.MouseEvent) => {
+                    e.stopPropagation();
+                    const rowId = row.original.id;
+                    if (!rowsExpanded.includes(rowId)) {
+                      dispatch(setRowsExpanded(rowsExpanded.concat(rowId)));
+                    } else {
+                      dispatch(
+                        setRowsExpanded(rowsExpanded.filter((r) => r !== rowId))
+                      );
+                    }
+                  }}
+                >
+                  {rowsExpanded.includes(row.original.id) ? (
+                    <FaChevronCircleUp size={18} />
+                  ) : (
+                    <FaChevronCircleDown size={18} />
+                  )}
+                </span>
+              </StyledTd>
+            )}
           </React.Fragment>
         ) : (
           <StyledTd colSpan={visibleColumns.length + 1}>

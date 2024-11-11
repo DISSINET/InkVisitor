@@ -3,7 +3,7 @@ import styled from "styled-components";
 
 interface StyledTable {
   $contentWidth: number;
-  $isExpanded: boolean;
+  $isListMode: boolean;
 }
 export const StyledTable = styled.table<StyledTable>`
   width: ${({ $contentWidth }) => $contentWidth};
@@ -14,7 +14,7 @@ export const StyledTable = styled.table<StyledTable>`
   border-style: solid;
   border-color: ${({ theme }) => theme.color["gray"][500]};
   box-shadow: ${({ theme }) => theme.boxShadow["subtle"]};
-
+  overflow-x: ${({ $isListMode }) => ($isListMode ? "auto" : "hidden")};
   transition: width 0.3s ease;
 `;
 export const StyledTHead = styled.thead`
