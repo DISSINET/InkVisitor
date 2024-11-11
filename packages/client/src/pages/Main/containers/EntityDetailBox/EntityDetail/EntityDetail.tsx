@@ -947,7 +947,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                       plural: "Anchors",
                     }}
                     entities={entity.entities}
-                    useCases={[]}
+                    useCases={entity.usedInDocuments}
                     perPage={10}
                   />
                 )}

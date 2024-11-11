@@ -8,6 +8,7 @@ import React, { useMemo } from "react";
 import { FaTrashAlt } from "react-icons/fa";
 import { HiClipboardList } from "react-icons/hi";
 import { CellProps, Column } from "react-table";
+import { StyledAnchorText } from "./EntityDetailUsedInDocumentsTableStyles";
 
 type CellType = CellProps<IResponseUsedInDocument>;
 interface EntityDetailUsedInDocumentsTable {
@@ -31,20 +32,19 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
     () => [
       {
         Header: "Anchor text",
-        // accessor: "data",
         Cell: ({ row }: CellType) => {
           const { anchorText } = row.original;
           return (
             <>
               {anchorText ? (
-                <p>
+                <StyledAnchorText>
                   <HiClipboardList
                     onClick={() =>
                       window.navigator.clipboard.writeText(anchorText)
                     }
                   />
                   {anchorText || ""}
-                </p>
+                </StyledAnchorText>
               ) : (
                 <></>
               )}
@@ -82,19 +82,20 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
           return (
             <Button
               icon={<FaTrashAlt />}
-              onClick={() =>
-                removeAnchorMutation.mutate({
-                  documentId: row.original.document.id,
-                  // TODO: which entity id to remove
-                  entityId: row.original.document.entityIds[0],
-                })
+              onClick={
+                () => {}
+                // removeAnchorMutation.mutate({
+                // documentId: row.original.document.id,
+                // entityId: row.original.document.entityIds[0],
+                // })
+                // TODO: which entity id to remove
               }
             />
           );
         },
       },
     ],
-    []
+    [entities]
   );
 
   return (
