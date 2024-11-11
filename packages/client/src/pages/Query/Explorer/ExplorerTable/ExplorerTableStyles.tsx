@@ -23,14 +23,19 @@ export const StyledGrid = styled.div<StyledGrid>`
 `;
 interface StyledGridRow {
   $isOdd: boolean;
+  $isSelected: boolean;
 }
 export const StyledGridRow = styled.div<StyledGridRow>`
   display: contents;
   cursor: pointer;
 
   & > div {
-    background-color: ${({ theme, $isOdd }) =>
-      $isOdd ? theme.color["white"] : theme.color["tableOddRow"]};
+    background-color: ${({ theme, $isOdd, $isSelected }) =>
+      $isSelected
+        ? theme.color["tableOpened"]
+        : $isOdd
+        ? theme.color["white"]
+        : theme.color["tableOddRow"]};
   }
   &:hover > div {
     background-color: ${({ theme }) => theme.color["gray"][100]};

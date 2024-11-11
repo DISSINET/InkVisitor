@@ -588,6 +588,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                           : setRowsExpanded(rowsExpanded.concat(rowId))
                       }
                       $isOdd={isOdd}
+                      $isSelected={selectedRows.includes(row.entity.id)}
                     >
                       {/* ACTIONS */}
                       <StyledGridColumn>
