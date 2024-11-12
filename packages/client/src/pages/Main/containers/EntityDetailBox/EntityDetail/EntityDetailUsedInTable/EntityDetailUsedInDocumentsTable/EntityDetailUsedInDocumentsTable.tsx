@@ -84,21 +84,21 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
         id: "action btns",
         Header: "",
         Cell: ({ row }: CellType) => {
-          return (
-            <Button
-              icon={<FaTrashAlt />}
-              color="danger"
-              inverted
-              onClick={
-                () => {}
-                // removeAnchorMutation.mutate({
-                // documentId: row.original.document.id,
-                // entityId: row.original.document.entityIds[0],
-                // })
-                // TODO: which entity id to remove
-              }
-            />
-          );
+          return <></>;
+          // return (
+          //   <Button
+          //     icon={<FaTrashAlt />}
+          //     color="danger"
+          //     inverted
+          //     onClick={
+          //       () =>
+          //        removeAnchorMutation.mutate({
+          //        documentId: row.original.document.id,
+          //        entityId: entityId,
+          //        })
+          //     }
+          //   />
+          // );
         },
       },
     ],
