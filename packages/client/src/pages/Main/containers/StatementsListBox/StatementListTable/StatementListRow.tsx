@@ -175,7 +175,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
                 size={7}
                 margin={4}
                 style={{ marginLeft: "0.3rem", marginTop: "0.1rem" }}
-                color="black"
+                color={themeContext?.color["primary"]}
               />
             </div>
           </StyledTd>
