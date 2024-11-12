@@ -1,11 +1,10 @@
 {
   "name": "database",
-  "version": "1.4.0.3",
-  "description": "",
+  "version": "1.4.0.5",
+  "description": "Package with gui-like app for manipulating rethinkdb",
   "engines": {
-    "npm": ">=8.19.2",
-    "node": ">=18.0.0",
-    "pnpm": ">=8.15.0"
+    "node": "^22.11.0",
+    "pnpm": "^9.0.0"
   },
   "scripts": {
     "start": "npx ts-node -r tsconfig-paths/register scripts/import.ts",
