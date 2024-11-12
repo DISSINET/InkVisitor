@@ -15,6 +15,21 @@ module.exports = merge(common, {
       directory: path.resolve(__dirname, "./src/assets"),
       publicPath: "/",
     },
+    client: {
+      overlay: {
+        runtimeErrors: (error) => {
+          console.log("123error", error);
+          if (
+            error.message === "ResizeObserver loop limit exceeded" ||
+            error.message ===
+              "ResizeObserver loop completed with undelivered notifications."
+          ) {
+            return false;
+          }
+          return true;
+        },
+      },
+    },
   },
   plugins: [
     new Dotenv({
