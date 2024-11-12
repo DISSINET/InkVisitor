@@ -107,7 +107,6 @@ export const TextAnnotator = ({
   const wLineNumbers = displayLineNumbers ? 50 : 0;
   const wTextArea = width - wLineNumbers - W_SCROLL;
 
-  const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const [isSelectingText, setIsSelectingText] = useState<boolean>(false);
 
   const mainCanvas = useRef<HTMLCanvasElement>(null);
