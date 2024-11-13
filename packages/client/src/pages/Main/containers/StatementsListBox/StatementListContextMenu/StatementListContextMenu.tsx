@@ -30,7 +30,7 @@ export const StatementListContextMenu: React.FC<StatementListContextMenu> = ({
   const handleMouseLeave = () => {
     const id = window.setTimeout(() => {
       setShowMenu(false);
-    }, 700);
+    }, 150);
 
     setTimeoutId(id);
   };
