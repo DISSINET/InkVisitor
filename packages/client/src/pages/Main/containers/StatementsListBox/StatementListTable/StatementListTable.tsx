@@ -57,7 +57,7 @@ const MINIFIED_HIDDEN_COLUMNS = [
   "text",
   "warnings",
   "lastEdit",
-  "expander",
+  "menu",
 ];
 type CellType = CellProps<IResponseStatement>;
 
@@ -165,8 +165,8 @@ export const StatementListTable: React.FC<StatementListTable> = ({
     return selectedStatements.map((statement) => statement.id);
   };
 
-  const columns = useMemo<Column<IResponseStatement>[]>(
-    () => [
+  const columns = useMemo<Column<IResponseStatement>[]>(() => {
+    return [
       {
         Header: "ID",
         accessor: "id",
@@ -362,96 +362,68 @@ export const StatementListTable: React.FC<StatementListTable> = ({
       },
       {
         Header: "",
-        id: "expander",
-        width: 300,
+        id: "menu",
+        width: 100,
         Cell: ({ row }: CellType) => {
           return (
-            <ButtonGroup>
-              {right !== UserEnums.RoleMode.Read && (
-                <StatementListContextMenu
-                  buttons={[
-                    <Button
-                      key="r"
-                      icon={<FaTrashAlt size={14} />}
-                      color="danger"
-                      tooltipLabel="delete"
-                      onClick={() => {
-                        setStatementToDelete(row.original);
-                        setShowSubmit(true);
-                      }}
-                    />,
-                    <Button
-                      key="d"
-                      icon={<FaClone size={14} />}
-                      color="warning"
-                      tooltipLabel="duplicate"
-                      onClick={() => {
-                        cloneStatementMutation.mutate(row.original.id);
-                      }}
-                    />,
-                    <Button
-                      key="add-up"
-                      icon={
-                        <>
-                          <FaPlus size={14} />
-                          <BsArrowUp size={14} />
-                        </>
-                      }
-                      tooltipLabel="add new statement before"
-                      color="info"
-                      onClick={() => {
-                        addStatementAtCertainIndex(row.index);
-                      }}
-                    />,
-                    <Button
-                      key="add-down"
-                      icon={
-                        <>
-                          <FaPlus size={14} />
-                          <BsArrowDown size={14} />
-                        </>
-                      }
-                      tooltipLabel="add new statement after"
-                      color="success"
-                      onClick={() => {
-                        addStatementAtCertainIndex(row.index + 1);
-                      }}
-                    />,
-                  ]}
-                />
-              )}
-              <span
-                {...row.getToggleRowExpandedProps()}
-                style={{
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                }}
-                onClick={(e: React.MouseEvent) => {
-                  e.stopPropagation();
-                  const rowId = row.original.id;
-                  if (!rowsExpanded.includes(rowId)) {
-                    dispatch(setRowsExpanded(rowsExpanded.concat(rowId)));
-                  } else {
-                    dispatch(
-                      setRowsExpanded(rowsExpanded.filter((r) => r !== rowId))
-                    );
-                  }
-                }}
-              >
-                {rowsExpanded.includes(row.original.id) ? (
-                  <FaChevronCircleUp />
-                ) : (
-                  <FaChevronCircleDown />
-                )}
-              </span>
-            </ButtonGroup>
+            right !== UserEnums.RoleMode.Read && (
+              <StatementListContextMenu
+                buttons={[
+                  <Button
+                    key="r"
+                    icon={<FaTrashAlt size={14} />}
+                    color="danger"
+                    tooltipLabel="delete"
+                    onClick={() => {
+                      setStatementToDelete(row.original);
+                      setShowSubmit(true);
+                    }}
+                  />,
+                  <Button
+                    key="d"
+                    icon={<FaClone size={14} />}
+                    color="warning"
+                    tooltipLabel="duplicate"
+                    onClick={() => {
+                      cloneStatementMutation.mutate(row.original.id);
+                    }}
+                  />,
+                  <Button
+                    key="add-up"
+                    icon={
+                      <>
+                        <FaPlus size={14} />
+                        <BsArrowUp size={14} />
+                      </>
+                    }
+                    tooltipLabel="add new statement before"
+                    color="info"
+                    onClick={() => {
+                      addStatementAtCertainIndex(row.index);
+                    }}
+                  />,
+                  <Button
+                    key="add-down"
+                    icon={
+                      <>
+                        <FaPlus size={14} />
+                        <BsArrowDown size={14} />
+                      </>
+                    }
+                    tooltipLabel="add new statement after"
+                    color="success"
+                    onClick={() => {
+                      addStatementAtCertainIndex(row.index + 1);
+                    }}
+                  />,
+                ]}
+              />
+            )
           );
         },
       },
-    ],
-    [statementsLocal, rowsExpanded, right, selectedRows, lastClickedIndex]
-  );
+    ];
+  }, [right, selectedRows, lastClickedIndex]);
 
   const {
     setHiddenColumns,
@@ -538,7 +510,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
     <StyledTable
       {...getTableProps()}
       $contentWidth={contentWidth - 10}
-      $isExpanded={displayMode === StatementListDisplayMode.LIST}
+      $isListMode={displayMode === StatementListDisplayMode.LIST}
     >
       <StyledTHead>
         {headerGroups.map((headerGroup, key) => (
@@ -551,6 +523,9 @@ export const StatementListTable: React.FC<StatementListTable> = ({
               ) : (
                 <th key={key}></th>
               )
+            )}
+            {displayMode !== StatementListDisplayMode.TEXT && (
+              <StyledTh style={{ width: "50px" }} key={"expander"}></StyledTh>
             )}
           </tr>
         ))}

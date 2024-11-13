@@ -3,7 +3,7 @@ import styled from "styled-components";
 
 interface StyledTable {
   $contentWidth: number;
-  $isExpanded: boolean;
+  $isListMode: boolean;
 }
 export const StyledTable = styled.table<StyledTable>`
   width: ${({ $contentWidth }) => $contentWidth};
@@ -14,7 +14,7 @@ export const StyledTable = styled.table<StyledTable>`
   border-style: solid;
   border-color: ${({ theme }) => theme.color["gray"][500]};
   box-shadow: ${({ theme }) => theme.boxShadow["subtle"]};
-
+  overflow-x: ${({ $isListMode }) => ($isListMode ? "auto" : "hidden")};
   transition: width 0.3s ease;
 `;
 export const StyledTHead = styled.thead`
@@ -38,6 +38,7 @@ interface StyledTr {
   opacity?: number;
 }
 export const StyledTr = styled.tr<StyledTr>`
+  height: ${({ theme }) => theme.space[16]};
   background-color: ${({ theme, $isOpened, $isSelected }) =>
     $isOpened
       ? theme.color["tableOpened"]
@@ -71,8 +72,9 @@ export const StyledTd = styled.td<StyledTd>`
   padding: ${({ theme }) => theme.space[2]};
   padding-left: ${({ theme }) => theme.space[4]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
-  height: 4rem;
+  height: ${({ theme }) => theme.space[16]};
 `;
+
 export const StyledTdMove = styled.td`
   cursor: move;
   width: 1%;
