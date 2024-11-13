@@ -32,7 +32,6 @@ import { IStatement } from "@shared/types";
 import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 import { CStatement } from "constructors";
 import { setIsLoading } from "redux/features/statementList/isLoadingSlice";
-import { setThirdPanelExpanded } from "redux/features/layout/thirdPanelExpandedSlice";
 
 type FourthPanelBoxes = "search" | "bookmarks" | "templates";
 
@@ -57,9 +56,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
   );
   const firstPanelExpanded: boolean = useAppSelector(
     (state) => state.layout.firstPanelExpanded
-  );
-  const thirdPanelExpanded: boolean = useAppSelector(
-    (state) => state.layout.thirdPanelExpanded
   );
   const fourthPanelExpanded: boolean = useAppSelector(
     (state) => state.layout.fourthPanelExpanded
@@ -92,24 +88,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
       onClick={toggleFirstPanel}
       inverted
       icon={firstPanelExpanded ? <RiMenuFoldFill /> : <RiMenuUnfoldFill />}
-    />
-  );
-
-  const toggleThirdPanel = () => {
-    if (thirdPanelExpanded) {
-      dispatch(setThirdPanelExpanded(false));
-      localStorage.setItem("thirdPanelExpanded", "false");
-    } else {
-      dispatch(setThirdPanelExpanded(true));
-      localStorage.setItem("thirdPanelExpanded", "true");
-    }
-  };
-
-  const thirdPanelButton = () => (
-    <Button
-      onClick={toggleThirdPanel}
-      inverted
-      icon={thirdPanelExpanded ? <RiMenuUnfoldFill /> : <RiMenuFoldFill />}
     />
   );
 
@@ -287,7 +265,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
   return (
     <>
       <ScrollHandler />
-      {separatorXPosition > 0 && thirdPanelExpanded && <PanelSeparator />}
+      {separatorXPosition > 0 && <PanelSeparator />}
 
       {/* FIRST PANEL */}
       <Panel width={firstPanelExpanded ? panelWidths[0] : collapsedPanelWidth}>
@@ -309,13 +287,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
       {/* SECOND PANEL */}
       <Panel
         width={
-          (firstPanelExpanded
+          firstPanelExpanded
             ? panelWidths[1]
-            : panelWidths[1] + panelWidths[0] - collapsedPanelWidth) +
-          (thirdPanelExpanded ? 0 : panelWidths[2] - collapsedPanelWidth) +
-          (!fourthPanelExpanded && !thirdPanelExpanded
-            ? panelWidths[3] - collapsedPanelWidth
-            : 0)
+            : panelWidths[1] + panelWidths[0] - collapsedPanelWidth
         }
       >
         <Box
@@ -434,20 +408,12 @@ const MainPage: React.FC<MainPage> = ({}) => {
       {/* THIRD PANEL */}
       <Panel
         width={
-          !thirdPanelExpanded
-            ? collapsedPanelWidth
-            : fourthPanelExpanded
+          fourthPanelExpanded
             ? panelWidths[2]
             : panelWidths[2] + panelWidths[3] - collapsedPanelWidth
         }
       >
-        <Box
-          borderColor="white"
-          height={contentHeight}
-          label="Editor"
-          buttons={[thirdPanelButton()]}
-          isExpanded={thirdPanelExpanded}
-        >
+        <Box borderColor="white" height={contentHeight} label="Editor">
           <MemoizedStatementEditorBox />
         </Box>
       </Panel>
