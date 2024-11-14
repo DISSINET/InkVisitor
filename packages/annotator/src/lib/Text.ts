@@ -255,7 +255,7 @@ class Text {
     return absIndex;
   }
 
-  getLineInFromPosition(segment: SegmentPosition): string {
+  getLineFromPosition(segment: SegmentPosition): string {
     return this.segments[segment.segmentIndex].lines[segment.lineIndex] || "";
   }
 

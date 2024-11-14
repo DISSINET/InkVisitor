@@ -9,7 +9,7 @@ import { Button, Loader } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 import TextAnnotator from "components/advanced/Annotator/Annotator";
 import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import { FaLongArrowAltRight, FaUnlink } from "react-icons/fa";
 import { GrDocumentMissing } from "react-icons/gr";
 import { TbAnchorOff } from "react-icons/tb";
@@ -20,6 +20,8 @@ import {
   StyledDocumentTag,
   StyledDocumentTitle,
 } from "../StatementLitBoxStyles";
+import useResizeObserver from "use-resize-observer";
+import { ThemeContext } from "styled-components";
 
 interface StatementListTextAnnotator {
   statements: IResponseStatement[];
@@ -206,6 +208,11 @@ export const StatementListTextAnnotator: React.FC<
     return false;
   }, [selectedDocument, territoryId]);
 
+  const { ref: selectorRef, height: selectorHeight = 0 } =
+    useResizeObserver<HTMLDivElement>();
+
+  const themeContext = useContext(ThemeContext);
+
   return (
     <animated.div style={animatedStyle}>
       <div
@@ -295,7 +302,13 @@ export const StatementListTextAnnotator: React.FC<
                 color="warning"
               />
             ) : (
-              <div style={{ display: "flex", gap: "0.4rem" }}>
+              <div
+                style={{
+                  display: "flex",
+                  gap: "0.4rem",
+                  color: themeContext?.color["black"],
+                }}
+              >
                 <i>No </i>
                 <TbAnchorOff />
                 <i>for Territory</i>
@@ -305,6 +318,7 @@ export const StatementListTextAnnotator: React.FC<
         )}
       </div>
 
+      {/* Class selector */}
       {selectedResource !== false && selectedResource?.data?.documentId && (
         <div
           style={{
@@ -313,6 +327,7 @@ export const StatementListTextAnnotator: React.FC<
             gap: "4px",
             marginBottom: "5px",
           }}
+          ref={selectorRef}
         >
           <StyledModeSwitcher style={{ textWrap: "nowrap" }}>
             Highlight
@@ -342,7 +357,7 @@ export const StatementListTextAnnotator: React.FC<
             <TextAnnotator
               width={
                 statements.length > 0
-                  ? contentWidth - COLLAPSED_TABLE_WIDTH
+                  ? contentWidth - COLLAPSED_TABLE_WIDTH - 5
                   : contentWidth
               }
               hlEntities={hlEntities}
@@ -352,7 +367,7 @@ export const StatementListTextAnnotator: React.FC<
               thisTerritoryEntityId={territoryId}
               initialScrollEntityId={territoryId}
               displayLineNumbers={true}
-              height={contentHeight - 100}
+              height={contentHeight - selectorHeight - 70}
               documentId={selectedDocumentId}
               handleCreateStatement={handleCreateStatement}
               handleCreateTerritory={handleCreateTerritory}

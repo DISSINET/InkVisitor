@@ -1,9 +1,4 @@
-import {
-  FloatingPortal,
-  autoUpdate,
-  offset,
-  useFloating,
-} from "@floating-ui/react";
+import { FloatingPortal, autoUpdate, useFloating } from "@floating-ui/react";
 import { config, useSpring } from "@react-spring/web";
 import React, { ReactNode, useEffect, useState } from "react";
 import {
@@ -35,7 +30,7 @@ export const StatementListContextMenu: React.FC<StatementListContextMenu> = ({
   const handleMouseLeave = () => {
     const id = window.setTimeout(() => {
       setShowMenu(false);
-    }, 700);
+    }, 150);
 
     setTimeoutId(id);
   };
@@ -70,7 +65,7 @@ export const StatementListContextMenu: React.FC<StatementListContextMenu> = ({
         <StyledCgMenuBoxed
           onClick={(e: React.MouseEvent) => e.stopPropagation()}
           $inverted={inverted}
-          size={18}
+          size={22}
         />
         {portalMounted && (
           <FloatingPortal id="page">
