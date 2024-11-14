@@ -1,13 +1,18 @@
 import { IEntity, IResponseStatement, IStatement } from "@shared/types";
 import { useSearchParams } from "hooks";
-import React, { useContext, useEffect, useRef } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import {
   DragSourceMonitor,
   DropTargetMonitor,
   useDrag,
   useDrop,
 } from "react-dnd";
-import { FaGripVertical } from "react-icons/fa";
+import {
+  FaChevronCircleDown,
+  FaChevronCircleUp,
+  FaGripVertical,
+} from "react-icons/fa";
+import { BeatLoader } from "react-spinners";
 import { Cell, ColumnInstance, Row } from "react-table";
 import { setDraggedRowId } from "redux/features/statementList/draggedRowIdSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
@@ -16,6 +21,8 @@ import { DragItem, ItemTypes, StatementListDisplayMode } from "types";
 import { dndHoverFn } from "utils/utils";
 import { StatementListRowExpanded } from "./StatementListRowExpanded/StatementListRowExpanded";
 import { StyledTd, StyledTdMove, StyledTr } from "./StatementListTableStyles";
+import useIsRowVisible from "./useRowIsVisible";
+import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 
 interface StatementListRow {
   row: Row<IResponseStatement>;
@@ -53,6 +60,8 @@ export const StatementListRow: React.FC<StatementListRow> = ({
   const dropRef = useRef<HTMLTableRowElement>(null);
   const dragRef = useRef<HTMLTableCellElement>(null);
 
+  const isVisible = useIsRowVisible(dropRef);
+
   const [, drop] = useDrop<DragItem>({
     accept: ItemTypes.STATEMENT_ROW,
     hover(item: DragItem, monitor: DropTargetMonitor) {
@@ -80,7 +89,10 @@ export const StatementListRow: React.FC<StatementListRow> = ({
   }, [isDragging]);
 
   preview(drop(dropRef));
-  drag(dragRef);
+
+  useEffect(() => {
+    drag(dragRef);
+  }, [isVisible]);
 
   const themeContext = useContext(ThemeContext);
 
@@ -98,25 +110,79 @@ export const StatementListRow: React.FC<StatementListRow> = ({
         // for scrollTo fn
         id={`statement${row.original.id}`}
       >
-        {row.cells.map((cell: Cell<IResponseStatement>) => {
-          if (cell.column.id === "move") {
-            return (
-              <StyledTdMove
-                key="move"
-                ref={dragRef}
-                onClick={(e: React.MouseEvent) => e.stopPropagation()}
+        {isVisible ? (
+          <React.Fragment>
+            {row.cells.map((cell: Cell<IResponseStatement>) => {
+              if (cell.column.id === "move") {
+                return (
+                  <StyledTdMove
+                    key="move"
+                    ref={dragRef}
+                    onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                  >
+                    <FaGripVertical color={themeContext?.color.black} />
+                  </StyledTdMove>
+                );
+              } else {
+                return (
+                  <StyledTd {...cell.getCellProps()}>
+                    {cell.render("Cell")}
+                  </StyledTd>
+                );
+              }
+            })}
+            {displayMode !== StatementListDisplayMode.TEXT && (
+              <StyledTd
+                style={{
+                  justifyContent: "center",
+                }}
               >
-                <FaGripVertical color={themeContext?.color.black} />
-              </StyledTdMove>
-            );
-          } else {
-            return (
-              <StyledTd {...cell.getCellProps()}>
-                {cell.render("Cell")}
+                <span
+                  {...row.getToggleRowExpandedProps()}
+                  style={{
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                  onClick={(e: React.MouseEvent) => {
+                    e.stopPropagation();
+                    const rowId = row.original.id;
+                    if (!rowsExpanded.includes(rowId)) {
+                      dispatch(setRowsExpanded(rowsExpanded.concat(rowId)));
+                    } else {
+                      dispatch(
+                        setRowsExpanded(rowsExpanded.filter((r) => r !== rowId))
+                      );
+                    }
+                  }}
+                >
+                  {rowsExpanded.includes(row.original.id) ? (
+                    <FaChevronCircleUp size={18} />
+                  ) : (
+                    <FaChevronCircleDown size={18} />
+                  )}
+                </span>
               </StyledTd>
-            );
-          }
-        })}
+            )}
+          </React.Fragment>
+        ) : (
+          <StyledTd colSpan={visibleColumns.length + 1}>
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                justifyContent: "center",
+              }}
+            >
+              <BeatLoader
+                size={7}
+                margin={4}
+                style={{ marginLeft: "0.3rem", marginTop: "0.1rem" }}
+                color={themeContext?.color["primary"]}
+              />
+            </div>
+          </StyledTd>
+        )}
       </StyledTr>
       {rowsExpanded.includes(row.original.id) &&
       !draggedRowId &&

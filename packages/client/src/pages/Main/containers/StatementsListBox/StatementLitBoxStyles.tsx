@@ -27,10 +27,15 @@ export const StyledActionLabel = styled.div`
   overflow: hidden;
   text-overflow: ellipsis;
 `;
-export const StyledTableWrapper = styled.div`
+
+interface StyledTableWrapper {
+  $isListMode?: boolean;
+}
+export const StyledTableWrapper = styled.div<StyledTableWrapper>`
   display: flex;
   flex-direction: column;
   overflow: auto;
+  overflow-x: ${({ $isListMode }) => ($isListMode ? "auto" : "hidden")};
   flex-shrink: 0;
   padding-right: 0.1rem;
   padding-bottom: 1rem;

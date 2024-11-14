@@ -4,7 +4,7 @@ import { IEntity } from "@shared/types";
 import { ThemeColor } from "Theme/theme";
 import { Button, Tag } from "components";
 import { EntityTooltip } from "components/advanced";
-import React, { ReactNode, useCallback, useState } from "react";
+import React, { ReactNode, useCallback, useRef, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
 import { useAppSelector } from "redux/hooks";
 import { DraggedEntityReduxItem, EntityDragItem } from "types";
@@ -81,21 +81,14 @@ export const EntityTag: React.FC<EntityTag> = ({
   }
 
   const classId = entity.class;
+
   const [buttonHovered, setButtonHovered] = useState(false);
   const [elvlHovered, setElvlHovered] = useState(false);
-
-  const [referenceElement, setReferenceElement] =
-    useState<HTMLDivElement | null>(null);
   const [tagHovered, setTagHovered] = useState(false);
 
-  const handleSetReferenceElement = useCallback(
-    (node: HTMLDivElement | null) => {
-      setReferenceElement(node);
-    },
-    []
-  );
+  const referenceEl = useRef<HTMLDivElement | null>(null);
 
-  const renderUnlinkButton = useCallback((unlinkButton: UnlinkButton) => {
+  const renderUnlinkButton = (unlinkButton: UnlinkButton) => {
     return (
       <Button
         key="d"
@@ -110,7 +103,7 @@ export const EntityTag: React.FC<EntityTag> = ({
         onClick={unlinkButton.onClick}
       />
     );
-  }, []);
+  };
 
   if (!isValidEntityClass(entity.class)) {
     // labels needs to have length and first label needs to be non-empty
@@ -144,7 +137,7 @@ export const EntityTag: React.FC<EntityTag> = ({
     <>
       <StyledEntityTagWrap
         $flexListMargin={flexListMargin}
-        ref={handleSetReferenceElement}
+        ref={referenceEl}
         onMouseEnter={handleTagHovered}
         onMouseLeave={handleTagUnhovered}
       >
@@ -174,7 +167,7 @@ export const EntityTag: React.FC<EntityTag> = ({
               Object.keys(draggedEntity).length !== 0
             }
             tagHovered={tagHovered}
-            referenceElement={referenceElement}
+            referenceElement={referenceEl.current}
             customTooltipAttributes={customTooltipAttributes}
           />
         )}

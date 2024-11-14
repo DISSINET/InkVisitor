@@ -25,6 +25,7 @@ import pingSlice from "./features/pingSlice";
 import showWarningsSlice from "./features/statementEditor/showWarningsSlice";
 import themeSlice from "./features/themeSlice";
 import isLoadingSlice from "./features/statementList/isLoadingSlice";
+import thirdPanelExpandedSlice from "./features/layout/thirdPanelExpandedSlice";
 
 const store: Store = configureStore({
   reducer: {
@@ -58,6 +59,7 @@ const store: Store = configureStore({
       panelWidths: panelWidthsSlice,
       separatorXPosition: separatorXPositionSlice,
       firstPanelExpanded: firstPanelExpandedSlice,
+      thirdPanelExpanded: thirdPanelExpandedSlice,
       fourthPanelExpanded: fourthPanelExpandedSlice,
       fourthPanelBoxesOpened: fourthPanelBoxesOpenedSlice,
       statementListOpened: statementListOpenedSlice,
