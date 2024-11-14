@@ -5,13 +5,14 @@ import api from "api";
 import { Button, DocumentTitle, Table } from "components";
 import { EntityTag } from "components/advanced";
 import React, { useMemo } from "react";
-import { FaTrashAlt } from "react-icons/fa";
+import { FaAnchor, FaTrashAlt } from "react-icons/fa";
 import { HiClipboardList } from "react-icons/hi";
 import { CellProps, Column } from "react-table";
 import {
   StyledAbbreviatedLabel,
   StyledAnchorText,
 } from "./EntityDetailUsedInDocumentsTableStyles";
+import { toast } from "react-toastify";
 
 type CellType = CellProps<IResponseUsedInDocument>;
 interface EntityDetailUsedInDocumentsTable {
@@ -42,9 +43,12 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
               {anchorText ? (
                 <StyledAnchorText>
                   <HiClipboardList
-                    onClick={() =>
-                      window.navigator.clipboard.writeText(anchorText)
-                    }
+                    size={18}
+                    style={{ cursor: "pointer" }}
+                    onClick={() => {
+                      window.navigator.clipboard.writeText(anchorText);
+                      toast.info("text copied to clipboard");
+                    }}
                   />
                   <StyledAbbreviatedLabel>
                     {anchorText || ""}
@@ -76,7 +80,18 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
         Cell: ({ row }: CellType) => {
           const territoryEntity = entities[row.original.parentTerritoryId];
           return (
-            <>{territoryEntity && <EntityTag entity={territoryEntity} />}</>
+            <>
+              {territoryEntity && (
+                <EntityTag
+                  entity={territoryEntity}
+                  unlinkButton={{
+                    onClick: () => {},
+                    icon: <FaAnchor />,
+                    tooltipLabel: "open anchor",
+                  }}
+                />
+              )}
+            </>
           );
         },
       },
