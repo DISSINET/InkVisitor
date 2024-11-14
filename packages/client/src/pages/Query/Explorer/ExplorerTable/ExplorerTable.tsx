@@ -27,12 +27,12 @@ import {
 } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 import { CMetaProp } from "constructors";
-import { CgClose } from "react-icons/cg";
 import {
   FaChevronCircleDown,
   FaChevronCircleUp,
   FaTrashAlt,
 } from "react-icons/fa";
+import { GrClose } from "react-icons/gr";
 import {
   MdOutlineCheckBox,
   MdOutlineCheckBoxOutlineBlank,
@@ -40,28 +40,28 @@ import {
 } from "react-icons/md";
 import { TbColumnInsertRight } from "react-icons/tb";
 import { ThemeContext } from "styled-components";
-import { DropdownItem } from "types";
 import useResizeObserver from "use-resize-observer";
 import { v4 as uuidv4 } from "uuid";
 import { ExploreAction, ExploreActionType } from "../state";
 import { ExplorerTableRowExpanded } from "./ExplorerTableRowExpanded/ExplorerTableRowExpanded";
 import {
   StyledCheckboxWrapper,
+  StyledColumn,
+  StyledColumnContent,
   StyledFocusedCircle,
-  StyledGrid,
-  StyledGridColumn,
-  StyledGridHeader,
-  StyledGridHeaderColumn,
-  StyledGridHeaderColumnContent,
-  StyledGridRow,
+  StyledHeader,
   StyledNewColumn,
-  StyledNewColumnGrid,
+  StyledNewColumnContent,
+  StyledNewColumnHeader,
   StyledNewColumnLabel,
   StyledNewColumnValue,
+  StyledRow,
   StyledTableWrapper,
 } from "./ExplorerTableStyles";
-import { BatchAction, batchOptions } from "./types";
 import ExploreTableControl from "./ExploreTableControl";
+import { BatchAction, batchOptions } from "./types";
+
+const WIDTH_COLUMN_DEFAULT = 800;
 
 const initialNewColumn: Explore.IExploreColumn = {
   id: uuidv4(),
@@ -76,6 +76,7 @@ interface ExplorerTable {
   data: IResponseQuery | undefined;
   isQueryFetching: boolean;
   queryError: Error | null;
+  height: number;
 }
 export const ExplorerTable: React.FC<ExplorerTable> = ({
   state,
@@ -83,6 +84,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   data,
   isQueryFetching,
   queryError,
+  height: heightBox,
 }) => {
   const { entities, total: incomingTotal } = data ?? {
     entities: [],
@@ -272,8 +274,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     batchOptions[0].value
   );
 
-  const renderControl = () => {};
-
   // const renderTableFooter = () => {
   //   return <StyledTableFooter>{renderPaging()}</StyledTableFooter>;
   // };
@@ -364,7 +364,13 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
 
   const themeContext = useContext(ThemeContext);
 
-  const { ref: contentRef, width: contentWidth } = useResizeObserver();
+  const {
+    ref: contentRef,
+    width: contentWidth,
+    height: contentHeight,
+  } = useResizeObserver();
+
+  const spaceTableBody = heightBox - 150;
 
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
   const [lastClickedIndex, setLastClickedIndex] = useState<number>(-1);
@@ -378,6 +384,10 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       setSelectedRows([...selectedRows, rowId]);
     }
   };
+
+  const widthTable = useMemo(() => {
+    return columns.length * WIDTH_COLUMN_DEFAULT + 200;
+  }, [columns]);
 
   const handleSelection = (
     lastClickedIndex: number,
@@ -455,48 +465,63 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   );
 
   return (
-    <>
-      <div
-        style={{
-          display: "flex",
-          // overflow: "auto",
-          padding: "1rem",
-          height: "100%",
-        }}
-      >
-        <StyledTableWrapper ref={contentRef}>
-          <ExploreTableControl
-            setIsNewColumnOpen={setIsNewColumnOpen}
-            isNewColumnOpen={isNewColumnOpen}
-            batchActionSelected={batchActionSelected}
-            setBatchActionSelected={setBatchActionSelected}
-            selectedRows={selectedRows}
-            setSelectedRows={setSelectedRows}
-            entities={entities}
-            setLastClickedIndex={setLastClickedIndex}
-          />
-          <CustomScrollbar>
-            <StyledGrid $columns={columns.length + 1}>
-              {/* HEADER */}
-              <StyledGridHeader>
-                <StyledGridHeaderColumn>{/* actions */}</StyledGridHeaderColumn>
-                <StyledGridHeaderColumn>
-                  {/* entities */}
-                </StyledGridHeaderColumn>
-                {columns.map((column, key) => {
-                  return (
-                    <StyledGridHeaderColumn key={key}>
-                      <div style={{ display: "flex", alignItems: "center" }}>
-                        {column.editable && (
-                          <MdOutlineEdit
-                            size={14}
-                            style={{ marginRight: "0.3rem" }}
-                          />
-                        )}
-                        {column.name}
+    <div
+      style={{
+        height: heightBox - 20,
+        margin: "1rem",
+        overflow: "hidden",
+      }}
+      ref={contentRef}
+    >
+      <StyledTableWrapper>
+        <ExploreTableControl
+          setIsNewColumnOpen={setIsNewColumnOpen}
+          isNewColumnOpen={isNewColumnOpen}
+          batchActionSelected={batchActionSelected}
+          setBatchActionSelected={setBatchActionSelected}
+          selectedRows={selectedRows}
+          setSelectedRows={setSelectedRows}
+          entities={entities}
+          setLastClickedIndex={setLastClickedIndex}
+        />
 
-                        {/* SORT */}
-                        {/* <span style={{ marginLeft: "0.5rem" }}>
+        {/* <div
+          style={{
+            overflowX: "scroll",
+            overflowY: "hidden",
+            width: "100%",
+          }}
+        > */}
+        <CustomScrollbar
+          contentHeight={contentHeight}
+          contentWidth={contentWidth}
+          noScrollY
+        >
+          {/* HEADER */}
+          <StyledHeader
+            style={{
+              width: widthTable,
+            }}
+          >
+            <StyledColumn $isHeader={true} $width={250}></StyledColumn>
+            {columns.map((column, key) => {
+              return (
+                <StyledColumn
+                  $isHeader={true}
+                  $width={WIDTH_COLUMN_DEFAULT}
+                  key={key}
+                >
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    {column.editable && (
+                      <MdOutlineEdit
+                        size={14}
+                        style={{ marginRight: "0.3rem" }}
+                      />
+                    )}
+                    {column.name}
+
+                    {/* SORT */}
+                    {/* <span style={{ marginLeft: "0.5rem" }}>
                             <Button
                               noBorder
                               noBackground
@@ -512,7 +537,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                                   )
                                 ) : (
                                   <FaSort color={"white"} />
-                                )
+                                  )
                               }
                               onClick={() => {
                                 const newDirection = toggleSortDirection(column.id);
@@ -528,263 +553,270 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                                 });
                               }}
                               tooltipLabel="sort"
-                            />
-                          </span> */}
+                              />
+                              </span> */}
 
-                        <span style={{ marginLeft: "0.5rem" }}>
-                          <Button
-                            noBorder
-                            noBackground
-                            inverted
-                            icon={<FaTrashAlt color={"white"} />}
-                            onClick={() =>
-                              dispatch({
-                                type: ExploreActionType.removeColumn,
-                                payload: { id: column.id },
-                              })
-                            }
-                            tooltipLabel="remove column"
-                          />
-                        </span>
-                      </div>
-                    </StyledGridHeaderColumn>
-                  );
-                })}
-              </StyledGridHeader>
+                    <span style={{ marginLeft: "0.5rem" }}>
+                      <Button
+                        noBorder
+                        noBackground
+                        inverted
+                        icon={<FaTrashAlt color={"white"} />}
+                        onClick={() =>
+                          dispatch({
+                            type: ExploreActionType.removeColumn,
+                            payload: { id: column.id },
+                          })
+                        }
+                        tooltipLabel="remove column"
+                      />
+                    </span>
+                  </div>
+                </StyledColumn>
+              );
+            })}
+          </StyledHeader>
 
-              {/* ROWS */}
-              {entities.map((row, key) => {
-                const { entity: rowEntity, columnData } = row;
-                const rowId = rowEntity.id;
-                const isOdd = Boolean(key % 2);
-                return (
-                  // ROW
-                  <React.Fragment key={key}>
-                    <StyledGridRow
-                      onClick={() =>
-                        rowsExpanded.includes(rowId)
-                          ? setRowsExpanded(
-                              rowsExpanded.filter((r) => r !== rowId)
-                            )
-                          : setRowsExpanded(rowsExpanded.concat(rowId))
-                      }
-                      $isOdd={isOdd}
-                      $isSelected={selectedRows.includes(row.entity.id)}
+          <CustomScrollbar
+            contentHeight={spaceTableBody}
+            contentWidth={widthTable}
+            noScrollX
+          >
+            {/* ROWS */}
+            {entities.map((row, key) => {
+              const { entity: rowEntity, columnData } = row;
+              const rowId = rowEntity.id;
+              const isOdd = Boolean(key % 2);
+
+              return (
+                // ROW
+                <React.Fragment key={key}>
+                  <StyledRow
+                    $width={widthTable}
+                    onClick={() =>
+                      rowsExpanded.includes(rowId)
+                        ? setRowsExpanded(
+                            rowsExpanded.filter((r) => r !== rowId)
+                          )
+                        : setRowsExpanded(rowsExpanded.concat(rowId))
+                    }
+                    $isOdd={isOdd}
+                    $isSelected={selectedRows.includes(row.entity.id)}
+                  >
+                    {/* ACTIONS */}
+                    <StyledColumn
+                      $width={250}
+                      style={{
+                        display: "sticky",
+                      }}
                     >
-                      {/* ACTIONS */}
-                      <StyledGridColumn>
-                        {renderCheckbox(row.entity.id, key)}
+                      {renderCheckbox(row.entity.id, key)}
 
-                        <span
-                          style={{
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                          }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (!rowsExpanded.includes(rowId)) {
-                              setRowsExpanded(rowsExpanded.concat(rowId));
-                            } else {
-                              setRowsExpanded(
-                                rowsExpanded.filter((r) => r !== rowId)
-                              );
-                            }
-                          }}
-                        >
-                          {rowsExpanded.includes(rowEntity.id) ? (
-                            <FaChevronCircleUp
-                              color={themeContext?.color.warning}
-                            />
-                          ) : (
-                            <FaChevronCircleDown />
-                          )}
-                        </span>
-                      </StyledGridColumn>
-
-                      <StyledGridColumn>
-                        <span
-                          style={{
-                            display: "inline-flex",
-                            overflow: "hidden",
-                          }}
-                        >
-                          <EntityTag
-                            entity={rowEntity}
-                            fullWidth
-                            disableDoubleClick
-                          />
-                        </span>
-                      </StyledGridColumn>
-                      {columns.map((column, key) => {
-                        return (
-                          <StyledGridColumn key={key}>
-                            <StyledGridHeaderColumnContent>
-                              {renderCell(
-                                rowEntity,
-                                columnData[column.id],
-                                column
-                              )}
-
-                              {column.editable &&
-                                column.type ===
-                                  Explore.EExploreColumnType.EPV && (
-                                  <EntitySuggester
-                                    categoryTypes={classesAll}
-                                    onPicked={(entity) => {
-                                      const params =
-                                        column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.EPV>;
-
-                                      const newProp: IProp = CMetaProp({
-                                        typeEntityId: params.propertyType,
-                                        valueEntityId: entity.id,
-                                      });
-
-                                      updateEntityMutation.mutate({
-                                        entityId: rowEntity.id,
-                                        changes: {
-                                          props: [...rowEntity.props, newProp],
-                                        },
-                                      });
-                                    }}
-                                  />
-                                )}
-                            </StyledGridHeaderColumnContent>
-                          </StyledGridColumn>
-                        );
-                      })}
-                    </StyledGridRow>
-
-                    {rowsExpanded.includes(rowEntity.id) && (
-                      <div style={{ display: "contents" }}>
-                        <ExplorerTableRowExpanded
-                          rowEntity={rowEntity}
-                          columns={columns}
-                          isOdd={isOdd}
-                        />
-                      </div>
-                    )}
-                  </React.Fragment>
-                );
-              })}
-            </StyledGrid>
-          </CustomScrollbar>
-          {/* {renderTableFooter()} */}
-        </StyledTableWrapper>
-
-        {/* NEW COLUMN */}
-        {isNewColumnOpen && (
-          <StyledNewColumn>
-            <StyledGridHeaderColumn $greyBackground>
-              <div style={{ display: "flex", alignItems: "center" }}>
-                <TbColumnInsertRight size={17} />
-                <p style={{ marginLeft: "0.5rem" }}>New column</p>
-              </div>
-              <div>
-                <Button
-                  icon={<CgClose size={14} />}
-                  onClick={() => setIsNewColumnOpen(false)}
-                  noBorder
-                  color="white"
-                  noBackground
-                  inverted
-                />
-              </div>
-            </StyledGridHeaderColumn>
-            <StyledNewColumnGrid>
-              <StyledNewColumnLabel>Column name</StyledNewColumnLabel>
-              <StyledNewColumnValue>
-                <Input
-                  width="full"
-                  value={columnName}
-                  onChangeFn={(value) => setColumnName(value)}
-                  changeOnType
-                />
-              </StyledNewColumnValue>
-              <StyledNewColumnLabel>Column type</StyledNewColumnLabel>
-              <StyledNewColumnValue>
-                <Dropdown.Single.Basic
-                  width="full"
-                  value={columnType}
-                  options={Object.keys(Explore.EExploreColumnType)
-                    .map(
-                      (key) =>
-                        Explore.EExploreColumnType[
-                          key as keyof typeof Explore.EExploreColumnType
-                        ]
-                    )
-                    .map((value) => {
-                      return {
-                        value: value,
-                        label: Explore.EExploreColumnTypeLabels[value],
-                        isDisabled:
-                          Explore.EExploreColumnTypeDisabled[value].disabled,
-                      };
-                    })}
-                  onChange={(value) => setColumnType(value)}
-                />
-              </StyledNewColumnValue>
-              {columnType === Explore.EExploreColumnType.EPV && (
-                <>
-                  <StyledNewColumnLabel>Property type</StyledNewColumnLabel>
-                  <StyledNewColumnValue>
-                    {propertyType ? (
-                      <EntityTag
-                        fullWidth
-                        entity={propertyType}
-                        unlinkButton={{
-                          onClick: () => setPropertyType(undefined),
+                      <span
+                        style={{
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
                         }}
-                        disableDoubleClick
-                      />
-                    ) : (
-                      <EntitySuggester
-                        categoryTypes={[EntityEnums.Class.Concept]}
-                        onPicked={(entity) => setPropertyType(entity)}
-                      />
-                    )}
-                  </StyledNewColumnValue>
-                </>
-              )}
-              <StyledNewColumnLabel>
-                <MdOutlineEdit size={14} style={{ marginRight: "0.3rem" }} />
-                Editable
-              </StyledNewColumnLabel>
-              <StyledNewColumnValue>
-                <Checkbox
-                  value={editable}
-                  onChangeFn={(value) => setEditable(value)}
-                />
-              </StyledNewColumnValue>
-            </StyledNewColumnGrid>
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (!rowsExpanded.includes(rowId)) {
+                            setRowsExpanded(rowsExpanded.concat(rowId));
+                          } else {
+                            setRowsExpanded(
+                              rowsExpanded.filter((r) => r !== rowId)
+                            );
+                          }
+                        }}
+                      >
+                        {rowsExpanded.includes(rowEntity.id) ? (
+                          <FaChevronCircleUp
+                            color={themeContext?.color.warning}
+                          />
+                        ) : (
+                          <FaChevronCircleDown />
+                        )}
+                      </span>
+                      <span
+                        style={{
+                          display: "inline-flex",
+                          overflow: "hidden",
+                        }}
+                      >
+                        <EntityTag
+                          entity={rowEntity}
+                          fullWidth
+                          disableDoubleClick
+                        />
+                      </span>
+                    </StyledColumn>
 
-            <span
-              style={{
-                width: "100%",
-                display: "flex",
-                justifyContent: "flex-end",
-              }}
-            >
-              <ButtonGroup style={{ marginLeft: "1rem", marginTop: "1rem" }}>
-                <Button
-                  color="warning"
-                  label="cancel"
-                  onClick={() => setIsNewColumnOpen(false)}
-                />
-                <Button
-                  label="create column"
-                  onClick={handleCreateColumn}
-                  disabled={
-                    !columnName.length ||
-                    (columnType === Explore.EExploreColumnType.EPV &&
-                      !propertyTypeId)
-                  }
-                />
-              </ButtonGroup>
-            </span>
-          </StyledNewColumn>
-        )}
-      </div>
-    </>
+                    {columns.map((column, key) => {
+                      return (
+                        <StyledColumn key={key} $width={WIDTH_COLUMN_DEFAULT}>
+                          <StyledColumnContent>
+                            {renderCell(
+                              rowEntity,
+                              columnData[column.id],
+                              column
+                            )}
+
+                            {column.editable &&
+                              column.type ===
+                                Explore.EExploreColumnType.EPV && (
+                                <EntitySuggester
+                                  categoryTypes={classesAll}
+                                  onPicked={(entity) => {
+                                    const params =
+                                      column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.EPV>;
+
+                                    const newProp: IProp = CMetaProp({
+                                      typeEntityId: params.propertyType,
+                                      valueEntityId: entity.id,
+                                    });
+
+                                    updateEntityMutation.mutate({
+                                      entityId: rowEntity.id,
+                                      changes: {
+                                        props: [...rowEntity.props, newProp],
+                                      },
+                                    });
+                                  }}
+                                />
+                              )}
+                          </StyledColumnContent>
+                        </StyledColumn>
+                      );
+                    })}
+                  </StyledRow>
+
+                  {rowsExpanded.includes(rowEntity.id) && (
+                    <ExplorerTableRowExpanded
+                      rowEntity={rowEntity}
+                      columns={columns}
+                      isOdd={isOdd}
+                    />
+                  )}
+                </React.Fragment>
+              );
+            })}
+          </CustomScrollbar>
+        </CustomScrollbar>
+        {/* {renderTableFooter()} */}
+      </StyledTableWrapper>
+
+      {/* NEW COLUMN */}
+      {isNewColumnOpen && (
+        <StyledNewColumn>
+          <StyledNewColumnHeader>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <TbColumnInsertRight size={17} />
+              <p style={{ marginLeft: "0.5rem" }}>New column</p>
+            </div>
+            <div>
+              <Button
+                icon={<GrClose size={14} />}
+                onClick={() => setIsNewColumnOpen(false)}
+                noBorder
+                color="white"
+                noBackground
+                inverted
+              />
+            </div>
+          </StyledNewColumnHeader>
+          <StyledNewColumnContent>
+            <StyledNewColumnLabel>Column name</StyledNewColumnLabel>
+            <StyledNewColumnValue>
+              <Input
+                width="full"
+                value={columnName}
+                onChangeFn={(value) => setColumnName(value)}
+                changeOnType
+              />
+            </StyledNewColumnValue>
+            <StyledNewColumnLabel>Column type</StyledNewColumnLabel>
+            <StyledNewColumnValue>
+              <Dropdown.Single.Basic
+                width="full"
+                value={columnType}
+                options={Object.keys(Explore.EExploreColumnType)
+                  .map(
+                    (key) =>
+                      Explore.EExploreColumnType[
+                        key as keyof typeof Explore.EExploreColumnType
+                      ]
+                  )
+                  .map((value) => {
+                    return {
+                      value: value,
+                      label: Explore.EExploreColumnTypeLabels[value],
+                      isDisabled:
+                        Explore.EExploreColumnTypeDisabled[value].disabled,
+                    };
+                  })}
+                onChange={(value) => setColumnType(value)}
+              />
+            </StyledNewColumnValue>
+            {columnType === Explore.EExploreColumnType.EPV && (
+              <>
+                <StyledNewColumnLabel>Property type</StyledNewColumnLabel>
+                <StyledNewColumnValue>
+                  {propertyType ? (
+                    <EntityTag
+                      fullWidth
+                      entity={propertyType}
+                      unlinkButton={{
+                        onClick: () => setPropertyType(undefined),
+                      }}
+                      disableDoubleClick
+                    />
+                  ) : (
+                    <EntitySuggester
+                      categoryTypes={[EntityEnums.Class.Concept]}
+                      onPicked={(entity) => setPropertyType(entity)}
+                    />
+                  )}
+                </StyledNewColumnValue>
+              </>
+            )}
+            <StyledNewColumnLabel>
+              <MdOutlineEdit size={14} style={{ marginRight: "0.3rem" }} />
+              Editable
+            </StyledNewColumnLabel>
+            <StyledNewColumnValue>
+              <Checkbox
+                value={editable}
+                onChangeFn={(value) => setEditable(value)}
+              />
+            </StyledNewColumnValue>
+          </StyledNewColumnContent>
+
+          <span
+            style={{
+              width: "100%",
+              display: "flex",
+              justifyContent: "flex-end",
+            }}
+          >
+            <ButtonGroup style={{ marginLeft: "1rem", marginTop: "1rem" }}>
+              <Button
+                color="warning"
+                label="cancel"
+                onClick={() => setIsNewColumnOpen(false)}
+              />
+              <Button
+                label="create column"
+                onClick={handleCreateColumn}
+                disabled={
+                  !columnName.length ||
+                  (columnType === Explore.EExploreColumnType.EPV &&
+                    !propertyTypeId)
+                }
+              />
+            </ButtonGroup>
+          </span>
+        </StyledNewColumn>
+      )}
+    </div>
   );
 };

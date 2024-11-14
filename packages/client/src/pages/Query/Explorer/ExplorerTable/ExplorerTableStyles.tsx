@@ -3,31 +3,18 @@ import styled from "styled-components";
 interface StyledTableWrapper {
   // $height: number;
 }
-export const StyledTableWrapper = styled.div<StyledTableWrapper>`
-  display: flex;
-  flex-direction: column;
-  /* overflow: auto; */
-  flex-shrink: 0;
-  flex-grow: 1;
-`;
-interface StyledGrid {
-  $columns: number;
-}
-export const StyledGrid = styled.div<StyledGrid>`
-  display: grid;
-  border: 1px solid ${({ theme }) => theme.color["black"]};
-  align-content: start;
-  grid-template-columns: ${({ $columns }) => `5rem repeat(${$columns}, auto)`};
-  color: ${({ theme }) => theme.color["black"]};
-  width: 100%;
-`;
-interface StyledGridRow {
+export const StyledTableWrapper = styled.div<StyledTableWrapper>``;
+interface StyledRow {
   $isOdd: boolean;
   $isSelected: boolean;
+  $width: number;
 }
-export const StyledGridRow = styled.div<StyledGridRow>`
-  display: contents;
+export const StyledRow = styled.div<StyledRow>`
+  display: flex;
+  width: ${({ $width }) => `${$width}px`};
+  align-items: center;
   cursor: pointer;
+  height: ${({ theme }) => theme.space[18]};
 
   & > div {
     background-color: ${({ theme, $isOdd, $isSelected }) =>
@@ -41,62 +28,65 @@ export const StyledGridRow = styled.div<StyledGridRow>`
     background-color: ${({ theme }) => theme.color["gray"][100]};
   }
 `;
-interface StyledGridColumn {}
-export const StyledGridColumn = styled.div`
-  display: grid;
-  gap: 0.3rem;
-  grid-template-columns: auto auto;
-  border-top: 0.5px solid ${({ theme }) => theme.color["gray"][600]};
+
+export const StyledHeader = styled.div`
+  display: flex;
+  z-index: 1;
+  height: ${({ theme }) => theme.space[18]};
+`;
+
+interface StyledColumn {
+  $isHeader?: boolean;
+  $width: number;
+}
+export const StyledColumn = styled.div<StyledColumn>`
+  display: inline-flex;
+  width: ${({ $width }) => `${$width}px`};
+  background-color: ${({ theme, $isHeader }) =>
+    $isHeader ? theme.color["success"] : theme.color["white"]};
+  color: ${({ theme, $isHeader }) =>
+    $isHeader ? theme.color["white"] : theme.color["black"]};
+  font-weight: ${({ theme, $isHeader }) =>
+    $isHeader ? theme.fontWeight["bold"] : theme.fontWeight["normal"]};
+  height: ${({ theme }) => theme.space[18]};
+
   padding: 0.3rem;
   padding-left: 1rem;
   align-items: center;
-
-  > :not(:last-child) {
-    /* margin-bottom: 0.3rem; */
-  }
+  border: 1px solid white;
+  gap: ${({ theme }) => theme.space[2]};
 `;
 
-export const StyledGridHeader = styled.div`
-  display: contents;
-  z-index: 1;
-`;
-interface StyledGridHeaderColumn {
-  $greyBackground?: boolean;
-}
-export const StyledGridHeaderColumn = styled(
-  StyledGridColumn
-)<StyledGridHeaderColumn>`
-  background-color: ${({ theme, $greyBackground }) =>
-    $greyBackground ? theme.color["query3"] : theme.color["success"]};
-  color: ${({ theme, $greyBackground }) =>
-    $greyBackground ? theme.color["white"] : "white"};
-  border: none;
-  justify-content: space-between;
-  height: 3rem;
-  font-size: ${({ theme }) => theme.fontSize["xs"]};
-  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
-  align-items: end;
-  padding-bottom: 0.5rem;
-`;
-
-export const StyledGridHeaderColumnContent = styled.div`
+export const StyledColumnContent = styled.div`
   display: flex;
   justify-content: start;
   align-items: center;
+  overflow-x: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   gap: ${({ theme }) => theme.space[2]};
 `;
 
 export const StyledNewColumn = styled.div`
+  position: absolute;
+  background-color: ${({ theme }) => theme.color["white"]};
+  right: 0;
+  bottom: 0;
+  top: 4rem;
   width: 27rem;
-  display: flex;
-  flex-shrink: 0;
-  flex-direction: column;
-  /* border-left: 2px solid ${({ theme }) => theme.color["gray"][400]}; */
-
-  position: sticky;
-  top: 0;
+  border-left: 2px solid ${({ theme }) => theme.color.white};
 `;
-export const StyledNewColumnGrid = styled.div`
+export const StyledNewColumnHeader = styled.div`
+  background-color: ${({ theme }) => theme.color.query3};
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  color: ${({ theme }) => theme.color["white"]};
+  width: 100%;
+  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+  padding: 1rem;
+`;
+export const StyledNewColumnContent = styled.div`
   display: grid;
   grid-template-columns: auto 1fr;
   grid-template-rows: repeat(4, 2.5rem);
@@ -122,6 +112,7 @@ export const StyledSpaceBetween = styled.div`
 export const StyledTableControl = styled(StyledSpaceBetween)`
   padding: ${({ theme }) => theme.space[2]};
   padding-top: 0.2rem;
+  margin-right: 2rem;
 
   /* position: sticky; */
   /* top: 0; */

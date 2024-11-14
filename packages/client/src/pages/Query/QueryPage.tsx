@@ -218,6 +218,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
         >
           <MemoizedExplorerBox
             state={exploreState}
+            height={contentHeight - querySeparatorYPosition}
             dispatch={exploreStateDispatch}
             data={queryData}
             isQueryFetching={queryIsFetching}

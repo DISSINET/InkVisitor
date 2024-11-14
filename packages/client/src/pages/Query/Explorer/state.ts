@@ -20,6 +20,13 @@ const exploreStateInitial: Explore.IExplore = {
       editable: true,
       params: {},
     },
+    {
+      id: "3",
+      name: "Types",
+      type: Explore.EExploreColumnType.EPT,
+      editable: true,
+      params: {},
+    },
   ],
   sort: undefined,
   filters: [],
