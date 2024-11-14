@@ -69,6 +69,8 @@ import {
 } from "./ExplorerTableStyles";
 import useResizeObserver from "use-resize-observer";
 import { DropdownItem } from "types";
+import { CgClose } from "react-icons/cg";
+import theme from "Theme/theme";
 
 enum BatchOption {
   fill_empty = "fill_empty",
@@ -352,32 +354,22 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           </div>
           {renderPaging()}
         </div>
-        <div>
-          <Button
-            icon={<TbColumnInsertRight size={17} />}
-            label="new column"
-            color={showNewColumn ? "info" : "primary"}
-            onClick={() => setShowNewColumn(!showNewColumn)}
-          />
-        </div>
+        {!showNewColumn && (
+          <div>
+            <Button
+              icon={<TbColumnInsertRight size={17} />}
+              label="new column"
+              color="query3"
+              onClick={() => setShowNewColumn(!showNewColumn)}
+            />
+          </div>
+        )}
       </StyledTableHeader>
     );
   };
 
   const renderTableFooter = () => {
-    return (
-      <StyledTableFooter>
-        {renderPaging()}
-        <div>
-          <Button
-            icon={<TbColumnInsertRight size={17} />}
-            label="new column"
-            color={showNewColumn ? "info" : "primary"}
-            onClick={() => setShowNewColumn(!showNewColumn)}
-          />
-        </div>
-      </StyledTableFooter>
-    );
+    return <StyledTableFooter>{renderPaging()}</StyledTableFooter>;
   };
 
   const renderCell = (
@@ -762,17 +754,27 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
               })}
             </StyledGrid>
           </CustomScrollbar>
-          {/* {renderTableFooter()} */}
+          {renderTableFooter()}
         </StyledTableWrapper>
 
         {/* NEW COLUMN */}
         {showNewColumn && (
           <StyledNewColumn>
             <StyledGridHeaderColumn $greyBackground>
-              <span style={{ display: "flex", alignItems: "center" }}>
+              <div style={{ display: "flex", alignItems: "center" }}>
                 <TbColumnInsertRight size={17} />
                 <p style={{ marginLeft: "0.5rem" }}>New column</p>
-              </span>
+              </div>
+              <div>
+                <Button
+                  icon={<CgClose size={14} />}
+                  onClick={() => setShowNewColumn(false)}
+                  noBorder
+                  color="white"
+                  noBackground
+                  inverted
+                />
+              </div>
             </StyledGridHeaderColumn>
             <StyledNewColumnGrid>
               <StyledNewColumnLabel>Column name</StyledNewColumnLabel>

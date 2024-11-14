@@ -67,10 +67,11 @@ export const StyledGridHeaderColumn = styled(
   StyledGridColumn
 )<StyledGridHeaderColumn>`
   background-color: ${({ theme, $greyBackground }) =>
-    $greyBackground ? theme.color["gray"][600] : theme.color["success"]};
+    $greyBackground ? theme.color["query3"] : theme.color["success"]};
   color: ${({ theme, $greyBackground }) =>
     $greyBackground ? theme.color["white"] : "white"};
   border: none;
+  justify-content: space-between;
   height: 3rem;
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
