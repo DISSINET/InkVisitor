@@ -9,7 +9,7 @@ import { Button, Loader } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 import TextAnnotator from "components/advanced/Annotator/Annotator";
 import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import { FaLongArrowAltRight, FaUnlink } from "react-icons/fa";
 import { GrDocumentMissing } from "react-icons/gr";
 import { TbAnchorOff } from "react-icons/tb";
@@ -21,6 +21,7 @@ import {
   StyledDocumentTitle,
 } from "../StatementLitBoxStyles";
 import useResizeObserver from "use-resize-observer";
+import { ThemeContext } from "styled-components";
 
 interface StatementListTextAnnotator {
   statements: IResponseStatement[];
@@ -210,6 +211,8 @@ export const StatementListTextAnnotator: React.FC<
   const { ref: selectorRef, height: selectorHeight = 0 } =
     useResizeObserver<HTMLDivElement>();
 
+  const themeContext = useContext(ThemeContext);
+
   return (
     <animated.div style={animatedStyle}>
       <div
@@ -299,7 +302,13 @@ export const StatementListTextAnnotator: React.FC<
                 color="warning"
               />
             ) : (
-              <div style={{ display: "flex", gap: "0.4rem" }}>
+              <div
+                style={{
+                  display: "flex",
+                  gap: "0.4rem",
+                  color: themeContext?.color["black"],
+                }}
+              >
                 <i>No </i>
                 <TbAnchorOff />
                 <i>for Territory</i>

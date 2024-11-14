@@ -1,4 +1,4 @@
-## 1.4.0.5 Changelog [Oct , 2024]
+## 1.4.0.5 Changelog [Oct 20, 2024]
 
 ### New Features:
 
