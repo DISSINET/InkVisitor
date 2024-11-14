@@ -12,6 +12,10 @@ import { StatementEditor } from "./StatementEditor/StatementEditor";
 import { StyledEditorEmptyState } from "./StatementEditorBoxStyles";
 
 export const StatementEditorBox: React.FC = () => {
+  const thirdPanelExpanded: boolean = useAppSelector(
+    (state) => state.layout.thirdPanelExpanded
+  );
+
   const { statementId, setStatementId, selectedDetailId, setTerritoryId } =
     useSearchParams();
 
@@ -362,7 +366,7 @@ export const StatementEditorBox: React.FC = () => {
 
   return (
     <>
-      {tempObject ? (
+      {tempObject && thirdPanelExpanded ? (
         <CustomScrollbar>
           <div onMouseLeave={() => sendChangesToBackend(tempObject)}>
             <StatementEditor
