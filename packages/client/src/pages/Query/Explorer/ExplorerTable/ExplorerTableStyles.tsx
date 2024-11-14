@@ -119,7 +119,7 @@ export const StyledSpaceBetween = styled.div`
   align-items: center;
   justify-content: space-between;
 `;
-export const StyledTableHeader = styled(StyledSpaceBetween)`
+export const StyledTableControl = styled(StyledSpaceBetween)`
   padding: ${({ theme }) => theme.space[2]};
   padding-top: 0.2rem;
 
