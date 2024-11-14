@@ -79,6 +79,13 @@ export const StyledGridHeaderColumn = styled(
   padding-bottom: 0.5rem;
 `;
 
+export const StyledGridHeaderColumnContent = styled.div`
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+`;
+
 export const StyledNewColumn = styled.div`
   width: 27rem;
   display: flex;

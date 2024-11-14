@@ -27,6 +27,7 @@ import {
 } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 import { CMetaProp } from "constructors";
+import { CgClose } from "react-icons/cg";
 import {
   FaChevronCircleDown,
   FaChevronCircleUp,
@@ -46,6 +47,8 @@ import {
 } from "react-icons/md";
 import { TbColumnInsertRight } from "react-icons/tb";
 import { ThemeContext } from "styled-components";
+import { DropdownItem } from "types";
+import useResizeObserver from "use-resize-observer";
 import { v4 as uuidv4 } from "uuid";
 import { ExploreAction, ExploreActionType } from "../state";
 import { ExplorerTableRowExpanded } from "./ExplorerTableRowExpanded/ExplorerTableRowExpanded";
@@ -57,6 +60,7 @@ import {
   StyledGridColumn,
   StyledGridHeader,
   StyledGridHeaderColumn,
+  StyledGridHeaderColumnContent,
   StyledGridRow,
   StyledNewColumn,
   StyledNewColumnGrid,
@@ -67,10 +71,6 @@ import {
   StyledTableHeader,
   StyledTableWrapper,
 } from "./ExplorerTableStyles";
-import useResizeObserver from "use-resize-observer";
-import { DropdownItem } from "types";
-import { CgClose } from "react-icons/cg";
-import theme from "Theme/theme";
 
 enum BatchOption {
   fill_empty = "fill_empty",
@@ -171,7 +171,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       payload: getNewColumn(),
     });
     handleClearLocalState();
-    // setShowNewColumn(false);
+    setShowNewColumn(false);
   };
 
   const totalPages = useMemo(() => Math.ceil(total / limit), [total, limit]);
@@ -487,7 +487,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     return selectedQueryEntities.map((queryEntity) => queryEntity.entity.id);
   };
 
-  const RenderCheckbox = useCallback(
+  const renderCheckbox = useCallback(
     (id: string, index: number) => {
       const size = 18;
       const checked = selectedRows.includes(id);
@@ -538,9 +538,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                 } else {
                   handleRowSelect(id);
                 }
-                // dispatch(
                 setLastClickedIndex(index);
-                // );
               }}
             />
           )}
@@ -660,7 +658,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                     >
                       {/* ACTIONS */}
                       <StyledGridColumn>
-                        {RenderCheckbox(row.entity.id, key)}
+                        {renderCheckbox(row.entity.id, key)}
 
                         <span
                           style={{
@@ -706,35 +704,37 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                       {columns.map((column, key) => {
                         return (
                           <StyledGridColumn key={key}>
-                            {renderCell(
-                              rowEntity,
-                              columnData[column.id],
-                              column
-                            )}
-
-                            {column.editable &&
-                              column.type ===
-                                Explore.EExploreColumnType.EPV && (
-                                <EntitySuggester
-                                  categoryTypes={classesAll}
-                                  onPicked={(entity) => {
-                                    const params =
-                                      column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.EPV>;
-
-                                    const newProp: IProp = CMetaProp({
-                                      typeEntityId: params.propertyType,
-                                      valueEntityId: entity.id,
-                                    });
-
-                                    updateEntityMutation.mutate({
-                                      entityId: rowEntity.id,
-                                      changes: {
-                                        props: [...rowEntity.props, newProp],
-                                      },
-                                    });
-                                  }}
-                                />
+                            <StyledGridHeaderColumnContent>
+                              {renderCell(
+                                rowEntity,
+                                columnData[column.id],
+                                column
                               )}
+
+                              {column.editable &&
+                                column.type ===
+                                  Explore.EExploreColumnType.EPV && (
+                                  <EntitySuggester
+                                    categoryTypes={classesAll}
+                                    onPicked={(entity) => {
+                                      const params =
+                                        column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.EPV>;
+
+                                      const newProp: IProp = CMetaProp({
+                                        typeEntityId: params.propertyType,
+                                        valueEntityId: entity.id,
+                                      });
+
+                                      updateEntityMutation.mutate({
+                                        entityId: rowEntity.id,
+                                        changes: {
+                                          props: [...rowEntity.props, newProp],
+                                        },
+                                      });
+                                    }}
+                                  />
+                                )}
+                            </StyledGridHeaderColumnContent>
                           </StyledGridColumn>
                         );
                       })}
