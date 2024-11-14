@@ -1,18 +1,18 @@
-import { IEntity } from "@shared/types";
+import { IDocumentMeta, IEntity } from "@shared/types";
 import { IResponseUsedInDocument } from "@shared/types/response-detail";
 import { useMutation } from "@tanstack/react-query";
 import api from "api";
-import { Button, DocumentTitle, Table } from "components";
-import { EntityTag } from "components/advanced";
-import React, { useMemo } from "react";
-import { FaAnchor, FaTrashAlt } from "react-icons/fa";
+import { DocumentTitle, Table } from "components";
+import { DocumentModalEdit, EntityTag } from "components/advanced";
+import React, { useMemo, useState } from "react";
+import { FaAnchor } from "react-icons/fa";
 import { HiClipboardList } from "react-icons/hi";
 import { CellProps, Column } from "react-table";
+import { toast } from "react-toastify";
 import {
   StyledAbbreviatedLabel,
   StyledAnchorText,
 } from "./EntityDetailUsedInDocumentsTableStyles";
-import { toast } from "react-toastify";
 
 type CellType = CellProps<IResponseUsedInDocument>;
 interface EntityDetailUsedInDocumentsTable {
@@ -31,6 +31,10 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
       api.documentRemoveAnchors(data.documentId, data.entityId),
     onSuccess(data, variables, context) {},
   });
+
+  const [openedDocument, setOpenedDocument] = useState<IDocumentMeta | false>(
+    false
+  );
 
   const columns = useMemo<Column<IResponseUsedInDocument>[]>(
     () => [
@@ -85,7 +89,7 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
                 <EntityTag
                   entity={territoryEntity}
                   unlinkButton={{
-                    onClick: () => {},
+                    onClick: () => setOpenedDocument(row.original.document),
                     icon: <FaAnchor />,
                     tooltipLabel: "open anchor",
                   }}
@@ -121,11 +125,19 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
   );
 
   return (
-    <Table
-      entityTitle={title}
-      columns={columns}
-      data={data}
-      perPage={perPage}
-    />
+    <>
+      <Table
+        entityTitle={title}
+        columns={columns}
+        data={data}
+        perPage={perPage}
+      />
+      {openedDocument && (
+        <DocumentModalEdit
+          document={openedDocument}
+          onClose={() => setOpenedDocument(false)}
+        />
+      )}
+    </>
   );
 };
