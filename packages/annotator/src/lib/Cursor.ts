@@ -271,6 +271,13 @@ export default class Cursor implements IRelativeCoordinates {
 
       const rowsToDraw: { rowI: number; start: number; end: number }[] = [];
 
+      // add cursor pointer on current y/x position
+      rowsToDraw.push({
+        rowI: this.yLine,
+        start: this.xLine,
+        end:  this.xLine,
+      });
+
       for (
         let i = 0;
         i < Math.min(viewport.lineEnd, textLines.length) - viewport.lineStart;
@@ -316,8 +323,8 @@ export default class Cursor implements IRelativeCoordinates {
 
       for (const row of rowsToDraw) {
         this.drawLine(ctx, row.rowI, row.start, row.end, drawingOptions);
-        this.xLine = row.end
-        this.yLine = row.rowI
+        //this.xLine = row.end
+       // this.yLine = row.rowI
       }
     }
     ctx.globalAlpha = 1;
