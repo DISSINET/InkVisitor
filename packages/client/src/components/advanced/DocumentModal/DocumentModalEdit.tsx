@@ -24,8 +24,7 @@ const DocumentModalEdit: React.FC<DocumentModalEdit> = ({
   }, []);
   const [windowWidth, windowHeight] = useWindowSize();
 
-  const [annotator, setAnnotator] = useState<Annotator | undefined>(undefined);
-  const [annotatorInitialized, setAnnotatorInitialized] = useState(false);
+  // const [annotatorInitialized, setAnnotatorInitialized] = useState(false);
 
   return (
     <Modal width={1000} showModal={show} onClose={onClose} fullHeight>
@@ -49,13 +48,11 @@ const DocumentModalEdit: React.FC<DocumentModalEdit> = ({
               hlEntities={[]}
               storedAnnotatorScroll={0}
               forwardAnnotator={(newAnnotator) => {
-                if (!annotatorInitialized && newAnnotator && anchor?.entityId) {
-                  console.log(newAnnotator);
-                  console.log(anchor?.entityId);
-                  anchor?.entityId &&
-                    newAnnotator?.scrollToAnchor(anchor?.entityId);
-                  setAnnotatorInitialized(true);
-                }
+                // if (!annotatorInitialized && newAnnotator && anchor?.entityId) {
+                anchor?.entityId &&
+                  newAnnotator?.scrollToAnchor(anchor?.entityId);
+                // setAnnotatorInitialized(true);
+                // }
               }}
             />
           </AnnotatorProvider>
