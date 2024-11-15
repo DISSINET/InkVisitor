@@ -35,6 +35,7 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
   const [openedDocument, setOpenedDocument] = useState<IDocumentMeta | false>(
     false
   );
+  const [tempAnchor, setTempAnchor] = useState<string | false>(false);
 
   const columns = useMemo<Column<IResponseUsedInDocument>[]>(
     () => [
@@ -89,7 +90,10 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
                 <EntityTag
                   entity={territoryEntity}
                   unlinkButton={{
-                    onClick: () => setOpenedDocument(row.original.document),
+                    onClick: () => {
+                      setTempAnchor(territoryEntity.id);
+                      setOpenedDocument(row.original.document);
+                    },
                     icon: <FaAnchor />,
                     tooltipLabel: "open anchor",
                   }}
@@ -135,7 +139,11 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
       {openedDocument && (
         <DocumentModalEdit
           document={openedDocument}
-          onClose={() => setOpenedDocument(false)}
+          onClose={() => {
+            setOpenedDocument(false);
+            setTempAnchor(false);
+          }}
+          anchor={tempAnchor ? { entityId: tempAnchor } : undefined}
         />
       )}
     </>

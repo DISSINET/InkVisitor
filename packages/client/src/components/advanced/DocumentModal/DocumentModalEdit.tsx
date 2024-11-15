@@ -10,17 +10,17 @@ import AnnotatorProvider from "../Annotator/AnnotatorProvider";
 interface DocumentModalEdit {
   document: IResponseDocument | IDocumentMeta | IDocument | undefined;
   onClose: () => void;
+  anchor?: { entityId: string; occurence?: number };
 }
 const DocumentModalEdit: React.FC<DocumentModalEdit> = ({
   onClose,
   document,
+  anchor,
 }) => {
   const [show, setShow] = useState(false);
-
   useEffect(() => {
     setShow(true);
   }, []);
-
   const [windowWidth, windowHeight] = useWindowSize();
 
   return (
@@ -44,21 +44,16 @@ const DocumentModalEdit: React.FC<DocumentModalEdit> = ({
               displayLineNumbers={true}
               hlEntities={[]}
               storedAnnotatorScroll={0}
+              forwardAnnotator={(newAnnotator) => {
+                anchor?.entityId &&
+                  newAnnotator?.scrollToAnchor(anchor?.entityId);
+              }}
             />
           </AnnotatorProvider>
         ) : (
           <div>Document not found</div>
         )}
       </ModalContent>
-      {/* <ModalFooter>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            width: "100%",
-          }}
-        ></div>
-      </ModalFooter> */}
     </Modal>
   );
 };
