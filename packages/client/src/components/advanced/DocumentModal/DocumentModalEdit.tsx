@@ -6,6 +6,7 @@ import { useWindowSize } from "hooks/useWindowSize";
 import { getShortLabelByLetterCount } from "utils/utils";
 import TextAnnotator from "../Annotator/Annotator";
 import AnnotatorProvider from "../Annotator/AnnotatorProvider";
+import { Annotator } from "@inkvisitor/annotator/src/lib";
 
 interface DocumentModalEdit {
   document: IResponseDocument | IDocumentMeta | IDocument | undefined;
@@ -22,6 +23,9 @@ const DocumentModalEdit: React.FC<DocumentModalEdit> = ({
     setShow(true);
   }, []);
   const [windowWidth, windowHeight] = useWindowSize();
+
+  const [annotator, setAnnotator] = useState<Annotator | undefined>(undefined);
+  const [annotatorInitialized, setAnnotatorInitialized] = useState(false);
 
   return (
     <Modal width={1000} showModal={show} onClose={onClose} fullHeight>
@@ -45,8 +49,13 @@ const DocumentModalEdit: React.FC<DocumentModalEdit> = ({
               hlEntities={[]}
               storedAnnotatorScroll={0}
               forwardAnnotator={(newAnnotator) => {
-                anchor?.entityId &&
-                  newAnnotator?.scrollToAnchor(anchor?.entityId);
+                if (!annotatorInitialized && newAnnotator && anchor?.entityId) {
+                  console.log(newAnnotator);
+                  console.log(anchor?.entityId);
+                  anchor?.entityId &&
+                    newAnnotator?.scrollToAnchor(anchor?.entityId);
+                  setAnnotatorInitialized(true);
+                }
               }}
             />
           </AnnotatorProvider>
