@@ -63,7 +63,7 @@ export const Page: React.FC<Page> = ({ children }) => {
     isFetching: isFetchingUser,
     isPaused,
   } = useQuery({
-    queryKey: ["user", { userId }],
+    queryKey: ["user", userId],
     queryFn: async () => {
       if (userId) {
         const res = await api.usersGet(userId);
