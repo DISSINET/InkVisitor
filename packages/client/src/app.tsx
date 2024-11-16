@@ -99,19 +99,31 @@ export const App: React.FC = () => {
     return theme;
   }, [selectedThemeId]);
 
+  const stateLayoutWidth: number = useAppSelector(
+    (state) => state.layout.layoutWidth
+  );
+  const stateContentHeight: number = useAppSelector(
+    (state) => state.layout.contentHeight
+  );
+
   const [debouncedWidth, debouncedHeight] = useDebounce(useWindowSize(), 50);
 
   useEffect(() => {
     if (debouncedHeight > 0) {
       const heightContent = debouncedHeight - heightHeader;
-      dispatch(setContentHeight(heightContent));
+      if (heightContent !== stateContentHeight) {
+        dispatch(setContentHeight(heightContent));
+      }
     }
   }, [debouncedHeight]);
 
   useEffect(() => {
     if (debouncedWidth > 0) {
       const layoutWidth = debouncedWidth;
-      dispatch(setLayoutWidth(layoutWidth));
+
+      if (layoutWidth !== stateLayoutWidth) {
+        dispatch(setLayoutWidth(layoutWidth));
+      }
       const onePercent = layoutWidth / 100;
 
       const separatorXStoragePosition =
