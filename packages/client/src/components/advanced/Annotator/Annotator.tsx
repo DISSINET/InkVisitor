@@ -537,7 +537,7 @@ export const TextAnnotator = ({
       </StyledCanvasWrapper>
 
       {annotator && (
-        <ButtonGroup marginTop>
+        <ButtonGroup $marginTop={true}>
           <Button
             key={EditMode.HIGHLIGHT}
             icon={<FaPen size={11} />}
