@@ -156,8 +156,6 @@ export const Page: React.FC<Page> = ({ children }) => {
     }
   }, [contentHeight > 0]);
 
-  console.log("rendering page");
-
   return (
     <StyledPage $layoutWidth={layoutWidth} onClick={handleClick}>
       <Header
