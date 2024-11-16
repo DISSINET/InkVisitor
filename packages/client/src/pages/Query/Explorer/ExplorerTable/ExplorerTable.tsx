@@ -60,6 +60,7 @@ import {
 } from "./ExplorerTableStyles";
 import ExploreTableControl from "./ExploreTableControl";
 import { BatchAction, batchOptions } from "./types";
+import Scrollbar from "react-scrollbars-custom";
 
 const WIDTH_COLUMN_DEFAULT = 800;
 
@@ -577,9 +578,65 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
             })}
           </StyledHeader>
 
-          <CustomScrollbar
-            contentHeight={spaceTableBody}
-            contentWidth={widthTable}
+          <Scrollbar
+            style={{
+              width: widthTable,
+              height: spaceTableBody,
+            }}
+            wrapperProps={{
+              renderer: (props) => {
+                const { elementRef, ...restProps } = props;
+                return (
+                  <span
+                    {...restProps}
+                    ref={elementRef}
+                    className="MyAwesomeScrollbarsWrapper"
+                  />
+                );
+              },
+            }}
+            trackYProps={{
+              renderer: (props) => {
+                const { elementRef, style, ...restProps } = props;
+                const trackStyle: React.CSSProperties = {
+                  ...style,
+                  left: contentWidth,
+                  position: "relative",
+                  height: spaceTableBody,
+                };
+
+                console.log(trackStyle);
+                return (
+                  <span
+                    {...restProps}
+                    style={{ ...trackStyle }}
+                    ref={elementRef}
+                    className="trackY"
+                  />
+                );
+              },
+            }}
+            thumbYProps={{
+              renderer: (props) => {
+                const { elementRef, style, ...restProps } = props;
+
+                const thumbStyle: React.CSSProperties = {
+                  ...style,
+                  left: contentWidth,
+                  position: "fixed",
+                  width: "10px",
+                };
+
+                return (
+                  <span
+                    style={thumbStyle}
+                    {...restProps}
+                    ref={elementRef}
+                    className="thumbY"
+                  />
+                );
+              },
+            }}
             noScrollX
           >
             {/* ROWS */}
@@ -700,7 +757,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                 </React.Fragment>
               );
             })}
-          </CustomScrollbar>
+          </Scrollbar>
         </CustomScrollbar>
         {/* {renderTableFooter()} */}
       </StyledTableWrapper>
