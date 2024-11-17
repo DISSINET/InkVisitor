@@ -70,8 +70,6 @@ export default class Results<T extends { id: string }> {
       this.items.length
     );
 
-    console.log("Filtering", this.items.length, exploreData.offset, endIndex);
-
     return this.items.slice(exploreData.offset, endIndex);
   }
 

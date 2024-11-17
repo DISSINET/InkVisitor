@@ -1,4 +1,3 @@
-import { IEntity } from "@shared/types";
 import { Explore } from "@shared/types/query";
 
 const exploreStateInitial: Explore.IExplore = {
@@ -106,11 +105,12 @@ const exploreReducer = (
   }
 };
 
+// TODO: implement a deep comparison
 const exploreDiff = (
   state1: Explore.IExplore,
   state2: Explore.IExplore
 ): boolean => {
-  return JSON.stringify(state1) !== JSON.stringify(state2);
+  return JSON.stringify(state1) === JSON.stringify(state2);
 };
 
 export {

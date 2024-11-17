@@ -203,7 +203,7 @@ const addNode = (state: Query.INode, parentId: string): Query.INode => {
 };
 
 const queryDiff = (state1: Query.INode, state2: Query.INode) => {
-  return true;
+  return false;
 };
 
 export {

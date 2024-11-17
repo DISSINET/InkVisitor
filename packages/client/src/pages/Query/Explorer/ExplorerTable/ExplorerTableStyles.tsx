@@ -8,23 +8,21 @@ interface StyledRow {
   $isOdd: boolean;
   $isSelected: boolean;
   $width: number;
+  $height: number;
 }
 export const StyledRow = styled.div<StyledRow>`
   display: flex;
   width: ${({ $width }) => `${$width}px`};
   align-items: center;
   cursor: pointer;
-  height: ${({ theme }) => theme.space[18]};
-
-  & > div {
-    background-color: ${({ theme, $isOdd, $isSelected }) =>
-      $isSelected
-        ? theme.color["tableOpened"]
-        : $isOdd
-        ? theme.color["white"]
-        : theme.color["tableOddRow"]};
-  }
-  &:hover > div {
+  height: ${({ theme, $height }) => `${$height}px`};
+  background-color: ${({ theme, $isOdd, $isSelected }) =>
+    $isSelected
+      ? theme.color["tableOpened"]
+      : $isOdd
+      ? theme.color["white"]
+      : theme.color["tableOddRow"]};
+  &:hover {
     background-color: ${({ theme }) => theme.color["gray"][100]};
   }
 `;
@@ -33,6 +31,8 @@ export const StyledHeader = styled.div`
   display: flex;
   z-index: 1;
   height: ${({ theme }) => theme.space[18]};
+  background-color: ${({ theme }) => theme.color["success"]};
+  color: ${({ theme }) => theme.color["white"]};
 `;
 
 interface StyledColumn {
@@ -42,10 +42,6 @@ interface StyledColumn {
 export const StyledColumn = styled.div<StyledColumn>`
   display: inline-flex;
   width: ${({ $width }) => `${$width}px`};
-  background-color: ${({ theme, $isHeader }) =>
-    $isHeader ? theme.color["success"] : theme.color["white"]};
-  color: ${({ theme, $isHeader }) =>
-    $isHeader ? theme.color["white"] : theme.color["black"]};
   font-weight: ${({ theme, $isHeader }) =>
     $isHeader ? theme.fontWeight["bold"] : theme.fontWeight["normal"]};
   height: ${({ theme }) => theme.space[18]};

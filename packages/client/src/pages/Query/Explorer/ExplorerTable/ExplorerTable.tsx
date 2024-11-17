@@ -1,54 +1,31 @@
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 
-import { classesAll } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
 import {
   IEntity,
   IProp,
   IResponseQuery,
   IResponseQueryEntity,
-  IUser,
 } from "@shared/types";
 import { Explore } from "@shared/types/query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import {
-  Button,
-  ButtonGroup,
-  Checkbox,
-  CustomScrollbar,
-  Input,
-} from "components";
+import { Button, ButtonGroup, Checkbox, Input } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 import { CMetaProp } from "constructors";
-import {
-  FaChevronCircleDown,
-  FaChevronCircleUp,
-  FaTrashAlt,
-} from "react-icons/fa";
+import { FaTrashAlt } from "react-icons/fa";
 import { GrClose } from "react-icons/gr";
-import {
-  MdOutlineCheckBox,
-  MdOutlineCheckBoxOutlineBlank,
-  MdOutlineEdit,
-} from "react-icons/md";
+import { MdOutlineEdit } from "react-icons/md";
 import { TbColumnInsertRight } from "react-icons/tb";
+import Scrollbar from "react-scrollbars-custom";
 import { ThemeContext } from "styled-components";
 import useResizeObserver from "use-resize-observer";
 import { v4 as uuidv4 } from "uuid";
 import { ExploreAction, ExploreActionType } from "../state";
+import { ExplorerTableRow } from "./ExplorerTableRow";
 import { ExplorerTableRowExpanded } from "./ExplorerTableRowExpanded/ExplorerTableRowExpanded";
 import {
-  StyledCheckboxWrapper,
   StyledColumn,
-  StyledColumnContent,
-  StyledFocusedCircle,
   StyledHeader,
   StyledNewColumn,
   StyledNewColumnContent,
@@ -60,9 +37,9 @@ import {
 } from "./ExplorerTableStyles";
 import ExploreTableControl from "./ExploreTableControl";
 import { BatchAction, batchOptions } from "./types";
-import Scrollbar from "react-scrollbars-custom";
 
 const WIDTH_COLUMN_DEFAULT = 800;
+const HEIGHT_ROW_DEFAULT = 40;
 
 const initialNewColumn: Explore.IExploreColumn = {
   id: uuidv4(),
@@ -91,9 +68,11 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     entities: [],
     total: 0,
   };
+
   const { columns, filters, limit, offset, sort, view } = state;
 
   const [total, setTotal] = useState(0);
+  const totalPages = useMemo(() => Math.ceil(total / limit), [total, limit]);
 
   useEffect(() => {
     if (!isQueryFetching) {
@@ -157,8 +136,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     setIsNewColumnOpen(false);
   };
 
-  const totalPages = useMemo(() => Math.ceil(total / limit), [total, limit]);
-
   const handleFirstPage = () => {
     dispatch({ type: ExploreActionType.setOffset, payload: 0 });
   };
@@ -198,6 +175,31 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       if (sort.direction === "desc") return undefined; // No sort
     }
     return "asc";
+  };
+
+  const handleEditColumn = (
+    rowEntity: IEntity,
+    columnId: string,
+    newEntity: IEntity
+  ) => {
+    const column = columns.find((column) => column.id === columnId);
+
+    if (column) {
+      const params =
+        column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.EPV>;
+
+      const newProp: IProp = CMetaProp({
+        typeEntityId: params.propertyType,
+        valueEntityId: newEntity.id,
+      });
+
+      updateEntityMutation.mutate({
+        entityId: rowEntity.id,
+        changes: {
+          props: [...rowEntity.props, newProp],
+        },
+      });
+    }
   };
 
   // const renderPaging = () => {
@@ -279,88 +281,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   //   return <StyledTableFooter>{renderPaging()}</StyledTableFooter>;
   // };
 
-  const renderCell = (
-    recordEntity: IEntity,
-    cellData:
-      | IEntity
-      | IEntity[]
-      | number
-      | number[]
-      | string
-      | string[]
-      | IUser
-      | IUser[],
-    column: Explore.IExploreColumn
-  ) => {
-    if (Array.isArray(cellData)) {
-      if (
-        cellData.length > 0 &&
-        typeof (cellData[0] as IEntity).class !== "undefined"
-      ) {
-        // is type IEntity[]
-        return cellData.map((entity, key) => {
-          return (
-            <React.Fragment key={key}>
-              <span>
-                <EntityTag
-                  entity={entity as IEntity}
-                  unlinkButton={
-                    column.editable && {
-                      onClick: () => {
-                        const { id } = entity as IEntity;
-                        const { id: recordEntityId, props } =
-                          recordEntity as IEntity;
-
-                        const foundEntity = props.find(
-                          (prop) => prop.value?.entityId === id
-                        );
-                        if (foundEntity) {
-                          updateEntityMutation.mutate({
-                            entityId: recordEntityId,
-                            changes: {
-                              props: props.filter(
-                                (prop) => prop.id !== foundEntity.id
-                              ),
-                            },
-                          });
-                        }
-                      },
-                    }
-                  }
-                  disableDoubleClick
-                />
-              </span>
-            </React.Fragment>
-          );
-        });
-      } else if (
-        cellData.length > 0 &&
-        typeof (cellData[0] as IUser).email !== "undefined"
-      ) {
-        // is type IUser[]
-        return (
-          <div>
-            <span
-              style={{
-                backgroundColor: "lime",
-                padding: "0.3rem",
-                display: "flex",
-              }}
-            >
-              {(cellData as IUser[]).map((user) => {
-                return user.name;
-              })}
-            </span>
-          </div>
-        );
-      }
-    } else {
-      // TODO: not an array - IEntity, IUser, number, string
-    }
-
-    // return <StyledEmpty>{"empty"}</StyledEmpty>;
-  };
-
   const [rowsExpanded, setRowsExpanded] = useState<string[]>([]);
 
   const themeContext = useContext(ThemeContext);
@@ -386,14 +306,16 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     }
   };
 
+  const handleScrollTable = (values: any) => {
+    const newOffset = Math.floor(values.scrollTop / HEIGHT_ROW_DEFAULT);
+    dispatch({ type: ExploreActionType.setOffset, payload: newOffset });
+  };
+
   const widthTable = useMemo(() => {
     return columns.length * WIDTH_COLUMN_DEFAULT + 200;
   }, [columns]);
 
-  const handleSelection = (
-    lastClickedIndex: number,
-    rowIndex: number
-  ): string[] => {
+  const handleSelection = (rowIndex: number): string[] => {
     let selectedQueryEntities: IResponseQueryEntity[] = [];
     if (lastClickedIndex < rowIndex) {
       selectedQueryEntities = entities.slice(lastClickedIndex, rowIndex + 1);
@@ -404,66 +326,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     return selectedQueryEntities.map((queryEntity) => queryEntity.entity.id);
   };
 
-  const renderCheckbox = useCallback(
-    (id: string, index: number) => {
-      const size = 18;
-      const checked = selectedRows.includes(id);
-      const isFocused = lastClickedIndex === index;
-
-      return (
-        <StyledCheckboxWrapper>
-          {isFocused && <StyledFocusedCircle checked={checked} />}
-          {checked ? (
-            <MdOutlineCheckBox
-              size={size}
-              style={{ zIndex: 2 }}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (
-                  e.shiftKey &&
-                  lastClickedIndex !== -1 &&
-                  lastClickedIndex !== index
-                ) {
-                  // unset all between
-                  const mappedIds = handleSelection(lastClickedIndex, index);
-                  const filteredIds = selectedRows.filter(
-                    (id) => !mappedIds.includes(id)
-                  );
-                  setSelectedRows(filteredIds);
-                } else {
-                  handleRowSelect(id);
-                }
-                // dispatch(
-                setLastClickedIndex(index);
-                // );
-              }}
-            />
-          ) : (
-            <MdOutlineCheckBoxOutlineBlank
-              size={size}
-              style={{ zIndex: 2 }}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (
-                  e.shiftKey &&
-                  lastClickedIndex !== -1 &&
-                  lastClickedIndex !== index
-                ) {
-                  // set all between
-                  const mappedIds = handleSelection(lastClickedIndex, index);
-                  setSelectedRows([...new Set(selectedRows.concat(mappedIds))]);
-                } else {
-                  handleRowSelect(id);
-                }
-                setLastClickedIndex(index);
-              }}
-            />
-          )}
-        </StyledCheckboxWrapper>
-      );
-    },
-    [selectedRows, lastClickedIndex]
-  );
+  const [scrollTableX, setScrollTableX] = useState<number>(0);
 
   return (
     <div
@@ -493,9 +356,15 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
             width: "100%",
           }}
         > */}
-        <CustomScrollbar
-          contentHeight={contentHeight}
-          contentWidth={contentWidth}
+        <Scrollbar
+          style={{
+            width: contentWidth,
+            height: contentHeight,
+          }}
+          onScrollStop={(values) => {
+            // @ts-ignore
+            setScrollTableX(values.scrollLeft);
+          }}
           noScrollY
         >
           {/* HEADER */}
@@ -583,29 +452,16 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
               width: widthTable,
               height: spaceTableBody,
             }}
-            wrapperProps={{
-              renderer: (props) => {
-                const { elementRef, ...restProps } = props;
-                return (
-                  <span
-                    {...restProps}
-                    ref={elementRef}
-                    className="MyAwesomeScrollbarsWrapper"
-                  />
-                );
-              },
-            }}
             trackYProps={{
               renderer: (props) => {
                 const { elementRef, style, ...restProps } = props;
                 const trackStyle: React.CSSProperties = {
                   ...style,
-                  left: contentWidth,
-                  position: "relative",
-                  height: spaceTableBody,
+                  left: scrollTableX + (contentWidth ?? 0) - 10,
+                  // position: "relative",
+                  // height: spaceTableBody,
                 };
 
-                console.log(trackStyle);
                 return (
                   <span
                     {...restProps}
@@ -616,140 +472,78 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                 );
               },
             }}
-            thumbYProps={{
-              renderer: (props) => {
-                const { elementRef, style, ...restProps } = props;
+            // thumbYProps={{
+            //   renderer: (props) => {
+            //     const { elementRef, style, ...restProps } = props;
 
-                const thumbStyle: React.CSSProperties = {
-                  ...style,
-                  left: contentWidth,
-                  position: "fixed",
-                  width: "10px",
-                };
+            //     const thumbStyle: React.CSSProperties = {
+            //       ...style,
+            //       // left: contentWidth,
+            //       // position: "fixed",
+            //       // width: "10px",
+            //     };
 
-                return (
-                  <span
-                    style={thumbStyle}
-                    {...restProps}
-                    ref={elementRef}
-                    className="thumbY"
-                  />
-                );
-              },
-            }}
+            //     return (
+            //       <span
+            //         style={thumbStyle}
+            //         {...restProps}
+            //         ref={elementRef}
+            //         className="thumbY"
+            //       />
+            //     );
+            //   },
+            // }}
             noScrollX
+            onScrollStop={(values) => {
+              handleScrollTable(values);
+            }}
           >
             {/* ROWS */}
-            {entities.map((row, key) => {
-              const { entity: rowEntity, columnData } = row;
-              const rowId = rowEntity.id;
-              const isOdd = Boolean(key % 2);
+            {Array.from({ length: total }).map((_, rowI) => {
+              const responseI = rowI - offset;
+              const isOdd = Boolean(rowI % 2);
+
+              const responseData: IResponseQueryEntity | undefined =
+                entities[responseI];
+
+              const responseEntityId: string | undefined =
+                responseData?.entity.id ?? undefined;
+
+              if (responseEntityId) {
+                // console.log(
+                //   "row",
+                //   `${rowI} -> ${responseI}`,
+                //   offset,
+                //   responseEntityId
+                // );
+              }
 
               return (
-                // ROW
-                <React.Fragment key={key}>
+                <React.Fragment key={`${rowI}`}>
                   <StyledRow
                     $width={widthTable}
+                    $height={HEIGHT_ROW_DEFAULT}
                     onClick={() =>
-                      rowsExpanded.includes(rowId)
+                      rowsExpanded.includes(responseEntityId)
                         ? setRowsExpanded(
-                            rowsExpanded.filter((r) => r !== rowId)
+                            rowsExpanded.filter((r) => r !== responseEntityId)
                           )
-                        : setRowsExpanded(rowsExpanded.concat(rowId))
+                        : setRowsExpanded(rowsExpanded.concat(responseEntityId))
                     }
                     $isOdd={isOdd}
-                    $isSelected={selectedRows.includes(row.entity.id)}
+                    $isSelected={selectedRows.includes(responseEntityId)}
                   >
-                    {/* ACTIONS */}
-                    <StyledColumn
-                      $width={250}
-                      style={{
-                        display: "sticky",
-                      }}
-                    >
-                      {renderCheckbox(row.entity.id, key)}
-
-                      <span
-                        style={{
-                          cursor: "pointer",
-                          display: "flex",
-                          alignItems: "center",
-                        }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (!rowsExpanded.includes(rowId)) {
-                            setRowsExpanded(rowsExpanded.concat(rowId));
-                          } else {
-                            setRowsExpanded(
-                              rowsExpanded.filter((r) => r !== rowId)
-                            );
-                          }
-                        }}
-                      >
-                        {rowsExpanded.includes(rowEntity.id) ? (
-                          <FaChevronCircleUp
-                            color={themeContext?.color.warning}
-                          />
-                        ) : (
-                          <FaChevronCircleDown />
-                        )}
-                      </span>
-                      <span
-                        style={{
-                          display: "inline-flex",
-                          overflow: "hidden",
-                        }}
-                      >
-                        <EntityTag
-                          entity={rowEntity}
-                          fullWidth
-                          disableDoubleClick
-                        />
-                      </span>
-                    </StyledColumn>
-
-                    {columns.map((column, key) => {
-                      return (
-                        <StyledColumn key={key} $width={WIDTH_COLUMN_DEFAULT}>
-                          <StyledColumnContent>
-                            {renderCell(
-                              rowEntity,
-                              columnData[column.id],
-                              column
-                            )}
-
-                            {column.editable &&
-                              column.type ===
-                                Explore.EExploreColumnType.EPV && (
-                                <EntitySuggester
-                                  categoryTypes={classesAll}
-                                  onPicked={(entity) => {
-                                    const params =
-                                      column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.EPV>;
-
-                                    const newProp: IProp = CMetaProp({
-                                      typeEntityId: params.propertyType,
-                                      valueEntityId: entity.id,
-                                    });
-
-                                    updateEntityMutation.mutate({
-                                      entityId: rowEntity.id,
-                                      changes: {
-                                        props: [...rowEntity.props, newProp],
-                                      },
-                                    });
-                                  }}
-                                />
-                              )}
-                          </StyledColumnContent>
-                        </StyledColumn>
-                      );
-                    })}
+                    <ExplorerTableRow
+                      responseData={responseData}
+                      columns={columns}
+                      handleEditColumn={handleEditColumn}
+                      updateEntityMutation={updateEntityMutation}
+                    />
                   </StyledRow>
 
-                  {rowsExpanded.includes(rowEntity.id) && (
+                  {rowsExpanded.includes(responseEntityId) && (
                     <ExplorerTableRowExpanded
-                      rowEntity={rowEntity}
+                      rowEntity={responseData.entity}
                       columns={columns}
                       isOdd={isOdd}
                     />
@@ -758,7 +552,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
               );
             })}
           </Scrollbar>
-        </CustomScrollbar>
+        </Scrollbar>
         {/* {renderTableFooter()} */}
       </StyledTableWrapper>
 
