@@ -172,12 +172,8 @@ export default class Cursor
     }
 
     let [hStart, hEnd] = this.getBounds();
-    if (!hStart || !hEnd) {
-      return;
-    }
 
     const rowsToDraw: { rowI: number; start: number; end: number }[] = [];
-    console.log("cursor normal", !this.isSelected());
 
     if (!this.isSelected()) {
       // in case there is no area selected, just drop a cursor at some
@@ -185,7 +181,7 @@ export default class Cursor
         ...drawingOptions,
         color: "black",
       });
-    } else {
+    } else if (hStart && hEnd) {
       // selection active, iterate over displayed lines
       for (
         let i = 0;
