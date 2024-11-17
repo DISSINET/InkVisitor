@@ -332,7 +332,17 @@ export default class Entity implements IEntity, IDbModel {
       .table(Entity.table)
       .getAll(rethink.args(ids.filter((id) => id)))
       .run(con);
-    return data;
+
+    // sort data by ids
+    const sortedData: IEntity[] = [];
+    ids.forEach((id) => {
+      const entity = data.find((e: IEntity) => e.id === id);
+      if (entity) {
+        sortedData.push(entity);
+      }
+    });
+
+    return sortedData;
   }
 
   async getEntities(db: Connection): Promise<IEntity[]> {

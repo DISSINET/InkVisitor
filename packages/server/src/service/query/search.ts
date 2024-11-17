@@ -69,6 +69,9 @@ export default class QuerySearch {
       return [];
     }
 
+    // sort
+    this.results.sort(this.explore.sort);
+
     const filteredIds = this.results.filter(this.explore);
     const filtered = await Entity.findEntitiesByIds(db, filteredIds);
 

@@ -760,7 +760,6 @@ export namespace Query {
     const validEdges = Object.entries(EdgeTypeNodeRules)
       .filter(([, [ruleFrom, ruleTo]]) => {
         const validType = ruleFrom.nodeType === node.type;
-        console.log(node);
         const validClass =
           node.params?.classes?.length && ruleFrom.params.entityClass?.length
             ? node.params.classes.some((cl) =>
