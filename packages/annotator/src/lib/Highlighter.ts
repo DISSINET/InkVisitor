@@ -1,5 +1,4 @@
 import { DrawingOptions } from "./Annotator";
-import Highlighter from "./Highlighter";
 import Viewport from "./Viewport";
 import { EditMode, HighlightMode } from "./constants";
 
@@ -25,77 +24,41 @@ export interface IRelativeCoordinates extends IAbsCoordinates {}
 /**
  * Cursor represents active position in the viewport with highlighting capabilities (marking start - end in absolute coordinates)
  */
-export default class Cursor
-  extends Highlighter
-  implements IRelativeCoordinates
-{
-  // relative!
-  xLine: number;
-  yLine: number;
+export default class Highlighter {
+  ratio: number;
 
-  // highlighted area must use absolute coordinates - highlighted area stays in position while scrolling
-  private selecting: boolean = false;
+  style: CursorStyle;
+
+  hlMode: HighlightMode;
+
   selectStart?: IAbsCoordinates;
   selectEnd?: IAbsCoordinates;
 
-  // Width of cursor point in px
-  static Width = 3;
-
   constructor(
     ratio: number,
-    xLine: number = -1,
-    yLine: number = -1,
     style: Partial<CursorStyle> = defaultStyle,
     hlMode: HighlightMode = HighlightMode.SELECT
   ) {
-    super(ratio, style, hlMode);
+    this.style = { ...defaultStyle, ...style };
+    this.hlMode = hlMode;
 
-    this.xLine = xLine;
-    this.yLine = yLine;
-  }
-
-  setPosition(lineX: number, lineY: number) {
-    this.xLine = lineX;
-    this.yLine = lineY;
-  }
-
-  setPositionFromEvent(evt: MouseEvent, lineHeight: number, charWidth: number) {
-    this.xLine = this.xToCharI(evt.offsetX, charWidth);
-    this.yLine = this.yToLineI(evt.offsetY, lineHeight);
+    this.ratio = ratio;
   }
 
   /**
-   * isSelecting is predicate for testing if any mouse-move event should update selected area (click+move)
-   * @returns
+   * @param style
+   * sets the style of the cursor
    */
-  isSelecting(): boolean {
-    return this.selecting;
+  setStyle(style: Partial<CursorStyle>) {
+    this.style = { ...this.style, ...style };
   }
 
-  /**
-   * isSelected is predicate for testing if selected area has been set - should be drawn
-   * @returns
-   */
-  isSelected(): boolean {
-    return !!this.selectStart && !!this.selectEnd;
+  yToLineI(y: number, lineHeight: number): number {
+    return Math.round((y / lineHeight) * this.ratio - 1);
   }
 
-  /**
-   * getSelectedArea return null if area is empty (no char selected)
-   * @returns
-   */
-  getSelectedArea(): [IAbsCoordinates, IAbsCoordinates] | null {
-    const selected = this.getSelected();
-    if (
-      selected[0] === undefined ||
-      selected[1] === undefined ||
-      (selected[0].xLine === selected[1].xLine &&
-        selected[0].yLine === selected[1].yLine)
-    ) {
-      return null;
-    }
-
-    return [selected[0], selected[1]];
+  xToCharI(x: number, charWidth: number): number {
+    return Math.floor((Math.max(x, 0) / charWidth) * this.ratio);
   }
 
   /**
@@ -116,60 +79,6 @@ export default class Cursor
     } else {
       return [this.selectEnd, this.selectStart];
     }
-  }
-
-  /**
-   * selectArea updates selected area's coordinates, either both start/end (set initial position) or just end (moving)
-   * @param yOffset
-   */
-  selectArea(yOffset: number) {
-    if (!this.selecting) {
-      this.selectStart = { xLine: this.xLine, yLine: yOffset + this.yLine };
-      this.selectEnd = { xLine: this.xLine, yLine: yOffset + this.yLine };
-      this.selecting = true;
-    } else {
-      this.selectEnd = { xLine: this.xLine, yLine: yOffset + this.yLine };
-    }
-  }
-
-  /**
-   * endHighlight marks final position for highlighted area by setting control flag to false
-   */
-  endHighlight() {
-    this.selecting = false;
-  }
-
-  /**
-   * move alters the cursor position by provided delta increments
-   * @param xDelta
-   * @param yDelta
-   * @returns
-   */
-  move(xDelta: number, yDelta: number) {
-    if (!xDelta && !yDelta) {
-      return;
-    }
-
-    let newX = this.xLine + xDelta;
-    let newY = this.yLine + yDelta;
-
-    if (newX < 0) {
-      newX = 0;
-    }
-    if (newY < 0) {
-      newY = 0;
-    }
-
-    this.xLine = newX;
-    this.yLine = newY;
-  }
-
-  /**
-   * move the cursor to start of the next line
-   */
-  moveToNewline() {
-    this.xLine = 0;
-    this.yLine += 1;
   }
 
   /**
@@ -214,12 +123,7 @@ export default class Cursor
 
       ctx.fillStyle = "black";
       ctx.globalAlpha = 1;
-      ctx.fillRect(
-        xEnd * charWidth,
-        relLine * lineHeight,
-        Cursor.Width,
-        lineHeight
-      );
+      ctx.fillRect(xEnd * charWidth, relLine * lineHeight, 1, lineHeight);
     }
   }
 
@@ -238,10 +142,6 @@ export default class Cursor
     drawingOptions: DrawingOptions,
     editMode: EditMode
   ) {
-    if (this.xLine === -1 && this.yLine === -1) {
-      return;
-    }
-
     const { charsAtLine } = drawingOptions;
 
     let [hStart, hEnd] = this.getSelected();
@@ -251,13 +151,6 @@ export default class Cursor
       }
 
       const rowsToDraw: { rowI: number; start: number; end: number }[] = [];
-
-      // add cursor pointer on current y/x position
-      rowsToDraw.push({
-        rowI: this.yLine,
-        start: this.xLine,
-        end: this.xLine,
-      });
 
       for (
         let i = 0;
@@ -317,11 +210,5 @@ export default class Cursor
   reset() {
     this.selectStart = undefined;
     this.selectEnd = undefined;
-    this.xLine = -1;
-    this.yLine = -1;
-  }
-
-  static fromPosition(pos: IAbsCoordinates): Cursor {
-    return new Cursor(0, pos.xLine, pos.yLine);
   }
 }

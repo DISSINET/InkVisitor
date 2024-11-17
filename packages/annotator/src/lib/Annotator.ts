@@ -1,4 +1,5 @@
-import Cursor, { IAbsCoordinates } from "./Cursor";
+import Cursor from "./Cursor";
+import Highlighter, { IAbsCoordinates } from "./Highlighter";
 import { Lines } from "./Lines";
 import Scroller from "./Scroller";
 import Text, { SegmentPosition } from "./Text";
@@ -966,10 +967,8 @@ export class Annotator {
       });
 
       for (const item of higlightItems) {
-        const highlighter = new Cursor(
+        const highlighter = new Highlighter(
           this.ratio,
-          0,
-          0,
           {
             color: item.schema.style.color,
             opacity: item.schema.style.opacity,
@@ -1033,7 +1032,7 @@ export class Annotator {
     let [start, end] = this.cursor.getSelected();
 
     if (start && end) {
-      const indexPositionStart = this.text.cursorToAbsIndex(
+      const indexPositionStart = this.text.relativeToAbsIndex(
         new Cursor(
           this.ratio,
           start.xLine,
@@ -1042,7 +1041,7 @@ export class Annotator {
         ),
         this.viewport
       );
-      const indexPositionEnd = this.text.cursorToAbsIndex(
+      const indexPositionEnd = this.text.relativeToAbsIndex(
         new Cursor(
           this.ratio,
           end.xLine,

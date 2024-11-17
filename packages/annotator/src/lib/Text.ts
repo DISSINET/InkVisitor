@@ -1,6 +1,10 @@
 import Viewport from "./Viewport";
-import Cursor, { IAbsCoordinates, IRelativeCoordinates } from "./Cursor";
+import Highlighter, {
+  IAbsCoordinates,
+  IRelativeCoordinates,
+} from "./Highlighter";
 import { EditMode } from "./constants";
+import Cursor from "./Cursor";
 
 export interface ITag {
   position: number;
@@ -220,7 +224,10 @@ class Text {
    * @param cursor
    * @returns
    */
-  cursorToIndex(viewport: Viewport, cursor: Cursor): SegmentPosition | null {
+  cursorToIndex(
+    viewport: Viewport,
+    cursor: IRelativeCoordinates
+  ): SegmentPosition | null {
     const pos = this.getSegmentPosition(
       cursor.yLine + viewport.lineStart,
       cursor.xLine
@@ -229,7 +236,10 @@ class Text {
     return pos;
   }
 
-  getCurrentLine(viewport: Viewport, cursor: Cursor): string | null {
+  getCurrentLine(
+    viewport: Viewport,
+    cursor: IRelativeCoordinates
+  ): string | null {
     const segment = this.cursorToIndex(viewport, cursor);
     if (!segment) {
       return null;
@@ -238,7 +248,10 @@ class Text {
     return this.segments[segment.segmentIndex].lines[segment.lineIndex];
   }
 
-  cursorToAbsIndex(cursor: Cursor, viewport?: Viewport): number {
+  relativeToAbsIndex(
+    cursor: IRelativeCoordinates,
+    viewport?: Viewport
+  ): number {
     const pos = this.getSegmentPosition(
       cursor.yLine + (viewport?.lineStart || 0),
       cursor.xLine
@@ -396,7 +409,10 @@ class Text {
    * @param cursor
    * @returns
    */
-  getCursorWordOffsets(viewport: Viewport, cursor: Cursor): [number, number] {
+  getCursorWordOffsets(
+    viewport: Viewport,
+    cursor: IRelativeCoordinates
+  ): [number, number] {
     const position = this.cursorToIndex(viewport, cursor);
     if (!position) {
       return [0, 0];
@@ -421,7 +437,7 @@ class Text {
    */
   insertText(
     viewport: Viewport,
-    cursorPosition: Cursor,
+    cursorPosition: IRelativeCoordinates,
     textToInsert: string
   ): void {
     const segmentPosition = this.cursorToIndex(viewport, cursorPosition);
@@ -465,7 +481,10 @@ class Text {
    * @param cursorPosition
    * @returns
    */
-  insertNewline(viewport: Viewport, cursorPosition: Cursor): void {
+  insertNewline(
+    viewport: Viewport,
+    cursorPosition: IRelativeCoordinates
+  ): void {
     const segmentPosition = this.cursorToIndex(viewport, cursorPosition);
     if (!segmentPosition) {
       return;
@@ -500,7 +519,7 @@ class Text {
    */
   deleteText(
     viewport: Viewport,
-    cursorPosition: Cursor,
+    cursorPosition: IRelativeCoordinates,
     charsToDelete: number
   ): void {
     const segmentPos = this.cursorToIndex(viewport, cursorPosition);
@@ -577,8 +596,8 @@ class Text {
       end = tempStart;
     }
 
-    const startI = this.cursorToAbsIndex(Cursor.fromPosition(start));
-    const endI = this.cursorToAbsIndex(Cursor.fromPosition(end));
+    const startI = this.relativeToAbsIndex(Cursor.fromPosition(start));
+    const endI = this.relativeToAbsIndex(Cursor.fromPosition(end));
     this.value = this.value.substring(0, startI) + this.value.substring(endI);
 
     this.prepareSegments();
