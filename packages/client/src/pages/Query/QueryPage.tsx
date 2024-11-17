@@ -110,9 +110,10 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     error: queryError,
     isFetching: queryIsFetching,
   } = useQuery({
-    queryKey: ["query", queryState, exploreState],
+    queryKey: ["query"],
     queryFn: async () => {
       if (queryStateValidity.isValid && api.isLoggedIn()) {
+        console.log("doing query call");
         const res = await api.query({
           query: queryState,
           explore: exploreState,
@@ -120,6 +121,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
         return res.data;
       }
     },
+    staleTime: 1000 * 60 * 5,
 
     enabled: queryStateValidity.isValid && api.isLoggedIn(),
   });
