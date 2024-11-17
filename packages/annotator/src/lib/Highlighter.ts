@@ -13,7 +13,7 @@ export interface CursorStyle {
   opacity: number;
 }
 
-const defaultStyle: CursorStyle = {
+export const defaultStyle: CursorStyle = {
   color: "black",
   opacity: 0.7,
 };
@@ -65,7 +65,7 @@ export default class Highlighter {
    * getSelected is getter for absolute selected coordinates
    * @returns
    */
-  getSelected(): [IAbsCoordinates | undefined, IAbsCoordinates | undefined] {
+  getBounds(): [IAbsCoordinates | undefined, IAbsCoordinates | undefined] {
     if (!this.selectStart || !this.selectEnd) {
       return [undefined, undefined];
     }
@@ -96,11 +96,11 @@ export default class Highlighter {
     xEnd: number,
     options: DrawingOptions
   ) {
-    const { charWidth, lineHeight } = options;
+    const { charWidth, lineHeight, color: colorOverride } = options;
     const width = (xEnd - xStart) * charWidth;
     const height = this.hlMode === HighlightMode.UNDERLINE ? 3 : lineHeight;
 
-    ctx.fillStyle = this.style.color;
+    ctx.fillStyle = colorOverride || this.style.color;
     ctx.globalAlpha = this.style.opacity;
 
     if (this.hlMode === "focus") {
@@ -116,14 +116,16 @@ export default class Highlighter {
       );
     } else if (this.hlMode === "background") {
       ctx.globalCompositeOperation = "multiply";
-      ctx.fillRect(xStart * charWidth, relLine * lineHeight, width, height);
+      ctx.fillRect(xStart * charWidth, relLine * lineHeight + 1, width, height);
     } else if (this.hlMode === "select") {
       ctx.globalCompositeOperation = "color";
-      ctx.fillRect(xStart * charWidth, relLine * lineHeight, width, height);
-
-      ctx.fillStyle = "black";
       ctx.globalAlpha = 1;
-      ctx.fillRect(xEnd * charWidth, relLine * lineHeight, 1, lineHeight);
+      ctx.fillRect(
+        xStart * charWidth,
+        relLine * lineHeight,
+        width || 1,
+        height
+      );
     }
   }
 
@@ -144,7 +146,7 @@ export default class Highlighter {
   ) {
     const { charsAtLine } = drawingOptions;
 
-    let [hStart, hEnd] = this.getSelected();
+    let [hStart, hEnd] = this.getBounds();
     if (hStart && hEnd) {
       if (hStart.yLine > hEnd.yLine) {
         [hStart, hEnd] = [hEnd, hStart];

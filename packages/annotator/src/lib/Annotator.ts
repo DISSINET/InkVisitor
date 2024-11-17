@@ -19,6 +19,7 @@ export interface DrawingOptions {
   charWidth: number;
   lineHeight: number;
   charsAtLine: number;
+  color?: string; // override
 }
 
 export interface Selected {
@@ -116,10 +117,7 @@ export class Annotator {
     this.inputText = inputText;
     this.text = new Text(this.inputText, charsAtLine);
 
-    this.cursor = new Cursor(this.ratio, 0, 0, {
-      color: this.selectColor,
-      opacity: this.selectOpacity,
-    });
+    this.cursor = new Cursor(this.ratio, 0, 0);
 
     this.bgColor = this.element.style.backgroundColor || "white";
     this.fontColor = this.element.style.color || "black";
@@ -157,7 +155,7 @@ export class Annotator {
    * @param anchor
    */
   removeAnchorFromSelection(anchor: string) {
-    const [start, end] = this.cursor.getSelected();
+    const [start, end] = this.cursor.getBounds();
 
     if (start && end) {
       this.text.getSegmentPosition(start.yLine, start.xLine) as SegmentPosition;
@@ -253,7 +251,7 @@ export class Annotator {
     const positionBeforeRel = this.viewport.lineStart / this.text.noLines;
 
     // FIXME try to update the cursor position based on the text that was selected before the resize
-    const [start, end] = this.cursor.getSelected();
+    const [start, end] = this.cursor.getBounds();
     const selectedTextBefore =
       start && end ? this.text.getRangeText(start, end) : "";
 
@@ -671,7 +669,7 @@ export class Annotator {
       }
     }
 
-    this.cursor.endHighlight();
+    this.cursor.endSelection();
     this.draw();
   }
 
@@ -895,7 +893,7 @@ export class Annotator {
     }
 
     if (this.onSelectTextCb && this.cursor.isSelected()) {
-      const [start, end] = this.cursor.getSelected();
+      const [start, end] = this.cursor.getBounds();
       if (
         start &&
         end &&
@@ -1029,25 +1027,19 @@ export class Annotator {
       return;
     }
 
-    let [start, end] = this.cursor.getSelected();
+    let [start, end] = this.cursor.getBounds();
 
     if (start && end) {
       const indexPositionStart = this.text.relativeToAbsIndex(
         new Cursor(
           this.ratio,
           start.xLine,
-          start.yLine - this.viewport.lineStart,
-          {}
+          start.yLine - this.viewport.lineStart
         ),
         this.viewport
       );
       const indexPositionEnd = this.text.relativeToAbsIndex(
-        new Cursor(
-          this.ratio,
-          end.xLine,
-          end.yLine - this.viewport.lineStart,
-          {}
-        ),
+        new Cursor(this.ratio, end.xLine, end.yLine - this.viewport.lineStart),
         this.viewport
       );
 
