@@ -1,4 +1,5 @@
-import Cursor, { IAbsCoordinates } from "./Cursor";
+import Cursor from "./Cursor";
+import Highlighter, { IAbsCoordinates } from "./Highlighter";
 import { Lines } from "./Lines";
 import Scroller from "./Scroller";
 import Text, { SegmentPosition } from "./Text";
@@ -18,6 +19,7 @@ export interface DrawingOptions {
   charWidth: number;
   lineHeight: number;
   charsAtLine: number;
+  color?: string; // override
 }
 
 export interface Selected {
@@ -115,10 +117,7 @@ export class Annotator {
     this.inputText = inputText;
     this.text = new Text(this.inputText, charsAtLine);
 
-    this.cursor = new Cursor(this.ratio, 0, 0, {
-      color: this.selectColor,
-      opacity: this.selectOpacity,
-    });
+    this.cursor = new Cursor(this.ratio, 0, 0);
 
     this.bgColor = this.element.style.backgroundColor || "white";
     this.fontColor = this.element.style.color || "black";
@@ -156,7 +155,7 @@ export class Annotator {
    * @param anchor
    */
   removeAnchorFromSelection(anchor: string) {
-    const [start, end] = this.cursor.getSelected();
+    const [start, end] = this.cursor.getBounds();
 
     if (start && end) {
       this.text.getSegmentPosition(start.yLine, start.xLine) as SegmentPosition;
@@ -252,7 +251,7 @@ export class Annotator {
     const positionBeforeRel = this.viewport.lineStart / this.text.noLines;
 
     // FIXME try to update the cursor position based on the text that was selected before the resize
-    const [start, end] = this.cursor.getSelected();
+    const [start, end] = this.cursor.getBounds();
     const selectedTextBefore =
       start && end ? this.text.getRangeText(start, end) : "";
 
@@ -370,10 +369,9 @@ export class Annotator {
 
       case "ArrowLeft":
         if (e.shiftKey && e.ctrlKey) {
-          let offsetLeft = 0,
-            offsetRight = 0;
+          let offsetLeft = 0;
           while (!offsetLeft) {
-            [offsetLeft, offsetRight] = this.text.getCursorWordOffsets(
+            [offsetLeft] = this.text.getCursorWordOffsets(
               this.viewport,
               this.cursor
             );
@@ -409,6 +407,12 @@ export class Annotator {
               yLine: this.viewport.lineStart + this.cursor.yLine,
             };
           } else {
+            if (this.cursor.isSelected()) {
+              // if something is selected -> move the cursor to leftmost position and cancel the selection
+              this.cursor.xLine =
+                this.cursor.selectStart?.xLine || this.cursor.xLine;
+            }
+
             this.cursor.selectStart = {
               xLine: this.cursor.xLine,
               yLine: this.viewport.lineStart + this.cursor.yLine,
@@ -475,6 +479,12 @@ export class Annotator {
               yLine: this.viewport.lineStart + this.cursor.yLine,
             };
           } else {
+            if (this.cursor.isSelected()) {
+              // if something is selected -> move the cursor to rightmost position and cancel the selection
+              this.cursor.xLine =
+                this.cursor.selectEnd?.xLine || this.cursor.xLine;
+            }
+
             this.cursor.selectEnd = {
               xLine: this.cursor.xLine,
               yLine: this.viewport.lineStart + this.cursor.yLine,
@@ -670,7 +680,7 @@ export class Annotator {
       }
     }
 
-    this.cursor.endHighlight();
+    this.cursor.endSelection();
     this.draw();
   }
 
@@ -894,7 +904,7 @@ export class Annotator {
     }
 
     if (this.onSelectTextCb && this.cursor.isSelected()) {
-      const [start, end] = this.cursor.getSelected();
+      const [start, end] = this.cursor.getBounds();
       if (
         start &&
         end &&
@@ -966,10 +976,8 @@ export class Annotator {
       });
 
       for (const item of higlightItems) {
-        const highlighter = new Cursor(
+        const highlighter = new Highlighter(
           this.ratio,
-          0,
-          0,
           {
             color: item.schema.style.color,
             opacity: item.schema.style.opacity,
@@ -1030,25 +1038,19 @@ export class Annotator {
       return;
     }
 
-    let [start, end] = this.cursor.getSelected();
+    let [start, end] = this.cursor.getBounds();
 
     if (start && end) {
-      const indexPositionStart = this.text.cursorToAbsIndex(
+      const indexPositionStart = this.text.relativeToAbsIndex(
         new Cursor(
           this.ratio,
           start.xLine,
-          start.yLine - this.viewport.lineStart,
-          {}
+          start.yLine - this.viewport.lineStart
         ),
         this.viewport
       );
-      const indexPositionEnd = this.text.cursorToAbsIndex(
-        new Cursor(
-          this.ratio,
-          end.xLine,
-          end.yLine - this.viewport.lineStart,
-          {}
-        ),
+      const indexPositionEnd = this.text.relativeToAbsIndex(
+        new Cursor(this.ratio, end.xLine, end.yLine - this.viewport.lineStart),
         this.viewport
       );
 

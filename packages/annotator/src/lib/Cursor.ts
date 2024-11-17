@@ -1,76 +1,32 @@
 import { DrawingOptions } from "./Annotator";
+import Highlighter, {
+  CursorStyle,
+  defaultStyle,
+  IAbsCoordinates,
+  IRelativeCoordinates,
+} from "./Highlighter";
 import Viewport from "./Viewport";
 import { EditMode, HighlightMode } from "./constants";
-
-// Absolute coordinates point to virtual position not limited by viewport - first line is first line of input
-export interface IAbsCoordinates {
-  xLine: number;
-  yLine: number;
-}
-
-export interface CursorStyle {
-  color: string;
-  opacity: number;
-}
-
-const defaultStyle: CursorStyle = {
-  color: "black",
-  opacity: 0.7,
-};
-
-// Relative coordinates point to position relative to viewport - first line is topmost rendered line
-export interface IRelativeCoordinates extends IAbsCoordinates {}
 
 /**
  * Cursor represents active position in the viewport with highlighting capabilities (marking start - end in absolute coordinates)
  */
-export default class Cursor implements IRelativeCoordinates {
+export default class Cursor
+  extends Highlighter
+  implements IRelativeCoordinates
+{
   // relative!
   xLine: number;
   yLine: number;
-  ratio: number;
-
-  style: CursorStyle;
-
-  hlMode: HighlightMode;
 
   // highlighted area must use absolute coordinates - highlighted area stays in position while scrolling
   private selecting: boolean = false;
-  selectStart?: IAbsCoordinates;
-  selectEnd?: IAbsCoordinates;
 
-  // Width of cursor point in px
-  static Width = 3;
-
-  constructor(
-    ratio: number,
-    xLine: number = -1,
-    yLine: number = -1,
-    style: Partial<CursorStyle> = defaultStyle,
-    hlMode: HighlightMode = HighlightMode.SELECT
-  ) {
-    this.style = { ...defaultStyle, ...style };
-    this.hlMode = hlMode;
-
-    this.ratio = ratio;
+  constructor(ratio: number, xLine: number = -1, yLine: number = -1) {
+    super(ratio, defaultStyle, HighlightMode.SELECT);
     this.xLine = xLine;
     this.yLine = yLine;
-  }
-
-  /**
-   * @param style
-   * sets the style of the cursor
-   */
-  setStyle(style: Partial<CursorStyle>) {
-    this.style = { ...this.style, ...style };
-  }
-
-  yToLineI(y: number, lineHeight: number): number {
-    return Math.round((y / lineHeight) * this.ratio - 1);
-  }
-
-  xToCharI(x: number, charWidth: number): number {
-    return Math.floor((Math.max(x, 0) / charWidth) * this.ratio);
+    this.style = { ...this.style, color: "black" };
   }
 
   setPosition(lineX: number, lineY: number) {
@@ -96,7 +52,12 @@ export default class Cursor implements IRelativeCoordinates {
    * @returns
    */
   isSelected(): boolean {
-    return !!this.selectStart && !!this.selectEnd;
+    return (
+      !!this.selectStart &&
+      !!this.selectEnd &&
+      (this.selectStart.xLine !== this.selectEnd.xLine ||
+        this.selectStart.yLine !== this.selectEnd.yLine)
+    );
   }
 
   /**
@@ -104,7 +65,7 @@ export default class Cursor implements IRelativeCoordinates {
    * @returns
    */
   getSelectedArea(): [IAbsCoordinates, IAbsCoordinates] | null {
-    const selected = this.getSelected();
+    const selected = this.getBounds();
     if (
       selected[0] === undefined ||
       selected[1] === undefined ||
@@ -121,7 +82,7 @@ export default class Cursor implements IRelativeCoordinates {
    * getSelected is getter for absolute selected coordinates
    * @returns
    */
-  getSelected(): [IAbsCoordinates | undefined, IAbsCoordinates | undefined] {
+  getBounds(): [IAbsCoordinates | undefined, IAbsCoordinates | undefined] {
     if (!this.selectStart || !this.selectEnd) {
       return [undefined, undefined];
     }
@@ -154,7 +115,7 @@ export default class Cursor implements IRelativeCoordinates {
   /**
    * endHighlight marks final position for highlighted area by setting control flag to false
    */
-  endHighlight() {
+  endSelection() {
     this.selecting = false;
   }
 
@@ -192,57 +153,6 @@ export default class Cursor implements IRelativeCoordinates {
   }
 
   /**
-   * drawLine is shorthand around drawing highlighted areas simply by providing relative coordinates
-   * @param ctx
-   * @param relLine
-   * @param xStart
-   * @param xEnd
-   * @param options
-   */
-  drawLine(
-    ctx: CanvasRenderingContext2D,
-    relLine: number,
-    xStart: number,
-    xEnd: number,
-    options: DrawingOptions
-  ) {
-    const { charWidth, lineHeight } = options;
-    const width = (xEnd - xStart) * charWidth;
-    const height = this.hlMode === HighlightMode.UNDERLINE ? 3 : lineHeight;
-
-    ctx.fillStyle = this.style.color;
-    ctx.globalAlpha = this.style.opacity;
-
-    if (this.hlMode === "focus") {
-      ctx.globalCompositeOperation = "xor";
-      ctx.fillRect(xStart * charWidth, relLine * lineHeight, width, height);
-    } else if (this.hlMode === "underline") {
-      ctx.globalCompositeOperation = "multiply";
-      ctx.fillRect(
-        xStart * charWidth,
-        (relLine + 1) * lineHeight,
-        width,
-        height
-      );
-    } else if (this.hlMode === "background") {
-      ctx.globalCompositeOperation = "multiply";
-      ctx.fillRect(xStart * charWidth, relLine * lineHeight, width, height);
-    } else if (this.hlMode === "select") {
-      ctx.globalCompositeOperation = "color";
-      ctx.fillRect(xStart * charWidth, relLine * lineHeight, width, height);
-
-      ctx.fillStyle = "black";
-      ctx.globalAlpha = 1;
-      ctx.fillRect(
-        xEnd * charWidth,
-        relLine * lineHeight,
-        Cursor.Width,
-        lineHeight
-      );
-    }
-  }
-
-  /**
    * draw places cursor and optionally highlighted area into the canvas
    * @param ctx
    * @param viewport
@@ -261,23 +171,22 @@ export default class Cursor implements IRelativeCoordinates {
       return;
     }
 
-    const { charsAtLine } = drawingOptions;
+    let [hStart, hEnd] = this.getBounds();
+    if (!hStart || !hEnd) {
+      return;
+    }
 
-    let [hStart, hEnd] = this.getSelected();
-    if (hStart && hEnd) {
-      if (hStart.yLine > hEnd.yLine) {
-        [hStart, hEnd] = [hEnd, hStart];
-      }
+    const rowsToDraw: { rowI: number; start: number; end: number }[] = [];
+    console.log("cursor normal", !this.isSelected());
 
-      const rowsToDraw: { rowI: number; start: number; end: number }[] = [];
-
-      // add cursor pointer on current y/x position
-      rowsToDraw.push({
-        rowI: this.yLine,
-        start: this.xLine,
-        end:  this.xLine,
+    if (!this.isSelected()) {
+      // in case there is no area selected, just drop a cursor at some
+      this.drawLine(ctx, this.yLine, this.xLine, this.xLine, {
+        ...drawingOptions,
+        color: "black",
       });
-
+    } else {
+      // selection active, iterate over displayed lines
       for (
         let i = 0;
         i < Math.min(viewport.lineEnd, textLines.length) - viewport.lineStart;
@@ -286,47 +195,31 @@ export default class Cursor implements IRelativeCoordinates {
         const currY = viewport.lineStart + i;
         const lastCharX = textLines[currY].length;
 
-        if (this.hlMode === "focus") {
-          if (currY < hStart.yLine || currY > hEnd.yLine) {
-            rowsToDraw.push({ rowI: i, start: 0, end: charsAtLine });
-          }
-          if (currY === hStart.yLine) {
-            rowsToDraw.push({ rowI: i, start: 0, end: hStart.xLine });
-          }
-          if (currY === hEnd.yLine) {
+        if (hStart.yLine <= currY && hEnd.yLine >= currY) {
+          if (hStart.yLine === currY) {
             rowsToDraw.push({
               rowI: i,
-              start: lastCharX,
-              end: hEnd.xLine,
+              start: hStart.xLine,
+              end: hStart.yLine === hEnd.yLine ? hEnd.xLine : lastCharX,
             });
-          }
-        } else {
-          if (hStart.yLine <= currY && hEnd.yLine >= currY) {
-            if (hStart.yLine === currY) {
-              rowsToDraw.push({
-                rowI: i,
-                start: hStart.xLine,
-                end: hStart.yLine === hEnd.yLine ? hEnd.xLine : lastCharX,
-              });
-            } else if (hEnd.yLine === currY) {
-              rowsToDraw.push({ rowI: i, start: 0, end: hEnd.xLine });
-            } else {
-              rowsToDraw.push({
-                rowI: i,
-                start: 0,
-                end: lastCharX,
-              });
-            }
+          } else if (hEnd.yLine === currY) {
+            rowsToDraw.push({ rowI: i, start: 0, end: hEnd.xLine });
+          } else {
+            rowsToDraw.push({
+              rowI: i,
+              start: 0,
+              end: lastCharX,
+            });
           }
         }
       }
 
+      // draw selections or cursor
       for (const row of rowsToDraw) {
         this.drawLine(ctx, row.rowI, row.start, row.end, drawingOptions);
-        //this.xLine = row.end
-       // this.yLine = row.rowI
       }
     }
+
     ctx.globalAlpha = 1;
   }
 
