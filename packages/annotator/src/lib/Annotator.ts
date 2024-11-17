@@ -369,10 +369,9 @@ export class Annotator {
 
       case "ArrowLeft":
         if (e.shiftKey && e.ctrlKey) {
-          let offsetLeft = 0,
-            offsetRight = 0;
+          let offsetLeft = 0;
           while (!offsetLeft) {
-            [offsetLeft, offsetRight] = this.text.getCursorWordOffsets(
+            [offsetLeft] = this.text.getCursorWordOffsets(
               this.viewport,
               this.cursor
             );
@@ -408,6 +407,12 @@ export class Annotator {
               yLine: this.viewport.lineStart + this.cursor.yLine,
             };
           } else {
+            if (this.cursor.isSelected()) {
+              // if something is selected -> move the cursor to leftmost position and cancel the selection
+              this.cursor.xLine =
+                this.cursor.selectStart?.xLine || this.cursor.xLine;
+            }
+
             this.cursor.selectStart = {
               xLine: this.cursor.xLine,
               yLine: this.viewport.lineStart + this.cursor.yLine,
@@ -474,6 +479,12 @@ export class Annotator {
               yLine: this.viewport.lineStart + this.cursor.yLine,
             };
           } else {
+            if (this.cursor.isSelected()) {
+              // if something is selected -> move the cursor to rightmost position and cancel the selection
+              this.cursor.xLine =
+                this.cursor.selectEnd?.xLine || this.cursor.xLine;
+            }
+
             this.cursor.selectEnd = {
               xLine: this.cursor.xLine,
               yLine: this.viewport.lineStart + this.cursor.yLine,

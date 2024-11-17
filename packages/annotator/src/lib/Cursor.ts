@@ -177,6 +177,7 @@ export default class Cursor
     }
 
     const rowsToDraw: { rowI: number; start: number; end: number }[] = [];
+    console.log("cursor normal", !this.isSelected());
 
     if (!this.isSelected()) {
       // in case there is no area selected, just drop a cursor at some
