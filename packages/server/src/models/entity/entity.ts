@@ -317,7 +317,7 @@ export default class Entity implements IEntity, IDbModel {
       out = out.concat(Entity.extractIdsFromProps(prop.children, kind, cb));
     }
 
-    return out;
+    return out.filter((id) => id);
   }
 
   static async findEntitiesByIds(
@@ -325,12 +325,12 @@ export default class Entity implements IEntity, IDbModel {
     ids: string[]
   ): Promise<IEntity[]> {
     if (ids.findIndex((id) => !id) !== -1) {
-      console.trace("Passed empty id to Entity.findEntitiesByIds");
+      console.trace("Passed empty id to Entity.findEntitiesByIds", ids);
     }
 
     const data = await rethink
       .table(Entity.table)
-      .getAll(rethink.args(ids))
+      .getAll(rethink.args(ids.filter((id) => id)))
       .run(con);
     return data;
   }
