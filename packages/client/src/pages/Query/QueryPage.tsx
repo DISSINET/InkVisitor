@@ -87,15 +87,15 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
 
   useEffect(() => {
     if (queryDiff(prevQueryState.current, queryState)) {
-      handleInvalidateQuery();
       prevQueryState.current = queryState;
+      handleInvalidateQuery();
     }
   }, [queryState]);
 
   useEffect(() => {
     if (exploreDiff(prevExploreState.current, exploreState)) {
-      handleInvalidateQuery();
       prevExploreState.current = exploreState;
+      handleInvalidateQuery();
     }
   }, [exploreState]);
 
@@ -110,7 +110,13 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     error: queryError,
     isFetching: queryIsFetching,
   } = useQuery({
-    queryKey: ["query", queryState, exploreState],
+    queryKey: [
+      "query",
+      {
+        query: queryState,
+        explore: exploreState,
+      },
+    ],
     queryFn: async () => {
       if (queryStateValidity.isValid && api.isLoggedIn()) {
         const res = await api.query({
@@ -120,11 +126,9 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
         return res.data;
       }
     },
-
+    staleTime: 1000 * 60 * 5,
     enabled: queryStateValidity.isValid && api.isLoggedIn(),
   });
-
-  // console.log("response", queryData);
 
   const onePercentOfContentHeight = useMemo(
     () => contentHeight / 100,
@@ -218,6 +222,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
         >
           <MemoizedExplorerBox
             state={exploreState}
+            height={contentHeight - querySeparatorYPosition}
             dispatch={exploreStateDispatch}
             data={queryData}
             isQueryFetching={queryIsFetching}

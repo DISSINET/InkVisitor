@@ -12,6 +12,7 @@ interface ExplorerBoxProps {
   data: IResponseQuery | undefined;
   isQueryFetching: boolean;
   queryError: Error | null;
+  height: number;
 }
 export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   state,
@@ -19,21 +20,17 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   data,
   isQueryFetching,
   queryError,
+  height,
 }) => {
-  const contentHeight: number = useAppSelector(
-    (state) => state.layout.contentHeight
-  );
-
   return (
-    <>
-      <ExplorerTable
-        state={state}
-        dispatch={dispatch}
-        data={data}
-        isQueryFetching={isQueryFetching}
-        queryError={queryError}
-      />
-    </>
+    <ExplorerTable
+      state={state}
+      dispatch={dispatch}
+      data={data}
+      isQueryFetching={isQueryFetching}
+      queryError={queryError}
+      height={height}
+    />
   );
 };
 

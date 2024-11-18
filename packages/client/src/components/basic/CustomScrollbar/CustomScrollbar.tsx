@@ -5,14 +5,19 @@ interface CustomScrollbar {
   scrollerId?: string;
   elementId?: string;
   contentWidth?: number;
-
+  contentHeight?: number;
   children: React.ReactNode;
+  noScrollX?: boolean;
+  noScrollY?: boolean;
 }
 export const CustomScrollbar: React.FC<CustomScrollbar> = ({
   scrollerId,
   elementId,
   contentWidth,
+  contentHeight,
   children,
+  noScrollX = false,
+  noScrollY = false,
 }) => {
   // Necessary for scrollTo functionality
   if (elementId && scrollerId) {
@@ -34,7 +39,12 @@ export const CustomScrollbar: React.FC<CustomScrollbar> = ({
       removeTrackXWhenNotUsed={true}
       removeTrackYWhenNotUsed={true}
       permanentTracks={false}
-      style={{ width: contentWidth || "" }}
+      style={{
+        width: contentWidth ?? "100%",
+        height: contentHeight ?? "100%",
+      }}
+      noScrollX={contentWidth === undefined || noScrollX}
+      noScrollY={contentHeight === undefined || noScrollY}
     >
       {children}
     </StyledScrollbar>

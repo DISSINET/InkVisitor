@@ -1,85 +1,50 @@
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 
-import { classesAll } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
 import {
   IEntity,
   IProp,
   IResponseQuery,
   IResponseQueryEntity,
-  IUser,
 } from "@shared/types";
 import { Explore } from "@shared/types/query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import {
-  Button,
-  ButtonGroup,
-  Checkbox,
-  CustomScrollbar,
-  Input,
-} from "components";
+import { Button, ButtonGroup, Checkbox, Input } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 import { CMetaProp } from "constructors";
-import {
-  FaChevronCircleDown,
-  FaChevronCircleUp,
-  FaTrashAlt,
-} from "react-icons/fa";
-import {
-  LuChevronFirst,
-  LuChevronLast,
-  LuChevronLeft,
-  LuChevronRight,
-} from "react-icons/lu";
-import {
-  MdOutlineCheckBox,
-  MdOutlineCheckBoxOutlineBlank,
-  MdOutlineEdit,
-  MdOutlineIndeterminateCheckBox,
-} from "react-icons/md";
+import { FaTrashAlt } from "react-icons/fa";
+import { GrClose } from "react-icons/gr";
+import { MdOutlineEdit } from "react-icons/md";
 import { TbColumnInsertRight } from "react-icons/tb";
+import Scrollbar from "react-scrollbars-custom";
 import { ThemeContext } from "styled-components";
+import useResizeObserver from "use-resize-observer";
 import { v4 as uuidv4 } from "uuid";
 import { ExploreAction, ExploreActionType } from "../state";
+import MemoizedExplorerTableRow from "./ExplorerTableRow";
 import { ExplorerTableRowExpanded } from "./ExplorerTableRowExpanded/ExplorerTableRowExpanded";
 import {
-  StyledCheckboxWrapper,
-  StyledCounter,
-  StyledFocusedCircle,
-  StyledGrid,
-  StyledGridColumn,
-  StyledGridHeader,
-  StyledGridHeaderColumn,
-  StyledGridRow,
+  StyledBody,
+  StyledColumn,
+  StyledHeader,
   StyledNewColumn,
-  StyledNewColumnGrid,
+  StyledNewColumnContent,
+  StyledNewColumnHeader,
   StyledNewColumnLabel,
   StyledNewColumnValue,
-  StyledPagination,
-  StyledTableFooter,
-  StyledTableHeader,
+  StyledRow,
+  StyledRowWrapper,
   StyledTableWrapper,
 } from "./ExplorerTableStyles";
-import useResizeObserver from "use-resize-observer";
-import { DropdownItem } from "types";
-
-enum BatchOption {
-  fill_empty = "fill_empty",
-}
-
-const batchOptions = [
-  {
-    value: BatchOption.fill_empty,
-    label: `fill empty`,
-  },
-];
+import ExploreTableControl from "./ExploreTableControl";
+import {
+  BatchAction,
+  batchOptions,
+  HEIGHT_ROW_DEFAULT,
+  WIDTH_COLUMN_DEFAULT,
+  WIDTH_COLUMN_FIRST,
+} from "./types";
 
 const initialNewColumn: Explore.IExploreColumn = {
   id: uuidv4(),
@@ -94,6 +59,7 @@ interface ExplorerTable {
   data: IResponseQuery | undefined;
   isQueryFetching: boolean;
   queryError: Error | null;
+  height: number;
 }
 export const ExplorerTable: React.FC<ExplorerTable> = ({
   state,
@@ -101,14 +67,48 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   data,
   isQueryFetching,
   queryError,
+  height: heightBox,
 }) => {
   const { entities, total: incomingTotal } = data ?? {
     entities: [],
     total: 0,
   };
+
   const { columns, filters, limit, offset, sort, view } = state;
 
   const [total, setTotal] = useState(0);
+  const totalPages = useMemo(() => Math.ceil(total / limit), [total, limit]);
+
+  const handleCheckboxClick = (
+    e: React.MouseEvent<HTMLDivElement, MouseEvent>,
+    rowId: number,
+    entityId: string
+  ) => {
+    const isSelected = rowsSelected.includes(entityId);
+
+    if (isSelected) {
+      if (e.shiftKey && lastClickedIndex !== -1 && lastClickedIndex !== rowId) {
+        // unset all between
+        const mappedIds = handleSelection(rowId);
+        const filteredIds = rowsSelected.filter(
+          (id) => !mappedIds.includes(id)
+        );
+        setRowsSelected(filteredIds);
+      } else {
+        handleRowSelect(entityId);
+      }
+      setLastClickedIndex(rowId);
+    } else {
+      if (e.shiftKey && lastClickedIndex !== -1 && lastClickedIndex !== rowId) {
+        // set all between
+        const mappedIds = handleSelection(rowId);
+        setRowsSelected([...new Set(rowsSelected.concat(mappedIds))]);
+      } else {
+        handleRowSelect(entityId);
+      }
+      setLastClickedIndex(rowId);
+    }
+  };
 
   useEffect(() => {
     if (!isQueryFetching) {
@@ -142,7 +142,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     return propertyType?.id || "";
   }, [propertyType]);
 
-  const [showNewColumn, setShowNewColumn] = useState(false);
+  const [isNewColumnOpen, setIsNewColumnOpen] = useState(false);
 
   const getNewColumn = (): Explore.IExploreColumn => {
     return {
@@ -169,10 +169,8 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       payload: getNewColumn(),
     });
     handleClearLocalState();
-    // setShowNewColumn(false);
+    setIsNewColumnOpen(false);
   };
-
-  const totalPages = useMemo(() => Math.ceil(total / limit), [total, limit]);
 
   const handleFirstPage = () => {
     dispatch({ type: ExploreActionType.setOffset, payload: 0 });
@@ -201,12 +199,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     setRowsExpanded([]);
   };
 
-  const startRecord = offset + 1;
-  const endRecord = Math.min(offset + limit, total);
-  const pageNumber = Math.floor(offset / limit + 1);
-  const canGoToPreviousPage = offset > 0;
-  const canGoToNextPage = offset + limit < total;
-
   const toggleSortDirection = (columnId: string) => {
     if (sort && sort.columnId === columnId) {
       if (sort.direction === "asc") return "desc";
@@ -215,276 +207,198 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     return "asc";
   };
 
-  const renderPaging = () => {
-    return (
-      <StyledPagination style={{ display: "flex", alignItems: "center" }}>
-        <span
-          style={{ marginRight: "1rem" }}
-        >{`page ${pageNumber} of ${totalPages}`}</span>
-        <span
-          style={{ marginRight: "1rem" }}
-        >{`records ${startRecord}-${endRecord} of ${total}`}</span>
-        {state.limit < total && (
-          <span
-            style={{
-              display: "inline-grid",
-              gap: "0.5rem",
-              gridTemplateColumns: "repeat(4,auto)",
-              marginRight: "1rem",
-            }}
-          >
-            <Button
-              onClick={handleFirstPage}
-              disabled={!canGoToPreviousPage}
-              icon={<LuChevronFirst size={13} />}
-              inverted
-              color="greyer"
-              radiusLeft
-              radiusRight
-            />
-            <Button
-              onClick={handlePreviousPage}
-              disabled={!canGoToPreviousPage}
-              icon={<LuChevronLeft size={13} />}
-              inverted
-              color="greyer"
-              radiusLeft
-              radiusRight
-            />
-            <Button
-              onClick={handleNextPage}
-              disabled={!canGoToNextPage}
-              icon={<LuChevronRight size={13} />}
-              inverted
-              color="greyer"
-              radiusLeft
-              radiusRight
-            />
-            <Button
-              onClick={handleLastPage}
-              disabled={!canGoToNextPage}
-              icon={<LuChevronLast size={13} />}
-              inverted
-              color="greyer"
-              radiusLeft
-              radiusRight
-            />
-          </span>
-        )}
-        <Dropdown.Single.Basic
-          width={50}
-          value={limit.toString()}
-          options={[5, 10, 20, 50, 100].map((number) => {
-            return {
-              value: number.toString(),
-              label: number.toString(),
-            };
-          })}
-          onChange={(value) => handleChangeLimit(Number(value))}
-        />
-      </StyledPagination>
-    );
-  };
-
-  const handleSelectAll = (checked: boolean) =>
-    checked
-      ? setSelectedRows(entities.map((queryEntity) => queryEntity.entity.id))
-      : setSelectedRows([]);
-
-  const renderHeaderCheckBox = () => {
-    const size = 18;
-    const isAllSelected =
-      entities.length > 0 && selectedRows.length === entities.length;
-
-    if (isAllSelected) {
-      return (
-        <MdOutlineCheckBox
-          size={size}
-          onClick={() => {
-            handleSelectAll(false);
-            setLastClickedIndex(-1);
-          }}
-        />
-      );
-    } else if (selectedRows.length > 0) {
-      // some rows selected
-      return (
-        <MdOutlineIndeterminateCheckBox
-          size={size}
-          onClick={() => {
-            handleSelectAll(false);
-            setLastClickedIndex(-1);
-          }}
-        />
-      );
-    } else {
-      return (
-        <MdOutlineCheckBoxOutlineBlank
-          size={size}
-          onClick={() => handleSelectAll(true)}
-        />
-      );
-    }
-  };
-
-  const [batchAction, setBatchAction] = useState<DropdownItem>(batchOptions[0]);
-
-  const renderTableHeader = () => {
-    return (
-      <StyledTableHeader>
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            {renderHeaderCheckBox()}
-            {selectedRows.length > 0 && (
-              <StyledCounter>{`${selectedRows.length}/${entities.length}`}</StyledCounter>
-            )}
-            <Dropdown.Single.Basic
-              width={98}
-              disabled={selectedRows.length === 0}
-              value={batchAction.value}
-              onChange={(selectedOption) =>
-                setBatchAction(
-                  batchOptions.find((o) => o.value === selectedOption)!
-                )
-              }
-              options={batchOptions}
-            />
-          </div>
-          {renderPaging()}
-        </div>
-        <div>
-          <Button
-            icon={<TbColumnInsertRight size={17} />}
-            label="new column"
-            color={showNewColumn ? "info" : "primary"}
-            onClick={() => setShowNewColumn(!showNewColumn)}
-          />
-        </div>
-      </StyledTableHeader>
-    );
-  };
-
-  const renderTableFooter = () => {
-    return (
-      <StyledTableFooter>
-        {renderPaging()}
-        <div>
-          <Button
-            icon={<TbColumnInsertRight size={17} />}
-            label="new column"
-            color={showNewColumn ? "info" : "primary"}
-            onClick={() => setShowNewColumn(!showNewColumn)}
-          />
-        </div>
-      </StyledTableFooter>
-    );
-  };
-
-  const renderCell = (
-    recordEntity: IEntity,
-    cellData:
-      | IEntity
-      | IEntity[]
-      | number
-      | number[]
-      | string
-      | string[]
-      | IUser
-      | IUser[],
-    column: Explore.IExploreColumn
+  const handleEditColumn = (
+    rowEntity: IEntity,
+    columnId: string,
+    newEntity: IEntity
   ) => {
-    if (Array.isArray(cellData)) {
-      if (
-        cellData.length > 0 &&
-        typeof (cellData[0] as IEntity).class !== "undefined"
-      ) {
-        // is type IEntity[]
-        return cellData.map((entity, key) => {
-          return (
-            <React.Fragment key={key}>
-              <span>
-                <EntityTag
-                  entity={entity as IEntity}
-                  unlinkButton={
-                    column.editable && {
-                      onClick: () => {
-                        const { id } = entity as IEntity;
-                        const { id: recordEntityId, props } =
-                          recordEntity as IEntity;
+    const column = columns.find((column) => column.id === columnId);
 
-                        const foundEntity = props.find(
-                          (prop) => prop.value?.entityId === id
-                        );
-                        if (foundEntity) {
-                          updateEntityMutation.mutate({
-                            entityId: recordEntityId,
-                            changes: {
-                              props: props.filter(
-                                (prop) => prop.id !== foundEntity.id
-                              ),
-                            },
-                          });
-                        }
-                      },
-                    }
-                  }
-                  disableDoubleClick
-                />
-              </span>
-            </React.Fragment>
-          );
-        });
-      } else if (
-        cellData.length > 0 &&
-        typeof (cellData[0] as IUser).email !== "undefined"
-      ) {
-        // is type IUser[]
-        return (
-          <div>
-            <span
-              style={{
-                backgroundColor: "lime",
-                padding: "0.3rem",
-                display: "flex",
-              }}
-            >
-              {(cellData as IUser[]).map((user) => {
-                return user.name;
-              })}
-            </span>
-          </div>
-        );
-      }
-    } else {
-      // TODO: not an array - IEntity, IUser, number, string
+    if (column) {
+      const params =
+        column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.EPV>;
+
+      const newProp: IProp = CMetaProp({
+        typeEntityId: params.propertyType,
+        valueEntityId: newEntity.id,
+      });
+
+      updateEntityMutation.mutate({
+        entityId: rowEntity.id,
+        changes: {
+          props: [...rowEntity.props, newProp],
+        },
+      });
     }
-
-    // return <StyledEmpty>{"empty"}</StyledEmpty>;
   };
+
+  // const renderPaging = () => {
+  //   return (
+  //     <StyledPagination style={{ display: "flex", alignItems: "center" }}>
+  //       <span
+  //         style={{ marginRight: "1rem" }}
+  //       >{`page ${pageNumber} of ${totalPages}`}</span>
+  //       <span
+  //         style={{ marginRight: "1rem" }}
+  //       >{`records ${startRecord}-${endRecord} of ${total}`}</span>
+  //       {state.limit < total && (
+  //         <span
+  //           style={{
+  //             display: "inline-grid",
+  //             gap: "0.5rem",
+  //             gridTemplateColumns: "repeat(4,auto)",
+  //             marginRight: "1rem",
+  //           }}
+  //         >
+  //           <Button
+  //             onClick={handleFirstPage}
+  //             disabled={!canGoToPreviousPage}
+  //             icon={<LuChevronFirst size={13} />}
+  //             inverted
+  //             color="greyer"
+  //             radiusLeft
+  //             radiusRight
+  //           />
+  //           <Button
+  //             onClick={handlePreviousPage}
+  //             disabled={!canGoToPreviousPage}
+  //             icon={<LuChevronLeft size={13} />}
+  //             inverted
+  //             color="greyer"
+  //             radiusLeft
+  //             radiusRight
+  //           />
+  //           <Button
+  //             onClick={handleNextPage}
+  //             disabled={!canGoToNextPage}
+  //             icon={<LuChevronRight size={13} />}
+  //             inverted
+  //             color="greyer"
+  //             radiusLeft
+  //             radiusRight
+  //           />
+  //           <Button
+  //             onClick={handleLastPage}
+  //             disabled={!canGoToNextPage}
+  //             icon={<LuChevronLast size={13} />}
+  //             inverted
+  //             color="greyer"
+  //             radiusLeft
+  //             radiusRight
+  //           />
+  //         </span>
+  //       )}
+  //       <Dropdown.Single.Basic
+  //         width={50}
+  //         value={limit.toString()}
+  //         options={[5, 10, 20, 50, 100].map((number) => {
+  //           return {
+  //             value: number.toString(),
+  //             label: number.toString(),
+  //           };
+  //         })}
+  //         onChange={(value) => handleChangeLimit(Number(value))}
+  //       />
+  //     </StyledPagination>
+  //   );
+  // };
+
+  const [batchActionSelected, setBatchActionSelected] = useState<BatchAction>(
+    batchOptions[0].value
+  );
+
+  // const renderTableFooter = () => {
+  //   return <StyledTableFooter>{renderPaging()}</StyledTableFooter>;
+  // };
 
   const [rowsExpanded, setRowsExpanded] = useState<string[]>([]);
+  const handleExpandRow = (rowId: string) => {
+    if (rowsExpanded.includes(rowId)) {
+      setRowsExpanded(
+        rowsExpanded.filter((expandedRow) => expandedRow !== rowId)
+      );
+    } else {
+      setRowsExpanded([...rowsExpanded, rowId]);
+    }
+  };
 
-  const themeContext = useContext(ThemeContext);
+  const {
+    ref: contentRef,
+    width: contentWidth,
+    height: contentHeight,
+  } = useResizeObserver();
 
-  const { ref: contentRef, width: contentWidth } = useResizeObserver();
+  const spaceTableBody = heightBox - 150;
 
-  const [selectedRows, setSelectedRows] = useState<string[]>([]);
+  const [rowsSelected, setRowsSelected] = useState<string[]>([]);
   const [lastClickedIndex, setLastClickedIndex] = useState<number>(-1);
 
   const handleRowSelect = (rowId: string) => {
-    if (selectedRows.includes(rowId)) {
-      setSelectedRows(
-        selectedRows.filter((selectedRow) => selectedRow !== rowId)
+    if (rowsSelected.includes(rowId)) {
+      setRowsSelected(
+        rowsSelected.filter((selectedRow) => selectedRow !== rowId)
       );
     } else {
-      setSelectedRows([...selectedRows, rowId]);
+      setRowsSelected([...rowsSelected, rowId]);
     }
+    setTimeout(() => {
+      checkVisibility();
+    }, 1000);
   };
 
-  const handleSelection = (
-    lastClickedIndex: number,
-    rowIndex: number
-  ): string[] => {
+  const handleScrollTable = (values: any) => {
+    checkVisibility();
+  };
+
+  const widthTable = useMemo(() => {
+    return columns.length * WIDTH_COLUMN_DEFAULT + WIDTH_COLUMN_FIRST;
+  }, [columns]);
+
+  const rowsRefs = useRef<HTMLDivElement[]>([]);
+  const refTable = useRef<HTMLDivElement>(null);
+  const [visibleItems, setVisibleItems] = useState<string[]>([]);
+
+  const checkVisibility = () => {
+    if (!refTable.current) return;
+
+    const containerRect = refTable.current.getBoundingClientRect();
+    const visible = rowsRefs.current
+      .filter((item) => {
+        if (!item) return false;
+        const itemRect = item.getBoundingClientRect();
+
+        // Check if item at least partly visible
+        return (
+          itemRect.top < containerRect.bottom &&
+          itemRect.bottom > containerRect.top
+        );
+      })
+      .map((item) => item.id);
+
+    setVisibleItems(visible);
+  };
+
+  useEffect(() => {
+    if (visibleItems.length === 0) return;
+
+    const indices = visibleItems.map((item) => parseInt(item));
+    const topItem = Math.min(...indices);
+    const bottomItem = Math.max(...indices);
+
+    const newOffset = topItem;
+    const newLimit = bottomItem - topItem + 1;
+
+    console.log("new scroll items", newOffset, newLimit, visibleItems);
+
+    if (newOffset !== offset || newLimit !== limit) {
+      dispatch({
+        type: ExploreActionType.setLimitAndOffset,
+        payload: { offset: newOffset, limit: newLimit },
+      });
+    }
+  }, [visibleItems.join("-")]);
+
+  const handleSelection = (rowIndex: number): string[] => {
     let selectedQueryEntities: IResponseQueryEntity[] = [];
     if (lastClickedIndex < rowIndex) {
       selectedQueryEntities = entities.slice(lastClickedIndex, rowIndex + 1);
@@ -495,103 +409,82 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     return selectedQueryEntities.map((queryEntity) => queryEntity.entity.id);
   };
 
-  const RenderCheckbox = useCallback(
-    (id: string, index: number) => {
-      const size = 18;
-      const checked = selectedRows.includes(id);
-      const isFocused = lastClickedIndex === index;
+  const [scrollTableX, setScrollTableX] = useState<number>(0);
+  const [scrollTableXScrolling, setScrollTableXScrolling] =
+    useState<boolean>(false);
 
-      return (
-        <StyledCheckboxWrapper>
-          {isFocused && <StyledFocusedCircle checked={checked} />}
-          {checked ? (
-            <MdOutlineCheckBox
-              size={size}
-              style={{ zIndex: 2 }}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (
-                  e.shiftKey &&
-                  lastClickedIndex !== -1 &&
-                  lastClickedIndex !== index
-                ) {
-                  // unset all between
-                  const mappedIds = handleSelection(lastClickedIndex, index);
-                  const filteredIds = selectedRows.filter(
-                    (id) => !mappedIds.includes(id)
-                  );
-                  setSelectedRows(filteredIds);
-                } else {
-                  handleRowSelect(id);
-                }
-                // dispatch(
-                setLastClickedIndex(index);
-                // );
-              }}
-            />
-          ) : (
-            <MdOutlineCheckBoxOutlineBlank
-              size={size}
-              style={{ zIndex: 2 }}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (
-                  e.shiftKey &&
-                  lastClickedIndex !== -1 &&
-                  lastClickedIndex !== index
-                ) {
-                  // set all between
-                  const mappedIds = handleSelection(lastClickedIndex, index);
-                  setSelectedRows([...new Set(selectedRows.concat(mappedIds))]);
-                } else {
-                  handleRowSelect(id);
-                }
-                // dispatch(
-                setLastClickedIndex(index);
-                // );
-              }}
-            />
-          )}
-        </StyledCheckboxWrapper>
-      );
-    },
-    [selectedRows, lastClickedIndex]
-  );
+  const scrollYLeft = useMemo<number>(() => {
+    if (scrollTableXScrolling) {
+      return -10;
+    } else {
+      return scrollTableX + (contentWidth ?? 0) - 10;
+    }
+  }, [contentWidth, scrollTableX, scrollTableXScrolling]);
 
   return (
-    <>
-      <div
-        style={{
-          display: "flex",
-          // overflow: "auto",
-          padding: "1rem",
-          height: "100%",
-        }}
-      >
-        <StyledTableWrapper ref={contentRef}>
-          {renderTableHeader()}
-          <CustomScrollbar>
-            <StyledGrid $columns={columns.length + 1}>
-              {/* HEADER */}
-              <StyledGridHeader>
-                <StyledGridHeaderColumn>{/* actions */}</StyledGridHeaderColumn>
-                <StyledGridHeaderColumn>
-                  {/* entities */}
-                </StyledGridHeaderColumn>
-                {columns.map((column, key) => {
-                  return (
-                    <StyledGridHeaderColumn key={key}>
-                      <div style={{ display: "flex", alignItems: "center" }}>
-                        {column.editable && (
-                          <MdOutlineEdit
-                            size={14}
-                            style={{ marginRight: "0.3rem" }}
-                          />
-                        )}
-                        {column.name}
+    <div
+      style={{
+        height: heightBox - 20,
+        margin: "1rem",
+        overflow: "hidden",
+      }}
+      ref={contentRef}
+    >
+      <StyledTableWrapper>
+        <ExploreTableControl
+          setIsNewColumnOpen={setIsNewColumnOpen}
+          isNewColumnOpen={isNewColumnOpen}
+          batchActionSelected={batchActionSelected}
+          setBatchActionSelected={setBatchActionSelected}
+          rowsSelected={rowsSelected}
+          setRowsSelected={setRowsSelected}
+          entities={entities}
+          setLastClickedIndex={setLastClickedIndex}
+          rowsTotal={total}
+        />
 
-                        {/* SORT */}
-                        {/* <span style={{ marginLeft: "0.5rem" }}>
+        <Scrollbar
+          style={{
+            width: contentWidth,
+            height: contentHeight,
+          }}
+          onScroll={() => {
+            setScrollTableXScrolling(true);
+          }}
+          onScrollStop={(values) => {
+            // @ts-ignore
+            setScrollTableX(values.scrollLeft);
+            setScrollTableXScrolling(false);
+          }}
+          noScrollY
+        >
+          {/* HEADER */}
+          <StyledHeader
+            style={{
+              width: widthTable,
+            }}
+          >
+            <StyledColumn $isHeader={true} $width={WIDTH_COLUMN_FIRST}>
+              Entity
+            </StyledColumn>
+            {columns.map((column, key) => {
+              return (
+                <StyledColumn
+                  $isHeader={true}
+                  $width={WIDTH_COLUMN_DEFAULT}
+                  key={key}
+                >
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    {column.editable && (
+                      <MdOutlineEdit
+                        size={14}
+                        style={{ marginRight: "0.3rem" }}
+                      />
+                    )}
+                    {column.name}
+
+                    {/* SORT */}
+                    {/* <span style={{ marginLeft: "0.5rem" }}>
                             <Button
                               noBorder
                               noBackground
@@ -607,7 +500,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                                   )
                                 ) : (
                                   <FaSort color={"white"} />
-                                )
+                                  )
                               }
                               onClick={() => {
                                 const newDirection = toggleSortDirection(column.id);
@@ -623,251 +516,226 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                                 });
                               }}
                               tooltipLabel="sort"
-                            />
-                          </span> */}
+                              />
+                              </span> */}
 
-                        <span style={{ marginLeft: "0.5rem" }}>
-                          <Button
-                            noBorder
-                            noBackground
-                            inverted
-                            icon={<FaTrashAlt color={"white"} />}
-                            onClick={() =>
-                              dispatch({
-                                type: ExploreActionType.removeColumn,
-                                payload: { id: column.id },
-                              })
-                            }
-                            tooltipLabel="remove column"
-                          />
-                        </span>
-                      </div>
-                    </StyledGridHeaderColumn>
-                  );
-                })}
-              </StyledGridHeader>
-
-              {/* ROWS */}
-              {entities.map((row, key) => {
-                const { entity: rowEntity, columnData } = row;
-                const rowId = rowEntity.id;
-                const isOdd = Boolean(key % 2);
-                return (
-                  // ROW
-                  <React.Fragment key={key}>
-                    <StyledGridRow
-                      onClick={() =>
-                        rowsExpanded.includes(rowId)
-                          ? setRowsExpanded(
-                              rowsExpanded.filter((r) => r !== rowId)
-                            )
-                          : setRowsExpanded(rowsExpanded.concat(rowId))
-                      }
-                      $isOdd={isOdd}
-                      $isSelected={selectedRows.includes(row.entity.id)}
-                    >
-                      {/* ACTIONS */}
-                      <StyledGridColumn>
-                        {RenderCheckbox(row.entity.id, key)}
-
-                        <span
-                          style={{
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                          }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (!rowsExpanded.includes(rowId)) {
-                              setRowsExpanded(rowsExpanded.concat(rowId));
-                            } else {
-                              setRowsExpanded(
-                                rowsExpanded.filter((r) => r !== rowId)
-                              );
-                            }
-                          }}
-                        >
-                          {rowsExpanded.includes(rowEntity.id) ? (
-                            <FaChevronCircleUp
-                              color={themeContext?.color.warning}
-                            />
-                          ) : (
-                            <FaChevronCircleDown />
-                          )}
-                        </span>
-                      </StyledGridColumn>
-
-                      <StyledGridColumn>
-                        <span
-                          style={{
-                            display: "inline-flex",
-                            overflow: "hidden",
-                          }}
-                        >
-                          <EntityTag
-                            entity={rowEntity}
-                            fullWidth
-                            disableDoubleClick
-                          />
-                        </span>
-                      </StyledGridColumn>
-                      {columns.map((column, key) => {
-                        return (
-                          <StyledGridColumn key={key}>
-                            {renderCell(
-                              rowEntity,
-                              columnData[column.id],
-                              column
-                            )}
-
-                            {column.editable &&
-                              column.type ===
-                                Explore.EExploreColumnType.EPV && (
-                                <EntitySuggester
-                                  categoryTypes={classesAll}
-                                  onPicked={(entity) => {
-                                    const params =
-                                      column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.EPV>;
-
-                                    const newProp: IProp = CMetaProp({
-                                      typeEntityId: params.propertyType,
-                                      valueEntityId: entity.id,
-                                    });
-
-                                    updateEntityMutation.mutate({
-                                      entityId: rowEntity.id,
-                                      changes: {
-                                        props: [...rowEntity.props, newProp],
-                                      },
-                                    });
-                                  }}
-                                />
-                              )}
-                          </StyledGridColumn>
-                        );
-                      })}
-                    </StyledGridRow>
-
-                    {rowsExpanded.includes(rowEntity.id) && (
-                      <div style={{ display: "contents" }}>
-                        <ExplorerTableRowExpanded
-                          rowEntity={rowEntity}
-                          columns={columns}
-                          isOdd={isOdd}
-                        />
-                      </div>
-                    )}
-                  </React.Fragment>
-                );
-              })}
-            </StyledGrid>
-          </CustomScrollbar>
-          {/* {renderTableFooter()} */}
-        </StyledTableWrapper>
-
-        {/* NEW COLUMN */}
-        {showNewColumn && (
-          <StyledNewColumn>
-            <StyledGridHeaderColumn $greyBackground>
-              <span style={{ display: "flex", alignItems: "center" }}>
-                <TbColumnInsertRight size={17} />
-                <p style={{ marginLeft: "0.5rem" }}>New column</p>
-              </span>
-            </StyledGridHeaderColumn>
-            <StyledNewColumnGrid>
-              <StyledNewColumnLabel>Column name</StyledNewColumnLabel>
-              <StyledNewColumnValue>
-                <Input
-                  width="full"
-                  value={columnName}
-                  onChangeFn={(value) => setColumnName(value)}
-                  changeOnType
-                />
-              </StyledNewColumnValue>
-              <StyledNewColumnLabel>Column type</StyledNewColumnLabel>
-              <StyledNewColumnValue>
-                <Dropdown.Single.Basic
-                  width="full"
-                  value={columnType}
-                  options={Object.keys(Explore.EExploreColumnType)
-                    .map(
-                      (key) =>
-                        Explore.EExploreColumnType[
-                          key as keyof typeof Explore.EExploreColumnType
-                        ]
-                    )
-                    .map((value) => {
-                      return {
-                        value: value,
-                        label: Explore.EExploreColumnTypeLabels[value],
-                        isDisabled:
-                          Explore.EExploreColumnTypeDisabled[value].disabled,
-                      };
-                    })}
-                  onChange={(value) => setColumnType(value)}
-                />
-              </StyledNewColumnValue>
-              {columnType === Explore.EExploreColumnType.EPV && (
-                <>
-                  <StyledNewColumnLabel>Property type</StyledNewColumnLabel>
-                  <StyledNewColumnValue>
-                    {propertyType ? (
-                      <EntityTag
-                        fullWidth
-                        entity={propertyType}
-                        unlinkButton={{
-                          onClick: () => setPropertyType(undefined),
-                        }}
-                        disableDoubleClick
+                    <span style={{ marginLeft: "0.5rem" }}>
+                      <Button
+                        noBorder
+                        noBackground
+                        inverted
+                        icon={<FaTrashAlt color={"white"} />}
+                        onClick={() =>
+                          dispatch({
+                            type: ExploreActionType.removeColumn,
+                            payload: { id: column.id },
+                          })
+                        }
+                        tooltipLabel="remove column"
                       />
-                    ) : (
-                      <EntitySuggester
-                        categoryTypes={[EntityEnums.Class.Concept]}
-                        onPicked={(entity) => setPropertyType(entity)}
-                      />
-                    )}
-                  </StyledNewColumnValue>
-                </>
-              )}
-              <StyledNewColumnLabel>
-                <MdOutlineEdit size={14} style={{ marginRight: "0.3rem" }} />
-                Editable
-              </StyledNewColumnLabel>
-              <StyledNewColumnValue>
-                <Checkbox
-                  value={editable}
-                  onChangeFn={(value) => setEditable(value)}
-                />
-              </StyledNewColumnValue>
-            </StyledNewColumnGrid>
-
-            <span
+                    </span>
+                  </div>
+                </StyledColumn>
+              );
+            })}
+          </StyledHeader>
+          <StyledBody ref={refTable}>
+            <Scrollbar
               style={{
-                width: "100%",
-                display: "flex",
-                justifyContent: "flex-end",
+                width: widthTable,
+                height: spaceTableBody,
+              }}
+              trackYProps={{
+                renderer: (props) => {
+                  const { elementRef, style, ...restProps } = props;
+                  const trackStyle: React.CSSProperties = {
+                    ...style,
+                    left: scrollYLeft,
+                  };
+
+                  return (
+                    <span
+                      {...restProps}
+                      style={{ ...trackStyle }}
+                      ref={elementRef}
+                      className="trackY"
+                    />
+                  );
+                },
+              }}
+              noScrollX
+              onScrollStop={(values) => {
+                handleScrollTable(values);
               }}
             >
-              <ButtonGroup style={{ marginLeft: "1rem", marginTop: "1rem" }}>
-                <Button
-                  color="warning"
-                  label="cancel"
-                  onClick={() => setShowNewColumn(false)}
-                />
-                <Button
-                  label="create column"
-                  onClick={handleCreateColumn}
-                  disabled={
-                    !columnName.length ||
-                    (columnType === Explore.EExploreColumnType.EPV &&
-                      !propertyTypeId)
-                  }
-                />
-              </ButtonGroup>
-            </span>
-          </StyledNewColumn>
-        )}
-      </div>
-    </>
+              {/* ROWS */}
+              {Array.from({ length: total }).map((_, rowI) => {
+                const responseI = rowI - offset;
+                const isOdd = Boolean(rowI % 2);
+
+                const responseData: IResponseQueryEntity | undefined =
+                  entities[responseI];
+
+                const responseEntityId: string | undefined =
+                  responseData?.entity.id ?? undefined;
+
+                return (
+                  <StyledRowWrapper
+                    key={`${rowI}`}
+                    ref={(el) => {
+                      // @ts-ignore
+                      rowsRefs.current[rowI] = el;
+                    }}
+                    id={`${rowI}`}
+                  >
+                    <StyledRow
+                      $width={widthTable}
+                      $height={HEIGHT_ROW_DEFAULT}
+                      onClick={() => handleExpandRow(responseEntityId)}
+                      $isOdd={isOdd}
+                      $isSelected={rowsSelected.includes(responseEntityId)}
+                    >
+                      <MemoizedExplorerTableRow
+                        rowId={rowI}
+                        responseData={responseData}
+                        columns={columns}
+                        handleEditColumn={handleEditColumn}
+                        updateEntityMutation={updateEntityMutation}
+                        onCheckboxClick={handleCheckboxClick}
+                        isSelected={rowsSelected.includes(responseEntityId)}
+                        isLastClicked={lastClickedIndex === rowI}
+                        isExpanded={rowsExpanded.includes(responseEntityId)}
+                      />
+                    </StyledRow>
+
+                    {rowsExpanded.includes(responseEntityId) && (
+                      <ExplorerTableRowExpanded
+                        rowEntity={responseData.entity}
+                        columns={columns}
+                        isOdd={isOdd}
+                      />
+                    )}
+                  </StyledRowWrapper>
+                );
+              })}
+            </Scrollbar>
+          </StyledBody>
+        </Scrollbar>
+        {/* {renderTableFooter()} */}
+      </StyledTableWrapper>
+
+      {/* NEW COLUMN */}
+      {isNewColumnOpen && (
+        <StyledNewColumn>
+          <StyledNewColumnHeader>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <TbColumnInsertRight size={17} />
+              <p style={{ marginLeft: "0.5rem" }}>New column</p>
+            </div>
+            <div>
+              <Button
+                icon={<GrClose size={14} />}
+                onClick={() => setIsNewColumnOpen(false)}
+                noBorder
+                color="white"
+                noBackground
+                inverted
+              />
+            </div>
+          </StyledNewColumnHeader>
+          <StyledNewColumnContent>
+            <StyledNewColumnLabel>Column name</StyledNewColumnLabel>
+            <StyledNewColumnValue>
+              <Input
+                width="full"
+                value={columnName}
+                onChangeFn={(value) => setColumnName(value)}
+                changeOnType
+              />
+            </StyledNewColumnValue>
+            <StyledNewColumnLabel>Column type</StyledNewColumnLabel>
+            <StyledNewColumnValue>
+              <Dropdown.Single.Basic
+                width="full"
+                value={columnType}
+                options={Object.keys(Explore.EExploreColumnType)
+                  .map(
+                    (key) =>
+                      Explore.EExploreColumnType[
+                        key as keyof typeof Explore.EExploreColumnType
+                      ]
+                  )
+                  .map((value) => {
+                    return {
+                      value: value,
+                      label: Explore.EExploreColumnTypeLabels[value],
+                      isDisabled:
+                        Explore.EExploreColumnTypeDisabled[value].disabled,
+                    };
+                  })}
+                onChange={(value) => setColumnType(value)}
+              />
+            </StyledNewColumnValue>
+            {columnType === Explore.EExploreColumnType.EPV && (
+              <>
+                <StyledNewColumnLabel>Property type</StyledNewColumnLabel>
+                <StyledNewColumnValue>
+                  {propertyType ? (
+                    <EntityTag
+                      fullWidth
+                      entity={propertyType}
+                      unlinkButton={{
+                        onClick: () => setPropertyType(undefined),
+                      }}
+                      disableDoubleClick
+                    />
+                  ) : (
+                    <EntitySuggester
+                      categoryTypes={[EntityEnums.Class.Concept]}
+                      onPicked={(entity) => setPropertyType(entity)}
+                    />
+                  )}
+                </StyledNewColumnValue>
+              </>
+            )}
+            <StyledNewColumnLabel>
+              <MdOutlineEdit size={14} style={{ marginRight: "0.3rem" }} />
+              Editable
+            </StyledNewColumnLabel>
+            <StyledNewColumnValue>
+              <Checkbox
+                value={editable}
+                onChangeFn={(value) => setEditable(value)}
+              />
+            </StyledNewColumnValue>
+          </StyledNewColumnContent>
+
+          <span
+            style={{
+              width: "100%",
+              display: "flex",
+              justifyContent: "flex-end",
+            }}
+          >
+            <ButtonGroup style={{ marginLeft: "1rem", marginTop: "1rem" }}>
+              <Button
+                color="warning"
+                label="cancel"
+                onClick={() => setIsNewColumnOpen(false)}
+              />
+              <Button
+                label="create column"
+                onClick={handleCreateColumn}
+                disabled={
+                  !columnName.length ||
+                  (columnType === Explore.EExploreColumnType.EPV &&
+                    !propertyTypeId)
+                }
+              />
+            </ButtonGroup>
+          </span>
+        </StyledNewColumn>
+      )}
+    </div>
   );
 };

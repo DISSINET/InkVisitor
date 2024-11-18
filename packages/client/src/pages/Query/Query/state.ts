@@ -8,7 +8,7 @@ const queryStateInitial: Query.INode = {
   type: Query.NodeType.E,
   id: "root",
   params: {
-    classes: [],
+    classes: [EntityEnums.Class.Person],
     label: "",
   },
   operator: Query.NodeOperator.And,
@@ -203,7 +203,7 @@ const addNode = (state: Query.INode, parentId: string): Query.INode => {
 };
 
 const queryDiff = (state1: Query.INode, state2: Query.INode) => {
-  return true;
+  return false;
 };
 
 export {

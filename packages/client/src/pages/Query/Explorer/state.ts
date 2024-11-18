@@ -1,18 +1,31 @@
-import { IEntity } from "@shared/types";
 import { Explore } from "@shared/types/query";
 
 const exploreStateInitial: Explore.IExplore = {
   view: { mode: Explore.EViewMode.Table },
   columns: [
-    // {
-    //   id: "sex_value",
-    //   name: "Sex",
-    //   type: Explore.EExploreColumnType.EPV,
-    //   editable: true,
-    //   params: {
-    //     propertyType: "4ce5e669-d421-40c9-b1ce-f476fdd171fe",
-    //   },
-    // },
+    {
+      id: "1",
+      name: "Sex",
+      type: Explore.EExploreColumnType.EPV,
+      editable: true,
+      params: {
+        propertyType: "4ce5e669-d421-40c9-b1ce-f476fdd171fe",
+      },
+    },
+    {
+      id: "2",
+      name: "Types",
+      type: Explore.EExploreColumnType.EPT,
+      editable: true,
+      params: {},
+    },
+    {
+      id: "3",
+      name: "Types",
+      type: Explore.EExploreColumnType.EPT,
+      editable: true,
+      params: {},
+    },
   ],
   sort: undefined,
   filters: [],
@@ -29,6 +42,7 @@ enum ExploreActionType {
   removeColumn,
   setOffset,
   setLimit,
+  setLimitAndOffset,
   sort,
 }
 
@@ -79,6 +93,15 @@ const exploreReducer = (
         },
       };
 
+    case ExploreActionType.setLimitAndOffset:
+      return {
+        ...state,
+        ...{
+          limit: action.payload.limit,
+          offset: action.payload.offset,
+        },
+      };
+
     case ExploreActionType.sort:
       return {
         ...state,
@@ -92,11 +115,12 @@ const exploreReducer = (
   }
 };
 
+// TODO: implement a deep comparison
 const exploreDiff = (
   state1: Explore.IExplore,
   state2: Explore.IExplore
 ): boolean => {
-  return JSON.stringify(state1) !== JSON.stringify(state2);
+  return JSON.stringify(state1) === JSON.stringify(state2);
 };
 
 export {

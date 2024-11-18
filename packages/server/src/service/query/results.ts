@@ -42,6 +42,22 @@ export default class Results<T extends { id: string }> {
     this.items = Array.from(new Set((this.items || []).concat(results)));
   }
 
+  sort(sortData: Explore.IExploreColumnSort | undefined): void {
+    if (!this.items || !this.items.length) {
+      return;
+    }
+
+    // TODO: implement sorting
+
+    // Temporary solution
+    const sortedItems = [...this.items];
+    sortedItems.sort((a, b) => {
+      return a > b ? 1 : -1;
+    });
+
+    this.items = sortedItems;
+  }
+
   filter(exploreData: Explore.IExplore): string[] {
     if (!this.items || !this.items.length) {
       return [];
