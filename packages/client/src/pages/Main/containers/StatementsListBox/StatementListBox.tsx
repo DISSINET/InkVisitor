@@ -619,7 +619,9 @@ export const StatementListBox: React.FC = () => {
               contentWidth={statements.length > 0 ? width + 10 : 0}
             >
               <StyledTableWrapper
-              // id="Statements-box-table"
+                $isListMode={displayMode === StatementListDisplayMode.LIST}
+
+                // id="Statements-box-table"
               >
                 {statements.length > 0 && (
                   <StatementListTable
