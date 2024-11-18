@@ -110,7 +110,13 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     error: queryError,
     isFetching: queryIsFetching,
   } = useQuery({
-    queryKey: ["query", { offset: exploreState.offset }],
+    queryKey: [
+      "query",
+      {
+        query: queryState,
+        explore: exploreState,
+      },
+    ],
     queryFn: async () => {
       if (queryStateValidity.isValid && api.isLoggedIn()) {
         const res = await api.query({

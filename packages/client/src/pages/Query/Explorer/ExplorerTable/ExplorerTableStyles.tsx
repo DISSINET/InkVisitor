@@ -4,6 +4,9 @@ interface StyledTableWrapper {
   // $height: number;
 }
 export const StyledTableWrapper = styled.div<StyledTableWrapper>``;
+export const StyledRowWrapper = styled.div`
+  display: block;
+`;
 interface StyledRow {
   $isOdd: boolean;
   $isSelected: boolean;
@@ -34,6 +37,8 @@ export const StyledHeader = styled.div`
   background-color: ${({ theme }) => theme.color["success"]};
   color: ${({ theme }) => theme.color["white"]};
 `;
+
+export const StyledBody = styled.div``;
 
 interface StyledColumn {
   $isHeader?: boolean;

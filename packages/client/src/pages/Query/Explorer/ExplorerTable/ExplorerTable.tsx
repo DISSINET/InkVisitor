@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 
 import { EntityEnums } from "@shared/enums";
 import {
@@ -22,9 +22,10 @@ import { ThemeContext } from "styled-components";
 import useResizeObserver from "use-resize-observer";
 import { v4 as uuidv4 } from "uuid";
 import { ExploreAction, ExploreActionType } from "../state";
-import { ExplorerTableRow } from "./ExplorerTableRow";
+import MemoizedExplorerTableRow from "./ExplorerTableRow";
 import { ExplorerTableRowExpanded } from "./ExplorerTableRowExpanded/ExplorerTableRowExpanded";
 import {
+  StyledBody,
   StyledColumn,
   StyledHeader,
   StyledNewColumn,
@@ -33,6 +34,7 @@ import {
   StyledNewColumnLabel,
   StyledNewColumnValue,
   StyledRow,
+  StyledRowWrapper,
   StyledTableWrapper,
 } from "./ExplorerTableStyles";
 import ExploreTableControl from "./ExploreTableControl";
@@ -283,8 +285,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
 
   const [rowsExpanded, setRowsExpanded] = useState<string[]>([]);
 
-  const themeContext = useContext(ThemeContext);
-
   const {
     ref: contentRef,
     width: contentWidth,
@@ -304,16 +304,62 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     } else {
       setSelectedRows([...selectedRows, rowId]);
     }
+    setTimeout(() => {
+      checkVisibility();
+    }, 1000);
   };
 
   const handleScrollTable = (values: any) => {
-    const newOffset = Math.floor(values.scrollTop / HEIGHT_ROW_DEFAULT);
-    dispatch({ type: ExploreActionType.setOffset, payload: newOffset });
+    checkVisibility();
   };
 
   const widthTable = useMemo(() => {
     return columns.length * WIDTH_COLUMN_DEFAULT + 200;
   }, [columns]);
+
+  const rowsRefs = useRef<HTMLDivElement[]>([]);
+  const refTable = useRef<HTMLDivElement>(null);
+  const [visibleItems, setVisibleItems] = useState<string[]>([]);
+
+  const checkVisibility = () => {
+    if (!refTable.current) return;
+
+    const containerRect = refTable.current.getBoundingClientRect();
+    const visible = rowsRefs.current
+      .filter((item) => {
+        if (!item) return false;
+        const itemRect = item.getBoundingClientRect();
+
+        // Check if item at least partly visible
+        return (
+          itemRect.top < containerRect.bottom &&
+          itemRect.bottom > containerRect.top
+        );
+      })
+      .map((item) => item.id);
+
+    setVisibleItems(visible);
+  };
+
+  useEffect(() => {
+    if (visibleItems.length === 0) return;
+
+    const indices = visibleItems.map((item) => parseInt(item));
+    const topItem = Math.min(...indices);
+    const bottomItem = Math.max(...indices);
+
+    const newOffset = topItem;
+    const newLimit = bottomItem - topItem + 1;
+
+    console.log("new scroll items", newOffset, newLimit, visibleItems);
+
+    if (newOffset !== offset || newLimit !== limit) {
+      dispatch({
+        type: ExploreActionType.setLimitAndOffset,
+        payload: { offset: newOffset, limit: newLimit },
+      });
+    }
+  }, [visibleItems.join("-")]);
 
   const handleSelection = (rowIndex: number): string[] => {
     let selectedQueryEntities: IResponseQueryEntity[] = [];
@@ -327,6 +373,8 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   };
 
   const [scrollTableX, setScrollTableX] = useState<number>(0);
+
+  console.log(entities);
 
   return (
     <div
@@ -446,112 +494,83 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
               );
             })}
           </StyledHeader>
+          <StyledBody ref={refTable}>
+            <Scrollbar
+              style={{
+                width: widthTable,
+                height: spaceTableBody,
+              }}
+              trackYProps={{
+                renderer: (props) => {
+                  const { elementRef, style, ...restProps } = props;
+                  const trackStyle: React.CSSProperties = {
+                    ...style,
+                    left: scrollTableX + (contentWidth ?? 0) - 10,
+                  };
 
-          <Scrollbar
-            style={{
-              width: widthTable,
-              height: spaceTableBody,
-            }}
-            trackYProps={{
-              renderer: (props) => {
-                const { elementRef, style, ...restProps } = props;
-                const trackStyle: React.CSSProperties = {
-                  ...style,
-                  left: scrollTableX + (contentWidth ?? 0) - 10,
-                  // position: "relative",
-                  // height: spaceTableBody,
-                };
+                  return (
+                    <span
+                      {...restProps}
+                      style={{ ...trackStyle }}
+                      ref={elementRef}
+                      className="trackY"
+                    />
+                  );
+                },
+              }}
+              noScrollX
+              onScrollStop={(values) => {
+                handleScrollTable(values);
+              }}
+            >
+              {/* ROWS */}
+              {Array.from({ length: total }).map((_, rowI) => {
+                const responseI = rowI - offset;
+                const isOdd = Boolean(rowI % 2);
+
+                const responseData: IResponseQueryEntity | undefined =
+                  entities[responseI];
+
+                const responseEntityId: string | undefined =
+                  responseData?.entity.id ?? undefined;
 
                 return (
-                  <span
-                    {...restProps}
-                    style={{ ...trackStyle }}
-                    ref={elementRef}
-                    className="trackY"
-                  />
-                );
-              },
-            }}
-            // thumbYProps={{
-            //   renderer: (props) => {
-            //     const { elementRef, style, ...restProps } = props;
-
-            //     const thumbStyle: React.CSSProperties = {
-            //       ...style,
-            //       // left: contentWidth,
-            //       // position: "fixed",
-            //       // width: "10px",
-            //     };
-
-            //     return (
-            //       <span
-            //         style={thumbStyle}
-            //         {...restProps}
-            //         ref={elementRef}
-            //         className="thumbY"
-            //       />
-            //     );
-            //   },
-            // }}
-            noScrollX
-            onScrollStop={(values) => {
-              handleScrollTable(values);
-            }}
-          >
-            {/* ROWS */}
-            {Array.from({ length: total }).map((_, rowI) => {
-              const responseI = rowI - offset;
-              const isOdd = Boolean(rowI % 2);
-
-              const responseData: IResponseQueryEntity | undefined =
-                entities[responseI];
-
-              const responseEntityId: string | undefined =
-                responseData?.entity.id ?? undefined;
-
-              if (responseEntityId) {
-                // console.log(
-                //   "row",
-                //   `${rowI} -> ${responseI}`,
-                //   offset,
-                //   responseEntityId
-                // );
-              }
-
-              return (
-                <React.Fragment key={`${rowI}`}>
-                  <StyledRow
-                    $width={widthTable}
-                    $height={HEIGHT_ROW_DEFAULT}
-                    onClick={() =>
-                      rowsExpanded.includes(responseEntityId)
-                        ? setRowsExpanded(
-                            rowsExpanded.filter((r) => r !== responseEntityId)
-                          )
-                        : setRowsExpanded(rowsExpanded.concat(responseEntityId))
-                    }
-                    $isOdd={isOdd}
-                    $isSelected={selectedRows.includes(responseEntityId)}
+                  <StyledRowWrapper
+                    key={`${rowI}`}
+                    ref={(el) => {
+                      // @ts-ignore
+                      rowsRefs.current[rowI] = el;
+                    }}
+                    id={`${rowI}`}
                   >
-                    <ExplorerTableRow
-                      responseData={responseData}
-                      columns={columns}
-                      handleEditColumn={handleEditColumn}
-                      updateEntityMutation={updateEntityMutation}
-                    />
-                  </StyledRow>
+                    <StyledRow
+                      $width={widthTable}
+                      $height={HEIGHT_ROW_DEFAULT}
+                      onClick={() => handleRowSelect(responseEntityId)}
+                      $isOdd={isOdd}
+                      $isSelected={selectedRows.includes(responseEntityId)}
+                    >
+                      <MemoizedExplorerTableRow
+                        rowId={`${rowI}`}
+                        responseData={responseData}
+                        columns={columns}
+                        handleEditColumn={handleEditColumn}
+                        updateEntityMutation={updateEntityMutation}
+                      />
+                    </StyledRow>
 
-                  {rowsExpanded.includes(responseEntityId) && (
-                    <ExplorerTableRowExpanded
-                      rowEntity={responseData.entity}
-                      columns={columns}
-                      isOdd={isOdd}
-                    />
-                  )}
-                </React.Fragment>
-              );
-            })}
-          </Scrollbar>
+                    {rowsExpanded.includes(responseEntityId) && (
+                      <ExplorerTableRowExpanded
+                        rowEntity={responseData.entity}
+                        columns={columns}
+                        isOdd={isOdd}
+                      />
+                    )}
+                  </StyledRowWrapper>
+                );
+              })}
+            </Scrollbar>
+          </StyledBody>
         </Scrollbar>
         {/* {renderTableFooter()} */}
       </StyledTableWrapper>

@@ -13,10 +13,12 @@ import { MdOutlineCheckBox } from "react-icons/md";
 import { IEntity, IProp, IResponseQueryEntity, IUser } from "@shared/types";
 import { classesAll } from "@shared/dictionaries/entity";
 import { CMetaProp } from "constructors";
+import { BeatLoader } from "react-spinners";
 
 const WIDTH_COLUMN_DEFAULT = 800;
 
 interface ExplorerTableRowProps {
+  rowId: string;
   responseData: IResponseQueryEntity | undefined;
   columns: Explore.IExploreColumn[];
   handleEditColumn: (
@@ -26,14 +28,36 @@ interface ExplorerTableRowProps {
   ) => void;
   updateEntityMutation: any;
 }
-export const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
+const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
+  rowId,
   responseData,
   columns,
   handleEditColumn,
   updateEntityMutation,
 }) => {
+  const themeContext = useContext(ThemeContext);
+
   if (!responseData) {
-    return <>loading...</>;
+    return (
+      <>
+        <div
+          style={{
+            display: "flex",
+            gap: "0.5rem",
+            justifyContent: "start",
+            marginLeft: "2.5rem",
+          }}
+        >
+          <BeatLoader
+            size={7}
+            margin={4}
+            style={{ marginLeft: "0.3rem", marginTop: "0.1rem" }}
+            color={themeContext?.color["primary"]}
+          />
+          <div>{`loading ${rowId}...`}</div>
+        </div>
+      </>
+    );
   }
 
   const { entity: rowEntity, columnData } = responseData;
@@ -119,20 +143,6 @@ export const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
 
     // return <StyledEmpty>{"empty"}</StyledEmpty>;
   };
-
-  const [rowsExpanded, setRowsExpanded] = useState<string[]>([]);
-
-  const themeContext = useContext(ThemeContext);
-
-  // const handleRowSelect = (rowId: string) => {
-  //   if (selectedRows.includes(rowId)) {
-  //     setSelectedRows(
-  //       selectedRows.filter((selectedRow) => selectedRow !== rowId)
-  //     );
-  //   } else {
-  //     setSelectedRows([...selectedRows, rowId]);
-  //   }
-  // };
 
   // const handleSelection = (rowIndex: number): string[] => {
   //   let selectedQueryEntities: IResponseQueryEntity[] = [];
@@ -276,3 +286,6 @@ export const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
     </React.Fragment>
   );
 };
+
+const MemoizedExplorerTableRow = React.memo(ExplorerTableRow);
+export default MemoizedExplorerTableRow;
