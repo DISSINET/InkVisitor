@@ -31,6 +31,7 @@ import { Connection, RDatum, WriteResult, r as rethink } from "rethinkdb-ts";
 import { IRequest } from "../../custom_typings/request";
 import Reference from "./reference";
 import { PropSpecKind } from "@shared/types/prop";
+import { IWarningPositionSection } from "@shared/types/warning";
 
 export default class Entity implements IEntity, IDbModel {
   static table = "entities";
@@ -374,6 +375,7 @@ export default class Entity implements IEntity, IDbModel {
         origin: this.id,
         validation: tValidation,
         position: {
+          section: IWarningPositionSection.Entity,
           entityId: this.id,
         },
       });
