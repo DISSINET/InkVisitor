@@ -38,10 +38,13 @@ import {
   StyledTableWrapper,
 } from "./ExplorerTableStyles";
 import ExploreTableControl from "./ExploreTableControl";
-import { BatchAction, batchOptions } from "./types";
-
-const WIDTH_COLUMN_DEFAULT = 800;
-const HEIGHT_ROW_DEFAULT = 40;
+import {
+  BatchAction,
+  batchOptions,
+  HEIGHT_ROW_DEFAULT,
+  WIDTH_COLUMN_DEFAULT,
+  WIDTH_COLUMN_FIRST,
+} from "./types";
 
 const initialNewColumn: Explore.IExploreColumn = {
   id: uuidv4(),
@@ -316,7 +319,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   };
 
   const widthTable = useMemo(() => {
-    return columns.length * WIDTH_COLUMN_DEFAULT + 200;
+    return columns.length * WIDTH_COLUMN_DEFAULT + WIDTH_COLUMN_FIRST;
   }, [columns]);
 
   const rowsRefs = useRef<HTMLDivElement[]>([]);
@@ -384,9 +387,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     } else {
       return scrollTableX + (contentWidth ?? 0) - 10;
     }
-  }, [yScrollerLeft, scrollTableXScrolling]);
-
-  console.log(entities);
+  }, [contentWidth, scrollTableX, scrollTableXScrolling]);
 
   return (
     <div
@@ -437,7 +438,10 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
               width: widthTable,
             }}
           >
-            <StyledColumn $isHeader={true} $width={250}></StyledColumn>
+            <StyledColumn
+              $isHeader={true}
+              $width={WIDTH_COLUMN_FIRST}
+            ></StyledColumn>
             {columns.map((column, key) => {
               return (
                 <StyledColumn

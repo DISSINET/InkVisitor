@@ -47,6 +47,8 @@ interface StyledColumn {
 export const StyledColumn = styled.div<StyledColumn>`
   display: inline-flex;
   width: ${({ $width }) => `${$width}px`};
+  min-width: ${({ $width }) => `${$width}px`};
+  max-width: ${({ $width }) => `${$width}px`};
   font-weight: ${({ theme, $isHeader }) =>
     $isHeader ? theme.fontWeight["bold"] : theme.fontWeight["normal"]};
   height: ${({ theme }) => theme.space[18]};

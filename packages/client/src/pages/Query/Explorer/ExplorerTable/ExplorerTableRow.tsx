@@ -14,8 +14,7 @@ import { IEntity, IProp, IResponseQueryEntity, IUser } from "@shared/types";
 import { classesAll } from "@shared/dictionaries/entity";
 import { CMetaProp } from "constructors";
 import { BeatLoader } from "react-spinners";
-
-const WIDTH_COLUMN_DEFAULT = 800;
+import { WIDTH_COLUMN_DEFAULT, WIDTH_COLUMN_FIRST } from "./types";
 
 interface ExplorerTableRowProps {
   rowId: string;
@@ -219,7 +218,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
   return (
     <React.Fragment>
       <StyledColumn
-        $width={250}
+        $width={WIDTH_COLUMN_FIRST}
         style={
           {
             // display: "sticky",
