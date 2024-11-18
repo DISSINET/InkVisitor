@@ -81,6 +81,37 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   const [total, setTotal] = useState(0);
   const totalPages = useMemo(() => Math.ceil(total / limit), [total, limit]);
 
+  const handleCheckboxClick = (
+    e: React.MouseEvent<HTMLDivElement, MouseEvent>,
+    rowId: number,
+    entityId: string
+  ) => {
+    const isSelected = rowsSelected.includes(entityId);
+
+    if (isSelected) {
+      if (e.shiftKey && lastClickedIndex !== -1 && lastClickedIndex !== rowId) {
+        // unset all between
+        const mappedIds = handleSelection(rowId);
+        const filteredIds = rowsSelected.filter(
+          (id) => !mappedIds.includes(id)
+        );
+        setRowsSelected(filteredIds);
+      } else {
+        handleRowSelect(entityId);
+      }
+      setLastClickedIndex(rowId);
+    } else {
+      if (e.shiftKey && lastClickedIndex !== -1 && lastClickedIndex !== rowId) {
+        // set all between
+        const mappedIds = handleSelection(rowId);
+        setRowsSelected([...new Set(rowsSelected.concat(mappedIds))]);
+      } else {
+        handleRowSelect(entityId);
+      }
+      setLastClickedIndex(rowId);
+    }
+  };
+
   useEffect(() => {
     if (!isQueryFetching) {
       setTotal(incomingTotal);
@@ -289,6 +320,15 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   // };
 
   const [rowsExpanded, setRowsExpanded] = useState<string[]>([]);
+  const handleExpandRow = (rowId: string) => {
+    if (rowsExpanded.includes(rowId)) {
+      setRowsExpanded(
+        rowsExpanded.filter((expandedRow) => expandedRow !== rowId)
+      );
+    } else {
+      setRowsExpanded([...rowsExpanded, rowId]);
+    }
+  };
 
   const {
     ref: contentRef,
@@ -298,16 +338,16 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
 
   const spaceTableBody = heightBox - 150;
 
-  const [selectedRows, setSelectedRows] = useState<string[]>([]);
+  const [rowsSelected, setRowsSelected] = useState<string[]>([]);
   const [lastClickedIndex, setLastClickedIndex] = useState<number>(-1);
 
   const handleRowSelect = (rowId: string) => {
-    if (selectedRows.includes(rowId)) {
-      setSelectedRows(
-        selectedRows.filter((selectedRow) => selectedRow !== rowId)
+    if (rowsSelected.includes(rowId)) {
+      setRowsSelected(
+        rowsSelected.filter((selectedRow) => selectedRow !== rowId)
       );
     } else {
-      setSelectedRows([...selectedRows, rowId]);
+      setRowsSelected([...rowsSelected, rowId]);
     }
     setTimeout(() => {
       checkVisibility();
@@ -404,8 +444,8 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           isNewColumnOpen={isNewColumnOpen}
           batchActionSelected={batchActionSelected}
           setBatchActionSelected={setBatchActionSelected}
-          selectedRows={selectedRows}
-          setSelectedRows={setSelectedRows}
+          rowsSelected={rowsSelected}
+          setRowsSelected={setRowsSelected}
           entities={entities}
           setLastClickedIndex={setLastClickedIndex}
         />
@@ -566,16 +606,20 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                     <StyledRow
                       $width={widthTable}
                       $height={HEIGHT_ROW_DEFAULT}
-                      onClick={() => handleRowSelect(responseEntityId)}
+                      onClick={() => handleExpandRow(responseEntityId)}
                       $isOdd={isOdd}
-                      $isSelected={selectedRows.includes(responseEntityId)}
+                      $isSelected={rowsSelected.includes(responseEntityId)}
                     >
                       <MemoizedExplorerTableRow
-                        rowId={`${rowI}`}
+                        rowId={rowI}
                         responseData={responseData}
                         columns={columns}
                         handleEditColumn={handleEditColumn}
                         updateEntityMutation={updateEntityMutation}
+                        onCheckboxClick={handleCheckboxClick}
+                        isSelected={rowsSelected.includes(responseEntityId)}
+                        isLastClicked={lastClickedIndex === rowI}
+                        isExpanded={rowsExpanded.includes(responseEntityId)}
                       />
                     </StyledRow>
 

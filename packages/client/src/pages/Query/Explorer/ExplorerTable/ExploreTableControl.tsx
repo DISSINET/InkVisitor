@@ -17,8 +17,8 @@ interface ExploreTableControlProps {
   isNewColumnOpen: boolean;
   setIsNewColumnOpen: (value: boolean) => void;
 
-  selectedRows: string[];
-  setSelectedRows: (value: string[]) => void;
+  rowsSelected: string[];
+  setRowsSelected: (value: string[]) => void;
 
   entities: IResponseQueryEntity[];
 
@@ -32,8 +32,8 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
   isNewColumnOpen,
   setIsNewColumnOpen,
 
-  selectedRows,
-  setSelectedRows,
+  rowsSelected,
+  setRowsSelected,
 
   entities,
 
@@ -44,13 +44,13 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
 }) => {
   const handleSelectAll = (checked: boolean) =>
     checked
-      ? setSelectedRows(entities.map((queryEntity) => queryEntity.entity.id))
-      : setSelectedRows([]);
+      ? setRowsSelected(entities.map((queryEntity) => queryEntity.entity.id))
+      : setRowsSelected([]);
 
   const renderHeaderCheckBox = () => {
     const size = 18;
     const isAllSelected =
-      entities.length > 0 && selectedRows.length === entities.length;
+      entities.length > 0 && rowsSelected.length === entities.length;
 
     if (isAllSelected) {
       return (
@@ -62,7 +62,7 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
           }}
         />
       );
-    } else if (selectedRows.length > 0) {
+    } else if (rowsSelected.length > 0) {
       // some rows selected
       return (
         <MdOutlineIndeterminateCheckBox
@@ -88,12 +88,12 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
       <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
           {renderHeaderCheckBox()}
-          {selectedRows.length > 0 && (
-            <StyledCounter>{`${selectedRows.length}/${entities.length}`}</StyledCounter>
+          {rowsSelected.length > 0 && (
+            <StyledCounter>{`${rowsSelected.length}/${entities.length}`}</StyledCounter>
           )}
           <Dropdown.Single.Basic
             width={98}
-            disabled={selectedRows.length === 0}
+            disabled={rowsSelected.length === 0}
             value={batchActionSelected}
             onChange={(selectedOption) => {
               const newSelectedAction = batchOptions.find(

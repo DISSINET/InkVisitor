@@ -152,12 +152,16 @@ export const StyledFocusedCircle = styled.span<StyledFocusedCircle>`
   left: 50%;
 `;
 export const StyledCheckboxWrapper = styled.div`
-  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
   color: ${({ theme }) => theme.color["black"]};
   cursor: pointer;
+  z-index: 2;
+  svg {
+    height: 1.6rem;
+    width: 1.6rem;
+  }
 `;
 export const StyledCounter = styled.div`
   white-space: nowrap;

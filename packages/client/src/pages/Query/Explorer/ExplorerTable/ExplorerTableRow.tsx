@@ -9,15 +9,19 @@ import {
 import { Explore } from "@shared/types/query";
 import { EntitySuggester, EntityTag } from "components/advanced";
 import { FaChevronCircleDown, FaChevronCircleUp } from "react-icons/fa";
-import { MdOutlineCheckBox } from "react-icons/md";
+import {
+  MdOutlineCheckBox,
+  MdOutlineCheckBoxOutlineBlank,
+} from "react-icons/md";
 import { IEntity, IProp, IResponseQueryEntity, IUser } from "@shared/types";
 import { classesAll } from "@shared/dictionaries/entity";
 import { CMetaProp } from "constructors";
 import { BeatLoader } from "react-spinners";
 import { WIDTH_COLUMN_DEFAULT, WIDTH_COLUMN_FIRST } from "./types";
+import { Checkbox } from "components";
 
 interface ExplorerTableRowProps {
-  rowId: string;
+  rowId: number;
   responseData: IResponseQueryEntity | undefined;
   columns: Explore.IExploreColumn[];
   handleEditColumn: (
@@ -26,6 +30,16 @@ interface ExplorerTableRowProps {
     newEntity: IEntity
   ) => void;
   updateEntityMutation: any;
+
+  onCheckboxClick: (
+    e: React.MouseEvent<HTMLDivElement, MouseEvent>,
+    rowId: number,
+    entityId: string
+  ) => void;
+
+  isSelected?: boolean;
+  isLastClicked?: boolean;
+  isExpanded?: boolean;
 }
 const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
   rowId,
@@ -33,6 +47,12 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
   columns,
   handleEditColumn,
   updateEntityMutation,
+
+  onCheckboxClick,
+
+  isSelected = false,
+  isLastClicked = false,
+  isExpanded = false,
 }) => {
   const themeContext = useContext(ThemeContext);
 
@@ -143,115 +163,44 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
     // return <StyledEmpty>{"empty"}</StyledEmpty>;
   };
 
-  // const handleSelection = (rowIndex: number): string[] => {
-  //   let selectedQueryEntities: IResponseQueryEntity[] = [];
-  //   if (lastClickedIndex < rowIndex) {
-  //     selectedQueryEntities = entities.slice(lastClickedIndex, rowIndex + 1);
-  //   } else {
-  //     // is bigger than - oposite direction of selection
-  //     selectedQueryEntities = entities.slice(rowIndex, lastClickedIndex + 1);
-  //   }
-  //   return selectedQueryEntities.map((queryEntity) => queryEntity.entity.id);
-  // };
-
-  // const renderCheckbox = useCallback(
-  //   (id: string, index: number) => {
-  //     const size = 18;
-  //     const checked = selectedRows.includes(id);
-  //     const isFocused = lastClickedIndex === index;
-
-  //     return (
-  //       <StyledCheckboxWrapper>
-  //         {isFocused && <StyledFocusedCircle checked={checked} />}
-  //         {checked ? (
-  //           <MdOutlineCheckBox
-  //             size={size}
-  //             style={{ zIndex: 2 }}
-  //             onClick={(e) => {
-  //               e.stopPropagation();
-  //               if (
-  //                 e.shiftKey &&
-  //                 lastClickedIndex !== -1 &&
-  //                 lastClickedIndex !== index
-  //               ) {
-  //                 // unset all between
-  //                 const mappedIds = handleSelection(index);
-  //                 const filteredIds = selectedRows.filter(
-  //                   (id) => !mappedIds.includes(id)
-  //                 );
-  //                 setSelectedRows(filteredIds);
-  //               } else {
-  //                 handleRowSelect(id);
-  //               }
-  //               // dispatch(
-  //               setLastClickedIndex(index);
-  //               // );
-  //             }}
-  //           />
-  //         ) : (
-  //           <MdOutlineCheckBoxOutlineBlank
-  //             size={size}
-  //             style={{ zIndex: 2 }}
-  //             onClick={(e) => {
-  //               e.stopPropagation();
-  //               if (
-  //                 e.shiftKey &&
-  //                 lastClickedIndex !== -1 &&
-  //                 lastClickedIndex !== index
-  //               ) {
-  //                 // set all between
-  //                 const mappedIds = handleSelection(index);
-  //                 setSelectedRows([...new Set(selectedRows.concat(mappedIds))]);
-  //               } else {
-  //                 handleRowSelect(id);
-  //               }
-  //               setLastClickedIndex(index);
-  //             }}
-  //           />
-  //         )}
-  //       </StyledCheckboxWrapper>
-  //     );
-  //   },
-  //   [selectedRows, lastClickedIndex]
-  // );
-
   return (
     <React.Fragment>
       <StyledColumn
         $width={WIDTH_COLUMN_FIRST}
         style={
           {
+            // TODO make it stick the left side
             // display: "sticky",
           }
         }
       >
-        {/* {renderCheckbox(rowEntity.id, rowI)} */}
+        <StyledCheckboxWrapper
+          onClick={(e) => {
+            e.stopPropagation();
+            onCheckboxClick(e, rowId, rowEntity.id);
+          }}
+        >
+          {isLastClicked && <StyledFocusedCircle checked={isSelected} />}
+          {isSelected ? (
+            <MdOutlineCheckBox />
+          ) : (
+            <MdOutlineCheckBoxOutlineBlank />
+          )}
+        </StyledCheckboxWrapper>
 
-        {/* <span
-        style={{
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-        }}
-        onClick={(e) => {
-          e.stopPropagation();
-          if (!rowsExpanded.includes(rowId)) {
-            setRowsExpanded(rowsExpanded.concat(rowId));
-          } else {
-            setRowsExpanded(
-              rowsExpanded.filter((r) => r !== rowId)
-            );
-          }
-        }}
-      >
-        {rowsExpanded.includes(rowEntity.id) ? (
-          <FaChevronCircleUp
-            color={themeContext?.color.warning}
-          />
-        ) : (
-          <FaChevronCircleDown />
-        )}
-      </span> */}
+        <div
+          style={{
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
+          {isExpanded ? (
+            <FaChevronCircleUp color={themeContext?.color.warning} />
+          ) : (
+            <FaChevronCircleDown />
+          )}
+        </div>
 
         <span
           style={{
