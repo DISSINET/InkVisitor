@@ -74,8 +74,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     total: 0,
   };
 
-  const [yScrollerLeft, setYScrollerLeft] = useState<number>(0);
-
   const { columns, filters, limit, offset, sort, view } = state;
 
   const [total, setTotal] = useState(0);
@@ -200,12 +198,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     dispatch({ type: ExploreActionType.setOffset, payload: 0 });
     setRowsExpanded([]);
   };
-
-  const startRecord = offset + 1;
-  const endRecord = Math.min(offset + limit, total);
-  const pageNumber = Math.floor(offset / limit + 1);
-  const canGoToPreviousPage = offset > 0;
-  const canGoToNextPage = offset + limit < total;
 
   const toggleSortDirection = (columnId: string) => {
     if (sort && sort.columnId === columnId) {
@@ -472,10 +464,9 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
               width: widthTable,
             }}
           >
-            <StyledColumn
-              $isHeader={true}
-              $width={WIDTH_COLUMN_FIRST}
-            ></StyledColumn>
+            <StyledColumn $isHeader={true} $width={WIDTH_COLUMN_FIRST}>
+              Entity
+            </StyledColumn>
             {columns.map((column, key) => {
               return (
                 <StyledColumn
