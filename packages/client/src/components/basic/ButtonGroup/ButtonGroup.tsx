@@ -3,7 +3,7 @@ import { space2 } from "Theme/constants";
 
 interface ButtonGroup {
   $noMarginRight?: boolean;
-  column?: boolean;
+  $column?: boolean;
   $marginBottom?: boolean;
   $marginTop?: boolean;
   $height?: number;
@@ -13,7 +13,7 @@ export const ButtonGroup = styled.div.attrs({
 })<ButtonGroup>`
   display: flex;
   height: ${({ $height }) => ($height ? `${$height / 10}rem` : "")};
-  flex-direction: ${({ column }) => (column ? "column" : "row")};
+  flex-direction: ${({ $column }) => ($column ? "column" : "row")};
   margin-top: ${({ $marginTop, theme }) => ($marginTop ? theme.space[2] : "")};
   margin-bottom: ${({ $marginBottom, theme }) =>
     $marginBottom ? theme.space[2] : ""};

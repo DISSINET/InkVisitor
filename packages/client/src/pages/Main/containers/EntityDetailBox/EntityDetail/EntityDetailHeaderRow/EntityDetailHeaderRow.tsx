@@ -93,7 +93,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
         <StyledTagWrap>
           <EntityTag entity={entity} fullWidth />
         </StyledTagWrap>
-        <ButtonGroup style={{ marginTop: "1rem" }}>
+        <ButtonGroup $marginTop={true}>
           {userCanEdit && (
             <Button
               color="primary"

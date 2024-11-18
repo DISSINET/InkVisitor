@@ -303,7 +303,7 @@ export const StatementListTextAnnotator: React.FC<
       </div>
 
       {/* Class selector */}
-      {selectedResource !== false && selectedResource?.data?.documentId && (
+      {/* {selectedResource !== false && selectedResource?.data?.documentId && (
         <div
           style={{
             display: "flex",
@@ -332,7 +332,7 @@ export const StatementListTextAnnotator: React.FC<
             noOptionsMessage="No entity classes to highlight"
           />
         </div>
-      )}
+      )} */}
 
       {/* Annotator */}
       <div style={{ marginTop: "0.2rem" }}>

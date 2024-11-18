@@ -290,7 +290,7 @@ export const StatementEditorActantTableRow: React.FC<
     const { entityId: propOriginId, id: propRowId } = sActant;
 
     return (
-      <ButtonGroup $noMarginRight height={19}>
+      <ButtonGroup $noMarginRight $height={19}>
         {userCanEdit && (
           <Button
             key="a"
