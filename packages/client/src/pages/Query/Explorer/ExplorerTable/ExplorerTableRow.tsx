@@ -1,4 +1,14 @@
-import React, { useCallback, useContext, useState } from "react";
+import { classesAll } from "@shared/dictionaries/entity";
+import { IEntity, IResponseQueryEntity, IUser } from "@shared/types";
+import { Explore } from "@shared/types/query";
+import { EntitySuggester, EntityTag } from "components/advanced";
+import React, { useContext } from "react";
+import { FaChevronCircleDown, FaChevronCircleUp } from "react-icons/fa";
+import {
+  MdOutlineCheckBox,
+  MdOutlineCheckBoxOutlineBlank,
+} from "react-icons/md";
+import { BeatLoader } from "react-spinners";
 import { ThemeContext } from "styled-components";
 import {
   StyledCheckboxWrapper,
@@ -6,19 +16,7 @@ import {
   StyledColumnContent,
   StyledFocusedCircle,
 } from "./ExplorerTableStyles";
-import { Explore } from "@shared/types/query";
-import { EntitySuggester, EntityTag } from "components/advanced";
-import { FaChevronCircleDown, FaChevronCircleUp } from "react-icons/fa";
-import {
-  MdOutlineCheckBox,
-  MdOutlineCheckBoxOutlineBlank,
-} from "react-icons/md";
-import { IEntity, IProp, IResponseQueryEntity, IUser } from "@shared/types";
-import { classesAll } from "@shared/dictionaries/entity";
-import { CMetaProp } from "constructors";
-import { BeatLoader } from "react-spinners";
 import { WIDTH_COLUMN_DEFAULT, WIDTH_COLUMN_FIRST } from "./types";
-import { Checkbox } from "components";
 
 interface ExplorerTableRowProps {
   rowId: number;

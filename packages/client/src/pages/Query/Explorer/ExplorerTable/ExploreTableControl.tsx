@@ -21,6 +21,7 @@ interface ExploreTableControlProps {
   setRowsSelected: (value: string[]) => void;
 
   entities: IResponseQueryEntity[];
+  rowsTotal: number;
 
   batchActionSelected: BatchAction;
   setBatchActionSelected: (value: BatchAction) => void;
@@ -36,6 +37,7 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
   setRowsSelected,
 
   entities,
+  rowsTotal,
 
   batchActionSelected,
   setBatchActionSelected,
@@ -88,9 +90,7 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
       <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
           {renderHeaderCheckBox()}
-          {rowsSelected.length > 0 && (
-            <StyledCounter>{`${rowsSelected.length}/${entities.length}`}</StyledCounter>
-          )}
+          <StyledCounter>{`${rowsSelected.length}/${rowsTotal}`}</StyledCounter>
           <Dropdown.Single.Basic
             width={98}
             disabled={rowsSelected.length === 0}

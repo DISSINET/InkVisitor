@@ -448,15 +448,9 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           setRowsSelected={setRowsSelected}
           entities={entities}
           setLastClickedIndex={setLastClickedIndex}
+          rowsTotal={total}
         />
 
-        {/* <div
-          style={{
-            overflowX: "scroll",
-            overflowY: "hidden",
-            width: "100%",
-          }}
-        > */}
         <Scrollbar
           style={{
             width: contentWidth,
