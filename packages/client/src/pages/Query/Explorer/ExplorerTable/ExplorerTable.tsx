@@ -71,6 +71,8 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     total: 0,
   };
 
+  const [yScrollerLeft, setYScrollerLeft] = useState<number>(0);
+
   const { columns, filters, limit, offset, sort, view } = state;
 
   const [total, setTotal] = useState(0);
@@ -373,6 +375,16 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   };
 
   const [scrollTableX, setScrollTableX] = useState<number>(0);
+  const [scrollTableXScrolling, setScrollTableXScrolling] =
+    useState<boolean>(false);
+
+  const scrollYLeft = useMemo<number>(() => {
+    if (scrollTableXScrolling) {
+      return -10;
+    } else {
+      return scrollTableX + (contentWidth ?? 0) - 10;
+    }
+  }, [yScrollerLeft, scrollTableXScrolling]);
 
   console.log(entities);
 
@@ -409,9 +421,13 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
             width: contentWidth,
             height: contentHeight,
           }}
+          onScroll={() => {
+            setScrollTableXScrolling(true);
+          }}
           onScrollStop={(values) => {
             // @ts-ignore
             setScrollTableX(values.scrollLeft);
+            setScrollTableXScrolling(false);
           }}
           noScrollY
         >
@@ -505,7 +521,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                   const { elementRef, style, ...restProps } = props;
                   const trackStyle: React.CSSProperties = {
                     ...style,
-                    left: scrollTableX + (contentWidth ?? 0) - 10,
+                    left: scrollYLeft,
                   };
 
                   return (
