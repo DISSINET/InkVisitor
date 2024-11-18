@@ -1276,6 +1276,23 @@ class Api {
     }
   }
 
+  async documentRemoveAnchor(
+    documentId: string,
+    entityId: string,
+    anchorText: string,
+    anchorIndex: number,
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      // todo add api endpoint
+
+      // @ts-ignore
+      return null;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
   /**
    * Document update
    */
