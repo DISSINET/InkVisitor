@@ -8,8 +8,8 @@ interface HeaderProps {
   paddingX?: number;
   paddingY?: number;
   height?: number;
-  left?: JSX.Element;
-  right?: JSX.Element;
+  left: JSX.Element | undefined;
+  right: JSX.Element | undefined;
   color?: keyof ThemeColor;
 }
 
