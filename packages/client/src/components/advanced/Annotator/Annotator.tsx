@@ -29,7 +29,7 @@ interface TextAnnotatorProps {
   width: number;
   height: number;
   displayLineNumbers: boolean;
-  hlEntities: EntityEnums.Class[];
+  hlEntities?: EntityEnums.Class[];
   documentId: string;
   handleCreateStatement?: Function | undefined;
   handleCreateTerritory?: Function | undefined;
@@ -38,7 +38,7 @@ interface TextAnnotatorProps {
 
   forwardAnnotator?: (annotator: Annotator | undefined) => void;
 
-  storedAnnotatorScroll: number;
+  storedAnnotatorScroll?: number;
   setStoredAnnotatorScroll?: React.Dispatch<React.SetStateAction<number>>;
 }
 
@@ -49,14 +49,14 @@ export const TextAnnotator = ({
   width = 400,
   height = 500,
   displayLineNumbers = true,
-  hlEntities,
+  hlEntities = Object.values(EntityEnums.Class),
   documentId,
   handleCreateStatement = undefined,
   handleCreateTerritory = undefined,
   initialScrollEntityId = undefined,
   thisTerritoryEntityId = undefined,
 
-  storedAnnotatorScroll,
+  storedAnnotatorScroll = 0,
   forwardAnnotator = (undefined) => {},
   setStoredAnnotatorScroll = () => {},
 }: TextAnnotatorProps) => {
@@ -537,7 +537,7 @@ export const TextAnnotator = ({
       </StyledCanvasWrapper>
 
       {annotator && (
-        <ButtonGroup marginTop>
+        <ButtonGroup $marginTop={true}>
           <Button
             key={EditMode.HIGHLIGHT}
             icon={<FaPen size={11} />}

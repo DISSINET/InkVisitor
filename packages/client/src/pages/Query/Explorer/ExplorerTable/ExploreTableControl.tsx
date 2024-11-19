@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import {
   MdOutlineCheckBox,
   MdOutlineCheckBoxOutlineBlank,
@@ -12,6 +12,7 @@ import Dropdown from "components/advanced";
 
 import { StyledCounter, StyledTableControl } from "./ExplorerTableStyles";
 import { BatchAction, batchOptions } from "./types";
+import { ThemeContext } from "styled-components";
 
 interface ExploreTableControlProps {
   isNewColumnOpen: boolean;
@@ -49,6 +50,8 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
       ? setRowsSelected(entities.map((queryEntity) => queryEntity.entity.id))
       : setRowsSelected([]);
 
+  const themeContext = useContext(ThemeContext);
+
   const renderHeaderCheckBox = () => {
     const size = 18;
     const isAllSelected =
@@ -57,6 +60,7 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
     if (isAllSelected) {
       return (
         <MdOutlineCheckBox
+          color={themeContext?.color.primary}
           size={size}
           onClick={() => {
             handleSelectAll(false);
@@ -68,6 +72,7 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
       // some rows selected
       return (
         <MdOutlineIndeterminateCheckBox
+          color={themeContext?.color.primary}
           size={size}
           onClick={() => {
             handleSelectAll(false);
@@ -78,6 +83,7 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
     } else {
       return (
         <MdOutlineCheckBoxOutlineBlank
+          color={themeContext?.color.primary}
           size={size}
           onClick={() => handleSelectAll(true)}
         />

@@ -234,7 +234,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
               userCanEdit={userCanEdit}
               buttons={
                 <>
-                  <ButtonGroup height={19} $noMarginRight>
+                  <ButtonGroup $height={19} $noMarginRight>
                     {(level === 1 || level === 2) && userCanEdit && (
                       <Button
                         key="add"

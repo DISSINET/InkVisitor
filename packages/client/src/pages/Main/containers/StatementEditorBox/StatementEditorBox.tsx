@@ -12,6 +12,10 @@ import { StyledEditorEmptyState } from "./StatementEditorBoxStyles";
 import { useAppSelector } from "redux/hooks";
 
 export const StatementEditorBox: React.FC = () => {
+  const thirdPanelExpanded: boolean = useAppSelector(
+    (state) => state.layout.mainPage.thirdPanelExpanded
+  );
+
   const { statementId, setStatementId, selectedDetailId, setTerritoryId } =
     useSearchParams();
 
@@ -362,7 +366,7 @@ export const StatementEditorBox: React.FC = () => {
 
   return (
     <>
-      {tempObject ? (
+      {tempObject && thirdPanelExpanded ? (
         <CustomScrollbar>
           <div onMouseLeave={() => sendChangesToBackend(tempObject)}>
             <StatementEditor

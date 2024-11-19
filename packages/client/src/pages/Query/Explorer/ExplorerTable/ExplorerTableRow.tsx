@@ -63,6 +63,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
             gap: "0.5rem",
             justifyContent: "start",
             marginLeft: "2.5rem",
+            color: themeContext?.color["primary"],
           }}
         >
           <BeatLoader
@@ -196,7 +197,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
           {isExpanded ? (
             <FaChevronCircleUp color={themeContext?.color.warning} />
           ) : (
-            <FaChevronCircleDown />
+            <FaChevronCircleDown color={themeContext?.color.primary} />
           )}
         </div>
 
