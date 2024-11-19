@@ -43,8 +43,8 @@ export const CustomScrollbar: React.FC<CustomScrollbar> = ({
         width: contentWidth ?? "100%",
         height: contentHeight ?? "100%",
       }}
-      noScrollX={contentWidth === undefined || noScrollX}
-      noScrollY={contentHeight === undefined || noScrollY}
+      // noScrollX={contentWidth === undefined || noScrollX}
+      // noScrollY={contentHeight === undefined || noScrollY}
     >
       {children}
     </StyledScrollbar>
