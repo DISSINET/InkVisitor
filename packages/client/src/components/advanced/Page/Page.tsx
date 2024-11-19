@@ -9,7 +9,7 @@ import {
 import { useSearchParams } from "hooks";
 import useKeyLift from "hooks/useKeyLift";
 import useKeypress from "hooks/useKeyPress";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { Id, toast } from "react-toastify";
 import { setDisableUserSelect } from "redux/features/layout/disableUserSelectSlice";
@@ -17,8 +17,8 @@ import { setPing } from "redux/features/pingSlice";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { setUsername } from "redux/features/usernameSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { StyledPage, StyledPageContent } from "./PageStyles";
 import { ThemeColor } from "Theme/theme";
+import { StyledPage, StyledPageContent } from "./PageStyles";
 
 interface Page {
   children?: React.ReactNode;
@@ -26,7 +26,9 @@ interface Page {
 export const Page: React.FC<Page> = ({ children }) => {
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
-  const username: string = useAppSelector((state) => state.username);
+  const lastClickedIndex: number = useAppSelector(
+    (state) => state.statementList.lastClickedIndex
+  );
   const userId = localStorage.getItem("userid");
   const userRole = localStorage.getItem("userrole");
   const { cleanAllParams } = useSearchParams();
@@ -74,18 +76,13 @@ export const Page: React.FC<Page> = ({ children }) => {
   const toastId = React.useRef<Id | null>(null);
   const notify = () =>
     (toastId.current = toast.dark("you're offline", { autoClose: false }));
-  const dismiss = () => {
-    if (toastId.current) {
-      toast.dismiss(toastId.current);
-    }
-  };
 
   useEffect(() => {
     if (isPaused) {
       notify();
     } else {
       if (toastId.current && toast.isActive(toastId.current)) {
-        dismiss();
+        toast.dismiss(toastId.current);
       }
     }
   }, [isPaused]);
@@ -96,36 +93,71 @@ export const Page: React.FC<Page> = ({ children }) => {
       dispatch(setUsername(""));
       queryClient.removeQueries();
       toast.success("You've been successfully logged out!");
-      //
+
       cleanAllParams();
 
       navigate("/login");
     },
   });
 
-  const [userCustomizationOpen, setUserCustomizationOpen] = useState(false);
+  const [userCustomizationOpen, setUserCustomizationOpen] =
+    useState<boolean>(false);
 
   const [tempLocation, setTempLocation] = useState<string | false>(false);
 
   useKeypress("Shift", () => dispatch(setDisableUserSelect(true)));
-
   useKeyLift("Shift", () => dispatch(setDisableUserSelect(false)));
 
   useQuery({
     queryKey: ["ping"],
     queryFn: async () => {
       const localPing = api.getPing();
-      if (localPing) dispatch(setPing(localPing));
+      if (localPing) {
+        dispatch(setPing(localPing));
+      }
       return localPing;
     },
     refetchInterval: 5000,
   });
 
+  const headerLeft = useMemo(
+    () => <LeftHeader tempLocation={tempLocation} />,
+    [tempLocation]
+  );
+
+  const headerRight = useMemo<undefined | JSX.Element>(() => {
+    if (disableRightHeader) {
+      return undefined;
+    }
+    return (
+      <RightHeader
+        setUserCustomizationOpen={setUserCustomizationOpen}
+        handleLogOut={logOutMutation.mutate}
+        userName={user?.name ?? ""}
+        userRole={userRole || ""}
+        setTempLocation={setTempLocation}
+        tempLocation={tempLocation}
+        userIsFetching={isFetchingUser}
+      />
+    );
+  }, [user?.name, userRole, isFetchingUser, tempLocation, disableRightHeader]);
+
+  const handleClick = useCallback(() => {
+    if (lastClickedIndex !== -1) {
+      dispatch(setLastClickedIndex(-1));
+    }
+  }, [lastClickedIndex]);
+
+  const contentEl = useMemo(() => {
+    if (contentHeight > 0) {
+      return children;
+    } else {
+      return <Loader show />;
+    }
+  }, [contentHeight > 0]);
+
   return (
-    <StyledPage
-      $layoutWidth={layoutWidth}
-      onClick={() => dispatch(setLastClickedIndex(-1))}
-    >
+    <StyledPage $layoutWidth={layoutWidth} onClick={handleClick}>
       <Header
         paddingY={0}
         paddingX={10}
@@ -134,33 +166,13 @@ export const Page: React.FC<Page> = ({ children }) => {
             ? (environmentName as keyof ThemeColor)
             : "muni"
         }
-        left={<LeftHeader tempLocation={tempLocation} />}
-        right={
-          <>
-            {!disableRightHeader && (
-              <RightHeader
-                setUserCustomizationOpen={setUserCustomizationOpen}
-                handleLogOut={logOutMutation.mutate}
-                userName={user ? user.name : ""}
-                userRole={userRole || ""}
-                setTempLocation={setTempLocation}
-                tempLocation={tempLocation}
-                userIsFetching={isFetchingUser}
-              />
-            )}
-          </>
-        }
+        left={headerLeft}
+        right={headerRight}
       />
 
-      {contentHeight > 0 ? (
-        <StyledPageContent id="page" height={contentHeight}>
-          {children}
-        </StyledPageContent>
-      ) : (
-        <StyledPageContent id="page" height={0}>
-          <Loader show />
-        </StyledPageContent>
-      )}
+      <StyledPageContent id="page" height={contentHeight}>
+        {contentEl}
+      </StyledPageContent>
 
       {user && userCustomizationOpen && (
         <UserCustomizationModal
