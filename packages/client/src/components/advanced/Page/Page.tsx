@@ -27,7 +27,7 @@ export const Page: React.FC<Page> = ({ children }) => {
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
   const lastClickedIndex: number = useAppSelector(
-    (state) => state.lastClickedIndex
+    (state) => state.statementList.lastClickedIndex
   );
   const userId = localStorage.getItem("userid");
   const userRole = localStorage.getItem("userrole");
