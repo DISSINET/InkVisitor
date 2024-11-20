@@ -1,13 +1,20 @@
+import {
+  AutoPlacement,
+  BasePlacement,
+  VariationPlacement,
+} from "@popperjs/core";
 import { Tooltip } from "components";
 import React, { useState } from "react";
 
 interface UserListIcon {
   icon: React.ReactNode;
   tooltipLabel?: string;
+  tooltipPosition?: AutoPlacement | BasePlacement | VariationPlacement;
 }
 export const UserListIcon: React.FC<UserListIcon> = ({
   icon,
   tooltipLabel,
+  tooltipPosition,
 }) => {
   const [referenceElement, setReferenceElement] =
     useState<HTMLSpanElement | null>(null);
@@ -28,7 +35,7 @@ export const UserListIcon: React.FC<UserListIcon> = ({
           label={tooltipLabel}
           visible={showTooltip}
           referenceElement={referenceElement}
-          // position={tooltipPosition}
+          position={tooltipPosition}
         />
       )}
     </>

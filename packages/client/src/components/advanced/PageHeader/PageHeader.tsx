@@ -32,7 +32,7 @@ import {
 } from "./PageHeaderStyles";
 import { setTheme } from "redux/features/themeSlice";
 import { MdDarkMode, MdSunny } from "react-icons/md";
-import { InterfaceEnums } from "@shared/enums";
+import { InterfaceEnums, UserEnums } from "@shared/enums";
 
 interface LeftHeader {
   tempLocation: string | false;
@@ -147,7 +147,7 @@ export const LeftHeader: React.FC<LeftHeader> = React.memo(
 interface RightHeader {
   setUserCustomizationOpen: (arg0: boolean) => void;
   userName: string;
-  userRole: string;
+  userRole: UserEnums.Role;
   tempLocation: string | false;
   setTempLocation: React.Dispatch<React.SetStateAction<string | false>>;
   handleLogOut: () => void;
@@ -219,6 +219,7 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
             {userName.length > 0 && (
               <StyledUser>
                 <StyledText>logged as</StyledText>
+
                 <StyledFaUserAlt
                   size={14}
                   onClick={() => setUserCustomizationOpen(true)}

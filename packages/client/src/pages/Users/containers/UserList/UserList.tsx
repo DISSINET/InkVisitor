@@ -245,7 +245,10 @@ export const UserList: React.FC<UserList> = React.memo(() => {
           const { id, role } = row.original;
           return (
             <AttributeButtonGroup
-              disabled={id === localStorage.getItem("userid")}
+              disabled={
+                id === localStorage.getItem("userid") ||
+                role === UserEnums.Role.Owner
+              }
               options={[
                 {
                   longValue: userRoleDict[0].label,
@@ -485,6 +488,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
             territoryRights: territoryActants,
             active,
             verified,
+            role,
           } = row.original;
 
           let activateTooltip = "activate user";
@@ -492,6 +496,8 @@ export const UserList: React.FC<UserList> = React.memo(() => {
             activateTooltip = "cannot activate unverified user";
           } else if (userId === localStorage.getItem("userid")) {
             activateTooltip = "cannot deactivate yourself";
+          } else if (role === UserEnums.Role.Owner) {
+            activateTooltip = "owner must be active";
           } else if (active) {
             activateTooltip = "deactivate user";
           }
@@ -508,7 +514,10 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                 icon={<FaTrashAlt size={14} />}
                 color="danger"
                 tooltipLabel={deleteTooltip}
-                disabled={userId === localStorage.getItem("userid")}
+                disabled={
+                  userId === localStorage.getItem("userid") ||
+                  role === UserEnums.Role.Owner
+                }
                 onClick={() => {
                   setRemovingUserId(userId);
                 }}
@@ -527,7 +536,9 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                   active ? <FaToggleOn size={14} /> : <FaToggleOff size={14} />
                 }
                 disabled={
-                  !verified || userId === localStorage.getItem("userid")
+                  !verified ||
+                  userId === localStorage.getItem("userid") ||
+                  role === UserEnums.Role.Owner
                 }
                 color={active ? "success" : "danger"}
                 tooltipLabel={activateTooltip}
