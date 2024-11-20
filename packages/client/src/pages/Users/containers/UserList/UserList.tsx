@@ -44,6 +44,13 @@ import { UserListTableRow } from "./UserListTableRow/UserListTableRow";
 import { UserListUsernameInput } from "./UserListUsernameInput/UserListUsernameInput";
 import { UsersUtils } from "./UsersUtils";
 
+const rolePriority: Record<UserEnums.Role, number> = {
+  [UserEnums.Role.Owner]: 1,
+  [UserEnums.Role.Admin]: 2,
+  [UserEnums.Role.Editor]: 3,
+  [UserEnums.Role.Viewer]: 4,
+};
+
 type CellType = CellProps<IResponseUser>;
 
 interface UserList {}
@@ -67,11 +74,21 @@ export const UserList: React.FC<UserList> = React.memo(() => {
     enabled: api.isLoggedIn(),
   });
 
-  // const localUsers = useMemo(() => users || [], [users]);
   const [localUsers, setLocalUsers] = useState<IResponseUser[]>([]);
+
+  const userComparator = (a: IResponseUser, b: IResponseUser): number => {
+    // First, compare by role priority
+    if (rolePriority[a.role] !== rolePriority[b.role]) {
+      return rolePriority[a.role] - rolePriority[b.role];
+    }
+
+    // If roles are the same, compare by active status
+    return b.active ? 1 : -1;
+  };
+
   useEffect(() => {
     if (users) {
-      setLocalUsers(users);
+      setLocalUsers(users.sort(userComparator));
     }
   }, [users]);
 
