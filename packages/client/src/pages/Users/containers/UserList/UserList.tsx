@@ -16,12 +16,11 @@ import {
   FaToggleOff,
   FaToggleOn,
   FaTrashAlt,
+  FaUserEdit,
+  FaUserTag,
+  FaUserTie,
 } from "react-icons/fa";
-import {
-  RiUserSearchFill,
-  RiUserSettingsFill,
-  RiUserStarFill,
-} from "react-icons/ri";
+import { FaUserGear } from "react-icons/fa6";
 import { CellProps, Column, Row, useTable } from "react-table";
 import { toast } from "react-toastify";
 import { UserListEmailInput } from "./UserListEmailInput/UserListEmailInput";
@@ -43,6 +42,7 @@ import {
 import { UserListTableRow } from "./UserListTableRow/UserListTableRow";
 import { UserListUsernameInput } from "./UserListUsernameInput/UserListUsernameInput";
 import { UsersUtils } from "./UsersUtils";
+import { UserListIcon } from "./UserListIcon/UserListIcon";
 
 const rolePriority: Record<UserEnums.Role, number> = {
   [UserEnums.Role.Owner]: 1,
@@ -168,19 +168,28 @@ export const UserList: React.FC<UserList> = React.memo(() => {
         Cell: ({ row }: CellType) => {
           const { name, email, role, active, verified } = row.original;
 
-          let icon = <RiUserSearchFill />;
+          let icon = <FaUserTag />;
+          let tooltipLabel = "viewer";
+          if (role === UserEnums.Role.Owner) {
+            icon = <FaUserGear />;
+            tooltipLabel = "owner";
+          }
           if (role === UserEnums.Role.Admin) {
-            icon = <RiUserStarFill />;
+            icon = <FaUserTie />;
+            tooltipLabel = "admin";
           }
           if (role === UserEnums.Role.Editor) {
-            icon = <RiUserSettingsFill />;
+            icon = <FaUserEdit />;
+            tooltipLabel = "editor";
           }
           if (!verified) {
             icon = <FaEnvelopeOpenText size={16} />;
           }
           return (
             <StyledUserNameColumn $active={active} $verified={verified}>
-              <StyledUserNameColumnIcon>{icon}</StyledUserNameColumnIcon>
+              <StyledUserNameColumnIcon>
+                <UserListIcon icon={icon} tooltipLabel={tooltipLabel} />
+              </StyledUserNameColumnIcon>
 
               {!verified ? (
                 <StyledNotActiveText>
@@ -268,6 +277,17 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                     userMutation.mutate({
                       id: id,
                       role: userRoleDict[2].value,
+                    });
+                  },
+                },
+                {
+                  longValue: userRoleDict[3].label,
+                  shortValue: userRoleDict[3].label,
+                  selected: role === userRoleDict[3].value,
+                  onClick: () => {
+                    userMutation.mutate({
+                      id: id,
+                      role: userRoleDict[3].value,
                     });
                   },
                 },
