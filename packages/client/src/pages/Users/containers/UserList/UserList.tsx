@@ -43,6 +43,7 @@ import { UserListTableRow } from "./UserListTableRow/UserListTableRow";
 import { UserListUsernameInput } from "./UserListUsernameInput/UserListUsernameInput";
 import { UsersUtils } from "./UsersUtils";
 import { UserListIcon } from "./UserListIcon/UserListIcon";
+import { getUserIcon } from "utils/utils";
 
 const rolePriority: Record<UserEnums.Role, number> = {
   [UserEnums.Role.Owner]: 1,
@@ -168,27 +169,19 @@ export const UserList: React.FC<UserList> = React.memo(() => {
         Cell: ({ row }: CellType) => {
           const { name, email, role, active, verified } = row.original;
 
-          let icon = <FaUserTag />;
-          let tooltipLabel = "viewer";
-          if (role === UserEnums.Role.Owner) {
-            icon = <FaUserGear />;
-            tooltipLabel = "owner";
-          }
-          if (role === UserEnums.Role.Admin) {
-            icon = <FaUserTie />;
-            tooltipLabel = "admin";
-          }
-          if (role === UserEnums.Role.Editor) {
-            icon = <FaUserEdit />;
-            tooltipLabel = "editor";
-          }
-          if (!verified) {
-            icon = <FaEnvelopeOpenText size={16} />;
-          }
           return (
             <StyledUserNameColumn $active={active} $verified={verified}>
               <StyledUserNameColumnIcon>
-                <UserListIcon icon={icon} tooltipLabel={tooltipLabel} />
+                <UserListIcon
+                  icon={
+                    !verified ? (
+                      <FaEnvelopeOpenText size={16} />
+                    ) : (
+                      getUserIcon(role)
+                    )
+                  }
+                  tooltipLabel={role}
+                />
               </StyledUserNameColumnIcon>
 
               {!verified ? (
