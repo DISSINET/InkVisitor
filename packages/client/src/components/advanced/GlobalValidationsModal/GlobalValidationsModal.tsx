@@ -16,6 +16,8 @@ import { FaToggleOff, FaToggleOn } from "react-icons/fa";
 import { rootTerritoryId } from "Theme/constants";
 import {
   StyledBlockSeparator,
+  StyledGridForm,
+  StyledGridFormLabel,
   StyledToggleWrap,
   StyledValidationList,
 } from "./GlobalValidationsModalStyles";
@@ -71,25 +73,8 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
     >
       <ModalHeader title="Global validations" />
       <ModalContent column enableScroll>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "auto 1fr",
-            gap: "1rem",
-            alignItems: "center",
-            marginTop: "0.5rem",
-            marginLeft: "0.8rem",
-            marginBottom: "2.5rem",
-          }}
-        >
-          <div
-            style={{
-              display: "grid",
-              justifyContent: "end",
-            }}
-          >
-            Superclass missing
-          </div>
+        <StyledGridForm>
+          <StyledGridFormLabel>Superclass missing</StyledGridFormLabel>
           <div>
             <StyledToggleWrap
               style={{ cursor: "pointer" }}
@@ -98,15 +83,9 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
               {superclassMissing ? ToggleOn() : ToggleOff()}
             </StyledToggleWrap>
           </div>
-          <div
-            style={{
-              display: "grid",
-              justifyContent: "end",
-              alignItems: "center",
-            }}
-          >
+          <StyledGridFormLabel>
             Missing Action/event equivalent
-          </div>
+          </StyledGridFormLabel>
           <div>
             <StyledToggleWrap
               style={{ cursor: "pointer" }}
@@ -117,7 +96,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
               {missinActionEventEquivalent ? ToggleOn() : ToggleOff()}
             </StyledToggleWrap>
           </div>
-        </div>
+        </StyledGridForm>
 
         {rootTerritory && validations && (
           <StyledValidationList>
