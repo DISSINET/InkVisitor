@@ -324,6 +324,7 @@ export const normalizeURL = (url: string) => {
 
 export const getUserIcon = (
   userRole: UserEnums.Role,
+  // size can be determined in parent component font-size instead
   size?: number
 ): React.ReactNode => {
   if (userRole === UserEnums.Role.Owner) {
