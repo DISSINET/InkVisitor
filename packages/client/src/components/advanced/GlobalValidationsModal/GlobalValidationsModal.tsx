@@ -10,7 +10,7 @@ import {
   ModalFooter,
   ModalHeader,
 } from "components";
-import { EntityDetailValidationRule } from "pages/Main/containers/EntityDetailBox/EntityDetail/EntityDetailValidationSection/EntityDetailValidationRule/EntityDetailValidationRule";
+import { ValidationRule } from "components/advanced";
 import React, { useEffect, useState } from "react";
 import { FaToggleOff, FaToggleOn } from "react-icons/fa";
 import { rootTerritoryId } from "Theme/constants";
@@ -103,7 +103,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
             {(validations as ITerritoryValidation[]).map((validation, key) => {
               return (
                 <React.Fragment key={key}>
-                  <EntityDetailValidationRule
+                  <ValidationRule
                     key={key}
                     validation={validation}
                     entities={rootTerritory.entities}

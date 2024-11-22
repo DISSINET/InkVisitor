@@ -6,7 +6,7 @@ import {
   EProtocolTieType,
   ITerritoryValidation,
 } from "@shared/types/territory";
-import { Button, Checkbox, Input } from "components";
+import { Button, Input } from "components";
 import Dropdown, {
   AttributeButtonGroup,
   EntitySuggester,
@@ -20,10 +20,10 @@ import {
   StyledGrid,
   StyledLabel,
   StyledNotActiveTag,
-} from "./EntityDetailValidationRuleStyles";
-import { EntityDetailValidationText } from "./EntityDetailValidationText/EntityDetailValidationText";
+} from "./ValidationRuleStyles";
+import { ValidationText } from "./ValidationText/ValidationText";
 
-interface EntityDetailValidationRule {
+interface ValidationRule {
   validation: ITerritoryValidation;
   entities: Record<string, IEntity>;
   updateValidationRule: (changes: Partial<ITerritoryValidation>) => void;
@@ -32,9 +32,7 @@ interface EntityDetailValidationRule {
   territoryParentId?: string;
   userCanEdit: boolean;
 }
-export const EntityDetailValidationRule: React.FC<
-  EntityDetailValidationRule
-> = ({
+export const ValidationRule: React.FC<ValidationRule> = ({
   validation,
   entities,
   updateValidationRule,
@@ -99,7 +97,7 @@ export const EntityDetailValidationRule: React.FC<
         }}
       >
         {!active && <StyledNotActiveTag>rule not activated</StyledNotActiveTag>}
-        <EntityDetailValidationText
+        <ValidationText
           validation={validation}
           entities={entities}
           active={active}
