@@ -21,6 +21,7 @@ export default class QuerySearch {
   constructor(query: Query.INode, explore: Explore.IExplore) {
     this.root = new SearchNode(query);
     this.explore = explore;
+
     if (this.explore.limit > QuerySearch.MAX_LIMIT) {
       this.explore.limit = QuerySearch.MAX_LIMIT;
     } else if (!this.explore.limit) {

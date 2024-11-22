@@ -388,7 +388,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     const newOffset = topItem;
     const newLimit = bottomItem - topItem + 1;
 
-    console.log("new scroll items", newOffset, newLimit, visibleItems);
+    // console.log("new scroll items", newOffset, newLimit, visibleItems);
 
     if (newOffset !== offset || newLimit !== limit) {
       dispatch({
@@ -446,7 +446,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
         <Scrollbar
           style={{
             width: contentWidth,
-            height: contentHeight,
+            height: 800,
           }}
           onScroll={() => {
             setScrollTableXScrolling(true);
@@ -579,6 +579,11 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                 const responseEntityId: string | undefined =
                   responseData?.entity.id ?? undefined;
 
+                const isVisible =
+                  visibleItems.length > 0
+                    ? visibleItems.includes(rowI.toString())
+                    : true;
+
                 return (
                   <StyledRowWrapper
                     key={`${rowI}`}
@@ -602,6 +607,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                         handleEditColumn={handleEditColumn}
                         updateEntityMutation={updateEntityMutation}
                         onCheckboxClick={handleCheckboxClick}
+                        isVisible={isVisible}
                         isSelected={rowsSelected.includes(responseEntityId)}
                         isLastClicked={lastClickedIndex === rowI}
                         isExpanded={rowsExpanded.includes(responseEntityId)}

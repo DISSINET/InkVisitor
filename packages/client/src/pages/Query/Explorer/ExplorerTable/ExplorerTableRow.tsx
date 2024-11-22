@@ -38,6 +38,7 @@ interface ExplorerTableRowProps {
   isSelected?: boolean;
   isLastClicked?: boolean;
   isExpanded?: boolean;
+  isVisible?: boolean;
 }
 const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
   rowId,
@@ -51,8 +52,13 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
   isSelected = false,
   isLastClicked = false,
   isExpanded = false,
+  isVisible = true,
 }) => {
   const themeContext = useContext(ThemeContext);
+
+  if (!isVisible) {
+    return null;
+  }
 
   if (!responseData) {
     return (
