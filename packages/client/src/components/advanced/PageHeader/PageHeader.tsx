@@ -1,38 +1,39 @@
+import { InterfaceEnums, UserEnums } from "@shared/enums";
 import { useQueryClient } from "@tanstack/react-query";
 import { heightHeader } from "Theme/constants";
 import { PingColor } from "Theme/theme";
 import LogoInkvisitor from "assets/logos/inkvisitor.svg";
 import { Button, Loader } from "components";
 import React, { useEffect, useState } from "react";
+import { MdDarkMode, MdSunny } from "react-icons/md";
 import { useLocation, useNavigate } from "react-router";
 import { BeatLoader } from "react-spinners";
 import { toast } from "react-toastify";
+import { setTheme } from "redux/features/themeSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { getUserIcon } from "utils/utils";
 import { Menu } from "..";
 import packageJson from "../../../../package.json";
 import {
-  StyledFaUserAlt,
   StyledFlexColumn,
   StyledFlexRow,
   StyledHeader,
   StyledHeaderLogo,
   StyledHeaderTag,
+  StyledLoggedAsWrap,
+  StyledMenu,
   StyledPingColor,
   StyledPingText,
   StyledRightHeader,
   StyledSandboxText,
   StyledSpace,
   StyledText,
-  StyledUser,
-  StyledUsername,
   StyledThemeSwitcher,
   StyledThemeSwitcherIcon,
-  StyledMenu,
-  StyledLoggedAsWrap,
+  StyledUser,
+  StyledUserIconWrap,
+  StyledUsername,
 } from "./PageHeaderStyles";
-import { setTheme } from "redux/features/themeSlice";
-import { MdDarkMode, MdSunny } from "react-icons/md";
-import { InterfaceEnums } from "@shared/enums";
 import { IoSettingsSharp } from "react-icons/io5";
 import { GlobalValidationsModal } from "../GlobalValidationsModal/GlobalValidationsModal";
 
@@ -149,7 +150,7 @@ export const LeftHeader: React.FC<LeftHeader> = React.memo(
 interface RightHeader {
   setUserCustomizationOpen: (arg0: boolean) => void;
   userName: string;
-  userRole: string;
+  userRole: UserEnums.Role;
   tempLocation: string | false;
   setTempLocation: React.Dispatch<React.SetStateAction<string | false>>;
   handleLogOut: () => void;
@@ -241,10 +242,12 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
             {userName.length > 0 && (
               <StyledUser>
                 <StyledText>logged as</StyledText>
-                <StyledFaUserAlt
-                  size={14}
+
+                <StyledUserIconWrap
                   onClick={() => setUserCustomizationOpen(true)}
-                />
+                >
+                  {getUserIcon(userRole, 19)}
+                </StyledUserIconWrap>
                 <StyledUsername onClick={() => setUserCustomizationOpen(true)}>
                   {userName}
                 </StyledUsername>

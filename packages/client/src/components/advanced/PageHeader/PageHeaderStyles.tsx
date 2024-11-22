@@ -24,10 +24,10 @@ export const StyledHeaderTag = styled.div`
   padding-bottom: 0;
 `;
 
-export const StyledFaUserAlt = styled(FaUserAlt)`
+export const StyledUserIconWrap = styled.div`
   cursor: pointer;
   margin-left: ${({ theme }) => theme.space[2]};
-  margin-right: ${({ theme }) => theme.space[1]};
+  margin-right: ${({ theme }) => theme.space[2]};
 `;
 export const StyledText = styled.div`
   font-size: ${({ theme }) => theme.fontSize["sm"]};
