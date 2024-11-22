@@ -310,6 +310,11 @@ export default class Entity implements IEntity, IDbModel {
         out.push(prop.value.entityId);
       }
 
+      if (prop.children) {
+        const childrenEs = this.extractIdsFromProps(prop.children, kind, cb);
+        out = out.concat(childrenEs);
+      }
+
       if (cb) {
         cb(prop);
       }
@@ -317,7 +322,14 @@ export default class Entity implements IEntity, IDbModel {
       out = out.concat(Entity.extractIdsFromProps(prop.children, kind, cb));
     }
 
-    return out.filter((id) => id);
+    // only unique values
+    const uniqueOut: Record<string, null> = {};
+    out.forEach((id) => {
+      if (id) {
+        uniqueOut[id] = null;
+      }
+    });
+    return Object.keys(uniqueOut);
   }
 
   static async findEntitiesByIds(

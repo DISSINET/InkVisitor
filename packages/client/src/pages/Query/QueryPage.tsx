@@ -130,6 +130,8 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     enabled: queryStateValidity.isValid && api.isLoggedIn(),
   });
 
+  console.log("explore", queryData?.entities);
+
   const onePercentOfContentHeight = useMemo(
     () => contentHeight / 100,
     [contentHeight]

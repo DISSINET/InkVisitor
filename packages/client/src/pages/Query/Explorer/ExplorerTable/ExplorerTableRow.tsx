@@ -17,6 +17,7 @@ import {
   StyledFocusedCircle,
 } from "./ExplorerTableStyles";
 import { WIDTH_COLUMN_DEFAULT, WIDTH_COLUMN_FIRST } from "./types";
+import { deleteProp } from "constructors";
 
 interface ExplorerTableRowProps {
   rowId: number;
@@ -86,6 +87,40 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
 
   const { entity: rowEntity, columnData } = responseData;
 
+  const handleUnlinkEntity = (
+    sourceEntity: IEntity,
+    entityToRemove: IEntity,
+    columnId: string
+  ) => {
+    const column = columns.find((column) => column.id === columnId);
+
+    if (column?.type === Explore.EExploreColumnType.EPT) {
+      const newEntity = deleteProp(sourceEntity, {
+        typeEntityId: entityToRemove.id,
+      });
+
+      updateEntityMutation.mutate({
+        entityId: sourceEntity.id,
+        changes: {
+          props: newEntity.props,
+        },
+      });
+    }
+
+    if (column?.type === Explore.EExploreColumnType.EPV) {
+      const newEntity = deleteProp(sourceEntity, {
+        valueEntityId: entityToRemove.id,
+      });
+
+      updateEntityMutation.mutate({
+        entityId: sourceEntity.id,
+        changes: {
+          props: newEntity.props,
+        },
+      });
+    }
+  };
+
   const renderCell = (
     recordEntity: IEntity,
     cellData:
@@ -105,32 +140,20 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
         typeof (cellData[0] as IEntity).class !== "undefined"
       ) {
         // is type IEntity[]
-        return cellData.map((entity, key) => {
+        return cellData.map((cellEntity, key) => {
           return (
             <React.Fragment key={key}>
               <span>
                 <EntityTag
-                  entity={entity as IEntity}
+                  entity={cellEntity as IEntity}
                   unlinkButton={
                     column.editable && {
                       onClick: () => {
-                        const { id } = entity as IEntity;
-                        const { id: recordEntityId, props } =
-                          recordEntity as IEntity;
-
-                        const foundEntity = props.find(
-                          (prop) => prop.value?.entityId === id
+                        handleUnlinkEntity(
+                          recordEntity,
+                          cellEntity as IEntity,
+                          column.id
                         );
-                        if (foundEntity) {
-                          updateEntityMutation.mutate({
-                            entityId: recordEntityId,
-                            changes: {
-                              props: props.filter(
-                                (prop) => prop.id !== foundEntity.id
-                              ),
-                            },
-                          });
-                        }
                       },
                     }
                   }
