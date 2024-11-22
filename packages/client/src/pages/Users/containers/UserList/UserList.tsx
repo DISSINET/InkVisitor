@@ -16,14 +16,12 @@ import {
   FaToggleOff,
   FaToggleOn,
   FaTrashAlt,
-  FaUserEdit,
-  FaUserTag,
-  FaUserTie,
 } from "react-icons/fa";
-import { FaUserGear } from "react-icons/fa6";
 import { CellProps, Column, Row, useTable } from "react-table";
 import { toast } from "react-toastify";
+import { getUserIcon } from "utils/utils";
 import { UserListEmailInput } from "./UserListEmailInput/UserListEmailInput";
+import { UserListIcon } from "./UserListIcon/UserListIcon";
 import {
   StyledNotActiveText,
   StyledTHead,
@@ -42,8 +40,6 @@ import {
 import { UserListTableRow } from "./UserListTableRow/UserListTableRow";
 import { UserListUsernameInput } from "./UserListUsernameInput/UserListUsernameInput";
 import { UsersUtils } from "./UsersUtils";
-import { UserListIcon } from "./UserListIcon/UserListIcon";
-import { getUserIcon } from "utils/utils";
 
 const rolePriority: Record<UserEnums.Role, number> = {
   [UserEnums.Role.Owner]: 1,
@@ -242,52 +238,57 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                 id === localStorage.getItem("userid") ||
                 role === UserEnums.Role.Owner
               }
-              options={[
-                {
-                  longValue: userRoleDict[0].label,
-                  shortValue: userRoleDict[0].label,
-                  selected: role === userRoleDict[0].value,
-                  onClick: () => {
-                    userMutation.mutate({
-                      id: id,
-                      role: userRoleDict[0].value,
-                    });
-                  },
-                },
-                {
-                  longValue: userRoleDict[1].label,
-                  shortValue: userRoleDict[1].label,
-                  selected: role === userRoleDict[1].value,
-                  onClick: () => {
-                    userMutation.mutate({
-                      id: id,
-                      role: userRoleDict[1].value,
-                    });
-                  },
-                },
-                {
-                  longValue: userRoleDict[2].label,
-                  shortValue: userRoleDict[2].label,
-                  selected: role === userRoleDict[2].value,
-                  onClick: () => {
-                    userMutation.mutate({
-                      id: id,
-                      role: userRoleDict[2].value,
-                    });
-                  },
-                },
-                {
-                  longValue: userRoleDict[3].label,
-                  shortValue: userRoleDict[3].label,
-                  selected: role === userRoleDict[3].value,
-                  onClick: () => {
-                    userMutation.mutate({
-                      id: id,
-                      role: userRoleDict[3].value,
-                    });
-                  },
-                },
-              ]}
+              options={
+                role === UserEnums.Role.Owner
+                  ? [
+                      {
+                        longValue: userRoleDict[0].label,
+                        shortValue: userRoleDict[0].label,
+                        selected: role === userRoleDict[0].value,
+                        onClick: () => {
+                          userMutation.mutate({
+                            id: id,
+                            role: userRoleDict[0].value,
+                          });
+                        },
+                      },
+                    ]
+                  : [
+                      {
+                        longValue: userRoleDict[1].label,
+                        shortValue: userRoleDict[1].label,
+                        selected: role === userRoleDict[1].value,
+                        onClick: () => {
+                          userMutation.mutate({
+                            id: id,
+                            role: userRoleDict[1].value,
+                          });
+                        },
+                      },
+                      {
+                        longValue: userRoleDict[2].label,
+                        shortValue: userRoleDict[2].label,
+                        selected: role === userRoleDict[2].value,
+                        onClick: () => {
+                          userMutation.mutate({
+                            id: id,
+                            role: userRoleDict[2].value,
+                          });
+                        },
+                      },
+                      {
+                        longValue: userRoleDict[3].label,
+                        shortValue: userRoleDict[3].label,
+                        selected: role === userRoleDict[3].value,
+                        onClick: () => {
+                          userMutation.mutate({
+                            id: id,
+                            role: userRoleDict[3].value,
+                          });
+                        },
+                      },
+                    ]
+              }
             />
           );
         },
