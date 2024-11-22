@@ -11,7 +11,5 @@
     "quotes": "off",
     "@typescript-eslint/quotes": ["error", "double"],
     "@typescript-eslint/lines-between-class-members": "off",
-    "react-hooks/rules-of-hooks": "error",
-    "react-hooks/exhaustive-deps": "warn"
   }
 }
