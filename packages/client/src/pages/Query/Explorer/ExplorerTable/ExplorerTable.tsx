@@ -343,7 +343,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     }
     setTimeout(() => {
       checkVisibility();
-    }, 1000);
+    }, 100);
   };
 
   const handleScrollTable = (values: any) => {
@@ -357,6 +357,12 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   const rowsRefs = useRef<HTMLDivElement[]>([]);
   const refTable = useRef<HTMLDivElement>(null);
   const [visibleItems, setVisibleItems] = useState<string[]>([]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      checkVisibility();
+    }, 100);
+  }, [contentHeight]);
 
   const checkVisibility = () => {
     if (!refTable.current) return;
@@ -446,7 +452,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
         <Scrollbar
           style={{
             width: contentWidth,
-            height: 800,
+            height: heightBox - 70,
           }}
           onScroll={() => {
             setScrollTableXScrolling(true);
@@ -579,10 +585,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                 const responseEntityId: string | undefined =
                   responseData?.entity.id ?? undefined;
 
-                const isVisible =
-                  visibleItems.length > 0
-                    ? visibleItems.includes(rowI.toString())
-                    : true;
+                const isVisible = visibleItems.includes(rowI.toString());
 
                 return (
                   <StyledRowWrapper

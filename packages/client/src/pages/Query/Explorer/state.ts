@@ -29,7 +29,7 @@ const exploreStateInitial: Explore.IExplore = {
   ],
   sort: undefined,
   filters: [],
-  limit: 20,
+  limit: 1,
   offset: 0,
 };
 
