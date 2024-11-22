@@ -24,9 +24,27 @@ export const StyledBlockSeparator = styled.div`
   grid-column: span 2;
   border-top: 1px dashed grey;
 `;
-export const StyledToggleWrap = styled.div`
+interface StyledToggleWrap {
+  $active: boolean;
+}
+export const StyledToggleWrap = styled.div<StyledToggleWrap>`
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+  color: ${({ theme, $active }) =>
+    $active ? theme.color["info"] : theme.color["danger"]};
+`;
+
+export const StyledSectionHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-weight: ${({ theme }) => theme.fontWeight.regular};
+  font-size: ${({ theme }) => theme.fontSize.lg};
+  margin-bottom: ${({ theme }) => theme.space[4]};
+  color: ${({ theme }) => theme.color["primary"]};
+`;
+export const StyledValidationCount = styled.p`
   color: ${({ theme }) => theme.color["info"]};
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;

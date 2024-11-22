@@ -12,13 +12,15 @@ import {
 } from "components";
 import { ValidationRule } from "components/advanced";
 import React, { useEffect, useState } from "react";
-import { FaToggleOff, FaToggleOn } from "react-icons/fa";
+import { FaPlus, FaToggleOff, FaToggleOn } from "react-icons/fa";
 import { rootTerritoryId } from "Theme/constants";
 import {
   StyledBlockSeparator,
   StyledGridForm,
   StyledGridFormLabel,
+  StyledSectionHeader,
   StyledToggleWrap,
+  StyledValidationCount,
   StyledValidationList,
 } from "./GlobalValidationsModalStyles";
 
@@ -61,7 +63,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
   );
   const ToggleOff = () => (
     <>
-      <FaToggleOff size={22} /> disabled
+      <FaToggleOff size={22} /> inactive
     </>
   );
 
@@ -71,12 +73,13 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
       onClose={() => setShowGlobalValidations(false)}
       width={650}
     >
-      <ModalHeader title="Global validations" />
+      <ModalHeader title="Global validations" boldTitle />
       <ModalContent column enableScroll>
         <StyledGridForm>
           <StyledGridFormLabel>Superclass missing</StyledGridFormLabel>
           <div>
             <StyledToggleWrap
+              $active={superclassMissing}
               style={{ cursor: "pointer" }}
               onClick={() => setSuperclassMissing(!superclassMissing)}
             >
@@ -88,6 +91,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
           </StyledGridFormLabel>
           <div>
             <StyledToggleWrap
+              $active={missinActionEventEquivalent}
               style={{ cursor: "pointer" }}
               onClick={() =>
                 setMissinActionEventEquivalent(!missinActionEventEquivalent)
@@ -99,30 +103,48 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
         </StyledGridForm>
 
         {rootTerritory && validations && (
-          <StyledValidationList>
-            {(validations as ITerritoryValidation[]).map((validation, key) => {
-              return (
-                <React.Fragment key={key}>
-                  <ValidationRule
-                    key={key}
-                    validation={validation}
-                    entities={rootTerritory.entities}
-                    updateValidationRule={(
-                      changes: Partial<ITerritoryValidation>
-                    ) => {
-                      // handleUpdateValidation(key, changes);
-                    }}
-                    removeValidationRule={() => {
-                      // setTempIndexToRemove(key)
-                    }}
-                    isInsideTemplate={false}
-                    userCanEdit
-                  />
-                  {key !== validations.length - 1 && <StyledBlockSeparator />}
-                </React.Fragment>
-              );
-            })}
-          </StyledValidationList>
+          <>
+            <StyledSectionHeader>
+              <b>Root T validation</b>
+              <StyledValidationCount>{`${validations.length} Root T validations`}</StyledValidationCount>
+              <span>
+                <Button
+                  icon={<FaPlus />}
+                  label="new validation rule"
+                  color="primary"
+                  // onClick={initValidationRule}
+                />
+              </span>
+            </StyledSectionHeader>
+            <StyledValidationList>
+              {(validations as ITerritoryValidation[]).map(
+                (validation, key) => {
+                  return (
+                    <React.Fragment key={key}>
+                      <ValidationRule
+                        key={key}
+                        validation={validation}
+                        entities={rootTerritory.entities}
+                        updateValidationRule={(
+                          changes: Partial<ITerritoryValidation>
+                        ) => {
+                          // handleUpdateValidation(key, changes);
+                        }}
+                        removeValidationRule={() => {
+                          // setTempIndexToRemove(key)
+                        }}
+                        isInsideTemplate={false}
+                        userCanEdit
+                      />
+                      {key !== validations.length - 1 && (
+                        <StyledBlockSeparator />
+                      )}
+                    </React.Fragment>
+                  );
+                }
+              )}
+            </StyledValidationList>
+          </>
         )}
         <Loader show={isFetching} />
       </ModalContent>
