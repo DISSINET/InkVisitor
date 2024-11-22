@@ -1,5 +1,8 @@
-import { ITerritoryValidation } from "@shared/types/territory";
-import { useQuery } from "@tanstack/react-query";
+import {
+  EProtocolTieType,
+  ITerritoryValidation,
+} from "@shared/types/territory";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import {
   Button,
@@ -9,6 +12,7 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
+  Submit,
 } from "components";
 import { ValidationRule } from "components/advanced";
 import React, { useEffect, useState } from "react";
@@ -23,6 +27,19 @@ import {
   StyledValidationCount,
   StyledValidationList,
 } from "./GlobalValidationsModalStyles";
+import { deepCopy } from "utils/utils";
+import { IEntity } from "@shared/types";
+import { useSearchParams } from "hooks";
+
+const initValidation: ITerritoryValidation = {
+  detail: "",
+  entityClasses: [],
+  classifications: [],
+  allowedEntities: [],
+  allowedClasses: [],
+  propType: [],
+  tieType: EProtocolTieType.Property,
+};
 
 interface GlobalValidationsModal {
   setShowGlobalValidations: React.Dispatch<React.SetStateAction<boolean>>;
@@ -67,97 +84,173 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
     </>
   );
 
-  return (
-    <Modal
-      showModal={showModal}
-      onClose={() => setShowGlobalValidations(false)}
-      width={650}
-    >
-      <ModalHeader title="Global validations" boldTitle />
-      <ModalContent column enableScroll>
-        <StyledGridForm>
-          <StyledGridFormLabel>Superclass missing</StyledGridFormLabel>
-          <div>
-            <StyledToggleWrap
-              $active={superclassMissing}
-              style={{ cursor: "pointer" }}
-              onClick={() => setSuperclassMissing(!superclassMissing)}
-            >
-              {superclassMissing ? ToggleOn() : ToggleOff()}
-            </StyledToggleWrap>
-          </div>
-          <StyledGridFormLabel>
-            Missing Action/event equivalent
-          </StyledGridFormLabel>
-          <div>
-            <StyledToggleWrap
-              $active={missinActionEventEquivalent}
-              style={{ cursor: "pointer" }}
-              onClick={() =>
-                setMissinActionEventEquivalent(!missinActionEventEquivalent)
-              }
-            >
-              {missinActionEventEquivalent ? ToggleOn() : ToggleOff()}
-            </StyledToggleWrap>
-          </div>
-        </StyledGridForm>
+  const queryClient = useQueryClient();
 
-        {rootTerritory && validations && (
-          <>
-            <StyledSectionHeader>
-              <b>Root T validation</b>
-              <StyledValidationCount>{`${validations.length} Root T validations`}</StyledValidationCount>
-              <span>
-                <Button
-                  icon={<FaPlus />}
-                  label="new validation rule"
-                  color="primary"
-                  // onClick={initValidationRule}
-                />
-              </span>
-            </StyledSectionHeader>
-            <StyledValidationList>
-              {(validations as ITerritoryValidation[]).map(
-                (validation, key) => {
-                  return (
-                    <React.Fragment key={key}>
-                      <ValidationRule
-                        key={key}
-                        validation={validation}
-                        entities={rootTerritory.entities}
-                        updateValidationRule={(
-                          changes: Partial<ITerritoryValidation>
-                        ) => {
-                          // handleUpdateValidation(key, changes);
-                        }}
-                        removeValidationRule={() => {
-                          // setTempIndexToRemove(key)
-                        }}
-                        isInsideTemplate={false}
-                        userCanEdit
-                      />
-                      {key !== validations.length - 1 && (
-                        <StyledBlockSeparator />
-                      )}
-                    </React.Fragment>
-                  );
+  const { selectedDetailId } = useSearchParams();
+
+  const updateEntityMutation = useMutation({
+    mutationFn: async (changes: Partial<IEntity>) =>
+      await api.entityUpdate(rootTerritoryId, changes),
+
+    onSuccess: (data, variables) => {
+      if (selectedDetailId === rootTerritoryId) {
+        queryClient.invalidateQueries({ queryKey: ["entity"] });
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["rootTerritoryDetail"] });
+    },
+  });
+
+  const [tempIndexToRemove, setTempIndexToRemove] = useState<false | number>(
+    false
+  );
+
+  const initValidationRule = () => {
+    updateEntityMutation.mutate({
+      data: {
+        validations: validations
+          ? [...validations, initValidation]
+          : [initValidation],
+      },
+    });
+  };
+
+  const removeValidationRule = (indexToRemove: number) => {
+    updateEntityMutation.mutate({
+      data: {
+        validations: (validations as ITerritoryValidation[])?.filter(
+          (_, index) => index !== indexToRemove
+        ),
+      },
+    });
+    setTempIndexToRemove(false);
+  };
+
+  const handleUpdateValidation = (
+    key: number,
+    changes: Partial<ITerritoryValidation>
+  ) => {
+    const validationsCopy = deepCopy(validations as ITerritoryValidation[]);
+    const updatedObject: ITerritoryValidation = {
+      ...validationsCopy[key],
+      ...changes,
+    };
+    const newValidation = [
+      ...validationsCopy.slice(0, key),
+      updatedObject,
+      ...validationsCopy.slice(key + 1),
+    ];
+    updateEntityMutation.mutate({
+      data: {
+        validations: newValidation,
+      },
+    });
+  };
+
+  return (
+    <>
+      <Modal
+        showModal={showModal}
+        onClose={() => setShowGlobalValidations(false)}
+        width={650}
+      >
+        <ModalHeader title="Global validations" boldTitle />
+        <ModalContent column enableScroll>
+          <StyledGridForm>
+            <StyledGridFormLabel>Superclass missing</StyledGridFormLabel>
+            <div>
+              <StyledToggleWrap
+                $active={superclassMissing}
+                style={{ cursor: "pointer" }}
+                onClick={() => setSuperclassMissing(!superclassMissing)}
+              >
+                {superclassMissing ? ToggleOn() : ToggleOff()}
+              </StyledToggleWrap>
+            </div>
+            <StyledGridFormLabel>
+              Missing Action/event equivalent
+            </StyledGridFormLabel>
+            <div>
+              <StyledToggleWrap
+                $active={missinActionEventEquivalent}
+                style={{ cursor: "pointer" }}
+                onClick={() =>
+                  setMissinActionEventEquivalent(!missinActionEventEquivalent)
                 }
-              )}
-            </StyledValidationList>
-          </>
-        )}
-        <Loader show={isFetching} />
-      </ModalContent>
-      <ModalFooter>
-        <ButtonGroup>
-          <Button
-            color="warning"
-            label="cancel"
-            onClick={() => setShowGlobalValidations(false)}
-          />
-          <Button color="primary" label="submit" />
-        </ButtonGroup>
-      </ModalFooter>
-    </Modal>
+              >
+                {missinActionEventEquivalent ? ToggleOn() : ToggleOff()}
+              </StyledToggleWrap>
+            </div>
+          </StyledGridForm>
+
+          {rootTerritory && validations && (
+            <>
+              <StyledSectionHeader>
+                <b>Root T validation</b>
+                <StyledValidationCount>{`${validations.length} Root T validations`}</StyledValidationCount>
+                <span>
+                  <Button
+                    icon={<FaPlus />}
+                    label="new validation rule"
+                    color="primary"
+                    onClick={initValidationRule}
+                  />
+                </span>
+              </StyledSectionHeader>
+              <StyledValidationList>
+                {(validations as ITerritoryValidation[]).map(
+                  (validation, key) => {
+                    return (
+                      <React.Fragment key={key}>
+                        <ValidationRule
+                          key={key}
+                          validation={validation}
+                          entities={rootTerritory.entities}
+                          updateValidationRule={(
+                            changes: Partial<ITerritoryValidation>
+                          ) => {
+                            handleUpdateValidation(key, changes);
+                          }}
+                          removeValidationRule={() => {
+                            setTempIndexToRemove(key);
+                          }}
+                          isInsideTemplate={false}
+                          userCanEdit
+                        />
+                        {key !== validations.length - 1 && (
+                          <StyledBlockSeparator />
+                        )}
+                      </React.Fragment>
+                    );
+                  }
+                )}
+              </StyledValidationList>
+            </>
+          )}
+          <Loader show={isFetching} />
+        </ModalContent>
+        <ModalFooter>
+          <ButtonGroup>
+            <Button
+              color="warning"
+              label="cancel"
+              onClick={() => setShowGlobalValidations(false)}
+            />
+            <Button color="primary" label="submit" />
+          </ButtonGroup>
+        </ModalFooter>
+      </Modal>
+
+      <Submit
+        show={tempIndexToRemove !== false}
+        title="Remove validation rule"
+        text="Do you really want to remove this validation rule?"
+        onSubmit={() => {
+          tempIndexToRemove !== false &&
+            removeValidationRule(tempIndexToRemove);
+        }}
+        onCancel={() => setTempIndexToRemove(false)}
+      />
+    </>
   );
 };
