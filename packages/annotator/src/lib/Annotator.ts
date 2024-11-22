@@ -425,7 +425,6 @@ export class Annotator {
           this.cursor.selectEnd = undefined;
         }
 
-        this.cursor.move(offsetLeft, 0);
 
         // go 1 line up if at the start
         if (this.cursor.xLine <= 0) {
@@ -433,7 +432,14 @@ export class Annotator {
           if (this.cursor.yLine > 0) {
             this.cursor.yLine = Math.max(0, this.cursor.yLine - 1);
             this.cursor.xLine = Math.floor(this.width / this.charWidth) - 1;
+
+            if (this.cursor.selectStart) {
+              this.cursor.selectStart.xLine = this.cursor.xLine;
+              this.cursor.selectStart.yLine = this.viewport.lineStart + this.cursor.yLine;
+            }
           }
+        } else {
+          this.cursor.move(offsetLeft, 0);
         }
 
         break;
