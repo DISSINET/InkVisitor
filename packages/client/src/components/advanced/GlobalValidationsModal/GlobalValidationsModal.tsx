@@ -35,9 +35,17 @@ import {
   entityKeys,
   territoryKeys,
   valencyKeys,
-  WarningsWithDescription,
+  GlobalValidationsDict,
+  WarningKey,
+  WarningTypeEnums,
 } from "@shared/enums/warning";
 
+const initialRulesState: Record<WarningKey, boolean> = Object.keys(
+  WarningTypeEnums
+).reduce((acc, key) => {
+  acc[key as WarningKey] = true;
+  return acc;
+}, {} as Record<WarningKey, boolean>);
 const initValidation: ITerritoryValidation = {
   detail: "",
   entityClasses: [],
@@ -154,6 +162,13 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
     });
   };
 
+  const [rules, setRules] =
+    useState<Record<WarningKey, boolean>>(initialRulesState);
+
+  const toggleRule = (key: WarningKey) => {
+    setRules((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
   return (
     <>
       <Modal
@@ -172,9 +187,16 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
               return (
                 <React.Fragment key={key}>
                   <StyledGridFormLabel>
-                    {WarningsWithDescription[val].label}
+                    {GlobalValidationsDict[val].label}
                   </StyledGridFormLabel>
-                  <div>toggle</div>
+                  <div>
+                    <StyledToggleWrap
+                      $active={rules[val]}
+                      onClick={() => toggleRule(val)}
+                    >
+                      {rules[val] ? ToggleOn() : ToggleOff()}
+                    </StyledToggleWrap>
+                  </div>
                 </React.Fragment>
               );
             })}
@@ -187,9 +209,16 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
               return (
                 <React.Fragment key={key}>
                   <StyledGridFormLabel>
-                    {WarningsWithDescription[val].label}
+                    {GlobalValidationsDict[val].label}
                   </StyledGridFormLabel>
-                  <div>toggle</div>
+                  <div>
+                    <StyledToggleWrap
+                      $active={rules[val]}
+                      onClick={() => toggleRule(val)}
+                    >
+                      {rules[val] ? ToggleOn() : ToggleOff()}
+                    </StyledToggleWrap>
+                  </div>
                 </React.Fragment>
               );
             })}
@@ -202,9 +231,16 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
               return (
                 <React.Fragment key={key}>
                   <StyledGridFormLabel>
-                    {WarningsWithDescription[val].label}
+                    {GlobalValidationsDict[val].label}
                   </StyledGridFormLabel>
-                  <div>toggle</div>
+                  <div>
+                    <StyledToggleWrap
+                      $active={rules[val]}
+                      onClick={() => toggleRule(val)}
+                    >
+                      {rules[val] ? ToggleOn() : ToggleOff()}
+                    </StyledToggleWrap>
+                  </div>
                 </React.Fragment>
               );
             })}

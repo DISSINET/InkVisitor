@@ -39,6 +39,7 @@ export const StyledToggleWrap = styled.div<StyledToggleWrap>`
   gap: 0.5rem;
   color: ${({ theme, $active }) =>
     $active ? theme.color["info"] : theme.color["danger"]};
+  cursor: pointer;
 `;
 
 export const StyledSectionHeader = styled.div`

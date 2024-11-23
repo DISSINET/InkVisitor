@@ -40,7 +40,7 @@ type IWarningWithDescription = {
   };
 };
 
-export const WarningsWithDescription: IWarningWithDescription = {
+export const GlobalValidationsDict: IWarningWithDescription = {
   SValency: {
     label: "Subject Valency",
     description: "",
@@ -61,7 +61,6 @@ export const WarningsWithDescription: IWarningWithDescription = {
     description: "",
     editAllowed: false,
   },
-
   // Valency validations
   NA: {
     label: "No Action defined",
@@ -76,8 +75,8 @@ export const WarningsWithDescription: IWarningWithDescription = {
     section: "valency",
   },
   WA: {
-    label: "Actant’s entity type does not match the Action",
-    description: "",
+    label: "Actant not matches the Action",
+    description: "Actant’s entity type does not match the Action",
     editAllowed: true,
     section: "valency",
   },
@@ -99,7 +98,6 @@ export const WarningsWithDescription: IWarningWithDescription = {
     editAllowed: true,
     section: "valency",
   },
-
   // Entity validations
   IELVL: {
     label: "Inconsistent Epistemic levels for the Property",
@@ -155,7 +153,6 @@ export const WarningsWithDescription: IWarningWithDescription = {
     editAllowed: true,
     section: "entity",
   },
-
   // T-based validations
   TVEP: {
     label: "Property missing",
@@ -201,16 +198,16 @@ export const WarningsWithDescription: IWarningWithDescription = {
   },
 };
 
-type WarningKey = keyof typeof WarningTypeEnums;
+export type WarningKey = keyof typeof WarningTypeEnums;
 
-export const valencyKeys = Object.keys(WarningsWithDescription).filter(
-  (key) => WarningsWithDescription[key as WarningKey].section === "valency"
+export const valencyKeys = Object.keys(GlobalValidationsDict).filter(
+  (key) => GlobalValidationsDict[key as WarningKey].section === "valency"
 ) as WarningKey[];
 
-export const entityKeys = Object.keys(WarningsWithDescription).filter(
-  (key) => WarningsWithDescription[key as WarningKey].section === "entity"
+export const entityKeys = Object.keys(GlobalValidationsDict).filter(
+  (key) => GlobalValidationsDict[key as WarningKey].section === "entity"
 ) as WarningKey[];
 
-export const territoryKeys = Object.keys(WarningsWithDescription).filter(
-  (key) => WarningsWithDescription[key as WarningKey].section === "territory"
+export const territoryKeys = Object.keys(GlobalValidationsDict).filter(
+  (key) => GlobalValidationsDict[key as WarningKey].section === "territory"
 ) as WarningKey[];
