@@ -15,10 +15,14 @@ export const StyledGridSectionHeading = styled.div`
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
   margin-top: 1rem;
 `;
-export const StyledGridFormLabel = styled.div`
+interface StyledGridFormLabel {
+  $disabled: boolean;
+}
+export const StyledGridFormLabel = styled.div<StyledGridFormLabel>`
   display: grid;
   justify-content: end;
   align-items: center;
+  color: ${({ theme, $disabled }) => ($disabled ? theme.color["greyer"] : "")};
 `;
 export const StyledValidationList = styled.div`
   display: flex;
@@ -32,14 +36,19 @@ export const StyledBlockSeparator = styled.div`
 `;
 interface StyledToggleWrap {
   $active: boolean;
+  $disabled: boolean;
 }
 export const StyledToggleWrap = styled.div<StyledToggleWrap>`
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  color: ${({ theme, $active }) =>
-    $active ? theme.color["info"] : theme.color["danger"]};
-  cursor: pointer;
+  color: ${({ theme, $active, $disabled }) =>
+    $disabled
+      ? theme.color["greyer"]
+      : $active
+      ? theme.color["info"]
+      : theme.color["danger"]};
+  cursor: ${({ $disabled }) => ($disabled ? "not-allowed" : "pointer")};
 `;
 
 export const StyledSectionHeader = styled.div`

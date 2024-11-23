@@ -46,6 +46,7 @@ const initialRulesState: Record<WarningKey, boolean> = Object.keys(
   acc[key as WarningKey] = true;
   return acc;
 }, {} as Record<WarningKey, boolean>);
+
 const initValidation: ITerritoryValidation = {
   detail: "",
   entityClasses: [],
@@ -184,15 +185,17 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
             </StyledGridSectionHeading>
             <div />
             {valencyKeys.map((val, key) => {
+              const isDisabled = !GlobalValidationsDict[val].editAllowed;
               return (
                 <React.Fragment key={key}>
-                  <StyledGridFormLabel>
+                  <StyledGridFormLabel $disabled={isDisabled}>
                     {GlobalValidationsDict[val].label}
                   </StyledGridFormLabel>
                   <div>
                     <StyledToggleWrap
                       $active={rules[val]}
-                      onClick={() => toggleRule(val)}
+                      $disabled={isDisabled}
+                      onClick={() => !isDisabled && toggleRule(val)}
                     >
                       {rules[val] ? ToggleOn() : ToggleOff()}
                     </StyledToggleWrap>
@@ -206,15 +209,17 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
             </StyledGridSectionHeading>
             <div />
             {entityKeys.map((val, key) => {
+              const isDisabled = !GlobalValidationsDict[val].editAllowed;
               return (
                 <React.Fragment key={key}>
-                  <StyledGridFormLabel>
+                  <StyledGridFormLabel $disabled={isDisabled}>
                     {GlobalValidationsDict[val].label}
                   </StyledGridFormLabel>
                   <div>
                     <StyledToggleWrap
                       $active={rules[val]}
-                      onClick={() => toggleRule(val)}
+                      $disabled={isDisabled}
+                      onClick={() => !isDisabled && toggleRule(val)}
                     >
                       {rules[val] ? ToggleOn() : ToggleOff()}
                     </StyledToggleWrap>
@@ -228,15 +233,17 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
             </StyledGridSectionHeading>
             <div />
             {territoryKeys.map((val, key) => {
+              const isDisabled = !GlobalValidationsDict[val].editAllowed;
               return (
                 <React.Fragment key={key}>
-                  <StyledGridFormLabel>
+                  <StyledGridFormLabel $disabled={isDisabled}>
                     {GlobalValidationsDict[val].label}
                   </StyledGridFormLabel>
                   <div>
                     <StyledToggleWrap
                       $active={rules[val]}
-                      onClick={() => toggleRule(val)}
+                      $disabled={isDisabled}
+                      onClick={() => !isDisabled && toggleRule(val)}
                     >
                       {rules[val] ? ToggleOn() : ToggleOff()}
                     </StyledToggleWrap>
@@ -244,31 +251,6 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
                 </React.Fragment>
               );
             })}
-
-            <StyledGridFormLabel>Superclass missing</StyledGridFormLabel>
-            <div>
-              <StyledToggleWrap
-                $active={superclassMissing}
-                style={{ cursor: "pointer" }}
-                onClick={() => setSuperclassMissing(!superclassMissing)}
-              >
-                {superclassMissing ? ToggleOn() : ToggleOff()}
-              </StyledToggleWrap>
-            </div>
-            <StyledGridFormLabel>
-              Missing Action/event equivalent
-            </StyledGridFormLabel>
-            <div>
-              <StyledToggleWrap
-                $active={missinActionEventEquivalent}
-                style={{ cursor: "pointer" }}
-                onClick={() =>
-                  setMissinActionEventEquivalent(!missinActionEventEquivalent)
-                }
-              >
-                {missinActionEventEquivalent ? ToggleOn() : ToggleOff()}
-              </StyledToggleWrap>
-            </div>
           </StyledGridForm>
 
           {rootTerritory && validations && (
@@ -315,7 +297,8 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
               </StyledValidationList>
             </>
           )}
-          <Loader show={isFetching} />
+
+          <Loader show={isFetching || updateEntityMutation.isPending} />
         </ModalContent>
         <ModalFooter>
           <ButtonGroup>

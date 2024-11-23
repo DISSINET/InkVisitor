@@ -59,13 +59,13 @@ export const GlobalValidationsDict: IWarningWithDescription = {
   NoTerritory: {
     label: "No Territory",
     description: "",
-    editAllowed: false,
+    editAllowed: true,
   },
   // Valency validations
   NA: {
     label: "No Action defined",
     description: "",
-    editAllowed: false,
+    editAllowed: true,
     section: "valency",
   },
   MA: {
@@ -83,7 +83,7 @@ export const GlobalValidationsDict: IWarningWithDescription = {
   ANA: {
     label: "This actant position allows no actant",
     description: "",
-    editAllowed: false,
+    editAllowed: true,
     section: "valency",
   },
   WAC: {
@@ -114,43 +114,43 @@ export const GlobalValidationsDict: IWarningWithDescription = {
   ISYNC: {
     label: "Inconsistent superclasses in the SYN cloud",
     description: "",
-    editAllowed: true,
+    editAllowed: false,
     section: "entity",
   },
   MVAL: {
     label: "Missing at least one entity-type valency",
     description: "",
-    editAllowed: true,
+    editAllowed: false,
     section: "entity",
   },
   AVAL: {
     label: "Asymmetrical valency",
     description: "",
-    editAllowed: true,
+    editAllowed: false,
     section: "entity",
   },
   MAEE: {
     label: "Missing action/event equivalent",
     description: "",
-    editAllowed: false,
+    editAllowed: true,
     section: "entity",
   },
   PSM: {
     label: "Part of speech is empty",
     description: "",
-    editAllowed: true,
+    editAllowed: false,
     section: "entity",
   },
   LM: {
     label: "Language is missing",
     description: "",
-    editAllowed: true,
+    editAllowed: false,
     section: "entity",
   },
   VETM: {
     label: "Empty valency for Action",
     description: "",
-    editAllowed: true,
+    editAllowed: false,
     section: "entity",
   },
   // T-based validations
