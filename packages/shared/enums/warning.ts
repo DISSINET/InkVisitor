@@ -81,118 +81,127 @@ export const GlobalValidationsDict: IWarningWithDescription = {
     section: "valency",
   },
   ANA: {
-    label: "This actant position allows no actant",
+    label: "Position allows no actant",
     description: "",
     editAllowed: true,
     section: "valency",
   },
   WAC: {
-    label: "Entity type valencies of the actions not matching",
+    label: "Action valencies not matching",
     description: "",
     editAllowed: true,
     section: "valency",
   },
   AVU: {
-    label: "Action valency not defined",
+    label: "Action valencies not defined",
     description: "",
     editAllowed: true,
     section: "valency",
   },
-  // Entity validations
+
+  // ???
   IELVL: {
     label: "Inconsistent Epistemic levels for the Property",
     description: "",
     editAllowed: false,
     section: "entity",
   },
+  // Entity validations
   SCLM: {
     label: "Superclass missing",
-    description: "",
+    description:
+      "There is at least one relation of type SCL which has the Entity at index 0",
     editAllowed: true,
     section: "entity",
   },
   ISYNC: {
     label: "Inconsistent superclasses in the SYN cloud",
-    description: "",
+    description:
+      "All Concepts in the SYN cloud (SYN Relation) have exactly the same SCL Relations.",
     editAllowed: false,
     section: "entity",
   },
   MVAL: {
     label: "Missing at least one entity-type valency",
-    description: "",
+    description:
+      "Every A needs to have at least one of the S slots (subject, actant1, actant2) entity type filled (the warning is active when all three are undefined) ",
     editAllowed: false,
     section: "entity",
   },
   AVAL: {
     label: "Asymmetrical valency",
-    description: "",
+    description:
+      "checking symmetry between the three valency types: unless the only value in entity-type valency for the given slot is 'empty', then (a) morphosyntactic valency must be filled in (at least one character), (b) semantic valency of that slot (SUS, A1S, A2S - depending on the slot) must be set. Also the other way around: if there is non-empty morphosyntactic valency, then the other two types of valency (semantic valency and entity-type valency) must be filled in for the given slot. I.e., simply put: if any of the valencies is set and the only value is not 'empty' (this last condition applies of course to entity type valency only), the other two must be filled in also for that slot. Works also the other way: if the slot has entity-type valency empty only, then the grammatical and semantic valency must be empty.",
+    editAllowed: false,
+    section: "entity",
+  },
+  VETM: {
+    label: "Entity type not filled in for all valencies", // Empty valency for Action
+    description:
+      "User should explicitly use the 'empty' option, the list of allowed entity types should not be empty (length 0)",
     editAllowed: false,
     section: "entity",
   },
   MAEE: {
     label: "Missing action/event equivalent",
-    description: "",
+    description: "To be valid, every A needs to have an AEE relation.",
     editAllowed: true,
     section: "entity",
   },
   PSM: {
-    label: "Part of speech is empty",
-    description: "",
+    label: "Missing part of speech attribute",
+    description:
+      "Value empty is assigned to the Part of Speech attribute of the Concept Entity",
     editAllowed: false,
     section: "entity",
   },
   LM: {
-    label: "Language is missing",
-    description: "",
-    editAllowed: false,
-    section: "entity",
-  },
-  VETM: {
-    label: "Empty valency for Action",
-    description: "",
+    label: "Missing label language attribute",
+    description: "Language attribute is empty.",
     editAllowed: false,
     section: "entity",
   },
   // T-based validations
   TVEP: {
-    label: "Property missing",
+    label: "Entity should have a property",
     description: "",
     editAllowed: true,
     section: "territory",
   },
   TVEPT: {
-    label: "Property wrong type",
+    label: "Entity is missing a required property type", // wrong type
     description: "",
     editAllowed: true,
     section: "territory",
   },
   TVEPV: {
-    label: "Property wrong value",
-    description: "",
+    label: "Entity has a wrong property value",
+    description:
+      "Entity has a Prop with a correct type (according to the protocol), but the Prop value is either missing or wrong",
     editAllowed: true,
     section: "territory",
   },
   TVEC: {
-    label: "Classification missing",
-    description: "",
+    label: "Entity should have a classification",
+    description: "Any classification should be assigned to E",
     editAllowed: true,
     section: "territory",
   },
   TVECE: {
-    label: "Classification wrong entity",
-    description: "",
+    label: "Entity is  not classified to valid entity",
+    description: "Entity does have a Classification but the entity is invalid",
     editAllowed: true,
     section: "territory",
   },
   TVER: {
-    label: "Reference missing",
-    description: "",
+    label: "Entity should have a reference",
+    description: "Any reference should be assigned to E",
     editAllowed: true,
     section: "territory",
   },
   TVERE: {
-    label: "Reference wrong entity",
-    description: "",
+    label: "Entity is not referenced to a valid entity",
+    description: "Entity does have a Reference but the R entity is invalid",
     editAllowed: true,
     section: "territory",
   },
