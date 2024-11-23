@@ -22,6 +22,7 @@ import {
   StyledBlockSeparator,
   StyledGridForm,
   StyledGridFormLabel,
+  StyledGridSectionHeading,
   StyledSectionHeader,
   StyledToggleWrap,
   StyledValidationCount,
@@ -30,6 +31,12 @@ import {
 import { deepCopy } from "utils/utils";
 import { IEntity } from "@shared/types";
 import { useSearchParams } from "hooks";
+import {
+  entityKeys,
+  territoryKeys,
+  valencyKeys,
+  WarningsWithDescription,
+} from "@shared/enums/warning";
 
 const initValidation: ITerritoryValidation = {
   detail: "",
@@ -157,6 +164,51 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
         <ModalHeader title="Global validations" boldTitle />
         <ModalContent column enableScroll>
           <StyledGridForm>
+            <StyledGridSectionHeading>
+              Valency validations
+            </StyledGridSectionHeading>
+            <div />
+            {valencyKeys.map((val, key) => {
+              return (
+                <React.Fragment key={key}>
+                  <StyledGridFormLabel>
+                    {WarningsWithDescription[val].label}
+                  </StyledGridFormLabel>
+                  <div>toggle</div>
+                </React.Fragment>
+              );
+            })}
+
+            <StyledGridSectionHeading>
+              Entity validations
+            </StyledGridSectionHeading>
+            <div />
+            {entityKeys.map((val, key) => {
+              return (
+                <React.Fragment key={key}>
+                  <StyledGridFormLabel>
+                    {WarningsWithDescription[val].label}
+                  </StyledGridFormLabel>
+                  <div>toggle</div>
+                </React.Fragment>
+              );
+            })}
+
+            <StyledGridSectionHeading>
+              Territory validations
+            </StyledGridSectionHeading>
+            <div />
+            {territoryKeys.map((val, key) => {
+              return (
+                <React.Fragment key={key}>
+                  <StyledGridFormLabel>
+                    {WarningsWithDescription[val].label}
+                  </StyledGridFormLabel>
+                  <div>toggle</div>
+                </React.Fragment>
+              );
+            })}
+
             <StyledGridFormLabel>Superclass missing</StyledGridFormLabel>
             <div>
               <StyledToggleWrap

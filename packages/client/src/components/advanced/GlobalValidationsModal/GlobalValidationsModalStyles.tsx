@@ -5,9 +5,15 @@ export const StyledGridForm = styled.div`
   grid-template-columns: auto 1fr;
   gap: 1rem;
   align-items: center;
-  margin-top: 0.5rem;
   margin-left: 0.8rem;
   margin-bottom: 2.5rem;
+`;
+export const StyledGridSectionHeading = styled.div`
+  display: grid;
+  justify-content: end;
+  align-items: center;
+  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+  margin-top: 1rem;
 `;
 export const StyledGridFormLabel = styled.div`
   display: grid;
@@ -44,6 +50,7 @@ export const StyledSectionHeader = styled.div`
   margin-bottom: ${({ theme }) => theme.space[4]};
   color: ${({ theme }) => theme.color["primary"]};
 `;
+
 export const StyledValidationCount = styled.p`
   color: ${({ theme }) => theme.color["info"]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
