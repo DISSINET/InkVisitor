@@ -30,11 +30,7 @@ interface ExplorerTableRowProps {
   ) => void;
   updateEntityMutation: any;
 
-  onCheckboxClick: (
-    e: React.MouseEvent<HTMLDivElement, MouseEvent>,
-    rowId: number,
-    entityId: string
-  ) => void;
+  onRowSelect: (rowId: number, isWithShift?: boolean) => void;
   onExpand: (rowId: number) => void;
 
   isSelected?: boolean;
@@ -49,7 +45,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
   handleEditColumn,
   updateEntityMutation,
 
-  onCheckboxClick,
+  onRowSelect,
   onExpand,
 
   isSelected = false,
@@ -207,10 +203,10 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
         <StyledCheckboxWrapper
           onClick={(e) => {
             e.stopPropagation();
-            onCheckboxClick(e, rowId, rowEntity.id);
+            onRowSelect(rowId, e.shiftKey);
           }}
         >
-          {isLastClicked && <StyledFocusedCircle checked={isSelected} />}
+          {isLastClicked && <StyledFocusedCircle />}
           {isSelected ? (
             <MdOutlineCheckBox />
           ) : (

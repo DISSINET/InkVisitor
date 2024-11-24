@@ -136,10 +136,7 @@ export const StyledPagination = styled.div`
   font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
 
-interface StyledFocusedCircle {
-  checked: boolean;
-}
-export const StyledFocusedCircle = styled.span<StyledFocusedCircle>`
+export const StyledFocusedCircle = styled.span`
   position: absolute;
   background-color: ${({ theme }) => theme.color.focusedCheckbox};
   width: 3.2rem;
@@ -151,6 +148,7 @@ export const StyledFocusedCircle = styled.span<StyledFocusedCircle>`
   left: 50%;
 `;
 export const StyledCheckboxWrapper = styled.div`
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;

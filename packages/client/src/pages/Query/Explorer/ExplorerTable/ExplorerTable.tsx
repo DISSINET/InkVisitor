@@ -1,4 +1,12 @@
-import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { FaTrashAlt } from "react-icons/fa";
+import { GrClose } from "react-icons/gr";
+import { MdOutlineEdit } from "react-icons/md";
+import { TbColumnInsertRight } from "react-icons/tb";
+import Scrollbar from "react-scrollbars-custom";
+import useResizeObserver from "use-resize-observer";
+import { v4 as uuidv4 } from "uuid";
 
 import { EntityEnums } from "@shared/enums";
 import {
@@ -8,19 +16,11 @@ import {
   IResponseQueryEntity,
 } from "@shared/types";
 import { Explore } from "@shared/types/query";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, ButtonGroup, Checkbox, Input } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 import { CMetaProp } from "constructors";
-import { FaTrashAlt } from "react-icons/fa";
-import { GrClose } from "react-icons/gr";
-import { MdOutlineEdit } from "react-icons/md";
-import { TbColumnInsertRight } from "react-icons/tb";
-import Scrollbar from "react-scrollbars-custom";
-import { ThemeContext } from "styled-components";
-import useResizeObserver from "use-resize-observer";
-import { v4 as uuidv4 } from "uuid";
+
 import { ExploreAction, ExploreActionType } from "../state";
 import MemoizedExplorerTableRow from "./ExplorerTableRow";
 import { ExplorerTableRowExpanded } from "./ExplorerTableRowExpanded/ExplorerTableRowExpanded";
@@ -74,41 +74,22 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     total: 0,
   };
 
+  const rowIndices = useMemo(() => {
+    return Array.from({ length: incomingTotal }).map((_, i) => i);
+  }, [incomingTotal]);
+
   const { columns, filters, limit, offset, sort, view } = state;
 
   const [total, setTotal] = useState(0);
   const totalPages = useMemo(() => Math.ceil(total / limit), [total, limit]);
 
-  const handleCheckboxClick = (
-    e: React.MouseEvent<HTMLDivElement, MouseEvent>,
-    rowId: number,
-    entityId: string
-  ) => {
-    const isSelected = rowsSelected.includes(entityId);
+  const [rowLastClicked, setRowLastClicked] = useState<number>(-1);
+  const [rowsSelected, setRowsSelected] = useState<number[]>([]);
 
-    if (isSelected) {
-      if (e.shiftKey && lastClickedIndex !== -1 && lastClickedIndex !== rowId) {
-        // unset all between
-        const mappedIds = handleSelection(rowId);
-        const filteredIds = rowsSelected.filter(
-          (id) => !mappedIds.includes(id)
-        );
-        setRowsSelected(filteredIds);
-      } else {
-        handleRowSelect(entityId);
-      }
-      setLastClickedIndex(rowId);
-    } else {
-      if (e.shiftKey && lastClickedIndex !== -1 && lastClickedIndex !== rowId) {
-        // set all between
-        const mappedIds = handleSelection(rowId);
-        setRowsSelected([...new Set(rowsSelected.concat(mappedIds))]);
-      } else {
-        handleRowSelect(entityId);
-      }
-      setLastClickedIndex(rowId);
-    }
-  };
+  const [batchActionSelected, setBatchActionSelected] = useState<BatchAction>(
+    batchOptions[0].value
+  );
+  const [rowsExpanded, setRowsExpanded] = useState<number[]>([]);
 
   useEffect(() => {
     if (!isQueryFetching) {
@@ -191,12 +172,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     if (offset - limit >= 0) {
       dispatch({ type: ExploreActionType.setOffset, payload: offset - limit });
     }
-  };
-
-  const handleChangeLimit = (newLimit: number) => {
-    dispatch({ type: ExploreActionType.setLimit, payload: newLimit });
-    dispatch({ type: ExploreActionType.setOffset, payload: 0 });
-    setRowsExpanded([]);
   };
 
   const toggleSortDirection = (columnId: string) => {
@@ -288,31 +263,15 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   //           />
   //         </span>
   //       )}
-  //       <Dropdown.Single.Basic
-  //         width={50}
-  //         value={limit.toString()}
-  //         options={[5, 10, 20, 50, 100].map((number) => {
-  //           return {
-  //             value: number.toString(),
-  //             label: number.toString(),
-  //           };
-  //         })}
-  //         onChange={(value) => handleChangeLimit(Number(value))}
-  //       />
   //     </StyledPagination>
   //   );
   // };
-
-  const [batchActionSelected, setBatchActionSelected] = useState<BatchAction>(
-    batchOptions[0].value
-  );
 
   // const renderTableFooter = () => {
   //   return <StyledTableFooter>{renderPaging()}</StyledTableFooter>;
   // };
 
-  const [rowsExpanded, setRowsExpanded] = useState<string[]>([]);
-  const handleExpandRow = (rowId: string) => {
+  const handleExpandRow = (rowId: number) => {
     if (rowsExpanded.includes(rowId)) {
       setRowsExpanded(
         rowsExpanded.filter((expandedRow) => expandedRow !== rowId)
@@ -330,20 +289,36 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
 
   const spaceTableBody = heightBox - 150;
 
-  const [rowsSelected, setRowsSelected] = useState<string[]>([]);
-  const [lastClickedIndex, setLastClickedIndex] = useState<number>(-1);
+  const handleRowSelect = (rowId: number, isWithShift: boolean = false) => {
+    const isRowAlreadySelected = rowsSelected.includes(rowId);
 
-  const handleRowSelect = (rowId: string) => {
-    if (rowsSelected.includes(rowId)) {
-      setRowsSelected(
-        rowsSelected.filter((selectedRow) => selectedRow !== rowId)
-      );
-    } else {
-      setRowsSelected([...rowsSelected, rowId]);
+    let newSelection = isRowAlreadySelected ? [] : [rowId];
+
+    if (isWithShift && rowLastClicked !== -1 && rowLastClicked !== rowId) {
+      newSelection =
+        rowLastClicked < rowId
+          ? // clicked after last
+            rowIndices.slice(rowLastClicked, rowId + 1)
+          : // clicked before last
+            rowIndices.slice(rowId, rowLastClicked + 1);
     }
-    setTimeout(() => {
-      checkVisibility();
-    }, 100);
+
+    setRowLastClicked(rowId);
+    setRowsSelected((prev) => {
+      if (isRowAlreadySelected) {
+        return prev.filter((selectedRow) => selectedRow !== rowId);
+      } else {
+        return [...new Set([...prev, ...newSelection])];
+      }
+    });
+  };
+
+  const handleAllRowsSelect = (isSelected: boolean) => {
+    if (isSelected) {
+      setRowsSelected(Array.from({ length: total }).map((_, i) => i));
+    } else {
+      setRowsSelected([]);
+    }
   };
 
   const handleScrollTable = (values: any) => {
@@ -404,17 +379,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     }
   }, [visibleItems.join("-")]);
 
-  const handleSelection = (rowIndex: number): string[] => {
-    let selectedQueryEntities: IResponseQueryEntity[] = [];
-    if (lastClickedIndex < rowIndex) {
-      selectedQueryEntities = entities.slice(lastClickedIndex, rowIndex + 1);
-    } else {
-      // is bigger than - oposite direction of selection
-      selectedQueryEntities = entities.slice(rowIndex, lastClickedIndex + 1);
-    }
-    return selectedQueryEntities.map((queryEntity) => queryEntity.entity.id);
-  };
-
   const [scrollTableX, setScrollTableX] = useState<number>(0);
   const [scrollTableXScrolling, setScrollTableXScrolling] =
     useState<boolean>(false);
@@ -443,10 +407,10 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           batchActionSelected={batchActionSelected}
           setBatchActionSelected={setBatchActionSelected}
           rowsSelected={rowsSelected}
-          setRowsSelected={setRowsSelected}
           entities={entities}
-          setLastClickedIndex={setLastClickedIndex}
+          setRowLastClicked={setRowLastClicked}
           rowsTotal={total}
+          onAllRowsSelect={handleAllRowsSelect}
         />
 
         <Scrollbar
@@ -582,10 +546,9 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                 const responseData: IResponseQueryEntity | undefined =
                   entities[responseI];
 
-                const responseEntityId: string | undefined =
-                  responseData?.entity.id ?? undefined;
-
                 const isVisible = visibleItems.includes(rowI.toString());
+                const isSelected = rowsSelected.includes(rowI);
+                const isExpanded = rowsExpanded.includes(rowI);
 
                 return (
                   <StyledRowWrapper
@@ -600,7 +563,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                       $width={widthTable}
                       $height={HEIGHT_ROW_DEFAULT}
                       $isOdd={isOdd}
-                      $isSelected={rowsSelected.includes(responseEntityId)}
+                      $isSelected={isSelected}
                     >
                       <MemoizedExplorerTableRow
                         rowId={rowI}
@@ -608,16 +571,16 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                         columns={columns}
                         handleEditColumn={handleEditColumn}
                         updateEntityMutation={updateEntityMutation}
-                        onCheckboxClick={handleCheckboxClick}
+                        onRowSelect={handleRowSelect}
                         isVisible={isVisible}
-                        isSelected={rowsSelected.includes(responseEntityId)}
-                        isLastClicked={lastClickedIndex === rowI}
-                        isExpanded={rowsExpanded.includes(responseEntityId)}
-                        onExpand={() => handleExpandRow(responseEntityId)}
+                        isSelected={isSelected}
+                        isLastClicked={rowLastClicked === rowI}
+                        isExpanded={isExpanded}
+                        onExpand={() => handleExpandRow(rowI)}
                       />
                     </StyledRow>
 
-                    {rowsExpanded.includes(responseEntityId) && (
+                    {isExpanded && (
                       <ExplorerTableRowExpanded
                         rowEntity={responseData.entity}
                         columns={columns}

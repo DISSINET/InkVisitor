@@ -1,5 +1,6 @@
 export enum BatchAction {
   fill_empty = "fill_empty",
+  export_csv = "export_csv",
 }
 
 export type BatchOption = {
@@ -11,6 +12,10 @@ export const batchOptions: BatchOption[] = [
   {
     value: BatchAction.fill_empty,
     label: `fill empty`,
+  },
+  {
+    value: BatchAction.export_csv,
+    label: `export as csv`,
   },
 ];
 

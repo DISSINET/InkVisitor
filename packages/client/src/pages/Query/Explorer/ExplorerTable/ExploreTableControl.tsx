@@ -18,8 +18,8 @@ interface ExploreTableControlProps {
   isNewColumnOpen: boolean;
   setIsNewColumnOpen: (value: boolean) => void;
 
-  rowsSelected: string[];
-  setRowsSelected: (value: string[]) => void;
+  rowsSelected: number[];
+  onAllRowsSelect: (checked: boolean) => void;
 
   entities: IResponseQueryEntity[];
   rowsTotal: number;
@@ -27,7 +27,7 @@ interface ExploreTableControlProps {
   batchActionSelected: BatchAction;
   setBatchActionSelected: (value: BatchAction) => void;
 
-  setLastClickedIndex: (value: number) => void;
+  setRowLastClicked: (value: number) => void;
 }
 
 const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
@@ -35,27 +35,22 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
   setIsNewColumnOpen,
 
   rowsSelected,
-  setRowsSelected,
+  onAllRowsSelect,
 
-  entities,
   rowsTotal,
 
   batchActionSelected,
   setBatchActionSelected,
 
-  setLastClickedIndex,
+  setRowLastClicked,
 }) => {
-  const handleSelectAll = (checked: boolean) =>
-    checked
-      ? setRowsSelected(entities.map((queryEntity) => queryEntity.entity.id))
-      : setRowsSelected([]);
+  const handleSelectAll = (checked: boolean) => onAllRowsSelect(checked);
 
   const themeContext = useContext(ThemeContext);
 
   const renderHeaderCheckBox = () => {
     const size = 18;
-    const isAllSelected =
-      entities.length > 0 && rowsSelected.length === entities.length;
+    const isAllSelected = rowsTotal === rowsSelected.length;
 
     if (isAllSelected) {
       return (
@@ -64,7 +59,7 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
           size={size}
           onClick={() => {
             handleSelectAll(false);
-            setLastClickedIndex(-1);
+            setRowLastClicked(-1);
           }}
         />
       );
@@ -76,7 +71,7 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
           size={size}
           onClick={() => {
             handleSelectAll(false);
-            setLastClickedIndex(-1);
+            setRowLastClicked(-1);
           }}
         />
       );

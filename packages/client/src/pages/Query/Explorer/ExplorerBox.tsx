@@ -2,7 +2,6 @@ import React from "react";
 
 import { IResponseQuery } from "@shared/types";
 import { Explore } from "@shared/types/query";
-import { useAppSelector } from "redux/hooks";
 import { ExplorerTable } from "./ExplorerTable/ExplorerTable";
 import { ExploreAction } from "./state";
 

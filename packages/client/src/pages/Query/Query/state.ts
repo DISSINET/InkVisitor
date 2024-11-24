@@ -8,7 +8,7 @@ const queryStateInitial: Query.INode = {
   type: Query.NodeType.E,
   id: "root",
   params: {
-    classes: [EntityEnums.Class.Person],
+    classes: [EntityEnums.Class.Concept],
     label: "",
   },
   operator: Query.NodeOperator.And,
