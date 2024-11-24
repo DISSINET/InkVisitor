@@ -1,5 +1,11 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { FaTrashAlt } from "react-icons/fa";
 import { GrClose } from "react-icons/gr";
 import { MdOutlineEdit } from "react-icons/md";
@@ -182,30 +188,29 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     return "asc";
   };
 
-  const handleEditColumn = (
-    rowEntity: IEntity,
-    columnId: string,
-    newEntity: IEntity
-  ) => {
-    const column = columns.find((column) => column.id === columnId);
+  const handleEditColumn = useCallback(
+    (rowEntity: IEntity, columnId: string, newEntity: IEntity) => {
+      const column = columns.find((column) => column.id === columnId);
 
-    if (column) {
-      const params =
-        column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.EPV>;
+      if (column) {
+        const params =
+          column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.EPV>;
 
-      const newProp: IProp = CMetaProp({
-        typeEntityId: params.propertyType,
-        valueEntityId: newEntity.id,
-      });
+        const newProp: IProp = CMetaProp({
+          typeEntityId: params.propertyType,
+          valueEntityId: newEntity.id,
+        });
 
-      updateEntityMutation.mutate({
-        entityId: rowEntity.id,
-        changes: {
-          props: [...rowEntity.props, newProp],
-        },
-      });
-    }
-  };
+        updateEntityMutation.mutate({
+          entityId: rowEntity.id,
+          changes: {
+            props: [...rowEntity.props, newProp],
+          },
+        });
+      }
+    },
+    []
+  );
 
   // const renderPaging = () => {
   //   return (
@@ -271,15 +276,18 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   //   return <StyledTableFooter>{renderPaging()}</StyledTableFooter>;
   // };
 
-  const handleExpandRow = (rowId: number) => {
-    if (rowsExpanded.includes(rowId)) {
-      setRowsExpanded(
-        rowsExpanded.filter((expandedRow) => expandedRow !== rowId)
-      );
-    } else {
-      setRowsExpanded([...rowsExpanded, rowId]);
-    }
-  };
+  const handleRowExpand = useCallback(
+    (rowId: number) => {
+      if (rowsExpanded.includes(rowId)) {
+        setRowsExpanded(
+          rowsExpanded.filter((expandedRow) => expandedRow !== rowId)
+        );
+      } else {
+        setRowsExpanded([...rowsExpanded, rowId]);
+      }
+    },
+    [rowsExpanded]
+  );
 
   const {
     ref: contentRef,
@@ -289,29 +297,33 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
 
   const spaceTableBody = heightBox - 150;
 
-  const handleRowSelect = (rowId: number, isWithShift: boolean = false) => {
-    const isRowAlreadySelected = rowsSelected.includes(rowId);
+  const handleRowSelect = useCallback(
+    (rowId: number, isWithShift: boolean = false) => {
+      setRowLastClicked(rowId);
 
-    let newSelection = isRowAlreadySelected ? [] : [rowId];
+      setRowsSelected((prev) => {
+        const isRowAlreadySelected = prev.includes(rowId);
 
-    if (isWithShift && rowLastClicked !== -1 && rowLastClicked !== rowId) {
-      newSelection =
-        rowLastClicked < rowId
-          ? // clicked after last
-            rowIndices.slice(rowLastClicked, rowId + 1)
-          : // clicked before last
-            rowIndices.slice(rowId, rowLastClicked + 1);
-    }
+        let newSelection = isRowAlreadySelected ? [] : [rowId];
 
-    setRowLastClicked(rowId);
-    setRowsSelected((prev) => {
-      if (isRowAlreadySelected) {
-        return prev.filter((selectedRow) => selectedRow !== rowId);
-      } else {
-        return [...new Set([...prev, ...newSelection])];
-      }
-    });
-  };
+        if (isWithShift && rowLastClicked !== -1 && rowLastClicked !== rowId) {
+          newSelection =
+            rowLastClicked < rowId
+              ? // clicked after last
+                rowIndices.slice(rowLastClicked, rowId + 1)
+              : // clicked before last
+                rowIndices.slice(rowId, rowLastClicked + 1);
+        }
+
+        if (isRowAlreadySelected) {
+          return prev.filter((selectedRow) => selectedRow !== rowId);
+        } else {
+          return [...new Set([...prev, ...newSelection])];
+        }
+      });
+    },
+    [rowLastClicked, rowIndices]
+  );
 
   const handleAllRowsSelect = (isSelected: boolean) => {
     if (isSelected) {
@@ -565,19 +577,19 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                       $isOdd={isOdd}
                       $isSelected={isSelected}
                     >
-                      <MemoizedExplorerTableRow
-                        rowId={rowI}
-                        responseData={responseData}
-                        columns={columns}
-                        handleEditColumn={handleEditColumn}
-                        updateEntityMutation={updateEntityMutation}
-                        onRowSelect={handleRowSelect}
-                        isVisible={isVisible}
-                        isSelected={isSelected}
-                        isLastClicked={rowLastClicked === rowI}
-                        isExpanded={isExpanded}
-                        onExpand={() => handleExpandRow(rowI)}
-                      />
+                      {isVisible && (
+                        <MemoizedExplorerTableRow
+                          rowId={rowI}
+                          responseData={responseData}
+                          columns={columns}
+                          handleEditColumn={handleEditColumn}
+                          onRowSelect={handleRowSelect}
+                          onExpand={handleRowExpand}
+                          isSelected={isSelected}
+                          isLastClicked={rowLastClicked === rowI}
+                          isExpanded={isExpanded}
+                        />
+                      )}
                     </StyledRow>
 
                     {isExpanded && (

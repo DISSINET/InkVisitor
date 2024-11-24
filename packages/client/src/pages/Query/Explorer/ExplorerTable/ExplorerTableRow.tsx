@@ -1,8 +1,4 @@
-import { classesAll } from "@shared/dictionaries/entity";
-import { IEntity, IResponseQueryEntity, IUser } from "@shared/types";
-import { Explore } from "@shared/types/query";
-import { EntitySuggester, EntityTag } from "components/advanced";
-import { deleteProp } from "constructors";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import React, { useContext } from "react";
 import { FaChevronCircleDown, FaChevronCircleUp } from "react-icons/fa";
 import {
@@ -11,6 +7,14 @@ import {
 } from "react-icons/md";
 import { BeatLoader } from "react-spinners";
 import { ThemeContext } from "styled-components";
+
+import { classesAll } from "@shared/dictionaries/entity";
+import { IEntity, IResponseQueryEntity, IUser } from "@shared/types";
+import { Explore } from "@shared/types/query";
+import api from "api";
+import { EntitySuggester, EntityTag } from "components/advanced";
+import { deleteProp } from "constructors";
+
 import {
   StyledCheckboxWrapper,
   StyledColumn,
@@ -28,7 +32,6 @@ interface ExplorerTableRowProps {
     columnId: string,
     newEntity: IEntity
   ) => void;
-  updateEntityMutation: any;
 
   onRowSelect: (rowId: number, isWithShift?: boolean) => void;
   onExpand: (rowId: number) => void;
@@ -36,14 +39,12 @@ interface ExplorerTableRowProps {
   isSelected?: boolean;
   isLastClicked?: boolean;
   isExpanded?: boolean;
-  isVisible?: boolean;
 }
 const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
   rowId,
   responseData,
   columns,
   handleEditColumn,
-  updateEntityMutation,
 
   onRowSelect,
   onExpand,
@@ -51,13 +52,23 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
   isSelected = false,
   isLastClicked = false,
   isExpanded = false,
-  isVisible = true,
 }) => {
   const themeContext = useContext(ThemeContext);
 
-  if (!isVisible) {
-    return null;
-  }
+  const queryClient = useQueryClient();
+
+  const updateEntityMutation = useMutation({
+    mutationFn: async (variables: {
+      entityId: string;
+      changes: Partial<IEntity>;
+    }) => await api.entityUpdate(variables.entityId, variables.changes),
+
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["query"],
+      });
+    },
+  });
 
   if (!responseData) {
     return (
