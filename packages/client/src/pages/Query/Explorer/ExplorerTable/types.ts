@@ -10,12 +10,12 @@ export type BatchOption = {
 
 export const batchOptions: BatchOption[] = [
   {
-    value: BatchAction.fill_empty,
-    label: `fill empty`,
-  },
-  {
     value: BatchAction.export_csv,
     label: `export as csv`,
+  },
+  {
+    value: BatchAction.fill_empty,
+    label: `fill empty`,
   },
 ];
 

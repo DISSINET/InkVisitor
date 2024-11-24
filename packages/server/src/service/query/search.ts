@@ -22,12 +22,6 @@ export default class QuerySearch {
     this.root = new SearchNode(query);
     this.explore = explore;
 
-    if (this.explore.limit > QuerySearch.MAX_LIMIT) {
-      this.explore.limit = QuerySearch.MAX_LIMIT;
-    } else if (!this.explore.limit) {
-      this.explore.limit = QuerySearch.DEFAULT_LIMIT;
-    }
-
     if (!this.explore.offset) {
       this.explore.offset = 0;
     } else if (this.explore.offset < 0) {
@@ -65,7 +59,10 @@ export default class QuerySearch {
     return this.results.items || [];
   }
 
-  async getResults(db: Connection): Promise<IResponseQueryEntity[]> {
+  async getResults(
+    db: Connection,
+    indices: number[] | false = false
+  ): Promise<IResponseQueryEntity[]> {
     if (!this.results) {
       return [];
     }
@@ -77,15 +74,21 @@ export default class QuerySearch {
     const filtered = await Entity.findEntitiesByIds(db, filteredIds);
 
     const out: IResponseQueryEntity[] = [];
+
     for (const entity of filtered) {
-      out.push({
-        entity,
-        columnData: await this.results!.columns(
-          db,
+      const rowI = filteredIds.indexOf(entity.id);
+
+      if (!indices || indices.includes(rowI)) {
+        out.push({
+          rowI,
           entity,
-          this.explore.columns
-        ),
-      });
+          columnData: await this.results!.columns(
+            db,
+            entity,
+            this.explore.columns
+          ),
+        });
+      }
     }
 
     return out;

@@ -21,12 +21,15 @@ import {
   IStatement,
   ITerritory,
   IUser,
+  Query,
   Relation,
   RequestPermissionUpdate,
 } from "@shared/types";
 import * as errors from "@shared/types/errors";
 import { NetworkError } from "@shared/types/errors";
+import { Explore } from "@shared/types/query";
 import { IRequestSearch } from "@shared/types/request-search";
+import { QueryState } from "@tanstack/react-query";
 import { defaultPing } from "Theme/constants";
 import axios, {
   AxiosError,
@@ -774,6 +777,42 @@ class Api {
       );
       return response;
     } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+  async queryExport(
+    query: Query.INode,
+    explore: Explore.IExplore,
+    rowIndices: number[],
+    options?: IApiOptions
+  ): Promise<any> {
+    try {
+      const response = await this.connection.post(
+        `/entities/query-export`,
+        { query, explore, rowIndices },
+        options
+      );
+
+      const tsvText = response.data.tsvText;
+
+      const dateStamp = new Date().toLocaleString();
+      let fileName = `query-${dateStamp}`;
+
+      const blob = new Blob([tsvText], { type: "text/tab-separated-values" });
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+
+      a.href = url;
+      a.download = `${fileName}.tsv`;
+      document.body.appendChild(a);
+      a.click();
+
+      // Clean up
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      console.log("err export", err);
       throw this.handleError(err);
     }
   }

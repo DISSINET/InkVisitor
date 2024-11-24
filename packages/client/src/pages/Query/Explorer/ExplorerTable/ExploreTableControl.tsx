@@ -10,9 +10,9 @@ import { IResponseQueryEntity } from "@shared/types";
 import { Button } from "components";
 import Dropdown from "components/advanced";
 
+import { ThemeContext } from "styled-components";
 import { StyledCounter, StyledTableControl } from "./ExplorerTableStyles";
 import { BatchAction, batchOptions } from "./types";
-import { ThemeContext } from "styled-components";
 
 interface ExploreTableControlProps {
   isNewColumnOpen: boolean;
@@ -28,6 +28,8 @@ interface ExploreTableControlProps {
   setBatchActionSelected: (value: BatchAction) => void;
 
   setRowLastClicked: (value: number) => void;
+
+  onExport: () => void;
 }
 
 const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
@@ -43,6 +45,8 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
   setBatchActionSelected,
 
   setRowLastClicked,
+
+  onExport,
 }) => {
   const handleSelectAll = (checked: boolean) => onAllRowsSelect(checked);
 
@@ -90,7 +94,16 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
     <StyledTableControl>
       <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-          {renderHeaderCheckBox()}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              cursor: "pointer",
+            }}
+          >
+            {renderHeaderCheckBox()}
+          </div>
           <StyledCounter>{`${rowsSelected.length}/${rowsTotal}`}</StyledCounter>
           <Dropdown.Single.Basic
             width={98}
@@ -107,6 +120,12 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
             }}
             options={batchOptions}
           />
+          {
+            // renderBatchAction()
+            batchActionSelected === BatchAction.export_csv && (
+              <Button label="export" color="query3" onClick={onExport} />
+            )
+          }
         </div>
         {/* {renderPaging()} */}
       </div>

@@ -66,6 +66,7 @@ interface ExplorerTable {
   isQueryFetching: boolean;
   queryError: Error | null;
   height: number;
+  onExport: (rowsSelected: number[]) => void;
 }
 export const ExplorerTable: React.FC<ExplorerTable> = ({
   state,
@@ -74,6 +75,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   isQueryFetching,
   queryError,
   height: heightBox,
+  onExport,
 }) => {
   const { entities, total: incomingTotal } = data ?? {
     entities: [],
@@ -337,6 +339,10 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     checkVisibility();
   };
 
+  const handleExport = () => {
+    onExport(rowsSelected);
+  };
+
   const widthTable = useMemo(() => {
     return columns.length * WIDTH_COLUMN_DEFAULT + WIDTH_COLUMN_FIRST;
   }, [columns]);
@@ -423,6 +429,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           setRowLastClicked={setRowLastClicked}
           rowsTotal={total}
           onAllRowsSelect={handleAllRowsSelect}
+          onExport={handleExport}
         />
 
         <Scrollbar

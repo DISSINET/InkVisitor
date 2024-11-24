@@ -65,6 +65,9 @@ export default class Results<T extends { id: string }> {
 
     if (exploreData.offset >= this.items.length) return [];
 
+    // return all items if limit is 0
+    if (exploreData.limit === 0) return this.items;
+
     const endIndex = Math.min(
       exploreData.offset + exploreData.limit,
       this.items.length

@@ -3,6 +3,7 @@ import { IEntity } from "./entity";
 import { IUser } from "./user";
 
 export interface IResponseQueryEntity {
+  rowI?: number;
   entity: IEntity; // the actual passing entity model
   columnData: Record<
     string,

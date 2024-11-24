@@ -12,6 +12,7 @@ interface ExplorerBoxProps {
   isQueryFetching: boolean;
   queryError: Error | null;
   height: number;
+  onExport: (rowsSelected: number[]) => void;
 }
 export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   state,
@@ -20,6 +21,7 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   isQueryFetching,
   queryError,
   height,
+  onExport,
 }) => {
   return (
     <ExplorerTable
@@ -29,6 +31,7 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
       isQueryFetching={isQueryFetching}
       queryError={queryError}
       height={height}
+      onExport={onExport}
     />
   );
 };

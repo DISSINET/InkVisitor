@@ -19,6 +19,7 @@ import { queryDiff, queryReducer, queryStateInitial } from "./Query/state";
 import { getAllEdges, getAllNodes } from "./Query/utils";
 import { QueryValidity, QueryValidityProblem } from "./types";
 import { BiRefresh } from "react-icons/bi";
+import { toast } from "react-toastify";
 
 interface QueryPage {}
 export const QueryPage: React.FC<QueryPage> = ({}) => {
@@ -137,6 +138,11 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     [contentHeight]
   );
 
+  const handleExport = (rowIndices: number[]) => {
+    toast.success("Exporting data...");
+    api.queryExport(queryState, exploreState, rowIndices);
+  };
+
   const handleSeparatorYPositionChange = (xPosition: number) => {
     if (querySeparatorYPosition !== xPosition) {
       setQuerySeparatorYPosition(xPosition);
@@ -229,6 +235,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
             data={queryData}
             isQueryFetching={queryIsFetching}
             queryError={queryError}
+            onExport={handleExport}
           />
           <Loader show={queryIsFetching} />
         </Box>

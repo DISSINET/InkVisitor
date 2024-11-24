@@ -1,4 +1,5 @@
 import { mergeDeep } from "@common/functions";
+
 import Audit from "@models/audit/audit";
 import Entity from "@models/entity/entity";
 import { ResponseEntity, ResponseEntityDetail } from "@models/entity/response";
@@ -17,6 +18,7 @@ import {
   IResponseDetail,
   IResponseEntity,
   IResponseGeneric,
+  IUser,
   Relation as RelationType,
   RequestSearch,
 } from "@shared/types";
@@ -30,7 +32,10 @@ import {
   ModelNotValidError,
   PermissionDeniedError,
 } from "@shared/types/errors";
-import { IRequestQuery } from "@shared/types/request-query";
+import {
+  IRequestQuery,
+  IRequestQueryExport,
+} from "@shared/types/request-query";
 import { IRequestSearch } from "@shared/types/request-search";
 import Document from "@models/document/document";
 import { IResponseQuery } from "@shared/types/response-query";
@@ -39,6 +44,7 @@ import { EventType } from "@shared/types/stats";
 import { Router } from "express";
 import { IRequest } from "src/custom_typings/request";
 import { asyncRouteHandler } from "../index";
+import User from "@models/user/user";
 
 export default Router()
   /**
@@ -730,4 +736,68 @@ export default Router()
         };
       }
     )
+  )
+  .post(
+    "/query-export",
+    asyncRouteHandler<any>(
+      async (request: IRequest<undefined, IRequestQueryExport>) => {
+        const { query, explore, rowIndices } = request.body;
+
+        const exportExplore = { ...explore, ...{ limit: 0 } };
+
+        const querySearch = new QuerySearch(query, exportExplore);
+
+        const ids = await querySearch.run(request.db.connection);
+
+        const results = await querySearch.getResults(
+          request.db.connection,
+          rowIndices
+        );
+
+        // create csv text
+        const tsvBodyRows = results
+          .map((result) => {
+            const rEntity = result.entity;
+            const rowColValues: string[] = [parseColumnValue(rEntity)];
+
+            Object.values(result.columnData).forEach((columnValue) => {
+              if (columnValue instanceof Array) {
+                rowColValues.push(
+                  columnValue
+                    .map((columnValuePart) => parseColumnValue(columnValuePart))
+                    .join(",")
+                );
+              } else {
+                rowColValues.push(parseColumnValue(columnValue));
+              }
+            });
+            return rowColValues.join("\t");
+          })
+          .join("\n");
+
+        const tsvHeader =
+          "result \t" + explore.columns.map((c) => c.name).join("\t");
+
+        return { tsvText: tsvHeader + "\n" + tsvBodyRows };
+      }
+    )
   );
+
+const parseColumnValue = (
+  columnValue: string | IEntity | number | string | IUser
+) => {
+  if (typeof columnValue === "string") {
+    return columnValue;
+  }
+  if (typeof columnValue === "number") {
+    return `${columnValue}`;
+  }
+  if ("class" in columnValue && "labels" in columnValue) {
+    return `(${columnValue.class}):${columnValue.labels[0]}[${columnValue.id}]`;
+  }
+  if (columnValue instanceof User) {
+    return columnValue.name;
+  } else {
+    return "unknown value";
+  }
+};
