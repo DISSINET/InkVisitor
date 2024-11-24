@@ -342,7 +342,10 @@ export class Annotator {
         }
         break;
 
-      case "ArrowUp":
+      case "ArrowUp": {
+        const originalXLine = this.cursor.xLine;
+        const originalYline = this.cursor.yLine;
+
         this.cursor.move(0, -1);
         if (this.cursor.yLine < 0) {
           this.viewport.scrollTo(
@@ -351,13 +354,38 @@ export class Annotator {
           );
           this.cursor.yLine = 0;
         }
-        if (this.cursor.isSelected()) {
+
+        const currentLine =
+          this.text.getCurrentLine(this.viewport, this.cursor) || "";
+        if (currentLine.length < this.cursor.xLine) {
+          this.cursor.xLine = 0;
+        }
+
+        if (e.shiftKey) {
+          // copy cursor's current position as selectStart
+          this.cursor.selectStart = {
+            xLine: this.cursor.xLine,
+            yLine: this.viewport.lineStart + this.cursor.yLine,
+          };
+          // set selectEnd to cursor's original position as initialization
+          if (!this.cursor.selectEnd) {
+            this.cursor.selectEnd = {
+              xLine: originalXLine,
+              yLine: originalYline,
+            };
+          }
+        } else {
           this.cursor.selectStart = undefined;
           this.cursor.selectEnd = undefined;
         }
-        break;
 
-      case "ArrowDown":
+        break;
+      }
+
+      case "ArrowDown": {
+        const originalXLine = this.cursor.xLine;
+        const originalYline = this.cursor.yLine;
+
         this.cursor.move(0, 1);
         if (
           this.cursor.yLine >
@@ -369,11 +397,27 @@ export class Annotator {
           );
           this.cursor.yLine = this.viewport.lineEnd - this.viewport.lineStart;
         }
-        if (this.cursor.isSelected()) {
+
+        if (e.shiftKey) {
+          // copy cursor's current position as selectStart
+          this.cursor.selectStart = {
+            xLine: this.cursor.xLine,
+            yLine: this.viewport.lineStart + this.cursor.yLine,
+          };
+          // set selectEnd to cursor's original position as initialization
+          if (!this.cursor.selectEnd) {
+            this.cursor.selectEnd = {
+              xLine: originalXLine,
+              yLine: originalYline,
+            };
+          }
+        } else {
           this.cursor.selectStart = undefined;
           this.cursor.selectEnd = undefined;
         }
+
         break;
+      }
 
       case "ArrowLeft": {
         // default delta to the left
