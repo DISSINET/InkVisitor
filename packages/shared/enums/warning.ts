@@ -70,7 +70,7 @@ export const globalValidationsDict: IWarningWithDescription = {
   },
   MA: {
     label: "Missing actant",
-    description: "at least one actant of a matching type should be used",
+    description: "At least one actant of a matching type should be used",
     editAllowed: true,
     section: "valency",
   },
@@ -131,7 +131,7 @@ export const globalValidationsDict: IWarningWithDescription = {
   AVAL: {
     label: "Asymmetrical valency",
     description:
-      "checking symmetry between the three valency types: unless the only value in entity-type valency for the given slot is 'empty', then (a) morphosyntactic valency must be filled in (at least one character), (b) semantic valency of that slot (SUS, A1S, A2S - depending on the slot) must be set. Also the other way around: if there is non-empty morphosyntactic valency, then the other two types of valency (semantic valency and entity-type valency) must be filled in for the given slot. I.e., simply put: if any of the valencies is set and the only value is not 'empty' (this last condition applies of course to entity type valency only), the other two must be filled in also for that slot. Works also the other way: if the slot has entity-type valency empty only, then the grammatical and semantic valency must be empty.",
+      "Checking symmetry between the three valency types: unless the only value in entity-type valency for the given slot is 'empty', then (a) morphosyntactic valency must be filled in (at least one character), (b) semantic valency of that slot (SUS, A1S, A2S - depending on the slot) must be set. Also the other way around: if there is non-empty morphosyntactic valency, then the other two types of valency (semantic valency and entity-type valency) must be filled in for the given slot. I.e., simply put: if any of the valencies is set and the only value is not 'empty' (this last condition applies of course to entity type valency only), the other two must be filled in also for that slot. Works also the other way: if the slot has entity-type valency empty only, then the grammatical and semantic valency must be empty.",
     editAllowed: false,
     section: "entity",
   },
