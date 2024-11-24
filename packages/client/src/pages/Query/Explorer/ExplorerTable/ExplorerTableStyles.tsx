@@ -17,7 +17,6 @@ export const StyledRow = styled.div<StyledRow>`
   display: flex;
   width: ${({ $width }) => `${$width}px`};
   align-items: center;
-  cursor: pointer;
   height: ${({ theme, $height }) => `${$height}px`};
   background-color: ${({ theme, $isOdd, $isSelected }) =>
     $isSelected

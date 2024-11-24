@@ -599,7 +599,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                     <StyledRow
                       $width={widthTable}
                       $height={HEIGHT_ROW_DEFAULT}
-                      onClick={() => handleExpandRow(responseEntityId)}
                       $isOdd={isOdd}
                       $isSelected={rowsSelected.includes(responseEntityId)}
                     >
@@ -614,6 +613,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                         isSelected={rowsSelected.includes(responseEntityId)}
                         isLastClicked={lastClickedIndex === rowI}
                         isExpanded={rowsExpanded.includes(responseEntityId)}
+                        onExpand={() => handleExpandRow(responseEntityId)}
                       />
                     </StyledRow>
 

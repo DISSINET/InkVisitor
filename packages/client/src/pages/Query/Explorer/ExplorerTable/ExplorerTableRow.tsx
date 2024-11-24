@@ -2,6 +2,7 @@ import { classesAll } from "@shared/dictionaries/entity";
 import { IEntity, IResponseQueryEntity, IUser } from "@shared/types";
 import { Explore } from "@shared/types/query";
 import { EntitySuggester, EntityTag } from "components/advanced";
+import { deleteProp } from "constructors";
 import React, { useContext } from "react";
 import { FaChevronCircleDown, FaChevronCircleUp } from "react-icons/fa";
 import {
@@ -17,7 +18,6 @@ import {
   StyledFocusedCircle,
 } from "./ExplorerTableStyles";
 import { WIDTH_COLUMN_DEFAULT, WIDTH_COLUMN_FIRST } from "./types";
-import { deleteProp } from "constructors";
 
 interface ExplorerTableRowProps {
   rowId: number;
@@ -35,6 +35,7 @@ interface ExplorerTableRowProps {
     rowId: number,
     entityId: string
   ) => void;
+  onExpand: (rowId: number) => void;
 
   isSelected?: boolean;
   isLastClicked?: boolean;
@@ -49,6 +50,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
   updateEntityMutation,
 
   onCheckboxClick,
+  onExpand,
 
   isSelected = false,
   isLastClicked = false,
@@ -221,6 +223,9 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
             cursor: "pointer",
             display: "flex",
             alignItems: "center",
+          }}
+          onClick={() => {
+            onExpand(rowId);
           }}
         >
           {isExpanded ? (
