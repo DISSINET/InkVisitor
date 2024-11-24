@@ -215,7 +215,6 @@ export default class Cursor
 
       // draw selections or cursor
       for (const row of rowsToDraw) {
-        console.log("TEXT", textLines[row.rowI]);
         this.drawLine(ctx, row.rowI, row.start, row.end, drawingOptions);
       }
     }

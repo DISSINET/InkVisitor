@@ -63,6 +63,11 @@
         </div>
       </div>
       <fieldset>
+        <label>search</label>
+        <input type="text" id="search" />
+        <button id="search-trigger">go</button>
+      </fieldset>
+      <fieldset>
         <label>mode</label>
         <select id="mode">
           <option value="raw">raw</option>
@@ -109,6 +114,8 @@
 
       const exampleResponse = await fetch("example.txt");
       const exampleTxt = await exampleResponse.text();
+      const searchInput = document.getElementById("search");
+      const searchTriggerInput = document.getElementById("search-trigger");
 
       let highlightEnabled = false;
       const annotator = new Annotator(
@@ -204,6 +211,13 @@
       document.getElementById("newText").onchange = () => {
         annotator.updateText(document.getElementById("newText").value);
       };
+
+      searchTriggerInput.onclick = function() {
+        const results = annotator.search(searchInput.value)
+        if (results.length) {
+          annotator.selectSearchOccurence(results[0])
+        } 
+      }
 
       window.addEventListener("resize", resizeAnnotator);
 

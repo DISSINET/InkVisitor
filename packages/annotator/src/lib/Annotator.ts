@@ -1157,4 +1157,57 @@ export class Annotator {
       this.scrollToLine(this.text.noLines - 1);
     }
   }
+
+  search(
+    toFind: string
+  ): { segmentIndex: number; lineIndex: number; start: number; end: number }[] {
+    const occurrences = [];
+
+    for (const segmentI in this.text.segments) {
+      for (const lineI in this.text.segments[segmentI].lines) {
+        let startIndex = 0;
+        const line = this.text.segments[segmentI].lines[lineI];
+        while (startIndex < line.length) {
+          const index = line.indexOf(toFind, startIndex);
+          if (index === -1) break;
+
+          occurrences.push({
+            segmentIndex: parseInt(segmentI),
+            lineIndex: parseInt(lineI),
+            start: index,
+            end: index + toFind.length,
+          });
+          startIndex = index + 1;
+        }
+      }
+    }
+
+    return occurrences;
+  }
+
+  selectSearchOccurence(occurence: {
+    segmentIndex: number;
+    lineIndex: number;
+    start: number;
+    end: number;
+  }) {
+    this.cursor.selectStart = {
+      xLine: occurence.start,
+      yLine:
+        this.text.segments[occurence.segmentIndex].lineStart +
+        occurence.lineIndex,
+    };
+    this.cursor.selectEnd = {
+      xLine: occurence.end,
+      yLine:
+        this.text.segments[occurence.segmentIndex].lineStart +
+        occurence.lineIndex,
+    };
+
+    this.cursor.xLine = this.cursor.selectStart.xLine;
+    this.cursor.yLine = this.cursor.selectStart.yLine - this.viewport.lineStart;
+
+    this.scrollToLine(this.cursor.yLine);
+    this.draw();
+  }
 }
