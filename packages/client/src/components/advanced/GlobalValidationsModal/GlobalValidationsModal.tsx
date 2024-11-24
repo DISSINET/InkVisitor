@@ -35,10 +35,11 @@ import {
   entityKeys,
   territoryKeys,
   valencyKeys,
-  GlobalValidationsDict,
+  globalValidationsDict,
   WarningKey,
   WarningTypeEnums,
 } from "@shared/enums/warning";
+import { GlobalValidationsSettingsRow } from "./GlobalValidationsSettingsRow";
 
 const initialRulesState: Record<WarningKey, boolean> = Object.keys(
   WarningTypeEnums
@@ -184,73 +185,40 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
               Valency validations
             </StyledGridSectionHeading>
             <div />
-            {valencyKeys.map((val, key) => {
-              const isDisabled = !GlobalValidationsDict[val].editAllowed;
-              return (
-                <React.Fragment key={key}>
-                  <StyledGridFormLabel $disabled={isDisabled}>
-                    {GlobalValidationsDict[val].label}
-                  </StyledGridFormLabel>
-                  <div>
-                    <StyledToggleWrap
-                      $active={rules[val]}
-                      $disabled={isDisabled}
-                      onClick={() => !isDisabled && toggleRule(val)}
-                    >
-                      {rules[val] ? ToggleOn() : ToggleOff()}
-                    </StyledToggleWrap>
-                  </div>
-                </React.Fragment>
-              );
-            })}
+            {valencyKeys.map((val, key) => (
+              <GlobalValidationsSettingsRow
+                key={key}
+                validation={val}
+                active={rules[val]}
+                toggleRule={() => toggleRule(val)}
+              />
+            ))}
 
             <StyledGridSectionHeading>
               Entity validations
             </StyledGridSectionHeading>
             <div />
-            {entityKeys.map((val, key) => {
-              const isDisabled = !GlobalValidationsDict[val].editAllowed;
-              return (
-                <React.Fragment key={key}>
-                  <StyledGridFormLabel $disabled={isDisabled}>
-                    {GlobalValidationsDict[val].label}
-                  </StyledGridFormLabel>
-                  <div>
-                    <StyledToggleWrap
-                      $active={rules[val]}
-                      $disabled={isDisabled}
-                      onClick={() => !isDisabled && toggleRule(val)}
-                    >
-                      {rules[val] ? ToggleOn() : ToggleOff()}
-                    </StyledToggleWrap>
-                  </div>
-                </React.Fragment>
-              );
-            })}
+            {entityKeys.map((val, key) => (
+              <GlobalValidationsSettingsRow
+                key={key}
+                validation={val}
+                active={rules[val]}
+                toggleRule={() => toggleRule(val)}
+              />
+            ))}
 
             <StyledGridSectionHeading>
               Territory validations
             </StyledGridSectionHeading>
             <div />
-            {territoryKeys.map((val, key) => {
-              const isDisabled = !GlobalValidationsDict[val].editAllowed;
-              return (
-                <React.Fragment key={key}>
-                  <StyledGridFormLabel $disabled={isDisabled}>
-                    {GlobalValidationsDict[val].label}
-                  </StyledGridFormLabel>
-                  <div>
-                    <StyledToggleWrap
-                      $active={rules[val]}
-                      $disabled={isDisabled}
-                      onClick={() => !isDisabled && toggleRule(val)}
-                    >
-                      {rules[val] ? ToggleOn() : ToggleOff()}
-                    </StyledToggleWrap>
-                  </div>
-                </React.Fragment>
-              );
-            })}
+            {territoryKeys.map((val, key) => (
+              <GlobalValidationsSettingsRow
+                key={key}
+                validation={val}
+                active={rules[val]}
+                toggleRule={() => toggleRule(val)}
+              />
+            ))}
           </StyledGridForm>
 
           {rootTerritory && validations && (

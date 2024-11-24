@@ -40,7 +40,7 @@ type IWarningWithDescription = {
   };
 };
 
-export const GlobalValidationsDict: IWarningWithDescription = {
+export const globalValidationsDict: IWarningWithDescription = {
   SValency: {
     label: "Subject Valency",
     description: "",
@@ -209,14 +209,14 @@ export const GlobalValidationsDict: IWarningWithDescription = {
 
 export type WarningKey = keyof typeof WarningTypeEnums;
 
-export const valencyKeys = Object.keys(GlobalValidationsDict).filter(
-  (key) => GlobalValidationsDict[key as WarningKey].section === "valency"
+export const valencyKeys = Object.keys(globalValidationsDict).filter(
+  (key) => globalValidationsDict[key as WarningKey].section === "valency"
 ) as WarningKey[];
 
-export const entityKeys = Object.keys(GlobalValidationsDict).filter(
-  (key) => GlobalValidationsDict[key as WarningKey].section === "entity"
+export const entityKeys = Object.keys(globalValidationsDict).filter(
+  (key) => globalValidationsDict[key as WarningKey].section === "entity"
 ) as WarningKey[];
 
-export const territoryKeys = Object.keys(GlobalValidationsDict).filter(
-  (key) => GlobalValidationsDict[key as WarningKey].section === "territory"
+export const territoryKeys = Object.keys(globalValidationsDict).filter(
+  (key) => globalValidationsDict[key as WarningKey].section === "territory"
 ) as WarningKey[];
