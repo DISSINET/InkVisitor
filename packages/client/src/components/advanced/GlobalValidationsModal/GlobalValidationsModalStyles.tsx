@@ -17,6 +17,7 @@ export const StyledGridSectionHeading = styled.div`
 `;
 interface StyledGridFormLabel {
   $disabled: boolean;
+  ref: React.Dispatch<React.SetStateAction<HTMLButtonElement | null>>;
 }
 export const StyledGridFormLabel = styled.div<StyledGridFormLabel>`
   display: grid;
