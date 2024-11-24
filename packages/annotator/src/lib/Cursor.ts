@@ -193,18 +193,21 @@ export default class Cursor
 
         if (hStart.yLine <= currY && hEnd.yLine >= currY) {
           if (hStart.yLine === currY) {
+            // opening highlight line
             rowsToDraw.push({
               rowI: i,
               start: hStart.xLine,
-              end: hStart.yLine === hEnd.yLine ? hEnd.xLine : lastCharX,
+              end: hStart.yLine === hEnd.yLine ? hEnd.xLine : lastCharX + 1,
             });
           } else if (hEnd.yLine === currY) {
+            // closing highlight line
             rowsToDraw.push({ rowI: i, start: 0, end: hEnd.xLine });
           } else {
+            // full line highlight (between open & end)
             rowsToDraw.push({
               rowI: i,
               start: 0,
-              end: lastCharX,
+              end: lastCharX + 1,
             });
           }
         }
@@ -212,6 +215,7 @@ export default class Cursor
 
       // draw selections or cursor
       for (const row of rowsToDraw) {
+        console.log("TEXT", textLines[row.rowI]);
         this.drawLine(ctx, row.rowI, row.start, row.end, drawingOptions);
       }
     }
