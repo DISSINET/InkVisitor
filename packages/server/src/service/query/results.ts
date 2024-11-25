@@ -129,6 +129,7 @@ export default class Results<T extends { id: string }> {
         }
         case Explore.EExploreColumnType.EUC: {
           const audit = await Audit.getFirstForEntity(db, entity.id);
+
           if (audit && audit.user) {
             const user = await User.findUserById(db, audit?.user);
             if (user) {

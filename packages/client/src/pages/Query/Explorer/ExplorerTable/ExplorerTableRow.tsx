@@ -1,6 +1,10 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import React, { useContext } from "react";
-import { FaChevronCircleDown, FaChevronCircleUp } from "react-icons/fa";
+import {
+  FaChevronCircleDown,
+  FaChevronCircleUp,
+  FaUserAlt,
+} from "react-icons/fa";
 import {
   MdOutlineCheckBox,
   MdOutlineCheckBoxOutlineBlank,
@@ -20,6 +24,7 @@ import {
   StyledColumn,
   StyledColumnContent,
   StyledFocusedCircle,
+  StyledUserTag,
 } from "./ExplorerTableStyles";
 import { WIDTH_COLUMN_DEFAULT, WIDTH_COLUMN_FIRST } from "./types";
 
@@ -130,6 +135,49 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
     }
   };
 
+  const renderCellValue = (
+    cellValue: IEntity | number | string | IUser,
+    recordEntity: IEntity,
+    column: Explore.IExploreColumn
+  ): React.ReactElement => {
+    if (typeof (cellValue as IEntity)?.class !== "undefined") {
+      return (
+        <EntityTag
+          entity={cellValue as IEntity}
+          unlinkButton={
+            column.editable && {
+              onClick: () => {
+                handleUnlinkEntity(
+                  recordEntity,
+                  cellValue as IEntity,
+                  column.id
+                );
+              },
+            }
+          }
+          disableDoubleClick
+        />
+      );
+    } else if (typeof (cellValue as IUser)?.email !== "undefined") {
+      // is type IUser[]
+      return (
+        <StyledUserTag>
+          <FaUserAlt
+            size={14}
+            // onClick={() => setUserCustomizationOpen(true)}
+          />
+          <span>{(cellValue as IUser).name}</span>
+        </StyledUserTag>
+      );
+    } else {
+      return (
+        <div>
+          <span>{cellValue as string}</span>
+        </div>
+      );
+    }
+  };
+
   const renderCell = (
     recordEntity: IEntity,
     cellData:
@@ -144,60 +192,16 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
     column: Explore.IExploreColumn
   ) => {
     if (Array.isArray(cellData)) {
-      if (
-        cellData.length > 0 &&
-        typeof (cellData[0] as IEntity).class !== "undefined"
-      ) {
-        // is type IEntity[]
-        return cellData.map((cellEntity, key) => {
-          return (
-            <React.Fragment key={key}>
-              <span>
-                <EntityTag
-                  entity={cellEntity as IEntity}
-                  unlinkButton={
-                    column.editable && {
-                      onClick: () => {
-                        handleUnlinkEntity(
-                          recordEntity,
-                          cellEntity as IEntity,
-                          column.id
-                        );
-                      },
-                    }
-                  }
-                  disableDoubleClick
-                />
-              </span>
-            </React.Fragment>
-          );
-        });
-      } else if (
-        cellData.length > 0 &&
-        typeof (cellData[0] as IUser).email !== "undefined"
-      ) {
-        // is type IUser[]
+      return cellData.map((cellEntity, key) => {
         return (
-          <div>
-            <span
-              style={{
-                backgroundColor: "lime",
-                padding: "0.3rem",
-                display: "flex",
-              }}
-            >
-              {(cellData as IUser[]).map((user) => {
-                return user.name;
-              })}
-            </span>
-          </div>
+          <React.Fragment key={key}>
+            {renderCellValue(cellEntity, recordEntity, column)}
+          </React.Fragment>
         );
-      }
+      });
     } else {
-      // TODO: not an array - IEntity, IUser, number, string
+      return renderCellValue(cellData, recordEntity, column);
     }
-
-    // return <StyledEmpty>{"empty"}</StyledEmpty>;
   };
 
   return (

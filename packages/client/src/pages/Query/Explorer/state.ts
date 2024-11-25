@@ -14,9 +14,9 @@ const exploreStateInitial: Explore.IExplore = {
     },
     {
       id: "2",
-      name: "Types",
-      type: Explore.EExploreColumnType.EPT,
-      editable: true,
+      name: "Creator",
+      type: Explore.EExploreColumnType.EUC,
+      editable: false,
       params: {},
     },
     {

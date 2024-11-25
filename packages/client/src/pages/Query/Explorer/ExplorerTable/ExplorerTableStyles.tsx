@@ -106,6 +106,17 @@ export const StyledNewColumnValue = styled.div`
   display: grid;
   align-items: center;
 `;
+export const StyledUserTag = styled.div`
+  background-color: ${({ theme }) => theme.color["tagColor"]};
+  color: ${({ theme }) => theme.color["white"]};
+  padding: ${({ theme }) => theme.space[1] + " " + theme.space[2]};
+  display: flex;
+  align-items: center;
+  padding; ${({ theme }) => theme.space[2]};
+  gap: ${({ theme }) => theme.space[3]};
+  border-radius: ${({ theme }) => theme.borderRadius["sm"]};
+`;
+
 export const StyledSpaceBetween = styled.div`
   display: flex;
   align-items: center;
