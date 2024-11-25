@@ -75,7 +75,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
     error: entityError,
     isFetching,
   } = useQuery({
-    queryKey: ["rootTerritoryDetail", rootTerritoryId],
+    queryKey: ["entity", rootTerritoryId],
     queryFn: async () => {
       const res = await api.detailGet(rootTerritoryId);
       return res.data;
@@ -84,37 +84,16 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
     enabled: api.isLoggedIn(),
   });
 
-  const [superclassMissing, setSuperclassMissing] = useState(true);
-  const [missinActionEventEquivalent, setMissinActionEventEquivalent] =
-    useState(true);
-
   const { validations } = rootTerritory?.data || {};
 
-  const ToggleOn = () => (
-    <>
-      <FaToggleOn size={22} /> active
-    </>
-  );
-  const ToggleOff = () => (
-    <>
-      <FaToggleOff size={22} /> inactive
-    </>
-  );
-
   const queryClient = useQueryClient();
-
-  const { selectedDetailId } = useSearchParams();
 
   const updateEntityMutation = useMutation({
     mutationFn: async (changes: Partial<IEntity>) =>
       await api.entityUpdate(rootTerritoryId, changes),
 
     onSuccess: (data, variables) => {
-      if (selectedDetailId === rootTerritoryId) {
-        queryClient.invalidateQueries({ queryKey: ["entity"] });
-      }
-
-      queryClient.invalidateQueries({ queryKey: ["rootTerritoryDetail"] });
+      queryClient.invalidateQueries({ queryKey: ["entity"] });
     },
   });
 
@@ -225,7 +204,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
             ))}
           </StyledGridForm> */}
 
-          {rootTerritory && validations && (
+          {rootTerritory && (
             <>
               <StyledSectionHeader>
                 <b>Root T validation</b>
