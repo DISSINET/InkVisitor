@@ -1,4 +1,4 @@
-import Cursor from "./Cursor";
+import Cursor, { DIRECTION } from "./Cursor";
 import Highlighter, { IAbsCoordinates } from "./Highlighter";
 import { Lines } from "./Lines";
 import Scroller from "./Scroller";
@@ -346,6 +346,15 @@ export class Annotator {
         const originalXLine = this.cursor.xLine;
         const originalYline = this.cursor.yLine;
 
+        if (this.cursor.selectEnd && this.cursor.selectStart) {
+          this.cursor.xLine = this.cursor.selectStart.xLine;
+          this.cursor.yLine =
+            this.cursor.selectStart.yLine - this.viewport.lineStart;
+        }
+
+        if (this.cursor.yLine === 0) {
+          this.cursor.xLine = 0;
+        }
         this.cursor.move(0, -1);
         if (this.cursor.yLine < 0) {
           this.viewport.scrollTo(
@@ -362,17 +371,31 @@ export class Annotator {
         }
 
         if (e.shiftKey) {
-          // copy cursor's current position as selectStart
-          this.cursor.selectStart = {
-            xLine: this.cursor.xLine,
-            yLine: this.viewport.lineStart + this.cursor.yLine,
-          };
-          // set selectEnd to cursor's original position as initialization
-          if (!this.cursor.selectEnd) {
-            this.cursor.selectEnd = {
-              xLine: originalXLine,
-              yLine: originalYline,
+          const direction = this.cursor.getSelectionDirection();
+          if (direction === DIRECTION.BACKWARD) {
+            this.cursor.selectStart = {
+              xLine: this.cursor.xLine,
+              yLine: this.viewport.lineStart + this.cursor.yLine,
             };
+            if (!this.cursor.selectEnd) {
+              this.cursor.selectStart = {
+                xLine: originalXLine,
+                yLine: this.viewport.lineStart + originalYline,
+              };
+            }
+          } else {
+            this.cursor.manualDirection = DIRECTION.BACKWARD;
+            this.cursor.selectEnd = this.cursor.selectStart;
+            this.cursor.selectStart = {
+              xLine: originalXLine,
+              yLine: this.viewport.lineStart + this.cursor.yLine,
+            };
+            if (!this.cursor.selectEnd) {
+              this.cursor.selectEnd = {
+                xLine: originalXLine,
+                yLine: this.viewport.lineStart + originalYline,
+              };
+            }
           }
         } else {
           this.cursor.selectStart = undefined;
@@ -386,6 +409,12 @@ export class Annotator {
         const originalXLine = this.cursor.xLine;
         const originalYline = this.cursor.yLine;
 
+        if (this.cursor.selectStart && this.cursor.selectEnd) {
+          this.cursor.xLine = this.cursor.selectEnd.xLine;
+          this.cursor.yLine =
+            this.cursor.selectEnd.yLine - this.viewport.lineStart;
+        }
+
         this.cursor.move(0, 1);
         if (
           this.cursor.yLine >
@@ -397,19 +426,46 @@ export class Annotator {
           );
           this.cursor.yLine = this.viewport.lineEnd - this.viewport.lineStart;
         }
+        if (this.cursor.yLine + this.viewport.lineStart >= this.text.noLines) {
+          this.cursor.yLine = this.text.noLines - this.viewport.lineStart - 1;
+          const line =
+            this.text.getCurrentLine(this.viewport, this.cursor) || "";
+          this.cursor.xLine = line.length;
+        }
 
         if (e.shiftKey) {
-          // copy cursor's current position as selectStart
-          this.cursor.selectStart = {
-            xLine: this.cursor.xLine,
-            yLine: this.viewport.lineStart + this.cursor.yLine,
-          };
-          // set selectEnd to cursor's original position as initialization
-          if (!this.cursor.selectEnd) {
+          const direction = this.cursor.getSelectionDirection();
+          if (direction === DIRECTION.FORWARD) {
             this.cursor.selectEnd = {
-              xLine: originalXLine,
-              yLine: originalYline,
+              xLine: this.cursor.xLine,
+              yLine: this.viewport.lineStart + this.cursor.yLine,
             };
+            // set selectEnd to cursor's original position as initialization
+            if (!this.cursor.selectStart) {
+              this.cursor.selectStart = {
+                xLine: originalXLine,
+                yLine: this.viewport.lineStart + originalYline,
+              };
+            }
+          } else {
+            this.cursor.manualDirection = DIRECTION.FORWARD;
+            this.cursor.selectStart = this.cursor.selectEnd;
+            this.cursor.selectEnd = {
+              xLine: this.cursor.xLine,
+              yLine: this.viewport.lineStart + this.cursor.yLine,
+            };
+            if (!this.cursor.selectStart) {
+              this.cursor.selectStart = {
+                xLine: originalXLine,
+                yLine: this.viewport.lineStart + originalYline,
+              };
+            }
+          }
+
+          const line =
+            this.text.getCurrentLine(this.viewport, this.cursor) || "";
+          if (line.length < this.cursor.selectEnd.xLine) {
+            this.cursor.selectEnd.xLine = line.length;
           }
         } else {
           this.cursor.selectStart = undefined;
@@ -422,6 +478,7 @@ export class Annotator {
       case "ArrowLeft": {
         // default delta to the left
         let offsetLeft = -1;
+        this.cursor.manualDirection = DIRECTION.BACKWARD;
         const originalXLine = this.cursor.xLine;
         const originalYline = this.cursor.yLine;
 
@@ -479,7 +536,7 @@ export class Annotator {
           if (!this.cursor.selectEnd) {
             this.cursor.selectEnd = {
               xLine: originalXLine,
-              yLine: originalYline,
+              yLine: this.viewport.lineStart + originalYline,
             };
           }
         } else {
@@ -503,6 +560,7 @@ export class Annotator {
       case "ArrowRight": {
         // default delta to the right
         let offsetRight = 1;
+        this.cursor.manualDirection = DIRECTION.FORWARD;
         const originalXLine = this.cursor.xLine;
         const originalYline = this.cursor.yLine;
 
@@ -571,7 +629,7 @@ export class Annotator {
           if (!this.cursor.selectStart) {
             this.cursor.selectStart = {
               xLine: originalXLine,
-              yLine: originalYline,
+              yLine: this.viewport.lineStart + originalYline,
             };
           }
         } else {
