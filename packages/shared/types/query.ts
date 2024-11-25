@@ -1004,7 +1004,7 @@ export namespace Explore {
     [EExploreColumnType.ER]: { disabled: false },
     [EExploreColumnType.EPV]: { disabled: false },
     [EExploreColumnType.EPT]: { disabled: false },
-    [EExploreColumnType.ERR]: { disabled: true },
+    [EExploreColumnType.ERR]: { disabled: false },
     [EExploreColumnType.ERV]: { disabled: true },
     [EExploreColumnType.ES]: { disabled: true },
     [EExploreColumnType.CPV]: { disabled: true },

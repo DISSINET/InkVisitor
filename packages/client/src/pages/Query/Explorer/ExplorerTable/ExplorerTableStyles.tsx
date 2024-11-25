@@ -69,6 +69,8 @@ export const StyledColumnContent = styled.div`
   gap: ${({ theme }) => theme.space[2]};
 `;
 
+export const StyledCell = styled.div``;
+
 export const StyledNewColumn = styled.div`
   position: absolute;
   background-color: ${({ theme }) => theme.color["white"]};

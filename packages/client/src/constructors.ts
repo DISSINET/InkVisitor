@@ -744,3 +744,31 @@ export const deleteProp = (
 
   return { ...entity, props: newProps };
 };
+
+export const deleteRef = (
+  entity: IEntity,
+  toRemove: {
+    refId?: string;
+    resourceId?: string;
+    valueId?: string;
+  }
+): IEntity => {
+  const shouldDelete = (ref: IReference) => {
+    if (toRemove.refId) {
+      return ref.id === toRemove.refId;
+    }
+    if (toRemove.resourceId) {
+      return ref.resource === toRemove.resourceId;
+    }
+    if (toRemove.valueId) {
+      return ref.value === toRemove.valueId;
+    }
+    return false;
+  };
+
+  const newRefs = [...entity.references].filter((ref) => !shouldDelete(ref));
+
+  console.log("new refs", entity, toRemove, newRefs);
+
+  return { ...entity, references: newRefs };
+};

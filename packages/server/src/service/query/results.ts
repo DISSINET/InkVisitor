@@ -106,6 +106,7 @@ export default class Results<T extends { id: string }> {
     > = {};
     for (const column of columnsData) {
       switch (column.type) {
+        // Entity Property value
         case Explore.EExploreColumnType.EPV: {
           const params =
             column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.EPV>;
@@ -127,6 +128,7 @@ export default class Results<T extends { id: string }> {
           );
           break;
         }
+        // Created by
         case Explore.EExploreColumnType.EUC: {
           const audit = await Audit.getFirstForEntity(db, entity.id);
 
@@ -138,6 +140,7 @@ export default class Results<T extends { id: string }> {
           }
           break;
         }
+        // Entity Reference Resources
         case Explore.EExploreColumnType.ERR: {
           const referenceIds = entity.references.reduce<string[]>(
             (acc, curr) => {
@@ -150,6 +153,7 @@ export default class Results<T extends { id: string }> {
           out[column.id] = resources;
           break;
         }
+        // Entity Property types
         case Explore.EExploreColumnType.EPT: {
           const entities = await Entity.findEntitiesByIds(
             db,
@@ -158,6 +162,7 @@ export default class Results<T extends { id: string }> {
           out[column.id] = entities;
           break;
         }
+        // Entity Relations
         case Explore.EExploreColumnType.ER: {
           const params =
             column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.ER>;

@@ -17,9 +17,10 @@ import { IEntity, IResponseQueryEntity, IUser } from "@shared/types";
 import { Explore } from "@shared/types/query";
 import api from "api";
 import { EntitySuggester, EntityTag } from "components/advanced";
-import { deleteProp } from "constructors";
+import { deleteProp, deleteRef } from "constructors";
 
 import {
+  StyledCell,
   StyledCheckboxWrapper,
   StyledColumn,
   StyledColumnContent,
@@ -27,6 +28,7 @@ import {
   StyledUserTag,
 } from "./ExplorerTableStyles";
 import { WIDTH_COLUMN_DEFAULT, WIDTH_COLUMN_FIRST } from "./types";
+import { EntityEnums } from "@shared/enums";
 
 interface ExplorerTableRowProps {
   rowId: number;
@@ -133,6 +135,19 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
         },
       });
     }
+
+    if (column?.type === Explore.EExploreColumnType.ERR) {
+      const newEntity = deleteRef(sourceEntity, {
+        resourceId: entityToRemove.id,
+      });
+
+      updateEntityMutation.mutate({
+        entityId: sourceEntity.id,
+        changes: {
+          references: newEntity.references,
+        },
+      });
+    }
   };
 
   const renderCellValue = (
@@ -190,18 +205,51 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
       | IUser
       | IUser[],
     column: Explore.IExploreColumn
-  ) => {
+  ): React.ReactElement => {
     if (Array.isArray(cellData)) {
-      return cellData.map((cellEntity, key) => {
-        return (
-          <React.Fragment key={key}>
-            {renderCellValue(cellEntity, recordEntity, column)}
-          </React.Fragment>
-        );
-      });
+      return (
+        <StyledCell>
+          {cellData.map((cellEntity, key) => {
+            return (
+              <React.Fragment key={key}>
+                {renderCellValue(cellEntity, recordEntity, column)}
+              </React.Fragment>
+            );
+          })}
+        </StyledCell>
+      );
     } else {
       return renderCellValue(cellData, recordEntity, column);
     }
+  };
+
+  const renderEditSection = (
+    rowEntity: IEntity,
+    column: Explore.IExploreColumn
+  ): React.ReactElement | null => {
+    if (column.editable) {
+      if (column.type === Explore.EExploreColumnType.EPV) {
+        return (
+          <EntitySuggester
+            categoryTypes={classesAll}
+            onPicked={(newEntity) => {
+              handleEditColumn(rowEntity, column.id, newEntity);
+            }}
+          />
+        );
+      }
+      if (column.type === Explore.EExploreColumnType.ERR) {
+        return (
+          <EntitySuggester
+            categoryTypes={[EntityEnums.Class.Resource]}
+            onPicked={(newEntity) => {
+              handleEditColumn(rowEntity, column.id, newEntity);
+            }}
+          />
+        );
+      }
+    }
+    return null;
   };
 
   return (
@@ -261,16 +309,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
           <StyledColumn key={key} $width={WIDTH_COLUMN_DEFAULT}>
             <StyledColumnContent>
               {renderCell(rowEntity, columnData[column.id], column)}
-
-              {column.editable &&
-                column.type === Explore.EExploreColumnType.EPV && (
-                  <EntitySuggester
-                    categoryTypes={classesAll}
-                    onPicked={(newEntity) => {
-                      handleEditColumn(rowEntity, column.id, newEntity);
-                    }}
-                  />
-                )}
+              {renderEditSection(rowEntity, column)}
             </StyledColumnContent>
           </StyledColumn>
         );

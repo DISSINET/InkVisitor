@@ -18,6 +18,7 @@ import { EntityEnums } from "@shared/enums";
 import {
   IEntity,
   IProp,
+  IReference,
   IResponseQuery,
   IResponseQueryEntity,
 } from "@shared/types";
@@ -195,23 +196,62 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       const column = columns.find((column) => column.id === columnId);
 
       if (column) {
-        const params =
-          column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.EPV>;
+        switch (column.type) {
+          case Explore.EExploreColumnType.EPT: {
+            const params =
+              column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.EPT>;
 
-        const newProp: IProp = CMetaProp({
-          typeEntityId: params.propertyType,
-          valueEntityId: newEntity.id,
-        });
+            const newProp: IProp = CMetaProp({
+              typeEntityId: newEntity.id,
+              valueEntityId: "",
+            });
 
-        updateEntityMutation.mutate({
-          entityId: rowEntity.id,
-          changes: {
-            props: [...rowEntity.props, newProp],
-          },
-        });
+            updateEntityMutation.mutate({
+              entityId: rowEntity.id,
+              changes: {
+                props: [...rowEntity.props, newProp],
+              },
+            });
+            break;
+          }
+
+          case Explore.EExploreColumnType.EPV: {
+            const params =
+              column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.EPV>;
+
+            const newProp: IProp = CMetaProp({
+              typeEntityId: params.propertyType,
+              valueEntityId: newEntity.id,
+            });
+
+            updateEntityMutation.mutate({
+              entityId: rowEntity.id,
+              changes: {
+                props: [...rowEntity.props, newProp],
+              },
+            });
+            break;
+          }
+
+          case Explore.EExploreColumnType.ERR: {
+            const newRef: IReference = {
+              id: uuidv4(),
+              resource: newEntity.id,
+              value: "",
+            };
+
+            updateEntityMutation.mutate({
+              entityId: rowEntity.id,
+              changes: {
+                references: [...rowEntity.references, newRef],
+              },
+            });
+            break;
+          }
+        }
       }
     },
-    []
+    [columns]
   );
 
   // const renderPaging = () => {
