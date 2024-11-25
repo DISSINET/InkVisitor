@@ -2,6 +2,11 @@ import { UserEnums } from "../enums";
 
 export const userRoleDict = [
   {
+    value: UserEnums.Role.Owner,
+    label: "owner",
+    info: "",
+  },
+  {
     value: UserEnums.Role.Admin,
     label: "admin",
     info: "",

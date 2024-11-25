@@ -1,5 +1,7 @@
+import { FaUserGear, FaUserTie } from "react-icons/fa6";
+import { FaUserEdit, FaUserTag } from "react-icons/fa";
 import { classesAll } from "@shared/dictionaries/entity";
-import { EntityEnums, RelationEnums } from "@shared/enums";
+import { EntityEnums, RelationEnums, UserEnums } from "@shared/enums";
 import {
   EntityTooltip,
   IEntity,
@@ -10,6 +12,7 @@ import {
 } from "@shared/types";
 import { DropTargetMonitor, XYCoord } from "react-dnd";
 import { DragItem, EntityDragItem } from "types";
+import React from "react";
 
 // is used to render italic for S, could be handled other way when first label "" is obligatory
 export const isFirstLabelEmpty = (labels: string[]) =>
@@ -317,4 +320,19 @@ export const normalizeURL = (url: string) => {
     return url + "/";
   }
   return url;
+};
+
+export const getUserIcon = (
+  userRole: UserEnums.Role,
+  // size can be determined in parent component font-size instead
+  size?: number
+): React.ReactNode => {
+  if (userRole === UserEnums.Role.Owner) {
+    return <FaUserGear size={size} />;
+  } else if (userRole === UserEnums.Role.Admin) {
+    return <FaUserTie size={size} />;
+  } else if (userRole === UserEnums.Role.Editor) {
+    return <FaUserEdit size={size} />;
+  }
+  return <FaUserTag size={size} />;
 };

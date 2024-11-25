@@ -38,6 +38,27 @@
   },
   {
     "id": "2",
+    "name": "owner",
+    "email": "owner@owner.com",
+    "password": "owner",
+    "active": true,
+    "verified": true,
+    "options": {
+      "defaultTerritory": "",
+      "defaultLanguage": "",
+      "searchLanguages": []
+    },
+    "bookmarks": null,
+    "role": "owner",
+    "rights": [
+      {
+        "territory": "T0",
+        "mode": "admin"
+      }
+    ]
+  },
+  {
+    "id": "3",
     "name": "editor1",
     "email": "editor@inkvisitor.com",
     "password": "abc",
@@ -62,7 +83,7 @@
     ]
   },
   {
-    "id": "3",
+    "id": "4",
     "name": "editor2",
     "email": "editor2@inkvisitor.com",
     "password": "def",
@@ -83,7 +104,7 @@
     ]
   },
   {
-    "id": "4",
+    "id": "5",
     "name": "viewer1",
     "email": "viewer1@inkvisitor.com",
     "password": "viewer",
@@ -104,7 +125,7 @@
     ]
   },
   {
-    "id": "5",
+    "id": "6",
     "name": "inactive",
     "email": "inactive@inkvisitor.com",
     "password": "inactive",

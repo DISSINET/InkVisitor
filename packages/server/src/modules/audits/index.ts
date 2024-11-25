@@ -1,10 +1,15 @@
 import { asyncRouteHandler } from "../index";
 import { Router } from "express";
 import { findEntityById } from "@service/shorthands";
-import { BadParams, AuditsDoNotExist } from "@shared/types/errors";
-import { IResponseAudit } from "@shared/types";
+import {
+  BadParams,
+  AuditsDoNotExist,
+  AuditDoesNotExist,
+} from "@shared/types/errors";
+import { IAudit, IResponseAudit, IResponseGeneric } from "@shared/types";
 import { ResponseAudit } from "@models/audit/response";
 import { IRequest } from "src/custom_typings/request";
+import Audit from "@models/audit/audit";
 
 export const getAuditByEntityId = asyncRouteHandler<IResponseAudit>(
   async (request: IRequest) => {
@@ -31,4 +36,30 @@ export const getAuditByEntityId = asyncRouteHandler<IResponseAudit>(
   }
 );
 
-export default Router()
+export default Router().get(
+  "/",
+  asyncRouteHandler<IResponseGeneric<IAudit>>(
+    async (
+      request: IRequest<
+        unknown,
+        unknown,
+        { skip: number; take: number; from: string }
+      >
+    ) => {
+      const firstAudits = await Audit.findMany(request.db.connection, {
+        skip: request.query.skip || 0,
+        take: request.query.take || 1,
+        from: new Date(request.query.from || "1970"),
+      });
+
+      if (!firstAudits || !firstAudits.length) {
+        throw new AuditDoesNotExist("no audit found");
+      }
+
+      return {
+        result: true,
+        data: firstAudits[0],
+      };
+    }
+  )
+);

@@ -1,5 +1,5 @@
 import { animated } from "@react-spring/web";
-import { ThemeColor } from "Theme/theme";
+import { ThemeColor, ThemeFontSize } from "Theme/theme";
 import styled from "styled-components";
 
 interface StyledContainer {

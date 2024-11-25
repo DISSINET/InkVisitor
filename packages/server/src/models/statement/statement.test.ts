@@ -142,7 +142,7 @@ describe("models/statement", function () {
     });
 
     describe("insert one child without explicit order", () => {
-      it("should have order = 0", async (done) => {
+      it("should have order = 0", async () => {
         const statement = new Statement({});
         statement.data = new StatementData({
           territory: { territoryId: "any", order: 0 },
@@ -154,13 +154,11 @@ describe("models/statement", function () {
           statement.data.territory?.territoryId
         );
         expect(createdData.data.territory?.order).toEqual(0);
-
-        done();
       });
     });
 
     describe("insert one child with explicit order", () => {
-      it("should have order = 999 as wanted", async (done) => {
+      it("should have order = 999 as wanted", async () => {
         const statement = new Statement({});
         statement.data = new StatementData({
           territory: { territoryId: "any", order: 999 },
@@ -174,13 +172,11 @@ describe("models/statement", function () {
         expect(createdData.data.territory?.order).toEqual(
           statement.data.territory?.order
         );
-
-        done();
       });
     });
 
     describe("insert two child without explicit order", () => {
-      it("should have order = 0 and 1 respectively", async (done) => {
+      it("should have order = 0 and 1 respectively", async () => {
         const statement1 = new Statement({});
         statement1.data = new StatementData({
           territory: { territoryId: "any", order: 0 },
@@ -214,7 +210,6 @@ describe("models/statement", function () {
           createdData2.data.territory?.territoryId
         );
         expect(createdData2.data.territory?.order).toEqual(1);
-        done();
       });
     });
   });
@@ -235,7 +230,7 @@ describe("models/statement", function () {
     });
 
     describe("update the only child", () => {
-      it("should have order = 0", async (done) => {
+      it("should have order = 0", async () => {
         const statement = new Statement({});
         statement.data = new StatementData({
           territory: { territoryId: "any", order: 0 },
@@ -248,13 +243,11 @@ describe("models/statement", function () {
         });
         const createdData = await findEntityById<IStatement>(db, statement.id);
         expect(createdData.data.territory?.order).toEqual(0);
-
-        done();
       });
     });
 
     describe("update the second's order value without conflict ", () => {
-      it("should have order as chosen", async (done) => {
+      it("should have order as chosen", async () => {
         const statement1 = new Statement({});
         statement1.data = new StatementData({
           territory: { territoryId: "any", order: 0 },
@@ -274,13 +267,11 @@ describe("models/statement", function () {
 
         const createdData = await findEntityById<IStatement>(db, statement2.id);
         expect(createdData.data.territory?.order).toEqual(wantedNewOrder);
-
-        done();
       });
     });
 
     describe("update the second's order value (conflict)", () => {
-      it("should have order as before", async (done) => {
+      it("should have order as before", async () => {
         const statement1 = new Statement({});
         statement1.data = new StatementData({
           territory: { territoryId: "any", order: 0 },
@@ -310,13 +301,11 @@ describe("models/statement", function () {
           statement1.id
         );
         expect(createdData1.data.territory?.order).toEqual(0);
-
-        done();
       });
     });
 
     describe("update the third's order value (conflict)", () => {
-      it("should have non conflicting order", async (done) => {
+      it("should have non conflicting order", async () => {
         const statement1 = new Statement({});
         statement1.data = new StatementData({
           territory: { territoryId: "any", order: 0 },
@@ -364,8 +353,6 @@ describe("models/statement", function () {
           statement3.id
         );
         expect(createdData3.data.territory?.order).toEqual(0.5);
-
-        done();
       });
     });
   });
@@ -420,10 +407,9 @@ describe("models/statement", function () {
     });
 
     describe("empty db", () => {
-      it("should return empty array", async (done) => {
+      it("should return empty array", async () => {
         const statements = await Statement.getLinkedEntities(db.connection, "");
         expect(statements).toHaveLength(0);
-        done();
       });
     });
 
@@ -760,7 +746,7 @@ describe("models/statement", function () {
     beforeAll(async () => {
       await db.initDb();
       await createMockTree(db, randSuffix);
-      treeCache.tree = await treeCache.createTree(db);
+      treeCache.tree = await treeCache.createTree();
     });
 
     afterAll(async () => {
@@ -910,7 +896,7 @@ describe("models/statement", function () {
     beforeAll(async () => {
       await db.initDb();
       await createMockTree(db, randSuffix);
-      treeCache.tree = await treeCache.createTree(db);
+      treeCache.tree = await treeCache.createTree();
     });
 
     afterAll(async () => {
@@ -1146,7 +1132,7 @@ describe("models/statement", function () {
     beforeAll(async () => {
       await db.initDb();
       await createMockTree(db, randSuffix);
-      treeCache.tree = await treeCache.createTree(db);
+      treeCache.tree = await treeCache.createTree();
     });
 
     afterAll(async () => {

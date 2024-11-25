@@ -7,20 +7,19 @@ import {
 } from "@shared/types/territory";
 import React, { useCallback, useMemo } from "react";
 import { getEntityLabel } from "utils/utils";
-import {
-  StyledSentence,
-  StyledSentenceEntity,
-} from "../EntityDetailValidationRuleStyles";
+import { StyledSentence, StyledSentenceEntity } from "../ValidationRuleStyles";
 
-interface EntityDetailValidationText {
+interface ValidationText {
   validation: ITerritoryValidation;
   entities: Record<string, IEntity>;
   active: boolean;
 }
 
-export const EntityDetailValidationText: React.FC<
-  EntityDetailValidationText
-> = ({ validation, entities, active }) => {
+export const ValidationText: React.FC<ValidationText> = ({
+  validation,
+  entities,
+  active,
+}) => {
   const {
     detail,
     entityClasses,

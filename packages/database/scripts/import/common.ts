@@ -2,7 +2,6 @@ import { RelationEnums } from "@shared/enums";
 import { Relation } from "@shared/types";
 import { RValue, RTable } from "rethinkdb-ts";
 
-
 export interface DbSchema {
   users: TableSchema;
   aclPermissions: TableSchema;
@@ -10,6 +9,7 @@ export interface DbSchema {
   audits: TableSchema;
   relations: TableSchema;
   documents: TableSchema;
+  settings: TableSchema;
 }
 
 export interface TableSchema {
@@ -27,7 +27,7 @@ export function parseArgs(): [datasetId: string, env: string] {
 }
 
 const [datasetId, env] = parseArgs();
-const envFile = `env/.env${env ? "." + env : ''}`;
+const envFile = `env/.env${env ? "." + env : ""}`;
 const envData = require("dotenv").config({ path: envFile }).parsed;
 
 if (!envData) {

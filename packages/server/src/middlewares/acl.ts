@@ -87,8 +87,10 @@ class Acl {
       return permissionDeniedErr;
     }
 
-    // allow admin for any route
-    if (req.getUserOrFail().role === UserEnums.Role.Admin) {
+    // allow admin/owner for any route
+    if (
+      req.getUserOrFail().hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin])
+    ) {
       return null;
     }
 

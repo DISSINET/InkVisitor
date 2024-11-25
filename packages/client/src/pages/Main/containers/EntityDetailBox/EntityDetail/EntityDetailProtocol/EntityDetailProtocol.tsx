@@ -13,7 +13,7 @@ import {
   StyledTagWrap,
   StyledValue,
 } from "./EntityDetailProtocolStyles";
-import { StyledFlexList } from "../EntityDetailValidationSection/EntityDetailValidationRule/EntityDetailValidationRuleStyles";
+import { StyledFlexList } from "../../../../../../components/advanced/ValidationRule/ValidationRuleStyles";
 
 const initialProtocol: ITerritoryProtocol = {
   project: "",

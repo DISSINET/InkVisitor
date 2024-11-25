@@ -396,6 +396,12 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                         selected: role === userRoleDict[2].value,
                         onClick: () => {},
                       },
+                      {
+                        longValue: userRoleDict[3].label,
+                        shortValue: userRoleDict[3].label,
+                        selected: role === userRoleDict[3].value,
+                        onClick: () => {},
+                      },
                     ]}
                   />
                 </div>

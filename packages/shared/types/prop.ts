@@ -17,6 +17,11 @@ export interface IProp {
   value: IPropSpec;
 }
 
+export enum PropSpecKind {
+  TYPE = "type",
+  VALUE = "value",
+}
+
 export interface IPropSpec {
   entityId: string;
   elvl: EntityEnums.Elvl;

@@ -10,7 +10,8 @@ export interface IRequestStats {
   aggregateBy: Aggregation;
   filter: {
     userIds: string[] | "all";
-    activities: {
+    editActivities: {
+      // relevant only for the edit function
       entities: boolean; // handling entities
       relationsMeta: boolean; // relations inside entities
       relationsStatement: boolean; // in-statment relations
@@ -20,6 +21,6 @@ export interface IRequestStats {
       tags: boolean; // tags for statements and entities
     };
     entityTypes: EntityEnums.Class[] | "all"; // what entities are involved
-    relationTypes: RelationEnums.Type[] | "all"; // what relations are involved
+    relationTypes: RelationEnums.Type[] | "all"; // what relations are involved - valid for edit
   };
 }

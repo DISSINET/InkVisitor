@@ -1,14 +1,14 @@
-import { Connection, r as rethink, RDatum, WriteResult } from "rethinkdb-ts";
-import { IEntity, IUser } from "@shared/types";
-import { Db } from "./rethink";
-import { IDbModel } from "@models/common";
-import { ModelNotValidError } from "@shared/types/errors";
-import { DbEnums, EntityEnums } from "@shared/enums";
-import Entity from "@models/entity/entity";
-import User from "@models/user/user";
-import Relation from "@models/relation/relation";
 import Audit from "@models/audit/audit";
+import { IDbModel } from "@models/common";
 import Document from "@models/document/document";
+import Entity from "@models/entity/entity";
+import Relation from "@models/relation/relation";
+import User from "@models/user/user";
+import { DbEnums, EntityEnums } from "@shared/enums";
+import { IEntity, IUser } from "@shared/types";
+import { ModelNotValidError } from "@shared/types/errors";
+import { Connection, RDatum, r as rethink, WriteResult } from "rethinkdb-ts";
+import { Db } from "./rethink";
 
 export async function getEntitiesDataByClass<T>(
   db: Connection,
@@ -28,6 +28,16 @@ export async function findEntityById<T extends IEntity>(
   const connection = db instanceof Db ? db.connection : db;
   const data = await rethink.table(Entity.table).get(id).run(connection);
   return data || null;
+}
+
+export async function getEntitiesByIds<T extends IEntity>(
+  db: Connection,
+  ids: string[]
+): Promise<T[]> {
+  return rethink
+    .table(Entity.table)
+    .getAll(...ids)
+    .run(db);
 }
 
 export async function createEntity(db: Db, data: IDbModel): Promise<boolean> {
