@@ -18,9 +18,9 @@ export namespace Query {
   }
 
   export interface INodeParams {
-    classes?: EntityEnums.Class[];
+    entityClasses?: EntityEnums.Class[];
     label?: string;
-    id?: string;
+    entityId?: string;
   }
   export interface IEdgeParams {}
 
@@ -110,6 +110,94 @@ export namespace Query {
   export type EdgeRule = {
     nodeType: NodeType;
     params: { entityClass?: EntityEnums.Class[] };
+  };
+
+  export const EdgeTypeTargetNodeParams: Record<
+    EdgeType,
+    Record<string, any>
+  > = {
+    "HP:V": {
+      entityId: { allowedClasses: [] },
+      entityClass: { allowedClasses: [] },
+    },
+    "I_HP:V": {},
+    "EP:T": {
+      entityId: { allowedClasses: [EntityEnums.Class.Concept] },
+    },
+
+    "IS:": {},
+    "I_IS:": {},
+    "IS:A": {},
+    "I_IS:A": {},
+    "IS:S": {},
+    "I_IS:S": {},
+    "IS:A1": {},
+    "I_IS:A1": {},
+    "IS:A2": {},
+    "I_IS:A2": {},
+    "IS:PS": {},
+    "I_IS:PS": {},
+    "SUT:": {
+      entityId: { allowedClasses: [EntityEnums.Class.Territory] },
+    },
+    "I_SUT:": {},
+    "SUT:D": {},
+    "I_SUT:D": {},
+    "SUT:C": {},
+    "I_SUT:C": {},
+    "HR:R": {},
+    "I_HR:R": {},
+    "HR:V": {},
+    "CT:": {},
+    "I_CT:": {},
+    "CT:D": {},
+    "I_CT:D": {},
+    "CT:G": {},
+    "I_CT:G": {},
+    "SP:T": {},
+    "I_SP:T": {},
+    "SP:V": {},
+    "I_SP:V": {},
+    SI: {},
+    I_SI: {},
+    SC: {},
+    I_SC: {},
+    "R:": {
+      entityId: { allowedClasses: [] },
+    },
+    "R:SCL": {
+      entityId: { allowedClasses: [EntityEnums.Class.Concept] },
+    },
+    "I_R:SCL": {},
+    "R:SYN": {},
+    "R:ANT": {},
+    "I_R:ANT": {},
+    "R:HOL": {},
+    "I_R:HOL": {},
+    "R:PRR": {},
+    "I_R:PRR": {},
+    "R:SAR": {},
+    "I_R:SAR": {},
+    "R:AEE": {},
+    "I_R:AEE": {},
+    "R:CLA": {
+      entityId: { allowedClasses: [EntityEnums.Class.Concept] },
+    },
+    "I_R:CLA": {},
+    "R:IDE": {},
+    "I_R:IDE": {},
+    "R:IMP": {},
+    "I_R:IMP": {},
+    "R:SOE": {},
+    "I_R:SOE": {},
+    "R:SUS": {},
+    "I_R:SUS": {},
+    "R:A1S": {},
+    "I_R:A1S": {},
+    "R:A2S": {},
+    "I_R:A2S": {},
+    "R:REL": {},
+    "I_R:REL": {},
   };
 
   export const EdgeTypeNodeRules: Record<EdgeType, [EdgeRule, EdgeRule]> = {
@@ -761,8 +849,9 @@ export namespace Query {
       .filter(([, [ruleFrom, ruleTo]]) => {
         const validType = ruleFrom.nodeType === node.type;
         const validClass =
-          node.params?.classes?.length && ruleFrom.params.entityClass?.length
-            ? node.params.classes.some((cl) =>
+          node.params?.entityClasses?.length &&
+          ruleFrom.params.entityClass?.length
+            ? node.params.entityClasses.some((cl) =>
                 ruleFrom.params.entityClass?.includes(cl)
               )
             : true;
@@ -778,7 +867,7 @@ export namespace Query {
         // TODO
         return (
           node.type === to.nodeType &&
-          to.params.entityClass?.includes(node.params.classes![0])
+          to.params.entityClass?.includes(node.params.entityClasses![0])
         );
       })
       .map(([type]) => type as EdgeType);
@@ -831,11 +920,14 @@ export namespace Query {
     ) {
       return true;
     }
-    if (node.params.classes === undefined || node.params.classes.length === 0) {
+    if (
+      node.params.entityClasses === undefined ||
+      node.params.entityClasses.length === 0
+    ) {
       return false;
     }
 
-    return node.params.classes.every((nodeClass) => {
+    return node.params.entityClasses.every((nodeClass) => {
       return rule.params.entityClass?.includes(nodeClass) || false;
     });
   };

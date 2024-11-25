@@ -8,28 +8,28 @@ const queryStateInitial: Query.INode = {
   type: Query.NodeType.E,
   id: "root",
   params: {
-    classes: [EntityEnums.Class.Concept],
+    entityClasses: [EntityEnums.Class.Person],
     label: "",
   },
   operator: Query.NodeOperator.And,
   edges: [
-    // {
-    //   type: Query.EdgeType["EP:T"],
-    //   params: {},
-    //   logic: Query.EdgeLogic.Positive,
-    //   id: "e1",
-    //   node: {
-    //     id: "n1",
-    //     type: Query.NodeType.E,
-    //     params: {
-    //       id: "4ce5e669-d421-40c9-b1ce-f476fdd171fe", //sex
-    //       classes: [],
-    //       label: "",
-    //     },
-    //     operator: Query.NodeOperator.And,
-    //     edges: [],
-    //   },
-    // },
+    {
+      type: Query.EdgeType["EP:T"],
+      params: {},
+      logic: Query.EdgeLogic.Positive,
+      id: "e1",
+      node: {
+        id: "n1",
+        type: Query.NodeType.E,
+        params: {
+          entityId: "4ce5e669-d421-40c9-b1ce-f476fdd171fe", //sex
+          entityClasses: [],
+          label: "",
+        },
+        operator: Query.NodeOperator.And,
+        edges: [],
+      },
+    },
   ],
 };
 
@@ -99,14 +99,14 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
       return updateNodeClass(
         state,
         action.payload.nodeId,
-        action.payload.newClasses
+        action.payload.newEntityClasses
       );
 
     case QueryActionType.updateNodeEntityId:
       return updateNodeEntityId(
         state,
         action.payload.nodeId,
-        action.payload.newId
+        action.payload.newEntityId
       );
 
     default:
@@ -117,7 +117,7 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
 const updateNodeClass = (
   state: Query.INode,
   nodeId: string,
-  newClasses: EntityEnums.Class[]
+  newEntityClasses: EntityEnums.Class[]
 ): Query.INode => {
   const updatedState = { ...state };
 
@@ -127,7 +127,7 @@ const updateNodeClass = (
   if (!nodeToUpdate) {
     return updatedState;
   }
-  nodeToUpdate.params.classes = newClasses;
+  nodeToUpdate.params.entityClasses = newEntityClasses;
 
   return updatedState;
 };
@@ -135,7 +135,7 @@ const updateNodeClass = (
 const updateNodeEntityId = (
   state: Query.INode,
   nodeId: string,
-  newId: string | undefined
+  newEntityId: string | undefined
 ): Query.INode => {
   const updatedState = { ...state };
 
@@ -145,11 +145,11 @@ const updateNodeEntityId = (
   if (!nodeToUpdate) {
     return updatedState;
   }
-  if (newId === undefined) {
-    delete nodeToUpdate.params.id;
+  if (newEntityId === undefined) {
+    delete nodeToUpdate.params.entityId;
   } else {
-    nodeToUpdate.params.id = newId;
-    nodeToUpdate.params.classes = [];
+    nodeToUpdate.params.entityId = newEntityId;
+    nodeToUpdate.params.entityClasses = [];
   }
 
   return updatedState;
@@ -183,7 +183,7 @@ const addNode = (state: Query.INode, parentId: string): Query.INode => {
       type: Query.NodeType.E,
       id: uuidv4(),
       params: {
-        classes: [],
+        entityClasses: [],
         label: "",
       },
       operator: Query.NodeOperator.And,

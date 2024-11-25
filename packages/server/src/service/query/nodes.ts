@@ -58,14 +58,14 @@ export default class SearchNode implements Query.INode {
     edge?: SearchEdge
   ): Promise<void> {
     let q: RStream = r.table(Entity.table);
-    if (node.params.classes?.length) {
+    if (node.params.entityClasses?.length) {
       q = q.filter(function (row: RDatum) {
-        return r.expr(node.params.classes).contains(row("class"));
+        return r.expr(node.params.entityClasses).contains(row("class"));
       });
     }
 
-    if (this.params.id) {
-      q = q.filter({ id: this.params.id });
+    if (this.params.entityId) {
+      q = q.filter({ id: this.params.entityId });
     }
     if (this.params.label) {
       q = q.filter({ label: this.params.label });
@@ -78,12 +78,12 @@ export default class SearchNode implements Query.INode {
       q = q.getField("id");
     }
 
-    const edgeResults = await q.distinct().run(db);
+    const results = await q.distinct().run(db);
 
     if (this.operator === Query.NodeOperator.And) {
-      this.results.addAnd(edgeResults);
+      this.results.addAnd(results);
     } else {
-      this.results.addOr(edgeResults);
+      this.results.addOr(results);
     }
   }
 

@@ -1,17 +1,19 @@
+import { useQuery } from "@tanstack/react-query";
+import React, { useMemo } from "react";
+import { FaPlus, FaTrash } from "react-icons/fa";
+
 import { entitiesDict } from "@shared/dictionaries";
 import { classesAll } from "@shared/dictionaries/entity";
-import { useQuery } from "@tanstack/react-query";
+import { EntityEnums } from "@shared/enums";
+import { Query } from "@shared/types/query";
 import api from "api";
 import { Button } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
-import React, { useMemo } from "react";
-import { FaPlus, FaTrash } from "react-icons/fa";
 import theme from "Theme/theme";
+
 import { INodeItem, QueryValidityProblem } from "../../types";
 import { QueryAction, QueryActionType } from "../state";
 import { StyledGraphNode, StyledNodeTypeSelect } from "./QueryStyles";
-import { Query } from "@shared/types/query";
-import { EntityEnums } from "@shared/enums";
 
 interface QueryGridNodeProps {
   node: INodeItem;
@@ -36,11 +38,17 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
     info: type.toString(),
   }));
 
+  const edgeType = edge?.type;
+
+  const nodeParams = edgeType ? Query.EdgeTypeTargetNodeParams[edgeType] : {};
+
+  const { entityId: paramEntityId, entityClass: paramEntityClass } = nodeParams;
+
   const { data: dataEntity } = useQuery({
-    queryKey: ["entity", node.params.id ?? ""],
+    queryKey: ["entity", node.params.entityId ?? ""],
     queryFn: async () => {
-      if (node.params.id) {
-        const res = await api.entitiesGet(node.params.id);
+      if (node.params.entityId) {
+        const res = await api.entitiesGet(node.params.entityId);
         return res.data;
       } else {
         return undefined;
@@ -106,61 +114,77 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
             }}
           />
         </StyledNodeTypeSelect>
-        <Dropdown.Multi.Entity
-          value={node.params.classes ?? [entitiesDict[0].value]}
-          disableEmpty
-          onChange={(newValue) => {
-            dispatch({
-              type: QueryActionType.updateNodeClass,
-              payload: {
-                nodeId: node.id,
-                newClasses: newValue,
-              },
-            });
-          }}
-          options={entitiesDict}
-          width={150}
-          noOptionsMessage="entity class"
-          disabled={node.params.id !== undefined}
-        />
-        <div>
-          {isRoot === false &&
-            (dataEntity !== undefined ? (
-              <EntityTag
-                entity={dataEntity}
-                unlinkButton={{
-                  onClick: () => {
+        {(paramEntityClass || isRoot) && (
+          <Dropdown.Multi.Entity
+            value={node.params.entityClasses ?? [entitiesDict[0].value]}
+            disableEmpty
+            onChange={(newValue) => {
+              dispatch({
+                type: QueryActionType.updateNodeClass,
+                payload: {
+                  nodeId: node.id,
+                  newEntityClasses: newValue,
+                },
+              });
+            }}
+            options={
+              isRoot || paramEntityClass.allowedClasses.length === 0
+                ? entitiesDict
+                : entitiesDict.filter((ecl) =>
+                    paramEntityClass.allowedClasses.includes(ecl.value)
+                  )
+            }
+            width={150}
+            noOptionsMessage="entity class"
+            disabled={node.params.entityId !== undefined}
+          />
+        )}
+        {paramEntityId && (
+          <div>
+            {isRoot === false &&
+              (dataEntity !== undefined ? (
+                <EntityTag
+                  entity={dataEntity}
+                  unlinkButton={{
+                    onClick: () => {
+                      dispatch({
+                        type: QueryActionType.updateNodeEntityId,
+                        payload: {
+                          nodeId: node.id,
+                          newType: undefined,
+                        },
+                      });
+                    },
+                  }}
+                />
+              ) : (
+                <EntitySuggester
+                  inputWidth={100}
+                  categoryTypes={
+                    paramEntityId.allowedClasses.length === 0
+                      ? classesAll
+                      : paramEntityId.allowedClasses
+                  }
+                  placeholder="entity"
+                  disableCreate
+                  initCategory={
+                    node.params.entityClasses?.[0] ??
+                    paramEntityId.allowedClasses[0] ??
+                    EntityEnums.Class.Concept
+                  }
+                  onSelected={(entityId: string) => {
                     dispatch({
                       type: QueryActionType.updateNodeEntityId,
                       payload: {
                         nodeId: node.id,
-                        newType: undefined,
+                        newEntityId: entityId,
                       },
                     });
-                  },
-                }}
-              />
-            ) : (
-              <EntitySuggester
-                inputWidth={100}
-                categoryTypes={classesAll}
-                placeholder="entity"
-                disableCreate
-                initCategory={
-                  node.params.classes?.[0] ?? EntityEnums.Class.Concept
-                }
-                onSelected={(entityId: string) => {
-                  dispatch({
-                    type: QueryActionType.updateNodeEntityId,
-                    payload: {
-                      nodeId: node.id,
-                      newId: entityId,
-                    },
-                  });
-                }}
-              />
-            ))}
-        </div>
+                  }}
+                />
+              ))}
+          </div>
+        )}
       </StyledGraphNode>
 
       <div>

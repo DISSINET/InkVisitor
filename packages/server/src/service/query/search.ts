@@ -48,8 +48,8 @@ export default class QuerySearch {
     }
     if (
       !this.root.edges.length &&
-      !(this.root.params.classes || []).length &&
-      !this.root.params.id &&
+      !(this.root.params.entityClasses || []).length &&
+      !this.root.params.entityId &&
       !this.root.params.label
     ) {
       return [];

@@ -26,13 +26,14 @@ export default class SearchEdge implements Query.IEdge {
   }
 }
 
-export class EdgeXHasClassification extends SearchEdge {
+export class EdgeHasClassification extends SearchEdge {
   constructor(data: Partial<Query.IEdge>) {
     super(data);
     this.type = Query.EdgeType["R:CLA"];
   }
 
   run(q: RStream): RStream {
+    const targetEntityId = this.node.params.entityId;
     return q.concatMap(function (entity: RDatum<IEntity>) {
       return r
         .table(Relation.table)
@@ -42,6 +43,12 @@ export class EdgeXHasClassification extends SearchEdge {
         })
         .filter(function (relation: RDatum<RelationTypes.IRelation>) {
           return relation("entityIds").nth(0).eq(entity("id"));
+        })
+        .filter(function (relation: RDatum<RelationTypes.IRelation>) {
+          if (targetEntityId) {
+            return relation("entityIds").contains(targetEntityId);
+          }
+          return true;
         })
         .map(function (relation) {
           return relation("entityIds").nth(0);
@@ -57,7 +64,17 @@ export class EdgeSUnderT extends SearchEdge {
   }
 
   run(q: RStream): RStream {
-    return q; // todo
+    const territoryId = this.node.params.entityId;
+    return q
+      .filter(function (e: RDatum<IEntity>) {
+        return e("class").eq("S");
+      })
+      .filter(function (e: RDatum<IEntity>) {
+        return e("data")("territory")("territoryId").eq(territoryId);
+      })
+      .map(function (e) {
+        return e("id");
+      });
   }
 }
 
@@ -68,13 +85,28 @@ export class EdgeHasRelation extends SearchEdge {
   }
 
   run(q: RStream): RStream {
+    const targetEntityId = this.node.params.entityId;
+
     return q.concatMap(function (entity: RDatum<IEntity>) {
-      return r
-        .table(Relation.table)
-        .getAll(entity("id"), { index: DbEnums.Indexes.RelationsEntityIds })
-        .map(function () {
-          return entity("id");
-        });
+      return (
+        r
+          .table(Relation.table)
+          .getAll(entity("id"), { index: DbEnums.Indexes.RelationsEntityIds })
+          // get all relations where any entity is the source entity
+          .filter(function (relation: RDatum<RelationTypes.IRelation>) {
+            return relation("entityIds").contains(entity("id"));
+          })
+          // check if the target entity is also in the relation
+          .filter(function (relation: RDatum<RelationTypes.IRelation>) {
+            if (targetEntityId) {
+              return relation("entityIds").contains(targetEntityId);
+            }
+            return true;
+          })
+          .map(function (relation) {
+            return relation("entityIds").nth(0);
+          })
+      );
     });
   }
 }
@@ -86,19 +118,30 @@ export class EdgeCHasSuperclass extends SearchEdge {
   }
 
   run(q: RStream): RStream {
+    const sclEntityId = this.node.params.entityId;
     return q.concatMap(function (entity: RDatum<IEntity>) {
-      return r
-        .table(Relation.table)
-        .getAll(entity("id"), { index: DbEnums.Indexes.RelationsEntityIds })
-        .filter({
-          type: RelationEnums.Type.Superclass,
-        })
-        .filter(function (relation: RDatum<RelationTypes.IRelation>) {
-          return relation("entityIds").nth(0).eq(entity("id")); // first element is specific class, second is super class
-        })
-        .map(function (relation) {
-          return relation("entityIds").nth(0);
-        });
+      return (
+        r
+          .table(Relation.table)
+          .getAll(entity("id"), { index: DbEnums.Indexes.RelationsEntityIds })
+          .filter({
+            type: RelationEnums.Type.Superclass,
+          })
+          // get all relations where the first entity is the source entity
+          .filter(function (relation: RDatum<RelationTypes.IRelation>) {
+            return relation("entityIds").nth(0).eq(entity("id"));
+          })
+          // check if the target entity is the desired superclass
+          .filter(function (relation: RDatum<RelationTypes.IRelation>) {
+            if (sclEntityId) {
+              return relation("entityIds").nth(1).eq(sclEntityId);
+            }
+            return true;
+          })
+          .map(function (relation) {
+            return relation("entityIds").nth(0);
+          })
+      );
     });
   }
 }
@@ -110,13 +153,20 @@ export class EdgeHasPropType extends SearchEdge {
   }
 
   run(q: RStream): RStream {
-    const that = this;
+    const typeId = this.node.params.entityId;
     return q
       .filter(function (e: RDatum<IEntity>) {
         // some of the e.[props].type.entityId is entity.id
-        return e("props").filter(function (prop1) {
-          return prop1("type")("entityId").eq(that.node.params.id);
-        });
+        return e("props")
+          .filter(function (prop) {
+            if (typeId) {
+              return prop("type")("entityId").eq(typeId);
+            } else {
+              return prop("type");
+            }
+          })
+          .count()
+          .gt(0);
       })
       .map(function (e) {
         return e("id");
@@ -131,7 +181,7 @@ export function getEdgeInstance(data: Partial<Query.IEdge>): SearchEdge {
     case Query.EdgeType["R:"]:
       return new EdgeHasRelation(data);
     case Query.EdgeType["R:CLA"]:
-      return new EdgeXHasClassification(data);
+      return new EdgeHasClassification(data);
     case Query.EdgeType["R:SCL"]:
       return new EdgeCHasSuperclass(data);
     case Query.EdgeType["SUT:"]:
