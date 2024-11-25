@@ -72,7 +72,7 @@
       </fieldset>
       <fieldset>
         <label>toggle highlight</label>
-        <input type="checkbox" id="highlightToggle" checked />
+        <input type="checkbox" id="highlightToggle" />
       </fieldset>
       <fieldset>
         <label>add anchor </label>
@@ -110,7 +110,7 @@
       const exampleResponse = await fetch("example.txt");
       const exampleTxt = await exampleResponse.text();
 
-      let highlightEnabled = true;
+      let highlightEnabled = false;
       const annotator = new Annotator(
         document.getElementById("canvas"),
         exampleTxt,

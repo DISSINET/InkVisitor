@@ -1,4 +1,4 @@
-import Cursor from "./Cursor";
+import Cursor, { DIRECTION } from "./Cursor";
 import Highlighter, { IAbsCoordinates } from "./Highlighter";
 import { Lines } from "./Lines";
 import Scroller from "./Scroller";
@@ -342,7 +342,19 @@ export class Annotator {
         }
         break;
 
-      case "ArrowUp":
+      case "ArrowUp": {
+        const originalXLine = this.cursor.xLine;
+        const originalYline = this.cursor.yLine;
+
+        if (this.cursor.selectEnd && this.cursor.selectStart) {
+          this.cursor.xLine = this.cursor.selectStart.xLine;
+          this.cursor.yLine =
+            this.cursor.selectStart.yLine - this.viewport.lineStart;
+        }
+
+        if (this.cursor.yLine === 0) {
+          this.cursor.xLine = 0;
+        }
         this.cursor.move(0, -1);
         if (this.cursor.yLine < 0) {
           this.viewport.scrollTo(
@@ -351,13 +363,58 @@ export class Annotator {
           );
           this.cursor.yLine = 0;
         }
-        if (this.cursor.isSelected()) {
+
+        const currentLine =
+          this.text.getCurrentLine(this.viewport, this.cursor) || "";
+        if (currentLine.length < this.cursor.xLine) {
+          this.cursor.xLine = 0;
+        }
+
+        if (e.shiftKey) {
+          const direction = this.cursor.getSelectionDirection();
+          if (direction === DIRECTION.BACKWARD) {
+            this.cursor.selectStart = {
+              xLine: this.cursor.xLine,
+              yLine: this.viewport.lineStart + this.cursor.yLine,
+            };
+            if (!this.cursor.selectEnd) {
+              this.cursor.selectStart = {
+                xLine: originalXLine,
+                yLine: this.viewport.lineStart + originalYline,
+              };
+            }
+          } else {
+            this.cursor.manualDirection = DIRECTION.BACKWARD;
+            this.cursor.selectEnd = this.cursor.selectStart;
+            this.cursor.selectStart = {
+              xLine: originalXLine,
+              yLine: this.viewport.lineStart + this.cursor.yLine,
+            };
+            if (!this.cursor.selectEnd) {
+              this.cursor.selectEnd = {
+                xLine: originalXLine,
+                yLine: this.viewport.lineStart + originalYline,
+              };
+            }
+          }
+        } else {
           this.cursor.selectStart = undefined;
           this.cursor.selectEnd = undefined;
         }
-        break;
 
-      case "ArrowDown":
+        break;
+      }
+
+      case "ArrowDown": {
+        const originalXLine = this.cursor.xLine;
+        const originalYline = this.cursor.yLine;
+
+        if (this.cursor.selectStart && this.cursor.selectEnd) {
+          this.cursor.xLine = this.cursor.selectEnd.xLine;
+          this.cursor.yLine =
+            this.cursor.selectEnd.yLine - this.viewport.lineStart;
+        }
+
         this.cursor.move(0, 1);
         if (
           this.cursor.yLine >
@@ -369,15 +426,68 @@ export class Annotator {
           );
           this.cursor.yLine = this.viewport.lineEnd - this.viewport.lineStart;
         }
-        if (this.cursor.isSelected()) {
+        if (this.cursor.yLine + this.viewport.lineStart >= this.text.noLines) {
+          this.cursor.yLine = this.text.noLines - this.viewport.lineStart - 1;
+          const line =
+            this.text.getCurrentLine(this.viewport, this.cursor) || "";
+          this.cursor.xLine = line.length;
+        }
+
+        if (e.shiftKey) {
+          const direction = this.cursor.getSelectionDirection();
+          if (direction === DIRECTION.FORWARD) {
+            this.cursor.selectEnd = {
+              xLine: this.cursor.xLine,
+              yLine: this.viewport.lineStart + this.cursor.yLine,
+            };
+            // set selectEnd to cursor's original position as initialization
+            if (!this.cursor.selectStart) {
+              this.cursor.selectStart = {
+                xLine: originalXLine,
+                yLine: this.viewport.lineStart + originalYline,
+              };
+            }
+          } else {
+            this.cursor.manualDirection = DIRECTION.FORWARD;
+            this.cursor.selectStart = this.cursor.selectEnd;
+            this.cursor.selectEnd = {
+              xLine: this.cursor.xLine,
+              yLine: this.viewport.lineStart + this.cursor.yLine,
+            };
+            if (!this.cursor.selectStart) {
+              this.cursor.selectStart = {
+                xLine: originalXLine,
+                yLine: this.viewport.lineStart + originalYline,
+              };
+            }
+          }
+
+          const line =
+            this.text.getCurrentLine(this.viewport, this.cursor) || "";
+          if (line.length < this.cursor.selectEnd.xLine) {
+            this.cursor.selectEnd.xLine = line.length;
+          }
+        } else {
           this.cursor.selectStart = undefined;
           this.cursor.selectEnd = undefined;
         }
-        break;
 
-      case "ArrowLeft":
+        break;
+      }
+
+      case "ArrowLeft": {
         // default delta to the left
         let offsetLeft = -1;
+        this.cursor.manualDirection = DIRECTION.BACKWARD;
+        const originalXLine = this.cursor.xLine;
+        const originalYline = this.cursor.yLine;
+
+        if (this.cursor.selectStart) {
+          // if already selected text (dblclick), reuse selectStart position as cursor's position
+          this.cursor.xLine = this.cursor.selectStart.xLine;
+          this.cursor.yLine =
+            this.cursor.selectStart.yLine - this.viewport.lineStart;
+        }
 
         if (e.ctrlKey) {
           // ctrl key used - find last word to the left
@@ -398,16 +508,35 @@ export class Annotator {
           }
         }
 
+        // go 1 line up if at the start
+        if (this.cursor.xLine <= 0) {
+          // only if there is a way to go up
+          if (this.cursor.yLine > 0) {
+            this.cursor.yLine = Math.max(0, this.cursor.yLine - 1);
+            const line = this.text.getCurrentLine(this.viewport, this.cursor);
+            this.cursor.xLine = line?.length || 0;
+
+            if (this.cursor.selectStart) {
+              this.cursor.selectStart.xLine = this.cursor.xLine;
+              this.cursor.selectStart.yLine =
+                this.viewport.lineStart + this.cursor.yLine;
+            }
+          }
+        } else {
+          this.cursor.move(offsetLeft, 0);
+        }
+
         if (e.shiftKey) {
-          // shift key used - move selection to the left using offsetLeft value
+          // copy cursor's current position as selectStart
           this.cursor.selectStart = {
-            xLine: this.cursor.xLine + offsetLeft,
+            xLine: this.cursor.xLine,
             yLine: this.viewport.lineStart + this.cursor.yLine,
           };
+          // set selectEnd to cursor's original position as initialization
           if (!this.cursor.selectEnd) {
             this.cursor.selectEnd = {
-              xLine: this.cursor.xLine,
-              yLine: this.viewport.lineStart + this.cursor.yLine,
+              xLine: originalXLine,
+              yLine: this.viewport.lineStart + originalYline,
             };
           }
         } else {
@@ -425,22 +554,22 @@ export class Annotator {
           this.cursor.selectEnd = undefined;
         }
 
-        this.cursor.move(offsetLeft, 0);
-
-        // go 1 line up if at the start
-        if (this.cursor.xLine <= 0) {
-          // only if there is a way to go up
-          if (this.cursor.yLine > 0) {
-            this.cursor.yLine = Math.max(0, this.cursor.yLine - 1);
-            this.cursor.xLine = Math.floor(this.width / this.charWidth) - 1;
-          }
-        }
-
         break;
+      }
 
-      case "ArrowRight":
+      case "ArrowRight": {
         // default delta to the right
         let offsetRight = 1;
+        this.cursor.manualDirection = DIRECTION.FORWARD;
+        const originalXLine = this.cursor.xLine;
+        const originalYline = this.cursor.yLine;
+
+        if (this.cursor.selectEnd) {
+          // if already selected text (dblclick), reuse selectEnd position as cursor's position
+          this.cursor.xLine = this.cursor.selectEnd.xLine;
+          this.cursor.yLine =
+            this.cursor.selectEnd.yLine - this.viewport.lineStart;
+        }
 
         if (e.ctrlKey) {
           // ctrl key used - find next word to the right
@@ -471,16 +600,36 @@ export class Annotator {
           }
         }
 
+        this.cursor.move(offsetRight, 0);
+
+        // check if we are at the end of the line -> move to next line
+        const currentLine =
+          this.text.getCurrentLine(this.viewport, this.cursor) || "";
+        let backupXLine = this.cursor.xLine;
+        let backupYLine = this.cursor.yLine;
+
+        if (currentLine.length < this.cursor.xLine) {
+          this.cursor.xLine = 0;
+          this.cursor.yLine++;
+        }
+
+        // revert if end of the document reached
+        if (!this.text.cursorToIndex(this.viewport, this.cursor)) {
+          this.cursor.xLine = backupXLine - 1;
+          this.cursor.yLine = backupYLine;
+        }
+
         if (e.shiftKey) {
-          // shift key used - move selection to the right using offsetLeft value
+          // copy cursor's current position as selectStart
           this.cursor.selectEnd = {
-            xLine: this.cursor.xLine + offsetRight,
+            xLine: this.cursor.xLine,
             yLine: this.viewport.lineStart + this.cursor.yLine,
           };
+          // set selectStart to cursor's original position as initialization
           if (!this.cursor.selectStart) {
             this.cursor.selectStart = {
-              xLine: this.cursor.xLine,
-              yLine: this.viewport.lineStart + this.cursor.yLine,
+              xLine: originalXLine,
+              yLine: this.viewport.lineStart + originalYline,
             };
           }
         } else {
@@ -498,29 +647,8 @@ export class Annotator {
           this.cursor.selectEnd = undefined;
         }
 
-        this.cursor.move(offsetRight, 0);
-
-        // check if we are at the end of the line -> move to next line
-        const segment = this.text.cursorToIndex(this.viewport, this.cursor);
-
-        if (segment) {
-          const line = this.text.getLineFromPosition(segment);
-          let backupXLine = this.cursor.xLine;
-          let backupYLine = this.cursor.yLine;
-
-          if (line.length < this.cursor.xLine) {
-            this.cursor.xLine = 0;
-            this.cursor.yLine++;
-          }
-
-          // revert if end of the document reached
-          if (!this.text.cursorToIndex(this.viewport, this.cursor)) {
-            this.cursor.xLine = backupXLine - 1;
-            this.cursor.yLine = backupYLine;
-          }
-        }
-
         break;
+      }
 
       case "Backspace":
         if (this.text.mode === EditMode.HIGHLIGHT) {
