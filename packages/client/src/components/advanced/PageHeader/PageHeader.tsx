@@ -184,7 +184,7 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
 
     const usernameLoaded = userName.length > 0;
 
-    const [showGlobalValidations, setShowGlobalValidations] = useState(true);
+    const [showGlobalValidations, setShowGlobalValidations] = useState(false);
 
     return (
       <>
@@ -220,23 +220,25 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
             </StyledThemeSwitcherIcon>
           </StyledThemeSwitcher>
 
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              marginRight: "1rem",
-            }}
-          >
-            <Button
-              radiusLeft
-              radiusRight
-              label="global validations"
-              icon={<IoSettingsSharp />}
-              onClick={() => setShowGlobalValidations(true)}
-              color="greyer"
-              inverted
-            />
-          </div>
+          {userRole === UserEnums.Role.Owner && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                marginRight: "1rem",
+              }}
+            >
+              <Button
+                radiusLeft
+                radiusRight
+                label="global validations"
+                icon={<IoSettingsSharp />}
+                onClick={() => setShowGlobalValidations(true)}
+                color="greyer"
+                inverted
+              />
+            </div>
+          )}
 
           <StyledLoggedAsWrap>
             {userName.length > 0 && (

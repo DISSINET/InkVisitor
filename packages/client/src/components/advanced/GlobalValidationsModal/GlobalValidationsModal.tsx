@@ -178,9 +178,13 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
         onClose={() => setShowGlobalValidations(false)}
         width={650}
       >
-        <ModalHeader title="Global validations" boldTitle />
+        <ModalHeader
+          title="Global validations"
+          boldTitle
+          onClose={() => setShowGlobalValidations(false)}
+        />
         <ModalContent column enableScroll>
-          <StyledGridForm>
+          {/* <StyledGridForm>
             <StyledGridSectionHeading>
               Valency validations
             </StyledGridSectionHeading>
@@ -219,7 +223,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
                 toggleRule={() => toggleRule(val)}
               />
             ))}
-          </StyledGridForm>
+          </StyledGridForm> */}
 
           {rootTerritory && validations && (
             <>
@@ -268,7 +272,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
 
           <Loader show={isFetching || updateEntityMutation.isPending} />
         </ModalContent>
-        <ModalFooter>
+        {/* <ModalFooter>
           <ButtonGroup>
             <Button
               color="warning"
@@ -277,7 +281,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
             />
             <Button color="primary" label="submit" />
           </ButtonGroup>
-        </ModalFooter>
+        </ModalFooter> */}
       </Modal>
 
       <Submit
