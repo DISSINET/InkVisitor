@@ -639,7 +639,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                       )}
                     </StyledRow>
 
-                    {isExpanded && (
+                    {isExpanded && responseData && (
                       <ExplorerTableRowExpanded
                         rowEntity={responseData.entity}
                         columns={columns}
