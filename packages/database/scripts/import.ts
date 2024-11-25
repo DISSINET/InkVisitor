@@ -369,6 +369,7 @@ const datasets: Record<string, DbSchema> = {
   },
 
   niort: {
+    settings: defaultSettingsTable,
     users: {
       tableName: "users",
       data: require("../datasets/niort/users.json"),

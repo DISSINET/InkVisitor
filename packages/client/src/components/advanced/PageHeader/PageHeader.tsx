@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { heightHeader } from "Theme/constants";
 import { PingColor } from "Theme/theme";
 import LogoInkvisitor from "assets/logos/inkvisitor.svg";
-import { Loader } from "components";
+import { Button, Loader } from "components";
 import React, { useEffect, useState } from "react";
 import { MdDarkMode, MdSunny } from "react-icons/md";
 import { useLocation, useNavigate } from "react-router";
@@ -34,6 +34,8 @@ import {
   StyledUserIconWrap,
   StyledUsername,
 } from "./PageHeaderStyles";
+import { IoSettingsSharp } from "react-icons/io5";
+import { GlobalValidationsModal } from "../GlobalValidationsModal/GlobalValidationsModal";
 
 interface LeftHeader {
   tempLocation: string | false;
@@ -182,6 +184,8 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
 
     const usernameLoaded = userName.length > 0;
 
+    const [showGlobalValidations, setShowGlobalValidations] = useState(false);
+
     return (
       <>
         {env === "sandbox" && (
@@ -216,6 +220,26 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
             </StyledThemeSwitcherIcon>
           </StyledThemeSwitcher>
 
+          {userRole === UserEnums.Role.Owner && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                marginRight: "1rem",
+              }}
+            >
+              <Button
+                radiusLeft
+                radiusRight
+                label="global validations"
+                icon={<IoSettingsSharp />}
+                onClick={() => setShowGlobalValidations(true)}
+                color="greyer"
+                inverted
+              />
+            </div>
+          )}
+
           <StyledLoggedAsWrap>
             {userName.length > 0 && (
               <StyledUser>
@@ -246,6 +270,12 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
             />
           </StyledMenu>
         </StyledRightHeader>
+
+        {showGlobalValidations && (
+          <GlobalValidationsModal
+            setShowGlobalValidations={setShowGlobalValidations}
+          />
+        )}
       </>
     );
   }

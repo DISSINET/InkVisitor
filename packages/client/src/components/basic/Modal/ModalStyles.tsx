@@ -85,8 +85,12 @@ export const StyledCardIcon = styled.div`
   font-size: 24;
   margin-right: 0.5rem;
 `;
-export const StyledCardTitle = styled.h2`
-  font-weight: ${({ theme }) => theme.fontWeight["medium"]};
+interface StyledCardTitle {
+  $boldTitle?: boolean;
+}
+export const StyledCardTitle = styled.h2<StyledCardTitle>`
+  font-weight: ${({ theme, $boldTitle }) =>
+    $boldTitle ? theme.fontWeight["bold"] : theme.fontWeight["medium"]};
   font-size: ${({ theme }) => theme.fontSize["xl"]};
 `;
 interface StyledCardBody {

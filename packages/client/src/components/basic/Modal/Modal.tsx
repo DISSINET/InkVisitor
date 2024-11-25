@@ -105,18 +105,20 @@ interface ModalHeader {
   color?: keyof ThemeColor;
   icon?: React.ReactNode;
   onClose?: () => void;
+  boldTitle?: boolean;
 }
 export const ModalHeader: FC<ModalHeader> = ({
   title,
   color,
   icon,
   onClose,
+  boldTitle,
 }) => {
   return (
     <>
       <StyledCardHeader $color={color}>
         {icon && <StyledCardIcon>{icon}</StyledCardIcon>}
-        <StyledCardTitle>{title}</StyledCardTitle>
+        <StyledCardTitle $boldTitle={boldTitle}>{title}</StyledCardTitle>
         {onClose && (
           <StyledCloseIconWrap onClick={onClose}>
             <StyledIoClose size={20} />
