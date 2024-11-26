@@ -7,19 +7,13 @@ import {
 } from "@shared/types";
 import { UseMutationResult } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
-import { Button, ButtonGroup, TagGroup } from "components";
+import { Button, TagGroup } from "components";
 import { EntityTag } from "components/advanced";
 import { useSearchParams } from "hooks";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { BsArrowDown, BsArrowUp } from "react-icons/bs";
-import {
-  FaChevronCircleDown,
-  FaChevronCircleUp,
-  FaClone,
-  FaPlus,
-  FaTrashAlt,
-} from "react-icons/fa";
+import { FaClone, FaPlus, FaTrashAlt } from "react-icons/fa";
 import {
   MdOutlineCheckBox,
   MdOutlineCheckBoxOutlineBlank,
@@ -34,7 +28,6 @@ import {
 } from "react-table";
 import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
-import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { StatementListDisplayMode } from "types";
 import { StatementListContextMenu } from "../StatementListContextMenu/StatementListContextMenu";

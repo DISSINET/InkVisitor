@@ -1,40 +1,50 @@
 import { mergeDeep } from "@common/functions";
-import { ResponseEntity, ResponseEntityDetail } from "@models/entity/response";
+
 import Audit from "@models/audit/audit";
+import Entity from "@models/entity/entity";
+import { ResponseEntity, ResponseEntityDetail } from "@models/entity/response";
+import { ResponseSearch } from "@models/entity/response-search";
+import { ResponseTooltip } from "@models/entity/response-tooltip";
 import { getEntityClass, getRelationClass } from "@models/factory";
+import { copyRelations } from "@models/relation/functions";
+import Relation from "@models/relation/relation";
+import { getAuditByEntityId } from "@modules/audits";
+import QuerySearch from "@service/query/search";
 import { findEntityById } from "@service/shorthands";
+import { RelationEnums } from "@shared/enums";
 import {
-  IEntity,
-  IResponseEntity,
-  IResponseDetail,
-  IResponseGeneric,
-  RequestSearch,
   EntityTooltip,
+  IEntity,
+  IResponseDetail,
+  IResponseEntity,
+  IResponseGeneric,
+  IUser,
+  Relation as RelationType,
+  RequestSearch,
 } from "@shared/types";
 import {
-  EntityDoesNotExist,
+  AuditDoesNotExist,
   BadParams,
+  CustomError,
+  EntityDoesNotExist,
   InternalServerError,
+  InvalidDeleteError,
   ModelNotValidError,
   PermissionDeniedError,
-  AuditDoesNotExist,
-  InvalidDeleteError,
-  CustomError,
 } from "@shared/types/errors";
-import { Router } from "express";
-import { asyncRouteHandler } from "../index";
-import { ResponseSearch } from "@models/entity/response-search";
+import {
+  IRequestQuery,
+  IRequestQueryExport,
+} from "@shared/types/request-query";
 import { IRequestSearch } from "@shared/types/request-search";
-import { getAuditByEntityId } from "@modules/audits";
-import { ResponseTooltip } from "@models/entity/response-tooltip";
-import { IRequest } from "src/custom_typings/request";
-import Relation from "@models/relation/relation";
-import { RelationEnums } from "@shared/enums";
-import { Relation as RelationType } from "@shared/types";
 import Document from "@models/document/document";
-import { copyRelations } from "@models/relation/functions";
-import Entity from "@models/entity/entity";
+import { IResponseQuery } from "@shared/types/response-query";
+
 import { EventType } from "@shared/types/stats";
+import { Router } from "express";
+import { IRequest } from "src/custom_typings/request";
+import { asyncRouteHandler } from "../index";
+import User from "@models/user/user";
 
 export default Router()
   /**
@@ -506,9 +516,10 @@ export default Router()
         // check for any blocking reasons for not deleting the entity + construct dependency map
         for (const entity of existing) {
           // if relations are linked to this entity, the delete should not be allowed
-          const [linkIds, relIds] = await Relation.getLinkedForEntities(req, [
-            entity.id,
-          ]);
+          const [linkIds, relIds] = await Relation.getLinkedForEntities(
+            req.db.connection,
+            [entity.id]
+          );
           if (relIds.length) {
             out.result = false;
             out.data[entity.id] = new InvalidDeleteError(
@@ -704,4 +715,89 @@ export default Router()
 
       return response;
     })
+  )
+  .post(
+    "/query",
+    asyncRouteHandler<IResponseQuery>(
+      async (request: IRequest<undefined, IRequestQuery>) => {
+        const querySearch = new QuerySearch(
+          request.body.query,
+          request.body.explore
+        );
+
+        const ids = await querySearch.run(request.db.connection);
+        const results = await querySearch.getResults(request.db.connection);
+
+        return {
+          query: request.body.query,
+          entities: results,
+          explore: querySearch.explore,
+          total: ids.length,
+        };
+      }
+    )
+  )
+  .post(
+    "/query-export",
+    asyncRouteHandler<any>(
+      async (request: IRequest<undefined, IRequestQueryExport>) => {
+        const { query, explore, rowIndices } = request.body;
+
+        const exportExplore = { ...explore, ...{ limit: 0 } };
+
+        const querySearch = new QuerySearch(query, exportExplore);
+
+        const ids = await querySearch.run(request.db.connection);
+
+        const results = await querySearch.getResults(
+          request.db.connection,
+          rowIndices
+        );
+
+        // create csv text
+        const tsvBodyRows = results
+          .map((result) => {
+            const rEntity = result.entity;
+            const rowColValues: string[] = [parseColumnValue(rEntity)];
+
+            Object.values(result.columnData).forEach((columnValue) => {
+              if (columnValue instanceof Array) {
+                rowColValues.push(
+                  columnValue
+                    .map((columnValuePart) => parseColumnValue(columnValuePart))
+                    .join(",")
+                );
+              } else {
+                rowColValues.push(parseColumnValue(columnValue));
+              }
+            });
+            return rowColValues.join("\t");
+          })
+          .join("\n");
+
+        const tsvHeader =
+          "result \t" + explore.columns.map((c) => c.name).join("\t");
+
+        return { tsvText: tsvHeader + "\n" + tsvBodyRows };
+      }
+    )
   );
+
+const parseColumnValue = (
+  columnValue: string | IEntity | number | string | IUser
+) => {
+  if (typeof columnValue === "string") {
+    return columnValue;
+  }
+  if (typeof columnValue === "number") {
+    return `${columnValue}`;
+  }
+  if ("class" in columnValue && "labels" in columnValue) {
+    return `(${columnValue.class}):${columnValue.labels[0]}[${columnValue.id}]`;
+  }
+  if (columnValue instanceof User) {
+    return columnValue.name;
+  } else {
+    return "unknown value";
+  }
+};

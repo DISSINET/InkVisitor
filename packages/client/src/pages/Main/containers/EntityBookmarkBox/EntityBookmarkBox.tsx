@@ -32,7 +32,7 @@ export const EntityBookmarkBox: React.FC = () => {
   const queryClient = useQueryClient();
 
   const fourthPanelBoxesOpened: { [key: string]: boolean } = useAppSelector(
-    (state) => state.layout.fourthPanelBoxesOpened
+    (state) => state.layout.mainPage.fourthPanelBoxesOpened
   );
 
   const [editingFolder, setEditingFolder] = useState<string | false>(false);

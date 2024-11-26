@@ -30,7 +30,7 @@ export const StyledPropGridRow = styled.div<StyledPropGridRow>`
   margin-bottom: ${({ theme, $disableBottomMargin }) =>
     $disableBottomMargin ? 0 : theme.space[1]};
   display: grid;
-  grid-template-columns: auto auto;
+  grid-template-columns: auto 1fr;
   overflow: hidden;
 `;
 interface StyledPropRow {

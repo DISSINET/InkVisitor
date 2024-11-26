@@ -36,6 +36,7 @@ import/~$actants.xlsx
 
 # docker files
 *.tar
+*.tar.gz
 
 # certificates
 *.pem

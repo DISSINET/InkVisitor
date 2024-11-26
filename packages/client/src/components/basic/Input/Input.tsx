@@ -85,28 +85,27 @@ export const Input: React.FC<Input> = ({
           className="value"
           placeholder={placeholder}
           value={displayValue}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+          onClick={(e) => e.stopPropagation()}
+          onChange={(e) => {
             setDisplayValue(e.currentTarget.value);
             if (changeOnType) {
               onChangeFn(e.currentTarget.value);
             }
           }}
-          onKeyDown={(event: React.KeyboardEvent) => {
-            switch (event.key) {
+          onKeyDown={(e) => {
+            switch (e.key) {
               case "Enter":
                 onEnterPressFn();
                 return;
               case "ArrowUp":
-                event.preventDefault();
+                e.preventDefault();
                 return;
               case "ArrowDown":
-                event.preventDefault();
+                e.preventDefault();
                 return;
             }
           }}
-          onFocus={(event: React.FocusEvent<HTMLInputElement>) =>
-            onFocus(event)
-          }
+          onFocus={(e) => onFocus(e)}
           onBlur={() => {
             if (displayValue !== value && !changeOnType) {
               onChangeFn(displayValue);
@@ -131,15 +130,13 @@ export const Input: React.FC<Input> = ({
           rows={rows}
           cols={cols}
           width={width}
-          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+          onChange={(e) => {
             setDisplayValue(e.target.value);
             if (changeOnType) {
               onChangeFn(e.currentTarget.value);
             }
           }}
-          onFocus={(event: React.FocusEvent<HTMLTextAreaElement>) =>
-            onFocus(event)
-          }
+          onFocus={(e) => onFocus(e)}
           onBlur={() => {
             if (displayValue !== value && !changeOnType) {
               onChangeFn(displayValue);

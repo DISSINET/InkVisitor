@@ -5,13 +5,14 @@ interface BasicDropdown<T = string> {
   width?: number | "full";
   value: T | null;
   onChange: (value: T) => void;
-  options: { value: T; label: string; info?: string }[];
+  options: { value: T; label: string; info?: string; isDisabled?: boolean }[];
   icon?: JSX.Element;
   placeholder?: string;
   tooltipLabel?: string;
   disableTyping?: boolean;
   disabled?: boolean;
 
+  noDropDownIndicator?: boolean;
   loggerId?: string;
 }
 export const BasicDropdown = <T extends string>({
@@ -24,8 +25,8 @@ export const BasicDropdown = <T extends string>({
   tooltipLabel,
   disableTyping = false,
   disabled,
-
   loggerId,
+  noDropDownIndicator = false,
 }: BasicDropdown<T>) => {
   return (
     <BaseDropdown
@@ -36,6 +37,7 @@ export const BasicDropdown = <T extends string>({
       placeholder={placeholder}
       tooltipLabel={tooltipLabel}
       icon={icon}
+      noDropDownIndicator={noDropDownIndicator}
       disableTyping={disableTyping}
       disabled={disabled}
       loggerId={loggerId}

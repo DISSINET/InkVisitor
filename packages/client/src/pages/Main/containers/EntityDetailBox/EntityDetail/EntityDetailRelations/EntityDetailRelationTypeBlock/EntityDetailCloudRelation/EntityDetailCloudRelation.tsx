@@ -14,7 +14,7 @@ interface EntityDetailCloudRelation {
   entityId: string;
   entities: Record<string, IEntity>;
   relations: Relation.IRelation[];
-  relationUpdateMutation: UseMutationResult<
+  relationUpdateMutation?: UseMutationResult<
     AxiosResponse<IResponseGeneric>,
     unknown,
     {
@@ -23,7 +23,7 @@ interface EntityDetailCloudRelation {
     },
     unknown
   >;
-  relationDeleteMutation: UseMutationResult<
+  relationDeleteMutation?: UseMutationResult<
     AxiosResponse<IResponseGeneric>,
     unknown,
     string,
@@ -45,12 +45,12 @@ export const EntityDetailCloudRelation: React.FC<EntityDetailCloudRelation> = ({
       const newEntityIds = relations[0].entityIds.filter(
         (eId) => eId !== entityId
       );
-      relationUpdateMutation.mutate({
+      relationUpdateMutation?.mutate({
         relationId: relations[0].id,
         changes: { entityIds: newEntityIds },
       });
     } else {
-      relationDeleteMutation.mutate(relations[0].id);
+      relationDeleteMutation?.mutate(relations[0].id);
     }
   };
 

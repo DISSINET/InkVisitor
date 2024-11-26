@@ -15,6 +15,7 @@ import { IRequest } from "../../custom_typings/request";
 import { sanitizeText } from "@common/functions";
 import Reference from "./reference";
 import { entityAllowedFields } from "@shared/types/entity";
+import { PropSpecKind } from "@shared/types/prop";
 
 export default class Entity implements IEntity, IDbModel {
   static table = "entities";
@@ -297,25 +298,38 @@ export default class Entity implements IEntity, IDbModel {
 
   static extractIdsFromProps(
     props: IProp[] = [],
+    kind?: PropSpecKind,
     cb?: (prop: IProp) => void
   ): string[] {
     let out: string[] = [];
     for (const prop of props) {
-      if (prop.type) {
+      if ((!kind || kind === PropSpecKind.TypeKind) && prop.type) {
         out.push(prop.type.entityId);
       }
-      if (prop.value) {
+      if ((!kind || kind === PropSpecKind.ValueKind) && prop.value) {
         out.push(prop.value.entityId);
+      }
+
+      if (prop.children) {
+        const childrenEs = this.extractIdsFromProps(prop.children, kind, cb);
+        out = out.concat(childrenEs);
       }
 
       if (cb) {
         cb(prop);
       }
 
-      out = out.concat(Entity.extractIdsFromProps(prop.children, cb));
+      out = out.concat(Entity.extractIdsFromProps(prop.children, kind, cb));
     }
 
-    return out;
+    // only unique values
+    const uniqueOut: Record<string, null> = {};
+    out.forEach((id) => {
+      if (id) {
+        uniqueOut[id] = null;
+      }
+    });
+    return Object.keys(uniqueOut);
   }
 
   static async findEntitiesByIds(
@@ -323,14 +337,24 @@ export default class Entity implements IEntity, IDbModel {
     ids: string[]
   ): Promise<IEntity[]> {
     if (ids.findIndex((id) => !id) !== -1) {
-      console.trace("Passed empty id to Entity.findEntitiesByIds");
+      console.trace("Passed empty id to Entity.findEntitiesByIds", ids);
     }
 
     const data = await rethink
       .table(Entity.table)
-      .getAll(rethink.args(ids))
+      .getAll(rethink.args(ids.filter((id) => id)))
       .run(con);
-    return data;
+
+    // sort data by ids
+    const sortedData: IEntity[] = [];
+    ids.forEach((id) => {
+      const entity = data.find((e: IEntity) => e.id === id);
+      if (entity) {
+        sortedData.push(entity);
+      }
+    });
+
+    return sortedData;
   }
 
   async getEntities(db: Connection): Promise<IEntity[]> {

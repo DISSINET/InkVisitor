@@ -29,7 +29,7 @@ interface EntityDetailValidationRule {
   updateValidationRule: (changes: Partial<ITerritoryValidation>) => void;
   removeValidationRule: () => void;
   isInsideTemplate: boolean;
-  territoryParentId: string | undefined;
+  territoryParentId?: string;
   userCanEdit: boolean;
 }
 export const EntityDetailValidationRule: React.FC<
@@ -72,10 +72,6 @@ export const EntityDetailValidationRule: React.FC<
   }, [validation.active]);
 
   const isAllowedEntitiesSuggesterVisible = useMemo<boolean>(() => {
-    if (!userCanEdit) {
-      return false;
-    }
-
     if (!allowedEntities) {
       return false;
     }
@@ -98,7 +94,7 @@ export const EntityDetailValidationRule: React.FC<
           paddingBottom: "1.5rem",
         }}
       >
-        {!active && <StyledNotActiveTag>rule not activated</StyledNotActiveTag>}
+        {!active && <StyledNotActiveTag>rule inactivate</StyledNotActiveTag>}
         <EntityDetailValidationText
           validation={validation}
           entities={entities}

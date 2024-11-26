@@ -420,17 +420,20 @@ export default class Relation implements IRelationModel {
 
   /**
    * searches for relations with specific entity ids and returns both relation ids and connected entity ids
-   * @param request IRequest
+   * @param db Connection
    * @param entityIds string[]
+   * @param relType RelationEnums.Type?
    * @returns promise with both entity/relation ids
    */
   static async getLinkedForEntities(
-    request: IRequest,
-    entityIds: string[]
+    db: Connection,
+    entityIds: string[],
+    relType?: RelationEnums.Type
   ): Promise<[string[], string[]]> {
     const linkedRelations = await Relation.findForEntities(
-      request.db.connection,
-      entityIds
+      db,
+      entityIds,
+      relType
     );
     let linkedEntitiyIds: string[], linkedRelationIds: string[];
 

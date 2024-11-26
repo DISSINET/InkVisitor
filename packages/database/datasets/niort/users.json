@@ -1,5 +1,26 @@
 [
   {
+    "id": "0",
+    "name": "owner",
+    "email": "owner@owner.com",
+    "password": "owner",
+    "active": true,
+    "verified": true,
+    "options": {
+      "defaultTerritory": "",
+      "defaultLanguage": "",
+      "searchLanguages": []
+    },
+    "bookmarks": null,
+    "role": "owner",
+    "rights": [
+      {
+        "territory": "T0",
+        "mode": "admin"
+      }
+    ]
+  },
+  {
     "id": "1",
     "name": "admin",
     "email": "admin@admin.com",
