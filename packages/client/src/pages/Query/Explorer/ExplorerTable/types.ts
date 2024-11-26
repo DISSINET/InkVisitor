@@ -19,6 +19,6 @@ export const batchOptions: BatchOption[] = [
   },
 ];
 
-export const WIDTH_COLUMN_FIRST = 250;
+export const WIDTH_COLUMN_FIRST = 400;
 export const WIDTH_COLUMN_DEFAULT = 400;
 export const HEIGHT_ROW_DEFAULT = 40;

@@ -1,6 +1,6 @@
 import { Query } from "@shared/types";
 
-export const QUERY_GRID_WIDTH = 400;
+export const QUERY_GRID_WIDTH = 500;
 export const QUERY_GRID_HEIGHT = 50;
 
 export type INodeItem = Query.INode & {

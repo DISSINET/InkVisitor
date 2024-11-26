@@ -6,7 +6,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { FaTrashAlt } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaTrashAlt } from "react-icons/fa";
 import { GrClose } from "react-icons/gr";
 import { MdOutlineEdit } from "react-icons/md";
 import { TbColumnInsertRight } from "react-icons/tb";
@@ -553,7 +553,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                         noBorder
                         noBackground
                         inverted
-                        icon={<FaTrashAlt color={"white"} />}
+                        icon={<FaEyeSlash color={"white"} />}
                         onClick={() =>
                           dispatch({
                             type: ExploreActionType.removeColumn,

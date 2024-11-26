@@ -94,7 +94,7 @@ export const EntityDetailValidationRule: React.FC<
           paddingBottom: "1.5rem",
         }}
       >
-        {!active && <StyledNotActiveTag>rule not activated</StyledNotActiveTag>}
+        {!active && <StyledNotActiveTag>rule inactivate</StyledNotActiveTag>}
         <EntityDetailValidationText
           validation={validation}
           entities={entities}
