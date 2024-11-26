@@ -8,6 +8,10 @@ import Highlighter, {
 import Viewport from "./Viewport";
 import { EditMode, HighlightMode } from "./constants";
 
+export enum DIRECTION {
+  FORWARD = "FORWARD",
+  BACKWARD = "BACKWARD",
+}
 /**
  * Cursor represents active position in the viewport with highlighting capabilities (marking start - end in absolute coordinates)
  */
@@ -19,6 +23,8 @@ export default class Cursor
   xLine: number;
   yLine: number;
 
+  manualDirection?: DIRECTION;
+
   // highlighted area must use absolute coordinates - highlighted area stays in position while scrolling
   private selecting: boolean = false;
 
@@ -27,6 +33,37 @@ export default class Cursor
     this.xLine = xLine;
     this.yLine = yLine;
     this.style = { ...this.style, color: "black" };
+  }
+
+  getTrueSelectionDirection(): DIRECTION | null {
+    if (this.selectStart && this.selectEnd) {
+      if (this.selectStart.yLine < this.selectEnd.yLine) {
+        // start is above end
+        return DIRECTION.FORWARD;
+      } else if (this.selectStart.yLine > this.selectEnd.yLine) {
+        // start is below end
+        return DIRECTION.BACKWARD;
+      } else {
+        // the same line
+        if (this.selectStart.xLine < this.selectEnd.xLine) {
+          // start is before end on horizontal axis
+          return DIRECTION.FORWARD;
+        } else if (this.selectStart.xLine > this.selectEnd.xLine) {
+          // start is after end on horizontal axis
+          return DIRECTION.BACKWARD;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  getSelectionDirection(): DIRECTION | undefined {
+    if (this.selectStart && this.selectEnd) {
+      return this.manualDirection;
+    }
+
+    return undefined;
   }
 
   setPosition(lineX: number, lineY: number) {

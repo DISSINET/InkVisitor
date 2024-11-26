@@ -1,6 +1,5 @@
 import { Annotator } from "@inkvisitor/annotator/src/lib";
 import { animated, useSpring } from "@react-spring/web";
-import { entitiesDict } from "@shared/dictionaries";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import { IEntity, IResponseEntity, IResponseStatement } from "@shared/types";
 import { useQuery } from "@tanstack/react-query";
@@ -14,14 +13,15 @@ import { FaLongArrowAltRight, FaUnlink } from "react-icons/fa";
 import { GrDocumentMissing } from "react-icons/gr";
 import { TbAnchorOff } from "react-icons/tb";
 import { TiDocumentText } from "react-icons/ti";
+import { ThemeContext } from "styled-components";
 import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
+import useResizeObserver from "use-resize-observer";
 import { StyledModeSwitcher } from "../StatementListHeader/StatementListHeaderStyles";
 import {
   StyledDocumentTag,
   StyledDocumentTitle,
 } from "../StatementLitBoxStyles";
-import useResizeObserver from "use-resize-observer";
-import { ThemeContext } from "styled-components";
+import { entitiesDict } from "@shared/dictionaries/entity";
 
 interface StatementListTextAnnotator {
   statements: IResponseStatement[];
@@ -319,7 +319,7 @@ export const StatementListTextAnnotator: React.FC<
       </div>
 
       {/* Class selector */}
-      {/* {selectedResource !== false && selectedResource?.data?.documentId && (
+      {selectedResource !== false && selectedResource?.data?.documentId && (
         <div
           style={{
             display: "flex",
@@ -348,7 +348,7 @@ export const StatementListTextAnnotator: React.FC<
             noOptionsMessage="No entity classes to highlight"
           />
         </div>
-      )} */}
+      )}
 
       {/* Annotator */}
       <div style={{ marginTop: "0.2rem" }}>

@@ -23,7 +23,7 @@ export const annotatorHighlight = (
       mode: HighlightMode.FOCUS,
       style: {
         color: "black",
-        opacity: 0.6,
+        opacity: 0.25,
       },
     };
   }
@@ -32,7 +32,11 @@ export const annotatorHighlight = (
     dReferenceEntityIds[key as EntityEnums.Class].includes(entityId)
   );
 
-  if (entityClass && hlEntities && hlEntities.includes(entityClass as EntityEnums.Class)) {
+  if (
+    entityClass &&
+    hlEntities &&
+    hlEntities.includes(entityClass as EntityEnums.Class)
+  ) {
     if (entityClass === EntityEnums.Class.Statement) {
       return {
         mode: HighlightMode.UNDERLINE,
