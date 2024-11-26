@@ -263,5 +263,12 @@
     "method": "GET",
     "roles": ["*"],
     "public": true
+  },
+  {
+    "controller": "settings",
+    "route": ":key",
+    "method": "PUT",
+    "roles": ["admin"],
+    "public": false
   }
 ]

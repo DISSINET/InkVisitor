@@ -16,7 +16,7 @@ export class Setting implements ISetting, IDbModel {
   }
 
   isValid(): boolean {
-    return Object.values(SettingsKey).includes(this.id);
+    return !!this.id;
   }
 
   async save(dbInstance: Connection | undefined): Promise<boolean> {
@@ -34,12 +34,12 @@ export class Setting implements ISetting, IDbModel {
 
   update(
     dbInstance: Connection | undefined,
-    updateData: { value: unknown; public: boolean }
+    updateData: { value: any }
   ): Promise<WriteResult> {
     return rethink
       .table(Setting.table)
       .get(this.id)
-      .update(updateData)
+      .replace({ ...updateData, id: this.id, public: this.public })
       .run(dbInstance);
   }
 

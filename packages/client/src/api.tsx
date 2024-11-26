@@ -1335,6 +1335,29 @@ class Api {
   }
 
   /**
+ * Setting update
+ * @param settingId
+ * @param options
+ * @returns
+ */
+  async settingUpdate(
+    settingId: string,
+    data: { value: unknown },
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      const response = await this.connection.put(
+        `/settings/${settingId}`,
+        data,
+        options
+      );
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  /**
    * Get owner's info
    * @param settingId
    * @param options
