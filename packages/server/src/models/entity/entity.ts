@@ -378,6 +378,7 @@ export default class Entity implements IEntity, IDbModel {
           section: IWarningPositionSection.Entity,
           entityId: this.id,
         },
+        territoryOriginId: teritoryId,
       });
     };
 

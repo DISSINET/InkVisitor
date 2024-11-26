@@ -6,6 +6,7 @@ export interface IWarning {
   position?: IWarningPosition;
   origin: string;
   validation?: ITerritoryValidation;
+  territoryOriginId?: string;
 }
 
 export interface IWarningPosition {
