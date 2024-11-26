@@ -229,6 +229,7 @@ export const TextAnnotator = ({
     if (displayLineNumbers && lines.current) {
       newAnnotator.addLines(lines.current);
     }
+
     newAnnotator.onSelectText(({ text, anchors }) => {
       handleTextSelection(text, anchors);
     });

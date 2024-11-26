@@ -1052,7 +1052,8 @@ export class Annotator {
       );
     }
 
-    if (this.onSelectTextCb && this.cursor.isSelected()) {
+    // if (this.onSelectTextCb && this.cursor.isSelected()) {
+    if (this.onSelectTextCb) {
       const [start, end] = this.cursor.getBounds();
       if (
         start &&
