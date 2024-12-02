@@ -5,12 +5,21 @@ import { space2, space4 } from "Theme/constants";
 interface StyledSuggester {
   $marginTop?: boolean;
   $fullWidth?: boolean;
+  $isFocused?: boolean;
 }
 export const StyledSuggester = styled.div<StyledSuggester>`
   position: relative;
   display: ${({ $fullWidth }) => ($fullWidth ? "flex" : "inline-flex")};
 
   margin-top: ${({ $marginTop }) => ($marginTop ? space2 : 0)};
+
+  input[type="text"] {
+    border-width: ${({ $isFocused }) => ($isFocused ? "2px" : "1px")};
+  }
+  .react-select__control {
+    border-width: ${({ $isFocused }) =>
+      $isFocused ? "2px !important" : "1px"};
+  }
 `;
 
 interface Column {}
