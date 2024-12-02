@@ -1307,10 +1307,10 @@ export class Annotator {
         occurence.lineIndex,
     };
 
-    this.cursor.xLine = this.cursor.selectStart.xLine;
-    this.cursor.yLine = this.cursor.selectStart.yLine - this.viewport.lineStart;
+    // this.cursor.xLine = this.cursor.selectStart.xLine;
+    // this.cursor.yLine = this.cursor.selectStart.yLine - this.viewport.lineStart;
 
-    this.scrollToLine(this.cursor.yLine);
+    this.scrollToLine(this.cursor.selectStart.yLine);
     this.draw();
   }
 }

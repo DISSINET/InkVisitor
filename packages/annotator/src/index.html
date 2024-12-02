@@ -66,6 +66,7 @@
         <label>search</label>
         <input type="text" id="search" />
         <button id="search-trigger">go</button>
+        <button id="searchTriggerNext">next</button>
       </fieldset>
       <fieldset>
         <label>mode</label>
@@ -97,7 +98,7 @@
       <fieldset>
         <label>update text</label>
         <textarea id="newText" cols="100" rows="10"></textarea>
-        <button id="scrollToAnchor">Update</button>
+        <button id="updateText">Update</button>
       </fieldset>
     </div>
 
@@ -178,6 +179,7 @@
           },
         };
       });
+
       annotator.onSelectText((text) => {
         // console.log("onSelectText", text);
       });
@@ -212,12 +214,26 @@
         annotator.updateText(document.getElementById("newText").value);
       };
 
-      searchTriggerInput.onclick = function() {
-        const results = annotator.search(searchInput.value)
+      let searchOccurence = 0;
+      document.getElementById("searchTriggerNext").onclick = () => {
+        const results = annotator.search(searchInput.value);
         if (results.length) {
-          annotator.selectSearchOccurence(results[0])
-        } 
-      }
+          searchOccurence = searchOccurence + 1;
+
+          if (searchOccurence >= results.length) {
+            searchOccurence = 0;
+          }
+
+          annotator.selectSearchOccurence(results[searchOccurence]);
+        }
+      };
+
+      searchTriggerInput.onclick = function () {
+        const results = annotator.search(searchInput.value);
+        if (results.length) {
+          annotator.selectSearchOccurence(results[0]);
+        }
+      };
 
       window.addEventListener("resize", resizeAnnotator);
 
