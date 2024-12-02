@@ -4,7 +4,7 @@ import { EntityEnums, UserEnums } from "@shared/enums";
 import { IEntity, IResponseEntity, IResponseStatement } from "@shared/types";
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
-import { Button, Loader } from "components";
+import { Button, Input, Loader } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 import TextAnnotator from "components/advanced/Annotator/Annotator";
 import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
@@ -16,12 +16,13 @@ import { TiDocumentText } from "react-icons/ti";
 import { ThemeContext } from "styled-components";
 import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
 import useResizeObserver from "use-resize-observer";
-import { StyledModeSwitcher } from "../StatementListHeader/StatementListHeaderStyles";
+import { StyledInfoText } from "../StatementListHeader/StatementListHeaderStyles";
 import {
   StyledDocumentTag,
   StyledDocumentTitle,
 } from "../StatementLitBoxStyles";
 import { entitiesDict } from "@shared/dictionaries/entity";
+import { useDebounce } from "hooks";
 
 interface StatementListTextAnnotator {
   statements: IResponseStatement[];
@@ -82,6 +83,25 @@ export const StatementListTextAnnotator: React.FC<
   }, []);
 
   const [annotator, setAnnotator] = useState<Annotator | undefined>(undefined);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [searchOccurences, setSearchOccurences] = useState<number>(0);
+  const [searchActiveOccurence, setSearchActiveOccurence] = useState<number>(0);
+
+  const dSearchTerm = useDebounce(searchTerm, 1000);
+
+  const isSearchTermValid = useMemo<boolean>(() => {
+    return dSearchTerm.length > 2;
+  }, [dSearchTerm]);
+
+  useEffect(() => {
+    if (annotator) {
+      if (isSearchTermValid) {
+        annotator?.search(searchTerm);
+        const occurences = annotator?.search(searchTerm);
+        setSearchOccurences(occurences?.length || 0);
+      }
+    }
+  }, [dSearchTerm]);
 
   const animatedStyle = useSpring({
     opacity: showAnnotator ? 1 : 0,
@@ -213,6 +233,22 @@ export const StatementListTextAnnotator: React.FC<
 
   const themeContext = useContext(ThemeContext);
 
+  const isSearchAllowed = useMemo<boolean>(() => {
+    return annotator !== undefined && selectedDocument !== undefined;
+  }, [annotator, selectedDocument]);
+
+  const annotatorHeight = useMemo<number>(() => {
+    let height = contentHeight - 70;
+
+    if (isSearchAllowed) {
+      height -= 30;
+    }
+    if (selectorHeight) {
+      height -= selectorHeight;
+    }
+    return height;
+  }, [contentHeight, selectorHeight, isSearchAllowed]);
+
   return (
     <animated.div style={animatedStyle}>
       <div
@@ -324,14 +360,14 @@ export const StatementListTextAnnotator: React.FC<
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "4px",
-            marginBottom: "5px",
+            gap: themeContext?.space[6],
+            marginBottom: themeContext?.space[2],
           }}
           ref={selectorRef}
         >
-          <StyledModeSwitcher style={{ textWrap: "nowrap" }}>
+          <StyledInfoText style={{ textWrap: "nowrap" }}>
             Highlight
-          </StyledModeSwitcher>
+          </StyledInfoText>
           <Dropdown.Multi.Entity
             options={entitiesDict}
             disableEmpty={true}
@@ -347,6 +383,73 @@ export const StatementListTextAnnotator: React.FC<
             }
             noOptionsMessage="No entity classes to highlight"
           />
+        </div>
+      )}
+
+      {isSearchAllowed && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: themeContext?.space[6],
+            marginBottom: themeContext?.space[2],
+          }}
+        >
+          <StyledInfoText style={{ textWrap: "nowrap", marginRight: "13px" }}>
+            Search
+          </StyledInfoText>
+          <Input
+            value={searchTerm}
+            onChangeFn={(newText) => {
+              setSearchTerm(newText);
+            }}
+            changeOnType
+          />
+          {isSearchTermValid && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: themeContext?.space[2],
+              }}
+            >
+              <div
+                style={{
+                  color: themeContext?.color["info"],
+                  fontSize: themeContext?.fontSize["xs"],
+                }}
+              >
+                {searchActiveOccurence + 1} / {searchOccurences} occurences
+              </div>
+              <Button
+                label="⬇"
+                color="info"
+                onClick={() => {
+                  const occurences = annotator?.search(searchTerm);
+                  if (occurences && occurences?.length) {
+                    const nextOccurence =
+                      (searchActiveOccurence + 1) % occurences.length;
+                    annotator?.selectSearchOccurence(occurences[nextOccurence]);
+                    setSearchActiveOccurence(nextOccurence);
+                  }
+                }}
+              />
+              <Button
+                label="⬆"
+                color="info"
+                onClick={() => {
+                  const occurences = annotator?.search(searchTerm);
+                  if (occurences && occurences?.length) {
+                    const prevOccurance =
+                      (searchActiveOccurence - 1 + occurences.length) %
+                      occurences.length;
+                    annotator?.selectSearchOccurence(occurences[prevOccurance]);
+                    setSearchActiveOccurence(prevOccurance);
+                  }
+                }}
+              />
+            </div>
+          )}
         </div>
       )}
 
@@ -367,7 +470,7 @@ export const StatementListTextAnnotator: React.FC<
               thisTerritoryEntityId={territoryId}
               initialScrollEntityId={territoryId}
               displayLineNumbers={true}
-              height={contentHeight - selectorHeight - 70}
+              height={annotatorHeight}
               documentId={selectedDocumentId}
               handleCreateStatement={handleCreateStatement}
               handleCreateTerritory={handleCreateTerritory}
