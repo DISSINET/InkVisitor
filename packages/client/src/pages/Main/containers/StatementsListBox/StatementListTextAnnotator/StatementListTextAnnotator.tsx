@@ -84,8 +84,24 @@ export const StatementListTextAnnotator: React.FC<
 
   const [annotator, setAnnotator] = useState<Annotator | undefined>(undefined);
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [searchOccurences, setSearchOccurences] = useState<number>(0);
+  const [searchOccurences, setSearchOccurences] = useState<
+    { segmentIndex: number; lineIndex: number; start: number; end: number }[]
+  >([]);
   const [searchActiveOccurence, setSearchActiveOccurence] = useState<number>(0);
+
+  useEffect(() => {
+    const newSelectedOccurence = searchOccurences[searchActiveOccurence];
+
+    console.log(
+      `selecting ${searchActiveOccurence} of`,
+      searchOccurences,
+      ` => ${newSelectedOccurence}`
+    );
+
+    if (newSelectedOccurence) {
+      annotator?.selectSearchOccurence(newSelectedOccurence);
+    }
+  }, [searchActiveOccurence, searchOccurences]);
 
   const dSearchTerm = useDebounce(searchTerm, 1000);
 
@@ -98,7 +114,18 @@ export const StatementListTextAnnotator: React.FC<
       if (isSearchTermValid) {
         annotator?.search(searchTerm);
         const occurences = annotator?.search(searchTerm);
-        setSearchOccurences(occurences?.length || 0);
+
+        setSearchOccurences(occurences);
+
+        setTimeout(() => {
+          setSearchActiveOccurence(0);
+        }, 1000);
+
+        // if (occurences.length > 0) {
+        //   annotator?.selectSearchOccurence(
+        //     searchOccurences[searchActiveOccurence]
+        //   );
+        // }
       }
     }
   }, [dSearchTerm]);
@@ -419,33 +446,26 @@ export const StatementListTextAnnotator: React.FC<
                   fontSize: themeContext?.fontSize["xs"],
                 }}
               >
-                {searchActiveOccurence + 1} / {searchOccurences} occurences
+                {searchActiveOccurence + 1} / {searchOccurences.length}{" "}
+                occurences
               </div>
               <Button
                 label="⬇"
                 color="info"
                 onClick={() => {
-                  const occurences = annotator?.search(searchTerm);
-                  if (occurences && occurences?.length) {
-                    const nextOccurence =
-                      (searchActiveOccurence + 1) % occurences.length;
-                    annotator?.selectSearchOccurence(occurences[nextOccurence]);
-                    setSearchActiveOccurence(nextOccurence);
-                  }
+                  const nextOccurence =
+                    (searchActiveOccurence + 1) % searchOccurences.length;
+                  setSearchActiveOccurence(nextOccurence);
                 }}
               />
               <Button
                 label="⬆"
                 color="info"
                 onClick={() => {
-                  const occurences = annotator?.search(searchTerm);
-                  if (occurences && occurences?.length) {
-                    const prevOccurance =
-                      (searchActiveOccurence - 1 + occurences.length) %
-                      occurences.length;
-                    annotator?.selectSearchOccurence(occurences[prevOccurance]);
-                    setSearchActiveOccurence(prevOccurance);
-                  }
+                  const prevOccurence =
+                    (searchActiveOccurence - 1 + searchOccurences.length) %
+                    searchOccurences.length;
+                  setSearchActiveOccurence(prevOccurence);
                 }}
               />
             </div>
