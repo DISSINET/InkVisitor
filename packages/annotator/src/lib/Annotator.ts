@@ -6,6 +6,14 @@ import Text, { SegmentPosition } from "./Text";
 import Viewport from "./Viewport";
 import { EditMode, HighlightMode } from "./constants";
 
+// Occurrence holds exact position of a point in text
+export interface Occurrence {
+  segmentIndex: number;
+  lineIndex: number;
+  start: number;
+  end: number;
+}
+
 export interface HighlightSchema {
   mode: HighlightMode;
   style: {
@@ -1242,8 +1250,8 @@ export class Annotator {
     this.draw();
   }
 
-  scrollToLine(line: number) {
-    this.viewport.scrollTo(line, this.text.noLines);
+  scrollToLine(absLine: number) {
+    this.viewport.scrollTo(absLine, this.text.noLines);
     this.draw();
   }
 
@@ -1261,9 +1269,12 @@ export class Annotator {
     }
   }
 
-  search(
-    toFind: string
-  ): { segmentIndex: number; lineIndex: number; start: number; end: number }[] {
+  /**
+   * searches for substring in the whole text, returning prepared Occurrence data
+   * @param toFind
+   * @returns
+   */
+  search(toFind: string): Occurrence[] {
     const occurrences = [];
 
     for (const segmentI in this.text.segments) {
@@ -1288,12 +1299,14 @@ export class Annotator {
     return occurrences;
   }
 
-  selectSearchOccurence(occurence: {
-    segmentIndex: number;
-    lineIndex: number;
-    start: number;
-    end: number;
-  }) {
+  /**
+   * Given the Occurrence argument, the method will use its value to select respective part of the text + scroll to the line at which is resides
+   * @param occurence
+   */
+  selectSearchOccurrence(occurence: Occurrence) {
+    this.cursor.xLine = occurence.end;
+    this.cursor.yLine = occurence.lineIndex;
+
     this.cursor.selectStart = {
       xLine: occurence.start,
       yLine:
@@ -1307,8 +1320,10 @@ export class Annotator {
         occurence.lineIndex,
     };
 
-    // this.cursor.xLine = this.cursor.selectStart.xLine;
-    // this.cursor.yLine = this.cursor.selectStart.yLine - this.viewport.lineStart;
+    // @ts-ignore
+    window.cursor = this.cursor;
+
+    console.log(occurence, this.cursor.selectStart, this.cursor.selectEnd);
 
     this.scrollToLine(this.cursor.selectStart.yLine);
     this.draw();

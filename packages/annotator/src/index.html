@@ -214,24 +214,24 @@
         annotator.updateText(document.getElementById("newText").value);
       };
 
-      let searchOccurence = 0;
+      let searchOccurrence = 0;
       document.getElementById("searchTriggerNext").onclick = () => {
         const results = annotator.search(searchInput.value);
         if (results.length) {
-          searchOccurence = searchOccurence + 1;
+          searchOccurrence = searchOccurrence + 1;
 
-          if (searchOccurence >= results.length) {
-            searchOccurence = 0;
+          if (searchOccurrence >= results.length) {
+            searchOccurrence = 0;
           }
 
-          annotator.selectSearchOccurence(results[searchOccurence]);
+          annotator.selectSearchOccurrence(results[searchOccurrence]);
         }
       };
 
       searchTriggerInput.onclick = function () {
         const results = annotator.search(searchInput.value);
         if (results.length) {
-          annotator.selectSearchOccurence(results[0]);
+          annotator.selectSearchOccurrence(results[0]);
         }
       };
 
