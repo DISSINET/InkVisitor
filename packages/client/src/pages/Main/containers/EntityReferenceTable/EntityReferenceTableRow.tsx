@@ -170,10 +170,10 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
                       "http"
                     )
                       ? normalizeURL(resourceEntity.data.partValueBaseURL) +
-                        valueEntity.label
+                        valueEntity.labels[0]
                       : "//" +
                         normalizeURL(resourceEntity.data.partValueBaseURL) +
-                        valueEntity.label;
+                        valueEntity.labels[0];
                     window.open(url, "_blank");
                   }}
                 />
