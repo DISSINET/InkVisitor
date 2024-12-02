@@ -39,7 +39,7 @@ export const StyledFaStar = styled(FaStar)`
   margin-right: 0.5rem;
   color: ${({ theme }) => theme.color["warning"]};
 `;
-export const StyledModeSwitcher = styled.div`
+export const StyledInfoText = styled.div`
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   font-weight: ${({ theme }) => theme.fontWeight["normal"]};
   display: flex;
