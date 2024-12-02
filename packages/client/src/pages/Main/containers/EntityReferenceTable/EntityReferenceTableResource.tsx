@@ -83,6 +83,7 @@ export const EntityReferenceTableResource: React.FC<
           territoryParentId={territoryParentId}
           disabled={disabled}
           initTyped={initResourceTyped}
+          autoFocus={reference.resource !== ""}
         />
       )}
     </StyledGridValue>
