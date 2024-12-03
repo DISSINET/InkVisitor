@@ -11,7 +11,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { CustomScrollbar, Loader, Submit, ToastWithLink } from "components";
 import { CStatement, CTerritory } from "constructors";
-import { useDebounce, useSearchParams } from "hooks";
+import { useDebounce, useResizeObserver, useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { toast } from "react-toastify";
@@ -22,7 +22,6 @@ import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice"
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
 import { EntitiesDeleteSuccessResponse, StatementListDisplayMode } from "types";
-import useResizeObserver from "use-resize-observer";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StatementListTextAnnotator } from "./StatementListTextAnnotator/StatementListTextAnnotator";
@@ -509,9 +508,8 @@ export const StatementListBox: React.FC = () => {
 
   const {
     ref: contentRef,
-    height: contentHeight = 0,
-    width: contentWidth = 0,
-  } = useResizeObserver<HTMLDivElement>();
+    size: { height: contentHeight = 0, width: contentWidth = 0 },
+  } = useResizeObserver<HTMLDivElement>({ debounceDelay: 500 });
 
   const debouncedWidth = useDebounce(contentWidth, 100);
 
