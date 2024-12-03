@@ -56,5 +56,5 @@ export const useResizeObserver = <T extends HTMLElement>({
     };
   }, [debouncedCallback]);
 
-  return { ref, size };
+  return { ref, ...size };
 };
