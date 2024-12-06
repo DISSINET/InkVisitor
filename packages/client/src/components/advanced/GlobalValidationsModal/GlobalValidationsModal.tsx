@@ -67,9 +67,6 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
   const [showModal, setShowModal] = useState(false);
   useEffect(() => {
     setShowModal(true);
-    // api.settingUpdate("test_1", {
-    //   value: false,
-    // });
   }, []);
 
   const {
@@ -94,13 +91,13 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
   } = useQuery({
     queryKey: ["settings"],
     queryFn: async () => {
-      const res = await api.settingGroupGet("validation");
+      const res = await api.settingGroupGet("validations");
       return res.data;
     },
     enabled: api.isLoggedIn(),
   });
 
-  console.log(settings);
+  console.log(rootTerritory);
   const { validations } = rootTerritory?.data || {};
 
   const queryClient = useQueryClient();
@@ -236,8 +233,8 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
                 </span>
               </StyledSectionHeader>
               <StyledValidationList>
-                {(validations as ITerritoryValidation[]) ||
-                  [].map((validation, key) => {
+                {(validations as ITerritoryValidation[])?.map(
+                  (validation, key) => {
                     return (
                       <React.Fragment key={key}>
                         <ValidationRule
@@ -260,7 +257,8 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
                         )}
                       </React.Fragment>
                     );
-                  })}
+                  }
+                )}
               </StyledValidationList>
             </>
           )}
