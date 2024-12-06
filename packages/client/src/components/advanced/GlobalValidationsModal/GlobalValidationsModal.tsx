@@ -97,8 +97,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
     enabled: api.isLoggedIn(),
   });
 
-  console.log(rootTerritory);
-  const { validations } = rootTerritory?.data || {};
+  const validations = rootTerritory?.data.validations || [];
 
   const queryClient = useQueryClient();
 

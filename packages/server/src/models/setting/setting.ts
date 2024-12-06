@@ -54,4 +54,12 @@ export class Setting implements ISetting, IDbModel {
     const result = await rethink.table(Setting.table).get(key).run(conn);
     return result ? new Setting(result as ISetting) : null;
   }
+
+  static async getSettings(
+    conn: Connection,
+    keys: string[]
+  ): Promise<Setting[]> {
+    const results = await rethink.table(Setting.table).getAll.apply(undefined, keys).run(conn);
+    return results.map(data => new Setting(data));
+  }
 }
