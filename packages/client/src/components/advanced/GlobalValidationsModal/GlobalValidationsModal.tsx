@@ -94,7 +94,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
   } = useQuery({
     queryKey: ["settings"],
     queryFn: async () => {
-      const res = await api.settingGet("test_1");
+      const res = await api.settingGroupGet("validation");
       return res.data;
     },
     enabled: api.isLoggedIn(),
@@ -225,7 +225,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
             <>
               <StyledSectionHeader>
                 <b>Root T validation</b>
-                <StyledValidationCount>{`${validations.length} Root T validations`}</StyledValidationCount>
+                <StyledValidationCount>{`${validations?.length} Root T validations`}</StyledValidationCount>
                 <span>
                   <Button
                     icon={<FaPlus />}
@@ -236,8 +236,8 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
                 </span>
               </StyledSectionHeader>
               <StyledValidationList>
-                {(validations as ITerritoryValidation[]).map(
-                  (validation, key) => {
+                {(validations as ITerritoryValidation[]) ||
+                  [].map((validation, key) => {
                     return (
                       <React.Fragment key={key}>
                         <ValidationRule
@@ -260,8 +260,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
                         )}
                       </React.Fragment>
                     );
-                  }
-                )}
+                  })}
               </StyledValidationList>
             </>
           )}

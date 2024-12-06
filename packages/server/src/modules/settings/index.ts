@@ -20,13 +20,13 @@ export default Router()
     asyncRouteHandler<IResponseGeneric<ISettingGroup>>(
       async (request: IRequest<{ groupkey: string }>) => {
         const groupkey = request.params.groupkey as string;
-        const dict = { ...SettingGroupDict };
+        const dict = [...SettingGroupDict];
 
         if (!groupkey) {
           throw new BadParams("invalid group setting key");
         }
 
-        const dictItem = dict.find((item) => item.id === groupkey);
+        const dictItem = dict.find((item) => item.id.startsWith(groupkey));
         if (!dictItem) {
           throw new NotFound(`No group with key ${groupkey} found`);
         }
