@@ -92,7 +92,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
     queryKey: ["settings"],
     queryFn: async () => {
       const res = await api.settingGroupGet("validations");
-      return res.data;
+      return res.data.data?.settings;
     },
     enabled: api.isLoggedIn(),
   });
@@ -162,6 +162,8 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
   const toggleRule = (key: WarningKey) => {
     setRules((prev) => ({ ...prev, [key]: !prev[key] }));
   };
+
+  console.log(settings);
 
   return (
     <>
