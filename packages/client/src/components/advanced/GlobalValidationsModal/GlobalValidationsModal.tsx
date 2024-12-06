@@ -67,6 +67,9 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
   const [showModal, setShowModal] = useState(false);
   useEffect(() => {
     setShowModal(true);
+    // api.settingUpdate("test_1", {
+    //   value: false,
+    // });
   }, []);
 
   const {
@@ -80,10 +83,24 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
       const res = await api.detailGet(rootTerritoryId);
       return res.data;
     },
-    // TODO: only for owner
     enabled: api.isLoggedIn(),
   });
 
+  const {
+    status: settingsStatus,
+    data: settings,
+    error: settingsError,
+    isFetching: settingsIsFetching,
+  } = useQuery({
+    queryKey: ["settings"],
+    queryFn: async () => {
+      const res = await api.settingGet("test_1");
+      return res.data;
+    },
+    enabled: api.isLoggedIn(),
+  });
+
+  console.log(settings);
   const { validations } = rootTerritory?.data || {};
 
   const queryClient = useQueryClient();
@@ -163,7 +180,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
           onClose={() => setShowGlobalValidations(false)}
         />
         <ModalContent column enableScroll>
-          {/* <StyledGridForm>
+          <StyledGridForm>
             <StyledGridSectionHeading>
               Valency validations
             </StyledGridSectionHeading>
@@ -202,7 +219,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
                 toggleRule={() => toggleRule(val)}
               />
             ))}
-          </StyledGridForm> */}
+          </StyledGridForm>
 
           {rootTerritory && (
             <>
@@ -251,7 +268,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
 
           <Loader show={isFetching || updateEntityMutation.isPending} />
         </ModalContent>
-        {/* <ModalFooter>
+        <ModalFooter>
           <ButtonGroup>
             <Button
               color="warning"
@@ -260,7 +277,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
             />
             <Button color="primary" label="submit" />
           </ButtonGroup>
-        </ModalFooter> */}
+        </ModalFooter>
       </Modal>
 
       <Submit
