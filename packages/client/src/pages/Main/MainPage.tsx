@@ -386,10 +386,15 @@ const MainPage: React.FC<MainPage> = ({}) => {
         });
 
         if (!localStorageCenterSeparatorXPosition) {
-          // console.log("first layout init");
+          console.log("first layout init");
           // first layout INIT
           dispatch(setPanelWidths(panelWidthsPx));
           dispatch(setPanelWidthsPercent(INIT_PERCENT_PANEL_WIDTHS));
+          setMainPageTreeSeparatorXPosition(panelWidthsPx[0]);
+          localStorage.setItem(
+            "mainPageTreeSeparatorXPosition",
+            (panelWidthsPx[0] / onePercentOfLayoutWidth).toString()
+          );
           setMainPageCenterSeparatorXPosition(
             panelWidthsPx[0] + panelWidthsPx[1]
           );
@@ -402,18 +407,19 @@ const MainPage: React.FC<MainPage> = ({}) => {
           );
         } else {
           // layout init with saved separator
-          // console.log("init load - separator determines panel widths");
+          console.log("init load - separator determines panel widths");
           let secondPanel = mainPageCenterSeparatorXPosition - panelWidthsPx[0];
           let thirdPanel =
             layoutWidth - (mainPageCenterSeparatorXPosition + panelWidthsPx[3]);
 
           const tempPanelWidths = [
-            panelWidthsPx[0],
+            mainPageTreeSeparatorXPosition,
             secondPanel,
             thirdPanel,
             panelWidthsPx[3],
           ];
 
+          console.log(tempPanelWidths);
           dispatch(
             setPanelWidths(
               tempPanelWidths.map((pW) => floorNumberToOneDecimal(pW))
@@ -429,7 +435,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
         }
       } else {
         // change of layout width (different monitor) / redirect from different page
-        // console.log("layout width changed");
+        console.log("layout width changed");
         const panelWidthsPx = panelWidthsPercent.map((percentWidth) => {
           return floorNumberToOneDecimal(
             percentWidth * onePercentOfLayoutWidth
@@ -504,7 +510,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
               leftSideMaxWidth={layoutWidth / 2}
               separatorXPosition={mainPageTreeSeparatorXPosition}
               setSeparatorXPosition={(xPosition) => {
-                console.log(xPosition);
                 handleTreeSeparatorXPositionChange(xPosition);
               }}
             />
