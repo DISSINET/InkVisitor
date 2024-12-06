@@ -10,8 +10,6 @@ import { IResponseGeneric } from "@shared/types";
 import { IRequest } from "src/custom_typings/request";
 import { ISetting, ISettingGroup, SettingsKey } from "@shared/types/settings";
 import { Setting } from "@models/setting/setting";
-import { WriteResult } from "rethinkdb-ts";
-
 import { SettingGroupDict } from "@shared/dictionaries/settinggroup";
 
 export default Router()
@@ -20,21 +18,18 @@ export default Router()
     asyncRouteHandler<IResponseGeneric<ISettingGroup>>(
       async (request: IRequest<{ groupkey: string }>) => {
         const groupkey = request.params.groupkey as string;
+        const dict = [ ...SettingGroupDict ];
 
         if (!groupkey) {
           throw new BadParams("invalid group setting key");
         }
 
-        const dictItem = SettingGroupDict.find((item) => item.id === groupkey);
+        const dictItem = dict.find((item) => item.id === groupkey);
         if (!dictItem) {
           throw new NotFound(`No group with key ${groupkey} found`);
         }
 
-        const settings = await Promise.all(
-          dictItem.value.map(async (key) => {
-            return await Setting.getSetting(request.db.connection, key);
-          })
-        );
+        const settings = await Setting.getSettings(request.db.connection, dictItem.value)
 
         return {
           result: true,
