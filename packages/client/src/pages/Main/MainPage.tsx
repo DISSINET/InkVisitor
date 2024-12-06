@@ -6,8 +6,9 @@ import {
   fourthPanelBoxesHeightThirds,
   hiddenBoxHeight,
   INIT_PERCENT_PANEL_WIDTHS,
+  MAIN_PAGE_CENTER_SEPARATOR_X_PERCENT_POSITION,
+  MAIN_PAGE_TREE_SEPARATOR_X_PERCENT_POSITION,
   SECOND_PANEL_MIN_WIDTH,
-  MAIN_PAGE_SEPARATOR_X_PERCENT_POSITION,
   THIRD_PANEL_MIN_WIDTH,
 } from "Theme/constants";
 import api from "api";
@@ -302,25 +303,62 @@ const MainPage: React.FC<MainPage> = ({}) => {
     [layoutWidth]
   );
 
-  const localStorageSeparatorXPosition = localStorage.getItem(
-    "mainPageSeparatorXPosition"
+  // TREE SEPARATOR STATE
+  const localStorageTreeSeparatorXPosition = localStorage.getItem(
+    "mainPageTreeSeparatorXPosition"
   );
-  const [mainPageSeparatorXPosition, setMainPageSeparatorXPosition] =
+  const [mainPageTreeSeparatorXPosition, setMainPageTreeSeparatorXPosition] =
     useState<number>(
-      localStorageSeparatorXPosition
-        ? Number(localStorageSeparatorXPosition) * onePercentOfLayoutWidth
-        : MAIN_PAGE_SEPARATOR_X_PERCENT_POSITION * onePercentOfLayoutWidth
+      localStorageTreeSeparatorXPosition
+        ? Number(localStorageTreeSeparatorXPosition) * onePercentOfLayoutWidth
+        : MAIN_PAGE_TREE_SEPARATOR_X_PERCENT_POSITION * onePercentOfLayoutWidth
     );
 
-  const handleSeparatorXPositionChange = (xPosition: number) => {
-    if (mainPageSeparatorXPosition !== xPosition) {
-      setMainPageSeparatorXPosition(xPosition);
+  // CENTER SEPARATOR STATE
+  const localStorageCenterSeparatorXPosition = localStorage.getItem(
+    "mainPageCenterSeparatorXPosition"
+  );
+  const [
+    mainPageCenterSeparatorXPosition,
+    setMainPageCenterSeparatorXPosition,
+  ] = useState<number>(
+    localStorageCenterSeparatorXPosition
+      ? Number(localStorageCenterSeparatorXPosition) * onePercentOfLayoutWidth
+      : MAIN_PAGE_CENTER_SEPARATOR_X_PERCENT_POSITION * onePercentOfLayoutWidth
+  );
+
+  const handleTreeSeparatorXPositionChange = (xPosition: number) => {
+    if (mainPageTreeSeparatorXPosition !== xPosition) {
+      setMainPageTreeSeparatorXPosition(xPosition);
 
       const separatorXPercentPosition = floorNumberToOneDecimal(
         xPosition / onePercentOfLayoutWidth
       );
       localStorage.setItem(
-        "mainPageSeparatorXPosition",
+        "mainPageTreeSeparatorXPosition",
+        separatorXPercentPosition.toString()
+      );
+
+      dispatch(
+        setPanelWidths([
+          xPosition,
+          mainPageCenterSeparatorXPosition - xPosition,
+          panelWidths[2],
+          panelWidths[3],
+        ])
+      );
+    }
+  };
+
+  const handleCenterSeparatorXPositionChange = (xPosition: number) => {
+    if (mainPageCenterSeparatorXPosition !== xPosition) {
+      setMainPageCenterSeparatorXPosition(xPosition);
+
+      const separatorXPercentPosition = floorNumberToOneDecimal(
+        xPosition / onePercentOfLayoutWidth
+      );
+      localStorage.setItem(
+        "mainPageCenterSeparatorXPosition",
         separatorXPercentPosition.toString()
       );
 
@@ -347,14 +385,16 @@ const MainPage: React.FC<MainPage> = ({}) => {
           );
         });
 
-        if (!localStorageSeparatorXPosition) {
+        if (!localStorageCenterSeparatorXPosition) {
           // console.log("first layout init");
           // first layout INIT
           dispatch(setPanelWidths(panelWidthsPx));
           dispatch(setPanelWidthsPercent(INIT_PERCENT_PANEL_WIDTHS));
-          setMainPageSeparatorXPosition(panelWidthsPx[0] + panelWidthsPx[1]);
+          setMainPageCenterSeparatorXPosition(
+            panelWidthsPx[0] + panelWidthsPx[1]
+          );
           localStorage.setItem(
-            "mainPageSeparatorXPosition",
+            "mainPageCenterSeparatorXPosition",
             (
               (panelWidthsPx[0] + panelWidthsPx[1]) /
               onePercentOfLayoutWidth
@@ -363,9 +403,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
         } else {
           // layout init with saved separator
           // console.log("init load - separator determines panel widths");
-          let secondPanel = mainPageSeparatorXPosition - panelWidthsPx[0];
+          let secondPanel = mainPageCenterSeparatorXPosition - panelWidthsPx[0];
           let thirdPanel =
-            layoutWidth - (mainPageSeparatorXPosition + panelWidthsPx[3]);
+            layoutWidth - (mainPageCenterSeparatorXPosition + panelWidthsPx[3]);
 
           const tempPanelWidths = [
             panelWidthsPx[0],
@@ -407,9 +447,11 @@ const MainPage: React.FC<MainPage> = ({}) => {
         // 2nd and 3rd panels undersized
         if (secondPanelUndersized && thirdPanelUndersized) {
           dispatch(setPanelWidths(panelWidthsPx));
-          setMainPageSeparatorXPosition(panelWidthsPx[0] + panelWidthsPx[1]);
+          setMainPageCenterSeparatorXPosition(
+            panelWidthsPx[0] + panelWidthsPx[1]
+          );
           localStorage.setItem(
-            "mainPageSeparatorXPosition",
+            "mainPageCenterSeparatorXPosition",
             (
               (panelWidthsPx[0] + panelWidthsPx[1]) /
               onePercentOfLayoutWidth
@@ -438,9 +480,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
           ];
 
           dispatch(setPanelWidths(panelWidthsCalculated));
-          setMainPageSeparatorXPosition(panelWidthsPx[0] + secondPanel);
+          setMainPageCenterSeparatorXPosition(panelWidthsPx[0] + secondPanel);
           localStorage.setItem(
-            "mainPageSeparatorXPosition",
+            "mainPageCenterSeparatorXPosition",
             (
               (panelWidthsPx[0] + panelWidthsPx[1]) /
               onePercentOfLayoutWidth
@@ -456,15 +498,26 @@ const MainPage: React.FC<MainPage> = ({}) => {
       {panelWidths.length && (
         <>
           <ScrollHandler />
-          {mainPageSeparatorXPosition > 0 && thirdPanelExpanded && (
+          {mainPageTreeSeparatorXPosition > 0 && firstPanelExpanded && (
+            <LayoutSeparatorVertical
+              leftSideMinWidth={100}
+              leftSideMaxWidth={layoutWidth / 2}
+              separatorXPosition={mainPageTreeSeparatorXPosition}
+              setSeparatorXPosition={(xPosition) => {
+                console.log(xPosition);
+                handleTreeSeparatorXPositionChange(xPosition);
+              }}
+            />
+          )}
+          {mainPageCenterSeparatorXPosition > 0 && thirdPanelExpanded && (
             <LayoutSeparatorVertical
               leftSideMinWidth={panelWidths[0] + SECOND_PANEL_MIN_WIDTH}
               leftSideMaxWidth={
                 layoutWidth - panelWidths[3] - THIRD_PANEL_MIN_WIDTH
               }
-              separatorXPosition={mainPageSeparatorXPosition}
+              separatorXPosition={mainPageCenterSeparatorXPosition}
               setSeparatorXPosition={(xPosition) => {
-                handleSeparatorXPositionChange(xPosition);
+                handleCenterSeparatorXPositionChange(xPosition);
               }}
             />
           )}
