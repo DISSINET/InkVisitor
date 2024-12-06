@@ -24,7 +24,7 @@ import {
   IRequestStats,
   IAudit,
 } from "@shared/types";
-import { ISetting } from "@shared/types/settings";
+import { ISetting, ISettingGroup } from "@shared/types/settings";
 import * as errors from "@shared/types/errors";
 import { NetworkError } from "@shared/types/errors";
 import { IRequestSearch } from "@shared/types/request-search";
@@ -1335,11 +1335,32 @@ class Api {
   }
 
   /**
- * Setting update
- * @param settingId
- * @param options
- * @returns
- */
+   * Setting group get
+   * @param settingId
+   * @param options
+   * @returns
+   */
+  async settingGroupGet(
+    settingGroupId: string,
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseGeneric<ISettingGroup>>> {
+    try {
+      const response = await this.connection.get(
+        `/settings/group/${settingGroupId}`,
+        options
+      );
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  /**
+   * Setting update
+   * @param settingId
+   * @param options
+   * @returns
+   */
   async settingUpdate(
     settingId: string,
     data: { value: unknown },
