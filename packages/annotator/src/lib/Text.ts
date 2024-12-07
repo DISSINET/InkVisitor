@@ -248,7 +248,7 @@ class Text {
     return this.segments[segment.segmentIndex].lines[segment.lineIndex];
   }
 
-  relativeToAbsIndex(
+  getAbsTextIndex(
     cursor: IRelativeCoordinates,
     viewport?: Viewport
   ): number {
@@ -512,15 +512,16 @@ class Text {
   }
 
   /**
-   * deleteText removes specific number of charactes from cursor position
+   * deleteText removes one char from text at cursor's position
+   * For more characters, see deleteRangeText as that method is slighly slower that this
    * @param viewport
    * @param cursorPosition
-   * @param charsToDelete
+   * @param forwardChar 
    */
-  deleteText(
+  deleteTextChar(
     viewport: Viewport,
     cursorPosition: IRelativeCoordinates,
-    charsToDelete: number
+    forwardChar?: boolean
   ): void {
     const segmentPos = this.cursorToIndex(viewport, cursorPosition);
     if (!segmentPos) {
@@ -542,7 +543,7 @@ class Text {
     if (!segment.raw) {
       this.prepareSegments();
     } else if (segmentPos.rawTextIndex) {
-      const xAlterPos = segmentPos.rawTextIndex - (charsToDelete > 0 ? 1 : 0);
+      const xAlterPos = segmentPos.rawTextIndex - (forwardChar ? 0 : 1);
       segment.raw =
         segment.raw.slice(0, xAlterPos) + segment.raw.slice(xAlterPos + 1);
       segment.parseText();
@@ -583,9 +584,7 @@ class Text {
 
   deleteRangeText(
     start: IAbsCoordinates,
-    end: IAbsCoordinates,
-    viewport: Viewport
-  ): void {
+    end: IAbsCoordinates  ): void {
     // swap in case start is after end
     if (
       start.yLine > end.yLine ||
@@ -596,8 +595,8 @@ class Text {
       end = tempStart;
     }
 
-    const startI = this.relativeToAbsIndex(Cursor.fromPosition(start));
-    const endI = this.relativeToAbsIndex(Cursor.fromPosition(end));
+    const startI = this.getAbsTextIndex(start);
+    const endI = this.getAbsTextIndex(end);
     this.value = this.value.substring(0, startI) + this.value.substring(endI);
 
     this.prepareSegments();

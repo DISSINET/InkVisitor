@@ -74,6 +74,88 @@ export default class Keys {
     this.annotator.element.onkeydown = this.onKeyDown.bind(this);
   }
 
+  onArrowLeft({ctrlKey, shiftKey}: { ctrlKey?: boolean; shiftKey?: boolean;}) {
+    // default delta to the left
+    let offsetLeft = -1;
+    this.cursor.manualDirection = DIRECTION.BACKWARD;
+    const originalXLine = this.cursor.xLine;
+    const originalYline = this.cursor.yLine;
+
+    if (this.cursor.selectStart) {
+      // if already selected text (dblclick), reuse selectStart position as cursor's position
+      this.cursor.xLine = this.cursor.selectStart.xLine;
+      this.cursor.yLine =
+        this.cursor.selectStart.yLine - this.viewport.lineStart;
+    }
+
+    if (ctrlKey) {
+      // ctrl key used - find last word to the left
+      offsetLeft = 0;
+      while (!offsetLeft) {
+        [offsetLeft] = this.text.getCursorWordOffsets(
+          this.viewport,
+          this.cursor
+        );
+
+        if (offsetLeft === -0) {
+          this.cursor.move(-1, 0);
+          if (this.cursor.xLine <= 0) {
+            this.cursor.yLine = Math.max(0, this.cursor.yLine - 1);
+            this.cursor.xLine =
+              Math.floor(this.annotator.width / this.annotator.charWidth) -
+              1;
+          }
+        }
+      }
+    }
+
+    // go 1 line up if at the start
+    if (this.cursor.xLine <= 0) {
+      // only if there is a way to go up
+      if (this.cursor.yLine > 0) {
+        this.cursor.yLine = Math.max(0, this.cursor.yLine - 1);
+        const line = this.text.getCurrentLine(this.viewport, this.cursor);
+        this.cursor.xLine = line?.length || 0;
+
+        if (this.cursor.selectStart) {
+          this.cursor.selectStart.xLine = this.cursor.xLine;
+          this.cursor.selectStart.yLine =
+            this.viewport.lineStart + this.cursor.yLine;
+        }
+      }
+    } else {
+      this.cursor.move(offsetLeft, 0);
+    }
+
+    if (shiftKey) {
+      // copy cursor's current position as selectStart
+      this.cursor.selectStart = {
+        xLine: this.cursor.xLine,
+        yLine: this.viewport.lineStart + this.cursor.yLine,
+      };
+      // set selectEnd to cursor's original position as initialization
+      if (!this.cursor.selectEnd) {
+        this.cursor.selectEnd = {
+          xLine: originalXLine,
+          yLine: this.viewport.lineStart + originalYline,
+        };
+      }
+    } else {
+      if (this.cursor.isSelected()) {
+        // if something is selected -> move the cursor to leftmost position and cancel the selection
+        this.cursor.xLine =
+          this.cursor.selectStart?.xLine || this.cursor.xLine;
+        this.cursor.yLine = this.cursor.selectStart
+          ? this.cursor.selectStart.yLine - this.viewport.lineStart
+          : this.cursor.yLine;
+        offsetLeft = 0;
+      }
+
+      this.cursor.selectStart = undefined;
+      this.cursor.selectEnd = undefined;
+    }
+  }
+
   /**
    * onKeyDown is handler for pressed key event
    * @param e
@@ -232,86 +314,7 @@ export default class Keys {
       }
 
       case Key.ArrowLeft: {
-        // default delta to the left
-        let offsetLeft = -1;
-        this.cursor.manualDirection = DIRECTION.BACKWARD;
-        const originalXLine = this.cursor.xLine;
-        const originalYline = this.cursor.yLine;
-
-        if (this.cursor.selectStart) {
-          // if already selected text (dblclick), reuse selectStart position as cursor's position
-          this.cursor.xLine = this.cursor.selectStart.xLine;
-          this.cursor.yLine =
-            this.cursor.selectStart.yLine - this.viewport.lineStart;
-        }
-
-        if (e.ctrlKey) {
-          // ctrl key used - find last word to the left
-          offsetLeft = 0;
-          while (!offsetLeft) {
-            [offsetLeft] = this.text.getCursorWordOffsets(
-              this.viewport,
-              this.cursor
-            );
-
-            if (offsetLeft === -0) {
-              this.cursor.move(-1, 0);
-              if (this.cursor.xLine <= 0) {
-                this.cursor.yLine = Math.max(0, this.cursor.yLine - 1);
-                this.cursor.xLine =
-                  Math.floor(this.annotator.width / this.annotator.charWidth) -
-                  1;
-              }
-            }
-          }
-        }
-
-        // go 1 line up if at the start
-        if (this.cursor.xLine <= 0) {
-          // only if there is a way to go up
-          if (this.cursor.yLine > 0) {
-            this.cursor.yLine = Math.max(0, this.cursor.yLine - 1);
-            const line = this.text.getCurrentLine(this.viewport, this.cursor);
-            this.cursor.xLine = line?.length || 0;
-
-            if (this.cursor.selectStart) {
-              this.cursor.selectStart.xLine = this.cursor.xLine;
-              this.cursor.selectStart.yLine =
-                this.viewport.lineStart + this.cursor.yLine;
-            }
-          }
-        } else {
-          this.cursor.move(offsetLeft, 0);
-        }
-
-        if (e.shiftKey) {
-          // copy cursor's current position as selectStart
-          this.cursor.selectStart = {
-            xLine: this.cursor.xLine,
-            yLine: this.viewport.lineStart + this.cursor.yLine,
-          };
-          // set selectEnd to cursor's original position as initialization
-          if (!this.cursor.selectEnd) {
-            this.cursor.selectEnd = {
-              xLine: originalXLine,
-              yLine: this.viewport.lineStart + originalYline,
-            };
-          }
-        } else {
-          if (this.cursor.isSelected()) {
-            // if something is selected -> move the cursor to leftmost position and cancel the selection
-            this.cursor.xLine =
-              this.cursor.selectStart?.xLine || this.cursor.xLine;
-            this.cursor.yLine = this.cursor.selectStart
-              ? this.cursor.selectStart.yLine - this.viewport.lineStart
-              : this.cursor.yLine;
-            offsetLeft = 0;
-          }
-
-          this.cursor.selectStart = undefined;
-          this.cursor.selectEnd = undefined;
-        }
-
+        this.onArrowLeft(e)
         break;
       }
 
@@ -418,71 +421,19 @@ export default class Keys {
 
         const area = this.cursor.getSelectedArea();
         if (area) {
-          this.text.deleteRangeText(area[0], area[1], this.viewport);
+          this.text.deleteRangeText(area[0], area[1]);
           this.cursor.reset();
           this.cursor.setPosition(
             area[0].xLine,
             area[0].yLine - this.viewport.lineStart
           );
         } else {
-          const segmentBefore = this.text.cursorToIndex(
-            this.viewport,
-            this.cursor
-          );
-          let upSegmentEmpty = false;
-          if (segmentBefore && segmentBefore.segmentIndex > 0) {
-            upSegmentEmpty =
-              !this.text.segments[segmentBefore?.segmentIndex - 1].raw;
-          }
-          this.text.deleteText(this.viewport, this.cursor, 1);
-          const segmentAfter = this.text.cursorToIndex(
-            this.viewport,
-            this.cursor
-          );
+          const before = new Cursor(this.cursor.ratio, this.cursor.xLine, this.cursor.yLine);
+          this.onArrowLeft({ctrlKey: true})
+          console.log("DEL", before.xLine - this.cursor.xLine)
+          this.text.deleteRangeText(before, this.cursor)
+          this.text.deleteTextChar(this.viewport, before);
 
-          const xDiff =
-            (segmentAfter?.rawTextIndex || 0) -
-            (segmentBefore?.rawTextIndex || 0);
-
-          if (xDiff < 0) {
-            this.cursor.move((xDiff + 1) * -1, 0);
-          } else if (xDiff > 0) {
-            if (segmentBefore?.segmentIndex !== segmentAfter?.segmentIndex) {
-              if (upSegmentEmpty) {
-                this.cursor.move(0, -1);
-              } else {
-                this.cursor.move(Infinity, -1);
-              }
-            } else {
-              this.cursor.move(-xDiff, 0);
-            }
-          } else {
-            if (segmentAfter!.rawTextIndex > 0) {
-              this.cursor.move(-1, 0);
-            } else {
-              this.cursor.move(-1, -1);
-            }
-          }
-
-          if (this.cursor.xLine < 0) {
-            this.cursor.move(Infinity, 0);
-          }
-
-          /*const segmentAfter = this.text.cursorToIndex(
-              this.viewport,
-              this.cursor
-            );
-          
-            if (this.cursor.xLine < 0) {
-              this.cursor.xLine = 0;
-              this.draw();
-              return;
-            }
-            if (xDiff > 0) {
-              this.cursor.move(Infinity, -1);
-              this.cursor.move(-xDiff, 0);
-            }
-    */
           if (this.annotator.onTextChangeCb) {
             this.annotator.onTextChangeCb(this.text.value);
           }
@@ -502,7 +453,7 @@ export default class Keys {
           return;
         }
 
-        this.text.deleteText(this.viewport, this.cursor, -1);
+        this.text.deleteTextChar(this.viewport, this.cursor, true);
         this.cursor.move(0, 0);
         break;
 
