@@ -33,11 +33,14 @@ export enum WarningTypeEnums {
   TVERE = "TVERE", // Reference wrong entity
 }
 
-const ValidationKeys = Object.keys(WarningTypeEnums).reduce((acc, key) => {
-  const validationKey = `validation_${key}` as ValidationKey;
-  acc[validationKey] = validationKey;
-  return acc;
-}, {} as Record<`validation_${keyof typeof WarningTypeEnums}`, string>);
+export const ValidationKeys = Object.keys(WarningTypeEnums).reduce(
+  (acc, key) => {
+    const validationKey = `validation_${key}` as ValidationKey;
+    acc[validationKey] = validationKey;
+    return acc;
+  },
+  {} as Record<`validation_${keyof typeof WarningTypeEnums}`, string>
+);
 
 export type ValidationKey = keyof typeof ValidationKeys;
 
