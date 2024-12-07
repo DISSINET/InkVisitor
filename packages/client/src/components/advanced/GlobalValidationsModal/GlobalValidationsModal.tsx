@@ -15,7 +15,7 @@ import {
   Submit,
 } from "components";
 import { ValidationRule } from "components/advanced";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { FaPlus, FaToggleOff, FaToggleOn } from "react-icons/fa";
 import { rootTerritoryId } from "Theme/constants";
 import {
@@ -36,17 +36,16 @@ import {
   territoryKeys,
   valencyKeys,
   globalValidationsDict,
-  WarningKey,
-  WarningTypeEnums,
+  ValidationKey,
 } from "@shared/enums/warning";
 import { GlobalValidationsSettingsRow } from "./GlobalValidationsSettingsRow";
 
-const initialRulesState: Record<WarningKey, boolean> = Object.keys(
-  WarningTypeEnums
+const initialRulesState: Record<ValidationKey, boolean> = Object.keys(
+  globalValidationsDict
 ).reduce((acc, key) => {
-  acc[key as WarningKey] = true;
+  acc[key as ValidationKey] = true;
   return acc;
-}, {} as Record<WarningKey, boolean>);
+}, {} as Record<ValidationKey, boolean>);
 
 const initValidation: ITerritoryValidation = {
   detail: "",
@@ -157,13 +156,26 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
   };
 
   const [rules, setRules] =
-    useState<Record<WarningKey, boolean>>(initialRulesState);
+    useState<Record<ValidationKey, boolean>>(initialRulesState);
 
-  const toggleRule = (key: WarningKey) => {
+  const settingsKeyValue = useMemo(
+    () =>
+      settings?.reduce((acc, setting) => {
+        acc[setting.id as ValidationKey] = setting.value as boolean;
+        return acc;
+      }, {} as Record<ValidationKey, boolean>),
+    [settings]
+  );
+
+  useEffect(() => {
+    if (settingsKeyValue) {
+      setRules(settingsKeyValue);
+    }
+  }, [JSON.stringify(settingsKeyValue)]);
+
+  const toggleRule = (key: ValidationKey) => {
     setRules((prev) => ({ ...prev, [key]: !prev[key] }));
   };
-
-  console.log(settings);
 
   return (
     <>
@@ -273,7 +285,13 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
               label="cancel"
               onClick={() => setShowGlobalValidations(false)}
             />
-            <Button color="primary" label="submit" />
+            <Button
+              color="primary"
+              label="submit"
+              disabled={
+                JSON.stringify(settingsKeyValue) === JSON.stringify(rules)
+              }
+            />
           </ButtonGroup>
         </ModalFooter>
       </Modal>
