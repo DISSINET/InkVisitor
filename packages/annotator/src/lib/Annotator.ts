@@ -720,7 +720,7 @@ export class Annotator {
     let [start, end] = this.cursor.getBounds();
 
     if (start && end) {
-      const indexPositionStart = this.text.relativeToAbsIndex(
+      const indexPositionStart = this.text.getAbsTextIndex(
         new Cursor(
           this.ratio,
           start.xLine,
@@ -728,7 +728,7 @@ export class Annotator {
         ),
         this.viewport
       );
-      const indexPositionEnd = this.text.relativeToAbsIndex(
+      const indexPositionEnd = this.text.getAbsTextIndex(
         new Cursor(this.ratio, end.xLine, end.yLine - this.viewport.lineStart),
         this.viewport
       );
