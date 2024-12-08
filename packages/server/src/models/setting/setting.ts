@@ -76,15 +76,11 @@ export class Setting implements ISetting, IDbModel {
   ): Promise<boolean> {
     for (const entry of data) {
       if (allowedSettingsKeys.includes(entry.id)) {
-        console.log("saving", entry.id)
-        const result = new Setting({
+        await new Setting({
           id: entry.id,
           value: entry.value,
           public: false,
         }).save(conn);
-        if (!result) {
-          return false;
-        }
       }
     }
     return true;
