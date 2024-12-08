@@ -74,7 +74,13 @@ export default class Keys {
     this.annotator.element.onkeydown = this.onKeyDown.bind(this);
   }
 
-  onArrowLeft({ctrlKey, shiftKey}: { ctrlKey?: boolean; shiftKey?: boolean;}) {
+  onArrowLeft({
+    ctrlKey,
+    shiftKey,
+  }: {
+    ctrlKey?: boolean;
+    shiftKey?: boolean;
+  }) {
     // default delta to the left
     let offsetLeft = -1;
     this.cursor.manualDirection = DIRECTION.BACKWARD;
@@ -102,8 +108,7 @@ export default class Keys {
           if (this.cursor.xLine <= 0) {
             this.cursor.yLine = Math.max(0, this.cursor.yLine - 1);
             this.cursor.xLine =
-              Math.floor(this.annotator.width / this.annotator.charWidth) -
-              1;
+              Math.floor(this.annotator.width / this.annotator.charWidth) - 1;
           }
         }
       }
@@ -143,8 +148,7 @@ export default class Keys {
     } else {
       if (this.cursor.isSelected()) {
         // if something is selected -> move the cursor to leftmost position and cancel the selection
-        this.cursor.xLine =
-          this.cursor.selectStart?.xLine || this.cursor.xLine;
+        this.cursor.xLine = this.cursor.selectStart?.xLine || this.cursor.xLine;
         this.cursor.yLine = this.cursor.selectStart
           ? this.cursor.selectStart.yLine - this.viewport.lineStart
           : this.cursor.yLine;
@@ -156,6 +160,103 @@ export default class Keys {
     }
   }
 
+  onArrowRight({
+    ctrlKey,
+    shiftKey,
+  }: {
+    ctrlKey?: boolean;
+    shiftKey?: boolean;
+  }) {
+    // default delta to the right
+    let offsetRight = 1;
+    this.cursor.manualDirection = DIRECTION.FORWARD;
+    const originalXLine = this.cursor.xLine;
+    const originalYline = this.cursor.yLine;
+
+    if (this.cursor.selectEnd) {
+      // if already selected text (dblclick), reuse selectEnd position as cursor's position
+      this.cursor.xLine = this.cursor.selectEnd.xLine;
+      this.cursor.yLine = this.cursor.selectEnd.yLine - this.viewport.lineStart;
+    }
+
+    if (ctrlKey) {
+      // ctrl key used - find next word to the right
+      offsetRight = 0;
+      while (!offsetRight) {
+        [, offsetRight] = this.text.getCursorWordOffsets(
+          this.viewport,
+          this.cursor
+        );
+        if (!offsetRight) {
+          this.cursor.move(1, 0);
+          if (
+            this.cursor.xLine >
+            Math.floor(this.annotator.width / this.annotator.charWidth)
+          ) {
+            this.cursor.xLine = 0;
+            this.cursor.yLine++;
+          }
+        } else if (
+          offsetRight + this.cursor.xLine >
+          Math.floor(this.annotator.width / this.annotator.charWidth)
+        ) {
+          this.cursor.xLine = 0;
+          this.cursor.yLine++;
+        }
+
+        if (this.cursor.yLine > this.viewport.noLines) {
+          this.cursor.yLine = this.viewport.noLines - 1;
+          break;
+        }
+      }
+    }
+
+    this.cursor.move(offsetRight, 0);
+
+    // check if we are at the end of the line -> move to next line
+    const currentLine =
+      this.text.getCurrentLine(this.viewport, this.cursor) || "";
+    let backupXLine = this.cursor.xLine;
+    let backupYLine = this.cursor.yLine;
+
+    if (currentLine.length < this.cursor.xLine) {
+      this.cursor.xLine = 0;
+      this.cursor.yLine++;
+    }
+
+    // revert if end of the document reached
+    if (!this.text.cursorToIndex(this.viewport, this.cursor)) {
+      this.cursor.xLine = backupXLine - 1;
+      this.cursor.yLine = backupYLine;
+    }
+
+    if (shiftKey) {
+      // copy cursor's current position as selectStart
+      this.cursor.selectEnd = {
+        xLine: this.cursor.xLine,
+        yLine: this.viewport.lineStart + this.cursor.yLine,
+      };
+      // set selectStart to cursor's original position as initialization
+      if (!this.cursor.selectStart) {
+        this.cursor.selectStart = {
+          xLine: originalXLine,
+          yLine: this.viewport.lineStart + originalYline,
+        };
+      }
+    } else {
+      if (this.cursor.isSelected()) {
+        // if something is selected -> move the cursor to rightmost position and cancel the selection
+        this.cursor.xLine = this.cursor.selectEnd?.xLine || this.cursor.xLine;
+        this.cursor.yLine = this.cursor.selectEnd
+          ? this.cursor.selectEnd.yLine - this.viewport.lineStart
+          : this.cursor.yLine;
+        offsetRight = 0;
+      }
+
+      this.cursor.selectStart = undefined;
+      this.cursor.selectEnd = undefined;
+    }
+  }
   /**
    * onKeyDown is handler for pressed key event
    * @param e
@@ -163,10 +264,6 @@ export default class Keys {
   onKeyDown(e: KeyboardEvent) {
     e.preventDefault();
     let key: Key = e.key as Key;
-
-    if (this.cursor.isSelected() && e.key === Key.Delete) {
-      key = Key.Backspace;
-    }
 
     switch (e.key) {
       case Key.Enter:
@@ -314,107 +411,16 @@ export default class Keys {
       }
 
       case Key.ArrowLeft: {
-        this.onArrowLeft(e)
+        this.onArrowLeft(e);
         break;
       }
 
       case Key.ArrowRight: {
-        // default delta to the right
-        let offsetRight = 1;
-        this.cursor.manualDirection = DIRECTION.FORWARD;
-        const originalXLine = this.cursor.xLine;
-        const originalYline = this.cursor.yLine;
-
-        if (this.cursor.selectEnd) {
-          // if already selected text (dblclick), reuse selectEnd position as cursor's position
-          this.cursor.xLine = this.cursor.selectEnd.xLine;
-          this.cursor.yLine =
-            this.cursor.selectEnd.yLine - this.viewport.lineStart;
-        }
-
-        if (e.ctrlKey) {
-          // ctrl key used - find next word to the right
-          offsetRight = 0;
-          while (!offsetRight) {
-            [, offsetRight] = this.text.getCursorWordOffsets(
-              this.viewport,
-              this.cursor
-            );
-            if (!offsetRight) {
-              this.cursor.move(1, 0);
-              if (
-                this.cursor.xLine >
-                Math.floor(this.annotator.width / this.annotator.charWidth)
-              ) {
-                this.cursor.xLine = 0;
-                this.cursor.yLine++;
-              }
-            } else if (
-              offsetRight + this.cursor.xLine >
-              Math.floor(this.annotator.width / this.annotator.charWidth)
-            ) {
-              this.cursor.xLine = 0;
-              this.cursor.yLine++;
-            }
-
-            if (this.cursor.yLine > this.viewport.noLines) {
-              this.cursor.yLine = this.viewport.noLines - 1;
-              break;
-            }
-          }
-        }
-
-        this.cursor.move(offsetRight, 0);
-
-        // check if we are at the end of the line -> move to next line
-        const currentLine =
-          this.text.getCurrentLine(this.viewport, this.cursor) || "";
-        let backupXLine = this.cursor.xLine;
-        let backupYLine = this.cursor.yLine;
-
-        if (currentLine.length < this.cursor.xLine) {
-          this.cursor.xLine = 0;
-          this.cursor.yLine++;
-        }
-
-        // revert if end of the document reached
-        if (!this.text.cursorToIndex(this.viewport, this.cursor)) {
-          this.cursor.xLine = backupXLine - 1;
-          this.cursor.yLine = backupYLine;
-        }
-
-        if (e.shiftKey) {
-          // copy cursor's current position as selectStart
-          this.cursor.selectEnd = {
-            xLine: this.cursor.xLine,
-            yLine: this.viewport.lineStart + this.cursor.yLine,
-          };
-          // set selectStart to cursor's original position as initialization
-          if (!this.cursor.selectStart) {
-            this.cursor.selectStart = {
-              xLine: originalXLine,
-              yLine: this.viewport.lineStart + originalYline,
-            };
-          }
-        } else {
-          if (this.cursor.isSelected()) {
-            // if something is selected -> move the cursor to rightmost position and cancel the selection
-            this.cursor.xLine =
-              this.cursor.selectEnd?.xLine || this.cursor.xLine;
-            this.cursor.yLine = this.cursor.selectEnd
-              ? this.cursor.selectEnd.yLine - this.viewport.lineStart
-              : this.cursor.yLine;
-            offsetRight = 0;
-          }
-
-          this.cursor.selectStart = undefined;
-          this.cursor.selectEnd = undefined;
-        }
-
+        this.onArrowRight(e);
         break;
       }
 
-      case Key.Backspace:
+      case Key.Backspace: {
         if (this.text.mode === EditMode.HIGHLIGHT) {
           return;
         }
@@ -428,17 +434,47 @@ export default class Keys {
             area[0].yLine - this.viewport.lineStart
           );
         } else {
-          const before = new Cursor(this.cursor.ratio, this.cursor.xLine, this.cursor.yLine);
-          this.onArrowLeft({ctrlKey: true})
-          console.log("DEL", before.xLine - this.cursor.xLine)
-          this.text.deleteRangeText(before, this.cursor)
-          this.text.deleteTextChar(this.viewport, before);
+          const before = this.cursor.getAbsolutePosition(this.viewport)
+          this.onArrowLeft(e);
+          const after = this.cursor.getAbsolutePosition(this.viewport)
+
+          this.text.deleteRangeText(before, after);
 
           if (this.annotator.onTextChangeCb) {
             this.annotator.onTextChangeCb(this.text.value);
           }
         }
         break;
+      }
+
+      case Key.Delete: {
+        if (this.text.mode === EditMode.HIGHLIGHT) {
+          return;
+        }
+
+        const area = this.cursor.getSelectedArea();
+        if (area) {
+          this.text.deleteRangeText(area[0], area[1]);
+          this.cursor.reset();
+          this.cursor.setPosition(
+            area[0].xLine,
+            area[0].yLine - this.viewport.lineStart
+          );
+        } else {
+          const before = this.cursor.getAbsolutePosition(this.viewport)
+          this.onArrowRight(e);
+          const after = this.cursor.getAbsolutePosition(this.viewport)
+
+          this.text.deleteRangeText(before, after);
+          this.cursor.xLine = before.xLine;
+          this.cursor.yLine = before.yLine - this.viewport.lineStart;
+
+          if (this.annotator.onTextChangeCb) {
+            this.annotator.onTextChangeCb(this.text.value);
+          }
+        }
+        break;
+      }
 
       case Key.PageUp:
         this.viewport.scrollUp(this.viewport.noLines);
@@ -446,15 +482,6 @@ export default class Keys {
 
       case Key.PageDown:
         this.viewport.scrollDown(this.viewport.noLines, this.text.noLines);
-        break;
-
-      case Key.Delete:
-        if (this.text.mode === EditMode.HIGHLIGHT) {
-          return;
-        }
-
-        this.text.deleteTextChar(this.viewport, this.cursor, true);
-        this.cursor.move(0, 0);
         break;
 
       case Key.End:

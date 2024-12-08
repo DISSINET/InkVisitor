@@ -272,4 +272,11 @@ export default class Cursor
   static fromPosition(pos: IAbsCoordinates): Cursor {
     return new Cursor(0, pos.xLine, pos.yLine);
   }
+
+  getAbsolutePosition(viewport: Viewport): IAbsCoordinates {
+    return {
+      xLine: this.xLine,
+      yLine: this.yLine + viewport.lineStart
+    }
+  }
 }
