@@ -15,7 +15,7 @@ import {
   Submit,
 } from "components";
 import { ValidationRule } from "components/advanced";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { FaPlus, FaToggleOff, FaToggleOn } from "react-icons/fa";
 import { rootTerritoryId } from "Theme/constants";
 import {
@@ -36,17 +36,18 @@ import {
   territoryKeys,
   valencyKeys,
   globalValidationsDict,
-  WarningKey,
-  WarningTypeEnums,
+  ValidationKey,
 } from "@shared/enums/warning";
 import { GlobalValidationsSettingsRow } from "./GlobalValidationsSettingsRow";
+import { ISetting } from "@shared/types/settings";
+import { toast } from "react-toastify";
 
-const initialRulesState: Record<WarningKey, boolean> = Object.keys(
-  WarningTypeEnums
+const initialRulesState: Record<ValidationKey, boolean> = Object.keys(
+  globalValidationsDict
 ).reduce((acc, key) => {
-  acc[key as WarningKey] = true;
+  acc[key as ValidationKey] = true;
   return acc;
-}, {} as Record<WarningKey, boolean>);
+}, {} as Record<ValidationKey, boolean>);
 
 const initValidation: ITerritoryValidation = {
   detail: "",
@@ -80,11 +81,24 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
       const res = await api.detailGet(rootTerritoryId);
       return res.data;
     },
-    // TODO: only for owner
     enabled: api.isLoggedIn(),
   });
 
-  const { validations } = rootTerritory?.data || {};
+  const {
+    status: settingsStatus,
+    data: settings,
+    error: settingsError,
+    isFetching: settingsIsFetching,
+  } = useQuery({
+    queryKey: ["settings"],
+    queryFn: async () => {
+      const res = await api.settingGroupGet("validations");
+      return res.data.data?.settings;
+    },
+    enabled: api.isLoggedIn(),
+  });
+
+  const validations = rootTerritory?.data.validations || [];
 
   const queryClient = useQueryClient();
 
@@ -94,6 +108,16 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
 
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["entity"] });
+    },
+  });
+
+  const updateSettingsMutation = useMutation({
+    mutationFn: async (newSettings: Omit<ISetting, "public">[]) =>
+      await api.settingGroupUpdate("validations", newSettings),
+
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["settings"] });
+      toast.success("settings updated");
     },
   });
 
@@ -144,9 +168,24 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
   };
 
   const [rules, setRules] =
-    useState<Record<WarningKey, boolean>>(initialRulesState);
+    useState<Record<ValidationKey, boolean>>(initialRulesState);
 
-  const toggleRule = (key: WarningKey) => {
+  const settingsKeyValue = useMemo(
+    () =>
+      settings?.reduce((acc, setting) => {
+        acc[setting.id as ValidationKey] = setting.value as boolean;
+        return acc;
+      }, {} as Record<ValidationKey, boolean>),
+    [settings]
+  );
+
+  useEffect(() => {
+    if (settingsKeyValue) {
+      setRules(settingsKeyValue);
+    }
+  }, [JSON.stringify(settingsKeyValue)]);
+
+  const toggleRule = (key: ValidationKey) => {
     setRules((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
@@ -163,7 +202,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
           onClose={() => setShowGlobalValidations(false)}
         />
         <ModalContent column enableScroll>
-          {/* <StyledGridForm>
+          <StyledGridForm>
             <StyledGridSectionHeading>
               Valency validations
             </StyledGridSectionHeading>
@@ -202,13 +241,13 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
                 toggleRule={() => toggleRule(val)}
               />
             ))}
-          </StyledGridForm> */}
+          </StyledGridForm>
 
           {rootTerritory && (
             <>
               <StyledSectionHeader>
                 <b>Root T validation</b>
-                <StyledValidationCount>{`${validations.length} Root T validations`}</StyledValidationCount>
+                <StyledValidationCount>{`${validations?.length} Root T validations`}</StyledValidationCount>
                 <span>
                   <Button
                     icon={<FaPlus />}
@@ -219,7 +258,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
                 </span>
               </StyledSectionHeader>
               <StyledValidationList>
-                {(validations as ITerritoryValidation[]).map(
+                {(validations as ITerritoryValidation[])?.map(
                   (validation, key) => {
                     return (
                       <React.Fragment key={key}>
@@ -251,16 +290,28 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
 
           <Loader show={isFetching || updateEntityMutation.isPending} />
         </ModalContent>
-        {/* <ModalFooter>
+        <ModalFooter>
           <ButtonGroup>
             <Button
               color="warning"
               label="cancel"
               onClick={() => setShowGlobalValidations(false)}
             />
-            <Button color="primary" label="submit" />
+            <Button
+              color="primary"
+              label="submit"
+              disabled={
+                JSON.stringify(settingsKeyValue) === JSON.stringify(rules)
+              }
+              onClick={() => {
+                const newSettings: Omit<ISetting, "public">[] = Object.entries(
+                  rules
+                ).map(([id, value]) => ({ id, value }));
+                updateSettingsMutation.mutate(newSettings);
+              }}
+            />
           </ButtonGroup>
-        </ModalFooter> */}
+        </ModalFooter>
       </Modal>
 
       <Submit

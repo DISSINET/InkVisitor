@@ -22,11 +22,14 @@ export class Setting implements ISetting, IDbModel {
   async save(dbInstance: Connection | undefined): Promise<boolean> {
     const result = await rethink
       .table(Setting.table)
-      .insert({
-        id: this.id,
-        value: this.value,
-        public: this.public,
-      })
+      .insert(
+        {
+          id: this.id,
+          value: this.value,
+          public: this.public,
+        },
+        { conflict: "update" } // use upsert
+      )
       .run(dbInstance);
 
     return result.inserted === 1;
@@ -59,7 +62,27 @@ export class Setting implements ISetting, IDbModel {
     conn: Connection,
     keys: string[]
   ): Promise<Setting[]> {
-    const results = await rethink.table(Setting.table).getAll.apply(undefined, keys).run(conn);
-    return results.map(data => new Setting(data));
+    const results = await rethink
+      .table(Setting.table)
+      .getAll.apply(undefined, keys)
+      .run(conn);
+    return results.map((data) => new Setting(data));
+  }
+
+  static async updateGroup(
+    conn: Connection,
+    allowedSettingsKeys: string[],
+    data: { id: string; value: unknown }[]
+  ): Promise<boolean> {
+    for (const entry of data) {
+      if (allowedSettingsKeys.includes(entry.id)) {
+        await new Setting({
+          id: entry.id,
+          value: entry.value,
+          public: false,
+        }).save(conn);
+      }
+    }
+    return true;
   }
 }
