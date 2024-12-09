@@ -1,11 +1,10 @@
 import { Annotator } from "@inkvisitor/annotator/src/lib";
 import { animated, useSpring } from "@react-spring/web";
-import { entitiesDict } from "@shared/dictionaries";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import { IEntity, IResponseEntity, IResponseStatement } from "@shared/types";
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
-import { Button, DocumentTitle, Loader } from "components";
+import { Button, Input, Loader, DocumentTitle } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 import TextAnnotator from "components/advanced/Annotator/Annotator";
 import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
@@ -13,10 +12,13 @@ import React, { useContext, useEffect, useMemo, useState } from "react";
 import { FaLongArrowAltRight, FaUnlink } from "react-icons/fa";
 import { GrDocumentMissing } from "react-icons/gr";
 import { TbAnchorOff } from "react-icons/tb";
-import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
-import { StyledModeSwitcher } from "../StatementListHeader/StatementListHeaderStyles";
-import useResizeObserver from "use-resize-observer";
+import { TiDocumentText } from "react-icons/ti";
 import { ThemeContext } from "styled-components";
+import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
+import useResizeObserver from "use-resize-observer";
+import { StyledInfoText } from "../StatementListHeader/StatementListHeaderStyles";
+import { entitiesDict } from "@shared/dictionaries/entity";
+import { useDebounce } from "hooks";
 
 interface StatementListTextAnnotator {
   statements: IResponseStatement[];
@@ -77,6 +79,52 @@ export const StatementListTextAnnotator: React.FC<
   }, []);
 
   const [annotator, setAnnotator] = useState<Annotator | undefined>(undefined);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [searchOccurences, setSearchOccurences] = useState<
+    { segmentIndex: number; lineIndex: number; start: number; end: number }[]
+  >([]);
+  const [searchActiveOccurence, setSearchActiveOccurence] = useState<number>(0);
+
+  useEffect(() => {
+    const newSelectedOccurence = searchOccurences[searchActiveOccurence];
+
+    console.log(
+      `selecting ${searchActiveOccurence} of`,
+      searchOccurences,
+      ` => ${newSelectedOccurence}`
+    );
+
+    if (newSelectedOccurence) {
+      annotator?.selectSearchOccurence(newSelectedOccurence);
+    }
+  }, [searchActiveOccurence, searchOccurences]);
+
+  const dSearchTerm = useDebounce(searchTerm, 1000);
+
+  const isSearchTermValid = useMemo<boolean>(() => {
+    return dSearchTerm.length > 2;
+  }, [dSearchTerm]);
+
+  useEffect(() => {
+    if (annotator) {
+      if (isSearchTermValid) {
+        annotator?.search(searchTerm);
+        const occurences = annotator?.search(searchTerm);
+
+        setSearchOccurences(occurences);
+
+        setTimeout(() => {
+          setSearchActiveOccurence(0);
+        }, 1000);
+
+        // if (occurences.length > 0) {
+        //   annotator?.selectSearchOccurence(
+        //     searchOccurences[searchActiveOccurence]
+        //   );
+        // }
+      }
+    }
+  }, [dSearchTerm]);
 
   const animatedStyle = useSpring({
     opacity: showAnnotator ? 1 : 0,
@@ -208,6 +256,22 @@ export const StatementListTextAnnotator: React.FC<
 
   const themeContext = useContext(ThemeContext);
 
+  const isSearchAllowed = useMemo<boolean>(() => {
+    return annotator !== undefined && selectedDocument !== undefined;
+  }, [annotator, selectedDocument]);
+
+  const annotatorHeight = useMemo<number>(() => {
+    let height = contentHeight - 70;
+
+    if (isSearchAllowed) {
+      height -= 30;
+    }
+    if (selectorHeight) {
+      height -= selectorHeight;
+    }
+    return height;
+  }, [contentHeight, selectorHeight, isSearchAllowed]);
+
   return (
     <animated.div style={animatedStyle}>
       <div
@@ -303,19 +367,19 @@ export const StatementListTextAnnotator: React.FC<
       </div>
 
       {/* Class selector */}
-      {/* {selectedResource !== false && selectedResource?.data?.documentId && (
+      {selectedResource !== false && selectedResource?.data?.documentId && (
         <div
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "4px",
-            marginBottom: "5px",
+            gap: themeContext?.space[6],
+            marginBottom: themeContext?.space[2],
           }}
           ref={selectorRef}
         >
-          <StyledModeSwitcher style={{ textWrap: "nowrap" }}>
+          <StyledInfoText style={{ textWrap: "nowrap" }}>
             Highlight
-          </StyledModeSwitcher>
+          </StyledInfoText>
           <Dropdown.Multi.Entity
             options={entitiesDict}
             disableEmpty={true}
@@ -332,7 +396,67 @@ export const StatementListTextAnnotator: React.FC<
             noOptionsMessage="No entity classes to highlight"
           />
         </div>
-      )} */}
+      )}
+
+      {isSearchAllowed && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: themeContext?.space[6],
+            marginBottom: themeContext?.space[2],
+          }}
+        >
+          <StyledInfoText style={{ textWrap: "nowrap", marginRight: "13px" }}>
+            Search
+          </StyledInfoText>
+          <Input
+            value={searchTerm}
+            onChangeFn={(newText: any) => {
+              setSearchTerm(newText);
+            }}
+            changeOnType
+          />
+          {isSearchTermValid && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: themeContext?.space[2],
+              }}
+            >
+              <div
+                style={{
+                  color: themeContext?.color["info"],
+                  fontSize: themeContext?.fontSize["xs"],
+                }}
+              >
+                {searchActiveOccurence + 1} / {searchOccurences.length}{" "}
+                occurences
+              </div>
+              <Button
+                label="⬇"
+                color="info"
+                onClick={() => {
+                  const nextOccurence =
+                    (searchActiveOccurence + 1) % searchOccurences.length;
+                  setSearchActiveOccurence(nextOccurence);
+                }}
+              />
+              <Button
+                label="⬆"
+                color="info"
+                onClick={() => {
+                  const prevOccurence =
+                    (searchActiveOccurence - 1 + searchOccurences.length) %
+                    searchOccurences.length;
+                  setSearchActiveOccurence(prevOccurence);
+                }}
+              />
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Annotator */}
       <div style={{ marginTop: "0.2rem" }}>
@@ -351,7 +475,7 @@ export const StatementListTextAnnotator: React.FC<
               thisTerritoryEntityId={territoryId}
               initialScrollEntityId={territoryId}
               displayLineNumbers={true}
-              height={contentHeight - selectorHeight - 70}
+              height={annotatorHeight}
               documentId={selectedDocumentId}
               handleCreateStatement={handleCreateStatement}
               handleCreateTerritory={handleCreateTerritory}

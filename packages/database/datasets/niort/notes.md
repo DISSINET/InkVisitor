@@ -1,1 +1,7 @@
-Buck 592bd351-5f0c-455e-b7c1-2913da601663
+- port forward port to db `ssh -L 28016:10.16.30.211:28015 servgitci@10.16.30.211`
+- check port in `env.tunnel` to point to 28016
+- run `pnpm run parse-niort`
+- go to `https://rancher.cloud.e-infra.cz/dashboard/home` and look for the `Download KubeConfig` button at the very top-right.
+- run `kubectl port-forward inkvisitor-niort-56b4bfd9cf-pkzxh 28025:28015 -n mertel-ns --kubeconfig=remote-niort.yaml` where remote-niort.yaml is the downlaoded config file
+- now you can use local port 28025 to access rethinkdb on niort cluster, so edit `DB_PORT` in `.env` file and run `pnpm start` - choose `niort` database and `niort` dataset
+- check https://inkvisitor-niort.dyn.cloud.e-infra.cz/login
