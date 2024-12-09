@@ -74,6 +74,70 @@ export default class Keys {
     this.annotator.element.onkeydown = this.onKeyDown.bind(this);
   }
 
+  onArrowUp({ ctrlKey, shiftKey }: { ctrlKey?: boolean; shiftKey?: boolean }) {
+    const originalXLine = this.cursor.xLine;
+    const originalYline = this.cursor.yLine;
+
+    if (this.cursor.selectEnd && this.cursor.selectStart) {
+      this.cursor.xLine = this.cursor.selectStart.xLine;
+      this.cursor.yLine =
+        this.cursor.selectStart.yLine - this.viewport.lineStart;
+    }
+
+    if (this.cursor.yLine <= 0) {
+      // scroll up if going outside of the viewport
+      this.viewport.scrollTo(this.viewport.lineStart - 1, this.text.noLines);
+      this.cursor.yLine = 0;
+    }
+
+    const isAbsTopLine = this.cursor.yLine + this.viewport.lineStart === 0;
+    if (isAbsTopLine) {
+      // if top line - move to start of the line
+      this.cursor.xLine = 0;
+    } else {
+      // move cursor up
+      this.cursor.move(0, -1);
+    }
+
+    const currentLine =
+      this.text.getCurrentLine(this.viewport, this.cursor) || "";
+    if (currentLine.length < this.cursor.xLine) {
+      this.cursor.xLine = 0;
+    }
+
+    if (shiftKey) {
+      const direction = this.cursor.getSelectionDirection();
+      if (direction === DIRECTION.BACKWARD) {
+        this.cursor.selectStart = {
+          xLine: this.cursor.xLine,
+          yLine: this.viewport.lineStart + this.cursor.yLine,
+        };
+        if (!this.cursor.selectEnd) {
+          this.cursor.selectStart = {
+            xLine: originalXLine,
+            yLine: this.viewport.lineStart + originalYline,
+          };
+        }
+      } else {
+        this.cursor.manualDirection = DIRECTION.BACKWARD;
+        this.cursor.selectEnd = this.cursor.selectStart;
+        this.cursor.selectStart = {
+          xLine: originalXLine,
+          yLine: this.viewport.lineStart + this.cursor.yLine,
+        };
+        if (!this.cursor.selectEnd) {
+          this.cursor.selectEnd = {
+            xLine: originalXLine,
+            yLine: this.viewport.lineStart + originalYline,
+          };
+        }
+      }
+    } else {
+      this.cursor.selectStart = undefined;
+      this.cursor.selectEnd = undefined;
+    }
+  }
+
   onArrowLeft({
     ctrlKey,
     shiftKey,
@@ -278,65 +342,7 @@ export default class Keys {
         break;
 
       case Key.ArrowUp: {
-        const originalXLine = this.cursor.xLine;
-        const originalYline = this.cursor.yLine;
-
-        if (this.cursor.selectEnd && this.cursor.selectStart) {
-          this.cursor.xLine = this.cursor.selectStart.xLine;
-          this.cursor.yLine =
-            this.cursor.selectStart.yLine - this.viewport.lineStart;
-        }
-
-        if (this.cursor.yLine === 0) {
-          this.cursor.xLine = 0;
-        }
-        this.cursor.move(0, -1);
-        if (this.cursor.yLine < 0) {
-          this.viewport.scrollTo(
-            this.viewport.lineStart + this.cursor.yLine,
-            this.text.noLines
-          );
-          this.cursor.yLine = 0;
-        }
-
-        const currentLine =
-          this.text.getCurrentLine(this.viewport, this.cursor) || "";
-        if (currentLine.length < this.cursor.xLine) {
-          this.cursor.xLine = 0;
-        }
-
-        if (e.shiftKey) {
-          const direction = this.cursor.getSelectionDirection();
-          if (direction === DIRECTION.BACKWARD) {
-            this.cursor.selectStart = {
-              xLine: this.cursor.xLine,
-              yLine: this.viewport.lineStart + this.cursor.yLine,
-            };
-            if (!this.cursor.selectEnd) {
-              this.cursor.selectStart = {
-                xLine: originalXLine,
-                yLine: this.viewport.lineStart + originalYline,
-              };
-            }
-          } else {
-            this.cursor.manualDirection = DIRECTION.BACKWARD;
-            this.cursor.selectEnd = this.cursor.selectStart;
-            this.cursor.selectStart = {
-              xLine: originalXLine,
-              yLine: this.viewport.lineStart + this.cursor.yLine,
-            };
-            if (!this.cursor.selectEnd) {
-              this.cursor.selectEnd = {
-                xLine: originalXLine,
-                yLine: this.viewport.lineStart + originalYline,
-              };
-            }
-          }
-        } else {
-          this.cursor.selectStart = undefined;
-          this.cursor.selectEnd = undefined;
-        }
-
+        this.onArrowUp(e);
         break;
       }
 
@@ -434,9 +440,9 @@ export default class Keys {
             area[0].yLine - this.viewport.lineStart
           );
         } else {
-          const before = this.cursor.getAbsolutePosition(this.viewport)
+          const before = this.cursor.getAbsolutePosition(this.viewport);
           this.onArrowLeft(e);
-          const after = this.cursor.getAbsolutePosition(this.viewport)
+          const after = this.cursor.getAbsolutePosition(this.viewport);
 
           this.text.deleteRangeText(before, after);
 
@@ -461,9 +467,9 @@ export default class Keys {
             area[0].yLine - this.viewport.lineStart
           );
         } else {
-          const before = this.cursor.getAbsolutePosition(this.viewport)
+          const before = this.cursor.getAbsolutePosition(this.viewport);
           this.onArrowRight(e);
-          const after = this.cursor.getAbsolutePosition(this.viewport)
+          const after = this.cursor.getAbsolutePosition(this.viewport);
 
           this.text.deleteRangeText(before, after);
           this.cursor.xLine = before.xLine;
