@@ -9,6 +9,7 @@ import {
   IStatementClassification,
   IStatementIdentification,
 } from "./statement";
+import { ITerritoryValidation } from "./territory";
 
 export interface IResponseDetail extends IResponseEntity {
   entities: Record<string, IEntity>; // all entities from IStatement and entityIds...
@@ -26,6 +27,13 @@ export interface IResponseDetail extends IResponseEntity {
   relations: Relation.IUsedRelations;
 
   warnings: IWarning[];
+  tValidations?: ITerritoryValidationNode; // applicable only to T entities
+}
+
+export interface ITerritoryValidationNode {
+  territoryId: string;
+  validations: ITerritoryValidation[];
+  parent: ITerritoryValidationNode | null;
 }
 
 // model is reapeated for each anchor in each document,
