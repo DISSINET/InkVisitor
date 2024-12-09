@@ -33,14 +33,18 @@ export const StyledTh = styled.th`
 
 interface StyledTr {
   $isOdd?: boolean;
-  $isSelected?: boolean;
   opacity?: number;
+  $isOwner: boolean;
+  $isAdmin: boolean;
 }
 export const StyledTr = styled.tr<StyledTr>`
-  background-color: ${({ theme, $isSelected }) =>
-    $isSelected ? theme.color["invertedBg"]["info"] : theme.color["white"]};
-  color: ${({ theme, $isSelected }) =>
-    $isSelected ? theme.color["primary"] : theme.color["black"]};
+  background-color: ${({ theme, $isOwner, $isAdmin }) =>
+    $isOwner
+      ? theme.color["invertedBg"]["primary"]
+      : $isAdmin
+      ? theme.color["invertedBg"]["info"]
+      : theme.color["white"]};
+  color: ${({ theme, $isOwner }) => theme.color["black"]};
   opacity: ${({ opacity }) => (opacity ? opacity : 1)};
   padding: ${({ theme }) => theme.space[1]};
   border: 1px solid ${({ theme }) => theme.color["gray"][400]};

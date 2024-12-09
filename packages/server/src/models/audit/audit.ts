@@ -85,7 +85,7 @@ export default class Audit implements IAudit, IDbModel {
     req: IRequest,
     entityId: string,
     updateData: object,
-    type: EventType,
+    type: EventType
   ): Promise<boolean> {
     const entry = new Audit({
       entityId,
@@ -189,7 +189,7 @@ export default class Audit implements IAudit, IDbModel {
       if (
         firstAudit &&
         firstAudit.date.toISOString().split("T")[0] ===
-        audit.date.toISOString().split("T")[0]
+          audit.date.toISOString().split("T")[0]
       ) {
         withValidDate.push(firstAudit);
       }
@@ -227,12 +227,36 @@ export default class Audit implements IAudit, IDbModel {
       if (
         firstAudit &&
         firstAudit.date.toISOString().split("T")[0] ===
-        audit.date.toISOString().split("T")[0]
+          audit.date.toISOString().split("T")[0]
       ) {
         withValidDate.push(firstAudit);
       }
     }
 
     return withValidDate;
+  }
+
+  /**
+   * returns first date-sorted entries for specific params
+   * @param db
+   * @param filter
+   * @returns
+   */
+  static async findMany(
+    db: Connection,
+    filter: { skip: number; take: number; from: Date }
+  ): Promise<Audit[]> {
+    const result = await rethink
+      .table(Audit.table)
+      .orderBy(rethink.asc("date"))
+      .filter(rethink.row("date").date().ge(filter.from))
+      .skip(filter.skip)
+      .limit(filter.take);
+
+    const audits = (await result.run(db)).map(
+      (data) => new Audit(data)
+    ) as Audit[];
+
+    return audits;
   }
 }

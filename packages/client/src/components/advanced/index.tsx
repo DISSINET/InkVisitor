@@ -26,6 +26,7 @@ import { LeftHeader, RightHeader } from "./PageHeader/PageHeader";
 import { PanelSeparator } from "./PanelSeparator/PanelSeparator";
 import { TerritoryActionModal } from "./TerritoryActionModal/TerritoryActionModal";
 import { UserCustomizationModal } from "./UserCustomizationModal/UserCustomizationModal";
+import { ValidationRule } from "./ValidationRule/ValidationRule";
 
 const Dropdown = {
   Single: {
@@ -61,6 +62,7 @@ export {
   PanelSeparator,
   TerritoryActionModal,
   UserCustomizationModal,
+  ValidationRule,
   ElvlButtonGroup,
   MoodVariantButtonGroup,
   PositionButtonGroup,

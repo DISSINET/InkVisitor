@@ -15,8 +15,8 @@ interface EntityDetailClassificationTable {
 }
 export const EntityDetailClassificationTable: React.FC<
   EntityDetailClassificationTable
-> = ({ title, entities, useCases, perPage = 5 }) => {
-  const data = useMemo(() => (useCases ? useCases : []), [useCases]);
+> = ({ title, entities, useCases = [], perPage = 5 }) => {
+  const data = useMemo(() => useCases, [useCases]);
 
   const columns = useMemo<Column<IResponseUsedInStatementClassification>[]>(
     () => [
