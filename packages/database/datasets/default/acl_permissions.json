@@ -270,5 +270,12 @@
     "method": "PUT",
     "roles": ["admin"],
     "public": false
+  },
+  {
+    "controller": "settings",
+    "route": "group/:groupkey",
+    "method": "PUT",
+    "roles": ["admin"],
+    "public": false
   }
 ]

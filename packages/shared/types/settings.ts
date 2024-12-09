@@ -1,3 +1,5 @@
+import { ValidationKey } from "@shared/enums/warning";
+
 export interface ISetting {
   id: SettingsKey;
   value: unknown;
@@ -9,6 +11,4 @@ export interface ISettingGroup {
   settings: ISetting[];
 }
 
-// ADAM: needed to change to string as it was not casting string to this properly
-// export enum SettingsKey {}
 export type SettingsKey = string;

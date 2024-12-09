@@ -184,7 +184,7 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
 
     const usernameLoaded = userName.length > 0;
 
-    const [showGlobalValidations, setShowGlobalValidations] = useState(false);
+    const [showGlobalValidations, setShowGlobalValidations] = useState(true);
 
     return (
       <>

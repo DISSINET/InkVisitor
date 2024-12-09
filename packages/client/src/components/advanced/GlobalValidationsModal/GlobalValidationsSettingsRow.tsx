@@ -1,5 +1,6 @@
 import {
   globalValidationsDict,
+  ValidationKey,
   WarningKey,
   WarningTypeEnums,
 } from "@shared/enums/warning";
@@ -12,7 +13,7 @@ import { FaToggleOn, FaToggleOff } from "react-icons/fa";
 import { Tooltip } from "components";
 
 interface GlobalValidationsSettingsRow {
-  validation: WarningKey;
+  validation: ValidationKey;
   active: boolean;
   toggleRule: () => void;
 }

@@ -13,23 +13,51 @@ import { Setting } from "@models/setting/setting";
 import { SettingGroupDict } from "@shared/dictionaries/settinggroup";
 
 export default Router()
+  .put(
+    "/group/:groupkey",
+    asyncRouteHandler<IResponseGeneric<ISettingGroup>>(
+      async (
+        request: IRequest<
+          { groupkey: string },
+          { id: string; value: unknown }[]
+        >
+      ) => {
+        const groupkey = request.params.groupkey as string;
+        const data = request.body;
+
+        if (!groupkey) {
+          throw new BadParams("invalid group setting key");
+        }
+        const dictItem = SettingGroupDict.find((item) => item.id === groupkey);
+        if (!dictItem) {
+          throw new NotFound(`No group with key ${groupkey} found`);
+        }
+
+        return {
+          result: await Setting.updateGroup(request.db.connection, dictItem.value, data),
+        };
+      }
+    )
+  )
   .get(
     "/group/:groupkey",
     asyncRouteHandler<IResponseGeneric<ISettingGroup>>(
       async (request: IRequest<{ groupkey: string }>) => {
         const groupkey = request.params.groupkey as string;
-        const dict = [ ...SettingGroupDict ];
 
         if (!groupkey) {
           throw new BadParams("invalid group setting key");
         }
-
+        const dict = [...SettingGroupDict];
         const dictItem = dict.find((item) => item.id === groupkey);
         if (!dictItem) {
           throw new NotFound(`No group with key ${groupkey} found`);
         }
 
-        const settings = await Setting.getSettings(request.db.connection, dictItem.value)
+        const settings = await Setting.getSettings(
+          request.db.connection,
+          dictItem.value
+        );
 
         return {
           result: true,

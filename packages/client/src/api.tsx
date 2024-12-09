@@ -1356,8 +1356,33 @@ class Api {
   }
 
   /**
+   * Setting group get
+   * @param settingId
+   * @param data
+   * @param options
+   * @returns
+   */
+  async settingGroupUpdate(
+    settingGroupId: string,
+    data: { id: string; value: unknown }[],
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseGeneric<ISettingGroup>>> {
+    try {
+      const response = await this.connection.put(
+        `/settings/group/${settingGroupId}`,
+        data,
+        options
+      );
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  /**
    * Setting update
    * @param settingId
+   * @param data
    * @param options
    * @returns
    */
