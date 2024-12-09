@@ -14,5 +14,5 @@ export enum EventType {
 export enum Aggregation {
   USER = "user",
   ENTITY_TYPE = "entityType",
-  ACTIVITY_TYPE = "activityType",
+  ACTIVITY_TYPE = "activityType", // in case of edit activity type
 }

@@ -2,20 +2,19 @@ import { EntityEnums, RelationEnums, UserEnums } from "@shared/enums";
 import {
   IEntity,
   IProp,
-  Relation as RelationTypes,
   IResponseDetail,
   IResponseEntity,
   IResponseUsedInMetaProp,
   IResponseUsedInStatement,
   IStatement,
   IWarning,
-  IResponseDocument,
 } from "@shared/types";
 import Entity from "./entity";
 import Statement from "@models/statement/statement";
 import { nonenumerable } from "@common/decorators";
 import { Connection } from "rethinkdb-ts";
 import {
+  IResponseUsedInDocument,
   IResponseUsedInStatementClassification,
   IResponseUsedInStatementIdentification,
   IResponseUsedInStatementProps,
@@ -27,8 +26,9 @@ import {
 } from "@shared/types/statement";
 import { UsedRelations } from "@models/relation/relations";
 import EntityWarnings from "./warnings";
-import Document from "@models/document/document";
-import { IDocumentMeta } from "@shared/types/document";
+import Document, { TreeNode } from "@models/document/document";
+import Resource from "@models/resource/resource";
+import treeCache from "@service/treeCache";
 
 export class ResponseEntity extends Entity implements IResponseEntity {
   // map of entity ids that should be populated in subsequent methods and used in fetching
@@ -118,7 +118,7 @@ export class ResponseEntityDetail
   usedInStatementProps: IResponseUsedInStatementProps[];
   usedInMetaProps: IResponseUsedInMetaProp[];
   usedAsTemplate?: string[] | undefined;
-  usedInDocuments: IDocumentMeta[];
+  usedInDocuments: IResponseUsedInDocument[];
   usedInStatementIdentifications: IResponseUsedInStatementIdentification[];
   usedInStatementClassifications: IResponseUsedInStatementClassification[];
 
@@ -191,17 +191,88 @@ export class ResponseEntityDetail
       this.addLinkedEntities(this.relations.getEntityIdsFromType(type));
     }
 
+    // get warnings - bound to entity & from root territory
+    const entityWarnings = new EntityWarnings(this.id, this.class);
+    this.warnings = [
+      ...(await entityWarnings.getWarnings(req.db.connection)),
+      ...(await entityWarnings.getTBasedWarnings(
+        req.db.connection,
+        this,
+        treeCache.tree.getRootTerritory()
+      )),
+    ];
+
+    // get all documents data in IResponseUsedInDocument format
+    this.usedInDocuments = await this.findUsedInDocuments(conn);
+    this.usedInDocuments.forEach(ud => {
+      this.addLinkedEntities(ud.parentTerritoryId);
+      this.addLinkedEntities(ud.resourceId);
+    });
+
+    // fill all collected entities
     this.entities = await this.populateEntitiesMap(conn);
 
+    // apply casts from templates - must be done after populateEntitiesMap
     await this.processTemplateData(conn);
-
-    this.warnings = await new EntityWarnings(this.id, this.class).getWarnings(
-      req.db.connection
-    );
-
-    this.usedInDocuments = await Document.findByEntityId(conn, this.id);
   }
 
+  /**
+   * returns data for usedInDocuments(IResponseUsedInDocument[]) field
+   * @param conn
+   * @returns
+   */
+  async findUsedInDocuments(
+    conn: Connection
+  ): Promise<IResponseUsedInDocument[]> {
+    const out: IResponseUsedInDocument[] = [];
+    await Promise.all(
+      (
+        await Document.findByEntityId(conn, this.id)
+      ).map(async (docData) => {
+        // construct document and tree node filled with entities data
+        const doc = new Document({
+          content: docData.content,
+        });
+        const anchors = doc.buildAnchorsTree();
+        const anchoredEntities = await Entity.findEntitiesByIds(
+          conn,
+          doc.collectAnchors(anchors)
+        );
+        doc.assignClassesBasedOnEntities(anchors, anchoredEntities);
+
+        const resource = await Resource.findByDocumentId(conn, docData.id);
+
+        // traverse the tree, search for anchor that === this.id
+        const traverse = (nodes: TreeNode[], parentT?: string) => {
+          for (const node of nodes) {
+            if (node.anchor === this.id) {
+              out.push({
+                document: {
+                  id: docData.id,
+                  title: docData.title,
+                  entityIds: docData.entityIds,
+                  createdAt: docData.createdAt,
+                  updatedAt: docData.updatedAt,
+                },
+                anchorText: node.getShortContent(),
+                resourceId: resource?.id || "",
+                parentTerritoryId: parentT || "",
+              });
+            }
+
+            traverse(
+              node.children,
+              node.class === EntityEnums.Class.Territory ? node.anchor : parentT
+            );
+          }
+        };
+
+        traverse(anchors);
+      })
+    );
+
+    return out;
+  }
   /**
    * Loads entries for usedInStatementIdentifications and usedInStatementClassifications fields
    * Needs to be called after walkStatementsDataEntities, since it uses also populated

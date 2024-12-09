@@ -37,7 +37,7 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
     async function getEntities(eids: string[]) {
       const extractedEntities: Record<string, IEntity> = { ...entities };
       for (const eid of eids) {
-        const entityRes = await api.entitiesGet(eid);
+        const entityRes = await api.entitiesGet(eid).catch(() => undefined);
         if (entityRes?.data && !entities?.[eid]) {
           extractedEntities[eid] = entityRes.data;
         }

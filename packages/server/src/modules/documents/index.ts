@@ -73,7 +73,7 @@ export default Router()
 
     console.log("EXPORTING");
 
-    const existing = await Document.findDocumentById(request.db.connection, id);
+    const existing = await Document.getDocumentById(request.db.connection, id);
 
     if (!existing) {
       throw DocumentDoesNotExist.forId(id);
@@ -150,7 +150,7 @@ export default Router()
         throw new BadParams("document id has to be set");
       }
 
-      const existing = await Document.findDocumentById(
+      const existing = await Document.getDocumentById(
         request.db.connection,
         id
       );
@@ -260,7 +260,7 @@ export default Router()
       await request.db.lock();
 
       // documentId must be already in the db
-      const existingDocument = await Document.findDocumentById(
+      const existingDocument = await Document.getDocumentById(
         request.db.connection,
         documentId
       );
@@ -326,7 +326,7 @@ export default Router()
 
       await request.db.lock();
 
-      const existing = await Document.findDocumentById(
+      const existing = await Document.getDocumentById(
         request.db.connection,
         id
       );
@@ -350,4 +350,41 @@ export default Router()
         throw new InternalServerError(`cannot delete document ${id}`);
       }
     })
+  )
+  .patch(
+    "/:documentId/removeAnchors",
+    asyncRouteHandler<IResponseGeneric>(
+      async (
+        request: IRequest<{ documentId: string }, unknown, { entityId: string }>
+      ) => {
+        const id = request.params.documentId;
+        if (!id) {
+          throw new BadParams("document id has to be set");
+        }
+
+        await request.db.lock();
+
+        const existing = await Document.getDocumentById(
+          request.db.connection,
+          id
+        );
+        if (!existing) {
+          throw DocumentDoesNotExist.forId(id);
+        }
+
+        let entityIds: string[] | string = request.query.entityId;
+        existing.removeAnchors(
+          typeof entityIds === "object" ? entityIds : [entityIds]
+        );
+
+        const result = await existing.update(request.db.connection, {
+          content: existing.content,
+          entityIds: existing.entityIds,
+        });
+
+        return {
+          result: !!result.replaced,
+        };
+      }
+    )
   );

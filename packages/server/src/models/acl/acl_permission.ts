@@ -1,7 +1,7 @@
 import { IResponsePermission } from "@shared/types";
 import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
 import { IDbModel } from "@models/common";
-import { HttpMethods } from "@shared/enums";
+import { HttpMethods, UserEnums } from "@shared/enums";
 
 export default class AclPermission implements IDbModel, IResponsePermission {
   static table = "acl_permissions";
@@ -10,7 +10,7 @@ export default class AclPermission implements IDbModel, IResponsePermission {
   controller: string;
   route: string;
   method: HttpMethods;
-  roles: string[];
+  roles: UserEnums.Role[];
   public: boolean;
 
   constructor(data: Record<string, any>) {
@@ -63,11 +63,12 @@ export default class AclPermission implements IDbModel, IResponsePermission {
     return true;
   }
 
-  isRoleAllowed(group: string): boolean {
+  isRoleAllowed(group: UserEnums.Role): boolean {
     return (
       this.roles &&
       !!this.roles.length &&
-      (this.roles.indexOf("*") !== -1 || this.roles.indexOf(group) !== -1)
+      (this.roles.indexOf("*" as UserEnums.Role) !== -1 ||
+        this.roles.indexOf(group) !== -1)
     );
   }
 

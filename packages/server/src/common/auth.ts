@@ -47,10 +47,12 @@ export function checkPassword(
 const defaultJwtAlgo = "HS256";
 
 let secret = (process.env.SECRET as string) || "";
-if (process.argv.length > 3) {
-  secret += process.argv[3];
-} else if (process.env.BUILD_TIMESTAMP) {
-  secret += process.env.BUILD_TIMESTAMP;
+if (process.env.NODE_ENV !== "test") {
+  if (process.argv.length > 3) {
+    secret += process.argv[3];
+  } else if (process.env.BUILD_TIMESTAMP) {
+    secret += process.env.BUILD_TIMESTAMP;
+  }
 }
 
 if (secret) {

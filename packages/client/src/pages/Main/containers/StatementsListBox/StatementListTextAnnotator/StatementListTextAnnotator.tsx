@@ -4,7 +4,7 @@ import { EntityEnums, UserEnums } from "@shared/enums";
 import { IEntity, IResponseEntity, IResponseStatement } from "@shared/types";
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
-import { Button, Input, Loader } from "components";
+import { Button, Input, Loader, DocumentTitle } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 import TextAnnotator from "components/advanced/Annotator/Annotator";
 import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
@@ -17,10 +17,6 @@ import { ThemeContext } from "styled-components";
 import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
 import useResizeObserver from "use-resize-observer";
 import { StyledInfoText } from "../StatementListHeader/StatementListHeaderStyles";
-import {
-  StyledDocumentTag,
-  StyledDocumentTitle,
-} from "../StatementLitBoxStyles";
 import { entitiesDict } from "@shared/dictionaries/entity";
 import { useDebounce } from "hooks";
 
@@ -320,18 +316,7 @@ export const StatementListTextAnnotator: React.FC<
         {!selectedDocumentIsFetching && (
           <>
             {selectedDocument && (
-              <>
-                <StyledDocumentTag>
-                  <TiDocumentText
-                    style={{ marginRight: "0.2rem", flexShrink: "0" }}
-                  />
-                  <div style={{ display: "grid" }}>
-                    <StyledDocumentTitle>
-                      {selectedDocument?.title}
-                    </StyledDocumentTitle>
-                  </div>
-                </StyledDocumentTag>
-              </>
+              <DocumentTitle title={selectedDocument.title} />
             )}
           </>
         )}
@@ -427,7 +412,7 @@ export const StatementListTextAnnotator: React.FC<
           </StyledInfoText>
           <Input
             value={searchTerm}
-            onChangeFn={(newText) => {
+            onChangeFn={(newText: any) => {
               setSearchTerm(newText);
             }}
             changeOnType

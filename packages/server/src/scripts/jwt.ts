@@ -10,7 +10,7 @@ import { Db } from "@service/rethink";
 
   const users = await User.findAllUsers(db.connection);
   users.forEach((u) => {
-    console.log(u.email, generateAccessToken(u, 365));
+    console.log(u.email, generateAccessToken(u, 365 * 10));
   });
 
   await db.close();
