@@ -39,6 +39,8 @@ import {
   ValidationKey,
 } from "@shared/enums/warning";
 import { GlobalValidationsSettingsRow } from "./GlobalValidationsSettingsRow";
+import { ISetting } from "@shared/types/settings";
+import { toast } from "react-toastify";
 
 const initialRulesState: Record<ValidationKey, boolean> = Object.keys(
   globalValidationsDict
@@ -106,6 +108,16 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
 
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["entity"] });
+    },
+  });
+
+  const updateSettingsMutation = useMutation({
+    mutationFn: async (newSettings: Omit<ISetting, "public">[]) =>
+      await api.settingGroupUpdate("validations", newSettings),
+
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["settings"] });
+      toast.success("settings updated");
     },
   });
 
@@ -291,6 +303,12 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
               disabled={
                 JSON.stringify(settingsKeyValue) === JSON.stringify(rules)
               }
+              onClick={() => {
+                const newSettings: Omit<ISetting, "public">[] = Object.entries(
+                  rules
+                ).map(([id, value]) => ({ id, value }));
+                updateSettingsMutation.mutate(newSettings);
+              }}
             />
           </ButtonGroup>
         </ModalFooter>
