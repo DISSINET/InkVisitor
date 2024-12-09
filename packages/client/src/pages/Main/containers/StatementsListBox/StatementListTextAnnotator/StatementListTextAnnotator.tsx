@@ -15,10 +15,9 @@ import { TbAnchorOff } from "react-icons/tb";
 import { TiDocumentText } from "react-icons/ti";
 import { ThemeContext } from "styled-components";
 import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
-import useResizeObserver from "use-resize-observer";
 import { StyledInfoText } from "../StatementListHeader/StatementListHeaderStyles";
 import { entitiesDict } from "@shared/dictionaries/entity";
-import { useDebounce } from "hooks";
+import { useDebounce, useResizeObserver } from "hooks";
 
 interface StatementListTextAnnotator {
   statements: IResponseStatement[];
@@ -252,7 +251,7 @@ export const StatementListTextAnnotator: React.FC<
   }, [selectedDocument, territoryId]);
 
   const { ref: selectorRef, height: selectorHeight = 0 } =
-    useResizeObserver<HTMLDivElement>();
+    useResizeObserver<HTMLDivElement>({ debounceDelay: 0 });
 
   const themeContext = useContext(ThemeContext);
 
