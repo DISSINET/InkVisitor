@@ -404,6 +404,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
   };
 
   useEffect(() => {
+    // console.log(layoutWidth);
     if (layoutWidth > 0) {
       const initPanelWidthsPx = INIT_PERCENT_PANEL_WIDTHS.map(
         (percentWidth) => {
@@ -440,30 +441,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
           // layout init with saved separator
           console.log("init load - separator determines panel widths");
           handleSeparatorLayoutInit(initPanelWidthsPx);
-          // let secondPanel =
-          //   mainPageCenterSeparatorXPosition - mainPageTreeSeparatorXPosition;
-          // let thirdPanel =
-          //   layoutWidth - (mainPageCenterSeparatorXPosition + panelWidthsPx[3]);
-
-          // const tempPanelWidths = [
-          //   mainPageTreeSeparatorXPosition,
-          //   secondPanel,
-          //   thirdPanel,
-          //   panelWidthsPx[3],
-          // ];
-
-          // dispatch(
-          //   setPanelWidths(
-          //     tempPanelWidths.map((pW) => floorNumberToOneDecimal(pW))
-          //   )
-          // );
-          // dispatch(
-          //   setPanelWidthsPercent(
-          //     tempPanelWidths.map((panelWidth) =>
-          //       floorNumberToOneDecimal(panelWidth / onePercentOfLayoutWidth)
-          //     )
-          //   )
-          // );
         }
       } else {
         // change of layout width (different monitor) / redirect from different page
@@ -512,52 +489,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
             ).toString()
           );
         }
-
-        // // 2nd and 3rd panels undersized
-        // if (secondPanelUndersized && thirdPanelUndersized) {
-        //   dispatch(setPanelWidths(panelWidthsPx));
-        //   setMainPageCenterSeparatorXPosition(
-        //     panelWidthsPx[0] + panelWidthsPx[1]
-        //   );
-        //   localStorage.setItem(
-        //     "mainPageCenterSeparatorXPosition",
-        //     (
-        //       (panelWidthsPx[0] + panelWidthsPx[1]) /
-        //       onePercentOfLayoutWidth
-        //     ).toString()
-        //   );
-        // } else {
-        //   let secondPanel = secondPanelUndersized
-        //     ? SECOND_PANEL_MIN_WIDTH
-        //     : panelWidthsPx[1];
-
-        //   let thirdPanel = thirdPanelUndersized
-        //     ? THIRD_PANEL_MIN_WIDTH
-        //     : panelWidthsPx[2];
-
-        //   // for undersized layout
-        //   if (!secondPanelUndersized && thirdPanelUndersized) {
-        //     const undersizeDifference = THIRD_PANEL_MIN_WIDTH - thirdPanel;
-        //     secondPanel = secondPanel - undersizeDifference;
-        //   }
-
-        //   const panelWidthsCalculated = [
-        //     panelWidthsPx[0],
-        //     secondPanel,
-        //     thirdPanel,
-        //     panelWidthsPx[3],
-        //   ];
-
-        //   dispatch(setPanelWidths(panelWidthsCalculated));
-        //   setMainPageCenterSeparatorXPosition(panelWidthsPx[0] + secondPanel);
-        //   localStorage.setItem(
-        //     "mainPageCenterSeparatorXPosition",
-        //     (
-        //       (panelWidthsPx[0] + panelWidthsPx[1]) /
-        //       onePercentOfLayoutWidth
-        //     ).toString()
-        //   );
-        // }
       }
     }
   }, [layoutWidth]);
