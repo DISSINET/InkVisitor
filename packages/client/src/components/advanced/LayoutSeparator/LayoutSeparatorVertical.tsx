@@ -49,7 +49,8 @@ export const LayoutSeparatorVertical: React.FC<LayoutSeparatorVertical> = ({
   const onMouseDown = (e: React.MouseEvent) => {
     setSeparatorXTempPosition(e.clientX);
     setDragging(true);
-    dispatch(setDisableUserSelect(true));
+    // TODO: disable only in css, without re-rendering app
+    // dispatch(setDisableUserSelect(true));
   };
 
   const onMove = (clientX: number) => {
