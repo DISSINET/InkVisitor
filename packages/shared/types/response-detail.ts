@@ -27,22 +27,14 @@ export interface IResponseDetail extends IResponseEntity {
   relations: Relation.IUsedRelations;
 
   warnings: IWarning[];
-  tValidations?: ITerritoryValidationNode; // applicable only to T entities
+  legacyValidations?: ITerritoryValidationNode; // applicable only to T entities
 }
 
+// legacy validations will be returned in a form of a tree / set of nodes ranging from the parent T to the root territory. In each node, there will be a list of validations for the territory.
 export interface ITerritoryValidationNode {
   territoryId: string;
   validations: ITerritoryValidation[];
   parent: ITerritoryValidationNode | null;
-}
-
-// model is reapeated for each anchor in each document,
-// so e.g., when the entity is used in 2 documents, and in one document it is used in 3 anchors, in the second is used in 1 anchor, model will be repeated 4 times
-export interface IResponseUsedInDocument {
-  document: IDocumentMeta;
-  anchorText: string; // content of the anchor
-  resourceId: string; // resource linked to the document
-  parentTerritoryId: string; // id of the closest territory anchor in the document, "" if no territory is found
 }
 
 // model is reapeated for each anchor in each document,

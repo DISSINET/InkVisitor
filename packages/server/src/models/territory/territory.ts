@@ -104,6 +104,7 @@ export class TerritoryValidation implements ITerritoryValidation {
   propType?: string[]; // relevant only in case of Property is selected as a tie
   allowedClasses?: EntityEnums.Class[]; // not relevant if allowedEntities is set
   allowedEntities?: string[]; //
+  territoryId?: string | undefined;
   detail: string;
   active?: boolean;
 
@@ -116,6 +117,7 @@ export class TerritoryValidation implements ITerritoryValidation {
     this.allowedClasses = data.allowedClasses;
     this.allowedEntities = data.allowedEntities;
     this.detail = data.detail || "";
+    this.territoryId = data.territoryId;
 
     this.active = data.active;
   }
@@ -172,6 +174,11 @@ class Territory extends Entity implements ITerritory {
         this.data.parent.territoryId
       );
     }
+
+    // add territory id to every validation to be able to track it
+    this.data.validations?.forEach((v: ITerritoryValidation) => {
+      v.territoryId = this.id;
+    });
 
     this.data.protocol = parentTerritory.data.protocol;
   }

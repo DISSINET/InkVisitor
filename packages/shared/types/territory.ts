@@ -30,6 +30,7 @@ export interface ITerritoryProtocol {
 
 export interface ITerritoryValidation {
   active?: boolean;
+  territoryId?: string;
   entityClasses: EntityEnums.Class[];
   classifications: string[];
   tieType: EProtocolTieType; // default is property

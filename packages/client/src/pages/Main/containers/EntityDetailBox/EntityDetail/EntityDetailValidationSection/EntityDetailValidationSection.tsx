@@ -63,11 +63,14 @@ export const EntityDetailValidationSection: React.FC<
   );
 
   const initValidationRule = () => {
+    const newValidation = { ...initValidation };
+    newValidation.territoryId = entity.id;
+
     updateEntityMutation.mutate({
       data: {
         validations: validations
-          ? [...validations, initValidation]
-          : [initValidation],
+          ? [...validations, newValidation]
+          : [newValidation],
       },
     });
   };
