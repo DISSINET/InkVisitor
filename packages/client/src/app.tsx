@@ -89,7 +89,7 @@ export const App: React.FC = () => {
     return theme;
   }, [selectedThemeId]);
 
-  const [debouncedWidth, debouncedHeight] = useDebounce(useWindowSize(), 50);
+  const [debouncedWidth, debouncedHeight] = useDebounce(useWindowSize(), 100);
 
   useEffect(() => {
     if (debouncedHeight > 0) {
