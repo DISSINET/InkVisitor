@@ -1,7 +1,5 @@
 import { useSpring } from "@react-spring/web";
 import React, { useEffect, useState } from "react";
-import { setDisableUserSelect } from "redux/features/layout/disableUserSelectSlice";
-import { useAppDispatch } from "redux/hooks";
 import { springConfig } from "Theme/constants";
 import { StyledLayoutSeparatorVertical } from "./SeparatorStyles";
 
@@ -18,8 +16,6 @@ export const LayoutSeparatorVertical: React.FC<LayoutSeparatorVertical> = ({
   separatorXPosition,
   setSeparatorXPosition,
 }) => {
-  const dispatch = useAppDispatch();
-
   const [separatorXTempPosition, setSeparatorXTempPosition] = useState<
     undefined | number
   >(undefined);
@@ -49,8 +45,7 @@ export const LayoutSeparatorVertical: React.FC<LayoutSeparatorVertical> = ({
   const onMouseDown = (e: React.MouseEvent) => {
     setSeparatorXTempPosition(e.clientX);
     setDragging(true);
-    // TODO: disable only in css, without re-rendering app
-    // dispatch(setDisableUserSelect(true));
+    document.body.classList.add("no-select");
   };
 
   const onMove = (clientX: number) => {
@@ -77,7 +72,7 @@ export const LayoutSeparatorVertical: React.FC<LayoutSeparatorVertical> = ({
 
   const onMouseUp = () => {
     setDragging(false);
-    dispatch(setDisableUserSelect(false));
+    document.body.classList.remove("no-select");
   };
 
   useEffect(() => {

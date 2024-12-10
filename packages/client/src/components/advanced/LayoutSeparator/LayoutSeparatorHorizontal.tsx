@@ -1,6 +1,5 @@
 import { useSpring } from "@react-spring/web";
 import React, { useEffect, useState } from "react";
-import { setDisableUserSelect } from "redux/features/layout/disableUserSelectSlice";
 import { useAppDispatch } from "redux/hooks";
 import { springConfig } from "Theme/constants";
 import { StyledLayoutSeparatorHorizontal } from "./SeparatorStyles";
@@ -49,7 +48,7 @@ export const LayoutSeparatorHorizontal: React.FC<LayoutSeparatorHorizontal> = ({
   const onMouseDown = (e: React.MouseEvent) => {
     setSeparatorXTempPosition(e.clientY);
     setDragging(true);
-    dispatch(setDisableUserSelect(true));
+    document.body.classList.add("no-select");
   };
 
   const onMove = (clientY: number) => {
@@ -76,7 +75,7 @@ export const LayoutSeparatorHorizontal: React.FC<LayoutSeparatorHorizontal> = ({
 
   const onMouseUp = () => {
     setDragging(false);
-    dispatch(setDisableUserSelect(false));
+    document.body.classList.remove("no-select");
   };
 
   useEffect(() => {
