@@ -503,7 +503,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
           {mainPageTreeSeparatorXPosition > 0 && firstPanelExpanded && (
             <LayoutSeparatorVertical
               leftSideMinWidth={FIRST_PANEL_MIN_WIDTH}
-              leftSideMaxWidth={layoutWidth / 2}
+              leftSideMaxWidth={mainPageCenterSeparatorXPosition - 200}
               separatorXPosition={mainPageTreeSeparatorXPosition}
               setSeparatorXPosition={(xPosition) => {
                 handleTreeSeparatorXPositionChange(xPosition);
@@ -514,7 +514,10 @@ const MainPage: React.FC<MainPage> = ({}) => {
           {/* CENTER SEPARATOR */}
           {mainPageCenterSeparatorXPosition > 0 && thirdPanelExpanded && (
             <LayoutSeparatorVertical
-              leftSideMinWidth={FIRST_PANEL_MIN_WIDTH + SECOND_PANEL_MIN_WIDTH}
+              leftSideMinWidth={
+                // FIRST_PANEL_MIN_WIDTH + SECOND_PANEL_MIN_WIDTH
+                mainPageTreeSeparatorXPosition + 200
+              }
               leftSideMaxWidth={
                 layoutWidth - panelWidths[3] - THIRD_PANEL_MIN_WIDTH
               }
