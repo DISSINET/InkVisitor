@@ -1,7 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { combineReducers, Store } from "redux";
 import contentHeightSlice from "./features/layout/contentHeightSlice";
-import disableUserSelectSlice from "./features/layout/disableUserSelectSlice";
 import layoutWidthSlice from "./features/layout/layoutWidthSlice";
 import firstPanelExpandedSlice from "./features/layout/mainPage/firstPanelExpandedSlice";
 import fourthPanelBoxesOpenedSlice from "./features/layout/mainPage/fourthPanelBoxesOpenedSlice";
@@ -56,7 +55,6 @@ const store: Store = configureStore({
     layout: combineReducers({
       layoutWidth: layoutWidthSlice,
       contentHeight: contentHeightSlice,
-      disableUserSelect: disableUserSelectSlice,
 
       mainPage: combineReducers({
         panelWidths: panelWidthsSlice,
