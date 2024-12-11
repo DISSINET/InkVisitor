@@ -86,9 +86,6 @@ const queryClient = new QueryClient({
 });
 export const App: React.FC = () => {
   const dispatch = useAppDispatch();
-  const disableUserSelect = useAppSelector(
-    (state) => state.layout.disableUserSelect
-  );
   const selectedThemeId: InterfaceEnums.Theme = useAppSelector(
     (state) => state.theme
   );
@@ -179,10 +176,7 @@ export const App: React.FC = () => {
         <link rel="stylesheet" type="text/css" href="/custom.css" />
       </Helmet>
       <ThemeProvider theme={themeConfig}>
-        <GlobalStyle
-          theme={themeConfig}
-          disableUserSelect={disableUserSelect}
-        />
+        <GlobalStyle theme={themeConfig} />
         <QueryClientProvider client={queryClient}>
           <div style={{ fontSize: "16px" }}>
             {/* fontSize zooms query devtools to normal size */}

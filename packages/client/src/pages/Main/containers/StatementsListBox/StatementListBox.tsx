@@ -510,9 +510,9 @@ export const StatementListBox: React.FC = () => {
     ref: contentRef,
     height: contentHeight = 0,
     width: contentWidth = 0,
-  } = useResizeObserver<HTMLDivElement>();
-
-  const debouncedWidth = useDebounce(contentWidth, 100);
+  } = useResizeObserver<HTMLDivElement>({
+    debounceDelay: displayMode === StatementListDisplayMode.LIST ? 50 : 0,
+  });
 
   const [storedAnnotatorResourceId, setStoredAnnotatorResourceId] = useState<
     string | false
@@ -547,9 +547,9 @@ export const StatementListBox: React.FC = () => {
   const width = useMemo(
     () =>
       displayMode === StatementListDisplayMode.LIST
-        ? debouncedWidth
+        ? contentWidth
         : COLLAPSED_TABLE_WIDTH,
-    [displayMode, debouncedWidth]
+    [displayMode, contentWidth]
   );
 
   return (
