@@ -14,14 +14,13 @@ import Dropdown, {
   EntitySuggester,
   EntityTag,
 } from "components/advanced";
-import { useDebounce, useSearchParams } from "hooks";
+import { useDebounce, useResizeObserver, useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import { CgOptions } from "react-icons/cg";
 import { FaPlus } from "react-icons/fa";
 import { IoMdArrowDropdownCircle } from "react-icons/io";
 import { RiCloseFill } from "react-icons/ri";
 import { DropdownItem } from "types";
-import useResizeObserver from "use-resize-observer";
 import {
   StyledAdvancedOptions,
   StyledAdvancedOptionsSign,
@@ -79,9 +78,8 @@ export const EntitySearchBox: React.FC = () => {
   const [searchData, setSearchData] = useState<IRequestSearch>(initValues);
   const debouncedValues = useDebounce<IRequestSearch>(searchData, debounceTime);
 
-  const { ref: resultRef, height = 0 } = useResizeObserver<HTMLDivElement>();
-
-  const debouncedResultsHeight = useDebounce(height, 20);
+  const { ref: resultRef, height: debouncedResultsHeight = 0 } =
+    useResizeObserver<HTMLDivElement>();
 
   const statusOptionSelected: EntityEnums.Status = useMemo(() => {
     if (!!searchData.status) {
