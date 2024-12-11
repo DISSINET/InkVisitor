@@ -11,7 +11,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { CustomScrollbar, Loader, Submit, ToastWithLink } from "components";
 import { CStatement, CTerritory } from "constructors";
-import { useResizeObserver, useSearchParams } from "hooks";
+import { useDebounce, useResizeObserver, useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { toast } from "react-toastify";
@@ -510,7 +510,9 @@ export const StatementListBox: React.FC = () => {
     ref: contentRef,
     height: contentHeight = 0,
     width: contentWidth = 0,
-  } = useResizeObserver<HTMLDivElement>({ debounceDelay: 100 });
+  } = useResizeObserver<HTMLDivElement>();
+
+  const debouncedWidth = useDebounce(contentWidth, 100);
 
   const [storedAnnotatorResourceId, setStoredAnnotatorResourceId] = useState<
     string | false
@@ -545,9 +547,9 @@ export const StatementListBox: React.FC = () => {
   const width = useMemo(
     () =>
       displayMode === StatementListDisplayMode.LIST
-        ? contentWidth
+        ? debouncedWidth
         : COLLAPSED_TABLE_WIDTH,
-    [displayMode, contentWidth]
+    [displayMode, debouncedWidth]
   );
 
   return (
