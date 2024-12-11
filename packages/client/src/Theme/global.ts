@@ -34,7 +34,6 @@ const GlobalStyle = createGlobalStyle<GlobalStyle>`
   .no-select {
     user-select: none;
   }
- 
   h1 {
     font-size: ${({ theme }) => theme.fontSize["4xl"]};
     line-height: 1.3;
