@@ -101,5 +101,12 @@
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^5.0.4",
     "webpack-merge": "^5.10.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "cross-spawn@>=7.0.0 <7.0.5": ">=7.0.5",
+      "path-to-regexp@<0.1.12": ">=0.1.12",
+      "nanoid@<3.3.8": ">=3.3.8"
+    }
   }
 }
