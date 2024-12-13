@@ -18,6 +18,7 @@ import { setUsername } from "redux/features/usernameSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { ThemeColor } from "Theme/theme";
 import { StyledPage, StyledPageContent } from "./PageStyles";
+import { UserEnums } from "@shared/enums";
 
 interface Page {
   children?: React.ReactNode;
@@ -29,7 +30,7 @@ export const Page: React.FC<Page> = ({ children }) => {
     (state) => state.statementList.lastClickedIndex
   );
   const userId = localStorage.getItem("userid");
-  const userRole = localStorage.getItem("userrole");
+  const userRole = localStorage.getItem("userrole") as UserEnums.Role;
   const { cleanAllParams } = useSearchParams();
 
   const layoutWidth: number = useAppSelector(

@@ -24,7 +24,10 @@ import {
   Query,
   Relation,
   RequestPermissionUpdate,
+  IRequestStats,
+  IAudit,
 } from "@shared/types";
+import { ISetting, ISettingGroup } from "@shared/types/settings";
 import * as errors from "@shared/types/errors";
 import { NetworkError } from "@shared/types/errors";
 import { Explore } from "@shared/types/query";
@@ -918,6 +921,21 @@ class Api {
   }
 
   /**
+   * Stats
+   */
+  async statsGet(
+    data: IRequestStats,
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseAudit>> {
+    try {
+      const response = await this.connection.post(`/stats`, data, options);
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  /**
    * Audit
    */
   async auditGet(
@@ -927,6 +945,20 @@ class Api {
     try {
       const response = await this.connection.get(
         `/entities/${entityId}/audits`,
+        options
+      );
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  async auditGetFirst(
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseGeneric<IAudit>>> {
+    try {
+      const response = await this.connection.get(
+        `/audits?skip=0&take=1&from=1970`,
         options
       );
       return response;
@@ -1284,6 +1316,40 @@ class Api {
     }
   }
 
+  async documentRemoveAnchors(
+    documentId: string,
+    entityId: string,
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      const response = await this.connection.patch(
+        `/documents/${documentId}/removeAnchors?entityId=${entityId}`,
+        document,
+        options
+      );
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  async documentRemoveAnchor(
+    documentId: string,
+    entityId: string,
+    anchorText: string,
+    anchorIndex: number,
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      // todo add api endpoint
+
+      // @ts-ignore
+      return null;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
   /**
    * Document update
    */
@@ -1298,6 +1364,113 @@ class Api {
         document,
         options
       );
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  /**
+   * Setting get
+   * @param settingId
+   * @param options
+   * @returns
+   */
+  async settingGet(
+    settingId: string,
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseGeneric<ISetting>>> {
+    try {
+      const response = await this.connection.get(
+        `/settings/${settingId}`,
+        options
+      );
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  /**
+   * Setting group get
+   * @param settingId
+   * @param options
+   * @returns
+   */
+  async settingGroupGet(
+    settingGroupId: string,
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseGeneric<ISettingGroup>>> {
+    try {
+      const response = await this.connection.get(
+        `/settings/group/${settingGroupId}`,
+        options
+      );
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  /**
+   * Setting group get
+   * @param settingId
+   * @param data
+   * @param options
+   * @returns
+   */
+  async settingGroupUpdate(
+    settingGroupId: string,
+    data: { id: string; value: unknown }[],
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseGeneric<ISettingGroup>>> {
+    try {
+      const response = await this.connection.put(
+        `/settings/group/${settingGroupId}`,
+        data,
+        options
+      );
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  /**
+   * Setting update
+   * @param settingId
+   * @param data
+   * @param options
+   * @returns
+   */
+  async settingUpdate(
+    settingId: string,
+    data: { value: unknown },
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      const response = await this.connection.put(
+        `/settings/${settingId}`,
+        data,
+        options
+      );
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  /**
+   * Get owner's info
+   * @param settingId
+   * @param options
+   * @returns
+   */
+  async usersGetOwner(
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseGeneric<string>>> {
+    try {
+      const response = await this.connection.get(`/users/owner`, options);
       return response;
     } catch (err) {
       throw this.handleError(err);

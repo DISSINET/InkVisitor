@@ -25,6 +25,7 @@ import {
   StatementObject,
 } from "@shared/types/statement";
 import { randomUUID } from "crypto";
+import { PropSpecKind } from "@shared/types/prop";
 
 export class StatementClassification implements IStatementClassification {
   id = "";
@@ -255,7 +256,7 @@ class Statement extends Entity implements IStatement {
    */
   canBeEditedByUser(user: User): boolean {
     // admin role has always the right
-    if (user.role === UserEnums.Role.Admin) {
+    if (user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin])) {
       return true;
     }
 
@@ -296,7 +297,7 @@ class Statement extends Entity implements IStatement {
    */
   canBeViewedByUser(user: User): boolean {
     // admin role has always the right
-    if (user.role === UserEnums.Role.Admin) {
+    if (user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin])) {
       return true;
     }
 
@@ -322,7 +323,7 @@ class Statement extends Entity implements IStatement {
    */
   canBeDeletedByUser(user: User): boolean {
     // only admin has the right, no matter the territory
-    if (user.role === UserEnums.Role.Admin) {
+    if (user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin])) {
       return true;
     }
 
@@ -507,14 +508,22 @@ class Statement extends Entity implements IStatement {
 
   walkObjects(cb: (o: StatementObject) => void) {
     // statement.props
-    Entity.extractIdsFromProps(this.props, undefined, cb);
+    Entity.extractIdsFromProps(
+      this.props,
+      [PropSpecKind.TYPE, PropSpecKind.VALUE],
+      cb
+    );
 
     // statement.actions
     for (const action of this.data.actions) {
       cb(action);
 
       // statement.actions.props
-      Entity.extractIdsFromProps(action.props, undefined, cb);
+      Entity.extractIdsFromProps(
+        action.props,
+        [PropSpecKind.TYPE, PropSpecKind.VALUE],
+        cb
+      );
     }
 
     // statement.actants
@@ -522,7 +531,11 @@ class Statement extends Entity implements IStatement {
       cb(actant);
 
       // statement.actants.props
-      Entity.extractIdsFromProps(actant.props, undefined, cb);
+      Entity.extractIdsFromProps(
+        actant.props,
+        [PropSpecKind.TYPE, PropSpecKind.VALUE],
+        cb
+      );
 
       // statement.actants.classifications
       for (const classification of actant.classifications) {

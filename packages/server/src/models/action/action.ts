@@ -20,10 +20,6 @@ export class ActionValency implements IActionValency, IModel {
   }
 
   isValid(): boolean {
-    if (this.a1 === "NULL" || this.a2 === "NULL" || this.s === "NULL") {
-      return false;
-    }
-
     return (
       typeof this.a1 === "string" &&
       typeof this.a2 === "string" &&
@@ -95,7 +91,6 @@ export class ActionEntity implements IActionEntity, IModel {
 class ActionData implements IActionData, IModel {
   valencies: ActionValency;
   entities: ActionEntity;
-  status: EntityEnums.Status = EntityEnums.Status.Pending;
   pos: EntityEnums.ActionPartOfSpeech = EntityEnums.ActionPartOfSpeech.Verb;
 
   constructor(data: Partial<IActionData>) {

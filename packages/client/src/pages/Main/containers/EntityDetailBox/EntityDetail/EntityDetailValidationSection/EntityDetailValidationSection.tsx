@@ -9,7 +9,7 @@ import {
   StyledBlockSeparator,
   StyledValidationList,
 } from "../EntityDetailStyles";
-import { EntityDetailValidationRule } from "./EntityDetailValidationRule/EntityDetailValidationRule";
+import { ValidationRule } from "components/advanced";
 
 interface EntityDetailValidationSection {
   validations?: ITerritoryValidation[];
@@ -81,7 +81,7 @@ export const EntityDetailValidationSection: React.FC<
           {(validations as ITerritoryValidation[]).map((validation, key) => {
             return (
               <React.Fragment key={key}>
-                <EntityDetailValidationRule
+                <ValidationRule
                   key={key}
                   validation={validation}
                   entities={entities}

@@ -106,7 +106,12 @@ export const Menu: React.FC<Menu> = ({
         <StyledMenuGroupWrapper>
           <StyledMenuGroup>
             {pages
-              .filter((p) => !p.admin || userRole === UserEnums.Role.Admin)
+              .filter(
+                (p) =>
+                  !p.admin ||
+                  userRole === UserEnums.Role.Admin ||
+                  userRole === UserEnums.Role.Owner
+              )
               .map((page, key) => (
                 <MenuItem
                   key={key}

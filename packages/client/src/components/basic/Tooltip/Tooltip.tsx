@@ -6,7 +6,7 @@ import {
   VirtualElement,
 } from "@popperjs/core";
 import { useSpring } from "@react-spring/web";
-import { ThemeColor } from "Theme/theme";
+import { ThemeColor, ThemeFontSize } from "Theme/theme";
 import React, { ReactElement, useEffect, useState } from "react";
 import { usePopper } from "react-popper";
 import {

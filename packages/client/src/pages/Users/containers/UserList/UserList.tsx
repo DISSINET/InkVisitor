@@ -17,14 +17,11 @@ import {
   FaToggleOn,
   FaTrashAlt,
 } from "react-icons/fa";
-import {
-  RiUserSearchFill,
-  RiUserSettingsFill,
-  RiUserStarFill,
-} from "react-icons/ri";
 import { CellProps, Column, Row, useTable } from "react-table";
 import { toast } from "react-toastify";
+import { getUserIcon } from "utils/utils";
 import { UserListEmailInput } from "./UserListEmailInput/UserListEmailInput";
+import { UserListIcon } from "./UserListIcon/UserListIcon";
 import {
   StyledNotActiveText,
   StyledTHead,
@@ -43,6 +40,13 @@ import {
 import { UserListTableRow } from "./UserListTableRow/UserListTableRow";
 import { UserListUsernameInput } from "./UserListUsernameInput/UserListUsernameInput";
 import { UsersUtils } from "./UsersUtils";
+
+const rolePriority: Record<UserEnums.Role, number> = {
+  [UserEnums.Role.Owner]: 1,
+  [UserEnums.Role.Admin]: 2,
+  [UserEnums.Role.Editor]: 3,
+  [UserEnums.Role.Viewer]: 4,
+};
 
 type CellType = CellProps<IResponseUser>;
 
@@ -67,11 +71,21 @@ export const UserList: React.FC<UserList> = React.memo(() => {
     enabled: api.isLoggedIn(),
   });
 
-  // const localUsers = useMemo(() => users || [], [users]);
   const [localUsers, setLocalUsers] = useState<IResponseUser[]>([]);
+
+  const userComparator = (a: IResponseUser, b: IResponseUser): number => {
+    // First, compare by role priority
+    if (rolePriority[a.role] !== rolePriority[b.role]) {
+      return rolePriority[a.role] - rolePriority[b.role];
+    }
+
+    // If roles are the same, compare by active status
+    return b.active ? 1 : -1;
+  };
+
   useEffect(() => {
     if (users) {
-      setLocalUsers(users);
+      setLocalUsers(users.sort(userComparator));
     }
   }, [users]);
 
@@ -151,19 +165,20 @@ export const UserList: React.FC<UserList> = React.memo(() => {
         Cell: ({ row }: CellType) => {
           const { name, email, role, active, verified } = row.original;
 
-          let icon = <RiUserSearchFill />;
-          if (role === UserEnums.Role.Admin) {
-            icon = <RiUserStarFill />;
-          }
-          if (role === UserEnums.Role.Editor) {
-            icon = <RiUserSettingsFill />;
-          }
-          if (!verified) {
-            icon = <FaEnvelopeOpenText size={16} />;
-          }
           return (
             <StyledUserNameColumn $active={active} $verified={verified}>
-              <StyledUserNameColumnIcon>{icon}</StyledUserNameColumnIcon>
+              <StyledUserNameColumnIcon>
+                <UserListIcon
+                  icon={
+                    !verified ? (
+                      <FaEnvelopeOpenText size={16} />
+                    ) : (
+                      getUserIcon(role)
+                    )
+                  }
+                  tooltipLabel={role}
+                />
+              </StyledUserNameColumnIcon>
 
               {!verified ? (
                 <StyledNotActiveText>
@@ -219,42 +234,61 @@ export const UserList: React.FC<UserList> = React.memo(() => {
           const { id, role } = row.original;
           return (
             <AttributeButtonGroup
-              disabled={id === localStorage.getItem("userid")}
-              options={[
-                {
-                  longValue: userRoleDict[0].label,
-                  shortValue: userRoleDict[0].label,
-                  selected: role === userRoleDict[0].value,
-                  onClick: () => {
-                    userMutation.mutate({
-                      id: id,
-                      role: userRoleDict[0].value,
-                    });
-                  },
-                },
-                {
-                  longValue: userRoleDict[1].label,
-                  shortValue: userRoleDict[1].label,
-                  selected: role === userRoleDict[1].value,
-                  onClick: () => {
-                    userMutation.mutate({
-                      id: id,
-                      role: userRoleDict[1].value,
-                    });
-                  },
-                },
-                {
-                  longValue: userRoleDict[2].label,
-                  shortValue: userRoleDict[2].label,
-                  selected: role === userRoleDict[2].value,
-                  onClick: () => {
-                    userMutation.mutate({
-                      id: id,
-                      role: userRoleDict[2].value,
-                    });
-                  },
-                },
-              ]}
+              disabled={
+                id === localStorage.getItem("userid") ||
+                role === UserEnums.Role.Owner
+              }
+              options={
+                role === UserEnums.Role.Owner
+                  ? [
+                      {
+                        longValue: userRoleDict[0].label,
+                        shortValue: userRoleDict[0].label,
+                        selected: role === userRoleDict[0].value,
+                        onClick: () => {
+                          userMutation.mutate({
+                            id: id,
+                            role: userRoleDict[0].value,
+                          });
+                        },
+                      },
+                    ]
+                  : [
+                      {
+                        longValue: userRoleDict[1].label,
+                        shortValue: userRoleDict[1].label,
+                        selected: role === userRoleDict[1].value,
+                        onClick: () => {
+                          userMutation.mutate({
+                            id: id,
+                            role: userRoleDict[1].value,
+                          });
+                        },
+                      },
+                      {
+                        longValue: userRoleDict[2].label,
+                        shortValue: userRoleDict[2].label,
+                        selected: role === userRoleDict[2].value,
+                        onClick: () => {
+                          userMutation.mutate({
+                            id: id,
+                            role: userRoleDict[2].value,
+                          });
+                        },
+                      },
+                      {
+                        longValue: userRoleDict[3].label,
+                        shortValue: userRoleDict[3].label,
+                        selected: role === userRoleDict[3].value,
+                        onClick: () => {
+                          userMutation.mutate({
+                            id: id,
+                            role: userRoleDict[3].value,
+                          });
+                        },
+                      },
+                    ]
+              }
             />
           );
         },
@@ -450,6 +484,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
             territoryRights: territoryActants,
             active,
             verified,
+            role,
           } = row.original;
 
           let activateTooltip = "activate user";
@@ -457,6 +492,8 @@ export const UserList: React.FC<UserList> = React.memo(() => {
             activateTooltip = "cannot activate unverified user";
           } else if (userId === localStorage.getItem("userid")) {
             activateTooltip = "cannot deactivate yourself";
+          } else if (role === UserEnums.Role.Owner) {
+            activateTooltip = "owner must be active";
           } else if (active) {
             activateTooltip = "deactivate user";
           }
@@ -473,7 +510,10 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                 icon={<FaTrashAlt size={14} />}
                 color="danger"
                 tooltipLabel={deleteTooltip}
-                disabled={userId === localStorage.getItem("userid")}
+                disabled={
+                  userId === localStorage.getItem("userid") ||
+                  role === UserEnums.Role.Owner
+                }
                 onClick={() => {
                   setRemovingUserId(userId);
                 }}
@@ -492,7 +532,9 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                   active ? <FaToggleOn size={14} /> : <FaToggleOff size={14} />
                 }
                 disabled={
-                  !verified || userId === localStorage.getItem("userid")
+                  !verified ||
+                  userId === localStorage.getItem("userid") ||
+                  role === UserEnums.Role.Owner
                 }
                 color={active ? "success" : "danger"}
                 tooltipLabel={activateTooltip}

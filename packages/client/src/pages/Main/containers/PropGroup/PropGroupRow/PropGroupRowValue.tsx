@@ -145,6 +145,7 @@ export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
                 true
               );
             }}
+            autoFocus={prop.type.entityId !== ""}
             placeholder="value"
             openDetailOnCreate={openDetailOnCreate}
             categoryTypes={classesPropValue}

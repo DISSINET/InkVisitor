@@ -63,6 +63,12 @@
         </div>
       </div>
       <fieldset>
+        <label>search</label>
+        <input type="text" id="search" />
+        <button id="search-trigger">go</button>
+        <button id="searchTriggerNext">next</button>
+      </fieldset>
+      <fieldset>
         <label>mode</label>
         <select id="mode">
           <option value="raw">raw</option>
@@ -92,7 +98,7 @@
       <fieldset>
         <label>update text</label>
         <textarea id="newText" cols="100" rows="10"></textarea>
-        <button id="scrollToAnchor">Update</button>
+        <button id="updateText">Update</button>
       </fieldset>
     </div>
 
@@ -109,6 +115,8 @@
 
       const exampleResponse = await fetch("example.txt");
       const exampleTxt = await exampleResponse.text();
+      const searchInput = document.getElementById("search");
+      const searchTriggerInput = document.getElementById("search-trigger");
 
       let highlightEnabled = false;
       const annotator = new Annotator(
@@ -171,6 +179,7 @@
           },
         };
       });
+
       annotator.onSelectText((text) => {
         // console.log("onSelectText", text);
       });
@@ -203,6 +212,27 @@
 
       document.getElementById("newText").onchange = () => {
         annotator.updateText(document.getElementById("newText").value);
+      };
+
+      let searchOccurrence = 0;
+      document.getElementById("searchTriggerNext").onclick = () => {
+        const results = annotator.search(searchInput.value);
+        if (results.length) {
+          searchOccurrence = searchOccurrence + 1;
+
+          if (searchOccurrence >= results.length) {
+            searchOccurrence = 0;
+          }
+
+          annotator.selectSearchOccurrence(results[searchOccurrence]);
+        }
+      };
+
+      searchTriggerInput.onclick = function () {
+        const results = annotator.search(searchInput.value);
+        if (results.length) {
+          annotator.selectSearchOccurrence(results[0]);
+        }
       };
 
       window.addEventListener("resize", resizeAnnotator);

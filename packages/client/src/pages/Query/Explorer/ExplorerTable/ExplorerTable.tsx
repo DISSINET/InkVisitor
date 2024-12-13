@@ -11,7 +11,6 @@ import { GrClose } from "react-icons/gr";
 import { MdOutlineEdit } from "react-icons/md";
 import { TbColumnInsertRight } from "react-icons/tb";
 import Scrollbar from "react-scrollbars-custom";
-import useResizeObserver from "use-resize-observer";
 import { v4 as uuidv4 } from "uuid";
 
 import { EntityEnums } from "@shared/enums";
@@ -52,6 +51,7 @@ import {
   WIDTH_COLUMN_DEFAULT,
   WIDTH_COLUMN_FIRST,
 } from "./types";
+import { useResizeObserver } from "hooks";
 
 const initialNewColumn: Explore.IExploreColumn = {
   id: uuidv4(),
@@ -335,7 +335,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     ref: contentRef,
     width: contentWidth,
     height: contentHeight,
-  } = useResizeObserver();
+  } = useResizeObserver<HTMLDivElement>();
 
   const spaceTableBody = heightBox - 150;
 

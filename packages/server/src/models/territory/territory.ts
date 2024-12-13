@@ -104,6 +104,7 @@ export class TerritoryValidation implements ITerritoryValidation {
   propType?: string[]; // relevant only in case of Property is selected as a tie
   allowedClasses?: EntityEnums.Class[]; // not relevant if allowedEntities is set
   allowedEntities?: string[]; //
+  territoryId?: string | undefined;
   detail: string;
   active?: boolean;
 
@@ -116,6 +117,7 @@ export class TerritoryValidation implements ITerritoryValidation {
     this.allowedClasses = data.allowedClasses;
     this.allowedEntities = data.allowedEntities;
     this.detail = data.detail || "";
+    this.territoryId = data.territoryId;
 
     this.active = data.active;
   }
@@ -172,6 +174,11 @@ class Territory extends Entity implements ITerritory {
         this.data.parent.territoryId
       );
     }
+
+    // add territory id to every validation to be able to track it
+    this.data.validations?.forEach((v: ITerritoryValidation) => {
+      v.territoryId = this.id;
+    });
 
     this.data.protocol = parentTerritory.data.protocol;
   }
@@ -293,8 +300,8 @@ class Territory extends Entity implements ITerritory {
   }
 
   canBeViewedByUser(user: User): boolean {
-    // admin role has always the right
-    if (user.role === UserEnums.Role.Admin) {
+    // admin/owner role has always the right
+    if (user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin])) {
       return true;
     }
 
@@ -307,8 +314,8 @@ class Territory extends Entity implements ITerritory {
   }
 
   canBeEditedByUser(user: User): boolean {
-    // admin role has always the right
-    if (user.role === UserEnums.Role.Admin) {
+    // admin/owner role has always the right
+    if (user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin])) {
       return true;
     }
 
@@ -329,8 +336,8 @@ class Territory extends Entity implements ITerritory {
   }
 
   canBeCreatedByUser(user: User): boolean {
-    // admin role has always the right
-    if (user.role === UserEnums.Role.Admin) {
+    // admin/owner role has always the right
+    if (user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin])) {
       return true;
     }
 
@@ -364,8 +371,8 @@ class Territory extends Entity implements ITerritory {
   }
 
   canBeDeletedByUser(user: User): boolean {
-    // admin role has always the right
-    if (user.role === UserEnums.Role.Admin) {
+    // admin/owner role has always the right
+    if (user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin])) {
       return true;
     }
 

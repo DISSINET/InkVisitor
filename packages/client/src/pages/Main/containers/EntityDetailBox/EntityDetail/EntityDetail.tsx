@@ -68,6 +68,7 @@ import { EntityDetailStatementPropsTable } from "./EntityDetailUsedInTable/Entit
 import { EntityDetailStatementsTable } from "./EntityDetailUsedInTable/EntityDetailStatementsTable/EntityDetailStatementsTable";
 import { EntityDetailValency } from "./EntityDetailValency/EntityDetailValency";
 import { EntityDetailValidationSection } from "./EntityDetailValidationSection/EntityDetailValidationSection";
+import { EntityDetailUsedInDocumentsTable } from "./EntityDetailUsedInTable/EntityDetailUsedInDocumentsTable/EntityDetailUsedInDocumentsTable";
 
 const allowedEntityChangeClasses = [
   EntityEnums.Class.Value,
@@ -1035,6 +1036,18 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                     entities={entity.entities}
                     useCases={entity.usedInStatementClassifications}
                     key="StatementClassification"
+                    perPage={10}
+                  />
+                )}
+
+                {!entity.isTemplate && (
+                  <EntityDetailUsedInDocumentsTable
+                    title={{
+                      singular: "Anchor",
+                      plural: "Anchors",
+                    }}
+                    entities={entity.entities}
+                    useCases={entity.usedInDocuments}
                     perPage={10}
                   />
                 )}

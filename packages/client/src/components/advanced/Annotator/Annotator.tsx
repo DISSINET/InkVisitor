@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 
 import { Annotator, EditMode } from "@inkvisitor/annotator/src/lib";
+import { EntityEnums } from "@shared/enums";
 import { IDocument, IEntity, IResponseDocumentDetail } from "@shared/types";
 import { Button } from "components/basic/Button/Button";
 import { ButtonGroup } from "components/basic/ButtonGroup/ButtonGroup";
@@ -23,7 +24,6 @@ import {
   StyledScrollerViewport,
 } from "./AnnotatorStyles";
 import { annotatorHighlight } from "./highlight";
-import { EntityEnums } from "@shared/enums";
 
 interface TextAnnotatorProps {
   width: number;
@@ -229,6 +229,7 @@ export const TextAnnotator = ({
     if (displayLineNumbers && lines.current) {
       newAnnotator.addLines(lines.current);
     }
+
     newAnnotator.onSelectText(({ text, anchors }) => {
       handleTextSelection(text, anchors);
     });
@@ -508,6 +509,7 @@ export const TextAnnotator = ({
             }}
           />
         )}
+
         <StyledMainCanvas
           onMouseDown={() => setIsSelectingText(true)}
           onMouseUp={() => setIsSelectingText(false)}
@@ -537,7 +539,7 @@ export const TextAnnotator = ({
       </StyledCanvasWrapper>
 
       {annotator && (
-        <ButtonGroup $marginTop={true}>
+        <ButtonGroup $marginTop>
           <Button
             key={EditMode.HIGHLIGHT}
             icon={<FaPen size={11} />}

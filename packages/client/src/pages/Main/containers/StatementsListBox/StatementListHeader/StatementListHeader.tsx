@@ -54,7 +54,7 @@ import {
   StyledHeaderBreadcrumbRow,
   StyledHeaderRow,
   StyledHeading,
-  StyledModeSwitcher,
+  StyledInfoText,
   StyledMoveToParent,
   StyledSuggesterRow,
 } from "./StatementListHeaderStyles";
@@ -508,7 +508,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
               )}
           </StyledActionsWrapper>
 
-          <StyledModeSwitcher>
+          <StyledInfoText>
             {"Mode "}
             <ButtonGroup style={{ marginLeft: "5px" }}>
               <Button
@@ -530,7 +530,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                 inverted={displayMode === StatementListDisplayMode.LIST}
               ></Button>
             </ButtonGroup>
-          </StyledModeSwitcher>
+          </StyledInfoText>
         </StyledSuggesterRow>
       </StyledHeader>
 

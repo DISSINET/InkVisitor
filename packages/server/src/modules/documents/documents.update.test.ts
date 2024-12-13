@@ -62,7 +62,7 @@ describe("modules/documents UPDATE", function () {
         .expect(200)
         .expect(successfulGenericResponse)
         .expect(async () => {
-          const changedEntry = await Document.findDocumentById(
+          const changedEntry = await Document.getDocumentById(
             db.connection,
             document.id
           );

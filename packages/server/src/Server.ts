@@ -13,6 +13,7 @@ import StatementsRouter from "@modules/statements";
 import TreeRouter from "@modules/tree";
 import StatsRouter from "@modules/stats";
 import PythonApiRouter from "@modules/pythondata";
+import SettingsRouter from "@modules/settings";
 import DocumentsRouter from "@modules/documents";
 import Acl from "@middlewares/acl";
 import customizeRequest from "@middlewares/request";
@@ -24,11 +25,8 @@ import compression from "compression";
 import * as path from "path";
 import rateLimit from "express-rate-limit";
 import "@models/events/register";
-import { Request, RequestHandler, Response } from "express";
-import {
-  BadCredentialsError,
-  TooManyRequestsError,
-} from "@shared/types/errors";
+import { Request, Response } from "express";
+import { TooManyRequestsError } from "@shared/types/errors";
 
 const server = express();
 
@@ -124,6 +122,7 @@ server.use(
       /api\/v1\/users\/signin/,
       /api\/v1\/users\/activation/,
       /api\/v1\/users\/password/,
+      /api\/v1\/users\/owner/,
       /api\/v1\/pythondata/,
     ],
   })
@@ -151,6 +150,7 @@ routerV1.use("/tree", TreeRouter);
 routerV1.use("/stats", StatsRouter);
 routerV1.use("/documents", DocumentsRouter);
 routerV1.use("/pythondata", PythonApiRouter);
+routerV1.use("/settings", SettingsRouter);
 
 // unknown paths (after jwt check) should return 404
 server.all("*", catchAll);

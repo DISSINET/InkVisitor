@@ -1,6 +1,6 @@
 {
   "name": "dissinet.ddb.client",
-  "version": "1.4.0.5",
+  "version": "1.4.0.6",
   "description": "",
   "main": "index.js",
   "engines": {
@@ -97,7 +97,6 @@
     "ts-loader": "^9.5.1",
     "typescript": "^5.5.4",
     "typescript-plugin-styled-components": "^3.0.0",
-    "use-resize-observer": "^9.1.0",
     "webpack": "^5.94.0",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^5.0.4",

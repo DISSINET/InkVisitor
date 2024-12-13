@@ -1,5 +1,12 @@
 [
   {
+    "controller": "users",
+    "route": "owner",
+    "method": "GET",
+    "roles": ["*"],
+    "public": true
+  },
+  {
     "controller": "acls",
     "route": "",
     "method": "GET",
@@ -19,8 +26,7 @@
   },
   {
     "controller": "statements",
-    "route": ":statementId",
-    "method": "GET",
+    "route": ":statementId","method": "GET",
     "roles": ["*"]
   },
   {
@@ -256,5 +262,26 @@
     "route": "query",
     "method": "POST",
     "roles": ["*"]
+  },
+  {
+    "controller": "settings",
+    "route": ":key",
+    "method": "GET",
+    "roles": ["*"],
+    "public": true
+  },
+  {
+    "controller": "settings",
+    "route": ":key",
+    "method": "PUT",
+    "roles": ["admin"],
+    "public": false
+  },
+  {
+    "controller": "settings",
+    "route": "group/:groupkey",
+    "method": "PUT",
+    "roles": ["admin"],
+    "public": false
   }
 ]

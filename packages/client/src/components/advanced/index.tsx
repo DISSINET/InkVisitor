@@ -27,6 +27,7 @@ import { Page } from "./Page/Page";
 import { LeftHeader, RightHeader } from "./PageHeader/PageHeader";
 import { TerritoryActionModal } from "./TerritoryActionModal/TerritoryActionModal";
 import { UserCustomizationModal } from "./UserCustomizationModal/UserCustomizationModal";
+import { ValidationRule } from "./ValidationRule/ValidationRule";
 
 const Dropdown = {
   Single: {
@@ -67,4 +68,5 @@ export {
   RightHeader,
   TerritoryActionModal,
   UserCustomizationModal,
+  ValidationRule,
 };

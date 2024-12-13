@@ -157,7 +157,7 @@ export default class Results<T extends { id: string }> {
         case Explore.EExploreColumnType.EPT: {
           const entities = await Entity.findEntitiesByIds(
             db,
-            Entity.extractIdsFromProps(entity.props, PropSpecKind.TypeKind)
+            Entity.extractIdsFromProps(entity.props, [PropSpecKind.TypeKind])
           );
           out[column.id] = entities;
           break;

@@ -9,8 +9,8 @@ import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
 import { IDbModel, fillArray, fillFlatObject } from "@models/common";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import { ModelNotValidError } from "@shared/types/errors";
-import { generateRandomString, generateUuid, hashPassword } from "@common/auth";
-import { generatePassword, regExpEscape } from "@common/functions";
+import { generateUuid, hashPassword } from "@common/auth";
+import { generatePassword } from "@common/functions";
 import { nonenumerable } from "@common/decorators";
 import { Db } from "@service/rethink";
 
@@ -166,13 +166,17 @@ export default class User implements IUser, IDbModel {
 
   /**
    * Soft delete operation - set deletedAt to current date, value indicated deleted user
-   * @param dbInstance 
-   * @returns 
+   * @param dbInstance
+   * @returns
    */
   delete(dbInstance: Connection): Promise<WriteResult> {
-    return rethink.table(User.table).get(this.id).update({
-      deletedAt: new Date()
-    }).run(dbInstance);
+    return rethink
+      .table(User.table)
+      .get(this.id)
+      .update({
+        deletedAt: new Date(),
+      })
+      .run(dbInstance);
   }
 
   isValid(): boolean {
@@ -193,15 +197,18 @@ export default class User implements IUser, IDbModel {
   }
 
   canBeCreatedByUser(user: User): boolean {
-    return user.role === UserEnums.Role.Admin;
+    return user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin]);
   }
 
   canBeEditedByUser(user: User): boolean {
-    return user.role === UserEnums.Role.Admin || user.id == this.id;
+    return (
+      user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin]) ||
+      user.id == this.id
+    );
   }
 
   canBeDeletedByUser(user: User): boolean {
-    return user.role === UserEnums.Role.Admin;
+    return user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin]);
   }
 
   generatePassword(): string {
@@ -223,9 +230,9 @@ export default class User implements IUser, IDbModel {
   /**
    * Finds user by 'id' field
    * Ignores thrashed entries
-   * @param dbInstance 
-   * @param id 
-   * @returns 
+   * @param dbInstance
+   * @param id
+   * @returns
    */
   static async findUserById(
     dbInstance: Connection | undefined,
@@ -241,11 +248,26 @@ export default class User implements IUser, IDbModel {
   }
 
   /**
+   * Returns first owner-role based user or null
+   * @param dbInstance
+   * @returns
+   */
+  static async getOwner(
+    dbInstance: Connection | undefined
+  ): Promise<User | null> {
+    const data = await rethink
+      .table(User.table)
+      .filter({ role: UserEnums.Role.Owner })
+      .run(dbInstance);
+    return data && data.length > 0 ? new User(data[0]) : null;
+  }
+
+  /**
    * Finds user identified by 'email' field
    * Ignores thrashed entries
-   * @param dbInstance 
-   * @param email 
-   * @returns 
+   * @param dbInstance
+   * @param email
+   * @returns
    */
   static async getUserByEmail(
     dbInstance: Connection | undefined,
@@ -253,8 +275,8 @@ export default class User implements IUser, IDbModel {
   ): Promise<User | null> {
     const data = await rethink
       .table(User.table)
-      .filter(function(user: any) {
-        return rethink.not(user.hasFields("deletedAt"))
+      .filter(function (user: any) {
+        return rethink.not(user.hasFields("deletedAt"));
       })
       .filter({ email })
       .limit(1)
@@ -268,9 +290,9 @@ export default class User implements IUser, IDbModel {
   /**
    * Finds user identified by 'hash' field
    * Ignores thrashed entries
-   * @param dbInstance 
-   * @param hash 
-   * @returns 
+   * @param dbInstance
+   * @param hash
+   * @returns
    */
   static async getUserByHash(
     dbInstance: Connection | undefined,
@@ -278,8 +300,8 @@ export default class User implements IUser, IDbModel {
   ): Promise<User | null> {
     const data = await rethink
       .table(User.table)
-      .filter(function(user: any) {
-        return rethink.not(user.hasFields("deletedAt"))
+      .filter(function (user: any) {
+        return rethink.not(user.hasFields("deletedAt"));
       })
       .filter({ hash })
       .run(dbInstance);
@@ -292,16 +314,16 @@ export default class User implements IUser, IDbModel {
   /**
    * Returns all users
    * Ignores thrashed entries
-   * @param dbInstance 
-   * @returns 
+   * @param dbInstance
+   * @returns
    */
   static async findAllUsers(
     dbInstance: Connection | undefined
   ): Promise<User[]> {
     const data = await rethink
       .table(User.table)
-      .filter(function(user: any) {
-        return rethink.not(user.hasFields("deletedAt"))
+      .filter(function (user: any) {
+        return rethink.not(user.hasFields("deletedAt"));
       })
       .orderBy(rethink.asc("role"), rethink.asc("name"))
       .run(dbInstance);
@@ -321,16 +343,16 @@ export default class User implements IUser, IDbModel {
     login: string,
     includeThrashed: boolean
   ): Promise<User | null> {
-    let req = await rethink
-      .table(User.table);
+    let req = await rethink.table(User.table);
 
     if (!includeThrashed) {
-      req = req.filter(function(user: any) {
-        return rethink.not(user.hasFields("deletedAt"))
+      req = req.filter(function (user: any) {
+        return rethink.not(user.hasFields("deletedAt"));
       });
     }
 
-    const data = await req.filter(function (user: any) {
+    const data = await req
+      .filter(function (user: any) {
         return rethink.or(
           rethink.row("name").eq(login),
           rethink.row("email").eq(login)
@@ -345,9 +367,9 @@ export default class User implements IUser, IDbModel {
   /**
    * Returns users by cleaned label (for name / email).
    * Does not return thrashed users.
-   * @param dbInstance 
-   * @param label 
-   * @returns 
+   * @param dbInstance
+   * @param label
+   * @returns
    */
   static async findUsersByLabel(
     dbInstance: Connection | undefined,
@@ -355,7 +377,7 @@ export default class User implements IUser, IDbModel {
   ): Promise<User[]> {
     const data = await rethink
       .table(User.table)
-     
+
       .run(dbInstance);
     return (data as IUser[]).map((d) => new User(d));
   }
@@ -445,5 +467,9 @@ export default class User implements IUser, IDbModel {
         storedTerritories: userModel.storedTerritories,
       });
     }
+  }
+
+  hasRole(allowed: UserEnums.Role[]): boolean {
+    return allowed.indexOf(this.role) !== -1;
   }
 }
