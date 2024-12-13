@@ -1,27 +1,15 @@
+import { InterfaceEnums } from "@shared/enums";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import React, { useEffect, useMemo } from "react";
-import { Helmet } from "react-helmet";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { ThemeProvider } from "styled-components";
-
 import api from "api";
 import { Page } from "components/advanced";
 import { useDebounce } from "hooks";
-import { useWindowSize } from "hooks/useWindowSize";
-import { heightHeader } from "Theme/constants";
-import GlobalStyle from "Theme/global";
-import theme, { ThemeType } from "Theme/theme";
-import { darkTheme } from "Theme/theme-dark";
-
-import { InterfaceEnums } from "@shared/enums";
 import { SearchParamsProvider } from "hooks/useSearchParamsContext";
+import { useWindowSize } from "hooks/useWindowSize";
 import {
   AboutPage,
   AclPage,
   ActivatePage,
-  QueryPage,
   DocumentsPage,
   LoginPage,
   MainPage,
@@ -29,10 +17,20 @@ import {
   PasswordResetPage,
   UsersPage,
 } from "pages";
+import React, { useEffect, useMemo } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import { Helmet } from "react-helmet";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { setContentHeight } from "redux/features/layout/contentHeightSlice";
 import { setLayoutWidth } from "redux/features/layout/layoutWidthSlice";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { ThemeProvider } from "styled-components";
+import { heightHeader } from "Theme/constants";
+import GlobalStyle from "Theme/global";
+import theme, { ThemeType } from "Theme/theme";
+import { darkTheme } from "Theme/theme-dark";
+import { QueryPage } from "pages";
 
 const clockPerformance = (
   profilerId: any,
