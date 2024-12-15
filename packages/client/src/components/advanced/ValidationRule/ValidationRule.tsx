@@ -45,6 +45,8 @@ export const ValidationRule: React.FC<ValidationRule> = ({
     detail,
     entityClasses,
     entityClassifications,
+    entityLanguages,
+    entityStatuses,
     tieType,
     propType,
     allowedClasses,
@@ -109,16 +111,16 @@ export const ValidationRule: React.FC<ValidationRule> = ({
         <Dropdown.Multi.Entity
           disableEmpty
           width="full"
-          value={entityClasses}
+          value={entityClasses ?? []}
           onChange={(values) => updateValidationRule({ entityClasses: values })}
           options={entitiesDict}
           disabled={!userCanEdit}
         />
 
-        {/* Classifications */}
-        <StyledLabel>..classified as</StyledLabel>
+        {/* Entity Classifications */}
+        <StyledLabel>...classified as</StyledLabel>
         <StyledFlexList>
-          {entityClassifications.map((classification, key) => (
+          {entityClassifications?.map((classification, key) => (
             <EntityTag
               key={key}
               flexListMargin
@@ -135,14 +137,101 @@ export const ValidationRule: React.FC<ValidationRule> = ({
               }
             />
           ))}
-          {!(!userCanEdit && entityClassifications.length > 0) && (
+          {!(
+            !userCanEdit &&
+            entityClassifications &&
+            entityClassifications?.length > 0
+          ) && (
             <EntitySuggester
               alwaysShowCreateModal
               excludedActantIds={entityClassifications}
               categoryTypes={[EntityEnums.Class.Concept]}
               onPicked={(entity) =>
                 updateValidationRule({
-                  entityClassifications: [...entityClassifications, entity.id],
+                  entityClassifications: [
+                    ...(entityClassifications ?? []),
+                    entity.id,
+                  ],
+                })
+              }
+              disabled={
+                !userCanEdit || tieType === EProtocolTieType.Classification
+              }
+            />
+          )}
+        </StyledFlexList>
+
+        {/* Entity Languages */}
+        <StyledLabel>having language</StyledLabel>
+        <StyledFlexList>
+          {entityLanguages?.map((language, key) => (
+            <LanguageTag
+              key={key}
+              flexListMargin
+              language={language}
+              unlinkButton={
+                userCanEdit && {
+                  onClick: () =>
+                    updateValidationRule({
+                      entityLanguages: entityLanguages?.filter(
+                        (l) => l !== language
+                      ),
+                    }),
+                }
+              }
+            />
+          ))}
+          {!(
+            !userCanEdit &&
+            entityLanguages &&
+            entityLanguages?.length > 0
+          ) && (
+            // ADD NEW LANGUAGE
+            // <EntitySuggester
+            //   alwaysShowCreateModal
+            //   excludedActantIds={entityClassifications}
+            //   categoryTypes={[EntityEnums.Class.Concept]}
+            //   onPicked={(entity) =>
+            //     updateValidationRule({
+            //       entityClassifications: [...entityClassifications, entity.id],
+            //     })
+            //   }
+            //   disabled={
+            //     !userCanEdit || tieType === EProtocolTieType.Classification
+            //   }
+            // />
+            <></>
+          )}
+        </StyledFlexList>
+
+        {/* Entity Statuses */}
+        <StyledLabel>having status</StyledLabel>
+        <StyledFlexList>
+          {entityStatuses &&
+            entityStatuses?.map((status, key) => (
+              <StatusTag
+                key={key}
+                flexListMargin
+                unlinkButton={
+                  userCanEdit && {
+                    onClick: () =>
+                      updateValidationRule({
+                        entityStatuses: entityStatuses.filter(
+                          (c) => c !== status
+                        ),
+                      }),
+                  }
+                }
+              />
+            ))}
+          {!(!userCanEdit && entityStatuses && entityStatuses.length > 0) && (
+            <StatusPicker
+              alwaysShowCreateModal
+              excludedActantIds={entityClassifications}
+              categoryTypes={[EntityEnums.Class.Concept]}
+              onPicked={(newStatus: EntityEnums.Status) =>
+                updateValidationRule({
+                  entityStatuses: [...(entityStatuses ?? []), newStatus],
                 })
               }
               disabled={
@@ -181,7 +270,8 @@ export const ValidationRule: React.FC<ValidationRule> = ({
                   allowedEntities: [],
                 }),
               selected: tieType === EProtocolTieType.Classification,
-              optionDisabled: entityClassifications.length > 0,
+              optionDisabled:
+                entityClassifications && entityClassifications.length > 0,
             },
             {
               longValue: EProtocolTieType.Reference,
