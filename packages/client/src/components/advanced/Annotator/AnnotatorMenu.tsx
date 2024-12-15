@@ -119,6 +119,7 @@ export const TextAnnotatorMenu = ({
               onAnchorAdd(newAnchorId);
             }}
             inputWidth={200}
+            openDetailOnCreate
           />
         </StyledAnnotatorItemContent>
       </StyledAnnotatorItem>
