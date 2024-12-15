@@ -8,7 +8,13 @@ import { Button, Input, Loader, DocumentTitle } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 import TextAnnotator from "components/advanced/Annotator/Annotator";
 import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { FaLongArrowAltRight, FaUnlink } from "react-icons/fa";
 import { GrDocumentMissing } from "react-icons/gr";
 import { TbAnchorOff } from "react-icons/tb";
@@ -76,6 +82,13 @@ export const StatementListTextAnnotator: React.FC<
   useEffect(() => {
     setShowAnnotator(true);
   }, []);
+
+  const handleHlEntitiesChange = useCallback(
+    (newHlEntities: EntityEnums.Class[]) => {
+      setHlEntities(newHlEntities);
+    },
+    []
+  );
 
   const [annotator, setAnnotator] = useState<Annotator | undefined>(undefined);
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -383,9 +396,7 @@ export const StatementListTextAnnotator: React.FC<
             options={entitiesDict}
             disableEmpty={true}
             disableAny={true}
-            onChange={(newValues) => {
-              setHlEntities(newValues);
-            }}
+            onChange={handleHlEntitiesChange}
             value={hlEntities}
             width={
               statements.length > 0
@@ -475,7 +486,7 @@ export const StatementListTextAnnotator: React.FC<
               initialScrollEntityId={territoryId}
               displayLineNumbers={true}
               height={annotatorHeight}
-              documentId={selectedDocumentId}
+              documentId={selectedDocumentId as string}
               handleCreateStatement={handleCreateStatement}
               handleCreateTerritory={handleCreateTerritory}
               storedAnnotatorScroll={storedAnnotatorScroll}
