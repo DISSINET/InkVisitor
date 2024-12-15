@@ -181,11 +181,11 @@ export class SearchQuery {
   }
 
   /**
-   * adds condition to filter by label
+   * prepares label for search
    * @param label
    * @returns
    */
-  whereLabel(label: string): SearchQuery {
+  prepareLabel(label: string): [string, string, string] {
     let leftWildcard = "^",
       rightWildcard = "$";
 
@@ -198,18 +198,52 @@ export class SearchQuery {
       rightWildcard = "";
       label = label.slice(0, -1);
     }
-
-    this.usedLabel = label;
-
     // escape problematic chars - messes with regexp search
-    label = regExpEscape(label.toLowerCase());
+    // label = regExpEscape(label.toLowerCase());
+
+    return [label, leftWildcard, rightWildcard];
+  }
+
+  /**
+   * adds condition to filter by label
+   * @param label
+   * @returns
+   */
+  whereLabel(label: string): SearchQuery {
+    const [preparedLabel, leftWildcard, rightWildcard] =
+      this.prepareLabel(label);
+
+    this.usedLabel = preparedLabel;
 
     this.query = this.query.filter(function (row: RDatum) {
       return SearchQuery.searchWordByWord(
         row,
-        label,
+        preparedLabel,
         leftWildcard,
         rightWildcard
+      );
+    });
+
+    this.filterUsed = true;
+    return this;
+  }
+
+  /**
+   * adds condition to filter by label or id
+   * @param label
+   * @returns
+   */
+  whereLabelOrId(labelOrId: string): SearchQuery {
+    const [label, leftWildcard, rightWildcard] = this.prepareLabel(labelOrId);
+    this.usedLabel = label;
+
+    this.query = this.query.filter(function (row: RDatum) {
+      return r.or(
+        // row("labels").contains<string>((label) =>
+        //   label.downcase().match(label)
+        // ),
+        SearchQuery.searchWordByWord(row, label, leftWildcard, rightWildcard),
+        row("id").match(labelOrId.replace("*", "")).ne(null)
       );
     });
 
@@ -394,6 +428,10 @@ export class SearchQuery {
 
     if (req.label) {
       this.whereLabel(req.label);
+    }
+
+    if (req.labelOrId) {
+      this.whereLabelOrId(req.labelOrId);
     }
 
     if (req.entityIds) {
