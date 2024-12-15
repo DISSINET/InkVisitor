@@ -44,7 +44,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
   const {
     detail,
     entityClasses,
-    classifications,
+    entityClassifications,
     tieType,
     propType,
     allowedClasses,
@@ -118,7 +118,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
         {/* Classifications */}
         <StyledLabel>..classified as</StyledLabel>
         <StyledFlexList>
-          {classifications.map((classification, key) => (
+          {entityClassifications.map((classification, key) => (
             <EntityTag
               key={key}
               flexListMargin
@@ -127,7 +127,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
                 userCanEdit && {
                   onClick: () =>
                     updateValidationRule({
-                      classifications: classifications.filter(
+                      entityClassifications: entityClassifications.filter(
                         (c) => c !== classification
                       ),
                     }),
@@ -135,14 +135,14 @@ export const ValidationRule: React.FC<ValidationRule> = ({
               }
             />
           ))}
-          {!(!userCanEdit && classifications.length > 0) && (
+          {!(!userCanEdit && entityClassifications.length > 0) && (
             <EntitySuggester
               alwaysShowCreateModal
-              excludedActantIds={classifications}
+              excludedActantIds={entityClassifications}
               categoryTypes={[EntityEnums.Class.Concept]}
               onPicked={(entity) =>
                 updateValidationRule({
-                  classifications: [...classifications, entity.id],
+                  entityClassifications: [...entityClassifications, entity.id],
                 })
               }
               disabled={
@@ -181,7 +181,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
                   allowedEntities: [],
                 }),
               selected: tieType === EProtocolTieType.Classification,
-              optionDisabled: classifications.length > 0,
+              optionDisabled: entityClassifications.length > 0,
             },
             {
               longValue: EProtocolTieType.Reference,

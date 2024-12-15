@@ -32,7 +32,10 @@ export interface ITerritoryValidation {
   active?: boolean;
   territoryId?: string;
   entityClasses: EntityEnums.Class[];
-  classifications: string[];
+  entityClassifications: string[];
+  entityLanguages: EntityEnums.Language[];
+  entityStatuses: EntityEnums.Status[];
+
   tieType: EProtocolTieType; // default is property
   propType?: string[]; // relevant only in case of Property is selected as a tie
   allowedClasses?: EntityEnums.Class[]; // not relevant if allowedEntities is set

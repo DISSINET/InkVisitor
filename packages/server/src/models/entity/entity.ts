@@ -384,7 +384,9 @@ export default class Entity implements IEntity, IDbModel {
     validations.forEach(([tId, validation]) => {
       const {
         entityClasses,
-        classifications,
+        entityClassifications,
+        entityLanguages,
+        entityStatuses,
         tieType,
         propType,
         allowedClasses,
@@ -397,8 +399,8 @@ export default class Entity implements IEntity, IDbModel {
 
       // check if entity has the allowed classifications
       const classificationCheck =
-        !classifications.length ||
-        classifications.some((c) =>
+        !entityClassifications.length ||
+        entityClassifications.some((c) =>
           classificationEs.map((cla) => cla.id)?.includes(c)
         );
 
