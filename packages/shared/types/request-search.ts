@@ -6,6 +6,7 @@ export interface IRequestSearch {
   class?: EntityEnums.Class | EntityEnums.Extension.Any;
   excluded?: EntityEnums.Class[];
   label?: string;
+  labelOrId?: string;
   entityIds?: string[];
   cooccurrenceId?: string;
   territoryId?: string;
@@ -23,6 +24,7 @@ export interface IRequestSearch {
 export class RequestSearch {
   class?: EntityEnums.Class | EntityEnums.Extension.Any;
   label?: string;
+  labelOrId?: string;
   entityIds?: string[];
   cooccurrenceId?: string;
   territoryId?: string;
@@ -40,6 +42,7 @@ export class RequestSearch {
   constructor(requestData: IRequestSearch) {
     this.class = requestData.class;
     this.label = requestData.label;
+    this.labelOrId = requestData.labelOrId;
     this.status = requestData.status;
 
     if (requestData.createdDate) {
@@ -131,6 +134,7 @@ export class RequestSearch {
 
     if (
       !this.label &&
+      !this.labelOrId &&
       !this.class &&
       !this.onlyTemplates &&
       !this.resourceHasDocument &&
