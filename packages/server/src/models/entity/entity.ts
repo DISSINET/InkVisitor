@@ -395,11 +395,11 @@ export default class Entity implements IEntity, IDbModel {
 
       // check if entity falls into the allowed classes
       const entityCheck =
-        !entityClasses.length || entityClasses.includes(this.class);
+        !entityClasses?.length || entityClasses.includes(this.class);
 
       // check if entity has the allowed classifications
       const classificationCheck =
-        !entityClassifications.length ||
+        !entityClassifications?.length ||
         entityClassifications.some((c) =>
           classificationEs.map((cla) => cla.id)?.includes(c)
         );
