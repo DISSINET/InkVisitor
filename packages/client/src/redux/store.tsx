@@ -1,29 +1,29 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { combineReducers, Store } from "redux";
-import firstPanelExpandedSlice from "./features/layout/firstPanelExpandedSlice";
-import fourthPanelExpandedSlice from "./features/layout/fourthPanelExpandedSlice";
-import fourthPanelBoxesOpenedSlice from "./features/layout/fourthPanelBoxesOpenedSlice";
+import contentHeightSlice from "./features/layout/contentHeightSlice";
 import layoutWidthSlice from "./features/layout/layoutWidthSlice";
-import panelWidthsSlice from "./features/layout/panelWidthsSlice";
-import separatorXPositionSlice from "./features/layout/separatorXPositionSlice";
+import firstPanelExpandedSlice from "./features/layout/mainPage/firstPanelExpandedSlice";
+import fourthPanelBoxesOpenedSlice from "./features/layout/mainPage/fourthPanelBoxesOpenedSlice";
+import fourthPanelExpandedSlice from "./features/layout/mainPage/fourthPanelExpandedSlice";
+import panelWidthsPercentSlice from "./features/layout/mainPage/panelWidthsPercentSlice";
+import panelWidthsSlice from "./features/layout/mainPage/panelWidthsSlice";
+import statementListOpenedSlice from "./features/layout/mainPage/statementListOpenedSlice";
+import pingSlice from "./features/pingSlice";
 import draggedActantRowSlice from "./features/rowDnd/draggedActantRowSlice";
 import draggedPropRowSlice from "./features/rowDnd/draggedPropRowSlice";
+import showWarningsSlice from "./features/statementEditor/showWarningsSlice";
+import disableStatementListScrollSlice from "./features/statementList/disableStatementListScrollSlice";
 import draggedRowIdSlice from "./features/statementList/draggedRowIdSlice";
+import isLoadingSlice from "./features/statementList/isLoadingSlice";
+import lastClickedIndexSlice from "./features/statementList/lastClickedIndexSlice";
 import rowsExpandedSlice from "./features/statementList/rowsExpandedSlice";
+import disableTreeScrollSlice from "./features/territoryTree/disableTreeScrollSlice";
 import draggedEntitySlice from "./features/territoryTree/draggedEntitySlice";
+import filterOpenSlice from "./features/territoryTree/filterOpenSlice";
 import selectedTerritoryPathSlice from "./features/territoryTree/selectedTerritoryPathSlice";
 import treeInitializeSlice from "./features/territoryTree/treeInitializeSlice";
-import usernameSlice from "./features/usernameSlice";
-import contentHeightSlice from "./features/layout/contentHeightSlice";
-import statementListOpenedSlice from "./features/layout/statementListOpenedSlice";
-import lastClickedIndexSlice from "./features/statementList/lastClickedIndexSlice";
-import disableStatementListScrollSlice from "./features/statementList/disableStatementListScrollSlice";
-import disableTreeScrollSlice from "./features/territoryTree/disableTreeScrollSlice";
-import filterOpenSlice from "./features/territoryTree/filterOpenSlice";
-import pingSlice from "./features/pingSlice";
-import showWarningsSlice from "./features/statementEditor/showWarningsSlice";
 import themeSlice from "./features/themeSlice";
-import isLoadingSlice from "./features/statementList/isLoadingSlice";
+import usernameSlice from "./features/usernameSlice";
 import thirdPanelExpandedSlice from "./features/layout/thirdPanelExpandedSlice";
 
 const store: Store = configureStore({
@@ -55,13 +55,16 @@ const store: Store = configureStore({
     layout: combineReducers({
       layoutWidth: layoutWidthSlice,
       contentHeight: contentHeightSlice,
-      panelWidths: panelWidthsSlice,
-      separatorXPosition: separatorXPositionSlice,
-      firstPanelExpanded: firstPanelExpandedSlice,
-      thirdPanelExpanded: thirdPanelExpandedSlice,
-      fourthPanelExpanded: fourthPanelExpandedSlice,
-      fourthPanelBoxesOpened: fourthPanelBoxesOpenedSlice,
-      statementListOpened: statementListOpenedSlice,
+
+      mainPage: combineReducers({
+        panelWidths: panelWidthsSlice,
+        panelWidthsPercent: panelWidthsPercentSlice,
+        firstPanelExpanded: firstPanelExpandedSlice,
+        thirdPanelExpanded: thirdPanelExpandedSlice,
+        fourthPanelExpanded: fourthPanelExpandedSlice,
+        fourthPanelBoxesOpened: fourthPanelBoxesOpenedSlice,
+        statementListOpened: statementListOpenedSlice,
+      }),
     }),
   },
 });

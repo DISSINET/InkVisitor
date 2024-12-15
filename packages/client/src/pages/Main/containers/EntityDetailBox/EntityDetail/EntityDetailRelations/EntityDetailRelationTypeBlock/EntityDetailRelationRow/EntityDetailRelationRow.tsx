@@ -26,7 +26,7 @@ interface EntityDetailRelationRow {
   relationRule: Relation.RelationRule;
   relationType: RelationEnums.Type;
   entities: Record<string, IEntity>;
-  relationUpdateMutation: UseMutationResult<
+  relationUpdateMutation?: UseMutationResult<
     AxiosResponse<IResponseGeneric>,
     unknown,
     {
@@ -35,7 +35,7 @@ interface EntityDetailRelationRow {
     },
     unknown
   >;
-  relationDeleteMutation: UseMutationResult<
+  relationDeleteMutation?: UseMutationResult<
     AxiosResponse<IResponseGeneric>,
     unknown,
     string,
@@ -68,7 +68,7 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
   const dragRef = useRef<HTMLTableCellElement>(null);
 
   const handleMultiRemove = (relationId: string) => {
-    relationDeleteMutation.mutate(relationId);
+    relationDeleteMutation?.mutate(relationId);
   };
 
   const shouldBeRendered = (key: number) =>
@@ -83,7 +83,7 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
         options={certaintyDict}
         value={relation.certainty}
         onChange={(newValue) => {
-          relationUpdateMutation.mutate({
+          relationUpdateMutation?.mutate({
             relationId: relation.id,
             changes: { certainty: newValue },
           });

@@ -34,7 +34,7 @@ const initFilterSettings: ITerritoryFilter = {
 };
 export const TerritoryTreeBox: React.FC = () => {
   const firstPanelExpanded: boolean = useAppSelector(
-    (state) => state.layout.firstPanelExpanded
+    (state) => state.layout.mainPage.firstPanelExpanded
   );
 
   const queryClient = useQueryClient();

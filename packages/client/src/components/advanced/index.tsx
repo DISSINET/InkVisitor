@@ -3,8 +3,8 @@ import { ApplyTemplateModal } from "./ApplyTemplateModal/ApplyTemplateModal";
 import { AttributeButtonGroup } from "./AttributeButtonGroup/AttributeButtonGroup";
 import { AuditTable } from "./AuditTable/AuditTable";
 import { BreadcrumbItem } from "./BreadcrumbItem/BreadcrumbItem";
-import DocumentModalExport from "./DocumentModal/DocumentModalExport";
 import DocumentModalEdit from "./DocumentModal/DocumentModalEdit";
+import DocumentModalExport from "./DocumentModal/DocumentModalExport";
 import { AttributeMultiDropdown } from "./Dropdowns/AttributeMultiDropdown";
 import { BasicDropdown } from "./Dropdowns/BasicDropdown";
 import { EntityMultiDropdown } from "./Dropdowns/EntityMultiDropdown";
@@ -20,10 +20,11 @@ import { LogicButtonGroup } from "./IconButtonGroups/LogicButtonGroup";
 import { MoodVariantButtonGroup } from "./IconButtonGroups/MoodVariantButtonGroup";
 import { PositionButtonGroup } from "./IconButtonGroups/PositionButtonGroup";
 import { JSONExplorer } from "./JSONExplorer/JSONExplorer";
+import { LayoutSeparatorHorizontal } from "./LayoutSeparator/LayoutSeparatorHorizontal";
+import { LayoutSeparatorVertical } from "./LayoutSeparator/LayoutSeparatorVertical";
 import { Menu } from "./Menu/Menu";
 import { Page } from "./Page/Page";
 import { LeftHeader, RightHeader } from "./PageHeader/PageHeader";
-import { PanelSeparator } from "./PanelSeparator/PanelSeparator";
 import { TerritoryActionModal } from "./TerritoryActionModal/TerritoryActionModal";
 import { UserCustomizationModal } from "./UserCustomizationModal/UserCustomizationModal";
 import { ValidationRule } from "./ValidationRule/ValidationRule";
@@ -46,8 +47,9 @@ export {
   AttributeButtonGroup,
   AuditTable,
   BreadcrumbItem,
-  DocumentModalExport,
   DocumentModalEdit,
+  DocumentModalExport,
+  ElvlButtonGroup,
   EmptyTag,
   EntityCreateModal,
   EntityDropzone,
@@ -55,16 +57,16 @@ export {
   EntityTag,
   EntityTooltip,
   JSONExplorer,
-  Menu,
-  Page,
+  LayoutSeparatorHorizontal,
+  LayoutSeparatorVertical,
   LeftHeader,
+  LogicButtonGroup,
+  Menu,
+  MoodVariantButtonGroup,
+  Page,
+  PositionButtonGroup,
   RightHeader,
-  PanelSeparator,
   TerritoryActionModal,
   UserCustomizationModal,
   ValidationRule,
-  ElvlButtonGroup,
-  MoodVariantButtonGroup,
-  PositionButtonGroup,
-  LogicButtonGroup,
 };

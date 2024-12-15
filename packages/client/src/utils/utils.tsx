@@ -322,6 +322,10 @@ export const normalizeURL = (url: string) => {
   return url;
 };
 
+export const floorNumberToOneDecimal = (numberToFloor: number) => {
+  return Math.floor(numberToFloor * 10) / 10;
+};
+
 export const getUserIcon = (
   userRole: UserEnums.Role,
   // size can be determined in parent component font-size instead

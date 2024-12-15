@@ -7,7 +7,7 @@ import {
 } from "@tanstack/react-query";
 import api from "api";
 import { AxiosResponse } from "axios";
-import { Button, ButtonGroup, Input, Tooltip } from "components";
+import { Button, ButtonGroup, Input } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
 import React, {
   Dispatch,
@@ -18,6 +18,8 @@ import React, {
 } from "react";
 import { FaSave, FaTrash } from "react-icons/fa";
 import { RiFileEditFill } from "react-icons/ri";
+import theme from "Theme/theme";
+import { EntityColors } from "types";
 import {
   StyledCount,
   StyledCountTag,
@@ -25,8 +27,6 @@ import {
   StyledTitle,
   StyledTitleWrap,
 } from "../DocumentsPageStyles";
-import theme from "Theme/theme";
-import { EntityColors } from "types";
 import { useResizeObserver } from "hooks";
 
 interface DocumentRow {
@@ -164,6 +164,7 @@ export const DocumentRow: React.FC<DocumentRow> = ({
               onClick: () => removeResourceMutation.mutate(resource.id),
             }}
             fullWidth
+            disableDoubleClick
           />
         ) : (
           <EntitySuggester

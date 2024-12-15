@@ -70,10 +70,6 @@ export const ValidationRule: React.FC<ValidationRule> = ({
   }, [validation.active]);
 
   const isAllowedEntitiesSuggesterVisible = useMemo<boolean>(() => {
-    if (!userCanEdit) {
-      return false;
-    }
-
     if (!allowedEntities) {
       return false;
     }

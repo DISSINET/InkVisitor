@@ -60,12 +60,19 @@ const theme = {
     tagSelectedColor: "#fff",
     tagItalic: "#4a5568",
 
+    query1: "#FFFCF2",
+    query2: "#CCC5B9",
+    query3: "#403D39",
+    query4: "#252422",
+    queryInvalid: "#EB5E28",
+
     iconButtonGroupColor: "#C4C4C4",
 
     treeNodeRead: "#718096",
     treeNodeWrite: "#2d3748",
     foundByTreeFilter: "#b4c0e8",
 
+    tableOddRow: "#f0f8ff",
     tableOpened: "#F2EBFE",
     tableSelection: "#bce5ff",
     tableSelectionHover: "#e0f3ff",

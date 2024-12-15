@@ -352,13 +352,23 @@ export const StatementListTextAnnotator: React.FC<
               <div
                 style={{
                   display: "flex",
+                  alignItems: "center",
+                  flexShrink: 0,
                   gap: "0.4rem",
                   color: themeContext?.color["black"],
+                  overflow: "hidden",
                 }}
               >
-                <i>No </i>
-                <TbAnchorOff />
-                <i>for Territory</i>
+                <i style={{ fontSize: themeContext?.fontSize["sm"] }}>No </i>
+                <TbAnchorOff size={14} style={{ flexShrink: 0 }} />
+                <i
+                  style={{
+                    fontSize: themeContext?.fontSize["sm"],
+                    // whiteSpace: "nowrap",
+                  }}
+                >
+                  for Territory
+                </i>
               </div>
             )}
           </div>

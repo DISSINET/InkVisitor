@@ -258,6 +258,12 @@
     "roles": ["*"]
   },
   {
+    "controller": "users",
+    "route": "query",
+    "method": "POST",
+    "roles": ["*"]
+  },
+  {
     "controller": "settings",
     "route": ":key",
     "method": "GET",

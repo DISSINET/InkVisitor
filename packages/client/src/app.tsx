@@ -24,20 +24,13 @@ import { Helmet } from "react-helmet";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { setContentHeight } from "redux/features/layout/contentHeightSlice";
 import { setLayoutWidth } from "redux/features/layout/layoutWidthSlice";
-import { setPanelWidths } from "redux/features/layout/panelWidthsSlice";
-import { setSeparatorXPosition } from "redux/features/layout/separatorXPositionSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { ThemeProvider } from "styled-components";
-import {
-  heightHeader,
-  percentPanelWidths,
-  secondPanelMinWidth,
-  separatorXPercentPosition,
-  thirdPanelMinWidth,
-} from "Theme/constants";
+import { heightHeader } from "Theme/constants";
 import GlobalStyle from "Theme/global";
 import theme, { ThemeType } from "Theme/theme";
 import { darkTheme } from "Theme/theme-dark";
+import { QueryPage } from "pages";
 
 const clockPerformance = (
   profilerId: any,
@@ -94,7 +87,7 @@ export const App: React.FC = () => {
     return theme;
   }, [selectedThemeId]);
 
-  const [debouncedWidth, debouncedHeight] = useDebounce(useWindowSize(), 50);
+  const [debouncedWidth, debouncedHeight] = useDebounce(useWindowSize(), 100);
 
   useEffect(() => {
     if (debouncedHeight > 0) {
@@ -105,63 +98,7 @@ export const App: React.FC = () => {
 
   useEffect(() => {
     if (debouncedWidth > 0) {
-      const layoutWidth = debouncedWidth;
-
-      dispatch(setLayoutWidth(layoutWidth));
-      const onePercent = layoutWidth / 100;
-
-      const separatorXStoragePosition =
-        localStorage.getItem("separatorXPosition");
-      const separatorPercentPosition: number = separatorXStoragePosition
-        ? Number(separatorXStoragePosition)
-        : separatorXPercentPosition;
-
-      if (!separatorXStoragePosition) {
-        localStorage.setItem(
-          "separatorXPosition",
-          separatorPercentPosition.toString()
-        );
-      }
-
-      // FIRST
-      const firstPanel =
-        Math.floor(onePercent * percentPanelWidths[0] * 10) / 10;
-
-      // SECOND
-      const secondPanelPx = Math.floor(
-        (onePercent * (separatorPercentPosition - percentPanelWidths[0]) * 10) /
-          10
-      );
-      const isSecondPanelUndersized = secondPanelPx < secondPanelMinWidth;
-      let secondPanel = isSecondPanelUndersized
-        ? secondPanelMinWidth
-        : secondPanelPx;
-
-      // THIRD
-      const thirdPanelPx = Math.floor(
-        layoutWidth -
-          (onePercent *
-            (separatorPercentPosition + percentPanelWidths[3]) *
-            10) /
-            10
-      );
-      const isThirdPanelUndersized = thirdPanelPx < thirdPanelMinWidth;
-      let thirdPanel = isThirdPanelUndersized
-        ? thirdPanelMinWidth
-        : thirdPanelPx;
-
-      // FOURTH
-      const fourthPanel =
-        Math.floor(onePercent * percentPanelWidths[3] * 10) / 10;
-
-      if (!isSecondPanelUndersized && isThirdPanelUndersized) {
-        const undersizeDifference = thirdPanelMinWidth - thirdPanelPx;
-        secondPanel = secondPanel - undersizeDifference;
-      }
-
-      const panels = [firstPanel, secondPanel, thirdPanel, fourthPanel];
-      dispatch(setPanelWidths(panels));
-      dispatch(setSeparatorXPosition(panels[0] + panels[1]));
+      dispatch(setLayoutWidth(debouncedWidth));
     }
   }, [debouncedWidth]);
 
@@ -247,6 +184,14 @@ export const App: React.FC = () => {
                       element={
                         <RequireAuth>
                           <DocumentsPage />
+                        </RequireAuth>
+                      }
+                    />
+                    <Route
+                      path="/query"
+                      element={
+                        <RequireAuth>
+                          <QueryPage />
                         </RequireAuth>
                       }
                     />

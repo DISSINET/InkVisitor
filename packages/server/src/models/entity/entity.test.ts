@@ -13,7 +13,7 @@ import Prop, { PropSpec } from "@models/prop/prop";
 import { EntityEnums } from "@shared/enums";
 import { getEntityClass } from "@models/factory";
 import Reference from "./reference";
-import { InvalidDeleteError, ModelNotValidError } from "@shared/types/errors";
+import { ModelNotValidError } from "@shared/types/errors";
 
 export const prepareEntity = (
   classValue: EntityEnums.Class = EntityEnums.Class.Concept
@@ -21,6 +21,7 @@ export const prepareEntity = (
   const id = Math.random().toString();
 
   const ent = new Entity({ id, class: classValue });
+  ent.label = `${ent.id}-label`;
   ent.props.push(new Prop({ id: `${id}-props[0].id` }));
 
   ent.props[0].children.push(new Prop({ id: `${id}-props[0].children[0].id` }));

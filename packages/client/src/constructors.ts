@@ -701,3 +701,74 @@ export const CTemplateEntity = (
 
   return templateEntity;
 };
+
+// based on a given propId, entityId, typeId or valueId, delete the prop
+export const deleteProp = (
+  entity: IEntity,
+  toRemove: {
+    propId?: string;
+    typeEntityId?: string;
+    valueEntityId?: string;
+  }
+): IEntity => {
+  const shouldDelete = (prop: IProp) => {
+    if (toRemove.propId) {
+      return prop.id === toRemove.propId;
+    }
+    if (toRemove.typeEntityId) {
+      return prop.type.entityId === toRemove.typeEntityId;
+    }
+    if (toRemove.valueEntityId) {
+      return prop.value.entityId === toRemove.valueEntityId;
+    }
+    return false;
+  };
+
+  const newProps = [...entity.props].filter((prop, pi) => {
+    return shouldDelete(prop) ? null : prop;
+  });
+
+  // 2nd level
+  newProps.forEach((prop1, pi1) => {
+    newProps[pi1].children = prop1.children.filter((child) =>
+      shouldDelete(child) ? null : child
+    );
+
+    // 3rd level
+    newProps[pi1].children.forEach((prop2, pi2) => {
+      newProps[pi1].children[pi2].children = newProps[pi1].children[
+        pi2
+      ].children.filter((child) => (shouldDelete(child) ? null : child));
+    });
+  });
+
+  return { ...entity, props: newProps };
+};
+
+export const deleteRef = (
+  entity: IEntity,
+  toRemove: {
+    refId?: string;
+    resourceId?: string;
+    valueId?: string;
+  }
+): IEntity => {
+  const shouldDelete = (ref: IReference) => {
+    if (toRemove.refId) {
+      return ref.id === toRemove.refId;
+    }
+    if (toRemove.resourceId) {
+      return ref.resource === toRemove.resourceId;
+    }
+    if (toRemove.valueId) {
+      return ref.value === toRemove.valueId;
+    }
+    return false;
+  };
+
+  const newRefs = [...entity.references].filter((ref) => !shouldDelete(ref));
+
+  console.log("new refs", entity, toRemove, newRefs);
+
+  return { ...entity, references: newRefs };
+};

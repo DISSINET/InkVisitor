@@ -7,6 +7,7 @@ import MainPage from "pages/Main/MainPage";
 import NotFoundPage from "pages/NotFound/NotFoundPage";
 import { PasswordResetPage } from "pages/PasswordReset/PasswordResetPage";
 import UsersPage from "pages/Users/UsersPage";
+import { QueryPage } from "./Query/QueryPage";
 
 export {
   AboutPage,
@@ -18,4 +19,5 @@ export {
   NotFoundPage,
   PasswordResetPage,
   UsersPage,
+  QueryPage,
 };

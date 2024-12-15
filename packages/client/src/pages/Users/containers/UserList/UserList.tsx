@@ -342,6 +342,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                                 },
                                 tooltipLabel: "remove territory from rights",
                               }}
+                              disableDoubleClick
                             />
                           </StyledTerritoryListItem>
                         ) : (
@@ -430,6 +431,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                                   },
                                   tooltipLabel: "remove territory from rights",
                                 }}
+                                disableDoubleClick
                               />
                             </StyledTerritoryListItem>
                           ) : (
