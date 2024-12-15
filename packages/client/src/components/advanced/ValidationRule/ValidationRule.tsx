@@ -1,4 +1,8 @@
-import { entitiesDict } from "@shared/dictionaries";
+import {
+  entitiesDict,
+  entityStatusDict,
+  languageDict,
+} from "@shared/dictionaries";
 import { classesAll } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
@@ -19,9 +23,11 @@ import {
   StyledFlexList,
   StyledGrid,
   StyledLabel,
+  StyledLanguageList,
   StyledNotActiveTag,
 } from "./ValidationRuleStyles";
 import { ValidationText } from "./ValidationText/ValidationText";
+import { LanguageTag } from "./LanguageTag";
 
 interface ValidationRule {
   validation: ITerritoryValidation;
@@ -118,7 +124,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
         />
 
         {/* Entity Classifications */}
-        <StyledLabel>...classified as</StyledLabel>
+        <StyledLabel>classified as</StyledLabel>
         <StyledFlexList>
           {entityClassifications?.map((classification, key) => (
             <EntityTag
@@ -164,81 +170,97 @@ export const ValidationRule: React.FC<ValidationRule> = ({
         {/* Entity Languages */}
         <StyledLabel>having language</StyledLabel>
         <StyledFlexList>
-          {entityLanguages?.map((language, key) => (
-            <LanguageTag
-              key={key}
-              flexListMargin
-              language={language}
-              unlinkButton={
-                userCanEdit && {
-                  onClick: () =>
-                    updateValidationRule({
-                      entityLanguages: entityLanguages?.filter(
-                        (l) => l !== language
-                      ),
-                    }),
+          <StyledLanguageList>
+            {entityLanguages?.map((language, key) => (
+              <LanguageTag
+                languageValue={language}
+                onUnlink={
+                  userCanEdit
+                    ? () => {
+                        updateValidationRule({
+                          entityLanguages: entityLanguages.filter(
+                            (c) => c !== language
+                          ),
+                        });
+                      }
+                    : undefined
                 }
-              }
+              />
+            ))}
+          </StyledLanguageList>
+
+          {!(!userCanEdit && entityLanguages) && (
+            <Dropdown.Single.Basic
+              disabled={!userCanEdit}
+              placeholder="Add new rule language"
+              width={200}
+              options={languageDict.filter(
+                (language) =>
+                  !entityLanguages || !entityLanguages.includes(language.value)
+              )}
+              value={null}
+              onChange={(selectedOption) => {
+                const newLanguageList = [...(entityLanguages ?? [])];
+                const newLanguage = selectedOption as EntityEnums.Language;
+
+                updateValidationRule({
+                  entityLanguages: newLanguageList.includes(newLanguage)
+                    ? newLanguageList.filter(
+                        (language) => language !== newLanguage
+                      )
+                    : [...newLanguageList, newLanguage],
+                });
+              }}
             />
-          ))}
-          {!(
-            !userCanEdit &&
-            entityLanguages &&
-            entityLanguages?.length > 0
-          ) && (
-            // ADD NEW LANGUAGE
-            // <EntitySuggester
-            //   alwaysShowCreateModal
-            //   excludedActantIds={entityClassifications}
-            //   categoryTypes={[EntityEnums.Class.Concept]}
-            //   onPicked={(entity) =>
-            //     updateValidationRule({
-            //       entityClassifications: [...entityClassifications, entity.id],
-            //     })
-            //   }
-            //   disabled={
-            //     !userCanEdit || tieType === EProtocolTieType.Classification
-            //   }
-            // />
-            <></>
           )}
         </StyledFlexList>
 
         {/* Entity Statuses */}
         <StyledLabel>having status</StyledLabel>
         <StyledFlexList>
-          {entityStatuses &&
-            entityStatuses?.map((status, key) => (
-              <StatusTag
-                key={key}
-                flexListMargin
-                unlinkButton={
-                  userCanEdit && {
-                    onClick: () =>
-                      updateValidationRule({
-                        entityStatuses: entityStatuses.filter(
-                          (c) => c !== status
-                        ),
-                      }),
+          <AttributeButtonGroup
+            noMargin
+            disabled={!userCanEdit}
+            canSelectMultiple={true}
+            options={entityStatusDict.map((entityStatusOption) => {
+              return {
+                longValue: entityStatusOption["label"],
+                shortValue: entityStatusOption["label"],
+
+                onClick: () => {
+                  let newStatus: EntityEnums.Status[] = [
+                    ...(entityStatuses ?? []),
+                  ];
+                  const statusValue = entityStatusOption[
+                    "value"
+                  ] as EntityEnums.Status;
+
+                  console.log("statusValue", statusValue);
+
+                  if (entityStatuses && entityStatuses.length > 0) {
+                    // remove if already in the list
+                    if (entityStatuses.includes(statusValue)) {
+                      newStatus = entityStatuses.filter(
+                        (status) => status !== statusValue
+                      );
+                    } else {
+                      newStatus.push(statusValue);
+                    }
+                  } else {
+                    newStatus.push(statusValue);
                   }
-                }
-              />
-            ))}
-          {!(!userCanEdit && entityStatuses && entityStatuses.length > 0) && (
-            <StatusPicker
-              alwaysShowCreateModal
-              excludedActantIds={entityClassifications}
-              categoryTypes={[EntityEnums.Class.Concept]}
-              onPicked={(newStatus: EntityEnums.Status) =>
-                updateValidationRule({
-                  entityStatuses: [...(entityStatuses ?? []), newStatus],
-                })
-              }
-              disabled={
-                !userCanEdit || tieType === EProtocolTieType.Classification
-              }
-            />
-          )}
+
+                  updateValidationRule({ entityStatuses: newStatus });
+                },
+                selected:
+                  entityStatuses && entityStatuses.length
+                    ? entityStatuses.includes(
+                        entityStatusOption["value"] as EntityEnums.Status
+                      )
+                    : true,
+              };
+            })}
+          />
         </StyledFlexList>
 
         {/* Tie type */}
