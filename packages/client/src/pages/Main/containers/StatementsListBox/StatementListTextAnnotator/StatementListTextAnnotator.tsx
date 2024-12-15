@@ -94,7 +94,7 @@ export const StatementListTextAnnotator: React.FC<
     );
 
     if (newSelectedOccurence) {
-      annotator?.selectSearchOccurence(newSelectedOccurence);
+      annotator?.selectSearchOccurrence(newSelectedOccurence);
     }
   }, [searchActiveOccurence, searchOccurences]);
 
