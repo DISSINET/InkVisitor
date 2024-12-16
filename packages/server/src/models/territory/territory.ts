@@ -99,7 +99,9 @@ export class TerritoryData implements ITerritoryData, IModel {
 
 export class TerritoryValidation implements ITerritoryValidation {
   entityClasses: EntityEnums.Class[];
-  classifications: string[];
+  entityClassifications: string[];
+  entityLanguages: EntityEnums.Language[];
+  entityStatuses: EntityEnums.Status[];
   tieType: EProtocolTieType; // default is property
   propType?: string[]; // relevant only in case of Property is selected as a tie
   allowedClasses?: EntityEnums.Class[]; // not relevant if allowedEntities is set
@@ -110,7 +112,10 @@ export class TerritoryValidation implements ITerritoryValidation {
 
   constructor(data: Partial<ITerritoryValidation>) {
     this.entityClasses = data.entityClasses || [];
-    this.classifications = data.classifications || [];
+    this.entityClassifications = data.entityClassifications || [];
+    this.entityLanguages = data.entityLanguages || [];
+    this.entityStatuses = data.entityStatuses || [];
+
     this.tieType = data.tieType || EProtocolTieType.Property;
 
     this.propType = data.propType;
@@ -393,7 +398,9 @@ class Territory extends Entity implements ITerritory {
 
     if (this.data.validations) {
       this.data.validations.forEach((v) => {
-        entityIds.push.apply(entityIds, v.classifications || []);
+        entityIds.push.apply(entityIds, v.entityClassifications || []);
+        entityIds.push.apply(entityIds, v.entityLanguages || []);
+        entityIds.push.apply(entityIds, v.entityStatuses || []);
         entityIds.push.apply(entityIds, v.propType || []);
         entityIds.push.apply(entityIds, v.allowedEntities || []);
       });

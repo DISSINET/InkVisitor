@@ -24,7 +24,9 @@ import { ValidationRule } from "components/advanced";
 const initValidation: ITerritoryValidation = {
   detail: "",
   entityClasses: [],
-  classifications: [],
+  entityClassifications: [],
+  entityLanguages: [],
+  entityStatuses: [],
   allowedEntities: [],
   allowedClasses: [],
   propType: [],
