@@ -334,7 +334,7 @@ export const Suggester: React.FC<Suggester> = ({
                 setSelected(-1);
               }}
               onEnterPressFn={handleEnterPress}
-              autoFocus={categories.length === 1 || autoFocus}
+              autoFocus={categories.length === 1 && autoFocus}
               disabled={disabled}
             />
             {typed.length > 0 && (

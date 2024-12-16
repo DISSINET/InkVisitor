@@ -86,6 +86,7 @@ export const EntityReferenceTableValue: React.FC<EntityReferenceTableValue> = ({
           isInsideTemplate={isInsideTemplate}
           territoryParentId={territoryParentId}
           initTyped={initValueTyped}
+          autoFocus={initValueTyped !== undefined}
           disabled={disabled}
         />
       )}
