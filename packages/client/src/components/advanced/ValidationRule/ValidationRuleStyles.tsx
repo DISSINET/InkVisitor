@@ -66,6 +66,7 @@ export const StyledValue = styled.div`
 export const StyledFlexList = styled.div`
   display: flex;
   flex-wrap: wrap;
+  items-align: center;
   gap: ${({ theme }) => theme.space[2]};
 `;
 

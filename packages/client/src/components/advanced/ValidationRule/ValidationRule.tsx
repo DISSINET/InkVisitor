@@ -174,6 +174,9 @@ export const ValidationRule: React.FC<ValidationRule> = ({
             {entityLanguages?.map((language, key) => (
               <LanguageTag
                 languageValue={language}
+                languageTooltip={
+                  languageDict.find((lang) => lang.value === language)?.label
+                }
                 onUnlink={
                   userCanEdit
                     ? () => {

@@ -399,6 +399,8 @@ class Territory extends Entity implements ITerritory {
     if (this.data.validations) {
       this.data.validations.forEach((v) => {
         entityIds.push.apply(entityIds, v.entityClassifications || []);
+        entityIds.push.apply(entityIds, v.entityLanguages || []);
+        entityIds.push.apply(entityIds, v.entityStatuses || []);
         entityIds.push.apply(entityIds, v.propType || []);
         entityIds.push.apply(entityIds, v.allowedEntities || []);
       });

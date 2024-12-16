@@ -404,7 +404,14 @@ export default class Entity implements IEntity, IDbModel {
           classificationEs.map((cla) => cla.id)?.includes(c)
         );
 
-      if (entityCheck && classificationCheck) {
+      const languageCheck =
+        !entityLanguages?.length || entityLanguages.includes(this.language);
+      console.log("language", this.language, entityLanguages, languageCheck);
+
+      const statusCheck =
+        !entityStatuses?.length || entityStatuses.includes(this.status);
+
+      if (entityCheck && classificationCheck && languageCheck && statusCheck) {
         // CLASSIFICATION TIE
         if (tieType === EProtocolTieType.Classification) {
           if (!allowedEntities || !allowedEntities.length) {
