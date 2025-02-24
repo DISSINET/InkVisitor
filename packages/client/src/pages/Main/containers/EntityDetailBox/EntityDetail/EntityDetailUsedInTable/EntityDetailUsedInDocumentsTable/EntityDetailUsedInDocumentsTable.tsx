@@ -1,5 +1,8 @@
 import { IDocumentMeta, IEntity } from "@shared/types";
-import { IResponseUsedInDocument } from "@shared/types/response-detail";
+import {
+  IResponseDetail,
+  IResponseUsedInDocument,
+} from "@shared/types/response-detail";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, DocumentTitle, Table } from "components";
@@ -17,21 +20,18 @@ import {
 type CellType = CellProps<IResponseUsedInDocument>;
 interface EntityDetailUsedInDocumentsTable {
   title: { singular: string; plural: string };
-  entities: { [key: string]: IEntity };
-  uses: IResponseUsedInDocument[];
   perPage?: number;
-  entity: IEntity;
+  entity: IResponseDetail;
 }
 export const EntityDetailUsedInDocumentsTable: React.FC<
   EntityDetailUsedInDocumentsTable
-> = ({ title, entities, uses = [], perPage, entity }) => {
-  // console.log(uses);
-
+> = ({ title, perPage, entity }: EntityDetailUsedInDocumentsTable) => {
+  const { entities, usedInDocuments: uses, id: entityId } = entity;
   const queryClient = useQueryClient();
 
   const removeAnchorMutation = useMutation({
     mutationFn: (data: { documentId: string; anchorIndex: number }) =>
-      api.documentRemoveAnchor(data.documentId, entity.id, data.anchorIndex),
+      api.documentRemoveAnchor(data.documentId, entityId, data.anchorIndex),
     onSuccess(data, variables, context) {
       queryClient.invalidateQueries({ queryKey: ["entity"] });
     },
@@ -76,7 +76,13 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
         Header: "Resource",
         Cell: ({ row }: CellType) => {
           const resourceEntity = entities[row.original.resourceId];
-          return <>{resourceEntity && <EntityTag entity={resourceEntity} />}</>;
+          return (
+            <>
+              {resourceEntity && (
+                <EntityTag entity={resourceEntity} fullWidth />
+              )}
+            </>
+          );
         },
       },
       {
@@ -95,14 +101,15 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
               {territoryEntity && (
                 <EntityTag
                   entity={territoryEntity}
-                  unlinkButton={{
-                    onClick: () => {
-                      setTAnchor(territoryEntity.id);
-                      setOpenedDocument(row.original.document);
-                    },
-                    icon: <FaAnchor />,
-                    tooltipLabel: "locate anchor",
-                  }}
+                  fullWidth
+                  // unlinkButton={{
+                  //   onClick: () => {
+                  //     setTAnchor(territoryentityId);
+                  //     setOpenedDocument(row.original.document);
+                  //   },
+                  //   icon: <FaAnchor />,
+                  //   tooltipLabel: "open anchor",
+                  // }}
                 />
               )}
             </>
