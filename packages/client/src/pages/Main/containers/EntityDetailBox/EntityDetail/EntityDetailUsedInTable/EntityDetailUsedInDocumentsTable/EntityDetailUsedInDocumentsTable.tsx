@@ -1,8 +1,5 @@
 import { IDocumentMeta, IEntity } from "@shared/types";
-import {
-  IResponseDetail,
-  IResponseUsedInDocument,
-} from "@shared/types/response-detail";
+import { IResponseUsedInDocument } from "@shared/types/response-detail";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, DocumentTitle, Table } from "components";
@@ -28,7 +25,7 @@ interface EntityDetailUsedInDocumentsTable {
 export const EntityDetailUsedInDocumentsTable: React.FC<
   EntityDetailUsedInDocumentsTable
 > = ({ title, entities, uses = [], perPage, entity }) => {
-  const data = useMemo(() => uses, [uses]);
+  // console.log(uses);
 
   const queryClient = useQueryClient();
 
@@ -64,8 +61,8 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
                       toast.info("text copied to clipboard");
                     }}
                   />
-                  <StyledAbbreviatedLabel>
-                    {anchorText || ""}
+                  <StyledAbbreviatedLabel title={anchorText}>
+                    {anchorText}
                   </StyledAbbreviatedLabel>
                 </StyledAnchorText>
               ) : (
@@ -140,7 +137,7 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
       <Table
         entityTitle={title}
         columns={columns}
-        data={data}
+        data={uses}
         perPage={perPage}
         isLoading={removeAnchorMutation.isPending}
       />

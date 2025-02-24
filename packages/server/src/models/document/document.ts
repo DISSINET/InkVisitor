@@ -8,12 +8,12 @@ import User from "@models/user/user";
 export class TreeNode {
   anchor: string; // The tag name (entity id)
   children: TreeNode[] = []; // Nested children (other nodes)
-  content: string = ""; // Text content within the tag
+  content = ""; // Text content within the tag
   class?: EntityEnums.Class; // will be populated in Document.assignClassesBasedOnEntities
 
-  static MAX_CONTENT_LENGTH = 20;
+  static MAX_CONTENT_LENGTH = 100;
 
-  constructor(anchor: string, content: string = "") {
+  constructor(anchor: string, content = "") {
     this.anchor = anchor;
     this.content = content;
   }
@@ -318,7 +318,7 @@ export default class Document implements IDocument, IDbModel {
     const tagRegex = new RegExp(`<\\/?${entityId}(>|$)`, "g");
     let match;
     let count = 0;
-    let positions: { start: number; end: number }[] = [];
+    const positions: { start: number; end: number }[] = [];
 
     // Find all matching tags in the content
     while ((match = tagRegex.exec(this.content)) !== null) {
