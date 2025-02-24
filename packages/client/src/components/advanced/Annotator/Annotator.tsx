@@ -216,6 +216,10 @@ export const TextAnnotator = ({
     annotator?.addAnchor(entityId);
     setSelectedText("");
     handleSaveNewContent(true);
+
+    queryClient.invalidateQueries({
+      queryKey: ["entity", entityId],
+    });
   };
 
   const refreshAnnotator = (scrollTo: { line?: number; anchor?: string }) => {
