@@ -79,7 +79,9 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
           return (
             <>
               {resourceEntity && (
-                <EntityTag entity={resourceEntity} fullWidth />
+                <div style={{ display: "grid" }}>
+                  <EntityTag entity={resourceEntity} fullWidth />
+                </div>
               )}
             </>
           );
@@ -99,18 +101,20 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
           return (
             <>
               {territoryEntity && (
-                <EntityTag
-                  entity={territoryEntity}
-                  fullWidth
-                  // unlinkButton={{
-                  //   onClick: () => {
-                  //     setTAnchor(territoryentityId);
-                  //     setOpenedDocument(row.original.document);
-                  //   },
-                  //   icon: <FaAnchor />,
-                  //   tooltipLabel: "open anchor",
-                  // }}
-                />
+                <div style={{ display: "grid" }}>
+                  <EntityTag
+                    entity={territoryEntity}
+                    fullWidth
+                    // unlinkButton={{
+                    //   onClick: () => {
+                    //     setTAnchor(territoryentityId);
+                    //     setOpenedDocument(row.original.document);
+                    //   },
+                    //   icon: <FaAnchor />,
+                    //   tooltipLabel: "open anchor",
+                    // }}
+                  />
+                </div>
               )}
             </>
           );
