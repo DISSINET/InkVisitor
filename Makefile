@@ -10,5 +10,8 @@ build-inkvisitor-sandbox:
 build-inkvisitor-data-import:
 	docker build --platform linux/amd64 -f Dockerfile -t dissinet/inkvisitor:data-import --build-arg="ENV=data-import" . && docker push dissinet/inkvisitor:data-import
 
+build-inkvisitor-data-import-persecutio:
+	docker build --platform linux/amd64 -f Dockerfile -t dissinet/inkvisitor:data-import-persecutio --build-arg="ENV=data-import-persecutio" . && docker push dissinet/inkvisitor:data-import-persecutio
+
 build-niort:
 	docker build --platform linux/amd64 -f Dockerfile -t dissinet/inkvisitor:niort --build-arg="ENV=niort" . && docker push dissinet/inkvisitor:niort

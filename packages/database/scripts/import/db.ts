@@ -43,6 +43,7 @@ export class DbHelper {
     try {
       this.conn = await r.connect(this.dbConfig);
     } catch (e) {
+      console.error(this.dbConfig);
       throw new Error(`Cannot connect to the db: ${e}`);
     }
 

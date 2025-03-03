@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
+import { confirm } from "../import/prompts";
 
 export default class Dataset {
   static DIRECTORY = "datasets";
@@ -15,6 +16,10 @@ export default class Dataset {
     this._datasetName = datasetName;
   }
 
+  public get datasetName() {
+    return this._datasetName;
+  }
+
   getPath(filename?: string) {
     if (!this._datasetName) {
       throw new Error(
@@ -22,13 +27,7 @@ export default class Dataset {
       );
     }
 
-    let parts = [
-      __dirname,
-      "..",
-      "..",
-      Dataset.DIRECTORY,
-      this._datasetName,
-    ];
+    let parts = [__dirname, "..", "..", Dataset.DIRECTORY, this._datasetName];
     if (filename) {
       parts.push(filename);
     }
@@ -39,11 +38,11 @@ export default class Dataset {
     const filePath = this.getPath(filename);
 
     if (!fs.existsSync(filePath)) {
-        throw new Error(`file ${filePath} does not exist`);
+      throw new Error(`file ${filePath} does not exist`);
     }
 
-    const rawData = fs.readFileSync(filePath, 'utf8')
-    return JSON.parse(rawData)
+    const rawData = fs.readFileSync(filePath, "utf8");
+    return JSON.parse(rawData);
   }
 
   async writeFile(filename: string, data: string) {
@@ -54,20 +53,27 @@ export default class Dataset {
     const dirPath = this.getPath();
     const filePath = this.getPath(filename);
 
+    console.log("dirPath", fs.existsSync(dirPath));
+    console.log("filePath", fs.existsSync(filePath));
+
+    // check folder path
     if (fs.existsSync(dirPath)) {
-      fs.mkdirSync(dirPath);
-    } else {
       if (await confirm(`dir ${dirPath} exists...continue?`)) {
-        console.log(`not reusing dir ${dirPath}`);
+        console.log(`reusing dir ${dirPath}`);
+      } else {
+        console.log(`not reusing dir ${dirPath}. Exiting`);
         return;
       }
+    } else {
+      fs.mkdirSync(dirPath);
     }
 
+    // check file path
     if (fs.existsSync(filePath)) {
       if (await confirm(`rewrite existing file ${filename}?`)) {
         fs.rmSync(filePath);
       } else {
-        console.log(`not overwriting file ${filePath}`);
+        console.log(`not overwriting file ${filePath}. Exiting`);
         return;
       }
     }

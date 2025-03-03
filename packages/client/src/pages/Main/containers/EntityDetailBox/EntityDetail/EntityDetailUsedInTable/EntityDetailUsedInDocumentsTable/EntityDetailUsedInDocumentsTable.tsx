@@ -104,7 +104,7 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
                       setOpenedDocument(row.original.document);
                     },
                     icon: <FaAnchor />,
-                    tooltipLabel: "open anchor",
+                    tooltipLabel: "locate anchor",
                   }}
                 />
               )}

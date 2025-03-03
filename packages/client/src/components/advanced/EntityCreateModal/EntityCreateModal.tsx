@@ -166,7 +166,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
           newCreated.label,
           newCreated.detail || "",
           newCreated.territoryId ? newCreated.territoryId : rootTerritoryId,
-          -1
+          EntityEnums.Order.Last
         );
         entityCreateMutation.mutate(newTerritory);
       } else if (newCreated.entityClass === EntityEnums.Class.Action) {

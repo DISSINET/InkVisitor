@@ -346,7 +346,7 @@ export const StatementListTextAnnotator: React.FC<
               <Button
                 label=""
                 iconRight={<FaLongArrowAltRight />}
-                tooltipLabel="localize anchor in document"
+                tooltipLabel="locate anchor"
                 inverted
                 onClick={() => {
                   annotator?.scrollToAnchor(territoryId);

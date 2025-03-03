@@ -75,6 +75,7 @@ const theme = {
     muni: "#091034",
     staging: "#911111",
     "data-import": "#99004C",
+    "data-import-persecutio": "#380099",
     development: "#6174C2",
     sandbox: "#CB6E17",
 
