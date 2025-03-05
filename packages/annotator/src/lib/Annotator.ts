@@ -450,28 +450,29 @@ export class Annotator {
     end: SegmentPosition | null
   ): string[] {
     // remaining opened tags - true = open, false = closed
-    const tagsUpToEnd: Record<string, boolean> = {};
-    const tagsUpToStart: Record<string, boolean> = {};
+    const tagsUpToEnd: Record<string, number> = {};
+    const tagsUpToStart: Record<string, number> = {};
 
     if (start) {
-      // find still opened tags up to the end position - point based check
+      // find still opened until current window
       for (let i = 0; i < start.segmentIndex; i++) {
         const segment = this.text.segments[i];
         for (const tag of segment.openingTags) {
-          tagsUpToStart[tag.tag] = true;
+          tagsUpToStart[tag.tag] ? tagsUpToStart[tag.tag]++ : tagsUpToStart[tag.tag] = 1;
         }
         for (const tag of segment.closingTags) {
-          tagsUpToStart[tag.tag] = false;
+          tagsUpToStart[tag.tag] ? tagsUpToStart[tag.tag]-- : tagsUpToStart[tag.tag] = 0;
         }
       }
 
+      // current segment - everything in here should be definitely in the output
       const startSegment = this.text.segments[start.segmentIndex];
       const [segOpened, segClosed] = startSegment.getTagsForPosition(start);
       for (const tag of segOpened) {
-        tagsUpToStart[tag.tag] = true;
+        tagsUpToStart[tag.tag] ? tagsUpToStart[tag.tag]+999 : tagsUpToStart[tag.tag] = 999;
       }
       for (const tag of segClosed) {
-        tagsUpToStart[tag.tag] = false;
+        tagsUpToStart[tag.tag] ? tagsUpToStart[tag.tag]+999 : tagsUpToStart[tag.tag] = 999;
       }
     }
 
@@ -480,20 +481,20 @@ export class Annotator {
       for (let i = start?.segmentIndex || 0; i < end.segmentIndex; i++) {
         const segment = this.text.segments[i];
         for (const tag of segment.openingTags) {
-          tagsUpToEnd[tag.tag] = true;
+          tagsUpToEnd[tag.tag] ? tagsUpToEnd[tag.tag]+999 : tagsUpToEnd[tag.tag] = 999;
         }
         for (const tag of segment.closingTags) {
-          tagsUpToEnd[tag.tag] = false;
+          tagsUpToEnd[tag.tag] ? tagsUpToEnd[tag.tag]+999 : tagsUpToEnd[tag.tag] = 999;
         }
       }
 
       const endSegment = this.text.segments[end.segmentIndex];
       const [segOpened, segClosed] = endSegment.getTagsForPosition(end);
       for (const tag of segOpened) {
-        tagsUpToEnd[tag.tag] = true;
+        tagsUpToEnd[tag.tag] ? tagsUpToEnd[tag.tag]+999 : tagsUpToEnd[tag.tag] = 999;
       }
       for (const tag of segClosed) {
-        tagsUpToEnd[tag.tag] = false;
+        tagsUpToEnd[tag.tag] ? tagsUpToEnd[tag.tag]+999 : tagsUpToEnd[tag.tag] = 999;
       }
     }
 
@@ -504,7 +505,7 @@ export class Annotator {
       }
     }
     for (const tag of Object.keys(tagsUpToEnd)) {
-      if (tagsUpToStart[tag] === undefined) {
+      if (tagsUpToEnd[tag]) {
         final[tag] = true;
       }
     }
