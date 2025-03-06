@@ -29,6 +29,7 @@ interface TextAnnotatorMenuProps {
   handleRemoveAnchor: Function | false;
   thisTerritoryEntityId: string | undefined;
   canCreateActiveTAnchor: boolean;
+  isLoadingEntities: boolean;
 }
 
 export const TextAnnotatorMenu = ({
@@ -95,7 +96,7 @@ export const TextAnnotatorMenu = ({
             <Button
               icon={
                 <>
-                  <FaPlus size={12} style={{}} />
+                  <FaPlus size={12} />
                   <TbAnchor size={15} />
                 </>
               }
@@ -111,7 +112,7 @@ export const TextAnnotatorMenu = ({
             <Button
               icon={
                 <>
-                  <FaPlus size={12} style={{}} />
+                  <FaPlus size={12} />
                   <TbAnchor size={15} />
                 </>
               }
