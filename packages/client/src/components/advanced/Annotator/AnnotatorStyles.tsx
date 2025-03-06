@@ -77,6 +77,13 @@ export const StyledAnnotatorItemContent = styled.div`
   margin-bottom: ${({ theme }) => theme.space[2]};
   flex-wrap: wrap;
 `;
+export const StyledAnnotatorAnchorListWrap = styled.div`
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  max-height: 200px;
+`;
+
 export const StyledAnnotatorItemTitle = styled.div`
   color: ${({ theme }) => theme.color.gray["700"]};
   font-size: ${({ theme }) => theme.fontSize["md"]};

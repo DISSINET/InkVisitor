@@ -11,6 +11,7 @@ import { EntitySuggester } from "../EntitySuggester/EntitySuggester";
 import { EntityTag } from "../EntityTag/EntityTag";
 import {
   StyledAnnotatorAnchorList,
+  StyledAnnotatorAnchorListWrap,
   StyledAnnotatorItem,
   StyledAnnotatorItemContent,
   StyledAnnotatorItemTitle,
@@ -138,27 +139,29 @@ export const TextAnnotatorMenu = ({
           Anchors in selection
         </StyledAnnotatorItemTitle>
         <StyledAnnotatorItemContent>
-          <StyledAnnotatorAnchorList>
-            {anchors.map((anchor) => {
-              if (entities[anchor]) {
-                return (
-                  <EntityTag
-                    unlinkButton={{
-                      onClick: () => {
-                        if (handleRemoveAnchor) {
-                          handleRemoveAnchor(anchor);
-                        }
-                      },
-                    }}
-                    key={anchor}
-                    entity={entities[anchor] as IEntity}
-                  />
-                );
-              } else {
-                return <React.Fragment key={anchor} />;
-              }
-            })}
-          </StyledAnnotatorAnchorList>
+          <StyledAnnotatorAnchorListWrap>
+            <StyledAnnotatorAnchorList>
+              {anchors.map((anchor) => {
+                if (entities[anchor]) {
+                  return (
+                    <EntityTag
+                      unlinkButton={{
+                        onClick: () => {
+                          if (handleRemoveAnchor) {
+                            handleRemoveAnchor(anchor);
+                          }
+                        },
+                      }}
+                      key={anchor}
+                      entity={entities[anchor] as IEntity}
+                    />
+                  );
+                } else {
+                  return <React.Fragment key={anchor} />;
+                }
+              })}
+            </StyledAnnotatorAnchorList>
+          </StyledAnnotatorAnchorListWrap>
         </StyledAnnotatorItemContent>
       </StyledAnnotatorItem>
     </>
