@@ -85,6 +85,7 @@ export const StyledAnnotatorAnchorListWrap = styled.div`
 `;
 
 export const StyledAnnotatorItemTitle = styled.div`
+  position: relative;
   color: ${({ theme }) => theme.color.gray["700"]};
   font-size: ${({ theme }) => theme.fontSize["md"]};
   font-weight: ${({ theme }) => theme.fontWeight["medium"]};

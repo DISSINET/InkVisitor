@@ -17,6 +17,7 @@ import {
   StyledAnnotatorItemTitle,
 } from "./AnnotatorStyles";
 import { toast } from "react-toastify";
+import { Loader } from "components";
 
 interface TextAnnotatorMenuProps {
   text: string;
@@ -42,6 +43,7 @@ export const TextAnnotatorMenu = ({
   handleRemoveAnchor = false,
   thisTerritoryEntityId,
   canCreateActiveTAnchor,
+  isLoadingEntities,
 }: TextAnnotatorMenuProps) => {
   return (
     <>
@@ -138,6 +140,7 @@ export const TextAnnotatorMenu = ({
       <StyledAnnotatorItem>
         <StyledAnnotatorItemTitle>
           Anchors in selection
+          <Loader show={isLoadingEntities} size={16} />
         </StyledAnnotatorItemTitle>
         <StyledAnnotatorItemContent>
           <StyledAnnotatorAnchorListWrap>
