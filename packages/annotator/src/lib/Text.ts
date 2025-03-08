@@ -1,10 +1,9 @@
 import Viewport from "./Viewport";
-import Highlighter, {
+import {
   IAbsCoordinates,
   IRelativeCoordinates,
 } from "./Highlighter";
 import { EditMode } from "./constants";
-import Cursor from "./Cursor";
 
 export interface ITag {
   position: number;
@@ -54,22 +53,69 @@ export class Segment {
     this.parsed = this.raw.replace(/<\/?[^<>]+?>/g, "");
   }
 
-  getTagsForPosition(pos: SegmentPosition): [ITag[], ITag[]] {
+  /**
+   * Returns list of opening/closing tags in this segment before raw index
+   * @param rawIndex 
+   * @returns 
+   */
+  getTagsBeforePosition(rawIndex: number): [ITag[], ITag[]] {
     const openedTags: ITag[] = [];
     const closedTags: ITag[] = [];
     for (const tag of this.openingTags) {
-      if (tag.position < pos.rawTextIndex) {
+      if (tag.position < rawIndex) {
         openedTags.push(tag);
       }
     }
     for (const tag of this.closingTags) {
-      if (tag.position < pos.rawTextIndex) {
+      if (tag.position < rawIndex) {
         closedTags.push(tag);
       }
     }
     return [openedTags, closedTags];
   }
 
+  /**
+   * Returns list of opening/closing tags in this segment after raw index
+   * @param rawIndex 
+   * @returns 
+   */
+   getTagsAfterPosition(rawIndex: number): [ITag[], ITag[]] {
+    const openedTags: ITag[] = [];
+    const closedTags: ITag[] = [];
+    for (const tag of this.openingTags) {
+      if (tag.position > rawIndex) {
+        openedTags.push(tag);
+      }
+    }
+    for (const tag of this.closingTags) {
+      if (tag.position > rawIndex) {
+        closedTags.push(tag);
+      }
+    }
+    return [openedTags, closedTags];
+  }
+
+  /**
+   * Returns list of opening/closing tags in this segment between start/end raw indexes
+   * @param pos 
+   * @returns 
+   */
+  getTagsInPosition(startRawIndex: number, endRawIndex: number): [ITag[], ITag[]] {
+    const openedTags: ITag[] = [];
+    const closedTags: ITag[] = [];
+    for (const tag of this.openingTags) {
+      if (tag.position < endRawIndex && tag.position > startRawIndex) {
+        openedTags.push(tag);
+      }
+    }
+    for (const tag of this.closingTags) {
+      if (tag.position < endRawIndex && tag.position > startRawIndex) {
+        closedTags.push(tag);
+      }
+    }
+    return [openedTags, closedTags];
+  }
+  
   findTagParsedPosition(tag: ITag): { x: number; y: number } {
     // find abs position right after the <tag> in segment's text
     let parsedTextOpenPosition = this.openingTags
