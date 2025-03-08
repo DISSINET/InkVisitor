@@ -17,7 +17,7 @@ import {
 } from "components";
 import Dropdown from "components/advanced";
 import useKeypress from "hooks/useKeyPress";
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { DropTargetMonitor, useDrop } from "react-dnd";
 import { FaPlus } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
@@ -140,6 +140,17 @@ export const Suggester: React.FC<Suggester> = ({
     },
     [showCreateModal, isFocused]
   );
+
+  const inputRef = useRef<HTMLDivElement>(null);
+  const [resultWidth, setResultWidth] = useState<number | undefined>(undefined);
+
+  // measure the input width when focused
+  useEffect(() => {
+    if (isFocused && inputRef.current) {
+      const width = inputRef.current.getBoundingClientRect().width;
+      setResultWidth(width);
+    }
+  }, [isFocused]);
 
   const onTypeFn = (newType: string) => {
     setSelected(-1);
@@ -312,7 +323,11 @@ export const Suggester: React.FC<Suggester> = ({
           <TypeBar entityLetter={category} />
 
           <div
-            ref={refs.setReference}
+            // ref={refs.setReference}
+            ref={(node) => {
+              refs.setReference(node);
+              inputRef.current = node;
+            }}
             style={{
               position: "relative",
               width: "100%",
@@ -381,7 +396,7 @@ export const Suggester: React.FC<Suggester> = ({
             >
               {suggestions.length || (isFetching && isFocused) ? (
                 <>
-                  <StyledRelativePosition>
+                  <StyledRelativePosition $width={resultWidth}>
                     {renderEntitySuggestions(suggestions)}
                     <Loader size={30} show={isFetching} />
                   </StyledRelativePosition>
@@ -401,7 +416,7 @@ export const Suggester: React.FC<Suggester> = ({
               {/* PRE-SUGGESTIONS */}
               {preSuggestions?.length && typed.length === 0 ? (
                 <>
-                  <StyledRelativePosition>
+                  <StyledRelativePosition $width={resultWidth}>
                     {renderEntitySuggestions(preSuggestions)}
                     <Loader size={30} show={isFetching} />
                   </StyledRelativePosition>
