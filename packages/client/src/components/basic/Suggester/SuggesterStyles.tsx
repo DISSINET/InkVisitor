@@ -61,13 +61,18 @@ export const StyledSuggestionCancelButton = styled.div<StyledSuggestionCancelBut
 export const StyledSuggesterList = styled.div`
   z-index: 160;
 `;
-
-export const StyledRelativePosition = styled.div`
+interface StyledRelativePosition {
+  $width?: number;
+}
+export const StyledRelativePosition = styled.div<StyledRelativePosition>`
   position: relative;
   background-color: ${({ theme }) => theme.color["blue"][50]};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
   min-width: 16.1rem;
-  max-width: 24rem;
+  /* max-width: 24rem; */
+  max-width: ${({ $width }) => (!$width ? "24rem" : "")};
+  width: ${({ $width }) => ($width ? `${$width / 10}rem` : "")};
+
   overflow: hidden;
   display: grid;
 

@@ -149,6 +149,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
             entityClassifications?.length > 0
           ) && (
             <EntitySuggester
+              inputWidth="full"
               alwaysShowCreateModal
               excludedActantIds={entityClassifications}
               categoryTypes={[EntityEnums.Class.Concept]}
@@ -337,6 +338,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
               ))}
               {!(!userCanEdit && propType && propType.length > 0) && (
                 <EntitySuggester
+                  inputWidth="full"
                   alwaysShowCreateModal
                   categoryTypes={[EntityEnums.Class.Concept]}
                   excludedActantIds={propType}
@@ -397,6 +399,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
 
           {isAllowedEntitiesSuggesterVisible && (
             <EntitySuggester
+              inputWidth="full"
               alwaysShowCreateModal
               categoryTypes={allowedEntitiesClasses}
               excludedActantIds={allowedEntities}

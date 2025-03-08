@@ -49,6 +49,7 @@ const getWidth = (width: "full" | "fat" | "normal" | "auto" | number) => {
 };
 export const StyledCard = styled(animated.div)<Card>`
   width: ${({ width }) => getWidth(width)};
+  max-width: calc(100vw - 4rem);
   height: ${({ $fullHeight }) => ($fullHeight ? "100%" : "")};
   display: flex;
   flex-direction: column;
@@ -132,6 +133,7 @@ export const StyledModalInputForm = styled.div<StyledModalInputForm>`
   grid-template-columns: ${({ $alignLeft }) =>
     $alignLeft ? "auto 1fr" : "auto auto"};
   grid-row-gap: ${({ theme }) => theme.space[1]};
+  width: 100%;
 `;
 export const StyledModalInputLabel = styled.p`
   display: grid;
