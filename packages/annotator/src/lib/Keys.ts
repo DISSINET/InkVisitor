@@ -60,6 +60,7 @@ export default class Keys {
     Key.ScrollLock,
     Key.End,
     Key.Home,
+    "AltGraph",
   ];
 
   annotator: AnnotatorCallbacks;
@@ -644,6 +645,10 @@ export default class Keys {
         break;
 
       default:
+        if (e.key === "AltGraph") {
+          // AltGr, don't insert text
+          break;
+        }
         if (e.ctrlKey || e.metaKey) {
           if (e.key === "c") {
             this.annotator.onCopyText();
