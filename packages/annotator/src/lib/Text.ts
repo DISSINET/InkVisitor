@@ -504,11 +504,7 @@ class Text {
     const segment = this.segments[segmentPosition.segmentIndex];
 
     if (this.mode !== EditMode.RAW) {
-      for (const tag of segment.closingTags) {
-        if (tag.position < segmentPosition.rawTextIndex) {
-          indexPosition -= tag.tag.length + 3;
-        }
-      }
+     
     }
 
     for (let i = 0; i < segmentPosition.segmentIndex; i++) {
