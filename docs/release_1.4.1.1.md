@@ -25,7 +25,7 @@
 - Add Territory should trigger entity creation modal #2504
 - Increase width of entity creation modal #2519
 - Increase width of suggester fields in Detail #2525
-- Fix annotator semi-mode char add & delete char
+- Fix annotator semi-mode char add & delete char #2587
 
 ### Dev improvements
 
