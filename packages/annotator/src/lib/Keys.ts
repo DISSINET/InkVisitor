@@ -12,6 +12,7 @@ enum Key {
   Escape = "Escape",
   Enter = "Enter",
   Delete = "Delete",
+  Insert = "Insert",
   Home = "Home",
   End = "End",
   Meta = "Meta",
@@ -42,26 +43,6 @@ export interface AnnotatorCallbacks {
 }
 
 export default class Keys {
-  static nonCharKeys = [
-    Key.CapsLock,
-    Key.Shift,
-    Key.Control,
-    Key.Alt,
-    Key.Tab,
-    Key.Escape,
-    Key.Enter,
-    Key.Delete,
-    Key.Meta,
-    Key.PageUp,
-    Key.PageDown,
-    Key.Fn,
-    Key.FnLock,
-    Key.NumLock,
-    Key.ScrollLock,
-    Key.End,
-    Key.Home,
-  ];
-
   annotator: AnnotatorCallbacks;
 
   cursor: Cursor;
@@ -682,7 +663,7 @@ export default class Keys {
           break;
         }
 
-        if (!Keys.nonCharKeys.includes(key)) {
+        if (key.length === 1) {
           if (this.text.mode === EditMode.HIGHLIGHT) {
             return;
           }

@@ -3,7 +3,7 @@ import Highlighter, { IAbsCoordinates } from "./Highlighter";
 import Keys from "./Keys";
 import { Lines } from "./Lines";
 import Scroller from "./Scroller";
-import Text, { SegmentPosition } from "./Text";
+import Text, { ITag, SegmentPosition } from "./Text";
 import Viewport from "./Viewport";
 import { EditMode, HighlightMode } from "./constants";
 
@@ -415,7 +415,7 @@ export class Annotator {
     };
     this.cursor.xLine = this.cursor.selectEnd.xLine;
     this.cursor.yLine = this.cursor.selectEnd.yLine;
-    this.cursor.selectDirection = DIRECTION.FORWARD
+    this.cursor.selectDirection = DIRECTION.FORWARD;
     this.draw();
   }
 
@@ -450,61 +450,87 @@ export class Annotator {
     end: SegmentPosition | null
   ): string[] {
     // remaining opened tags - true = open, false = closed
-    const tagsUpToEnd: Record<string, boolean> = {};
-    const tagsUpToStart: Record<string, boolean> = {};
-
-    if (start) {
-      // find still opened tags up to the end position - point based check
-      for (let i = 0; i < start.segmentIndex; i++) {
-        const segment = this.text.segments[i];
-        for (const tag of segment.openingTags) {
-          tagsUpToStart[tag.tag] = true;
-        }
-        for (const tag of segment.closingTags) {
-          tagsUpToStart[tag.tag] = false;
-        }
-      }
-
-      const startSegment = this.text.segments[start.segmentIndex];
-      const [segOpened, segClosed] = startSegment.getTagsForPosition(start);
-      for (const tag of segOpened) {
-        tagsUpToStart[tag.tag] = true;
-      }
-      for (const tag of segClosed) {
-        tagsUpToStart[tag.tag] = false;
-      }
-    }
-
-    if (end) {
-      // find still opened tags up to the end position - point based check
-      for (let i = start?.segmentIndex || 0; i < end.segmentIndex; i++) {
-        const segment = this.text.segments[i];
-        for (const tag of segment.openingTags) {
-          tagsUpToEnd[tag.tag] = true;
-        }
-        for (const tag of segment.closingTags) {
-          tagsUpToEnd[tag.tag] = false;
-        }
-      }
-
-      const endSegment = this.text.segments[end.segmentIndex];
-      const [segOpened, segClosed] = endSegment.getTagsForPosition(end);
-      for (const tag of segOpened) {
-        tagsUpToEnd[tag.tag] = true;
-      }
-      for (const tag of segClosed) {
-        tagsUpToEnd[tag.tag] = false;
-      }
-    }
-
+    const untilStart: Record<string, number> = {};
     const final: Record<string, boolean> = {};
-    for (const tag of Object.keys(tagsUpToStart)) {
-      if (tagsUpToStart[tag]) {
-        final[tag] = true;
+
+    // sanitize case without start
+    if (!start) {
+      start = {
+        charInLineIndex: 0,
+        lineIndex: 0,
+        parsedTextIndex: 0,
+        rawTextIndex: 0,
+        segmentIndex: 0,
+      };
+    }
+    // sanitize case without end
+    if (!end) {
+      end = start;
+    }
+
+    // find still opened until current window
+    for (let i = 0; i <= start.segmentIndex; i++) {
+      const segment = this.text.segments[i];
+      let openingTags, closingTags: ITag[];
+      if (i === start.segmentIndex) {
+        [openingTags, closingTags] = segment.getTagsBeforePosition(
+          start.rawTextIndex
+        );
+      } else {
+        [openingTags, closingTags] = [segment.openingTags, segment.closingTags];
+      }
+
+      for (const tag of openingTags) {
+        untilStart[tag.tag] = (untilStart[tag.tag] || 0) + 1;
+      }
+      for (const tag of closingTags) {
+        untilStart[tag.tag] = (untilStart[tag.tag] || 0) - 1;
       }
     }
-    for (const tag of Object.keys(tagsUpToEnd)) {
-      if (tagsUpToStart[tag] === undefined) {
+
+    // use everything that is between start and end
+    for (let i = start.segmentIndex; i < end.segmentIndex; i++) {
+      const segment = this.text.segments[i];
+      let openingTags, closingTags: ITag[];
+      if (i === start.segmentIndex) {
+        [openingTags, closingTags] = segment.getTagsAfterPosition(
+          start.rawTextIndex
+        );
+      } else {
+        [openingTags, closingTags] = [segment.openingTags, segment.closingTags];
+      }
+      for (const tag of openingTags) {
+        final[tag.tag] = true;
+      }
+      for (const tag of closingTags) {
+        final[tag.tag] = true;
+      }
+    }
+
+    // process end segment
+    const endSegment = this.text.segments[end.segmentIndex];
+    let opened, closed: ITag[];
+    if (start.segmentIndex !== end.segmentIndex) {
+      // if end segment != start segment - use everything up to end position
+      [opened, closed] = endSegment.getTagsBeforePosition(end.rawTextIndex);
+    } else {
+      // if end segment === start segment
+      const segment = this.text.segments[end.segmentIndex];
+      [opened, closed] = segment.getTagsInPosition(
+        start.rawTextIndex,
+        end.rawTextIndex
+      );
+    }
+    for (const tag of opened) {
+      final[tag.tag] = true;
+    }
+    for (const tag of closed) {
+      final[tag.tag] = true;
+    }
+
+    // reduce untilStart
+    for (const tag of Object.keys(untilStart)) {
+      if (untilStart[tag] > 0) {
         final[tag] = true;
       }
     }
@@ -601,6 +627,8 @@ export class Annotator {
           end.xLine
         ) as SegmentPosition;
         const annotated = this.getAnnotations(startSegment, endSegment);
+        console.log(annotated, startSegment, endSegment);
+        (window as any).test = this;
         this.onSelectTextCb({
           text: this.text.getRangeText(start, end),
           anchors: annotated,
@@ -733,7 +761,7 @@ export class Annotator {
       const indexPositionEnd = this.text.getAbsTextIndex(
         new Cursor(this.ratio, end.xLine, end.yLine - this.viewport.lineStart),
         this.viewport,
-        true,
+        true
       );
 
       const beforeText = this.text.value.slice(0, indexPositionStart);

@@ -130,7 +130,13 @@ export const TextAnnotator = ({
 
   const [selectedText, setSelectedText] = useState<string>("");
   const [selectedAnchors, setSelectedAnchors] = useState<string[]>([]);
-  const storedEntities = useRef<Record<string, IEntity | false>>({});
+  // const storedEntities = useRef<Record<string, IEntity | false>>({});
+  // Add loading state
+  const [isLoadingEntities, setIsLoadingEntities] = useState(false);
+  // Move entities to state instead of ref to trigger re-renders
+  const [storedEntities, setStoredEntities] = useState<
+    Record<string, IEntity | false>
+  >({});
 
   const [scrollAfterRefresh, setScrollAfterRefresh] = useState<
     number | undefined
@@ -167,12 +173,12 @@ export const TextAnnotator = ({
   };
 
   const addEntityToStore = (eid: string, entity: IEntity | false) => {
-    storedEntities.current[eid] = entity;
+    setStoredEntities((prev) => ({ ...prev, [eid]: entity }));
   };
 
   const obtainEntity = async (eid: string) => {
-    if (Object.keys(storedEntities.current).includes(eid)) {
-      return storedEntities.current[eid];
+    if (storedEntities[eid]) {
+      return storedEntities[eid];
     } else {
       try {
         const entityRes = await fetchEntity(eid);
@@ -190,13 +196,16 @@ export const TextAnnotator = ({
     if (annotatorMode === EditMode.HIGHLIGHT) {
       setSelectedText(text);
       setSelectedAnchors(anchors);
+      setIsLoadingEntities(true);
 
-      for (const anchorI in anchors) {
-        await obtainEntity(anchors[anchorI]);
-      }
-
-      if (thisTerritoryEntityId) {
-        await obtainEntity(thisTerritoryEntityId);
+      try {
+        // Load all entities in parallel
+        await Promise.all([
+          ...anchors.map((anchor) => obtainEntity(anchor)),
+          thisTerritoryEntityId ? obtainEntity(thisTerritoryEntityId) : null,
+        ]);
+      } finally {
+        setIsLoadingEntities(false);
       }
     }
   };
@@ -492,7 +501,7 @@ export const TextAnnotator = ({
               anchors={selectedAnchors}
               documentData={dataDocument as IResponseDocumentDetail}
               text={selectedText}
-              entities={storedEntities.current}
+              entities={storedEntities}
               onAnchorAdd={handleAddAnchor}
               handleCreateTerritory={onCreateTerritory}
               handleCreateStatement={onCreateStatement}
@@ -503,6 +512,7 @@ export const TextAnnotator = ({
                   thisTerritoryEntityId ?? ""
                 )
               }
+              isLoadingEntities={isLoadingEntities}
             />
           </StyledAnnotatorMenu>
         )}

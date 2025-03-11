@@ -487,6 +487,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
               </>,
               refreshBoxButton(["entity", "user"], false),
               <Button
+                dataTestId="maximize-detail-box"
                 inverted
                 tooltipLabel={getMaximizeBtnTooltip()}
                 icon={

@@ -6,14 +6,13 @@ import { AxiosResponse } from "axios";
 import { Input } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
 import React, { useEffect } from "react";
-import { StyledSuggesterWrapper } from "../EntityDetailRelations/EntityDetailRelationTypeBlock/EntityDetailRelationTypeBlockStyles";
 import {
+  StyledFlexList,
   StyledGrid,
   StyledLabel,
   StyledTagWrap,
   StyledValue,
 } from "./EntityDetailProtocolStyles";
-import { StyledFlexList } from "../../../../../../components/advanced/ValidationRule/ValidationRuleStyles";
 
 const initialProtocol: ITerritoryProtocol = {
   project: "",
@@ -114,6 +113,7 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
             })}
           {userCanEdit && (
             <EntitySuggester
+              inputWidth="full"
               alwaysShowCreateModal
               onPicked={(newPicked) => {
                 updateProtocol({
@@ -171,6 +171,7 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
             })}
           {userCanEdit && (
             <EntitySuggester
+              inputWidth="full"
               alwaysShowCreateModal
               onPicked={(newPicked) => {
                 updateProtocol({
@@ -213,6 +214,7 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
             })}
           {userCanEdit && (
             <EntitySuggester
+              inputWidth="full"
               alwaysShowCreateModal
               onPicked={(newPicked) => {
                 updateProtocol({
@@ -244,6 +246,7 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
           </StyledTagWrap>
         ) : (
           <EntitySuggester
+            inputWidth="full"
             alwaysShowCreateModal
             onPicked={(newPicked) => {
               updateProtocol({ startDate: newPicked.id });
@@ -271,6 +274,7 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
           </StyledTagWrap>
         ) : (
           <EntitySuggester
+            inputWidth="full"
             alwaysShowCreateModal
             onPicked={(newPicked) => {
               updateProtocol({ endDate: newPicked.id });
@@ -310,6 +314,7 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
             })}
           {userCanEdit && (
             <EntitySuggester
+              inputWidth="full"
               alwaysShowCreateModal
               onPicked={(newPicked) => {
                 updateProtocol({

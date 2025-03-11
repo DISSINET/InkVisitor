@@ -11,11 +11,13 @@ import { EntitySuggester } from "../EntitySuggester/EntitySuggester";
 import { EntityTag } from "../EntityTag/EntityTag";
 import {
   StyledAnnotatorAnchorList,
+  StyledAnnotatorAnchorListWrap,
   StyledAnnotatorItem,
   StyledAnnotatorItemContent,
   StyledAnnotatorItemTitle,
 } from "./AnnotatorStyles";
 import { toast } from "react-toastify";
+import { Loader } from "components";
 
 interface TextAnnotatorMenuProps {
   text: string;
@@ -28,6 +30,7 @@ interface TextAnnotatorMenuProps {
   handleRemoveAnchor: Function | false;
   thisTerritoryEntityId: string | undefined;
   canCreateActiveTAnchor: boolean;
+  isLoadingEntities: boolean;
 }
 
 export const TextAnnotatorMenu = ({
@@ -40,6 +43,7 @@ export const TextAnnotatorMenu = ({
   handleRemoveAnchor = false,
   thisTerritoryEntityId,
   canCreateActiveTAnchor,
+  isLoadingEntities,
 }: TextAnnotatorMenuProps) => {
   return (
     <>
@@ -94,7 +98,7 @@ export const TextAnnotatorMenu = ({
             <Button
               icon={
                 <>
-                  <FaPlus size={12} style={{}} />
+                  <FaPlus size={12} />
                   <TbAnchor size={15} />
                 </>
               }
@@ -110,7 +114,7 @@ export const TextAnnotatorMenu = ({
             <Button
               icon={
                 <>
-                  <FaPlus size={12} style={{}} />
+                  <FaPlus size={12} />
                   <TbAnchor size={15} />
                 </>
               }
@@ -136,29 +140,32 @@ export const TextAnnotatorMenu = ({
       <StyledAnnotatorItem>
         <StyledAnnotatorItemTitle>
           Anchors in selection
+          <Loader show={isLoadingEntities} size={16} />
         </StyledAnnotatorItemTitle>
         <StyledAnnotatorItemContent>
-          <StyledAnnotatorAnchorList>
-            {anchors.map((anchor) => {
-              if (entities[anchor]) {
-                return (
-                  <EntityTag
-                    unlinkButton={{
-                      onClick: () => {
-                        if (handleRemoveAnchor) {
-                          handleRemoveAnchor(anchor);
-                        }
-                      },
-                    }}
-                    key={anchor}
-                    entity={entities[anchor] as IEntity}
-                  />
-                );
-              } else {
-                return <React.Fragment key={anchor} />;
-              }
-            })}
-          </StyledAnnotatorAnchorList>
+          <StyledAnnotatorAnchorListWrap>
+            <StyledAnnotatorAnchorList>
+              {anchors.map((anchor) => {
+                if (entities[anchor]) {
+                  return (
+                    <EntityTag
+                      unlinkButton={{
+                        onClick: () => {
+                          if (handleRemoveAnchor) {
+                            handleRemoveAnchor(anchor);
+                          }
+                        },
+                      }}
+                      key={anchor}
+                      entity={entities[anchor] as IEntity}
+                    />
+                  );
+                } else {
+                  return <React.Fragment key={anchor} />;
+                }
+              })}
+            </StyledAnnotatorAnchorList>
+          </StyledAnnotatorAnchorListWrap>
         </StyledAnnotatorItemContent>
       </StyledAnnotatorItem>
     </>

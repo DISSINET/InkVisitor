@@ -235,7 +235,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   return (
     <Modal
       showModal={showModal}
-      width={400}
+      width={800}
       isLoading={entityCreateMutation.isPending}
       onEnterPress={handleCheckOnSubmit}
       onClose={closeModal}
