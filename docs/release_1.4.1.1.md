@@ -31,5 +31,5 @@
 
 - Simplified README for deploy / development
 - Define persecutio data import instance build
-- Render modal through portal - this makes modal independent on the rest of the UI
+- Render modal through portal - this makes modal independent from the rest of the UI
 - Add users and audit tables to the download-production script
