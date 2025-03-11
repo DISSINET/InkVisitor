@@ -50,7 +50,7 @@ import {
 
 const MINIFIED_HIDDEN_COLUMNS = [
   "id",
-  "move",
+  // "move",
   "subject",
   "actions",
   "objects",
