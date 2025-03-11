@@ -224,6 +224,17 @@ class Api {
 
   handleError = (err: any | AxiosError) => {
     if (axios.isAxiosError(err)) {
+      // The production server returns HTML error response when the server is unavailable
+      if (
+        err.response?.data &&
+        typeof err.response?.data === "string" &&
+        (err.response?.data.includes("<!DOCTYPE HTML") ||
+          err.response?.data.includes("<html"))
+      ) {
+        // Handle HTML error responses
+        return new NetworkError();
+      }
+
       return err.response?.data || new NetworkError();
     } else {
       return new NetworkError();
