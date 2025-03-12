@@ -1,9 +1,11 @@
 import { EntityEnums } from "@shared/enums";
 import {
   EntityTooltip,
+  IAudit,
   IDocument,
   IEntity,
   IReference,
+  IRequestStats,
   IResponseAudit,
   IResponseBookmarkFolder,
   IResponseDetail,
@@ -21,13 +23,10 @@ import {
   IUser,
   Relation,
   RequestPermissionUpdate,
-  IRequestStats,
-  IAudit,
 } from "@shared/types";
-import { ISetting, ISettingGroup } from "@shared/types/settings";
 import * as errors from "@shared/types/errors";
-import { NetworkError } from "@shared/types/errors";
 import { IRequestSearch } from "@shared/types/request-search";
+import { ISetting, ISettingGroup } from "@shared/types/settings";
 import { defaultPing } from "Theme/constants";
 import axios, {
   AxiosError,
@@ -223,21 +222,15 @@ class Api {
   }
 
   handleError = (err: any | AxiosError) => {
+    console.log(err);
     if (axios.isAxiosError(err)) {
-      // The production server returns HTML error response when the server is unavailable
-      if (
-        err.response?.data &&
-        typeof err.response?.data === "string" &&
-        (err.response?.data.includes("<!DOCTYPE HTML") ||
-          err.response?.data.includes("<html"))
-      ) {
-        // Handle HTML error responses
-        return new NetworkError();
+      if (err.response?.status === 503) {
+        console.log("status 503");
+        return new errors.NetworkError();
       }
-
-      return err.response?.data || new NetworkError();
+      return err.response?.data || new errors.NetworkError();
     } else {
-      return new NetworkError();
+      return new errors.NetworkError();
     }
   };
 
