@@ -242,8 +242,10 @@ class Api {
 
     if (
       responseData instanceof AxiosError &&
-      (responseData as AxiosError).code === AxiosError.ERR_NETWORK
+      ((responseData as AxiosError).code === AxiosError.ERR_NETWORK ||
+        (responseData as AxiosError).code === AxiosError.ERR_BAD_RESPONSE)
     ) {
+      console.log("response to error - NetworkError");
       out.error = errors.NetworkError.name;
     } else if (
       responseData &&
