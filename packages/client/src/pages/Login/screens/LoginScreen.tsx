@@ -34,7 +34,7 @@ export const LoginScreen: React.FC<LoginScreen> = ({
 }) => {
   const dispatch = useAppDispatch();
   const [error, setError] = useState<
-    { title: string; message: string } | false
+    { title?: string; message: string } | false
   >(false);
 
   const ping: number = useAppSelector((state) => state.ping);
@@ -60,7 +60,6 @@ export const LoginScreen: React.FC<LoginScreen> = ({
                 message: NetworkError.message,
               }
             : {
-                title: errorTemp.title,
                 message: errorTemp.message,
               }
         );
