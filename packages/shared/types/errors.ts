@@ -467,6 +467,7 @@ class UnknownError extends CustomError {
 }
 
 class NetworkError extends CustomError {
+  public static readonly TYPE = "NetworkError";
   public static code = 500;
   public static title = "Connection to server lost";
   public static message =

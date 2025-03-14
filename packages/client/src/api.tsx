@@ -222,12 +222,7 @@ class Api {
   }
 
   handleError = (err: any | AxiosError) => {
-    console.log(err);
     if (axios.isAxiosError(err)) {
-      if (err.response?.status === 503) {
-        console.log("status 503");
-        return new errors.NetworkError();
-      }
       return err.response?.data || new errors.NetworkError();
     } else {
       return new errors.NetworkError();
@@ -245,8 +240,8 @@ class Api {
       ((responseData as AxiosError).code === AxiosError.ERR_NETWORK ||
         (responseData as AxiosError).code === AxiosError.ERR_BAD_RESPONSE)
     ) {
-      console.log("response to error - NetworkError");
-      out.error = errors.NetworkError.name;
+      out.error = errors.NetworkError.TYPE;
+      out.message = errors.NetworkError.message;
     } else if (
       responseData &&
       (responseData as any).response &&
