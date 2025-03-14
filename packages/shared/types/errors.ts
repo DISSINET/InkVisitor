@@ -520,9 +520,14 @@ export interface IErrorSignature {
 }
 
 export function getErrorByCode(errSig: IErrorSignature): CustomError {
-  return allErrors[errSig.error]
-    ? new allErrors[errSig.error](errSig.message)
-    : new UnknownError(errSig.message || "Unknown error occured");
+  const ErrorClass = allErrors[errSig.error];
+  if (ErrorClass) {
+    // Create a new instance of the error class and allow to overwrite the message
+    const errorInstance = new ErrorClass(errSig.message || ErrorClass.message);
+    errorInstance.title = ErrorClass.title; // Set the title from the class
+    return errorInstance;
+  }
+  return new UnknownError(errSig.message || "Unknown error occurred");
 }
 
 export {

@@ -240,8 +240,8 @@ class Api {
       ((responseData as AxiosError).code === AxiosError.ERR_NETWORK ||
         (responseData as AxiosError).code === AxiosError.ERR_BAD_RESPONSE)
     ) {
+      // type doesn't get minified unlike the class name
       out.error = errors.NetworkError.TYPE;
-      out.message = errors.NetworkError.message;
     } else if (
       responseData &&
       (responseData as any).response &&
