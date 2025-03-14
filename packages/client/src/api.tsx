@@ -223,6 +223,9 @@ class Api {
 
   handleError = (err: any | AxiosError) => {
     if (axios.isAxiosError(err)) {
+      if (err.response?.status === 503) {
+        return new errors.NetworkError();
+      }
       return err.response?.data || new errors.NetworkError();
     } else {
       return new errors.NetworkError();
@@ -230,6 +233,7 @@ class Api {
   };
 
   responseToError(responseData: unknown): errors.IErrorSignature {
+    console.log("responseData", responseData);
     const out = {
       error: "",
       message: "",
