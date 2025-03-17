@@ -1,9 +1,11 @@
 import { EntityEnums } from "@shared/enums";
 import {
   EntityTooltip,
+  IAudit,
   IDocument,
   IEntity,
   IReference,
+  IRequestStats,
   IResponseAudit,
   IResponseBookmarkFolder,
   IResponseDetail,
@@ -21,13 +23,10 @@ import {
   IUser,
   Relation,
   RequestPermissionUpdate,
-  IRequestStats,
-  IAudit,
 } from "@shared/types";
-import { ISetting, ISettingGroup } from "@shared/types/settings";
 import * as errors from "@shared/types/errors";
-import { NetworkError } from "@shared/types/errors";
 import { IRequestSearch } from "@shared/types/request-search";
+import { ISetting, ISettingGroup } from "@shared/types/settings";
 import { defaultPing } from "Theme/constants";
 import axios, {
   AxiosError,
@@ -224,13 +223,17 @@ class Api {
 
   handleError = (err: any | AxiosError) => {
     if (axios.isAxiosError(err)) {
-      return err.response?.data || new NetworkError();
+      if (err.response?.status === 503) {
+        return new errors.NetworkError();
+      }
+      return err.response?.data || new errors.NetworkError();
     } else {
-      return new NetworkError();
+      return new errors.NetworkError();
     }
   };
 
   responseToError(responseData: unknown): errors.IErrorSignature {
+    console.log("responseData", responseData);
     const out = {
       error: "",
       message: "",
@@ -238,9 +241,11 @@ class Api {
 
     if (
       responseData instanceof AxiosError &&
-      (responseData as AxiosError).code === AxiosError.ERR_NETWORK
+      ((responseData as AxiosError).code === AxiosError.ERR_NETWORK ||
+        (responseData as AxiosError).code === AxiosError.ERR_BAD_RESPONSE)
     ) {
-      out.error = errors.NetworkError.name;
+      // type doesn't get minified unlike the class name
+      out.error = errors.NetworkError.TYPE;
     } else if (
       responseData &&
       (responseData as any).response &&

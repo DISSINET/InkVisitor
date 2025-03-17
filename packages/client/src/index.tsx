@@ -5,6 +5,7 @@ import { Provider } from "react-redux";
 import { App } from "app";
 import store from "redux/store";
 import { ensureBasename } from "ensure-basename";
+import { HelmetProvider } from "react-helmet-async";
 
 ensureBasename();
 
@@ -16,8 +17,12 @@ if (module.hot) {
   module.hot.accept();
 }
 
+const helmetContext = {};
+
 root.render(
   <Provider store={store}>
-    <App />
+    <HelmetProvider context={helmetContext}>
+      <App />
+    </HelmetProvider>
   </Provider>
 );

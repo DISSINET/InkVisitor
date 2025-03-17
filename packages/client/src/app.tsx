@@ -21,7 +21,7 @@ import {
 import React, { useEffect, useMemo } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { Helmet } from "react-helmet";
+import { Helmet } from "react-helmet-async";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { setContentHeight } from "redux/features/layout/contentHeightSlice";
 import { setLayoutWidth } from "redux/features/layout/layoutWidthSlice";
@@ -171,7 +171,6 @@ export const App: React.FC = () => {
       <Helmet>
         <meta charSet="utf-8" />
         <title>InkVisitor</title>
-        <link rel="stylesheet" type="text/css" href="/custom.css" />
       </Helmet>
       <ThemeProvider theme={themeConfig}>
         <GlobalStyle theme={themeConfig} />

@@ -467,10 +467,11 @@ class UnknownError extends CustomError {
 }
 
 class NetworkError extends CustomError {
+  public static readonly TYPE = "NetworkError";
   public static code = 500;
   public static title = "Connection to server lost";
   public static message =
-    "Please check your network connection. Otherwise contact the project owner.";
+    "Please check your network connection. If the issue persists, please try again later or contact the project owner.";
 }
 
 const allErrors: Record<string, any> = {
@@ -519,9 +520,14 @@ export interface IErrorSignature {
 }
 
 export function getErrorByCode(errSig: IErrorSignature): CustomError {
-  return allErrors[errSig.error]
-    ? new allErrors[errSig.error](errSig.message)
-    : new UnknownError(errSig.message || "Unknown error occured");
+  const ErrorClass = allErrors[errSig.error];
+  if (ErrorClass) {
+    // Create a new instance of the error class and allow to overwrite the message
+    const errorInstance = new ErrorClass(errSig.message || ErrorClass.message);
+    errorInstance.title = ErrorClass.title; // Set the title from the class
+    return errorInstance;
+  }
+  return new UnknownError(errSig.message || "Unknown error occurred");
 }
 
 export {
