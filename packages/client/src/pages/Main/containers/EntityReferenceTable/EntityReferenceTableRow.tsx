@@ -174,8 +174,8 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
                     const url = resourceEntity.data.partValueBaseURL.includes(
                       "http"
                     )
-                      ? `${baseUrl}/${label}`
-                      : `//${baseUrl}/${label}`;
+                      ? `${baseUrl}${label}`
+                      : `//${baseUrl}${label}`;
                     window.open(url, "_blank");
                   }}
                 />
