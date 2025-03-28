@@ -18,9 +18,20 @@ import React from "react";
 export const isFirstLabelEmpty = (labels: string[]) =>
   labels ? labels.length === 0 || labels[0] === "" : true;
 
-export const getEntityLabel = (entity?: IResponseEntity) =>
-  (entity?.labels && entity?.labels[0]) || entity?.data.text || "no label";
-
+export const getEntityLabel = (
+  entity?: IResponseEntity,
+  isStatement?: boolean
+) => {
+  if (isStatement) {
+    return (
+      (entity?.labels && entity?.labels[0]) || entity?.data.text || "no label"
+    );
+  }
+  // TODO: remove entity?.data.text here after isStatement is used everywhere
+  return (
+    (entity?.labels && entity?.labels[0]) || entity?.data.text || "no label"
+  );
+};
 export const getShortLabelByLetterCount = (
   label: string,
   maxLetterCount: number
