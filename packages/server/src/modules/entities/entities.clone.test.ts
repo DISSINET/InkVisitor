@@ -64,7 +64,7 @@ describe("Entities clone", function () {
     entity.legacyId = `${entity.id}-legacyid`;
     const [, relationEntity] = prepareEntity(); // so the relation is valid
     const [, relation] = prepareRelation(RelationEnums.Type.Related);
-    entity.label = `${entity.id}-label`;
+    entity.labels = [`${entity.id}-label`];
     let entitiesSaved = false;
     let relationSaved = false;
 
@@ -100,13 +100,12 @@ describe("Entities clone", function () {
 
       const clone = await findEntityById(db, cloneData.id);
       expect(clone).toBeTruthy();
-      expect(clone.label).toEqual(entity.label);
+      expect(clone.labels[0]).toEqual(entity.labels[0]);
       expect(clone.legacyId).toBeFalsy();
 
-      const clonedRelations = await Relation.findForEntities(
-        db.connection,
-        [clone.id]
-      );
+      const clonedRelations = await Relation.findForEntities(db.connection, [
+        clone.id,
+      ]);
       expect(clonedRelations).toHaveLength(1);
       expect(clonedRelations[0].id).not.toEqual(relation.id);
       expect(clonedRelations[0].entityIds).toContain(cloneData.id);
