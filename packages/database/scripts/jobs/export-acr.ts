@@ -18,7 +18,8 @@ import { question } from "scripts/import/prompts";
 import { v4 as uuidv4 } from "uuid";
 import { IJob } from ".";
 import Generator from "./Generator";
-
+import Audit from "@models/audit/audit";
+import fs from "fs";
 export async function getEntitiesDataByClass<T>(
   db: Connection,
   entityClass: EntityEnums.Class
@@ -292,6 +293,16 @@ const exportACR: IJob = async (db: Connection): Promise<void> => {
   generator.entities.entities.V = values;
   generator.entities.entities.R = [originResource, ...resources];
 
+  // get all audits and filter only relevant entities there, remove the change
+  const auditsAll: Audit[] = await rethink.table("audits").run(db);
+
+  const audits = auditsAll
+    .filter((a) => allIds.includes(a.entityId))
+    .map((a) => {
+      a.changes = {};
+      return a;
+    });
+
   generator.relations.relations = Object.values(RelationEnums.Type).reduce(
     (acc, type) => {
       acc[type] = relations.filter((r) => r.type === type);
@@ -301,6 +312,10 @@ const exportACR: IJob = async (db: Connection): Promise<void> => {
   );
 
   generator.output();
+  fs.writeFileSync(
+    generator.getPath("audits.json"),
+    JSON.stringify(audits, null, 4)
+  );
 };
 
 export default exportACR;
