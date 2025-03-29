@@ -56,8 +56,8 @@ export default class Entity implements IEntity, IDbModel {
 
   constructor(data: Partial<IEntity>) {
     fillFlatObject(this, { ...data, data: undefined });
-    fillArray<Reference>(this.references, Reference, data.references);
-    fillArray<Prop>(this.props, Prop, data.props);
+    fillArray<Reference>(this.references, Reference, data?.references);
+    fillArray<Prop>(this.props, Prop, data?.props);
 
     this.labels = data.labels || [];
     if (data.notes !== undefined) {
