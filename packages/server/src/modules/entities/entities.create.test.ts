@@ -1,35 +1,31 @@
+import { apiPath } from "@common/constants";
+import { pool } from "@middlewares/db";
+import { prepareEntity } from "@models/entity/entity.test";
+import Relation from "@models/relation/relation";
+import { prepareRelation } from "@models/relation/relation.test";
+import Statement, {
+  StatementData,
+  StatementTerritory,
+} from "@models/statement/statement";
+import Territory from "@models/territory/territory";
 import {
   clean,
   successfulGenericResponse,
   testErroneousResponse,
 } from "@modules/common.test";
-import {
-  EntityDoesNotExist,
-  InternalServerError,
-  ModelNotValidError,
-} from "@shared/types/errors";
-import request from "supertest";
-import { apiPath } from "@common/constants";
-import app from "../../Server";
-import { supertestConfig } from "..";
-import Statement, {
-  StatementData,
-  StatementTerritory,
-} from "@models/statement/statement";
+import { Db } from "@service/rethink";
 import {
   deleteEntities,
   findEntityById,
   getEntitiesDataByClass,
 } from "@service/shorthands";
-import { Db } from "@service/rethink";
-import Territory from "@models/territory/territory";
-import "ts-jest";
-import { ITerritory } from "@shared/types";
-import { prepareEntity } from "@models/entity/entity.test";
 import { EntityEnums, RelationEnums } from "@shared/enums";
-import { prepareRelation } from "@models/relation/relation.test";
-import Relation from "@models/relation/relation";
-import { pool } from "@middlewares/db";
+import { ITerritory } from "@shared/types";
+import { EntityDoesNotExist, ModelNotValidError } from "@shared/types/errors";
+import request from "supertest";
+import "ts-jest";
+import { supertestConfig } from "..";
+import app from "../../Server";
 
 describe("Entities create", function () {
   afterAll(async () => {
@@ -114,7 +110,7 @@ describe("Entities create", function () {
       await db.initDb();
       await deleteEntities(db);
 
-      const ent = new Territory({ label: "22323" });
+      const ent = new Territory({ labels: ["22323"] });
 
       await request(app)
         .post(`${apiPath}/entities`)
@@ -124,10 +120,13 @@ describe("Entities create", function () {
         .expect("Content-Type", /json/)
         .expect(successfulGenericResponse);
 
-      const allEnt = await getEntitiesDataByClass<ITerritory>(db, ent.class);
+      const allEnt = await getEntitiesDataByClass<ITerritory>(
+        db.connection,
+        ent.class
+      );
       expect(allEnt).toHaveLength(1);
       expect(allEnt[0].id).not.toBe("");
-      expect(allEnt[0].label).toBe(ent.label);
+      expect(allEnt[0].labels[0]).toBe(ent.labels[0]);
 
       await clean(db);
     });
@@ -136,7 +135,7 @@ describe("Entities create", function () {
   describe("test create from template", function () {
     const db = new Db();
     const [, conceptTemplate] = prepareEntity(EntityEnums.Class.Concept);
-    conceptTemplate.label = "original label";
+    conceptTemplate.labels = ["original label"];
     conceptTemplate.isTemplate = true;
 
     const [, person] = prepareEntity(EntityEnums.Class.Person);
@@ -193,13 +192,15 @@ describe("Entities create", function () {
 
       it("new entity should have altered field", async () => {
         const createdEntity = await findEntityById(db.connection, newEntity.id);
-        expect(createdEntity.label).toContain(conceptTemplate.label);
-        expect(createdEntity.label).not.toEqual(conceptTemplate.label); // should use root of the original label
+        expect(createdEntity.labels[0]).toContain(conceptTemplate.labels[0]);
+        expect(createdEntity.labels[0]).not.toEqual(conceptTemplate.labels[0]); // should use root of the original label
         expect(createdEntity.isTemplate).toBeFalsy();
       });
 
       it("new entity should have copied relations (Cla/Rel)", async () => {
-        const rels = await Relation.findForEntities(db.connection, [newEntity.id]);
+        const rels = await Relation.findForEntities(db.connection, [
+          newEntity.id,
+        ]);
         expect(rels.length).toEqual(3); // cla + 2x rel
         expect(rels.find((r) => r.id === classif.id)).toBeFalsy();
         expect(rels.find((r) => r.id === related1.id)).toBeFalsy();

@@ -81,7 +81,9 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
     onClearAfterInitTyped();
   }, []);
 
-  const dropRef = useRef<HTMLTableRowElement>(null);
+  const dropRef = useRef<HTMLDivElement>(
+    null
+  ) as React.RefObject<HTMLDivElement>;
   const dragRef = useRef<HTMLTableCellElement>(null);
 
   const [{ handlerId }, drop] = useDrop<

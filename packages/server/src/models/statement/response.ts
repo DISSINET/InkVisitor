@@ -203,31 +203,34 @@ export class ResponseStatement extends Statement implements IResponseStatement {
       const entityId = allEntities[ei];
       if (entityId) {
         const entityData = await this.obtainEntity(entityId, req);
-        const entity = new Entity(entityData);
 
-        const classificationRels =
-          await Classification.getClassificationForwardConnections(
+        if (entityData?.id === entityId) {
+          const entity = new Entity(entityData);
+
+          const classificationRels =
+            await Classification.getClassificationForwardConnections(
+              req.db.connection,
+              entityId,
+              entity.class,
+              1,
+              0
+            );
+          const classificationEs: IConcept[] = await getEntitiesByIds<IConcept>(
             req.db.connection,
-            entityId,
-            entity.class,
-            1,
-            0
+            classificationRels.map((c) => c.entityIds[1])
           );
-        const classificationEs: IConcept[] = await getEntitiesByIds<IConcept>(
-          req.db.connection,
-          classificationRels.map((c) => c.entityIds[1])
-        );
-        const propValueEs = await getEntitiesByIds<IEntity>(
-          req.db.connection,
-          Entity.extractIdsFromProps(entity.props, [PropSpecKind.VALUE])
-        );
-        const eWarnings = entity.getTBasedWarnings(
-          territoryEs,
-          classificationEs,
-          propValueEs
-        );
-        if (eWarnings.length) {
-          warnings = warnings.concat(eWarnings);
+          const propValueEs = await getEntitiesByIds<IEntity>(
+            req.db.connection,
+            Entity.extractIdsFromProps(entity.props, [PropSpecKind.VALUE])
+          );
+          const eWarnings = entity.getTBasedWarnings(
+            territoryEs,
+            classificationEs,
+            propValueEs
+          );
+          if (eWarnings.length) {
+            warnings = warnings.concat(eWarnings);
+          }
         }
       }
     }

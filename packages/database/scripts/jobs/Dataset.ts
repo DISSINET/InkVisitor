@@ -53,9 +53,6 @@ export default class Dataset {
     const dirPath = this.getPath();
     const filePath = this.getPath(filename);
 
-    console.log("dirPath", fs.existsSync(dirPath));
-    console.log("filePath", fs.existsSync(filePath));
-
     // check folder path
     if (fs.existsSync(dirPath)) {
       if (await confirm(`dir ${dirPath} exists...continue?`)) {
