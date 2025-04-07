@@ -166,10 +166,8 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
                   icon={<FaExternalLinkAlt />}
                   color="plain"
                   onClick={() => {
-                    const baseUrl = normalizeURL(
-                      resourceEntity.data.partValueBaseURL
-                    ).replace(/\/$/, "");
-                    const label = valueEntity.labels[0].replace(/^\//, ""); // Remove leading slash from label if present
+                    const baseUrl = resourceEntity.data.partValueBaseURL;
+                    const label = valueEntity.labels[0];
 
                     const url = resourceEntity.data.partValueBaseURL.includes(
                       "http"
