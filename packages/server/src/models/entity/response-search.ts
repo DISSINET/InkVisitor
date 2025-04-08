@@ -1,20 +1,18 @@
-import { EntityEnums } from "@shared/enums";
-import { IConcept, IEntity, ITerritory, RequestSearch } from "@shared/types";
-import { regExpEscape } from "@common/functions";
-import Entity from "./entity";
-import Statement from "@models/statement/statement";
-import { Connection, ContainsArgType, r, RDatum, RTable } from "rethinkdb-ts";
-import { ResponseEntity } from "./response";
-import { getEntityClass } from "@models/factory";
-import { IRequest } from "src/custom_typings/request";
-import Territory from "@models/territory/territory";
 import Audit from "@models/audit/audit";
 import Document from "@models/document/document";
-import treeCache from "@service/treeCache";
-import { getEntitiesByIds } from "@service/shorthands";
-import entity from "./entity";
+import { getEntityClass } from "@models/factory";
 import Classification from "@models/relation/classification";
+import Statement from "@models/statement/statement";
+import Territory from "@models/territory/territory";
+import { getEntitiesByIds } from "@service/shorthands";
+import treeCache from "@service/treeCache";
+import { EntityEnums } from "@shared/enums";
+import { IConcept, IEntity, ITerritory, RequestSearch } from "@shared/types";
 import { PropSpecKind } from "@shared/types/prop";
+import { Connection, r, RDatum, RTable } from "rethinkdb-ts";
+import { IRequest } from "src/custom_typings/request";
+import Entity from "./entity";
+import { ResponseEntity } from "./response";
 
 /**
  * SearchQuery is customized builder for search queries, allowing to build query by chaining prepared filters
@@ -243,18 +241,34 @@ export class SearchQuery {
     this.usedLabel = label;
 
     // replace regexp chars
-    let escapedLabelOrId = labelOrId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const escapedLabel = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    let escapedLabelOrId = labelOrId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const escapedLabel = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
     // frontend adds one final asterisk for labelOrId - we need to retain it there
-    const hasEscapedAsteriskAtEnd = escapedLabelOrId.endsWith('\\*');
+    const hasEscapedAsteriskAtEnd = escapedLabelOrId.endsWith("\\*");
     if (hasEscapedAsteriskAtEnd) {
-      escapedLabelOrId = escapedLabelOrId.slice(0, -2) + '*';
+      escapedLabelOrId = escapedLabelOrId.slice(0, -2) + "*";
     }
 
+    // search 3 times:
+    // 1. search for exact word match with some normalization
+    // 2. search for exact word match without normalization
+    // 3. search for id match
     this.query = this.query.filter(function (row: RDatum) {
       return r.or(
-        SearchQuery.searchWordByWord(row, escapedLabel, leftWildcard, rightWildcard),
+        SearchQuery.searchWordByWord(
+          row,
+          escapedLabel,
+          leftWildcard,
+          rightWildcard
+        ),
+        SearchQuery.searchWordByWord(
+          row,
+          escapedLabel,
+          leftWildcard,
+          rightWildcard,
+          false
+        ),
         row("id").match(escapedLabelOrId).ne(null)
       );
     });
@@ -286,33 +300,43 @@ export class SearchQuery {
    * @param label - cleaned label input (with escaped chars)
    * @param left - optional wildcard on the left
    * @param right - optional wildcard on the right
+   * @param normalize - if true, the label will be normalized to remove diacritics and convert to lowercase
    * @returns filtration statement for RDatum
    */
   public static searchWordByWord(
     row: RDatum,
     label: string,
     left: string,
-    right: string
-  ): RDatum {
-    // if wildcard not used, update the left/right side to limit search for word start/end
+    right: string,
+    normalize = true
+  ): RDatum<boolean> {
+    // if wildcard not used, update the left/right side to simulate word boundaries
     // ie. search for 'building' would be changed to '(\^|[\\W \\.\\,\\:\\_])building'
     // to match 'building' word only
     // otherwise with wildcard, the '*uilding' would be changed to 'uilding' without constraint
     // and will behave like wildcard on the left
     if (left === "^") {
-      left = "(^|[\\W\\_])";
+      left = "(^|[^a-zA-Z0-9])";
     }
     if (right === "$") {
-      right = "($|[\\W\\_])";
+      right = "($|[^a-zA-Z0-9])";
     }
 
-    // words have to be splitted and joined with regexps to provide variable glue
-    label = label.toLowerCase().split(" ").join("([\\W\\_]+[\\w]+)*[\\W\\_]+");
+    const processedLabel = normalize
+      ? label
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "") // remove diacritics
+          .toLowerCase()
+      : label;
 
-    const regexp = `${left}${label}${right}`;
+    const regexBody = processedLabel
+      .split(" ")
+      .join("([^a-zA-Z0-9]+[\\w]+)*[^a-zA-Z0-9]+"); // Allow glue between words
 
-    return row("labels").contains<string>((label) =>
-      label.downcase().match(regexp)
+    const regexp = `(?i)${left}${regexBody}${right}`;
+
+    return row("labels").contains<string>((targetLabel) =>
+      targetLabel.match(regexp)
     );
   }
 
