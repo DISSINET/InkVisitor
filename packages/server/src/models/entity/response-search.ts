@@ -311,10 +311,6 @@ export class SearchQuery {
     normalize = true
   ): RDatum<boolean> {
     // if wildcard not used, update the left/right side to simulate word boundaries
-    // ie. search for 'building' would be changed to '(\^|[\\W \\.\\,\\:\\_])building'
-    // to match 'building' word only
-    // otherwise with wildcard, the '*uilding' would be changed to 'uilding' without constraint
-    // and will behave like wildcard on the left
     if (left === "^") {
       left = "(^|[^a-zA-Z0-9])";
     }
