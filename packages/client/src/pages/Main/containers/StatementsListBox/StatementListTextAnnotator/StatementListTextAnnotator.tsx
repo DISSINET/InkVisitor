@@ -50,6 +50,9 @@ interface StatementListTextAnnotator {
 
   contentHeight: number;
   contentWidth: number;
+
+  annotator?: Annotator;
+  setAnnotator?: React.Dispatch<React.SetStateAction<Annotator | undefined>>;
 }
 
 export const StatementListTextAnnotator: React.FC<
@@ -77,6 +80,9 @@ export const StatementListTextAnnotator: React.FC<
 
   contentHeight,
   contentWidth,
+
+  annotator,
+  setAnnotator = () => {},
 }) => {
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const [showAnnotator, setShowAnnotator] = useState(false);
@@ -91,7 +97,6 @@ export const StatementListTextAnnotator: React.FC<
     []
   );
 
-  const [annotator, setAnnotator] = useState<Annotator | undefined>(undefined);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [searchOccurences, setSearchOccurences] = useState<
     { segmentIndex: number; lineIndex: number; start: number; end: number }[]
