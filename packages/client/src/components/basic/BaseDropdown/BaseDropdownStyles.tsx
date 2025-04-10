@@ -99,6 +99,9 @@ export const StyledSelect = styled(Select)<StyledSelect>`
       height: 18;
     }
   }
+  .react-select__clear-indicator {
+    padding: 0.2rem;
+  }
   .react-select__indicator-separator {
     display: none;
   }

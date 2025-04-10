@@ -2,7 +2,7 @@ import { allEntities, empty } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
 import { BaseDropdown } from "components";
 import { StyledSelect } from "components/basic/BaseDropdown/BaseDropdownStyles";
-import React from "react";
+import React, { useContext } from "react";
 import { FaCheckSquare, FaRegSquare } from "react-icons/fa";
 import {
   MultiValueProps,
@@ -18,6 +18,7 @@ import {
   StyledOptionIconWrap,
   StyledOptionRow,
 } from "./DropdownStyles";
+import { ThemeContext } from "styled-components";
 
 interface EntityMultiDropdown<T = string> {
   width?: number | "full";
@@ -146,15 +147,38 @@ const ValueContainer = ({
 }: { children: any } & ValueContainerProps<any, any, any> & {
     selectProps: StyledSelect;
   }): React.ReactElement => {
+  const themeContext = useContext(ThemeContext);
+
   const currentValues: DropdownItem[] = [...props.getValue()];
   let toBeRendered = children;
 
   if (currentValues.length > 0) {
     // filter ANY out of the values array
+    const filteredChildren = children[0].filter(
+      (ch: any) => ch.key !== `${allEntities.label}-${allEntities.value}`
+    );
+
+    // Show only first 3 entities and add ellipsis if there are more
+    const visibleChildren = filteredChildren.slice(0, 3);
+    const remainingCount = filteredChildren.length - 3;
+
     toBeRendered = [
-      children[0].filter(
-        (ch: any) => ch.key !== `${allEntities.label}-${allEntities.value}`
-      ),
+      [
+        ...visibleChildren,
+        ...(remainingCount > 0
+          ? [
+              <div
+                key="ellipsis"
+                style={{
+                  padding: "0.2rem 0.2rem 0.2rem 0.3rem",
+                  color: themeContext?.color["primary"],
+                }}
+              >
+                +{remainingCount} more
+              </div>,
+            ]
+          : []),
+      ],
       children[1],
     ];
   }
