@@ -460,6 +460,7 @@ export const StatementListTextAnnotator: React.FC<
                 : contentWidth - 75
             }
             noOptionsMessage="No entity classes to highlight"
+            limitSelectedItems={3}
           />
         </div>
       )}

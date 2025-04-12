@@ -139,6 +139,7 @@ export const EntityMultiDropdown = <T extends string>({
       disabled={disabled}
       loggerId={loggerId}
       customComponents={{ Option, MultiValue, ValueContainer }}
+      limitSelectedItems={limitSelectedItems}
     />
   );
 };

@@ -339,7 +339,6 @@ export const TextAnnotator = ({
 
     const yCenter = yStart && yEnd ? (yStart + yEnd) / 2 : 0;
     const viewportMiddle = allLines / 2;
-    console.log(viewportMiddle);
 
     // if the selection is spanning through both halves of the viewport
     if (
