@@ -59,6 +59,7 @@ interface BaseDropdown {
   isClearable?: boolean;
   hideSelectedOptions?: boolean;
   noDropDownIndicator?: boolean;
+  limitSelectedItems?: number;
 }
 export const BaseDropdown: React.FC<BaseDropdown> = ({
   options = [],

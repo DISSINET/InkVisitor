@@ -34,6 +34,7 @@ interface EntityMultiDropdown<T = string> {
   disabled?: boolean;
 
   isClearable?: boolean;
+  limitSelectedItems?: number;
 
   loggerId?: string;
 }
@@ -51,6 +52,7 @@ export const EntityMultiDropdown = <T extends string>({
   disabled,
 
   isClearable = true,
+  limitSelectedItems,
 
   loggerId,
 }: EntityMultiDropdown<T>) => {
@@ -158,9 +160,12 @@ const ValueContainer = ({
       (ch: any) => ch.key !== `${allEntities.label}-${allEntities.value}`
     );
 
-    // Show only first 3 entities and add ellipsis if there are more
-    const visibleChildren = filteredChildren.slice(0, 3);
-    const remainingCount = filteredChildren.length - 3;
+    const limit = props.selectProps.limitSelectedItems;
+    // Show limited number of entities and add ellipsis if there are more
+    const visibleChildren = limit
+      ? filteredChildren.slice(0, limit)
+      : filteredChildren;
+    const remainingCount = limit ? filteredChildren.length - limit : 0;
 
     toBeRendered = [
       [

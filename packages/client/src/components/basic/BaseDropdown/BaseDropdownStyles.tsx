@@ -30,6 +30,7 @@ export interface StyledSelect {
   wildCardChar?: boolean;
   icon?: JSX.Element;
   loggerId?: string;
+  limitSelectedItems?: number;
 }
 export const StyledSelect = styled(Select)<StyledSelect>`
   display: inline-flex;
