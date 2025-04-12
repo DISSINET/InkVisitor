@@ -431,9 +431,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
         <Box
           label="Statements"
           borderColor="white"
-          onHeaderClick={
-            DetailBoxState.FullHeight ? handleMaximizeDetailBox : undefined
-          }
           height={getStatementListBoxHeight()}
           buttons={[
             <>

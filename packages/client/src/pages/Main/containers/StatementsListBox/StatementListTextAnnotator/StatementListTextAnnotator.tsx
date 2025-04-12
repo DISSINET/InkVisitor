@@ -276,6 +276,8 @@ export const StatementListTextAnnotator: React.FC<
     return height;
   }, [contentHeight, selectorHeight]);
 
+  const debouncedContentWidth = useDebounce(contentWidth, 80);
+
   return (
     <animated.div style={animatedStyle}>
       <div
@@ -456,11 +458,11 @@ export const StatementListTextAnnotator: React.FC<
             value={hlEntities}
             width={
               statements.length > 0
-                ? contentWidth - COLLAPSED_TABLE_WIDTH - 75
-                : contentWidth - 75
+                ? debouncedContentWidth - COLLAPSED_TABLE_WIDTH - 75
+                : debouncedContentWidth - 75
             }
             noOptionsMessage="No entity classes to highlight"
-            limitSelectedItems={Math.floor((contentWidth - 232) / 80)}
+            limitSelectedItems={Math.floor((debouncedContentWidth - 232) / 80)}
           />
         </div>
       )}
