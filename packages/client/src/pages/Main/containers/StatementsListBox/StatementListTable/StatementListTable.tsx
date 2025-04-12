@@ -427,33 +427,8 @@ export const StatementListTable: React.FC<StatementListTable> = ({
           );
         },
       },
-      {
-        id: "anchor",
-        Header: "",
-        Cell: ({ row }: CellType) => {
-          return (
-            <>
-              {/* {document.referencedEntityIds  */}
-              {
-                <Button
-                  icon={<FaAnchor size={14} />}
-                  color="primary"
-                  noBorder
-                  noBackground
-                  inverted
-                  onClick={() => {
-                    if (annotator) {
-                      annotator.scrollToAnchor(row.id);
-                    }
-                  }}
-                />
-              }
-            </>
-          );
-        },
-      },
     ];
-  }, [right, selectedRows, lastClickedIndex, annotator]);
+  }, [right, selectedRows, lastClickedIndex]);
 
   const {
     setHiddenColumns,
@@ -536,7 +511,6 @@ export const StatementListTable: React.FC<StatementListTable> = ({
     }
   };
 
-  // TODO: remove this in case we don't need to locate the anchor on row click
   const handleRowClickWithAnnotator = useCallback(
     (rowId: string) => {
       handleRowClick(rowId);
@@ -580,8 +554,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
           return (
             <StatementListRow
               index={i}
-              handleClick={handleRowClick}
-              // handleClick={handleRowClickWithAnnotator}
+              handleClick={handleRowClickWithAnnotator}
               row={row}
               moveRow={moveRow}
               moveEndRow={moveEndRow}
