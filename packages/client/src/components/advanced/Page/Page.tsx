@@ -162,9 +162,11 @@ export const Page: React.FC<Page> = ({ children }) => {
         paddingY={0}
         paddingX={10}
         color={
-          ["production", ""].indexOf(environmentName) === -1
-            ? (environmentName as keyof ThemeColor)
-            : "muni"
+          environmentName === "production"
+            ? "muni"
+            : environmentName === ""
+            ? "medhate"
+            : (environmentName as keyof ThemeColor)
         }
         left={headerLeft}
         right={headerRight}
