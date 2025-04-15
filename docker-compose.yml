@@ -26,7 +26,7 @@ services:
       dockerfile: Dockerfile
       platform: linux/amd64
       args:
-        ENV: production
+        ENV: latest # make sure the file for client packages/client/env/.env is present during build
     image: dissinet/inkvisitor:latest
     container_name: inkvisitor
     restart: always
