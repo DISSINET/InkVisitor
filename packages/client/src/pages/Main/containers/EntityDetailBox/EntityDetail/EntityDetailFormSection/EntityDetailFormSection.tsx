@@ -120,8 +120,6 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
   >(false);
   const alternativeLabels = entity.labels.slice(1);
 
-  const environmentName = process.env.NODE_ENV || "";
-
   return (
     <>
       <StyledFormWrapper>
