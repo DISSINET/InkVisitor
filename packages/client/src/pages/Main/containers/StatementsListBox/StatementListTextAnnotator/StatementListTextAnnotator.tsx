@@ -29,6 +29,7 @@ import { BiSearch } from "react-icons/bi";
 interface StatementListTextAnnotator {
   statements: IResponseStatement[];
   territoryId: string;
+  statementId: string;
   entities: { [key: string]: IEntity };
   right: UserEnums.RoleMode;
   setShowSubmit: React.Dispatch<React.SetStateAction<boolean>>;
@@ -60,6 +61,7 @@ export const StatementListTextAnnotator: React.FC<
 > = ({
   statements,
   territoryId,
+  statementId,
   entities,
   right,
   setShowSubmit,
@@ -487,7 +489,13 @@ export const StatementListTextAnnotator: React.FC<
                 setAnnotator(newAnnotator);
               }}
               thisTerritoryEntityId={territoryId}
-              initialScrollEntityId={territoryId}
+              // if the statement is anchored in the document, scroll to the statement, otherwise scroll to the territory
+              initialScrollEntityId={
+                selectedDocument &&
+                selectedDocument.referencedEntityIds.S?.includes(statementId)
+                  ? statementId
+                  : territoryId
+              }
               displayLineNumbers={true}
               height={annotatorHeight}
               documentId={selectedDocumentId as string}

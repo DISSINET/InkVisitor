@@ -674,6 +674,7 @@ export const StatementListBox: React.FC = () => {
                 handleCreateStatement={handleCreateStatement}
                 handleCreateTerritory={handleCreateTerritory}
                 territoryId={territoryId}
+                statementId={statementId}
                 storedAnnotatorResourceId={storedAnnotatorResourceId}
                 setStoredAnnotatorResourceId={setStoredAnnotatorResourceId}
                 storedAnnotatorScroll={storedAnnotatorScroll}
