@@ -40,13 +40,7 @@ export const Page: React.FC<Page> = ({ children }) => {
     (state) => state.layout.contentHeight
   );
 
-  let environmentName = (process.env.ROOT_URL || "").replace(
-    /apps\/inkvisitor[-]?/,
-    ""
-  );
-  if (environmentName === "/") {
-    environmentName = "";
-  }
+  const environmentName = process.env.NODE_ENV || "";
 
   const location = useLocation();
   const navigate = useNavigate();

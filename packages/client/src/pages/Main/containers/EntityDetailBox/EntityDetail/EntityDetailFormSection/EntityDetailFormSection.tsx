@@ -120,10 +120,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
   >(false);
   const alternativeLabels = entity.labels.slice(1);
 
-  let environmentName = (process.env.ROOT_URL || "").replace(
-    /apps\/inkvisitor[-]?/,
-    ""
-  );
+  const environmentName = process.env.NODE_ENV || "";
 
   return (
     <>
