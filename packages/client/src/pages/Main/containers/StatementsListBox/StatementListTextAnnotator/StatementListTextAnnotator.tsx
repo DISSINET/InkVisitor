@@ -29,6 +29,7 @@ import { BiSearch } from "react-icons/bi";
 interface StatementListTextAnnotator {
   statements: IResponseStatement[];
   territoryId: string;
+  statementId: string;
   entities: { [key: string]: IEntity };
   right: UserEnums.RoleMode;
   setShowSubmit: React.Dispatch<React.SetStateAction<boolean>>;
@@ -50,6 +51,9 @@ interface StatementListTextAnnotator {
 
   contentHeight: number;
   contentWidth: number;
+
+  annotator?: Annotator;
+  setAnnotator?: React.Dispatch<React.SetStateAction<Annotator | undefined>>;
 }
 
 export const StatementListTextAnnotator: React.FC<
@@ -57,6 +61,7 @@ export const StatementListTextAnnotator: React.FC<
 > = ({
   statements,
   territoryId,
+  statementId,
   entities,
   right,
   setShowSubmit,
@@ -77,6 +82,9 @@ export const StatementListTextAnnotator: React.FC<
 
   contentHeight,
   contentWidth,
+
+  annotator,
+  setAnnotator = () => {},
 }) => {
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const [showAnnotator, setShowAnnotator] = useState(false);
@@ -91,7 +99,6 @@ export const StatementListTextAnnotator: React.FC<
     []
   );
 
-  const [annotator, setAnnotator] = useState<Annotator | undefined>(undefined);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [searchOccurences, setSearchOccurences] = useState<
     { segmentIndex: number; lineIndex: number; start: number; end: number }[]
@@ -482,7 +489,13 @@ export const StatementListTextAnnotator: React.FC<
                 setAnnotator(newAnnotator);
               }}
               thisTerritoryEntityId={territoryId}
-              initialScrollEntityId={territoryId}
+              // if the statement is anchored in the document, scroll to the statement, otherwise scroll to the territory
+              initialScrollEntityId={
+                selectedDocument &&
+                selectedDocument.referencedEntityIds.S?.includes(statementId)
+                  ? statementId
+                  : territoryId
+              }
               displayLineNumbers={true}
               height={annotatorHeight}
               documentId={selectedDocumentId as string}

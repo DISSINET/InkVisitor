@@ -14,6 +14,7 @@ import update from "immutability-helper";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { BsArrowDown, BsArrowUp } from "react-icons/bs";
 import {
+  FaAnchor,
   FaChevronCircleDown,
   FaChevronCircleUp,
   FaClone,
@@ -47,8 +48,10 @@ import {
   StyledTable,
   StyledTh,
 } from "./StatementListTableStyles";
+import { Annotator } from "@inkvisitor/annotator/src/lib";
 
-const MINIFIED_HIDDEN_COLUMNS = [
+const HIDDEN_COLUMNS_FULL = ["id", "anchor"];
+const HIDDEN_COLUMNS_MINIFIED = [
   "id",
   // "move",
   "subject",
@@ -92,6 +95,7 @@ interface StatementListTable {
   setSelectedRows: React.Dispatch<React.SetStateAction<string[]>>;
   displayMode: StatementListDisplayMode;
   contentWidth: number;
+  annotator?: Annotator;
 }
 export const StatementListTable: React.FC<StatementListTable> = ({
   statements,
@@ -109,6 +113,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   setSelectedRows,
   displayMode,
   contentWidth,
+  annotator,
 }) => {
   const dispatch = useAppDispatch();
   const { territoryId, setStatementId } = useSearchParams();
@@ -443,8 +448,8 @@ export const StatementListTable: React.FC<StatementListTable> = ({
       initialState: {
         hiddenColumns:
           displayMode === StatementListDisplayMode.TEXT
-            ? MINIFIED_HIDDEN_COLUMNS
-            : ["id"],
+            ? HIDDEN_COLUMNS_MINIFIED
+            : HIDDEN_COLUMNS_FULL,
       },
     },
     useExpanded,
@@ -453,10 +458,10 @@ export const StatementListTable: React.FC<StatementListTable> = ({
 
   useEffect(() => {
     if (displayMode === StatementListDisplayMode.TEXT) {
-      setHiddenColumns(MINIFIED_HIDDEN_COLUMNS);
+      setHiddenColumns(HIDDEN_COLUMNS_MINIFIED);
     } else {
       setTimeout(() => {
-        setHiddenColumns(["id"]);
+        setHiddenColumns(HIDDEN_COLUMNS_FULL);
       }, 450);
     }
   }, [displayMode]);
@@ -506,6 +511,19 @@ export const StatementListTable: React.FC<StatementListTable> = ({
     }
   };
 
+  const handleRowClickWithAnnotator = useCallback(
+    (rowId: string) => {
+      handleRowClick(rowId);
+
+      // If annotator is available, highlight the statement in the annotator
+      if (annotator) {
+        // Use the scrollToAnchor method to highlight the statement
+        annotator.scrollToAnchor(rowId);
+      }
+    },
+    [handleRowClick, annotator]
+  );
+
   return (
     <StyledTable
       {...getTableProps()}
@@ -518,7 +536,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
             {headerGroup.headers.map((column, key) =>
               key < 6 ? (
                 <StyledTh {...column.getHeaderProps()} key={key}>
-                  {column.render("Header")}
+                  {column.render("Header") as React.ReactNode}
                 </StyledTh>
               ) : (
                 <th key={key}></th>
@@ -536,7 +554,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
           return (
             <StatementListRow
               index={i}
-              handleClick={handleRowClick}
+              handleClick={handleRowClickWithAnnotator}
               row={row}
               moveRow={moveRow}
               moveEndRow={moveEndRow}
