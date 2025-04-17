@@ -18,19 +18,19 @@ import React from "react";
 export const isFirstLabelEmpty = (labels: string[]) =>
   labels ? labels.length === 0 || labels[0] === "" : true;
 
-export const getEntityLabel = (
-  entity?: IResponseEntity,
-  isStatement?: boolean
-) => {
-  if (isStatement) {
+export const getEntityLabel = (entity?: IResponseEntity) => {
+  if (entity?.class === EntityEnums.Class.Statement) {
+    // statement label logic:
+    //   [1] If a user-defined label exists, show it.
+    //   [2] If no label but the statement has an anchor, show the anchor's text. If multiple anchors, concatenate them with " ... ".
+    //   [3] If neither label nor anchor, show the Statement text.
+    //   [4] If nothing is available, show "no label".
     return (
       (entity?.labels && entity?.labels[0]) || entity?.data.text || "no label"
     );
   }
-  // TODO: remove entity?.data.text here after isStatement is used everywhere
-  return (
-    (entity?.labels && entity?.labels[0]) || entity?.data.text || "no label"
-  );
+  // non-statement
+  return (entity?.labels && entity?.labels[0]) || "no label";
 };
 export const getShortLabelByLetterCount = (
   label: string,
