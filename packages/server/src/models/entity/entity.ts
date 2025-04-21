@@ -355,10 +355,10 @@ export default class Entity implements IEntity, IDbModel {
       console.trace("Passed empty id to Entity.findEntitiesByIds");
     }
 
-    const data = await rethink
-      .table(Entity.table)
-      .getAll(rethink.args(ids))
-      .run(con);
+    const data =
+      ids.length > 0
+        ? await rethink.table(Entity.table).getAll(rethink.args(ids)).run(con)
+        : [];
     return data;
   }
 

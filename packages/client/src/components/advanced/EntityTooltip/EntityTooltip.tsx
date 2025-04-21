@@ -18,19 +18,22 @@ import {
 } from "Theme/constants";
 import { ThemeColor } from "Theme/theme";
 import api from "api";
-import { LetterIcon, Tooltip } from "components";
+import { DocumentTitle, LetterIcon, Tooltip } from "components";
 import React, { useEffect, useMemo, useState } from "react";
 import { AiOutlineTag, AiOutlineTags } from "react-icons/ai";
 import { BiCommentDetail } from "react-icons/bi";
 import { BsCardText } from "react-icons/bs";
 import { ImListNumbered } from "react-icons/im";
 import { MdOutlineLabel } from "react-icons/md";
+import { TbAnchor } from "react-icons/tb";
 import {
   getEntityRelationRules,
   getShortLabelByLetterCount,
 } from "utils/utils";
 import { EntityTooltipRelationTreeTable } from "./EntityTooltipRelationTreeTable/EntityTooltipRelationTreeTable";
 import {
+  StyledAnchorItem,
+  StyledAnchorText,
   StyledBold,
   StyledDetail,
   StyledIconWrap,
@@ -40,7 +43,6 @@ import {
   StyledRelations,
   StyledRow,
 } from "./EntityTooltipStyles";
-
 interface EntityTooltip {
   // entity
   entityId: string;
@@ -112,6 +114,8 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
     },
     enabled: api.isLoggedIn() && !!entityId && allowFetch,
   });
+
+  const anchors = data?.usedInDocuments;
 
   const getActionPartOfSpeech = () =>
     actionPartOfSpeechDict.find((i) => i.value === partOfSpeech)?.label ?? "";
@@ -191,11 +195,31 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                 </StyledDetail>
               </StyledRow>
             )}
+            {anchors && anchors.length > 0 && (
+              <StyledRow>
+                <StyledIconWrap>
+                  <TbAnchor />
+                </StyledIconWrap>
+                <StyledDetail>
+                  {anchors.map((documentAnchor, dai) => (
+                    <StyledAnchorItem key={dai}>
+                      <DocumentTitle
+                        title={documentAnchor.document.title}
+                        size="sm"
+                      />
+                      <StyledAnchorText>
+                        {documentAnchor.anchorText}
+                      </StyledAnchorText>
+                    </StyledAnchorItem>
+                  ))}
+                </StyledDetail>
+              </StyledRow>
+            )}
           </>
         )}
       </>
     ),
-    [text, detail, label, itemsCount]
+    [text, detail, label, itemsCount, tooltipData]
   );
 
   const renderCloudRelations = (

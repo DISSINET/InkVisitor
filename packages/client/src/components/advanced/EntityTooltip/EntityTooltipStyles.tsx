@@ -41,3 +41,26 @@ export const StyledLetterIconWrap = styled.div`
   display: grid;
   justify-content: center;
 `;
+
+export const StyledAnchorItem = styled.div`
+  display: inline;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[1]};
+`;
+
+export const StyledAnchorText = styled.div`
+  color: ${({ theme }) => theme.color["white"]};
+  margin-bottom: ${({ theme }) => theme.space[1]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  font-family: mono;
+  padding-left: ${({ theme }) => theme.space[2]};
+  padding-bottom: ${({ theme }) => theme.space[1]};
+`;
+
+export const StyledAnchorEmptyState = styled.div`
+  padding: ${({ theme }) => theme.space[2]};
+  color: ${({ theme }) => theme.color["gray"][600]};
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  font-style: italic;
+  text-align: center;
+`;
