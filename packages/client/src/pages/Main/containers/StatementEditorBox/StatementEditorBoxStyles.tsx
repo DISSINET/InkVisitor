@@ -16,6 +16,34 @@ export const StyledGridCell = styled.div`
   display: grid;
 `;
 
+// Base Components
+interface StyledSectionBase {}
+export const StyledSectionBase = styled.div<StyledSectionBase>`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+  padding-left: ${({ theme }) => theme.space[3]};
+  padding-right: ${({ theme }) => theme.space[3]};
+  padding-bottom: ${({ theme }) => theme.space[4]};
+`;
+
+interface StyledSectionLabel {}
+export const StyledSectionLabel = styled.div<StyledSectionLabel>`
+  color: ${({ theme }) => theme.color["info"]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  margin-bottom: ${({ theme }) => theme.space[2]};
+`;
+
+interface StyledSectionContent {}
+export const StyledSectionContent = styled.div<StyledSectionContent>`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.space[3]};
+  width: 100%;
+  box-sizing: border-box;
+`;
+
 // Editor Section
 interface StyledEditorEmptyState {}
 export const StyledEditorEmptyState = styled.div<StyledEditorEmptyState>`
@@ -27,37 +55,53 @@ export const StyledEditorEmptyState = styled.div<StyledEditorEmptyState>`
   align-items: center;
   text-align: center;
 `;
-interface StyledEditorPreSection {}
+
+export const StyledEditorPreBlock = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.space[3]};
+  padding-left: ${({ theme }) => theme.space[6]};
+  padding-right: ${({ theme }) => theme.space[6]};
+`;
+
+interface StyledEditorPreSection {
+  $inline?: boolean;
+}
 export const StyledEditorPreSection = styled.div<StyledEditorPreSection>`
-  padding: ${({ theme }) => theme.space[3]};
   color: ${({ theme }) => theme.color["info"]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
+  ${({ $inline }) => $inline && `display: flex;`}
+  ${({ $inline }) => $inline && `flex-direction: row;`}
+  ${({ $inline }) => $inline && `align-items: center;`}
+  ${({ theme, $inline }) => $inline && `gap: ${theme.space[2]};`}
 `;
+
 interface StyledEditorSection {
-  $firstSection?: boolean;
   $lastSection?: boolean;
   $metaSection?: boolean;
   $marginRight?: boolean;
 }
-export const StyledEditorSection = styled.div<StyledEditorSection>`
-  position: relative;
+export const StyledEditorSection = styled(
+  StyledSectionBase
+)<StyledEditorSection>`
   padding: ${({ theme }) => theme.space[6]};
   padding-right: ${({ $metaSection }) => ($metaSection ? 0 : "")};
+  padding-right: ${({ $marginRight }) => ($marginRight ? "0.5rem" : "")};
+  box-sizing: border-box;
+  margin: 0.2rem 0 0 2rem;
   border-bottom-width: ${({ theme }) => theme.borderWidth[1]};
   border-bottom-color: ${({ theme }) => theme.color["gray"][500]};
-  box-shadow: ${({ theme, $firstSection = false }) =>
-    $firstSection ? theme.boxShadow["subtle"] : ""};
-  border-left: ${({ theme, $firstSection = false }) =>
-    $firstSection ? "3px solid " + theme.color["success"] : ""};
-  background-color: ${({ theme, $firstSection = false }) =>
-    $firstSection ? theme.color["white"] : theme.color["gray"][200]};
   border-bottom-style: solid;
-  margin: ${({ theme, $firstSection = false }) =>
-    $firstSection ? "0 0 0 0.7rem" : "0.2rem 0 0 2rem"};
-  margin-right: ${({ $marginRight }) => ($marginRight ? "0.5rem" : "")};
+  background-color: ${({ theme }) => theme.color["gray"][200]};
   &:hover {
     background-color: ${({ theme }) => theme.color["gray"][100]};
   }
+`;
+
+export const StyledEditorSectionText = styled.div`
+  box-shadow: ${({ theme }) => theme.boxShadow["subtle"]};
+  border-left: ${({ theme }) => "3px solid " + theme.color["success"]};
+  background-color: ${({ theme }) => theme.color["white"]};
 `;
 
 export const StyledDetailWarnings = styled.div`
@@ -75,18 +119,16 @@ export const StyledEditorSectionHeader = styled.div<StyledEditorSectionHeader>`
   margin-bottom: ${({ theme }) => theme.space["4"]};
   color: ${({ theme }) => theme.color["primary"]};
 `;
+
 export const StyledEditorSectionHeading = styled.div`
   margin-right: ${({ theme }) => theme.space[2]};
   align-items: center;
   display: flex;
 `;
-interface StyledEditorSectionContent {
-  $firstSection?: boolean;
-}
+
 interface StyledEditorSectionContent {}
 export const StyledEditorSectionContent = styled.div<StyledEditorSectionContent>`
-  padding-left: ${({ theme, $firstSection = false }) =>
-    $firstSection ? "" : theme.space[6]};
+  padding-left: ${({ theme }) => theme.space[6]};
 `;
 
 // Grids
@@ -164,25 +206,33 @@ export const StyledHeaderTagWrap = styled.div`
   margin-right: ${({ theme }) => theme.space[3]};
   margin-bottom: ${({ theme }) => theme.space[2]};
 `;
-export const StyledEditorStatementInfoLabel = styled.div`
-  display: flex;
-  align-items: center;
-  margin-right: ${({ theme }) => theme.space[1]};
-  margin-bottom: ${({ theme }) => theme.space[2]};
-`;
+
 export const StyledEditorHeaderInputWrap = styled.div`
   margin-bottom: ${({ theme }) => theme.space[2]};
 `;
 
-export const StyledEditorContentRow = styled.div``;
-export const StyledEditorContentRowLabel = styled.div`
-  float: left;
-  color: ${({ theme }) => theme.color["info"]};
-  font-size: ${({ theme }) => theme.fontSize["xs"]};
+export const StyledEditorContentRow = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+  box-sizing: border-box;
 `;
+
+export const StyledEditorContentLabel = styled(StyledSectionLabel)`
+  margin-bottom: 0;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+`;
+
 export const StyledEditorContentRowValue = styled.div`
-  float: right;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  min-width: 0;
 `;
+
 export const StyledEditorContentRowValueID = styled.div`
   display: inline-flex;
   font-style: italic;
@@ -194,29 +244,14 @@ export const StyledEditorContentRowValueID = styled.div`
   }
 `;
 
-export const StyledEditorTemplateSection = styled.div`
-  display: table;
-  width: 100%;
-  margin-bottom: ${({ theme }) => theme.space[1]};
-  ${StyledEditorContentRow} {
-    display: table-row;
-    width: 100%;
-    ${StyledEditorContentRowLabel} {
-      width: 1%;
-      white-space: nowrap;
-      display: table-cell;
-      padding: ${({ theme }) => theme.space[3]};
-      vertical-align: top;
-      text-align: right;
-      float: initial;
-    }
-    ${StyledEditorContentRowValue} {
-      display: table-cell;
-      width: 100%;
-      padding: ${({ theme }) => theme.space[2]};
-    }
-  }
+export const StyledEditorTemplateSection = styled(StyledSectionBase)`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+  box-sizing: border-box;
 `;
+
 export const StyledMissingTerritory = styled.p`
   color: ${({ theme }) => theme.color["warning"]};
   margin-left: 0.5rem;
@@ -224,22 +259,9 @@ export const StyledMissingTerritory = styled.p`
 `;
 
 // Anchor Section
-interface StyledEditorAnchorSection {}
-export const StyledEditorAnchorSection = styled.div<StyledEditorAnchorSection>`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  margin-left: ${({ theme }) => theme.space[3]};
-  margin-right: ${({ theme }) => theme.space[3]};
-  margin-bottom: ${({ theme }) => theme.space[4]};
-`;
+export const StyledEditorAnchorSection = styled(StyledSectionBase)``;
 
-interface StyledEditorAnchorSectionContent {}
-export const StyledEditorAnchorSectionContent = styled.div<StyledEditorAnchorSectionContent>`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.space[3]};
-`;
+export const StyledEditorAnchorSectionContent = styled(StyledSectionContent)``;
 
 interface StyledEditorAnchorSectionAnchor {}
 export const StyledEditorAnchorSectionAnchor = styled.div<StyledEditorAnchorSectionAnchor>`
