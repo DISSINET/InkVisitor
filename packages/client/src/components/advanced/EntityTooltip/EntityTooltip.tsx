@@ -11,6 +11,7 @@ import {
   IEntity,
   Relation,
 } from "@shared/types";
+import { IResponseUsedInDocument } from "@shared/types/response-detail";
 import { useQuery } from "@tanstack/react-query";
 import {
   maxTooltipMultiRelations,
@@ -25,7 +26,6 @@ import { BiCommentDetail } from "react-icons/bi";
 import { BsCardText } from "react-icons/bs";
 import { ImListNumbered } from "react-icons/im";
 import { MdOutlineLabel } from "react-icons/md";
-import { TbAnchor } from "react-icons/tb";
 import {
   getEntityRelationRules,
   getShortLabelByLetterCount,
@@ -43,6 +43,7 @@ import {
   StyledRelations,
   StyledRow,
 } from "./EntityTooltipStyles";
+
 interface EntityTooltip {
   // entity
   entityId: string;
@@ -67,6 +68,11 @@ interface EntityTooltip {
   customTooltipAttributes?: { partLabel?: string };
   isTemplate?: boolean;
 }
+
+interface IResponseWithAnchors extends EntityTooltipNamespace.IResponse {
+  usedInDocuments: IResponseUsedInDocument[];
+}
+
 export const EntityTooltip: React.FC<EntityTooltip> = ({
   // entity
   entityId,
@@ -195,23 +201,36 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                 </StyledDetail>
               </StyledRow>
             )}
-            {anchors && anchors.length > 0 && (
+            {anchors && anchors?.length > 0 && (
               <StyledRow>
                 <StyledIconWrap>
-                  <TbAnchor />
+                  <BsCardText />
                 </StyledIconWrap>
                 <StyledDetail>
-                  {anchors.map((documentAnchor, dai) => (
-                    <StyledAnchorItem key={dai}>
-                      <DocumentTitle
-                        title={documentAnchor.document.title}
-                        size="sm"
-                      />
-                      <StyledAnchorText>
-                        {documentAnchor.anchorText}
-                      </StyledAnchorText>
-                    </StyledAnchorItem>
-                  ))}
+                  {anchors.map((documentAnchor, index) => {
+                    return (
+                      <StyledAnchorItem key={index}>
+                        <StyledAnchorText>
+                          {documentAnchor.anchorText}
+                        </StyledAnchorText>
+                        <DocumentTitle
+                          title={documentAnchor.document.title}
+                          size="sm"
+                        />
+                        {documentAnchor.parentTerritoryId && (
+                          <StyledAnchorText>
+                            Territory:{" "}
+                            {getShortLabelByLetterCount(
+                              (tooltipData as IResponseWithAnchors).entities[
+                                documentAnchor.parentTerritoryId
+                              ]?.labels[0] || "",
+                              20
+                            )}
+                          </StyledAnchorText>
+                        )}
+                      </StyledAnchorItem>
+                    );
+                  })}
                 </StyledDetail>
               </StyledRow>
             )}
@@ -219,7 +238,18 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
         )}
       </>
     ),
-    [text, detail, label, itemsCount, tooltipData]
+    [
+      text,
+      detail,
+      label,
+      itemsCount,
+      tooltipData,
+      language,
+      partOfSpeech,
+      entityClass,
+      customTooltipAttributes,
+      alternativeLabels,
+    ]
   );
 
   const renderCloudRelations = (
