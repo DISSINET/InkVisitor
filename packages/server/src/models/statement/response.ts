@@ -59,7 +59,16 @@ export class ResponseStatement extends Statement implements IResponseStatement {
    */
   async prepareEntities(db: Connection): Promise<void> {
     const entities = await this.getEntities(db);
-    this.entities = Object.assign({}, ...entities.map((x) => ({ [x.id]: x })));
+    const anchorEntities = await Entity.findEntitiesByIds(
+      db,
+      Entity.extractIdsFromAnchors(this.usedInDocuments)
+    );
+
+    this.entities = Object.assign(
+      {},
+      ...entities.map((x) => ({ [x.id]: x })),
+      ...anchorEntities.map((x) => ({ [x.id]: x }))
+    );
   }
 
   /**

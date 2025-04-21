@@ -32,6 +32,7 @@ import { IRequest } from "../../custom_typings/request";
 import Reference from "./reference";
 import { PropSpecKind } from "@shared/types/prop";
 import { IWarningPositionSection } from "@shared/types/warning";
+import { IResponseUsedInDocument } from "@shared/types/response-detail";
 
 export default class Entity implements IEntity, IDbModel {
   static table = "entities";
@@ -307,6 +308,16 @@ export default class Entity implements IEntity, IDbModel {
     for (const reference of references) {
       out.push(reference.resource);
       out.push(reference.value);
+    }
+
+    return out;
+  }
+
+  static extractIdsFromAnchors(anchors: IResponseUsedInDocument[]): string[] {
+    const out: string[] = [];
+    for (const anchor of anchors) {
+      out.push(anchor.resourceId);
+      out.push(anchor.parentTerritoryId);
     }
 
     return out;
