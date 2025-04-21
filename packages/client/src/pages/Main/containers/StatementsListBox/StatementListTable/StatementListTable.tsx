@@ -95,7 +95,6 @@ interface StatementListTable {
   setSelectedRows: React.Dispatch<React.SetStateAction<string[]>>;
   displayMode: StatementListDisplayMode;
   contentWidth: number;
-  annotator?: Annotator;
 }
 export const StatementListTable: React.FC<StatementListTable> = ({
   statements,
@@ -113,7 +112,6 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   setSelectedRows,
   displayMode,
   contentWidth,
-  annotator,
 }) => {
   const dispatch = useAppDispatch();
   const { territoryId, setStatementId } = useSearchParams();

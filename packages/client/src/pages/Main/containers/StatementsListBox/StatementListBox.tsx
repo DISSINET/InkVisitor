@@ -647,7 +647,6 @@ export const StatementListBox: React.FC = () => {
                     handleRowClick={(rowId: string) => {
                       dispatch(setShowWarnings(false));
                       setStatementId(rowId);
-                      annotator?.scrollToAnchor(rowId);
                     }}
                     actantsUpdateMutation={statementUpdateMutation}
                     entities={entities}
@@ -660,7 +659,6 @@ export const StatementListBox: React.FC = () => {
                     setSelectedRows={setSelectedRows}
                     displayMode={displayMode}
                     contentWidth={width}
-                    annotator={annotator}
                   />
                 )}
               </StyledTableWrapper>
