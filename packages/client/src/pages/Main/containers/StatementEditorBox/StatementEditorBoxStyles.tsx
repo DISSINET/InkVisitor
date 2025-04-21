@@ -222,3 +222,66 @@ export const StyledMissingTerritory = styled.p`
   margin-left: 0.5rem;
   margin-bottom: 0.1rem;
 `;
+
+// Anchor Section
+interface StyledEditorAnchorSection {}
+export const StyledEditorAnchorSection = styled.div<StyledEditorAnchorSection>`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-left: ${({ theme }) => theme.space[3]};
+  margin-right: ${({ theme }) => theme.space[3]};
+  margin-bottom: ${({ theme }) => theme.space[4]};
+`;
+
+interface StyledEditorAnchorSectionContent {}
+export const StyledEditorAnchorSectionContent = styled.div<StyledEditorAnchorSectionContent>`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.space[3]};
+`;
+
+interface StyledEditorAnchorSectionAnchor {}
+export const StyledEditorAnchorSectionAnchor = styled.div<StyledEditorAnchorSectionAnchor>`
+  display: flex;
+  flex-direction: column;
+  padding: ${({ theme }) => theme.space[3]};
+`;
+
+interface StyledAnchorText {}
+export const StyledAnchorText = styled.div<StyledAnchorText>`
+  color: ${({ theme }) => theme.color["gray"][800]};
+  margin-bottom: ${({ theme }) => theme.space[2]};
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  font-weight: ${({ theme }) => theme.fontWeight.medium};
+  font-family: mono;
+`;
+
+interface StyledAnchorMeta {}
+export const StyledAnchorMeta = styled.div<StyledAnchorMeta>`
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${({ theme }) => theme.space[2]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  color: ${({ theme }) => theme.color["gray"][600]};
+`;
+
+interface StyledAnchorTag {}
+export const StyledAnchorTag = styled.span<StyledAnchorTag>`
+  display: inline-flex;
+  align-items: center;
+  padding: ${({ theme }) => theme.space[1]} ${({ theme }) => theme.space[2]};
+  background-color: ${({ theme }) => theme.color["gray"][100]};
+  border-radius: ${({ theme }) => theme.borderRadius["sm"]};
+  color: ${({ theme }) => theme.color["gray"][700]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+`;
+
+interface StyledAnchorEmptyState {}
+export const StyledAnchorEmptyState = styled.div<StyledAnchorEmptyState>`
+  padding: ${({ theme }) => theme.space[3]};
+  color: ${({ theme }) => theme.color["gray"][600]};
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  font-style: italic;
+  text-align: center;
+`;

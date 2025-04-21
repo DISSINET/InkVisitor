@@ -16,7 +16,14 @@ import {
 } from "@tanstack/react-query";
 import { excludedSuggesterEntities } from "Theme/constants";
 import api from "api";
-import { Button, Input, Message, MultiInput, Submit } from "components";
+import {
+  Button,
+  DocumentTitle,
+  Input,
+  Message,
+  MultiInput,
+  Submit,
+} from "components";
 import Dropdown, {
   ApplyTemplateModal,
   AuditTable,
@@ -55,6 +62,10 @@ import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReference
 import {
   StyledBreadcrumbWrap,
   StyledDetailWarnings,
+  StyledEditorAnchorSectionAnchor,
+  StyledEditorAnchorSection,
+  StyledEditorAnchorSectionContent,
+  StyledEditorAnchorSectionHeading,
   StyledEditorContentRow,
   StyledEditorContentRowLabel,
   StyledEditorContentRowValue,
@@ -71,6 +82,10 @@ import {
   StyledMissingTerritory,
   StyledTagsList,
   StyledTagsListItem,
+  StyledAnchorText,
+  StyledAnchorMeta,
+  StyledAnchorTag,
+  StyledAnchorEmptyState,
 } from "../StatementEditorBoxStyles";
 import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
@@ -746,6 +761,42 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             </StyledEditorContentRow>
           </StyledEditorTemplateSection>
         )}
+
+        <StyledEditorAnchorSection>
+          <StyledEditorContentRowLabel>
+            Document Anchors
+          </StyledEditorContentRowLabel>
+          <StyledEditorAnchorSectionContent>
+            {statement.usedInDocuments.length > 0 ? (
+              statement.usedInDocuments.map((documentAnchor, dai) => (
+                <StyledEditorAnchorSectionAnchor key={dai}>
+                  <StyledAnchorText>
+                    {documentAnchor.anchorText}
+                  </StyledAnchorText>
+                  <StyledAnchorMeta>
+                    <DocumentTitle title={documentAnchor.document.title} />
+                    {documentAnchor.resourceId && (
+                      <EntityTag
+                        entity={statement.entities[documentAnchor.resourceId]}
+                      />
+                    )}
+                    {documentAnchor.parentTerritoryId && (
+                      <EntityTag
+                        entity={
+                          statement.entities[documentAnchor.parentTerritoryId]
+                        }
+                      />
+                    )}
+                  </StyledAnchorMeta>
+                </StyledEditorAnchorSectionAnchor>
+              ))
+            ) : (
+              <StyledAnchorEmptyState>
+                No document anchors found
+              </StyledAnchorEmptyState>
+            )}
+          </StyledEditorAnchorSectionContent>
+        </StyledEditorAnchorSection>
 
         <StyledEditorSection
           $firstSection
