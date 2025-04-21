@@ -26,20 +26,27 @@ import Entity from "../entity/entity";
 import { PositionRules } from "./PositionRules";
 import Statement from "./statement";
 import { PropSpecKind } from "@shared/types/prop";
+import { IResponseUsedInDocument } from "@shared/types/response-detail";
+import Document, { TreeNode } from "@models/document/document";
+import Resource from "@models/resource/resource";
 
 export class ResponseStatement extends Statement implements IResponseStatement {
   entities: { [key: string]: IEntity };
   right: UserEnums.RoleMode = UserEnums.RoleMode.Read;
   warnings: IWarning[];
+  usedInDocuments: IResponseUsedInDocument[];
 
   constructor(entity: IStatement) {
     super(entity);
     this.entities = {};
     this.warnings = [];
+    this.usedInDocuments = [];
   }
 
   async prepare(req: IRequest) {
     this.right = this.getUserRoleMode(req.getUserOrFail());
+    this.usedInDocuments = await this.findUsedInDocuments(req.db.connection);
+
     await this.prepareEntities(req.db.connection);
     if (!this.isTemplate) {
       this.warnings = await this.getWarnings(req);
@@ -53,6 +60,64 @@ export class ResponseStatement extends Statement implements IResponseStatement {
   async prepareEntities(db: Connection): Promise<void> {
     const entities = await this.getEntities(db);
     this.entities = Object.assign({}, ...entities.map((x) => ({ [x.id]: x })));
+  }
+
+  /**
+   * returns data for usedInDocuments(IResponseUsedInDocument[]) field
+   * @param conn
+   * @returns
+   */
+  async findUsedInDocuments(
+    conn: Connection
+  ): Promise<IResponseUsedInDocument[]> {
+    const out: IResponseUsedInDocument[] = [];
+    await Promise.all(
+      (
+        await Document.findByEntityId(conn, this.id)
+      ).map(async (docData) => {
+        // construct document and tree node filled with entities data
+        const doc = new Document({
+          content: docData.content,
+        });
+        const anchors = doc.buildAnchorsTree();
+        const anchoredEntities = await Entity.findEntitiesByIds(
+          conn,
+          doc.collectAnchors(anchors)
+        );
+        doc.assignClassesBasedOnEntities(anchors, anchoredEntities);
+
+        const resource = await Resource.findByDocumentId(conn, docData.id);
+
+        // traverse the tree, search for anchor that === this.id
+        const traverse = (nodes: TreeNode[], parentT?: string) => {
+          for (const node of nodes) {
+            if (node.anchor === this.id) {
+              out.push({
+                document: {
+                  id: docData.id,
+                  title: docData.title,
+                  entityIds: docData.entityIds,
+                  createdAt: docData.createdAt,
+                  updatedAt: docData.updatedAt,
+                },
+                anchorText: node.getShortContent(),
+                resourceId: resource?.id || "",
+                parentTerritoryId: parentT || "",
+              });
+            }
+
+            traverse(
+              node.children,
+              node.class === EntityEnums.Class.Territory ? node.anchor : parentT
+            );
+          }
+        };
+
+        traverse(anchors);
+      })
+    );
+
+    return out;
   }
 
   /**
