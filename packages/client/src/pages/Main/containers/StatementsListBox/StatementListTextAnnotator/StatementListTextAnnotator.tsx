@@ -53,7 +53,7 @@ interface StatementListTextAnnotator {
   contentWidth: number;
 
   annotator?: Annotator;
-  setAnnotator?: React.Dispatch<React.SetStateAction<Annotator | undefined>>;
+  setAnnotator: React.Dispatch<React.SetStateAction<Annotator | undefined>>;
 }
 
 export const StatementListTextAnnotator: React.FC<
@@ -84,7 +84,7 @@ export const StatementListTextAnnotator: React.FC<
   contentWidth,
 
   annotator,
-  setAnnotator = () => {},
+  setAnnotator,
 }) => {
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const [showAnnotator, setShowAnnotator] = useState(false);
@@ -250,6 +250,22 @@ export const StatementListTextAnnotator: React.FC<
     },
     enabled: api.isLoggedIn(),
   });
+
+  // INIT + react to url changes
+  useEffect(() => {
+    if (annotator && selectedDocument) {
+      const scrollToId =
+        statementId &&
+        selectedDocument.referencedEntityIds.S?.includes(statementId)
+          ? statementId
+          : territoryId;
+
+      // ensure the annotator is fully initialized
+      setTimeout(() => {
+        annotator.scrollToAnchor(scrollToId);
+      }, 100);
+    }
+  }, [statementId, annotator, territoryId, selectedDocument]);
 
   const thisTHasAnchor = useMemo<boolean>(() => {
     if (selectedDocument) {
@@ -489,13 +505,6 @@ export const StatementListTextAnnotator: React.FC<
                 setAnnotator(newAnnotator);
               }}
               thisTerritoryEntityId={territoryId}
-              // if the statement is anchored in the document, scroll to the statement, otherwise scroll to the territory
-              initialScrollEntityId={
-                selectedDocument &&
-                selectedDocument.referencedEntityIds.S?.includes(statementId)
-                  ? statementId
-                  : territoryId
-              }
               displayLineNumbers={true}
               height={annotatorHeight}
               documentId={selectedDocumentId as string}
@@ -503,6 +512,7 @@ export const StatementListTextAnnotator: React.FC<
               handleCreateTerritory={handleCreateTerritory}
               storedAnnotatorScroll={storedAnnotatorScroll}
               setStoredAnnotatorScroll={setStoredAnnotatorScroll}
+              // initialScrollEntityId={territoryId}
             />
           )}
         </AnnotatorProvider>

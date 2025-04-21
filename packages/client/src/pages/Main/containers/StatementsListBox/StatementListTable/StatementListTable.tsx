@@ -95,7 +95,6 @@ interface StatementListTable {
   setSelectedRows: React.Dispatch<React.SetStateAction<string[]>>;
   displayMode: StatementListDisplayMode;
   contentWidth: number;
-  annotator?: Annotator;
 }
 export const StatementListTable: React.FC<StatementListTable> = ({
   statements,
@@ -113,7 +112,6 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   setSelectedRows,
   displayMode,
   contentWidth,
-  annotator,
 }) => {
   const dispatch = useAppDispatch();
   const { territoryId, setStatementId } = useSearchParams();
@@ -511,19 +509,6 @@ export const StatementListTable: React.FC<StatementListTable> = ({
     }
   };
 
-  const handleRowClickWithAnnotator = useCallback(
-    (rowId: string) => {
-      handleRowClick(rowId);
-
-      // If annotator is available, highlight the statement in the annotator
-      if (annotator) {
-        // Use the scrollToAnchor method to highlight the statement
-        annotator.scrollToAnchor(rowId);
-      }
-    },
-    [handleRowClick, annotator]
-  );
-
   return (
     <StyledTable
       {...getTableProps()}
@@ -554,7 +539,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
           return (
             <StatementListRow
               index={i}
-              handleClick={handleRowClickWithAnnotator}
+              handleClick={handleRowClick}
               row={row}
               moveRow={moveRow}
               moveEndRow={moveEndRow}

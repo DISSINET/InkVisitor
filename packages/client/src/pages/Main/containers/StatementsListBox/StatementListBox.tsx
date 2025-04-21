@@ -659,7 +659,6 @@ export const StatementListBox: React.FC = () => {
                     setSelectedRows={setSelectedRows}
                     displayMode={displayMode}
                     contentWidth={width}
-                    annotator={annotator}
                   />
                 )}
               </StyledTableWrapper>
