@@ -142,6 +142,7 @@ export const TextAnnotator = ({
     number | undefined
   >(undefined);
 
+  // quiet does not trigger a toast notification
   const handleSaveNewContent = (quiet: boolean) => {
     const scrollBeforeUpdated = annotator?.viewport?.lineStart;
     setScrollAfterRefresh(scrollBeforeUpdated);
@@ -448,7 +449,7 @@ export const TextAnnotator = ({
       handleAddAnchor(newStatementId);
       // remove linebreaks from text
       const validatedText = selectedText.replace(/\n/g, " ");
-      handleCreateStatement(validatedText, newStatementId);
+      handleCreateStatement("", newStatementId);
       handleSaveNewContent(true);
     }
   };

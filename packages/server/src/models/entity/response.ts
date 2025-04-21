@@ -1,3 +1,9 @@
+import { nonenumerable } from "@common/decorators";
+import Document, { TreeNode } from "@models/document/document";
+import { UsedRelations } from "@models/relation/relations";
+import Resource from "@models/resource/resource";
+import Statement from "@models/statement/statement";
+import treeCache from "@service/treeCache";
 import { EntityEnums, RelationEnums, UserEnums } from "@shared/enums";
 import {
   IEntity,
@@ -10,27 +16,20 @@ import {
   ITerritory,
   IWarning,
 } from "@shared/types";
-import Entity from "./entity";
-import Statement from "@models/statement/statement";
-import { nonenumerable } from "@common/decorators";
-import { Connection } from "rethinkdb-ts";
 import {
   IResponseUsedInDocument,
   IResponseUsedInStatementClassification,
   IResponseUsedInStatementIdentification,
   IResponseUsedInStatementProps,
 } from "@shared/types/response-detail";
-import { IRequest } from "src/custom_typings/request";
 import {
   IStatementClassification,
   IStatementIdentification,
 } from "@shared/types/statement";
-import { UsedRelations } from "@models/relation/relations";
+import { Connection } from "rethinkdb-ts";
+import { IRequest } from "src/custom_typings/request";
+import Entity from "./entity";
 import EntityWarnings from "./warnings";
-import Document, { TreeNode } from "@models/document/document";
-import Resource from "@models/resource/resource";
-import treeCache from "@service/treeCache";
-import Territory from "@models/territory/territory";
 
 export class ResponseEntity extends Entity implements IResponseEntity {
   // map of entity ids that should be populated in subsequent methods and used in fetching
