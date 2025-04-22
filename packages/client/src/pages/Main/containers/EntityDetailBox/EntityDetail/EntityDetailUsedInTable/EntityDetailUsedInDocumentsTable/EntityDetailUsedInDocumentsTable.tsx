@@ -37,11 +37,11 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
     },
   });
 
-  const [openedDocument, setOpenedDocument] = useState<IDocumentMeta | false>(
-    false
-  );
-  const [tAnchor, setTAnchor] = useState<string | false>(false);
-  const [entityOcc, setEntityOcc] = useState<number | false>(false);
+  // const [openedDocument, setOpenedDocument] = useState<IDocumentMeta | false>(
+  //   false
+  // );
+  // const [tAnchor, setTAnchor] = useState<string | false>(false);
+  // const [entityOcc, setEntityOcc] = useState<number | false>(false);
 
   const columns = useMemo<Column<IResponseUsedInDocument>[]>(
     () => [
@@ -53,14 +53,25 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
             <>
               {anchorText ? (
                 <StyledAnchorText>
-                  <HiClipboardList
-                    size={18}
-                    style={{ cursor: "pointer", flexShrink: 0 }}
+                  <Button
+                    color="primary"
+                    icon={
+                      <HiClipboardList
+                        size={18}
+                        style={{ cursor: "pointer", flexShrink: 0 }}
+                      />
+                    }
                     onClick={() => {
                       window.navigator.clipboard.writeText(anchorText);
                       toast.info("text copied to clipboard");
                     }}
+                    tooltipLabel="copy anchor text to clipboard"
+                    inverted
+                    noBackground
+                    noBorder
+                    noIconMargin
                   />
+
                   <StyledAbbreviatedLabel title={anchorText}>
                     {anchorText}
                   </StyledAbbreviatedLabel>
@@ -95,7 +106,7 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
         },
       },
       {
-        Header: "Parent territory",
+        Header: "Parent T",
         Cell: ({ row }: CellType) => {
           const territoryEntity = entities[row.original.parentTerritoryId];
           return (
@@ -152,7 +163,7 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
         perPage={perPage}
         isLoading={removeAnchorMutation.isPending}
       />
-      {openedDocument && (
+      {/* {openedDocument && (
         <DocumentModalEdit
           document={openedDocument}
           onClose={() => {
@@ -162,7 +173,7 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
           }}
           anchor={tAnchor ? { entityId: tAnchor } : undefined}
         />
-      )}
+      )} */}
     </>
   );
 };
