@@ -210,24 +210,26 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                   {anchors.map((documentAnchor, index) => {
                     return (
                       <StyledAnchorItem key={index}>
-                        <StyledAnchorText>
-                          {documentAnchor.anchorText}
-                        </StyledAnchorText>
                         <DocumentTitle
                           title={documentAnchor.document.title}
                           size="sm"
                         />
-                        {documentAnchor.parentTerritoryId && (
-                          <StyledAnchorText>
-                            Territory:{" "}
-                            {getShortLabelByLetterCount(
-                              (tooltipData as IResponseWithAnchors).entities[
-                                documentAnchor.parentTerritoryId
-                              ]?.labels[0] || "",
-                              20
-                            )}
-                          </StyledAnchorText>
-                        )}
+                        <StyledAnchorText>
+                          {documentAnchor.anchorText}
+                        </StyledAnchorText>
+                      </StyledAnchorItem>
+                    );
+                  })}
+                  {anchors.map((documentAnchor, index) => {
+                    return (
+                      <StyledAnchorItem key={index}>
+                        <DocumentTitle
+                          title={documentAnchor.document.title}
+                          size="sm"
+                        />
+                        <StyledAnchorText>
+                          {documentAnchor.anchorText}
+                        </StyledAnchorText>
                       </StyledAnchorItem>
                     );
                   })}

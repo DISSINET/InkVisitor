@@ -17,7 +17,12 @@ export const StyledBold = styled.span`
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
 `;
 
-export const StyledDetail = styled.p``;
+export const StyledDetail = styled.div`
+  font-size: ${({ theme }) => theme.fontSize["xxs"]};
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.space[2]};
+`;
 
 export const StyledIconWrap = styled.span`
   margin-top: 2px;
@@ -58,7 +63,7 @@ export const StyledAnchorItem = styled.div`
 export const StyledAnchorText = styled.div`
   color: ${({ theme }) => theme.color["white"]};
   margin-bottom: ${({ theme }) => theme.space[1]};
-  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  font-size: ${({ theme }) => theme.fontSize["xxs"]};
   font-family: mono;
   padding-left: ${({ theme }) => theme.space[2]};
   padding-bottom: ${({ theme }) => theme.space[1]};
