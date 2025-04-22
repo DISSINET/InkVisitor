@@ -91,7 +91,6 @@ export const TerritoryTreeBox: React.FC = () => {
   });
 
   const userRole = localStorage.getItem("userrole");
-
   const { territoryId } = useSearchParams();
   const [showCreate, setShowCreate] = useState(false);
 

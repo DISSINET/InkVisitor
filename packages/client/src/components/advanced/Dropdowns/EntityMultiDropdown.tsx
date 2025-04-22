@@ -2,7 +2,7 @@ import { allEntities, empty } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
 import { BaseDropdown } from "components";
 import { StyledSelect } from "components/basic/BaseDropdown/BaseDropdownStyles";
-import React from "react";
+import React, { useContext } from "react";
 import { FaCheckSquare, FaRegSquare } from "react-icons/fa";
 import {
   MultiValueProps,
@@ -18,6 +18,7 @@ import {
   StyledOptionIconWrap,
   StyledOptionRow,
 } from "./DropdownStyles";
+import { ThemeContext } from "styled-components";
 
 interface EntityMultiDropdown<T = string> {
   width?: number | "full";
@@ -33,6 +34,7 @@ interface EntityMultiDropdown<T = string> {
   disabled?: boolean;
 
   isClearable?: boolean;
+  limitSelectedItems?: number;
 
   loggerId?: string;
 }
@@ -50,6 +52,7 @@ export const EntityMultiDropdown = <T extends string>({
   disabled,
 
   isClearable = true,
+  limitSelectedItems,
 
   loggerId,
 }: EntityMultiDropdown<T>) => {
@@ -136,6 +139,7 @@ export const EntityMultiDropdown = <T extends string>({
       disabled={disabled}
       loggerId={loggerId}
       customComponents={{ Option, MultiValue, ValueContainer }}
+      limitSelectedItems={limitSelectedItems}
     />
   );
 };
@@ -146,15 +150,41 @@ const ValueContainer = ({
 }: { children: any } & ValueContainerProps<any, any, any> & {
     selectProps: StyledSelect;
   }): React.ReactElement => {
+  const themeContext = useContext(ThemeContext);
+
   const currentValues: DropdownItem[] = [...props.getValue()];
   let toBeRendered = children;
 
   if (currentValues.length > 0) {
     // filter ANY out of the values array
+    const filteredChildren = children[0].filter(
+      (ch: any) => ch.key !== `${allEntities.label}-${allEntities.value}`
+    );
+
+    const limit = props.selectProps.limitSelectedItems;
+    // Show limited number of entities and add ellipsis if there are more
+    const visibleChildren = limit
+      ? filteredChildren.slice(0, limit)
+      : filteredChildren;
+    const remainingCount = limit ? filteredChildren.length - limit : 0;
+
     toBeRendered = [
-      children[0].filter(
-        (ch: any) => ch.key !== `${allEntities.label}-${allEntities.value}`
-      ),
+      [
+        ...visibleChildren,
+        ...(remainingCount > 0
+          ? [
+              <div
+                key="ellipsis"
+                style={{
+                  padding: "0.2rem 0.2rem 0.2rem 0.3rem",
+                  color: themeContext?.color["primary"],
+                }}
+              >
+                +{remainingCount} more
+              </div>,
+            ]
+          : []),
+      ],
       children[1],
     ];
   }

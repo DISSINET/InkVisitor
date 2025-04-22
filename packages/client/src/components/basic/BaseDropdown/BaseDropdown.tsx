@@ -59,6 +59,7 @@ interface BaseDropdown {
   isClearable?: boolean;
   hideSelectedOptions?: boolean;
   noDropDownIndicator?: boolean;
+  limitSelectedItems?: number;
 }
 export const BaseDropdown: React.FC<BaseDropdown> = ({
   options = [],
@@ -85,6 +86,7 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
   attributeDropdown,
 
   loggerId,
+  limitSelectedItems,
 }) => {
   const isOneOptionSingleEntitySelect =
     options.length < 2 && !isMulti && entityDropdown;
@@ -168,6 +170,7 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
           width={width}
           hideSelectedOptions={hideSelectedOptions}
           loggerId={loggerId}
+          limitSelectedItems={limitSelectedItems}
         />
       </StyledSelectWrapper>
 

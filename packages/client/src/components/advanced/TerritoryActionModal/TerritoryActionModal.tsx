@@ -256,7 +256,7 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
                         data: {
                           parent: {
                             territoryId: newParentEntities[0].id,
-                            order: EntityEnums.Order.First,
+                            order: EntityEnums.Order.Last,
                           },
                         },
                       },

@@ -29,6 +29,7 @@ import { BiSearch } from "react-icons/bi";
 interface StatementListTextAnnotator {
   statements: IResponseStatement[];
   territoryId: string;
+  statementId: string;
   entities: { [key: string]: IEntity };
   right: UserEnums.RoleMode;
   setShowSubmit: React.Dispatch<React.SetStateAction<boolean>>;
@@ -50,6 +51,9 @@ interface StatementListTextAnnotator {
 
   contentHeight: number;
   contentWidth: number;
+
+  annotator?: Annotator;
+  setAnnotator: React.Dispatch<React.SetStateAction<Annotator | undefined>>;
 }
 
 export const StatementListTextAnnotator: React.FC<
@@ -57,6 +61,7 @@ export const StatementListTextAnnotator: React.FC<
 > = ({
   statements,
   territoryId,
+  statementId,
   entities,
   right,
   setShowSubmit,
@@ -77,6 +82,9 @@ export const StatementListTextAnnotator: React.FC<
 
   contentHeight,
   contentWidth,
+
+  annotator,
+  setAnnotator,
 }) => {
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const [showAnnotator, setShowAnnotator] = useState(false);
@@ -91,7 +99,6 @@ export const StatementListTextAnnotator: React.FC<
     []
   );
 
-  const [annotator, setAnnotator] = useState<Annotator | undefined>(undefined);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [searchOccurences, setSearchOccurences] = useState<
     { segmentIndex: number; lineIndex: number; start: number; end: number }[]
@@ -244,6 +251,22 @@ export const StatementListTextAnnotator: React.FC<
     enabled: api.isLoggedIn(),
   });
 
+  // INIT + react to url changes
+  useEffect(() => {
+    if (annotator && selectedDocument) {
+      const scrollToId =
+        statementId &&
+        selectedDocument.referencedEntityIds.S?.includes(statementId)
+          ? statementId
+          : territoryId;
+
+      // ensure the annotator is fully initialized
+      setTimeout(() => {
+        annotator.scrollToAnchor(scrollToId);
+      }, 100);
+    }
+  }, [statementId, annotator, territoryId, selectedDocument]);
+
   const thisTHasAnchor = useMemo<boolean>(() => {
     if (selectedDocument) {
       return selectedDocument?.referencedEntityIds.T.includes(territoryId);
@@ -275,6 +298,8 @@ export const StatementListTextAnnotator: React.FC<
     }
     return height;
   }, [contentHeight, selectorHeight]);
+
+  const debouncedContentWidth = useDebounce(contentWidth, 80);
 
   return (
     <animated.div style={animatedStyle}>
@@ -456,10 +481,11 @@ export const StatementListTextAnnotator: React.FC<
             value={hlEntities}
             width={
               statements.length > 0
-                ? contentWidth - COLLAPSED_TABLE_WIDTH - 75
-                : contentWidth - 75
+                ? debouncedContentWidth - COLLAPSED_TABLE_WIDTH - 75
+                : debouncedContentWidth - 75
             }
             noOptionsMessage="No entity classes to highlight"
+            limitSelectedItems={Math.floor((debouncedContentWidth - 232) / 80)}
           />
         </div>
       )}
@@ -479,7 +505,6 @@ export const StatementListTextAnnotator: React.FC<
                 setAnnotator(newAnnotator);
               }}
               thisTerritoryEntityId={territoryId}
-              initialScrollEntityId={territoryId}
               displayLineNumbers={true}
               height={annotatorHeight}
               documentId={selectedDocumentId as string}
@@ -487,6 +512,7 @@ export const StatementListTextAnnotator: React.FC<
               handleCreateTerritory={handleCreateTerritory}
               storedAnnotatorScroll={storedAnnotatorScroll}
               setStoredAnnotatorScroll={setStoredAnnotatorScroll}
+              // initialScrollEntityId={territoryId}
             />
           )}
         </AnnotatorProvider>

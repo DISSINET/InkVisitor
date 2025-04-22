@@ -27,6 +27,7 @@ import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StatementListTextAnnotator } from "./StatementListTextAnnotator/StatementListTextAnnotator";
 import { StyledEmptyState, StyledTableWrapper } from "./StatementLitBoxStyles";
 import { RelationPathExist } from "@shared/types/errors";
+import { Annotator } from "@inkvisitor/annotator/src/lib";
 
 const initialData: {
   statements: IResponseStatement[];
@@ -570,6 +571,8 @@ export const StatementListBox: React.FC = () => {
     [displayMode, contentWidth]
   );
 
+  const [annotator, setAnnotator] = useState<Annotator | undefined>(undefined);
+
   return (
     <>
       {showStatementList && (
@@ -637,8 +640,6 @@ export const StatementListBox: React.FC = () => {
             >
               <StyledTableWrapper
                 $isListMode={displayMode === StatementListDisplayMode.LIST}
-
-                // id="Statements-box-table"
               >
                 {statements.length > 0 && (
                   <StatementListTable
@@ -672,6 +673,7 @@ export const StatementListBox: React.FC = () => {
                 handleCreateStatement={handleCreateStatement}
                 handleCreateTerritory={handleCreateTerritory}
                 territoryId={territoryId}
+                statementId={statementId}
                 storedAnnotatorResourceId={storedAnnotatorResourceId}
                 setStoredAnnotatorResourceId={setStoredAnnotatorResourceId}
                 storedAnnotatorScroll={storedAnnotatorScroll}
@@ -688,6 +690,8 @@ export const StatementListBox: React.FC = () => {
                 addStatementAtCertainIndex={addStatementAtCertainIndex}
                 selectedRows={selectedRows}
                 setSelectedRows={setSelectedRows}
+                annotator={annotator}
+                setAnnotator={setAnnotator}
               />
             )}
           </div>

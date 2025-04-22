@@ -30,6 +30,7 @@ export interface StyledSelect {
   wildCardChar?: boolean;
   icon?: JSX.Element;
   loggerId?: string;
+  limitSelectedItems?: number;
 }
 export const StyledSelect = styled(Select)<StyledSelect>`
   display: inline-flex;
@@ -98,6 +99,9 @@ export const StyledSelect = styled(Select)<StyledSelect>`
     svg {
       height: 18;
     }
+  }
+  .react-select__clear-indicator {
+    padding: 0.2rem;
   }
   .react-select__indicator-separator {
     display: none;

@@ -29,7 +29,6 @@ export const StyledTh = styled.th`
   text-align: left;
   padding-right: ${({ theme }) => theme.space[2]};
   padding-left: ${({ theme }) => theme.space[2]};
-  font-weight: normal;
 `;
 
 interface StyledTr {
