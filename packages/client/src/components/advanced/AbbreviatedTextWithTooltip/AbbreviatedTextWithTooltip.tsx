@@ -1,30 +1,33 @@
 import React, { useState } from "react";
-import { TiDocumentText } from "react-icons/ti";
-import { Tooltip } from "../Tooltip/Tooltip";
-import { StyledDocumentTag, StyledDocumentTitle } from "./DocumentTitleStyles";
+import { Tooltip } from "../../basic/Tooltip/Tooltip";
+import {
+  StyledText,
+  StyledTextWrapper,
+} from "./AbbreviatedTextWithTooltipStyles";
 
-interface DocumentTitle {
-  title?: string;
+interface AbbreviatedTextWithTooltip {
+  text?: string;
 }
-export const DocumentTitle: React.FC<DocumentTitle> = ({ title = "" }) => {
+export const AbbreviatedTextWithTooltip: React.FC<
+  AbbreviatedTextWithTooltip
+> = ({ text = "" }) => {
   const [referenceElement, setReferenceElement] =
     useState<HTMLDivElement | null>(null);
 
   const [isTooltipOpen, setIsTooltipOpen] = React.useState(false);
   return (
     <React.Fragment>
-      <StyledDocumentTag
+      <StyledTextWrapper
         ref={setReferenceElement}
         onMouseEnter={() => setIsTooltipOpen(true)}
         onMouseLeave={() => setIsTooltipOpen(false)}
       >
-        <TiDocumentText style={{ marginRight: "0.2rem", flexShrink: "0" }} />
         <div style={{ display: "grid" }}>
-          <StyledDocumentTitle>{title}</StyledDocumentTitle>
+          <StyledText>{text}</StyledText>
         </div>
-      </StyledDocumentTag>
+      </StyledTextWrapper>
       <Tooltip
-        label={title}
+        label={text}
         visible={isTooltipOpen}
         referenceElement={referenceElement}
       />

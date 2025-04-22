@@ -38,7 +38,7 @@ import { Tooltip } from "./basic/Tooltip/Tooltip";
 import { TypeBar } from "./basic/TypeBar/TypeBar";
 import { ContactOwnerFooting } from "./basic/ContactOwnerFooting/ContactOwnerFooting";
 import { CustomScrollbar } from "./basic/CustomScrollbar/CustomScrollbar";
-import { DocumentTitle } from "./basic/DocumentTitle/DocumentTitle";
+import { DocumentTitle } from "./advanced/DocumentTitle/DocumentTitle";
 
 export {
   AttributeIcon,

@@ -6,7 +6,11 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, DocumentTitle, Table } from "components";
-import { DocumentModalEdit, EntityTag } from "components/advanced";
+import {
+  AbbreviatedTextWithTooltip,
+  DocumentModalEdit,
+  EntityTag,
+} from "components/advanced";
 import React, { useMemo, useState } from "react";
 import { FaAnchor, FaTrashAlt } from "react-icons/fa";
 import { HiClipboardList } from "react-icons/hi";
@@ -72,9 +76,9 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
                     noIconMargin
                   />
 
-                  <StyledAbbreviatedLabel title={anchorText}>
-                    {anchorText}
-                  </StyledAbbreviatedLabel>
+                  {/* <StyledAbbreviatedLabel title={anchorText}> */}
+                  <AbbreviatedTextWithTooltip text={anchorText} />
+                  {/* </StyledAbbreviatedLabel> */}
                 </StyledAnchorText>
               ) : (
                 <></>
