@@ -19,16 +19,14 @@ import { findEntityById, getEntitiesByIds } from "@service/shorthands";
 import treeCache from "@service/treeCache";
 import { WarningTypeEnums } from "@shared/enums";
 import { InternalServerError } from "@shared/types/errors";
+import { PropSpecKind } from "@shared/types/prop";
+import { IResponseUsedInDocument } from "@shared/types/response-detail";
 import { ITerritoryValidation } from "@shared/types/territory";
 import { Connection } from "rethinkdb-ts";
 import { IRequest } from "src/custom_typings/request";
 import Entity from "../entity/entity";
 import { PositionRules } from "./PositionRules";
 import Statement from "./statement";
-import { PropSpecKind } from "@shared/types/prop";
-import { IResponseUsedInDocument } from "@shared/types/response-detail";
-import Document, { TreeNode } from "@models/document/document";
-import Resource from "@models/resource/resource";
 
 export class ResponseStatement extends Statement implements IResponseStatement {
   entities: { [key: string]: IEntity };
