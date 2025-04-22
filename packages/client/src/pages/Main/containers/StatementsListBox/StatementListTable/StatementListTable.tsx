@@ -19,6 +19,7 @@ import {
   MdOutlineCheckBox,
   MdOutlineCheckBoxOutlineBlank,
 } from "react-icons/md";
+import { TbAnchor } from "react-icons/tb";
 import { TiWarningOutline } from "react-icons/ti";
 import {
   CellProps,
@@ -41,7 +42,6 @@ import {
   StyledTable,
   StyledTh,
 } from "./StatementListTableStyles";
-import { TbAnchor } from "react-icons/tb";
 
 const HIDDEN_COLUMNS_FULL = ["id", "anchor"];
 const HIDDEN_COLUMNS_MINIFIED = [

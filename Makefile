@@ -1,5 +1,8 @@
+build-latest:
+	docker build --platform linux/amd64 -f Dockerfile -t dissinet/inkvisitor:latest --build-arg="ENV=latest" . && docker push dissinet/inkvisitor:latest
+
 build-inkvisitor:
-	docker build --platform linux/amd64 -f Dockerfile -t dissinet/inkvisitor:latest --build-arg="ENV=production" . && docker push dissinet/inkvisitor:latest
+	docker build --platform linux/amd64 -f Dockerfile -t dissinet/inkvisitor:production --build-arg="ENV=production" . && docker push dissinet/inkvisitor:production
 
 build-inkvisitor-staging:
 	docker build --platform linux/amd64 -f Dockerfile -t dissinet/inkvisitor:staging --build-arg="ENV=staging" . && docker push dissinet/inkvisitor:staging

@@ -42,10 +42,7 @@ interface LeftHeader {
 }
 export const LeftHeader: React.FC<LeftHeader> = React.memo(
   ({ tempLocation }) => {
-    let env = (process.env.ROOT_URL || "").replace(/apps\/inkvisitor[-]?/, "");
-    if (env === "/") {
-      env = "";
-    }
+    const env = process.env.NODE_ENV || "";
 
     const versionText = `v. ${packageJson.version}${
       env ? ` | ${env}` : ``
@@ -168,10 +165,7 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
     handleLogOut,
     userIsFetching = false,
   }) => {
-    const env = (process.env.ROOT_URL || "").replace(
-      /apps\/inkvisitor[-]?/,
-      ""
-    );
+    const env = process.env.NODE_ENV || "";
 
     const dispatch = useAppDispatch();
     const selectedThemeId: InterfaceEnums.Theme = useAppSelector(

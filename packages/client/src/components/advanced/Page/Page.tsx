@@ -40,13 +40,7 @@ export const Page: React.FC<Page> = ({ children }) => {
     (state) => state.layout.contentHeight
   );
 
-  let environmentName = (process.env.ROOT_URL || "").replace(
-    /apps\/inkvisitor[-]?/,
-    ""
-  );
-  if (environmentName === "/") {
-    environmentName = "";
-  }
+  const environmentName = process.env.NODE_ENV || "";
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -162,9 +156,11 @@ export const Page: React.FC<Page> = ({ children }) => {
         paddingY={0}
         paddingX={10}
         color={
-          ["production", ""].indexOf(environmentName) === -1
-            ? (environmentName as keyof ThemeColor)
-            : "muni"
+          environmentName === "production"
+            ? "muni"
+            : environmentName === ""
+            ? "medhate"
+            : (environmentName as keyof ThemeColor)
         }
         left={headerLeft}
         right={headerRight}

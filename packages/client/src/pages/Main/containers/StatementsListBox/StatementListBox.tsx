@@ -645,7 +645,11 @@ export const StatementListBox: React.FC = () => {
                     statements={statements}
                     handleRowClick={(rowId: string) => {
                       dispatch(setShowWarnings(false));
-                      setStatementId(rowId);
+                      if (statementId !== rowId) {
+                        setStatementId(rowId);
+                      } else {
+                        annotator?.scrollToAnchor(rowId);
+                      }
                     }}
                     actantsUpdateMutation={statementUpdateMutation}
                     entities={entities}

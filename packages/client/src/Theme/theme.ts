@@ -72,12 +72,13 @@ const theme = {
     focusedCheckbox: "rgba(9,16,52,0.1)",
 
     headerTextColor: " #fff",
-    muni: "#091034",
+    muni: "#091034", // muni primary color
     staging: "#911111",
     "data-import": "#99004C",
     "data-import-persecutio": "#380099",
     development: "#6174C2",
     sandbox: "#CB6E17",
+    medhate: "#470d4f",
 
     entityC: "#83BCB6",
     entityE: "#D8B5A5",

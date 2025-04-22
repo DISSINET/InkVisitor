@@ -46,7 +46,7 @@ import {
   AiOutlineCaretUp,
   AiOutlineWarning,
 } from "react-icons/ai";
-import { FaRegCopy } from "react-icons/fa";
+import { FaAnchor, FaRegCopy } from "react-icons/fa";
 import { TiWarningOutline } from "react-icons/ti";
 import { toast } from "react-toastify";
 import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
@@ -60,30 +60,28 @@ import {
 } from "utils/utils";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
 import {
+  StyledAnchorEmptyState,
+  StyledAnchorMeta,
+  StyledAnchorText,
   StyledBreadcrumbWrap,
   StyledDetailWarnings,
-  StyledEditorAnchorSection,
   StyledEditorAnchorSectionAnchor,
   StyledEditorAnchorSectionContent,
-  StyledEditorContentRow,
   StyledEditorContentLabel,
   StyledEditorContentRowValue,
   StyledEditorHeaderInputWrap,
+  StyledEditorPreBlock,
   StyledEditorPreSection,
   StyledEditorSection,
   StyledEditorSectionContent,
   StyledEditorSectionHeader,
   StyledEditorSectionHeading,
+  StyledEditorSectionText,
   StyledEditorStatementInfo,
   StyledHeaderTagWrap,
   StyledMissingTerritory,
   StyledTagsList,
   StyledTagsListItem,
-  StyledAnchorText,
-  StyledAnchorMeta,
-  StyledAnchorEmptyState,
-  StyledEditorSectionText,
-  StyledEditorPreBlock,
 } from "../StatementEditorBoxStyles";
 import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
@@ -126,6 +124,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 }) => {
   const {
     statementId,
+    setStatementId,
     territoryId,
     setTerritoryId,
     appendDetailId,
@@ -649,7 +648,22 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           <StyledEditorPreSection>
             <StyledEditorStatementInfo>
               <StyledHeaderTagWrap>
-                <EntityTag entity={statement} fullWidth />
+                <EntityTag
+                  entity={statement}
+                  fullWidth
+                  button={
+                    <Button
+                      inverted
+                      tooltipLabel="locate statement anchor"
+                      icon={<FaAnchor />}
+                      onClick={() => {
+                        setStatementId(statement.id);
+                        statementTerritoryId &&
+                          setTerritoryId(statementTerritoryId);
+                      }}
+                    />
+                  }
+                />
                 <div style={{ marginLeft: "0.5rem", marginRight: "0.5rem" }}>
                   <Button
                     inverted
@@ -664,6 +678,20 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   />
                 </div>
               </StyledHeaderTagWrap>
+              <div style={{ marginLeft: "0.5rem", marginRight: "0.5rem" }}>
+                <Button
+                  inverted
+                  tooltipLabel="copy statement ID"
+                  color="primary"
+                  label=""
+                  icon={<FaRegCopy />}
+                  onClick={async () => {
+                    await navigator.clipboard.writeText(statement.id);
+                    toast.info("ID copied to clipboard");
+                  }}
+                />
+              </div>
+
               {userCanEdit && (
                 <div style={{ display: "flex" }}>
                   <StyledEditorContentLabel>

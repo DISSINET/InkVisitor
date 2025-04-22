@@ -1,13 +1,15 @@
 import { Annotator } from "@inkvisitor/annotator/src/lib";
 import { animated, useSpring } from "@react-spring/web";
+import { entitiesDict } from "@shared/dictionaries/entity";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import { IEntity, IResponseEntity, IResponseStatement } from "@shared/types";
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
-import { Button, Input, Loader, DocumentTitle } from "components";
+import { Button, DocumentTitle, Input, Loader } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 import TextAnnotator from "components/advanced/Annotator/Annotator";
 import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
+import { useDebounce, useResizeObserver } from "hooks";
 import React, {
   useCallback,
   useContext,
@@ -15,16 +17,13 @@ import React, {
   useMemo,
   useState,
 } from "react";
+import { BiSearch } from "react-icons/bi";
 import { FaLongArrowAltRight, FaUnlink } from "react-icons/fa";
 import { GrDocumentMissing } from "react-icons/gr";
 import { TbAnchorOff } from "react-icons/tb";
-import { TiDocumentText } from "react-icons/ti";
 import { ThemeContext } from "styled-components";
 import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
 import { StyledInfoText } from "../StatementListHeader/StatementListHeaderStyles";
-import { entitiesDict } from "@shared/dictionaries/entity";
-import { useDebounce, useResizeObserver } from "hooks";
-import { BiSearch } from "react-icons/bi";
 
 interface StatementListTextAnnotator {
   statements: IResponseStatement[];
@@ -250,6 +249,22 @@ export const StatementListTextAnnotator: React.FC<
     },
     enabled: api.isLoggedIn(),
   });
+
+  // INIT + react to url changes
+  useEffect(() => {
+    if (annotator && selectedDocument) {
+      const scrollToId =
+        statementId &&
+        selectedDocument.referencedEntityIds.S?.includes(statementId)
+          ? statementId
+          : territoryId;
+
+      // ensure the annotator is fully initialized
+      setTimeout(() => {
+        annotator.scrollToAnchor(scrollToId);
+      }, 100);
+    }
+  }, [statementId, annotator, territoryId, selectedDocument]);
 
   const thisTHasAnchor = useMemo<boolean>(() => {
     if (selectedDocument) {
@@ -489,13 +504,6 @@ export const StatementListTextAnnotator: React.FC<
                 setAnnotator(newAnnotator);
               }}
               thisTerritoryEntityId={territoryId}
-              // if the statement is anchored in the document, scroll to the statement, otherwise scroll to the territory
-              initialScrollEntityId={
-                selectedDocument &&
-                selectedDocument.referencedEntityIds.S?.includes(statementId)
-                  ? statementId
-                  : territoryId
-              }
               displayLineNumbers={true}
               height={annotatorHeight}
               documentId={selectedDocumentId as string}
@@ -503,6 +511,7 @@ export const StatementListTextAnnotator: React.FC<
               handleCreateTerritory={handleCreateTerritory}
               storedAnnotatorScroll={storedAnnotatorScroll}
               setStoredAnnotatorScroll={setStoredAnnotatorScroll}
+              // initialScrollEntityId={territoryId}
             />
           )}
         </AnnotatorProvider>
