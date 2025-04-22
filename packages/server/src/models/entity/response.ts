@@ -1,7 +1,5 @@
 import { nonenumerable } from "@common/decorators";
-import Document, { TreeNode } from "@models/document/document";
 import { UsedRelations } from "@models/relation/relations";
-import Resource from "@models/resource/resource";
 import Statement from "@models/statement/statement";
 import treeCache from "@service/treeCache";
 import { EntityEnums, RelationEnums, UserEnums } from "@shared/enums";
@@ -217,63 +215,6 @@ export class ResponseEntityDetail
     await this.processTemplateData(conn);
   }
 
-  /**
-   * returns data for usedInDocuments(IResponseUsedInDocument[]) field
-   * @param conn
-   * @returns
-   */
-  async findUsedInDocuments(
-    conn: Connection
-  ): Promise<IResponseUsedInDocument[]> {
-    const out: IResponseUsedInDocument[] = [];
-    await Promise.all(
-      (
-        await Document.findByEntityId(conn, this.id)
-      ).map(async (docData) => {
-        // construct document and tree node filled with entities data
-        const doc = new Document({
-          content: docData.content,
-        });
-        const anchors = doc.buildAnchorsTree();
-        const anchoredEntities = await Entity.findEntitiesByIds(
-          conn,
-          doc.collectAnchors(anchors)
-        );
-        doc.assignClassesBasedOnEntities(anchors, anchoredEntities);
-
-        const resource = await Resource.findByDocumentId(conn, docData.id);
-
-        // traverse the tree, search for anchor that === this.id
-        const traverse = (nodes: TreeNode[], parentT?: string) => {
-          for (const node of nodes) {
-            if (node.anchor === this.id) {
-              out.push({
-                document: {
-                  id: docData.id,
-                  title: docData.title,
-                  entityIds: docData.entityIds,
-                  createdAt: docData.createdAt,
-                  updatedAt: docData.updatedAt,
-                },
-                anchorText: node.getShortContent(),
-                resourceId: resource?.id || "",
-                parentTerritoryId: parentT || "",
-              });
-            }
-
-            traverse(
-              node.children,
-              node.class === EntityEnums.Class.Territory ? node.anchor : parentT
-            );
-          }
-        };
-
-        traverse(anchors);
-      })
-    );
-
-    return out;
-  }
   /**
    * Loads entries for usedInStatementIdentifications and usedInStatementClassifications fields
    * Needs to be called after walkStatementsDataEntities, since it uses also populated
