@@ -35,7 +35,6 @@ import { IWarningPositionSection } from "@shared/types/warning";
 import { Connection, RDatum, WriteResult, r as rethink } from "rethinkdb-ts";
 import { IRequest } from "../../custom_typings/request";
 import Reference from "./reference";
-import Resource from "@models/resource/resource";
 
 export default class Entity implements IEntity, IDbModel {
   static table = "entities";
@@ -584,7 +583,17 @@ export default class Entity implements IEntity, IDbModel {
         );
         doc.assignClassesBasedOnEntities(anchors, anchoredEntities);
 
-        const resource = await Resource.findByDocumentId(conn, docData.id);
+        const resources = await rethink
+          .table(Entity.table)
+          .filter({
+            class: EntityEnums.Class.Resource,
+            data: {
+              documentId: docData.id,
+            },
+          })
+          .run(conn);
+
+        const resource = resources.length > 0 ? resources[0] : null;
 
         // traverse the tree, search for anchor that === this.id
         const traverse = (nodes: TreeNode[], parentT?: string) => {

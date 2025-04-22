@@ -220,19 +220,6 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                       </StyledAnchorItem>
                     );
                   })}
-                  {anchors.map((documentAnchor, index) => {
-                    return (
-                      <StyledAnchorItem key={index}>
-                        <DocumentTitle
-                          title={documentAnchor.document.title}
-                          size="sm"
-                        />
-                        <StyledAnchorText>
-                          {documentAnchor.anchorText}
-                        </StyledAnchorText>
-                      </StyledAnchorItem>
-                    );
-                  })}
                 </StyledDetail>
               </StyledRow>
             )}
