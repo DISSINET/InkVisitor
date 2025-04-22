@@ -142,10 +142,10 @@ export const dndHoverFn = (
   item: EntityDragItem | DragItem,
   index: number,
   monitor: DropTargetMonitor,
-  ref: React.RefObject<HTMLDivElement>,
+  ref: React.RefObject<HTMLDivElement> | null,
   moveFn: (dragIndex: number, hoverIndex: number) => void
 ) => {
-  if (!ref.current) {
+  if (!ref?.current) {
     return;
   }
 
