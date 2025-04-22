@@ -55,7 +55,7 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
     middleware: [offset({ mainAxis: -14 })],
   });
 
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>(null) as React.RefObject<HTMLDivElement>;
 
   const [, drop] = useDrop<DragItem>({
     accept: ItemTypes.DETAIL_TAB,
