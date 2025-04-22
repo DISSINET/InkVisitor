@@ -191,12 +191,12 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
     setRules((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  useEffect(() => {
-    const newSettings: Omit<ISetting, "public">[] = Object.entries(rules).map(
-      ([id, value]) => ({ id, value })
-    );
-    updateSettingsMutation.mutate(newSettings);
-  }, [rules]);
+  // useEffect(() => {
+  // const newSettings: Omit<ISetting, "public">[] = Object.entries(rules).map(
+  //   ([id, value]) => ({ id, value })
+  // );
+  // updateSettingsMutation.mutate(newSettings);
+  // }, [rules]);
 
   return (
     <>
