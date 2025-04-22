@@ -102,6 +102,8 @@ export const StyledEditorSectionText = styled.div`
   box-shadow: ${({ theme }) => theme.boxShadow["subtle"]};
   border-left: ${({ theme }) => "3px solid " + theme.color["success"]};
   background-color: ${({ theme }) => theme.color["white"]};
+  padding: ${({ theme }) => theme.space[3]};
+  margin-top: ${({ theme }) => theme.space[3]};
 `;
 
 export const StyledDetailWarnings = styled.div`
