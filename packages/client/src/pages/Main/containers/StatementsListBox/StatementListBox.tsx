@@ -28,6 +28,7 @@ import { StatementListTextAnnotator } from "./StatementListTextAnnotator/Stateme
 import { StyledEmptyState, StyledTableWrapper } from "./StatementLitBoxStyles";
 import { RelationPathExist } from "@shared/types/errors";
 import { Annotator } from "@inkvisitor/annotator/src/lib";
+import { EntityCreateModal } from "components/advanced";
 
 const initialData: {
   statements: IResponseStatement[];
@@ -110,7 +111,12 @@ export const StatementListBox: React.FC = () => {
     setAnnotatorOpened(newDisplayMode === StatementListDisplayMode.TEXT);
   };
 
-  const { status, data, error, isFetching } = useQuery({
+  const {
+    status,
+    data: territory,
+    error,
+    isFetching,
+  } = useQuery({
     queryKey: ["territory", "statement-list", territoryId, statementListOpened],
     queryFn: async () => {
       const res = await api.territoryGet(territoryId);
@@ -119,7 +125,7 @@ export const StatementListBox: React.FC = () => {
     enabled: !!territoryId && api.isLoggedIn() && statementListOpened,
   });
 
-  const { statements, entities, right } = data || initialData;
+  const { statements, entities, right } = territory || initialData;
 
   useEffect(() => {
     dispatch(setRowsExpanded([]));
@@ -151,7 +157,7 @@ export const StatementListBox: React.FC = () => {
       );
     }
   }, [userData?.storedTerritories]);
-  const isFavorited = data && storedTerritoryIds?.includes(data.id);
+  const isFavorited = territory && storedTerritoryIds?.includes(territory.id);
 
   useEffect(() => {
     if (error && (error as any).error === "TerritoryDoesNotExits") {
@@ -256,18 +262,18 @@ export const StatementListBox: React.FC = () => {
       toast.error(`Error: Statement not created!`);
     },
   });
-  const territoryCreateMutation = useMutation({
-    mutationFn: async (newTerritory: ITerritory) =>
-      await api.entityCreate(newTerritory),
-    onSuccess: (data, variables) => {
-      toast.info(`Sub Teritory created!`);
-      queryClient.invalidateQueries({ queryKey: ["tree"] });
-      appendDetailId(variables.id);
-    },
-    onError: () => {
-      toast.error(`Error: Sub Territory not created!`);
-    },
-  });
+  // const territoryCreateMutation = useMutation({
+  //   mutationFn: async (newTerritory: ITerritory) =>
+  //     await api.entityCreate(newTerritory),
+  //   onSuccess: (data, variables) => {
+  //     toast.info(`Sub Teritory created!`);
+  //     queryClient.invalidateQueries({ queryKey: ["tree"] });
+  //     appendDetailId(variables.id);
+  //   },
+  //   onError: () => {
+  //     toast.error(`Error: Sub Territory not created!`);
+  //   },
+  // });
 
   const addStatementAtCertainIndex = async (index: number) => {
     let newOrder: number | false = false;
@@ -390,7 +396,7 @@ export const StatementListBox: React.FC = () => {
     text: string = "",
     statementId: string | undefined = undefined
   ) => {
-    if (userData && data) {
+    if (userData && territory) {
       const newStatement: IStatement = CStatement(
         localStorage.getItem("userrole") as UserEnums.Role,
         userData.options,
@@ -405,22 +411,21 @@ export const StatementListBox: React.FC = () => {
   };
 
   const handleCreateTerritory = (newTerritoryId?: string) => {
-    if (userData && data) {
+    if (userData && territory) {
       const newTerritory: ITerritory = CTerritory(
         localStorage.getItem("userrole") as UserEnums.Role,
         userData.options,
-        `subT of ${data.labels[0]}`,
-        data.detail,
+        `subT of ${territory.labels[0]}`,
+        territory.detail,
         territoryId,
         EntityEnums.Order.Last,
         newTerritoryId
       );
 
-      console.log(newTerritory);
-
-      territoryCreateMutation.mutate(newTerritory);
+      // territoryCreateMutation.mutate(newTerritory);
     }
   };
+
   const updateTerritoryMutation = useMutation({
     mutationFn: async (tObject: {
       territoryId: string;
@@ -577,9 +582,9 @@ export const StatementListBox: React.FC = () => {
     <>
       {showStatementList && (
         <>
-          {data && (
+          {territory && (
             <StatementListHeader
-              territory={data}
+              territory={territory}
               isFavorited={isFavorited}
               selectedRows={selectedRows}
               setSelectedRows={setSelectedRows}
@@ -668,7 +673,7 @@ export const StatementListBox: React.FC = () => {
               </StyledTableWrapper>
             </CustomScrollbar>
 
-            {data && displayMode === StatementListDisplayMode.TEXT && (
+            {territory && displayMode === StatementListDisplayMode.TEXT && (
               <StatementListTextAnnotator
                 key={territoryId}
                 contentHeight={contentHeight}
@@ -677,6 +682,7 @@ export const StatementListBox: React.FC = () => {
                 handleCreateStatement={handleCreateStatement}
                 handleCreateTerritory={handleCreateTerritory}
                 territoryId={territoryId}
+                territory={territory}
                 statementId={statementId}
                 storedAnnotatorResourceId={storedAnnotatorResourceId}
                 setStoredAnnotatorResourceId={setStoredAnnotatorResourceId}
