@@ -1,4 +1,3 @@
-import { IDocumentMeta, IEntity } from "@shared/types";
 import {
   IResponseDetail,
   IResponseUsedInDocument,
@@ -6,20 +5,13 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, DocumentTitle, Table } from "components";
-import {
-  AbbreviatedTextWithTooltip,
-  DocumentModalEdit,
-  EntityTag,
-} from "components/advanced";
-import React, { useMemo, useState } from "react";
-import { FaAnchor, FaTrashAlt } from "react-icons/fa";
+import { AbbreviatedTextWithTooltip, EntityTag } from "components/advanced";
+import React, { useMemo } from "react";
+import { FaTrashAlt } from "react-icons/fa";
 import { HiClipboardList } from "react-icons/hi";
 import { CellProps, Column } from "react-table";
 import { toast } from "react-toastify";
-import {
-  StyledAbbreviatedLabel,
-  StyledAnchorText,
-} from "./EntityDetailUsedInDocumentsTableStyles";
+import { StyledAnchorText } from "./EntityDetailUsedInDocumentsTableStyles";
 
 type CellType = CellProps<IResponseUsedInDocument>;
 interface EntityDetailUsedInDocumentsTable {
@@ -41,18 +33,12 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
     },
   });
 
-  // const [openedDocument, setOpenedDocument] = useState<IDocumentMeta | false>(
-  //   false
-  // );
-  // const [tAnchor, setTAnchor] = useState<string | false>(false);
-  // const [entityOcc, setEntityOcc] = useState<number | false>(false);
-
   const columns = useMemo<Column<IResponseUsedInDocument>[]>(
     () => [
       {
         Header: "Anchor text",
         Cell: ({ row }: CellType) => {
-          const { anchorText } = row.original;
+          const { anchorText, document } = row.original;
           return (
             <>
               {anchorText ? (
@@ -66,8 +52,12 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
                       />
                     }
                     onClick={() => {
-                      window.navigator.clipboard.writeText(anchorText);
-                      toast.info("text copied to clipboard");
+                      api.documentGet(document.id).then((document) => {
+                        window.navigator.clipboard.writeText(
+                          document.data.content
+                        );
+                        toast.info("text copied to clipboard");
+                      });
                     }}
                     tooltipLabel="copy anchor text to clipboard"
                     inverted
@@ -76,9 +66,7 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
                     noIconMargin
                   />
 
-                  {/* <StyledAbbreviatedLabel title={anchorText}> */}
                   <AbbreviatedTextWithTooltip text={anchorText} />
-                  {/* </StyledAbbreviatedLabel> */}
                 </StyledAnchorText>
               ) : (
                 <></>
@@ -117,18 +105,7 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
             <>
               {territoryEntity && (
                 <div style={{ display: "grid" }}>
-                  <EntityTag
-                    entity={territoryEntity}
-                    fullWidth
-                    // unlinkButton={{
-                    //   onClick: () => {
-                    //     setTAnchor(territoryentityId);
-                    //     setOpenedDocument(row.original.document);
-                    //   },
-                    //   icon: <FaAnchor />,
-                    //   tooltipLabel: "open anchor",
-                    // }}
-                  />
+                  <EntityTag entity={territoryEntity} fullWidth />
                 </div>
               )}
             </>
@@ -167,17 +144,6 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
         perPage={perPage}
         isLoading={removeAnchorMutation.isPending}
       />
-      {/* {openedDocument && (
-        <DocumentModalEdit
-          document={openedDocument}
-          onClose={() => {
-            setOpenedDocument(false);
-            setTAnchor(false);
-            setEntityOcc(false);
-          }}
-          anchor={tAnchor ? { entityId: tAnchor } : undefined}
-        />
-      )} */}
     </>
   );
 };
