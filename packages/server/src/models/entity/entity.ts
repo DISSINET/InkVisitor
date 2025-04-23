@@ -610,6 +610,8 @@ export default class Entity implements IEntity, IDbModel {
                 anchorText: node.getShortContent(),
                 resourceId: resource?.id || "",
                 parentTerritoryId: parentT || "",
+                anchorIndex: out.filter((o) => o.document.id === docData.id)
+                  .length,
               });
             }
 
