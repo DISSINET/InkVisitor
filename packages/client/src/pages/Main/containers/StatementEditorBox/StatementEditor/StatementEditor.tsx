@@ -16,14 +16,7 @@ import {
 } from "@tanstack/react-query";
 import { excludedSuggesterEntities } from "Theme/constants";
 import api from "api";
-import {
-  Button,
-  DocumentTitle,
-  Input,
-  Message,
-  MultiInput,
-  Submit,
-} from "components";
+import { Button, Input, Message, MultiInput, Submit } from "components";
 import Dropdown, {
   ApplyTemplateModal,
   AuditTable,
