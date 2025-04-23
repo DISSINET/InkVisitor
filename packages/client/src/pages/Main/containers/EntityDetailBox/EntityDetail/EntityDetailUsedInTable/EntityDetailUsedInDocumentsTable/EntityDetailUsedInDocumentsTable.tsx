@@ -52,6 +52,7 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
                       />
                     }
                     onClick={() => {
+                      // TODO: get anchor text only!!!
                       api.documentGet(document.id).then((document) => {
                         window.navigator.clipboard.writeText(
                           document.data.content
