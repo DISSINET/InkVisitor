@@ -132,7 +132,7 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
               onClick={() =>
                 removeAnchorMutation.mutate({
                   documentId: row.original.document.id,
-                  anchorIndex: row.index,
+                  anchorIndex: row.original.anchorIndex,
                 })
               }
             />
