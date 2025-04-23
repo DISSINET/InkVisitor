@@ -19,7 +19,7 @@ import {
 } from "Theme/constants";
 import { ThemeColor } from "Theme/theme";
 import api from "api";
-import { LetterIcon, Tooltip } from "components";
+import { DocumentTitle, LetterIcon, Tooltip } from "components";
 import React, { useEffect, useMemo, useState } from "react";
 import { AiOutlineTag, AiOutlineTags } from "react-icons/ai";
 import { BiCommentDetail } from "react-icons/bi";
