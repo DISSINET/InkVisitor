@@ -16,7 +16,14 @@ import {
 } from "@tanstack/react-query";
 import { excludedSuggesterEntities } from "Theme/constants";
 import api from "api";
-import { Button, Input, Message, MultiInput, Submit } from "components";
+import {
+  Button,
+  DocumentTitle,
+  Input,
+  Message,
+  MultiInput,
+  Submit,
+} from "components";
 import Dropdown, {
   ApplyTemplateModal,
   AuditTable,
@@ -53,20 +60,24 @@ import {
 } from "utils/utils";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
 import {
+  StyledAnchorEmptyState,
+  StyledAnchorMeta,
+  StyledAnchorText,
   StyledBreadcrumbWrap,
   StyledDetailWarnings,
-  StyledEditorContentRow,
-  StyledEditorContentRowLabel,
+  StyledEditorAnchorSectionAnchor,
+  StyledEditorAnchorSectionContent,
+  StyledEditorContentLabel,
   StyledEditorContentRowValue,
   StyledEditorHeaderInputWrap,
+  StyledEditorPreBlock,
   StyledEditorPreSection,
   StyledEditorSection,
   StyledEditorSectionContent,
   StyledEditorSectionHeader,
   StyledEditorSectionHeading,
+  StyledEditorSectionText,
   StyledEditorStatementInfo,
-  StyledEditorStatementInfoLabel,
-  StyledEditorTemplateSection,
   StyledHeaderTagWrap,
   StyledMissingTerritory,
   StyledTagsList,
@@ -633,25 +644,40 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   return (
     <>
       <React.Fragment key={statement.id}>
-        <StyledEditorPreSection>
-          <StyledEditorStatementInfo>
-            <StyledHeaderTagWrap>
-              <EntityTag
-                entity={statement}
-                fullWidth
-                button={
+        <StyledEditorPreBlock>
+          <StyledEditorPreSection>
+            <StyledEditorStatementInfo>
+              <StyledHeaderTagWrap>
+                <EntityTag
+                  entity={statement}
+                  fullWidth
+                  button={
+                    <Button
+                      inverted
+                      tooltipLabel="locate statement anchor"
+                      icon={<FaAnchor />}
+                      onClick={() => {
+                        setStatementId(statement.id);
+                        statementTerritoryId &&
+                          setTerritoryId(statementTerritoryId);
+                      }}
+                    />
+                  }
+                />
+                <div style={{ marginLeft: "0.5rem", marginRight: "0.5rem" }}>
                   <Button
                     inverted
-                    tooltipLabel="locate statement anchor"
-                    icon={<FaAnchor />}
-                    onClick={() => {
-                      setStatementId(statement.id);
-                      statementTerritoryId &&
-                        setTerritoryId(statementTerritoryId);
+                    tooltipLabel="copy statement ID"
+                    color="primary"
+                    label=""
+                    icon={<FaRegCopy />}
+                    onClick={async () => {
+                      await navigator.clipboard.writeText(statement.id);
+                      toast.info("ID copied to clipboard");
                     }}
                   />
-                }
-              />
+                </div>
+              </StyledHeaderTagWrap>
               <div style={{ marginLeft: "0.5rem", marginRight: "0.5rem" }}>
                 <Button
                   inverted
@@ -665,88 +691,92 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   }}
                 />
               </div>
-            </StyledHeaderTagWrap>
-            {userCanEdit && (
-              <div style={{ display: "flex" }}>
-                <StyledEditorStatementInfoLabel>
-                  change statement label:
-                </StyledEditorStatementInfoLabel>
-                <StyledEditorHeaderInputWrap>
-                  <Input
-                    type="text"
-                    value={statement.labels[0] || ""}
-                    onChangeFn={(newValue: string) => {
-                      handleAttributeChange(
-                        {
-                          labels: statement.labels
-                            ? [newValue, ...statement.labels.slice(1)]
-                            : [],
-                        },
-                        true
-                      );
-                    }}
-                  />
-                </StyledEditorHeaderInputWrap>
-              </div>
-            )}
-          </StyledEditorStatementInfo>
-          {!statement.isTemplate && (
-            <StyledBreadcrumbWrap>
-              {territoryPath &&
-                territoryPath.map((territory: string, key: number) => {
-                  return (
-                    <React.Fragment key={key}>
-                      <BreadcrumbItem territoryId={territory} />
-                    </React.Fragment>
-                  );
-                })}
-              {territoryData ? (
-                <React.Fragment key={territoryData.id}>
-                  <BreadcrumbItem
-                    territoryId={territoryData.id}
-                    territoryData={territoryData}
-                  />
-                </React.Fragment>
-              ) : (
-                <>
-                  {!isFetchingTerritory && (
-                    <div style={{ display: "flex", alignItems: "flex-end" }}>
-                      <AiOutlineWarning
-                        size={22}
-                        color={themeContext?.color.warning}
-                      />
-                      <StyledMissingTerritory>
-                        {"missing territory"}
-                      </StyledMissingTerritory>
-                    </div>
-                  )}
-                </>
-              )}
-            </StyledBreadcrumbWrap>
-          )}
-        </StyledEditorPreSection>
 
-        {userCanEdit && !statement.isTemplate && (
-          <StyledEditorPreSection>
-            {"Move to territory: "}
-            <EntitySuggester
-              disableTemplatesAccept
-              filterEditorRights
-              inputWidth={96}
-              disableCreate
-              categoryTypes={[EntityEnums.Class.Territory]}
-              onSelected={(newSelectedId: string) => {
-                moveStatementMutation.mutate(newSelectedId);
-              }}
-            />
+              {userCanEdit && (
+                <div style={{ display: "flex" }}>
+                  <StyledEditorContentLabel>
+                    Change statement label:
+                  </StyledEditorContentLabel>
+                  <StyledEditorHeaderInputWrap>
+                    <Input
+                      type="text"
+                      value={statement.labels[0] || ""}
+                      onChangeFn={(newValue: string) => {
+                        handleAttributeChange(
+                          {
+                            labels: statement.labels
+                              ? [newValue, ...statement.labels.slice(1)]
+                              : [],
+                          },
+                          true
+                        );
+                      }}
+                    />
+                  </StyledEditorHeaderInputWrap>
+                </div>
+              )}
+            </StyledEditorStatementInfo>
+            {!statement.isTemplate && (
+              <StyledBreadcrumbWrap>
+                {territoryPath &&
+                  territoryPath.map((territory: string, key: number) => {
+                    return (
+                      <React.Fragment key={key}>
+                        <BreadcrumbItem territoryId={territory} />
+                      </React.Fragment>
+                    );
+                  })}
+                {territoryData ? (
+                  <React.Fragment key={territoryData.id}>
+                    <BreadcrumbItem
+                      territoryId={territoryData.id}
+                      territoryData={territoryData}
+                    />
+                  </React.Fragment>
+                ) : (
+                  <>
+                    {!isFetchingTerritory && (
+                      <div style={{ display: "flex", alignItems: "flex-end" }}>
+                        <AiOutlineWarning
+                          size={22}
+                          color={themeContext?.color.warning}
+                        />
+                        <StyledMissingTerritory>
+                          {"missing territory"}
+                        </StyledMissingTerritory>
+                      </div>
+                    )}
+                  </>
+                )}
+              </StyledBreadcrumbWrap>
+            )}
           </StyledEditorPreSection>
-        )}
-        {userCanEdit && (
-          <StyledEditorTemplateSection>
-            <StyledEditorContentRow>
-              <StyledEditorContentRowLabel>
+
+          {userCanEdit && !statement.isTemplate && (
+            <StyledEditorPreSection $inline>
+              <StyledEditorContentLabel>
+                Move to territory:
+              </StyledEditorContentLabel>
+              <StyledEditorContentRowValue>
+                <EntitySuggester
+                  disableTemplatesAccept
+                  filterEditorRights
+                  inputWidth={96}
+                  disableCreate
+                  categoryTypes={[EntityEnums.Class.Territory]}
+                  onSelected={(newSelectedId: string) => {
+                    moveStatementMutation.mutate(newSelectedId);
+                  }}
+                />
+              </StyledEditorContentRowValue>
+            </StyledEditorPreSection>
+          )}
+
+          {userCanEdit && (
+            <StyledEditorPreSection $inline>
+              <StyledEditorContentLabel>
                 Apply Template
-              </StyledEditorContentRowLabel>
+              </StyledEditorContentLabel>
               <StyledEditorContentRowValue>
                 <Dropdown.Single.Basic
                   placeholder="select template.."
@@ -759,32 +789,65 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   }}
                 />
               </StyledEditorContentRowValue>
-            </StyledEditorContentRow>
-          </StyledEditorTemplateSection>
-        )}
+            </StyledEditorPreSection>
+          )}
 
-        <StyledEditorSection
-          $firstSection
-          key="editor-section-summary"
-          $marginRight
-        >
-          <StyledEditorSectionContent $firstSection>
-            <Input
-              type="textarea"
-              rows={5}
-              disabled={!userCanEdit}
-              width="full"
-              noBorder
-              placeholder="Insert statement text here"
-              onChangeFn={(newValue: string) => {
-                if (newValue !== statement.data.text) {
-                  handleDataAttributeChange({ text: newValue }, true);
-                }
-              }}
-              value={statement.data.text}
-            />
-          </StyledEditorSectionContent>
-        </StyledEditorSection>
+          <StyledEditorPreSection>
+            <StyledEditorContentLabel>
+              Document Anchors
+            </StyledEditorContentLabel>
+            <StyledEditorAnchorSectionContent>
+              {statement.usedInDocuments.length > 0 ? (
+                statement.usedInDocuments.map((documentAnchor, dai) => (
+                  <StyledEditorAnchorSectionAnchor key={dai}>
+                    <StyledAnchorText>
+                      {documentAnchor.anchorText}
+                    </StyledAnchorText>
+                    <StyledAnchorMeta>
+                      <DocumentTitle title={documentAnchor.document.title} />
+                      {documentAnchor.resourceId && (
+                        <EntityTag
+                          entity={statement.entities[documentAnchor.resourceId]}
+                        />
+                      )}
+                      {documentAnchor.parentTerritoryId && (
+                        <EntityTag
+                          entity={
+                            statement.entities[documentAnchor.parentTerritoryId]
+                          }
+                        />
+                      )}
+                    </StyledAnchorMeta>
+                  </StyledEditorAnchorSectionAnchor>
+                ))
+              ) : (
+                <StyledAnchorEmptyState>
+                  No document anchors found
+                </StyledAnchorEmptyState>
+              )}
+            </StyledEditorAnchorSectionContent>
+          </StyledEditorPreSection>
+
+          <StyledEditorPreSection>
+            <StyledEditorContentLabel>Statement Text</StyledEditorContentLabel>
+            <StyledEditorSectionText>
+              <Input
+                type="textarea"
+                rows={5}
+                disabled={!userCanEdit}
+                width="full"
+                noBorder
+                placeholder="Insert statement text here"
+                onChangeFn={(newValue: string) => {
+                  if (newValue !== statement.data.text) {
+                    handleDataAttributeChange({ text: newValue }, true);
+                  }
+                }}
+                value={statement.data.text}
+              />
+            </StyledEditorSectionText>
+          </StyledEditorPreSection>
+        </StyledEditorPreBlock>
 
         {statement.warnings.length > 0 && (
           <StyledEditorSection>

@@ -11,7 +11,7 @@ export class TreeNode {
   content = ""; // Text content within the tag
   class?: EntityEnums.Class; // will be populated in Document.assignClassesBasedOnEntities
 
-  static MAX_CONTENT_LENGTH = 200;
+  static MAX_CONTENT_LENGTH = 400;
 
   constructor(anchor: string, content = "") {
     this.anchor = anchor;

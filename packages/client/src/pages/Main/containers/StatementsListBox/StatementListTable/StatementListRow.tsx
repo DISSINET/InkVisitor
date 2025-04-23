@@ -1,6 +1,6 @@
 import { IEntity, IResponseStatement, IStatement } from "@shared/types";
 import { useSearchParams } from "hooks";
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 import {
   DragSourceMonitor,
   DropTargetMonitor,
@@ -15,6 +15,7 @@ import {
 import { BeatLoader } from "react-spinners";
 import { Cell, ColumnInstance, Row } from "react-table";
 import { setDraggedRowId } from "redux/features/statementList/draggedRowIdSlice";
+import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { ThemeContext } from "styled-components";
 import { DragItem, ItemTypes, StatementListDisplayMode } from "types";
@@ -22,7 +23,6 @@ import { dndHoverFn } from "utils/utils";
 import { StatementListRowExpanded } from "./StatementListRowExpanded/StatementListRowExpanded";
 import { StyledTd, StyledTdMove, StyledTr } from "./StatementListTableStyles";
 import useIsRowVisible from "./useRowIsVisible";
-import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 
 interface StatementListRow {
   row: Row<IResponseStatement>;
@@ -57,8 +57,8 @@ export const StatementListRow: React.FC<StatementListRow> = ({
   );
   const { statementId } = useSearchParams();
 
-  const dropRef = useRef<HTMLTableRowElement>(null);
-  const dragRef = useRef<HTMLTableCellElement>(null);
+  const dropRef = useRef<HTMLTableRowElement | null>(null);
+  const dragRef = useRef<HTMLTableCellElement | null>(null);
 
   const isVisible = useIsRowVisible(dropRef);
 

@@ -1,3 +1,4 @@
+import { Annotator } from "@inkvisitor/annotator/src/lib";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import {
   IEntity,
@@ -11,7 +12,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { CustomScrollbar, Loader, Submit, ToastWithLink } from "components";
 import { CStatement, CTerritory } from "constructors";
-import { useDebounce, useResizeObserver, useSearchParams } from "hooks";
+import { useResizeObserver, useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { toast } from "react-toastify";
@@ -26,8 +27,6 @@ import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StatementListTextAnnotator } from "./StatementListTextAnnotator/StatementListTextAnnotator";
 import { StyledEmptyState, StyledTableWrapper } from "./StatementLitBoxStyles";
-import { RelationPathExist } from "@shared/types/errors";
-import { Annotator } from "@inkvisitor/annotator/src/lib";
 
 const initialData: {
   statements: IResponseStatement[];
@@ -394,12 +393,11 @@ export const StatementListBox: React.FC = () => {
       const newStatement: IStatement = CStatement(
         localStorage.getItem("userrole") as UserEnums.Role,
         userData.options,
-        "",
+        text,
         "",
         territoryId,
         statementId
       );
-      newStatement.data.text = text;
       addStatementAtTheEndMutation.mutate(newStatement);
     }
   };
@@ -663,6 +661,7 @@ export const StatementListBox: React.FC = () => {
                     setSelectedRows={setSelectedRows}
                     displayMode={displayMode}
                     contentWidth={width}
+                    annotator={annotator}
                   />
                 )}
               </StyledTableWrapper>

@@ -1,3 +1,4 @@
+import { Annotator } from "@inkvisitor/annotator/src/lib";
 import { UserEnums } from "@shared/enums";
 import {
   IEntity,
@@ -7,24 +8,18 @@ import {
 } from "@shared/types";
 import { UseMutationResult } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
-import { Button, ButtonGroup, TagGroup } from "components";
+import { Button, TagGroup } from "components";
 import { EntityTag } from "components/advanced";
 import { useSearchParams } from "hooks";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { BsArrowDown, BsArrowUp } from "react-icons/bs";
-import {
-  FaAnchor,
-  FaChevronCircleDown,
-  FaChevronCircleUp,
-  FaClone,
-  FaPlus,
-  FaTrashAlt,
-} from "react-icons/fa";
+import { FaClone, FaPlus, FaTrashAlt } from "react-icons/fa";
 import {
   MdOutlineCheckBox,
   MdOutlineCheckBoxOutlineBlank,
 } from "react-icons/md";
+import { TbAnchor } from "react-icons/tb";
 import { TiWarningOutline } from "react-icons/ti";
 import {
   CellProps,
@@ -35,7 +30,6 @@ import {
 } from "react-table";
 import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
-import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { StatementListDisplayMode } from "types";
 import { StatementListContextMenu } from "../StatementListContextMenu/StatementListContextMenu";
@@ -48,7 +42,6 @@ import {
   StyledTable,
   StyledTh,
 } from "./StatementListTableStyles";
-import { Annotator } from "@inkvisitor/annotator/src/lib";
 
 const HIDDEN_COLUMNS_FULL = ["id", "anchor"];
 const HIDDEN_COLUMNS_MINIFIED = [
@@ -95,6 +88,7 @@ interface StatementListTable {
   setSelectedRows: React.Dispatch<React.SetStateAction<string[]>>;
   displayMode: StatementListDisplayMode;
   contentWidth: number;
+  annotator?: Annotator;
 }
 export const StatementListTable: React.FC<StatementListTable> = ({
   statements,
@@ -112,6 +106,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   setSelectedRows,
   displayMode,
   contentWidth,
+  annotator,
 }) => {
   const dispatch = useAppDispatch();
   const { territoryId, setStatementId } = useSearchParams();
@@ -332,8 +327,26 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         Header: "Text",
         accessor: "data",
         Cell: ({ row }: CellType) => {
+          const { usedInDocuments } = row.original;
+
+          const firstAnchorText = usedInDocuments[0]?.anchorText;
+
+          if (firstAnchorText) {
+            return (
+              <StyledAbbreviatedLabel>
+                <TbAnchor />
+                {firstAnchorText}
+              </StyledAbbreviatedLabel>
+            );
+          }
+
           const { text } = row.original.data;
-          return <StyledAbbreviatedLabel>{text}</StyledAbbreviatedLabel>;
+
+          return (
+            <StyledAbbreviatedLabel>
+              {usedInDocuments[0]?.anchorText || text}
+            </StyledAbbreviatedLabel>
+          );
         },
       },
       {
@@ -509,6 +522,19 @@ export const StatementListTable: React.FC<StatementListTable> = ({
     }
   };
 
+  const handleRowClickWithAnnotator = useCallback(
+    (rowId: string) => {
+      handleRowClick(rowId);
+
+      // If annotator is available, highlight the statement in the annotator
+      if (annotator) {
+        // Use the scrollToAnchor method to highlight the statement
+        annotator.scrollToAnchor(rowId);
+      }
+    },
+    [handleRowClick, annotator]
+  );
+
   return (
     <StyledTable
       {...getTableProps()}
@@ -539,7 +565,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
           return (
             <StatementListRow
               index={i}
-              handleClick={handleRowClick}
+              handleClick={handleRowClickWithAnnotator}
               row={row}
               moveRow={moveRow}
               moveEndRow={moveEndRow}
