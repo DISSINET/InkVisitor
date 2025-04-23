@@ -4,11 +4,15 @@ import { StyledDocumentTag, StyledDocumentTitle } from "./DocumentTitleStyles";
 
 interface DocumentTitle {
   title?: string;
+  size?: "sm" | "md" | "lg";
 }
-export const DocumentTitle: React.FC<DocumentTitle> = ({ title = "" }) => {
+export const DocumentTitle: React.FC<DocumentTitle> = ({
+  title = "",
+  size = "md",
+}) => {
   return (
     <>
-      <StyledDocumentTag>
+      <StyledDocumentTag $size={size}>
         <TiDocumentText style={{ marginRight: "0.2rem", flexShrink: "0" }} />
         <div style={{ display: "grid" }}>
           <StyledDocumentTitle>{title}</StyledDocumentTitle>

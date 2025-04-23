@@ -19,27 +19,32 @@ import { findEntityById, getEntitiesByIds } from "@service/shorthands";
 import treeCache from "@service/treeCache";
 import { WarningTypeEnums } from "@shared/enums";
 import { InternalServerError } from "@shared/types/errors";
+import { PropSpecKind } from "@shared/types/prop";
+import { IResponseUsedInDocument } from "@shared/types/response-detail";
 import { ITerritoryValidation } from "@shared/types/territory";
 import { Connection } from "rethinkdb-ts";
 import { IRequest } from "src/custom_typings/request";
 import Entity from "../entity/entity";
 import { PositionRules } from "./PositionRules";
 import Statement from "./statement";
-import { PropSpecKind } from "@shared/types/prop";
 
 export class ResponseStatement extends Statement implements IResponseStatement {
   entities: { [key: string]: IEntity };
   right: UserEnums.RoleMode = UserEnums.RoleMode.Read;
   warnings: IWarning[];
+  usedInDocuments: IResponseUsedInDocument[];
 
   constructor(entity: IStatement) {
     super(entity);
     this.entities = {};
     this.warnings = [];
+    this.usedInDocuments = [];
   }
 
   async prepare(req: IRequest) {
     this.right = this.getUserRoleMode(req.getUserOrFail());
+    this.usedInDocuments = await this.findUsedInDocuments(req.db.connection);
+
     await this.prepareEntities(req.db.connection);
     if (!this.isTemplate) {
       this.warnings = await this.getWarnings(req);
@@ -52,7 +57,16 @@ export class ResponseStatement extends Statement implements IResponseStatement {
    */
   async prepareEntities(db: Connection): Promise<void> {
     const entities = await this.getEntities(db);
-    this.entities = Object.assign({}, ...entities.map((x) => ({ [x.id]: x })));
+    const anchorEntities = await Entity.findEntitiesByIds(
+      db,
+      Entity.extractIdsFromAnchors(this.usedInDocuments)
+    );
+
+    this.entities = Object.assign(
+      {},
+      ...entities.map((x) => ({ [x.id]: x })),
+      ...anchorEntities.map((x) => ({ [x.id]: x }))
+    );
   }
 
   /**
