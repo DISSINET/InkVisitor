@@ -153,6 +153,7 @@ export const TextAnnotator = ({
     number | undefined
   >(undefined);
 
+  // quiet does not trigger a toast notification
   const handleSaveNewContent = (quiet: boolean) => {
     const scrollBeforeUpdated = annotator?.viewport?.lineStart;
     setScrollAfterRefresh(scrollBeforeUpdated);

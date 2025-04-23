@@ -1,8 +1,10 @@
 import { sanitizeText } from "@common/functions";
 import { IDbModel, fillArray, fillFlatObject } from "@models/common";
+import Document, { TreeNode } from "@models/document/document";
 import Prop from "@models/prop/prop";
 import User from "@models/user/user";
 import { findEntityById } from "@service/shorthands";
+
 import {
   DbEnums,
   EntityEnums,
@@ -23,15 +25,16 @@ import {
   InternalServerError,
   ModelNotValidError,
 } from "@shared/types/errors";
+import { PropSpecKind } from "@shared/types/prop";
+import { IResponseUsedInDocument } from "@shared/types/response-detail";
 import {
   EProtocolTieType,
   ITerritoryValidation,
 } from "@shared/types/territory";
+import { IWarningPositionSection } from "@shared/types/warning";
 import { Connection, RDatum, WriteResult, r as rethink } from "rethinkdb-ts";
 import { IRequest } from "../../custom_typings/request";
 import Reference from "./reference";
-import { PropSpecKind } from "@shared/types/prop";
-import { IWarningPositionSection } from "@shared/types/warning";
 
 export default class Entity implements IEntity, IDbModel {
   static table = "entities";
@@ -312,6 +315,16 @@ export default class Entity implements IEntity, IDbModel {
     return out;
   }
 
+  static extractIdsFromAnchors(anchors: IResponseUsedInDocument[]): string[] {
+    const out: string[] = [];
+    for (const anchor of anchors) {
+      out.push(anchor.resourceId);
+      out.push(anchor.parentTerritoryId);
+    }
+
+    return out;
+  }
+
   static extractIdsFromProps(
     props: IProp[] = [],
     accepted: PropSpecKind[] = [PropSpecKind.TYPE, PropSpecKind.VALUE],
@@ -344,10 +357,10 @@ export default class Entity implements IEntity, IDbModel {
       console.trace("Passed empty id to Entity.findEntitiesByIds");
     }
 
-    const data = await rethink
-      .table(Entity.table)
-      .getAll(rethink.args(ids))
-      .run(con);
+    const data =
+      ids.length > 0
+        ? await rethink.table(Entity.table).getAll(rethink.args(ids)).run(con)
+        : [];
     return data;
   }
 
@@ -544,6 +557,74 @@ export default class Entity implements IEntity, IDbModel {
     });
 
     return warnings;
+  }
+
+  /**
+   * returns data for usedInDocuments(IResponseUsedInDocument[]) field
+   * @param conn
+   * @returns
+   */
+  async findUsedInDocuments(
+    conn: Connection
+  ): Promise<IResponseUsedInDocument[]> {
+    const out: IResponseUsedInDocument[] = [];
+    await Promise.all(
+      (
+        await Document.findByEntityId(conn, this.id)
+      ).map(async (docData) => {
+        // construct document and tree node filled with entities data
+        const doc = new Document({
+          content: docData.content,
+        });
+        const anchors = doc.buildAnchorsTree();
+        const anchoredEntities = await Entity.findEntitiesByIds(
+          conn,
+          doc.collectAnchors(anchors)
+        );
+        doc.assignClassesBasedOnEntities(anchors, anchoredEntities);
+
+        const resources = await rethink
+          .table(Entity.table)
+          .filter({
+            class: EntityEnums.Class.Resource,
+            data: {
+              documentId: docData.id,
+            },
+          })
+          .run(conn);
+
+        const resource = resources.length > 0 ? resources[0] : null;
+
+        // traverse the tree, search for anchor that === this.id
+        const traverse = (nodes: TreeNode[], parentT?: string) => {
+          for (const node of nodes) {
+            if (node.anchor === this.id) {
+              out.push({
+                document: {
+                  id: docData.id,
+                  title: docData.title,
+                  entityIds: docData.entityIds,
+                  createdAt: docData.createdAt,
+                  updatedAt: docData.updatedAt,
+                },
+                anchorText: node.getShortContent(),
+                resourceId: resource?.id || "",
+                parentTerritoryId: parentT || "",
+              });
+            }
+
+            traverse(
+              node.children,
+              node.class === EntityEnums.Class.Territory ? node.anchor : parentT
+            );
+          }
+        };
+
+        traverse(anchors);
+      })
+    );
+
+    return out;
   }
 
   async getEntities(db: Connection): Promise<IEntity[]> {

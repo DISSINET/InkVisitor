@@ -1,5 +1,6 @@
 import { Annotator } from "@inkvisitor/annotator/src/lib";
 import { animated, useSpring } from "@react-spring/web";
+import { entitiesDict } from "@shared/dictionaries/entity";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import {
   IEntity,
@@ -9,10 +10,11 @@ import {
 } from "@shared/types";
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
-import { Button, Input, Loader, DocumentTitle } from "components";
+import { Button, DocumentTitle, Input, Loader } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 import TextAnnotator from "components/advanced/Annotator/Annotator";
 import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
+import { useDebounce, useResizeObserver } from "hooks";
 import React, {
   useCallback,
   useContext,
@@ -20,16 +22,13 @@ import React, {
   useMemo,
   useState,
 } from "react";
+import { BiSearch } from "react-icons/bi";
 import { FaLongArrowAltRight, FaUnlink } from "react-icons/fa";
 import { GrDocumentMissing } from "react-icons/gr";
 import { TbAnchorOff } from "react-icons/tb";
-import { TiDocumentText } from "react-icons/ti";
 import { ThemeContext } from "styled-components";
 import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
 import { StyledInfoText } from "../StatementListHeader/StatementListHeaderStyles";
-import { entitiesDict } from "@shared/dictionaries/entity";
-import { useDebounce, useResizeObserver } from "hooks";
-import { BiSearch } from "react-icons/bi";
 
 interface StatementListTextAnnotator {
   statements: IResponseStatement[];
@@ -59,7 +58,7 @@ interface StatementListTextAnnotator {
   contentWidth: number;
 
   annotator?: Annotator;
-  setAnnotator: React.Dispatch<React.SetStateAction<Annotator | undefined>>;
+  setAnnotator?: React.Dispatch<React.SetStateAction<Annotator | undefined>>;
 }
 
 export const StatementListTextAnnotator: React.FC<
@@ -91,7 +90,7 @@ export const StatementListTextAnnotator: React.FC<
   contentWidth,
 
   annotator,
-  setAnnotator,
+  setAnnotator = () => {},
 }) => {
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const [showAnnotator, setShowAnnotator] = useState(false);

@@ -11,7 +11,7 @@ export class TreeNode {
   content: string = ""; // Text content within the tag
   class?: EntityEnums.Class; // will be populated in Document.assignClassesBasedOnEntities
 
-  static MAX_CONTENT_LENGTH = 20;
+  static MAX_CONTENT_LENGTH = 400;
 
   constructor(anchor: string, content: string = "") {
     this.anchor = anchor;
@@ -318,7 +318,7 @@ export default class Document implements IDocument, IDbModel {
     const tagRegex = new RegExp(`<\\/?${entityId}(>|$)`, "g");
     let match;
     let count = 0;
-    let positions: { start: number; end: number }[] = [];
+    const positions: { start: number; end: number }[] = [];
 
     // Find all matching tags in the content
     while ((match = tagRegex.exec(this.content)) !== null) {

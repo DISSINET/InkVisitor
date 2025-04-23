@@ -1,5 +1,8 @@
+import { mergeDeep } from "@common/functions";
+import Document from "@models/document/document";
+import ResponseDocument from "@models/document/response";
+import { EntityEnums } from "@shared/enums";
 import {
-  IDocument,
   IResponseDocument,
   IResponseDocumentDetail,
   IResponseGeneric,
@@ -12,12 +15,8 @@ import {
   PermissionDeniedError,
 } from "@shared/types/errors";
 import { Router } from "express";
-import { asyncRouteHandler } from "../index";
-import { mergeDeep } from "@common/functions";
 import { IRequest } from "src/custom_typings/request";
-import Document from "@models/document/document";
-import ResponseDocument from "@models/document/response";
-import { EntityEnums } from "@shared/enums";
+import { asyncRouteHandler } from "../index";
 
 export default Router()
   /**
@@ -189,9 +188,7 @@ export default Router()
   .post(
     "/",
     asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
-      console.log("before model");
       const model = new Document(request.body as Record<string, unknown>);
-      console.log("after model", model);
 
       if (!model.isValid()) {
         throw new ModelNotValidError("");
