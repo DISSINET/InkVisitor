@@ -2,7 +2,12 @@ import { Annotator } from "@inkvisitor/annotator/src/lib";
 import { animated, useSpring } from "@react-spring/web";
 import { entitiesDict } from "@shared/dictionaries/entity";
 import { EntityEnums, UserEnums } from "@shared/enums";
-import { IEntity, IResponseEntity, IResponseStatement } from "@shared/types";
+import {
+  IEntity,
+  IResponseEntity,
+  IResponseStatement,
+  IResponseTerritory,
+} from "@shared/types";
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
 import { Button, DocumentTitle, Input, Loader } from "components";
@@ -27,14 +32,15 @@ import { StyledInfoText } from "../StatementListHeader/StatementListHeaderStyles
 
 interface StatementListTextAnnotator {
   statements: IResponseStatement[];
+  // it's faster than the territory entity so it's better to pass territoryId separately
   territoryId: string;
+  territory: IResponseTerritory;
   statementId: string;
   entities: { [key: string]: IEntity };
   right: UserEnums.RoleMode;
   setShowSubmit: React.Dispatch<React.SetStateAction<boolean>>;
   addStatementAtCertainIndex: (index: number) => Promise<void>;
   handleCreateStatement: (detail?: string, statementId?: string) => void;
-  handleCreateTerritory: (territoryId?: string) => void;
   selectedRows: string[];
   setSelectedRows: React.Dispatch<React.SetStateAction<string[]>>;
 
@@ -60,13 +66,14 @@ export const StatementListTextAnnotator: React.FC<
 > = ({
   statements,
   territoryId,
+  territory,
   statementId,
   entities,
   right,
   setShowSubmit,
   addStatementAtCertainIndex,
   handleCreateStatement,
-  handleCreateTerritory,
+  // handleCreateTerritory,
   selectedRows,
   setSelectedRows,
 
@@ -508,10 +515,9 @@ export const StatementListTextAnnotator: React.FC<
               height={annotatorHeight}
               documentId={selectedDocumentId as string}
               handleCreateStatement={handleCreateStatement}
-              handleCreateTerritory={handleCreateTerritory}
               storedAnnotatorScroll={storedAnnotatorScroll}
               setStoredAnnotatorScroll={setStoredAnnotatorScroll}
-              // initialScrollEntityId={territoryId}
+              territory={territory}
             />
           )}
         </AnnotatorProvider>

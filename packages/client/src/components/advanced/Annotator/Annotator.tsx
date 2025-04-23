@@ -7,7 +7,12 @@ import { v4 as uuidv4 } from "uuid";
 
 import { Annotator, EditMode } from "@inkvisitor/annotator/src/lib";
 import { EntityEnums } from "@shared/enums";
-import { IDocument, IEntity, IResponseDocumentDetail } from "@shared/types";
+import {
+  IDocument,
+  IEntity,
+  IResponseDocumentDetail,
+  IResponseTerritory,
+} from "@shared/types";
 import { Button } from "components/basic/Button/Button";
 import { ButtonGroup } from "components/basic/ButtonGroup/ButtonGroup";
 import { BsFileTextFill } from "react-icons/bs";
@@ -25,6 +30,8 @@ import {
 } from "./AnnotatorStyles";
 import { annotatorHighlight } from "./highlight";
 import { useAppSelector } from "redux/hooks";
+import { EntityCreateModal } from "..";
+import { useSearchParams } from "hooks";
 
 interface TextAnnotatorProps {
   width: number;
@@ -33,7 +40,6 @@ interface TextAnnotatorProps {
   hlEntities?: EntityEnums.Class[];
   documentId: string;
   handleCreateStatement?: Function | undefined;
-  handleCreateTerritory?: Function | undefined;
   initialScrollEntityId?: string | undefined;
   thisTerritoryEntityId?: string | undefined;
 
@@ -41,6 +47,8 @@ interface TextAnnotatorProps {
 
   storedAnnotatorScroll?: number;
   setStoredAnnotatorScroll?: React.Dispatch<React.SetStateAction<number>>;
+
+  territory?: IResponseTerritory;
 }
 
 const W_SCROLL = 20;
@@ -53,16 +61,19 @@ export const TextAnnotator = ({
   hlEntities = Object.values(EntityEnums.Class),
   documentId,
   handleCreateStatement = undefined,
-  handleCreateTerritory = undefined,
   initialScrollEntityId = undefined,
   thisTerritoryEntityId = undefined,
 
   storedAnnotatorScroll = 0,
   forwardAnnotator = (undefined) => {},
   setStoredAnnotatorScroll = () => {},
+
+  territory,
 }: TextAnnotatorProps) => {
   const queryClient = useQueryClient();
   const theme = useContext(ThemeContext);
+
+  const { appendDetailId } = useSearchParams();
 
   const contentHeight: number = useAppSelector(
     (state) => state.layout.contentHeight
@@ -212,8 +223,6 @@ export const TextAnnotator = ({
   };
 
   const handleAddAnchor = (entityId: string) => {
-    toast.info(`Anchor created ${entityId}.`);
-
     annotator?.addAnchor(entityId);
     setSelectedText("");
     handleSaveNewContent(true);
@@ -221,6 +230,7 @@ export const TextAnnotator = ({
     queryClient.invalidateQueries({
       queryKey: ["entity", entityId],
     });
+    toast.info(`Anchor created ${entityId}.`);
   };
 
   const refreshAnnotator = (scrollTo: { line?: number; anchor?: string }) => {
@@ -439,12 +449,14 @@ export const TextAnnotator = ({
   }, [annotator?.text?.value, dataDocument?.content, localTextContent]);
 
   const onCreateTerritory = () => {
-    if (handleCreateTerritory && selectedText) {
-      const newTerritoryId = uuidv4();
-      handleAddAnchor(newTerritoryId);
-      handleCreateTerritory(newTerritoryId);
-      handleSaveNewContent(true);
-    }
+    setShowEntityCreateModal(true);
+
+    // if (handleCreateTerritory && selectedText) {
+    //   const newTerritoryId = uuidv4();
+    //   handleAddAnchor(newTerritoryId);
+    //   handleCreateTerritory(newTerritoryId);
+    //   handleSaveNewContent(true);
+    // }
   };
 
   const onCreateStatement = () => {
@@ -472,6 +484,8 @@ export const TextAnnotator = ({
     );
   }, [annotatorMode, selectedText, isSelectingText, dataDocument]);
 
+  const [showEntityCreateModal, setShowEntityCreateModal] = useState(false);
+
   if (errorDocument) {
     return <div>Error loading document: {errorDocument.message}</div>;
   }
@@ -481,152 +495,171 @@ export const TextAnnotator = ({
   }
 
   return (
-    <div
-      style={{ width: width, position: "absolute" }}
-      onKeyDown={(e) => {
-        if (e.key === "Escape") {
-          setSelectedText("");
-        }
-      }}
-    >
-      <StyledCanvasWrapper>
-        {isMenuDisplayed && (
-          <StyledAnnotatorMenu
-            $top={
-              menuPositionY + 300 > contentHeight
-                ? contentHeight / 2
-                : menuPositionY
-            }
-            $left={100}
-            // $translateY={"100%"}
-            $translateY={translateMenu}
-          >
-            <TextAnnotatorMenu
-              anchors={selectedAnchors}
-              documentData={dataDocument as IResponseDocumentDetail}
-              text={selectedText}
-              entities={storedEntities}
-              onAnchorAdd={handleAddAnchor}
-              handleCreateTerritory={onCreateTerritory}
-              handleCreateStatement={onCreateStatement}
-              handleRemoveAnchor={onRemoveAnchor}
-              thisTerritoryEntityId={thisTerritoryEntityId}
-              canCreateActiveTAnchor={
-                !dataDocument?.referencedEntityIds.T.includes(
-                  thisTerritoryEntityId ?? ""
-                )
+    <>
+      <div
+        style={{ width: width, position: "absolute" }}
+        onKeyDown={(e) => {
+          if (e.key === "Escape") {
+            setSelectedText("");
+          }
+        }}
+      >
+        <StyledCanvasWrapper>
+          {isMenuDisplayed && (
+            <StyledAnnotatorMenu
+              $top={
+                menuPositionY + 300 > contentHeight
+                  ? contentHeight / 2
+                  : menuPositionY
               }
-              isLoadingEntities={isLoadingEntities}
-            />
-          </StyledAnnotatorMenu>
-        )}
+              $left={100}
+              // $translateY={"100%"}
+              $translateY={translateMenu}
+            >
+              <TextAnnotatorMenu
+                anchors={selectedAnchors}
+                documentData={dataDocument as IResponseDocumentDetail}
+                text={selectedText}
+                entities={storedEntities}
+                onAnchorAdd={handleAddAnchor}
+                handleCreateTerritory={onCreateTerritory}
+                handleCreateStatement={onCreateStatement}
+                handleRemoveAnchor={onRemoveAnchor}
+                thisTerritoryEntityId={thisTerritoryEntityId}
+                canCreateActiveTAnchor={
+                  !dataDocument?.referencedEntityIds.T.includes(
+                    thisTerritoryEntityId ?? ""
+                  )
+                }
+                isLoadingEntities={isLoadingEntities}
+              />
+            </StyledAnnotatorMenu>
+          )}
 
-        {displayLineNumbers && (
-          <StyledLinesCanvas
-            ref={lines}
-            width={wLineNumbers}
-            height={height}
+          {displayLineNumbers && (
+            <StyledLinesCanvas
+              ref={lines}
+              width={wLineNumbers}
+              height={height}
+              style={{
+                outline: "none",
+                backgroundColor: theme?.color.white,
+                color: theme?.color.plain,
+              }}
+            />
+          )}
+
+          <StyledMainCanvas
+            onMouseDown={() => setIsSelectingText(true)}
+            onMouseUp={() => setIsSelectingText(false)}
+            tabIndex={0}
+            ref={mainCanvas}
+            id="statement-list-annotator-mainCanvas"
             style={{
-              outline: "none",
+              height: height,
+              width: wTextArea,
               backgroundColor: theme?.color.white,
-              color: theme?.color.plain,
+              color: theme?.color.text,
+              outline: "none",
             }}
           />
-        )}
+          <StyledScrollerViewport
+            ref={scroller}
+            style={{
+              background: theme?.color.grey,
+            }}
+          >
+            <StyledScrollerCursor
+              style={{
+                backgroundColor: theme?.color.primary,
+              }}
+            />
+          </StyledScrollerViewport>
+        </StyledCanvasWrapper>
 
-        <StyledMainCanvas
-          onMouseDown={() => setIsSelectingText(true)}
-          onMouseUp={() => setIsSelectingText(false)}
-          tabIndex={0}
-          ref={mainCanvas}
-          id="statement-list-annotator-mainCanvas"
-          style={{
-            height: height,
-            width: wTextArea,
-            backgroundColor: theme?.color.white,
-            color: theme?.color.text,
-            outline: "none",
+        {annotator && (
+          <ButtonGroup $marginTop>
+            <Button
+              key={EditMode.HIGHLIGHT}
+              icon={<FaPen size={11} />}
+              label={EditMode.HIGHLIGHT}
+              color="success"
+              inverted={annotatorMode !== EditMode.HIGHLIGHT}
+              onClick={() => {
+                annotator.setMode(EditMode.HIGHLIGHT);
+                setAnnotatorMode(EditMode.HIGHLIGHT);
+                annotator.draw();
+              }}
+              tooltipLabel="activate syntax highlighting mode"
+            />
+            <Button
+              key={EditMode.SEMI}
+              icon={<BsFileTextFill size={11} />}
+              color="success"
+              label="text edit"
+              inverted={annotatorMode !== EditMode.SEMI}
+              onClick={() => {
+                annotator.setMode(EditMode.SEMI);
+                setAnnotatorMode(EditMode.SEMI);
+                annotator.draw();
+              }}
+              tooltipLabel="activate semi mode"
+            />
+            <Button
+              key={EditMode.RAW}
+              icon={<HiCodeBracket size={11} />}
+              color="success"
+              label="XML"
+              inverted={annotatorMode !== EditMode.RAW}
+              onClick={() => {
+                annotator.setMode(EditMode.RAW);
+                setAnnotatorMode(EditMode.RAW);
+                annotator.draw();
+              }}
+              tooltipLabel="activate edit mode"
+            />
+
+            <Button
+              label="save edits"
+              color="primary"
+              icon={<FaRegSave />}
+              disabled={!isChangeMade}
+              onClick={() => {
+                handleSaveNewContent(false);
+              }}
+            />
+            <Button
+              label="discard changes"
+              color="warning"
+              icon={<FaTrash />}
+              disabled={!isChangeMade}
+              onClick={() => {
+                if (dataDocument?.content) {
+                  annotator?.updateText(dataDocument?.content);
+                }
+              }}
+            />
+          </ButtonGroup>
+        )}
+      </div>
+
+      {territory && showEntityCreateModal && (
+        <EntityCreateModal
+          closeModal={() => setShowEntityCreateModal(false)}
+          allowedEntityClasses={[EntityEnums.Class.Territory]}
+          labelTyped={`subT of ${territory.labels[0]}`}
+          parentTerritory={territory}
+          onMutationSuccess={(entity) => {
+            handleAddAnchor(entity.id);
+            handleSaveNewContent(true);
+            setShowEntityCreateModal(false);
+            toast.info(`Sub Teritory created!`);
+            queryClient.invalidateQueries({ queryKey: ["tree"] });
+            appendDetailId(entity.id);
           }}
         />
-        <StyledScrollerViewport
-          ref={scroller}
-          style={{
-            background: theme?.color.grey,
-          }}
-        >
-          <StyledScrollerCursor
-            style={{
-              backgroundColor: theme?.color.primary,
-            }}
-          />
-        </StyledScrollerViewport>
-      </StyledCanvasWrapper>
-
-      {annotator && (
-        <ButtonGroup $marginTop>
-          <Button
-            key={EditMode.HIGHLIGHT}
-            icon={<FaPen size={11} />}
-            label={EditMode.HIGHLIGHT}
-            color="success"
-            inverted={annotatorMode !== EditMode.HIGHLIGHT}
-            onClick={() => {
-              annotator.setMode(EditMode.HIGHLIGHT);
-              setAnnotatorMode(EditMode.HIGHLIGHT);
-              annotator.draw();
-            }}
-            tooltipLabel="activate syntax highlighting mode"
-          />
-          <Button
-            key={EditMode.SEMI}
-            icon={<BsFileTextFill size={11} />}
-            color="success"
-            label="text edit"
-            inverted={annotatorMode !== EditMode.SEMI}
-            onClick={() => {
-              annotator.setMode(EditMode.SEMI);
-              setAnnotatorMode(EditMode.SEMI);
-              annotator.draw();
-            }}
-            tooltipLabel="activate semi mode"
-          />
-          <Button
-            key={EditMode.RAW}
-            icon={<HiCodeBracket size={11} />}
-            color="success"
-            label="XML"
-            inverted={annotatorMode !== EditMode.RAW}
-            onClick={() => {
-              annotator.setMode(EditMode.RAW);
-              setAnnotatorMode(EditMode.RAW);
-              annotator.draw();
-            }}
-            tooltipLabel="activate edit mode"
-          />
-
-          <Button
-            label="save edits"
-            color="primary"
-            icon={<FaRegSave />}
-            disabled={!isChangeMade}
-            onClick={() => {
-              handleSaveNewContent(false);
-            }}
-          />
-          <Button
-            label="discard changes"
-            color="warning"
-            icon={<FaTrash />}
-            disabled={!isChangeMade}
-            onClick={() => {
-              if (dataDocument?.content) {
-                annotator?.updateText(dataDocument?.content);
-              }
-            }}
-          />
-        </ButtonGroup>
       )}
-    </div>
+    </>
   );
 };
 
