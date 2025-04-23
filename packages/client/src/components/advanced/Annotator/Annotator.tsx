@@ -449,7 +449,7 @@ export const TextAnnotator = ({
       handleAddAnchor(newStatementId);
       // remove linebreaks from text
       const validatedText = selectedText.replace(/\n/g, " ");
-      handleCreateStatement("", newStatementId);
+      handleCreateStatement(validatedText, newStatementId);
       handleSaveNewContent(true);
     }
   };

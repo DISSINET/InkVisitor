@@ -393,12 +393,11 @@ export const StatementListBox: React.FC = () => {
       const newStatement: IStatement = CStatement(
         localStorage.getItem("userrole") as UserEnums.Role,
         userData.options,
-        "",
+        text,
         "",
         territoryId,
         statementId
       );
-      newStatement.data.text = text;
       addStatementAtTheEndMutation.mutate(newStatement);
     }
   };
