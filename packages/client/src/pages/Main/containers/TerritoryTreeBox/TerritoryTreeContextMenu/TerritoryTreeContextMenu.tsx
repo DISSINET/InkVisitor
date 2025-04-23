@@ -90,6 +90,7 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
                   <Button
                     key="add"
                     tooltipLabel="add child territory"
+                    tooltipPosition="top"
                     icon={<FaPlus size={14} />}
                     color="info"
                     onClick={() => {
@@ -105,6 +106,7 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
                   tooltipLabel={
                     isFavorited ? "remove from favorites" : "add to favorites"
                   }
+                  tooltipPosition="top"
                   icon={<FaStar size={14} />}
                   color={isFavorited ? "grey" : "warning"}
                   onClick={() => {
@@ -145,6 +147,7 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
                   <Button
                     key="delete"
                     tooltipLabel="delete territory"
+                    tooltipPosition="top"
                     icon={<FaTrashAlt size={14} />}
                     color="danger"
                     onClick={() => {
