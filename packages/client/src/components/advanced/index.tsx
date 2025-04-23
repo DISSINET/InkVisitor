@@ -28,6 +28,7 @@ import { TerritoryActionModal } from "./TerritoryActionModal/TerritoryActionModa
 import { UserCustomizationModal } from "./UserCustomizationModal/UserCustomizationModal";
 import { ValidationRule } from "./ValidationRule/ValidationRule";
 import { AbbreviatedTextWithTooltip } from "./AbbreviatedTextWithTooltip/AbbreviatedTextWithTooltip";
+import { DocumentTitle } from "./DocumentTitle/DocumentTitle";
 
 const Dropdown = {
   Single: {
@@ -49,6 +50,7 @@ export {
   AuditTable,
   BreadcrumbItem,
   DocumentModalExport,
+  DocumentTitle,
   DocumentModalEdit,
   EmptyTag,
   EntityCreateModal,

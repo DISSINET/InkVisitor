@@ -5,8 +5,12 @@ import { StyledDocumentTag, StyledDocumentTitle } from "./DocumentTitleStyles";
 
 interface DocumentTitle {
   title?: string;
+  size?: "sm" | "md" | "lg";
 }
-export const DocumentTitle: React.FC<DocumentTitle> = ({ title = "" }) => {
+export const DocumentTitle: React.FC<DocumentTitle> = ({
+  title = "",
+  size = "md",
+}) => {
   const [referenceElement, setReferenceElement] =
     useState<HTMLDivElement | null>(null);
 
@@ -14,6 +18,7 @@ export const DocumentTitle: React.FC<DocumentTitle> = ({ title = "" }) => {
   return (
     <React.Fragment>
       <StyledDocumentTag
+        $size={size}
         ref={setReferenceElement}
         onMouseEnter={() => setIsTooltipOpen(true)}
         onMouseLeave={() => setIsTooltipOpen(false)}

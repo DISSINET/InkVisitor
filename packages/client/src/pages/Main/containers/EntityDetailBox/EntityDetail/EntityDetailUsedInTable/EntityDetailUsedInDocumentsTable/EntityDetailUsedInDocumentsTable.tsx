@@ -4,8 +4,12 @@ import {
 } from "@shared/types/response-detail";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Button, DocumentTitle, Table } from "components";
-import { AbbreviatedTextWithTooltip, EntityTag } from "components/advanced";
+import { Button, Table } from "components";
+import {
+  AbbreviatedTextWithTooltip,
+  DocumentTitle,
+  EntityTag,
+} from "components/advanced";
 import React, { useMemo } from "react";
 import { FaTrashAlt } from "react-icons/fa";
 import { HiClipboardList } from "react-icons/hi";
