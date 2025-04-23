@@ -40,7 +40,6 @@ interface TextAnnotatorProps {
   hlEntities?: EntityEnums.Class[];
   documentId: string;
   handleCreateStatement?: Function | undefined;
-  handleCreateTerritory?: Function | undefined;
   initialScrollEntityId?: string | undefined;
   thisTerritoryEntityId?: string | undefined;
 
@@ -62,7 +61,6 @@ export const TextAnnotator = ({
   hlEntities = Object.values(EntityEnums.Class),
   documentId,
   handleCreateStatement = undefined,
-  handleCreateTerritory = undefined,
   initialScrollEntityId = undefined,
   thisTerritoryEntityId = undefined,
 

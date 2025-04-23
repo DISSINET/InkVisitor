@@ -262,18 +262,6 @@ export const StatementListBox: React.FC = () => {
       toast.error(`Error: Statement not created!`);
     },
   });
-  // const territoryCreateMutation = useMutation({
-  //   mutationFn: async (newTerritory: ITerritory) =>
-  //     await api.entityCreate(newTerritory),
-  //   onSuccess: (data, variables) => {
-  //     toast.info(`Sub Teritory created!`);
-  //     queryClient.invalidateQueries({ queryKey: ["tree"] });
-  //     appendDetailId(variables.id);
-  //   },
-  //   onError: () => {
-  //     toast.error(`Error: Sub Territory not created!`);
-  //   },
-  // });
 
   const addStatementAtCertainIndex = async (index: number) => {
     let newOrder: number | false = false;
@@ -407,22 +395,6 @@ export const StatementListBox: React.FC = () => {
       );
       newStatement.data.text = text;
       addStatementAtTheEndMutation.mutate(newStatement);
-    }
-  };
-
-  const handleCreateTerritory = (newTerritoryId?: string) => {
-    if (userData && territory) {
-      const newTerritory: ITerritory = CTerritory(
-        localStorage.getItem("userrole") as UserEnums.Role,
-        userData.options,
-        `subT of ${territory.labels[0]}`,
-        territory.detail,
-        territoryId,
-        EntityEnums.Order.Last,
-        newTerritoryId
-      );
-
-      // territoryCreateMutation.mutate(newTerritory);
     }
   };
 
@@ -680,7 +652,7 @@ export const StatementListBox: React.FC = () => {
                 contentWidth={contentWidth - 10}
                 statements={statements}
                 handleCreateStatement={handleCreateStatement}
-                handleCreateTerritory={handleCreateTerritory}
+                // handleCreateTerritory={handleCreateTerritory}
                 territoryId={territoryId}
                 territory={territory}
                 statementId={statementId}
