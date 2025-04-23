@@ -59,14 +59,17 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
                         toast.info("text copied to clipboard");
                       });
                     }}
-                    tooltipLabel="copy anchor text to clipboard"
+                    tooltipLabel="copy anchored text to clipboard"
                     inverted
                     noBackground
                     noBorder
                     noIconMargin
                   />
 
-                  <AbbreviatedTextWithTooltip text={anchorText} />
+                  <AbbreviatedTextWithTooltip
+                    text={anchorText}
+                    documentId={document.id}
+                  />
                 </StyledAnchorText>
               ) : (
                 <></>
