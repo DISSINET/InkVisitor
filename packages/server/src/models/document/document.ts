@@ -71,6 +71,29 @@ export default class Document implements IDocument, IDbModel {
   }
 
   /**
+   * Finds content inside one anchor-tag specified by entity id(tag) and index position in document
+   * @param tag
+   * @returns
+   */
+  findAnchorWithIndex(tag: string, index: number): string {
+    const regex = /<([\w-\.]+)>/g;
+    let match;
+
+    let foundIndex = 0;
+
+    while ((match = regex.exec(this.content)) !== null) {
+      if (match[1] === tag) {
+        if (foundIndex === index) {
+          return match[0];
+        }
+        foundIndex++;
+      }
+    }
+
+    return "";
+  }
+
+  /**
    * Finds content inside anchor-tags specified by entity id(tag)
    * @param tag
    * @returns

@@ -1206,9 +1206,6 @@ class Api {
     }
   }
 
-  /**
-   * Document
-   */
   async documentUpload(
     document: Partial<IDocument>,
     options?: IApiOptions
@@ -1315,6 +1312,23 @@ class Api {
       const response = await this.connection.put(
         `/documents/${documentId}`,
         document,
+        options
+      );
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  async documentFindAnchorWithIndex(
+    documentId: string,
+    entityId: string,
+    anchorIndex: number,
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseGeneric<string>>> {
+    try {
+      const response = await this.connection.get(
+        `/documents/${documentId}/findAnchorWithIndex/${entityId}/${anchorIndex}`,
         options
       );
       return response;

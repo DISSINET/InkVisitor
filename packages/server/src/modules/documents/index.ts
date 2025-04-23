@@ -430,4 +430,38 @@ export default Router()
         };
       }
     )
+  )
+  .get(
+    "/:documentId/findAnchorWithIndex/:entityId/:anchorIndex",
+    asyncRouteHandler<{ result: string }>(
+      async (
+        request: IRequest<{
+          documentId: string;
+          entityId: string;
+          anchorIndex: number;
+        }>
+      ) => {
+        const id = request.params.documentId;
+        if (!id) {
+          throw new BadParams("document id has to be set");
+        }
+
+        const existing = await Document.getDocumentById(
+          request.db.connection,
+          id
+        );
+        if (!existing) {
+          throw DocumentDoesNotExist.forId(id);
+        }
+
+        const anchor = existing.findAnchorWithIndex(
+          request.params.entityId,
+          request.params.anchorIndex
+        );
+
+        return {
+          result: anchor,
+        };
+      }
+    )
   );
