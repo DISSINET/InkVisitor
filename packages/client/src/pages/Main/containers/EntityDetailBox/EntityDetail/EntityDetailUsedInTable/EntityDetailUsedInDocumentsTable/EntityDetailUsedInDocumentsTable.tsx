@@ -56,13 +56,19 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
                       />
                     }
                     onClick={() => {
-                      // TODO: get anchor text only!!!
-                      api.documentGet(document.id).then((document) => {
-                        window.navigator.clipboard.writeText(
-                          document.data.content
-                        );
-                        toast.info("text copied to clipboard");
-                      });
+                      api
+                        .documentFindAnchorWithIndex(
+                          document.id,
+                          entityId,
+                          row.original.anchorIndex
+                        )
+                        .then((response) => {
+                          console.log(response);
+                          window.navigator.clipboard.writeText(
+                            response.data.data || ""
+                          );
+                          toast.info("text copied to clipboard");
+                        });
                     }}
                     tooltipLabel="copy anchored text to clipboard"
                     inverted
