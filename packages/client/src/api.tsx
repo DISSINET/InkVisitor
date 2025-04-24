@@ -1261,6 +1261,23 @@ class Api {
     }
   }
 
+  async documentGetAnchorText(
+    documentId: string,
+    entityId: string,
+    anchorIndex: number,
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseGeneric<string>>> {
+    try {
+      const response = await this.connection.get(
+        `/documents/${documentId}/findAnchorWithIndex/${entityId}/${anchorIndex}`,
+        options
+      );
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
   async documentRemoveAnchors(
     documentId: string,
     // can be both single string or array of strings
@@ -1320,7 +1337,7 @@ class Api {
     }
   }
 
-  async documentFindAnchorWithIndex(
+  async anchorTextGet(
     documentId: string,
     entityId: string,
     anchorIndex: number,

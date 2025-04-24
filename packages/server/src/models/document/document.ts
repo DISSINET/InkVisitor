@@ -76,18 +76,15 @@ export default class Document implements IDocument, IDbModel {
    * @returns
    */
   findAnchorWithIndex(tag: string, index: number): string {
-    const regex = /<([\w-\.]+)>/g;
+    const regex = new RegExp(`<${tag}>(.*?)<\/${tag}>`, "g");
     let match;
-
     let foundIndex = 0;
 
     while ((match = regex.exec(this.content)) !== null) {
-      if (match[1] === tag) {
-        if (foundIndex === index) {
-          return match[0];
-        }
-        foundIndex++;
+      if (foundIndex === index) {
+        return match[1];
       }
+      foundIndex++;
     }
 
     return "";
