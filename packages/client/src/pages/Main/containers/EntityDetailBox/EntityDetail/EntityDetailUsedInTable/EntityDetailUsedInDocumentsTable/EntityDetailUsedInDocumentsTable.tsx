@@ -1,72 +1,86 @@
-import { IDocumentMeta, IEntity } from "@shared/types";
 import {
   IResponseDetail,
   IResponseUsedInDocument,
 } from "@shared/types/response-detail";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Button, DocumentTitle, Table } from "components";
-import { DocumentModalEdit, EntityTag } from "components/advanced";
-import React, { useMemo, useState } from "react";
-import { FaAnchor, FaTrashAlt } from "react-icons/fa";
+import { Button, Table } from "components";
+import {
+  AbbreviatedTextWithTooltip,
+  DocumentTitle,
+  EntityTag,
+} from "components/advanced";
+import React, { useMemo } from "react";
+import { FaTrashAlt } from "react-icons/fa";
 import { HiClipboardList } from "react-icons/hi";
 import { CellProps, Column } from "react-table";
 import { toast } from "react-toastify";
-import {
-  StyledAbbreviatedLabel,
-  StyledAnchorText,
-} from "./EntityDetailUsedInDocumentsTableStyles";
+import { StyledAnchorText } from "./EntityDetailUsedInDocumentsTableStyles";
 
 type CellType = CellProps<IResponseUsedInDocument>;
 interface EntityDetailUsedInDocumentsTable {
   title: { singular: string; plural: string };
-  entities: { [key: string]: IEntity };
-  uses: IResponseUsedInDocument[];
   perPage?: number;
-  entity: IEntity;
+  entity: IResponseDetail;
 }
 export const EntityDetailUsedInDocumentsTable: React.FC<
   EntityDetailUsedInDocumentsTable
-> = ({ title, entities, uses = [], perPage, entity }) => {
-  const data = useMemo(() => uses, [uses]);
-
+> = ({ title, perPage, entity }: EntityDetailUsedInDocumentsTable) => {
+  const { entities, usedInDocuments: uses, id: entityId } = entity;
   const queryClient = useQueryClient();
 
   const removeAnchorMutation = useMutation({
     mutationFn: (data: { documentId: string; anchorIndex: number }) =>
-      api.documentRemoveAnchor(data.documentId, entity.id, data.anchorIndex),
+      api.documentRemoveAnchor(data.documentId, entityId, data.anchorIndex),
     onSuccess(data, variables, context) {
       queryClient.invalidateQueries({ queryKey: ["entity"] });
     },
   });
-
-  const [openedDocument, setOpenedDocument] = useState<IDocumentMeta | false>(
-    false
-  );
-  const [tAnchor, setTAnchor] = useState<string | false>(false);
-  const [entityOcc, setEntityOcc] = useState<number | false>(false);
 
   const columns = useMemo<Column<IResponseUsedInDocument>[]>(
     () => [
       {
         Header: "Anchor text",
         Cell: ({ row }: CellType) => {
-          const { anchorText } = row.original;
+          const { anchorText, document } = row.original;
           return (
             <>
               {anchorText ? (
                 <StyledAnchorText>
-                  <HiClipboardList
-                    size={18}
-                    style={{ cursor: "pointer", flexShrink: 0 }}
+                  <Button
+                    color="primary"
+                    icon={
+                      <HiClipboardList
+                        size={18}
+                        style={{ cursor: "pointer", flexShrink: 0 }}
+                      />
+                    }
                     onClick={() => {
-                      window.navigator.clipboard.writeText(anchorText);
-                      toast.info("text copied to clipboard");
+                      api
+                        .documentFindAnchorWithIndex(
+                          document.id,
+                          entityId,
+                          row.original.anchorIndex
+                        )
+                        .then((response) => {
+                          console.log(response);
+                          window.navigator.clipboard.writeText(
+                            response.data.data || ""
+                          );
+                          toast.info("text copied to clipboard");
+                        });
                     }}
+                    tooltipLabel="copy anchored text to clipboard"
+                    inverted
+                    noBackground
+                    noBorder
+                    noIconMargin
                   />
-                  <StyledAbbreviatedLabel>
-                    {anchorText || ""}
-                  </StyledAbbreviatedLabel>
+
+                  <AbbreviatedTextWithTooltip
+                    text={anchorText}
+                    documentId={document.id}
+                  />
                 </StyledAnchorText>
               ) : (
                 <></>
@@ -79,7 +93,15 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
         Header: "Resource",
         Cell: ({ row }: CellType) => {
           const resourceEntity = entities[row.original.resourceId];
-          return <>{resourceEntity && <EntityTag entity={resourceEntity} />}</>;
+          return (
+            <>
+              {resourceEntity && (
+                <div style={{ display: "grid" }}>
+                  <EntityTag entity={resourceEntity} fullWidth />
+                </div>
+              )}
+            </>
+          );
         },
       },
       {
@@ -90,23 +112,15 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
         },
       },
       {
-        Header: "Parent territory",
+        Header: "Parent T",
         Cell: ({ row }: CellType) => {
           const territoryEntity = entities[row.original.parentTerritoryId];
           return (
             <>
               {territoryEntity && (
-                <EntityTag
-                  entity={territoryEntity}
-                  unlinkButton={{
-                    onClick: () => {
-                      setTAnchor(territoryEntity.id);
-                      setOpenedDocument(row.original.document);
-                    },
-                    icon: <FaAnchor />,
-                    tooltipLabel: "locate anchor",
-                  }}
-                />
+                <div style={{ display: "grid" }}>
+                  <EntityTag entity={territoryEntity} fullWidth />
+                </div>
               )}
             </>
           );
@@ -124,7 +138,7 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
               onClick={() =>
                 removeAnchorMutation.mutate({
                   documentId: row.original.document.id,
-                  anchorIndex: row.index,
+                  anchorIndex: row.original.anchorIndex,
                 })
               }
             />
@@ -140,21 +154,10 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
       <Table
         entityTitle={title}
         columns={columns}
-        data={data}
+        data={uses}
         perPage={perPage}
         isLoading={removeAnchorMutation.isPending}
       />
-      {openedDocument && (
-        <DocumentModalEdit
-          document={openedDocument}
-          onClose={() => {
-            setOpenedDocument(false);
-            setTAnchor(false);
-            setEntityOcc(false);
-          }}
-          anchor={tAnchor ? { entityId: tAnchor } : undefined}
-        />
-      )}
     </>
   );
 };

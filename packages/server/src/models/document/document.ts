@@ -8,12 +8,12 @@ import User from "@models/user/user";
 export class TreeNode {
   anchor: string; // The tag name (entity id)
   children: TreeNode[] = []; // Nested children (other nodes)
-  content: string = ""; // Text content within the tag
+  content = ""; // Text content within the tag
   class?: EntityEnums.Class; // will be populated in Document.assignClassesBasedOnEntities
 
   static MAX_CONTENT_LENGTH = 400;
 
-  constructor(anchor: string, content: string = "") {
+  constructor(anchor: string, content = "") {
     this.anchor = anchor;
     this.content = content;
   }

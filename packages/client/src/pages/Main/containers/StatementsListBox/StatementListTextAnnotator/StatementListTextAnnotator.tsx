@@ -10,8 +10,12 @@ import {
 } from "@shared/types";
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
-import { Button, DocumentTitle, Input, Loader } from "components";
-import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
+import { Button, Input, Loader } from "components";
+import Dropdown, {
+  DocumentTitle,
+  EntitySuggester,
+  EntityTag,
+} from "components/advanced";
 import TextAnnotator from "components/advanced/Annotator/Annotator";
 import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
 import { useDebounce, useResizeObserver } from "hooks";

@@ -227,6 +227,9 @@ export const TextAnnotator = ({
     setSelectedText("");
     handleSaveNewContent(true);
 
+    queryClient.invalidateQueries({
+      queryKey: ["entity", entityId],
+    });
     toast.info(`Anchor created ${entityId}.`);
   };
 
