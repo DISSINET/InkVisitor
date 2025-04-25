@@ -57,7 +57,7 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
                     }
                     onClick={() => {
                       api
-                        .documentFindAnchorWithIndex(
+                        .documentGetAnchorText(
                           document.id,
                           entityId,
                           row.original.anchorIndex
