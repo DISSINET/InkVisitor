@@ -1269,7 +1269,7 @@ class Api {
   ): Promise<AxiosResponse<IResponseGeneric<string>>> {
     try {
       const response = await this.connection.get(
-        `/documents/${documentId}/findAnchorWithIndex/${entityId}/${anchorIndex}`,
+        `/documents/${documentId}/anchors?entityId=${entityId}&index=${anchorIndex}`,
         options
       );
       return response;

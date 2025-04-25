@@ -432,18 +432,26 @@ export default Router()
     )
   )
   .get(
-    "/:documentId/findAnchorWithIndex/:entityId/:anchorIndex",
+    "/:documentId/anchors?entityId/:anchorIndex",
     asyncRouteHandler<{ result: string }>(
       async (
-        request: IRequest<{
-          documentId: string;
-          entityId: string;
-          anchorIndex: number;
-        }>
+        request: IRequest<
+          {
+            documentId: string;
+          },any,
+          {
+            entityId: string;
+            index: number;
+          }
+        >
       ) => {
         const id = request.params.documentId;
         if (!id) {
           throw new BadParams("document id has to be set");
+        }
+        const { entityId, index } = request.query;
+        if (!entityId || index === undefined) {
+          throw new BadParams("entityId and anchorIndex needs to be set");
         }
 
         const existing = await Document.getDocumentById(
@@ -454,10 +462,7 @@ export default Router()
           throw DocumentDoesNotExist.forId(id);
         }
 
-        const anchor = existing.findAnchorWithIndex(
-          request.params.entityId,
-          request.params.anchorIndex
-        );
+        const anchor = existing.findAnchorWithIndex(entityId, index);
 
         return {
           result: anchor,
