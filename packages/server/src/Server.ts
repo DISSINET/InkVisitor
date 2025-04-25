@@ -113,7 +113,7 @@ server.use(dbMiddleware);
 server.use(timeout('30s'));
 
 // Health route
-server.get("/health", async function (req, res) {
+server.get("/api/health", async function (req, res) {
   await rethink.tableList().run(req.db.connection);
   res.json({
     result: true
