@@ -27,6 +27,8 @@ import rateLimit from "express-rate-limit";
 import "@models/events/register";
 import { Request, Response } from "express";
 import { TooManyRequestsError } from "@shared/types/errors";
+import { r as rethink } from "rethinkdb-ts";
+import timeout from 'connect-timeout';
 
 const server = express();
 
@@ -89,11 +91,6 @@ if (process.env.NODE_ENV === "production") {
   server.use(helmet());
 }
 
-// Health route
-server.get("/health", function (req, res) {
-  res.send("ok");
-});
-
 // Rate limited for signin
 server.use(
   `${apiPath}/users/signin`,
@@ -113,6 +110,15 @@ server.use(
 server.use(profilerMiddleware);
 
 server.use(dbMiddleware);
+server.use(timeout('30s'));
+
+// Health route
+server.get("/health", async function (req, res) {
+  await rethink.tableList().run(req.db.connection);
+  res.json({
+    result: true
+  });
+});
 
 // uncomment this to enable auth
 server.use(
