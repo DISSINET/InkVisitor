@@ -107,7 +107,6 @@ export const TextAnnotator = ({
       queryClient.invalidateQueries({ queryKey: ["document"] });
       queryClient.invalidateQueries({ queryKey: ["documents"] });
       toast.info("Document content saved");
-      setAnnotatorMode(EditMode.HIGHLIGHT);
     },
   });
 
@@ -629,7 +628,7 @@ export const TextAnnotator = ({
               }}
             />
             <Button
-              label="discard changes"
+              label="discard edits"
               color="warning"
               icon={<FaTrash />}
               disabled={!isChangeMade}
