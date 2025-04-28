@@ -64,8 +64,8 @@ export const TextAnnotator = ({
   thisTerritoryEntityId = undefined,
 
   storedAnnotatorScroll = 0,
-  forwardAnnotator = (undefined) => {},
-  setStoredAnnotatorScroll = () => {},
+  forwardAnnotator = (undefined) => { },
+  setStoredAnnotatorScroll = () => { },
 
   territory,
 }: TextAnnotatorProps) => {
@@ -514,23 +514,25 @@ export const TextAnnotator = ({
               // $translateY={"100%"}
               $translateY={translateMenu}
             >
-              <TextAnnotatorMenu
-                anchors={selectedAnchors}
-                documentData={dataDocument}
-                text={selectedText}
-                entities={storedEntities}
-                onAnchorAdd={handleAddAnchor}
-                handleCreateTerritory={onCreateTerritory}
-                handleCreateStatement={onCreateStatement}
-                handleRemoveAnchor={onRemoveAnchor}
-                thisTerritoryEntityId={thisTerritoryEntityId}
-                canCreateActiveTAnchor={
-                  !dataDocument?.entityIds.T.includes(
-                    thisTerritoryEntityId ?? ""
-                  )
-                }
-                isLoadingEntities={isLoadingEntities}
-              />
+              {dataDocument && (
+                <TextAnnotatorMenu
+                  anchors={selectedAnchors}
+                  documentData={dataDocument}
+                  text={selectedText}
+                  entities={storedEntities}
+                  onAnchorAdd={handleAddAnchor}
+                  handleCreateTerritory={onCreateTerritory}
+                  handleCreateStatement={onCreateStatement}
+                  handleRemoveAnchor={onRemoveAnchor}
+                  thisTerritoryEntityId={thisTerritoryEntityId}
+                  canCreateActiveTAnchor={
+                    !dataDocument?.entityIds.T.includes(
+                      thisTerritoryEntityId ?? ""
+                    )
+                  }
+                  isLoadingEntities={isLoadingEntities}
+                />
+              )}
             </StyledAnnotatorMenu>
           )}
 
