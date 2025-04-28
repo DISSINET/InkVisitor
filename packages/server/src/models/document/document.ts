@@ -4,6 +4,7 @@ import { IDocument, IEntity } from "@shared/types";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import { InternalServerError, ModelNotValidError } from "@shared/types/errors";
 import User from "@models/user/user";
+import { findEntityById } from "@service/shorthands";
 
 export class TreeNode {
   anchor: string; // The tag name (entity id)
@@ -36,10 +37,10 @@ export default class Document implements IDocument, IDbModel {
   id = "";
   title: string;
   content: string;
-  entityIds: string[] = [];
   createdAt?: Date;
   updatedAt?: Date;
-
+  entityIds: Record<EntityEnums.Class, string[]>;
+  
   constructor(data: Partial<IDocument>) {
     this.id = data.id || "";
     this.title = data.title || "";
@@ -48,14 +49,52 @@ export default class Document implements IDocument, IDbModel {
     if (data.updatedAt !== undefined) {
       this.updatedAt = data.updatedAt;
     }
-    this.entityIds = this.findEntities();
+    this.entityIds = {} as Record<EntityEnums.Class, string[]>;
+  }
+
+  async preprocess(conn: Connection): Promise<void> {
+    const entityIds = this.findEntityIds();
+    this.entityIds = await this.findReferencedEntityIds(conn, entityIds);
+  }
+
+  async findReferencedEntityIds(conn: Connection, ids: string[]): Promise<Record<EntityEnums.Class, string[]>> {
+    const referencedEntityIds: Record<EntityEnums.Class, string[]> = {
+      [EntityEnums.Class.Action]: [],
+      [EntityEnums.Class.Resource]: [],
+      [EntityEnums.Class.Concept]: [],
+      [EntityEnums.Class.Person]: [],
+      [EntityEnums.Class.Location]: [],
+      [EntityEnums.Class.Event]: [],
+      [EntityEnums.Class.Object]: [],
+      [EntityEnums.Class.Territory]: [],
+      [EntityEnums.Class.Statement]: [],
+      [EntityEnums.Class.Value]: [],
+      [EntityEnums.Class.Being]: [],
+      [EntityEnums.Class.Group]: [],
+    };
+
+    for (const entityId of ids) {
+      const entity = await findEntityById(conn, entityId);
+
+      if (entity) {
+        const entityClass = entity.class;
+        if (entityClass) {
+          if (!referencedEntityIds[entityClass]) {
+            referencedEntityIds[entityClass] = [];
+          }
+          referencedEntityIds[entityClass].push(entity.id);
+        }
+      }
+    }
+
+    return referencedEntityIds;
   }
 
   /**
    * Parses the raw content and finds tags - entity ids
    * @returns
    */
-  findEntities(): string[] {
+  findEntityIds(): string[] {
     const regex = /<([\w-\.]+)>/g;
     let match;
 
@@ -330,7 +369,13 @@ export default class Document implements IDocument, IDbModel {
       const tagRegex = new RegExp(`<\\/?${entityId}(>|$)`, "g");
       const updatedContent = this.content.replace(tagRegex, "");
       this.content = updatedContent;
-      this.entityIds = this.entityIds.filter((id) => id !== entityId);
+      
+      // Search and remove the id from all class arrays
+      Object.keys(this.entityIds).forEach((classKey) => {
+        this.entityIds[classKey as EntityEnums.Class] = this.entityIds[classKey as EntityEnums.Class].filter(
+          (id) => id !== entityId
+        );
+      });
     }
   }
 

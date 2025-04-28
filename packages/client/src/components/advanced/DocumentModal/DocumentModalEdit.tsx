@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-import { IDocument, IDocumentMeta, IResponseDocument } from "@shared/types";
+import { IDocument, IDocumentMeta } from "@shared/types";
 import { Modal, ModalContent, ModalHeader } from "components";
 import { useWindowSize } from "hooks/useWindowSize";
 import { getShortLabelByLetterCount } from "utils/utils";
@@ -10,7 +10,7 @@ import { Annotator } from "@inkvisitor/annotator/src/lib";
 import { EntityEnums } from "@shared/enums";
 
 interface DocumentModalEdit {
-  document: IResponseDocument | IDocumentMeta | IDocument | undefined;
+  document: IDocument | IDocumentMeta | IDocument | undefined;
   onClose: () => void;
   anchor?: { entityId: string; occurence?: number };
 }

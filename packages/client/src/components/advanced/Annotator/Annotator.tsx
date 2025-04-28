@@ -10,7 +10,6 @@ import { EntityEnums } from "@shared/enums";
 import {
   IDocument,
   IEntity,
-  IResponseDocumentDetail,
   IResponseTerritory,
 } from "@shared/types";
 import { Button } from "components/basic/Button/Button";
@@ -517,7 +516,7 @@ export const TextAnnotator = ({
             >
               <TextAnnotatorMenu
                 anchors={selectedAnchors}
-                documentData={dataDocument as IResponseDocumentDetail}
+                documentData={dataDocument}
                 text={selectedText}
                 entities={storedEntities}
                 onAnchorAdd={handleAddAnchor}
@@ -526,7 +525,7 @@ export const TextAnnotator = ({
                 handleRemoveAnchor={onRemoveAnchor}
                 thisTerritoryEntityId={thisTerritoryEntityId}
                 canCreateActiveTAnchor={
-                  !dataDocument?.referencedEntityIds.T.includes(
+                  !dataDocument?.entityIds.T.includes(
                     thisTerritoryEntityId ?? ""
                   )
                 }

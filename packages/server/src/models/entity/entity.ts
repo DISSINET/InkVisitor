@@ -599,14 +599,10 @@ export default class Entity implements IEntity, IDbModel {
         const traverse = (nodes: TreeNode[], parentT?: string) => {
           for (const node of nodes) {
             if (node.anchor === this.id) {
+              const { content, ...documentMeta } = docData;
+
               out.push({
-                document: {
-                  id: docData.id,
-                  title: docData.title,
-                  entityIds: docData.entityIds,
-                  createdAt: docData.createdAt,
-                  updatedAt: docData.updatedAt,
-                },
+                document: documentMeta,
                 anchorText: node.getShortContent(),
                 resourceId: resource?.id || "",
                 parentTerritoryId: parentT || "",
