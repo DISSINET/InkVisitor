@@ -600,7 +600,7 @@ export class Annotator {
       this.cursor.draw(
         this.ctx,
         this.viewport,
-        this.text.lines,
+        this.text,
         {
           lineHeight: this.lineHeight,
           charWidth: this.charWidth,
@@ -700,7 +700,7 @@ export class Annotator {
         highlighter.draw(
           this.ctx,
           this.viewport,
-          this.text.lines,
+          this.text,
           {
             lineHeight: this.lineHeight,
             charWidth: this.charWidth,
