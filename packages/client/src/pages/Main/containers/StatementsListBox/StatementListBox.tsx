@@ -27,6 +27,7 @@ import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StatementListTextAnnotator } from "./StatementListTextAnnotator/StatementListTextAnnotator";
 import { StyledEmptyState, StyledTableWrapper } from "./StatementLitBoxStyles";
+import useAnnotator from "hooks/useAnnotator";
 
 const initialData: {
   statements: IResponseStatement[];
@@ -546,6 +547,14 @@ export const StatementListBox: React.FC = () => {
   );
 
   const [annotator, setAnnotator] = useState<Annotator | undefined>(undefined);
+
+  const { setAnnotator: useAnnotatorSetAnnotator } = useAnnotator();
+
+  useEffect(() => {
+    if (annotator) {
+      useAnnotatorSetAnnotator(annotator);
+    }
+  }, [annotator, useAnnotatorSetAnnotator]);
 
   return (
     <>

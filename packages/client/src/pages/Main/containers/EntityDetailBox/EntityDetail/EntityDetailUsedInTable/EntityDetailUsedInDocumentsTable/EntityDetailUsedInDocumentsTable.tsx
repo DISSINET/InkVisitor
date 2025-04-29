@@ -21,6 +21,8 @@ import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { setStatementListOpened } from "redux/features/layout/statementListOpenedSlice";
 import { setDetailBoxState } from "redux/features/layout/detailBoxStateSlice";
 import { DetailBoxState } from "types";
+import { EntityEnums } from "@shared/enums";
+import useAnnotator from "hooks/useAnnotator";
 
 type CellType = CellProps<IResponseUsedInDocument>;
 interface EntityDetailUsedInDocumentsTable {
@@ -35,7 +37,12 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
     (state) => state.layout.detailBoxState
   );
 
-  const { entities, usedInDocuments: uses, id: entityId } = entity;
+  const {
+    entities,
+    usedInDocuments: uses,
+    id: entityId,
+    class: entityClass,
+  } = entity;
   const queryClient = useQueryClient();
 
   const removeAnchorMutation = useMutation({
@@ -46,8 +53,11 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
     },
   });
 
-  const { setTerritoryId, setAnnotatorOpened } = useSearchParams();
+  const { setTerritoryId, setAnnotatorOpened, setStatementId } =
+    useSearchParams();
   const dispatch = useAppDispatch();
+
+  const { scrollToAnchor } = useAnnotator();
 
   const columns = useMemo<Column<IResponseUsedInDocument>[]>(
     () => [
@@ -61,8 +71,10 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
                 <Button
                   tooltipLabel="locate in annotator"
                   onClick={() => {
-                    // TODO: for S also select S in the list
                     setTerritoryId(parentTerritoryId);
+                    if (entityClass === EntityEnums.Class.Statement) {
+                      setStatementId(entityId);
+                    }
 
                     if (detailBoxState === DetailBoxState.FullHeight) {
                       dispatch(setStatementListOpened(true));
@@ -74,7 +86,16 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
                       );
                     }
                     setAnnotatorOpened(true);
-                    // annotator.scrollToAnchor(entity.id)
+
+                    // scroll to for non-T/non-S entities because T and S is automatically located with search params
+                    if (
+                      entityClass !== EntityEnums.Class.Territory &&
+                      entityClass !== EntityEnums.Class.Statement
+                    ) {
+                      setTimeout(() => {
+                        scrollToAnchor(entityId);
+                      }, 1000);
+                    }
                   }}
                   icon={<FaAnchor size={16} />}
                   inverted
@@ -194,7 +215,7 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
         },
       },
     ],
-    [entities]
+    [entities, detailBoxState, entityClass, entityId]
   );
 
   return (
