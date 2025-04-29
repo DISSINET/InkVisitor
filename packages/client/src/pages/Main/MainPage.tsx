@@ -35,6 +35,7 @@ import { MemoizedStatementListBox } from "./containers/StatementsListBox/Stateme
 import { MemoizedTemplateListBox } from "./containers/TemplateListBox/TemplateListBox";
 import { MemoizedTerritoryTreeBox } from "./containers/TerritoryTreeBox/TerritoryTreeBox";
 import { setDetailBoxMinimized } from "redux/features/layout/detailBoxMinimizedSlice";
+import { setDetailBoxState } from "redux/features/layout/detailBoxStateSlice";
 
 type FourthPanelBoxes = "search" | "bookmarks" | "templates";
 
@@ -81,6 +82,10 @@ const MainPage: React.FC<MainPage> = ({}) => {
   const detailBoxMinimized: boolean = useAppSelector(
     (state) => state.layout.detailBoxMinimized
   );
+  const detailBoxState: DetailBoxState = useAppSelector(
+    (state) => state.layout.detailBoxState
+  );
+  const [lastState, setLastState] = useState(DetailBoxState.Normal);
 
   const toggleFirstPanel = () => {
     if (firstPanelExpanded) {
@@ -301,48 +306,56 @@ const MainPage: React.FC<MainPage> = ({}) => {
     }
   };
 
-  const [detailBoxState, setDetailBoxState] = useState(
-    detailBoxMinimized ? DetailBoxState.Minimized : DetailBoxState.Normal
-  );
-  const [lastState, setLastState] = useState(DetailBoxState.Normal);
-
   useEffect(() => {
-    if (detailBoxState === DetailBoxState.FullHeight) {
-      if (statementListOpened) {
-        dispatch(setStatementListOpened(false));
+    if (detailIdArray.length > 0) {
+      // Only automatically control statementList if it hasn't been manually set
+      if (detailBoxState === DetailBoxState.FullHeight) {
+        if (statementListOpened) {
+          dispatch(setStatementListOpened(false));
+        }
+      } else if (!localStorage.getItem("statementListManuallySet")) {
+        // Only auto-open if not manually set
+        if (!statementListOpened) {
+          dispatch(setStatementListOpened(true));
+        }
       }
-    } else {
-      // detail box is not full height
-      if (!statementListOpened) {
-        dispatch(setStatementListOpened(true));
+
+      if (detailBoxState === DetailBoxState.Minimized) {
+        if (!detailBoxMinimized) {
+          dispatch(setDetailBoxMinimized(true));
+        }
+      } else {
+        if (detailBoxMinimized) {
+          dispatch(setDetailBoxMinimized(false));
+        }
       }
     }
-    if (detailBoxState === DetailBoxState.Minimized) {
-      if (!detailBoxMinimized) {
-        dispatch(setDetailBoxMinimized(true));
-      }
-    } else {
-      if (detailBoxMinimized) {
-        dispatch(setDetailBoxMinimized(false));
-      }
-    }
-  }, [detailBoxState]);
+  }, [detailBoxState, statementListOpened, detailBoxMinimized, detailIdArray]);
 
   const handleMaximizeDetailBox = () => {
     if (detailBoxState === DetailBoxState.Normal) {
-      setDetailBoxState(DetailBoxState.FullHeight);
+      dispatch(setDetailBoxState(DetailBoxState.FullHeight));
     } else {
-      setDetailBoxState(DetailBoxState.Normal);
+      dispatch(setDetailBoxState(DetailBoxState.Normal));
     }
   };
 
   const handleMinimizeDetailBox = () => {
     if (detailBoxState === DetailBoxState.Minimized) {
-      setDetailBoxState(lastState);
+      dispatch(setDetailBoxState(lastState));
     } else {
       setLastState(detailBoxState);
-      setDetailBoxState(DetailBoxState.Minimized);
+      dispatch(setDetailBoxState(DetailBoxState.Minimized));
     }
+  };
+
+  const handleStatementListToggle = () => {
+    dispatch(setStatementListOpened(!statementListOpened));
+    localStorage.setItem(
+      "statementListOpened",
+      (!statementListOpened).toString()
+    );
+    localStorage.setItem("statementListManuallySet", "true");
   };
 
   const minimizeDetailBoxButton = () => {
@@ -498,9 +511,13 @@ const MainPage: React.FC<MainPage> = ({}) => {
                 tooltipLabel="close all tabs"
                 icon={<VscCloseAll style={{ transform: "scale(1.3)" }} />}
                 onClick={() => {
-                  clearAllDetailIds();
+                  // First ensure statement list is opened
                   dispatch(setStatementListOpened(true));
-                  setDetailBoxState(DetailBoxState.Normal);
+                  localStorage.setItem("statementListOpened", "true");
+
+                  // Then clear the detail IDs
+                  clearAllDetailIds();
+                  dispatch(setDetailBoxState(DetailBoxState.Normal));
                 }}
               />,
             ]}

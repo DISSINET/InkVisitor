@@ -26,6 +26,7 @@ import treeInitializeSlice from "./features/territoryTree/treeInitializeSlice";
 import themeSlice from "./features/themeSlice";
 import usernameSlice from "./features/usernameSlice";
 import detailBoxMinimizedSlice from "./features/layout/detailBoxMinimizedSlice";
+import detailBoxStateSlice from "./features/layout/detailBoxStateSlice";
 
 const store: Store = configureStore({
   reducer: {
@@ -64,6 +65,7 @@ const store: Store = configureStore({
       fourthPanelBoxesOpened: fourthPanelBoxesOpenedSlice,
       statementListOpened: statementListOpenedSlice,
       detailBoxMinimized: detailBoxMinimizedSlice,
+      detailBoxState: detailBoxStateSlice,
     }),
   },
 });

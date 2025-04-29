@@ -11,11 +11,16 @@ import {
   EntityTag,
 } from "components/advanced";
 import React, { useMemo } from "react";
-import { FaTrashAlt } from "react-icons/fa";
+import { FaAnchor, FaTrashAlt } from "react-icons/fa";
 import { HiClipboardList } from "react-icons/hi";
 import { CellProps, Column } from "react-table";
 import { toast } from "react-toastify";
 import { StyledAnchorText } from "./EntityDetailUsedInDocumentsTableStyles";
+import { useSearchParams } from "hooks";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { setStatementListOpened } from "redux/features/layout/statementListOpenedSlice";
+import { setDetailBoxState } from "redux/features/layout/detailBoxStateSlice";
+import { DetailBoxState } from "types";
 
 type CellType = CellProps<IResponseUsedInDocument>;
 interface EntityDetailUsedInDocumentsTable {
@@ -26,6 +31,10 @@ interface EntityDetailUsedInDocumentsTable {
 export const EntityDetailUsedInDocumentsTable: React.FC<
   EntityDetailUsedInDocumentsTable
 > = ({ title, perPage, entity }: EntityDetailUsedInDocumentsTable) => {
+  const detailBoxState: DetailBoxState = useAppSelector(
+    (state) => state.layout.detailBoxState
+  );
+
   const { entities, usedInDocuments: uses, id: entityId } = entity;
   const queryClient = useQueryClient();
 
@@ -37,8 +46,47 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
     },
   });
 
+  const { setTerritoryId, setAnnotatorOpened } = useSearchParams();
+  const dispatch = useAppDispatch();
+
   const columns = useMemo<Column<IResponseUsedInDocument>[]>(
     () => [
+      {
+        id: "anchor btn",
+        Cell: ({ row }: CellType) => {
+          const { parentTerritoryId } = row.original;
+          return (
+            <>
+              {parentTerritoryId && (
+                <Button
+                  tooltipLabel="locate in annotator"
+                  onClick={() => {
+                    // TODO: for S also select S in the list
+                    setTerritoryId(parentTerritoryId);
+
+                    if (detailBoxState === DetailBoxState.FullHeight) {
+                      dispatch(setStatementListOpened(true));
+                      localStorage.setItem("statementListOpened", "true");
+                      dispatch(setDetailBoxState(DetailBoxState.Normal));
+                      localStorage.setItem(
+                        "detailBoxState",
+                        DetailBoxState.Normal
+                      );
+                    }
+                    setAnnotatorOpened(true);
+                    // annotator.scrollToAnchor(entity.id)
+                  }}
+                  icon={<FaAnchor size={16} />}
+                  inverted
+                  noBackground
+                  noBorder
+                  noIconMargin
+                />
+              )}
+            </>
+          );
+        },
+      },
       {
         Header: "Anchor text",
         Cell: ({ row }: CellType) => {
