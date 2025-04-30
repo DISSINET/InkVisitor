@@ -500,9 +500,9 @@ export const StatementListTextAnnotator: React.FC<
             limitSelectedItems={
               statements.length > 0
                 ? Math.floor(
-                    (debouncedContentWidth - 128 - COLLAPSED_TABLE_WIDTH) / 80
+                    (debouncedContentWidth - 130 - COLLAPSED_TABLE_WIDTH) / 80
                   )
-                : Math.floor((debouncedContentWidth - 128) / 80)
+                : Math.floor((debouncedContentWidth - 130) / 80)
             }
           />
         </div>
