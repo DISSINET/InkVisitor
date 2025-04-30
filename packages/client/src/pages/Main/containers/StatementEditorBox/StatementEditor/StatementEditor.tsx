@@ -646,16 +646,18 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   entity={statement}
                   fullWidth
                   button={
-                    <Button
-                      inverted
-                      tooltipLabel="locate statement anchor"
-                      icon={<FaAnchor />}
-                      onClick={() => {
-                        setStatementId(statement.id);
-                        statementTerritoryId &&
-                          setTerritoryId(statementTerritoryId);
-                      }}
-                    />
+                    statement.usedInDocuments.length > 0 && (
+                      <Button
+                        inverted
+                        tooltipLabel="locate statement anchor"
+                        icon={<FaAnchor />}
+                        onClick={() => {
+                          setStatementId(statement.id);
+                          statementTerritoryId &&
+                            setTerritoryId(statementTerritoryId);
+                        }}
+                      />
+                    )
                   }
                 />
                 <div style={{ marginLeft: "0.5rem", marginRight: "0.5rem" }}>
