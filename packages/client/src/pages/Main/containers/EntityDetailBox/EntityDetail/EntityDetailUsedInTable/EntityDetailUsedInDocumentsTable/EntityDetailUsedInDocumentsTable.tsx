@@ -94,7 +94,8 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
                     ) {
                       setTimeout(() => {
                         scrollToAnchor(entityId);
-                      }, 1000);
+                        // TODO: it's loading longer than 200ms, so we need to find a way to react to annotator load
+                      }, 200);
                     }
                   }}
                   icon={<FaAnchor size={16} />}
@@ -226,6 +227,8 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
         data={uses}
         perPage={perPage}
         isLoading={removeAnchorMutation.isPending}
+        firstColumnMinWidth
+        // lastColumnMinWidth
       />
     </>
   );
