@@ -80,6 +80,7 @@ import {
 import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
 import { StatementEditorSectionButtons } from "./StatementEditorSectionButtons/StatementEditorSectionButtons";
+import useAnnotator from "hooks/useAnnotator";
 
 const valencyErrorTypes: WarningTypeEnums[] = [
   WarningTypeEnums.MA,
@@ -635,6 +636,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     [territoryData]
   );
 
+  const { scrollToAnchor } = useAnnotator();
+
   return (
     <>
       <React.Fragment key={statement.id}>
@@ -645,6 +648,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 <EntityTag
                   entity={statement}
                   fullWidth
+                  // TODO: remove this button
                   button={
                     statement.usedInDocuments.length > 0 && (
                       <Button
@@ -652,9 +656,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                         tooltipLabel="locate statement anchor"
                         icon={<FaAnchor />}
                         onClick={() => {
-                          setStatementId(statement.id);
                           statementTerritoryId &&
                             setTerritoryId(statementTerritoryId);
+                          scrollToAnchor(statement.id);
                         }}
                       />
                     )
@@ -787,6 +791,21 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                       {documentAnchor.anchorText}
                     </StyledAnchorText>
                     <StyledAnchorMeta>
+                      <Button
+                        inverted
+                        // noBorder
+                        noBackground
+                        tooltipLabel="locate statement anchor"
+                        icon={<FaAnchor />}
+                        onClick={() => {
+                          documentAnchor.parentTerritoryId &&
+                            setTerritoryId(documentAnchor.parentTerritoryId);
+                          scrollToAnchor(
+                            statement.id,
+                            documentAnchor.anchorIndex
+                          );
+                        }}
+                      />
                       <DocumentTitle title={documentAnchor.document.title} />
                       {documentAnchor.resourceId && (
                         <EntityTag

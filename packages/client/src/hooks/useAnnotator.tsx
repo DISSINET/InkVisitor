@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 
 type AnnotatorRef = {
-  scrollToAnchor: (anchor: string) => void;
+  scrollToAnchor: (anchor: string, occurence?: number) => void;
 };
 
 // singleton ref outside the hook
@@ -12,9 +12,9 @@ const useAnnotator = () => {
     annotatorRef.current = annotator;
   }, []);
 
-  const scrollToAnchor = useCallback((anchor: string) => {
+  const scrollToAnchor = useCallback((anchor: string, occurence?: number) => {
     if (annotatorRef.current) {
-      annotatorRef.current.scrollToAnchor(anchor);
+      annotatorRef.current.scrollToAnchor(anchor, occurence);
     }
   }, []);
 
