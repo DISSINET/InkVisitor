@@ -311,6 +311,8 @@ export const StatementListTextAnnotator: React.FC<
 
   const debouncedContentWidth = useDebounce(contentWidth, 80);
 
+  console.log(statements.length);
+
   return (
     <animated.div style={animatedStyle}>
       <div
@@ -495,7 +497,13 @@ export const StatementListTextAnnotator: React.FC<
                 : debouncedContentWidth - 75
             }
             noOptionsMessage="No entity classes to highlight"
-            limitSelectedItems={Math.floor((debouncedContentWidth - 232) / 80)}
+            limitSelectedItems={
+              statements.length > 0
+                ? Math.floor(
+                    (debouncedContentWidth - 128 - COLLAPSED_TABLE_WIDTH) / 80
+                  )
+                : Math.floor((debouncedContentWidth - 128) / 80)
+            }
           />
         </div>
       )}
