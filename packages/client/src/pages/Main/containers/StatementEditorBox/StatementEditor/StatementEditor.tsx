@@ -674,19 +674,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   />
                 </div>
               </StyledHeaderTagWrap>
-              <div style={{ marginLeft: "0.5rem", marginRight: "0.5rem" }}>
-                <Button
-                  inverted
-                  tooltipLabel="copy statement ID"
-                  color="primary"
-                  label=""
-                  icon={<FaRegCopy />}
-                  onClick={async () => {
-                    await navigator.clipboard.writeText(statement.id);
-                    toast.info("ID copied to clipboard");
-                  }}
-                />
-              </div>
 
               {userCanEdit && (
                 <div style={{ display: "flex" }}>
