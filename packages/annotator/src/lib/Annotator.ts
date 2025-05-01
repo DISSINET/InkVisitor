@@ -627,8 +627,6 @@ export class Annotator {
           end.xLine
         ) as SegmentPosition;
         const annotated = this.getAnnotations(startSegment, endSegment);
-        console.log(annotated, startSegment, endSegment);
-        (window as any).test = this;
         this.onSelectTextCb({
           text: this.text.getRangeText(start, end),
           anchors: annotated,

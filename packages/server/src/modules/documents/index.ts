@@ -265,6 +265,8 @@ export default Router()
         id: documentId,
       });
 
+      await model.preprocess(request.db.connection);
+
       // checking the validity of the final model (already has updated data)
       if (!model.isValid()) {
         throw new ModelNotValidError("");

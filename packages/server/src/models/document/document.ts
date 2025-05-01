@@ -465,7 +465,7 @@ export default class Document implements IDocument, IDbModel {
     const entries = await rethink
       .table(Document.table)
       .filter(function (row: RDatum) {
-        return row("entityIds").contains(entityId);
+        return row("entityIds").values().concatMap((arr => arr)).contains(entityId);
       })
       .run(db);
 
