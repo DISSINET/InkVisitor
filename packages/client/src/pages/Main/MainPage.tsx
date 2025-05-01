@@ -310,24 +310,20 @@ const MainPage: React.FC<MainPage> = ({}) => {
     if (detailBoxState === DetailBoxState.FullHeight) {
       if (statementListOpened) {
         dispatch(setStatementListOpened(false));
-        localStorage.setItem("statementListOpened", "false");
       }
     } else {
       // detail box is not full height
       if (!statementListOpened) {
         dispatch(setStatementListOpened(true));
-        localStorage.setItem("statementListOpened", "true");
       }
     }
     if (detailBoxState === DetailBoxState.Minimized) {
       if (!detailBoxMinimized) {
         dispatch(setDetailBoxMinimized(true));
-        localStorage.setItem("detailBoxMinimized", "true");
       }
     } else {
       if (detailBoxMinimized) {
         dispatch(setDetailBoxMinimized(false));
-        localStorage.setItem("detailBoxMinimized", "false");
       }
     }
   }, [detailBoxState]);

@@ -8,8 +8,10 @@ const detailBoxMinimizedSlice = createSlice({
   name: "detailBoxMinimized",
   initialState: initialState,
   reducers: {
-    setDetailBoxMinimized: (state: boolean, action: PayloadAction<boolean>) =>
-      (state = action.payload),
+    setDetailBoxMinimized: (state: boolean, action: PayloadAction<boolean>) => {
+      localStorage.setItem("detailBoxMinimized", action.payload.toString());
+      return action.payload;
+    },
   },
 });
 
