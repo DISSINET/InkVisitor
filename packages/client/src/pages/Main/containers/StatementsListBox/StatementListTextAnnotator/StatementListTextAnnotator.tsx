@@ -261,6 +261,7 @@ export const StatementListTextAnnotator: React.FC<
     enabled: api.isLoggedIn(),
   });
 
+  // TODO: react on click separately and scroll to anchor only on init load
   // INIT + react to url changes
   useEffect(() => {
     if (annotator && selectedDocument) {

@@ -308,13 +308,11 @@ const MainPage: React.FC<MainPage> = ({}) => {
 
   useEffect(() => {
     if (detailIdArray.length > 0) {
-      // Only automatically control statementList if it hasn't been manually set
       if (detailBoxState === DetailBoxState.FullHeight) {
         if (statementListOpened) {
           dispatch(setStatementListOpened(false));
         }
-      } else if (!localStorage.getItem("statementListManuallySet")) {
-        // Only auto-open if not manually set
+      } else {
         if (!statementListOpened) {
           dispatch(setStatementListOpened(true));
         }
@@ -347,15 +345,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
       setLastState(detailBoxState);
       dispatch(setDetailBoxState(DetailBoxState.Minimized));
     }
-  };
-
-  const handleStatementListToggle = () => {
-    dispatch(setStatementListOpened(!statementListOpened));
-    localStorage.setItem(
-      "statementListOpened",
-      (!statementListOpened).toString()
-    );
-    localStorage.setItem("statementListManuallySet", "true");
   };
 
   const minimizeDetailBoxButton = () => {

@@ -46,7 +46,12 @@ import { toast } from "react-toastify";
 import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { ThemeContext } from "styled-components";
-import { DropdownItem, classesEditorActants, classesEditorTags } from "types";
+import {
+  DetailBoxState,
+  DropdownItem,
+  classesEditorActants,
+  classesEditorTags,
+} from "types";
 import {
   deepCopy,
   getEntityLabel,
@@ -81,6 +86,7 @@ import { StatementEditorActantTable } from "./StatementEditorActantTable/Stateme
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
 import { StatementEditorSectionButtons } from "./StatementEditorSectionButtons/StatementEditorSectionButtons";
 import useAnnotator from "hooks/useAnnotator";
+import { setDetailBoxState } from "redux/features/layout/detailBoxStateSlice";
 
 const valencyErrorTypes: WarningTypeEnums[] = [
   WarningTypeEnums.MA,
@@ -124,6 +130,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     setTerritoryId,
     appendDetailId,
     appendMultipleDetailIds,
+    setAnnotatorOpened,
   } = useSearchParams();
 
   const queryClient = useQueryClient();
@@ -641,6 +648,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   const scrollToStatementAnchor = (anchorIndex?: number) => {
     // TODO: short timeout -> statement list is open and the active territory is the anchor parent territory
     // TODO: set longer timeout if statement list is closed or different territory is active
+    dispatch(setDetailBoxState(DetailBoxState.Normal));
+    setAnnotatorOpened(true);
     statementTerritoryId && setTerritoryId(statementTerritoryId);
     scrollToAnchor(statement.id, anchorIndex);
   };
