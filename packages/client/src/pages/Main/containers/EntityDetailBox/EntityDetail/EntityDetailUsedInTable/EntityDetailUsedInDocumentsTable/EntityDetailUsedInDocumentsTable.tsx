@@ -87,6 +87,9 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
                     }
                     setAnnotatorOpened(true);
 
+                    // TODO: short timeout -> statement list is open and the active territory is the anchor parent territory
+                    // TODO: set longer timeout if statement list is closed or different territory is active
+
                     // scroll to for non-T/non-S entities because T and S is automatically located with search params
                     if (
                       entityClass !== EntityEnums.Class.Territory &&

@@ -638,6 +638,13 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
   const { scrollToAnchor } = useAnnotator();
 
+  const scrollToStatementAnchor = (anchorIndex?: number) => {
+    // TODO: short timeout -> statement list is open and the active territory is the anchor parent territory
+    // TODO: set longer timeout if statement list is closed or different territory is active
+    statementTerritoryId && setTerritoryId(statementTerritoryId);
+    scrollToAnchor(statement.id, anchorIndex);
+  };
+
   return (
     <>
       <React.Fragment key={statement.id}>
@@ -648,7 +655,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 <EntityTag
                   entity={statement}
                   fullWidth
-                  // TODO: remove this button
+                  // TODO: remove this button?
                   button={
                     statement.usedInDocuments.length > 0 && (
                       <Button
@@ -656,9 +663,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                         tooltipLabel="locate statement anchor"
                         icon={<FaAnchor />}
                         onClick={() => {
-                          statementTerritoryId &&
-                            setTerritoryId(statementTerritoryId);
-                          scrollToAnchor(statement.id);
+                          scrollToStatementAnchor();
                         }}
                       />
                     )
@@ -798,12 +803,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                         tooltipLabel="locate statement anchor"
                         icon={<FaAnchor />}
                         onClick={() => {
-                          documentAnchor.parentTerritoryId &&
-                            setTerritoryId(documentAnchor.parentTerritoryId);
-                          scrollToAnchor(
-                            statement.id,
-                            documentAnchor.anchorIndex
-                          );
+                          scrollToStatementAnchor();
+                          // documentAnchor.anchorIndex
                         }}
                       />
                       <DocumentTitle title={documentAnchor.document.title} />
