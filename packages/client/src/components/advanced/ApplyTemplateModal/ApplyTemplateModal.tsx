@@ -1,7 +1,8 @@
 import { entitiesDictKeys } from "@shared/dictionaries";
 import { UserEnums } from "@shared/enums";
 import { IEntity, IResponseGeneric } from "@shared/types";
-import { UseMutationResult } from "@tanstack/react-query";
+import { UseMutationResult, useQuery } from "@tanstack/react-query";
+import api from "api";
 import { AxiosResponse } from "axios";
 import {
   Button,
@@ -40,6 +41,21 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModal> = ({
   templateToApply,
   setTemplateToApply,
 }) => {
+  const {
+    status,
+    data: templateDetail,
+    error: templateDetailError,
+    isFetching: templateDetailIsFetching,
+  } = useQuery({
+    queryKey: ["entity", templateToApply.id],
+    queryFn: async () => {
+      const res = await api.detailGet(templateToApply.id);
+      console.log(res.data.relations);
+      return res.data;
+    },
+    enabled: !!templateToApply.id && api.isLoggedIn(),
+  });
+
   const handleApplyTemplate = async (templateToApply: IEntity) => {
     try {
       const entityAfterTemplateApplied: IEntity = await applyTemplate(
