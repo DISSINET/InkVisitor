@@ -179,7 +179,7 @@ class Text {
  getLine(lineIndex: number): string {
   // Find the segment that contains the line
   const segmentIndex = this.segments.findIndex(
-    (s) => s.lineStart <= lineIndex && s.lineEnd >= lineIndex
+    (s) => s.lineStart <= lineIndex && s.lineEnd > lineIndex
   );
   
   if (segmentIndex === -1) {
