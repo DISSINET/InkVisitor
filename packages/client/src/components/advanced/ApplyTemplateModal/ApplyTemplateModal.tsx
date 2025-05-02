@@ -15,9 +15,12 @@ import {
 } from "components";
 import { EntityTag } from "components/advanced";
 import { applyTemplate } from "constructors";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { getShortLabelByLetterCount } from "utils/utils";
+import { Relation } from "@shared/types";
+import { RelationEnums } from "@shared/enums";
+import { v4 as uuidv4 } from "uuid";
 
 interface ApplyTemplateModal {
   showModal: boolean;
@@ -55,6 +58,41 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModal> = ({
     },
     enabled: !!templateToApply.id && api.isLoggedIn(),
   });
+
+  const [newRelations, setNewRelations] = useState<Relation.IUsedRelations>({});
+
+  // instantiate relations from template
+  useEffect(() => {
+    if (templateDetail) {
+      const { relations } = templateDetail;
+      const newRelations: Relation.IUsedRelations = {};
+
+      // Iterate through each relation type in IUsedRelations
+      Object.entries(relations).forEach(([relationType, relationDetail]) => {
+        if (relationDetail) {
+          // Create a new relation detail object
+          const newRelationDetail = {
+            ...relationDetail,
+            connections: relationDetail.connections?.map(
+              (connection: Relation.IConnection<Relation.IRelation>) => ({
+                ...connection,
+                id: uuidv4(),
+                entityIds: connection.entityIds.map((id: string) =>
+                  id === templateToApply.id ? entity.id : id
+                ),
+              })
+            ),
+          };
+
+          // Add the new relation detail to the new relations object
+          newRelations[relationType as RelationEnums.Type] = newRelationDetail;
+        }
+      });
+
+      console.log("New relations", newRelations);
+      setNewRelations(newRelations);
+    }
+  }, [templateDetail, entity.id, templateToApply.id]);
 
   const handleApplyTemplate = async (templateToApply: IEntity) => {
     try {
@@ -118,8 +156,8 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModal> = ({
             label="Apply"
             color="info"
             onClick={() => {
-              setShowApplyTemplateModal(false);
               handleApplyTemplate(templateToApply);
+              setShowApplyTemplateModal(false);
             }}
           />
         </ButtonGroup>
