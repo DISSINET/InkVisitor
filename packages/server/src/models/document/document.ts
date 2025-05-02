@@ -92,21 +92,20 @@ export default class Document implements IDocument, IDbModel {
 
   /**
    * Parses the raw content and finds tags - entity ids
-   * @returns
+   * @returns unique list of entity IDs
    */
   findEntityIds(): string[] {
-    const regex = /<([\w-\.]+)>/g;
+    // Match opening tags that contain entity IDs
+    // Entity IDs can contain letters, numbers, hyphens, dots, and underscores
+    const regex = /<([\w\-\._]+)>/g;
+    const entities = new Set<string>();
     let match;
 
-    const entities = [];
-
     while ((match = regex.exec(this.content)) !== null) {
-      entities.push(match[1]);
+      entities.add(match[1]);
     }
 
-    const uEntities = [...new Set(entities)];
-
-    return uEntities;
+    return Array.from(entities);
   }
 
   /**
@@ -463,11 +462,20 @@ export default class Document implements IDocument, IDbModel {
     entityId: string
   ): Promise<IDocument[]> {
     const entries = await rethink
-      .table(Document.table)
-      .filter(function (row: RDatum) {
-        return row("entityIds").values().concatMap((arr => arr)).contains(entityId);
-      })
-      .run(db);
+    .table(Document.table)
+    .filter(function (row: RDatum) {
+      const entityIds = row("entityIds");
+  
+      return rethink.branch(
+        entityIds.typeOf().eq("ARRAY"),
+        // Case: entityIds is string[] (old format)
+        entityIds.contains(entityId),
+  
+        // Else assume object: Record<string, string[]> (new format)
+        entityIds.values().concatMap(arr => arr).contains(entityId)
+      );
+    })
+    .run(db);
 
     return entries && entries.length ? (entries as IDocument[]) : [];
   }

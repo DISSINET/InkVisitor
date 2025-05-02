@@ -194,6 +194,7 @@ export default Router()
 
       await request.db.lock();
 
+      await model.preprocess(request.db.connection);
       const saved = await model.save(request.db.connection);
       if (!saved) {
         throw new InternalServerError("cannot create document");
