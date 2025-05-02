@@ -271,7 +271,8 @@ export const applyTemplate = async (
   userRole: UserEnums.Role
 ): Promise<IEntity> => {
   if (templateEntity.isTemplate && templateEntity.class === entity.class) {
-    const newEntity = { ...templateEntity };
+    // get labels from entity and the rest from template
+    const newEntity = { ...templateEntity, labels: entity.labels };
 
     if (templateEntity.class === EntityEnums.Class.Statement) {
       // entity is a statement
