@@ -1,10 +1,7 @@
-import Document, { TreeNode } from "@models/document/document";
 import { UsedRelations } from "@models/relation/relations";
-import Resource from "@models/resource/resource";
-import { EntityEnums, RelationEnums } from "@shared/enums";
+import { RelationEnums } from "@shared/enums";
 import { EntityTooltip, IEntity } from "@shared/types";
 import { IResponseUsedInDocument } from "@shared/types/response-detail";
-import { Connection } from "rethinkdb-ts";
 import { IRequest } from "src/custom_typings/request";
 import Entity from "./entity";
 import { ResponseEntity } from "./response";

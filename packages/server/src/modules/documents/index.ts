@@ -436,7 +436,8 @@ export default Router()
         request: IRequest<
           {
             documentId: string;
-          },any,
+          },
+          any,
           {
             entityId: string;
             index: number;
@@ -463,7 +464,7 @@ export default Router()
         const anchor = existing.findAnchorWithIndex(entityId, index);
 
         return {
-          result: anchor,
+          result: anchor?.content || "",
         };
       }
     )
