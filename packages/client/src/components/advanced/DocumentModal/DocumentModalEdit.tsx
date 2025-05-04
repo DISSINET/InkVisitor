@@ -53,7 +53,7 @@ const DocumentModalEdit: React.FC<DocumentModalEdit> = ({
                 anchor?.entityId &&
                   newAnnotator?.scrollToAnchor(
                     anchor?.entityId,
-                    anchor?.occurence || 1
+                    anchor?.occurence || 0
                   );
                 // setAnnotatorInitialized(true);
                 // }

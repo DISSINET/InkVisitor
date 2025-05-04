@@ -657,7 +657,7 @@ export class Annotator {
         if (hlSchema) {
           // iterate over all tag occurrences
           let occurence: IAbsCoordinates[];
-          let i = 1;
+          let i = 0;
           do {
             occurence = this.text.getTagPosition(tag, i);
             if (occurence.length > 1) {
@@ -780,8 +780,8 @@ export class Annotator {
     }
   }
 
-  scrollToAnchor(tag: string, occurence: number = 1) {
-    const pos = this.text.getTagPosition(tag, occurence);
+  scrollToAnchor(tag: string, index: number = 0) {
+    const pos = this.text.getTagPosition(tag, index);
 
     if (pos.length !== 2) {
       return;
@@ -860,11 +860,6 @@ export class Annotator {
         this.text.segments[occurence.segmentIndex].lineStart +
         occurence.lineIndex,
     };
-
-    // @ts-ignore
-    window.cursor = this.cursor;
-
-    console.log(occurence, this.cursor.selectStart, this.cursor.selectEnd);
 
     this.scrollToLine(this.cursor.selectStart.yLine);
     this.draw();
