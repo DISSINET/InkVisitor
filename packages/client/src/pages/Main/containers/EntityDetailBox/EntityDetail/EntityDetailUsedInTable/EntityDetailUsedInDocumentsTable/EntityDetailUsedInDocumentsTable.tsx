@@ -80,6 +80,8 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
                   <AbbreviatedTextWithTooltip
                     text={anchorText}
                     documentId={document.id}
+                    entityId={entityId}
+                    anchorIndex={row.original.anchorIndex}
                   />
                 </StyledAnchorText>
               ) : (

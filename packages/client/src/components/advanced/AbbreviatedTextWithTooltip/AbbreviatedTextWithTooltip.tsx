@@ -12,18 +12,18 @@ import { getShortLabelByLetterCount } from "utils/utils";
 interface AbbreviatedTextWithTooltip {
   text?: string;
   documentId: string;
+  entityId: string;
+  anchorIndex: number;
 }
 export const AbbreviatedTextWithTooltip: React.FC<
   AbbreviatedTextWithTooltip
-> = ({ text = "", documentId }) => {
+> = ({ text = "", documentId, entityId, anchorIndex }) => {
   const [referenceElement, setReferenceElement] =
     useState<HTMLDivElement | null>(null);
 
   const [isTooltipOpen, setIsTooltipOpen] = React.useState(false);
   const [allowFetch, setAllowFetch] = useState(false);
-  const [document, setDocument] = useState<IResponseDocumentDetail | null>(
-    null
-  );
+  const [anchorText, setAnchorText] = useState<string | null>(null);
 
   useEffect(() => {
     if (isTooltipOpen) {
@@ -36,12 +36,17 @@ export const AbbreviatedTextWithTooltip: React.FC<
   }, [isTooltipOpen]);
 
   const { data, isFetching, isSuccess } = useQuery({
-    queryKey: ["document", documentId, allowFetch],
+    queryKey: ["document", documentId, entityId, anchorIndex, allowFetch],
     queryFn: async () => {
-      const res = await api.documentGet(documentId);
-      setDocument(res.data);
+      const res = await api.documentGetAnchorText(
+        documentId,
+        entityId,
+        anchorIndex
+      );
+      setAnchorText(res.data.data || null);
+      return res.data.data;
     },
-    enabled: api.isLoggedIn() && !!documentId && allowFetch,
+    enabled: api.isLoggedIn() && allowFetch,
   });
 
   return (
@@ -58,9 +63,7 @@ export const AbbreviatedTextWithTooltip: React.FC<
       <Tooltip
         content={
           <div>
-            {document?.content
-              ? getShortLabelByLetterCount(document?.content, 4000)
-              : text}
+            {anchorText ? getShortLabelByLetterCount(anchorText, 4000) : text}
           </div>
         }
         visible={isTooltipOpen}
