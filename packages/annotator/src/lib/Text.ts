@@ -704,22 +704,22 @@ class Text {
     this.calculateLines();
   }
 
-  getTagPosition(tag: string, occurrence: number = 1): IAbsCoordinates[] {
+  getTagPosition(tag: string, index: number = 0): IAbsCoordinates[] {
     let openingTagMatch: { tag: ITag; segment: Segment } | null = null;
     let closingTagMatch: { tag: ITag; segment: Segment } | null = null;
 
-    let openingTagCount = 0;
-    let closingTagCount = 0;
+    let openingTagIndex = 0;
+    let closingTagIndex = 0;
 
     // Search for the opening tag
     for (const segment of this.segments) {
       for (const openingTag of segment.openingTags) {
         if (openingTag.tag === tag) {
-          openingTagCount++;
-          if (openingTagCount === occurrence) {
+          if (openingTagIndex === index) {
             openingTagMatch = { tag: openingTag, segment };
             break;
           }
+          openingTagIndex++;
         }
       }
       if (openingTagMatch) break;
@@ -729,11 +729,11 @@ class Text {
     for (const segment of this.segments) {
       for (const closingTag of segment.closingTags) {
         if (closingTag.tag === tag) {
-          closingTagCount++;
-          if (closingTagCount === occurrence) {
+          if (closingTagIndex === index) {
             closingTagMatch = { tag: closingTag, segment };
             break;
           }
+          closingTagIndex++;
         }
       }
       if (closingTagMatch) break;
