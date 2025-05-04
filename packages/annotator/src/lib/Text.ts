@@ -161,22 +161,39 @@ class Text {
   dirtySegment?: number;
   value: string;
   charsAtLine: number;
-
+  noLines: number;
   constructor(value: string, charsAtLine: number) {
     this.value = value;
     this.segments = [];
     this.prepareSegments();
     this.charsAtLine = charsAtLine;
+    this.noLines = 0;
     this.calculateLines();
   }
 
-  get noLines(): number {
-    return this.segments.reduce<number>((a, c) => a + c.lines.length, 0);
+ /**
+   * Returns the line at the specified index by iterating over segments
+   * @param lineIndex The absolute line index
+   * @returns The line at the specified index or an empty string if not found
+   */
+ getLine(lineIndex: number): string {
+  // Find the segment that contains the line
+  const segmentIndex = this.segments.findIndex(
+    (s) => s.lineStart <= lineIndex && s.lineEnd > lineIndex
+  );
+  
+  if (segmentIndex === -1) {
+    return "";
   }
+  
+  // Calculate the relative line index within the segment
+  const segment = this.segments[segmentIndex];
+  const relativeLineIndex = lineIndex - segment.lineStart;
+  
+  // Return the line from the segment
+  return segment.lines[relativeLineIndex] || "";
+}
 
-  get lines(): string[] {
-    return this.segments.reduce<string[]>((a, cur) => a.concat(cur.lines), []);
-  }
 
   updateCharsAtLine(charsAtLine: number) {
     this.charsAtLine = charsAtLine;
@@ -264,6 +281,7 @@ class Text {
     // Performance check
     // const time2 = performance.now();
     // console.log(`${time2 - time1} ms `);
+    this.noLines = this.segments.reduce<number>((a, c) => a + c.lines.length, 0);
   }
 
   /**
@@ -330,8 +348,8 @@ class Text {
     // sanitize bounds
     if (absLineIndex < 0) {
       absLineIndex = 0;
-    } else if (absLineIndex > this.lines.length) {
-      absLineIndex = this.lines.length;
+    } else if (absLineIndex > this.noLines) {
+      absLineIndex = this.noLines;
     }
 
     const segmentIndex = this.segments.findLastIndex(
@@ -393,6 +411,40 @@ class Text {
       parsedTextIndex: 0,
       rawTextIndex: 0,
     };
+  }
+
+  /**
+   * Returns an array of lines between the specified start and end line indices
+   * @param startLine The starting line index (inclusive)
+   * @param endLine The ending line index (exclusive)
+   * @returns Array of lines between the specified indices
+   */
+  getRangeLines(startLine: number, endLine: number): string[] {
+    // Sanitize bounds
+    if (startLine < 0) startLine = 0;
+    if (endLine > this.noLines) endLine = this.noLines;
+    if (startLine >= endLine) return [];
+
+    const result: string[] = [];
+    
+    // Find the segments that contain the requested lines
+    for (let i = 0; i < this.segments.length; i++) {
+      const segment = this.segments[i];
+      
+      // Skip segments that don't contain any of the requested lines
+      if (segment.lineEnd <= startLine || segment.lineStart >= endLine) {
+        continue;
+      }
+      
+      // Calculate the relative line indices within this segment
+      const relativeStartLine = Math.max(0, startLine - segment.lineStart);
+      const relativeEndLine = Math.min(segment.lines.length, endLine - segment.lineStart);
+      
+      // Add the relevant lines from this segment
+      result.push(...segment.lines.slice(relativeStartLine, relativeEndLine));
+    }
+    
+    return result;
   }
 
   /**
@@ -622,7 +674,7 @@ class Text {
       end = tempStart;
     }
 
-    const rangeLines = this.lines.slice(start.yLine, end.yLine + 1);
+    const rangeLines = this.getRangeLines(start.yLine, end.yLine + 1);
     const linesSize = rangeLines.length;
     if (!linesSize) {
       return "";
@@ -652,22 +704,22 @@ class Text {
     this.calculateLines();
   }
 
-  getTagPosition(tag: string, occurrence: number = 1): IAbsCoordinates[] {
+  getTagPosition(tag: string, index: number = 0): IAbsCoordinates[] {
     let openingTagMatch: { tag: ITag; segment: Segment } | null = null;
     let closingTagMatch: { tag: ITag; segment: Segment } | null = null;
 
-    let openingTagCount = 0;
-    let closingTagCount = 0;
+    let openingTagIndex = 0;
+    let closingTagIndex = 0;
 
     // Search for the opening tag
     for (const segment of this.segments) {
       for (const openingTag of segment.openingTags) {
         if (openingTag.tag === tag) {
-          openingTagCount++;
-          if (openingTagCount === occurrence) {
+          if (openingTagIndex === index) {
             openingTagMatch = { tag: openingTag, segment };
             break;
           }
+          openingTagIndex++;
         }
       }
       if (openingTagMatch) break;
@@ -677,11 +729,11 @@ class Text {
     for (const segment of this.segments) {
       for (const closingTag of segment.closingTags) {
         if (closingTag.tag === tag) {
-          closingTagCount++;
-          if (closingTagCount === occurrence) {
+          if (closingTagIndex === index) {
             closingTagMatch = { tag: closingTag, segment };
             break;
           }
+          closingTagIndex++;
         }
       }
       if (closingTagMatch) break;

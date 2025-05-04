@@ -4,115 +4,72 @@ import { IDocument, IEntity } from "@shared/types";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import { InternalServerError, ModelNotValidError } from "@shared/types/errors";
 import User from "@models/user/user";
-
-export class TreeNode {
-  anchor: string; // The tag name (entity id)
-  children: TreeNode[] = []; // Nested children (other nodes)
-  content = ""; // Text content within the tag
-  class?: EntityEnums.Class; // will be populated in Document.assignClassesBasedOnEntities
-
-  static MAX_CONTENT_LENGTH = 400;
-
-  constructor(anchor: string, content = "") {
-    this.anchor = anchor;
-    this.content = content;
-  }
-
-  /**
-   * Returns sanitized content - shortened to MAX_CONTENT_LENGTH chars
-   * @returns
-   */
-  getShortContent(): string {
-    if (this.content.length > TreeNode.MAX_CONTENT_LENGTH) {
-      return this.content.slice(0, TreeNode.MAX_CONTENT_LENGTH) + "...";
-    }
-    return this.content;
-  }
-}
+import { findEntityById } from "@service/shorthands";
+import { AnchorsNode } from "./anchors";
 
 export default class Document implements IDocument, IDbModel {
   static table = "documents";
 
-  id = "";
+  id: string;
   title: string;
   content: string;
-  entityIds: string[] = [];
   createdAt?: Date;
   updatedAt?: Date;
+
+  // following fields are populated in preprocess method (before save)
+  anchors: AnchorsNode[];
+  entityIds: Record<EntityEnums.Class, string[]>;
 
   constructor(data: Partial<IDocument>) {
     this.id = data.id || "";
     this.title = data.title || "";
     this.content = data.content || "";
+    this.entityIds = data.entityIds || {} as Record<EntityEnums.Class, string[]>;
+    this.anchors = data.anchors?.map((anchor) => new AnchorsNode(anchor.anchor, anchor.content, anchor.children, anchor.class)) || [];
+
     this.createdAt = data.createdAt || new Date();
     if (data.updatedAt !== undefined) {
       this.updatedAt = data.updatedAt;
     }
-    this.entityIds = this.findEntities();
   }
 
   /**
-   * Parses the raw content and finds tags - entity ids
-   * @returns
+   * Preprocesses the document to find entity ids and build anchors tree
+   * @param conn Connection
+   * @returns Promise<void>
    */
-  findEntities(): string[] {
-    const regex = /<([\w-\.]+)>/g;
-    let match;
-
-    const entities = [];
-
-    while ((match = regex.exec(this.content)) !== null) {
-      entities.push(match[1]);
-    }
-
-    const uEntities = [...new Set(entities)];
-
-    return uEntities;
+  async preprocess(conn: Connection): Promise<void> {
+    const entityIds = this.gatherEntityIds();
+    this.entityIds = await this.findReferencedEntityIds(conn, entityIds);
+    this.anchors = this.buildAnchorsTree();
   }
 
   /**
-   * Finds content inside one anchor-tag specified by entity id(tag) and index position in document
-   * @param tag
-   * @returns
+   * Parses the raw content and gathers tags - entity ids
+   * @returns unique list of entity IDs
    */
-  findAnchorWithIndex(tag: string, index: number): string {
-    const regex = new RegExp(`<${tag}>(.*?)<\/${tag}>`, "g");
+  gatherEntityIds(): string[] {
+    // Match opening tags that contain entity IDs
+    // Entity IDs can contain letters, numbers, hyphens, dots, and underscores
+    const regex = /<([\w\-\._]+)>/g;
+    const entities = new Set<string>();
     let match;
-    let foundIndex = 0;
 
     while ((match = regex.exec(this.content)) !== null) {
-      if (foundIndex === index) {
-        return match[1];
-      }
-      foundIndex++;
+      entities.add(match[1]);
     }
 
-    return "";
+    return Array.from(entities);
   }
 
   /**
-   * Finds content inside anchor-tags specified by entity id(tag)
-   * @param tag
+   * Builds the anchors tree
    * @returns
    */
-  findAnchors(tag: string): string[] {
-    const regex = new RegExp(`<${tag}>(.*?)<\/${tag}>`, "g");
-
-    const result: string[] = [];
-
-    let match;
-    while ((match = regex.exec(this.content)) !== null) {
-      // match[1] contains the text inside the tag
-      result.push(match[1]);
-    }
-
-    return result;
-  }
-
-  buildAnchorsTree(): TreeNode[] {
+  buildAnchorsTree(): AnchorsNode[] {
     const tagPattern = /<\/?([\w\-.]+)>/g; // Regex to match <tag> or </tag>
-    const rootNodes: TreeNode[] = [];
-    const nodeStack: TreeNode[] = [];
+    const rootNodes: AnchorsNode[] = []; // List of root nodes
+    const nodeStack: AnchorsNode[] = []; // Stack to keep track of the current node
 
     let lastIndex = 0;
     let match: RegExpExecArray | null;
@@ -121,6 +78,7 @@ export default class Document implements IDocument, IDbModel {
       const tag = match[1];
       const isClosingTag = this.content[match.index + 1] === "/";
 
+      // Add text content between tags to the parent node
       if (match.index > lastIndex) {
         const text = this.content.slice(lastIndex, match.index);
         if (text.length > 0 && nodeStack.length > 0) {
@@ -130,15 +88,25 @@ export default class Document implements IDocument, IDbModel {
 
       if (!isClosingTag) {
         // Open tag: Create a new node for the tag
-        const newNode = new TreeNode(tag);
-        if (nodeStack.length > 0) {
-          nodeStack[nodeStack.length - 1].children.push(newNode);
-        } else {
-          // Root level node
-          rootNodes.push(newNode);
+        let anchorClass: EntityEnums.Class | undefined;
+        for (const classType of Object.keys(this.entityIds)) {
+          if (this.entityIds[classType as EntityEnums.Class].includes(tag)) {
+            anchorClass = classType as EntityEnums.Class;
+            break;
+          }
         }
-        // Push the new node onto the stack (start processing its children)
-        nodeStack.push(newNode);
+
+        if (anchorClass) {
+          const newNode = new AnchorsNode(tag, "", [], anchorClass);
+          if (nodeStack.length > 0) {
+            nodeStack[nodeStack.length - 1].children.push(newNode);
+          } else {
+            // Root level node
+            rootNodes.push(newNode);
+          }
+          // Push the new node onto the stack (start processing its children)
+          nodeStack.push(newNode);
+        }
       } else {
         // Close tag: Pop the node off the stack
         const closedNode = nodeStack.pop();
@@ -163,53 +131,71 @@ export default class Document implements IDocument, IDbModel {
     return rootNodes;
   }
 
-  flattenTree(nodes: TreeNode[]): TreeNode[] {
-    const flatList: TreeNode[] = [];
+  /**
+   * Finds referenced entity ids
+   * @param conn Connection
+   * @param ids string[]
+   * @returns Promise<Record<EntityEnums.Class, string[]>>
+   */
+  async findReferencedEntityIds(conn: Connection, ids: string[]): Promise<Record<EntityEnums.Class, string[]>> {
+    const referencedEntityIds: Record<EntityEnums.Class, string[]> = {
+      [EntityEnums.Class.Action]: [],
+      [EntityEnums.Class.Resource]: [],
+      [EntityEnums.Class.Concept]: [],
+      [EntityEnums.Class.Person]: [],
+      [EntityEnums.Class.Location]: [],
+      [EntityEnums.Class.Event]: [],
+      [EntityEnums.Class.Object]: [],
+      [EntityEnums.Class.Territory]: [],
+      [EntityEnums.Class.Statement]: [],
+      [EntityEnums.Class.Value]: [],
+      [EntityEnums.Class.Being]: [],
+      [EntityEnums.Class.Group]: [],
+    };
 
-    function recurse(node: TreeNode) {
-      flatList.push(node); // Add current node to flat list
-      // Recurse through each child and flatten them
-      node.children.forEach((child) => recurse(child));
-    }
+    for (const entityId of ids) {
+      const entity = await findEntityById(conn, entityId);
 
-    // Start recursion for each root node
-    nodes.forEach((node) => recurse(node));
-
-    return flatList;
-  }
-
-  collectAnchors(nodes: TreeNode[]): string[] {
-    const result: string[] = [];
-
-    nodes.forEach((node) => {
-      result.push(node.anchor); // Add the anchor of the current node
-
-      // Recursively collect anchors from the children
-      if (node.children.length > 0) {
-        result.push(...this.collectAnchors(node.children));
-      }
-    });
-
-    return result;
-  }
-
-  assignClassesBasedOnEntities(tree: TreeNode[], entities: IEntity[]): void {
-    const entityMap = new Map(
-      entities.map((entity) => [entity.id, entity.class])
-    ); // Create a map for faster lookup
-
-    function recurse(nodes: TreeNode[]) {
-      nodes.forEach((node) => {
-        // Check if the anchor matches any entity id
-        if (entityMap.has(node.anchor)) {
-          node.class = entityMap.get(node.anchor) || undefined; // Assign class if a match is found
+      if (entity) {
+        const entityClass = entity.class;
+        if (entityClass) {
+          if (!referencedEntityIds[entityClass]) {
+            referencedEntityIds[entityClass] = [];
+          }
+          referencedEntityIds[entityClass].push(entity.id);
         }
-        // Recursively process children
-        recurse(node.children);
-      });
+      }
     }
 
-    recurse(tree); // Start recursion
+    return referencedEntityIds;
+  }
+
+  /**
+   * Finds content inside one anchor-tag specified by entity id(tag) and index position in document
+   * @param tag
+   * @returns
+   */
+  findAnchorWithIndex(tag: string, index: number): AnchorsNode | null {
+    let foundIndex = 0;
+    // Helper function to traverse the tree and find the nth occurrence of the tag
+    const traverse = (nodes: AnchorsNode[]): AnchorsNode | null => {
+      for (const node of nodes) {
+        if (node.anchor === tag) {
+          if (foundIndex === index) {
+            return node;
+          }
+          foundIndex++;
+        }
+        const result = traverse(node.children);
+        if (result !== null) {
+          return result;
+        }
+      }
+      return null;
+    };
+
+    const result = traverse(this.anchors);
+    return result ;
   }
 
   /**
@@ -245,6 +231,7 @@ export default class Document implements IDocument, IDbModel {
     db: Connection | undefined,
     updateData: Partial<IDocument>
   ): Promise<WriteResult> {
+    console.log("updateData", { ...updateData, content: " " });
     this.updatedAt = updateData.updatedAt = new Date();
     delete updateData.createdAt;
     return rethink
@@ -330,7 +317,13 @@ export default class Document implements IDocument, IDbModel {
       const tagRegex = new RegExp(`<\\/?${entityId}(>|$)`, "g");
       const updatedContent = this.content.replace(tagRegex, "");
       this.content = updatedContent;
-      this.entityIds = this.entityIds.filter((id) => id !== entityId);
+
+      // Search and remove the id from all class arrays
+      Object.keys(this.entityIds).forEach((classKey) => {
+        this.entityIds[classKey as EntityEnums.Class] = this.entityIds[classKey as EntityEnums.Class].filter(
+          (id) => id !== entityId
+        );
+      });
     }
   }
 
@@ -418,11 +411,20 @@ export default class Document implements IDocument, IDbModel {
     entityId: string
   ): Promise<IDocument[]> {
     const entries = await rethink
-      .table(Document.table)
-      .filter(function (row: RDatum) {
-        return row("entityIds").contains(entityId);
-      })
-      .run(db);
+    .table(Document.table)
+    .filter(function (row: RDatum) {
+      const entityIds = row("entityIds");
+  
+      return rethink.branch(
+        entityIds.typeOf().eq("ARRAY"),
+        // Case: entityIds is string[] (old format)
+        entityIds.contains(entityId),
+  
+        // Else assume object: Record<string, string[]> (new format)
+        entityIds.values().concatMap(arr => arr).contains(entityId)
+      );
+    })
+    .run(db);
 
     return entries && entries.length ? (entries as IDocument[]) : [];
   }

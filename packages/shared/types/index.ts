@@ -55,8 +55,6 @@ import { IResponseStoredTerritory, IResponseUser } from "./response-user";
 import {
   IDocument,
   IDocumentMeta,
-  IResponseDocument,
-  IResponseDocumentDetail,
 } from "./document";
 import { IRequestStats } from "./request-stats";
 import { IResponseEntity } from "./response-entity";
@@ -115,8 +113,6 @@ export type {
   IResponseAudit,
   IResponseBookmarkFolder,
   IResponseDetail,
-  IResponseDocument,
-  IResponseDocumentDetail,
   IResponseEntity,
   IResponseGeneric,
   IResponsePermission,

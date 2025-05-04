@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import { EntityEnums } from "@shared/enums";
-import { IResponseDocument } from "@shared/types";
+import { IDocument } from "@shared/types";
 import theme from "Theme/theme";
 import {
   Button,
@@ -11,7 +11,6 @@ import {
   ModalFooter,
   ModalHeader,
 } from "components";
-import { useWindowSize } from "hooks/useWindowSize";
 import {
   FaCheckSquare,
   FaCircle,
@@ -31,7 +30,7 @@ import {
 import api from "api";
 
 interface DocumentModalExportProps {
-  document: IResponseDocument | undefined;
+  document: IDocument | undefined;
   onClose: () => void;
 }
 const DocumentModalExport: React.FC<DocumentModalExportProps> = ({
@@ -70,7 +69,7 @@ const DocumentModalExport: React.FC<DocumentModalExportProps> = ({
 
   const sumAnchorsToExport = useMemo<number>(() => {
     return exportedClasses.reduce((acc, entityClass) => {
-      const anchors = document?.referencedEntityIds[entityClass];
+      const anchors = document?.entityIds[entityClass];
       if (anchors) {
         return acc + anchors.length;
       } else {
@@ -112,7 +111,7 @@ const DocumentModalExport: React.FC<DocumentModalExportProps> = ({
 
                   const selected = exportedClasses.includes(entityClassId);
                   const classReferences =
-                    document?.referencedEntityIds[entityClassId];
+                    document?.entityIds[entityClassId];
 
                   return (
                     <React.Fragment key={entityClassId}>

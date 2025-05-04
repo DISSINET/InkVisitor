@@ -1,6 +1,6 @@
 import { sanitizeText } from "@common/functions";
 import { IDbModel, fillArray, fillFlatObject } from "@models/common";
-import Document, { TreeNode } from "@models/document/document";
+import Document from "@models/document/document";
 import Prop from "@models/prop/prop";
 import User from "@models/user/user";
 import { findEntityById } from "@service/shorthands";
@@ -35,6 +35,7 @@ import { IWarningPositionSection } from "@shared/types/warning";
 import { Connection, RDatum, WriteResult, r as rethink } from "rethinkdb-ts";
 import { IRequest } from "../../custom_typings/request";
 import Reference from "./reference";
+import { AnchorsNode } from "@models/document/anchors";
 
 export default class Entity implements IEntity, IDbModel {
   static table = "entities";
@@ -573,16 +574,7 @@ export default class Entity implements IEntity, IDbModel {
         await Document.findByEntityId(conn, this.id)
       ).map(async (docData) => {
         // construct document and tree node filled with entities data
-        const doc = new Document({
-          content: docData.content,
-        });
-        const anchors = doc.buildAnchorsTree();
-        const anchoredEntities = await Entity.findEntitiesByIds(
-          conn,
-          doc.collectAnchors(anchors)
-        );
-        doc.assignClassesBasedOnEntities(anchors, anchoredEntities);
-
+        const doc = new Document(docData);
         const resources = await rethink
           .table(Entity.table)
           .filter({
@@ -596,17 +588,13 @@ export default class Entity implements IEntity, IDbModel {
         const resource = resources.length > 0 ? resources[0] : null;
 
         // traverse the tree, search for anchor that === this.id
-        const traverse = (nodes: TreeNode[], parentT?: string) => {
+        const traverse = (nodes: AnchorsNode[], parentT?: string) => {
           for (const node of nodes) {
             if (node.anchor === this.id) {
+              const { content, ...documentMeta } = docData;
+
               out.push({
-                document: {
-                  id: docData.id,
-                  title: docData.title,
-                  entityIds: docData.entityIds,
-                  createdAt: docData.createdAt,
-                  updatedAt: docData.updatedAt,
-                },
+                document: documentMeta,
                 anchorText: node.getShortContent(),
                 resourceId: resource?.id || "",
                 parentTerritoryId: parentT || "",
@@ -622,7 +610,7 @@ export default class Entity implements IEntity, IDbModel {
           }
         };
 
-        traverse(anchors);
+        traverse(doc.anchors);
       })
     );
 

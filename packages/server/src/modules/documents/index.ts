@@ -1,10 +1,8 @@
 import { mergeDeep } from "@common/functions";
 import Document from "@models/document/document";
-import ResponseDocument from "@models/document/response";
 import { EntityEnums } from "@shared/enums";
 import {
-  IResponseDocument,
-  IResponseDocumentDetail,
+  IDocument,
   IResponseGeneric,
 } from "@shared/types";
 import {
@@ -43,17 +41,18 @@ export default Router()
    *             schema:
    *               type: array
    *               items:
-   *                 $ref: "#/components/schemas/IResponseDocument"
+   *                 $ref: "#/components/schemas/IDocument"
    */
   .get(
     "/",
-    asyncRouteHandler<IResponseDocument[]>(async (request: IRequest) => {
+    asyncRouteHandler<IDocument[]>(async (request: IRequest) => {
       const docs = await Document.getAll(request.db.connection);
 
-      const docResponses = [];
+      const docResponses: IDocument[] = [];
       for (const d of docs) {
-        const document = new ResponseDocument(d);
-        await document.populateWithEntities(request.db.connection);
+        const document = new Document(d);
+        await document.preprocess(request.db.connection);
+
         docResponses.push(document);
       }
 
@@ -70,16 +69,11 @@ export default Router()
       throw new BadParams("document id has to be set");
     }
 
-    console.log("EXPORTING");
+    const document = await Document.getDocumentById(request.db.connection, id);
 
-    const existing = await Document.getDocumentById(request.db.connection, id);
-
-    if (!existing) {
+    if (!document) {
       throw DocumentDoesNotExist.forId(id);
     }
-
-    const document = new ResponseDocument(existing);
-    await document.populateWithEntities(request.db.connection);
 
     // Search document for anchors <entityId>text</entityId>
     // Anchors with entityId that are not in exportedEntities should be removed
@@ -90,7 +84,7 @@ export default Router()
       const entityId = match.slice(1, -1).replace("/", "");
       let validEntityClass = false;
       exportedEntities.forEach((entityClass) => {
-        document.referencedEntityIds[entityClass].forEach((id) => {
+        document.entityIds[entityClass].forEach((id) => {
           if (id === entityId) {
             validEntityClass = true;
           }
@@ -138,28 +132,28 @@ export default Router()
    *         content:
    *           application/json:
    *             schema:
-   *               $ref: "#/components/schemas/IResponseDocumentDetail"
+   *               $ref: "#/components/schemas/IDocument"
    */
   .get(
     "/:documentId?",
-    asyncRouteHandler<IResponseDocumentDetail>(async (request: IRequest) => {
+    asyncRouteHandler<IDocument>(async (request: IRequest) => {
       const id = request.params.documentId;
 
       if (!id) {
         throw new BadParams("document id has to be set");
       }
 
-      const existing = await Document.getDocumentById(
+      const document = await Document.getDocumentById(
         request.db.connection,
         id
       );
 
-      if (!existing) {
+      if (!document) {
         throw DocumentDoesNotExist.forId(id);
       }
 
-      const document = new ResponseDocument(existing);
-      await document.populateWithEntities(request.db.connection);
+      await document.preprocess(request.db.connection);
+
       return document;
     })
   )
@@ -200,6 +194,7 @@ export default Router()
 
       await request.db.lock();
 
+      await model.preprocess(request.db.connection);
       const saved = await model.save(request.db.connection);
       if (!saved) {
         throw new InternalServerError("cannot create document");
@@ -270,6 +265,8 @@ export default Router()
         ...mergeDeep(existingDocument, documentData),
         id: documentId,
       });
+
+      await model.preprocess(request.db.connection);
 
       // checking the validity of the final model (already has updated data)
       if (!model.isValid()) {
@@ -419,7 +416,8 @@ export default Router()
         }
 
         existing.removeAnchor(entityId, anchorIndex);
-        existing.entityIds = existing.findEntities();
+        await existing.preprocess(request.db.connection);
+
         const result = await existing.update(request.db.connection, {
           content: existing.content,
           entityIds: existing.entityIds,
@@ -438,10 +436,11 @@ export default Router()
         request: IRequest<
           {
             documentId: string;
-          },any,
+          },
+          any,
           {
             entityId: string;
-            index: number;
+            index: string;
           }
         >
       ) => {
@@ -462,10 +461,10 @@ export default Router()
           throw DocumentDoesNotExist.forId(id);
         }
 
-        const anchor = existing.findAnchorWithIndex(entityId, index);
+        const anchor = existing.findAnchorWithIndex(entityId, parseInt(index));
 
         return {
-          result: anchor,
+          result: anchor?.content || "",
         };
       }
     )

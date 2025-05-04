@@ -1,4 +1,4 @@
-import { IResponseDocumentDetail } from "@shared/types";
+import { IDocument } from "@shared/types";
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
 import React, { useEffect, useState } from "react";
@@ -21,7 +21,7 @@ export const AbbreviatedTextWithTooltip: React.FC<
 
   const [isTooltipOpen, setIsTooltipOpen] = React.useState(false);
   const [allowFetch, setAllowFetch] = useState(false);
-  const [document, setDocument] = useState<IResponseDocumentDetail | null>(
+  const [document, setDocument] = useState<IDocument | null>(
     null
   );
 
