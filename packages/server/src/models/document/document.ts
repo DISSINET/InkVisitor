@@ -177,7 +177,6 @@ export default class Document implements IDocument, IDbModel {
    */
   findAnchorWithIndex(tag: string, index: number): AnchorsNode | null {
     let foundIndex = 0;
-    
     // Helper function to traverse the tree and find the nth occurrence of the tag
     const traverse = (nodes: AnchorsNode[]): AnchorsNode | null => {
       for (const node of nodes) {

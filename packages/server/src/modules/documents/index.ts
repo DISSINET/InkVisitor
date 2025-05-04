@@ -440,7 +440,7 @@ export default Router()
           any,
           {
             entityId: string;
-            index: number;
+            index: string;
           }
         >
       ) => {
@@ -461,7 +461,7 @@ export default Router()
           throw DocumentDoesNotExist.forId(id);
         }
 
-        const anchor = existing.findAnchorWithIndex(entityId, index);
+        const anchor = existing.findAnchorWithIndex(entityId, parseInt(index));
 
         return {
           result: anchor?.content || "",
