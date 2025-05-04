@@ -430,7 +430,7 @@ export default Router()
     )
   )
   .get(
-    "/:documentId/anchors?entityId/:anchorIndex",
+    "/:documentId/anchors",
     asyncRouteHandler<{ result: string }>(
       async (
         request: IRequest<
