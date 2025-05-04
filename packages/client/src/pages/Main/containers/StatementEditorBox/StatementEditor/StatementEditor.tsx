@@ -651,7 +651,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     dispatch(setDetailBoxState(DetailBoxState.Normal));
     setAnnotatorOpened(true);
     statementTerritoryId && setTerritoryId(statementTerritoryId);
-    scrollToAnchor(statement.id, anchorIndex);
+    scrollToAnchor(statement.id, anchorIndex ? anchorIndex : undefined);
   };
 
   return (
@@ -803,6 +803,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   <StyledEditorAnchorSectionAnchor key={dai}>
                     <StyledAnchorText>
                       {documentAnchor.anchorText}
+                      {documentAnchor.anchorIndex}
                     </StyledAnchorText>
                     <StyledAnchorMeta>
                       <Button
@@ -812,8 +813,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                         tooltipLabel="locate statement anchor"
                         icon={<FaAnchor />}
                         onClick={() => {
-                          scrollToStatementAnchor();
-                          // documentAnchor.anchorIndex
+                          scrollToStatementAnchor(documentAnchor.anchorIndex);
                         }}
                       />
                       <DocumentTitle title={documentAnchor.document.title} />
