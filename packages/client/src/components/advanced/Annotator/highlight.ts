@@ -1,12 +1,11 @@
-import { HighlightMode, HighlightSchema } from "@inkvisitor/annotator";
+import { HighlightMode, HighlightSchema } from "@inkvisitor/annotator/src/lib";
 import { EntityEnums } from "@shared/enums";
-import { IResponseDocumentDetail } from "@shared/types";
 import { DefaultTheme } from "styled-components";
 import { EntityColors } from "types";
-
+import { IDocument } from "@shared/types";
 interface annotatorHighlightData {
   thisTerritoryEntityId: string | undefined;
-  dataDocument: IResponseDocumentDetail;
+  dataDocument: IDocument;
 }
 
 export const annotatorHighlight = (
@@ -16,7 +15,7 @@ export const annotatorHighlight = (
   theme: DefaultTheme | undefined
 ): HighlightSchema | undefined => {
   const dReferenceEntityIds: Record<EntityEnums.Class, string[]> =
-    data.dataDocument?.referencedEntityIds ?? {};
+    data.dataDocument?.entityIds ?? {};
 
   if (entityId === data.thisTerritoryEntityId) {
     return {

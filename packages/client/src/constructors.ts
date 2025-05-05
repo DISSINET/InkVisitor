@@ -271,7 +271,11 @@ export const applyTemplate = async (
   userRole: UserEnums.Role
 ): Promise<IEntity> => {
   if (templateEntity.isTemplate && templateEntity.class === entity.class) {
-    const newEntity = { ...templateEntity };
+    // get labels from entity and the rest from template
+    const newEntity = {
+      ...templateEntity,
+      labels: [...entity.labels, ...templateEntity.labels.slice(1)],
+    };
 
     if (templateEntity.class === EntityEnums.Class.Statement) {
       // entity is a statement
@@ -308,6 +312,45 @@ export const applyTemplate = async (
   } else {
     return entity;
   }
+};
+
+// Instantiate relations to new entity
+export const InstRelations = (
+  templateRelations: Relation.IUsedRelations,
+  templateId: string,
+  entityId: string
+) => {
+  const newRelations: Relation.IRelation[] = [];
+  // Iterate through each relation type in IUsedRelations
+  Object.entries(templateRelations).forEach(
+    ([relationType, relationDetail]) => {
+      if (relationDetail && relationDetail.connections) {
+        // Process each connection in the relation detail
+        relationDetail.connections.forEach(
+          (connection: Relation.IConnection<Relation.IRelation>) => {
+            // Create a new relation object for each connection
+            const newRelation: Relation.IRelation = {
+              id: uuidv4(),
+              type: relationType as RelationEnums.Type,
+              entityIds:
+                relationType === RelationEnums.Type.Synonym
+                  ? [...connection.entityIds, entityId] // For SYN type, add the entity ID to the cloud
+                  : connection.entityIds.map(
+                      (
+                        id: string // For other types, replace template ID
+                      ) => (id === templateId ? entityId : id)
+                    ),
+              order: connection.order,
+            };
+
+            newRelations.push(newRelation);
+          }
+        );
+      }
+    }
+  );
+
+  return newRelations;
 };
 
 // duplicate statement

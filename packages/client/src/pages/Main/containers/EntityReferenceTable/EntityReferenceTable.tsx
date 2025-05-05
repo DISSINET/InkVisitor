@@ -161,7 +161,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
   //       <>
   //         {resourceEntity ? (
   //           resourceEntity.data.documentId ? (
-  //             document?.referencedEntityIds.includes(entityId) ? (
+  //             document?.entityIds.includes(entityId) ? (
   //               <Button
   //                 tooltipLabel="with entity"
   //                 icon={<GrDocumentVerified />}

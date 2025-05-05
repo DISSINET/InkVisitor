@@ -1,6 +1,6 @@
 import React from "react";
 
-import { IEntity, IResponseDocument } from "@shared/types";
+import { IDocument, IEntity } from "@shared/types";
 import { Button } from "components/basic/Button/Button";
 import { BsSegmentedNav } from "react-icons/bs";
 import { FaClipboard, FaPlus } from "react-icons/fa";
@@ -21,7 +21,7 @@ import { Loader } from "components";
 
 interface TextAnnotatorMenuProps {
   text: string;
-  documentData: IResponseDocument;
+  documentData: IDocument;
   anchors: string[];
   entities: Record<string, IEntity | false>;
   onAnchorAdd: (entityId: string) => void;
