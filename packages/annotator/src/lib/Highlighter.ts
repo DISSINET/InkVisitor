@@ -1,4 +1,5 @@
 import { DrawingOptions } from "./Annotator";
+import Text from "./Text";
 import Viewport from "./Viewport";
 import { EditMode, HighlightMode } from "./constants";
 
@@ -140,7 +141,7 @@ export default class Highlighter {
   draw(
     ctx: CanvasRenderingContext2D,
     viewport: Viewport,
-    textLines: string[],
+    text: Text,
     drawingOptions: DrawingOptions,
     editMode: EditMode
   ) {
@@ -156,11 +157,11 @@ export default class Highlighter {
 
       for (
         let i = 0;
-        i < Math.min(viewport.lineEnd, textLines.length) - viewport.lineStart;
+        i < Math.min(viewport.lineEnd, text.noLines) - viewport.lineStart;
         i++
       ) {
         const currY = viewport.lineStart + i;
-        const lastCharX = textLines[currY].length;
+        const lastCharX = text.getLine(currY).length;
 
         if (this.hlMode === "focus") {
           if (currY < hStart.yLine || currY > hEnd.yLine) {

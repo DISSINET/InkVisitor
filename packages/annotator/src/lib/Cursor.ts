@@ -5,6 +5,7 @@ import Highlighter, {
   IAbsCoordinates,
   IRelativeCoordinates,
 } from "./Highlighter";
+import Text from "./Text";
 import Viewport from "./Viewport";
 import { EditMode, HighlightMode } from "./constants";
 
@@ -207,7 +208,7 @@ export default class Cursor
   draw(
     ctx: CanvasRenderingContext2D,
     viewport: Viewport,
-    textLines: string[],
+    text: Text,
     drawingOptions: DrawingOptions,
     editMode: EditMode
   ) {
@@ -229,11 +230,11 @@ export default class Cursor
       // selection active, iterate over displayed lines
       for (
         let i = 0;
-        i < Math.min(viewport.lineEnd, textLines.length) - viewport.lineStart;
+        i < Math.min(viewport.lineEnd, text.noLines) - viewport.lineStart;
         i++
       ) {
         const currY = viewport.lineStart + i;
-        const lastCharX = textLines[currY].length;
+        const lastCharX = text.getLine(currY).length;
 
         if (hStart.yLine <= currY && hEnd.yLine >= currY) {
           if (hStart.yLine === currY) {
