@@ -53,7 +53,7 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
     },
   });
 
-  const { setTerritoryId, setAnnotatorOpened, setStatementId } =
+  const { setTerritoryId, setAnnotatorOpened, setStatementId, territoryId } =
     useSearchParams();
   const dispatch = useAppDispatch();
 
@@ -71,6 +71,16 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
                 <Button
                   tooltipLabel="locate in annotator"
                   onClick={() => {
+                    let timeout = 0;
+                    if (
+                      territoryId !== parentTerritoryId ||
+                      detailBoxState === DetailBoxState.FullHeight
+                    ) {
+                      timeout = 1000;
+                    } else {
+                      timeout = 100;
+                    }
+
                     setTerritoryId(parentTerritoryId);
                     if (entityClass === EntityEnums.Class.Statement) {
                       setStatementId(entityId);
@@ -87,15 +97,9 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
                     }
                     setAnnotatorOpened(true);
 
-                    // TODO: short timeout -> statement list is open and the active territory is the anchor parent territory
-                    // TODO: set longer timeout if statement list is closed or different territory is active
-
-                    // scroll to for non-T/non-S entities because T and S is automatically located with search params
-
                     setTimeout(() => {
                       scrollToAnchor(entityId, row.original.anchorIndex);
-                      // TODO: it's loading longer than 200ms, so we need to find a way to react to annotator load
-                    }, 200);
+                    }, timeout);
                   }}
                   icon={<FaAnchor size={16} />}
                   inverted
@@ -222,7 +226,7 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
         },
       },
     ],
-    [entities, detailBoxState, entityClass, entityId]
+    [entities, detailBoxState, entityClass, entityId, territoryId]
   );
 
   return (
