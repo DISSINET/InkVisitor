@@ -48,14 +48,12 @@ export const StyledAnnotatorMenu = styled.div<StyledAnnotatorMenuProps>`
   width: 400px;
   left: ${({ $left }) => $left + "px"};
   top: ${({ $top }) => $top + "px"};
-  background: ${({ theme }) => theme.color.gray["300"]};
-  border: ${({ theme }) =>
-    theme.borderWidth["default"] + " solid " + theme.color.gray["300"]};
+  background: ${({ theme }) => theme.color.blue["100"]};
   padding: ${({ theme }) => theme.space[2]};
   z-index: 100;
   border-radius: ${({ theme }) => theme.borderRadius["default"]};
   box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.4);
-  opacity: 0.9;
+  opacity: 0.95;
   &:hover {
     opacity: 1;
   }
@@ -64,10 +62,8 @@ export const StyledAnnotatorMenu = styled.div<StyledAnnotatorMenuProps>`
 
 export const StyledAnnotatorItem = styled.div`
   padding: ${({ theme }) => theme.space[2]};
-  background: ${({ theme }) => theme.color.gray["300"]};
-  border: 2px solid ${({ theme }) => theme.color.gray["300"]};
   &:hover {
-    background: ${({ theme }) => theme.color.gray["200"]};
+    background: ${({ theme }) => theme.color.blue["150"]};
   }
 `;
 export const StyledAnnotatorItemContent = styled.div`

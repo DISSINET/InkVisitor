@@ -6,7 +6,7 @@ import { BsSegmentedNav } from "react-icons/bs";
 import { FaClipboard, FaPlus } from "react-icons/fa";
 import { TbAnchor } from "react-icons/tb";
 import theme from "Theme/theme";
-import { classesAnnotator } from "types";
+import { ButtonSize, classesAnnotator } from "types";
 import { EntitySuggester } from "../EntitySuggester/EntitySuggester";
 import { EntityTag } from "../EntityTag/EntityTag";
 import {
@@ -51,7 +51,8 @@ export const TextAnnotatorMenu = ({
         <StyledAnnotatorItemTitle>Actions</StyledAnnotatorItemTitle>
         <StyledAnnotatorItemContent>
           <Button
-            icon={<BsSegmentedNav size={22} />}
+            icon={<BsSegmentedNav size={16} />}
+            size={ButtonSize.Small}
             color="primary"
             onClick={() => {
               console.log("Segment selection into Statements");
@@ -61,7 +62,8 @@ export const TextAnnotatorMenu = ({
             disabled
           />
           <Button
-            icon={<FaClipboard size={16} />}
+            icon={<FaClipboard size={10} />}
+            size={ButtonSize.Small}
             color="primary"
             onClick={() => {
               navigator.clipboard.writeText(text);
