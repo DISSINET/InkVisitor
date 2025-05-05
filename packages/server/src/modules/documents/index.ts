@@ -1,10 +1,7 @@
 import { mergeDeep } from "@common/functions";
 import Document from "@models/document/document";
 import { EntityEnums } from "@shared/enums";
-import {
-  IDocument,
-  IResponseGeneric,
-} from "@shared/types";
+import { IDocument, IResponseGeneric } from "@shared/types";
 import {
   BadParams,
   DocumentDoesNotExist,
@@ -431,7 +428,7 @@ export default Router()
   )
   .get(
     "/:documentId/anchors",
-    asyncRouteHandler<{ result: string }>(
+    asyncRouteHandler<IResponseGeneric<string>>(
       async (
         request: IRequest<
           {
@@ -464,7 +461,8 @@ export default Router()
         const anchor = existing.findAnchorWithIndex(entityId, parseInt(index));
 
         return {
-          result: anchor?.content || "",
+          result: true,
+          data: anchor?.content || "",
         };
       }
     )
