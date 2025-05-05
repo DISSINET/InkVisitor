@@ -91,15 +91,11 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
                     // TODO: set longer timeout if statement list is closed or different territory is active
 
                     // scroll to for non-T/non-S entities because T and S is automatically located with search params
-                    if (
-                      entityClass !== EntityEnums.Class.Territory &&
-                      entityClass !== EntityEnums.Class.Statement
-                    ) {
-                      setTimeout(() => {
-                        scrollToAnchor(entityId);
-                        // TODO: it's loading longer than 200ms, so we need to find a way to react to annotator load
-                      }, 200);
-                    }
+
+                    setTimeout(() => {
+                      scrollToAnchor(entityId, row.original.anchorIndex);
+                      // TODO: it's loading longer than 200ms, so we need to find a way to react to annotator load
+                    }, 200);
                   }}
                   icon={<FaAnchor size={16} />}
                   inverted

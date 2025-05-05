@@ -645,13 +645,28 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
   const { scrollToAnchor } = useAnnotator();
 
-  const scrollToStatementAnchor = (anchorIndex?: number) => {
-    // TODO: short timeout -> statement list is open and the active territory is the anchor parent territory
-    // TODO: set longer timeout if statement list is closed or different territory is active
+  const statementListOpened = useAppSelector(
+    (state) => state.layout.statementListOpened
+  );
+
+  const scrollToStatementAnchor = (
+    parentTerritoryId: string,
+    anchorIndex?: number
+  ) => {
+    let timeout = 0;
+    // short timeout -> statement list is open and the active territory is the anchor parent territory
+    if (statementListOpened && parentTerritoryId === territoryId) {
+      timeout = 100;
+    } else {
+      // long timeout -> statement list is closed or different territory is active => needs more time to initialize the annotator
+      timeout = 2000;
+    }
     dispatch(setDetailBoxState(DetailBoxState.Normal));
     setAnnotatorOpened(true);
-    statementTerritoryId && setTerritoryId(statementTerritoryId);
-    scrollToAnchor(statement.id, anchorIndex ? anchorIndex : undefined);
+    setTerritoryId(parentTerritoryId);
+    setTimeout(() => {
+      scrollToAnchor(statement.id, anchorIndex ? anchorIndex : undefined);
+    }, timeout);
   };
 
   return (
@@ -661,23 +676,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           <StyledEditorPreSection>
             <StyledEditorStatementInfo>
               <StyledHeaderTagWrap>
-                <EntityTag
-                  entity={statement}
-                  fullWidth
-                  // TODO: remove this button?
-                  button={
-                    statement.usedInDocuments.length > 0 && (
-                      <Button
-                        inverted
-                        tooltipLabel="locate statement anchor"
-                        icon={<FaAnchor />}
-                        onClick={() => {
-                          scrollToStatementAnchor();
-                        }}
-                      />
-                    )
-                  }
-                />
+                <EntityTag entity={statement} fullWidth />
                 <div style={{ marginLeft: "0.5rem", marginRight: "0.5rem" }}>
                   <Button
                     inverted
@@ -803,7 +802,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   <StyledEditorAnchorSectionAnchor key={dai}>
                     <StyledAnchorText>
                       {documentAnchor.anchorText}
-                      {documentAnchor.anchorIndex}
                     </StyledAnchorText>
                     <StyledAnchorMeta>
                       <Button
@@ -813,7 +811,10 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                         tooltipLabel="locate statement anchor"
                         icon={<FaAnchor />}
                         onClick={() => {
-                          scrollToStatementAnchor(documentAnchor.anchorIndex);
+                          scrollToStatementAnchor(
+                            documentAnchor.parentTerritoryId,
+                            documentAnchor.anchorIndex
+                          );
                         }}
                       />
                       <DocumentTitle title={documentAnchor.document.title} />
