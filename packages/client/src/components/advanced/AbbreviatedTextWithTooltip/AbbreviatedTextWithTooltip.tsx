@@ -23,7 +23,6 @@ export const AbbreviatedTextWithTooltip: React.FC<
 
   const [isTooltipOpen, setIsTooltipOpen] = React.useState(false);
   const [allowFetch, setAllowFetch] = useState(false);
-  const [anchorText, setAnchorText] = useState<string | null>(null);
 
   useEffect(() => {
     if (isTooltipOpen) {
@@ -35,7 +34,11 @@ export const AbbreviatedTextWithTooltip: React.FC<
     }
   }, [isTooltipOpen]);
 
-  const { data, isFetching, isSuccess } = useQuery({
+  const {
+    data: anchorText,
+    isFetching,
+    isSuccess,
+  } = useQuery({
     queryKey: ["document", documentId, entityId, anchorIndex, allowFetch],
     queryFn: async () => {
       const res = await api.documentGetAnchorText(
@@ -43,7 +46,6 @@ export const AbbreviatedTextWithTooltip: React.FC<
         entityId,
         anchorIndex
       );
-      setAnchorText(res.data.data || null);
       return res.data.data;
     },
     enabled: api.isLoggedIn() && allowFetch,
@@ -63,7 +65,7 @@ export const AbbreviatedTextWithTooltip: React.FC<
       <Tooltip
         content={
           <div>
-            {anchorText ? getShortLabelByLetterCount(anchorText, 4000) : text}
+            {anchorText ? getShortLabelByLetterCount(anchorText, 4120) : text}
           </div>
         }
         visible={isTooltipOpen}
