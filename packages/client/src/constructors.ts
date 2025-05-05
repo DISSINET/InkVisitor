@@ -272,7 +272,10 @@ export const applyTemplate = async (
 ): Promise<IEntity> => {
   if (templateEntity.isTemplate && templateEntity.class === entity.class) {
     // get labels from entity and the rest from template
-    const newEntity = { ...templateEntity, labels: entity.labels };
+    const newEntity = {
+      ...templateEntity,
+      labels: [...entity.labels, ...templateEntity.labels.slice(1)],
+    };
 
     if (templateEntity.class === EntityEnums.Class.Statement) {
       // entity is a statement

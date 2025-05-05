@@ -65,7 +65,6 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModal> = ({
   const [newRelations, setNewRelations] = useState<Relation.IRelation[]>([]);
 
   // instantiate relations from template
-  // TODO: move to constructor
   useEffect(() => {
     if (templateDetail) {
       const { relations } = templateDetail;
@@ -90,7 +89,6 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModal> = ({
       );
 
       if (entityAfterTemplateApplied) {
-        // TODO: put into mutation
         api
           .relationsCreate(newRelations)
           .then(() => {
