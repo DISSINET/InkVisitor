@@ -600,7 +600,7 @@ export class Annotator {
       this.cursor.draw(
         this.ctx,
         this.viewport,
-        this.text.lines,
+        this.text,
         {
           lineHeight: this.lineHeight,
           charWidth: this.charWidth,
@@ -627,8 +627,6 @@ export class Annotator {
           end.xLine
         ) as SegmentPosition;
         const annotated = this.getAnnotations(startSegment, endSegment);
-        console.log(annotated, startSegment, endSegment);
-        (window as any).test = this;
         this.onSelectTextCb({
           text: this.text.getRangeText(start, end),
           anchors: annotated,
@@ -659,7 +657,7 @@ export class Annotator {
         if (hlSchema) {
           // iterate over all tag occurrences
           let occurence: IAbsCoordinates[];
-          let i = 1;
+          let i = 0;
           do {
             occurence = this.text.getTagPosition(tag, i);
             if (occurence.length > 1) {
@@ -700,7 +698,7 @@ export class Annotator {
         highlighter.draw(
           this.ctx,
           this.viewport,
-          this.text.lines,
+          this.text,
           {
             lineHeight: this.lineHeight,
             charWidth: this.charWidth,
@@ -782,8 +780,8 @@ export class Annotator {
     }
   }
 
-  scrollToAnchor(tag: string, occurence: number = 1) {
-    const pos = this.text.getTagPosition(tag, occurence);
+  scrollToAnchor(tag: string, index: number = 0) {
+    const pos = this.text.getTagPosition(tag, index);
 
     if (pos.length !== 2) {
       return;
@@ -862,11 +860,6 @@ export class Annotator {
         this.text.segments[occurence.segmentIndex].lineStart +
         occurence.lineIndex,
     };
-
-    // @ts-ignore
-    window.cursor = this.cursor;
-
-    console.log(occurence, this.cursor.selectStart, this.cursor.selectEnd);
 
     this.scrollToLine(this.cursor.selectStart.yLine);
     this.draw();

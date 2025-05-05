@@ -270,6 +270,12 @@
     "roles": ["admin"]
   },
   {
+    "controller": "documents",
+    "route": ":documentId/anchors",
+    "method": "GET",
+    "roles": ["*"]
+  },
+  {
     "controller": "settings",
     "route": ":key",
     "method": "GET",

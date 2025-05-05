@@ -7,12 +7,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { Annotator, EditMode } from "@inkvisitor/annotator/src/lib";
 import { EntityEnums } from "@shared/enums";
-import {
-  IDocument,
-  IEntity,
-  IResponseDocumentDetail,
-  IResponseTerritory,
-} from "@shared/types";
+import { IDocument, IEntity, IResponseTerritory } from "@shared/types";
 import { Button } from "components/basic/Button/Button";
 import { ButtonGroup } from "components/basic/ButtonGroup/ButtonGroup";
 import { BsFileTextFill } from "react-icons/bs";
@@ -203,21 +198,40 @@ export const TextAnnotator = ({
     }
   };
 
-  const handleTextSelection = async (text: string, anchors: string[]) => {
+  const [pendingSelection, setPendingSelection] = useState<{
+    text: string;
+    anchors: string[];
+  } | null>(null);
+
+  const handleTextSelection = (text: string, anchors: string[]) => {
     if (annotatorMode === EditMode.HIGHLIGHT) {
+      setPendingSelection({ text, anchors });
+    }
+  };
+
+  useEffect(() => {
+    // isSelectingText didn't work as expected without the useEffect and pendingSelection so this implementation was necessary
+    if (pendingSelection && !isSelectingText) {
+      const { text, anchors } = pendingSelection;
       setSelectedText(text);
       setSelectedAnchors(anchors);
-      setIsLoadingEntities(true);
 
-      try {
-        // Load all entities in parallel
-        await Promise.all([
-          ...anchors.map((anchor) => obtainEntity(anchor)),
-          thisTerritoryEntityId ? obtainEntity(thisTerritoryEntityId) : null,
-        ]);
-      } finally {
-        setIsLoadingEntities(false);
-      }
+      setIsLoadingEntities(true);
+      handleFetchEntities(anchors);
+
+      setPendingSelection(null);
+    }
+  }, [pendingSelection, isSelectingText]);
+
+  const handleFetchEntities = async (anchors: string[]) => {
+    try {
+      // Load all entities in parallel
+      await Promise.all([
+        ...anchors.map((anchor) => obtainEntity(anchor)),
+        thisTerritoryEntityId ? obtainEntity(thisTerritoryEntityId) : null,
+      ]);
+    } finally {
+      setIsLoadingEntities(false);
     }
   };
 
@@ -515,23 +529,25 @@ export const TextAnnotator = ({
               // $translateY={"100%"}
               $translateY={translateMenu}
             >
-              <TextAnnotatorMenu
-                anchors={selectedAnchors}
-                documentData={dataDocument as IResponseDocumentDetail}
-                text={selectedText}
-                entities={storedEntities}
-                onAnchorAdd={handleAddAnchor}
-                handleCreateTerritory={onCreateTerritory}
-                handleCreateStatement={onCreateStatement}
-                handleRemoveAnchor={onRemoveAnchor}
-                thisTerritoryEntityId={thisTerritoryEntityId}
-                canCreateActiveTAnchor={
-                  !dataDocument?.referencedEntityIds.T.includes(
-                    thisTerritoryEntityId ?? ""
-                  )
-                }
-                isLoadingEntities={isLoadingEntities}
-              />
+              {dataDocument && (
+                <TextAnnotatorMenu
+                  anchors={selectedAnchors}
+                  documentData={dataDocument}
+                  text={selectedText}
+                  entities={storedEntities}
+                  onAnchorAdd={handleAddAnchor}
+                  handleCreateTerritory={onCreateTerritory}
+                  handleCreateStatement={onCreateStatement}
+                  handleRemoveAnchor={onRemoveAnchor}
+                  thisTerritoryEntityId={thisTerritoryEntityId}
+                  canCreateActiveTAnchor={
+                    !dataDocument?.entityIds.T.includes(
+                      thisTerritoryEntityId ?? ""
+                    )
+                  }
+                  isLoadingEntities={isLoadingEntities}
+                />
+              )}
             </StyledAnnotatorMenu>
           )}
 

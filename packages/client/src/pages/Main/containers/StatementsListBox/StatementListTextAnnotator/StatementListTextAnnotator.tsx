@@ -3,6 +3,7 @@ import { animated, useSpring } from "@react-spring/web";
 import { entitiesDict } from "@shared/dictionaries/entity";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import {
+  IDocument,
   IEntity,
   IResponseEntity,
   IResponseStatement,
@@ -174,7 +175,7 @@ export const StatementListTextAnnotator: React.FC<
     data: documents,
     error,
     isFetching,
-  } = useQuery({
+  } = useQuery<IDocument[]>({
     queryKey: ["documents"],
     queryFn: async () => {
       const res = await api.documentsGet({});
@@ -207,7 +208,7 @@ export const StatementListTextAnnotator: React.FC<
             (d) => d.id === resource.data.documentId
           );
           if (document) {
-            return document.referencedEntityIds.T.includes(territoryId);
+            return document.entityIds.T.includes(territoryId);
           }
         }
         return false;
@@ -249,7 +250,7 @@ export const StatementListTextAnnotator: React.FC<
     data: selectedDocument,
     error: selectedDocumentError,
     isFetching: selectedDocumentIsFetching,
-  } = useQuery({
+  } = useQuery<IDocument | false>({
     queryKey: ["document", selectedDocumentId],
     queryFn: async () => {
       if (selectedDocumentId !== undefined) {
@@ -266,7 +267,7 @@ export const StatementListTextAnnotator: React.FC<
     if (annotator && selectedDocument) {
       const scrollToId =
         statementId &&
-        selectedDocument.referencedEntityIds.S?.includes(statementId)
+        selectedDocument.entityIds.S?.includes(statementId)
           ? statementId
           : territoryId;
 
@@ -279,14 +280,14 @@ export const StatementListTextAnnotator: React.FC<
 
   const thisTHasAnchor = useMemo<boolean>(() => {
     if (selectedDocument) {
-      return selectedDocument?.referencedEntityIds.T.includes(territoryId);
+      return selectedDocument?.entityIds.T.includes(territoryId);
     }
     return false;
   }, [selectedDocument, territoryId]);
 
   const activeTHasAnchor = useMemo<boolean>(() => {
     if (selectedDocument) {
-      return selectedDocument?.referencedEntityIds.T.includes(territoryId);
+      return selectedDocument?.entityIds.T.includes(territoryId);
     }
     return false;
   }, [selectedDocument, territoryId]);

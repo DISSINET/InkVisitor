@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { v4 as uuidv4 } from "uuid";
 
-import { IDocument, IResponseDocument, IResponseEntity } from "@shared/types";
+import { IDocument, IResponseEntity } from "@shared/types";
 import api from "api";
 import { Loader, Submit } from "components";
 import React, { ChangeEvent, useMemo, useRef, useState } from "react";
@@ -17,7 +17,7 @@ import {
 } from "./DocumentsPageStyles";
 
 type DocumentWithResource = {
-  document: IResponseDocument;
+  document: IDocument;
   resource: false | IResponseEntity;
 };
 

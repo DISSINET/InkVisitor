@@ -9,8 +9,6 @@ import {
   IResponseAudit,
   IResponseBookmarkFolder,
   IResponseDetail,
-  IResponseDocument,
-  IResponseDocumentDetail,
   IResponseEntity,
   IResponseGeneric,
   IResponsePermission,
@@ -1164,7 +1162,7 @@ class Api {
   async documentsGet(
     filter: IFilterDocuments,
     options?: IApiOptions
-  ): Promise<AxiosResponse<IResponseDocument[]>> {
+  ): Promise<AxiosResponse<IDocument[]>> {
     try {
       const response = await this.connection.get(`/documents/`, {
         ...options,
@@ -1179,7 +1177,7 @@ class Api {
   async documentGet(
     documentId: string,
     options?: IApiOptions
-  ): Promise<AxiosResponse<IResponseDocumentDetail>> {
+  ): Promise<AxiosResponse<IDocument>> {
     try {
       const response = await this.connection.get(
         `/documents/${documentId}`,
