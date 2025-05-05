@@ -69,6 +69,10 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
                             );
                             toast.info("text copied to clipboard");
                           }
+                        })
+                        .catch((error) => {
+                          console.error("Failed to get anchor text:", error);
+                          toast.error("Failed to copy text to clipboard");
                         });
                     }}
                     tooltipLabel="copy anchored text to clipboard"
