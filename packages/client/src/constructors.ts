@@ -334,7 +334,7 @@ export const InstRelations = (
               type: relationType as RelationEnums.Type,
               entityIds:
                 relationType === RelationEnums.Type.Synonym
-                  ? [...connection.entityIds, entityId] // For SYN type, add the entity ID
+                  ? [...connection.entityIds, entityId] // For SYN type, add the entity ID to the cloud
                   : connection.entityIds.map(
                       (
                         id: string // For other types, replace template ID
