@@ -63,11 +63,12 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
                           row.original.anchorIndex
                         )
                         .then((response) => {
-                          console.log(response);
-                          window.navigator.clipboard.writeText(
-                            response.data.data || ""
-                          );
-                          toast.info("text copied to clipboard");
+                          if (response.data.data) {
+                            window.navigator.clipboard.writeText(
+                              response.data.data
+                            );
+                            toast.info("text copied to clipboard");
+                          }
                         });
                     }}
                     tooltipLabel="copy anchored text to clipboard"
