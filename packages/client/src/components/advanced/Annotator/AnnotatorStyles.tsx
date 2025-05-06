@@ -1,5 +1,4 @@
 import styled from "styled-components";
-import { Button } from "components/basic/Button/Button";
 
 export const StyledScrollerViewport = styled.div`
   background: #ccc;
@@ -92,7 +91,7 @@ export const StyledAnnotatorAnchorListWrap = styled.div`
   overflow: auto;
   max-height: 200px;
   border-radius: ${({ theme }) => theme.borderRadius.xs};
-  background-color: ${({ theme }) => theme.color.blue["50"]};
+  background-color: ${({ theme }) => theme.color.gray["500"]};
   padding: ${({ theme }) => theme.space[3]};
   border-radius: ${({ theme }) => theme.borderRadius.sm};
   margin-left: ${({ theme }) => theme.space["-2"]};

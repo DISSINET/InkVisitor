@@ -266,8 +266,7 @@ export const StatementListTextAnnotator: React.FC<
   useEffect(() => {
     if (annotator && selectedDocument) {
       const scrollToId =
-        statementId &&
-        selectedDocument.entityIds.S?.includes(statementId)
+        statementId && selectedDocument.entityIds.S?.includes(statementId)
           ? statementId
           : territoryId;
 
@@ -298,8 +297,10 @@ export const StatementListTextAnnotator: React.FC<
   const themeContext = useContext(ThemeContext);
 
   const isSearchAllowed = useMemo<boolean>(() => {
-    return annotator !== undefined && selectedDocument !== undefined;
+    return annotator !== undefined && !!selectedDocument;
   }, [annotator, selectedDocument]);
+
+  console.log(selectedDocument);
 
   const annotatorHeight = useMemo<number>(() => {
     let height = contentHeight - 70;
