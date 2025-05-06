@@ -93,7 +93,9 @@ export const StyledAnnotatorAnchorListWrap = styled.div`
   max-height: 200px;
   border-radius: ${({ theme }) => theme.borderRadius.xs};
   background-color: ${({ theme }) => theme.color.blue["50"]};
-  padding: ${({ theme }) => theme.space[1]};
+  padding: ${({ theme }) => theme.space[3]};
+  border-radius: ${({ theme }) => theme.borderRadius.sm};
+  margin-left: ${({ theme }) => theme.space["-2"]};
 `;
 
 export const StyledAnnotatorItemTitle = styled.div`
@@ -116,10 +118,27 @@ export const StyledAnnotatorAnchorList = styled.div`
 
 export const StyledTerritorySubsection = styled.div`
   display: flex;
+  align-items: center;
   background-color: ${({ theme }) => theme.color.blue["200"]};
   gap: ${({ theme }) => theme.space[2]};
   padding: ${({ theme }) => theme.space[3]};
   border-radius: ${({ theme }) => theme.borderRadius.sm};
-  margin-left: ${({ theme }) => theme.space["-3"]};
+  margin-left: ${({ theme }) => theme.space["-2"]};
   margin-top: ${({ theme }) => theme.space[1]};
+`;
+
+export const StyledTerritorySubsectionTitle = styled.div`
+  font-weight: ${({ theme }) => theme.fontWeight["medium"]};
+  color: ${({ theme }) => theme.color.gray["800"]};
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  font-variant-caps: small-caps;
+`;
+
+export const StyledAnnotatorNoAnchors = styled.div`
+  color: ${({ theme }) => theme.color.gray["500"]};
+  align-self: center;
+  display: flex;
+  justify-content: center;
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  font-style: italic;
 `;

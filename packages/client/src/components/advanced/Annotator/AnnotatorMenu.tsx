@@ -18,7 +18,9 @@ import {
   StyledAnnotatorItemContent,
   StyledAnnotatorItemContentLine,
   StyledAnnotatorItemTitle,
+  StyledAnnotatorNoAnchors,
   StyledTerritorySubsection,
+  StyledTerritorySubsectionTitle,
 } from "./AnnotatorStyles";
 import { TerritoryCreateModalType } from "./types";
 
@@ -143,7 +145,9 @@ export const TextAnnotatorMenu = ({
           <StyledAnnotatorItemContentLine>
             {onCreateTerritory && (
               <StyledTerritorySubsection>
-                Territory
+                <StyledTerritorySubsectionTitle>
+                  territory
+                </StyledTerritorySubsectionTitle>
                 <Button
                   fullWidth={false}
                   icon={
@@ -202,6 +206,11 @@ export const TextAnnotatorMenu = ({
         </StyledAnnotatorItemTitle>
         <StyledAnnotatorItemContent>
           <StyledAnnotatorAnchorListWrap>
+            {anchors.length === 0 && (
+              <StyledAnnotatorNoAnchors>
+                no anchors in selection
+              </StyledAnnotatorNoAnchors>
+            )}
             <StyledAnnotatorAnchorList>
               {anchors.map((anchor) => {
                 if (entities[anchor]) {
