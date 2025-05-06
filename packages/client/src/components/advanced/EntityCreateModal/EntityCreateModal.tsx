@@ -5,7 +5,7 @@ import {
 } from "@shared/dictionaries";
 import { classesAll, entitiesDictKeys } from "@shared/dictionaries/entity";
 import { EntityEnums, UserEnums } from "@shared/enums";
-import { IEntity, ITerritory } from "@shared/types";
+import { IEntity, IResponseEntity, ITerritory } from "@shared/types";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   MIN_LABEL_LENGTH_MESSAGE,
@@ -25,17 +25,24 @@ import {
   ModalInputLabel,
   ModalInputWrap,
 } from "components";
-import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
+import Dropdown, {
+  ApplyTemplateModal,
+  EntitySuggester,
+  EntityTag,
+} from "components/advanced";
 import {
   CAction,
   CConcept,
   CEntity,
   CStatement,
   CTerritory,
+  InstTemplate,
 } from "constructors";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { StyledNote } from "./EntityCreateModalStyles";
+import { DropdownItem } from "types";
+import { getEntityLabel, getShortLabelByLetterCount } from "utils/utils";
 
 interface EntityCreateModal {
   closeModal: () => void;
@@ -232,174 +239,303 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
     }
   };
 
+  const {
+    status: templateStatus,
+    data: templates,
+    error: templateError,
+    isFetching: isFetchingTemplates,
+  } = useQuery({
+    queryKey: ["entity-templates", "templates", selectedCategory],
+    queryFn: async () => {
+      if (selectedCategory) {
+        const res = await api.entitiesSearch({
+          onlyTemplates: true,
+          class: selectedCategory,
+        });
+
+        const templates = res.data;
+        templates.sort((a: IEntity, b: IEntity) =>
+          a.labels[0].toLocaleLowerCase() > b.labels[0].toLocaleLowerCase()
+            ? 1
+            : -1
+        );
+        return templates;
+      }
+    },
+    enabled: !!selectedCategory && api.isLoggedIn(),
+  });
+
+  const templateOptions: DropdownItem[] & { template: IEntity }[] =
+    useMemo(() => {
+      const options = templates
+        ? templates.map((template) => ({
+            value: template.id,
+            label: getShortLabelByLetterCount(getEntityLabel(template), 200),
+            template: template,
+          }))
+        : [];
+
+      return options;
+    }, [templates]);
+
+  const handleAskForTemplateApply = (templateId: string) => {
+    setShowApplyTemplateModal(true);
+    const template = templates?.find((template) => template.id === templateId);
+    if (template) {
+      setTemplateToApply(template);
+    }
+  };
+
+  const [showApplyTemplateModal, setShowApplyTemplateModal] = useState(false);
+  const [templateToApply, setTemplateToApply] = useState<
+    IResponseEntity | false
+  >(false);
+
+  const createEntityFromTemplate = async (templateToApply: IEntity) => {
+    const newEntity = await InstTemplate(
+      templateToApply,
+      userRole,
+      parentTerritory?.id,
+      label
+    );
+    if (newEntity) {
+      onMutationSuccess(newEntity);
+      closeModal();
+    } else {
+      toast.warning("Failed to create entity from template");
+    }
+  };
+
   return (
-    <Modal
-      showModal={showModal}
-      width={800}
-      isLoading={entityCreateMutation.isPending}
-      onEnterPress={handleCheckOnSubmit}
-      onClose={closeModal}
-    >
-      <ModalHeader
-        title={`Create ${
-          entityClasses.length === 1
-            ? entitiesDictKeys[selectedCategory].label
-            : "entity"
-        }`}
-      />
-      <ModalContent column>
-        <ModalInputForm alignLeft>
-          <ModalInputLabel>{"Class & Label: "}</ModalInputLabel>
-          <ModalInputWrap>
-            <EntitySuggester
-              initTyped={label}
-              initCategory={selectedCategory}
-              categoryTypes={entityClasses}
-              excludedEntityClasses={excludedSuggesterEntities}
-              onChangeCategory={(selectedOption) => {
-                // Any not allowed here - this condition makes it type safe
-                if (selectedOption !== EntityEnums.Extension.Any) {
-                  setSelectedCategory(selectedOption);
-                }
-              }}
-              onTyped={(newType: string) => setLabel(newType)}
-              disableCreate
-              disableTemplatesAccept
-              disableWildCard
-              disableTemplateInstantiation
-              inputWidth="full"
-              autoFocus
-              disableButtons
-              disableEnter
-            />
-          </ModalInputWrap>
+    <>
+      <Modal
+        showModal={showModal}
+        width={800}
+        isLoading={entityCreateMutation.isPending}
+        onEnterPress={handleCheckOnSubmit}
+        onClose={closeModal}
+      >
+        <ModalHeader
+          title={`Create ${
+            entityClasses.length === 1
+              ? entitiesDictKeys[selectedCategory].label
+              : "entity"
+          }`}
+        />
+        <ModalContent column>
+          <ModalInputForm alignLeft>
+            <ModalInputLabel>{"Apply Template: "}</ModalInputLabel>
+            <ModalInputWrap>
+              <Dropdown.Single.Basic
+                placeholder="select template.."
+                disabled={templateOptions.length === 0}
+                width="full"
+                // TODO: bind this
+                value={null}
+                options={templateOptions}
+                onChange={(templateToApply) => {
+                  handleAskForTemplateApply(templateToApply);
+                }}
+              />
+            </ModalInputWrap>
+            <ModalInputLabel>{"Class & Label: "}</ModalInputLabel>
+            <ModalInputWrap>
+              <EntitySuggester
+                initTyped={label}
+                initCategory={selectedCategory}
+                categoryTypes={entityClasses}
+                excludedEntityClasses={excludedSuggesterEntities}
+                onChangeCategory={(selectedOption) => {
+                  // Any not allowed here - this condition makes it type safe
+                  if (selectedOption !== EntityEnums.Extension.Any) {
+                    setSelectedCategory(selectedOption);
+                  }
+                }}
+                onTyped={(newType: string) => setLabel(newType)}
+                disableCreate
+                disableTemplatesAccept
+                disableWildCard
+                disableTemplateInstantiation
+                inputWidth="full"
+                autoFocus
+                disableButtons
+                disableEnter
+              />
+            </ModalInputWrap>
 
-          {/* Detail */}
-          <ModalInputLabel>{"Detail: "}</ModalInputLabel>
-          <ModalInputWrap>
-            <Input
-              value={detailTyped}
-              onChangeFn={(newType: string) => setDetailTyped(newType)}
-              changeOnType
-              width="full"
-            />
-          </ModalInputWrap>
+            {/* Detail */}
+            <ModalInputLabel>{"Detail: "}</ModalInputLabel>
+            <ModalInputWrap>
+              <Input
+                value={detailTyped}
+                onChangeFn={(newType: string) => setDetailTyped(newType)}
+                changeOnType
+                width="full"
+              />
+            </ModalInputWrap>
 
-          {/* Language */}
-          <ModalInputLabel>{"Language: "}</ModalInputLabel>
-          <ModalInputWrap>
-            <Dropdown.Single.Basic
-              width="full"
-              options={languageDict}
-              value={selectedLanguage}
-              onChange={(newValue) => {
-                setSelectedLanguage(newValue);
-              }}
-            />
-          </ModalInputWrap>
+            {/* Language */}
+            <ModalInputLabel>{"Language: "}</ModalInputLabel>
+            <ModalInputWrap>
+              <Dropdown.Single.Basic
+                width="full"
+                options={languageDict}
+                value={selectedLanguage}
+                onChange={(newValue) => {
+                  setSelectedLanguage(newValue);
+                }}
+              />
+            </ModalInputWrap>
 
-          {/* Part of speech */}
-          {selectedCategory === EntityEnums.Class.Action && (
-            <>
-              <ModalInputLabel>{"Part of Speech: "}</ModalInputLabel>
-              <ModalInputWrap>
-                <Dropdown.Single.Basic
-                  width="full"
-                  value={actionPos}
-                  options={actionPartOfSpeechDict}
-                  onChange={(newValue) => {
-                    setActionPos(newValue);
-                  }}
-                />
-              </ModalInputWrap>
-            </>
-          )}
-          {selectedCategory === EntityEnums.Class.Concept && (
-            <>
-              <ModalInputLabel>{"Part of Speech: "}</ModalInputLabel>
-              <ModalInputWrap>
-                <Dropdown.Single.Basic
-                  width="full"
-                  value={conceptPos}
-                  options={conceptPartOfSpeechDict}
-                  onChange={(newValue) => {
-                    setConceptPos(newValue);
-                  }}
-                />
-              </ModalInputWrap>
-            </>
-          )}
-
-          {/* Suggester territory */}
-          {(selectedCategory === EntityEnums.Class.Territory ||
-            selectedCategory === EntityEnums.Class.Statement) && (
-            <>
-              <ModalInputLabel>
-                {selectedCategory === EntityEnums.Class.Territory
-                  ? "Parent territory: "
-                  : "Territory: "}
-              </ModalInputLabel>
-              <ModalInputWrap>
-                {territoryEntity ? (
-                  <EntityTag
-                    fullWidth
-                    entity={territoryEntity}
-                    tooltipPosition="left"
-                    unlinkButton={{
-                      onClick: () => {
-                        setTerritoryEntity(false);
-                      },
+            {/* Part of speech */}
+            {selectedCategory === EntityEnums.Class.Action && (
+              <>
+                <ModalInputLabel>{"Part of Speech: "}</ModalInputLabel>
+                <ModalInputWrap>
+                  <Dropdown.Single.Basic
+                    width="full"
+                    value={actionPos}
+                    options={actionPartOfSpeechDict}
+                    onChange={(newValue) => {
+                      setActionPos(newValue);
                     }}
                   />
-                ) : (
-                  <EntitySuggester
-                    disableTemplatesAccept
-                    filterEditorRights
-                    inputWidth="full"
-                    disableCreate
-                    categoryTypes={[EntityEnums.Class.Territory]}
-                    onPicked={(entity: IEntity) => {
-                      setTerritoryEntity(entity);
-                    }}
-                  />
-                )}
-              </ModalInputWrap>
-            </>
-          )}
-        </ModalInputForm>
-        {(userRole === UserEnums.Role.Admin ||
-          userRole === UserEnums.Role.Owner) && (
-          <>
-            {selectedCategory === EntityEnums.Class.Territory &&
-            !territoryEntity ? (
-              <StyledNote>
-                {"Territory will be added under root"}
-                <br />
-                {"when nothing is selected"}
-              </StyledNote>
-            ) : (
-              <div />
+                </ModalInputWrap>
+              </>
             )}
-          </>
-        )}
-      </ModalContent>
-      <ModalFooter>
-        <ButtonGroup>
-          <Button
-            key="cancel"
-            label="Cancel"
-            color="greyer"
-            inverted
-            onClick={closeModal}
-          />
-          <Button
-            key="submit"
-            label="Create"
-            color="info"
-            onClick={handleCheckOnSubmit}
-          />
-        </ButtonGroup>
-      </ModalFooter>
-    </Modal>
+            {selectedCategory === EntityEnums.Class.Concept && (
+              <>
+                <ModalInputLabel>{"Part of Speech: "}</ModalInputLabel>
+                <ModalInputWrap>
+                  <Dropdown.Single.Basic
+                    width="full"
+                    value={conceptPos}
+                    options={conceptPartOfSpeechDict}
+                    onChange={(newValue) => {
+                      setConceptPos(newValue);
+                    }}
+                  />
+                </ModalInputWrap>
+              </>
+            )}
+
+            {/* Suggester territory */}
+            {(selectedCategory === EntityEnums.Class.Territory ||
+              selectedCategory === EntityEnums.Class.Statement) && (
+              <>
+                <ModalInputLabel>
+                  {selectedCategory === EntityEnums.Class.Territory
+                    ? "Parent territory: "
+                    : "Territory: "}
+                </ModalInputLabel>
+                <ModalInputWrap>
+                  {territoryEntity ? (
+                    <EntityTag
+                      fullWidth
+                      entity={territoryEntity}
+                      tooltipPosition="left"
+                      unlinkButton={{
+                        onClick: () => {
+                          setTerritoryEntity(false);
+                        },
+                      }}
+                    />
+                  ) : (
+                    <EntitySuggester
+                      disableTemplatesAccept
+                      filterEditorRights
+                      inputWidth="full"
+                      disableCreate
+                      categoryTypes={[EntityEnums.Class.Territory]}
+                      onPicked={(entity: IEntity) => {
+                        setTerritoryEntity(entity);
+                      }}
+                    />
+                  )}
+                </ModalInputWrap>
+              </>
+            )}
+          </ModalInputForm>
+          {(userRole === UserEnums.Role.Admin ||
+            userRole === UserEnums.Role.Owner) && (
+            <>
+              {selectedCategory === EntityEnums.Class.Territory &&
+              !territoryEntity ? (
+                <StyledNote>
+                  {"Territory will be added under root"}
+                  <br />
+                  {"when nothing is selected"}
+                </StyledNote>
+              ) : (
+                <div />
+              )}
+            </>
+          )}
+        </ModalContent>
+        <ModalFooter>
+          <ButtonGroup>
+            <Button
+              key="cancel"
+              label="Cancel"
+              color="greyer"
+              inverted
+              onClick={closeModal}
+            />
+            <Button
+              key="submit"
+              label="Create"
+              color="info"
+              onClick={handleCheckOnSubmit}
+            />
+          </ButtonGroup>
+        </ModalFooter>
+      </Modal>
+
+      {/* CREATE ENTITY FROM TEMPLATE */}
+      {templateToApply && (
+        <Modal
+          showModal={showApplyTemplateModal}
+          width="auto"
+          onEnterPress={() => {
+            createEntityFromTemplate(templateToApply);
+            setShowApplyTemplateModal(false);
+          }}
+          onClose={() => {
+            setShowApplyTemplateModal(false);
+          }}
+        >
+          <ModalHeader title="Create entity from Template" />
+          <ModalContent>
+            <ModalInputForm>{`Create entity from template?`}</ModalInputForm>
+            <div style={{ marginLeft: "0.5rem" }}>
+              <EntityTag disableDrag entity={templateToApply} />
+            </div>
+            {/* here goes the info about template #951 */}
+          </ModalContent>
+          <ModalFooter>
+            <ButtonGroup>
+              <Button
+                key="cancel"
+                label="Cancel"
+                color="greyer"
+                inverted
+                onClick={() => {
+                  setShowApplyTemplateModal(false);
+                }}
+              />
+              <Button
+                key="submit"
+                label="Create"
+                color="info"
+                onClick={() => {
+                  createEntityFromTemplate(templateToApply);
+                  setShowApplyTemplateModal(false);
+                }}
+              />
+            </ButtonGroup>
+          </ModalFooter>
+        </Modal>
+      )}
+    </>
   );
 };

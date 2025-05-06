@@ -206,11 +206,11 @@ export const InstAction: any = async (
 
 // instantiate template
 // TODO #952 handle conflicts in Templates application
-
 export const InstTemplate = async (
   templateEntity: IEntity | IStatement | ITerritory,
   userRole: UserEnums.Role,
-  territoryParentId?: string
+  territoryParentId?: string,
+  label?: string
 ): Promise<IEntity | false> => {
   if (templateEntity.isTemplate) {
     let iEntity: false | IEntity = false;
@@ -238,8 +238,11 @@ export const InstTemplate = async (
     }
 
     if (iEntity) {
+      if (label) {
+        iEntity.labels[0] = label;
+      }
       // #1554
-      if (templateEntity.class === EntityEnums.Class.Statement) {
+      else if (templateEntity.class === EntityEnums.Class.Statement) {
         iEntity.labels[0] = "";
       } else {
         iEntity.labels[0] = `[INSTANCE OF] ${templateEntity.labels[0]}`;
