@@ -36,6 +36,7 @@ import { StatementListContextMenu } from "../StatementListContextMenu/StatementL
 import { StatementListRow } from "./StatementListRow";
 import {
   StyledAbbreviatedLabel,
+  StyledAnchor,
   StyledCheckboxWrapper,
   StyledFocusedCircle,
   StyledTHead,
@@ -334,7 +335,9 @@ export const StatementListTable: React.FC<StatementListTable> = ({
           if (firstAnchorText) {
             return (
               <StyledAbbreviatedLabel>
-                <TbAnchor />
+                <StyledAnchor>
+                  <TbAnchor size={12} strokeWidth={2} />
+                </StyledAnchor>
                 {firstAnchorText}
               </StyledAbbreviatedLabel>
             );

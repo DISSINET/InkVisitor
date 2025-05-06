@@ -68,7 +68,7 @@ export const StyledRelativePosition = styled.div<StyledRelativePosition>`
   position: relative;
   background-color: ${({ theme }) => theme.color["blue"][50]};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
-  min-width: 16.1rem;
+  min-width: ${({ theme }) => theme.space[10]};
   /* max-width: 24rem; */
   max-width: ${({ $width }) => (!$width ? "24rem" : "")};
   width: ${({ $width }) => ($width ? `${$width / 10}rem` : "")};

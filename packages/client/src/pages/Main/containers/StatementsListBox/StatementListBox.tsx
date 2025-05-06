@@ -565,8 +565,6 @@ export const StatementListBox: React.FC = () => {
               duplicateStatementsMutation={duplicateStatementsMutation}
               replaceReferencesMutation={replaceReferencesMutation}
               appendReferencesMutation={appendReferencesMutation}
-              displayMode={displayMode}
-              handleDisplayModeChange={handleDisplayModeChange}
               updateTerritoryMutation={updateTerritoryMutation}
               duplicateTerritoryMutation={duplicateTerritoryMutation}
               deleteStatementsMutation={deleteStatementsMutation}

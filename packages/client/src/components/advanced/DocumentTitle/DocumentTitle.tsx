@@ -11,7 +11,7 @@ interface DocumentTitle {
 export const DocumentTitle: React.FC<DocumentTitle> = ({
   title = "",
   size = "md",
-  width = "100px",
+  width = "100%",
 }) => {
   const [referenceElement, setReferenceElement] =
     useState<HTMLDivElement | null>(null);
@@ -21,13 +21,14 @@ export const DocumentTitle: React.FC<DocumentTitle> = ({
     <React.Fragment>
       <StyledDocumentTag
         $size={size}
+        $width={width}
         ref={setReferenceElement}
         onMouseEnter={() => setIsTooltipOpen(true)}
         onMouseLeave={() => setIsTooltipOpen(false)}
       >
         <TiDocumentText style={{ marginRight: "0.2rem", flexShrink: "0" }} />
 
-        <StyledDocumentTitle $width={width}>{title}</StyledDocumentTitle>
+        <StyledDocumentTitle>{title}</StyledDocumentTitle>
       </StyledDocumentTag>
       <Tooltip
         label={title}

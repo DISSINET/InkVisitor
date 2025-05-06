@@ -17,7 +17,7 @@ import {
 import { rootTerritoryId } from "Theme/constants";
 import api from "api";
 import { AxiosResponse } from "axios";
-import { Button, ButtonGroup, Submit, Tooltip } from "components";
+import { Button, Submit, Tooltip } from "components";
 import Dropdown, {
   BreadcrumbItem,
   EntitySuggester,
@@ -25,7 +25,7 @@ import Dropdown, {
 } from "components/advanced";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
-import { FaHighlighter, FaList, FaTrash } from "react-icons/fa";
+import { FaTrash } from "react-icons/fa";
 import {
   MdOutlineCheckBox,
   MdOutlineCheckBoxOutlineBlank,
@@ -40,7 +40,6 @@ import {
   EntitiesDeleteSuccessResponse,
   RelationsCreateErrorResponse,
   RelationsCreateSuccessResponse,
-  StatementListDisplayMode,
 } from "types";
 import { collectTerritoryChildren, searchTree } from "utils/utils";
 import { v4 as uuidv4 } from "uuid";
@@ -49,12 +48,8 @@ import {
   StyledCheckboxWrapper,
   StyledCounter,
   StyledDropdownWrap,
-  StyledFaStar,
   StyledHeader,
   StyledHeaderBreadcrumbRow,
-  StyledHeaderRow,
-  StyledHeading,
-  StyledInfoText,
   StyledMoveToParent,
   StyledSuggesterRow,
 } from "./StatementListHeaderStyles";
@@ -62,9 +57,6 @@ import {
 interface StatementListHeader {
   territory: IResponseTerritory;
   isFavorited?: boolean;
-
-  displayMode: StatementListDisplayMode;
-  handleDisplayModeChange: (newMode: StatementListDisplayMode) => void;
 
   isAllSelected: boolean;
   selectedRows: string[];
@@ -140,9 +132,6 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   isAllSelected,
   selectedRows,
   setSelectedRows,
-
-  displayMode,
-  handleDisplayModeChange,
 
   moveStatementsMutation,
   duplicateStatementsMutation,
@@ -367,18 +356,27 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
     useState<HTMLSpanElement | null>(null);
   const [showSubmit, setShowSubmit] = useState(false);
 
+  const [moveToParentHovered, setMoveToParentHovered] = useState(false);
+
   const BreadcrumbItems = useMemo(() => {
     return (
       <React.Fragment>
         {selectedTerritoryPath?.map((territoryId: string, key: number) => {
           return (
             <React.Fragment key={key}>
-              <BreadcrumbItem territoryId={territoryId} />
+              <BreadcrumbItem
+                territoryId={territoryId}
+                isFavorited={isFavorited}
+              />
             </React.Fragment>
           );
         })}
         <React.Fragment key="this-territory">
-          <BreadcrumbItem territoryId={territoryId} territoryData={territory} />
+          <BreadcrumbItem
+            territoryId={territoryId}
+            territoryData={territory}
+            isFavorited={isFavorited}
+          />
         </React.Fragment>
       </React.Fragment>
     );
@@ -394,46 +392,6 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
       <StyledHeader>
         <StyledHeaderBreadcrumbRow>{BreadcrumbItems}</StyledHeaderBreadcrumbRow>
-
-        <StyledHeaderRow>
-          <span style={{ display: "grid", gridTemplateColumns: "auto auto" }}>
-            {isFavorited && <StyledFaStar size={16} />}
-            {territoryId ? (
-              <StyledHeading
-                ref={setReferenceElement}
-                onMouseEnter={() => setHeadingHovered(true)}
-                onMouseLeave={() => setHeadingHovered(false)}
-              >{`T:\xa0${territory.labels[0]}`}</StyledHeading>
-            ) : (
-              <StyledHeading>{"no territory selected"}</StyledHeading>
-            )}
-          </span>
-
-          {territory.id !== rootTerritoryId && userCanEdit && (
-            <StyledMoveToParent>
-              <EntitySuggester
-                placeholder="new parent"
-                disableTemplatesAccept
-                filterEditorRights
-                inputWidth={96}
-                disableCreate
-                categoryTypes={[EntityEnums.Class.Territory]}
-                onPicked={(selectedEntity) => {
-                  setMoveToParentEntity(selectedEntity);
-                  setShowTActionModal(true);
-                }}
-                excludedActantIds={excludedMoveTerritories}
-                button={
-                  <Button
-                    icon={<TbHomeMove size={14} />}
-                    onClick={() => setShowTActionModal(true)}
-                    tooltipLabel="move or duplicate current territory"
-                  />
-                }
-              />
-            </StyledMoveToParent>
-          )}
-        </StyledHeaderRow>
 
         <StyledSuggesterRow>
           {/* BATCH ACTIONS */}
@@ -510,30 +468,33 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                 </>
               )}
           </StyledActionsWrapper>
-
-          <StyledInfoText>
-            {"Mode "}
-            <ButtonGroup style={{ marginLeft: "5px" }}>
-              <Button
-                color="success"
-                icon={<FaList />}
-                label={`list (${territory.statements.length})`}
-                onClick={() => {
-                  handleDisplayModeChange(StatementListDisplayMode.LIST);
+          {territory.id !== rootTerritoryId && userCanEdit && (
+            <StyledMoveToParent
+              onMouseEnter={() => setMoveToParentHovered(true)}
+              onMouseLeave={() => setMoveToParentHovered(false)}
+            >
+              <EntitySuggester
+                placeholder="move"
+                disableTemplatesAccept
+                filterEditorRights
+                inputWidth={moveToParentHovered ? 80 : 40}
+                disableCreate
+                categoryTypes={[EntityEnums.Class.Territory]}
+                onPicked={(selectedEntity) => {
+                  setMoveToParentEntity(selectedEntity);
+                  setShowTActionModal(true);
                 }}
-                inverted={displayMode === StatementListDisplayMode.TEXT}
-              ></Button>
-              <Button
-                color="success"
-                icon={<FaHighlighter />}
-                label="annotator"
-                onClick={() => {
-                  handleDisplayModeChange(StatementListDisplayMode.TEXT);
-                }}
-                inverted={displayMode === StatementListDisplayMode.LIST}
-              ></Button>
-            </ButtonGroup>
-          </StyledInfoText>
+                excludedActantIds={excludedMoveTerritories}
+                button={
+                  <Button
+                    icon={<TbHomeMove size={14} />}
+                    onClick={() => setShowTActionModal(true)}
+                    tooltipLabel="move or duplicate current territory"
+                  />
+                }
+              />
+            </StyledMoveToParent>
+          )}
         </StyledSuggesterRow>
       </StyledHeader>
 
