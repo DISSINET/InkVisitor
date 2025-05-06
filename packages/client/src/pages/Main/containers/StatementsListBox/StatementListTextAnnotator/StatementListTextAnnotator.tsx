@@ -312,8 +312,6 @@ export const StatementListTextAnnotator: React.FC<
 
   const debouncedContentWidth = useDebounce(contentWidth, 80);
 
-  console.log(statements.length);
-
   return (
     <animated.div style={animatedStyle}>
       <div
