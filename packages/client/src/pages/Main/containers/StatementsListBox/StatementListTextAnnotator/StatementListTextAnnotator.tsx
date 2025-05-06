@@ -194,14 +194,8 @@ export const StatementListTextAnnotator: React.FC<
     }
   }, [selectedResourceId]);
 
-  // if no resource is selected, select the document with this territoryId in document references
   const loadDefaultResource = () => {
-    if (
-      resources &&
-      documents &&
-      isInitialized === false &&
-      storedAnnotatorResourceId === false
-    ) {
+    if (resources && documents) {
       const resourceWithAnchor = resources.find((resource) => {
         if (resource.data.documentId) {
           const document = documents.find(
@@ -219,18 +213,12 @@ export const StatementListTextAnnotator: React.FC<
       } else {
         setSelectedResourceId(false);
       }
-
-      setIsInitialized(true);
     }
   };
 
   useEffect(() => {
-    setIsInitialized(false);
-  }, [territoryId]);
-
-  useEffect(() => {
     loadDefaultResource();
-  }, [resources, documents, isInitialized, territoryId]);
+  }, [territoryId, resources, documents]);
 
   const selectedResource = useMemo<IResponseEntity | false>(() => {
     if (selectedResourceId && resources) {
