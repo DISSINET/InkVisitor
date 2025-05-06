@@ -271,10 +271,10 @@ export const applyTemplate = async (
   userRole: UserEnums.Role
 ): Promise<IEntity> => {
   if (templateEntity.isTemplate && templateEntity.class === entity.class) {
-    // get labels from entity and the rest from template
+    // get labels from entity and props from entity + template, rest from template
     const newEntity = {
       ...templateEntity,
-      labels: [...entity.labels, ...templateEntity.labels.slice(1)],
+      labels: [...entity.labels],
     };
 
     if (templateEntity.class === EntityEnums.Class.Statement) {
@@ -304,7 +304,8 @@ export const applyTemplate = async (
         }
       }
       newEntity.usedTemplate = templateEntity.id;
-      newEntity.props = await InstProps(templateEntity.props);
+      const instantiatedTemplateProps = await InstProps(templateEntity.props);
+      newEntity.props = [...entity.props, ...instantiatedTemplateProps];
       newEntity.isTemplate = false;
     }
 
