@@ -300,8 +300,6 @@ export const StatementListTextAnnotator: React.FC<
     return annotator !== undefined && !!selectedDocument;
   }, [annotator, selectedDocument]);
 
-  console.log(selectedDocument);
-
   const annotatorHeight = useMemo<number>(() => {
     let height = contentHeight - 70;
 

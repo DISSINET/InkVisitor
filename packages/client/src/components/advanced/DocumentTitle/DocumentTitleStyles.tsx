@@ -21,10 +21,11 @@ export const StyledDocumentTag = styled.div<{ $size: "sm" | "md" | "lg" }>`
   align-items: center;
 `;
 
-export const StyledDocumentTitle = styled.p`
+export const StyledDocumentTitle = styled.p<{ $width?: string }>`
   display: inline-block;
   vertical-align: middle;
   white-space: nowrap;
   overflow: hidden !important;
   text-overflow: ellipsis;
+  max-width: ${({ $width }) => $width || "100%"};
 `;
