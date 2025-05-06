@@ -539,7 +539,7 @@ export const TextAnnotator = ({
                   handleCreateTerritory={onCreateTerritory}
                   handleCreateStatement={onCreateStatement}
                   handleRemoveAnchor={onRemoveAnchor}
-                  thisTerritoryEntityId={thisTerritoryEntityId}
+                  territory={territory}
                   canCreateActiveTAnchor={
                     !dataDocument?.entityIds.T.includes(
                       thisTerritoryEntityId ?? ""
