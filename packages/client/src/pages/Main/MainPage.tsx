@@ -454,6 +454,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
                 ></Button>
               </ButtonGroup>
               <ButtonGroup style={{ marginLeft: "5px", marginRight: "5px" }}>
+                {/* TODO: check if user has write rights to Territory */}
                 {userRole !== UserEnums.Role.Viewer && territoryId && (
                   <Button
                     key="add"
