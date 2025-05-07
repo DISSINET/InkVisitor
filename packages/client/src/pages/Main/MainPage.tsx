@@ -48,6 +48,8 @@ const MainPage: React.FC<MainPage> = ({}) => {
     selectedDetailId,
     appendDetailId,
     setStatementId,
+    annotatorOpened,
+    setAnnotatorOpened,
   } = useSearchParams();
 
   const dispatch = useAppDispatch();
@@ -389,8 +391,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
         return "open detail box";
     }
   };
-
-  const { annotatorOpened, setAnnotatorOpened } = useSearchParams();
 
   return (
     <>
