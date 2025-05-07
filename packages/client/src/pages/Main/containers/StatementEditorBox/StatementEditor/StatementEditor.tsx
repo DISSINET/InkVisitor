@@ -655,7 +655,10 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   ) => {
     let timeout = 0;
     // short timeout -> statement list is open and the active territory is the anchor parent territory
-    if (statementListOpened && parentTerritoryId === territoryId) {
+    if (
+      (statementListOpened && parentTerritoryId === territoryId) ||
+      !parentTerritoryId.length
+    ) {
       timeout = 100;
     } else {
       // long timeout -> statement list is closed or different territory is active => needs more time to initialize the annotator
@@ -663,7 +666,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     }
     dispatch(setDetailBoxState(DetailBoxState.Normal));
     setAnnotatorOpened(true);
-    setTerritoryId(parentTerritoryId);
+    if (parentTerritoryId.length && territoryId !== parentTerritoryId) {
+      setTerritoryId(parentTerritoryId);
+    }
     setTimeout(() => {
       scrollToAnchor(statement.id, anchorIndex ? anchorIndex : undefined);
     }, timeout);
