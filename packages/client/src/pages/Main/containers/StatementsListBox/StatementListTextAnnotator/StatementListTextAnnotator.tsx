@@ -97,7 +97,6 @@ export const StatementListTextAnnotator: React.FC<
   annotator,
   setAnnotator = () => {},
 }) => {
-  const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const [showAnnotator, setShowAnnotator] = useState(false);
   useEffect(() => {
     setShowAnnotator(true);
