@@ -5,7 +5,7 @@ import {
 } from "@shared/dictionaries";
 import { classesAll, entitiesDictKeys } from "@shared/dictionaries/entity";
 import { EntityEnums, UserEnums } from "@shared/enums";
-import { IEntity, IResponseEntity, ITerritory } from "@shared/types";
+import { IEntity, IResponseEntity } from "@shared/types";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   MIN_LABEL_LENGTH_MESSAGE,
@@ -25,11 +25,7 @@ import {
   ModalInputLabel,
   ModalInputWrap,
 } from "components";
-import Dropdown, {
-  ApplyTemplateModal,
-  EntitySuggester,
-  EntityTag,
-} from "components/advanced";
+import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 import {
   CAction,
   CConcept,
@@ -40,10 +36,11 @@ import {
 } from "constructors";
 import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
-import { StyledNote } from "./EntityCreateModalStyles";
 import { DropdownItem } from "types";
 import { getEntityLabel, getShortLabelByLetterCount } from "utils/utils";
+import { StyledNote } from "./EntityCreateModalStyles";
 
+const defaultDropdownValue = "empty";
 interface EntityCreateModal {
   closeModal: () => void;
   onMutationSuccess?: (entity: IEntity) => void;
@@ -126,6 +123,32 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   });
 
   const userRole = localStorage.getItem("userrole") as UserEnums.Role;
+
+  // User rights validation for the parent territory is filtered in Suggester for parent territory
+  const validateEntityCreation = (skipLabelCheck = false) => {
+    if (userRole === UserEnums.Role.Viewer) {
+      toast.warning("You don't have permission to create entities");
+      return false;
+    } else if (!skipLabelCheck && label.length < 1) {
+      toast.info(MIN_LABEL_LENGTH_MESSAGE);
+      return false;
+    } else if (
+      selectedCategory === EntityEnums.Class.Statement &&
+      !territoryEntity
+    ) {
+      toast.warning("Territory is required!");
+      return false;
+    } else if (
+      selectedCategory === EntityEnums.Class.Territory &&
+      !territoryEntity &&
+      userRole !== UserEnums.Role.Admin &&
+      userRole !== UserEnums.Role.Owner
+    ) {
+      toast.warning("Parent territory is required!");
+      return false;
+    }
+    return true;
+  };
 
   const handleCreateActant = () => {
     const newCreated: {
@@ -216,25 +239,8 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
     }
   };
 
-  // TODO: check if user has rights to the territoryEntity
-  const handleCheckOnSubmit = () => {
-    if (userRole === UserEnums.Role.Viewer) {
-      toast.warning("You don't have permission to create entities");
-    } else if (label.length < 1) {
-      toast.info(MIN_LABEL_LENGTH_MESSAGE);
-    } else if (
-      selectedCategory === EntityEnums.Class.Statement &&
-      !territoryEntity
-    ) {
-      toast.warning("Territory is required!");
-    } else if (
-      selectedCategory === EntityEnums.Class.Territory &&
-      !territoryEntity &&
-      userRole !== UserEnums.Role.Admin &&
-      userRole !== UserEnums.Role.Owner
-    ) {
-      toast.warning("Parent territory is required!");
-    } else {
+  const handleSubmit = () => {
+    if (validateEntityCreation()) {
       handleCreateActant();
     }
   };
@@ -292,12 +298,23 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   >(false);
 
   const createEntityFromTemplate = async (templateToApply: IEntity) => {
-    const newEntity = await InstTemplate(
-      templateToApply,
-      userRole,
-      parentTerritory?.id,
-      label
-    );
+    let newEntity: IEntity | false;
+    if (selectedCategory === EntityEnums.Class.Territory) {
+      newEntity = await InstTemplate(
+        templateToApply,
+        userRole,
+        // TODO: rights
+        territoryEntity ? territoryEntity.id : rootTerritoryId,
+        label
+      );
+    } else {
+      newEntity = await InstTemplate(
+        templateToApply,
+        userRole,
+        undefined,
+        label
+      );
+    }
     if (newEntity) {
       onMutationSuccess(newEntity);
       closeModal();
@@ -306,9 +323,10 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
     }
   };
 
-  const [selectedTemplate, setSelectedTemplate] = useState<string>("empty");
+  const [selectedTemplate, setSelectedTemplate] =
+    useState<string>(defaultDropdownValue);
   useEffect(() => {
-    setSelectedTemplate("empty");
+    setSelectedTemplate(defaultDropdownValue);
   }, [selectedCategory]);
 
   return (
@@ -317,7 +335,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
         showModal={showModal}
         width={800}
         isLoading={entityCreateMutation.isPending}
-        onEnterPress={handleCheckOnSubmit}
+        onEnterPress={handleSubmit}
         onClose={closeModal}
       >
         <ModalHeader
@@ -337,11 +355,11 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
                 width="full"
                 value={selectedTemplate}
                 options={[
-                  { value: "empty", label: "Select template..." },
+                  { value: defaultDropdownValue, label: "Select template..." },
                   ...templateOptions,
                 ]}
                 onChange={(templateToApply) => {
-                  if (templateToApply !== "empty") {
+                  if (templateToApply !== defaultDropdownValue) {
                     setSelectedTemplate(templateToApply);
                     handleAskForTemplateApply(templateToApply);
                   }
@@ -499,7 +517,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
               key="submit"
               label="Create"
               color="info"
-              onClick={handleCheckOnSubmit}
+              onClick={handleSubmit}
             />
           </ButtonGroup>
         </ModalFooter>
@@ -511,12 +529,15 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
           showModal={showApplyTemplateModal}
           width="auto"
           onEnterPress={() => {
-            createEntityFromTemplate(templateToApply);
-            setShowApplyTemplateModal(false);
+            if (validateEntityCreation(true)) {
+              createEntityFromTemplate(templateToApply);
+              setShowApplyTemplateModal(false);
+            }
           }}
           onClose={() => {
             setShowApplyTemplateModal(false);
             setTemplateToApply(false);
+            setSelectedTemplate(defaultDropdownValue);
           }}
         >
           <ModalHeader title="Create entity from Template" />
@@ -537,6 +558,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
                 onClick={() => {
                   setShowApplyTemplateModal(false);
                   setTemplateToApply(false);
+                  setSelectedTemplate(defaultDropdownValue);
                 }}
               />
               <Button
@@ -544,8 +566,10 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
                 label="Create"
                 color="info"
                 onClick={() => {
-                  createEntityFromTemplate(templateToApply);
-                  setShowApplyTemplateModal(false);
+                  if (validateEntityCreation(true)) {
+                    createEntityFromTemplate(templateToApply);
+                    setShowApplyTemplateModal(false);
+                  }
                 }}
               />
             </ButtonGroup>
