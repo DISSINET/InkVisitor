@@ -306,6 +306,11 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
     }
   };
 
+  const [selectedTemplate, setSelectedTemplate] = useState<string>("empty");
+  useEffect(() => {
+    setSelectedTemplate("empty");
+  }, [selectedCategory]);
+
   return (
     <>
       <Modal
@@ -330,11 +335,16 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
                 placeholder="select template.."
                 disabled={templateOptions.length === 0}
                 width="full"
-                // TODO: bind this
-                value={null}
-                options={templateOptions}
+                value={selectedTemplate}
+                options={[
+                  { value: "empty", label: "Select template..." },
+                  ...templateOptions,
+                ]}
                 onChange={(templateToApply) => {
-                  handleAskForTemplateApply(templateToApply);
+                  if (templateToApply !== "empty") {
+                    setSelectedTemplate(templateToApply);
+                    handleAskForTemplateApply(templateToApply);
+                  }
                 }}
               />
             </ModalInputWrap>
@@ -371,6 +381,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
                 onChangeFn={(newType: string) => setDetailTyped(newType)}
                 changeOnType
                 width="full"
+                disabled={!!templateToApply}
               />
             </ModalInputWrap>
 
@@ -384,6 +395,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
                 onChange={(newValue) => {
                   setSelectedLanguage(newValue);
                 }}
+                disabled={!!templateToApply}
               />
             </ModalInputWrap>
 
@@ -399,6 +411,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
                     onChange={(newValue) => {
                       setActionPos(newValue);
                     }}
+                    disabled={!!templateToApply}
                   />
                 </ModalInputWrap>
               </>
@@ -414,6 +427,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
                     onChange={(newValue) => {
                       setConceptPos(newValue);
                     }}
+                    disabled={!!templateToApply}
                   />
                 </ModalInputWrap>
               </>
@@ -502,6 +516,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
           }}
           onClose={() => {
             setShowApplyTemplateModal(false);
+            setTemplateToApply(false);
           }}
         >
           <ModalHeader title="Create entity from Template" />
@@ -521,6 +536,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
                 inverted
                 onClick={() => {
                   setShowApplyTemplateModal(false);
+                  setTemplateToApply(false);
                 }}
               />
               <Button
