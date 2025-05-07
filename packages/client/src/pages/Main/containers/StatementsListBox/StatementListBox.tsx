@@ -600,7 +600,7 @@ export const StatementListBox: React.FC = () => {
             style={{
               display: "flex",
               height: "100%",
-              maxHeight: "calc(100% - 101px)",
+              maxHeight: "calc(100%)",
               overflow: "auto",
             }}
             ref={contentRef}
