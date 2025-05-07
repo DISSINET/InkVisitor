@@ -67,7 +67,8 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
           const { parentTerritoryId } = row.original;
           return (
             <>
-              {parentTerritoryId && (
+              {(parentTerritoryId ||
+                entityClass === EntityEnums.Class.Territory) && (
                 <Button
                   tooltipLabel="locate in annotator"
                   onClick={() => {
@@ -76,24 +77,24 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
                       territoryId !== parentTerritoryId ||
                       detailBoxState === DetailBoxState.FullHeight
                     ) {
+                      // set more time to open statement list, annotator and/or find the territory
                       timeout = 1000;
                     } else {
                       timeout = 100;
                     }
+                    if (parentTerritoryId) {
+                      setTerritoryId(parentTerritoryId);
+                    } else if (entityClass === EntityEnums.Class.Territory) {
+                      setTerritoryId(entityId);
+                    }
 
-                    setTerritoryId(parentTerritoryId);
                     if (entityClass === EntityEnums.Class.Statement) {
                       setStatementId(entityId);
                     }
 
                     if (detailBoxState === DetailBoxState.FullHeight) {
                       dispatch(setStatementListOpened(true));
-                      localStorage.setItem("statementListOpened", "true");
                       dispatch(setDetailBoxState(DetailBoxState.Normal));
-                      localStorage.setItem(
-                        "detailBoxState",
-                        DetailBoxState.Normal
-                      );
                     }
                     setAnnotatorOpened(true);
 
