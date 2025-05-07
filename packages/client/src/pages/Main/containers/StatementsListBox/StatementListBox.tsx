@@ -608,7 +608,13 @@ export const StatementListBox: React.FC = () => {
             <CustomScrollbar
               scrollerId="Statements"
               elementId="Statements-box-table"
-              contentWidth={statements.length > 0 ? width + 10 : 0}
+              contentWidth={
+                statements.length > 0
+                  ? displayMode === StatementListDisplayMode.TEXT
+                    ? width + 10
+                    : width
+                  : 0
+              }
             >
               <StyledTableWrapper
                 $isListMode={displayMode === StatementListDisplayMode.LIST}
