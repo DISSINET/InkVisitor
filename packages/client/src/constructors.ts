@@ -309,6 +309,10 @@ export const applyTemplate = async (
       newEntity.usedTemplate = templateEntity.id;
       const instantiatedTemplateProps = await InstProps(templateEntity.props);
       newEntity.props = [...entity.props, ...instantiatedTemplateProps];
+      newEntity.references = [
+        ...entity.references,
+        ...DReferences(templateEntity.references),
+      ];
       newEntity.isTemplate = false;
     }
 
