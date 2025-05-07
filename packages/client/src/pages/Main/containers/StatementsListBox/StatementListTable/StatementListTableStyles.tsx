@@ -110,3 +110,12 @@ export const StyledAbbreviatedLabel = styled.div`
   min-width: 5rem;
   font-size: ${({ theme }) => theme.fontSize["xs"]};
 `;
+
+export const StyledAnchor = styled.div`
+  background-color: ${({ theme }) => theme.color.blue[400]};
+  color: ${({ theme }) => theme.color.white};
+  margin-right: 5px;
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 50%;
+`;

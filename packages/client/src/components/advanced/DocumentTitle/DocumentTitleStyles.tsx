@@ -1,7 +1,11 @@
 import styled from "styled-components";
 
-export const StyledDocumentTag = styled.div<{ $size: "sm" | "md" | "lg" }>`
-  display: inline-flex;
+export const StyledDocumentTag = styled.div<{
+  $size: "sm" | "md" | "lg";
+  $width?: string;
+}>`
+  display: flex;
+  flex-shrink: 1;
   margin: 0 0.6rem;
   background-color: ${({ theme }) => theme.color["blue"][400]};
   padding: ${({ theme, $size }) =>
@@ -19,13 +23,14 @@ export const StyledDocumentTag = styled.div<{ $size: "sm" | "md" | "lg" }>`
       ? theme.fontSize["xs"]
       : theme.fontSize["sm"]};
   align-items: center;
+  max-width: ${({ $width }) => $width || "100%"};
+  overflow: hidden !important;
 `;
 
-export const StyledDocumentTitle = styled.p<{ $width?: string }>`
-  display: inline-block;
+export const StyledDocumentTitle = styled.div`
+  display: block;
   vertical-align: middle;
-  white-space: nowrap;
   overflow: hidden !important;
+  white-space: nowrap;
   text-overflow: ellipsis;
-  max-width: ${({ $width }) => $width || "100%"};
 `;

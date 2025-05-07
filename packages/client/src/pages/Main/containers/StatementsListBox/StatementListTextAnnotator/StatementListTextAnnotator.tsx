@@ -30,7 +30,7 @@ import React, {
 import { BiSearch } from "react-icons/bi";
 import { FaLongArrowAltRight, FaUnlink } from "react-icons/fa";
 import { GrDocumentMissing } from "react-icons/gr";
-import { TbAnchorOff } from "react-icons/tb";
+import { TbAnchor, TbAnchorOff } from "react-icons/tb";
 import { ThemeContext } from "styled-components";
 import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
 import { StyledInfoText } from "../StatementListHeader/StatementListHeaderStyles";
@@ -304,6 +304,11 @@ export const StatementListTextAnnotator: React.FC<
       <div
         style={{
           display: "flex",
+          maxWidth: `${
+            statements.length > 0
+              ? debouncedContentWidth - COLLAPSED_TABLE_WIDTH
+              : debouncedContentWidth
+          }px`,
           alignItems: "center",
           padding: "0.2rem 0.5rem",
         }}
@@ -324,15 +329,13 @@ export const StatementListTextAnnotator: React.FC<
               gap: "0.2rem",
             }}
           >
-            <EntityTag entity={selectedResource} />
-            <Button
-              key="d"
-              tooltipLabel={"use different resource"}
-              icon={<FaUnlink />}
-              color={"warning"}
-              inverted
-              onClick={() => {
-                setSelectedResourceId(false);
+            <EntityTag
+              entity={selectedResource}
+              unlinkButton={{
+                onClick: () => {
+                  setSelectedResourceId(false);
+                },
+                tooltipLabel: "use different resource",
               }}
             />
           </div>
@@ -340,12 +343,8 @@ export const StatementListTextAnnotator: React.FC<
 
         {selectedDocumentIsFetching && <Loader />}
 
-        {!selectedDocumentIsFetching && (
-          <>
-            {selectedDocument && (
-              <DocumentTitle title={selectedDocument.title} />
-            )}
-          </>
+        {!selectedDocumentIsFetching && selectedDocument && (
+          <DocumentTitle title={selectedDocument.title} />
         )}
 
         {!selectedDocumentIsFetching &&
@@ -368,7 +367,12 @@ export const StatementListTextAnnotator: React.FC<
             {activeTHasAnchor ? (
               <Button
                 label=""
-                iconRight={<FaLongArrowAltRight />}
+                iconRight={
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    <TbAnchor />
+                    <FaLongArrowAltRight />
+                  </div>
+                }
                 tooltipLabel="locate anchor"
                 inverted
                 onClick={() => {
@@ -385,9 +389,7 @@ export const StatementListTextAnnotator: React.FC<
                   fontSize: themeContext?.fontSize["sm"],
                 }}
               >
-                <i>No </i>
-                <TbAnchorOff />
-                <i>for T</i>
+                <TbAnchorOff title="no anchor for T" />
               </div>
             )}
           </div>
@@ -411,7 +413,7 @@ export const StatementListTextAnnotator: React.FC<
                 setSearchTerm(newText);
               }}
               changeOnType
-              width={"full"}
+              minWidth={100}
             />
             {isSearchTermValid && (
               <div

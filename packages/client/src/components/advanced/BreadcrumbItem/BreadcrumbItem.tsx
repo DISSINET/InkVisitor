@@ -16,6 +16,7 @@ interface BreadcrumbItem {
   territoryId: string;
   // If the territory is in params (territory), territory data needs to be added to props!!!
   territoryData?: IResponseTerritory;
+  isFavorited?: boolean;
 }
 const initialData: IEntity = {
   id: "",
@@ -32,6 +33,7 @@ const initialData: IEntity = {
 export const BreadcrumbItem: React.FC<BreadcrumbItem> = ({
   territoryId,
   territoryData,
+  isFavorited,
 }) => {
   const { setTerritoryId, territoryId: paramsTerritoryId } = useSearchParams();
 
@@ -53,7 +55,11 @@ export const BreadcrumbItem: React.FC<BreadcrumbItem> = ({
         <StyledItemBox>
           <BsArrowRightShort />
           <EntityTag
+            showOnly="label"
+            fullWidth={!!territoryData}
+            isSelected={!!territoryData}
             entity={territoryData || data || initialData}
+            isFavorited={isFavorited}
             button={
               paramsTerritoryId !== territoryId && (
                 <Button
