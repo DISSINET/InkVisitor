@@ -430,6 +430,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
           height={getStatementListBoxHeight()}
           buttons={[
             <>
+              {/* TODO: check if user has write rights to Territory */}
               {statementListOpened &&
                 userRole !== UserEnums.Role.Viewer &&
                 territoryId && (
