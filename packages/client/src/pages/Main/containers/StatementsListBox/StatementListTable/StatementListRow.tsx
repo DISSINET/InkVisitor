@@ -103,9 +103,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
 
   preview(drop(dropRef));
 
-  useEffect(() => {
-    drag(dragRef);
-  }, [isVisible]);
+  drag(dragRef);
 
   const themeContext = useContext(ThemeContext);
 
