@@ -12,20 +12,31 @@ import {
   FaChevronCircleUp,
   FaGripVertical,
 } from "react-icons/fa";
+import { FaArrowDownLong, FaArrowUpLong } from "react-icons/fa6";
 import { BeatLoader } from "react-spinners";
 import { Cell, ColumnInstance, Row } from "react-table";
 import { setDraggedRowId } from "redux/features/statementList/draggedRowIdSlice";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { ThemeContext } from "styled-components";
-import { DragItem, ItemTypes, StatementListDisplayMode } from "types";
+import {
+  DragItem,
+  ItemTypes,
+  StatementListDisplayMode,
+  StatementOrderCorrection,
+} from "types";
 import { dndHoverFn } from "utils/utils";
 import { StatementListRowExpanded } from "./StatementListRowExpanded/StatementListRowExpanded";
-import { StyledTd, StyledTdMove, StyledTr } from "./StatementListTableStyles";
+import {
+  StyledOrderCorrection,
+  StyledTd,
+  StyledTdMove,
+  StyledTr,
+} from "./StatementListTableStyles";
 import useIsRowVisible from "./useRowIsVisible";
 
 interface StatementListRow {
-  row: Row<IResponseStatement>;
+  row: Row<IResponseStatement & { orderCorrection?: StatementOrderCorrection }>;
   index: number;
   moveRow: (dragIndex: number, hoverIndex: number) => void;
   moveEndRow: (statementToMove: IStatement, index: number) => Promise<void>;
@@ -57,7 +68,9 @@ export const StatementListRow: React.FC<StatementListRow> = ({
   );
   const { statementId } = useSearchParams();
 
-  const dropRef = useRef<HTMLTableRowElement | null>(null);
+  const dropRef = useRef<HTMLTableRowElement>(
+    null
+  ) as React.RefObject<HTMLTableRowElement>;
   const dragRef = useRef<HTMLTableCellElement | null>(null);
 
   const isVisible = useIsRowVisible(dropRef);
@@ -96,6 +109,8 @@ export const StatementListRow: React.FC<StatementListRow> = ({
 
   const themeContext = useContext(ThemeContext);
 
+  const orderCorrection = row.original.orderCorrection;
+
   return (
     <React.Fragment key={row.original.data.territory?.order}>
       <StyledTr
@@ -115,18 +130,33 @@ export const StatementListRow: React.FC<StatementListRow> = ({
             {row.cells.map((cell: Cell<IResponseStatement>) => {
               if (cell.column.id === "move") {
                 return (
-                  <StyledTdMove
-                    key="move"
-                    ref={dragRef}
-                    onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                  >
-                    <FaGripVertical color={themeContext?.color.black} />
+                  <StyledTdMove key="move">
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      <div
+                        style={{ cursor: "move" }}
+                        ref={dragRef}
+                        onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                      >
+                        <FaGripVertical color={themeContext?.color.black} />
+                      </div>
+                      {orderCorrection && (
+                        <StyledOrderCorrection>
+                          {orderCorrection.shouldMoveUp ? (
+                            <FaArrowUpLong size={14} />
+                          ) : orderCorrection &&
+                            orderCorrection.shouldMoveDown ? (
+                            <FaArrowDownLong size={14} />
+                          ) : null}
+                          <div>{orderCorrection.distance}</div>
+                        </StyledOrderCorrection>
+                      )}
+                    </div>
                   </StyledTdMove>
                 );
               } else {
                 return (
                   <StyledTd {...cell.getCellProps()}>
-                    {cell.render("Cell")}
+                    {cell.render("Cell") as React.ReactNode}
                   </StyledTd>
                 );
               }

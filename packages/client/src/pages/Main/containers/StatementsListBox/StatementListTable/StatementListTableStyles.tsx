@@ -69,14 +69,13 @@ export const StyledTr = styled.tr<StyledTr>`
 interface StyledTd {}
 export const StyledTd = styled.td<StyledTd>`
   padding: ${({ theme }) => theme.space[2]};
-  padding-left: ${({ theme }) => theme.space[4]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   height: ${({ theme }) => theme.space[16]};
 `;
 
 export const StyledTdMove = styled.td`
-  cursor: move;
   width: 1%;
+  padding-right: 0.5rem;
 `;
 
 interface StyledFocusedCircle {
@@ -118,4 +117,11 @@ export const StyledAnchor = styled.div`
   display: inline-flex;
   padding: 2px;
   border-radius: 50%;
+`;
+
+export const StyledOrderCorrection = styled.div`
+  display: flex;
+  align-items: center;
+  color: ${({ theme }) => theme.color["gray"]["500"]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
 `;

@@ -15,6 +15,7 @@ import update from "immutability-helper";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { BsArrowDown, BsArrowUp } from "react-icons/bs";
 import { FaClone, FaPlus, FaTrashAlt } from "react-icons/fa";
+import { FaArrowDownLong, FaArrowUpLong } from "react-icons/fa6";
 import {
   MdOutlineCheckBox,
   MdOutlineCheckBoxOutlineBlank,
@@ -43,7 +44,6 @@ import {
   StyledTable,
   StyledTh,
 } from "./StatementListTableStyles";
-import { FaArrowDown19, FaArrowUp19 } from "react-icons/fa6";
 
 const HIDDEN_COLUMNS_FULL = ["id", "anchor"];
 const HIDDEN_COLUMNS_MINIFIED = [
@@ -248,27 +248,6 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         },
       },
       {
-        id: "orderCorrection",
-        Cell: ({ row }: CellType) => {
-          const orderCorrection = row.original.orderCorrection;
-
-          return (
-            orderCorrection && (
-              <>
-                {orderCorrection.shouldMoveUp ? (
-                  <>
-                    <FaArrowUp19 size={14} />
-                  </>
-                ) : orderCorrection && orderCorrection.shouldMoveDown ? (
-                  <FaArrowDown19 size={14} />
-                ) : null}
-                {orderCorrection.distance}
-              </>
-            )
-          );
-        },
-      },
-      {
         id: "statement",
         Header: "",
         Cell: ({ row }: CellType) => {
@@ -394,6 +373,8 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                   inverted
                   noBorder
                   noBackground
+                  // noIconMargin
+                  noPadding
                   onClick={(e) => {
                     e.stopPropagation();
                     setStatementId(row.id);
