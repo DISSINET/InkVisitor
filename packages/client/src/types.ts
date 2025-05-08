@@ -429,3 +429,11 @@ export enum DetailBoxState {
   Normal = "normal",
   FullHeight = "fullHeight",
 }
+
+export type StatementOrderCorrection = {
+  currentPosition: number;
+  correctPosition: number;
+  distance: number;
+  shouldMoveUp: boolean;
+  shouldMoveDown: boolean;
+};

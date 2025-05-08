@@ -1,8 +1,10 @@
 import { Annotator } from "@inkvisitor/annotator/src/lib";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import {
+  IDocument,
   IEntity,
   IReference,
+  IResponseEntity,
   IResponseStatement,
   IStatement,
   ITerritory,
@@ -22,11 +24,16 @@ import { setDisableStatementListScroll } from "redux/features/statementList/disa
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
-import { EntitiesDeleteSuccessResponse, StatementListDisplayMode } from "types";
+import {
+  EntitiesDeleteSuccessResponse,
+  StatementListDisplayMode,
+  StatementOrderCorrection,
+} from "types";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StatementListTextAnnotator } from "./StatementListTextAnnotator/StatementListTextAnnotator";
 import { StyledEmptyState, StyledTableWrapper } from "./StatementLitBoxStyles";
+import { IAnchorsNode } from "@shared/types/document";
 
 const initialData: {
   statements: IResponseStatement[];
@@ -547,6 +554,150 @@ export const StatementListBox: React.FC = () => {
 
   const [annotator, setAnnotator] = useState<Annotator | undefined>(undefined);
 
+  const {
+    data: resources,
+    error: resourcesError,
+    isFetching: resourcesIsFetching,
+  } = useQuery({
+    queryKey: ["resourcesWithDocuments"],
+    queryFn: async () => {
+      const res = await api.entitiesSearch({
+        resourceHasDocument: true,
+      });
+      return res.data;
+    },
+    enabled: api.isLoggedIn(),
+  });
+
+  const {
+    data: documents,
+    error: documentsError,
+    isFetching: documentsIsFetching,
+  } = useQuery<IDocument[]>({
+    queryKey: ["documents"],
+    queryFn: async () => {
+      const res = await api.documentsGet({});
+      return res.data;
+    },
+    enabled: api.isLoggedIn(),
+  });
+
+  const [selectedResourceId, setSelectedResourceId] = useState<string | false>(
+    storedAnnotatorResourceId
+  );
+
+  useEffect(() => {
+    if (selectedResourceId) {
+      setStoredAnnotatorResourceId(selectedResourceId);
+    }
+  }, [selectedResourceId]);
+
+  const loadDefaultResource = () => {
+    if (resources && documents) {
+      const resourceWithAnchor = resources.find((resource) => {
+        if (resource.data.documentId) {
+          const document = documents.find(
+            (d) => d.id === resource.data.documentId
+          );
+          if (document) {
+            return document.entityIds.T.includes(territoryId);
+          }
+        }
+        return false;
+      });
+
+      if (resourceWithAnchor) {
+        setSelectedResourceId(resourceWithAnchor.id);
+      } else {
+        setSelectedResourceId(false);
+      }
+    }
+  };
+
+  useEffect(() => {
+    loadDefaultResource();
+  }, [territoryId, resources, documents]);
+
+  const selectedResource = useMemo<IResponseEntity | false>(() => {
+    if (selectedResourceId && resources) {
+      return resources?.find((r) => r.id === selectedResourceId) ?? false;
+    }
+    return false;
+  }, [selectedResourceId, resources]);
+
+  const selectedDocumentId = useMemo<string | undefined>(() => {
+    if (selectedResource) {
+      return selectedResource.data.documentId;
+    }
+    return undefined;
+  }, [selectedResource]);
+
+  const {
+    data: selectedDocument,
+    error: selectedDocumentError,
+    isFetching: selectedDocumentIsFetching,
+  } = useQuery<IDocument | false>({
+    queryKey: ["document", selectedDocumentId],
+    queryFn: async () => {
+      if (selectedDocumentId) {
+        const res = await api.documentGet(selectedDocumentId);
+        return res.data;
+      }
+      return false;
+    },
+    enabled: api.isLoggedIn() && !!selectedDocumentId,
+  });
+
+  const collectStatementAnchors = (anchors: IAnchorsNode[]): IAnchorsNode[] => {
+    return anchors.reduce((acc: any[], anchor) => {
+      if (anchor.class === EntityEnums.Class.Statement) {
+        acc.push(anchor);
+      }
+      if (anchor.children) {
+        acc.push(...collectStatementAnchors(anchor.children));
+      }
+      return acc;
+    }, []);
+  };
+
+  // adds object orderCorrection to each statement with info about the order in the list vs the annotator
+  const statementsWithOrder: (IResponseStatement & {
+    orderCorrection?: StatementOrderCorrection;
+  })[] = useMemo(() => {
+    if (!selectedDocument) return statements;
+
+    const statementAnchors = collectStatementAnchors(selectedDocument.anchors);
+
+    // Create a map of statement IDs to their correct positions
+    const correctPositionMap = new Map(
+      statementAnchors.map((anchor, index) => [anchor.anchor, index])
+    );
+
+    // Add hasCorrectOrder flag and correction info to each statement
+    return statements.map((statement, index) => {
+      const correctPosition = correctPositionMap.get(statement.id);
+      const needsCorrection = correctPosition !== index;
+
+      return {
+        ...statement,
+        orderCorrection: needsCorrection
+          ? {
+              currentPosition: index,
+              correctPosition: correctPosition,
+              shouldMoveUp:
+                correctPosition !== undefined && correctPosition < index,
+              shouldMoveDown:
+                correctPosition !== undefined && correctPosition > index,
+              distance:
+                correctPosition !== undefined
+                  ? Math.abs(correctPosition - index)
+                  : 0,
+            }
+          : null,
+      };
+    });
+  }, [selectedDocument, statements]);
+
   return (
     <>
       {showStatementList && (
@@ -621,7 +772,7 @@ export const StatementListBox: React.FC = () => {
               >
                 {statements.length > 0 && (
                   <StatementListTable
-                    statements={statements}
+                    statements={statementsWithOrder}
                     handleRowClick={(rowId: string) => {
                       dispatch(setShowWarnings(false));
                       if (statementId !== rowId) {
@@ -676,6 +827,13 @@ export const StatementListBox: React.FC = () => {
                 setSelectedRows={setSelectedRows}
                 annotator={annotator}
                 setAnnotator={setAnnotator}
+                selectedDocumentId={selectedDocumentId}
+                selectedDocument={selectedDocument}
+                selectedDocumentIsFetching={selectedDocumentIsFetching}
+                selectedResource={selectedResource}
+                resources={resources}
+                documents={documents}
+                setSelectedResourceId={setSelectedResourceId}
               />
             )}
           </div>

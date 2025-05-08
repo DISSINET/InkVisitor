@@ -31,7 +31,7 @@ import {
 import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { StatementListDisplayMode } from "types";
+import { StatementListDisplayMode, StatementOrderCorrection } from "types";
 import { StatementListContextMenu } from "../StatementListContextMenu/StatementListContextMenu";
 import { StatementListRow } from "./StatementListRow";
 import {
@@ -43,6 +43,7 @@ import {
   StyledTable,
   StyledTh,
 } from "./StatementListTableStyles";
+import { FaArrowDown19, FaArrowUp19 } from "react-icons/fa6";
 
 const HIDDEN_COLUMNS_FULL = ["id", "anchor"];
 const HIDDEN_COLUMNS_MINIFIED = [
@@ -56,10 +57,14 @@ const HIDDEN_COLUMNS_MINIFIED = [
   "lastEdit",
   "menu",
 ];
-type CellType = CellProps<IResponseStatement>;
+type CellType = CellProps<
+  IResponseStatement & { orderCorrection?: StatementOrderCorrection }
+>;
 
 interface StatementListTable {
-  statements: IResponseStatement[];
+  statements: (IResponseStatement & {
+    orderCorrection?: StatementOrderCorrection;
+  })[];
   handleRowClick?: (rowId: string) => void;
   actantsUpdateMutation: UseMutationResult<
     AxiosResponse<IResponseGeneric>,
@@ -118,9 +123,9 @@ export const StatementListTable: React.FC<StatementListTable> = ({
     (state) => state.statementList.lastClickedIndex
   );
 
-  const [statementsLocal, setStatementsLocal] = useState<IResponseStatement[]>(
-    []
-  );
+  const [statementsLocal, setStatementsLocal] = useState<
+    (IResponseStatement & { orderCorrection?: StatementOrderCorrection })[]
+  >([]);
 
   useEffect(() => {
     dispatch(setLastClickedIndex(-1));
@@ -240,6 +245,27 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         id: "move",
         Cell: ({ row }: CellType) => {
           return false;
+        },
+      },
+      {
+        id: "orderCorrection",
+        Cell: ({ row }: CellType) => {
+          const orderCorrection = row.original.orderCorrection;
+
+          return (
+            orderCorrection && (
+              <>
+                {orderCorrection.shouldMoveUp ? (
+                  <>
+                    <FaArrowUp19 size={14} />
+                  </>
+                ) : orderCorrection && orderCorrection.shouldMoveDown ? (
+                  <FaArrowDown19 size={14} />
+                ) : null}
+                {orderCorrection.distance}
+              </>
+            )
+          );
         },
       },
       {
