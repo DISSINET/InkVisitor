@@ -676,7 +676,8 @@ export const StatementListBox: React.FC = () => {
     // Add hasCorrectOrder flag and correction info to each statement
     return statements.map((statement, index) => {
       const correctPosition = correctPositionMap.get(statement.id);
-      const needsCorrection = correctPosition !== index;
+      const needsCorrection =
+        correctPosition !== undefined && correctPosition !== index;
 
       return {
         ...statement,
@@ -684,14 +685,9 @@ export const StatementListBox: React.FC = () => {
           ? {
               currentPosition: index,
               correctPosition: correctPosition,
-              shouldMoveUp:
-                correctPosition !== undefined && correctPosition < index,
-              shouldMoveDown:
-                correctPosition !== undefined && correctPosition > index,
-              distance:
-                correctPosition !== undefined
-                  ? Math.abs(correctPosition - index)
-                  : 0,
+              shouldMoveUp: correctPosition < index,
+              shouldMoveDown: correctPosition > index,
+              distance: Math.abs(correctPosition - index),
             }
           : null,
       };
