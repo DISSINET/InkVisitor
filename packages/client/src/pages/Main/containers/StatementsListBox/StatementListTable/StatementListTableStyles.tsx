@@ -124,4 +124,5 @@ export const StyledOrderCorrection = styled.div`
   align-items: center;
   color: ${({ theme }) => theme.color["gray"]["500"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
+  width: 2rem;
 `;

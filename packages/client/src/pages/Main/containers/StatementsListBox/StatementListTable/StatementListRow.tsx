@@ -137,17 +137,19 @@ export const StatementListRow: React.FC<StatementListRow> = ({
                       >
                         <FaGripVertical color={themeContext?.color.black} />
                       </div>
-                      {orderCorrection && (
-                        <StyledOrderCorrection>
-                          {orderCorrection.shouldMoveUp ? (
-                            <FaArrowUpLong size={14} />
-                          ) : orderCorrection &&
-                            orderCorrection.shouldMoveDown ? (
-                            <FaArrowDownLong size={14} />
-                          ) : null}
-                          <div>{orderCorrection.distance}</div>
-                        </StyledOrderCorrection>
-                      )}
+                      <StyledOrderCorrection>
+                        {orderCorrection && (
+                          <>
+                            {orderCorrection.shouldMoveUp ? (
+                              <FaArrowUpLong size={14} />
+                            ) : orderCorrection &&
+                              orderCorrection.shouldMoveDown ? (
+                              <FaArrowDownLong size={14} />
+                            ) : null}
+                            <div>{orderCorrection.distance}</div>
+                          </>
+                        )}
+                      </StyledOrderCorrection>
                     </div>
                   </StyledTdMove>
                 );
