@@ -34,6 +34,7 @@ import {
   StyledTr,
 } from "./StatementListTableStyles";
 import useIsRowVisible from "./useRowIsVisible";
+import { TbAnchorOff } from "react-icons/tb";
 
 interface StatementListRow {
   row: Row<IResponseStatement & { orderCorrection?: StatementOrderCorrection }>;
@@ -138,16 +139,20 @@ export const StatementListRow: React.FC<StatementListRow> = ({
                         <FaGripVertical color={themeContext?.color.black} />
                       </div>
                       <StyledOrderCorrection>
-                        {orderCorrection && (
+                        {orderCorrection ? (
                           <>
                             {orderCorrection.shouldMoveUp ? (
                               <FaArrowUpLong size={14} />
-                            ) : orderCorrection &&
-                              orderCorrection.shouldMoveDown ? (
-                              <FaArrowDownLong size={14} />
-                            ) : null}
+                            ) : (
+                              orderCorrection &&
+                              orderCorrection.shouldMoveDown && (
+                                <FaArrowDownLong size={14} />
+                              )
+                            )}
                             <div>{orderCorrection.distance}</div>
                           </>
+                        ) : (
+                          <TbAnchorOff size={14} />
                         )}
                       </StyledOrderCorrection>
                     </div>
