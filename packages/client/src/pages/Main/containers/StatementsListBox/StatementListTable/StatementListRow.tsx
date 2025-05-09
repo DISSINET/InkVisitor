@@ -146,10 +146,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
                       <StyledOrderCorrection>
                         {/* no anchor icon */}
                         {!isAnchored ? (
-                          <TbAnchorOff
-                            size={15}
-                            color={themeContext?.color.danger}
-                          />
+                          <TbAnchorOff size={15} />
                         ) : (
                           // order correction helper
                           orderCorrection &&
