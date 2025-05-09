@@ -123,7 +123,7 @@ export const StyledOrderCorrection = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  color: ${({ theme }) => theme.color["gray"]["500"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   width: 2rem;
+  color: ${({ theme }) => theme.color["gray"]["800"]};
 `;
