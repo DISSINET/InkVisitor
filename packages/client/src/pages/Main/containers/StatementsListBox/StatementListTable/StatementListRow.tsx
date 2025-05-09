@@ -37,7 +37,12 @@ import useIsRowVisible from "./useRowIsVisible";
 import { TbAnchorOff } from "react-icons/tb";
 
 interface StatementListRow {
-  row: Row<IResponseStatement & { orderCorrection?: StatementOrderCorrection }>;
+  row: Row<
+    IResponseStatement & {
+      orderCorrection?: StatementOrderCorrection;
+      isAnchored?: boolean;
+    }
+  >;
   index: number;
   moveRow: (dragIndex: number, hoverIndex: number) => void;
   moveEndRow: (statementToMove: IStatement, index: number) => Promise<void>;
@@ -108,7 +113,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
 
   const themeContext = useContext(ThemeContext);
 
-  const orderCorrection = row.original.orderCorrection;
+  const { orderCorrection, isAnchored } = row.original;
 
   return (
     <React.Fragment key={row.original.data.territory?.order}>
@@ -139,7 +144,13 @@ export const StatementListRow: React.FC<StatementListRow> = ({
                         <FaGripVertical color={themeContext?.color.black} />
                       </div>
                       <StyledOrderCorrection>
-                        {orderCorrection ? (
+                        {!isAnchored && (
+                          <TbAnchorOff
+                            size={15}
+                            color={themeContext?.color.danger}
+                          />
+                        )}
+                        {orderCorrection && (
                           <>
                             {orderCorrection.shouldMoveUp ? (
                               <FaArrowUpLong size={14} />
@@ -151,8 +162,6 @@ export const StatementListRow: React.FC<StatementListRow> = ({
                             )}
                             <div>{orderCorrection.distance}</div>
                           </>
-                        ) : (
-                          <TbAnchorOff size={14} />
                         )}
                       </StyledOrderCorrection>
                     </div>

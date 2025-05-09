@@ -663,6 +663,7 @@ export const StatementListBox: React.FC = () => {
   // adds object orderCorrection to each statement with info about the order in the list vs the annotator
   const statementsWithOrder: (IResponseStatement & {
     orderCorrection?: StatementOrderCorrection;
+    isAnchored?: boolean;
   })[] = useMemo(() => {
     if (!selectedDocument) return statements;
 
@@ -676,11 +677,12 @@ export const StatementListBox: React.FC = () => {
     // Add hasCorrectOrder flag and correction info to each statement
     return statements.map((statement, index) => {
       const correctPosition = correctPositionMap.get(statement.id);
-      const needsCorrection =
-        correctPosition !== undefined && correctPosition !== index;
+      const isAnchored = correctPosition !== undefined;
+      const needsCorrection = isAnchored && correctPosition !== index;
 
       return {
         ...statement,
+        isAnchored,
         orderCorrection: needsCorrection
           ? {
               currentPosition: index,

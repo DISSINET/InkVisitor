@@ -58,12 +58,16 @@ const HIDDEN_COLUMNS_MINIFIED = [
   "menu",
 ];
 type CellType = CellProps<
-  IResponseStatement & { orderCorrection?: StatementOrderCorrection }
+  IResponseStatement & {
+    orderCorrection?: StatementOrderCorrection;
+    isAnchored?: boolean;
+  }
 >;
 
 interface StatementListTable {
   statements: (IResponseStatement & {
     orderCorrection?: StatementOrderCorrection;
+    isAnchored?: boolean;
   })[];
   handleRowClick?: (rowId: string) => void;
   actantsUpdateMutation: UseMutationResult<
