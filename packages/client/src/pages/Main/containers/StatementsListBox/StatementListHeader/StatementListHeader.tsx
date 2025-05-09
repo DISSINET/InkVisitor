@@ -17,7 +17,7 @@ import {
 import { rootTerritoryId } from "Theme/constants";
 import api from "api";
 import { AxiosResponse } from "axios";
-import { Button, Submit, Tooltip } from "components";
+import { Button, Submit } from "components";
 import Dropdown, {
   BreadcrumbItem,
   EntitySuggester,
@@ -26,6 +26,7 @@ import Dropdown, {
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaTrash } from "react-icons/fa";
+import { FaArrowDownShortWide } from "react-icons/fa6";
 import {
   MdOutlineCheckBox,
   MdOutlineCheckBoxOutlineBlank,
@@ -53,7 +54,6 @@ import {
   StyledMoveToParent,
   StyledSuggesterRow,
 } from "./StatementListHeaderStyles";
-import { FaArrowDown19 } from "react-icons/fa6";
 
 interface StatementListHeader {
   territory: IResponseTerritory;
@@ -391,8 +391,10 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
           {/* BATCH ACTIONS */}
           <StyledActionsWrapper>
             <Button
-              icon={<FaArrowDown19 />}
+              icon={<FaArrowDownShortWide />}
               onClick={() => autoOrderStatementsMutation.mutate()}
+              color="success"
+              tooltipLabel="auto order statements"
             />
             {user?.role !== UserEnums.Role.Viewer &&
               territory.statements.length > 0 && (
