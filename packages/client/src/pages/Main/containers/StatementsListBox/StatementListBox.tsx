@@ -506,6 +506,70 @@ export const StatementListBox: React.FC = () => {
     },
   });
 
+  const autoOrderStatementsMutation = useMutation({
+    mutationFn: async () => {
+      if (!selectedDocument) return;
+
+      const statementAnchors = collectStatementAnchors(
+        selectedDocument.anchors
+      );
+      const correctPositionMap = new Map(
+        statementAnchors.map((anchor, index) => [anchor.anchor, index])
+      );
+
+      // Separate anchored and non-anchored statements
+      const anchoredStatements = statements.filter((s) =>
+        correctPositionMap.has(s.id)
+      );
+      const nonAnchoredStatements = statements.filter(
+        (s) => !correctPositionMap.has(s.id)
+      );
+
+      // Sort anchored statements by their correct position
+      const sortedAnchoredStatements = anchoredStatements.sort((a, b) => {
+        const posA = correctPositionMap.get(a.id) ?? 0;
+        const posB = correctPositionMap.get(b.id) ?? 0;
+        return posA - posB;
+      });
+
+      // Interleave anchored and non-anchored statements based on their original relative positions
+      const finalOrder: IResponseStatement[] = [];
+      let anchoredIndex = 0;
+      let nonAnchoredIndex = 0;
+
+      statements.forEach((statement) => {
+        if (correctPositionMap.has(statement.id)) {
+          finalOrder.push(sortedAnchoredStatements[anchoredIndex++]);
+        } else {
+          finalOrder.push(nonAnchoredStatements[nonAnchoredIndex++]);
+        }
+      });
+
+      // Update each statement's order
+      const updates = finalOrder.map((statement, index) => {
+        const order = index * 100; // Use increments of 100 to leave room for future insertions
+        return api.entityUpdate(statement.id, {
+          data: {
+            ...statement.data,
+            territory: {
+              ...statement.data.territory,
+              order,
+            },
+          },
+        });
+      });
+
+      await Promise.all(updates);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["territory"] });
+      toast.info("Statements reordered according to document");
+    },
+    onError: () => {
+      toast.error("Failed to reorder statements");
+    },
+  });
+
   const {
     ref: contentRef,
     height: contentHeight = 0,
@@ -675,21 +739,22 @@ export const StatementListBox: React.FC = () => {
     );
 
     // First, create a map of all statements with their original indexes
-    const statementsWithIndexes = statements.map((statement, index) => ({
-      statement,
-      originalIndex: index,
-      isAnchored: correctPositionMap.has(statement.id),
-      correctPosition: correctPositionMap.get(statement.id),
-    }));
+    const statementsWithCorrectPosition = statements.map(
+      (statement, index) => ({
+        statement,
+        isAnchored: correctPositionMap.has(statement.id),
+        correctPosition: correctPositionMap.get(statement.id),
+      })
+    );
 
     // Filter and sort only anchored statements
-    const anchoredStatements = statementsWithIndexes
+    const anchoredStatements = statementsWithCorrectPosition
       .filter((item) => item.isAnchored)
       .sort((a, b) => (a.correctPosition ?? 0) - (b.correctPosition ?? 0));
 
     // Create a map of current anchored positions (excluding non-anchored statements)
     const currentAnchoredPositions = new Map(
-      statementsWithIndexes
+      statementsWithCorrectPosition
         .filter((item) => item.isAnchored)
         .map((item, index) => [item.statement.id, index])
     );
@@ -716,15 +781,13 @@ export const StatementListBox: React.FC = () => {
     );
 
     // Reconstruct the array in original order with corrections
-    return statementsWithIndexes.map(
-      ({ statement, originalIndex, isAnchored }) => ({
-        ...statement,
-        isAnchored,
-        orderCorrection: isAnchored
-          ? anchoredCorrections.get(statement.id)
-          : null,
-      })
-    );
+    return statementsWithCorrectPosition.map(({ statement, isAnchored }) => ({
+      ...statement,
+      isAnchored,
+      orderCorrection: isAnchored
+        ? anchoredCorrections.get(statement.id)
+        : null,
+    }));
   }, [selectedDocument, statements]);
 
   return (
@@ -749,6 +812,7 @@ export const StatementListBox: React.FC = () => {
               duplicateTerritoryMutation={duplicateTerritoryMutation}
               deleteStatementsMutation={deleteStatementsMutation}
               relationsCreateMutation={relationsCreateMutation}
+              autoOrderStatementsMutation={autoOrderStatementsMutation}
             />
           )}
 
@@ -906,6 +970,7 @@ export const StatementListBox: React.FC = () => {
           duplicateTerritoryMutation.isPending ||
           deleteStatementsMutation.isPending ||
           relationsCreateMutation.isPending ||
+          autoOrderStatementsMutation.isPending ||
           (statementListOpened && !showStatementList)
         }
       />

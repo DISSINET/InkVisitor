@@ -53,6 +53,7 @@ import {
   StyledMoveToParent,
   StyledSuggesterRow,
 } from "./StatementListHeaderStyles";
+import { FaArrowDown19 } from "react-icons/fa6";
 
 interface StatementListHeader {
   territory: IResponseTerritory;
@@ -124,6 +125,7 @@ interface StatementListHeader {
     Relation.IRelation[],
     unknown
   >;
+  autoOrderStatementsMutation: UseMutationResult<void, Error, void, unknown>;
 }
 export const StatementListHeader: React.FC<StatementListHeader> = ({
   territory,
@@ -143,6 +145,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
   deleteStatementsMutation,
   relationsCreateMutation,
+  autoOrderStatementsMutation,
 }) => {
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
@@ -351,9 +354,6 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
   const userCanEdit = territory.right !== UserEnums.RoleMode.Read;
 
-  const [headingHovered, setHeadingHovered] = useState(false);
-  const [referenceElement, setReferenceElement] =
-    useState<HTMLSpanElement | null>(null);
   const [showSubmit, setShowSubmit] = useState(false);
 
   const [moveToParentHovered, setMoveToParentHovered] = useState(false);
@@ -384,18 +384,16 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
   return (
     <>
-      <Tooltip
-        label={territory.labels[0]}
-        visible={headingHovered}
-        referenceElement={referenceElement}
-      />
-
       <StyledHeader>
         <StyledHeaderBreadcrumbRow>{BreadcrumbItems}</StyledHeaderBreadcrumbRow>
 
         <StyledSuggesterRow>
           {/* BATCH ACTIONS */}
           <StyledActionsWrapper>
+            <Button
+              icon={<FaArrowDown19 />}
+              onClick={() => autoOrderStatementsMutation.mutate()}
+            />
             {user?.role !== UserEnums.Role.Viewer &&
               territory.statements.length > 0 && (
                 <>
