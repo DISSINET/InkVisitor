@@ -144,24 +144,28 @@ export const StatementListRow: React.FC<StatementListRow> = ({
                         <FaGripVertical color={themeContext?.color.black} />
                       </div>
                       <StyledOrderCorrection>
-                        {!isAnchored && (
+                        {/* no anchor icon */}
+                        {!isAnchored ? (
                           <TbAnchorOff
                             size={15}
                             color={themeContext?.color.danger}
                           />
-                        )}
-                        {orderCorrection && (
-                          <>
-                            {orderCorrection.shouldMoveUp ? (
-                              <FaArrowUpLong size={14} />
-                            ) : (
-                              orderCorrection &&
-                              orderCorrection.shouldMoveDown && (
-                                <FaArrowDownLong size={14} />
-                              )
-                            )}
-                            <div>{orderCorrection.distance}</div>
-                          </>
+                        ) : (
+                          // order correction helper
+                          orderCorrection &&
+                          orderCorrection.distance > 0 && (
+                            <>
+                              {orderCorrection.shouldMoveUp ? (
+                                <FaArrowUpLong size={14} />
+                              ) : (
+                                orderCorrection &&
+                                orderCorrection.shouldMoveDown && (
+                                  <FaArrowDownLong size={14} />
+                                )
+                              )}
+                              <div>{orderCorrection.distance}</div>
+                            </>
+                          )
                         )}
                       </StyledOrderCorrection>
                     </div>

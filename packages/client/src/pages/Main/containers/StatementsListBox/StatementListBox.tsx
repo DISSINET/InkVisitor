@@ -674,26 +674,57 @@ export const StatementListBox: React.FC = () => {
       statementAnchors.map((anchor, index) => [anchor.anchor, index])
     );
 
-    // Add hasCorrectOrder flag and correction info to each statement
-    return statements.map((statement, index) => {
-      const correctPosition = correctPositionMap.get(statement.id);
-      const isAnchored = correctPosition !== undefined;
-      const needsCorrection = isAnchored && correctPosition !== index;
+    // First, create a map of all statements with their original indexes
+    const statementsWithIndexes = statements.map((statement, index) => ({
+      statement,
+      originalIndex: index,
+      isAnchored: correctPositionMap.has(statement.id),
+      correctPosition: correctPositionMap.get(statement.id),
+    }));
 
-      return {
+    // Filter and sort only anchored statements
+    const anchoredStatements = statementsWithIndexes
+      .filter((item) => item.isAnchored)
+      .sort((a, b) => (a.correctPosition ?? 0) - (b.correctPosition ?? 0));
+
+    // Create a map of current anchored positions (excluding non-anchored statements)
+    const currentAnchoredPositions = new Map(
+      statementsWithIndexes
+        .filter((item) => item.isAnchored)
+        .map((item, index) => [item.statement.id, index])
+    );
+
+    // Create a map of anchored statements with their corrections
+    const anchoredCorrections = new Map(
+      anchoredStatements.map((item) => [
+        item.statement.id,
+        {
+          currentPosition: currentAnchoredPositions.get(item.statement.id) ?? 0,
+          correctPosition: item.correctPosition ?? 0,
+          shouldMoveUp:
+            (item.correctPosition ?? 0) <
+            (currentAnchoredPositions.get(item.statement.id) ?? 0),
+          shouldMoveDown:
+            (item.correctPosition ?? 0) >
+            (currentAnchoredPositions.get(item.statement.id) ?? 0),
+          distance: Math.abs(
+            (item.correctPosition ?? 0) -
+              (currentAnchoredPositions.get(item.statement.id) ?? 0)
+          ),
+        },
+      ])
+    );
+
+    // Reconstruct the array in original order with corrections
+    return statementsWithIndexes.map(
+      ({ statement, originalIndex, isAnchored }) => ({
         ...statement,
         isAnchored,
-        orderCorrection: needsCorrection
-          ? {
-              currentPosition: index,
-              correctPosition: correctPosition,
-              shouldMoveUp: correctPosition < index,
-              shouldMoveDown: correctPosition > index,
-              distance: Math.abs(correctPosition - index),
-            }
+        orderCorrection: isAnchored
+          ? anchoredCorrections.get(statement.id)
           : null,
-      };
-    });
+      })
+    );
   }, [selectedDocument, statements]);
 
   return (
