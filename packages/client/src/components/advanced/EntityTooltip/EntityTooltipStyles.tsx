@@ -55,7 +55,8 @@ export const StyledLetterIconWrap = styled.div`
 `;
 
 export const StyledAnchorItem = styled.div`
-  display: inline;
+  display: flex;
+  flex-direction: column;
   align-items: center;
   gap: ${({ theme }) => theme.space[1]};
 `;
