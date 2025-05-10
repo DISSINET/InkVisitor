@@ -11,12 +11,7 @@ import {
 } from "@shared/types";
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
-import { Button, Input, Loader } from "components";
-import Dropdown, {
-  DocumentTitle,
-  EntitySuggester,
-  EntityTag,
-} from "components/advanced";
+import Dropdown from "components/advanced";
 import TextAnnotator from "components/advanced/Annotator/Annotator";
 import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
 import { useDebounce, useResizeObserver } from "hooks";
@@ -27,12 +22,10 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { BiSearch } from "react-icons/bi";
-import { FaLongArrowAltRight, FaUnlink } from "react-icons/fa";
-import { GrDocumentMissing } from "react-icons/gr";
-import { TbAnchor, TbAnchorOff } from "react-icons/tb";
 import { ThemeContext } from "styled-components";
 import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
+import { StatementListDisplayMode } from "types";
+import StatementListDocumentSearchLine from "../StatementListDocumentSearchLine/StatementListDocumentSearchLine";
 import { StyledInfoText } from "../StatementListHeader/StatementListHeaderStyles";
 
 interface StatementListTextAnnotator {
@@ -46,8 +39,6 @@ interface StatementListTextAnnotator {
   setShowSubmit: React.Dispatch<React.SetStateAction<boolean>>;
   addStatementAtCertainIndex: (index: number) => Promise<void>;
   handleCreateStatement: (detail?: string, statementId?: string) => void;
-  selectedRows: string[];
-  setSelectedRows: React.Dispatch<React.SetStateAction<string[]>>;
 
   storedAnnotatorResourceId: string | false;
   setStoredAnnotatorResourceId?: React.Dispatch<
@@ -64,6 +55,9 @@ interface StatementListTextAnnotator {
 
   annotator?: Annotator;
   setAnnotator?: React.Dispatch<React.SetStateAction<Annotator | undefined>>;
+
+  displayMode: StatementListDisplayMode;
+  showStatementList: boolean;
 }
 
 export const StatementListTextAnnotator: React.FC<
@@ -78,9 +72,6 @@ export const StatementListTextAnnotator: React.FC<
   setShowSubmit,
   addStatementAtCertainIndex,
   handleCreateStatement,
-  // handleCreateTerritory,
-  selectedRows,
-  setSelectedRows,
 
   storedAnnotatorResourceId,
   setStoredAnnotatorResourceId = () => {},
@@ -96,6 +87,9 @@ export const StatementListTextAnnotator: React.FC<
 
   annotator,
   setAnnotator = () => {},
+
+  displayMode,
+  showStatementList,
 }) => {
   const [showAnnotator, setShowAnnotator] = useState(false);
   useEffect(() => {
@@ -300,161 +294,27 @@ export const StatementListTextAnnotator: React.FC<
 
   return (
     <animated.div style={animatedStyle}>
-      <div
-        style={{
-          display: "flex",
-          maxWidth: `${
-            statements.length > 0
-              ? debouncedContentWidth - COLLAPSED_TABLE_WIDTH
-              : debouncedContentWidth
-          }px`,
-          alignItems: "center",
-          padding: "0.2rem 0.5rem",
-        }}
-      >
-        {!selectedResource && (
-          <EntitySuggester
-            categoryTypes={[EntityEnums.Class.Resource]}
-            preSuggestions={resources}
-            onPicked={(entity) => {
-              setSelectedResourceId(entity.id);
-            }}
-          />
-        )}
-        {selectedResource && (
-          <div
-            style={{
-              display: "flex",
-              gap: "0.2rem",
-            }}
-          >
-            <EntityTag
-              entity={selectedResource}
-              unlinkButton={{
-                onClick: () => {
-                  setSelectedResourceId(false);
-                },
-                tooltipLabel: "use different resource",
-              }}
-            />
-          </div>
-        )}
-
-        {selectedDocumentIsFetching && <Loader />}
-
-        {!selectedDocumentIsFetching && selectedDocument && (
-          <DocumentTitle title={selectedDocument.title} />
-        )}
-
-        {!selectedDocumentIsFetching &&
-          selectedResource !== false &&
-          selectedResource.data.documentId === undefined && (
-            <>
-              <GrDocumentMissing />
-              <i>This Resource does not have any document</i>
-            </>
-          )}
-
-        {selectedResource !== false && selectedResource?.data?.documentId && (
-          <div
-            className="annotator-menu-bar"
-            style={{
-              gap: "0.2rem",
-            }}
-          >
-            {/* T anchor line */}
-            {activeTHasAnchor ? (
-              <Button
-                label=""
-                iconRight={
-                  <div style={{ display: "flex", alignItems: "center" }}>
-                    <TbAnchor />
-                    <FaLongArrowAltRight />
-                  </div>
-                }
-                tooltipLabel="locate anchor"
-                inverted
-                onClick={() => {
-                  annotator?.scrollToAnchor(territoryId);
-                }}
-                color="warning"
-              />
-            ) : (
-              <div
-                style={{
-                  display: "flex",
-                  gap: "0.4rem",
-                  color: themeContext?.color["black"],
-                  fontSize: themeContext?.fontSize["sm"],
-                }}
-              >
-                <TbAnchorOff title="no anchor for T" />
-              </div>
-            )}
-          </div>
-        )}
-        {isSearchAllowed && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: themeContext?.space[1],
-              marginLeft: themeContext?.space[2],
-              flex: "1",
-            }}
-          >
-            <StyledInfoText style={{ textWrap: "nowrap", marginRight: "2px" }}>
-              <BiSearch />
-            </StyledInfoText>
-            <Input
-              value={searchTerm}
-              onChangeFn={(newText: any) => {
-                setSearchTerm(newText);
-              }}
-              changeOnType
-              minWidth={100}
-            />
-            {isSearchTermValid && (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: themeContext?.space[2],
-                }}
-              >
-                <div
-                  style={{
-                    color: themeContext?.color["info"],
-                    fontSize: themeContext?.fontSize["xs"],
-                  }}
-                >
-                  {searchActiveOccurence + 1} / {searchOccurences.length}{" "}
-                  occurences
-                </div>
-                <Button
-                  label="⬇"
-                  color="info"
-                  onClick={() => {
-                    const nextOccurence =
-                      (searchActiveOccurence + 1) % searchOccurences.length;
-                    setSearchActiveOccurence(nextOccurence);
-                  }}
-                />
-                <Button
-                  label="⬆"
-                  color="info"
-                  onClick={() => {
-                    const prevOccurence =
-                      (searchActiveOccurence - 1 + searchOccurences.length) %
-                      searchOccurences.length;
-                    setSearchActiveOccurence(prevOccurence);
-                  }}
-                />
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+      <StatementListDocumentSearchLine
+        statements={statements}
+        contentWidth={contentWidth}
+        selectedResource={selectedResource}
+        setSelectedResourceId={setSelectedResourceId}
+        selectedDocumentIsFetching={selectedDocumentIsFetching}
+        selectedDocument={selectedDocument}
+        activeTHasAnchor={activeTHasAnchor}
+        annotator={annotator}
+        territoryId={territoryId}
+        isSearchAllowed={isSearchAllowed}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        isSearchTermValid={isSearchTermValid}
+        hasNoSearchResults={searchOccurences.length === 0}
+        searchActiveOccurence={searchActiveOccurence}
+        searchOccurences={searchOccurences}
+        setSearchActiveOccurence={setSearchActiveOccurence}
+        resources={resources || []}
+        showStatementList={showStatementList}
+      />
 
       {/* Class selector */}
       {selectedResource !== false && selectedResource?.data?.documentId && (
@@ -465,6 +325,7 @@ export const StatementListTextAnnotator: React.FC<
             gap: themeContext?.space[4],
             paddingRight: themeContext?.space[2],
             marginBottom: themeContext?.space[2],
+            marginLeft: showStatementList ? `-${COLLAPSED_TABLE_WIDTH}px` : "0",
           }}
           ref={selectorRef}
         >
@@ -478,11 +339,7 @@ export const StatementListTextAnnotator: React.FC<
             disableAny={true}
             onChange={handleHlEntitiesChange}
             value={hlEntities}
-            width={
-              statements.length > 0
-                ? debouncedContentWidth - COLLAPSED_TABLE_WIDTH - 75
-                : debouncedContentWidth - 75
-            }
+            width={debouncedContentWidth - 75}
             noOptionsMessage="No entity classes to highlight"
             limitSelectedItems={
               statements.length > 0

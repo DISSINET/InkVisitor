@@ -23,6 +23,7 @@ export const StyledDocumentTag = styled.div<{
       ? theme.fontSize["xs"]
       : theme.fontSize["sm"]};
   align-items: center;
+  min-width: 0;
   max-width: ${({ $width }) => $width || "100%"};
   overflow: hidden !important;
 `;
@@ -33,4 +34,7 @@ export const StyledDocumentTitle = styled.div`
   overflow: hidden !important;
   white-space: nowrap;
   text-overflow: ellipsis;
+  min-width: 0;
+
+  flex-shrink: 1;
 `;

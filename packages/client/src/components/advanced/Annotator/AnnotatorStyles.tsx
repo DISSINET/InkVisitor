@@ -134,7 +134,7 @@ export const StyledTerritorySubsectionTitle = styled.div`
 `;
 
 export const StyledAnnotatorNoAnchors = styled.div`
-  color: ${({ theme }) => theme.color.gray["500"]};
+  color: ${({ theme }) => theme.color.white};
   align-self: center;
   display: flex;
   justify-content: center;
