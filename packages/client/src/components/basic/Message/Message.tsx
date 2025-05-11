@@ -10,7 +10,9 @@ import { EntityColors } from "types";
 import {
   StyledMessage,
   StyledMessageTValidationContent,
+  StyledMessageOrigin,
 } from "./MessageStyles";
+import { isWarningTBased } from "utils/utils";
 
 interface Message {
   warning: IWarning;
@@ -29,6 +31,9 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
   const [extendedEntities, setExtendedEntities] = useState<
     Record<string, IEntity>
   >(entities ?? {});
+
+  const originId = warning.origin;
+  const originEntity = entities?.[originId];
 
   useEffect((): void => {
     const entitiesOut = [];
@@ -301,7 +306,7 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
           <StyledMessageTValidationContent>
             {renderEntityTags([warning?.position?.entityId])} is not classified
             with valid entity{" "}
-            {renderEntityClasses(warning.validation?.allowedClasses)}{" "}
+            {renderEntityTags(warning.validation?.allowedEntities ?? [])}
             {renderValidationLabel(warning)}
           </StyledMessageTValidationContent>
         );
@@ -335,7 +340,21 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
       <div style={{ width: "3rem" }}>
         <TiWarningOutline size={20} style={{ marginRight: "0.5rem" }} />
       </div>
-      {getWarningMessage()}
+      <div
+        style={{
+          display: "inline-flex",
+          flexWrap: "wrap",
+          gap: theme.space[2],
+        }}
+      >
+        {getWarningMessage()}
+        {isWarningTBased(warning) && originEntity && (
+          <StyledMessageOrigin>
+            <b>Source</b>
+            <EntityTag entity={originEntity} showOnly="label" />
+          </StyledMessageOrigin>
+        )}
+      </div>
     </StyledMessage>
   );
 };

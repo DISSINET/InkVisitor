@@ -77,7 +77,6 @@ export const StatementListBox: React.FC = () => {
     removeDetailId,
     appendDetailId,
     annotatorOpened,
-    setAnnotatorOpened,
   } = useSearchParams();
 
   useEffect(() => {
@@ -102,12 +101,6 @@ export const StatementListBox: React.FC = () => {
       ? StatementListDisplayMode.TEXT
       : StatementListDisplayMode.LIST;
   }, [annotatorOpened]);
-
-  const handleDisplayModeChange = (
-    newDisplayMode: StatementListDisplayMode
-  ) => {
-    setAnnotatorOpened(newDisplayMode === StatementListDisplayMode.TEXT);
-  };
 
   const {
     status,
@@ -537,13 +530,16 @@ export const StatementListBox: React.FC = () => {
     }
   }, [statementListOpened]);
 
-  const width = useMemo(
-    () =>
-      displayMode === StatementListDisplayMode.LIST
-        ? contentWidth
-        : COLLAPSED_TABLE_WIDTH,
-    [displayMode, contentWidth]
-  );
+  const isListNonEmpty = statements.length > 0;
+
+  const tableWidth = useMemo(() => {
+    if (isListNonEmpty) {
+      return displayMode === StatementListDisplayMode.LIST
+        ? contentWidth + 10
+        : COLLAPSED_TABLE_WIDTH;
+    }
+    return 0;
+  }, [displayMode, contentWidth, statements.length]);
 
   const [annotator, setAnnotator] = useState<Annotator | undefined>(undefined);
 
@@ -565,8 +561,6 @@ export const StatementListBox: React.FC = () => {
               duplicateStatementsMutation={duplicateStatementsMutation}
               replaceReferencesMutation={replaceReferencesMutation}
               appendReferencesMutation={appendReferencesMutation}
-              displayMode={displayMode}
-              handleDisplayModeChange={handleDisplayModeChange}
               updateTerritoryMutation={updateTerritoryMutation}
               duplicateTerritoryMutation={duplicateTerritoryMutation}
               deleteStatementsMutation={deleteStatementsMutation}
@@ -602,7 +596,7 @@ export const StatementListBox: React.FC = () => {
             style={{
               display: "flex",
               height: "100%",
-              maxHeight: "calc(100% - 101px)",
+              maxHeight: "calc(100%)",
               overflow: "auto",
             }}
             ref={contentRef}
@@ -610,7 +604,7 @@ export const StatementListBox: React.FC = () => {
             <CustomScrollbar
               scrollerId="Statements"
               elementId="Statements-box-table"
-              contentWidth={statements.length > 0 ? width + 10 : 0}
+              contentWidth={tableWidth}
             >
               <StyledTableWrapper
                 $isListMode={displayMode === StatementListDisplayMode.LIST}
@@ -636,7 +630,7 @@ export const StatementListBox: React.FC = () => {
                     selectedRows={selectedRows}
                     setSelectedRows={setSelectedRows}
                     displayMode={displayMode}
-                    contentWidth={width}
+                    contentWidth={tableWidth - 10}
                     annotator={annotator}
                   />
                 )}
@@ -668,10 +662,10 @@ export const StatementListBox: React.FC = () => {
                 right={right}
                 setShowSubmit={setShowSubmit}
                 addStatementAtCertainIndex={addStatementAtCertainIndex}
-                selectedRows={selectedRows}
-                setSelectedRows={setSelectedRows}
                 annotator={annotator}
                 setAnnotator={setAnnotator}
+                displayMode={displayMode}
+                showStatementList={isListNonEmpty}
               />
             )}
           </div>

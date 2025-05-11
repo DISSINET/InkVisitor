@@ -50,3 +50,84 @@ export const StyledEmptyState = styled.div`
   align-items: center;
   text-align: center;
 `;
+
+export const StyledDocumentSearchLine = styled.div`
+  display: flex;
+  gap: 0.2rem;
+  align-items: center;
+  padding: 0.2rem 0.5rem;
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+`;
+
+export const StyledSearchContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[1]};
+  margin-left: ${({ theme }) => theme.space[2]};
+  flex-shrink: 1;
+  min-width: 0;
+`;
+
+export const StyledSearchIcon = styled.div`
+  display: flex;
+  flex-shrink: 0;
+`;
+
+export const StyledSearchInputContainer = styled.div`
+  display: flex;
+  align-items: center;
+  flex-shrink: 1;
+  min-width: 0;
+  gap: ${({ theme }) => theme.space[1]};
+`;
+
+export const StyledSearchResults = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+  flex-shrink: 0;
+  color: ${({ theme }) => theme.color.info};
+  font-size: ${({ theme }) => theme.fontSize.xxs};
+  font-weight: ${({ theme }) => theme.fontWeight.bold};
+  white-space: nowrap;
+`;
+
+export const StyledSearchNavigation = styled.div`
+  display: flex;
+  gap: 0.4rem;
+  color: ${({ theme }) => theme.color.black};
+  font-size: ${({ theme }) => theme.fontSize.sm};
+  flex-shrink: 0;
+`;
+
+export const StyledAnnotatorMenuBar = styled.div`
+  display: flex;
+  gap: 0.2rem;
+  flex-shrink: 0;
+`;
+
+export const StyledNoDocumentMessage = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-style: italic;
+  flex-shrink: 0;
+`;
+
+export const StyledEntityContainer = styled.div`
+  display: flex;
+  align-items: center;
+  flex-shrink: 1;
+  min-width: 0;
+  max-width: 200px;
+`;
+
+export const StyledDocumentTitleContainer = styled.div`
+  display: flex;
+  align-items: center;
+  flex-shrink: 3;
+  min-width: 0;
+  max-width: 300px;
+`;

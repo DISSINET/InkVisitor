@@ -6,6 +6,8 @@ export const StyledDetailWrapper = styled.div<StyledDetailWrapper>`
   flex-direction: column;
   overflow: auto;
   align-items: start;
+  // necessary for correct scroll / overflow
+  padding-bottom: 2.5rem;
 `;
 
 interface StyledDetailSection {

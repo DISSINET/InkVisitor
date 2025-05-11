@@ -7,7 +7,7 @@ interface StyledTable {
 }
 export const StyledTable = styled.table<StyledTable>`
   width: ${({ $contentWidth }) => $contentWidth};
-  min-width: ${({}) => `${COLLAPSED_TABLE_WIDTH / 10}rem`};
+  min-width: ${({}) => `${COLLAPSED_TABLE_WIDTH / 10 - 2.5}rem`};
   border-spacing: 0;
   border-collapse: collapse;
   border-width: ${({ theme }) => theme.borderWidth[1]};
@@ -15,6 +15,10 @@ export const StyledTable = styled.table<StyledTable>`
   border-color: ${({ theme }) => theme.color["gray"][500]};
   box-shadow: ${({ theme }) => theme.boxShadow["subtle"]};
   overflow-x: ${({ $isListMode }) => ($isListMode ? "auto" : "hidden")};
+  margin-top: ${({ theme, $isListMode }) =>
+    $isListMode ? "0" : theme.space[24]};
+  margin-left: ${({ theme }) => theme.space[1]};
+  margin-right: ${({ theme }) => theme.space[1]};
   transition: width 0.3s ease;
 `;
 export const StyledTHead = styled.thead`
@@ -109,4 +113,13 @@ export const StyledAbbreviatedLabel = styled.div`
   -webkit-line-clamp: 2;
   min-width: 5rem;
   font-size: ${({ theme }) => theme.fontSize["xs"]};
+`;
+
+export const StyledAnchor = styled.div`
+  background-color: ${({ theme }) => theme.color.blue[400]};
+  color: ${({ theme }) => theme.color.white};
+  margin-right: 5px;
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 50%;
 `;

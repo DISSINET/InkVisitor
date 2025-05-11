@@ -7,7 +7,7 @@ import {
   hiddenBoxHeight,
 } from "Theme/constants";
 import api from "api";
-import { Box, Button, Panel } from "components";
+import { Box, Button, ButtonGroup, Panel } from "components";
 import { EntityCreateModal, PanelSeparator } from "components/advanced";
 import { CStatement } from "constructors";
 import { useSearchParams } from "hooks";
@@ -15,7 +15,7 @@ import ScrollHandler from "hooks/ScrollHandler";
 import React, { useEffect, useState } from "react";
 import { BiHide, BiRefresh, BiShow } from "react-icons/bi";
 import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
-import { FaPlus } from "react-icons/fa";
+import { FaList, FaHighlighter, FaPlus } from "react-icons/fa";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { VscCloseAll } from "react-icons/vsc";
 import { setFirstPanelExpanded } from "redux/features/layout/firstPanelExpandedSlice";
@@ -26,7 +26,7 @@ import { setThirdPanelExpanded } from "redux/features/layout/thirdPanelExpandedS
 import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 import { setIsLoading } from "redux/features/statementList/isLoadingSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { DetailBoxState } from "types";
+import { DetailBoxState, StatementListDisplayMode } from "types";
 import { MemoizedEntityBookmarkBox } from "./containers/EntityBookmarkBox/EntityBookmarkBox";
 import { MemoizedEntityDetailBox } from "./containers/EntityDetailBox/EntityDetailBox";
 import { MemoizedEntitySearchBox } from "./containers/EntitySearchBox/EntitySearchBox";
@@ -48,6 +48,8 @@ const MainPage: React.FC<MainPage> = ({}) => {
     selectedDetailId,
     appendDetailId,
     setStatementId,
+    annotatorOpened,
+    setAnnotatorOpened,
   } = useSearchParams();
 
   const dispatch = useAppDispatch();
@@ -430,15 +432,36 @@ const MainPage: React.FC<MainPage> = ({}) => {
           height={getStatementListBoxHeight()}
           buttons={[
             <>
-              {statementListOpened &&
-                userRole !== UserEnums.Role.Viewer &&
-                territoryId && (
+              <ButtonGroup style={{ marginLeft: "5px", marginRight: "5px" }}>
+                <Button
+                  color="success"
+                  icon={<FaList />}
+                  // label={`list (${territory.statements.length})`}
+                  label={`list`}
+                  onClick={() => {
+                    setAnnotatorOpened(false);
+                  }}
+                  inverted={!!annotatorOpened}
+                ></Button>
+                <Button
+                  color="success"
+                  icon={<FaHighlighter />}
+                  label="annotator"
+                  onClick={() => {
+                    setAnnotatorOpened(true);
+                  }}
+                  inverted={!annotatorOpened}
+                ></Button>
+              </ButtonGroup>
+              <ButtonGroup style={{ marginLeft: "5px", marginRight: "5px" }}>
+                {/* TODO: check if user has write rights to Territory */}
+                {userRole !== UserEnums.Role.Viewer && territoryId && (
                   <Button
                     key="add"
                     icon={<FaPlus />}
                     tooltipLabel="add new statement at the end of the list"
                     color="primary"
-                    label="new statement"
+                    label="statement"
                     onClick={() => {
                       if (user) {
                         addStatementAtTheEndMutation.mutate(
@@ -454,6 +477,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
                     }}
                   />
                 )}
+              </ButtonGroup>
             </>,
             statementListOpened &&
               territoryId &&
@@ -468,13 +492,16 @@ const MainPage: React.FC<MainPage> = ({}) => {
             borderColor="white"
             onHeaderClick={handleMaximizeDetailBox}
             height={getDetailBoxHeight()}
+            // Scroll is disabled because of the tabs and is handled inside the EntityDetail component
+            disableScroll
             buttons={[
               <>
                 {userRole !== UserEnums.Role.Viewer && (
                   <Button
                     icon={<FaPlus />}
-                    label="new entity"
+                    label="entity"
                     onClick={() => setShowEntityCreateModal(true)}
+                    tooltipLabel="create new entity"
                   />
                 )}
               </>,

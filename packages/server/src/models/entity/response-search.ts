@@ -318,14 +318,27 @@ export class SearchQuery {
       right = "($|[^a-zA-Z0-9])";
     }
 
-    const processedLabel = normalize
-      ? label
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "") // remove diacritics
-          .toLowerCase()
-      : label;
+    // Instead of normalizing, create a pattern that matches both accented and non-accented versions
+    const processedLabel = label.toLowerCase();
+    const diacriticPattern = processedLabel
+      .split("")
+      .map((char) => {
+        // Map common accented characters to their base form with optional accents
+        const map: Record<string, string> = {
+          a: "[aàáâãäå]",
+          e: "[eèéêë]",
+          i: "[iìíîï]",
+          o: "[oòóôõö]",
+          u: "[uùúûü]",
+          y: "[yýÿ]",
+          n: "[nñ]",
+          c: "[cç]",
+        };
+        return map[char] || char;
+      })
+      .join("");
 
-    const regexBody = processedLabel
+    const regexBody = diacriticPattern
       .split(" ")
       .join("([^a-zA-Z0-9]+[\\w]+)*[^a-zA-Z0-9]+"); // Allow glue between words
 
