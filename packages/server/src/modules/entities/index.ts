@@ -628,7 +628,7 @@ export default Router()
    */
   .get(
     "/:entityId/detail",
-    asyncRouteHandler<IResponseDetail>(async (request: IRequest) => {
+    asyncRouteHandler<IResponseDetail>(async (request: IRequest<{ entityId: string }>) => {
       const entityId = request.params.entityId;
 
       if (!entityId) {
