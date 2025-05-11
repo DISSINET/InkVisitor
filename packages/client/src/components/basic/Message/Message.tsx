@@ -306,7 +306,7 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
           <StyledMessageTValidationContent>
             {renderEntityTags([warning?.position?.entityId])} is not classified
             with valid entity{" "}
-            {renderEntityClasses(warning.validation?.allowedClasses)}{" "}
+            {renderEntityTags(warning.validation?.allowedEntities ?? [])}
             {renderValidationLabel(warning)}
           </StyledMessageTValidationContent>
         );
