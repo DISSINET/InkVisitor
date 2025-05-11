@@ -285,7 +285,7 @@ export const TextAnnotator = ({
       newAnnotator.addLines(lines.current);
     }
 
-    newAnnotator.onSelectText(({ text, anchors }) => {
+    newAnnotator.onSelectText(({ text, anchors, index }) => {
       handleTextSelection(text, anchors);
     });
 
