@@ -51,15 +51,13 @@ export const StyledActionsWrapper = styled.div`
   padding-left: 0.5rem;
   display: flex;
   align-items: center;
+  gap: 0.5rem;
 `;
 export const StyledCounter = styled.div`
   white-space: nowrap;
-  margin-left: 0.5rem;
   color: ${({ theme }) => theme.color["black"]};
 `;
-export const StyledDropdownWrap = styled.div`
-  margin: 0 0.5rem;
-`;
+export const StyledDropdownWrap = styled.div``;
 export const StyledCheckboxWrapper = styled.div`
   color: ${({ theme }) => theme.color["black"]};
   cursor: pointer;

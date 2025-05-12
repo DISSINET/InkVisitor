@@ -2,7 +2,6 @@ import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import { Button, Input, Loader } from "components";
 import { DocumentTitle, EntitySuggester, EntityTag } from "components/advanced";
-import { useDebounce } from "hooks";
 import React, { useContext } from "react";
 import { BiSearch } from "react-icons/bi";
 import {
@@ -14,7 +13,6 @@ import { GrDocumentMissing } from "react-icons/gr";
 import { TbAnchor, TbAnchorOff } from "react-icons/tb";
 import { ThemeContext } from "styled-components";
 import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
-import { StatementListDisplayMode } from "types";
 import {
   StyledAnnotatorMenuBar,
   StyledDocumentSearchLine,
@@ -26,7 +24,7 @@ import {
   StyledSearchInputContainer,
   StyledSearchNavigation,
   StyledSearchResults,
-} from "../StatementLitBoxStyles";
+} from "../StatementListBoxStyles";
 
 interface StatementListDocumentSearchLineProps {
   statements: any[];
@@ -156,7 +154,7 @@ const StatementListDocumentSearchLine: React.FC<
       {isSearchAllowed && (
         <StyledSearchContainer>
           <StyledSearchIcon>
-            <BiSearch colorProfile={themeContext?.color.info} />
+            <BiSearch color={themeContext?.color.info} />
           </StyledSearchIcon>
           <StyledSearchInputContainer>
             <Input
