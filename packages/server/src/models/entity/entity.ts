@@ -386,7 +386,7 @@ export default class Entity implements IEntity, IDbModel {
     ) => {
       warnings.push({
         type: warningType,
-        origin: this.id,
+        origin: teritoryId,
         validation: tValidation,
         position: {
           section: IWarningPositionSection.Entity,

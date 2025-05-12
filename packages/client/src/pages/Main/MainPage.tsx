@@ -492,6 +492,8 @@ const MainPage: React.FC<MainPage> = ({}) => {
             borderColor="white"
             onHeaderClick={handleMaximizeDetailBox}
             height={getDetailBoxHeight()}
+            // Scroll is disabled because of the tabs and is handled inside the EntityDetail component
+            disableScroll
             buttons={[
               <>
                 {userRole !== UserEnums.Role.Viewer && (

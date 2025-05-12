@@ -76,6 +76,7 @@ export const StyledContent = styled(animated.div)<StyledContent>`
 `;
 interface StyledContentAnimationWrap {
   $hideContent: boolean;
+  $disableScroll?: boolean;
 }
 export const StyledContentAnimationWrap = styled(
   animated.div
@@ -83,6 +84,7 @@ export const StyledContentAnimationWrap = styled(
   display: ${({ $hideContent }) => ($hideContent ? "none" : "inherit")};
   flex-direction: column;
   height: 100%;
+  overflow: ${({ $disableScroll }) => ($disableScroll ? "hidden" : "auto")};
 `;
 interface StyledVerticalText {
   $showContentLabel: boolean;
