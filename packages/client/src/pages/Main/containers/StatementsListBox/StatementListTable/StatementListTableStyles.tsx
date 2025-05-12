@@ -56,7 +56,7 @@ export const StyledTr = styled.tr<StyledTr>`
     $isOpened ? "4px solid " + theme.color["success"] : ""};
   cursor: ${({ $isOpened }) => ($isOpened ? "default" : "pointer")};
   td:first-child {
-    padding-left: ${({ theme, $isOpened }) => ($isOpened ? "0.9rem" : "")};
+    padding-left: ${({ $isOpened }) => (!$isOpened ? "0.9rem" : "")};
     width: 1%;
   }
   td:last-child {
