@@ -32,7 +32,7 @@ import {
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StatementListTextAnnotator } from "./StatementListTextAnnotator/StatementListTextAnnotator";
-import { StyledEmptyState, StyledTableWrapper } from "./StatementLitBoxStyles";
+import { StyledEmptyState, StyledTableWrapper } from "./StatementListBoxStyles";
 import { IAnchorsNode } from "@shared/types/document";
 
 const initialData: {
