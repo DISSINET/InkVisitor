@@ -395,6 +395,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
               onClick={() => autoOrderStatementsMutation.mutate()}
               color="success"
               tooltipLabel="auto order statements"
+              tooltipContent={<i>leaves non anchored statements in place</i>}
             />
             {user?.role !== UserEnums.Role.Viewer &&
               territory.statements.length > 0 && (
