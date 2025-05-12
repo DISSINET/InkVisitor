@@ -7,7 +7,7 @@ export const StyledDetailWrapper = styled.div<StyledDetailWrapper>`
   overflow: auto;
   align-items: start;
   // necessary for correct scroll / overflow
-  padding-bottom: 2.5rem;
+  /* padding-bottom: 2.5rem; */
 `;
 
 interface StyledDetailSection {
