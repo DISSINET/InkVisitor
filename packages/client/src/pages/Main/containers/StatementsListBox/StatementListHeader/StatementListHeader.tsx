@@ -4,6 +4,7 @@ import {
   IEntity,
   IReference,
   IResponseGeneric,
+  IResponseStatement,
   IResponseTerritory,
   IResponseTree,
   ITerritory,
@@ -41,6 +42,7 @@ import {
   EntitiesDeleteSuccessResponse,
   RelationsCreateErrorResponse,
   RelationsCreateSuccessResponse,
+  StatementOrderCorrection,
 } from "types";
 import { collectTerritoryChildren, searchTree } from "utils/utils";
 import { v4 as uuidv4 } from "uuid";
@@ -126,6 +128,10 @@ interface StatementListHeader {
     unknown
   >;
   autoOrderStatementsMutation: UseMutationResult<void, Error, void, unknown>;
+  statementsWithOrder: (IResponseStatement & {
+    orderCorrection?: StatementOrderCorrection;
+    isAnchored?: boolean;
+  })[];
 }
 export const StatementListHeader: React.FC<StatementListHeader> = ({
   territory,
@@ -146,6 +152,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   deleteStatementsMutation,
   relationsCreateMutation,
   autoOrderStatementsMutation,
+  statementsWithOrder,
 }) => {
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
@@ -382,6 +389,10 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
     );
   }, [selectedTerritoryPath.join(",")]);
 
+  const hasAnchoredStatementsOutOfOrder = statementsWithOrder.some(
+    (s) => s.isAnchored && s.orderCorrection && s.orderCorrection.distance > 0
+  );
+
   return (
     <>
       <StyledHeader>
@@ -395,7 +406,16 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
               onClick={() => autoOrderStatementsMutation.mutate()}
               color="success"
               tooltipLabel="auto order statements"
-              tooltipContent={<i>leaves non anchored statements in place</i>}
+              tooltipContent={
+                hasAnchoredStatementsOutOfOrder ? (
+                  <i>leaves non-anchored statements in place</i>
+                ) : (
+                  <i>
+                    order of anchored statements corresponds to the document
+                  </i>
+                )
+              }
+              disabled={!hasAnchoredStatementsOutOfOrder}
             />
             {user?.role !== UserEnums.Role.Viewer &&
               territory.statements.length > 0 && (

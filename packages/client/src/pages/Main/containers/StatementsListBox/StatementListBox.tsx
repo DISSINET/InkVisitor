@@ -809,6 +809,7 @@ export const StatementListBox: React.FC = () => {
               deleteStatementsMutation={deleteStatementsMutation}
               relationsCreateMutation={relationsCreateMutation}
               autoOrderStatementsMutation={autoOrderStatementsMutation}
+              statementsWithOrder={statementsWithOrder}
             />
           )}
 
