@@ -328,11 +328,17 @@ class Text {
       return -1;
     }
 
-    let absIndex = pos.rawTextIndex;
-    for (let i = 0; i < pos.segmentIndex; i++) {
+    return this.getAbsTextIndexFromPosition(pos);
+  }
+
+  getAbsTextIndexFromPosition(segment: SegmentPosition | null): number {
+    if (!segment) {
+      return -1;
+    }
+    let absIndex = segment.rawTextIndex;
+    for (let i = 0; i < segment.segmentIndex; i++) {
       absIndex += this.segments[i].raw.length + 1;
     }
-
     return absIndex;
   }
 
