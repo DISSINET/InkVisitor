@@ -214,11 +214,20 @@ export const TextAnnotator = ({
   const [pendingSelection, setPendingSelection] = useState<{
     text: string;
     anchors: string[];
+    index: number;
   } | null>(null);
 
-  const handleTextSelection = (text: string, anchors: string[]) => {
+  useEffect(() => {
+    console.log("pendingSelection", pendingSelection);
+  }, [pendingSelection]);
+
+  const handleTextSelection = (
+    text: string,
+    anchors: string[],
+    index: number
+  ) => {
     if (annotatorMode === EditMode.HIGHLIGHT) {
-      setPendingSelection({ text, anchors });
+      setPendingSelection({ text, anchors, index });
     }
   };
 
@@ -286,7 +295,7 @@ export const TextAnnotator = ({
     }
 
     newAnnotator.onSelectText(({ text, anchors, index }) => {
-      handleTextSelection(text, anchors);
+      handleTextSelection(text, anchors, index);
     });
 
     newAnnotator.onHighlight((entityId) => {
