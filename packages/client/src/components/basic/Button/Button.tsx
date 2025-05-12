@@ -36,6 +36,7 @@ interface ButtonProps {
   tooltipPosition?: AutoPlacement | BasePlacement | VariationPlacement;
   hideTooltipOnClick?: boolean;
   dataTestId?: string;
+  noPadding?: boolean;
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -61,6 +62,7 @@ export const Button: React.FC<ButtonProps> = ({
   tooltipPosition = "bottom",
   hideTooltipOnClick = false,
   dataTestId,
+  noPadding = false,
 }) => {
   const [referenceElement, setReferenceElement] =
     useState<HTMLButtonElement | null>(null);
@@ -92,6 +94,7 @@ export const Button: React.FC<ButtonProps> = ({
         onMouseLeave={() => setShowTooltip(false)}
         onKeyPress={(e: KeyboardEvent<HTMLButtonElement>) => e.preventDefault()}
         data-testid={dataTestId}
+        $noPadding={noPadding}
       >
         {icon}
         {label && (

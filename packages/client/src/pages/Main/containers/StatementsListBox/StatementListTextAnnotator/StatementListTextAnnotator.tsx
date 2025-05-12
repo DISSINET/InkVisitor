@@ -56,6 +56,14 @@ interface StatementListTextAnnotator {
   annotator?: Annotator;
   setAnnotator?: React.Dispatch<React.SetStateAction<Annotator | undefined>>;
 
+  selectedDocument?: IDocument | false;
+  selectedResource: IResponseEntity | false;
+  resources?: IResponseEntity[];
+  documents?: IDocument[];
+  setSelectedResourceId: React.Dispatch<React.SetStateAction<string | false>>;
+
+  selectedDocumentId: string | undefined;
+  selectedDocumentIsFetching: boolean;
   displayMode: StatementListDisplayMode;
   showStatementList: boolean;
 }
@@ -88,6 +96,14 @@ export const StatementListTextAnnotator: React.FC<
   annotator,
   setAnnotator = () => {},
 
+  selectedDocument,
+  selectedResource,
+  resources,
+  documents,
+  setSelectedResourceId,
+
+  selectedDocumentId,
+  selectedDocumentIsFetching,
   displayMode,
   showStatementList,
 }) => {
@@ -147,100 +163,6 @@ export const StatementListTextAnnotator: React.FC<
   const animatedStyle = useSpring({
     opacity: showAnnotator ? 1 : 0,
     delay: 300,
-  });
-
-  const {
-    data: resources,
-    error: resourcesError,
-    isFetching: resourcesIsFetching,
-  } = useQuery({
-    queryKey: ["resourcesWithDocuments"],
-    queryFn: async () => {
-      const res = await api.entitiesSearch({
-        resourceHasDocument: true,
-      });
-      return res.data;
-    },
-    enabled: api.isLoggedIn(),
-  });
-
-  const {
-    data: documents,
-    error,
-    isFetching,
-  } = useQuery<IDocument[]>({
-    queryKey: ["documents"],
-    queryFn: async () => {
-      const res = await api.documentsGet({});
-      return res.data;
-    },
-    enabled: api.isLoggedIn(),
-  });
-
-  const [selectedResourceId, setSelectedResourceId] = useState<string | false>(
-    storedAnnotatorResourceId
-  );
-
-  useEffect(() => {
-    if (selectedResourceId) {
-      setStoredAnnotatorResourceId(selectedResourceId);
-    }
-  }, [selectedResourceId]);
-
-  const loadDefaultResource = () => {
-    if (resources && documents) {
-      const resourceWithAnchor = resources.find((resource) => {
-        if (resource.data.documentId) {
-          const document = documents.find(
-            (d) => d.id === resource.data.documentId
-          );
-          if (document) {
-            return document.entityIds.T.includes(territoryId);
-          }
-        }
-        return false;
-      });
-
-      if (resourceWithAnchor) {
-        setSelectedResourceId(resourceWithAnchor.id);
-      } else {
-        setSelectedResourceId(false);
-      }
-    }
-  };
-
-  useEffect(() => {
-    loadDefaultResource();
-  }, [territoryId, resources, documents]);
-
-  const selectedResource = useMemo<IResponseEntity | false>(() => {
-    if (selectedResourceId && resources) {
-      return resources?.find((r) => r.id === selectedResourceId) ?? false;
-    }
-    return false;
-  }, [selectedResourceId, resources]);
-
-  const selectedDocumentId = useMemo<string | undefined>(() => {
-    if (selectedResource) {
-      return selectedResource.data.documentId;
-    }
-    return undefined;
-  }, [selectedResource]);
-
-  const {
-    data: selectedDocument,
-    error: selectedDocumentError,
-    isFetching: selectedDocumentIsFetching,
-  } = useQuery<IDocument | false>({
-    queryKey: ["document", selectedDocumentId],
-    queryFn: async () => {
-      if (selectedDocumentId !== undefined) {
-        const res = await api.documentGet(selectedDocumentId);
-        return res.data;
-      }
-      return false;
-    },
-    enabled: api.isLoggedIn(),
   });
 
   // INIT + react to url changes
@@ -341,13 +263,7 @@ export const StatementListTextAnnotator: React.FC<
             value={hlEntities}
             width={debouncedContentWidth - 75}
             noOptionsMessage="No entity classes to highlight"
-            limitSelectedItems={
-              statements.length > 0
-                ? Math.floor(
-                    (debouncedContentWidth - 130 - COLLAPSED_TABLE_WIDTH) / 80
-                  )
-                : Math.floor((debouncedContentWidth - 130) / 80)
-            }
+            limitSelectedItems={Math.floor((debouncedContentWidth - 130) / 80)}
           />
         </div>
       )}

@@ -3,7 +3,7 @@ import styled from "styled-components";
 interface StyledMessage {}
 export const StyledMessage = styled.div<StyledMessage>`
   display: flex;
-  align-items: start;
+  align-items: center;
   color: ${({ theme }) => theme.color["warningText"]};
   background-color: ${({ theme }) => theme.color["warningMessage"]};
   padding: ${({ theme }) => theme.space[3]};
@@ -17,7 +17,6 @@ export const StyledMessage = styled.div<StyledMessage>`
 
 export const StyledMessageTValidationContent = styled.div`
   display: inline;
-  items-align: center;
 `;
 
 export const StyledMessageOrigin = styled.div`

@@ -2,7 +2,7 @@ import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
 import styled from "styled-components";
 
 interface StyledTable {
-  $contentWidth: number;
+  $contentWidth?: number;
   $isListMode: boolean;
 }
 export const StyledTable = styled.table<StyledTable>`
@@ -56,7 +56,7 @@ export const StyledTr = styled.tr<StyledTr>`
     $isOpened ? "4px solid " + theme.color["success"] : ""};
   cursor: ${({ $isOpened }) => ($isOpened ? "default" : "pointer")};
   td:first-child {
-    padding-left: ${({ theme, $isOpened }) => ($isOpened ? "0.9rem" : "")};
+    padding-left: ${({ $isOpened }) => (!$isOpened ? "0.9rem" : "")};
     width: 1%;
   }
   td:last-child {
@@ -73,14 +73,13 @@ export const StyledTr = styled.tr<StyledTr>`
 interface StyledTd {}
 export const StyledTd = styled.td<StyledTd>`
   padding: ${({ theme }) => theme.space[2]};
-  padding-left: ${({ theme }) => theme.space[4]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   height: ${({ theme }) => theme.space[16]};
 `;
 
 export const StyledTdMove = styled.td`
-  cursor: move;
   width: 1%;
+  padding-right: 0.5rem;
 `;
 
 interface StyledFocusedCircle {
@@ -122,4 +121,13 @@ export const StyledAnchor = styled.div`
   display: inline-flex;
   padding: 2px;
   border-radius: 50%;
+`;
+
+export const StyledOrderCorrection = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  width: 2rem;
+  color: ${({ theme }) => theme.color["gray"]["800"]};
 `;

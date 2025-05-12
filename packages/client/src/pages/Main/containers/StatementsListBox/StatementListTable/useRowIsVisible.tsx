@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 function useIsRowVisible(
-  rowRef: React.RefObject<HTMLTableRowElement> | null,
+  rowRef: React.RefObject<HTMLTableRowElement>,
   options: IntersectionObserverInit = {}
 ) {
   const [isVisible, setIsVisible] = useState(false);

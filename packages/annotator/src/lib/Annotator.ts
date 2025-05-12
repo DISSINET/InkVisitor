@@ -34,6 +34,7 @@ export interface DrawingOptions {
 export interface Selected {
   text: string;
   anchors: string[];
+  index: number;
 }
 
 /**
@@ -299,14 +300,14 @@ export class Annotator {
    * Will be used only if text really changes
    * @param cb
    */
-  onSelectText(cb: (text: Selected) => void) {
+  onSelectText(cb: (selection: Selected) => void) {
     this.lastSelectedText = "";
-    this.onSelectTextCb = (text: Selected) => {
-      if (text.text === this.lastSelectedText) {
+    this.onSelectTextCb = (selection: Selected) => {
+      if (selection.text === this.lastSelectedText) {
         return;
       }
-      this.lastSelectedText = text.text;
-      cb(text);
+      this.lastSelectedText = selection.text;
+      cb(selection);
     };
   }
 
@@ -630,11 +631,13 @@ export class Annotator {
         this.onSelectTextCb({
           text: this.text.getRangeText(start, end),
           anchors: annotated,
+          index: this.text.getAbsTextIndexFromPosition(this.text.getSegmentPosition(start.yLine, start.xLine))
         });
       } else {
         this.onSelectTextCb({
           text: "",
           anchors: [],
+          index: -1
         });
       }
     }

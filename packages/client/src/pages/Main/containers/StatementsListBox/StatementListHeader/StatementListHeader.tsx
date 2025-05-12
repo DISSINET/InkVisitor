@@ -4,6 +4,7 @@ import {
   IEntity,
   IReference,
   IResponseGeneric,
+  IResponseStatement,
   IResponseTerritory,
   IResponseTree,
   ITerritory,
@@ -17,7 +18,7 @@ import {
 import { rootTerritoryId } from "Theme/constants";
 import api from "api";
 import { AxiosResponse } from "axios";
-import { Button, Submit, Tooltip } from "components";
+import { Button, Submit } from "components";
 import Dropdown, {
   BreadcrumbItem,
   EntitySuggester,
@@ -26,6 +27,7 @@ import Dropdown, {
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaTrash } from "react-icons/fa";
+import { FaArrowDownShortWide } from "react-icons/fa6";
 import {
   MdOutlineCheckBox,
   MdOutlineCheckBoxOutlineBlank,
@@ -40,6 +42,7 @@ import {
   EntitiesDeleteSuccessResponse,
   RelationsCreateErrorResponse,
   RelationsCreateSuccessResponse,
+  StatementOrderCorrection,
 } from "types";
 import { collectTerritoryChildren, searchTree } from "utils/utils";
 import { v4 as uuidv4 } from "uuid";
@@ -124,6 +127,11 @@ interface StatementListHeader {
     Relation.IRelation[],
     unknown
   >;
+  autoOrderStatementsMutation: UseMutationResult<void, Error, void, unknown>;
+  statementsWithOrder: (IResponseStatement & {
+    orderCorrection?: StatementOrderCorrection;
+    isAnchored?: boolean;
+  })[];
 }
 export const StatementListHeader: React.FC<StatementListHeader> = ({
   territory,
@@ -143,6 +151,8 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
   deleteStatementsMutation,
   relationsCreateMutation,
+  autoOrderStatementsMutation,
+  statementsWithOrder,
 }) => {
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
@@ -351,9 +361,6 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
   const userCanEdit = territory.right !== UserEnums.RoleMode.Read;
 
-  const [headingHovered, setHeadingHovered] = useState(false);
-  const [referenceElement, setReferenceElement] =
-    useState<HTMLSpanElement | null>(null);
   const [showSubmit, setShowSubmit] = useState(false);
 
   const [moveToParentHovered, setMoveToParentHovered] = useState(false);
@@ -382,20 +389,34 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
     );
   }, [selectedTerritoryPath.join(",")]);
 
+  const hasAnchoredStatementsOutOfOrder = statementsWithOrder.some(
+    (s) => s.isAnchored && s.orderCorrection && s.orderCorrection.distance > 0
+  );
+
   return (
     <>
-      <Tooltip
-        label={territory.labels[0]}
-        visible={headingHovered}
-        referenceElement={referenceElement}
-      />
-
       <StyledHeader>
         <StyledHeaderBreadcrumbRow>{BreadcrumbItems}</StyledHeaderBreadcrumbRow>
 
         <StyledSuggesterRow>
           {/* BATCH ACTIONS */}
           <StyledActionsWrapper>
+            <Button
+              icon={<FaArrowDownShortWide />}
+              onClick={() => autoOrderStatementsMutation.mutate()}
+              color="success"
+              tooltipLabel="auto order statements"
+              tooltipContent={
+                hasAnchoredStatementsOutOfOrder ? (
+                  <i>leaves non-anchored statements in place</i>
+                ) : (
+                  <i>
+                    order of anchored statements corresponds to the document
+                  </i>
+                )
+              }
+              disabled={!hasAnchoredStatementsOutOfOrder}
+            />
             {user?.role !== UserEnums.Role.Viewer &&
               territory.statements.length > 0 && (
                 <>
