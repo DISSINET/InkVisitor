@@ -38,7 +38,7 @@ export const StyledTableWrapper = styled.div<StyledTableWrapper>`
   overflow-x: ${({ $isListMode }) => ($isListMode ? "auto" : "hidden")};
   flex-shrink: 0;
   padding-right: 0.1rem;
-  padding-bottom: 6.5rem;
+  padding-bottom: 0.5rem;
 `;
 
 export const StyledEmptyState = styled.div`
