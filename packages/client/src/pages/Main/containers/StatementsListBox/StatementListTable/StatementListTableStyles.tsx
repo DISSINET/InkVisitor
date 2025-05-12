@@ -15,8 +15,8 @@ export const StyledTable = styled.table<StyledTable>`
   border-color: ${({ theme }) => theme.color["gray"][500]};
   box-shadow: ${({ theme }) => theme.boxShadow["subtle"]};
   overflow-x: ${({ $isListMode }) => ($isListMode ? "auto" : "hidden")};
-  margin-top: ${({ theme, $isListMode }) =>
-    $isListMode ? "0" : theme.space[24]};
+  /* margin-top: ${({ theme, $isListMode }) =>
+    $isListMode ? "0" : theme.space[24]}; */
   margin-left: ${({ theme }) => theme.space[1]};
   margin-right: ${({ theme }) => theme.space[1]};
   transition: width 0.3s ease;

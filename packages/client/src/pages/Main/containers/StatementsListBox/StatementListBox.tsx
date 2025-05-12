@@ -597,7 +597,7 @@ export const StatementListBox: React.FC = () => {
               display: "flex",
               height: "100%",
               maxHeight: "calc(100%)",
-              overflow: "auto",
+              overflow: "hidden",
             }}
             ref={contentRef}
           >
@@ -605,6 +605,9 @@ export const StatementListBox: React.FC = () => {
               scrollerId="Statements"
               elementId="Statements-box-table"
               contentWidth={tableWidth}
+              customStyle={{
+                marginTop: "6rem",
+              }}
             >
               <StyledTableWrapper
                 $isListMode={displayMode === StatementListDisplayMode.LIST}
