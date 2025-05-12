@@ -606,7 +606,7 @@ export const StatementListBox: React.FC = () => {
   const tableWidth = useMemo(() => {
     if (isListNonEmpty) {
       return displayMode === StatementListDisplayMode.LIST
-        ? contentWidth + 10
+        ? contentWidth
         : COLLAPSED_TABLE_WIDTH;
     }
     return 0;
@@ -850,7 +850,10 @@ export const StatementListBox: React.FC = () => {
               elementId="Statements-box-table"
               contentWidth={tableWidth}
               customStyle={{
-                marginTop: "6rem",
+                marginTop:
+                  displayMode === StatementListDisplayMode.TEXT
+                    ? "6rem"
+                    : undefined,
               }}
             >
               <StyledTableWrapper

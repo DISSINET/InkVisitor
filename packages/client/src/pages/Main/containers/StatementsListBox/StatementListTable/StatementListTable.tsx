@@ -552,8 +552,8 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   return (
     <StyledTable
       {...getTableProps()}
-      $contentWidth={contentWidth - 10}
       $isListMode={displayMode === StatementListDisplayMode.LIST}
+      // $contentWidth={contentWidth}
     >
       <StyledTHead>
         {headerGroups.map((headerGroup, key) => (

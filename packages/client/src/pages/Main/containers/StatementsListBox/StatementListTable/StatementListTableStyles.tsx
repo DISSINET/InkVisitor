@@ -2,7 +2,7 @@ import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
 import styled from "styled-components";
 
 interface StyledTable {
-  $contentWidth: number;
+  $contentWidth?: number;
   $isListMode: boolean;
 }
 export const StyledTable = styled.table<StyledTable>`

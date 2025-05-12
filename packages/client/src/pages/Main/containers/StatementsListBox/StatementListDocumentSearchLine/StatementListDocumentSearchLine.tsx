@@ -156,7 +156,7 @@ const StatementListDocumentSearchLine: React.FC<
       {isSearchAllowed && (
         <StyledSearchContainer>
           <StyledSearchIcon>
-            <BiSearch colorProfile={themeContext?.color.info} />
+            <BiSearch color={themeContext?.color.info} />
           </StyledSearchIcon>
           <StyledSearchInputContainer>
             <Input
