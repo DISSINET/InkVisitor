@@ -811,10 +811,10 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                     <StyledAnchorMeta>
                       <Button
                         inverted
-                        // noBorder
+                        noBorder
                         noBackground
                         tooltipLabel="locate statement anchor"
-                        icon={<FaAnchor />}
+                        icon={<FaAnchor size={16} />}
                         onClick={() => {
                           scrollToStatementAnchor(
                             documentAnchor.parentTerritoryId,
