@@ -452,7 +452,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
       dispatch(
         setPanelWidths([
           flooredXPosition,
-          mainPageCenterSeparatorXPosition - flooredXPosition,
+          floorNumberToOneDecimal(
+            mainPageCenterSeparatorXPosition - flooredXPosition
+          ),
           panelWidths[2],
           panelWidths[3],
         ])
@@ -475,7 +477,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
       dispatch(
         setPanelWidths([
           panelWidths[0],
-          xPosition - panelWidths[0],
+          floorNumberToOneDecimal(xPosition - panelWidths[0]),
           layoutWidth - panelWidths[3] - xPosition,
           panelWidths[3],
         ])
