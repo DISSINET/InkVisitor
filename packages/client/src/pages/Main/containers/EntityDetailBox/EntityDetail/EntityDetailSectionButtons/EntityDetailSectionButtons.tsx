@@ -72,6 +72,7 @@ export const EntityDetailSectionButtons: React.FC<
         disableCreate
         inputWidth={90}
         placeholder="another Entity"
+        disableTemplateInstantiation
       />
     </>
   );
