@@ -23,7 +23,6 @@ import { JSONExplorer } from "./JSONExplorer/JSONExplorer";
 import { Menu } from "./Menu/Menu";
 import { Page } from "./Page/Page";
 import { LeftHeader, RightHeader } from "./PageHeader/PageHeader";
-import { PanelSeparator } from "./PanelSeparator/PanelSeparator";
 import { TerritoryActionModal } from "./TerritoryActionModal/TerritoryActionModal";
 import { UserCustomizationModal } from "./UserCustomizationModal/UserCustomizationModal";
 import { ValidationRule } from "./ValidationRule/ValidationRule";
@@ -67,7 +66,6 @@ export {
   Page,
   LeftHeader,
   RightHeader,
-  PanelSeparator,
   TerritoryActionModal,
   UserCustomizationModal,
   ValidationRule,
