@@ -23,6 +23,7 @@ import { FaPlus } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
 import { toast } from "react-toastify";
 import { FixedSizeList as List } from "react-window";
+import { ListChildComponentProps } from "react-window";
 import { ThemeContext } from "styled-components";
 import {
   EntityDragItem,
@@ -257,9 +258,16 @@ export const Suggester: React.FC<Suggester> = ({
     };
 
     const rowHeight = 25;
+    const Row = ({
+      index,
+      style,
+    }: ListChildComponentProps<SuggestionRowEntityItemData>) => {
+      return <MemoizedEntityRow index={index} data={itemData} style={style} />;
+    };
+
     return (
       <List
-        itemData={itemData as SuggestionRowEntityItemData}
+        itemData={itemData}
         height={
           suggestions.length > 7
             ? rowHeight * 8
@@ -270,7 +278,7 @@ export const Suggester: React.FC<Suggester> = ({
         width="100%"
         overscanCount={scrollOverscanCount}
       >
-        {MemoizedEntityRow}
+        {Row}
       </List>
     );
   };
