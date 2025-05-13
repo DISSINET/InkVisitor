@@ -23,12 +23,13 @@ import { JSONExplorer } from "./JSONExplorer/JSONExplorer";
 import { Menu } from "./Menu/Menu";
 import { Page } from "./Page/Page";
 import { LeftHeader, RightHeader } from "./PageHeader/PageHeader";
-import { PanelSeparator } from "./PanelSeparator/PanelSeparator";
 import { TerritoryActionModal } from "./TerritoryActionModal/TerritoryActionModal";
 import { UserCustomizationModal } from "./UserCustomizationModal/UserCustomizationModal";
 import { ValidationRule } from "./ValidationRule/ValidationRule";
 import { AbbreviatedTextWithTooltip } from "./AbbreviatedTextWithTooltip/AbbreviatedTextWithTooltip";
 import { DocumentTitle } from "./DocumentTitle/DocumentTitle";
+import { LayoutSeparatorVertical } from "./PanelSeparator/LayoutSeparatorVertical";
+import { LayoutSeparatorHorizontal } from "./PanelSeparator/LayoutSeparatorHorizontal";
 
 const Dropdown = {
   Single: {
@@ -59,11 +60,12 @@ export {
   EntityTag,
   EntityTooltip,
   JSONExplorer,
+  LayoutSeparatorVertical,
+  LayoutSeparatorHorizontal,
   Menu,
   Page,
   LeftHeader,
   RightHeader,
-  PanelSeparator,
   TerritoryActionModal,
   UserCustomizationModal,
   ValidationRule,

@@ -10,7 +10,7 @@ const ScrollHandler = () => {
   const { statementId, territoryId } = useSearchParams();
 
   const statementListOpened: boolean = useAppSelector(
-    (state) => state.layout.statementListOpened
+    (state) => state.layout.mainPage.statementListOpened
   );
   const disableStatementListScroll: boolean = useAppSelector(
     (state) => state.statementList.disableStatementListScroll

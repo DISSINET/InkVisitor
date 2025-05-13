@@ -23,6 +23,7 @@ interface Box {
   children?: ReactNode;
   onHeaderClick?: () => void;
   disableOpenBoxHeaderClick?: boolean;
+  disableScroll?: boolean;
 }
 
 export const Box: React.FC<Box> = ({
@@ -36,6 +37,7 @@ export const Box: React.FC<Box> = ({
   children,
   onHeaderClick,
   disableOpenBoxHeaderClick = false,
+  disableScroll = false,
 }) => {
   const [hideContent, setHideContent] = useState<boolean>(false);
   const [showContentLabel, setShowContentLabel] = useState<boolean>(
@@ -99,6 +101,7 @@ export const Box: React.FC<Box> = ({
         <StyledContentAnimationWrap
           $hideContent={hideContent}
           style={animatedExpand}
+          $disableScroll={disableScroll}
         >
           {children}
         </StyledContentAnimationWrap>

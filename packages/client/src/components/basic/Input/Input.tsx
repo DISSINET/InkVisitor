@@ -16,6 +16,7 @@ interface Input {
   rows?: number;
   cols?: number;
   width?: number | "full";
+  minWidth?: number;
   onChangeFn: (value: string) => void;
   onEnterPressFn?: () => void;
   onFocus?: (
@@ -48,6 +49,7 @@ export const Input: React.FC<Input> = ({
   rows = 3,
   cols = 50,
   width,
+  minWidth,
   changeOnType = false,
   onEnterPressFn = () => {},
   onChangeFn,
@@ -74,6 +76,7 @@ export const Input: React.FC<Input> = ({
     <StyledWrapper
       width={width}
       $fullHeightTextArea={type === "textarea" && fullHeightTextArea}
+      $minWidth={minWidth}
     >
       {label && <Label className="label">{label}</Label>}
       {(type === "text" || type === "password") && (

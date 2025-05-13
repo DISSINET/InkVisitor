@@ -38,7 +38,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
   const [filterByLabel, setFilterByLabel] = useState<string>("");
 
   const fourthPanelBoxesOpened: { [key: string]: boolean } = useAppSelector(
-    (state) => state.layout.fourthPanelBoxesOpened
+    (state) => state.layout.mainPage.fourthPanelBoxesOpened
   );
 
   const {

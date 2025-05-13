@@ -21,11 +21,13 @@ const getWidth = (width?: number | "full") => {
 interface StyledWrapper {
   $fullHeightTextArea: boolean;
   width?: number | "full";
+  $minWidth?: number;
 }
 export const StyledWrapper = styled.div<StyledWrapper>`
   display: flex;
   height: ${({ $fullHeightTextArea }) => ($fullHeightTextArea ? "100%" : "")};
   flex-grow: ${({ width }) => (width === "full" ? 1 : "")};
+  min-width: ${({ $minWidth }) => ($minWidth ? `${$minWidth}px` : "")};
 `;
 export const Label = styled.span`
   text-align: right;
@@ -55,7 +57,7 @@ export const StyledInput = styled.input<IValueStyle>`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   padding-left: ${({ theme }) => theme.space[2]};
   width: ${({ width }) => getWidth(width)};
-  min-width: 6rem;
+  min-width: ${({ theme }) => theme.space[6]};
   background: ${({ disabled, theme }) =>
     disabled ? theme.background["stripes"] : ""};
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "")};

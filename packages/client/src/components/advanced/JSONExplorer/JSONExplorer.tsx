@@ -1,6 +1,6 @@
 import { Button } from "components";
 import React, { useState } from "react";
-import { BsArrowsCollapse, BsArrowsExpand } from "react-icons/bs";
+import { BsArrowsCollapse, BsArrowsExpand, BsClipboard } from "react-icons/bs";
 import ReactJson from "react-json-view";
 import { StyledJSONExplorerWrapper } from "./JSONExplorerStyles";
 import { useAppSelector } from "redux/hooks";
@@ -16,22 +16,35 @@ export const JSONExplorer: React.FC<IJSONDisplay> = ({ data = {} }) => {
     (state) => state.theme
   );
 
+  const handleCopy = () => {
+    navigator.clipboard.writeText(JSON.stringify(data, null, 2));
+  };
+
   return (
     <StyledJSONExplorerWrapper>
-      <Button
-        onClick={() => {
-          setCollapsed(!collapsed);
-        }}
-        inverted
-        icon={
-          collapsed ? (
-            <BsArrowsExpand size={17} />
-          ) : (
-            <BsArrowsCollapse size={17} />
-          )
-        }
-        label={collapsed ? "Expand all" : "Collapse all"}
-      ></Button>
+      <div style={{ display: "flex", gap: "8px" }}>
+        <Button
+          onClick={() => {
+            setCollapsed(!collapsed);
+          }}
+          inverted
+          icon={
+            collapsed ? (
+              <BsArrowsExpand size={17} />
+            ) : (
+              <BsArrowsCollapse size={17} />
+            )
+          }
+          label={collapsed ? "Expand all" : "Collapse all"}
+        />
+        <Button
+          onClick={handleCopy}
+          inverted
+          icon={<BsClipboard size={17} />}
+          label="Copy JSON"
+        />
+      </div>
+
       <ReactJson
         src={data}
         enableClipboard={false}

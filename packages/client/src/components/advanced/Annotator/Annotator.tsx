@@ -10,9 +10,12 @@ import { EntityEnums } from "@shared/enums";
 import { IDocument, IEntity, IResponseTerritory } from "@shared/types";
 import { Button } from "components/basic/Button/Button";
 import { ButtonGroup } from "components/basic/ButtonGroup/ButtonGroup";
+import { useSearchParams } from "hooks";
 import { BsFileTextFill } from "react-icons/bs";
 import { HiCodeBracket } from "react-icons/hi2";
+import { useAppSelector } from "redux/hooks";
 import { ThemeContext } from "styled-components";
+import { EntityCreateModal } from "..";
 import { useAnnotator } from "./AnnotatorContext";
 import TextAnnotatorMenu from "./AnnotatorMenu";
 import {
@@ -24,10 +27,7 @@ import {
   StyledScrollerViewport,
 } from "./AnnotatorStyles";
 import { annotatorHighlight } from "./highlight";
-import { useAppSelector } from "redux/hooks";
-import { EntityCreateModal } from "..";
-import { useSearchParams } from "hooks";
-
+import { RATIO, TerritoryCreateModalType, W_SCROLL } from "./types";
 interface TextAnnotatorProps {
   width: number;
   height: number;
@@ -45,9 +45,6 @@ interface TextAnnotatorProps {
 
   territory?: IResponseTerritory;
 }
-
-const W_SCROLL = 20;
-const RATIO = 2;
 
 export const TextAnnotator = ({
   width = 400,
@@ -93,6 +90,19 @@ export const TextAnnotator = ({
       return res.data;
     },
     enabled: api.isLoggedIn(),
+  });
+
+  const parentTerritoryId = territory?.data?.parent
+    ? territory?.data?.parent?.territoryId
+    : undefined;
+
+  const { data: dataParentTerritory } = useQuery({
+    queryKey: ["territory", parentTerritoryId as string],
+    queryFn: async () => {
+      const res = await api.territoryGet(parentTerritoryId as string);
+      return res.data;
+    },
+    enabled: !!parentTerritoryId,
   });
 
   const updateDocumentMutation = useMutation({
@@ -142,6 +152,9 @@ export const TextAnnotator = ({
   const [storedEntities, setStoredEntities] = useState<
     Record<string, IEntity | false>
   >({});
+
+  const [territoryCreateModalType, setTerritoryCreateModalType] =
+    useState<TerritoryCreateModalType>(false);
 
   const [scrollAfterRefresh, setScrollAfterRefresh] = useState<
     number | undefined
@@ -201,11 +214,20 @@ export const TextAnnotator = ({
   const [pendingSelection, setPendingSelection] = useState<{
     text: string;
     anchors: string[];
+    index: number;
   } | null>(null);
 
-  const handleTextSelection = (text: string, anchors: string[]) => {
+  useEffect(() => {
+    console.log("pendingSelection", pendingSelection);
+  }, [pendingSelection]);
+
+  const handleTextSelection = (
+    text: string,
+    anchors: string[],
+    index: number
+  ) => {
     if (annotatorMode === EditMode.HIGHLIGHT) {
-      setPendingSelection({ text, anchors });
+      setPendingSelection({ text, anchors, index });
     }
   };
 
@@ -281,8 +303,8 @@ export const TextAnnotator = ({
       newAnnotator.addLines(lines.current);
     }
 
-    newAnnotator.onSelectText(({ text, anchors }) => {
-      handleTextSelection(text, anchors);
+    newAnnotator.onSelectText(({ text, anchors, index }) => {
+      handleTextSelection(text, anchors, index);
     });
 
     newAnnotator.onHighlight((entityId) => {
@@ -470,16 +492,21 @@ export const TextAnnotator = ({
     return annotator?.text?.value !== dataDocument?.content;
   }, [annotator?.text?.value, dataDocument?.content, localTextContent]);
 
-  const onCreateTerritory = () => {
-    setShowEntityCreateModal(true);
-
-    // if (handleCreateTerritory && selectedText) {
-    //   const newTerritoryId = uuidv4();
-    //   handleAddAnchor(newTerritoryId);
-    //   handleCreateTerritory(newTerritoryId);
-    //   handleSaveNewContent(true);
-    // }
+  const onCreateTerritory = (mode: TerritoryCreateModalType | undefined) => {
+    setTerritoryCreateModalType(mode ?? false);
   };
+
+  const newTerritoryName = useMemo<string>(() => {
+    const thisTName = territory?.labels[0];
+    const parentTName = dataParentTerritory?.labels[0];
+
+    if (territoryCreateModalType === "sibling-T") {
+      return `subT of ${parentTName}`;
+    } else if (territoryCreateModalType === "child-T") {
+      return `subT of ${thisTName}`;
+    }
+    return "new Territory";
+  }, [territoryCreateModalType, territory]);
 
   const onCreateStatement = () => {
     if (handleCreateStatement && selectedText) {
@@ -506,8 +533,6 @@ export const TextAnnotator = ({
     );
   }, [annotatorMode, selectedText, isSelectingText, dataDocument]);
 
-  const [showEntityCreateModal, setShowEntityCreateModal] = useState(false);
-
   if (errorDocument) {
     return <div>Error loading document: {errorDocument.message}</div>;
   }
@@ -515,6 +540,8 @@ export const TextAnnotator = ({
   if (isFetchingDocument) {
     return <div>Loading document...</div>;
   }
+
+  const hasParentT = territory?.data?.parent !== undefined;
 
   return (
     <>
@@ -545,16 +572,23 @@ export const TextAnnotator = ({
                   text={selectedText}
                   entities={storedEntities}
                   onAnchorAdd={handleAddAnchor}
-                  handleCreateTerritory={onCreateTerritory}
+                  onCreateTerritory={onCreateTerritory}
                   handleCreateStatement={onCreateStatement}
                   handleRemoveAnchor={onRemoveAnchor}
-                  thisTerritoryEntityId={thisTerritoryEntityId}
+                  isTextInsideThisT={selectedAnchors.some(
+                    (anchor) => anchor === thisTerritoryEntityId
+                  )}
+                  activeTerritoryId={thisTerritoryEntityId}
+                  onCreateActiveTAnchor={() => {
+                    handleAddAnchor(thisTerritoryEntityId ?? "");
+                  }}
                   canCreateActiveTAnchor={
                     !dataDocument?.entityIds.T.includes(
                       thisTerritoryEntityId ?? ""
                     )
                   }
                   isLoadingEntities={isLoadingEntities}
+                  hasParentT={hasParentT}
                 />
               )}
             </StyledAnnotatorMenu>
@@ -667,17 +701,21 @@ export const TextAnnotator = ({
         )}
       </div>
 
-      {territory && showEntityCreateModal && (
+      {territory && territoryCreateModalType && (
         <EntityCreateModal
-          closeModal={() => setShowEntityCreateModal(false)}
+          closeModal={() => setTerritoryCreateModalType(false)}
           allowedEntityClasses={[EntityEnums.Class.Territory]}
-          labelTyped={`subT of ${territory.labels[0]}`}
-          parentTerritory={territory}
+          labelTyped={newTerritoryName}
+          parentTerritory={
+            territoryCreateModalType === "sibling-T"
+              ? dataParentTerritory
+              : territory
+          }
           onMutationSuccess={(entity) => {
             handleAddAnchor(entity.id);
             handleSaveNewContent(true);
-            setShowEntityCreateModal(false);
-            toast.info(`Sub Teritory created!`);
+            setTerritoryCreateModalType(false);
+            toast.info(`${newTerritoryName} created!`);
             queryClient.invalidateQueries({ queryKey: ["tree"] });
             appendDetailId(entity.id);
           }}

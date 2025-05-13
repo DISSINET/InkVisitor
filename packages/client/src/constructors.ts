@@ -206,11 +206,11 @@ export const InstAction: any = async (
 
 // instantiate template
 // TODO #952 handle conflicts in Templates application
-
 export const InstTemplate = async (
   templateEntity: IEntity | IStatement | ITerritory,
   userRole: UserEnums.Role,
-  territoryParentId?: string
+  territoryParentId?: string,
+  label?: string
 ): Promise<IEntity | false> => {
   if (templateEntity.isTemplate) {
     let iEntity: false | IEntity = false;
@@ -238,8 +238,11 @@ export const InstTemplate = async (
     }
 
     if (iEntity) {
+      if (label) {
+        iEntity.labels[0] = label;
+      }
       // #1554
-      if (templateEntity.class === EntityEnums.Class.Statement) {
+      else if (templateEntity.class === EntityEnums.Class.Statement) {
         iEntity.labels[0] = "";
       } else {
         iEntity.labels[0] = `[INSTANCE OF] ${templateEntity.labels[0]}`;
@@ -271,10 +274,10 @@ export const applyTemplate = async (
   userRole: UserEnums.Role
 ): Promise<IEntity> => {
   if (templateEntity.isTemplate && templateEntity.class === entity.class) {
-    // get labels from entity and the rest from template
+    // get labels from entity and props from entity + template, rest from template
     const newEntity = {
       ...templateEntity,
-      labels: [...entity.labels, ...templateEntity.labels.slice(1)],
+      labels: [...entity.labels],
     };
 
     if (templateEntity.class === EntityEnums.Class.Statement) {
@@ -304,7 +307,12 @@ export const applyTemplate = async (
         }
       }
       newEntity.usedTemplate = templateEntity.id;
-      newEntity.props = await InstProps(templateEntity.props);
+      const instantiatedTemplateProps = await InstProps(templateEntity.props);
+      newEntity.props = [...entity.props, ...instantiatedTemplateProps];
+      newEntity.references = [
+        ...entity.references,
+        ...DReferences(templateEntity.references),
+      ];
       newEntity.isTemplate = false;
     }
 

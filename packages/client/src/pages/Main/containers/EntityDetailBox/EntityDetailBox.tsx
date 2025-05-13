@@ -14,7 +14,7 @@ interface EntityDetailBox {}
 export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   const ping: number = useAppSelector((state) => state.ping);
   const detailBoxMinimized: boolean = useAppSelector(
-    (state) => state.layout.detailBoxMinimized
+    (state) => state.layout.mainPage.detailBoxMinimized
   );
 
   const {

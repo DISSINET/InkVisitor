@@ -5,6 +5,7 @@ interface CustomScrollbar {
   scrollerId?: string;
   elementId?: string;
   contentWidth?: number;
+  customStyle?: React.CSSProperties;
 
   children: React.ReactNode;
 }
@@ -12,6 +13,7 @@ export const CustomScrollbar: React.FC<CustomScrollbar> = ({
   scrollerId,
   elementId,
   contentWidth,
+  customStyle,
   children,
 }) => {
   // Necessary for scrollTo functionality
@@ -34,7 +36,7 @@ export const CustomScrollbar: React.FC<CustomScrollbar> = ({
       removeTrackXWhenNotUsed={true}
       removeTrackYWhenNotUsed={true}
       permanentTracks={false}
-      style={{ width: contentWidth }}
+      style={{ width: contentWidth, ...customStyle }}
     >
       {children}
     </StyledScrollbar>

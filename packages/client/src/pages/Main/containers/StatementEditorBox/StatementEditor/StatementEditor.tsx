@@ -86,7 +86,7 @@ import { StatementEditorActantTable } from "./StatementEditorActantTable/Stateme
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
 import { StatementEditorSectionButtons } from "./StatementEditorSectionButtons/StatementEditorSectionButtons";
 import useAnnotator from "hooks/useAnnotator";
-import { setDetailBoxState } from "redux/features/layout/detailBoxStateSlice";
+import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
 
 const valencyErrorTypes: WarningTypeEnums[] = [
   WarningTypeEnums.MA,

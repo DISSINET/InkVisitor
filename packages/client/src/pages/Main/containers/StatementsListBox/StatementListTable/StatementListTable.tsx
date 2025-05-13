@@ -15,6 +15,7 @@ import update from "immutability-helper";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { BsArrowDown, BsArrowUp } from "react-icons/bs";
 import { FaClone, FaPlus, FaTrashAlt } from "react-icons/fa";
+import { FaArrowDownLong, FaArrowUpLong } from "react-icons/fa6";
 import {
   MdOutlineCheckBox,
   MdOutlineCheckBoxOutlineBlank,
@@ -31,11 +32,12 @@ import {
 import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { StatementListDisplayMode } from "types";
+import { StatementListDisplayMode, StatementOrderCorrection } from "types";
 import { StatementListContextMenu } from "../StatementListContextMenu/StatementListContextMenu";
 import { StatementListRow } from "./StatementListRow";
 import {
   StyledAbbreviatedLabel,
+  StyledAnchor,
   StyledCheckboxWrapper,
   StyledFocusedCircle,
   StyledTHead,
@@ -55,10 +57,18 @@ const HIDDEN_COLUMNS_MINIFIED = [
   "lastEdit",
   "menu",
 ];
-type CellType = CellProps<IResponseStatement>;
+type CellType = CellProps<
+  IResponseStatement & {
+    orderCorrection?: StatementOrderCorrection;
+    isAnchored?: boolean;
+  }
+>;
 
 interface StatementListTable {
-  statements: IResponseStatement[];
+  statements: (IResponseStatement & {
+    orderCorrection?: StatementOrderCorrection;
+    isAnchored?: boolean;
+  })[];
   handleRowClick?: (rowId: string) => void;
   actantsUpdateMutation: UseMutationResult<
     AxiosResponse<IResponseGeneric>,
@@ -117,9 +127,9 @@ export const StatementListTable: React.FC<StatementListTable> = ({
     (state) => state.statementList.lastClickedIndex
   );
 
-  const [statementsLocal, setStatementsLocal] = useState<IResponseStatement[]>(
-    []
-  );
+  const [statementsLocal, setStatementsLocal] = useState<
+    (IResponseStatement & { orderCorrection?: StatementOrderCorrection })[]
+  >([]);
 
   useEffect(() => {
     dispatch(setLastClickedIndex(-1));
@@ -334,7 +344,9 @@ export const StatementListTable: React.FC<StatementListTable> = ({
           if (firstAnchorText) {
             return (
               <StyledAbbreviatedLabel>
-                <TbAnchor />
+                <StyledAnchor>
+                  <TbAnchor size={12} strokeWidth={2} />
+                </StyledAnchor>
                 {firstAnchorText}
               </StyledAbbreviatedLabel>
             );
@@ -365,6 +377,8 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                   inverted
                   noBorder
                   noBackground
+                  // noIconMargin
+                  noPadding
                   onClick={(e) => {
                     e.stopPropagation();
                     setStatementId(row.id);
@@ -538,8 +552,8 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   return (
     <StyledTable
       {...getTableProps()}
-      $contentWidth={contentWidth - 10}
       $isListMode={displayMode === StatementListDisplayMode.LIST}
+      // $contentWidth={contentWidth}
     >
       <StyledTHead>
         {headerGroups.map((headerGroup, key) => (

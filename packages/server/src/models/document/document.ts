@@ -41,7 +41,7 @@ export default class Document implements IDocument, IDbModel {
   async preprocess(conn: Connection): Promise<void> {
     const entityIds = this.gatherEntityIds();
     this.entityIds = await this.findReferencedEntityIds(conn, entityIds);
-    this.anchors = this.buildAnchorsTree();
+    this.anchors = AnchorsNode.buildAnchorsTree(this.content, this.entityIds);
   }
 
   /**
@@ -60,75 +60,6 @@ export default class Document implements IDocument, IDbModel {
     }
 
     return Array.from(entities);
-  }
-
-  /**
-   * Builds the anchors tree
-   * @returns
-   */
-  buildAnchorsTree(): AnchorsNode[] {
-    const tagPattern = /<\/?([\w\-.]+)>/g; // Regex to match <tag> or </tag>
-    const rootNodes: AnchorsNode[] = []; // List of root nodes
-    const nodeStack: AnchorsNode[] = []; // Stack to keep track of the current node
-
-    let lastIndex = 0;
-    let match: RegExpExecArray | null;
-
-    while ((match = tagPattern.exec(this.content)) !== null) {
-      const tag = match[1];
-      const isClosingTag = this.content[match.index + 1] === "/";
-
-      // Add text content between tags to the parent node
-      if (match.index > lastIndex) {
-        const text = this.content.slice(lastIndex, match.index);
-        if (text.length > 0 && nodeStack.length > 0) {
-          nodeStack[nodeStack.length - 1].content += text;
-        }
-      }
-
-      if (!isClosingTag) {
-        // Open tag: Create a new node for the tag
-        let anchorClass: EntityEnums.Class | undefined;
-        for (const classType of Object.keys(this.entityIds)) {
-          if (this.entityIds[classType as EntityEnums.Class].includes(tag)) {
-            anchorClass = classType as EntityEnums.Class;
-            break;
-          }
-        }
-
-        if (anchorClass) {
-          const newNode = new AnchorsNode(tag, "", [], anchorClass);
-          if (nodeStack.length > 0) {
-            nodeStack[nodeStack.length - 1].children.push(newNode);
-          } else {
-            // Root level node
-            rootNodes.push(newNode);
-          }
-          // Push the new node onto the stack (start processing its children)
-          nodeStack.push(newNode);
-        }
-      } else {
-        // Close tag: Pop the node off the stack
-        const closedNode = nodeStack.pop();
-
-        // If there's a parent node, merge the content of the closed node into its parent (remove tag, keep content)
-        if (closedNode && nodeStack.length > 0) {
-          nodeStack[nodeStack.length - 1].content += closedNode.content;
-        }
-      }
-
-      lastIndex = tagPattern.lastIndex;
-    }
-
-    // Handle any remaining text after the last tag
-    if (lastIndex < this.content.length) {
-      const remainingText = this.content.slice(lastIndex).trim();
-      if (remainingText.length > 0 && nodeStack.length > 0) {
-        nodeStack[nodeStack.length - 1].content += remainingText;
-      }
-    }
-
-    return rootNodes;
   }
 
   /**

@@ -18,11 +18,11 @@ import { toast } from "react-toastify";
 import { StyledAnchorText } from "./EntityDetailUsedInDocumentsTableStyles";
 import { useSearchParams } from "hooks";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { setStatementListOpened } from "redux/features/layout/statementListOpenedSlice";
-import { setDetailBoxState } from "redux/features/layout/detailBoxStateSlice";
+import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
 import { DetailBoxState } from "types";
 import { EntityEnums } from "@shared/enums";
 import useAnnotator from "hooks/useAnnotator";
+import { setStatementListOpened } from "redux/features/layout/mainPage/statementListOpenedSlice";
 
 type CellType = CellProps<IResponseUsedInDocument>;
 interface EntityDetailUsedInDocumentsTable {

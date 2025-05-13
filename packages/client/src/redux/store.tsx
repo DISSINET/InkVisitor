@@ -1,14 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { combineReducers, Store } from "redux";
 import contentHeightSlice from "./features/layout/contentHeightSlice";
-import firstPanelExpandedSlice from "./features/layout/firstPanelExpandedSlice";
-import fourthPanelBoxesOpenedSlice from "./features/layout/fourthPanelBoxesOpenedSlice";
-import fourthPanelExpandedSlice from "./features/layout/fourthPanelExpandedSlice";
+import firstPanelExpandedSlice from "./features/layout/mainPage/firstPanelExpandedSlice";
+import fourthPanelBoxesOpenedSlice from "./features/layout/mainPage/fourthPanelBoxesOpenedSlice";
+import fourthPanelExpandedSlice from "./features/layout/mainPage/fourthPanelExpandedSlice";
 import layoutWidthSlice from "./features/layout/layoutWidthSlice";
-import panelWidthsSlice from "./features/layout/panelWidthsSlice";
-import separatorXPositionSlice from "./features/layout/separatorXPositionSlice";
-import statementListOpenedSlice from "./features/layout/statementListOpenedSlice";
-import thirdPanelExpandedSlice from "./features/layout/thirdPanelExpandedSlice";
+import panelWidthsSlice from "./features/layout/mainPage/panelWidthsSlice";
+import statementListOpenedSlice from "./features/layout/mainPage/statementListOpenedSlice";
+import thirdPanelExpandedSlice from "./features/layout/mainPage/thirdPanelExpandedSlice";
 import pingSlice from "./features/pingSlice";
 import draggedActantRowSlice from "./features/rowDnd/draggedActantRowSlice";
 import draggedPropRowSlice from "./features/rowDnd/draggedPropRowSlice";
@@ -25,8 +24,9 @@ import selectedTerritoryPathSlice from "./features/territoryTree/selectedTerrito
 import treeInitializeSlice from "./features/territoryTree/treeInitializeSlice";
 import themeSlice from "./features/themeSlice";
 import usernameSlice from "./features/usernameSlice";
-import detailBoxMinimizedSlice from "./features/layout/detailBoxMinimizedSlice";
-import detailBoxStateSlice from "./features/layout/detailBoxStateSlice";
+import detailBoxStateSlice from "./features/layout/mainPage/detailBoxStateSlice";
+import detailBoxMinimizedSlice from "./features/layout/mainPage/detailBoxMinimizedSlice";
+import panelWidthsPercentSlice from "./features/layout/mainPage/panelWidthsPercentSlice";
 
 const store: Store = configureStore({
   reducer: {
@@ -57,15 +57,18 @@ const store: Store = configureStore({
     layout: combineReducers({
       layoutWidth: layoutWidthSlice,
       contentHeight: contentHeightSlice,
-      panelWidths: panelWidthsSlice,
-      separatorXPosition: separatorXPositionSlice,
-      firstPanelExpanded: firstPanelExpandedSlice,
-      thirdPanelExpanded: thirdPanelExpandedSlice,
-      fourthPanelExpanded: fourthPanelExpandedSlice,
-      fourthPanelBoxesOpened: fourthPanelBoxesOpenedSlice,
-      statementListOpened: statementListOpenedSlice,
-      detailBoxMinimized: detailBoxMinimizedSlice,
-      detailBoxState: detailBoxStateSlice,
+
+      mainPage: combineReducers({
+        panelWidths: panelWidthsSlice,
+        panelWidthsPercent: panelWidthsPercentSlice,
+        firstPanelExpanded: firstPanelExpandedSlice,
+        thirdPanelExpanded: thirdPanelExpandedSlice,
+        fourthPanelExpanded: fourthPanelExpandedSlice,
+        fourthPanelBoxesOpened: fourthPanelBoxesOpenedSlice,
+        statementListOpened: statementListOpenedSlice,
+        detailBoxMinimized: detailBoxMinimizedSlice,
+        detailBoxState: detailBoxStateSlice,
+      }),
     }),
   },
 });

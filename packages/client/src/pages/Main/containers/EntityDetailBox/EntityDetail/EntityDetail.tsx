@@ -601,7 +601,12 @@ export const EntityDetail: React.FC<EntityDetail> = ({
   return (
     <>
       {entity && (
-        <CustomScrollbar>
+        <CustomScrollbar
+          customStyle={{
+            // necessary to scroll until the bottom of the page
+            height: "calc(100% - 2.5rem)",
+          }}
+        >
           <>
             <EntityDetailHeaderRow
               entity={entity}

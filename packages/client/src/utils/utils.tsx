@@ -1,13 +1,19 @@
 import { FaUserGear, FaUserTie } from "react-icons/fa6";
 import { FaUserEdit, FaUserTag } from "react-icons/fa";
 import { classesAll } from "@shared/dictionaries/entity";
-import { EntityEnums, RelationEnums, UserEnums } from "@shared/enums";
+import {
+  EntityEnums,
+  RelationEnums,
+  UserEnums,
+  WarningTypeEnums,
+} from "@shared/enums";
 import {
   EntityTooltip,
   IEntity,
   IResponseEntity,
   IResponseTree,
   IStatement,
+  IWarning,
   Relation,
 } from "@shared/types";
 import { DropTargetMonitor, XYCoord } from "react-dnd";
@@ -333,6 +339,10 @@ export const normalizeURL = (url: string) => {
   return url;
 };
 
+export const floorNumberToOneDecimal = (numberToFloor: number) => {
+  return Math.floor(numberToFloor * 10) / 10;
+};
+
 export const getUserIcon = (
   userRole: UserEnums.Role,
   // size can be determined in parent component font-size instead
@@ -346,4 +356,16 @@ export const getUserIcon = (
     return <FaUserEdit size={size} />;
   }
   return <FaUserTag size={size} />;
+};
+
+export const isWarningTBased = (warning: IWarning) => {
+  return (
+    warning.type === WarningTypeEnums.TVEP ||
+    warning.type === WarningTypeEnums.TVEPT ||
+    warning.type === WarningTypeEnums.TVEPV ||
+    warning.type === WarningTypeEnums.TVEC ||
+    warning.type === WarningTypeEnums.TVECE ||
+    warning.type === WarningTypeEnums.TVER ||
+    warning.type === WarningTypeEnums.TVERE
+  );
 };
