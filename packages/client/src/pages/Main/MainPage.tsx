@@ -525,17 +525,18 @@ const MainPage: React.FC<MainPage> = ({}) => {
   const isPanelUndersized = (panelWidth: number, minWidth: number) =>
     panelWidth < minWidth;
 
-  const handleSeparatorLayoutInit = (initPanelWidthsPx: number[]) => {
+  const handleSeparatorLayoutInit = () => {
     let secondPanel =
       mainPageCenterSeparatorXPosition - mainPageTreeSeparatorXPosition;
     let thirdPanel =
-      layoutWidth - (mainPageCenterSeparatorXPosition + initPanelWidthsPx[3]);
+      mainPageSearchSeparatorXPosition - mainPageCenterSeparatorXPosition;
+    let fourthPanel = layoutWidth - mainPageSearchSeparatorXPosition;
 
     const tempPanelWidths = [
       mainPageTreeSeparatorXPosition,
       secondPanel,
       thirdPanel,
-      initPanelWidthsPx[3],
+      fourthPanel,
     ];
 
     dispatch(
@@ -562,7 +563,8 @@ const MainPage: React.FC<MainPage> = ({}) => {
       if (!panelWidths.length) {
         if (
           !localStorageCenterSeparatorXPosition ||
-          !localStorageTreeSeparatorXPosition
+          !localStorageTreeSeparatorXPosition ||
+          !localStorageSearchSeparatorXPosition
         ) {
           console.log("first layout init");
           // first layout INIT
@@ -583,10 +585,22 @@ const MainPage: React.FC<MainPage> = ({}) => {
               onePercentOfLayoutWidth
             ).toString()
           );
+          setMainPageSearchSeparatorXPosition(
+            initPanelWidthsPx[0] + initPanelWidthsPx[1] + initPanelWidthsPx[2]
+          );
+          localStorage.setItem(
+            "mainPageSearchSeparatorXPosition",
+            (
+              (initPanelWidthsPx[0] +
+                initPanelWidthsPx[1] +
+                initPanelWidthsPx[2]) /
+              onePercentOfLayoutWidth
+            ).toString()
+          );
         } else {
           // layout init with saved separator
           console.log("init load - separator determines panel widths");
-          handleSeparatorLayoutInit(initPanelWidthsPx);
+          handleSeparatorLayoutInit();
         }
       } else {
         // change of layout width (different monitor) / redirect from different page
@@ -615,7 +629,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
           !thirdPanelUndersized
         ) {
           console.log("not undersized - set calculated width");
-          handleSeparatorLayoutInit(panelWidthsPx);
+          handleSeparatorLayoutInit();
         } else {
           console.log("something is undersized - set init width");
           dispatch(setPanelWidths(initPanelWidthsPx));
@@ -631,6 +645,18 @@ const MainPage: React.FC<MainPage> = ({}) => {
             "mainPageCenterSeparatorXPosition",
             (
               (initPanelWidthsPx[0] + initPanelWidthsPx[1]) /
+              onePercentOfLayoutWidth
+            ).toString()
+          );
+          setMainPageSearchSeparatorXPosition(
+            initPanelWidthsPx[0] + initPanelWidthsPx[1] + initPanelWidthsPx[2]
+          );
+          localStorage.setItem(
+            "mainPageSearchSeparatorXPosition",
+            (
+              (initPanelWidthsPx[0] +
+                initPanelWidthsPx[1] +
+                initPanelWidthsPx[2]) /
               onePercentOfLayoutWidth
             ).toString()
           );
