@@ -525,11 +525,31 @@ export const TextAnnotator = ({
   }, [annotatorMode, selectedText, isSelectingText, dataDocument]);
 
   if (errorDocument) {
-    return <div>Error loading document: {errorDocument.message}</div>;
+    return (
+      <div
+        style={{
+          color: theme?.color.black,
+          margin: "1rem",
+          fontSize: theme?.fontSize.small,
+        }}
+      >
+        Error loading document: {errorDocument.message}
+      </div>
+    );
   }
 
   if (isFetchingDocument) {
-    return <div>Loading document...</div>;
+    return (
+      <div
+        style={{
+          color: theme?.color.black,
+          margin: "1rem",
+          fontSize: theme?.fontSize.small,
+        }}
+      >
+        Loading document...
+      </div>
+    );
   }
 
   const hasParentT = territory?.data?.parent !== undefined;
