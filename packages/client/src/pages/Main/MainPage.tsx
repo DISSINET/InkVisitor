@@ -512,7 +512,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
   };
 
   useEffect(() => {
-    console.log("layoutWidth", layoutWidth);
     if (layoutWidth > 0) {
       const initPanelWidthsPx = INIT_PERCENT_PANEL_WIDTHS.map(
         (percentWidth) => {
