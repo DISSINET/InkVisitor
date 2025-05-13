@@ -86,6 +86,7 @@ interface Suggester {
   setShowCreateModal: React.Dispatch<React.SetStateAction<boolean>>;
   alwaysShowCreateModal?: boolean;
   button?: React.ReactNode;
+  disableTemplateInstantiation?: boolean;
 }
 
 export const Suggester: React.FC<Suggester> = ({
@@ -124,6 +125,7 @@ export const Suggester: React.FC<Suggester> = ({
   setShowCreateModal,
   alwaysShowCreateModal,
   button,
+  disableTemplateInstantiation = false,
 }) => {
   const [selected, setSelected] = useState(-1);
   const [isFocused, setIsFocused] = useState(false);
@@ -255,6 +257,7 @@ export const Suggester: React.FC<Suggester> = ({
       isInsideTemplate,
       territoryParentId,
       disableButtons,
+      disableTemplateInstantiation,
     };
 
     const rowHeight = 25;

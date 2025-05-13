@@ -86,12 +86,12 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   button,
   preSuggestions,
 
-  disableCreate,
+  disableCreate = false,
   disableTemplateInstantiation = false,
   disableWildCard = false,
   disableTemplatesAccept = false,
   disableButtons = false,
-  disableEnter,
+  disableEnter = false,
   autoFocus,
 
   initTyped,
@@ -475,6 +475,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         alwaysShowCreateModal={alwaysShowCreateModal}
         disableWildCard={disableWildCard || allCategories.length < 2}
         button={button}
+        disableTemplateInstantiation={disableTemplateInstantiation}
       />
       {showAddTerritoryModal && (
         <AddTerritoryModal
