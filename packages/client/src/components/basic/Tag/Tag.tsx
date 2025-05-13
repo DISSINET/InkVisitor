@@ -90,7 +90,7 @@ export const Tag: React.FC<TagProps> = ({
   );
 
   const [clickedOnce, setClickedOnce] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>(null!);
 
   const [isDragging, canDrag, drag, drop] = useDragDrop({
     entity,
