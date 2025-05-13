@@ -29,6 +29,8 @@ import { UserCustomizationModal } from "./UserCustomizationModal/UserCustomizati
 import { ValidationRule } from "./ValidationRule/ValidationRule";
 import { AbbreviatedTextWithTooltip } from "./AbbreviatedTextWithTooltip/AbbreviatedTextWithTooltip";
 import { DocumentTitle } from "./DocumentTitle/DocumentTitle";
+import { LayoutSeparatorVertical } from "./PanelSeparator/LayoutSeparatorVertical";
+import { LayoutSeparatorHorizontal } from "./PanelSeparator/LayoutSeparatorHorizontal";
 
 const Dropdown = {
   Single: {
@@ -59,6 +61,8 @@ export {
   EntityTag,
   EntityTooltip,
   JSONExplorer,
+  LayoutSeparatorVertical,
+  LayoutSeparatorHorizontal,
   Menu,
   Page,
   LeftHeader,
