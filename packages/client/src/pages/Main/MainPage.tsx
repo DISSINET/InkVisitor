@@ -11,6 +11,7 @@ import {
   MAIN_PAGE_TREE_SEPARATOR_X_PERCENT_POSITION,
   SECOND_PANEL_MIN_WIDTH,
   THIRD_PANEL_MIN_WIDTH,
+  MAIN_PAGE_SEARCH_SEPARATOR_X_PERCENT_POSITION,
 } from "Theme/constants";
 import api from "api";
 import { Box, Button, ButtonGroup, Panel } from "components";
@@ -436,6 +437,19 @@ const MainPage: React.FC<MainPage> = ({}) => {
       : MAIN_PAGE_CENTER_SEPARATOR_X_PERCENT_POSITION * onePercentOfLayoutWidth
   );
 
+  // SEARCH SEPARATOR STATE
+  const localStorageSearchSeparatorXPosition = localStorage.getItem(
+    "mainPageSearchSeparatorXPosition"
+  );
+  const [
+    mainPageSearchSeparatorXPosition,
+    setMainPageSearchSeparatorXPosition,
+  ] = useState<number>(
+    localStorageSearchSeparatorXPosition
+      ? Number(localStorageSearchSeparatorXPosition) * onePercentOfLayoutWidth
+      : MAIN_PAGE_SEARCH_SEPARATOR_X_PERCENT_POSITION * onePercentOfLayoutWidth
+  );
+
   const handleTreeSeparatorXPositionChange = (xPosition: number) => {
     const flooredXPosition = floorNumberToOneDecimal(xPosition);
     if (mainPageTreeSeparatorXPosition !== flooredXPosition) {
@@ -480,6 +494,29 @@ const MainPage: React.FC<MainPage> = ({}) => {
           floorNumberToOneDecimal(xPosition - panelWidths[0]),
           layoutWidth - panelWidths[3] - xPosition,
           panelWidths[3],
+        ])
+      );
+    }
+  };
+
+  const handleSearchSeparatorXPositionChange = (xPosition: number) => {
+    if (mainPageSearchSeparatorXPosition !== xPosition) {
+      setMainPageSearchSeparatorXPosition(xPosition);
+
+      const separatorXPercentPosition = floorNumberToOneDecimal(
+        xPosition / onePercentOfLayoutWidth
+      );
+      localStorage.setItem(
+        "mainPageSearchSeparatorXPosition",
+        separatorXPercentPosition.toString()
+      );
+
+      dispatch(
+        setPanelWidths([
+          panelWidths[0],
+          panelWidths[1],
+          floorNumberToOneDecimal(xPosition - mainPageCenterSeparatorXPosition),
+          layoutWidth - xPosition,
         ])
       );
     }
@@ -630,6 +667,20 @@ const MainPage: React.FC<MainPage> = ({}) => {
           separatorXPosition={mainPageCenterSeparatorXPosition}
           setSeparatorXPosition={(xPosition) => {
             handleCenterSeparatorXPositionChange(xPosition);
+          }}
+        />
+      )}
+
+      {/* SEARCH SEPARATOR */}
+      {mainPageSearchSeparatorXPosition > 0 && fourthPanelExpanded && (
+        <LayoutSeparatorVertical
+          leftSideMinWidth={
+            mainPageCenterSeparatorXPosition + THIRD_PANEL_MIN_WIDTH
+          }
+          leftSideMaxWidth={layoutWidth - 200}
+          separatorXPosition={mainPageSearchSeparatorXPosition}
+          setSeparatorXPosition={(xPosition) => {
+            handleSearchSeparatorXPositionChange(xPosition);
           }}
         />
       )}
