@@ -13,7 +13,7 @@ import { StyledEditorEmptyState } from "./StatementEditorBoxStyles";
 
 export const StatementEditorBox: React.FC = () => {
   const thirdPanelExpanded: boolean = useAppSelector(
-    (state) => state.layout.thirdPanelExpanded
+    (state) => state.layout.mainPage.thirdPanelExpanded
   );
 
   const { statementId, setStatementId, selectedDetailId, setTerritoryId } =

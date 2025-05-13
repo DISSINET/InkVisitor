@@ -27,14 +27,14 @@ import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
 import { FaHighlighter, FaList, FaPlus } from "react-icons/fa";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { VscCloseAll } from "react-icons/vsc";
-import { setDetailBoxMinimized } from "redux/features/layout/detailBoxMinimizedSlice";
-import { setFirstPanelExpanded } from "redux/features/layout/firstPanelExpandedSlice";
-import { setFourthPanelBoxesOpened } from "redux/features/layout/fourthPanelBoxesOpenedSlice";
-import { setFourthPanelExpanded } from "redux/features/layout/fourthPanelExpandedSlice";
+import { setDetailBoxMinimized } from "redux/features/layout/mainPage/detailBoxMinimizedSlice";
+import { setFirstPanelExpanded } from "redux/features/layout/mainPage/firstPanelExpandedSlice";
+import { setFourthPanelBoxesOpened } from "redux/features/layout/mainPage/fourthPanelBoxesOpenedSlice";
+import { setFourthPanelExpanded } from "redux/features/layout/mainPage/fourthPanelExpandedSlice";
 import { setPanelWidthsPercent } from "redux/features/layout/mainPage/panelWidthsPercentSlice";
-import { setPanelWidths } from "redux/features/layout/panelWidthsSlice";
-import { setStatementListOpened } from "redux/features/layout/statementListOpenedSlice";
-import { setThirdPanelExpanded } from "redux/features/layout/thirdPanelExpandedSlice";
+import { setPanelWidths } from "redux/features/layout/mainPage/panelWidthsSlice";
+import { setStatementListOpened } from "redux/features/layout/mainPage/statementListOpenedSlice";
+import { setThirdPanelExpanded } from "redux/features/layout/mainPage/thirdPanelExpandedSlice";
 import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 import { setIsLoading } from "redux/features/statementList/isLoadingSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
@@ -75,28 +75,28 @@ const MainPage: React.FC<MainPage> = ({}) => {
     (state) => state.layout.contentHeight
   );
   const panelWidths: number[] = useAppSelector(
-    (state) => state.layout.panelWidths
+    (state) => state.layout.mainPage.panelWidths
   );
   const panelWidthsPercent: number[] = useAppSelector(
     (state) => state.layout.mainPage.panelWidthsPercent
   );
   const fourthPanelBoxesOpened: { [key: string]: boolean } = useAppSelector(
-    (state) => state.layout.fourthPanelBoxesOpened
+    (state) => state.layout.mainPage.fourthPanelBoxesOpened
   );
   const firstPanelExpanded: boolean = useAppSelector(
-    (state) => state.layout.firstPanelExpanded
+    (state) => state.layout.mainPage.firstPanelExpanded
   );
   const thirdPanelExpanded: boolean = useAppSelector(
-    (state) => state.layout.thirdPanelExpanded
+    (state) => state.layout.mainPage.thirdPanelExpanded
   );
   const fourthPanelExpanded: boolean = useAppSelector(
-    (state) => state.layout.fourthPanelExpanded
+    (state) => state.layout.mainPage.fourthPanelExpanded
   );
   const statementListOpened: boolean = useAppSelector(
-    (state) => state.layout.statementListOpened
+    (state) => state.layout.mainPage.statementListOpened
   );
   const detailBoxMinimized: boolean = useAppSelector(
-    (state) => state.layout.detailBoxMinimized
+    (state) => state.layout.mainPage.detailBoxMinimized
   );
 
   const toggleFirstPanel = () => {
