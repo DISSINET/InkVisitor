@@ -150,6 +150,7 @@ export const StatementEditorSectionButtons: React.FC<
         disableCreate
         inputWidth={76}
         placeholder="another S"
+        disableTemplateInstantiation
       />
     </>
   );

@@ -261,16 +261,10 @@ export const Suggester: React.FC<Suggester> = ({
     };
 
     const rowHeight = 25;
-    const Row = ({
-      index,
-      style,
-    }: ListChildComponentProps<SuggestionRowEntityItemData>) => {
-      return <MemoizedEntityRow index={index} data={itemData} style={style} />;
-    };
 
     return (
       <List
-        itemData={itemData}
+        itemData={itemData as SuggestionRowEntityItemData}
         height={
           suggestions.length > 7
             ? rowHeight * 8
@@ -281,7 +275,7 @@ export const Suggester: React.FC<Suggester> = ({
         width="100%"
         overscanCount={scrollOverscanCount}
       >
-        {Row}
+        {MemoizedEntityRow}
       </List>
     );
   };
