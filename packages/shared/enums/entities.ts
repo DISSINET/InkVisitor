@@ -230,7 +230,7 @@ export namespace EntityEnums {
     OldEnglish = "ang",
     OldFrench = "fro",
     OldHighGerman = "goh",
-    OldItalian = "roa", // general code for Romance languages
+    OldItalian = "ito", // not an ISO 639-2 code
     OldNorse = "non",
     OldOccitan = "pro",
     Polish = "pol",
