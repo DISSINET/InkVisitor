@@ -276,7 +276,7 @@ export const StatementListTextAnnotator: React.FC<
               width={
                 statements.length > 0
                   ? contentWidth - COLLAPSED_TABLE_WIDTH - 5
-                  : contentWidth
+                  : contentWidth - 5
               }
               hlEntities={hlEntities}
               forwardAnnotator={(newAnnotator) => {
