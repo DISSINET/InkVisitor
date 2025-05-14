@@ -80,7 +80,7 @@ const theme = {
     "data-import-persecutio": "#380099",
     development: "#6174C2",
     sandbox: "#CB6E17",
-    medhate: "#470d4f",
+    medhate: "#006666",
 
     entityC: "#83BCB6",
     entityE: "#D8B5A5",
