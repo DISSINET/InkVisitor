@@ -141,3 +141,9 @@ export const StyledAnnotatorNoAnchors = styled.div`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   font-style: italic;
 `;
+
+export const StyledInfoText = styled.div`
+  color: ${({ theme }) => theme.color.black};
+  font-size: ${({ theme }) => theme.fontSize.sm};
+  margin: ${({ theme }) => theme.space[4]};
+`;

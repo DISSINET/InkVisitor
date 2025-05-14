@@ -21,6 +21,7 @@ import TextAnnotatorMenu from "./AnnotatorMenu";
 import {
   StyledAnnotatorMenu,
   StyledCanvasWrapper,
+  StyledInfoText,
   StyledLinesCanvas,
   StyledMainCanvas,
   StyledScrollerCursor,
@@ -526,30 +527,14 @@ export const TextAnnotator = ({
 
   if (errorDocument) {
     return (
-      <div
-        style={{
-          color: theme?.color.black,
-          margin: "1rem",
-          fontSize: theme?.fontSize.small,
-        }}
-      >
+      <StyledInfoText>
         Error loading document: {errorDocument.message}
-      </div>
+      </StyledInfoText>
     );
   }
 
   if (isFetchingDocument) {
-    return (
-      <div
-        style={{
-          color: theme?.color.black,
-          margin: "1rem",
-          fontSize: theme?.fontSize.small,
-        }}
-      >
-        Loading document...
-      </div>
-    );
+    return <StyledInfoText>Loading document...</StyledInfoText>;
   }
 
   const hasParentT = territory?.data?.parent !== undefined;
