@@ -218,10 +218,6 @@ export const TextAnnotator = ({
     index: number;
   } | null>(null);
 
-  useEffect(() => {
-    console.log("pendingSelection", pendingSelection);
-  }, [pendingSelection]);
-
   const handleTextSelection = (
     text: string,
     anchors: string[],
