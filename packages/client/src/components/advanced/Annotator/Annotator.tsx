@@ -21,6 +21,7 @@ import TextAnnotatorMenu from "./AnnotatorMenu";
 import {
   StyledAnnotatorMenu,
   StyledCanvasWrapper,
+  StyledInfoText,
   StyledLinesCanvas,
   StyledMainCanvas,
   StyledScrollerCursor,
@@ -216,10 +217,6 @@ export const TextAnnotator = ({
     anchors: string[];
     index: number;
   } | null>(null);
-
-  useEffect(() => {
-    console.log("pendingSelection", pendingSelection);
-  }, [pendingSelection]);
 
   const handleTextSelection = (
     text: string,
@@ -534,11 +531,15 @@ export const TextAnnotator = ({
   }, [annotatorMode, selectedText, isSelectingText, dataDocument]);
 
   if (errorDocument) {
-    return <div>Error loading document: {errorDocument.message}</div>;
+    return (
+      <StyledInfoText>
+        Error loading document: {errorDocument.message}
+      </StyledInfoText>
+    );
   }
 
   if (isFetchingDocument) {
-    return <div>Loading document...</div>;
+    return <StyledInfoText>Loading document...</StyledInfoText>;
   }
 
   const hasParentT = territory?.data?.parent !== undefined;

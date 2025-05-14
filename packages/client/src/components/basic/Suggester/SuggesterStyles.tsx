@@ -1,3 +1,4 @@
+import { ConnectDropTarget } from "react-dnd";
 import { AiOutlineWarning } from "react-icons/ai";
 import styled from "styled-components";
 import { space2, space4 } from "Theme/constants";
@@ -27,6 +28,7 @@ interface InputWrapper {
   $isOver: boolean;
   $hasButton: boolean;
   $hasText?: boolean;
+  ref?: ConnectDropTarget;
 }
 export const StyledInputWrapper = styled.div<InputWrapper>`
   display: flex;

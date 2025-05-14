@@ -39,6 +39,9 @@ export const UserListUsernameInput: React.FC<UserListUsernameInput> = ({
           if (localUsername.length < 4) {
             toast.warning("Minimum length of username is 4 characters");
             setLocalUsername(name);
+          } else if (localUsername.length > 20) {
+            toast.warning("Maximum length of username is 20 characters");
+            setLocalUsername(name);
           } else if (
             usernameList?.filter((u) => u !== name).includes(localUsername)
           ) {

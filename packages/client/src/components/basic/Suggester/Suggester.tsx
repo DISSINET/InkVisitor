@@ -23,6 +23,7 @@ import { FaPlus } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
 import { toast } from "react-toastify";
 import { FixedSizeList as List } from "react-window";
+import { ListChildComponentProps } from "react-window";
 import { ThemeContext } from "styled-components";
 import {
   EntityDragItem,
@@ -85,6 +86,7 @@ interface Suggester {
   setShowCreateModal: React.Dispatch<React.SetStateAction<boolean>>;
   alwaysShowCreateModal?: boolean;
   button?: React.ReactNode;
+  disableTemplateInstantiation?: boolean;
 }
 
 export const Suggester: React.FC<Suggester> = ({
@@ -123,6 +125,7 @@ export const Suggester: React.FC<Suggester> = ({
   setShowCreateModal,
   alwaysShowCreateModal,
   button,
+  disableTemplateInstantiation = false,
 }) => {
   const [selected, setSelected] = useState(-1);
   const [isFocused, setIsFocused] = useState(false);
@@ -254,9 +257,11 @@ export const Suggester: React.FC<Suggester> = ({
       isInsideTemplate,
       territoryParentId,
       disableButtons,
+      disableTemplateInstantiation,
     };
 
     const rowHeight = 25;
+
     return (
       <List
         itemData={itemData as SuggestionRowEntityItemData}

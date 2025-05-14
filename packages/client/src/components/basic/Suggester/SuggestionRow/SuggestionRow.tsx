@@ -21,6 +21,7 @@ export type SuggestionRowEntityItemData = {
   isInsideTemplate: boolean;
   territoryParentId: string | undefined;
   disableButtons: boolean;
+  disableTemplateInstantiation: boolean;
 };
 
 interface EntityRow {
@@ -37,6 +38,7 @@ const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
     isInsideTemplate,
     territoryParentId,
     disableButtons,
+    disableTemplateInstantiation,
   } = data;
   const { entity, icons } = items[index];
   const isNotDiscouraged = entity.status !== EntityEnums.Status.Discouraged;
@@ -65,23 +67,24 @@ const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
             }
           />
         )}
-        {entity.isTemplate && !territoryWithoutParent && (
-          <Button
-            tooltipLabel="link a new template instance"
-            key="instantiate template"
-            inverted
-            noBorder
-            noBackground
-            icon={
-              <FaPlusSquare
-                onClick={() => {
-                  // onPick template inside nonTemplate
-                  onPick(entity, true);
-                }}
-              />
-            }
-          />
-        )}
+        {entity.isTemplate &&
+          (!territoryWithoutParent || disableTemplateInstantiation) && (
+            <Button
+              tooltipLabel="link a new template instance"
+              key="instantiate template"
+              inverted
+              noBorder
+              noBackground
+              icon={
+                <FaPlusSquare
+                  onClick={() => {
+                    // onPick template inside nonTemplate
+                    onPick(entity, true);
+                  }}
+                />
+              }
+            />
+          )}
         {entity.isTemplate && isInsideTemplate && (
           <Button
             tooltipLabel="link template"

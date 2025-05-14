@@ -76,7 +76,7 @@ const darkTheme = {
     "data-import-persecutio": "#8c79e0",
     development: "#6174C2",
     sandbox: "#e59857",
-    medhate: "#3d0d51",
+    medhate: "#008080",
 
     entityC: "#83BCB6",
     entityE: "#D8B5A5",
