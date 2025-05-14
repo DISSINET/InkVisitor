@@ -216,6 +216,7 @@ export namespace EntityEnums {
     English = "eng",
     MiddleEnglish = "enm",
     Occitan = "oci",
+    OldOccitan = "pro",
     Czech = "ces",
     Italian = "ita",
     French = "fra",
@@ -227,6 +228,9 @@ export namespace EntityEnums {
     Dutch = "dut",
     Chinese = "chi",
     Japanese = "jpn",
+    OldChurchSlavonic = "chu",
+    OldFrench = "fro",
+    OldItalian = "roa",
   }
 
   export enum ResourceType {

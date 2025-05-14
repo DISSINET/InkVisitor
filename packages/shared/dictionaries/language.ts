@@ -5,7 +5,7 @@ export const languageDict = [
   { label: "Latin", value: EntityEnums.Language.Latin },
   { label: "English", value: EntityEnums.Language.English },
   { label: "Middle English", value: EntityEnums.Language.MiddleEnglish },
-  { label: "Occitan", value: EntityEnums.Language.Occitan },
+  { label: "Old Occitan", value: EntityEnums.Language.Occitan },
   { label: "Czech", value: EntityEnums.Language.Czech },
   { label: "Italian", value: EntityEnums.Language.Italian },
   { label: "French", value: EntityEnums.Language.French },
@@ -17,4 +17,10 @@ export const languageDict = [
   { label: "Dutch", value: EntityEnums.Language.Dutch },
   { label: "Chinese", value: EntityEnums.Language.Chinese },
   { label: "Japanese", value: EntityEnums.Language.Japanese },
+  {
+    label: "Old Church Slavonic",
+    value: EntityEnums.Language.OldChurchSlavonic,
+  },
+  { label: "Old French", value: EntityEnums.Language.OldFrench },
+  { label: "Old Italian", value: EntityEnums.Language.OldItalian },
 ];
