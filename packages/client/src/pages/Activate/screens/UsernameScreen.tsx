@@ -43,7 +43,7 @@ export const UsernameScreen: React.FC<UsernameScreen> = ({
   const handleActivation = async () => {
     if (username.length < 4) {
       setError(UsernameTooShortError.message);
-    } else if (username.length > 10) {
+    } else if (username.length > 20) {
       setError(UsernameTooLongError.message);
     } else {
       try {
