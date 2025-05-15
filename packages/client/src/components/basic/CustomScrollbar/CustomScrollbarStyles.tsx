@@ -2,8 +2,6 @@ import Scrollbar from "react-scrollbars-custom";
 import styled from "styled-components";
 
 export const StyledScrollbar = styled(Scrollbar)`
-  display: flex;
-  flex-shrink: 0;
   .ScrollbarsCustom-Wrapper {
     .ScrollbarsCustom-Scroller {
     }

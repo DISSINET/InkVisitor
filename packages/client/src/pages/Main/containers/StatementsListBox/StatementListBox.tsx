@@ -856,6 +856,8 @@ export const StatementListBox: React.FC = () => {
               elementId="Statements-box-table"
               contentWidth={tableWidth}
               customStyle={{
+                display: "flex",
+                flexShrink: 0,
                 // fix for overheight because of marginTop which is necessary to make space for annotator header
                 marginTop:
                   displayMode === StatementListDisplayMode.TEXT
