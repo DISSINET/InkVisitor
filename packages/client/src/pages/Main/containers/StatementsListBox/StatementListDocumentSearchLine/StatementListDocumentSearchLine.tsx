@@ -46,6 +46,7 @@ interface StatementListDocumentSearchLineProps {
   setSearchActiveOccurence: (index: number) => void;
   resources: IEntity[];
   showStatementList: boolean;
+  userCanEdit: boolean;
 }
 
 const StatementListDocumentSearchLine: React.FC<
@@ -70,6 +71,7 @@ const StatementListDocumentSearchLine: React.FC<
   setSearchActiveOccurence,
   resources,
   showStatementList,
+  userCanEdit,
 }) => {
   const themeContext = useContext(ThemeContext);
   const maxWidth = showStatementList
@@ -91,6 +93,7 @@ const StatementListDocumentSearchLine: React.FC<
             onPicked={(entity) => {
               setSelectedResourceId(entity.id);
             }}
+            disabled={!userCanEdit}
           />
         )}
         {selectedResource && (

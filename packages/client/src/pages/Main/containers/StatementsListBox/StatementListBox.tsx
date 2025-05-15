@@ -786,6 +786,11 @@ export const StatementListBox: React.FC = () => {
     }));
   }, [selectedDocument, statements]);
 
+  const userCanEdit = useMemo(
+    () => territory?.right !== UserEnums.RoleMode.Read,
+    [territory]
+  );
+
   return (
     <>
       {showStatementList && (
@@ -929,6 +934,7 @@ export const StatementListBox: React.FC = () => {
                 setSelectedResourceId={setSelectedResourceId}
                 displayMode={displayMode}
                 showStatementList={isListNonEmpty}
+                userCanEdit={userCanEdit}
               />
             )}
           </div>

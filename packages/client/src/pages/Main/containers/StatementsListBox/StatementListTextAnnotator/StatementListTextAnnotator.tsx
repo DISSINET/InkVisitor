@@ -66,6 +66,7 @@ interface StatementListTextAnnotator {
   selectedDocumentIsFetching: boolean;
   displayMode: StatementListDisplayMode;
   showStatementList: boolean;
+  userCanEdit: boolean;
 }
 
 export const StatementListTextAnnotator: React.FC<
@@ -106,6 +107,7 @@ export const StatementListTextAnnotator: React.FC<
   selectedDocumentIsFetching,
   displayMode,
   showStatementList,
+  userCanEdit,
 }) => {
   const [showAnnotator, setShowAnnotator] = useState(false);
   useEffect(() => {
@@ -236,6 +238,7 @@ export const StatementListTextAnnotator: React.FC<
         setSearchActiveOccurence={setSearchActiveOccurence}
         resources={resources || []}
         showStatementList={showStatementList}
+        userCanEdit={userCanEdit}
       />
 
       {/* Class selector */}
