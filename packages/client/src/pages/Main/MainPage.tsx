@@ -121,6 +121,14 @@ const MainPage: React.FC<MainPage> = ({}) => {
       dispatch(setThirdPanelExpanded(false));
     } else {
       dispatch(setThirdPanelExpanded(true));
+      if (
+        mainPageCenterSeparatorXPosition - mainPageTreeSeparatorXPosition <
+        SECOND_PANEL_MIN_WIDTH
+      ) {
+        handleTreeSeparatorXPositionChange(
+          mainPageCenterSeparatorXPosition - SECOND_PANEL_MIN_WIDTH
+        );
+      }
     }
   };
 
@@ -610,7 +618,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
         }
       } else {
         // change of layout width (different monitor) / redirect from different page
-        console.log("layout width changed / redirect from different page");
+        console.log("redirect from different page / layout width changed");
         const panelWidthsPx = panelWidthsPercent.map((percentWidth) => {
           return floorNumberToOneDecimal(
             percentWidth * onePercentOfLayoutWidth
@@ -620,10 +628,17 @@ const MainPage: React.FC<MainPage> = ({}) => {
           panelWidthsPx[0],
           FIRST_PANEL_MIN_WIDTH
         );
+
         const secondPanelUndersized = isPanelUndersized(
-          panelWidthsPx[1],
+          thirdPanelExpanded
+            ? panelWidthsPx[1]
+            : layoutWidth -
+                panelWidthsPx[3] -
+                collapsedPanelWidth -
+                mainPageTreeSeparatorXPosition,
           SECOND_PANEL_MIN_WIDTH
         );
+
         const thirdPanelUndersized = isPanelUndersized(
           panelWidthsPx[2],
           THIRD_PANEL_MIN_WIDTH
