@@ -670,7 +670,7 @@ export const TextAnnotator = ({
             />
 
             <Button
-              label="save edits"
+              label="save"
               color="primary"
               icon={<FaRegSave />}
               disabled={!isChangeMade}
@@ -679,7 +679,7 @@ export const TextAnnotator = ({
               }}
             />
             <Button
-              label="discard edits"
+              label="discard"
               color="warning"
               icon={<FaTrash />}
               disabled={!isChangeMade}
