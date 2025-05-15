@@ -128,5 +128,5 @@ export const StyledDocumentTitleContainer = styled.div`
   align-items: center;
   flex-shrink: 3;
   min-width: 0;
-  max-width: 300px;
+  max-width: 100px;
 `;
