@@ -687,7 +687,13 @@ const MainPage: React.FC<MainPage> = ({}) => {
         <LayoutSeparatorVertical
           leftSideMinWidth={FIRST_PANEL_MIN_WIDTH}
           leftSideMaxWidth={
-            mainPageCenterSeparatorXPosition - SECOND_PANEL_MIN_WIDTH
+            thirdPanelExpanded
+              ? mainPageCenterSeparatorXPosition - SECOND_PANEL_MIN_WIDTH
+              : // if the editor is collapsed,
+                layoutWidth -
+                panelWidths[3] -
+                collapsedPanelWidth -
+                SECOND_PANEL_MIN_WIDTH
           }
           separatorXPosition={mainPageTreeSeparatorXPosition}
           setSeparatorXPosition={(xPosition) => {
