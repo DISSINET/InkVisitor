@@ -84,7 +84,7 @@ export const UsernameScreen: React.FC<UsernameScreen> = ({
           </StyledMail>
           <StyledDescription>
             The username has to be unique and <br />
-            between 4 and 10 characters long.
+            between 4 and 20 characters long.
           </StyledDescription>
           <ModalInputWrap>
             <StyledInputRow>
