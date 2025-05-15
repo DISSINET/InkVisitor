@@ -19,6 +19,7 @@ import {
   StyledTbLockExclamation,
   StyledTbLockPlus,
 } from "./ActivateSreensStyles";
+import useKeypress from "hooks/useKeyPress";
 
 interface PasswordScreen {
   email: string;
@@ -55,6 +56,14 @@ export const PasswordScreen: React.FC<PasswordScreen> = ({
       setUsernameScreen(true);
     }
   };
+
+  useKeypress(
+    "Enter",
+    () => {
+      handleContinue();
+    },
+    []
+  );
 
   return (
     <>

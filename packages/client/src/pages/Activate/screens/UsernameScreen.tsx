@@ -22,6 +22,7 @@ import {
   StyledInputRow,
   StyledMail,
 } from "pages/AuthModalSharedStyles";
+import useKeypress from "hooks/useKeyPress";
 
 interface UsernameScreen {
   hash: string;
@@ -72,6 +73,14 @@ export const UsernameScreen: React.FC<UsernameScreen> = ({
       console.log(err);
     }
   };
+
+  useKeypress(
+    "Enter",
+    () => {
+      !continueScreen ? handleActivation() : handleLogin();
+    },
+    [continueScreen]
+  );
 
   return (
     <>
