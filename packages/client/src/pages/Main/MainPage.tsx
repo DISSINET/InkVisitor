@@ -304,6 +304,20 @@ const MainPage: React.FC<MainPage> = ({}) => {
     enabled: !!userId && api.isLoggedIn(),
   });
 
+  // Admin / Owner / Editor with writer rights
+  const hasWriteRightsToSelectedTerritory = useMemo(() => {
+    return (
+      (user?.role === UserEnums.Role.Editor &&
+        user?.rights?.some(
+          (right) =>
+            right.territory === territoryId &&
+            right.mode === UserEnums.RoleMode.Write
+        )) ||
+      user?.role === UserEnums.Role.Admin ||
+      user?.role === UserEnums.Role.Owner
+    );
+  }, [user, territoryId]);
+
   const getStatementListBoxHeight = () => {
     if (!detailIdArray.length) {
       return contentHeight;
@@ -769,8 +783,8 @@ const MainPage: React.FC<MainPage> = ({}) => {
                 ></Button>
               </ButtonGroup>
               <ButtonGroup style={{ marginLeft: "5px", marginRight: "5px" }}>
-                {/* TODO: check if user has write rights to Territory */}
-                {userRole !== UserEnums.Role.Viewer && territoryId && (
+                {/* Admin / Owner / Editor with writer rights */}
+                {hasWriteRightsToSelectedTerritory && territoryId && (
                   <Button
                     key="add"
                     icon={<FaPlus />}
