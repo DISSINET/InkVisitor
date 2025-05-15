@@ -146,7 +146,7 @@ export const LeftHeader: React.FC<LeftHeader> = React.memo(
 );
 
 interface RightHeader {
-  setUserCustomizationOpen: (arg0: boolean) => void;
+  setUserCustomizationOpen: React.Dispatch<React.SetStateAction<boolean>>;
   userName: string;
   userRole: UserEnums.Role;
   tempLocation: string | false;
@@ -262,6 +262,7 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
               tempLocation={tempLocation}
               setTempLocation={setTempLocation}
               handleLogOut={handleLogOut}
+              setUserCustomizationOpen={setUserCustomizationOpen}
             />
           </StyledMenu>
         </StyledRightHeader>
