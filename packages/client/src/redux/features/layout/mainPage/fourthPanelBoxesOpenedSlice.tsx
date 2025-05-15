@@ -17,7 +17,13 @@ const fourthPanelBoxesOpenedSlice = createSlice({
     setFourthPanelBoxesOpened: (
       state: { [key: string]: boolean },
       action: PayloadAction<{ [key: string]: boolean }>
-    ) => (state = action.payload),
+    ) => {
+      localStorage.setItem(
+        "fourthPanelBoxesOpened",
+        JSON.stringify(action.payload)
+      );
+      return action.payload;
+    },
   },
 });
 

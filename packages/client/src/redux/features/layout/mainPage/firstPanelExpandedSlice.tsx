@@ -8,8 +8,10 @@ const firstPanelExpandedSlice = createSlice({
   name: "firstPanelExpanded",
   initialState: initialState,
   reducers: {
-    setFirstPanelExpanded: (state: boolean, action: PayloadAction<boolean>) =>
-      (state = action.payload),
+    setFirstPanelExpanded: (state: boolean, action: PayloadAction<boolean>) => {
+      localStorage.setItem("firstPanelExpanded", action.payload.toString());
+      return action.payload;
+    },
   },
 });
 

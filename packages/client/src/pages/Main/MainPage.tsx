@@ -103,10 +103,8 @@ const MainPage: React.FC<MainPage> = ({}) => {
   const toggleFirstPanel = () => {
     if (firstPanelExpanded) {
       dispatch(setFirstPanelExpanded(false));
-      localStorage.setItem("firstPanelExpanded", "false");
     } else {
       dispatch(setFirstPanelExpanded(true));
-      localStorage.setItem("firstPanelExpanded", "true");
     }
   };
 
@@ -121,10 +119,8 @@ const MainPage: React.FC<MainPage> = ({}) => {
   const toggleThirdPanel = () => {
     if (thirdPanelExpanded) {
       dispatch(setThirdPanelExpanded(false));
-      localStorage.setItem("thirdPanelExpanded", "false");
     } else {
       dispatch(setThirdPanelExpanded(true));
-      localStorage.setItem("thirdPanelExpanded", "true");
     }
   };
 
@@ -139,10 +135,8 @@ const MainPage: React.FC<MainPage> = ({}) => {
   const toggleFourthPanel = () => {
     if (fourthPanelExpanded) {
       dispatch(setFourthPanelExpanded(false));
-      localStorage.setItem("fourthPanelExpanded", "false");
     } else {
       dispatch(setFourthPanelExpanded(true));
-      localStorage.setItem("fourthPanelExpanded", "true");
     }
   };
 
@@ -165,14 +159,12 @@ const MainPage: React.FC<MainPage> = ({}) => {
         [boxToHide]: true,
       };
       dispatch(setFourthPanelBoxesOpened(newObject));
-      localStorage.setItem("fourthPanelBoxesOpened", JSON.stringify(newObject));
     } else {
       const newObject = {
         ...fourthPanelBoxesOpened,
         [boxToHide]: false,
       };
       dispatch(setFourthPanelBoxesOpened(newObject));
-      localStorage.setItem("fourthPanelBoxesOpened", JSON.stringify(newObject));
     }
   };
 
@@ -689,7 +681,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
           leftSideMaxWidth={
             thirdPanelExpanded
               ? mainPageCenterSeparatorXPosition - SECOND_PANEL_MIN_WIDTH
-              : // if the editor is collapsed,
+              : // if the editor is collapsed, calculate the min width from the right side
                 layoutWidth -
                 panelWidths[3] -
                 collapsedPanelWidth -
