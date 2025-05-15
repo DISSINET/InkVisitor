@@ -46,8 +46,8 @@ export const StatementListOrderCorrection: React.FC<
         visible={showTooltip}
         label={
           !isAnchored
-            ? "statement is unanchored"
-            : `distance to correct the order of the statement`
+            ? "statement is not anchored"
+            : `distance and direction to correct the order of the statement`
         }
         referenceElement={referenceElement}
         position="right"
