@@ -119,7 +119,7 @@ export const InstProps: any = async (
   ) => {
     // type
     if (prop.type.entityId) {
-      const typeEntityReq = await api.entitiesGet(prop.type.entityId);
+      const typeEntityReq = await api.entityGet(prop.type.entityId);
 
       if (typeEntityReq && typeEntityReq.data) {
         if (typeEntityReq.data.isTemplate) {
@@ -133,7 +133,7 @@ export const InstProps: any = async (
 
     // value
     if (prop.value.entityId) {
-      const valueEntityReq = await api.entitiesGet(prop.value.entityId);
+      const valueEntityReq = await api.entityGet(prop.value.entityId);
 
       if (valueEntityReq && valueEntityReq.data) {
         if (valueEntityReq.data.isTemplate) {
@@ -168,7 +168,7 @@ export const InstActant = async (
   actant.props = await InstProps(actant.props, userRole);
 
   if (actant?.entityId) {
-    const eReq = await api.entitiesGet(actant.entityId);
+    const eReq = await api.entityGet(actant.entityId);
     const actantE = eReq.data;
 
     if (actantE && actantE.isTemplate) {
@@ -190,7 +190,7 @@ export const InstAction: any = async (
   action.props = await InstProps(action.props, userRole);
 
   if (action?.actionId) {
-    const eReq = await api.entitiesGet(action.actionId);
+    const eReq = await api.entityGet(action.actionId);
     const actionE = eReq.data;
 
     if (actionE && actionE.isTemplate) {
