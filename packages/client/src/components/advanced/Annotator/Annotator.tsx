@@ -220,7 +220,8 @@ export const TextAnnotator = ({
   const handleFetchEntities = async (anchors: string[]) => {
     try {
       if (anchors.length > 0) {
-        const entities = await api.entitiesGet(anchors);
+        const uniqueAnchors = [...new Set(anchors)];
+        const entities = await api.entitiesGet(uniqueAnchors);
         setStoredEntities(
           entities.data.reduce((acc, entity) => {
             acc[entity.id] = entity;
