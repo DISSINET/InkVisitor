@@ -105,8 +105,6 @@ const StatementListDocumentSearchLine: React.FC<
               },
               tooltipLabel: "use different resource",
             }}
-            // fullWidth={false}
-            // showOnly="label"
           />
         )}
       </StyledEntityContainer>
