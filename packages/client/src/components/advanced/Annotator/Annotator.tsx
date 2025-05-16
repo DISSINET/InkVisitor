@@ -188,7 +188,7 @@ export const TextAnnotator = ({
   };
 
   const fetchEntity = async (anchor: string) => {
-    const entity = await api.entitiesGet(anchor);
+    const entity = await api.entityGet(anchor);
     return entity;
   };
 
@@ -245,10 +245,17 @@ export const TextAnnotator = ({
   const handleFetchEntities = async (anchors: string[]) => {
     try {
       // Load all entities in parallel
-      await Promise.all([
-        ...anchors.map((anchor) => obtainEntity(anchor)),
-        thisTerritoryEntityId ? obtainEntity(thisTerritoryEntityId) : null,
-      ]);
+      // await Promise.all([
+      //   ...anchors.map((anchor) => obtainEntity(anchor)),
+      //   thisTerritoryEntityId ? obtainEntity(thisTerritoryEntityId) : null,
+      // ]);
+      const entities = await api.entitiesGet(anchors);
+      setStoredEntities(
+        entities.data.reduce((acc, entity) => {
+          acc[entity.id] = entity;
+          return acc;
+        }, {} as Record<string, IEntity>)
+      );
     } finally {
       setIsLoadingEntities(false);
     }

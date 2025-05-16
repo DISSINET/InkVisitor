@@ -579,13 +579,29 @@ class Api {
    * Entities
    * Suggester container
    */
-  async entitiesGet(
+  async entityGet(
     entityId: string,
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseEntity>> {
     try {
       const response = await this.connection.get(
         `/entities/${entityId}`,
+        options
+      );
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  async entitiesGet(
+    entityIds: string[],
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseEntity[]>> {
+    try {
+      const response = await this.connection.post(
+        `/entities/batch`,
+        { ids: entityIds },
         options
       );
       return response;

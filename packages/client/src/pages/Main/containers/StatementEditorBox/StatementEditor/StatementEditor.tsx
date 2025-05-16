@@ -421,7 +421,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     if (user) {
       const statementLanguage = user.options.defaultStatementLanguage;
       if (changes.type) {
-        api.entitiesGet(changes.type?.entityId).then((typeEntity) => {
+        api.entityGet(changes.type?.entityId).then((typeEntity) => {
           if (typeEntity.data) {
             const entityLanguage = typeEntity.data.language;
             if (entityLanguage !== statementLanguage && changes.type) {
@@ -435,7 +435,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         });
       }
       if (changes.value) {
-        api.entitiesGet(changes.value.entityId).then((valueEntity) => {
+        api.entityGet(changes.value.entityId).then((valueEntity) => {
           if (valueEntity.data) {
             const entityLanguage = valueEntity.data.language;
             if (entityLanguage !== statementLanguage && changes.value) {
