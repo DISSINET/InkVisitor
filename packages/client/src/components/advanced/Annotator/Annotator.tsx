@@ -66,7 +66,7 @@ export const TextAnnotator = ({
   const queryClient = useQueryClient();
   const theme = useContext(ThemeContext);
 
-  const { appendDetailId } = useSearchParams();
+  const { appendDetailId, statementId } = useSearchParams();
 
   const contentHeight: number = useAppSelector(
     (state) => state.layout.contentHeight
@@ -242,6 +242,14 @@ export const TextAnnotator = ({
     queryClient.invalidateQueries({
       queryKey: ["entity", entityId],
     });
+    if (entityId === statementId) {
+      // timeout is necessary for BE to process the new anchor
+      setTimeout(() => {
+        queryClient.invalidateQueries({
+          queryKey: ["statement", entityId],
+        });
+      }, 100);
+    }
     toast.info(`Anchor created ${entityId}.`);
   };
 
