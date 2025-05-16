@@ -75,10 +75,8 @@ export const StatementListRow: React.FC<StatementListRow> = ({
   );
   const { statementId } = useSearchParams();
 
-  const dropRef = useRef<HTMLTableRowElement>(
-    null
-  ) as React.RefObject<HTMLTableRowElement>;
-  const dragRef = useRef<HTMLTableCellElement | null>(null);
+  const dropRef = useRef<HTMLTableRowElement>(null);
+  const dragRef = useRef<HTMLTableCellElement>(null);
 
   const isVisible = useIsRowVisible(dropRef);
 
