@@ -107,10 +107,9 @@ server.use(
   })
 );
 
-server.use(profilerMiddleware);
-
-server.use(dbMiddleware);
 server.use(timeout('30s'));
+server.use(profilerMiddleware);
+server.use(dbMiddleware);
 
 // Health route
 server.get("/api/health", async function (req, res) {
