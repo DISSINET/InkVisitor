@@ -41,7 +41,7 @@ interface PropGroup {
   }) => void;
 
   userCanEdit: boolean;
-  openDetailOnCreate: boolean;
+  openDetailOnCreate?: boolean;
   category: DraggedPropRowCategory;
   disabledAttributes?: PropAttributeFilter;
   isInsideTemplate: boolean;

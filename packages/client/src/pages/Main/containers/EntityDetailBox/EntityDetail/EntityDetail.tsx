@@ -797,7 +797,6 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                         });
                       }}
                       userCanEdit={userCanEdit}
-                      openDetailOnCreate={false}
                       movePropToIndex={(propId, oldIndex, newIndex) => {
                         movePropToIndex(propId, oldIndex, newIndex);
                       }}
