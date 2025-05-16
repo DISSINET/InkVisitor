@@ -147,15 +147,14 @@ export const StatementListBox: React.FC = () => {
     enabled: api.isLoggedIn() && !!userId,
   });
 
-  const [storedTerritoryIds, setStoredTerritoryIds] = useState<string[]>([]);
-  useEffect(() => {
+  const favoritedTerritoryIds = useMemo(() => {
     if (userData?.storedTerritories) {
-      setStoredTerritoryIds(
-        userData.storedTerritories.map((territory) => territory.territory.id)
+      return userData.storedTerritories.map(
+        (territory) => territory.territory.id
       );
     }
+    return [];
   }, [userData?.storedTerritories]);
-  const isFavorited = territory && storedTerritoryIds?.includes(territory.id);
 
   useEffect(() => {
     if (error && (error as any).error === "TerritoryDoesNotExits") {
@@ -798,7 +797,6 @@ export const StatementListBox: React.FC = () => {
           {territory && (
             <StatementListHeader
               territory={territory}
-              isFavorited={isFavorited}
               selectedRows={selectedRows}
               setSelectedRows={setSelectedRows}
               isAllSelected={
@@ -815,6 +813,7 @@ export const StatementListBox: React.FC = () => {
               relationsCreateMutation={relationsCreateMutation}
               autoOrderStatementsMutation={autoOrderStatementsMutation}
               statementsWithOrder={statementsWithOrder}
+              favoritedTerritoryIds={favoritedTerritoryIds}
             />
           )}
 

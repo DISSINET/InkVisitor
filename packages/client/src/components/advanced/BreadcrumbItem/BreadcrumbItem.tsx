@@ -12,12 +12,7 @@ import { useAppDispatch } from "redux/hooks";
 import { rootTerritoryId } from "Theme/constants";
 import { StyledItemBox } from "./BreadcrumbItemStyles";
 
-interface BreadcrumbItem {
-  territoryId: string;
-  // If the territory is in params (territory), territory data needs to be added to props!!!
-  territoryData?: IResponseTerritory;
-  isFavorited?: boolean;
-}
+// initalData is used in the moment of loading to show the tag with the loader
 const initialData: IEntity = {
   id: "",
   class: EntityEnums.Class.Territory,
@@ -30,6 +25,13 @@ const initialData: IEntity = {
   props: [],
   notes: [],
 };
+
+interface BreadcrumbItem {
+  territoryId: string;
+  // If the territory is in params (territory), territory data needs to be added to props!!!
+  territoryData?: IResponseTerritory;
+  isFavorited?: boolean;
+}
 export const BreadcrumbItem: React.FC<BreadcrumbItem> = ({
   territoryId,
   territoryData,

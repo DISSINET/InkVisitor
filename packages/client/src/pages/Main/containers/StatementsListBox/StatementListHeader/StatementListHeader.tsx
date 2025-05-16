@@ -59,7 +59,6 @@ import {
 
 interface StatementListHeader {
   territory: IResponseTerritory;
-  isFavorited?: boolean;
 
   isAllSelected: boolean;
   selectedRows: string[];
@@ -132,11 +131,11 @@ interface StatementListHeader {
     orderCorrection?: StatementOrderCorrection;
     isAnchored?: boolean;
   })[];
+  favoritedTerritoryIds: string[];
 }
 export const StatementListHeader: React.FC<StatementListHeader> = ({
   territory,
 
-  isFavorited,
   isAllSelected,
   selectedRows,
   setSelectedRows,
@@ -153,6 +152,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   relationsCreateMutation,
   autoOrderStatementsMutation,
   statementsWithOrder,
+  favoritedTerritoryIds,
 }) => {
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
@@ -376,21 +376,27 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
             <React.Fragment key={key}>
               <BreadcrumbItem
                 territoryId={territoryId}
-                isFavorited={isFavorited}
+                isFavorited={favoritedTerritoryIds?.includes(territoryId)}
               />
             </React.Fragment>
           );
         })}
         <React.Fragment key="this-territory">
           <BreadcrumbItem
+            // in this case territoryId is being used to compare and not fetch anything inside the component
             territoryId={territoryId}
             territoryData={territory}
-            isFavorited={isFavorited}
+            isFavorited={favoritedTerritoryIds?.includes(territoryId)}
           />
         </React.Fragment>
       </React.Fragment>
     );
-  }, [selectedTerritoryPath.join(",")]);
+  }, [
+    territoryId,
+    selectedTerritoryPath.join(","),
+    territory.labels,
+    favoritedTerritoryIds,
+  ]);
 
   const hasAnchoredStatementsOutOfOrder = statementsWithOrder.some(
     (s) => s.isAnchored && s.orderCorrection && s.orderCorrection.distance > 0
@@ -399,7 +405,11 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   return (
     <>
       <StyledHeader>
-        <StyledHeaderBreadcrumbRow>{BreadcrumbItems}</StyledHeaderBreadcrumbRow>
+        <div style={{ display: "grid", maxWidth: "100%" }}>
+          <StyledHeaderBreadcrumbRow>
+            {BreadcrumbItems}
+          </StyledHeaderBreadcrumbRow>
+        </div>
 
         {userCanEdit && (
           <StyledSuggesterRow>
