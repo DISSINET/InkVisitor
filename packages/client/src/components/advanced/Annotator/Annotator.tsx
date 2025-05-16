@@ -187,31 +187,6 @@ export const TextAnnotator = ({
     }
   };
 
-  const fetchEntity = async (anchor: string) => {
-    const entity = await api.entityGet(anchor);
-    return entity;
-  };
-
-  const addEntityToStore = (eid: string, entity: IEntity | false) => {
-    setStoredEntities((prev) => ({ ...prev, [eid]: entity }));
-  };
-
-  const obtainEntity = async (eid: string) => {
-    if (storedEntities[eid]) {
-      return storedEntities[eid];
-    } else {
-      try {
-        const entityRes = await fetchEntity(eid);
-        if (entityRes && entityRes.data) {
-          addEntityToStore(eid, entityRes.data);
-          return entityRes.data;
-        }
-      } catch (error) {
-        addEntityToStore(eid, false);
-      }
-    }
-  };
-
   const [pendingSelection, setPendingSelection] = useState<{
     text: string;
     anchors: string[];
@@ -244,18 +219,15 @@ export const TextAnnotator = ({
 
   const handleFetchEntities = async (anchors: string[]) => {
     try {
-      // Load all entities in parallel
-      // await Promise.all([
-      //   ...anchors.map((anchor) => obtainEntity(anchor)),
-      //   thisTerritoryEntityId ? obtainEntity(thisTerritoryEntityId) : null,
-      // ]);
-      const entities = await api.entitiesGet(anchors);
-      setStoredEntities(
-        entities.data.reduce((acc, entity) => {
-          acc[entity.id] = entity;
-          return acc;
-        }, {} as Record<string, IEntity>)
-      );
+      if (anchors.length > 0) {
+        const entities = await api.entitiesGet(anchors);
+        setStoredEntities(
+          entities.data.reduce((acc, entity) => {
+            acc[entity.id] = entity;
+            return acc;
+          }, {} as Record<string, IEntity>)
+        );
+      }
     } finally {
       setIsLoadingEntities(false);
     }
