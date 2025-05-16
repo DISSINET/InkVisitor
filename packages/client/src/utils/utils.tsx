@@ -16,7 +16,7 @@ import {
 } from "@shared/types";
 import React from "react";
 import { DropTargetMonitor, XYCoord } from "react-dnd";
-import { FaUserEdit, FaUserTag } from "react-icons/fa";
+import { FaUserEdit, FaUserShield, FaUserTag } from "react-icons/fa";
 import { FaUserGear } from "react-icons/fa6";
 import { RiUserStarFill } from "react-icons/ri";
 import { DragItem, EntityDragItem } from "types";
@@ -350,7 +350,7 @@ export const getUserIcon = (
   size?: number
 ): React.ReactNode => {
   if (userRole === UserEnums.Role.Owner) {
-    return <RiUserStarFill size={size} />;
+    return <FaUserShield size={size} />;
   } else if (userRole === UserEnums.Role.Admin) {
     return <FaUserGear size={size} />;
   } else if (userRole === UserEnums.Role.Editor) {
