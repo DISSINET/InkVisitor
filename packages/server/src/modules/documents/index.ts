@@ -1,7 +1,7 @@
 import { mergeDeep } from "@common/functions";
 import Document from "@models/document/document";
 import { EntityEnums } from "@shared/enums";
-import { IDocument, IResponseGeneric } from "@shared/types";
+import { IDocument, IDocumentMeta, IResponseGeneric } from "@shared/types";
 import {
   BadParams,
   DocumentDoesNotExist,
@@ -42,14 +42,18 @@ export default Router()
    */
   .get(
     "/",
-    asyncRouteHandler<IDocument[]>(async (request: IRequest) => {
+    asyncRouteHandler<IDocumentMeta[]>(async (request: IRequest) => {
       const docs = await Document.getAll(request.db.connection);
 
-      const docResponses: IDocument[] = [];
+      const docResponses: IDocumentMeta[] = [];
       for (const d of docs) {
         const document = new Document(d);
-        await document.preprocess(request.db.connection);
+        if (!document.anchors || document.anchors.length === 0) {
+          await document.preprocess(request.db.connection);
+        }
 
+        // @ts-ignore 
+        delete document.content;
         docResponses.push(document);
       }
 
