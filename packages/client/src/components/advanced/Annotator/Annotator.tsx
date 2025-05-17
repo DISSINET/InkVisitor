@@ -146,10 +146,6 @@ export const TextAnnotator = ({
 
   const [selectedText, setSelectedText] = useState<string>("");
   const [selectedAnchors, setSelectedAnchors] = useState<string[]>([]);
-  // const storedEntities = useRef<Record<string, IEntity | false>>({});
-  // Add loading state
-  const [isLoadingEntities, setIsLoadingEntities] = useState(false);
-  // Move entities to state instead of ref to trigger re-renders
   const [storedEntities, setStoredEntities] = useState<
     Record<string, IEntity | false>
   >({});
@@ -210,16 +206,18 @@ export const TextAnnotator = ({
       setSelectedText(text);
       setSelectedAnchors(anchors);
 
-      setIsLoadingEntities(true);
       handleFetchEntities(anchors);
 
       setPendingSelection(null);
     }
   }, [pendingSelection, isSelectingText]);
 
-  const handleFetchEntities = async (anchors: string[]) => {
-    try {
-      if (anchors.length > 0) {
+  const [anchors, setAnchors] = useState<string[]>([]);
+
+  const { data: anchorEntities, isFetching: isFetchingAnchorEntities } =
+    useQuery({
+      queryKey: ["anchorEntities", anchors],
+      queryFn: async () => {
         const uniqueAnchors = [...new Set(anchors)];
         const entities = await api.entitiesGet(uniqueAnchors);
         setStoredEntities(
@@ -228,10 +226,13 @@ export const TextAnnotator = ({
             return acc;
           }, {} as Record<string, IEntity>)
         );
-      }
-    } finally {
-      setIsLoadingEntities(false);
-    }
+        return entities.data;
+      },
+      enabled: api.isLoggedIn() && anchors.length > 0,
+    });
+
+  const handleFetchEntities = async (anchors: string[]) => {
+    setAnchors(anchors);
   };
 
   const handleAddAnchor = (entityId: string) => {
@@ -498,6 +499,16 @@ export const TextAnnotator = ({
   const onRemoveAnchor = (anchor: string) => {
     annotator?.removeAnchorFromSelection(anchor);
     handleSaveNewContent(true);
+    setSelectedText("");
+    annotator?.cursor.reset();
+    annotator?.draw();
+    if (anchor === statementId) {
+      setTimeout(() => {
+        queryClient.invalidateQueries({
+          queryKey: ["statement", statementId],
+        });
+      }, 100);
+    }
   };
 
   const isMenuDisplayed = useMemo<boolean>(() => {
@@ -567,7 +578,7 @@ export const TextAnnotator = ({
                       thisTerritoryEntityId ?? ""
                     )
                   }
-                  isLoadingEntities={isLoadingEntities}
+                  isLoadingEntities={isFetchingAnchorEntities}
                   hasParentT={hasParentT}
                 />
               )}
