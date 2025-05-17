@@ -136,7 +136,7 @@ export default Router()
    *               $ref: "#/components/schemas/IDocument"
    */
   .get(
-    "/:documentId?",
+    "/:documentId",
     asyncRouteHandler<IDocument>(async (request: IRequest) => {
       const id = request.params.documentId;
 

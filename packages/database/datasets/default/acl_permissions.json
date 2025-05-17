@@ -240,6 +240,12 @@
     "roles": ["*"]
   },
   {
+    "controller":"documents",
+    "route": ":documentId",
+    "method": "GET",
+    "roles": ["editor"]
+  },
+  {
     "controller": "documents",
     "route": "",
     "method": "POST",
