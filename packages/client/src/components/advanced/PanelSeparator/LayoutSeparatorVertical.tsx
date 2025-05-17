@@ -2,7 +2,6 @@ import { useSpring } from "@react-spring/web";
 import React, { useEffect, useState, useCallback } from "react";
 import { springConfig } from "Theme/constants";
 import { StyledLayoutSeparatorVertical } from "./SeparatorStyles";
-import { useDebouncedCallback } from "hooks";
 
 interface LayoutSeparatorVertical {
   leftSideMinWidth: number;
