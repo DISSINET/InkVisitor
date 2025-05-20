@@ -415,7 +415,8 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
           <StyledSuggesterRow>
             {/* BATCH ACTIONS */}
             <StyledActionsWrapper>
-              <Button
+              {/* temporary disabled */}
+              {/* <Button
                 icon={<FaArrowDownShortWide />}
                 onClick={() => autoOrderStatementsMutation.mutate()}
                 color="success"
@@ -430,7 +431,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                   )
                 }
                 disabled={!hasAnchoredStatementsOutOfOrder}
-              />
+              /> */}
               {user?.role !== UserEnums.Role.Viewer &&
                 territory.statements.length > 0 && (
                   <>

@@ -12,7 +12,6 @@ import {
   FaChevronCircleUp,
   FaGripVertical,
 } from "react-icons/fa";
-import { FaArrowDownLong, FaArrowUpLong } from "react-icons/fa6";
 import { BeatLoader } from "react-spinners";
 import { Cell, ColumnInstance, Row } from "react-table";
 import { setDraggedRowId } from "redux/features/statementList/draggedRowIdSlice";
@@ -26,16 +25,10 @@ import {
   StatementOrderCorrection,
 } from "types";
 import { dndHoverFn } from "utils/utils";
-import { StatementListRowExpanded } from "./StatementListRowExpanded/StatementListRowExpanded";
-import {
-  StyledOrderCorrection,
-  StyledTd,
-  StyledTdMove,
-  StyledTr,
-} from "./StatementListTableStyles";
-import useIsRowVisible from "./useRowIsVisible";
-import { TbAnchorOff } from "react-icons/tb";
 import { StatementListOrderCorrection } from "./StatementListOrderCorrection/StatementListOrderCorrection";
+import { StatementListRowExpanded } from "./StatementListRowExpanded/StatementListRowExpanded";
+import { StyledTd, StyledTdMove, StyledTr } from "./StatementListTableStyles";
+import useIsRowVisible from "./useRowIsVisible";
 
 interface StatementListRow {
   row: Row<
