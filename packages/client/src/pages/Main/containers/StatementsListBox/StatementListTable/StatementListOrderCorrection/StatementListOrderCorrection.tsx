@@ -24,7 +24,6 @@ export const StatementListOrderCorrection: React.FC<
         onMouseLeave={() => setShowTooltip(false)}
       >
         {/* no anchor icon */}
-        {!isAnchored && <TbAnchorOff size={15} />}
         {/* temporary disabled */}
         {/* {!isAnchored ? (
           <TbAnchorOff size={15} />

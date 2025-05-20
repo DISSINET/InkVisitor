@@ -126,7 +126,7 @@ interface StatementListHeader {
     Relation.IRelation[],
     unknown
   >;
-  autoOrderStatementsMutation: UseMutationResult<void, Error, void, unknown>;
+  // autoOrderStatementsMutation: UseMutationResult<void, Error, void, unknown>;
   statementsWithOrder: (IResponseStatement & {
     orderCorrection?: StatementOrderCorrection;
     isAnchored?: boolean;
@@ -150,7 +150,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
   deleteStatementsMutation,
   relationsCreateMutation,
-  autoOrderStatementsMutation,
+  // autoOrderStatementsMutation,
   statementsWithOrder,
   favoritedTerritoryIds,
 }) => {

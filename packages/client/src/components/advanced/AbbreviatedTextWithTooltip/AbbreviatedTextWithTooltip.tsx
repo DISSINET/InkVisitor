@@ -39,7 +39,7 @@ export const AbbreviatedTextWithTooltip: React.FC<
     isFetching,
     isSuccess,
   } = useQuery({
-    queryKey: ["document", documentId, entityId, anchorIndex, allowFetch],
+    queryKey: ["anchorText", documentId, entityId, anchorIndex, allowFetch],
     queryFn: async () => {
       const res = await api.documentGetAnchorText(
         documentId,

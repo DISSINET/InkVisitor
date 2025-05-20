@@ -498,69 +498,69 @@ export const StatementListBox: React.FC = () => {
     },
   });
 
-  const autoOrderStatementsMutation = useMutation({
-    mutationFn: async () => {
-      if (!selectedDocument) return;
+  // const autoOrderStatementsMutation = useMutation({
+  //   mutationFn: async () => {
+  //     if (!selectedDocument) return;
 
-      const statementAnchors = collectStatementAnchors(
-        selectedDocument.anchors
-      );
-      const correctPositionMap = new Map(
-        statementAnchors.map((anchor, index) => [anchor.anchor, index])
-      );
+  //     const statementAnchors = collectStatementAnchors(
+  //       selectedDocument.anchors
+  //     );
+  //     const correctPositionMap = new Map(
+  //       statementAnchors.map((anchor, index) => [anchor.anchor, index])
+  //     );
 
-      // Separate anchored and non-anchored statements
-      const anchoredStatements = statements.filter((s) =>
-        correctPositionMap.has(s.id)
-      );
-      const nonAnchoredStatements = statements.filter(
-        (s) => !correctPositionMap.has(s.id)
-      );
+  //     // Separate anchored and non-anchored statements
+  //     const anchoredStatements = statements.filter((s) =>
+  //       correctPositionMap.has(s.id)
+  //     );
+  //     const nonAnchoredStatements = statements.filter(
+  //       (s) => !correctPositionMap.has(s.id)
+  //     );
 
-      // Sort anchored statements by their correct position
-      const sortedAnchoredStatements = anchoredStatements.sort((a, b) => {
-        const posA = correctPositionMap.get(a.id) ?? 0;
-        const posB = correctPositionMap.get(b.id) ?? 0;
-        return posA - posB;
-      });
+  //     // Sort anchored statements by their correct position
+  //     const sortedAnchoredStatements = anchoredStatements.sort((a, b) => {
+  //       const posA = correctPositionMap.get(a.id) ?? 0;
+  //       const posB = correctPositionMap.get(b.id) ?? 0;
+  //       return posA - posB;
+  //     });
 
-      // Interleave anchored and non-anchored statements based on their original relative positions
-      const finalOrder: IResponseStatement[] = [];
-      let anchoredIndex = 0;
-      let nonAnchoredIndex = 0;
+  //     // Interleave anchored and non-anchored statements based on their original relative positions
+  //     const finalOrder: IResponseStatement[] = [];
+  //     let anchoredIndex = 0;
+  //     let nonAnchoredIndex = 0;
 
-      statements.forEach((statement) => {
-        if (correctPositionMap.has(statement.id)) {
-          finalOrder.push(sortedAnchoredStatements[anchoredIndex++]);
-        } else {
-          finalOrder.push(nonAnchoredStatements[nonAnchoredIndex++]);
-        }
-      });
+  //     statements.forEach((statement) => {
+  //       if (correctPositionMap.has(statement.id)) {
+  //         finalOrder.push(sortedAnchoredStatements[anchoredIndex++]);
+  //       } else {
+  //         finalOrder.push(nonAnchoredStatements[nonAnchoredIndex++]);
+  //       }
+  //     });
 
-      // Update each statement's order
-      const updates = finalOrder.map((statement, index) => {
-        const order = index * 100; // Use increments of 100 to leave room for future insertions
-        return api.entityUpdate(statement.id, {
-          data: {
-            ...statement.data,
-            territory: {
-              ...statement.data.territory,
-              order,
-            },
-          },
-        });
-      });
+  //     // Update each statement's order
+  //     const updates = finalOrder.map((statement, index) => {
+  //       const order = index * 100; // Use increments of 100 to leave room for future insertions
+  //       return api.entityUpdate(statement.id, {
+  //         data: {
+  //           ...statement.data,
+  //           territory: {
+  //             ...statement.data.territory,
+  //             order,
+  //           },
+  //         },
+  //       });
+  //     });
 
-      await Promise.all(updates);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["territory"] });
-      toast.info("Statements reordered according to document");
-    },
-    onError: () => {
-      toast.error("Failed to reorder statements");
-    },
-  });
+  //     await Promise.all(updates);
+  //   },
+  //   onSuccess: () => {
+  //     queryClient.invalidateQueries({ queryKey: ["territory"] });
+  //     toast.info("Statements reordered according to document");
+  //   },
+  //   onError: () => {
+  //     toast.error("Failed to reorder statements");
+  //   },
+  // });
 
   const {
     ref: contentRef,
@@ -707,83 +707,83 @@ export const StatementListBox: React.FC = () => {
     enabled: api.isLoggedIn() && !!selectedDocumentId,
   });
 
-  const collectStatementAnchors = (anchors: IAnchorsNode[]): IAnchorsNode[] => {
-    return anchors.reduce((acc: any[], anchor) => {
-      if (anchor.class === EntityEnums.Class.Statement) {
-        acc.push(anchor);
-      }
-      if (anchor.children) {
-        acc.push(...collectStatementAnchors(anchor.children));
-      }
-      return acc;
-    }, []);
-  };
+  // const collectStatementAnchors = (anchors: IAnchorsNode[]): IAnchorsNode[] => {
+  //   return anchors.reduce((acc: any[], anchor) => {
+  //     if (anchor.class === EntityEnums.Class.Statement) {
+  //       acc.push(anchor);
+  //     }
+  //     if (anchor.children) {
+  //       acc.push(...collectStatementAnchors(anchor.children));
+  //     }
+  //     return acc;
+  //   }, []);
+  // };
 
   // adds object orderCorrection to each statement with info about the order in the list vs the annotator
-  const statementsWithOrder: (IResponseStatement & {
-    orderCorrection?: StatementOrderCorrection;
-    isAnchored?: boolean;
-  })[] = useMemo(() => {
-    if (!selectedDocument) return statements;
+  // const statementsWithOrder: (IResponseStatement & {
+  //   orderCorrection?: StatementOrderCorrection;
+  //   isAnchored?: boolean;
+  // })[] = useMemo(() => {
+  //   if (!selectedDocument) return statements;
 
-    const statementAnchors = collectStatementAnchors(selectedDocument.anchors);
+  //   const statementAnchors = collectStatementAnchors(selectedDocument.anchors);
 
-    // Create a map of statement IDs to their correct positions
-    const correctPositionMap = new Map(
-      statementAnchors.map((anchor, index) => [anchor.anchor, index])
-    );
+  //   // Create a map of statement IDs to their correct positions
+  //   const correctPositionMap = new Map(
+  //     statementAnchors.map((anchor, index) => [anchor.anchor, index])
+  //   );
 
-    // First, create a map of all statements with their original indexes
-    const statementsWithCorrectPosition = statements.map(
-      (statement, index) => ({
-        statement,
-        isAnchored: correctPositionMap.has(statement.id),
-        correctPosition: correctPositionMap.get(statement.id),
-      })
-    );
+  //   // First, create a map of all statements with their original indexes
+  //   const statementsWithCorrectPosition = statements.map(
+  //     (statement, index) => ({
+  //       statement,
+  //       isAnchored: correctPositionMap.has(statement.id),
+  //       correctPosition: correctPositionMap.get(statement.id),
+  //     })
+  //   );
 
-    // Filter and sort only anchored statements
-    const anchoredStatements = statementsWithCorrectPosition
-      .filter((item) => item.isAnchored)
-      .sort((a, b) => (a.correctPosition ?? 0) - (b.correctPosition ?? 0));
+  //   // Filter and sort only anchored statements
+  //   const anchoredStatements = statementsWithCorrectPosition
+  //     .filter((item) => item.isAnchored)
+  //     .sort((a, b) => (a.correctPosition ?? 0) - (b.correctPosition ?? 0));
 
-    // Create a map of current anchored positions (excluding non-anchored statements)
-    const currentAnchoredPositions = new Map(
-      statementsWithCorrectPosition
-        .filter((item) => item.isAnchored)
-        .map((item, index) => [item.statement.id, index])
-    );
+  //   // Create a map of current anchored positions (excluding non-anchored statements)
+  //   const currentAnchoredPositions = new Map(
+  //     statementsWithCorrectPosition
+  //       .filter((item) => item.isAnchored)
+  //       .map((item, index) => [item.statement.id, index])
+  //   );
 
-    // Create a map of anchored statements with their corrections
-    const anchoredCorrections = new Map(
-      anchoredStatements.map((item) => [
-        item.statement.id,
-        {
-          currentPosition: currentAnchoredPositions.get(item.statement.id) ?? 0,
-          correctPosition: item.correctPosition ?? 0,
-          shouldMoveUp:
-            (item.correctPosition ?? 0) <
-            (currentAnchoredPositions.get(item.statement.id) ?? 0),
-          shouldMoveDown:
-            (item.correctPosition ?? 0) >
-            (currentAnchoredPositions.get(item.statement.id) ?? 0),
-          distance: Math.abs(
-            (item.correctPosition ?? 0) -
-              (currentAnchoredPositions.get(item.statement.id) ?? 0)
-          ),
-        },
-      ])
-    );
+  //   // Create a map of anchored statements with their corrections
+  //   const anchoredCorrections = new Map(
+  //     anchoredStatements.map((item) => [
+  //       item.statement.id,
+  //       {
+  //         currentPosition: currentAnchoredPositions.get(item.statement.id) ?? 0,
+  //         correctPosition: item.correctPosition ?? 0,
+  //         shouldMoveUp:
+  //           (item.correctPosition ?? 0) <
+  //           (currentAnchoredPositions.get(item.statement.id) ?? 0),
+  //         shouldMoveDown:
+  //           (item.correctPosition ?? 0) >
+  //           (currentAnchoredPositions.get(item.statement.id) ?? 0),
+  //         distance: Math.abs(
+  //           (item.correctPosition ?? 0) -
+  //             (currentAnchoredPositions.get(item.statement.id) ?? 0)
+  //         ),
+  //       },
+  //     ])
+  //   );
 
-    // Reconstruct the array in original order with corrections
-    return statementsWithCorrectPosition.map(({ statement, isAnchored }) => ({
-      ...statement,
-      isAnchored,
-      orderCorrection: isAnchored
-        ? anchoredCorrections.get(statement.id)
-        : null,
-    }));
-  }, [selectedDocument, statements]);
+  //   // Reconstruct the array in original order with corrections
+  //   return statementsWithCorrectPosition.map(({ statement, isAnchored }) => ({
+  //     ...statement,
+  //     isAnchored,
+  //     orderCorrection: isAnchored
+  //       ? anchoredCorrections.get(statement.id)
+  //       : null,
+  //   }));
+  // }, [selectedDocument, statements]);
 
   const userCanEdit = useMemo(
     () => territory?.right !== UserEnums.RoleMode.Read,
@@ -811,8 +811,9 @@ export const StatementListBox: React.FC = () => {
               duplicateTerritoryMutation={duplicateTerritoryMutation}
               deleteStatementsMutation={deleteStatementsMutation}
               relationsCreateMutation={relationsCreateMutation}
-              autoOrderStatementsMutation={autoOrderStatementsMutation}
-              statementsWithOrder={statementsWithOrder}
+              // autoOrderStatementsMutation={autoOrderStatementsMutation}
+              statementsWithOrder={statements}
+              // statementsWithOrder={statementsWithOrder}
               favoritedTerritoryIds={favoritedTerritoryIds}
             />
           )}
@@ -873,7 +874,8 @@ export const StatementListBox: React.FC = () => {
               >
                 {statements.length > 0 && (
                   <StatementListTable
-                    statements={statementsWithOrder}
+                    statements={statements}
+                    // statements={statementsWithOrder}
                     handleRowClick={(rowId: string) => {
                       dispatch(setShowWarnings(false));
                       if (statementId !== rowId) {
@@ -979,7 +981,7 @@ export const StatementListBox: React.FC = () => {
           duplicateTerritoryMutation.isPending ||
           deleteStatementsMutation.isPending ||
           relationsCreateMutation.isPending ||
-          autoOrderStatementsMutation.isPending ||
+          // autoOrderStatementsMutation.isPending ||
           (statementListOpened && !showStatementList)
         }
       />
