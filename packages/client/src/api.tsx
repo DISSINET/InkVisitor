@@ -99,7 +99,7 @@ class Api {
 
     this.connection = axios.create({
       baseURL: this.apiUrl,
-      timeout: 8000,
+      timeout: 15000,
       responseType: "json",
       headers: this.headers,
     });
