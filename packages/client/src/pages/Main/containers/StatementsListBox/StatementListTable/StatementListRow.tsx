@@ -136,13 +136,13 @@ export const StatementListRow: React.FC<StatementListRow> = ({
                         <FaGripVertical color={themeContext?.color.black} />
                       </div>
                       {/* temporary disabled */}
-                      {/* {(!isAnchored ||
+                      {(!isAnchored ||
                         (orderCorrection && orderCorrection?.distance > 0)) && (
                         <StatementListOrderCorrection
                           orderCorrection={orderCorrection}
                           isAnchored={isAnchored}
                         />
-                      )} */}
+                      )}
                     </div>
                   </StyledTdMove>
                 );

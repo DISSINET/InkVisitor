@@ -707,83 +707,83 @@ export const StatementListBox: React.FC = () => {
     enabled: api.isLoggedIn() && !!selectedDocumentId,
   });
 
-  // const collectStatementAnchors = (anchors: IAnchorsNode[]): IAnchorsNode[] => {
-  //   return anchors.reduce((acc: any[], anchor) => {
-  //     if (anchor.class === EntityEnums.Class.Statement) {
-  //       acc.push(anchor);
-  //     }
-  //     if (anchor.children) {
-  //       acc.push(...collectStatementAnchors(anchor.children));
-  //     }
-  //     return acc;
-  //   }, []);
-  // };
+  const collectStatementAnchors = (anchors: IAnchorsNode[]): IAnchorsNode[] => {
+    return anchors.reduce((acc: any[], anchor) => {
+      if (anchor.class === EntityEnums.Class.Statement) {
+        acc.push(anchor);
+      }
+      if (anchor.children) {
+        acc.push(...collectStatementAnchors(anchor.children));
+      }
+      return acc;
+    }, []);
+  };
 
   // adds object orderCorrection to each statement with info about the order in the list vs the annotator
-  // const statementsWithOrder: (IResponseStatement & {
-  //   orderCorrection?: StatementOrderCorrection;
-  //   isAnchored?: boolean;
-  // })[] = useMemo(() => {
-  //   if (!selectedDocument) return statements;
+  const statementsWithOrder: (IResponseStatement & {
+    orderCorrection?: StatementOrderCorrection;
+    isAnchored?: boolean;
+  })[] = useMemo(() => {
+    if (!selectedDocument) return statements;
 
-  //   const statementAnchors = collectStatementAnchors(selectedDocument.anchors);
+    const statementAnchors = collectStatementAnchors(selectedDocument.anchors);
 
-  //   // Create a map of statement IDs to their correct positions
-  //   const correctPositionMap = new Map(
-  //     statementAnchors.map((anchor, index) => [anchor.anchor, index])
-  //   );
+    // Create a map of statement IDs to their correct positions
+    const correctPositionMap = new Map(
+      statementAnchors.map((anchor, index) => [anchor.anchor, index])
+    );
 
-  //   // First, create a map of all statements with their original indexes
-  //   const statementsWithCorrectPosition = statements.map(
-  //     (statement, index) => ({
-  //       statement,
-  //       isAnchored: correctPositionMap.has(statement.id),
-  //       correctPosition: correctPositionMap.get(statement.id),
-  //     })
-  //   );
+    // First, create a map of all statements with their original indexes
+    const statementsWithCorrectPosition = statements.map(
+      (statement, index) => ({
+        statement,
+        isAnchored: correctPositionMap.has(statement.id),
+        correctPosition: correctPositionMap.get(statement.id),
+      })
+    );
 
-  //   // Filter and sort only anchored statements
-  //   const anchoredStatements = statementsWithCorrectPosition
-  //     .filter((item) => item.isAnchored)
-  //     .sort((a, b) => (a.correctPosition ?? 0) - (b.correctPosition ?? 0));
+    // Filter and sort only anchored statements
+    const anchoredStatements = statementsWithCorrectPosition
+      .filter((item) => item.isAnchored)
+      .sort((a, b) => (a.correctPosition ?? 0) - (b.correctPosition ?? 0));
 
-  //   // Create a map of current anchored positions (excluding non-anchored statements)
-  //   const currentAnchoredPositions = new Map(
-  //     statementsWithCorrectPosition
-  //       .filter((item) => item.isAnchored)
-  //       .map((item, index) => [item.statement.id, index])
-  //   );
+    // Create a map of current anchored positions (excluding non-anchored statements)
+    const currentAnchoredPositions = new Map(
+      statementsWithCorrectPosition
+        .filter((item) => item.isAnchored)
+        .map((item, index) => [item.statement.id, index])
+    );
 
-  //   // Create a map of anchored statements with their corrections
-  //   const anchoredCorrections = new Map(
-  //     anchoredStatements.map((item) => [
-  //       item.statement.id,
-  //       {
-  //         currentPosition: currentAnchoredPositions.get(item.statement.id) ?? 0,
-  //         correctPosition: item.correctPosition ?? 0,
-  //         shouldMoveUp:
-  //           (item.correctPosition ?? 0) <
-  //           (currentAnchoredPositions.get(item.statement.id) ?? 0),
-  //         shouldMoveDown:
-  //           (item.correctPosition ?? 0) >
-  //           (currentAnchoredPositions.get(item.statement.id) ?? 0),
-  //         distance: Math.abs(
-  //           (item.correctPosition ?? 0) -
-  //             (currentAnchoredPositions.get(item.statement.id) ?? 0)
-  //         ),
-  //       },
-  //     ])
-  //   );
+    // Create a map of anchored statements with their corrections
+    const anchoredCorrections = new Map(
+      anchoredStatements.map((item) => [
+        item.statement.id,
+        {
+          currentPosition: currentAnchoredPositions.get(item.statement.id) ?? 0,
+          correctPosition: item.correctPosition ?? 0,
+          shouldMoveUp:
+            (item.correctPosition ?? 0) <
+            (currentAnchoredPositions.get(item.statement.id) ?? 0),
+          shouldMoveDown:
+            (item.correctPosition ?? 0) >
+            (currentAnchoredPositions.get(item.statement.id) ?? 0),
+          distance: Math.abs(
+            (item.correctPosition ?? 0) -
+              (currentAnchoredPositions.get(item.statement.id) ?? 0)
+          ),
+        },
+      ])
+    );
 
-  //   // Reconstruct the array in original order with corrections
-  //   return statementsWithCorrectPosition.map(({ statement, isAnchored }) => ({
-  //     ...statement,
-  //     isAnchored,
-  //     orderCorrection: isAnchored
-  //       ? anchoredCorrections.get(statement.id)
-  //       : null,
-  //   }));
-  // }, [selectedDocument, statements]);
+    // Reconstruct the array in original order with corrections
+    return statementsWithCorrectPosition.map(({ statement, isAnchored }) => ({
+      ...statement,
+      isAnchored,
+      orderCorrection: isAnchored
+        ? anchoredCorrections.get(statement.id)
+        : null,
+    }));
+  }, [selectedDocument, statements]);
 
   const userCanEdit = useMemo(
     () => territory?.right !== UserEnums.RoleMode.Read,
@@ -811,10 +811,10 @@ export const StatementListBox: React.FC = () => {
               duplicateTerritoryMutation={duplicateTerritoryMutation}
               deleteStatementsMutation={deleteStatementsMutation}
               relationsCreateMutation={relationsCreateMutation}
-              // autoOrderStatementsMutation={autoOrderStatementsMutation}
+              favoritedTerritoryIds={favoritedTerritoryIds}
               statementsWithOrder={statements}
               // statementsWithOrder={statementsWithOrder}
-              favoritedTerritoryIds={favoritedTerritoryIds}
+              // autoOrderStatementsMutation={autoOrderStatementsMutation}
             />
           )}
 
@@ -874,8 +874,8 @@ export const StatementListBox: React.FC = () => {
               >
                 {statements.length > 0 && (
                   <StatementListTable
-                    statements={statements}
-                    // statements={statementsWithOrder}
+                    // statements={statements}
+                    statements={statementsWithOrder}
                     handleRowClick={(rowId: string) => {
                       dispatch(setShowWarnings(false));
                       if (statementId !== rowId) {

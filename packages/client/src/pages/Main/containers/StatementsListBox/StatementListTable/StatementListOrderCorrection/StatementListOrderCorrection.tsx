@@ -25,6 +25,7 @@ export const StatementListOrderCorrection: React.FC<
       >
         {/* no anchor icon */}
         {/* temporary disabled */}
+        {!isAnchored && <TbAnchorOff size={15} />}
         {/* {!isAnchored ? (
           <TbAnchorOff size={15} />
         ) : (
