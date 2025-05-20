@@ -651,8 +651,37 @@ export const StatementListBox: React.FC = () => {
     }
   }, [selectedResourceId]);
 
+  // const loadDefaultResource = () => {
+  //   if (resources && documents) {
+  //     const resourceWithAnchor = resources.find((resource) => {
+  //       if (resource.data.documentId) {
+  //         const document = documents.find(
+  //           (d) => d.id === resource.data.documentId
+  //         );
+  //         if (document) {
+  //           return document.entityIds.T.includes(territoryId);
+  //         }
+  //       }
+  //       return false;
+  //     });
+
+  //     if (resourceWithAnchor) {
+  //       setSelectedResourceId(resourceWithAnchor.id);
+  //     } else {
+  //       setSelectedResourceId(false);
+  //     }
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   loadDefaultResource();
+  // }, [territoryId, resources, documents]);
+
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // if no resource is selected, select the document with this territoryId in document references
   const loadDefaultResource = () => {
-    if (resources && documents) {
+    if (resources && documents && !isInitialized) {
       const resourceWithAnchor = resources.find((resource) => {
         if (resource.data.documentId) {
           const document = documents.find(
@@ -670,12 +699,18 @@ export const StatementListBox: React.FC = () => {
       } else {
         setSelectedResourceId(false);
       }
+
+      setIsInitialized(true);
     }
   };
 
   useEffect(() => {
     loadDefaultResource();
-  }, [territoryId, resources, documents]);
+  }, [resources, documents, isInitialized, territoryId]);
+
+  useEffect(() => {
+    setIsInitialized(false);
+  }, [territoryId]);
 
   const selectedResource = useMemo<IResponseEntity | false>(() => {
     if (selectedResourceId && resources) {
@@ -698,6 +733,7 @@ export const StatementListBox: React.FC = () => {
   } = useQuery<IDocument | false>({
     queryKey: ["document", selectedDocumentId],
     queryFn: async () => {
+      console.log("useQuery selectedDocumentId", selectedDocumentId);
       if (selectedDocumentId) {
         const res = await api.documentGet(selectedDocumentId);
         return res.data;
@@ -931,6 +967,7 @@ export const StatementListBox: React.FC = () => {
                 selectedDocumentId={selectedDocumentId}
                 selectedDocument={selectedDocument}
                 selectedDocumentIsFetching={selectedDocumentIsFetching}
+                selectedDocumentError={selectedDocumentError}
                 selectedResource={selectedResource}
                 resources={resources}
                 documents={documents}

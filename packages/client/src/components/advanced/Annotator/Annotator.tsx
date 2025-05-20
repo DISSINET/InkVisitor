@@ -35,16 +35,19 @@ interface TextAnnotatorProps {
   displayLineNumbers: boolean;
   hlEntities?: EntityEnums.Class[];
   documentId: string;
-  handleCreateStatement?: Function | undefined;
-  initialScrollEntityId?: string | undefined;
-  thisTerritoryEntityId?: string | undefined;
+  handleCreateStatement?: Function;
+  initialScrollEntityId?: string;
+  thisTerritoryEntityId?: string;
 
-  forwardAnnotator?: (annotator: Annotator | undefined) => void;
+  forwardAnnotator?: (annotator?: Annotator) => void;
 
   storedAnnotatorScroll?: number;
   setStoredAnnotatorScroll?: React.Dispatch<React.SetStateAction<number>>;
 
   territory?: IResponseTerritory;
+  dataDocument?: IDocument;
+  dataDocumentIsFetching?: boolean;
+  errorDocument: Error | null;
 }
 
 export const TextAnnotator = ({
@@ -62,11 +65,14 @@ export const TextAnnotator = ({
   setStoredAnnotatorScroll = () => {},
 
   territory,
+  dataDocument,
+  dataDocumentIsFetching,
+  errorDocument,
 }: TextAnnotatorProps) => {
   const queryClient = useQueryClient();
   const theme = useContext(ThemeContext);
 
-  const { appendDetailId, statementId } = useSearchParams();
+  const { appendDetailId, statementId, selectedDetailId } = useSearchParams();
 
   const contentHeight: number = useAppSelector(
     (state) => state.layout.contentHeight
@@ -79,19 +85,6 @@ export const TextAnnotator = ({
   useEffect(() => {
     return forwardAnnotator(undefined);
   }, []);
-
-  const {
-    data: dataDocument,
-    error: errorDocument,
-    isFetching: isFetchingDocument,
-  } = useQuery({
-    queryKey: ["document", documentId],
-    queryFn: async () => {
-      const res = await api.documentGet(documentId);
-      return res.data;
-    },
-    enabled: api.isLoggedIn(),
-  });
 
   const parentTerritoryId = territory?.data?.parent
     ? territory?.data?.parent?.territoryId
@@ -239,19 +232,26 @@ export const TextAnnotator = ({
     annotator?.addAnchor(entityId);
     setSelectedText("");
     handleSaveNewContent(true);
+    handleRefreshEntityAndStatement(entityId);
+    toast.info(`Anchor created ${entityId}.`);
+  };
 
-    queryClient.invalidateQueries({
-      queryKey: ["entity", entityId],
-    });
-    if (entityId === statementId) {
-      // timeout is necessary for BE to process the new anchor
+  const handleRefreshEntityAndStatement = (entityId: string) => {
+    // refresh only if statement entity is open in editor or entity in detail
+    if (entityId === statementId || entityId === selectedDetailId) {
       setTimeout(() => {
-        queryClient.invalidateQueries({
-          queryKey: ["statement", entityId],
-        });
+        if (entityId === selectedDetailId) {
+          queryClient.invalidateQueries({
+            queryKey: ["entity", entityId],
+          });
+        }
+        if (entityId === statementId) {
+          queryClient.invalidateQueries({
+            queryKey: ["statement", entityId],
+          });
+        }
       }, 100);
     }
-    toast.info(`Anchor created ${entityId}.`);
   };
 
   const refreshAnnotator = (scrollTo: { line?: number; anchor?: string }) => {
@@ -322,7 +322,7 @@ export const TextAnnotator = ({
   };
 
   useEffect(() => {
-    if (!isFetchingDocument) {
+    if (!dataDocumentIsFetching) {
       if (scrollAfterRefresh) {
         refreshAnnotator({
           line: scrollAfterRefresh,
@@ -333,18 +333,18 @@ export const TextAnnotator = ({
         });
       }
     }
-  }, [isFetchingDocument, dataDocument]);
+  }, [dataDocumentIsFetching, dataDocument]);
 
   useEffect(() => {
-    if (!isFetchingDocument) {
+    if (!dataDocumentIsFetching) {
       refreshAnnotator({
         line: storedAnnotatorScroll,
       });
     }
-  }, [theme, isFetchingDocument]);
+  }, [theme, dataDocumentIsFetching]);
 
   useEffect(() => {
-    if (!isFetchingDocument) {
+    if (!dataDocumentIsFetching) {
       refreshAnnotator({
         line: storedAnnotatorScroll,
       });
@@ -492,7 +492,6 @@ export const TextAnnotator = ({
       // remove linebreaks from text
       const validatedText = selectedText.replace(/\n/g, " ");
       handleCreateStatement(validatedText, newStatementId);
-      handleSaveNewContent(true);
     }
   };
 
@@ -502,13 +501,7 @@ export const TextAnnotator = ({
     setSelectedText("");
     annotator?.cursor.reset();
     annotator?.draw();
-    if (anchor === statementId) {
-      setTimeout(() => {
-        queryClient.invalidateQueries({
-          queryKey: ["statement", statementId],
-        });
-      }, 100);
-    }
+    handleRefreshEntityAndStatement(anchor);
   };
 
   const isMenuDisplayed = useMemo<boolean>(() => {
@@ -528,7 +521,7 @@ export const TextAnnotator = ({
     );
   }
 
-  if (isFetchingDocument) {
+  if (dataDocumentIsFetching) {
     return <StyledInfoText>Loading document...</StyledInfoText>;
   }
 
@@ -704,7 +697,6 @@ export const TextAnnotator = ({
           }
           onMutationSuccess={(entity) => {
             handleAddAnchor(entity.id);
-            handleSaveNewContent(true);
             setTerritoryCreateModalType(false);
             toast.info(`${newTerritoryName} created!`);
             queryClient.invalidateQueries({ queryKey: ["tree"] });
