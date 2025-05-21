@@ -1,20 +1,20 @@
 ## 1.4.2 Changelog [May 17 , 2025]
 
 Main topics:
-Annotator optimization and integration with the current InkVisitor interface & functionality, redesign of annotator anchor highlight menu.
-Statement list header redesign to lower the amount of visual elements while preserving the functionality and create more space for Annotator and Statement list.
-All panels on the main page are now resizable and the detail is now possible to minimize to see full height annotator while preserving the opened tabs.
+Annotator optimization and integration with the current InkVisitor interface and functionality. Redesigned the Annotator anchor highlight menu.
+All panels on the main page are now resizable, and the detail box can now be minimized to allow full-height view of the Annotator while preserving the opened tabs.
+The statement list header has been redesigned to reduce the number of visual elements while preserving functionality and creating more space for the Annotator and the statement list.
 
 ### New Features:
 
-- Redesign of Statement list header to save space and make the interface cleaner
-- Territory tree box and last panel (with Search etc.) is now resizable (#2050, #2560)
+- Territory tree box and last panel (with Search etc.) are now resizable (#2050, #2560)
 - Statement anchors are now in attribute labels, it's visible on Statement tooltip, in Statement editor and in Statement list table in text column (#2594)
 - Apply template modal now also appends relations and references, metaprops are now being appended instead of replaced (#2520)
 - Allow creation of sub T vs same level T from annotator menu (#2622)
 
 ### Bug Fixes and Improvements:
 
+- Redesigned Statement list header to save space and make the interface cleaner
 - Annotator optimization - fluent scroll and page Down for large documents (#2592)
 - Improved used in documents (anchors) table in detail (#2557)
 - Visual improvements of annotator menu
