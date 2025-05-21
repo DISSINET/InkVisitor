@@ -237,9 +237,9 @@ export default Router()
    */
   .put(
     "/:documentId",
-    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
+    asyncRouteHandler<IResponseGeneric>(async (request: IRequest<{documentId: string}, IDocument>) => {
       const documentId = request.params.documentId;
-      const documentData = request.body as Record<string, unknown>;
+      const documentData = request.body;
 
       // not validation, just required data for this operation
       if (
