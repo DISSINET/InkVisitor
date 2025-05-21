@@ -9,8 +9,6 @@ import {
   IResponseStatement,
   IResponseTerritory,
 } from "@shared/types";
-import { useQuery } from "@tanstack/react-query";
-import api from "api";
 import Dropdown from "components/advanced";
 import TextAnnotator from "components/advanced/Annotator/Annotator";
 import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";

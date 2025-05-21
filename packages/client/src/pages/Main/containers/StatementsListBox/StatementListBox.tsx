@@ -733,7 +733,6 @@ export const StatementListBox: React.FC = () => {
   } = useQuery<IDocument | false>({
     queryKey: ["document", selectedDocumentId],
     queryFn: async () => {
-      console.log("useQuery selectedDocumentId", selectedDocumentId);
       if (selectedDocumentId) {
         const res = await api.documentGet(selectedDocumentId);
         return res.data;
