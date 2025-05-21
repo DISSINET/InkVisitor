@@ -521,9 +521,9 @@ export const TextAnnotator = ({
     );
   }
 
-  if (dataDocumentIsFetching) {
-    return <StyledInfoText>Loading document...</StyledInfoText>;
-  }
+  // if (dataDocumentIsFetching) {
+  //   return <StyledInfoText>Loading document...</StyledInfoText>;
+  // }
 
   const hasParentT = territory?.data?.parent !== undefined;
 
