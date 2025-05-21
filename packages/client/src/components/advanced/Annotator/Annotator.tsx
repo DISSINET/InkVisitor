@@ -323,10 +323,12 @@ export const TextAnnotator = ({
 
   useEffect(() => {
     if (!dataDocumentIsFetching) {
-      if (scrollAfterRefresh) {
+      if (scrollAfterRefresh !== undefined) {
         refreshAnnotator({
           line: scrollAfterRefresh,
         });
+        // Clear scrollAfterRefresh after it's been used to prevent it from overriding future scrolls
+        setScrollAfterRefresh(undefined);
       } else {
         refreshAnnotator({
           line: storedAnnotatorScroll,
