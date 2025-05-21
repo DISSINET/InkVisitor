@@ -60,9 +60,11 @@ interface StatementListTextAnnotator {
   documents?: IDocument[];
   setSelectedResourceId: React.Dispatch<React.SetStateAction<string | false>>;
 
+  // useQuery for selectedDocument
   selectedDocumentId: string | undefined;
   selectedDocumentIsFetching: boolean;
   selectedDocumentError: Error | null;
+
   displayMode: StatementListDisplayMode;
   showStatementList: boolean;
   userCanEdit: boolean;
@@ -293,11 +295,6 @@ export const StatementListTextAnnotator: React.FC<
               storedAnnotatorScroll={storedAnnotatorScroll}
               setStoredAnnotatorScroll={setStoredAnnotatorScroll}
               territory={territory}
-              dataDocument={
-                selectedDocument !== false ? selectedDocument : undefined
-              }
-              dataDocumentIsFetching={selectedDocumentIsFetching}
-              errorDocument={selectedDocumentError}
             />
           )}
         </AnnotatorProvider>

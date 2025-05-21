@@ -45,9 +45,9 @@ interface TextAnnotatorProps {
   setStoredAnnotatorScroll?: React.Dispatch<React.SetStateAction<number>>;
 
   territory?: IResponseTerritory;
-  dataDocument?: IDocument;
-  dataDocumentIsFetching?: boolean;
-  errorDocument: Error | null;
+  // dataDocument?: IDocument;
+  // dataDocumentIsFetching?: boolean;
+  // errorDocument: Error | null;
 }
 
 export const TextAnnotator = ({
@@ -65,10 +65,10 @@ export const TextAnnotator = ({
   setStoredAnnotatorScroll = () => {},
 
   territory,
-  dataDocument,
-  dataDocumentIsFetching,
-  errorDocument,
-}: TextAnnotatorProps) => {
+}: // dataDocument,
+// dataDocumentIsFetching,
+// errorDocument,
+TextAnnotatorProps) => {
   const queryClient = useQueryClient();
   const theme = useContext(ThemeContext);
 
@@ -97,6 +97,20 @@ export const TextAnnotator = ({
       return res.data;
     },
     enabled: !!parentTerritoryId,
+  });
+
+  // it has to be here currently to render the annotator in the documents page
+  const {
+    data: dataDocument,
+    error: errorDocument,
+    isFetching: isFetchingDocument,
+  } = useQuery({
+    queryKey: ["document", documentId],
+    queryFn: async () => {
+      const res = await api.documentGet(documentId);
+      return res.data;
+    },
+    enabled: api.isLoggedIn(),
   });
 
   const updateDocumentMutation = useMutation({
@@ -322,7 +336,7 @@ export const TextAnnotator = ({
   };
 
   useEffect(() => {
-    if (!dataDocumentIsFetching) {
+    if (!isFetchingDocument) {
       if (scrollAfterRefresh !== undefined) {
         refreshAnnotator({
           line: scrollAfterRefresh,
@@ -335,18 +349,18 @@ export const TextAnnotator = ({
         });
       }
     }
-  }, [dataDocumentIsFetching, dataDocument]);
+  }, [isFetchingDocument, dataDocument]);
 
   useEffect(() => {
-    if (!dataDocumentIsFetching) {
+    if (!isFetchingDocument) {
       refreshAnnotator({
         line: storedAnnotatorScroll,
       });
     }
-  }, [theme, dataDocumentIsFetching]);
+  }, [theme, isFetchingDocument]);
 
   useEffect(() => {
-    if (!dataDocumentIsFetching) {
+    if (!isFetchingDocument) {
       refreshAnnotator({
         line: storedAnnotatorScroll,
       });
