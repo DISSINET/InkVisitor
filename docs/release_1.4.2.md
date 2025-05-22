@@ -1,10 +1,5 @@
 ## 1.4.2 Changelog [May 17 , 2025]
 
-Main topics:
-Annotator optimization and integration with the current InkVisitor interface and functionality. Redesigned the Annotator anchor highlight menu.
-All panels on the main page are now resizable, and the detail box can now be minimized to allow full-height view of the Annotator while preserving the opened tabs.
-The statement list header has been redesigned to reduce the number of visual elements while preserving functionality and creating more space for the Annotator and the statement list.
-
 ### New Features:
 
 - Territory tree box and last panel (with Search etc.) are now resizable (#2050, #2560)
