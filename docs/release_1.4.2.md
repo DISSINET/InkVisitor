@@ -3,7 +3,7 @@
 ### New Features:
 
 - Territory tree box and last panel (with Search etc.) are now resizable (#2050, #2560)
-- Statement anchors are now in attribute labels, it's visible on Statement tooltip, in Statement editor and in Statement list table in text column (#2594)
+- Statement anchors are now in attribute labels and are visible on Statement tooltip, in Statement editor and in Statement list table in text column (#2594)
 - Apply template modal now also appends relations and references, metaprops are now being appended instead of replaced (#2520)
 - Allow creation of sub T vs same level T from annotator menu (#2622)
 
