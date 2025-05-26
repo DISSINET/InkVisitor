@@ -20,6 +20,7 @@ export const collapsedPanelWidth = 31;
 export const FIRST_PANEL_MIN_WIDTH = 100;
 export const SECOND_PANEL_MIN_WIDTH = 450;
 export const THIRD_PANEL_MIN_WIDTH = 350;
+export const FOURTH_PANEL_MIN_WIDTH = 200;
 // % PERCENT PANEL WIDTHS
 export const INIT_PERCENT_PANEL_WIDTHS = [10, 37, 35, 18];
 export const MAIN_PAGE_TREE_SEPARATOR_X_PERCENT_POSITION =

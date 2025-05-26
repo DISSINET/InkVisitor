@@ -648,6 +648,7 @@ TextAnnotatorProps) => {
                   annotator.draw();
                 }}
                 tooltipLabel="highlight (activate syntax highlighting mode)"
+                tooltipPosition="top"
               />
               <Button
                 key={EditMode.SEMI}
@@ -661,6 +662,7 @@ TextAnnotatorProps) => {
                   annotator.draw();
                 }}
                 tooltipLabel="text edit (activate semi mode)"
+                tooltipPosition="top"
               />
               <Button
                 key={EditMode.RAW}
@@ -674,6 +676,7 @@ TextAnnotatorProps) => {
                   annotator.draw();
                 }}
                 tooltipLabel="XML (activate edit mode)"
+                tooltipPosition="top"
               />
             </ButtonGroup>
 

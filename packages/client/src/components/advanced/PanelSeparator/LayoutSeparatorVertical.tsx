@@ -9,12 +9,14 @@ interface LayoutSeparatorVertical {
   // set custom one related to specific page
   separatorXPosition: number;
   setSeparatorXPosition: (xPosition: number) => void;
+  onMaxWidthReached?: () => void;
 }
 export const LayoutSeparatorVertical: React.FC<LayoutSeparatorVertical> = ({
   leftSideMinWidth,
   leftSideMaxWidth,
   separatorXPosition,
   setSeparatorXPosition,
+  onMaxWidthReached,
 }) => {
   const [separatorXTempPosition, setSeparatorXTempPosition] = useState<
     number | undefined
@@ -53,6 +55,11 @@ export const LayoutSeparatorVertical: React.FC<LayoutSeparatorVertical> = ({
           leftSideMaxWidth
         );
         setLeftWidth(clampedWidth);
+
+        // Notify parent when max width is reached
+        if (clampedWidth === leftSideMaxWidth && onMaxWidthReached) {
+          onMaxWidthReached();
+        }
       }
     },
     [
@@ -61,6 +68,7 @@ export const LayoutSeparatorVertical: React.FC<LayoutSeparatorVertical> = ({
       separatorXTempPosition,
       leftSideMinWidth,
       leftSideMaxWidth,
+      onMaxWidthReached,
     ]
   );
 

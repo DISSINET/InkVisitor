@@ -12,6 +12,7 @@ import {
   SECOND_PANEL_MIN_WIDTH,
   THIRD_PANEL_MIN_WIDTH,
   MAIN_PAGE_SEARCH_SEPARATOR_X_PERCENT_POSITION,
+  FOURTH_PANEL_MIN_WIDTH,
 } from "Theme/constants";
 import api from "api";
 import { Box, Button, ButtonGroup, Panel } from "components";
@@ -610,11 +611,22 @@ const MainPage: React.FC<MainPage> = ({}) => {
           // first layout INIT
           handleLayoutInit();
         } else {
-          // layout init with saved separator - coming from different page
-          console.log(
-            "page reload / coming from different page - separator determines panel widths"
-          );
-          handleSeparatorLayoutInit();
+          if (
+            panelWidths[0] < FIRST_PANEL_MIN_WIDTH ||
+            panelWidths[1] < SECOND_PANEL_MIN_WIDTH ||
+            panelWidths[2] < THIRD_PANEL_MIN_WIDTH ||
+            panelWidths[3] < FOURTH_PANEL_MIN_WIDTH
+          ) {
+            // something is undersized
+            console.log("something is undersized");
+            handleLayoutInit();
+          } else {
+            // layout init with saved separator - coming from different page
+            console.log(
+              "page reload / coming from different page - separator determines panel widths"
+            );
+            handleSeparatorLayoutInit();
+          }
         }
 
         isFirstRender.current = false;
@@ -646,6 +658,13 @@ const MainPage: React.FC<MainPage> = ({}) => {
           setSeparatorXPosition={(xPosition) => {
             handleTreeSeparatorXPositionChange(xPosition);
           }}
+          onMaxWidthReached={() => {
+            console.log("max width reached");
+            // doesn't work because I need this reaches redux in parallel with the main handler
+            handleCenterSeparatorXPositionChange(
+              mainPageCenterSeparatorXPosition + 1
+            );
+          }}
         />
       )}
 
@@ -671,7 +690,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
           leftSideMinWidth={
             mainPageCenterSeparatorXPosition + THIRD_PANEL_MIN_WIDTH
           }
-          leftSideMaxWidth={layoutWidth - 200}
+          leftSideMaxWidth={layoutWidth - FOURTH_PANEL_MIN_WIDTH}
           separatorXPosition={mainPageSearchSeparatorXPosition}
           setSeparatorXPosition={(xPosition) => {
             handleSearchSeparatorXPositionChange(xPosition);
