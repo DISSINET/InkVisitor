@@ -74,14 +74,6 @@ export const StyledSearchIcon = styled.div`
   flex-shrink: 0;
 `;
 
-export const StyledSearchInputContainer = styled.div`
-  display: flex;
-  align-items: center;
-  flex-shrink: 1;
-  min-width: 0;
-  gap: ${({ theme }) => theme.space[1]};
-`;
-
 export const StyledSearchResults = styled.div`
   display: flex;
   align-items: center;
@@ -126,7 +118,5 @@ export const StyledEntityContainer = styled.div`
 export const StyledDocumentTitleContainer = styled.div`
   display: flex;
   align-items: center;
-  flex-shrink: 3;
-  min-width: 0;
-  max-width: 100px;
+  /* max-width: 100px; */
 `;

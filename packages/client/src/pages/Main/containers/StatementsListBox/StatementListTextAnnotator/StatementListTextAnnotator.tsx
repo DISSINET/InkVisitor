@@ -218,6 +218,17 @@ export const StatementListTextAnnotator: React.FC<
 
   const debouncedContentWidth = useDebounce(contentWidth, 80);
 
+  const annotatorWidth = useMemo<number>(() => {
+    return statements.length > 0
+      ? contentWidth - COLLAPSED_TABLE_WIDTH
+      : contentWidth;
+  }, [contentWidth, statements.length]);
+
+  // TODO: min reasonable width as constant
+  const annotatorWidthTooNarrow = useMemo<boolean>(() => {
+    return annotatorWidth < 345;
+  }, [annotatorWidth]);
+
   return (
     <animated.div style={animatedStyle}>
       <StatementListDocumentSearchLine
@@ -241,6 +252,7 @@ export const StatementListTextAnnotator: React.FC<
         resources={resources || []}
         showStatementList={showStatementList}
         userCanEdit={userCanEdit}
+        annotatorWidthTooNarrow={annotatorWidthTooNarrow}
       />
 
       {/* Class selector */}
@@ -266,7 +278,7 @@ export const StatementListTextAnnotator: React.FC<
             disableAny={true}
             onChange={handleHlEntitiesChange}
             value={hlEntities}
-            width={debouncedContentWidth - 75}
+            width={debouncedContentWidth - 70}
             noOptionsMessage="No entity classes to highlight"
             limitSelectedItems={Math.floor((debouncedContentWidth - 130) / 80)}
           />
@@ -278,11 +290,8 @@ export const StatementListTextAnnotator: React.FC<
         <AnnotatorProvider>
           {selectedDocumentId && (
             <TextAnnotator
-              width={
-                statements.length > 0
-                  ? contentWidth - COLLAPSED_TABLE_WIDTH - 5
-                  : contentWidth - 5
-              }
+              width={annotatorWidth}
+              annotatorWidthTooNarrow={annotatorWidthTooNarrow}
               hlEntities={hlEntities}
               forwardAnnotator={(newAnnotator) => {
                 setAnnotator(newAnnotator);

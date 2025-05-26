@@ -21,12 +21,11 @@ import {
   StyledNoDocumentMessage,
   StyledSearchContainer,
   StyledSearchIcon,
-  StyledSearchInputContainer,
   StyledSearchNavigation,
   StyledSearchResults,
 } from "../StatementListBoxStyles";
 
-interface StatementListDocumentSearchLineProps {
+interface StatementListDocumentSearchLine {
   statements: any[];
   contentWidth: number;
   selectedResource: IEntity | false;
@@ -45,12 +44,14 @@ interface StatementListDocumentSearchLineProps {
   searchOccurences: any[];
   setSearchActiveOccurence: (index: number) => void;
   resources: IEntity[];
+  // is list non empty
   showStatementList: boolean;
   userCanEdit: boolean;
+  annotatorWidthTooNarrow: boolean;
 }
 
 const StatementListDocumentSearchLine: React.FC<
-  StatementListDocumentSearchLineProps
+  StatementListDocumentSearchLine
 > = ({
   statements,
   contentWidth,
@@ -72,16 +73,14 @@ const StatementListDocumentSearchLine: React.FC<
   resources,
   showStatementList,
   userCanEdit,
+  annotatorWidthTooNarrow,
 }) => {
   const themeContext = useContext(ThemeContext);
-  const maxWidth = showStatementList
-    ? contentWidth + COLLAPSED_TABLE_WIDTH
-    : contentWidth;
 
   return (
     <StyledDocumentSearchLine
       style={{
-        maxWidth: `${maxWidth}px`,
+        maxWidth: `${contentWidth}px`,
         marginLeft: showStatementList ? `-${COLLAPSED_TABLE_WIDTH}px` : "0",
       }}
     >
@@ -97,22 +96,34 @@ const StatementListDocumentSearchLine: React.FC<
           />
         )}
         {selectedResource && (
-          <EntityTag
-            entity={selectedResource}
-            unlinkButton={{
-              onClick: () => {
-                setSelectedResourceId(false);
-              },
-              tooltipLabel: "use different resource",
+          <div
+            style={{
+              display: "flex",
+              width: annotatorWidthTooNarrow ? "9rem" : "12rem",
             }}
-          />
+          >
+            <EntityTag
+              fullWidth
+              entity={selectedResource}
+              unlinkButton={{
+                onClick: () => {
+                  setSelectedResourceId(false);
+                },
+                tooltipLabel: "use different resource",
+              }}
+            />
+          </div>
         )}
       </StyledEntityContainer>
 
       {selectedDocumentIsFetching && <Loader />}
 
       {!selectedDocumentIsFetching && selectedDocument && (
-        <StyledDocumentTitleContainer>
+        <StyledDocumentTitleContainer
+          style={{
+            maxWidth: annotatorWidthTooNarrow ? "10rem" : "13rem",
+          }}
+        >
           <DocumentTitle title={selectedDocument.title} />
         </StyledDocumentTitleContainer>
       )}
@@ -157,16 +168,14 @@ const StatementListDocumentSearchLine: React.FC<
           <StyledSearchIcon>
             <BiSearch color={themeContext?.color.info} />
           </StyledSearchIcon>
-          <StyledSearchInputContainer>
-            <Input
-              value={searchTerm}
-              onChangeFn={(newText: string) => {
-                setSearchTerm(newText);
-              }}
-              changeOnType
-              minWidth={90}
-            />
-          </StyledSearchInputContainer>
+          <Input
+            value={searchTerm}
+            onChangeFn={(newText: string) => {
+              setSearchTerm(newText);
+            }}
+            changeOnType
+            width={115}
+          />
 
           {isSearchTermValid && (
             <StyledSearchResults>

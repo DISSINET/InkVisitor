@@ -31,6 +31,7 @@ import { annotatorHighlight } from "./highlight";
 import { RATIO, TerritoryCreateModalType, W_SCROLL } from "./types";
 interface TextAnnotatorProps {
   width: number;
+  annotatorWidthTooNarrow: boolean;
   height: number;
   displayLineNumbers: boolean;
   hlEntities?: EntityEnums.Class[];
@@ -52,6 +53,7 @@ interface TextAnnotatorProps {
 
 export const TextAnnotator = ({
   width = 400,
+  annotatorWidthTooNarrow = false,
   height = 500,
   displayLineNumbers = true,
   hlEntities = Object.values(EntityEnums.Class),
@@ -537,11 +539,6 @@ TextAnnotatorProps) => {
     );
   }
 
-  // TODO: min reasonable width as constant
-  const componentWidthTooNarrow = useMemo<boolean>(() => {
-    return width < 345;
-  }, [width]);
-
   const hasParentT = territory?.data?.parent !== undefined;
 
   return (
@@ -642,7 +639,7 @@ TextAnnotatorProps) => {
               <Button
                 key={EditMode.HIGHLIGHT}
                 icon={<FaPen size={11} />}
-                label={!componentWidthTooNarrow ? EditMode.HIGHLIGHT : ""}
+                label={!annotatorWidthTooNarrow ? EditMode.HIGHLIGHT : ""}
                 color="success"
                 inverted={annotatorMode !== EditMode.HIGHLIGHT}
                 onClick={() => {
@@ -656,7 +653,7 @@ TextAnnotatorProps) => {
                 key={EditMode.SEMI}
                 icon={<BsFileTextFill size={11} />}
                 color="success"
-                label={!componentWidthTooNarrow ? "text edit" : ""}
+                label={!annotatorWidthTooNarrow ? "text edit" : ""}
                 inverted={annotatorMode !== EditMode.SEMI}
                 onClick={() => {
                   annotator.setMode(EditMode.SEMI);
@@ -669,7 +666,7 @@ TextAnnotatorProps) => {
                 key={EditMode.RAW}
                 icon={<HiCodeBracket size={11} />}
                 color="success"
-                label={!componentWidthTooNarrow ? "XML" : ""}
+                label={!annotatorWidthTooNarrow ? "XML" : ""}
                 inverted={annotatorMode !== EditMode.RAW}
                 onClick={() => {
                   annotator.setMode(EditMode.RAW);
