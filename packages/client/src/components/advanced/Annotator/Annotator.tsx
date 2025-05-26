@@ -539,7 +539,7 @@ TextAnnotatorProps) => {
 
   // TODO: min reasonable width as constant
   const componentWidthTooNarrow = useMemo<boolean>(() => {
-    return width < 335;
+    return width < 345;
   }, [width]);
 
   const hasParentT = territory?.data?.parent !== undefined;
@@ -680,7 +680,7 @@ TextAnnotatorProps) => {
               />
             </ButtonGroup>
 
-            <ButtonGroup $marginTop>
+            <ButtonGroup $marginTop style={{ marginLeft: "0.5rem" }}>
               <Button
                 label="save"
                 color="primary"
