@@ -74,15 +74,21 @@ export const StyledSearchIcon = styled.div`
   flex-shrink: 0;
 `;
 
-export const StyledSearchResults = styled.div`
+interface StyledSearchResults {
+  $annotatorWidthTooNarrow?: boolean;
+}
+export const StyledSearchResults = styled.div<StyledSearchResults>`
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => theme.space[2]};
-  flex-shrink: 0;
+  justify-content: center;
+  column-gap: ${({ theme }) => theme.space[2]};
   color: ${({ theme }) => theme.color.info};
   font-size: ${({ theme }) => theme.fontSize.xxs};
   font-weight: ${({ theme }) => theme.fontWeight.bold};
   white-space: nowrap;
+  flex-wrap: ${({ $annotatorWidthTooNarrow }) =>
+    $annotatorWidthTooNarrow ? "wrap" : "nowrap"};
+  /* flex-wrap: wrap; */
 `;
 
 export const StyledSearchNavigation = styled.div`

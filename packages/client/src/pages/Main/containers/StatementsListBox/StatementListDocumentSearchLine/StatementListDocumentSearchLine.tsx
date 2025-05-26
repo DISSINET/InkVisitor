@@ -99,7 +99,7 @@ const StatementListDocumentSearchLine: React.FC<
           <div
             style={{
               display: "flex",
-              width: annotatorWidthTooNarrow ? "9rem" : "12rem",
+              width: annotatorWidthTooNarrow ? "9rem" : "10rem",
             }}
           >
             <EntityTag
@@ -121,7 +121,7 @@ const StatementListDocumentSearchLine: React.FC<
       {!selectedDocumentIsFetching && selectedDocument && (
         <StyledDocumentTitleContainer
           style={{
-            maxWidth: annotatorWidthTooNarrow ? "10rem" : "13rem",
+            maxWidth: annotatorWidthTooNarrow ? "10rem" : "12rem",
           }}
         >
           <DocumentTitle title={selectedDocument.title} />
@@ -178,37 +178,43 @@ const StatementListDocumentSearchLine: React.FC<
           />
 
           {isSearchTermValid && (
-            <StyledSearchResults>
+            <StyledSearchResults
+              $annotatorWidthTooNarrow={annotatorWidthTooNarrow}
+            >
               {hasNoSearchResults ? (
-                <div>no results</div>
+                <div style={{ marginLeft: "0.2rem" }}>no results</div>
               ) : (
                 <>
-                  <div>
+                  <div style={{ display: "flex" }}>
                     {searchActiveOccurence + 1} of {searchOccurences.length}
                   </div>
-                  <FaRegArrowAltCircleUp
-                    size={15}
-                    color={themeContext?.color.info}
-                    style={{ cursor: "pointer" }}
-                    title="previous occurence"
-                    onClick={() => {
-                      const previousOccurence =
-                        (searchActiveOccurence - 1 + searchOccurences.length) %
-                        searchOccurences.length;
-                      setSearchActiveOccurence(previousOccurence);
-                    }}
-                  />
-                  <FaRegArrowAltCircleDown
-                    size={15}
-                    color={themeContext?.color.info}
-                    style={{ cursor: "pointer" }}
-                    title="next occurence"
-                    onClick={() => {
-                      const nextOccurence =
-                        (searchActiveOccurence + 1) % searchOccurences.length;
-                      setSearchActiveOccurence(nextOccurence);
-                    }}
-                  />
+                  <div style={{ display: "flex", gap: "0.5rem" }}>
+                    <FaRegArrowAltCircleUp
+                      size={15}
+                      color={themeContext?.color.info}
+                      style={{ cursor: "pointer" }}
+                      title="previous occurence"
+                      onClick={() => {
+                        const previousOccurence =
+                          (searchActiveOccurence -
+                            1 +
+                            searchOccurences.length) %
+                          searchOccurences.length;
+                        setSearchActiveOccurence(previousOccurence);
+                      }}
+                    />
+                    <FaRegArrowAltCircleDown
+                      size={15}
+                      color={themeContext?.color.info}
+                      style={{ cursor: "pointer" }}
+                      title="next occurence"
+                      onClick={() => {
+                        const nextOccurence =
+                          (searchActiveOccurence + 1) % searchOccurences.length;
+                        setSearchActiveOccurence(nextOccurence);
+                      }}
+                    />
+                  </div>
                 </>
               )}
             </StyledSearchResults>
