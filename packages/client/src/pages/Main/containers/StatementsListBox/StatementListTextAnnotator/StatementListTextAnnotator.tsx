@@ -226,7 +226,7 @@ export const StatementListTextAnnotator: React.FC<
 
   // TODO: min reasonable width as constant
   const annotatorWidthTooNarrow = useMemo<boolean>(() => {
-    return annotatorWidth < 345;
+    return annotatorWidth < 360;
   }, [annotatorWidth]);
 
   return (
@@ -278,7 +278,7 @@ export const StatementListTextAnnotator: React.FC<
             disableAny={true}
             onChange={handleHlEntitiesChange}
             value={hlEntities}
-            width={debouncedContentWidth - 70}
+            width={debouncedContentWidth - 71}
             noOptionsMessage="No entity classes to highlight"
             limitSelectedItems={Math.floor((debouncedContentWidth - 130) / 80)}
           />

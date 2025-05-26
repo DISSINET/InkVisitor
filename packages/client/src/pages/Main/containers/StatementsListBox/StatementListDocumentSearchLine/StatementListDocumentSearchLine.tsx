@@ -84,84 +84,91 @@ const StatementListDocumentSearchLine: React.FC<
         marginLeft: showStatementList ? `-${COLLAPSED_TABLE_WIDTH}px` : "0",
       }}
     >
-      <StyledEntityContainer>
-        {!selectedResource && (
-          <EntitySuggester
-            categoryTypes={[EntityEnums.Class.Resource]}
-            preSuggestions={resources}
-            onPicked={(entity) => {
-              setSelectedResourceId(entity.id);
-            }}
-            disabled={!userCanEdit}
-          />
-        )}
-        {selectedResource && (
-          <div
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+        }}
+      >
+        <StyledEntityContainer>
+          {!selectedResource && (
+            <EntitySuggester
+              categoryTypes={[EntityEnums.Class.Resource]}
+              preSuggestions={resources}
+              onPicked={(entity) => {
+                setSelectedResourceId(entity.id);
+              }}
+              disabled={!userCanEdit}
+            />
+          )}
+          {selectedResource && (
+            <div
+              style={{
+                display: "flex",
+                width: annotatorWidthTooNarrow ? "9rem" : "10rem",
+              }}
+            >
+              <EntityTag
+                fullWidth
+                entity={selectedResource}
+                unlinkButton={{
+                  onClick: () => {
+                    setSelectedResourceId(false);
+                  },
+                  tooltipLabel: "use different resource",
+                }}
+              />
+            </div>
+          )}
+        </StyledEntityContainer>
+
+        {selectedDocumentIsFetching && <Loader />}
+
+        {!selectedDocumentIsFetching && selectedDocument && (
+          <StyledDocumentTitleContainer
             style={{
-              display: "flex",
-              width: annotatorWidthTooNarrow ? "9rem" : "10rem",
+              maxWidth: annotatorWidthTooNarrow ? "10rem" : "12rem",
             }}
           >
-            <EntityTag
-              fullWidth
-              entity={selectedResource}
-              unlinkButton={{
-                onClick: () => {
-                  setSelectedResourceId(false);
-                },
-                tooltipLabel: "use different resource",
-              }}
-            />
-          </div>
-        )}
-      </StyledEntityContainer>
-
-      {selectedDocumentIsFetching && <Loader />}
-
-      {!selectedDocumentIsFetching && selectedDocument && (
-        <StyledDocumentTitleContainer
-          style={{
-            maxWidth: annotatorWidthTooNarrow ? "10rem" : "12rem",
-          }}
-        >
-          <DocumentTitle title={selectedDocument.title} />
-        </StyledDocumentTitleContainer>
-      )}
-
-      {!selectedDocumentIsFetching &&
-        selectedResource !== false &&
-        selectedResource.data.documentId === undefined && (
-          <StyledNoDocumentMessage>
-            <GrDocumentMissing />
-            <i>This Resource does not have any document</i>
-          </StyledNoDocumentMessage>
+            <DocumentTitle title={selectedDocument.title} />
+          </StyledDocumentTitleContainer>
         )}
 
-      {selectedResource !== false && selectedResource?.data?.documentId && (
-        <StyledAnnotatorMenuBar>
-          {activeTHasAnchor ? (
-            <Button
-              label=""
-              iconRight={
-                <div style={{ display: "flex", alignItems: "center" }}>
-                  <TbAnchor />
-                  <FaLongArrowAltRight />
-                </div>
-              }
-              tooltipLabel="locate anchor"
-              inverted
-              onClick={() => {
-                annotator?.scrollToAnchor(territoryId);
-              }}
-              color="warning"
-            />
-          ) : (
-            <StyledSearchNavigation>
-              <TbAnchorOff title="no anchor for T" />
-            </StyledSearchNavigation>
+        {!selectedDocumentIsFetching &&
+          selectedResource !== false &&
+          selectedResource.data.documentId === undefined && (
+            <StyledNoDocumentMessage>
+              <GrDocumentMissing />
+              <i>This Resource does not have any document</i>
+            </StyledNoDocumentMessage>
           )}
-        </StyledAnnotatorMenuBar>
-      )}
+
+        {selectedResource !== false && selectedResource?.data?.documentId && (
+          <StyledAnnotatorMenuBar>
+            {activeTHasAnchor ? (
+              <Button
+                label=""
+                iconRight={
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    <TbAnchor />
+                    <FaLongArrowAltRight />
+                  </div>
+                }
+                tooltipLabel="locate anchor"
+                inverted
+                onClick={() => {
+                  annotator?.scrollToAnchor(territoryId);
+                }}
+                color="warning"
+              />
+            ) : (
+              <StyledSearchNavigation>
+                <TbAnchorOff title="no anchor for T" />
+              </StyledSearchNavigation>
+            )}
+          </StyledAnnotatorMenuBar>
+        )}
+      </div>
 
       {isSearchAllowed && (
         <StyledSearchContainer>
