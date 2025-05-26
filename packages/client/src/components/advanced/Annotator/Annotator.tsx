@@ -537,9 +537,10 @@ TextAnnotatorProps) => {
     );
   }
 
-  // if (dataDocumentIsFetching) {
-  //   return <StyledInfoText>Loading document...</StyledInfoText>;
-  // }
+  // TODO: min reasonable width as constant
+  const componentWidthTooNarrow = useMemo<boolean>(() => {
+    return width < 335;
+  }, [width]);
 
   const hasParentT = territory?.data?.parent !== undefined;
 
@@ -636,68 +637,72 @@ TextAnnotatorProps) => {
         </StyledCanvasWrapper>
 
         {annotator && (
-          <ButtonGroup $marginTop>
-            <Button
-              key={EditMode.HIGHLIGHT}
-              icon={<FaPen size={11} />}
-              label={EditMode.HIGHLIGHT}
-              color="success"
-              inverted={annotatorMode !== EditMode.HIGHLIGHT}
-              onClick={() => {
-                annotator.setMode(EditMode.HIGHLIGHT);
-                setAnnotatorMode(EditMode.HIGHLIGHT);
-                annotator.draw();
-              }}
-              tooltipLabel="activate syntax highlighting mode"
-            />
-            <Button
-              key={EditMode.SEMI}
-              icon={<BsFileTextFill size={11} />}
-              color="success"
-              label="text edit"
-              inverted={annotatorMode !== EditMode.SEMI}
-              onClick={() => {
-                annotator.setMode(EditMode.SEMI);
-                setAnnotatorMode(EditMode.SEMI);
-                annotator.draw();
-              }}
-              tooltipLabel="activate semi mode"
-            />
-            <Button
-              key={EditMode.RAW}
-              icon={<HiCodeBracket size={11} />}
-              color="success"
-              label="XML"
-              inverted={annotatorMode !== EditMode.RAW}
-              onClick={() => {
-                annotator.setMode(EditMode.RAW);
-                setAnnotatorMode(EditMode.RAW);
-                annotator.draw();
-              }}
-              tooltipLabel="activate edit mode"
-            />
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <ButtonGroup $marginTop>
+              <Button
+                key={EditMode.HIGHLIGHT}
+                icon={<FaPen size={11} />}
+                label={!componentWidthTooNarrow ? EditMode.HIGHLIGHT : ""}
+                color="success"
+                inverted={annotatorMode !== EditMode.HIGHLIGHT}
+                onClick={() => {
+                  annotator.setMode(EditMode.HIGHLIGHT);
+                  setAnnotatorMode(EditMode.HIGHLIGHT);
+                  annotator.draw();
+                }}
+                tooltipLabel="highlight (activate syntax highlighting mode)"
+              />
+              <Button
+                key={EditMode.SEMI}
+                icon={<BsFileTextFill size={11} />}
+                color="success"
+                label={!componentWidthTooNarrow ? "text edit" : ""}
+                inverted={annotatorMode !== EditMode.SEMI}
+                onClick={() => {
+                  annotator.setMode(EditMode.SEMI);
+                  setAnnotatorMode(EditMode.SEMI);
+                  annotator.draw();
+                }}
+                tooltipLabel="text edit (activate semi mode)"
+              />
+              <Button
+                key={EditMode.RAW}
+                icon={<HiCodeBracket size={11} />}
+                color="success"
+                label={!componentWidthTooNarrow ? "XML" : ""}
+                inverted={annotatorMode !== EditMode.RAW}
+                onClick={() => {
+                  annotator.setMode(EditMode.RAW);
+                  setAnnotatorMode(EditMode.RAW);
+                  annotator.draw();
+                }}
+                tooltipLabel="XML (activate edit mode)"
+              />
+            </ButtonGroup>
 
-            <Button
-              label="save"
-              color="primary"
-              icon={<FaRegSave />}
-              disabled={!isChangeMade}
-              onClick={() => {
-                handleSaveNewContent(false);
-              }}
-            />
-            <Button
-              label="discard"
-              color="warning"
-              icon={<FaTrash />}
-              disabled={!isChangeMade}
-              onClick={() => {
-                if (dataDocument?.content) {
-                  annotator?.updateText(dataDocument?.content);
-                }
-              }}
-            />
-          </ButtonGroup>
+            <ButtonGroup $marginTop>
+              <Button
+                label="save"
+                color="primary"
+                icon={<FaRegSave />}
+                disabled={!isChangeMade}
+                onClick={() => {
+                  handleSaveNewContent(false);
+                }}
+              />
+              <Button
+                label="discard"
+                color="warning"
+                icon={<FaTrash />}
+                disabled={!isChangeMade}
+                onClick={() => {
+                  if (dataDocument?.content) {
+                    annotator?.updateText(dataDocument?.content);
+                  }
+                }}
+              />
+            </ButtonGroup>
+          </div>
         )}
       </div>
 
