@@ -536,9 +536,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
     }
   };
 
-  const isPanelUndersized = (panelWidth: number, minWidth: number) =>
-    panelWidth < minWidth;
-
   const handleSeparatorLayoutInit = () => {
     let secondPanel =
       mainPageCenterSeparatorXPosition - mainPageTreeSeparatorXPosition;
@@ -615,7 +612,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
         } else {
           // layout init with saved separator - coming from different page
           console.log(
-            "coming from different page - separator determines panel widths"
+            "page reload / coming from different page - separator determines panel widths"
           );
           handleSeparatorLayoutInit();
         }
