@@ -40,15 +40,16 @@ export const LayoutSeparatorVertical: React.FC<LayoutSeparatorVertical> = ({
   }, [separatorXPosition, dragging]);
 
   const onMouseDown = (e: React.MouseEvent) => {
+    document.body.classList.add("no-select");
     setSeparatorXTempPosition(e.clientX);
     setDragging(true);
-    document.body.classList.add("no-select");
   };
 
   const onMove = useCallback(
     (clientX: number) => {
       if (dragging && leftWidth && separatorXTempPosition) {
         const newLeftWidth = leftWidth + clientX - separatorXTempPosition;
+
         setSeparatorXTempPosition(clientX);
 
         // Clamp the new width between min and max

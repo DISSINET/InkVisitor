@@ -673,9 +673,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
           }}
           onMaxWidthReached={() => {
             // doesn't work because I need this reaches redux in parallel with the main handler
-            if (panelWidths[2] > THIRD_PANEL_MIN_WIDTH) {
+            if (panelWidths[2] > THIRD_PANEL_MIN_WIDTH + 10) {
               handleCenterSeparatorXPositionChange(
-                mainPageCenterSeparatorXPosition + 5
+                mainPageCenterSeparatorXPosition + 10
               );
             }
           }}
@@ -696,10 +696,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
             handleCenterSeparatorXPositionChange(xPosition);
           }}
           onMinWidthReached={() => {
-            console.log("min width reached");
-            if (panelWidths[0] > FIRST_PANEL_MIN_WIDTH) {
+            if (panelWidths[0] > FIRST_PANEL_MIN_WIDTH + 10) {
               handleTreeSeparatorXPositionChange(
-                mainPageTreeSeparatorXPosition - 5
+                mainPageTreeSeparatorXPosition - 10
               );
             }
           }}
