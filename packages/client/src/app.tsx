@@ -103,6 +103,17 @@ export const App: React.FC = () => {
     }
   }, [debouncedWidth]);
 
+  useEffect(() => {
+    api.settingGroupGet("app").then((res) => {
+      const mapped = res.data.data?.settings.reduce((acc, current) => {
+        acc[current.id] = current.value;
+        return acc;
+      }, {} as Record<string, any>);
+      console.log(`Got App settings`, mapped);
+ //     dispatch(setAppSettings(mapped));
+    });
+  }, []);
+
   return (
     <>
       <Helmet>
