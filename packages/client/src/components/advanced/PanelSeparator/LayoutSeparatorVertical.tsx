@@ -10,6 +10,7 @@ interface LayoutSeparatorVertical {
   separatorXPosition: number;
   setSeparatorXPosition: (xPosition: number) => void;
   onMaxWidthReached?: () => void;
+  onMinWidthReached?: () => void;
 }
 export const LayoutSeparatorVertical: React.FC<LayoutSeparatorVertical> = ({
   leftSideMinWidth,
@@ -17,6 +18,7 @@ export const LayoutSeparatorVertical: React.FC<LayoutSeparatorVertical> = ({
   separatorXPosition,
   setSeparatorXPosition,
   onMaxWidthReached,
+  onMinWidthReached,
 }) => {
   const [separatorXTempPosition, setSeparatorXTempPosition] = useState<
     number | undefined
@@ -60,6 +62,10 @@ export const LayoutSeparatorVertical: React.FC<LayoutSeparatorVertical> = ({
         if (clampedWidth === leftSideMaxWidth && onMaxWidthReached) {
           onMaxWidthReached();
         }
+        // Notify parent when min width is reached
+        if (clampedWidth === leftSideMinWidth && onMinWidthReached) {
+          onMinWidthReached();
+        }
       }
     },
     [
@@ -69,6 +75,7 @@ export const LayoutSeparatorVertical: React.FC<LayoutSeparatorVertical> = ({
       leftSideMinWidth,
       leftSideMaxWidth,
       onMaxWidthReached,
+      onMinWidthReached,
     ]
   );
 
