@@ -22,7 +22,7 @@ import {
 import { CStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import ScrollHandler from "hooks/ScrollHandler";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { BiHide, BiRefresh, BiShow } from "react-icons/bi";
 import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
 import { FaHighlighter, FaList, FaPlus } from "react-icons/fa";
@@ -78,9 +78,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
   const panelWidths: number[] = useAppSelector(
     (state) => state.layout.mainPage.panelWidths
   );
-  const panelWidthsPercent: number[] = useAppSelector(
-    (state) => state.layout.mainPage.panelWidthsPercent
-  );
+  // const panelWidthsPercent: number[] = useAppSelector(
+  //   (state) => state.layout.mainPage.panelWidthsPercent
+  // );
   const fourthPanelBoxesOpened: { [key: string]: boolean } = useAppSelector(
     (state) => state.layout.mainPage.fourthPanelBoxesOpened
   );
@@ -565,16 +565,45 @@ const MainPage: React.FC<MainPage> = ({}) => {
     );
   };
 
+  const handleLayoutInit = () => {
+    const initPanelWidthsPx = INIT_PERCENT_PANEL_WIDTHS.map((percentWidth) => {
+      return floorNumberToOneDecimal(percentWidth * onePercentOfLayoutWidth);
+    });
+    dispatch(setPanelWidths(initPanelWidthsPx));
+    dispatch(setPanelWidthsPercent(INIT_PERCENT_PANEL_WIDTHS));
+    setMainPageTreeSeparatorXPosition(initPanelWidthsPx[0]);
+    localStorage.setItem(
+      "mainPageTreeSeparatorXPosition",
+      (initPanelWidthsPx[0] / onePercentOfLayoutWidth).toString()
+    );
+    setMainPageCenterSeparatorXPosition(
+      initPanelWidthsPx[0] + initPanelWidthsPx[1]
+    );
+    localStorage.setItem(
+      "mainPageCenterSeparatorXPosition",
+      (
+        (initPanelWidthsPx[0] + initPanelWidthsPx[1]) /
+        onePercentOfLayoutWidth
+      ).toString()
+    );
+    setMainPageSearchSeparatorXPosition(
+      initPanelWidthsPx[0] + initPanelWidthsPx[1] + initPanelWidthsPx[2]
+    );
+    localStorage.setItem(
+      "mainPageSearchSeparatorXPosition",
+      (
+        (initPanelWidthsPx[0] + initPanelWidthsPx[1] + initPanelWidthsPx[2]) /
+        onePercentOfLayoutWidth
+      ).toString()
+    );
+  };
+
+  const isFirstRender = useRef(true);
+
   useEffect(() => {
     if (layoutWidth > 0) {
-      const initPanelWidthsPx = INIT_PERCENT_PANEL_WIDTHS.map(
-        (percentWidth) => {
-          return floorNumberToOneDecimal(
-            percentWidth * onePercentOfLayoutWidth
-          );
-        }
-      );
-      if (!panelWidths.length) {
+      if (isFirstRender.current || !panelWidths.length) {
+        // This is either initial load or coming from different page
         if (
           !localStorageCenterSeparatorXPosition ||
           !localStorageTreeSeparatorXPosition ||
@@ -582,106 +611,20 @@ const MainPage: React.FC<MainPage> = ({}) => {
         ) {
           console.log("first layout init");
           // first layout INIT
-          dispatch(setPanelWidths(initPanelWidthsPx));
-          dispatch(setPanelWidthsPercent(INIT_PERCENT_PANEL_WIDTHS));
-          setMainPageTreeSeparatorXPosition(initPanelWidthsPx[0]);
-          localStorage.setItem(
-            "mainPageTreeSeparatorXPosition",
-            (initPanelWidthsPx[0] / onePercentOfLayoutWidth).toString()
-          );
-          setMainPageCenterSeparatorXPosition(
-            initPanelWidthsPx[0] + initPanelWidthsPx[1]
-          );
-          localStorage.setItem(
-            "mainPageCenterSeparatorXPosition",
-            (
-              (initPanelWidthsPx[0] + initPanelWidthsPx[1]) /
-              onePercentOfLayoutWidth
-            ).toString()
-          );
-          setMainPageSearchSeparatorXPosition(
-            initPanelWidthsPx[0] + initPanelWidthsPx[1] + initPanelWidthsPx[2]
-          );
-          localStorage.setItem(
-            "mainPageSearchSeparatorXPosition",
-            (
-              (initPanelWidthsPx[0] +
-                initPanelWidthsPx[1] +
-                initPanelWidthsPx[2]) /
-              onePercentOfLayoutWidth
-            ).toString()
-          );
+          handleLayoutInit();
         } else {
-          // layout init with saved separator
-          console.log("init load - separator determines panel widths");
+          // layout init with saved separator - coming from different page
+          console.log(
+            "coming from different page - separator determines panel widths"
+          );
           handleSeparatorLayoutInit();
         }
+
+        isFirstRender.current = false;
       } else {
-        // change of layout width (different monitor) / redirect from different page
-        console.log("redirect from different page / layout width changed");
-        const panelWidthsPx = panelWidthsPercent.map((percentWidth) => {
-          return floorNumberToOneDecimal(
-            percentWidth * onePercentOfLayoutWidth
-          );
-        });
-        const firstPanelUndersized = isPanelUndersized(
-          panelWidthsPx[0],
-          FIRST_PANEL_MIN_WIDTH
-        );
-
-        const secondPanelUndersized = isPanelUndersized(
-          thirdPanelExpanded
-            ? panelWidthsPx[1]
-            : layoutWidth -
-                panelWidthsPx[3] -
-                collapsedPanelWidth -
-                mainPageTreeSeparatorXPosition,
-          SECOND_PANEL_MIN_WIDTH
-        );
-
-        const thirdPanelUndersized = isPanelUndersized(
-          panelWidthsPx[2],
-          THIRD_PANEL_MIN_WIDTH
-        );
-
-        if (
-          !firstPanelUndersized &&
-          !secondPanelUndersized &&
-          !thirdPanelUndersized
-        ) {
-          console.log("not undersized - set calculated width");
-          handleSeparatorLayoutInit();
-        } else {
-          console.log("something is undersized - set init width");
-          dispatch(setPanelWidths(initPanelWidthsPx));
-          setMainPageTreeSeparatorXPosition(initPanelWidthsPx[0]);
-          localStorage.setItem(
-            "mainPageTreeSeparatorXPosition",
-            (initPanelWidthsPx[0] / onePercentOfLayoutWidth).toString()
-          );
-          setMainPageCenterSeparatorXPosition(
-            initPanelWidthsPx[0] + initPanelWidthsPx[1]
-          );
-          localStorage.setItem(
-            "mainPageCenterSeparatorXPosition",
-            (
-              (initPanelWidthsPx[0] + initPanelWidthsPx[1]) /
-              onePercentOfLayoutWidth
-            ).toString()
-          );
-          setMainPageSearchSeparatorXPosition(
-            initPanelWidthsPx[0] + initPanelWidthsPx[1] + initPanelWidthsPx[2]
-          );
-          localStorage.setItem(
-            "mainPageSearchSeparatorXPosition",
-            (
-              (initPanelWidthsPx[0] +
-                initPanelWidthsPx[1] +
-                initPanelWidthsPx[2]) /
-              onePercentOfLayoutWidth
-            ).toString()
-          );
-        }
+        // change of layout width (different monitor / change of zoom)
+        console.log("layout width changed");
+        handleLayoutInit();
       }
     }
   }, [layoutWidth]);
