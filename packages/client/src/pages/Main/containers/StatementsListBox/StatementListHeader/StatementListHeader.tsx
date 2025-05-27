@@ -509,7 +509,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                   placeholder="move"
                   disableTemplatesAccept
                   filterEditorRights
-                  inputWidth={selectedRows.length > 0 ? 40 : 80}
+                  inputWidth={selectedRows.length > 0 ? 32 : 80}
                   disableCreate
                   categoryTypes={[EntityEnums.Class.Territory]}
                   onPicked={(selectedEntity) => {

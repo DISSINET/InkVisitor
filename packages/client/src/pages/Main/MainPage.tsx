@@ -15,6 +15,8 @@ import {
   FOURTH_PANEL_MIN_WIDTH,
   INIT_PERCENT_PANEL_WIDTHS_SMALL_SCREEN,
   SMALL_SCREEN_LIMIT,
+  INIT_PERCENT_PANEL_WIDTHS_LARGE_SCREEN,
+  LARGE_SCREEN_LIMIT,
 } from "Theme/constants";
 import api from "api";
 import { Box, Button, ButtonGroup, Panel } from "components";
@@ -567,7 +569,13 @@ const MainPage: React.FC<MainPage> = ({}) => {
 
   const handleLayoutInit = () => {
     const initPanelWidthsPx =
-      layoutWidth < SMALL_SCREEN_LIMIT
+      layoutWidth > LARGE_SCREEN_LIMIT
+        ? INIT_PERCENT_PANEL_WIDTHS_LARGE_SCREEN.map((percentWidth) => {
+            return floorNumberToOneDecimal(
+              percentWidth * onePercentOfLayoutWidth
+            );
+          })
+        : layoutWidth < SMALL_SCREEN_LIMIT
         ? INIT_PERCENT_PANEL_WIDTHS_SMALL_SCREEN.map((percentWidth) => {
             return floorNumberToOneDecimal(
               percentWidth * onePercentOfLayoutWidth
@@ -581,7 +589,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
     dispatch(setPanelWidths(initPanelWidthsPx));
     dispatch(
       setPanelWidthsPercent(
-        layoutWidth < SMALL_SCREEN_LIMIT
+        layoutWidth > LARGE_SCREEN_LIMIT
+          ? INIT_PERCENT_PANEL_WIDTHS_LARGE_SCREEN
+          : layoutWidth < SMALL_SCREEN_LIMIT
           ? INIT_PERCENT_PANEL_WIDTHS_SMALL_SCREEN
           : INIT_PERCENT_PANEL_WIDTHS
       )
@@ -629,10 +639,20 @@ const MainPage: React.FC<MainPage> = ({}) => {
           handleLayoutInit();
         } else {
           const isSomethingUndersized =
-            panelWidths[0] < FIRST_PANEL_MIN_WIDTH ||
-            panelWidths[1] < SECOND_PANEL_MIN_WIDTH ||
-            panelWidths[2] < THIRD_PANEL_MIN_WIDTH ||
-            panelWidths[3] < FOURTH_PANEL_MIN_WIDTH;
+            Number(localStorageTreeSeparatorXPosition) *
+              onePercentOfLayoutWidth <
+              FIRST_PANEL_MIN_WIDTH ||
+            (Number(localStorageCenterSeparatorXPosition) -
+              Number(localStorageTreeSeparatorXPosition)) *
+              onePercentOfLayoutWidth <
+              SECOND_PANEL_MIN_WIDTH ||
+            (Number(localStorageSearchSeparatorXPosition) -
+              Number(localStorageCenterSeparatorXPosition)) *
+              onePercentOfLayoutWidth <
+              THIRD_PANEL_MIN_WIDTH ||
+            (layoutWidth - Number(localStorageSearchSeparatorXPosition)) *
+              onePercentOfLayoutWidth <
+              FOURTH_PANEL_MIN_WIDTH;
 
           if (isSomethingUndersized) {
             // something is undersized

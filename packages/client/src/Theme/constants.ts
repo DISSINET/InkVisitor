@@ -20,12 +20,15 @@ export const collapsedPanelWidth = 31;
 export const FIRST_PANEL_MIN_WIDTH = 120;
 export const SECOND_PANEL_MIN_WIDTH = 410;
 export const THIRD_PANEL_MIN_WIDTH = 300;
-export const FOURTH_PANEL_MIN_WIDTH = 200;
+export const FOURTH_PANEL_MIN_WIDTH = 192;
 // % PERCENT PANEL WIDTHS
 export const INIT_PERCENT_PANEL_WIDTHS = [10, 37, 35, 18];
-// less than 1400px -> sacrifice editor mode
+// less than 1400px = sacrifice editor
 export const SMALL_SCREEN_LIMIT = 1400;
-export const INIT_PERCENT_PANEL_WIDTHS_SMALL_SCREEN = [12, 37, 33, 18];
+export const INIT_PERCENT_PANEL_WIDTHS_SMALL_SCREEN = [12, 38, 32, 18];
+// more than 1900px
+export const LARGE_SCREEN_LIMIT = 1900;
+export const INIT_PERCENT_PANEL_WIDTHS_LARGE_SCREEN = [10, 40, 40, 10];
 
 export const MAIN_PAGE_TREE_SEPARATOR_X_PERCENT_POSITION =
   INIT_PERCENT_PANEL_WIDTHS[0];
