@@ -40,7 +40,7 @@ export const Page: React.FC<Page> = ({ children }) => {
     (state) => state.layout.contentHeight
   );
 
-  const environmentName = process.env.ENV || "";
+  const environmentName = window.appConfig.env || "";
 
   const location = useLocation();
   const navigate = useNavigate();

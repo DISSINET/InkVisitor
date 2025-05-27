@@ -104,7 +104,7 @@ class Api {
       headers: this.headers,
     });
 
-    this.tokenKey = `${process.env.ENV}-token`;
+    this.tokenKey = `${window.appConfig.env}-token`;
     this.token = "";
 
     // TODO: remove after release - only needed once to clean up previous localStorage token usage
