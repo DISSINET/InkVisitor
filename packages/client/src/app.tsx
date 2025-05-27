@@ -109,7 +109,7 @@ export const App: React.FC = () => {
         acc[current.id] = current.value;
         return acc;
       }, {} as Record<string, any>);
-      console.log(`Got App settings`, mapped);
+      console.log(`Got App settings`, window.appConfig);
  //     dispatch(setAppSettings(mapped));
     });
   }, []);

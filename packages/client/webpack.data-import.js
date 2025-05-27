@@ -1,17 +1,12 @@
 const path = require("path");
 const { merge } = require("webpack-merge");
 const common = require("./webpack.common.js");
-const Dotenv = require("dotenv-webpack");
 
-module.exports = merge(common, {
+module.exports = merge(common('data-import'), {
   mode: "production",
   devtool: "source-map",
 
   plugins: [
-    new Dotenv({
-      path: "./env/.env.data-import",
-      systemvars: true,
-    }),
   ],
 
   output: {
