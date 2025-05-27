@@ -1,4 +1,3 @@
-import { FaStar } from "react-icons/fa";
 import { animated } from "react-spring";
 import styled from "styled-components";
 
@@ -25,9 +24,7 @@ export const StyledMoveToParent = styled(animated.div)`
   display: flex;
   align-items: center;
   color: ${({ theme }) => theme.color["info"]};
-  margin-bottom: 0.5rem;
   margin-left: 0.3rem;
-  margin-top: 0.3rem;
 `;
 
 export const StyledInfoText = styled.div`

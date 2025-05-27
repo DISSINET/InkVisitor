@@ -31,6 +31,7 @@ import { annotatorHighlight } from "./highlight";
 import { RATIO, TerritoryCreateModalType, W_SCROLL } from "./types";
 interface TextAnnotatorProps {
   width: number;
+  annotatorWidthTooSmall: boolean;
   height: number;
   displayLineNumbers: boolean;
   hlEntities?: EntityEnums.Class[];
@@ -52,6 +53,7 @@ interface TextAnnotatorProps {
 
 export const TextAnnotator = ({
   width = 400,
+  annotatorWidthTooSmall = false,
   height = 500,
   displayLineNumbers = true,
   hlEntities = Object.values(EntityEnums.Class),
@@ -537,10 +539,6 @@ TextAnnotatorProps) => {
     );
   }
 
-  // if (dataDocumentIsFetching) {
-  //   return <StyledInfoText>Loading document...</StyledInfoText>;
-  // }
-
   const hasParentT = territory?.data?.parent !== undefined;
 
   return (
@@ -636,68 +634,75 @@ TextAnnotatorProps) => {
         </StyledCanvasWrapper>
 
         {annotator && (
-          <ButtonGroup $marginTop>
-            <Button
-              key={EditMode.HIGHLIGHT}
-              icon={<FaPen size={11} />}
-              label={EditMode.HIGHLIGHT}
-              color="success"
-              inverted={annotatorMode !== EditMode.HIGHLIGHT}
-              onClick={() => {
-                annotator.setMode(EditMode.HIGHLIGHT);
-                setAnnotatorMode(EditMode.HIGHLIGHT);
-                annotator.draw();
-              }}
-              tooltipLabel="activate syntax highlighting mode"
-            />
-            <Button
-              key={EditMode.SEMI}
-              icon={<BsFileTextFill size={11} />}
-              color="success"
-              label="text edit"
-              inverted={annotatorMode !== EditMode.SEMI}
-              onClick={() => {
-                annotator.setMode(EditMode.SEMI);
-                setAnnotatorMode(EditMode.SEMI);
-                annotator.draw();
-              }}
-              tooltipLabel="activate semi mode"
-            />
-            <Button
-              key={EditMode.RAW}
-              icon={<HiCodeBracket size={11} />}
-              color="success"
-              label="XML"
-              inverted={annotatorMode !== EditMode.RAW}
-              onClick={() => {
-                annotator.setMode(EditMode.RAW);
-                setAnnotatorMode(EditMode.RAW);
-                annotator.draw();
-              }}
-              tooltipLabel="activate edit mode"
-            />
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <ButtonGroup $marginTop>
+              <Button
+                key={EditMode.HIGHLIGHT}
+                icon={<FaPen size={11} />}
+                label={!annotatorWidthTooSmall ? EditMode.HIGHLIGHT : ""}
+                color="success"
+                inverted={annotatorMode !== EditMode.HIGHLIGHT}
+                onClick={() => {
+                  annotator.setMode(EditMode.HIGHLIGHT);
+                  setAnnotatorMode(EditMode.HIGHLIGHT);
+                  annotator.draw();
+                }}
+                tooltipLabel="highlight (activate syntax highlighting mode)"
+                tooltipPosition="top"
+              />
+              <Button
+                key={EditMode.SEMI}
+                icon={<BsFileTextFill size={11} />}
+                color="success"
+                label={!annotatorWidthTooSmall ? "text edit" : ""}
+                inverted={annotatorMode !== EditMode.SEMI}
+                onClick={() => {
+                  annotator.setMode(EditMode.SEMI);
+                  setAnnotatorMode(EditMode.SEMI);
+                  annotator.draw();
+                }}
+                tooltipLabel="text edit (activate semi mode)"
+                tooltipPosition="top"
+              />
+              <Button
+                key={EditMode.RAW}
+                icon={<HiCodeBracket size={11} />}
+                color="success"
+                label={!annotatorWidthTooSmall ? "XML" : ""}
+                inverted={annotatorMode !== EditMode.RAW}
+                onClick={() => {
+                  annotator.setMode(EditMode.RAW);
+                  setAnnotatorMode(EditMode.RAW);
+                  annotator.draw();
+                }}
+                tooltipLabel="XML (activate edit mode)"
+                tooltipPosition="top"
+              />
+            </ButtonGroup>
 
-            <Button
-              label="save"
-              color="primary"
-              icon={<FaRegSave />}
-              disabled={!isChangeMade}
-              onClick={() => {
-                handleSaveNewContent(false);
-              }}
-            />
-            <Button
-              label="discard"
-              color="warning"
-              icon={<FaTrash />}
-              disabled={!isChangeMade}
-              onClick={() => {
-                if (dataDocument?.content) {
-                  annotator?.updateText(dataDocument?.content);
-                }
-              }}
-            />
-          </ButtonGroup>
+            <ButtonGroup $marginTop style={{ marginLeft: "0.5rem" }}>
+              <Button
+                label="save"
+                color="primary"
+                icon={<FaRegSave />}
+                disabled={!isChangeMade}
+                onClick={() => {
+                  handleSaveNewContent(false);
+                }}
+              />
+              <Button
+                label="discard"
+                color="warning"
+                icon={<FaTrash />}
+                disabled={!isChangeMade}
+                onClick={() => {
+                  if (dataDocument?.content) {
+                    annotator?.updateText(dataDocument?.content);
+                  }
+                }}
+              />
+            </ButtonGroup>
+          </div>
         )}
       </div>
 

@@ -21,10 +21,6 @@ export const StatementEditorBox: React.FC = () => {
 
   const queryClient = useQueryClient();
 
-  const contentHeight: number = useAppSelector(
-    (state) => state.layout.contentHeight
-  );
-
   const userId = localStorage.getItem("userid");
   const {
     status: statusUser,

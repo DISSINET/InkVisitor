@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, ButtonGroup, CustomScrollbar, Loader } from "components";
 import { EntityCreateModal } from "components/advanced";
-import { useSearchParams } from "hooks";
+import { useResizeObserver, useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { BsFilter } from "react-icons/bs";
 import { FaPlus } from "react-icons/fa";
@@ -183,22 +183,30 @@ export const TerritoryTreeBox: React.FC = () => {
     (state) => state.territoryTree.filterOpen
   );
 
+  const { ref: treeRef, width: treeWidth = 0 } =
+    useResizeObserver<HTMLDivElement>({
+      debounceDelay: 50,
+    });
+
+  const treeWidthTooSmall = treeWidth < 130;
+
   return (
     <>
       <ButtonGroup>
         {(userRole === UserEnums.Role.Admin ||
           userRole === UserEnums.Role.Owner) && (
           <Button
-            label="new"
+            label={!treeWidthTooSmall ? "new" : ""}
             iconRight={<span style={{ marginLeft: 5 }}>{"\u0054"}</span>}
             icon={<FaPlus />}
             onClick={() => setShowCreate(true)}
             fullWidth
+            tooltipLabel={treeWidthTooSmall ? "create new territory" : ""}
           />
         )}
         <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
           <Button
-            label="filter"
+            label={!treeWidthTooSmall ? "filter" : ""}
             onClick={() => {
               if (treeFilterOpen) {
                 dispatch(setFilterOpen(false));
@@ -213,6 +221,7 @@ export const TerritoryTreeBox: React.FC = () => {
             inverted={!treeFilterOpen}
             fullWidth
             icon={<BsFilter />}
+            tooltipLabel={treeWidthTooSmall ? "filter" : ""}
             tooltipPosition="right"
           />
         </div>
@@ -232,7 +241,8 @@ export const TerritoryTreeBox: React.FC = () => {
           elementId="Territories-box-content"
         >
           <StyledTreeWrapper
-          // id="Territories-box-content"
+            // id="Territories-box-content"
+            ref={treeRef}
           >
             {filteredTreeData && (
               <MemoizedTerritoryTreeNode
