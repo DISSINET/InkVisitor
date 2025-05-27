@@ -47,7 +47,7 @@ interface StatementListDocumentSearchLine {
   // is list non empty
   showStatementList: boolean;
   userCanEdit: boolean;
-  annotatorWidthTooNarrow: boolean;
+  annotatorWidthTooSmall: boolean;
 }
 
 const StatementListDocumentSearchLine: React.FC<
@@ -73,7 +73,7 @@ const StatementListDocumentSearchLine: React.FC<
   resources,
   showStatementList,
   userCanEdit,
-  annotatorWidthTooNarrow,
+  annotatorWidthTooSmall,
 }) => {
   const themeContext = useContext(ThemeContext);
 
@@ -105,7 +105,7 @@ const StatementListDocumentSearchLine: React.FC<
             <div
               style={{
                 display: "flex",
-                width: annotatorWidthTooNarrow ? "9rem" : "10rem",
+                width: annotatorWidthTooSmall ? "9rem" : "10rem",
               }}
             >
               <EntityTag
@@ -127,7 +127,7 @@ const StatementListDocumentSearchLine: React.FC<
         {!selectedDocumentIsFetching && selectedDocument && (
           <StyledDocumentTitleContainer
             style={{
-              maxWidth: annotatorWidthTooNarrow ? "10rem" : "12rem",
+              maxWidth: annotatorWidthTooSmall ? "10rem" : "12rem",
             }}
           >
             <DocumentTitle title={selectedDocument.title} />
@@ -186,7 +186,7 @@ const StatementListDocumentSearchLine: React.FC<
 
           {isSearchTermValid && (
             <StyledSearchResults
-              $annotatorWidthTooNarrow={annotatorWidthTooNarrow}
+              $annotatorWidthTooSmall={annotatorWidthTooSmall}
             >
               {hasNoSearchResults ? (
                 <div style={{ marginLeft: "0.2rem" }}>no results</div>

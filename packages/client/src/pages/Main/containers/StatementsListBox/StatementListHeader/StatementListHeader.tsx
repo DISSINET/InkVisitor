@@ -27,7 +27,6 @@ import Dropdown, {
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaTrash } from "react-icons/fa";
-import { FaArrowDownShortWide } from "react-icons/fa6";
 import {
   MdOutlineCheckBox,
   MdOutlineCheckBoxOutlineBlank,
@@ -132,6 +131,7 @@ interface StatementListHeader {
     isAnchored?: boolean;
   })[];
   favoritedTerritoryIds: string[];
+  // annotatorWidthTooSmall: boolean;
 }
 export const StatementListHeader: React.FC<StatementListHeader> = ({
   territory,
@@ -153,6 +153,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   // autoOrderStatementsMutation,
   statementsWithOrder,
   favoritedTerritoryIds,
+  // annotatorWidthTooSmall,
 }) => {
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
@@ -366,8 +367,6 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
   const [showSubmit, setShowSubmit] = useState(false);
 
-  const [moveToParentHovered, setMoveToParentHovered] = useState(false);
-
   const BreadcrumbItems = useMemo(() => {
     return (
       <React.Fragment>
@@ -505,15 +504,12 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                 )}
             </StyledActionsWrapper>
             {territory.id !== rootTerritoryId && userCanEdit && (
-              <StyledMoveToParent
-                onMouseEnter={() => setMoveToParentHovered(true)}
-                onMouseLeave={() => setMoveToParentHovered(false)}
-              >
+              <StyledMoveToParent>
                 <EntitySuggester
                   placeholder="move"
                   disableTemplatesAccept
                   filterEditorRights
-                  inputWidth={moveToParentHovered ? 80 : 40}
+                  inputWidth={selectedRows.length > 0 ? 40 : 80}
                   disableCreate
                   categoryTypes={[EntityEnums.Class.Territory]}
                   onPicked={(selectedEntity) => {

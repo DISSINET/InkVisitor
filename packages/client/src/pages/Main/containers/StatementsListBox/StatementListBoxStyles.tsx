@@ -77,7 +77,7 @@ export const StyledSearchIcon = styled.div`
 `;
 
 interface StyledSearchResults {
-  $annotatorWidthTooNarrow?: boolean;
+  $annotatorWidthTooSmall?: boolean;
 }
 export const StyledSearchResults = styled.div<StyledSearchResults>`
   display: flex;
@@ -88,8 +88,8 @@ export const StyledSearchResults = styled.div<StyledSearchResults>`
   font-size: ${({ theme }) => theme.fontSize.xxs};
   font-weight: ${({ theme }) => theme.fontWeight.bold};
   white-space: nowrap;
-  flex-wrap: ${({ $annotatorWidthTooNarrow }) =>
-    $annotatorWidthTooNarrow ? "wrap" : "nowrap"};
+  flex-wrap: ${({ $annotatorWidthTooSmall }) =>
+    $annotatorWidthTooSmall ? "wrap" : "nowrap"};
   /* flex-wrap: wrap; */
 `;
 

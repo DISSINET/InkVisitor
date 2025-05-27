@@ -31,7 +31,7 @@ import { annotatorHighlight } from "./highlight";
 import { RATIO, TerritoryCreateModalType, W_SCROLL } from "./types";
 interface TextAnnotatorProps {
   width: number;
-  annotatorWidthTooNarrow: boolean;
+  annotatorWidthTooSmall: boolean;
   height: number;
   displayLineNumbers: boolean;
   hlEntities?: EntityEnums.Class[];
@@ -53,7 +53,7 @@ interface TextAnnotatorProps {
 
 export const TextAnnotator = ({
   width = 400,
-  annotatorWidthTooNarrow = false,
+  annotatorWidthTooSmall = false,
   height = 500,
   displayLineNumbers = true,
   hlEntities = Object.values(EntityEnums.Class),
@@ -639,7 +639,7 @@ TextAnnotatorProps) => {
               <Button
                 key={EditMode.HIGHLIGHT}
                 icon={<FaPen size={11} />}
-                label={!annotatorWidthTooNarrow ? EditMode.HIGHLIGHT : ""}
+                label={!annotatorWidthTooSmall ? EditMode.HIGHLIGHT : ""}
                 color="success"
                 inverted={annotatorMode !== EditMode.HIGHLIGHT}
                 onClick={() => {
@@ -654,7 +654,7 @@ TextAnnotatorProps) => {
                 key={EditMode.SEMI}
                 icon={<BsFileTextFill size={11} />}
                 color="success"
-                label={!annotatorWidthTooNarrow ? "text edit" : ""}
+                label={!annotatorWidthTooSmall ? "text edit" : ""}
                 inverted={annotatorMode !== EditMode.SEMI}
                 onClick={() => {
                   annotator.setMode(EditMode.SEMI);
@@ -668,7 +668,7 @@ TextAnnotatorProps) => {
                 key={EditMode.RAW}
                 icon={<HiCodeBracket size={11} />}
                 color="success"
-                label={!annotatorWidthTooNarrow ? "XML" : ""}
+                label={!annotatorWidthTooSmall ? "XML" : ""}
                 inverted={annotatorMode !== EditMode.RAW}
                 onClick={() => {
                   annotator.setMode(EditMode.RAW);
