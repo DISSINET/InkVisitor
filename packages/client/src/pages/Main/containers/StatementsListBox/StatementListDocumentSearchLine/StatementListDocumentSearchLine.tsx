@@ -181,7 +181,7 @@ const StatementListDocumentSearchLine: React.FC<
               setSearchTerm(newText);
             }}
             changeOnType
-            width={150}
+            width={130}
             minWidth={50}
           />
 

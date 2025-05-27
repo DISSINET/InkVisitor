@@ -13,6 +13,8 @@ import {
   THIRD_PANEL_MIN_WIDTH,
   MAIN_PAGE_SEARCH_SEPARATOR_X_PERCENT_POSITION,
   FOURTH_PANEL_MIN_WIDTH,
+  INIT_PERCENT_PANEL_WIDTHS_SMALL_SCREEN,
+  SMALL_SCREEN_LIMIT,
 } from "Theme/constants";
 import api from "api";
 import { Box, Button, ButtonGroup, Panel } from "components";
@@ -564,11 +566,26 @@ const MainPage: React.FC<MainPage> = ({}) => {
   };
 
   const handleLayoutInit = () => {
-    const initPanelWidthsPx = INIT_PERCENT_PANEL_WIDTHS.map((percentWidth) => {
-      return floorNumberToOneDecimal(percentWidth * onePercentOfLayoutWidth);
-    });
+    const initPanelWidthsPx =
+      layoutWidth < SMALL_SCREEN_LIMIT
+        ? INIT_PERCENT_PANEL_WIDTHS_SMALL_SCREEN.map((percentWidth) => {
+            return floorNumberToOneDecimal(
+              percentWidth * onePercentOfLayoutWidth
+            );
+          })
+        : INIT_PERCENT_PANEL_WIDTHS.map((percentWidth) => {
+            return floorNumberToOneDecimal(
+              percentWidth * onePercentOfLayoutWidth
+            );
+          });
     dispatch(setPanelWidths(initPanelWidthsPx));
-    dispatch(setPanelWidthsPercent(INIT_PERCENT_PANEL_WIDTHS));
+    dispatch(
+      setPanelWidthsPercent(
+        layoutWidth < SMALL_SCREEN_LIMIT
+          ? INIT_PERCENT_PANEL_WIDTHS_SMALL_SCREEN
+          : INIT_PERCENT_PANEL_WIDTHS
+      )
+    );
     setMainPageTreeSeparatorXPosition(initPanelWidthsPx[0]);
     localStorage.setItem(
       "mainPageTreeSeparatorXPosition",
