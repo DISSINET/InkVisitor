@@ -33,7 +33,7 @@ import {
   CStatementActant,
   CStatementAction,
 } from "constructors";
-import { useSearchParams } from "hooks";
+import { useResizeObserver, useSearchParams } from "hooks";
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import {
   AiOutlineCaretDown,
@@ -635,10 +635,17 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     [territoryData]
   );
 
+  const { ref: editorRef, width: editorWidth = 0 } =
+    useResizeObserver<HTMLDivElement>({
+      debounceDelay: 50,
+    });
+
+  const editorWidthTooSmall = editorWidth < 450;
+
   return (
     <>
       <React.Fragment key={statement.id}>
-        <StyledEditorPreBlock>
+        <StyledEditorPreBlock ref={editorRef}>
           <StyledEditorPreSection>
             <StyledEditorStatementInfo>
               <StyledHeaderTagWrap>
@@ -887,6 +894,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 setShowSubmitSection={setShowSubmitSection}
                 handleAttributeChange={handleAttributeChange}
                 handleDataAttributeChange={handleDataAttributeChange}
+                editorWidthTooSmall={editorWidthTooSmall}
               />
             )}
           </StyledEditorSectionHeader>
@@ -937,6 +945,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 setShowSubmitSection={setShowSubmitSection}
                 handleAttributeChange={handleAttributeChange}
                 handleDataAttributeChange={handleDataAttributeChange}
+                editorWidthTooSmall={editorWidthTooSmall}
               />
             )}
           </StyledEditorSectionHeader>
@@ -985,6 +994,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 setShowSubmitSection={setShowSubmitSection}
                 handleAttributeChange={handleAttributeChange}
                 handleDataAttributeChange={handleDataAttributeChange}
+                editorWidthTooSmall={editorWidthTooSmall}
               />
             )}
           </StyledEditorSectionHeader>
