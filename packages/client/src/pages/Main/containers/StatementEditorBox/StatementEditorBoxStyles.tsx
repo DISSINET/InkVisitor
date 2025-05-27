@@ -102,6 +102,7 @@ export const StyledEditorSectionHeading = styled.div`
   margin-right: ${({ theme }) => theme.space[2]};
   align-items: center;
   display: flex;
+  white-space: nowrap;
 `;
 
 interface StyledEditorSectionContent {}
