@@ -42,7 +42,7 @@ interface LeftHeader {
 }
 export const LeftHeader: React.FC<LeftHeader> = React.memo(
   ({ tempLocation }) => {
-    const env = process.env.NODE_ENV || "";
+    const env = process.env.ENV || "";
 
     const versionText = `v. ${packageJson.version}${
       env ? ` | ${env}` : ``
@@ -165,7 +165,7 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
     handleLogOut,
     userIsFetching = false,
   }) => {
-    const env = process.env.NODE_ENV || "";
+    const env = process.env.ENV || "";
 
     const dispatch = useAppDispatch();
     const selectedThemeId: InterfaceEnums.Theme = useAppSelector(
