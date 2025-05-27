@@ -611,42 +611,30 @@ const MainPage: React.FC<MainPage> = ({}) => {
           // first layout INIT
           handleLayoutInit();
         } else {
-          // layout init with saved separator - coming from different page
-          console.log(
-            "page reload / coming from different page - separator determines panel widths"
-          );
-          handleSeparatorLayoutInit();
+          const isSomethingUndersized =
+            panelWidths[0] < FIRST_PANEL_MIN_WIDTH ||
+            panelWidths[1] < SECOND_PANEL_MIN_WIDTH ||
+            panelWidths[2] < THIRD_PANEL_MIN_WIDTH ||
+            panelWidths[3] < FOURTH_PANEL_MIN_WIDTH;
+
+          if (isSomethingUndersized) {
+            // something is undersized
+            console.log("something is undersized");
+            handleLayoutInit();
+          } else {
+            // layout init with saved separator - coming from different page
+            console.log(
+              "page reload / coming from different page - separator determines panel widths"
+            );
+            handleSeparatorLayoutInit();
+          }
         }
 
         isFirstRender.current = false;
       } else {
-        // undersized check only needed on resizing bug
-        if (
-          panelWidths[0] < FIRST_PANEL_MIN_WIDTH ||
-          panelWidths[1] < SECOND_PANEL_MIN_WIDTH ||
-          panelWidths[2] < THIRD_PANEL_MIN_WIDTH ||
-          panelWidths[3] < FOURTH_PANEL_MIN_WIDTH
-        ) {
-          // something is undersized
-          console.log("something is undersized");
-          if (panelWidths[0] < FIRST_PANEL_MIN_WIDTH) {
-            console.log("first panel is undersized");
-          }
-          if (panelWidths[1] < SECOND_PANEL_MIN_WIDTH) {
-            console.log("second panel is undersized");
-          }
-          if (panelWidths[2] < THIRD_PANEL_MIN_WIDTH) {
-            console.log("third panel is undersized");
-          }
-          if (panelWidths[3] < FOURTH_PANEL_MIN_WIDTH) {
-            console.log("fourth panel is undersized");
-          }
-          handleLayoutInit();
-        } else {
-          // change of layout width (different monitor / change of zoom)
-          console.log("layout width changed");
-          handleLayoutInit();
-        }
+        // change of layout width (different monitor / change of zoom)
+        console.log("layout width changed");
+        handleLayoutInit();
       }
     }
   }, [layoutWidth]);
