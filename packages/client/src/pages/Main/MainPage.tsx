@@ -568,6 +568,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
   };
 
   const handleLayoutInit = () => {
+    // calculate panel widths based on screen width
     const initPanelWidthsPx =
       layoutWidth > LARGE_SCREEN_LIMIT
         ? INIT_PERCENT_PANEL_WIDTHS_LARGE_SCREEN.map((percentWidth) => {
@@ -596,6 +597,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
           : INIT_PERCENT_PANEL_WIDTHS
       )
     );
+    // set all separators to redux and local storage
     setMainPageTreeSeparatorXPosition(initPanelWidthsPx[0]);
     localStorage.setItem(
       "mainPageTreeSeparatorXPosition",
