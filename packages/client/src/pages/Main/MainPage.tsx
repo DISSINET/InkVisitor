@@ -150,6 +150,14 @@ const MainPage: React.FC<MainPage> = ({}) => {
       dispatch(setFourthPanelExpanded(false));
     } else {
       dispatch(setFourthPanelExpanded(true));
+      if (
+        mainPageSearchSeparatorXPosition - mainPageCenterSeparatorXPosition <
+        THIRD_PANEL_MIN_WIDTH
+      ) {
+        handleCenterSeparatorXPositionChange(
+          mainPageSearchSeparatorXPosition - THIRD_PANEL_MIN_WIDTH
+        );
+      }
     }
   };
 
@@ -716,7 +724,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
             mainPageTreeSeparatorXPosition + SECOND_PANEL_MIN_WIDTH
           }
           leftSideMaxWidth={
-            layoutWidth - panelWidths[3] - THIRD_PANEL_MIN_WIDTH
+            fourthPanelExpanded
+              ? layoutWidth - panelWidths[3] - THIRD_PANEL_MIN_WIDTH
+              : layoutWidth - collapsedPanelWidth - THIRD_PANEL_MIN_WIDTH
           }
           separatorXPosition={mainPageCenterSeparatorXPosition}
           setSeparatorXPosition={(xPosition) => {

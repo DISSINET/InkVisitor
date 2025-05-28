@@ -23,7 +23,7 @@ import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlic
 import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
+import { COLLAPSED_TABLE_WIDTH, SECOND_PANEL_MIN_WIDTH } from "Theme/constants";
 import {
   EntitiesDeleteSuccessResponse,
   StatementListDisplayMode,
@@ -848,6 +848,7 @@ export const StatementListBox: React.FC = () => {
               relationsCreateMutation={relationsCreateMutation}
               favoritedTerritoryIds={favoritedTerritoryIds}
               statementsWithOrder={statements}
+              contentWidthTooSmall={contentWidth < SECOND_PANEL_MIN_WIDTH + 60}
               // statementsWithOrder={statementsWithOrder}
               // autoOrderStatementsMutation={autoOrderStatementsMutation}
             />
