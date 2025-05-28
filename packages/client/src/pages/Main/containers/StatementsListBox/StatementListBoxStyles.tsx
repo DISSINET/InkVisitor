@@ -57,7 +57,7 @@ export const StyledDocumentSearchLine = styled.div`
   align-items: center;
   justify-content: space-between;
   padding: 0.2rem 0.5rem;
-  padding-right: 0;
+  padding-right: 0.5rem;
   overflow: hidden;
   white-space: nowrap;
 `;

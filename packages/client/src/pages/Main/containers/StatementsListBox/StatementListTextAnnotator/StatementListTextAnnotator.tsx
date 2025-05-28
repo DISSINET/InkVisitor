@@ -112,6 +112,7 @@ export const StatementListTextAnnotator: React.FC<
   userCanEdit,
 }) => {
   const [showAnnotator, setShowAnnotator] = useState(false);
+
   useEffect(() => {
     setShowAnnotator(true);
   }, []);
@@ -163,6 +164,8 @@ export const StatementListTextAnnotator: React.FC<
       }
     }
   }, [dSearchTerm]);
+
+  const debouncedContentWidth = useDebounce(contentWidth, 80);
 
   const animatedStyle = useSpring({
     opacity: showAnnotator ? 1 : 0,
@@ -216,8 +219,6 @@ export const StatementListTextAnnotator: React.FC<
     return height;
   }, [contentHeight, selectorHeight]);
 
-  const debouncedContentWidth = useDebounce(contentWidth, 80);
-
   const annotatorWidth = useMemo<number>(() => {
     return statements.length > 0
       ? contentWidth - COLLAPSED_TABLE_WIDTH
@@ -233,7 +234,6 @@ export const StatementListTextAnnotator: React.FC<
     <animated.div style={animatedStyle}>
       <StatementListDocumentSearchLine
         statements={statements}
-        contentWidth={contentWidth}
         selectedResource={selectedResource}
         setSelectedResourceId={setSelectedResourceId}
         selectedDocumentIsFetching={selectedDocumentIsFetching}
