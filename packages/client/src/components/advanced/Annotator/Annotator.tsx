@@ -31,7 +31,7 @@ import { annotatorHighlight } from "./highlight";
 import { RATIO, TerritoryCreateModalType, W_SCROLL } from "./types";
 interface TextAnnotatorProps {
   width: number;
-  annotatorWidthTooSmall: boolean;
+  annotatorWidthTooSmall?: boolean;
   height: number;
   displayLineNumbers: boolean;
   hlEntities?: EntityEnums.Class[];
@@ -544,7 +544,7 @@ TextAnnotatorProps) => {
   return (
     <>
       <div
-        style={{ width: width, position: "absolute" }}
+        style={{ width: width, position: "relative" }}
         onKeyDown={(e) => {
           if (e.key === "Escape") {
             setSelectedText("");
