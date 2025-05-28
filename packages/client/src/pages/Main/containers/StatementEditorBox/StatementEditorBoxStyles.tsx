@@ -187,6 +187,9 @@ export const StyledHeaderTagWrap = styled.div`
 `;
 
 export const StyledEditorHeaderInputWrap = styled.div`
+  display: flex;
+  flex-shrink: 1;
+  width: 100%;
   margin-bottom: ${({ theme }) => theme.space[2]};
 `;
 

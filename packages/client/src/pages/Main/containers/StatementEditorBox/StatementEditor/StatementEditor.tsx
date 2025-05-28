@@ -689,6 +689,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   </StyledEditorContentLabel>
                   <StyledEditorHeaderInputWrap>
                     <Input
+                      width={"full"}
+                      minWidth={100}
                       type="text"
                       value={statement.labels[0] || ""}
                       onChangeFn={(newValue: string) => {
