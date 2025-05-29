@@ -390,29 +390,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
     }
   };
 
-  const minimizeDetailBoxButton = () => {
-    return (
-      <>
-        <Button
-          tooltipLabel={
-            detailBoxState === DetailBoxState.Minimized
-              ? "open detail box"
-              : "minimize detail box"
-          }
-          inverted
-          icon={
-            detailBoxState === DetailBoxState.Minimized ? (
-              <BiShow />
-            ) : (
-              <BiHide />
-            )
-          }
-          onClick={handleMinimizeDetailBox}
-        />
-      </>
-    );
-  };
-
   const getDetailBoxHeight = () => {
     switch (detailBoxState) {
       case DetailBoxState.FullHeight:
@@ -864,7 +841,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
                   />
                 )}
               </>,
-              refreshBoxButton(["entity", "user"], false),
+              // refreshBoxButton(["entity", "user"], false),
               <Button
                 dataTestId="maximize-detail-box"
                 inverted
@@ -878,7 +855,16 @@ const MainPage: React.FC<MainPage> = ({}) => {
                 }
                 onClick={handleMaximizeDetailBox}
               />,
-              minimizeDetailBoxButton(),
+              <>
+                {detailBoxState !== DetailBoxState.Minimized && (
+                  <Button
+                    tooltipLabel={"minimize detail box"}
+                    inverted
+                    icon={<BiHide />}
+                    onClick={handleMinimizeDetailBox}
+                  />
+                )}
+              </>,
               <Button
                 inverted
                 tooltipLabel="close all tabs"
