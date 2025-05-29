@@ -188,7 +188,7 @@ export const TerritoryTreeBox: React.FC = () => {
       debounceDelay: 50,
     });
 
-  const treeWidthTooSmall = treeWidth < 130;
+  const treeWidthTooSmall = treeWidth < 140;
 
   return (
     <>

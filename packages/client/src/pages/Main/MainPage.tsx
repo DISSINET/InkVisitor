@@ -13,6 +13,10 @@ import {
   THIRD_PANEL_MIN_WIDTH,
   MAIN_PAGE_SEARCH_SEPARATOR_X_PERCENT_POSITION,
   FOURTH_PANEL_MIN_WIDTH,
+  INIT_PERCENT_PANEL_WIDTHS_SMALL_SCREEN,
+  SMALL_SCREEN_LIMIT,
+  INIT_PERCENT_PANEL_WIDTHS_LARGE_SCREEN,
+  LARGE_SCREEN_LIMIT,
 } from "Theme/constants";
 import api from "api";
 import { Box, Button, ButtonGroup, Panel } from "components";
@@ -146,6 +150,14 @@ const MainPage: React.FC<MainPage> = ({}) => {
       dispatch(setFourthPanelExpanded(false));
     } else {
       dispatch(setFourthPanelExpanded(true));
+      if (
+        mainPageSearchSeparatorXPosition - mainPageCenterSeparatorXPosition <
+        THIRD_PANEL_MIN_WIDTH
+      ) {
+        handleCenterSeparatorXPositionChange(
+          mainPageSearchSeparatorXPosition - THIRD_PANEL_MIN_WIDTH
+        );
+      }
     }
   };
 
@@ -564,11 +576,36 @@ const MainPage: React.FC<MainPage> = ({}) => {
   };
 
   const handleLayoutInit = () => {
-    const initPanelWidthsPx = INIT_PERCENT_PANEL_WIDTHS.map((percentWidth) => {
-      return floorNumberToOneDecimal(percentWidth * onePercentOfLayoutWidth);
-    });
+    // calculate panel widths based on screen width
+    const initPanelWidthsPx =
+      layoutWidth > LARGE_SCREEN_LIMIT
+        ? INIT_PERCENT_PANEL_WIDTHS_LARGE_SCREEN.map((percentWidth) => {
+            return floorNumberToOneDecimal(
+              percentWidth * onePercentOfLayoutWidth
+            );
+          })
+        : layoutWidth < SMALL_SCREEN_LIMIT
+        ? INIT_PERCENT_PANEL_WIDTHS_SMALL_SCREEN.map((percentWidth) => {
+            return floorNumberToOneDecimal(
+              percentWidth * onePercentOfLayoutWidth
+            );
+          })
+        : INIT_PERCENT_PANEL_WIDTHS.map((percentWidth) => {
+            return floorNumberToOneDecimal(
+              percentWidth * onePercentOfLayoutWidth
+            );
+          });
     dispatch(setPanelWidths(initPanelWidthsPx));
-    dispatch(setPanelWidthsPercent(INIT_PERCENT_PANEL_WIDTHS));
+    dispatch(
+      setPanelWidthsPercent(
+        layoutWidth > LARGE_SCREEN_LIMIT
+          ? INIT_PERCENT_PANEL_WIDTHS_LARGE_SCREEN
+          : layoutWidth < SMALL_SCREEN_LIMIT
+          ? INIT_PERCENT_PANEL_WIDTHS_SMALL_SCREEN
+          : INIT_PERCENT_PANEL_WIDTHS
+      )
+    );
+    // set all separators to redux and local storage
     setMainPageTreeSeparatorXPosition(initPanelWidthsPx[0]);
     localStorage.setItem(
       "mainPageTreeSeparatorXPosition",
@@ -611,42 +648,40 @@ const MainPage: React.FC<MainPage> = ({}) => {
           // first layout INIT
           handleLayoutInit();
         } else {
-          // layout init with saved separator - coming from different page
-          console.log(
-            "page reload / coming from different page - separator determines panel widths"
-          );
-          handleSeparatorLayoutInit();
+          const isSomethingUndersized =
+            Number(localStorageTreeSeparatorXPosition) *
+              onePercentOfLayoutWidth <
+              FIRST_PANEL_MIN_WIDTH ||
+            (Number(localStorageCenterSeparatorXPosition) -
+              Number(localStorageTreeSeparatorXPosition)) *
+              onePercentOfLayoutWidth <
+              SECOND_PANEL_MIN_WIDTH ||
+            (Number(localStorageSearchSeparatorXPosition) -
+              Number(localStorageCenterSeparatorXPosition)) *
+              onePercentOfLayoutWidth <
+              THIRD_PANEL_MIN_WIDTH ||
+            (layoutWidth - Number(localStorageSearchSeparatorXPosition)) *
+              onePercentOfLayoutWidth <
+              FOURTH_PANEL_MIN_WIDTH;
+
+          if (isSomethingUndersized) {
+            // something is undersized
+            console.log("something is undersized");
+            handleLayoutInit();
+          } else {
+            // layout init with saved separator - coming from different page
+            console.log(
+              "page reload / coming from different page - separator determines panel widths"
+            );
+            handleSeparatorLayoutInit();
+          }
         }
 
         isFirstRender.current = false;
       } else {
-        // undersized check only needed on resizing bug
-        if (
-          panelWidths[0] < FIRST_PANEL_MIN_WIDTH ||
-          panelWidths[1] < SECOND_PANEL_MIN_WIDTH ||
-          panelWidths[2] < THIRD_PANEL_MIN_WIDTH ||
-          panelWidths[3] < FOURTH_PANEL_MIN_WIDTH
-        ) {
-          // something is undersized
-          console.log("something is undersized");
-          if (panelWidths[0] < FIRST_PANEL_MIN_WIDTH) {
-            console.log("first panel is undersized");
-          }
-          if (panelWidths[1] < SECOND_PANEL_MIN_WIDTH) {
-            console.log("second panel is undersized");
-          }
-          if (panelWidths[2] < THIRD_PANEL_MIN_WIDTH) {
-            console.log("third panel is undersized");
-          }
-          if (panelWidths[3] < FOURTH_PANEL_MIN_WIDTH) {
-            console.log("fourth panel is undersized");
-          }
-          handleLayoutInit();
-        } else {
-          // change of layout width (different monitor / change of zoom)
-          console.log("layout width changed");
-          handleLayoutInit();
-        }
+        // change of layout width (different monitor / change of zoom)
+        console.log("layout width changed");
+        handleLayoutInit();
       }
     }
   }, [layoutWidth]);
@@ -689,7 +724,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
             mainPageTreeSeparatorXPosition + SECOND_PANEL_MIN_WIDTH
           }
           leftSideMaxWidth={
-            layoutWidth - panelWidths[3] - THIRD_PANEL_MIN_WIDTH
+            fourthPanelExpanded
+              ? layoutWidth - panelWidths[3] - THIRD_PANEL_MIN_WIDTH
+              : layoutWidth - collapsedPanelWidth - THIRD_PANEL_MIN_WIDTH
           }
           separatorXPosition={mainPageCenterSeparatorXPosition}
           setSeparatorXPosition={(xPosition) => {

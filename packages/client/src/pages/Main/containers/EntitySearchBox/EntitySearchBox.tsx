@@ -584,6 +584,7 @@ export const EntitySearchBox: React.FC = () => {
                 <StyledRowHeader>Root T validity</StyledRowHeader>
 
                 <AttributeButtonGroup
+                  noMargin
                   options={[
                     {
                       longValue: "All",

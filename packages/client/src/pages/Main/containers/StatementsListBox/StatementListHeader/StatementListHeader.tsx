@@ -131,7 +131,7 @@ interface StatementListHeader {
     isAnchored?: boolean;
   })[];
   favoritedTerritoryIds: string[];
-  // annotatorWidthTooSmall: boolean;
+  contentWidthTooSmall: boolean;
 }
 export const StatementListHeader: React.FC<StatementListHeader> = ({
   territory,
@@ -153,7 +153,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   // autoOrderStatementsMutation,
   statementsWithOrder,
   favoritedTerritoryIds,
-  // annotatorWidthTooSmall,
+  contentWidthTooSmall,
 }) => {
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
@@ -509,7 +509,9 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                   placeholder="move"
                   disableTemplatesAccept
                   filterEditorRights
-                  inputWidth={selectedRows.length > 0 ? 40 : 80}
+                  inputWidth={
+                    selectedRows.length > 0 && contentWidthTooSmall ? 36 : 80
+                  }
                   disableCreate
                   categoryTypes={[EntityEnums.Class.Territory]}
                   onPicked={(selectedEntity) => {

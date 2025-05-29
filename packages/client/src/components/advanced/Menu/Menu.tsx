@@ -83,7 +83,6 @@ export const Menu: React.FC<Menu> = ({
   const rotateMenuIcon = useSpring({
     transform: menuOpen ? "rotate(90deg)" : "rotate(0deg)",
     config: config.stiff,
-    immediate: !menuOpen,
   });
 
   return (

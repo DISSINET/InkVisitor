@@ -18,11 +18,18 @@ export const layoutWidthBreakpoint = 1400;
 // MORE PANEL WIDTHS
 export const collapsedPanelWidth = 31;
 export const FIRST_PANEL_MIN_WIDTH = 100;
-export const SECOND_PANEL_MIN_WIDTH = 440;
-export const THIRD_PANEL_MIN_WIDTH = 350;
-export const FOURTH_PANEL_MIN_WIDTH = 200;
-// % PERCENT PANEL WIDTHS
-export const INIT_PERCENT_PANEL_WIDTHS = [10, 37, 35, 18];
+export const SECOND_PANEL_MIN_WIDTH = 420;
+export const THIRD_PANEL_MIN_WIDTH = 300;
+export const FOURTH_PANEL_MIN_WIDTH = 192;
+// % PERCENT PANEL WIDTHS for 1440px
+export const INIT_PERCENT_PANEL_WIDTHS = [10, 41, 34, 15];
+// less than 1400px = sacrifice editor
+export const SMALL_SCREEN_LIMIT = 1400;
+export const INIT_PERCENT_PANEL_WIDTHS_SMALL_SCREEN = [11, 39, 32, 18];
+// more than 1900px
+export const LARGE_SCREEN_LIMIT = 1900;
+export const INIT_PERCENT_PANEL_WIDTHS_LARGE_SCREEN = [10, 40, 36, 14];
+
 export const MAIN_PAGE_TREE_SEPARATOR_X_PERCENT_POSITION =
   INIT_PERCENT_PANEL_WIDTHS[0];
 export const MAIN_PAGE_CENTER_SEPARATOR_X_PERCENT_POSITION =

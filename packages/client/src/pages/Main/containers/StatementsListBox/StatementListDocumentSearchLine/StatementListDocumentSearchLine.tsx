@@ -27,7 +27,6 @@ import {
 
 interface StatementListDocumentSearchLine {
   statements: any[];
-  contentWidth: number;
   selectedResource: IEntity | false;
   setSelectedResourceId: (id: string | false) => void;
   selectedDocumentIsFetching: boolean;
@@ -54,7 +53,6 @@ const StatementListDocumentSearchLine: React.FC<
   StatementListDocumentSearchLine
 > = ({
   statements,
-  contentWidth,
   selectedResource,
   setSelectedResourceId,
   selectedDocumentIsFetching,
@@ -80,7 +78,6 @@ const StatementListDocumentSearchLine: React.FC<
   return (
     <StyledDocumentSearchLine
       style={{
-        maxWidth: `${contentWidth}px`,
         marginLeft: showStatementList ? `-${COLLAPSED_TABLE_WIDTH}px` : "0",
       }}
     >
@@ -181,7 +178,8 @@ const StatementListDocumentSearchLine: React.FC<
               setSearchTerm(newText);
             }}
             changeOnType
-            width={115}
+            width={130}
+            minWidth={50}
           />
 
           {isSearchTermValid && (
