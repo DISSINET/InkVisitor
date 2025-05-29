@@ -864,7 +864,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
                   />
                 )}
               </>,
-              refreshBoxButton(["entity", "user"], false),
+              // refreshBoxButton(["entity", "user"], false),
               <Button
                 dataTestId="maximize-detail-box"
                 inverted
@@ -878,7 +878,10 @@ const MainPage: React.FC<MainPage> = ({}) => {
                 }
                 onClick={handleMaximizeDetailBox}
               />,
-              minimizeDetailBoxButton(),
+              <>
+                {detailBoxState !== DetailBoxState.Minimized &&
+                  minimizeDetailBoxButton()}
+              </>,
               <Button
                 inverted
                 tooltipLabel="close all tabs"
