@@ -44,7 +44,7 @@ export const BreadcrumbItem: React.FC<BreadcrumbItem> = ({
   const { status, data, error, isFetching } = useQuery({
     queryKey: ["territory", territoryId],
     queryFn: async () => {
-      const res = await api.territoryGet(territoryId);
+      const res = await api.entityGet(territoryId);
       return res.data;
     },
     enabled:

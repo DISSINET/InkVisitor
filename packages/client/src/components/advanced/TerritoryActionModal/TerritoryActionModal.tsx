@@ -98,7 +98,7 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
     queryKey: ["territory", oldParentId],
     queryFn: async () => {
       if (oldParentId) {
-        const res = await api.territoryGet(oldParentId);
+        const res = await api.entityGet(oldParentId);
         return res.data;
       }
     },
