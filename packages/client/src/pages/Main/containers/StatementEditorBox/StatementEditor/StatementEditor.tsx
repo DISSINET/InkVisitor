@@ -301,7 +301,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     if (treeData && statementTerritoryId) {
       const foundTerritory = searchTree(treeData, statementTerritoryId);
       if (foundTerritory) {
-        setterritoryPath(foundTerritory.path);
+        setterritoryPath(foundTerritory.path.concat(statementTerritoryId));
       }
     }
   }, [treeData, statementTerritoryId]);
@@ -722,34 +722,27 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             {!statement.isTemplate && (
               <StyledBreadcrumbWrap>
                 {territoryPath &&
-                  territoryPath.map((territory: string, key: number) => {
+                  territoryPath.map((territoryId: string, key: number) => {
                     return (
                       <React.Fragment key={key}>
-                        <BreadcrumbItem territoryId={territory} />
+                        <BreadcrumbItem
+                          territoryId={territoryId}
+                          isSelected={territoryId === statementTerritoryId}
+                        />
                       </React.Fragment>
                     );
                   })}
-                {territoryData ? (
-                  <React.Fragment key={territoryData.id}>
-                    <BreadcrumbItem
-                      territoryId={territoryData.id}
-                      territoryData={territoryData}
+
+                {!territoryData && !isFetchingTerritory && (
+                  <div style={{ display: "flex", alignItems: "flex-end" }}>
+                    <AiOutlineWarning
+                      size={22}
+                      color={themeContext?.color.warning}
                     />
-                  </React.Fragment>
-                ) : (
-                  <>
-                    {!isFetchingTerritory && (
-                      <div style={{ display: "flex", alignItems: "flex-end" }}>
-                        <AiOutlineWarning
-                          size={22}
-                          color={themeContext?.color.warning}
-                        />
-                        <StyledMissingTerritory>
-                          {"missing territory"}
-                        </StyledMissingTerritory>
-                      </div>
-                    )}
-                  </>
+                    <StyledMissingTerritory>
+                      {"missing territory"}
+                    </StyledMissingTerritory>
+                  </div>
                 )}
               </StyledBreadcrumbWrap>
             )}
