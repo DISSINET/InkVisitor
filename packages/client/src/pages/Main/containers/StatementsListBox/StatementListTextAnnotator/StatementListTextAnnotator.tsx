@@ -268,20 +268,26 @@ export const StatementListTextAnnotator: React.FC<
           }}
           ref={selectorRef}
         >
-          <StyledInfoText style={{ textWrap: "nowrap" }}>
-            Highlight
-          </StyledInfoText>
-          <Dropdown.Multi.Entity
-            options={entitiesDict}
-            disableEmpty={true}
-            isClearable={true}
-            disableAny={true}
-            onChange={handleHlEntitiesChange}
-            value={hlEntities}
-            width={debouncedContentWidth - 71}
-            noOptionsMessage="No entity classes to highlight"
-            limitSelectedItems={Math.floor((debouncedContentWidth - 145) / 80)}
-          />
+          {debouncedContentWidth && (
+            <>
+              <StyledInfoText style={{ textWrap: "nowrap" }}>
+                Highlight
+              </StyledInfoText>
+              <Dropdown.Multi.Entity
+                options={entitiesDict}
+                disableEmpty={true}
+                isClearable={true}
+                disableAny={true}
+                onChange={handleHlEntitiesChange}
+                value={hlEntities}
+                width={debouncedContentWidth - 71}
+                noOptionsMessage="No entity classes to highlight"
+                limitSelectedItems={Math.floor(
+                  (debouncedContentWidth - 145) / 80
+                )}
+              />
+            </>
+          )}
         </div>
       )}
 

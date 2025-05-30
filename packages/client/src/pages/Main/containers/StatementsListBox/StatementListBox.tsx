@@ -1021,7 +1021,7 @@ export const StatementListBox: React.FC = () => {
                   zIndex: 1,
                 }}
               >
-                <Loader show={statementListTableIsLoading} />
+                <Loader show size={50} />
               </div>
             )}
           </div>
