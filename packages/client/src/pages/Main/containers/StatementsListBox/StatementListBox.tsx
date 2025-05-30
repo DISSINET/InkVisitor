@@ -592,20 +592,12 @@ export const StatementListBox: React.FC = () => {
 
   // delay of show content for fluent animation on open
   const [showStatementList, setShowStatementList] = useState(true);
-  const isFirstRender = useRef(true);
 
   useEffect(() => {
     if (statementListOpened) {
-      let timeout: number;
-      if (isFirstRender.current) {
-        timeout = 200;
-        isFirstRender.current = false;
-      } else {
-        timeout = 500;
-      }
       setTimeout(() => {
         setShowStatementList(true);
-      }, timeout);
+      }, 500);
     } else {
       setShowStatementList(false);
     }
