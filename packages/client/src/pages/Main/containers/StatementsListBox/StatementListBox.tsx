@@ -825,6 +825,23 @@ export const StatementListBox: React.FC = () => {
     [territory]
   );
 
+  const statementListTableIsLoading =
+    isFetchingTerritory ||
+    isLoading ||
+    deleteStatementMutation.isPending ||
+    addStatementAtTheEndMutation.isPending ||
+    statementCreateMutation.isPending ||
+    statementUpdateMutation.isPending ||
+    moveStatementsMutation.isPending ||
+    duplicateStatementsMutation.isPending ||
+    cloneStatementMutation.isPending ||
+    updateTerritoryMutation.isPending ||
+    duplicateTerritoryMutation.isPending ||
+    deleteStatementsMutation.isPending ||
+    relationsCreateMutation.isPending ||
+    // autoOrderStatementsMutation.isPending ||
+    (statementListOpened && !showStatementList);
+
   return (
     <>
       {showStatementList && (
@@ -929,28 +946,11 @@ export const StatementListBox: React.FC = () => {
                     setSelectedRows={setSelectedRows}
                     displayMode={displayMode}
                     annotator={annotator}
+                    isLoading={statementListTableIsLoading}
                   />
                 )}
 
-                <Loader
-                  show={
-                    isFetchingTerritory ||
-                    isLoading ||
-                    deleteStatementMutation.isPending ||
-                    addStatementAtTheEndMutation.isPending ||
-                    statementCreateMutation.isPending ||
-                    statementUpdateMutation.isPending ||
-                    moveStatementsMutation.isPending ||
-                    duplicateStatementsMutation.isPending ||
-                    cloneStatementMutation.isPending ||
-                    updateTerritoryMutation.isPending ||
-                    duplicateTerritoryMutation.isPending ||
-                    deleteStatementsMutation.isPending ||
-                    relationsCreateMutation.isPending ||
-                    // autoOrderStatementsMutation.isPending ||
-                    (statementListOpened && !showStatementList)
-                  }
-                />
+                <Loader show={statementListTableIsLoading} />
               </StyledTableWrapper>
             </CustomScrollbar>
 

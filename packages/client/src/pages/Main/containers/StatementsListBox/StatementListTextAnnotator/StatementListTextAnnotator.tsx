@@ -280,7 +280,7 @@ export const StatementListTextAnnotator: React.FC<
             value={hlEntities}
             width={debouncedContentWidth - 71}
             noOptionsMessage="No entity classes to highlight"
-            limitSelectedItems={Math.floor((debouncedContentWidth - 130) / 80)}
+            limitSelectedItems={Math.floor((debouncedContentWidth - 145) / 82)}
           />
         </div>
       )}

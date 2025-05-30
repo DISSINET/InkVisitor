@@ -8,7 +8,7 @@ import {
 } from "@shared/types";
 import { UseMutationResult } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
-import { Button, TagGroup } from "components";
+import { Button, Loader, TagGroup } from "components";
 import { EntityTag } from "components/advanced";
 import { useSearchParams } from "hooks";
 import update from "immutability-helper";
@@ -98,6 +98,7 @@ interface StatementListTable {
   setSelectedRows: React.Dispatch<React.SetStateAction<string[]>>;
   displayMode: StatementListDisplayMode;
   annotator?: Annotator;
+  isLoading: boolean;
 }
 export const StatementListTable: React.FC<StatementListTable> = ({
   statements,
@@ -115,6 +116,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   setSelectedRows,
   displayMode,
   annotator,
+  isLoading,
 }) => {
   const dispatch = useAppDispatch();
   const { territoryId, setStatementId } = useSearchParams();
@@ -589,6 +591,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
           );
         })}
       </tbody>
+      <Loader show={isLoading} />
     </StyledTable>
   );
 };
