@@ -934,7 +934,7 @@ export const StatementListBox: React.FC = () => {
               <StyledTableWrapper
                 $isListMode={displayMode === StatementListDisplayMode.LIST}
               >
-                {(isListNonEmpty || statementListTableIsLoading) && (
+                {isListNonEmpty && (
                   <StatementListTable
                     // statements={statements}
                     statements={statementsWithOrder}
@@ -960,18 +960,6 @@ export const StatementListBox: React.FC = () => {
                     isLoading={statementListTableIsLoading}
                   />
                 )}
-                {displayMode === StatementListDisplayMode.TEXT &&
-                  statementListTableIsLoading && (
-                    <div
-                      style={{
-                        width: COLLAPSED_TABLE_WIDTH,
-                        height: contentHeight,
-                        flexShrink: 0,
-                      }}
-                    >
-                      <Loader show={statementListTableIsLoading} />
-                    </div>
-                  )}
               </StyledTableWrapper>
             </CustomScrollbar>
 
@@ -1017,15 +1005,26 @@ export const StatementListBox: React.FC = () => {
                 userCanEdit={userCanEdit}
               />
             )}
-          </div>
 
-          {/* Only show loader for the whole box if the mode is LIST */}
-          <Loader
-            show={
-              displayMode === StatementListDisplayMode.LIST &&
-              statementListTableIsLoading
-            }
-          />
+            {statementListTableIsLoading && (
+              <div
+                style={{
+                  width: tableWidth,
+                  height:
+                    displayMode === StatementListDisplayMode.TEXT
+                      ? contentHeight - 56
+                      : contentHeight,
+                  flexShrink: 0,
+                  position: "absolute",
+                  bottom: 0,
+                  left: 0,
+                  zIndex: 1,
+                }}
+              >
+                <Loader show={statementListTableIsLoading} />
+              </div>
+            )}
+          </div>
 
           <Submit
             title="Delete statement"
