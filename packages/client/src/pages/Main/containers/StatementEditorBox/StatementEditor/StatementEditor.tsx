@@ -4,6 +4,7 @@ import {
   IProp,
   IReference,
   IResponseStatement,
+  IResponseTree,
   IStatement,
   IStatementActant,
   IStatementAction,
@@ -51,6 +52,7 @@ import {
   deepCopy,
   getEntityLabel,
   getShortLabelByLetterCount,
+  searchTree,
 } from "utils/utils";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
 import {
@@ -289,11 +291,27 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     return false;
   }, [territoryData, statement.id]);
 
-  //TODO recurse to get all parents
-  const territoryPath =
-    territoryData &&
-    territoryData.data?.parent &&
-    Array(territoryData.data?.parent?.territoryId);
+  // use cached tree to get all parents
+  const treeData: IResponseTree | undefined = queryClient.getQueryData([
+    "tree",
+  ]);
+  const [territoryPath, setterritoryPath] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (treeData && statementTerritoryId) {
+      const foundTerritory = searchTree(treeData, statementTerritoryId);
+      if (foundTerritory) {
+        setterritoryPath(foundTerritory.path.concat(statementTerritoryId));
+      }
+    }
+  }, [treeData, statementTerritoryId]);
+
+  const favoritedTerritoryIds = useMemo(() => {
+    if (user?.storedTerritories) {
+      return user.storedTerritories.map((territory) => territory.territory.id);
+    }
+    return [];
+  }, [user?.storedTerritories]);
 
   const userCanEdit: boolean = useMemo(() => {
     return (
@@ -711,34 +729,30 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             {!statement.isTemplate && (
               <StyledBreadcrumbWrap>
                 {territoryPath &&
-                  territoryPath.map((territory: string, key: number) => {
+                  territoryPath.map((territoryId: string, key: number) => {
                     return (
                       <React.Fragment key={key}>
-                        <BreadcrumbItem territoryId={territory} />
+                        <BreadcrumbItem
+                          territoryId={territoryId}
+                          isSelected={territoryId === statementTerritoryId}
+                          isFavorited={favoritedTerritoryIds.includes(
+                            territoryId
+                          )}
+                        />
                       </React.Fragment>
                     );
                   })}
-                {territoryData ? (
-                  <React.Fragment key={territoryData.id}>
-                    <BreadcrumbItem
-                      territoryId={territoryData.id}
-                      territoryData={territoryData}
+
+                {!territoryData && !isFetchingTerritory && (
+                  <div style={{ display: "flex", alignItems: "flex-end" }}>
+                    <AiOutlineWarning
+                      size={22}
+                      color={themeContext?.color.warning}
                     />
-                  </React.Fragment>
-                ) : (
-                  <>
-                    {!isFetchingTerritory && (
-                      <div style={{ display: "flex", alignItems: "flex-end" }}>
-                        <AiOutlineWarning
-                          size={22}
-                          color={themeContext?.color.warning}
-                        />
-                        <StyledMissingTerritory>
-                          {"missing territory"}
-                        </StyledMissingTerritory>
-                      </div>
-                    )}
-                  </>
+                    <StyledMissingTerritory>
+                      {"missing territory"}
+                    </StyledMissingTerritory>
+                  </div>
                 )}
               </StyledBreadcrumbWrap>
             )}

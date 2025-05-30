@@ -57,7 +57,8 @@ import {
 } from "./StatementListHeaderStyles";
 
 interface StatementListHeader {
-  territory: IResponseTerritory;
+  territory?: IResponseTerritory;
+  isFetchingTerritory: boolean;
 
   isAllSelected: boolean;
   selectedRows: string[];
@@ -135,6 +136,7 @@ interface StatementListHeader {
 }
 export const StatementListHeader: React.FC<StatementListHeader> = ({
   territory,
+  isFetchingTerritory,
 
   isAllSelected,
   selectedRows,
@@ -317,7 +319,9 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
   const handleSelectAll = (checked: boolean) =>
     checked
-      ? setSelectedRows(territory.statements.map((statement) => statement.id))
+      ? setSelectedRows(
+          territory?.statements.map((statement) => statement.id) || []
+        )
       : setSelectedRows([]);
 
   const renderCheckBox = () => {
@@ -361,7 +365,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   );
 
   const userCanEdit = useMemo(
-    () => territory.right !== UserEnums.RoleMode.Read,
+    () => territory?.right !== UserEnums.RoleMode.Read,
     [territory]
   );
 
@@ -370,30 +374,25 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   const BreadcrumbItems = useMemo(() => {
     return (
       <React.Fragment>
-        {selectedTerritoryPath?.map((territoryId: string, key: number) => {
-          return (
-            <React.Fragment key={key}>
-              <BreadcrumbItem
-                territoryId={territoryId}
-                isFavorited={favoritedTerritoryIds?.includes(territoryId)}
-              />
-            </React.Fragment>
-          );
-        })}
-        <React.Fragment key="this-territory">
-          <BreadcrumbItem
-            // in this case territoryId is being used to compare and not fetch anything inside the component
-            territoryId={territoryId}
-            territoryData={territory}
-            isFavorited={favoritedTerritoryIds?.includes(territoryId)}
-          />
-        </React.Fragment>
+        {selectedTerritoryPath
+          ?.concat(territoryId)
+          .map((tId: string, key: number) => {
+            return (
+              <React.Fragment key={key}>
+                <BreadcrumbItem
+                  territoryId={tId}
+                  isFavorited={favoritedTerritoryIds?.includes(tId)}
+                  isSelected={tId === territoryId}
+                />
+              </React.Fragment>
+            );
+          })}
       </React.Fragment>
     );
   }, [
     territoryId,
     selectedTerritoryPath.join(","),
-    territory.labels,
+    territory?.labels,
     favoritedTerritoryIds,
   ]);
 
@@ -432,6 +431,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                 disabled={!hasAnchoredStatementsOutOfOrder}
               /> */}
               {user?.role !== UserEnums.Role.Viewer &&
+                territory &&
                 territory.statements.length > 0 && (
                   <>
                     <StyledCheckboxWrapper>
@@ -503,7 +503,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                   </>
                 )}
             </StyledActionsWrapper>
-            {territory.id !== rootTerritoryId && userCanEdit && (
+            {territoryId !== rootTerritoryId && userCanEdit && (
               <StyledMoveToParent>
                 <EntitySuggester
                   placeholder="move"
@@ -543,6 +543,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
           updateTerritoryMutation={updateTerritoryMutation}
           excludedMoveTerritories={excludedMoveTerritories}
           duplicateTerritoryMutation={duplicateTerritoryMutation}
+          isFetchingTerritory={isFetchingTerritory}
         />
       )}
       <Submit

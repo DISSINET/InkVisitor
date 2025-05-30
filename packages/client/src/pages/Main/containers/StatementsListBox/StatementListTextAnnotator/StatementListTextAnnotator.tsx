@@ -30,7 +30,7 @@ interface StatementListTextAnnotator {
   statements: IResponseStatement[];
   // it's faster than the territory entity so it's better to pass territoryId separately
   territoryId: string;
-  territory: IResponseTerritory;
+  territory?: IResponseTerritory;
   statementId: string;
   entities: { [key: string]: IEntity };
   right: UserEnums.RoleMode;
@@ -220,10 +220,10 @@ export const StatementListTextAnnotator: React.FC<
   }, [contentHeight, selectorHeight]);
 
   const annotatorWidth = useMemo<number>(() => {
-    return statements.length > 0
+    return showStatementList
       ? contentWidth - COLLAPSED_TABLE_WIDTH
       : contentWidth;
-  }, [contentWidth, statements.length]);
+  }, [contentWidth, showStatementList]);
 
   // TODO: min reasonable width as constant
   const annotatorWidthTooSmall = useMemo<boolean>(() => {
@@ -268,20 +268,26 @@ export const StatementListTextAnnotator: React.FC<
           }}
           ref={selectorRef}
         >
-          <StyledInfoText style={{ textWrap: "nowrap" }}>
-            Highlight
-          </StyledInfoText>
-          <Dropdown.Multi.Entity
-            options={entitiesDict}
-            disableEmpty={true}
-            isClearable={true}
-            disableAny={true}
-            onChange={handleHlEntitiesChange}
-            value={hlEntities}
-            width={debouncedContentWidth - 71}
-            noOptionsMessage="No entity classes to highlight"
-            limitSelectedItems={Math.floor((debouncedContentWidth - 130) / 80)}
-          />
+          {debouncedContentWidth && (
+            <>
+              <StyledInfoText style={{ textWrap: "nowrap" }}>
+                Highlight
+              </StyledInfoText>
+              <Dropdown.Multi.Entity
+                options={entitiesDict}
+                disableEmpty={true}
+                isClearable={true}
+                disableAny={true}
+                onChange={handleHlEntitiesChange}
+                value={hlEntities}
+                width={debouncedContentWidth - 71}
+                noOptionsMessage="No entity classes to highlight"
+                limitSelectedItems={Math.floor(
+                  (debouncedContentWidth - 145) / 80
+                )}
+              />
+            </>
+          )}
         </div>
       )}
 

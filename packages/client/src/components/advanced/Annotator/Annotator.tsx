@@ -95,7 +95,7 @@ TextAnnotatorProps) => {
   const { data: dataParentTerritory } = useQuery({
     queryKey: ["territory", parentTerritoryId as string],
     queryFn: async () => {
-      const res = await api.territoryGet(parentTerritoryId as string);
+      const res = await api.entityGet(parentTerritoryId as string);
       return res.data;
     },
     enabled: !!parentTerritoryId,

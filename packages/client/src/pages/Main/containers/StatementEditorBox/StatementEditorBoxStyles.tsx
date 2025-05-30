@@ -206,6 +206,7 @@ export const StyledEditorContentLabel = styled(StyledSectionLabel)`
   white-space: nowrap;
   display: flex;
   align-items: center;
+  margin-right: ${({ theme }) => theme.space[3]};
 `;
 
 export const StyledEditorContentRowValue = styled.div`

@@ -16,7 +16,7 @@ export const UserRightItem: React.FC<UserRightItem> = ({ territoryId }) => {
   } = useQuery({
     queryKey: ["territory", territoryId],
     queryFn: async () => {
-      const res = await api.territoryGet(territoryId);
+      const res = await api.entityGet(territoryId);
       return res.data;
     },
     enabled: !!territoryId && api.isLoggedIn(),

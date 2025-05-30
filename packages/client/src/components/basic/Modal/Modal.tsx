@@ -138,12 +138,14 @@ interface ModalContent {
   children?: ReactNode;
   enableScroll?: boolean;
   centered?: boolean;
+  isLoading?: boolean;
 }
 export const ModalContent: FC<ModalContent> = ({
   children,
   column,
   enableScroll = false,
   centered,
+  isLoading,
 }) => {
   return (
     <StyledCardBody
@@ -152,6 +154,7 @@ export const ModalContent: FC<ModalContent> = ({
       centered={centered}
     >
       {children}
+      <Loader show={isLoading} />
     </StyledCardBody>
   );
 };

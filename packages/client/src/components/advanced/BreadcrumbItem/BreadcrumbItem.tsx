@@ -17,7 +17,7 @@ const initialData: IEntity = {
   id: "",
   class: EntityEnums.Class.Territory,
   data: {},
-  labels: [],
+  labels: ["..."],
   detail: "",
   status: EntityEnums.Status.Approved,
   language: EntityEnums.Language.Empty,
@@ -31,11 +31,13 @@ interface BreadcrumbItem {
   // If the territory is in params (territory), territory data needs to be added to props!!!
   territoryData?: IResponseTerritory;
   isFavorited?: boolean;
+  isSelected?: boolean;
 }
 export const BreadcrumbItem: React.FC<BreadcrumbItem> = ({
   territoryId,
   territoryData,
   isFavorited,
+  isSelected = false,
 }) => {
   const { setTerritoryId, territoryId: paramsTerritoryId } = useSearchParams();
 
@@ -44,11 +46,10 @@ export const BreadcrumbItem: React.FC<BreadcrumbItem> = ({
   const { status, data, error, isFetching } = useQuery({
     queryKey: ["territory", territoryId],
     queryFn: async () => {
-      const res = await api.territoryGet(territoryId);
+      const res = await api.entityGet(territoryId);
       return res.data;
     },
-    enabled:
-      !!territoryId && api.isLoggedIn() && paramsTerritoryId !== territoryId,
+    enabled: !!territoryId && !territoryData && api.isLoggedIn(),
   });
 
   return (
@@ -58,8 +59,8 @@ export const BreadcrumbItem: React.FC<BreadcrumbItem> = ({
           <BsArrowRightShort />
           <EntityTag
             showOnly="label"
-            fullWidth={!!territoryData}
-            isSelected={!!territoryData}
+            fullWidth={isSelected}
+            isSelected={isSelected}
             entity={territoryData || data || initialData}
             isFavorited={isFavorited}
             button={
