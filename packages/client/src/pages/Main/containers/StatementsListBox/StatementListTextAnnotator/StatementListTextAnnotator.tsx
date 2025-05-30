@@ -30,7 +30,7 @@ interface StatementListTextAnnotator {
   statements: IResponseStatement[];
   // it's faster than the territory entity so it's better to pass territoryId separately
   territoryId: string;
-  territory: IResponseTerritory;
+  territory?: IResponseTerritory;
   statementId: string;
   entities: { [key: string]: IEntity };
   right: UserEnums.RoleMode;

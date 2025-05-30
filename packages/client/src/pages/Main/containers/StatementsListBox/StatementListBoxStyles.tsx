@@ -32,6 +32,7 @@ interface StyledTableWrapper {
   $isListMode?: boolean;
 }
 export const StyledTableWrapper = styled.div<StyledTableWrapper>`
+  position: relative;
   display: flex;
   flex-direction: column;
   overflow: auto;

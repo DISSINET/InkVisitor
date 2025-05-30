@@ -934,10 +934,30 @@ export const StatementListBox: React.FC = () => {
                     annotator={annotator}
                   />
                 )}
+
+                <Loader
+                  show={
+                    isFetching ||
+                    isLoading ||
+                    deleteStatementMutation.isPending ||
+                    addStatementAtTheEndMutation.isPending ||
+                    statementCreateMutation.isPending ||
+                    statementUpdateMutation.isPending ||
+                    moveStatementsMutation.isPending ||
+                    duplicateStatementsMutation.isPending ||
+                    cloneStatementMutation.isPending ||
+                    updateTerritoryMutation.isPending ||
+                    duplicateTerritoryMutation.isPending ||
+                    deleteStatementsMutation.isPending ||
+                    relationsCreateMutation.isPending ||
+                    // autoOrderStatementsMutation.isPending ||
+                    (statementListOpened && !showStatementList)
+                  }
+                />
               </StyledTableWrapper>
             </CustomScrollbar>
 
-            {territory && displayMode === StatementListDisplayMode.TEXT && (
+            {displayMode === StatementListDisplayMode.TEXT && (
               <StatementListTextAnnotator
                 key={territoryId}
                 contentHeight={contentHeight}
@@ -1003,25 +1023,6 @@ export const StatementListBox: React.FC = () => {
           />
         </>
       )}
-      <Loader
-        show={
-          isFetching ||
-          isLoading ||
-          deleteStatementMutation.isPending ||
-          addStatementAtTheEndMutation.isPending ||
-          statementCreateMutation.isPending ||
-          statementUpdateMutation.isPending ||
-          moveStatementsMutation.isPending ||
-          duplicateStatementsMutation.isPending ||
-          cloneStatementMutation.isPending ||
-          updateTerritoryMutation.isPending ||
-          duplicateTerritoryMutation.isPending ||
-          deleteStatementsMutation.isPending ||
-          relationsCreateMutation.isPending ||
-          // autoOrderStatementsMutation.isPending ||
-          (statementListOpened && !showStatementList)
-        }
-      />
     </>
   );
 };

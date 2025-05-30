@@ -4,6 +4,7 @@ import {
   IProp,
   IReference,
   IResponseStatement,
+  IResponseTree,
   IStatement,
   IStatementActant,
   IStatementAction,
@@ -51,6 +52,7 @@ import {
   deepCopy,
   getEntityLabel,
   getShortLabelByLetterCount,
+  searchTree,
 } from "utils/utils";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
 import {
@@ -289,11 +291,20 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     return false;
   }, [territoryData, statement.id]);
 
-  //TODO recurse to get all parents
-  const territoryPath =
-    territoryData &&
-    territoryData.data?.parent &&
-    Array(territoryData.data?.parent?.territoryId);
+  // use cached tree to get all parents
+  const treeData: IResponseTree | undefined = queryClient.getQueryData([
+    "tree",
+  ]);
+  const [territoryPath, setterritoryPath] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (treeData && statementTerritoryId) {
+      const foundTerritory = searchTree(treeData, statementTerritoryId);
+      if (foundTerritory) {
+        setterritoryPath(foundTerritory.path);
+      }
+    }
+  }, [treeData, statementTerritoryId]);
 
   const userCanEdit: boolean = useMemo(() => {
     return (
