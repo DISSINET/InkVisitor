@@ -306,6 +306,13 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     }
   }, [treeData, statementTerritoryId]);
 
+  const favoritedTerritoryIds = useMemo(() => {
+    if (user?.storedTerritories) {
+      return user.storedTerritories.map((territory) => territory.territory.id);
+    }
+    return [];
+  }, [user?.storedTerritories]);
+
   const userCanEdit: boolean = useMemo(() => {
     return (
       statement.right === UserEnums.RoleMode.Admin ||
@@ -728,6 +735,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                         <BreadcrumbItem
                           territoryId={territoryId}
                           isSelected={territoryId === statementTerritoryId}
+                          isFavorited={favoritedTerritoryIds.includes(
+                            territoryId
+                          )}
                         />
                       </React.Fragment>
                     );
