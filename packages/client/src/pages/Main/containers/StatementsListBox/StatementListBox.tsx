@@ -113,7 +113,7 @@ export const StatementListBox: React.FC = () => {
     status,
     data: territory,
     error,
-    isFetching,
+    isFetching: isFetchingTerritory,
   } = useQuery({
     queryKey: ["territory", "statement-list", territoryId, statementListOpened],
     queryFn: async () => {
@@ -831,6 +831,7 @@ export const StatementListBox: React.FC = () => {
         <>
           <StatementListHeader
             territory={territory}
+            isFetchingTerritory={isFetchingTerritory}
             selectedRows={selectedRows}
             setSelectedRows={setSelectedRows}
             isAllSelected={
@@ -866,7 +867,7 @@ export const StatementListBox: React.FC = () => {
             statements.length === 0 &&
             displayMode === StatementListDisplayMode.LIST &&
             statementListOpened &&
-            !isFetching && (
+            !isFetchingTerritory && (
               <>
                 <StyledEmptyState>
                   <BsInfoCircle size="23" />
@@ -934,7 +935,7 @@ export const StatementListBox: React.FC = () => {
 
                 <Loader
                   show={
-                    isFetching ||
+                    isFetchingTerritory ||
                     isLoading ||
                     deleteStatementMutation.isPending ||
                     addStatementAtTheEndMutation.isPending ||

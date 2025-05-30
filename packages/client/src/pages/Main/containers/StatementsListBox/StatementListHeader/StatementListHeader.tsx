@@ -58,6 +58,7 @@ import {
 
 interface StatementListHeader {
   territory?: IResponseTerritory;
+  isFetchingTerritory: boolean;
 
   isAllSelected: boolean;
   selectedRows: string[];
@@ -135,6 +136,7 @@ interface StatementListHeader {
 }
 export const StatementListHeader: React.FC<StatementListHeader> = ({
   territory,
+  isFetchingTerritory,
 
   isAllSelected,
   selectedRows,
@@ -531,7 +533,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
         )}
       </StyledHeader>
 
-      {territory && showTActionModal && (
+      {showTActionModal && (
         <TerritoryActionModal
           onClose={() => setShowTActionModal(false)}
           selectedParentEntity={moveToParentEntity}
@@ -541,6 +543,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
           updateTerritoryMutation={updateTerritoryMutation}
           excludedMoveTerritories={excludedMoveTerritories}
           duplicateTerritoryMutation={duplicateTerritoryMutation}
+          isFetchingTerritory={isFetchingTerritory}
         />
       )}
       <Submit

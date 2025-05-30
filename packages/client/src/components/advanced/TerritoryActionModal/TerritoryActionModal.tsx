@@ -38,7 +38,7 @@ import {
 } from "./TerritoryActionModalStyles";
 
 interface TerritoryActionModal {
-  territory: IResponseTerritory;
+  territory?: IResponseTerritory;
   onClose: () => void;
   showModal?: boolean;
   selectedParentEntity: IEntity | false;
@@ -64,6 +64,7 @@ interface TerritoryActionModal {
     },
     unknown
   >;
+  isFetchingTerritory: boolean;
 }
 export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
   showModal = false,
@@ -75,6 +76,7 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
 
   updateTerritoryMutation,
   duplicateTerritoryMutation,
+  isFetchingTerritory,
 }) => {
   const [action, setAction] = useState<"move" | "duplicate">("move");
   const [includeChildren, setIncludeChildren] = useState(true);
@@ -119,7 +121,7 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
   return (
     <Modal showModal={showModal} onClose={onClose}>
       <ModalHeader title="Manage territory" icon={<TbHomeMove />} />
-      <ModalContent column enableScroll>
+      <ModalContent column enableScroll isLoading={isFetchingTerritory}>
         <StyledFlexRow>
           {territory && (
             <>
@@ -244,10 +246,10 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
           <ButtonGroup>
             <Button label="cancel" onClick={onClose} />
             <Button
-              disabled={!newParentEntities.length}
+              disabled={!newParentEntities.length || !territory}
               label={action}
               onClick={() => {
-                if (newParentEntities.length > 0) {
+                if (newParentEntities.length > 0 && territory) {
                   if (action === "move") {
                     // MOVE
                     updateTerritoryMutation.mutate({

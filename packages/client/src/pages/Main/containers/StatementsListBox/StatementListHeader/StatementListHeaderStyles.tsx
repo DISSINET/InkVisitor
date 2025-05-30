@@ -19,6 +19,7 @@ export const StyledHeaderBreadcrumbRowLeft = styled.div`
   align-items: center;
 `;
 export const StyledMoveToParent = styled(animated.div)`
+  position: relative;
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   font-weight: ${({ theme }) => theme.fontWeight["normal"]};
   display: flex;

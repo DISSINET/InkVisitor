@@ -48,6 +48,7 @@ const getWidth = (width: "full" | "fat" | "normal" | "auto" | number) => {
   }
 };
 export const StyledCard = styled(animated.div)<Card>`
+  position: relative;
   width: ${({ width }) => getWidth(width)};
   max-width: calc(100vw - 4rem);
   height: ${({ $fullHeight }) => ($fullHeight ? "100%" : "")};
@@ -59,7 +60,6 @@ export const StyledCard = styled(animated.div)<Card>`
   background-color: ${({ theme }) => theme.color["gray"][100]};
   color: ${({ theme }) => theme.color["black"]};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
-  position: relative;
 `;
 
 interface StyledCardHeader {
@@ -100,6 +100,7 @@ interface StyledCardBody {
   centered?: boolean;
 }
 export const StyledCardBody = styled.section<StyledCardBody>`
+  position: relative;
   display: flex;
   height: 100%;
   flex-direction: ${({ $column }) => ($column ? "column" : "row")};
