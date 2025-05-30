@@ -567,7 +567,7 @@ export const StatementListBox: React.FC = () => {
     height: contentHeight = 0,
     width: contentWidth = 0,
   } = useResizeObserver<HTMLDivElement>({
-    debounceDelay: displayMode === StatementListDisplayMode.LIST ? 50 : 0,
+    debounceDelay: 50,
   });
 
   const [storedAnnotatorResourceId, setStoredAnnotatorResourceId] = useState<
@@ -928,7 +928,6 @@ export const StatementListBox: React.FC = () => {
                     selectedRows={selectedRows}
                     setSelectedRows={setSelectedRows}
                     displayMode={displayMode}
-                    contentWidth={tableWidth - 10}
                     annotator={annotator}
                   />
                 )}

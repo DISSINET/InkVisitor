@@ -12,6 +12,7 @@ export const StyledHeaderBreadcrumbRow = styled.div`
   align-items: center;
   flex-wrap: wrap;
   justify-content: left;
+  margin-bottom: 0.3rem;
 `;
 
 export const StyledHeaderBreadcrumbRowLeft = styled.div`

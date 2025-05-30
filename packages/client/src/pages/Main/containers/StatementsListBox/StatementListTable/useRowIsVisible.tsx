@@ -11,13 +11,7 @@ function useIsRowVisible(
 
     const observer = new IntersectionObserver(
       ([entry]) => setIsVisible(entry.isIntersecting),
-      {
-        // Only trigger when at least 50% of the row is visible
-        threshold: 0.5,
-        // Add a 100px buffer zone
-        rootMargin: "100px",
-        ...options,
-      }
+      options
     );
 
     observer.observe(rowRef.current);

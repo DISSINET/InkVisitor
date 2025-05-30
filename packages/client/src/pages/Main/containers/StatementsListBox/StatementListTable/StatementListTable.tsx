@@ -97,7 +97,6 @@ interface StatementListTable {
   selectedRows: string[];
   setSelectedRows: React.Dispatch<React.SetStateAction<string[]>>;
   displayMode: StatementListDisplayMode;
-  contentWidth: number;
   annotator?: Annotator;
 }
 export const StatementListTable: React.FC<StatementListTable> = ({
@@ -115,7 +114,6 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   selectedRows,
   setSelectedRows,
   displayMode,
-  contentWidth,
   annotator,
 }) => {
   const dispatch = useAppDispatch();
@@ -553,7 +551,6 @@ export const StatementListTable: React.FC<StatementListTable> = ({
     <StyledTable
       {...getTableProps()}
       $isListMode={displayMode === StatementListDisplayMode.LIST}
-      // $contentWidth={contentWidth}
     >
       <StyledTHead>
         {headerGroups.map((headerGroup, key) => (
