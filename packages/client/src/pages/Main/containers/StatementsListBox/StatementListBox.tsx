@@ -6,6 +6,7 @@ import {
   IReference,
   IResponseEntity,
   IResponseStatement,
+  IResponseTree,
   IStatement,
   ITerritory,
   Relation,
@@ -15,7 +16,7 @@ import api from "api";
 import { CustomScrollbar, Loader, Submit, ToastWithLink } from "components";
 import { CStatement } from "constructors";
 import { useResizeObserver, useSearchParams } from "hooks";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { toast } from "react-toastify";
 import { setStatementListOpened } from "redux/features/layout/mainPage/statementListOpenedSlice";
@@ -34,6 +35,7 @@ import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StatementListTextAnnotator } from "./StatementListTextAnnotator/StatementListTextAnnotator";
 import { StyledEmptyState, StyledTableWrapper } from "./StatementListBoxStyles";
 import { IAnchorsNode } from "@shared/types/document";
+import { searchTree } from "utils/utils";
 
 const initialData: {
   statements: IResponseStatement[];
@@ -590,26 +592,24 @@ export const StatementListBox: React.FC = () => {
 
   // delay of show content for fluent animation on open
   const [showStatementList, setShowStatementList] = useState(true);
+  const isFirstRender = useRef(true);
+
   useEffect(() => {
     if (statementListOpened) {
+      let timeout: number;
+      if (isFirstRender.current) {
+        timeout = 200;
+        isFirstRender.current = false;
+      } else {
+        timeout = 500;
+      }
       setTimeout(() => {
         setShowStatementList(true);
-      }, 500);
+      }, timeout);
     } else {
       setShowStatementList(false);
     }
   }, [statementListOpened]);
-
-  const isListNonEmpty = statements.length > 0;
-
-  const tableWidth = useMemo(() => {
-    if (isListNonEmpty) {
-      return displayMode === StatementListDisplayMode.LIST
-        ? contentWidth
-        : COLLAPSED_TABLE_WIDTH;
-    }
-    return 0;
-  }, [displayMode, contentWidth, statements.length]);
 
   const [annotator, setAnnotator] = useState<Annotator | undefined>(undefined);
 
@@ -825,6 +825,8 @@ export const StatementListBox: React.FC = () => {
     [territory]
   );
 
+  const isListNonEmpty = statements.length > 0;
+
   const statementListTableIsLoading =
     isFetchingTerritory ||
     isLoading ||
@@ -842,6 +844,15 @@ export const StatementListBox: React.FC = () => {
     // autoOrderStatementsMutation.isPending ||
     (statementListOpened && !showStatementList);
 
+  const tableWidth = useMemo(() => {
+    if (isListNonEmpty || statementListTableIsLoading) {
+      return displayMode === StatementListDisplayMode.LIST
+        ? contentWidth
+        : COLLAPSED_TABLE_WIDTH;
+    }
+    return 0;
+  }, [displayMode, contentWidth, isListNonEmpty, statementListTableIsLoading]);
+
   return (
     <>
       {showStatementList && (
@@ -852,7 +863,7 @@ export const StatementListBox: React.FC = () => {
             selectedRows={selectedRows}
             setSelectedRows={setSelectedRows}
             isAllSelected={
-              statements.length > 0 && selectedRows.length === statements.length
+              isListNonEmpty && selectedRows.length === statements.length
             }
             moveStatementsMutation={moveStatementsMutation}
             duplicateStatementsMutation={duplicateStatementsMutation}
@@ -897,7 +908,7 @@ export const StatementListBox: React.FC = () => {
             style={{
               display: "flex",
               height: "100%",
-              maxHeight: "calc(100%)",
+              // maxHeight: "calc(100%)",
               overflow: "hidden",
             }}
             ref={contentRef}
@@ -923,7 +934,7 @@ export const StatementListBox: React.FC = () => {
               <StyledTableWrapper
                 $isListMode={displayMode === StatementListDisplayMode.LIST}
               >
-                {statements.length > 0 && (
+                {(isListNonEmpty || statementListTableIsLoading) && (
                   <StatementListTable
                     // statements={statements}
                     statements={statementsWithOrder}
@@ -949,8 +960,18 @@ export const StatementListBox: React.FC = () => {
                     isLoading={statementListTableIsLoading}
                   />
                 )}
-
-                <Loader show={statementListTableIsLoading} />
+                {displayMode === StatementListDisplayMode.TEXT &&
+                  statementListTableIsLoading && (
+                    <div
+                      style={{
+                        width: COLLAPSED_TABLE_WIDTH,
+                        height: contentHeight,
+                        flexShrink: 0,
+                      }}
+                    >
+                      <Loader show={statementListTableIsLoading} />
+                    </div>
+                  )}
               </StyledTableWrapper>
             </CustomScrollbar>
 
@@ -990,11 +1011,21 @@ export const StatementListBox: React.FC = () => {
                 documents={documents}
                 setSelectedResourceId={setSelectedResourceId}
                 displayMode={displayMode}
-                showStatementList={isListNonEmpty}
+                showStatementList={
+                  isListNonEmpty || statementListTableIsLoading
+                }
                 userCanEdit={userCanEdit}
               />
             )}
           </div>
+
+          {/* Only show loader for the whole box if the mode is LIST */}
+          <Loader
+            show={
+              displayMode === StatementListDisplayMode.LIST &&
+              statementListTableIsLoading
+            }
+          />
 
           <Submit
             title="Delete statement"

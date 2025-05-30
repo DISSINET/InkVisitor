@@ -6,6 +6,7 @@ interface StyledTable {
 }
 export const StyledTable = styled.table<StyledTable>`
   min-width: ${({}) => `${COLLAPSED_TABLE_WIDTH / 10 - 2.5}rem`};
+  height: 100%;
   border-spacing: 0;
   border-collapse: collapse;
   border-width: ${({ theme }) => theme.borderWidth[1]};

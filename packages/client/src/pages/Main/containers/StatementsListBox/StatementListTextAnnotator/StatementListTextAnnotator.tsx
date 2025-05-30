@@ -220,10 +220,10 @@ export const StatementListTextAnnotator: React.FC<
   }, [contentHeight, selectorHeight]);
 
   const annotatorWidth = useMemo<number>(() => {
-    return statements.length > 0
+    return showStatementList
       ? contentWidth - COLLAPSED_TABLE_WIDTH
       : contentWidth;
-  }, [contentWidth, statements.length]);
+  }, [contentWidth, showStatementList]);
 
   // TODO: min reasonable width as constant
   const annotatorWidthTooSmall = useMemo<boolean>(() => {
@@ -280,7 +280,7 @@ export const StatementListTextAnnotator: React.FC<
             value={hlEntities}
             width={debouncedContentWidth - 71}
             noOptionsMessage="No entity classes to highlight"
-            limitSelectedItems={Math.floor((debouncedContentWidth - 145) / 82)}
+            limitSelectedItems={Math.floor((debouncedContentWidth - 145) / 80)}
           />
         </div>
       )}
