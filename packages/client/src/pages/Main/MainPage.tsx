@@ -496,7 +496,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
         setPanelWidths([
           panelWidths[0],
           floorNumberToOneDecimal(xPosition - panelWidths[0]),
-          layoutWidth - panelWidths[3] - xPosition,
+          floorNumberToOneDecimal(layoutWidth - panelWidths[3] - xPosition),
           panelWidths[3],
         ])
       );
