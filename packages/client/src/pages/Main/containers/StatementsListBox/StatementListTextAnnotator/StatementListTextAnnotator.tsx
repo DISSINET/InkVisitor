@@ -165,7 +165,7 @@ export const StatementListTextAnnotator: React.FC<
     }
   }, [dSearchTerm]);
 
-  const debouncedContentWidth = useDebounce(contentWidth, 80);
+  // const debouncedContentWidth = useDebounce(contentWidth, 80);
 
   const animatedStyle = useSpring({
     opacity: showAnnotator ? 1 : 0,
@@ -221,9 +221,9 @@ export const StatementListTextAnnotator: React.FC<
 
   const annotatorWidth = useMemo<number>(() => {
     return showStatementList
-      ? debouncedContentWidth - COLLAPSED_TABLE_WIDTH
-      : debouncedContentWidth;
-  }, [debouncedContentWidth, showStatementList]);
+      ? contentWidth - COLLAPSED_TABLE_WIDTH
+      : contentWidth;
+  }, [contentWidth, showStatementList]);
 
   // TODO: min reasonable width as constant
   const annotatorWidthTooSmall = useMemo<boolean>(() => {
@@ -232,7 +232,7 @@ export const StatementListTextAnnotator: React.FC<
 
   return (
     <animated.div style={animatedStyle}>
-      {debouncedContentWidth > 0 && (
+      {contentWidth > 0 && (
         <StatementListDocumentSearchLine
           statements={statements}
           selectedResource={selectedResource}
@@ -271,7 +271,7 @@ export const StatementListTextAnnotator: React.FC<
           ref={selectorRef}
         >
           {/* this condition helps initial render in firefox */}
-          {debouncedContentWidth > 0 && (
+          {contentWidth > 0 && (
             <>
               <StyledInfoText style={{ textWrap: "nowrap" }}>
                 Highlight
@@ -283,11 +283,9 @@ export const StatementListTextAnnotator: React.FC<
                 disableAny={true}
                 onChange={handleHlEntitiesChange}
                 value={hlEntities}
-                width={debouncedContentWidth - 71}
+                width={contentWidth - 71}
                 noOptionsMessage="No entity classes to highlight"
-                limitSelectedItems={Math.floor(
-                  (debouncedContentWidth - 145) / 80
-                )}
+                limitSelectedItems={Math.floor((contentWidth - 145) / 80)}
               />
             </>
           )}

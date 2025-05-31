@@ -585,6 +585,9 @@ export const StatementListBox: React.FC = () => {
   const thirdPanelExpanded = useAppSelector(
     (state) => state.layout.mainPage.thirdPanelExpanded
   );
+  const fourthPanelExpanded = useAppSelector(
+    (state) => state.layout.mainPage.fourthPanelExpanded
+  );
 
   const contentWidth = useMemo(() => {
     let contentWidth = panelWidths[1];
@@ -594,8 +597,17 @@ export const StatementListBox: React.FC = () => {
     if (!thirdPanelExpanded) {
       contentWidth += panelWidths[2] - COLLAPSED_PANEL_WIDTH;
     }
+    // fourth panel has effect on content width only if third panel is collapsed
+    if (!fourthPanelExpanded && !thirdPanelExpanded) {
+      contentWidth += panelWidths[3] - COLLAPSED_PANEL_WIDTH;
+    }
     return contentWidth;
-  }, [panelWidths, firstPanelExpanded, thirdPanelExpanded]);
+  }, [
+    panelWidths,
+    firstPanelExpanded,
+    thirdPanelExpanded,
+    fourthPanelExpanded,
+  ]);
 
   const [storedAnnotatorResourceId, setStoredAnnotatorResourceId] = useState<
     string | false
