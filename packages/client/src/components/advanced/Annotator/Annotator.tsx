@@ -4,6 +4,14 @@ import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { FaPen, FaRegSave, FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
+import {
+  FloatingPortal,
+  useFloating,
+  autoUpdate,
+  offset,
+  flip,
+  shift,
+} from "@floating-ui/react";
 
 import { Annotator, EditMode } from "@inkvisitor/annotator/src/lib";
 import { EntityEnums } from "@shared/enums";
@@ -165,6 +173,65 @@ TextAnnotatorProps) => {
   const [scrollAfterRefresh, setScrollAfterRefresh] = useState<
     number | undefined
   >(undefined);
+
+  const [menuReferenceElement, setMenuReferenceElement] =
+    useState<HTMLElement | null>(null);
+
+  const { refs, floatingStyles } = useFloating({
+    placement: "right",
+    whileElementsMounted: autoUpdate,
+    middleware: [
+      offset({ mainAxis: 100, crossAxis: 0 }),
+      flip({
+        padding: 10,
+        fallbackPlacements: ["left", "left-start", "left-end"],
+      }),
+      shift({
+        padding: 10,
+        crossAxis: true,
+      }),
+    ],
+    elements: {
+      reference: menuReferenceElement,
+    },
+  });
+
+  useEffect(() => {
+    if (annotator?.cursor?.selectStart && annotator?.cursor?.selectEnd) {
+      const canvas = mainCanvas.current;
+      if (canvas) {
+        const rect = canvas.getBoundingClientRect();
+        const startX = rect.left + annotator.cursor.selectStart.xLine * RATIO;
+        const startY =
+          rect.top +
+          (annotator.cursor.selectStart.yLine * annotator.lineHeight) / RATIO;
+        const endX = rect.left + annotator.cursor.selectEnd.xLine * RATIO;
+        const endY =
+          rect.top +
+          (annotator.cursor.selectEnd.yLine * annotator.lineHeight) / RATIO;
+
+        // Create a virtual element for the reference point that represents the selection
+        const virtualElement = {
+          getBoundingClientRect: () => ({
+            x: startX,
+            y: startY,
+            width: endX - startX,
+            height: endY - startY,
+            top: startY,
+            right: endX,
+            bottom: endY,
+            left: startX,
+          }),
+        };
+
+        setMenuReferenceElement(virtualElement as unknown as HTMLElement);
+      }
+    }
+  }, [
+    annotator?.cursor?.selectStart,
+    annotator?.cursor?.selectEnd,
+    annotator?.lineHeight,
+  ]);
 
   // quiet does not trigger a toast notification
   const handleSaveNewContent = (quiet: boolean) => {
@@ -553,43 +620,42 @@ TextAnnotatorProps) => {
       >
         <StyledCanvasWrapper>
           {isMenuDisplayed && (
-            <StyledAnnotatorMenu
-              $top={
-                menuPositionY + 300 > contentHeight
-                  ? contentHeight / 2
-                  : menuPositionY
-              }
-              $left={100}
-              // $translateY={"100%"}
-              $translateY={translateMenu}
-            >
-              {dataDocument && (
-                <TextAnnotatorMenu
-                  anchors={selectedAnchors}
-                  documentData={dataDocument}
-                  text={selectedText}
-                  entities={storedEntities}
-                  onAnchorAdd={handleAddAnchor}
-                  onCreateTerritory={onCreateTerritory}
-                  handleCreateStatement={onCreateStatement}
-                  handleRemoveAnchor={onRemoveAnchor}
-                  isTextInsideThisT={selectedAnchors.some(
-                    (anchor) => anchor === thisTerritoryEntityId
-                  )}
-                  activeTerritoryId={thisTerritoryEntityId}
-                  onCreateActiveTAnchor={() => {
-                    handleAddAnchor(thisTerritoryEntityId ?? "");
-                  }}
-                  canCreateActiveTAnchor={
-                    !dataDocument?.entityIds.T.includes(
-                      thisTerritoryEntityId ?? ""
-                    )
-                  }
-                  isLoadingEntities={isFetchingAnchorEntities}
-                  hasParentT={hasParentT}
-                />
-              )}
-            </StyledAnnotatorMenu>
+            <FloatingPortal id="page">
+              <StyledAnnotatorMenu
+                ref={refs.setFloating}
+                style={floatingStyles}
+                $top={0}
+                $left={0}
+                $translateY={translateMenu}
+              >
+                {dataDocument && (
+                  <TextAnnotatorMenu
+                    anchors={selectedAnchors}
+                    documentData={dataDocument}
+                    text={selectedText}
+                    entities={storedEntities}
+                    onAnchorAdd={handleAddAnchor}
+                    onCreateTerritory={onCreateTerritory}
+                    handleCreateStatement={onCreateStatement}
+                    handleRemoveAnchor={onRemoveAnchor}
+                    isTextInsideThisT={selectedAnchors.some(
+                      (anchor) => anchor === thisTerritoryEntityId
+                    )}
+                    activeTerritoryId={thisTerritoryEntityId}
+                    onCreateActiveTAnchor={() => {
+                      handleAddAnchor(thisTerritoryEntityId ?? "");
+                    }}
+                    canCreateActiveTAnchor={
+                      !dataDocument?.entityIds.T.includes(
+                        thisTerritoryEntityId ?? ""
+                      )
+                    }
+                    isLoadingEntities={isFetchingAnchorEntities}
+                    hasParentT={hasParentT}
+                  />
+                )}
+              </StyledAnnotatorMenu>
+            </FloatingPortal>
           )}
 
           {displayLineNumbers && (
