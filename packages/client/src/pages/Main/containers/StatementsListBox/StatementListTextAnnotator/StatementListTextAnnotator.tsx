@@ -221,9 +221,9 @@ export const StatementListTextAnnotator: React.FC<
 
   const annotatorWidth = useMemo<number>(() => {
     return showStatementList
-      ? contentWidth - COLLAPSED_TABLE_WIDTH
-      : contentWidth;
-  }, [contentWidth, showStatementList]);
+      ? debouncedContentWidth - COLLAPSED_TABLE_WIDTH
+      : debouncedContentWidth;
+  }, [debouncedContentWidth, showStatementList]);
 
   // TODO: min reasonable width as constant
   const annotatorWidthTooSmall = useMemo<boolean>(() => {
@@ -232,28 +232,30 @@ export const StatementListTextAnnotator: React.FC<
 
   return (
     <animated.div style={animatedStyle}>
-      <StatementListDocumentSearchLine
-        statements={statements}
-        selectedResource={selectedResource}
-        setSelectedResourceId={setSelectedResourceId}
-        selectedDocumentIsFetching={selectedDocumentIsFetching}
-        selectedDocument={selectedDocument}
-        activeTHasAnchor={activeTHasAnchor}
-        annotator={annotator}
-        territoryId={territoryId}
-        isSearchAllowed={isSearchAllowed}
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        isSearchTermValid={isSearchTermValid}
-        hasNoSearchResults={searchOccurences.length === 0}
-        searchActiveOccurence={searchActiveOccurence}
-        searchOccurences={searchOccurences}
-        setSearchActiveOccurence={setSearchActiveOccurence}
-        resources={resources || []}
-        showStatementList={showStatementList}
-        userCanEdit={userCanEdit}
-        annotatorWidthTooSmall={annotatorWidthTooSmall}
-      />
+      {debouncedContentWidth > 0 && (
+        <StatementListDocumentSearchLine
+          statements={statements}
+          selectedResource={selectedResource}
+          setSelectedResourceId={setSelectedResourceId}
+          selectedDocumentIsFetching={selectedDocumentIsFetching}
+          selectedDocument={selectedDocument}
+          activeTHasAnchor={activeTHasAnchor}
+          annotator={annotator}
+          territoryId={territoryId}
+          isSearchAllowed={isSearchAllowed}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          isSearchTermValid={isSearchTermValid}
+          hasNoSearchResults={searchOccurences.length === 0}
+          searchActiveOccurence={searchActiveOccurence}
+          searchOccurences={searchOccurences}
+          setSearchActiveOccurence={setSearchActiveOccurence}
+          resources={resources || []}
+          showStatementList={showStatementList}
+          userCanEdit={userCanEdit}
+          annotatorWidthTooSmall={annotatorWidthTooSmall}
+        />
+      )}
 
       {/* Class selector */}
       {selectedResource !== false && selectedResource?.data?.documentId && (
@@ -268,7 +270,8 @@ export const StatementListTextAnnotator: React.FC<
           }}
           ref={selectorRef}
         >
-          {debouncedContentWidth && (
+          {/* this condition helps initial render in firefox */}
+          {debouncedContentWidth > 0 && (
             <>
               <StyledInfoText style={{ textWrap: "nowrap" }}>
                 Highlight
