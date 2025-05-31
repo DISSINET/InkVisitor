@@ -1351,23 +1351,6 @@ class Api {
     }
   }
 
-  async anchorTextGet(
-    documentId: string,
-    entityId: string,
-    anchorIndex: number,
-    options?: IApiOptions
-  ): Promise<AxiosResponse<IResponseGeneric<string>>> {
-    try {
-      const response = await this.connection.get(
-        `/documents/${documentId}/findAnchorWithIndex/${entityId}/${anchorIndex}`,
-        options
-      );
-      return response;
-    } catch (err) {
-      throw this.handleError(err);
-    }
-  }
-
   /**
    * Setting get
    * @param settingId
