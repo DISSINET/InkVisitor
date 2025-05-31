@@ -181,7 +181,7 @@ TextAnnotatorProps) => {
       offset({ mainAxis: 100, crossAxis: 0 }),
       flip({
         padding: 10,
-        fallbackPlacements: ["left", "left-start", "left-end"],
+        // fallbackPlacements: ["left", "left-start", "left-end"],
       }),
       shift({
         padding: 10,
@@ -204,16 +204,21 @@ TextAnnotatorProps) => {
           rect.top +
           (annotator.cursor.selectEnd.yLine * annotator.lineHeight) / RATIO;
 
+        // Check if selection spans the entire document
+        const isFullSelection =
+          annotator.cursor.selectStart.yLine === 0 &&
+          annotator.cursor.selectEnd.yLine >= annotator.viewport.noLines - 1;
+
         // Create a virtual element for the reference point that represents the selection
         const virtualElement = {
           getBoundingClientRect: () => ({
             x: startX,
-            y: startY,
+            y: isFullSelection ? rect.top + rect.height / 2 : startY,
             width: endX - startX,
-            height: endY - startY,
-            top: startY,
+            height: isFullSelection ? 0 : endY - startY,
+            top: isFullSelection ? rect.top + rect.height / 2 : startY,
             right: endX,
-            bottom: endY,
+            bottom: isFullSelection ? rect.top + rect.height / 2 : endY,
             left: startX,
           }),
         };
@@ -225,6 +230,7 @@ TextAnnotatorProps) => {
     annotator?.cursor?.selectStart,
     annotator?.cursor?.selectEnd,
     annotator?.lineHeight,
+    annotator?.viewport?.noLines,
   ]);
 
   // quiet does not trigger a toast notification

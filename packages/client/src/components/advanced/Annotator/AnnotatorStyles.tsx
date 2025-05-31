@@ -82,12 +82,15 @@ export const StyledAnnotatorAnchorListWrap = styled.div`
   display: flex;
   flex-direction: column;
   overflow: auto;
-  max-height: 200px;
+  max-height: 13rem;
   border-radius: ${({ theme }) => theme.borderRadius.xs};
   background-color: ${({ theme }) => theme.color.gray["500"]};
   padding: ${({ theme }) => theme.space[3]};
+  padding-bottom: ${({ theme }) => theme.space[4]};
   border-radius: ${({ theme }) => theme.borderRadius.sm};
   margin-left: ${({ theme }) => theme.space["-2"]};
+  mask-image: linear-gradient(to top, transparent, black 8%);
+  -webkit-mask-image: linear-gradient(to top, transparent, black 8%);
 `;
 
 export const StyledAnnotatorItemTitle = styled.div`
