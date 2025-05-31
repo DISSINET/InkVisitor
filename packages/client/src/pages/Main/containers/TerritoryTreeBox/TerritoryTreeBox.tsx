@@ -220,7 +220,7 @@ export const TerritoryTreeBox: React.FC = () => {
             color="success"
             inverted={!treeFilterOpen}
             fullWidth
-            icon={<BsFilter />}
+            icon={<BsFilter size={14} />}
             tooltipLabel={treeWidthTooSmall ? "filter" : ""}
             tooltipPosition="right"
           />

@@ -178,10 +178,9 @@ TextAnnotatorProps) => {
     placement: "right",
     whileElementsMounted: autoUpdate,
     middleware: [
-      offset({ mainAxis: 100, crossAxis: 0 }),
+      offset({ mainAxis: 100, crossAxis: 40 }),
       flip({
         padding: 10,
-        // fallbackPlacements: ["left", "left-start", "left-end"],
       }),
       shift({
         padding: 10,
