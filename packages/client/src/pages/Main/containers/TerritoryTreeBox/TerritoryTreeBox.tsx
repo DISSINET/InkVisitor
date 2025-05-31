@@ -4,10 +4,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, ButtonGroup, CustomScrollbar, Loader } from "components";
 import { EntityCreateModal } from "components/advanced";
-import { useResizeObserver, useSearchParams } from "hooks";
+import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { BsFilter } from "react-icons/bs";
 import { FaPlus } from "react-icons/fa";
+import { useSelector } from "react-redux";
+import { selectPanelWidth } from "redux/features/layout/mainPage/panelWidthsSlice";
 import { setFilterOpen } from "redux/features/territoryTree/filterOpenSlice";
 import { setSelectedTerritoryPath } from "redux/features/territoryTree/selectedTerritoryPathSlice";
 import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
@@ -24,8 +26,7 @@ import {
   markNodesWithFilters,
 } from "./TerritoryTreeFilterUtils";
 import { MemoizedTerritoryTreeNode } from "./TerritoryTreeNode/TerritoryTreeNode";
-import { useSelector } from "react-redux";
-import { selectPanelWidth } from "redux/features/layout/mainPage/panelWidthsSlice";
+import { useDebounce } from "hooks";
 
 const initFilterSettings: ITerritoryFilter = {
   nonEmpty: false,
@@ -185,7 +186,7 @@ export const TerritoryTreeBox: React.FC = () => {
     (state) => state.territoryTree.filterOpen
   );
 
-  const treeWidth = useSelector(selectPanelWidth(0));
+  const treeWidth = useDebounce(useSelector(selectPanelWidth(0)), 200);
 
   const treeWidthTooSmall = treeWidth < 140;
 

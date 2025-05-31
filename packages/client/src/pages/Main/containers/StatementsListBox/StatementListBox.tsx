@@ -6,17 +6,17 @@ import {
   IReference,
   IResponseEntity,
   IResponseStatement,
-  IResponseTree,
   IStatement,
   ITerritory,
   Relation,
 } from "@shared/types";
+import { IAnchorsNode } from "@shared/types/document";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { CustomScrollbar, Loader, Submit, ToastWithLink } from "components";
 import { CStatement } from "constructors";
-import { useResizeObserver, useSearchParams } from "hooks";
-import React, { useEffect, useMemo, useState, useRef } from "react";
+import { useResizeObserver, useSearchParams, useDebounce } from "hooks";
+import React, { useEffect, useMemo, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { toast } from "react-toastify";
 import { setStatementListOpened } from "redux/features/layout/mainPage/statementListOpenedSlice";
@@ -34,12 +34,10 @@ import {
   StatementListDisplayMode,
   StatementOrderCorrection,
 } from "types";
+import { StyledEmptyState, StyledTableWrapper } from "./StatementListBoxStyles";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StatementListTextAnnotator } from "./StatementListTextAnnotator/StatementListTextAnnotator";
-import { StyledEmptyState, StyledTableWrapper } from "./StatementListBoxStyles";
-import { IAnchorsNode } from "@shared/types/document";
-import { searchTree } from "utils/utils";
 
 const initialData: {
   statements: IResponseStatement[];
@@ -579,6 +577,7 @@ export const StatementListBox: React.FC = () => {
   const panelWidths = useAppSelector(
     (state) => state.layout.mainPage.panelWidths
   );
+  const debouncedPanelWidths = useDebounce(panelWidths, 200);
   const firstPanelExpanded = useAppSelector(
     (state) => state.layout.mainPage.firstPanelExpanded
   );
@@ -590,20 +589,20 @@ export const StatementListBox: React.FC = () => {
   );
 
   const contentWidth = useMemo(() => {
-    let contentWidth = panelWidths[1];
+    let contentWidth = debouncedPanelWidths[1];
     if (!firstPanelExpanded) {
-      contentWidth += panelWidths[0] - COLLAPSED_PANEL_WIDTH;
+      contentWidth += debouncedPanelWidths[0] - COLLAPSED_PANEL_WIDTH;
     }
     if (!thirdPanelExpanded) {
-      contentWidth += panelWidths[2] - COLLAPSED_PANEL_WIDTH;
+      contentWidth += debouncedPanelWidths[2] - COLLAPSED_PANEL_WIDTH;
     }
     // fourth panel has effect on content width only if third panel is collapsed
     if (!fourthPanelExpanded && !thirdPanelExpanded) {
-      contentWidth += panelWidths[3] - COLLAPSED_PANEL_WIDTH;
+      contentWidth += debouncedPanelWidths[3] - COLLAPSED_PANEL_WIDTH;
     }
     return contentWidth;
   }, [
-    panelWidths,
+    debouncedPanelWidths,
     firstPanelExpanded,
     thirdPanelExpanded,
     fourthPanelExpanded,
