@@ -998,24 +998,26 @@ export const StatementListBox: React.FC = () => {
               />
             )}
 
-            {statementListTableIsLoading && (
-              <div
-                style={{
-                  width: tableWidth,
-                  height:
-                    displayMode === StatementListDisplayMode.TEXT
-                      ? contentHeight - 56
-                      : contentHeight,
-                  flexShrink: 0,
-                  position: "absolute",
-                  bottom: 0,
-                  left: 0,
-                  zIndex: 1,
-                }}
-              >
-                <Loader show size={50} />
-              </div>
-            )}
+            {statementListTableIsLoading &&
+              tableWidth > 0 &&
+              contentHeight > 0 && (
+                <div
+                  style={{
+                    width: tableWidth,
+                    height:
+                      displayMode === StatementListDisplayMode.TEXT
+                        ? contentHeight - 56
+                        : contentHeight,
+                    flexShrink: 0,
+                    position: "absolute",
+                    bottom: 0,
+                    left: 0,
+                    zIndex: 1,
+                  }}
+                >
+                  <Loader show size={50} />
+                </div>
+              )}
           </div>
 
           <Submit
