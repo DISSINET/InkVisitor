@@ -2,7 +2,7 @@ import { EntityEnums, UserEnums } from "@shared/enums";
 import { IStatement } from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  collapsedPanelWidth,
+  COLLAPSED_PANEL_WIDTH,
   FIRST_PANEL_MIN_WIDTH,
   fourthPanelBoxesHeightThirds,
   hiddenBoxHeight,
@@ -676,7 +676,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
               : // if the editor is collapsed, calculate the min width from the right side
                 layoutWidth -
                 panelWidths[3] -
-                collapsedPanelWidth -
+                COLLAPSED_PANEL_WIDTH -
                 SECOND_PANEL_MIN_WIDTH
           }
           separatorXPosition={mainPageTreeSeparatorXPosition}
@@ -703,7 +703,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
           leftSideMaxWidth={
             fourthPanelExpanded
               ? layoutWidth - panelWidths[3] - THIRD_PANEL_MIN_WIDTH
-              : layoutWidth - collapsedPanelWidth - THIRD_PANEL_MIN_WIDTH
+              : layoutWidth - COLLAPSED_PANEL_WIDTH - THIRD_PANEL_MIN_WIDTH
           }
           separatorXPosition={mainPageCenterSeparatorXPosition}
           setSeparatorXPosition={(xPosition) => {
@@ -734,7 +734,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
       )}
 
       {/* FIRST PANEL */}
-      <Panel width={firstPanelExpanded ? panelWidths[0] : collapsedPanelWidth}>
+      <Panel
+        width={firstPanelExpanded ? panelWidths[0] : COLLAPSED_PANEL_WIDTH}
+      >
         <Box
           height={contentHeight}
           label="Territories"
@@ -755,10 +757,10 @@ const MainPage: React.FC<MainPage> = ({}) => {
         width={
           (firstPanelExpanded
             ? panelWidths[1]
-            : panelWidths[1] + panelWidths[0] - collapsedPanelWidth) +
-          (thirdPanelExpanded ? 0 : panelWidths[2] - collapsedPanelWidth) +
+            : panelWidths[1] + panelWidths[0] - COLLAPSED_PANEL_WIDTH) +
+          (thirdPanelExpanded ? 0 : panelWidths[2] - COLLAPSED_PANEL_WIDTH) +
           (!fourthPanelExpanded && !thirdPanelExpanded
-            ? panelWidths[3] - collapsedPanelWidth
+            ? panelWidths[3] - COLLAPSED_PANEL_WIDTH
             : 0)
         }
       >
@@ -899,10 +901,10 @@ const MainPage: React.FC<MainPage> = ({}) => {
       <Panel
         width={
           !thirdPanelExpanded
-            ? collapsedPanelWidth
+            ? COLLAPSED_PANEL_WIDTH
             : fourthPanelExpanded
             ? panelWidths[2]
-            : panelWidths[2] + panelWidths[3] - collapsedPanelWidth
+            : panelWidths[2] + panelWidths[3] - COLLAPSED_PANEL_WIDTH
         }
       >
         <Box
@@ -917,7 +919,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
       </Panel>
 
       {/* FOURTH PANEL */}
-      <Panel width={fourthPanelExpanded ? panelWidths[3] : collapsedPanelWidth}>
+      <Panel
+        width={fourthPanelExpanded ? panelWidths[3] : COLLAPSED_PANEL_WIDTH}
+      >
         <Box
           height={getFourthPanelBoxHeight("search")}
           label="Search"

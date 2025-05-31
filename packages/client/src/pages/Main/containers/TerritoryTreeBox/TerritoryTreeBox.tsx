@@ -24,6 +24,8 @@ import {
   markNodesWithFilters,
 } from "./TerritoryTreeFilterUtils";
 import { MemoizedTerritoryTreeNode } from "./TerritoryTreeNode/TerritoryTreeNode";
+import { useSelector } from "react-redux";
+import { selectPanelWidth } from "redux/features/layout/mainPage/panelWidthsSlice";
 
 const initFilterSettings: ITerritoryFilter = {
   nonEmpty: false,
@@ -183,10 +185,7 @@ export const TerritoryTreeBox: React.FC = () => {
     (state) => state.territoryTree.filterOpen
   );
 
-  const { ref: treeRef, width: treeWidth = 0 } =
-    useResizeObserver<HTMLDivElement>({
-      debounceDelay: 50,
-    });
+  const treeWidth = useSelector(selectPanelWidth(0));
 
   const treeWidthTooSmall = treeWidth < 140;
 
@@ -241,8 +240,7 @@ export const TerritoryTreeBox: React.FC = () => {
           elementId="Territories-box-content"
         >
           <StyledTreeWrapper
-            // id="Territories-box-content"
-            ref={treeRef}
+          // id="Territories-box-content"
           >
             {filteredTreeData && (
               <MemoizedTerritoryTreeNode

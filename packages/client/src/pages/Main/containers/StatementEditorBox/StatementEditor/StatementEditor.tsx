@@ -15,7 +15,10 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { excludedSuggesterEntities } from "Theme/constants";
+import {
+  COLLAPSED_PANEL_WIDTH,
+  excludedSuggesterEntities,
+} from "Theme/constants";
 import api from "api";
 import { Button, Input, Message, MultiInput, Submit } from "components";
 import Dropdown, {
@@ -34,7 +37,7 @@ import {
   CStatementActant,
   CStatementAction,
 } from "constructors";
-import { useResizeObserver, useSearchParams } from "hooks";
+import { useSearchParams } from "hooks";
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import {
   AiOutlineCaretDown,
@@ -43,7 +46,9 @@ import {
 } from "react-icons/ai";
 import { FaAnchor, FaRegCopy } from "react-icons/fa";
 import { TiWarningOutline } from "react-icons/ti";
+import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
+import { selectPanelWidth } from "redux/features/layout/mainPage/panelWidthsSlice";
 import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { ThemeContext } from "styled-components";
@@ -653,17 +658,27 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     [territoryData]
   );
 
-  const { ref: editorRef, width: editorWidth = 0 } =
-    useResizeObserver<HTMLDivElement>({
-      debounceDelay: 50,
-    });
+  const fourthPanelExpanded = useAppSelector(
+    (state) => state.layout.mainPage.fourthPanelExpanded
+  );
+
+  const thirdPanelWidth = useSelector(selectPanelWidth(2));
+  const fourthPanelWidth = useSelector(selectPanelWidth(3));
+
+  const editorWidth = useMemo(
+    () =>
+      fourthPanelExpanded
+        ? thirdPanelWidth
+        : thirdPanelWidth + (fourthPanelWidth - COLLAPSED_PANEL_WIDTH),
+    [fourthPanelExpanded, thirdPanelWidth, fourthPanelWidth]
+  );
 
   const editorWidthTooSmall = editorWidth < 450;
 
   return (
     <>
       <React.Fragment key={statement.id}>
-        <StyledEditorPreBlock ref={editorRef}>
+        <StyledEditorPreBlock>
           <StyledEditorPreSection>
             <StyledEditorStatementInfo>
               <StyledHeaderTagWrap>

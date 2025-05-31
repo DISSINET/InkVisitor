@@ -24,7 +24,11 @@ import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlic
 import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { COLLAPSED_TABLE_WIDTH, SECOND_PANEL_MIN_WIDTH } from "Theme/constants";
+import {
+  COLLAPSED_PANEL_WIDTH,
+  COLLAPSED_TABLE_WIDTH,
+  SECOND_PANEL_MIN_WIDTH,
+} from "Theme/constants";
 import {
   EntitiesDeleteSuccessResponse,
   StatementListDisplayMode,
@@ -567,10 +571,31 @@ export const StatementListBox: React.FC = () => {
   const {
     ref: contentRef,
     height: contentHeight = 0,
-    width: contentWidth = 0,
+    // width: contentWidth = 0,
   } = useResizeObserver<HTMLDivElement>({
     debounceDelay: 50,
   });
+
+  const panelWidths = useAppSelector(
+    (state) => state.layout.mainPage.panelWidths
+  );
+  const firstPanelExpanded = useAppSelector(
+    (state) => state.layout.mainPage.firstPanelExpanded
+  );
+  const thirdPanelExpanded = useAppSelector(
+    (state) => state.layout.mainPage.thirdPanelExpanded
+  );
+
+  const contentWidth = useMemo(() => {
+    let contentWidth = panelWidths[1];
+    if (!firstPanelExpanded) {
+      contentWidth += panelWidths[0] - COLLAPSED_PANEL_WIDTH;
+    }
+    if (!thirdPanelExpanded) {
+      contentWidth += panelWidths[2] - COLLAPSED_PANEL_WIDTH;
+    }
+    return contentWidth;
+  }, [panelWidths, firstPanelExpanded, thirdPanelExpanded]);
 
   const [storedAnnotatorResourceId, setStoredAnnotatorResourceId] = useState<
     string | false

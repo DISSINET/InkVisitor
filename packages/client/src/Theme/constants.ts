@@ -16,7 +16,7 @@ export const heightHeader = 70;
 export const minLayoutWidth = 1440;
 export const layoutWidthBreakpoint = 1400;
 // MORE PANEL WIDTHS
-export const collapsedPanelWidth = 31;
+export const COLLAPSED_PANEL_WIDTH = 31;
 export const FIRST_PANEL_MIN_WIDTH = 100;
 export const SECOND_PANEL_MIN_WIDTH = 420;
 export const THIRD_PANEL_MIN_WIDTH = 300;
