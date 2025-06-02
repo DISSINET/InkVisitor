@@ -605,7 +605,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
     useAppSelector((state) => state.layout.mainPage.secondPanelRealWidth),
     100
   );
-  const widthTooSmall = contentWidth < 485;
+  const widthTooSmall = contentWidth < 516;
 
   return (
     <>
