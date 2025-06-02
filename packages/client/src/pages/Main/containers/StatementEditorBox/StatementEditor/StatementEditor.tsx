@@ -87,6 +87,7 @@ import {
 import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
 import { StatementEditorSectionButtons } from "./StatementEditorSectionButtons/StatementEditorSectionButtons";
+import { useDebounce } from "hooks";
 
 const valencyErrorTypes: WarningTypeEnums[] = [
   WarningTypeEnums.MA,
@@ -662,8 +663,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     (state) => state.layout.mainPage.fourthPanelExpanded
   );
 
-  const thirdPanelWidth = useSelector(selectPanelWidth(2));
-  const fourthPanelWidth = useSelector(selectPanelWidth(3));
+  const thirdPanelWidth = useDebounce(useSelector(selectPanelWidth(2)), 200);
+  const fourthPanelWidth = useDebounce(useSelector(selectPanelWidth(3)), 200);
 
   const editorWidth = useMemo(
     () =>
