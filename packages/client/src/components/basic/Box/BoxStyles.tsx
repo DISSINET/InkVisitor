@@ -43,6 +43,15 @@ export const StyledHead = styled(animated.div)<StyledHead>`
     $noPadding || !$isExpanded ? theme.borderWidth[1] : theme.borderWidth[4]};
   cursor: ${({ $hasHeaderClick }) => ($hasHeaderClick ? "pointer" : "")};
 `;
+export const StyledLabel = styled(animated.div)`
+  display: inline-block;
+  vertical-align: middle;
+  white-space: nowrap;
+  overflow: hidden !important;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  padding-right: 4.3rem;
+`;
 interface StyledButtonWrap {}
 export const StyledButtonWrap = styled.div<StyledButtonWrap>`
   position: absolute;
