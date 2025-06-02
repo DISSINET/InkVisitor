@@ -22,7 +22,7 @@ export class ResponseTerritory extends Territory implements IResponseTerritory {
     this.entities = {};
   }
 
-  async prepare(req: IRequest): Promise<void> {
+  async prepare(req: IRequest, preload: boolean = false): Promise<void> {
     this.right = this.getUserRoleMode(req.getUserOrFail());
 
     const statements = await Statement.findStatementsInTerritory(
@@ -43,10 +43,38 @@ export class ResponseTerritory extends Territory implements IResponseTerritory {
       {}
     );
 
-    for (const statement of statements) {
-      const responseStatement = new ResponseStatement(new Statement(statement));
-      await responseStatement.prepare(req);
-      this.statements.push(responseStatement);
+    if (preload) {
+      // prepare all entity ids required for statements
+      const preloadedEntities: Record<string, IEntity | undefined> = {};
+      for (const statement of statements) {
+        const responseStatement = new ResponseStatement(new Statement(statement));
+        responseStatement.usedInDocuments = await responseStatement.findUsedInDocuments(req.db.connection);
+
+        for (const entityId of responseStatement.getEntitiesIds()) {
+          preloadedEntities[entityId] = undefined;
+        }
+
+        for (const entityId of Entity.extractIdsFromAnchors(responseStatement.usedInDocuments)) {
+          preloadedEntities[entityId] = undefined;
+        }
+      }
+
+      // fetch all entities required for statements
+      for (const entity of await Entity.findEntitiesByIds(req.db.connection, Object.keys(preloadedEntities))) {
+        preloadedEntities[entity.id] = entity;
+      }
+
+      for (const statement of statements) {
+        const responseStatement = new ResponseStatement(new Statement(statement));
+        responseStatement.prepareSync(req, preloadedEntities as Record<string, IEntity>);
+        this.statements.push(responseStatement);
+      }
+    } else {
+      for (const statement of statements) {
+        const responseStatement = new ResponseStatement(new Statement(statement));
+        await responseStatement.prepare(req);
+        this.statements.push(responseStatement);
+      }
     }
   }
 }

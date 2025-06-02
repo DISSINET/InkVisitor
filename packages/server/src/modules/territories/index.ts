@@ -18,8 +18,6 @@ import { Router } from "express";
 import { IRequest } from "src/custom_typings/request";
 import { asyncRouteHandler } from "..";
 import Entity from "@models/entity/entity";
-import treeCache from "@service/treeCache";
-import tree from "@modules/tree";
 
 export default Router()
   /**
@@ -46,7 +44,9 @@ export default Router()
    */
   .get(
     "/:territoryId",
-    asyncRouteHandler<IResponseTerritory>(async (request: IRequest) => {
+    asyncRouteHandler<IResponseTerritory>(async (request: IRequest<{territoryId: string}, any, {preload: string}>) => {
+      const startTime = performance.now();
+      
       const territoryId = request.params.territoryId;
       if (!territoryId) {
         throw new BadParams("territoryId has to be set");
@@ -70,9 +70,12 @@ export default Router()
       ) {
         throw new PermissionDeniedError(`cannot view entity ${territoryId}`);
       }
-
+ 
       const response = new ResponseTerritory(territory);
-      await response.prepare(request);
+      await response.prepare(request, request.query.preload === "1");
+
+      const endTime = performance.now();
+      console.log(`Territory GET /:territoryId execution time: ${endTime - startTime}ms`);
 
       return response;
     })
@@ -172,7 +175,7 @@ export default Router()
         );
         if (!tgts || !tgts.length || tgts.length !== targetIds.length) {
           throw new TerritoryDoesNotExits(
-            "one or more target territories not found",
+            `one or more target territories(${targetIds.length}) not found`,
             targetIds.join(",")
           );
         }

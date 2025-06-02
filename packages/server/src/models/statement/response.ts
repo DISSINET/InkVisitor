@@ -52,6 +52,42 @@ export class ResponseStatement extends Statement implements IResponseStatement {
   }
 
   /**
+   * Prepares the statement with preloaded entities
+   * Does not generate warnings
+   * Does need usedInDocuments to be set
+   * @param req
+   * @param preloadedEntities
+   */
+  prepareSync(req: IRequest, preloadedEntities: Record<string, IEntity>) {
+    this.right = this.getUserRoleMode(req.getUserOrFail());
+    this.prepareEntitiesSync(preloadedEntities);
+  }
+
+  prepareEntitiesSync(preloadedEntities: Record<string, IEntity>) {
+    const wantedEntityIds = this.getEntitiesIds();
+    const wantedAnchorEntityIds = Entity.extractIdsFromAnchors(this.usedInDocuments);
+    const entities: IEntity[] = [];
+    const anchorEntities: IEntity[] = [];
+
+    for (const entityId of wantedEntityIds) {
+      if (preloadedEntities[entityId]) {
+        entities.push(preloadedEntities[entityId]);
+      }
+    }
+
+    for (const anchorEntityId of wantedAnchorEntityIds) {
+      if (preloadedEntities[anchorEntityId]) {
+        anchorEntities.push(preloadedEntities[anchorEntityId]);
+      }
+    }
+
+    this.entities = Object.assign(
+      {},
+      ...entities.map((x) => ({ [x.id]: x })),
+      ...anchorEntities.map((x) => ({ [x.id]: x }))
+    );
+  }
+  /**
    * Prepares the entities map
    * @param db
    */
