@@ -374,19 +374,20 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   const BreadcrumbItems = useMemo(() => {
     return (
       <React.Fragment>
-        {selectedTerritoryPath
-          ?.concat(territoryId)
-          .map((tId: string, key: number) => {
-            return (
-              <React.Fragment key={key}>
-                <BreadcrumbItem
-                  territoryId={tId}
-                  isFavorited={favoritedTerritoryIds?.includes(tId)}
-                  isSelected={tId === territoryId}
-                />
-              </React.Fragment>
-            );
-          })}
+        {territoryId.length > 0 &&
+          selectedTerritoryPath
+            ?.concat(territoryId)
+            .map((tId: string, key: number) => {
+              return (
+                <React.Fragment key={key}>
+                  <BreadcrumbItem
+                    territoryId={tId}
+                    isFavorited={favoritedTerritoryIds?.includes(tId)}
+                    isSelected={tId === territoryId}
+                  />
+                </React.Fragment>
+              );
+            })}
       </React.Fragment>
     );
   }, [
