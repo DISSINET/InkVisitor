@@ -67,6 +67,7 @@ import { EntityDetailValidationSection } from "./EntityDetailValidationSection/E
 import { EntityDetailUsedInDocumentsTable } from "./EntityDetailUsedInTable/EntityDetailUsedInDocumentsTable/EntityDetailUsedInDocumentsTable";
 import { useSelector } from "react-redux";
 import { selectPanelWidth } from "redux/features/layout/mainPage/panelWidthsSlice";
+import { useAppSelector } from "redux/hooks";
 
 const allowedEntityChangeClasses = [
   EntityEnums.Class.Value,
@@ -600,8 +601,11 @@ export const EntityDetail: React.FC<EntityDetail> = ({
     useState(false);
   const [loadingValidations, setLoadingValidations] = useState(false);
 
-  const secondPanelWidth = useDebounce(useSelector(selectPanelWidth(1)), 200);
-  const widthTooSmall = secondPanelWidth < 485;
+  const contentWidth = useDebounce(
+    useAppSelector((state) => state.layout.mainPage.secondPanelRealWidth),
+    100
+  );
+  const widthTooSmall = contentWidth < 485;
 
   return (
     <>

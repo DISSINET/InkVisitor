@@ -6,6 +6,8 @@ import fourthPanelBoxesOpenedSlice from "./features/layout/mainPage/fourthPanelB
 import fourthPanelExpandedSlice from "./features/layout/mainPage/fourthPanelExpandedSlice";
 import layoutWidthSlice from "./features/layout/layoutWidthSlice";
 import panelWidthsSlice from "./features/layout/mainPage/panelWidthsSlice";
+import secondPanelRealWidthSlice from "./features/layout/mainPage/secondPanelRealWidthSlice";
+import thirdPanelRealWidthSlice from "./features/layout/mainPage/thirdPanelRealWidthSlice";
 import statementListOpenedSlice from "./features/layout/mainPage/statementListOpenedSlice";
 import thirdPanelExpandedSlice from "./features/layout/mainPage/thirdPanelExpandedSlice";
 import pingSlice from "./features/pingSlice";
@@ -66,6 +68,8 @@ const store: Store = configureStore({
         fourthPanelBoxesOpened: fourthPanelBoxesOpenedSlice,
         statementListOpened: statementListOpenedSlice,
         detailBoxMinimized: detailBoxMinimizedSlice,
+        secondPanelRealWidth: secondPanelRealWidthSlice,
+        thirdPanelRealWidth: thirdPanelRealWidthSlice,
       }),
     }),
   },

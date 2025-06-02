@@ -39,8 +39,10 @@ import { setFourthPanelBoxesOpened } from "redux/features/layout/mainPage/fourth
 import { setFourthPanelExpanded } from "redux/features/layout/mainPage/fourthPanelExpandedSlice";
 import { setPanelWidthsPercent } from "redux/features/layout/mainPage/panelWidthsPercentSlice";
 import { setPanelWidths } from "redux/features/layout/mainPage/panelWidthsSlice";
-import { setStatementListOpened } from "redux/features/layout/mainPage/statementListOpenedSlice";
+import { setSecondPanelRealWidth } from "redux/features/layout/mainPage/secondPanelRealWidthSlice";
+import { setThirdPanelRealWidth } from "redux/features/layout/mainPage/thirdPanelRealWidthSlice";
 import { setThirdPanelExpanded } from "redux/features/layout/mainPage/thirdPanelExpandedSlice";
+import { setStatementListOpened } from "redux/features/layout/mainPage/statementListOpenedSlice";
 import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 import { setIsLoading } from "redux/features/statementList/isLoadingSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
@@ -83,9 +85,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
   const panelWidths: number[] = useAppSelector(
     (state) => state.layout.mainPage.panelWidths
   );
-  // const panelWidthsPercent: number[] = useAppSelector(
-  //   (state) => state.layout.mainPage.panelWidthsPercent
-  // );
   const fourthPanelBoxesOpened: { [key: string]: boolean } = useAppSelector(
     (state) => state.layout.mainPage.fourthPanelBoxesOpened
   );
@@ -612,6 +611,35 @@ const MainPage: React.FC<MainPage> = ({}) => {
 
   const isFirstRender = useRef(true);
 
+  const secondPanelWidth = useMemo(() => {
+    const width =
+      (firstPanelExpanded
+        ? panelWidths[1]
+        : panelWidths[1] + panelWidths[0] - COLLAPSED_PANEL_WIDTH) +
+      (thirdPanelExpanded ? 0 : panelWidths[2] - COLLAPSED_PANEL_WIDTH) +
+      (!fourthPanelExpanded && !thirdPanelExpanded
+        ? panelWidths[3] - COLLAPSED_PANEL_WIDTH
+        : 0);
+    dispatch(setSecondPanelRealWidth(width));
+    return width;
+  }, [
+    firstPanelExpanded,
+    thirdPanelExpanded,
+    fourthPanelExpanded,
+    panelWidths,
+    dispatch,
+  ]);
+
+  const thirdPanelWidth = useMemo(() => {
+    const width = !thirdPanelExpanded
+      ? COLLAPSED_PANEL_WIDTH
+      : fourthPanelExpanded
+      ? panelWidths[2]
+      : panelWidths[2] + panelWidths[3] - COLLAPSED_PANEL_WIDTH;
+    dispatch(setThirdPanelRealWidth(width));
+    return width;
+  }, [thirdPanelExpanded, fourthPanelExpanded, panelWidths, dispatch]);
+
   useEffect(() => {
     if (layoutWidth > 0) {
       if (isFirstRender.current || !panelWidths.length) {
@@ -753,17 +781,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
       </Panel>
 
       {/* SECOND PANEL */}
-      <Panel
-        width={
-          (firstPanelExpanded
-            ? panelWidths[1]
-            : panelWidths[1] + panelWidths[0] - COLLAPSED_PANEL_WIDTH) +
-          (thirdPanelExpanded ? 0 : panelWidths[2] - COLLAPSED_PANEL_WIDTH) +
-          (!fourthPanelExpanded && !thirdPanelExpanded
-            ? panelWidths[3] - COLLAPSED_PANEL_WIDTH
-            : 0)
-        }
-      >
+      <Panel width={secondPanelWidth}>
         <Box
           label="Statements"
           borderColor="white"
@@ -898,15 +916,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
       </Panel>
 
       {/* THIRD PANEL */}
-      <Panel
-        width={
-          !thirdPanelExpanded
-            ? COLLAPSED_PANEL_WIDTH
-            : fourthPanelExpanded
-            ? panelWidths[2]
-            : panelWidths[2] + panelWidths[3] - COLLAPSED_PANEL_WIDTH
-        }
-      >
+      <Panel width={thirdPanelWidth}>
         <Box
           borderColor="white"
           height={contentHeight}

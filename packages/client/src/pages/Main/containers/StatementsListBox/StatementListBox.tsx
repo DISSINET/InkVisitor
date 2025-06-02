@@ -568,45 +568,17 @@ export const StatementListBox: React.FC = () => {
 
   const {
     ref: contentRef,
+    // TODO: calculate height - contentHeight / 2 - StatementListHeader height
     height: contentHeight = 0,
     // width: contentWidth = 0,
   } = useResizeObserver<HTMLDivElement>({
     debounceDelay: 50,
   });
 
-  const panelWidths = useAppSelector(
-    (state) => state.layout.mainPage.panelWidths
+  const contentWidth = useDebounce(
+    useAppSelector((state) => state.layout.mainPage.secondPanelRealWidth),
+    100
   );
-  const debouncedPanelWidths = useDebounce(panelWidths, 200);
-  const firstPanelExpanded = useAppSelector(
-    (state) => state.layout.mainPage.firstPanelExpanded
-  );
-  const thirdPanelExpanded = useAppSelector(
-    (state) => state.layout.mainPage.thirdPanelExpanded
-  );
-  const fourthPanelExpanded = useAppSelector(
-    (state) => state.layout.mainPage.fourthPanelExpanded
-  );
-
-  const contentWidth = useMemo(() => {
-    let contentWidth = debouncedPanelWidths[1];
-    if (!firstPanelExpanded) {
-      contentWidth += debouncedPanelWidths[0] - COLLAPSED_PANEL_WIDTH;
-    }
-    if (!thirdPanelExpanded) {
-      contentWidth += debouncedPanelWidths[2] - COLLAPSED_PANEL_WIDTH;
-    }
-    // fourth panel has effect on content width only if third panel is collapsed
-    if (!fourthPanelExpanded && !thirdPanelExpanded) {
-      contentWidth += debouncedPanelWidths[3] - COLLAPSED_PANEL_WIDTH;
-    }
-    return contentWidth;
-  }, [
-    debouncedPanelWidths,
-    firstPanelExpanded,
-    thirdPanelExpanded,
-    fourthPanelExpanded,
-  ]);
 
   const [storedAnnotatorResourceId, setStoredAnnotatorResourceId] = useState<
     string | false
