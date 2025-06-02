@@ -26,7 +26,7 @@ import {
   JSONExplorer,
 } from "components/advanced";
 import { CMetaProp, DProps } from "constructors";
-import { useSearchParams } from "hooks";
+import { useDebounce, useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
@@ -65,6 +65,8 @@ import { EntityDetailStatementsTable } from "./EntityDetailUsedInTable/EntityDet
 import { EntityDetailValency } from "./EntityDetailValency/EntityDetailValency";
 import { EntityDetailValidationSection } from "./EntityDetailValidationSection/EntityDetailValidationSection";
 import { EntityDetailUsedInDocumentsTable } from "./EntityDetailUsedInTable/EntityDetailUsedInDocumentsTable/EntityDetailUsedInDocumentsTable";
+import { useSelector } from "react-redux";
+import { selectPanelWidth } from "redux/features/layout/mainPage/panelWidthsSlice";
 
 const allowedEntityChangeClasses = [
   EntityEnums.Class.Value,
@@ -598,6 +600,9 @@ export const EntityDetail: React.FC<EntityDetail> = ({
     useState(false);
   const [loadingValidations, setLoadingValidations] = useState(false);
 
+  const secondPanelWidth = useDebounce(useSelector(selectPanelWidth(1)), 200);
+  const widthTooSmall = secondPanelWidth < 485;
+
   return (
     <>
       {entity && (
@@ -646,6 +651,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                     setShowTypeSubmit={setShowTypeSubmit}
                     templateOptions={templateOptions}
                     updateEntityMutation={updateEntityMutation}
+                    widthTooSmall={widthTooSmall}
                   />
                 </StyledDetailSectionContent>
               </StyledDetailSection>
