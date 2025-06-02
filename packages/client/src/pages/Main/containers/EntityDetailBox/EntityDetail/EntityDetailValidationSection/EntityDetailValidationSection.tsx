@@ -47,6 +47,7 @@ interface EntityDetailValidationSection {
   territoryParentId: string | undefined;
   entity: IResponseDetail;
   setLoadingValidations: React.Dispatch<React.SetStateAction<boolean>>;
+  widthTooSmall: boolean;
 }
 export const EntityDetailValidationSection: React.FC<
   EntityDetailValidationSection
@@ -59,6 +60,7 @@ export const EntityDetailValidationSection: React.FC<
   territoryParentId,
   entity,
   setLoadingValidations,
+  widthTooSmall,
 }) => {
   const [tempIndexToRemove, setTempIndexToRemove] = useState<false | number>(
     false
@@ -188,6 +190,7 @@ export const EntityDetailValidationSection: React.FC<
                   removeValidationRule={() => setTempIndexToRemove(key)}
                   isInsideTemplate={isInsideTemplate}
                   territoryParentId={territoryParentId}
+                  widthTooSmall={widthTooSmall}
                   userCanEdit={userCanEdit}
                 />
                 {key !== validations.length - 1 && <StyledBlockSeparator />}

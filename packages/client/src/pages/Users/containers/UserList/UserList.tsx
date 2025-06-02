@@ -19,7 +19,7 @@ import {
 } from "react-icons/fa";
 import { CellProps, Column, Row, useTable } from "react-table";
 import { toast } from "react-toastify";
-import { getUserIcon } from "utils/utils";
+import { getUserIcon } from "utils/iconUtils";
 import { UserListEmailInput } from "./UserListEmailInput/UserListEmailInput";
 import { UserListIcon } from "./UserListIcon/UserListIcon";
 import {
@@ -575,7 +575,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
               <tr {...headerGroup.getHeaderGroupProps()} key={key}>
                 {headerGroup.headers.map((column, key) => (
                   <StyledTh {...column.getHeaderProps()} key={key}>
-                    {column.render("Header")}
+                    {column.render("Header") as React.ReactNode}
                   </StyledTh>
                 ))}
               </tr>

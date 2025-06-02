@@ -51,6 +51,7 @@ import {
   StyledCloseIcon,
   StyledGreyBar,
 } from "./EntityDetailFormSectionStyles";
+import { getEntityStatusIcon } from "utils/iconUtils";
 
 interface EntityDetailFormSection {
   entity: IResponseDetail;
@@ -334,22 +335,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                 iconsOnly={widthTooSmall}
                 disabled={!userCanAdmin}
                 options={entityStatusDict.map((entityStatusOption) => {
-                  const icon = (() => {
-                    switch (entityStatusOption.value) {
-                      case EntityEnums.Status.Pending:
-                        return <FaClock />;
-                      case EntityEnums.Status.Approved:
-                        return <FaCheck />;
-                      case EntityEnums.Status.Discouraged:
-                        return <FaTimes />;
-                      case EntityEnums.Status.Warning:
-                        return <FaExclamationTriangle />;
-                      case EntityEnums.Status.Unfinished:
-                        return <FaEdit />;
-                      default:
-                        return undefined;
-                    }
-                  })();
+                  const icon = getEntityStatusIcon(entityStatusOption["value"]);
 
                   return {
                     longValue: entityStatusOption["label"],

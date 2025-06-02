@@ -693,6 +693,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                     territoryParentId={getTerritoryId(entity)}
                     entity={entity}
                     setLoadingValidations={setLoadingValidations}
+                    widthTooSmall={widthTooSmall}
                   />
                 </StyledDetailSection>
               )}

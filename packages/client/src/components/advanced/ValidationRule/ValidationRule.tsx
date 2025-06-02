@@ -28,6 +28,7 @@ import {
 } from "./ValidationRuleStyles";
 import { ValidationText } from "./ValidationText/ValidationText";
 import { LanguageTag } from "./LanguageTag";
+import { getEntityStatusIcon } from "utils/iconUtils";
 
 interface ValidationRule {
   validation: ITerritoryValidation;
@@ -36,6 +37,7 @@ interface ValidationRule {
   removeValidationRule: () => void;
   isInsideTemplate: boolean;
   territoryParentId?: string;
+  widthTooSmall?: boolean;
   userCanEdit: boolean;
 }
 export const ValidationRule: React.FC<ValidationRule> = ({
@@ -45,6 +47,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
   removeValidationRule,
   isInsideTemplate,
   territoryParentId,
+  widthTooSmall = false,
   userCanEdit,
 }) => {
   const {
@@ -221,16 +224,18 @@ export const ValidationRule: React.FC<ValidationRule> = ({
 
         {/* Entity Statuses */}
         <StyledLabel>having status</StyledLabel>
-        <StyledFlexList>
+        <div>
           <AttributeButtonGroup
             noMargin
+            iconsOnly={widthTooSmall}
             disabled={!userCanEdit}
             canSelectMultiple={true}
             options={entityStatusDict.map((entityStatusOption) => {
+              const icon = getEntityStatusIcon(entityStatusOption["value"]);
               return {
                 longValue: entityStatusOption["label"],
                 shortValue: entityStatusOption["label"],
-
+                icon: widthTooSmall ? icon : undefined,
                 onClick: () => {
                   let newStatus: EntityEnums.Status[] = [
                     ...(entityStatuses ?? []),
@@ -265,7 +270,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
               };
             })}
           />
-        </StyledFlexList>
+        </div>
 
         {/* Tie type */}
         <StyledLabel>Tie type</StyledLabel>
