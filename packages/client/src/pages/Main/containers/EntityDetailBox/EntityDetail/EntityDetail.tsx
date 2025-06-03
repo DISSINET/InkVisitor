@@ -963,6 +963,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                     }}
                     perPage={10}
                     entity={entity}
+                    widthTooSmall={widthTooSmall}
                   />
                 )}
               </StyledDetailSection>
