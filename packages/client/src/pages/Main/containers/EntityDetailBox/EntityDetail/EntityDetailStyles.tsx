@@ -176,7 +176,9 @@ export const StyledTagWrap = styled.div`
 `;
 
 export const StyledPropGroupWrap = styled.div`
+  overflow: auto;
   margin-bottom: ${({ theme }) => theme.space[5]};
+  padding-bottom: ${({ theme }) => theme.space[5]};
 `;
 
 export const StyledBlockSeparator = styled.div`

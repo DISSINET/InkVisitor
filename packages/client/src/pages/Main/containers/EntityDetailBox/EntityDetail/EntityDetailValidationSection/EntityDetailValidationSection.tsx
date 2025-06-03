@@ -136,6 +136,7 @@ export const EntityDetailValidationSection: React.FC<
                 ? entity.data.validations.length === 0
                 : true
             }
+            widthTooSmall={widthTooSmall}
             handleCopyFromEntity={(pickedEntity, replace) => {
               setLoadingValidations(true);
               api.detailGet(pickedEntity.id).then((data) => {
