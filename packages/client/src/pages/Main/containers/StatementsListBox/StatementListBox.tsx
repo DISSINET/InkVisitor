@@ -847,7 +847,7 @@ export const StatementListBox: React.FC = () => {
   const tableWidth = useMemo(() => {
     if (isListNonEmpty || statementListTableIsLoading) {
       return displayMode === StatementListDisplayMode.LIST
-        ? contentWidth
+        ? contentWidth - 8
         : COLLAPSED_TABLE_WIDTH;
     }
     return 0;
