@@ -24,6 +24,7 @@ import selectedTerritoryPathSlice from "./features/territoryTree/selectedTerrito
 import treeInitializeSlice from "./features/territoryTree/treeInitializeSlice";
 import themeSlice from "./features/themeSlice";
 import usernameSlice from "./features/usernameSlice";
+import detailBoxStateSlice from "./features/layout/mainPage/detailBoxStateSlice";
 import detailBoxMinimizedSlice from "./features/layout/mainPage/detailBoxMinimizedSlice";
 import panelWidthsPercentSlice from "./features/layout/mainPage/panelWidthsPercentSlice";
 
@@ -66,6 +67,7 @@ const store: Store = configureStore({
         fourthPanelBoxesOpened: fourthPanelBoxesOpenedSlice,
         statementListOpened: statementListOpenedSlice,
         detailBoxMinimized: detailBoxMinimizedSlice,
+        detailBoxState: detailBoxStateSlice,
       }),
     }),
   },

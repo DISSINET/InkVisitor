@@ -33,6 +33,7 @@ import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
 import { FaHighlighter, FaList, FaPlus } from "react-icons/fa";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { VscCloseAll } from "react-icons/vsc";
+import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
 import { setDetailBoxMinimized } from "redux/features/layout/mainPage/detailBoxMinimizedSlice";
 import { setFirstPanelExpanded } from "redux/features/layout/mainPage/firstPanelExpandedSlice";
 import { setFourthPanelBoxesOpened } from "redux/features/layout/mainPage/fourthPanelBoxesOpenedSlice";
@@ -104,6 +105,10 @@ const MainPage: React.FC<MainPage> = ({}) => {
   const detailBoxMinimized: boolean = useAppSelector(
     (state) => state.layout.mainPage.detailBoxMinimized
   );
+  const detailBoxState: DetailBoxState = useAppSelector(
+    (state) => state.layout.mainPage.detailBoxState
+  );
+  const [lastState, setLastState] = useState(DetailBoxState.Normal);
 
   const toggleFirstPanel = () => {
     if (firstPanelExpanded) {
@@ -346,47 +351,44 @@ const MainPage: React.FC<MainPage> = ({}) => {
     }
   };
 
-  const [detailBoxState, setDetailBoxState] = useState(
-    detailBoxMinimized ? DetailBoxState.Minimized : DetailBoxState.Normal
-  );
-  const [lastState, setLastState] = useState(DetailBoxState.Normal);
-
   useEffect(() => {
-    if (detailBoxState === DetailBoxState.FullHeight) {
-      if (statementListOpened) {
-        dispatch(setStatementListOpened(false));
+    if (detailIdArray.length > 0) {
+      if (detailBoxState === DetailBoxState.FullHeight) {
+        if (statementListOpened) {
+          dispatch(setStatementListOpened(false));
+        }
+      } else {
+        if (!statementListOpened) {
+          dispatch(setStatementListOpened(true));
+        }
       }
-    } else {
-      // detail box is not full height
-      if (!statementListOpened) {
-        dispatch(setStatementListOpened(true));
+
+      if (detailBoxState === DetailBoxState.Minimized) {
+        if (!detailBoxMinimized) {
+          dispatch(setDetailBoxMinimized(true));
+        }
+      } else {
+        if (detailBoxMinimized) {
+          dispatch(setDetailBoxMinimized(false));
+        }
       }
     }
-    if (detailBoxState === DetailBoxState.Minimized) {
-      if (!detailBoxMinimized) {
-        dispatch(setDetailBoxMinimized(true));
-      }
-    } else {
-      if (detailBoxMinimized) {
-        dispatch(setDetailBoxMinimized(false));
-      }
-    }
-  }, [detailBoxState]);
+  }, [detailBoxState, statementListOpened, detailBoxMinimized, detailIdArray]);
 
   const handleMaximizeDetailBox = () => {
     if (detailBoxState === DetailBoxState.Normal) {
-      setDetailBoxState(DetailBoxState.FullHeight);
+      dispatch(setDetailBoxState(DetailBoxState.FullHeight));
     } else {
-      setDetailBoxState(DetailBoxState.Normal);
+      dispatch(setDetailBoxState(DetailBoxState.Normal));
     }
   };
 
   const handleMinimizeDetailBox = () => {
     if (detailBoxState === DetailBoxState.Minimized) {
-      setDetailBoxState(lastState);
+      dispatch(setDetailBoxState(lastState));
     } else {
       setLastState(detailBoxState);
-      setDetailBoxState(DetailBoxState.Minimized);
+      dispatch(setDetailBoxState(DetailBoxState.Minimized));
     }
   };
 
@@ -872,9 +874,13 @@ const MainPage: React.FC<MainPage> = ({}) => {
                 tooltipLabel="close all tabs"
                 icon={<VscCloseAll style={{ transform: "scale(1.3)" }} />}
                 onClick={() => {
-                  clearAllDetailIds();
+                  // First ensure statement list is opened
                   dispatch(setStatementListOpened(true));
-                  setDetailBoxState(DetailBoxState.Normal);
+                  localStorage.setItem("statementListOpened", "true");
+
+                  // Then clear the detail IDs
+                  clearAllDetailIds();
+                  dispatch(setDetailBoxState(DetailBoxState.Normal));
                 }}
               />,
             ]}
