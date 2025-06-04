@@ -34,10 +34,11 @@ import {
   StatementListDisplayMode,
   StatementOrderCorrection,
 } from "types";
-import { StyledEmptyState, StyledTableWrapper } from "./StatementListBoxStyles";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StatementListTextAnnotator } from "./StatementListTextAnnotator/StatementListTextAnnotator";
+import useAnnotator from "hooks/useAnnotator";
+import { StyledEmptyState, StyledTableWrapper } from "./StatementListBoxStyles";
 
 const initialData: {
   statements: IResponseStatement[];
@@ -613,6 +614,13 @@ export const StatementListBox: React.FC = () => {
 
   const [annotator, setAnnotator] = useState<Annotator | undefined>(undefined);
 
+  const { setAnnotator: useAnnotatorSetAnnotator } = useAnnotator();
+
+  useEffect(() => {
+    if (annotator) {
+      useAnnotatorSetAnnotator(annotator);
+    }
+  }, [annotator, useAnnotatorSetAnnotator]);
   const {
     data: resources,
     error: resourcesError,

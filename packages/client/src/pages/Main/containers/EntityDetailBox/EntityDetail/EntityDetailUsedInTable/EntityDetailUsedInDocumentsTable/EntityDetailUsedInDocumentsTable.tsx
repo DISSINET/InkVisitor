@@ -11,11 +11,18 @@ import {
   EntityTag,
 } from "components/advanced";
 import React, { useMemo } from "react";
-import { FaTrashAlt } from "react-icons/fa";
+import { FaAnchor, FaTrashAlt } from "react-icons/fa";
 import { HiClipboardList } from "react-icons/hi";
 import { CellProps, Column } from "react-table";
 import { toast } from "react-toastify";
 import { StyledAnchorText } from "./EntityDetailUsedInDocumentsTableStyles";
+import { useSearchParams } from "hooks";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
+import { DetailBoxState } from "types";
+import { EntityEnums } from "@shared/enums";
+import useAnnotator from "hooks/useAnnotator";
+import { setStatementListOpened } from "redux/features/layout/mainPage/statementListOpenedSlice";
 
 type CellType = CellProps<IResponseUsedInDocument>;
 interface EntityDetailUsedInDocumentsTable {
@@ -32,7 +39,16 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
   entity,
   widthTooSmall,
 }: EntityDetailUsedInDocumentsTable) => {
-  const { entities, usedInDocuments: uses, id: entityId } = entity;
+  const detailBoxState: DetailBoxState = useAppSelector(
+    (state) => state.layout.detailBoxState
+  );
+
+  const {
+    entities,
+    usedInDocuments: uses,
+    id: entityId,
+    class: entityClass,
+  } = entity;
   const queryClient = useQueryClient();
 
   const removeAnchorMutation = useMutation({
@@ -43,8 +59,66 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
     },
   });
 
+  const { setTerritoryId, setAnnotatorOpened, setStatementId, territoryId } =
+    useSearchParams();
+  const dispatch = useAppDispatch();
+
+  const { scrollToAnchor } = useAnnotator();
+
   const columns = useMemo<Column<IResponseUsedInDocument>[]>(
     () => [
+      {
+        id: "anchor btn",
+        Cell: ({ row }: CellType) => {
+          const { parentTerritoryId } = row.original;
+          return (
+            <>
+              {(parentTerritoryId ||
+                entityClass === EntityEnums.Class.Territory) && (
+                <Button
+                  tooltipLabel="locate in annotator"
+                  onClick={() => {
+                    let timeout = 0;
+                    if (
+                      territoryId !== parentTerritoryId ||
+                      detailBoxState === DetailBoxState.FullHeight
+                    ) {
+                      // set more time to open statement list, annotator and/or find the territory
+                      timeout = 1000;
+                    } else {
+                      timeout = 100;
+                    }
+                    if (parentTerritoryId) {
+                      setTerritoryId(parentTerritoryId);
+                    } else if (entityClass === EntityEnums.Class.Territory) {
+                      setTerritoryId(entityId);
+                    }
+
+                    if (entityClass === EntityEnums.Class.Statement) {
+                      setStatementId(entityId);
+                    }
+
+                    if (detailBoxState === DetailBoxState.FullHeight) {
+                      dispatch(setStatementListOpened(true));
+                      dispatch(setDetailBoxState(DetailBoxState.Normal));
+                    }
+                    setAnnotatorOpened(true);
+
+                    setTimeout(() => {
+                      scrollToAnchor(entityId, row.original.anchorIndex);
+                    }, timeout);
+                  }}
+                  icon={<FaAnchor size={16} />}
+                  inverted
+                  noBackground
+                  noBorder
+                  noIconMargin
+                />
+              )}
+            </>
+          );
+        },
+      },
       {
         Header: "Anchor text",
         Cell: ({ row }: CellType) => {
@@ -166,7 +240,14 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
         },
       },
     ],
-    [entities, widthTooSmall]
+    [
+      entities,
+      detailBoxState,
+      entityClass,
+      entityId,
+      territoryId,
+      widthTooSmall,
+    ]
   );
 
   return (
@@ -177,6 +258,8 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
         data={uses}
         perPage={perPage}
         isLoading={removeAnchorMutation.isPending}
+        firstColumnMinWidth
+        // lastColumnMinWidth
       />
     </>
   );
