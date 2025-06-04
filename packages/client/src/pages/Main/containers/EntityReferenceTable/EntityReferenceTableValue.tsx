@@ -23,6 +23,7 @@ interface EntityReferenceTableValue {
   alwaysShowCreateModal?: boolean;
   openDetailOnCreate?: boolean;
   initValueTyped?: string;
+  editorWidthTooSmall: boolean;
 
   disabled?: boolean;
 }
@@ -36,6 +37,7 @@ export const EntityReferenceTableValue: React.FC<EntityReferenceTableValue> = ({
   alwaysShowCreateModal,
   openDetailOnCreate,
   initValueTyped,
+  editorWidthTooSmall,
 
   disabled,
 }) => {
@@ -74,6 +76,7 @@ export const EntityReferenceTableValue: React.FC<EntityReferenceTableValue> = ({
         </EntityDropzone>
       ) : (
         <EntitySuggester
+          inputWidth={editorWidthTooSmall ? 60 : 100}
           alwaysShowCreateModal={alwaysShowCreateModal}
           placeholder={resourceEntity?.data?.partValueLabel}
           excludedEntityClasses={excludedSuggesterEntities}

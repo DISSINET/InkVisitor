@@ -22,6 +22,7 @@ interface EntityReferenceTableResource {
   openDetailOnCreate?: boolean;
 
   initResourceTyped?: string;
+  editorWidthTooSmall: boolean;
 
   disabled?: boolean;
 }
@@ -37,6 +38,7 @@ export const EntityReferenceTableResource: React.FC<
   openDetailOnCreate,
 
   initResourceTyped,
+  editorWidthTooSmall,
 
   disabled,
 }) => {
@@ -71,6 +73,7 @@ export const EntityReferenceTableResource: React.FC<
         </EntityDropzone>
       ) : (
         <EntitySuggester
+          inputWidth={editorWidthTooSmall ? 60 : 100}
           alwaysShowCreateModal={alwaysShowCreateModal}
           openDetailOnCreate={openDetailOnCreate}
           territoryActants={[]}

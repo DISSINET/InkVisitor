@@ -1083,6 +1083,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               entities={statement.entities ?? {}}
               entityId={statement.id}
               userCanEdit={userCanEdit}
+              editorWidthTooSmall={editorWidthTooSmall}
             />
           </StyledEditorSectionContent>
         </StyledEditorSection>

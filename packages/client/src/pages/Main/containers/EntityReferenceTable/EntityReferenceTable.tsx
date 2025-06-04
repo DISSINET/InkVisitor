@@ -25,6 +25,7 @@ interface EntityReferenceTable {
   territoryParentId?: string;
   userCanEdit: boolean;
   alwaysShowCreateModal?: boolean;
+  editorWidthTooSmall?: boolean;
 }
 
 export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
@@ -38,6 +39,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
   territoryParentId,
   userCanEdit,
   alwaysShowCreateModal,
+  editorWidthTooSmall = false,
 }) => {
   const [localReferences, setLocalReferences] = useState<IReference[]>([]);
 
@@ -224,6 +226,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
               setInitResourceTyped("");
               setInitValueTyped("");
             }}
+            editorWidthTooSmall={editorWidthTooSmall}
           />
         );
       })}
@@ -233,6 +236,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
         <StyledSpareRow $marginTop={localReferences.length > 0}>
           {/* RESOURCE */}
           <EntitySuggester
+            inputWidth={editorWidthTooSmall ? 60 : undefined}
             alwaysShowCreateModal={alwaysShowCreateModal}
             openDetailOnCreate={openDetailOnCreate}
             territoryActants={[]}
@@ -258,6 +262,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
           />
           {/* VALUE */}
           <EntitySuggester
+            inputWidth={editorWidthTooSmall ? 60 : undefined}
             alwaysShowCreateModal={alwaysShowCreateModal}
             excludedEntityClasses={excludedSuggesterEntities}
             openDetailOnCreate={openDetailOnCreate}
