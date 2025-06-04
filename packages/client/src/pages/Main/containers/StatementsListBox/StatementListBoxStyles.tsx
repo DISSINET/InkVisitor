@@ -120,7 +120,7 @@ export const StyledEntityContainer = styled.div`
   align-items: center;
   flex-shrink: 1;
   min-width: 0;
-  max-width: 200px;
+  max-width: 20rem;
 `;
 
 export const StyledDocumentTitleContainer = styled.div`
