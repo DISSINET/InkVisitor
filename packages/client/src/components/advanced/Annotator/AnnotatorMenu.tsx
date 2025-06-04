@@ -121,7 +121,6 @@ export const TextAnnotatorMenu = ({
             <StyledAnnotatorItemContentLine>
               <Button
                 icon={<TbAnchor size={15} />}
-                fullWidth={false}
                 color="primary"
                 onClick={() => {
                   handleCreateStatement();
@@ -149,7 +148,6 @@ export const TextAnnotatorMenu = ({
                   territory
                 </StyledTerritorySubsectionTitle>
                 <Button
-                  fullWidth={false}
                   icon={
                     <svg
                       xmlns="http://www.w3.org/2000/svg"

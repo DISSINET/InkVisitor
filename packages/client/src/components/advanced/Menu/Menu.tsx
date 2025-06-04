@@ -9,18 +9,21 @@ import { useLocation, useNavigate } from "react-router";
 import { IPage } from "types";
 import { MenuItem } from "./MenuItem";
 import { StyledMenuGroup, StyledMenuGroupWrapper } from "./MenuStyles";
+import { CiSettings } from "react-icons/ci";
 
 interface Menu {
   userRole: string;
   tempLocation: string | false;
   setTempLocation: React.Dispatch<React.SetStateAction<string | false>>;
   handleLogOut: () => void;
+  setUserCustomizationOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 export const Menu: React.FC<Menu> = ({
   userRole,
   tempLocation,
   setTempLocation,
   handleLogOut,
+  setUserCustomizationOpen,
 }) => {
   const pages: IPage[] = [
     {
@@ -36,6 +39,7 @@ export const Menu: React.FC<Menu> = ({
       label: "About",
       color: "info",
       href: "/about",
+      admin: false,
       icon: <FaInfo />,
     },
     // {
@@ -61,6 +65,14 @@ export const Menu: React.FC<Menu> = ({
       href: "/documents",
       admin: true,
       icon: <CgFileDocument size={18} />,
+    },
+    {
+      id: "customize",
+      label: "Customize",
+      color: "info",
+      href: false,
+      admin: false,
+      icon: <CiSettings size={18} />,
     },
   ];
 
@@ -104,7 +116,11 @@ export const Menu: React.FC<Menu> = ({
                   label={page.label}
                   icon={page.icon}
                   onClick={() => {
-                    if (page.id === "main") {
+                    if (!page.href) {
+                      if (page.id === "customize") {
+                        setUserCustomizationOpen(true);
+                      }
+                    } else if (page.id === "main") {
                       navigate({
                         pathname: "/",
                         hash: tempLocation ? tempLocation : "",

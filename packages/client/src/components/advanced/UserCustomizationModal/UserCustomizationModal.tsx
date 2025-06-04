@@ -1,6 +1,6 @@
 import { languageDict, userRoleDict } from "@shared/dictionaries";
 import { EntityEnums, UserEnums } from "@shared/enums";
-import { IResponseUser, IUser } from "@shared/types";
+import { IEntity, IResponseUser, IUser } from "@shared/types";
 import { UnsafePasswordError } from "@shared/types/errors";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { SAFE_PASSWORD_DESCRIPTION } from "Theme/constants";
@@ -84,10 +84,25 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
   }, [user]);
 
   const [data, setData] = useState<DataObject>(initialValues);
+  const [defaultTerritory, setDefaultTerritory] = useState<IEntity | null>(
+    null
+  );
 
   useEffect(() => {
     setData(initialValues);
   }, [initialValues]);
+
+  useEffect(() => {
+    // territory is selected in the suggester
+    if (defaultTerritory) {
+      setData({
+        ...data,
+        defaultTerritory: defaultTerritory.id,
+      });
+    } else {
+      handleChange("defaultTerritory", "");
+    }
+  }, [defaultTerritory]);
 
   const handleChange = (
     key: string,
@@ -114,9 +129,14 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
   } = useQuery({
     queryKey: ["territory", data.defaultTerritory],
     queryFn: async () => {
-      if (data.defaultTerritory) {
-        const res = await api.territoryGet(data.defaultTerritory);
-        return res.data;
+      // defaultTerritory is set but is not loaded in local state
+      if (
+        data.defaultTerritory &&
+        (defaultTerritory === null ||
+          defaultTerritory?.id !== data.defaultTerritory)
+      ) {
+        const res = await api.entityGet(data.defaultTerritory);
+        setDefaultTerritory(res.data);
       }
     },
     enabled: !!data.defaultTerritory && api.isLoggedIn(),
@@ -342,13 +362,13 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
 
               <ModalInputLabel>{"default territory"}</ModalInputLabel>
               <ModalInputWrap width={165}>
-                {territory ? (
+                {defaultTerritory ? (
                   <EntityTag
-                    entity={territory}
+                    entity={defaultTerritory}
                     tooltipPosition="left"
                     unlinkButton={{
                       onClick: () => {
-                        handleChange("defaultTerritory", "");
+                        setDefaultTerritory(null);
                       },
                       color: "danger",
                     }}
@@ -357,9 +377,9 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                   <div>
                     <EntitySuggester
                       categoryTypes={[EntityEnums.Class.Territory]}
-                      onSelected={(selected: string) =>
-                        handleChange("defaultTerritory", selected)
-                      }
+                      onPicked={(entity) => {
+                        setDefaultTerritory(entity);
+                      }}
                       inputWidth={104}
                       disableTemplatesAccept
                     />

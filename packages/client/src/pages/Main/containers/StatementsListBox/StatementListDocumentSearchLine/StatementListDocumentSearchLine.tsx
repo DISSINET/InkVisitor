@@ -21,14 +21,12 @@ import {
   StyledNoDocumentMessage,
   StyledSearchContainer,
   StyledSearchIcon,
-  StyledSearchInputContainer,
   StyledSearchNavigation,
   StyledSearchResults,
 } from "../StatementListBoxStyles";
 
-interface StatementListDocumentSearchLineProps {
+interface StatementListDocumentSearchLine {
   statements: any[];
-  contentWidth: number;
   selectedResource: IEntity | false;
   setSelectedResourceId: (id: string | false) => void;
   selectedDocumentIsFetching: boolean;
@@ -45,14 +43,16 @@ interface StatementListDocumentSearchLineProps {
   searchOccurences: any[];
   setSearchActiveOccurence: (index: number) => void;
   resources: IEntity[];
+  // is list non empty
   showStatementList: boolean;
+  userCanEdit: boolean;
+  annotatorWidthTooSmall: boolean;
 }
 
 const StatementListDocumentSearchLine: React.FC<
-  StatementListDocumentSearchLineProps
+  StatementListDocumentSearchLine
 > = ({
   statements,
-  contentWidth,
   selectedResource,
   setSelectedResourceId,
   selectedDocumentIsFetching,
@@ -70,135 +70,156 @@ const StatementListDocumentSearchLine: React.FC<
   setSearchActiveOccurence,
   resources,
   showStatementList,
+  userCanEdit,
+  annotatorWidthTooSmall,
 }) => {
   const themeContext = useContext(ThemeContext);
-  const maxWidth = showStatementList
-    ? contentWidth + COLLAPSED_TABLE_WIDTH
-    : contentWidth;
 
   return (
     <StyledDocumentSearchLine
       style={{
-        maxWidth: `${maxWidth}px`,
         marginLeft: showStatementList ? `-${COLLAPSED_TABLE_WIDTH}px` : "0",
       }}
     >
-      <StyledEntityContainer>
-        {!selectedResource && (
-          <EntitySuggester
-            categoryTypes={[EntityEnums.Class.Resource]}
-            preSuggestions={resources}
-            onPicked={(entity) => {
-              setSelectedResourceId(entity.id);
-            }}
-          />
-        )}
-        {selectedResource && (
-          <EntityTag
-            entity={selectedResource}
-            unlinkButton={{
-              onClick: () => {
-                setSelectedResourceId(false);
-              },
-              tooltipLabel: "use different resource",
-            }}
-            fullWidth={false}
-            showOnly="label"
-          />
-        )}
-      </StyledEntityContainer>
-
-      {selectedDocumentIsFetching && <Loader />}
-
-      {!selectedDocumentIsFetching && selectedDocument && (
-        <StyledDocumentTitleContainer>
-          <DocumentTitle title={selectedDocument.title} />
-        </StyledDocumentTitleContainer>
-      )}
-
-      {!selectedDocumentIsFetching &&
-        selectedResource !== false &&
-        selectedResource.data.documentId === undefined && (
-          <StyledNoDocumentMessage>
-            <GrDocumentMissing />
-            <i>This Resource does not have any document</i>
-          </StyledNoDocumentMessage>
-        )}
-
-      {selectedResource !== false && selectedResource?.data?.documentId && (
-        <StyledAnnotatorMenuBar>
-          {activeTHasAnchor ? (
-            <Button
-              label=""
-              iconRight={
-                <div style={{ display: "flex", alignItems: "center" }}>
-                  <TbAnchor />
-                  <FaLongArrowAltRight />
-                </div>
-              }
-              tooltipLabel="locate anchor"
-              inverted
-              onClick={() => {
-                annotator?.scrollToAnchor(territoryId);
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+        }}
+      >
+        <StyledEntityContainer>
+          {!selectedResource && (
+            <EntitySuggester
+              categoryTypes={[EntityEnums.Class.Resource]}
+              preSuggestions={resources}
+              onPicked={(entity) => {
+                setSelectedResourceId(entity.id);
               }}
-              color="warning"
+              disabled={!userCanEdit}
             />
-          ) : (
-            <StyledSearchNavigation>
-              <TbAnchorOff title="no anchor for T" />
-            </StyledSearchNavigation>
           )}
-        </StyledAnnotatorMenuBar>
-      )}
+          {selectedResource && (
+            <div
+              style={{
+                display: "flex",
+                width: annotatorWidthTooSmall ? "9rem" : "10rem",
+              }}
+            >
+              <EntityTag
+                fullWidth
+                entity={selectedResource}
+                unlinkButton={{
+                  onClick: () => {
+                    setSelectedResourceId(false);
+                  },
+                  tooltipLabel: "use different resource",
+                }}
+              />
+            </div>
+          )}
+        </StyledEntityContainer>
+
+        {selectedDocumentIsFetching && <Loader />}
+
+        {!selectedDocumentIsFetching && selectedDocument && (
+          <StyledDocumentTitleContainer
+            style={{
+              maxWidth: annotatorWidthTooSmall ? "10rem" : "12rem",
+            }}
+          >
+            <DocumentTitle title={selectedDocument.title} />
+          </StyledDocumentTitleContainer>
+        )}
+
+        {!selectedDocumentIsFetching &&
+          selectedResource !== false &&
+          selectedResource.data.documentId === undefined && (
+            <StyledNoDocumentMessage>
+              <GrDocumentMissing />
+              <i>This Resource does not have any document</i>
+            </StyledNoDocumentMessage>
+          )}
+
+        {selectedResource !== false && selectedResource?.data?.documentId && (
+          <StyledAnnotatorMenuBar>
+            {activeTHasAnchor ? (
+              <Button
+                label=""
+                iconRight={
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    <TbAnchor />
+                    <FaLongArrowAltRight />
+                  </div>
+                }
+                tooltipLabel="locate anchor"
+                inverted
+                onClick={() => {
+                  annotator?.scrollToAnchor(territoryId);
+                }}
+                color="warning"
+              />
+            ) : (
+              <StyledSearchNavigation>
+                <TbAnchorOff title="no anchor for T" />
+              </StyledSearchNavigation>
+            )}
+          </StyledAnnotatorMenuBar>
+        )}
+      </div>
 
       {isSearchAllowed && (
         <StyledSearchContainer>
           <StyledSearchIcon>
             <BiSearch color={themeContext?.color.info} />
           </StyledSearchIcon>
-          <StyledSearchInputContainer>
-            <Input
-              value={searchTerm}
-              onChangeFn={(newText: string) => {
-                setSearchTerm(newText);
-              }}
-              changeOnType
-              minWidth={90}
-            />
-          </StyledSearchInputContainer>
+          <Input
+            value={searchTerm}
+            onChangeFn={(newText: string) => {
+              setSearchTerm(newText);
+            }}
+            changeOnType
+            width={130}
+            minWidth={50}
+          />
 
           {isSearchTermValid && (
-            <StyledSearchResults>
+            <StyledSearchResults
+              $annotatorWidthTooSmall={annotatorWidthTooSmall}
+            >
               {hasNoSearchResults ? (
-                <div>no results</div>
+                <div style={{ marginLeft: "0.2rem" }}>no results</div>
               ) : (
                 <>
-                  <div>
+                  <div style={{ display: "flex" }}>
                     {searchActiveOccurence + 1} of {searchOccurences.length}
                   </div>
-                  <FaRegArrowAltCircleUp
-                    size={15}
-                    color={themeContext?.color.info}
-                    style={{ cursor: "pointer" }}
-                    title="previous occurence"
-                    onClick={() => {
-                      const previousOccurence =
-                        (searchActiveOccurence - 1 + searchOccurences.length) %
-                        searchOccurences.length;
-                      setSearchActiveOccurence(previousOccurence);
-                    }}
-                  />
-                  <FaRegArrowAltCircleDown
-                    size={15}
-                    color={themeContext?.color.info}
-                    style={{ cursor: "pointer" }}
-                    title="next occurence"
-                    onClick={() => {
-                      const nextOccurence =
-                        (searchActiveOccurence + 1) % searchOccurences.length;
-                      setSearchActiveOccurence(nextOccurence);
-                    }}
-                  />
+                  <div style={{ display: "flex", gap: "0.5rem" }}>
+                    <FaRegArrowAltCircleUp
+                      size={15}
+                      color={themeContext?.color.info}
+                      style={{ cursor: "pointer" }}
+                      title="previous occurence"
+                      onClick={() => {
+                        const previousOccurence =
+                          (searchActiveOccurence -
+                            1 +
+                            searchOccurences.length) %
+                          searchOccurences.length;
+                        setSearchActiveOccurence(previousOccurence);
+                      }}
+                    />
+                    <FaRegArrowAltCircleDown
+                      size={15}
+                      color={themeContext?.color.info}
+                      style={{ cursor: "pointer" }}
+                      title="next occurence"
+                      onClick={() => {
+                        const nextOccurence =
+                          (searchActiveOccurence + 1) % searchOccurences.length;
+                        setSearchActiveOccurence(nextOccurence);
+                      }}
+                    />
+                  </div>
                 </>
               )}
             </StyledSearchResults>

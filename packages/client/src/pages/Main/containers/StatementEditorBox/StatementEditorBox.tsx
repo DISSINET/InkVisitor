@@ -21,10 +21,6 @@ export const StatementEditorBox: React.FC = () => {
 
   const queryClient = useQueryClient();
 
-  const contentHeight: number = useAppSelector(
-    (state) => state.layout.contentHeight
-  );
-
   const userId = localStorage.getItem("userid");
   const {
     status: statusUser,
@@ -200,9 +196,9 @@ export const StatementEditorBox: React.FC = () => {
     if (newActant || newAction) {
       let entity = null;
       if (newActant) {
-        entity = await api.entitiesGet(newActant.entityId);
+        entity = await api.entityGet(newActant.entityId);
       } else if (newAction) {
-        entity = await api.entitiesGet(newAction.actionId);
+        entity = await api.entityGet(newAction.actionId);
       }
 
       if (!entity) {

@@ -9,8 +9,6 @@ import {
   IResponseStatement,
   IResponseTerritory,
 } from "@shared/types";
-import { useQuery } from "@tanstack/react-query";
-import api from "api";
 import Dropdown from "components/advanced";
 import TextAnnotator from "components/advanced/Annotator/Annotator";
 import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
@@ -32,7 +30,7 @@ interface StatementListTextAnnotator {
   statements: IResponseStatement[];
   // it's faster than the territory entity so it's better to pass territoryId separately
   territoryId: string;
-  territory: IResponseTerritory;
+  territory?: IResponseTerritory;
   statementId: string;
   entities: { [key: string]: IEntity };
   right: UserEnums.RoleMode;
@@ -62,10 +60,14 @@ interface StatementListTextAnnotator {
   documents?: IDocument[];
   setSelectedResourceId: React.Dispatch<React.SetStateAction<string | false>>;
 
+  // useQuery for selectedDocument
   selectedDocumentId: string | undefined;
   selectedDocumentIsFetching: boolean;
+  selectedDocumentError: Error | null;
+
   displayMode: StatementListDisplayMode;
   showStatementList: boolean;
+  userCanEdit: boolean;
 }
 
 export const StatementListTextAnnotator: React.FC<
@@ -104,10 +106,13 @@ export const StatementListTextAnnotator: React.FC<
 
   selectedDocumentId,
   selectedDocumentIsFetching,
+  selectedDocumentError,
   displayMode,
   showStatementList,
+  userCanEdit,
 }) => {
   const [showAnnotator, setShowAnnotator] = useState(false);
+
   useEffect(() => {
     setShowAnnotator(true);
   }, []);
@@ -159,6 +164,8 @@ export const StatementListTextAnnotator: React.FC<
       }
     }
   }, [dSearchTerm]);
+
+  // const debouncedContentWidth = useDebounce(contentWidth, 80);
 
   const animatedStyle = useSpring({
     opacity: showAnnotator ? 1 : 0,
@@ -212,31 +219,43 @@ export const StatementListTextAnnotator: React.FC<
     return height;
   }, [contentHeight, selectorHeight]);
 
-  const debouncedContentWidth = useDebounce(contentWidth, 80);
+  const annotatorWidth = useMemo<number>(() => {
+    return showStatementList
+      ? contentWidth - COLLAPSED_TABLE_WIDTH
+      : contentWidth;
+  }, [contentWidth, showStatementList]);
+
+  // TODO: min reasonable width as constant
+  const annotatorWidthTooSmall = useMemo<boolean>(() => {
+    return annotatorWidth < 360;
+  }, [annotatorWidth]);
 
   return (
     <animated.div style={animatedStyle}>
-      <StatementListDocumentSearchLine
-        statements={statements}
-        contentWidth={contentWidth}
-        selectedResource={selectedResource}
-        setSelectedResourceId={setSelectedResourceId}
-        selectedDocumentIsFetching={selectedDocumentIsFetching}
-        selectedDocument={selectedDocument}
-        activeTHasAnchor={activeTHasAnchor}
-        annotator={annotator}
-        territoryId={territoryId}
-        isSearchAllowed={isSearchAllowed}
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        isSearchTermValid={isSearchTermValid}
-        hasNoSearchResults={searchOccurences.length === 0}
-        searchActiveOccurence={searchActiveOccurence}
-        searchOccurences={searchOccurences}
-        setSearchActiveOccurence={setSearchActiveOccurence}
-        resources={resources || []}
-        showStatementList={showStatementList}
-      />
+      {contentWidth > 0 && (
+        <StatementListDocumentSearchLine
+          statements={statements}
+          selectedResource={selectedResource}
+          setSelectedResourceId={setSelectedResourceId}
+          selectedDocumentIsFetching={selectedDocumentIsFetching}
+          selectedDocument={selectedDocument}
+          activeTHasAnchor={activeTHasAnchor}
+          annotator={annotator}
+          territoryId={territoryId}
+          isSearchAllowed={isSearchAllowed}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          isSearchTermValid={isSearchTermValid}
+          hasNoSearchResults={searchOccurences.length === 0}
+          searchActiveOccurence={searchActiveOccurence}
+          searchOccurences={searchOccurences}
+          setSearchActiveOccurence={setSearchActiveOccurence}
+          resources={resources || []}
+          showStatementList={showStatementList}
+          userCanEdit={userCanEdit}
+          annotatorWidthTooSmall={annotatorWidthTooSmall}
+        />
+      )}
 
       {/* Class selector */}
       {selectedResource !== false && selectedResource?.data?.documentId && (
@@ -251,20 +270,25 @@ export const StatementListTextAnnotator: React.FC<
           }}
           ref={selectorRef}
         >
-          <StyledInfoText style={{ textWrap: "nowrap" }}>
-            Highlight
-          </StyledInfoText>
-          <Dropdown.Multi.Entity
-            options={entitiesDict}
-            disableEmpty={true}
-            isClearable={true}
-            disableAny={true}
-            onChange={handleHlEntitiesChange}
-            value={hlEntities}
-            width={debouncedContentWidth - 75}
-            noOptionsMessage="No entity classes to highlight"
-            limitSelectedItems={Math.floor((debouncedContentWidth - 130) / 80)}
-          />
+          {/* this condition helps initial render in firefox */}
+          {contentWidth > 0 && (
+            <>
+              <StyledInfoText style={{ textWrap: "nowrap" }}>
+                Highlight
+              </StyledInfoText>
+              <Dropdown.Multi.Entity
+                options={entitiesDict}
+                disableEmpty={true}
+                isClearable={true}
+                disableAny={true}
+                onChange={handleHlEntitiesChange}
+                value={hlEntities}
+                width={contentWidth - 71}
+                noOptionsMessage="No entity classes to highlight"
+                limitSelectedItems={Math.floor((contentWidth - 145) / 80)}
+              />
+            </>
+          )}
         </div>
       )}
 
@@ -273,11 +297,8 @@ export const StatementListTextAnnotator: React.FC<
         <AnnotatorProvider>
           {selectedDocumentId && (
             <TextAnnotator
-              width={
-                statements.length > 0
-                  ? contentWidth - COLLAPSED_TABLE_WIDTH - 5
-                  : contentWidth - 5
-              }
+              width={annotatorWidth}
+              annotatorWidthTooSmall={annotatorWidthTooSmall}
               hlEntities={hlEntities}
               forwardAnnotator={(newAnnotator) => {
                 setAnnotator(newAnnotator);

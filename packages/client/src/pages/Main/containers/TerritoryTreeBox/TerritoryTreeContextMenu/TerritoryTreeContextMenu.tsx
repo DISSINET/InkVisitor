@@ -112,17 +112,11 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
                   onClick={() => {
                     if (isFavorited) {
                       // remove from favorites
-                      const index = storedTerritories.indexOf(
-                        territoryActant.id
-                      );
-                      if (index > -1) {
-                        storedTerritories.splice(index, 1).slice;
-                      }
-                      const newStored = [
-                        ...storedTerritories.map((storedTerritory) => ({
+                      const newStored = storedTerritories
+                        .filter((id) => id !== territoryActant.id)
+                        .map((storedTerritory) => ({
                           territoryId: storedTerritory,
-                        })),
-                      ];
+                        }));
                       updateUserMutation.mutate({
                         storedTerritories: newStored,
                       });
@@ -138,6 +132,7 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
                         storedTerritories: newStored,
                       });
                     }
+
                     setShowMenu(false);
                     onMenuClose();
                   }}

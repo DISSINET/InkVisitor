@@ -34,6 +34,7 @@ interface StatementEditorSectionButtons {
     changes: Partial<IStatementData>,
     instantUpdate: boolean
   ) => void;
+  editorWidthTooSmall: boolean;
 }
 export const StatementEditorSectionButtons: React.FC<
   StatementEditorSectionButtons
@@ -45,6 +46,7 @@ export const StatementEditorSectionButtons: React.FC<
 
   handleAttributeChange,
   handleDataAttributeChange,
+  editorWidthTooSmall,
 }) => {
   const [replaceSection, setReplaceSection] = useState(false);
 
@@ -132,7 +134,7 @@ export const StatementEditorSectionButtons: React.FC<
         />
         <Button
           icon={<FaClone />}
-          label="previous S"
+          label={!editorWidthTooSmall ? "previous S" : ""}
           disabled={!previousStatement}
           tooltipLabel={`copy ${section} from the previous statement`}
           inverted

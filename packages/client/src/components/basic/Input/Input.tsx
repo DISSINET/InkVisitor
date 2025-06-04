@@ -16,7 +16,6 @@ interface Input {
   rows?: number;
   cols?: number;
   width?: number | "full";
-  minWidth?: number;
   onChangeFn: (value: string) => void;
   onEnterPressFn?: () => void;
   onFocus?: (
@@ -38,6 +37,7 @@ interface Input {
 
   autocomplete?: string;
   required?: boolean;
+  minWidth?: number;
 }
 
 export const Input: React.FC<Input> = ({
@@ -49,7 +49,6 @@ export const Input: React.FC<Input> = ({
   rows = 3,
   cols = 50,
   width,
-  minWidth,
   changeOnType = false,
   onEnterPressFn = () => {},
   onChangeFn,
@@ -66,6 +65,7 @@ export const Input: React.FC<Input> = ({
 
   autocomplete = "",
   required = false,
+  minWidth,
 }) => {
   const [displayValue, setDisplayValue] = useState(value);
   useEffect(() => {

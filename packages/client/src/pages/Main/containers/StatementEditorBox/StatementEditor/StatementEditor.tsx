@@ -4,6 +4,7 @@ import {
   IProp,
   IReference,
   IResponseStatement,
+  IResponseTree,
   IStatement,
   IStatementActant,
   IStatementAction,
@@ -14,7 +15,10 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { excludedSuggesterEntities } from "Theme/constants";
+import {
+  COLLAPSED_PANEL_WIDTH,
+  excludedSuggesterEntities,
+} from "Theme/constants";
 import api from "api";
 import { Button, Input, Message, MultiInput, Submit } from "components";
 import Dropdown, {
@@ -42,7 +46,9 @@ import {
 } from "react-icons/ai";
 import { FaAnchor, FaRegCopy } from "react-icons/fa";
 import { TiWarningOutline } from "react-icons/ti";
+import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
+import { selectPanelWidth } from "redux/features/layout/mainPage/panelWidthsSlice";
 import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { ThemeContext } from "styled-components";
@@ -56,6 +62,7 @@ import {
   deepCopy,
   getEntityLabel,
   getShortLabelByLetterCount,
+  searchTree,
 } from "utils/utils";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
 import {
@@ -297,11 +304,27 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     return false;
   }, [territoryData, statement.id]);
 
-  //TODO recurse to get all parents
-  const territoryPath =
-    territoryData &&
-    territoryData.data?.parent &&
-    Array(territoryData.data?.parent?.territoryId);
+  // use cached tree to get all parents
+  const treeData: IResponseTree | undefined = queryClient.getQueryData([
+    "tree",
+  ]);
+  const [territoryPath, setterritoryPath] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (treeData && statementTerritoryId) {
+      const foundTerritory = searchTree(treeData, statementTerritoryId);
+      if (foundTerritory) {
+        setterritoryPath(foundTerritory.path.concat(statementTerritoryId));
+      }
+    }
+  }, [treeData, statementTerritoryId]);
+
+  const favoritedTerritoryIds = useMemo(() => {
+    if (user?.storedTerritories) {
+      return user.storedTerritories.map((territory) => territory.territory.id);
+    }
+    return [];
+  }, [user?.storedTerritories]);
 
   const userCanEdit: boolean = useMemo(() => {
     return (
@@ -429,7 +452,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     if (user) {
       const statementLanguage = user.options.defaultStatementLanguage;
       if (changes.type) {
-        api.entitiesGet(changes.type?.entityId).then((typeEntity) => {
+        api.entityGet(changes.type?.entityId).then((typeEntity) => {
           if (typeEntity.data) {
             const entityLanguage = typeEntity.data.language;
             if (entityLanguage !== statementLanguage && changes.type) {
@@ -443,7 +466,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         });
       }
       if (changes.value) {
-        api.entitiesGet(changes.value.entityId).then((valueEntity) => {
+        api.entityGet(changes.value.entityId).then((valueEntity) => {
           if (valueEntity.data) {
             const entityLanguage = valueEntity.data.language;
             if (entityLanguage !== statementLanguage && changes.value) {
@@ -673,6 +696,22 @@ export const StatementEditor: React.FC<StatementEditor> = ({
       scrollToAnchor(statement.id, anchorIndex ? anchorIndex : undefined);
     }, timeout);
   };
+  const fourthPanelExpanded = useAppSelector(
+    (state) => state.layout.mainPage.fourthPanelExpanded
+  );
+
+  const thirdPanelWidth = useSelector(selectPanelWidth(2));
+  const fourthPanelWidth = useSelector(selectPanelWidth(3));
+
+  const editorWidth = useMemo(
+    () =>
+      fourthPanelExpanded
+        ? thirdPanelWidth
+        : thirdPanelWidth + (fourthPanelWidth - COLLAPSED_PANEL_WIDTH),
+    [fourthPanelExpanded, thirdPanelWidth, fourthPanelWidth]
+  );
+
+  const editorWidthTooSmall = editorWidth < 450;
 
   return (
     <>
@@ -704,6 +743,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   </StyledEditorContentLabel>
                   <StyledEditorHeaderInputWrap>
                     <Input
+                      width={"full"}
+                      minWidth={100}
                       type="text"
                       value={statement.labels[0] || ""}
                       onChangeFn={(newValue: string) => {
@@ -724,34 +765,30 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             {!statement.isTemplate && (
               <StyledBreadcrumbWrap>
                 {territoryPath &&
-                  territoryPath.map((territory: string, key: number) => {
+                  territoryPath.map((territoryId: string, key: number) => {
                     return (
                       <React.Fragment key={key}>
-                        <BreadcrumbItem territoryId={territory} />
+                        <BreadcrumbItem
+                          territoryId={territoryId}
+                          isSelected={territoryId === statementTerritoryId}
+                          isFavorited={favoritedTerritoryIds.includes(
+                            territoryId
+                          )}
+                        />
                       </React.Fragment>
                     );
                   })}
-                {territoryData ? (
-                  <React.Fragment key={territoryData.id}>
-                    <BreadcrumbItem
-                      territoryId={territoryData.id}
-                      territoryData={territoryData}
+
+                {!territoryData && !isFetchingTerritory && (
+                  <div style={{ display: "flex", alignItems: "flex-end" }}>
+                    <AiOutlineWarning
+                      size={22}
+                      color={themeContext?.color.warning}
                     />
-                  </React.Fragment>
-                ) : (
-                  <>
-                    {!isFetchingTerritory && (
-                      <div style={{ display: "flex", alignItems: "flex-end" }}>
-                        <AiOutlineWarning
-                          size={22}
-                          color={themeContext?.color.warning}
-                        />
-                        <StyledMissingTerritory>
-                          {"missing territory"}
-                        </StyledMissingTerritory>
-                      </div>
-                    )}
-                  </>
+                    <StyledMissingTerritory>
+                      {"missing territory"}
+                    </StyledMissingTerritory>
+                  </div>
                 )}
               </StyledBreadcrumbWrap>
             )}
@@ -922,6 +959,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 setShowSubmitSection={setShowSubmitSection}
                 handleAttributeChange={handleAttributeChange}
                 handleDataAttributeChange={handleDataAttributeChange}
+                editorWidthTooSmall={editorWidthTooSmall}
               />
             )}
           </StyledEditorSectionHeader>
@@ -972,6 +1010,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 setShowSubmitSection={setShowSubmitSection}
                 handleAttributeChange={handleAttributeChange}
                 handleDataAttributeChange={handleDataAttributeChange}
+                editorWidthTooSmall={editorWidthTooSmall}
               />
             )}
           </StyledEditorSectionHeader>
@@ -1020,6 +1059,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 setShowSubmitSection={setShowSubmitSection}
                 handleAttributeChange={handleAttributeChange}
                 handleDataAttributeChange={handleDataAttributeChange}
+                editorWidthTooSmall={editorWidthTooSmall}
               />
             )}
           </StyledEditorSectionHeader>

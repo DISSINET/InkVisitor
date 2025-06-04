@@ -12,7 +12,6 @@ import {
   FaChevronCircleUp,
   FaGripVertical,
 } from "react-icons/fa";
-import { FaArrowDownLong, FaArrowUpLong } from "react-icons/fa6";
 import { BeatLoader } from "react-spinners";
 import { Cell, ColumnInstance, Row } from "react-table";
 import { setDraggedRowId } from "redux/features/statementList/draggedRowIdSlice";
@@ -26,16 +25,10 @@ import {
   StatementOrderCorrection,
 } from "types";
 import { dndHoverFn } from "utils/utils";
-import { StatementListRowExpanded } from "./StatementListRowExpanded/StatementListRowExpanded";
-import {
-  StyledOrderCorrection,
-  StyledTd,
-  StyledTdMove,
-  StyledTr,
-} from "./StatementListTableStyles";
-import useIsRowVisible from "./useRowIsVisible";
-import { TbAnchorOff } from "react-icons/tb";
 import { StatementListOrderCorrection } from "./StatementListOrderCorrection/StatementListOrderCorrection";
+import { StatementListRowExpanded } from "./StatementListRowExpanded/StatementListRowExpanded";
+import { StyledTd, StyledTdMove, StyledTr } from "./StatementListTableStyles";
+import useIsRowVisible from "./useRowIsVisible";
 
 interface StatementListRow {
   row: Row<
@@ -75,10 +68,8 @@ export const StatementListRow: React.FC<StatementListRow> = ({
   );
   const { statementId } = useSearchParams();
 
-  const dropRef = useRef<HTMLTableRowElement>(
-    null
-  ) as React.RefObject<HTMLTableRowElement>;
-  const dragRef = useRef<HTMLTableCellElement | null>(null);
+  const dropRef = useRef<HTMLTableRowElement>(null);
+  const dragRef = useRef<HTMLTableCellElement>(null);
 
   const isVisible = useIsRowVisible(dropRef);
 
@@ -144,6 +135,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
                       >
                         <FaGripVertical color={themeContext?.color.black} />
                       </div>
+                      {/* temporary disabled */}
                       {(!isAnchored ||
                         (orderCorrection && orderCorrection?.distance > 0)) && (
                         <StatementListOrderCorrection

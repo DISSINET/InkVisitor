@@ -1,5 +1,5 @@
 import { useSpring } from "@react-spring/web";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { springConfig } from "Theme/constants";
 import { StyledLayoutSeparatorVertical } from "./SeparatorStyles";
 
@@ -9,15 +9,19 @@ interface LayoutSeparatorVertical {
   // set custom one related to specific page
   separatorXPosition: number;
   setSeparatorXPosition: (xPosition: number) => void;
+  onMaxWidthReached?: () => void;
+  onMinWidthReached?: () => void;
 }
 export const LayoutSeparatorVertical: React.FC<LayoutSeparatorVertical> = ({
   leftSideMinWidth,
   leftSideMaxWidth,
   separatorXPosition,
   setSeparatorXPosition,
+  onMaxWidthReached,
+  onMinWidthReached,
 }) => {
   const [separatorXTempPosition, setSeparatorXTempPosition] = useState<
-    undefined | number
+    number | undefined
   >(undefined);
   const [leftWidth, setLeftWidth] = useState<number>(separatorXPosition);
   const [dragging, setDragging] = useState(false);
@@ -29,51 +33,69 @@ export const LayoutSeparatorVertical: React.FC<LayoutSeparatorVertical> = ({
   });
 
   useEffect(() => {
-    if (leftWidth !== separatorXPosition) {
+    if (leftWidth !== separatorXPosition && !dragging) {
       setLeftWidth(separatorXPosition);
     }
-
     window.getSelection()?.removeAllRanges();
-  }, [separatorXPosition]);
-
-  useEffect(() => {
-    if (!dragging && leftWidth !== separatorXPosition) {
-      setSeparatorXPosition(leftWidth);
-    }
-  }, [leftWidth, dragging]);
+  }, [separatorXPosition, dragging]);
 
   const onMouseDown = (e: React.MouseEvent) => {
+    document.body.classList.add("no-select");
     setSeparatorXTempPosition(e.clientX);
     setDragging(true);
-    document.body.classList.add("no-select");
   };
 
-  const onMove = (clientX: number) => {
-    if (dragging && leftWidth && separatorXTempPosition) {
-      const newLeftWidth = leftWidth + clientX - separatorXTempPosition;
-      setSeparatorXTempPosition(clientX);
-      if (newLeftWidth < leftSideMinWidth) {
-        setLeftWidth(leftSideMinWidth);
-        return;
+  const onMove = useCallback(
+    (clientX: number) => {
+      if (dragging && leftWidth && separatorXTempPosition) {
+        const newLeftWidth = leftWidth + clientX - separatorXTempPosition;
+
+        setSeparatorXTempPosition(clientX);
+
+        // Clamp the new width between min and max
+        const clampedWidth = Math.min(
+          Math.max(newLeftWidth, leftSideMinWidth),
+          leftSideMaxWidth
+        );
+        setLeftWidth(clampedWidth);
+
+        // Notify parent when max width is reached
+        if (clampedWidth === leftSideMaxWidth && onMaxWidthReached) {
+          onMaxWidthReached();
+        }
+        // Notify parent when min width is reached
+        if (clampedWidth === leftSideMinWidth && onMinWidthReached) {
+          onMinWidthReached();
+        }
       }
+    },
+    [
+      dragging,
+      leftWidth,
+      separatorXTempPosition,
+      leftSideMinWidth,
+      leftSideMaxWidth,
+      onMaxWidthReached,
+      onMinWidthReached,
+    ]
+  );
 
-      if (newLeftWidth > leftSideMaxWidth) {
-        setLeftWidth(leftSideMaxWidth);
-        return;
-      }
-      setLeftWidth(newLeftWidth);
-    }
-  };
+  const onMouseMove = useCallback(
+    (e: MouseEvent) => {
+      e.preventDefault();
+      onMove(e.clientX);
+    },
+    [onMove]
+  );
 
-  const onMouseMove = (e: MouseEvent) => {
-    e.preventDefault();
-    onMove(e.clientX);
-  };
-
-  const onMouseUp = () => {
+  const onMouseUp = useCallback(() => {
     setDragging(false);
     document.body.classList.remove("no-select");
-  };
+    // Apply the final position
+    if (leftWidth !== separatorXPosition) {
+      setSeparatorXPosition(leftWidth);
+    }
+  }, [leftWidth, separatorXPosition, setSeparatorXPosition]);
 
   useEffect(() => {
     if (hovered || dragging) {
@@ -85,7 +107,7 @@ export const LayoutSeparatorVertical: React.FC<LayoutSeparatorVertical> = ({
         document.removeEventListener("mouseup", onMouseUp);
       };
     }
-  }, [hovered, dragging]);
+  }, [hovered, dragging, onMouseMove, onMouseUp]);
 
   return (
     <StyledLayoutSeparatorVertical

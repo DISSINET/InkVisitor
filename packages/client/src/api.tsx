@@ -99,12 +99,12 @@ class Api {
 
     this.connection = axios.create({
       baseURL: this.apiUrl,
-      timeout: 8000,
+      timeout: 15000,
       responseType: "json",
       headers: this.headers,
     });
 
-    this.tokenKey = `${process.env.NODE_ENV}-token`;
+    this.tokenKey = `${process.env.ENV}-token`;
     this.token = "";
 
     // TODO: remove after release - only needed once to clean up previous localStorage token usage
@@ -579,13 +579,29 @@ class Api {
    * Entities
    * Suggester container
    */
-  async entitiesGet(
+  async entityGet(
     entityId: string,
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseEntity>> {
     try {
       const response = await this.connection.get(
         `/entities/${entityId}`,
+        options
+      );
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  async entitiesGet(
+    entityIds: string[],
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseEntity[]>> {
+    try {
+      const response = await this.connection.post(
+        `/entities/batch`,
+        { ids: entityIds },
         options
       );
       return response;
@@ -1327,23 +1343,6 @@ class Api {
       const response = await this.connection.put(
         `/documents/${documentId}`,
         document,
-        options
-      );
-      return response;
-    } catch (err) {
-      throw this.handleError(err);
-    }
-  }
-
-  async anchorTextGet(
-    documentId: string,
-    entityId: string,
-    anchorIndex: number,
-    options?: IApiOptions
-  ): Promise<AxiosResponse<IResponseGeneric<string>>> {
-    try {
-      const response = await this.connection.get(
-        `/documents/${documentId}/findAnchorWithIndex/${entityId}/${anchorIndex}`,
         options
       );
       return response;

@@ -27,7 +27,6 @@ import Dropdown, {
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaTrash } from "react-icons/fa";
-import { FaArrowDownShortWide } from "react-icons/fa6";
 import {
   MdOutlineCheckBox,
   MdOutlineCheckBoxOutlineBlank,
@@ -58,8 +57,8 @@ import {
 } from "./StatementListHeaderStyles";
 
 interface StatementListHeader {
-  territory: IResponseTerritory;
-  isFavorited?: boolean;
+  territory?: IResponseTerritory;
+  isFetchingTerritory: boolean;
 
   isAllSelected: boolean;
   selectedRows: string[];
@@ -127,16 +126,18 @@ interface StatementListHeader {
     Relation.IRelation[],
     unknown
   >;
-  autoOrderStatementsMutation: UseMutationResult<void, Error, void, unknown>;
+  // autoOrderStatementsMutation: UseMutationResult<void, Error, void, unknown>;
   statementsWithOrder: (IResponseStatement & {
     orderCorrection?: StatementOrderCorrection;
     isAnchored?: boolean;
   })[];
+  favoritedTerritoryIds: string[];
+  contentWidthTooSmall: boolean;
 }
 export const StatementListHeader: React.FC<StatementListHeader> = ({
   territory,
+  isFetchingTerritory,
 
-  isFavorited,
   isAllSelected,
   selectedRows,
   setSelectedRows,
@@ -151,8 +152,10 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
   deleteStatementsMutation,
   relationsCreateMutation,
-  autoOrderStatementsMutation,
+  // autoOrderStatementsMutation,
   statementsWithOrder,
+  favoritedTerritoryIds,
+  contentWidthTooSmall,
 }) => {
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
@@ -316,7 +319,9 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
   const handleSelectAll = (checked: boolean) =>
     checked
-      ? setSelectedRows(territory.statements.map((statement) => statement.id))
+      ? setSelectedRows(
+          territory?.statements.map((statement) => statement.id) || []
+        )
       : setSelectedRows([]);
 
   const renderCheckBox = () => {
@@ -359,35 +364,38 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
     false
   );
 
-  const userCanEdit = territory.right !== UserEnums.RoleMode.Read;
+  const userCanEdit = useMemo(
+    () => territory?.right !== UserEnums.RoleMode.Read,
+    [territory]
+  );
 
   const [showSubmit, setShowSubmit] = useState(false);
-
-  const [moveToParentHovered, setMoveToParentHovered] = useState(false);
 
   const BreadcrumbItems = useMemo(() => {
     return (
       <React.Fragment>
-        {selectedTerritoryPath?.map((territoryId: string, key: number) => {
-          return (
-            <React.Fragment key={key}>
-              <BreadcrumbItem
-                territoryId={territoryId}
-                isFavorited={isFavorited}
-              />
-            </React.Fragment>
-          );
-        })}
-        <React.Fragment key="this-territory">
-          <BreadcrumbItem
-            territoryId={territoryId}
-            territoryData={territory}
-            isFavorited={isFavorited}
-          />
-        </React.Fragment>
+        {territoryId.length > 0 &&
+          selectedTerritoryPath
+            ?.concat(territoryId)
+            .map((tId: string, key: number) => {
+              return (
+                <React.Fragment key={key}>
+                  <BreadcrumbItem
+                    territoryId={tId}
+                    isFavorited={favoritedTerritoryIds?.includes(tId)}
+                    isSelected={tId === territoryId}
+                  />
+                </React.Fragment>
+              );
+            })}
       </React.Fragment>
     );
-  }, [selectedTerritoryPath.join(",")]);
+  }, [
+    territoryId,
+    selectedTerritoryPath.join(","),
+    territory?.labels,
+    favoritedTerritoryIds,
+  ]);
 
   const hasAnchoredStatementsOutOfOrder = statementsWithOrder.some(
     (s) => s.isAnchored && s.orderCorrection && s.orderCorrection.distance > 0
@@ -396,127 +404,134 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   return (
     <>
       <StyledHeader>
-        <StyledHeaderBreadcrumbRow>{BreadcrumbItems}</StyledHeaderBreadcrumbRow>
+        <div style={{ display: "grid", maxWidth: "100%" }}>
+          <StyledHeaderBreadcrumbRow>
+            {BreadcrumbItems}
+          </StyledHeaderBreadcrumbRow>
+        </div>
 
-        <StyledSuggesterRow>
-          {/* BATCH ACTIONS */}
-          <StyledActionsWrapper>
-            <Button
-              icon={<FaArrowDownShortWide />}
-              onClick={() => autoOrderStatementsMutation.mutate()}
-              color="success"
-              tooltipLabel="auto order statements"
-              tooltipContent={
-                hasAnchoredStatementsOutOfOrder ? (
-                  <i>leaves non-anchored statements in place</i>
-                ) : (
-                  <i>
-                    order of anchored statements corresponds to the document
-                  </i>
-                )
-              }
-              disabled={!hasAnchoredStatementsOutOfOrder}
-            />
-            {user?.role !== UserEnums.Role.Viewer &&
-              territory.statements.length > 0 && (
-                <>
-                  <StyledCheckboxWrapper>
-                    {renderCheckBox()}
-                  </StyledCheckboxWrapper>
-
-                  {selectedRows.length > 0 && (
-                    <StyledCounter>{`${selectedRows.length}/${territory.statements.length}`}</StyledCounter>
-                  )}
-
-                  {
-                    <>
-                      <StyledDropdownWrap>
-                        <Dropdown.Single.Basic
-                          tooltipLabel={
-                            batchAction.info === EntityEnums.Class.Resource
-                              ? batchAction.label
-                              : ""
-                          }
-                          width={98}
-                          disabled={selectedRows.length === 0}
-                          value={batchAction.value}
-                          onChange={(selectedOption) =>
-                            setBatchAction(
-                              batchOptions.find(
-                                (o) => o.value === selectedOption
-                              )!
-                            )
-                          }
-                          options={batchOptions}
-                        />
-                      </StyledDropdownWrap>
-
-                      {/* Batch delete */}
-                      {batchAction.value === BatchOption.delete_S && (
-                        <Button
-                          icon={<FaTrash />}
-                          color="danger"
-                          inverted
-                          onClick={() => setShowSubmit(true)}
-                          tooltipLabel="delete selected statements"
-                        />
-                      )}
-
-                      {batchAction.info && (
-                        <EntitySuggester
-                          inputWidth={70}
-                          placeholder={
-                            batchAction.info === EntityEnums.Class.Territory
-                              ? "to territory"
-                              : ""
-                          }
-                          disableTemplatesAccept
-                          filterEditorRights
-                          categoryTypes={[
-                            entitiesDictKeys[
-                              batchAction.info as EntityEnums.Class
-                            ].value,
-                          ]}
-                          onSelected={(newSelectedId: string) =>
-                            handleOnSelected(newSelectedId)
-                          }
-                          excludedActantIds={[territory.id]}
-                          disabled={selectedRows.length === 0}
-                        />
-                      )}
-                    </>
-                  }
-                </>
-              )}
-          </StyledActionsWrapper>
-          {territory.id !== rootTerritoryId && userCanEdit && (
-            <StyledMoveToParent
-              onMouseEnter={() => setMoveToParentHovered(true)}
-              onMouseLeave={() => setMoveToParentHovered(false)}
-            >
-              <EntitySuggester
-                placeholder="move"
-                disableTemplatesAccept
-                filterEditorRights
-                inputWidth={moveToParentHovered ? 80 : 40}
-                disableCreate
-                categoryTypes={[EntityEnums.Class.Territory]}
-                onPicked={(selectedEntity) => {
-                  setMoveToParentEntity(selectedEntity);
-                  setShowTActionModal(true);
-                }}
-                excludedActantIds={excludedMoveTerritories}
-                button={
-                  <Button
-                    icon={<TbHomeMove size={14} />}
-                    onClick={() => setShowTActionModal(true)}
-                    tooltipLabel="move or duplicate current territory"
-                  />
+        {userCanEdit && (
+          <StyledSuggesterRow>
+            {/* BATCH ACTIONS */}
+            <StyledActionsWrapper>
+              {/* temporary disabled */}
+              {/* <Button
+                icon={<FaArrowDownShortWide />}
+                onClick={() => autoOrderStatementsMutation.mutate()}
+                color="success"
+                tooltipLabel="auto order statements"
+                tooltipContent={
+                  hasAnchoredStatementsOutOfOrder ? (
+                    <i>leaves non-anchored statements in place</i>
+                  ) : (
+                    <i>
+                      order of anchored statements corresponds to the document
+                    </i>
+                  )
                 }
-              />
-            </StyledMoveToParent>
-          )}
-        </StyledSuggesterRow>
+                disabled={!hasAnchoredStatementsOutOfOrder}
+              /> */}
+              {user?.role !== UserEnums.Role.Viewer &&
+                territory &&
+                territory.statements.length > 0 && (
+                  <>
+                    <StyledCheckboxWrapper>
+                      {renderCheckBox()}
+                    </StyledCheckboxWrapper>
+
+                    {selectedRows.length > 0 && (
+                      <StyledCounter>{`${selectedRows.length}/${territory.statements.length}`}</StyledCounter>
+                    )}
+
+                    {
+                      <>
+                        <StyledDropdownWrap>
+                          <Dropdown.Single.Basic
+                            tooltipLabel={
+                              batchAction.info === EntityEnums.Class.Resource
+                                ? batchAction.label
+                                : ""
+                            }
+                            width={98}
+                            disabled={selectedRows.length === 0}
+                            value={batchAction.value}
+                            onChange={(selectedOption) =>
+                              setBatchAction(
+                                batchOptions.find(
+                                  (o) => o.value === selectedOption
+                                )!
+                              )
+                            }
+                            options={batchOptions}
+                          />
+                        </StyledDropdownWrap>
+
+                        {/* Batch delete */}
+                        {batchAction.value === BatchOption.delete_S && (
+                          <Button
+                            icon={<FaTrash />}
+                            color="danger"
+                            inverted
+                            onClick={() => setShowSubmit(true)}
+                            tooltipLabel="delete selected statements"
+                          />
+                        )}
+
+                        {batchAction.info && (
+                          <EntitySuggester
+                            inputWidth={70}
+                            placeholder={
+                              batchAction.info === EntityEnums.Class.Territory
+                                ? "to territory"
+                                : ""
+                            }
+                            disableTemplatesAccept
+                            filterEditorRights
+                            categoryTypes={[
+                              entitiesDictKeys[
+                                batchAction.info as EntityEnums.Class
+                              ].value,
+                            ]}
+                            onSelected={(newSelectedId: string) =>
+                              handleOnSelected(newSelectedId)
+                            }
+                            excludedActantIds={[territory.id]}
+                            disabled={selectedRows.length === 0}
+                          />
+                        )}
+                      </>
+                    }
+                  </>
+                )}
+            </StyledActionsWrapper>
+            {territoryId !== rootTerritoryId && userCanEdit && (
+              <StyledMoveToParent>
+                <EntitySuggester
+                  placeholder="move"
+                  disableTemplatesAccept
+                  filterEditorRights
+                  inputWidth={
+                    selectedRows.length > 0 && contentWidthTooSmall ? 36 : 80
+                  }
+                  disableCreate
+                  categoryTypes={[EntityEnums.Class.Territory]}
+                  onPicked={(selectedEntity) => {
+                    setMoveToParentEntity(selectedEntity);
+                    setShowTActionModal(true);
+                  }}
+                  excludedActantIds={excludedMoveTerritories}
+                  button={
+                    <Button
+                      icon={<TbHomeMove size={14} />}
+                      onClick={() => setShowTActionModal(true)}
+                      tooltipLabel="move or duplicate current territory"
+                    />
+                  }
+                />
+              </StyledMoveToParent>
+            )}
+          </StyledSuggesterRow>
+        )}
       </StyledHeader>
 
       {showTActionModal && (
@@ -529,6 +544,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
           updateTerritoryMutation={updateTerritoryMutation}
           excludedMoveTerritories={excludedMoveTerritories}
           duplicateTerritoryMutation={duplicateTerritoryMutation}
+          isFetchingTerritory={isFetchingTerritory}
         />
       )}
       <Submit

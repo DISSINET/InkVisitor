@@ -8,20 +8,26 @@ import {
 } from "@shared/types";
 import { UseMutationResult } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
-import { Button, TagGroup } from "components";
+import { Button, Loader, TagGroup } from "components";
 import { EntityTag } from "components/advanced";
 import { useSearchParams } from "hooks";
 import update from "immutability-helper";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { BsArrowDown, BsArrowUp } from "react-icons/bs";
 import { FaClone, FaPlus, FaTrashAlt } from "react-icons/fa";
-import { FaArrowDownLong, FaArrowUpLong } from "react-icons/fa6";
 import {
   MdOutlineCheckBox,
   MdOutlineCheckBoxOutlineBlank,
 } from "react-icons/md";
 import { TbAnchor } from "react-icons/tb";
 import { TiWarningOutline } from "react-icons/ti";
+import { BeatLoader } from "react-spinners";
 import {
   CellProps,
   Column,
@@ -32,6 +38,7 @@ import {
 import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { ThemeContext } from "styled-components";
 import { StatementListDisplayMode, StatementOrderCorrection } from "types";
 import { StatementListContextMenu } from "../StatementListContextMenu/StatementListContextMenu";
 import { StatementListRow } from "./StatementListRow";
@@ -42,6 +49,7 @@ import {
   StyledFocusedCircle,
   StyledTHead,
   StyledTable,
+  StyledTd,
   StyledTh,
 } from "./StatementListTableStyles";
 
@@ -97,8 +105,8 @@ interface StatementListTable {
   selectedRows: string[];
   setSelectedRows: React.Dispatch<React.SetStateAction<string[]>>;
   displayMode: StatementListDisplayMode;
-  contentWidth: number;
   annotator?: Annotator;
+  isLoading: boolean;
 }
 export const StatementListTable: React.FC<StatementListTable> = ({
   statements,
@@ -115,8 +123,8 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   selectedRows,
   setSelectedRows,
   displayMode,
-  contentWidth,
   annotator,
+  isLoading,
 }) => {
   const dispatch = useAppDispatch();
   const { territoryId, setStatementId } = useSearchParams();
@@ -550,48 +558,49 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   );
 
   return (
-    <StyledTable
-      {...getTableProps()}
-      $isListMode={displayMode === StatementListDisplayMode.LIST}
-      // $contentWidth={contentWidth}
-    >
-      <StyledTHead>
-        {headerGroups.map((headerGroup, key) => (
-          <tr {...headerGroup.getHeaderGroupProps()} key={key}>
-            {headerGroup.headers.map((column, key) =>
-              key < 6 ? (
-                <StyledTh {...column.getHeaderProps()} key={key}>
-                  {column.render("Header") as React.ReactNode}
-                </StyledTh>
-              ) : (
-                <th key={key}></th>
-              )
-            )}
-            {displayMode !== StatementListDisplayMode.TEXT && (
-              <StyledTh style={{ width: "50px" }} key={"expander"}></StyledTh>
-            )}
-          </tr>
-        ))}
-      </StyledTHead>
-      <tbody {...getTableBodyProps()}>
-        {rows.map((row, i) => {
-          prepareRow(row);
-          return (
-            <StatementListRow
-              index={i}
-              handleClick={handleRowClickWithAnnotator}
-              row={row}
-              moveRow={moveRow}
-              moveEndRow={moveEndRow}
-              visibleColumns={visibleColumns}
-              entities={entities}
-              isSelected={selectedRows.includes(row.id)}
-              displayMode={displayMode}
-              {...row.getRowProps()}
-            />
-          );
-        })}
-      </tbody>
-    </StyledTable>
+    <>
+      <StyledTable
+        {...getTableProps()}
+        $isListMode={displayMode === StatementListDisplayMode.LIST}
+      >
+        <StyledTHead>
+          {headerGroups.map((headerGroup, key) => (
+            <tr {...headerGroup.getHeaderGroupProps()} key={key}>
+              {headerGroup.headers.map((column, key) =>
+                key < 6 ? (
+                  <StyledTh {...column.getHeaderProps()} key={key}>
+                    {column.render("Header") as React.ReactNode}
+                  </StyledTh>
+                ) : (
+                  <th key={key}></th>
+                )
+              )}
+              {displayMode !== StatementListDisplayMode.TEXT && (
+                <StyledTh style={{ width: "50px" }} key={"expander"}></StyledTh>
+              )}
+            </tr>
+          ))}
+        </StyledTHead>
+        <tbody {...getTableBodyProps()}>
+          {rows.map((row, i) => {
+            prepareRow(row);
+            return (
+              <StatementListRow
+                index={i}
+                handleClick={handleRowClickWithAnnotator}
+                row={row}
+                moveRow={moveRow}
+                moveEndRow={moveEndRow}
+                visibleColumns={visibleColumns}
+                entities={entities}
+                isSelected={selectedRows.includes(row.id)}
+                displayMode={displayMode}
+                {...row.getRowProps()}
+              />
+            );
+          })}
+        </tbody>
+      </StyledTable>
+    </>
   );
 };

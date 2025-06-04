@@ -16,32 +16,11 @@ export const StyledGridCell = styled.div`
   display: grid;
 `;
 
-// Base Components
-interface StyledSectionBase {}
-export const StyledSectionBase = styled.div<StyledSectionBase>`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  box-sizing: border-box;
-  padding-left: ${({ theme }) => theme.space[3]};
-  padding-right: ${({ theme }) => theme.space[3]};
-  padding-bottom: ${({ theme }) => theme.space[4]};
-`;
-
 interface StyledSectionLabel {}
 export const StyledSectionLabel = styled.div<StyledSectionLabel>`
   color: ${({ theme }) => theme.color["info"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   margin-bottom: ${({ theme }) => theme.space[2]};
-`;
-
-interface StyledSectionContent {}
-export const StyledSectionContent = styled.div<StyledSectionContent>`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.space[3]};
-  width: 100%;
-  box-sizing: border-box;
 `;
 
 // Editor Section
@@ -81,13 +60,10 @@ interface StyledEditorSection {
   $metaSection?: boolean;
   $marginRight?: boolean;
 }
-export const StyledEditorSection = styled(
-  StyledSectionBase
-)<StyledEditorSection>`
+export const StyledEditorSection = styled.div<StyledEditorSection>`
   padding: ${({ theme }) => theme.space[6]};
   padding-right: ${({ $metaSection }) => ($metaSection ? 0 : "")};
   padding-right: ${({ $marginRight }) => ($marginRight ? "0.5rem" : "")};
-  box-sizing: border-box;
   margin: 0.2rem 0 0 2rem;
   border-bottom-width: ${({ theme }) => theme.borderWidth[1]};
   border-bottom-color: ${({ theme }) => theme.color["gray"][500]};
@@ -126,6 +102,7 @@ export const StyledEditorSectionHeading = styled.div`
   margin-right: ${({ theme }) => theme.space[2]};
   align-items: center;
   display: flex;
+  white-space: nowrap;
 `;
 
 interface StyledEditorSectionContent {}
@@ -210,6 +187,9 @@ export const StyledHeaderTagWrap = styled.div`
 `;
 
 export const StyledEditorHeaderInputWrap = styled.div`
+  display: flex;
+  flex-shrink: 1;
+  width: 100%;
   margin-bottom: ${({ theme }) => theme.space[2]};
 `;
 
@@ -226,6 +206,7 @@ export const StyledEditorContentLabel = styled(StyledSectionLabel)`
   white-space: nowrap;
   display: flex;
   align-items: center;
+  margin-right: ${({ theme }) => theme.space[3]};
 `;
 
 export const StyledEditorContentRowValue = styled.div`
@@ -246,14 +227,6 @@ export const StyledEditorContentRowValueID = styled.div`
   }
 `;
 
-export const StyledEditorTemplateSection = styled(StyledSectionBase)`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: ${({ theme }) => theme.space[2]};
-  box-sizing: border-box;
-`;
-
 export const StyledMissingTerritory = styled.p`
   color: ${({ theme }) => theme.color["warning"]};
   margin-left: 0.5rem;
@@ -261,9 +234,12 @@ export const StyledMissingTerritory = styled.p`
 `;
 
 // Anchor Section
-export const StyledEditorAnchorSection = styled(StyledSectionBase)``;
-
-export const StyledEditorAnchorSectionContent = styled(StyledSectionContent)``;
+export const StyledEditorAnchorSectionContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.space[3]};
+  width: 100%;
+`;
 
 interface StyledEditorAnchorSectionAnchor {}
 export const StyledEditorAnchorSectionAnchor = styled.div<StyledEditorAnchorSectionAnchor>`

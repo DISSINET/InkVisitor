@@ -427,7 +427,6 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     <>
       <Suggester
         isFetching={isFetchingStatement}
-        marginTop={false}
         suggestions={suggestions || []}
         preSuggestions={
           preSuggestions &&

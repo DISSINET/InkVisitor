@@ -24,7 +24,9 @@ export const StatementListOrderCorrection: React.FC<
         onMouseLeave={() => setShowTooltip(false)}
       >
         {/* no anchor icon */}
-        {!isAnchored ? (
+        {/* temporary disabled */}
+        {!isAnchored && <TbAnchorOff size={15} />}
+        {/* {!isAnchored ? (
           <TbAnchorOff size={15} />
         ) : (
           // order correction helper
@@ -40,14 +42,14 @@ export const StatementListOrderCorrection: React.FC<
               <div>{orderCorrection.distance}</div>
             </>
           )
-        )}
+        )} */}
       </StyledOrderCorrection>
       <Tooltip
         visible={showTooltip}
         label={
           !isAnchored
-            ? "statement is unanchored"
-            : `distance to correct the order of the statement`
+            ? "statement is not anchored"
+            : `distance and direction to correct the order of the statement`
         }
         referenceElement={referenceElement}
         position="right"

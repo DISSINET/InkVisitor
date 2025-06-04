@@ -5,6 +5,7 @@ import ReactJson from "react-json-view";
 import { StyledJSONExplorerWrapper } from "./JSONExplorerStyles";
 import { useAppSelector } from "redux/hooks";
 import { InterfaceEnums } from "@shared/enums";
+import { toast } from "react-toastify";
 
 interface IJSONDisplay {
   data: object;
@@ -18,6 +19,7 @@ export const JSONExplorer: React.FC<IJSONDisplay> = ({ data = {} }) => {
 
   const handleCopy = () => {
     navigator.clipboard.writeText(JSON.stringify(data, null, 2));
+    toast.info("JSON copied to clipboard");
   };
 
   return (

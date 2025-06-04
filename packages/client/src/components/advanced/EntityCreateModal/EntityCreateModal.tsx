@@ -404,7 +404,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
             </ModalInputWrap>
 
             {/* Language */}
-            <ModalInputLabel>{"Language: "}</ModalInputLabel>
+            <ModalInputLabel>{"Label language: "}</ModalInputLabel>
             <ModalInputWrap>
               <Dropdown.Single.Basic
                 width="full"

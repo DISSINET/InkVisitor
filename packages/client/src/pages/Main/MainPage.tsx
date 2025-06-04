@@ -2,7 +2,7 @@ import { EntityEnums, UserEnums } from "@shared/enums";
 import { IStatement } from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  collapsedPanelWidth,
+  COLLAPSED_PANEL_WIDTH,
   FIRST_PANEL_MIN_WIDTH,
   fourthPanelBoxesHeightThirds,
   hiddenBoxHeight,
@@ -12,6 +12,11 @@ import {
   SECOND_PANEL_MIN_WIDTH,
   THIRD_PANEL_MIN_WIDTH,
   MAIN_PAGE_SEARCH_SEPARATOR_X_PERCENT_POSITION,
+  FOURTH_PANEL_MIN_WIDTH,
+  INIT_PERCENT_PANEL_WIDTHS_SMALL_SCREEN,
+  SMALL_SCREEN_LIMIT,
+  INIT_PERCENT_PANEL_WIDTHS_LARGE_SCREEN,
+  LARGE_SCREEN_LIMIT,
 } from "Theme/constants";
 import api from "api";
 import { Box, Button, ButtonGroup, Panel } from "components";
@@ -22,7 +27,7 @@ import {
 import { CStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import ScrollHandler from "hooks/ScrollHandler";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { BiHide, BiRefresh, BiShow } from "react-icons/bi";
 import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
 import { FaHighlighter, FaList, FaPlus } from "react-icons/fa";
@@ -79,9 +84,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
   const panelWidths: number[] = useAppSelector(
     (state) => state.layout.mainPage.panelWidths
   );
-  const panelWidthsPercent: number[] = useAppSelector(
-    (state) => state.layout.mainPage.panelWidthsPercent
-  );
+  // const panelWidthsPercent: number[] = useAppSelector(
+  //   (state) => state.layout.mainPage.panelWidthsPercent
+  // );
   const fourthPanelBoxesOpened: { [key: string]: boolean } = useAppSelector(
     (state) => state.layout.mainPage.fourthPanelBoxesOpened
   );
@@ -108,10 +113,8 @@ const MainPage: React.FC<MainPage> = ({}) => {
   const toggleFirstPanel = () => {
     if (firstPanelExpanded) {
       dispatch(setFirstPanelExpanded(false));
-      localStorage.setItem("firstPanelExpanded", "false");
     } else {
       dispatch(setFirstPanelExpanded(true));
-      localStorage.setItem("firstPanelExpanded", "true");
     }
   };
 
@@ -126,10 +129,16 @@ const MainPage: React.FC<MainPage> = ({}) => {
   const toggleThirdPanel = () => {
     if (thirdPanelExpanded) {
       dispatch(setThirdPanelExpanded(false));
-      localStorage.setItem("thirdPanelExpanded", "false");
     } else {
       dispatch(setThirdPanelExpanded(true));
-      localStorage.setItem("thirdPanelExpanded", "true");
+      if (
+        mainPageCenterSeparatorXPosition - mainPageTreeSeparatorXPosition <
+        SECOND_PANEL_MIN_WIDTH
+      ) {
+        handleTreeSeparatorXPositionChange(
+          mainPageCenterSeparatorXPosition - SECOND_PANEL_MIN_WIDTH
+        );
+      }
     }
   };
 
@@ -144,10 +153,16 @@ const MainPage: React.FC<MainPage> = ({}) => {
   const toggleFourthPanel = () => {
     if (fourthPanelExpanded) {
       dispatch(setFourthPanelExpanded(false));
-      localStorage.setItem("fourthPanelExpanded", "false");
     } else {
       dispatch(setFourthPanelExpanded(true));
-      localStorage.setItem("fourthPanelExpanded", "true");
+      if (
+        mainPageSearchSeparatorXPosition - mainPageCenterSeparatorXPosition <
+        THIRD_PANEL_MIN_WIDTH
+      ) {
+        handleCenterSeparatorXPositionChange(
+          mainPageSearchSeparatorXPosition - THIRD_PANEL_MIN_WIDTH
+        );
+      }
     }
   };
 
@@ -170,14 +185,12 @@ const MainPage: React.FC<MainPage> = ({}) => {
         [boxToHide]: true,
       };
       dispatch(setFourthPanelBoxesOpened(newObject));
-      localStorage.setItem("fourthPanelBoxesOpened", JSON.stringify(newObject));
     } else {
       const newObject = {
         ...fourthPanelBoxesOpened,
         [boxToHide]: false,
       };
       dispatch(setFourthPanelBoxesOpened(newObject));
-      localStorage.setItem("fourthPanelBoxesOpened", JSON.stringify(newObject));
     }
   };
 
@@ -309,6 +322,20 @@ const MainPage: React.FC<MainPage> = ({}) => {
     enabled: !!userId && api.isLoggedIn(),
   });
 
+  // Admin / Owner / Editor with writer rights
+  const hasWriteRightsToSelectedTerritory = useMemo(() => {
+    return (
+      (user?.role === UserEnums.Role.Editor &&
+        user?.rights?.some(
+          (right) =>
+            right.territory === territoryId &&
+            right.mode === UserEnums.RoleMode.Write
+        )) ||
+      user?.role === UserEnums.Role.Admin ||
+      user?.role === UserEnums.Role.Owner
+    );
+  }, [user, territoryId]);
+
   const getStatementListBoxHeight = () => {
     if (!detailIdArray.length) {
       return contentHeight;
@@ -363,29 +390,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
       setLastState(detailBoxState);
       dispatch(setDetailBoxState(DetailBoxState.Minimized));
     }
-  };
-
-  const minimizeDetailBoxButton = () => {
-    return (
-      <>
-        <Button
-          tooltipLabel={
-            detailBoxState === DetailBoxState.Minimized
-              ? "open detail box"
-              : "minimize detail box"
-          }
-          inverted
-          icon={
-            detailBoxState === DetailBoxState.Minimized ? (
-              <BiShow />
-            ) : (
-              <BiHide />
-            )
-          }
-          onClick={handleMinimizeDetailBox}
-        />
-      </>
-    );
   };
 
   const getDetailBoxHeight = () => {
@@ -494,7 +498,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
         setPanelWidths([
           panelWidths[0],
           floorNumberToOneDecimal(xPosition - panelWidths[0]),
-          layoutWidth - panelWidths[3] - xPosition,
+          floorNumberToOneDecimal(layoutWidth - panelWidths[3] - xPosition),
           panelWidths[3],
         ])
       );
@@ -524,9 +528,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
     }
   };
 
-  const isPanelUndersized = (panelWidth: number, minWidth: number) =>
-    panelWidth < minWidth;
-
   const handleSeparatorLayoutInit = () => {
     let secondPanel =
       mainPageCenterSeparatorXPosition - mainPageTreeSeparatorXPosition;
@@ -553,16 +554,70 @@ const MainPage: React.FC<MainPage> = ({}) => {
     );
   };
 
+  const handleLayoutInit = () => {
+    // calculate panel widths based on screen width
+    const initPanelWidthsPx =
+      layoutWidth > LARGE_SCREEN_LIMIT
+        ? INIT_PERCENT_PANEL_WIDTHS_LARGE_SCREEN.map((percentWidth) => {
+            return floorNumberToOneDecimal(
+              percentWidth * onePercentOfLayoutWidth
+            );
+          })
+        : layoutWidth < SMALL_SCREEN_LIMIT
+        ? INIT_PERCENT_PANEL_WIDTHS_SMALL_SCREEN.map((percentWidth) => {
+            return floorNumberToOneDecimal(
+              percentWidth * onePercentOfLayoutWidth
+            );
+          })
+        : INIT_PERCENT_PANEL_WIDTHS.map((percentWidth) => {
+            return floorNumberToOneDecimal(
+              percentWidth * onePercentOfLayoutWidth
+            );
+          });
+    dispatch(setPanelWidths(initPanelWidthsPx));
+    dispatch(
+      setPanelWidthsPercent(
+        layoutWidth > LARGE_SCREEN_LIMIT
+          ? INIT_PERCENT_PANEL_WIDTHS_LARGE_SCREEN
+          : layoutWidth < SMALL_SCREEN_LIMIT
+          ? INIT_PERCENT_PANEL_WIDTHS_SMALL_SCREEN
+          : INIT_PERCENT_PANEL_WIDTHS
+      )
+    );
+    // set all separators to redux and local storage
+    setMainPageTreeSeparatorXPosition(initPanelWidthsPx[0]);
+    localStorage.setItem(
+      "mainPageTreeSeparatorXPosition",
+      (initPanelWidthsPx[0] / onePercentOfLayoutWidth).toString()
+    );
+    setMainPageCenterSeparatorXPosition(
+      initPanelWidthsPx[0] + initPanelWidthsPx[1]
+    );
+    localStorage.setItem(
+      "mainPageCenterSeparatorXPosition",
+      (
+        (initPanelWidthsPx[0] + initPanelWidthsPx[1]) /
+        onePercentOfLayoutWidth
+      ).toString()
+    );
+    setMainPageSearchSeparatorXPosition(
+      initPanelWidthsPx[0] + initPanelWidthsPx[1] + initPanelWidthsPx[2]
+    );
+    localStorage.setItem(
+      "mainPageSearchSeparatorXPosition",
+      (
+        (initPanelWidthsPx[0] + initPanelWidthsPx[1] + initPanelWidthsPx[2]) /
+        onePercentOfLayoutWidth
+      ).toString()
+    );
+  };
+
+  const isFirstRender = useRef(true);
+
   useEffect(() => {
     if (layoutWidth > 0) {
-      const initPanelWidthsPx = INIT_PERCENT_PANEL_WIDTHS.map(
-        (percentWidth) => {
-          return floorNumberToOneDecimal(
-            percentWidth * onePercentOfLayoutWidth
-          );
-        }
-      );
-      if (!panelWidths.length) {
+      if (isFirstRender.current || !panelWidths.length) {
+        // This is either initial load or coming from different page
         if (
           !localStorageCenterSeparatorXPosition ||
           !localStorageTreeSeparatorXPosition ||
@@ -570,99 +625,42 @@ const MainPage: React.FC<MainPage> = ({}) => {
         ) {
           console.log("first layout init");
           // first layout INIT
-          dispatch(setPanelWidths(initPanelWidthsPx));
-          dispatch(setPanelWidthsPercent(INIT_PERCENT_PANEL_WIDTHS));
-          setMainPageTreeSeparatorXPosition(initPanelWidthsPx[0]);
-          localStorage.setItem(
-            "mainPageTreeSeparatorXPosition",
-            (initPanelWidthsPx[0] / onePercentOfLayoutWidth).toString()
-          );
-          setMainPageCenterSeparatorXPosition(
-            initPanelWidthsPx[0] + initPanelWidthsPx[1]
-          );
-          localStorage.setItem(
-            "mainPageCenterSeparatorXPosition",
-            (
-              (initPanelWidthsPx[0] + initPanelWidthsPx[1]) /
-              onePercentOfLayoutWidth
-            ).toString()
-          );
-          setMainPageSearchSeparatorXPosition(
-            initPanelWidthsPx[0] + initPanelWidthsPx[1] + initPanelWidthsPx[2]
-          );
-          localStorage.setItem(
-            "mainPageSearchSeparatorXPosition",
-            (
-              (initPanelWidthsPx[0] +
-                initPanelWidthsPx[1] +
-                initPanelWidthsPx[2]) /
-              onePercentOfLayoutWidth
-            ).toString()
-          );
+          handleLayoutInit();
         } else {
-          // layout init with saved separator
-          console.log("init load - separator determines panel widths");
-          handleSeparatorLayoutInit();
-        }
-      } else {
-        // change of layout width (different monitor) / redirect from different page
-        console.log("layout width changed / redirect from different page");
-        const panelWidthsPx = panelWidthsPercent.map((percentWidth) => {
-          return floorNumberToOneDecimal(
-            percentWidth * onePercentOfLayoutWidth
-          );
-        });
-        const firstPanelUndersized = isPanelUndersized(
-          panelWidthsPx[0],
-          FIRST_PANEL_MIN_WIDTH
-        );
-        const secondPanelUndersized = isPanelUndersized(
-          panelWidthsPx[1],
-          SECOND_PANEL_MIN_WIDTH
-        );
-        const thirdPanelUndersized = isPanelUndersized(
-          panelWidthsPx[2],
-          THIRD_PANEL_MIN_WIDTH
-        );
+          const isSomethingUndersized =
+            Number(localStorageTreeSeparatorXPosition) *
+              onePercentOfLayoutWidth <
+              FIRST_PANEL_MIN_WIDTH ||
+            (Number(localStorageCenterSeparatorXPosition) -
+              Number(localStorageTreeSeparatorXPosition)) *
+              onePercentOfLayoutWidth <
+              SECOND_PANEL_MIN_WIDTH ||
+            (Number(localStorageSearchSeparatorXPosition) -
+              Number(localStorageCenterSeparatorXPosition)) *
+              onePercentOfLayoutWidth <
+              THIRD_PANEL_MIN_WIDTH ||
+            (layoutWidth - Number(localStorageSearchSeparatorXPosition)) *
+              onePercentOfLayoutWidth <
+              FOURTH_PANEL_MIN_WIDTH;
 
-        if (
-          !firstPanelUndersized &&
-          !secondPanelUndersized &&
-          !thirdPanelUndersized
-        ) {
-          console.log("not undersized - set calculated width");
-          handleSeparatorLayoutInit();
-        } else {
-          console.log("something is undersized - set init width");
-          dispatch(setPanelWidths(initPanelWidthsPx));
-          setMainPageTreeSeparatorXPosition(initPanelWidthsPx[0]);
-          localStorage.setItem(
-            "mainPageTreeSeparatorXPosition",
-            (initPanelWidthsPx[0] / onePercentOfLayoutWidth).toString()
-          );
-          setMainPageCenterSeparatorXPosition(
-            initPanelWidthsPx[0] + initPanelWidthsPx[1]
-          );
-          localStorage.setItem(
-            "mainPageCenterSeparatorXPosition",
-            (
-              (initPanelWidthsPx[0] + initPanelWidthsPx[1]) /
-              onePercentOfLayoutWidth
-            ).toString()
-          );
-          setMainPageSearchSeparatorXPosition(
-            initPanelWidthsPx[0] + initPanelWidthsPx[1] + initPanelWidthsPx[2]
-          );
-          localStorage.setItem(
-            "mainPageSearchSeparatorXPosition",
-            (
-              (initPanelWidthsPx[0] +
-                initPanelWidthsPx[1] +
-                initPanelWidthsPx[2]) /
-              onePercentOfLayoutWidth
-            ).toString()
-          );
+          if (isSomethingUndersized) {
+            // something is undersized
+            console.log("something is undersized");
+            handleLayoutInit();
+          } else {
+            // layout init with saved separator - coming from different page
+            console.log(
+              "page reload / coming from different page - separator determines panel widths"
+            );
+            handleSeparatorLayoutInit();
+          }
         }
+
+        isFirstRender.current = false;
+      } else {
+        // change of layout width (different monitor / change of zoom)
+        console.log("layout width changed");
+        handleLayoutInit();
       }
     }
   }, [layoutWidth]);
@@ -675,11 +673,25 @@ const MainPage: React.FC<MainPage> = ({}) => {
         <LayoutSeparatorVertical
           leftSideMinWidth={FIRST_PANEL_MIN_WIDTH}
           leftSideMaxWidth={
-            mainPageCenterSeparatorXPosition - SECOND_PANEL_MIN_WIDTH
+            thirdPanelExpanded
+              ? mainPageCenterSeparatorXPosition - SECOND_PANEL_MIN_WIDTH
+              : // if the editor is collapsed, calculate the min width from the right side
+                layoutWidth -
+                panelWidths[3] -
+                COLLAPSED_PANEL_WIDTH -
+                SECOND_PANEL_MIN_WIDTH
           }
           separatorXPosition={mainPageTreeSeparatorXPosition}
           setSeparatorXPosition={(xPosition) => {
             handleTreeSeparatorXPositionChange(xPosition);
+          }}
+          onMaxWidthReached={() => {
+            // doesn't work because I need this reaches redux in parallel with the main handler
+            if (panelWidths[2] > THIRD_PANEL_MIN_WIDTH + 10) {
+              handleCenterSeparatorXPositionChange(
+                mainPageCenterSeparatorXPosition + 10
+              );
+            }
           }}
         />
       )}
@@ -691,11 +703,20 @@ const MainPage: React.FC<MainPage> = ({}) => {
             mainPageTreeSeparatorXPosition + SECOND_PANEL_MIN_WIDTH
           }
           leftSideMaxWidth={
-            layoutWidth - panelWidths[3] - THIRD_PANEL_MIN_WIDTH
+            fourthPanelExpanded
+              ? layoutWidth - panelWidths[3] - THIRD_PANEL_MIN_WIDTH
+              : layoutWidth - COLLAPSED_PANEL_WIDTH - THIRD_PANEL_MIN_WIDTH
           }
           separatorXPosition={mainPageCenterSeparatorXPosition}
           setSeparatorXPosition={(xPosition) => {
             handleCenterSeparatorXPositionChange(xPosition);
+          }}
+          onMinWidthReached={() => {
+            if (panelWidths[0] > FIRST_PANEL_MIN_WIDTH + 10) {
+              handleTreeSeparatorXPositionChange(
+                mainPageTreeSeparatorXPosition - 10
+              );
+            }
           }}
         />
       )}
@@ -706,7 +727,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
           leftSideMinWidth={
             mainPageCenterSeparatorXPosition + THIRD_PANEL_MIN_WIDTH
           }
-          leftSideMaxWidth={layoutWidth - 200}
+          leftSideMaxWidth={layoutWidth - FOURTH_PANEL_MIN_WIDTH}
           separatorXPosition={mainPageSearchSeparatorXPosition}
           setSeparatorXPosition={(xPosition) => {
             handleSearchSeparatorXPositionChange(xPosition);
@@ -715,7 +736,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
       )}
 
       {/* FIRST PANEL */}
-      <Panel width={firstPanelExpanded ? panelWidths[0] : collapsedPanelWidth}>
+      <Panel
+        width={firstPanelExpanded ? panelWidths[0] : COLLAPSED_PANEL_WIDTH}
+      >
         <Box
           height={contentHeight}
           label="Territories"
@@ -736,10 +759,10 @@ const MainPage: React.FC<MainPage> = ({}) => {
         width={
           (firstPanelExpanded
             ? panelWidths[1]
-            : panelWidths[1] + panelWidths[0] - collapsedPanelWidth) +
-          (thirdPanelExpanded ? 0 : panelWidths[2] - collapsedPanelWidth) +
+            : panelWidths[1] + panelWidths[0] - COLLAPSED_PANEL_WIDTH) +
+          (thirdPanelExpanded ? 0 : panelWidths[2] - COLLAPSED_PANEL_WIDTH) +
           (!fourthPanelExpanded && !thirdPanelExpanded
-            ? panelWidths[3] - collapsedPanelWidth
+            ? panelWidths[3] - COLLAPSED_PANEL_WIDTH
             : 0)
         }
       >
@@ -771,8 +794,8 @@ const MainPage: React.FC<MainPage> = ({}) => {
                 ></Button>
               </ButtonGroup>
               <ButtonGroup style={{ marginLeft: "5px", marginRight: "5px" }}>
-                {/* TODO: check if user has write rights to Territory */}
-                {userRole !== UserEnums.Role.Viewer && territoryId && (
+                {/* Admin / Owner / Editor with writer rights */}
+                {hasWriteRightsToSelectedTerritory && territoryId && (
                   <Button
                     key="add"
                     icon={<FaPlus />}
@@ -822,7 +845,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
                   />
                 )}
               </>,
-              refreshBoxButton(["entity", "user"], false),
+              // refreshBoxButton(["entity", "user"], false),
               <Button
                 dataTestId="maximize-detail-box"
                 inverted
@@ -836,7 +859,16 @@ const MainPage: React.FC<MainPage> = ({}) => {
                 }
                 onClick={handleMaximizeDetailBox}
               />,
-              minimizeDetailBoxButton(),
+              <>
+                {detailBoxState !== DetailBoxState.Minimized && (
+                  <Button
+                    tooltipLabel={"minimize detail box"}
+                    inverted
+                    icon={<BiHide />}
+                    onClick={handleMinimizeDetailBox}
+                  />
+                )}
+              </>,
               <Button
                 inverted
                 tooltipLabel="close all tabs"
@@ -875,10 +907,10 @@ const MainPage: React.FC<MainPage> = ({}) => {
       <Panel
         width={
           !thirdPanelExpanded
-            ? collapsedPanelWidth
+            ? COLLAPSED_PANEL_WIDTH
             : fourthPanelExpanded
             ? panelWidths[2]
-            : panelWidths[2] + panelWidths[3] - collapsedPanelWidth
+            : panelWidths[2] + panelWidths[3] - COLLAPSED_PANEL_WIDTH
         }
       >
         <Box
@@ -893,7 +925,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
       </Panel>
 
       {/* FOURTH PANEL */}
-      <Panel width={fourthPanelExpanded ? panelWidths[3] : collapsedPanelWidth}>
+      <Panel
+        width={fourthPanelExpanded ? panelWidths[3] : COLLAPSED_PANEL_WIDTH}
+      >
         <Box
           height={getFourthPanelBoxHeight("search")}
           label="Search"

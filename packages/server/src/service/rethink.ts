@@ -8,6 +8,8 @@ export const rethinkConfig = {
   port: parseInt(process?.env?.DB_PORT || "28015"),
   password: process.env.DB_AUTH,
   max: parseInt(process.env.DB_POOL_CONNECTIONS || "0") || 0,
+  acquireTimeoutMillis: 10000,
+  idleTimeoutMillis: 30000,
 };
 
 export class Db {

@@ -55,7 +55,9 @@ export const StyledDocumentSearchLine = styled.div`
   display: flex;
   gap: 0.2rem;
   align-items: center;
+  justify-content: space-between;
   padding: 0.2rem 0.5rem;
+  padding-right: 0.5rem;
   overflow: hidden;
   white-space: nowrap;
 `;
@@ -74,23 +76,21 @@ export const StyledSearchIcon = styled.div`
   flex-shrink: 0;
 `;
 
-export const StyledSearchInputContainer = styled.div`
+interface StyledSearchResults {
+  $annotatorWidthTooSmall?: boolean;
+}
+export const StyledSearchResults = styled.div<StyledSearchResults>`
   display: flex;
   align-items: center;
-  flex-shrink: 1;
-  min-width: 0;
-  gap: ${({ theme }) => theme.space[1]};
-`;
-
-export const StyledSearchResults = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.space[2]};
-  flex-shrink: 0;
+  justify-content: center;
+  column-gap: ${({ theme }) => theme.space[2]};
   color: ${({ theme }) => theme.color.info};
   font-size: ${({ theme }) => theme.fontSize.xxs};
   font-weight: ${({ theme }) => theme.fontWeight.bold};
   white-space: nowrap;
+  flex-wrap: ${({ $annotatorWidthTooSmall }) =>
+    $annotatorWidthTooSmall ? "wrap" : "nowrap"};
+  /* flex-wrap: wrap; */
 `;
 
 export const StyledSearchNavigation = styled.div`
@@ -126,7 +126,5 @@ export const StyledEntityContainer = styled.div`
 export const StyledDocumentTitleContainer = styled.div`
   display: flex;
   align-items: center;
-  flex-shrink: 3;
-  min-width: 0;
-  max-width: 300px;
+  /* max-width: 100px; */
 `;

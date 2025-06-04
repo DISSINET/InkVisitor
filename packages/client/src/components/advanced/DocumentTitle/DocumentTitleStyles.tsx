@@ -30,7 +30,6 @@ export const StyledDocumentTag = styled.div<{
 
 export const StyledDocumentTitle = styled.div`
   display: block;
-  vertical-align: middle;
   overflow: hidden !important;
   white-space: nowrap;
   text-overflow: ellipsis;

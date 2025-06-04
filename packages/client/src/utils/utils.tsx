@@ -1,5 +1,3 @@
-import { FaUserGear, FaUserTie } from "react-icons/fa6";
-import { FaUserEdit, FaUserTag } from "react-icons/fa";
 import { classesAll } from "@shared/dictionaries/entity";
 import {
   EntityEnums,
@@ -16,9 +14,12 @@ import {
   IWarning,
   Relation,
 } from "@shared/types";
-import { DropTargetMonitor, XYCoord } from "react-dnd";
-import { DragItem, EntityDragItem } from "types";
 import React from "react";
+import { DropTargetMonitor, XYCoord } from "react-dnd";
+import { FaUserEdit, FaUserShield, FaUserTag } from "react-icons/fa";
+import { FaUserGear } from "react-icons/fa6";
+import { RiUserStarFill } from "react-icons/ri";
+import { DragItem, EntityDragItem } from "types";
 
 // is used to render italic for S, could be handled other way when first label "" is obligatory
 export const isFirstLabelEmpty = (labels: string[]) =>
@@ -148,7 +149,7 @@ export const dndHoverFn = (
   item: EntityDragItem | DragItem,
   index: number,
   monitor: DropTargetMonitor,
-  ref: React.RefObject<HTMLDivElement> | null,
+  ref: React.RefObject<HTMLDivElement | HTMLTableRowElement | null>,
   moveFn: (dragIndex: number, hoverIndex: number) => void
 ) => {
   if (!ref?.current) {
@@ -183,7 +184,7 @@ export const dndHoverFnHorizontal = (
   item: EntityDragItem | DragItem,
   index: number,
   monitor: DropTargetMonitor,
-  ref: React.RefObject<HTMLDivElement>,
+  ref: React.RefObject<HTMLDivElement | null>,
   moveFn: (dragIndex: number, hoverIndex: number) => void
 ) => {
   if (!ref.current) {
@@ -349,9 +350,9 @@ export const getUserIcon = (
   size?: number
 ): React.ReactNode => {
   if (userRole === UserEnums.Role.Owner) {
-    return <FaUserGear size={size} />;
+    return <FaUserShield size={size} />;
   } else if (userRole === UserEnums.Role.Admin) {
-    return <FaUserTie size={size} />;
+    return <FaUserGear size={size} />;
   } else if (userRole === UserEnums.Role.Editor) {
     return <FaUserEdit size={size} />;
   }

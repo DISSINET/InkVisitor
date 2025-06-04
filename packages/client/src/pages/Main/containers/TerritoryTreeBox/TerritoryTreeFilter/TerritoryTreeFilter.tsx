@@ -52,7 +52,11 @@ export const TerritoryTreeFilter: React.FC<TerritoryTreeFilter> = ({
             />
           )}
         <StyledInputWrap>
-          <FaSearch color={themeContext?.color.black} />
+          <FaSearch
+            style={{ flexShrink: 0 }}
+            size={14}
+            color={themeContext?.color.black}
+          />
           <Input
             value={filterData.filter}
             placeholder="Filter by text"

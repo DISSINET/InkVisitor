@@ -13,10 +13,31 @@
 {"active": true, "bookmarks": null, "email": "lidhin93@gmail.com", "id": "106", "name": "Lidia Hinz-Wieczorek", "options": {"defaultLanguage": "", "defaultTerritory": "", "searchLanguages": []}, "password": "$2b$10$n6MltfLMJCah7A8pC.VuluCKNZLZQ49WCEaDWZ.Gq7Fhh.TODP1Nq", "rights": [{"mode": "admin", "territory": "T0"}], "role": "editor", "verified": true},
 {"active": true, "bookmarks": null, "email": "larissa.lyth@mail.muni.cz", "id": "107", "name": "Larissa de Freitas Lyth", "options": {"defaultLanguage": "", "defaultTerritory": "", "searchLanguages": []}, "password": "$2b$10$QDPKgJts2Wbp/uIeey9ap.IzsRbQ9rV/F0sgzGTZsjKGzzRE0o4JS", "rights": [{"mode": "admin", "territory": "T0"}], "role": "viewer", "verified": true},
 {"active": true, "bookmarks": [], "email": "tomas.hampejs@mail.muni.cz", "id": "151", "name": "Tom\u00e1\u0161 Hampejs", "options": {"defaultLanguage": "", "defaultTerritory": "", "searchLanguages": []}, "password": "$2b$10$1oaqOnhqERm4tPfrwpp6IOaKab7u1blqSCOyhQC7pm7oIJngS6VXO", "rights": [{"mode": "admin", "territory": "T0"}], "role": "admin", "storedTerritories": [{"territoryId": "8bcbfeef-f973-4315-be40-d88f0edef980"}], "verified": true},
-{"active": false, "bookmarks": null, "email": "editor@inkvisitor.com", "id": "2", "name": "editor1", "options": {"defaultLanguage": "", "defaultTerritory": "", "searchLanguages": []}, "password": "$2b$10$5KRYuqJZdX9eHeU4acf1eeDs02CN/MPZMMsuSJlQRp6GgPuyaZ/9u", "rights": [], "role": "editor", "verified": true},
-{"active": false, "bookmarks": null, "email": "editor2@inkvisitor.com", "id": "3", "name": "editor2", "options": {"defaultLanguage": "", "defaultTerritory": "", "searchLanguages": []}, "password": "$2b$10$SAk/OxCBA37pkZ2JSij6ke/0fVstLi/SfjU09S/hOpHhyAVhufEJC", "rights": [], "role": "editor", "verified": true},
-{"active": false, "bookmarks": null, "email": "viewer1@inkvisitor.com", "id": "4", "name": "viewer1", "options": {"defaultLanguage": "", "defaultTerritory": "", "searchLanguages": []}, "password": "$2b$10$Ac/YkZykbhULPq08dzkQY.I7W/IQtOch.Hh4aONye5qe0JdoTjp5y", "rights": [], "role": "viewer", "verified": true},
-{"active": false, "bookmarks": null, "email": "inactive@inkvisitor.com", "id": "5", "name": "inactive", "options": {"defaultLanguage": "", "defaultTerritory": "", "searchLanguages": []}, "password": "$2b$10$hoNjK3arqttDj94L8mWnV.ALGtj0GMiWOGtEOypfhzri67NzMSgcO", "rights": [], "role": "viewer", "verified": true},
+{
+  "id": "2",
+  "name": "owner",
+  "email": "owner@owner.com",
+  "password": "owner",
+  "active": true,
+  "verified": true,
+  "options": {
+    "defaultTerritory": "",
+    "defaultLanguage": "",
+    "searchLanguages": []
+  },
+  "bookmarks": null,
+  "role": "owner",
+  "rights": [
+    {
+      "territory": "T0",
+      "mode": "admin"
+    }
+  ]
+},
+{"active": false, "bookmarks": null, "email": "editor@inkvisitor.com", "id": "3", "name": "editor1", "options": {"defaultLanguage": "", "defaultTerritory": "", "searchLanguages": []}, "password": "$2b$10$5KRYuqJZdX9eHeU4acf1eeDs02CN/MPZMMsuSJlQRp6GgPuyaZ/9u", "rights": [], "role": "editor", "verified": true},
+{"active": false, "bookmarks": null, "email": "editor2@inkvisitor.com", "id": "4", "name": "editor2", "options": {"defaultLanguage": "", "defaultTerritory": "", "searchLanguages": []}, "password": "$2b$10$SAk/OxCBA37pkZ2JSij6ke/0fVstLi/SfjU09S/hOpHhyAVhufEJC", "rights": [], "role": "editor", "verified": true},
+{"active": false, "bookmarks": null, "email": "viewer1@inkvisitor.com", "id": "5", "name": "viewer1", "options": {"defaultLanguage": "", "defaultTerritory": "", "searchLanguages": []}, "password": "$2b$10$Ac/YkZykbhULPq08dzkQY.I7W/IQtOch.Hh4aONye5qe0JdoTjp5y", "rights": [], "role": "viewer", "verified": true},
+{"active": false, "bookmarks": null, "email": "inactive@inkvisitor.com", "id": "6", "name": "inactive", "options": {"defaultLanguage": "", "defaultTerritory": "", "searchLanguages": []}, "password": "$2b$10$hoNjK3arqttDj94L8mWnV.ALGtj0GMiWOGtEOypfhzri67NzMSgcO", "rights": [], "role": "viewer", "verified": true},
 {"active": true, "bookmarks": [], "email": "stanislaw.banach@mail.muni.cz", "hash": "aa5358b0-094f-11ef-b957-f139233b3012", "id": "5a8b6aff-3dc1-40b2-9704-82b47a952d4c", "name": "stanislaw.banach", "options": {"defaultLanguage": "", "defaultStatementLanguage": "", "defaultTerritory": "", "hideStatementElementsOrderTable": false, "searchLanguages": []}, "password": "$2b$10$4rGCIWZ/zVxvGtYCiO0Nq.KrLNIwGtCidsSDwPOkKJC2Mpdm.Guvy", "rights": [], "role": "editor", "storedTerritories": [], "verified": true},
 {"active": true, "bookmarks": [], "email": "gideon.kotze@mail.muni.cz", "hash": "90615c00-f946-11ed-96e3-117a08ff4854", "id": "602ee995-7590-4d9b-b7ce-8f63a8a284b6", "name": "Gideon Kotz\u00e9", "options": {"defaultLanguage": "eng", "defaultTerritory": "", "hideStatementElementsOrderTable": false, "searchLanguages": []}, "password": "$2b$10$Tm5/uqYz99q4Z5VuPVSOKOGbXgZ9k9qvgjoJ6csGDCY0QJzVdwmzG", "rights": [], "role": "viewer", "storedTerritories": [], "verified": true}
 ]

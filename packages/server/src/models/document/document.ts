@@ -6,6 +6,7 @@ import { InternalServerError, ModelNotValidError } from "@shared/types/errors";
 import User from "@models/user/user";
 import { findEntityById } from "@service/shorthands";
 import { AnchorsNode } from "./anchors";
+import Entity from "@models/entity/entity";
 
 export default class Document implements IDocument, IDbModel {
   static table = "documents";
@@ -39,9 +40,19 @@ export default class Document implements IDocument, IDbModel {
    * @returns Promise<void>
    */
   async preprocess(conn: Connection): Promise<void> {
+    const gatherStart = performance.now();
     const entityIds = this.gatherEntityIds();
+    const gatherTime = performance.now() - gatherStart;
+    
+    const findStart = performance.now();
     this.entityIds = await this.findReferencedEntityIds(conn, entityIds);
+    const findTime = performance.now() - findStart;
+    
+    const buildStart = performance.now();
     this.anchors = AnchorsNode.buildAnchorsTree(this.content, this.entityIds);
+    const buildTime = performance.now() - buildStart;
+    
+    console.log(`[Document preprocess] ${this.id}: gatherEntityIds took ${gatherTime.toFixed(5)}ms, findReferencedEntityIds took ${findTime.toFixed(5)}ms, buildAnchorsTree took ${buildTime.toFixed(5)}ms`);
   }
 
   /**
@@ -84,17 +95,14 @@ export default class Document implements IDocument, IDbModel {
       [EntityEnums.Class.Group]: [],
     };
 
-    for (const entityId of ids) {
-      const entity = await findEntityById(conn, entityId);
-
-      if (entity) {
-        const entityClass = entity.class;
-        if (entityClass) {
-          if (!referencedEntityIds[entityClass]) {
-            referencedEntityIds[entityClass] = [];
-          }
-          referencedEntityIds[entityClass].push(entity.id);
+    const entities = await Entity.findEntitiesByIds(conn, ids);
+    for (const entity of entities) {
+      const entityClass = entity.class;
+      if (entityClass) {
+        if (!referencedEntityIds[entityClass]) {
+          referencedEntityIds[entityClass] = [];
         }
+        referencedEntityIds[entityClass].push(entity.id);
       }
     }
 
@@ -126,7 +134,7 @@ export default class Document implements IDocument, IDbModel {
     };
 
     const result = traverse(this.anchors);
-    return result ;
+    return result;
   }
 
   /**
@@ -342,20 +350,20 @@ export default class Document implements IDocument, IDbModel {
     entityId: string
   ): Promise<IDocument[]> {
     const entries = await rethink
-    .table(Document.table)
-    .filter(function (row: RDatum) {
-      const entityIds = row("entityIds");
-  
-      return rethink.branch(
-        entityIds.typeOf().eq("ARRAY"),
-        // Case: entityIds is string[] (old format)
-        entityIds.contains(entityId),
-  
-        // Else assume object: Record<string, string[]> (new format)
-        entityIds.values().concatMap(arr => arr).contains(entityId)
-      );
-    })
-    .run(db);
+      .table(Document.table)
+      .filter(function (row: RDatum) {
+        const entityIds = row("entityIds");
+
+        return rethink.branch(
+          entityIds.typeOf().eq("ARRAY"),
+          // Case: entityIds is string[] (old format)
+          entityIds.contains(entityId),
+
+          // Else assume object: Record<string, string[]> (new format)
+          entityIds.values().concatMap(arr => arr).contains(entityId)
+        );
+      })
+      .run(db);
 
     return entries && entries.length ? (entries as IDocument[]) : [];
   }
