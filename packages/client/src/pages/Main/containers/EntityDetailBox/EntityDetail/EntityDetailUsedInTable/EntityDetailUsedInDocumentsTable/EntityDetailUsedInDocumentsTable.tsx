@@ -29,10 +29,16 @@ interface EntityDetailUsedInDocumentsTable {
   title: { singular: string; plural: string };
   perPage?: number;
   entity: IResponseDetail;
+  widthTooSmall: boolean;
 }
 export const EntityDetailUsedInDocumentsTable: React.FC<
   EntityDetailUsedInDocumentsTable
-> = ({ title, perPage, entity }: EntityDetailUsedInDocumentsTable) => {
+> = ({
+  title,
+  perPage,
+  entity,
+  widthTooSmall,
+}: EntityDetailUsedInDocumentsTable) => {
   const detailBoxState: DetailBoxState = useAppSelector(
     (state) => state.layout.detailBoxState
   );
@@ -189,7 +195,14 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
         Header: "Document",
         Cell: ({ row }: CellType) => {
           const { document } = row.original;
-          return document ? <DocumentTitle title={document.title} /> : <></>;
+          return document ? (
+            <DocumentTitle
+              title={document.title}
+              width={widthTooSmall ? 60 : "full"}
+            />
+          ) : (
+            <></>
+          );
         },
       },
       {
@@ -227,7 +240,14 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
         },
       },
     ],
-    [entities, detailBoxState, entityClass, entityId, territoryId]
+    [
+      entities,
+      detailBoxState,
+      entityClass,
+      entityId,
+      territoryId,
+      widthTooSmall,
+    ]
   );
 
   return (

@@ -115,12 +115,14 @@ export const StatementEditorSectionButtons: React.FC<
         />
         <StyledSectionButtonsBorder />
         <AttributeButtonGroup
+          iconsOnly={editorWidthTooSmall}
           options={[
             {
               longValue: "append",
               shortValue: "",
               onClick: () => setReplaceSection(false),
               selected: !replaceSection,
+              icon: editorWidthTooSmall ? <FaPlus /> : undefined,
               shortIcon: <FaPlus />,
             },
             {
@@ -128,6 +130,7 @@ export const StatementEditorSectionButtons: React.FC<
               shortValue: "",
               onClick: () => setReplaceSection(true),
               selected: replaceSection,
+              icon: editorWidthTooSmall ? <TbReplace /> : undefined,
               shortIcon: <TbReplace />,
             },
           ]}
@@ -150,7 +153,7 @@ export const StatementEditorSectionButtons: React.FC<
         }
         excludedActantIds={[statement.id]}
         disableCreate
-        inputWidth={76}
+        inputWidth={editorWidthTooSmall ? 60 : 76}
         placeholder="another S"
         disableTemplateInstantiation
       />

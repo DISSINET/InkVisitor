@@ -92,6 +92,7 @@ import {
 import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
 import { StatementEditorSectionButtons } from "./StatementEditorSectionButtons/StatementEditorSectionButtons";
+import { useDebounce } from "hooks";
 import useAnnotator from "hooks/useAnnotator";
 import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
 
@@ -700,8 +701,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     (state) => state.layout.mainPage.fourthPanelExpanded
   );
 
-  const thirdPanelWidth = useSelector(selectPanelWidth(2));
-  const fourthPanelWidth = useSelector(selectPanelWidth(3));
+  const thirdPanelWidth = useDebounce(useSelector(selectPanelWidth(2)), 200);
+  const fourthPanelWidth = useDebounce(useSelector(selectPanelWidth(3)), 200);
 
   const editorWidth = useMemo(
     () =>
@@ -711,7 +712,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     [fourthPanelExpanded, thirdPanelWidth, fourthPanelWidth]
   );
 
-  const editorWidthTooSmall = editorWidth < 450;
+  const editorWidthTooSmall = editorWidth < 480;
 
   return (
     <>
@@ -1082,6 +1083,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               entities={statement.entities ?? {}}
               entityId={statement.id}
               userCanEdit={userCanEdit}
+              editorWidthTooSmall={editorWidthTooSmall}
             />
           </StyledEditorSectionContent>
         </StyledEditorSection>

@@ -25,6 +25,7 @@ interface EntityReferenceTable {
   territoryParentId?: string;
   userCanEdit: boolean;
   alwaysShowCreateModal?: boolean;
+  editorWidthTooSmall?: boolean;
 }
 
 export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
@@ -38,6 +39,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
   territoryParentId,
   userCanEdit,
   alwaysShowCreateModal,
+  editorWidthTooSmall = false,
 }) => {
   const [localReferences, setLocalReferences] = useState<IReference[]>([]);
 
@@ -119,80 +121,6 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
     );
   }, []);
 
-  // OLD DOCUMENTS IMPLEMENTATION
-  // Documents query
-  // const {
-  //   status: documentsStatus,
-  //   data: documents,
-  //   error: documentsError,
-  //   isFetching: DocumentsIsFetching,
-  // } = useQuery({
-  //   queryKey: ["documents", localReferences],
-  //   queryFn: async () => {
-  //     const documentIds: string[] = [];
-
-  //     localReferences
-  //       .map((ref) => ref.resource)
-  //       .forEach((ref) => {
-  //         const refE = entities[ref];
-  //         if (refE) {
-  //           if (refE.data.documentId) {
-  //             documentIds.push(refE.data.documentId);
-  //           }
-  //         }
-  //       });
-  //     const res = await api.documentsGet({ documentIds: documentIds });
-  //     return res.data;
-  //   },
-  //   enabled: !!entityId && api.isLoggedIn(),
-  // });
-
-  //     const reference = row.original;
-  //     const resourceEntity = entities[reference.resource];
-
-  //     const document =
-  //       resourceEntity && documents
-  //         ? documents.find(
-  //             (doc) => doc.id === resourceEntity.data.documentId
-  //           )
-  //         : undefined;
-
-  //     return (
-  //       <>
-  //         {resourceEntity ? (
-  //           resourceEntity.data.documentId ? (
-  //             document?.entityIds.includes(entityId) ? (
-  //               <Button
-  //                 tooltipLabel="with entity"
-  //                 icon={<GrDocumentVerified />}
-  //                 inverted
-  //                 color="primary"
-  //                 noBorder
-  //               />
-  //             ) : (
-  //               <Button
-  //                 tooltipLabel="no reference in document found"
-  //                 icon={<GrDocument />}
-  //                 inverted
-  //                 color="plain"
-  //                 noBorder
-  //               />
-  //             )
-  //           ) : (
-  //             <Button
-  //               icon={<GrDocumentMissing />}
-  //               tooltipLabel="no document assigned for this resource"
-  //               color="danger"
-  //               noBorder
-  //               inverted
-  //             />
-  //           )
-  //         ) : (
-  //           <></>
-  //         )}
-  //       </>
-  //     );
-
   return (
     <React.Fragment>
       {localReferences.map((ref, key) => {
@@ -224,6 +152,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
               setInitResourceTyped("");
               setInitValueTyped("");
             }}
+            editorWidthTooSmall={editorWidthTooSmall}
           />
         );
       })}
@@ -233,6 +162,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
         <StyledSpareRow $marginTop={localReferences.length > 0}>
           {/* RESOURCE */}
           <EntitySuggester
+            inputWidth={editorWidthTooSmall ? "full" : undefined}
             alwaysShowCreateModal={alwaysShowCreateModal}
             openDetailOnCreate={openDetailOnCreate}
             territoryActants={[]}
@@ -258,6 +188,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
           />
           {/* VALUE */}
           <EntitySuggester
+            inputWidth={editorWidthTooSmall ? "full" : undefined}
             alwaysShowCreateModal={alwaysShowCreateModal}
             excludedEntityClasses={excludedSuggesterEntities}
             openDetailOnCreate={openDetailOnCreate}

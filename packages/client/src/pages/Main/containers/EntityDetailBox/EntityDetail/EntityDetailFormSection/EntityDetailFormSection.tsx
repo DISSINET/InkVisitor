@@ -21,7 +21,16 @@ import { AxiosResponse } from "axios";
 import { Button, Input, MultiInput, TypeBar } from "components";
 import Dropdown, { AttributeButtonGroup, EntityTag } from "components/advanced";
 import React, { useEffect, useMemo, useState } from "react";
-import { FaExternalLinkAlt, FaPlus, FaRegCopy } from "react-icons/fa";
+import {
+  FaExternalLinkAlt,
+  FaPlus,
+  FaRegCopy,
+  FaClock,
+  FaCheck,
+  FaTimes,
+  FaExclamationTriangle,
+  FaEdit,
+} from "react-icons/fa";
 import { toast } from "react-toastify";
 import { DropdownItem } from "types";
 import {
@@ -42,6 +51,7 @@ import {
   StyledCloseIcon,
   StyledGreyBar,
 } from "./EntityDetailFormSectionStyles";
+import { getEntityStatusIcon } from "utils/iconUtils";
 
 interface EntityDetailFormSection {
   entity: IResponseDetail;
@@ -64,6 +74,7 @@ interface EntityDetailFormSection {
   handleAskForTemplateApply: (templateIdToApply: string) => void;
   isTerritoryWithParent: (entity: IResponseDetail) => boolean;
   isStatementWithTerritory: (entity: IResponseDetail) => boolean;
+  widthTooSmall: boolean;
 }
 export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
   entity,
@@ -79,6 +90,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
   handleAskForTemplateApply,
   isTerritoryWithParent,
   isStatementWithTerritory,
+  widthTooSmall,
 }) => {
   const { status: documentsStatus, data: documents } = useQuery({
     queryKey: ["documents"],
@@ -320,11 +332,15 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
             <StyledDetailContentRowValue>
               <AttributeButtonGroup
                 noMargin
+                iconsOnly={widthTooSmall}
                 disabled={!userCanAdmin}
                 options={entityStatusDict.map((entityStatusOption) => {
+                  const icon = getEntityStatusIcon(entityStatusOption["value"]);
+
                   return {
                     longValue: entityStatusOption["label"],
                     shortValue: entityStatusOption["label"],
+                    icon: widthTooSmall ? icon : undefined,
                     onClick: () => {
                       updateEntityMutation.mutate({
                         status: entityStatusOption["value"],

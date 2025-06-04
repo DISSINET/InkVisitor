@@ -77,6 +77,7 @@ export const Button: React.FC<ButtonProps> = ({
           if (!disabled) {
             hideTooltipOnClick && setShowTooltip(false);
             onClick(e);
+            setShowTooltip(false);
           }
         }}
         $size={size}

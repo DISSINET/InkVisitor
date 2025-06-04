@@ -89,8 +89,6 @@ export const StyledAnnotatorAnchorListWrap = styled.div`
   padding-bottom: ${({ theme }) => theme.space[4]};
   border-radius: ${({ theme }) => theme.borderRadius.sm};
   margin-left: ${({ theme }) => theme.space["-2"]};
-  mask-image: linear-gradient(to top, transparent, black 8%);
-  -webkit-mask-image: linear-gradient(to top, transparent, black 8%);
 `;
 
 export const StyledAnnotatorItemTitle = styled.div`
