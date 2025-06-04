@@ -42,7 +42,11 @@ export const EntityReferenceTableValue: React.FC<EntityReferenceTableValue> = ({
   disabled,
 }) => {
   return (
-    <StyledGridValue>
+    <StyledGridValue
+      style={{
+        minWidth: editorWidthTooSmall ? "10rem" : "",
+      }}
+    >
       {valueEntity ? (
         <EntityDropzone
           onSelected={(newSelectedId: string) => {
@@ -76,7 +80,7 @@ export const EntityReferenceTableValue: React.FC<EntityReferenceTableValue> = ({
         </EntityDropzone>
       ) : (
         <EntitySuggester
-          inputWidth={editorWidthTooSmall ? 60 : 100}
+          inputWidth={editorWidthTooSmall ? "full" : 100}
           alwaysShowCreateModal={alwaysShowCreateModal}
           placeholder={resourceEntity?.data?.partValueLabel}
           excludedEntityClasses={excludedSuggesterEntities}

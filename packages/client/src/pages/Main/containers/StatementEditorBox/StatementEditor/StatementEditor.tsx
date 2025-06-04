@@ -712,7 +712,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     [fourthPanelExpanded, thirdPanelWidth, fourthPanelWidth]
   );
 
-  const editorWidthTooSmall = editorWidth < 450;
+  const editorWidthTooSmall = editorWidth < 480;
 
   return (
     <>

@@ -43,7 +43,7 @@ export const EntityReferenceTableResource: React.FC<
   disabled,
 }) => {
   return (
-    <StyledGridValue>
+    <StyledGridValue style={{ minWidth: editorWidthTooSmall ? "10rem" : "" }}>
       {resourceEntity ? (
         <EntityDropzone
           onSelected={(newSelectedId: string) => {
@@ -73,7 +73,7 @@ export const EntityReferenceTableResource: React.FC<
         </EntityDropzone>
       ) : (
         <EntitySuggester
-          inputWidth={editorWidthTooSmall ? 60 : 100}
+          inputWidth={editorWidthTooSmall ? "full" : 100}
           alwaysShowCreateModal={alwaysShowCreateModal}
           openDetailOnCreate={openDetailOnCreate}
           territoryActants={[]}
