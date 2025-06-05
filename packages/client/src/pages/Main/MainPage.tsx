@@ -25,7 +25,7 @@ import {
   LayoutSeparatorVertical,
 } from "components/advanced";
 import { CStatement } from "constructors";
-import { useSearchParams } from "hooks";
+import { useDebouncedCallback, useSearchParams } from "hooks";
 import ScrollHandler from "hooks/ScrollHandler";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { BiHide, BiRefresh, BiShow } from "react-icons/bi";
@@ -613,6 +613,10 @@ const MainPage: React.FC<MainPage> = ({}) => {
 
   const isFirstRender = useRef(true);
 
+  const debouncedSetSecondPanelWidth = useDebouncedCallback((width: number) => {
+    dispatch(setSecondPanelRealWidth(width));
+  }, 200);
+
   const secondPanelWidth = useMemo(() => {
     const width =
       (firstPanelExpanded
@@ -622,7 +626,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
       (!fourthPanelExpanded && !thirdPanelExpanded
         ? panelWidths[3] - COLLAPSED_PANEL_WIDTH
         : 0);
-    dispatch(setSecondPanelRealWidth(width));
+    debouncedSetSecondPanelWidth(width);
     return width;
   }, [
     firstPanelExpanded,
@@ -632,15 +636,25 @@ const MainPage: React.FC<MainPage> = ({}) => {
     dispatch,
   ]);
 
+  const debouncedSetThirdPanelWidth = useDebouncedCallback((width: number) => {
+    dispatch(setThirdPanelRealWidth(width));
+  }, 200);
+
   const thirdPanelWidth = useMemo(() => {
     const width = !thirdPanelExpanded
       ? COLLAPSED_PANEL_WIDTH
       : fourthPanelExpanded
       ? panelWidths[2]
       : panelWidths[2] + panelWidths[3] - COLLAPSED_PANEL_WIDTH;
-    dispatch(setThirdPanelRealWidth(width));
+
+    debouncedSetThirdPanelWidth(width);
     return width;
-  }, [thirdPanelExpanded, fourthPanelExpanded, panelWidths, dispatch]);
+  }, [
+    thirdPanelExpanded,
+    fourthPanelExpanded,
+    panelWidths,
+    debouncedSetThirdPanelWidth,
+  ]);
 
   useEffect(() => {
     if (layoutWidth > 0) {
