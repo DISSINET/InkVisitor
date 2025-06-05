@@ -127,6 +127,6 @@ export const StyledOrderCorrection = styled.div`
   align-items: center;
   justify-content: center;
   font-size: ${({ theme }) => theme.fontSize["xs"]};
-  width: 2rem;
+  width: 2.6rem;
   color: ${({ theme }) => theme.color["gray"]["800"]};
 `;
