@@ -746,7 +746,7 @@ export const StatementListBox: React.FC = () => {
     orderCorrection?: StatementOrderCorrection;
     isAnchored?: boolean;
   })[] = useMemo(() => {
-    if (!selectedDocument) return statements;
+    if (!selectedDocument || !statements.length) return statements;
 
     // Collect anchors from the document and remove duplicates
     const statementAnchors = Array.from(
@@ -869,9 +869,9 @@ export const StatementListBox: React.FC = () => {
             deleteStatementsMutation={deleteStatementsMutation}
             relationsCreateMutation={relationsCreateMutation}
             favoritedTerritoryIds={favoritedTerritoryIds}
-            statementsWithOrder={statements}
+            // statementsWithOrder={statements}
             contentWidthTooSmall={contentWidth < SECOND_PANEL_MIN_WIDTH + 60}
-            // statementsWithOrder={statementsWithOrder}
+            statementsWithOrder={statementsWithOrder}
             // autoOrderStatementsMutation={autoOrderStatementsMutation}
           />
 

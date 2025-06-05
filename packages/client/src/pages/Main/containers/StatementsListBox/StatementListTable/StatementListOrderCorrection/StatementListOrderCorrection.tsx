@@ -16,8 +16,6 @@ export const StatementListOrderCorrection: React.FC<
     useState<HTMLDivElement | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
 
-  console.log("orderCorrection", orderCorrection);
-
   return (
     <>
       <StyledOrderCorrection
@@ -26,7 +24,6 @@ export const StatementListOrderCorrection: React.FC<
         onMouseLeave={() => setShowTooltip(false)}
       >
         {/* no anchor icon */}
-        {/* temporary disabled */}
         {/* {!isAnchored && <TbAnchorOff size={15} />} */}
         {!isAnchored ? (
           <TbAnchorOff size={15} />
