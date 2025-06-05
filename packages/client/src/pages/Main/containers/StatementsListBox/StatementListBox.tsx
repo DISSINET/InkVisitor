@@ -659,32 +659,6 @@ export const StatementListBox: React.FC = () => {
     }
   }, [selectedResourceId]);
 
-  // const loadDefaultResource = () => {
-  //   if (resources && documents) {
-  //     const resourceWithAnchor = resources.find((resource) => {
-  //       if (resource.data.documentId) {
-  //         const document = documents.find(
-  //           (d) => d.id === resource.data.documentId
-  //         );
-  //         if (document) {
-  //           return document.entityIds.T.includes(territoryId);
-  //         }
-  //       }
-  //       return false;
-  //     });
-
-  //     if (resourceWithAnchor) {
-  //       setSelectedResourceId(resourceWithAnchor.id);
-  //     } else {
-  //       setSelectedResourceId(false);
-  //     }
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   loadDefaultResource();
-  // }, [territoryId, resources, documents]);
-
   const [isInitialized, setIsInitialized] = useState(false);
 
   // if no resource is selected, select the document with this territoryId in document references
