@@ -37,17 +37,10 @@ export const StyledLinesCanvas = styled.canvas`
   outline: none;
 `;
 
-interface StyledAnnotatorMenuProps {
-  $top: number;
-  $left: number;
-  $translateY: string;
-}
+interface StyledAnnotatorMenuProps {}
 export const StyledAnnotatorMenu = styled.div<StyledAnnotatorMenuProps>`
   position: absolute;
-  transform: translate(0%, ${({ $translateY }) => $translateY});
-  width: 400px;
-  left: ${({ $left }) => $left + "px"};
-  top: ${({ $top }) => $top + "px"};
+  width: 40rem;
   background: ${({ theme }) => theme.color.blue["100"]};
   padding: ${({ theme }) => theme.space[2]};
   z-index: 100;
@@ -89,10 +82,11 @@ export const StyledAnnotatorAnchorListWrap = styled.div`
   display: flex;
   flex-direction: column;
   overflow: auto;
-  max-height: 200px;
+  max-height: 13rem;
   border-radius: ${({ theme }) => theme.borderRadius.xs};
   background-color: ${({ theme }) => theme.color.gray["500"]};
   padding: ${({ theme }) => theme.space[3]};
+  padding-bottom: ${({ theme }) => theme.space[4]};
   border-radius: ${({ theme }) => theme.borderRadius.sm};
   margin-left: ${({ theme }) => theme.space["-2"]};
 `;

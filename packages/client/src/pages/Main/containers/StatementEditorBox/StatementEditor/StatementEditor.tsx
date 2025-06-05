@@ -15,7 +15,10 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { excludedSuggesterEntities } from "Theme/constants";
+import {
+  COLLAPSED_PANEL_WIDTH,
+  excludedSuggesterEntities,
+} from "Theme/constants";
 import api from "api";
 import { Button, Input, Message, MultiInput, Submit } from "components";
 import Dropdown, {
@@ -34,7 +37,7 @@ import {
   CStatementActant,
   CStatementAction,
 } from "constructors";
-import { useResizeObserver, useSearchParams } from "hooks";
+import { useSearchParams } from "hooks";
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import {
   AiOutlineCaretDown,
@@ -43,11 +46,18 @@ import {
 } from "react-icons/ai";
 import { FaAnchor, FaRegCopy } from "react-icons/fa";
 import { TiWarningOutline } from "react-icons/ti";
+import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
+import { selectPanelWidth } from "redux/features/layout/mainPage/panelWidthsSlice";
 import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { ThemeContext } from "styled-components";
-import { DropdownItem, classesEditorActants, classesEditorTags } from "types";
+import {
+  DetailBoxState,
+  DropdownItem,
+  classesEditorActants,
+  classesEditorTags,
+} from "types";
 import {
   deepCopy,
   getEntityLabel,
@@ -82,6 +92,9 @@ import {
 import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
 import { StatementEditorSectionButtons } from "./StatementEditorSectionButtons/StatementEditorSectionButtons";
+import { useDebounce } from "hooks";
+import useAnnotator from "hooks/useAnnotator";
+import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
 
 const valencyErrorTypes: WarningTypeEnums[] = [
   WarningTypeEnums.MA,
@@ -125,6 +138,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     setTerritoryId,
     appendDetailId,
     appendMultipleDetailIds,
+    setAnnotatorOpened,
   } = useSearchParams();
 
   const queryClient = useQueryClient();
@@ -653,38 +667,61 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     [territoryData]
   );
 
-  const { ref: editorRef, width: editorWidth = 0 } =
-    useResizeObserver<HTMLDivElement>({
-      debounceDelay: 50,
-    });
+  const { scrollToAnchor } = useAnnotator();
 
-  const editorWidthTooSmall = editorWidth < 450;
+  const statementListOpened = useAppSelector(
+    (state) => state.layout.statementListOpened
+  );
+
+  const scrollToStatementAnchor = (
+    parentTerritoryId: string,
+    anchorIndex?: number
+  ) => {
+    let timeout = 0;
+    // short timeout -> statement list is open and the active territory is the anchor parent territory
+    if (
+      (statementListOpened && parentTerritoryId === territoryId) ||
+      !parentTerritoryId.length
+    ) {
+      timeout = 100;
+    } else {
+      // long timeout -> statement list is closed or different territory is active => needs more time to initialize the annotator
+      timeout = 2000;
+    }
+    dispatch(setDetailBoxState(DetailBoxState.Normal));
+    setAnnotatorOpened(true);
+    if (parentTerritoryId.length && territoryId !== parentTerritoryId) {
+      setTerritoryId(parentTerritoryId);
+    }
+    setTimeout(() => {
+      scrollToAnchor(statement.id, anchorIndex ? anchorIndex : undefined);
+    }, timeout);
+  };
+  const fourthPanelExpanded = useAppSelector(
+    (state) => state.layout.mainPage.fourthPanelExpanded
+  );
+
+  const thirdPanelWidth = useDebounce(useSelector(selectPanelWidth(2)), 200);
+  const fourthPanelWidth = useDebounce(useSelector(selectPanelWidth(3)), 200);
+
+  const editorWidth = useMemo(
+    () =>
+      fourthPanelExpanded
+        ? thirdPanelWidth
+        : thirdPanelWidth + (fourthPanelWidth - COLLAPSED_PANEL_WIDTH),
+    [fourthPanelExpanded, thirdPanelWidth, fourthPanelWidth]
+  );
+
+  const editorWidthTooSmall = editorWidth < 480;
 
   return (
     <>
       <React.Fragment key={statement.id}>
-        <StyledEditorPreBlock ref={editorRef}>
+        <StyledEditorPreBlock>
           <StyledEditorPreSection>
             <StyledEditorStatementInfo>
               <StyledHeaderTagWrap>
-                <EntityTag
-                  entity={statement}
-                  fullWidth
-                  button={
-                    statement.usedInDocuments.length > 0 && (
-                      <Button
-                        inverted
-                        tooltipLabel="locate statement anchor"
-                        icon={<FaAnchor />}
-                        onClick={() => {
-                          setStatementId(statement.id);
-                          statementTerritoryId &&
-                            setTerritoryId(statementTerritoryId);
-                        }}
-                      />
-                    )
-                  }
-                />
+                <EntityTag entity={statement} fullWidth />
                 <div style={{ marginLeft: "0.5rem", marginRight: "0.5rem" }}>
                   <Button
                     inverted
@@ -810,6 +847,19 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                       {documentAnchor.anchorText}
                     </StyledAnchorText>
                     <StyledAnchorMeta>
+                      <Button
+                        inverted
+                        noBorder
+                        noBackground
+                        tooltipLabel="locate statement anchor"
+                        icon={<FaAnchor size={16} />}
+                        onClick={() => {
+                          scrollToStatementAnchor(
+                            documentAnchor.parentTerritoryId,
+                            documentAnchor.anchorIndex
+                          );
+                        }}
+                      />
                       <DocumentTitle title={documentAnchor.document.title} />
                       {documentAnchor.resourceId && (
                         <EntityTag
@@ -1033,6 +1083,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               entities={statement.entities ?? {}}
               entityId={statement.id}
               userCanEdit={userCanEdit}
+              editorWidthTooSmall={editorWidthTooSmall}
             />
           </StyledEditorSectionContent>
         </StyledEditorSection>

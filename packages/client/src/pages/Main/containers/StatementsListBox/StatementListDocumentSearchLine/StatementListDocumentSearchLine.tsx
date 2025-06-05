@@ -102,7 +102,7 @@ const StatementListDocumentSearchLine: React.FC<
             <div
               style={{
                 display: "flex",
-                width: annotatorWidthTooSmall ? "9rem" : "10rem",
+                maxWidth: annotatorWidthTooSmall ? "9rem" : "10rem",
               }}
             >
               <EntityTag

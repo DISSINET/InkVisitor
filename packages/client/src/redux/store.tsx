@@ -6,6 +6,8 @@ import fourthPanelBoxesOpenedSlice from "./features/layout/mainPage/fourthPanelB
 import fourthPanelExpandedSlice from "./features/layout/mainPage/fourthPanelExpandedSlice";
 import layoutWidthSlice from "./features/layout/layoutWidthSlice";
 import panelWidthsSlice from "./features/layout/mainPage/panelWidthsSlice";
+import secondPanelRealWidthSlice from "./features/layout/mainPage/secondPanelRealWidthSlice";
+import thirdPanelRealWidthSlice from "./features/layout/mainPage/thirdPanelRealWidthSlice";
 import statementListOpenedSlice from "./features/layout/mainPage/statementListOpenedSlice";
 import thirdPanelExpandedSlice from "./features/layout/mainPage/thirdPanelExpandedSlice";
 import pingSlice from "./features/pingSlice";
@@ -24,6 +26,7 @@ import selectedTerritoryPathSlice from "./features/territoryTree/selectedTerrito
 import treeInitializeSlice from "./features/territoryTree/treeInitializeSlice";
 import themeSlice from "./features/themeSlice";
 import usernameSlice from "./features/usernameSlice";
+import detailBoxStateSlice from "./features/layout/mainPage/detailBoxStateSlice";
 import detailBoxMinimizedSlice from "./features/layout/mainPage/detailBoxMinimizedSlice";
 import panelWidthsPercentSlice from "./features/layout/mainPage/panelWidthsPercentSlice";
 
@@ -66,6 +69,9 @@ const store: Store = configureStore({
         fourthPanelBoxesOpened: fourthPanelBoxesOpenedSlice,
         statementListOpened: statementListOpenedSlice,
         detailBoxMinimized: detailBoxMinimizedSlice,
+        secondPanelRealWidth: secondPanelRealWidthSlice,
+        thirdPanelRealWidth: thirdPanelRealWidthSlice,
+        detailBoxState: detailBoxStateSlice,
       }),
     }),
   },

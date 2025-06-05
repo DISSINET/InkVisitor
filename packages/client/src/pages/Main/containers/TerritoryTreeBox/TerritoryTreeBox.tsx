@@ -4,10 +4,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, ButtonGroup, CustomScrollbar, Loader } from "components";
 import { EntityCreateModal } from "components/advanced";
-import { useResizeObserver, useSearchParams } from "hooks";
+import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { BsFilter } from "react-icons/bs";
 import { FaPlus } from "react-icons/fa";
+import { useSelector } from "react-redux";
+import { selectPanelWidth } from "redux/features/layout/mainPage/panelWidthsSlice";
 import { setFilterOpen } from "redux/features/territoryTree/filterOpenSlice";
 import { setSelectedTerritoryPath } from "redux/features/territoryTree/selectedTerritoryPathSlice";
 import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
@@ -24,6 +26,7 @@ import {
   markNodesWithFilters,
 } from "./TerritoryTreeFilterUtils";
 import { MemoizedTerritoryTreeNode } from "./TerritoryTreeNode/TerritoryTreeNode";
+import { useDebounce } from "hooks";
 
 const initFilterSettings: ITerritoryFilter = {
   nonEmpty: false,
@@ -183,10 +186,7 @@ export const TerritoryTreeBox: React.FC = () => {
     (state) => state.territoryTree.filterOpen
   );
 
-  const { ref: treeRef, width: treeWidth = 0 } =
-    useResizeObserver<HTMLDivElement>({
-      debounceDelay: 50,
-    });
+  const treeWidth = useDebounce(useSelector(selectPanelWidth(0)), 200);
 
   const treeWidthTooSmall = treeWidth < 140;
 
@@ -220,7 +220,7 @@ export const TerritoryTreeBox: React.FC = () => {
             color="success"
             inverted={!treeFilterOpen}
             fullWidth
-            icon={<BsFilter />}
+            icon={<BsFilter size={14} />}
             tooltipLabel={treeWidthTooSmall ? "filter" : ""}
             tooltipPosition="right"
           />
@@ -241,8 +241,7 @@ export const TerritoryTreeBox: React.FC = () => {
           elementId="Territories-box-content"
         >
           <StyledTreeWrapper
-            // id="Territories-box-content"
-            ref={treeRef}
+          // id="Territories-box-content"
           >
             {filteredTreeData && (
               <MemoizedTerritoryTreeNode

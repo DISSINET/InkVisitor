@@ -4,6 +4,14 @@ import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { FaPen, FaRegSave, FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
+import {
+  FloatingPortal,
+  useFloating,
+  autoUpdate,
+  offset,
+  flip,
+  shift,
+} from "@floating-ui/react";
 
 import { Annotator, EditMode } from "@inkvisitor/annotator/src/lib";
 import { EntityEnums } from "@shared/enums";
@@ -165,6 +173,64 @@ TextAnnotatorProps) => {
   const [scrollAfterRefresh, setScrollAfterRefresh] = useState<
     number | undefined
   >(undefined);
+
+  const { refs, floatingStyles } = useFloating({
+    placement: "right",
+    whileElementsMounted: autoUpdate,
+    middleware: [
+      offset({ mainAxis: 100, crossAxis: 40 }),
+      flip({
+        padding: 10,
+      }),
+      shift({
+        padding: 10,
+        crossAxis: true,
+      }),
+    ],
+  });
+
+  useEffect(() => {
+    if (annotator?.cursor?.selectStart && annotator?.cursor?.selectEnd) {
+      const canvas = mainCanvas.current;
+      if (canvas) {
+        const rect = canvas.getBoundingClientRect();
+        const startX = rect.left + annotator.cursor.selectStart.xLine * RATIO;
+        const startY =
+          rect.top +
+          (annotator.cursor.selectStart.yLine * annotator.lineHeight) / RATIO;
+        const endX = rect.left + annotator.cursor.selectEnd.xLine * RATIO;
+        const endY =
+          rect.top +
+          (annotator.cursor.selectEnd.yLine * annotator.lineHeight) / RATIO;
+
+        // Check if selection spans the entire document
+        const isFullSelection =
+          annotator.cursor.selectStart.yLine === 0 &&
+          annotator.cursor.selectEnd.yLine >= annotator.viewport.noLines - 1;
+
+        // Create a virtual element for the reference point that represents the selection
+        const virtualElement = {
+          getBoundingClientRect: () => ({
+            x: startX,
+            y: isFullSelection ? rect.top + rect.height / 2 : startY,
+            width: endX - startX,
+            height: isFullSelection ? 0 : endY - startY,
+            top: isFullSelection ? rect.top + rect.height / 2 : startY,
+            right: endX,
+            bottom: isFullSelection ? rect.top + rect.height / 2 : endY,
+            left: startX,
+          }),
+        };
+
+        refs.setPositionReference(virtualElement);
+      }
+    }
+  }, [
+    annotator?.cursor?.selectStart,
+    annotator?.cursor?.selectEnd,
+    annotator?.lineHeight,
+    annotator?.viewport?.noLines,
+  ]);
 
   // quiet does not trigger a toast notification
   const handleSaveNewContent = (quiet: boolean) => {
@@ -383,106 +449,6 @@ TextAnnotatorProps) => {
     }
   }, [initialScrollEntityId, mainCanvas.current]);
 
-  // check if the selection is in the first half of the viewport
-  const menuSelectionPosition = useMemo<"top" | "bottom" | "both">(() => {
-    const vStart = annotator?.viewport?.lineStart ?? 0;
-    const yEnd = (annotator?.cursor?.selectEnd?.yLine ?? 0) - vStart;
-    const yStart = (annotator?.cursor?.selectStart?.yLine ?? 0) - vStart;
-
-    const allLines = annotator?.viewport.noLines ?? 0;
-
-    const yCenter = yStart && yEnd ? (yStart + yEnd) / 2 : 0;
-    const viewportMiddle = allLines / 2;
-
-    // if the selection is spanning through both halves of the viewport
-    if (
-      (yStart < viewportMiddle && yEnd > viewportMiddle) ||
-      (yEnd < viewportMiddle && yStart > viewportMiddle)
-    ) {
-      return "both";
-    }
-
-    return yCenter < viewportMiddle ? "top" : "bottom";
-  }, [
-    annotator?.cursor?.selectEnd?.yLine,
-    annotator?.cursor?.selectStart?.yLine,
-    annotator?.viewport.noLines,
-  ]);
-
-  const isSelectionTopDown = useMemo<boolean>(() => {
-    const vStart = annotator?.viewport?.lineStart ?? 0;
-    const yEnd = (annotator?.cursor?.selectEnd?.yLine ?? 0) - vStart;
-    const yStart = (annotator?.cursor?.selectStart?.yLine ?? 0) - vStart;
-
-    return yEnd >= yStart;
-  }, [
-    annotator?.cursor?.selectEnd?.yLine,
-    annotator?.cursor?.selectStart?.yLine,
-  ]);
-
-  const translateMenu = useMemo<string>(() => {
-    if (menuSelectionPosition === "top") {
-      return "0%";
-    } else if (menuSelectionPosition === "bottom") {
-      return "-100%";
-    } else {
-      if (isSelectionTopDown) {
-        return "-100%";
-      } else {
-        return "0%";
-      }
-    }
-  }, [menuSelectionPosition, isSelectionTopDown]);
-
-  const menuPositionY = useMemo<number>(() => {
-    const vStart = annotator?.viewport?.lineStart ?? 0;
-
-    const yStart = (annotator?.cursor?.selectStart?.yLine ?? 0) - vStart;
-    const yEnd = (annotator?.cursor?.selectEnd?.yLine ?? 0) - vStart;
-
-    const lineHeight = (annotator?.lineHeight ?? 0) / RATIO;
-
-    let menuYD = 0;
-    if (menuSelectionPosition === "top") {
-      menuYD = 2 * lineHeight;
-    } else if (menuSelectionPosition === "bottom") {
-      menuYD = -lineHeight;
-    } else {
-      if (isSelectionTopDown) {
-        menuYD = -lineHeight;
-      } else {
-        menuYD = 4 * lineHeight;
-      }
-    }
-    // large
-    // if the selection is top-down or bottom-up
-
-    // if end is before start + menuSelectionPosition is true, then the menu should be above the cursor...
-    // top-down + large => menu below end
-    // top-down + top => menu below end
-    // top-down + bottom => menu above start
-    // bottom-up + top => menu below start
-    // bottom-up + bottom => menu above end
-
-    if (isSelectionTopDown) {
-      if (menuSelectionPosition === "top") {
-        return yEnd * lineHeight + menuYD;
-      } else if (menuSelectionPosition === "bottom") {
-        return yStart * lineHeight + menuYD;
-      } else {
-        return yEnd * lineHeight;
-      }
-    } else {
-      if (menuSelectionPosition === "top") {
-        return yStart * lineHeight + menuYD;
-      } else if (menuSelectionPosition === "bottom") {
-        return yEnd * lineHeight + menuYD;
-      } else {
-        return yEnd * lineHeight + menuYD;
-      }
-    }
-  }, [annotator?.cursor?.yLine, annotator?.lineHeight, menuSelectionPosition]);
-
   const isChangeMade = useMemo<boolean>(() => {
     return annotator?.text?.value !== dataDocument?.content;
   }, [annotator?.text?.value, dataDocument?.content, localTextContent]);
@@ -553,43 +519,39 @@ TextAnnotatorProps) => {
       >
         <StyledCanvasWrapper>
           {isMenuDisplayed && (
-            <StyledAnnotatorMenu
-              $top={
-                menuPositionY + 300 > contentHeight
-                  ? contentHeight / 2
-                  : menuPositionY
-              }
-              $left={100}
-              // $translateY={"100%"}
-              $translateY={translateMenu}
-            >
-              {dataDocument && (
-                <TextAnnotatorMenu
-                  anchors={selectedAnchors}
-                  documentData={dataDocument}
-                  text={selectedText}
-                  entities={storedEntities}
-                  onAnchorAdd={handleAddAnchor}
-                  onCreateTerritory={onCreateTerritory}
-                  handleCreateStatement={onCreateStatement}
-                  handleRemoveAnchor={onRemoveAnchor}
-                  isTextInsideThisT={selectedAnchors.some(
-                    (anchor) => anchor === thisTerritoryEntityId
-                  )}
-                  activeTerritoryId={thisTerritoryEntityId}
-                  onCreateActiveTAnchor={() => {
-                    handleAddAnchor(thisTerritoryEntityId ?? "");
-                  }}
-                  canCreateActiveTAnchor={
-                    !dataDocument?.entityIds.T.includes(
-                      thisTerritoryEntityId ?? ""
-                    )
-                  }
-                  isLoadingEntities={isFetchingAnchorEntities}
-                  hasParentT={hasParentT}
-                />
-              )}
-            </StyledAnnotatorMenu>
+            <FloatingPortal id="page">
+              <StyledAnnotatorMenu
+                ref={refs.setFloating}
+                style={floatingStyles}
+              >
+                {dataDocument && (
+                  <TextAnnotatorMenu
+                    anchors={selectedAnchors}
+                    documentData={dataDocument}
+                    text={selectedText}
+                    entities={storedEntities}
+                    onAnchorAdd={handleAddAnchor}
+                    onCreateTerritory={onCreateTerritory}
+                    handleCreateStatement={onCreateStatement}
+                    handleRemoveAnchor={onRemoveAnchor}
+                    isTextInsideThisT={selectedAnchors.some(
+                      (anchor) => anchor === thisTerritoryEntityId
+                    )}
+                    activeTerritoryId={thisTerritoryEntityId}
+                    onCreateActiveTAnchor={() => {
+                      handleAddAnchor(thisTerritoryEntityId ?? "");
+                    }}
+                    canCreateActiveTAnchor={
+                      !dataDocument?.entityIds.T.includes(
+                        thisTerritoryEntityId ?? ""
+                      )
+                    }
+                    isLoadingEntities={isFetchingAnchorEntities}
+                    hasParentT={hasParentT}
+                  />
+                )}
+              </StyledAnnotatorMenu>
+            </FloatingPortal>
           )}
 
           {displayLineNumbers && (

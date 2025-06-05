@@ -2,7 +2,7 @@ import { EntityEnums, UserEnums } from "@shared/enums";
 import { IStatement } from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  collapsedPanelWidth,
+  COLLAPSED_PANEL_WIDTH,
   FIRST_PANEL_MIN_WIDTH,
   fourthPanelBoxesHeightThirds,
   hiddenBoxHeight,
@@ -33,14 +33,17 @@ import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
 import { FaHighlighter, FaList, FaPlus } from "react-icons/fa";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { VscCloseAll } from "react-icons/vsc";
+import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
 import { setDetailBoxMinimized } from "redux/features/layout/mainPage/detailBoxMinimizedSlice";
 import { setFirstPanelExpanded } from "redux/features/layout/mainPage/firstPanelExpandedSlice";
 import { setFourthPanelBoxesOpened } from "redux/features/layout/mainPage/fourthPanelBoxesOpenedSlice";
 import { setFourthPanelExpanded } from "redux/features/layout/mainPage/fourthPanelExpandedSlice";
 import { setPanelWidthsPercent } from "redux/features/layout/mainPage/panelWidthsPercentSlice";
 import { setPanelWidths } from "redux/features/layout/mainPage/panelWidthsSlice";
-import { setStatementListOpened } from "redux/features/layout/mainPage/statementListOpenedSlice";
+import { setSecondPanelRealWidth } from "redux/features/layout/mainPage/secondPanelRealWidthSlice";
+import { setThirdPanelRealWidth } from "redux/features/layout/mainPage/thirdPanelRealWidthSlice";
 import { setThirdPanelExpanded } from "redux/features/layout/mainPage/thirdPanelExpandedSlice";
+import { setStatementListOpened } from "redux/features/layout/mainPage/statementListOpenedSlice";
 import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 import { setIsLoading } from "redux/features/statementList/isLoadingSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
@@ -83,9 +86,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
   const panelWidths: number[] = useAppSelector(
     (state) => state.layout.mainPage.panelWidths
   );
-  // const panelWidthsPercent: number[] = useAppSelector(
-  //   (state) => state.layout.mainPage.panelWidthsPercent
-  // );
   const fourthPanelBoxesOpened: { [key: string]: boolean } = useAppSelector(
     (state) => state.layout.mainPage.fourthPanelBoxesOpened
   );
@@ -104,6 +104,10 @@ const MainPage: React.FC<MainPage> = ({}) => {
   const detailBoxMinimized: boolean = useAppSelector(
     (state) => state.layout.mainPage.detailBoxMinimized
   );
+  const detailBoxState: DetailBoxState = useAppSelector(
+    (state) => state.layout.mainPage.detailBoxState
+  );
+  const [lastState, setLastState] = useState(DetailBoxState.Normal);
 
   const toggleFirstPanel = () => {
     if (firstPanelExpanded) {
@@ -346,47 +350,44 @@ const MainPage: React.FC<MainPage> = ({}) => {
     }
   };
 
-  const [detailBoxState, setDetailBoxState] = useState(
-    detailBoxMinimized ? DetailBoxState.Minimized : DetailBoxState.Normal
-  );
-  const [lastState, setLastState] = useState(DetailBoxState.Normal);
-
   useEffect(() => {
-    if (detailBoxState === DetailBoxState.FullHeight) {
-      if (statementListOpened) {
-        dispatch(setStatementListOpened(false));
+    if (detailIdArray.length > 0) {
+      if (detailBoxState === DetailBoxState.FullHeight) {
+        if (statementListOpened) {
+          dispatch(setStatementListOpened(false));
+        }
+      } else {
+        if (!statementListOpened) {
+          dispatch(setStatementListOpened(true));
+        }
       }
-    } else {
-      // detail box is not full height
-      if (!statementListOpened) {
-        dispatch(setStatementListOpened(true));
+
+      if (detailBoxState === DetailBoxState.Minimized) {
+        if (!detailBoxMinimized) {
+          dispatch(setDetailBoxMinimized(true));
+        }
+      } else {
+        if (detailBoxMinimized) {
+          dispatch(setDetailBoxMinimized(false));
+        }
       }
     }
-    if (detailBoxState === DetailBoxState.Minimized) {
-      if (!detailBoxMinimized) {
-        dispatch(setDetailBoxMinimized(true));
-      }
-    } else {
-      if (detailBoxMinimized) {
-        dispatch(setDetailBoxMinimized(false));
-      }
-    }
-  }, [detailBoxState]);
+  }, [detailBoxState, statementListOpened, detailBoxMinimized, detailIdArray]);
 
   const handleMaximizeDetailBox = () => {
     if (detailBoxState === DetailBoxState.Normal) {
-      setDetailBoxState(DetailBoxState.FullHeight);
+      dispatch(setDetailBoxState(DetailBoxState.FullHeight));
     } else {
-      setDetailBoxState(DetailBoxState.Normal);
+      dispatch(setDetailBoxState(DetailBoxState.Normal));
     }
   };
 
   const handleMinimizeDetailBox = () => {
     if (detailBoxState === DetailBoxState.Minimized) {
-      setDetailBoxState(lastState);
+      dispatch(setDetailBoxState(lastState));
     } else {
       setLastState(detailBoxState);
-      setDetailBoxState(DetailBoxState.Minimized);
+      dispatch(setDetailBoxState(DetailBoxState.Minimized));
     }
   };
 
@@ -612,6 +613,35 @@ const MainPage: React.FC<MainPage> = ({}) => {
 
   const isFirstRender = useRef(true);
 
+  const secondPanelWidth = useMemo(() => {
+    const width =
+      (firstPanelExpanded
+        ? panelWidths[1]
+        : panelWidths[1] + panelWidths[0] - COLLAPSED_PANEL_WIDTH) +
+      (thirdPanelExpanded ? 0 : panelWidths[2] - COLLAPSED_PANEL_WIDTH) +
+      (!fourthPanelExpanded && !thirdPanelExpanded
+        ? panelWidths[3] - COLLAPSED_PANEL_WIDTH
+        : 0);
+    dispatch(setSecondPanelRealWidth(width));
+    return width;
+  }, [
+    firstPanelExpanded,
+    thirdPanelExpanded,
+    fourthPanelExpanded,
+    panelWidths,
+    dispatch,
+  ]);
+
+  const thirdPanelWidth = useMemo(() => {
+    const width = !thirdPanelExpanded
+      ? COLLAPSED_PANEL_WIDTH
+      : fourthPanelExpanded
+      ? panelWidths[2]
+      : panelWidths[2] + panelWidths[3] - COLLAPSED_PANEL_WIDTH;
+    dispatch(setThirdPanelRealWidth(width));
+    return width;
+  }, [thirdPanelExpanded, fourthPanelExpanded, panelWidths, dispatch]);
+
   useEffect(() => {
     if (layoutWidth > 0) {
       if (isFirstRender.current || !panelWidths.length) {
@@ -676,7 +706,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
               : // if the editor is collapsed, calculate the min width from the right side
                 layoutWidth -
                 panelWidths[3] -
-                collapsedPanelWidth -
+                COLLAPSED_PANEL_WIDTH -
                 SECOND_PANEL_MIN_WIDTH
           }
           separatorXPosition={mainPageTreeSeparatorXPosition}
@@ -703,7 +733,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
           leftSideMaxWidth={
             fourthPanelExpanded
               ? layoutWidth - panelWidths[3] - THIRD_PANEL_MIN_WIDTH
-              : layoutWidth - collapsedPanelWidth - THIRD_PANEL_MIN_WIDTH
+              : layoutWidth - COLLAPSED_PANEL_WIDTH - THIRD_PANEL_MIN_WIDTH
           }
           separatorXPosition={mainPageCenterSeparatorXPosition}
           setSeparatorXPosition={(xPosition) => {
@@ -734,7 +764,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
       )}
 
       {/* FIRST PANEL */}
-      <Panel width={firstPanelExpanded ? panelWidths[0] : collapsedPanelWidth}>
+      <Panel
+        width={firstPanelExpanded ? panelWidths[0] : COLLAPSED_PANEL_WIDTH}
+      >
         <Box
           height={contentHeight}
           label="Territories"
@@ -751,17 +783,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
       </Panel>
 
       {/* SECOND PANEL */}
-      <Panel
-        width={
-          (firstPanelExpanded
-            ? panelWidths[1]
-            : panelWidths[1] + panelWidths[0] - collapsedPanelWidth) +
-          (thirdPanelExpanded ? 0 : panelWidths[2] - collapsedPanelWidth) +
-          (!fourthPanelExpanded && !thirdPanelExpanded
-            ? panelWidths[3] - collapsedPanelWidth
-            : 0)
-        }
-      >
+      <Panel width={secondPanelWidth}>
         <Box
           label="Statements"
           borderColor="white"
@@ -870,9 +892,13 @@ const MainPage: React.FC<MainPage> = ({}) => {
                 tooltipLabel="close all tabs"
                 icon={<VscCloseAll style={{ transform: "scale(1.3)" }} />}
                 onClick={() => {
-                  clearAllDetailIds();
+                  // First ensure statement list is opened
                   dispatch(setStatementListOpened(true));
-                  setDetailBoxState(DetailBoxState.Normal);
+                  localStorage.setItem("statementListOpened", "true");
+
+                  // Then clear the detail IDs
+                  clearAllDetailIds();
+                  dispatch(setDetailBoxState(DetailBoxState.Normal));
                 }}
               />,
             ]}
@@ -896,15 +922,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
       </Panel>
 
       {/* THIRD PANEL */}
-      <Panel
-        width={
-          !thirdPanelExpanded
-            ? collapsedPanelWidth
-            : fourthPanelExpanded
-            ? panelWidths[2]
-            : panelWidths[2] + panelWidths[3] - collapsedPanelWidth
-        }
-      >
+      <Panel width={thirdPanelWidth}>
         <Box
           borderColor="white"
           height={contentHeight}
@@ -917,7 +935,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
       </Panel>
 
       {/* FOURTH PANEL */}
-      <Panel width={fourthPanelExpanded ? panelWidths[3] : collapsedPanelWidth}>
+      <Panel
+        width={fourthPanelExpanded ? panelWidths[3] : COLLAPSED_PANEL_WIDTH}
+      >
         <Box
           height={getFourthPanelBoxHeight("search")}
           label="Search"

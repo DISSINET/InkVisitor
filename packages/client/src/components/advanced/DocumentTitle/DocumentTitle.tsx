@@ -6,12 +6,12 @@ import { StyledDocumentTag, StyledDocumentTitle } from "./DocumentTitleStyles";
 interface DocumentTitle {
   title?: string;
   size?: "sm" | "md" | "lg";
-  width?: string;
+  width?: number | "full";
 }
 export const DocumentTitle: React.FC<DocumentTitle> = ({
   title = "",
   size = "md",
-  width = "100%",
+  width = "full",
 }) => {
   const [referenceElement, setReferenceElement] =
     useState<HTMLDivElement | null>(null);

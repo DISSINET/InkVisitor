@@ -6,17 +6,17 @@ import {
   IReference,
   IResponseEntity,
   IResponseStatement,
-  IResponseTree,
   IStatement,
   ITerritory,
   Relation,
 } from "@shared/types";
+import { IAnchorsNode } from "@shared/types/document";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { CustomScrollbar, Loader, Submit, ToastWithLink } from "components";
 import { CStatement } from "constructors";
-import { useResizeObserver, useSearchParams } from "hooks";
-import React, { useEffect, useMemo, useState, useRef } from "react";
+import { useResizeObserver, useSearchParams, useDebounce } from "hooks";
+import React, { useEffect, useMemo, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { toast } from "react-toastify";
 import { setStatementListOpened } from "redux/features/layout/mainPage/statementListOpenedSlice";
@@ -24,7 +24,11 @@ import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlic
 import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { COLLAPSED_TABLE_WIDTH, SECOND_PANEL_MIN_WIDTH } from "Theme/constants";
+import {
+  COLLAPSED_PANEL_WIDTH,
+  COLLAPSED_TABLE_WIDTH,
+  SECOND_PANEL_MIN_WIDTH,
+} from "Theme/constants";
 import {
   EntitiesDeleteSuccessResponse,
   StatementListDisplayMode,
@@ -33,9 +37,8 @@ import {
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StatementListTextAnnotator } from "./StatementListTextAnnotator/StatementListTextAnnotator";
+import useAnnotator from "hooks/useAnnotator";
 import { StyledEmptyState, StyledTableWrapper } from "./StatementListBoxStyles";
-import { IAnchorsNode } from "@shared/types/document";
-import { searchTree } from "utils/utils";
 
 const initialData: {
   statements: IResponseStatement[];
@@ -566,11 +569,17 @@ export const StatementListBox: React.FC = () => {
 
   const {
     ref: contentRef,
+    // TODO: calculate height - contentHeight / 2 - StatementListHeader height
     height: contentHeight = 0,
-    width: contentWidth = 0,
+    // width: contentWidth = 0,
   } = useResizeObserver<HTMLDivElement>({
     debounceDelay: 50,
   });
+
+  const contentWidth = useDebounce(
+    useAppSelector((state) => state.layout.mainPage.secondPanelRealWidth),
+    100
+  );
 
   const [storedAnnotatorResourceId, setStoredAnnotatorResourceId] = useState<
     string | false
@@ -605,6 +614,13 @@ export const StatementListBox: React.FC = () => {
 
   const [annotator, setAnnotator] = useState<Annotator | undefined>(undefined);
 
+  const { setAnnotator: useAnnotatorSetAnnotator } = useAnnotator();
+
+  useEffect(() => {
+    if (annotator) {
+      useAnnotatorSetAnnotator(annotator);
+    }
+  }, [annotator, useAnnotatorSetAnnotator]);
   const {
     data: resources,
     error: resourcesError,
@@ -839,7 +855,7 @@ export const StatementListBox: React.FC = () => {
   const tableWidth = useMemo(() => {
     if (isListNonEmpty || statementListTableIsLoading) {
       return displayMode === StatementListDisplayMode.LIST
-        ? contentWidth
+        ? contentWidth - 8
         : COLLAPSED_TABLE_WIDTH;
     }
     return 0;
@@ -998,24 +1014,26 @@ export const StatementListBox: React.FC = () => {
               />
             )}
 
-            {statementListTableIsLoading && (
-              <div
-                style={{
-                  width: tableWidth,
-                  height:
-                    displayMode === StatementListDisplayMode.TEXT
-                      ? contentHeight - 56
-                      : contentHeight,
-                  flexShrink: 0,
-                  position: "absolute",
-                  bottom: 0,
-                  left: 0,
-                  zIndex: 1,
-                }}
-              >
-                <Loader show size={50} />
-              </div>
-            )}
+            {statementListTableIsLoading &&
+              tableWidth > 0 &&
+              contentHeight > 0 && (
+                <div
+                  style={{
+                    width: tableWidth,
+                    height:
+                      displayMode === StatementListDisplayMode.TEXT
+                        ? contentHeight - 56
+                        : contentHeight,
+                    flexShrink: 0,
+                    position: "absolute",
+                    bottom: 0,
+                    left: 0,
+                    zIndex: 1,
+                  }}
+                >
+                  <Loader show size={50} />
+                </div>
+              )}
           </div>
 
           <Submit
