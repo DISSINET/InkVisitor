@@ -44,6 +44,7 @@ export class ResponseTerritory extends Territory implements IResponseTerritory {
     );
 
     if (preload) {
+      console.log("using preload for statements data");
       // prepare all entity ids required for statements
       const preloadedEntities: Record<string, IEntity | undefined> = {};
       for (const statement of statements) {
