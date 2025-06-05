@@ -748,10 +748,19 @@ export const StatementListBox: React.FC = () => {
   })[] = useMemo(() => {
     if (!selectedDocument) return statements;
 
-    const statementAnchors = collectStatementAnchors(selectedDocument.anchors);
+    // Collect anchors from the document and remove duplicates
+    const statementAnchors = Array.from(
+      new Map(
+        collectStatementAnchors(selectedDocument.anchors).map((anchor) => [
+          anchor.anchor,
+          anchor,
+        ])
+      ).values()
+    );
 
     // Create a map of statement IDs to their correct positions
     const correctPositionMap = new Map(
+      // this index is the position of the statement IN THE DOCUMENT
       statementAnchors.map((anchor, index) => [anchor.anchor, index])
     );
 
@@ -765,15 +774,14 @@ export const StatementListBox: React.FC = () => {
     );
 
     // Filter and sort only anchored statements
-    const anchoredStatements = statementsWithCorrectPosition
-      .filter((item) => item.isAnchored)
-      .sort((a, b) => (a.correctPosition ?? 0) - (b.correctPosition ?? 0));
+    const anchoredStatements = statementsWithCorrectPosition.filter(
+      (item) => item.isAnchored
+    );
 
-    // Create a map of current anchored positions (excluding non-anchored statements)
+    // Create a map of territory statements (anchored) with position in the list
     const currentAnchoredPositions = new Map(
-      statementsWithCorrectPosition
-        .filter((item) => item.isAnchored)
-        .map((item, index) => [item.statement.id, index])
+      // this index is the position of the statement IN THE LIST
+      anchoredStatements.map((item, index) => [item.statement.id, index])
     );
 
     // Create a map of anchored statements with their corrections
