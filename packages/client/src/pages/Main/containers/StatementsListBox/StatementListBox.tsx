@@ -750,9 +750,14 @@ export const StatementListBox: React.FC = () => {
     enabled: api.isLoggedIn() && !!selectedDocumentId,
   });
 
+  // collect all statement anchors that are in the statements list
   const collectStatementAnchors = (anchors: IAnchorsNode[]): IAnchorsNode[] => {
+    const statementIds = new Set(statements.map((s) => s.id));
     return anchors.reduce((acc: any[], anchor) => {
-      if (anchor.class === EntityEnums.Class.Statement) {
+      if (
+        anchor.class === EntityEnums.Class.Statement &&
+        statementIds.has(anchor.anchor)
+      ) {
         acc.push(anchor);
       }
       if (anchor.children) {
