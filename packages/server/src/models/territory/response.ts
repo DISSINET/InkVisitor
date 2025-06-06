@@ -41,14 +41,9 @@ export class ResponseTerritory extends Territory implements IResponseTerritory {
       const preloadedEntities: Record<string, IEntity | undefined> = {};
       for (const statement of statements) {
         const responseStatement = new ResponseStatement(new Statement(statement));
-        responseStatement.usedInDocuments = await responseStatement.findUsedInDocuments(req.db.connection);
         responseStatements.push(responseStatement);
 
         for (const entityId of responseStatement.getEntitiesIds()) {
-          preloadedEntities[entityId] = undefined;
-        }
-
-        for (const entityId of Entity.extractIdsFromAnchors(responseStatement.usedInDocuments)) {
           preloadedEntities[entityId] = undefined;
         }
       }
