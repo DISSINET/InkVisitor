@@ -5,6 +5,7 @@ import { findEntityById } from "@service/shorthands";
 import { EntityEnums } from "@shared/enums";
 import {
   IResponseGeneric,
+  IResponseStatement,
   IResponseTerritory,
   IStatement,
   ITerritory,
@@ -78,6 +79,44 @@ export default Router()
       console.log(`Territory GET /:territoryId execution time: ${endTime - startTime}ms`);
 
       return response;
+    })
+  )
+  .get(
+    "/:territoryId/statements",
+    asyncRouteHandler<IResponseStatement[]>(async (request: IRequest<{territoryId: string}>) => {
+      const startTime = performance.now();
+      
+      const territoryId = request.params.territoryId;
+      if (!territoryId) {
+        throw new BadParams("territoryId has to be set");
+      }
+
+      const territory = await findEntityById<ITerritory>(
+        request.db,
+        territoryId
+      );
+      if (!territory || territory.class !== EntityEnums.Class.Territory) {
+        throw new TerritoryDoesNotExits(
+          `territory ${territoryId} was not found`,
+          territoryId
+        );
+      }
+
+      if (
+        !new Territory({ id: territoryId }).canBeViewedByUser(
+          request.getUserOrFail()
+        )
+      ) {
+        throw new PermissionDeniedError(`cannot view entity ${territoryId}`);
+      }
+ 
+      const response = new ResponseTerritory(territory);
+      const statements = await response.prepareStatements(request, true, true);
+
+      const endTime = performance.now();
+      console.log(`Territory GET /:territoryId/statements execution time: ${endTime - startTime}ms`);
+
+      return statements;
     })
   )
   /**

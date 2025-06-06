@@ -824,6 +824,25 @@ class Api {
   }
 
   /**
+   * Territory
+   * List statements
+   */
+  async territoryGetStatements(
+    territoryId: string,
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseStatement[]>> {
+    try {
+      const response = await this.connection.get(
+        `/territories/${territoryId}/statements`,
+        options
+      );
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  /**
    * entityIdsInTerritory retieves ids of statements that are used on the territory
    * @see Statement.findDependentStatementIds
    */
