@@ -615,7 +615,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
 
   const debouncedSetSecondPanelWidth = useDebouncedCallback((width: number) => {
     dispatch(setSecondPanelRealWidth(width));
-  }, 200);
+  }, 250);
 
   const secondPanelWidth = useMemo(() => {
     const width =
@@ -638,7 +638,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
 
   const debouncedSetThirdPanelWidth = useDebouncedCallback((width: number) => {
     dispatch(setThirdPanelRealWidth(width));
-  }, 200);
+  }, 250);
 
   const thirdPanelWidth = useMemo(() => {
     const width = !thirdPanelExpanded

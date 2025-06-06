@@ -582,9 +582,8 @@ export const StatementListBox: React.FC = () => {
     debounceDelay: 50,
   });
 
-  const contentWidth = useDebounce(
-    useAppSelector((state) => state.layout.mainPage.secondPanelRealWidth),
-    100
+  const contentWidth = useAppSelector(
+    (state) => state.layout.mainPage.secondPanelRealWidth
   );
 
   const [storedAnnotatorResourceId, setStoredAnnotatorResourceId] = useState<
@@ -842,7 +841,7 @@ export const StatementListBox: React.FC = () => {
     duplicateTerritoryMutation.isPending ||
     deleteStatementsMutation.isPending ||
     relationsCreateMutation.isPending ||
-    // autoOrderStatementsMutation.isPending ||
+    autoOrderStatementsMutation.isPending ||
     (statementListOpened && !showStatementList);
 
   const tableWidth = useMemo(() => {
@@ -1009,11 +1008,11 @@ export const StatementListBox: React.FC = () => {
               contentHeight > 0 && (
                 <div
                   style={{
-                    width: tableWidth,
+                    width: tableWidth + 4,
                     height:
                       displayMode === StatementListDisplayMode.TEXT
                         ? contentHeight - 56
-                        : contentHeight,
+                        : contentHeight + 4,
                     flexShrink: 0,
                     position: "absolute",
                     bottom: 0,

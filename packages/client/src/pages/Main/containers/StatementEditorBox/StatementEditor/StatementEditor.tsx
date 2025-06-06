@@ -697,19 +697,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
       scrollToAnchor(statement.id, anchorIndex ? anchorIndex : undefined);
     }, timeout);
   };
-  const fourthPanelExpanded = useAppSelector(
-    (state) => state.layout.mainPage.fourthPanelExpanded
-  );
 
-  const thirdPanelWidth = useDebounce(useSelector(selectPanelWidth(2)), 200);
-  const fourthPanelWidth = useDebounce(useSelector(selectPanelWidth(3)), 200);
-
-  const editorWidth = useMemo(
-    () =>
-      fourthPanelExpanded
-        ? thirdPanelWidth
-        : thirdPanelWidth + (fourthPanelWidth - COLLAPSED_PANEL_WIDTH),
-    [fourthPanelExpanded, thirdPanelWidth, fourthPanelWidth]
+  const editorWidth = useAppSelector(
+    (state) => state.layout.mainPage.thirdPanelRealWidth
   );
 
   const editorWidthTooSmall = editorWidth < 480;
