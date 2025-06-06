@@ -44,12 +44,13 @@ export class ResponseTerritory extends Territory implements IResponseTerritory {
     );
 
     if (preload) {
-      console.log("using preload for statements data");
+      const responseStatements: ResponseStatement[] = [];
       // prepare all entity ids required for statements
       const preloadedEntities: Record<string, IEntity | undefined> = {};
       for (const statement of statements) {
         const responseStatement = new ResponseStatement(new Statement(statement));
         responseStatement.usedInDocuments = await responseStatement.findUsedInDocuments(req.db.connection);
+        responseStatements.push(responseStatement);
 
         for (const entityId of responseStatement.getEntitiesIds()) {
           preloadedEntities[entityId] = undefined;
@@ -65,8 +66,7 @@ export class ResponseTerritory extends Territory implements IResponseTerritory {
         preloadedEntities[entity.id] = entity;
       }
 
-      for (const statement of statements) {
-        const responseStatement = new ResponseStatement(new Statement(statement));
+      for (const responseStatement of responseStatements) {
         responseStatement.prepareSync(req, preloadedEntities as Record<string, IEntity>);
         this.statements.push(responseStatement);
       }
