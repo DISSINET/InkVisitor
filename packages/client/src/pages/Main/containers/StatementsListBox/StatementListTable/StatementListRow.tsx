@@ -99,9 +99,13 @@ export const StatementListRow: React.FC<StatementListRow> = ({
       : dispatch(setDraggedRowId(""));
   }, [isDragging]);
 
-  preview(drop(dropRef));
-
-  drag(dragRef);
+  useEffect(() => {
+    if (isVisible) {
+      preview(drop(dropRef));
+      drag(dragRef);
+    }
+    // there are more dependencies because it was getting stuck after few moves
+  }, [isVisible, preview, drop, drag, index, row.original.id]);
 
   const themeContext = useContext(ThemeContext);
 
