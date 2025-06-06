@@ -26,7 +26,6 @@ import {
 } from "../StatementListBoxStyles";
 
 interface StatementListDocumentSearchLine {
-  statements: any[];
   selectedResource: IEntity | false;
   setSelectedResourceId: (id: string | false) => void;
   selectedDocumentIsFetching: boolean;
@@ -52,7 +51,6 @@ interface StatementListDocumentSearchLine {
 const StatementListDocumentSearchLine: React.FC<
   StatementListDocumentSearchLine
 > = ({
-  statements,
   selectedResource,
   setSelectedResourceId,
   selectedDocumentIsFetching,
