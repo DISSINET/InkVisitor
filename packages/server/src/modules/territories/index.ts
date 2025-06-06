@@ -44,7 +44,7 @@ export default Router()
    */
   .get(
     "/:territoryId",
-    asyncRouteHandler<IResponseTerritory>(async (request: IRequest<{territoryId: string}, any, {preload: string}>) => {
+    asyncRouteHandler<IResponseTerritory>(async (request: IRequest<{territoryId: string}, any, {preload: string, warnings: string}>) => {
       const startTime = performance.now();
       
       const territoryId = request.params.territoryId;
@@ -72,7 +72,7 @@ export default Router()
       }
  
       const response = new ResponseTerritory(territory);
-      await response.prepare(request, request.query.preload === "1");
+      await response.prepare(request, request.query.preload === "1", request.query.warnings === "1");
 
       const endTime = performance.now();
       console.log(`Territory GET /:territoryId execution time: ${endTime - startTime}ms`);

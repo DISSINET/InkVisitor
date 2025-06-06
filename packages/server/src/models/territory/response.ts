@@ -22,7 +22,7 @@ export class ResponseTerritory extends Territory implements IResponseTerritory {
     this.entities = {};
   }
 
-  async prepare(req: IRequest, preload: boolean = false): Promise<void> {
+  async prepare(req: IRequest, usePreload: boolean = false, useWarnings: boolean = false): Promise<void> {
     this.right = this.getUserRoleMode(req.getUserOrFail());
 
     const statements = await Statement.findStatementsInTerritory(
@@ -43,7 +43,7 @@ export class ResponseTerritory extends Territory implements IResponseTerritory {
       {}
     );
 
-    if (preload) {
+    if (usePreload) {
       const responseStatements: ResponseStatement[] = [];
       // prepare all entity ids required for statements
       const preloadedEntities: Record<string, IEntity | undefined> = {};
@@ -68,6 +68,9 @@ export class ResponseTerritory extends Territory implements IResponseTerritory {
 
       for (const responseStatement of responseStatements) {
         responseStatement.prepareSync(req, preloadedEntities as Record<string, IEntity>);
+        if (useWarnings && !this.isTemplate) {
+          responseStatement.warnings = await responseStatement.getWarnings(req);
+        }
         this.statements.push(responseStatement);
       }
     } else {

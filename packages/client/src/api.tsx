@@ -814,7 +814,7 @@ class Api {
   ): Promise<AxiosResponse<IResponseTerritory>> {
     try {
       const response = await this.connection.get(
-        `/territories/${territoryId}?preload=1`,
+        `/territories/${territoryId}?preload=1&warnings=1`,
         options
       );
       return response;
