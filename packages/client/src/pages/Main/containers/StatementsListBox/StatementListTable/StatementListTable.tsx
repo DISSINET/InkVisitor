@@ -452,7 +452,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         },
       },
     ];
-  }, [right, selectedRows, lastClickedIndex]);
+  }, [right, selectedRows, lastClickedIndex, entities]);
 
   const {
     setHiddenColumns,
