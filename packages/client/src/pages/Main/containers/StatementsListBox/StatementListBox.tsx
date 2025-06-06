@@ -870,8 +870,8 @@ export const StatementListBox: React.FC = () => {
             relationsCreateMutation={relationsCreateMutation}
             favoritedTerritoryIds={favoritedTerritoryIds}
             contentWidthTooSmall={contentWidth < SECOND_PANEL_MIN_WIDTH + 60}
-            statementsWithOrder={statements}
-            // statementsWithOrder={statementsWithOrder}
+            // statementsWithOrder={statements}
+            statementsWithOrder={statementsWithOrder}
             // autoOrderStatementsMutation={autoOrderStatementsMutation}
           />
 
@@ -931,8 +931,8 @@ export const StatementListBox: React.FC = () => {
               >
                 {isListNonEmpty && (
                   <StatementListTable
-                    statements={statements}
-                    // statements={statementsWithOrder}
+                    // statements={statements}
+                    statements={statementsWithOrder}
                     handleRowClick={(rowId: string) => {
                       dispatch(setShowWarnings(false));
                       if (statementId !== rowId) {
