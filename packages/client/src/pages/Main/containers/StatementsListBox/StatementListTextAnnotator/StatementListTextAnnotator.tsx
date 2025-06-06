@@ -27,7 +27,6 @@ import StatementListDocumentSearchLine from "../StatementListDocumentSearchLine/
 import { StyledInfoText } from "../StatementListHeader/StatementListHeaderStyles";
 
 interface StatementListTextAnnotator {
-  statements: IResponseStatement[];
   // it's faster than the territory entity so it's better to pass territoryId separately
   territoryId: string;
   territory?: IResponseTerritory;
@@ -38,10 +37,10 @@ interface StatementListTextAnnotator {
   addStatementAtCertainIndex: (index: number) => Promise<void>;
   handleCreateStatement: (detail?: string, statementId?: string) => void;
 
-  storedAnnotatorResourceId: string | false;
-  setStoredAnnotatorResourceId?: React.Dispatch<
-    React.SetStateAction<string | false>
-  >;
+  // storedAnnotatorResourceId: string | false;
+  // setStoredAnnotatorResourceId?: React.Dispatch<
+  //   React.SetStateAction<string | false>
+  // >;
   storedAnnotatorScroll: number;
   setStoredAnnotatorScroll?: React.Dispatch<React.SetStateAction<number>>;
 
@@ -73,7 +72,6 @@ interface StatementListTextAnnotator {
 export const StatementListTextAnnotator: React.FC<
   StatementListTextAnnotator
 > = ({
-  statements,
   territoryId,
   territory,
   statementId,
@@ -83,8 +81,8 @@ export const StatementListTextAnnotator: React.FC<
   addStatementAtCertainIndex,
   handleCreateStatement,
 
-  storedAnnotatorResourceId,
-  setStoredAnnotatorResourceId = () => {},
+  // storedAnnotatorResourceId,
+  // setStoredAnnotatorResourceId = () => {},
 
   storedAnnotatorScroll,
   setStoredAnnotatorScroll = () => {},
@@ -165,8 +163,6 @@ export const StatementListTextAnnotator: React.FC<
     }
   }, [dSearchTerm]);
 
-  // const debouncedContentWidth = useDebounce(contentWidth, 80);
-
   const animatedStyle = useSpring({
     opacity: showAnnotator ? 1 : 0,
     delay: 300,
@@ -234,7 +230,6 @@ export const StatementListTextAnnotator: React.FC<
     <animated.div style={animatedStyle}>
       {contentWidth > 0 && (
         <StatementListDocumentSearchLine
-          statements={statements}
           selectedResource={selectedResource}
           setSelectedResourceId={setSelectedResourceId}
           selectedDocumentIsFetching={selectedDocumentIsFetching}

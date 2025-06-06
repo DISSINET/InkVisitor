@@ -99,9 +99,13 @@ export const StatementListRow: React.FC<StatementListRow> = ({
       : dispatch(setDraggedRowId(""));
   }, [isDragging]);
 
-  preview(drop(dropRef));
-
-  drag(dragRef);
+  useEffect(() => {
+    if (isVisible) {
+      preview(drop(dropRef));
+      drag(dragRef);
+    }
+    // there are more dependencies because it was getting stuck after few moves
+  }, [isVisible, preview, drop, drag, index, row.original.id]);
 
   const themeContext = useContext(ThemeContext);
 
@@ -135,7 +139,6 @@ export const StatementListRow: React.FC<StatementListRow> = ({
                       >
                         <FaGripVertical color={themeContext?.color.black} />
                       </div>
-                      {/* temporary disabled */}
                       {(!isAnchored ||
                         (orderCorrection && orderCorrection?.distance > 0)) && (
                         <StatementListOrderCorrection

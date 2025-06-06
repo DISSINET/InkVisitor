@@ -78,7 +78,7 @@ export const StyledTd = styled.td<StyledTd>`
 
 export const StyledTdMove = styled.td`
   width: 1%;
-  padding-right: 0.5rem;
+  padding-right: 0.2rem;
 `;
 
 interface StyledFocusedCircle {
@@ -127,6 +127,7 @@ export const StyledOrderCorrection = styled.div`
   align-items: center;
   justify-content: center;
   font-size: ${({ theme }) => theme.fontSize["xs"]};
-  width: 2rem;
+  max-width: 2.6rem;
+  width: 100%;
   color: ${({ theme }) => theme.color["gray"]["800"]};
 `;

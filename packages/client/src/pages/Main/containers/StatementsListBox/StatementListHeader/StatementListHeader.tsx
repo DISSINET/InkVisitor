@@ -27,6 +27,7 @@ import Dropdown, {
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaTrash } from "react-icons/fa";
+import { FaArrowDownShortWide } from "react-icons/fa6";
 import {
   MdOutlineCheckBox,
   MdOutlineCheckBoxOutlineBlank,
@@ -126,7 +127,7 @@ interface StatementListHeader {
     Relation.IRelation[],
     unknown
   >;
-  // autoOrderStatementsMutation: UseMutationResult<void, Error, void, unknown>;
+  autoOrderStatementsMutation: UseMutationResult<void, Error, void, unknown>;
   statementsWithOrder: (IResponseStatement & {
     orderCorrection?: StatementOrderCorrection;
     isAnchored?: boolean;
@@ -152,7 +153,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
   deleteStatementsMutation,
   relationsCreateMutation,
-  // autoOrderStatementsMutation,
+  autoOrderStatementsMutation,
   statementsWithOrder,
   favoritedTerritoryIds,
   contentWidthTooSmall,
@@ -415,7 +416,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
             {/* BATCH ACTIONS */}
             <StyledActionsWrapper>
               {/* temporary disabled */}
-              {/* <Button
+              <Button
                 icon={<FaArrowDownShortWide />}
                 onClick={() => autoOrderStatementsMutation.mutate()}
                 color="success"
@@ -430,7 +431,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                   )
                 }
                 disabled={!hasAnchoredStatementsOutOfOrder}
-              /> */}
+              />
               {user?.role !== UserEnums.Role.Viewer &&
                 territory &&
                 territory.statements.length > 0 && (
