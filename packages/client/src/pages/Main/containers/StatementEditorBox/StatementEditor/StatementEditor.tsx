@@ -670,7 +670,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   const { scrollToAnchor } = useAnnotator();
 
   const statementListOpened = useAppSelector(
-    (state) => state.layout.statementListOpened
+    (state) => state.layout.mainPage.statementListOpened
   );
 
   const scrollToStatementAnchor = (

@@ -40,7 +40,7 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
   widthTooSmall,
 }: EntityDetailUsedInDocumentsTable) => {
   const detailBoxState: DetailBoxState = useAppSelector(
-    (state) => state.layout.detailBoxState
+    (state) => state.layout.mainPage.detailBoxState
   );
 
   const {
