@@ -15,7 +15,11 @@ import React, {
   useState,
 } from "react";
 import { ThemeContext } from "styled-components";
-import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
+import {
+  ANNOTATOR_TOO_SMALL_BREAKPOINT,
+  COLLAPSED_TABLE_WIDTH,
+  ANNOTATOR_SELECTOR_HEIGHT,
+} from "Theme/constants";
 import StatementListDocumentSearchLine from "../StatementListDocumentSearchLine/StatementListDocumentSearchLine";
 import { StyledInfoText } from "../StatementListHeader/StatementListHeaderStyles";
 
@@ -180,8 +184,7 @@ export const StatementListTextAnnotator: React.FC<
   }, [annotator, selectedDocument]);
 
   const annotatorHeight = useMemo<number>(() => {
-    // TODO: to constants!
-    const selectorHeight = 27;
+    const selectorHeight = ANNOTATOR_SELECTOR_HEIGHT;
     let height = contentHeight - 70 - selectorHeight;
 
     return height;
@@ -193,9 +196,8 @@ export const StatementListTextAnnotator: React.FC<
       : contentWidth;
   }, [contentWidth, showStatementList]);
 
-  // TODO: min reasonable width as constant
   const annotatorWidthTooSmall = useMemo<boolean>(() => {
-    return annotatorWidth < 360;
+    return annotatorWidth < ANNOTATOR_TOO_SMALL_BREAKPOINT;
   }, [annotatorWidth]);
 
   return (

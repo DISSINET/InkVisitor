@@ -23,10 +23,10 @@ export const THIRD_PANEL_MIN_WIDTH = 300;
 export const FOURTH_PANEL_MIN_WIDTH = 192;
 // % PERCENT PANEL WIDTHS for 1440px
 export const INIT_PERCENT_PANEL_WIDTHS = [10, 41, 34, 15];
-// less than 1400px = sacrifice editor
+// % PERCENT PANEL WIDTHS for less than 1400px = sacrifice editor
 export const SMALL_SCREEN_LIMIT = 1400;
 export const INIT_PERCENT_PANEL_WIDTHS_SMALL_SCREEN = [11, 39, 32, 18];
-// more than 1900px
+// % PERCENT PANEL WIDTHS for more than 1900px
 export const LARGE_SCREEN_LIMIT = 1900;
 export const INIT_PERCENT_PANEL_WIDTHS_LARGE_SCREEN = [10, 40, 36, 14];
 
@@ -38,6 +38,12 @@ export const MAIN_PAGE_SEARCH_SEPARATOR_X_PERCENT_POSITION =
   INIT_PERCENT_PANEL_WIDTHS[0] +
   INIT_PERCENT_PANEL_WIDTHS[1] +
   INIT_PERCENT_PANEL_WIDTHS[2];
+
+// breakpoint for annotator width too small
+export const ANNOTATOR_TOO_SMALL_BREAKPOINT = 400;
+// height of class selector for highlight in annotator
+export const ANNOTATOR_SELECTOR_HEIGHT = 27;
+
 // BOXES
 export const hiddenBoxHeight = 33;
 export const fourthPanelBoxesHeightThirds = {
