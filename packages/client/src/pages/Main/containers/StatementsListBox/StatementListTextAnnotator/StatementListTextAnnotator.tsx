@@ -6,7 +6,7 @@ import { IDocument, IResponseEntity, IResponseTerritory } from "@shared/types";
 import Dropdown from "components/advanced";
 import TextAnnotator from "components/advanced/Annotator/Annotator";
 import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
-import { useDebounce, useResizeObserver } from "hooks";
+import { useDebounce } from "hooks";
 import React, {
   useCallback,
   useContext,
@@ -173,9 +173,6 @@ export const StatementListTextAnnotator: React.FC<
     return false;
   }, [selectedDocument, territoryId]);
 
-  const { ref: selectorRef, height: selectorHeight = 0 } =
-    useResizeObserver<HTMLDivElement>({ debounceDelay: 0 });
-
   const themeContext = useContext(ThemeContext);
 
   const isSearchAllowed = useMemo<boolean>(() => {
@@ -183,13 +180,12 @@ export const StatementListTextAnnotator: React.FC<
   }, [annotator, selectedDocument]);
 
   const annotatorHeight = useMemo<number>(() => {
-    let height = contentHeight - 70;
+    // TODO: to constants!
+    const selectorHeight = 27;
+    let height = contentHeight - 70 - selectorHeight;
 
-    if (selectorHeight) {
-      height -= selectorHeight;
-    }
     return height;
-  }, [contentHeight, selectorHeight]);
+  }, [contentHeight]);
 
   const annotatorWidth = useMemo<number>(() => {
     return showStatementList
@@ -239,7 +235,6 @@ export const StatementListTextAnnotator: React.FC<
             marginBottom: themeContext?.space[2],
             marginLeft: showStatementList ? `-${COLLAPSED_TABLE_WIDTH}px` : "0",
           }}
-          ref={selectorRef}
         >
           {/* this condition helps initial render in firefox */}
           {contentWidth > 0 && (
@@ -254,8 +249,8 @@ export const StatementListTextAnnotator: React.FC<
                 disableAny={true}
                 onChange={handleHlEntitiesChange}
                 value={hlEntities}
-                width={contentWidth - 71}
                 noOptionsMessage="No entity classes to highlight"
+                width={contentWidth - 71}
                 limitSelectedItems={Math.floor((contentWidth - 145) / 80)}
               />
             </>

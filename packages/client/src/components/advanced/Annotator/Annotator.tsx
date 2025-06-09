@@ -1,17 +1,17 @@
+import {
+  autoUpdate,
+  flip,
+  FloatingPortal,
+  offset,
+  shift,
+  useFloating,
+} from "@floating-ui/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { FaPen, FaRegSave, FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
-import {
-  FloatingPortal,
-  useFloating,
-  autoUpdate,
-  offset,
-  flip,
-  shift,
-} from "@floating-ui/react";
 
 import { Annotator, EditMode } from "@inkvisitor/annotator/src/lib";
 import { EntityEnums } from "@shared/enums";
@@ -21,7 +21,6 @@ import { ButtonGroup } from "components/basic/ButtonGroup/ButtonGroup";
 import { useSearchParams } from "hooks";
 import { BsFileTextFill } from "react-icons/bs";
 import { HiCodeBracket } from "react-icons/hi2";
-import { useAppSelector } from "redux/hooks";
 import { ThemeContext } from "styled-components";
 import { EntityCreateModal } from "..";
 import { useAnnotator } from "./AnnotatorContext";
@@ -83,10 +82,6 @@ export const TextAnnotator = ({
   const theme = useContext(ThemeContext);
 
   const { appendDetailId, statementId, selectedDetailId } = useSearchParams();
-
-  const contentHeight: number = useAppSelector(
-    (state) => state.layout.contentHeight
-  );
 
   const { annotator, setAnnotator } = useAnnotator();
 
