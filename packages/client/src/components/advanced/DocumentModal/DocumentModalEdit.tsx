@@ -11,14 +11,13 @@ import { useQuery } from "@tanstack/react-query";
 import api from "api";
 
 interface DocumentModalEdit {
-  // document: IDocument | IDocumentMeta | undefined;
   documentId: string;
   onClose: () => void;
   anchor?: { entityId: string; occurence?: number };
 }
 const DocumentModalEdit: React.FC<DocumentModalEdit> = ({
-  onClose,
   documentId,
+  onClose,
   anchor,
 }) => {
   const [show, setShow] = useState(false);
@@ -43,11 +42,15 @@ const DocumentModalEdit: React.FC<DocumentModalEdit> = ({
   return (
     <Modal width={1000} showModal={show} onClose={onClose} fullHeight>
       <ModalHeader
-        title={`Edit ${
-          document
-            ? getShortLabelByLetterCount(document?.title, 90)
-            : "no label"
-        }`}
+        title={
+          dataDocumentIsFetching
+            ? "Loading..."
+            : `Edit ${
+                dataDocument
+                  ? getShortLabelByLetterCount(dataDocument.title, 90)
+                  : "no label"
+              }`
+        }
         onClose={onClose}
       />
 
