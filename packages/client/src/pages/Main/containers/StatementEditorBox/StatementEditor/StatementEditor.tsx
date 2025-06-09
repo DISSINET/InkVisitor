@@ -16,7 +16,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import {
-  COLLAPSED_PANEL_WIDTH,
+  EDITOR_TOO_SMALL_BREAKPOINT,
   excludedSuggesterEntities,
 } from "Theme/constants";
 import api from "api";
@@ -38,6 +38,7 @@ import {
   CStatementAction,
 } from "constructors";
 import { useSearchParams } from "hooks";
+import useAnnotator from "hooks/useAnnotator";
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import {
   AiOutlineCaretDown,
@@ -46,9 +47,8 @@ import {
 } from "react-icons/ai";
 import { FaAnchor, FaRegCopy } from "react-icons/fa";
 import { TiWarningOutline } from "react-icons/ti";
-import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import { selectPanelWidth } from "redux/features/layout/mainPage/panelWidthsSlice";
+import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
 import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { ThemeContext } from "styled-components";
@@ -92,9 +92,6 @@ import {
 import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
 import { StatementEditorSectionButtons } from "./StatementEditorSectionButtons/StatementEditorSectionButtons";
-import { useDebounce } from "hooks";
-import useAnnotator from "hooks/useAnnotator";
-import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
 
 const valencyErrorTypes: WarningTypeEnums[] = [
   WarningTypeEnums.MA,
@@ -702,7 +699,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     (state) => state.layout.mainPage.thirdPanelRealWidth
   );
 
-  const editorWidthTooSmall = editorWidth < 480;
+  const editorWidthTooSmall = editorWidth < EDITOR_TOO_SMALL_BREAKPOINT;
 
   return (
     <>
@@ -896,7 +893,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         </StyledEditorPreBlock>
 
         {statement.warnings.length > 0 && (
-          <StyledEditorSection>
+          <StyledEditorSection $widthTooSmall={editorWidthTooSmall}>
             <StyledEditorSectionHeader>
               <StyledEditorSectionHeading>
                 {statement.warnings.length} Warnings{" "}
@@ -938,6 +935,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           $metaSection
           key="editor-section-actions"
           id="action-section"
+          $widthTooSmall={editorWidthTooSmall}
         >
           <StyledEditorSectionHeader>
             <StyledEditorSectionHeading>Actions</StyledEditorSectionHeading>
@@ -989,6 +987,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           $metaSection
           key="editor-section-actants"
           id="actant-section"
+          $widthTooSmall={editorWidthTooSmall}
         >
           <StyledEditorSectionHeader>
             <StyledEditorSectionHeading>Actants</StyledEditorSectionHeading>
@@ -1038,7 +1037,10 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         </StyledEditorSection>
 
         {/* Refs */}
-        <StyledEditorSection key="editor-section-refs">
+        <StyledEditorSection
+          key="editor-section-refs"
+          $widthTooSmall={editorWidthTooSmall}
+        >
           <StyledEditorSectionHeader>
             <StyledEditorSectionHeading>References</StyledEditorSectionHeading>
 
@@ -1079,7 +1081,10 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         </StyledEditorSection>
 
         {/* Tags */}
-        <StyledEditorSection key="editor-section-tags">
+        <StyledEditorSection
+          key="editor-section-tags"
+          $widthTooSmall={editorWidthTooSmall}
+        >
           <StyledEditorSectionHeader>
             <StyledEditorSectionHeading>Tags</StyledEditorSectionHeading>
           </StyledEditorSectionHeader>
@@ -1133,7 +1138,11 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         </StyledEditorSection>
 
         {/* Notes */}
-        <StyledEditorSection key="editor-section-notes" $lastSection>
+        <StyledEditorSection
+          key="editor-section-notes"
+          $lastSection
+          $widthTooSmall={editorWidthTooSmall}
+        >
           <StyledEditorSectionHeader>Notes</StyledEditorSectionHeader>
           <StyledEditorSectionContent>
             <MultiInput
@@ -1148,7 +1157,10 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         </StyledEditorSection>
 
         {/* Audits */}
-        <StyledEditorSection key="editor-section-audits">
+        <StyledEditorSection
+          key="editor-section-audits"
+          $widthTooSmall={editorWidthTooSmall}
+        >
           <StyledEditorSectionHeader>Audits</StyledEditorSectionHeader>
           <StyledEditorSectionContent>
             {audit && <AuditTable {...audit} />}
@@ -1156,7 +1168,10 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         </StyledEditorSection>
 
         {/* JSON */}
-        <StyledEditorSection key="editor-section-json">
+        <StyledEditorSection
+          key="editor-section-json"
+          $widthTooSmall={editorWidthTooSmall}
+        >
           <StyledEditorSectionHeader>JSON</StyledEditorSectionHeader>
           <StyledEditorSectionContent>
             {statement && <JSONExplorer data={statement} />}
