@@ -43,7 +43,7 @@ export const StyledAnnotatorMenu = styled.div<StyledAnnotatorMenuProps>`
   width: 40rem;
   background: ${({ theme }) => theme.color.blue["100"]};
   padding: ${({ theme }) => theme.space[2]};
-  z-index: 100;
+  z-index: 200;
   border-radius: ${({ theme }) => theme.borderRadius["default"]};
   box-shadow: ${({ theme }) => theme.boxShadow.high};
   opacity: 0.95;
