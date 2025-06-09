@@ -1,14 +1,8 @@
 import { Annotator } from "@inkvisitor/annotator/src/lib";
 import { animated, useSpring } from "@react-spring/web";
 import { entitiesDict } from "@shared/dictionaries/entity";
-import { EntityEnums, UserEnums } from "@shared/enums";
-import {
-  IDocument,
-  IEntity,
-  IResponseEntity,
-  IResponseStatement,
-  IResponseTerritory,
-} from "@shared/types";
+import { EntityEnums } from "@shared/enums";
+import { IDocument, IResponseEntity, IResponseTerritory } from "@shared/types";
 import Dropdown from "components/advanced";
 import TextAnnotator from "components/advanced/Annotator/Annotator";
 import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
@@ -22,7 +16,6 @@ import React, {
 } from "react";
 import { ThemeContext } from "styled-components";
 import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
-import { StatementListDisplayMode } from "types";
 import StatementListDocumentSearchLine from "../StatementListDocumentSearchLine/StatementListDocumentSearchLine";
 import { StyledInfoText } from "../StatementListHeader/StatementListHeaderStyles";
 
@@ -31,16 +24,9 @@ interface StatementListTextAnnotator {
   territoryId: string;
   territory?: IResponseTerritory;
   statementId: string;
-  entities: { [key: string]: IEntity };
-  right: UserEnums.RoleMode;
-  setShowSubmit: React.Dispatch<React.SetStateAction<boolean>>;
   addStatementAtCertainIndex: (index: number) => Promise<void>;
   handleCreateStatement: (detail?: string, statementId?: string) => void;
 
-  // storedAnnotatorResourceId: string | false;
-  // setStoredAnnotatorResourceId?: React.Dispatch<
-  //   React.SetStateAction<string | false>
-  // >;
   storedAnnotatorScroll: number;
   setStoredAnnotatorScroll?: React.Dispatch<React.SetStateAction<number>>;
 
@@ -56,7 +42,6 @@ interface StatementListTextAnnotator {
   selectedDocument?: IDocument | false;
   selectedResource: IResponseEntity | false;
   resources?: IResponseEntity[];
-  documents?: IDocument[];
   setSelectedResourceId: React.Dispatch<React.SetStateAction<string | false>>;
 
   // useQuery for selectedDocument
@@ -64,7 +49,6 @@ interface StatementListTextAnnotator {
   selectedDocumentIsFetching: boolean;
   selectedDocumentError: Error | null;
 
-  displayMode: StatementListDisplayMode;
   showStatementList: boolean;
   userCanEdit: boolean;
 }
@@ -75,14 +59,8 @@ export const StatementListTextAnnotator: React.FC<
   territoryId,
   territory,
   statementId,
-  entities,
-  right,
-  setShowSubmit,
   addStatementAtCertainIndex,
   handleCreateStatement,
-
-  // storedAnnotatorResourceId,
-  // setStoredAnnotatorResourceId = () => {},
 
   storedAnnotatorScroll,
   setStoredAnnotatorScroll = () => {},
@@ -99,13 +77,11 @@ export const StatementListTextAnnotator: React.FC<
   selectedDocument,
   selectedResource,
   resources,
-  documents,
   setSelectedResourceId,
 
   selectedDocumentId,
   selectedDocumentIsFetching,
   selectedDocumentError,
-  displayMode,
   showStatementList,
   userCanEdit,
 }) => {
@@ -290,7 +266,7 @@ export const StatementListTextAnnotator: React.FC<
       {/* Annotator */}
       <div style={{ marginTop: "0.2rem" }}>
         <AnnotatorProvider>
-          {selectedDocumentId && (
+          {selectedDocumentId && selectedDocument && (
             <TextAnnotator
               width={annotatorWidth}
               annotatorWidthTooSmall={annotatorWidthTooSmall}
@@ -306,6 +282,9 @@ export const StatementListTextAnnotator: React.FC<
               storedAnnotatorScroll={storedAnnotatorScroll}
               setStoredAnnotatorScroll={setStoredAnnotatorScroll}
               territory={territory}
+              dataDocument={selectedDocument}
+              dataDocumentIsFetching={selectedDocumentIsFetching}
+              dataDocumentError={selectedDocumentError}
             />
           )}
         </AnnotatorProvider>

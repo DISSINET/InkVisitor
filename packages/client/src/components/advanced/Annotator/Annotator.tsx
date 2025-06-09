@@ -54,9 +54,9 @@ interface TextAnnotatorProps {
   setStoredAnnotatorScroll?: React.Dispatch<React.SetStateAction<number>>;
 
   territory?: IResponseTerritory;
-  // dataDocument?: IDocument;
-  // dataDocumentIsFetching?: boolean;
-  // errorDocument: Error | null;
+  dataDocument?: IDocument;
+  dataDocumentIsFetching?: boolean;
+  dataDocumentError: Error | null;
 }
 
 export const TextAnnotator = ({
@@ -75,10 +75,10 @@ export const TextAnnotator = ({
   setStoredAnnotatorScroll = () => {},
 
   territory,
-}: // dataDocument,
-// dataDocumentIsFetching,
-// errorDocument,
-TextAnnotatorProps) => {
+  dataDocument,
+  dataDocumentIsFetching,
+  dataDocumentError,
+}: TextAnnotatorProps) => {
   const queryClient = useQueryClient();
   const theme = useContext(ThemeContext);
 
@@ -107,20 +107,6 @@ TextAnnotatorProps) => {
       return res.data;
     },
     enabled: !!parentTerritoryId,
-  });
-
-  // it has to be here currently to render the annotator in the documents page
-  const {
-    data: dataDocument,
-    error: errorDocument,
-    isFetching: isFetchingDocument,
-  } = useQuery({
-    queryKey: ["document", documentId],
-    queryFn: async () => {
-      const res = await api.documentGet(documentId);
-      return res.data;
-    },
-    enabled: api.isLoggedIn(),
   });
 
   const updateDocumentMutation = useMutation({
@@ -404,7 +390,7 @@ TextAnnotatorProps) => {
   };
 
   useEffect(() => {
-    if (!isFetchingDocument) {
+    if (!dataDocumentIsFetching) {
       if (scrollAfterRefresh !== undefined) {
         refreshAnnotator({
           line: scrollAfterRefresh,
@@ -417,18 +403,18 @@ TextAnnotatorProps) => {
         });
       }
     }
-  }, [isFetchingDocument, dataDocument]);
+  }, [dataDocumentIsFetching, dataDocument]);
 
   useEffect(() => {
-    if (!isFetchingDocument) {
+    if (!dataDocumentIsFetching) {
       refreshAnnotator({
         line: storedAnnotatorScroll,
       });
     }
-  }, [theme, isFetchingDocument]);
+  }, [theme, dataDocumentIsFetching]);
 
   useEffect(() => {
-    if (!isFetchingDocument) {
+    if (!dataDocumentIsFetching) {
       refreshAnnotator({
         line: storedAnnotatorScroll,
       });
@@ -497,10 +483,10 @@ TextAnnotatorProps) => {
     );
   }, [annotatorMode, selectedText, isSelectingText, dataDocument]);
 
-  if (errorDocument) {
+  if (dataDocumentError) {
     return (
       <StyledInfoText>
-        Error loading document: {errorDocument.message}
+        Error loading document: {dataDocumentError.message}
       </StyledInfoText>
     );
   }

@@ -967,12 +967,9 @@ export const StatementListBox: React.FC = () => {
                 contentHeight={contentHeight}
                 contentWidth={contentWidth - 10}
                 handleCreateStatement={handleCreateStatement}
-                // handleCreateTerritory={handleCreateTerritory}
                 territoryId={territoryId}
                 territory={territory}
                 statementId={statementId}
-                // storedAnnotatorResourceId={storedAnnotatorResourceId}
-                // setStoredAnnotatorResourceId={setStoredAnnotatorResourceId}
                 storedAnnotatorScroll={storedAnnotatorScroll}
                 setStoredAnnotatorScroll={(newScroll) => {
                   if (storedAnnotatorResourceId) {
@@ -981,9 +978,6 @@ export const StatementListBox: React.FC = () => {
                 }}
                 hlEntities={hlEntities}
                 setHlEntities={setHlEntities}
-                entities={entities}
-                right={right}
-                setShowSubmit={setShowSubmit}
                 addStatementAtCertainIndex={addStatementAtCertainIndex}
                 annotator={annotator}
                 setAnnotator={setAnnotator}
@@ -993,9 +987,7 @@ export const StatementListBox: React.FC = () => {
                 selectedDocumentError={selectedDocumentError}
                 selectedResource={selectedResource}
                 resources={resources}
-                documents={documents}
                 setSelectedResourceId={setSelectedResourceId}
-                displayMode={displayMode}
                 showStatementList={
                   isListNonEmpty || statementListTableIsLoading
                 }
