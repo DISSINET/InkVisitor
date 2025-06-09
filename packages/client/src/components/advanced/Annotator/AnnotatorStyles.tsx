@@ -141,3 +141,11 @@ export const StyledInfoText = styled.div`
   font-size: ${({ theme }) => theme.fontSize.sm};
   margin: ${({ theme }) => theme.space[4]};
 `;
+
+interface StyledDisplayModeButtonIconWrapper {
+  $annotatorWidthTooSmall?: boolean;
+}
+export const StyledDisplayModeButtonIconWrapper = styled.div<StyledDisplayModeButtonIconWrapper>`
+  padding: ${({ $annotatorWidthTooSmall }) =>
+    $annotatorWidthTooSmall ? "0 0.5rem" : ""};
+`;

@@ -28,6 +28,7 @@ import TextAnnotatorMenu from "./AnnotatorMenu";
 import {
   StyledAnnotatorMenu,
   StyledCanvasWrapper,
+  StyledDisplayModeButtonIconWrapper,
   StyledInfoText,
   StyledLinesCanvas,
   StyledMainCanvas,
@@ -581,7 +582,13 @@ export const TextAnnotator = ({
             <ButtonGroup $marginTop>
               <Button
                 key={EditMode.HIGHLIGHT}
-                icon={<FaPen size={11} />}
+                icon={
+                  <StyledDisplayModeButtonIconWrapper
+                    $annotatorWidthTooSmall={annotatorWidthTooSmall}
+                  >
+                    <FaPen size={11} />
+                  </StyledDisplayModeButtonIconWrapper>
+                }
                 label={!annotatorWidthTooSmall ? EditMode.HIGHLIGHT : ""}
                 color="success"
                 inverted={annotatorMode !== EditMode.HIGHLIGHT}
@@ -595,7 +602,13 @@ export const TextAnnotator = ({
               />
               <Button
                 key={EditMode.SEMI}
-                icon={<BsFileTextFill size={11} />}
+                icon={
+                  <StyledDisplayModeButtonIconWrapper
+                    $annotatorWidthTooSmall={annotatorWidthTooSmall}
+                  >
+                    <BsFileTextFill size={11} />
+                  </StyledDisplayModeButtonIconWrapper>
+                }
                 color="success"
                 label={!annotatorWidthTooSmall ? "text edit" : ""}
                 inverted={annotatorMode !== EditMode.SEMI}
@@ -609,7 +622,13 @@ export const TextAnnotator = ({
               />
               <Button
                 key={EditMode.RAW}
-                icon={<HiCodeBracket size={11} />}
+                icon={
+                  <StyledDisplayModeButtonIconWrapper
+                    $annotatorWidthTooSmall={annotatorWidthTooSmall}
+                  >
+                    <HiCodeBracket size={11} />
+                  </StyledDisplayModeButtonIconWrapper>
+                }
                 color="success"
                 label={!annotatorWidthTooSmall ? "XML" : ""}
                 inverted={annotatorMode !== EditMode.RAW}
