@@ -667,6 +667,10 @@ export const StatementListBox: React.FC = () => {
 
   const [isInitialized, setIsInitialized] = useState(false);
 
+  const selectedTerritoryPath: string[] = useAppSelector(
+    (state) => state.territoryTree.selectedTerritoryPath
+  );
+
   // if no resource is selected, select the document with this territoryId in document references
   const loadDefaultResource = () => {
     if (resources && documents && !isInitialized) {
@@ -676,7 +680,12 @@ export const StatementListBox: React.FC = () => {
             (d) => d.id === resource.data.documentId
           );
           if (document) {
-            return document.entityIds.T.includes(territoryId);
+            return (
+              document.entityIds.T.includes(territoryId) ||
+              document.entityIds.T.includes(
+                selectedTerritoryPath[selectedTerritoryPath.length - 1]
+              )
+            );
           }
         }
         return false;
