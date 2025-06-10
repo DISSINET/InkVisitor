@@ -88,7 +88,11 @@ const Option = ({
               ].label
             : ""
         }
-        visible={showTooltip && !disableTooltip}
+        visible={
+          showTooltip &&
+          !disableTooltip &&
+          props.data.value !== EntityEnums.Extension.Any
+        }
         referenceElement={referenceElement}
         position="left"
       />
