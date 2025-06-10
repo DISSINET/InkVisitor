@@ -14,7 +14,7 @@ export const StyledContainer = styled(animated.div)<StyledContainer>`
 
   box-shadow: 0 0 5px ${({ theme }) => theme.color.tooltipBoxShadow};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
-  z-index: 888;
+  z-index: 10000;
 
   display: flex;
   justify-content: center;

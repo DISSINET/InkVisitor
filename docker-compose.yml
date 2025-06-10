@@ -24,7 +24,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      platform: linux/amd64
       args:
         ENV: latest # make sure the file for client packages/client/env/.env is present during build
     image: dissinet/inkvisitor:latest

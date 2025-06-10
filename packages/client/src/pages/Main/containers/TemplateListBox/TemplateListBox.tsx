@@ -145,6 +145,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
                   }}
                   width="full"
                   disableTyping
+                  disableTooltip={!widthTooSmall}
                 />
                 <TypeBar entityLetter={filterByClass} />
               </div>
