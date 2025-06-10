@@ -674,22 +674,37 @@ export const StatementListBox: React.FC = () => {
   // if no resource is selected, select the document with this territoryId in document references
   const loadDefaultResource = () => {
     if (resources && documents && !isInitialized) {
-      const resourceWithAnchor = resources.find((resource) => {
+      // First try to find resource with document containing territoryId
+      let resourceWithAnchor = resources.find((resource) => {
         if (resource.data.documentId) {
           const document = documents.find(
             (d) => d.id === resource.data.documentId
           );
           if (document) {
-            return (
-              document.entityIds.T.includes(territoryId) ||
-              document.entityIds.T.includes(
-                selectedTerritoryPath[selectedTerritoryPath.length - 1]
-              )
-            );
+            return document.entityIds.T.includes(territoryId);
           }
         }
         return false;
       });
+
+      // If not found, try each territory in the path in reverse order
+      if (!resourceWithAnchor) {
+        for (let i = selectedTerritoryPath.length - 1; i > 0; i--) {
+          const territoryInPath = selectedTerritoryPath[i];
+          resourceWithAnchor = resources.find((resource) => {
+            if (resource.data.documentId) {
+              const document = documents.find(
+                (d) => d.id === resource.data.documentId
+              );
+              if (document) {
+                return document.entityIds.T.includes(territoryInPath);
+              }
+            }
+            return false;
+          });
+          if (resourceWithAnchor) break;
+        }
+      }
 
       if (resourceWithAnchor) {
         setSelectedResourceId(resourceWithAnchor.id);
