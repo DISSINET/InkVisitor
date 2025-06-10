@@ -1,8 +1,11 @@
 import { BaseDropdown } from "components";
-import React from "react";
+import React, { useState } from "react";
 import { OptionProps, components } from "react-select";
 import { EntityColors } from "types";
 import { StyledEntityValue } from "./DropdownStyles";
+import { Tooltip } from "components";
+import { entitiesDictKeys } from "@shared/dictionaries/entity";
+import { EntityEnums } from "@shared/enums";
 
 interface EntitySingleDropdown<T = string> {
   width?: number | "full";
@@ -16,6 +19,7 @@ interface EntitySingleDropdown<T = string> {
   suggester?: boolean;
   disableTyping?: boolean;
   disabled?: boolean;
+  disableTooltip?: boolean;
 
   loggerId?: string;
 }
@@ -31,7 +35,7 @@ export const EntitySingleDropdown = <T extends string>({
   suggester,
   disableTyping,
   disabled,
-
+  disableTooltip,
   loggerId,
 }: EntitySingleDropdown<T>) => {
   return (
@@ -49,19 +53,45 @@ export const EntitySingleDropdown = <T extends string>({
       disabled={disabled}
       autoFocus={autoFocus}
       loggerId={loggerId}
-      customComponents={{ Option }}
+      customComponents={{
+        Option: (props) => (
+          <Option {...props} disableTooltip={disableTooltip} />
+        ),
+      }}
     />
   );
 };
 
-const Option = ({ ...props }: OptionProps | any): React.ReactElement => {
+const Option = ({
+  disableTooltip,
+  ...props
+}: OptionProps<any> & { disableTooltip?: boolean }): React.ReactElement => {
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [referenceElement, setReferenceElement] =
+    useState<HTMLDivElement | null>(null);
+
   return (
     <components.Option {...props}>
       <StyledEntityValue
-        color={EntityColors[props.value]?.color ?? "transparent"}
+        ref={setReferenceElement}
+        color={EntityColors[props.data.value]?.color ?? "transparent"}
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
       >
-        {props.label}
+        {props.data.label}
       </StyledEntityValue>
+      <Tooltip
+        label={
+          props.data.value !== EntityEnums.Extension.Any
+            ? entitiesDictKeys[
+                props.data.value as keyof typeof entitiesDictKeys
+              ].label
+            : ""
+        }
+        visible={showTooltip && !disableTooltip}
+        referenceElement={referenceElement}
+        position="left"
+      />
     </components.Option>
   );
 };
