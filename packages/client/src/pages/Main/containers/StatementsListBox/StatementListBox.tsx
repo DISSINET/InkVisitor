@@ -671,7 +671,6 @@ export const StatementListBox: React.FC = () => {
     (state) => state.territoryTree.selectedTerritoryPath
   );
 
-  // if no resource is selected, select the document with this territoryId in document references
   const loadDefaultResource = () => {
     if (resources && documents && !isInitialized) {
       // First try to find resource with document containing territoryId
