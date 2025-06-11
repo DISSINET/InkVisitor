@@ -127,7 +127,9 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
             <>
               <span>
                 <AttributeButtonGroup
-                  disabled={newParentEntities.length > 1}
+                  // #2684 disabled until we have batch remove
+                  disabled
+                  // disabled={newParentEntities.length > 1}
                   fullSizeDisabled
                   disabledBtnsTooltip="cannot move to multiple Territories"
                   options={[
@@ -191,7 +193,8 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
               })}
             </StyledTagList>
 
-            {oldParentId && (
+            {/* #2684 only allow one parentuntil we have batch remove */}
+            {oldParentId && newParentEntities.length === 0 && (
               <EntitySuggester
                 autoFocus
                 placeholder="new parent"

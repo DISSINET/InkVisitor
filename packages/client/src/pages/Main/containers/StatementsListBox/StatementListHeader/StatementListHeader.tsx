@@ -415,23 +415,24 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
           <StyledSuggesterRow>
             {/* BATCH ACTIONS */}
             <StyledActionsWrapper>
-              {/* temporary disabled */}
-              <Button
-                icon={<FaArrowDownShortWide />}
-                onClick={() => autoOrderStatementsMutation.mutate()}
-                color="success"
-                tooltipLabel="auto order statements"
-                tooltipContent={
-                  hasAnchoredStatementsOutOfOrder ? (
-                    <i>leaves non-anchored statements in place</i>
-                  ) : (
-                    <i>
-                      order of anchored statements corresponds to the document
-                    </i>
-                  )
-                }
-                disabled={!hasAnchoredStatementsOutOfOrder}
-              />
+              {territoryId && statementsWithOrder.length > 0 && (
+                <Button
+                  icon={<FaArrowDownShortWide />}
+                  onClick={() => autoOrderStatementsMutation.mutate()}
+                  color="success"
+                  tooltipLabel="auto order statements"
+                  tooltipContent={
+                    hasAnchoredStatementsOutOfOrder ? (
+                      <i>leaves non-anchored statements in place</i>
+                    ) : (
+                      <i>
+                        order of anchored statements corresponds to the document
+                      </i>
+                    )
+                  }
+                  disabled={!hasAnchoredStatementsOutOfOrder}
+                />
+              )}
               {user?.role !== UserEnums.Role.Viewer &&
                 territory &&
                 territory.statements.length > 0 && (
@@ -505,7 +506,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                   </>
                 )}
             </StyledActionsWrapper>
-            {territoryId !== rootTerritoryId && userCanEdit && (
+            {territoryId && territoryId !== rootTerritoryId && userCanEdit && (
               <StyledMoveToParent>
                 <EntitySuggester
                   placeholder="move"
