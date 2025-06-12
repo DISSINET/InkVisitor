@@ -158,12 +158,18 @@ export const TextAnnotator = ({
   >(undefined);
 
   const { refs, floatingStyles } = useFloating({
-    placement: "right",
+    placement: "bottom",
     whileElementsMounted: autoUpdate,
     middleware: [
-      offset({ mainAxis: 100, crossAxis: 40 }),
+      offset({
+        mainAxis: annotator?.lineHeight
+          ? (annotator.lineHeight / RATIO) * 1.2
+          : 30,
+        crossAxis: wTextArea / 2 + 100,
+      }),
       flip({
         padding: 10,
+        fallbackPlacements: ["top"],
       }),
       shift({
         padding: 10,
