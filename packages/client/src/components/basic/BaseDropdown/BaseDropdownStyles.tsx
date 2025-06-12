@@ -44,6 +44,8 @@ export const StyledSelect = styled(Select)<StyledSelect>`
     width: ${({ width }) => getWidth(width)};
     max-width: 100%;
     min-height: ${({ theme }) => theme.space[10]};
+    // only for one row multi entity dropdown to avoid glitches during resizing
+    height: ${({ limitSelectedItems }) => (limitSelectedItems ? "27px" : "")};
     border-width: 1px;
     border-style: solid;
     border-color: ${({ theme, suggester }) =>

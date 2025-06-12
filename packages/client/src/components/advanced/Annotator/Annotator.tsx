@@ -1,17 +1,17 @@
+import {
+  autoUpdate,
+  flip,
+  FloatingPortal,
+  offset,
+  shift,
+  useFloating,
+} from "@floating-ui/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { FaPen, FaRegSave, FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
-import {
-  FloatingPortal,
-  useFloating,
-  autoUpdate,
-  offset,
-  flip,
-  shift,
-} from "@floating-ui/react";
 
 import { Annotator, EditMode } from "@inkvisitor/annotator/src/lib";
 import { EntityEnums } from "@shared/enums";
@@ -21,14 +21,15 @@ import { ButtonGroup } from "components/basic/ButtonGroup/ButtonGroup";
 import { useSearchParams } from "hooks";
 import { BsFileTextFill } from "react-icons/bs";
 import { HiCodeBracket } from "react-icons/hi2";
-import { useAppSelector } from "redux/hooks";
 import { ThemeContext } from "styled-components";
 import { EntityCreateModal } from "..";
 import { useAnnotator } from "./AnnotatorContext";
 import TextAnnotatorMenu from "./AnnotatorMenu";
 import {
+  StyledAnnotatorButtons,
   StyledAnnotatorMenu,
   StyledCanvasWrapper,
+  StyledDisplayModeButtonIconWrapper,
   StyledInfoText,
   StyledLinesCanvas,
   StyledMainCanvas,
@@ -54,9 +55,9 @@ interface TextAnnotatorProps {
   setStoredAnnotatorScroll?: React.Dispatch<React.SetStateAction<number>>;
 
   territory?: IResponseTerritory;
-  // dataDocument?: IDocument;
-  // dataDocumentIsFetching?: boolean;
-  // errorDocument: Error | null;
+  dataDocument?: IDocument;
+  dataDocumentIsFetching?: boolean;
+  dataDocumentError: Error | null;
 }
 
 export const TextAnnotator = ({
@@ -75,18 +76,14 @@ export const TextAnnotator = ({
   setStoredAnnotatorScroll = () => {},
 
   territory,
-}: // dataDocument,
-// dataDocumentIsFetching,
-// errorDocument,
-TextAnnotatorProps) => {
+  dataDocument,
+  dataDocumentIsFetching,
+  dataDocumentError,
+}: TextAnnotatorProps) => {
   const queryClient = useQueryClient();
   const theme = useContext(ThemeContext);
 
   const { appendDetailId, statementId, selectedDetailId } = useSearchParams();
-
-  const contentHeight: number = useAppSelector(
-    (state) => state.layout.contentHeight
-  );
 
   const { annotator, setAnnotator } = useAnnotator();
 
@@ -107,20 +104,6 @@ TextAnnotatorProps) => {
       return res.data;
     },
     enabled: !!parentTerritoryId,
-  });
-
-  // it has to be here currently to render the annotator in the documents page
-  const {
-    data: dataDocument,
-    error: errorDocument,
-    isFetching: isFetchingDocument,
-  } = useQuery({
-    queryKey: ["document", documentId],
-    queryFn: async () => {
-      const res = await api.documentGet(documentId);
-      return res.data;
-    },
-    enabled: api.isLoggedIn(),
   });
 
   const updateDocumentMutation = useMutation({
@@ -175,12 +158,18 @@ TextAnnotatorProps) => {
   >(undefined);
 
   const { refs, floatingStyles } = useFloating({
-    placement: "right",
+    placement: "bottom",
     whileElementsMounted: autoUpdate,
     middleware: [
-      offset({ mainAxis: 100, crossAxis: 40 }),
+      offset({
+        mainAxis: annotator?.lineHeight
+          ? (annotator.lineHeight / RATIO) * 1.2
+          : 30,
+        crossAxis: wTextArea / 2 + 100,
+      }),
       flip({
         padding: 10,
+        fallbackPlacements: ["top"],
       }),
       shift({
         padding: 10,
@@ -404,7 +393,7 @@ TextAnnotatorProps) => {
   };
 
   useEffect(() => {
-    if (!isFetchingDocument) {
+    if (!dataDocumentIsFetching) {
       if (scrollAfterRefresh !== undefined) {
         refreshAnnotator({
           line: scrollAfterRefresh,
@@ -417,18 +406,18 @@ TextAnnotatorProps) => {
         });
       }
     }
-  }, [isFetchingDocument, dataDocument]);
+  }, [dataDocumentIsFetching, dataDocument]);
 
   useEffect(() => {
-    if (!isFetchingDocument) {
+    if (!dataDocumentIsFetching) {
       refreshAnnotator({
         line: storedAnnotatorScroll,
       });
     }
-  }, [theme, isFetchingDocument]);
+  }, [theme, dataDocumentIsFetching]);
 
   useEffect(() => {
-    if (!isFetchingDocument) {
+    if (!dataDocumentIsFetching) {
       refreshAnnotator({
         line: storedAnnotatorScroll,
       });
@@ -497,10 +486,10 @@ TextAnnotatorProps) => {
     );
   }, [annotatorMode, selectedText, isSelectingText, dataDocument]);
 
-  if (errorDocument) {
+  if (dataDocumentError) {
     return (
       <StyledInfoText>
-        Error loading document: {errorDocument.message}
+        Error loading document: {dataDocumentError.message}
       </StyledInfoText>
     );
   }
@@ -596,11 +585,17 @@ TextAnnotatorProps) => {
         </StyledCanvasWrapper>
 
         {annotator && (
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <StyledAnnotatorButtons>
             <ButtonGroup $marginTop>
               <Button
                 key={EditMode.HIGHLIGHT}
-                icon={<FaPen size={11} />}
+                icon={
+                  <StyledDisplayModeButtonIconWrapper
+                    $annotatorWidthTooSmall={annotatorWidthTooSmall}
+                  >
+                    <FaPen size={11} />
+                  </StyledDisplayModeButtonIconWrapper>
+                }
                 label={!annotatorWidthTooSmall ? EditMode.HIGHLIGHT : ""}
                 color="success"
                 inverted={annotatorMode !== EditMode.HIGHLIGHT}
@@ -614,7 +609,13 @@ TextAnnotatorProps) => {
               />
               <Button
                 key={EditMode.SEMI}
-                icon={<BsFileTextFill size={11} />}
+                icon={
+                  <StyledDisplayModeButtonIconWrapper
+                    $annotatorWidthTooSmall={annotatorWidthTooSmall}
+                  >
+                    <BsFileTextFill size={11} />
+                  </StyledDisplayModeButtonIconWrapper>
+                }
                 color="success"
                 label={!annotatorWidthTooSmall ? "text edit" : ""}
                 inverted={annotatorMode !== EditMode.SEMI}
@@ -628,7 +629,13 @@ TextAnnotatorProps) => {
               />
               <Button
                 key={EditMode.RAW}
-                icon={<HiCodeBracket size={11} />}
+                icon={
+                  <StyledDisplayModeButtonIconWrapper
+                    $annotatorWidthTooSmall={annotatorWidthTooSmall}
+                  >
+                    <HiCodeBracket size={11} />
+                  </StyledDisplayModeButtonIconWrapper>
+                }
                 color="success"
                 label={!annotatorWidthTooSmall ? "XML" : ""}
                 inverted={annotatorMode !== EditMode.RAW}
@@ -664,7 +671,7 @@ TextAnnotatorProps) => {
                 }}
               />
             </ButtonGroup>
-          </div>
+          </StyledAnnotatorButtons>
         )}
       </div>
 

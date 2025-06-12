@@ -43,7 +43,7 @@ export const StyledAnnotatorMenu = styled.div<StyledAnnotatorMenuProps>`
   width: 40rem;
   background: ${({ theme }) => theme.color.blue["100"]};
   padding: ${({ theme }) => theme.space[2]};
-  z-index: 100;
+  z-index: 200;
   border-radius: ${({ theme }) => theme.borderRadius["default"]};
   box-shadow: ${({ theme }) => theme.boxShadow.high};
   opacity: 0.95;
@@ -140,4 +140,17 @@ export const StyledInfoText = styled.div`
   color: ${({ theme }) => theme.color.black};
   font-size: ${({ theme }) => theme.fontSize.sm};
   margin: ${({ theme }) => theme.space[4]};
+`;
+
+interface StyledDisplayModeButtonIconWrapper {
+  $annotatorWidthTooSmall?: boolean;
+}
+export const StyledDisplayModeButtonIconWrapper = styled.div<StyledDisplayModeButtonIconWrapper>`
+  padding: ${({ $annotatorWidthTooSmall }) =>
+    $annotatorWidthTooSmall ? "0 0.5rem" : ""};
+`;
+
+export const StyledAnnotatorButtons = styled.div`
+  display: flex;
+  justify-content: space-between;
 `;

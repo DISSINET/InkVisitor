@@ -47,7 +47,7 @@ interface SearchParamsContext {
   clearAllDetailIds: () => void;
   cleanAllParams: () => void;
 
-  annotatorOpened: boolean | null;
+  annotatorOpened: boolean;
   setAnnotatorOpened: (opened: boolean) => void;
 }
 const SearchParamsContext = createContext<SearchParamsContext>(INITIAL_CONTEXT);
@@ -96,10 +96,8 @@ export const SearchParamsProvider = ({
     }
   };
 
-  const [annotatorOpened, setAnnotatorOpened] = useState<boolean | null>(
-    parsedParams.annotatorOpened
-      ? stringToBoolean(parsedParams.annotatorOpened)
-      : INITIAL_CONTEXT.annotatorOpened
+  const [annotatorOpened, setAnnotatorOpened] = useState<boolean>(
+    "annotatorOpened" in parsedParams ? true : false
   );
 
   const [disablePush, setDisablePush] = useState(false);
@@ -207,8 +205,14 @@ export const SearchParamsProvider = ({
 
   const handleHistoryPush = () => {
     if (!disablePush) {
+      const hashString = params.toString();
+      // Remove the = symbol for annotatorOpened parameter
+      const cleanHash = hashString
+        .replace(/annotatorOpened=&/g, "annotatorOpened&")
+        .replace(/&annotatorOpened=/g, "&annotatorOpened")
+        .replace(/^annotatorOpened=$/g, "annotatorOpened");
       navigate({
-        hash: `${params}`,
+        hash: cleanHash,
       });
     }
   };
@@ -217,7 +221,7 @@ export const SearchParamsProvider = ({
     clearAllDetailIds();
     setStatementId("");
     setTerritoryId("");
-    setAnnotatorOpened(null);
+    setAnnotatorOpened(false);
   };
 
   const hasSearchParams = useMemo(
@@ -240,10 +244,8 @@ export const SearchParamsProvider = ({
         : params.delete("selectedDetail");
       detailId ? params.set("detail", detailId) : params.delete("detail");
 
-      annotatorOpened !== null
-        ? annotatorOpened
-          ? params.set("annotatorOpened", "true")
-          : params.set("annotatorOpened", "false")
+      annotatorOpened
+        ? params.set("annotatorOpened", "")
         : params.delete("annotatorOpened");
 
       handleHistoryPush();

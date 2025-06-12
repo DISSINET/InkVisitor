@@ -40,7 +40,7 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
   widthTooSmall,
 }: EntityDetailUsedInDocumentsTable) => {
   const detailBoxState: DetailBoxState = useAppSelector(
-    (state) => state.layout.detailBoxState
+    (state) => state.layout.mainPage.detailBoxState
   );
 
   const {
@@ -84,7 +84,7 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
                       detailBoxState === DetailBoxState.FullHeight
                     ) {
                       // set more time to open statement list, annotator and/or find the territory
-                      timeout = 1000;
+                      timeout = 2000;
                     } else {
                       timeout = 100;
                     }
