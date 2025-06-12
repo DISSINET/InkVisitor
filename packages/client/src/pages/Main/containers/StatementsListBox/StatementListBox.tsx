@@ -979,6 +979,8 @@ export const StatementListBox: React.FC = () => {
                     displayMode={displayMode}
                     annotator={annotator}
                     isLoading={statementListTableIsLoading}
+                    selectedDocument={selectedDocument}
+                    selectedDocumentIsFetching={selectedDocumentIsFetching}
                   />
                 )}
               </StyledTableWrapper>

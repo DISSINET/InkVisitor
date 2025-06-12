@@ -45,6 +45,8 @@ interface StatementListRow {
   entities: { [key: string]: IEntity };
   isSelected: boolean;
   displayMode: StatementListDisplayMode;
+  selectedDocument: any;
+  selectedDocumentIsFetching: boolean;
 }
 
 export const StatementListRow: React.FC<StatementListRow> = ({
@@ -57,6 +59,8 @@ export const StatementListRow: React.FC<StatementListRow> = ({
   entities,
   isSelected,
   displayMode,
+  selectedDocument,
+  selectedDocumentIsFetching,
 }) => {
   const dispatch = useAppDispatch();
 
@@ -141,10 +145,13 @@ export const StatementListRow: React.FC<StatementListRow> = ({
                       </div>
                       {!isAnchored ||
                       (orderCorrection && orderCorrection?.distance > 0) ? (
-                        <StatementListOrderCorrection
-                          orderCorrection={orderCorrection}
-                          isAnchored={isAnchored}
-                        />
+                        selectedDocument &&
+                        !selectedDocumentIsFetching && (
+                          <StatementListOrderCorrection
+                            orderCorrection={orderCorrection}
+                            isAnchored={isAnchored}
+                          />
+                        )
                       ) : (
                         <div style={{ width: "2rem" }} />
                       )}

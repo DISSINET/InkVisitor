@@ -1,6 +1,7 @@
 import { Annotator } from "@inkvisitor/annotator/src/lib";
 import { UserEnums } from "@shared/enums";
 import {
+  IDocument,
   IEntity,
   IResponseGeneric,
   IResponseStatement,
@@ -98,6 +99,8 @@ interface StatementListTable {
   displayMode: StatementListDisplayMode;
   annotator?: Annotator;
   isLoading: boolean;
+  selectedDocument?: false | IDocument;
+  selectedDocumentIsFetching: boolean;
 }
 export const StatementListTable: React.FC<StatementListTable> = ({
   statements,
@@ -116,6 +119,8 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   displayMode,
   annotator,
   isLoading,
+  selectedDocument,
+  selectedDocumentIsFetching,
 }) => {
   const dispatch = useAppDispatch();
   const { territoryId, setStatementId } = useSearchParams();
@@ -577,16 +582,18 @@ export const StatementListTable: React.FC<StatementListTable> = ({
             prepareRow(row);
             return (
               <StatementListRow
-                index={i}
-                handleClick={handleRowClickWithAnnotator}
+                key={row.id}
                 row={row}
+                index={i}
                 moveRow={moveRow}
                 moveEndRow={moveEndRow}
+                handleClick={handleRowClickWithAnnotator}
                 visibleColumns={visibleColumns}
                 entities={entities}
-                isSelected={selectedRows.includes(row.id)}
+                isSelected={selectedRows.includes(row.original.id)}
                 displayMode={displayMode}
-                {...row.getRowProps()}
+                selectedDocument={selectedDocument}
+                selectedDocumentIsFetching={selectedDocumentIsFetching}
               />
             );
           })}
