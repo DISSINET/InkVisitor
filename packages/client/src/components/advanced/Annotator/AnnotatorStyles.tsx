@@ -149,3 +149,8 @@ export const StyledDisplayModeButtonIconWrapper = styled.div<StyledDisplayModeBu
   padding: ${({ $annotatorWidthTooSmall }) =>
     $annotatorWidthTooSmall ? "0 0.5rem" : ""};
 `;
+
+export const StyledAnnotatorButtons = styled.div`
+  display: flex;
+  justify-content: space-between;
+`;

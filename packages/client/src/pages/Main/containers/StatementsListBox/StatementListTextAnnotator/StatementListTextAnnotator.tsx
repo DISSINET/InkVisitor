@@ -184,10 +184,7 @@ export const StatementListTextAnnotator: React.FC<
   }, [annotator, selectedDocument]);
 
   const annotatorHeight = useMemo<number>(() => {
-    const selectorHeight = ANNOTATOR_SELECTOR_HEIGHT;
-    let height = contentHeight - 70 - selectorHeight;
-
-    return height;
+    return contentHeight - 70 - ANNOTATOR_SELECTOR_HEIGHT;
   }, [contentHeight]);
 
   const annotatorWidth = useMemo<number>(() => {

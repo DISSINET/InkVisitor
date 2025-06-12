@@ -579,7 +579,7 @@ export const StatementListBox: React.FC = () => {
     height: contentHeight = 0,
     // width: contentWidth = 0,
   } = useResizeObserver<HTMLDivElement>({
-    debounceDelay: 50,
+    debounceDelay: 0,
   });
 
   const contentWidth = useAppSelector(

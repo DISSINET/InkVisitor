@@ -26,6 +26,7 @@ import { EntityCreateModal } from "..";
 import { useAnnotator } from "./AnnotatorContext";
 import TextAnnotatorMenu from "./AnnotatorMenu";
 import {
+  StyledAnnotatorButtons,
   StyledAnnotatorMenu,
   StyledCanvasWrapper,
   StyledDisplayModeButtonIconWrapper,
@@ -578,7 +579,7 @@ export const TextAnnotator = ({
         </StyledCanvasWrapper>
 
         {annotator && (
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <StyledAnnotatorButtons>
             <ButtonGroup $marginTop>
               <Button
                 key={EditMode.HIGHLIGHT}
@@ -664,7 +665,7 @@ export const TextAnnotator = ({
                 }}
               />
             </ButtonGroup>
-          </div>
+          </StyledAnnotatorButtons>
         )}
       </div>
 
