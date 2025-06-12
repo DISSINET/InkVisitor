@@ -29,6 +29,7 @@ import { Request, Response } from "express";
 import { TooManyRequestsError } from "@shared/types/errors";
 import { r as rethink } from "rethinkdb-ts";
 import timeout from 'connect-timeout';
+import { pool } from "@middlewares/db";
 
 const server = express();
 
@@ -115,7 +116,16 @@ server.use(dbMiddleware);
 server.get("/api/health", async function (req, res) {
   await rethink.tableList().run(req.db.connection);
   res.json({
-    result: true
+    result: true,
+    db: {
+      pool: {
+        size: pool.pool.size,
+        available: pool.pool.available,
+        borrowed: pool.pool.size - pool.pool.available,
+        pending: pool.pool.pending,
+        max: pool.options.max
+      }
+    }
   });
 });
 

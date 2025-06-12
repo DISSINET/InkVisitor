@@ -503,69 +503,75 @@ export const StatementListBox: React.FC = () => {
     },
   });
 
-  // const autoOrderStatementsMutation = useMutation({
-  //   mutationFn: async () => {
-  //     if (!selectedDocument) return;
+  const autoOrderStatementsMutation = useMutation({
+    mutationFn: async () => {
+      if (!selectedDocument) return;
 
-  //     const statementAnchors = collectStatementAnchors(
-  //       selectedDocument.anchors
-  //     );
-  //     const correctPositionMap = new Map(
-  //       statementAnchors.map((anchor, index) => [anchor.anchor, index])
-  //     );
+      // Collect anchors from the document and remove duplicates
+      const statementAnchors = Array.from(
+        new Map(
+          collectStatementAnchors(selectedDocument.anchors).map((anchor) => [
+            anchor.anchor,
+            anchor,
+          ])
+        ).values()
+      );
+      const correctPositionMap = new Map(
+        statementAnchors.map((anchor, index) => [anchor.anchor, index])
+      );
 
-  //     // Separate anchored and non-anchored statements
-  //     const anchoredStatements = statements.filter((s) =>
-  //       correctPositionMap.has(s.id)
-  //     );
-  //     const nonAnchoredStatements = statements.filter(
-  //       (s) => !correctPositionMap.has(s.id)
-  //     );
+      // Separate anchored and non-anchored statements
+      const anchoredStatements = statements.filter((s) =>
+        correctPositionMap.has(s.id)
+      );
+      const nonAnchoredStatements = statements.filter(
+        (s) => !correctPositionMap.has(s.id)
+      );
 
-  //     // Sort anchored statements by their correct position
-  //     const sortedAnchoredStatements = anchoredStatements.sort((a, b) => {
-  //       const posA = correctPositionMap.get(a.id) ?? 0;
-  //       const posB = correctPositionMap.get(b.id) ?? 0;
-  //       return posA - posB;
-  //     });
+      // Sort anchored statements by their correct position
+      const sortedAnchoredStatements = anchoredStatements.sort((a, b) => {
+        const posA = correctPositionMap.get(a.id) ?? 0;
+        const posB = correctPositionMap.get(b.id) ?? 0;
+        return posA - posB;
+      });
 
-  //     // Interleave anchored and non-anchored statements based on their original relative positions
-  //     const finalOrder: IResponseStatement[] = [];
-  //     let anchoredIndex = 0;
-  //     let nonAnchoredIndex = 0;
+      // Interleave anchored and non-anchored statements based on their original relative positions
+      const finalOrder: IResponseStatement[] = [];
+      let anchoredIndex = 0;
+      let nonAnchoredIndex = 0;
 
-  //     statements.forEach((statement) => {
-  //       if (correctPositionMap.has(statement.id)) {
-  //         finalOrder.push(sortedAnchoredStatements[anchoredIndex++]);
-  //       } else {
-  //         finalOrder.push(nonAnchoredStatements[nonAnchoredIndex++]);
-  //       }
-  //     });
+      statements.forEach((statement) => {
+        if (correctPositionMap.has(statement.id)) {
+          finalOrder.push(sortedAnchoredStatements[anchoredIndex++]);
+        } else {
+          finalOrder.push(nonAnchoredStatements[nonAnchoredIndex++]);
+        }
+      });
 
-  //     // Update each statement's order
-  //     const updates = finalOrder.map((statement, index) => {
-  //       const order = index * 100; // Use increments of 100 to leave room for future insertions
-  //       return api.entityUpdate(statement.id, {
-  //         data: {
-  //           ...statement.data,
-  //           territory: {
-  //             ...statement.data.territory,
-  //             order,
-  //           },
-  //         },
-  //       });
-  //     });
+      // Update each statement's order
+      const updates = finalOrder.map((statement, index) => {
+        const order = index * 100; // Use increments of 100 to leave room for future insertions
+        return api.entityUpdate(statement.id, {
+          data: {
+            ...statement.data,
+            territory: {
+              ...statement.data.territory,
+              order,
+            },
+          },
+        });
+      });
 
-  //     await Promise.all(updates);
-  //   },
-  //   onSuccess: () => {
-  //     queryClient.invalidateQueries({ queryKey: ["territory"] });
-  //     toast.info("Statements reordered according to document");
-  //   },
-  //   onError: () => {
-  //     toast.error("Failed to reorder statements");
-  //   },
-  // });
+      await Promise.all(updates);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["territory"] });
+      toast.info("Statements reordered according to document");
+    },
+    onError: () => {
+      toast.error("Failed to reorder statements");
+    },
+  });
 
   const {
     ref: contentRef,
@@ -573,12 +579,11 @@ export const StatementListBox: React.FC = () => {
     height: contentHeight = 0,
     // width: contentWidth = 0,
   } = useResizeObserver<HTMLDivElement>({
-    debounceDelay: 50,
+    debounceDelay: 0,
   });
 
-  const contentWidth = useDebounce(
-    useAppSelector((state) => state.layout.mainPage.secondPanelRealWidth),
-    100
+  const contentWidth = useAppSelector(
+    (state) => state.layout.mainPage.secondPanelRealWidth
   );
 
   const [storedAnnotatorResourceId, setStoredAnnotatorResourceId] = useState<
@@ -659,38 +664,16 @@ export const StatementListBox: React.FC = () => {
     }
   }, [selectedResourceId]);
 
-  // const loadDefaultResource = () => {
-  //   if (resources && documents) {
-  //     const resourceWithAnchor = resources.find((resource) => {
-  //       if (resource.data.documentId) {
-  //         const document = documents.find(
-  //           (d) => d.id === resource.data.documentId
-  //         );
-  //         if (document) {
-  //           return document.entityIds.T.includes(territoryId);
-  //         }
-  //       }
-  //       return false;
-  //     });
-
-  //     if (resourceWithAnchor) {
-  //       setSelectedResourceId(resourceWithAnchor.id);
-  //     } else {
-  //       setSelectedResourceId(false);
-  //     }
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   loadDefaultResource();
-  // }, [territoryId, resources, documents]);
-
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // if no resource is selected, select the document with this territoryId in document references
+  const selectedTerritoryPath: string[] = useAppSelector(
+    (state) => state.territoryTree.selectedTerritoryPath
+  );
+
   const loadDefaultResource = () => {
     if (resources && documents && !isInitialized) {
-      const resourceWithAnchor = resources.find((resource) => {
+      // First try to find resource with document containing territoryId
+      let resourceWithAnchor = resources.find((resource) => {
         if (resource.data.documentId) {
           const document = documents.find(
             (d) => d.id === resource.data.documentId
@@ -701,6 +684,25 @@ export const StatementListBox: React.FC = () => {
         }
         return false;
       });
+
+      // If not found, try each territory in the path in reverse order
+      if (!resourceWithAnchor) {
+        for (let i = selectedTerritoryPath.length - 1; i > 0; i--) {
+          const territoryInPath = selectedTerritoryPath[i];
+          resourceWithAnchor = resources.find((resource) => {
+            if (resource.data.documentId) {
+              const document = documents.find(
+                (d) => d.id === resource.data.documentId
+              );
+              if (document) {
+                return document.entityIds.T.includes(territoryInPath);
+              }
+            }
+            return false;
+          });
+          if (resourceWithAnchor) break;
+        }
+      }
 
       if (resourceWithAnchor) {
         setSelectedResourceId(resourceWithAnchor.id);
@@ -750,9 +752,14 @@ export const StatementListBox: React.FC = () => {
     enabled: api.isLoggedIn() && !!selectedDocumentId,
   });
 
+  // collect all statement anchors that are in the statements list
   const collectStatementAnchors = (anchors: IAnchorsNode[]): IAnchorsNode[] => {
+    const statementIds = new Set(statements.map((s) => s.id));
     return anchors.reduce((acc: any[], anchor) => {
-      if (anchor.class === EntityEnums.Class.Statement) {
+      if (
+        anchor.class === EntityEnums.Class.Statement &&
+        statementIds.has(anchor.anchor)
+      ) {
         acc.push(anchor);
       }
       if (anchor.children) {
@@ -767,12 +774,21 @@ export const StatementListBox: React.FC = () => {
     orderCorrection?: StatementOrderCorrection;
     isAnchored?: boolean;
   })[] = useMemo(() => {
-    if (!selectedDocument) return statements;
+    if (!selectedDocument || !statements.length) return statements;
 
-    const statementAnchors = collectStatementAnchors(selectedDocument.anchors);
+    // Collect anchors from the document and remove duplicates
+    const statementAnchors = Array.from(
+      new Map(
+        collectStatementAnchors(selectedDocument.anchors).map((anchor) => [
+          anchor.anchor,
+          anchor,
+        ])
+      ).values()
+    );
 
     // Create a map of statement IDs to their correct positions
     const correctPositionMap = new Map(
+      // this index is the position of the statement IN THE DOCUMENT
       statementAnchors.map((anchor, index) => [anchor.anchor, index])
     );
 
@@ -786,15 +802,14 @@ export const StatementListBox: React.FC = () => {
     );
 
     // Filter and sort only anchored statements
-    const anchoredStatements = statementsWithCorrectPosition
-      .filter((item) => item.isAnchored)
-      .sort((a, b) => (a.correctPosition ?? 0) - (b.correctPosition ?? 0));
+    const anchoredStatements = statementsWithCorrectPosition.filter(
+      (item) => item.isAnchored
+    );
 
-    // Create a map of current anchored positions (excluding non-anchored statements)
+    // Create a map of territory statements (anchored) with position in the list
     const currentAnchoredPositions = new Map(
-      statementsWithCorrectPosition
-        .filter((item) => item.isAnchored)
-        .map((item, index) => [item.statement.id, index])
+      // this index is the position of the statement IN THE LIST
+      anchoredStatements.map((item, index) => [item.statement.id, index])
     );
 
     // Create a map of anchored statements with their corrections
@@ -849,7 +864,7 @@ export const StatementListBox: React.FC = () => {
     duplicateTerritoryMutation.isPending ||
     deleteStatementsMutation.isPending ||
     relationsCreateMutation.isPending ||
-    // autoOrderStatementsMutation.isPending ||
+    autoOrderStatementsMutation.isPending ||
     (statementListOpened && !showStatementList);
 
   const tableWidth = useMemo(() => {
@@ -882,10 +897,9 @@ export const StatementListBox: React.FC = () => {
             deleteStatementsMutation={deleteStatementsMutation}
             relationsCreateMutation={relationsCreateMutation}
             favoritedTerritoryIds={favoritedTerritoryIds}
-            statementsWithOrder={statements}
             contentWidthTooSmall={contentWidth < SECOND_PANEL_MIN_WIDTH + 60}
-            // statementsWithOrder={statementsWithOrder}
-            // autoOrderStatementsMutation={autoOrderStatementsMutation}
+            statementsWithOrder={statementsWithOrder}
+            autoOrderStatementsMutation={autoOrderStatementsMutation}
           />
 
           {!territoryId && (
@@ -944,7 +958,6 @@ export const StatementListBox: React.FC = () => {
               >
                 {isListNonEmpty && (
                   <StatementListTable
-                    // statements={statements}
                     statements={statementsWithOrder}
                     handleRowClick={(rowId: string) => {
                       dispatch(setShowWarnings(false));
@@ -976,14 +989,10 @@ export const StatementListBox: React.FC = () => {
                 key={territoryId}
                 contentHeight={contentHeight}
                 contentWidth={contentWidth - 10}
-                statements={statements}
                 handleCreateStatement={handleCreateStatement}
-                // handleCreateTerritory={handleCreateTerritory}
                 territoryId={territoryId}
                 territory={territory}
                 statementId={statementId}
-                storedAnnotatorResourceId={storedAnnotatorResourceId}
-                setStoredAnnotatorResourceId={setStoredAnnotatorResourceId}
                 storedAnnotatorScroll={storedAnnotatorScroll}
                 setStoredAnnotatorScroll={(newScroll) => {
                   if (storedAnnotatorResourceId) {
@@ -992,9 +1001,6 @@ export const StatementListBox: React.FC = () => {
                 }}
                 hlEntities={hlEntities}
                 setHlEntities={setHlEntities}
-                entities={entities}
-                right={right}
-                setShowSubmit={setShowSubmit}
                 addStatementAtCertainIndex={addStatementAtCertainIndex}
                 annotator={annotator}
                 setAnnotator={setAnnotator}
@@ -1004,9 +1010,7 @@ export const StatementListBox: React.FC = () => {
                 selectedDocumentError={selectedDocumentError}
                 selectedResource={selectedResource}
                 resources={resources}
-                documents={documents}
                 setSelectedResourceId={setSelectedResourceId}
-                displayMode={displayMode}
                 showStatementList={
                   isListNonEmpty || statementListTableIsLoading
                 }
@@ -1019,11 +1023,11 @@ export const StatementListBox: React.FC = () => {
               contentHeight > 0 && (
                 <div
                   style={{
-                    width: tableWidth,
+                    width: tableWidth + 4,
                     height:
                       displayMode === StatementListDisplayMode.TEXT
                         ? contentHeight - 56
-                        : contentHeight,
+                        : contentHeight + 4,
                     flexShrink: 0,
                     position: "absolute",
                     bottom: 0,

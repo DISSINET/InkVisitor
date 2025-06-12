@@ -24,9 +24,8 @@ export const StatementListOrderCorrection: React.FC<
         onMouseLeave={() => setShowTooltip(false)}
       >
         {/* no anchor icon */}
-        {/* temporary disabled */}
-        {!isAnchored && <TbAnchorOff size={15} />}
-        {/* {!isAnchored ? (
+        {/* {!isAnchored && <TbAnchorOff size={15} />} */}
+        {!isAnchored ? (
           <TbAnchorOff size={15} />
         ) : (
           // order correction helper
@@ -34,15 +33,16 @@ export const StatementListOrderCorrection: React.FC<
           orderCorrection?.distance > 0 && (
             <>
               {orderCorrection.shouldMoveUp ? (
-                <FaArrowUpLong size={14} />
+                <FaArrowUpLong style={{ flexShrink: 0 }} size={14} />
               ) : (
-                orderCorrection &&
-                orderCorrection.shouldMoveDown && <FaArrowDownLong size={14} />
+                orderCorrection.shouldMoveDown && (
+                  <FaArrowDownLong style={{ flexShrink: 0 }} size={14} />
+                )
               )}
-              <div>{orderCorrection.distance}</div>
+              <div style={{ flexShrink: 1 }}>{orderCorrection.distance}</div>
             </>
           )
-        )} */}
+        )}
       </StyledOrderCorrection>
       <Tooltip
         visible={showTooltip}

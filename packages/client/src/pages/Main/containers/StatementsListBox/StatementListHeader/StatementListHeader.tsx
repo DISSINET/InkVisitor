@@ -27,6 +27,7 @@ import Dropdown, {
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaTrash } from "react-icons/fa";
+import { FaArrowDownShortWide } from "react-icons/fa6";
 import {
   MdOutlineCheckBox,
   MdOutlineCheckBoxOutlineBlank,
@@ -126,7 +127,7 @@ interface StatementListHeader {
     Relation.IRelation[],
     unknown
   >;
-  // autoOrderStatementsMutation: UseMutationResult<void, Error, void, unknown>;
+  autoOrderStatementsMutation: UseMutationResult<void, Error, void, unknown>;
   statementsWithOrder: (IResponseStatement & {
     orderCorrection?: StatementOrderCorrection;
     isAnchored?: boolean;
@@ -152,7 +153,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
   deleteStatementsMutation,
   relationsCreateMutation,
-  // autoOrderStatementsMutation,
+  autoOrderStatementsMutation,
   statementsWithOrder,
   favoritedTerritoryIds,
   contentWidthTooSmall,
@@ -414,23 +415,24 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
           <StyledSuggesterRow>
             {/* BATCH ACTIONS */}
             <StyledActionsWrapper>
-              {/* temporary disabled */}
-              {/* <Button
-                icon={<FaArrowDownShortWide />}
-                onClick={() => autoOrderStatementsMutation.mutate()}
-                color="success"
-                tooltipLabel="auto order statements"
-                tooltipContent={
-                  hasAnchoredStatementsOutOfOrder ? (
-                    <i>leaves non-anchored statements in place</i>
-                  ) : (
-                    <i>
-                      order of anchored statements corresponds to the document
-                    </i>
-                  )
-                }
-                disabled={!hasAnchoredStatementsOutOfOrder}
-              /> */}
+              {territoryId && statementsWithOrder.length > 0 && (
+                <Button
+                  icon={<FaArrowDownShortWide />}
+                  onClick={() => autoOrderStatementsMutation.mutate()}
+                  color="success"
+                  tooltipLabel="auto order statements"
+                  tooltipContent={
+                    hasAnchoredStatementsOutOfOrder ? (
+                      <i>leaves non-anchored statements in place</i>
+                    ) : (
+                      <i>
+                        order of anchored statements corresponds to the document
+                      </i>
+                    )
+                  }
+                  disabled={!hasAnchoredStatementsOutOfOrder}
+                />
+              )}
               {user?.role !== UserEnums.Role.Viewer &&
                 territory &&
                 territory.statements.length > 0 && (
@@ -504,7 +506,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                   </>
                 )}
             </StyledActionsWrapper>
-            {territoryId !== rootTerritoryId && userCanEdit && (
+            {territoryId && territoryId !== rootTerritoryId && userCanEdit && (
               <StyledMoveToParent>
                 <EntitySuggester
                   placeholder="move"

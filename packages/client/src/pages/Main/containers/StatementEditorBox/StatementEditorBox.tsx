@@ -352,32 +352,57 @@ export const StatementEditorBox: React.FC = () => {
     }
   };
 
+  // delay of show content for fluent animation on open
+  const [showEditor, setShowEditor] = useState(true);
+
+  useEffect(() => {
+    if (thirdPanelExpanded) {
+      setTimeout(() => {
+        setShowEditor(true);
+      }, 500);
+    } else {
+      setShowEditor(false);
+    }
+  }, [thirdPanelExpanded]);
+
   return (
     <>
-      {tempObject && thirdPanelExpanded ? (
-        <CustomScrollbar>
-          <div onMouseLeave={() => sendChangesToBackend(tempObject)}>
-            <StatementEditor
-              statement={tempObject}
-              updateStatementMutation={updateStatementMutation}
-              moveStatementMutation={moveStatementMutation}
-              handleAttributeChange={handleAttributeChange}
-              handleDataAttributeChange={handleDataAttributeChange}
-            />
-          </div>
-        </CustomScrollbar>
-      ) : (
+      {showEditor && (
         <>
-          <StyledEditorEmptyState>
-            <BsInfoCircle size="23" />
-          </StyledEditorEmptyState>
-          <StyledEditorEmptyState>
-            {"No statement selected yet. Pick one from the statements table"}
-          </StyledEditorEmptyState>
+          {tempObject && thirdPanelExpanded ? (
+            <CustomScrollbar>
+              <div onMouseLeave={() => sendChangesToBackend(tempObject)}>
+                <StatementEditor
+                  statement={tempObject}
+                  updateStatementMutation={updateStatementMutation}
+                  moveStatementMutation={moveStatementMutation}
+                  handleAttributeChange={handleAttributeChange}
+                  handleDataAttributeChange={handleDataAttributeChange}
+                />
+              </div>
+            </CustomScrollbar>
+          ) : (
+            <>
+              <StyledEditorEmptyState>
+                <BsInfoCircle size="23" />
+              </StyledEditorEmptyState>
+              <StyledEditorEmptyState>
+                {
+                  "No statement selected yet. Pick one from the statements table"
+                }
+              </StyledEditorEmptyState>
+            </>
+          )}
         </>
       )}
 
-      <Loader show={isFetchingStatement || updateStatementMutation.isPending} />
+      <Loader
+        show={
+          isFetchingStatement ||
+          updateStatementMutation.isPending ||
+          (thirdPanelExpanded && !showEditor)
+        }
+      />
     </>
   );
 };
