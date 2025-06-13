@@ -224,7 +224,7 @@ export default class Cursor
       // in case there is no area selected, just drop a cursor at some
       this.drawLine(ctx, this.yLine, this.xLine, this.xLine, {
         ...drawingOptions,
-        color: "black",
+        color: this.style.color,
       });
     } else if (hStart && hEnd) {
       // selection active, iterate over displayed lines
