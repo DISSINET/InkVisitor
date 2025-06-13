@@ -143,7 +143,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
                       >
                         <FaGripVertical color={themeContext?.color.black} />
                       </div>
-                      {!isAnchored ||
+                      {(isAnchored !== undefined && !isAnchored) ||
                       (orderCorrection && orderCorrection?.distance > 0) ? (
                         selectedDocument &&
                         !selectedDocumentIsFetching && (
