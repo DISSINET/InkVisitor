@@ -45,8 +45,6 @@ interface StatementListRow {
   entities: { [key: string]: IEntity };
   isSelected: boolean;
   displayMode: StatementListDisplayMode;
-  selectedDocument: any;
-  selectedDocumentIsFetching: boolean;
 }
 
 export const StatementListRow: React.FC<StatementListRow> = ({
@@ -59,8 +57,6 @@ export const StatementListRow: React.FC<StatementListRow> = ({
   entities,
   isSelected,
   displayMode,
-  selectedDocument,
-  selectedDocumentIsFetching,
 }) => {
   const dispatch = useAppDispatch();
 
@@ -109,7 +105,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
       drag(dragRef);
     }
     // there are more dependencies because it was getting stuck after few moves
-  }, [isVisible, preview, drop, drag, index, row.original.id]);
+  }, [isVisible, preview, drop, drag]);
 
   const themeContext = useContext(ThemeContext);
 

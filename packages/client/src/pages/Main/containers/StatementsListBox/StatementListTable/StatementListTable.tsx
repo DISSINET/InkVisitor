@@ -592,8 +592,6 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                 entities={entities}
                 isSelected={selectedRows.includes(row.original.id)}
                 displayMode={displayMode}
-                selectedDocument={selectedDocument}
-                selectedDocumentIsFetching={selectedDocumentIsFetching}
               />
             );
           })}
