@@ -99,8 +99,6 @@ interface StatementListTable {
   displayMode: StatementListDisplayMode;
   annotator?: Annotator;
   isLoading: boolean;
-  selectedDocument?: false | IDocument;
-  selectedDocumentIsFetching: boolean;
 }
 export const StatementListTable: React.FC<StatementListTable> = ({
   statements,
@@ -119,8 +117,6 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   displayMode,
   annotator,
   isLoading,
-  selectedDocument,
-  selectedDocumentIsFetching,
 }) => {
   const dispatch = useAppDispatch();
   const { territoryId, setStatementId } = useSearchParams();
