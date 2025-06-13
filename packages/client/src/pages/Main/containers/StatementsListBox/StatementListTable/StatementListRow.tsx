@@ -99,12 +99,16 @@ export const StatementListRow: React.FC<StatementListRow> = ({
       : dispatch(setDraggedRowId(""));
   }, [isDragging]);
 
+  // drag and drop needs to be inside component body to work correctly but needs to be also inside the useEffect reinitialize when the row gets visible
+  preview(drop(dropRef));
+  drag(dragRef);
+  // needed as well as mentioned in the comment above
   useEffect(() => {
     if (isVisible) {
       preview(drop(dropRef));
       drag(dragRef);
     }
-  }, [isVisible, preview, drop, drag]);
+  }, [isVisible]);
 
   const themeContext = useContext(ThemeContext);
 
