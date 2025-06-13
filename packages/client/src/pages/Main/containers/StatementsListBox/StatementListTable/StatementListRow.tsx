@@ -145,13 +145,10 @@ export const StatementListRow: React.FC<StatementListRow> = ({
                       </div>
                       {(isAnchored !== undefined && !isAnchored) ||
                       (orderCorrection && orderCorrection?.distance > 0) ? (
-                        selectedDocument &&
-                        !selectedDocumentIsFetching && (
-                          <StatementListOrderCorrection
-                            orderCorrection={orderCorrection}
-                            isAnchored={isAnchored}
-                          />
-                        )
+                        <StatementListOrderCorrection
+                          orderCorrection={orderCorrection}
+                          isAnchored={isAnchored}
+                        />
                       ) : (
                         <div style={{ width: "2rem" }} />
                       )}
