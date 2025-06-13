@@ -99,13 +99,16 @@ export const StatementListRow: React.FC<StatementListRow> = ({
       : dispatch(setDraggedRowId(""));
   }, [isDragging]);
 
+  // drag and drop needs to be inside component body to work correctly but needs to be also inside the useEffect reinitialize when the row gets visible
+  preview(drop(dropRef));
+  drag(dragRef);
+  // needed as well as mentioned in the comment above
   useEffect(() => {
     if (isVisible) {
       preview(drop(dropRef));
       drag(dragRef);
     }
-    // there are more dependencies because it was getting stuck after few moves
-  }, [isVisible, preview, drop, drag, index, row.original.id]);
+  }, [isVisible]);
 
   const themeContext = useContext(ThemeContext);
 
@@ -139,12 +142,14 @@ export const StatementListRow: React.FC<StatementListRow> = ({
                       >
                         <FaGripVertical color={themeContext?.color.black} />
                       </div>
-                      {(!isAnchored ||
-                        (orderCorrection && orderCorrection?.distance > 0)) && (
+                      {(isAnchored !== undefined && !isAnchored) ||
+                      (orderCorrection && orderCorrection?.distance > 0) ? (
                         <StatementListOrderCorrection
                           orderCorrection={orderCorrection}
                           isAnchored={isAnchored}
                         />
+                      ) : (
+                        <div style={{ width: "2rem" }} />
                       )}
                     </div>
                   </StyledTdMove>

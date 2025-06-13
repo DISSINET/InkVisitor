@@ -5,6 +5,7 @@ import { findEntityById } from "@service/shorthands";
 import { EntityEnums } from "@shared/enums";
 import {
   IResponseGeneric,
+  IResponseStatement,
   IResponseTerritory,
   IStatement,
   ITerritory,
@@ -18,8 +19,6 @@ import { Router } from "express";
 import { IRequest } from "src/custom_typings/request";
 import { asyncRouteHandler } from "..";
 import Entity from "@models/entity/entity";
-import treeCache from "@service/treeCache";
-import tree from "@modules/tree";
 
 export default Router()
   /**
@@ -46,7 +45,9 @@ export default Router()
    */
   .get(
     "/:territoryId",
-    asyncRouteHandler<IResponseTerritory>(async (request: IRequest) => {
+    asyncRouteHandler<IResponseTerritory>(async (request: IRequest<{territoryId: string}, any, {preload: string, warnings: string}>) => {
+      const startTime = performance.now();
+      
       const territoryId = request.params.territoryId;
       if (!territoryId) {
         throw new BadParams("territoryId has to be set");
@@ -70,11 +71,52 @@ export default Router()
       ) {
         throw new PermissionDeniedError(`cannot view entity ${territoryId}`);
       }
-
+ 
       const response = new ResponseTerritory(territory);
-      await response.prepare(request);
+      await response.prepare(request, request.query.preload === "1", request.query.warnings === "1");
+
+      const endTime = performance.now();
+      console.log(`Territory GET /:territoryId execution time: ${endTime - startTime}ms`);
 
       return response;
+    })
+  )
+  .get(
+    "/:territoryId/statements",
+    asyncRouteHandler<IResponseStatement[]>(async (request: IRequest<{territoryId: string}>) => {
+      const startTime = performance.now();
+      
+      const territoryId = request.params.territoryId;
+      if (!territoryId) {
+        throw new BadParams("territoryId has to be set");
+      }
+
+      const territory = await findEntityById<ITerritory>(
+        request.db,
+        territoryId
+      );
+      if (!territory || territory.class !== EntityEnums.Class.Territory) {
+        throw new TerritoryDoesNotExits(
+          `territory ${territoryId} was not found`,
+          territoryId
+        );
+      }
+
+      if (
+        !new Territory({ id: territoryId }).canBeViewedByUser(
+          request.getUserOrFail()
+        )
+      ) {
+        throw new PermissionDeniedError(`cannot view entity ${territoryId}`);
+      }
+ 
+      const response = new ResponseTerritory(territory);
+      const statements = await response.prepareStatements(request, true, true);
+
+      const endTime = performance.now();
+      console.log(`Territory GET /:territoryId/statements execution time: ${endTime - startTime}ms`);
+
+      return statements;
     })
   )
   /**
@@ -172,7 +214,7 @@ export default Router()
         );
         if (!tgts || !tgts.length || tgts.length !== targetIds.length) {
           throw new TerritoryDoesNotExits(
-            "one or more target territories not found",
+            `one or more target territories(${targetIds.length}) not found`,
             targetIds.join(",")
           );
         }

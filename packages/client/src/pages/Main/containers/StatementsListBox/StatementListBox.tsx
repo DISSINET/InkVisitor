@@ -963,8 +963,11 @@ export const StatementListBox: React.FC = () => {
                       dispatch(setShowWarnings(false));
                       if (statementId !== rowId) {
                         setStatementId(rowId);
-                      } else {
-                        annotator?.scrollToAnchor(rowId);
+                      } else if (
+                        displayMode === StatementListDisplayMode.TEXT &&
+                        annotator
+                      ) {
+                        annotator.scrollToAnchor(rowId);
                       }
                     }}
                     actantsUpdateMutation={statementUpdateMutation}

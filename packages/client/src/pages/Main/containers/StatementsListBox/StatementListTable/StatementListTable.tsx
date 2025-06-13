@@ -1,6 +1,7 @@
 import { Annotator } from "@inkvisitor/annotator/src/lib";
 import { UserEnums } from "@shared/enums";
 import {
+  IDocument,
   IEntity,
   IResponseGeneric,
   IResponseStatement,
@@ -577,16 +578,16 @@ export const StatementListTable: React.FC<StatementListTable> = ({
             prepareRow(row);
             return (
               <StatementListRow
-                index={i}
-                handleClick={handleRowClickWithAnnotator}
+                key={row.id}
                 row={row}
+                index={i}
                 moveRow={moveRow}
                 moveEndRow={moveEndRow}
+                handleClick={handleRowClickWithAnnotator}
                 visibleColumns={visibleColumns}
                 entities={entities}
-                isSelected={selectedRows.includes(row.id)}
+                isSelected={selectedRows.includes(row.original.id)}
                 displayMode={displayMode}
-                {...row.getRowProps()}
               />
             );
           })}
