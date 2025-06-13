@@ -875,6 +875,9 @@ export class Annotator {
   onPasteText() {
     window.navigator.clipboard.readText().then((clipText: string) => {
       this.text.insertText(this.viewport, this.cursor, clipText);
+      this.cursor.move(clipText.length, 0)
+      const position = this.cursor.fixOutOfBounds(this.viewport, this.text)
+      
       this.draw();
     });
   }
