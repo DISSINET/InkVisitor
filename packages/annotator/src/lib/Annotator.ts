@@ -631,13 +631,15 @@ export class Annotator {
         this.onSelectTextCb({
           text: this.text.getRangeText(start, end),
           anchors: annotated,
-          index: this.text.getAbsTextIndexFromPosition(this.text.getSegmentPosition(start.yLine, start.xLine))
+          index: this.text.getAbsTextIndexFromPosition(
+            this.text.getSegmentPosition(start.yLine, start.xLine)
+          ),
         });
       } else {
         this.onSelectTextCb({
           text: "",
           anchors: [],
-          index: -1
+          index: -1,
         });
       }
     }
@@ -884,9 +886,9 @@ export class Annotator {
         );
       }
       this.text.insertText(this.viewport, this.cursor, clipText);
-      this.cursor.move(clipText.length, 0)
-      this.cursor.fixOutOfBounds(this.viewport, this.text)
-      
+      this.cursor.move(clipText.length, 0);
+      this.cursor.fixOutOfBounds(this.viewport, this.text);
+
       this.draw();
     });
   }
