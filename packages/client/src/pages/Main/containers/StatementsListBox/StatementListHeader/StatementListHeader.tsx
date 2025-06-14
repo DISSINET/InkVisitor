@@ -58,7 +58,8 @@ import {
 } from "./StatementListHeaderStyles";
 
 interface StatementListHeader {
-  territory: IResponseTerritory;
+  territory?: IResponseTerritory;
+  isFetchingTerritory: boolean;
 
   isAllSelected: boolean;
   selectedRows: string[];
@@ -126,15 +127,17 @@ interface StatementListHeader {
     Relation.IRelation[],
     unknown
   >;
-  // autoOrderStatementsMutation: UseMutationResult<void, Error, void, unknown>;
+  autoOrderStatementsMutation: UseMutationResult<void, Error, void, unknown>;
   statementsWithOrder: (IResponseStatement & {
     orderCorrection?: StatementOrderCorrection;
     isAnchored?: boolean;
   })[];
   favoritedTerritoryIds: string[];
+  contentWidthTooSmall: boolean;
 }
 export const StatementListHeader: React.FC<StatementListHeader> = ({
   territory,
+  isFetchingTerritory,
 
   isAllSelected,
   selectedRows,
@@ -150,9 +153,10 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
   deleteStatementsMutation,
   relationsCreateMutation,
-  // autoOrderStatementsMutation,
+  autoOrderStatementsMutation,
   statementsWithOrder,
   favoritedTerritoryIds,
+  contentWidthTooSmall,
 }) => {
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
@@ -316,7 +320,9 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
   const handleSelectAll = (checked: boolean) =>
     checked
-      ? setSelectedRows(territory.statements.map((statement) => statement.id))
+      ? setSelectedRows(
+          territory?.statements.map((statement) => statement.id) || []
+        )
       : setSelectedRows([]);
 
   const renderCheckBox = () => {
@@ -360,41 +366,35 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   );
 
   const userCanEdit = useMemo(
-    () => territory.right !== UserEnums.RoleMode.Read,
+    () => territory?.right !== UserEnums.RoleMode.Read,
     [territory]
   );
 
   const [showSubmit, setShowSubmit] = useState(false);
 
-  const [moveToParentHovered, setMoveToParentHovered] = useState(false);
-
   const BreadcrumbItems = useMemo(() => {
     return (
       <React.Fragment>
-        {selectedTerritoryPath?.map((territoryId: string, key: number) => {
-          return (
-            <React.Fragment key={key}>
-              <BreadcrumbItem
-                territoryId={territoryId}
-                isFavorited={favoritedTerritoryIds?.includes(territoryId)}
-              />
-            </React.Fragment>
-          );
-        })}
-        <React.Fragment key="this-territory">
-          <BreadcrumbItem
-            // in this case territoryId is being used to compare and not fetch anything inside the component
-            territoryId={territoryId}
-            territoryData={territory}
-            isFavorited={favoritedTerritoryIds?.includes(territoryId)}
-          />
-        </React.Fragment>
+        {territoryId.length > 0 &&
+          selectedTerritoryPath
+            ?.concat(territoryId)
+            .map((tId: string, key: number) => {
+              return (
+                <React.Fragment key={key}>
+                  <BreadcrumbItem
+                    territoryId={tId}
+                    isFavorited={favoritedTerritoryIds?.includes(tId)}
+                    isSelected={tId === territoryId}
+                  />
+                </React.Fragment>
+              );
+            })}
       </React.Fragment>
     );
   }, [
     territoryId,
     selectedTerritoryPath.join(","),
-    territory.labels,
+    territory?.labels,
     favoritedTerritoryIds,
   ]);
 
@@ -415,24 +415,26 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
           <StyledSuggesterRow>
             {/* BATCH ACTIONS */}
             <StyledActionsWrapper>
-              {/* temporary disabled */}
-              {/* <Button
-                icon={<FaArrowDownShortWide />}
-                onClick={() => autoOrderStatementsMutation.mutate()}
-                color="success"
-                tooltipLabel="auto order statements"
-                tooltipContent={
-                  hasAnchoredStatementsOutOfOrder ? (
-                    <i>leaves non-anchored statements in place</i>
-                  ) : (
-                    <i>
-                      order of anchored statements corresponds to the document
-                    </i>
-                  )
-                }
-                disabled={!hasAnchoredStatementsOutOfOrder}
-              /> */}
+              {territoryId && statementsWithOrder.length > 0 && (
+                <Button
+                  icon={<FaArrowDownShortWide />}
+                  onClick={() => autoOrderStatementsMutation.mutate()}
+                  color="success"
+                  tooltipLabel="auto order statements"
+                  tooltipContent={
+                    hasAnchoredStatementsOutOfOrder ? (
+                      <i>leaves non-anchored statements in place</i>
+                    ) : (
+                      <i>
+                        order of anchored statements corresponds to the document
+                      </i>
+                    )
+                  }
+                  disabled={!hasAnchoredStatementsOutOfOrder}
+                />
+              )}
               {user?.role !== UserEnums.Role.Viewer &&
+                territory &&
                 territory.statements.length > 0 && (
                   <>
                     <StyledCheckboxWrapper>
@@ -504,16 +506,15 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                   </>
                 )}
             </StyledActionsWrapper>
-            {territory.id !== rootTerritoryId && userCanEdit && (
-              <StyledMoveToParent
-                onMouseEnter={() => setMoveToParentHovered(true)}
-                onMouseLeave={() => setMoveToParentHovered(false)}
-              >
+            {territoryId && territoryId !== rootTerritoryId && userCanEdit && (
+              <StyledMoveToParent>
                 <EntitySuggester
                   placeholder="move"
                   disableTemplatesAccept
                   filterEditorRights
-                  inputWidth={moveToParentHovered ? 80 : 40}
+                  inputWidth={
+                    selectedRows.length > 0 && contentWidthTooSmall ? 36 : 80
+                  }
                   disableCreate
                   categoryTypes={[EntityEnums.Class.Territory]}
                   onPicked={(selectedEntity) => {
@@ -545,6 +546,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
           updateTerritoryMutation={updateTerritoryMutation}
           excludedMoveTerritories={excludedMoveTerritories}
           duplicateTerritoryMutation={duplicateTerritoryMutation}
+          isFetchingTerritory={isFetchingTerritory}
         />
       )}
       <Submit

@@ -9,6 +9,7 @@ import {
   StyledContent,
   StyledContentAnimationWrap,
   StyledHead,
+  StyledLabel,
   StyledVerticalText,
 } from "./BoxStyles";
 
@@ -79,7 +80,7 @@ export const Box: React.FC<Box> = ({
         }
       >
         {!hideContent && (
-          <animated.div style={animatedExpand}>{label}</animated.div>
+          <StyledLabel style={animatedExpand}>{label}</StyledLabel>
         )}
         <StyledButtonWrap>
           {buttons && (

@@ -188,7 +188,28 @@ export default class Cursor
     this.xLine = newX;
     this.yLine = newY;
   }
+ 
+  /**
+   * fixOutOfBounds moves the cursor to the next line if the current line is too short
+   * @param viewport
+   * @param text
+   */
+  fixOutOfBounds(viewport: Viewport, text: Text) {
+    let line = undefined;
+    do {
+      line = text.getCurrentLine(viewport, this);
+      if (line === null) {
+        this.reset();
+        return;
+      }
 
+      if (line.length < this.xLine) {
+        this.yLine++;
+        this.xLine = this.xLine - line.length;
+      }
+    } while (!line ||line.length < this.xLine)
+  }
+  
   /**
    * move the cursor to start of the next line
    */
@@ -224,7 +245,7 @@ export default class Cursor
       // in case there is no area selected, just drop a cursor at some
       this.drawLine(ctx, this.yLine, this.xLine, this.xLine, {
         ...drawingOptions,
-        color: "black",
+        color: this.style.selectorColor,
       });
     } else if (hStart && hEnd) {
       // selection active, iterate over displayed lines
@@ -275,10 +296,6 @@ export default class Cursor
     this.selectEnd = undefined;
     this.xLine = -1;
     this.yLine = -1;
-  }
-
-  static fromPosition(pos: IAbsCoordinates): Cursor {
-    return new Cursor(0, pos.xLine, pos.yLine);
   }
 
   getAbsolutePosition(viewport: Viewport): IAbsCoordinates {

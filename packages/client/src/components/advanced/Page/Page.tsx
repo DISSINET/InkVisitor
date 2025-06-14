@@ -33,9 +33,6 @@ export const Page: React.FC<Page> = ({ children }) => {
   const userRole = localStorage.getItem("userrole") as UserEnums.Role;
   const { cleanAllParams } = useSearchParams();
 
-  const layoutWidth: number = useAppSelector(
-    (state) => state.layout.layoutWidth
-  );
   const contentHeight: number = useAppSelector(
     (state) => state.layout.contentHeight
   );
@@ -148,10 +145,10 @@ export const Page: React.FC<Page> = ({ children }) => {
     } else {
       return <Loader show />;
     }
-  }, [contentHeight > 0]);
+  }, [contentHeight]);
 
   return (
-    <StyledPage $layoutWidth={layoutWidth} onClick={handleClick}>
+    <StyledPage onClick={handleClick}>
       <Header
         paddingY={0}
         paddingX={10}

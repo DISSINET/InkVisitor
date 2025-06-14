@@ -741,7 +741,7 @@ export default Router()
    */
   .post(
     "/batch",
-    asyncRouteHandler<IResponseEntity[]>(async (request: IRequest) => {
+    asyncRouteHandler<IResponseEntity[]>(async (request: IRequest<any, { ids: string[] }>) => {
       const { ids } = request.body;
 
       if (!ids || !Array.isArray(ids) || ids.length === 0) {

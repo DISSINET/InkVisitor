@@ -34,6 +34,7 @@ interface StatementEditorSectionButtons {
     changes: Partial<IStatementData>,
     instantUpdate: boolean
   ) => void;
+  editorWidthTooSmall: boolean;
 }
 export const StatementEditorSectionButtons: React.FC<
   StatementEditorSectionButtons
@@ -45,6 +46,7 @@ export const StatementEditorSectionButtons: React.FC<
 
   handleAttributeChange,
   handleDataAttributeChange,
+  editorWidthTooSmall,
 }) => {
   const [replaceSection, setReplaceSection] = useState(false);
 
@@ -113,12 +115,14 @@ export const StatementEditorSectionButtons: React.FC<
         />
         <StyledSectionButtonsBorder />
         <AttributeButtonGroup
+          iconsOnly={editorWidthTooSmall}
           options={[
             {
               longValue: "append",
               shortValue: "",
               onClick: () => setReplaceSection(false),
               selected: !replaceSection,
+              icon: editorWidthTooSmall ? <FaPlus /> : undefined,
               shortIcon: <FaPlus />,
             },
             {
@@ -126,13 +130,14 @@ export const StatementEditorSectionButtons: React.FC<
               shortValue: "",
               onClick: () => setReplaceSection(true),
               selected: replaceSection,
+              icon: editorWidthTooSmall ? <TbReplace /> : undefined,
               shortIcon: <TbReplace />,
             },
           ]}
         />
         <Button
           icon={<FaClone />}
-          label="previous S"
+          label={!editorWidthTooSmall ? "previous S" : ""}
           disabled={!previousStatement}
           tooltipLabel={`copy ${section} from the previous statement`}
           inverted
@@ -148,7 +153,7 @@ export const StatementEditorSectionButtons: React.FC<
         }
         excludedActantIds={[statement.id]}
         disableCreate
-        inputWidth={76}
+        inputWidth={editorWidthTooSmall ? 60 : 76}
         placeholder="another S"
         disableTemplateInstantiation
       />

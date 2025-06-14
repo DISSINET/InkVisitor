@@ -2,7 +2,7 @@ import styled from "styled-components";
 
 export const StyledDocumentTag = styled.div<{
   $size: "sm" | "md" | "lg";
-  $width?: string;
+  $width: number | "full";
 }>`
   display: flex;
   flex-shrink: 1;
@@ -24,13 +24,13 @@ export const StyledDocumentTag = styled.div<{
       : theme.fontSize["sm"]};
   align-items: center;
   min-width: 0;
-  max-width: ${({ $width }) => $width || "100%"};
+  max-width: ${({ $width }) =>
+    $width === "full" ? "100%" : `${$width / 10}rem`};
   overflow: hidden !important;
 `;
 
 export const StyledDocumentTitle = styled.div`
   display: block;
-  vertical-align: middle;
   overflow: hidden !important;
   white-space: nowrap;
   text-overflow: ellipsis;

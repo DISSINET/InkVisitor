@@ -12,11 +12,13 @@ export interface IAbsCoordinates {
 export interface CursorStyle {
   color: string;
   opacity: number;
+  selectorColor: string;
 }
 
 export const defaultStyle: CursorStyle = {
   color: "black",
   opacity: 0.7,
+  selectorColor: "black",
 };
 
 // Relative coordinates point to position relative to viewport - first line is topmost rendered line

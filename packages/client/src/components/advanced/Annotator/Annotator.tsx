@@ -1,3 +1,11 @@
+import {
+  autoUpdate,
+  flip,
+  FloatingPortal,
+  offset,
+  shift,
+  useFloating,
+} from "@floating-ui/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
@@ -13,14 +21,15 @@ import { ButtonGroup } from "components/basic/ButtonGroup/ButtonGroup";
 import { useSearchParams } from "hooks";
 import { BsFileTextFill } from "react-icons/bs";
 import { HiCodeBracket } from "react-icons/hi2";
-import { useAppSelector } from "redux/hooks";
 import { ThemeContext } from "styled-components";
 import { EntityCreateModal } from "..";
 import { useAnnotator } from "./AnnotatorContext";
 import TextAnnotatorMenu from "./AnnotatorMenu";
 import {
+  StyledAnnotatorButtons,
   StyledAnnotatorMenu,
   StyledCanvasWrapper,
+  StyledDisplayModeButtonIconWrapper,
   StyledInfoText,
   StyledLinesCanvas,
   StyledMainCanvas,
@@ -31,6 +40,7 @@ import { annotatorHighlight } from "./highlight";
 import { RATIO, TerritoryCreateModalType, W_SCROLL } from "./types";
 interface TextAnnotatorProps {
   width: number;
+  annotatorWidthTooSmall?: boolean;
   height: number;
   displayLineNumbers: boolean;
   hlEntities?: EntityEnums.Class[];
@@ -45,13 +55,14 @@ interface TextAnnotatorProps {
   setStoredAnnotatorScroll?: React.Dispatch<React.SetStateAction<number>>;
 
   territory?: IResponseTerritory;
-  // dataDocument?: IDocument;
-  // dataDocumentIsFetching?: boolean;
-  // errorDocument: Error | null;
+  dataDocument?: IDocument;
+  dataDocumentIsFetching?: boolean;
+  dataDocumentError: Error | null;
 }
 
 export const TextAnnotator = ({
   width = 400,
+  annotatorWidthTooSmall = false,
   height = 500,
   displayLineNumbers = true,
   hlEntities = Object.values(EntityEnums.Class),
@@ -65,18 +76,14 @@ export const TextAnnotator = ({
   setStoredAnnotatorScroll = () => {},
 
   territory,
-}: // dataDocument,
-// dataDocumentIsFetching,
-// errorDocument,
-TextAnnotatorProps) => {
+  dataDocument,
+  dataDocumentIsFetching,
+  dataDocumentError,
+}: TextAnnotatorProps) => {
   const queryClient = useQueryClient();
   const theme = useContext(ThemeContext);
 
   const { appendDetailId, statementId, selectedDetailId } = useSearchParams();
-
-  const contentHeight: number = useAppSelector(
-    (state) => state.layout.contentHeight
-  );
 
   const { annotator, setAnnotator } = useAnnotator();
 
@@ -93,24 +100,10 @@ TextAnnotatorProps) => {
   const { data: dataParentTerritory } = useQuery({
     queryKey: ["territory", parentTerritoryId as string],
     queryFn: async () => {
-      const res = await api.territoryGet(parentTerritoryId as string);
+      const res = await api.entityGet(parentTerritoryId as string);
       return res.data;
     },
     enabled: !!parentTerritoryId,
-  });
-
-  // it has to be here currently to render the annotator in the documents page
-  const {
-    data: dataDocument,
-    error: errorDocument,
-    isFetching: isFetchingDocument,
-  } = useQuery({
-    queryKey: ["document", documentId],
-    queryFn: async () => {
-      const res = await api.documentGet(documentId);
-      return res.data;
-    },
-    enabled: api.isLoggedIn(),
   });
 
   const updateDocumentMutation = useMutation({
@@ -163,6 +156,70 @@ TextAnnotatorProps) => {
   const [scrollAfterRefresh, setScrollAfterRefresh] = useState<
     number | undefined
   >(undefined);
+
+  const { refs, floatingStyles } = useFloating({
+    placement: "bottom",
+    whileElementsMounted: autoUpdate,
+    middleware: [
+      offset({
+        mainAxis: annotator?.lineHeight
+          ? (annotator.lineHeight / RATIO) * 1.2
+          : 30,
+        crossAxis: wTextArea / 2 + 100,
+      }),
+      flip({
+        padding: 10,
+        fallbackPlacements: ["top"],
+      }),
+      shift({
+        padding: 10,
+        crossAxis: true,
+      }),
+    ],
+  });
+
+  useEffect(() => {
+    if (annotator?.cursor?.selectStart && annotator?.cursor?.selectEnd) {
+      const canvas = mainCanvas.current;
+      if (canvas) {
+        const rect = canvas.getBoundingClientRect();
+        const startX = rect.left + annotator.cursor.selectStart.xLine * RATIO;
+        const startY =
+          rect.top +
+          (annotator.cursor.selectStart.yLine * annotator.lineHeight) / RATIO;
+        const endX = rect.left + annotator.cursor.selectEnd.xLine * RATIO;
+        const endY =
+          rect.top +
+          (annotator.cursor.selectEnd.yLine * annotator.lineHeight) / RATIO;
+
+        // Check if selection spans the entire document
+        const isFullSelection =
+          annotator.cursor.selectStart.yLine === 0 &&
+          annotator.cursor.selectEnd.yLine >= annotator.viewport.noLines - 1;
+
+        // Create a virtual element for the reference point that represents the selection
+        const virtualElement = {
+          getBoundingClientRect: () => ({
+            x: startX,
+            y: isFullSelection ? rect.top + rect.height / 2 : startY,
+            width: endX - startX,
+            height: isFullSelection ? 0 : endY - startY,
+            top: isFullSelection ? rect.top + rect.height / 2 : startY,
+            right: endX,
+            bottom: isFullSelection ? rect.top + rect.height / 2 : endY,
+            left: startX,
+          }),
+        };
+
+        refs.setPositionReference(virtualElement);
+      }
+    }
+  }, [
+    annotator?.cursor?.selectStart,
+    annotator?.cursor?.selectEnd,
+    annotator?.lineHeight,
+    annotator?.viewport?.noLines,
+  ]);
 
   // quiet does not trigger a toast notification
   const handleSaveNewContent = (quiet: boolean) => {
@@ -284,7 +341,7 @@ TextAnnotatorProps) => {
     newAnnotator.fontColor = theme?.color.black;
     newAnnotator.bgColor = "transparent";
 
-    newAnnotator.setSelectStyle("turquoise", 0.8);
+    newAnnotator.setSelectStyle("turquoise", 0.8, theme?.color.black);
 
     if (scroller?.current) {
       newAnnotator.addScroller(scroller.current);
@@ -336,7 +393,7 @@ TextAnnotatorProps) => {
   };
 
   useEffect(() => {
-    if (!isFetchingDocument) {
+    if (!dataDocumentIsFetching) {
       if (scrollAfterRefresh !== undefined) {
         refreshAnnotator({
           line: scrollAfterRefresh,
@@ -349,18 +406,18 @@ TextAnnotatorProps) => {
         });
       }
     }
-  }, [isFetchingDocument, dataDocument]);
+  }, [dataDocumentIsFetching, dataDocument]);
 
   useEffect(() => {
-    if (!isFetchingDocument) {
+    if (!dataDocumentIsFetching) {
       refreshAnnotator({
         line: storedAnnotatorScroll,
       });
     }
-  }, [theme, isFetchingDocument]);
+  }, [theme, dataDocumentIsFetching]);
 
   useEffect(() => {
-    if (!isFetchingDocument) {
+    if (!dataDocumentIsFetching) {
       refreshAnnotator({
         line: storedAnnotatorScroll,
       });
@@ -380,106 +437,6 @@ TextAnnotatorProps) => {
       }
     }
   }, [initialScrollEntityId, mainCanvas.current]);
-
-  // check if the selection is in the first half of the viewport
-  const menuSelectionPosition = useMemo<"top" | "bottom" | "both">(() => {
-    const vStart = annotator?.viewport?.lineStart ?? 0;
-    const yEnd = (annotator?.cursor?.selectEnd?.yLine ?? 0) - vStart;
-    const yStart = (annotator?.cursor?.selectStart?.yLine ?? 0) - vStart;
-
-    const allLines = annotator?.viewport.noLines ?? 0;
-
-    const yCenter = yStart && yEnd ? (yStart + yEnd) / 2 : 0;
-    const viewportMiddle = allLines / 2;
-
-    // if the selection is spanning through both halves of the viewport
-    if (
-      (yStart < viewportMiddle && yEnd > viewportMiddle) ||
-      (yEnd < viewportMiddle && yStart > viewportMiddle)
-    ) {
-      return "both";
-    }
-
-    return yCenter < viewportMiddle ? "top" : "bottom";
-  }, [
-    annotator?.cursor?.selectEnd?.yLine,
-    annotator?.cursor?.selectStart?.yLine,
-    annotator?.viewport.noLines,
-  ]);
-
-  const isSelectionTopDown = useMemo<boolean>(() => {
-    const vStart = annotator?.viewport?.lineStart ?? 0;
-    const yEnd = (annotator?.cursor?.selectEnd?.yLine ?? 0) - vStart;
-    const yStart = (annotator?.cursor?.selectStart?.yLine ?? 0) - vStart;
-
-    return yEnd >= yStart;
-  }, [
-    annotator?.cursor?.selectEnd?.yLine,
-    annotator?.cursor?.selectStart?.yLine,
-  ]);
-
-  const translateMenu = useMemo<string>(() => {
-    if (menuSelectionPosition === "top") {
-      return "0%";
-    } else if (menuSelectionPosition === "bottom") {
-      return "-100%";
-    } else {
-      if (isSelectionTopDown) {
-        return "-100%";
-      } else {
-        return "0%";
-      }
-    }
-  }, [menuSelectionPosition, isSelectionTopDown]);
-
-  const menuPositionY = useMemo<number>(() => {
-    const vStart = annotator?.viewport?.lineStart ?? 0;
-
-    const yStart = (annotator?.cursor?.selectStart?.yLine ?? 0) - vStart;
-    const yEnd = (annotator?.cursor?.selectEnd?.yLine ?? 0) - vStart;
-
-    const lineHeight = (annotator?.lineHeight ?? 0) / RATIO;
-
-    let menuYD = 0;
-    if (menuSelectionPosition === "top") {
-      menuYD = 2 * lineHeight;
-    } else if (menuSelectionPosition === "bottom") {
-      menuYD = -lineHeight;
-    } else {
-      if (isSelectionTopDown) {
-        menuYD = -lineHeight;
-      } else {
-        menuYD = 4 * lineHeight;
-      }
-    }
-    // large
-    // if the selection is top-down or bottom-up
-
-    // if end is before start + menuSelectionPosition is true, then the menu should be above the cursor...
-    // top-down + large => menu below end
-    // top-down + top => menu below end
-    // top-down + bottom => menu above start
-    // bottom-up + top => menu below start
-    // bottom-up + bottom => menu above end
-
-    if (isSelectionTopDown) {
-      if (menuSelectionPosition === "top") {
-        return yEnd * lineHeight + menuYD;
-      } else if (menuSelectionPosition === "bottom") {
-        return yStart * lineHeight + menuYD;
-      } else {
-        return yEnd * lineHeight;
-      }
-    } else {
-      if (menuSelectionPosition === "top") {
-        return yStart * lineHeight + menuYD;
-      } else if (menuSelectionPosition === "bottom") {
-        return yEnd * lineHeight + menuYD;
-      } else {
-        return yEnd * lineHeight + menuYD;
-      }
-    }
-  }, [annotator?.cursor?.yLine, annotator?.lineHeight, menuSelectionPosition]);
 
   const isChangeMade = useMemo<boolean>(() => {
     return annotator?.text?.value !== dataDocument?.content;
@@ -529,24 +486,20 @@ TextAnnotatorProps) => {
     );
   }, [annotatorMode, selectedText, isSelectingText, dataDocument]);
 
-  if (errorDocument) {
+  if (dataDocumentError) {
     return (
       <StyledInfoText>
-        Error loading document: {errorDocument.message}
+        Error loading document: {dataDocumentError.message}
       </StyledInfoText>
     );
   }
-
-  // if (dataDocumentIsFetching) {
-  //   return <StyledInfoText>Loading document...</StyledInfoText>;
-  // }
 
   const hasParentT = territory?.data?.parent !== undefined;
 
   return (
     <>
       <div
-        style={{ width: width, position: "absolute" }}
+        style={{ width: width, position: "relative" }}
         onKeyDown={(e) => {
           if (e.key === "Escape") {
             setSelectedText("");
@@ -555,43 +508,39 @@ TextAnnotatorProps) => {
       >
         <StyledCanvasWrapper>
           {isMenuDisplayed && (
-            <StyledAnnotatorMenu
-              $top={
-                menuPositionY + 300 > contentHeight
-                  ? contentHeight / 2
-                  : menuPositionY
-              }
-              $left={100}
-              // $translateY={"100%"}
-              $translateY={translateMenu}
-            >
-              {dataDocument && (
-                <TextAnnotatorMenu
-                  anchors={selectedAnchors}
-                  documentData={dataDocument}
-                  text={selectedText}
-                  entities={storedEntities}
-                  onAnchorAdd={handleAddAnchor}
-                  onCreateTerritory={onCreateTerritory}
-                  handleCreateStatement={onCreateStatement}
-                  handleRemoveAnchor={onRemoveAnchor}
-                  isTextInsideThisT={selectedAnchors.some(
-                    (anchor) => anchor === thisTerritoryEntityId
-                  )}
-                  activeTerritoryId={thisTerritoryEntityId}
-                  onCreateActiveTAnchor={() => {
-                    handleAddAnchor(thisTerritoryEntityId ?? "");
-                  }}
-                  canCreateActiveTAnchor={
-                    !dataDocument?.entityIds.T.includes(
-                      thisTerritoryEntityId ?? ""
-                    )
-                  }
-                  isLoadingEntities={isFetchingAnchorEntities}
-                  hasParentT={hasParentT}
-                />
-              )}
-            </StyledAnnotatorMenu>
+            <FloatingPortal id="page">
+              <StyledAnnotatorMenu
+                ref={refs.setFloating}
+                style={floatingStyles}
+              >
+                {dataDocument && (
+                  <TextAnnotatorMenu
+                    anchors={selectedAnchors}
+                    documentData={dataDocument}
+                    text={selectedText}
+                    entities={storedEntities}
+                    onAnchorAdd={handleAddAnchor}
+                    onCreateTerritory={onCreateTerritory}
+                    handleCreateStatement={onCreateStatement}
+                    handleRemoveAnchor={onRemoveAnchor}
+                    isTextInsideThisT={selectedAnchors.some(
+                      (anchor) => anchor === thisTerritoryEntityId
+                    )}
+                    activeTerritoryId={thisTerritoryEntityId}
+                    onCreateActiveTAnchor={() => {
+                      handleAddAnchor(thisTerritoryEntityId ?? "");
+                    }}
+                    canCreateActiveTAnchor={
+                      !dataDocument?.entityIds.T.includes(
+                        thisTerritoryEntityId ?? ""
+                      )
+                    }
+                    isLoadingEntities={isFetchingAnchorEntities}
+                    hasParentT={hasParentT}
+                  />
+                )}
+              </StyledAnnotatorMenu>
+            </FloatingPortal>
           )}
 
           {displayLineNumbers && (
@@ -636,68 +585,93 @@ TextAnnotatorProps) => {
         </StyledCanvasWrapper>
 
         {annotator && (
-          <ButtonGroup $marginTop>
-            <Button
-              key={EditMode.HIGHLIGHT}
-              icon={<FaPen size={11} />}
-              label={EditMode.HIGHLIGHT}
-              color="success"
-              inverted={annotatorMode !== EditMode.HIGHLIGHT}
-              onClick={() => {
-                annotator.setMode(EditMode.HIGHLIGHT);
-                setAnnotatorMode(EditMode.HIGHLIGHT);
-                annotator.draw();
-              }}
-              tooltipLabel="activate syntax highlighting mode"
-            />
-            <Button
-              key={EditMode.SEMI}
-              icon={<BsFileTextFill size={11} />}
-              color="success"
-              label="text edit"
-              inverted={annotatorMode !== EditMode.SEMI}
-              onClick={() => {
-                annotator.setMode(EditMode.SEMI);
-                setAnnotatorMode(EditMode.SEMI);
-                annotator.draw();
-              }}
-              tooltipLabel="activate semi mode"
-            />
-            <Button
-              key={EditMode.RAW}
-              icon={<HiCodeBracket size={11} />}
-              color="success"
-              label="XML"
-              inverted={annotatorMode !== EditMode.RAW}
-              onClick={() => {
-                annotator.setMode(EditMode.RAW);
-                setAnnotatorMode(EditMode.RAW);
-                annotator.draw();
-              }}
-              tooltipLabel="activate edit mode"
-            />
-
-            <Button
-              label="save"
-              color="primary"
-              icon={<FaRegSave />}
-              disabled={!isChangeMade}
-              onClick={() => {
-                handleSaveNewContent(false);
-              }}
-            />
-            <Button
-              label="discard"
-              color="warning"
-              icon={<FaTrash />}
-              disabled={!isChangeMade}
-              onClick={() => {
-                if (dataDocument?.content) {
-                  annotator?.updateText(dataDocument?.content);
+          <StyledAnnotatorButtons>
+            <ButtonGroup $marginTop>
+              <Button
+                key={EditMode.HIGHLIGHT}
+                icon={
+                  <StyledDisplayModeButtonIconWrapper
+                    $annotatorWidthTooSmall={annotatorWidthTooSmall}
+                  >
+                    <FaPen size={11} />
+                  </StyledDisplayModeButtonIconWrapper>
                 }
-              }}
-            />
-          </ButtonGroup>
+                label={!annotatorWidthTooSmall ? EditMode.HIGHLIGHT : ""}
+                color="success"
+                inverted={annotatorMode !== EditMode.HIGHLIGHT}
+                onClick={() => {
+                  annotator.setMode(EditMode.HIGHLIGHT);
+                  setAnnotatorMode(EditMode.HIGHLIGHT);
+                  annotator.draw();
+                }}
+                tooltipLabel="highlight (activate syntax highlighting mode)"
+                tooltipPosition="top"
+              />
+              <Button
+                key={EditMode.SEMI}
+                icon={
+                  <StyledDisplayModeButtonIconWrapper
+                    $annotatorWidthTooSmall={annotatorWidthTooSmall}
+                  >
+                    <BsFileTextFill size={11} />
+                  </StyledDisplayModeButtonIconWrapper>
+                }
+                color="success"
+                label={!annotatorWidthTooSmall ? "text edit" : ""}
+                inverted={annotatorMode !== EditMode.SEMI}
+                onClick={() => {
+                  annotator.setMode(EditMode.SEMI);
+                  setAnnotatorMode(EditMode.SEMI);
+                  annotator.draw();
+                }}
+                tooltipLabel="text edit (activate semi mode)"
+                tooltipPosition="top"
+              />
+              <Button
+                key={EditMode.RAW}
+                icon={
+                  <StyledDisplayModeButtonIconWrapper
+                    $annotatorWidthTooSmall={annotatorWidthTooSmall}
+                  >
+                    <HiCodeBracket size={11} />
+                  </StyledDisplayModeButtonIconWrapper>
+                }
+                color="success"
+                label={!annotatorWidthTooSmall ? "XML" : ""}
+                inverted={annotatorMode !== EditMode.RAW}
+                onClick={() => {
+                  annotator.setMode(EditMode.RAW);
+                  setAnnotatorMode(EditMode.RAW);
+                  annotator.draw();
+                }}
+                tooltipLabel="XML (activate edit mode)"
+                tooltipPosition="top"
+              />
+            </ButtonGroup>
+
+            <ButtonGroup $marginTop style={{ marginLeft: "0.5rem" }}>
+              <Button
+                label="save"
+                color="primary"
+                icon={<FaRegSave />}
+                disabled={!isChangeMade}
+                onClick={() => {
+                  handleSaveNewContent(false);
+                }}
+              />
+              <Button
+                label="discard"
+                color="warning"
+                icon={<FaTrash />}
+                disabled={!isChangeMade}
+                onClick={() => {
+                  if (dataDocument?.content) {
+                    annotator?.updateText(dataDocument?.content);
+                  }
+                }}
+              />
+            </ButtonGroup>
+          </StyledAnnotatorButtons>
         )}
       </div>
 

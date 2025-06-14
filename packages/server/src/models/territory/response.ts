@@ -22,31 +22,58 @@ export class ResponseTerritory extends Territory implements IResponseTerritory {
     this.entities = {};
   }
 
-  async prepare(req: IRequest): Promise<void> {
+  async prepare(req: IRequest, usePreload: boolean = false, useWarnings: boolean = false): Promise<void> {
     this.right = this.getUserRoleMode(req.getUserOrFail());
 
+    this.statements = await this.prepareStatements(req, usePreload, useWarnings);
+  }
+
+  async prepareStatements(req: IRequest, usePreload: boolean = false, useWarnings: boolean = false): Promise<ResponseStatement[]> {
     const statements = await Statement.findStatementsInTerritory(
       req.db.connection,
       this.id
     );
 
-    const entitiesList = await Entity.findEntitiesByIds(
-      req.db.connection,
-      Statement.getEntitiesIdsForMany(statements)
-    );
+    const responseStatements: ResponseStatement[] = [];
 
-    this.entities = entitiesList.reduce<{ [key: string]: IEntity }>(
-      (acc, entity) => {
-        acc[entity.id] = entity;
-        return acc;
-      },
-      {}
-    );
+    if (usePreload) {
+      // prepare all entity ids required for statements
+      const preloadedEntities: Record<string, IEntity | undefined> = {};
+      for (const statement of statements) {
+        const responseStatement = new ResponseStatement(new Statement(statement));
+        responseStatements.push(responseStatement);
 
-    for (const statement of statements) {
-      const responseStatement = new ResponseStatement(new Statement(statement));
-      await responseStatement.prepare(req);
-      this.statements.push(responseStatement);
+        for (const entityId of responseStatement.getEntitiesIds()) {
+          preloadedEntities[entityId] = undefined;
+        }
+      }
+
+      // fetch all entities required for statements
+      for (const entity of await Entity.findEntitiesByIds(req.db.connection, Object.keys(preloadedEntities))) {
+        preloadedEntities[entity.id] = entity;
+      }
+
+      this.entities = preloadedEntities as { [key: string]: IEntity };
+      
+      for (const responseStatement of responseStatements) {
+        responseStatement.prepareSync(req, preloadedEntities as Record<string, IEntity>);
+        if (useWarnings && !this.isTemplate) {
+          responseStatement.warnings = await responseStatement.getWarnings(req);
+        }
+      }
+    } else {
+      for (const statement of statements) {
+        const responseStatement = new ResponseStatement(new Statement(statement));
+        await responseStatement.prepare(req);
+
+        for (const entityId of Object.keys(responseStatement.entities)) {
+          this.entities[entityId] = responseStatement.entities[entityId];
+        }
+
+        responseStatements.push(responseStatement);
+      }
     }
+
+    return responseStatements;
   }
 }

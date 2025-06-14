@@ -2,12 +2,11 @@ import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
 import styled from "styled-components";
 
 interface StyledTable {
-  $contentWidth?: number;
   $isListMode: boolean;
 }
 export const StyledTable = styled.table<StyledTable>`
-  width: ${({ $contentWidth }) => $contentWidth};
   min-width: ${({}) => `${COLLAPSED_TABLE_WIDTH / 10 - 2.5}rem`};
+  height: 100%;
   border-spacing: 0;
   border-collapse: collapse;
   border-width: ${({ theme }) => theme.borderWidth[1]};
@@ -79,7 +78,7 @@ export const StyledTd = styled.td<StyledTd>`
 
 export const StyledTdMove = styled.td`
   width: 1%;
-  padding-right: 0.5rem;
+  padding-right: 0.2rem;
 `;
 
 interface StyledFocusedCircle {
@@ -128,6 +127,7 @@ export const StyledOrderCorrection = styled.div`
   align-items: center;
   justify-content: center;
   font-size: ${({ theme }) => theme.fontSize["xs"]};
-  width: 2rem;
+  max-width: 2.6rem;
+  width: 100%;
   color: ${({ theme }) => theme.color["gray"]["800"]};
 `;

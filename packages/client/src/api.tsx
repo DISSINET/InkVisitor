@@ -814,7 +814,26 @@ class Api {
   ): Promise<AxiosResponse<IResponseTerritory>> {
     try {
       const response = await this.connection.get(
-        `/territories/${territoryId}`,
+        `/territories/${territoryId}?preload=1&warnings=1`,
+        options
+      );
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  /**
+   * Territory
+   * List statements
+   */
+  async territoryGetStatements(
+    territoryId: string,
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseStatement[]>> {
+    try {
+      const response = await this.connection.get(
+        `/territories/${territoryId}/statements`,
         options
       );
       return response;
@@ -1343,23 +1362,6 @@ class Api {
       const response = await this.connection.put(
         `/documents/${documentId}`,
         document,
-        options
-      );
-      return response;
-    } catch (err) {
-      throw this.handleError(err);
-    }
-  }
-
-  async anchorTextGet(
-    documentId: string,
-    entityId: string,
-    anchorIndex: number,
-    options?: IApiOptions
-  ): Promise<AxiosResponse<IResponseGeneric<string>>> {
-    try {
-      const response = await this.connection.get(
-        `/documents/${documentId}/findAnchorWithIndex/${entityId}/${anchorIndex}`,
         options
       );
       return response;

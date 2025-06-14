@@ -11,7 +11,7 @@ import { BeatLoader } from "react-spinners";
 import { toast } from "react-toastify";
 import { setTheme } from "redux/features/themeSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { getUserIcon } from "utils/utils";
+import { getUserIcon } from "utils/iconUtils";
 import { Menu } from "..";
 import packageJson from "../../../../package.json";
 import {

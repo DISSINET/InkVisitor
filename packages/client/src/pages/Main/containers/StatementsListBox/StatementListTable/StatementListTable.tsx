@@ -1,6 +1,7 @@
 import { Annotator } from "@inkvisitor/annotator/src/lib";
 import { UserEnums } from "@shared/enums";
 import {
+  IDocument,
   IEntity,
   IResponseGeneric,
   IResponseStatement,
@@ -15,7 +16,6 @@ import update from "immutability-helper";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { BsArrowDown, BsArrowUp } from "react-icons/bs";
 import { FaClone, FaPlus, FaTrashAlt } from "react-icons/fa";
-import { FaArrowDownLong, FaArrowUpLong } from "react-icons/fa6";
 import {
   MdOutlineCheckBox,
   MdOutlineCheckBoxOutlineBlank,
@@ -97,8 +97,8 @@ interface StatementListTable {
   selectedRows: string[];
   setSelectedRows: React.Dispatch<React.SetStateAction<string[]>>;
   displayMode: StatementListDisplayMode;
-  contentWidth: number;
   annotator?: Annotator;
+  isLoading: boolean;
 }
 export const StatementListTable: React.FC<StatementListTable> = ({
   statements,
@@ -115,8 +115,8 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   selectedRows,
   setSelectedRows,
   displayMode,
-  contentWidth,
   annotator,
+  isLoading,
 }) => {
   const dispatch = useAppDispatch();
   const { territoryId, setStatementId } = useSearchParams();
@@ -453,7 +453,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         },
       },
     ];
-  }, [right, selectedRows, lastClickedIndex]);
+  }, [right, selectedRows, lastClickedIndex, entities]);
 
   const {
     setHiddenColumns,
@@ -550,48 +550,49 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   );
 
   return (
-    <StyledTable
-      {...getTableProps()}
-      $isListMode={displayMode === StatementListDisplayMode.LIST}
-      // $contentWidth={contentWidth}
-    >
-      <StyledTHead>
-        {headerGroups.map((headerGroup, key) => (
-          <tr {...headerGroup.getHeaderGroupProps()} key={key}>
-            {headerGroup.headers.map((column, key) =>
-              key < 6 ? (
-                <StyledTh {...column.getHeaderProps()} key={key}>
-                  {column.render("Header") as React.ReactNode}
-                </StyledTh>
-              ) : (
-                <th key={key}></th>
-              )
-            )}
-            {displayMode !== StatementListDisplayMode.TEXT && (
-              <StyledTh style={{ width: "50px" }} key={"expander"}></StyledTh>
-            )}
-          </tr>
-        ))}
-      </StyledTHead>
-      <tbody {...getTableBodyProps()}>
-        {rows.map((row, i) => {
-          prepareRow(row);
-          return (
-            <StatementListRow
-              index={i}
-              handleClick={handleRowClickWithAnnotator}
-              row={row}
-              moveRow={moveRow}
-              moveEndRow={moveEndRow}
-              visibleColumns={visibleColumns}
-              entities={entities}
-              isSelected={selectedRows.includes(row.id)}
-              displayMode={displayMode}
-              {...row.getRowProps()}
-            />
-          );
-        })}
-      </tbody>
-    </StyledTable>
+    <>
+      <StyledTable
+        {...getTableProps()}
+        $isListMode={displayMode === StatementListDisplayMode.LIST}
+      >
+        <StyledTHead>
+          {headerGroups.map((headerGroup, key) => (
+            <tr {...headerGroup.getHeaderGroupProps()} key={key}>
+              {headerGroup.headers.map((column, key) =>
+                key < 6 ? (
+                  <StyledTh {...column.getHeaderProps()} key={key}>
+                    {column.render("Header") as React.ReactNode}
+                  </StyledTh>
+                ) : (
+                  <th key={key}></th>
+                )
+              )}
+              {displayMode !== StatementListDisplayMode.TEXT && (
+                <StyledTh style={{ width: "50px" }} key={"expander"}></StyledTh>
+              )}
+            </tr>
+          ))}
+        </StyledTHead>
+        <tbody {...getTableBodyProps()}>
+          {rows.map((row, i) => {
+            prepareRow(row);
+            return (
+              <StatementListRow
+                key={row.id}
+                row={row}
+                index={i}
+                moveRow={moveRow}
+                moveEndRow={moveEndRow}
+                handleClick={handleRowClickWithAnnotator}
+                visibleColumns={visibleColumns}
+                entities={entities}
+                isSelected={selectedRows.includes(row.original.id)}
+                displayMode={displayMode}
+              />
+            );
+          })}
+        </tbody>
+      </StyledTable>
+    </>
   );
 };

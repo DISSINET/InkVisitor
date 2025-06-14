@@ -13,6 +13,7 @@ import {
   StyledMessageOrigin,
 } from "./MessageStyles";
 import { isWarningTBased } from "utils/utils";
+import { wildCardChar } from "Theme/constants";
 
 interface Message {
   warning: IWarning;
@@ -127,6 +128,7 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
       return (
         <>
           {entityClasses.map((entityClass, index) => {
+            if (entityClass === wildCardChar) return null;
             const classItem = EntityColors[entityClass];
             const colorName = classItem?.color ?? "transparent";
             const color = theme.color[colorName] as string;
@@ -140,7 +142,7 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
                     color: "white",
                   }}
                 >
-                  {classItem.entityClass}
+                  {classItem?.entityClass}
                 </span>
                 {index < entityClasses.length - 1 ? ", " : ""}
               </span>

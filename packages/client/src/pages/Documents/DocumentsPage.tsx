@@ -202,7 +202,7 @@ export const DocumentsPage: React.FC = ({}) => {
 
       {editedDocumentId && (
         <DocumentModalEdit
-          document={editedDocument}
+          documentId={editedDocumentId}
           onClose={handleModalClose}
         />
       )}

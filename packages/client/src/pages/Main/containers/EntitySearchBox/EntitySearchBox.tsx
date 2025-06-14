@@ -7,7 +7,7 @@ import { IRequestSearch } from "@shared/types/request-search";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { wildCardChar } from "Theme/constants";
 import api from "api";
-import { Button, Checkbox, Input, Loader, Tooltip, TypeBar } from "components";
+import { Button, Input, Loader, TypeBar } from "components";
 import Dropdown, {
   AttributeButtonGroup,
   EntityCreateModal,
@@ -584,6 +584,7 @@ export const EntitySearchBox: React.FC = () => {
                 <StyledRowHeader>Root T validity</StyledRowHeader>
 
                 <AttributeButtonGroup
+                  noMargin
                   options={[
                     {
                       longValue: "All",

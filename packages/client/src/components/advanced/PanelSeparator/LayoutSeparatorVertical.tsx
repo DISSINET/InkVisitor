@@ -9,12 +9,16 @@ interface LayoutSeparatorVertical {
   // set custom one related to specific page
   separatorXPosition: number;
   setSeparatorXPosition: (xPosition: number) => void;
+  onMaxWidthReached?: () => void;
+  onMinWidthReached?: () => void;
 }
 export const LayoutSeparatorVertical: React.FC<LayoutSeparatorVertical> = ({
   leftSideMinWidth,
   leftSideMaxWidth,
   separatorXPosition,
   setSeparatorXPosition,
+  onMaxWidthReached,
+  onMinWidthReached,
 }) => {
   const [separatorXTempPosition, setSeparatorXTempPosition] = useState<
     number | undefined
@@ -36,15 +40,16 @@ export const LayoutSeparatorVertical: React.FC<LayoutSeparatorVertical> = ({
   }, [separatorXPosition, dragging]);
 
   const onMouseDown = (e: React.MouseEvent) => {
+    document.body.classList.add("no-select");
     setSeparatorXTempPosition(e.clientX);
     setDragging(true);
-    document.body.classList.add("no-select");
   };
 
   const onMove = useCallback(
     (clientX: number) => {
       if (dragging && leftWidth && separatorXTempPosition) {
         const newLeftWidth = leftWidth + clientX - separatorXTempPosition;
+
         setSeparatorXTempPosition(clientX);
 
         // Clamp the new width between min and max
@@ -53,6 +58,15 @@ export const LayoutSeparatorVertical: React.FC<LayoutSeparatorVertical> = ({
           leftSideMaxWidth
         );
         setLeftWidth(clampedWidth);
+
+        // Notify parent when max width is reached
+        if (clampedWidth === leftSideMaxWidth && onMaxWidthReached) {
+          onMaxWidthReached();
+        }
+        // Notify parent when min width is reached
+        if (clampedWidth === leftSideMinWidth && onMinWidthReached) {
+          onMinWidthReached();
+        }
       }
     },
     [
@@ -61,6 +75,8 @@ export const LayoutSeparatorVertical: React.FC<LayoutSeparatorVertical> = ({
       separatorXTempPosition,
       leftSideMinWidth,
       leftSideMaxWidth,
+      onMaxWidthReached,
+      onMinWidthReached,
     ]
   );
 

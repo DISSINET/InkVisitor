@@ -8,6 +8,8 @@ import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { BsFilter } from "react-icons/bs";
 import { FaPlus } from "react-icons/fa";
+import { useSelector } from "react-redux";
+import { selectPanelWidth } from "redux/features/layout/mainPage/panelWidthsSlice";
 import { setFilterOpen } from "redux/features/territoryTree/filterOpenSlice";
 import { setSelectedTerritoryPath } from "redux/features/territoryTree/selectedTerritoryPathSlice";
 import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
@@ -24,6 +26,7 @@ import {
   markNodesWithFilters,
 } from "./TerritoryTreeFilterUtils";
 import { MemoizedTerritoryTreeNode } from "./TerritoryTreeNode/TerritoryTreeNode";
+import { useDebounce } from "hooks";
 
 const initFilterSettings: ITerritoryFilter = {
   nonEmpty: false,
@@ -183,22 +186,27 @@ export const TerritoryTreeBox: React.FC = () => {
     (state) => state.territoryTree.filterOpen
   );
 
+  const treeWidth = useDebounce(useSelector(selectPanelWidth(0)), 200);
+
+  const treeWidthTooSmall = treeWidth < 140;
+
   return (
     <>
       <ButtonGroup>
         {(userRole === UserEnums.Role.Admin ||
           userRole === UserEnums.Role.Owner) && (
           <Button
-            label="new"
+            label={!treeWidthTooSmall ? "new" : ""}
             iconRight={<span style={{ marginLeft: 5 }}>{"\u0054"}</span>}
             icon={<FaPlus />}
             onClick={() => setShowCreate(true)}
             fullWidth
+            tooltipLabel={treeWidthTooSmall ? "create new territory" : ""}
           />
         )}
         <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
           <Button
-            label="filter"
+            label={!treeWidthTooSmall ? "filter" : ""}
             onClick={() => {
               if (treeFilterOpen) {
                 dispatch(setFilterOpen(false));
@@ -212,7 +220,8 @@ export const TerritoryTreeBox: React.FC = () => {
             color="success"
             inverted={!treeFilterOpen}
             fullWidth
-            icon={<BsFilter />}
+            icon={<BsFilter size={14} />}
+            tooltipLabel={treeWidthTooSmall ? "filter" : ""}
             tooltipPosition="right"
           />
         </div>

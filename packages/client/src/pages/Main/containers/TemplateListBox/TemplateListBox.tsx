@@ -1,4 +1,4 @@
-import { entitiesDict } from "@shared/dictionaries";
+import { entitiesDict, entitiesDictKeys } from "@shared/dictionaries";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import { IRequestSearch } from "@shared/types/request-search";
@@ -22,6 +22,9 @@ import {
 } from "./TemplateListBoxStyles";
 import { TemplateListCreateModal } from "./TemplateListCreateModal/TemplateListCreateModal";
 import { TemplateListRemoveModal } from "./TemplateListRemoveModal/TemplateListRemoveModal";
+import { selectPanelWidth } from "redux/features/layout/mainPage/panelWidthsSlice";
+import { useSelector } from "react-redux";
+import { useDebounce } from "hooks";
 
 interface TemplateListBox {}
 export const TemplateListBox: React.FC<TemplateListBox> = () => {
@@ -40,6 +43,8 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
   const fourthPanelBoxesOpened: { [key: string]: boolean } = useAppSelector(
     (state) => state.layout.mainPage.fourthPanelBoxesOpened
   );
+  const fourthPanelWidth = useDebounce(useSelector(selectPanelWidth(3)), 200);
+  const widthTooSmall = fourthPanelWidth < 220;
 
   const {
     status,
@@ -125,12 +130,22 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
               <div style={{ position: "relative" }}>
                 <Dropdown.Single.Entity
                   value={filterByClass}
-                  options={allEntityOptions}
+                  options={
+                    widthTooSmall
+                      ? allEntityOptions.map((c) => {
+                          return {
+                            value: c.value,
+                            label: c.value,
+                          };
+                        })
+                      : allEntityOptions
+                  }
                   onChange={(selectedOption) => {
                     setFilterByClass(selectedOption);
                   }}
                   width="full"
                   disableTyping
+                  disableTooltip={!widthTooSmall}
                 />
                 <TypeBar entityLetter={filterByClass} />
               </div>

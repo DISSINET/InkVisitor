@@ -1,5 +1,5 @@
 import Cursor, { DIRECTION } from "./Cursor";
-import Highlighter, { IAbsCoordinates } from "./Highlighter";
+import Highlighter, { IAbsCoordinates, CursorStyle } from "./Highlighter";
 import Keys from "./Keys";
 import { Lines } from "./Lines";
 import Scroller from "./Scroller";
@@ -151,14 +151,15 @@ export class Annotator {
     this.draw();
   }
 
-  setSelectStyle(selectColor: string, selectOpacity: number) {
+  setSelectStyle(selectColor: string, selectOpacity: number, selectorColor: string) {
     this.selectColor = selectColor;
     this.selectOpacity = selectOpacity;
 
     this.cursor.style = {
       color: this.selectColor,
       opacity: this.selectOpacity,
-    };
+      selectorColor: selectorColor,
+    } as CursorStyle;
   }
 
   /**
@@ -631,13 +632,15 @@ export class Annotator {
         this.onSelectTextCb({
           text: this.text.getRangeText(start, end),
           anchors: annotated,
-          index: this.text.getAbsTextIndexFromPosition(this.text.getSegmentPosition(start.yLine, start.xLine))
+          index: this.text.getAbsTextIndexFromPosition(
+            this.text.getSegmentPosition(start.yLine, start.xLine)
+          ),
         });
       } else {
         this.onSelectTextCb({
           text: "",
           anchors: [],
-          index: -1
+          index: -1,
         });
       }
     }
@@ -874,7 +877,19 @@ export class Annotator {
 
   onPasteText() {
     window.navigator.clipboard.readText().then((clipText: string) => {
+      const area = this.cursor.getSelectedArea();
+      if (area) {
+        this.text.deleteRangeText(area[0], area[1]);
+        this.cursor.reset();
+        this.cursor.setPosition(
+          area[0].xLine,
+          area[0].yLine - this.viewport.lineStart
+        );
+      }
       this.text.insertText(this.viewport, this.cursor, clipText);
+      this.cursor.move(clipText.length, 0);
+      this.cursor.fixOutOfBounds(this.viewport, this.text);
+
       this.draw();
     });
   }
