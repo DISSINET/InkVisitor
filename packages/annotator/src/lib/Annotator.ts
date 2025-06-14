@@ -151,13 +151,14 @@ export class Annotator {
     this.draw();
   }
 
-  setSelectStyle(selectColor: string, selectOpacity: number) {
+  setSelectStyle(selectColor: string, selectOpacity: number, selectorColor: string) {
     this.selectColor = selectColor;
     this.selectOpacity = selectOpacity;
 
     this.cursor.style = {
       color: this.selectColor,
       opacity: this.selectOpacity,
+      selectorColor: selectorColor,
     };
   }
 
