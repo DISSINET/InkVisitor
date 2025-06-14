@@ -341,7 +341,6 @@ export const TextAnnotator = ({
     newAnnotator.fontColor = theme?.color.black;
     newAnnotator.bgColor = "transparent";
 
-    newAnnotator.setSelectStyle("turquoise", 0.8);
     newAnnotator.setSelectStyle("turquoise", 0.8, theme?.color.black);
 
     if (scroller?.current) {
