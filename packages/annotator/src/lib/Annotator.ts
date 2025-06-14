@@ -1,5 +1,5 @@
 import Cursor, { DIRECTION } from "./Cursor";
-import Highlighter, { IAbsCoordinates } from "./Highlighter";
+import Highlighter, { IAbsCoordinates, CursorStyle } from "./Highlighter";
 import Keys from "./Keys";
 import { Lines } from "./Lines";
 import Scroller from "./Scroller";
@@ -159,7 +159,7 @@ export class Annotator {
       color: this.selectColor,
       opacity: this.selectOpacity,
       selectorColor: selectorColor,
-    };
+    } as CursorStyle;
   }
 
   /**
