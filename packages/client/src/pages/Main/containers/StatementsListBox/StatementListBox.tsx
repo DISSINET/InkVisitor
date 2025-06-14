@@ -573,13 +573,14 @@ export const StatementListBox: React.FC = () => {
     },
   });
 
+  // TODO: migrate to annotator to limit updates in statement list box
   const {
     ref: contentRef,
-    // TODO: calculate height - contentHeight / 2 - StatementListHeader height
+    // TODO: calculate height - contentHeight / 2 - StatementListHeader height ?
     height: contentHeight = 0,
     // width: contentWidth = 0,
   } = useResizeObserver<HTMLDivElement>({
-    debounceDelay: 0,
+    debounceDelay: 50,
   });
 
   const contentWidth = useAppSelector(
