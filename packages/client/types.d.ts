@@ -5,3 +5,9 @@ declare namespace NodeJS {
     };
   }
 }
+
+interface Window {
+  appConfig: {
+    env: string;
+  }
+}

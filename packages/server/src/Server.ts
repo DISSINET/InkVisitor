@@ -51,17 +51,32 @@ if (!!process.env.STATIC_PATH) {
         req.path.startsWith(process.env.STATIC_PATH as string)
       ) {
         if (req.path.indexOf(".") === -1) {
-          // replacement for react(client) router that should process only pages alone (/, /login etc)
-          res.sendFile(
-            path.join(
-              __dirname,
-              "..",
-              "..",
-              "..",
-              "..",
-              "client/dist/index.html"
-            )
+          // Read and modify index.html before sending
+          const fs = require('fs');
+          const indexPath = path.join(
+            __dirname,
+            "..",
+            "..",
+            "..",
+            "..",
+            "client/dist/index.html"
           );
+
+          fs.readFile(indexPath, 'utf8', (err: NodeJS.ErrnoException | null, data: string) => {
+            if (err) {
+              return next(err);
+            }
+
+            if (process.env.ENV) {
+              data = data.replace('</head>',
+                `  <!-- Injected content -->
+  <script>window.appConfig = { env: "${process.env.ENV || 'development'}" };</script>
+</head>`);
+            }
+            
+            res.type('html');
+            res.send(data);
+          });
         } else {
           // everythink else will go here
           express.static("../client/dist")(req, res, next);
