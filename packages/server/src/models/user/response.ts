@@ -82,14 +82,16 @@ export class ResponseUser implements IResponseUser {
   }
 
   async unwindTerritories(req: IRequest): Promise<void> {
-    for (const territory of this._userStoredTerritories) {
+    const allIds = this._userStoredTerritories.filter(t => !!t.territoryId).map(t => t.territoryId);
+    const territories = await Entity.findEntitiesByIds(req.db.connection, allIds)
+    territories.forEach(t => {
       const territoryResponse: IResponseStoredTerritory = {
         territory: {
-          ...(await findEntityById(req.db, territory.territoryId)),
+          ...t,
         },
       };
       this.storedTerritories.push(territoryResponse);
-    }
+    })
   }
 
   async unwindRights(req: IRequest): Promise<void> {

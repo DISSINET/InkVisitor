@@ -579,12 +579,11 @@ export const StatementListBox: React.FC = () => {
     height: contentHeight = 0,
     // width: contentWidth = 0,
   } = useResizeObserver<HTMLDivElement>({
-    debounceDelay: 50,
+    debounceDelay: 0,
   });
 
-  const contentWidth = useDebounce(
-    useAppSelector((state) => state.layout.mainPage.secondPanelRealWidth),
-    100
+  const contentWidth = useAppSelector(
+    (state) => state.layout.mainPage.secondPanelRealWidth
   );
 
   const [storedAnnotatorResourceId, setStoredAnnotatorResourceId] = useState<
@@ -865,7 +864,7 @@ export const StatementListBox: React.FC = () => {
     duplicateTerritoryMutation.isPending ||
     deleteStatementsMutation.isPending ||
     relationsCreateMutation.isPending ||
-    // autoOrderStatementsMutation.isPending ||
+    autoOrderStatementsMutation.isPending ||
     (statementListOpened && !showStatementList);
 
   const tableWidth = useMemo(() => {
@@ -964,8 +963,11 @@ export const StatementListBox: React.FC = () => {
                       dispatch(setShowWarnings(false));
                       if (statementId !== rowId) {
                         setStatementId(rowId);
-                      } else {
-                        annotator?.scrollToAnchor(rowId);
+                      } else if (
+                        displayMode === StatementListDisplayMode.TEXT &&
+                        annotator
+                      ) {
+                        annotator.scrollToAnchor(rowId);
                       }
                     }}
                     actantsUpdateMutation={statementUpdateMutation}
@@ -991,12 +993,9 @@ export const StatementListBox: React.FC = () => {
                 contentHeight={contentHeight}
                 contentWidth={contentWidth - 10}
                 handleCreateStatement={handleCreateStatement}
-                // handleCreateTerritory={handleCreateTerritory}
                 territoryId={territoryId}
                 territory={territory}
                 statementId={statementId}
-                // storedAnnotatorResourceId={storedAnnotatorResourceId}
-                // setStoredAnnotatorResourceId={setStoredAnnotatorResourceId}
                 storedAnnotatorScroll={storedAnnotatorScroll}
                 setStoredAnnotatorScroll={(newScroll) => {
                   if (storedAnnotatorResourceId) {
@@ -1005,9 +1004,6 @@ export const StatementListBox: React.FC = () => {
                 }}
                 hlEntities={hlEntities}
                 setHlEntities={setHlEntities}
-                entities={entities}
-                right={right}
-                setShowSubmit={setShowSubmit}
                 addStatementAtCertainIndex={addStatementAtCertainIndex}
                 annotator={annotator}
                 setAnnotator={setAnnotator}
@@ -1017,9 +1013,7 @@ export const StatementListBox: React.FC = () => {
                 selectedDocumentError={selectedDocumentError}
                 selectedResource={selectedResource}
                 resources={resources}
-                documents={documents}
                 setSelectedResourceId={setSelectedResourceId}
-                displayMode={displayMode}
                 showStatementList={
                   isListNonEmpty || statementListTableIsLoading
                 }
@@ -1032,11 +1026,11 @@ export const StatementListBox: React.FC = () => {
               contentHeight > 0 && (
                 <div
                   style={{
-                    width: tableWidth,
+                    width: tableWidth + 4,
                     height:
                       displayMode === StatementListDisplayMode.TEXT
                         ? contentHeight - 56
-                        : contentHeight,
+                        : contentHeight + 4,
                     flexShrink: 0,
                     position: "absolute",
                     bottom: 0,

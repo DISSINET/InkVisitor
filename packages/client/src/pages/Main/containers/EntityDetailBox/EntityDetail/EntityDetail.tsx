@@ -601,9 +601,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({
     useState(false);
   const [loadingValidations, setLoadingValidations] = useState(false);
 
-  const contentWidth = useDebounce(
-    useAppSelector((state) => state.layout.mainPage.secondPanelRealWidth),
-    100
+  const contentWidth = useAppSelector(
+    (state) => state.layout.mainPage.secondPanelRealWidth
   );
   const widthTooSmall = contentWidth < 516;
 

@@ -54,32 +54,36 @@ export const BreadcrumbItem: React.FC<BreadcrumbItem> = ({
 
   return (
     <>
-      {territoryId !== rootTerritoryId && (
-        <StyledItemBox>
-          <BsArrowRightShort />
-          <EntityTag
-            showOnly="label"
-            fullWidth={isSelected}
-            isSelected={isSelected}
-            entity={territoryData || data || initialData}
-            isFavorited={isFavorited}
-            button={
-              paramsTerritoryId !== territoryId && (
-                <Button
-                  icon={<BsArrow90DegLeft />}
-                  color="plain"
-                  inverted
-                  tooltipLabel="go to territory"
-                  onClick={() => {
-                    dispatch(setTreeInitialized(false));
-                    setTerritoryId(territoryId);
-                  }}
-                />
-              )
-            }
-          />
-          <Loader show={isFetching} size={18} />
-        </StyledItemBox>
+      {(territoryData || data || (initialData && isFetching)) && (
+        <>
+          {territoryId !== rootTerritoryId && (
+            <StyledItemBox>
+              <BsArrowRightShort />
+              <EntityTag
+                showOnly="label"
+                fullWidth={isSelected}
+                isSelected={isSelected}
+                entity={territoryData || data || initialData}
+                isFavorited={isFavorited}
+                button={
+                  paramsTerritoryId !== territoryId && (
+                    <Button
+                      icon={<BsArrow90DegLeft />}
+                      color="plain"
+                      inverted
+                      tooltipLabel="go to territory"
+                      onClick={() => {
+                        dispatch(setTreeInitialized(false));
+                        setTerritoryId(territoryId);
+                      }}
+                    />
+                  )
+                }
+              />
+              <Loader show={isFetching} size={18} />
+            </StyledItemBox>
+          )}
+        </>
       )}
     </>
   );
