@@ -7,9 +7,9 @@ The frontend of the InkVisitor is written in TypeScript, plus several other pack
 - [React](https://reactjs.org) for creating components
 - [Redux toolkit](https://redux-toolkit.js.org) for handling global state
 - [Styled components](https://styled-components.com) for making things nicer (as a replacement of S/CSS)
-- [Webpack](https://webpack.js.org) for bundling
+- [Vite](https://vitejs.dev) for bundling and development
 
-Package uses different environments - each of them has dedicated `.env.<env>` file coupled with `pnpm build-<env>` task. Development environment has also `pnpm start` script.
+Package uses different environments - each of them has dedicated `.env.<env>` file coupled with `pnpm build:<env>` task. Development environment has also `pnpm start` script.
 
 ### Env variables
 
