@@ -113,7 +113,7 @@ export const StyledSandboxText = styled.div`
   max-width: 40rem;
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
   display: flex;
-  color: ${({ theme }) => theme.color["danger"]};
+  color: ${({ theme }) => theme.color["warningText"]};
 `;
 export const StyledSpace = styled.div`
   display: flex;
