@@ -13,21 +13,6 @@ export default defineConfig(({ mode }) => {
 
   return {
     base: base,
-    plugins: [
-      react({
-        babel: {
-          plugins: [
-            [
-              "babel-plugin-styled-components",
-              {
-                displayName: true,
-                ssr: false,
-              },
-            ],
-          ],
-        },
-      }),
-    ],
     resolve: {
       alias: {
         "@shared": path.resolve(__dirname, "../shared/"),
@@ -73,11 +58,6 @@ export default defineConfig(({ mode }) => {
       ),
       global: "globalThis",
       "window.appConfig": JSON.stringify({ env: env.ENV || mode }),
-    },
-    css: {
-      modules: {
-        localsConvention: "camelCase",
-      },
     },
   };
 });
