@@ -60,7 +60,9 @@ export default defineConfig(({ mode }) => {
       },
     },
     define: {
-      "process.env": env,
+      "process.env.ENV": JSON.stringify(env.ENV || mode),
+      "process.env.ROOT_URL": JSON.stringify(env.ROOT_URL || ""),
+      "process.env.APIURL": JSON.stringify(env.APIURL || ""),
       global: "globalThis",
       "window.appConfig": JSON.stringify({ env: env.ENV || mode }),
     },
