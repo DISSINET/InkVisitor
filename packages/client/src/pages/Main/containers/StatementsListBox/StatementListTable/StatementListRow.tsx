@@ -155,8 +155,10 @@ export const StatementListRow: React.FC<StatementListRow> = ({
                   </StyledTdMove>
                 );
               } else {
+                const cellProps = cell.getCellProps();
+                const { key, ...restCellProps } = cellProps;
                 return (
-                  <StyledTd {...cell.getCellProps()}>
+                  <StyledTd key={key} {...restCellProps}>
                     {cell.render("Cell") as React.ReactNode}
                   </StyledTd>
                 );
