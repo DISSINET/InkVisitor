@@ -7,8 +7,12 @@ export default defineConfig(({ mode }) => {
   // Load env file based on `mode` in the current working directory.
   const env = loadEnv(mode, "./env", "");
 
+  // Ensure base path starts with a slash
+  const rootUrl = env.ROOT_URL || "";
+  const base = rootUrl.startsWith("/") ? rootUrl : `/${rootUrl}`;
+
   return {
-    base: env.ROOT_URL || "/",
+    base: base,
     plugins: [
       react({
         babel: {
