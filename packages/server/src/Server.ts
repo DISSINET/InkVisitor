@@ -28,7 +28,7 @@ import "@models/events/register";
 import { Request, Response } from "express";
 import { TooManyRequestsError } from "@shared/types/errors";
 import { r as rethink } from "rethinkdb-ts";
-import timeout from 'connect-timeout';
+import timeout from "connect-timeout";
 import { pool } from "@middlewares/db";
 
 const server = express();
@@ -44,15 +44,11 @@ server.use(cors());
 if (!!process.env.STATIC_PATH) {
   if (process.env.STATIC_PATH === "/") {
     server.use((req, res, next) => {
-      // allow all requests not starting with /api and that are pointed to wanted static path
-      // relative to the root like domain.com/<static path>/...
-      if (
-        !req.path.startsWith("/api") &&
-        req.path.startsWith(process.env.STATIC_PATH as string)
-      ) {
+      // allow all requests not starting with /api
+      if (!req.path.startsWith("/api")) {
         if (req.path.indexOf(".") === -1) {
           // Read and modify index.html before sending
-          const fs = require('fs');
+          const fs = require("fs");
           const indexPath = path.join(
             __dirname,
             "..",
@@ -62,21 +58,29 @@ if (!!process.env.STATIC_PATH) {
             "client/dist/index.html"
           );
 
-          fs.readFile(indexPath, 'utf8', (err: NodeJS.ErrnoException | null, data: string) => {
-            if (err) {
-              return next(err);
-            }
+          fs.readFile(
+            indexPath,
+            "utf8",
+            (err: NodeJS.ErrnoException | null, data: string) => {
+              if (err) {
+                return next(err);
+              }
 
-            if (process.env.ENV) {
-              data = data.replace('</head>',
-                `  <!-- Injected content -->
-  <script>window.appConfig = { env: "${process.env.ENV || 'development'}" };</script>
-</head>`);
+              if (process.env.ENV) {
+                data = data.replace(
+                  "</head>",
+                  `  <!-- Injected content -->
+                     <script>window.appConfig = { env: "${
+                       process.env.ENV || "development"
+                     }" };</script>
+                  </head>`
+                );
+              }
+
+              res.type("html");
+              res.send(data);
             }
-            
-            res.type('html');
-            res.send(data);
-          });
+          );
         } else {
           // everythink else will go here
           express.static("../client/dist")(req, res, next);
@@ -123,7 +127,7 @@ server.use(
   })
 );
 
-server.use(timeout('30s'));
+server.use(timeout("30s"));
 server.use(profilerMiddleware);
 server.use(dbMiddleware);
 
@@ -138,9 +142,9 @@ server.get("/api/health", async function (req, res) {
         available: pool.pool.available,
         borrowed: pool.pool.size - pool.pool.available,
         pending: pool.pool.pending,
-        max: pool.options.max
-      }
-    }
+        max: pool.options.max,
+      },
+    },
   });
 });
 

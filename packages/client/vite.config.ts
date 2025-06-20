@@ -8,6 +8,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, "./env", "");
 
   return {
+    base: env.ROOT_URL || "/",
     plugins: [
       react({
         babel: {
@@ -63,6 +64,9 @@ export default defineConfig(({ mode }) => {
       "process.env.ENV": JSON.stringify(env.ENV || mode),
       "process.env.ROOT_URL": JSON.stringify(env.ROOT_URL || ""),
       "process.env.APIURL": JSON.stringify(env.APIURL || ""),
+      "process.env.BUILD_TIMESTAMP": JSON.stringify(
+        process.env.BUILD_TIMESTAMP || ""
+      ),
       global: "globalThis",
       "window.appConfig": JSON.stringify({ env: env.ENV || mode }),
     },

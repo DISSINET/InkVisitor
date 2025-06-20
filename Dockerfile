@@ -10,7 +10,7 @@ ARG ENV
 COPY ./packages .
 
 RUN cd annotator && pnpm install && pnpm build
-RUN cd client && pnpm install && BUILD_TIMESTAMP=$(date +'%a %d.%m.%Y %H:%M') pnpm build:${ENV}
+RUN cd client && pnpm install && BUILD_TIMESTAMP=$(date +'%a %d.%m.%Y %H:%M') && export BUILD_TIMESTAMP && pnpm build:${ENV}
 RUN rm -rf client/node_modules client/src
 
 WORKDIR /app/server
