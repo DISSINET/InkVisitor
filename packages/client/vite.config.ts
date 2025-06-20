@@ -1,7 +1,5 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
 import path from "path";
-import { loadEnv } from "vite";
+import { defineConfig, loadEnv } from "vite";
 
 export default defineConfig(({ mode }) => {
   // Load env file based on `mode` in the current working directory.
