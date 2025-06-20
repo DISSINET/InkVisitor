@@ -15,10 +15,10 @@ import LogoInkvisitor from "assets/logos/inkvisitor-full.svg";
 import { FaUserAlt } from "react-icons/fa";
 import { HiLink } from "react-icons/hi";
 import { MdMail } from "react-icons/md";
-const LogoGACR = require("assets/logos/gacr-en_rgb.png");
-const LogoERC = require("assets/logos/logo_erc-flag_eum.png");
-const LogoMUNI = require("assets/logos/arts-muni.png");
-const LogoEUMSMT = require("assets/logos/eu_msmt.png");
+import LogoGACR from "assets/logos/gacr-en_rgb.png";
+import LogoERC from "assets/logos/logo_erc-flag_eum.png";
+import LogoMUNI from "assets/logos/arts-muni.png";
+import LogoEUMSMT from "assets/logos/eu_msmt.png";
 
 interface IAcknowledgementLogo {
   src: string;
@@ -185,28 +185,28 @@ export const AboutPage: React.FC<IAboutPage> = ({}) => {
           <StyledHeader>Funding</StyledHeader>
           <StyledTextList>
             <StyledTextListItem>
-              <b>European Research Council</b> (project No. 101000442 “Networks
+              <b>European Research Council</b> (project No. 101000442 "Networks
               of Dissent: Computational Modelling of Dissident and Inquisitorial
-              Cultures in Medieval Europe (DISSINET)”, 9/2021–8/2026)
+              Cultures in Medieval Europe (DISSINET)", 9/2021–8/2026)
             </StyledTextListItem>
             <StyledTextListItem>
               <b>Czech Science Foundation</b> (EXPRO project No. GX19-26975X
-              “Dissident Religious Cultures in Medieval Europe from the
+              "Dissident Religious Cultures in Medieval Europe from the
               Perspective of Social Network Analysis and Geographic Information
-              Systems”, 1/2019–8/2021)
+              Systems", 1/2019–8/2021)
             </StyledTextListItem>
             <StyledTextListItem>
-              <b>Masaryk University, Faculty of Arts</b> (project “InkVisitor
+              <b>Masaryk University, Faculty of Arts</b> (project "InkVisitor
               Development: Towards a Project-Neutral Open-Source Research
               Application for the Collection of Structured Relational Data from
-              Texts”, 7/2022–8/2023)
+              Texts", 7/2022–8/2023)
             </StyledTextListItem>
             <StyledTextListItem>
               <b>
                 Czech Ministry of Education, Youth and Sports & European Union
               </b>{" "}
-              (project “Beyond Security: Role of Conflict in
-              Resilience-Building”, 9/2023–6/2028)
+              (project "Beyond Security: Role of Conflict in
+              Resilience-Building", 9/2023–6/2028)
             </StyledTextListItem>
           </StyledTextList>
 
