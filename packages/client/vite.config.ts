@@ -1,5 +1,6 @@
 import path from "path";
 import { defineConfig, loadEnv } from "vite";
+import react from "@vitejs/plugin-react";
 
 export default defineConfig(({ mode }) => {
   // Load env file based on `mode` in the current working directory.
@@ -11,6 +12,22 @@ export default defineConfig(({ mode }) => {
 
   return {
     base: base,
+    plugins: [
+      react({
+        babel: {
+          plugins: [
+            [
+              "babel-plugin-styled-components",
+              {
+                displayName: true,
+                fileName: false,
+                pure: true,
+              },
+            ],
+          ],
+        },
+      }),
+    ],
     resolve: {
       alias: {
         "@shared": path.resolve(__dirname, "../shared/"),

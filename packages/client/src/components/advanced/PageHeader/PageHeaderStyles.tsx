@@ -41,6 +41,7 @@ export const StyledRightHeader = styled.div`
   display: flex;
 `;
 export const StyledThemeSwitcher = styled.div`
+  height: 3rem;
   display: inline-flex;
   border-radius: 1.2rem;
   overflow: hidden;
