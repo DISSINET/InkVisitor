@@ -25,6 +25,7 @@ export const StyledHeaderTag = styled.div`
 `;
 
 export const StyledUserIconWrap = styled.div`
+  display: flex;
   cursor: pointer;
   margin-left: ${({ theme }) => theme.space[2]};
   margin-right: ${({ theme }) => theme.space[2]};
@@ -107,6 +108,7 @@ export const StyledFlexRow = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
+  height: 1.4rem;
 `;
 
 export const StyledSandboxText = styled.div`
