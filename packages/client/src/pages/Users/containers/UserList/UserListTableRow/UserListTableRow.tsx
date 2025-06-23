@@ -20,9 +20,11 @@ export const UserListTableRow: React.FC<UserListTableRow> = ({
         $isAdmin={row.original.role === UserEnums.Role.Admin}
         $isOdd={Boolean(index % 2)}
       >
-        {row.cells.map((cell) => {
+        {row.cells.map((cell, key) => {
           return (
-            <StyledTd {...cell.getCellProps()}>{cell.render("Cell")}</StyledTd>
+            <StyledTd {...cell.getCellProps()} key={key}>
+              {cell.render("Cell")}
+            </StyledTd>
           );
         })}
       </StyledTr>
