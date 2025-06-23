@@ -51,7 +51,7 @@ export const StyledTr = styled.tr<StyledTr>`
 
   td:first-child {
     padding-left: ${({ theme }) => theme.space[2]};
-    padding-right: ${({ theme }) => theme.space[2]};π
+    padding-right: ${({ theme }) => theme.space[2]};
   }
   td:not(:last-child) {
     /* width: 1%; */

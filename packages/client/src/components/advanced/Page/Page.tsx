@@ -163,9 +163,7 @@ export const Page: React.FC<Page> = ({ children }) => {
         right={headerRight}
       />
 
-      <StyledPageContent id="page" height={contentHeight}>
-        {contentEl}
-      </StyledPageContent>
+      <StyledPageContent id="page">{contentEl}</StyledPageContent>
 
       {user && userCustomizationOpen && (
         <UserCustomizationModal
