@@ -19,6 +19,7 @@ import { setUsername } from "redux/features/usernameSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { ThemeColor } from "Theme/theme";
 import { StyledPage, StyledPageContent } from "./PageStyles";
+import { JSX } from "react";
 
 interface Page {
   children?: React.ReactNode;

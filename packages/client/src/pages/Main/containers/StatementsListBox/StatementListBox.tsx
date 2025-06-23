@@ -881,37 +881,45 @@ export const StatementListBox: React.FC = () => {
     <>
       {showStatementList && (
         <>
-          <StatementListHeader
-            territory={territory}
-            isFetchingTerritory={isFetchingTerritory}
-            selectedRows={selectedRows}
-            setSelectedRows={setSelectedRows}
-            isAllSelected={
-              isListNonEmpty && selectedRows.length === statements.length
-            }
-            moveStatementsMutation={moveStatementsMutation}
-            duplicateStatementsMutation={duplicateStatementsMutation}
-            replaceReferencesMutation={replaceReferencesMutation}
-            appendReferencesMutation={appendReferencesMutation}
-            updateTerritoryMutation={updateTerritoryMutation}
-            duplicateTerritoryMutation={duplicateTerritoryMutation}
-            deleteStatementsMutation={deleteStatementsMutation}
-            relationsCreateMutation={relationsCreateMutation}
-            favoritedTerritoryIds={favoritedTerritoryIds}
-            contentWidthTooSmall={contentWidth < SECOND_PANEL_MIN_WIDTH + 60}
-            statementsWithOrder={statementsWithOrder}
-            autoOrderStatementsMutation={autoOrderStatementsMutation}
-          />
-
+          {territoryId && (
+            <StatementListHeader
+              territory={territory}
+              isFetchingTerritory={isFetchingTerritory}
+              selectedRows={selectedRows}
+              setSelectedRows={setSelectedRows}
+              isAllSelected={
+                isListNonEmpty && selectedRows.length === statements.length
+              }
+              moveStatementsMutation={moveStatementsMutation}
+              duplicateStatementsMutation={duplicateStatementsMutation}
+              replaceReferencesMutation={replaceReferencesMutation}
+              appendReferencesMutation={appendReferencesMutation}
+              updateTerritoryMutation={updateTerritoryMutation}
+              duplicateTerritoryMutation={duplicateTerritoryMutation}
+              deleteStatementsMutation={deleteStatementsMutation}
+              relationsCreateMutation={relationsCreateMutation}
+              favoritedTerritoryIds={favoritedTerritoryIds}
+              contentWidthTooSmall={contentWidth < SECOND_PANEL_MIN_WIDTH + 60}
+              statementsWithOrder={statementsWithOrder}
+              autoOrderStatementsMutation={autoOrderStatementsMutation}
+            />
+          )}
           {!territoryId && (
-            <>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                marginTop: "2rem",
+              }}
+            >
               <StyledEmptyState>
                 <BsInfoCircle size="23" />
               </StyledEmptyState>
               <StyledEmptyState>
                 {"No territory selected yet. Pick one from the territory tree"}
               </StyledEmptyState>
-            </>
+            </div>
           )}
 
           {territoryId &&
