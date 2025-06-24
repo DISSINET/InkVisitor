@@ -10,6 +10,7 @@ interface IValueStyle {
   $noBorder?: boolean;
   $borderColor?: keyof ThemeColor;
   $autocomplete?: string;
+  $fullHeight?: boolean;
 }
 const getWidth = (width?: number | "full") => {
   if (width) {
@@ -22,10 +23,12 @@ interface StyledWrapper {
   $fullHeightTextArea: boolean;
   width?: number | "full";
   $minWidth?: number;
+  $fullHeight?: boolean;
 }
 export const StyledWrapper = styled.div<StyledWrapper>`
   display: flex;
   height: ${({ $fullHeightTextArea }) => ($fullHeightTextArea ? "100%" : "")};
+  height: ${({ $fullHeight }) => ($fullHeight ? "100%" : "")};
   flex-grow: ${({ width }) => (width === "full" ? 1 : "")};
   min-width: ${({ $minWidth }) => ($minWidth ? `${$minWidth}px` : "")};
 `;
@@ -39,7 +42,9 @@ export const Label = styled.span`
   font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
 export const StyledInput = styled.input<IValueStyle>`
-  height: ${({ theme }) => theme.space[10]};
+  /* height: ${({ theme }) => theme.space[10]}; */
+  height: ${({ $fullHeight, theme }) =>
+    $fullHeight ? "100%" : theme.space[10]};
   text-align: left;
   border-style: solid;
   color: ${({ $inverted, theme }) =>

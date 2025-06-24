@@ -20,8 +20,8 @@ interface ButtonProps {
   tooltipLabel?: string;
   tooltipContent?: ReactElement[] | ReactElement;
   label?: string;
-  icon?: JSX.Element | EntityEnums.Operator;
-  iconRight?: JSX.Element | EntityEnums.Operator;
+  icon?: React.ReactNode | EntityEnums.Operator;
+  iconRight?: React.ReactNode | EntityEnums.Operator;
   noIconMargin?: boolean;
   noBackground?: boolean;
   inverted?: boolean;
@@ -33,6 +33,8 @@ interface ButtonProps {
   color?: keyof ThemeColor;
   onClick?: MouseEventHandler<HTMLElement>;
   fullWidth?: boolean;
+  // to control the height from parent
+  fullHeight?: boolean;
   tooltipPosition?: AutoPlacement | BasePlacement | VariationPlacement;
   hideTooltipOnClick?: boolean;
   dataTestId?: string;
@@ -59,6 +61,7 @@ export const Button: React.FC<ButtonProps> = ({
     // do nothing
   },
   fullWidth = false,
+  fullHeight = false,
   tooltipPosition = "bottom",
   hideTooltipOnClick = false,
   dataTestId,
@@ -90,6 +93,7 @@ export const Button: React.FC<ButtonProps> = ({
         $radiusLeft={radiusLeft}
         $radiusRight={radiusRight}
         $fullWidth={fullWidth}
+        $fullHeight={fullHeight}
         $disabled={disabled}
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}

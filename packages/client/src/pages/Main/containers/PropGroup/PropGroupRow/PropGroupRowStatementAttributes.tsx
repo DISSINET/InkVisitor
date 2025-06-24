@@ -19,7 +19,7 @@ interface PropGroupRowStatementAttributes {
   isExpanded: boolean;
   disabledAttributes: PropAttributeFilter;
   userCanEdit: boolean;
-  buttons: JSX.Element;
+  buttons: React.ReactNode;
 }
 export const PropGroupRowStatementAttributes: React.FC<
   PropGroupRowStatementAttributes

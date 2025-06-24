@@ -57,6 +57,7 @@ interface IButtonStyle {
   $radiusLeft?: boolean;
   $radiusRight?: boolean;
   $noPadding?: boolean;
+  $fullHeight?: boolean;
 }
 export const StyledButton = styled.button.attrs(({ ref }) => ({
   ref: ref,
@@ -65,6 +66,7 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
   align-items: center;
   justify-content: center;
   width: ${({ $fullWidth }) => ($fullWidth ? "100%" : "auto")};
+  height: ${({ $fullHeight }) => ($fullHeight ? "100%" : "")};
   font-size: ${({ theme, $size }) => theme.fontSize[getFontSize($size)]};
   font-weight: ${({ $disabled, $textRegular }) =>
     $disabled ? 400 : $textRegular ? 500 : 900};

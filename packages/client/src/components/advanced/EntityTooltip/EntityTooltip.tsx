@@ -49,7 +49,7 @@ interface EntityTooltip {
   // entity
   entityId: string;
   entityClass: EntityEnums.Class;
-  label?: string | JSX.Element;
+  label?: string | React.ReactNode;
   alternativeLabels?: string[];
   language: EntityEnums.Language;
   detail?: string;

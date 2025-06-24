@@ -19,7 +19,7 @@ interface UnlinkButton {
   onClick: () => void;
   color?: keyof ThemeColor;
   tooltipLabel?: string;
-  icon?: JSX.Element;
+  icon?: React.ReactNode;
 }
 interface EntityTag {
   entity: IEntity;

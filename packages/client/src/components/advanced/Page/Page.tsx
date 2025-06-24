@@ -117,7 +117,7 @@ export const Page: React.FC<Page> = ({ children }) => {
     [tempLocation]
   );
 
-  const headerRight = useMemo<undefined | JSX.Element>(() => {
+  const headerRight = useMemo<undefined | React.ReactNode>(() => {
     if (disableRightHeader) {
       return undefined;
     }

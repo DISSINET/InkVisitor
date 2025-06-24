@@ -357,6 +357,7 @@ export const Suggester: React.FC<Suggester> = ({
               onEnterPressFn={handleEnterPress}
               autoFocus={categories.length === 1 && autoFocus}
               disabled={disabled}
+              fullHeight
             />
             {typed.length > 0 && (
               <StyledSuggestionCancelButton>
@@ -376,6 +377,7 @@ export const Suggester: React.FC<Suggester> = ({
                   handleAddBtnClick();
                 }}
                 disabled={disabled}
+                fullHeight
               />
             </StyledSuggesterButton>
           )}

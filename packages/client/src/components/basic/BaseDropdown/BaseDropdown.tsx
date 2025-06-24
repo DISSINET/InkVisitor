@@ -35,7 +35,7 @@ interface BaseDropdown {
   width?: number | "full";
   placeholder?: string;
   noOptionsMessage?: string;
-  icon?: JSX.Element;
+  icon?: React.ReactNode;
   tooltipLabel?: string;
   // single entity dropdown props
   onFocus?: () => void;

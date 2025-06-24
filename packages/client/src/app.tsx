@@ -59,7 +59,7 @@ export const PublicPath = (props: any) => {
   return props.children;
 };
 
-export const RequireAuth = ({ children }: { children: JSX.Element }) => {
+export const RequireAuth = ({ children }: { children: React.ReactNode }) => {
   return api.isLoggedIn() ? children : <Navigate to="/login" />;
 };
 
