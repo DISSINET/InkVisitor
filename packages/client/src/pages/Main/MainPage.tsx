@@ -805,7 +805,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
           height={getStatementListBoxHeight()}
           buttons={[
             <>
-              <ButtonGroup style={{ marginLeft: "5px", marginRight: "5px" }}>
+              <ButtonGroup
+                style={{ marginLeft: "0.5rem", marginRight: "0.5rem" }}
+              >
                 <Button
                   color="success"
                   icon={<FaList />}
@@ -826,9 +828,11 @@ const MainPage: React.FC<MainPage> = ({}) => {
                   inverted={!annotatorOpened}
                 ></Button>
               </ButtonGroup>
-              <ButtonGroup style={{ marginLeft: "5px", marginRight: "5px" }}>
-                {/* Admin / Owner / Editor with writer rights */}
-                {hasWriteRightsToSelectedTerritory && territoryId && (
+              {/* Admin / Owner / Editor with writer rights */}
+              {hasWriteRightsToSelectedTerritory && territoryId && (
+                <ButtonGroup
+                  style={{ marginLeft: "0.5rem", marginRight: "0.5rem" }}
+                >
                   <Button
                     key="add"
                     icon={<FaPlus />}
@@ -849,8 +853,8 @@ const MainPage: React.FC<MainPage> = ({}) => {
                       }
                     }}
                   />
-                )}
-              </ButtonGroup>
+                </ButtonGroup>
+              )}
             </>,
             statementListOpened &&
               territoryId &&

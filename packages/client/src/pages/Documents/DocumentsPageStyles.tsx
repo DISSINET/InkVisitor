@@ -91,8 +91,8 @@ export const StyledInputWrap = styled.div`
     ${theme.color.white},
     ${theme.color.white},
     2px,
-    ${theme.color["blue"][100]} 1px,
-    ${theme.color["blue"][100]} 12px
+    ${theme.color.uploadDocumentBg} 1px,
+    ${theme.color.uploadDocumentBg} 12px
   )
   `};
 `;
