@@ -105,6 +105,7 @@ export const EntityBookmarkTable: React.FC<EntityBookmarkTable> = ({
               visibleColumns={visibleColumns}
               hasOrder={rows.length > 1}
               {...row.getRowProps()}
+              key={i}
             />
           );
         })}

@@ -8,8 +8,8 @@ interface HeaderProps {
   paddingX?: number;
   paddingY?: number;
   height?: number;
-  left: JSX.Element | undefined;
-  right: JSX.Element | undefined;
+  left: React.ReactNode | undefined;
+  right: React.ReactNode | undefined;
   color?: keyof ThemeColor;
 }
 

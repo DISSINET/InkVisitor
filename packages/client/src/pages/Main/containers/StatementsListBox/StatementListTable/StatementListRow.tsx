@@ -136,7 +136,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
                   <StyledTdMove key="move">
                     <div style={{ display: "flex", alignItems: "center" }}>
                       <div
-                        style={{ cursor: "move" }}
+                        style={{ display: "flex", cursor: "move" }}
                         ref={dragRef}
                         onClick={(e: React.MouseEvent) => e.stopPropagation()}
                       >

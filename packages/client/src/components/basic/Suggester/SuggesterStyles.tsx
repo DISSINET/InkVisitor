@@ -34,7 +34,7 @@ export const StyledInputWrapper = styled.div<InputWrapper>`
   display: flex;
   opacity: ${({ $isOver }) => $isOver && "50%"};
   width: 100%;
-  /* max-width: 16.1rem; */
+  height: 2.5rem;
   input {
     padding-right: ${({ theme, $hasText }) =>
       $hasText ? theme.space[7] : theme.space[1]};

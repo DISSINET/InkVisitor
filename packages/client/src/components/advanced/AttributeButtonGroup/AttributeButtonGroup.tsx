@@ -10,8 +10,8 @@ interface AttributeButtonGroup {
   options: {
     longValue: string;
     shortValue: string;
-    shortIcon?: JSX.Element;
-    icon?: JSX.Element;
+    shortIcon?: React.ReactNode;
+    icon?: React.ReactNode;
     onClick: () => void;
     selected: boolean;
     optionDisabled?: boolean;

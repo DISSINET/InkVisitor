@@ -28,7 +28,7 @@ export interface StyledSelect {
   entityDropdown?: boolean;
   attributeDropdown?: boolean;
   wildCardChar?: boolean;
-  icon?: JSX.Element;
+  icon?: React.ReactNode;
   loggerId?: string;
   limitSelectedItems?: number;
 }

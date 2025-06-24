@@ -85,7 +85,9 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
     }
   }, [warning, entities]);
 
-  function renderEntityTags(entityIds: (string | undefined)[]): JSX.Element {
+  function renderEntityTags(
+    entityIds: (string | undefined)[]
+  ): React.ReactNode {
     return (
       <>
         {entityIds
@@ -108,7 +110,7 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
       </>
     );
   }
-  function renderValidationLabel(warning: IWarning): JSX.Element {
+  function renderValidationLabel(warning: IWarning): React.ReactNode {
     if (warning.validation?.detail) {
       return (
         <span>
@@ -123,7 +125,7 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
 
   function renderEntityClasses(
     entityClasses: string[] | undefined
-  ): JSX.Element {
+  ): React.ReactNode {
     if (entityClasses) {
       return (
         <>
@@ -155,7 +157,7 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
     }
   }
 
-  function getWarningMessage(): JSX.Element {
+  function getWarningMessage(): React.ReactNode {
     const { type, position } = warning;
     const positionName = position?.subSection
       ? ` - ${positionObject[position.subSection]}`

@@ -146,6 +146,9 @@ interface StyledDisplayModeButtonIconWrapper {
   $annotatorWidthTooSmall?: boolean;
 }
 export const StyledDisplayModeButtonIconWrapper = styled.div<StyledDisplayModeButtonIconWrapper>`
+  display: flex;
+  justify-content: center;
+  align-items: center;
   padding: ${({ $annotatorWidthTooSmall }) =>
     $annotatorWidthTooSmall ? "0 0.5rem" : ""};
 `;

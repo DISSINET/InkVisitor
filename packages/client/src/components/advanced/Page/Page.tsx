@@ -19,6 +19,7 @@ import { setUsername } from "redux/features/usernameSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { ThemeColor } from "Theme/theme";
 import { StyledPage, StyledPageContent } from "./PageStyles";
+import { JSX } from "react";
 
 interface Page {
   children?: React.ReactNode;
@@ -116,7 +117,7 @@ export const Page: React.FC<Page> = ({ children }) => {
     [tempLocation]
   );
 
-  const headerRight = useMemo<undefined | JSX.Element>(() => {
+  const headerRight = useMemo<undefined | React.ReactNode>(() => {
     if (disableRightHeader) {
       return undefined;
     }
@@ -163,9 +164,7 @@ export const Page: React.FC<Page> = ({ children }) => {
         right={headerRight}
       />
 
-      <StyledPageContent id="page" height={contentHeight}>
-        {contentEl}
-      </StyledPageContent>
+      <StyledPageContent id="page">{contentEl}</StyledPageContent>
 
       {user && userCustomizationOpen && (
         <UserCustomizationModal

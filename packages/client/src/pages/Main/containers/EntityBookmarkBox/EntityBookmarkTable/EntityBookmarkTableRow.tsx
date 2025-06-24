@@ -70,9 +70,11 @@ export const EntityBookmarkTableRow: React.FC<EntityBookmarkTableRow> = ({
         ) : (
           <td style={{ width: "2rem" }} />
         )}
-        {row.cells.map((cell) => {
+        {row.cells.map((cell, key) => {
           return (
-            <StyledTd {...cell.getCellProps()}>{cell.render("Cell")}</StyledTd>
+            <StyledTd {...cell.getCellProps()} key={key}>
+              {cell.render("Cell")}
+            </StyledTd>
           );
         })}
       </StyledTr>

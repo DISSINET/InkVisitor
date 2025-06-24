@@ -68,6 +68,7 @@ const darkTheme = {
     tableSelection: "#4c82a1",
     tableSelectionHover: "#2c638c",
     focusedCheckbox: "rgba(246,246,255,0.1)",
+    uploadDocumentBg: "#22315a",
 
     closeBtnBackground: "rgba(200, 200, 200, 0.1)",
 

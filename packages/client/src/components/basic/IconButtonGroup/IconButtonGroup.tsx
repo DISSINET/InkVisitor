@@ -16,7 +16,7 @@ type IconButtonGroup<TValue extends ValueTypes> = {
   options: { value: TValue; label: string; info?: string }[];
   onChange: (value: TValue) => void;
   value: TValue;
-  icons: { [key in TValue]: JSX.Element };
+  icons: { [key in TValue]: React.ReactNode };
   disabled?: boolean;
 };
 

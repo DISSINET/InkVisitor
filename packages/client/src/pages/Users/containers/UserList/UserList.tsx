@@ -585,7 +585,12 @@ export const UserList: React.FC<UserList> = React.memo(() => {
             {rows.map((row: Row<IResponseUser>, i: number) => {
               prepareRow(row);
               return (
-                <UserListTableRow index={i} row={row} {...row.getRowProps()} />
+                <UserListTableRow
+                  index={i}
+                  row={row}
+                  {...row.getRowProps()}
+                  key={i}
+                />
               );
             })}
           </tbody>

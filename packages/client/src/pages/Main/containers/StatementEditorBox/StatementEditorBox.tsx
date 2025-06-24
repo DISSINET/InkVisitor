@@ -382,7 +382,14 @@ export const StatementEditorBox: React.FC = () => {
               </div>
             </CustomScrollbar>
           ) : (
-            <>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                marginTop: "2rem",
+              }}
+            >
               <StyledEditorEmptyState>
                 <BsInfoCircle size="23" />
               </StyledEditorEmptyState>
@@ -391,7 +398,7 @@ export const StatementEditorBox: React.FC = () => {
                   "No statement selected yet. Pick one from the statements table"
                 }
               </StyledEditorEmptyState>
-            </>
+            </div>
           )}
         </>
       )}
