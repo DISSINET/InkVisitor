@@ -58,6 +58,8 @@ export const StyledCounter = styled.div`
 `;
 export const StyledDropdownWrap = styled.div``;
 export const StyledCheckboxWrapper = styled.div`
-  color: ${({ theme }) => theme.color["black"]};
+  display: flex;
+  align-items: center;
   cursor: pointer;
+  color: ${({ theme }) => theme.color["black"]};
 `;

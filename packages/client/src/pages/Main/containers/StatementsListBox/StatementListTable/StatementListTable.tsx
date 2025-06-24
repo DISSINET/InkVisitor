@@ -368,7 +368,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
           const { warnings } = row.original;
 
           return (
-            <>
+            <div style={{ display: "flex", alignItems: "center" }}>
               {warnings.length > 0 && (
                 <Button
                   icon={<TiWarningOutline size={20} />}
@@ -386,7 +386,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                   }}
                 />
               )}
-            </>
+            </div>
           );
         },
       },
