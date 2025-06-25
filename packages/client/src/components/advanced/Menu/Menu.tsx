@@ -94,7 +94,7 @@ export const Menu: React.FC<Menu> = ({
     >
       <Button
         icon={
-          <animated.div style={rotateMenuIcon}>
+          <animated.div style={rotateMenuIcon} {...({} as any)}>
             <FaBars size={14} />
           </animated.div>
         }

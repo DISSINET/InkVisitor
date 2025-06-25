@@ -198,7 +198,8 @@ export const StatementListTextAnnotator: React.FC<
   }, [annotatorWidth]);
 
   return (
-    <animated.div style={animatedStyle}>
+    // {...({} as any)} => accept any additional props including children
+    <animated.div style={animatedStyle} {...({} as any)}>
       {contentWidth > 0 && (
         <StatementListDocumentSearchLine
           selectedResource={selectedResource}
