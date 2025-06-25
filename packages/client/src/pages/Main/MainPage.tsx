@@ -805,29 +805,31 @@ const MainPage: React.FC<MainPage> = ({}) => {
           height={getStatementListBoxHeight()}
           buttons={[
             <>
-              <ButtonGroup
-                style={{ marginLeft: "0.5rem", marginRight: "0.5rem" }}
-              >
-                <Button
-                  color="success"
-                  icon={<FaList />}
-                  // label={`list (${territory.statements.length})`}
-                  label={`list`}
-                  onClick={() => {
-                    setAnnotatorOpened(false);
-                  }}
-                  inverted={!!annotatorOpened}
-                ></Button>
-                <Button
-                  color="success"
-                  icon={<FaHighlighter />}
-                  label="annotator"
-                  onClick={() => {
-                    setAnnotatorOpened(true);
-                  }}
-                  inverted={!annotatorOpened}
-                ></Button>
-              </ButtonGroup>
+              {territoryId && (
+                <ButtonGroup
+                  style={{ marginLeft: "0.5rem", marginRight: "0.5rem" }}
+                >
+                  <Button
+                    color="success"
+                    icon={<FaList />}
+                    // label={`list (${territory.statements.length})`}
+                    label={`list`}
+                    onClick={() => {
+                      setAnnotatorOpened(false);
+                    }}
+                    inverted={!!annotatorOpened}
+                  ></Button>
+                  <Button
+                    color="success"
+                    icon={<FaHighlighter />}
+                    label="annotator"
+                    onClick={() => {
+                      setAnnotatorOpened(true);
+                    }}
+                    inverted={!annotatorOpened}
+                  ></Button>
+                </ButtonGroup>
+              )}
               {/* Admin / Owner / Editor with writer rights */}
               {hasWriteRightsToSelectedTerritory && territoryId && (
                 <ButtonGroup
