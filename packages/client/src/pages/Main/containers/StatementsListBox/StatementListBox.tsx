@@ -935,122 +935,124 @@ export const StatementListBox: React.FC = () => {
               </>
             )}
 
-          <div
-            style={{
-              display: "flex",
-              height: "100%",
-              // maxHeight: "calc(100%)",
-              overflow: "hidden",
-            }}
-            ref={contentRef}
-          >
-            <CustomScrollbar
-              scrollerId="Statements"
-              elementId="Statements-box-table"
-              contentWidth={tableWidth}
-              customStyle={{
+          {territoryId && (
+            <div
+              style={{
                 display: "flex",
-                flexShrink: 0,
-                // fix for overheight because of marginTop which is necessary to make space for annotator header
-                marginTop:
-                  displayMode === StatementListDisplayMode.TEXT
-                    ? "6rem"
-                    : undefined,
-                height:
-                  displayMode === StatementListDisplayMode.TEXT
-                    ? "calc(100% - 6rem)"
-                    : "100%",
+                height: "100%",
+                // maxHeight: "calc(100%)",
+                overflow: "hidden",
               }}
+              ref={contentRef}
             >
-              <StyledTableWrapper
-                $isListMode={displayMode === StatementListDisplayMode.LIST}
-              >
-                {isListNonEmpty && (
-                  <StatementListTable
-                    statements={statementsWithOrder}
-                    handleRowClick={(rowId: string) => {
-                      dispatch(setShowWarnings(false));
-                      if (statementId !== rowId) {
-                        setStatementId(rowId);
-                      } else if (
-                        displayMode === StatementListDisplayMode.TEXT &&
-                        annotator
-                      ) {
-                        annotator.scrollToAnchor(rowId);
-                      }
-                    }}
-                    actantsUpdateMutation={statementUpdateMutation}
-                    entities={entities}
-                    right={right}
-                    cloneStatementMutation={cloneStatementMutation}
-                    setStatementToDelete={setStatementToDelete}
-                    setShowSubmit={setShowSubmit}
-                    addStatementAtCertainIndex={addStatementAtCertainIndex}
-                    selectedRows={selectedRows}
-                    setSelectedRows={setSelectedRows}
-                    displayMode={displayMode}
-                    annotator={annotator}
-                    isLoading={statementListTableIsLoading}
-                  />
-                )}
-              </StyledTableWrapper>
-            </CustomScrollbar>
-
-            {displayMode === StatementListDisplayMode.TEXT && (
-              <StatementListTextAnnotator
-                key={territoryId}
-                contentHeight={contentHeight}
-                contentWidth={contentWidth - 10}
-                handleCreateStatement={handleCreateStatement}
-                territoryId={territoryId}
-                territory={territory}
-                statementId={statementId}
-                storedAnnotatorScroll={storedAnnotatorScroll}
-                setStoredAnnotatorScroll={(newScroll) => {
-                  if (storedAnnotatorResourceId) {
-                    setStoredAnnotatorScroll(newScroll);
-                  }
+              <CustomScrollbar
+                scrollerId="Statements"
+                elementId="Statements-box-table"
+                contentWidth={tableWidth}
+                customStyle={{
+                  display: "flex",
+                  flexShrink: 0,
+                  // fix for overheight because of marginTop which is necessary to make space for annotator header
+                  marginTop:
+                    displayMode === StatementListDisplayMode.TEXT
+                      ? "6rem"
+                      : undefined,
+                  height:
+                    displayMode === StatementListDisplayMode.TEXT
+                      ? "calc(100% - 6rem)"
+                      : "100%",
                 }}
-                hlEntities={hlEntities}
-                setHlEntities={setHlEntities}
-                addStatementAtCertainIndex={addStatementAtCertainIndex}
-                annotator={annotator}
-                setAnnotator={setAnnotator}
-                selectedDocumentId={selectedDocumentId}
-                selectedDocument={selectedDocument}
-                selectedDocumentIsFetching={selectedDocumentIsFetching}
-                selectedDocumentError={selectedDocumentError}
-                selectedResource={selectedResource}
-                resources={resources}
-                setSelectedResourceId={setSelectedResourceId}
-                showStatementList={
-                  isListNonEmpty || statementListTableIsLoading
-                }
-                userCanEdit={userCanEdit}
-              />
-            )}
-
-            {statementListTableIsLoading &&
-              tableWidth > 0 &&
-              contentHeight > 0 && (
-                <div
-                  style={{
-                    width: tableWidth + 4,
-                    height:
-                      displayMode === StatementListDisplayMode.TEXT
-                        ? contentHeight - 56
-                        : contentHeight + 4,
-                    flexShrink: 0,
-                    position: "absolute",
-                    bottom: 0,
-                    left: 0,
-                    zIndex: 1,
-                  }}
+              >
+                <StyledTableWrapper
+                  $isListMode={displayMode === StatementListDisplayMode.LIST}
                 >
-                  <Loader show size={50} />
-                </div>
+                  {isListNonEmpty && (
+                    <StatementListTable
+                      statements={statementsWithOrder}
+                      handleRowClick={(rowId: string) => {
+                        dispatch(setShowWarnings(false));
+                        if (statementId !== rowId) {
+                          setStatementId(rowId);
+                        } else if (
+                          displayMode === StatementListDisplayMode.TEXT &&
+                          annotator
+                        ) {
+                          annotator.scrollToAnchor(rowId);
+                        }
+                      }}
+                      actantsUpdateMutation={statementUpdateMutation}
+                      entities={entities}
+                      right={right}
+                      cloneStatementMutation={cloneStatementMutation}
+                      setStatementToDelete={setStatementToDelete}
+                      setShowSubmit={setShowSubmit}
+                      addStatementAtCertainIndex={addStatementAtCertainIndex}
+                      selectedRows={selectedRows}
+                      setSelectedRows={setSelectedRows}
+                      displayMode={displayMode}
+                      annotator={annotator}
+                      isLoading={statementListTableIsLoading}
+                    />
+                  )}
+                </StyledTableWrapper>
+              </CustomScrollbar>
+
+              {displayMode === StatementListDisplayMode.TEXT && (
+                <StatementListTextAnnotator
+                  key={territoryId}
+                  contentHeight={contentHeight}
+                  contentWidth={contentWidth - 10}
+                  handleCreateStatement={handleCreateStatement}
+                  territoryId={territoryId}
+                  territory={territory}
+                  statementId={statementId}
+                  storedAnnotatorScroll={storedAnnotatorScroll}
+                  setStoredAnnotatorScroll={(newScroll) => {
+                    if (storedAnnotatorResourceId) {
+                      setStoredAnnotatorScroll(newScroll);
+                    }
+                  }}
+                  hlEntities={hlEntities}
+                  setHlEntities={setHlEntities}
+                  addStatementAtCertainIndex={addStatementAtCertainIndex}
+                  annotator={annotator}
+                  setAnnotator={setAnnotator}
+                  selectedDocumentId={selectedDocumentId}
+                  selectedDocument={selectedDocument}
+                  selectedDocumentIsFetching={selectedDocumentIsFetching}
+                  selectedDocumentError={selectedDocumentError}
+                  selectedResource={selectedResource}
+                  resources={resources}
+                  setSelectedResourceId={setSelectedResourceId}
+                  showStatementList={
+                    isListNonEmpty || statementListTableIsLoading
+                  }
+                  userCanEdit={userCanEdit}
+                />
               )}
-          </div>
+
+              {statementListTableIsLoading &&
+                tableWidth > 0 &&
+                contentHeight > 0 && (
+                  <div
+                    style={{
+                      width: tableWidth + 4,
+                      height:
+                        displayMode === StatementListDisplayMode.TEXT
+                          ? contentHeight - 56
+                          : contentHeight + 4,
+                      flexShrink: 0,
+                      position: "absolute",
+                      bottom: 0,
+                      left: 0,
+                      zIndex: 1,
+                    }}
+                  >
+                    <Loader show size={50} />
+                  </div>
+                )}
+            </div>
+          )}
 
           <Submit
             title="Delete statement"
