@@ -26,15 +26,9 @@ import Dropdown, {
   LogicButtonGroup,
   PositionButtonGroup,
 } from "components/advanced";
-import { useSearchParams } from "hooks";
+import { useSearchParams, useTheme } from "hooks";
 import { TooltipAttributes } from "pages/Main/containers";
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   DragSourceMonitor,
   DropTargetMonitor,
@@ -68,7 +62,6 @@ import {
   StyledSuggesterWrap,
   StyledTagWrapper,
 } from "./StatementEditorActantTableStyles";
-import { ThemeContext } from "styled-components";
 
 interface StatementEditorActantTableRow {
   filteredActant: FilteredActantObject;
@@ -384,7 +377,7 @@ export const StatementEditorActantTableRow: React.FC<
 
   const { classifications, identifications } = filteredActant.data.sActant;
 
-  const themeContext = useContext(ThemeContext);
+  const theme = useTheme();
 
   return (
     <StyledRow
@@ -397,7 +390,7 @@ export const StatementEditorActantTableRow: React.FC<
           <StyledGridColumn ref={dragRef} style={{ cursor: "move" }}>
             <FaGripVertical
               style={{ marginTop: "0.3rem" }}
-              color={themeContext?.color.black}
+              color={theme.color.black}
             />
           </StyledGridColumn>
         ) : (

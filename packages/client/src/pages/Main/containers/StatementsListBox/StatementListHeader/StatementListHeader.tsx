@@ -445,64 +445,60 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                       <StyledCounter>{`${selectedRows.length}/${territory.statements.length}`}</StyledCounter>
                     )}
 
-                    {
-                      <>
-                        <StyledDropdownWrap>
-                          <Dropdown.Single.Basic
-                            tooltipLabel={
-                              batchAction.info === EntityEnums.Class.Resource
-                                ? batchAction.label
-                                : ""
-                            }
-                            width={98}
-                            disabled={selectedRows.length === 0}
-                            value={batchAction.value}
-                            onChange={(selectedOption) =>
-                              setBatchAction(
-                                batchOptions.find(
-                                  (o) => o.value === selectedOption
-                                )!
-                              )
-                            }
-                            options={batchOptions}
-                          />
-                        </StyledDropdownWrap>
+                    <StyledDropdownWrap>
+                      <Dropdown.Single.Basic
+                        tooltipLabel={
+                          batchAction.info === EntityEnums.Class.Resource
+                            ? batchAction.label
+                            : ""
+                        }
+                        width={98}
+                        disabled={selectedRows.length === 0}
+                        value={batchAction.value}
+                        onChange={(selectedOption) =>
+                          setBatchAction(
+                            batchOptions.find(
+                              (o) => o.value === selectedOption
+                            )!
+                          )
+                        }
+                        options={batchOptions}
+                      />
+                    </StyledDropdownWrap>
 
-                        {/* Batch delete */}
-                        {batchAction.value === BatchOption.delete_S && (
-                          <Button
-                            icon={<FaTrash />}
-                            color="danger"
-                            inverted
-                            onClick={() => setShowSubmit(true)}
-                            tooltipLabel="delete selected statements"
-                          />
-                        )}
+                    {/* Batch delete */}
+                    {batchAction.value === BatchOption.delete_S && (
+                      <Button
+                        icon={<FaTrash />}
+                        color="danger"
+                        inverted
+                        onClick={() => setShowSubmit(true)}
+                        tooltipLabel="delete selected statements"
+                      />
+                    )}
 
-                        {batchAction.info && (
-                          <EntitySuggester
-                            inputWidth={70}
-                            placeholder={
-                              batchAction.info === EntityEnums.Class.Territory
-                                ? "to territory"
-                                : ""
-                            }
-                            disableTemplatesAccept
-                            filterEditorRights
-                            categoryTypes={[
-                              entitiesDictKeys[
-                                batchAction.info as EntityEnums.Class
-                              ].value,
-                            ]}
-                            onSelected={(newSelectedId: string) =>
-                              handleOnSelected(newSelectedId)
-                            }
-                            excludedActantIds={[territory.id]}
-                            disabled={selectedRows.length === 0}
-                          />
-                        )}
-                      </>
-                    }
+                    {batchAction.info !== undefined && (
+                      <EntitySuggester
+                        inputWidth={70}
+                        placeholder={
+                          batchAction.info === EntityEnums.Class.Territory
+                            ? "to territory"
+                            : ""
+                        }
+                        disableTemplatesAccept
+                        filterEditorRights
+                        categoryTypes={[
+                          entitiesDictKeys[
+                            batchAction.info as EntityEnums.Class
+                          ].value,
+                        ]}
+                        onSelected={(newSelectedId: string) =>
+                          handleOnSelected(newSelectedId)
+                        }
+                        excludedActantIds={[territory.id]}
+                        disabled={selectedRows.length === 0}
+                      />
+                    )}
                   </>
                 )}
             </StyledActionsWrapper>

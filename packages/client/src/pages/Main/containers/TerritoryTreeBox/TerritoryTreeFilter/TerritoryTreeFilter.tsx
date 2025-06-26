@@ -1,9 +1,9 @@
 import { UserEnums } from "@shared/enums";
 import { Checkbox, Input } from "components";
-import React, { useContext } from "react";
+import { useTheme } from "hooks";
+import React from "react";
 import { FaSearch } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
-import { ThemeContext } from "styled-components";
 import { ITerritoryFilter } from "types";
 import {
   StyledCancelButton,
@@ -25,7 +25,7 @@ export const TerritoryTreeFilter: React.FC<TerritoryTreeFilter> = ({
   handleFilterChange,
   userRole,
 }) => {
-  const themeContext = useContext(ThemeContext);
+  const theme = useTheme();
 
   return (
     <StyledFilterWrap>
@@ -55,7 +55,7 @@ export const TerritoryTreeFilter: React.FC<TerritoryTreeFilter> = ({
           <FaSearch
             style={{ flexShrink: 0 }}
             size={14}
-            color={themeContext?.color.black}
+            color={theme.color.black}
           />
           <Input
             value={filterData.filter}
