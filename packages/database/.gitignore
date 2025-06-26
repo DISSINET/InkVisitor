@@ -2,3 +2,6 @@ sheetcache
 rethinkdb_data
 .env
 .cmd.*
+
+# audit files
+datasets/production/audits.json
