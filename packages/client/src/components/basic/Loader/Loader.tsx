@@ -3,6 +3,7 @@ import { DotLoader } from "react-spinners";
 import { ThemeContext } from "styled-components";
 import { StyledLoaderWrap } from "./LoaderStyles";
 import { ThemeColor } from "Theme/theme";
+import { useTheme } from "hooks";
 
 interface Loader {
   show?: boolean;
@@ -16,11 +17,11 @@ export const Loader: React.FC<Loader> = ({
   noBackground = false,
   color = "primary",
 }) => {
-  const themeContext = useContext(ThemeContext);
+  const theme = useTheme();
 
   return (
     <StyledLoaderWrap $show={show} $noBackground={noBackground}>
-      <DotLoader color={themeContext?.color[color]} size={size} />
+      <DotLoader color={theme.color[color] as string} size={size} />
     </StyledLoaderWrap>
   );
 };

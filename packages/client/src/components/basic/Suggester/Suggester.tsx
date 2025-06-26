@@ -8,6 +8,7 @@ import { dropdownWildCard } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
 import { IEntity, IUserOptions } from "@shared/types";
 import { MIN_LABEL_LENGTH_MESSAGE, scrollOverscanCount } from "Theme/constants";
+import { ThemeType } from "Theme/theme";
 import {
   Button,
   Input,
@@ -17,14 +18,13 @@ import {
 } from "components";
 import Dropdown from "components/advanced";
 import useKeypress from "hooks/useKeyPress";
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { DropTargetMonitor, useDrop } from "react-dnd";
 import { FaPlus } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
 import { toast } from "react-toastify";
 import { FixedSizeList as List } from "react-window";
-import { ListChildComponentProps } from "react-window";
-import { ThemeContext } from "styled-components";
+import { useTheme } from "hooks";
 import {
   EntityDragItem,
   EntitySingleDropdownItem,
@@ -286,7 +286,7 @@ export const Suggester: React.FC<Suggester> = ({
     middleware: [flip({ padding: 10 })],
   });
 
-  const themeContext = useContext(ThemeContext);
+  const theme = useTheme();
 
   if (disabled) {
     return <StyledDash>-</StyledDash>;
@@ -385,10 +385,7 @@ export const Suggester: React.FC<Suggester> = ({
         </StyledInputWrapper>
 
         {isWrongDropCategory && isOver && (
-          <StyledAiOutlineWarning
-            size={22}
-            color={themeContext?.color.warning}
-          />
+          <StyledAiOutlineWarning size={22} color={theme.color.warning} />
         )}
 
         {(isFocused || isHovered) && !middlewareData.hide?.referenceHidden && (

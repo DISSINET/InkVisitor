@@ -2,7 +2,8 @@ import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import { Button, Input, Loader } from "components";
 import { DocumentTitle, EntitySuggester, EntityTag } from "components/advanced";
-import React, { useContext } from "react";
+import { useTheme } from "hooks";
+import React from "react";
 import { BiSearch } from "react-icons/bi";
 import {
   FaLongArrowAltRight,
@@ -11,7 +12,6 @@ import {
 } from "react-icons/fa";
 import { GrDocumentMissing } from "react-icons/gr";
 import { TbAnchor, TbAnchorOff } from "react-icons/tb";
-import { ThemeContext } from "styled-components";
 import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
 import {
   StyledAnnotatorMenuBar,
@@ -71,7 +71,7 @@ const StatementListDocumentSearchLine: React.FC<
   userCanEdit,
   annotatorWidthTooSmall,
 }) => {
-  const themeContext = useContext(ThemeContext);
+  const theme = useTheme();
 
   return (
     <StyledDocumentSearchLine
@@ -168,7 +168,7 @@ const StatementListDocumentSearchLine: React.FC<
       {isSearchAllowed && (
         <StyledSearchContainer>
           <StyledSearchIcon>
-            <BiSearch color={themeContext?.color.info} />
+            <BiSearch color={theme.color.info} />
           </StyledSearchIcon>
           <Input
             value={searchTerm}
@@ -194,7 +194,7 @@ const StatementListDocumentSearchLine: React.FC<
                   <div style={{ display: "flex", gap: "0.5rem" }}>
                     <FaRegArrowAltCircleUp
                       size={15}
-                      color={themeContext?.color.info}
+                      color={theme.color.info}
                       style={{ cursor: "pointer" }}
                       title="previous occurence"
                       onClick={() => {
@@ -208,7 +208,7 @@ const StatementListDocumentSearchLine: React.FC<
                     />
                     <FaRegArrowAltCircleDown
                       size={15}
-                      color={themeContext?.color.info}
+                      color={theme.color.info}
                       style={{ cursor: "pointer" }}
                       title="next occurence"
                       onClick={() => {

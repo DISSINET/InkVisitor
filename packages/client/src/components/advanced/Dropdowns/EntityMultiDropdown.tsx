@@ -2,7 +2,8 @@ import { allEntities, empty } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
 import { BaseDropdown } from "components";
 import { StyledSelect } from "components/basic/BaseDropdown/BaseDropdownStyles";
-import React, { useContext } from "react";
+import { useTheme } from "hooks";
+import React from "react";
 import { FaCheckSquare, FaRegSquare } from "react-icons/fa";
 import {
   MultiValueProps,
@@ -18,7 +19,6 @@ import {
   StyledOptionIconWrap,
   StyledOptionRow,
 } from "./DropdownStyles";
-import { ThemeContext } from "styled-components";
 
 interface EntityMultiDropdown<T = string> {
   width?: number | "full";
@@ -150,7 +150,7 @@ const ValueContainer = ({
 }: { children: any } & ValueContainerProps<any, any, any> & {
     selectProps: StyledSelect;
   }): React.ReactElement => {
-  const themeContext = useContext(ThemeContext);
+  const theme = useTheme();
 
   const currentValues: DropdownItem[] = [...props.getValue()];
   let toBeRendered = children;
@@ -177,7 +177,7 @@ const ValueContainer = ({
                 key="ellipsis"
                 style={{
                   padding: "0.2rem 0.2rem 0.2rem 0.3rem",
-                  color: themeContext?.color["primary"],
+                  color: theme.color.primary,
                 }}
               >
                 +{remainingCount} more

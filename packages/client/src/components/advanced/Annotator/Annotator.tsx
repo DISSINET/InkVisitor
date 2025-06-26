@@ -8,7 +8,7 @@ import {
 } from "@floating-ui/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { FaPen, FaRegSave, FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
@@ -18,10 +18,9 @@ import { EntityEnums } from "@shared/enums";
 import { IDocument, IEntity, IResponseTerritory } from "@shared/types";
 import { Button } from "components/basic/Button/Button";
 import { ButtonGroup } from "components/basic/ButtonGroup/ButtonGroup";
-import { useSearchParams } from "hooks";
+import { useSearchParams, useTheme } from "hooks";
 import { BsFileTextFill } from "react-icons/bs";
 import { HiCodeBracket } from "react-icons/hi2";
-import { ThemeContext } from "styled-components";
 import { EntityCreateModal } from "..";
 import { useAnnotator } from "./AnnotatorContext";
 import TextAnnotatorMenu from "./AnnotatorMenu";
@@ -81,7 +80,7 @@ export const TextAnnotator = ({
   dataDocumentError,
 }: TextAnnotatorProps) => {
   const queryClient = useQueryClient();
-  const theme = useContext(ThemeContext);
+  const theme = useTheme();
 
   const { appendDetailId, statementId, selectedDetailId } = useSearchParams();
 
@@ -338,10 +337,10 @@ export const TextAnnotator = ({
       RATIO
     );
 
-    newAnnotator.fontColor = theme?.color.black;
+    newAnnotator.fontColor = theme.color.black;
     newAnnotator.bgColor = "transparent";
 
-    newAnnotator.setSelectStyle("turquoise", 0.8, theme?.color.black);
+    newAnnotator.setSelectStyle("turquoise", 0.8, theme.color.black);
 
     if (scroller?.current) {
       newAnnotator.addScroller(scroller.current);
@@ -565,20 +564,20 @@ export const TextAnnotator = ({
             style={{
               height: height,
               width: wTextArea,
-              backgroundColor: theme?.color.white,
-              color: theme?.color.text,
+              backgroundColor: theme.color.white,
+              color: theme.color.text,
               outline: "none",
             }}
           />
           <StyledScrollerViewport
             ref={scroller}
             style={{
-              background: theme?.color.grey,
+              background: theme.color.grey,
             }}
           >
             <StyledScrollerCursor
               style={{
-                backgroundColor: theme?.color.primary,
+                backgroundColor: theme.color.primary,
               }}
             />
           </StyledScrollerViewport>

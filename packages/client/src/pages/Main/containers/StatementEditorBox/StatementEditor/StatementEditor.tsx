@@ -37,9 +37,9 @@ import {
   CStatementActant,
   CStatementAction,
 } from "constructors";
-import { useSearchParams } from "hooks";
+import { useSearchParams, useTheme } from "hooks";
 import useAnnotator from "hooks/useAnnotator";
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   AiOutlineCaretDown,
   AiOutlineCaretUp,
@@ -51,7 +51,6 @@ import { toast } from "react-toastify";
 import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
 import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { ThemeContext } from "styled-components";
 import {
   DetailBoxState,
   DropdownItem,
@@ -139,7 +138,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   } = useSearchParams();
 
   const queryClient = useQueryClient();
-  const themeContext = useContext(ThemeContext);
+  const theme = useTheme();
 
   // Audit query
   const {
@@ -769,10 +768,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
                 {!territoryData && !isFetchingTerritory && (
                   <div style={{ display: "flex", alignItems: "flex-end" }}>
-                    <AiOutlineWarning
-                      size={22}
-                      color={themeContext?.color.warning}
-                    />
+                    <AiOutlineWarning size={22} color={theme.color.warning} />
                     <StyledMissingTerritory>
                       {"missing territory"}
                     </StyledMissingTerritory>

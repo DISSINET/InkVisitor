@@ -21,16 +21,10 @@ import Dropdown, {
   LogicButtonGroup,
   MoodVariantButtonGroup,
 } from "components/advanced";
-import { useSearchParams } from "hooks";
+import { useSearchParams, useTheme } from "hooks";
 import { TooltipAttributes } from "pages/Main/containers";
 import { PropGroup } from "pages/Main/containers/PropGroup/PropGroup";
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   DragSourceMonitor,
   DropTargetMonitor,
@@ -41,7 +35,6 @@ import { FaGripVertical, FaPlus, FaTrashAlt } from "react-icons/fa";
 import { TbSettingsAutomation, TbSettingsFilled } from "react-icons/tb";
 import { setDraggedActantRow } from "redux/features/rowDnd/draggedActantRowSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { ThemeContext } from "styled-components";
 import {
   DragItem,
   DraggedActantRowItem,
@@ -314,7 +307,7 @@ export const StatementEditorActionTableRow: React.FC<
 
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const themeContext = useContext(ThemeContext);
+  const theme = useTheme();
 
   return (
     <React.Fragment key={index}>
@@ -323,7 +316,7 @@ export const StatementEditorActionTableRow: React.FC<
           <StyledGridColumn ref={dragRef} style={{ cursor: "move" }}>
             <FaGripVertical
               style={{ marginTop: "0.3rem" }}
-              color={themeContext?.color.black}
+              color={theme.color.black}
             />
           </StyledGridColumn>
         ) : (

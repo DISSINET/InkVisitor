@@ -10,14 +10,13 @@ import {
 import { rootTerritoryId } from "Theme/constants";
 import api from "api";
 import { EntityDropzone, EntityTag } from "components/advanced";
-import { useSearchParams } from "hooks";
+import { useSearchParams, useTheme } from "hooks";
 import update from "immutability-helper";
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { setDisableTreeScroll } from "redux/features/territoryTree/disableTreeScrollSlice";
 import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { ThemeContext } from "styled-components";
 import {
   DraggedEntityReduxItem,
   EntityDragItem,
@@ -83,7 +82,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     config: config.stiff,
   });
 
-  const themeContext = useContext(ThemeContext);
+  const theme = useTheme();
 
   useEffect(() => {
     setChildTerritories(children);
@@ -203,7 +202,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
             id={`territory${id}`}
             style={{
               backgroundColor: foundByRecursion
-                ? themeContext?.color.foundByTreeFilter
+                ? theme.color.foundByTreeFilter
                 : "",
               opacity: animatedStyle.opacity,
             }}

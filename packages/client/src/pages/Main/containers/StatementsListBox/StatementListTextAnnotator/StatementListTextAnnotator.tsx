@@ -6,19 +6,12 @@ import { IDocument, IResponseEntity, IResponseTerritory } from "@shared/types";
 import Dropdown from "components/advanced";
 import TextAnnotator from "components/advanced/Annotator/Annotator";
 import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
-import { useDebounce } from "hooks";
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-import { ThemeContext } from "styled-components";
+import { useDebounce, useTheme } from "hooks";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
+  ANNOTATOR_SELECTOR_HEIGHT,
   ANNOTATOR_TOO_SMALL_BREAKPOINT,
   COLLAPSED_TABLE_WIDTH,
-  ANNOTATOR_SELECTOR_HEIGHT,
 } from "Theme/constants";
 import StatementListDocumentSearchLine from "../StatementListDocumentSearchLine/StatementListDocumentSearchLine";
 import { StyledInfoText } from "../StatementListHeader/StatementListHeaderStyles";
@@ -177,7 +170,7 @@ export const StatementListTextAnnotator: React.FC<
     return false;
   }, [selectedDocument, territoryId]);
 
-  const themeContext = useContext(ThemeContext);
+  const theme = useTheme();
 
   const isSearchAllowed = useMemo<boolean>(() => {
     return annotator !== undefined && !!selectedDocument;
@@ -229,9 +222,9 @@ export const StatementListTextAnnotator: React.FC<
           style={{
             display: "flex",
             alignItems: "center",
-            gap: themeContext?.space[4],
-            paddingRight: themeContext?.space[2],
-            marginBottom: themeContext?.space[2],
+            gap: theme.space[4],
+            paddingRight: theme.space[2],
+            marginBottom: theme.space[2],
             marginLeft: showStatementList ? `-${COLLAPSED_TABLE_WIDTH}px` : "0",
           }}
         >
