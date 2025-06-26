@@ -210,7 +210,7 @@ export const StatementEditorActionTableRow: React.FC<
           isInsideTemplate={isInsideTemplate}
           territoryParentId={territoryParentId}
           territoryActants={territoryActants}
-          disabled={!userCanEdit}
+          isHidden={!userCanEdit}
         />
       </StyledSuggesterWrap>
     );

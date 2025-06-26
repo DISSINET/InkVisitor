@@ -496,7 +496,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                           handleOnSelected(newSelectedId)
                         }
                         excludedActantIds={[territory.id]}
-                        disabled={selectedRows.length === 0}
+                        isHidden={selectedRows.length === 0}
                       />
                     )}
                   </>

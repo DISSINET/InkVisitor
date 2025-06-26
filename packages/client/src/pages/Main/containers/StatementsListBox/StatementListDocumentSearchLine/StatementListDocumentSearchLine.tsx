@@ -93,7 +93,7 @@ const StatementListDocumentSearchLine: React.FC<
               onPicked={(entity) => {
                 setSelectedResourceId(entity.id);
               }}
-              disabled={!userCanEdit}
+              isHidden={!userCanEdit}
             />
           )}
           {selectedResource && (

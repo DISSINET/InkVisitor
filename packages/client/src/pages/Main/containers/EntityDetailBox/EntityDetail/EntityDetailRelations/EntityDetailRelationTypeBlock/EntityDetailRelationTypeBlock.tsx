@@ -310,7 +310,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
                   }
                 }}
                 excludedActantIds={usedEntityIds}
-                disabled={!userCanEdit}
+                isHidden={!userCanEdit}
                 alwaysShowCreateModal
               />
             </StyledSuggesterWrapper>

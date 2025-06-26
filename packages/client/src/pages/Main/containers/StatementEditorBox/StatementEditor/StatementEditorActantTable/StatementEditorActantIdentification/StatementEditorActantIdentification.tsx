@@ -123,7 +123,7 @@ export const StatementEditorActantIdentification: React.FC<
               isInsideTemplate={isInsideTemplate}
               territoryActants={territoryActants}
               excludedEntityClasses={excludedSuggesterEntities}
-              disabled={!userCanEdit}
+              isHidden={!userCanEdit}
             />
           </StyledSuggesterWrap>
         )}

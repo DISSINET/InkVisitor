@@ -35,13 +35,13 @@ import {
 import { SuggesterKeyPress } from "./SuggesterKeyPress";
 import {
   StyledAiOutlineWarning,
-  StyledDash,
   StyledInputWrapper,
   StyledRelativePosition,
   StyledSuggester,
   StyledSuggesterButton,
   StyledSuggesterList,
   StyledSuggestionCancelButton,
+  SuggesterHidden,
 } from "./SuggesterStyles";
 import {
   MemoizedEntityRow,
@@ -87,6 +87,7 @@ interface Suggester {
   alwaysShowCreateModal?: boolean;
   button?: React.ReactNode;
   disableTemplateInstantiation?: boolean;
+  isHidden?: boolean;
 }
 
 export const Suggester: React.FC<Suggester> = ({
@@ -126,6 +127,7 @@ export const Suggester: React.FC<Suggester> = ({
   alwaysShowCreateModal,
   button,
   disableTemplateInstantiation = false,
+  isHidden = false,
 }) => {
   const [selected, setSelected] = useState(-1);
   const [isFocused, setIsFocused] = useState(false);
@@ -288,8 +290,8 @@ export const Suggester: React.FC<Suggester> = ({
 
   const theme = useTheme();
 
-  if (disabled) {
-    return <StyledDash>-</StyledDash>;
+  if (isHidden) {
+    return <SuggesterHidden />;
   }
 
   return (

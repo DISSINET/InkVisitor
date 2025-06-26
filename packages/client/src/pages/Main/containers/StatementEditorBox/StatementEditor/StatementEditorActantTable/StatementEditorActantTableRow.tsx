@@ -258,7 +258,7 @@ export const StatementEditorActantTableRow: React.FC<
           territoryActants={territoryActants}
           placeholder={"add actant"}
           isInsideStatement
-          disabled={!userCanEdit}
+          isHidden={!userCanEdit}
         />
       </StyledSuggesterWrap>
     );
