@@ -231,7 +231,7 @@ export const EntityDetailValencySection: React.FC<
               handleMultiSelected(selectedId, relationType);
             }}
             excludedActantIds={usedEntityIds}
-            disabled={!userCanEdit}
+            isHidden={!userCanEdit}
             alwaysShowCreateModal
           />
         </StyledLabelInputWrapper>

@@ -116,8 +116,7 @@ export const StyledAiOutlineWarning = styled(AiOutlineWarning)`
   margin-top: 0.1rem;
   margin-left: 0.5rem;
 `;
-export const StyledDash = styled.div`
-  font-size: ${({ theme }) => theme.fontSize["base"]};
-  color: ${({ theme }) => theme.color["black"]};
-  padding-left: 0.3rem;
+
+export const SuggesterHidden = styled.div`
+  display: none;
 `;
