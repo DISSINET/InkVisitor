@@ -7,7 +7,7 @@ interface StyledHeader {
   $paddingX?: number;
   $paddingY?: number;
   $height?: number;
-  $layoutWidth: number;
+  // $layoutWidth: number;
 }
 export const StyledHeader = styled.div<StyledHeader>`
   height: ${({ $height }) => ($height ? `${$height / 10}rem` : "auto")};
@@ -15,7 +15,7 @@ export const StyledHeader = styled.div<StyledHeader>`
     `${$paddingY || $paddingY === 0 ? `${$paddingY / 10}rem` : space10} ${
       $paddingX || $paddingX === 0 ? `${$paddingX / 10}rem` : space3
     }`};
-  width: ${({ $layoutWidth }) => ($layoutWidth > 0 ? $layoutWidth : "100%")};
+  width: 100%;
   background-color: ${({ theme, $color }) => theme.color[$color]};
   color: ${({ theme }) => theme.color.headerTextColor};
   display: flex;
@@ -26,7 +26,6 @@ export const TextLeft = styled.div`
   display: flex;
   flex: 1 1 0%;
   align-self: center;
-  font-size: ${({ theme }) => theme.fontSize["3xl"]};
   font-weight: 500;
 `;
 export const TextRight = styled.div`

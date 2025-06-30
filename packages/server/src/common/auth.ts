@@ -1,4 +1,4 @@
-import * as bcrypt from "bcrypt";
+import * as bcrypt from "bcryptjs";
 import { sign as signJwt } from "jsonwebtoken";
 import { IUser } from "@shared/types/user";
 import { expressjwt, Request as JWTRequest } from "express-jwt";
@@ -46,6 +46,7 @@ export function checkPassword(
 
 const defaultJwtAlgo = "HS256";
 
+// apply altered secret variable - each run will get secret refresh
 let secret = (process.env.SECRET as string) || "";
 if (process.env.NODE_ENV !== "test") {
   if (process.argv.length > 3) {
@@ -88,7 +89,7 @@ export function validateJwt() {
     secret: secret,
     algorithms: [defaultJwtAlgo],
     requestProperty: "user",
-    isRevoked: async (req, tokenn) => {
+    isRevoked: async (req, token) => {
       return false;
     },
     getToken: (req: Request): string | Promise<string> | undefined => {
@@ -100,6 +101,12 @@ export function validateJwt() {
       } else if (req.query && req.query.token) {
         return req.query.token as string;
       }
+
+      // dev purposes - check pnpm run jwt to generate it and set it as env variable TEST_JWT_TOKEN
+      if (process.env.TEST_JWT_TOKEN) {
+        return process.env.TEST_JWT_TOKEN;
+      }
+
       return undefined;
     },
   });

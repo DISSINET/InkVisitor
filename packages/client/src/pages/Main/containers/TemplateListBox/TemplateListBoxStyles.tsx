@@ -29,12 +29,9 @@ export const StyledTemplateSectionList = styled.div`
   min-height: 5rem;
   width: 100%;
   overflow: hidden;
-  display: inline-flex;
+  display: flex;
   flex-wrap: wrap;
-
-  > div {
-    padding: ${({ theme }) => theme.space[1]};
-  }
+  gap: 0.5rem;
 `;
 
 export const StyledTemplateFilterInputRow = styled.div``;

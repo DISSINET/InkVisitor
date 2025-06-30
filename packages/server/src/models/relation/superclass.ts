@@ -42,14 +42,7 @@ export default class Superclass
         RelationEnums.Type.Superclass,
         0
       );
-    } else if (Entities.IsPLOGESTR(asClass)) {
-      relations = await Relation.findForEntities(
-        conn,
-        [parentId],
-        RelationEnums.Type.Classification,
-        0
-      );
-    }
+    } 
 
     // sort by order
     relations.sort(

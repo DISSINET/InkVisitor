@@ -1,18 +1,18 @@
 import { FloatingPortal, autoUpdate, useFloating } from "@floating-ui/react";
 import { config, useSpring } from "@react-spring/web";
-import { UserEnums } from "@shared/enums";
+import { EntityEnums, UserEnums } from "@shared/enums";
 import { IEntity, IUser } from "@shared/types";
-import { UseMutationResult } from "@tanstack/react-query";
+import { UseMutationResult, useQueryClient } from "@tanstack/react-query";
 import { Button } from "components";
 import React, { useEffect, useState } from "react";
 import { FaPlus, FaStar, FaTrashAlt } from "react-icons/fa";
-import { ContextMenuNewTerritoryModal } from "../ContextMenuNewTerritoryModal/ContextMenuNewTerritoryModal";
 import { ContextMenuSubmitDelete } from "../ContextMenuSubmitDelete/ContextMenuSubmitDelete";
 import {
   StyledCgMenuBoxed,
   StyledContextButtonGroup,
   StyledWrapper,
 } from "./TerritoryTreeContextMenuStyles";
+import { EntityCreateModal } from "components/advanced";
 
 interface TerritoryTreeContextMenu {
   territoryActant: IEntity;
@@ -58,6 +58,8 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
     }
   }, [showMenu]);
 
+  const queryClient = useQueryClient();
+
   return (
     <>
       <StyledWrapper
@@ -88,6 +90,7 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
                   <Button
                     key="add"
                     tooltipLabel="add child territory"
+                    tooltipPosition="top"
                     icon={<FaPlus size={14} />}
                     color="info"
                     onClick={() => {
@@ -103,22 +106,17 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
                   tooltipLabel={
                     isFavorited ? "remove from favorites" : "add to favorites"
                   }
+                  tooltipPosition="top"
                   icon={<FaStar size={14} />}
                   color={isFavorited ? "grey" : "warning"}
                   onClick={() => {
                     if (isFavorited) {
                       // remove from favorites
-                      const index = storedTerritories.indexOf(
-                        territoryActant.id
-                      );
-                      if (index > -1) {
-                        storedTerritories.splice(index, 1).slice;
-                      }
-                      const newStored = [
-                        ...storedTerritories.map((storedTerritory) => ({
+                      const newStored = storedTerritories
+                        .filter((id) => id !== territoryActant.id)
+                        .map((storedTerritory) => ({
                           territoryId: storedTerritory,
-                        })),
-                      ];
+                        }));
                       updateUserMutation.mutate({
                         storedTerritories: newStored,
                       });
@@ -134,6 +132,7 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
                         storedTerritories: newStored,
                       });
                     }
+
                     setShowMenu(false);
                     onMenuClose();
                   }}
@@ -143,6 +142,7 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
                   <Button
                     key="delete"
                     tooltipLabel="delete territory"
+                    tooltipPosition="top"
                     icon={<FaTrashAlt size={14} />}
                     color="danger"
                     onClick={() => {
@@ -165,9 +165,13 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
         />
       )}
       {showCreate && (
-        <ContextMenuNewTerritoryModal
-          onClose={() => setShowCreate(false)}
-          territoryActantId={territoryActant.id}
+        <EntityCreateModal
+          closeModal={() => setShowCreate(false)}
+          allowedEntityClasses={[EntityEnums.Class.Territory]}
+          onMutationSuccess={() =>
+            queryClient.invalidateQueries({ queryKey: ["tree"] })
+          }
+          parentTerritory={territoryActant}
         />
       )}
     </>

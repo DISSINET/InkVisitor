@@ -148,7 +148,7 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
   return (
     <Modal
       showModal={showCreateModal}
-      width="auto"
+      width={600}
       key="create"
       onEnterPress={() => {
         handleCreateTemplate();
@@ -160,7 +160,7 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
     >
       <ModalHeader title="Create Template" />
       <ModalContent>
-        <ModalInputForm>
+        <ModalInputForm alignLeft>
           <ModalInputLabel>{"Entity type: "}</ModalInputLabel>
           <ModalInputWrap>
             <Dropdown.Single.Entity
@@ -183,6 +183,7 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
                 setCreateModalEntityLabel(newType)
               }
               changeOnType
+              width="full"
             />
           </ModalInputWrap>
           <ModalInputLabel>{"Detail: "}</ModalInputLabel>
@@ -193,6 +194,7 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
                 setCreateModalEntityDetail(newType)
               }
               changeOnType
+              width="full"
             />
           </ModalInputWrap>
         </ModalInputForm>

@@ -1,33 +1,46 @@
 import React from "react";
 
-import { IEntity, IResponseDocument } from "@shared/types";
+import { IDocument, IEntity } from "@shared/types";
+import { Loader } from "components";
 import { Button } from "components/basic/Button/Button";
-import { BiSolidBookAdd, BiSolidMessageSquareAdd } from "react-icons/bi";
 import { BsSegmentedNav } from "react-icons/bs";
-import { classesAnnotator } from "types";
+import { FaBolt, FaClipboard, FaPlus } from "react-icons/fa";
+import { PiSelectionFill } from "react-icons/pi";
+import { TbAnchor } from "react-icons/tb";
+import { toast } from "react-toastify";
+import { ButtonSize, classesAnnotator } from "types";
 import { EntitySuggester } from "../EntitySuggester/EntitySuggester";
 import { EntityTag } from "../EntityTag/EntityTag";
 import {
   StyledAnnotatorAnchorList,
+  StyledAnnotatorAnchorListWrap,
   StyledAnnotatorItem,
   StyledAnnotatorItemContent,
+  StyledAnnotatorItemContentLine,
   StyledAnnotatorItemTitle,
+  StyledAnnotatorNoAnchors,
+  StyledTerritorySubsection,
+  StyledTerritorySubsectionTitle,
 } from "./AnnotatorStyles";
-import { TbAnchor } from "react-icons/tb";
-import { FaPlus } from "react-icons/fa";
-import theme from "Theme/theme";
+import { TerritoryCreateModalType } from "./types";
 
 interface TextAnnotatorMenuProps {
   text: string;
-  documentData: IResponseDocument;
+  documentData: IDocument;
   anchors: string[];
   entities: Record<string, IEntity | false>;
   onAnchorAdd: (entityId: string) => void;
-  handleCreateStatement: Function | false;
-  handleCreateTerritory: Function | false;
-  handleRemoveAnchor: Function | false;
-  thisTerritoryEntityId: string | undefined;
+  handleCreateStatement: Function | undefined;
+  onCreateTerritory:
+    | undefined
+    | ((territoryCreateModalType?: TerritoryCreateModalType) => void);
+  handleRemoveAnchor: Function | undefined;
   canCreateActiveTAnchor: boolean;
+  onCreateActiveTAnchor: Function | undefined;
+  isLoadingEntities: boolean;
+  hasParentT: boolean;
+  isTextInsideThisT: boolean;
+  activeTerritoryId: string | undefined;
 }
 
 export const TextAnnotatorMenu = ({
@@ -35,119 +48,189 @@ export const TextAnnotatorMenu = ({
   anchors,
   entities,
   onAnchorAdd,
-  handleCreateStatement = false,
-  handleCreateTerritory = false,
-  handleRemoveAnchor = false,
-  thisTerritoryEntityId,
+  handleCreateStatement = undefined,
+  onCreateTerritory = undefined,
+  onCreateActiveTAnchor = undefined,
+  handleRemoveAnchor = undefined,
   canCreateActiveTAnchor,
+  isLoadingEntities,
+  hasParentT,
+  isTextInsideThisT,
+  activeTerritoryId,
 }: TextAnnotatorMenuProps) => {
+  const activeTerritory = entities[activeTerritoryId as string];
   return (
     <>
       <StyledAnnotatorItem>
-        <StyledAnnotatorItemTitle>Actions</StyledAnnotatorItemTitle>
+        <StyledAnnotatorItemTitle>
+          <FaBolt size={13} />
+          Actions
+        </StyledAnnotatorItemTitle>
         <StyledAnnotatorItemContent>
-          <Button
-            icon={<BsSegmentedNav size={22} />}
-            color="primary"
-            onClick={() => {
-              console.log("Segment selection into Statements");
-            }}
-            label={"Segment"}
-            tooltipLabel="Segment selection into Statements"
-            disabled
-          />
-        </StyledAnnotatorItemContent>
-      </StyledAnnotatorItem>
-      <StyledAnnotatorItem>
-        <StyledAnnotatorItemContent>
-          {canCreateActiveTAnchor &&
-            thisTerritoryEntityId &&
-            entities[thisTerritoryEntityId] && (
-              <div style={{ display: "flex", gap: theme.space[2] }}>
-                <Button
-                  label="Active territory"
-                  icon={<TbAnchor size={15} />}
-                  color="primary"
-                  onClick={() => {
-                    onAnchorAdd(thisTerritoryEntityId);
-                  }}
-                  tooltipLabel="Create anchor for active territory"
-                />
-                <EntityTag
-                  entity={entities[thisTerritoryEntityId] as IEntity}
-                />
-              </div>
-            )}
-        </StyledAnnotatorItemContent>
-        <StyledAnnotatorItemContent>
-          {handleCreateStatement && (
+          <StyledAnnotatorItemContentLine>
             <Button
-              icon={
-                <>
-                  <FaPlus size={12} style={{}} />
-                  <TbAnchor size={15} />
-                </>
-              }
+              icon={<BsSegmentedNav size={13} />}
+              size={ButtonSize.Small}
               color="primary"
               onClick={() => {
-                handleCreateStatement();
+                console.log("Segment selection into Statements");
               }}
-              label="Statement"
-              tooltipLabel="Create new Statement from selection"
+              label={"Segment"}
+              tooltipLabel="Segment selection into Statements"
+              disabled
             />
-          )}
-          {handleCreateTerritory && (
             <Button
-              icon={
-                <>
-                  <FaPlus size={12} style={{}} />
-                  <TbAnchor size={15} />
-                </>
-              }
+              icon={<FaClipboard size={10} />}
+              size={ButtonSize.Small}
               color="primary"
               onClick={() => {
-                handleCreateTerritory();
+                navigator.clipboard.writeText(text);
+                toast.info("Text copied to clipboard");
               }}
-              label="Territory"
-              tooltipLabel="Create new sub-territory from selection"
+              label={"clipboard"}
+              tooltipLabel="Copy selected text to clipboard"
             />
-          )}
-          <EntitySuggester
-            categoryTypes={classesAnnotator}
-            initTyped={text.length > 30 ? text.substring(0, 30) : text}
-            onSelected={(newAnchorId) => {
-              onAnchorAdd(newAnchorId);
-            }}
-            inputWidth={200}
-          />
+          </StyledAnnotatorItemContentLine>
         </StyledAnnotatorItemContent>
       </StyledAnnotatorItem>
       <StyledAnnotatorItem>
         <StyledAnnotatorItemTitle>
-          Anchors in selection
+          <FaPlus size={13} />
+          Create Anchors
         </StyledAnnotatorItemTitle>
         <StyledAnnotatorItemContent>
-          <StyledAnnotatorAnchorList>
-            {anchors.map((anchor) => {
-              if (entities[anchor]) {
-                return (
-                  <EntityTag
-                    unlinkButton={{
-                      onClick: () => {
-                        if (handleRemoveAnchor) {
-                          handleRemoveAnchor(anchor);
-                        }
-                      },
+          {canCreateActiveTAnchor && onCreateActiveTAnchor && (
+            <StyledAnnotatorItemContentLine>
+              <Button
+                label="Active Territory"
+                icon={<TbAnchor size={15} />}
+                color="primary"
+                onClick={() => {
+                  onCreateActiveTAnchor();
+                }}
+                tooltipLabel="Create anchor for active territory"
+              />
+              {activeTerritory && (
+                <EntityTag entity={activeTerritory as IEntity} />
+              )}
+            </StyledAnnotatorItemContentLine>
+          )}
+        </StyledAnnotatorItemContent>
+        <StyledAnnotatorItemContent>
+          {handleCreateStatement && (
+            <StyledAnnotatorItemContentLine>
+              <Button
+                icon={<TbAnchor size={15} />}
+                color="primary"
+                onClick={() => {
+                  handleCreateStatement();
+                }}
+                label="New Statement"
+                tooltipLabel="Create new Statement from selection"
+              />
+            </StyledAnnotatorItemContentLine>
+          )}
+          <StyledAnnotatorItemContentLine>
+            <EntitySuggester
+              categoryTypes={classesAnnotator}
+              initTyped={text.length > 30 ? text.substring(0, 30) : text}
+              onSelected={(newAnchorId) => {
+                onAnchorAdd(newAnchorId);
+              }}
+              inputWidth={200}
+              openDetailOnCreate
+            />
+          </StyledAnnotatorItemContentLine>
+          <StyledAnnotatorItemContentLine>
+            {onCreateTerritory && (
+              <StyledTerritorySubsection>
+                <StyledTerritorySubsectionTitle>
+                  territory
+                </StyledTerritorySubsectionTitle>
+                <Button
+                  icon={
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="14"
+                      height="14"
+                      viewBox="0 0 16 16"
+                    >
+                      <path
+                        fill="currentColor"
+                        d="M2 3.75C2 2.784 2.784 2 3.75 2h8.5c.966 0 1.75.784 1.75 1.75v1.5A1.75 1.75 0 0 1 12.25 7H5v2.5A1.5 1.5 0 0 0 6.5 11H8v-.25C8 9.784 8.784 9 9.75 9h2.5c.966 0 1.75.784 1.75 1.75v1.5A1.75 1.75 0 0 1 12.25 14h-2.5A1.75 1.75 0 0 1 8 12.25V12H6.5A2.5 2.5 0 0 1 4 9.5V7h-.25A1.75 1.75 0 0 1 2 5.25zm7 8.5c0 .414.336.75.75.75h2.5a.75.75 0 0 0 .75-.75v-1.5a.75.75 0 0 0-.75-.75h-2.5a.75.75 0 0 0-.75.75zM12.25 6a.75.75 0 0 0 .75-.75v-1.5a.75.75 0 0 0-.75-.75h-8.5a.75.75 0 0 0-.75.75v1.5c0 .414.336.75.75.75z"
+                      />
+                    </svg>
+                  }
+                  color={isTextInsideThisT ? "greyer" : "primary"}
+                  onClick={() => {
+                    onCreateTerritory("sibling-T");
+                  }}
+                  label="Sibling"
+                  tooltipLabel="Create new sibling territory anchor"
+                />
+                {hasParentT && (
+                  <Button
+                    icon={
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="14"
+                        height="14"
+                        viewBox="0 0 32 32"
+                      >
+                        <path
+                          fill="currentColor"
+                          d="M28 12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h11v4H9a2 2 0 0 0-2 2v4H4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2H9v-4h14v4h-3a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2h-3v-4a2 2 0 0 0-2-2h-6v-4ZM12 28H4v-4h8Zm16 0h-8v-4h8ZM4 4h24v6H4Z"
+                        />
+                      </svg>
+                    }
+                    color={isTextInsideThisT ? "primary" : "greyer"}
+                    onClick={() => {
+                      onCreateTerritory("child-T");
                     }}
-                    key={anchor}
-                    entity={entities[anchor] as IEntity}
+                    label="Child"
+                    tooltipLabel="Create new child territory anchor"
                   />
-                );
-              } else {
-                return <React.Fragment key={anchor} />;
-              }
-            })}
-          </StyledAnnotatorAnchorList>
+                )}
+              </StyledTerritorySubsection>
+            )}
+          </StyledAnnotatorItemContentLine>
+        </StyledAnnotatorItemContent>
+      </StyledAnnotatorItem>
+      <StyledAnnotatorItem>
+        <StyledAnnotatorItemTitle>
+          <PiSelectionFill size={13} />
+          Anchors in selection
+          <Loader show={isLoadingEntities} size={13} />
+        </StyledAnnotatorItemTitle>
+        <StyledAnnotatorItemContent>
+          <StyledAnnotatorAnchorListWrap>
+            {anchors.length === 0 && (
+              <StyledAnnotatorNoAnchors>
+                no anchors in selection
+              </StyledAnnotatorNoAnchors>
+            )}
+            <StyledAnnotatorAnchorList>
+              {anchors.map((anchor) => {
+                if (entities[anchor]) {
+                  return (
+                    <EntityTag
+                      unlinkButton={{
+                        onClick: () => {
+                          if (handleRemoveAnchor) {
+                            handleRemoveAnchor(anchor);
+                          }
+                        },
+                      }}
+                      key={anchor}
+                      entity={entities[anchor] as IEntity}
+                    />
+                  );
+                } else {
+                  return <React.Fragment key={anchor} />;
+                }
+              })}
+            </StyledAnnotatorAnchorList>
+          </StyledAnnotatorAnchorListWrap>
         </StyledAnnotatorItemContent>
       </StyledAnnotatorItem>
     </>

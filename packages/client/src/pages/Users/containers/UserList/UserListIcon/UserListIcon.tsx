@@ -26,6 +26,7 @@ export const UserListIcon: React.FC<UserListIcon> = ({
         ref={setReferenceElement}
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
+        style={{ display: "flex" }}
       >
         {icon}
       </span>

@@ -116,10 +116,10 @@ export const ExtentedEntityColors: { [key: string]: IEntityColor } = {
 export type EntityKeys = keyof typeof EntityColors;
 
 export interface IPage {
-  id: "main" | "users" | "acl" | "about" | "documents" | "query";
+  id: "main" | "users" | "acl" | "about" | "documents" | "customize" | "query";
   label: string;
   color: "info" | "success" | "danger" | "warning";
-  href: string;
+  href: string | false;
   admin?: boolean;
   icon?: React.ReactElement;
 }
@@ -428,3 +428,17 @@ export enum ButtonSize {
   Medium = "M",
   Large = "L",
 }
+
+export enum DetailBoxState {
+  Minimized = "minimized",
+  Normal = "normal",
+  FullHeight = "fullHeight",
+}
+
+export type StatementOrderCorrection = {
+  currentPosition: number;
+  correctPosition: number;
+  distance: number;
+  shouldMoveUp: boolean;
+  shouldMoveDown: boolean;
+};

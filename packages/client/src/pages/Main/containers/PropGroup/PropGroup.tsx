@@ -41,7 +41,7 @@ interface PropGroup {
   }) => void;
 
   userCanEdit: boolean;
-  openDetailOnCreate: boolean;
+  openDetailOnCreate?: boolean;
   category: DraggedPropRowCategory;
   disabledAttributes?: PropAttributeFilter;
   isInsideTemplate: boolean;
@@ -79,7 +79,7 @@ export const PropGroup: React.FC<PropGroup> = ({
   // territory query
   const {
     status,
-    data: territoryActants,
+    data: territoryActants = [],
     error,
     isFetching,
   } = useQuery({
@@ -92,7 +92,6 @@ export const PropGroup: React.FC<PropGroup> = ({
         return [];
       }
     },
-    initialData: [],
     enabled: !!territoryId && api.isLoggedIn(),
   });
 
@@ -310,7 +309,7 @@ export const PropGroup: React.FC<PropGroup> = ({
             categoryTypes={classesAll}
             isInsideTemplate={isInsideTemplate}
             territoryParentId={territoryParentId}
-            disabled={!userCanEdit}
+            isHidden={!userCanEdit}
             onTyped={(typed) => setTempValueTyped(typed)}
             externalTyped={tempValueTyped}
           />

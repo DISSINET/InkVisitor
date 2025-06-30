@@ -1,26 +1,44 @@
-import { FaUserGear, FaUserTie } from "react-icons/fa6";
-import { FaUserEdit, FaUserTag } from "react-icons/fa";
 import { classesAll } from "@shared/dictionaries/entity";
-import { EntityEnums, RelationEnums, UserEnums } from "@shared/enums";
+import {
+  EntityEnums,
+  RelationEnums,
+  UserEnums,
+  WarningTypeEnums,
+} from "@shared/enums";
 import {
   EntityTooltip,
   IEntity,
   IResponseEntity,
   IResponseTree,
   IStatement,
+  IWarning,
   Relation,
 } from "@shared/types";
-import { DropTargetMonitor, XYCoord } from "react-dnd";
-import { DragItem, EntityDragItem } from "types";
 import React from "react";
+import { DropTargetMonitor, XYCoord } from "react-dnd";
+import { FaUserEdit } from "react-icons/fa";
+
+import { FaUserGear, FaUserTag, FaUserTie } from "react-icons/fa6";
+import { DragItem, EntityDragItem } from "types";
 
 // is used to render italic for S, could be handled other way when first label "" is obligatory
 export const isFirstLabelEmpty = (labels: string[]) =>
   labels ? labels.length === 0 || labels[0] === "" : true;
 
-export const getEntityLabel = (entity?: IResponseEntity) =>
-  (entity?.labels && entity?.labels[0]) || entity?.data.text || "no label";
-
+export const getEntityLabel = (entity?: IResponseEntity) => {
+  if (entity?.class === EntityEnums.Class.Statement) {
+    // statement label logic:
+    //   [1] If a user-defined label exists, show it.
+    //   [2] If no label but the statement has an anchor, show the anchor's text. If multiple anchors, concatenate them with " ... ".
+    //   [3] If neither label nor anchor, show the Statement text.
+    //   [4] If nothing is available, show "no label".
+    return (
+      (entity?.labels && entity?.labels[0]) || entity?.data.text || "no label"
+    );
+  }
+  // non-statement
+  return (entity?.labels && entity?.labels[0]) || "no label";
+};
 export const getShortLabelByLetterCount = (
   label: string,
   maxLetterCount: number
@@ -131,10 +149,10 @@ export const dndHoverFn = (
   item: EntityDragItem | DragItem,
   index: number,
   monitor: DropTargetMonitor,
-  ref: React.RefObject<HTMLDivElement>,
+  ref: React.RefObject<HTMLDivElement | HTMLTableRowElement | null>,
   moveFn: (dragIndex: number, hoverIndex: number) => void
 ) => {
-  if (!ref.current) {
+  if (!ref?.current) {
     return;
   }
 
@@ -166,7 +184,7 @@ export const dndHoverFnHorizontal = (
   item: EntityDragItem | DragItem,
   index: number,
   monitor: DropTargetMonitor,
-  ref: React.RefObject<HTMLDivElement>,
+  ref: React.RefObject<HTMLDivElement | null>,
   moveFn: (dragIndex: number, hoverIndex: number) => void
 ) => {
   if (!ref.current) {
@@ -339,4 +357,16 @@ export const getUserIcon = (
     return <FaUserEdit size={size} />;
   }
   return <FaUserTag size={size} />;
+};
+
+export const isWarningTBased = (warning: IWarning) => {
+  return (
+    warning.type === WarningTypeEnums.TVEP ||
+    warning.type === WarningTypeEnums.TVEPT ||
+    warning.type === WarningTypeEnums.TVEPV ||
+    warning.type === WarningTypeEnums.TVEC ||
+    warning.type === WarningTypeEnums.TVECE ||
+    warning.type === WarningTypeEnums.TVER ||
+    warning.type === WarningTypeEnums.TVERE
+  );
 };

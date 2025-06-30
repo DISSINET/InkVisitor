@@ -11,6 +11,7 @@ import {
   IEntity,
   Relation,
 } from "@shared/types";
+import { IResponseUsedInDocument } from "@shared/types/response-detail";
 import { useQuery } from "@tanstack/react-query";
 import {
   maxTooltipMultiRelations,
@@ -31,6 +32,8 @@ import {
 } from "utils/utils";
 import { EntityTooltipRelationTreeTable } from "./EntityTooltipRelationTreeTable/EntityTooltipRelationTreeTable";
 import {
+  StyledAnchorItem,
+  StyledAnchorText,
   StyledBold,
   StyledDetail,
   StyledIconWrap,
@@ -40,12 +43,13 @@ import {
   StyledRelations,
   StyledRow,
 } from "./EntityTooltipStyles";
+import { DocumentTitle } from "..";
 
 interface EntityTooltip {
   // entity
   entityId: string;
   entityClass: EntityEnums.Class;
-  label?: string | JSX.Element;
+  label?: string | React.ReactNode;
   alternativeLabels?: string[];
   language: EntityEnums.Language;
   detail?: string;
@@ -65,6 +69,11 @@ interface EntityTooltip {
   customTooltipAttributes?: { partLabel?: string };
   isTemplate?: boolean;
 }
+
+interface IResponseWithAnchors extends EntityTooltipNamespace.IResponse {
+  usedInDocuments: IResponseUsedInDocument[];
+}
+
 export const EntityTooltip: React.FC<EntityTooltip> = ({
   // entity
   entityId,
@@ -112,6 +121,8 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
     },
     enabled: api.isLoggedIn() && !!entityId && allowFetch,
   });
+
+  const anchors = data?.usedInDocuments;
 
   const getActionPartOfSpeech = () =>
     actionPartOfSpeechDict.find((i) => i.value === partOfSpeech)?.label ?? "";
@@ -191,11 +202,44 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                 </StyledDetail>
               </StyledRow>
             )}
+            {anchors && anchors?.length > 0 && (
+              <StyledRow>
+                <StyledIconWrap>
+                  <BsCardText />
+                </StyledIconWrap>
+                <StyledDetail>
+                  {anchors.map((documentAnchor, index) => {
+                    return (
+                      <StyledAnchorItem key={index}>
+                        <DocumentTitle
+                          title={documentAnchor.document.title}
+                          size="sm"
+                        />
+                        <StyledAnchorText>
+                          {documentAnchor.anchorText}
+                        </StyledAnchorText>
+                      </StyledAnchorItem>
+                    );
+                  })}
+                </StyledDetail>
+              </StyledRow>
+            )}
           </>
         )}
       </>
     ),
-    [text, detail, label, itemsCount]
+    [
+      text,
+      detail,
+      label,
+      itemsCount,
+      tooltipData,
+      language,
+      partOfSpeech,
+      entityClass,
+      customTooltipAttributes,
+      alternativeLabels,
+    ]
   );
 
   const renderCloudRelations = (

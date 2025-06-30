@@ -16,7 +16,7 @@ export const StyledModalWrap = styled.div<ModalWrap>`
   left: 0;
   right: 0;
   top: 0;
-  z-index: 40;
+  z-index: 150;
 `;
 export const StyledBackground = styled(animated.div)`
   position: absolute;
@@ -48,17 +48,18 @@ const getWidth = (width: "full" | "fat" | "normal" | "auto" | number) => {
   }
 };
 export const StyledCard = styled(animated.div)<Card>`
+  position: relative;
   width: ${({ width }) => getWidth(width)};
+  max-width: calc(100vw - 4rem);
   height: ${({ $fullHeight }) => ($fullHeight ? "100%" : "")};
   display: flex;
   flex-direction: column;
   margin: ${({ theme }) => `0 ${theme.space[8]}`};
   max-height: calc(100vh - 8rem);
-  z-index: 50;
+  z-index: 155;
   background-color: ${({ theme }) => theme.color["gray"][100]};
   color: ${({ theme }) => theme.color["black"]};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
-  position: relative;
 `;
 
 interface StyledCardHeader {
@@ -99,6 +100,7 @@ interface StyledCardBody {
   centered?: boolean;
 }
 export const StyledCardBody = styled.section<StyledCardBody>`
+  position: relative;
   display: flex;
   height: 100%;
   flex-direction: ${({ $column }) => ($column ? "column" : "row")};
@@ -124,10 +126,15 @@ export const StyledFooter = styled.div<StyledFooter>`
   padding: ${({ theme }) => theme.space[4]};
 `;
 
-export const StyledModalInputForm = styled.div`
+interface StyledModalInputForm {
+  $alignLeft: boolean;
+}
+export const StyledModalInputForm = styled.div<StyledModalInputForm>`
   display: grid;
-  grid-template-columns: auto auto;
+  grid-template-columns: ${({ $alignLeft }) =>
+    $alignLeft ? "auto 1fr" : "auto auto"};
   grid-row-gap: ${({ theme }) => theme.space[1]};
+  width: 100%;
 `;
 export const StyledModalInputLabel = styled.p`
   display: grid;

@@ -22,6 +22,7 @@ import {
   StyledInputRow,
   StyledMail,
 } from "pages/AuthModalSharedStyles";
+import useKeypress from "hooks/useKeyPress";
 
 interface UsernameScreen {
   hash: string;
@@ -43,7 +44,7 @@ export const UsernameScreen: React.FC<UsernameScreen> = ({
   const handleActivation = async () => {
     if (username.length < 4) {
       setError(UsernameTooShortError.message);
-    } else if (username.length > 10) {
+    } else if (username.length > 20) {
       setError(UsernameTooLongError.message);
     } else {
       try {
@@ -73,6 +74,14 @@ export const UsernameScreen: React.FC<UsernameScreen> = ({
     }
   };
 
+  useKeypress(
+    "Enter",
+    () => {
+      !continueScreen ? handleActivation() : handleLogin();
+    },
+    [continueScreen]
+  );
+
   return (
     <>
       {!continueScreen ? (
@@ -84,7 +93,7 @@ export const UsernameScreen: React.FC<UsernameScreen> = ({
           </StyledMail>
           <StyledDescription>
             The username has to be unique and <br />
-            between 4 and 10 characters long.
+            between 4 and 20 characters long.
           </StyledDescription>
           <ModalInputWrap>
             <StyledInputRow>

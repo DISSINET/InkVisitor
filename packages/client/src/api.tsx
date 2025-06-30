@@ -1,15 +1,15 @@
 import { EntityEnums } from "@shared/enums";
 import {
   EntityTooltip,
+  IAudit,
   IDocument,
   IEntity,
   IReference,
   IRequestQuery,
+  IRequestStats,
   IResponseAudit,
   IResponseBookmarkFolder,
   IResponseDetail,
-  IResponseDocument,
-  IResponseDocumentDetail,
   IResponseEntity,
   IResponseGeneric,
   IResponsePermission,
@@ -24,15 +24,11 @@ import {
   Query,
   Relation,
   RequestPermissionUpdate,
-  IRequestStats,
-  IAudit,
 } from "@shared/types";
-import { ISetting, ISettingGroup } from "@shared/types/settings";
 import * as errors from "@shared/types/errors";
-import { NetworkError } from "@shared/types/errors";
 import { Explore } from "@shared/types/query";
 import { IRequestSearch } from "@shared/types/request-search";
-import { QueryState } from "@tanstack/react-query";
+import { ISetting, ISettingGroup } from "@shared/types/settings";
 import { defaultPing } from "Theme/constants";
 import axios, {
   AxiosError,
@@ -40,7 +36,6 @@ import axios, {
   AxiosRequestConfig,
   AxiosResponse,
 } from "axios";
-import React from "react";
 import { toast } from "react-toastify";
 import io, { Socket } from "socket.io-client";
 import {
@@ -107,12 +102,12 @@ class Api {
 
     this.connection = axios.create({
       baseURL: this.apiUrl,
-      timeout: 8000,
+      timeout: 15000,
       responseType: "json",
       headers: this.headers,
     });
 
-    this.tokenKey = `${process.env.NODE_ENV}-token`;
+    this.tokenKey = `${window.appConfig.env}-token`;
     this.token = "";
   }
 
@@ -226,13 +221,17 @@ class Api {
 
   handleError = (err: any | AxiosError) => {
     if (axios.isAxiosError(err)) {
-      return err.response?.data || new NetworkError();
+      if (err.response?.status === 503) {
+        return new errors.NetworkError();
+      }
+      return err.response?.data || new errors.NetworkError();
     } else {
-      return new NetworkError();
+      return new errors.NetworkError();
     }
   };
 
   responseToError(responseData: unknown): errors.IErrorSignature {
+    console.log("responseData", responseData);
     const out = {
       error: "",
       message: "",
@@ -240,9 +239,11 @@ class Api {
 
     if (
       responseData instanceof AxiosError &&
-      (responseData as AxiosError).code === AxiosError.ERR_NETWORK
+      ((responseData as AxiosError).code === AxiosError.ERR_NETWORK ||
+        (responseData as AxiosError).code === AxiosError.ERR_BAD_RESPONSE)
     ) {
-      out.error = errors.NetworkError.name;
+      // type doesn't get minified unlike the class name
+      out.error = errors.NetworkError.TYPE;
     } else if (
       responseData &&
       (responseData as any).response &&
@@ -578,13 +579,29 @@ class Api {
    * Entities
    * Suggester container
    */
-  async entitiesGet(
+  async entityGet(
     entityId: string,
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseEntity>> {
     try {
       const response = await this.connection.get(
         `/entities/${entityId}`,
+        options
+      );
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  async entitiesGet(
+    entityIds: string[],
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseEntity[]>> {
+    try {
+      const response = await this.connection.post(
+        `/entities/batch`,
+        { ids: entityIds },
         options
       );
       return response;
@@ -852,7 +869,26 @@ class Api {
   ): Promise<AxiosResponse<IResponseTerritory>> {
     try {
       const response = await this.connection.get(
-        `/territories/${territoryId}`,
+        `/territories/${territoryId}?preload=1&warnings=1`,
+        options
+      );
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  /**
+   * Territory
+   * List statements
+   */
+  async territoryGetStatements(
+    territoryId: string,
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseStatement[]>> {
+    try {
+      const response = await this.connection.get(
+        `/territories/${territoryId}/statements`,
         options
       );
       return response;
@@ -1216,7 +1252,7 @@ class Api {
   async documentsGet(
     filter: IFilterDocuments,
     options?: IApiOptions
-  ): Promise<AxiosResponse<IResponseDocument[]>> {
+  ): Promise<AxiosResponse<IDocument[]>> {
     try {
       const response = await this.connection.get(`/documents/`, {
         ...options,
@@ -1231,7 +1267,7 @@ class Api {
   async documentGet(
     documentId: string,
     options?: IApiOptions
-  ): Promise<AxiosResponse<IResponseDocumentDetail>> {
+  ): Promise<AxiosResponse<IDocument>> {
     try {
       const response = await this.connection.get(
         `/documents/${documentId}`,
@@ -1258,9 +1294,6 @@ class Api {
     }
   }
 
-  /**
-   * Document
-   */
   async documentUpload(
     document: Partial<IDocument>,
     options?: IApiOptions
@@ -1316,15 +1349,33 @@ class Api {
     }
   }
 
-  async documentRemoveAnchors(
+  async documentGetAnchorText(
     documentId: string,
     entityId: string,
+    anchorIndex: number,
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseGeneric<string>>> {
+    try {
+      const response = await this.connection.get(
+        `/documents/${documentId}/anchors?entityId=${entityId}&index=${anchorIndex}`,
+        options
+      );
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  async documentRemoveAnchors(
+    documentId: string,
+    // can be both single string or array of strings
+    entityIds: string[] | string,
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
       const response = await this.connection.patch(
-        `/documents/${documentId}/removeAnchors?entityId=${entityId}`,
-        document,
+        `/documents/${documentId}/removeAnchors?entityId=${entityIds}`,
+        undefined,
         options
       );
       return response;
@@ -1336,15 +1387,19 @@ class Api {
   async documentRemoveAnchor(
     documentId: string,
     entityId: string,
-    anchorText: string,
     anchorIndex: number,
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
-      // todo add api endpoint
-
-      // @ts-ignore
-      return null;
+      const response = await this.connection.patch(
+        `/documents/${documentId}/removeAnchor`,
+        {
+          entityId,
+          anchorIndex,
+        },
+        options
+      );
+      return response;
     } catch (err) {
       throw this.handleError(err);
     }

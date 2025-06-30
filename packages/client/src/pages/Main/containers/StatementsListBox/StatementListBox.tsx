@@ -1,17 +1,21 @@
+import { Annotator } from "@inkvisitor/annotator/src/lib";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import {
+  IDocument,
   IEntity,
   IReference,
+  IResponseEntity,
   IResponseStatement,
   IStatement,
   ITerritory,
   Relation,
 } from "@shared/types";
+import { IAnchorsNode } from "@shared/types/document";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { CustomScrollbar, Loader, Submit, ToastWithLink } from "components";
-import { CStatement, CTerritory } from "constructors";
-import { useDebounce, useResizeObserver, useSearchParams } from "hooks";
+import { CStatement } from "constructors";
+import { useResizeObserver, useSearchParams, useDebounce } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { toast } from "react-toastify";
@@ -20,12 +24,21 @@ import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlic
 import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
-import { EntitiesDeleteSuccessResponse, StatementListDisplayMode } from "types";
+import {
+  COLLAPSED_PANEL_WIDTH,
+  COLLAPSED_TABLE_WIDTH,
+  SECOND_PANEL_MIN_WIDTH,
+} from "Theme/constants";
+import {
+  EntitiesDeleteSuccessResponse,
+  StatementListDisplayMode,
+  StatementOrderCorrection,
+} from "types";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StatementListTextAnnotator } from "./StatementListTextAnnotator/StatementListTextAnnotator";
-import { StyledEmptyState, StyledTableWrapper } from "./StatementLitBoxStyles";
+import useAnnotator from "hooks/useAnnotator";
+import { StyledEmptyState, StyledTableWrapper } from "./StatementListBoxStyles";
 
 const initialData: {
   statements: IResponseStatement[];
@@ -76,7 +89,6 @@ export const StatementListBox: React.FC = () => {
     removeDetailId,
     appendDetailId,
     annotatorOpened,
-    setAnnotatorOpened,
   } = useSearchParams();
 
   useEffect(() => {
@@ -102,13 +114,12 @@ export const StatementListBox: React.FC = () => {
       : StatementListDisplayMode.LIST;
   }, [annotatorOpened]);
 
-  const handleDisplayModeChange = (
-    newDisplayMode: StatementListDisplayMode
-  ) => {
-    setAnnotatorOpened(newDisplayMode === StatementListDisplayMode.TEXT);
-  };
-
-  const { status, data, error, isFetching } = useQuery({
+  const {
+    status,
+    data: territory,
+    error,
+    isFetching: isFetchingTerritory,
+  } = useQuery({
     queryKey: ["territory", "statement-list", territoryId, statementListOpened],
     queryFn: async () => {
       const res = await api.territoryGet(territoryId);
@@ -117,7 +128,7 @@ export const StatementListBox: React.FC = () => {
     enabled: !!territoryId && api.isLoggedIn() && statementListOpened,
   });
 
-  const { statements, entities, right } = data || initialData;
+  const { statements, entities, right } = territory || initialData;
 
   useEffect(() => {
     dispatch(setRowsExpanded([]));
@@ -141,15 +152,14 @@ export const StatementListBox: React.FC = () => {
     enabled: api.isLoggedIn() && !!userId,
   });
 
-  const [storedTerritoryIds, setStoredTerritoryIds] = useState<string[]>([]);
-  useEffect(() => {
+  const favoritedTerritoryIds = useMemo(() => {
     if (userData?.storedTerritories) {
-      setStoredTerritoryIds(
-        userData.storedTerritories.map((territory) => territory.territory.id)
+      return userData.storedTerritories.map(
+        (territory) => territory.territory.id
       );
     }
+    return [];
   }, [userData?.storedTerritories]);
-  const isFavorited = data && storedTerritoryIds?.includes(data.id);
 
   useEffect(() => {
     if (error && (error as any).error === "TerritoryDoesNotExits") {
@@ -252,17 +262,6 @@ export const StatementListBox: React.FC = () => {
     },
     onError: () => {
       toast.error(`Error: Statement not created!`);
-    },
-  });
-  const territoryCreateMutation = useMutation({
-    mutationFn: async (newTerritory: ITerritory) =>
-      await api.entityCreate(newTerritory),
-    onSuccess: (data, variables) => {
-      toast.info(`Sub Teritory created!`);
-      queryClient.invalidateQueries({ queryKey: ["tree"] });
-    },
-    onError: () => {
-      toast.error(`Error: Sub Territory not created!`);
     },
   });
 
@@ -387,35 +386,19 @@ export const StatementListBox: React.FC = () => {
     text: string = "",
     statementId: string | undefined = undefined
   ) => {
-    if (userData && data) {
+    if (userData && territory) {
       const newStatement: IStatement = CStatement(
         localStorage.getItem("userrole") as UserEnums.Role,
         userData.options,
-        "",
+        text,
         "",
         territoryId,
         statementId
       );
-      newStatement.data.text = text;
       addStatementAtTheEndMutation.mutate(newStatement);
     }
   };
 
-  const handleCreateTerritory = (newTerritoryId?: string) => {
-    if (userData && data) {
-      const newTerritory: ITerritory = CTerritory(
-        localStorage.getItem("userrole") as UserEnums.Role,
-        userData.options,
-        `subT of ${data.labels[0]}`,
-        data.detail,
-        territoryId,
-        Infinity,
-        newTerritoryId
-      );
-
-      territoryCreateMutation.mutate(newTerritory);
-    }
-  };
   const updateTerritoryMutation = useMutation({
     mutationFn: async (tObject: {
       territoryId: string;
@@ -487,15 +470,29 @@ export const StatementListBox: React.FC = () => {
 
   const relationsCreateMutation = useMutation({
     mutationFn: async (newRelations: Relation.IRelation[]) =>
-      api.relationsCreate(newRelations),
+      api.relationsCreate(newRelations, { ignoreErrorToast: true }),
     onSuccess: (data, variables) => {
       const errorRows = data.filter((row) => (row as any).error);
-      if (errorRows.length > 0) {
-        toast.error(
-          `Some relaions ${errorRows.length} were not possible to create`
+      const errorCount = errorRows.length;
+      const successCount = data.length - errorCount;
+
+      if (successCount > 0) {
+        toast.success(
+          `${successCount} relation${successCount === 1 ? "" : "s"} created`
         );
-      } else {
-        toast.success(`${data.length} relations created`);
+      }
+      if (errorCount > 0) {
+        if (errorRows[0].details.error === "RelationPathExist") {
+          toast.error(
+            `${errorCount} relation${
+              errorCount === 1 ? "" : "s"
+            } to this entity already existed`
+          );
+        } else {
+          toast.error(
+            `Some relations ${errorCount} were not possible to create`
+          );
+        }
       }
       queryClient.invalidateQueries({
         queryKey: ["territory"],
@@ -506,13 +503,89 @@ export const StatementListBox: React.FC = () => {
     },
   });
 
+  const autoOrderStatementsMutation = useMutation({
+    mutationFn: async () => {
+      if (!selectedDocument) return;
+
+      // Collect anchors from the document and remove duplicates
+      const statementAnchors = Array.from(
+        new Map(
+          collectStatementAnchors(selectedDocument.anchors).map((anchor) => [
+            anchor.anchor,
+            anchor,
+          ])
+        ).values()
+      );
+      const correctPositionMap = new Map(
+        statementAnchors.map((anchor, index) => [anchor.anchor, index])
+      );
+
+      // Separate anchored and non-anchored statements
+      const anchoredStatements = statements.filter((s) =>
+        correctPositionMap.has(s.id)
+      );
+      const nonAnchoredStatements = statements.filter(
+        (s) => !correctPositionMap.has(s.id)
+      );
+
+      // Sort anchored statements by their correct position
+      const sortedAnchoredStatements = anchoredStatements.sort((a, b) => {
+        const posA = correctPositionMap.get(a.id) ?? 0;
+        const posB = correctPositionMap.get(b.id) ?? 0;
+        return posA - posB;
+      });
+
+      // Interleave anchored and non-anchored statements based on their original relative positions
+      const finalOrder: IResponseStatement[] = [];
+      let anchoredIndex = 0;
+      let nonAnchoredIndex = 0;
+
+      statements.forEach((statement) => {
+        if (correctPositionMap.has(statement.id)) {
+          finalOrder.push(sortedAnchoredStatements[anchoredIndex++]);
+        } else {
+          finalOrder.push(nonAnchoredStatements[nonAnchoredIndex++]);
+        }
+      });
+
+      // Update each statement's order
+      const updates = finalOrder.map((statement, index) => {
+        const order = index * 100; // Use increments of 100 to leave room for future insertions
+        return api.entityUpdate(statement.id, {
+          data: {
+            ...statement.data,
+            territory: {
+              ...statement.data.territory,
+              order,
+            },
+          },
+        });
+      });
+
+      await Promise.all(updates);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["territory"] });
+      toast.info("Statements reordered according to document");
+    },
+    onError: () => {
+      toast.error("Failed to reorder statements");
+    },
+  });
+
+  // TODO: migrate to annotator to limit updates in statement list box
   const {
     ref: contentRef,
+    // TODO: calculate height - contentHeight / 2 - StatementListHeader height ?
     height: contentHeight = 0,
-    width: contentWidth = 0,
+    // width: contentWidth = 0,
   } = useResizeObserver<HTMLDivElement>({
-    debounceDelay: displayMode === StatementListDisplayMode.LIST ? 50 : 0,
+    debounceDelay: 50,
   });
+
+  const contentWidth = useAppSelector(
+    (state) => state.layout.mainPage.secondPanelRealWidth
+  );
 
   const [storedAnnotatorResourceId, setStoredAnnotatorResourceId] = useState<
     string | false
@@ -534,6 +607,7 @@ export const StatementListBox: React.FC = () => {
 
   // delay of show content for fluent animation on open
   const [showStatementList, setShowStatementList] = useState(true);
+
   useEffect(() => {
     if (statementListOpened) {
       setTimeout(() => {
@@ -544,57 +618,315 @@ export const StatementListBox: React.FC = () => {
     }
   }, [statementListOpened]);
 
-  const width = useMemo(
-    () =>
-      displayMode === StatementListDisplayMode.LIST
-        ? contentWidth
-        : COLLAPSED_TABLE_WIDTH,
-    [displayMode, contentWidth]
+  const [annotator, setAnnotator] = useState<Annotator | undefined>(undefined);
+
+  const { setAnnotator: useAnnotatorSetAnnotator } = useAnnotator();
+
+  useEffect(() => {
+    if (annotator) {
+      useAnnotatorSetAnnotator(annotator);
+    }
+  }, [annotator, useAnnotatorSetAnnotator]);
+  const {
+    data: resources,
+    error: resourcesError,
+    isFetching: resourcesIsFetching,
+  } = useQuery({
+    queryKey: ["resourcesWithDocuments"],
+    queryFn: async () => {
+      const res = await api.entitiesSearch({
+        resourceHasDocument: true,
+      });
+      return res.data;
+    },
+    enabled: api.isLoggedIn(),
+  });
+
+  const {
+    data: documents,
+    error: documentsError,
+    isFetching: documentsIsFetching,
+  } = useQuery<IDocument[]>({
+    queryKey: ["documents"],
+    queryFn: async () => {
+      const res = await api.documentsGet({});
+      return res.data;
+    },
+    enabled: api.isLoggedIn(),
+  });
+
+  const [selectedResourceId, setSelectedResourceId] = useState<string | false>(
+    storedAnnotatorResourceId
   );
+
+  useEffect(() => {
+    if (selectedResourceId) {
+      setStoredAnnotatorResourceId(selectedResourceId);
+    }
+  }, [selectedResourceId]);
+
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  const selectedTerritoryPath: string[] = useAppSelector(
+    (state) => state.territoryTree.selectedTerritoryPath
+  );
+
+  const loadDefaultResource = () => {
+    if (resources && documents && !isInitialized) {
+      // First try to find resource with document containing territoryId
+      let resourceWithAnchor = resources.find((resource) => {
+        if (resource.data.documentId) {
+          const document = documents.find(
+            (d) => d.id === resource.data.documentId
+          );
+          if (document) {
+            return document.entityIds.T.includes(territoryId);
+          }
+        }
+        return false;
+      });
+
+      // If not found, try each territory in the path in reverse order
+      if (!resourceWithAnchor) {
+        for (let i = selectedTerritoryPath.length - 1; i > 0; i--) {
+          const territoryInPath = selectedTerritoryPath[i];
+          resourceWithAnchor = resources.find((resource) => {
+            if (resource.data.documentId) {
+              const document = documents.find(
+                (d) => d.id === resource.data.documentId
+              );
+              if (document) {
+                return document.entityIds.T.includes(territoryInPath);
+              }
+            }
+            return false;
+          });
+          if (resourceWithAnchor) break;
+        }
+      }
+
+      if (resourceWithAnchor) {
+        setSelectedResourceId(resourceWithAnchor.id);
+      } else {
+        setSelectedResourceId(false);
+      }
+
+      setIsInitialized(true);
+    }
+  };
+
+  useEffect(() => {
+    loadDefaultResource();
+  }, [resources, documents, isInitialized, territoryId]);
+
+  useEffect(() => {
+    setIsInitialized(false);
+  }, [territoryId]);
+
+  const selectedResource = useMemo<IResponseEntity | false>(() => {
+    if (selectedResourceId && resources) {
+      return resources?.find((r) => r.id === selectedResourceId) ?? false;
+    }
+    return false;
+  }, [selectedResourceId, resources]);
+
+  const selectedDocumentId = useMemo<string | undefined>(() => {
+    if (selectedResource) {
+      return selectedResource.data.documentId;
+    }
+    return undefined;
+  }, [selectedResource]);
+
+  const {
+    data: selectedDocument,
+    error: selectedDocumentError,
+    isFetching: selectedDocumentIsFetching,
+  } = useQuery<IDocument | false>({
+    queryKey: ["document", selectedDocumentId],
+    queryFn: async () => {
+      if (selectedDocumentId) {
+        const res = await api.documentGet(selectedDocumentId);
+        return res.data;
+      }
+      return false;
+    },
+    enabled: api.isLoggedIn() && !!selectedDocumentId,
+  });
+
+  // collect all statement anchors that are in the statements list
+  const collectStatementAnchors = (anchors: IAnchorsNode[]): IAnchorsNode[] => {
+    const statementIds = new Set(statements.map((s) => s.id));
+    return anchors.reduce((acc: any[], anchor) => {
+      if (
+        anchor.class === EntityEnums.Class.Statement &&
+        statementIds.has(anchor.anchor)
+      ) {
+        acc.push(anchor);
+      }
+      if (anchor.children) {
+        acc.push(...collectStatementAnchors(anchor.children));
+      }
+      return acc;
+    }, []);
+  };
+
+  // adds object orderCorrection to each statement with info about the order in the list vs the annotator
+  const statementsWithOrder: (IResponseStatement & {
+    orderCorrection?: StatementOrderCorrection;
+    isAnchored?: boolean;
+  })[] = useMemo(() => {
+    if (!selectedDocument || !statements.length) return statements;
+
+    // Collect anchors from the document and remove duplicates
+    const statementAnchors = Array.from(
+      new Map(
+        collectStatementAnchors(selectedDocument.anchors).map((anchor) => [
+          anchor.anchor,
+          anchor,
+        ])
+      ).values()
+    );
+
+    // Create a map of statement IDs to their correct positions
+    const correctPositionMap = new Map(
+      // this index is the position of the statement IN THE DOCUMENT
+      statementAnchors.map((anchor, index) => [anchor.anchor, index])
+    );
+
+    // First, create a map of all statements with their original indexes
+    const statementsWithCorrectPosition = statements.map(
+      (statement, index) => ({
+        statement,
+        isAnchored: correctPositionMap.has(statement.id),
+        correctPosition: correctPositionMap.get(statement.id),
+      })
+    );
+
+    // Filter and sort only anchored statements
+    const anchoredStatements = statementsWithCorrectPosition.filter(
+      (item) => item.isAnchored
+    );
+
+    // Create a map of territory statements (anchored) with position in the list
+    const currentAnchoredPositions = new Map(
+      // this index is the position of the statement IN THE LIST
+      anchoredStatements.map((item, index) => [item.statement.id, index])
+    );
+
+    // Create a map of anchored statements with their corrections
+    const anchoredCorrections = new Map(
+      anchoredStatements.map((item) => [
+        item.statement.id,
+        {
+          currentPosition: currentAnchoredPositions.get(item.statement.id) ?? 0,
+          correctPosition: item.correctPosition ?? 0,
+          shouldMoveUp:
+            (item.correctPosition ?? 0) <
+            (currentAnchoredPositions.get(item.statement.id) ?? 0),
+          shouldMoveDown:
+            (item.correctPosition ?? 0) >
+            (currentAnchoredPositions.get(item.statement.id) ?? 0),
+          distance: Math.abs(
+            (item.correctPosition ?? 0) -
+              (currentAnchoredPositions.get(item.statement.id) ?? 0)
+          ),
+        },
+      ])
+    );
+
+    // Reconstruct the array in original order with corrections
+    return statementsWithCorrectPosition.map(({ statement, isAnchored }) => ({
+      ...statement,
+      isAnchored,
+      orderCorrection: isAnchored
+        ? anchoredCorrections.get(statement.id)
+        : null,
+    }));
+  }, [selectedDocument, statements]);
+
+  const userCanEdit = useMemo(
+    () => territory?.right !== UserEnums.RoleMode.Read,
+    [territory]
+  );
+
+  const isListNonEmpty = statements.length > 0;
+
+  const statementListTableIsLoading =
+    isFetchingTerritory ||
+    isLoading ||
+    deleteStatementMutation.isPending ||
+    addStatementAtTheEndMutation.isPending ||
+    statementCreateMutation.isPending ||
+    statementUpdateMutation.isPending ||
+    moveStatementsMutation.isPending ||
+    duplicateStatementsMutation.isPending ||
+    cloneStatementMutation.isPending ||
+    updateTerritoryMutation.isPending ||
+    duplicateTerritoryMutation.isPending ||
+    deleteStatementsMutation.isPending ||
+    relationsCreateMutation.isPending ||
+    autoOrderStatementsMutation.isPending ||
+    (statementListOpened && !showStatementList);
+
+  const tableWidth = useMemo(() => {
+    if (isListNonEmpty || statementListTableIsLoading) {
+      return displayMode === StatementListDisplayMode.LIST
+        ? contentWidth - 8
+        : COLLAPSED_TABLE_WIDTH;
+    }
+    return 0;
+  }, [displayMode, contentWidth, isListNonEmpty, statementListTableIsLoading]);
 
   return (
     <>
       {showStatementList && (
         <>
-          {data && (
+          {territoryId && (
             <StatementListHeader
-              territory={data}
-              isFavorited={isFavorited}
+              territory={territory}
+              isFetchingTerritory={isFetchingTerritory}
               selectedRows={selectedRows}
               setSelectedRows={setSelectedRows}
               isAllSelected={
-                statements.length > 0 &&
-                selectedRows.length === statements.length
+                isListNonEmpty && selectedRows.length === statements.length
               }
               moveStatementsMutation={moveStatementsMutation}
               duplicateStatementsMutation={duplicateStatementsMutation}
               replaceReferencesMutation={replaceReferencesMutation}
               appendReferencesMutation={appendReferencesMutation}
-              displayMode={displayMode}
-              handleDisplayModeChange={handleDisplayModeChange}
               updateTerritoryMutation={updateTerritoryMutation}
               duplicateTerritoryMutation={duplicateTerritoryMutation}
               deleteStatementsMutation={deleteStatementsMutation}
               relationsCreateMutation={relationsCreateMutation}
+              favoritedTerritoryIds={favoritedTerritoryIds}
+              contentWidthTooSmall={contentWidth < SECOND_PANEL_MIN_WIDTH + 60}
+              statementsWithOrder={statementsWithOrder}
+              autoOrderStatementsMutation={autoOrderStatementsMutation}
             />
           )}
-
           {!territoryId && (
-            <>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                marginTop: "2rem",
+              }}
+            >
               <StyledEmptyState>
                 <BsInfoCircle size="23" />
               </StyledEmptyState>
               <StyledEmptyState>
                 {"No territory selected yet. Pick one from the territory tree"}
               </StyledEmptyState>
-            </>
+            </div>
           )}
 
           {territoryId &&
             statements.length === 0 &&
             displayMode === StatementListDisplayMode.LIST &&
             statementListOpened &&
-            !isFetching && (
+            !isFetchingTerritory && (
               <>
                 <StyledEmptyState>
                   <BsInfoCircle size="23" />
@@ -603,76 +935,124 @@ export const StatementListBox: React.FC = () => {
               </>
             )}
 
-          <div
-            style={{
-              display: "flex",
-              height: "100%",
-              maxHeight: "calc(100% - 101px)",
-              overflow: "auto",
-            }}
-            ref={contentRef}
-          >
-            <CustomScrollbar
-              scrollerId="Statements"
-              elementId="Statements-box-table"
-              contentWidth={statements.length > 0 ? width + 10 : 0}
+          {territoryId && (
+            <div
+              style={{
+                display: "flex",
+                height: "100%",
+                // maxHeight: "calc(100%)",
+                overflow: "hidden",
+              }}
+              ref={contentRef}
             >
-              <StyledTableWrapper
-                $isListMode={displayMode === StatementListDisplayMode.LIST}
-
-                // id="Statements-box-table"
-              >
-                {statements.length > 0 && (
-                  <StatementListTable
-                    statements={statements}
-                    handleRowClick={(rowId: string) => {
-                      dispatch(setShowWarnings(false));
-                      setStatementId(rowId);
-                    }}
-                    actantsUpdateMutation={statementUpdateMutation}
-                    entities={entities}
-                    right={right}
-                    cloneStatementMutation={cloneStatementMutation}
-                    setStatementToDelete={setStatementToDelete}
-                    setShowSubmit={setShowSubmit}
-                    addStatementAtCertainIndex={addStatementAtCertainIndex}
-                    selectedRows={selectedRows}
-                    setSelectedRows={setSelectedRows}
-                    displayMode={displayMode}
-                    contentWidth={width}
-                  />
-                )}
-              </StyledTableWrapper>
-            </CustomScrollbar>
-
-            {data && displayMode === StatementListDisplayMode.TEXT && (
-              <StatementListTextAnnotator
-                key={territoryId}
-                contentHeight={contentHeight}
-                contentWidth={contentWidth - 10}
-                statements={statements}
-                handleCreateStatement={handleCreateStatement}
-                handleCreateTerritory={handleCreateTerritory}
-                territoryId={territoryId}
-                storedAnnotatorResourceId={storedAnnotatorResourceId}
-                setStoredAnnotatorResourceId={setStoredAnnotatorResourceId}
-                storedAnnotatorScroll={storedAnnotatorScroll}
-                setStoredAnnotatorScroll={(newScroll) => {
-                  if (storedAnnotatorResourceId) {
-                    setStoredAnnotatorScroll(newScroll);
-                  }
+              <CustomScrollbar
+                scrollerId="Statements"
+                elementId="Statements-box-table"
+                contentWidth={tableWidth}
+                customStyle={{
+                  display: "flex",
+                  flexShrink: 0,
+                  // fix for overheight because of marginTop which is necessary to make space for annotator header
+                  marginTop:
+                    displayMode === StatementListDisplayMode.TEXT
+                      ? "6rem"
+                      : undefined,
+                  height:
+                    displayMode === StatementListDisplayMode.TEXT
+                      ? "calc(100% - 6rem)"
+                      : "100%",
                 }}
-                hlEntities={hlEntities}
-                setHlEntities={setHlEntities}
-                entities={entities}
-                right={right}
-                setShowSubmit={setShowSubmit}
-                addStatementAtCertainIndex={addStatementAtCertainIndex}
-                selectedRows={selectedRows}
-                setSelectedRows={setSelectedRows}
-              />
-            )}
-          </div>
+              >
+                <StyledTableWrapper
+                  $isListMode={displayMode === StatementListDisplayMode.LIST}
+                >
+                  {isListNonEmpty && (
+                    <StatementListTable
+                      statements={statementsWithOrder}
+                      handleRowClick={(rowId: string) => {
+                        dispatch(setShowWarnings(false));
+                        if (statementId !== rowId) {
+                          setStatementId(rowId);
+                        } else if (
+                          displayMode === StatementListDisplayMode.TEXT &&
+                          annotator
+                        ) {
+                          annotator.scrollToAnchor(rowId);
+                        }
+                      }}
+                      actantsUpdateMutation={statementUpdateMutation}
+                      entities={entities}
+                      right={right}
+                      cloneStatementMutation={cloneStatementMutation}
+                      setStatementToDelete={setStatementToDelete}
+                      setShowSubmit={setShowSubmit}
+                      addStatementAtCertainIndex={addStatementAtCertainIndex}
+                      selectedRows={selectedRows}
+                      setSelectedRows={setSelectedRows}
+                      displayMode={displayMode}
+                      annotator={annotator}
+                      isLoading={statementListTableIsLoading}
+                    />
+                  )}
+                </StyledTableWrapper>
+              </CustomScrollbar>
+
+              {displayMode === StatementListDisplayMode.TEXT && (
+                <StatementListTextAnnotator
+                  key={territoryId}
+                  contentHeight={contentHeight}
+                  contentWidth={contentWidth - 10}
+                  handleCreateStatement={handleCreateStatement}
+                  territoryId={territoryId}
+                  territory={territory}
+                  statementId={statementId}
+                  storedAnnotatorScroll={storedAnnotatorScroll}
+                  setStoredAnnotatorScroll={(newScroll) => {
+                    if (storedAnnotatorResourceId) {
+                      setStoredAnnotatorScroll(newScroll);
+                    }
+                  }}
+                  hlEntities={hlEntities}
+                  setHlEntities={setHlEntities}
+                  addStatementAtCertainIndex={addStatementAtCertainIndex}
+                  annotator={annotator}
+                  setAnnotator={setAnnotator}
+                  selectedDocumentId={selectedDocumentId}
+                  selectedDocument={selectedDocument}
+                  selectedDocumentIsFetching={selectedDocumentIsFetching}
+                  selectedDocumentError={selectedDocumentError}
+                  selectedResource={selectedResource}
+                  resources={resources}
+                  setSelectedResourceId={setSelectedResourceId}
+                  showStatementList={
+                    isListNonEmpty || statementListTableIsLoading
+                  }
+                  userCanEdit={userCanEdit}
+                />
+              )}
+
+              {statementListTableIsLoading &&
+                tableWidth > 0 &&
+                contentHeight > 0 && (
+                  <div
+                    style={{
+                      width: tableWidth + 4,
+                      height:
+                        displayMode === StatementListDisplayMode.TEXT
+                          ? contentHeight - 56
+                          : contentHeight + 4,
+                      flexShrink: 0,
+                      position: "absolute",
+                      bottom: 0,
+                      left: 0,
+                      zIndex: 1,
+                    }}
+                  >
+                    <Loader show size={50} />
+                  </div>
+                )}
+            </div>
+          )}
 
           <Submit
             title="Delete statement"
@@ -698,24 +1078,6 @@ export const StatementListBox: React.FC = () => {
           />
         </>
       )}
-      <Loader
-        show={
-          isFetching ||
-          isLoading ||
-          deleteStatementMutation.isPending ||
-          addStatementAtTheEndMutation.isPending ||
-          statementCreateMutation.isPending ||
-          statementUpdateMutation.isPending ||
-          moveStatementsMutation.isPending ||
-          duplicateStatementsMutation.isPending ||
-          cloneStatementMutation.isPending ||
-          updateTerritoryMutation.isPending ||
-          duplicateTerritoryMutation.isPending ||
-          deleteStatementsMutation.isPending ||
-          relationsCreateMutation.isPending ||
-          (statementListOpened && !showStatementList)
-        }
-      />
     </>
   );
 };

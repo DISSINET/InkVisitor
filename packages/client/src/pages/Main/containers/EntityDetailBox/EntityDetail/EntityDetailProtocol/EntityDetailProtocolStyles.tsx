@@ -6,6 +6,12 @@ export const StyledGrid = styled.div`
   grid-gap: 1rem;
   padding-right: 2rem;
 `;
+export const StyledFlexList = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${({ theme }) => theme.space[2]};
+  /* flex-grow: 1; */
+`;
 export const StyledLabel = styled.div`
   display: grid;
   align-items: center;

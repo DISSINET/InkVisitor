@@ -212,16 +212,30 @@ export namespace EntityEnums {
   // ISO 639-2 codes
   export enum Language {
     Empty = "",
-    Latin = "lat",
-    English = "eng",
-    MiddleEnglish = "enm",
-    Occitan = "oci",
+    Chinese = "chi",
     Czech = "ces",
-    Italian = "ita",
+    Dutch = "dut",
+    English = "eng",
     French = "fra",
     German = "deu",
-    Spanish = "spa",
     Hungarian = "hun",
+    Italian = "ita",
+    Japanese = "jpn",
+    Latin = "lat",
+    MiddleEnglish = "enm",
+    MiddleFrench = "frm",
+    MiddleHighGerman = "gmh",
+    Occitan = "oci",
+    OldChurchSlavonic = "chu", // same as the Church Slavic
+    OldEnglish = "ang",
+    OldFrench = "fro",
+    OldHighGerman = "goh",
+    OldItalian = "ito", // not an ISO 639-2 code
+    OldNorse = "non",
+    OldOccitan = "pro",
+    Polish = "pol",
+    Portuguese = "por",
+    Spanish = "spa",
   }
 
   export enum ResourceType {

@@ -1,5 +1,5 @@
 import { EntityEnums } from "@shared/enums";
-import { IDocument, IResponseDocument, IResponseEntity } from "@shared/types";
+import { IDocument, IResponseEntity } from "@shared/types";
 import {
   UseMutationResult,
   useMutation,
@@ -30,7 +30,7 @@ import {
 import { useResizeObserver } from "hooks";
 
 interface DocumentRow {
-  document: IResponseDocument;
+  document: IDocument;
   resource: IResponseEntity | false;
   handleDocumentEdit: (id: string) => void;
   handleDocumentExport: (id: string) => void;
@@ -63,10 +63,10 @@ export const DocumentRow: React.FC<DocumentRow> = ({
 
   const countTotal = useMemo(() => {
     let total = 0;
-    Object.keys(document.referencedEntityIds).forEach((key) => {
+    Object.keys(document.entityIds).forEach((key) => {
       const classEntities =
-        document.referencedEntityIds[
-          key as keyof typeof document.referencedEntityIds
+        document.entityIds[
+          key as keyof typeof document.entityIds
         ];
 
       const classNo =
@@ -76,7 +76,7 @@ export const DocumentRow: React.FC<DocumentRow> = ({
       total += classNo;
     });
     return total;
-  }, [document.referencedEntityIds]);
+  }, [document.entityIds]);
 
   useEffect(() => {
     if (document) {
@@ -178,7 +178,7 @@ export const DocumentRow: React.FC<DocumentRow> = ({
         {countTotal} anchors
         {Object.values(EntityEnums.Class)
           .filter((eClass) => {
-            return document.referencedEntityIds[eClass]?.length;
+            return document.entityIds[eClass]?.length;
           })
           .map((eClass) => {
             const entityClass =
@@ -191,7 +191,7 @@ export const DocumentRow: React.FC<DocumentRow> = ({
                 classColorName as keyof typeof theme.color
               ] as string) ?? theme.color.primary;
 
-            const count = document.referencedEntityIds[eClass]?.length || 0;
+            const count = document.entityIds[eClass]?.length || 0;
 
             return (
               <React.Fragment key={eClass}>

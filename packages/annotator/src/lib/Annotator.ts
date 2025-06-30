@@ -1,9 +1,9 @@
 import Cursor, { DIRECTION } from "./Cursor";
-import Highlighter, { IAbsCoordinates } from "./Highlighter";
+import Highlighter, { IAbsCoordinates, CursorStyle } from "./Highlighter";
 import Keys from "./Keys";
 import { Lines } from "./Lines";
 import Scroller from "./Scroller";
-import Text, { SegmentPosition } from "./Text";
+import Text, { ITag, SegmentPosition } from "./Text";
 import Viewport from "./Viewport";
 import { EditMode, HighlightMode } from "./constants";
 
@@ -34,6 +34,7 @@ export interface DrawingOptions {
 export interface Selected {
   text: string;
   anchors: string[];
+  index: number;
 }
 
 /**
@@ -150,14 +151,15 @@ export class Annotator {
     this.draw();
   }
 
-  setSelectStyle(selectColor: string, selectOpacity: number) {
+  setSelectStyle(selectColor: string, selectOpacity: number, selectorColor: string) {
     this.selectColor = selectColor;
     this.selectOpacity = selectOpacity;
 
     this.cursor.style = {
       color: this.selectColor,
       opacity: this.selectOpacity,
-    };
+      selectorColor: selectorColor,
+    } as CursorStyle;
   }
 
   /**
@@ -299,14 +301,14 @@ export class Annotator {
    * Will be used only if text really changes
    * @param cb
    */
-  onSelectText(cb: (text: Selected) => void) {
+  onSelectText(cb: (selection: Selected) => void) {
     this.lastSelectedText = "";
-    this.onSelectTextCb = (text: Selected) => {
-      if (text.text === this.lastSelectedText) {
+    this.onSelectTextCb = (selection: Selected) => {
+      if (selection.text === this.lastSelectedText) {
         return;
       }
-      this.lastSelectedText = text.text;
-      cb(text);
+      this.lastSelectedText = selection.text;
+      cb(selection);
     };
   }
 
@@ -413,6 +415,9 @@ export class Annotator {
       xLine: this.cursor.xLine + offsetRight,
       yLine: this.cursor.yLine + this.viewport.lineStart,
     };
+    this.cursor.xLine = this.cursor.selectEnd.xLine;
+    this.cursor.yLine = this.cursor.selectEnd.yLine;
+    this.cursor.selectDirection = DIRECTION.FORWARD;
     this.draw();
   }
 
@@ -447,61 +452,87 @@ export class Annotator {
     end: SegmentPosition | null
   ): string[] {
     // remaining opened tags - true = open, false = closed
-    const tagsUpToEnd: Record<string, boolean> = {};
-    const tagsUpToStart: Record<string, boolean> = {};
-
-    if (start) {
-      // find still opened tags up to the end position - point based check
-      for (let i = 0; i < start.segmentIndex; i++) {
-        const segment = this.text.segments[i];
-        for (const tag of segment.openingTags) {
-          tagsUpToStart[tag.tag] = true;
-        }
-        for (const tag of segment.closingTags) {
-          tagsUpToStart[tag.tag] = false;
-        }
-      }
-
-      const startSegment = this.text.segments[start.segmentIndex];
-      const [segOpened, segClosed] = startSegment.getTagsForPosition(start);
-      for (const tag of segOpened) {
-        tagsUpToStart[tag.tag] = true;
-      }
-      for (const tag of segClosed) {
-        tagsUpToStart[tag.tag] = false;
-      }
-    }
-
-    if (end) {
-      // find still opened tags up to the end position - point based check
-      for (let i = start?.segmentIndex || 0; i < end.segmentIndex; i++) {
-        const segment = this.text.segments[i];
-        for (const tag of segment.openingTags) {
-          tagsUpToEnd[tag.tag] = true;
-        }
-        for (const tag of segment.closingTags) {
-          tagsUpToEnd[tag.tag] = false;
-        }
-      }
-
-      const endSegment = this.text.segments[end.segmentIndex];
-      const [segOpened, segClosed] = endSegment.getTagsForPosition(end);
-      for (const tag of segOpened) {
-        tagsUpToEnd[tag.tag] = true;
-      }
-      for (const tag of segClosed) {
-        tagsUpToEnd[tag.tag] = false;
-      }
-    }
-
+    const untilStart: Record<string, number> = {};
     const final: Record<string, boolean> = {};
-    for (const tag of Object.keys(tagsUpToStart)) {
-      if (tagsUpToStart[tag]) {
-        final[tag] = true;
+
+    // sanitize case without start
+    if (!start) {
+      start = {
+        charInLineIndex: 0,
+        lineIndex: 0,
+        parsedTextIndex: 0,
+        rawTextIndex: 0,
+        segmentIndex: 0,
+      };
+    }
+    // sanitize case without end
+    if (!end) {
+      end = start;
+    }
+
+    // find still opened until current window
+    for (let i = 0; i <= start.segmentIndex; i++) {
+      const segment = this.text.segments[i];
+      let openingTags, closingTags: ITag[];
+      if (i === start.segmentIndex) {
+        [openingTags, closingTags] = segment.getTagsBeforePosition(
+          start.rawTextIndex
+        );
+      } else {
+        [openingTags, closingTags] = [segment.openingTags, segment.closingTags];
+      }
+
+      for (const tag of openingTags) {
+        untilStart[tag.tag] = (untilStart[tag.tag] || 0) + 1;
+      }
+      for (const tag of closingTags) {
+        untilStart[tag.tag] = (untilStart[tag.tag] || 0) - 1;
       }
     }
-    for (const tag of Object.keys(tagsUpToEnd)) {
-      if (tagsUpToStart[tag] === undefined) {
+
+    // use everything that is between start and end
+    for (let i = start.segmentIndex; i < end.segmentIndex; i++) {
+      const segment = this.text.segments[i];
+      let openingTags, closingTags: ITag[];
+      if (i === start.segmentIndex) {
+        [openingTags, closingTags] = segment.getTagsAfterPosition(
+          start.rawTextIndex
+        );
+      } else {
+        [openingTags, closingTags] = [segment.openingTags, segment.closingTags];
+      }
+      for (const tag of openingTags) {
+        final[tag.tag] = true;
+      }
+      for (const tag of closingTags) {
+        final[tag.tag] = true;
+      }
+    }
+
+    // process end segment
+    const endSegment = this.text.segments[end.segmentIndex];
+    let opened, closed: ITag[];
+    if (start.segmentIndex !== end.segmentIndex) {
+      // if end segment != start segment - use everything up to end position
+      [opened, closed] = endSegment.getTagsBeforePosition(end.rawTextIndex);
+    } else {
+      // if end segment === start segment
+      const segment = this.text.segments[end.segmentIndex];
+      [opened, closed] = segment.getTagsInPosition(
+        start.rawTextIndex,
+        end.rawTextIndex
+      );
+    }
+    for (const tag of opened) {
+      final[tag.tag] = true;
+    }
+    for (const tag of closed) {
+      final[tag.tag] = true;
+    }
+
+    // reduce untilStart
+    for (const tag of Object.keys(untilStart)) {
+      if (untilStart[tag] > 0) {
         final[tag] = true;
       }
     }
@@ -571,7 +602,7 @@ export class Annotator {
       this.cursor.draw(
         this.ctx,
         this.viewport,
-        this.text.lines,
+        this.text,
         {
           lineHeight: this.lineHeight,
           charWidth: this.charWidth,
@@ -601,11 +632,15 @@ export class Annotator {
         this.onSelectTextCb({
           text: this.text.getRangeText(start, end),
           anchors: annotated,
+          index: this.text.getAbsTextIndexFromPosition(
+            this.text.getSegmentPosition(start.yLine, start.xLine)
+          ),
         });
       } else {
         this.onSelectTextCb({
           text: "",
           anchors: [],
+          index: -1,
         });
       }
     }
@@ -628,7 +663,7 @@ export class Annotator {
         if (hlSchema) {
           // iterate over all tag occurrences
           let occurence: IAbsCoordinates[];
-          let i = 1;
+          let i = 0;
           do {
             occurence = this.text.getTagPosition(tag, i);
             if (occurence.length > 1) {
@@ -669,7 +704,7 @@ export class Annotator {
         highlighter.draw(
           this.ctx,
           this.viewport,
-          this.text.lines,
+          this.text,
           {
             lineHeight: this.lineHeight,
             charWidth: this.charWidth,
@@ -718,7 +753,6 @@ export class Annotator {
     }
 
     let [start, end] = this.cursor.getBounds();
-
     if (start && end) {
       const indexPositionStart = this.text.getAbsTextIndex(
         new Cursor(
@@ -730,21 +764,13 @@ export class Annotator {
       );
       const indexPositionEnd = this.text.getAbsTextIndex(
         new Cursor(this.ratio, end.xLine, end.yLine - this.viewport.lineStart),
-        this.viewport
+        this.viewport,
+        true
       );
-
-      // this.text.value =
-      //   this.text.value.slice(0, indexPositionStart) +
-      //   `<${anchor}>` +
-      //   this.text.value.slice(indexPositionStart);
-
-      // this.text.value =
-      //   this.text.value.slice(0, indexPositionEnd) +
-      //   `</${anchor}>` +
-      //   this.text.value.slice(indexPositionEnd);
 
       const beforeText = this.text.value.slice(0, indexPositionStart);
       const afterText = this.text.value.slice(indexPositionEnd);
+
       const insideText = this.text.value.slice(
         indexPositionStart,
         indexPositionEnd
@@ -760,8 +786,8 @@ export class Annotator {
     }
   }
 
-  scrollToAnchor(tag: string, occurence: number = 1) {
-    const pos = this.text.getTagPosition(tag, occurence);
+  scrollToAnchor(tag: string, index: number = 0) {
+    const pos = this.text.getTagPosition(tag, index);
 
     if (pos.length !== 2) {
       return;
@@ -841,11 +867,6 @@ export class Annotator {
         occurence.lineIndex,
     };
 
-    // @ts-ignore
-    window.cursor = this.cursor;
-
-    console.log(occurence, this.cursor.selectStart, this.cursor.selectEnd);
-
     this.scrollToLine(this.cursor.selectStart.yLine);
     this.draw();
   }
@@ -856,7 +877,19 @@ export class Annotator {
 
   onPasteText() {
     window.navigator.clipboard.readText().then((clipText: string) => {
+      const area = this.cursor.getSelectedArea();
+      if (area) {
+        this.text.deleteRangeText(area[0], area[1]);
+        this.cursor.reset();
+        this.cursor.setPosition(
+          area[0].xLine,
+          area[0].yLine - this.viewport.lineStart
+        );
+      }
       this.text.insertText(this.viewport, this.cursor, clipText);
+      this.cursor.move(clipText.length, 0);
+      this.cursor.fixOutOfBounds(this.viewport, this.text);
+
       this.draw();
     });
   }

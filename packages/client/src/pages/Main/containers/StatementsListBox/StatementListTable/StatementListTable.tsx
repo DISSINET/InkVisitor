@@ -1,5 +1,7 @@
+import { Annotator } from "@inkvisitor/annotator/src/lib";
 import { UserEnums } from "@shared/enums";
 import {
+  IDocument,
   IEntity,
   IResponseGeneric,
   IResponseStatement,
@@ -18,6 +20,7 @@ import {
   MdOutlineCheckBox,
   MdOutlineCheckBoxOutlineBlank,
 } from "react-icons/md";
+import { TbAnchor } from "react-icons/tb";
 import { TiWarningOutline } from "react-icons/ti";
 import {
   CellProps,
@@ -29,11 +32,12 @@ import {
 import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { StatementListDisplayMode } from "types";
+import { StatementListDisplayMode, StatementOrderCorrection } from "types";
 import { StatementListContextMenu } from "../StatementListContextMenu/StatementListContextMenu";
 import { StatementListRow } from "./StatementListRow";
 import {
   StyledAbbreviatedLabel,
+  StyledAnchor,
   StyledCheckboxWrapper,
   StyledFocusedCircle,
   StyledTHead,
@@ -41,9 +45,10 @@ import {
   StyledTh,
 } from "./StatementListTableStyles";
 
-const MINIFIED_HIDDEN_COLUMNS = [
+const HIDDEN_COLUMNS_FULL = ["id", "anchor"];
+const HIDDEN_COLUMNS_MINIFIED = [
   "id",
-  "move",
+  // "move",
   "subject",
   "actions",
   "objects",
@@ -52,10 +57,18 @@ const MINIFIED_HIDDEN_COLUMNS = [
   "lastEdit",
   "menu",
 ];
-type CellType = CellProps<IResponseStatement>;
+type CellType = CellProps<
+  IResponseStatement & {
+    orderCorrection?: StatementOrderCorrection;
+    isAnchored?: boolean;
+  }
+>;
 
 interface StatementListTable {
-  statements: IResponseStatement[];
+  statements: (IResponseStatement & {
+    orderCorrection?: StatementOrderCorrection;
+    isAnchored?: boolean;
+  })[];
   handleRowClick?: (rowId: string) => void;
   actantsUpdateMutation: UseMutationResult<
     AxiosResponse<IResponseGeneric>,
@@ -84,7 +97,8 @@ interface StatementListTable {
   selectedRows: string[];
   setSelectedRows: React.Dispatch<React.SetStateAction<string[]>>;
   displayMode: StatementListDisplayMode;
-  contentWidth: number;
+  annotator?: Annotator;
+  isLoading: boolean;
 }
 export const StatementListTable: React.FC<StatementListTable> = ({
   statements,
@@ -101,7 +115,8 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   selectedRows,
   setSelectedRows,
   displayMode,
-  contentWidth,
+  annotator,
+  isLoading,
 }) => {
   const dispatch = useAppDispatch();
   const { territoryId, setStatementId } = useSearchParams();
@@ -112,9 +127,9 @@ export const StatementListTable: React.FC<StatementListTable> = ({
     (state) => state.statementList.lastClickedIndex
   );
 
-  const [statementsLocal, setStatementsLocal] = useState<IResponseStatement[]>(
-    []
-  );
+  const [statementsLocal, setStatementsLocal] = useState<
+    (IResponseStatement & { orderCorrection?: StatementOrderCorrection })[]
+  >([]);
 
   useEffect(() => {
     dispatch(setLastClickedIndex(-1));
@@ -322,8 +337,28 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         Header: "Text",
         accessor: "data",
         Cell: ({ row }: CellType) => {
+          const { usedInDocuments } = row.original;
+
+          const firstAnchorText = usedInDocuments[0]?.anchorText;
+
+          if (firstAnchorText) {
+            return (
+              <StyledAbbreviatedLabel>
+                <StyledAnchor>
+                  <TbAnchor size={12} strokeWidth={2} />
+                </StyledAnchor>
+                {firstAnchorText}
+              </StyledAbbreviatedLabel>
+            );
+          }
+
           const { text } = row.original.data;
-          return <StyledAbbreviatedLabel>{text}</StyledAbbreviatedLabel>;
+
+          return (
+            <StyledAbbreviatedLabel>
+              {usedInDocuments[0]?.anchorText || text}
+            </StyledAbbreviatedLabel>
+          );
         },
       },
       {
@@ -333,7 +368,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
           const { warnings } = row.original;
 
           return (
-            <>
+            <div style={{ display: "flex", alignItems: "center" }}>
               {warnings.length > 0 && (
                 <Button
                   icon={<TiWarningOutline size={20} />}
@@ -342,6 +377,8 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                   inverted
                   noBorder
                   noBackground
+                  // noIconMargin
+                  noPadding
                   onClick={(e) => {
                     e.stopPropagation();
                     setStatementId(row.id);
@@ -349,7 +386,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                   }}
                 />
               )}
-            </>
+            </div>
           );
         },
       },
@@ -416,7 +453,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         },
       },
     ];
-  }, [right, selectedRows, lastClickedIndex]);
+  }, [right, selectedRows, lastClickedIndex, entities]);
 
   const {
     setHiddenColumns,
@@ -436,8 +473,8 @@ export const StatementListTable: React.FC<StatementListTable> = ({
       initialState: {
         hiddenColumns:
           displayMode === StatementListDisplayMode.TEXT
-            ? MINIFIED_HIDDEN_COLUMNS
-            : ["id"],
+            ? HIDDEN_COLUMNS_MINIFIED
+            : HIDDEN_COLUMNS_FULL,
       },
     },
     useExpanded,
@@ -446,10 +483,10 @@ export const StatementListTable: React.FC<StatementListTable> = ({
 
   useEffect(() => {
     if (displayMode === StatementListDisplayMode.TEXT) {
-      setHiddenColumns(MINIFIED_HIDDEN_COLUMNS);
+      setHiddenColumns(HIDDEN_COLUMNS_MINIFIED);
     } else {
       setTimeout(() => {
-        setHiddenColumns(["id"]);
+        setHiddenColumns(HIDDEN_COLUMNS_FULL);
       }, 450);
     }
   }, [displayMode]);
@@ -499,49 +536,63 @@ export const StatementListTable: React.FC<StatementListTable> = ({
     }
   };
 
+  const handleRowClickWithAnnotator = useCallback(
+    (rowId: string) => {
+      handleRowClick(rowId);
+
+      // If annotator is available, highlight the statement in the annotator
+      if (annotator) {
+        // Use the scrollToAnchor method to highlight the statement
+        annotator.scrollToAnchor(rowId);
+      }
+    },
+    [handleRowClick, annotator]
+  );
+
   return (
-    <StyledTable
-      {...getTableProps()}
-      $contentWidth={contentWidth - 10}
-      $isListMode={displayMode === StatementListDisplayMode.LIST}
-    >
-      <StyledTHead>
-        {headerGroups.map((headerGroup, key) => (
-          <tr {...headerGroup.getHeaderGroupProps()} key={key}>
-            {headerGroup.headers.map((column, key) =>
-              key < 6 ? (
-                <StyledTh {...column.getHeaderProps()} key={key}>
-                  {column.render("Header")}
-                </StyledTh>
-              ) : (
-                <th key={key}></th>
-              )
-            )}
-            {displayMode !== StatementListDisplayMode.TEXT && (
-              <StyledTh style={{ width: "50px" }} key={"expander"}></StyledTh>
-            )}
-          </tr>
-        ))}
-      </StyledTHead>
-      <tbody {...getTableBodyProps()}>
-        {rows.map((row, i) => {
-          prepareRow(row);
-          return (
-            <StatementListRow
-              index={i}
-              handleClick={handleRowClick}
-              row={row}
-              moveRow={moveRow}
-              moveEndRow={moveEndRow}
-              visibleColumns={visibleColumns}
-              entities={entities}
-              isSelected={selectedRows.includes(row.id)}
-              displayMode={displayMode}
-              {...row.getRowProps()}
-            />
-          );
-        })}
-      </tbody>
-    </StyledTable>
+    <>
+      <StyledTable
+        {...getTableProps()}
+        $isListMode={displayMode === StatementListDisplayMode.LIST}
+      >
+        <StyledTHead>
+          {headerGroups.map((headerGroup, key) => (
+            <tr {...headerGroup.getHeaderGroupProps()} key={key}>
+              {headerGroup.headers.map((column, key) =>
+                key < 6 ? (
+                  <StyledTh {...column.getHeaderProps()} key={key}>
+                    {column.render("Header") as React.ReactNode}
+                  </StyledTh>
+                ) : (
+                  <th key={key}></th>
+                )
+              )}
+              {displayMode !== StatementListDisplayMode.TEXT && (
+                <StyledTh style={{ width: "50px" }} key={"expander"}></StyledTh>
+              )}
+            </tr>
+          ))}
+        </StyledTHead>
+        <tbody {...getTableBodyProps()}>
+          {rows.map((row, i) => {
+            prepareRow(row);
+            return (
+              <StatementListRow
+                key={row.id}
+                row={row}
+                index={i}
+                moveRow={moveRow}
+                moveEndRow={moveEndRow}
+                handleClick={handleRowClickWithAnnotator}
+                visibleColumns={visibleColumns}
+                entities={entities}
+                isSelected={selectedRows.includes(row.original.id)}
+                displayMode={displayMode}
+              />
+            );
+          })}
+        </tbody>
+      </StyledTable>
+    </>
   );
 };

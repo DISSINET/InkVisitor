@@ -1,9 +1,7 @@
-import {
-  IDocument,
-  IResponseDocument,
-  IResponseDocumentDetail,
-  IResponseGeneric,
-} from "@shared/types";
+import { mergeDeep } from "@common/functions";
+import Document from "@models/document/document";
+import { EntityEnums } from "@shared/enums";
+import { IDocument, IDocumentMeta, IResponseGeneric } from "@shared/types";
 import {
   BadParams,
   DocumentDoesNotExist,
@@ -12,12 +10,8 @@ import {
   PermissionDeniedError,
 } from "@shared/types/errors";
 import { Router } from "express";
-import { asyncRouteHandler } from "../index";
-import { mergeDeep } from "@common/functions";
 import { IRequest } from "src/custom_typings/request";
-import Document from "@models/document/document";
-import ResponseDocument from "@models/document/response";
-import { EntityEnums } from "@shared/enums";
+import { asyncRouteHandler } from "../index";
 
 export default Router()
   /**
@@ -44,17 +38,22 @@ export default Router()
    *             schema:
    *               type: array
    *               items:
-   *                 $ref: "#/components/schemas/IResponseDocument"
+   *                 $ref: "#/components/schemas/IDocument"
    */
   .get(
     "/",
-    asyncRouteHandler<IResponseDocument[]>(async (request: IRequest) => {
+    asyncRouteHandler<IDocumentMeta[]>(async (request: IRequest) => {
       const docs = await Document.getAll(request.db.connection);
 
-      const docResponses = [];
+      const docResponses: IDocumentMeta[] = [];
       for (const d of docs) {
-        const document = new ResponseDocument(d);
-        await document.populateWithEntities(request.db.connection);
+        const document = new Document(d);
+        if (!document.anchors || document.anchors.length === 0) {
+          await document.preprocess(request.db.connection);
+        }
+
+        // @ts-ignore 
+        delete document.content;
         docResponses.push(document);
       }
 
@@ -71,16 +70,11 @@ export default Router()
       throw new BadParams("document id has to be set");
     }
 
-    console.log("EXPORTING");
+    const document = await Document.getDocumentById(request.db.connection, id);
 
-    const existing = await Document.getDocumentById(request.db.connection, id);
-
-    if (!existing) {
+    if (!document) {
       throw DocumentDoesNotExist.forId(id);
     }
-
-    const document = new ResponseDocument(existing);
-    await document.populateWithEntities(request.db.connection);
 
     // Search document for anchors <entityId>text</entityId>
     // Anchors with entityId that are not in exportedEntities should be removed
@@ -91,7 +85,7 @@ export default Router()
       const entityId = match.slice(1, -1).replace("/", "");
       let validEntityClass = false;
       exportedEntities.forEach((entityClass) => {
-        document.referencedEntityIds[entityClass].forEach((id) => {
+        document.entityIds[entityClass].forEach((id) => {
           if (id === entityId) {
             validEntityClass = true;
           }
@@ -139,28 +133,28 @@ export default Router()
    *         content:
    *           application/json:
    *             schema:
-   *               $ref: "#/components/schemas/IResponseDocumentDetail"
+   *               $ref: "#/components/schemas/IDocument"
    */
   .get(
-    "/:documentId?",
-    asyncRouteHandler<IResponseDocumentDetail>(async (request: IRequest) => {
+    "/:documentId",
+    asyncRouteHandler<IDocument>(async (request: IRequest) => {
       const id = request.params.documentId;
 
       if (!id) {
         throw new BadParams("document id has to be set");
       }
 
-      const existing = await Document.getDocumentById(
+      const document = await Document.getDocumentById(
         request.db.connection,
         id
       );
 
-      if (!existing) {
+      if (!document) {
         throw DocumentDoesNotExist.forId(id);
       }
 
-      const document = new ResponseDocument(existing);
-      await document.populateWithEntities(request.db.connection);
+      await document.preprocess(request.db.connection);
+
       return document;
     })
   )
@@ -189,9 +183,7 @@ export default Router()
   .post(
     "/",
     asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
-      console.log("before model");
       const model = new Document(request.body as Record<string, unknown>);
-      console.log("after model", model);
 
       if (!model.isValid()) {
         throw new ModelNotValidError("");
@@ -203,6 +195,7 @@ export default Router()
 
       await request.db.lock();
 
+      await model.preprocess(request.db.connection);
       const saved = await model.save(request.db.connection);
       if (!saved) {
         throw new InternalServerError("cannot create document");
@@ -244,9 +237,9 @@ export default Router()
    */
   .put(
     "/:documentId",
-    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
+    asyncRouteHandler<IResponseGeneric>(async (request: IRequest<{documentId: string}, IDocument>) => {
       const documentId = request.params.documentId;
-      const documentData = request.body as Record<string, unknown>;
+      const documentData = request.body;
 
       // not validation, just required data for this operation
       if (
@@ -273,6 +266,8 @@ export default Router()
         ...mergeDeep(existingDocument, documentData),
         id: documentId,
       });
+
+      await model.preprocess(request.db.connection);
 
       // checking the validity of the final model (already has updated data)
       if (!model.isValid()) {
@@ -355,7 +350,11 @@ export default Router()
     "/:documentId/removeAnchors",
     asyncRouteHandler<IResponseGeneric>(
       async (
-        request: IRequest<{ documentId: string }, unknown, { entityId: string }>
+        request: IRequest<
+          { documentId: string },
+          unknown,
+          { entityIds: string[] | string }
+        >
       ) => {
         const id = request.params.documentId;
         if (!id) {
@@ -372,7 +371,7 @@ export default Router()
           throw DocumentDoesNotExist.forId(id);
         }
 
-        let entityIds: string[] | string = request.query.entityId;
+        const entityIds: string[] | string = request.query.entityIds;
         existing.removeAnchors(
           typeof entityIds === "object" ? entityIds : [entityIds]
         );
@@ -384,6 +383,90 @@ export default Router()
 
         return {
           result: !!result.replaced,
+        };
+      }
+    )
+  )
+  .patch(
+    "/:documentId/removeAnchor",
+    asyncRouteHandler<IResponseGeneric<any>>(
+      async (
+        request: IRequest<
+          { documentId: string },
+          { entityId: string; anchorIndex: number }
+        >
+      ) => {
+        const id = request.params.documentId;
+        if (!id) {
+          throw new BadParams("document id has to be set");
+        }
+
+        const { entityId, anchorIndex } = request.body;
+        if (!entityId || anchorIndex < 0) {
+          throw new BadParams("entiyId and anchorIndex has to be set");
+        }
+
+        await request.db.lock();
+
+        const existing = await Document.getDocumentById(
+          request.db.connection,
+          id
+        );
+        if (!existing) {
+          throw DocumentDoesNotExist.forId(id);
+        }
+
+        existing.removeAnchor(entityId, anchorIndex);
+        await existing.preprocess(request.db.connection);
+
+        const result = await existing.update(request.db.connection, {
+          content: existing.content,
+          entityIds: existing.entityIds,
+        });
+
+        return {
+          result: !!result.replaced,
+        };
+      }
+    )
+  )
+  .get(
+    "/:documentId/anchors",
+    asyncRouteHandler<IResponseGeneric<string>>(
+      async (
+        request: IRequest<
+          {
+            documentId: string;
+          },
+          any,
+          {
+            entityId: string;
+            index: string;
+          }
+        >
+      ) => {
+        const id = request.params.documentId;
+        if (!id) {
+          throw new BadParams("document id has to be set");
+        }
+        const { entityId, index } = request.query;
+        if (!entityId || index === undefined) {
+          throw new BadParams("entityId and anchorIndex needs to be set");
+        }
+
+        const existing = await Document.getDocumentById(
+          request.db.connection,
+          id
+        );
+        if (!existing) {
+          throw DocumentDoesNotExist.forId(id);
+        }
+
+        const anchor = existing.findAnchorWithIndex(entityId, parseInt(index));
+
+        return {
+          result: true,
+          data: anchor?.content || "",
         };
       }
     )

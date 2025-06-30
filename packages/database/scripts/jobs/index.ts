@@ -4,7 +4,7 @@ import printDeletedEntitiesJob from "./print-deleted-entities";
 import fixDuplicatedElementsJob from "./fix-duplicated-array-elements";
 import addPosFieldJob from "./add-pos-field";
 import generateDatasetJob from "./generate-datasets/generate-dataset";
-import exportACR from "./export-a-c-r";
+import exportACR from "./export-acr";
 import fixACR from "./fix-acr";
 import addAuditType from "./add-audit-type";
 import iterateDataset from "./iterate-dataset";

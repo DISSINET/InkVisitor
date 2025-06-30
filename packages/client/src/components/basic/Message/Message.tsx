@@ -10,7 +10,10 @@ import { EntityColors } from "types";
 import {
   StyledMessage,
   StyledMessageTValidationContent,
+  StyledMessageOrigin,
 } from "./MessageStyles";
+import { isWarningTBased } from "utils/utils";
+import { wildCardChar } from "Theme/constants";
 
 interface Message {
   warning: IWarning;
@@ -30,6 +33,9 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
     Record<string, IEntity>
   >(entities ?? {});
 
+  const originId = warning.origin;
+  const originEntity = entities?.[originId];
+
   useEffect((): void => {
     const entitiesOut = [];
     const newEntityIds: string[] = [];
@@ -37,7 +43,7 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
     async function getEntities(eids: string[]) {
       const extractedEntities: Record<string, IEntity> = { ...entities };
       for (const eid of eids) {
-        const entityRes = await api.entitiesGet(eid).catch(() => undefined);
+        const entityRes = await api.entityGet(eid).catch(() => undefined);
         if (entityRes?.data && !entities?.[eid]) {
           extractedEntities[eid] = entityRes.data;
         }
@@ -79,7 +85,9 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
     }
   }, [warning, entities]);
 
-  function renderEntityTags(entityIds: (string | undefined)[]): JSX.Element {
+  function renderEntityTags(
+    entityIds: (string | undefined)[]
+  ): React.ReactNode {
     return (
       <>
         {entityIds
@@ -102,7 +110,7 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
       </>
     );
   }
-  function renderValidationLabel(warning: IWarning): JSX.Element {
+  function renderValidationLabel(warning: IWarning): React.ReactNode {
     if (warning.validation?.detail) {
       return (
         <span>
@@ -117,11 +125,12 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
 
   function renderEntityClasses(
     entityClasses: string[] | undefined
-  ): JSX.Element {
+  ): React.ReactNode {
     if (entityClasses) {
       return (
         <>
           {entityClasses.map((entityClass, index) => {
+            if (entityClass === wildCardChar) return null;
             const classItem = EntityColors[entityClass];
             const colorName = classItem?.color ?? "transparent";
             const color = theme.color[colorName] as string;
@@ -135,7 +144,7 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
                     color: "white",
                   }}
                 >
-                  {classItem.entityClass}
+                  {classItem?.entityClass}
                 </span>
                 {index < entityClasses.length - 1 ? ", " : ""}
               </span>
@@ -148,7 +157,7 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
     }
   }
 
-  function getWarningMessage(): JSX.Element {
+  function getWarningMessage(): React.ReactNode {
     const { type, position } = warning;
     const positionName = position?.subSection
       ? ` - ${positionObject[position.subSection]}`
@@ -301,7 +310,7 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
           <StyledMessageTValidationContent>
             {renderEntityTags([warning?.position?.entityId])} is not classified
             with valid entity{" "}
-            {renderEntityClasses(warning.validation?.allowedClasses)}{" "}
+            {renderEntityTags(warning.validation?.allowedEntities ?? [])}
             {renderValidationLabel(warning)}
           </StyledMessageTValidationContent>
         );
@@ -335,7 +344,21 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
       <div style={{ width: "3rem" }}>
         <TiWarningOutline size={20} style={{ marginRight: "0.5rem" }} />
       </div>
-      {getWarningMessage()}
+      <div
+        style={{
+          display: "inline-flex",
+          flexWrap: "wrap",
+          gap: theme.space[2],
+        }}
+      >
+        {getWarningMessage()}
+        {isWarningTBased(warning) && originEntity && (
+          <StyledMessageOrigin>
+            <b>Source</b>
+            <EntityTag entity={originEntity} showOnly="label" />
+          </StyledMessageOrigin>
+        )}
+      </div>
     </StyledMessage>
   );
 };

@@ -18,6 +18,7 @@ import {
   StyledModalInputWrap,
   StyledModalWrap,
 } from "./ModalStyles";
+import ReactDOM from "react-dom";
 
 interface Modal {
   children?: ReactNode;
@@ -52,22 +53,25 @@ export const Modal: FC<Modal> = ({
     <>
       {showModal && (
         <>
-          <StyledModalWrap>
-            {!disableBackground && (
-              <StyledBackground
-                style={animatedMount}
-                onClick={disableBgClick ? () => {} : onClose}
-              />
-            )}
-            <ModalCard
-              animatedMount={animatedMount}
-              width={width}
-              isLoading={isLoading}
-              fullHeight={fullHeight}
-            >
-              {children}
-            </ModalCard>
-          </StyledModalWrap>
+          {ReactDOM.createPortal(
+            <StyledModalWrap>
+              {!disableBackground && (
+                <StyledBackground
+                  style={animatedMount}
+                  onClick={disableBgClick ? () => {} : onClose}
+                />
+              )}
+              <ModalCard
+                animatedMount={animatedMount}
+                width={width}
+                isLoading={isLoading}
+                fullHeight={fullHeight}
+              >
+                {children}
+              </ModalCard>
+            </StyledModalWrap>,
+            document.body
+          )}
           <ModalKeyPress
             onEnter={onEnterPress}
             onEscape={disableEscapeClose ? () => {} : onClose}
@@ -134,12 +138,14 @@ interface ModalContent {
   children?: ReactNode;
   enableScroll?: boolean;
   centered?: boolean;
+  isLoading?: boolean;
 }
 export const ModalContent: FC<ModalContent> = ({
   children,
   column,
   enableScroll = false,
   centered,
+  isLoading,
 }) => {
   return (
     <StyledCardBody
@@ -148,6 +154,7 @@ export const ModalContent: FC<ModalContent> = ({
       centered={centered}
     >
       {children}
+      <Loader show={isLoading} />
     </StyledCardBody>
   );
 };
@@ -163,9 +170,17 @@ export const ModalFooter: FC<ModalFooter> = ({ children, column = false }) => {
 // Input form helpers
 interface ModalInputForm {
   children?: React.ReactNode;
+  alignLeft?: boolean; // centered by default
 }
-export const ModalInputForm: React.FC<ModalInputForm> = ({ children }) => {
-  return <StyledModalInputForm>{children}</StyledModalInputForm>;
+export const ModalInputForm: React.FC<ModalInputForm> = ({
+  children,
+  alignLeft = false,
+}) => {
+  return (
+    <StyledModalInputForm $alignLeft={alignLeft}>
+      {children}
+    </StyledModalInputForm>
+  );
 };
 interface ModalInputLabel {
   children?: React.ReactNode;

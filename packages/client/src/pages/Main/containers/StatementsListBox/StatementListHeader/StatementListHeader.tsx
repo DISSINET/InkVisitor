@@ -4,6 +4,7 @@ import {
   IEntity,
   IReference,
   IResponseGeneric,
+  IResponseStatement,
   IResponseTerritory,
   IResponseTree,
   ITerritory,
@@ -17,15 +18,16 @@ import {
 import { rootTerritoryId } from "Theme/constants";
 import api from "api";
 import { AxiosResponse } from "axios";
-import { Button, ButtonGroup, Submit, Tooltip } from "components";
+import { Button, Submit } from "components";
 import Dropdown, {
   BreadcrumbItem,
   EntitySuggester,
   TerritoryActionModal,
 } from "components/advanced";
 import { useSearchParams } from "hooks";
-import React, { useEffect, useState } from "react";
-import { FaHighlighter, FaList, FaTrash } from "react-icons/fa";
+import React, { useEffect, useMemo, useState } from "react";
+import { FaTrash } from "react-icons/fa";
+import { FaArrowDownShortWide } from "react-icons/fa6";
 import {
   MdOutlineCheckBox,
   MdOutlineCheckBoxOutlineBlank,
@@ -40,7 +42,7 @@ import {
   EntitiesDeleteSuccessResponse,
   RelationsCreateErrorResponse,
   RelationsCreateSuccessResponse,
-  StatementListDisplayMode,
+  StatementOrderCorrection,
 } from "types";
 import { collectTerritoryChildren, searchTree } from "utils/utils";
 import { v4 as uuidv4 } from "uuid";
@@ -49,22 +51,15 @@ import {
   StyledCheckboxWrapper,
   StyledCounter,
   StyledDropdownWrap,
-  StyledFaStar,
   StyledHeader,
   StyledHeaderBreadcrumbRow,
-  StyledHeaderRow,
-  StyledHeading,
-  StyledInfoText,
   StyledMoveToParent,
   StyledSuggesterRow,
 } from "./StatementListHeaderStyles";
 
 interface StatementListHeader {
-  territory: IResponseTerritory;
-  isFavorited?: boolean;
-
-  displayMode: StatementListDisplayMode;
-  handleDisplayModeChange: (newMode: StatementListDisplayMode) => void;
+  territory?: IResponseTerritory;
+  isFetchingTerritory: boolean;
 
   isAllSelected: boolean;
   selectedRows: string[];
@@ -132,17 +127,21 @@ interface StatementListHeader {
     Relation.IRelation[],
     unknown
   >;
+  autoOrderStatementsMutation: UseMutationResult<void, Error, void, unknown>;
+  statementsWithOrder: (IResponseStatement & {
+    orderCorrection?: StatementOrderCorrection;
+    isAnchored?: boolean;
+  })[];
+  favoritedTerritoryIds: string[];
+  contentWidthTooSmall: boolean;
 }
 export const StatementListHeader: React.FC<StatementListHeader> = ({
   territory,
+  isFetchingTerritory,
 
-  isFavorited,
   isAllSelected,
   selectedRows,
   setSelectedRows,
-
-  displayMode,
-  handleDisplayModeChange,
 
   moveStatementsMutation,
   duplicateStatementsMutation,
@@ -154,6 +153,10 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
   deleteStatementsMutation,
   relationsCreateMutation,
+  autoOrderStatementsMutation,
+  statementsWithOrder,
+  favoritedTerritoryIds,
+  contentWidthTooSmall,
 }) => {
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
@@ -317,7 +320,9 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
   const handleSelectAll = (checked: boolean) =>
     checked
-      ? setSelectedRows(territory.statements.map((statement) => statement.id))
+      ? setSelectedRows(
+          territory?.statements.map((statement) => statement.id) || []
+        )
       : setSelectedRows([]);
 
   const renderCheckBox = () => {
@@ -360,178 +365,171 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
     false
   );
 
-  const userCanEdit = territory.right !== UserEnums.RoleMode.Read;
+  const userCanEdit = useMemo(
+    () => territory?.right !== UserEnums.RoleMode.Read,
+    [territory]
+  );
 
-  const [headingHovered, setHeadingHovered] = useState(false);
-  const [referenceElement, setReferenceElement] =
-    useState<HTMLSpanElement | null>(null);
   const [showSubmit, setShowSubmit] = useState(false);
 
-  return (
-    <>
-      <Tooltip
-        label={territory.labels[0]}
-        visible={headingHovered}
-        referenceElement={referenceElement}
-      />
-
-      <StyledHeader>
-        <StyledHeaderBreadcrumbRow>
-          {selectedTerritoryPath &&
-            selectedTerritoryPath.map((territoryId: string, key: number) => {
+  const BreadcrumbItems = useMemo(() => {
+    return (
+      <React.Fragment>
+        {territoryId.length > 0 &&
+          selectedTerritoryPath
+            ?.concat(territoryId)
+            .map((tId: string, key: number) => {
               return (
                 <React.Fragment key={key}>
-                  <BreadcrumbItem territoryId={territoryId} />
+                  <BreadcrumbItem
+                    territoryId={tId}
+                    isFavorited={favoritedTerritoryIds?.includes(tId)}
+                    isSelected={tId === territoryId}
+                  />
                 </React.Fragment>
               );
             })}
-          <React.Fragment key="this-territory">
-            <BreadcrumbItem
-              territoryId={territoryId}
-              territoryData={territory}
-            />
-          </React.Fragment>
-        </StyledHeaderBreadcrumbRow>
+      </React.Fragment>
+    );
+  }, [
+    territoryId,
+    selectedTerritoryPath.join(","),
+    territory?.labels,
+    favoritedTerritoryIds,
+  ]);
 
-        <StyledHeaderRow>
-          <span style={{ display: "grid", gridTemplateColumns: "auto auto" }}>
-            {isFavorited && <StyledFaStar size={16} />}
-            {territoryId ? (
-              <StyledHeading
-                ref={setReferenceElement}
-                onMouseEnter={() => setHeadingHovered(true)}
-                onMouseLeave={() => setHeadingHovered(false)}
-              >{`T:\xa0${territory.labels[0]}`}</StyledHeading>
-            ) : (
-              <StyledHeading>{"no territory selected"}</StyledHeading>
-            )}
-          </span>
+  const hasAnchoredStatementsOutOfOrder = statementsWithOrder.some(
+    (s) => s.isAnchored && s.orderCorrection && s.orderCorrection.distance > 0
+  );
 
-          {territory.id !== rootTerritoryId && userCanEdit && (
-            <StyledMoveToParent>
-              <EntitySuggester
-                placeholder="new parent"
-                disableTemplatesAccept
-                filterEditorRights
-                inputWidth={96}
-                disableCreate
-                categoryTypes={[EntityEnums.Class.Territory]}
-                onPicked={(selectedEntity) => {
-                  setMoveToParentEntity(selectedEntity);
-                  setShowTActionModal(true);
-                }}
-                excludedActantIds={excludedMoveTerritories}
-                button={
-                  <Button
-                    icon={<TbHomeMove size={14} />}
-                    onClick={() => setShowTActionModal(true)}
-                  />
-                }
-              />
-            </StyledMoveToParent>
-          )}
-        </StyledHeaderRow>
+  return (
+    <>
+      <StyledHeader>
+        <div style={{ display: "grid", maxWidth: "100%" }}>
+          <StyledHeaderBreadcrumbRow>
+            {BreadcrumbItems}
+          </StyledHeaderBreadcrumbRow>
+        </div>
 
-        <StyledSuggesterRow>
-          {/* BATCH ACTIONS */}
-          <StyledActionsWrapper>
-            {user?.role !== UserEnums.Role.Viewer &&
-              territory.statements.length > 0 && (
-                <>
-                  <StyledCheckboxWrapper>
-                    {renderCheckBox()}
-                  </StyledCheckboxWrapper>
-
-                  {selectedRows.length > 0 && (
-                    <StyledCounter>{`${selectedRows.length}/${territory.statements.length}`}</StyledCounter>
-                  )}
-
-                  {
-                    <>
-                      <StyledDropdownWrap>
-                        <Dropdown.Single.Basic
-                          tooltipLabel={
-                            batchAction.info === EntityEnums.Class.Resource
-                              ? batchAction.label
-                              : ""
-                          }
-                          width={98}
-                          disabled={selectedRows.length === 0}
-                          value={batchAction.value}
-                          onChange={(selectedOption) =>
-                            setBatchAction(
-                              batchOptions.find(
-                                (o) => o.value === selectedOption
-                              )!
-                            )
-                          }
-                          options={batchOptions}
-                        />
-                      </StyledDropdownWrap>
-
-                      {/* Batch delete */}
-                      {batchAction.value === BatchOption.delete_S && (
-                        <Button
-                          icon={<FaTrash />}
-                          color="danger"
-                          inverted
-                          onClick={() => setShowSubmit(true)}
-                          tooltipLabel="delete selected statements"
-                        />
-                      )}
-
-                      {batchAction.info && (
-                        <EntitySuggester
-                          inputWidth={70}
-                          placeholder={
-                            batchAction.info === EntityEnums.Class.Territory
-                              ? "to territory"
-                              : ""
-                          }
-                          disableTemplatesAccept
-                          filterEditorRights
-                          categoryTypes={[
-                            entitiesDictKeys[
-                              batchAction.info as EntityEnums.Class
-                            ].value,
-                          ]}
-                          onSelected={(newSelectedId: string) =>
-                            handleOnSelected(newSelectedId)
-                          }
-                          excludedActantIds={[territory.id]}
-                          disabled={selectedRows.length === 0}
-                        />
-                      )}
-                    </>
+        {userCanEdit && (
+          <StyledSuggesterRow>
+            {/* BATCH ACTIONS */}
+            <StyledActionsWrapper>
+              {territoryId && statementsWithOrder.length > 0 && (
+                <Button
+                  icon={<FaArrowDownShortWide />}
+                  onClick={() => autoOrderStatementsMutation.mutate()}
+                  color="success"
+                  tooltipLabel="auto order statements"
+                  tooltipContent={
+                    hasAnchoredStatementsOutOfOrder ? (
+                      <i>leaves non-anchored statements in place</i>
+                    ) : (
+                      <i>
+                        order of anchored statements corresponds to the document
+                      </i>
+                    )
                   }
-                </>
+                  disabled={!hasAnchoredStatementsOutOfOrder}
+                />
               )}
-          </StyledActionsWrapper>
+              {user?.role !== UserEnums.Role.Viewer &&
+                territory &&
+                territory.statements.length > 0 && (
+                  <>
+                    <StyledCheckboxWrapper>
+                      {renderCheckBox()}
+                    </StyledCheckboxWrapper>
 
-          <StyledInfoText>
-            {"Mode "}
-            <ButtonGroup style={{ marginLeft: "5px" }}>
-              <Button
-                color="success"
-                icon={<FaList />}
-                label={`list (${territory.statements.length})`}
-                onClick={() => {
-                  handleDisplayModeChange(StatementListDisplayMode.LIST);
-                }}
-                inverted={displayMode === StatementListDisplayMode.TEXT}
-              ></Button>
-              <Button
-                color="success"
-                icon={<FaHighlighter />}
-                label="annotator"
-                onClick={() => {
-                  handleDisplayModeChange(StatementListDisplayMode.TEXT);
-                }}
-                inverted={displayMode === StatementListDisplayMode.LIST}
-              ></Button>
-            </ButtonGroup>
-          </StyledInfoText>
-        </StyledSuggesterRow>
+                    {selectedRows.length > 0 && (
+                      <StyledCounter>{`${selectedRows.length}/${territory.statements.length}`}</StyledCounter>
+                    )}
+
+                    <StyledDropdownWrap>
+                      <Dropdown.Single.Basic
+                        tooltipLabel={
+                          batchAction.info === EntityEnums.Class.Resource
+                            ? batchAction.label
+                            : ""
+                        }
+                        width={98}
+                        disabled={selectedRows.length === 0}
+                        value={batchAction.value}
+                        onChange={(selectedOption) =>
+                          setBatchAction(
+                            batchOptions.find(
+                              (o) => o.value === selectedOption
+                            )!
+                          )
+                        }
+                        options={batchOptions}
+                      />
+                    </StyledDropdownWrap>
+
+                    {/* Batch delete */}
+                    {batchAction.value === BatchOption.delete_S && (
+                      <Button
+                        icon={<FaTrash />}
+                        color="danger"
+                        inverted
+                        onClick={() => setShowSubmit(true)}
+                        tooltipLabel="delete selected statements"
+                      />
+                    )}
+
+                    {batchAction.info !== undefined && (
+                      <EntitySuggester
+                        inputWidth={70}
+                        placeholder={
+                          batchAction.info === EntityEnums.Class.Territory
+                            ? "to territory"
+                            : ""
+                        }
+                        disableTemplatesAccept
+                        filterEditorRights
+                        categoryTypes={[
+                          entitiesDictKeys[
+                            batchAction.info as EntityEnums.Class
+                          ].value,
+                        ]}
+                        onSelected={(newSelectedId: string) =>
+                          handleOnSelected(newSelectedId)
+                        }
+                        excludedActantIds={[territory.id]}
+                        isHidden={selectedRows.length === 0}
+                      />
+                    )}
+                  </>
+                )}
+            </StyledActionsWrapper>
+            {territoryId && territoryId !== rootTerritoryId && userCanEdit && (
+              <StyledMoveToParent>
+                <EntitySuggester
+                  placeholder="move"
+                  disableTemplatesAccept
+                  filterEditorRights
+                  inputWidth={
+                    selectedRows.length > 0 && contentWidthTooSmall ? 36 : 80
+                  }
+                  disableCreate
+                  categoryTypes={[EntityEnums.Class.Territory]}
+                  onPicked={(selectedEntity) => {
+                    setMoveToParentEntity(selectedEntity);
+                    setShowTActionModal(true);
+                  }}
+                  excludedActantIds={excludedMoveTerritories}
+                  button={
+                    <Button
+                      icon={<TbHomeMove size={14} />}
+                      onClick={() => setShowTActionModal(true)}
+                      tooltipLabel="move or duplicate current territory"
+                    />
+                  }
+                />
+              </StyledMoveToParent>
+            )}
+          </StyledSuggesterRow>
+        )}
       </StyledHeader>
 
       {showTActionModal && (
@@ -544,6 +542,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
           updateTerritoryMutation={updateTerritoryMutation}
           excludedMoveTerritories={excludedMoveTerritories}
           duplicateTerritoryMutation={duplicateTerritoryMutation}
+          isFetchingTerritory={isFetchingTerritory}
         />
       )}
       <Submit

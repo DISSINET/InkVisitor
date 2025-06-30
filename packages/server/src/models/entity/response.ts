@@ -1,3 +1,7 @@
+import { nonenumerable } from "@common/decorators";
+import { UsedRelations } from "@models/relation/relations";
+import Statement from "@models/statement/statement";
+import treeCache from "@service/treeCache";
 import { EntityEnums, RelationEnums, UserEnums } from "@shared/enums";
 import {
   IEntity,
@@ -7,28 +11,23 @@ import {
   IResponseUsedInMetaProp,
   IResponseUsedInStatement,
   IStatement,
+  ITerritory,
   IWarning,
 } from "@shared/types";
-import Entity from "./entity";
-import Statement from "@models/statement/statement";
-import { nonenumerable } from "@common/decorators";
-import { Connection } from "rethinkdb-ts";
 import {
   IResponseUsedInDocument,
   IResponseUsedInStatementClassification,
   IResponseUsedInStatementIdentification,
   IResponseUsedInStatementProps,
 } from "@shared/types/response-detail";
-import { IRequest } from "src/custom_typings/request";
 import {
   IStatementClassification,
   IStatementIdentification,
 } from "@shared/types/statement";
-import { UsedRelations } from "@models/relation/relations";
+import { Connection } from "rethinkdb-ts";
+import { IRequest } from "src/custom_typings/request";
+import Entity from "./entity";
 import EntityWarnings from "./warnings";
-import Document, { TreeNode } from "@models/document/document";
-import Resource from "@models/resource/resource";
-import treeCache from "@service/treeCache";
 
 export class ResponseEntity extends Entity implements IResponseEntity {
   // map of entity ids that should be populated in subsequent methods and used in fetching
@@ -198,13 +197,13 @@ export class ResponseEntityDetail
       ...(await entityWarnings.getTBasedWarnings(
         req.db.connection,
         this,
-        treeCache.tree.getRootTerritory()
+        treeCache.tree.getRootTerritory() as ITerritory
       )),
     ];
 
     // get all documents data in IResponseUsedInDocument format
     this.usedInDocuments = await this.findUsedInDocuments(conn);
-    this.usedInDocuments.forEach(ud => {
+    this.usedInDocuments.forEach((ud) => {
       this.addLinkedEntities(ud.parentTerritoryId);
       this.addLinkedEntities(ud.resourceId);
     });
@@ -216,63 +215,6 @@ export class ResponseEntityDetail
     await this.processTemplateData(conn);
   }
 
-  /**
-   * returns data for usedInDocuments(IResponseUsedInDocument[]) field
-   * @param conn
-   * @returns
-   */
-  async findUsedInDocuments(
-    conn: Connection
-  ): Promise<IResponseUsedInDocument[]> {
-    const out: IResponseUsedInDocument[] = [];
-    await Promise.all(
-      (
-        await Document.findByEntityId(conn, this.id)
-      ).map(async (docData) => {
-        // construct document and tree node filled with entities data
-        const doc = new Document({
-          content: docData.content,
-        });
-        const anchors = doc.buildAnchorsTree();
-        const anchoredEntities = await Entity.findEntitiesByIds(
-          conn,
-          doc.collectAnchors(anchors)
-        );
-        doc.assignClassesBasedOnEntities(anchors, anchoredEntities);
-
-        const resource = await Resource.findByDocumentId(conn, docData.id);
-
-        // traverse the tree, search for anchor that === this.id
-        const traverse = (nodes: TreeNode[], parentT?: string) => {
-          for (const node of nodes) {
-            if (node.anchor === this.id) {
-              out.push({
-                document: {
-                  id: docData.id,
-                  title: docData.title,
-                  entityIds: docData.entityIds,
-                  createdAt: docData.createdAt,
-                  updatedAt: docData.updatedAt,
-                },
-                anchorText: node.getShortContent(),
-                resourceId: resource?.id || "",
-                parentTerritoryId: parentT || "",
-              });
-            }
-
-            traverse(
-              node.children,
-              node.class === EntityEnums.Class.Territory ? node.anchor : parentT
-            );
-          }
-        };
-
-        traverse(anchors);
-      })
-    );
-
-    return out;
-  }
   /**
    * Loads entries for usedInStatementIdentifications and usedInStatementClassifications fields
    * Needs to be called after walkStatementsDataEntities, since it uses also populated

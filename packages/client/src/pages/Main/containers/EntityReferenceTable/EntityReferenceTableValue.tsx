@@ -1,13 +1,13 @@
 import { EntityEnums } from "@shared/enums";
+import { IEntity, IReference } from "@shared/types";
 import { excludedSuggesterEntities } from "Theme/constants";
 import {
   EntityDropzone,
-  EntityTag,
   EntitySuggester,
+  EntityTag,
 } from "components/advanced";
 import React from "react";
 import { StyledGridValue } from "./EntityReferenceTableStyles";
-import { IEntity, IReference } from "@shared/types";
 
 interface EntityReferenceTableValue {
   reference: IReference;
@@ -23,6 +23,7 @@ interface EntityReferenceTableValue {
   alwaysShowCreateModal?: boolean;
   openDetailOnCreate?: boolean;
   initValueTyped?: string;
+  editorWidthTooSmall: boolean;
 
   disabled?: boolean;
 }
@@ -36,11 +37,16 @@ export const EntityReferenceTableValue: React.FC<EntityReferenceTableValue> = ({
   alwaysShowCreateModal,
   openDetailOnCreate,
   initValueTyped,
+  editorWidthTooSmall,
 
   disabled,
 }) => {
   return (
-    <StyledGridValue>
+    <StyledGridValue
+      style={{
+        minWidth: editorWidthTooSmall ? "10rem" : "",
+      }}
+    >
       {valueEntity ? (
         <EntityDropzone
           onSelected={(newSelectedId: string) => {
@@ -74,6 +80,7 @@ export const EntityReferenceTableValue: React.FC<EntityReferenceTableValue> = ({
         </EntityDropzone>
       ) : (
         <EntitySuggester
+          inputWidth={editorWidthTooSmall ? "full" : 100}
           alwaysShowCreateModal={alwaysShowCreateModal}
           placeholder={resourceEntity?.data?.partValueLabel}
           excludedEntityClasses={excludedSuggesterEntities}
@@ -86,6 +93,7 @@ export const EntityReferenceTableValue: React.FC<EntityReferenceTableValue> = ({
           isInsideTemplate={isInsideTemplate}
           territoryParentId={territoryParentId}
           initTyped={initValueTyped}
+          // autoFocus={initValueTyped !== undefined}
           disabled={disabled}
         />
       )}

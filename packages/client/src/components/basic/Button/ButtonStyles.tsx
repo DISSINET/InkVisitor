@@ -56,6 +56,8 @@ interface IButtonStyle {
   $disabled?: boolean;
   $radiusLeft?: boolean;
   $radiusRight?: boolean;
+  $noPadding?: boolean;
+  $fullHeight?: boolean;
 }
 export const StyledButton = styled.button.attrs(({ ref }) => ({
   ref: ref,
@@ -64,11 +66,17 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
   align-items: center;
   justify-content: center;
   width: ${({ $fullWidth }) => ($fullWidth ? "100%" : "auto")};
+  height: ${({ $fullHeight }) => ($fullHeight ? "100%" : "")};
   font-size: ${({ theme, $size }) => theme.fontSize[getFontSize($size)]};
   font-weight: ${({ $disabled, $textRegular }) =>
     $disabled ? 400 : $textRegular ? 500 : 900};
-  padding: ${({ $iconButton, $size }) =>
-    `${getVerticalMargin($size)} ${getHorizontalMargin($size, $iconButton)}`};
+  padding: ${({ $iconButton, $size, $noPadding }) =>
+    $noPadding
+      ? "0"
+      : `${getVerticalMargin($size)} ${getHorizontalMargin(
+          $size,
+          $iconButton
+        )}`};
   border-color: ${({ theme, $disabled, $color }) =>
     $disabled ? theme.color["gray"][400] : theme.color[$color]};
   border-width: ${({ $noBorder }) => ($noBorder ? 0 : "thin")};

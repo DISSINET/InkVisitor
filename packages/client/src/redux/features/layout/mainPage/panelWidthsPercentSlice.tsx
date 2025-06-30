@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { INIT_PERCENT_PANEL_WIDTHS } from "Theme/constants";
 
-const initialState: number[] = [];
+const initialState: number[] = INIT_PERCENT_PANEL_WIDTHS;
 
 const panelWidthsPercentSlice = createSlice({
   name: "panelWidthsPercent",

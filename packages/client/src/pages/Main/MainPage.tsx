@@ -2,7 +2,7 @@ import { EntityEnums, UserEnums } from "@shared/enums";
 import { IStatement } from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  collapsedPanelWidth,
+  COLLAPSED_PANEL_WIDTH,
   FIRST_PANEL_MIN_WIDTH,
   fourthPanelBoxesHeightThirds,
   hiddenBoxHeight,
@@ -13,29 +13,44 @@ import {
   THIRD_PANEL_MIN_WIDTH,
 } from "Theme/constants";
 import api from "api";
-import { Box, Button, Panel } from "components";
+import {
+  MAIN_PAGE_SEARCH_SEPARATOR_X_PERCENT_POSITION,
+  FOURTH_PANEL_MIN_WIDTH,
+  INIT_PERCENT_PANEL_WIDTHS_SMALL_SCREEN,
+  SMALL_SCREEN_LIMIT,
+  INIT_PERCENT_PANEL_WIDTHS_LARGE_SCREEN,
+  LARGE_SCREEN_LIMIT,
+} from "Theme/constants";
+import { Box, Button, ButtonGroup, Panel } from "components";
 import {
   EntityCreateModal,
   LayoutSeparatorVertical,
 } from "components/advanced";
 import { CStatement } from "constructors";
-import { useSearchParams } from "hooks";
+import { useDebouncedCallback, useSearchParams } from "hooks";
 import ScrollHandler from "hooks/ScrollHandler";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { BiHide, BiRefresh, BiShow } from "react-icons/bi";
 import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
-import { FaPlus } from "react-icons/fa";
+import { FaHighlighter, FaList, FaPlus } from "react-icons/fa";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { VscCloseAll } from "react-icons/vsc";
+import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
+import { setDetailBoxMinimized } from "redux/features/layout/mainPage/detailBoxMinimizedSlice";
 import { setFirstPanelExpanded } from "redux/features/layout/mainPage/firstPanelExpandedSlice";
 import { setFourthPanelBoxesOpened } from "redux/features/layout/mainPage/fourthPanelBoxesOpenedSlice";
 import { setFourthPanelExpanded } from "redux/features/layout/mainPage/fourthPanelExpandedSlice";
 import { setPanelWidthsPercent } from "redux/features/layout/mainPage/panelWidthsPercentSlice";
 import { setPanelWidths } from "redux/features/layout/mainPage/panelWidthsSlice";
+import { setSecondPanelRealWidth } from "redux/features/layout/mainPage/secondPanelRealWidthSlice";
+import { setThirdPanelRealWidth } from "redux/features/layout/mainPage/thirdPanelRealWidthSlice";
+import { setThirdPanelExpanded } from "redux/features/layout/mainPage/thirdPanelExpandedSlice";
 import { setStatementListOpened } from "redux/features/layout/mainPage/statementListOpenedSlice";
 import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 import { setIsLoading } from "redux/features/statementList/isLoadingSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { DetailBoxState } from "types";
+import { floorNumberToOneDecimal } from "utils/utils";
 import { MemoizedEntityBookmarkBox } from "./containers/EntityBookmarkBox/EntityBookmarkBox";
 import { MemoizedEntityDetailBox } from "./containers/EntityDetailBox/EntityDetailBox";
 import { MemoizedEntitySearchBox } from "./containers/EntitySearchBox/EntitySearchBox";
@@ -43,8 +58,6 @@ import { MemoizedStatementEditorBox } from "./containers/StatementEditorBox/Stat
 import { MemoizedStatementListBox } from "./containers/StatementsListBox/StatementListBox";
 import { MemoizedTemplateListBox } from "./containers/TemplateListBox/TemplateListBox";
 import { MemoizedTerritoryTreeBox } from "./containers/TerritoryTreeBox/TerritoryTreeBox";
-import { floorNumberToOneDecimal } from "utils/utils";
-import { setThirdPanelExpanded } from "redux/features/layout/thirdPanelExpandedSlice";
 
 type FourthPanelBoxes = "search" | "bookmarks" | "templates";
 
@@ -58,6 +71,8 @@ const MainPage: React.FC<MainPage> = ({}) => {
     selectedDetailId,
     appendDetailId,
     setStatementId,
+    annotatorOpened,
+    setAnnotatorOpened,
   } = useSearchParams();
 
   const dispatch = useAppDispatch();
@@ -72,9 +87,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
   );
   const panelWidths: number[] = useAppSelector(
     (state) => state.layout.mainPage.panelWidths
-  );
-  const panelWidthsPercent: number[] = useAppSelector(
-    (state) => state.layout.mainPage.panelWidthsPercent
   );
   const fourthPanelBoxesOpened: { [key: string]: boolean } = useAppSelector(
     (state) => state.layout.mainPage.fourthPanelBoxesOpened
@@ -91,14 +103,19 @@ const MainPage: React.FC<MainPage> = ({}) => {
   const statementListOpened: boolean = useAppSelector(
     (state) => state.layout.mainPage.statementListOpened
   );
+  const detailBoxMinimized: boolean = useAppSelector(
+    (state) => state.layout.mainPage.detailBoxMinimized
+  );
+  const detailBoxState: DetailBoxState = useAppSelector(
+    (state) => state.layout.mainPage.detailBoxState
+  );
+  const [lastState, setLastState] = useState(DetailBoxState.Normal);
 
   const toggleFirstPanel = () => {
     if (firstPanelExpanded) {
       dispatch(setFirstPanelExpanded(false));
-      localStorage.setItem("firstPanelExpanded", "false");
     } else {
       dispatch(setFirstPanelExpanded(true));
-      localStorage.setItem("firstPanelExpanded", "true");
     }
   };
 
@@ -113,10 +130,16 @@ const MainPage: React.FC<MainPage> = ({}) => {
   const toggleThirdPanel = () => {
     if (thirdPanelExpanded) {
       dispatch(setThirdPanelExpanded(false));
-      localStorage.setItem("thirdPanelExpanded", "false");
     } else {
       dispatch(setThirdPanelExpanded(true));
-      localStorage.setItem("thirdPanelExpanded", "true");
+      if (
+        mainPageCenterSeparatorXPosition - mainPageTreeSeparatorXPosition <
+        SECOND_PANEL_MIN_WIDTH
+      ) {
+        handleTreeSeparatorXPositionChange(
+          mainPageCenterSeparatorXPosition - SECOND_PANEL_MIN_WIDTH
+        );
+      }
     }
   };
 
@@ -131,10 +154,16 @@ const MainPage: React.FC<MainPage> = ({}) => {
   const toggleFourthPanel = () => {
     if (fourthPanelExpanded) {
       dispatch(setFourthPanelExpanded(false));
-      localStorage.setItem("fourthPanelExpanded", "false");
     } else {
       dispatch(setFourthPanelExpanded(true));
-      localStorage.setItem("fourthPanelExpanded", "true");
+      if (
+        mainPageSearchSeparatorXPosition - mainPageCenterSeparatorXPosition <
+        THIRD_PANEL_MIN_WIDTH
+      ) {
+        handleCenterSeparatorXPositionChange(
+          mainPageSearchSeparatorXPosition - THIRD_PANEL_MIN_WIDTH
+        );
+      }
     }
   };
 
@@ -147,7 +176,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
     />
   );
 
-  const handleHideBoxButtonClick = (
+  const handleHideFourthPanelBoxButtonClick = (
     boxToHide: FourthPanelBoxes,
     isThisBoxHidden: boolean
   ) => {
@@ -157,18 +186,17 @@ const MainPage: React.FC<MainPage> = ({}) => {
         [boxToHide]: true,
       };
       dispatch(setFourthPanelBoxesOpened(newObject));
-      localStorage.setItem("fourthPanelBoxesOpened", JSON.stringify(newObject));
     } else {
       const newObject = {
         ...fourthPanelBoxesOpened,
         [boxToHide]: false,
       };
       dispatch(setFourthPanelBoxesOpened(newObject));
-      localStorage.setItem("fourthPanelBoxesOpened", JSON.stringify(newObject));
     }
   };
 
-  const hideBoxButton = (boxToHide: FourthPanelBoxes) => {
+  // hide one of the boxes in fourth panel
+  const hideFourthPanelBoxButton = (boxToHide: FourthPanelBoxes) => {
     const isThisBoxHidden = !fourthPanelBoxesOpened[boxToHide];
     return (
       <>
@@ -177,12 +205,15 @@ const MainPage: React.FC<MainPage> = ({}) => {
             key={boxToHide}
             inverted
             icon={isThisBoxHidden ? <BiShow /> : <BiHide />}
-            onClick={() => handleHideBoxButtonClick(boxToHide, isThisBoxHidden)}
+            onClick={() =>
+              handleHideFourthPanelBoxButtonClick(boxToHide, isThisBoxHidden)
+            }
           />
         )}
       </>
     );
   };
+
   const refreshBoxButton = (
     queriesToRefresh: string[],
     isThisBoxHidden: boolean
@@ -252,13 +283,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
 
   const [showEntityCreateModal, setShowEntityCreateModal] = useState(false);
 
-  const toggleStatementListOpen = () => {
-    statementListOpened
-      ? localStorage.setItem("statementListOpened", "false")
-      : localStorage.setItem("statementListOpened", "true");
-    dispatch(setStatementListOpened(!statementListOpened));
-  };
-
   const userRole = localStorage.getItem("userrole") as UserEnums.Role;
 
   const addStatementAtTheEndMutation = useMutation({
@@ -299,6 +323,98 @@ const MainPage: React.FC<MainPage> = ({}) => {
     enabled: !!userId && api.isLoggedIn(),
   });
 
+  // Admin / Owner / Editor with writer rights
+  const hasWriteRightsToSelectedTerritory = useMemo(() => {
+    return (
+      (user?.role === UserEnums.Role.Editor &&
+        user?.rights?.some(
+          (right) =>
+            right.territory === territoryId &&
+            right.mode === UserEnums.RoleMode.Write
+        )) ||
+      user?.role === UserEnums.Role.Admin ||
+      user?.role === UserEnums.Role.Owner
+    );
+  }, [user, territoryId]);
+
+  const getStatementListBoxHeight = () => {
+    if (!detailIdArray.length) {
+      return contentHeight;
+    } else {
+      switch (detailBoxState) {
+        case DetailBoxState.FullHeight:
+          return hiddenBoxHeight;
+        case DetailBoxState.Normal:
+          return contentHeight / 2 + 20;
+        case DetailBoxState.Minimized:
+          return contentHeight - hiddenBoxHeight;
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (detailIdArray.length > 0) {
+      if (detailBoxState === DetailBoxState.FullHeight) {
+        if (statementListOpened) {
+          dispatch(setStatementListOpened(false));
+        }
+      } else {
+        if (!statementListOpened) {
+          dispatch(setStatementListOpened(true));
+        }
+      }
+
+      if (detailBoxState === DetailBoxState.Minimized) {
+        if (!detailBoxMinimized) {
+          dispatch(setDetailBoxMinimized(true));
+        }
+      } else {
+        if (detailBoxMinimized) {
+          dispatch(setDetailBoxMinimized(false));
+        }
+      }
+    }
+  }, [detailBoxState, statementListOpened, detailBoxMinimized, detailIdArray]);
+
+  const handleMaximizeDetailBox = () => {
+    if (detailBoxState === DetailBoxState.Normal) {
+      dispatch(setDetailBoxState(DetailBoxState.FullHeight));
+    } else {
+      dispatch(setDetailBoxState(DetailBoxState.Normal));
+    }
+  };
+
+  const handleMinimizeDetailBox = () => {
+    if (detailBoxState === DetailBoxState.Minimized) {
+      dispatch(setDetailBoxState(lastState));
+    } else {
+      setLastState(detailBoxState);
+      dispatch(setDetailBoxState(DetailBoxState.Minimized));
+    }
+  };
+
+  const getDetailBoxHeight = () => {
+    switch (detailBoxState) {
+      case DetailBoxState.FullHeight:
+        return contentHeight - hiddenBoxHeight;
+      case DetailBoxState.Normal:
+        return contentHeight / 2 + 20;
+      case DetailBoxState.Minimized:
+        return hiddenBoxHeight + 22;
+    }
+  };
+
+  const getMaximizeBtnTooltip = () => {
+    switch (detailBoxState) {
+      case DetailBoxState.FullHeight:
+        return "shrink detail box";
+      case DetailBoxState.Normal:
+        return "maximize detail box";
+      case DetailBoxState.Minimized:
+        return "open detail box";
+    }
+  };
+
   const onePercentOfLayoutWidth = useMemo(
     () => layoutWidth / 100,
     [layoutWidth]
@@ -328,6 +444,19 @@ const MainPage: React.FC<MainPage> = ({}) => {
       : MAIN_PAGE_CENTER_SEPARATOR_X_PERCENT_POSITION * onePercentOfLayoutWidth
   );
 
+  // SEARCH SEPARATOR STATE
+  const localStorageSearchSeparatorXPosition = localStorage.getItem(
+    "mainPageSearchSeparatorXPosition"
+  );
+  const [
+    mainPageSearchSeparatorXPosition,
+    setMainPageSearchSeparatorXPosition,
+  ] = useState<number>(
+    localStorageSearchSeparatorXPosition
+      ? Number(localStorageSearchSeparatorXPosition) * onePercentOfLayoutWidth
+      : MAIN_PAGE_SEARCH_SEPARATOR_X_PERCENT_POSITION * onePercentOfLayoutWidth
+  );
+
   const handleTreeSeparatorXPositionChange = (xPosition: number) => {
     const flooredXPosition = floorNumberToOneDecimal(xPosition);
     if (mainPageTreeSeparatorXPosition !== flooredXPosition) {
@@ -344,7 +473,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
       dispatch(
         setPanelWidths([
           flooredXPosition,
-          mainPageCenterSeparatorXPosition - flooredXPosition,
+          floorNumberToOneDecimal(
+            mainPageCenterSeparatorXPosition - flooredXPosition
+          ),
           panelWidths[2],
           panelWidths[3],
         ])
@@ -367,28 +498,49 @@ const MainPage: React.FC<MainPage> = ({}) => {
       dispatch(
         setPanelWidths([
           panelWidths[0],
-          xPosition - panelWidths[0],
-          layoutWidth - panelWidths[3] - xPosition,
+          floorNumberToOneDecimal(xPosition - panelWidths[0]),
+          floorNumberToOneDecimal(layoutWidth - panelWidths[3] - xPosition),
           panelWidths[3],
         ])
       );
     }
   };
 
-  const isPanelUndersized = (panelWidth: number, minWidth: number) =>
-    panelWidth < minWidth;
+  const handleSearchSeparatorXPositionChange = (xPosition: number) => {
+    if (mainPageSearchSeparatorXPosition !== xPosition) {
+      setMainPageSearchSeparatorXPosition(xPosition);
 
-  const handleSeparatorLayoutInit = (initPanelWidthsPx: number[]) => {
+      const separatorXPercentPosition = floorNumberToOneDecimal(
+        xPosition / onePercentOfLayoutWidth
+      );
+      localStorage.setItem(
+        "mainPageSearchSeparatorXPosition",
+        separatorXPercentPosition.toString()
+      );
+
+      dispatch(
+        setPanelWidths([
+          panelWidths[0],
+          panelWidths[1],
+          floorNumberToOneDecimal(xPosition - mainPageCenterSeparatorXPosition),
+          layoutWidth - xPosition,
+        ])
+      );
+    }
+  };
+
+  const handleSeparatorLayoutInit = () => {
     let secondPanel =
       mainPageCenterSeparatorXPosition - mainPageTreeSeparatorXPosition;
     let thirdPanel =
-      layoutWidth - (mainPageCenterSeparatorXPosition + initPanelWidthsPx[3]);
+      mainPageSearchSeparatorXPosition - mainPageCenterSeparatorXPosition;
+    let fourthPanel = layoutWidth - mainPageSearchSeparatorXPosition;
 
     const tempPanelWidths = [
       mainPageTreeSeparatorXPosition,
       secondPanel,
       thirdPanel,
-      initPanelWidthsPx[3],
+      fourthPanel,
     ];
 
     dispatch(
@@ -403,351 +555,445 @@ const MainPage: React.FC<MainPage> = ({}) => {
     );
   };
 
+  const handleLayoutInit = () => {
+    // calculate panel widths based on screen width
+    const initPanelWidthsPx =
+      layoutWidth > LARGE_SCREEN_LIMIT
+        ? INIT_PERCENT_PANEL_WIDTHS_LARGE_SCREEN.map((percentWidth) => {
+            return floorNumberToOneDecimal(
+              percentWidth * onePercentOfLayoutWidth
+            );
+          })
+        : layoutWidth < SMALL_SCREEN_LIMIT
+        ? INIT_PERCENT_PANEL_WIDTHS_SMALL_SCREEN.map((percentWidth) => {
+            return floorNumberToOneDecimal(
+              percentWidth * onePercentOfLayoutWidth
+            );
+          })
+        : INIT_PERCENT_PANEL_WIDTHS.map((percentWidth) => {
+            return floorNumberToOneDecimal(
+              percentWidth * onePercentOfLayoutWidth
+            );
+          });
+    dispatch(setPanelWidths(initPanelWidthsPx));
+    dispatch(
+      setPanelWidthsPercent(
+        layoutWidth > LARGE_SCREEN_LIMIT
+          ? INIT_PERCENT_PANEL_WIDTHS_LARGE_SCREEN
+          : layoutWidth < SMALL_SCREEN_LIMIT
+          ? INIT_PERCENT_PANEL_WIDTHS_SMALL_SCREEN
+          : INIT_PERCENT_PANEL_WIDTHS
+      )
+    );
+    // set all separators to redux and local storage
+    setMainPageTreeSeparatorXPosition(initPanelWidthsPx[0]);
+    localStorage.setItem(
+      "mainPageTreeSeparatorXPosition",
+      (initPanelWidthsPx[0] / onePercentOfLayoutWidth).toString()
+    );
+    setMainPageCenterSeparatorXPosition(
+      initPanelWidthsPx[0] + initPanelWidthsPx[1]
+    );
+    localStorage.setItem(
+      "mainPageCenterSeparatorXPosition",
+      (
+        (initPanelWidthsPx[0] + initPanelWidthsPx[1]) /
+        onePercentOfLayoutWidth
+      ).toString()
+    );
+    setMainPageSearchSeparatorXPosition(
+      initPanelWidthsPx[0] + initPanelWidthsPx[1] + initPanelWidthsPx[2]
+    );
+    localStorage.setItem(
+      "mainPageSearchSeparatorXPosition",
+      (
+        (initPanelWidthsPx[0] + initPanelWidthsPx[1] + initPanelWidthsPx[2]) /
+        onePercentOfLayoutWidth
+      ).toString()
+    );
+  };
+
+  const isFirstRender = useRef(true);
+
+  // postponing the dispatch so the panel resizing happens before the rerender which minifies the content
+  const debouncedSetSecondPanelWidth = useDebouncedCallback((width: number) => {
+    dispatch(setSecondPanelRealWidth(width));
+  }, 400);
+
+  const secondPanelWidth = useMemo(() => {
+    const width =
+      (firstPanelExpanded
+        ? panelWidths[1]
+        : panelWidths[1] + panelWidths[0] - COLLAPSED_PANEL_WIDTH) +
+      (thirdPanelExpanded ? 0 : panelWidths[2] - COLLAPSED_PANEL_WIDTH) +
+      (!fourthPanelExpanded && !thirdPanelExpanded
+        ? panelWidths[3] - COLLAPSED_PANEL_WIDTH
+        : 0);
+    debouncedSetSecondPanelWidth(width);
+    return width;
+  }, [
+    firstPanelExpanded,
+    thirdPanelExpanded,
+    fourthPanelExpanded,
+    panelWidths,
+    dispatch,
+  ]);
+
+  const debouncedSetThirdPanelWidth = useDebouncedCallback((width: number) => {
+    dispatch(setThirdPanelRealWidth(width));
+  }, 400);
+
+  const thirdPanelWidth = useMemo(() => {
+    const width = !thirdPanelExpanded
+      ? COLLAPSED_PANEL_WIDTH
+      : fourthPanelExpanded
+      ? panelWidths[2]
+      : panelWidths[2] + panelWidths[3] - COLLAPSED_PANEL_WIDTH;
+
+    debouncedSetThirdPanelWidth(width);
+    return width;
+  }, [
+    thirdPanelExpanded,
+    fourthPanelExpanded,
+    panelWidths,
+    debouncedSetThirdPanelWidth,
+  ]);
+
   useEffect(() => {
-    // console.log(layoutWidth);
     if (layoutWidth > 0) {
-      const initPanelWidthsPx = INIT_PERCENT_PANEL_WIDTHS.map(
-        (percentWidth) => {
-          return floorNumberToOneDecimal(
-            percentWidth * onePercentOfLayoutWidth
-          );
-        }
-      );
-      if (!panelWidths.length) {
+      if (isFirstRender.current || !panelWidths.length) {
+        // This is either initial load or coming from different page
         if (
           !localStorageCenterSeparatorXPosition ||
-          !localStorageTreeSeparatorXPosition
+          !localStorageTreeSeparatorXPosition ||
+          !localStorageSearchSeparatorXPosition
         ) {
           console.log("first layout init");
           // first layout INIT
-          dispatch(setPanelWidths(initPanelWidthsPx));
-          dispatch(setPanelWidthsPercent(INIT_PERCENT_PANEL_WIDTHS));
-          setMainPageTreeSeparatorXPosition(initPanelWidthsPx[0]);
-          localStorage.setItem(
-            "mainPageTreeSeparatorXPosition",
-            (initPanelWidthsPx[0] / onePercentOfLayoutWidth).toString()
-          );
-          setMainPageCenterSeparatorXPosition(
-            initPanelWidthsPx[0] + initPanelWidthsPx[1]
-          );
-          localStorage.setItem(
-            "mainPageCenterSeparatorXPosition",
-            (
-              (initPanelWidthsPx[0] + initPanelWidthsPx[1]) /
-              onePercentOfLayoutWidth
-            ).toString()
-          );
+          handleLayoutInit();
         } else {
-          // layout init with saved separator
-          console.log("init load - separator determines panel widths");
-          handleSeparatorLayoutInit(initPanelWidthsPx);
-        }
-      } else {
-        // change of layout width (different monitor) / redirect from different page
-        console.log("layout width changed / redirect from different page");
-        const panelWidthsPx = panelWidthsPercent.map((percentWidth) => {
-          return floorNumberToOneDecimal(
-            percentWidth * onePercentOfLayoutWidth
-          );
-        });
-        const firstPanelUndersized = isPanelUndersized(
-          panelWidthsPx[0],
-          FIRST_PANEL_MIN_WIDTH
-        );
-        const secondPanelUndersized = isPanelUndersized(
-          panelWidthsPx[1],
-          SECOND_PANEL_MIN_WIDTH
-        );
-        const thirdPanelUndersized = isPanelUndersized(
-          panelWidthsPx[2],
-          THIRD_PANEL_MIN_WIDTH
-        );
+          const isSomethingUndersized =
+            Number(localStorageTreeSeparatorXPosition) *
+              onePercentOfLayoutWidth <
+              FIRST_PANEL_MIN_WIDTH ||
+            (Number(localStorageCenterSeparatorXPosition) -
+              Number(localStorageTreeSeparatorXPosition)) *
+              onePercentOfLayoutWidth <
+              SECOND_PANEL_MIN_WIDTH ||
+            (Number(localStorageSearchSeparatorXPosition) -
+              Number(localStorageCenterSeparatorXPosition)) *
+              onePercentOfLayoutWidth <
+              THIRD_PANEL_MIN_WIDTH ||
+            (layoutWidth - Number(localStorageSearchSeparatorXPosition)) *
+              onePercentOfLayoutWidth <
+              FOURTH_PANEL_MIN_WIDTH;
 
-        if (
-          !firstPanelUndersized &&
-          !secondPanelUndersized &&
-          !thirdPanelUndersized
-        ) {
-          console.log("not undersized - set calculated width");
-          handleSeparatorLayoutInit(panelWidthsPx);
-        } else {
-          console.log("something is undersized - set init width");
-          dispatch(setPanelWidths(initPanelWidthsPx));
-          setMainPageTreeSeparatorXPosition(initPanelWidthsPx[0]);
-          localStorage.setItem(
-            "mainPageTreeSeparatorXPosition",
-            (initPanelWidthsPx[0] / onePercentOfLayoutWidth).toString()
-          );
-          setMainPageCenterSeparatorXPosition(
-            initPanelWidthsPx[0] + initPanelWidthsPx[1]
-          );
-          localStorage.setItem(
-            "mainPageCenterSeparatorXPosition",
-            (
-              (initPanelWidthsPx[0] + initPanelWidthsPx[1]) /
-              onePercentOfLayoutWidth
-            ).toString()
-          );
+          if (isSomethingUndersized) {
+            // something is undersized
+            console.log("something is undersized");
+            handleLayoutInit();
+          } else {
+            // layout init with saved separator - coming from different page
+            console.log(
+              "page reload / coming from different page - separator determines panel widths"
+            );
+            handleSeparatorLayoutInit();
+          }
         }
+
+        isFirstRender.current = false;
+      } else {
+        // change of layout width (different monitor / change of zoom)
+        console.log("layout width changed");
+        handleLayoutInit();
       }
     }
   }, [layoutWidth]);
 
   return (
     <>
-      {panelWidths.length && (
-        <>
-          <ScrollHandler />
-
-          {/* TREE SEPARATOR */}
-          {mainPageTreeSeparatorXPosition > 0 && firstPanelExpanded && (
-            <LayoutSeparatorVertical
-              leftSideMinWidth={FIRST_PANEL_MIN_WIDTH}
-              leftSideMaxWidth={mainPageCenterSeparatorXPosition - 200}
-              separatorXPosition={mainPageTreeSeparatorXPosition}
-              setSeparatorXPosition={(xPosition) => {
-                handleTreeSeparatorXPositionChange(xPosition);
-              }}
-            />
-          )}
-
-          {/* CENTER SEPARATOR */}
-          {mainPageCenterSeparatorXPosition > 0 && thirdPanelExpanded && (
-            <LayoutSeparatorVertical
-              leftSideMinWidth={
-                // FIRST_PANEL_MIN_WIDTH + SECOND_PANEL_MIN_WIDTH
-                mainPageTreeSeparatorXPosition + 200
-              }
-              leftSideMaxWidth={
-                layoutWidth - panelWidths[3] - THIRD_PANEL_MIN_WIDTH
-              }
-              separatorXPosition={mainPageCenterSeparatorXPosition}
-              setSeparatorXPosition={(xPosition) => {
-                handleCenterSeparatorXPositionChange(xPosition);
-              }}
-            />
-          )}
-
-          {/* FIRST PANEL */}
-          <Panel
-            width={firstPanelExpanded ? panelWidths[0] : collapsedPanelWidth}
-          >
-            <Box
-              height={contentHeight}
-              label="Territories"
-              isExpanded={firstPanelExpanded}
-              buttons={[
-                refreshBoxButton(["tree", "user"], !firstPanelExpanded),
-                firstPanelButton(),
-              ]}
-              noPadding
-              onHeaderClick={toggleFirstPanel}
-            >
-              <MemoizedTerritoryTreeBox />
-            </Box>
-          </Panel>
-
-          {/* SECOND PANEL */}
-          <Panel
-            width={
-              (firstPanelExpanded
-                ? panelWidths[1]
-                : panelWidths[1] + panelWidths[0] - collapsedPanelWidth) +
-              (thirdPanelExpanded ? 0 : panelWidths[2] - collapsedPanelWidth) +
-              (!fourthPanelExpanded && !thirdPanelExpanded
-                ? panelWidths[3] - collapsedPanelWidth
-                : 0)
+      <ScrollHandler />
+      {/* TREE SEPARATOR */}
+      {mainPageTreeSeparatorXPosition > 0 && firstPanelExpanded && (
+        <LayoutSeparatorVertical
+          leftSideMinWidth={FIRST_PANEL_MIN_WIDTH}
+          leftSideMaxWidth={
+            thirdPanelExpanded
+              ? mainPageCenterSeparatorXPosition - SECOND_PANEL_MIN_WIDTH
+              : // if the editor is collapsed, calculate the min width from the right side
+                layoutWidth -
+                panelWidths[3] -
+                COLLAPSED_PANEL_WIDTH -
+                SECOND_PANEL_MIN_WIDTH
+          }
+          separatorXPosition={mainPageTreeSeparatorXPosition}
+          setSeparatorXPosition={(xPosition) => {
+            handleTreeSeparatorXPositionChange(xPosition);
+          }}
+          onMaxWidthReached={() => {
+            if (panelWidths[2] > THIRD_PANEL_MIN_WIDTH + 10) {
+              handleCenterSeparatorXPositionChange(
+                mainPageCenterSeparatorXPosition + 10
+              );
             }
-          >
-            <Box
-              label="Statements"
-              borderColor="white"
-              onHeaderClick={
-                !statementListOpened ? toggleStatementListOpen : undefined
-              }
-              height={
-                detailIdArray.length
-                  ? statementListOpened
-                    ? contentHeight / 2 - 20
-                    : hiddenBoxHeight
-                  : contentHeight
-              }
-              buttons={[
-                <>
-                  {statementListOpened &&
-                    userRole !== UserEnums.Role.Viewer &&
-                    territoryId && (
-                      <Button
-                        key="add"
-                        icon={<FaPlus />}
-                        tooltipLabel="add new statement at the end of the list"
-                        color="primary"
-                        label="new statement"
-                        onClick={() => {
-                          if (user) {
-                            addStatementAtTheEndMutation.mutate(
-                              CStatement(
-                                userRole,
-                                user.options,
-                                "",
-                                "",
-                                territoryId
-                              )
-                            );
-                          }
-                        }}
-                      />
-                    )}
-                </>,
-                statementListOpened &&
-                  territoryId &&
-                  refreshBoxButton(["territory", "statement", "user"], false),
-              ]}
-            >
-              <MemoizedStatementListBox />
-            </Box>
-            {(selectedDetailId || detailIdArray.length > 0) && (
-              <Box
-                label="Detail"
-                borderColor="white"
-                onHeaderClick={toggleStatementListOpen}
-                height={
-                  statementListOpened
-                    ? contentHeight / 2 + 20
-                    : contentHeight - hiddenBoxHeight
-                }
-                buttons={[
-                  <>
-                    {userRole !== UserEnums.Role.Viewer && (
-                      <Button
-                        icon={<FaPlus />}
-                        label="new entity"
-                        onClick={() => setShowEntityCreateModal(true)}
-                      />
-                    )}
-                  </>,
-                  refreshBoxButton(["entity", "user"], false),
-                  <Button
-                    inverted
-                    tooltipLabel={
-                      statementListOpened
-                        ? "maximize detail box"
-                        : "shrink detail box"
-                    }
-                    icon={
-                      statementListOpened ? (
-                        <BsSquareFill />
-                      ) : (
-                        <BsSquareHalf style={{ transform: "rotate(270deg)" }} />
-                      )
-                    }
-                    onClick={toggleStatementListOpen}
-                  />,
-                  <Button
-                    inverted
-                    tooltipLabel="close all tabs"
-                    icon={<VscCloseAll style={{ transform: "scale(1.3)" }} />}
-                    onClick={() => {
-                      clearAllDetailIds();
-                      dispatch(setStatementListOpened(true));
-                    }}
-                  />,
-                ]}
-              >
-                <MemoizedEntityDetailBox />
-              </Box>
-            )}
-            {showEntityCreateModal && (
-              <EntityCreateModal
-                closeModal={() => setShowEntityCreateModal(false)}
-                onMutationSuccess={(entity) => {
-                  if (entity.class !== EntityEnums.Class.Value) {
-                    appendDetailId(entity.id);
-                  }
-                  if (entity.class === EntityEnums.Class.Territory) {
-                    queryClient.invalidateQueries({ queryKey: ["tree"] });
-                  }
-                }}
-              />
-            )}
-          </Panel>
-
-          {/* THIRD PANEL */}
-          <Panel
-            width={
-              !thirdPanelExpanded
-                ? collapsedPanelWidth
-                : fourthPanelExpanded
-                ? panelWidths[2]
-                : panelWidths[2] + panelWidths[3] - collapsedPanelWidth
-            }
-          >
-            <Box
-              borderColor="white"
-              height={contentHeight}
-              label="Editor"
-              buttons={[thirdPanelButton()]}
-              isExpanded={thirdPanelExpanded}
-            >
-              <MemoizedStatementEditorBox />
-            </Box>
-          </Panel>
-
-          {/* FOURTH PANEL */}
-          <Panel
-            width={fourthPanelExpanded ? panelWidths[3] : collapsedPanelWidth}
-          >
-            <Box
-              height={getFourthPanelBoxHeight("search")}
-              label="Search"
-              color="white"
-              isExpanded={fourthPanelExpanded}
-              buttons={[
-                refreshBoxButton(
-                  ["search-templates", "search"],
-                  !fourthPanelExpanded
-                ),
-                hideBoxButton("search"),
-                hideFourthPanelButton(),
-              ]}
-              onHeaderClick={toggleFourthPanel}
-              disableOpenBoxHeaderClick
-            >
-              <MemoizedEntitySearchBox />
-            </Box>
-            <Box
-              height={getFourthPanelBoxHeight("bookmarks")}
-              label="Bookmarks"
-              color="white"
-              isExpanded={fourthPanelExpanded}
-              buttons={[
-                refreshBoxButton(["bookmarks"], !fourthPanelExpanded),
-                hideBoxButton("bookmarks"),
-                hideFourthPanelButton(),
-              ]}
-              onHeaderClick={toggleFourthPanel}
-              disableOpenBoxHeaderClick
-            >
-              <MemoizedEntityBookmarkBox />
-            </Box>
-            <Box
-              height={getFourthPanelBoxHeight("templates")}
-              label="Templates"
-              color="white"
-              isExpanded={fourthPanelExpanded}
-              buttons={[
-                refreshBoxButton(["templates"], !fourthPanelExpanded),
-                hideBoxButton("templates"),
-                hideFourthPanelButton(),
-              ]}
-              onHeaderClick={toggleFourthPanel}
-              disableOpenBoxHeaderClick
-            >
-              <MemoizedTemplateListBox />
-            </Box>
-          </Panel>
-        </>
+          }}
+        />
       )}
+
+      {/* CENTER SEPARATOR */}
+      {mainPageCenterSeparatorXPosition > 0 && thirdPanelExpanded && (
+        <LayoutSeparatorVertical
+          leftSideMinWidth={
+            mainPageTreeSeparatorXPosition + SECOND_PANEL_MIN_WIDTH
+          }
+          leftSideMaxWidth={
+            fourthPanelExpanded
+              ? layoutWidth - panelWidths[3] - THIRD_PANEL_MIN_WIDTH
+              : layoutWidth - COLLAPSED_PANEL_WIDTH - THIRD_PANEL_MIN_WIDTH
+          }
+          separatorXPosition={mainPageCenterSeparatorXPosition}
+          setSeparatorXPosition={(xPosition) => {
+            handleCenterSeparatorXPositionChange(xPosition);
+          }}
+          onMinWidthReached={() => {
+            if (panelWidths[0] > FIRST_PANEL_MIN_WIDTH + 10) {
+              handleTreeSeparatorXPositionChange(
+                mainPageTreeSeparatorXPosition - 10
+              );
+            }
+          }}
+        />
+      )}
+
+      {/* SEARCH SEPARATOR */}
+      {mainPageSearchSeparatorXPosition > 0 && fourthPanelExpanded && (
+        <LayoutSeparatorVertical
+          leftSideMinWidth={
+            mainPageCenterSeparatorXPosition + THIRD_PANEL_MIN_WIDTH
+          }
+          leftSideMaxWidth={layoutWidth - FOURTH_PANEL_MIN_WIDTH}
+          separatorXPosition={mainPageSearchSeparatorXPosition}
+          setSeparatorXPosition={(xPosition) => {
+            handleSearchSeparatorXPositionChange(xPosition);
+          }}
+        />
+      )}
+
+      {/* FIRST PANEL */}
+      <Panel
+        width={firstPanelExpanded ? panelWidths[0] : COLLAPSED_PANEL_WIDTH}
+      >
+        <Box
+          height={contentHeight}
+          label="Territories"
+          isExpanded={firstPanelExpanded}
+          buttons={[
+            refreshBoxButton(["tree", "user"], !firstPanelExpanded),
+            firstPanelButton(),
+          ]}
+          noPadding
+          onHeaderClick={toggleFirstPanel}
+        >
+          <MemoizedTerritoryTreeBox />
+        </Box>
+      </Panel>
+
+      {/* SECOND PANEL */}
+      <Panel width={secondPanelWidth}>
+        <Box
+          label="Statements"
+          borderColor="white"
+          height={getStatementListBoxHeight()}
+          buttons={[
+            <>
+              <ButtonGroup
+                style={{ marginLeft: "0.5rem", marginRight: "0.5rem" }}
+              >
+                <Button
+                  color="success"
+                  icon={<FaList />}
+                  // label={`list (${territory.statements.length})`}
+                  label={`list`}
+                  onClick={() => {
+                    setAnnotatorOpened(false);
+                  }}
+                  inverted={!!annotatorOpened}
+                ></Button>
+                <Button
+                  color="success"
+                  icon={<FaHighlighter />}
+                  label="annotator"
+                  onClick={() => {
+                    setAnnotatorOpened(true);
+                  }}
+                  inverted={!annotatorOpened}
+                ></Button>
+              </ButtonGroup>
+              {/* Admin / Owner / Editor with writer rights */}
+              {hasWriteRightsToSelectedTerritory && territoryId && (
+                <ButtonGroup
+                  style={{ marginLeft: "0.5rem", marginRight: "0.5rem" }}
+                >
+                  <Button
+                    key="add"
+                    icon={<FaPlus />}
+                    tooltipLabel="add new statement at the end of the list"
+                    color="primary"
+                    label="statement"
+                    onClick={() => {
+                      if (user) {
+                        addStatementAtTheEndMutation.mutate(
+                          CStatement(
+                            userRole,
+                            user.options,
+                            "",
+                            "",
+                            territoryId
+                          )
+                        );
+                      }
+                    }}
+                  />
+                </ButtonGroup>
+              )}
+            </>,
+            statementListOpened &&
+              territoryId &&
+              refreshBoxButton(["territory", "statement", "user"], false),
+          ]}
+        >
+          <MemoizedStatementListBox />
+        </Box>
+        {(selectedDetailId || detailIdArray.length > 0) && (
+          <Box
+            label="Detail"
+            borderColor="white"
+            onHeaderClick={handleMaximizeDetailBox}
+            height={getDetailBoxHeight()}
+            // Scroll is disabled because of the tabs and is handled inside the EntityDetail component
+            disableScroll
+            buttons={[
+              <>
+                {userRole !== UserEnums.Role.Viewer && (
+                  <Button
+                    icon={<FaPlus />}
+                    label="entity"
+                    onClick={() => setShowEntityCreateModal(true)}
+                    tooltipLabel="create new entity"
+                  />
+                )}
+              </>,
+              // refreshBoxButton(["entity", "user"], false),
+              <Button
+                dataTestId="maximize-detail-box"
+                inverted
+                tooltipLabel={getMaximizeBtnTooltip()}
+                icon={
+                  detailBoxState === DetailBoxState.Normal ? (
+                    <BsSquareFill />
+                  ) : (
+                    <BsSquareHalf style={{ transform: "rotate(270deg)" }} />
+                  )
+                }
+                onClick={handleMaximizeDetailBox}
+              />,
+              <>
+                {detailBoxState !== DetailBoxState.Minimized && (
+                  <Button
+                    tooltipLabel={"minimize detail box"}
+                    inverted
+                    icon={<BiHide />}
+                    onClick={handleMinimizeDetailBox}
+                  />
+                )}
+              </>,
+              <Button
+                inverted
+                tooltipLabel="close all tabs"
+                icon={<VscCloseAll style={{ transform: "scale(1.3)" }} />}
+                onClick={() => {
+                  // First ensure statement list is opened
+                  dispatch(setStatementListOpened(true));
+                  localStorage.setItem("statementListOpened", "true");
+
+                  // Then clear the detail IDs
+                  clearAllDetailIds();
+                  dispatch(setDetailBoxState(DetailBoxState.Normal));
+                }}
+              />,
+            ]}
+          >
+            <MemoizedEntityDetailBox />
+          </Box>
+        )}
+      </Panel>
+
+      {/* THIRD PANEL */}
+      <Panel width={thirdPanelWidth}>
+        <Box
+          borderColor="white"
+          height={contentHeight}
+          label="Editor"
+          buttons={[thirdPanelButton()]}
+          isExpanded={thirdPanelExpanded}
+        >
+          <MemoizedStatementEditorBox />
+        </Box>
+      </Panel>
+
+      {/* FOURTH PANEL */}
+      <Panel
+        width={fourthPanelExpanded ? panelWidths[3] : COLLAPSED_PANEL_WIDTH}
+      >
+        <Box
+          height={getFourthPanelBoxHeight("search")}
+          label="Search"
+          color="white"
+          isExpanded={fourthPanelExpanded}
+          buttons={[
+            refreshBoxButton(
+              ["search-templates", "search"],
+              !fourthPanelExpanded
+            ),
+            hideFourthPanelBoxButton("search"),
+            hideFourthPanelButton(),
+          ]}
+          onHeaderClick={toggleFourthPanel}
+          disableOpenBoxHeaderClick
+        >
+          <MemoizedEntitySearchBox />
+        </Box>
+        <Box
+          height={getFourthPanelBoxHeight("bookmarks")}
+          label="Bookmarks"
+          color="white"
+          isExpanded={fourthPanelExpanded}
+          buttons={[
+            refreshBoxButton(["bookmarks"], !fourthPanelExpanded),
+            hideFourthPanelBoxButton("bookmarks"),
+            hideFourthPanelButton(),
+          ]}
+          onHeaderClick={toggleFourthPanel}
+          disableOpenBoxHeaderClick
+        >
+          <MemoizedEntityBookmarkBox />
+        </Box>
+        <Box
+          height={getFourthPanelBoxHeight("templates")}
+          label="Templates"
+          color="white"
+          isExpanded={fourthPanelExpanded}
+          buttons={[
+            refreshBoxButton(["templates"], !fourthPanelExpanded),
+            hideFourthPanelBoxButton("templates"),
+            hideFourthPanelButton(),
+          ]}
+          onHeaderClick={toggleFourthPanel}
+          disableOpenBoxHeaderClick
+        >
+          <MemoizedTemplateListBox />
+        </Box>
+      </Panel>
     </>
   );
 };

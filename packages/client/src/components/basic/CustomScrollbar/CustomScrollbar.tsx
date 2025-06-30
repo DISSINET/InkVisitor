@@ -6,6 +6,8 @@ interface CustomScrollbar {
   elementId?: string;
   contentWidth?: number;
   contentHeight?: number;
+  customStyle?: React.CSSProperties;
+
   children: React.ReactNode;
   noScrollX?: boolean;
   noScrollY?: boolean;
@@ -15,6 +17,7 @@ export const CustomScrollbar: React.FC<CustomScrollbar> = ({
   elementId,
   contentWidth,
   contentHeight,
+  customStyle,
   children,
   noScrollX = false,
   noScrollY = false,
@@ -42,6 +45,7 @@ export const CustomScrollbar: React.FC<CustomScrollbar> = ({
       style={{
         width: contentWidth ?? "100%",
         height: contentHeight ?? "100%",
+        ...customStyle,
       }}
       noScrollX={noScrollX}
       noScrollY={noScrollY}

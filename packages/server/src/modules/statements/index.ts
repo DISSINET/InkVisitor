@@ -157,11 +157,34 @@ export default Router()
         throw new StatementDoesNotExits("at least one statement not found", "");
       }
 
-      for (const statementData of statements) {
+      // Get existing statements in target territory to determine the last order
+      const existingStatements = await Statement.findStatementsInTerritory(
+        request.db.connection,
+        newTerritoryId
+      );
+      const lastOrder =
+        existingStatements.length > 0
+          ? Math.max(
+              ...existingStatements.map((s) => s.data.territory?.order || 0)
+            )
+          : 0;
+
+      // Sort statements by their current order to preserve relative ordering
+      const sortedStatements = statements
+        .filter((s) => s.class === EntityEnums.Class.Statement)
+        .sort(
+          (a, b) =>
+            (a.data.territory?.order || 0) - (b.data.territory?.order || 0)
+        );
+
+      // Move statements while preserving their relative order
+      for (let i = 0; i < sortedStatements.length; i++) {
+        const statementData = sortedStatements[i];
         const model = new Statement({ ...(statementData as IStatement) });
-        //update territory
+        //update territory with new order
         model.data.territory = new StatementTerritory({
           territoryId: newTerritoryId,
+          order: lastOrder + i + 1,
         });
         await model.update(request.db.connection, { data: model.data });
       }
@@ -247,15 +270,38 @@ export default Router()
         throw new StatementDoesNotExits("at least one statement not found", "");
       }
 
+      // Get existing statements in target territory to determine the last order
+      const existingStatements = await Statement.findStatementsInTerritory(
+        req.db.connection,
+        newTerritoryId
+      );
+      const lastOrder =
+        existingStatements.length > 0
+          ? Math.max(
+              ...existingStatements.map((s) => s.data.territory?.order || 0)
+            )
+          : 0;
+
+      // Sort statements by their current order to preserve relative ordering
+      const sortedStatements = statements
+        .filter((s) => s.class === EntityEnums.Class.Statement)
+        .sort(
+          (a, b) =>
+            (a.data.territory?.order || 0) - (b.data.territory?.order || 0)
+        );
+
       const newIds: string[] = [];
       let relsErr = false;
 
-      for (const stmtData of statements) {
+      // Copy statements while preserving their relative order
+      for (let i = 0; i < sortedStatements.length; i++) {
+        const stmtData = sortedStatements[i];
         const model = new Statement({ ...(stmtData as IStatement) });
 
-        //update territory
+        //update territory with new order
         model.data.territory = new StatementTerritory({
           territoryId: newTerritoryId,
+          order: lastOrder + i + 1,
         });
 
         model.resetIds();

@@ -2,6 +2,7 @@ import { InterfaceEnums } from "@shared/enums";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import api from "api";
+import { Toast } from "components";
 import { Page } from "components/advanced";
 import { useDebounce } from "hooks";
 import { SearchParamsProvider } from "hooks/useSearchParamsContext";
@@ -20,7 +21,7 @@ import {
 import React, { useEffect, useMemo } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { Helmet } from "react-helmet";
+import { Helmet } from "react-helmet-async";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { setContentHeight } from "redux/features/layout/contentHeightSlice";
 import { setLayoutWidth } from "redux/features/layout/layoutWidthSlice";
@@ -28,7 +29,7 @@ import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { ThemeProvider } from "styled-components";
 import { heightHeader } from "Theme/constants";
 import GlobalStyle from "Theme/global";
-import theme, { ThemeType } from "Theme/theme";
+import theme from "Theme/theme";
 import { darkTheme } from "Theme/theme-dark";
 import { QueryPage } from "pages";
 
@@ -59,14 +60,14 @@ export const PublicPath = (props: any) => {
   return props.children;
 };
 
-export const RequireAuth = ({ children }: { children: JSX.Element }) => {
+export const RequireAuth = ({ children }: { children: React.ReactNode }) => {
   return api.isLoggedIn() ? children : <Navigate to="/login" />;
 };
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60,
+      // staleTime: 1000 * 60,
       refetchOnWindowFocus: false,
       retry: false,
       // turn on for airplane / offline work
@@ -80,7 +81,7 @@ export const App: React.FC = () => {
     (state) => state.theme
   );
 
-  const themeConfig = useMemo<ThemeType>(() => {
+  const themeConfig = useMemo(() => {
     if (selectedThemeId === "dark") {
       return darkTheme;
     }
@@ -98,7 +99,8 @@ export const App: React.FC = () => {
 
   useEffect(() => {
     if (debouncedWidth > 0) {
-      dispatch(setLayoutWidth(debouncedWidth));
+      const layoutWidth = debouncedWidth;
+      dispatch(setLayoutWidth(layoutWidth));
     }
   }, [debouncedWidth]);
 
@@ -107,7 +109,6 @@ export const App: React.FC = () => {
       <Helmet>
         <meta charSet="utf-8" />
         <title>InkVisitor</title>
-        <link rel="stylesheet" type="text/css" href="/custom.css" />
       </Helmet>
       <ThemeProvider theme={themeConfig}>
         <GlobalStyle theme={themeConfig} />
@@ -198,6 +199,8 @@ export const App: React.FC = () => {
 
                     <Route path="*" element={<NotFoundPage />} />
                   </Routes>
+
+                  <Toast />
                 </Page>
               </SearchParamsProvider>
             </BrowserRouter>

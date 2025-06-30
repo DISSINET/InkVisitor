@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { v4 as uuidv4 } from "uuid";
 
-import { IDocument, IResponseDocument, IResponseEntity } from "@shared/types";
+import { IDocument, IResponseEntity } from "@shared/types";
+import { EntityEnums } from "@shared/enums";
 import api from "api";
 import { Loader, Submit } from "components";
 import React, { ChangeEvent, useMemo, useRef, useState } from "react";
@@ -17,7 +18,7 @@ import {
 } from "./DocumentsPageStyles";
 
 type DocumentWithResource = {
-  document: IResponseDocument;
+  document: IDocument;
   resource: false | IResponseEntity;
 };
 
@@ -36,8 +37,6 @@ export const DocumentsPage: React.FC = ({}) => {
     },
     enabled: api.isLoggedIn(),
   });
-
-  console.log(documents);
 
   const {
     data: resources,
@@ -102,7 +101,21 @@ export const DocumentsPage: React.FC = ({}) => {
       id: uuidv4(),
       title: filename.substring(0, filename.lastIndexOf(".")) || filename,
       content: text,
-      entityIds: [],
+      entityIds: {
+        [EntityEnums.Class.Action]: [],
+        [EntityEnums.Class.Resource]: [],
+        [EntityEnums.Class.Concept]: [],
+        [EntityEnums.Class.Person]: [],
+        [EntityEnums.Class.Location]: [],
+        [EntityEnums.Class.Event]: [],
+        [EntityEnums.Class.Object]: [],
+        [EntityEnums.Class.Territory]: [],
+        [EntityEnums.Class.Statement]: [],
+        [EntityEnums.Class.Value]: [],
+        [EntityEnums.Class.Being]: [],
+        [EntityEnums.Class.Group]: [],
+      },
+      anchors: [],
     };
     uploadDocumentMutation.mutate(document);
     if (inputRef.current) inputRef.current.value = "";
@@ -189,7 +202,7 @@ export const DocumentsPage: React.FC = ({}) => {
 
       {editedDocumentId && (
         <DocumentModalEdit
-          document={editedDocument}
+          documentId={editedDocumentId}
           onClose={handleModalClose}
         />
       )}

@@ -10,8 +10,8 @@ interface AttributeButtonGroup {
   options: {
     longValue: string;
     shortValue: string;
-    shortIcon?: JSX.Element;
-    icon?: JSX.Element;
+    shortIcon?: React.ReactNode;
+    icon?: React.ReactNode;
     onClick: () => void;
     selected: boolean;
     optionDisabled?: boolean;
@@ -23,6 +23,8 @@ interface AttributeButtonGroup {
 
   fullSizeDisabled?: boolean;
   disabledBtnsTooltip?: string;
+  canSelectMultiple?: boolean;
+  iconsOnly?: boolean;
 }
 
 export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
@@ -32,6 +34,8 @@ export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
   paddingX = false,
   fullSizeDisabled = false,
   disabledBtnsTooltip,
+  canSelectMultiple = false,
+  iconsOnly = false,
 }) => {
   return (
     <StyledWrap>
@@ -49,6 +53,7 @@ export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
           $leftMargin={!noMargin}
           $rightMargin={!noMargin}
           $border
+          $iconsOnly={iconsOnly}
         >
           {options.map((option, oi) => {
             const firstInRow = oi === 0;
@@ -59,8 +64,11 @@ export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
                 disabled={
                   option.optionDisabled || (disabled && !option.selected)
                 }
+                fullWidth={iconsOnly}
                 label={
-                  option.selected
+                  iconsOnly
+                    ? undefined
+                    : option.selected
                     ? option.longValue
                     : option.shortValue !== undefined
                     ? option.shortValue
@@ -74,7 +82,7 @@ export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
                     : undefined
                 }
                 tooltipLabel={
-                  !option.selected &&
+                  (!option.selected || iconsOnly) &&
                   (option.longValue !== option.shortValue || option.icon)
                     ? option.longValue
                     : undefined
@@ -86,11 +94,10 @@ export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
                 radiusLeft={firstInRow}
                 radiusRight={lastInRow}
                 onClick={() => {
-                  if (!option.selected && !disabled) {
+                  if ((!option.selected || canSelectMultiple) && !disabled) {
                     option.onClick();
                   }
                 }}
-                paddingX={paddingX}
               />
             );
           })}

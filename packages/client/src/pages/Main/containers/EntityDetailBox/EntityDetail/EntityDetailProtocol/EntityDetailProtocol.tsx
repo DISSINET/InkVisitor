@@ -6,14 +6,13 @@ import { AxiosResponse } from "axios";
 import { Input } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
 import React, { useEffect } from "react";
-import { StyledSuggesterWrapper } from "../EntityDetailRelations/EntityDetailRelationTypeBlock/EntityDetailRelationTypeBlockStyles";
 import {
+  StyledFlexList,
   StyledGrid,
   StyledLabel,
   StyledTagWrap,
   StyledValue,
 } from "./EntityDetailProtocolStyles";
-import { StyledFlexList } from "../../../../../../components/advanced/ValidationRule/ValidationRuleStyles";
 
 const initialProtocol: ITerritoryProtocol = {
   project: "",
@@ -112,20 +111,24 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
                 </StyledTagWrap>
               );
             })}
-
-          <EntitySuggester
-            alwaysShowCreateModal
-            onPicked={(newPicked) => {
-              updateProtocol({
-                dataCollectionMethods: [...dataCollectionMethods, newPicked.id],
-              });
-            }}
-            excludedActantIds={dataCollectionMethods}
-            categoryTypes={[EntityEnums.Class.Concept]}
-            territoryParentId={territory.data.parent.territoryId}
-            isInsideTemplate={isInsideTemplate}
-            disabled={!userCanEdit}
-          />
+          {userCanEdit && (
+            <EntitySuggester
+              inputWidth="full"
+              alwaysShowCreateModal
+              onPicked={(newPicked) => {
+                updateProtocol({
+                  dataCollectionMethods: [
+                    ...dataCollectionMethods,
+                    newPicked.id,
+                  ],
+                });
+              }}
+              excludedActantIds={dataCollectionMethods}
+              categoryTypes={[EntityEnums.Class.Concept]}
+              territoryParentId={territory.data.parent.territoryId}
+              isInsideTemplate={isInsideTemplate}
+            />
+          )}
         </StyledFlexList>
       </StyledValue>
 
@@ -165,20 +168,21 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
                 </StyledTagWrap>
               );
             })}
-
-          <EntitySuggester
-            alwaysShowCreateModal
-            onPicked={(newPicked) => {
-              updateProtocol({
-                guidelines: [...guidelines, newPicked.id],
-              });
-            }}
-            excludedActantIds={guidelines}
-            categoryTypes={[EntityEnums.Class.Resource]}
-            territoryParentId={territory.data.parent.territoryId}
-            isInsideTemplate={isInsideTemplate}
-            disabled={!userCanEdit}
-          />
+          {userCanEdit && (
+            <EntitySuggester
+              inputWidth="full"
+              alwaysShowCreateModal
+              onPicked={(newPicked) => {
+                updateProtocol({
+                  guidelines: [...guidelines, newPicked.id],
+                });
+              }}
+              excludedActantIds={guidelines}
+              categoryTypes={[EntityEnums.Class.Resource]}
+              territoryParentId={territory.data.parent.territoryId}
+              isInsideTemplate={isInsideTemplate}
+            />
+          )}
         </StyledFlexList>
       </StyledValue>
 
@@ -206,20 +210,21 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
                 </StyledTagWrap>
               );
             })}
-
-          <EntitySuggester
-            alwaysShowCreateModal
-            onPicked={(newPicked) => {
-              updateProtocol({
-                detailedProtocols: [...detailedProtocols, newPicked.id],
-              });
-            }}
-            excludedActantIds={detailedProtocols}
-            categoryTypes={[EntityEnums.Class.Resource]}
-            territoryParentId={territory.data.parent.territoryId}
-            isInsideTemplate={isInsideTemplate}
-            disabled={!userCanEdit}
-          />
+          {userCanEdit && (
+            <EntitySuggester
+              inputWidth="full"
+              alwaysShowCreateModal
+              onPicked={(newPicked) => {
+                updateProtocol({
+                  detailedProtocols: [...detailedProtocols, newPicked.id],
+                });
+              }}
+              excludedActantIds={detailedProtocols}
+              categoryTypes={[EntityEnums.Class.Resource]}
+              territoryParentId={territory.data.parent.territoryId}
+              isInsideTemplate={isInsideTemplate}
+            />
+          )}
         </StyledFlexList>
       </StyledValue>
 
@@ -238,6 +243,7 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
           </StyledTagWrap>
         ) : (
           <EntitySuggester
+            inputWidth="full"
             alwaysShowCreateModal
             onPicked={(newPicked) => {
               updateProtocol({ startDate: newPicked.id });
@@ -245,7 +251,7 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
             categoryTypes={[EntityEnums.Class.Value]}
             territoryParentId={territory.data.parent.territoryId}
             isInsideTemplate={isInsideTemplate}
-            disabled={!userCanEdit}
+            isHidden={!userCanEdit}
           />
         )}
       </StyledValue>
@@ -265,6 +271,7 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
           </StyledTagWrap>
         ) : (
           <EntitySuggester
+            inputWidth="full"
             alwaysShowCreateModal
             onPicked={(newPicked) => {
               updateProtocol({ endDate: newPicked.id });
@@ -272,7 +279,7 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
             categoryTypes={[EntityEnums.Class.Value]}
             territoryParentId={territory.data.parent.territoryId}
             isInsideTemplate={isInsideTemplate}
-            disabled={!userCanEdit}
+            isHidden={!userCanEdit}
           />
         )}
       </StyledValue>
@@ -302,23 +309,25 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
                 </StyledTagWrap>
               );
             })}
-
-          <EntitySuggester
-            alwaysShowCreateModal
-            onPicked={(newPicked) => {
-              updateProtocol({
-                relatedDataPublications: [
-                  ...relatedDataPublications,
-                  newPicked.id,
-                ],
-              });
-            }}
-            excludedActantIds={relatedDataPublications}
-            categoryTypes={[EntityEnums.Class.Resource]}
-            territoryParentId={territory.data.parent.territoryId}
-            isInsideTemplate={isInsideTemplate}
-            disabled={!userCanEdit}
-          />
+          {userCanEdit && (
+            <EntitySuggester
+              inputWidth="full"
+              alwaysShowCreateModal
+              onPicked={(newPicked) => {
+                updateProtocol({
+                  relatedDataPublications: [
+                    ...relatedDataPublications,
+                    newPicked.id,
+                  ],
+                });
+              }}
+              excludedActantIds={relatedDataPublications}
+              categoryTypes={[EntityEnums.Class.Resource]}
+              territoryParentId={territory.data.parent.territoryId}
+              isInsideTemplate={isInsideTemplate}
+              isHidden={!userCanEdit}
+            />
+          )}
         </StyledFlexList>
       </StyledValue>
     </StyledGrid>

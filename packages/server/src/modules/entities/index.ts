@@ -154,7 +154,10 @@ export default Router()
     asyncRouteHandler<IResponseEntity[]>(
       async (req: IRequest<unknown, unknown, IRequestSearch>) => {
         const search = new RequestSearch(req.query);
-        if (search.label && search.label.length < 2) {
+        if (
+          (search.label && search.label.length < 2) ||
+          (search.labelOrId && search.labelOrId.length < 2)
+        ) {
           return [];
         }
 
@@ -212,7 +215,7 @@ export default Router()
         throw new InternalServerError("cannot create entity");
       }
 
-      const out: IResponseGeneric = { result: true };
+      const out: IResponseGeneric = { result: true, data: model };
 
       if (model.usedTemplate) {
         await model.applyTemplate(request, model.usedTemplate);
@@ -636,33 +639,35 @@ export default Router()
    */
   .get(
     "/:entityId/detail",
-    asyncRouteHandler<IResponseDetail>(async (request: IRequest) => {
-      const entityId = request.params.entityId;
+    asyncRouteHandler<IResponseDetail>(
+      async (request: IRequest<{ entityId: string }>) => {
+        const entityId = request.params.entityId;
 
-      if (!entityId) {
-        throw new BadParams("entity id has to be set");
+        if (!entityId) {
+          throw new BadParams("entity id has to be set");
+        }
+
+        const entityData = await findEntityById(request.db, entityId);
+        if (!entityData) {
+          throw new EntityDoesNotExist(
+            `entity ${entityId} was not found`,
+            entityId
+          );
+        }
+
+        const entity = getEntityClass({ ...entityData });
+
+        if (!entity.canBeViewedByUser(request.getUserOrFail())) {
+          throw new PermissionDeniedError(`cannot view entity ${entityId}`);
+        }
+
+        const response = new ResponseEntityDetail(entity);
+
+        await response.prepare(request);
+
+        return response;
       }
-
-      const entityData = await findEntityById(request.db, entityId);
-      if (!entityData) {
-        throw new EntityDoesNotExist(
-          `entity ${entityId} was not found`,
-          entityId
-        );
-      }
-
-      const entity = getEntityClass({ ...entityData });
-
-      if (!entity.canBeViewedByUser(request.getUserOrFail())) {
-        throw new PermissionDeniedError(`cannot view entity ${entityId}`);
-      }
-
-      const response = new ResponseEntityDetail(entity);
-
-      await response.prepare(request);
-
-      return response;
-    })
+    )
   )
   /**
    * @openapi
@@ -737,6 +742,7 @@ export default Router()
       }
     )
   )
+
   .post(
     "/query-export",
     asyncRouteHandler<any>(
@@ -779,6 +785,67 @@ export default Router()
           "result \t" + explore.columns.map((c) => c.name).join("\t");
 
         return { tsvText: tsvHeader + "\n" + tsvBodyRows };
+      }
+    )
+  )
+
+  /**
+   * @openapi
+   * /entities/batch:
+   *   post:
+   *     description: Get multiple entities by their IDs (POST method for large arrays)
+   *     tags:
+   *       - entities
+   *     requestBody:
+   *       description: Array of entity IDs
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               ids:
+   *                 type: array
+   *                 items:
+   *                   type: string
+   *     responses:
+   *       200:
+   *         description: Returns array of entity entries
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 $ref: "#/components/schemas/IResponseEntity"
+   */
+  .post(
+    "/batch",
+    asyncRouteHandler<IResponseEntity[]>(
+      async (request: IRequest<any, { ids: string[] }>) => {
+        const { ids } = request.body;
+
+        if (!ids || !Array.isArray(ids) || ids.length === 0) {
+          throw new BadParams("ids array must be provided");
+        }
+
+        const entities = await Entity.findEntitiesByIds(
+          request.db.connection,
+          ids
+        );
+
+        if (!entities || entities.length === 0) {
+          return [];
+        }
+
+        const responses = await Promise.all(
+          entities.map(async (entityData) => {
+            const entity = getEntityClass({ ...entityData });
+            const response = new ResponseEntity(entity);
+            await response.prepare(request);
+            return response;
+          })
+        );
+
+        return responses;
       }
     )
   );

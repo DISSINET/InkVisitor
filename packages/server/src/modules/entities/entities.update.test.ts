@@ -1,18 +1,21 @@
-import { clean, testErroneousResponse } from "@modules/common.test";
-import { EntityDoesNotExist, BadParams } from "@shared/types/errors";
-import request from "supertest";
 import { apiPath } from "@common/constants";
-import app from "../../Server";
-import { supertestConfig } from "..";
-import { Db } from "@service/rethink";
-import { findEntityById } from "@service/shorthands";
-import { IEntity } from "@shared/types";
+import { pool } from "@middlewares/db";
 import Statement, {
   StatementData,
   StatementTerritory,
 } from "@models/statement/statement";
-import { successfulGenericResponse } from "@modules/common.test";
-import { pool } from "@middlewares/db";
+import {
+  clean,
+  successfulGenericResponse,
+  testErroneousResponse,
+} from "@modules/common.test";
+import { Db } from "@service/rethink";
+import { findEntityById } from "@service/shorthands";
+import { IEntity } from "@shared/types";
+import { BadParams, EntityDoesNotExist } from "@shared/types/errors";
+import request from "supertest";
+import { supertestConfig } from "..";
+import app from "../../Server";
 
 describe("Entities update", function () {
   afterAll(async () => {
@@ -48,7 +51,7 @@ describe("Entities update", function () {
       const changeLabelTo = "new label";
       const statementData = new Statement({
         id: testId,
-        label: "",
+        labels: ["test"],
         data: new StatementData({
           territory: new StatementTerritory({ territoryId: testId + "ter" }),
         }),
@@ -57,14 +60,14 @@ describe("Entities update", function () {
 
       await request(app)
         .put(`${apiPath}/entities/${testId}`)
-        .send({ label: changeLabelTo })
+        .send({ labels: [changeLabelTo] })
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(200)
         .expect(successfulGenericResponse)
         .expect(async () => {
           const changedEntry = await findEntityById<IEntity>(db, testId);
-          expect(changedEntry.label).toEqual(changeLabelTo);
+          expect(changedEntry.labels[0]).toEqual(changeLabelTo);
         });
 
       await clean(db);

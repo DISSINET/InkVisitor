@@ -5,6 +5,7 @@ import Highlighter, {
   IAbsCoordinates,
   IRelativeCoordinates,
 } from "./Highlighter";
+import Text from "./Text";
 import Viewport from "./Viewport";
 import { EditMode, HighlightMode } from "./constants";
 
@@ -23,7 +24,7 @@ export default class Cursor
   xLine: number;
   yLine: number;
 
-  manualDirection?: DIRECTION;
+  selectDirection?: DIRECTION;
 
   // highlighted area must use absolute coordinates - highlighted area stays in position while scrolling
   private selecting: boolean = false;
@@ -35,32 +36,36 @@ export default class Cursor
     this.style = { ...this.style, color: "black" };
   }
 
-  getTrueSelectionDirection(): DIRECTION | null {
+  setTrueSelectionDirection() {
     if (this.selectStart && this.selectEnd) {
       if (this.selectStart.yLine < this.selectEnd.yLine) {
         // start is above end
-        return DIRECTION.FORWARD;
+        this.selectDirection = DIRECTION.FORWARD;
+        return;
       } else if (this.selectStart.yLine > this.selectEnd.yLine) {
         // start is below end
-        return DIRECTION.BACKWARD;
+        this.selectDirection = DIRECTION.BACKWARD;
+        return;
       } else {
         // the same line
         if (this.selectStart.xLine < this.selectEnd.xLine) {
           // start is before end on horizontal axis
-          return DIRECTION.FORWARD;
+          this.selectDirection = DIRECTION.FORWARD;
+          return;
         } else if (this.selectStart.xLine > this.selectEnd.xLine) {
           // start is after end on horizontal axis
-          return DIRECTION.BACKWARD;
+          this.selectDirection = DIRECTION.BACKWARD;
+          return;
         }
       }
     }
 
-    return null;
+    this.selectDirection = undefined;
   }
 
   getSelectionDirection(): DIRECTION | undefined {
     if (this.selectStart && this.selectEnd) {
-      return this.manualDirection;
+      return this.selectDirection;
     }
 
     return undefined;
@@ -147,6 +152,9 @@ export default class Cursor
     } else {
       this.selectEnd = { xLine: this.xLine, yLine: yOffset + this.yLine };
     }
+
+    // test direction from selectArea call
+    this.setTrueSelectionDirection();
   }
 
   /**
@@ -180,7 +188,28 @@ export default class Cursor
     this.xLine = newX;
     this.yLine = newY;
   }
+ 
+  /**
+   * fixOutOfBounds moves the cursor to the next line if the current line is too short
+   * @param viewport
+   * @param text
+   */
+  fixOutOfBounds(viewport: Viewport, text: Text) {
+    let line = undefined;
+    do {
+      line = text.getCurrentLine(viewport, this);
+      if (line === null) {
+        this.reset();
+        return;
+      }
 
+      if (line.length < this.xLine) {
+        this.yLine++;
+        this.xLine = this.xLine - line.length;
+      }
+    } while (!line ||line.length < this.xLine)
+  }
+  
   /**
    * move the cursor to start of the next line
    */
@@ -200,7 +229,7 @@ export default class Cursor
   draw(
     ctx: CanvasRenderingContext2D,
     viewport: Viewport,
-    textLines: string[],
+    text: Text,
     drawingOptions: DrawingOptions,
     editMode: EditMode
   ) {
@@ -216,17 +245,17 @@ export default class Cursor
       // in case there is no area selected, just drop a cursor at some
       this.drawLine(ctx, this.yLine, this.xLine, this.xLine, {
         ...drawingOptions,
-        color: "black",
+        color: this.style.selectorColor,
       });
     } else if (hStart && hEnd) {
       // selection active, iterate over displayed lines
       for (
         let i = 0;
-        i < Math.min(viewport.lineEnd, textLines.length) - viewport.lineStart;
+        i < Math.min(viewport.lineEnd, text.noLines) - viewport.lineStart;
         i++
       ) {
         const currY = viewport.lineStart + i;
-        const lastCharX = textLines[currY].length;
+        const lastCharX = text.getLine(currY).length;
 
         if (hStart.yLine <= currY && hEnd.yLine >= currY) {
           if (hStart.yLine === currY) {
@@ -269,14 +298,10 @@ export default class Cursor
     this.yLine = -1;
   }
 
-  static fromPosition(pos: IAbsCoordinates): Cursor {
-    return new Cursor(0, pos.xLine, pos.yLine);
-  }
-
   getAbsolutePosition(viewport: Viewport): IAbsCoordinates {
     return {
       xLine: this.xLine,
-      yLine: this.yLine + viewport.lineStart
-    }
+      yLine: this.yLine + viewport.lineStart,
+    };
   }
 }

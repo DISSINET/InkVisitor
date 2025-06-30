@@ -1,8 +1,10 @@
 import { sanitizeText } from "@common/functions";
 import { IDbModel, fillArray, fillFlatObject } from "@models/common";
+import Document from "@models/document/document";
 import Prop from "@models/prop/prop";
 import User from "@models/user/user";
 import { findEntityById } from "@service/shorthands";
+
 import {
   DbEnums,
   EntityEnums,
@@ -23,15 +25,17 @@ import {
   InternalServerError,
   ModelNotValidError,
 } from "@shared/types/errors";
+import { PropSpecKind } from "@shared/types/prop";
+import { IResponseUsedInDocument } from "@shared/types/response-detail";
 import {
   EProtocolTieType,
   ITerritoryValidation,
 } from "@shared/types/territory";
+import { IWarningPositionSection } from "@shared/types/warning";
 import { Connection, RDatum, WriteResult, r as rethink } from "rethinkdb-ts";
 import { IRequest } from "../../custom_typings/request";
 import Reference from "./reference";
-import { PropSpecKind } from "@shared/types/prop";
-import { IWarningPositionSection } from "@shared/types/warning";
+import { AnchorsNode } from "@models/document/anchors";
 
 export default class Entity implements IEntity, IDbModel {
   static table = "entities";
@@ -56,15 +60,15 @@ export default class Entity implements IEntity, IDbModel {
 
   constructor(data: Partial<IEntity>) {
     fillFlatObject(this, { ...data, data: undefined });
-    fillArray<Reference>(this.references, Reference, data.references);
-    fillArray<Prop>(this.props, Prop, data.props);
+    fillArray<Reference>(this.references, Reference, data?.references);
+    fillArray<Prop>(this.props, Prop, data?.props);
 
     this.labels = data.labels || [];
     if (data.notes !== undefined) {
       this.notes = data.notes.map(sanitizeText);
     }
     if (data.legacyId !== undefined) {
-      // this.legacyId = data.legacyId;
+      this.legacyId = data.legacyId;
     }
     if (data.isTemplate !== undefined) {
       this.isTemplate = data.isTemplate;
@@ -312,6 +316,16 @@ export default class Entity implements IEntity, IDbModel {
     return out;
   }
 
+  static extractIdsFromAnchors(anchors: IResponseUsedInDocument[]): string[] {
+    const out: string[] = [];
+    for (const anchor of anchors) {
+      out.push(anchor.resourceId);
+      out.push(anchor.parentTerritoryId);
+    }
+
+    return out;
+  }
+
   static extractIdsFromProps(
     props: IProp[] = [],
     accepted: PropSpecKind[] = [PropSpecKind.TYPE, PropSpecKind.VALUE],
@@ -389,7 +403,7 @@ export default class Entity implements IEntity, IDbModel {
     ) => {
       warnings.push({
         type: warningType,
-        origin: this.id,
+        origin: teritoryId,
         validation: tValidation,
         position: {
           section: IWarningPositionSection.Entity,
@@ -401,7 +415,9 @@ export default class Entity implements IEntity, IDbModel {
     validations.forEach(([tId, validation]) => {
       const {
         entityClasses,
-        classifications,
+        entityClassifications,
+        entityLanguages,
+        entityStatuses,
         tieType,
         propType,
         allowedClasses,
@@ -410,16 +426,22 @@ export default class Entity implements IEntity, IDbModel {
 
       // check if entity falls into the allowed classes
       const entityCheck =
-        !entityClasses.length || entityClasses.includes(this.class);
+        !entityClasses?.length || entityClasses.includes(this.class);
 
       // check if entity has the allowed classifications
       const classificationCheck =
-        !classifications.length ||
-        classifications.some((c) =>
+        !entityClassifications?.length ||
+        entityClassifications.some((c) =>
           classificationEs.map((cla) => cla.id)?.includes(c)
         );
 
-      if (entityCheck && classificationCheck) {
+      const languageCheck =
+        !entityLanguages?.length || entityLanguages.includes(this.language);
+
+      const statusCheck =
+        !entityStatuses?.length || entityStatuses.includes(this.status);
+
+      if (entityCheck && classificationCheck && languageCheck && statusCheck) {
         // CLASSIFICATION TIE
         if (tieType === EProtocolTieType.Classification) {
           if (!allowedEntities || !allowedEntities.length) {
@@ -553,6 +575,63 @@ export default class Entity implements IEntity, IDbModel {
     });
 
     return warnings;
+  }
+
+  /**
+   * returns data for usedInDocuments(IResponseUsedInDocument[]) field
+   * @param conn
+   * @returns
+   */
+  async findUsedInDocuments(
+    conn: Connection
+  ): Promise<IResponseUsedInDocument[]> {
+    const out: IResponseUsedInDocument[] = [];
+    await Promise.all(
+      (
+        await Document.findByEntityId(conn, this.id)
+      ).map(async (docData) => {
+        // construct document and tree node filled with entities data
+        const doc = new Document(docData);
+        const resources = await rethink
+          .table(Entity.table)
+          .filter({
+            class: EntityEnums.Class.Resource,
+            data: {
+              documentId: docData.id,
+            },
+          })
+          .run(conn);
+
+        const resource = resources.length > 0 ? resources[0] : null;
+
+        // traverse the tree, search for anchor that === this.id
+        const traverse = (nodes: AnchorsNode[], parentT?: string) => {
+          for (const node of nodes) {
+            if (node.anchor === this.id) {
+              const { content, ...documentMeta } = docData;
+
+              out.push({
+                document: documentMeta,
+                anchorText: node.getShortContent(),
+                resourceId: resource?.id || "",
+                parentTerritoryId: parentT || "",
+                anchorIndex: out.filter((o) => o.document.id === docData.id)
+                  .length,
+              });
+            }
+
+            traverse(
+              node.children,
+              node.class === EntityEnums.Class.Territory ? node.anchor : parentT
+            );
+          }
+        };
+
+        traverse(doc.anchors);
+      })
+    );
+
+    return out;
   }
 
   async getEntities(db: Connection): Promise<IEntity[]> {

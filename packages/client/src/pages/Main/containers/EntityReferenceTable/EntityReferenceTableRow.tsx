@@ -1,6 +1,7 @@
 import { IEntity, IReference } from "@shared/types";
 import { Button } from "components";
-import React, { useContext, useEffect, useRef } from "react";
+import { useTheme } from "hooks";
+import React, { useEffect, useRef } from "react";
 import {
   DragSourceMonitor,
   DropTargetMonitor,
@@ -8,9 +9,8 @@ import {
   useDrop,
 } from "react-dnd";
 import { FaExternalLinkAlt, FaGripVertical, FaTrashAlt } from "react-icons/fa";
-import { ThemeContext } from "styled-components";
 import { DragItem, Identifier, ItemTypes } from "types";
-import { dndHoverFn, normalizeURL } from "utils/utils";
+import { dndHoverFn } from "utils/utils";
 import { EntityReferenceTableResource } from "./EntityReferenceTableResource";
 import {
   StyledGrid,
@@ -39,6 +39,7 @@ interface EntityReferenceTableRow {
   territoryParentId?: string;
   alwaysShowCreateModal?: boolean;
   openDetailOnCreate?: boolean;
+  editorWidthTooSmall: boolean;
 
   hasOrder: boolean;
   index: number;
@@ -63,6 +64,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
   territoryParentId,
   openDetailOnCreate,
   alwaysShowCreateModal,
+  editorWidthTooSmall,
 
   hasOrder,
   index,
@@ -81,7 +83,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
     onClearAfterInitTyped();
   }, []);
 
-  const dropRef = useRef<HTMLTableRowElement>(null);
+  const dropRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<HTMLTableCellElement>(null);
 
   const [{ handlerId }, drop] = useDrop<
@@ -116,7 +118,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
   preview(drop(dropRef));
   drag(dragRef);
 
-  const themeContext = useContext(ThemeContext);
+  const theme = useTheme();
 
   const resourceEntity = entities[reference.resource];
   const valueEntity = entities[reference.value];
@@ -126,7 +128,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
       <StyledGrid ref={dropRef} data-handler-id={handlerId} style={{ opacity }}>
         {hasOrder && userCanEdit ? (
           <span ref={dragRef} style={{ cursor: "move" }}>
-            <FaGripVertical color={themeContext?.color.black} />
+            <FaGripVertical color={theme.color.black} />
           </span>
         ) : (
           <span style={{ width: "1.5rem" }} />
@@ -140,6 +142,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
           openDetailOnCreate={openDetailOnCreate}
           alwaysShowCreateModal={alwaysShowCreateModal}
           initResourceTyped={initResourceTyped}
+          editorWidthTooSmall={editorWidthTooSmall}
           disabled={disabled}
         />
         <EntityReferenceTableValue
@@ -152,6 +155,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
           openDetailOnCreate={openDetailOnCreate}
           territoryParentId={territoryParentId}
           initValueTyped={initValueTyped}
+          editorWidthTooSmall={editorWidthTooSmall}
           disabled={disabled}
         />
         <span>
@@ -166,14 +170,14 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
                   icon={<FaExternalLinkAlt />}
                   color="plain"
                   onClick={() => {
+                    const baseUrl = resourceEntity.data.partValueBaseURL;
+                    const label = valueEntity.labels[0];
+
                     const url = resourceEntity.data.partValueBaseURL.includes(
                       "http"
                     )
-                      ? normalizeURL(resourceEntity.data.partValueBaseURL) +
-                        valueEntity.labels[0]
-                      : "//" +
-                        normalizeURL(resourceEntity.data.partValueBaseURL) +
-                        valueEntity.labels[0];
+                      ? `${baseUrl}${label}`
+                      : `//${baseUrl}${label}`;
                     window.open(url, "_blank");
                   }}
                 />

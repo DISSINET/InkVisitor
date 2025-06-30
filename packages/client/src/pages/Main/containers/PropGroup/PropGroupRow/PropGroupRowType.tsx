@@ -151,7 +151,7 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
             excludedEntityClasses={excludedSuggesterEntities}
             isInsideTemplate={isInsideTemplate}
             territoryParentId={territoryParentId}
-            disabled={!userCanEdit}
+            isHidden={!userCanEdit}
             alwaysShowCreateModal={alwaysShowCreateModal}
             initTyped={initTypeTyped}
           />

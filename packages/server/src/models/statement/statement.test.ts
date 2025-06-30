@@ -1,32 +1,31 @@
-import "ts-jest";
-import Statement, {
-  StatementActant,
-  StatementAction,
-  StatementData,
-  StatementTerritory,
-} from "./statement";
-import { Db } from "@service/rethink";
-import { deleteEntities, findEntityById } from "@service/shorthands";
+import { prepareEntity } from "@models/entity/entity.test";
+import Reference from "@models/entity/reference";
+import Prop, { PropSpec } from "@models/prop/prop";
 import Territory from "@models/territory/territory";
-import {
-  IStatement,
-  IStatementData,
-  ROOT_TERRITORY_ID,
-} from "@shared/types/statement";
+import User, { UserRight } from "@models/user/user";
 import {
   clean,
   createMockTree,
   getIStatementActionMock,
   getIStatementMock,
 } from "@modules/common.test";
-import Prop, { PropSpec } from "@models/prop/prop";
-import treeCache, { TreeCache } from "@service/treeCache";
-import User, { UserRight } from "@models/user/user";
-import { EntityEnums, UserEnums } from "@shared/enums";
-import tree from "@modules/tree";
-import Reference from "@models/entity/reference";
-import { StatementClassification } from "./statement";
-import { prepareEntity } from "@models/entity/entity.test";
+import { Db } from "@service/rethink";
+import { deleteEntities, findEntityById } from "@service/shorthands";
+import treeCache from "@service/treeCache";
+import { UserEnums } from "@shared/enums";
+import {
+  IStatement,
+  IStatementData,
+  ROOT_TERRITORY_ID,
+} from "@shared/types/statement";
+import "ts-jest";
+import Statement, {
+  StatementActant,
+  StatementAction,
+  StatementClassification,
+  StatementData,
+  StatementTerritory,
+} from "./statement";
 
 const fillStatementProps = function (
   container: StatementActant | StatementAction,
@@ -375,7 +374,7 @@ describe("models/statement", function () {
       it("should return true", () => {
         const notEmpty = new Statement({
           id: "id",
-          label: "label",
+          labels: ["label"],
           data: {
             text: "text",
             territory: {

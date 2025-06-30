@@ -6,7 +6,7 @@ interface BasicDropdown<T = string> {
   value: T | null;
   onChange: (value: T) => void;
   options: { value: T; label: string; info?: string; isDisabled?: boolean }[];
-  icon?: JSX.Element;
+  icon?: React.ReactNode;
   placeholder?: string;
   tooltipLabel?: string;
   disableTyping?: boolean;

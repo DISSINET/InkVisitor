@@ -1,21 +1,23 @@
 import React, { useEffect, useState } from "react";
 
-import { IDocument, IDocumentMeta, IResponseDocument } from "@shared/types";
+import { EntityEnums } from "@shared/enums";
+import { IDocument, IDocumentMeta } from "@shared/types";
 import { Modal, ModalContent, ModalHeader } from "components";
 import { useWindowSize } from "hooks/useWindowSize";
 import { getShortLabelByLetterCount } from "utils/utils";
 import TextAnnotator from "../Annotator/Annotator";
 import AnnotatorProvider from "../Annotator/AnnotatorProvider";
-import { Annotator } from "@inkvisitor/annotator/src/lib";
+import { useQuery } from "@tanstack/react-query";
+import api from "api";
 
 interface DocumentModalEdit {
-  document: IResponseDocument | IDocumentMeta | IDocument | undefined;
+  documentId: string;
   onClose: () => void;
   anchor?: { entityId: string; occurence?: number };
 }
 const DocumentModalEdit: React.FC<DocumentModalEdit> = ({
+  documentId,
   onClose,
-  document,
   anchor,
 }) => {
   const [show, setShow] = useState(false);
@@ -24,16 +26,31 @@ const DocumentModalEdit: React.FC<DocumentModalEdit> = ({
   }, []);
   const [windowWidth, windowHeight] = useWindowSize();
 
-  // const [annotatorInitialized, setAnnotatorInitialized] = useState(false);
+  const {
+    data: dataDocument,
+    error: errorDocument,
+    isFetching: dataDocumentIsFetching,
+  } = useQuery({
+    queryKey: ["document", documentId],
+    queryFn: async () => {
+      const res = await api.documentGet(documentId);
+      return res.data;
+    },
+    enabled: api.isLoggedIn(),
+  });
 
   return (
     <Modal width={1000} showModal={show} onClose={onClose} fullHeight>
       <ModalHeader
-        title={`Edit ${
-          document
-            ? getShortLabelByLetterCount(document?.title, 90)
-            : "no label"
-        }`}
+        title={
+          dataDocumentIsFetching
+            ? "Loading..."
+            : `Edit ${
+                dataDocument
+                  ? getShortLabelByLetterCount(dataDocument.title, 90)
+                  : "no label"
+              }`
+        }
         onClose={onClose}
       />
 
@@ -41,19 +58,23 @@ const DocumentModalEdit: React.FC<DocumentModalEdit> = ({
         {document ? (
           <AnnotatorProvider>
             <TextAnnotator
-              documentId={document?.id}
+              documentId={documentId}
+              dataDocument={dataDocument}
+              dataDocumentIsFetching={dataDocumentIsFetching}
+              dataDocumentError={errorDocument}
               width={965}
               height={windowHeight - 180}
               displayLineNumbers={true}
-              hlEntities={[]}
+              hlEntities={[EntityEnums.Class.Territory]}
               storedAnnotatorScroll={0}
               forwardAnnotator={(newAnnotator) => {
-                // if (!annotatorInitialized && newAnnotator && anchor?.entityId) {
                 anchor?.entityId &&
-                  newAnnotator?.scrollToAnchor(anchor?.entityId);
-                // setAnnotatorInitialized(true);
-                // }
+                  newAnnotator?.scrollToAnchor(
+                    anchor?.entityId,
+                    anchor?.occurence || 0
+                  );
               }}
+              thisTerritoryEntityId={anchor?.entityId}
             />
           </AnnotatorProvider>
         ) : (

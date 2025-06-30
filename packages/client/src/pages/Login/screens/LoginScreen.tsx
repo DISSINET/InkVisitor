@@ -33,13 +33,15 @@ export const LoginScreen: React.FC<LoginScreen> = ({
   setRedirectToMain,
 }) => {
   const dispatch = useAppDispatch();
-  const [error, setError] = useState<string | false>(false);
+  const [error, setError] = useState<
+    { title?: string; message: string } | false
+  >(false);
 
   const ping: number = useAppSelector((state) => state.ping);
 
   const handleLogIn = async () => {
     if (ping === -1 || ping === -2) {
-      setError(NetworkError.message);
+      setError({ title: NetworkError.title, message: NetworkError.message });
     } else {
       try {
         const res = await api.signIn(usernameLocal, password, {
@@ -50,7 +52,17 @@ export const LoginScreen: React.FC<LoginScreen> = ({
           setRedirectToMain(true);
         }
       } catch (err) {
-        setError(getErrorByCode(err as IErrorSignature).message);
+        const errorTemp = getErrorByCode(err as IErrorSignature);
+        setError(
+          err?.toString().startsWith("NetworkError")
+            ? {
+                title: NetworkError.title,
+                message: NetworkError.message,
+              }
+            : {
+                message: errorTemp.message,
+              }
+        );
       }
     }
   };
@@ -94,7 +106,16 @@ export const LoginScreen: React.FC<LoginScreen> = ({
         </StyledInputRow>
       </form>
 
-      {error !== false && <StyledErrorText>{error}</StyledErrorText>}
+      {error !== false && (
+        <div style={{ marginTop: "0.5rem" }}>
+          {error.title && (
+            <StyledErrorText>
+              <b>{error.title}</b>
+            </StyledErrorText>
+          )}
+          <StyledErrorText>{error.message}</StyledErrorText>
+        </div>
+      )}
 
       <StyledButtonWrap>
         <Button

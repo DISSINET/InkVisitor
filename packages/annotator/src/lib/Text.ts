@@ -1,14 +1,14 @@
 import Viewport from "./Viewport";
-import Highlighter, {
+import {
   IAbsCoordinates,
   IRelativeCoordinates,
 } from "./Highlighter";
 import { EditMode } from "./constants";
-import Cursor from "./Cursor";
 
 export interface ITag {
   position: number;
   tag: string;
+  closing?: boolean;
 }
 
 export class Segment {
@@ -45,6 +45,7 @@ export class Segment {
       this.closingTags.push({
         position: match.index,
         tag: match[1],
+        closing: true,
       });
     }
 
@@ -52,22 +53,69 @@ export class Segment {
     this.parsed = this.raw.replace(/<\/?[^<>]+?>/g, "");
   }
 
-  getTagsForPosition(pos: SegmentPosition): [ITag[], ITag[]] {
+  /**
+   * Returns list of opening/closing tags in this segment before raw index
+   * @param rawIndex 
+   * @returns 
+   */
+  getTagsBeforePosition(rawIndex: number): [ITag[], ITag[]] {
     const openedTags: ITag[] = [];
     const closedTags: ITag[] = [];
     for (const tag of this.openingTags) {
-      if (tag.position < pos.rawTextIndex) {
+      if (tag.position < rawIndex) {
         openedTags.push(tag);
       }
     }
     for (const tag of this.closingTags) {
-      if (tag.position < pos.rawTextIndex) {
+      if (tag.position < rawIndex) {
         closedTags.push(tag);
       }
     }
     return [openedTags, closedTags];
   }
 
+  /**
+   * Returns list of opening/closing tags in this segment after raw index
+   * @param rawIndex 
+   * @returns 
+   */
+   getTagsAfterPosition(rawIndex: number): [ITag[], ITag[]] {
+    const openedTags: ITag[] = [];
+    const closedTags: ITag[] = [];
+    for (const tag of this.openingTags) {
+      if (tag.position > rawIndex) {
+        openedTags.push(tag);
+      }
+    }
+    for (const tag of this.closingTags) {
+      if (tag.position > rawIndex) {
+        closedTags.push(tag);
+      }
+    }
+    return [openedTags, closedTags];
+  }
+
+  /**
+   * Returns list of opening/closing tags in this segment between start/end raw indexes
+   * @param pos 
+   * @returns 
+   */
+  getTagsInPosition(startRawIndex: number, endRawIndex: number): [ITag[], ITag[]] {
+    const openedTags: ITag[] = [];
+    const closedTags: ITag[] = [];
+    for (const tag of this.openingTags) {
+      if (tag.position < endRawIndex && tag.position > startRawIndex) {
+        openedTags.push(tag);
+      }
+    }
+    for (const tag of this.closingTags) {
+      if (tag.position < endRawIndex && tag.position > startRawIndex) {
+        closedTags.push(tag);
+      }
+    }
+    return [openedTags, closedTags];
+  }
+  
   findTagParsedPosition(tag: ITag): { x: number; y: number } {
     // find abs position right after the <tag> in segment's text
     let parsedTextOpenPosition = this.openingTags
@@ -113,22 +161,39 @@ class Text {
   dirtySegment?: number;
   value: string;
   charsAtLine: number;
-
+  noLines: number;
   constructor(value: string, charsAtLine: number) {
     this.value = value;
     this.segments = [];
     this.prepareSegments();
     this.charsAtLine = charsAtLine;
+    this.noLines = 0;
     this.calculateLines();
   }
 
-  get noLines(): number {
-    return this.segments.reduce<number>((a, c) => a + c.lines.length, 0);
+ /**
+   * Returns the line at the specified index by iterating over segments
+   * @param lineIndex The absolute line index
+   * @returns The line at the specified index or an empty string if not found
+   */
+ getLine(lineIndex: number): string {
+  // Find the segment that contains the line
+  const segmentIndex = this.segments.findIndex(
+    (s) => s.lineStart <= lineIndex && s.lineEnd > lineIndex
+  );
+  
+  if (segmentIndex === -1) {
+    return "";
   }
+  
+  // Calculate the relative line index within the segment
+  const segment = this.segments[segmentIndex];
+  const relativeLineIndex = lineIndex - segment.lineStart;
+  
+  // Return the line from the segment
+  return segment.lines[relativeLineIndex] || "";
+}
 
-  get lines(): string[] {
-    return this.segments.reduce<string[]>((a, cur) => a.concat(cur.lines), []);
-  }
 
   updateCharsAtLine(charsAtLine: number) {
     this.charsAtLine = charsAtLine;
@@ -216,6 +281,7 @@ class Text {
     // Performance check
     // const time2 = performance.now();
     // console.log(`${time2 - time1} ms `);
+    this.noLines = this.segments.reduce<number>((a, c) => a + c.lines.length, 0);
   }
 
   /**
@@ -250,21 +316,29 @@ class Text {
 
   getAbsTextIndex(
     cursor: IRelativeCoordinates,
-    viewport?: Viewport
+    viewport?: Viewport,
+    fixClosingTag?: boolean
   ): number {
     const pos = this.getSegmentPosition(
       cursor.yLine + (viewport?.lineStart || 0),
-      cursor.xLine
+      cursor.xLine,
+      fixClosingTag || undefined
     );
     if (!pos) {
       return -1;
     }
 
-    let absIndex = pos.rawTextIndex;
-    for (let i = 0; i < pos.segmentIndex; i++) {
+    return this.getAbsTextIndexFromPosition(pos);
+  }
+
+  getAbsTextIndexFromPosition(segment: SegmentPosition | null): number {
+    if (!segment) {
+      return -1;
+    }
+    let absIndex = segment.rawTextIndex;
+    for (let i = 0; i < segment.segmentIndex; i++) {
       absIndex += this.segments[i].raw.length + 1;
     }
-
     return absIndex;
   }
 
@@ -274,13 +348,14 @@ class Text {
 
   getSegmentPosition(
     absLineIndex: number,
-    charInLineIndex: number = 0
+    charInLineIndex: number = 0,
+    fixClosingTag?: boolean
   ): SegmentPosition | null {
     // sanitize bounds
     if (absLineIndex < 0) {
       absLineIndex = 0;
-    } else if (absLineIndex > this.lines.length) {
-      absLineIndex = this.lines.length;
+    } else if (absLineIndex > this.noLines) {
+      absLineIndex = this.noLines;
     }
 
     const segmentIndex = this.segments.findLastIndex(
@@ -293,6 +368,8 @@ class Text {
 
     const segment = this.segments[segmentIndex];
     const lineIndex = absLineIndex - segment.lineStart;
+
+    // compute initial start - jumpong over previous segments / previous lines in current segment
     charInLineIndex = segment.lines[lineIndex]
       ? Math.min(charInLineIndex, segment.lines[lineIndex].length)
       : 0;
@@ -303,15 +380,17 @@ class Text {
 
     let rawTextIndex = parsedTextIndex;
 
+    // in raw mode - include also opening and closing tags <tag> + </tag> where applicable
     if (this.mode !== EditMode.RAW) {
-      for (const tag of segment.openingTags) {
-        if (tag.position <= rawTextIndex) {
-          rawTextIndex += tag.tag.length + 2;
-        }
-      }
-      for (const tag of segment.closingTags) {
-        if (tag.position <= rawTextIndex) {
-          rawTextIndex += tag.tag.length + 3;
+      const tags = segment.openingTags
+        .concat(segment.closingTags)
+        .sort((a, b) => a.position - b.position);
+      for (const tag of tags) {
+        // condition which ignores tags on same position as current rawTextIndex
+        const excludeTagFix = tag.closing && fixClosingTag;
+
+        if (excludeTagFix ? tag.position < rawTextIndex : tag.position <= rawTextIndex) {
+          rawTextIndex += tag.tag.length + (tag.closing ? 3 : 2);
         }
       }
     }
@@ -338,6 +417,40 @@ class Text {
       parsedTextIndex: 0,
       rawTextIndex: 0,
     };
+  }
+
+  /**
+   * Returns an array of lines between the specified start and end line indices
+   * @param startLine The starting line index (inclusive)
+   * @param endLine The ending line index (exclusive)
+   * @returns Array of lines between the specified indices
+   */
+  getRangeLines(startLine: number, endLine: number): string[] {
+    // Sanitize bounds
+    if (startLine < 0) startLine = 0;
+    if (endLine > this.noLines) endLine = this.noLines;
+    if (startLine >= endLine) return [];
+
+    const result: string[] = [];
+    
+    // Find the segments that contain the requested lines
+    for (let i = 0; i < this.segments.length; i++) {
+      const segment = this.segments[i];
+      
+      // Skip segments that don't contain any of the requested lines
+      if (segment.lineEnd <= startLine || segment.lineStart >= endLine) {
+        continue;
+      }
+      
+      // Calculate the relative line indices within this segment
+      const relativeStartLine = Math.max(0, startLine - segment.lineStart);
+      const relativeEndLine = Math.min(segment.lines.length, endLine - segment.lineStart);
+      
+      // Add the relevant lines from this segment
+      result.push(...segment.lines.slice(relativeStartLine, relativeEndLine));
+    }
+    
+    return result;
   }
 
   /**
@@ -449,11 +562,7 @@ class Text {
     const segment = this.segments[segmentPosition.segmentIndex];
 
     if (this.mode !== EditMode.RAW) {
-      for (const tag of segment.closingTags) {
-        if (tag.position < segmentPosition.rawTextIndex) {
-          indexPosition -= tag.tag.length + 3;
-        }
-      }
+     
     }
 
     for (let i = 0; i < segmentPosition.segmentIndex; i++) {
@@ -516,7 +625,7 @@ class Text {
    * For more characters, see deleteRangeText as that method is slighly slower that this
    * @param viewport
    * @param cursorPosition
-   * @param forwardChar 
+   * @param forwardChar
    */
   deleteTextChar(
     viewport: Viewport,
@@ -571,7 +680,7 @@ class Text {
       end = tempStart;
     }
 
-    const rangeLines = this.lines.slice(start.yLine, end.yLine + 1);
+    const rangeLines = this.getRangeLines(start.yLine, end.yLine + 1);
     const linesSize = rangeLines.length;
     if (!linesSize) {
       return "";
@@ -582,9 +691,7 @@ class Text {
     return rangeLines.join("\n");
   }
 
-  deleteRangeText(
-    start: IAbsCoordinates,
-    end: IAbsCoordinates  ): void {
+  deleteRangeText(start: IAbsCoordinates, end: IAbsCoordinates): void {
     // swap in case start is after end
     if (
       start.yLine > end.yLine ||
@@ -603,22 +710,22 @@ class Text {
     this.calculateLines();
   }
 
-  getTagPosition(tag: string, occurrence: number = 1): IAbsCoordinates[] {
+  getTagPosition(tag: string, index: number = 0): IAbsCoordinates[] {
     let openingTagMatch: { tag: ITag; segment: Segment } | null = null;
     let closingTagMatch: { tag: ITag; segment: Segment } | null = null;
 
-    let openingTagCount = 0;
-    let closingTagCount = 0;
+    let openingTagIndex = 0;
+    let closingTagIndex = 0;
 
     // Search for the opening tag
     for (const segment of this.segments) {
       for (const openingTag of segment.openingTags) {
         if (openingTag.tag === tag) {
-          openingTagCount++;
-          if (openingTagCount === occurrence) {
+          if (openingTagIndex === index) {
             openingTagMatch = { tag: openingTag, segment };
             break;
           }
+          openingTagIndex++;
         }
       }
       if (openingTagMatch) break;
@@ -628,11 +735,11 @@ class Text {
     for (const segment of this.segments) {
       for (const closingTag of segment.closingTags) {
         if (closingTag.tag === tag) {
-          closingTagCount++;
-          if (closingTagCount === occurrence) {
+          if (closingTagIndex === index) {
             closingTagMatch = { tag: closingTag, segment };
             break;
           }
+          closingTagIndex++;
         }
       }
       if (closingTagMatch) break;

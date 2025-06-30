@@ -1,4 +1,4 @@
-FROM gplane/pnpm:node18-alpine as build-env
+FROM gplane/pnpm:node22-alpine as build-env
 
 RUN apk add tzdata openssl
 ENV TZ=Europe/Prague
@@ -9,7 +9,8 @@ ARG ENV
 
 COPY ./packages .
 
-RUN cd client && pnpm install && BUILD_TIMESTAMP=$(date +'%a %d.%m.%Y %H:%M') pnpm build:${ENV}
+RUN cd annotator && pnpm install && pnpm build
+RUN cd client && pnpm install && BUILD_TIMESTAMP=$(date +'%a %d.%m.%Y %H:%M') && export BUILD_TIMESTAMP && pnpm build:${ENV}
 RUN rm -rf client/node_modules client/src
 
 WORKDIR /app/server
@@ -18,7 +19,7 @@ RUN pnpm prune --prod
 RUN mkdir -p ./secret
 RUN openssl req -x509 -newkey rsa:2048 -nodes -out ./secret/cert.pem -keyout ./secret/key.pem -days 365 -subj "/C=FR/O=krkr/OU=Domain Control Validated/CN=*"
 
-FROM gplane/pnpm:node18-alpine 
+FROM gplane/pnpm:node22-alpine 
 
 COPY --from=build-env /app /app
 
@@ -31,4 +32,3 @@ RUN BUILD_TIMESTAMP=$(date +'%a %d.%m.%Y %H:%M') && \
 RUN echo "source /app/server/.build_env" >> /etc/profile
 
 CMD ["/bin/sh", "-c", "source /app/server/.build_env && pnpm start:dist -- \"$BUILD_TIMESTAMP\""]
-    

@@ -1,3 +1,4 @@
+import { ConnectDropTarget } from "react-dnd";
 import { AiOutlineWarning } from "react-icons/ai";
 import styled from "styled-components";
 import { space2, space4 } from "Theme/constants";
@@ -27,12 +28,13 @@ interface InputWrapper {
   $isOver: boolean;
   $hasButton: boolean;
   $hasText?: boolean;
+  ref?: ConnectDropTarget;
 }
 export const StyledInputWrapper = styled.div<InputWrapper>`
   display: flex;
   opacity: ${({ $isOver }) => $isOver && "50%"};
   width: 100%;
-  /* max-width: 16.1rem; */
+  height: 2.5rem;
   input {
     padding-right: ${({ theme, $hasText }) =>
       $hasText ? theme.space[7] : theme.space[1]};
@@ -59,15 +61,20 @@ export const StyledSuggestionCancelButton = styled.div<StyledSuggestionCancelBut
 `;
 
 export const StyledSuggesterList = styled.div`
-  z-index: 100;
+  z-index: 160;
 `;
-
-export const StyledRelativePosition = styled.div`
+interface StyledRelativePosition {
+  $width?: number;
+}
+export const StyledRelativePosition = styled.div<StyledRelativePosition>`
   position: relative;
   background-color: ${({ theme }) => theme.color["blue"][50]};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
   min-width: 16.1rem;
-  max-width: 24rem;
+  /* max-width: 24rem; */
+  max-width: ${({ $width }) => (!$width ? "24rem" : "")};
+  width: ${({ $width }) => ($width ? `${$width / 10}rem` : "")};
+
   overflow: hidden;
   display: grid;
 
@@ -109,8 +116,7 @@ export const StyledAiOutlineWarning = styled(AiOutlineWarning)`
   margin-top: 0.1rem;
   margin-left: 0.5rem;
 `;
-export const StyledDash = styled.div`
-  font-size: ${({ theme }) => theme.fontSize["base"]};
-  color: ${({ theme }) => theme.color["black"]};
-  padding-left: 0.3rem;
+
+export const SuggesterHidden = styled.div`
+  display: none;
 `;

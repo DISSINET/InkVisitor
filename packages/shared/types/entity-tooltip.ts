@@ -1,11 +1,12 @@
 import { IEntity, IResponseEntity } from ".";
 import { EntityEnums, RelationEnums } from "../enums";
 import { Relation as RelationTypes } from "./relation";
-
+import { IResponseUsedInDocument } from "./response-detail";
 export namespace EntityTooltip {
   export interface IResponse extends IResponseEntity {
     entities: Record<string, IEntity>; //  all entities mentioned in relations
     relations: RelationTypes.IUsedRelations;
+    usedInDocuments: IResponseUsedInDocument[];
   }
 
   export type IIdentification = {

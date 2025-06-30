@@ -10,6 +10,7 @@ interface IValueStyle {
   $noBorder?: boolean;
   $borderColor?: keyof ThemeColor;
   $autocomplete?: string;
+  $fullHeight?: boolean;
 }
 const getWidth = (width?: number | "full") => {
   if (width) {
@@ -21,11 +22,15 @@ const getWidth = (width?: number | "full") => {
 interface StyledWrapper {
   $fullHeightTextArea: boolean;
   width?: number | "full";
+  $minWidth?: number;
+  $fullHeight?: boolean;
 }
 export const StyledWrapper = styled.div<StyledWrapper>`
   display: flex;
   height: ${({ $fullHeightTextArea }) => ($fullHeightTextArea ? "100%" : "")};
+  height: ${({ $fullHeight }) => ($fullHeight ? "100%" : "")};
   flex-grow: ${({ width }) => (width === "full" ? 1 : "")};
+  min-width: ${({ $minWidth }) => ($minWidth ? `${$minWidth}px` : "")};
 `;
 export const Label = styled.span`
   text-align: right;
@@ -37,7 +42,9 @@ export const Label = styled.span`
   font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
 export const StyledInput = styled.input<IValueStyle>`
-  height: ${({ theme }) => theme.space[10]};
+  /* height: ${({ theme }) => theme.space[10]}; */
+  height: ${({ $fullHeight, theme }) =>
+    $fullHeight ? "100%" : theme.space[10]};
   text-align: left;
   border-style: solid;
   color: ${({ $inverted, theme }) =>
@@ -55,7 +62,7 @@ export const StyledInput = styled.input<IValueStyle>`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   padding-left: ${({ theme }) => theme.space[2]};
   width: ${({ width }) => getWidth(width)};
-  min-width: 6rem;
+  min-width: ${({ theme }) => theme.space[6]};
   background: ${({ disabled, theme }) =>
     disabled ? theme.background["stripes"] : ""};
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "")};
@@ -70,6 +77,9 @@ export const StyledInput = styled.input<IValueStyle>`
     outline: 0;
     border-color: ${({ theme }) => theme.color["info"]};
     border-width: ${({ theme }) => theme.borderWidth[1]};
+  }
+  &::placeholder {
+    font-size: 1.1rem;
   }
 `;
 

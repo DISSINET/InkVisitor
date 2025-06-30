@@ -28,8 +28,9 @@ export interface StyledSelect {
   entityDropdown?: boolean;
   attributeDropdown?: boolean;
   wildCardChar?: boolean;
-  icon?: JSX.Element;
+  icon?: React.ReactNode;
   loggerId?: string;
+  limitSelectedItems?: number;
 }
 export const StyledSelect = styled(Select)<StyledSelect>`
   display: inline-flex;
@@ -43,6 +44,8 @@ export const StyledSelect = styled(Select)<StyledSelect>`
     width: ${({ width }) => getWidth(width)};
     max-width: 100%;
     min-height: ${({ theme }) => theme.space[10]};
+    // only for one row multi entity dropdown to avoid glitches during resizing
+    height: ${({ limitSelectedItems }) => (limitSelectedItems ? "27px" : "")};
     border-width: 1px;
     border-style: solid;
     border-color: ${({ theme, suggester }) =>
@@ -98,6 +101,9 @@ export const StyledSelect = styled(Select)<StyledSelect>`
     svg {
       height: 18;
     }
+  }
+  .react-select__clear-indicator {
+    padding: 0.2rem;
   }
   .react-select__indicator-separator {
     display: none;

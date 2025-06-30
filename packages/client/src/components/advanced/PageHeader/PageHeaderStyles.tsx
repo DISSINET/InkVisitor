@@ -25,6 +25,7 @@ export const StyledHeaderTag = styled.div`
 `;
 
 export const StyledUserIconWrap = styled.div`
+  display: flex;
   cursor: pointer;
   margin-left: ${({ theme }) => theme.space[2]};
   margin-right: ${({ theme }) => theme.space[2]};
@@ -41,6 +42,7 @@ export const StyledRightHeader = styled.div`
   display: flex;
 `;
 export const StyledThemeSwitcher = styled.div`
+  height: 3rem;
   display: inline-flex;
   border-radius: 1.2rem;
   overflow: hidden;
@@ -106,13 +108,14 @@ export const StyledFlexRow = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
+  height: 1.4rem;
 `;
 
 export const StyledSandboxText = styled.div`
   max-width: 40rem;
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
   display: flex;
-  color: ${({ theme }) => theme.color["danger"]};
+  color: ${({ theme }) => theme.color["warningText"]};
 `;
 export const StyledSpace = styled.div`
   display: flex;

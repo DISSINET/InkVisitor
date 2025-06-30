@@ -37,6 +37,8 @@ interface Input {
 
   autocomplete?: string;
   required?: boolean;
+  minWidth?: number;
+  fullHeight?: boolean;
 }
 
 export const Input: React.FC<Input> = ({
@@ -64,6 +66,8 @@ export const Input: React.FC<Input> = ({
 
   autocomplete = "",
   required = false,
+  minWidth,
+  fullHeight = false,
 }) => {
   const [displayValue, setDisplayValue] = useState(value);
   useEffect(() => {
@@ -74,6 +78,8 @@ export const Input: React.FC<Input> = ({
     <StyledWrapper
       width={width}
       $fullHeightTextArea={type === "textarea" && fullHeightTextArea}
+      $minWidth={minWidth}
+      $fullHeight={fullHeight}
     >
       {label && <Label className="label">{label}</Label>}
       {(type === "text" || type === "password") && (
@@ -81,6 +87,7 @@ export const Input: React.FC<Input> = ({
           disabled={disabled}
           type={type}
           width={width}
+          $fullHeight={fullHeight}
           autoFocus={autoFocus}
           className="value"
           placeholder={placeholder}

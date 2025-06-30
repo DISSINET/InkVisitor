@@ -352,7 +352,9 @@ describe("models/entity/warnings", function () {
       await db.initDb();
       await actionWithEmptyLanguage.save(db.connection);
       await conceptWithSetLanguage.save(db.connection);
-      
+    });
+  });
+
   describe("test VETV", function () {
     const db = new Db();
 
@@ -400,19 +402,20 @@ describe("models/entity/warnings", function () {
 
     it("should have LM for entity without language", async () => {
       const psm = await new EntityWarnings(
-        actionWithEmptyLanguage.id,
-        actionWithEmptyLanguage.class
+        actionEntity0.id,
+        actionEntity0.class
       ).hasLM(db.connection);
       expect(psm).toBeTruthy();
     });
 
     it("should have not LM for entity with language", async () => {
       const psm = await new EntityWarnings(
-        conceptWithSetLanguage.id,
-        conceptWithSetLanguage.class
+        actionEntity1.id,
+        actionEntity1.class
       ).hasLM(db.connection);
       expect(psm).toBeFalsy();
-      
+    });
+
     it("should return 0 warnings", async () => {
       const warnings = await new EntityWarnings(
         actionEntity0.id,
@@ -428,6 +431,7 @@ describe("models/entity/warnings", function () {
       ).hasVETM(db.connection);
       expect(warnings).toHaveLength(1);
     });
+
     it("should return 2 warnings", async () => {
       const warnings = await new EntityWarnings(
         actionEntity2.id,

@@ -359,6 +359,19 @@ class SearchEdgeTypesInvalid extends CustomError {
 }
 
 /**
+ * RelationPathExists will be thrown when attempting to add relation while there could already be the same path
+ */
+class RelationPathExist extends CustomError {
+  public static code = 400;
+  public static title = "Relation not created";
+  public static message = "Relation constraint already exists";
+
+  static forId(id: string): RelationPathExist {
+    return new RelationPathExist(RelationPathExist.message.replace("$1", id));
+  }
+}
+
+/**
  * RelationAsymetricalPathExist will be thrown when attempting to add asymetrical relation while there could already be path from A -> B
  */
 class RelationAsymetricalPathExist extends CustomError {
@@ -463,10 +476,11 @@ class UnknownError extends CustomError {
 }
 
 class NetworkError extends CustomError {
+  public static readonly TYPE = "NetworkError";
   public static code = 500;
   public static title = "Connection to server lost";
   public static message =
-    "Please check your network connection. Otherwise contact the administrator.";
+    "Please check your network connection. If the issue persists, please try again later or contact the project owner.";
 }
 
 const allErrors: Record<string, any> = {
@@ -496,6 +510,7 @@ const allErrors: Record<string, any> = {
   EmailError,
   RelationDoesNotExist,
   SearchEdgeTypesInvalid,
+  RelationPathExist,
   RelationAsymetricalPathExist,
   DocumentDoesNotExist,
   NetworkError,
@@ -515,9 +530,14 @@ export interface IErrorSignature {
 }
 
 export function getErrorByCode(errSig: IErrorSignature): CustomError {
-  return allErrors[errSig.error]
-    ? new allErrors[errSig.error](errSig.message)
-    : new UnknownError(errSig.message || "Unknown error occured");
+  const ErrorClass = allErrors[errSig.error];
+  if (ErrorClass) {
+    // Create a new instance of the error class and allow to overwrite the message
+    const errorInstance = new ErrorClass(errSig.message || ErrorClass.message);
+    errorInstance.title = ErrorClass.title; // Set the title from the class
+    return errorInstance;
+  }
+  return new UnknownError(errSig.message || "Unknown error occurred");
 }
 
 export {
@@ -547,6 +567,7 @@ export {
   EmailError,
   RelationDoesNotExist,
   SearchEdgeTypesInvalid,
+  RelationPathExist,
   RelationAsymetricalPathExist,
   DocumentDoesNotExist,
   NetworkError,

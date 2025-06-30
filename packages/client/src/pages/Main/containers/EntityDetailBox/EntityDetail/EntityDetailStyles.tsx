@@ -6,6 +6,8 @@ export const StyledDetailWrapper = styled.div<StyledDetailWrapper>`
   flex-direction: column;
   overflow: auto;
   align-items: start;
+  // necessary for correct scroll / overflow
+  /* padding-bottom: 2.5rem; */
 `;
 
 interface StyledDetailSection {
@@ -174,7 +176,9 @@ export const StyledTagWrap = styled.div`
 `;
 
 export const StyledPropGroupWrap = styled.div`
+  overflow: auto;
   margin-bottom: ${({ theme }) => theme.space[5]};
+  padding-bottom: ${({ theme }) => theme.space[5]};
 `;
 
 export const StyledBlockSeparator = styled.div`

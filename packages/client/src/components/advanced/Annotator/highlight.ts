@@ -1,29 +1,28 @@
-import { HighlightSchema, HighlightMode } from "@inkvisitor/annotator";
+import { HighlightMode, HighlightSchema } from "@inkvisitor/annotator/src/lib";
 import { EntityEnums } from "@shared/enums";
-import { IResponseDocumentDetail } from "@shared/types";
 import { DefaultTheme } from "styled-components";
 import { EntityColors } from "types";
-
+import { IDocument } from "@shared/types";
 interface annotatorHighlightData {
   thisTerritoryEntityId: string | undefined;
-  dataDocument: IResponseDocumentDetail;
+  dataDocument: IDocument;
 }
 
 export const annotatorHighlight = (
   entityId: string,
   data: annotatorHighlightData,
-  hlEntities: EntityEnums.Class[],
+  hlClasses: EntityEnums.Class[],
   theme: DefaultTheme | undefined
 ): HighlightSchema | undefined => {
   const dReferenceEntityIds: Record<EntityEnums.Class, string[]> =
-    data.dataDocument?.referencedEntityIds ?? {};
+    data.dataDocument?.entityIds ?? {};
 
   if (entityId === data.thisTerritoryEntityId) {
     return {
       mode: HighlightMode.FOCUS,
       style: {
-        color: "black",
-        opacity: 0.25,
+        color: theme?.color["black"],
+        opacity: 0.08,
       },
     };
   }
@@ -34,8 +33,8 @@ export const annotatorHighlight = (
 
   if (
     entityClass &&
-    hlEntities &&
-    hlEntities.includes(entityClass as EntityEnums.Class)
+    hlClasses &&
+    hlClasses.includes(entityClass as EntityEnums.Class)
   ) {
     if (entityClass === EntityEnums.Class.Statement) {
       return {

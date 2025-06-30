@@ -52,7 +52,9 @@ const initialRulesState: Record<ValidationKey, boolean> = Object.keys(
 const initValidation: ITerritoryValidation = {
   detail: "",
   entityClasses: [],
-  classifications: [],
+  entityClassifications: [],
+  entityLanguages: [],
+  entityStatuses: [],
   allowedEntities: [],
   allowedClasses: [],
   propType: [],
@@ -189,6 +191,13 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
     setRules((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
+  // useEffect(() => {
+  // const newSettings: Omit<ISetting, "public">[] = Object.entries(rules).map(
+  //   ([id, value]) => ({ id, value })
+  // );
+  // updateSettingsMutation.mutate(newSettings);
+  // }, [rules]);
+
   return (
     <>
       <Modal
@@ -202,7 +211,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
           onClose={() => setShowGlobalValidations(false)}
         />
         <ModalContent column enableScroll>
-          <StyledGridForm>
+          {/* <StyledGridForm>
             <StyledGridSectionHeading>
               Valency validations
             </StyledGridSectionHeading>
@@ -241,7 +250,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
                 toggleRule={() => toggleRule(val)}
               />
             ))}
-          </StyledGridForm>
+          </StyledGridForm> */}
 
           {rootTerritory && (
             <>
@@ -285,6 +294,14 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
                   }
                 )}
               </StyledValidationList>
+              <div style={{ marginTop: "2rem" }}>
+                <Button
+                  icon={<FaPlus />}
+                  label="new validation rule"
+                  color="primary"
+                  onClick={initValidationRule}
+                />
+              </div>
             </>
           )}
 
@@ -293,22 +310,9 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
         <ModalFooter>
           <ButtonGroup>
             <Button
-              color="warning"
-              label="cancel"
+              color="success"
+              label="done"
               onClick={() => setShowGlobalValidations(false)}
-            />
-            <Button
-              color="primary"
-              label="submit"
-              disabled={
-                JSON.stringify(settingsKeyValue) === JSON.stringify(rules)
-              }
-              onClick={() => {
-                const newSettings: Omit<ISetting, "public">[] = Object.entries(
-                  rules
-                ).map(([id, value]) => ({ id, value }));
-                updateSettingsMutation.mutate(newSettings);
-              }}
             />
           </ButtonGroup>
         </ModalFooter>

@@ -1,20 +1,42 @@
-import { IEntity, IResponseGeneric } from "@shared/types";
-import { ITerritoryValidation } from "@shared/types/territory";
+import { IEntity, IResponseDetail, IResponseGeneric } from "@shared/types";
+import {
+  EProtocolTieType,
+  ITerritory,
+  ITerritoryValidation,
+} from "@shared/types/territory";
 import { UseMutationResult } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
-import { Submit } from "components";
+import { Button, Submit } from "components";
 import React, { useState } from "react";
 import { deepCopy } from "utils/utils";
 import {
   StyledBlockSeparator,
+  StyledDetailSectionHeader,
   StyledValidationList,
 } from "../EntityDetailStyles";
 import { ValidationRule } from "components/advanced";
+import { FaPlus } from "react-icons/fa";
+import { EntityDetailSectionButtons } from "../EntityDetailSectionButtons/EntityDetailSectionButtons";
+import { EntityEnums } from "@shared/enums";
+import api from "api";
+import { toast } from "react-toastify";
+
+const initValidation: ITerritoryValidation = {
+  detail: "",
+  entityClasses: [],
+  entityClassifications: [],
+  entityLanguages: [],
+  entityStatuses: [],
+  allowedEntities: [],
+  allowedClasses: [],
+  propType: [],
+  tieType: EProtocolTieType.Property,
+};
 
 interface EntityDetailValidationSection {
   validations?: ITerritoryValidation[];
   entities: Record<string, IEntity>;
-  updateEntityMutation?: UseMutationResult<
+  updateEntityMutation: UseMutationResult<
     AxiosResponse<IResponseGeneric<any>, any>,
     Error,
     Partial<IEntity>,
@@ -23,10 +45,9 @@ interface EntityDetailValidationSection {
   userCanEdit: boolean;
   isInsideTemplate?: boolean;
   territoryParentId?: string | undefined;
-  showValidationsBatchRemoveSubmit?: boolean;
-  setShowValidationsBatchRemoveSubmit?: React.Dispatch<
-    React.SetStateAction<boolean>
-  >;
+  entity: IResponseDetail;
+  setLoadingValidations: React.Dispatch<React.SetStateAction<boolean>>;
+  widthTooSmall: boolean;
 }
 export const EntityDetailValidationSection: React.FC<
   EntityDetailValidationSection
@@ -37,12 +58,26 @@ export const EntityDetailValidationSection: React.FC<
   userCanEdit,
   isInsideTemplate = false,
   territoryParentId,
-  showValidationsBatchRemoveSubmit,
-  setShowValidationsBatchRemoveSubmit,
+  entity,
+  setLoadingValidations,
+  widthTooSmall,
 }) => {
   const [tempIndexToRemove, setTempIndexToRemove] = useState<false | number>(
     false
   );
+
+  const initValidationRule = () => {
+    const newValidation = { ...initValidation };
+    newValidation.territoryId = entity.id;
+
+    updateEntityMutation.mutate({
+      data: {
+        validations: validations
+          ? [...validations, newValidation]
+          : [newValidation],
+      },
+    });
+  };
 
   const removeValidationRule = (indexToRemove: number) => {
     updateEntityMutation?.mutate({
@@ -74,8 +109,71 @@ export const EntityDetailValidationSection: React.FC<
     });
   };
 
+  const [showBatchRemoveSubmit, setShowBatchRemoveSubmit] = useState(false);
+
   return (
     <>
+      <StyledDetailSectionHeader>
+        Validation rules
+        {userCanEdit && (
+          <span style={{ marginLeft: "1rem", marginRight: "1rem" }}>
+            <Button
+              color="primary"
+              label="rule"
+              icon={<FaPlus />}
+              onClick={initValidationRule}
+            />
+          </span>
+        )}
+        {userCanEdit && (
+          <EntityDetailSectionButtons
+            entityId={entity.id}
+            suggesterCategoryTypes={[EntityEnums.Class.Territory]}
+            setShowSubmit={setShowBatchRemoveSubmit}
+            removeBtnTooltip="remove all validations from entity"
+            removeBtnDisabled={
+              entity.data.validations
+                ? entity.data.validations.length === 0
+                : true
+            }
+            widthTooSmall={widthTooSmall}
+            handleCopyFromEntity={(pickedEntity, replace) => {
+              setLoadingValidations(true);
+              api.detailGet(pickedEntity.id).then((data) => {
+                setLoadingValidations(false);
+                const otherValidations = (data.data as ITerritory).data
+                  .validations;
+                if (otherValidations && otherValidations.length > 0) {
+                  if (replace) {
+                    updateEntityMutation.mutate({
+                      data: {
+                        validations: otherValidations,
+                      },
+                    });
+                  } else {
+                    if (validations) {
+                      updateEntityMutation.mutate({
+                        data: {
+                          validations: [...validations, ...otherValidations],
+                        },
+                      });
+                    } else {
+                      updateEntityMutation.mutate({
+                        data: {
+                          validations: otherValidations,
+                        },
+                      });
+                    }
+                  }
+                } else {
+                  toast.info("no validations");
+                }
+              });
+            }}
+          />
+        )}
+      </StyledDetailSectionHeader>
+
       {validations && (
         <StyledValidationList>
           {(validations as ITerritoryValidation[]).map((validation, key) => {
@@ -93,6 +191,7 @@ export const EntityDetailValidationSection: React.FC<
                   removeValidationRule={() => setTempIndexToRemove(key)}
                   isInsideTemplate={isInsideTemplate}
                   territoryParentId={territoryParentId}
+                  widthTooSmall={widthTooSmall}
                   userCanEdit={userCanEdit}
                 />
                 {key !== validations.length - 1 && <StyledBlockSeparator />}
@@ -100,6 +199,19 @@ export const EntityDetailValidationSection: React.FC<
             );
           })}
         </StyledValidationList>
+      )}
+
+      {userCanEdit && validations && validations.length > 0 && (
+        <div
+          style={{ marginLeft: "1rem", marginRight: "1rem", marginTop: "2rem" }}
+        >
+          <Button
+            color="primary"
+            label="validation rule"
+            icon={<FaPlus />}
+            onClick={initValidationRule}
+          />
+        </div>
       )}
 
       <Submit
@@ -112,23 +224,20 @@ export const EntityDetailValidationSection: React.FC<
         }}
         onCancel={() => setTempIndexToRemove(false)}
       />
-      {showValidationsBatchRemoveSubmit !== undefined &&
-        setShowValidationsBatchRemoveSubmit !== undefined && (
-          <Submit
-            show={showValidationsBatchRemoveSubmit}
-            title="Remove validation rules"
-            text="Do you really want to remove all validation rules?"
-            onSubmit={() => {
-              updateEntityMutation?.mutate({
-                data: {
-                  validations: [],
-                },
-              });
-              setShowValidationsBatchRemoveSubmit(false);
-            }}
-            onCancel={() => setShowValidationsBatchRemoveSubmit(false)}
-          />
-        )}
+      <Submit
+        show={showBatchRemoveSubmit}
+        title="Remove validation rules"
+        text="Do you really want to remove all validation rules?"
+        onSubmit={() => {
+          updateEntityMutation.mutate({
+            data: {
+              validations: [],
+            },
+          });
+          setShowBatchRemoveSubmit(false);
+        }}
+        onCancel={() => setShowBatchRemoveSubmit(false)}
+      />
     </>
   );
 };

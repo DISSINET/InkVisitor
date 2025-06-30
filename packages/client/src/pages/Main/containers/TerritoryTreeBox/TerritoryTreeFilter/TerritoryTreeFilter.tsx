@@ -1,9 +1,9 @@
 import { UserEnums } from "@shared/enums";
 import { Checkbox, Input } from "components";
-import React, { useContext } from "react";
+import { useTheme } from "hooks";
+import React from "react";
 import { FaSearch } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
-import { ThemeContext } from "styled-components";
 import { ITerritoryFilter } from "types";
 import {
   StyledCancelButton,
@@ -25,7 +25,7 @@ export const TerritoryTreeFilter: React.FC<TerritoryTreeFilter> = ({
   handleFilterChange,
   userRole,
 }) => {
-  const themeContext = useContext(ThemeContext);
+  const theme = useTheme();
 
   return (
     <StyledFilterWrap>
@@ -41,17 +41,22 @@ export const TerritoryTreeFilter: React.FC<TerritoryTreeFilter> = ({
           onChangeFn={(value: boolean) => handleFilterChange("starred", value)}
         />
         {/* Only for non admin users */}
-        {userRole !== UserEnums.Role.Admin && (
-          <Checkbox
-            label="editor rights"
-            value={filterData.editorRights}
-            onChangeFn={(value: boolean) =>
-              handleFilterChange("editorRights", value)
-            }
-          />
-        )}
+        {userRole !== UserEnums.Role.Admin &&
+          userRole !== UserEnums.Role.Owner && (
+            <Checkbox
+              label="editor rights"
+              value={filterData.editorRights}
+              onChangeFn={(value: boolean) =>
+                handleFilterChange("editorRights", value)
+              }
+            />
+          )}
         <StyledInputWrap>
-          <FaSearch color={themeContext?.color.black} />
+          <FaSearch
+            style={{ flexShrink: 0 }}
+            size={14}
+            color={theme.color.black}
+          />
           <Input
             value={filterData.filter}
             placeholder="Filter by text"

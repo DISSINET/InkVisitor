@@ -28,6 +28,8 @@ import { LeftHeader, RightHeader } from "./PageHeader/PageHeader";
 import { TerritoryActionModal } from "./TerritoryActionModal/TerritoryActionModal";
 import { UserCustomizationModal } from "./UserCustomizationModal/UserCustomizationModal";
 import { ValidationRule } from "./ValidationRule/ValidationRule";
+import { AbbreviatedTextWithTooltip } from "./AbbreviatedTextWithTooltip/AbbreviatedTextWithTooltip";
+import { DocumentTitle } from "./DocumentTitle/DocumentTitle";
 
 const Dropdown = {
   Single: {
@@ -45,8 +47,10 @@ export {
   AddTerritoryModal,
   ApplyTemplateModal,
   AttributeButtonGroup,
+  AbbreviatedTextWithTooltip,
   AuditTable,
   BreadcrumbItem,
+  DocumentTitle,
   DocumentModalEdit,
   DocumentModalExport,
   ElvlButtonGroup,
@@ -57,8 +61,8 @@ export {
   EntityTag,
   EntityTooltip,
   JSONExplorer,
-  LayoutSeparatorHorizontal,
   LayoutSeparatorVertical,
+  LayoutSeparatorHorizontal,
   LeftHeader,
   LogicButtonGroup,
   Menu,

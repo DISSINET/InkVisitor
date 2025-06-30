@@ -10,6 +10,7 @@ const theme = {
     blue: {
       50: "#e6eafa",
       100: "#CCD5F4",
+      150: "#B3C0E9",
       200: "#9DADEA",
       300: "#6174C2",
       400: "#324185",
@@ -21,6 +22,7 @@ const theme = {
     },
     gray: {
       100: "#f7fafc",
+      150: "#f4f7fa",
       200: "#edf2f7",
       300: "#e2e8f0",
       400: "#cbd5e0",
@@ -77,13 +79,16 @@ const theme = {
     tableSelection: "#bce5ff",
     tableSelectionHover: "#e0f3ff",
     focusedCheckbox: "rgba(9,16,52,0.1)",
+    uploadDocumentBg: "#CCD5F4",
 
     headerTextColor: " #fff",
-    muni: "#091034",
+    muni: "#091034", // muni primary color
     staging: "#911111",
     "data-import": "#99004C",
+    "data-import-persecutio": "#380099",
     development: "#6174C2",
     sandbox: "#CB6E17",
+    medhate: "#006666",
 
     entityC: "#83BCB6",
     entityE: "#D8B5A5",
@@ -140,6 +145,10 @@ const theme = {
     "4": "#f27a43", //unfinished
   },
   space: {
+    "-4": "-1rem",
+    "-3": "-0.75rem",
+    "-2": "-0.5rem",
+    "-1": "-0.25rem",
     px: "1px",
     0: "0",
     1: "0.25rem",

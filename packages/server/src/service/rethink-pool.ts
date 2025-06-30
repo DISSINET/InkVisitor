@@ -1,4 +1,4 @@
-import { createPool, Pool } from "generic-pool";
+import { createPool, Pool, Options } from "generic-pool";
 import { RConnectionOptions } from "rethinkdb-ts";
 import { Db } from "./rethink";
 
@@ -14,14 +14,26 @@ export default class DbPool {
       validate: this.validate.bind(this),
     };
 
-    this.pool = createPool<Db>(factory, { ...options });
+    const poolOptions: Options = {
+      max: options.max,
+      min: 0,
+      acquireTimeoutMillis: options.acquireTimeoutMillis || 10000,
+      idleTimeoutMillis: options.idleTimeoutMillis || 30000,
+      autostart: true,
+      evictionRunIntervalMillis: 1000,
+      numTestsPerEvictionRun: 3,
+      testOnBorrow: true,
+      testOnReturn: true
+    };
+
+    this.pool = createPool<Db>(factory, poolOptions);
   }
 
   async acquire(): Promise<Db> {
     //console.log(
     //  `Acquiring db connection, available=${this.pool.available}, size=${this.pool.size}`
     //);
-    const db = this.pool.acquire();
+    const db = await this.pool.acquire();
     //console.log(
     //  `Acquired db connection, available=${this.pool.available}, size=${this.pool.size}`
     //);

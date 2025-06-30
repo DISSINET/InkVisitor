@@ -1,7 +1,7 @@
 import { config, useSpring } from "@react-spring/web";
-import theme, { ThemeColor } from "Theme/theme";
-import React, { useContext, useState } from "react";
-import { ThemeContext } from "styled-components";
+import { ThemeColor } from "Theme/theme";
+import { useTheme } from "hooks";
+import React, { useState } from "react";
 import { StyledMenuItem } from "./MenuStyles";
 
 interface MenuItem {
@@ -16,15 +16,15 @@ export const MenuItem: React.FC<MenuItem> = ({
   color = "primary",
   onClick,
 }) => {
-  const themeContext = useContext(ThemeContext);
+  const theme = useTheme();
 
   const [isHovered, setIsHovered] = useState(false);
 
-  const selectedColor = themeContext?.color[color];
+  const selectedColor = theme.color[color] as string;
 
   const animatedBackground = useSpring({
-    color: isHovered ? themeContext?.color["white"] : selectedColor,
-    backgroundColor: isHovered ? selectedColor : themeContext?.color["white"],
+    color: isHovered ? theme.color.white : selectedColor,
+    backgroundColor: isHovered ? selectedColor : theme.color.white,
     config: config.stiff,
   });
 

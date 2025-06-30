@@ -19,38 +19,90 @@ import { findEntityById, getEntitiesByIds } from "@service/shorthands";
 import treeCache from "@service/treeCache";
 import { WarningTypeEnums } from "@shared/enums";
 import { InternalServerError } from "@shared/types/errors";
+import { PropSpecKind } from "@shared/types/prop";
+import { IResponseUsedInDocument } from "@shared/types/response-detail";
 import { ITerritoryValidation } from "@shared/types/territory";
 import { Connection } from "rethinkdb-ts";
 import { IRequest } from "src/custom_typings/request";
 import Entity from "../entity/entity";
 import { PositionRules } from "./PositionRules";
 import Statement from "./statement";
-import { PropSpecKind } from "@shared/types/prop";
 
 export class ResponseStatement extends Statement implements IResponseStatement {
   entities: { [key: string]: IEntity };
   right: UserEnums.RoleMode = UserEnums.RoleMode.Read;
   warnings: IWarning[];
+  usedInDocuments: IResponseUsedInDocument[];
 
   constructor(entity: IStatement) {
     super(entity);
     this.entities = {};
     this.warnings = [];
+    this.usedInDocuments = [];
   }
 
   async prepare(req: IRequest) {
     this.right = this.getUserRoleMode(req.getUserOrFail());
+    this.usedInDocuments = await this.findUsedInDocuments(req.db.connection);
+
     await this.prepareEntities(req.db.connection);
-    this.warnings = await this.getWarnings(req);
+    if (!this.isTemplate) {
+      this.warnings = await this.getWarnings(req);
+    }
   }
 
+  /**
+   * Prepares the statement with preloaded entities
+   * Does not generate warnings
+   * Does need usedInDocuments to be set
+   * @param req
+   * @param preloadedEntities
+   */
+  prepareSync(req: IRequest, preloadedEntities: Record<string, IEntity>) {
+    this.right = this.getUserRoleMode(req.getUserOrFail());
+    this.prepareEntitiesSync(preloadedEntities);
+  }
+
+  prepareEntitiesSync(preloadedEntities: Record<string, IEntity>) {
+    const wantedEntityIds = this.getEntitiesIds();
+    const wantedAnchorEntityIds = Entity.extractIdsFromAnchors(this.usedInDocuments);
+    const entities: IEntity[] = [];
+    const anchorEntities: IEntity[] = [];
+
+    for (const entityId of wantedEntityIds) {
+      if (preloadedEntities[entityId]) {
+        entities.push(preloadedEntities[entityId]);
+      }
+    }
+
+    for (const anchorEntityId of wantedAnchorEntityIds) {
+      if (preloadedEntities[anchorEntityId]) {
+        anchorEntities.push(preloadedEntities[anchorEntityId]);
+      }
+    }
+
+    this.entities = Object.assign(
+      {},
+      ...entities.map((x) => ({ [x.id]: x })),
+      ...anchorEntities.map((x) => ({ [x.id]: x }))
+    );
+  }
   /**
    * Prepares the entities map
    * @param db
    */
   async prepareEntities(db: Connection): Promise<void> {
     const entities = await this.getEntities(db);
-    this.entities = Object.assign({}, ...entities.map((x) => ({ [x.id]: x })));
+    const anchorEntities = await Entity.findEntitiesByIds(
+      db,
+      Entity.extractIdsFromAnchors(this.usedInDocuments)
+    );
+
+    this.entities = Object.assign(
+      {},
+      ...entities.map((x) => ({ [x.id]: x })),
+      ...anchorEntities.map((x) => ({ [x.id]: x }))
+    );
   }
 
   /**
@@ -201,36 +253,38 @@ export class ResponseStatement extends Statement implements IResponseStatement {
       const entityId = allEntities[ei];
       if (entityId) {
         const entityData = await this.obtainEntity(entityId, req);
-        const entity = new Entity(entityData);
 
-        const classificationRels =
-          await Classification.getClassificationForwardConnections(
+        if (entityData?.id === entityId) {
+          const entity = new Entity(entityData);
+
+          const classificationRels =
+            await Classification.getClassificationForwardConnections(
+              req.db.connection,
+              entityId,
+              entity.class,
+              1,
+              0
+            );
+          const classificationEs: IConcept[] = await getEntitiesByIds<IConcept>(
             req.db.connection,
-            entityId,
-            entity.class,
-            1,
-            0
+            classificationRels.map((c) => c.entityIds[1])
           );
-        const classificationEs: IConcept[] = await getEntitiesByIds<IConcept>(
-          req.db.connection,
-          classificationRels.map((c) => c.entityIds[1])
-        );
-        const propValueEs = await getEntitiesByIds<IEntity>(
-          req.db.connection,
-          Entity.extractIdsFromProps(entity.props, [PropSpecKind.VALUE])
-        );
-        const eWarnings = entity.getTBasedWarnings(
-          territoryEs,
-          classificationEs,
-          propValueEs
-        );
-        if (eWarnings.length) {
-          warnings = warnings.concat(eWarnings);
+          const propValueEs = await getEntitiesByIds<IEntity>(
+            req.db.connection,
+            Entity.extractIdsFromProps(entity.props, [PropSpecKind.VALUE])
+          );
+          const eWarnings = entity.getTBasedWarnings(
+            territoryEs,
+            classificationEs,
+            propValueEs
+          );
+          if (eWarnings.length) {
+            warnings = warnings.concat(eWarnings);
+          }
         }
       }
     }
 
-    console.log(warnings);
     return warnings;
   }
 

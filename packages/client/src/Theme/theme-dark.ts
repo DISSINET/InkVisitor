@@ -7,6 +7,7 @@ const darkTheme = {
     blue: {
       50: "#111625",
       100: "#1E2330",
+      150: "#2A3245",
       200: "#2D324A",
       300: "#47546F",
       400: "#677B9E",
@@ -18,6 +19,7 @@ const darkTheme = {
     },
     gray: {
       100: "#1a202c",
+      150: "#232A38",
       200: "#2d3748",
       300: "#4a5568",
       400: "#718096",
@@ -67,13 +69,16 @@ const darkTheme = {
     tableSelection: "#4c82a1",
     tableSelectionHover: "#2c638c",
     focusedCheckbox: "rgba(246,246,255,0.1)",
+    uploadDocumentBg: "#22315a",
 
     closeBtnBackground: "rgba(200, 200, 200, 0.1)",
 
     staging: "#911111",
     "data-import": "#ff6aaf",
+    "data-import-persecutio": "#8c79e0",
     development: "#6174C2",
     sandbox: "#e59857",
+    medhate: "#008080",
 
     entityC: "#83BCB6",
     entityE: "#D8B5A5",

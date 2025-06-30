@@ -6,7 +6,8 @@ import firstPanelExpandedSlice from "./features/layout/mainPage/firstPanelExpand
 import fourthPanelBoxesOpenedSlice from "./features/layout/mainPage/fourthPanelBoxesOpenedSlice";
 import fourthPanelExpandedSlice from "./features/layout/mainPage/fourthPanelExpandedSlice";
 import panelWidthsPercentSlice from "./features/layout/mainPage/panelWidthsPercentSlice";
-import panelWidthsSlice from "./features/layout/mainPage/panelWidthsSlice";
+import secondPanelRealWidthSlice from "./features/layout/mainPage/secondPanelRealWidthSlice";
+import thirdPanelRealWidthSlice from "./features/layout/mainPage/thirdPanelRealWidthSlice";
 import statementListOpenedSlice from "./features/layout/mainPage/statementListOpenedSlice";
 import pingSlice from "./features/pingSlice";
 import draggedActantRowSlice from "./features/rowDnd/draggedActantRowSlice";
@@ -24,7 +25,10 @@ import selectedTerritoryPathSlice from "./features/territoryTree/selectedTerrito
 import treeInitializeSlice from "./features/territoryTree/treeInitializeSlice";
 import themeSlice from "./features/themeSlice";
 import usernameSlice from "./features/usernameSlice";
-import thirdPanelExpandedSlice from "./features/layout/thirdPanelExpandedSlice";
+import detailBoxStateSlice from "./features/layout/mainPage/detailBoxStateSlice";
+import detailBoxMinimizedSlice from "./features/layout/mainPage/detailBoxMinimizedSlice";
+import panelWidthsSlice from "./features/layout/mainPage/panelWidthsSlice";
+import thirdPanelExpandedSlice from "./features/layout/mainPage/thirdPanelExpandedSlice";
 
 const store: Store = configureStore({
   reducer: {
@@ -64,6 +68,10 @@ const store: Store = configureStore({
         fourthPanelExpanded: fourthPanelExpandedSlice,
         fourthPanelBoxesOpened: fourthPanelBoxesOpenedSlice,
         statementListOpened: statementListOpenedSlice,
+        detailBoxMinimized: detailBoxMinimizedSlice,
+        secondPanelRealWidth: secondPanelRealWidthSlice,
+        thirdPanelRealWidth: thirdPanelRealWidthSlice,
+        detailBoxState: detailBoxStateSlice,
       }),
     }),
   },

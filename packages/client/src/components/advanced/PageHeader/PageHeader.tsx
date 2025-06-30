@@ -11,7 +11,7 @@ import { BeatLoader } from "react-spinners";
 import { toast } from "react-toastify";
 import { setTheme } from "redux/features/themeSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { getUserIcon } from "utils/utils";
+import { getUserIcon } from "utils/iconUtils";
 import { Menu } from "..";
 import packageJson from "../../../../package.json";
 import {
@@ -42,10 +42,7 @@ interface LeftHeader {
 }
 export const LeftHeader: React.FC<LeftHeader> = React.memo(
   ({ tempLocation }) => {
-    let env = (process.env.ROOT_URL || "").replace(/apps\/inkvisitor[-]?/, "");
-    if (env === "/") {
-      env = "";
-    }
+    const env = window.appConfig.env || "";
 
     const versionText = `v. ${packageJson.version}${
       env ? ` | ${env}` : ``
@@ -135,7 +132,10 @@ export const LeftHeader: React.FC<LeftHeader> = React.memo(
               <BeatLoader
                 size={6}
                 margin={4}
-                style={{ marginLeft: "0.3rem", marginTop: "0.1rem" }}
+                style={{
+                  marginLeft: "0.3rem",
+                  marginTop: "0.1rem",
+                }}
                 color="white"
               />
             )}
@@ -149,7 +149,7 @@ export const LeftHeader: React.FC<LeftHeader> = React.memo(
 );
 
 interface RightHeader {
-  setUserCustomizationOpen: (arg0: boolean) => void;
+  setUserCustomizationOpen: React.Dispatch<React.SetStateAction<boolean>>;
   userName: string;
   userRole: UserEnums.Role;
   tempLocation: string | false;
@@ -168,10 +168,7 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
     handleLogOut,
     userIsFetching = false,
   }) => {
-    const env = (process.env.ROOT_URL || "").replace(
-      /apps\/inkvisitor[-]?/,
-      ""
-    );
+    const env = window.appConfig.env || "";
 
     const dispatch = useAppDispatch();
     const selectedThemeId: InterfaceEnums.Theme = useAppSelector(
@@ -268,6 +265,7 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
               tempLocation={tempLocation}
               setTempLocation={setTempLocation}
               handleLogOut={handleLogOut}
+              setUserCustomizationOpen={setUserCustomizationOpen}
             />
           </StyledMenu>
         </StyledRightHeader>

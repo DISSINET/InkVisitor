@@ -10,7 +10,7 @@ interface FirstLevelPropGroup {
     moveProp: (dragIndex: number, hoverIndex: number) => void,
     hasOrder: boolean,
     isLast: boolean
-  ) => JSX.Element;
+  ) => React.ReactNode;
 }
 export const FirstLevelPropGroup: React.FC<FirstLevelPropGroup> = ({
   props,

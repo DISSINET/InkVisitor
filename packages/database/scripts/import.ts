@@ -57,6 +57,7 @@ const datasets: Record<string, DbSchema> = {
       transform: function () {},
     },
   },
+
   empty: {
     settings: defaultSettingsTable,
     users: {
@@ -87,6 +88,7 @@ const datasets: Record<string, DbSchema> = {
       },
       indexes: entitiesIndexes,
     },
+
     audits: {
       tableName: "audits",
       data: require("../datasets/empty/audits.json"),
@@ -110,6 +112,7 @@ const datasets: Record<string, DbSchema> = {
       transform: function () {},
     },
   },
+
   relationstest: {
     settings: defaultSettingsTable,
     users: {
@@ -186,6 +189,7 @@ const datasets: Record<string, DbSchema> = {
       transform: function () {},
     },
   },
+
   allparsed: {
     settings: defaultSettingsTable,
     users: {
@@ -259,6 +263,7 @@ const datasets: Record<string, DbSchema> = {
       transform: function () {},
     },
   },
+
   initial_c: {
     settings: defaultSettingsTable,
     users: {
@@ -295,6 +300,7 @@ const datasets: Record<string, DbSchema> = {
       transform: function () {},
     },
   },
+
   initial_a: {
     settings: defaultSettingsTable,
     users: {
@@ -331,6 +337,7 @@ const datasets: Record<string, DbSchema> = {
       transform: function () {},
     },
   },
+
   acr: {
     settings: defaultSettingsTable,
     users: {
@@ -414,7 +421,7 @@ const datasets: Record<string, DbSchema> = {
     settings: defaultSettingsTable,
     users: {
       tableName: "users",
-      data: require("../datasets/default/users.json"),
+      data: require("../datasets/production/users.json"),
       transform: function () {
         this.data = this.data.map((user: IUser) => {
           user.password = hashPassword(user.password ? user.password : "");
@@ -435,7 +442,7 @@ const datasets: Record<string, DbSchema> = {
     },
     audits: {
       tableName: "audits",
-      data: require("../datasets/empty/audits.json"),
+      data: require("../datasets/production/audits.json"),
       transform: function () {},
       indexes: auditsIndexes,
     },

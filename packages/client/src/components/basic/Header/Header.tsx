@@ -8,8 +8,8 @@ interface HeaderProps {
   paddingX?: number;
   paddingY?: number;
   height?: number;
-  left: JSX.Element | undefined;
-  right: JSX.Element | undefined;
+  left: React.ReactNode | undefined;
+  right: React.ReactNode | undefined;
   color?: keyof ThemeColor;
 }
 
@@ -21,17 +21,12 @@ export const Header: React.FC<HeaderProps> = ({
   height = heightHeader,
   color = "primary",
 }) => {
-  const layoutWidth: number = useAppSelector(
-    (state) => state.layout.layoutWidth
-  );
-
   return (
     <StyledHeader
       $color={color}
       $height={height}
       $paddingX={paddingX}
       $paddingY={paddingY}
-      $layoutWidth={layoutWidth}
     >
       <TextLeft>{left}</TextLeft>
       <TextRight>{right}</TextRight>

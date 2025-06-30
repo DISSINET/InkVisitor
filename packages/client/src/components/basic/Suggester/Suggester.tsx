@@ -8,6 +8,7 @@ import { dropdownWildCard } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
 import { IEntity, IUserOptions } from "@shared/types";
 import { MIN_LABEL_LENGTH_MESSAGE, scrollOverscanCount } from "Theme/constants";
+import { ThemeType } from "Theme/theme";
 import {
   Button,
   Input,
@@ -17,13 +18,13 @@ import {
 } from "components";
 import Dropdown from "components/advanced";
 import useKeypress from "hooks/useKeyPress";
-import React, { useContext, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { DropTargetMonitor, useDrop } from "react-dnd";
 import { FaPlus } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
 import { toast } from "react-toastify";
 import { FixedSizeList as List } from "react-window";
-import { ThemeContext } from "styled-components";
+import { useTheme } from "hooks";
 import {
   EntityDragItem,
   EntitySingleDropdownItem,
@@ -34,18 +35,17 @@ import {
 import { SuggesterKeyPress } from "./SuggesterKeyPress";
 import {
   StyledAiOutlineWarning,
-  StyledDash,
   StyledInputWrapper,
   StyledRelativePosition,
   StyledSuggester,
   StyledSuggesterButton,
   StyledSuggesterList,
   StyledSuggestionCancelButton,
+  SuggesterHidden,
 } from "./SuggesterStyles";
 import {
   MemoizedEntityRow,
   SuggestionRowEntityItemData,
-  createItemData,
 } from "./SuggestionRow/SuggestionRow";
 
 interface Suggester {
@@ -86,10 +86,12 @@ interface Suggester {
   setShowCreateModal: React.Dispatch<React.SetStateAction<boolean>>;
   alwaysShowCreateModal?: boolean;
   button?: React.ReactNode;
+  disableTemplateInstantiation?: boolean;
+  isHidden?: boolean;
 }
 
 export const Suggester: React.FC<Suggester> = ({
-  marginTop,
+  marginTop = false,
   suggestions = [],
   placeholder = "",
   typed,
@@ -124,6 +126,8 @@ export const Suggester: React.FC<Suggester> = ({
   setShowCreateModal,
   alwaysShowCreateModal,
   button,
+  disableTemplateInstantiation = false,
+  isHidden = false,
 }) => {
   const [selected, setSelected] = useState(-1);
   const [isFocused, setIsFocused] = useState(false);
@@ -141,6 +145,17 @@ export const Suggester: React.FC<Suggester> = ({
     },
     [showCreateModal, isFocused]
   );
+
+  const inputRef = useRef<HTMLDivElement>(null);
+  const [resultWidth, setResultWidth] = useState<number | undefined>(undefined);
+
+  // measure the input width when focused
+  useEffect(() => {
+    if (isFocused && inputRef.current) {
+      const width = inputRef.current.getBoundingClientRect().width;
+      setResultWidth(width);
+    }
+  }, [isFocused]);
 
   const onTypeFn = (newType: string) => {
     setSelected(-1);
@@ -237,15 +252,18 @@ export const Suggester: React.FC<Suggester> = ({
   };
 
   const renderEntitySuggestions = (suggestions: EntitySuggestion[]) => {
-    const itemData: SuggestionRowEntityItemData = createItemData(
-      suggestions as EntitySuggestion[],
+    const itemData: SuggestionRowEntityItemData = {
+      items: suggestions,
       onPick,
       selected,
       isInsideTemplate,
       territoryParentId,
-      disableButtons
-    );
+      disableButtons,
+      disableTemplateInstantiation,
+    };
+
     const rowHeight = 25;
+
     return (
       <List
         itemData={itemData as SuggestionRowEntityItemData}
@@ -270,15 +288,15 @@ export const Suggester: React.FC<Suggester> = ({
     middleware: [flip({ padding: 10 })],
   });
 
-  const themeContext = useContext(ThemeContext);
+  const theme = useTheme();
 
-  if (disabled) {
-    return <StyledDash>-</StyledDash>;
+  if (isHidden) {
+    return <SuggesterHidden />;
   }
 
   return (
     // div is necessary for flex to work and render the clear button properly
-    <div>
+    <div style={{ width: inputWidth === "full" ? "100%" : undefined }}>
       <StyledSuggester
         $marginTop={marginTop}
         $fullWidth={inputWidth === "full"}
@@ -312,9 +330,14 @@ export const Suggester: React.FC<Suggester> = ({
           <TypeBar entityLetter={category} />
 
           <div
-            ref={refs.setReference}
+            // ref={refs.setReference}
+            ref={(node) => {
+              refs.setReference(node);
+              inputRef.current = node;
+            }}
             style={{
               position: "relative",
+              width: "100%",
             }}
           >
             <Input
@@ -334,8 +357,9 @@ export const Suggester: React.FC<Suggester> = ({
                 setSelected(-1);
               }}
               onEnterPressFn={handleEnterPress}
-              autoFocus={categories.length === 1 || autoFocus}
+              autoFocus={categories.length === 1 && autoFocus}
               disabled={disabled}
+              fullHeight
             />
             {typed.length > 0 && (
               <StyledSuggestionCancelButton>
@@ -355,6 +379,7 @@ export const Suggester: React.FC<Suggester> = ({
                   handleAddBtnClick();
                 }}
                 disabled={disabled}
+                fullHeight
               />
             </StyledSuggesterButton>
           )}
@@ -362,10 +387,7 @@ export const Suggester: React.FC<Suggester> = ({
         </StyledInputWrapper>
 
         {isWrongDropCategory && isOver && (
-          <StyledAiOutlineWarning
-            size={22}
-            color={themeContext?.color.warning}
-          />
+          <StyledAiOutlineWarning size={22} color={theme.color.warning} />
         )}
 
         {(isFocused || isHovered) && !middlewareData.hide?.referenceHidden && (
@@ -380,7 +402,7 @@ export const Suggester: React.FC<Suggester> = ({
             >
               {suggestions.length || (isFetching && isFocused) ? (
                 <>
-                  <StyledRelativePosition>
+                  <StyledRelativePosition $width={resultWidth}>
                     {renderEntitySuggestions(suggestions)}
                     <Loader size={30} show={isFetching} />
                   </StyledRelativePosition>
@@ -400,7 +422,7 @@ export const Suggester: React.FC<Suggester> = ({
               {/* PRE-SUGGESTIONS */}
               {preSuggestions?.length && typed.length === 0 ? (
                 <>
-                  <StyledRelativePosition>
+                  <StyledRelativePosition $width={resultWidth}>
                     {renderEntitySuggestions(preSuggestions)}
                     <Loader size={30} show={isFetching} />
                   </StyledRelativePosition>

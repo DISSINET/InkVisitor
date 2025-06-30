@@ -44,6 +44,7 @@ export interface IResponseUsedInDocument {
   anchorText: string; // content of the anchor
   resourceId: string; // resource linked to the document
   parentTerritoryId: string; // id of the closest territory anchor in the document, "" if no territory is found
+  anchorIndex: number; // index of the anchor in the document
 }
 
 export interface IResponseUsedInStatement<PositionEnum> {

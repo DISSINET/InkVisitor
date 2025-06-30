@@ -1,8 +1,9 @@
 import styled from "styled-components";
 
-export const StyledBorderLeft = styled.div<{
+interface StyledBorderLeftProps {
   $active: boolean;
-}>`
+}
+export const StyledBorderLeft = styled.div<StyledBorderLeftProps>`
   border-left: ${({ theme, $active }) => {
     if ($active) {
       return `${theme.borderWidth[4]} solid`;
@@ -35,15 +36,18 @@ export const StyledGrid = styled.div`
   grid-template-columns: auto 1fr;
   grid-gap: 1rem;
 `;
-export const StyledSentence = styled.p<{ $active: boolean }>`
+interface StyledSentenceProps {
+  $active: boolean;
+}
+export const StyledSentence = styled.p<StyledSentenceProps>`
   margin-top: 0.1rem;
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   color: ${({ theme, $active }) =>
     $active ? theme.color.primary : theme.color.greyer};
-  &:before: {
+  &::before {
     content: '"';
   }
-  &:after: {
+  &::after {
     content: '"';
   }
 `;
@@ -66,4 +70,12 @@ export const StyledValue = styled.div`
 export const StyledFlexList = styled.div`
   display: flex;
   flex-wrap: wrap;
+  gap: ${({ theme }) => theme.space[2]};
+`;
+
+export const StyledLanguageList = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${({ theme }) => theme.space[2]};
+  margin-bottom: ${({ theme }) => theme.space[2]};
 `;

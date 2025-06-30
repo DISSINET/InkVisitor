@@ -1,63 +1,173 @@
-import { IDocumentMeta, IEntity } from "@shared/types";
-import { IResponseUsedInDocument } from "@shared/types/response-detail";
-import { useMutation } from "@tanstack/react-query";
+import {
+  IResponseDetail,
+  IResponseUsedInDocument,
+} from "@shared/types/response-detail";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { DocumentTitle, Table } from "components";
-import { DocumentModalEdit, EntityTag } from "components/advanced";
-import React, { useMemo, useState } from "react";
-import { FaAnchor } from "react-icons/fa";
+import { Button, Table } from "components";
+import {
+  AbbreviatedTextWithTooltip,
+  DocumentTitle,
+  EntityTag,
+} from "components/advanced";
+import React, { useMemo } from "react";
+import { FaAnchor, FaTrashAlt } from "react-icons/fa";
 import { HiClipboardList } from "react-icons/hi";
 import { CellProps, Column } from "react-table";
 import { toast } from "react-toastify";
-import {
-  StyledAbbreviatedLabel,
-  StyledAnchorText,
-} from "./EntityDetailUsedInDocumentsTableStyles";
+import { StyledAnchorText } from "./EntityDetailUsedInDocumentsTableStyles";
+import { useSearchParams } from "hooks";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
+import { DetailBoxState } from "types";
+import { EntityEnums } from "@shared/enums";
+import useAnnotator from "hooks/useAnnotator";
+import { setStatementListOpened } from "redux/features/layout/mainPage/statementListOpenedSlice";
 
 type CellType = CellProps<IResponseUsedInDocument>;
 interface EntityDetailUsedInDocumentsTable {
   title: { singular: string; plural: string };
-  entities: { [key: string]: IEntity };
-  useCases: IResponseUsedInDocument[];
   perPage?: number;
+  entity: IResponseDetail;
+  widthTooSmall: boolean;
 }
 export const EntityDetailUsedInDocumentsTable: React.FC<
   EntityDetailUsedInDocumentsTable
-> = ({ title, entities, useCases = [], perPage }) => {
-  const data = useMemo(() => useCases, [useCases]);
+> = ({
+  title,
+  perPage,
+  entity,
+  widthTooSmall,
+}: EntityDetailUsedInDocumentsTable) => {
+  const detailBoxState: DetailBoxState = useAppSelector(
+    (state) => state.layout.mainPage.detailBoxState
+  );
+
+  const {
+    entities,
+    usedInDocuments: uses,
+    id: entityId,
+    class: entityClass,
+  } = entity;
+  const queryClient = useQueryClient();
 
   const removeAnchorMutation = useMutation({
-    mutationFn: (data: { documentId: string; entityId: string }) =>
-      api.documentRemoveAnchors(data.documentId, data.entityId),
-    onSuccess(data, variables, context) {},
+    mutationFn: (data: { documentId: string; anchorIndex: number }) =>
+      api.documentRemoveAnchor(data.documentId, entityId, data.anchorIndex),
+    onSuccess(data, variables, context) {
+      queryClient.invalidateQueries({ queryKey: ["entity"] });
+    },
   });
 
-  const [openedDocument, setOpenedDocument] = useState<IDocumentMeta | false>(
-    false
-  );
-  const [tempAnchor, setTempAnchor] = useState<string | false>(false);
+  const { setTerritoryId, setAnnotatorOpened, setStatementId, territoryId } =
+    useSearchParams();
+  const dispatch = useAppDispatch();
+
+  const { scrollToAnchor } = useAnnotator();
 
   const columns = useMemo<Column<IResponseUsedInDocument>[]>(
     () => [
       {
+        id: "anchor btn",
+        Cell: ({ row }: CellType) => {
+          const { parentTerritoryId } = row.original;
+          return (
+            <>
+              {(parentTerritoryId ||
+                entityClass === EntityEnums.Class.Territory) && (
+                <Button
+                  tooltipLabel="locate in annotator"
+                  onClick={() => {
+                    let timeout = 0;
+                    if (
+                      territoryId !== parentTerritoryId ||
+                      detailBoxState === DetailBoxState.FullHeight
+                    ) {
+                      // set more time to open statement list, annotator and/or find the territory
+                      timeout = 2000;
+                    } else {
+                      timeout = 100;
+                    }
+                    if (parentTerritoryId) {
+                      setTerritoryId(parentTerritoryId);
+                    } else if (entityClass === EntityEnums.Class.Territory) {
+                      setTerritoryId(entityId);
+                    }
+
+                    if (entityClass === EntityEnums.Class.Statement) {
+                      setStatementId(entityId);
+                    }
+
+                    if (detailBoxState === DetailBoxState.FullHeight) {
+                      dispatch(setStatementListOpened(true));
+                      dispatch(setDetailBoxState(DetailBoxState.Normal));
+                    }
+                    setAnnotatorOpened(true);
+
+                    setTimeout(() => {
+                      scrollToAnchor(entityId, row.original.anchorIndex);
+                    }, timeout);
+                  }}
+                  icon={<FaAnchor size={16} />}
+                  inverted
+                  noBackground
+                  noBorder
+                  noIconMargin
+                />
+              )}
+            </>
+          );
+        },
+      },
+      {
         Header: "Anchor text",
         Cell: ({ row }: CellType) => {
-          const { anchorText } = row.original;
+          const { anchorText, document } = row.original;
           return (
             <>
               {anchorText ? (
                 <StyledAnchorText>
-                  <HiClipboardList
-                    size={18}
-                    style={{ cursor: "pointer" }}
+                  <Button
+                    color="primary"
+                    icon={
+                      <HiClipboardList
+                        size={18}
+                        style={{ cursor: "pointer", flexShrink: 0 }}
+                      />
+                    }
                     onClick={() => {
-                      window.navigator.clipboard.writeText(anchorText);
-                      toast.info("text copied to clipboard");
+                      api
+                        .documentGetAnchorText(
+                          document.id,
+                          entityId,
+                          row.original.anchorIndex
+                        )
+                        .then((response) => {
+                          if (response.data.data) {
+                            window.navigator.clipboard.writeText(
+                              response.data.data
+                            );
+                            toast.info("text copied to clipboard");
+                          }
+                        })
+                        .catch((error) => {
+                          console.error("Failed to get anchor text:", error);
+                          toast.error("Failed to copy text to clipboard");
+                        });
                     }}
+                    tooltipLabel="copy anchored text to clipboard"
+                    inverted
+                    noBackground
+                    noBorder
+                    noIconMargin
                   />
-                  <StyledAbbreviatedLabel>
-                    {anchorText || ""}
-                  </StyledAbbreviatedLabel>
+
+                  <AbbreviatedTextWithTooltip
+                    text={anchorText}
+                    documentId={document.id}
+                    entityId={entityId}
+                    anchorIndex={row.original.anchorIndex}
+                  />
                 </StyledAnchorText>
               ) : (
                 <></>
@@ -70,34 +180,41 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
         Header: "Resource",
         Cell: ({ row }: CellType) => {
           const resourceEntity = entities[row.original.resourceId];
-          return <>{resourceEntity && <EntityTag entity={resourceEntity} />}</>;
+          return (
+            <>
+              {resourceEntity && (
+                <div style={{ display: "grid" }}>
+                  <EntityTag entity={resourceEntity} fullWidth />
+                </div>
+              )}
+            </>
+          );
         },
       },
       {
         Header: "Document",
         Cell: ({ row }: CellType) => {
           const { document } = row.original;
-          return document ? <DocumentTitle title={document.title} /> : <></>;
+          return document ? (
+            <DocumentTitle
+              title={document.title}
+              width={widthTooSmall ? 60 : "full"}
+            />
+          ) : (
+            <></>
+          );
         },
       },
       {
-        Header: "Parent territory",
+        Header: "Parent T",
         Cell: ({ row }: CellType) => {
           const territoryEntity = entities[row.original.parentTerritoryId];
           return (
             <>
               {territoryEntity && (
-                <EntityTag
-                  entity={territoryEntity}
-                  unlinkButton={{
-                    onClick: () => {
-                      setTempAnchor(territoryEntity.id);
-                      setOpenedDocument(row.original.document);
-                    },
-                    icon: <FaAnchor />,
-                    tooltipLabel: "open anchor",
-                  }}
-                />
+                <div style={{ display: "grid" }}>
+                  <EntityTag entity={territoryEntity} fullWidth />
+                </div>
               )}
             </>
           );
@@ -107,25 +224,30 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
         id: "action btns",
         Header: "",
         Cell: ({ row }: CellType) => {
-          return <></>;
-          // return (
-          //   <Button
-          //     icon={<FaTrashAlt />}
-          //     color="danger"
-          //     inverted
-          //     onClick={
-          //       () =>
-          //        removeAnchorMutation.mutate({
-          //        documentId: row.original.document.id,
-          //        entityId: entityId,
-          //        })
-          //     }
-          //   />
-          // );
+          return (
+            <Button
+              icon={<FaTrashAlt />}
+              color="danger"
+              inverted
+              onClick={() =>
+                removeAnchorMutation.mutate({
+                  documentId: row.original.document.id,
+                  anchorIndex: row.original.anchorIndex,
+                })
+              }
+            />
+          );
         },
       },
     ],
-    [entities]
+    [
+      entities,
+      detailBoxState,
+      entityClass,
+      entityId,
+      territoryId,
+      widthTooSmall,
+    ]
   );
 
   return (
@@ -133,19 +255,12 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
       <Table
         entityTitle={title}
         columns={columns}
-        data={data}
+        data={uses}
         perPage={perPage}
+        isLoading={removeAnchorMutation.isPending}
+        firstColumnMinWidth
+        // lastColumnMinWidth
       />
-      {openedDocument && (
-        <DocumentModalEdit
-          document={openedDocument}
-          onClose={() => {
-            setOpenedDocument(false);
-            setTempAnchor(false);
-          }}
-          anchor={tempAnchor ? { entityId: tempAnchor } : undefined}
-        />
-      )}
     </>
   );
 };

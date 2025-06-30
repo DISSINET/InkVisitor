@@ -4,6 +4,7 @@ import {
   IProp,
   IReference,
   IResponseStatement,
+  IResponseTree,
   IStatement,
   IStatementActant,
   IStatementAction,
@@ -14,13 +15,17 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { excludedSuggesterEntities } from "Theme/constants";
+import {
+  EDITOR_TOO_SMALL_BREAKPOINT,
+  excludedSuggesterEntities,
+} from "Theme/constants";
 import api from "api";
 import { Button, Input, Message, MultiInput, Submit } from "components";
 import Dropdown, {
   ApplyTemplateModal,
   AuditTable,
   BreadcrumbItem,
+  DocumentTitle,
   EntitySuggester,
   EntityTag,
   JSONExplorer,
@@ -32,41 +37,52 @@ import {
   CStatementActant,
   CStatementAction,
 } from "constructors";
-import { useSearchParams } from "hooks";
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import { useSearchParams, useTheme } from "hooks";
+import useAnnotator from "hooks/useAnnotator";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   AiOutlineCaretDown,
   AiOutlineCaretUp,
   AiOutlineWarning,
 } from "react-icons/ai";
-import { FaRegCopy } from "react-icons/fa";
+import { FaAnchor, FaRegCopy } from "react-icons/fa";
 import { TiWarningOutline } from "react-icons/ti";
 import { toast } from "react-toastify";
+import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
 import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { ThemeContext } from "styled-components";
-import { DropdownItem, classesEditorActants, classesEditorTags } from "types";
+import {
+  DetailBoxState,
+  DropdownItem,
+  classesEditorActants,
+  classesEditorTags,
+} from "types";
 import {
   deepCopy,
   getEntityLabel,
   getShortLabelByLetterCount,
+  searchTree,
 } from "utils/utils";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
 import {
+  StyledAnchorEmptyState,
+  StyledAnchorMeta,
+  StyledAnchorText,
   StyledBreadcrumbWrap,
   StyledDetailWarnings,
-  StyledEditorContentRow,
-  StyledEditorContentRowLabel,
+  StyledEditorAnchorSectionAnchor,
+  StyledEditorAnchorSectionContent,
+  StyledEditorContentLabel,
   StyledEditorContentRowValue,
   StyledEditorHeaderInputWrap,
+  StyledEditorPreBlock,
   StyledEditorPreSection,
   StyledEditorSection,
   StyledEditorSectionContent,
   StyledEditorSectionHeader,
   StyledEditorSectionHeading,
+  StyledEditorSectionText,
   StyledEditorStatementInfo,
-  StyledEditorStatementInfoLabel,
-  StyledEditorTemplateSection,
   StyledHeaderTagWrap,
   StyledMissingTerritory,
   StyledTagsList,
@@ -113,14 +129,16 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 }) => {
   const {
     statementId,
+    setStatementId,
     territoryId,
     setTerritoryId,
     appendDetailId,
     appendMultipleDetailIds,
+    setAnnotatorOpened,
   } = useSearchParams();
 
   const queryClient = useQueryClient();
-  const themeContext = useContext(ThemeContext);
+  const theme = useTheme();
 
   // Audit query
   const {
@@ -159,7 +177,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   // territory query
   const {
     status,
-    data: territoryActants,
+    data: territoryActants = [],
     error,
     isFetching,
   } = useQuery({
@@ -174,7 +192,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         return [];
       }
     },
-    initialData: [],
     enabled: !!statement.data.territory?.territoryId && api.isLoggedIn(),
   });
 
@@ -284,11 +301,27 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     return false;
   }, [territoryData, statement.id]);
 
-  //TODO recurse to get all parents
-  const territoryPath =
-    territoryData &&
-    territoryData.data?.parent &&
-    Array(territoryData.data?.parent?.territoryId);
+  // use cached tree to get all parents
+  const treeData: IResponseTree | undefined = queryClient.getQueryData([
+    "tree",
+  ]);
+  const [territoryPath, setterritoryPath] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (treeData && statementTerritoryId) {
+      const foundTerritory = searchTree(treeData, statementTerritoryId);
+      if (foundTerritory) {
+        setterritoryPath(foundTerritory.path.concat(statementTerritoryId));
+      }
+    }
+  }, [treeData, statementTerritoryId]);
+
+  const favoritedTerritoryIds = useMemo(() => {
+    if (user?.storedTerritories) {
+      return user.storedTerritories.map((territory) => territory.territory.id);
+    }
+    return [];
+  }, [user?.storedTerritories]);
 
   const userCanEdit: boolean = useMemo(() => {
     return (
@@ -416,7 +449,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     if (user) {
       const statementLanguage = user.options.defaultStatementLanguage;
       if (changes.type) {
-        api.entitiesGet(changes.type?.entityId).then((typeEntity) => {
+        api.entityGet(changes.type?.entityId).then((typeEntity) => {
           if (typeEntity.data) {
             const entityLanguage = typeEntity.data.language;
             if (entityLanguage !== statementLanguage && changes.type) {
@@ -430,7 +463,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         });
       }
       if (changes.value) {
-        api.entitiesGet(changes.value.entityId).then((valueEntity) => {
+        api.entityGet(changes.value.entityId).then((valueEntity) => {
           if (valueEntity.data) {
             const entityLanguage = valueEntity.data.language;
             if (entityLanguage !== statementLanguage && changes.value) {
@@ -630,108 +663,146 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     [territoryData]
   );
 
+  const { scrollToAnchor } = useAnnotator();
+
+  const statementListOpened = useAppSelector(
+    (state) => state.layout.mainPage.statementListOpened
+  );
+
+  const scrollToStatementAnchor = (
+    parentTerritoryId: string,
+    anchorIndex?: number
+  ) => {
+    let timeout = 0;
+    // short timeout -> statement list is open and the active territory is the anchor parent territory
+    if (
+      (statementListOpened && parentTerritoryId === territoryId) ||
+      !parentTerritoryId.length
+    ) {
+      timeout = 100;
+    } else {
+      // long timeout -> statement list is closed or different territory is active => needs more time to initialize the annotator
+      timeout = 2000;
+    }
+    dispatch(setDetailBoxState(DetailBoxState.Normal));
+    setAnnotatorOpened(true);
+    if (parentTerritoryId.length && territoryId !== parentTerritoryId) {
+      setTerritoryId(parentTerritoryId);
+    }
+    setTimeout(() => {
+      scrollToAnchor(statement.id, anchorIndex ? anchorIndex : undefined);
+    }, timeout);
+  };
+
+  const editorWidth = useAppSelector(
+    (state) => state.layout.mainPage.thirdPanelRealWidth
+  );
+
+  const editorWidthTooSmall = editorWidth < EDITOR_TOO_SMALL_BREAKPOINT;
+
   return (
     <>
       <React.Fragment key={statement.id}>
-        <StyledEditorPreSection>
-          <StyledEditorStatementInfo>
-            <StyledHeaderTagWrap>
-              <EntityTag entity={statement} fullWidth />
-              <div style={{ marginLeft: "0.5rem", marginRight: "0.5rem" }}>
-                <Button
-                  inverted
-                  tooltipLabel="copy statement ID"
-                  color="primary"
-                  label=""
-                  icon={<FaRegCopy />}
-                  onClick={async () => {
-                    await navigator.clipboard.writeText(statement.id);
-                    toast.info("ID copied to clipboard");
-                  }}
-                />
-              </div>
-            </StyledHeaderTagWrap>
-            {userCanEdit && (
-              <div style={{ display: "flex" }}>
-                <StyledEditorStatementInfoLabel>
-                  change statement label:
-                </StyledEditorStatementInfoLabel>
-                <StyledEditorHeaderInputWrap>
-                  <Input
-                    type="text"
-                    value={statement.labels[0] || ""}
-                    onChangeFn={(newValue: string) => {
-                      handleAttributeChange(
-                        {
-                          labels: statement.labels
-                            ? [newValue, ...statement.labels.slice(1)]
-                            : [],
-                        },
-                        true
-                      );
+        <StyledEditorPreBlock>
+          <StyledEditorPreSection>
+            <StyledEditorStatementInfo>
+              <StyledHeaderTagWrap>
+                <EntityTag entity={statement} fullWidth />
+                <div style={{ marginLeft: "0.5rem", marginRight: "0.5rem" }}>
+                  <Button
+                    inverted
+                    tooltipLabel="copy statement ID"
+                    color="primary"
+                    label=""
+                    icon={<FaRegCopy />}
+                    onClick={async () => {
+                      await navigator.clipboard.writeText(statement.id);
+                      toast.info("ID copied to clipboard");
                     }}
                   />
-                </StyledEditorHeaderInputWrap>
-              </div>
-            )}
-          </StyledEditorStatementInfo>
-          {!statement.isTemplate && (
-            <StyledBreadcrumbWrap>
-              {territoryPath &&
-                territoryPath.map((territory: string, key: number) => {
-                  return (
-                    <React.Fragment key={key}>
-                      <BreadcrumbItem territoryId={territory} />
-                    </React.Fragment>
-                  );
-                })}
-              {territoryData ? (
-                <React.Fragment key={territoryData.id}>
-                  <BreadcrumbItem
-                    territoryId={territoryData.id}
-                    territoryData={territoryData}
-                  />
-                </React.Fragment>
-              ) : (
-                <>
-                  {!isFetchingTerritory && (
-                    <div style={{ display: "flex", alignItems: "flex-end" }}>
-                      <AiOutlineWarning
-                        size={22}
-                        color={themeContext?.color.warning}
-                      />
-                      <StyledMissingTerritory>
-                        {"missing territory"}
-                      </StyledMissingTerritory>
-                    </div>
-                  )}
-                </>
-              )}
-            </StyledBreadcrumbWrap>
-          )}
-        </StyledEditorPreSection>
+                </div>
+              </StyledHeaderTagWrap>
 
-        {userCanEdit && !statement.isTemplate && (
-          <StyledEditorPreSection>
-            {"Move to territory: "}
-            <EntitySuggester
-              disableTemplatesAccept
-              filterEditorRights
-              inputWidth={96}
-              disableCreate
-              categoryTypes={[EntityEnums.Class.Territory]}
-              onSelected={(newSelectedId: string) => {
-                moveStatementMutation.mutate(newSelectedId);
-              }}
-            />
+              {userCanEdit && (
+                <div style={{ display: "flex" }}>
+                  <StyledEditorContentLabel>
+                    Change statement label:
+                  </StyledEditorContentLabel>
+                  <StyledEditorHeaderInputWrap>
+                    <Input
+                      width={"full"}
+                      minWidth={100}
+                      type="text"
+                      value={statement.labels[0] || ""}
+                      onChangeFn={(newValue: string) => {
+                        handleAttributeChange(
+                          {
+                            labels: statement.labels
+                              ? [newValue, ...statement.labels.slice(1)]
+                              : [],
+                          },
+                          true
+                        );
+                      }}
+                    />
+                  </StyledEditorHeaderInputWrap>
+                </div>
+              )}
+            </StyledEditorStatementInfo>
+            {!statement.isTemplate && (
+              <StyledBreadcrumbWrap>
+                {territoryPath &&
+                  territoryPath.map((territoryId: string, key: number) => {
+                    return (
+                      <React.Fragment key={key}>
+                        <BreadcrumbItem
+                          territoryId={territoryId}
+                          isSelected={territoryId === statementTerritoryId}
+                          isFavorited={favoritedTerritoryIds.includes(
+                            territoryId
+                          )}
+                        />
+                      </React.Fragment>
+                    );
+                  })}
+
+                {!territoryData && !isFetchingTerritory && (
+                  <div style={{ display: "flex", alignItems: "flex-end" }}>
+                    <AiOutlineWarning size={22} color={theme.color.warning} />
+                    <StyledMissingTerritory>
+                      {"missing territory"}
+                    </StyledMissingTerritory>
+                  </div>
+                )}
+              </StyledBreadcrumbWrap>
+            )}
           </StyledEditorPreSection>
-        )}
-        {userCanEdit && (
-          <StyledEditorTemplateSection>
-            <StyledEditorContentRow>
-              <StyledEditorContentRowLabel>
+
+          {userCanEdit && !statement.isTemplate && (
+            <StyledEditorPreSection $inline>
+              <StyledEditorContentLabel>
+                Move to territory:
+              </StyledEditorContentLabel>
+              <StyledEditorContentRowValue>
+                <EntitySuggester
+                  disableTemplatesAccept
+                  filterEditorRights
+                  inputWidth={96}
+                  disableCreate
+                  categoryTypes={[EntityEnums.Class.Territory]}
+                  onSelected={(newSelectedId: string) => {
+                    moveStatementMutation.mutate(newSelectedId);
+                  }}
+                />
+              </StyledEditorContentRowValue>
+            </StyledEditorPreSection>
+          )}
+
+          {userCanEdit && (
+            <StyledEditorPreSection $inline>
+              <StyledEditorContentLabel>
                 Apply Template
-              </StyledEditorContentRowLabel>
+              </StyledEditorContentLabel>
               <StyledEditorContentRowValue>
                 <Dropdown.Single.Basic
                   placeholder="select template.."
@@ -744,35 +815,81 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   }}
                 />
               </StyledEditorContentRowValue>
-            </StyledEditorContentRow>
-          </StyledEditorTemplateSection>
-        )}
+            </StyledEditorPreSection>
+          )}
 
-        <StyledEditorSection
-          $firstSection
-          key="editor-section-summary"
-          $marginRight
-        >
-          <StyledEditorSectionContent $firstSection>
-            <Input
-              type="textarea"
-              rows={5}
-              disabled={!userCanEdit}
-              width="full"
-              noBorder
-              placeholder="Insert statement text here"
-              onChangeFn={(newValue: string) => {
-                if (newValue !== statement.data.text) {
-                  handleDataAttributeChange({ text: newValue }, true);
-                }
-              }}
-              value={statement.data.text}
-            />
-          </StyledEditorSectionContent>
-        </StyledEditorSection>
+          <StyledEditorPreSection>
+            <StyledEditorContentLabel>
+              Document Anchors
+            </StyledEditorContentLabel>
+            <StyledEditorAnchorSectionContent>
+              {statement.usedInDocuments.length > 0 ? (
+                statement.usedInDocuments.map((documentAnchor, dai) => (
+                  <StyledEditorAnchorSectionAnchor key={dai}>
+                    <StyledAnchorText>
+                      {documentAnchor.anchorText}
+                    </StyledAnchorText>
+                    <StyledAnchorMeta>
+                      <Button
+                        inverted
+                        noBorder
+                        noBackground
+                        tooltipLabel="locate statement anchor"
+                        icon={<FaAnchor size={16} />}
+                        onClick={() => {
+                          scrollToStatementAnchor(
+                            documentAnchor.parentTerritoryId,
+                            documentAnchor.anchorIndex
+                          );
+                        }}
+                      />
+                      <DocumentTitle title={documentAnchor.document.title} />
+                      {documentAnchor.resourceId && (
+                        <EntityTag
+                          entity={statement.entities[documentAnchor.resourceId]}
+                        />
+                      )}
+                      {documentAnchor.parentTerritoryId && (
+                        <EntityTag
+                          entity={
+                            statement.entities[documentAnchor.parentTerritoryId]
+                          }
+                        />
+                      )}
+                    </StyledAnchorMeta>
+                  </StyledEditorAnchorSectionAnchor>
+                ))
+              ) : (
+                <StyledAnchorEmptyState>
+                  No document anchors found
+                </StyledAnchorEmptyState>
+              )}
+            </StyledEditorAnchorSectionContent>
+          </StyledEditorPreSection>
+
+          <StyledEditorPreSection>
+            <StyledEditorContentLabel>Statement Text</StyledEditorContentLabel>
+            <StyledEditorSectionText>
+              <Input
+                type="textarea"
+                rows={5}
+                disabled={!userCanEdit}
+                width="full"
+                noBorder
+                placeholder="Insert statement text here"
+                onChangeFn={(newValue: string) => {
+                  if (newValue !== statement.data.text) {
+                    handleDataAttributeChange({ text: newValue }, true);
+                  }
+                }}
+                value={statement.data.text}
+              />
+            </StyledEditorSectionText>
+          </StyledEditorPreSection>
+        </StyledEditorPreBlock>
 
         {statement.warnings.length > 0 && (
-          <StyledEditorSection>
+          <StyledEditorSection $widthTooSmall={editorWidthTooSmall}>
             <StyledEditorSectionHeader>
               <StyledEditorSectionHeading>
                 {statement.warnings.length} Warnings{" "}
@@ -814,6 +931,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           $metaSection
           key="editor-section-actions"
           id="action-section"
+          $widthTooSmall={editorWidthTooSmall}
         >
           <StyledEditorSectionHeader>
             <StyledEditorSectionHeading>Actions</StyledEditorSectionHeading>
@@ -826,6 +944,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 setShowSubmitSection={setShowSubmitSection}
                 handleAttributeChange={handleAttributeChange}
                 handleDataAttributeChange={handleDataAttributeChange}
+                editorWidthTooSmall={editorWidthTooSmall}
               />
             )}
           </StyledEditorSectionHeader>
@@ -864,6 +983,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           $metaSection
           key="editor-section-actants"
           id="actant-section"
+          $widthTooSmall={editorWidthTooSmall}
         >
           <StyledEditorSectionHeader>
             <StyledEditorSectionHeading>Actants</StyledEditorSectionHeading>
@@ -876,6 +996,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 setShowSubmitSection={setShowSubmitSection}
                 handleAttributeChange={handleAttributeChange}
                 handleDataAttributeChange={handleDataAttributeChange}
+                editorWidthTooSmall={editorWidthTooSmall}
               />
             )}
           </StyledEditorSectionHeader>
@@ -912,7 +1033,10 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         </StyledEditorSection>
 
         {/* Refs */}
-        <StyledEditorSection key="editor-section-refs">
+        <StyledEditorSection
+          key="editor-section-refs"
+          $widthTooSmall={editorWidthTooSmall}
+        >
           <StyledEditorSectionHeader>
             <StyledEditorSectionHeading>References</StyledEditorSectionHeading>
 
@@ -924,6 +1048,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 setShowSubmitSection={setShowSubmitSection}
                 handleAttributeChange={handleAttributeChange}
                 handleDataAttributeChange={handleDataAttributeChange}
+                editorWidthTooSmall={editorWidthTooSmall}
               />
             )}
           </StyledEditorSectionHeader>
@@ -946,12 +1071,16 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               entities={statement.entities ?? {}}
               entityId={statement.id}
               userCanEdit={userCanEdit}
+              editorWidthTooSmall={editorWidthTooSmall}
             />
           </StyledEditorSectionContent>
         </StyledEditorSection>
 
         {/* Tags */}
-        <StyledEditorSection key="editor-section-tags">
+        <StyledEditorSection
+          key="editor-section-tags"
+          $widthTooSmall={editorWidthTooSmall}
+        >
           <StyledEditorSectionHeader>
             <StyledEditorSectionHeading>Tags</StyledEditorSectionHeading>
           </StyledEditorSectionHeader>
@@ -1005,7 +1134,11 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         </StyledEditorSection>
 
         {/* Notes */}
-        <StyledEditorSection key="editor-section-notes" $lastSection>
+        <StyledEditorSection
+          key="editor-section-notes"
+          $lastSection
+          $widthTooSmall={editorWidthTooSmall}
+        >
           <StyledEditorSectionHeader>Notes</StyledEditorSectionHeader>
           <StyledEditorSectionContent>
             <MultiInput
@@ -1020,7 +1153,10 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         </StyledEditorSection>
 
         {/* Audits */}
-        <StyledEditorSection key="editor-section-audits">
+        <StyledEditorSection
+          key="editor-section-audits"
+          $widthTooSmall={editorWidthTooSmall}
+        >
           <StyledEditorSectionHeader>Audits</StyledEditorSectionHeader>
           <StyledEditorSectionContent>
             {audit && <AuditTable {...audit} />}
@@ -1028,7 +1164,10 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         </StyledEditorSection>
 
         {/* JSON */}
-        <StyledEditorSection key="editor-section-json">
+        <StyledEditorSection
+          key="editor-section-json"
+          $widthTooSmall={editorWidthTooSmall}
+        >
           <StyledEditorSectionHeader>JSON</StyledEditorSectionHeader>
           <StyledEditorSectionContent>
             {statement && <JSONExplorer data={statement} />}

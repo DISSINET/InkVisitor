@@ -148,7 +148,7 @@ export const Table: React.FC<Table<any>> = ({
                       {...column.getHeaderProps(column.getSortByToggleProps())}
                       key={key}
                     >
-                      {column.render("Header")}
+                      {column.render("Header") as React.ReactNode}
                       {/* Add a sort direction indicator */}
                       <span>
                         {column.isSorted
@@ -184,7 +184,7 @@ export const Table: React.FC<Table<any>> = ({
                         key={key}
                         $noBorder={noBorder}
                       >
-                        {cell.render("Cell")}
+                        {cell.render("Cell") as React.ReactNode}
                       </StyledTd>
                     );
                   })}

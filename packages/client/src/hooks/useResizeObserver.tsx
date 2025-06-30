@@ -1,5 +1,5 @@
 import { useDebouncedCallback } from "hooks";
-import { useLayoutEffect, useState, useRef } from "react";
+import { useLayoutEffect, useState, useRef, useCallback } from "react";
 
 interface UseResizeObserverOptions {
   debounceDelay?: number;
@@ -20,8 +20,16 @@ export const useResizeObserver = <T extends HTMLElement>({
     height: undefined,
   });
 
-  const debouncedCallback = useDebouncedCallback((value: Size) => {
-    setSize(value);
+  const debouncedCallback = useDebouncedCallback((newSize: Size) => {
+    setSize((prevSize) => {
+      if (
+        prevSize.width === newSize.width &&
+        prevSize.height === newSize.height
+      ) {
+        return prevSize; // No state update if size hasn't changed
+      }
+      return newSize;
+    });
   }, debounceDelay);
 
   useLayoutEffect(() => {

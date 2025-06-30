@@ -99,7 +99,7 @@ export const EntityDetailCreateTemplateModal: React.FC<
   return (
     <Modal
       showModal={showModal}
-      width="auto"
+      width={600}
       onEnterPress={() => {
         handleCreateTemplate();
       }}
@@ -109,7 +109,7 @@ export const EntityDetailCreateTemplateModal: React.FC<
     >
       <ModalHeader title="Create Template" />
       <ModalContent>
-        <ModalInputForm>
+        <ModalInputForm alignLeft>
           <ModalInputLabel>Label</ModalInputLabel>
           <ModalInputWrap>
             <Input

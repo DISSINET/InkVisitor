@@ -1,6 +1,7 @@
 import { UsedRelations } from "@models/relation/relations";
 import { RelationEnums } from "@shared/enums";
 import { EntityTooltip, IEntity } from "@shared/types";
+import { IResponseUsedInDocument } from "@shared/types/response-detail";
 import { IRequest } from "src/custom_typings/request";
 import Entity from "./entity";
 import { ResponseEntity } from "./response";
@@ -10,13 +11,14 @@ export class ResponseTooltip
   implements EntityTooltip.IResponse
 {
   entities: Record<string, IEntity> = {};
-
   relations: UsedRelations;
+  usedInDocuments: IResponseUsedInDocument[] = [];
 
   constructor(entity: Entity) {
     super(entity);
     this.relations = new UsedRelations(entity.id, entity.class);
     this.relations.maxListLen = 10;
+    this.usedInDocuments = [];
   }
 
   /**
@@ -70,6 +72,10 @@ export class ResponseTooltip
     );
     this.addLinkedEntities(
       this.relations.getEntityIdsFromType(RelationEnums.Type.Actant2Semantics)
+    );
+
+    this.usedInDocuments = await this.findUsedInDocuments(
+      request.db.connection
     );
 
     this.entities = await this.populateEntitiesMap(request.db.connection);

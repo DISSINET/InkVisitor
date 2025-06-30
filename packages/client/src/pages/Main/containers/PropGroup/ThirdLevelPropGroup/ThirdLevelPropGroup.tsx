@@ -12,7 +12,7 @@ interface ThirdLevelPropGroup {
     prop2: IProp,
     moveProp: (dragIndex: number, hoverIndex: number) => void,
     hasOrder: boolean
-  ) => JSX.Element;
+  ) => React.ReactNode;
   thirdLevelProps: IProp[];
   category: DraggedPropRowCategory;
 }

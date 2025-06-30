@@ -2,12 +2,11 @@ import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
 import styled from "styled-components";
 
 interface StyledTable {
-  $contentWidth: number;
   $isListMode: boolean;
 }
 export const StyledTable = styled.table<StyledTable>`
-  width: ${({ $contentWidth }) => $contentWidth};
-  min-width: ${({}) => `${COLLAPSED_TABLE_WIDTH / 10}rem`};
+  min-width: ${({}) => `${COLLAPSED_TABLE_WIDTH / 10 - 2.5}rem`};
+  height: 100%;
   border-spacing: 0;
   border-collapse: collapse;
   border-width: ${({ theme }) => theme.borderWidth[1]};
@@ -15,6 +14,10 @@ export const StyledTable = styled.table<StyledTable>`
   border-color: ${({ theme }) => theme.color["gray"][500]};
   box-shadow: ${({ theme }) => theme.boxShadow["subtle"]};
   overflow-x: ${({ $isListMode }) => ($isListMode ? "auto" : "hidden")};
+  /* margin-top: ${({ theme, $isListMode }) =>
+    $isListMode ? "0" : theme.space[24]}; */
+  margin-left: ${({ theme }) => theme.space[1]};
+  margin-right: ${({ theme }) => theme.space[1]};
   transition: width 0.3s ease;
 `;
 export const StyledTHead = styled.thead`
@@ -29,7 +32,6 @@ export const StyledTh = styled.th`
   text-align: left;
   padding-right: ${({ theme }) => theme.space[2]};
   padding-left: ${({ theme }) => theme.space[2]};
-  font-weight: normal;
 `;
 
 interface StyledTr {
@@ -53,7 +55,7 @@ export const StyledTr = styled.tr<StyledTr>`
     $isOpened ? "4px solid " + theme.color["success"] : ""};
   cursor: ${({ $isOpened }) => ($isOpened ? "default" : "pointer")};
   td:first-child {
-    padding-left: ${({ theme, $isOpened }) => ($isOpened ? "0.9rem" : "")};
+    padding-left: ${({ $isOpened }) => (!$isOpened ? "0.9rem" : "")};
     width: 1%;
   }
   td:last-child {
@@ -70,14 +72,13 @@ export const StyledTr = styled.tr<StyledTr>`
 interface StyledTd {}
 export const StyledTd = styled.td<StyledTd>`
   padding: ${({ theme }) => theme.space[2]};
-  padding-left: ${({ theme }) => theme.space[4]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   height: ${({ theme }) => theme.space[16]};
 `;
 
 export const StyledTdMove = styled.td`
-  cursor: move;
   width: 1%;
+  padding-right: 0.2rem;
 `;
 
 interface StyledFocusedCircle {
@@ -110,4 +111,23 @@ export const StyledAbbreviatedLabel = styled.div`
   -webkit-line-clamp: 2;
   min-width: 5rem;
   font-size: ${({ theme }) => theme.fontSize["xs"]};
+`;
+
+export const StyledAnchor = styled.div`
+  background-color: ${({ theme }) => theme.color.blue[400]};
+  color: ${({ theme }) => theme.color.white};
+  margin-right: 5px;
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 50%;
+`;
+
+export const StyledOrderCorrection = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  max-width: 2.6rem;
+  width: 100%;
+  color: ${({ theme }) => theme.color["gray"]["800"]};
 `;

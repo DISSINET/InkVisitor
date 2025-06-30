@@ -27,6 +27,9 @@ import rateLimit from "express-rate-limit";
 import "@models/events/register";
 import { Request, Response } from "express";
 import { TooManyRequestsError } from "@shared/types/errors";
+import { r as rethink } from "rethinkdb-ts";
+import timeout from "connect-timeout";
+import { pool } from "@middlewares/db";
 
 const server = express();
 
@@ -41,23 +44,42 @@ server.use(cors());
 if (!!process.env.STATIC_PATH) {
   if (process.env.STATIC_PATH === "/") {
     server.use((req, res, next) => {
-      // allow all requests not starting with /api and that are pointed to wanted static path
-      // relative to the root like domain.com/<static path>/...
-      if (
-        !req.path.startsWith("/api") &&
-        req.path.startsWith(process.env.STATIC_PATH as string)
-      ) {
+      // allow all requests not starting with /api
+      if (!req.path.startsWith("/api")) {
         if (req.path.indexOf(".") === -1) {
-          // replacement for react(client) router that should process only pages alone (/, /login etc)
-          res.sendFile(
-            path.join(
-              __dirname,
-              "..",
-              "..",
-              "..",
-              "..",
-              "client/dist/index.html"
-            )
+          // Read and modify index.html before sending
+          const fs = require("fs");
+          const indexPath = path.join(
+            __dirname,
+            "..",
+            "..",
+            "..",
+            "..",
+            "client/dist/index.html"
+          );
+
+          fs.readFile(
+            indexPath,
+            "utf8",
+            (err: NodeJS.ErrnoException | null, data: string) => {
+              if (err) {
+                return next(err);
+              }
+
+              if (process.env.ENV) {
+                data = data.replace(
+                  "</head>",
+                  `  <!-- Injected content -->
+                     <script>window.appConfig = { env: "${
+                       process.env.ENV || "development"
+                     }" };</script>
+                  </head>`
+                );
+              }
+
+              res.type("html");
+              res.send(data);
+            }
           );
         } else {
           // everythink else will go here
@@ -89,11 +111,6 @@ if (process.env.NODE_ENV === "production") {
   server.use(helmet());
 }
 
-// Health route
-server.get("/health", function (req, res) {
-  res.send("ok");
-});
-
 // Rate limited for signin
 server.use(
   `${apiPath}/users/signin`,
@@ -110,9 +127,26 @@ server.use(
   })
 );
 
+server.use(timeout("30s"));
 server.use(profilerMiddleware);
-
 server.use(dbMiddleware);
+
+// Health route
+server.get("/api/health", async function (req, res) {
+  await rethink.tableList().run(req.db.connection);
+  res.json({
+    result: true,
+    db: {
+      pool: {
+        size: pool.pool.size,
+        available: pool.pool.available,
+        borrowed: pool.pool.size - pool.pool.available,
+        pending: pool.pool.pending,
+        max: pool.options.max,
+      },
+    },
+  });
+});
 
 // uncomment this to enable auth
 server.use(

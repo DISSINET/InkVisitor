@@ -1,15 +1,18 @@
-import { EntityEnums } from "@shared/enums";
-import { IEntity, RequestSearch } from "@shared/types";
-import { regExpEscape } from "@common/functions";
-import Entity from "./entity";
-import Statement from "@models/statement/statement";
-import { Connection, ContainsArgType, r, RDatum, RTable } from "rethinkdb-ts";
-import { ResponseEntity } from "./response";
-import { getEntityClass } from "@models/factory";
-import { IRequest } from "src/custom_typings/request";
-import Territory from "@models/territory/territory";
 import Audit from "@models/audit/audit";
 import Document from "@models/document/document";
+import { getEntityClass } from "@models/factory";
+import Classification from "@models/relation/classification";
+import Statement from "@models/statement/statement";
+import Territory from "@models/territory/territory";
+import { getEntitiesByIds } from "@service/shorthands";
+import treeCache from "@service/treeCache";
+import { EntityEnums } from "@shared/enums";
+import { IConcept, IEntity, ITerritory, RequestSearch } from "@shared/types";
+import { PropSpecKind } from "@shared/types/prop";
+import { Connection, r, RDatum, RTable } from "rethinkdb-ts";
+import { IRequest } from "src/custom_typings/request";
+import Entity from "./entity";
+import { ResponseEntity } from "./response";
 
 /**
  * SearchQuery is customized builder for search queries, allowing to build query by chaining prepared filters
@@ -181,11 +184,11 @@ export class SearchQuery {
   }
 
   /**
-   * adds condition to filter by label
+   * prepares label for search
    * @param label
    * @returns
    */
-  whereLabel(label: string): SearchQuery {
+  prepareLabel(label: string): [string, string, string] {
     let leftWildcard = "^",
       rightWildcard = "$";
 
@@ -198,18 +201,75 @@ export class SearchQuery {
       rightWildcard = "";
       label = label.slice(0, -1);
     }
-
-    this.usedLabel = label;
-
     // escape problematic chars - messes with regexp search
-    label = regExpEscape(label.toLowerCase());
+    // label = regExpEscape(label.toLowerCase());
+
+    return [label, leftWildcard, rightWildcard];
+  }
+
+  /**
+   * adds condition to filter by label
+   * @param label
+   * @returns
+   */
+  whereLabel(label: string): SearchQuery {
+    const [preparedLabel, leftWildcard, rightWildcard] =
+      this.prepareLabel(label);
+
+    this.usedLabel = preparedLabel;
 
     this.query = this.query.filter(function (row: RDatum) {
       return SearchQuery.searchWordByWord(
         row,
-        label,
+        preparedLabel,
         leftWildcard,
         rightWildcard
+      );
+    });
+
+    this.filterUsed = true;
+    return this;
+  }
+
+  /**
+   * adds condition to filter by label or id
+   * @param label
+   * @returns
+   */
+  whereLabelOrId(labelOrId: string): SearchQuery {
+    const [label, leftWildcard, rightWildcard] = this.prepareLabel(labelOrId);
+    this.usedLabel = label;
+
+    // replace regexp chars
+    let escapedLabelOrId = labelOrId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const escapedLabel = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+    // frontend adds one final asterisk for labelOrId - we need to retain it there
+    const hasEscapedAsteriskAtEnd = escapedLabelOrId.endsWith("\\*");
+    if (hasEscapedAsteriskAtEnd) {
+      escapedLabelOrId = escapedLabelOrId.slice(0, -2) + "*";
+    }
+
+    // search 3 times:
+    // 1. search for exact word match with some normalization
+    // 2. search for exact word match without normalization
+    // 3. search for id match
+    this.query = this.query.filter(function (row: RDatum) {
+      return r.or(
+        SearchQuery.searchWordByWord(
+          row,
+          escapedLabel,
+          leftWildcard,
+          rightWildcard
+        ),
+        SearchQuery.searchWordByWord(
+          row,
+          escapedLabel,
+          leftWildcard,
+          rightWildcard,
+          false
+        ),
+        row("id").match(escapedLabelOrId).ne(null)
       );
     });
 
@@ -240,33 +300,52 @@ export class SearchQuery {
    * @param label - cleaned label input (with escaped chars)
    * @param left - optional wildcard on the left
    * @param right - optional wildcard on the right
+   * @param normalize - if true, the label will be normalized to remove diacritics and convert to lowercase
    * @returns filtration statement for RDatum
    */
   public static searchWordByWord(
     row: RDatum,
     label: string,
     left: string,
-    right: string
-  ): RDatum {
-    // if wildcard not used, update the left/right side to limit search for word start/end
-    // ie. search for 'building' would be changed to '(\^|[\\W \\.\\,\\:\\_])building'
-    // to match 'building' word only
-    // otherwise with wildcard, the '*uilding' would be changed to 'uilding' without constraint
-    // and will behave like wildcard on the left
+    right: string,
+    normalize = true
+  ): RDatum<boolean> {
+    // if wildcard not used, update the left/right side to simulate word boundaries
     if (left === "^") {
-      left = "(^|[\\W\\_])";
+      left = "(^|[^a-zA-Z0-9])";
     }
     if (right === "$") {
-      right = "($|[\\W\\_])";
+      right = "($|[^a-zA-Z0-9])";
     }
 
-    // words have to be splitted and joined with regexps to provide variable glue
-    label = label.toLowerCase().split(" ").join("([\\W\\_]+[\\w]+)*[\\W\\_]+");
+    // Instead of normalizing, create a pattern that matches both accented and non-accented versions
+    const processedLabel = label.toLowerCase();
+    const diacriticPattern = processedLabel
+      .split("")
+      .map((char) => {
+        // Map common accented characters to their base form with optional accents
+        const map: Record<string, string> = {
+          a: "[aàáâãäå]",
+          e: "[eèéêë]",
+          i: "[iìíîï]",
+          o: "[oòóôõö]",
+          u: "[uùúûü]",
+          y: "[yýÿ]",
+          n: "[nñ]",
+          c: "[cç]",
+        };
+        return map[char] || char;
+      })
+      .join("");
 
-    const regexp = `${left}${label}${right}`;
+    const regexBody = diacriticPattern
+      .split(" ")
+      .join("([^a-zA-Z0-9]+[\\w]+)*[^a-zA-Z0-9]+"); // Allow glue between words
 
-    return row("labels").contains<string>((label) =>
-      label.downcase().match(regexp)
+    const regexp = `(?i)${left}${regexBody}${right}`;
+
+    return row("labels").contains<string>((targetLabel) =>
+      targetLabel.match(regexp)
     );
   }
 
@@ -396,6 +475,10 @@ export class SearchQuery {
       this.whereLabel(req.label);
     }
 
+    if (req.labelOrId) {
+      this.whereLabelOrId(req.labelOrId);
+    }
+
     if (req.entityIds) {
       this.whereEntityIds(req.entityIds);
     }
@@ -430,6 +513,45 @@ export class ResponseSearch {
     const query = new SearchQuery(httpRequest.db.connection);
     await query.fromRequest(this.request);
     let entities = await query.do();
+
+    // Handling this search condition here while it is reusing the entity method
+    if (this.request.isRootInvalid === true) {
+      const rootT = treeCache.tree.getRootTerritory() as ITerritory;
+      const conn = httpRequest.db.connection;
+
+      const entitiesToCheck = [...entities];
+      entities = [];
+
+      for (const entity of entitiesToCheck) {
+        const classificationRels =
+          await Classification.getClassificationForwardConnections(
+            conn,
+            entity.id,
+            entity.class,
+            1,
+            0
+          );
+        const classificationEs: IConcept[] = await getEntitiesByIds<IConcept>(
+          conn,
+          classificationRels.map((c) => c.entityIds[1])
+        );
+        const propValueEs = await getEntitiesByIds<IEntity>(
+          conn,
+          Entity.extractIdsFromProps(entity.props, [PropSpecKind.VALUE])
+        );
+
+        const entityModel = new Entity(entity);
+
+        const warnings = entityModel.getTBasedWarnings(
+          [rootT],
+          classificationEs,
+          propValueEs
+        );
+        if (warnings.length > 0) {
+          entities.push(entity);
+        }
+      }
+    }
 
     if (query.retainedIdsOrder) {
       entities = sortByRequiredOrder(entities, query.retainedIdsOrder);

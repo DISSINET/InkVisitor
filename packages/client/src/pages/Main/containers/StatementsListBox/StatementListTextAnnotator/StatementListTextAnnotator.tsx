@@ -1,40 +1,29 @@
 import { Annotator } from "@inkvisitor/annotator/src/lib";
 import { animated, useSpring } from "@react-spring/web";
-import { EntityEnums, UserEnums } from "@shared/enums";
-import { IEntity, IResponseEntity, IResponseStatement } from "@shared/types";
-import { useQuery } from "@tanstack/react-query";
-import api from "api";
-import { Button, Input, Loader, DocumentTitle } from "components";
-import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
+import { entitiesDict } from "@shared/dictionaries/entity";
+import { EntityEnums } from "@shared/enums";
+import { IDocument, IResponseEntity, IResponseTerritory } from "@shared/types";
+import Dropdown from "components/advanced";
 import TextAnnotator from "components/advanced/Annotator/Annotator";
 import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
-import React, { useContext, useEffect, useMemo, useState } from "react";
-import { FaLongArrowAltRight, FaUnlink } from "react-icons/fa";
-import { GrDocumentMissing } from "react-icons/gr";
-import { TbAnchorOff } from "react-icons/tb";
-import { TiDocumentText } from "react-icons/ti";
-import { ThemeContext } from "styled-components";
-import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
+import { useDebounce, useTheme } from "hooks";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  ANNOTATOR_SELECTOR_HEIGHT,
+  ANNOTATOR_TOO_SMALL_BREAKPOINT,
+  COLLAPSED_TABLE_WIDTH,
+} from "Theme/constants";
+import StatementListDocumentSearchLine from "../StatementListDocumentSearchLine/StatementListDocumentSearchLine";
 import { StyledInfoText } from "../StatementListHeader/StatementListHeaderStyles";
-import { entitiesDict } from "@shared/dictionaries/entity";
-import { useDebounce, useResizeObserver } from "hooks";
 
 interface StatementListTextAnnotator {
-  statements: IResponseStatement[];
+  // it's faster than the territory entity so it's better to pass territoryId separately
   territoryId: string;
-  entities: { [key: string]: IEntity };
-  right: UserEnums.RoleMode;
-  setShowSubmit: React.Dispatch<React.SetStateAction<boolean>>;
+  territory?: IResponseTerritory;
+  statementId: string;
   addStatementAtCertainIndex: (index: number) => Promise<void>;
   handleCreateStatement: (detail?: string, statementId?: string) => void;
-  handleCreateTerritory: (territoryId?: string) => void;
-  selectedRows: string[];
-  setSelectedRows: React.Dispatch<React.SetStateAction<string[]>>;
 
-  storedAnnotatorResourceId: string | false;
-  setStoredAnnotatorResourceId?: React.Dispatch<
-    React.SetStateAction<string | false>
-  >;
   storedAnnotatorScroll: number;
   setStoredAnnotatorScroll?: React.Dispatch<React.SetStateAction<number>>;
 
@@ -43,24 +32,32 @@ interface StatementListTextAnnotator {
 
   contentHeight: number;
   contentWidth: number;
+
+  annotator?: Annotator;
+  setAnnotator?: React.Dispatch<React.SetStateAction<Annotator | undefined>>;
+
+  selectedDocument?: IDocument | false;
+  selectedResource: IResponseEntity | false;
+  resources?: IResponseEntity[];
+  setSelectedResourceId: React.Dispatch<React.SetStateAction<string | false>>;
+
+  // useQuery for selectedDocument
+  selectedDocumentId: string | undefined;
+  selectedDocumentIsFetching: boolean;
+  selectedDocumentError: Error | null;
+
+  showStatementList: boolean;
+  userCanEdit: boolean;
 }
 
 export const StatementListTextAnnotator: React.FC<
   StatementListTextAnnotator
 > = ({
-  statements,
   territoryId,
-  entities,
-  right,
-  setShowSubmit,
+  territory,
+  statementId,
   addStatementAtCertainIndex,
   handleCreateStatement,
-  handleCreateTerritory,
-  selectedRows,
-  setSelectedRows,
-
-  storedAnnotatorResourceId,
-  setStoredAnnotatorResourceId = () => {},
 
   storedAnnotatorScroll,
   setStoredAnnotatorScroll = () => {},
@@ -70,14 +67,34 @@ export const StatementListTextAnnotator: React.FC<
 
   contentHeight,
   contentWidth,
+
+  annotator,
+  setAnnotator = () => {},
+
+  selectedDocument,
+  selectedResource,
+  resources,
+  setSelectedResourceId,
+
+  selectedDocumentId,
+  selectedDocumentIsFetching,
+  selectedDocumentError,
+  showStatementList,
+  userCanEdit,
 }) => {
-  const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const [showAnnotator, setShowAnnotator] = useState(false);
+
   useEffect(() => {
     setShowAnnotator(true);
   }, []);
 
-  const [annotator, setAnnotator] = useState<Annotator | undefined>(undefined);
+  const handleHlEntitiesChange = useCallback(
+    (newHlEntities: EntityEnums.Class[]) => {
+      setHlEntities(newHlEntities);
+    },
+    []
+  );
+
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [searchOccurences, setSearchOccurences] = useState<
     { segmentIndex: number; lineIndex: number; start: number; end: number }[]
@@ -87,14 +104,8 @@ export const StatementListTextAnnotator: React.FC<
   useEffect(() => {
     const newSelectedOccurence = searchOccurences[searchActiveOccurence];
 
-    console.log(
-      `selecting ${searchActiveOccurence} of`,
-      searchOccurences,
-      ` => ${newSelectedOccurence}`
-    );
-
     if (newSelectedOccurence) {
-      annotator?.selectSearchOccurence(newSelectedOccurence);
+      annotator?.selectSearchOccurrence(newSelectedOccurence);
     }
   }, [searchActiveOccurence, searchOccurences]);
 
@@ -130,250 +141,80 @@ export const StatementListTextAnnotator: React.FC<
     delay: 300,
   });
 
-  const {
-    data: resources,
-    error: resourcesError,
-    isFetching: resourcesIsFetching,
-  } = useQuery({
-    queryKey: ["resourcesWithDocuments"],
-    queryFn: async () => {
-      const res = await api.entitiesSearch({
-        resourceHasDocument: true,
-      });
-      return res.data;
-    },
-    enabled: api.isLoggedIn(),
-  });
-
-  const {
-    data: documents,
-    error,
-    isFetching,
-  } = useQuery({
-    queryKey: ["documents"],
-    queryFn: async () => {
-      const res = await api.documentsGet({});
-      return res.data;
-    },
-    enabled: api.isLoggedIn(),
-  });
-
-  const [selectedResourceId, setSelectedResourceId] = useState<string | false>(
-    storedAnnotatorResourceId
-  );
-
+  // INIT + react to url changes
   useEffect(() => {
-    if (selectedResourceId) {
-      setStoredAnnotatorResourceId(selectedResourceId);
+    if (annotator && selectedDocument) {
+      const scrollToId =
+        statementId && selectedDocument.entityIds.S?.includes(statementId)
+          ? statementId
+          : territoryId;
+
+      // ensure the annotator is fully initialized
+      setTimeout(() => {
+        annotator.scrollToAnchor(scrollToId);
+      }, 100);
     }
-  }, [selectedResourceId]);
-
-  // if no resource is selected, select the document with this territoryId in document references
-  const loadDefaultResource = () => {
-    if (
-      resources &&
-      documents &&
-      isInitialized === false &&
-      storedAnnotatorResourceId === false
-    ) {
-      const resourceWithAnchor = resources.find((resource) => {
-        if (resource.data.documentId) {
-          const document = documents.find(
-            (d) => d.id === resource.data.documentId
-          );
-          if (document) {
-            return document.referencedEntityIds.T.includes(territoryId);
-          }
-        }
-        return false;
-      });
-
-      if (resourceWithAnchor) {
-        setSelectedResourceId(resourceWithAnchor.id);
-      } else {
-        setSelectedResourceId(false);
-      }
-
-      setIsInitialized(true);
-    }
-  };
-
-  useEffect(() => {
-    setIsInitialized(false);
-  }, [territoryId]);
-
-  useEffect(() => {
-    loadDefaultResource();
-  }, [resources, documents, isInitialized, territoryId]);
-
-  const selectedResource = useMemo<IResponseEntity | false>(() => {
-    if (selectedResourceId && resources) {
-      return resources?.find((r) => r.id === selectedResourceId) ?? false;
-    }
-    return false;
-  }, [selectedResourceId, resources]);
-
-  const selectedDocumentId = useMemo<string | undefined>(() => {
-    if (selectedResource) {
-      return selectedResource.data.documentId;
-    }
-    return undefined;
-  }, [selectedResource]);
-
-  const {
-    data: selectedDocument,
-    error: selectedDocumentError,
-    isFetching: selectedDocumentIsFetching,
-  } = useQuery({
-    queryKey: ["document", selectedDocumentId],
-    queryFn: async () => {
-      if (selectedDocumentId !== undefined) {
-        const res = await api.documentGet(selectedDocumentId);
-        return res.data;
-      }
-      return false;
-    },
-    enabled: api.isLoggedIn(),
-  });
+  }, [statementId, annotator, territoryId, selectedDocument]);
 
   const thisTHasAnchor = useMemo<boolean>(() => {
     if (selectedDocument) {
-      return selectedDocument?.referencedEntityIds.T.includes(territoryId);
+      return selectedDocument?.entityIds.T.includes(territoryId);
     }
     return false;
   }, [selectedDocument, territoryId]);
 
   const activeTHasAnchor = useMemo<boolean>(() => {
     if (selectedDocument) {
-      return selectedDocument?.referencedEntityIds.T.includes(territoryId);
+      return selectedDocument?.entityIds.T.includes(territoryId);
     }
     return false;
   }, [selectedDocument, territoryId]);
 
-  const { ref: selectorRef, height: selectorHeight = 0 } =
-    useResizeObserver<HTMLDivElement>({ debounceDelay: 0 });
-
-  const themeContext = useContext(ThemeContext);
+  const theme = useTheme();
 
   const isSearchAllowed = useMemo<boolean>(() => {
-    return annotator !== undefined && selectedDocument !== undefined;
+    return annotator !== undefined && !!selectedDocument;
   }, [annotator, selectedDocument]);
 
   const annotatorHeight = useMemo<number>(() => {
-    let height = contentHeight - 70;
+    return contentHeight - 70 - ANNOTATOR_SELECTOR_HEIGHT;
+  }, [contentHeight]);
 
-    if (isSearchAllowed) {
-      height -= 30;
-    }
-    if (selectorHeight) {
-      height -= selectorHeight;
-    }
-    return height;
-  }, [contentHeight, selectorHeight, isSearchAllowed]);
+  const annotatorWidth = useMemo<number>(() => {
+    return showStatementList
+      ? contentWidth - COLLAPSED_TABLE_WIDTH
+      : contentWidth;
+  }, [contentWidth, showStatementList]);
+
+  const annotatorWidthTooSmall = useMemo<boolean>(() => {
+    return annotatorWidth < ANNOTATOR_TOO_SMALL_BREAKPOINT;
+  }, [annotatorWidth]);
 
   return (
     <animated.div style={animatedStyle}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          padding: "0.2rem 0.5rem",
-        }}
-      >
-        {!selectedResource && (
-          <EntitySuggester
-            categoryTypes={[EntityEnums.Class.Resource]}
-            preSuggestions={resources}
-            onPicked={(entity) => {
-              setSelectedResourceId(entity.id);
-            }}
-          />
-        )}
-        {selectedResource && (
-          <div
-            style={{
-              display: "flex",
-              gap: "0.2rem",
-            }}
-          >
-            <EntityTag entity={selectedResource} />
-            <Button
-              key="d"
-              tooltipLabel={"use different resource"}
-              icon={<FaUnlink />}
-              color={"warning"}
-              inverted
-              onClick={() => {
-                setSelectedResourceId(false);
-              }}
-            />
-          </div>
-        )}
-
-        {selectedDocumentIsFetching && <Loader />}
-
-        {!selectedDocumentIsFetching && (
-          <>
-            {selectedDocument && (
-              <DocumentTitle title={selectedDocument.title} />
-            )}
-          </>
-        )}
-
-        {!selectedDocumentIsFetching &&
-          selectedResource !== false &&
-          selectedResource.data.documentId === undefined && (
-            <>
-              <GrDocumentMissing />
-              <i>This Resource does not have any document</i>
-            </>
-          )}
-
-        {selectedResource !== false && selectedResource?.data?.documentId && (
-          <div
-            className="annotator-menu-bar"
-            style={{
-              gap: "0.2rem",
-            }}
-          >
-            {/* T anchor line */}
-            {activeTHasAnchor ? (
-              <Button
-                label="Locate territory"
-                iconRight={<FaLongArrowAltRight />}
-                tooltipLabel="localize anchor in document"
-                inverted
-                onClick={() => {
-                  annotator?.scrollToAnchor(territoryId);
-                }}
-                color="warning"
-              />
-            ) : (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  flexShrink: 0,
-                  gap: "0.4rem",
-                  color: themeContext?.color["black"],
-                  overflow: "hidden",
-                }}
-              >
-                <i style={{ fontSize: themeContext?.fontSize["sm"] }}>No </i>
-                <TbAnchorOff size={14} style={{ flexShrink: 0 }} />
-                <i
-                  style={{
-                    fontSize: themeContext?.fontSize["sm"],
-                    // whiteSpace: "nowrap",
-                  }}
-                >
-                  for Territory
-                </i>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+      {contentWidth > 0 && (
+        <StatementListDocumentSearchLine
+          selectedResource={selectedResource}
+          setSelectedResourceId={setSelectedResourceId}
+          selectedDocumentIsFetching={selectedDocumentIsFetching}
+          selectedDocument={selectedDocument}
+          activeTHasAnchor={activeTHasAnchor}
+          annotator={annotator}
+          territoryId={territoryId}
+          isSearchAllowed={isSearchAllowed}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          isSearchTermValid={isSearchTermValid}
+          hasNoSearchResults={searchOccurences.length === 0}
+          searchActiveOccurence={searchActiveOccurence}
+          searchOccurences={searchOccurences}
+          setSearchActiveOccurence={setSearchActiveOccurence}
+          resources={resources || []}
+          showStatementList={showStatementList}
+          userCanEdit={userCanEdit}
+          annotatorWidthTooSmall={annotatorWidthTooSmall}
+        />
+      )}
 
       {/* Class selector */}
       {selectedResource !== false && selectedResource?.data?.documentId && (
@@ -381,88 +222,30 @@ export const StatementListTextAnnotator: React.FC<
           style={{
             display: "flex",
             alignItems: "center",
-            gap: themeContext?.space[6],
-            marginBottom: themeContext?.space[2],
-          }}
-          ref={selectorRef}
-        >
-          <StyledInfoText style={{ textWrap: "nowrap" }}>
-            Highlight
-          </StyledInfoText>
-          <Dropdown.Multi.Entity
-            options={entitiesDict}
-            disableEmpty={true}
-            disableAny={true}
-            onChange={(newValues) => {
-              setHlEntities(newValues);
-            }}
-            value={hlEntities}
-            width={
-              statements.length > 0
-                ? contentWidth - COLLAPSED_TABLE_WIDTH - 70
-                : contentWidth - 70
-            }
-            noOptionsMessage="No entity classes to highlight"
-          />
-        </div>
-      )}
-
-      {isSearchAllowed && (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: themeContext?.space[6],
-            marginBottom: themeContext?.space[2],
+            gap: theme.space[4],
+            paddingRight: theme.space[2],
+            marginBottom: theme.space[2],
+            marginLeft: showStatementList ? `-${COLLAPSED_TABLE_WIDTH}px` : "0",
           }}
         >
-          <StyledInfoText style={{ textWrap: "nowrap", marginRight: "13px" }}>
-            Search
-          </StyledInfoText>
-          <Input
-            value={searchTerm}
-            onChangeFn={(newText: any) => {
-              setSearchTerm(newText);
-            }}
-            changeOnType
-          />
-          {isSearchTermValid && (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: themeContext?.space[2],
-              }}
-            >
-              <div
-                style={{
-                  color: themeContext?.color["info"],
-                  fontSize: themeContext?.fontSize["xs"],
-                }}
-              >
-                {searchActiveOccurence + 1} / {searchOccurences.length}{" "}
-                occurences
-              </div>
-              <Button
-                label="⬇"
-                color="info"
-                onClick={() => {
-                  const nextOccurence =
-                    (searchActiveOccurence + 1) % searchOccurences.length;
-                  setSearchActiveOccurence(nextOccurence);
-                }}
+          {/* this condition helps initial render in firefox */}
+          {contentWidth > 0 && (
+            <>
+              <StyledInfoText style={{ textWrap: "nowrap" }}>
+                Highlight
+              </StyledInfoText>
+              <Dropdown.Multi.Entity
+                options={entitiesDict}
+                disableEmpty={true}
+                isClearable={true}
+                disableAny={true}
+                onChange={handleHlEntitiesChange}
+                value={hlEntities}
+                noOptionsMessage="No entity classes to highlight"
+                width={contentWidth - 71}
+                limitSelectedItems={Math.floor((contentWidth - 145) / 80)}
               />
-              <Button
-                label="⬆"
-                color="info"
-                onClick={() => {
-                  const prevOccurence =
-                    (searchActiveOccurence - 1 + searchOccurences.length) %
-                    searchOccurences.length;
-                  setSearchActiveOccurence(prevOccurence);
-                }}
-              />
-            </div>
+            </>
           )}
         </div>
       )}
@@ -470,26 +253,25 @@ export const StatementListTextAnnotator: React.FC<
       {/* Annotator */}
       <div style={{ marginTop: "0.2rem" }}>
         <AnnotatorProvider>
-          {selectedDocumentId && (
+          {selectedDocumentId && selectedDocument && (
             <TextAnnotator
-              width={
-                statements.length > 0
-                  ? contentWidth - COLLAPSED_TABLE_WIDTH - 5
-                  : contentWidth
-              }
+              width={annotatorWidth}
+              annotatorWidthTooSmall={annotatorWidthTooSmall}
               hlEntities={hlEntities}
               forwardAnnotator={(newAnnotator) => {
                 setAnnotator(newAnnotator);
               }}
               thisTerritoryEntityId={territoryId}
-              initialScrollEntityId={territoryId}
               displayLineNumbers={true}
               height={annotatorHeight}
-              documentId={selectedDocumentId}
+              documentId={selectedDocumentId as string}
               handleCreateStatement={handleCreateStatement}
-              handleCreateTerritory={handleCreateTerritory}
               storedAnnotatorScroll={storedAnnotatorScroll}
               setStoredAnnotatorScroll={setStoredAnnotatorScroll}
+              territory={territory}
+              dataDocument={selectedDocument}
+              dataDocumentIsFetching={selectedDocumentIsFetching}
+              dataDocumentError={selectedDocumentError}
             />
           )}
         </AnnotatorProvider>

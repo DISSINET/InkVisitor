@@ -64,6 +64,7 @@ interface EntitySuggester {
   alwaysShowCreateModal?: boolean;
 
   disabled?: boolean;
+  isHidden?: boolean;
 }
 
 export const EntitySuggester: React.FC<EntitySuggester> = ({
@@ -86,12 +87,12 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   button,
   preSuggestions,
 
-  disableCreate,
+  disableCreate = false,
   disableTemplateInstantiation = false,
   disableWildCard = false,
   disableTemplatesAccept = false,
   disableButtons = false,
-  disableEnter,
+  disableEnter = false,
   autoFocus,
 
   initTyped,
@@ -101,6 +102,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   alwaysShowCreateModal,
 
   disabled = false,
+  isHidden = false,
 }) => {
   const [typed, setTyped] = useState<string>(initTyped ?? "");
   const debouncedTyped = useDebounce(typed, 100);
@@ -180,7 +182,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     ],
     queryFn: async () => {
       const resSuggestions = await api.entitiesSearch({
-        label: debouncedTyped + wildCardChar,
+        labelOrId: debouncedTyped + wildCardChar,
         class:
           selectedCategory === dropdownWildCard.value
             ? undefined
@@ -212,7 +214,9 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
           }
         })
         .filter((s) =>
-          filterEditorRights && userRole !== UserEnums.Role.Admin
+          filterEditorRights &&
+          userRole !== UserEnums.Role.Admin &&
+          userRole !== UserEnums.Role.Owner
             ? s.right === UserEnums.RoleMode.Write
             : s
         )
@@ -428,7 +432,6 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     <>
       <Suggester
         isFetching={isFetchingStatement}
-        marginTop={false}
         suggestions={suggestions || []}
         preSuggestions={
           preSuggestions &&
@@ -476,6 +479,8 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         alwaysShowCreateModal={alwaysShowCreateModal}
         disableWildCard={disableWildCard || allCategories.length < 2}
         button={button}
+        disableTemplateInstantiation={disableTemplateInstantiation}
+        isHidden={isHidden}
       />
       {showAddTerritoryModal && (
         <AddTerritoryModal

@@ -9,6 +9,7 @@ import {
   StyledContent,
   StyledContentAnimationWrap,
   StyledHead,
+  StyledLabel,
   StyledVerticalText,
 } from "./BoxStyles";
 
@@ -23,6 +24,7 @@ interface Box {
   children?: ReactNode;
   onHeaderClick?: () => void;
   disableOpenBoxHeaderClick?: boolean;
+  disableScroll?: boolean;
 }
 
 export const Box: React.FC<Box> = ({
@@ -36,6 +38,7 @@ export const Box: React.FC<Box> = ({
   children,
   onHeaderClick,
   disableOpenBoxHeaderClick = false,
+  disableScroll = false,
 }) => {
   const [hideContent, setHideContent] = useState<boolean>(false);
   const [showContentLabel, setShowContentLabel] = useState<boolean>(
@@ -77,7 +80,7 @@ export const Box: React.FC<Box> = ({
         }
       >
         {!hideContent && (
-          <animated.div style={animatedExpand}>{label}</animated.div>
+          <StyledLabel style={animatedExpand}>{label}</StyledLabel>
         )}
         <StyledButtonWrap>
           {buttons && (
@@ -99,6 +102,7 @@ export const Box: React.FC<Box> = ({
         <StyledContentAnimationWrap
           $hideContent={hideContent}
           style={animatedExpand}
+          $disableScroll={disableScroll}
         >
           {children}
         </StyledContentAnimationWrap>

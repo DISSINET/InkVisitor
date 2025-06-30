@@ -30,7 +30,7 @@ import {
   JSONExplorer,
 } from "components/advanced";
 import { CMetaProp, DProps } from "constructors";
-import { useSearchParams } from "hooks";
+import { useDebounce, useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
@@ -69,6 +69,9 @@ import { EntityDetailStatementsTable } from "./EntityDetailUsedInTable/EntityDet
 import { EntityDetailValency } from "./EntityDetailValency/EntityDetailValency";
 import { EntityDetailValidationSection } from "./EntityDetailValidationSection/EntityDetailValidationSection";
 import { EntityDetailUsedInDocumentsTable } from "./EntityDetailUsedInTable/EntityDetailUsedInDocumentsTable/EntityDetailUsedInDocumentsTable";
+import { useSelector } from "react-redux";
+import { selectPanelWidth } from "redux/features/layout/mainPage/panelWidthsSlice";
+import { useAppSelector } from "redux/hooks";
 
 const allowedEntityChangeClasses = [
   EntityEnums.Class.Value,
@@ -626,11 +629,20 @@ export const EntityDetail: React.FC<EntityDetail> = ({
       },
     });
   };
+  const contentWidth = useAppSelector(
+    (state) => state.layout.mainPage.secondPanelRealWidth
+  );
+  const widthTooSmall = contentWidth < 516;
 
   return (
     <>
       {entity && (
-        <CustomScrollbar>
+        <CustomScrollbar
+          customStyle={{
+            // necessary to scroll until the bottom of the page
+            height: "calc(100% - 2.5rem)",
+          }}
+        >
           <>
             <EntityDetailHeaderRow
               entity={entity}
@@ -670,6 +682,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                     setShowTypeSubmit={setShowTypeSubmit}
                     templateOptions={templateOptions}
                     updateEntityMutation={updateEntityMutation}
+                    widthTooSmall={widthTooSmall}
                   />
                 </StyledDetailSectionContent>
               </StyledDetailSection>
@@ -694,91 +707,21 @@ export const EntityDetail: React.FC<EntityDetail> = ({
               {/* Validation rules */}
               {entity.class === EntityEnums.Class.Territory && (
                 <StyledDetailSection>
-                  <StyledDetailSectionHeader>
-                    Validation rules
-                    {userCanEdit && (
-                      <span style={{ marginLeft: "1rem", marginRight: "1rem" }}>
-                        <Button
-                          color="primary"
-                          label="rule"
-                          icon={<FaPlus />}
-                          onClick={initValidationRule}
-                        />
-                      </span>
-                    )}
-                    {userCanEdit && (
-                      <EntityDetailSectionButtons
-                        entityId={entity.id}
-                        suggesterCategoryTypes={[EntityEnums.Class.Territory]}
-                        setShowSubmit={setShowValidationsBatchRemoveSubmit}
-                        removeBtnTooltip="remove all validations from entity"
-                        removeBtnDisabled={
-                          entity.data.validations
-                            ? entity.data.validations.length === 0
-                            : true
-                        }
-                        handleCopyFromEntity={(pickedEntity, replace) => {
-                          setLoadingValidations(true);
-                          api.detailGet(pickedEntity.id).then((data) => {
-                            setLoadingValidations(false);
-                            const otherValidations = (data.data as ITerritory)
-                              .data.validations;
-                            if (
-                              otherValidations &&
-                              otherValidations.length > 0
-                            ) {
-                              if (replace) {
-                                updateEntityMutation?.mutate({
-                                  data: {
-                                    validations: otherValidations,
-                                  },
-                                });
-                              } else {
-                                if (entity.data.validations) {
-                                  updateEntityMutation?.mutate({
-                                    data: {
-                                      validations: [
-                                        ...entity.data.validations,
-                                        ...otherValidations,
-                                      ],
-                                    },
-                                  });
-                                } else {
-                                  updateEntityMutation?.mutate({
-                                    data: {
-                                      validations: otherValidations,
-                                    },
-                                  });
-                                }
-                              }
-                            } else {
-                              toast.info("no validations");
-                            }
-                          });
-                        }}
-                      />
-                    )}
-                  </StyledDetailSectionHeader>
-                  <StyledDetailSectionContent>
-                    <EntityDetailValidationSection
-                      validations={
-                        entity.data.validations as
-                          | ITerritoryValidation[]
-                          | undefined
-                      }
-                      entities={entity.entities}
-                      updateEntityMutation={updateEntityMutation}
-                      userCanEdit={userCanEdit}
-                      isInsideTemplate={isInsideTemplate}
-                      territoryParentId={getTerritoryId(entity)}
-                      showValidationsBatchRemoveSubmit={
-                        showValidationsBatchRemoveSubmit
-                      }
-                      setShowValidationsBatchRemoveSubmit={
-                        setShowValidationsBatchRemoveSubmit
-                      }
-                    />
-                  </StyledDetailSectionContent>
+                  <EntityDetailValidationSection
+                    validations={
+                      entity.data.validations as
+                        | ITerritoryValidation[]
+                        | undefined
+                    }
+                    entities={entity.entities}
+                    updateEntityMutation={updateEntityMutation}
+                    userCanEdit={userCanEdit}
+                    isInsideTemplate={isInsideTemplate}
+                    territoryParentId={getTerritoryId(entity)}
+                    entity={entity}
+                    setLoadingValidations={setLoadingValidations}
+                    widthTooSmall={widthTooSmall}
+                  />
                 </StyledDetailSection>
               )}
 
@@ -892,7 +835,6 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                         });
                       }}
                       userCanEdit={userCanEdit}
-                      openDetailOnCreate={false}
                       movePropToIndex={(propId, oldIndex, newIndex) => {
                         movePropToIndex(propId, oldIndex, newIndex);
                       }}
@@ -1046,9 +988,9 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                       singular: "Anchor",
                       plural: "Anchors",
                     }}
-                    entities={entity.entities}
-                    useCases={entity.usedInDocuments}
                     perPage={10}
+                    entity={entity}
+                    widthTooSmall={widthTooSmall}
                   />
                 )}
               </StyledDetailSection>

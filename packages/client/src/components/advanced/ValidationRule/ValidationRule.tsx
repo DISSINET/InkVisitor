@@ -1,4 +1,8 @@
-import { entitiesDict } from "@shared/dictionaries";
+import {
+  entitiesDict,
+  entityStatusDict,
+  languageDict,
+} from "@shared/dictionaries";
 import { classesAll } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
@@ -19,9 +23,12 @@ import {
   StyledFlexList,
   StyledGrid,
   StyledLabel,
+  StyledLanguageList,
   StyledNotActiveTag,
 } from "./ValidationRuleStyles";
 import { ValidationText } from "./ValidationText/ValidationText";
+import { LanguageTag } from "./LanguageTag";
+import { getEntityStatusIcon } from "utils/iconUtils";
 
 interface ValidationRule {
   validation: ITerritoryValidation;
@@ -30,6 +37,7 @@ interface ValidationRule {
   removeValidationRule: () => void;
   isInsideTemplate: boolean;
   territoryParentId?: string;
+  widthTooSmall?: boolean;
   userCanEdit: boolean;
 }
 export const ValidationRule: React.FC<ValidationRule> = ({
@@ -39,12 +47,15 @@ export const ValidationRule: React.FC<ValidationRule> = ({
   removeValidationRule,
   isInsideTemplate,
   territoryParentId,
+  widthTooSmall = false,
   userCanEdit,
 }) => {
   const {
     detail,
     entityClasses,
-    classifications,
+    entityClassifications,
+    entityLanguages,
+    entityStatuses,
     tieType,
     propType,
     allowedClasses,
@@ -105,16 +116,16 @@ export const ValidationRule: React.FC<ValidationRule> = ({
         <Dropdown.Multi.Entity
           disableEmpty
           width="full"
-          value={entityClasses}
+          value={entityClasses ?? []}
           onChange={(values) => updateValidationRule({ entityClasses: values })}
           options={entitiesDict}
           disabled={!userCanEdit}
         />
 
-        {/* Classifications */}
-        <StyledLabel>..classified as</StyledLabel>
+        {/* Entity Classifications */}
+        <StyledLabel>classified as</StyledLabel>
         <StyledFlexList>
-          {classifications.map((classification, key) => (
+          {entityClassifications?.map((classification, key) => (
             <EntityTag
               key={key}
               flexListMargin
@@ -123,7 +134,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
                 userCanEdit && {
                   onClick: () =>
                     updateValidationRule({
-                      classifications: classifications.filter(
+                      entityClassifications: entityClassifications.filter(
                         (c) => c !== classification
                       ),
                     }),
@@ -131,14 +142,22 @@ export const ValidationRule: React.FC<ValidationRule> = ({
               }
             />
           ))}
-          {!(!userCanEdit && classifications.length > 0) && (
+          {!(
+            !userCanEdit &&
+            entityClassifications &&
+            entityClassifications?.length > 0
+          ) && (
             <EntitySuggester
+              inputWidth="full"
               alwaysShowCreateModal
-              excludedActantIds={classifications}
+              excludedActantIds={entityClassifications}
               categoryTypes={[EntityEnums.Class.Concept]}
               onPicked={(entity) =>
                 updateValidationRule({
-                  classifications: [...classifications, entity.id],
+                  entityClassifications: [
+                    ...(entityClassifications ?? []),
+                    entity.id,
+                  ],
                 })
               }
               disabled={
@@ -147,6 +166,107 @@ export const ValidationRule: React.FC<ValidationRule> = ({
             />
           )}
         </StyledFlexList>
+
+        {/* Entity Languages */}
+        <StyledLabel>having language</StyledLabel>
+        <StyledFlexList>
+          <StyledLanguageList>
+            {entityLanguages?.map((language, key) => (
+              <LanguageTag
+                languageValue={language}
+                languageTooltip={
+                  languageDict.find((lang) => lang.value === language)?.label
+                }
+                onUnlink={
+                  userCanEdit
+                    ? () => {
+                        updateValidationRule({
+                          entityLanguages: entityLanguages.filter(
+                            (c) => c !== language
+                          ),
+                        });
+                      }
+                    : undefined
+                }
+              />
+            ))}
+          </StyledLanguageList>
+
+          {!(!userCanEdit && entityLanguages) && (
+            <Dropdown.Single.Basic
+              disabled={!userCanEdit}
+              placeholder="Add new rule language"
+              width={200}
+              options={languageDict.filter(
+                (language) =>
+                  !entityLanguages || !entityLanguages.includes(language.value)
+              )}
+              value={null}
+              onChange={(selectedOption) => {
+                const newLanguageList = [...(entityLanguages ?? [])];
+                const newLanguage = selectedOption as EntityEnums.Language;
+
+                updateValidationRule({
+                  entityLanguages: newLanguageList.includes(newLanguage)
+                    ? newLanguageList.filter(
+                        (language) => language !== newLanguage
+                      )
+                    : [...newLanguageList, newLanguage],
+                });
+              }}
+            />
+          )}
+        </StyledFlexList>
+
+        {/* Entity Statuses */}
+        <StyledLabel>having status</StyledLabel>
+        <div>
+          <AttributeButtonGroup
+            noMargin
+            iconsOnly={widthTooSmall}
+            disabled={!userCanEdit}
+            canSelectMultiple={true}
+            options={entityStatusDict.map((entityStatusOption) => {
+              const icon = getEntityStatusIcon(entityStatusOption["value"]);
+              return {
+                longValue: entityStatusOption["label"],
+                shortValue: entityStatusOption["label"],
+                icon: widthTooSmall ? icon : undefined,
+                onClick: () => {
+                  let newStatus: EntityEnums.Status[] = [
+                    ...(entityStatuses ?? []),
+                  ];
+                  const statusValue = entityStatusOption[
+                    "value"
+                  ] as EntityEnums.Status;
+
+                  console.log("statusValue", statusValue);
+
+                  if (entityStatuses && entityStatuses.length > 0) {
+                    // remove if already in the list
+                    if (entityStatuses.includes(statusValue)) {
+                      newStatus = entityStatuses.filter(
+                        (status) => status !== statusValue
+                      );
+                    } else {
+                      newStatus.push(statusValue);
+                    }
+                  } else {
+                    newStatus.push(statusValue);
+                  }
+
+                  updateValidationRule({ entityStatuses: newStatus });
+                },
+                selected:
+                  entityStatuses && entityStatuses.length
+                    ? entityStatuses.includes(
+                        entityStatusOption["value"] as EntityEnums.Status
+                      )
+                    : true,
+              };
+            })}
+          />
+        </div>
 
         {/* Tie type */}
         <StyledLabel>Tie type</StyledLabel>
@@ -177,7 +297,8 @@ export const ValidationRule: React.FC<ValidationRule> = ({
                   allowedEntities: [],
                 }),
               selected: tieType === EProtocolTieType.Classification,
-              optionDisabled: classifications.length > 0,
+              optionDisabled:
+                entityClassifications && entityClassifications.length > 0,
             },
             {
               longValue: EProtocolTieType.Reference,
@@ -218,6 +339,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
               ))}
               {!(!userCanEdit && propType && propType.length > 0) && (
                 <EntitySuggester
+                  inputWidth="full"
                   alwaysShowCreateModal
                   categoryTypes={[EntityEnums.Class.Concept]}
                   excludedActantIds={propType}
@@ -236,7 +358,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
         {/* Allowed classes */}
         {tieType === EProtocolTieType.Property && (
           <>
-            <StyledLabel>Allowed E types</StyledLabel>
+            <StyledLabel>Entity types allowed in property value</StyledLabel>
             <Dropdown.Multi.Entity
               disableEmpty
               width="full"
@@ -254,7 +376,8 @@ export const ValidationRule: React.FC<ValidationRule> = ({
         <StyledLabel>
           {tieType === EProtocolTieType.Classification && "Allowed Concepts"}
           {tieType === EProtocolTieType.Reference && "Allowed Resources"}
-          {tieType === EProtocolTieType.Property && "Allowed E values"}
+          {tieType === EProtocolTieType.Property &&
+            "Entities allowed in property value"}
         </StyledLabel>
         <StyledFlexList>
           {allowedEntities?.map((entityId, key) => (
@@ -277,6 +400,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
 
           {isAllowedEntitiesSuggesterVisible && (
             <EntitySuggester
+              inputWidth="full"
               alwaysShowCreateModal
               categoryTypes={allowedEntitiesClasses}
               excludedActantIds={allowedEntities}

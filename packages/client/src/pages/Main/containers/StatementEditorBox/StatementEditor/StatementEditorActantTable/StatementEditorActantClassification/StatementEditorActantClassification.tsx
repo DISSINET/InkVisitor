@@ -118,7 +118,7 @@ export const StatementEditorActantClassification: React.FC<
               openDetailOnCreate
               isInsideTemplate={isInsideTemplate}
               territoryActants={territoryActants}
-              disabled={!userCanEdit}
+              isHidden={!userCanEdit}
             />
           </StyledSuggesterWrap>
         )}

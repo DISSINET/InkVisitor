@@ -1,16 +1,15 @@
-import React, { useContext } from "react";
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 import {
-  BsCaretDownFill,
-  BsCaretRightFill,
-  BsCaretRight,
   BsCaretDown,
+  BsCaretDownFill,
+  BsCaretRight,
+  BsCaretRightFill,
 } from "react-icons/bs";
 
-import { StyledFaCircle, StyledFaDotCircle } from "./TerritoryTreeNodeStyles";
 import { InterfaceEnums, UserEnums } from "@shared/enums";
+import { useTheme } from "hooks";
 import { useAppSelector } from "redux/hooks";
-import { ThemeContext } from "styled-components";
+import { StyledFaCircle, StyledFaDotCircle } from "./TerritoryTreeNodeStyles";
 
 interface TerritoryTreeNodeArrowIcon {
   territoryId: string;
@@ -32,12 +31,12 @@ const TerritoryTreeNodeArrowIcon: React.FC<TerritoryTreeNodeArrowIcon> = ({
     (state) => state.theme
   );
 
-  const themeContext = useContext(ThemeContext);
+  const theme = useTheme();
 
   const symbolColor = useMemo(() => {
     return right === UserEnums.RoleMode.Read
-      ? themeContext?.color.treeNodeRead
-      : themeContext?.color.treeNodeWrite;
+      ? theme.color.treeNodeRead
+      : theme.color.treeNodeWrite;
   }, [right, selectedThemeId]);
 
   const iconStyle: React.CSSProperties = {

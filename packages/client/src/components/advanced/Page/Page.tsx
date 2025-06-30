@@ -1,6 +1,7 @@
+import { UserEnums } from "@shared/enums";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Header, Loader, Toast } from "components";
+import { Header, Loader } from "components";
 import {
   LeftHeader,
   RightHeader,
@@ -18,7 +19,7 @@ import { setUsername } from "redux/features/usernameSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { ThemeColor } from "Theme/theme";
 import { StyledPage, StyledPageContent } from "./PageStyles";
-import { UserEnums } from "@shared/enums";
+import { JSX } from "react";
 
 interface Page {
   children?: React.ReactNode;
@@ -33,20 +34,11 @@ export const Page: React.FC<Page> = ({ children }) => {
   const userRole = localStorage.getItem("userrole") as UserEnums.Role;
   const { cleanAllParams } = useSearchParams();
 
-  const layoutWidth: number = useAppSelector(
-    (state) => state.layout.layoutWidth
-  );
   const contentHeight: number = useAppSelector(
     (state) => state.layout.contentHeight
   );
 
-  let environmentName = (process.env.ROOT_URL || "").replace(
-    /apps\/inkvisitor[-]?/,
-    ""
-  );
-  if (environmentName === "/") {
-    environmentName = "";
-  }
+  const environmentName = window.appConfig.env || "";
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -125,7 +117,7 @@ export const Page: React.FC<Page> = ({ children }) => {
     [tempLocation]
   );
 
-  const headerRight = useMemo<undefined | JSX.Element>(() => {
+  const headerRight = useMemo<undefined | React.ReactNode>(() => {
     if (disableRightHeader) {
       return undefined;
     }
@@ -154,25 +146,25 @@ export const Page: React.FC<Page> = ({ children }) => {
     } else {
       return <Loader show />;
     }
-  }, [contentHeight > 0]);
+  }, [contentHeight]);
 
   return (
-    <StyledPage $layoutWidth={layoutWidth} onClick={handleClick}>
+    <StyledPage onClick={handleClick}>
       <Header
         paddingY={0}
         paddingX={10}
         color={
-          ["production", ""].indexOf(environmentName) === -1
-            ? (environmentName as keyof ThemeColor)
-            : "muni"
+          environmentName === "production"
+            ? "muni"
+            : environmentName === ""
+            ? "medhate"
+            : (environmentName as keyof ThemeColor)
         }
         left={headerLeft}
         right={headerRight}
       />
 
-      <StyledPageContent id="page" height={contentHeight}>
-        {contentEl}
-      </StyledPageContent>
+      <StyledPageContent id="page">{contentEl}</StyledPageContent>
 
       {user && userCustomizationOpen && (
         <UserCustomizationModal
@@ -180,7 +172,6 @@ export const Page: React.FC<Page> = ({ children }) => {
           onClose={() => setUserCustomizationOpen(false)}
         />
       )}
-      <Toast />
     </StyledPage>
   );
 };

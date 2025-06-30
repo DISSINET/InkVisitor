@@ -1,7 +1,12 @@
 import { entitiesDictKeys } from "@shared/dictionaries";
 import { UserEnums } from "@shared/enums";
 import { IEntity, IResponseGeneric } from "@shared/types";
-import { UseMutationResult } from "@tanstack/react-query";
+import {
+  UseMutationResult,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import api from "api";
 import { AxiosResponse } from "axios";
 import {
   Button,
@@ -13,10 +18,13 @@ import {
   ModalInputForm,
 } from "components";
 import { EntityTag } from "components/advanced";
-import { applyTemplate } from "constructors";
-import React from "react";
+import { applyTemplate, InstRelations } from "constructors";
+import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { getShortLabelByLetterCount } from "utils/utils";
+import { Relation } from "@shared/types";
+import { RelationEnums } from "@shared/enums";
+import { v4 as uuidv4 } from "uuid";
 
 interface ApplyTemplateModal {
   showModal: boolean;
@@ -40,6 +48,38 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModal> = ({
   templateToApply,
   setTemplateToApply,
 }) => {
+  const {
+    status,
+    data: templateDetail,
+    error: templateDetailError,
+    isFetching: templateDetailIsFetching,
+  } = useQuery({
+    queryKey: ["entity", templateToApply.id],
+    queryFn: async () => {
+      const res = await api.detailGet(templateToApply.id);
+      return res.data;
+    },
+    enabled: !!templateToApply.id && api.isLoggedIn(),
+  });
+
+  const [newRelations, setNewRelations] = useState<Relation.IRelation[]>([]);
+
+  // instantiate relations from template
+  useEffect(() => {
+    if (templateDetail) {
+      const { relations } = templateDetail;
+      const newRelations: Relation.IRelation[] = InstRelations(
+        relations,
+        templateToApply.id,
+        entity.id
+      );
+
+      setNewRelations(newRelations);
+    }
+  }, [templateDetail, entity.id, templateToApply.id]);
+
+  const queryClient = useQueryClient();
+
   const handleApplyTemplate = async (templateToApply: IEntity) => {
     try {
       const entityAfterTemplateApplied: IEntity = await applyTemplate(
@@ -49,6 +89,15 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModal> = ({
       );
 
       if (entityAfterTemplateApplied) {
+        api
+          .relationsCreate(newRelations)
+          .then(() => {
+            queryClient.invalidateQueries({ queryKey: ["entity"] });
+          })
+          .catch((error) => {
+            console.error("Failed to create relations:", error);
+          });
+
         toast.info(
           `Template "${getShortLabelByLetterCount(
             templateToApply.labels[0] || "",
@@ -71,8 +120,8 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModal> = ({
       showModal={showModal}
       width="auto"
       onEnterPress={() => {
-        setShowApplyTemplateModal(false);
         handleApplyTemplate(templateToApply);
+        setShowApplyTemplateModal(false);
       }}
       onClose={() => {
         setShowApplyTemplateModal(false);
@@ -102,8 +151,8 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModal> = ({
             label="Apply"
             color="info"
             onClick={() => {
-              setShowApplyTemplateModal(false);
               handleApplyTemplate(templateToApply);
+              setShowApplyTemplateModal(false);
             }}
           />
         </ButtonGroup>

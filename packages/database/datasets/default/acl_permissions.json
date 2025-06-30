@@ -42,6 +42,12 @@
     "roles": ["*"]
   },
   {
+    "controller": "territories",
+    "route": ":territoryId/statements",
+    "method": "GET",
+    "roles": ["*"]
+  },
+  {
     "controller": "tree",
     "route": "",
     "method": "GET",
@@ -240,6 +246,12 @@
     "roles": ["*"]
   },
   {
+    "controller":"documents",
+    "route": ":documentId",
+    "method": "GET",
+    "roles": ["editor"]
+  },
+  {
     "controller": "documents",
     "route": "",
     "method": "POST",
@@ -260,7 +272,24 @@
   {
     "controller": "users",
     "route": "query",
-    "method": "POST",
+    "method": "POST"
+  },
+  {
+    "controller":"documents",
+    "route": ":documentId/removeAnchors",
+    "method": "PATCH",
+    "roles": ["admin"]
+  },
+  {
+    "controller":"documents",
+    "route": ":documentId/removeAnchor",
+    "method": "PATCH",
+    "roles": ["admin"]
+  },
+  {
+    "controller": "documents",
+    "route": ":documentId/anchors",
+    "method": "GET",
     "roles": ["*"]
   },
   {

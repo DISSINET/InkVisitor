@@ -4,6 +4,7 @@
 
 import { IEntity, IStatement, IWarning } from ".";
 import { StatementEnums, UserEnums } from "../enums";
+import { IResponseUsedInDocument } from "./response-detail";
 
 export interface EntityOrder {
   type: StatementEnums.ElementType.Actant | StatementEnums.ElementType.Action;
@@ -36,6 +37,7 @@ export interface IdentificationOrder {
 export interface IResponseStatement extends IStatement {
   entities: { [key: string]: IEntity }; // all entities (IEntity) used in actions/actants, actions/actants.props.type/value, territory, references, tags, actant identifications and classifications
   // usedIn?: IStatement[];
+  usedInDocuments: IResponseUsedInDocument[];
   warnings: IWarning[];
   right?: UserEnums.RoleMode;
 }

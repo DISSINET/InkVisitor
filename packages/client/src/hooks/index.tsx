@@ -5,6 +5,7 @@ import useKeyLift from "./useKeyLift";
 import useKeyPress from "./useKeyPress";
 import { useResizeObserver } from "./useResizeObserver";
 import { useSearchParams } from "./useSearchParamsContext";
+import { useTheme } from "./useTheme";
 import { useWindowSize } from "./useWindowSize";
 
 export {
@@ -15,5 +16,6 @@ export {
   useSearchParams,
   useDebouncedCallback,
   useResizeObserver,
+  useTheme,
   useWindowSize,
 };

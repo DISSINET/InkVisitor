@@ -1,20 +1,21 @@
-import { UserEnums } from "@shared/enums";
+import { EntityEnums, UserEnums } from "@shared/enums";
 import { IResponseTree, IUser } from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { rootTerritoryId } from "Theme/constants";
 import api from "api";
 import { Button, ButtonGroup, CustomScrollbar, Loader } from "components";
+import { EntityCreateModal } from "components/advanced";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { BsFilter } from "react-icons/bs";
 import { FaPlus } from "react-icons/fa";
+import { useSelector } from "react-redux";
+import { selectPanelWidth } from "redux/features/layout/mainPage/panelWidthsSlice";
 import { setFilterOpen } from "redux/features/territoryTree/filterOpenSlice";
 import { setSelectedTerritoryPath } from "redux/features/territoryTree/selectedTerritoryPathSlice";
 import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { ITerritoryFilter } from "types";
 import { searchTree } from "utils/utils";
-import { ContextMenuNewTerritoryModal } from "./ContextMenuNewTerritoryModal/ContextMenuNewTerritoryModal";
 import { StyledNoResults, StyledTreeWrapper } from "./TerritoryTreeBoxStyles";
 import { TerritoryTreeFilter } from "./TerritoryTreeFilter/TerritoryTreeFilter";
 import {
@@ -25,6 +26,7 @@ import {
   markNodesWithFilters,
 } from "./TerritoryTreeFilterUtils";
 import { MemoizedTerritoryTreeNode } from "./TerritoryTreeNode/TerritoryTreeNode";
+import { useDebounce } from "hooks";
 
 const initFilterSettings: ITerritoryFilter = {
   nonEmpty: false,
@@ -184,21 +186,27 @@ export const TerritoryTreeBox: React.FC = () => {
     (state) => state.territoryTree.filterOpen
   );
 
+  const treeWidth = useDebounce(useSelector(selectPanelWidth(0)), 200);
+
+  const treeWidthTooSmall = treeWidth < 140;
+
   return (
     <>
       <ButtonGroup>
-        {userRole === UserEnums.RoleMode.Admin && (
+        {(userRole === UserEnums.Role.Admin ||
+          userRole === UserEnums.Role.Owner) && (
           <Button
-            label="new"
+            label={!treeWidthTooSmall ? "new" : ""}
             iconRight={<span style={{ marginLeft: 5 }}>{"\u0054"}</span>}
             icon={<FaPlus />}
             onClick={() => setShowCreate(true)}
             fullWidth
+            tooltipLabel={treeWidthTooSmall ? "create new territory" : ""}
           />
         )}
         <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
           <Button
-            label="filter"
+            label={!treeWidthTooSmall ? "filter" : ""}
             onClick={() => {
               if (treeFilterOpen) {
                 dispatch(setFilterOpen(false));
@@ -212,7 +220,8 @@ export const TerritoryTreeBox: React.FC = () => {
             color="success"
             inverted={!treeFilterOpen}
             fullWidth
-            icon={<BsFilter />}
+            icon={<BsFilter size={14} />}
+            tooltipLabel={treeWidthTooSmall ? "filter" : ""}
             tooltipPosition="right"
           />
         </div>
@@ -257,9 +266,12 @@ export const TerritoryTreeBox: React.FC = () => {
       )}
 
       {showCreate && (
-        <ContextMenuNewTerritoryModal
-          onClose={() => setShowCreate(false)}
-          territoryActantId={rootTerritoryId}
+        <EntityCreateModal
+          closeModal={() => setShowCreate(false)}
+          allowedEntityClasses={[EntityEnums.Class.Territory]}
+          onMutationSuccess={() =>
+            queryClient.invalidateQueries({ queryKey: ["tree"] })
+          }
         />
       )}
       <Loader show={isFetching || updateUserMutation.isPending} />

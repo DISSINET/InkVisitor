@@ -1,6 +1,6 @@
 import { IEntity, IResponseStatement, IStatement } from "@shared/types";
-import { useSearchParams } from "hooks";
-import React, { useContext, useEffect, useRef, useState } from "react";
+import { useSearchParams, useTheme } from "hooks";
+import React, { useEffect, useRef } from "react";
 import {
   DragSourceMonitor,
   DropTargetMonitor,
@@ -15,17 +15,27 @@ import {
 import { BeatLoader } from "react-spinners";
 import { Cell, ColumnInstance, Row } from "react-table";
 import { setDraggedRowId } from "redux/features/statementList/draggedRowIdSlice";
+import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { ThemeContext } from "styled-components";
-import { DragItem, ItemTypes, StatementListDisplayMode } from "types";
+import {
+  DragItem,
+  ItemTypes,
+  StatementListDisplayMode,
+  StatementOrderCorrection,
+} from "types";
 import { dndHoverFn } from "utils/utils";
+import { StatementListOrderCorrection } from "./StatementListOrderCorrection/StatementListOrderCorrection";
 import { StatementListRowExpanded } from "./StatementListRowExpanded/StatementListRowExpanded";
 import { StyledTd, StyledTdMove, StyledTr } from "./StatementListTableStyles";
 import useIsRowVisible from "./useRowIsVisible";
-import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 
 interface StatementListRow {
-  row: Row<IResponseStatement>;
+  row: Row<
+    IResponseStatement & {
+      orderCorrection?: StatementOrderCorrection;
+      isAnchored?: boolean;
+    }
+  >;
   index: number;
   moveRow: (dragIndex: number, hoverIndex: number) => void;
   moveEndRow: (statementToMove: IStatement, index: number) => Promise<void>;
@@ -88,13 +98,20 @@ export const StatementListRow: React.FC<StatementListRow> = ({
       : dispatch(setDraggedRowId(""));
   }, [isDragging]);
 
+  // drag and drop needs to be inside component body to work correctly but needs to be also inside the useEffect reinitialize when the row gets visible
   preview(drop(dropRef));
-
+  drag(dragRef);
+  // needed as well as mentioned in the comment above
   useEffect(() => {
-    drag(dragRef);
+    if (isVisible) {
+      preview(drop(dropRef));
+      drag(dragRef);
+    }
   }, [isVisible]);
 
-  const themeContext = useContext(ThemeContext);
+  const theme = useTheme();
+
+  const { orderCorrection, isAnchored } = row.original;
 
   return (
     <React.Fragment key={row.original.data.territory?.order}>
@@ -115,18 +132,33 @@ export const StatementListRow: React.FC<StatementListRow> = ({
             {row.cells.map((cell: Cell<IResponseStatement>) => {
               if (cell.column.id === "move") {
                 return (
-                  <StyledTdMove
-                    key="move"
-                    ref={dragRef}
-                    onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                  >
-                    <FaGripVertical color={themeContext?.color.black} />
+                  <StyledTdMove key="move">
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      <div
+                        style={{ display: "flex", cursor: "move" }}
+                        ref={dragRef}
+                        onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                      >
+                        <FaGripVertical color={theme.color.black} />
+                      </div>
+                      {(isAnchored !== undefined && !isAnchored) ||
+                      (orderCorrection && orderCorrection?.distance > 0) ? (
+                        <StatementListOrderCorrection
+                          orderCorrection={orderCorrection}
+                          isAnchored={isAnchored}
+                        />
+                      ) : (
+                        <div style={{ width: "2rem" }} />
+                      )}
+                    </div>
                   </StyledTdMove>
                 );
               } else {
+                const cellProps = cell.getCellProps();
+                const { key, ...restCellProps } = cellProps;
                 return (
-                  <StyledTd {...cell.getCellProps()}>
-                    {cell.render("Cell")}
+                  <StyledTd key={key} {...restCellProps}>
+                    {cell.render("Cell") as React.ReactNode}
                   </StyledTd>
                 );
               }
@@ -178,7 +210,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
                 size={7}
                 margin={4}
                 style={{ marginLeft: "0.3rem", marginTop: "0.1rem" }}
-                color={themeContext?.color["primary"]}
+                color={theme.color["primary"]}
               />
             </div>
           </StyledTd>
