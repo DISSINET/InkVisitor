@@ -40,6 +40,7 @@ export const StyledUsername = styled.div`
 `;
 export const StyledRightHeader = styled.div`
   display: flex;
+  align-items: center;
 `;
 export const StyledThemeSwitcher = styled.div`
   height: 3rem;
