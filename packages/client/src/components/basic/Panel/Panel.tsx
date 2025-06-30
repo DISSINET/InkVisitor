@@ -18,7 +18,7 @@ export const Panel: React.FC<Panel> = ({ width, children }) => {
   });
 
   useEffect(() => {
-    if (initialWidth === null) {
+    if (initialWidth === null && width > 0) {
       setInitialWidth(width);
     }
   }, [width, initialWidth]);

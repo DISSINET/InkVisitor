@@ -37,6 +37,9 @@ export const Page: React.FC<Page> = ({ children }) => {
   const contentHeight: number = useAppSelector(
     (state) => state.layout.contentHeight
   );
+  const layoutWidth: number = useAppSelector(
+    (state) => state.layout.layoutWidth
+  );
 
   const environmentName = window.appConfig.env || "";
 
@@ -141,12 +144,12 @@ export const Page: React.FC<Page> = ({ children }) => {
   }, [lastClickedIndex]);
 
   const contentEl = useMemo(() => {
-    if (contentHeight > 0) {
+    if (contentHeight > 0 && layoutWidth > 0) {
       return children;
     } else {
       return <Loader show />;
     }
-  }, [contentHeight]);
+  }, [contentHeight, layoutWidth]);
 
   return (
     <StyledPage onClick={handleClick}>
