@@ -20,8 +20,6 @@ import { LogicButtonGroup } from "./IconButtonGroups/LogicButtonGroup";
 import { MoodVariantButtonGroup } from "./IconButtonGroups/MoodVariantButtonGroup";
 import { PositionButtonGroup } from "./IconButtonGroups/PositionButtonGroup";
 import { JSONExplorer } from "./JSONExplorer/JSONExplorer";
-import { LayoutSeparatorHorizontal } from "./LayoutSeparator/LayoutSeparatorHorizontal";
-import { LayoutSeparatorVertical } from "./LayoutSeparator/LayoutSeparatorVertical";
 import { Menu } from "./Menu/Menu";
 import { Page } from "./Page/Page";
 import { LeftHeader, RightHeader } from "./PageHeader/PageHeader";
@@ -30,6 +28,8 @@ import { UserCustomizationModal } from "./UserCustomizationModal/UserCustomizati
 import { ValidationRule } from "./ValidationRule/ValidationRule";
 import { AbbreviatedTextWithTooltip } from "./AbbreviatedTextWithTooltip/AbbreviatedTextWithTooltip";
 import { DocumentTitle } from "./DocumentTitle/DocumentTitle";
+import { LayoutSeparatorVertical } from "./PanelSeparator/LayoutSeparatorVertical";
+import { LayoutSeparatorHorizontal } from "./PanelSeparator/LayoutSeparatorHorizontal";
 
 const Dropdown = {
   Single: {

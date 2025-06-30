@@ -85,14 +85,6 @@ const exploreReducer = (
         },
       };
 
-    case ExploreActionType.setLimit:
-      return {
-        ...state,
-        ...{
-          limit: action.payload,
-        },
-      };
-
     case ExploreActionType.setLimitAndOffset:
       return {
         ...state,
