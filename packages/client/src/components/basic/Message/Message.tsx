@@ -341,7 +341,7 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
 
   return (
     <StyledMessage>
-      <div style={{ width: "3rem" }}>
+      <div style={{ display: "flex", alignItems: "center", width: "3rem" }}>
         <TiWarningOutline size={20} style={{ marginRight: "0.5rem" }} />
       </div>
       <div
