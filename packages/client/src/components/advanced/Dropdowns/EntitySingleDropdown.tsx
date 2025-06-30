@@ -54,7 +54,7 @@ export const EntitySingleDropdown = <T extends string>({
       autoFocus={autoFocus}
       loggerId={loggerId}
       customComponents={{
-        Option: (props) => (
+        Option: (props: OptionProps<any>) => (
           <Option {...props} disableTooltip={disableTooltip} />
         ),
       }}
@@ -80,22 +80,20 @@ const Option = ({
       >
         {props.data.label}
       </StyledEntityValue>
-      <Tooltip
-        label={
-          props.data.value !== EntityEnums.Extension.Any
-            ? entitiesDictKeys[
+      {!disableTooltip &&
+        props.data.value !== EntityEnums.Extension.Any &&
+        props.data.value !== "" && (
+          <Tooltip
+            label={
+              entitiesDictKeys[
                 props.data.value as keyof typeof entitiesDictKeys
-              ].label
-            : ""
-        }
-        visible={
-          showTooltip &&
-          !disableTooltip &&
-          props.data.value !== EntityEnums.Extension.Any
-        }
-        referenceElement={referenceElement}
-        position="left"
-      />
+              ]?.label
+            }
+            visible={showTooltip}
+            referenceElement={referenceElement}
+            position="left"
+          />
+        )}
     </components.Option>
   );
 };
