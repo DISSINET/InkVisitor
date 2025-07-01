@@ -190,91 +190,120 @@ export const TerritoryTreeBox: React.FC = () => {
 
   const treeWidthTooSmall = treeWidth < 140;
 
+  // delay of show content for fluent animation on open
+  const [showTerritoryTree, setShowTerritoryTree] = useState(true);
+
+  useEffect(() => {
+    if (firstPanelExpanded) {
+      setTimeout(() => {
+        setShowTerritoryTree(true);
+      }, 500);
+    } else {
+      setShowTerritoryTree(false);
+    }
+  }, [firstPanelExpanded]);
+
   return (
     <>
-      <ButtonGroup>
-        {(userRole === UserEnums.Role.Admin ||
-          userRole === UserEnums.Role.Owner) && (
-          <Button
-            label={!treeWidthTooSmall ? "new" : ""}
-            iconRight={<span style={{ marginLeft: 5 }}>{"\u0054"}</span>}
-            icon={<FaPlus />}
-            onClick={() => setShowCreate(true)}
-            fullWidth
-            tooltipLabel={treeWidthTooSmall ? "create new territory" : ""}
-          />
-        )}
-        <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-          <Button
-            label={!treeWidthTooSmall ? "filter" : ""}
-            onClick={() => {
-              if (treeFilterOpen) {
-                dispatch(setFilterOpen(false));
-                setFilteredTreeData(treeData);
-                setFilterSettings(initFilterSettings);
-                dispatch(setTreeInitialized(false));
-              } else {
-                dispatch(setFilterOpen(true));
-              }
-            }}
-            color="success"
-            inverted={!treeFilterOpen}
-            fullWidth
-            icon={<BsFilter size={14} />}
-            tooltipLabel={treeWidthTooSmall ? "filter" : ""}
-            tooltipPosition="right"
-          />
-        </div>
-      </ButtonGroup>
-
-      {treeFilterOpen && (
-        <TerritoryTreeFilter
-          filterData={filterSettings}
-          handleFilterChange={(key, value) => handleFilterChange(key, value)}
-          userRole={userRole}
-        />
-      )}
-
-      {firstPanelExpanded && (
-        <CustomScrollbar
-          scrollerId="Territories"
-          elementId="Territories-box-content"
-        >
-          <StyledTreeWrapper
-          // id="Territories-box-content"
-          >
-            {filteredTreeData && (
-              <MemoizedTerritoryTreeNode
-                right={filteredTreeData.right}
-                territory={filteredTreeData.territory}
-                children={filteredTreeData.children}
-                lvl={filteredTreeData.lvl}
-                statementsCount={filteredTreeData.statementsCount}
-                initExpandedNodes={selectedTerritoryPath}
-                empty={filteredTreeData.empty}
-                storedTerritories={storedTerritoryIds ? storedTerritoryIds : []}
-                updateUserMutation={updateUserMutation}
+      {showTerritoryTree && (
+        <>
+          <ButtonGroup>
+            {(userRole === UserEnums.Role.Admin ||
+              userRole === UserEnums.Role.Owner) && (
+              <Button
+                label={!treeWidthTooSmall ? "new" : ""}
+                iconRight={<span style={{ marginLeft: 5 }}>{"\u0054"}</span>}
+                icon={<FaPlus />}
+                onClick={() => setShowCreate(true)}
+                fullWidth
+                tooltipLabel={treeWidthTooSmall ? "create new territory" : ""}
               />
             )}
+            <div
+              style={{ display: "flex", alignItems: "center", width: "100%" }}
+            >
+              <Button
+                label={!treeWidthTooSmall ? "filter" : ""}
+                onClick={() => {
+                  if (treeFilterOpen) {
+                    dispatch(setFilterOpen(false));
+                    setFilteredTreeData(treeData);
+                    setFilterSettings(initFilterSettings);
+                    dispatch(setTreeInitialized(false));
+                  } else {
+                    dispatch(setFilterOpen(true));
+                  }
+                }}
+                color="success"
+                inverted={!treeFilterOpen}
+                fullWidth
+                icon={<BsFilter size={14} />}
+                tooltipLabel={treeWidthTooSmall ? "filter" : ""}
+                tooltipPosition="right"
+              />
+            </div>
+          </ButtonGroup>
 
-            {/* No results */}
-            {treeFilterOpen && !filteredTreeData && (
-              <StyledNoResults>{"No results"}</StyledNoResults>
-            )}
-          </StyledTreeWrapper>
-        </CustomScrollbar>
-      )}
+          {treeFilterOpen && (
+            <TerritoryTreeFilter
+              filterData={filterSettings}
+              handleFilterChange={(key, value) =>
+                handleFilterChange(key, value)
+              }
+              userRole={userRole}
+            />
+          )}
 
-      {showCreate && (
-        <EntityCreateModal
-          closeModal={() => setShowCreate(false)}
-          allowedEntityClasses={[EntityEnums.Class.Territory]}
-          onMutationSuccess={() =>
-            queryClient.invalidateQueries({ queryKey: ["tree"] })
-          }
-        />
+          {firstPanelExpanded && (
+            <CustomScrollbar
+              scrollerId="Territories"
+              elementId="Territories-box-content"
+            >
+              <StyledTreeWrapper
+              // id="Territories-box-content"
+              >
+                {filteredTreeData && (
+                  <MemoizedTerritoryTreeNode
+                    right={filteredTreeData.right}
+                    territory={filteredTreeData.territory}
+                    children={filteredTreeData.children}
+                    lvl={filteredTreeData.lvl}
+                    statementsCount={filteredTreeData.statementsCount}
+                    initExpandedNodes={selectedTerritoryPath}
+                    empty={filteredTreeData.empty}
+                    storedTerritories={
+                      storedTerritoryIds ? storedTerritoryIds : []
+                    }
+                    updateUserMutation={updateUserMutation}
+                  />
+                )}
+
+                {/* No results */}
+                {treeFilterOpen && !filteredTreeData && (
+                  <StyledNoResults>{"No results"}</StyledNoResults>
+                )}
+              </StyledTreeWrapper>
+            </CustomScrollbar>
+          )}
+
+          {showCreate && (
+            <EntityCreateModal
+              closeModal={() => setShowCreate(false)}
+              allowedEntityClasses={[EntityEnums.Class.Territory]}
+              onMutationSuccess={() =>
+                queryClient.invalidateQueries({ queryKey: ["tree"] })
+              }
+            />
+          )}
+        </>
       )}
-      <Loader show={isFetching || updateUserMutation.isPending} />
+      <Loader
+        show={
+          isFetching ||
+          updateUserMutation.isPending ||
+          (firstPanelExpanded && !showTerritoryTree)
+        }
+      />
     </>
   );
 };
