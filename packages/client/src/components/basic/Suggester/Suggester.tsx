@@ -162,7 +162,9 @@ export const Suggester: React.FC<Suggester> = ({
     onType(newType);
   };
 
-  const [{ isOver }, dropRef] = useDrop({
+  const dropRef = useRef<HTMLDivElement>(null);
+
+  const [{ isOver }, drop] = useDrop({
     accept: ItemTypes.TAG,
     drop: (item: EntityDragItem) => {
       if (!isWrongDropCategory) {
@@ -189,6 +191,8 @@ export const Suggester: React.FC<Suggester> = ({
       isOver: !!monitor.isOver(),
     }),
   });
+
+  drop(dropRef);
 
   const handleEnterPress = () => {
     if (selected === -1 && typed.length > 0) {

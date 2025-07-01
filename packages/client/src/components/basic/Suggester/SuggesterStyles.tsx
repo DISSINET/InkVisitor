@@ -28,7 +28,6 @@ interface InputWrapper {
   $isOver: boolean;
   $hasButton: boolean;
   $hasText?: boolean;
-  ref?: ConnectDropTarget;
 }
 export const StyledInputWrapper = styled.div<InputWrapper>`
   display: flex;
