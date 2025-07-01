@@ -81,12 +81,9 @@ export default defineConfig(({ mode }) => {
 
             // Vendor chunks
             if (id.includes("node_modules")) {
-              // Split React and React-DOM for better optimization
-              if (id.includes("react") && !id.includes("react-dom")) {
-                return "react-core";
-              }
-              if (id.includes("react-dom")) {
-                return "react-dom";
+              // Group React and React-DOM together
+              if (id.includes("react") || id.includes("react-dom")) {
+                return "react-vendor";
               }
               if (id.includes("@reduxjs") || id.includes("redux")) {
                 return "redux-vendor";
