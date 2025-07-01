@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, ButtonGroup, Tooltip } from "components";
 import { EntitySuggester } from "components/advanced";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { DropTargetMonitor, useDrop } from "react-dnd";
 import {
   FaEdit,
@@ -107,7 +107,9 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
     }
   };
 
-  const [{ isOver }, dropRef] = useDrop({
+  const ref = useRef<HTMLDivElement>(null);
+
+  const [{ isOver }, drop] = useDrop({
     accept: ItemTypes.TAG,
     drop: (item: DragItem) => {
       addBookmark(bookmarkFolder.id, item.id);
@@ -116,6 +118,8 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
       isOver: !!monitor.isOver(),
     }),
   });
+
+  drop(ref);
 
   const [referenceElement, setReferenceElement] =
     useState<HTMLDivElement | null>(null);
@@ -126,7 +130,7 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
   return (
     <StyledFolderWrapper
       key={bookmarkFolder.id}
-      ref={dropRef}
+      ref={ref}
       style={{ opacity: isOver ? 0.7 : 1 }}
     >
       <StyledFolderHeader
