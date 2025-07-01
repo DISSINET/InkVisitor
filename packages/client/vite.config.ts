@@ -55,7 +55,7 @@ export default defineConfig(({ mode }) => {
     build: {
       outDir: "dist",
       sourcemap: mode === "development",
-      chunkSizeWarningLimit: 1000,
+      chunkSizeWarningLimit: 500,
       rollupOptions: {
         output: {
           manualChunks: (id) => {
@@ -81,8 +81,12 @@ export default defineConfig(({ mode }) => {
 
             // Vendor chunks
             if (id.includes("node_modules")) {
-              if (id.includes("react") || id.includes("react-dom")) {
-                return "react-vendor";
+              // Split React and React-DOM for better optimization
+              if (id.includes("react") && !id.includes("react-dom")) {
+                return "react-core";
+              }
+              if (id.includes("react-dom")) {
+                return "react-dom";
               }
               if (id.includes("@reduxjs") || id.includes("redux")) {
                 return "redux-vendor";
