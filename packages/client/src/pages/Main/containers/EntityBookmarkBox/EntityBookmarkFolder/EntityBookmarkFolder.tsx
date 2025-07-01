@@ -107,7 +107,7 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
     }
   };
 
-  const ref = useRef<HTMLDivElement>(null);
+  const dropRef = useRef<HTMLDivElement>(null);
 
   const [{ isOver }, drop] = useDrop({
     accept: ItemTypes.TAG,
@@ -119,7 +119,7 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
     }),
   });
 
-  drop(ref);
+  drop(dropRef);
 
   const [referenceElement, setReferenceElement] =
     useState<HTMLDivElement | null>(null);
@@ -130,7 +130,7 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
   return (
     <StyledFolderWrapper
       key={bookmarkFolder.id}
-      ref={ref}
+      ref={dropRef}
       style={{ opacity: isOver ? 0.7 : 1 }}
     >
       <StyledFolderHeader
