@@ -99,7 +99,6 @@ export const Menu: React.FC<Menu> = ({
               ...rotateMenuIcon,
               display: "flex",
               alignItems: "center",
-              justifyContent: "center",
             }}
           >
             <FaBars size={14} />

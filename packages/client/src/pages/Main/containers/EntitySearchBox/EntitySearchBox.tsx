@@ -302,7 +302,6 @@ export const EntitySearchBox: React.FC = () => {
                         ...rotateOptionsIcon,
                         display: "flex",
                         alignItems: "center",
-                        justifyContent: "center",
                       }}
                     >
                       <IoMdArrowDropdownCircle size={16} />

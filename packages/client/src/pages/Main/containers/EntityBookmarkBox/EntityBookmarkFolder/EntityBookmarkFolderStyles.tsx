@@ -56,5 +56,7 @@ export const StyledFolderContentTag = styled.div`
 `;
 export const StyledFolderSuggester = styled.div``;
 export const StyledIconWrap = styled.div`
+  display: flex;
+  align-items: center;
   width: ${({ theme }) => theme.space[7]};
 `;
