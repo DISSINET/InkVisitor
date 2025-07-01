@@ -19,6 +19,7 @@ import {
   StyledGridColumn,
 } from "../EntityDetailRelationTypeBlockStyles";
 import { ThemeContext } from "styled-components";
+import { useTheme } from "hooks";
 
 interface EntityDetailRelationRow {
   relation: Relation.IRelation | Relation.IIdentification;
@@ -131,8 +132,7 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
 
   const uniqueRelationIds = [...new Set(relation.entityIds)];
 
-  const themeContext = useContext(ThemeContext);
-
+  const theme = useTheme();
   return (
     <>
       <StyledGrid
@@ -157,7 +157,7 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
                           cursor: "move",
                         }}
                       >
-                        <FaGripVertical color={themeContext?.color.black} />
+                        <FaGripVertical color={theme.color.black} />
                       </StyledGridColumn>
                     )}
                     <StyledGridColumn key={key}>

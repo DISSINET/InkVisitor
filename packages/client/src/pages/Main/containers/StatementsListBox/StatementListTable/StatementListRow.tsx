@@ -1,6 +1,6 @@
 import { IEntity, IResponseStatement, IStatement } from "@shared/types";
-import { useSearchParams } from "hooks";
-import React, { useContext, useEffect, useRef } from "react";
+import { useSearchParams, useTheme } from "hooks";
+import React, { useEffect, useRef } from "react";
 import {
   DragSourceMonitor,
   DropTargetMonitor,
@@ -17,7 +17,6 @@ import { Cell, ColumnInstance, Row } from "react-table";
 import { setDraggedRowId } from "redux/features/statementList/draggedRowIdSlice";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { ThemeContext } from "styled-components";
 import {
   DragItem,
   ItemTypes,
@@ -110,7 +109,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
     }
   }, [isVisible]);
 
-  const themeContext = useContext(ThemeContext);
+  const theme = useTheme();
 
   const { orderCorrection, isAnchored } = row.original;
 
@@ -140,7 +139,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
                         ref={dragRef}
                         onClick={(e: React.MouseEvent) => e.stopPropagation()}
                       >
-                        <FaGripVertical color={themeContext?.color.black} />
+                        <FaGripVertical color={theme.color.black} />
                       </div>
                       {(isAnchored !== undefined && !isAnchored) ||
                       (orderCorrection && orderCorrection?.distance > 0) ? (
@@ -211,7 +210,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
                 size={7}
                 margin={4}
                 style={{ marginLeft: "0.3rem", marginTop: "0.1rem" }}
-                color={themeContext?.color["primary"]}
+                color={theme.color["primary"]}
               />
             </div>
           </StyledTd>

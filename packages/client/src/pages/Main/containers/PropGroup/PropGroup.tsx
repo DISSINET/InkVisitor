@@ -309,7 +309,7 @@ export const PropGroup: React.FC<PropGroup> = ({
             categoryTypes={classesAll}
             isInsideTemplate={isInsideTemplate}
             territoryParentId={territoryParentId}
-            disabled={!userCanEdit}
+            isHidden={!userCanEdit}
             onTyped={(typed) => setTempValueTyped(typed)}
             externalTyped={tempValueTyped}
           />

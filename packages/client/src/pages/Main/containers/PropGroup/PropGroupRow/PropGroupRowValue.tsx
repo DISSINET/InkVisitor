@@ -153,7 +153,7 @@ export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
             excludedEntityClasses={excludedSuggesterEntities}
             isInsideTemplate={isInsideTemplate}
             territoryParentId={territoryParentId}
-            disabled={!userCanEdit}
+            isHidden={!userCanEdit}
             alwaysShowCreateModal={alwaysShowCreateModal}
             initTyped={initValueTyped}
           />

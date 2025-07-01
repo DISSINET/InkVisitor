@@ -97,7 +97,6 @@ interface StyledEditorSectionHeader {}
 export const StyledEditorSectionHeader = styled.div<StyledEditorSectionHeader>`
   display: flex;
   align-items: center;
-  font-weight: ${({ theme }) => theme.fontWeight.regular};
   font-size: ${({ theme }) => theme.fontSize.lg};
   margin-bottom: ${({ theme }) => theme.space["4"]};
   color: ${({ theme }) => theme.color["primary"]};
@@ -259,7 +258,6 @@ export const StyledAnchorText = styled.div<StyledAnchorText>`
   margin-bottom: ${({ theme }) => theme.space[2]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   font-weight: ${({ theme }) => theme.fontWeight.medium};
-  font-family: mono;
 `;
 
 interface StyledAnchorMeta {}

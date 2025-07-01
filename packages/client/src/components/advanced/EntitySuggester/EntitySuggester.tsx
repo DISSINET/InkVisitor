@@ -64,6 +64,7 @@ interface EntitySuggester {
   alwaysShowCreateModal?: boolean;
 
   disabled?: boolean;
+  isHidden?: boolean;
 }
 
 export const EntitySuggester: React.FC<EntitySuggester> = ({
@@ -101,6 +102,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   alwaysShowCreateModal,
 
   disabled = false,
+  isHidden = false,
 }) => {
   const [typed, setTyped] = useState<string>(initTyped ?? "");
   const debouncedTyped = useDebounce(typed, 100);
@@ -475,6 +477,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         disableWildCard={disableWildCard || allCategories.length < 2}
         button={button}
         disableTemplateInstantiation={disableTemplateInstantiation}
+        isHidden={isHidden}
       />
       {showAddTerritoryModal && (
         <AddTerritoryModal

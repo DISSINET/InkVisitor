@@ -297,7 +297,14 @@ export const EntitySearchBox: React.FC = () => {
                     <p style={{ margin: "0 0.3rem" }}>
                       {showAdvancedOptions ? "hide" : "show"}
                     </p>
-                    <animated.div style={rotateOptionsIcon} {...({} as any)}>
+                    <animated.div
+                      style={{
+                        ...rotateOptionsIcon,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
                       <IoMdArrowDropdownCircle size={16} />
                     </animated.div>
                   </div>

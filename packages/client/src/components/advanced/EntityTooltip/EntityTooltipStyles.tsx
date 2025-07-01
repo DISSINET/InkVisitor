@@ -65,7 +65,6 @@ export const StyledAnchorText = styled.div`
   color: ${({ theme }) => theme.color["tooltipColor"]};
   margin-bottom: ${({ theme }) => theme.space[1]};
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
-  font-family: mono;
   padding-left: ${({ theme }) => theme.space[2]};
   padding-bottom: ${({ theme }) => theme.space[1]};
 `;

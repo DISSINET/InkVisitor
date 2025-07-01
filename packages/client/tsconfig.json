@@ -39,6 +39,7 @@
   },
   "exclude": ["node_modules", "dist", "public"],
   "include": [
+    "styled.d.ts",
     "types.d.ts",
     "images.d.ts",
     "fonts.d.ts",

@@ -127,7 +127,6 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
               categoryTypes={[EntityEnums.Class.Concept]}
               territoryParentId={territory.data.parent.territoryId}
               isInsideTemplate={isInsideTemplate}
-              disabled={!userCanEdit}
             />
           )}
         </StyledFlexList>
@@ -182,7 +181,6 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
               categoryTypes={[EntityEnums.Class.Resource]}
               territoryParentId={territory.data.parent.territoryId}
               isInsideTemplate={isInsideTemplate}
-              disabled={!userCanEdit}
             />
           )}
         </StyledFlexList>
@@ -225,7 +223,6 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
               categoryTypes={[EntityEnums.Class.Resource]}
               territoryParentId={territory.data.parent.territoryId}
               isInsideTemplate={isInsideTemplate}
-              disabled={!userCanEdit}
             />
           )}
         </StyledFlexList>
@@ -254,7 +251,7 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
             categoryTypes={[EntityEnums.Class.Value]}
             territoryParentId={territory.data.parent.territoryId}
             isInsideTemplate={isInsideTemplate}
-            disabled={!userCanEdit}
+            isHidden={!userCanEdit}
           />
         )}
       </StyledValue>
@@ -282,7 +279,7 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
             categoryTypes={[EntityEnums.Class.Value]}
             territoryParentId={territory.data.parent.territoryId}
             isInsideTemplate={isInsideTemplate}
-            disabled={!userCanEdit}
+            isHidden={!userCanEdit}
           />
         )}
       </StyledValue>
@@ -328,7 +325,7 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
               categoryTypes={[EntityEnums.Class.Resource]}
               territoryParentId={territory.data.parent.territoryId}
               isInsideTemplate={isInsideTemplate}
-              disabled={!userCanEdit}
+              isHidden={!userCanEdit}
             />
           )}
         </StyledFlexList>
