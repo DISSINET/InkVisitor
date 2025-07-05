@@ -1,6 +1,6 @@
 import { lazy } from "react";
 
-// Dynamic imports for code splitting
+// Dynamic imports for code splitting - makes the chunk size smaller
 const AboutPage = lazy(() =>
   import("pages/About/AboutPage").then((module) => ({
     default: module.AboutPage,
