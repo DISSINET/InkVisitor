@@ -773,7 +773,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                   <StyledDetailSectionHeading>
                     Metaproperties
                   </StyledDetailSectionHeading>
-                  {userCanEdit && (
+                  {userCanEdit && !disableAttributesForNonOwnersInRoot && (
                     <EntityDetailSectionButtons
                       entityId={entity.id}
                       setShowSubmit={setShowBatchRemovePropSubmit}
