@@ -31,3 +31,4 @@
 - Change admin icon to a more gender-neutral one (#2639)
 - Prevented copy label on double click (#2567)
 - Ctrl+X works as intended (#2465)
+- Allow UUID search also in suggester
