@@ -185,11 +185,15 @@ export const TextAnnotator = ({
         const startX = rect.left + annotator.cursor.selectStart.xLine * RATIO;
         const startY =
           rect.top +
-          (annotator.cursor.selectStart.yLine * annotator.lineHeight) / RATIO;
+          ((annotator.cursor.selectStart.yLine - annotator.viewport.lineStart) *
+            annotator.lineHeight) /
+            RATIO;
         const endX = rect.left + annotator.cursor.selectEnd.xLine * RATIO;
         const endY =
           rect.top +
-          (annotator.cursor.selectEnd.yLine * annotator.lineHeight) / RATIO;
+          ((annotator.cursor.selectEnd.yLine - annotator.viewport.lineStart) *
+            annotator.lineHeight) /
+            RATIO;
 
         // Check if selection spans the entire document
         const isFullSelection =
@@ -218,6 +222,7 @@ export const TextAnnotator = ({
     annotator?.cursor?.selectEnd,
     annotator?.lineHeight,
     annotator?.viewport?.noLines,
+    annotator?.viewport?.lineStart,
   ]);
 
   // quiet does not trigger a toast notification
