@@ -185,7 +185,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
     {
       value: BatchOption.delete_S,
       label: `delete`,
-      info: "",
+      info: undefined,
     },
     {
       value: BatchOption.replace_R,
