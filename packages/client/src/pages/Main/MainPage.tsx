@@ -1,22 +1,22 @@
 import { EntityEnums, UserEnums } from "@shared/enums";
-import { IStatement } from "@shared/types";
+import { IResponseTree, IStatement } from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   COLLAPSED_PANEL_WIDTH,
   FIRST_PANEL_MIN_WIDTH,
+  FOURTH_PANEL_MIN_WIDTH,
   fourthPanelBoxesHeightThirds,
   hiddenBoxHeight,
   INIT_PERCENT_PANEL_WIDTHS,
+  INIT_PERCENT_PANEL_WIDTHS_LARGE_SCREEN,
+  INIT_PERCENT_PANEL_WIDTHS_SMALL_SCREEN,
+  LARGE_SCREEN_LIMIT,
   MAIN_PAGE_CENTER_SEPARATOR_X_PERCENT_POSITION,
+  MAIN_PAGE_SEARCH_SEPARATOR_X_PERCENT_POSITION,
   MAIN_PAGE_TREE_SEPARATOR_X_PERCENT_POSITION,
   SECOND_PANEL_MIN_WIDTH,
-  THIRD_PANEL_MIN_WIDTH,
-  MAIN_PAGE_SEARCH_SEPARATOR_X_PERCENT_POSITION,
-  FOURTH_PANEL_MIN_WIDTH,
-  INIT_PERCENT_PANEL_WIDTHS_SMALL_SCREEN,
   SMALL_SCREEN_LIMIT,
-  INIT_PERCENT_PANEL_WIDTHS_LARGE_SCREEN,
-  LARGE_SCREEN_LIMIT,
+  THIRD_PANEL_MIN_WIDTH,
 } from "Theme/constants";
 import api from "api";
 import { Box, Button, ButtonGroup, Panel } from "components";
@@ -31,24 +31,25 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { BiHide, BiRefresh, BiShow } from "react-icons/bi";
 import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
 import { FaHighlighter, FaList, FaPlus } from "react-icons/fa";
+import { FaDiagramNext } from "react-icons/fa6";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { VscCloseAll } from "react-icons/vsc";
-import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
 import { setDetailBoxMinimized } from "redux/features/layout/mainPage/detailBoxMinimizedSlice";
+import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
 import { setFirstPanelExpanded } from "redux/features/layout/mainPage/firstPanelExpandedSlice";
 import { setFourthPanelBoxesOpened } from "redux/features/layout/mainPage/fourthPanelBoxesOpenedSlice";
 import { setFourthPanelExpanded } from "redux/features/layout/mainPage/fourthPanelExpandedSlice";
 import { setPanelWidthsPercent } from "redux/features/layout/mainPage/panelWidthsPercentSlice";
 import { setPanelWidths } from "redux/features/layout/mainPage/panelWidthsSlice";
 import { setSecondPanelRealWidth } from "redux/features/layout/mainPage/secondPanelRealWidthSlice";
-import { setThirdPanelRealWidth } from "redux/features/layout/mainPage/thirdPanelRealWidthSlice";
-import { setThirdPanelExpanded } from "redux/features/layout/mainPage/thirdPanelExpandedSlice";
 import { setStatementListOpened } from "redux/features/layout/mainPage/statementListOpenedSlice";
+import { setThirdPanelExpanded } from "redux/features/layout/mainPage/thirdPanelExpandedSlice";
+import { setThirdPanelRealWidth } from "redux/features/layout/mainPage/thirdPanelRealWidthSlice";
 import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 import { setIsLoading } from "redux/features/statementList/isLoadingSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { DetailBoxState } from "types";
-import { floorNumberToOneDecimal } from "utils/utils";
+import { floorNumberToOneDecimal, searchTree } from "utils/utils";
 import { MemoizedEntityBookmarkBox } from "./containers/EntityBookmarkBox/EntityBookmarkBox";
 import { MemoizedEntityDetailBox } from "./containers/EntityDetailBox/EntityDetailBox";
 import { MemoizedEntitySearchBox } from "./containers/EntitySearchBox/EntitySearchBox";
@@ -69,6 +70,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
     selectedDetailId,
     appendDetailId,
     setStatementId,
+    setTerritoryId,
     annotatorOpened,
     setAnnotatorOpened,
   } = useSearchParams();
@@ -708,6 +710,47 @@ const MainPage: React.FC<MainPage> = ({}) => {
     }
   }, [layoutWidth]);
 
+  const treeData: IResponseTree | undefined = queryClient.getQueryData([
+    "tree",
+  ]);
+
+  const selectedTerritoryPath = useAppSelector(
+    (state) => state.territoryTree.selectedTerritoryPath
+  );
+
+  // Get sibling territories at the same level
+  const siblingTerritories = useMemo(() => {
+    const parentId = selectedTerritoryPath[selectedTerritoryPath.length - 1];
+    if (treeData) {
+      const parentTerritory = searchTree(treeData, parentId);
+      if (parentTerritory) {
+        return parentTerritory.children.map((child) => child.territory.id);
+      }
+    }
+    return [];
+  }, [selectedTerritoryPath, treeData]);
+
+  // Get previous and next territory IDs
+  const previousTerritoryId = useMemo(() => {
+    if (!territoryId || siblingTerritories.length === 0) return null;
+
+    const currentIndex = siblingTerritories.indexOf(territoryId);
+    if (currentIndex > 0) {
+      return siblingTerritories[currentIndex - 1];
+    }
+    return null;
+  }, [territoryId, siblingTerritories]);
+
+  const nextTerritoryId = useMemo(() => {
+    if (!territoryId || siblingTerritories.length === 0) return null;
+
+    const currentIndex = siblingTerritories.indexOf(territoryId);
+    if (currentIndex < siblingTerritories.length - 1) {
+      return siblingTerritories[currentIndex + 1];
+    }
+    return null;
+  }, [territoryId, siblingTerritories]);
+
   return (
     <>
       <ScrollHandler />
@@ -804,6 +847,32 @@ const MainPage: React.FC<MainPage> = ({}) => {
           height={getStatementListBoxHeight()}
           buttons={[
             <>
+              <ButtonGroup style={{ marginRight: "0.5rem" }}>
+                <Button
+                  color="info"
+                  icon={
+                    <FaDiagramNext style={{ transform: "rotate(180deg)" }} />
+                  }
+                  tooltipLabel="go to previous territory"
+                  onClick={() => {
+                    if (previousTerritoryId) {
+                      setTerritoryId(previousTerritoryId);
+                    }
+                  }}
+                  disabled={!previousTerritoryId}
+                />
+                <Button
+                  color="info"
+                  icon={<FaDiagramNext />}
+                  tooltipLabel="go to next territory"
+                  onClick={() => {
+                    if (nextTerritoryId) {
+                      setTerritoryId(nextTerritoryId);
+                    }
+                  }}
+                  disabled={!nextTerritoryId}
+                />
+              </ButtonGroup>
               {territoryId && (
                 <ButtonGroup
                   style={{ marginLeft: "0.5rem", marginRight: "0.5rem" }}
