@@ -34,6 +34,7 @@ const initFilterSettings: ITerritoryFilter = {
   withSubterritories: false,
   withStatements: false,
   filter: "",
+  operator: "and",
 };
 export const TerritoryTreeBox: React.FC = () => {
   const firstPanelExpanded: boolean = useAppSelector(

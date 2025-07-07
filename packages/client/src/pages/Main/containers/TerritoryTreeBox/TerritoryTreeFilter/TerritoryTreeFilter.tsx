@@ -11,6 +11,7 @@ import {
   StyledFilterWrap,
   StyledInputWrap,
 } from "./TerritoryTreeFilterStyles";
+import { AttributeButtonGroup } from "components/advanced";
 
 interface TerritoryTreeFilter {
   filterData: ITerritoryFilter;
@@ -29,6 +30,22 @@ export const TerritoryTreeFilter: React.FC<TerritoryTreeFilter> = ({
 
   return (
     <StyledFilterWrap>
+      <AttributeButtonGroup
+        options={[
+          {
+            longValue: "and",
+            shortValue: "and",
+            onClick: () => handleFilterChange("operator", "and"),
+            selected: filterData.operator === "and",
+          },
+          {
+            longValue: "or",
+            shortValue: "or",
+            onClick: () => handleFilterChange("operator", "or"),
+            selected: filterData.operator === "or",
+          },
+        ]}
+      />
       <StyledFilterList>
         <Checkbox
           label="starred"

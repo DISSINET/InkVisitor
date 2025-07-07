@@ -384,6 +384,7 @@ export interface ITerritoryFilter {
   withSubterritories: boolean;
   withStatements: boolean;
   filter: string;
+  operator?: "and" | "or"; // "and" on default
 }
 
 export interface IExtendedResponseTree extends IResponseTree {

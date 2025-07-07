@@ -1,6 +1,6 @@
 import { UserEnums } from "@shared/enums";
 import { IResponseTree } from "@shared/types";
-import { IExtendedResponseTree } from "types";
+import { IExtendedResponseTree, ITerritoryFilter } from "types";
 
 // Filter WITH STATEMENTS
 export function filterTreeWithStatements(
@@ -203,13 +203,7 @@ export function filterTreeWithSubterritories(
 
 export function markNodesWithFilters(
   node: IResponseTree,
-  filters: {
-    starred: boolean;
-    editorRights: boolean;
-    withSubterritories: boolean;
-    withStatements: boolean;
-    filter: string;
-  },
+  filters: ITerritoryFilter,
   favoriteIds: string[]
 ): IExtendedResponseTree {
   const extendedNode: IExtendedResponseTree = {
@@ -227,13 +221,7 @@ export function markNodesWithFilters(
 
 function isNodeMatchingFilters(
   node: IResponseTree,
-  filters: {
-    starred: boolean;
-    editorRights: boolean;
-    withSubterritories: boolean;
-    withStatements: boolean;
-    filter: string;
-  },
+  filters: ITerritoryFilter,
   favoriteIds: string[]
 ): boolean {
   const {
@@ -242,6 +230,7 @@ function isNodeMatchingFilters(
     withSubterritories,
     withStatements,
     filter: targetLabel,
+    operator = "and", // default to "and" if not specified
   } = filters;
 
   const meetsWithStatementsCondition = withStatements
@@ -260,11 +249,32 @@ function isNodeMatchingFilters(
     targetLabel.length === 0 ||
     node.territory.labels[0].toLowerCase().includes(targetLabel.toLowerCase());
 
-  return (
-    meetsWithStatementsCondition &&
-    meetsWithSubterritoriesCondition &&
-    meetsStarredCondition &&
-    meetsEditorRightsCondition &&
-    meetsFilterCondition
-  );
+  // Apply AND/OR logic based on operator
+  if (operator === "or") {
+    // For OR logic, at least one condition must be true (excluding conditions that are always true)
+    const activeConditions = [
+      withStatements ? meetsWithStatementsCondition : null,
+      withSubterritories ? meetsWithSubterritoriesCondition : null,
+      starred ? meetsStarredCondition : null,
+      editorRights ? meetsEditorRightsCondition : null,
+      targetLabel.length > 0 ? meetsFilterCondition : null,
+    ].filter((condition) => condition !== null);
+
+    // If no active conditions, return true (no filters applied)
+    if (activeConditions.length === 0) {
+      return true;
+    }
+
+    // Return true if any active condition is true
+    return activeConditions.some((condition) => condition === true);
+  } else {
+    // Default AND logic - all conditions must be true
+    return (
+      meetsWithStatementsCondition &&
+      meetsWithSubterritoriesCondition &&
+      meetsStarredCondition &&
+      meetsEditorRightsCondition &&
+      meetsFilterCondition
+    );
+  }
 }
