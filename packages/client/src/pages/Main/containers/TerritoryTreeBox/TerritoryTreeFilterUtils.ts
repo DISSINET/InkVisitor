@@ -2,7 +2,7 @@ import { UserEnums } from "@shared/enums";
 import { IResponseTree } from "@shared/types";
 import { IExtendedResponseTree } from "types";
 
-// Filter with statements
+// Filter WITH STATEMENTS
 export function filterTreeWithStatements(
   node: IResponseTree | null
 ): IResponseTree | null {
@@ -10,11 +10,11 @@ export function filterTreeWithStatements(
     return null;
   }
 
-  const hasNonEmptyDescendant = node.children.some((child) =>
-    hasNonEmptyRecursively(child)
+  const hasDescendantWithStatements = node.children.some((child) =>
+    hasNodeWithStatementsRecursively(child)
   );
 
-  if (node.statementsCount > 0 || hasNonEmptyDescendant) {
+  if (node.statementsCount > 0 || hasDescendantWithStatements) {
     const filteredChildren = node.children
       .map((child) =>
         // stop recursion with this condition to keep children of filtered nodes
@@ -31,14 +31,14 @@ export function filterTreeWithStatements(
   return null;
 }
 
-function hasNonEmptyRecursively(node: IResponseTree | null): boolean {
+function hasNodeWithStatementsRecursively(node: IResponseTree | null): boolean {
   if (!node) {
     return false;
   }
   if (node.statementsCount > 0) {
     return true;
   }
-  return node.children.some((child) => hasNonEmptyRecursively(child));
+  return node.children.some((child) => hasNodeWithStatementsRecursively(child));
 }
 
 // Filter EDITOR RIGHTS
