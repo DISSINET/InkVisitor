@@ -260,9 +260,9 @@ function isNodeMatchingFilters(
       targetLabel.length > 0 ? meetsFilterCondition : null,
     ].filter((condition) => condition !== null);
 
-    // If no active conditions, return true (no filters applied)
+    // If no active conditions, return false (no filters applied, so no highlighting)
     if (activeConditions.length === 0) {
-      return true;
+      return false;
     }
 
     // Return true if any active condition is true
