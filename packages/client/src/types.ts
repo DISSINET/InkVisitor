@@ -379,9 +379,10 @@ export interface FilteredActionObject {
 }
 
 export interface ITerritoryFilter {
-  nonEmpty: boolean;
   starred: boolean;
   editorRights: boolean;
+  withSubterritories: boolean;
+  withStatements: boolean;
   filter: string;
 }
 

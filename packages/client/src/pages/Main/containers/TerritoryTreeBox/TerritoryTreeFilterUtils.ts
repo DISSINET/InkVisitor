@@ -2,8 +2,8 @@ import { UserEnums } from "@shared/enums";
 import { IResponseTree } from "@shared/types";
 import { IExtendedResponseTree } from "types";
 
-// Filter NON EMPTY
-export function filterTreeNonEmpty(
+// Filter with statements
+export function filterTreeWithStatements(
   node: IResponseTree | null
 ): IResponseTree | null {
   if (!node) {
@@ -18,7 +18,7 @@ export function filterTreeNonEmpty(
     const filteredChildren = node.children
       .map((child) =>
         // stop recursion with this condition to keep children of filtered nodes
-        child.statementsCount > 0 ? child : filterTreeNonEmpty(child)
+        child.statementsCount > 0 ? child : filterTreeWithStatements(child)
       )
       .filter((filteredChild) => filteredChild !== null);
 
@@ -178,9 +178,10 @@ function hasLabelRecursively(
 export function markNodesWithFilters(
   node: IResponseTree,
   filters: {
-    nonEmpty: boolean;
     starred: boolean;
     editorRights: boolean;
+    withSubterritories: boolean;
+    withStatements: boolean;
     filter: string;
   },
   favoriteIds: string[]
@@ -201,16 +202,28 @@ export function markNodesWithFilters(
 function isNodeMatchingFilters(
   node: IResponseTree,
   filters: {
-    nonEmpty: boolean;
     starred: boolean;
     editorRights: boolean;
+    withSubterritories: boolean;
+    withStatements: boolean;
     filter: string;
   },
   favoriteIds: string[]
 ): boolean {
-  const { nonEmpty, starred, editorRights, filter: targetLabel } = filters;
+  const {
+    starred,
+    editorRights,
+    withSubterritories,
+    withStatements,
+    filter: targetLabel,
+  } = filters;
 
-  const meetsNonEmptyCondition = nonEmpty ? node.statementsCount > 0 : true;
+  const meetsWithStatementsCondition = withStatements
+    ? node.statementsCount > 0
+    : true;
+  const meetsWithSubterritoriesCondition = withSubterritories
+    ? node.children.length > 0
+    : true;
   const meetsStarredCondition = starred
     ? favoriteIds.includes(node.territory.id)
     : true;
@@ -222,7 +235,8 @@ function isNodeMatchingFilters(
     node.territory.labels[0].toLowerCase().includes(targetLabel.toLowerCase());
 
   return (
-    meetsNonEmptyCondition &&
+    meetsWithStatementsCondition &&
+    meetsWithSubterritoriesCondition &&
     meetsStarredCondition &&
     meetsEditorRightsCondition &&
     meetsFilterCondition

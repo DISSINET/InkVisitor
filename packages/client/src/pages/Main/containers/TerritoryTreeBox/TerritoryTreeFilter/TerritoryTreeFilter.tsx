@@ -31,11 +31,6 @@ export const TerritoryTreeFilter: React.FC<TerritoryTreeFilter> = ({
     <StyledFilterWrap>
       <StyledFilterList>
         <Checkbox
-          label="non empty"
-          value={filterData.nonEmpty}
-          onChangeFn={(value: boolean) => handleFilterChange("nonEmpty", value)}
-        />
-        <Checkbox
           label="starred"
           value={filterData.starred}
           onChangeFn={(value: boolean) => handleFilterChange("starred", value)}
@@ -51,6 +46,20 @@ export const TerritoryTreeFilter: React.FC<TerritoryTreeFilter> = ({
               }
             />
           )}
+        <Checkbox
+          label="with subterritories"
+          value={filterData.withSubterritories}
+          onChangeFn={(value: boolean) =>
+            handleFilterChange("withSubterritories", value)
+          }
+        />
+        <Checkbox
+          label="with statements"
+          value={filterData.withStatements}
+          onChangeFn={(value: boolean) =>
+            handleFilterChange("withStatements", value)
+          }
+        />
         <StyledInputWrap>
           <FaSearch
             style={{ flexShrink: 0 }}

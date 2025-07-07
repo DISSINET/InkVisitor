@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, ButtonGroup, CustomScrollbar, Loader } from "components";
 import { EntityCreateModal } from "components/advanced";
-import { useSearchParams } from "hooks";
+import { useDebounce, useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { BsFilter } from "react-icons/bs";
 import { FaPlus } from "react-icons/fa";
@@ -21,17 +21,17 @@ import { TerritoryTreeFilter } from "./TerritoryTreeFilter/TerritoryTreeFilter";
 import {
   filterTreeByFavorites,
   filterTreeByLabel,
-  filterTreeNonEmpty,
+  filterTreeWithStatements,
   filterTreeWithWriteRights,
   markNodesWithFilters,
 } from "./TerritoryTreeFilterUtils";
 import { MemoizedTerritoryTreeNode } from "./TerritoryTreeNode/TerritoryTreeNode";
-import { useDebounce } from "hooks";
 
 const initFilterSettings: ITerritoryFilter = {
-  nonEmpty: false,
   starred: false,
   editorRights: false,
+  withSubterritories: false,
+  withStatements: false,
   filter: "",
 };
 export const TerritoryTreeBox: React.FC = () => {
@@ -129,10 +129,11 @@ export const TerritoryTreeBox: React.FC = () => {
     if (treeData) {
       let newFilteredTreeData: IResponseTree | null = treeData;
 
-      if (filterSettings.nonEmpty) {
-        // NON EMPTY
-        const nonEmptyTreeData = filterTreeNonEmpty(newFilteredTreeData);
-        newFilteredTreeData = nonEmptyTreeData;
+      if (filterSettings.withStatements) {
+        // WITH STATEMENTS
+        const withStatementsTreeData =
+          filterTreeWithStatements(newFilteredTreeData);
+        newFilteredTreeData = withStatementsTreeData;
       }
       if (filterSettings.starred) {
         // STARED
