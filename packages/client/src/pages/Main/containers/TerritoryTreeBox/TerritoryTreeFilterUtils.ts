@@ -175,6 +175,32 @@ function hasLabelRecursively(
   return node.children.some((child) => hasLabelRecursively(child, targetLabel));
 }
 
+// Filter WITH SUBTERRITORIES (first level only)
+export function filterTreeWithSubterritories(
+  node: IResponseTree | null
+): IResponseTree | null {
+  if (!node) {
+    return null;
+  }
+
+  // For first level territories (direct children of root), check if they have sub-territories
+  const filteredChildren = node.children
+    .map((child) => {
+      // If this child has sub-territories, keep it with all its children
+      if (child.children.length > 0) {
+        return child;
+      }
+      // If this child has no sub-territories, filter it out
+      return null;
+    })
+    .filter((filteredChild) => filteredChild !== null);
+
+  return {
+    ...node,
+    children: filteredChildren,
+  } as IResponseTree;
+}
+
 export function markNodesWithFilters(
   node: IResponseTree,
   filters: {

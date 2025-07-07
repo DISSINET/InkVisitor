@@ -22,6 +22,7 @@ import {
   filterTreeByFavorites,
   filterTreeByLabel,
   filterTreeWithStatements,
+  filterTreeWithSubterritories,
   filterTreeWithWriteRights,
   markNodesWithFilters,
 } from "./TerritoryTreeFilterUtils";
@@ -129,12 +130,6 @@ export const TerritoryTreeBox: React.FC = () => {
     if (treeData) {
       let newFilteredTreeData: IResponseTree | null = treeData;
 
-      if (filterSettings.withStatements) {
-        // WITH STATEMENTS
-        const withStatementsTreeData =
-          filterTreeWithStatements(newFilteredTreeData);
-        newFilteredTreeData = withStatementsTreeData;
-      }
       if (filterSettings.starred) {
         // STARED
         if (userData) {
@@ -150,6 +145,18 @@ export const TerritoryTreeBox: React.FC = () => {
         const editorRightsTreeData =
           filterTreeWithWriteRights(newFilteredTreeData);
         newFilteredTreeData = editorRightsTreeData;
+      }
+      if (filterSettings.withStatements) {
+        // WITH STATEMENTS
+        const withStatementsTreeData =
+          filterTreeWithStatements(newFilteredTreeData);
+        newFilteredTreeData = withStatementsTreeData;
+      }
+      if (filterSettings.withSubterritories) {
+        // WITH SUBTERRITORIES
+        const withSubterritoriesTreeData =
+          filterTreeWithSubterritories(newFilteredTreeData);
+        newFilteredTreeData = withSubterritoriesTreeData;
       }
       if (filterSettings.filter.length > 0) {
         // LABEL FILTER
