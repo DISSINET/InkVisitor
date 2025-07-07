@@ -11,6 +11,7 @@ import {
   StyledFilterWrap,
   StyledInputWrap,
 } from "./TerritoryTreeFilterStyles";
+import { AttributeButtonGroup } from "components/advanced";
 
 interface TerritoryTreeFilter {
   filterData: ITerritoryFilter;
@@ -29,12 +30,26 @@ export const TerritoryTreeFilter: React.FC<TerritoryTreeFilter> = ({
 
   return (
     <StyledFilterWrap>
-      <StyledFilterList>
-        <Checkbox
-          label="non empty"
-          value={filterData.nonEmpty}
-          onChangeFn={(value: boolean) => handleFilterChange("nonEmpty", value)}
+      <div style={{ marginBottom: "0.3rem", padding: "0 0.5rem" }}>
+        <AttributeButtonGroup
+          fullWidth
+          options={[
+            {
+              longValue: "AND",
+              shortValue: "AND",
+              onClick: () => handleFilterChange("operator", "and"),
+              selected: filterData.operator === "and",
+            },
+            {
+              longValue: "OR",
+              shortValue: "OR",
+              onClick: () => handleFilterChange("operator", "or"),
+              selected: filterData.operator === "or",
+            },
+          ]}
         />
+      </div>
+      <StyledFilterList>
         <Checkbox
           label="starred"
           value={filterData.starred}
@@ -51,6 +66,21 @@ export const TerritoryTreeFilter: React.FC<TerritoryTreeFilter> = ({
               }
             />
           )}
+        <Checkbox
+          label="with subterritories"
+          value={filterData.withSubterritories}
+          onChangeFn={(value: boolean) =>
+            handleFilterChange("withSubterritories", value)
+          }
+          tooltipLabel="first-level Territories (directly under root) which have sub-Territories"
+        />
+        <Checkbox
+          label="with statements"
+          value={filterData.withStatements}
+          onChangeFn={(value: boolean) =>
+            handleFilterChange("withStatements", value)
+          }
+        />
         <StyledInputWrap>
           <FaSearch
             style={{ flexShrink: 0 }}

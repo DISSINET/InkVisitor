@@ -379,10 +379,12 @@ export interface FilteredActionObject {
 }
 
 export interface ITerritoryFilter {
-  nonEmpty: boolean;
   starred: boolean;
   editorRights: boolean;
+  withSubterritories: boolean;
+  withStatements: boolean;
   filter: string;
+  operator?: "and" | "or"; // "and" on default
 }
 
 export interface IExtendedResponseTree extends IResponseTree {

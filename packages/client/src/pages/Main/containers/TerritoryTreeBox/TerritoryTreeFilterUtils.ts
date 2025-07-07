@@ -1,24 +1,24 @@
 import { UserEnums } from "@shared/enums";
 import { IResponseTree } from "@shared/types";
-import { IExtendedResponseTree } from "types";
+import { IExtendedResponseTree, ITerritoryFilter } from "types";
 
-// Filter NON EMPTY
-export function filterTreeNonEmpty(
+// Filter WITH STATEMENTS
+export function filterTreeWithStatements(
   node: IResponseTree | null
 ): IResponseTree | null {
   if (!node) {
     return null;
   }
 
-  const hasNonEmptyDescendant = node.children.some((child) =>
-    hasNonEmptyRecursively(child)
+  const hasDescendantWithStatements = node.children.some((child) =>
+    hasNodeWithStatementsRecursively(child)
   );
 
-  if (node.statementsCount > 0 || hasNonEmptyDescendant) {
+  if (node.statementsCount > 0 || hasDescendantWithStatements) {
     const filteredChildren = node.children
       .map((child) =>
         // stop recursion with this condition to keep children of filtered nodes
-        child.statementsCount > 0 ? child : filterTreeNonEmpty(child)
+        child.statementsCount > 0 ? child : filterTreeWithStatements(child)
       )
       .filter((filteredChild) => filteredChild !== null);
 
@@ -31,14 +31,14 @@ export function filterTreeNonEmpty(
   return null;
 }
 
-function hasNonEmptyRecursively(node: IResponseTree | null): boolean {
+function hasNodeWithStatementsRecursively(node: IResponseTree | null): boolean {
   if (!node) {
     return false;
   }
   if (node.statementsCount > 0) {
     return true;
   }
-  return node.children.some((child) => hasNonEmptyRecursively(child));
+  return node.children.some((child) => hasNodeWithStatementsRecursively(child));
 }
 
 // Filter EDITOR RIGHTS
@@ -175,14 +175,35 @@ function hasLabelRecursively(
   return node.children.some((child) => hasLabelRecursively(child, targetLabel));
 }
 
+// Filter WITH SUBTERRITORIES (first level only)
+export function filterTreeWithSubterritories(
+  node: IResponseTree | null
+): IResponseTree | null {
+  if (!node) {
+    return null;
+  }
+
+  // For first level territories (direct children of root), check if they have sub-territories
+  const filteredChildren = node.children
+    .map((child) => {
+      // If this child has sub-territories, keep it with all its children
+      if (child.children.length > 0) {
+        return child;
+      }
+      // If this child has no sub-territories, filter it out
+      return null;
+    })
+    .filter((filteredChild) => filteredChild !== null);
+
+  return {
+    ...node,
+    children: filteredChildren,
+  } as IResponseTree;
+}
+
 export function markNodesWithFilters(
   node: IResponseTree,
-  filters: {
-    nonEmpty: boolean;
-    starred: boolean;
-    editorRights: boolean;
-    filter: string;
-  },
+  filters: ITerritoryFilter,
   favoriteIds: string[]
 ): IExtendedResponseTree {
   const extendedNode: IExtendedResponseTree = {
@@ -200,17 +221,24 @@ export function markNodesWithFilters(
 
 function isNodeMatchingFilters(
   node: IResponseTree,
-  filters: {
-    nonEmpty: boolean;
-    starred: boolean;
-    editorRights: boolean;
-    filter: string;
-  },
+  filters: ITerritoryFilter,
   favoriteIds: string[]
 ): boolean {
-  const { nonEmpty, starred, editorRights, filter: targetLabel } = filters;
+  const {
+    starred,
+    editorRights,
+    withSubterritories,
+    withStatements,
+    filter: targetLabel,
+    operator = "and", // default to "and" if not specified
+  } = filters;
 
-  const meetsNonEmptyCondition = nonEmpty ? node.statementsCount > 0 : true;
+  const meetsWithStatementsCondition = withStatements
+    ? node.statementsCount > 0
+    : true;
+  const meetsWithSubterritoriesCondition = withSubterritories
+    ? node.children.length > 0
+    : true;
   const meetsStarredCondition = starred
     ? favoriteIds.includes(node.territory.id)
     : true;
@@ -221,10 +249,32 @@ function isNodeMatchingFilters(
     targetLabel.length === 0 ||
     node.territory.labels[0].toLowerCase().includes(targetLabel.toLowerCase());
 
-  return (
-    meetsNonEmptyCondition &&
-    meetsStarredCondition &&
-    meetsEditorRightsCondition &&
-    meetsFilterCondition
-  );
+  // Apply AND/OR logic based on operator
+  if (operator === "or") {
+    // For OR logic, at least one condition must be true (excluding conditions that are always true)
+    const activeConditions = [
+      withStatements ? meetsWithStatementsCondition : null,
+      withSubterritories ? meetsWithSubterritoriesCondition : null,
+      starred ? meetsStarredCondition : null,
+      editorRights ? meetsEditorRightsCondition : null,
+      targetLabel.length > 0 ? meetsFilterCondition : null,
+    ].filter((condition) => condition !== null);
+
+    // If no active conditions, return false (no filters applied, so no highlighting)
+    if (activeConditions.length === 0) {
+      return false;
+    }
+
+    // Return true if any active condition is true
+    return activeConditions.some((condition) => condition === true);
+  } else {
+    // Default AND logic - all conditions must be true
+    return (
+      meetsWithStatementsCondition &&
+      meetsWithSubterritoriesCondition &&
+      meetsStarredCondition &&
+      meetsEditorRightsCondition &&
+      meetsFilterCondition
+    );
+  }
 }
