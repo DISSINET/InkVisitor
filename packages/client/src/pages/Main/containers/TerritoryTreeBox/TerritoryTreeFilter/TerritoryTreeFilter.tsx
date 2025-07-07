@@ -30,7 +30,7 @@ export const TerritoryTreeFilter: React.FC<TerritoryTreeFilter> = ({
 
   return (
     <StyledFilterWrap>
-      <div style={{ marginBottom: theme.space[2], padding: "0 0.5rem" }}>
+      <div style={{ marginBottom: "0.3rem", padding: "0 0.5rem" }}>
         <AttributeButtonGroup
           fullWidth
           options={[
