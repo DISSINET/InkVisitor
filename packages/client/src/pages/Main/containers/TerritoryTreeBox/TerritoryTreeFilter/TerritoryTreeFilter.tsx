@@ -52,6 +52,7 @@ export const TerritoryTreeFilter: React.FC<TerritoryTreeFilter> = ({
           onChangeFn={(value: boolean) =>
             handleFilterChange("withSubterritories", value)
           }
+          tooltipLabel="first-level Territories (directly under root) which have sub-Territories"
         />
         <Checkbox
           label="with statements"
