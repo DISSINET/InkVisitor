@@ -30,22 +30,25 @@ export const TerritoryTreeFilter: React.FC<TerritoryTreeFilter> = ({
 
   return (
     <StyledFilterWrap>
-      <AttributeButtonGroup
-        options={[
-          {
-            longValue: "and",
-            shortValue: "and",
-            onClick: () => handleFilterChange("operator", "and"),
-            selected: filterData.operator === "and",
-          },
-          {
-            longValue: "or",
-            shortValue: "or",
-            onClick: () => handleFilterChange("operator", "or"),
-            selected: filterData.operator === "or",
-          },
-        ]}
-      />
+      <div style={{ marginBottom: theme.space[2], padding: "0 0.5rem" }}>
+        <AttributeButtonGroup
+          fullWidth
+          options={[
+            {
+              longValue: "AND",
+              shortValue: "AND",
+              onClick: () => handleFilterChange("operator", "and"),
+              selected: filterData.operator === "and",
+            },
+            {
+              longValue: "OR",
+              shortValue: "OR",
+              onClick: () => handleFilterChange("operator", "or"),
+              selected: filterData.operator === "or",
+            },
+          ]}
+        />
+      </div>
       <StyledFilterList>
         <Checkbox
           label="starred"

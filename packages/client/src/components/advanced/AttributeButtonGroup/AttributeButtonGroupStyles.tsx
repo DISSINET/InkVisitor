@@ -11,7 +11,7 @@ interface StyledPropButtonGroup {
   $border?: boolean;
   width?: number;
   padding?: boolean;
-  $iconsOnly?: boolean;
+  $fullWidth?: boolean;
 }
 export const StyledPropButtonGroup = styled.div<StyledPropButtonGroup>`
   margin-left: ${({ theme, $leftMargin }) =>
@@ -23,7 +23,7 @@ export const StyledPropButtonGroup = styled.div<StyledPropButtonGroup>`
   border-radius: 8px;
   border: ${({ $border }) => ($border ? "1px" : 0)} solid
     ${({ theme }) => theme.color["gray"][600]};
-  width: ${({ $iconsOnly }) => ($iconsOnly ? "100%" : "")};
+  width: ${({ $fullWidth }) => ($fullWidth ? "100%" : "")};
 `;
 
 interface StyledButtonWrap {
