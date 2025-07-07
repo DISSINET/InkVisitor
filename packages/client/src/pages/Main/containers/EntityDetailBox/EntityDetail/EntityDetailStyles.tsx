@@ -33,7 +33,7 @@ interface StyledDetailSectionHeader {
 export const StyledDetailSectionHeader = styled.div<StyledDetailSectionHeader>`
   display: flex;
   align-items: center;
-  font-weight: ${({ theme }) => theme.fontWeight.regular};
+  font-weight: ${({ theme }) => theme.fontWeight.normal};
   font-size: ${({ theme, $secondary }) =>
     $secondary ? theme.fontSize["base"] : theme.fontSize.lg};
   margin-top: ${({ theme, $secondary }) => ($secondary ? theme.space[12] : "")};

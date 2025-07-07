@@ -847,32 +847,34 @@ const MainPage: React.FC<MainPage> = ({}) => {
           height={getStatementListBoxHeight()}
           buttons={[
             <>
-              <ButtonGroup style={{ marginRight: "0.5rem" }}>
-                <Button
-                  color="info"
-                  icon={
-                    <FaDiagramNext style={{ transform: "rotate(180deg)" }} />
-                  }
-                  tooltipLabel="go to previous territory"
-                  onClick={() => {
-                    if (previousTerritoryId) {
-                      setTerritoryId(previousTerritoryId);
+              {territoryId && (
+                <ButtonGroup style={{ marginRight: "0.5rem" }}>
+                  <Button
+                    color="info"
+                    icon={
+                      <FaDiagramNext style={{ transform: "rotate(180deg)" }} />
                     }
-                  }}
-                  disabled={!previousTerritoryId}
-                />
-                <Button
-                  color="info"
-                  icon={<FaDiagramNext />}
-                  tooltipLabel="go to next territory"
-                  onClick={() => {
-                    if (nextTerritoryId) {
-                      setTerritoryId(nextTerritoryId);
-                    }
-                  }}
-                  disabled={!nextTerritoryId}
-                />
-              </ButtonGroup>
+                    tooltipLabel="go to previous territory"
+                    onClick={() => {
+                      if (previousTerritoryId) {
+                        setTerritoryId(previousTerritoryId);
+                      }
+                    }}
+                    disabled={!previousTerritoryId}
+                  />
+                  <Button
+                    color="info"
+                    icon={<FaDiagramNext />}
+                    tooltipLabel="go to next territory"
+                    onClick={() => {
+                      if (nextTerritoryId) {
+                        setTerritoryId(nextTerritoryId);
+                      }
+                    }}
+                    disabled={!nextTerritoryId}
+                  />
+                </ButtonGroup>
+              )}
               {territoryId && (
                 <ButtonGroup
                   style={{ marginLeft: "0.5rem", marginRight: "0.5rem" }}

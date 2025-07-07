@@ -610,6 +610,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
     (localStorage.getItem("userrole") as UserEnums.Role) ===
     UserEnums.Role.Owner;
   const disableAttributesForNonOwnersInRoot = isRootTerritory && !isOwner;
+  const canEditEntity = userCanEdit && !disableAttributesForNonOwnersInRoot;
 
   return (
     <>
@@ -623,7 +624,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
           <>
             <EntityDetailHeaderRow
               entity={entity}
-              userCanEdit={userCanEdit && !disableAttributesForNonOwnersInRoot}
+              userCanEdit={canEditEntity}
               mayBeRemoved={mayBeRemoved}
               setShowRemoveSubmit={setShowRemoveSubmit}
               setCreateTemplateModal={setCreateTemplateModal}
@@ -647,9 +648,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                   </StyledDetailWarnings>
                   <EntityDetailFormSection
                     entity={entity}
-                    userCanEdit={
-                      userCanEdit && !disableAttributesForNonOwnersInRoot
-                    }
+                    userCanEdit={canEditEntity}
                     userCanAdmin={userCanAdmin}
                     actantMode={actantMode}
                     isStatementWithTerritory={isStatementWithTerritory}
@@ -677,9 +676,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                       territory={entity}
                       updateEntityMutation={updateEntityMutation}
                       isInsideTemplate={isInsideTemplate}
-                      userCanEdit={
-                        userCanEdit && !disableAttributesForNonOwnersInRoot
-                      }
+                      userCanEdit={canEditEntity}
                     />
                   </StyledDetailSectionContent>
                 </StyledDetailSection>
@@ -696,9 +693,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                     }
                     entities={entity.entities}
                     updateEntityMutation={updateEntityMutation}
-                    userCanEdit={
-                      userCanEdit && !disableAttributesForNonOwnersInRoot
-                    }
+                    userCanEdit={canEditEntity}
                     isInsideTemplate={isInsideTemplate}
                     territoryParentId={getTerritoryId(entity)}
                     entity={entity}
@@ -727,9 +722,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                   <StyledDetailSectionContent>
                     <EntityDetailValency
                       entity={entity}
-                      userCanEdit={
-                        userCanEdit && !disableAttributesForNonOwnersInRoot
-                      }
+                      userCanEdit={canEditEntity}
                       updateEntityMutation={updateEntityMutation}
                       relationCreateMutation={relationCreateMutation}
                       relationUpdateMutation={relationUpdateMutation}
@@ -760,9 +753,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                     relationCreateMutation={relationCreateMutation}
                     relationUpdateMutation={relationUpdateMutation}
                     relationDeleteMutation={relationDeleteMutation}
-                    userCanEdit={
-                      userCanEdit && !disableAttributesForNonOwnersInRoot
-                    }
+                    userCanEdit={canEditEntity}
                   />
                 </StyledDetailSectionContent>
               </StyledDetailSection>
@@ -773,7 +764,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                   <StyledDetailSectionHeading>
                     Metaproperties
                   </StyledDetailSectionHeading>
-                  {userCanEdit && !disableAttributesForNonOwnersInRoot && (
+                  {canEditEntity && (
                     <EntityDetailSectionButtons
                       entityId={entity.id}
                       setShowSubmit={setShowBatchRemovePropSubmit}
@@ -821,9 +812,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                           props: [...entity.props, newProp],
                         });
                       }}
-                      userCanEdit={
-                        userCanEdit && !disableAttributesForNonOwnersInRoot
-                      }
+                      userCanEdit={canEditEntity}
                       movePropToIndex={(propId, oldIndex, newIndex) => {
                         movePropToIndex(propId, oldIndex, newIndex);
                       }}
@@ -841,7 +830,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                       alwaysShowCreateModal
                     />
                   </StyledPropGroupWrap>
-                  {userCanEdit && (
+                  {canEditEntity && (
                     <Button
                       color="primary"
                       label="new metaproperty"
@@ -864,7 +853,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                 </StyledDetailSectionHeader>
                 <StyledDetailSectionContent>
                   <EntityReferenceTable
-                    disabled={!userCanEdit}
+                    disabled={!canEditEntity}
                     references={entity.references ?? []}
                     entities={entity.entities}
                     entityId={entity.id}
@@ -872,9 +861,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                       updateEntityMutation.mutate({ references: newValues });
                     }}
                     isInsideTemplate={isInsideTemplate}
-                    userCanEdit={
-                      userCanEdit && !disableAttributesForNonOwnersInRoot
-                    }
+                    userCanEdit={canEditEntity}
                     alwaysShowCreateModal
                   />
                 </StyledDetailSectionContent>
@@ -1070,7 +1057,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
           setCreateTemplateModal={setCreateTemplateModal}
           entity={entity}
           showModal={createTemplateModal}
-          userCanEdit={userCanEdit && !disableAttributesForNonOwnersInRoot}
+          userCanEdit={canEditEntity}
           updateEntityMutation={updateEntityMutation}
         />
       )}
