@@ -6,7 +6,7 @@ import {
   entityStatusDict,
   languageDict,
 } from "@shared/dictionaries";
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums, UserEnums } from "@shared/enums";
 import {
   IActionData,
   IEntity,
@@ -131,6 +131,10 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
     false | number
   >(false);
   const alternativeLabels = entity.labels.slice(1);
+
+  const isOwner =
+    (localStorage.getItem("userrole") as UserEnums.Role) ===
+    UserEnums.Role.Owner;
 
   return (
     <>
@@ -333,7 +337,9 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
               <AttributeButtonGroup
                 noMargin
                 iconsOnly={widthTooSmall}
-                disabled={!userCanAdmin}
+                disabled={
+                  !userCanAdmin || (entity.id === rootTerritoryId && !isOwner)
+                }
                 options={entityStatusDict.map((entityStatusOption) => {
                   const icon = getEntityStatusIcon(entityStatusOption["value"]);
 
