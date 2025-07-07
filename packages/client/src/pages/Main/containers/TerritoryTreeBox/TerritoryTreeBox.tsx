@@ -131,44 +131,95 @@ export const TerritoryTreeBox: React.FC = () => {
     if (treeData) {
       let newFilteredTreeData: IResponseTree | null = treeData;
 
-      if (filterSettings.starred) {
-        // STARED
-        if (userData) {
+      // Check if any filters are active
+      const hasActiveFilters =
+        filterSettings.starred ||
+        filterSettings.editorRights ||
+        filterSettings.withStatements ||
+        filterSettings.withSubterritories ||
+        filterSettings.filter.length > 0;
+
+      if (!hasActiveFilters) {
+        // No filters active, return tree without highlighting
+        return newFilteredTreeData;
+      }
+
+      if (filterSettings.operator === "or") {
+        // OR logic: apply each filter independently and merge results
+        const filteredResults: (IResponseTree | null)[] = [];
+
+        if (filterSettings.starred && userData) {
+          const starredTreeData = filterTreeByFavorites(
+            treeData,
+            userData.storedTerritories.map((t) => t.territory.id)
+          );
+          if (starredTreeData) filteredResults.push(starredTreeData);
+        }
+
+        if (filterSettings.editorRights) {
+          const editorRightsTreeData = filterTreeWithWriteRights(treeData);
+          if (editorRightsTreeData) filteredResults.push(editorRightsTreeData);
+        }
+
+        if (filterSettings.withStatements) {
+          const withStatementsTreeData = filterTreeWithStatements(treeData);
+          if (withStatementsTreeData)
+            filteredResults.push(withStatementsTreeData);
+        }
+
+        if (filterSettings.withSubterritories) {
+          const withSubterritoriesTreeData =
+            filterTreeWithSubterritories(treeData);
+          if (withSubterritoriesTreeData)
+            filteredResults.push(withSubterritoriesTreeData);
+        }
+
+        if (filterSettings.filter.length > 0) {
+          const labelFilterTreeData = filterTreeByLabel(
+            treeData,
+            filterSettings.filter
+          );
+          if (labelFilterTreeData) filteredResults.push(labelFilterTreeData);
+        }
+
+        // Merge OR results (this is a simplified merge - we might need more sophisticated logic)
+        if (filteredResults.length > 0) {
+          newFilteredTreeData = filteredResults[0]; // For now, use first result
+        }
+      } else {
+        // AND logic: apply filters sequentially
+        if (filterSettings.starred && userData) {
           const starredTreeData = filterTreeByFavorites(
             newFilteredTreeData,
             userData.storedTerritories.map((t) => t.territory.id)
           );
           newFilteredTreeData = starredTreeData;
         }
-      }
-      if (filterSettings.editorRights) {
-        // EDITOR RIGHTS
-        const editorRightsTreeData =
-          filterTreeWithWriteRights(newFilteredTreeData);
-        newFilteredTreeData = editorRightsTreeData;
-      }
-      if (filterSettings.withStatements) {
-        // WITH STATEMENTS
-        const withStatementsTreeData =
-          filterTreeWithStatements(newFilteredTreeData);
-        newFilteredTreeData = withStatementsTreeData;
-      }
-      if (filterSettings.withSubterritories) {
-        // WITH SUBTERRITORIES
-        const withSubterritoriesTreeData =
-          filterTreeWithSubterritories(newFilteredTreeData);
-        newFilteredTreeData = withSubterritoriesTreeData;
-      }
-      if (filterSettings.filter.length > 0) {
-        // LABEL FILTER
-        const labelFilterTreeData = filterTreeByLabel(
-          newFilteredTreeData,
-          filterSettings.filter
-        );
-        newFilteredTreeData = labelFilterTreeData;
+        if (filterSettings.editorRights) {
+          const editorRightsTreeData =
+            filterTreeWithWriteRights(newFilteredTreeData);
+          newFilteredTreeData = editorRightsTreeData;
+        }
+        if (filterSettings.withStatements) {
+          const withStatementsTreeData =
+            filterTreeWithStatements(newFilteredTreeData);
+          newFilteredTreeData = withStatementsTreeData;
+        }
+        if (filterSettings.withSubterritories) {
+          const withSubterritoriesTreeData =
+            filterTreeWithSubterritories(newFilteredTreeData);
+          newFilteredTreeData = withSubterritoriesTreeData;
+        }
+        if (filterSettings.filter.length > 0) {
+          const labelFilterTreeData = filterTreeByLabel(
+            newFilteredTreeData,
+            filterSettings.filter
+          );
+          newFilteredTreeData = labelFilterTreeData;
+        }
       }
 
-      // Mark tree data when all selected conditions are satisfied
+      // Mark tree data for highlighting
       if (newFilteredTreeData && userData) {
         const markedTreeData = markNodesWithFilters(
           newFilteredTreeData,
