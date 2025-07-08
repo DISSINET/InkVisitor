@@ -4,6 +4,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import api from "api";
 import { Toast } from "components";
 import { Page } from "components/advanced";
+import ErrorBoundary from "components/ErrorBoundary";
 import { useDebounce } from "hooks";
 import { SearchParamsProvider } from "hooks/useSearchParamsContext";
 import { useWindowSize } from "hooks/useWindowSize";
@@ -72,6 +73,9 @@ const queryClient = new QueryClient({
       // turn on for airplane / offline work
       // networkMode: "always",
     },
+    mutations: {
+      retry: false,
+    },
   },
 });
 export const App: React.FC = () => {
@@ -104,7 +108,7 @@ export const App: React.FC = () => {
   }, [debouncedWidth]);
 
   return (
-    <>
+    <ErrorBoundary>
       <Helmet>
         <meta charSet="utf-8" />
         <title>InkVisitor</title>
@@ -198,6 +202,6 @@ export const App: React.FC = () => {
           </DndProvider>
         </QueryClientProvider>
       </ThemeProvider>
-    </>
+    </ErrorBoundary>
   );
 };
