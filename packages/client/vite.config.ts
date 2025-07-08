@@ -58,93 +58,9 @@ export default defineConfig(({ mode }) => {
       chunkSizeWarningLimit: 500,
       rollupOptions: {
         output: {
-          manualChunks: (id) => {
-            // Group all components together to avoid circular dependencies
-            if (id.includes("src/components/")) {
-              return "components";
-            }
-
-            // Group all pages together
-            if (id.includes("src/pages/")) {
-              return "pages";
-            }
-
-            // Group all hooks together
-            if (id.includes("src/hooks/")) {
-              return "hooks";
-            }
-
-            // Group all redux features together
-            if (id.includes("src/redux/features/")) {
-              return "redux-features";
-            }
-
-            // Vendor chunks
-            if (id.includes("node_modules")) {
-              // Group React and React-DOM together
-              if (id.includes("react") || id.includes("react-dom")) {
-                return "react-vendor";
-              }
-              if (id.includes("@reduxjs") || id.includes("redux")) {
-                return "redux-vendor";
-              }
-              if (id.includes("react-router")) {
-                return "router-vendor";
-              }
-              if (
-                id.includes("styled-components") ||
-                id.includes("@react-spring")
-              ) {
-                return "ui-vendor";
-              }
-              if (id.includes("react-icons")) {
-                return "icons-vendor";
-              }
-              if (id.includes("@tanstack/react-query")) {
-                return "query-vendor";
-              }
-              if (id.includes("react-dnd")) {
-                return "dnd-vendor";
-              }
-              if (
-                id.includes("react-select") ||
-                id.includes("react-popper") ||
-                id.includes("@popperjs")
-              ) {
-                return "form-vendor";
-              }
-              if (id.includes("react-table") || id.includes("react-window")) {
-                return "table-vendor";
-              }
-              if (id.includes("reactflow")) {
-                return "flow-vendor";
-              }
-              if (
-                id.includes("axios") ||
-                id.includes("uuid") ||
-                id.includes("immutability-helper")
-              ) {
-                return "utils-vendor";
-              }
-              if (
-                id.includes("react-toastify") ||
-                id.includes("react-spinners")
-              ) {
-                return "feedback-vendor";
-              }
-              if (
-                id.includes("react-helmet") ||
-                id.includes("react-json-view")
-              ) {
-                return "document-vendor";
-              }
-              if (id.includes("@inkvisitor/annotator")) {
-                return "annotator-vendor";
-              }
-
-              // Default vendor chunk for other node_modules
-              return "vendor";
-            }
+          manualChunks: {
+            vendor: ["react", "react-dom"],
+            redux: ["react-redux", "@reduxjs/toolkit", "redux"],
           },
         },
       },
