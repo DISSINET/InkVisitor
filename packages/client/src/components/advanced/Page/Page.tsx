@@ -49,7 +49,7 @@ export const Page: React.FC<Page> = ({ children }) => {
   );
 
   const environmentName = window.appConfig.env || "";
-
+  console.log(`Environment name: ${environmentName}`);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -174,7 +174,7 @@ export const Page: React.FC<Page> = ({ children }) => {
         color={
           environmentName === "production"
             ? "muni"
-            : environmentName === ""
+            : environmentName === "medhate"
             ? "medhate"
             : (environmentName as keyof ThemeColor)
         }
