@@ -1,8 +1,14 @@
 import { animated } from "@react-spring/web";
 import { IoClose } from "react-icons/io5";
 import styled from "styled-components";
-import { space2, space4, space5, space6, space7 } from "Theme/constants";
 import { ThemeColor } from "Theme/theme";
+import {
+  space2,
+  space4,
+  space5,
+  space6,
+  space7,
+} from "Theme/theme-space-shortcut";
 
 interface ModalWrap {}
 export const StyledModalWrap = styled.div<ModalWrap>`
@@ -72,8 +78,8 @@ export const StyledCardHeader = styled.header<StyledCardHeader>`
   align-items: center;
   flex-shrink: 0;
   padding: ${space4} ${space6} ${space2} ${space6};
-  background-color: ${({ theme, color }) =>
-    color ? theme.color[color] : "transparent"};
+  background-color: ${({ theme, $color }) =>
+    $color ? theme.color[$color] : "transparent"};
   border-top-left-radius: ${({ theme }) => theme.borderRadius["sm"]};
   border-top-right-radius: ${({ theme }) => theme.borderRadius["sm"]};
 

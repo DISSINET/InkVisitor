@@ -1,9 +1,3 @@
-export type ThemeType = typeof theme;
-export type ThemeColor = typeof theme.color;
-export type ElementTypeColor = typeof theme.color.elementType;
-export type ThemeFontSize = typeof theme.fontSize;
-export type PingColor = typeof theme.color.ping;
-
 const theme = {
   color: {
     transparent: "transparent",
@@ -234,5 +228,12 @@ const theme = {
       "0 2px 0px hsl(220, 7%, 83%, 0.5), inset 0 2px 2px hsla(0, 0%, 0%, 0.1)",
   },
 };
+
+export type ThemeType = typeof theme;
+export type ThemeColor = typeof theme.color;
+export type InvertedBgColor = typeof theme.color.invertedBg;
+export type ElementTypeColor = typeof theme.color.elementType;
+export type ThemeFontSize = typeof theme.fontSize;
+export type PingColor = typeof theme.color.ping;
 
 export default theme;

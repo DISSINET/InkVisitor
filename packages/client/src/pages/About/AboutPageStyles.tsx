@@ -1,4 +1,4 @@
-import { space5, space7 } from "Theme/constants";
+import { space5, space7 } from "Theme/theme-space-shortcut";
 import styled from "styled-components";
 
 export const StyledContentWrapper = styled.div`
@@ -26,7 +26,7 @@ export const StyledTitle = styled.div`
 `;
 export const StyledSubTitle = styled.div`
   font-size: ${({ theme }) => theme.fontSize["xl"]};
-  font-weight: ${({ theme }) => theme.fontWeight["italic"]};
+  font-weight: ${({ theme }) => theme.fontWeight["normal"]};
 `;
 export const StyledHeader = styled.div`
   font-family: Muni;

@@ -65,11 +65,25 @@ export const SearchParamsProvider = ({
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const params = new URLSearchParams(location.hash.substring(1));
-  const parsedParams = Object.fromEntries(params);
 
-  const paramsSearch = new URLSearchParams(location.search);
-  const parsedParamsSearch = Object.fromEntries(paramsSearch);
+  // Add error handling for URL parsing
+  let params: URLSearchParams;
+  let parsedParams: Record<string, string>;
+  let paramsSearch: URLSearchParams;
+  let parsedParamsSearch: Record<string, string>;
+
+  try {
+    params = new URLSearchParams(location.hash.substring(1));
+    parsedParams = Object.fromEntries(params);
+    paramsSearch = new URLSearchParams(location.search);
+    parsedParamsSearch = Object.fromEntries(paramsSearch);
+  } catch (error) {
+    console.error("Error parsing URL parameters:", error);
+    params = new URLSearchParams();
+    parsedParams = {};
+    paramsSearch = new URLSearchParams();
+    parsedParamsSearch = {};
+  }
 
   const [territoryId, setTerritoryId] = useState<string>(
     typeof parsedParams.territory === "string" ? parsedParams.territory : ""

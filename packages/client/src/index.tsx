@@ -1,5 +1,6 @@
 import * as ReactDOM from "react-dom/client";
 import { Provider } from "react-redux";
+import { StrictMode } from "react";
 
 import { App } from "app";
 import { ensureBasename } from "ensure-basename";
@@ -15,9 +16,11 @@ const root = ReactDOM.createRoot(
 const helmetContext = {};
 
 root.render(
-  <Provider store={store}>
-    <HelmetProvider context={helmetContext}>
-      <App />
-    </HelmetProvider>
-  </Provider>
+  <StrictMode>
+    <Provider store={store}>
+      <HelmetProvider context={helmetContext}>
+        <App />
+      </HelmetProvider>
+    </Provider>
+  </StrictMode>
 );

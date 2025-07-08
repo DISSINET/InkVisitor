@@ -1,7 +1,6 @@
-import { ConnectDropTarget } from "react-dnd";
 import { AiOutlineWarning } from "react-icons/ai";
 import styled from "styled-components";
-import { space2, space4 } from "Theme/constants";
+import { space2 } from "Theme/theme-space-shortcut";
 
 interface StyledSuggester {
   $marginTop?: boolean;

@@ -1,6 +1,5 @@
 import styled from "styled-components";
-import { space1, space2 } from "Theme/constants";
-import { ThemeColor } from "Theme/theme";
+import { InvertedBgColor, ThemeColor } from "Theme/theme";
 import { ButtonSize } from "types";
 
 const getRadius = ($radiusLeft?: boolean, $radiusRight?: boolean) => {
@@ -100,7 +99,7 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
       return theme.background["stripes"];
     }
     if ($inverted) {
-      return theme.color["invertedBg"][$color];
+      return theme.color.invertedBg[$color as keyof InvertedBgColor];
     }
 
     return theme.color[$color];

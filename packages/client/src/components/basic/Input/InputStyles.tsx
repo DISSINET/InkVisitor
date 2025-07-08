@@ -1,6 +1,6 @@
 import styled from "styled-components";
-import { space1, space2 } from "Theme/constants";
 import { ThemeColor, ThemeFontSize } from "Theme/theme";
+import { space1, space2 } from "Theme/theme-space-shortcut";
 
 interface IValueStyle {
   $inverted?: boolean;
