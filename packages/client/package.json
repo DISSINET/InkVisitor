@@ -14,7 +14,7 @@
     "dev": "vite",
     "start": "vite",
     "build": "vite build",
-    "build:latest": "vite build",
+    "build:latest": "vite build --mode latest",
     "build:development": "vite build --mode development",
     "build:production": "vite build --mode production",
     "build:niort": "vite build --mode production",
