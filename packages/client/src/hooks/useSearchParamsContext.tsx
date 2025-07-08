@@ -28,6 +28,7 @@ const INITIAL_CONTEXT = {
   removeDetailId: UNINITIALISED,
   clearAllDetailIds: UNINITIALISED,
   cleanAllParams: UNINITIALISED,
+  setLogoutState: UNINITIALISED,
 
   annotatorOpened: false,
   setAnnotatorOpened: UNINITIALISED,
@@ -46,6 +47,7 @@ interface SearchParamsContext {
   removeDetailId: (id: string) => void;
   clearAllDetailIds: () => void;
   cleanAllParams: () => void;
+  setLogoutState: (isLoggingOut: boolean) => void;
 
   annotatorOpened: boolean;
   setAnnotatorOpened: (opened: boolean) => void;
@@ -101,6 +103,7 @@ export const SearchParamsProvider = ({
   );
 
   const [disablePush, setDisablePush] = useState(false);
+  const isLoggingOutRef = React.useRef(false);
 
   const getDetailIdArray = () => {
     return detailId.length > 0 ? detailId.split(arrJoinChar) : [];
@@ -204,7 +207,7 @@ export const SearchParamsProvider = ({
   };
 
   const handleHistoryPush = () => {
-    if (!disablePush) {
+    if (!disablePush && !isLoggingOutRef.current) {
       const hashString = params.toString();
       // Remove the = symbol for annotatorOpened parameter
       const cleanHash = hashString
@@ -222,6 +225,10 @@ export const SearchParamsProvider = ({
     setStatementId("");
     setTerritoryId("");
     setAnnotatorOpened(false);
+  };
+
+  const setLogoutState = (isLoggingOut: boolean) => {
+    isLoggingOutRef.current = isLoggingOut;
   };
 
   const hasSearchParams = useMemo(
@@ -300,6 +307,7 @@ export const SearchParamsProvider = ({
         removeDetailId,
         clearAllDetailIds,
         cleanAllParams,
+        setLogoutState,
 
         annotatorOpened,
         setAnnotatorOpened,

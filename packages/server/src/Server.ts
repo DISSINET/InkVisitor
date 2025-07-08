@@ -111,21 +111,23 @@ if (process.env.NODE_ENV === "production") {
   server.use(helmet());
 }
 
-// Rate limited for signin
-server.use(
-  `${apiPath}/users/signin`,
-  rateLimit({
-    windowMs: 5 * 60 * 1000, // 5 minutes window
-    max: 5, // Limit each IP to 5 requests per windowMs
-    handler: (req: Request, res: Response, next: NextFunction, options) => {
-      throw new TooManyRequestsError(
-        `${TooManyRequestsError.title}: try again in 5 minutes`
-      );
-    },
-    standardHeaders: true,
-    legacyHeaders: false,
-  })
-);
+// Rate limited for signin (disabled in development)
+if (process.env.NODE_ENV !== "development") {
+  server.use(
+    `${apiPath}/users/signin`,
+    rateLimit({
+      windowMs: 5 * 60 * 1000, // 5 minutes window
+      max: 5, // Limit each IP to 5 requests per windowMs
+      handler: (req: Request, res: Response, next: NextFunction, options) => {
+        throw new TooManyRequestsError(
+          `${TooManyRequestsError.title}: try again in 5 minutes`
+        );
+      },
+      standardHeaders: true,
+      legacyHeaders: false,
+    })
+  );
+}
 
 server.use(timeout("30s"));
 server.use(profilerMiddleware);

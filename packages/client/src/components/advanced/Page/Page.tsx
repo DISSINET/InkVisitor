@@ -32,7 +32,14 @@ export const Page: React.FC<Page> = ({ children }) => {
   );
   const userId = localStorage.getItem("userid");
   const userRole = localStorage.getItem("userrole") as UserEnums.Role;
-  const { cleanAllParams } = useSearchParams();
+  const {
+    cleanAllParams,
+    clearAllDetailIds,
+    setStatementId,
+    setTerritoryId,
+    setAnnotatorOpened,
+    setLogoutState,
+  } = useSearchParams();
 
   const contentHeight: number = useAppSelector(
     (state) => state.layout.contentHeight
@@ -85,6 +92,9 @@ export const Page: React.FC<Page> = ({ children }) => {
   const logOutMutation = useMutation({
     mutationFn: async () => await api.signOut(),
     onSuccess: (data, variables) => {
+      // Set logout state to prevent navigation conflicts in React 19
+      setLogoutState(true);
+
       dispatch(setUsername(""));
       queryClient.removeQueries();
       toast.success("You've been successfully logged out!");
@@ -92,6 +102,11 @@ export const Page: React.FC<Page> = ({ children }) => {
       cleanAllParams();
 
       navigate("/login");
+
+      // Reset the logout flag after navigation completes
+      setTimeout(() => {
+        setLogoutState(false);
+      }, 100);
     },
   });
 
