@@ -19,7 +19,6 @@ import { setUsername } from "redux/features/usernameSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { ThemeColor } from "Theme/theme";
 import { StyledPage, StyledPageContent } from "./PageStyles";
-import { JSX } from "react";
 
 interface Page {
   children?: React.ReactNode;
@@ -32,14 +31,7 @@ export const Page: React.FC<Page> = ({ children }) => {
   );
   const userId = localStorage.getItem("userid");
   const userRole = localStorage.getItem("userrole") as UserEnums.Role;
-  const {
-    cleanAllParams,
-    clearAllDetailIds,
-    setStatementId,
-    setTerritoryId,
-    setAnnotatorOpened,
-    setLogoutState,
-  } = useSearchParams();
+  const { cleanAllParams, setLogoutState } = useSearchParams();
 
   const contentHeight: number = useAppSelector(
     (state) => state.layout.contentHeight
@@ -49,7 +41,6 @@ export const Page: React.FC<Page> = ({ children }) => {
   );
 
   const environmentName = window.appConfig.env || "";
-  console.log(`Environment name: ${environmentName}`);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -118,17 +109,17 @@ export const Page: React.FC<Page> = ({ children }) => {
   useKeypress("Shift", () => document.body.classList.add("no-select"));
   useKeyLift("Shift", () => document.body.classList.remove("no-select"));
 
-  useQuery({
-    queryKey: ["ping"],
-    queryFn: async () => {
+  useEffect(() => {
+    const updatePing = () => {
       const localPing = api.getPing();
       if (localPing) {
         dispatch(setPing(localPing));
       }
-      return localPing;
-    },
-    refetchInterval: 5000,
-  });
+    };
+    updatePing();
+    const interval = setInterval(updatePing, 5000);
+    return () => clearInterval(interval);
+  }, [dispatch]);
 
   const headerLeft = useMemo(
     () => <LeftHeader tempLocation={tempLocation} />,
