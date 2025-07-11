@@ -165,9 +165,9 @@ export const Page: React.FC<Page> = ({ children }) => {
         color={
           environmentName === "production"
             ? "muni"
-            : environmentName === "medhate"
-            ? "medhate"
-            : (environmentName as keyof ThemeColor)
+            : environmentName
+            ? (environmentName as keyof ThemeColor)
+            : "black"
         }
         left={headerLeft}
         right={headerRight}
