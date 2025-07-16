@@ -118,6 +118,7 @@ export const SearchParamsProvider = ({
 
   const [disablePush, setDisablePush] = useState(false);
   const isLoggingOutRef = React.useRef(false);
+  const isHandlingLocationChangeRef = React.useRef(false);
 
   const getDetailIdArray = () => {
     return detailId.length > 0 ? detailId.split(arrJoinChar) : [];
@@ -221,7 +222,11 @@ export const SearchParamsProvider = ({
   };
 
   const handleHistoryPush = () => {
-    if (!disablePush && !isLoggingOutRef.current) {
+    if (
+      !disablePush &&
+      !isLoggingOutRef.current &&
+      !isHandlingLocationChangeRef.current
+    ) {
       const hashString = params.toString();
       // Remove the = symbol for annotatorOpened parameter
       const cleanHash = hashString
@@ -273,37 +278,46 @@ export const SearchParamsProvider = ({
     }
   }, [territoryId, statementId, selectedDetailId, detailId, annotatorOpened]);
 
-  // const handleLocationChange = (location: any) => {
-  //   const paramsTemp = new URLSearchParams(location.hash.substring(1));
-  //   const parsedParamsTemp = Object.fromEntries(paramsTemp);
+  const handleLocationChange = (location: any) => {
+    try {
+      const paramsTemp = new URLSearchParams(location.hash.substring(1));
+      const parsedParamsTemp = Object.fromEntries(paramsTemp);
 
-  //   parsedParamsTemp.territory
-  //     ? setTerritoryId(parsedParamsTemp.territory)
-  //     : setTerritoryId("");
+      parsedParamsTemp.territory
+        ? setTerritoryId(parsedParamsTemp.territory)
+        : setTerritoryId("");
 
-  //   parsedParamsTemp.statement
-  //     ? setStatementId(parsedParamsTemp.statement)
-  //     : setStatementId("");
+      parsedParamsTemp.statement
+        ? setStatementId(parsedParamsTemp.statement)
+        : setStatementId("");
 
-  //   parsedParamsTemp.selectedDetail
-  //     ? setSelectedDetailId(parsedParamsTemp.selectedDetail)
-  //     : setSelectedDetailId("");
+      parsedParamsTemp.selectedDetail
+        ? setSelectedDetailId(parsedParamsTemp.selectedDetail)
+        : setSelectedDetailId("");
 
-  //   parsedParamsTemp.detail
-  //     ? setDetailId(parsedParamsTemp.detail)
-  //     : setDetailId("");
-  // };
+      parsedParamsTemp.detail
+        ? setDetailId(parsedParamsTemp.detail)
+        : setDetailId("");
 
-  // useEffect(() => {
-  // Should be only change from the url => add state to switch of listener
-  // this condition is for redirect - don't use our lifecycle when params are set by search query (?)
-  // if (!hasSearchParams) {
-  //   setDisablePush(true);
-  //   handleLocationChange(location);
-  //   setDisablePush(false);
-  // }
-  // }),
-  // [location];
+      // Handle annotatorOpened parameter
+      setAnnotatorOpened("annotatorOpened" in parsedParamsTemp);
+    } catch (error) {
+      console.error("Error parsing location hash:", error);
+    }
+  };
+
+  useEffect(() => {
+    // Listen for URL changes (back/forward button, direct navigation)
+    // This condition is for redirect - don't use our lifecycle when params are set by search query
+    if (!hasSearchParams) {
+      isHandlingLocationChangeRef.current = true;
+      handleLocationChange(location);
+      // Use setTimeout to ensure state updates have completed before allowing history pushes
+      setTimeout(() => {
+        isHandlingLocationChangeRef.current = false;
+      }, 0);
+    }
+  }, [location, hasSearchParams]);
 
   return (
     <SearchParamsContext.Provider
