@@ -89,7 +89,9 @@ export const StyledCardHeader = styled.header<StyledCardHeader>`
   min-height: ${({ theme }) => theme.space[12]};
 `;
 export const StyledCardIcon = styled.div`
-  font-size: 24;
+  display: flex;
+  flex-shrink: 0;
+  font-size: 2.4rem;
   margin-right: 0.5rem;
 `;
 interface StyledCardTitle {

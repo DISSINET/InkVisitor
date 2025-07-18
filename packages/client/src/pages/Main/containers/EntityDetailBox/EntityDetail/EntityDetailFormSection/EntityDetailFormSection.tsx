@@ -167,6 +167,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["tree"] });
       queryClient.invalidateQueries({ queryKey: ["territory"] });
+      queryClient.invalidateQueries({ queryKey: ["entity"] });
     },
   });
 
@@ -799,15 +800,11 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
 
       {showTActionModal && (
         <TerritoryActionModal
-          onClose={() => setShowTActionModal(false)}
+          territory={entity}
           selectedParentEntity={moveToParentEntity}
+          onClose={() => setShowTActionModal(false)}
           setMoveToParentEntity={setMoveToParentEntity}
           showModal={showTActionModal}
-          territory={
-            entity.entities[
-              entity.data.parent.territoryId
-            ] as IResponseTerritory
-          }
           updateTerritoryMutation={updateTerritoryMutation}
           excludedMoveTerritories={excludedMoveTerritories}
           isFetchingTerritory={false}

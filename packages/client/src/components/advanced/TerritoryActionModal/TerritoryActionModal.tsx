@@ -82,6 +82,7 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
   const [action, setAction] = useState<"move" | "duplicate">("move");
   const [includeChildren, setIncludeChildren] = useState(true);
   const [newParentEntities, setNewParentEntities] = useState<IEntity[]>([]);
+  const [order, setOrder] = useState<EntityEnums.Order>(EntityEnums.Order.Last);
 
   useEffect(() => {
     if (selectedParentEntity) {
@@ -244,9 +245,38 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
             </span>
           </StyledHeadingColumn>
         </StyledFlexRow>
+        <StyledFlexRow>
+          Order:
+          <AttributeButtonGroup
+            options={[
+              {
+                longValue: "First",
+                shortValue: "First",
+                onClick: () => {
+                  setOrder(EntityEnums.Order.First);
+                },
+                selected: order === EntityEnums.Order.First,
+              },
+              {
+                longValue: "Last",
+                shortValue: "Last",
+                onClick: () => {
+                  setOrder(EntityEnums.Order.Last);
+                },
+                selected: order === EntityEnums.Order.Last,
+              },
+            ]}
+          />
+        </StyledFlexRow>
       </ModalContent>
       <ModalFooter column>
-        <div style={{ width: "100%", display: "flex" }}>
+        <div
+          style={{
+            width: "100%",
+            display: "flex",
+            justifyContent: "flex-end",
+          }}
+        >
           <ButtonGroup>
             <Button label="cancel" onClick={onClose} />
             <Button
@@ -262,7 +292,7 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
                         data: {
                           parent: {
                             territoryId: newParentEntities[0].id,
-                            order: EntityEnums.Order.Last,
+                            order: order,
                           },
                         },
                       },
