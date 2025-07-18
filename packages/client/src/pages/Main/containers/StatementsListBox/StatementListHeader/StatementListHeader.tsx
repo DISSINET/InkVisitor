@@ -541,7 +541,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
           territory={territory}
           updateTerritoryMutation={updateTerritoryMutation}
           excludedMoveTerritories={excludedMoveTerritories}
-          duplicateTerritoryMutation={duplicateTerritoryMutation}
+          // duplicateTerritoryMutation={duplicateTerritoryMutation}
           isFetchingTerritory={isFetchingTerritory}
         />
       )}

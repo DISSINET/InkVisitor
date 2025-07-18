@@ -12,14 +12,26 @@ import {
   IEntity,
   IResponseDetail,
   IResponseGeneric,
+  IResponseTerritory,
+  ITerritory,
 } from "@shared/types";
 import { IConceptData } from "@shared/types/concept";
-import { UseMutationResult, useQuery } from "@tanstack/react-query";
+import {
+  useMutation,
+  UseMutationResult,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { MIN_LABEL_LENGTH_MESSAGE, rootTerritoryId } from "Theme/constants";
 import api from "api";
 import { AxiosResponse } from "axios";
 import { Button, Input, MultiInput, TypeBar } from "components";
-import Dropdown, { AttributeButtonGroup, EntityTag } from "components/advanced";
+import Dropdown, {
+  AttributeButtonGroup,
+  EntitySuggester,
+  EntityTag,
+  TerritoryActionModal,
+} from "components/advanced";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   FaExternalLinkAlt,
@@ -52,6 +64,7 @@ import {
   StyledGreyBar,
 } from "./EntityDetailFormSectionStyles";
 import { getEntityStatusIcon } from "utils/iconUtils";
+import { TbHomeMove } from "react-icons/tb";
 
 interface EntityDetailFormSection {
   entity: IResponseDetail;
@@ -135,6 +148,27 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
   const isOwner =
     (localStorage.getItem("userrole") as UserEnums.Role) ===
     UserEnums.Role.Owner;
+
+  const [showTActionModal, setShowTActionModal] = useState(false);
+  const [moveToParentEntity, setMoveToParentEntity] = useState<IEntity | false>(
+    false
+  );
+  const [excludedMoveTerritories, setExcludedMoveTerritories] = useState<
+    string[]
+  >([rootTerritoryId, entity.data.parent.territoryId]);
+
+  const queryClient = useQueryClient();
+
+  const updateTerritoryMutation = useMutation({
+    mutationFn: async (tObject: {
+      territoryId: string;
+      changes: Partial<ITerritory>;
+    }) => await api.entityUpdate(tObject.territoryId, tObject.changes),
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["tree"] });
+      queryClient.invalidateQueries({ queryKey: ["territory"] });
+    },
+  });
 
   return (
     <>
@@ -314,6 +348,33 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                     }
                   />
                 </StyledTagWrap>
+                {entity.data.parent.territoryId !== rootTerritoryId && (
+                  <div style={{ marginTop: "0.5rem" }}>
+                    <EntitySuggester
+                      placeholder="move"
+                      disableTemplatesAccept
+                      filterEditorRights
+                      inputWidth={
+                        80
+                        // selectedRows.length > 0 && contentWidthTooSmall ? 36 : 80
+                      }
+                      disableCreate
+                      categoryTypes={[EntityEnums.Class.Territory]}
+                      onPicked={(selectedEntity) => {
+                        setMoveToParentEntity(selectedEntity);
+                        setShowTActionModal(true);
+                      }}
+                      excludedActantIds={excludedMoveTerritories}
+                      button={
+                        <Button
+                          icon={<TbHomeMove size={14} />}
+                          onClick={() => setShowTActionModal(true)}
+                          tooltipLabel="move or duplicate current territory"
+                        />
+                      }
+                    />
+                  </div>
+                )}
               </StyledDetailContentRowValue>
             </StyledDetailContentRow>
           )}
@@ -735,6 +796,25 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
           )}
         </StyledDetailForm>
       </StyledFormWrapper>
+
+      {showTActionModal && (
+        <TerritoryActionModal
+          onClose={() => setShowTActionModal(false)}
+          selectedParentEntity={moveToParentEntity}
+          setMoveToParentEntity={setMoveToParentEntity}
+          showModal={showTActionModal}
+          territory={
+            entity.entities[
+              entity.data.parent.territoryId
+            ] as IResponseTerritory
+          }
+          updateTerritoryMutation={updateTerritoryMutation}
+          excludedMoveTerritories={excludedMoveTerritories}
+          isFetchingTerritory={false}
+          // duplicateTerritoryMutation={duplicateTerritoryMutation}
+          // isFetchingTerritory={isFetchingTerritory}
+        />
+      )}
     </>
   );
 };

@@ -11,6 +11,7 @@ import { AxiosResponse } from "axios";
 import {
   Button,
   ButtonGroup,
+  Loader,
   Modal,
   ModalContent,
   ModalFooter,
@@ -54,16 +55,16 @@ interface TerritoryActionModal {
     },
     unknown
   >;
-  duplicateTerritoryMutation: UseMutationResult<
-    AxiosResponse<IResponseGeneric<any>, any>,
-    Error,
-    {
-      territoryId: string;
-      targets: string[];
-      withChildren: boolean;
-    },
-    unknown
-  >;
+  // duplicateTerritoryMutation: UseMutationResult<
+  //   AxiosResponse<IResponseGeneric<any>, any>,
+  //   Error,
+  //   {
+  //     territoryId: string;
+  //     targets: string[];
+  //     withChildren: boolean;
+  //   },
+  //   unknown
+  // >;
   isFetchingTerritory: boolean;
 }
 export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
@@ -75,7 +76,7 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
   excludedMoveTerritories,
 
   updateTerritoryMutation,
-  duplicateTerritoryMutation,
+  // duplicateTerritoryMutation,
   isFetchingTerritory,
 }) => {
   const [action, setAction] = useState<"move" | "duplicate">("move");
@@ -173,7 +174,7 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
           </StyledArrowWrapper>
 
           <div>
-            <StyledGreyText>{`new parent(s) T (${newParentEntities.length} T selected)`}</StyledGreyText>
+            <StyledGreyText>{`new parent T`}</StyledGreyText>
 
             <StyledTagList>
               {newParentEntities.map((e, key) => {
@@ -267,15 +268,16 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
                       },
                     });
                     onClose();
-                  } else if (action === "duplicate") {
-                    // DUPLICATE
-                    duplicateTerritoryMutation.mutate({
-                      territoryId: territory.id,
-                      targets: newParentEntities.map((e) => e.id),
-                      withChildren: includeChildren,
-                    });
-                    onClose();
                   }
+                  //  else if (action === "duplicate") {
+                  //   // DUPLICATE
+                  //   duplicateTerritoryMutation.mutate({
+                  //     territoryId: territory.id,
+                  //     targets: newParentEntities.map((e) => e.id),
+                  //     withChildren: includeChildren,
+                  //   });
+                  //   onClose();
+                  // }
                 }
               }}
               color={"success"}
