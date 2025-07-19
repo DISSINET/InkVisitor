@@ -881,7 +881,7 @@ export const StatementListBox: React.FC = () => {
     <>
       {showStatementList && (
         <>
-          {territoryId && (
+          {territory && (
             <StatementListHeader
               territory={territory}
               isFetchingTerritory={isFetchingTerritory}
@@ -895,7 +895,7 @@ export const StatementListBox: React.FC = () => {
               replaceReferencesMutation={replaceReferencesMutation}
               appendReferencesMutation={appendReferencesMutation}
               updateTerritoryMutation={updateTerritoryMutation}
-              duplicateTerritoryMutation={duplicateTerritoryMutation}
+              // duplicateTerritoryMutation={duplicateTerritoryMutation}
               deleteStatementsMutation={deleteStatementsMutation}
               relationsCreateMutation={relationsCreateMutation}
               favoritedTerritoryIds={favoritedTerritoryIds}
