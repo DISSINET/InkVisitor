@@ -6,6 +6,11 @@ export const StyledHeadingColumn = styled.div`
   align-items: center;
   margin-right: 1rem;
 `;
+export const StyledFlexContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+`;
 export const StyledFlexRow = styled.div`
   display: flex;
   align-items: center;
@@ -13,7 +18,6 @@ export const StyledFlexRow = styled.div`
 export const StyledParentRow = styled.div`
   display: flex;
   flex-direction: row;
-  margin: 1rem;
 `;
 
 export const StyledBlueText = styled.p`
