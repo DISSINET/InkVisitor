@@ -41,9 +41,10 @@ import {
 } from "./TerritoryActionModalStyles";
 
 interface TerritoryActionModal {
-  territory?: IResponseTerritory | IResponseEntity;
-  onClose: () => void;
+  territory: IResponseTerritory | IResponseEntity;
+  oldParentTerritory: IResponseTerritory | IResponseEntity;
   showModal?: boolean;
+  onClose: () => void;
   selectedParentEntity: IEntity | false;
   setMoveToParentEntity: React.Dispatch<React.SetStateAction<IEntity | false>>;
   excludedMoveTerritories: string[];
@@ -70,9 +71,10 @@ interface TerritoryActionModal {
   isFetchingTerritory: boolean;
 }
 export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
+  territory,
+  oldParentTerritory,
   showModal = false,
   onClose,
-  territory,
   selectedParentEntity,
   setMoveToParentEntity,
   excludedMoveTerritories,
@@ -93,28 +95,10 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
     }
   }, []);
 
-  const oldParentId =
-    territory?.data.parent && territory?.data.parent.territoryId;
-
-  const {
-    data: oldParentTerritory,
-    error: oldParentError,
-    isFetching: oldParentIsFetching,
-  } = useQuery({
-    queryKey: ["territory", oldParentId],
-    queryFn: async () => {
-      if (oldParentId) {
-        const res = await api.entityGet(oldParentId);
-        return res.data;
-      }
-    },
-    enabled: !!oldParentId && api.isLoggedIn(),
-  });
-
   // const showDuplicateNote =
   //   action === "duplicate" && territory && territory.statements.length > 0;
 
-  const showMoveNote = action === "move" && newParentEntities.length > 1;
+  // const showMoveNote = action === "move" && newParentEntities.length > 1;
 
   useEffect(() => {
     if (newParentEntities.length > 1 && action === "move") {
@@ -198,14 +182,14 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
                 })}
               </StyledTagList>
 
-              {/* #2684 only allow one parentuntil we have batch remove */}
-              {oldParentId && newParentEntities.length === 0 && (
+              {/* #2684 only allow one parent until we have batch remove */}
+              {oldParentTerritory && newParentEntities.length === 0 && (
                 <EntitySuggester
                   autoFocus
                   placeholder="new parent"
                   categoryTypes={[EntityEnums.Class.Territory]}
                   excludedActantIds={[
-                    oldParentId,
+                    oldParentTerritory.id,
                     ...excludedMoveTerritories,
                     ...newParentEntities.map((entity) => entity.id),
                   ]}

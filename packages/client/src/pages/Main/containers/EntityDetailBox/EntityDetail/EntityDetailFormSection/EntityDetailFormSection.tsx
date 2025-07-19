@@ -801,6 +801,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
       {showTActionModal && (
         <TerritoryActionModal
           territory={entity}
+          oldParentTerritory={entity.entities[entity.data.parent.territoryId]}
           selectedParentEntity={moveToParentEntity}
           onClose={() => setShowTActionModal(false)}
           setMoveToParentEntity={setMoveToParentEntity}
