@@ -153,9 +153,10 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
   const [moveToParentEntity, setMoveToParentEntity] = useState<IEntity | false>(
     false
   );
-  const [excludedMoveTerritories, setExcludedMoveTerritories] = useState<
-    string[]
-  >([rootTerritoryId, entity.data.parent.territoryId]);
+  const excludedMoveTerritories = useMemo(
+    () => [rootTerritoryId, entity.data.parent.territoryId],
+    [entity.data.parent.territoryId]
+  );
 
   const queryClient = useQueryClient();
 
