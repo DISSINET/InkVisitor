@@ -1,6 +1,7 @@
 import { EntityEnums } from "@shared/enums";
 import {
   IEntity,
+  IResponseEntity,
   IResponseGeneric,
   IResponseTerritory,
   ITerritory,
@@ -28,6 +29,7 @@ import {
   StyledArrowShaft,
   StyledArrowWrapper,
   StyledBlueText,
+  StyledFlexContainer,
   StyledFlexRow,
   StyledGreyText,
   StyledHeadingColumn,
@@ -39,7 +41,7 @@ import {
 } from "./TerritoryActionModalStyles";
 
 interface TerritoryActionModal {
-  territory?: IResponseTerritory;
+  territory?: IResponseTerritory | IResponseEntity;
   onClose: () => void;
   showModal?: boolean;
   selectedParentEntity: IEntity | false;
@@ -109,8 +111,8 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
     enabled: !!oldParentId && api.isLoggedIn(),
   });
 
-  const showDuplicateNote =
-    action === "duplicate" && territory && territory.statements.length > 0;
+  // const showDuplicateNote =
+  //   action === "duplicate" && territory && territory.statements.length > 0;
 
   const showMoveNote = action === "move" && newParentEntities.length > 1;
 
@@ -124,150 +126,152 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
     <Modal showModal={showModal} onClose={onClose}>
       <ModalHeader title="Manage territory" icon={<TbHomeMove />} />
       <ModalContent column enableScroll isLoading={isFetchingTerritory}>
-        <StyledFlexRow>
-          {territory && (
-            <>
+        <StyledFlexContainer>
+          <StyledFlexRow>
+            {territory && (
+              <>
+                <span>
+                  <AttributeButtonGroup
+                    // #2684 disabled until we have batch remove
+                    disabled
+                    // disabled={newParentEntities.length > 1}
+                    fullSizeDisabled
+                    disabledBtnsTooltip="cannot move to multiple Territories"
+                    options={[
+                      {
+                        longValue: "Move",
+                        shortValue: "Move",
+                        onClick: () => {
+                          setAction("move");
+                          setIncludeChildren(true);
+                        },
+                        selected: action === "move",
+                      },
+                      {
+                        longValue: "Duplicate",
+                        shortValue: "Duplicate",
+                        onClick: () => {
+                          setAction("duplicate");
+                        },
+                        selected: action === "duplicate",
+                      },
+                    ]}
+                  />
+                </span>
+                <EntityTag entity={territory} fullWidth />
+              </>
+            )}
+          </StyledFlexRow>
+
+          <StyledParentRow>
+            <div>
+              <StyledBlueText>from old parent T</StyledBlueText>
+              {oldParentTerritory && <EntityTag entity={oldParentTerritory} />}
+            </div>
+
+            <StyledArrowWrapper>
+              <StyledInto>into</StyledInto>
+              <StyledArrowContainer>
+                <StyledArrowShaft />
+                <StyledArrowHead />
+              </StyledArrowContainer>
+            </StyledArrowWrapper>
+
+            <div>
+              <StyledGreyText>{`new parent T`}</StyledGreyText>
+
+              <StyledTagList>
+                {newParentEntities.map((e, key) => {
+                  return (
+                    <StyledTagWrap key={key}>
+                      <EntityTag
+                        entity={e}
+                        unlinkButton={{
+                          onClick: () =>
+                            setNewParentEntities(
+                              newParentEntities.filter((et) => et.id !== e.id)
+                            ),
+                        }}
+                      />
+                    </StyledTagWrap>
+                  );
+                })}
+              </StyledTagList>
+
+              {/* #2684 only allow one parentuntil we have batch remove */}
+              {oldParentId && newParentEntities.length === 0 && (
+                <EntitySuggester
+                  autoFocus
+                  placeholder="new parent"
+                  categoryTypes={[EntityEnums.Class.Territory]}
+                  excludedActantIds={[
+                    oldParentId,
+                    ...excludedMoveTerritories,
+                    ...newParentEntities.map((entity) => entity.id),
+                  ]}
+                  onPicked={(entity) => {
+                    setNewParentEntities([...newParentEntities, entity]);
+                  }}
+                  disableTemplatesAccept
+                  filterEditorRights
+                  disableCreate
+                />
+              )}
+            </div>
+          </StyledParentRow>
+
+          <StyledFlexRow>
+            <StyledHeadingColumn>
               <span>
                 <AttributeButtonGroup
-                  // #2684 disabled until we have batch remove
-                  disabled
-                  // disabled={newParentEntities.length > 1}
+                  disabled={action === "move"}
                   fullSizeDisabled
-                  disabledBtnsTooltip="cannot move to multiple Territories"
                   options={[
                     {
-                      longValue: "Move",
-                      shortValue: "Move",
+                      longValue: "Move children",
+                      shortValue: "Move children",
                       onClick: () => {
-                        setAction("move");
                         setIncludeChildren(true);
                       },
-                      selected: action === "move",
+                      selected: includeChildren === true,
                     },
                     {
-                      longValue: "Duplicate",
-                      shortValue: "Duplicate",
+                      longValue: "Don't move children",
+                      shortValue: "Don't move children",
                       onClick: () => {
-                        setAction("duplicate");
+                        setIncludeChildren(false);
                       },
-                      selected: action === "duplicate",
+                      selected: includeChildren === false,
                     },
                   ]}
                 />
               </span>
-              <EntityTag entity={territory} fullWidth />
-            </>
-          )}
-        </StyledFlexRow>
-
-        <StyledParentRow>
-          <div>
-            <StyledBlueText>from old parent T</StyledBlueText>
-            {oldParentTerritory && <EntityTag entity={oldParentTerritory} />}
-          </div>
-
-          <StyledArrowWrapper>
-            <StyledInto>into</StyledInto>
-            <StyledArrowContainer>
-              <StyledArrowShaft />
-              <StyledArrowHead />
-            </StyledArrowContainer>
-          </StyledArrowWrapper>
-
-          <div>
-            <StyledGreyText>{`new parent T`}</StyledGreyText>
-
-            <StyledTagList>
-              {newParentEntities.map((e, key) => {
-                return (
-                  <StyledTagWrap key={key}>
-                    <EntityTag
-                      entity={e}
-                      unlinkButton={{
-                        onClick: () =>
-                          setNewParentEntities(
-                            newParentEntities.filter((et) => et.id !== e.id)
-                          ),
-                      }}
-                    />
-                  </StyledTagWrap>
-                );
-              })}
-            </StyledTagList>
-
-            {/* #2684 only allow one parentuntil we have batch remove */}
-            {oldParentId && newParentEntities.length === 0 && (
-              <EntitySuggester
-                autoFocus
-                placeholder="new parent"
-                categoryTypes={[EntityEnums.Class.Territory]}
-                excludedActantIds={[
-                  oldParentId,
-                  ...excludedMoveTerritories,
-                  ...newParentEntities.map((entity) => entity.id),
-                ]}
-                onPicked={(entity) => {
-                  setNewParentEntities([...newParentEntities, entity]);
-                }}
-                disableTemplatesAccept
-                filterEditorRights
-                disableCreate
-              />
-            )}
-          </div>
-        </StyledParentRow>
-
-        <StyledFlexRow>
-          <StyledHeadingColumn>
-            <span>
-              <AttributeButtonGroup
-                disabled={action === "move"}
-                fullSizeDisabled
-                options={[
-                  {
-                    longValue: "Move children",
-                    shortValue: "Move children",
-                    onClick: () => {
-                      setIncludeChildren(true);
-                    },
-                    selected: includeChildren === true,
+            </StyledHeadingColumn>
+          </StyledFlexRow>
+          <StyledFlexRow>
+            <StyledGreyText>Order:</StyledGreyText>
+            <AttributeButtonGroup
+              options={[
+                {
+                  longValue: "First",
+                  shortValue: "First",
+                  onClick: () => {
+                    setOrder(EntityEnums.Order.First);
                   },
-                  {
-                    longValue: "Don't move children",
-                    shortValue: "Don't move children",
-                    onClick: () => {
-                      setIncludeChildren(false);
-                    },
-                    selected: includeChildren === false,
+                  selected: order === EntityEnums.Order.First,
+                },
+                {
+                  longValue: "Last",
+                  shortValue: "Last",
+                  onClick: () => {
+                    setOrder(EntityEnums.Order.Last);
                   },
-                ]}
-              />
-            </span>
-          </StyledHeadingColumn>
-        </StyledFlexRow>
-        <StyledFlexRow>
-          Order:
-          <AttributeButtonGroup
-            options={[
-              {
-                longValue: "First",
-                shortValue: "First",
-                onClick: () => {
-                  setOrder(EntityEnums.Order.First);
+                  selected: order === EntityEnums.Order.Last,
                 },
-                selected: order === EntityEnums.Order.First,
-              },
-              {
-                longValue: "Last",
-                shortValue: "Last",
-                onClick: () => {
-                  setOrder(EntityEnums.Order.Last);
-                },
-                selected: order === EntityEnums.Order.Last,
-              },
-            ]}
-          />
-        </StyledFlexRow>
+              ]}
+            />
+          </StyledFlexRow>
+        </StyledFlexContainer>
       </ModalContent>
       <ModalFooter column>
         <div
@@ -314,16 +318,16 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
             />
           </ButtonGroup>
         </div>
-        {(showDuplicateNote || showMoveNote) && (
+        {/* this note will appear if we are duplicating T (with or without children) that have at least 1 S */}
+        {/* {(showDuplicateNote || showMoveNote) && (
           <StyledNotes>
-            {/* this note will appear if we are duplicating T (with or without children) that have at least 1 S */}
             {showDuplicateNote && (
               <p>
                 <i>{`Note: Statements are not going to be duplicated`}</i>
               </p>
             )}
           </StyledNotes>
-        )}
+        )} */}
       </ModalFooter>
     </Modal>
   );
