@@ -68,7 +68,7 @@ interface TerritoryActionModal {
   //   },
   //   unknown
   // >;
-  isFetchingTerritory: boolean;
+  isFetchingTerritory?: boolean;
 }
 export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
   territory,

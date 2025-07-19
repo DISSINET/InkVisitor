@@ -808,9 +808,6 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
           showModal={showTActionModal}
           updateTerritoryMutation={updateTerritoryMutation}
           excludedMoveTerritories={excludedMoveTerritories}
-          isFetchingTerritory={false}
-          // duplicateTerritoryMutation={duplicateTerritoryMutation}
-          // isFetchingTerritory={isFetchingTerritory}
         />
       )}
     </>
