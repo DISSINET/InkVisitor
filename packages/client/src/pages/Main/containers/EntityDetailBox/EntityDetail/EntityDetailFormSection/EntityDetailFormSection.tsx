@@ -12,7 +12,6 @@ import {
   IEntity,
   IResponseDetail,
   IResponseGeneric,
-  IResponseTerritory,
   ITerritory,
 } from "@shared/types";
 import { IConceptData } from "@shared/types/concept";
@@ -33,18 +32,11 @@ import Dropdown, {
   TerritoryActionModal,
 } from "components/advanced";
 import React, { useEffect, useMemo, useState } from "react";
-import {
-  FaExternalLinkAlt,
-  FaPlus,
-  FaRegCopy,
-  FaClock,
-  FaCheck,
-  FaTimes,
-  FaExclamationTriangle,
-  FaEdit,
-} from "react-icons/fa";
+import { FaExternalLinkAlt, FaPlus, FaRegCopy } from "react-icons/fa";
+import { TbHomeMove } from "react-icons/tb";
 import { toast } from "react-toastify";
 import { DropdownItem } from "types";
+import { getEntityStatusIcon } from "utils/iconUtils";
 import {
   StyledDetailContentRow,
   StyledDetailContentRowLabel,
@@ -63,8 +55,6 @@ import {
   StyledCloseIcon,
   StyledGreyBar,
 } from "./EntityDetailFormSectionStyles";
-import { getEntityStatusIcon } from "utils/iconUtils";
-import { TbHomeMove } from "react-icons/tb";
 
 interface EntityDetailFormSection {
   entity: IResponseDetail;
@@ -154,8 +144,8 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
     false
   );
   const excludedMoveTerritories = useMemo(
-    () => [rootTerritoryId, entity.data.parent.territoryId],
-    [entity.data.parent.territoryId]
+    () => [rootTerritoryId, entity.data.parent?.territoryId],
+    [entity.data.parent?.territoryId]
   );
 
   const queryClient = useQueryClient();
@@ -164,7 +154,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
     mutationFn: async (tObject: {
       territoryId: string;
       changes: Partial<ITerritory>;
-    }) => await api.entityUpdate(tObject.territoryId, tObject.changes),
+    }) => await api.entityUpdate(tObject?.territoryId, tObject?.changes),
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["tree"] });
       queryClient.invalidateQueries({ queryKey: ["territory"] });
@@ -338,15 +328,15 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                 <StyledTagWrap>
                   <EntityTag
                     fullWidth
-                    entity={entity.entities[entity.data.parent.territoryId]}
+                    entity={entity.entities[entity.data.parent?.territoryId]}
                     disableDoubleClick={
-                      entity.data.parent.territoryId === rootTerritoryId
+                      entity.data.parent?.territoryId === rootTerritoryId
                     }
                     disableDrag={
-                      entity.data.parent.territoryId === rootTerritoryId
+                      entity.data.parent?.territoryId === rootTerritoryId
                     }
                     disableTooltip={
-                      entity.data.parent.territoryId === rootTerritoryId
+                      entity.data.parent?.territoryId === rootTerritoryId
                     }
                   />
                 </StyledTagWrap>
@@ -389,7 +379,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
               </StyledDetailContentRowLabel>
               <StyledDetailContentRowValue>
                 <EntityTag
-                  entity={entity.entities[entity.data.territory.territoryId]}
+                  entity={entity.entities[entity.data.territory?.territoryId]}
                 />
               </StyledDetailContentRowValue>
             </StyledDetailContentRow>
