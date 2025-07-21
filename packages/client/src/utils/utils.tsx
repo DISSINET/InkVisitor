@@ -347,3 +347,53 @@ export const isWarningTBased = (warning: IWarning) => {
     warning.type === WarningTypeEnums.TVERE
   );
 };
+
+// Utility function to compute differences between two objects
+export const computeDifferences = <T extends Record<string, any>>(
+  original: T,
+  current: T
+): Partial<T> => {
+  const differences: Partial<T> = {};
+
+  for (const key in current) {
+    if (current.hasOwnProperty(key)) {
+      const originalValue = original[key];
+      const currentValue = current[key];
+
+      // Handle nested objects (like data field)
+      if (
+        typeof currentValue === "object" &&
+        currentValue !== null &&
+        !Array.isArray(currentValue)
+      ) {
+        if (
+          typeof originalValue === "object" &&
+          originalValue !== null &&
+          !Array.isArray(originalValue)
+        ) {
+          const nestedDiff = computeDifferences(originalValue, currentValue);
+          if (Object.keys(nestedDiff).length > 0) {
+            differences[key] = nestedDiff as T[Extract<keyof T, string>];
+          }
+        } else {
+          differences[key] = currentValue;
+        }
+      }
+      // Handle arrays
+      else if (Array.isArray(currentValue)) {
+        if (
+          !Array.isArray(originalValue) ||
+          JSON.stringify(originalValue) !== JSON.stringify(currentValue)
+        ) {
+          differences[key] = currentValue;
+        }
+      }
+      // Handle primitive values
+      else if (originalValue !== currentValue) {
+        differences[key] = currentValue;
+      }
+    }
+  }
+
+  return differences;
+};
