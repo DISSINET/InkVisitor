@@ -154,8 +154,13 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
     false
   );
   const excludedMoveTerritories = useMemo(
-    () => [rootTerritoryId, entity.data.parent.territoryId],
-    [entity.data.parent.territoryId]
+    () =>
+      entity.class === EntityEnums.Class.Territory
+        ? entity.data.parent?.territoryId
+          ? [rootTerritoryId, entity.data.parent.territoryId]
+          : [rootTerritoryId]
+        : [],
+    [entity.class, entity.data.parent?.territoryId]
   );
 
   const queryClient = useQueryClient();
@@ -350,33 +355,35 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                     }
                   />
                 </StyledTagWrap>
-                {entity.data.parent.territoryId !== rootTerritoryId && (
-                  <div style={{ marginTop: "0.5rem" }}>
-                    <EntitySuggester
-                      placeholder="move"
-                      disableTemplatesAccept
-                      filterEditorRights
-                      inputWidth={
-                        80
-                        // selectedRows.length > 0 && contentWidthTooSmall ? 36 : 80
-                      }
-                      disableCreate
-                      categoryTypes={[EntityEnums.Class.Territory]}
-                      onPicked={(selectedEntity) => {
-                        setMoveToParentEntity(selectedEntity);
-                        setShowTActionModal(true);
-                      }}
-                      excludedActantIds={excludedMoveTerritories}
-                      button={
-                        <Button
-                          icon={<TbHomeMove size={14} />}
-                          onClick={() => setShowTActionModal(true)}
-                          tooltipLabel="move current territory"
-                        />
-                      }
-                    />
-                  </div>
-                )}
+                {/* move to different parent territory */}
+                {entity.class === EntityEnums.Class.Territory &&
+                  entity.data.parent.territoryId !== rootTerritoryId && (
+                    <div style={{ marginTop: "0.5rem" }}>
+                      <EntitySuggester
+                        placeholder="move"
+                        disableTemplatesAccept
+                        filterEditorRights
+                        inputWidth={
+                          80
+                          // selectedRows.length > 0 && contentWidthTooSmall ? 36 : 80
+                        }
+                        disableCreate
+                        categoryTypes={[EntityEnums.Class.Territory]}
+                        onPicked={(selectedEntity) => {
+                          setMoveToParentEntity(selectedEntity);
+                          setShowTActionModal(true);
+                        }}
+                        excludedActantIds={excludedMoveTerritories}
+                        button={
+                          <Button
+                            icon={<TbHomeMove size={14} />}
+                            onClick={() => setShowTActionModal(true)}
+                            tooltipLabel="move current territory"
+                          />
+                        }
+                      />
+                    </div>
+                  )}
               </StyledDetailContentRowValue>
             </StyledDetailContentRow>
           )}
