@@ -72,7 +72,7 @@ export const EntityDetailSectionButtons: React.FC<
         }
         excludedActantIds={[entityId]}
         disableCreate
-        inputWidth={widthTooSmall ? 62 : 85}
+        inputWidth={widthTooSmall ? 46 : 85}
         placeholder="another entity"
         disableTemplateInstantiation
       />
