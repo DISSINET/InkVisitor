@@ -15,6 +15,15 @@ import {
 } from "Theme/constants";
 import StatementListDocumentLine from "../StatementListDocumentLine/StatementListDocumentLine";
 import { StyledInfoText } from "../StatementListHeader/StatementListHeaderStyles";
+import {
+  StyledSearchContainer,
+  StyledSearchIcon,
+  StyledSearchResults,
+} from "../StatementListBoxStyles";
+import { BiSearch } from "react-icons/bi";
+import { Input } from "components";
+import { FaRegArrowAltCircleDown, FaRegArrowAltCircleUp } from "react-icons/fa";
+import { StatementListSearchLine } from "../StatementListSearchLine/StatementListSearchLine";
 
 interface StatementListTextAnnotator {
   // it's faster than the territory entity so it's better to pass territoryId separately
@@ -201,54 +210,27 @@ export const StatementListTextAnnotator: React.FC<
           activeTHasAnchor={activeTHasAnchor}
           annotator={annotator}
           territoryId={territoryId}
-          isSearchAllowed={isSearchAllowed}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          isSearchTermValid={isSearchTermValid}
-          hasNoSearchResults={searchOccurences.length === 0}
-          searchActiveOccurence={searchActiveOccurence}
-          searchOccurences={searchOccurences}
-          setSearchActiveOccurence={setSearchActiveOccurence}
           resources={resources || []}
           showStatementList={showStatementList}
           userCanEdit={userCanEdit}
           annotatorWidthTooSmall={annotatorWidthTooSmall}
+          contentWidth={contentWidth}
+          handleHlEntitiesChange={handleHlEntitiesChange}
+          hlEntities={hlEntities}
         />
       )}
 
-      {/* Class selector */}
-      {selectedResource !== false && selectedResource?.data?.documentId && (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: theme.space[4],
-            paddingRight: theme.space[2],
-            marginBottom: theme.space[2],
-            marginLeft: showStatementList ? `-${COLLAPSED_TABLE_WIDTH}px` : "0",
-          }}
-        >
-          {/* this condition helps initial render in firefox */}
-          {contentWidth > 0 && (
-            <>
-              <StyledInfoText style={{ textWrap: "nowrap" }}>
-                Highlight
-              </StyledInfoText>
-              <Dropdown.Multi.Entity
-                options={entitiesDict}
-                disableEmpty={true}
-                isClearable={true}
-                disableAny={true}
-                onChange={handleHlEntitiesChange}
-                value={hlEntities}
-                noOptionsMessage="No entity classes to highlight"
-                width={contentWidth - 71}
-                limitSelectedItems={Math.floor((contentWidth - 145) / 80)}
-              />
-            </>
-          )}
-        </div>
-      )}
+      <StatementListSearchLine
+        showStatementList={showStatementList}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        isSearchTermValid={isSearchTermValid}
+        searchOccurences={searchOccurences}
+        searchActiveOccurence={searchActiveOccurence}
+        isSearchAllowed={isSearchAllowed}
+        annotatorWidthTooSmall={annotatorWidthTooSmall}
+        setSearchActiveOccurence={setSearchActiveOccurence}
+      />
 
       {/* Annotator */}
       <div style={{ marginTop: "0.2rem" }}>

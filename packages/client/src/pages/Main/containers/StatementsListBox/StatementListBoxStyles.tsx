@@ -69,21 +69,26 @@ export const StyledEmptyState = styled.div`
 `;
 
 interface StyledDocumentSearchLine {
-  $showStatementList?: boolean;
+  marginLeft?: boolean;
 }
 export const StyledDocumentSearchLine = styled.div<StyledDocumentSearchLine>`
   display: flex;
   gap: 0.2rem;
   align-items: center;
   justify-content: space-between;
+  height: 3rem;
   padding: 0.2rem 0.5rem;
   padding-right: 0.5rem;
   overflow: hidden;
   white-space: nowrap;
-  margin-left: ${({ $showStatementList }) =>
-    $showStatementList ? `-${COLLAPSED_TABLE_WIDTH / 10}rem` : "0"};
+  margin-left: ${({ marginLeft }) =>
+    marginLeft ? `-${COLLAPSED_TABLE_WIDTH / 10}rem` : "0"};
 `;
-
+export const StyledHighlightContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+`;
 export const StyledSearchContainer = styled.div`
   display: flex;
   align-items: center;

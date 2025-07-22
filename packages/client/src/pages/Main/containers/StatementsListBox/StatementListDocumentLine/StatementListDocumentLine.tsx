@@ -1,11 +1,16 @@
 import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import { Button, Input, Loader } from "components";
-import { DocumentTitle, EntitySuggester, EntityTag } from "components/advanced";
+import Dropdown, {
+  DocumentTitle,
+  EntitySuggester,
+  EntityTag,
+} from "components/advanced";
 import { useTheme } from "hooks";
 import React from "react";
 import { BiSearch } from "react-icons/bi";
 import {
+  FaHighlighter,
   FaLongArrowAltRight,
   FaRegArrowAltCircleDown,
   FaRegArrowAltCircleUp,
@@ -18,12 +23,15 @@ import {
   StyledDocumentSearchLine,
   StyledDocumentTitleContainer,
   StyledEntityContainer,
+  StyledHighlightContainer,
   StyledNoDocumentMessage,
   StyledSearchContainer,
   StyledSearchIcon,
   StyledSearchNavigation,
   StyledSearchResults,
 } from "../StatementListBoxStyles";
+import { StyledInfoText } from "../StatementListHeader/StatementListHeaderStyles";
+import { entitiesDict } from "@shared/dictionaries";
 
 interface StatementListDocumentLine {
   selectedResource: IEntity | false;
@@ -33,19 +41,16 @@ interface StatementListDocumentLine {
   activeTHasAnchor: boolean;
   annotator?: any;
   territoryId: string;
-  isSearchAllowed: boolean;
-  searchTerm: string;
-  setSearchTerm: (term: string) => void;
-  isSearchTermValid: boolean;
-  hasNoSearchResults: boolean;
-  searchActiveOccurence: number;
-  searchOccurences: any[];
-  setSearchActiveOccurence: (index: number) => void;
   resources: IEntity[];
   // is list non empty
   showStatementList: boolean;
   userCanEdit: boolean;
   annotatorWidthTooSmall: boolean;
+
+  // highlight
+  contentWidth: number;
+  handleHlEntitiesChange: (entities: EntityEnums.Class[]) => void;
+  hlEntities: EntityEnums.Class[];
 }
 
 const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
@@ -56,23 +61,17 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
   activeTHasAnchor,
   annotator,
   territoryId,
-  isSearchAllowed,
-  searchTerm,
-  setSearchTerm,
-  isSearchTermValid,
-  hasNoSearchResults,
-  searchActiveOccurence,
-  searchOccurences,
-  setSearchActiveOccurence,
   resources,
   showStatementList,
   userCanEdit,
   annotatorWidthTooSmall,
-}) => {
-  const theme = useTheme();
 
+  contentWidth,
+  handleHlEntitiesChange,
+  hlEntities,
+}) => {
   return (
-    <StyledDocumentSearchLine $showStatementList={showStatementList}>
+    <StyledDocumentSearchLine marginLeft={showStatementList}>
       <div
         style={{
           display: "flex",
@@ -159,64 +158,29 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
         )}
       </div>
 
-      {isSearchAllowed && (
-        <StyledSearchContainer>
-          <StyledSearchIcon>
-            <BiSearch color={theme.color.info} />
-          </StyledSearchIcon>
-          <Input
-            value={searchTerm}
-            onChangeFn={(newText: string) => {
-              setSearchTerm(newText);
-            }}
-            changeOnType
-            width={130}
-            minWidth={50}
-          />
-
-          {isSearchTermValid && (
-            <StyledSearchResults
-              $annotatorWidthTooSmall={annotatorWidthTooSmall}
-            >
-              {hasNoSearchResults ? (
-                <div style={{ marginLeft: "0.2rem" }}>no results</div>
-              ) : (
-                <>
-                  <div style={{ display: "flex" }}>
-                    {searchActiveOccurence + 1} of {searchOccurences.length}
-                  </div>
-                  <div style={{ display: "flex", gap: "0.5rem" }}>
-                    <FaRegArrowAltCircleUp
-                      size={15}
-                      color={theme.color.info}
-                      style={{ cursor: "pointer" }}
-                      title="previous occurence"
-                      onClick={() => {
-                        const previousOccurence =
-                          (searchActiveOccurence -
-                            1 +
-                            searchOccurences.length) %
-                          searchOccurences.length;
-                        setSearchActiveOccurence(previousOccurence);
-                      }}
-                    />
-                    <FaRegArrowAltCircleDown
-                      size={15}
-                      color={theme.color.info}
-                      style={{ cursor: "pointer" }}
-                      title="next occurence"
-                      onClick={() => {
-                        const nextOccurence =
-                          (searchActiveOccurence + 1) % searchOccurences.length;
-                        setSearchActiveOccurence(nextOccurence);
-                      }}
-                    />
-                  </div>
-                </>
-              )}
-            </StyledSearchResults>
+      {/* Class selector - HIGHLIGHT */}
+      {selectedResource !== false && selectedResource?.data?.documentId && (
+        <StyledHighlightContainer>
+          {/* this condition helps initial render in firefox */}
+          {contentWidth > 0 && (
+            <>
+              <StyledInfoText style={{ textWrap: "nowrap" }}>
+                <FaHighlighter />
+              </StyledInfoText>
+              <Dropdown.Multi.Entity
+                options={entitiesDict}
+                disableEmpty={true}
+                isClearable={true}
+                disableAny={true}
+                onChange={handleHlEntitiesChange}
+                value={hlEntities}
+                noOptionsMessage="No entity classes to highlight"
+                width={contentWidth / 2.5}
+                limitSelectedItems={Math.floor((contentWidth / 2.5 - 145) / 80)}
+              />
+            </>
           )}
-        </StyledSearchContainer>
+        </StyledHighlightContainer>
       )}
     </StyledDocumentSearchLine>
   );
