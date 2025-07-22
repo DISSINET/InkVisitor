@@ -13,7 +13,7 @@ import {
   ANNOTATOR_TOO_SMALL_BREAKPOINT,
   COLLAPSED_TABLE_WIDTH,
 } from "Theme/constants";
-import StatementListDocumentSearchLine from "../StatementListDocumentSearchLine/StatementListDocumentSearchLine";
+import StatementListDocumentLine from "../StatementListDocumentLine/StatementListDocumentLine";
 import { StyledInfoText } from "../StatementListHeader/StatementListHeaderStyles";
 
 interface StatementListTextAnnotator {
@@ -193,7 +193,7 @@ export const StatementListTextAnnotator: React.FC<
   return (
     <animated.div style={animatedStyle}>
       {contentWidth > 0 && (
-        <StatementListDocumentSearchLine
+        <StatementListDocumentLine
           selectedResource={selectedResource}
           setSelectedResourceId={setSelectedResourceId}
           selectedDocumentIsFetching={selectedDocumentIsFetching}

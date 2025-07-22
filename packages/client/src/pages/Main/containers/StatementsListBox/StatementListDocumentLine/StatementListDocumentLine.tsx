@@ -25,7 +25,7 @@ import {
   StyledSearchResults,
 } from "../StatementListBoxStyles";
 
-interface StatementListDocumentSearchLine {
+interface StatementListDocumentLine {
   selectedResource: IEntity | false;
   setSelectedResourceId: (id: string | false) => void;
   selectedDocumentIsFetching: boolean;
@@ -48,9 +48,7 @@ interface StatementListDocumentSearchLine {
   annotatorWidthTooSmall: boolean;
 }
 
-const StatementListDocumentSearchLine: React.FC<
-  StatementListDocumentSearchLine
-> = ({
+const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
   selectedResource,
   setSelectedResourceId,
   selectedDocumentIsFetching,
@@ -74,11 +72,7 @@ const StatementListDocumentSearchLine: React.FC<
   const theme = useTheme();
 
   return (
-    <StyledDocumentSearchLine
-      style={{
-        marginLeft: showStatementList ? `-${COLLAPSED_TABLE_WIDTH}px` : "0",
-      }}
-    >
+    <StyledDocumentSearchLine $showStatementList={showStatementList}>
       <div
         style={{
           display: "flex",
@@ -228,4 +222,4 @@ const StatementListDocumentSearchLine: React.FC<
   );
 };
 
-export default StatementListDocumentSearchLine;
+export default StatementListDocumentLine;

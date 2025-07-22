@@ -38,7 +38,13 @@ import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StatementListTextAnnotator } from "./StatementListTextAnnotator/StatementListTextAnnotator";
 import useAnnotator from "hooks/useAnnotator";
-import { StyledEmptyState, StyledTableWrapper } from "./StatementListBoxStyles";
+import {
+  StyledContentWrapper,
+  StyledEmptyState,
+  StyledInfoWrapper,
+  StyledLoaderWrap,
+  StyledTableWrapper,
+} from "./StatementListBoxStyles";
 
 const initialData: {
   statements: IResponseStatement[];
@@ -905,21 +911,14 @@ export const StatementListBox: React.FC = () => {
             />
           )}
           {!territoryId && (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                marginTop: "2rem",
-              }}
-            >
+            <StyledInfoWrapper>
               <StyledEmptyState>
                 <BsInfoCircle size="23" />
               </StyledEmptyState>
               <StyledEmptyState>
                 {"No territory selected yet. Pick one from the territory tree"}
               </StyledEmptyState>
-            </div>
+            </StyledInfoWrapper>
           )}
 
           {territoryId &&
@@ -936,15 +935,7 @@ export const StatementListBox: React.FC = () => {
             )}
 
           {territoryId && (
-            <div
-              style={{
-                display: "flex",
-                height: "100%",
-                // maxHeight: "calc(100%)",
-                overflow: "hidden",
-              }}
-              ref={contentRef}
-            >
+            <StyledContentWrapper ref={contentRef}>
               <CustomScrollbar
                 scrollerId="Statements"
                 elementId="Statements-box-table"
@@ -1034,24 +1025,18 @@ export const StatementListBox: React.FC = () => {
               {statementListTableIsLoading &&
                 tableWidth > 0 &&
                 contentHeight > 0 && (
-                  <div
-                    style={{
-                      width: tableWidth + 4,
-                      height:
-                        displayMode === StatementListDisplayMode.TEXT
-                          ? contentHeight - 56
-                          : contentHeight + 4,
-                      flexShrink: 0,
-                      position: "absolute",
-                      bottom: 0,
-                      left: 0,
-                      zIndex: 1,
-                    }}
+                  <StyledLoaderWrap
+                    $width={tableWidth + 4}
+                    $height={
+                      displayMode === StatementListDisplayMode.TEXT
+                        ? contentHeight - 56
+                        : contentHeight + 4
+                    }
                   >
                     <Loader show size={50} />
-                  </div>
+                  </StyledLoaderWrap>
                 )}
-            </div>
+            </StyledContentWrapper>
           )}
 
           <Submit
