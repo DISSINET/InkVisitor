@@ -12,6 +12,7 @@ import {
   ITerritory,
   Relation,
 } from "@shared/types";
+import { ITerritoryProtocol } from "@shared/types/territory";
 import { UserOptions } from "@shared/types/response-user";
 
 import {
@@ -21,6 +22,17 @@ import {
 import api from "api";
 import { deepCopy } from "utils/utils";
 import { v4 as uuidv4 } from "uuid";
+
+export const CEmptyProtocol = (): ITerritoryProtocol => ({
+  project: "",
+  dataCollectionMethods: [],
+  description: "",
+  guidelines: [],
+  detailedProtocols: [],
+  startDate: "",
+  endDate: "",
+  relatedDataPublications: [],
+});
 
 export const CBookmarkFolder = (bookmarkName: string): IBookmarkFolder => ({
   id: uuidv4(),
@@ -622,6 +634,7 @@ export const CTerritory = (
   notes: [],
   data: {
     parent: { territoryId: parentId, order: parentOrder },
+    protocol: CEmptyProtocol(),
   },
   status:
     userRole === UserEnums.Role.Admin || userRole === UserEnums.Role.Owner
