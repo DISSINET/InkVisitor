@@ -71,7 +71,7 @@ export const StyledEmptyState = styled.div`
 interface StyledDocumentSearchLine {
   marginLeft?: boolean;
 }
-export const StyledDocumentSearchLine = styled.div<StyledDocumentSearchLine>`
+export const StyledDocumentLine = styled.div<StyledDocumentSearchLine>`
   display: flex;
   gap: 0.2rem;
   align-items: center;
@@ -81,6 +81,14 @@ export const StyledDocumentSearchLine = styled.div<StyledDocumentSearchLine>`
   padding-right: 0.5rem;
   overflow: hidden;
   white-space: nowrap;
+  margin-left: ${({ marginLeft }) =>
+    marginLeft ? `-${COLLAPSED_TABLE_WIDTH / 10}rem` : "0"};
+`;
+
+export const StyledSearchLine = styled.div<StyledDocumentSearchLine>`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
   margin-left: ${({ marginLeft }) =>
     marginLeft ? `-${COLLAPSED_TABLE_WIDTH / 10}rem` : "0"};
 `;

@@ -1,37 +1,26 @@
+import { entitiesDict } from "@shared/dictionaries";
 import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
-import { Button, Input, Loader } from "components";
+import { Button, Loader } from "components";
 import Dropdown, {
   DocumentTitle,
   EntitySuggester,
   EntityTag,
 } from "components/advanced";
-import { useTheme } from "hooks";
 import React from "react";
-import { BiSearch } from "react-icons/bi";
-import {
-  FaHighlighter,
-  FaLongArrowAltRight,
-  FaRegArrowAltCircleDown,
-  FaRegArrowAltCircleUp,
-} from "react-icons/fa";
+import { FaHighlighter, FaLongArrowAltRight } from "react-icons/fa";
 import { GrDocumentMissing } from "react-icons/gr";
 import { TbAnchor, TbAnchorOff } from "react-icons/tb";
-import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
 import {
   StyledAnnotatorMenuBar,
-  StyledDocumentSearchLine,
   StyledDocumentTitleContainer,
   StyledEntityContainer,
   StyledHighlightContainer,
   StyledNoDocumentMessage,
-  StyledSearchContainer,
-  StyledSearchIcon,
   StyledSearchNavigation,
-  StyledSearchResults,
+  StyledDocumentLine,
 } from "../StatementListBoxStyles";
 import { StyledInfoText } from "../StatementListHeader/StatementListHeaderStyles";
-import { entitiesDict } from "@shared/dictionaries";
 
 interface StatementListDocumentLine {
   selectedResource: IEntity | false;
@@ -71,7 +60,7 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
   hlEntities,
 }) => {
   return (
-    <StyledDocumentSearchLine marginLeft={showStatementList}>
+    <StyledDocumentLine marginLeft={showStatementList}>
       <div
         style={{
           display: "flex",
@@ -182,7 +171,7 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
           )}
         </StyledHighlightContainer>
       )}
-    </StyledDocumentSearchLine>
+    </StyledDocumentLine>
   );
 };
 
