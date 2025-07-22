@@ -47,6 +47,19 @@ export const StyledDetailSectionHeading = styled.div`
   display: flex;
 `;
 
+export const StyledExpandIcon = styled.div`
+  margin-left: ${({ theme }) => theme.space[2]};
+  display: flex;
+  align-items: center;
+  transition: transform 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    color: ${({ theme }) => theme.color["primary"]};
+    opacity: 0.8;
+  }
+`;
+
 export const StyledDetailWarnings = styled.div`
   display: grid;
   grid-gap: ${({ theme }) => theme.space["1"]};
