@@ -220,6 +220,8 @@ export const StatementListTextAnnotator: React.FC<
         annotatorWidthTooSmall={annotatorWidthTooSmall}
         setSearchActiveOccurence={setSearchActiveOccurence}
         annotator={annotator}
+        documentId={selectedDocumentId}
+        dataDocument={selectedDocument || undefined}
       />
 
       {/* Annotator */}

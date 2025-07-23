@@ -19,9 +19,12 @@ import {
   StyledSearchLine,
   StyledSearchResults,
 } from "../StatementListBoxStyles";
-import { IEntity } from "@shared/types";
+import { IDocument, IEntity } from "@shared/types";
 import { LuReplace, LuReplaceAll } from "react-icons/lu";
 import { Annotator } from "@inkvisitor/annotator/src/lib";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
+import api from "api";
 
 interface StatementListSearchLine {
   searchTerm: string;
@@ -39,6 +42,8 @@ interface StatementListSearchLine {
   annotatorWidthTooSmall: boolean;
   showStatementList: boolean;
   annotator?: Annotator;
+  documentId?: string;
+  dataDocument?: IDocument;
 }
 export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
   searchTerm,
@@ -51,11 +56,42 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
   setSearchActiveOccurence,
   showStatementList,
   annotator,
+  documentId,
+  dataDocument,
 }) => {
   const theme = useTheme();
   const [replaceSection, setReplaceSection] = useState(false);
   const [entityToAnchor, setEntityToAnchor] = useState<IEntity | null>(null);
   const [replaceWith, setReplaceWith] = useState<string>("");
+
+  const queryClient = useQueryClient();
+
+  const updateDocumentMutation = useMutation({
+    mutationFn: async (data: { id: string; doc: Partial<IDocument> }) =>
+      api.documentUpdate(data.id, data.doc),
+    onSuccess: (variables, data) => {
+      queryClient.invalidateQueries({ queryKey: ["document"] });
+      queryClient.invalidateQueries({ queryKey: ["documents"] });
+      toast.info("Anchor saved");
+    },
+  });
+
+  const handleSaveNewContent = () => {
+    if (annotator && documentId && dataDocument) {
+      updateDocumentMutation.mutate({
+        id: documentId,
+        doc: {
+          ...dataDocument,
+          content: annotator.text.value,
+        },
+      });
+    }
+  };
+
+  const goToNextOccurence = () => {
+    const nextOccurence = (searchActiveOccurence + 1) % searchOccurences.length;
+    setSearchActiveOccurence(nextOccurence);
+  };
 
   return (
     <StyledSearchLine marginLeft={showStatementList}>
@@ -105,12 +141,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                         color={theme.color.info}
                         style={{ cursor: "pointer" }}
                         title="next occurence"
-                        onClick={() => {
-                          const nextOccurence =
-                            (searchActiveOccurence + 1) %
-                            searchOccurences.length;
-                          setSearchActiveOccurence(nextOccurence);
-                        }}
+                        onClick={goToNextOccurence}
                       />
                     </div>
                   </>
@@ -150,6 +181,8 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                 onClick={() => {
                   if (entityToAnchor) {
                     annotator?.addAnchor(entityToAnchor.id);
+                    handleSaveNewContent();
+                    goToNextOccurence();
                   }
                 }}
                 disabled={!isSearchTermValid || !entityToAnchor}
