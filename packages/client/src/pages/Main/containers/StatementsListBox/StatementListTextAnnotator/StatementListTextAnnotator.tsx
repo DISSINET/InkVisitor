@@ -1,9 +1,7 @@
 import { Annotator } from "@inkvisitor/annotator/src/lib";
 import { animated, useSpring } from "@react-spring/web";
-import { entitiesDict } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
 import { IDocument, IResponseEntity, IResponseTerritory } from "@shared/types";
-import Dropdown from "components/advanced";
 import TextAnnotator from "components/advanced/Annotator/Annotator";
 import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
 import { useDebounce, useTheme } from "hooks";
@@ -14,15 +12,6 @@ import {
   COLLAPSED_TABLE_WIDTH,
 } from "Theme/constants";
 import StatementListDocumentLine from "../StatementListDocumentLine/StatementListDocumentLine";
-import { StyledInfoText } from "../StatementListHeader/StatementListHeaderStyles";
-import {
-  StyledSearchContainer,
-  StyledSearchIcon,
-  StyledSearchResults,
-} from "../StatementListBoxStyles";
-import { BiSearch } from "react-icons/bi";
-import { Input } from "components";
-import { FaRegArrowAltCircleDown, FaRegArrowAltCircleUp } from "react-icons/fa";
 import { StatementListSearchLine } from "../StatementListSearchLine/StatementListSearchLine";
 
 interface StatementListTextAnnotator {
@@ -230,6 +219,7 @@ export const StatementListTextAnnotator: React.FC<
         isSearchAllowed={isSearchAllowed}
         annotatorWidthTooSmall={annotatorWidthTooSmall}
         setSearchActiveOccurence={setSearchActiveOccurence}
+        annotator={annotator}
       />
 
       {/* Annotator */}

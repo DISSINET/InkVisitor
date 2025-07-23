@@ -21,6 +21,7 @@ import {
 } from "../StatementListBoxStyles";
 import { IEntity } from "@shared/types";
 import { LuReplace, LuReplaceAll } from "react-icons/lu";
+import { Annotator } from "@inkvisitor/annotator/src/lib";
 
 interface StatementListSearchLine {
   searchTerm: string;
@@ -37,6 +38,7 @@ interface StatementListSearchLine {
   isSearchAllowed: boolean;
   annotatorWidthTooSmall: boolean;
   showStatementList: boolean;
+  annotator?: Annotator;
 }
 export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
   searchTerm,
@@ -48,11 +50,13 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
   annotatorWidthTooSmall,
   setSearchActiveOccurence,
   showStatementList,
+  annotator,
 }) => {
   const theme = useTheme();
   const [replaceSection, setReplaceSection] = useState(false);
   const [entityToAnchor, setEntityToAnchor] = useState<IEntity | null>(null);
   const [replaceWith, setReplaceWith] = useState<string>("");
+
   return (
     <StyledSearchLine marginLeft={showStatementList}>
       {isSearchAllowed && (
@@ -144,7 +148,9 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                 label="+"
                 color="success"
                 onClick={() => {
-                  console.log("annotate");
+                  if (entityToAnchor) {
+                    annotator?.addAnchor(entityToAnchor.id);
+                  }
                 }}
                 disabled={!isSearchTermValid || !entityToAnchor}
               />
