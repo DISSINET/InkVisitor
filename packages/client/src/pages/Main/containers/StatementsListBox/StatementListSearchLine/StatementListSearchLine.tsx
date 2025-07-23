@@ -174,21 +174,23 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                 }}
               />
               <Button
+                circular
                 color="info"
                 inverted
                 tooltipLabel="replace one occurence"
                 noBackground
-                icon={<LuReplace />}
+                icon={<LuReplace size={12} />}
                 onClick={() => {
                   console.log("replace one");
                 }}
               />
               <Button
+                circular
                 color="info"
                 inverted
                 tooltipLabel="replace all occurences"
                 noBackground
-                icon={<LuReplaceAll />}
+                icon={<LuReplaceAll size={12} />}
                 onClick={() => {
                   console.log("replace all");
                 }}
