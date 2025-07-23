@@ -139,17 +139,18 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
           {!replaceSection ? (
             <>
               <Button
-                tooltipLabel="wrap selection with anchor of a given entity and go to next one"
+                tooltipLabel="wrap selection with anchor of a given entity and go to the next one"
                 icon={<FaAnchor />}
                 label="+"
                 color="success"
                 onClick={() => {
                   console.log("annotate");
                 }}
-                disabled={!isSearchTermValid}
+                disabled={!isSearchTermValid || !entityToAnchor}
               />
               {!entityToAnchor ? (
                 <EntitySuggester
+                  placeholder="select entity"
                   onPicked={(entity) => {
                     setEntityToAnchor(entity);
                   }}
@@ -173,10 +174,9 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                 }}
               />
               <Button
-                color="success"
+                color="info"
                 inverted
                 tooltipLabel="replace one occurence"
-                noBorder
                 noBackground
                 icon={<LuReplace />}
                 onClick={() => {
@@ -184,10 +184,9 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                 }}
               />
               <Button
-                color="success"
+                color="info"
                 inverted
                 tooltipLabel="replace all occurences"
-                noBorder
                 noBackground
                 icon={<LuReplaceAll />}
                 onClick={() => {

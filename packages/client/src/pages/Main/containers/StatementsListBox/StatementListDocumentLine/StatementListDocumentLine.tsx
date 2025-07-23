@@ -161,6 +161,7 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
                 disableEmpty={true}
                 isClearable={true}
                 disableAny={true}
+                closeMenuOnSelect={false}
                 onChange={handleHlEntitiesChange}
                 value={hlEntities}
                 noOptionsMessage="No entity classes to highlight"

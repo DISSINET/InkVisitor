@@ -14,7 +14,6 @@ import {
   ValueContainerProps,
   components,
 } from "react-select";
-import { SelectComponents } from "react-select/dist/declarations/src/components";
 import { DropdownItem } from "types";
 import {
   StyledFaChevronDown,
@@ -22,7 +21,6 @@ import {
   StyledSelect,
   StyledSelectWrapper,
 } from "./BaseDropdownStyles";
-import { MenuPortalProps } from "react-select/dist/declarations/src/components/Menu";
 
 interface BaseDropdown {
   options?: DropdownItem[];
@@ -50,9 +48,7 @@ interface BaseDropdown {
   disableTyping?: boolean;
   disabled?: boolean;
   // override lib components
-  customComponents?: Partial<
-    SelectComponents<unknown, boolean, GroupBase<unknown>>
-  >;
+  customComponents?: Partial<typeof components>;
   // for logging / debugging purposes
   loggerId?: string;
   // currently unused props
@@ -60,6 +56,7 @@ interface BaseDropdown {
   hideSelectedOptions?: boolean;
   noDropDownIndicator?: boolean;
   limitSelectedItems?: number;
+  closeMenuOnSelect?: boolean;
 }
 export const BaseDropdown: React.FC<BaseDropdown> = ({
   options = [],
@@ -87,6 +84,7 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
 
   loggerId,
   limitSelectedItems,
+  closeMenuOnSelect = true,
 }) => {
   const isOneOptionSingleEntitySelect =
     options.length < 2 && !isMulti && entityDropdown;
@@ -134,6 +132,7 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
           noOptionsMessage={() => noOptionsMessage}
           isClearable={isClearable}
           captureMenuScroll={false}
+          closeMenuOnSelect={closeMenuOnSelect}
           components={{ ...localCustomComponents, ...customComponents }}
           isSearchable={!disableTyping}
           value={value}
@@ -277,7 +276,7 @@ const Control = ({
 };
 
 const MenuPortal: typeof components.MenuPortal = (
-  props: MenuPortalProps<any, any, any> & { selectProps: StyledSelect }
+  props: any & { selectProps: StyledSelect }
 ) => {
   const { entityDropdown } = props.selectProps;
 

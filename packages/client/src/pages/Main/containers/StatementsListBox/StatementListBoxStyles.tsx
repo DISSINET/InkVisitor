@@ -91,6 +91,8 @@ export const StyledSearchLine = styled.div<StyledDocumentSearchLine>`
   gap: ${({ theme }) => theme.space[2]};
   margin-left: ${({ marginLeft }) =>
     marginLeft ? `-${COLLAPSED_TABLE_WIDTH / 10}rem` : "0"};
+  justify-content: center;
+  height: 3.5rem;
 `;
 export const StyledHighlightContainer = styled.div`
   display: flex;
