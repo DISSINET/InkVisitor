@@ -60,7 +60,7 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
   hlEntities,
 }) => {
   return (
-    <StyledDocumentLine marginLeft={showStatementList}>
+    <StyledDocumentLine $marginLeft={showStatementList}>
       <div
         style={{
           display: "flex",

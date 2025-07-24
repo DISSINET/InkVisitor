@@ -69,7 +69,7 @@ export const StyledEmptyState = styled.div`
 `;
 
 interface StyledDocumentSearchLine {
-  marginLeft?: boolean;
+  $marginLeft?: boolean;
 }
 export const StyledDocumentLine = styled.div<StyledDocumentSearchLine>`
   display: flex;
@@ -81,16 +81,16 @@ export const StyledDocumentLine = styled.div<StyledDocumentSearchLine>`
   padding-right: 0.5rem;
   overflow: hidden;
   white-space: nowrap;
-  margin-left: ${({ marginLeft }) =>
-    marginLeft ? `-${COLLAPSED_TABLE_WIDTH / 10}rem` : "0"};
+  margin-left: ${({ $marginLeft }) =>
+    $marginLeft ? `-${COLLAPSED_TABLE_WIDTH / 10}rem` : "0"};
 `;
 
 export const StyledSearchLine = styled.div<StyledDocumentSearchLine>`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.space[2]};
-  margin-left: ${({ marginLeft }) =>
-    marginLeft ? `-${COLLAPSED_TABLE_WIDTH / 10}rem` : "0"};
+  margin-left: ${({ $marginLeft }) =>
+    $marginLeft ? `-${COLLAPSED_TABLE_WIDTH / 10}rem` : "0"};
   justify-content: center;
   height: 3rem;
 `;

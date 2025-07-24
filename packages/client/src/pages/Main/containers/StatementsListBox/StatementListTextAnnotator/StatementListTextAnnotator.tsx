@@ -104,8 +104,25 @@ export const StatementListTextAnnotator: React.FC<
   const [entityToAnchor, setEntityToAnchor] = useState<IResponseEntity | null>(
     null
   );
-  // check if the entity to anchor exists in the current selection
+  // does the pre-selected anchor exist in the current selection
   const [currentAnchorExist, setCurrentAnchorExist] = useState(false);
+
+  // check if the entity to anchor exists in the current selection
+  useEffect(() => {
+    if (!entityToAnchor) {
+      setCurrentAnchorExist(false);
+      return;
+    }
+    annotator?.onSelectText(({ text, anchors, index }) => {
+      console.log("anchors", anchors);
+      console.log("entityToAnchor", entityToAnchor);
+      if (anchors.some((anchorId) => anchorId === entityToAnchor?.id)) {
+        setCurrentAnchorExist(true);
+      } else {
+        setCurrentAnchorExist(false);
+      }
+    });
+  }, [searchActiveOccurence, entityToAnchor, annotator]);
 
   // Handle search occurrence selection
   useEffect(() => {
@@ -113,16 +130,8 @@ export const StatementListTextAnnotator: React.FC<
 
     if (newSelectedOccurence) {
       annotator?.selectSearchOccurrence(newSelectedOccurence);
-      annotator?.onSelectText(({ text, anchors, index }) => {
-        console.log("anchors", anchors);
-        if (anchors.some((anchorId) => anchorId === entityToAnchor?.id)) {
-          setCurrentAnchorExist(true);
-        } else {
-          setCurrentAnchorExist(false);
-        }
-      });
     }
-  }, [searchActiveOccurence, searchOccurences, annotator, entityToAnchor]);
+  }, [searchActiveOccurence, searchOccurences, annotator]);
 
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
@@ -134,7 +143,7 @@ export const StatementListTextAnnotator: React.FC<
 
       setTimeout(() => {
         setSearchActiveOccurence(0);
-      }, 500);
+      }, 1000);
 
       // if (occurences.length > 0) {
       //   annotator?.selectSearchOccurence(

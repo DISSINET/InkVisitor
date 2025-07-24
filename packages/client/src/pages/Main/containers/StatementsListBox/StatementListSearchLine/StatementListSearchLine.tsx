@@ -112,7 +112,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
   }, [searchOccurences]);
 
   return (
-    <StyledSearchLine marginLeft={showStatementList}>
+    <StyledSearchLine $marginLeft={showStatementList}>
       {isSearchAllowed && (
         <>
           <StyledSearchContainer>
