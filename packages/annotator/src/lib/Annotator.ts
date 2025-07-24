@@ -151,7 +151,11 @@ export class Annotator {
     this.draw();
   }
 
-  setSelectStyle(selectColor: string, selectOpacity: number, selectorColor: string) {
+  setSelectStyle(
+    selectColor: string,
+    selectOpacity: number,
+    selectorColor: string
+  ) {
     this.selectColor = selectColor;
     this.selectOpacity = selectOpacity;
 
@@ -869,6 +873,29 @@ export class Annotator {
 
     this.scrollToLine(this.cursor.selectStart.yLine);
     this.draw();
+
+    // Manually trigger onSelectText callback for search-based selections
+    if (this.onSelectTextCb) {
+      const [start, end] = this.cursor.getBounds();
+      if (start && end) {
+        const startSegment = this.text.getSegmentPosition(
+          start.yLine,
+          start.xLine
+        ) as SegmentPosition;
+        const endSegment = this.text.getSegmentPosition(
+          end.yLine,
+          end.xLine
+        ) as SegmentPosition;
+        const annotated = this.getAnnotations(startSegment, endSegment);
+        this.onSelectTextCb({
+          text: this.text.getRangeText(start, end),
+          anchors: annotated,
+          index: this.text.getAbsTextIndexFromPosition(
+            this.text.getSegmentPosition(start.yLine, start.xLine)
+          ),
+        });
+      }
+    }
   }
 
   onCopyText() {

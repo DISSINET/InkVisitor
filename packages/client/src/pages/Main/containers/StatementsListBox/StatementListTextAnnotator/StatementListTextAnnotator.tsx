@@ -99,14 +99,30 @@ export const StatementListTextAnnotator: React.FC<
   >([]);
   const [searchActiveOccurence, setSearchActiveOccurence] = useState<number>(0);
 
+  // annotate tool
+  // entity to anchor
+  const [entityToAnchor, setEntityToAnchor] = useState<IResponseEntity | null>(
+    null
+  );
+  // check if the entity to anchor exists in the current selection
+  const [currentAnchorExist, setCurrentAnchorExist] = useState(false);
+
   // Handle search occurrence selection
   useEffect(() => {
     const newSelectedOccurence = searchOccurences[searchActiveOccurence];
 
     if (newSelectedOccurence) {
       annotator?.selectSearchOccurrence(newSelectedOccurence);
+      annotator?.onSelectText(({ text, anchors, index }) => {
+        console.log("anchors", anchors);
+        if (anchors.some((anchorId) => anchorId === entityToAnchor?.id)) {
+          setCurrentAnchorExist(true);
+        } else {
+          setCurrentAnchorExist(false);
+        }
+      });
     }
-  }, [searchActiveOccurence, searchOccurences, annotator]);
+  }, [searchActiveOccurence, searchOccurences, annotator, entityToAnchor]);
 
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
@@ -215,6 +231,9 @@ export const StatementListTextAnnotator: React.FC<
         annotator={annotator}
         documentId={selectedDocumentId}
         dataDocument={selectedDocument || undefined}
+        setEntityToAnchor={setEntityToAnchor}
+        entityToAnchor={entityToAnchor}
+        currentAnchorExist={currentAnchorExist}
       />
 
       {/* Annotator */}

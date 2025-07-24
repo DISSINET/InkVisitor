@@ -1,17 +1,24 @@
+import { Annotator } from "@inkvisitor/annotator/src/lib";
+import { IDocument, IResponseEntity } from "@shared/types";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import api from "api";
 import { Button, Input } from "components";
 import {
   AttributeButtonGroup,
   EntitySuggester,
   EntityTag,
 } from "components/advanced";
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { BiSearch } from "react-icons/bi";
 import {
   FaAnchor,
   FaRegArrowAltCircleDown,
   FaRegArrowAltCircleUp,
 } from "react-icons/fa";
+import { FaAnchorCircleCheck } from "react-icons/fa6";
+import { LuReplace, LuReplaceAll } from "react-icons/lu";
 import { TbReplace } from "react-icons/tb";
+import { toast } from "react-toastify";
 import { useTheme } from "styled-components";
 import {
   StyledSearchContainer,
@@ -19,13 +26,6 @@ import {
   StyledSearchLine,
   StyledSearchResults,
 } from "../StatementListBoxStyles";
-import { IDocument, IEntity } from "@shared/types";
-import { LuReplace, LuReplaceAll } from "react-icons/lu";
-import { Annotator } from "@inkvisitor/annotator/src/lib";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "react-toastify";
-import api from "api";
-import { FaAnchorCircleCheck } from "react-icons/fa6";
 
 interface StatementListSearchLine {
   searchTerm: string;
@@ -44,6 +44,11 @@ interface StatementListSearchLine {
   annotator?: Annotator;
   documentId?: string;
   dataDocument?: IDocument;
+  currentAnchorExist: boolean;
+  setEntityToAnchor: React.Dispatch<
+    React.SetStateAction<IResponseEntity | null>
+  >;
+  entityToAnchor: IResponseEntity | null;
 }
 export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
   searchTerm,
@@ -57,10 +62,13 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
   annotator,
   documentId,
   dataDocument,
+
+  currentAnchorExist,
+  setEntityToAnchor,
+  entityToAnchor,
 }) => {
   const theme = useTheme();
   const [replaceSection, setReplaceSection] = useState(false);
-  const [entityToAnchor, setEntityToAnchor] = useState<IEntity | null>(null);
   const [replaceWith, setReplaceWith] = useState<string>("");
 
   const queryClient = useQueryClient();
@@ -87,8 +95,6 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
     }
   };
 
-  const [currentAnchorExist, setCurrentAnchorExist] = useState(false);
-
   const goToNextOccurence = () => {
     const nextOccurence = (searchActiveOccurence + 1) % searchOccurences.length;
     setSearchActiveOccurence(nextOccurence);
@@ -100,19 +106,6 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
       searchOccurences.length;
     setSearchActiveOccurence(previousOccurence);
   };
-
-  // check for anchors
-  useEffect(() => {
-    if (annotator && entityToAnchor) {
-      annotator.onSelectText(({ text, anchors, index }) => {
-        if (anchors.some((anchorId) => anchorId === entityToAnchor.id)) {
-          setCurrentAnchorExist(true);
-        } else {
-          setCurrentAnchorExist(false);
-        }
-      });
-    }
-  }, [annotator, entityToAnchor]);
 
   const hasResults = useMemo<boolean>(() => {
     return searchOccurences.length > 0;
