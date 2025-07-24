@@ -99,40 +99,34 @@ export const StatementListTextAnnotator: React.FC<
   >([]);
   const [searchActiveOccurence, setSearchActiveOccurence] = useState<number>(0);
 
+  // Handle search occurrence selection
   useEffect(() => {
     const newSelectedOccurence = searchOccurences[searchActiveOccurence];
 
     if (newSelectedOccurence) {
       annotator?.selectSearchOccurrence(newSelectedOccurence);
     }
-  }, [searchActiveOccurence, searchOccurences]);
+  }, [searchActiveOccurence, searchOccurences, annotator]);
 
-  const dSearchTerm = useDebounce(searchTerm, 1000);
-
-  const isSearchTermValid = useMemo<boolean>(() => {
-    return dSearchTerm.length > 2;
-  }, [dSearchTerm]);
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
   useEffect(() => {
-    if (annotator) {
-      if (isSearchTermValid) {
-        annotator?.search(searchTerm);
-        const occurences = annotator?.search(searchTerm);
+    if (annotator && debouncedSearchTerm.length > 2) {
+      const occurrences = annotator.search(debouncedSearchTerm);
 
-        setSearchOccurences(occurences);
+      setSearchOccurences(occurrences);
 
-        setTimeout(() => {
-          setSearchActiveOccurence(0);
-        }, 1000);
+      setTimeout(() => {
+        setSearchActiveOccurence(0);
+      }, 500);
 
-        // if (occurences.length > 0) {
-        //   annotator?.selectSearchOccurence(
-        //     searchOccurences[searchActiveOccurence]
-        //   );
-        // }
-      }
+      // if (occurences.length > 0) {
+      //   annotator?.selectSearchOccurence(
+      //     searchOccurences[searchActiveOccurence]
+      //   );
+      // }
     }
-  }, [dSearchTerm]);
+  }, [debouncedSearchTerm, annotator]);
 
   const animatedStyle = useSpring({
     opacity: showAnnotator ? 1 : 0,
@@ -213,7 +207,6 @@ export const StatementListTextAnnotator: React.FC<
         showStatementList={showStatementList}
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
-        isSearchTermValid={isSearchTermValid}
         searchOccurences={searchOccurences}
         searchActiveOccurence={searchActiveOccurence}
         isSearchAllowed={isSearchAllowed}

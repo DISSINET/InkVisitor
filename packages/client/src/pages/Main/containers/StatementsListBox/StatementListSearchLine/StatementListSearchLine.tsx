@@ -4,7 +4,7 @@ import {
   EntitySuggester,
   EntityTag,
 } from "components/advanced";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { BiSearch } from "react-icons/bi";
 import {
   FaAnchor,
@@ -30,7 +30,6 @@ import { FaAnchorCircleCheck } from "react-icons/fa6";
 interface StatementListSearchLine {
   searchTerm: string;
   setSearchTerm: (searchTerm: string) => void;
-  isSearchTermValid: boolean;
   searchOccurences: {
     segmentIndex: number;
     lineIndex: number;
@@ -49,7 +48,6 @@ interface StatementListSearchLine {
 export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
   searchTerm,
   setSearchTerm,
-  isSearchTermValid,
   searchOccurences,
   searchActiveOccurence,
   isSearchAllowed,
@@ -116,6 +114,10 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
     }
   }, [annotator, entityToAnchor]);
 
+  const hasResults = useMemo<boolean>(() => {
+    return searchOccurences.length > 0;
+  }, [searchOccurences]);
+
   return (
     <StyledSearchLine marginLeft={showStatementList}>
       {isSearchAllowed && (
@@ -127,13 +129,16 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
             <Input
               value={searchTerm}
               onChangeFn={(newText: string) => {
-                setSearchTerm(newText);
+                // only set search term if it's longer than 2 characters
+                if (newText.length > 2) {
+                  setSearchTerm(newText);
+                }
               }}
               changeOnType
               width={130}
               minWidth={50}
             />
-            {isSearchTermValid && (
+            {hasResults && (
               <StyledSearchResults
                 $annotatorWidthTooSmall={annotatorWidthTooSmall}
               >
@@ -167,7 +172,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
           </StyledSearchContainer>
 
           <AttributeButtonGroup
-            disabled={!isSearchTermValid}
+            disabled={!hasResults}
             options={[
               {
                 longValue: "replace",
@@ -205,7 +210,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                       goToNextOccurence();
                     }
                   }}
-                  disabled={!isSearchTermValid || !entityToAnchor}
+                  disabled={!hasResults || !entityToAnchor}
                 />
               )}
               {!entityToAnchor ? (
