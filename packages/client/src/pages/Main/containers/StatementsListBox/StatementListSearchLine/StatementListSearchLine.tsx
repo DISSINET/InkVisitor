@@ -4,7 +4,7 @@ import {
   EntitySuggester,
   EntityTag,
 } from "components/advanced";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { BiSearch } from "react-icons/bi";
 import {
   FaAnchor,
@@ -25,6 +25,7 @@ import { Annotator } from "@inkvisitor/annotator/src/lib";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import api from "api";
+import { FaAnchorCircleCheck } from "react-icons/fa6";
 
 interface StatementListSearchLine {
   searchTerm: string;
@@ -88,10 +89,32 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
     }
   };
 
+  const [currentAnchorExist, setCurrentAnchorExist] = useState(false);
+
   const goToNextOccurence = () => {
     const nextOccurence = (searchActiveOccurence + 1) % searchOccurences.length;
     setSearchActiveOccurence(nextOccurence);
   };
+
+  const goToPreviousOccurence = () => {
+    const previousOccurence =
+      (searchActiveOccurence - 1 + searchOccurences.length) %
+      searchOccurences.length;
+    setSearchActiveOccurence(previousOccurence);
+  };
+
+  // check for anchors
+  useEffect(() => {
+    if (annotator && entityToAnchor) {
+      annotator.onSelectText(({ text, anchors, index }) => {
+        if (anchors.some((anchorId) => anchorId === entityToAnchor.id)) {
+          setCurrentAnchorExist(true);
+        } else {
+          setCurrentAnchorExist(false);
+        }
+      });
+    }
+  }, [annotator, entityToAnchor]);
 
   return (
     <StyledSearchLine marginLeft={showStatementList}>
@@ -127,14 +150,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                         color={theme.color.info}
                         style={{ cursor: "pointer" }}
                         title="previous occurence"
-                        onClick={() => {
-                          const previousOccurence =
-                            (searchActiveOccurence -
-                              1 +
-                              searchOccurences.length) %
-                            searchOccurences.length;
-                          setSearchActiveOccurence(previousOccurence);
-                        }}
+                        onClick={goToPreviousOccurence}
                       />
                       <FaRegArrowAltCircleDown
                         size={15}
@@ -173,20 +189,25 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
 
           {!replaceSection ? (
             <>
-              <Button
-                tooltipLabel="wrap selection with anchor of a given entity and go to the next one"
-                icon={<FaAnchor />}
-                label="+"
-                color="success"
-                onClick={() => {
-                  if (entityToAnchor) {
-                    annotator?.addAnchor(entityToAnchor.id);
-                    handleSaveNewContent();
-                    goToNextOccurence();
-                  }
-                }}
-                disabled={!isSearchTermValid || !entityToAnchor}
-              />
+              {currentAnchorExist ? (
+                // TODO: add tooltip
+                <FaAnchorCircleCheck size={16} color={theme.color.info} />
+              ) : (
+                <Button
+                  tooltipLabel="wrap selection with anchor of a given entity and go to the next one"
+                  icon={<FaAnchor />}
+                  label="+"
+                  color="success"
+                  onClick={() => {
+                    if (entityToAnchor) {
+                      annotator?.addAnchor(entityToAnchor.id);
+                      handleSaveNewContent();
+                      goToNextOccurence();
+                    }
+                  }}
+                  disabled={!isSearchTermValid || !entityToAnchor}
+                />
+              )}
               {!entityToAnchor ? (
                 <EntitySuggester
                   placeholder="select entity"

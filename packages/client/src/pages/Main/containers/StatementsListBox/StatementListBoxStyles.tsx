@@ -106,6 +106,7 @@ export const StyledSearchContainer = styled.div`
   margin-left: ${({ theme }) => theme.space[2]};
   flex-shrink: 1;
   min-width: 0;
+  user-select: none;
 `;
 
 export const StyledSearchIcon = styled.div`
