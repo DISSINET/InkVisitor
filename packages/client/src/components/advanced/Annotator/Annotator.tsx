@@ -200,17 +200,32 @@ export const TextAnnotator = ({
           annotator.cursor.selectStart.yLine === 0 &&
           annotator.cursor.selectEnd.yLine >= annotator.viewport.noLines - 1;
 
+        // Determine if selection is backwards (end to start)
+        const isBackwardsSelection =
+          annotator.cursor.selectEnd.yLine <
+            annotator.cursor.selectStart.yLine ||
+          (annotator.cursor.selectEnd.yLine ===
+            annotator.cursor.selectStart.yLine &&
+            annotator.cursor.selectEnd.xLine <
+              annotator.cursor.selectStart.xLine);
+
+        // Use end position for backwards selection, start position for forwards selection
+        const menuX = isBackwardsSelection ? endX : startX;
+        const menuY = isBackwardsSelection ? endY : startY;
+
         // Create a virtual element for the reference point that represents the selection
         const virtualElement = {
           getBoundingClientRect: () => ({
-            x: startX,
-            y: isFullSelection ? rect.top + rect.height / 2 : startY,
-            width: endX - startX,
-            height: isFullSelection ? 0 : endY - startY,
-            top: isFullSelection ? rect.top + rect.height / 2 : startY,
-            right: endX,
-            bottom: isFullSelection ? rect.top + rect.height / 2 : endY,
-            left: startX,
+            x: menuX,
+            y: isFullSelection ? rect.top + rect.height / 2 : menuY,
+            width: Math.abs(endX - startX),
+            height: isFullSelection ? 0 : Math.abs(endY - startY),
+            top: isFullSelection ? rect.top + rect.height / 2 : menuY,
+            right: Math.max(startX, endX),
+            bottom: isFullSelection
+              ? rect.top + rect.height / 2
+              : Math.max(startY, endY),
+            left: Math.min(startX, endX),
           }),
         };
 
