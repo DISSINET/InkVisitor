@@ -164,7 +164,8 @@ export const TextAnnotator = ({
         mainAxis: annotator?.lineHeight
           ? (annotator.lineHeight / RATIO) * 1.2
           : 30,
-        crossAxis: wTextArea / 2 + 100,
+        // crossAxis: wTextArea / 2 + 100,
+        // crossAxis: 100,
       }),
       flip({
         padding: 10,
@@ -182,13 +183,15 @@ export const TextAnnotator = ({
       const canvas = mainCanvas.current;
       if (canvas) {
         const rect = canvas.getBoundingClientRect();
-        const startX = rect.left + annotator.cursor.selectStart.xLine * RATIO;
+        const startX =
+          rect.left + annotator.cursor.selectStart.xLine * annotator.charWidth;
         const startY =
           rect.top +
           ((annotator.cursor.selectStart.yLine - annotator.viewport.lineStart) *
             annotator.lineHeight) /
             RATIO;
-        const endX = rect.left + annotator.cursor.selectEnd.xLine * RATIO;
+        const endX =
+          rect.left + annotator.cursor.selectEnd.xLine * annotator.charWidth;
         const endY =
           rect.top +
           ((annotator.cursor.selectEnd.yLine - annotator.viewport.lineStart) *
