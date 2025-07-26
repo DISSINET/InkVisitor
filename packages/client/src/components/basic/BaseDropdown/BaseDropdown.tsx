@@ -57,6 +57,7 @@ interface BaseDropdown {
   noDropDownIndicator?: boolean;
   limitSelectedItems?: number;
   closeMenuOnSelect?: boolean;
+  shortLabel?: boolean;
 }
 export const BaseDropdown: React.FC<BaseDropdown> = ({
   options = [],
@@ -85,6 +86,7 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
   loggerId,
   limitSelectedItems,
   closeMenuOnSelect = true,
+  shortLabel = false,
 }) => {
   const isOneOptionSingleEntitySelect =
     options.length < 2 && !isMulti && entityDropdown;
@@ -170,6 +172,7 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
           hideSelectedOptions={hideSelectedOptions}
           loggerId={loggerId}
           limitSelectedItems={limitSelectedItems}
+          shortLabel={shortLabel}
         />
       </StyledSelectWrapper>
 

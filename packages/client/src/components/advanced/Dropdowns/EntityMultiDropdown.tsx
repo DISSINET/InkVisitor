@@ -38,6 +38,7 @@ interface EntityMultiDropdown<T = string> {
 
   loggerId?: string;
   closeMenuOnSelect?: boolean;
+  shortLabel?: boolean;
 }
 export const EntityMultiDropdown = <T extends string>({
   width,
@@ -57,6 +58,7 @@ export const EntityMultiDropdown = <T extends string>({
 
   loggerId,
   closeMenuOnSelect = true,
+  shortLabel = false,
 }: EntityMultiDropdown<T>) => {
   const getValues = (items: DropdownItem[]) => items.map((i) => i.value as T);
 
@@ -147,6 +149,7 @@ export const EntityMultiDropdown = <T extends string>({
       }}
       limitSelectedItems={limitSelectedItems}
       closeMenuOnSelect={closeMenuOnSelect}
+      shortLabel={shortLabel}
     />
   );
 };
@@ -203,13 +206,15 @@ const ValueContainer = ({
   );
 };
 
-const MultiValue = (props: MultiValueProps<any>): React.ReactElement => {
+const MultiValue = (props: any): React.ReactElement => {
+  const shortLabel = props.selectProps?.shortLabel;
+
   return (
     <components.MultiValue {...props}>
       <StyledEntityMultiValue
         $color={EntityColors[props.data.value]?.color ?? "transparent"}
       >
-        {props.data.label}
+        {shortLabel ? props.data.value : props.data.label}
       </StyledEntityMultiValue>
     </components.MultiValue>
   );

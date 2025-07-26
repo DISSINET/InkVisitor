@@ -157,6 +157,7 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
                 <FaHighlighter />
               </StyledInfoText>
               <Dropdown.Multi.Entity
+                shortLabel={true}
                 options={entitiesDict}
                 disableEmpty={true}
                 isClearable={true}
@@ -166,7 +167,8 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
                 value={hlEntities}
                 noOptionsMessage="No entity classes to highlight"
                 width={contentWidth / 2.5}
-                limitSelectedItems={Math.floor((contentWidth / 2.5 - 145) / 80)}
+                // limitSelectedItems={Math.floor((contentWidth / 2.5 - 145) / 80)}
+                limitSelectedItems={Math.floor((contentWidth / 2.5 - 100) / 37)}
               />
             </>
           )}

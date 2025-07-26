@@ -31,6 +31,7 @@ export interface StyledSelect {
   icon?: React.ReactNode;
   loggerId?: string;
   limitSelectedItems?: number;
+  shortLabel?: boolean;
 }
 export const StyledSelect = styled(Select)<StyledSelect>`
   display: inline-flex;
