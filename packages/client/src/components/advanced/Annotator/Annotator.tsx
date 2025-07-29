@@ -15,10 +15,15 @@ import { v4 as uuidv4 } from "uuid";
 
 import { Annotator, EditMode } from "@inkvisitor/annotator/src/lib";
 import { EntityEnums } from "@shared/enums";
-import { IDocument, IEntity, IResponseTerritory } from "@shared/types";
+import {
+  IDocument,
+  IEntity,
+  IResponseEntity,
+  IResponseTerritory,
+} from "@shared/types";
 import { Button } from "components/basic/Button/Button";
 import { ButtonGroup } from "components/basic/ButtonGroup/ButtonGroup";
-import { useSearchParams, useTheme } from "hooks";
+import { useDebounce, useSearchParams, useTheme } from "hooks";
 import { BsFileTextFill } from "react-icons/bs";
 import { HiCodeBracket } from "react-icons/hi2";
 import { EntityCreateModal } from "..";
@@ -37,6 +42,7 @@ import {
 } from "./AnnotatorStyles";
 import { annotatorHighlight } from "./highlight";
 import { RATIO, TerritoryCreateModalType, W_SCROLL } from "./types";
+import { StatementListSearchLine } from "pages/Main/containers/StatementsListBox/StatementListSearchLine/StatementListSearchLine";
 interface TextAnnotatorProps {
   width: number;
   annotatorWidthTooSmall?: boolean;
@@ -57,6 +63,7 @@ interface TextAnnotatorProps {
   dataDocument?: IDocument;
   dataDocumentIsFetching?: boolean;
   dataDocumentError: Error | null;
+  showStatementList?: boolean;
 }
 
 export const TextAnnotator = ({
@@ -78,6 +85,7 @@ export const TextAnnotator = ({
   dataDocument,
   dataDocumentIsFetching,
   dataDocumentError,
+  showStatementList,
 }: TextAnnotatorProps) => {
   const queryClient = useQueryClient();
   const theme = useTheme();
@@ -518,8 +526,95 @@ export const TextAnnotator = ({
 
   const hasParentT = territory?.data?.parent !== undefined;
 
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [searchOccurences, setSearchOccurences] = useState<
+    { segmentIndex: number; lineIndex: number; start: number; end: number }[]
+  >([]);
+  const [searchActiveOccurence, setSearchActiveOccurence] = useState<number>(0);
+
+  // annotate tool
+  // entity to anchor
+  const [entityToAnchor, setEntityToAnchor] = useState<IResponseEntity | null>(
+    null
+  );
+  // does the pre-selected anchor exist in the current selection
+  const [currentAnchorExist, setCurrentAnchorExist] = useState(false);
+
+  // check if the entity to anchor exists in the current selection
+  useEffect(() => {
+    if (!entityToAnchor) {
+      console.log("no entityToAnchor");
+      setCurrentAnchorExist(false);
+      return;
+    }
+    console.log("entityToAnchor", entityToAnchor);
+    console.log("annotator", annotator);
+    annotator?.onSelectText(({ text, anchors, index }) => {
+      console.log("anchors", anchors);
+      // console.log("entityToAnchor", entityToAnchor);
+      if (anchors.some((anchorId) => anchorId === entityToAnchor?.id)) {
+        setCurrentAnchorExist(true);
+      } else {
+        setCurrentAnchorExist(false);
+      }
+    });
+    // searchActiveOccurence is in dependencies to call onSelectText on occurence change
+  }, [searchActiveOccurence, entityToAnchor]);
+
+  // Handle search occurrence selection
+  useEffect(() => {
+    const newSelectedOccurence = searchOccurences[searchActiveOccurence];
+
+    if (newSelectedOccurence) {
+      annotator?.selectSearchOccurrence(newSelectedOccurence);
+    }
+  }, [searchActiveOccurence, searchOccurences, annotator]);
+
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+
+  useEffect(() => {
+    if (annotator && debouncedSearchTerm.length > 2) {
+      const occurrences = annotator.search(debouncedSearchTerm);
+
+      setSearchOccurences(occurrences);
+
+      setTimeout(() => {
+        setSearchActiveOccurence(0);
+      }, 1000);
+
+      // if (occurences.length > 0) {
+      //   annotator?.selectSearchOccurence(
+      //     searchOccurences[searchActiveOccurence]
+      //   );
+      // }
+    }
+  }, [debouncedSearchTerm, annotator]);
+
+  const isSearchAllowed = useMemo<boolean>(() => {
+    return annotator !== undefined && !!dataDocument;
+  }, [annotator, dataDocument]);
+
   return (
     <>
+      {annotator && (
+        <StatementListSearchLine
+          showStatementList={showStatementList ?? false}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          searchOccurences={searchOccurences}
+          searchActiveOccurence={searchActiveOccurence}
+          isSearchAllowed={isSearchAllowed}
+          annotatorWidthTooSmall={annotatorWidthTooSmall}
+          setSearchActiveOccurence={setSearchActiveOccurence}
+          annotator={annotator}
+          documentId={documentId}
+          dataDocument={dataDocument || undefined}
+          setEntityToAnchor={setEntityToAnchor}
+          entityToAnchor={entityToAnchor}
+          currentAnchorExist={currentAnchorExist}
+        />
+      )}
+
       <div
         style={{ width: width, position: "relative" }}
         onKeyDown={(e) => {

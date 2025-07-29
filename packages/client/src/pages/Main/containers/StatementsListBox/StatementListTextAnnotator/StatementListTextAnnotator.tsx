@@ -93,70 +93,6 @@ export const StatementListTextAnnotator: React.FC<
     []
   );
 
-  const [searchTerm, setSearchTerm] = useState<string>("");
-  const [searchOccurences, setSearchOccurences] = useState<
-    { segmentIndex: number; lineIndex: number; start: number; end: number }[]
-  >([]);
-  const [searchActiveOccurence, setSearchActiveOccurence] = useState<number>(0);
-
-  // annotate tool
-  // entity to anchor
-  const [entityToAnchor, setEntityToAnchor] = useState<IResponseEntity | null>(
-    null
-  );
-  // does the pre-selected anchor exist in the current selection
-  const [currentAnchorExist, setCurrentAnchorExist] = useState(false);
-
-  // check if the entity to anchor exists in the current selection
-  useEffect(() => {
-    if (!entityToAnchor) {
-      console.log("no entityToAnchor");
-      setCurrentAnchorExist(false);
-      return;
-    }
-    console.log("entityToAnchor", entityToAnchor);
-    console.log("annotator", annotator);
-    annotator?.onSelectText(({ text, anchors, index }) => {
-      console.log("anchors", anchors);
-      // console.log("entityToAnchor", entityToAnchor);
-      if (anchors.some((anchorId) => anchorId === entityToAnchor?.id)) {
-        setCurrentAnchorExist(true);
-      } else {
-        setCurrentAnchorExist(false);
-      }
-    });
-    // searchActiveOccurence is in dependencies to call onSelectText on occurence change
-  }, [searchActiveOccurence, entityToAnchor, annotator?.onSelectText]);
-
-  // Handle search occurrence selection
-  useEffect(() => {
-    const newSelectedOccurence = searchOccurences[searchActiveOccurence];
-
-    if (newSelectedOccurence) {
-      annotator?.selectSearchOccurrence(newSelectedOccurence);
-    }
-  }, [searchActiveOccurence, searchOccurences, annotator]);
-
-  const debouncedSearchTerm = useDebounce(searchTerm, 500);
-
-  useEffect(() => {
-    if (annotator && debouncedSearchTerm.length > 2) {
-      const occurrences = annotator.search(debouncedSearchTerm);
-
-      setSearchOccurences(occurrences);
-
-      setTimeout(() => {
-        setSearchActiveOccurence(0);
-      }, 1000);
-
-      // if (occurences.length > 0) {
-      //   annotator?.selectSearchOccurence(
-      //     searchOccurences[searchActiveOccurence]
-      //   );
-      // }
-    }
-  }, [debouncedSearchTerm, annotator]);
-
   const animatedStyle = useSpring({
     opacity: showAnnotator ? 1 : 0,
     delay: 300,
@@ -190,12 +126,6 @@ export const StatementListTextAnnotator: React.FC<
     }
     return false;
   }, [selectedDocument, territoryId]);
-
-  const theme = useTheme();
-
-  const isSearchAllowed = useMemo<boolean>(() => {
-    return annotator !== undefined && !!selectedDocument;
-  }, [annotator, selectedDocument]);
 
   const annotatorHeight = useMemo<number>(() => {
     return contentHeight - 70 - ANNOTATOR_SELECTOR_HEIGHT;
@@ -232,23 +162,6 @@ export const StatementListTextAnnotator: React.FC<
         />
       )}
 
-      <StatementListSearchLine
-        showStatementList={showStatementList}
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        searchOccurences={searchOccurences}
-        searchActiveOccurence={searchActiveOccurence}
-        isSearchAllowed={isSearchAllowed}
-        annotatorWidthTooSmall={annotatorWidthTooSmall}
-        setSearchActiveOccurence={setSearchActiveOccurence}
-        annotator={annotator}
-        documentId={selectedDocumentId}
-        dataDocument={selectedDocument || undefined}
-        setEntityToAnchor={setEntityToAnchor}
-        entityToAnchor={entityToAnchor}
-        currentAnchorExist={currentAnchorExist}
-      />
-
       {/* Annotator */}
       <div style={{ marginTop: "0.2rem" }}>
         <AnnotatorProvider>
@@ -263,7 +176,7 @@ export const StatementListTextAnnotator: React.FC<
               thisTerritoryEntityId={territoryId}
               displayLineNumbers={true}
               height={annotatorHeight}
-              documentId={selectedDocumentId as string}
+              documentId={selectedDocumentId}
               handleCreateStatement={handleCreateStatement}
               storedAnnotatorScroll={storedAnnotatorScroll}
               setStoredAnnotatorScroll={setStoredAnnotatorScroll}
@@ -271,6 +184,7 @@ export const StatementListTextAnnotator: React.FC<
               dataDocument={selectedDocument}
               dataDocumentIsFetching={selectedDocumentIsFetching}
               dataDocumentError={selectedDocumentError}
+              showStatementList={showStatementList}
             />
           )}
         </AnnotatorProvider>
