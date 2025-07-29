@@ -24,6 +24,7 @@ export const StyledEntityMultiValue = styled.div<StyledEntityMultiValue>`
   border-left-color: ${({ theme, $color }) =>
     $color ? theme.color[$color] : ""};
   border-radius: 0px;
+  font-size: 1.2rem;
 `;
 
 export const StyledOptionRow = styled.div`
