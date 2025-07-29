@@ -110,19 +110,23 @@ export const StatementListTextAnnotator: React.FC<
   // check if the entity to anchor exists in the current selection
   useEffect(() => {
     if (!entityToAnchor) {
+      console.log("no entityToAnchor");
       setCurrentAnchorExist(false);
       return;
     }
+    console.log("entityToAnchor", entityToAnchor);
+    console.log("annotator", annotator);
     annotator?.onSelectText(({ text, anchors, index }) => {
       console.log("anchors", anchors);
-      console.log("entityToAnchor", entityToAnchor);
+      // console.log("entityToAnchor", entityToAnchor);
       if (anchors.some((anchorId) => anchorId === entityToAnchor?.id)) {
         setCurrentAnchorExist(true);
       } else {
         setCurrentAnchorExist(false);
       }
     });
-  }, [searchActiveOccurence, entityToAnchor, annotator]);
+    // searchActiveOccurence is in dependencies to call onSelectText on occurence change
+  }, [searchActiveOccurence, entityToAnchor, annotator?.onSelectText]);
 
   // Handle search occurrence selection
   useEffect(() => {
