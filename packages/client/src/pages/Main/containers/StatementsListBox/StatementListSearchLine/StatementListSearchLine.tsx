@@ -1,4 +1,4 @@
-import { Annotator } from "@inkvisitor/annotator/src/lib";
+import { Annotator, EditMode } from "@inkvisitor/annotator/src/lib";
 import { IDocument, IResponseEntity } from "@shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
@@ -49,6 +49,7 @@ interface StatementListSearchLine {
     React.SetStateAction<IResponseEntity | null>
   >;
   entityToAnchor: IResponseEntity | null;
+  annotatorMode: EditMode;
 }
 export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
   searchTerm,
@@ -66,9 +67,14 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
   currentAnchorExist,
   setEntityToAnchor,
   entityToAnchor,
+  annotatorMode,
 }) => {
   const theme = useTheme();
-  const [replaceSection, setReplaceSection] = useState(false);
+
+  const replaceSection = useMemo<boolean>(() => {
+    return annotatorMode !== EditMode.HIGHLIGHT;
+  }, [annotatorMode]);
+
   const [replaceWith, setReplaceWith] = useState<string>("");
 
   const queryClient = useQueryClient();
@@ -165,19 +171,19 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
           </StyledSearchContainer>
 
           <AttributeButtonGroup
-            disabled={!hasResults}
+            disabled
             options={[
               {
                 longValue: "replace",
                 shortValue: "",
-                onClick: () => setReplaceSection(true),
+                onClick: () => {},
                 selected: replaceSection,
                 icon: <TbReplace />,
               },
               {
                 longValue: "annotate",
                 shortValue: "",
-                onClick: () => setReplaceSection(false),
+                onClick: () => {},
                 selected: !replaceSection,
                 // shortIcon: <FaPlus />,
                 icon: <FaAnchor />,

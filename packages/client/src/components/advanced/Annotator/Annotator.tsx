@@ -300,7 +300,7 @@ export const TextAnnotator = ({
       setSelectedText(text);
       setSelectedAnchors(anchors);
 
-      handleFetchEntities(anchors);
+      setAnchors(anchors);
 
       setPendingSelection(null);
     }
@@ -324,10 +324,6 @@ export const TextAnnotator = ({
       },
       enabled: api.isLoggedIn() && anchors.length > 0,
     });
-
-  const handleFetchEntities = async (anchors: string[]) => {
-    setAnchors(anchors);
-  };
 
   const handleAddAnchor = (entityId: string) => {
     annotator?.addAnchor(entityId);
@@ -542,16 +538,12 @@ export const TextAnnotator = ({
 
   // check if the entity to anchor exists in the current selection
   useEffect(() => {
-    if (!entityToAnchor) {
-      console.log("no entityToAnchor");
-      setCurrentAnchorExist(false);
-      return;
-    }
-    console.log("entityToAnchor", entityToAnchor);
-    console.log("annotator", annotator);
     annotator?.onSelectText(({ text, anchors, index }) => {
-      console.log("anchors", anchors);
-      // console.log("entityToAnchor", entityToAnchor);
+      setAnchors(anchors);
+      if (!entityToAnchor) {
+        setCurrentAnchorExist(false);
+        return;
+      }
       if (anchors.some((anchorId) => anchorId === entityToAnchor?.id)) {
         setCurrentAnchorExist(true);
       } else {
@@ -612,6 +604,7 @@ export const TextAnnotator = ({
           setEntityToAnchor={setEntityToAnchor}
           entityToAnchor={entityToAnchor}
           currentAnchorExist={currentAnchorExist}
+          annotatorMode={annotatorMode}
         />
       )}
 
