@@ -1,7 +1,7 @@
 import { entitiesDict } from "@shared/dictionaries";
 import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
-import { Button, Loader } from "components";
+import { Button, IconWithTooltip, Loader } from "components";
 import Dropdown, {
   DocumentTitle,
   EntitySuggester,
@@ -154,7 +154,10 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
           {contentWidth > 0 && (
             <>
               <StyledInfoText style={{ textWrap: "nowrap" }}>
-                <FaHighlighter />
+                <IconWithTooltip
+                  icon={<FaHighlighter />}
+                  tooltipLabel="Highlight"
+                />
               </StyledInfoText>
               <Dropdown.Multi.Entity
                 shortLabel={true}

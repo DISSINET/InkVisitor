@@ -2,7 +2,7 @@ import { Annotator, EditMode } from "@inkvisitor/annotator/src/lib";
 import { IDocument, IResponseEntity } from "@shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Button, Input } from "components";
+import { Button, IconWithTooltip, Input } from "components";
 import {
   AttributeButtonGroup,
   EntitySuggester,
@@ -194,8 +194,12 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
           {!replaceSection ? (
             <>
               {currentAnchorExist ? (
-                // TODO: add tooltip
-                <FaAnchorCircleCheck size={16} color={theme.color.info} />
+                <IconWithTooltip
+                  icon={
+                    <FaAnchorCircleCheck size={16} color={theme.color.info} />
+                  }
+                  tooltipLabel="anchor exists"
+                />
               ) : (
                 <Button
                   tooltipLabel="wrap selection with anchor of a given entity and go to the next one"
