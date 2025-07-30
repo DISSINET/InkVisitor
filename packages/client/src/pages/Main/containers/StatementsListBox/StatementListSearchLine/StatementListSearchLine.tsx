@@ -8,7 +8,7 @@ import {
   EntitySuggester,
   EntityTag,
 } from "components/advanced";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { BiSearch } from "react-icons/bi";
 import {
   FaAnchor,

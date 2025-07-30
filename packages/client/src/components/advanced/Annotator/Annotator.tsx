@@ -540,18 +540,19 @@ export const TextAnnotator = ({
   useEffect(() => {
     annotator?.onSelectText(({ text, anchors, index }) => {
       setAnchors(anchors);
-      if (!entityToAnchor) {
-        setCurrentAnchorExist(false);
-        return;
-      }
-      if (anchors.some((anchorId) => anchorId === entityToAnchor?.id)) {
-        setCurrentAnchorExist(true);
-      } else {
-        setCurrentAnchorExist(false);
-      }
     });
     // searchActiveOccurence is in dependencies to call onSelectText on occurence change
-  }, [searchActiveOccurence, entityToAnchor]);
+  }, [searchActiveOccurence]);
+
+  useEffect(() => {
+    if (!entityToAnchor) {
+      setCurrentAnchorExist(false);
+    } else if (anchors.some((anchorId) => anchorId === entityToAnchor?.id)) {
+      setCurrentAnchorExist(true);
+    } else {
+      setCurrentAnchorExist(false);
+    }
+  }, [anchors, entityToAnchor]);
 
   // Handle search occurrence selection
   useEffect(() => {
@@ -573,14 +574,8 @@ export const TextAnnotator = ({
       setTimeout(() => {
         setSearchActiveOccurence(0);
       }, 1000);
-
-      // if (occurences.length > 0) {
-      //   annotator?.selectSearchOccurence(
-      //     searchOccurences[searchActiveOccurence]
-      //   );
-      // }
     }
-  }, [debouncedSearchTerm, annotator]);
+  }, [debouncedSearchTerm]);
 
   const isSearchAllowed = useMemo<boolean>(() => {
     return annotator !== undefined && !!dataDocument;
