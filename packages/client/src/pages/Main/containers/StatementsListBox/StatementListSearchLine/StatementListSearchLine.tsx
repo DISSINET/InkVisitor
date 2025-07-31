@@ -240,6 +240,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
             <>
               <Input
                 placeholder="replace with"
+                changeOnType
                 value={replaceWith}
                 onChangeFn={(value: string) => {
                   setReplaceWith(value);
@@ -253,8 +254,11 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                 noBackground
                 icon={<LuReplace size={12} />}
                 onClick={() => {
-                  console.log("replace one");
+                  annotator?.onReplaceText(replaceWith);
                 }}
+                disabled={
+                  searchOccurences.length === 0 || replaceWith.length === 0
+                }
               />
               <Button
                 circular
@@ -266,6 +270,9 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                 onClick={() => {
                   console.log("replace all");
                 }}
+                disabled={
+                  searchOccurences.length === 0 || replaceWith.length === 0
+                }
               />
             </>
           )}
