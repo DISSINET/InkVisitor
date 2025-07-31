@@ -300,19 +300,15 @@ export const TextAnnotator = ({
       setSelectedText(text);
       setSelectedAnchors(anchors);
 
-      setAnchors(anchors);
-
       setPendingSelection(null);
     }
   }, [pendingSelection, isSelectingText]);
 
-  const [anchors, setAnchors] = useState<string[]>([]);
-
   const { data: anchorEntities, isFetching: isFetchingAnchorEntities } =
     useQuery({
-      queryKey: ["anchorEntities", anchors],
+      queryKey: ["anchorEntities", selectedAnchors],
       queryFn: async () => {
-        const uniqueAnchors = [...new Set(anchors)];
+        const uniqueAnchors = [...new Set(selectedAnchors)];
         const entities = await api.entitiesGet(uniqueAnchors);
         setStoredEntities(
           entities.data.reduce((acc, entity) => {
@@ -322,7 +318,7 @@ export const TextAnnotator = ({
         );
         return entities.data;
       },
-      enabled: api.isLoggedIn() && anchors.length > 0,
+      enabled: api.isLoggedIn() && selectedAnchors.length > 0,
     });
 
   const handleAddAnchor = (entityId: string) => {
@@ -539,7 +535,7 @@ export const TextAnnotator = ({
   // check if the entity to anchor exists in the current selection
   useEffect(() => {
     annotator?.onSelectText(({ text, anchors, index }) => {
-      setAnchors(anchors);
+      handleTextSelection(text, anchors, index);
     });
     // searchActiveOccurence is in dependencies to call onSelectText on occurence change
   }, [searchActiveOccurence]);
@@ -547,12 +543,14 @@ export const TextAnnotator = ({
   useEffect(() => {
     if (!entityToAnchor) {
       setCurrentAnchorExist(false);
-    } else if (anchors.some((anchorId) => anchorId === entityToAnchor?.id)) {
+    } else if (
+      selectedAnchors.some((anchorId) => anchorId === entityToAnchor?.id)
+    ) {
       setCurrentAnchorExist(true);
     } else {
       setCurrentAnchorExist(false);
     }
-  }, [anchors, entityToAnchor]);
+  }, [selectedAnchors, entityToAnchor]);
 
   // Handle search occurrence selection
   useEffect(() => {
@@ -600,6 +598,7 @@ export const TextAnnotator = ({
           entityToAnchor={entityToAnchor}
           currentAnchorExist={currentAnchorExist}
           annotatorMode={annotatorMode}
+          selectedText={selectedText}
         />
       )}
 

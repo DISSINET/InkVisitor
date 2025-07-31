@@ -50,6 +50,7 @@ interface StatementListSearchLine {
   >;
   entityToAnchor: IResponseEntity | null;
   annotatorMode: EditMode;
+  selectedText: string;
 }
 export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
   searchTerm,
@@ -68,6 +69,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
   setEntityToAnchor,
   entityToAnchor,
   annotatorMode,
+  selectedText,
 }) => {
   const theme = useTheme();
 
@@ -213,7 +215,9 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                       goToNextOccurence();
                     }
                   }}
-                  disabled={!hasResults || !entityToAnchor}
+                  disabled={
+                    !hasResults || !entityToAnchor || selectedText.length === 0
+                  }
                 />
               )}
               {!entityToAnchor ? (
