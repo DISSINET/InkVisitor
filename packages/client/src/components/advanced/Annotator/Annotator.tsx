@@ -44,7 +44,7 @@ interface TextAnnotatorProps {
   displayLineNumbers: boolean;
   hlEntities?: EntityEnums.Class[];
   documentId: string;
-  handleCreateStatement?: Function;
+  handleCreateStatement?: (text: string, statementId: string) => void;
   initialScrollEntityId?: string;
   thisTerritoryEntityId?: string;
 
