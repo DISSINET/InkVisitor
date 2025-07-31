@@ -921,4 +921,21 @@ export class Annotator {
       this.draw();
     });
   }
+
+  onReplaceText(text: string) {
+    const area = this.cursor.getSelectedArea();
+    if (area) {
+      this.text.deleteRangeText(area[0], area[1]);
+      this.cursor.reset();
+      this.cursor.setPosition(
+        area[0].xLine,
+        area[0].yLine - this.viewport.lineStart
+      );
+    }
+    this.text.insertText(this.viewport, this.cursor, text);
+    this.cursor.move(text.length, 0);
+    this.cursor.fixOutOfBounds(this.viewport, this.text);
+
+    this.draw();
+  }
 }
