@@ -82,16 +82,19 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
   const queryClient = useQueryClient();
 
   const updateDocumentMutation = useMutation({
-    mutationFn: async (data: { id: string; doc: Partial<IDocument> }) =>
-      api.documentUpdate(data.id, data.doc),
+    mutationFn: async (data: {
+      id: string;
+      doc: Partial<IDocument>;
+      successMessage?: string;
+    }) => api.documentUpdate(data.id, data.doc),
     onSuccess: (variables, data) => {
       queryClient.invalidateQueries({ queryKey: ["document"] });
       queryClient.invalidateQueries({ queryKey: ["documents"] });
-      toast.info("Anchor saved");
+      toast.info(data.successMessage || "Anchor saved");
     },
   });
 
-  const handleSaveNewContent = () => {
+  const handleSaveNewContent = (successMessage?: string) => {
     if (annotator && documentId && dataDocument) {
       updateDocumentMutation.mutate({
         id: documentId,
@@ -99,6 +102,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
           ...dataDocument,
           content: annotator.text.value,
         },
+        successMessage,
       });
     }
   };
@@ -130,10 +134,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
             <Input
               value={searchTerm}
               onChangeFn={(newText: string) => {
-                // only set search term if it's longer than 2 characters
-                if (newText.length > 2) {
-                  setSearchTerm(newText);
-                }
+                setSearchTerm(newText);
               }}
               changeOnType
               width={130}
@@ -255,6 +256,9 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                 icon={<LuReplace size={12} />}
                 onClick={() => {
                   annotator?.onReplaceText(replaceWith);
+                  handleSaveNewContent("occurrence replaced");
+
+                  // goToNextOccurence();
                 }}
                 disabled={
                   searchOccurences.length === 0 || replaceWith.length === 0
@@ -268,7 +272,9 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                 noBackground
                 icon={<LuReplaceAll size={12} />}
                 onClick={() => {
-                  console.log("replace all");
+                  // annotator?.onReplaceText(replaceWith);
+                  // goToNextOccurence();
+                  // handleSaveNewContent("all occurrences replaced");
                 }}
                 disabled={
                   searchOccurences.length === 0 || replaceWith.length === 0

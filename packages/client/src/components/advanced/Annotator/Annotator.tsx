@@ -559,19 +559,25 @@ export const TextAnnotator = ({
     if (newSelectedOccurence) {
       annotator?.selectSearchOccurrence(newSelectedOccurence);
     }
-  }, [searchActiveOccurence, searchOccurences, annotator]);
+  }, [searchActiveOccurence, searchOccurences]);
 
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
+  const searchTermRef = useRef<string>("");
 
   useEffect(() => {
     if (annotator && debouncedSearchTerm.length > 2) {
       const occurrences = annotator.search(debouncedSearchTerm);
-
       setSearchOccurences(occurrences);
 
-      setTimeout(() => {
+      // Only reset to first occurrence if this is a new search term
+      if (searchTermRef.current !== debouncedSearchTerm) {
         setSearchActiveOccurence(0);
-      }, 1000);
+        searchTermRef.current = debouncedSearchTerm;
+      }
+    } else if (debouncedSearchTerm.length <= 2) {
+      setSearchOccurences([]);
+      setSearchActiveOccurence(0);
+      searchTermRef.current = "";
     }
   }, [debouncedSearchTerm]);
 
