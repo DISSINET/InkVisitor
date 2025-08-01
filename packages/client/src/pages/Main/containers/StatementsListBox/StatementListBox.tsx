@@ -386,6 +386,9 @@ export const StatementListBox: React.FC = () => {
     text: string = "",
     statementId: string | undefined = undefined
   ) => {
+    // TODO: take order from the anchors in the document => filter only S that are in the statement list
+    // TODO: then find the start index of the last statement before the new statement
+    // TODO: see the order of the last start index statement in the statement list and put the new statement after it
     if (userData && territory) {
       const newStatement: IStatement = CStatement(
         localStorage.getItem("userrole") as UserEnums.Role,
