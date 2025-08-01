@@ -8,7 +8,7 @@ import {
   EntitySuggester,
   EntityTag,
 } from "components/advanced";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { BiSearch } from "react-icons/bi";
 import {
   FaAnchor,
@@ -17,6 +17,7 @@ import {
 } from "react-icons/fa";
 import { FaAnchorCircleCheck } from "react-icons/fa6";
 import { LuReplace, LuReplaceAll } from "react-icons/lu";
+import { MdCancel } from "react-icons/md";
 import { TbReplace } from "react-icons/tb";
 import { toast } from "react-toastify";
 import { useTheme } from "styled-components";
@@ -26,6 +27,7 @@ import {
   StyledSearchLine,
   StyledSearchResults,
 } from "../StatementListBoxStyles";
+import { StyledSearchCancelButton } from "./StatementListSearchLineStyles";
 
 interface StatementListSearchLine {
   searchTerm: string;
@@ -131,15 +133,22 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
             <StyledSearchIcon>
               <BiSearch color={theme.color.info} />
             </StyledSearchIcon>
-            <Input
-              value={searchTerm}
-              onChangeFn={(newText: string) => {
-                setSearchTerm(newText);
-              }}
-              changeOnType
-              width={130}
-              minWidth={50}
-            />
+            <div style={{ position: "relative" }}>
+              <Input
+                value={searchTerm}
+                onChangeFn={(newText: string) => {
+                  setSearchTerm(newText);
+                }}
+                changeOnType
+                width={130}
+                minWidth={50}
+              />
+              {searchTerm.length > 0 && (
+                <StyledSearchCancelButton>
+                  <MdCancel size={16} onClick={() => setSearchTerm("")} />
+                </StyledSearchCancelButton>
+              )}
+            </div>
             {hasResults && (
               <StyledSearchResults
                 $annotatorWidthTooSmall={annotatorWidthTooSmall}

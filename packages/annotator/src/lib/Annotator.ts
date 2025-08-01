@@ -938,4 +938,12 @@ export class Annotator {
 
     this.draw();
   }
+
+  /**
+   * clearSelection clears the current text selection and redraws the canvas
+   */
+  clearSelection() {
+    this.cursor.reset();
+    this.draw();
+  }
 }

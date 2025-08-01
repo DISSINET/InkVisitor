@@ -324,6 +324,7 @@ export const TextAnnotator = ({
   const handleAddAnchor = (entityId: string) => {
     annotator?.addAnchor(entityId);
     setSelectedText("");
+    annotator?.clearSelection();
     handleSaveNewContent(true);
     handleRefreshEntityAndStatement(entityId);
     toast.info(`Anchor created ${entityId}.`);
@@ -494,8 +495,7 @@ export const TextAnnotator = ({
     annotator?.removeAnchorFromSelection(anchor);
     handleSaveNewContent(true);
     setSelectedText("");
-    annotator?.cursor.reset();
-    annotator?.draw();
+    annotator?.clearSelection();
     handleRefreshEntityAndStatement(anchor);
   };
 
@@ -578,6 +578,8 @@ export const TextAnnotator = ({
       setSearchOccurences([]);
       setSearchActiveOccurence(0);
       searchTermRef.current = "";
+      setSelectedText("");
+      annotator?.clearSelection();
     }
   }, [debouncedSearchTerm]);
 
@@ -613,6 +615,7 @@ export const TextAnnotator = ({
         onKeyDown={(e) => {
           if (e.key === "Escape") {
             setSelectedText("");
+            annotator?.clearSelection();
           }
         }}
       >
