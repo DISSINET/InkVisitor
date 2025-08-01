@@ -607,6 +607,7 @@ export const TextAnnotator = ({
           currentAnchorExist={currentAnchorExist}
           annotatorMode={annotatorMode}
           selectedText={selectedText}
+          setSearchOccurences={setSearchOccurences}
         />
       )}
 

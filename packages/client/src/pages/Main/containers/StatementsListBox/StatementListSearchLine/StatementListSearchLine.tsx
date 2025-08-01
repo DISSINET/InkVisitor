@@ -53,6 +53,16 @@ interface StatementListSearchLine {
   entityToAnchor: IResponseEntity | null;
   annotatorMode: EditMode;
   selectedText: string;
+  setSearchOccurences: React.Dispatch<
+    React.SetStateAction<
+      {
+        segmentIndex: number;
+        lineIndex: number;
+        start: number;
+        end: number;
+      }[]
+    >
+  >;
 }
 export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
   searchTerm,
@@ -72,6 +82,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
   entityToAnchor,
   annotatorMode,
   selectedText,
+  setSearchOccurences,
 }) => {
   const theme = useTheme();
 
@@ -125,6 +136,35 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
     return searchOccurences.length > 0;
   }, [searchOccurences]);
 
+  const replaceOccurence = () => {
+    annotator?.onReplaceText(replaceWith);
+
+    // Store the current search state before saving
+    const currentSearchActiveOccurence = searchActiveOccurence;
+    const newOccurrences = searchOccurences.filter(
+      (_, index) => index !== searchActiveOccurence
+    );
+
+    // Calculate the new active occurrence index
+    let newActiveOccurence = currentSearchActiveOccurence;
+    if (newOccurrences.length > 0) {
+      // If we removed the last occurrence, go to the previous one
+      if (currentSearchActiveOccurence >= newOccurrences.length) {
+        newActiveOccurence = newOccurrences.length - 1;
+      }
+      // Otherwise, stay at the same index (which now points to the next occurrence)
+    } else {
+      // No more occurrences, reset to 0
+      newActiveOccurence = 0;
+    }
+
+    // Update the search state immediately
+    setSearchOccurences(newOccurrences);
+    setSearchActiveOccurence(newActiveOccurence);
+
+    // Save the content
+    handleSaveNewContent("occurrence replaced");
+  };
   return (
     <StyledSearchLine $marginLeft={showStatementList}>
       {isSearchAllowed && (
@@ -263,12 +303,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                 tooltipLabel="replace one occurence"
                 noBackground
                 icon={<LuReplace size={12} />}
-                onClick={() => {
-                  annotator?.onReplaceText(replaceWith);
-                  handleSaveNewContent("occurrence replaced");
-
-                  // goToNextOccurence();
-                }}
+                onClick={replaceOccurence}
                 disabled={
                   searchOccurences.length === 0 || replaceWith.length === 0
                 }
