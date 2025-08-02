@@ -167,6 +167,172 @@ export const StatementListBox: React.FC = () => {
     }
   }, [error]);
 
+  const [storedAnnotatorResourceId, setStoredAnnotatorResourceId] = useState<
+    string | false
+  >(false);
+  const [storedAnnotatorScroll, setStoredAnnotatorScroll] = useState<number>(0);
+
+  // so the annotator jumps to the anchor
+  useEffect(() => {
+    setStoredAnnotatorResourceId(false);
+    setStoredAnnotatorScroll(0);
+  }, [territoryId]);
+
+  // its needed as the scroll event is executed even when the annotator is not active
+  useEffect(() => {
+    if (!storedAnnotatorResourceId) {
+      setStoredAnnotatorScroll(0);
+    }
+  }, [storedAnnotatorResourceId]);
+
+  // delay of show content for fluent animation on open
+  const [showStatementList, setShowStatementList] = useState(true);
+
+  useEffect(() => {
+    if (statementListOpened) {
+      setTimeout(() => {
+        setShowStatementList(true);
+      }, 500);
+    } else {
+      setShowStatementList(false);
+    }
+  }, [statementListOpened]);
+
+  const [annotator, setAnnotator] = useState<Annotator | undefined>(undefined);
+
+  const { setAnnotator: useAnnotatorSetAnnotator } = useAnnotator();
+
+  useEffect(() => {
+    if (annotator) {
+      useAnnotatorSetAnnotator(annotator);
+    }
+  }, [annotator, useAnnotatorSetAnnotator]);
+  const {
+    data: resources,
+    error: resourcesError,
+    isFetching: resourcesIsFetching,
+  } = useQuery({
+    queryKey: ["resourcesWithDocuments"],
+    queryFn: async () => {
+      const res = await api.entitiesSearch({
+        resourceHasDocument: true,
+      });
+      return res.data;
+    },
+    enabled: api.isLoggedIn(),
+  });
+
+  const {
+    data: documents,
+    error: documentsError,
+    isFetching: documentsIsFetching,
+  } = useQuery<IDocument[]>({
+    queryKey: ["documents"],
+    queryFn: async () => {
+      const res = await api.documentsGet({});
+      return res.data;
+    },
+    enabled: api.isLoggedIn(),
+  });
+
+  const [selectedResourceId, setSelectedResourceId] = useState<string | false>(
+    storedAnnotatorResourceId
+  );
+
+  useEffect(() => {
+    if (selectedResourceId) {
+      setStoredAnnotatorResourceId(selectedResourceId);
+    }
+  }, [selectedResourceId]);
+
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  const selectedTerritoryPath: string[] = useAppSelector(
+    (state) => state.territoryTree.selectedTerritoryPath
+  );
+
+  const loadDefaultResource = () => {
+    if (resources && documents && !isInitialized) {
+      // First try to find resource with document containing territoryId
+      let resourceWithAnchor = resources.find((resource) => {
+        if (resource.data.documentId) {
+          const document = documents.find(
+            (d) => d.id === resource.data.documentId
+          );
+          if (document) {
+            return document.entityIds.T.includes(territoryId);
+          }
+        }
+        return false;
+      });
+
+      // If not found, try each territory in the path in reverse order
+      if (!resourceWithAnchor) {
+        for (let i = selectedTerritoryPath.length - 1; i > 0; i--) {
+          const territoryInPath = selectedTerritoryPath[i];
+          resourceWithAnchor = resources.find((resource) => {
+            if (resource.data.documentId) {
+              const document = documents.find(
+                (d) => d.id === resource.data.documentId
+              );
+              if (document) {
+                return document.entityIds.T.includes(territoryInPath);
+              }
+            }
+            return false;
+          });
+          if (resourceWithAnchor) break;
+        }
+      }
+
+      if (resourceWithAnchor) {
+        setSelectedResourceId(resourceWithAnchor.id);
+      } else {
+        setSelectedResourceId(false);
+      }
+
+      setIsInitialized(true);
+    }
+  };
+
+  useEffect(() => {
+    loadDefaultResource();
+  }, [resources, documents, isInitialized, territoryId]);
+
+  useEffect(() => {
+    setIsInitialized(false);
+  }, [territoryId]);
+
+  const selectedResource = useMemo<IResponseEntity | false>(() => {
+    if (selectedResourceId && resources) {
+      return resources?.find((r) => r.id === selectedResourceId) ?? false;
+    }
+    return false;
+  }, [selectedResourceId, resources]);
+
+  const selectedDocumentId = useMemo<string | undefined>(() => {
+    if (selectedResource) {
+      return selectedResource.data.documentId;
+    }
+    return undefined;
+  }, [selectedResource]);
+
+  const {
+    data: selectedDocument,
+    error: selectedDocumentError,
+    isFetching: selectedDocumentIsFetching,
+  } = useQuery<IDocument | false>({
+    queryKey: ["document", selectedDocumentId],
+    queryFn: async () => {
+      if (selectedDocumentId) {
+        const res = await api.documentGet(selectedDocumentId);
+        return res.data;
+      }
+      return false;
+    },
+    enabled: api.isLoggedIn() && !!selectedDocumentId,
+  });
+
   const deleteStatementMutation = useMutation({
     mutationFn: async (sId: string) =>
       await api.entityDelete(sId, { ignoreErrorToast: true }),
@@ -382,13 +548,56 @@ export const StatementListBox: React.FC = () => {
     },
   });
 
+  // collect all statement anchors that are in the statements list
+  const collectStatementAnchors = (anchors: IAnchorsNode[]): IAnchorsNode[] => {
+    const statementIds = new Set(statements.map((s) => s.id));
+    return anchors.reduce((acc: any[], anchor) => {
+      if (
+        anchor.class === EntityEnums.Class.Statement &&
+        statementIds.has(anchor.anchor)
+      ) {
+        acc.push(anchor);
+      }
+      if (anchor.children) {
+        acc.push(...collectStatementAnchors(anchor.children));
+      }
+      return acc;
+    }, []);
+  };
+
   const handleCreateStatement = (
     text: string = "",
-    statementId: string | undefined = undefined
+    statementId: string | undefined = undefined,
+    startIndex: number | undefined = undefined
   ) => {
     // TODO: take order from the anchors in the document => filter only S that are in the statement list
-    // TODO: then find the start index of the last statement before the new statement
-    // TODO: see the order of the last start index statement in the statement list and put the new statement after it
+    if (selectedDocument) {
+      const statementAnchors = Array.from(
+        new Map(
+          collectStatementAnchors(selectedDocument.anchors).map((anchor) => [
+            anchor.anchor,
+            anchor,
+          ])
+        ).values()
+      );
+      const territoryStatements = territory?.statements || [];
+
+      // Filter statement anchors to only include those that are in the territory.statements
+      const filteredStatementAnchors = statementAnchors.filter((anchor) =>
+        territoryStatements.some((statement) => statement.id === anchor.anchor)
+      );
+
+      // Find the last statement anchor with start index before the given startIndex
+      const lastAnchorBeforeIndex =
+        startIndex !== undefined
+          ? filteredStatementAnchors
+              .filter((anchor) => anchor.indexStart < startIndex)
+              .sort((a, b) => b.indexStart - a.indexStart)[0] // Sort descending and take first
+          : undefined;
+
+      // TODO: see the order of the last start index statement in the statement list and put the new statement after it
+    }
+
     if (userData && territory) {
       const newStatement: IStatement = CStatement(
         localStorage.getItem("userrole") as UserEnums.Role,
@@ -589,189 +798,6 @@ export const StatementListBox: React.FC = () => {
   const contentWidth = useAppSelector(
     (state) => state.layout.mainPage.secondPanelRealWidth
   );
-
-  const [storedAnnotatorResourceId, setStoredAnnotatorResourceId] = useState<
-    string | false
-  >(false);
-  const [storedAnnotatorScroll, setStoredAnnotatorScroll] = useState<number>(0);
-
-  // so the annotator jumps to the anchor
-  useEffect(() => {
-    setStoredAnnotatorResourceId(false);
-    setStoredAnnotatorScroll(0);
-  }, [territoryId]);
-
-  // its needed as the scroll event is executed even when the annotator is not active
-  useEffect(() => {
-    if (!storedAnnotatorResourceId) {
-      setStoredAnnotatorScroll(0);
-    }
-  }, [storedAnnotatorResourceId]);
-
-  // delay of show content for fluent animation on open
-  const [showStatementList, setShowStatementList] = useState(true);
-
-  useEffect(() => {
-    if (statementListOpened) {
-      setTimeout(() => {
-        setShowStatementList(true);
-      }, 500);
-    } else {
-      setShowStatementList(false);
-    }
-  }, [statementListOpened]);
-
-  const [annotator, setAnnotator] = useState<Annotator | undefined>(undefined);
-
-  const { setAnnotator: useAnnotatorSetAnnotator } = useAnnotator();
-
-  useEffect(() => {
-    if (annotator) {
-      useAnnotatorSetAnnotator(annotator);
-    }
-  }, [annotator, useAnnotatorSetAnnotator]);
-  const {
-    data: resources,
-    error: resourcesError,
-    isFetching: resourcesIsFetching,
-  } = useQuery({
-    queryKey: ["resourcesWithDocuments"],
-    queryFn: async () => {
-      const res = await api.entitiesSearch({
-        resourceHasDocument: true,
-      });
-      return res.data;
-    },
-    enabled: api.isLoggedIn(),
-  });
-
-  const {
-    data: documents,
-    error: documentsError,
-    isFetching: documentsIsFetching,
-  } = useQuery<IDocument[]>({
-    queryKey: ["documents"],
-    queryFn: async () => {
-      const res = await api.documentsGet({});
-      return res.data;
-    },
-    enabled: api.isLoggedIn(),
-  });
-
-  const [selectedResourceId, setSelectedResourceId] = useState<string | false>(
-    storedAnnotatorResourceId
-  );
-
-  useEffect(() => {
-    if (selectedResourceId) {
-      setStoredAnnotatorResourceId(selectedResourceId);
-    }
-  }, [selectedResourceId]);
-
-  const [isInitialized, setIsInitialized] = useState(false);
-
-  const selectedTerritoryPath: string[] = useAppSelector(
-    (state) => state.territoryTree.selectedTerritoryPath
-  );
-
-  const loadDefaultResource = () => {
-    if (resources && documents && !isInitialized) {
-      // First try to find resource with document containing territoryId
-      let resourceWithAnchor = resources.find((resource) => {
-        if (resource.data.documentId) {
-          const document = documents.find(
-            (d) => d.id === resource.data.documentId
-          );
-          if (document) {
-            return document.entityIds.T.includes(territoryId);
-          }
-        }
-        return false;
-      });
-
-      // If not found, try each territory in the path in reverse order
-      if (!resourceWithAnchor) {
-        for (let i = selectedTerritoryPath.length - 1; i > 0; i--) {
-          const territoryInPath = selectedTerritoryPath[i];
-          resourceWithAnchor = resources.find((resource) => {
-            if (resource.data.documentId) {
-              const document = documents.find(
-                (d) => d.id === resource.data.documentId
-              );
-              if (document) {
-                return document.entityIds.T.includes(territoryInPath);
-              }
-            }
-            return false;
-          });
-          if (resourceWithAnchor) break;
-        }
-      }
-
-      if (resourceWithAnchor) {
-        setSelectedResourceId(resourceWithAnchor.id);
-      } else {
-        setSelectedResourceId(false);
-      }
-
-      setIsInitialized(true);
-    }
-  };
-
-  useEffect(() => {
-    loadDefaultResource();
-  }, [resources, documents, isInitialized, territoryId]);
-
-  useEffect(() => {
-    setIsInitialized(false);
-  }, [territoryId]);
-
-  const selectedResource = useMemo<IResponseEntity | false>(() => {
-    if (selectedResourceId && resources) {
-      return resources?.find((r) => r.id === selectedResourceId) ?? false;
-    }
-    return false;
-  }, [selectedResourceId, resources]);
-
-  const selectedDocumentId = useMemo<string | undefined>(() => {
-    if (selectedResource) {
-      return selectedResource.data.documentId;
-    }
-    return undefined;
-  }, [selectedResource]);
-
-  const {
-    data: selectedDocument,
-    error: selectedDocumentError,
-    isFetching: selectedDocumentIsFetching,
-  } = useQuery<IDocument | false>({
-    queryKey: ["document", selectedDocumentId],
-    queryFn: async () => {
-      if (selectedDocumentId) {
-        const res = await api.documentGet(selectedDocumentId);
-        return res.data;
-      }
-      return false;
-    },
-    enabled: api.isLoggedIn() && !!selectedDocumentId,
-  });
-
-  // collect all statement anchors that are in the statements list
-  const collectStatementAnchors = (anchors: IAnchorsNode[]): IAnchorsNode[] => {
-    const statementIds = new Set(statements.map((s) => s.id));
-    return anchors.reduce((acc: any[], anchor) => {
-      if (
-        anchor.class === EntityEnums.Class.Statement &&
-        statementIds.has(anchor.anchor)
-      ) {
-        acc.push(anchor);
-      }
-      if (anchor.children) {
-        acc.push(...collectStatementAnchors(anchor.children));
-      }
-      return acc;
-    }, []);
-  };
 
   // adds object orderCorrection to each statement with info about the order in the list vs the annotator
   const statementsWithOrder: (IResponseStatement & {
