@@ -30,13 +30,13 @@ interface TextAnnotatorMenuProps {
   anchors: string[];
   entities: Record<string, IEntity | false>;
   onAnchorAdd: (entityId: string) => void;
-  handleCreateStatement: Function | undefined;
-  onCreateTerritory:
-    | undefined
-    | ((territoryCreateModalType?: TerritoryCreateModalType) => void);
-  handleRemoveAnchor: Function | undefined;
+  onCreateStatement?: () => void;
+  onCreateTerritory?: (
+    territoryCreateModalType?: TerritoryCreateModalType
+  ) => void;
+  onRemoveAnchor?: (anchor: string) => void;
   canCreateActiveTAnchor: boolean;
-  onCreateActiveTAnchor: Function | undefined;
+  onCreateActiveTAnchor?: () => void;
   isLoadingEntities: boolean;
   hasParentT: boolean;
   isTextInsideThisT: boolean;
@@ -48,10 +48,10 @@ export const TextAnnotatorMenu = ({
   anchors,
   entities,
   onAnchorAdd,
-  handleCreateStatement = undefined,
+  onCreateStatement = undefined,
   onCreateTerritory = undefined,
   onCreateActiveTAnchor = undefined,
-  handleRemoveAnchor = undefined,
+  onRemoveAnchor = undefined,
   canCreateActiveTAnchor,
   isLoadingEntities,
   hasParentT,
@@ -117,13 +117,13 @@ export const TextAnnotatorMenu = ({
           )}
         </StyledAnnotatorItemContent>
         <StyledAnnotatorItemContent>
-          {handleCreateStatement && (
+          {onCreateStatement && (
             <StyledAnnotatorItemContentLine>
               <Button
                 icon={<TbAnchor size={15} />}
                 color="primary"
                 onClick={() => {
-                  handleCreateStatement();
+                  onCreateStatement();
                 }}
                 label="New Statement"
                 tooltipLabel="Create new Statement from selection"
@@ -216,8 +216,8 @@ export const TextAnnotatorMenu = ({
                     <EntityTag
                       unlinkButton={{
                         onClick: () => {
-                          if (handleRemoveAnchor) {
-                            handleRemoveAnchor(anchor);
+                          if (onRemoveAnchor) {
+                            onRemoveAnchor(anchor);
                           }
                         },
                       }}

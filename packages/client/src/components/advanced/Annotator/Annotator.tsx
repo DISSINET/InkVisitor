@@ -525,8 +525,8 @@ export const TextAnnotator = ({
                     entities={storedEntities}
                     onAnchorAdd={handleAddAnchor}
                     onCreateTerritory={onCreateTerritory}
-                    handleCreateStatement={onCreateStatement}
-                    handleRemoveAnchor={onRemoveAnchor}
+                    onCreateStatement={onCreateStatement}
+                    onRemoveAnchor={onRemoveAnchor}
                     isTextInsideThisT={selectedAnchors.some(
                       (anchor) => anchor === thisTerritoryEntityId
                     )}
