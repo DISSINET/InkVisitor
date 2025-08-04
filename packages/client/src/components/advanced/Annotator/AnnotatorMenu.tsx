@@ -23,6 +23,9 @@ import {
   StyledTerritorySubsectionTitle,
 } from "./AnnotatorStyles";
 import { TerritoryCreateModalType } from "./types";
+import { EntityEnums } from "@shared/enums";
+import { useQueryClient } from "@tanstack/react-query";
+import { useSearchParams } from "hooks";
 
 interface TextAnnotatorMenuProps {
   text: string;
@@ -61,6 +64,8 @@ export const TextAnnotatorMenu = ({
   territory,
 }: TextAnnotatorMenuProps) => {
   const activeTerritory = entities[activeTerritoryId ?? ""];
+  const queryClient = useQueryClient();
+  const { setStatementId } = useSearchParams();
   return (
     <>
       <StyledAnnotatorItem>
@@ -142,6 +147,14 @@ export const TextAnnotatorMenu = ({
               inputWidth={200}
               openDetailOnCreate
               parentTerritory={territory}
+              onEntityCreateMutationSuccess={(entity) => {
+                if (entity.class === EntityEnums.Class.Statement) {
+                  queryClient.invalidateQueries({
+                    queryKey: ["territory", "statement-list"],
+                  });
+                  setStatementId(entity.id);
+                }
+              }}
             />
           </StyledAnnotatorItemContentLine>
           <StyledAnnotatorItemContentLine>

@@ -46,6 +46,7 @@ interface EntitySuggester {
   territoryParentId?: string;
   // used for create entity modal
   parentTerritory?: IEntity;
+  onEntityCreateMutationSuccess?: (entity: IEntity) => void;
 
   button?: React.ReactNode;
   preSuggestions?: IEntity[];
@@ -87,6 +88,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   isInsideStatement = false,
   territoryParentId,
   parentTerritory,
+  onEntityCreateMutationSuccess,
 
   button,
   preSuggestions,
@@ -275,6 +277,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     if (entity.class === EntityEnums.Class.Territory) {
       queryClient.invalidateQueries({ queryKey: ["tree"] });
     }
+    onEntityCreateMutationSuccess && onEntityCreateMutationSuccess(entity);
   };
 
   const entityCreateMutation = useMutation({
