@@ -22,7 +22,11 @@ interface StatementListTextAnnotator {
   territory?: IResponseTerritory;
   statementId: string;
   addStatementAtCertainIndex: (index: number) => Promise<void>;
-  handleCreateStatement: (detail?: string, statementId?: string) => void;
+  handleCreateStatement: (
+    text: string,
+    statementId: string,
+    startIndex: number
+  ) => void;
 
   storedAnnotatorScroll: number;
   setStoredAnnotatorScroll?: React.Dispatch<React.SetStateAction<number>>;

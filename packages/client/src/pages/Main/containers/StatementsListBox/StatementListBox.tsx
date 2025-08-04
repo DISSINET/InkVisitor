@@ -7,6 +7,7 @@ import {
   IResponseEntity,
   IResponseStatement,
   IStatement,
+  IStatementDataTerritory,
   ITerritory,
   Relation,
 } from "@shared/types";
@@ -431,38 +432,35 @@ export const StatementListBox: React.FC = () => {
     },
   });
 
-  const addStatementAtCertainIndex = async (index: number) => {
+  const getOrderByIndex = (index: number) => {
     let newOrder: number | false = false;
 
-    if (userData) {
-      if (index + 1 > statements.length) {
-        // last one
-        newOrder = EntityEnums.Order.Last;
-      } else {
-        if (index < 1 && statements[0].data.territory) {
-          // first one
-          newOrder = EntityEnums.Order.First;
-        } else if (
-          statements[index - 1].data.territory &&
-          statements[index].data.territory
-        ) {
-          // somewhere between
-          newOrder =
-            ((
-              statements[index - 1].data.territory as {
-                order: number;
-                territoryId: string;
-              }
-            ).order +
-              (
-                statements[index].data.territory as {
-                  order: number;
-                  territoryId: string;
-                }
-              ).order) /
-            2;
-        }
+    if (index + 1 > statements.length) {
+      // last one
+      newOrder = EntityEnums.Order.Last;
+    } else {
+      if (index < 1 && statements[0].data.territory) {
+        // first one
+        newOrder = EntityEnums.Order.First;
+      } else if (
+        statements[index - 1].data.territory &&
+        statements[index].data.territory
+      ) {
+        // somewhere between
+        newOrder =
+          ((statements[index - 1].data.territory as IStatementDataTerritory)
+            .order +
+            (statements[index].data.territory as IStatementDataTerritory)
+              .order) /
+          2;
       }
+    }
+    return newOrder;
+  };
+
+  const addStatementAtCertainIndex = async (index: number) => {
+    if (userData) {
+      let newOrder = getOrderByIndex(index);
 
       if (newOrder) {
         const newStatement: IStatement = CStatement(
@@ -472,9 +470,8 @@ export const StatementListBox: React.FC = () => {
           "",
           territoryId
         );
-        (
-          newStatement.data.territory as { order: number; territoryId: string }
-        ).order = newOrder;
+        (newStatement.data.territory as IStatementDataTerritory).order =
+          newOrder;
 
         statementCreateMutation.mutate(newStatement);
       }
@@ -567,11 +564,12 @@ export const StatementListBox: React.FC = () => {
 
   const handleCreateStatement = (
     text: string = "",
-    statementId: string | undefined = undefined,
-    startIndex: number | undefined = undefined
+    statementId: string,
+    // start index of selected text
+    startIndex: number
   ) => {
-    // TODO: take order from the anchors in the document => filter only S that are in the statement list
     if (selectedDocument) {
+      // take order from the anchors in the document => filter only S that are in the statement list
       const statementAnchors = Array.from(
         new Map(
           collectStatementAnchors(selectedDocument.anchors).map((anchor) => [
@@ -589,25 +587,37 @@ export const StatementListBox: React.FC = () => {
 
       // Find the last statement anchor with start index before the given startIndex
       const lastAnchorBeforeIndex =
-        startIndex !== undefined
+        startIndex !== -1
           ? filteredStatementAnchors
               .filter((anchor) => anchor.indexStart < startIndex)
               .sort((a, b) => b.indexStart - a.indexStart)[0] // Sort descending and take first
           : undefined;
 
-      // TODO: see the order of the last start index statement in the statement list and put the new statement after it
-    }
+      // see the order of the previous start index statement in the statement list and put the new statement after it
+      const lastIndexBeforeHighlight =
+        territoryStatements.findIndex(
+          (statement) => statement.id === lastAnchorBeforeIndex?.anchor
+        ) ?? -1;
+      const newOrder = getOrderByIndex(lastIndexBeforeHighlight + 1);
 
-    if (userData && territory) {
-      const newStatement: IStatement = CStatement(
-        localStorage.getItem("userrole") as UserEnums.Role,
-        userData.options,
-        text,
-        "",
-        territoryId,
-        statementId
-      );
-      addStatementAtTheEndMutation.mutate(newStatement);
+      if (userData && territory) {
+        const newStatement: IStatement = CStatement(
+          localStorage.getItem("userrole") as UserEnums.Role,
+          userData.options,
+          text,
+          "",
+          territoryId,
+          statementId
+        );
+
+        if (newOrder) {
+          (newStatement.data.territory as IStatementDataTerritory).order =
+            newOrder;
+          statementCreateMutation.mutate(newStatement);
+        } else {
+          addStatementAtTheEndMutation.mutate(newStatement);
+        }
+      }
     }
   };
 

@@ -44,7 +44,11 @@ interface TextAnnotatorProps {
   displayLineNumbers: boolean;
   hlEntities?: EntityEnums.Class[];
   documentId: string;
-  handleCreateStatement?: (text: string, statementId: string) => void;
+  handleCreateStatement?: (
+    text: string,
+    statementId: string,
+    startIndex: number
+  ) => void;
   initialScrollEntityId?: string;
   thisTerritoryEntityId?: string;
 
@@ -145,6 +149,7 @@ export const TextAnnotator = ({
 
   const [selectedText, setSelectedText] = useState<string>("");
   const [selectedAnchors, setSelectedAnchors] = useState<string[]>([]);
+  const [selectionStartIndex, setSelectionStartIndex] = useState<number>(-1);
   const [storedEntities, setStoredEntities] = useState<
     Record<string, IEntity | false>
   >({});
@@ -270,9 +275,10 @@ export const TextAnnotator = ({
   useEffect(() => {
     // isSelectingText didn't work as expected without the useEffect and pendingSelection so this implementation was necessary
     if (pendingSelection && !isSelectingText) {
-      const { text, anchors } = pendingSelection;
+      const { text, anchors, index } = pendingSelection;
       setSelectedText(text);
       setSelectedAnchors(anchors);
+      setSelectionStartIndex(index);
 
       handleFetchEntities(anchors);
 
@@ -304,6 +310,7 @@ export const TextAnnotator = ({
   };
 
   const handleAddAnchor = (entityId: string) => {
+    // TODO: handle adding a new statement - preserve the order
     annotator?.addAnchor(entityId);
     setSelectedText("");
     handleSaveNewContent(true);
@@ -463,12 +470,12 @@ export const TextAnnotator = ({
   }, [territoryCreateModalType, territory]);
 
   const onCreateStatement = () => {
-    if (handleCreateStatement && selectedText) {
+    if (handleCreateStatement && selectedText && selectionStartIndex !== -1) {
       const newStatementId = uuidv4();
       handleAddAnchor(newStatementId);
       // remove linebreaks from text
       const validatedText = selectedText.replace(/\n/g, " ");
-      handleCreateStatement(validatedText, newStatementId);
+      handleCreateStatement(validatedText, newStatementId, selectionStartIndex);
     }
   };
 
