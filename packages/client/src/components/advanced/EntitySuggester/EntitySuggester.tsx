@@ -42,7 +42,10 @@ interface EntitySuggester {
   filterEditorRights?: boolean;
   isInsideTemplate?: boolean;
   isInsideStatement?: boolean;
+  // used for instantiating template T, entity suggestions
   territoryParentId?: string;
+  // used for create entity modal
+  parentTerritory?: IEntity;
 
   button?: React.ReactNode;
   preSuggestions?: IEntity[];
@@ -83,6 +86,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   isInsideTemplate = false,
   isInsideStatement = false,
   territoryParentId,
+  parentTerritory,
 
   button,
   preSuggestions,
@@ -513,6 +517,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
           closeModal={() => setShowCreateModal(false)}
           onMutationSuccess={(entity) => onMutationSuccess(entity)}
           allowedEntityClasses={categoryTypes}
+          parentTerritory={parentTerritory}
         />
       )}
     </>

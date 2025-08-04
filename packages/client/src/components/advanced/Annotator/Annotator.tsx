@@ -548,6 +548,7 @@ export const TextAnnotator = ({
                     }
                     isLoadingEntities={isFetchingAnchorEntities}
                     hasParentT={hasParentT}
+                    territory={territory}
                   />
                 )}
               </StyledAnnotatorMenu>

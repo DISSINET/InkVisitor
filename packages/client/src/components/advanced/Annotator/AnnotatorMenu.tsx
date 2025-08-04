@@ -1,6 +1,6 @@
 import React from "react";
 
-import { IDocument, IEntity } from "@shared/types";
+import { IDocument, IEntity, IResponseTerritory } from "@shared/types";
 import { Loader } from "components";
 import { Button } from "components/basic/Button/Button";
 import { BsSegmentedNav } from "react-icons/bs";
@@ -41,6 +41,7 @@ interface TextAnnotatorMenuProps {
   hasParentT: boolean;
   isTextInsideThisT: boolean;
   activeTerritoryId: string | undefined;
+  territory?: IResponseTerritory;
 }
 
 export const TextAnnotatorMenu = ({
@@ -57,8 +58,9 @@ export const TextAnnotatorMenu = ({
   hasParentT,
   isTextInsideThisT,
   activeTerritoryId,
+  territory,
 }: TextAnnotatorMenuProps) => {
-  const activeTerritory = entities[activeTerritoryId as string];
+  const activeTerritory = entities[activeTerritoryId ?? ""];
   return (
     <>
       <StyledAnnotatorItem>
@@ -139,6 +141,7 @@ export const TextAnnotatorMenu = ({
               }}
               inputWidth={200}
               openDetailOnCreate
+              parentTerritory={territory}
             />
           </StyledAnnotatorItemContentLine>
           <StyledAnnotatorItemContentLine>
