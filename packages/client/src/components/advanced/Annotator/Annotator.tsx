@@ -120,6 +120,10 @@ export const TextAnnotator = ({
       queryClient.invalidateQueries({ queryKey: ["document"] });
       queryClient.invalidateQueries({ queryKey: ["documents"] });
       toast.info("Document content saved");
+      setIsSaving(false);
+    },
+    onError: (error) => {
+      setIsSaving(false);
     },
   });
 
@@ -129,6 +133,10 @@ export const TextAnnotator = ({
     onSuccess: (variables, data) => {
       queryClient.invalidateQueries({ queryKey: ["document"] });
       queryClient.invalidateQueries({ queryKey: ["documents"] });
+      setIsSaving(false);
+    },
+    onError: (error) => {
+      setIsSaving(false);
     },
   });
 
@@ -163,6 +171,8 @@ export const TextAnnotator = ({
   const [scrollAfterRefresh, setScrollAfterRefresh] = useState<
     number | undefined
   >(undefined);
+
+  const [isSaving, setIsSaving] = useState<boolean>(false);
 
   const { refs, floatingStyles } = useFloating({
     placement: "bottom",
@@ -257,6 +267,8 @@ export const TextAnnotator = ({
     setScrollAfterRefresh(scrollBeforeUpdated);
 
     if (annotator && documentId) {
+      setIsSaving(true);
+
       if (quiet) {
         updateDocumentMutationQuiet.mutate({
           id: documentId,
@@ -292,6 +304,10 @@ export const TextAnnotator = ({
       setPendingSelection({ text, anchors, index });
     }
   };
+
+  useEffect(() => {
+    console.log("selectedText", selectedText);
+  }, [selectedText]);
 
   useEffect(() => {
     // isSelectingText didn't work as expected without the useEffect and pendingSelection so this implementation was necessary
@@ -350,6 +366,42 @@ export const TextAnnotator = ({
 
   const refreshAnnotator = (scrollTo: { line?: number; anchor?: string }) => {
     if (!mainCanvas.current) {
+      return;
+    }
+
+    // Check if the document content has actually changed
+    const currentContent = annotator?.text?.value;
+    const newContent = dataDocument?.content ?? "no text";
+
+    // If content hasn't changed and we have an existing annotator, just redraw it
+    if (annotator && currentContent === newContent) {
+      // Preserve current selection state
+      const currentSelection = {
+        selectStart: annotator.cursor?.selectStart,
+        selectEnd: annotator.cursor?.selectEnd,
+        selectedText: selectedText,
+        selectedAnchors: selectedAnchors,
+      };
+
+      annotator.draw();
+
+      // Restore selection if it existed
+      if (currentSelection.selectStart && currentSelection.selectEnd) {
+        annotator.cursor.selectStart = currentSelection.selectStart;
+        annotator.cursor.selectEnd = currentSelection.selectEnd;
+        setSelectedText(currentSelection.selectedText);
+        setSelectedAnchors(currentSelection.selectedAnchors);
+      }
+
+      // Handle scrolling if needed
+      setTimeout(() => {
+        if (scrollTo.line) {
+          annotator.scrollToLine(scrollTo.line);
+        } else if (scrollTo.anchor) {
+          annotator.scrollToAnchor(scrollTo.anchor);
+        }
+      }, 200);
+
       return;
     }
 
@@ -416,7 +468,7 @@ export const TextAnnotator = ({
   };
 
   useEffect(() => {
-    if (!dataDocumentIsFetching) {
+    if (!dataDocumentIsFetching && !isSaving) {
       if (scrollAfterRefresh !== undefined) {
         refreshAnnotator({
           line: scrollAfterRefresh,
@@ -429,23 +481,23 @@ export const TextAnnotator = ({
         });
       }
     }
-  }, [dataDocumentIsFetching, dataDocument]);
+  }, [dataDocumentIsFetching, dataDocument, isSaving]);
 
   useEffect(() => {
-    if (!dataDocumentIsFetching) {
+    if (!dataDocumentIsFetching && !isSaving) {
       refreshAnnotator({
         line: storedAnnotatorScroll,
       });
     }
-  }, [theme, dataDocumentIsFetching]);
+  }, [theme, dataDocumentIsFetching, isSaving]);
 
   useEffect(() => {
-    if (!dataDocumentIsFetching) {
+    if (!dataDocumentIsFetching && !isSaving) {
       refreshAnnotator({
         line: storedAnnotatorScroll,
       });
     }
-  }, [hlEntities]);
+  }, [hlEntities, isSaving]);
 
   useEffect(() => {
     if (mainCanvas.current) {
