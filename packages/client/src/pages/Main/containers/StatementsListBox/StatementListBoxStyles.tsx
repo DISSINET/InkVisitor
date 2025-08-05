@@ -162,7 +162,8 @@ export const StyledEntityContainer = styled.div`
 `;
 
 export const StyledDocumentTitleContainer = styled.div`
+  position: relative;
   display: flex;
   align-items: center;
-  /* max-width: 100px; */
+  min-width: 1rem;
 `;

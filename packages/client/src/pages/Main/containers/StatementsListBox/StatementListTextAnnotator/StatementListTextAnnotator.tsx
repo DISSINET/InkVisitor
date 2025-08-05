@@ -4,7 +4,6 @@ import { EntityEnums } from "@shared/enums";
 import { IDocument, IResponseEntity, IResponseTerritory } from "@shared/types";
 import TextAnnotator from "components/advanced/Annotator/Annotator";
 import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
-import { useDebounce, useTheme } from "hooks";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ANNOTATOR_SELECTOR_HEIGHT,
@@ -12,7 +11,6 @@ import {
   COLLAPSED_TABLE_WIDTH,
 } from "Theme/constants";
 import StatementListDocumentLine from "../StatementListDocumentLine/StatementListDocumentLine";
-import { StatementListSearchLine } from "../StatementListSearchLine/StatementListSearchLine";
 
 interface StatementListTextAnnotator {
   // it's faster than the territory entity so it's better to pass territoryId separately

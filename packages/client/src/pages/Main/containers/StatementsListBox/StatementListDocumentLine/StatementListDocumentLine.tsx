@@ -99,17 +99,14 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
           )}
         </StyledEntityContainer>
 
-        {selectedDocumentIsFetching && <Loader />}
-
-        {!selectedDocumentIsFetching && selectedDocument && (
-          <StyledDocumentTitleContainer
-            style={{
-              maxWidth: annotatorWidthTooSmall ? "10rem" : "12rem",
-            }}
-          >
-            <DocumentTitle title={selectedDocument.title} />
-          </StyledDocumentTitleContainer>
-        )}
+        <StyledDocumentTitleContainer
+          style={{
+            maxWidth: annotatorWidthTooSmall ? "10rem" : "12rem",
+          }}
+        >
+          {selectedDocument && <DocumentTitle title={selectedDocument.title} />}
+          <Loader show={selectedDocumentIsFetching} size={16} />
+        </StyledDocumentTitleContainer>
 
         {!selectedDocumentIsFetching &&
           selectedResource !== false &&
