@@ -47,6 +47,7 @@ interface EntitySuggester {
   // used for create entity modal
   parentTerritory?: IEntity;
   onEntityCreateMutationSuccess?: (entity: IEntity) => void;
+  entityCreateStatementOrder?: number;
 
   button?: React.ReactNode;
   preSuggestions?: IEntity[];
@@ -89,6 +90,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   territoryParentId,
   parentTerritory,
   onEntityCreateMutationSuccess,
+  entityCreateStatementOrder,
 
   button,
   preSuggestions,
@@ -521,6 +523,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
           onMutationSuccess={(entity) => onMutationSuccess(entity)}
           allowedEntityClasses={categoryTypes}
           parentTerritory={parentTerritory}
+          entityCreateStatementOrder={entityCreateStatementOrder}
         />
       )}
     </>

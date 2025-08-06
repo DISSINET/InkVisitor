@@ -433,7 +433,7 @@ export const StatementListBox: React.FC = () => {
   });
 
   const getOrderByIndex = (index: number) => {
-    let newOrder: number | false = false;
+    let newOrder: number = EntityEnums.Order.Last;
 
     if (index + 1 > statements.length) {
       // last one
@@ -607,16 +607,11 @@ export const StatementListBox: React.FC = () => {
           text,
           "",
           territoryId,
-          statementId
+          statementId,
+          newOrder
         );
 
-        if (newOrder) {
-          (newStatement.data.territory as IStatementDataTerritory).order =
-            newOrder;
-          statementCreateMutation.mutate(newStatement);
-        } else {
-          addStatementAtTheEndMutation.mutate(newStatement);
-        }
+        statementCreateMutation.mutate(newStatement);
       }
     }
   };

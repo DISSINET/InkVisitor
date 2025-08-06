@@ -50,6 +50,7 @@ interface EntityCreateModal {
   languageSelected?: EntityEnums.Language;
   // init for create T / S
   parentTerritory?: IEntity;
+  entityCreateStatementOrder?: number;
 
   allowedEntityClasses?: EntityEnums.Class[];
 }
@@ -60,6 +61,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   categorySelected,
   languageSelected,
   parentTerritory,
+  entityCreateStatementOrder,
   allowedEntityClasses,
 }) => {
   const entityClasses = allowedEntityClasses
@@ -182,7 +184,9 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
           },
           newCreated.label,
           newCreated.detail,
-          newCreated.territoryId
+          newCreated.territoryId,
+          undefined,
+          entityCreateStatementOrder ?? EntityEnums.Order.Last
         );
         entityCreateMutation.mutate(newStatement);
       } else if (newCreated.entityClass === EntityEnums.Class.Territory) {
