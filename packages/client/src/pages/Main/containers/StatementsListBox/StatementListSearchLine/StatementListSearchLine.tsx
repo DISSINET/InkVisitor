@@ -178,7 +178,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                 setSearchTerm(newText);
               }}
               changeOnType
-              width={130}
+              width={annotatorWidthTooSmall ? 100 : 130}
               minWidth={50}
               clearable
             />
@@ -216,26 +216,30 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
             )}
           </StyledSearchContainer>
 
-          <AttributeButtonGroup
-            disabled
-            options={[
-              {
-                longValue: "replace",
-                shortValue: "",
-                onClick: () => {},
-                selected: replaceSection,
-                icon: <TbReplace />,
-              },
-              {
-                longValue: "annotate",
-                shortValue: "",
-                onClick: () => {},
-                selected: !replaceSection,
-                // shortIcon: <FaPlus />,
-                icon: <FaAnchor />,
-              },
-            ]}
-          />
+          {annotatorWidthTooSmall ? (
+            <div style={{ width: "1rem" }}></div>
+          ) : (
+            <AttributeButtonGroup
+              disabled
+              options={[
+                {
+                  longValue: "replace",
+                  shortValue: "",
+                  onClick: () => {},
+                  selected: replaceSection,
+                  icon: <TbReplace />,
+                },
+                {
+                  longValue: "annotate",
+                  shortValue: "",
+                  onClick: () => {},
+                  selected: !replaceSection,
+                  // shortIcon: <FaPlus />,
+                  icon: <FaAnchor />,
+                },
+              ]}
+            />
+          )}
 
           {!replaceSection ? (
             <>
@@ -270,6 +274,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                   onPicked={(entity) => {
                     setEntityToAnchor(entity);
                   }}
+                  inputWidth={annotatorWidthTooSmall ? 70 : 100}
                 />
               ) : (
                 <EntityTag
@@ -289,6 +294,9 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                 onChangeFn={(value: string) => {
                   setReplaceWith(value);
                 }}
+                width={annotatorWidthTooSmall ? 100 : 130}
+                minWidth={50}
+                clearable
               />
               <Button
                 circular
@@ -302,7 +310,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                   searchOccurences.length === 0 || replaceWith.length === 0
                 }
               />
-              <Button
+              {/* <Button
                 circular
                 color="info"
                 inverted
@@ -317,7 +325,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                 disabled={
                   searchOccurences.length === 0 || replaceWith.length === 0
                 }
-              />
+              /> */}
             </>
           )}
         </>

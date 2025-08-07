@@ -166,8 +166,16 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
                 onChange={handleHlEntitiesChange}
                 value={hlEntities}
                 noOptionsMessage="No entity classes to highlight"
-                width={contentWidth / 2.5}
-                limitSelectedItems={Math.floor((contentWidth / 2.5 - 110) / 37)}
+                width={
+                  annotatorWidthTooSmall
+                    ? contentWidth / 2.7
+                    : contentWidth / 2.5
+                }
+                limitSelectedItems={
+                  annotatorWidthTooSmall
+                    ? Math.floor((contentWidth / 2.7 - 110) / 37)
+                    : Math.floor((contentWidth / 2.5 - 110) / 37)
+                }
               />
             </>
           )}
