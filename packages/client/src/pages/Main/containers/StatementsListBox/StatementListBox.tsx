@@ -40,6 +40,7 @@ import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StatementListTextAnnotator } from "./StatementListTextAnnotator/StatementListTextAnnotator";
 import useAnnotator from "hooks/useAnnotator";
 import { StyledEmptyState, StyledTableWrapper } from "./StatementListBoxStyles";
+import { collectStatementAnchors, getStatementOrderByIndex } from "utils/utils";
 
 const initialData: {
   statements: IResponseStatement[];
@@ -432,35 +433,9 @@ export const StatementListBox: React.FC = () => {
     },
   });
 
-  const getOrderByIndex = (index: number) => {
-    let newOrder: number = EntityEnums.Order.Last;
-
-    if (index + 1 > statements.length) {
-      // last one
-      newOrder = EntityEnums.Order.Last;
-    } else {
-      if (index < 1 && statements[0].data.territory) {
-        // first one
-        newOrder = EntityEnums.Order.First;
-      } else if (
-        statements[index - 1].data.territory &&
-        statements[index].data.territory
-      ) {
-        // somewhere between
-        newOrder =
-          ((statements[index - 1].data.territory as IStatementDataTerritory)
-            .order +
-            (statements[index].data.territory as IStatementDataTerritory)
-              .order) /
-          2;
-      }
-    }
-    return newOrder;
-  };
-
   const addStatementAtCertainIndex = async (index: number) => {
     if (userData) {
-      let newOrder = getOrderByIndex(index);
+      let newOrder = getStatementOrderByIndex(index, statements);
 
       if (newOrder) {
         const newStatement: IStatement = CStatement(
@@ -544,77 +519,6 @@ export const StatementListBox: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ["statement"] });
     },
   });
-
-  // collect all statement anchors that are in the statements list
-  const collectStatementAnchors = (anchors: IAnchorsNode[]): IAnchorsNode[] => {
-    const statementIds = new Set(statements.map((s) => s.id));
-    return anchors.reduce((acc: any[], anchor) => {
-      if (
-        anchor.class === EntityEnums.Class.Statement &&
-        statementIds.has(anchor.anchor)
-      ) {
-        acc.push(anchor);
-      }
-      if (anchor.children) {
-        acc.push(...collectStatementAnchors(anchor.children));
-      }
-      return acc;
-    }, []);
-  };
-
-  const handleCreateStatement = (
-    text: string = "",
-    statementId: string,
-    // start index of selected text
-    startIndex: number
-  ) => {
-    if (selectedDocument) {
-      // take order from the anchors in the document => filter only S that are in the statement list
-      const statementAnchors = Array.from(
-        new Map(
-          collectStatementAnchors(selectedDocument.anchors).map((anchor) => [
-            anchor.anchor,
-            anchor,
-          ])
-        ).values()
-      );
-      const territoryStatements = territory?.statements || [];
-
-      // Filter statement anchors to only include those that are in the territory.statements
-      const filteredStatementAnchors = statementAnchors.filter((anchor) =>
-        territoryStatements.some((statement) => statement.id === anchor.anchor)
-      );
-
-      // Find the last statement anchor with start index before the given startIndex
-      const lastAnchorBeforeIndex =
-        startIndex !== -1
-          ? filteredStatementAnchors
-              .filter((anchor) => anchor.indexStart < startIndex)
-              .sort((a, b) => b.indexStart - a.indexStart)[0] // Sort descending and take first
-          : undefined;
-
-      // see the order of the previous start index statement in the statement list and put the new statement after it
-      const lastIndexBeforeHighlight =
-        territoryStatements.findIndex(
-          (statement) => statement.id === lastAnchorBeforeIndex?.anchor
-        ) ?? -1;
-      const newOrder = getOrderByIndex(lastIndexBeforeHighlight + 1);
-
-      if (userData && territory) {
-        const newStatement: IStatement = CStatement(
-          localStorage.getItem("userrole") as UserEnums.Role,
-          userData.options,
-          text,
-          "",
-          territoryId,
-          statementId,
-          newOrder
-        );
-
-        statementCreateMutation.mutate(newStatement);
-      }
-    }
-  };
 
   const updateTerritoryMutation = useMutation({
     mutationFn: async (tObject: {
@@ -733,8 +637,14 @@ export const StatementListBox: React.FC = () => {
           ])
         ).values()
       );
+      // only filter the statement anchors that are in the statements list
+      const statementIds = new Set(statements.map((s) => s.id));
+      const statementAnchorsInList = statementAnchors.filter((anchor) =>
+        statementIds.has(anchor.anchor)
+      );
+
       const correctPositionMap = new Map(
-        statementAnchors.map((anchor, index) => [anchor.anchor, index])
+        statementAnchorsInList.map((anchor, index) => [anchor.anchor, index])
       );
 
       // Separate anchored and non-anchored statements
@@ -820,11 +730,15 @@ export const StatementListBox: React.FC = () => {
         ])
       ).values()
     );
+    const statementIds = new Set(statements.map((s) => s.id));
+    const statementAnchorsInList = statementAnchors.filter((anchor) =>
+      statementIds.has(anchor.anchor)
+    );
 
     // Create a map of statement IDs to their correct positions
     const correctPositionMap = new Map(
       // this index is the position of the statement IN THE DOCUMENT
-      statementAnchors.map((anchor, index) => [anchor.anchor, index])
+      statementAnchorsInList.map((anchor, index) => [anchor.anchor, index])
     );
 
     // First, create a map of all statements with their original indexes
@@ -1036,7 +950,6 @@ export const StatementListBox: React.FC = () => {
                   key={territoryId}
                   contentHeight={contentHeight}
                   contentWidth={contentWidth - 10}
-                  handleCreateStatement={handleCreateStatement}
                   territoryId={territoryId}
                   territory={territory}
                   statementId={statementId}
@@ -1049,6 +962,7 @@ export const StatementListBox: React.FC = () => {
                   hlEntities={hlEntities}
                   setHlEntities={setHlEntities}
                   addStatementAtCertainIndex={addStatementAtCertainIndex}
+                  statementCreateMutation={statementCreateMutation}
                   annotator={annotator}
                   setAnnotator={setAnnotator}
                   selectedDocumentId={selectedDocumentId}
@@ -1062,6 +976,7 @@ export const StatementListBox: React.FC = () => {
                     isListNonEmpty || statementListTableIsLoading
                   }
                   userCanEdit={userCanEdit}
+                  userData={userData}
                 />
               )}
 

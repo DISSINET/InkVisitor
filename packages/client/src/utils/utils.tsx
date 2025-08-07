@@ -4,11 +4,14 @@ import {
   EntityTooltip,
   IEntity,
   IResponseEntity,
+  IResponseStatement,
   IResponseTree,
   IStatement,
+  IStatementDataTerritory,
   IWarning,
   Relation,
 } from "@shared/types";
+import { IAnchorsNode } from "@shared/types/document";
 import React from "react";
 import { DropTargetMonitor, XYCoord } from "react-dnd";
 import { DragItem, EntityDragItem } from "types";
@@ -396,4 +399,47 @@ export const computeDifferences = <T extends Record<string, any>>(
   }
 
   return differences;
+};
+
+// collect all anchors that has class Statememnt
+export const collectStatementAnchors = (
+  anchors: IAnchorsNode[]
+): IAnchorsNode[] => {
+  return anchors.reduce((acc: any[], anchor) => {
+    if (anchor.class === EntityEnums.Class.Statement) {
+      acc.push(anchor);
+    }
+    if (anchor.children) {
+      acc.push(...collectStatementAnchors(anchor.children));
+    }
+    return acc;
+  }, []);
+};
+
+export const getStatementOrderByIndex = (
+  index: number,
+  statements: IResponseStatement[]
+) => {
+  let newOrder: number = EntityEnums.Order.Last;
+
+  if (index + 1 > statements.length) {
+    // last one
+    newOrder = EntityEnums.Order.Last;
+  } else {
+    if (index < 1 && statements[0].data.territory) {
+      // first one
+      newOrder = EntityEnums.Order.First;
+    } else if (
+      statements[index - 1].data.territory &&
+      statements[index].data.territory
+    ) {
+      // somewhere between
+      newOrder =
+        ((statements[index - 1].data.territory as IStatementDataTerritory)
+          .order +
+          (statements[index].data.territory as IStatementDataTerritory).order) /
+        2;
+    }
+  }
+  return newOrder;
 };
