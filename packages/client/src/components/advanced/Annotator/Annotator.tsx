@@ -761,6 +761,18 @@ export const TextAnnotator = ({
     }
   }, [debouncedSearchTerm]);
 
+  // Re-run search when width changes to update occurrence positions
+  useEffect(() => {
+    if (annotator && debouncedSearchTerm.length > 2) {
+      // Force a redraw first to recalculate text layout, then search
+      setTimeout(() => {
+        annotator.draw();
+        const occurrences = annotator.search(debouncedSearchTerm);
+        setSearchOccurences(occurrences);
+      }, 0);
+    }
+  }, [width, debouncedSearchTerm]);
+
   const isSearchAllowed = useMemo<boolean>(() => {
     return annotator !== undefined && !!dataDocument;
   }, [annotator, dataDocument]);
