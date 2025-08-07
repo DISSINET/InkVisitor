@@ -33,7 +33,12 @@ interface TextAnnotatorMenuProps {
   anchors: string[];
   entities: Record<string, IEntity | false>;
   onAnchorAdd: (entityId: string) => void;
-  onCreateStatement?: () => void;
+  onCreateStatement?: (entityCreateModalProps?: {
+    label: string;
+    detail: string;
+    territoryId: string;
+    language: EntityEnums.Language;
+  }) => void;
   onCreateTerritory?: (
     territoryCreateModalType?: TerritoryCreateModalType
   ) => void;
@@ -155,6 +160,7 @@ export const TextAnnotatorMenu = ({
                   setStatementId(entity.id);
                 }
               }}
+              onCreateStatement={onCreateStatement}
             />
           </StyledAnnotatorItemContentLine>
           <StyledAnnotatorItemContentLine>

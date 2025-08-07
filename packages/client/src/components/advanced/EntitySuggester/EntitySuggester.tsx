@@ -46,6 +46,13 @@ interface EntitySuggester {
   territoryParentId?: string;
   // used for create entity modal
   parentTerritory?: IEntity;
+  // not obligatory, only for specific creation like from annotator where calculation of order is needed
+  onCreateStatement?: (entityCreateModalProps?: {
+    label: string;
+    detail: string;
+    territoryId: string;
+    language: EntityEnums.Language;
+  }) => void;
   onEntityCreateMutationSuccess?: (entity: IEntity) => void;
   entityCreateStatementOrder?: number;
 
@@ -89,6 +96,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   isInsideStatement = false,
   territoryParentId,
   parentTerritory,
+  onCreateStatement,
   onEntityCreateMutationSuccess,
   entityCreateStatementOrder,
 
@@ -524,6 +532,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
           allowedEntityClasses={categoryTypes}
           parentTerritory={parentTerritory}
           entityCreateStatementOrder={entityCreateStatementOrder}
+          onCreateStatement={onCreateStatement}
         />
       )}
     </>

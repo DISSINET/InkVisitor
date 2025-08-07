@@ -28,7 +28,6 @@ import {
   IResponseUser,
   IStatement,
 } from "@shared/types";
-import { IAnchorsNode } from "@shared/types/document";
 import { AxiosResponse } from "axios";
 import { Button } from "components/basic/Button/Button";
 import { ButtonGroup } from "components/basic/ButtonGroup/ButtonGroup";
@@ -180,10 +179,18 @@ export const TextAnnotator = ({
     text: string = "",
     statementId: string,
     // start index of selected text
-    startIndex: number
+    startIndex: number,
+    // following props are only for creation from EntitySuggester -> EntityCreateModal
+    entityCreateModalProps?: {
+      label: string;
+      detail: string;
+      territoryId: string;
+      language: EntityEnums.Language;
+    }
   ) => {
     if (dataDocument) {
-      // take order from the anchors in the document => filter only S that are in the statement list
+      // take order from the anchors in the document
+      // filter only Statements
       const statementAnchors = Array.from(
         new Map(
           collectStatementAnchors(dataDocument.anchors).map((anchor) => [
@@ -195,19 +202,15 @@ export const TextAnnotator = ({
       const territoryStatements = territory?.statements || [];
 
       const statementIds = new Set(territoryStatements.map((s) => s.id));
+      // filter only anchors that are in the statement list
       const statementAnchorsInList = statementAnchors.filter((anchor) =>
         statementIds.has(anchor.anchor)
-      );
-
-      // Filter statement anchors to only include those that are in the territory.statements
-      const filteredStatementAnchors = statementAnchors.filter((anchor) =>
-        territoryStatements.some((statement) => statement.id === anchor.anchor)
       );
 
       // Find the last statement anchor with start index before the given startIndex
       const lastAnchorBeforeIndex =
         startIndex !== -1
-          ? filteredStatementAnchors
+          ? statementAnchorsInList
               .filter((anchor) => anchor.indexStart < startIndex)
               .sort((a, b) => b.indexStart - a.indexStart)[0] // Sort descending and take first
           : undefined;
@@ -223,17 +226,34 @@ export const TextAnnotator = ({
       );
 
       if (userData && territory) {
-        const newStatement: IStatement = CStatement(
-          localStorage.getItem("userrole") as UserEnums.Role,
-          userData.options,
-          text,
-          "",
-          territory.id,
-          statementId,
-          newOrder
-        );
-
-        statementCreateMutation.mutate(newStatement);
+        if (entityCreateModalProps) {
+          const { label, detail, territoryId, language } =
+            entityCreateModalProps;
+          const newStatement: IStatement = CStatement(
+            userData.role,
+            {
+              ...userData.options,
+              defaultLanguage: language,
+            },
+            label,
+            detail,
+            territoryId,
+            statementId,
+            newOrder
+          );
+          statementCreateMutation.mutate(newStatement);
+        } else {
+          const newStatement: IStatement = CStatement(
+            localStorage.getItem("userrole") as UserEnums.Role,
+            userData.options,
+            text,
+            "",
+            territory.id,
+            statementId,
+            newOrder
+          );
+          statementCreateMutation.mutate(newStatement);
+        }
       }
     }
   };
@@ -553,13 +573,33 @@ export const TextAnnotator = ({
     return "new Territory";
   }, [territoryCreateModalType, territory]);
 
-  const onCreateStatement = () => {
+  const onCreateStatement = (
+    // following props are only for creation from EntitySuggester -> EntityCreateModal
+    entityCreateModalProps?: {
+      label: string;
+      detail: string;
+      territoryId: string;
+      language: EntityEnums.Language;
+    }
+  ) => {
     if (handleCreateStatement && selectedText && selectionStartIndex !== -1) {
       const newStatementId = uuidv4();
       handleAddAnchor(newStatementId);
       // remove linebreaks from text
       const validatedText = selectedText.replace(/\n/g, " ");
-      handleCreateStatement(validatedText, newStatementId, selectionStartIndex);
+      handleCreateStatement(
+        validatedText,
+        newStatementId,
+        selectionStartIndex,
+        entityCreateModalProps
+          ? {
+              label: entityCreateModalProps.label,
+              detail: entityCreateModalProps.detail,
+              territoryId: entityCreateModalProps.territoryId,
+              language: entityCreateModalProps.language,
+            }
+          : undefined
+      );
     }
   };
 
