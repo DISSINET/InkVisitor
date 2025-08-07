@@ -695,8 +695,9 @@ export const TextAnnotator = ({
 
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [searchOccurences, setSearchOccurences] = useState<
-    { segmentIndex: number; lineIndex: number; start: number; end: number }[]
-  >([]);
+    | { segmentIndex: number; lineIndex: number; start: number; end: number }[]
+    | null
+  >(null);
   const [searchActiveOccurence, setSearchActiveOccurence] = useState<number>(0);
 
   // annotate tool
@@ -729,10 +730,12 @@ export const TextAnnotator = ({
 
   // Handle search occurrence selection
   useEffect(() => {
-    const newSelectedOccurence = searchOccurences[searchActiveOccurence];
+    if (searchOccurences !== null) {
+      const newSelectedOccurence = searchOccurences[searchActiveOccurence];
 
-    if (newSelectedOccurence) {
-      annotator?.selectSearchOccurrence(newSelectedOccurence);
+      if (newSelectedOccurence) {
+        annotator?.selectSearchOccurrence(newSelectedOccurence);
+      }
     }
   }, [searchActiveOccurence, searchOccurences]);
 
@@ -750,7 +753,7 @@ export const TextAnnotator = ({
         searchTermRef.current = debouncedSearchTerm;
       }
     } else if (debouncedSearchTerm.length <= 2) {
-      setSearchOccurences([]);
+      setSearchOccurences(null);
       setSearchActiveOccurence(0);
       searchTermRef.current = "";
       setSelectedText("");

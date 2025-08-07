@@ -30,12 +30,14 @@ import {
 interface StatementListSearchLine {
   searchTerm: string;
   setSearchTerm: (searchTerm: string) => void;
-  searchOccurences: {
-    segmentIndex: number;
-    lineIndex: number;
-    start: number;
-    end: number;
-  }[];
+  searchOccurences:
+    | {
+        segmentIndex: number;
+        lineIndex: number;
+        start: number;
+        end: number;
+      }[]
+    | null;
   searchActiveOccurence: number;
   setSearchActiveOccurence: (searchActiveOccurence: number) => void;
   isSearchAllowed: boolean;
@@ -53,12 +55,13 @@ interface StatementListSearchLine {
   selectedText: string;
   setSearchOccurences: React.Dispatch<
     React.SetStateAction<
-      {
-        segmentIndex: number;
-        lineIndex: number;
-        start: number;
-        end: number;
-      }[]
+      | {
+          segmentIndex: number;
+          lineIndex: number;
+          start: number;
+          end: number;
+        }[]
+      | null
     >
   >;
 }
@@ -119,11 +122,13 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
   };
 
   const goToNextOccurence = () => {
+    if (searchOccurences === null) return;
     const nextOccurence = (searchActiveOccurence + 1) % searchOccurences.length;
     setSearchActiveOccurence(nextOccurence);
   };
 
   const goToPreviousOccurence = () => {
+    if (searchOccurences === null) return;
     const previousOccurence =
       (searchActiveOccurence - 1 + searchOccurences.length) %
       searchOccurences.length;
@@ -131,7 +136,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
   };
 
   const hasResults = useMemo<boolean>(() => {
-    return searchOccurences.length > 0;
+    return searchOccurences !== null && searchOccurences.length > 0;
   }, [searchOccurences]);
 
   const replaceOccurence = () => {
@@ -139,6 +144,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
 
     // Store the current search state before saving
     const currentSearchActiveOccurence = searchActiveOccurence;
+    if (searchOccurences === null) return;
     const newOccurrences = searchOccurences.filter(
       (_, index) => index !== searchActiveOccurence
     );
@@ -183,7 +189,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
               clearable
             />
 
-            {hasResults && (
+            {searchOccurences !== null && (
               <StyledSearchResults
                 $annotatorWidthTooSmall={annotatorWidthTooSmall}
               >
@@ -307,7 +313,9 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                 icon={<LuReplace size={12} />}
                 onClick={replaceOccurence}
                 disabled={
-                  searchOccurences.length === 0 || replaceWith.length === 0
+                  searchOccurences === null ||
+                  searchOccurences.length === 0 ||
+                  replaceWith.length === 0
                 }
               />
               {/* <Button
@@ -323,6 +331,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                   // handleSaveNewContent("all occurrences replaced");
                 }}
                 disabled={
+                  searchOccurences === null ||
                   searchOccurences.length === 0 || replaceWith.length === 0
                 }
               /> */}
