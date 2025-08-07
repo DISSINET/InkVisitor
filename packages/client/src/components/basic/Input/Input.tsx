@@ -86,8 +86,8 @@ export const Input: React.FC<Input> = ({
       $fullHeight={fullHeight}
     >
       {label && <Label className="label">{label}</Label>}
-      <div style={{ position: "relative" }}>
-        {(type === "text" || type === "password") && (
+      {(type === "text" || type === "password") && (
+        <div style={{ position: "relative", width: "100%", display: "flex" }}>
           <StyledInput
             disabled={disabled}
             type={type}
@@ -132,19 +132,20 @@ export const Input: React.FC<Input> = ({
             required={required}
             $paddingRight={clearable && displayValue.length > 0}
           />
-        )}
-        {displayValue.length > 0 && clearable && (
-          <StyledClearableInputButton>
-            <MdCancel
-              size={16}
-              onClick={() => {
-                setDisplayValue("");
-                onChangeFn("");
-              }}
-            />
-          </StyledClearableInputButton>
-        )}
-      </div>
+
+          {displayValue.length > 0 && clearable && (
+            <StyledClearableInputButton>
+              <MdCancel
+                size={16}
+                onClick={() => {
+                  setDisplayValue("");
+                  onChangeFn("");
+                }}
+              />
+            </StyledClearableInputButton>
+          )}
+        </div>
+      )}
       {type === "textarea" && (
         <StyledTextArea
           $fullHeightTextArea={fullHeightTextArea}

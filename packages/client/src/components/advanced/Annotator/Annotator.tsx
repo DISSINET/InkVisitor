@@ -411,10 +411,6 @@ export const TextAnnotator = ({
   };
 
   useEffect(() => {
-    console.log("selectedText", selectedText);
-  }, [selectedText]);
-
-  useEffect(() => {
     // isSelectingText didn't work as expected without the useEffect and pendingSelection so this implementation was necessary
     if (pendingSelection && !isSelectingText) {
       const { text, anchors, index } = pendingSelection;
@@ -808,6 +804,10 @@ export const TextAnnotator = ({
               >
                 {dataDocument && (
                   <TextAnnotatorMenu
+                    onEscapePressed={() => {
+                      setSelectedText("");
+                      annotator?.clearSelection();
+                    }}
                     anchors={selectedAnchors}
                     documentData={dataDocument}
                     text={selectedText}
