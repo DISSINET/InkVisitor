@@ -1,7 +1,17 @@
 import { Annotator } from "@inkvisitor/annotator/src/lib";
 import { animated, useSpring } from "@react-spring/web";
 import { EntityEnums } from "@shared/enums";
-import { IDocument, IResponseEntity, IResponseTerritory } from "@shared/types";
+import {
+  IDocument,
+  IResponseEntity,
+  IResponseGeneric,
+  IResponseTerritory,
+  IResponseUser,
+  IStatement,
+} from "@shared/types";
+import { UseMutationResult } from "@tanstack/react-query";
+import { AxiosResponse } from "axios";
+import Dropdown from "components/advanced";
 import TextAnnotator from "components/advanced/Annotator/Annotator";
 import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -18,7 +28,12 @@ interface StatementListTextAnnotator {
   territory?: IResponseTerritory;
   statementId: string;
   addStatementAtCertainIndex: (index: number) => Promise<void>;
-  handleCreateStatement: (detail?: string, statementId?: string) => void;
+  statementCreateMutation: UseMutationResult<
+    AxiosResponse<IResponseGeneric<IStatement>, any>,
+    Error,
+    IStatement,
+    unknown
+  >;
 
   storedAnnotatorScroll: number;
   setStoredAnnotatorScroll?: React.Dispatch<React.SetStateAction<number>>;
@@ -44,6 +59,7 @@ interface StatementListTextAnnotator {
 
   showStatementList: boolean;
   userCanEdit: boolean;
+  userData?: IResponseUser;
 }
 
 export const StatementListTextAnnotator: React.FC<
@@ -53,7 +69,7 @@ export const StatementListTextAnnotator: React.FC<
   territory,
   statementId,
   addStatementAtCertainIndex,
-  handleCreateStatement,
+  statementCreateMutation,
 
   storedAnnotatorScroll,
   setStoredAnnotatorScroll = () => {},
@@ -77,6 +93,7 @@ export const StatementListTextAnnotator: React.FC<
   selectedDocumentError,
   showStatementList,
   userCanEdit,
+  userData,
 }) => {
   const [showAnnotator, setShowAnnotator] = useState(false);
 
@@ -175,7 +192,7 @@ export const StatementListTextAnnotator: React.FC<
               displayLineNumbers={true}
               height={annotatorHeight}
               documentId={selectedDocumentId}
-              handleCreateStatement={handleCreateStatement}
+              statementCreateMutation={statementCreateMutation}
               storedAnnotatorScroll={storedAnnotatorScroll}
               setStoredAnnotatorScroll={setStoredAnnotatorScroll}
               territory={territory}
@@ -183,6 +200,7 @@ export const StatementListTextAnnotator: React.FC<
               dataDocumentIsFetching={selectedDocumentIsFetching}
               dataDocumentError={selectedDocumentError}
               showStatementList={showStatementList}
+              userData={userData}
             />
           )}
         </AnnotatorProvider>

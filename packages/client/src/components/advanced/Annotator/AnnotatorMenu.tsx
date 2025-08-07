@@ -1,6 +1,6 @@
 import React from "react";
 
-import { IDocument, IEntity } from "@shared/types";
+import { IDocument, IEntity, IResponseTerritory } from "@shared/types";
 import { Loader } from "components";
 import { Button } from "components/basic/Button/Button";
 import { BsSegmentedNav } from "react-icons/bs";
@@ -23,6 +23,9 @@ import {
   StyledTerritorySubsectionTitle,
 } from "./AnnotatorStyles";
 import { TerritoryCreateModalType } from "./types";
+import { EntityEnums } from "@shared/enums";
+import { useQueryClient } from "@tanstack/react-query";
+import { useSearchParams } from "hooks";
 
 interface TextAnnotatorMenuProps {
   text: string;
@@ -30,17 +33,23 @@ interface TextAnnotatorMenuProps {
   anchors: string[];
   entities: Record<string, IEntity | false>;
   onAnchorAdd: (entityId: string) => void;
-  handleCreateStatement: Function | undefined;
-  onCreateTerritory:
-    | undefined
-    | ((territoryCreateModalType?: TerritoryCreateModalType) => void);
-  handleRemoveAnchor: Function | undefined;
+  onCreateStatement?: (entityCreateModalProps?: {
+    label: string;
+    detail: string;
+    territoryId: string;
+    language: EntityEnums.Language;
+  }) => void;
+  onCreateTerritory?: (
+    territoryCreateModalType?: TerritoryCreateModalType
+  ) => void;
+  onRemoveAnchor?: (anchor: string) => void;
   canCreateActiveTAnchor: boolean;
-  onCreateActiveTAnchor: Function | undefined;
+  onCreateActiveTAnchor?: () => void;
   isLoadingEntities: boolean;
   hasParentT: boolean;
   isTextInsideThisT: boolean;
   activeTerritoryId: string | undefined;
+  territory?: IResponseTerritory;
 }
 
 export const TextAnnotatorMenu = ({
@@ -48,17 +57,20 @@ export const TextAnnotatorMenu = ({
   anchors,
   entities,
   onAnchorAdd,
-  handleCreateStatement = undefined,
+  onCreateStatement = undefined,
   onCreateTerritory = undefined,
   onCreateActiveTAnchor = undefined,
-  handleRemoveAnchor = undefined,
+  onRemoveAnchor = undefined,
   canCreateActiveTAnchor,
   isLoadingEntities,
   hasParentT,
   isTextInsideThisT,
   activeTerritoryId,
+  territory,
 }: TextAnnotatorMenuProps) => {
-  const activeTerritory = entities[activeTerritoryId as string];
+  const activeTerritory = entities[activeTerritoryId ?? ""];
+  const queryClient = useQueryClient();
+  const { setStatementId } = useSearchParams();
   return (
     <>
       <StyledAnnotatorItem>
@@ -117,13 +129,13 @@ export const TextAnnotatorMenu = ({
           )}
         </StyledAnnotatorItemContent>
         <StyledAnnotatorItemContent>
-          {handleCreateStatement && (
+          {onCreateStatement && (
             <StyledAnnotatorItemContentLine>
               <Button
                 icon={<TbAnchor size={15} />}
                 color="primary"
                 onClick={() => {
-                  handleCreateStatement();
+                  onCreateStatement();
                 }}
                 label="New Statement"
                 tooltipLabel="Create new Statement from selection"
@@ -139,6 +151,16 @@ export const TextAnnotatorMenu = ({
               }}
               inputWidth={200}
               openDetailOnCreate
+              parentTerritory={territory}
+              onEntityCreateMutationSuccess={(entity) => {
+                if (entity.class === EntityEnums.Class.Statement) {
+                  queryClient.invalidateQueries({
+                    queryKey: ["territory", "statement-list"],
+                  });
+                  setStatementId(entity.id);
+                }
+              }}
+              onCreateStatement={onCreateStatement}
             />
           </StyledAnnotatorItemContentLine>
           <StyledAnnotatorItemContentLine>
@@ -216,8 +238,8 @@ export const TextAnnotatorMenu = ({
                     <EntityTag
                       unlinkButton={{
                         onClick: () => {
-                          if (handleRemoveAnchor) {
-                            handleRemoveAnchor(anchor);
+                          if (onRemoveAnchor) {
+                            onRemoveAnchor(anchor);
                           }
                         },
                       }}

@@ -585,7 +585,7 @@ export const CStatement = (
   detail?: string,
   territoryId: string | undefined = undefined,
   id: string | undefined = undefined,
-  lastInT: boolean = true
+  order: number = EntityEnums.Order.Last
 ): IStatement => {
   const newStatement: IStatement = {
     id: id ?? uuidv4(),
@@ -611,7 +611,7 @@ export const CStatement = (
   if (territoryId) {
     newStatement.data.territory = {
       territoryId: territoryId,
-      order: lastInT ? EntityEnums.Order.Last : EntityEnums.Order.First,
+      order: order,
     };
   }
   return newStatement;
