@@ -6,7 +6,7 @@ export interface IRequestStats {
   fromDate: number;
   toDate: number;
   timeUnit: TimeUnit;
-  eventType: EventType;
+  eventType: EventType[];
   aggregateBy: Aggregation;
   filter: {
     userIds: string[] | "all";

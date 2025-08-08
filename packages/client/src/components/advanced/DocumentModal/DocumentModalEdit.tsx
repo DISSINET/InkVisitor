@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from "react";
 
 import { EntityEnums } from "@shared/enums";
-import { IDocument, IDocumentMeta } from "@shared/types";
+import { useQuery } from "@tanstack/react-query";
+import api from "api";
 import { Modal, ModalContent, ModalHeader } from "components";
 import { useWindowSize } from "hooks/useWindowSize";
 import { getShortLabelByLetterCount } from "utils/utils";
 import TextAnnotator from "../Annotator/Annotator";
 import AnnotatorProvider from "../Annotator/AnnotatorProvider";
-import { useQuery } from "@tanstack/react-query";
-import api from "api";
 
 interface DocumentModalEdit {
   documentId: string;

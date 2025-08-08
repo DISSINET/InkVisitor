@@ -1,22 +1,28 @@
-import { IAudit, IResponseStats } from "@shared/types";
-import { Aggregation, TimeUnit } from "@shared/types/stats";
-import { IRequest } from "src/custom_typings/request";
-import { IRequestStats } from "@shared/types/request-stats";
-import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
 import Audit from "@models/audit/audit";
+import { IResponseStats } from "@shared/types";
+import { IRequestStats } from "@shared/types/request-stats";
+import { Aggregation, EventType, TimeUnit } from "@shared/types/stats";
+import { RDatum, r as rethink } from "rethinkdb-ts";
+import { IRequest } from "src/custom_typings/request";
 
 export class ResponseStats implements IResponseStats {
   fromDate: number;
   toDate: number;
   timeUnit: TimeUnit;
+  eventType: EventType[];
   aggregateBy: Aggregation;
-  values: Record<string, Record<string, number>>;
+  values: Record<string, Record<Aggregation, number>>;
 
   constructor(request: IRequestStats) {
     this.fromDate = request.fromDate || this.getStartOfCurrentMonth().getTime();
     this.toDate = request.toDate || new Date().getTime();
     this.timeUnit = request.timeUnit || TimeUnit.DAY;
     this.aggregateBy = request.aggregateBy || Aggregation.ACTIVITY_TYPE;
+    this.eventType = request.eventType || [
+      EventType.EDIT,
+      EventType.DELETE,
+      EventType.CREATE,
+    ];
 
     this.values = {};
   }
@@ -26,53 +32,61 @@ export class ResponseStats implements IResponseStats {
     return new Date(now.getFullYear(), now.getMonth(), 1);
   }
 
-  private getTimeKey(date: Date, timeUnit: TimeUnit): string {
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, "0"); // 0-based month
-    const day = date.getDate().toString().padStart(2, "0");
+  async prepare(req: IRequest) {
+    const { fromDate, toDate, timeUnit, aggregateBy } = this;
 
+    let timeBucket;
     switch (timeUnit) {
       case TimeUnit.DAY:
-        return `${year}-${month}-${day}`;
+        timeBucket = (doc: RDatum) => doc("date").toISO8601().slice(0, 10);
+        break;
       case TimeUnit.WEEK:
-        const startOfWeek = new Date(date);
-        const dayOfWeek = startOfWeek.getDay();
-        const diff = startOfWeek.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
-        startOfWeek.setDate(diff);
-        const weekMonth = (startOfWeek.getMonth() + 1).toString().padStart(2, "0");
-        const weekDay = startOfWeek.getDate().toString().padStart(2, "0");
-        return `${startOfWeek.getFullYear()}-${weekMonth}-${weekDay}`;
+        timeBucket = (doc: RDatum) => {
+          const date = doc("date");
+          return date
+            .sub(date.dayOfWeek().sub(1).mul(86400))
+            .toISO8601()
+            .slice(0, 10);
+        };
+        break;
       case TimeUnit.MONTH:
-        return `${year}-${month}`;
+        timeBucket = (doc: RDatum) => doc("date").toISO8601().slice(0, 7);
+        break;
       case TimeUnit.YEAR:
-        return `${year}`;
+        timeBucket = (doc: RDatum) => doc("date").toISO8601().slice(0, 4);
+        break;
       default:
         throw new Error("Invalid time unit");
     }
-  }
 
-  private aggregateByTimeUnit(data: IAudit[]): Record<string, number> {
-    const aggregation: Record<string, number> = {};
-
-    data.forEach(item => {
-      const dateKey = this.getTimeKey(item.date, this.timeUnit);
-
-      if (dateKey in aggregation) {
-        aggregation[dateKey]++;
-      } else {
-        aggregation[dateKey] = 1;
-      }
-    });
-
-    return aggregation;
-  }
-
-  async prepare(req: IRequest) {
-    const result = await rethink
+    const aggregatedData = (await rethink
       .table(Audit.table)
-      .between(new Date(this.fromDate), new Date(this.toDate), { index: 'date' })
-      .run(req.db.connection);
+      .between(new Date(fromDate), new Date(toDate), {
+        index: "date",
+      })
+      .filter((doc: RDatum) =>
+        rethink.expr(this.eventType).contains(doc("type"))
+      )
+      .group(timeBucket, (doc: RDatum) =>
+        aggregateBy === Aggregation.ACTIVITY_TYPE
+          ? doc("type")
+          : doc(aggregateBy)
+      )
+      .count()
+      .run(req.db.connection)) as unknown as {
+      group: [string, string];
+      reduction: number;
+    }[];
 
-    this.values[Aggregation.ACTIVITY_TYPE] = this.aggregateByTimeUnit(result as IAudit[])
+    const newValues: Record<string, Record<string, number>> = {};
+    for (const item of aggregatedData) {
+      const [dateKey, aggregationGroup] = item.group;
+      if (!newValues[dateKey]) {
+        newValues[dateKey] = {};
+      }
+      newValues[dateKey][aggregationGroup] = item.reduction;
+    }
+
+    this.values = newValues;
   }
 }

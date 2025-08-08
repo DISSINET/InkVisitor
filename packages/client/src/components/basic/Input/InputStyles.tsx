@@ -32,6 +32,7 @@ export const StyledWrapper = styled.div<StyledWrapper>`
   height: ${({ $fullHeight }) => ($fullHeight ? "100%" : "")};
   flex-grow: ${({ width }) => (width === "full" ? 1 : "")};
   min-width: ${({ $minWidth }) => ($minWidth ? `${$minWidth}px` : "")};
+  align-items: center;
 `;
 export const Label = styled.span`
   text-align: right;
