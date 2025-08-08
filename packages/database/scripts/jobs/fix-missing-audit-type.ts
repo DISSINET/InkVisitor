@@ -1,7 +1,7 @@
-import { Connection, r, RDatum } from "rethinkdb-ts";
-import { IJob } from ".";
 import { IAudit } from "@shared/types";
 import { EventType } from "@shared/types/stats";
+import { Connection, r, RDatum } from "rethinkdb-ts";
+import { IJob } from ".";
 
 const BATCH_SIZE = 100;
 

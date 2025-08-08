@@ -19,6 +19,7 @@ import {
   PasswordResetPage,
   UsersPage,
 } from "pages";
+import { StatsPage } from "pages/Stats/StatsPage";
 import React, { useEffect, useMemo } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
@@ -177,6 +178,14 @@ export const App: React.FC = () => {
                       element={
                         <RequireAuth>
                           <UsersPage />
+                        </RequireAuth>
+                      }
+                    />
+                    <Route
+                      path="/stats"
+                      element={
+                        <RequireAuth>
+                          <StatsPage />
                         </RequireAuth>
                       }
                     />

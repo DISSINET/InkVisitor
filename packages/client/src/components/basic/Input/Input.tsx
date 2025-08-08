@@ -12,7 +12,7 @@ interface Input {
   value?: string;
   inverted?: boolean;
   suggester?: boolean;
-  type?: "text" | "textarea" | "select" | "password";
+  type?: "text" | "textarea" | "select" | "password" | "datetime-local";
   rows?: number;
   cols?: number;
   width?: number | "full";
@@ -158,6 +158,27 @@ export const Input: React.FC<Input> = ({
           $suggester={suggester}
           $fontSizeTextArea={fontSizeTextArea}
           $borderColor={borderColor}
+        />
+      )}
+      {type === "datetime-local" && (
+        <StyledInput
+          type="datetime-local"
+          value={displayValue}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            setDisplayValue(e.currentTarget.value);
+            if (changeOnType) {
+              onChangeFn(e.currentTarget.value);
+            }
+          }}
+          onFocus={(event: React.FocusEvent<HTMLInputElement>) =>
+            onFocus(event)
+          }
+          onBlur={() => {
+            if (displayValue !== value && !changeOnType) {
+              onChangeFn(displayValue);
+            }
+            onBlur();
+          }}
         />
       )}
     </StyledWrapper>

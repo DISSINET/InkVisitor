@@ -2,7 +2,7 @@ import Audit from "@models/audit/audit";
 import { IResponseStats } from "@shared/types";
 import { IRequestStats } from "@shared/types/request-stats";
 import { Aggregation, EventType, TimeUnit } from "@shared/types/stats";
-import { r as rethink, RDatum } from "rethinkdb-ts";
+import { RDatum, r as rethink } from "rethinkdb-ts";
 import { IRequest } from "src/custom_typings/request";
 
 export class ResponseStats implements IResponseStats {

@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import api from "api";
 import React, {
   createContext,
@@ -7,8 +8,7 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { maxTabCount } from "Theme/constants";
 
 const UNINITIALISED = (): void => {
