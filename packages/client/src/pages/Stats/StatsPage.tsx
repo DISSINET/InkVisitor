@@ -20,6 +20,10 @@ const Container = styled.div`
   width: 100%;
 `;
 
+const Heading = styled.h1`
+  color: ${({ theme }) => theme.color["primary"]};
+`;
+
 const FieldGroup = styled.div`
   display: grid;
   width: 100%;
@@ -41,6 +45,7 @@ const FieldLabel = styled.div`
   display: flex;
   align-items: flex-end;
   font-size: ${({ theme }) => theme.fontSize["sm"]};
+  color: ${({ theme }) => theme.color["primary"]};
 `;
 
 const ResultsChart = styled.div`
@@ -106,7 +111,7 @@ export const StatsPage = () => {
 
   return (
     <Container>
-      <h1>Statistics</h1>
+      <Heading>Statistics</Heading>
 
       <FieldGroup>
         <Field>
