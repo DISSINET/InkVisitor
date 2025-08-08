@@ -24,7 +24,7 @@ export const Cloud: React.FC<Cloud> = ({
           color="plain"
           inverted
           tooltipLabel={`unlink ${
-            originEntity?.label ?? "entity"
+            originEntity?.labels ?? "entity"
           } from the cloud`}
           icon={<FaUnlink />}
           onClick={onUnlink}

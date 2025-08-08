@@ -6,7 +6,12 @@ import {
   shift,
   useFloating,
 } from "@floating-ui/react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  UseMutationResult,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import api from "api";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { FaPen, FaRegSave, FaTrash } from "react-icons/fa";
@@ -14,13 +19,24 @@ import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 
 import { Annotator, EditMode } from "@inkvisitor/annotator/src/lib";
-import { EntityEnums } from "@shared/enums";
-import { IDocument, IEntity, IResponseTerritory } from "@shared/types";
+import {
+  IDocument,
+  IEntity,
+  IResponseEntity,
+  IResponseGeneric,
+  IResponseTerritory,
+  IResponseUser,
+  IStatement,
+} from "@shared/types";
+import { EntityEnums, UserEnums } from "@shared/enums";
+import { AxiosResponse } from "axios";
 import { Button } from "components/basic/Button/Button";
 import { ButtonGroup } from "components/basic/ButtonGroup/ButtonGroup";
-import { useSearchParams, useTheme } from "hooks";
+import { CStatement } from "constructors";
+import { useDebounce, useSearchParams, useTheme } from "hooks";
 import { BsFileTextFill } from "react-icons/bs";
 import { HiCodeBracket } from "react-icons/hi2";
+import { collectStatementAnchors, getStatementOrderByIndex } from "utils/utils";
 import { EntityCreateModal } from "..";
 import { useAnnotator } from "./AnnotatorContext";
 import TextAnnotatorMenu from "./AnnotatorMenu";
@@ -37,6 +53,7 @@ import {
 } from "./AnnotatorStyles";
 import { annotatorHighlight } from "./highlight";
 import { RATIO, TerritoryCreateModalType, W_SCROLL } from "./types";
+import { StatementListSearchLine } from "pages/Main/containers/StatementsListBox/StatementListSearchLine/StatementListSearchLine";
 interface TextAnnotatorProps {
   width: number;
   annotatorWidthTooSmall?: boolean;
@@ -44,7 +61,6 @@ interface TextAnnotatorProps {
   displayLineNumbers: boolean;
   hlEntities?: EntityEnums.Class[];
   documentId: string;
-  handleCreateStatement?: Function;
   initialScrollEntityId?: string;
   thisTerritoryEntityId?: string;
 
@@ -57,6 +73,16 @@ interface TextAnnotatorProps {
   dataDocument?: IDocument;
   dataDocumentIsFetching?: boolean;
   dataDocumentError: Error | null;
+  showStatementList?: boolean;
+
+  statementCreateMutation: UseMutationResult<
+    AxiosResponse<IResponseGeneric<IStatement>, any>,
+    Error,
+    IStatement,
+    unknown
+  >;
+
+  userData?: IResponseUser;
 }
 
 export const TextAnnotator = ({
@@ -66,7 +92,6 @@ export const TextAnnotator = ({
   displayLineNumbers = true,
   hlEntities = Object.values(EntityEnums.Class),
   documentId,
-  handleCreateStatement = undefined,
   initialScrollEntityId = undefined,
   thisTerritoryEntityId = undefined,
 
@@ -78,6 +103,10 @@ export const TextAnnotator = ({
   dataDocument,
   dataDocumentIsFetching,
   dataDocumentError,
+  showStatementList,
+
+  statementCreateMutation,
+  userData,
 }: TextAnnotatorProps) => {
   const queryClient = useQueryClient();
   const theme = useTheme();
@@ -112,6 +141,10 @@ export const TextAnnotator = ({
       queryClient.invalidateQueries({ queryKey: ["document"] });
       queryClient.invalidateQueries({ queryKey: ["documents"] });
       toast.info("Document content saved");
+      setIsSaving(false);
+    },
+    onError: (error) => {
+      setIsSaving(false);
     },
   });
 
@@ -121,6 +154,10 @@ export const TextAnnotator = ({
     onSuccess: (variables, data) => {
       queryClient.invalidateQueries({ queryKey: ["document"] });
       queryClient.invalidateQueries({ queryKey: ["documents"] });
+      setIsSaving(false);
+    },
+    onError: (error) => {
+      setIsSaving(false);
     },
   });
 
@@ -140,14 +177,101 @@ export const TextAnnotator = ({
   useEffect(() => {
     if (annotator) {
       annotator.setMode(annotatorMode);
+      setSearchOccurences(null);
+      setSearchActiveOccurence(0);
+      setSearchTerm("");
     }
   }, [annotatorMode]);
 
   const [selectedText, setSelectedText] = useState<string>("");
   const [selectedAnchors, setSelectedAnchors] = useState<string[]>([]);
+  const [selectionStartIndex, setSelectionStartIndex] = useState<number>(-1);
   const [storedEntities, setStoredEntities] = useState<
     Record<string, IEntity | false>
   >({});
+
+  const handleCreateStatement = (
+    text: string = "",
+    statementId: string,
+    // start index of selected text
+    startIndex: number,
+    // following props are only for creation from EntitySuggester -> EntityCreateModal
+    entityCreateModalProps?: {
+      label: string;
+      detail: string;
+      territoryId: string;
+      language: EntityEnums.Language;
+    }
+  ) => {
+    if (dataDocument) {
+      // take order from the anchors in the document
+      // filter only Statements
+      const statementAnchors = Array.from(
+        new Map(
+          collectStatementAnchors(dataDocument.anchors).map((anchor) => [
+            anchor.anchor,
+            anchor,
+          ])
+        ).values()
+      );
+      const territoryStatements = territory?.statements || [];
+
+      const statementIds = new Set(territoryStatements.map((s) => s.id));
+      // filter only anchors that are in the statement list
+      const statementAnchorsInList = statementAnchors.filter((anchor) =>
+        statementIds.has(anchor.anchor)
+      );
+
+      // Find the last statement anchor with start index before the given startIndex
+      const lastAnchorBeforeIndex =
+        startIndex !== -1
+          ? statementAnchorsInList
+              .filter((anchor) => anchor.indexStart < startIndex)
+              .sort((a, b) => b.indexStart - a.indexStart)[0] // Sort descending and take first
+          : undefined;
+
+      // see the order of the previous start index statement in the statement list and put the new statement after it
+      const lastIndexBeforeHighlight =
+        territoryStatements.findIndex(
+          (statement) => statement.id === lastAnchorBeforeIndex?.anchor
+        ) ?? -1;
+      const newOrder = getStatementOrderByIndex(
+        lastIndexBeforeHighlight + 1,
+        territoryStatements
+      );
+
+      if (userData && territory) {
+        if (entityCreateModalProps) {
+          const { label, detail, territoryId, language } =
+            entityCreateModalProps;
+          const newStatement: IStatement = CStatement(
+            userData.role,
+            {
+              ...userData.options,
+              defaultLanguage: language,
+            },
+            label,
+            detail,
+            territoryId,
+            statementId,
+            newOrder
+          );
+          statementCreateMutation.mutate(newStatement);
+        } else {
+          const newStatement: IStatement = CStatement(
+            localStorage.getItem("userrole") as UserEnums.Role,
+            userData.options,
+            text,
+            "",
+            territory.id,
+            statementId,
+            newOrder
+          );
+          statementCreateMutation.mutate(newStatement);
+        }
+      }
+    }
+  };
 
   const [territoryCreateModalType, setTerritoryCreateModalType] =
     useState<TerritoryCreateModalType>(false);
@@ -155,6 +279,8 @@ export const TextAnnotator = ({
   const [scrollAfterRefresh, setScrollAfterRefresh] = useState<
     number | undefined
   >(undefined);
+
+  const [isSaving, setIsSaving] = useState<boolean>(false);
 
   const { refs, floatingStyles } = useFloating({
     placement: "bottom",
@@ -164,7 +290,8 @@ export const TextAnnotator = ({
         mainAxis: annotator?.lineHeight
           ? (annotator.lineHeight / RATIO) * 1.2
           : 30,
-        crossAxis: wTextArea / 2 + 100,
+        // crossAxis: wTextArea / 2 + 100,
+        // crossAxis: 100,
       }),
       flip({
         padding: 10,
@@ -182,13 +309,15 @@ export const TextAnnotator = ({
       const canvas = mainCanvas.current;
       if (canvas) {
         const rect = canvas.getBoundingClientRect();
-        const startX = rect.left + annotator.cursor.selectStart.xLine * RATIO;
+        const startX =
+          rect.left + annotator.cursor.selectStart.xLine * annotator.charWidth;
         const startY =
           rect.top +
           ((annotator.cursor.selectStart.yLine - annotator.viewport.lineStart) *
             annotator.lineHeight) /
             RATIO;
-        const endX = rect.left + annotator.cursor.selectEnd.xLine * RATIO;
+        const endX =
+          rect.left + annotator.cursor.selectEnd.xLine * annotator.charWidth;
         const endY =
           rect.top +
           ((annotator.cursor.selectEnd.yLine - annotator.viewport.lineStart) *
@@ -200,17 +329,32 @@ export const TextAnnotator = ({
           annotator.cursor.selectStart.yLine === 0 &&
           annotator.cursor.selectEnd.yLine >= annotator.viewport.noLines - 1;
 
+        // Determine if selection is backwards (end to start)
+        const isBackwardsSelection =
+          annotator.cursor.selectEnd.yLine <
+            annotator.cursor.selectStart.yLine ||
+          (annotator.cursor.selectEnd.yLine ===
+            annotator.cursor.selectStart.yLine &&
+            annotator.cursor.selectEnd.xLine <
+              annotator.cursor.selectStart.xLine);
+
+        // Use end position for backwards selection, start position for forwards selection
+        const menuX = isBackwardsSelection ? endX : startX;
+        const menuY = isBackwardsSelection ? endY : startY;
+
         // Create a virtual element for the reference point that represents the selection
         const virtualElement = {
           getBoundingClientRect: () => ({
-            x: startX,
-            y: isFullSelection ? rect.top + rect.height / 2 : startY,
-            width: endX - startX,
-            height: isFullSelection ? 0 : endY - startY,
-            top: isFullSelection ? rect.top + rect.height / 2 : startY,
-            right: endX,
-            bottom: isFullSelection ? rect.top + rect.height / 2 : endY,
-            left: startX,
+            x: menuX,
+            y: isFullSelection ? rect.top + rect.height / 2 : menuY,
+            width: Math.abs(endX - startX),
+            height: isFullSelection ? 0 : Math.abs(endY - startY),
+            top: isFullSelection ? rect.top + rect.height / 2 : menuY,
+            right: Math.max(startX, endX),
+            bottom: isFullSelection
+              ? rect.top + rect.height / 2
+              : Math.max(startY, endY),
+            left: Math.min(startX, endX),
           }),
         };
 
@@ -231,6 +375,8 @@ export const TextAnnotator = ({
     setScrollAfterRefresh(scrollBeforeUpdated);
 
     if (annotator && documentId) {
+      setIsSaving(true);
+
       if (quiet) {
         updateDocumentMutationQuiet.mutate({
           id: documentId,
@@ -270,23 +416,20 @@ export const TextAnnotator = ({
   useEffect(() => {
     // isSelectingText didn't work as expected without the useEffect and pendingSelection so this implementation was necessary
     if (pendingSelection && !isSelectingText) {
-      const { text, anchors } = pendingSelection;
+      const { text, anchors, index } = pendingSelection;
       setSelectedText(text);
       setSelectedAnchors(anchors);
-
-      handleFetchEntities(anchors);
+      setSelectionStartIndex(index);
 
       setPendingSelection(null);
     }
   }, [pendingSelection, isSelectingText]);
 
-  const [anchors, setAnchors] = useState<string[]>([]);
-
   const { data: anchorEntities, isFetching: isFetchingAnchorEntities } =
     useQuery({
-      queryKey: ["anchorEntities", anchors],
+      queryKey: ["anchorEntities", selectedAnchors],
       queryFn: async () => {
-        const uniqueAnchors = [...new Set(anchors)];
+        const uniqueAnchors = [...new Set(selectedAnchors)];
         const entities = await api.entitiesGet(uniqueAnchors);
         setStoredEntities(
           entities.data.reduce((acc, entity) => {
@@ -296,16 +439,14 @@ export const TextAnnotator = ({
         );
         return entities.data;
       },
-      enabled: api.isLoggedIn() && anchors.length > 0,
+      enabled: api.isLoggedIn() && selectedAnchors.length > 0,
     });
 
-  const handleFetchEntities = async (anchors: string[]) => {
-    setAnchors(anchors);
-  };
-
   const handleAddAnchor = (entityId: string) => {
+    // TODO: handle adding a new statement - preserve the order
     annotator?.addAnchor(entityId);
     setSelectedText("");
+    annotator?.clearSelection();
     handleSaveNewContent(true);
     handleRefreshEntityAndStatement(entityId);
     toast.info(`Anchor created ${entityId}.`);
@@ -331,6 +472,68 @@ export const TextAnnotator = ({
 
   const refreshAnnotator = (scrollTo: { line?: number; anchor?: string }) => {
     if (!mainCanvas.current) {
+      return;
+    }
+
+    // Check if the document content has actually changed
+    const currentContent = annotator?.text?.value;
+    const newContent = dataDocument?.content ?? "no text";
+
+    // If content hasn't changed and we have an existing annotator, just redraw it
+    if (annotator && currentContent === newContent) {
+      // Preserve current selection state
+      const currentSelection = {
+        selectStart: annotator.cursor?.selectStart,
+        selectEnd: annotator.cursor?.selectEnd,
+        selectedText: selectedText,
+        selectedAnchors: selectedAnchors,
+      };
+
+      // Update theme colors for existing annotator
+      annotator.fontColor = theme.color.black;
+      annotator.bgColor = "transparent";
+      annotator.setSelectStyle("turquoise", 0.8, theme.color.black);
+
+      // Update Lines component colors if it exists
+      if (annotator.lines) {
+        annotator.lines.fontColor = theme.color.plain;
+        annotator.lines.bgColor = theme.color.white;
+      }
+
+      // Update highlight callback to use current theme
+      annotator.onHighlight((entityId) => {
+        if (dataDocument) {
+          return annotatorHighlight(
+            entityId,
+            {
+              thisTerritoryEntityId,
+              dataDocument,
+            },
+            hlEntities,
+            theme
+          );
+        }
+      });
+
+      annotator.draw();
+
+      // Restore selection if it existed
+      if (currentSelection.selectStart && currentSelection.selectEnd) {
+        annotator.cursor.selectStart = currentSelection.selectStart;
+        annotator.cursor.selectEnd = currentSelection.selectEnd;
+        setSelectedText(currentSelection.selectedText);
+        setSelectedAnchors(currentSelection.selectedAnchors);
+      }
+
+      // Handle scrolling if needed
+      setTimeout(() => {
+        if (scrollTo.line) {
+          annotator.scrollToLine(scrollTo.line);
+        } else if (scrollTo.anchor) {
+          annotator.scrollToAnchor(scrollTo.anchor);
+        }
+      }, 200);
+
       return;
     }
 
@@ -397,7 +600,7 @@ export const TextAnnotator = ({
   };
 
   useEffect(() => {
-    if (!dataDocumentIsFetching) {
+    if (!dataDocumentIsFetching && !isSaving) {
       if (scrollAfterRefresh !== undefined) {
         refreshAnnotator({
           line: scrollAfterRefresh,
@@ -410,23 +613,23 @@ export const TextAnnotator = ({
         });
       }
     }
-  }, [dataDocumentIsFetching, dataDocument]);
+  }, [dataDocumentIsFetching, dataDocument, isSaving]);
 
   useEffect(() => {
-    if (!dataDocumentIsFetching) {
+    if (!dataDocumentIsFetching && !isSaving) {
       refreshAnnotator({
         line: storedAnnotatorScroll,
       });
     }
-  }, [theme, dataDocumentIsFetching]);
+  }, [theme, dataDocumentIsFetching, isSaving]);
 
   useEffect(() => {
-    if (!dataDocumentIsFetching) {
+    if (!dataDocumentIsFetching && !isSaving) {
       refreshAnnotator({
         line: storedAnnotatorScroll,
       });
     }
-  }, [hlEntities]);
+  }, [hlEntities, isSaving]);
 
   useEffect(() => {
     if (mainCanvas.current) {
@@ -462,13 +665,33 @@ export const TextAnnotator = ({
     return "new Territory";
   }, [territoryCreateModalType, territory]);
 
-  const onCreateStatement = () => {
-    if (handleCreateStatement && selectedText) {
+  const onCreateStatement = (
+    // following props are only for creation from EntitySuggester -> EntityCreateModal
+    entityCreateModalProps?: {
+      label: string;
+      detail: string;
+      territoryId: string;
+      language: EntityEnums.Language;
+    }
+  ) => {
+    if (handleCreateStatement && selectedText && selectionStartIndex !== -1) {
       const newStatementId = uuidv4();
       handleAddAnchor(newStatementId);
       // remove linebreaks from text
       const validatedText = selectedText.replace(/\n/g, " ");
-      handleCreateStatement(validatedText, newStatementId);
+      handleCreateStatement(
+        validatedText,
+        newStatementId,
+        selectionStartIndex,
+        entityCreateModalProps
+          ? {
+              label: entityCreateModalProps.label,
+              detail: entityCreateModalProps.detail,
+              territoryId: entityCreateModalProps.territoryId,
+              language: entityCreateModalProps.language,
+            }
+          : undefined
+      );
     }
   };
 
@@ -476,8 +699,7 @@ export const TextAnnotator = ({
     annotator?.removeAnchorFromSelection(anchor);
     handleSaveNewContent(true);
     setSelectedText("");
-    annotator?.cursor.reset();
-    annotator?.draw();
+    annotator?.clearSelection();
     handleRefreshEntityAndStatement(anchor);
   };
 
@@ -500,13 +722,120 @@ export const TextAnnotator = ({
 
   const hasParentT = territory?.data?.parent !== undefined;
 
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [searchOccurences, setSearchOccurences] = useState<
+    | { segmentIndex: number; lineIndex: number; start: number; end: number }[]
+    | null
+  >(null);
+  const [searchActiveOccurence, setSearchActiveOccurence] = useState<number>(0);
+
+  // annotate tool
+  // entity to anchor
+  const [entityToAnchor, setEntityToAnchor] = useState<IResponseEntity | null>(
+    null
+  );
+  // does the pre-selected anchor exist in the current selection
+  const [currentAnchorExist, setCurrentAnchorExist] = useState(false);
+
+  // check if the entity to anchor exists in the current selection
+  useEffect(() => {
+    annotator?.onSelectText(({ text, anchors, index }) => {
+      handleTextSelection(text, anchors, index);
+    });
+    // searchActiveOccurence is in dependencies to call onSelectText on occurence change
+  }, [searchActiveOccurence]);
+
+  useEffect(() => {
+    if (!entityToAnchor) {
+      setCurrentAnchorExist(false);
+    } else if (
+      selectedAnchors.some((anchorId) => anchorId === entityToAnchor?.id)
+    ) {
+      setCurrentAnchorExist(true);
+    } else {
+      setCurrentAnchorExist(false);
+    }
+  }, [selectedAnchors, entityToAnchor]);
+
+  // Handle search occurrence selection
+  useEffect(() => {
+    if (searchOccurences !== null) {
+      const newSelectedOccurence = searchOccurences[searchActiveOccurence];
+
+      if (newSelectedOccurence) {
+        annotator?.selectSearchOccurrence(newSelectedOccurence);
+      }
+    }
+  }, [searchActiveOccurence, searchOccurences]);
+
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+  const searchTermRef = useRef<string>("");
+
+  useEffect(() => {
+    if (annotator && debouncedSearchTerm.length > 2) {
+      const occurrences = annotator.search(debouncedSearchTerm);
+      setSearchOccurences(occurrences);
+
+      // Only reset to first occurrence if this is a new search term
+      if (searchTermRef.current !== debouncedSearchTerm) {
+        setSearchActiveOccurence(0);
+        searchTermRef.current = debouncedSearchTerm;
+      }
+    } else if (debouncedSearchTerm.length <= 2) {
+      setSearchOccurences(null);
+      setSearchActiveOccurence(0);
+      searchTermRef.current = "";
+      setSelectedText("");
+      annotator?.clearSelection();
+    }
+  }, [debouncedSearchTerm]);
+
+  // Re-run search when width changes to update occurrence positions
+  useEffect(() => {
+    if (annotator && debouncedSearchTerm.length > 2) {
+      // Force a redraw first to recalculate text layout, then search
+      setTimeout(() => {
+        annotator.draw();
+        const occurrences = annotator.search(debouncedSearchTerm);
+        setSearchOccurences(occurrences);
+      }, 0);
+    }
+  }, [width, debouncedSearchTerm]);
+
+  const isSearchAllowed = useMemo<boolean>(() => {
+    return annotator !== undefined && !!dataDocument;
+  }, [annotator, dataDocument]);
+
   return (
     <>
+      {annotator && (
+        <StatementListSearchLine
+          showStatementList={showStatementList ?? false}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          searchOccurences={searchOccurences}
+          searchActiveOccurence={searchActiveOccurence}
+          isSearchAllowed={isSearchAllowed}
+          annotatorWidthTooSmall={annotatorWidthTooSmall}
+          setSearchActiveOccurence={setSearchActiveOccurence}
+          annotator={annotator}
+          documentId={documentId}
+          dataDocument={dataDocument || undefined}
+          setEntityToAnchor={setEntityToAnchor}
+          entityToAnchor={entityToAnchor}
+          currentAnchorExist={currentAnchorExist}
+          annotatorMode={annotatorMode}
+          selectedText={selectedText}
+          setSearchOccurences={setSearchOccurences}
+        />
+      )}
+
       <div
         style={{ width: width, position: "relative" }}
         onKeyDown={(e) => {
           if (e.key === "Escape") {
             setSelectedText("");
+            annotator?.clearSelection();
           }
         }}
       >
@@ -519,14 +848,18 @@ export const TextAnnotator = ({
               >
                 {dataDocument && (
                   <TextAnnotatorMenu
+                    onEscapePressed={() => {
+                      setSelectedText("");
+                      annotator?.clearSelection();
+                    }}
                     anchors={selectedAnchors}
                     documentData={dataDocument}
                     text={selectedText}
                     entities={storedEntities}
                     onAnchorAdd={handleAddAnchor}
                     onCreateTerritory={onCreateTerritory}
-                    handleCreateStatement={onCreateStatement}
-                    handleRemoveAnchor={onRemoveAnchor}
+                    onCreateStatement={onCreateStatement}
+                    onRemoveAnchor={onRemoveAnchor}
                     isTextInsideThisT={selectedAnchors.some(
                       (anchor) => anchor === thisTerritoryEntityId
                     )}
@@ -541,6 +874,7 @@ export const TextAnnotator = ({
                     }
                     isLoadingEntities={isFetchingAnchorEntities}
                     hasParentT={hasParentT}
+                    territory={territory}
                   />
                 )}
               </StyledAnnotatorMenu>

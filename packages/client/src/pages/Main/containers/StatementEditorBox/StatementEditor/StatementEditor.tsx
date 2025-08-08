@@ -105,7 +105,7 @@ interface StatementEditor {
   updateStatementMutation: UseMutationResult<
     void,
     unknown,
-    IStatement,
+    Partial<IStatement>,
     unknown
   >;
   moveStatementMutation: UseMutationResult<void, unknown, string, unknown>;

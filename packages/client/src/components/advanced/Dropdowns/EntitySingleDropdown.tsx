@@ -1,11 +1,10 @@
-import { BaseDropdown } from "components";
-import React, { useState } from "react";
-import { OptionProps, components } from "react-select";
-import { EntityColors } from "types";
-import { StyledEntityValue } from "./DropdownStyles";
-import { Tooltip } from "components";
 import { entitiesDictKeys } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
+import { BaseDropdown, Tooltip } from "components";
+import React, { useState } from "react";
+import { components, OptionProps } from "react-select";
+import { EntityColors } from "types";
+import { StyledEntityValue } from "./DropdownStyles";
 
 interface EntitySingleDropdown<T = string> {
   width?: number | "full";
@@ -54,7 +53,7 @@ export const EntitySingleDropdown = <T extends string>({
       autoFocus={autoFocus}
       loggerId={loggerId}
       customComponents={{
-        Option: (props: OptionProps<any>) => (
+        Option: (props: any) => (
           <Option {...props} disableTooltip={disableTooltip} />
         ),
       }}

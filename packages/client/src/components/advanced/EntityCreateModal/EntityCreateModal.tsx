@@ -43,6 +43,13 @@ import { StyledNote } from "./EntityCreateModalStyles";
 const defaultDropdownValue = "empty";
 interface EntityCreateModal {
   closeModal: () => void;
+  // not obligatory, only for specific creation like from annotator where calculation of order is needed
+  onCreateStatement?: (entityCreateModalProps?: {
+    label: string;
+    detail: string;
+    territoryId: string;
+    language: EntityEnums.Language;
+  }) => void;
   onMutationSuccess?: (entity: IEntity) => void;
 
   labelTyped?: string;
@@ -50,16 +57,19 @@ interface EntityCreateModal {
   languageSelected?: EntityEnums.Language;
   // init for create T / S
   parentTerritory?: IEntity;
+  entityCreateStatementOrder?: number;
 
   allowedEntityClasses?: EntityEnums.Class[];
 }
 export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   closeModal,
+  onCreateStatement = undefined,
   onMutationSuccess = () => {},
   labelTyped = "",
   categorySelected,
   languageSelected,
   parentTerritory,
+  entityCreateStatementOrder,
   allowedEntityClasses,
 }) => {
   const entityClasses = allowedEntityClasses
@@ -173,18 +183,29 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
         newCreated.entityClass === EntityEnums.Class.Statement &&
         newCreated.territoryId
       ) {
-        const newStatement = CStatement(
-          userRole,
-          {
-            ...user.options,
-            defaultLanguage:
-              newCreated.language || user.options.defaultLanguage,
-          },
-          newCreated.label,
-          newCreated.detail,
-          newCreated.territoryId
-        );
-        entityCreateMutation.mutate(newStatement);
+        if (onCreateStatement) {
+          onCreateStatement({
+            label: newCreated.label,
+            detail: newCreated.detail || "",
+            territoryId: newCreated.territoryId,
+            language: newCreated.language || user.options.defaultLanguage,
+          });
+        } else {
+          const newStatement = CStatement(
+            userRole,
+            {
+              ...user.options,
+              defaultLanguage:
+                newCreated.language || user.options.defaultLanguage,
+            },
+            newCreated.label,
+            newCreated.detail,
+            newCreated.territoryId,
+            undefined,
+            entityCreateStatementOrder ?? EntityEnums.Order.Last
+          );
+          entityCreateMutation.mutate(newStatement);
+        }
       } else if (newCreated.entityClass === EntityEnums.Class.Territory) {
         const newTerritory = CTerritory(
           userRole,

@@ -28,7 +28,7 @@ import {
 import { CMetaProp, DProps } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
-import { FaPlus } from "react-icons/fa";
+import { FaPlus, FaChevronCircleDown, FaChevronCircleUp } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
 import {
@@ -57,6 +57,7 @@ import {
   StyledPropGroupWrap,
   StyledUsedAsHeading,
   StyledUsedAsTitle,
+  StyledExpandIcon,
 } from "./EntityDetailStyles";
 import { EntityDetailClassificationTable } from "./EntityDetailUsedInTable/EntityDetailClassificationTable/EntityDetailClassificationTable";
 import { EntityDetailIdentificationTable } from "./EntityDetailUsedInTable/EntityDetailIdentificationTable/EntityDetailIdentificationTable";
@@ -599,6 +600,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({
   const [showBatchRemovePropSubmit, setShowBatchRemovePropSubmit] =
     useState(false);
   const [loadingValidations, setLoadingValidations] = useState(false);
+  const [isProtocolExpanded, setIsProtocolExpanded] = useState(false);
+  const [isValidationExpanded, setIsValidationExpanded] = useState(false);
 
   const contentWidth = useAppSelector(
     (state) => state.layout.mainPage.secondPanelRealWidth
@@ -669,16 +672,29 @@ export const EntityDetail: React.FC<EntityDetail> = ({
               {entity.class === EntityEnums.Class.Territory && (
                 <StyledDetailSection>
                   <StyledDetailSectionHeader>
-                    Protocol
+                    <StyledDetailSectionHeading>
+                      Protocol
+                    </StyledDetailSectionHeading>
+                    <StyledExpandIcon
+                      onClick={() => setIsProtocolExpanded(!isProtocolExpanded)}
+                    >
+                      {isProtocolExpanded ? (
+                        <FaChevronCircleUp size={16} />
+                      ) : (
+                        <FaChevronCircleDown size={16} />
+                      )}
+                    </StyledExpandIcon>
                   </StyledDetailSectionHeader>
-                  <StyledDetailSectionContent>
-                    <EntityDetailProtocol
-                      territory={entity}
-                      updateEntityMutation={updateEntityMutation}
-                      isInsideTemplate={isInsideTemplate}
-                      userCanEdit={canEditEntity}
-                    />
-                  </StyledDetailSectionContent>
+                  {isProtocolExpanded && (
+                    <StyledDetailSectionContent>
+                      <EntityDetailProtocol
+                        territory={entity}
+                        updateEntityMutation={updateEntityMutation}
+                        isInsideTemplate={isInsideTemplate}
+                        userCanEdit={canEditEntity}
+                      />
+                    </StyledDetailSectionContent>
+                  )}
                 </StyledDetailSection>
               )}
 
@@ -686,6 +702,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({
               {entity.class === EntityEnums.Class.Territory && (
                 <StyledDetailSection>
                   <EntityDetailValidationSection
+                    isValidationExpanded={isValidationExpanded}
+                    setIsValidationExpanded={setIsValidationExpanded}
                     validations={
                       entity.data.validations as
                         | ITerritoryValidation[]

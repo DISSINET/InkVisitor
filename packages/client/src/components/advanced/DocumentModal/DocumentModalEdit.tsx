@@ -54,7 +54,7 @@ const DocumentModalEdit: React.FC<DocumentModalEdit> = ({
         onClose={onClose}
       />
 
-      <ModalContent>
+      <ModalContent column>
         {document ? (
           <AnnotatorProvider>
             <TextAnnotator
@@ -63,7 +63,7 @@ const DocumentModalEdit: React.FC<DocumentModalEdit> = ({
               dataDocumentIsFetching={dataDocumentIsFetching}
               dataDocumentError={errorDocument}
               width={965}
-              height={windowHeight - 180}
+              height={windowHeight - 203}
               displayLineNumbers={true}
               hlEntities={[EntityEnums.Class.Territory]}
               storedAnnotatorScroll={0}

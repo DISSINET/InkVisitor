@@ -10,6 +10,7 @@ import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
 import { StatementEditor } from "./StatementEditor/StatementEditor";
 import { StyledEditorEmptyState } from "./StatementEditorBoxStyles";
+import { computeDifferences } from "utils/utils";
 
 export const StatementEditorBox: React.FC = () => {
   const thirdPanelExpanded: boolean = useAppSelector(
@@ -64,7 +65,7 @@ export const StatementEditorBox: React.FC = () => {
 
   // MUTATIONS
   const updateStatementMutation = useMutation({
-    mutationFn: async (changes: IStatement) => {
+    mutationFn: async (changes: Partial<IStatement>) => {
       await api.entityUpdate(statementId, changes);
     },
     onSuccess: (data, variables) => {
@@ -74,7 +75,7 @@ export const StatementEditorBox: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ["statement"] });
       queryClient.invalidateQueries({ queryKey: ["territory"] });
 
-      if (variables.labels[0] !== undefined) {
+      if (variables.labels?.[0] !== undefined) {
         queryClient.invalidateQueries({ queryKey: ["detail-tab-entities"] });
       }
       if (statement && statement.isTemplate) {
@@ -107,17 +108,36 @@ export const StatementEditorBox: React.FC = () => {
   });
 
   const [tempObject, setTempObject] = useState<IResponseStatement>();
+  const [lastSentData, setLastSentData] = useState<string>("");
 
   useEffect(() => {
     if (JSON.stringify(statement) !== JSON.stringify(tempObject)) {
       setTempObject(statement);
+      // Reset last sent data when statement changes
+      setLastSentData("");
     }
   }, [statement]);
 
   const sendChangesToBackend = (changes: IResponseStatement) => {
     if (statement && JSON.stringify(statement) !== JSON.stringify(changes)) {
-      const { entities, warnings, right, ...newStatement } = changes;
-      updateStatementMutation.mutate(newStatement);
+      // Remove response-specific fields
+      const { entities, warnings, right, ...cleanChanges } = changes;
+
+      // Compute only the differences between original statement and current changes
+      const differences = computeDifferences(statement, cleanChanges);
+
+      // Create a hash of the differences to check for duplicates
+      const differencesHash = JSON.stringify(differences);
+
+      // Only send if there are actual differences and we haven't sent this exact change before
+      if (
+        Object.keys(differences).length > 0 &&
+        differencesHash !== lastSentData
+      ) {
+        updateStatementMutation.mutate(differences);
+        setLastSentData(differencesHash);
+        setChangesPending(false);
+      }
     }
   };
 
@@ -371,7 +391,13 @@ export const StatementEditorBox: React.FC = () => {
         <>
           {tempObject && thirdPanelExpanded ? (
             <CustomScrollbar>
-              <div onMouseLeave={() => sendChangesToBackend(tempObject)}>
+              <div
+                onMouseLeave={() => {
+                  if (changesPending && tempObject) {
+                    sendChangesToBackend(tempObject);
+                  }
+                }}
+              >
                 <StatementEditor
                   statement={tempObject}
                   updateStatementMutation={updateStatementMutation}

@@ -8,7 +8,6 @@ import { dropdownWildCard } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
 import { IEntity, IUserOptions } from "@shared/types";
 import { MIN_LABEL_LENGTH_MESSAGE, scrollOverscanCount } from "Theme/constants";
-import { ThemeType } from "Theme/theme";
 import {
   Button,
   Input,
@@ -17,14 +16,13 @@ import {
   TypeBar,
 } from "components";
 import Dropdown from "components/advanced";
+import { useTheme } from "hooks";
 import useKeypress from "hooks/useKeyPress";
 import React, { useEffect, useRef, useState } from "react";
 import { DropTargetMonitor, useDrop } from "react-dnd";
 import { FaPlus } from "react-icons/fa";
-import { MdCancel } from "react-icons/md";
 import { toast } from "react-toastify";
 import { FixedSizeList as List } from "react-window";
-import { useTheme } from "hooks";
 import {
   EntityDragItem,
   EntitySingleDropdownItem,
@@ -40,7 +38,6 @@ import {
   StyledSuggester,
   StyledSuggesterButton,
   StyledSuggesterList,
-  StyledSuggestionCancelButton,
   SuggesterHidden,
 } from "./SuggesterStyles";
 import {
@@ -310,7 +307,6 @@ export const Suggester: React.FC<Suggester> = ({
           ref={dropRef}
           $hasButton={!disableCreate}
           $isOver={isOver}
-          $hasText={typed.length > 0}
         >
           <Dropdown.Single.Entity
             value={category}
@@ -334,13 +330,11 @@ export const Suggester: React.FC<Suggester> = ({
           <TypeBar entityLetter={category} />
 
           <div
-            // ref={refs.setReference}
             ref={(node) => {
               refs.setReference(node);
               inputRef.current = node;
             }}
             style={{
-              position: "relative",
               width: "100%",
             }}
           >
@@ -364,12 +358,8 @@ export const Suggester: React.FC<Suggester> = ({
               autoFocus={categories.length === 1 && autoFocus}
               disabled={disabled}
               fullHeight
+              clearable
             />
-            {typed.length > 0 && (
-              <StyledSuggestionCancelButton>
-                <MdCancel size={16} onClick={() => onCancel()} />
-              </StyledSuggestionCancelButton>
-            )}
           </div>
 
           {!disableCreate && (

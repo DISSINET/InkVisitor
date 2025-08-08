@@ -26,17 +26,12 @@ interface Column {}
 interface InputWrapper {
   $isOver: boolean;
   $hasButton: boolean;
-  $hasText?: boolean;
 }
 export const StyledInputWrapper = styled.div<InputWrapper>`
   display: flex;
   opacity: ${({ $isOver }) => $isOver && "50%"};
   width: 100%;
   height: 2.5rem;
-  input {
-    padding-right: ${({ theme, $hasText }) =>
-      $hasText ? theme.space[7] : theme.space[1]};
-  }
   input[type="text"] {
     border-left-width: 0;
     border-right-width: ${({ $hasButton }) => ($hasButton ? 0 : "")};
@@ -47,15 +42,6 @@ export const StyledInputWrapper = styled.div<InputWrapper>`
 `;
 export const StyledSuggesterButton = styled.div`
   border: 1px solid ${({ theme }) => theme.color["primary"]};
-`;
-interface StyledSuggestionCancelButton {}
-export const StyledSuggestionCancelButton = styled.div<StyledSuggestionCancelButton>`
-  position: absolute;
-  right: 0.25rem;
-  top: 4px;
-  svg {
-    color: ${({ theme }) => theme.color["danger"]};
-  }
 `;
 
 export const StyledSuggesterList = styled.div`
