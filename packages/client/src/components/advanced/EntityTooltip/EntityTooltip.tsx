@@ -39,6 +39,7 @@ import {
   StyledIconWrap,
   StyledLabel,
   StyledLetterIconWrap,
+  StyledMoreText,
   StyledRelationTypeBlock,
   StyledRelations,
   StyledRow,
@@ -208,7 +209,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                   <BsCardText />
                 </StyledIconWrap>
                 <StyledDetail>
-                  {anchors.map((documentAnchor, index) => {
+                  {anchors.slice(0, 8).map((documentAnchor, index) => {
                     return (
                       <StyledAnchorItem key={index}>
                         <DocumentTitle
@@ -221,6 +222,11 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                       </StyledAnchorItem>
                     );
                   })}
+                  {anchors.length > 8 && (
+                    <StyledMoreText>
+                      +{anchors.length - 8} more anchors
+                    </StyledMoreText>
+                  )}
                 </StyledDetail>
               </StyledRow>
             )}

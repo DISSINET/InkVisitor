@@ -100,6 +100,11 @@
         <textarea id="newText" cols="100" rows="10"></textarea>
         <button id="updateText">Update</button>
       </fieldset>
+      <fieldset>
+        <label>replace text</label>
+        <input type="text" id="replaceText" placeholder="Text to replace selection" />
+        <button id="replaceTextBtn">Replace</button>
+      </fieldset>
     </div>
 
     <p>Text from textfile.txt:</p>
@@ -212,6 +217,13 @@
 
       document.getElementById("newText").onchange = () => {
         annotator.updateText(document.getElementById("newText").value);
+      };
+
+      document.getElementById("replaceTextBtn").onclick = () => {
+        const replaceText = document.getElementById("replaceText").value;
+        if (replaceText) {
+          annotator.onReplaceText(replaceText);
+        }
       };
 
       let searchOccurrence = 0;

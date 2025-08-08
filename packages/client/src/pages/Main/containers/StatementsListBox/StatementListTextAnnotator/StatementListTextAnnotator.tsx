@@ -1,6 +1,5 @@
 import { Annotator } from "@inkvisitor/annotator/src/lib";
 import { animated, useSpring } from "@react-spring/web";
-import { entitiesDict } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
 import {
   IDocument,
@@ -15,15 +14,13 @@ import { AxiosResponse } from "axios";
 import Dropdown from "components/advanced";
 import TextAnnotator from "components/advanced/Annotator/Annotator";
 import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
-import { useDebounce, useTheme } from "hooks";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ANNOTATOR_SELECTOR_HEIGHT,
   ANNOTATOR_TOO_SMALL_BREAKPOINT,
   COLLAPSED_TABLE_WIDTH,
 } from "Theme/constants";
-import StatementListDocumentSearchLine from "../StatementListDocumentSearchLine/StatementListDocumentSearchLine";
-import { StyledInfoText } from "../StatementListHeader/StatementListHeaderStyles";
+import StatementListDocumentLine from "../StatementListDocumentLine/StatementListDocumentLine";
 
 interface StatementListTextAnnotator {
   // it's faster than the territory entity so it's better to pass territoryId separately
@@ -111,47 +108,6 @@ export const StatementListTextAnnotator: React.FC<
     []
   );
 
-  const [searchTerm, setSearchTerm] = useState<string>("");
-  const [searchOccurences, setSearchOccurences] = useState<
-    { segmentIndex: number; lineIndex: number; start: number; end: number }[]
-  >([]);
-  const [searchActiveOccurence, setSearchActiveOccurence] = useState<number>(0);
-
-  useEffect(() => {
-    const newSelectedOccurence = searchOccurences[searchActiveOccurence];
-
-    if (newSelectedOccurence) {
-      annotator?.selectSearchOccurrence(newSelectedOccurence);
-    }
-  }, [searchActiveOccurence, searchOccurences]);
-
-  const dSearchTerm = useDebounce(searchTerm, 1000);
-
-  const isSearchTermValid = useMemo<boolean>(() => {
-    return dSearchTerm.length > 2;
-  }, [dSearchTerm]);
-
-  useEffect(() => {
-    if (annotator) {
-      if (isSearchTermValid) {
-        annotator?.search(searchTerm);
-        const occurences = annotator?.search(searchTerm);
-
-        setSearchOccurences(occurences);
-
-        setTimeout(() => {
-          setSearchActiveOccurence(0);
-        }, 1000);
-
-        // if (occurences.length > 0) {
-        //   annotator?.selectSearchOccurence(
-        //     searchOccurences[searchActiveOccurence]
-        //   );
-        // }
-      }
-    }
-  }, [dSearchTerm]);
-
   const animatedStyle = useSpring({
     opacity: showAnnotator ? 1 : 0,
     delay: 300,
@@ -186,12 +142,6 @@ export const StatementListTextAnnotator: React.FC<
     return false;
   }, [selectedDocument, territoryId]);
 
-  const theme = useTheme();
-
-  const isSearchAllowed = useMemo<boolean>(() => {
-    return annotator !== undefined && !!selectedDocument;
-  }, [annotator, selectedDocument]);
-
   const annotatorHeight = useMemo<number>(() => {
     return contentHeight - 70 - ANNOTATOR_SELECTOR_HEIGHT;
   }, [contentHeight]);
@@ -209,7 +159,7 @@ export const StatementListTextAnnotator: React.FC<
   return (
     <animated.div style={animatedStyle}>
       {contentWidth > 0 && (
-        <StatementListDocumentSearchLine
+        <StatementListDocumentLine
           selectedResource={selectedResource}
           setSelectedResourceId={setSelectedResourceId}
           selectedDocumentIsFetching={selectedDocumentIsFetching}
@@ -217,53 +167,14 @@ export const StatementListTextAnnotator: React.FC<
           activeTHasAnchor={activeTHasAnchor}
           annotator={annotator}
           territoryId={territoryId}
-          isSearchAllowed={isSearchAllowed}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          isSearchTermValid={isSearchTermValid}
-          hasNoSearchResults={searchOccurences.length === 0}
-          searchActiveOccurence={searchActiveOccurence}
-          searchOccurences={searchOccurences}
-          setSearchActiveOccurence={setSearchActiveOccurence}
           resources={resources || []}
           showStatementList={showStatementList}
           userCanEdit={userCanEdit}
           annotatorWidthTooSmall={annotatorWidthTooSmall}
+          contentWidth={contentWidth}
+          handleHlEntitiesChange={handleHlEntitiesChange}
+          hlEntities={hlEntities}
         />
-      )}
-
-      {/* Class selector */}
-      {selectedResource !== false && selectedResource?.data?.documentId && (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: theme.space[4],
-            paddingRight: theme.space[2],
-            marginBottom: theme.space[2],
-            marginLeft: showStatementList ? `-${COLLAPSED_TABLE_WIDTH}px` : "0",
-          }}
-        >
-          {/* this condition helps initial render in firefox */}
-          {contentWidth > 0 && (
-            <>
-              <StyledInfoText style={{ textWrap: "nowrap" }}>
-                Highlight
-              </StyledInfoText>
-              <Dropdown.Multi.Entity
-                options={entitiesDict}
-                disableEmpty={true}
-                isClearable={true}
-                disableAny={true}
-                onChange={handleHlEntitiesChange}
-                value={hlEntities}
-                noOptionsMessage="No entity classes to highlight"
-                width={contentWidth - 71}
-                limitSelectedItems={Math.floor((contentWidth - 145) / 80)}
-              />
-            </>
-          )}
-        </div>
       )}
 
       {/* Annotator */}
@@ -280,7 +191,7 @@ export const StatementListTextAnnotator: React.FC<
               thisTerritoryEntityId={territoryId}
               displayLineNumbers={true}
               height={annotatorHeight}
-              documentId={selectedDocumentId as string}
+              documentId={selectedDocumentId}
               statementCreateMutation={statementCreateMutation}
               storedAnnotatorScroll={storedAnnotatorScroll}
               setStoredAnnotatorScroll={setStoredAnnotatorScroll}
@@ -288,6 +199,7 @@ export const StatementListTextAnnotator: React.FC<
               dataDocument={selectedDocument}
               dataDocumentIsFetching={selectedDocumentIsFetching}
               dataDocumentError={selectedDocumentError}
+              showStatementList={showStatementList}
               userData={userData}
             />
           )}

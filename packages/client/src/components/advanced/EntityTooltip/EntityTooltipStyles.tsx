@@ -76,3 +76,11 @@ export const StyledAnchorEmptyState = styled.div`
   font-style: italic;
   text-align: center;
 `;
+
+export const StyledMoreText = styled.div`
+  color: ${({ theme }) => theme.color["tooltipColor"]};
+  font-size: ${({ theme }) => theme.fontSize["xxs"]};
+  font-style: italic;
+  padding-left: ${({ theme }) => theme.space[2]};
+  margin-top: ${({ theme }) => theme.space[1]};
+`;

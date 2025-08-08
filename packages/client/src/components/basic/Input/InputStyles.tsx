@@ -11,6 +11,7 @@ interface IValueStyle {
   $borderColor?: keyof ThemeColor;
   $autocomplete?: string;
   $fullHeight?: boolean;
+  $paddingRight?: boolean;
 }
 const getWidth = (width?: number | "full") => {
   if (width) {
@@ -61,12 +62,17 @@ export const StyledInput = styled.input<IValueStyle>`
       : theme.color["gray"]["400"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   padding-left: ${({ theme }) => theme.space[2]};
+
+  padding-right: ${({ theme, $paddingRight }) =>
+    $paddingRight ? theme.space[7] : theme.space[1]};
+
   width: ${({ width }) => getWidth(width)};
   min-width: ${({ theme }) => theme.space[6]};
   background: ${({ disabled, theme }) =>
     disabled ? theme.background["stripes"] : ""};
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "")};
   resize: none;
+
   &:hover {
     border-color: ${({ theme }) => theme.color["info"]};
     border-width: ${({ theme }) => theme.borderWidth[1]};
@@ -114,5 +120,15 @@ export const StyledTextArea = styled.textarea<StyledTextArea>`
   }
   &:hover {
     border-color: ${({ theme }) => theme.color["info"]};
+  }
+`;
+
+interface StyledClearableInputButton {}
+export const StyledClearableInputButton = styled.div<StyledClearableInputButton>`
+  position: absolute;
+  right: 0.25rem;
+  top: 4px;
+  svg {
+    color: ${({ theme }) => theme.color["danger"]};
   }
 `;

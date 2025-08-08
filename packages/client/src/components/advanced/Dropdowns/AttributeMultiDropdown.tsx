@@ -95,7 +95,11 @@ export const AttributeMultiDropdown = <T extends string>({
       disableTyping={disableTyping}
       disabled={disabled}
       loggerId={loggerId}
-      customComponents={{ Option, MultiValue, ValueContainer }}
+      customComponents={{
+        Option,
+        MultiValue: MultiValue as typeof components.MultiValue,
+        ValueContainer,
+      }}
     />
   );
 };
@@ -121,9 +125,7 @@ const ValueContainer = ({
   );
 };
 
-const MultiValue = (
-  props: MultiValueProps<any> & { selectProps: StyledSelect }
-): React.ReactElement => {
+const MultiValue = (props: MultiValueProps<any>): React.ReactElement => {
   let labelToBeDisplayed = `${props.data.label}`;
   const { value, options } = props.selectProps;
 

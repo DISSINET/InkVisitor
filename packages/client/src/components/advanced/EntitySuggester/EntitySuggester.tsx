@@ -1,4 +1,5 @@
 import {
+  classesAll,
   dropdownWildCard,
   entitiesDictKeys,
 } from "@shared/dictionaries/entity";
@@ -26,7 +27,7 @@ import { deepCopy } from "utils/utils";
 import { AddTerritoryModal, EntityCreateModal } from "..";
 
 interface EntitySuggester {
-  categoryTypes: EntityEnums.Class[];
+  categoryTypes?: EntityEnums.Class[];
   onSelected?: (id: string) => void;
   onPicked?: (entity: IEntity) => void;
   onChangeCategory?: (
@@ -80,7 +81,7 @@ interface EntitySuggester {
 }
 
 export const EntitySuggester: React.FC<EntitySuggester> = ({
-  categoryTypes,
+  categoryTypes = classesAll,
   onSelected = () => {},
   onPicked = () => {},
   onChangeCategory,

@@ -1,5 +1,17 @@
 import styled from "styled-components";
+import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
 
+export const StyledContentWrapper = styled.div`
+  display: flex;
+  height: 100%;
+  overflow: hidden;
+`;
+export const StyledInfoWrapper = styled.div`
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
 export const StyledDots = styled.p`
   display: flex;
   align-items: flex-end;
@@ -7,12 +19,17 @@ export const StyledDots = styled.p`
   cursor: default;
 `;
 
-export const StyledLoaderWrap = styled.div`
-  height: 100%;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+interface StyledLoaderWrap {
+  $width: number;
+  $height: number;
+}
+export const StyledLoaderWrap = styled.div<StyledLoaderWrap>`
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  width: ${({ $width }) => `${$width / 10}rem`};
+  height: ${({ $height }) => `${$height / 10}rem`};
 `;
 
 export const StyledSelectorCell = styled.div`
@@ -51,17 +68,37 @@ export const StyledEmptyState = styled.div`
   text-align: center;
 `;
 
-export const StyledDocumentSearchLine = styled.div`
+interface StyledDocumentSearchLine {
+  $marginLeft?: boolean;
+}
+export const StyledDocumentLine = styled.div<StyledDocumentSearchLine>`
   display: flex;
   gap: 0.2rem;
   align-items: center;
   justify-content: space-between;
+  height: 3rem;
   padding: 0.2rem 0.5rem;
   padding-right: 0.5rem;
   overflow: hidden;
   white-space: nowrap;
+  margin-left: ${({ $marginLeft }) =>
+    $marginLeft ? `-${COLLAPSED_TABLE_WIDTH / 10}rem` : "0"};
 `;
 
+export const StyledSearchLine = styled.div<StyledDocumentSearchLine>`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+  margin-left: ${({ $marginLeft }) =>
+    $marginLeft ? `-${COLLAPSED_TABLE_WIDTH / 10}rem` : "0"};
+  justify-content: center;
+  height: 3rem;
+`;
+export const StyledHighlightContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+`;
 export const StyledSearchContainer = styled.div`
   display: flex;
   align-items: center;
@@ -69,6 +106,7 @@ export const StyledSearchContainer = styled.div`
   margin-left: ${({ theme }) => theme.space[2]};
   flex-shrink: 1;
   min-width: 0;
+  user-select: none;
 `;
 
 export const StyledSearchIcon = styled.div`
@@ -124,7 +162,8 @@ export const StyledEntityContainer = styled.div`
 `;
 
 export const StyledDocumentTitleContainer = styled.div`
+  position: relative;
   display: flex;
   align-items: center;
-  /* max-width: 100px; */
+  min-width: 1rem;
 `;

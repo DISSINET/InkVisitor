@@ -1,7 +1,9 @@
 import { ThemeColor, ThemeFontSize } from "Theme/theme";
 import React, { useEffect, useState } from "react";
+import { MdCancel } from "react-icons/md";
 import {
   Label,
+  StyledClearableInputButton,
   StyledInput,
   StyledTextArea,
   StyledWrapper,
@@ -39,6 +41,7 @@ interface Input {
   required?: boolean;
   minWidth?: number;
   fullHeight?: boolean;
+  clearable?: boolean;
 }
 
 export const Input: React.FC<Input> = ({
@@ -68,6 +71,7 @@ export const Input: React.FC<Input> = ({
   required = false,
   minWidth,
   fullHeight = false,
+  clearable = false,
 }) => {
   const [displayValue, setDisplayValue] = useState(value);
   useEffect(() => {
@@ -83,49 +87,64 @@ export const Input: React.FC<Input> = ({
     >
       {label && <Label className="label">{label}</Label>}
       {(type === "text" || type === "password") && (
-        <StyledInput
-          disabled={disabled}
-          type={type}
-          width={width}
-          $fullHeight={fullHeight}
-          autoFocus={autoFocus}
-          className="value"
-          placeholder={placeholder}
-          value={displayValue}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            setDisplayValue(e.currentTarget.value);
-            if (changeOnType) {
-              onChangeFn(e.currentTarget.value);
+        <div style={{ position: "relative", width: "100%", display: "flex" }}>
+          <StyledInput
+            disabled={disabled}
+            type={type}
+            width={width}
+            $fullHeight={fullHeight}
+            autoFocus={autoFocus}
+            className="value"
+            placeholder={placeholder}
+            value={displayValue}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              setDisplayValue(e.currentTarget.value);
+              if (changeOnType) {
+                onChangeFn(e.currentTarget.value);
+              }
+            }}
+            onKeyDown={(event: React.KeyboardEvent) => {
+              switch (event.key) {
+                case "Enter":
+                  onEnterPressFn();
+                  return;
+                case "ArrowUp":
+                  event.preventDefault();
+                  return;
+                case "ArrowDown":
+                  event.preventDefault();
+                  return;
+              }
+            }}
+            onFocus={(event: React.FocusEvent<HTMLInputElement>) =>
+              onFocus(event)
             }
-          }}
-          onKeyDown={(event: React.KeyboardEvent) => {
-            switch (event.key) {
-              case "Enter":
-                onEnterPressFn();
-                return;
-              case "ArrowUp":
-                event.preventDefault();
-                return;
-              case "ArrowDown":
-                event.preventDefault();
-                return;
-            }
-          }}
-          onFocus={(event: React.FocusEvent<HTMLInputElement>) =>
-            onFocus(event)
-          }
-          onBlur={() => {
-            if (displayValue !== value && !changeOnType) {
-              onChangeFn(displayValue);
-            }
-            onBlur();
-          }}
-          $inverted={inverted}
-          $suggester={suggester}
-          $borderColor={borderColor}
-          $autocomplete={autocomplete}
-          required={required}
-        />
+            onBlur={() => {
+              if (displayValue !== value && !changeOnType) {
+                onChangeFn(displayValue);
+              }
+              onBlur();
+            }}
+            $inverted={inverted}
+            $suggester={suggester}
+            $borderColor={borderColor}
+            $autocomplete={autocomplete}
+            required={required}
+            $paddingRight={clearable && displayValue.length > 0}
+          />
+
+          {displayValue.length > 0 && clearable && (
+            <StyledClearableInputButton>
+              <MdCancel
+                size={16}
+                onClick={() => {
+                  setDisplayValue("");
+                  onChangeFn("");
+                }}
+              />
+            </StyledClearableInputButton>
+          )}
+        </div>
       )}
       {type === "textarea" && (
         <StyledTextArea

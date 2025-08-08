@@ -74,7 +74,7 @@ export class Annotator {
   annotatedPosition: SegmentPosition | null = null;
 
   // to control highlightChangeCb callback
-  lastSelectedText = "";
+  lastSelectedText?: Selected;
   ratio: number = 1;
 
   previousRenderViewportLineStart: number;
@@ -151,7 +151,11 @@ export class Annotator {
     this.draw();
   }
 
-  setSelectStyle(selectColor: string, selectOpacity: number, selectorColor: string) {
+  setSelectStyle(
+    selectColor: string,
+    selectOpacity: number,
+    selectorColor: string
+  ) {
     this.selectColor = selectColor;
     this.selectOpacity = selectOpacity;
 
@@ -302,12 +306,12 @@ export class Annotator {
    * @param cb
    */
   onSelectText(cb: (selection: Selected) => void) {
-    this.lastSelectedText = "";
+    this.lastSelectedText = undefined;
     this.onSelectTextCb = (selection: Selected) => {
-      if (selection.text === this.lastSelectedText) {
+      if (JSON.stringify(this.lastSelectedText) === JSON.stringify(selection)) {
         return;
       }
-      this.lastSelectedText = selection.text;
+      this.lastSelectedText = selection;
       cb(selection);
     };
   }
@@ -869,10 +873,34 @@ export class Annotator {
 
     this.scrollToLine(this.cursor.selectStart.yLine);
     this.draw();
+
+    // Manually trigger onSelectText callback for search-based selections
+    if (this.onSelectTextCb) {
+      const [start, end] = this.cursor.getBounds();
+
+      if (start && end) {
+        const startSegment = this.text.getSegmentPosition(
+          start.yLine,
+          start.xLine
+        ) as SegmentPosition;
+        const endSegment = this.text.getSegmentPosition(
+          end.yLine,
+          end.xLine
+        ) as SegmentPosition;
+        const annotated = this.getAnnotations(startSegment, endSegment);
+        this.onSelectTextCb({
+          text: this.text.getRangeText(start, end),
+          anchors: annotated,
+          index: this.text.getAbsTextIndexFromPosition(
+            this.text.getSegmentPosition(start.yLine, start.xLine)
+          ),
+        });
+      }
+    }
   }
 
   onCopyText() {
-    window.navigator.clipboard.writeText(this.lastSelectedText);
+    window.navigator.clipboard.writeText(this.lastSelectedText?.text || "");
   }
 
   onPasteText() {
@@ -892,5 +920,30 @@ export class Annotator {
 
       this.draw();
     });
+  }
+
+  onReplaceText(text: string) {
+    const area = this.cursor.getSelectedArea();
+    if (area) {
+      this.text.deleteRangeText(area[0], area[1]);
+      this.cursor.reset();
+      this.cursor.setPosition(
+        area[0].xLine,
+        area[0].yLine - this.viewport.lineStart
+      );
+    }
+    this.text.insertText(this.viewport, this.cursor, text);
+    this.cursor.move(text.length, 0);
+    this.cursor.fixOutOfBounds(this.viewport, this.text);
+
+    this.draw();
+  }
+
+  /**
+   * clearSelection clears the current text selection and redraws the canvas
+   */
+  clearSelection() {
+    this.cursor.reset();
+    this.draw();
   }
 }

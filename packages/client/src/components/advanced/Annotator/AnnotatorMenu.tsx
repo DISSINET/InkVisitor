@@ -26,6 +26,7 @@ import { TerritoryCreateModalType } from "./types";
 import { EntityEnums } from "@shared/enums";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "hooks";
+import useKeypress from "hooks/useKeyPress";
 
 interface TextAnnotatorMenuProps {
   text: string;
@@ -50,6 +51,7 @@ interface TextAnnotatorMenuProps {
   isTextInsideThisT: boolean;
   activeTerritoryId: string | undefined;
   territory?: IResponseTerritory;
+  onEscapePressed: () => void;
 }
 
 export const TextAnnotatorMenu = ({
@@ -67,10 +69,12 @@ export const TextAnnotatorMenu = ({
   isTextInsideThisT,
   activeTerritoryId,
   territory,
+  onEscapePressed,
 }: TextAnnotatorMenuProps) => {
   const activeTerritory = entities[activeTerritoryId ?? ""];
   const queryClient = useQueryClient();
   const { setStatementId } = useSearchParams();
+  useKeypress("Escape", onEscapePressed);
   return (
     <>
       <StyledAnnotatorItem>
