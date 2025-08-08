@@ -1,11 +1,11 @@
 import { IRequestStats, IResponseStats } from "@shared/types";
-import { Aggregation, EventType } from "@shared/types/stats";
+import { Aggregation } from "@shared/types/stats";
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
 import { useMemo } from "react";
 import { Column, useTable } from "react-table";
 import styled from "styled-components";
-import { getNonEmptyUsers } from "./utils";
+import { getDataCategories, transformDataForTable } from "./utils";
 
 interface StatsTableProps {
   data: IResponseStats;
@@ -92,77 +92,19 @@ export const StatsTable = ({
     return mapNames;
   }, [dataUsers]);
 
-  console.log(userKeyMap, values);
+  const dataCategories = useMemo(
+    () => getDataCategories(aggregateBy, userKeyMap, values),
+    [aggregateBy, userKeyMap, values]
+  );
 
-  const dataCategories = useMemo<string[]>(() => {
-    const categoriesOut = [];
+  const tableData = useMemo(
+    () =>
+      transformDataForTable(values, dataCategories, aggregateBy, userKeyMap),
+    [values, dataCategories, aggregateBy, userKeyMap]
+  );
 
-    if (aggregateBy === Aggregation.ACTIVITY_TYPE) {
-      categoriesOut.push(EventType.EDIT);
-      categoriesOut.push(EventType.DELETE);
-      categoriesOut.push(EventType.CREATE);
-    }
-
-    if (aggregateBy === Aggregation.USER) {
-      categoriesOut.push(...getNonEmptyUsers(userKeyMap, values));
-    }
-    return categoriesOut;
-  }, [aggregateBy, userKeyMap]);
-
-  const tableData = useMemo<TableRow[]>(() => {
-    // Calculate sums for the first row
-    const sums: Record<string, number> = {};
-    dataCategories.forEach((category) => {
-      sums[category] = 0;
-    });
-
-    // Transform data for table rows
-    const rows: TableRow[] = Object.keys(values).map((timeKey) => {
-      const row: TableRow = { timeKey };
-      const valObject = values[timeKey];
-
-      if (aggregateBy === Aggregation.USER) {
-        for (const user of dataUsers?.data || []) {
-          const value = valObject[user.id] || 0;
-          const userName = userKeyMap[user.id];
-          row[userName] = value;
-          sums[userName] = (sums[userName] || 0) + value;
-        }
-      } else {
-        dataCategories.forEach((category) => {
-          const value = valObject[category] || 0;
-          row[category] = value;
-          sums[category] = (sums[category] || 0) + value;
-        });
-      }
-
-      return row;
-    });
-
-    console.log("rows", rows);
-
-    // Calculate grand total for percentages
-    const grandTotal = Object.values(sums).reduce((acc, val) => acc + val, 0);
-
-    // Add sums row with percentages at the beginning
-    rows.unshift({
-      timeKey: "Total",
-      ...Object.fromEntries(
-        Object.entries(sums).map(([key, value]) => [
-          key,
-          `${value} [${Math.round((value / grandTotal) * 100)}%]`,
-        ])
-      ),
-    });
-
-    return rows;
-  }, [values, dataCategories, dataUsers, userKeyMap, aggregateBy]);
-
-  const columns = useMemo<Column<TableRow>[]>(() => {
-    const timeColumnWidth = 200;
-    const remainingWidth = width - timeColumnWidth;
-
-    return [
+  const columns = useMemo<Column<TableRow>[]>(
+    () => [
       {
         Header: "Time",
         accessor: "timeKey",
@@ -173,11 +115,13 @@ export const StatsTable = ({
         accessor: category,
         Cell: ({ value }: { value: number | string }) => value,
         id: category,
+        width: 200,
+        minWidth: 200,
+        maxWidth: 200,
       })),
-    ];
-  }, [dataCategories]);
-
-  console.log(columns, tableData);
+    ],
+    [dataCategories]
+  );
 
   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
     useTable({
