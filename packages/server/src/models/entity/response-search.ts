@@ -451,6 +451,34 @@ export class SearchQuery {
       }
     }
 
+    if (req.createdBy) {
+      const audits = await Audit.getByCreatedBy(this.connection, req.createdBy);
+      if (!req.entityIds) {
+        req.entityIds = audits.map((a) => a.entityId);
+      } else {
+        req.entityIds = req.entityIds.reduce((acc, curr) => {
+          if (audits.find((a) => a.entityId === curr)) {
+            acc.push(curr);
+          }
+          return acc;
+        }, [] as string[]);
+      }
+    }
+
+    if (req.updatedBy) {
+      const audits = await Audit.getByUpdatedBy(this.connection, req.updatedBy);
+      if (!req.entityIds) {
+        req.entityIds = audits.map((a) => a.entityId);
+      } else {
+        req.entityIds = req.entityIds.reduce((acc, curr) => {
+          if (audits.find((a) => a.entityId === curr)) {
+            acc.push(curr);
+          }
+          return acc;
+        }, [] as string[]);
+      }
+    }
+
     if (req.usedTemplate) {
       this.whereUsedTemplate(req.usedTemplate);
     }

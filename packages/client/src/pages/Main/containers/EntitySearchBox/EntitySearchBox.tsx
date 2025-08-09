@@ -105,6 +105,19 @@ export const EntitySearchBox: React.FC = () => {
   }, [debouncedValues]);
 
   const {
+    data: users,
+    isFetching: isFetchingUsers,
+    error: usersError,
+  } = useQuery({
+    queryKey: ["users"],
+    queryFn: async () => {
+      const res = await api.usersGetMore({});
+      return res.data;
+    },
+    enabled: api.isLoggedIn(),
+  });
+
+  const {
     status,
     data: entities,
     error,
@@ -251,6 +264,18 @@ export const EntitySearchBox: React.FC = () => {
   });
 
   const userRole = localStorage.getItem("userrole");
+
+  const userOptions = useMemo(() => {
+    const usersOptionsOut: DropdownItem[] =
+      users
+        ?.filter((user) => user && user.id && user.name)
+        .map((user) => ({
+          label: user.name,
+          value: user.id,
+        })) ?? [];
+    usersOptionsOut.push({ label: "All", value: "" });
+    return usersOptionsOut;
+  }, [users]);
 
   return (
     <>
@@ -586,6 +611,31 @@ export const EntitySearchBox: React.FC = () => {
                   />
                 )}
               </StyledRow>
+
+              <StyledRow>
+                <StyledRowHeader>created by</StyledRowHeader>
+                <Dropdown.Single.Basic
+                  width="full"
+                  options={userOptions}
+                  value={searchData.createdBy ?? ""}
+                  onChange={(value) => {
+                    handleChange({ createdBy: value });
+                  }}
+                />
+              </StyledRow>
+
+              <StyledRow>
+                <StyledRowHeader>updated by</StyledRowHeader>
+                <Dropdown.Single.Basic
+                  width="full"
+                  options={userOptions}
+                  value={searchData.updatedBy ?? ""}
+                  onChange={(value) => {
+                    handleChange({ updatedBy: value });
+                  }}
+                />
+              </StyledRow>
+
               <StyledRow>
                 <StyledRowHeader>Root T validity</StyledRowHeader>
 
