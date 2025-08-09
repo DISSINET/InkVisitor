@@ -171,7 +171,7 @@ export class Annotator {
    * @param anchor
    */
   removeAnchorFromSelection(anchor: string) {
-    const [start, end] = this.cursor.getBounds();
+    const [start, end] = this.cursor.getAbsBounds();
 
     if (start && end) {
       this.text.getSegmentPosition(start.yLine, start.xLine) as SegmentPosition;
@@ -267,7 +267,7 @@ export class Annotator {
     const positionBeforeRel = this.viewport.lineStart / this.text.noLines;
 
     // FIXME try to update the cursor position based on the text that was selected before the resize
-    const [start, end] = this.cursor.getBounds();
+    const [start, end] = this.cursor.getAbsBounds();
     const selectedTextBefore =
       start && end ? this.text.getRangeText(start, end) : "";
 
@@ -618,7 +618,7 @@ export class Annotator {
 
     // if (this.onSelectTextCb && this.cursor.isSelected()) {
     if (this.onSelectTextCb) {
-      const [start, end] = this.cursor.getBounds();
+      const [start, end] = this.cursor.getAbsBounds();
       if (
         start &&
         end &&
@@ -756,17 +756,77 @@ export class Annotator {
       return;
     }
 
-    let [start, end] = this.cursor.getBounds();
+    // get bounds of the selection
+    let [start, end] = this.cursor.getAbsBounds();
     if (start && end) {
-      const indexPositionStart = this.text.getAbsTextIndex(start);
-      const indexPositionEnd = this.text.getAbsTextIndex(end);
-      const beforeText = this.text.value.slice(0, indexPositionStart);
-      const afterText = this.text.value.slice(indexPositionEnd);
-
-      const insideText = this.text.value.slice(
-        indexPositionStart,
-        indexPositionEnd
+      let indexStart = this.text.getAbsTextIndexFromPosition(
+        this.text.getSegmentPosition(start.yLine, start.xLine, true)
       );
+      let indexEnd = this.text.getAbsTextIndexFromPosition(
+        this.text.getSegmentPosition(end.yLine, end.xLine, true)
+      );
+
+      // Check if indexStart position coincides with another tag in the segment
+      const segmentPosition = this.text.getSegmentFromAbsTextIndex(indexStart);
+      if (segmentPosition) {  
+        const segment = this.text.segments[segmentPosition.segmentIndex];
+        const startRawTextIndex = segmentPosition.rawTextIndex;
+        const openingTagAtPosition = segment.openingTags.find(
+          (tag) => tag.position === startRawTextIndex
+        );
+        if (openingTagAtPosition) {
+          // Find the corresponding closing tag to calculate content size
+          const correspondingClosingTag = segment.closingTags.find(
+            (tag) =>
+              tag.tag === openingTagAtPosition.tag &&
+              tag.position > openingTagAtPosition.position
+          );
+
+          if (correspondingClosingTag) {
+            const existingTagContentSize =
+              correspondingClosingTag.position - openingTagAtPosition.position;
+            const newSelectionSize = indexEnd - indexStart;
+            console.log(existingTagContentSize, newSelectionSize)
+            if (existingTagContentSize > newSelectionSize) {
+              // Move start index to the right, making the new selection smaller
+              indexStart += openingTagAtPosition.tag.length + 2;
+            }
+          }
+        }
+      }
+
+      // Check if indexEnd position coincides with another tag in the segment
+      const endSegmentPosition = this.text.getSegmentFromAbsTextIndex(indexEnd);
+      if (endSegmentPosition) {
+        const endSegment = this.text.segments[endSegmentPosition.segmentIndex];
+        const endRawTextIndex = endSegmentPosition.rawTextIndex;
+        const closingTagAtEndPosition = endSegment.closingTags.find(
+          (tag) => tag.position === endRawTextIndex
+        );
+        if (closingTagAtEndPosition) {
+          // Find the corresponding opening tag to calculate content size
+          const correspondingOpeningTag = endSegment.openingTags.find(
+            (tag) =>
+              tag.tag === closingTagAtEndPosition.tag &&
+              tag.position < closingTagAtEndPosition.position
+          );
+          if (correspondingOpeningTag) {
+            const existingTagContentSize =
+              closingTagAtEndPosition.position -
+              correspondingOpeningTag.position;
+            const newSelectionSize = indexEnd - indexStart;
+
+            if (existingTagContentSize < newSelectionSize) {
+              // new selection is larger than existing selection, push indexEnd after the closing tag
+              indexEnd += closingTagAtEndPosition.tag.length + 3;
+            }
+          }
+        }
+      }
+
+      const beforeText = this.text.value.slice(0, indexStart);
+      const afterText = this.text.value.slice(indexEnd);
+      const insideText = this.text.value.slice(indexStart, indexEnd);
 
       this.text.value =
         beforeText + `<${anchor}>` + insideText + `</${anchor}>` + afterText;
@@ -864,7 +924,7 @@ export class Annotator {
 
     // Manually trigger onSelectText callback for search-based selections
     if (this.onSelectTextCb) {
-      const [start, end] = this.cursor.getBounds();
+      const [start, end] = this.cursor.getAbsBounds();
 
       if (start && end) {
         const startSegment = this.text.getSegmentPosition(

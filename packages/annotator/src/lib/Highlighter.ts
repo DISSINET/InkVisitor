@@ -68,7 +68,7 @@ export default class Highlighter {
    * getSelected is getter for absolute selected coordinates
    * @returns
    */
-  getBounds(): [IAbsCoordinates | undefined, IAbsCoordinates | undefined] {
+  getAbsBounds(): [IAbsCoordinates | undefined, IAbsCoordinates | undefined] {
     if (!this.selectStart || !this.selectEnd) {
       return [undefined, undefined];
     }
@@ -149,7 +149,7 @@ export default class Highlighter {
   ) {
     const { charsAtLine } = drawingOptions;
 
-    let [hStart, hEnd] = this.getBounds();
+    let [hStart, hEnd] = this.getAbsBounds();
     if (hStart && hEnd) {
       if (hStart.yLine > hEnd.yLine) {
         [hStart, hEnd] = [hEnd, hStart];

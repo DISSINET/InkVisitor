@@ -322,10 +322,7 @@ class Text {
    * @returns
    */
   getAbsTextIndex(absCoords: IAbsCoordinates): number {
-    const pos = this.getSegmentPosition(
-      absCoords.yLine,
-      absCoords.xLine,
-    );
+    const pos = this.getSegmentPosition(absCoords.yLine, absCoords.xLine);
     if (!pos) {
       return -1;
     }
@@ -350,6 +347,117 @@ class Text {
   }
 
   /**
+   * getSegmentFromAbsTextIndex returns segment position from absolute text index
+   * @param absTextIndex
+   * @returns
+   */
+  getSegmentFromAbsTextIndex(absTextIndex: number): SegmentPosition | null {
+    if (absTextIndex < 0 || this.segments.length === 0) {
+      return null;
+    }
+
+    let currentIndex = 0;
+
+    // Find which segment contains this absolute text index
+    for (
+      let segmentIndex = 0;
+      segmentIndex < this.segments.length;
+      segmentIndex++
+    ) {
+      const segment = this.segments[segmentIndex];
+      const segmentLength = segment.raw.length;
+
+      // Check if the index falls within this segment
+      if (absTextIndex < currentIndex + segmentLength) {
+        const rawTextIndex = absTextIndex - currentIndex;
+
+        // Calculate parsed text index by accounting for tags
+        let parsedTextIndex = rawTextIndex;
+        if (this.mode !== EditMode.RAW) {
+          const tags = segment.openingTags
+            .concat(segment.closingTags)
+            .sort((a, b) => a.position - b.position);
+
+          for (const tag of tags) {
+            if (tag.position <= rawTextIndex) {
+              parsedTextIndex -= tag.tag.length + (tag.closing ? 3 : 2);
+            }
+          }
+        }
+
+        // Find line index and character position within the line
+        let lineIndex = 0;
+        let charInLineIndex = parsedTextIndex;
+        let remainingChars = parsedTextIndex;
+
+        for (let i = 0; i < segment.lines.length; i++) {
+          const lineLength = segment.lines[i].length;
+          if (remainingChars < lineLength) {
+            lineIndex = i;
+            charInLineIndex = remainingChars;
+            break;
+          }
+          remainingChars -= lineLength;
+          lineIndex = i + 1;
+        }
+
+        // Ensure we don't exceed bounds
+        if (lineIndex >= segment.lines.length) {
+          lineIndex = segment.lines.length - 1;
+          charInLineIndex = segment.lines[lineIndex]?.length || 0;
+        }
+
+        return {
+          segmentIndex,
+          lineIndex,
+          charInLineIndex,
+          parsedTextIndex: Math.max(0, parsedTextIndex),
+          rawTextIndex,
+        };
+      }
+
+      // Move to next segment (add 1 for newline character between segments)
+      currentIndex += segmentLength + 1;
+
+      // Handle case where index points to the newline between segments
+      if (
+        absTextIndex === currentIndex - 1 &&
+        segmentIndex < this.segments.length - 1
+      ) {
+        // Return end of current segment
+        const lastLineIndex = segment.lines.length - 1;
+        const lastLineLength = segment.lines[lastLineIndex]?.length || 0;
+
+        return {
+          segmentIndex,
+          lineIndex: lastLineIndex,
+          charInLineIndex: lastLineLength,
+          parsedTextIndex: segment.parsed.length,
+          rawTextIndex: segment.raw.length,
+        };
+      }
+    }
+
+    // If index is beyond the text, return the last position
+    if (absTextIndex >= currentIndex - 1) {
+      const lastSegmentIndex = this.segments.length - 1;
+      const lastSegment = this.segments[lastSegmentIndex];
+      const lastLineIndex = lastSegment.lines.length - 1;
+      const lastLineLength = lastSegment.lines[lastLineIndex]?.length || 0;
+
+      return {
+        segmentIndex: lastSegmentIndex,
+        lineIndex: lastLineIndex,
+        charInLineIndex: lastLineLength,
+        parsedTextIndex: lastSegment.parsed.length,
+        rawTextIndex: lastSegment.raw.length,
+      };
+    }
+
+    return null;
+  }
+
+  /**
    * getLineFromPosition returns line from segment position
    * @param segment
    * @returns
@@ -367,6 +475,7 @@ class Text {
   getSegmentPosition(
     absLineIndex: number,
     charInLineIndex: number = 0,
+    ignoreLastClosingTag: boolean = false
   ): SegmentPosition | null {
     // sanitize bounds
     if (absLineIndex < 0) {
@@ -403,7 +512,12 @@ class Text {
         .concat(segment.closingTags)
         .sort((a, b) => a.position - b.position);
       for (const tag of tags) {
-        if (tag.position <= rawTextIndex) {
+        // condition which ignores tags on same position as current rawTextIndex
+        if (
+          ignoreLastClosingTag
+            ? tag.position < rawTextIndex
+            : tag.position <= rawTextIndex
+        ) {
           rawTextIndex += tag.tag.length + (tag.closing ? 3 : 2);
         }
       }
