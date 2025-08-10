@@ -5,6 +5,7 @@ import { Lines } from "./Lines";
 import Scroller from "./Scroller";
 import Text, { ITag, SegmentPosition } from "./Text";
 import Viewport from "./Viewport";
+import { Warnings } from "./warnings";
 import { EditMode, HighlightMode } from "./constants";
 
 // Occurrence holds exact position of a point in text
@@ -70,6 +71,7 @@ export class Annotator {
   scroller?: Scroller;
   lines?: Lines;
   keys: Keys;
+  warnings: Warnings;
 
   annotatedPosition: SegmentPosition | null = null;
 
@@ -131,6 +133,7 @@ export class Annotator {
     this.cursor = new Cursor(this.ratio, 0, 0);
 
     this.keys = new Keys(this);
+    this.warnings = new Warnings();
 
     this.bgColor = this.element.style.backgroundColor || "white";
     this.fontColor = this.element.style.color || "black";
@@ -245,6 +248,7 @@ export class Annotator {
 
         // update annotator
         // this.text.prepareSegments();
+        this.warnings.onTextChanged(this.text.value);
         this.draw();
       }
     }
@@ -298,6 +302,10 @@ export class Annotator {
 
   onTextChanged(cb: (text: string) => void): void {
     this.onTextChangeCb = cb;
+  }
+
+  onWarning(cb: (message: string) => void): void {
+    this.warnings.onWarning(cb);
   }
 
   /**
@@ -834,6 +842,7 @@ export class Annotator {
       this.text.prepareSegments();
       this.text.calculateLines();
       this.cursor.reset();
+      this.warnings.onTextChanged(this.text.value);
       this.draw();
     }
   }
@@ -860,6 +869,7 @@ export class Annotator {
     this.text.value = newText;
     this.text.prepareSegments();
     this.text.calculateLines();
+    this.warnings.onTextChanged(this.text.value);
 
     if (positionBeforeChange < this.text.noLines) {
       this.scrollToLine(positionBeforeChange);
@@ -968,6 +978,7 @@ export class Annotator {
         this.cursor.move(clipText.length, 0);
         this.cursor.fixOutOfBounds(this.viewport, this.text);
 
+        this.warnings.onTextChanged(this.text.value);
         this.draw();
       })
       .catch((err) => {
@@ -989,7 +1000,29 @@ export class Annotator {
     this.cursor.move(text.length, 0);
     this.cursor.fixOutOfBounds(this.viewport, this.text);
 
+    this.warnings.onTextChanged(this.text.value);
     this.draw();
+  }
+
+  /**
+   * Enable warnings system
+   */
+  enableWarnings(): void {
+    this.warnings.enable();
+  }
+
+  /**
+   * Disable warnings system
+   */
+  disableWarnings(): void {
+    this.warnings.disable();
+  }
+
+  /**
+   * Check if warnings are enabled
+   */
+  isWarningsEnabled(): boolean {
+    return this.warnings.isEnabled();
   }
 
   /**
