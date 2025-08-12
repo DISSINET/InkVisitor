@@ -127,7 +127,7 @@ export const StatsChart = ({
     // return {};
   }, [aggregateBy, userKeyMap, colors]);
 
-  console.log(categoryColors);
+  // console.log(categoryColors);
   const dataChart = useMemo<ChartDataPoint[]>(() => {
     if (aggregateBy === Aggregation.USER) {
       return Object.keys(values).map((timeKey) => {
