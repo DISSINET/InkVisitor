@@ -34,7 +34,6 @@ const FieldGroup = styled.div`
 `;
 
 const Field = styled.div`
-  /* display: contents; */
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -53,7 +52,6 @@ const FieldLabel = styled.div`
 `;
 
 const ResultsChart = styled.div`
-  /* height: 500px; */
   width: 100%;
 `;
 
@@ -65,6 +63,11 @@ const ResultsTable = styled.div`
 `;
 
 const ResponseSection = styled.div``;
+
+const StyledQueryState = styled.div`
+  color: ${({ theme }) => theme.color.primary};
+  font-size: ${({ theme }) => theme.fontSize.sm};
+`;
 
 export const StatsPage = () => {
   const client = useQueryClient();
@@ -212,9 +215,9 @@ export const StatsPage = () => {
       </FieldGroup>
 
       <ResponseSection>
-        {isError && <div>Error</div>}
-        {isLoading && <div>Loading...</div>}
-        {isNoData && <div>No data</div>}
+        {isError && <StyledQueryState>Error</StyledQueryState>}
+        {isLoading && <StyledQueryState>Loading...</StyledQueryState>}
+        {isNoData && <StyledQueryState>No data</StyledQueryState>}
         {isReady && (
           <>
             <ResultsChart>
