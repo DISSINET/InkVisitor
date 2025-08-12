@@ -71,8 +71,9 @@ export const StatsChart = ({
   // }, [data, height, values, yAxisPadding]);
 
   const { data: dataUsers } = useQuery({
-    queryKey: ["users"],
+    queryKey: ["users-stats"],
     queryFn: () => api.usersGetMore({}),
+    enabled: api.isLoggedIn(),
   });
 
   const userKeyMap = useMemo<Record<string, string>>(() => {
