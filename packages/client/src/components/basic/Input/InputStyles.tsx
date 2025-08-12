@@ -85,6 +85,24 @@ export const StyledInput = styled.input<IValueStyle>`
   &::placeholder {
     font-size: 1.1rem;
   }
+
+  /* Theming for native datetime picker icon */
+  &[type="datetime-local"] {
+    /* Hint the UA to render internal controls in the correct scheme */
+    /* color-scheme: ${({ theme }) => theme.color.primary}; */
+  }
+
+  /* Chrome/Safari specific calendar icon */
+  &[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    /* Fallback coloring so the icon remains visible in dark mode */
+    filter: ${({ theme }) =>
+      theme.color.white === "#060c26" ? "invert(1) brightness(0.9)" : "none"};
+    opacity: 0.85;
+  }
+  &[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+  }
 `;
 
 interface StyledTextArea extends IValueStyle {
