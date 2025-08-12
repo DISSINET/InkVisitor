@@ -3,13 +3,13 @@
 ### New Features:
 
 - Stats page #849
-- Sequential adding of annotation #2468
+- Sequential annotation #2468
 - Replace search occurrence #2583
 - New S created from annotator is now being placed on the same spot as the Statement anchor order in the document #2668
+- Search by user audits #2718
 
 ### Bug Fixes and Improvements:
 
-- Search by user audits #2718
 - Fixed browser back button refresh #1805
 - Allow change of territory parent also from detail #2625
 - Protocol and validations on T detail are now expandable #2505
