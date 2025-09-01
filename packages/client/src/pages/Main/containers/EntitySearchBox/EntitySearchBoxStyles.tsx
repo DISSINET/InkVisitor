@@ -72,9 +72,7 @@ export const StyledDateTag = styled.div`
   background-color: ${({ theme }) => theme.color["gray"][600]};
   padding: ${({ theme }) => theme.space[2] + " " + theme.space[4]};
   border-radius: ${({ theme }) => theme.space[2]};
-  width: 150px;
-  display: grid;
-  grid-template-columns: ${({ theme }) => "auto " + theme.space["6"]};
+  display: flex;
 `;
 
 export const StyledDateTagText = styled.div`

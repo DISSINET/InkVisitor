@@ -103,6 +103,17 @@ export const StyledInput = styled.input<IValueStyle>`
   &[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
     opacity: 1;
   }
+  /* Chrome/Safari specific calendar icon */
+  &[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    /* Fallback coloring so the icon remains visible in dark mode */
+    filter: ${({ theme }) =>
+      theme.color.white === "#060c26" ? "invert(1) brightness(0.9)" : "none"};
+    opacity: 0.85;
+  }
+  &[type="date"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+  }
 `;
 
 interface StyledTextArea extends IValueStyle {

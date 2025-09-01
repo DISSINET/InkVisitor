@@ -25,7 +25,6 @@ import {
   StyledAdvancedOptions,
   StyledAdvancedOptionsSign,
   StyledBoxContent,
-  StyledDatePicker,
   StyledDateTag,
   StyledDateTagButton,
   StyledDateTagText,
@@ -566,14 +565,14 @@ export const EntitySearchBox: React.FC = () => {
                     />
                   </StyledDateTag>
                 ) : (
-                  <StyledDatePicker
+                  <Input
                     type="date"
-                    id="created-date"
                     width="full"
-                    name="created-date"
-                    onBlur={(e) => {
-                      const createdDate = new Date(e.target.value);
-                      handleChange({ createdDate });
+                    onChangeFn={(value) => {
+                      if (value) {
+                        const createdDate = new Date(value);
+                        handleChange({ createdDate });
+                      }
                     }}
                   />
                 )}
@@ -599,14 +598,14 @@ export const EntitySearchBox: React.FC = () => {
                     />
                   </StyledDateTag>
                 ) : (
-                  <StyledDatePicker
+                  <Input
                     type="date"
-                    id="updated-date"
                     width="full"
-                    name="updated-date"
-                    onBlur={(e) => {
-                      const updatedDate = new Date(e.target.value);
-                      handleChange({ updatedDate });
+                    onChangeFn={(value) => {
+                      if (value) {
+                        const updatedDate = new Date(value);
+                        handleChange({ updatedDate });
+                      }
                     }}
                   />
                 )}
