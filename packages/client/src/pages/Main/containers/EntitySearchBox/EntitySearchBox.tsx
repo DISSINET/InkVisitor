@@ -47,13 +47,13 @@ const defaultClassOption = {
 };
 
 const defaultStatusOption = {
-  label: "all",
+  label: "any",
   value: "" as EntityEnums.Status,
 };
 const statusOptions = [defaultStatusOption].concat(entityStatusDict);
 
 const defaultLanguageOption = {
-  label: "all",
+  label: "any",
   value: "" as EntityEnums.Language,
 };
 const languageOptions = [defaultLanguageOption].concat(languageDict);
@@ -273,7 +273,7 @@ export const EntitySearchBox: React.FC = () => {
           label: user.name,
           value: user.id,
         })) ?? [];
-    usersOptionsOut.push({ label: "All", value: "" });
+    usersOptionsOut.push({ label: "any", value: "" });
     return usersOptionsOut;
   }, [users]);
 
@@ -643,8 +643,8 @@ export const EntitySearchBox: React.FC = () => {
                   noMargin
                   options={[
                     {
-                      longValue: "All",
-                      shortValue: "All",
+                      longValue: "any",
+                      shortValue: "any",
                       onClick: () => {
                         handleChange({ isRootInvalid: undefined });
                       },
