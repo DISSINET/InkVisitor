@@ -547,23 +547,25 @@ export const EntitySearchBox: React.FC = () => {
               <StyledRow>
                 <StyledRowHeader>created at</StyledRowHeader>
                 {searchData.createdDate ? (
-                  <StyledDateTag>
-                    <StyledDateTagText>
-                      {searchData.createdDate.toDateString()}
-                    </StyledDateTagText>
-                    <StyledDateTagButton
-                      key="d"
-                      icon={<RiCloseFill />}
-                      color="white"
-                      noBorder
-                      noBackground
-                      inverted
-                      tooltipLabel="remove date"
-                      onClick={() => {
-                        handleChange({ createdDate: undefined });
-                      }}
-                    />
-                  </StyledDateTag>
+                  <div style={{ display: "flex" }}>
+                    <StyledDateTag>
+                      <StyledDateTagText>
+                        {searchData.createdDate.toDateString()}
+                      </StyledDateTagText>
+                      <StyledDateTagButton
+                        key="d"
+                        icon={<RiCloseFill size={15} />}
+                        color="white"
+                        noBorder
+                        noBackground
+                        inverted
+                        tooltipLabel="remove date"
+                        onClick={() => {
+                          handleChange({ createdDate: undefined });
+                        }}
+                      />
+                    </StyledDateTag>
+                  </div>
                 ) : (
                   <Input
                     type="date"
@@ -580,23 +582,25 @@ export const EntitySearchBox: React.FC = () => {
               <StyledRow>
                 <StyledRowHeader>udpated at</StyledRowHeader>
                 {searchData.updatedDate ? (
-                  <StyledDateTag>
-                    <StyledDateTagText>
-                      {searchData.updatedDate.toDateString()}
-                    </StyledDateTagText>
-                    <StyledDateTagButton
-                      key="d"
-                      icon={<RiCloseFill />}
-                      color="white"
-                      noBorder
-                      noBackground
-                      inverted
-                      tooltipLabel="remove date"
-                      onClick={() => {
-                        handleChange({ updatedDate: undefined });
-                      }}
-                    />
-                  </StyledDateTag>
+                  <div style={{ display: "flex" }}>
+                    <StyledDateTag>
+                      <StyledDateTagText>
+                        {searchData.updatedDate.toDateString()}
+                      </StyledDateTagText>
+                      <StyledDateTagButton
+                        key="d"
+                        icon={<RiCloseFill size={15} />}
+                        color="white"
+                        noBorder
+                        noBackground
+                        inverted
+                        tooltipLabel="remove date"
+                        onClick={() => {
+                          handleChange({ updatedDate: undefined });
+                        }}
+                      />
+                    </StyledDateTag>
+                  </div>
                 ) : (
                   <Input
                     type="date"
