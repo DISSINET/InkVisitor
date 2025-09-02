@@ -1,6 +1,5 @@
 import { MIN_SEARCH_RESULT_HEIGHT } from "Theme/constants";
 import { Button } from "components";
-import { StyledInput } from "components/basic/Input/InputStyles";
 import styled from "styled-components";
 
 export const StyledBoxContent = styled.div`
@@ -66,15 +65,13 @@ export const StyledTagLoaderWrap = styled.div`
   min-height: 3rem;
 `;
 
-export const StyledDatePicker = styled(StyledInput)``;
-
 export const StyledDateTag = styled.div`
   background-color: ${({ theme }) => theme.color["gray"][600]};
-  padding: ${({ theme }) => theme.space[2] + " " + theme.space[4]};
+  padding: 0.2rem 0.8rem;
   border-radius: ${({ theme }) => theme.space[2]};
-  width: 150px;
-  display: grid;
-  grid-template-columns: ${({ theme }) => "auto " + theme.space["6"]};
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
 `;
 
 export const StyledDateTagText = styled.div`
