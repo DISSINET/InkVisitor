@@ -415,7 +415,8 @@ export class SearchQuery {
       if (req.subTerritorySearch) {
         const childs = Object.values(
           await new Territory({ id: req.territoryId }).findChilds(
-            this.connection
+            this.connection,
+            true
           )
         );
         territoryIds = territoryIds.concat(childs.map((ch) => ch.id));
