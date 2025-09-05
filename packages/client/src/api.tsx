@@ -1270,16 +1270,6 @@ class Api {
         { responseType: "blob" }
       );
 
-      // let fileName = `${documentId}-`;
-      // let fileName = `${document.title}`;
-      // if (Object.keys(EntityEnums.Class).length === exportedEntities.length) {
-      //   fileName += "all_anchors";
-      // } else if (exportedEntities.length > 0) {
-      //   fileName += exportedEntities.join("");
-      // } else {
-      //   fileName += "no_anchors";
-      // }
-
       const url = window.URL.createObjectURL(response.data);
       const a = document.createElement("a");
 
