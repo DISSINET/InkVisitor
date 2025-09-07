@@ -1257,7 +1257,8 @@ class Api {
 
   async documentExport(
     documentId: string,
-    exportedEntities: EntityEnums.Class[]
+    exportedEntities: EntityEnums.Class[],
+    fileName: string
   ): Promise<any> {
     try {
       const response = await this.connection.post(
@@ -1268,15 +1269,6 @@ class Api {
         },
         { responseType: "blob" }
       );
-
-      let fileName = `${documentId}-`;
-      if (Object.keys(EntityEnums.Class).length === exportedEntities.length) {
-        fileName += "all_anchors";
-      } else if (exportedEntities.length > 0) {
-        fileName += exportedEntities.join("");
-      } else {
-        fileName += "no_anchors";
-      }
 
       const url = window.URL.createObjectURL(response.data);
       const a = document.createElement("a");

@@ -28,12 +28,15 @@ const FieldGroup = styled.div`
   display: grid;
   width: 100%;
   padding-bottom: 10px;
-  grid-template-columns: 100px 1fr;
+  grid-template-columns: repeat(6, auto);
   gap: ${(props) => props.theme.space[5]};
+  align-items: end;
 `;
 
 const Field = styled.div`
-  display: contents;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 `;
 
 const FieldLabel = styled.div`
@@ -49,17 +52,22 @@ const FieldLabel = styled.div`
 `;
 
 const ResultsChart = styled.div`
-  height: 500px;
   width: 100%;
 `;
 
 const ResultsTable = styled.div`
+  color: ${({ theme }) => theme.color["primary"]};
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: ${(props) => props.theme.space[5]};
 `;
 
 const ResponseSection = styled.div``;
+
+const StyledQueryState = styled.div`
+  color: ${({ theme }) => theme.color.primary};
+  font-size: ${({ theme }) => theme.fontSize.sm};
+`;
 
 export const StatsPage = () => {
   const client = useQueryClient();
@@ -194,22 +202,22 @@ export const StatsPage = () => {
             ))}
           </ButtonGroup>
         </Field>
+        <div>
+          <Button
+            color="success"
+            label="Refresh"
+            disabled={isLoading}
+            onClick={() => {
+              client.invalidateQueries({ queryKey: ["stats", statsRequest] });
+            }}
+          />
+        </div>
       </FieldGroup>
 
-      <div style={{ paddingBottom: 10 }}>
-        <Button
-          label="Refresh"
-          disabled={isLoading}
-          onClick={() => {
-            client.invalidateQueries({ queryKey: ["stats", statsRequest] });
-          }}
-        />
-      </div>
-
       <ResponseSection>
-        {isError && <div>Error</div>}
-        {isLoading && <div>Loading...</div>}
-        {isNoData && <div>No data</div>}
+        {isError && <StyledQueryState>Error</StyledQueryState>}
+        {isLoading && <StyledQueryState>Loading...</StyledQueryState>}
+        {isNoData && <StyledQueryState>No data</StyledQueryState>}
         {isReady && (
           <>
             <ResultsChart>

@@ -18,6 +18,7 @@ import { setDisableTreeScroll } from "redux/features/territoryTree/disableTreeSc
 import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import {
+  DetailBoxState,
   DraggedEntityReduxItem,
   EntityDragItem,
   IExtendedResponseTree,
@@ -30,6 +31,7 @@ import {
   StyledIconWrap,
   StyledTerritoryTagWrap,
 } from "./TerritoryTreeNodeStyles";
+import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
 
 interface TerritoryTreeNode {
   territory: ITerritory;
@@ -178,6 +180,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     if (hasChildren) {
       setIsExpanded((prevIsExpanded) => !prevIsExpanded);
     }
+    dispatch(setDetailBoxState(DetailBoxState.Normal));
   }, [hasChildren, territoryId]);
 
   const moveStatementsMutation = useMutation({

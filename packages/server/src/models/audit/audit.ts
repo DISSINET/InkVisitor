@@ -237,6 +237,42 @@ export default class Audit implements IAudit, IDbModel {
   }
 
   /**
+   * Retrieves Audit entries that are created by specific user
+   * @param db rethinkdb Connection
+   * @param createdBy string
+   * @returns Promise<Audit[]> list of Audit entries
+   */
+  static async getByCreatedBy(
+    db: Connection,
+    createdBy: string
+  ): Promise<Audit[]> {
+    const result = await rethink
+      .table(Audit.table)
+      .filter(rethink.row("type").eq(EventType.CREATE))
+      .filter(rethink.row("user").eq(createdBy))
+      .run(db);
+    return result.map((data) => new Audit(data)) as Audit[];
+  }
+
+  /**
+   * Retrieves Audit entries that are updated by specific user
+   * @param db rethinkdb Connection
+   * @param updatedBy string
+   * @returns Promise<Audit[]> list of Audit entries
+   */
+  static async getByUpdatedBy(
+    db: Connection,
+    updatedBy: string
+  ): Promise<Audit[]> {
+    const result = await rethink
+      .table(Audit.table)
+      .filter(rethink.row("type").eq(EventType.EDIT))
+      .filter(rethink.row("user").eq(updatedBy))
+      .run(db);
+    return result.map((data) => new Audit(data)) as Audit[];
+  }
+
+  /**
    * returns first date-sorted entries for specific params
    * @param db
    * @param filter
