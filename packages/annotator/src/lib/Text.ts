@@ -2,10 +2,63 @@ import Viewport from "./Viewport";
 import { IAbsCoordinates, IRelativeCoordinates } from "./Highlighter";
 import { EditMode } from "./constants";
 
-export interface ITag {
+export class Tag {
   position: number;
   tag: string;
   closing?: boolean;
+  attributes: Record<string, string>;
+
+  constructor(position: number, tag: string, closing?: boolean) {
+    this.position = position;
+    this.tag = tag;
+    this.closing = closing;
+    this.attributes = this.parseAttributes(tag);
+  }
+
+  private parseAttributes(tagString: string): Record<string, string> {
+    const attributes: Record<string, string> = {};
+    
+    // Split the tag string to separate tag name from attributes
+    const parts = tagString.trim().split(/\s+/);
+    
+    // If there are no attributes, return empty object
+    if (parts.length === 1) {
+      return attributes;
+    }
+    
+    // Parse attributes from the remaining parts
+    for (let i = 1; i < parts.length; i++) {
+      const part = parts[i];
+      const equalIndex = part.indexOf('=');
+      
+      if (equalIndex > 0) {
+        const key = part.substring(0, equalIndex);
+        let value = part.substring(equalIndex + 1);
+        
+        // Remove quotes if present
+        if ((value.startsWith('"') && value.endsWith('"')) || 
+            (value.startsWith("'") && value.endsWith("'"))) {
+          value = value.slice(1, -1);
+        }
+        
+        attributes[key] = value;
+      }
+    }
+    
+    return attributes;
+  }
+
+  getTag(): string {
+    if (this.closing) {
+      return `</${this.tag}>`;
+    }
+    let openTag = `<${this.tag}`;
+    for (const [key, value] of Object.entries(this.attributes)) {
+      openTag += ` ${key}="${value}"`;
+    }
+    openTag += '>';
+    return openTag;
+  }
 }
 
 export class Segment {
@@ -13,8 +66,8 @@ export class Segment {
   lineEnd: number = -1; // incl.
   raw: string;
   parsed: string = "";
-  openingTags: ITag[] = [];
-  closingTags: ITag[] = [];
+  openingTags: Tag[] = [];
+  closingTags: Tag[] = [];
   lines: string[] = [];
 
   constructor(text: string) {
@@ -31,19 +84,12 @@ export class Segment {
     // Find opening tags
     let match;
     while ((match = openingTagsRegex.exec(this.raw)) !== null) {
-      this.openingTags.push({
-        position: match.index,
-        tag: match[1],
-      });
+      this.openingTags.push(new Tag(match.index, match[1]));
     }
 
     // Find closing tags
     while ((match = closingTagsRegex.exec(this.raw)) !== null) {
-      this.closingTags.push({
-        position: match.index,
-        tag: match[1],
-        closing: true,
-      });
+      this.closingTags.push(new Tag(match.index, match[1], true));
     }
 
     // Remove tags from the text
@@ -55,9 +101,9 @@ export class Segment {
    * @param rawIndex
    * @returns
    */
-  getTagsBeforePosition(rawIndex: number): [ITag[], ITag[]] {
-    const openedTags: ITag[] = [];
-    const closedTags: ITag[] = [];
+  getTagsBeforePosition(rawIndex: number): [Tag[], Tag[]] {
+    const openedTags: Tag[] = [];
+    const closedTags: Tag[] = [];
     for (const tag of this.openingTags) {
       if (tag.position < rawIndex) {
         openedTags.push(tag);
@@ -76,9 +122,9 @@ export class Segment {
    * @param rawIndex
    * @returns
    */
-  getTagsAfterPosition(rawIndex: number): [ITag[], ITag[]] {
-    const openedTags: ITag[] = [];
-    const closedTags: ITag[] = [];
+  getTagsAfterPosition(rawIndex: number): [Tag[], Tag[]] {
+    const openedTags: Tag[] = [];
+    const closedTags: Tag[] = [];
     for (const tag of this.openingTags) {
       if (tag.position > rawIndex) {
         openedTags.push(tag);
@@ -100,9 +146,9 @@ export class Segment {
   getTagsInPosition(
     startRawIndex: number,
     endRawIndex: number
-  ): [ITag[], ITag[]] {
-    const openedTags: ITag[] = [];
-    const closedTags: ITag[] = [];
+  ): [Tag[], Tag[]] {
+    const openedTags: Tag[] = [];
+    const closedTags: Tag[] = [];
     for (const tag of this.openingTags) {
       if (tag.position < endRawIndex && tag.position > startRawIndex) {
         openedTags.push(tag);
@@ -116,7 +162,7 @@ export class Segment {
     return [openedTags, closedTags];
   }
 
-  findTagParsedPosition(tag: ITag): { x: number; y: number } {
+  findTagParsedPosition(tag: Tag): { x: number; y: number } {
     // find abs position right after the <tag> in segment's text
     let parsedTextOpenPosition = this.openingTags
       .filter((t) => t.position < tag.position)
@@ -851,8 +897,8 @@ class Text {
   }
 
   getTagPosition(tag: string, index: number = 0): IAbsCoordinates[] {
-    let openingTagMatch: { tag: ITag; segment: Segment } | null = null;
-    let closingTagMatch: { tag: ITag; segment: Segment } | null = null;
+    let openingTagMatch: { tag: Tag; segment: Segment } | null = null;
+    let closingTagMatch: { tag: Tag; segment: Segment } | null = null;
 
     let openingTagIndex = 0;
     let closingTagIndex = 0;

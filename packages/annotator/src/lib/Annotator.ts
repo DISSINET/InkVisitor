@@ -3,7 +3,7 @@ import Highlighter, { IAbsCoordinates, CursorStyle } from "./Highlighter";
 import Keys from "./Keys";
 import { Lines } from "./Lines";
 import Scroller from "./Scroller";
-import Text, { ITag, SegmentPosition } from "./Text";
+import Text, { Tag, SegmentPosition } from "./Text";
 import Viewport from "./Viewport";
 import { Warnings } from "./warnings";
 import { EditMode, HighlightMode } from "./constants";
@@ -485,7 +485,7 @@ export class Annotator {
     // find still opened until current window
     for (let i = 0; i <= start.segmentIndex; i++) {
       const segment = this.text.segments[i];
-      let openingTags, closingTags: ITag[];
+      let openingTags, closingTags: Tag[];
       if (i === start.segmentIndex) {
         [openingTags, closingTags] = segment.getTagsBeforePosition(
           start.rawTextIndex
@@ -505,7 +505,7 @@ export class Annotator {
     // use everything that is between start and end
     for (let i = start.segmentIndex; i < end.segmentIndex; i++) {
       const segment = this.text.segments[i];
-      let openingTags, closingTags: ITag[];
+      let openingTags, closingTags: Tag[];
       if (i === start.segmentIndex) {
         [openingTags, closingTags] = segment.getTagsAfterPosition(
           start.rawTextIndex
@@ -523,7 +523,7 @@ export class Annotator {
 
     // process end segment
     const endSegment = this.text.segments[end.segmentIndex];
-    let opened, closed: ITag[];
+    let opened, closed: Tag[];
     if (start.segmentIndex !== end.segmentIndex) {
       // if end segment != start segment - use everything up to end position
       [opened, closed] = endSegment.getTagsBeforePosition(end.rawTextIndex);
@@ -759,10 +759,17 @@ export class Annotator {
     this.text.calculateLines();
   }
 
-  addAnchor(anchor: string) {
+  addAnchor(anchor: string, attributes?: Record<string, string>) {
     if (!this.cursor.isSelected()) {
       return;
     }
+
+    // Construct the Tag at the start
+    const openTag = new Tag(0, anchor, false);
+    if (attributes) {
+      openTag.attributes = attributes;
+    }
+    const closeTag = new Tag(0, anchor, true);
 
     // get bounds of the selection
     let [start, end] = this.cursor.getAbsBounds();
@@ -794,10 +801,9 @@ export class Annotator {
             const existingTagContentSize =
               correspondingClosingTag.position - openingTagAtPosition.position;
             const newSelectionSize = indexEnd - indexStart;
-            console.log(existingTagContentSize, newSelectionSize)
             if (existingTagContentSize > newSelectionSize) {
               // Move start index to the right, making the new selection smaller
-              indexStart += openingTagAtPosition.tag.length + 2;
+              indexStart += openingTagAtPosition.getTag().length;
             }
           }
         }
@@ -826,7 +832,7 @@ export class Annotator {
 
             if (existingTagContentSize < newSelectionSize) {
               // new selection is larger than existing selection, push indexEnd after the closing tag
-              indexEnd += closingTagAtEndPosition.tag.length + 3;
+              indexEnd += closingTagAtEndPosition.getTag().length;
             }
           }
         }
@@ -837,7 +843,7 @@ export class Annotator {
       const insideText = this.text.value.slice(indexStart, indexEnd);
 
       this.text.value =
-        beforeText + `<${anchor}>` + insideText + `</${anchor}>` + afterText;
+        beforeText + openTag.getTag() + insideText + closeTag.getTag() + afterText;
 
       this.text.prepareSegments();
       this.text.calculateLines();
