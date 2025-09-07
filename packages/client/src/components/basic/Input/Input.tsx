@@ -14,7 +14,13 @@ interface Input {
   value?: string;
   inverted?: boolean;
   suggester?: boolean;
-  type?: "text" | "textarea" | "select" | "password" | "datetime-local";
+  type?:
+    | "text"
+    | "textarea"
+    | "select"
+    | "password"
+    | "datetime-local"
+    | "date";
   rows?: number;
   cols?: number;
   width?: number | "full";
@@ -179,9 +185,9 @@ export const Input: React.FC<Input> = ({
           $borderColor={borderColor}
         />
       )}
-      {type === "datetime-local" && (
+      {(type === "datetime-local" || type === "date") && (
         <StyledInput
-          type="datetime-local"
+          type={type}
           value={displayValue}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             setDisplayValue(e.currentTarget.value);

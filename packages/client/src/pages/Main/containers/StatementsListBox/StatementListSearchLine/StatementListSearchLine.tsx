@@ -318,7 +318,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                   replaceWith.length === 0
                 }
               />
-              {/* <Button
+              <Button
                 circular
                 color="info"
                 inverted
@@ -326,15 +326,43 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                 noBackground
                 icon={<LuReplaceAll size={12} />}
                 onClick={() => {
-                  // annotator?.onReplaceText(replaceWith);
-                  // goToNextOccurence();
-                  // handleSaveNewContent("all occurrences replaced");
+                  if (
+                    annotator &&
+                    searchOccurences &&
+                    searchOccurences.length > 0
+                  ) {
+                    // Replace all occurrences from last to first to avoid position shifting issues
+                    const occurrencesToReplace = [
+                      ...searchOccurences,
+                    ].reverse();
+                    let replacedCount = 0;
+
+                    occurrencesToReplace.forEach((occurrence) => {
+                      // Select the occurrence
+                      annotator.selectSearchOccurrence(occurrence);
+
+                      // Replace the text
+                      annotator.onReplaceText(replaceWith);
+
+                      replacedCount++;
+                    });
+
+                    // Clear search occurrences since they're all replaced
+                    setSearchOccurences(null);
+                    setSearchActiveOccurence(0);
+
+                    // Save the content
+                    handleSaveNewContent(
+                      `${replacedCount} occurrences replaced`
+                    );
+                  }
                 }}
                 disabled={
                   searchOccurences === null ||
-                  searchOccurences.length === 0 || replaceWith.length === 0
+                  searchOccurences.length === 0 ||
+                  replaceWith.length === 0
                 }
-              /> */}
+              />
             </>
           )}
         </>

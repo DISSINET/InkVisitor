@@ -110,8 +110,7 @@ const DocumentModalExport: React.FC<DocumentModalExportProps> = ({
                   const classColor = theme.color[classColorName] as string;
 
                   const selected = exportedClasses.includes(entityClassId);
-                  const classReferences =
-                    document?.entityIds[entityClassId];
+                  const classReferences = document?.entityIds[entityClassId];
 
                   return (
                     <React.Fragment key={entityClassId}>
@@ -196,7 +195,11 @@ const DocumentModalExport: React.FC<DocumentModalExportProps> = ({
           <Button
             onClick={() => {
               if (document?.id) {
-                api.documentExport(document.id, exportedClasses);
+                api.documentExport(
+                  document.id,
+                  exportedClasses,
+                  document?.title || document.id
+                );
               }
             }}
             icon={<FaRegSave size={20} style={{ marginRight: "3px" }} />}

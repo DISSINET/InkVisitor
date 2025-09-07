@@ -279,26 +279,63 @@ class Territory extends Entity implements ITerritory {
   }
 
   async findChilds(
-    db: Connection | undefined
-  ): Promise<Record<number, ITerritory>> {
-    const list: ITerritory[] = await rethink
-      .table(Territory.table)
-      .filter({
-        class: EntityEnums.Class.Territory,
-      })
-      .filter((territory: RDatum) => {
-        return rethink.and(
-          territory("data")("parent").typeOf().eq("OBJECT"),
-          territory("data")("parent")("territoryId").eq(this.id)
-        );
-      })
-      .run(db);
+    db: Connection | undefined,
+    isDeep?: boolean
+  ): Promise<Record<number | string, ITerritory>> {
+    const getDirectChildren = async (): Promise<ITerritory[]> => {
+      return rethink
+        .table(Territory.table)
+        .filter({
+          class: EntityEnums.Class.Territory,
+        })
+        .filter((territory: RDatum) => {
+          return rethink.and(
+            territory("data")("parent").typeOf().eq("OBJECT"),
+            territory("data")("parent")("territoryId").eq(this.id)
+          );
+        })
+        .run(db);
+    };
 
-    const out: Record<number, ITerritory> = {};
-    for (const ter of list) {
-      if (ter.data.parent) {
-        out[ter.data.parent.order] = ter;
+    // For non-deep queries, keep the original behavior
+    if (!isDeep) {
+      const list = await getDirectChildren();
+      const out: Record<number, ITerritory> = {};
+      for (const ter of list) {
+        if (ter.data.parent) {
+          out[ter.data.parent.order] = ter;
+        }
       }
+      return out;
+    }
+
+    // For deep queries, use the tree cache which already has the full structure
+    const node = treeCache.tree.idMap[this.id];
+    if (!node) {
+      // Territory not in cache, fallback to database query
+      const list = await getDirectChildren();
+      const out: Record<string, ITerritory> = {};
+      for (const ter of list) {
+        if (ter.id) {
+          out[ter.id] = ter;
+
+          const territory = new Territory(ter);
+          const childTerritories = await territory.findChilds(db, true);
+          Object.assign(out, childTerritories);
+        }
+      }
+      return out;
+    }
+
+    const out: Record<string, ITerritory> = {};
+    const stack = [...node.children];
+
+    while (stack.length > 0) {
+      const current = stack.pop();
+      if (!current || !current.territory.id) continue;
+
+      out[current.territory.id] = current.territory;
+      stack.push(...current.children);
     }
 
     return out;

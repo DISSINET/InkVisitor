@@ -368,6 +368,28 @@ export class SearchQuery {
   }
 
   /**
+   * Fetches audits and updates the request's entityIds by intersecting with the audit results.
+   * This is a helper to abstract away the repeated logic for filtering by audit data.
+   * It also improves performance by using a Set for intersection.
+   * @param req The request search object, will be mutated.
+   * @param getAudits A function that returns a promise of audits.
+   */
+  private async _updateEntityIdsFromAudits(
+    req: RequestSearch,
+    getAudits: () => Promise<{ entityId: string }[]>
+  ) {
+    const audits = await getAudits();
+    const auditEntityIds = audits.map((a) => a.entityId);
+
+    if (!req.entityIds) {
+      req.entityIds = auditEntityIds;
+    } else {
+      const auditEntityIdsSet = new Set(auditEntityIds);
+      req.entityIds = req.entityIds.filter((id) => auditEntityIdsSet.has(id));
+    }
+  }
+
+  /**
    * prepares the query according to request
    * @param req
    */
@@ -393,7 +415,8 @@ export class SearchQuery {
       if (req.subTerritorySearch) {
         const childs = Object.values(
           await new Territory({ id: req.territoryId }).findChilds(
-            this.connection
+            this.connection,
+            true
           )
         );
         territoryIds = territoryIds.concat(childs.map((ch) => ch.id));
@@ -418,37 +441,27 @@ export class SearchQuery {
     }
 
     if (req.createdDate) {
-      const audits = await Audit.getByCreatedDate(
-        this.connection,
-        req.createdDate
+      await this._updateEntityIdsFromAudits(req, () =>
+        Audit.getByCreatedDate(this.connection, req.createdDate!)
       );
-      if (!req.entityIds) {
-        req.entityIds = audits.map((a) => a.entityId);
-      } else {
-        req.entityIds = req.entityIds.reduce((acc, curr) => {
-          if (audits.find((a) => a.entityId === curr)) {
-            acc.push(curr);
-          }
-          return acc;
-        }, [] as string[]);
-      }
     }
 
     if (req.updatedDate) {
-      const audits = await Audit.getByUpdatedDate(
-        this.connection,
-        req.updatedDate
+      await this._updateEntityIdsFromAudits(req, () =>
+        Audit.getByUpdatedDate(this.connection, req.updatedDate!)
       );
-      if (!req.entityIds) {
-        req.entityIds = audits.map((a) => a.entityId);
-      } else {
-        req.entityIds = req.entityIds.reduce((acc, curr) => {
-          if (audits.find((a) => a.entityId === curr)) {
-            acc.push(curr);
-          }
-          return acc;
-        }, [] as string[]);
-      }
+    }
+
+    if (req.createdBy) {
+      await this._updateEntityIdsFromAudits(req, () =>
+        Audit.getByCreatedBy(this.connection, req.createdBy!)
+      );
+    }
+
+    if (req.updatedBy) {
+      await this._updateEntityIdsFromAudits(req, () =>
+        Audit.getByUpdatedBy(this.connection, req.updatedBy!)
+      );
     }
 
     if (req.usedTemplate) {

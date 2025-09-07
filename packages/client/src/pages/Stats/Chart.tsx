@@ -71,8 +71,9 @@ export const StatsChart = ({
   // }, [data, height, values, yAxisPadding]);
 
   const { data: dataUsers } = useQuery({
-    queryKey: ["users"],
+    queryKey: ["users-stats"],
     queryFn: () => api.usersGetMore({}),
+    enabled: api.isLoggedIn(),
   });
 
   const userKeyMap = useMemo<Record<string, string>>(() => {
@@ -127,7 +128,7 @@ export const StatsChart = ({
     // return {};
   }, [aggregateBy, userKeyMap, colors]);
 
-  console.log(categoryColors);
+  // console.log(categoryColors);
   const dataChart = useMemo<ChartDataPoint[]>(() => {
     if (aggregateBy === Aggregation.USER) {
       return Object.keys(values).map((timeKey) => {

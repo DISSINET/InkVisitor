@@ -25,7 +25,6 @@ import {
   StyledAdvancedOptions,
   StyledAdvancedOptionsSign,
   StyledBoxContent,
-  StyledDatePicker,
   StyledDateTag,
   StyledDateTagButton,
   StyledDateTagText,
@@ -47,13 +46,13 @@ const defaultClassOption = {
 };
 
 const defaultStatusOption = {
-  label: "all",
+  label: "any",
   value: "" as EntityEnums.Status,
 };
 const statusOptions = [defaultStatusOption].concat(entityStatusDict);
 
 const defaultLanguageOption = {
-  label: "all",
+  label: "any",
   value: "" as EntityEnums.Language,
 };
 const languageOptions = [defaultLanguageOption].concat(languageDict);
@@ -103,6 +102,19 @@ export const EntitySearchBox: React.FC = () => {
         .length > 0
     );
   }, [debouncedValues]);
+
+  const {
+    data: users,
+    isFetching: isFetchingUsers,
+    error: usersError,
+  } = useQuery({
+    queryKey: ["users"],
+    queryFn: async () => {
+      const res = await api.usersGetMore({});
+      return res.data;
+    },
+    enabled: api.isLoggedIn(),
+  });
 
   const {
     status,
@@ -251,6 +263,18 @@ export const EntitySearchBox: React.FC = () => {
   });
 
   const userRole = localStorage.getItem("userrole");
+
+  const userOptions = useMemo(() => {
+    const usersOptionsOut: DropdownItem[] =
+      users
+        ?.filter((user) => user && user.id && user.name)
+        .map((user) => ({
+          label: user.name,
+          value: user.id,
+        })) ?? [];
+    usersOptionsOut.push({ label: "any", value: "" });
+    return usersOptionsOut;
+  }, [users]);
 
   return (
     <>
@@ -523,32 +547,34 @@ export const EntitySearchBox: React.FC = () => {
               <StyledRow>
                 <StyledRowHeader>created at</StyledRowHeader>
                 {searchData.createdDate ? (
-                  <StyledDateTag>
-                    <StyledDateTagText>
-                      {searchData.createdDate.toDateString()}
-                    </StyledDateTagText>
-                    <StyledDateTagButton
-                      key="d"
-                      icon={<RiCloseFill />}
-                      color="white"
-                      noBorder
-                      noBackground
-                      inverted
-                      tooltipLabel="remove date"
-                      onClick={() => {
-                        handleChange({ createdDate: undefined });
-                      }}
-                    />
-                  </StyledDateTag>
+                  <div style={{ display: "flex" }}>
+                    <StyledDateTag>
+                      <StyledDateTagText>
+                        {searchData.createdDate.toDateString()}
+                      </StyledDateTagText>
+                      <StyledDateTagButton
+                        key="d"
+                        icon={<RiCloseFill size={15} />}
+                        color="white"
+                        noBorder
+                        noBackground
+                        inverted
+                        tooltipLabel="remove date"
+                        onClick={() => {
+                          handleChange({ createdDate: undefined });
+                        }}
+                      />
+                    </StyledDateTag>
+                  </div>
                 ) : (
-                  <StyledDatePicker
+                  <Input
                     type="date"
-                    id="created-date"
                     width="full"
-                    name="created-date"
-                    onBlur={(e) => {
-                      const createdDate = new Date(e.target.value);
-                      handleChange({ createdDate });
+                    onChangeFn={(value) => {
+                      if (value) {
+                        const createdDate = new Date(value);
+                        handleChange({ createdDate });
+                      }
                     }}
                   />
                 )}
@@ -556,36 +582,63 @@ export const EntitySearchBox: React.FC = () => {
               <StyledRow>
                 <StyledRowHeader>udpated at</StyledRowHeader>
                 {searchData.updatedDate ? (
-                  <StyledDateTag>
-                    <StyledDateTagText>
-                      {searchData.updatedDate.toDateString()}
-                    </StyledDateTagText>
-                    <StyledDateTagButton
-                      key="d"
-                      icon={<RiCloseFill />}
-                      color="white"
-                      noBorder
-                      noBackground
-                      inverted
-                      tooltipLabel="remove date"
-                      onClick={() => {
-                        handleChange({ updatedDate: undefined });
-                      }}
-                    />
-                  </StyledDateTag>
+                  <div style={{ display: "flex" }}>
+                    <StyledDateTag>
+                      <StyledDateTagText>
+                        {searchData.updatedDate.toDateString()}
+                      </StyledDateTagText>
+                      <StyledDateTagButton
+                        key="d"
+                        icon={<RiCloseFill size={15} />}
+                        color="white"
+                        noBorder
+                        noBackground
+                        inverted
+                        tooltipLabel="remove date"
+                        onClick={() => {
+                          handleChange({ updatedDate: undefined });
+                        }}
+                      />
+                    </StyledDateTag>
+                  </div>
                 ) : (
-                  <StyledDatePicker
+                  <Input
                     type="date"
-                    id="updated-date"
                     width="full"
-                    name="updated-date"
-                    onBlur={(e) => {
-                      const updatedDate = new Date(e.target.value);
-                      handleChange({ updatedDate });
+                    onChangeFn={(value) => {
+                      if (value) {
+                        const updatedDate = new Date(value);
+                        handleChange({ updatedDate });
+                      }
                     }}
                   />
                 )}
               </StyledRow>
+
+              <StyledRow>
+                <StyledRowHeader>created by</StyledRowHeader>
+                <Dropdown.Single.Basic
+                  width="full"
+                  options={userOptions}
+                  value={searchData.createdBy ?? ""}
+                  onChange={(value) => {
+                    handleChange({ createdBy: value });
+                  }}
+                />
+              </StyledRow>
+
+              <StyledRow>
+                <StyledRowHeader>updated by</StyledRowHeader>
+                <Dropdown.Single.Basic
+                  width="full"
+                  options={userOptions}
+                  value={searchData.updatedBy ?? ""}
+                  onChange={(value) => {
+                    handleChange({ updatedBy: value });
+                  }}
+                />
+              </StyledRow>
+
               <StyledRow>
                 <StyledRowHeader>Root T validity</StyledRowHeader>
 
@@ -593,8 +646,8 @@ export const EntitySearchBox: React.FC = () => {
                   noMargin
                   options={[
                     {
-                      longValue: "All",
-                      shortValue: "All",
+                      longValue: "any",
+                      shortValue: "any",
                       onClick: () => {
                         handleChange({ isRootInvalid: undefined });
                       },

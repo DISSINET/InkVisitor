@@ -17,6 +17,8 @@ export interface IRequestSearch {
   status?: EntityEnums.Status;
   createdDate?: Date;
   updatedDate?: Date;
+  createdBy?: string;
+  updatedBy?: string;
   resourceHasDocument?: boolean;
   haveReferenceTo?: string;
   isRootInvalid?: boolean;
@@ -37,6 +39,8 @@ export class RequestSearch {
   status?: EntityEnums.Status;
   createdDate?: Date;
   updatedDate?: Date;
+  createdBy?: string;
+  updatedBy?: string;
   resourceHasDocument?: boolean;
   haveReferenceTo?: string;
   isRootInvalid?: boolean;
@@ -78,6 +82,8 @@ export class RequestSearch {
     this.resourceHasDocument = Boolean(requestData.resourceHasDocument);
     this.haveReferenceTo = requestData.haveReferenceTo ?? undefined;
     this.isRootInvalid = Boolean(requestData.isRootInvalid);
+    this.createdBy = requestData.createdBy ?? undefined;
+    this.updatedBy = requestData.updatedBy ?? undefined;
   }
 
   /**
@@ -145,6 +151,8 @@ export class RequestSearch {
       !this.usedTemplate &&
       !this.territoryId &&
       !this.status &&
+      !this.createdBy &&
+      !this.updatedBy &&
       !this.language &&
       !this.createdDate &&
       !this.updatedDate &&

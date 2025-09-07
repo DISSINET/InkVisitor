@@ -894,7 +894,7 @@ export const StatementListBox: React.FC = () => {
                   // fix for overheight because of marginTop which is necessary to make space for annotator header
                   marginTop:
                     displayMode === StatementListDisplayMode.TEXT
-                      ? "6rem"
+                      ? "6.2rem"
                       : undefined,
                   height:
                     displayMode === StatementListDisplayMode.TEXT
