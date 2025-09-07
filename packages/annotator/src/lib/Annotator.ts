@@ -768,7 +768,7 @@ export class Annotator {
 
       // Check if indexStart position coincides with another tag in the segment
       const segmentPosition = this.text.getSegmentFromAbsTextIndex(indexStart);
-      if (segmentPosition) {  
+      if (segmentPosition) {
         const segment = this.text.segments[segmentPosition.segmentIndex];
         const startRawTextIndex = segmentPosition.rawTextIndex;
         const openingTagAtPosition = segment.openingTags.find(
@@ -786,7 +786,7 @@ export class Annotator {
             const existingTagContentSize =
               correspondingClosingTag.position - openingTagAtPosition.position;
             const newSelectionSize = indexEnd - indexStart;
-            console.log(existingTagContentSize, newSelectionSize)
+            console.log(existingTagContentSize, newSelectionSize);
             if (existingTagContentSize > newSelectionSize) {
               // Move start index to the right, making the new selection smaller
               indexStart += openingTagAtPosition.tag.length + 2;
@@ -952,22 +952,27 @@ export class Annotator {
   }
 
   onPasteText() {
-    window.navigator.clipboard.readText().then((clipText: string) => {
-      const area = this.cursor.getSelectedArea();
-      if (area) {
-        this.text.deleteRangeText(area[0], area[1]);
-        this.cursor.reset();
-        this.cursor.setPosition(
-          area[0].xLine,
-          area[0].yLine - this.viewport.lineStart
-        );
-      }
-      this.text.insertText(this.viewport, this.cursor, clipText);
-      this.cursor.move(clipText.length, 0);
-      this.cursor.fixOutOfBounds(this.viewport, this.text);
+    window.navigator.clipboard
+      .readText()
+      .then((clipText: string) => {
+        const area = this.cursor.getSelectedArea();
+        if (area) {
+          this.text.deleteRangeText(area[0], area[1]);
+          this.cursor.reset();
+          this.cursor.setPosition(
+            area[0].xLine,
+            area[0].yLine - this.viewport.lineStart
+          );
+        }
+        this.text.insertText(this.viewport, this.cursor, clipText);
+        this.cursor.move(clipText.length, 0);
+        this.cursor.fixOutOfBounds(this.viewport, this.text);
 
-      this.draw();
-    });
+        this.draw();
+      })
+      .catch((err) => {
+        console.error("Error reading clipboard", err);
+      });
   }
 
   onReplaceText(text: string) {
