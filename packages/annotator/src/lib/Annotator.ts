@@ -8,6 +8,12 @@ import Viewport from "./Viewport";
 import { Warnings } from "./warnings";
 import { EditMode, HighlightMode } from "./constants";
 
+// Updated regex to properly handle tags with attributes
+// Opening tags: <tagname attr="value"> or <tagname>
+const openingTagRegex = /<([a-zA-Z0-9\-_]+)(?:\s+[^>]*)?>/g;
+// Closing tags: </tagname>
+const closingTagRegex = /<\/([a-zA-Z0-9\-_]+)>/g;
+
 // Occurrence holds exact position of a point in text
 export interface Occurrence {
   segmentIndex: number;
@@ -781,69 +787,23 @@ export class Annotator {
         this.text.getSegmentPosition(end.yLine, end.xLine, true)
       );
 
-      // Check if indexStart position coincides with another tag in the segment
-      const segmentPosition = this.text.getSegmentFromAbsTextIndex(indexStart);
-      if (segmentPosition) {
-        const segment = this.text.segments[segmentPosition.segmentIndex];
-        const startRawTextIndex = segmentPosition.rawTextIndex;
-        const openingTagAtPosition = segment.openingTags.find(
-          (tag) => tag.position === startRawTextIndex
-        );
-        if (openingTagAtPosition) {
-          // Find the corresponding closing tag to calculate content size
-          const correspondingClosingTag = segment.closingTags.find(
-            (tag) =>
-              tag.tag === openingTagAtPosition.tag &&
-              tag.position > openingTagAtPosition.position
-          );
+      // Move endIndex after tags on the right to avoid gathering additional non-XML tag characters
+      // after this we have envelope around neighboring tags
+      indexEnd = this.skipTagsOnRight(indexEnd);
 
-          if (correspondingClosingTag) {
-            const existingTagContentSize =
-              correspondingClosingTag.position - openingTagAtPosition.position;
-            const newSelectionSize = indexEnd - indexStart;
-            if (existingTagContentSize > newSelectionSize) {
-              // Move start index to the right, making the new selection smaller
-              indexStart += openingTagAtPosition.getTag().length;
-            }
-          }
-        }
-      }
-
-      // Check if indexEnd position coincides with another tag in the segment
-      const endSegmentPosition = this.text.getSegmentFromAbsTextIndex(indexEnd);
-      if (endSegmentPosition) {
-        const endSegment = this.text.segments[endSegmentPosition.segmentIndex];
-        const endRawTextIndex = endSegmentPosition.rawTextIndex;
-        const closingTagAtEndPosition = endSegment.closingTags.find(
-          (tag) => tag.position === endRawTextIndex
-        );
-        if (closingTagAtEndPosition) {
-          // Find the corresponding opening tag to calculate content size
-          const correspondingOpeningTag = endSegment.openingTags.find(
-            (tag) =>
-              tag.tag === closingTagAtEndPosition.tag &&
-              tag.position < closingTagAtEndPosition.position
-          );
-          if (correspondingOpeningTag) {
-            const existingTagContentSize =
-              closingTagAtEndPosition.position -
-              correspondingOpeningTag.position;
-            const newSelectionSize = indexEnd - indexStart;
-
-            if (existingTagContentSize < newSelectionSize) {
-              // new selection is larger than existing selection, push indexEnd after the closing tag
-              indexEnd += closingTagAtEndPosition.getTag().length;
-            }
-          }
-        }
-      }
-
+      // Sanitize envelope range by removing enveloping tags from both left and right sides
+      [indexStart, indexEnd] = this.sanitizeEnvelopeRange(indexStart, indexEnd);
+      // could be '<tag>text .... text</tag> (closing tag always included if present)
+      const selectedRawText = this.text.value.slice(indexStart, indexEnd);
       const beforeText = this.text.value.slice(0, indexStart);
       const afterText = this.text.value.slice(indexEnd);
-      const insideText = this.text.value.slice(indexStart, indexEnd);
 
       this.text.value =
-        beforeText + openTag.getTag() + insideText + closeTag.getTag() + afterText;
+        beforeText +
+        openTag.getTag() +
+        selectedRawText +
+        closeTag.getTag() +
+        afterText;
 
       this.text.prepareSegments();
       this.text.calculateLines();
@@ -1038,4 +998,148 @@ export class Annotator {
     this.cursor.reset();
     this.draw();
   }
+
+  /**
+   * Skip closing XML tags on the right side of the given index to avoid gathering additional non-XML tag characters
+   * Only moves over closing tags when the selection ends exactly at the tag boundary, not when followed by normal text
+   * Includes all consecutive closing tags
+   * @param index The starting index
+   * @returns The new index after skipping consecutive closing tags on the right
+   */
+  private skipTagsOnRight(index: number): number {
+    const text = this.text.value;
+    let newIndex = index;
+    let currentIndex = index;
+
+    // Look for consecutive closing XML tags starting from the current index
+    const closingTagRegex = /<\/([^<>]+?)>/g;
+
+    while (true) {
+      closingTagRegex.lastIndex = currentIndex;
+      const match = closingTagRegex.exec(text);
+
+      // If we find a closing tag that starts exactly at our current position
+      if (match && match.index === currentIndex) {
+        // Move the index to the end of this closing tag
+        newIndex = match.index + match[0].length;
+        currentIndex = newIndex;
+        // Continue looking for more consecutive closing tags
+      } else {
+        // No more consecutive closing tags, stop
+        break;
+      }
+    }
+
+    return newIndex;
+  }
+
+  /**
+   * Include XML tags on the left side of the given index
+   * @param index The starting index
+   * @returns The new index including tags on the left
+   */
+  private includeTagsOnLeft(index: number): number {
+    const text = this.text.value;
+    let newIndex = index;
+
+    // Look for XML tags before the current index
+    const tagRegex = /<\/?[^<>]+?>/g;
+    let match;
+    let lastTagEnd = 0;
+
+    while ((match = tagRegex.exec(text)) !== null) {
+      if (match.index < index) {
+        // Keep track of the end position of the last tag before our index
+        lastTagEnd = match.index + match[0].length;
+      } else {
+        // We've reached tags at or after our index, stop
+        break;
+      }
+    }
+
+    // If we found tags before our index, start from the beginning of the first tag
+    if (lastTagEnd > 0) {
+      // Find the start of the first tag that ends before or at our index
+      tagRegex.lastIndex = 0;
+      while ((match = tagRegex.exec(text)) !== null) {
+        if (match.index + match[0].length <= index) {
+          newIndex = match.index;
+        } else {
+          break;
+        }
+      }
+    }
+
+    return newIndex;
+  }
+
+  /**
+   * Prevent overlapping anchors by ensuring proper nesting
+   * When a shorter span selection arrives at the end of another anchor, the shorter span should be within the longer span
+   * When a longer span is selected, the anchors should encompass the shorter span
+   * @param indexStart The current start index
+   * @param indexEnd The current end index
+   * @returns The new [indexStart, indexEnd] after preventing overlaps
+   */
+  private sanitizeEnvelopeRange(
+    indexStart: number,
+    indexEnd: number
+  ): [number, number] {
+    const text = this.text.value;
+
+    // Case 1: Check if selection starts at the beginning of an opening tag
+    const currentSelection = text.slice(indexStart, indexEnd);
+    
+    // Check if the selection itself starts with an opening tag
+    openingTagRegex.lastIndex = 0; // Reset regex
+    const openingMatch = openingTagRegex.exec(currentSelection);
+    if (openingMatch && openingMatch.index === 0) {
+      // Selection starts with an opening tag, move start to after the tag
+      const openingTagEnd = indexStart + openingMatch[0].length;
+      indexStart = openingTagEnd;
+    }
+    
+
+    // Case 2: Check if selection ends with a closing tag that was added by skipTagsOnRight
+    const updatedSelection = text.slice(indexStart, indexEnd);
+    if (updatedSelection.endsWith(">") && updatedSelection.includes("</")) {
+      // Find the last closing tag in the selection
+      let lastClosingTag = null;
+      let match;
+      closingTagRegex.lastIndex = 0;
+
+      while ((match = closingTagRegex.exec(updatedSelection)) !== null) {
+        lastClosingTag = {
+          tagName: match[1],
+          start: indexStart + match.index,
+          end: indexStart + match.index + match[0].length,
+        };
+      }
+
+      if (lastClosingTag) {
+        // Check if this closing tag has a matching opening tag before the selection
+        const beforeSelection = text.slice(0, indexStart);
+        const openingTagName = lastClosingTag.tagName;
+        const openingPattern = new RegExp(`<${openingTagName}(?:\\s+[^>]*)?>`, 'g');
+        let openingMatch;
+        let lastOpeningTag = null;
+
+        while ((openingMatch = openingPattern.exec(beforeSelection)) !== null) {
+          lastOpeningTag = {
+            start: openingMatch.index,
+            end: openingMatch.index + openingMatch[0].length,
+          };
+        }
+
+        if (lastOpeningTag && lastOpeningTag.end <= indexStart) {
+          // This closing tag belongs to an opening tag before the selection
+          // Remove the closing tag from the end
+          indexEnd = lastClosingTag.start;
+        }
+      }
+    }
+
+    return [indexStart, indexEnd];
+  }
+
 }

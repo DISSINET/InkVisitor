@@ -7,12 +7,14 @@ export class Tag {
   tag: string;
   closing?: boolean;
   attributes: Record<string, string>;
+  relativeParsedPosition: number;
 
-  constructor(position: number, tag: string, closing?: boolean) {
+  constructor(position: number, tag: string, closing?: boolean, segment?: Segment) {
     this.position = position;
     this.tag = tag;
     this.closing = closing;
     this.attributes = this.parseAttributes(tag);
+    this.relativeParsedPosition = this.calculateRelativeParsedPosition(segment);
   }
 
   private parseAttributes(tagString: string): Record<string, string> {
@@ -46,6 +48,31 @@ export class Tag {
     }
     
     return attributes;
+  }
+
+  private calculateRelativeParsedPosition(segment?: Segment): number {
+    if (!segment) {
+      return 0;
+    }
+
+    // Calculate the parsed position by subtracting the length of all tags that come before this tag
+    let parsedPosition = this.position;
+    
+    // Subtract length of all opening tags before this position
+    for (const tag of segment.openingTags) {
+      if (tag.position < this.position) {
+        parsedPosition -= tag.tag.length + 2; // +2 for < and >
+      }
+    }
+    
+    // Subtract length of all closing tags before this position
+    for (const tag of segment.closingTags) {
+      if (tag.position < this.position) {
+        parsedPosition -= tag.tag.length + 3; // +3 for </ and >
+      }
+    }
+    
+    return parsedPosition;
   }
 
   getTag(): string {
@@ -84,12 +111,12 @@ export class Segment {
     // Find opening tags
     let match;
     while ((match = openingTagsRegex.exec(this.raw)) !== null) {
-      this.openingTags.push(new Tag(match.index, match[1]));
+      this.openingTags.push(new Tag(match.index, match[1], false, this));
     }
 
     // Find closing tags
     while ((match = closingTagsRegex.exec(this.raw)) !== null) {
-      this.closingTags.push(new Tag(match.index, match[1], true));
+      this.closingTags.push(new Tag(match.index, match[1], true, this));
     }
 
     // Remove tags from the text
