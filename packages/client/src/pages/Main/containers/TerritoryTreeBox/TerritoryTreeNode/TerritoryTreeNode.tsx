@@ -178,16 +178,10 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     showPagination,
     handlePreviousPage,
     handleNextPage,
-    resetPage,
   } = usePagination({
     items: childTerritories,
     itemsPerPage: 10,
   });
-
-  // Reset pagination when children change
-  useEffect(() => {
-    resetPage();
-  }, [children, resetPage]);
 
   const handleMenuOpen = useCallback(() => {
     setContextMenuOpen(true);
