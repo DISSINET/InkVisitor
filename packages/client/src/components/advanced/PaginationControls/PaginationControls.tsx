@@ -46,10 +46,11 @@ export const PaginationControls: React.FC<PaginationControlsProps> = ({
           borderRadius: "3px",
         }}
       >
-        Previous
+        {"<"}
       </button>
       <span>
-        Page {currentPage} of {totalPages} ({totalItems} total)
+        {currentPage} of {totalPages}
+        {/* ({totalItems} total) */}
       </span>
       <button
         onClick={onNextPage}
@@ -70,7 +71,7 @@ export const PaginationControls: React.FC<PaginationControlsProps> = ({
           borderRadius: "3px",
         }}
       >
-        Next
+        {">"}
       </button>
     </div>
   );
