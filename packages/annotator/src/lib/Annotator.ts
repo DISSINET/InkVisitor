@@ -10,9 +10,11 @@ import { EditMode, HighlightMode } from "./constants";
 
 // Updated regex to properly handle tags with attributes
 // Opening tags: <tagname attr="value"> or <tagname>
-const openingTagRegex = /<([a-zA-Z0-9\-_]+)(?:\s+[^>]*)?>/g;
+export const openingTagRegex = /<([a-zA-Z0-9\-_\s="']+)>/g;
 // Closing tags: </tagname>
-const closingTagRegex = /<\/([a-zA-Z0-9\-_]+)>/g;
+export const closingTagRegex = /<\/([a-zA-Z0-9\-_]+)>/g;
+// General tag removal regex
+export const tagRemovalRegex = /<\/?[^<>]+?>/g;
 
 // Occurrence holds exact position of a point in text
 export interface Occurrence {
@@ -765,6 +767,23 @@ export class Annotator {
     this.text.calculateLines();
   }
 
+  /**
+   * Adds an anchor tag around the currently selected text.
+   * 
+   * This function wraps the selected text with opening and closing XML-like tags.
+   * It handles text selection bounds, sanitizes the envelope range to avoid
+   * including unwanted neighboring tags, and updates the text content accordingly.
+   * 
+   * @param anchor - The tag name to wrap around the selected text (e.g., "person", "location")
+   * @param attributes - Optional attributes to add to the opening tag (e.g., {id: "123", type: "proper"})
+   * 
+   * @example
+   * // Wrap selected text with a person tag
+   * addAnchor("person");
+   * 
+   * // Wrap selected text with a location tag and attributes
+   * addAnchor("location", {id: "loc1", type: "city"});
+   */
   addAnchor(anchor: string, attributes?: Record<string, string>) {
     if (!this.cursor.isSelected()) {
       return;
@@ -1011,9 +1030,6 @@ export class Annotator {
     let newIndex = index;
     let currentIndex = index;
 
-    // Look for consecutive closing XML tags starting from the current index
-    const closingTagRegex = /<\/([^<>]+?)>/g;
-
     while (true) {
       closingTagRegex.lastIndex = currentIndex;
       const match = closingTagRegex.exec(text);
@@ -1034,46 +1050,6 @@ export class Annotator {
   }
 
   /**
-   * Include XML tags on the left side of the given index
-   * @param index The starting index
-   * @returns The new index including tags on the left
-   */
-  private includeTagsOnLeft(index: number): number {
-    const text = this.text.value;
-    let newIndex = index;
-
-    // Look for XML tags before the current index
-    const tagRegex = /<\/?[^<>]+?>/g;
-    let match;
-    let lastTagEnd = 0;
-
-    while ((match = tagRegex.exec(text)) !== null) {
-      if (match.index < index) {
-        // Keep track of the end position of the last tag before our index
-        lastTagEnd = match.index + match[0].length;
-      } else {
-        // We've reached tags at or after our index, stop
-        break;
-      }
-    }
-
-    // If we found tags before our index, start from the beginning of the first tag
-    if (lastTagEnd > 0) {
-      // Find the start of the first tag that ends before or at our index
-      tagRegex.lastIndex = 0;
-      while ((match = tagRegex.exec(text)) !== null) {
-        if (match.index + match[0].length <= index) {
-          newIndex = match.index;
-        } else {
-          break;
-        }
-      }
-    }
-
-    return newIndex;
-  }
-
-  /**
    * Prevent overlapping anchors by ensuring proper nesting
    * When a shorter span selection arrives at the end of another anchor, the shorter span should be within the longer span
    * When a longer span is selected, the anchors should encompass the shorter span
@@ -1086,7 +1062,7 @@ export class Annotator {
     indexEnd: number
   ): [number, number] {
     const text = this.text.value;
-
+  
     // Case 1: Check if selection starts at the beginning of an opening tag
     const currentSelection = text.slice(indexStart, indexEnd);
     
@@ -1099,7 +1075,6 @@ export class Annotator {
       indexStart = openingTagEnd;
     }
     
-
     // Case 2: Check if selection ends with a closing tag that was added by skipTagsOnRight
     const updatedSelection = text.slice(indexStart, indexEnd);
     if (updatedSelection.endsWith(">") && updatedSelection.includes("</")) {
