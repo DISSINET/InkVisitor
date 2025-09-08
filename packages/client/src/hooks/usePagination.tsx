@@ -41,7 +41,15 @@ export const usePagination = <T,>({
       ) {
         setCurrentPage(totalPages);
       }
-      // If items were added, keep current page (don't reset to 1)
+      // If items were added and a new page was created, go to the new page
+      else if (currentItemsLength > prevItemsLength && totalPages > 1) {
+        const prevTotalPages = Math.ceil(prevItemsLength / itemsPerPage);
+        if (totalPages > prevTotalPages) {
+          // New page was created, go to the last page (where the new item likely is)
+          setCurrentPage(totalPages);
+        }
+        // If no new page was created, keep current page
+      }
       // Only reset to 1 if this is the initial load (prevItemsLength was 0)
       else if (prevItemsLength === 0 && currentItemsLength > 0) {
         setCurrentPage(1);
@@ -49,7 +57,7 @@ export const usePagination = <T,>({
 
       previousItemsLength.current = currentItemsLength;
     }
-  }, [items.length, currentPage, totalPages]);
+  }, [items.length, currentPage, totalPages, itemsPerPage]);
 
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
