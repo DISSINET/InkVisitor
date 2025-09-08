@@ -10,7 +10,9 @@ import {
 import { rootTerritoryId } from "Theme/constants";
 import api from "api";
 import { EntityDropzone, EntityTag } from "components/advanced";
+import { PaginationControls } from "components/advanced/PaginationControls";
 import { useSearchParams, useTheme } from "hooks";
+import { usePagination } from "hooks/usePagination";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -167,6 +169,26 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   const parent = data.parent as IParentTerritory;
   const isFavorited = storedTerritories?.includes(id);
 
+  // Pagination hook
+  const {
+    currentPage,
+    totalPages,
+    totalItems,
+    paginatedItems: paginatedChildren,
+    showPagination,
+    handlePreviousPage,
+    handleNextPage,
+    resetPage,
+  } = usePagination({
+    items: childTerritories,
+    itemsPerPage: 10,
+  });
+
+  // Reset pagination when children change
+  useEffect(() => {
+    resetPage();
+  }, [children, resetPage]);
+
   const handleMenuOpen = useCallback(() => {
     setContextMenuOpen(true);
   }, []);
@@ -267,10 +289,10 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
       <StyledChildrenWrap>
         {!hideChildTerritories &&
           isExpanded &&
-          childTerritories.map((child: IExtendedResponseTree, key: number) => (
+          paginatedChildren.map((child: IExtendedResponseTree, key: number) => (
             <MemoizedTerritoryTreeNode
-              key={key}
-              index={key}
+              key={(currentPage - 1) * 10 + key}
+              index={(currentPage - 1) * 10 + key}
               propId={child.territory.id}
               territory={child.territory}
               children={child.children}
@@ -285,6 +307,16 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
               updateUserMutation={updateUserMutation}
             />
           ))}
+        {!hideChildTerritories && isExpanded && showPagination && (
+          <PaginationControls
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={totalItems}
+            onPreviousPage={handlePreviousPage}
+            onNextPage={handleNextPage}
+            level={lvl}
+          />
+        )}
       </StyledChildrenWrap>
     </>
   );
