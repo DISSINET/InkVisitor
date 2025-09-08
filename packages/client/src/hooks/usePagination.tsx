@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 interface UsePaginationProps<T> {
   items: T[];
   itemsPerPage: number;
+  level?: number; // Add level parameter to detect first level
 }
 
 interface UsePaginationReturn<T> {
@@ -19,13 +20,14 @@ interface UsePaginationReturn<T> {
 export const usePagination = <T,>({
   items,
   itemsPerPage,
+  level = 0,
 }: UsePaginationProps<T>): UsePaginationReturn<T> => {
   const [currentPage, setCurrentPage] = useState(1);
   const previousItemsLength = useRef(items.length);
 
   const totalItems = items.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
-  const showPagination = totalItems > itemsPerPage;
+  const showPagination = totalItems > itemsPerPage && level >= 1;
 
   // Auto-adjust current page when items change
   useEffect(() => {
@@ -42,7 +44,13 @@ export const usePagination = <T,>({
         setCurrentPage(totalPages);
       }
       // If items were added and a new page was created, go to the new page
-      else if (currentItemsLength > prevItemsLength && totalPages > 1) {
+      // But only for levels 1 and above, and not on initial load
+      else if (
+        currentItemsLength > prevItemsLength &&
+        totalPages > 1 &&
+        level >= 1 &&
+        prevItemsLength > 0 // Ensure this is not the initial load
+      ) {
         const prevTotalPages = Math.ceil(prevItemsLength / itemsPerPage);
         if (totalPages > prevTotalPages) {
           // New page was created, go to the last page (where the new item likely is)
@@ -57,7 +65,7 @@ export const usePagination = <T,>({
 
       previousItemsLength.current = currentItemsLength;
     }
-  }, [items.length, currentPage, totalPages, itemsPerPage]);
+  }, [items.length, currentPage, totalPages, itemsPerPage, level]);
 
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;

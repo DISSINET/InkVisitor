@@ -25,11 +25,11 @@ export const PaginationControls: React.FC<PaginationControlsProps> = ({
       style={{
         display: "flex",
         alignItems: "center",
-        gap: "8px",
+        gap: "5px",
         padding: "4px 8px",
         fontSize: "12px",
+        marginBottom: "3px",
         color: theme.color.text,
-        marginLeft: `${level * 20}px`,
       }}
     >
       <button

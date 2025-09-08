@@ -181,7 +181,13 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   } = usePagination({
     items: childTerritories,
     itemsPerPage: 10,
+    level: lvl,
   });
+
+  // Use all children when pagination is disabled (level 0), otherwise use paginated children
+  const childrenToRender = showPagination
+    ? paginatedChildren
+    : childTerritories;
 
   const handleMenuOpen = useCallback(() => {
     setContextMenuOpen(true);
@@ -283,10 +289,10 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
       <StyledChildrenWrap>
         {!hideChildTerritories &&
           isExpanded &&
-          paginatedChildren.map((child: IExtendedResponseTree, key: number) => (
+          childrenToRender.map((child: IExtendedResponseTree, key: number) => (
             <MemoizedTerritoryTreeNode
-              key={(currentPage - 1) * 10 + key}
-              index={(currentPage - 1) * 10 + key}
+              key={showPagination ? (currentPage - 1) * 10 + key : key}
+              index={showPagination ? (currentPage - 1) * 10 + key : key}
               propId={child.territory.id}
               territory={child.territory}
               children={child.children}
