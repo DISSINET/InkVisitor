@@ -770,26 +770,26 @@ export class Annotator {
   /**
    * Adds an anchor tag around the currently selected text.
    * 
-   * This function wraps the selected text with opening and closing XML-like tags.
+   * This function wraps the selected text with HTML tags using the anchor name as the tag name.
    * It handles text selection bounds, sanitizes the envelope range to avoid
    * including unwanted neighboring tags, and updates the text content accordingly.
    * 
-   * @param anchor - The tag name to wrap around the selected text (e.g., "person", "location")
-   * @param attributes - Optional attributes to add to the opening tag (e.g., {id: "123", type: "proper"})
+   * @param anchor - The HTML tag name to wrap around the selected text
+   * @param attributes - Optional attributes to add to the tag
    * 
    * @example
-   * // Wrap selected text with a person tag
+   * // Wrap selected text with a person tag (no attributes)
    * addAnchor("person");
    * 
-   * // Wrap selected text with a location tag and attributes
-   * addAnchor("location", {id: "loc1", type: "city"});
+   * // Wrap selected text with a div tag and custom attributes
+   * addAnchor("div", {id: "loc1", class: "city"});
    */
   addAnchor(anchor: string, attributes?: Record<string, string>) {
     if (!this.cursor.isSelected()) {
       return;
     }
 
-    // Construct the Tag at the start
+    // Construct the Tag instances
     const openTag = new Tag(0, anchor, false);
     if (attributes) {
       openTag.attributes = attributes;

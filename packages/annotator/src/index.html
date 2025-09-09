@@ -82,8 +82,19 @@
       </fieldset>
       <fieldset>
         <label>add anchor </label>
-        <input type="text" id="anchorText" />
-        <button id="addAnchor">add</button>
+        <input type="text" id="anchorText" placeholder="Anchor name (e.g., person, location)" />
+        <div style="margin-top: 5px;">
+          <label>Attributes (key-value pairs):</label>
+          <div id="attributeFields" style="margin-top: 5px;">
+            <div class="attribute-row" style="margin-bottom: 5px;">
+              <input type="text" placeholder="Key" class="attr-key" style="width: 100px; margin-right: 5px;" />
+              <input type="text" placeholder="Value" class="attr-value" style="width: 100px; margin-right: 5px;" />
+              <button type="button" class="remove-attr" style="background: #ff6b6b; color: white; border: none; padding: 2px 6px; cursor: pointer;">×</button>
+            </div>
+          </div>
+          <button type="button" id="addAttribute" style="background: #4ecdc4; color: white; border: none; padding: 4px 8px; cursor: pointer; margin-top: 5px;">+ Add Attribute</button>
+        </div>
+        <button id="addAnchor" style="margin-top: 10px;">add</button>
       </fieldset>
       <fieldset>
         <label>remove anchor from selection </label>
@@ -198,8 +209,49 @@
         annotator.draw();
       };
 
+      // Function to add a new attribute row
+      document.getElementById("addAttribute").onclick = () => {
+        const attributeFields = document.getElementById("attributeFields");
+        const newRow = document.createElement("div");
+        newRow.className = "attribute-row";
+        newRow.style.marginBottom = "5px";
+        newRow.innerHTML = `
+          <input type="text" placeholder="Key" class="attr-key" style="width: 100px; margin-right: 5px;" />
+          <input type="text" placeholder="Value" class="attr-value" style="width: 100px; margin-right: 5px;" />
+          <button type="button" class="remove-attr" style="background: #ff6b6b; color: white; border: none; padding: 2px 6px; cursor: pointer;">×</button>
+        `;
+        attributeFields.appendChild(newRow);
+        
+        // Add click handler for the remove button
+        newRow.querySelector(".remove-attr").onclick = () => {
+          newRow.remove();
+        };
+      };
+
+      // Add click handlers for existing remove buttons
+      document.querySelectorAll(".remove-attr").forEach(btn => {
+        btn.onclick = () => {
+          btn.parentElement.remove();
+        };
+      });
+
+      // Function to collect attributes from the form
+      function collectAttributes() {
+        const attributes = {};
+        document.querySelectorAll(".attribute-row").forEach(row => {
+          const keyInput = row.querySelector(".attr-key");
+          const valueInput = row.querySelector(".attr-value");
+          if (keyInput.value.trim() && valueInput.value.trim()) {
+            attributes[keyInput.value.trim()] = valueInput.value.trim();
+          }
+        });
+        return Object.keys(attributes).length > 0 ? attributes : undefined;
+      }
+
       document.getElementById("addAnchor").onclick = () => {
-        annotator.addAnchor(document.getElementById("anchorText").value);
+        const anchorText = document.getElementById("anchorText").value;
+        const attributes = collectAttributes();
+        annotator.addAnchor(anchorText, attributes);
       };
 
       document.getElementById("removeAnchor").onclick = () => {
