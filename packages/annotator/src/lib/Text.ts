@@ -93,14 +93,14 @@ export class Tag {
     // Subtract length of all opening tags before this position
     for (const tag of segment.openingTags) {
       if (tag.position < this.position) {
-        parsedPosition -= tag.tag.length + 2; // +2 for < and >
+        parsedPosition -= tag.getTag().length; 
       }
     }
     
     // Subtract length of all closing tags before this position
     for (const tag of segment.closingTags) {
       if (tag.position < this.position) {
-        parsedPosition -= tag.tag.length + 3; // +3 for </ and >
+        parsedPosition -= tag.getTag().length;
       }
     }
     
@@ -265,12 +265,12 @@ export class Segment {
     let parsedTextOpenPosition = this.openingTags
       .filter((t) => t.position < tag.position)
       .reduce((acc, cur) => {
-        return acc - cur.tag.length - 2;
+        return acc - cur.getTag().length;
       }, tag.position);
     parsedTextOpenPosition = this.closingTags
       .filter((t) => t.position < tag.position)
       .reduce((acc, cur) => {
-        return acc - cur.tag.length - 3;
+        return acc - cur.getTag().length;
       }, parsedTextOpenPosition);
 
     // fold text-lines to get line-based positon (2d instead of 1d coordinates)
@@ -454,9 +454,8 @@ class Text {
       }
     }
 
-    // Performance check
-    // const time2 = performance.now();
-    // console.log(`${time2 - time1} ms `);
+    console.log("this.segments", this.segments);
+
     this.noLines = this.segments.reduce<number>(
       (a, c) => a + c.lines.length,
       0
@@ -571,7 +570,7 @@ class Text {
 
           for (const tag of tags) {
             if (tag.position <= rawTextIndex) {
-              parsedTextIndex -= tag.tag.length + (tag.closing ? 3 : 2);
+              parsedTextIndex -= tag.getTag().length;
             }
           }
         }
@@ -715,7 +714,7 @@ class Text {
             ? tag.position < rawTextIndex
             : tag.position <= rawTextIndex
         ) {
-          rawTextIndex += tag.tag.length + (tag.closing ? 3 : 2);
+          rawTextIndex += tag.getTag().length;
         }
       }
     }
