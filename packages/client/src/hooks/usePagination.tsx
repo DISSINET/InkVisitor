@@ -43,7 +43,7 @@ export const usePagination = <T,>({
       ) {
         setCurrentPage(totalPages);
       }
-      // If items were added and a new page was created, go to the new page
+      // If items were added, go to the last page
       // But only for levels 1 and above, and not on initial load
       else if (
         currentItemsLength > prevItemsLength &&
@@ -51,12 +51,8 @@ export const usePagination = <T,>({
         level >= 1 &&
         prevItemsLength > 0 // Ensure this is not the initial load
       ) {
-        const prevTotalPages = Math.ceil(prevItemsLength / itemsPerPage);
-        if (totalPages > prevTotalPages) {
-          // New page was created, go to the last page (where the new item likely is)
-          setCurrentPage(totalPages);
-        }
-        // If no new page was created, keep current page
+        // Always go to the last page when new items are added
+        setCurrentPage(totalPages);
       }
       // Only reset to 1 if this is the initial load (prevItemsLength was 0)
       else if (prevItemsLength === 0 && currentItemsLength > 0) {
