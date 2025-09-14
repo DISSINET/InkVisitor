@@ -126,6 +126,19 @@ export class Tag {
     openTag += '>';
     return openTag;
   }
+
+  /**
+   * Gets the base tag name without attributes.
+   * 
+   * Extracts just the tag name from the parsed tag content.
+   * For example, if tag contains "div id='123' class='container'", this returns "div".
+   * 
+   * @returns The base tag name
+   */
+  getTagName(): string {
+    // Split by whitespace and take the first part (the tag name)
+    return this.tag.trim().split(/\s+/)[0];
+  }
 }
 
 /**
@@ -453,8 +466,6 @@ class Text {
         segment.lines = [""];
       }
     }
-
-    console.log("this.segments", this.segments);
 
     this.noLines = this.segments.reduce<number>(
       (a, c) => a + c.lines.length,
@@ -1083,7 +1094,7 @@ class Text {
     // Search for the opening tag
     for (const segment of this.segments) {
       for (const openingTag of segment.openingTags) {
-        if (openingTag.tag === tag) {
+        if (openingTag.getTagName() === tag) {
           if (openingTagIndex === index) {
             openingTagMatch = { tag: openingTag, segment };
             break;
@@ -1097,7 +1108,7 @@ class Text {
     // Search for the closing tag
     for (const segment of this.segments) {
       for (const closingTag of segment.closingTags) {
-        if (closingTag.tag === tag) {
+        if (closingTag.getTagName() === tag) {
           if (closingTagIndex === index) {
             closingTagMatch = { tag: closingTag, segment };
             break;

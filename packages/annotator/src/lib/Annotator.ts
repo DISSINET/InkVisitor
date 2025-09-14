@@ -10,7 +10,7 @@ import { EditMode, HighlightMode } from "./constants";
 
 // Updated regex to properly handle tags with attributes
 // Opening tags: <tagname attr="value"> or <tagname>
-export const openingTagRegex = /<([a-zA-Z0-9\-_\s="']+)>/g;
+export const openingTagRegex = /<([a-zA-Z0-9\-_\.\?\:\s="'\/]+)>/g;
 // Closing tags: </tagname>
 export const closingTagRegex = /<\/([a-zA-Z0-9\-_]+)>/g;
 // General tag removal regex
