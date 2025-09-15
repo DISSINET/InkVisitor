@@ -271,6 +271,9 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                 isFavorited={isFavorited}
                 showOnly="label"
                 tooltipPosition="right"
+                customTooltipAttributes={{
+                  childCount: children.length,
+                }}
               />
             </EntityDropzone>
             <TerritoryTreeContextMenu
