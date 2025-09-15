@@ -317,10 +317,8 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
           <PaginationControls
             currentPage={currentPage}
             totalPages={totalPages}
-            totalItems={totalItems}
             onPreviousPage={handlePreviousPage}
             onNextPage={handleNextPage}
-            level={lvl}
           />
         )}
       </StyledChildrenWrap>
