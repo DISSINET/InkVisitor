@@ -9,8 +9,11 @@ import {
 } from "@tanstack/react-query";
 import { rootTerritoryId } from "Theme/constants";
 import api from "api";
-import { EntityDropzone, EntityTag } from "components/advanced";
-import { PaginationControls } from "components/advanced/PaginationControls";
+import {
+  EntityDropzone,
+  EntityTag,
+  PaginationControls,
+} from "components/advanced";
 import { useSearchParams, useTheme } from "hooks";
 import { usePagination } from "hooks/usePagination";
 import update from "immutability-helper";

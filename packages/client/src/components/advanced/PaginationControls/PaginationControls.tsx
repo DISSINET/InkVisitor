@@ -1,5 +1,6 @@
 import React from "react";
 import { useTheme } from "hooks";
+import { StyledPagination } from "./PaginationControlsStyles";
 
 interface PaginationControlsProps {
   currentPage: number;
@@ -21,28 +22,16 @@ export const PaginationControls: React.FC<PaginationControlsProps> = ({
   const theme = useTheme();
 
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: "5px",
-        padding: "4px 8px",
-        fontSize: "12px",
-        marginBottom: "3px",
-        color: theme.color.text,
-      }}
-    >
+    <StyledPagination>
       <button
         onClick={onPreviousPage}
-        disabled={currentPage === 1}
         style={{
           padding: "2px 6px",
           fontSize: "11px",
           border: `1px solid ${theme.color.gray[300]}`,
-          backgroundColor:
-            currentPage === 1 ? theme.color.gray[200] : theme.color.white,
-          color: currentPage === 1 ? theme.color.gray[500] : theme.color.text,
-          cursor: currentPage === 1 ? "not-allowed" : "pointer",
+          backgroundColor: theme.color.white,
+          color: theme.color.text,
+          cursor: "pointer",
           borderRadius: "3px",
         }}
       >
@@ -54,25 +43,18 @@ export const PaginationControls: React.FC<PaginationControlsProps> = ({
       </span>
       <button
         onClick={onNextPage}
-        disabled={currentPage === totalPages}
         style={{
           padding: "2px 6px",
           fontSize: "11px",
           border: `1px solid ${theme.color.gray[300]}`,
-          backgroundColor:
-            currentPage === totalPages
-              ? theme.color.gray[200]
-              : theme.color.white,
-          color:
-            currentPage === totalPages
-              ? theme.color.gray[500]
-              : theme.color.text,
-          cursor: currentPage === totalPages ? "not-allowed" : "pointer",
+          backgroundColor: theme.color.white,
+          color: theme.color.text,
+          cursor: "pointer",
           borderRadius: "3px",
         }}
       >
         {">"}
       </button>
-    </div>
+    </StyledPagination>
   );
 };

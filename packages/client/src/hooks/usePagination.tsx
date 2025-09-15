@@ -68,11 +68,23 @@ export const usePagination = <T,>({
   const paginatedItems = items.slice(startIndex, endIndex);
 
   const handlePreviousPage = useCallback(() => {
-    setCurrentPage((prev) => Math.max(1, prev - 1));
-  }, []);
+    setCurrentPage((prev) => {
+      if (prev === 1) {
+        // If on first page, go to last page
+        return totalPages;
+      }
+      return prev - 1;
+    });
+  }, [totalPages]);
 
   const handleNextPage = useCallback(() => {
-    setCurrentPage((prev) => Math.min(totalPages, prev + 1));
+    setCurrentPage((prev) => {
+      if (prev === totalPages) {
+        // If on last page, go to first page
+        return 1;
+      }
+      return prev + 1;
+    });
   }, [totalPages]);
 
   const resetPage = useCallback(() => {
