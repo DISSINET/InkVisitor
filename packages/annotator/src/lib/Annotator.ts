@@ -15,6 +15,8 @@ export const openingTagRegex = /<([a-zA-Z0-9\-_\s="']+)>/g;
 export const closingTagRegex = /<\/([a-zA-Z0-9\-_]+)>/g;
 // General tag removal regex
 export const tagRemovalRegex = /<\/?[^<>]+?>/g;
+// Opening tag with specific name and optional attributes: <tagname attr="value"> or <tagname>
+export const createOpeningTagRegex = (tagName: string) => new RegExp(`<${tagName}(?:\\s+[^>]*)?>`, 'g');
 
 // Occurrence holds exact position of a point in text
 export interface Occurrence {
@@ -809,9 +811,9 @@ export class Annotator {
       // Move endIndex after tags on the right to avoid gathering additional non-XML tag characters
       // after this we have envelope around neighboring tags
       indexEnd = this.skipTagsOnRight(indexEnd);
-
       // Sanitize envelope range by removing enveloping tags from both left and right sides
       [indexStart, indexEnd] = this.sanitizeEnvelopeRange(indexStart, indexEnd);
+
       // could be '<tag>text .... text</tag> (closing tag always included if present)
       const selectedRawText = this.text.value.slice(indexStart, indexEnd);
       const beforeText = this.text.value.slice(0, indexStart);
@@ -1062,7 +1064,6 @@ export class Annotator {
     indexEnd: number
   ): [number, number] {
     const text = this.text.value;
-  
     // Case 1: Check if selection starts at the beginning of an opening tag
     const currentSelection = text.slice(indexStart, indexEnd);
     
@@ -1075,41 +1076,47 @@ export class Annotator {
       indexStart = openingTagEnd;
     }
     
-    // Case 2: Check if selection ends with a closing tag that was added by skipTagsOnRight
+    // Case 2: Check if selection ends with closing tags that don't belong to content within the selection
     const updatedSelection = text.slice(indexStart, indexEnd);
     if (updatedSelection.endsWith(">") && updatedSelection.includes("</")) {
-      // Find the last closing tag in the selection
-      let lastClosingTag = null;
+      // Find all closing tags in the selection
       let match;
       closingTagRegex.lastIndex = 0;
+      const closingTagsInSelection = [];
 
       while ((match = closingTagRegex.exec(updatedSelection)) !== null) {
-        lastClosingTag = {
+        closingTagsInSelection.push({
           tagName: match[1],
           start: indexStart + match.index,
           end: indexStart + match.index + match[0].length,
-        };
+        });
       }
 
-      if (lastClosingTag) {
-        // Check if this closing tag has a matching opening tag before the selection
-        const beforeSelection = text.slice(0, indexStart);
-        const openingTagName = lastClosingTag.tagName;
-        const openingPattern = new RegExp(`<${openingTagName}(?:\\s+[^>]*)?>`, 'g');
+      // Process closing tags from right to left (last to first)
+      for (let i = closingTagsInSelection.length - 1; i >= 0; i--) {
+        const closingTag = closingTagsInSelection[i];
+        const openingTagName = closingTag.tagName;
+        const openingPattern = createOpeningTagRegex(openingTagName);
         let openingMatch;
-        let lastOpeningTag = null;
+        let hasMatchingOpeningInSelection = false;
 
-        while ((openingMatch = openingPattern.exec(beforeSelection)) !== null) {
-          lastOpeningTag = {
-            start: openingMatch.index,
-            end: openingMatch.index + openingMatch[0].length,
-          };
+        // Check if there's a matching opening tag within the selection
+        while ((openingMatch = openingPattern.exec(updatedSelection)) !== null) {
+          const openingTagStart = indexStart + openingMatch.index;
+          const openingTagEnd = openingTagStart + openingMatch[0].length;
+          
+          // Only keep the closing tag if the opening tag is completely within the selection
+          // and the opening tag comes before the closing tag
+          if (openingTagStart >= indexStart && openingTagEnd <= closingTag.start && 
+              openingTagEnd <= indexEnd) {
+            hasMatchingOpeningInSelection = true;
+            break;
+          }
         }
 
-        if (lastOpeningTag && lastOpeningTag.end <= indexStart) {
-          // This closing tag belongs to an opening tag before the selection
-          // Remove the closing tag from the end
-          indexEnd = lastClosingTag.start;
+        // If no matching opening tag found within the selection, remove this closing tag
+        if (!hasMatchingOpeningInSelection) {
+          indexEnd = closingTag.start;
         }
       }
     }

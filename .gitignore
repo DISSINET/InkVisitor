@@ -49,3 +49,5 @@ database_data
 
 **/*.tar
 **/*.tar.gz
+
+.pnpm-store
