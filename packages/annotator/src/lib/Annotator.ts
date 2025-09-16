@@ -1071,9 +1071,22 @@ export class Annotator {
     openingTagRegex.lastIndex = 0; // Reset regex
     const openingMatch = openingTagRegex.exec(currentSelection);
     if (openingMatch && openingMatch.index === 0) {
-      // Selection starts with an opening tag, move start to after the tag
+      // Selection starts with an opening tag
       const openingTagEnd = indexStart + openingMatch[0].length;
-      indexStart = openingTagEnd;
+      const tagName = openingMatch[1].trim().split(/\s+/)[0];
+      
+      // Check if the selection contains the complete tag (opening + content + closing)
+      const selectionAfterOpening = text.slice(openingTagEnd, indexEnd);
+      const closingPattern = createOpeningTagRegex(tagName);
+      const closingMatch = closingTagRegex.exec(selectionAfterOpening);
+      
+      if (closingMatch) {
+        // Complete tag is within selection, keep the entire tag
+        // Don't modify indexStart - keep the opening tag
+      } else {
+        // Incomplete tag, move start to after the opening tag
+        indexStart = openingTagEnd;
+      }
     }
     
     // Case 2: Check if selection ends with closing tags that don't belong to content within the selection
