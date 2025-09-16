@@ -42,7 +42,7 @@ interface EntityTag {
   flexListMargin?: boolean;
 
   unlinkButton?: UnlinkButton | false;
-  customTooltipAttributes?: { partLabel?: string };
+  customTooltipAttributes?: { partLabel?: string; childCount?: number };
 }
 
 export const EntityTag: React.FC<EntityTag> = ({

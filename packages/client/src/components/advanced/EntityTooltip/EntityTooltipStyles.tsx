@@ -21,6 +21,7 @@ export const StyledDetail = styled.div`
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: ${({ theme }) => theme.space[2]};
 `;
 

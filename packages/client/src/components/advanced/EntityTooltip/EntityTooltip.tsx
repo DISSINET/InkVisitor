@@ -45,6 +45,7 @@ import {
   StyledRow,
 } from "./EntityTooltipStyles";
 import { DocumentTitle } from "..";
+import { RiNodeTree } from "react-icons/ri";
 
 interface EntityTooltip {
   // entity
@@ -67,7 +68,7 @@ interface EntityTooltip {
   tagHovered: boolean;
 
   referenceElement: HTMLDivElement | null;
-  customTooltipAttributes?: { partLabel?: string };
+  customTooltipAttributes?: { partLabel?: string; childCount?: number };
   isTemplate?: boolean;
 }
 
@@ -186,10 +187,20 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                 <StyledDetail>{itemsCount}</StyledDetail>
               </StyledRow>
             )}
+            {(customTooltipAttributes?.childCount ?? 0) > 0 && (
+              <StyledRow>
+                <StyledIconWrap>
+                  <RiNodeTree size={12} />
+                </StyledIconWrap>
+                <StyledDetail>
+                  {customTooltipAttributes?.childCount}
+                </StyledDetail>
+              </StyledRow>
+            )}
             {alternativeLabels && alternativeLabels.length > 0 && (
               <StyledRow>
                 <StyledIconWrap>
-                  <AiOutlineTags size={12} />
+                  <AiOutlineTags size={11} />
                 </StyledIconWrap>
                 <StyledDetail>
                   {alternativeLabels.map((altLabel, key) => {
