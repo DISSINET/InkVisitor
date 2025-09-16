@@ -3,9 +3,20 @@ import Highlighter, { IAbsCoordinates, CursorStyle } from "./Highlighter";
 import Keys from "./Keys";
 import { Lines } from "./Lines";
 import Scroller from "./Scroller";
-import Text, { ITag, SegmentPosition } from "./Text";
+import Text, { Tag, SegmentPosition } from "./Text";
 import Viewport from "./Viewport";
+import { Warnings } from "./warnings";
 import { EditMode, HighlightMode } from "./constants";
+
+// Updated regex to properly handle tags with attributes
+// Opening tags: <tagname attr="value"> or <tagname>
+export const openingTagRegex = /<([a-zA-Z0-9\-_\s="']+)>/g;
+// Closing tags: </tagname>
+export const closingTagRegex = /<\/([a-zA-Z0-9\-_]+)>/g;
+// General tag removal regex
+export const tagRemovalRegex = /<\/?[^<>]+?>/g;
+// Opening tag with specific name and optional attributes: <tagname attr="value"> or <tagname>
+export const createOpeningTagRegex = (tagName: string) => new RegExp(`<${tagName}(?:\\s+[^>]*)?>`, 'g');
 
 // Occurrence holds exact position of a point in text
 export interface Occurrence {
@@ -70,6 +81,7 @@ export class Annotator {
   scroller?: Scroller;
   lines?: Lines;
   keys: Keys;
+  warnings: Warnings;
 
   annotatedPosition: SegmentPosition | null = null;
 
@@ -131,6 +143,7 @@ export class Annotator {
     this.cursor = new Cursor(this.ratio, 0, 0);
 
     this.keys = new Keys(this);
+    this.warnings = new Warnings();
 
     this.bgColor = this.element.style.backgroundColor || "white";
     this.fontColor = this.element.style.color || "black";
@@ -171,7 +184,7 @@ export class Annotator {
    * @param anchor
    */
   removeAnchorFromSelection(anchor: string) {
-    const [start, end] = this.cursor.getBounds();
+    const [start, end] = this.cursor.getAbsBounds();
 
     if (start && end) {
       this.text.getSegmentPosition(start.yLine, start.xLine) as SegmentPosition;
@@ -245,6 +258,7 @@ export class Annotator {
 
         // update annotator
         // this.text.prepareSegments();
+        this.warnings.onTextChanged(this.text.value);
         this.draw();
       }
     }
@@ -267,7 +281,7 @@ export class Annotator {
     const positionBeforeRel = this.viewport.lineStart / this.text.noLines;
 
     // FIXME try to update the cursor position based on the text that was selected before the resize
-    const [start, end] = this.cursor.getBounds();
+    const [start, end] = this.cursor.getAbsBounds();
     const selectedTextBefore =
       start && end ? this.text.getRangeText(start, end) : "";
 
@@ -298,6 +312,10 @@ export class Annotator {
 
   onTextChanged(cb: (text: string) => void): void {
     this.onTextChangeCb = cb;
+  }
+
+  onWarning(cb: (message: string) => void): void {
+    this.warnings.onWarning(cb);
   }
 
   /**
@@ -477,7 +495,7 @@ export class Annotator {
     // find still opened until current window
     for (let i = 0; i <= start.segmentIndex; i++) {
       const segment = this.text.segments[i];
-      let openingTags, closingTags: ITag[];
+      let openingTags, closingTags: Tag[];
       if (i === start.segmentIndex) {
         [openingTags, closingTags] = segment.getTagsBeforePosition(
           start.rawTextIndex
@@ -497,7 +515,7 @@ export class Annotator {
     // use everything that is between start and end
     for (let i = start.segmentIndex; i < end.segmentIndex; i++) {
       const segment = this.text.segments[i];
-      let openingTags, closingTags: ITag[];
+      let openingTags, closingTags: Tag[];
       if (i === start.segmentIndex) {
         [openingTags, closingTags] = segment.getTagsAfterPosition(
           start.rawTextIndex
@@ -515,7 +533,7 @@ export class Annotator {
 
     // process end segment
     const endSegment = this.text.segments[end.segmentIndex];
-    let opened, closed: ITag[];
+    let opened, closed: Tag[];
     if (start.segmentIndex !== end.segmentIndex) {
       // if end segment != start segment - use everything up to end position
       [opened, closed] = endSegment.getTagsBeforePosition(end.rawTextIndex);
@@ -618,7 +636,7 @@ export class Annotator {
 
     // if (this.onSelectTextCb && this.cursor.isSelected()) {
     if (this.onSelectTextCb) {
-      const [start, end] = this.cursor.getBounds();
+      const [start, end] = this.cursor.getAbsBounds();
       if (
         start &&
         end &&
@@ -751,29 +769,67 @@ export class Annotator {
     this.text.calculateLines();
   }
 
-  addAnchor(anchor: string) {
+  /**
+   * Adds an anchor tag around the currently selected text.
+   * 
+   * This function wraps the selected text with opening and closing XML-like tags.
+   * It handles text selection bounds, sanitizes the envelope range to avoid
+   * including unwanted neighboring tags, and updates the text content accordingly.
+   * 
+   * @param anchor - The tag name to wrap around the selected text (e.g., "person", "location")
+   * @param attributes - Optional attributes to add to the opening tag (e.g., {id: "123", type: "proper"})
+   * 
+   * @example
+   * // Wrap selected text with a person tag
+   * addAnchor("person");
+   * 
+   * // Wrap selected text with a location tag and attributes
+   * addAnchor("location", {id: "loc1", type: "city"});
+   */
+  addAnchor(anchor: string, attributes?: Record<string, string>) {
     if (!this.cursor.isSelected()) {
       return;
     }
 
-    let [start, end] = this.cursor.getBounds();
-    if (start && end) {
-      const indexPositionStart = this.text.getAbsTextIndex(start);
-      const indexPositionEnd = this.text.getAbsTextIndex(end);
-      const beforeText = this.text.value.slice(0, indexPositionStart);
-      const afterText = this.text.value.slice(indexPositionEnd);
+    // Construct the Tag at the start
+    const openTag = new Tag(0, anchor, false);
+    if (attributes) {
+      openTag.attributes = attributes;
+    }
+    const closeTag = new Tag(0, anchor, true);
 
-      const insideText = this.text.value.slice(
-        indexPositionStart,
-        indexPositionEnd
+    // get bounds of the selection
+    let [start, end] = this.cursor.getAbsBounds();
+    if (start && end) {
+      let indexStart = this.text.getAbsTextIndexFromPosition(
+        this.text.getSegmentPosition(start.yLine, start.xLine, true)
+      );
+      let indexEnd = this.text.getAbsTextIndexFromPosition(
+        this.text.getSegmentPosition(end.yLine, end.xLine, true)
       );
 
+      // Move endIndex after tags on the right to avoid gathering additional non-XML tag characters
+      // after this we have envelope around neighboring tags
+      indexEnd = this.skipTagsOnRight(indexEnd);
+      // Sanitize envelope range by removing enveloping tags from both left and right sides
+      [indexStart, indexEnd] = this.sanitizeEnvelopeRange(indexStart, indexEnd);
+
+      // could be '<tag>text .... text</tag> (closing tag always included if present)
+      const selectedRawText = this.text.value.slice(indexStart, indexEnd);
+      const beforeText = this.text.value.slice(0, indexStart);
+      const afterText = this.text.value.slice(indexEnd);
+
       this.text.value =
-        beforeText + `<${anchor}>` + insideText + `</${anchor}>` + afterText;
+        beforeText +
+        openTag.getTag() +
+        selectedRawText +
+        closeTag.getTag() +
+        afterText;
 
       this.text.prepareSegments();
       this.text.calculateLines();
       this.cursor.reset();
+      this.warnings.onTextChanged(this.text.value);
       this.draw();
     }
   }
@@ -800,6 +856,7 @@ export class Annotator {
     this.text.value = newText;
     this.text.prepareSegments();
     this.text.calculateLines();
+    this.warnings.onTextChanged(this.text.value);
 
     if (positionBeforeChange < this.text.noLines) {
       this.scrollToLine(positionBeforeChange);
@@ -864,7 +921,7 @@ export class Annotator {
 
     // Manually trigger onSelectText callback for search-based selections
     if (this.onSelectTextCb) {
-      const [start, end] = this.cursor.getBounds();
+      const [start, end] = this.cursor.getAbsBounds();
 
       if (start && end) {
         const startSegment = this.text.getSegmentPosition(
@@ -892,22 +949,28 @@ export class Annotator {
   }
 
   onPasteText() {
-    window.navigator.clipboard.readText().then((clipText: string) => {
-      const area = this.cursor.getSelectedArea();
-      if (area) {
-        this.text.deleteRangeText(area[0], area[1]);
-        this.cursor.reset();
-        this.cursor.setPosition(
-          area[0].xLine,
-          area[0].yLine - this.viewport.lineStart
-        );
-      }
-      this.text.insertText(this.viewport, this.cursor, clipText);
-      this.cursor.move(clipText.length, 0);
-      this.cursor.fixOutOfBounds(this.viewport, this.text);
+    window.navigator.clipboard
+      .readText()
+      .then((clipText: string) => {
+        const area = this.cursor.getSelectedArea();
+        if (area) {
+          this.text.deleteRangeText(area[0], area[1]);
+          this.cursor.reset();
+          this.cursor.setPosition(
+            area[0].xLine,
+            area[0].yLine - this.viewport.lineStart
+          );
+        }
+        this.text.insertText(this.viewport, this.cursor, clipText);
+        this.cursor.move(clipText.length, 0);
+        this.cursor.fixOutOfBounds(this.viewport, this.text);
 
-      this.draw();
-    });
+        this.warnings.onTextChanged(this.text.value);
+        this.draw();
+      })
+      .catch((err) => {
+        console.error("Error reading clipboard", err);
+      });
   }
 
   onReplaceText(text: string) {
@@ -924,7 +987,29 @@ export class Annotator {
     this.cursor.move(text.length, 0);
     this.cursor.fixOutOfBounds(this.viewport, this.text);
 
+    this.warnings.onTextChanged(this.text.value);
     this.draw();
+  }
+
+  /**
+   * Enable warnings system
+   */
+  enableWarnings(): void {
+    this.warnings.enable();
+  }
+
+  /**
+   * Disable warnings system
+   */
+  disableWarnings(): void {
+    this.warnings.disable();
+  }
+
+  /**
+   * Check if warnings are enabled
+   */
+  isWarningsEnabled(): boolean {
+    return this.warnings.isEnabled();
   }
 
   /**
@@ -934,4 +1019,132 @@ export class Annotator {
     this.cursor.reset();
     this.draw();
   }
+
+  /**
+   * Skip closing XML tags on the right side of the given index to avoid gathering additional non-XML tag characters
+   * Only moves over closing tags when the selection ends exactly at the tag boundary, not when followed by normal text
+   * Includes all consecutive closing tags
+   * @param index The starting index
+   * @returns The new index after skipping consecutive closing tags on the right
+   */
+  private skipTagsOnRight(index: number): number {
+    const text = this.text.value;
+    let newIndex = index;
+    let currentIndex = index;
+
+    while (true) {
+      closingTagRegex.lastIndex = currentIndex;
+      const match = closingTagRegex.exec(text);
+
+      // If we find a closing tag that starts exactly at our current position
+      if (match && match.index === currentIndex) {
+        // Move the index to the end of this closing tag
+        newIndex = match.index + match[0].length;
+        currentIndex = newIndex;
+        // Continue looking for more consecutive closing tags
+      } else {
+        // No more consecutive closing tags, stop
+        break;
+      }
+    }
+
+    return newIndex;
+  }
+
+  /**
+   * Prevent overlapping anchors by ensuring proper nesting
+   * When a shorter span selection arrives at the end of another anchor, the shorter span should be within the longer span
+   * When a longer span is selected, the anchors should encompass the shorter span
+   * @param indexStart The current start index
+   * @param indexEnd The current end index
+   * @returns The new [indexStart, indexEnd] after preventing overlaps
+   */
+  private sanitizeEnvelopeRange(
+    indexStart: number,
+    indexEnd: number
+  ): [number, number] {
+    const text = this.text.value;
+    // Case 1: Check if selection starts at the beginning of an opening tag
+    const currentSelection = text.slice(indexStart, indexEnd);
+    
+    // Check if the selection itself starts with an opening tag
+    openingTagRegex.lastIndex = 0; // Reset regex
+    const openingMatch = openingTagRegex.exec(currentSelection);
+    if (openingMatch && openingMatch.index === 0) {
+      // Selection starts with an opening tag
+      const openingTagEnd = indexStart + openingMatch[0].length;
+      
+      // Check if the selection contains the complete tag (opening + content + closing)
+      const selectionAfterOpening = text.slice(openingTagEnd, indexEnd);
+      closingTagRegex.lastIndex = 0; // Reset regex
+      const closingMatch = closingTagRegex.exec(selectionAfterOpening);
+      
+      if (closingMatch) {
+        // Complete tag is within selection
+        const closingTagStart = openingTagEnd + closingMatch.index;
+        const closingTagEnd = closingTagStart + closingMatch[0].length;
+        
+        // If selection extends beyond the complete tag, keep the entire selection
+        // If selection is exactly the complete tag or smaller, keep the entire tag
+        if (indexEnd >= closingTagEnd) {
+          // Selection is larger than or equal to the complete tag - keep everything
+          // Don't modify indexStart - keep the opening tag
+        } else {
+          // Selection is smaller than the complete tag - keep the entire tag
+          indexEnd = closingTagEnd;
+        }
+      } else {
+        // Incomplete tag, move start to after the opening tag
+        indexStart = openingTagEnd;
+      }
+    }
+    
+    // Case 2: Check if selection ends with closing tags that don't belong to content within the selection
+    const updatedSelection = text.slice(indexStart, indexEnd);
+    if (updatedSelection.endsWith(">") && updatedSelection.includes("</")) {
+      // Find all closing tags in the selection
+      let match;
+      closingTagRegex.lastIndex = 0;
+      const closingTagsInSelection = [];
+
+      while ((match = closingTagRegex.exec(updatedSelection)) !== null) {
+        closingTagsInSelection.push({
+          tagName: match[1],
+          start: indexStart + match.index,
+          end: indexStart + match.index + match[0].length,
+        });
+      }
+
+      // Process closing tags from right to left (last to first)
+      for (let i = closingTagsInSelection.length - 1; i >= 0; i--) {
+        const closingTag = closingTagsInSelection[i];
+        const openingTagName = closingTag.tagName;
+        const openingPattern = createOpeningTagRegex(openingTagName);
+        let openingMatch;
+        let hasMatchingOpeningInSelection = false;
+
+        // Check if there's a matching opening tag within the selection
+        while ((openingMatch = openingPattern.exec(updatedSelection)) !== null) {
+          const openingTagStart = indexStart + openingMatch.index;
+          const openingTagEnd = openingTagStart + openingMatch[0].length;
+          
+          // Only keep the closing tag if the opening tag is completely within the selection
+          // and the opening tag comes before the closing tag
+          if (openingTagStart >= indexStart && openingTagEnd <= closingTag.start && 
+              openingTagEnd <= indexEnd) {
+            hasMatchingOpeningInSelection = true;
+            break;
+          }
+        }
+
+        // If no matching opening tag found within the selection, remove this closing tag
+        if (!hasMatchingOpeningInSelection) {
+          indexEnd = closingTag.start;
+        }
+      }
+    }
+
+    return [indexStart, indexEnd];
+  }
+
 }

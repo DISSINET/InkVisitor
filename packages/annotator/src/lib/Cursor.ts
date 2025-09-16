@@ -107,7 +107,7 @@ export default class Cursor
    * @returns
    */
   getSelectedArea(): [IAbsCoordinates, IAbsCoordinates] | null {
-    const selected = this.getBounds();
+    const selected = this.getAbsBounds();
     if (
       selected[0] === undefined ||
       selected[1] === undefined ||
@@ -121,10 +121,10 @@ export default class Cursor
   }
 
   /**
-   * getSelected is getter for absolute selected coordinates
+   * getAbsBounds is getter for absolute selected coordinates start->end
    * @returns
    */
-  getBounds(): [IAbsCoordinates | undefined, IAbsCoordinates | undefined] {
+  getAbsBounds(): [IAbsCoordinates | undefined, IAbsCoordinates | undefined] {
     if (!this.selectStart || !this.selectEnd) {
       return [undefined, undefined];
     }
@@ -237,7 +237,7 @@ export default class Cursor
       return;
     }
 
-    let [hStart, hEnd] = this.getBounds();
+    let [hStart, hEnd] = this.getAbsBounds();
 
     const rowsToDraw: { rowI: number; start: number; end: number }[] = [];
 
