@@ -10,13 +10,18 @@ import { EditMode, HighlightMode } from "./constants";
 
 // Updated regex to properly handle tags with attributes
 // Opening tags: <tagname attr="value"> or <tagname>
-export const openingTagRegex = /<([a-zA-Z0-9\-_\s="']+)>/g;
+// Handles UUIDs, alphanumeric, hyphens, underscores, and attributes
+const openingTagRegex = /<([a-zA-Z0-9\-_]+(?:\s+[^>]*)?)>/g;
 // Closing tags: </tagname>
+// Handles UUIDs, alphanumeric, hyphens, underscores
 export const closingTagRegex = /<\/([a-zA-Z0-9\-_]+)>/g;
 // General tag removal regex
 export const tagRemovalRegex = /<\/?[^<>]+?>/g;
+// Creates a new regex instance for opening tags (no shared state)
+export const createOpeningTagRegex = () => new RegExp(openingTagRegex.source, openingTagRegex.flags);
+
 // Opening tag with specific name and optional attributes: <tagname attr="value"> or <tagname>
-export const createOpeningTagRegex = (tagName: string) => new RegExp(`<${tagName}(?:\\s+[^>]*)?>`, 'g');
+export const createSpecificOpeningTagRegex = (tagName: string) => new RegExp(`<${tagName}(?:\\s+[^>]*)?>`, 'g');
 
 // Occurrence holds exact position of a point in text
 export interface Occurrence {
@@ -1066,9 +1071,7 @@ export class Annotator {
     const text = this.text.value;
     // Case 1: Check if selection starts at the beginning of an opening tag
     const currentSelection = text.slice(indexStart, indexEnd);
-    
-    // Check if the selection itself starts with an opening tag
-    openingTagRegex.lastIndex = 0; // Reset regex
+    const openingTagRegex = createOpeningTagRegex();
     const openingMatch = openingTagRegex.exec(currentSelection);
     if (openingMatch && openingMatch.index === 0) {
       // Selection starts with an opening tag
@@ -1119,7 +1122,7 @@ export class Annotator {
       for (let i = closingTagsInSelection.length - 1; i >= 0; i--) {
         const closingTag = closingTagsInSelection[i];
         const openingTagName = closingTag.tagName;
-        const openingPattern = createOpeningTagRegex(openingTagName);
+        const openingPattern = createSpecificOpeningTagRegex(openingTagName);
         let openingMatch;
         let hasMatchingOpeningInSelection = false;
 

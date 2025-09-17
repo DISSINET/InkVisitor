@@ -1,7 +1,7 @@
 import Viewport from "./Viewport";
 import { IAbsCoordinates, IRelativeCoordinates } from "./Highlighter";
 import { EditMode } from "./constants";
-import { closingTagRegex, openingTagRegex, tagRemovalRegex } from "./Annotator";
+import { closingTagRegex, createOpeningTagRegex, tagRemovalRegex } from "./Annotator";
 
 /**
  * Represents an XML-like tag within a text segment.
@@ -163,7 +163,7 @@ export class Segment {
     this.closingTags = [];
 
     // Create new regex instances to avoid global flag state issues
-    const openingRegex = new RegExp(openingTagRegex.source, openingTagRegex.flags);
+    const openingRegex = createOpeningTagRegex();
     const closingRegex = new RegExp(closingTagRegex.source, closingTagRegex.flags);
 
     // Find opening tags
