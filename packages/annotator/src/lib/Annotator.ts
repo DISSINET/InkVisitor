@@ -812,20 +812,6 @@ export class Annotator {
       let indexEnd = this.text.getAbsTextIndexFromPosition(
         this.text.getSegmentPosition(end.yLine, end.xLine, true)
       );
-      let indexEnd = this.text.getAbsTextIndexFromPosition(
-        this.text.getSegmentPosition(end.yLine, end.xLine, true)
-      );
-
-      // Move endIndex after tags on the right to avoid gathering additional non-XML tag characters
-      // after this we have envelope around neighboring tags
-      indexEnd = this.skipTagsOnRight(indexEnd);
-
-      // Sanitize envelope range by removing enveloping tags from both left and right sides
-      [indexStart, indexEnd] = this.sanitizeEnvelopeRange(indexStart, indexEnd);
-      // could be '<tag>text .... text</tag> (closing tag always included if present)
-      const selectedRawText = this.text.value.slice(indexStart, indexEnd);
-      const beforeText = this.text.value.slice(0, indexStart);
-      const afterText = this.text.value.slice(indexEnd);
 
       // Move endIndex after tags on the right to avoid gathering additional non-XML tag characters
       // after this we have envelope around neighboring tags
