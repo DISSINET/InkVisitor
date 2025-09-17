@@ -57,6 +57,7 @@ export interface IResponseUsedInStatementProps {
   typeId: string;
   valueId: string;
   originId: string; // what entity is the detail id used for
+  lvl: number; // level of nesting (1 for first level, 2 for second level, etc.)
 }
 
 export interface IResponseUsedInMetaProp {

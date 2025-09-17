@@ -441,7 +441,8 @@ export class ResponseEntityDetail
         this.walkStatementDataRecursiveProps(
           statement,
           action.actionId,
-          action.props
+          action.props,
+          1
         );
       }
 
@@ -449,7 +450,8 @@ export class ResponseEntityDetail
         this.walkStatementDataRecursiveProps(
           statement,
           actant.entityId,
-          actant.props
+          actant.props,
+          1
         );
       }
     }
@@ -460,11 +462,13 @@ export class ResponseEntityDetail
    * @param statement
    * @param originId
    * @param props
+   * @param level
    */
   walkStatementDataRecursiveProps(
     statement: IStatement,
     originId: string,
-    props: IProp[]
+    props: IProp[],
+    level: number
   ) {
     for (const prop of props) {
       if (
@@ -476,7 +480,8 @@ export class ResponseEntityDetail
           statement.id,
           originId,
           prop.type.entityId,
-          prop.value.entityId
+          prop.value.entityId,
+          level
         );
       }
 
@@ -484,7 +489,8 @@ export class ResponseEntityDetail
         this.walkStatementDataRecursiveProps(
           statement,
           originId,
-          prop.children
+          prop.children,
+          level + 1
         );
       }
     }
@@ -496,18 +502,21 @@ export class ResponseEntityDetail
    * @param originId
    * @param valueId
    * @param typeId
+   * @param level
    */
   addUsedInStatementProp(
     statementId: string,
     originId: string,
     typeId: string,
-    valueId: string
+    valueId: string,
+    level: number
   ) {
     this.usedInStatementProps.push({
       statementId,
       originId,
       typeId,
       valueId,
+      lvl: level,
     });
 
     this.addLinkedEntities([statementId, originId, valueId, typeId]);
