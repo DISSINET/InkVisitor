@@ -34,7 +34,7 @@
     "@reduxjs/toolkit": "^2.8.2",
     "@tanstack/react-query": "^5.81.2",
     "annotator": "link:../annotator",
-    "axios": "^1.11.0",
+    "axios": "^1.12.0",
     "d3": "^7.9.0",
     "d3-axis-for-react": "^1.1.1",
     "immutability-helper": "^3.1.1",
@@ -84,6 +84,6 @@
     "socket.io-client": "^4.8.1",
     "typescript": "^5.8.3",
     "typescript-plugin-styled-components": "^3.0.0",
-    "vite": "^7.0.0"
+    "vite": "^7.0.7"
   }
 }

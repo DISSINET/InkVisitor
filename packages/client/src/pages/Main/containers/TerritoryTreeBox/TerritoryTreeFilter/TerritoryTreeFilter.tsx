@@ -93,15 +93,8 @@ export const TerritoryTreeFilter: React.FC<TerritoryTreeFilter> = ({
             onChangeFn={(value: string) => handleFilterChange("filter", value)}
             changeOnType
             width="full"
+            clearable
           />
-          {filterData.filter.length > 0 && (
-            <StyledCancelButton>
-              <MdCancel
-                size={16}
-                onClick={() => handleFilterChange("filter", "")}
-              />
-            </StyledCancelButton>
-          )}
         </StyledInputWrap>
       </StyledFilterList>
     </StyledFilterWrap>
