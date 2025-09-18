@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 import { IDocument, IEntity, IResponseTerritory } from "@shared/types";
 import { Loader } from "components";
@@ -27,6 +27,7 @@ import { EntityEnums } from "@shared/enums";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "hooks";
 import useKeypress from "hooks/useKeyPress";
+import { ElvlButtonGroup } from "../IconButtonGroups/ElvlButtonGroup";
 
 interface TextAnnotatorMenuProps {
   text: string;
@@ -75,6 +76,11 @@ export const TextAnnotatorMenu = ({
   const queryClient = useQueryClient();
   const { setStatementId } = useSearchParams();
   useKeypress("Escape", onEscapePressed);
+
+  const [elvl, setElvl] = useState<EntityEnums.Elvl>(EntityEnums.Elvl.Textual);
+
+  const [showSuggesterElvl, setShowSuggesterElvl] = useState<boolean>(false);
+
   return (
     <>
       <StyledAnnotatorItem>
@@ -146,7 +152,10 @@ export const TextAnnotatorMenu = ({
               />
             </StyledAnnotatorItemContentLine>
           )}
-          <StyledAnnotatorItemContentLine>
+          <StyledAnnotatorItemContentLine
+            onMouseOver={() => setShowSuggesterElvl(true)}
+            onMouseOut={() => setShowSuggesterElvl(false)}
+          >
             <EntitySuggester
               categoryTypes={classesAnnotator}
               initTyped={text.length > 30 ? text.substring(0, 30) : text}
@@ -166,6 +175,15 @@ export const TextAnnotatorMenu = ({
               }}
               onCreateStatement={onCreateStatement}
             />
+            {showSuggesterElvl && (
+              <ElvlButtonGroup
+                border
+                value={elvl}
+                onChange={(elvl) => {
+                  setElvl(elvl);
+                }}
+              />
+            )}
           </StyledAnnotatorItemContentLine>
           <StyledAnnotatorItemContentLine>
             {onCreateTerritory && (
