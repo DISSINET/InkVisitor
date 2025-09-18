@@ -14,6 +14,7 @@ import { IRequest } from "src/custom_typings/request";
 import Entity from "./entity";
 import { ResponseEntity } from "./response";
 import { IRequestSearchRootValidity } from "@shared/types/request-search";
+import { Setting } from "@models/setting/setting";
 
 /**
  * SearchQuery is customized builder for search queries, allowing to build query by chaining prepared filters
@@ -545,6 +546,7 @@ export class ResponseSearch {
    */
   async prepare(httpRequest: IRequest): Promise<ResponseEntity[]> {
     const query = new SearchQuery(httpRequest.db.connection);
+    const settings = await Setting.getSettingsAll(httpRequest.db.connection);
     await query.fromRequest(this.request);
     let entities = await query.do();
 
@@ -582,7 +584,8 @@ export class ResponseSearch {
         const warnings = entityModel.getTBasedWarnings(
           [rootT],
           classificationEs,
-          propValueEs
+          propValueEs,
+          settings
         );
 
         if (this.request.isRootInvalid === IRequestSearchRootValidity.Valid) {

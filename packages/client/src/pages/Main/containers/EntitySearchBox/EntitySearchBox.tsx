@@ -259,7 +259,6 @@ export const EntitySearchBox: React.FC = () => {
 
   const [showEntityCreateModal, setShowEntityCreateModal] = useState(false);
 
-  console.log(searchData.updatedDate);
   const rotateOptionsIcon = useSpring({
     transform: showAdvancedOptions ? "rotate(180deg)" : "rotate(0deg)",
     config: config.stiff,

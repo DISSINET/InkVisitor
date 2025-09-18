@@ -69,6 +69,11 @@ export class Setting implements ISetting, IDbModel {
     return results.map((data) => new Setting(data));
   }
 
+  static async getSettingsAll(conn: Connection): Promise<Setting[]> {
+    const results = await rethink.table(Setting.table).run(conn);
+    return results.map((data) => new Setting(data));
+  }
+
   static async updateGroup(
     conn: Connection,
     allowedSettingsKeys: string[],
