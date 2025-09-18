@@ -8,9 +8,9 @@ import { useWindowSize } from "hooks";
 import { useMemo, useReducer } from "react";
 import styled from "styled-components";
 import { space1 } from "Theme/theme-space-shortcut";
-import { StatsChart } from "./Chart";
+import { StatsChart } from "./StatsChart";
 import { initialState, statsReducer } from "./store";
-import { StatsTable } from "./Table";
+import { StatsTable } from "./StatsTable";
 
 const Container = styled.div`
   padding: 20px;
