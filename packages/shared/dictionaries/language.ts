@@ -15,6 +15,10 @@ export const languageDict = [
   { label: "Middle English", value: EntityEnums.Language.MiddleEnglish },
   { label: "Middle French", value: EntityEnums.Language.MiddleFrench },
   { label: "Middle High German", value: EntityEnums.Language.MiddleHighGerman },
+  {
+    label: "Early New High German",
+    value: EntityEnums.Language.EarlyNewHighGerman,
+  },
   { label: "Occitan", value: EntityEnums.Language.Occitan },
   {
     label: "Old Church Slavonic",
