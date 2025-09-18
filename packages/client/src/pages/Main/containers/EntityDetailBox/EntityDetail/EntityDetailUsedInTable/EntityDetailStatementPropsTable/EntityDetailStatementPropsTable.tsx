@@ -32,7 +32,14 @@ export const EntityDetailStatementPropsTable: React.FC<
           const useCase = row.original;
           const entityId = useCase.statementId;
           const entity = entityId ? entities[entityId] : false;
-          return <>{entity && <EntityTag key={entity.id} entity={entity} />}</>;
+          return (
+            <div style={{ display: "flex" }}>
+              <div style={{ width: useCase.lvl * 1 + "rem" }}>
+                {useCase.lvl}
+              </div>
+              {entity && <EntityTag key={entity.id} entity={entity} />}
+            </div>
+          );
         },
       },
       {
