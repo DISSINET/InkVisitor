@@ -21,7 +21,13 @@ export interface IRequestSearch {
   updatedBy?: string;
   resourceHasDocument?: boolean;
   haveReferenceTo?: string;
-  isRootInvalid?: boolean;
+  isRootInvalid?: IRequestSearchRootValidity;
+}
+
+export enum IRequestSearchRootValidity {
+  Any = "Any",
+  Valid = "Valid",
+  Invalid = "Invalid",
 }
 
 export class RequestSearch {
@@ -43,7 +49,7 @@ export class RequestSearch {
   updatedBy?: string;
   resourceHasDocument?: boolean;
   haveReferenceTo?: string;
-  isRootInvalid?: boolean;
+  isRootInvalid?: IRequestSearchRootValidity;
 
   constructor(requestData: IRequestSearch) {
     this.class = requestData.class;
@@ -81,7 +87,8 @@ export class RequestSearch {
     this.subTerritorySearch = Boolean(requestData.subTerritorySearch);
     this.resourceHasDocument = Boolean(requestData.resourceHasDocument);
     this.haveReferenceTo = requestData.haveReferenceTo ?? undefined;
-    this.isRootInvalid = Boolean(requestData.isRootInvalid);
+    this.isRootInvalid =
+      requestData.isRootInvalid ?? IRequestSearchRootValidity.Any;
     this.createdBy = requestData.createdBy ?? undefined;
     this.updatedBy = requestData.updatedBy ?? undefined;
   }

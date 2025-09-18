@@ -3,7 +3,10 @@ import { entityStatusDict, languageDict } from "@shared/dictionaries";
 import { entitiesDict } from "@shared/dictionaries/entity";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
-import { IRequestSearch } from "@shared/types/request-search";
+import {
+  IRequestSearch,
+  IRequestSearchRootValidity,
+} from "@shared/types/request-search";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { wildCardChar } from "Theme/constants";
 import api from "api";
@@ -16,6 +19,11 @@ import Dropdown, {
 } from "components/advanced";
 import { useDebounce, useResizeObserver, useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
+import {
+  BsShieldExclamation,
+  BsShieldFillCheck,
+  BsShieldShaded,
+} from "react-icons/bs";
 import { CgOptions } from "react-icons/cg";
 import { FaPlus } from "react-icons/fa";
 import { IoMdArrowDropdownCircle } from "react-icons/io";
@@ -39,6 +47,7 @@ import { EntitySearchResults } from "./EntitySearchResults/EntitySearchResults";
 const initSearchValues: IRequestSearch = {
   labelOrId: "",
   cooccurrenceId: "",
+  isRootInvalid: IRequestSearchRootValidity.Any,
 };
 const defaultClassOption = {
   label: "*",
@@ -177,10 +186,6 @@ export const EntitySearchBox: React.FC = () => {
       }
     });
 
-    if (changes.isRootInvalid === false) {
-      delete newSearch.isRootInvalid;
-    }
-
     setSearchData(newSearch);
   };
 
@@ -257,6 +262,7 @@ export const EntitySearchBox: React.FC = () => {
 
   const [showEntityCreateModal, setShowEntityCreateModal] = useState(false);
 
+  console.log(searchData);
   const rotateOptionsIcon = useSpring({
     transform: showAdvancedOptions ? "rotate(180deg)" : "rotate(0deg)",
     config: config.stiff,
@@ -640,26 +646,57 @@ export const EntitySearchBox: React.FC = () => {
               </StyledRow>
 
               <StyledRow>
-                <StyledRowHeader>Root T validity</StyledRowHeader>
+                <StyledRowHeader>root validity</StyledRowHeader>
 
                 <AttributeButtonGroup
                   noMargin
                   options={[
                     {
-                      longValue: "any",
-                      shortValue: "any",
+                      longValue: "Any",
+                      shortValue: "",
+                      shortIcon: (
+                        <BsShieldShaded style={{ margin: "2px 4px" }} />
+                      ),
                       onClick: () => {
-                        handleChange({ isRootInvalid: undefined });
+                        handleChange({
+                          isRootInvalid: IRequestSearchRootValidity.Any,
+                        });
                       },
-                      selected: !searchData.isRootInvalid,
+                      selected:
+                        searchData.isRootInvalid ===
+                          IRequestSearchRootValidity.Any ||
+                        searchData.isRootInvalid === undefined ||
+                        searchData.isRootInvalid === null,
                     },
                     {
-                      longValue: "Only Invalid",
-                      shortValue: "Only Invalid",
+                      longValue: "Valid",
+                      shortValue: "",
+                      shortIcon: (
+                        <BsShieldFillCheck style={{ margin: "2px 4px" }} />
+                      ),
                       onClick: () => {
-                        handleChange({ isRootInvalid: true });
+                        handleChange({
+                          isRootInvalid: IRequestSearchRootValidity.Valid,
+                        });
                       },
-                      selected: searchData.isRootInvalid === true,
+                      selected:
+                        searchData.isRootInvalid ===
+                        IRequestSearchRootValidity.Valid,
+                    },
+                    {
+                      longValue: "Invalid",
+                      shortValue: "",
+                      shortIcon: (
+                        <BsShieldExclamation style={{ margin: "2px 4px" }} />
+                      ),
+                      onClick: () => {
+                        handleChange({
+                          isRootInvalid: IRequestSearchRootValidity.Invalid,
+                        });
+                      },
+                      selected:
+                        searchData.isRootInvalid ===
+                        IRequestSearchRootValidity.Invalid,
                     },
                   ]}
                 />

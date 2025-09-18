@@ -13,6 +13,7 @@ import { Connection, r, RDatum, RTable } from "rethinkdb-ts";
 import { IRequest } from "src/custom_typings/request";
 import Entity from "./entity";
 import { ResponseEntity } from "./response";
+import { IRequestSearchRootValidity } from "@shared/types/request-search";
 
 /**
  * SearchQuery is customized builder for search queries, allowing to build query by chaining prepared filters
@@ -528,7 +529,10 @@ export class ResponseSearch {
     let entities = await query.do();
 
     // Handling this search condition here while it is reusing the entity method
-    if (this.request.isRootInvalid === true) {
+    if (
+      this.request.isRootInvalid === IRequestSearchRootValidity.Valid ||
+      this.request.isRootInvalid === IRequestSearchRootValidity.Invalid
+    ) {
       const rootT = treeCache.tree.getRootTerritory() as ITerritory;
       const conn = httpRequest.db.connection;
 
@@ -560,8 +564,17 @@ export class ResponseSearch {
           classificationEs,
           propValueEs
         );
-        if (warnings.length > 0) {
-          entities.push(entity);
+
+        if (this.request.isRootInvalid === IRequestSearchRootValidity.Valid) {
+          if (warnings.length === 0) {
+            entities.push(entity);
+          }
+        } else if (
+          this.request.isRootInvalid === IRequestSearchRootValidity.Invalid
+        ) {
+          if (warnings.length > 0) {
+            entities.push(entity);
+          }
         }
       }
     }
