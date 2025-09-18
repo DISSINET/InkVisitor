@@ -192,14 +192,16 @@ export class ResponseEntityDetail
 
     // get warnings - bound to entity & from root territory
     const entityWarnings = new EntityWarnings(this.id, this.class);
-    this.warnings = [
-      ...(await entityWarnings.getWarnings(req.db.connection)),
-      ...(await entityWarnings.getTBasedWarnings(
-        req.db.connection,
-        this,
-        treeCache.tree.getRootTerritory() as ITerritory
-      )),
-    ];
+    this.warnings = this.isTemplate
+      ? []
+      : [
+          ...(await entityWarnings.getWarnings(req.db.connection)),
+          ...(await entityWarnings.getTBasedWarnings(
+            req.db.connection,
+            this,
+            treeCache.tree.getRootTerritory() as ITerritory
+          )),
+        ];
 
     // get all documents data in IResponseUsedInDocument format
     this.usedInDocuments = await this.findUsedInDocuments(conn);
