@@ -102,10 +102,10 @@ export const EntitySearchBox: React.FC = () => {
   }, [searchData.language]);
 
   // check whether the search should be executed
-  const validSearch = useMemo(() => {
+  const validSearch = useMemo<boolean>(() => {
     return (
       Object.values(debouncedValues).filter((searchValue: any) => searchValue)
-        .length > 0
+        .length > 1
     );
   }, [debouncedValues]);
 
