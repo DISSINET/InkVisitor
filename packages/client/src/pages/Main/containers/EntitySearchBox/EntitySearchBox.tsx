@@ -33,9 +33,6 @@ import {
   StyledAdvancedOptions,
   StyledAdvancedOptionsSign,
   StyledBoxContent,
-  StyledDateTag,
-  StyledDateTagButton,
-  StyledDateTagText,
   StyledOptions,
   StyledResultsHeader,
   StyledResultsWrapper,
@@ -262,7 +259,7 @@ export const EntitySearchBox: React.FC = () => {
 
   const [showEntityCreateModal, setShowEntityCreateModal] = useState(false);
 
-  console.log(searchData);
+  console.log(searchData.updatedDate);
   const rotateOptionsIcon = useSpring({
     transform: showAdvancedOptions ? "rotate(180deg)" : "rotate(0deg)",
     config: config.stiff,
@@ -552,73 +549,49 @@ export const EntitySearchBox: React.FC = () => {
               </StyledRow>
               <StyledRow>
                 <StyledRowHeader>created at</StyledRowHeader>
-                {searchData.createdDate ? (
-                  <div style={{ display: "flex" }}>
-                    <StyledDateTag>
-                      <StyledDateTagText>
-                        {searchData.createdDate.toDateString()}
-                      </StyledDateTagText>
-                      <StyledDateTagButton
-                        key="d"
-                        icon={<RiCloseFill size={15} />}
-                        color="white"
-                        noBorder
-                        noBackground
-                        inverted
-                        tooltipLabel="remove date"
-                        onClick={() => {
-                          handleChange({ createdDate: undefined });
-                        }}
-                      />
-                    </StyledDateTag>
-                  </div>
-                ) : (
-                  <Input
-                    type="date"
-                    width="full"
-                    onChangeFn={(value) => {
-                      if (value) {
-                        const createdDate = new Date(value);
-                        handleChange({ createdDate });
-                      }
-                    }}
-                  />
-                )}
+
+                <Input
+                  type="date"
+                  width="full"
+                  value={
+                    searchData.createdDate
+                      ? searchData.createdDate.toISOString().split("T")[0]
+                      : ""
+                  }
+                  onChangeFn={(value) => {
+                    const createdDate = new Date(value);
+                    if (createdDate && !isNaN(createdDate.getTime())) {
+                      handleChange({ createdDate });
+                    } else {
+                      handleChange({ createdDate: undefined });
+                    }
+                  }}
+                  clearable
+                />
+                {/* )} */}
               </StyledRow>
               <StyledRow>
                 <StyledRowHeader>udpated at</StyledRowHeader>
-                {searchData.updatedDate ? (
-                  <div style={{ display: "flex" }}>
-                    <StyledDateTag>
-                      <StyledDateTagText>
-                        {searchData.updatedDate.toDateString()}
-                      </StyledDateTagText>
-                      <StyledDateTagButton
-                        key="d"
-                        icon={<RiCloseFill size={15} />}
-                        color="white"
-                        noBorder
-                        noBackground
-                        inverted
-                        tooltipLabel="remove date"
-                        onClick={() => {
-                          handleChange({ updatedDate: undefined });
-                        }}
-                      />
-                    </StyledDateTag>
-                  </div>
-                ) : (
-                  <Input
-                    type="date"
-                    width="full"
-                    onChangeFn={(value) => {
-                      if (value) {
-                        const updatedDate = new Date(value);
-                        handleChange({ updatedDate });
-                      }
-                    }}
-                  />
-                )}
+
+                <Input
+                  type="date"
+                  width="full"
+                  onChangeFn={(value) => {
+                    const updatedDate = new Date(value);
+
+                    if (updatedDate && !isNaN(updatedDate.getTime())) {
+                      handleChange({ updatedDate });
+                    } else {
+                      handleChange({ updatedDate: undefined });
+                    }
+                  }}
+                  value={
+                    searchData.updatedDate
+                      ? searchData.updatedDate.toISOString().split("T")[0]
+                      : ""
+                  }
+                  clearable
+                />
               </StyledRow>
 
               <StyledRow>
@@ -641,6 +614,18 @@ export const EntitySearchBox: React.FC = () => {
                   value={searchData.updatedBy ?? ""}
                   onChange={(value) => {
                     handleChange({ updatedBy: value });
+                  }}
+                />
+              </StyledRow>
+
+              <StyledRow>
+                <StyledRowHeader>edited by</StyledRowHeader>
+                <Dropdown.Single.Basic
+                  width="full"
+                  options={userOptions}
+                  value={searchData.editedBy ?? ""}
+                  onChange={(value) => {
+                    handleChange({ editedBy: value });
                   }}
                 />
               </StyledRow>

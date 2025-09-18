@@ -195,6 +195,8 @@ export const Input: React.FC<Input> = ({
               onChangeFn(e.currentTarget.value);
             }
           }}
+          $noBorder={noBorder}
+          $borderColor={borderColor}
           onFocus={(event: React.FocusEvent<HTMLInputElement>) =>
             onFocus(event)
           }

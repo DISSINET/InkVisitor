@@ -443,26 +443,46 @@ export class SearchQuery {
 
     if (req.createdDate) {
       await this._updateEntityIdsFromAudits(req, () =>
-        Audit.getByCreatedDate(this.connection, req.createdDate!)
+        Audit.getByCreatedDate(this.connection, req.createdDate as Date)
       );
     }
 
     if (req.updatedDate) {
       await this._updateEntityIdsFromAudits(req, () =>
-        Audit.getByUpdatedDate(this.connection, req.updatedDate!)
+        Audit.getByUpdatedDate(this.connection, req.updatedDate as Date)
       );
     }
 
     if (req.createdBy) {
       await this._updateEntityIdsFromAudits(req, () =>
-        Audit.getByCreatedBy(this.connection, req.createdBy!)
+        Audit.getByCreatedBy(this.connection, req.createdBy as string)
       );
     }
 
     if (req.updatedBy) {
       await this._updateEntityIdsFromAudits(req, () =>
-        Audit.getByUpdatedBy(this.connection, req.updatedBy!)
+        Audit.getByUpdatedBy(this.connection, req.updatedBy as string)
       );
+    }
+
+    if (req.editedBy) {
+      const updatedBy = await Audit.getByUpdatedBy(
+        this.connection,
+        req.editedBy as string
+      );
+      const createdBy = await Audit.getByCreatedBy(
+        this.connection,
+        req.editedBy as string
+      );
+
+      const auditEntityIds = updatedBy.concat(createdBy).map((a) => a.entityId);
+
+      if (!req.entityIds) {
+        req.entityIds = auditEntityIds;
+      } else {
+        const auditEntityIdsSet = new Set(auditEntityIds);
+        req.entityIds = req.entityIds.filter((id) => auditEntityIdsSet.has(id));
+      }
     }
 
     if (req.usedTemplate) {

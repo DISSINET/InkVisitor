@@ -231,6 +231,7 @@ const theme = {
 
 export type ThemeType = typeof theme;
 export type ThemeColor = typeof theme.color;
+export type ThemeBorderWidth = typeof theme.borderWidth;
 export type InvertedBgColor = typeof theme.color.invertedBg;
 export type ElementTypeColor = typeof theme.color.elementType;
 export type ThemeFontSize = typeof theme.fontSize;

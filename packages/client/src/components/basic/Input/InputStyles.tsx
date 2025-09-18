@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { ThemeColor, ThemeFontSize } from "Theme/theme";
+import { ThemeBorderWidth, ThemeColor, ThemeFontSize } from "Theme/theme";
 import { space1, space2 } from "Theme/theme-space-shortcut";
 
 interface IValueStyle {
@@ -9,6 +9,7 @@ interface IValueStyle {
   width?: number | "full";
   $noBorder?: boolean;
   $borderColor?: keyof ThemeColor;
+  $borderWidth?: keyof ThemeBorderWidth;
   $autocomplete?: string;
   $fullHeight?: boolean;
   $paddingRight?: boolean;
@@ -52,8 +53,12 @@ export const StyledInput = styled.input<IValueStyle>`
     $inverted ? theme.color["white"] : theme.color["primary"]};
   background-color: ${({ $inverted, theme }) =>
     $inverted ? theme.color["primary"] : theme.color["white"]};
-  border-width: ${({ theme, $inverted }) =>
-    $inverted ? 0 : theme.borderWidth[1]};
+  border-width: ${({ theme, $inverted, $borderWidth }) =>
+    $inverted
+      ? 0
+      : $borderWidth
+      ? theme.borderWidth[$borderWidth]
+      : theme.borderWidth[1]};
   border-color: ${({ theme, $suggester, $borderColor }) =>
     $suggester
       ? theme.color["primary"]
