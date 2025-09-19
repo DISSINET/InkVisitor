@@ -23,13 +23,12 @@ export const StyledTableHeader = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr auto;
   gap: ${({ theme }) => theme.space[4]};
-  padding: 0.5rem;
-  border-radius: ${({ theme }) => theme.borderRadius.sm};
-  margin-bottom: 1rem;
+  padding-left: 0.5rem;
+  border: 1px solid ${({ theme }) => theme.color.gray[500]};
   font-weight: 600;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   background-color: ${({ theme }) => theme.color.gray[100]};
-  color: ${({ theme }) => theme.color.black};
+  color: ${({ theme }) => theme.color.gray[700]};
 `;
 interface StyledTableRowProps {
   $isLevel1: boolean;
@@ -44,8 +43,13 @@ export const StyledTableRow = styled.div<StyledTableRowProps>`
   background-color: ${({ theme, $isLevel1 }) =>
     $isLevel1 ? theme.color.gray[400] : "transparent"};
   margin-left: ${({ marginLeft }) => marginLeft}rem;
-  /* margin-bottom: ${({ $isLevel1 }) => ($isLevel1 ? "0.5rem" : "0")}; */
   position: relative;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: ${({ theme, $isLevel1 }) =>
+      $isLevel1 ? theme.color.gray[500] : theme.color.gray[100]};
+  }
 `;
 
 export const TreeLineContainer = styled.div<{
