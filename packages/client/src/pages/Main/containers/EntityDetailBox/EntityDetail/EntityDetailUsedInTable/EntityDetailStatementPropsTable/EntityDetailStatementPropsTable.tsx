@@ -97,6 +97,7 @@ export const EntityDetailStatementPropsTable: React.FC<
                 color="primary"
                 inverted
                 noBorder
+                noBackground
                 tooltipLabel="edit statement"
                 onClick={() => handleEditClick(useCase.statementId)}
               />
