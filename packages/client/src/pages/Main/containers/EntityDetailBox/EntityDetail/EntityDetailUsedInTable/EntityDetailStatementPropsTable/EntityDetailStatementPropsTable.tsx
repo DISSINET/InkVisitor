@@ -9,7 +9,10 @@ import { FaEdit } from "react-icons/fa";
 import { renderEntityTag } from "../EntityDetailUsedInTableUtils";
 import {
   StyledHeading,
+  StyledTableHeader,
+  StyledTableRow,
   StyledTableWrapper,
+  StyledTagWrapper,
   StyledUsedInTitle,
 } from "./EntityDetailStatementPropsTableStyles";
 
@@ -72,25 +75,16 @@ export const EntityDetailStatementPropsTable: React.FC<
     const valueEntity = entities[useCase.valueId];
 
     return (
-      <div
+      <StyledTableRow
         key={`${useCase.statementId}-${useCase.lvl}`}
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr 1fr 1fr auto",
-          gap: "1rem",
-          padding: "0.5rem",
-          borderBottom: isLevel1 ? "2px solid #e0e0e0" : "1px solid #f0f0f0",
-          backgroundColor: isLevel1 ? "#f8f9fa" : "transparent",
-          marginLeft: isLevel1 ? "0" : `${(useCase.lvl - 1) * 1.5}rem`,
-          borderRadius: isLevel1 ? "4px" : "0",
-          marginBottom: isLevel1 ? "0.5rem" : "0",
-        }}
+        $isLevel1={isLevel1}
+        marginLeft={isLevel1 ? 0 : (useCase.lvl - 1) * 1.5}
       >
-        <div style={{ display: "flex", alignItems: "center" }}>
+        <StyledTagWrapper>
           {statementEntity && (
             <EntityTag key={statementEntity.id} entity={statementEntity} />
           )}
-        </div>
+        </StyledTagWrapper>
         <div>{originEntity && renderEntityTag(originEntity)}</div>
         <div>{typeEntity && renderEntityTag(typeEntity)}</div>
         <div>{valueEntity && renderEntityTag(valueEntity)}</div>
@@ -106,7 +100,7 @@ export const EntityDetailStatementPropsTable: React.FC<
             />
           )}
         </div>
-      </div>
+      </StyledTableRow>
     );
   };
 
@@ -121,25 +115,13 @@ export const EntityDetailStatementPropsTable: React.FC<
         }
       </StyledHeading>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr 1fr 1fr auto",
-          gap: "1rem",
-          padding: "0.5rem",
-          backgroundColor: "#f5f5f5",
-          borderRadius: "4px",
-          marginBottom: "1rem",
-          fontWeight: "600",
-          fontSize: "1.1rem",
-        }}
-      >
+      <StyledTableHeader>
         <div>Statement</div>
         <div>Origin</div>
         <div>Type</div>
         <div>Value</div>
-        <div style={{ textAlign: "center" }}>Actions</div>
-      </div>
+        <div>{/* Actions */}</div>
+      </StyledTableHeader>
 
       <div style={{ maxHeight: `${perPage * 4}rem`, overflowY: "auto" }}>
         {groupedData.map((group, groupIndex) => (
