@@ -105,32 +105,36 @@ export const EntityDetailStatementPropsTable: React.FC<
   };
 
   return (
-    <StyledTableWrapper>
-      <StyledHeading>
-        {
-          <StyledUsedInTitle>
-            <b>{`${useCases.length} `}</b>{" "}
-            {`${useCases.length === 1 ? title.singular : title.plural}`}
-          </StyledUsedInTitle>
-        }
-      </StyledHeading>
+    <>
+      {useCases.length > 0 && (
+        <StyledTableWrapper>
+          <StyledHeading>
+            {
+              <StyledUsedInTitle>
+                <b>{`${useCases.length} `}</b>{" "}
+                {`${useCases.length === 1 ? title.singular : title.plural}`}
+              </StyledUsedInTitle>
+            }
+          </StyledHeading>
 
-      <StyledTableHeader>
-        <div>Statement</div>
-        <div>Origin</div>
-        <div>Type</div>
-        <div>Value</div>
-        <div>{/* Actions */}</div>
-      </StyledTableHeader>
+          <StyledTableHeader>
+            <div>Statement</div>
+            <div>Origin</div>
+            <div>Type</div>
+            <div>Value</div>
+            <div>{/* Actions */}</div>
+          </StyledTableHeader>
 
-      <div style={{ maxHeight: `${perPage * 4}rem`, overflowY: "auto" }}>
-        {groupedData.map((group, groupIndex) => (
-          <div key={groupIndex} style={{ marginBottom: "1rem" }}>
-            {renderStatementRow(group.level1, true)}
-            {group.children.map((child) => renderStatementRow(child))}
+          <div style={{ maxHeight: `${perPage * 4}rem`, overflowY: "auto" }}>
+            {groupedData.map((group, groupIndex) => (
+              <div key={groupIndex} style={{ marginBottom: "1rem" }}>
+                {renderStatementRow(group.level1, true)}
+                {group.children.map((child) => renderStatementRow(child))}
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-    </StyledTableWrapper>
+        </StyledTableWrapper>
+      )}
+    </>
   );
 };
