@@ -41,14 +41,59 @@ export const StyledTableRow = styled.div<StyledTableRowProps>`
   grid-template-columns: 1fr 1fr 1fr 1fr auto;
   gap: ${({ theme }) => theme.space[4]};
   padding: 0.5rem;
-  border-radius: ${({ theme, $isLevel1 }) =>
-    $isLevel1 ? theme.borderRadius.sm : "0"};
-  border-bottom: ${({ theme, $isLevel1 }) =>
-    $isLevel1
-      ? `2px solid ${theme.color.gray[500]}`
-      : `0px solid ${theme.color.gray[500]}`};
   background-color: ${({ theme, $isLevel1 }) =>
-    $isLevel1 ? theme.color.gray[100] : "transparent"};
+    $isLevel1 ? theme.color.gray[400] : "transparent"};
   margin-left: ${({ marginLeft }) => marginLeft}rem;
-  margin-bottom: ${({ theme, $isLevel1 }) => ($isLevel1 ? "0.5rem" : "0")};
+  /* margin-bottom: ${({ $isLevel1 }) => ($isLevel1 ? "0.5rem" : "0")}; */
+  position: relative;
+`;
+
+export const TreeLineContainer = styled.div<{
+  $isLevel1: boolean;
+  $marginLeft: number;
+}>`
+  position: relative;
+  margin-left: ${({ $marginLeft }) => $marginLeft}rem;
+
+  &::before {
+    content: "";
+    position: absolute;
+    left: -1.5rem;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background-color: ${({ theme }) => theme.color.gray[400]};
+    display: ${({ $isLevel1 }) => ($isLevel1 ? "none" : "block")};
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    left: -1.5rem;
+    top: 50%;
+    width: 1rem;
+    height: 1px;
+    background-color: ${({ theme }) => theme.color.gray[400]};
+    display: ${({ $isLevel1 }) => ($isLevel1 ? "none" : "block")};
+  }
+`;
+
+export const TreeLineVertical = styled.div<{ $height: number }>`
+  position: absolute;
+  left: -1.5rem;
+  top: 0;
+  width: 1px;
+  height: ${({ $height }) => $height}px;
+  background-color: ${({ theme }) => theme.color.gray[400]};
+  z-index: 1;
+`;
+
+export const TreeLineHorizontal = styled.div<{ $left: number }>`
+  position: absolute;
+  left: ${({ $left }) => $left}rem;
+  top: 50%;
+  width: 1rem;
+  height: 1px;
+  background-color: ${({ theme }) => theme.color.gray[400]};
+  z-index: 1;
 `;

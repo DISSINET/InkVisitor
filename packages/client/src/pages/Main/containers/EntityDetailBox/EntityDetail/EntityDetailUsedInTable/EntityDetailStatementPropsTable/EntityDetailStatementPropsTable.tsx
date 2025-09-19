@@ -14,6 +14,7 @@ import {
   StyledTableWrapper,
   StyledTagWrapper,
   StyledUsedInTitle,
+  TreeLineContainer,
 } from "./EntityDetailStatementPropsTableStyles";
 
 interface EntityDetailStatementPropsTable {
@@ -75,32 +76,34 @@ export const EntityDetailStatementPropsTable: React.FC<
     const valueEntity = entities[useCase.valueId];
 
     return (
-      <StyledTableRow
+      <TreeLineContainer
         key={`${useCase.statementId}-${useCase.lvl}`}
         $isLevel1={isLevel1}
-        marginLeft={isLevel1 ? 0 : (useCase.lvl - 1) * 1.5}
+        $marginLeft={isLevel1 ? 0 : (useCase.lvl - 1) * 1.5}
       >
-        <StyledTagWrapper>
-          {statementEntity && (
-            <EntityTag key={statementEntity.id} entity={statementEntity} />
-          )}
-        </StyledTagWrapper>
-        <div>{originEntity && renderEntityTag(originEntity)}</div>
-        <div>{typeEntity && renderEntityTag(typeEntity)}</div>
-        <div>{valueEntity && renderEntityTag(valueEntity)}</div>
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          {statementEntity && (
-            <Button
-              icon={<FaEdit size={14} />}
-              color="primary"
-              inverted
-              noBorder
-              tooltipLabel="edit statement"
-              onClick={() => handleEditClick(useCase.statementId)}
-            />
-          )}
-        </div>
-      </StyledTableRow>
+        <StyledTableRow $isLevel1={isLevel1} marginLeft={0}>
+          <StyledTagWrapper>
+            {statementEntity && (
+              <EntityTag key={statementEntity.id} entity={statementEntity} />
+            )}
+          </StyledTagWrapper>
+          <div>{originEntity && renderEntityTag(originEntity)}</div>
+          <div>{typeEntity && renderEntityTag(typeEntity)}</div>
+          <div>{valueEntity && renderEntityTag(valueEntity)}</div>
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            {statementEntity && (
+              <Button
+                icon={<FaEdit size={14} />}
+                color="primary"
+                inverted
+                noBorder
+                tooltipLabel="edit statement"
+                onClick={() => handleEditClick(useCase.statementId)}
+              />
+            )}
+          </div>
+        </StyledTableRow>
+      </TreeLineContainer>
     );
   };
 
