@@ -1,17 +1,15 @@
 import { UserEnums } from "@shared/enums";
 import { Checkbox, Input } from "components";
+import { AttributeButtonGroup } from "components/advanced";
 import { useTheme } from "hooks";
 import React from "react";
 import { FaSearch } from "react-icons/fa";
-import { MdCancel } from "react-icons/md";
 import { ITerritoryFilter } from "types";
 import {
-  StyledCancelButton,
   StyledFilterList,
   StyledFilterWrap,
   StyledInputWrap,
 } from "./TerritoryTreeFilterStyles";
-import { AttributeButtonGroup } from "components/advanced";
 
 interface TerritoryTreeFilter {
   filterData: ITerritoryFilter;
@@ -35,16 +33,16 @@ export const TerritoryTreeFilter: React.FC<TerritoryTreeFilter> = ({
           fullWidth
           options={[
             {
-              longValue: "AND",
-              shortValue: "AND",
-              onClick: () => handleFilterChange("operator", "and"),
-              selected: filterData.operator === "and",
-            },
-            {
               longValue: "OR",
               shortValue: "OR",
               onClick: () => handleFilterChange("operator", "or"),
               selected: filterData.operator === "or",
+            },
+            {
+              longValue: "AND",
+              shortValue: "AND",
+              onClick: () => handleFilterChange("operator", "and"),
+              selected: filterData.operator === "and",
             },
           ]}
         />
