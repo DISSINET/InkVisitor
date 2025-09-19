@@ -13,6 +13,7 @@ export const StyledUsedInTitle = styled.div`
   padding-left: ${({ theme }) => theme.space[2]};
   margin-bottom: ${({ theme }) => theme.space[1]};
   color: ${({ theme }) => theme.color["info"]};
+  margin-bottom: 0.5rem;
 `;
 
 export const StyledTableWrapper = styled.div`
