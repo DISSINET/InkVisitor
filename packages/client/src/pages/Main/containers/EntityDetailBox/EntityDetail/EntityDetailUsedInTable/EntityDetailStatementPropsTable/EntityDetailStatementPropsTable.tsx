@@ -4,7 +4,7 @@ import { IResponseUsedInStatementProps } from "@shared/types/response-detail";
 import { Button } from "components";
 import { EntityTag } from "components/advanced";
 import { useSearchParams } from "hooks";
-import React, { useMemo } from "react";
+import React from "react";
 import { FaEdit } from "react-icons/fa";
 import { renderEntityTag } from "../EntityDetailUsedInTableUtils";
 import {
@@ -24,36 +24,10 @@ interface EntityDetailStatementPropsTable {
   perPage?: number;
 }
 
-interface StatementGroup {
-  level1: IResponseUsedInStatementProps;
-  children: IResponseUsedInStatementProps[];
-}
-
 export const EntityDetailStatementPropsTable: React.FC<
   EntityDetailStatementPropsTable
 > = ({ title, entities, useCases, perPage = 5 }) => {
   const { setStatementId, setTerritoryId } = useSearchParams();
-
-  // Group the data by level 1 statement props
-  const groupedData = useMemo(() => {
-    const data = useCases ? useCases : [];
-    const groups: StatementGroup[] = [];
-
-    data.forEach((useCase) => {
-      if (useCase.lvl === 1) {
-        // Start a new group
-        groups.push({
-          level1: useCase,
-          children: [],
-        });
-      } else if (groups.length > 0) {
-        // Add to the last group
-        groups[groups.length - 1].children.push(useCase);
-      }
-    });
-
-    return groups;
-  }, [useCases]);
 
   const handleEditClick = async (statementId: string) => {
     const entity = entities[statementId];
@@ -66,14 +40,12 @@ export const EntityDetailStatementPropsTable: React.FC<
     }
   };
 
-  const renderStatementRow = (
-    useCase: IResponseUsedInStatementProps,
-    isLevel1: boolean = false
-  ) => {
+  const renderStatementRow = (useCase: IResponseUsedInStatementProps) => {
     const statementEntity = entities[useCase.statementId];
     const originEntity = entities[useCase.originId];
     const typeEntity = entities[useCase.typeId];
     const valueEntity = entities[useCase.valueId];
+    const isLevel1 = useCase.lvl === 1;
 
     return (
       <TreeLineContainer
@@ -130,12 +102,7 @@ export const EntityDetailStatementPropsTable: React.FC<
           </StyledTableHeader>
 
           <div style={{ maxHeight: `${perPage * 4}rem`, overflowY: "auto" }}>
-            {groupedData.map((group, groupIndex) => (
-              <div key={groupIndex} style={{ marginBottom: "0.2rem" }}>
-                {renderStatementRow(group.level1, true)}
-                {group.children.map((child) => renderStatementRow(child))}
-              </div>
-            ))}
+            {useCases.map((useCase) => renderStatementRow(useCase))}
           </div>
         </StyledTableWrapper>
       )}
