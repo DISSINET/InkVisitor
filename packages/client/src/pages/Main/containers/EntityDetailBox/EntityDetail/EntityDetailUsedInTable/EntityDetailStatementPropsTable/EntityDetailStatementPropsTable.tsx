@@ -131,7 +131,7 @@ export const EntityDetailStatementPropsTable: React.FC<
 
           <div style={{ maxHeight: `${perPage * 4}rem`, overflowY: "auto" }}>
             {groupedData.map((group, groupIndex) => (
-              <div key={groupIndex} style={{ marginBottom: "1rem" }}>
+              <div key={groupIndex} style={{ marginBottom: "0.2rem" }}>
                 {renderStatementRow(group.level1, true)}
                 {group.children.map((child) => renderStatementRow(child))}
               </div>
