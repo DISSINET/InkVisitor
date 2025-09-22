@@ -126,15 +126,14 @@ export const EntityDetailStatementPropsTable: React.FC<
     });
   }, [useCases]);
 
-  // Calculate total height for the visible window
-  // const totalHeight = useMemo(() => {
-  //   const visibleItems = Math.min(perPage, useCases.length);
-  //   let height = 0;
-  //   for (let i = 0; i < visibleItems; i++) {
-  //     height += itemSizes[i] || 30;
-  //   }
-  //   return height;
-  // }, [perPage, useCases.length, itemSizes]);
+  const totalHeight = useMemo(() => {
+    const visibleItems = Math.min(perPage, useCases.length);
+    let height = 0;
+    for (let i = 0; i < visibleItems; i++) {
+      height += itemSizes[i] || 30;
+    }
+    return height;
+  }, [perPage, useCases.length, itemSizes]);
 
   return (
     <>
@@ -158,7 +157,7 @@ export const EntityDetailStatementPropsTable: React.FC<
           </StyledTableHeader>
 
           <List
-            height={perPage * 30}
+            height={totalHeight}
             width="100%"
             itemCount={useCases.length}
             itemSize={(index) => itemSizes[index] || 30}
