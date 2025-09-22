@@ -34,7 +34,7 @@ interface TextAnnotatorMenuProps {
   documentData: IDocument;
   anchors: string[];
   entities: Record<string, IEntity | false>;
-  onAnchorAdd: (entityId: string) => void;
+  onAnchorAdd: (entityId: string, elvl: EntityEnums.Elvl) => void;
   onCreateStatement?: (entityCreateModalProps?: {
     label: string;
     detail: string;
@@ -78,8 +78,6 @@ export const TextAnnotatorMenu = ({
   useKeypress("Escape", onEscapePressed);
 
   const [elvl, setElvl] = useState<EntityEnums.Elvl>(EntityEnums.Elvl.Textual);
-
-  const [showSuggesterElvl, setShowSuggesterElvl] = useState<boolean>(false);
 
   return (
     <>
@@ -152,15 +150,12 @@ export const TextAnnotatorMenu = ({
               />
             </StyledAnnotatorItemContentLine>
           )}
-          <StyledAnnotatorItemContentLine
-            onMouseOver={() => setShowSuggesterElvl(true)}
-            onMouseOut={() => setShowSuggesterElvl(false)}
-          >
+          <StyledAnnotatorItemContentLine>
             <EntitySuggester
               categoryTypes={classesAnnotator}
               initTyped={text.length > 30 ? text.substring(0, 30) : text}
               onSelected={(newAnchorId) => {
-                onAnchorAdd(newAnchorId);
+                onAnchorAdd(newAnchorId, elvl);
               }}
               inputWidth={200}
               openDetailOnCreate
@@ -175,15 +170,13 @@ export const TextAnnotatorMenu = ({
               }}
               onCreateStatement={onCreateStatement}
             />
-            {showSuggesterElvl && (
-              <ElvlButtonGroup
-                border
-                value={elvl}
-                onChange={(elvl) => {
-                  setElvl(elvl);
-                }}
-              />
-            )}
+            <ElvlButtonGroup
+              border
+              value={elvl}
+              onChange={(elvl) => {
+                setElvl(elvl);
+              }}
+            />
           </StyledAnnotatorItemContentLine>
           <StyledAnnotatorItemContentLine>
             {onCreateTerritory && (

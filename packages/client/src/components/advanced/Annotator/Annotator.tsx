@@ -442,9 +442,16 @@ export const TextAnnotator = ({
       enabled: api.isLoggedIn() && selectedAnchors.length > 0,
     });
 
-  const handleAddAnchor = (entityId: string) => {
+  const handleAddAnchor = (entityId: string, elvl?: EntityEnums.Elvl) => {
     // TODO: handle adding a new statement - preserve the order
-    annotator?.addAnchor(entityId);
+    annotator?.addAnchor(
+      entityId,
+      elvl
+        ? {
+            elvl: elvl,
+          }
+        : {}
+    );
     setSelectedText("");
     annotator?.clearSelection();
     handleSaveNewContent(true);
