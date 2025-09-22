@@ -76,7 +76,13 @@ const RowRenderer: React.FC<RowRendererProps> = ({ index, style, data }) => {
           <div>{originEntity && renderEntityTag(originEntity)}</div>
           <div>{typeEntity && renderEntityTag(typeEntity)}</div>
           <div>{valueEntity && renderEntityTag(valueEntity)}</div>
-          <div style={{ display: "flex", justifyContent: "center" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              paddingRight: "0.5rem",
+            }}
+          >
             {statementEntity && (
               <Button
                 icon={<FaEdit size={14} />}
