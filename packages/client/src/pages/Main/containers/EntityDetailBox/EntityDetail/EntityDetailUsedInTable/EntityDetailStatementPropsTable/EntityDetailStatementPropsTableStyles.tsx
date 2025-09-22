@@ -34,16 +34,18 @@ export const StyledTableHeader = styled.div`
 interface StyledTableRowProps {
   $isLevel1: boolean;
   // in px
-  marginLeft: number;
+  $marginLeft: number;
 }
 export const StyledTableRow = styled.div<StyledTableRowProps>`
+  height: 3rem;
   display: grid;
+  align-items: center;
+  padding: 0 0.5rem;
   grid-template-columns: 1fr 1fr 1fr 1fr auto;
   gap: ${({ theme }) => theme.space[4]};
-  padding: 0.5rem;
   background-color: ${({ theme, $isLevel1 }) =>
     $isLevel1 ? theme.color.gray[400] : "transparent"};
-  margin-left: ${({ marginLeft }) => marginLeft}rem;
+  margin-left: ${({ $marginLeft }) => $marginLeft}rem;
   position: relative;
   transition: background-color 0.2s ease;
 
