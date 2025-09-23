@@ -8,23 +8,23 @@ import { closingTagRegex, createOpeningTagRegex, tagRemovalRegex } from "./Annot
  * Tags can be opening or closing tags and may contain attributes.
  */
 export class Tag {
-  position: number;
-  tag: string;
+  position: number; // raw position in whole text
+  private tagContent: string; // div id="12"
   closing?: boolean;
   attributes: Record<string, string>;
-  relativeParsedPosition: number;
+  relativeParsedPosition: number; // relative position in parsed segment text
 
   /**
    * Creates a new Tag instance.
    * 
    * @param position - The absolute position of the tag in the raw text
-   * @param tag - The tag name (e.g., "person", "location")
+   * @param tag - The tag name (e.g., "person", "location" along with attributes)
    * @param closing - Whether this is a closing tag (default: false)
    * @param segment - Optional segment reference for calculating relative position
    */
   constructor(position: number, tag: string, closing?: boolean, segment?: Segment) {
     this.position = position;
-    this.tag = tag;
+    this.tagContent = tag;
     this.closing = closing;
     this.attributes = this.parseAttributes(tag);
     this.relativeParsedPosition = this.calculateRelativeParsedPosition(segment);
@@ -117,9 +117,9 @@ export class Tag {
    */
   getTag(): string {
     if (this.closing) {
-      return `</${this.tag}>`;
+      return `</${this.getTagName()}>`;
     }
-    let openTag = `<${this.tag}`;
+    let openTag = `<${this.getTagName()}`;
     for (const [key, value] of Object.entries(this.attributes)) {
       openTag += ` ${key}="${value}"`;
     }
@@ -137,7 +137,7 @@ export class Tag {
    */
   getTagName(): string {
     // Split by whitespace and take the first part (the tag name)
-    return this.tag.trim().split(/\s+/)[0];
+    return this.tagContent.trim().split(/\s+/)[0];
   }
 }
 

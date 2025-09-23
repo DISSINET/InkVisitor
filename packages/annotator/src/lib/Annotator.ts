@@ -212,13 +212,13 @@ export class Annotator {
           .slice(0, endSegment.segmentIndex + 1)
           .reverse()
           .find((segment) =>
-            segment.openingTags.find((tag) => tag.tag === anchor)
+            segment.openingTags.find((tag) => tag.getTagName() === anchor)
           );
 
         // replace open tag with empty string in the openTagSegment
         if (openTagSegment) {
           const openTag = openTagSegment.openingTags.find(
-            (tag) => tag.tag === anchor
+            (tag) => tag.getTagName() === anchor
           );
           if (openTag) {
             const openTagsSegmentI = this.text.segments.findIndex(
@@ -228,7 +228,7 @@ export class Annotator {
             );
 
             this.text.segments[openTagsSegmentI].raw =
-              openTagSegment.raw.replace(`<${anchor}>`, "");
+              openTagSegment.raw.replace(openTag.getTag(), "");
             // this.text.segments[openTagsSegmentI].parseText();
           }
         }
@@ -237,12 +237,12 @@ export class Annotator {
         const closeTagSegment = this.text.segments
           .slice(startSegment.segmentIndex, this.text.segments.length)
           .find((segment) =>
-            segment.closingTags.find((tag) => tag.tag === anchor)
+            segment.closingTags.find((tag) => tag.getTagName() === anchor)
           );
 
         if (closeTagSegment) {
           const closeTag = closeTagSegment.closingTags.find(
-            (tag) => tag.tag === anchor
+            (tag) => tag.getTagName() === anchor
           );
           if (closeTag) {
             const closeTagsSegmentI =
@@ -284,11 +284,6 @@ export class Annotator {
     const charsAtLine = Math.floor(this.width / this.charWidth);
 
     const positionBeforeRel = this.viewport.lineStart / this.text.noLines;
-
-    // FIXME try to update the cursor position based on the text that was selected before the resize
-    const [start, end] = this.cursor.getAbsBounds();
-    const selectedTextBefore =
-      start && end ? this.text.getRangeText(start, end) : "";
 
     this.viewport.updateLineEnd(noLinesViewport);
     this.text.updateCharsAtLine(charsAtLine);
@@ -510,10 +505,10 @@ export class Annotator {
       }
 
       for (const tag of openingTags) {
-        untilStart[tag.tag] = (untilStart[tag.tag] || 0) + 1;
+        untilStart[tag.getTagName()] = (untilStart[tag.getTagName()] || 0) + 1;
       }
       for (const tag of closingTags) {
-        untilStart[tag.tag] = (untilStart[tag.tag] || 0) - 1;
+        untilStart[tag.getTagName()] = (untilStart[tag.getTagName()] || 0) - 1;
       }
     }
 
@@ -529,10 +524,10 @@ export class Annotator {
         [openingTags, closingTags] = [segment.openingTags, segment.closingTags];
       }
       for (const tag of openingTags) {
-        final[tag.tag] = true;
+        final[tag.getTagName()] = true;
       }
       for (const tag of closingTags) {
-        final[tag.tag] = true;
+        final[tag.getTagName()] = true;
       }
     }
 
@@ -551,10 +546,10 @@ export class Annotator {
       );
     }
     for (const tag of opened) {
-      final[tag.tag] = true;
+      final[tag.getTagName()] = true;
     }
     for (const tag of closed) {
-      final[tag.tag] = true;
+      final[tag.getTagName()] = true;
     }
 
     // reduce untilStart
