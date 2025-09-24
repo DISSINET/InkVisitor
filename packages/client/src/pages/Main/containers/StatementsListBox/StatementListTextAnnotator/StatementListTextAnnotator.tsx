@@ -11,7 +11,6 @@ import {
 } from "@shared/types";
 import { UseMutationResult } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
-import Dropdown from "components/advanced";
 import TextAnnotator from "components/advanced/Annotator/Annotator";
 import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -110,6 +109,7 @@ export const StatementListTextAnnotator: React.FC<
 
   const animatedStyle = useSpring({
     opacity: showAnnotator ? 1 : 0,
+    width: "100%",
     delay: 300,
   });
 
