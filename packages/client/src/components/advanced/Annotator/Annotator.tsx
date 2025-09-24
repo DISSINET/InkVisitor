@@ -75,7 +75,7 @@ interface TextAnnotatorProps {
   dataDocumentError: Error | null;
   showStatementList?: boolean;
 
-  statementCreateMutation: UseMutationResult<
+  statementCreateMutation?: UseMutationResult<
     AxiosResponse<IResponseGeneric<IStatement>, any>,
     Error,
     IStatement,
@@ -83,6 +83,7 @@ interface TextAnnotatorProps {
   >;
 
   userData?: IResponseUser;
+  disableCreate?: boolean;
 }
 
 export const TextAnnotator = ({
@@ -107,6 +108,7 @@ export const TextAnnotator = ({
 
   statementCreateMutation,
   userData,
+  disableCreate = false,
 }: TextAnnotatorProps) => {
   const queryClient = useQueryClient();
   const theme = useTheme();
@@ -240,7 +242,7 @@ export const TextAnnotator = ({
         territoryStatements
       );
 
-      if (userData && territory) {
+      if (userData && territory && statementCreateMutation) {
         if (entityCreateModalProps) {
           const { label, detail, territoryId, language } =
             entityCreateModalProps;
@@ -882,6 +884,7 @@ export const TextAnnotator = ({
                     isLoadingEntities={isFetchingAnchorEntities}
                     hasParentT={hasParentT}
                     territory={territory}
+                    disableCreate={disableCreate}
                   />
                 )}
               </StyledAnnotatorMenu>
