@@ -12,6 +12,7 @@ import {
 import { Router } from "express";
 import { IRequest } from "src/custom_typings/request";
 import { asyncRouteHandler } from "../index";
+import { createOpeningTagRegex, closingTagRegex } from "@common/regex";
 
 export default Router()
   /**
@@ -80,9 +81,19 @@ export default Router()
     // Anchors with entityId that are not in exportedEntities should be removed
     // When removing the anchors, the text between the anchors should be kept
     //
-    const filteredContent = document.content.replace(/<[^<>]+>/g, (match) => {
-      // remove <, >, and / from the match
-      const entityId = match.slice(1, -1).replace("/", "");
+    const openingTagRegex = createOpeningTagRegex();
+    const closingTagRegexInstance = closingTagRegex;
+    
+    let filteredContent = document.content;
+    let match;
+    
+    // Process opening tags
+    while ((match = openingTagRegex.exec(document.content)) !== null) {
+      const fullTag = match[0];
+      const tagContent = match[1];
+      // Extract only the tag name (first word before any attributes or spaces)
+      const entityId = tagContent.split(/\s+/)[0];
+      
       let validEntityClass = false;
       exportedEntities.forEach((entityClass) => {
         document.entityIds[entityClass].forEach((id) => {
@@ -92,13 +103,31 @@ export default Router()
         });
       });
 
-      if (validEntityClass) {
-        return match;
-      } else {
-        // return the text inbetween the anchors
-        return "";
+      if (!validEntityClass) {
+        // Remove the opening tag if entity is not in exported entities
+        filteredContent = filteredContent.replace(fullTag, "");
       }
-    });
+    }
+    
+    // Process closing tags
+    while ((match = closingTagRegexInstance.exec(document.content)) !== null) {
+      const fullTag = match[0];
+      const entityId = match[1];
+      
+      let validEntityClass = false;
+      exportedEntities.forEach((entityClass) => {
+        document.entityIds[entityClass].forEach((id) => {
+          if (id === entityId) {
+            validEntityClass = true;
+          }
+        });
+      });
+
+      if (!validEntityClass) {
+        // Remove the closing tag if entity is not in exported entities
+        filteredContent = filteredContent.replace(fullTag, "");
+      }
+    }
 
     // TODO: filtering of anchors should happen here
 
