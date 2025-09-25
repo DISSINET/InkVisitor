@@ -95,16 +95,34 @@ export default Router()
       const entityId = tagContent.split(/\s+/)[0];
       
       let validEntityClass = false;
+      let isUnknownEntity = true;
+      
+      // Check if entity exists in any entity class
       exportedEntities.forEach((entityClass) => {
-        document.entityIds[entityClass].forEach((id) => {
-          if (id === entityId) {
-            validEntityClass = true;
-          }
-        });
+        if (document.entityIds[entityClass]) {
+          document.entityIds[entityClass].forEach((id) => {
+            if (id === entityId) {
+              validEntityClass = true;
+              isUnknownEntity = false;
+            }
+          });
+        }
+      });
+      
+      // Also check all entity classes to determine if this is an unknown entity
+      Object.values(EntityEnums.Class).forEach((entityClass) => {
+        if (document.entityIds[entityClass]) {
+          document.entityIds[entityClass].forEach((id) => {
+            if (id === entityId) {
+              isUnknownEntity = false;
+            }
+          });
+        }
       });
 
-      if (!validEntityClass) {
-        // Remove the opening tag if entity is not in exported entities
+      // Keep the tag if it's in exported entities OR if it's an unknown entity
+      if (!validEntityClass && !isUnknownEntity) {
+        // Remove the opening tag if entity is not in exported entities and is not unknown
         filteredContent = filteredContent.replace(fullTag, "");
       }
     }
@@ -115,21 +133,37 @@ export default Router()
       const entityId = match[1];
       
       let validEntityClass = false;
+      let isUnknownEntity = true;
+      
+      // Check if entity exists in any entity class
       exportedEntities.forEach((entityClass) => {
-        document.entityIds[entityClass].forEach((id) => {
-          if (id === entityId) {
-            validEntityClass = true;
-          }
-        });
+        if (document.entityIds[entityClass]) {
+          document.entityIds[entityClass].forEach((id) => {
+            if (id === entityId) {
+              validEntityClass = true;
+              isUnknownEntity = false;
+            }
+          });
+        }
+      });
+      
+      // Also check all entity classes to determine if this is an unknown entity
+      Object.values(EntityEnums.Class).forEach((entityClass) => {
+        if (document.entityIds[entityClass]) {
+          document.entityIds[entityClass].forEach((id) => {
+            if (id === entityId) {
+              isUnknownEntity = false;
+            }
+          });
+        }
       });
 
-      if (!validEntityClass) {
-        // Remove the closing tag if entity is not in exported entities
+      // Keep the tag if it's in exported entities OR if it's an unknown entity
+      if (!validEntityClass && !isUnknownEntity) {
+        // Remove the closing tag if entity is not in exported entities and is not unknown
         filteredContent = filteredContent.replace(fullTag, "");
       }
     }
-
-    // TODO: filtering of anchors should happen here
 
     res.setHeader("content-type", "text/plain");
     res.setHeader("Content-Disposition", `attachment; filename="export.txt"`);
