@@ -298,6 +298,7 @@ export const EntitySearchBox: React.FC = () => {
                 onChangeFn={(value: string) =>
                   handleChange({ labelOrId: value })
                 }
+                clearable
               />
               {userRole !== UserEnums.Role.Viewer && (
                 <Button
