@@ -103,9 +103,9 @@ export const EntitySearchBox: React.FC = () => {
 
   // check whether the search should be executed
   const validSearch = useMemo<boolean>(() => {
-    return (
-      Object.values(debouncedValues).filter((searchValue: any) => searchValue)
-        .length > 1
+    return Boolean(
+      debouncedValues?.labelOrId?.length &&
+        debouncedValues?.labelOrId?.length > 1
     );
   }, [debouncedValues]);
 
