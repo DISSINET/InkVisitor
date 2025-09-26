@@ -35,12 +35,15 @@ interface TextAnnotatorMenuProps {
   anchors: string[];
   entities: Record<string, IEntity | false>;
   onAnchorAdd: (entityId: string, elvl: EntityEnums.Elvl) => void;
-  onCreateStatement?: (entityCreateModalProps?: {
-    label: string;
-    detail: string;
-    territoryId: string;
-    language: EntityEnums.Language;
-  }) => void;
+  onCreateStatement?: (
+    elvl: EntityEnums.Elvl,
+    entityCreateModalProps?: {
+      label: string;
+      detail: string;
+      territoryId: string;
+      language: EntityEnums.Language;
+    }
+  ) => void;
   onCreateTerritory?: (
     territoryCreateModalType?: TerritoryCreateModalType
   ) => void;
@@ -79,7 +82,15 @@ export const TextAnnotatorMenu = ({
   const { setStatementId } = useSearchParams();
   useKeypress("Escape", onEscapePressed);
 
-  const [elvl, setElvl] = useState<EntityEnums.Elvl>(EntityEnums.Elvl.Textual);
+  const [statementElvl, setStatementElvl] = useState<EntityEnums.Elvl>(
+    EntityEnums.Elvl.Textual
+  );
+  const [suggesterElvl, setSuggesterElvl] = useState<EntityEnums.Elvl>(
+    EntityEnums.Elvl.Textual
+  );
+  const [territoryElvl, setTerritoryElvl] = useState<EntityEnums.Elvl>(
+    EntityEnums.Elvl.Textual
+  );
 
   return (
     <>
@@ -146,10 +157,17 @@ export const TextAnnotatorMenu = ({
                   icon={<TbAnchor size={15} />}
                   color="primary"
                   onClick={() => {
-                    onCreateStatement();
+                    onCreateStatement(statementElvl);
                   }}
                   label="New Statement"
                   tooltipLabel="Create new Statement from selection"
+                />
+                <ElvlButtonGroup
+                  border
+                  value={statementElvl}
+                  onChange={(statementElvl) => {
+                    setStatementElvl(statementElvl);
+                  }}
                 />
               </StyledAnnotatorItemContentLine>
             )}
@@ -158,7 +176,7 @@ export const TextAnnotatorMenu = ({
                 categoryTypes={classesAnnotator}
                 initTyped={text.length > 30 ? text.substring(0, 30) : text}
                 onSelected={(newAnchorId) => {
-                  onAnchorAdd(newAnchorId, elvl);
+                  onAnchorAdd(newAnchorId, suggesterElvl);
                 }}
                 inputWidth={200}
                 openDetailOnCreate
@@ -171,13 +189,16 @@ export const TextAnnotatorMenu = ({
                     setStatementId(entity.id);
                   }
                 }}
-                onCreateStatement={onCreateStatement}
+                onCreateStatement={(entityCreateModalProps) =>
+                  onCreateStatement &&
+                  onCreateStatement(suggesterElvl, entityCreateModalProps)
+                }
               />
               <ElvlButtonGroup
                 border
-                value={elvl}
-                onChange={(elvl) => {
-                  setElvl(elvl);
+                value={suggesterElvl}
+                onChange={(suggesterElvl) => {
+                  setSuggesterElvl(suggesterElvl);
                 }}
               />
             </StyledAnnotatorItemContentLine>
@@ -231,6 +252,13 @@ export const TextAnnotatorMenu = ({
                       tooltipLabel="Create new child territory anchor"
                     />
                   )}
+                  <ElvlButtonGroup
+                    border
+                    value={territoryElvl}
+                    onChange={(territoryElvl) => {
+                      setTerritoryElvl(territoryElvl);
+                    }}
+                  />
                 </StyledTerritorySubsection>
               )}
             </StyledAnnotatorItemContentLine>

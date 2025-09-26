@@ -675,6 +675,7 @@ export const TextAnnotator = ({
   }, [territoryCreateModalType, territory]);
 
   const onCreateStatement = (
+    elvl: EntityEnums.Elvl,
     // following props are only for creation from EntitySuggester -> EntityCreateModal
     entityCreateModalProps?: {
       label: string;
@@ -685,7 +686,7 @@ export const TextAnnotator = ({
   ) => {
     if (handleCreateStatement && selectedText && selectionStartIndex !== -1) {
       const newStatementId = uuidv4();
-      handleAddAnchor(newStatementId);
+      handleAddAnchor(newStatementId, elvl);
       // remove linebreaks from text
       const validatedText = selectedText.replace(/\n/g, " ");
       handleCreateStatement(
