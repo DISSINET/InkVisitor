@@ -169,6 +169,7 @@ export const TextAnnotator = ({
   const mainCanvas = useRef<HTMLCanvasElement>(null);
   const scroller = useRef<HTMLDivElement>(null);
   const lines = useRef<HTMLCanvasElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const [annotatorMode, setAnnotatorMode] = useState<EditMode>(
     EditMode.HIGHLIGHT
@@ -712,6 +713,29 @@ export const TextAnnotator = ({
     );
   }, [annotatorMode, selectedText, isSelectingText, dataDocument]);
 
+  // Handle click outside menu to close it
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        isMenuDisplayed &&
+        menuRef.current &&
+        !menuRef.current.contains(event.target as Node) &&
+        !mainCanvas.current?.contains(event.target as Node)
+      ) {
+        setSelectedText("");
+        annotator?.clearSelection();
+      }
+    };
+
+    if (isMenuDisplayed) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isMenuDisplayed, annotator]);
+
   if (dataDocumentError) {
     return (
       <StyledInfoText>
@@ -843,7 +867,10 @@ export const TextAnnotator = ({
           {isMenuDisplayed && (
             <FloatingPortal id="page">
               <StyledAnnotatorMenu
-                ref={refs.setFloating}
+                ref={(node) => {
+                  refs.setFloating(node);
+                  menuRef.current = node;
+                }}
                 style={floatingStyles}
               >
                 {dataDocument && (
