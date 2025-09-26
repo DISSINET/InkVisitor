@@ -9,13 +9,15 @@ import { EntityDetailTab } from "./EntityDetailTab/EntityDetailTab";
 import update from "immutability-helper";
 import { Loader } from "components";
 import { useAppSelector } from "redux/hooks";
+import { DetailBoxState } from "types";
 
 interface EntityDetailBox {}
 export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   const ping: number = useAppSelector((state) => state.ping);
-  const detailBoxMinimized: boolean = useAppSelector(
-    (state) => state.layout.mainPage.detailBoxMinimized
+  const detailBoxState: DetailBoxState = useAppSelector(
+    (state) => state.layout.mainPage.detailBoxState
   );
+  const detailBoxMinimized = detailBoxState === DetailBoxState.Minimized;
 
   const {
     detailIdArray,
