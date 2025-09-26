@@ -45,11 +45,12 @@ interface TextAnnotatorMenuProps {
     }
   ) => void;
   onCreateTerritory?: (
-    territoryCreateModalType?: TerritoryCreateModalType
+    territoryCreateModalType: TerritoryCreateModalType,
+    elvl: EntityEnums.Elvl
   ) => void;
   onRemoveAnchor?: (anchor: string) => void;
   canCreateActiveTAnchor: boolean;
-  onCreateActiveTAnchor?: () => void;
+  onCreateActiveTAnchor?: (elvl: EntityEnums.Elvl) => void;
   isLoadingEntities: boolean;
   hasParentT: boolean;
   isTextInsideThisT: boolean;
@@ -82,6 +83,8 @@ export const TextAnnotatorMenu = ({
   const { setStatementId } = useSearchParams();
   useKeypress("Escape", onEscapePressed);
 
+  const [activeTerritoryElvl, setActiveTerritoryElvl] =
+    useState<EntityEnums.Elvl>(EntityEnums.Elvl.Textual);
   const [statementElvl, setStatementElvl] = useState<EntityEnums.Elvl>(
     EntityEnums.Elvl.Textual
   );
@@ -140,13 +143,20 @@ export const TextAnnotatorMenu = ({
                   icon={<TbAnchor size={15} />}
                   color="primary"
                   onClick={() => {
-                    onCreateActiveTAnchor();
+                    onCreateActiveTAnchor(activeTerritoryElvl);
                   }}
                   tooltipLabel="Create anchor for active territory"
                 />
                 {activeTerritory && (
                   <EntityTag entity={activeTerritory as IEntity} />
                 )}
+                <ElvlButtonGroup
+                  border
+                  value={activeTerritoryElvl}
+                  onChange={(territoryElvl) => {
+                    setActiveTerritoryElvl(territoryElvl);
+                  }}
+                />
               </StyledAnnotatorItemContentLine>
             )}
           </StyledAnnotatorItemContent>
@@ -224,7 +234,7 @@ export const TextAnnotatorMenu = ({
                     }
                     color={isTextInsideThisT ? "greyer" : "primary"}
                     onClick={() => {
-                      onCreateTerritory("sibling-T");
+                      onCreateTerritory("sibling-T", territoryElvl);
                     }}
                     label="Sibling"
                     tooltipLabel="Create new sibling territory anchor"
@@ -246,7 +256,7 @@ export const TextAnnotatorMenu = ({
                       }
                       color={isTextInsideThisT ? "primary" : "greyer"}
                       onClick={() => {
-                        onCreateTerritory("child-T");
+                        onCreateTerritory("child-T", territoryElvl);
                       }}
                       label="Child"
                       tooltipLabel="Create new child territory anchor"

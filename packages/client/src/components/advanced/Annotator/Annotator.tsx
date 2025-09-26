@@ -119,6 +119,8 @@ export const TextAnnotator = ({
 
   const [localTextContent, setLocalTextContent] = useState<string>("");
 
+  const [territoryElvl, setTerritoryElvl] = useState<EntityEnums.Elvl>();
+
   useEffect(() => {
     return forwardAnnotator(undefined);
   }, []);
@@ -658,8 +660,12 @@ export const TextAnnotator = ({
     return annotator?.text?.value !== dataDocument?.content;
   }, [annotator?.text?.value, dataDocument?.content, localTextContent]);
 
-  const onCreateTerritory = (mode: TerritoryCreateModalType | undefined) => {
-    setTerritoryCreateModalType(mode ?? false);
+  const onCreateTerritory = (
+    mode: TerritoryCreateModalType,
+    elvl: EntityEnums.Elvl
+  ) => {
+    setTerritoryCreateModalType(mode);
+    setTerritoryElvl(elvl);
   };
 
   const newTerritoryName = useMemo<string>(() => {
@@ -874,8 +880,8 @@ export const TextAnnotator = ({
                       (anchor) => anchor === thisTerritoryEntityId
                     )}
                     activeTerritoryId={thisTerritoryEntityId}
-                    onCreateActiveTAnchor={() => {
-                      handleAddAnchor(thisTerritoryEntityId ?? "");
+                    onCreateActiveTAnchor={(elvl) => {
+                      handleAddAnchor(thisTerritoryEntityId ?? "", elvl);
                     }}
                     canCreateActiveTAnchor={
                       !dataDocument?.entityIds.T.includes(
@@ -1026,7 +1032,10 @@ export const TextAnnotator = ({
 
       {territory && territoryCreateModalType && (
         <EntityCreateModal
-          closeModal={() => setTerritoryCreateModalType(false)}
+          closeModal={() => {
+            setTerritoryCreateModalType(false);
+            setTerritoryElvl(EntityEnums.Elvl.Textual);
+          }}
           allowedEntityClasses={[EntityEnums.Class.Territory]}
           labelTyped={newTerritoryName}
           parentTerritory={
@@ -1035,8 +1044,9 @@ export const TextAnnotator = ({
               : territory
           }
           onMutationSuccess={(entity) => {
-            handleAddAnchor(entity.id);
+            handleAddAnchor(entity.id, territoryElvl);
             setTerritoryCreateModalType(false);
+            setTerritoryElvl(EntityEnums.Elvl.Textual);
             toast.info(`${newTerritoryName} created!`);
             queryClient.invalidateQueries({ queryKey: ["tree"] });
             appendDetailId(entity.id);
