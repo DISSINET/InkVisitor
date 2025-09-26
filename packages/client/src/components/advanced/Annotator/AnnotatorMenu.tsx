@@ -84,7 +84,7 @@ export const TextAnnotatorMenu = ({
         </StyledAnnotatorItemTitle>
         <StyledAnnotatorItemContent>
           <StyledAnnotatorItemContentLine>
-            <Button
+            {/* <Button
               icon={<BsSegmentedNav size={13} />}
               size={ButtonSize.Small}
               color="primary"
@@ -94,7 +94,7 @@ export const TextAnnotatorMenu = ({
               label={"Segment"}
               tooltipLabel="Segment selection into Statements"
               disabled
-            />
+            /> */}
             <Button
               icon={<FaClipboard size={10} />}
               size={ButtonSize.Small}
