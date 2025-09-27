@@ -1,11 +1,11 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 
-import { IRequestStats, IResponseStats } from "@shared/types";
+import { IRequestStats, IResponseAudit, IResponseStats } from "@shared/types";
 import { Aggregation, EventType, TimeUnit } from "@shared/types/stats";
 import { Button, ButtonGroup, Input } from "components";
 import { useWindowSize } from "hooks";
-import { useMemo, useReducer } from "react";
+import { useMemo, useReducer, useState } from "react";
 import styled from "styled-components";
 import { space1 } from "Theme/theme-space-shortcut";
 import { StatsChart } from "./StatsChart";
@@ -75,6 +75,11 @@ export const StatsPage = () => {
 
   const [windowWidth, windowHeight] = useWindowSize();
 
+  const [usersIgnoreBelowValue, setUsersIgnoreBelowValue] = useState<number>(0);
+  const usersIgnoreBelowValueString = useMemo<string>(() => {
+    return usersIgnoreBelowValue.toString();
+  }, [usersIgnoreBelowValue]);
+
   const statsRequest = useMemo<IRequestStats>(() => {
     return {
       fromDate: new Date(state.timeFrom).getTime(),
@@ -116,6 +121,10 @@ export const StatsPage = () => {
 
   const isNoData = !isLoadingStats && !isErrorStats && !dataStats;
   const isReady = !isLoadingStats && !isErrorStats && dataStats;
+
+  const data = useMemo<IResponseAudit | undefined>(() => {
+    return dataStats;
+  }, [dataStats]);
 
   return (
     <Container>
@@ -201,6 +210,14 @@ export const StatsPage = () => {
               />
             ))}
           </ButtonGroup>
+        </Field>
+        <Field>
+          <FieldLabel>Users Ignore Below Value</FieldLabel>
+          <Input
+            type="number"
+            value={usersIgnoreBelowValueString}
+            onChangeFn={(value) => setUsersIgnoreBelowValue(Number(value))}
+          />
         </Field>
         <div>
           <Button
