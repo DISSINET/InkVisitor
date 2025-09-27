@@ -58,10 +58,8 @@ export const Page: React.FC<Page> = ({ children }) => {
   } = useQuery({
     queryKey: ["user", userId],
     queryFn: async () => {
-      if (userId) {
-        const res = await api.usersGet(userId);
-        return res.data;
-      }
+      const res = await api.usersGet(userId as string);
+      return res.data ?? undefined;
     },
     enabled: api.isLoggedIn() && !disableRightHeader,
   });

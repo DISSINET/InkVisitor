@@ -80,7 +80,7 @@ export const StatsTable = ({
   const { aggregateBy } = request;
 
   const { data: dataUsers } = useQuery({
-    queryKey: ["users-stats"],
+    queryKey: ["users"],
     queryFn: () => api.usersGetMore({}),
     enabled: api.isLoggedIn(),
   });

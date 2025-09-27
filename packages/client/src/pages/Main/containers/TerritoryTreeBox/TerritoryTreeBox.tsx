@@ -66,10 +66,8 @@ export const TerritoryTreeBox: React.FC = () => {
   } = useQuery({
     queryKey: ["user", userId],
     queryFn: async () => {
-      if (userId) {
-        const res = await api.usersGet(userId);
-        return res.data;
-      }
+      const res = await api.usersGet(userId as string);
+      return res.data ?? undefined;
     },
     enabled: api.isLoggedIn() && !!userId,
   });
