@@ -211,7 +211,7 @@ export const StatsChart = ({
       {gridEl}
       {xAxisEl}
       {yAxisEl}
-      <Tooltip />
+      <Tooltip wrapperStyle={{ zIndex: 200 }} />
       <Legend
         content={() => (
           <div
@@ -220,6 +220,7 @@ export const StatsChart = ({
               flexDirection: "row",
               gap: theme.space[1],
               flexWrap: "wrap",
+              zIndex: 2,
             }}
           >
             {dataCategories.map((category) => {
