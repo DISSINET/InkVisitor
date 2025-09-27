@@ -322,7 +322,7 @@ export const StatementListBox: React.FC = () => {
     data: selectedDocument,
     error: selectedDocumentError,
     isFetching: selectedDocumentIsFetching,
-  } = useQuery<IDocument | undefined>({
+  } = useQuery({
     queryKey: ["document", selectedDocumentId],
     queryFn: async () => {
       if (selectedDocumentId) {
