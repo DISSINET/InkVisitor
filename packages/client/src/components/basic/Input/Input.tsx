@@ -20,7 +20,9 @@ interface Input {
     | "select"
     | "password"
     | "datetime-local"
-    | "date";
+    | "date"
+    | "number";
+
   rows?: number;
   cols?: number;
   width?: number | "full";
@@ -206,6 +208,21 @@ export const Input: React.FC<Input> = ({
             }
             onBlur();
           }}
+        />
+      )}
+      {type === "number" && (
+        <StyledInput
+          type={type}
+          value={displayValue}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            setDisplayValue(e.currentTarget.value);
+
+            if (changeOnType) {
+              onChangeFn(e.currentTarget.value);
+            }
+          }}
+          $noBorder={noBorder}
+          $borderColor={borderColor}
         />
       )}
     </StyledWrapper>
