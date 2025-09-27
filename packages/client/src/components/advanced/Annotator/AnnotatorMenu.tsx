@@ -302,6 +302,14 @@ export const TextAnnotatorMenu = ({
                       }}
                       key={anchor}
                       entity={entities[anchor] as IEntity}
+                      // elvlButtonGroup={
+                      //   <ElvlButtonGroup
+                      //     value={entities[anchor]?.anchorElvl}
+                      //     onChange={(elvl) => {
+                      //       console.log(elvl);
+                      //     }}
+                      //   />
+                      // }
                     />
                   );
                 } else {
