@@ -134,26 +134,37 @@ export const StatsTable = ({
     <TableContainer $height={height} $width={width}>
       <Table {...getTableProps()} $width={width}>
         <thead>
-          {headerGroups.map((headerGroup) => (
-            <tr {...headerGroup.getHeaderGroupProps()}>
-              {headerGroup.headers.map((column, index) => (
-                <Th {...column.getHeaderProps()} $isSticky={index === 0}>
-                  {column.render("Header")}
-                </Th>
-              ))}
-            </tr>
-          ))}
+          {headerGroups.map((headerGroup) => {
+            const { key, ...restHeaderGroupProps } =
+              headerGroup.getHeaderGroupProps();
+            return (
+              <tr key={key} {...restHeaderGroupProps}>
+                {headerGroup.headers.map((column, index) => {
+                  const { key, ...restHeaderProps } = column.getHeaderProps();
+                  return (
+                    <Th key={key} {...restHeaderProps} $isSticky={index === 0}>
+                      {column.render("Header")}
+                    </Th>
+                  );
+                })}
+              </tr>
+            );
+          })}
         </thead>
         <tbody {...getTableBodyProps()}>
           {rows.map((row) => {
             prepareRow(row);
+            const { key, ...restRowProps } = row.getRowProps();
             return (
-              <tr {...row.getRowProps()}>
-                {row.cells.map((cell, index) => (
-                  <Td {...cell.getCellProps()} $isSticky={index === 0}>
-                    {cell.render("Cell")}
-                  </Td>
-                ))}
+              <tr key={key} {...restRowProps}>
+                {row.cells.map((cell, index) => {
+                  const { key, ...restCellProps } = cell.getCellProps();
+                  return (
+                    <Td key={key} {...restCellProps} $isSticky={index === 0}>
+                      {cell.render("Cell")}
+                    </Td>
+                  );
+                })}
               </tr>
             );
           })}

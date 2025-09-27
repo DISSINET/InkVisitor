@@ -1,7 +1,7 @@
 import { IRequestStats, IResponseStats } from "@shared/types";
 import { Aggregation, EventType } from "@shared/types/stats";
 import { useQuery } from "@tanstack/react-query";
-import api from "api";
+import { color as d3Color, schemeTableau10 } from "d3";
 import { useCallback, useMemo, useState } from "react";
 import {
   Bar,
@@ -13,9 +13,10 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import theme from "Theme/theme";
 
-import { color as d3Color, schemeTableau10 } from "d3";
+import api from "api";
+import theme from "Theme/theme";
+import { ContentType } from "recharts/types/component/DefaultLegendContent";
 import { getNonEmptyUsers } from "./utils";
 
 interface StatsChartProps {
@@ -185,72 +186,13 @@ export const StatsChart = ({
     [hoveringDataKey, categoryColors]
   );
 
-  const BarEls = useMemo(() => {
+  const BarEls = useMemo<React.ReactNode[]>(() => {
     return dataCategories.map((category) => {
       const color = getColor(category);
 
-      return <Bar dataKey={category} fill={color} stackId="a" />;
+      return <Bar key={category} dataKey={category} fill={color} stackId="a" />;
     });
   }, [dataCategories, getColor]);
-
-  const LegendEl = useMemo(() => {
-    return (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          gap: theme.space[1],
-          flexWrap: "wrap",
-        }}
-      >
-        {dataCategories.map((category) => {
-          const isActive = hoveringDataKey === category;
-          const color = getColor(category);
-
-          return (
-            <div
-              key={category}
-              style={{
-                flexShrink: 0,
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-                cursor: "pointer",
-                padding: `${theme.space[0]} ${theme.space[5]}`,
-                gap: theme.space[2],
-              }}
-              onMouseEnter={() => {
-                if (!isActive) {
-                  handleMouseEnter({ dataKey: category, value: category });
-                }
-              }}
-              onMouseLeave={() => {
-                if (isActive) {
-                  handleMouseLeave();
-                }
-              }}
-            >
-              <div
-                style={{
-                  backgroundColor: color,
-                  width: theme.space[6],
-                  height: theme.space[6],
-                }}
-              />
-              <span
-                style={{
-                  fontSize: theme.fontSize.base,
-                  color: color,
-                }}
-              >
-                {category}
-              </span>
-            </div>
-          );
-        })}
-      </div>
-    );
-  }, [hoveringDataKey, handleMouseEnter, handleMouseLeave]);
 
   const xAxisEl = useMemo(() => {
     return <XAxis dataKey="name" />;
@@ -269,9 +211,65 @@ export const StatsChart = ({
       {gridEl}
       {xAxisEl}
       {yAxisEl}
-      <Tooltip />
+      <Tooltip wrapperStyle={{ zIndex: 200 }} />
       <Legend
-        content={LegendEl}
+        content={() => (
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              gap: theme.space[1],
+              flexWrap: "wrap",
+              zIndex: 2,
+            }}
+          >
+            {dataCategories.map((category) => {
+              const isActive = hoveringDataKey === category;
+              const color = getColor(category);
+
+              return (
+                <div
+                  key={category}
+                  style={{
+                    flexShrink: 0,
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    cursor: "pointer",
+                    padding: `${theme.space[0]} ${theme.space[5]}`,
+                    gap: theme.space[2],
+                  }}
+                  onMouseEnter={() => {
+                    if (!isActive) {
+                      handleMouseEnter({ dataKey: category, value: category });
+                    }
+                  }}
+                  onMouseLeave={() => {
+                    if (isActive) {
+                      handleMouseLeave();
+                    }
+                  }}
+                >
+                  <div
+                    style={{
+                      backgroundColor: color,
+                      width: theme.space[6],
+                      height: theme.space[6],
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontSize: theme.fontSize.base,
+                      color: color,
+                    }}
+                  >
+                    {category}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        )}
         wrapperStyle={{ paddingTop: 20, paddingBottom: 10 }}
       />
       {BarEls}
