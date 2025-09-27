@@ -166,10 +166,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   } = useQuery({
     queryKey: ["user", userId],
     queryFn: async () => {
-      if (userId) {
-        const res = await api.usersGet(userId);
-        return res.data;
-      }
+      const res = await api.usersGet(userId as string);
+      return res.data ?? undefined;
     },
     enabled: !!userId && api.isLoggedIn(),
   });
@@ -187,7 +185,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         const res = await api.entityIdsInTerritory(
           statement.data.territory.territoryId
         );
-        return res.data;
+        return res.data ?? [];
       } else {
         return [];
       }
@@ -228,7 +226,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         class: EntityEnums.Class.Statement,
       });
 
-      const templates = res.data;
+      const templates = res.data ?? [];
       templates.sort((a: IEntity, b: IEntity) =>
         a.labels[0].toLocaleLowerCase() > b.labels[0].toLocaleLowerCase()
           ? 1

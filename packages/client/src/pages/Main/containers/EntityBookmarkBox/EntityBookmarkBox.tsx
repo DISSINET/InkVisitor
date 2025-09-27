@@ -51,8 +51,9 @@ export const EntityBookmarkBox: React.FC = () => {
     queryKey: ["bookmarks"],
     queryFn: async () => {
       const res = await api.bookmarksGet("me");
-      res.data.sort((a, b) => (a.name > b.name ? 1 : -1));
-      return res.data;
+      const data = res.data ?? [];
+      data.sort((a, b) => (a.name > b.name ? 1 : -1));
+      return data;
     },
     enabled: api.isLoggedIn() && fourthPanelBoxesOpened["bookmarks"],
   });

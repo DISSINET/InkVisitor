@@ -173,10 +173,8 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   } = useQuery({
     queryKey: ["user", userId],
     queryFn: async () => {
-      if (userId) {
-        const res = await api.usersGet(userId);
-        return res.data;
-      }
+      const res = await api.usersGet(userId as string);
+      return res.data ?? undefined;
     },
     enabled: !!userId && api.isLoggedIn(),
   });
@@ -206,7 +204,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
           : undefined,
       });
 
-      return filterSuggestions(resSuggestions.data);
+      return filterSuggestions(resSuggestions.data ?? []);
     },
     enabled:
       debouncedTyped.length > 1 &&

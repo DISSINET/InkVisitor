@@ -157,7 +157,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
           class: entity?.class,
         });
 
-        const templates = res.data;
+        const templates = res.data ?? [];
         templates.sort((a: IEntity, b: IEntity) =>
           a.labels[0].toLocaleLowerCase() > b.labels[0].toLocaleLowerCase()
             ? 1

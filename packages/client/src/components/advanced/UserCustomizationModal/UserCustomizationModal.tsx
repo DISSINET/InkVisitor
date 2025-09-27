@@ -136,7 +136,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
           defaultTerritory?.id !== data.defaultTerritory)
       ) {
         const res = await api.entityGet(data.defaultTerritory);
-        setDefaultTerritory(res.data);
+        setDefaultTerritory(res.data ?? null);
       }
     },
     enabled: !!data.defaultTerritory && api.isLoggedIn(),
