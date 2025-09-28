@@ -46,9 +46,17 @@ export const getDataCategories = (
       userKeyMap
     );
 
-    return userCategories.sort((a, b) => {
+    userCategories.sort((a, b) => {
       return sumsWithPercentages.sums[b] - sumsWithPercentages.sums[a];
     });
+
+    // move others to the end of the categories
+    if (userCategories.includes("others")) {
+      userCategories.splice(userCategories.indexOf("others"), 1);
+    }
+    userCategories.push("others");
+
+    return userCategories;
   }
 
   return [];
@@ -149,6 +157,8 @@ export const transformDataForChart = (
     const categoryMap = Object.fromEntries(
       categories.map((category, index) => [category, index])
     );
+
+    // categoryMap["others"] = categories.length - 1;
 
     return Object.keys(values).map((timeKey) => {
       const valObject = values[timeKey];

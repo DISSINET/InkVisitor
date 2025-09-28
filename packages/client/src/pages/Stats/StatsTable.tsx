@@ -132,8 +132,8 @@ export const StatsTable = ({
     });
 
   return (
-    <TableContainer $height={height} $width={width}>
-      <Table {...getTableProps()} $width={width}>
+    <TableContainer $height={height} $width={width - 10}>
+      <Table {...getTableProps()} $width={width - 20}>
         <thead>
           {headerGroups.map((headerGroup) => {
             const { key, ...restHeaderGroupProps } =

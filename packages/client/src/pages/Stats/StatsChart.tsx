@@ -102,14 +102,16 @@ export const StatsChart = ({
 
   const BarEls = useMemo<React.ReactNode[]>(() => {
     return dataCategories.map((category, index) => {
+      console.log("dataCategory", category, index);
       const color = getColor(category);
 
       return (
         <Bar
-          key={category}
+          key={index}
           dataKey={(obj) => {
             return obj[index]?.value;
           }}
+          order={index}
           fill={color}
           stackId="a"
         />
