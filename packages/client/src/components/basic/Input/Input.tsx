@@ -50,6 +50,10 @@ interface Input {
   minWidth?: number;
   fullHeight?: boolean;
   clearable?: boolean;
+
+  // Number props
+  min?: number;
+  max?: number;
 }
 
 export const Input: React.FC<Input> = ({
@@ -80,6 +84,8 @@ export const Input: React.FC<Input> = ({
   minWidth,
   fullHeight = false,
   clearable = false,
+  min,
+  max,
 }) => {
   const [displayValue, setDisplayValue] = useState(value);
   useEffect(() => {
@@ -213,6 +219,8 @@ export const Input: React.FC<Input> = ({
       {type === "number" && (
         <StyledInput
           type={type}
+          min={min}
+          max={max}
           value={displayValue}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             setDisplayValue(e.currentTarget.value);
