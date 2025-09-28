@@ -28,7 +28,7 @@ export const getDataCategories = (
   values: Record<string, Record<string, number>>
 ): string[] => {
   if (aggregateBy === Aggregation.ACTIVITY_TYPE) {
-    return [EventType.EDIT, EventType.DELETE, EventType.CREATE];
+    return [EventType.EDIT, EventType.CREATE, EventType.DELETE];
   }
   if (aggregateBy === Aggregation.USER) {
     const userCategories = getNonEmptyUsers(userKeyMap, values);
@@ -38,8 +38,19 @@ export const getDataCategories = (
       userCategories.splice(userCategories.indexOf("others"), 1);
     }
     userCategories.push("others");
-    return userCategories;
+    // sort based on the sumsWithPercentages
+    const sumsWithPercentages = calculateSumsAndPercentages(
+      values,
+      userCategories,
+      aggregateBy,
+      userKeyMap
+    );
+
+    return userCategories.sort((a, b) => {
+      return sumsWithPercentages.sums[b] - sumsWithPercentages.sums[a];
+    });
   }
+
   return [];
 };
 
@@ -134,15 +145,21 @@ export const transformDataForChart = (
   userKeyMap: Record<string, string>
 ) => {
   if (aggregateBy === Aggregation.USER) {
+    // keep the order in the categories
+    const categoryMap = Object.fromEntries(
+      categories.map((category, index) => [category, index])
+    );
+
     return Object.keys(values).map((timeKey) => {
       const valObject = values[timeKey];
 
-      const userValues: Record<string, number> = {};
+      const userValues: Record<string, { id: string; value: number }> = {};
       for (const user of Object.keys(userKeyMap)) {
         const value = valObject[user];
         const userName = userKeyMap[user];
 
-        userValues[userName] = value;
+        const userIndex = categoryMap[userName];
+        userValues[userIndex] = { id: user, value };
       }
 
       return {
@@ -151,13 +168,25 @@ export const transformDataForChart = (
       };
     });
   }
+
   if (aggregateBy === Aggregation.ACTIVITY_TYPE) {
+    const categoryMap = Object.fromEntries(
+      categories.map((category, index) => [category, index])
+    );
+
     return Object.keys(values).map((timeKey) => {
       const valObject = values[timeKey];
 
+      const activityValues: Record<string, { id: string; value: number }> = {};
+      for (const activity of Object.keys(categoryMap)) {
+        const value = valObject[activity];
+        const activityKey = categoryMap[activity];
+        activityValues[activityKey] = { id: activity, value };
+      }
+
       return {
         name: timeKey,
-        ...valObject,
+        ...activityValues,
       };
     });
   }

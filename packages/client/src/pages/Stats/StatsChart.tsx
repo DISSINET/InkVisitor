@@ -1,5 +1,4 @@
 import { IRequestStats, IResponseStats } from "@shared/types";
-import { Aggregation, EventType } from "@shared/types/stats";
 import { useQuery } from "@tanstack/react-query";
 import { color as d3Color, schemeTableau10 } from "d3";
 import { useCallback, useMemo, useState } from "react";
@@ -7,6 +6,7 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
+  Cell,
   Legend,
   LegendPayload,
   Tooltip,
@@ -16,11 +16,9 @@ import {
 
 import api from "api";
 import theme from "Theme/theme";
-import { ContentType } from "recharts/types/component/DefaultLegendContent";
 import {
   ChartDataPoint,
   getDataCategories,
-  getNonEmptyUsers,
   transformDataForChart,
 } from "./utils";
 
@@ -129,6 +127,7 @@ export const StatsChart = ({
     );
   }, [values, dataCategories, aggregateBy, userKeyMap]);
 
+  console.log("dataChart", dataChart);
   const handleMouseEnter = useCallback((payload: LegendPayload) => {
     setHoveringDataKey(payload.dataKey as string);
   }, []);
@@ -153,10 +152,21 @@ export const StatsChart = ({
   );
 
   const BarEls = useMemo<React.ReactNode[]>(() => {
-    return dataCategories.map((category) => {
+    return dataCategories.map((category, index) => {
       const color = getColor(category);
 
-      return <Bar key={category} dataKey={category} fill={color} stackId="a" />;
+      console.log("category", category);
+
+      return (
+        <Bar
+          key={category}
+          dataKey={(obj) => {
+            return obj[index]?.value;
+          }}
+          fill={color}
+          stackId="a"
+        />
+      );
     });
   }, [dataCategories, getColor]);
 
