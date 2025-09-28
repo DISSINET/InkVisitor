@@ -278,17 +278,19 @@ export const StatsPage = () => {
             ))}
           </ButtonGroup>
         </Field>
-        <Field>
-          <FieldLabel>Ignore users below %</FieldLabel>
-          <Input
-            type="number"
-            value={usersIgnoreBelowValueString}
-            onChangeFn={(value) => setUsersIgnoreBelowValue(Number(value))}
-            changeOnType
-            min={0}
-            max={20}
-          />
-        </Field>
+        {state.aggregate === Aggregation.USER && (
+          <Field>
+            <FieldLabel>Ignore users below %</FieldLabel>
+            <Input
+              type="number"
+              value={usersIgnoreBelowValueString}
+              onChangeFn={(value) => setUsersIgnoreBelowValue(Number(value))}
+              changeOnType
+              min={0}
+              max={20}
+            />
+          </Field>
+        )}
         <div>
           <Button
             color="success"
