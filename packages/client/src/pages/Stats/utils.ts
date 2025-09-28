@@ -1,5 +1,7 @@
 import { IResponseStats } from "@shared/types";
 import { Aggregation, EventType } from "@shared/types/stats";
+import { schemeTableau10 } from "d3";
+import theme from "Theme/theme";
 
 export const getNonEmptyUsers = (
   userKeyMap: Record<string, string>,
@@ -140,6 +142,19 @@ export const transformDataForTable = (
   });
 
   return rows;
+};
+
+const colors = schemeTableau10;
+
+export const getCategoryMap = (categories: string[]) => {
+  const colorsOut: Record<string, string> = {};
+  Object.keys(categories).forEach((category, index) => {
+    const color = colors[index % colors.length] || "#000";
+    const categoryValue = categories[index];
+    colorsOut[categoryValue] = color;
+  });
+  colorsOut["others"] = theme.color.greyer;
+  return colorsOut;
 };
 
 export type ChartDataPoint = {

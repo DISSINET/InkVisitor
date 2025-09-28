@@ -17,6 +17,7 @@ import api from "api";
 import theme from "Theme/theme";
 import {
   ChartDataPoint,
+  getCategoryMap,
   getDataCategories,
   transformDataForChart,
 } from "./utils";
@@ -54,20 +55,9 @@ export const StatsChart = ({
     return mapNames;
   }, [dataUsers]);
 
-  const colors = schemeTableau10;
-
   const dataCategories = getDataCategories(aggregateBy, userKeyMap, values);
 
-  const categoryColors = useMemo<Record<string, string>>(() => {
-    const colorsOut: Record<string, string> = {};
-    Object.keys(dataCategories).forEach((category, index) => {
-      const color = colors[index % colors.length] || "#000";
-      const categoryValue = dataCategories[index];
-      colorsOut[categoryValue] = color;
-    });
-    colorsOut["others"] = theme.color.greyer;
-    return colorsOut;
-  }, [aggregateBy, userKeyMap, colors, values, dataCategories]);
+  const categoryColors = getCategoryMap(dataCategories);
 
   const dataChart = useMemo<ChartDataPoint[]>(() => {
     return transformDataForChart(
