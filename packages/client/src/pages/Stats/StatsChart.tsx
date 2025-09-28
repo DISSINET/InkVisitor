@@ -9,6 +9,7 @@ import {
   Legend,
   LegendPayload,
   Tooltip,
+  TooltipContentProps,
   XAxis,
   YAxis,
 } from "recharts";
@@ -21,6 +22,7 @@ import {
   getDataCategories,
   transformDataForChart,
 } from "./utils";
+import { ContentType } from "recharts/types/component/Tooltip";
 
 interface StatsChartProps {
   data: IResponseStats;
@@ -121,6 +123,103 @@ export const StatsChart = ({
     return <CartesianGrid strokeDasharray="3 3" />;
   }, [values]);
 
+  const TooltipEl = ({
+    payload,
+    label,
+    active,
+  }: TooltipContentProps<number, string>): React.ReactNode => {
+    console.log(payload, label);
+    if (!active) {
+      return null;
+    }
+    return (
+      <div
+        className="custom-tooltip"
+        style={{
+          visibility: "visible",
+          display: "flex",
+          flexDirection: "column",
+          gap: theme.space[2],
+          backgroundColor: theme.color.gray[100],
+          padding: theme.space[4],
+          borderRadius: theme.space[2],
+          width: "100%",
+          opacity: 0.85,
+        }}
+      >
+        {/* label */}
+        <div
+          style={{
+            fontSize: theme.fontSize.sm,
+            color: theme.color.gray[100],
+            width: "fit-content",
+            backgroundColor: theme.color.gray[600],
+            padding: theme.space[1] + " " + theme.space[2],
+            borderRadius: theme.space[2],
+          }}
+        >
+          {label}
+        </div>
+        {/* payload */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: theme.space[1],
+            paddingLeft: theme.space[1],
+          }}
+        >
+          {dataCategories.map((category, index) => {
+            const payloadItem = payload?.[0]?.payload?.[index];
+            console.log(payload, category, index, payloadItem);
+            const payloadValue = payloadItem?.value;
+            const payloadName = payloadItem?.id;
+
+            if (!payloadValue) {
+              return null;
+            }
+
+            return (
+              <div
+                key={index}
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: theme.space[1],
+                }}
+              >
+                <span
+                  style={{
+                    backgroundColor: categoryColors[category],
+                    width: theme.space[6],
+                    height: theme.space[4],
+                  }}
+                />
+                <span
+                  style={{
+                    fontSize: theme.fontSize.xs,
+                    fontWeight: theme.fontWeight.medium,
+                  }}
+                >
+                  {category}
+                </span>
+                <span
+                  style={{
+                    fontSize: theme.fontSize.xs,
+                    fontWeight: theme.fontWeight.bold,
+                  }}
+                >
+                  {payloadValue}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <BarChart
       width={width}
@@ -135,7 +234,7 @@ export const StatsChart = ({
       {gridEl}
       {xAxisEl}
       {yAxisEl}
-      <Tooltip wrapperStyle={{ zIndex: 200 }} />
+      <Tooltip wrapperStyle={{ zIndex: 200 }} content={TooltipEl} />
       <Legend
         content={() => (
           <div
