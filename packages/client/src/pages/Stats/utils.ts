@@ -3,6 +3,8 @@ import { Aggregation, EventType } from "@shared/types/stats";
 import { schemeTableau10 } from "d3";
 import theme from "Theme/theme";
 
+export const OTHERS_KEY = "others";
+
 export const getNonEmptyUsers = (
   userKeyMap: Record<string, string>,
   values: Record<string, Record<string, number>>
@@ -24,6 +26,74 @@ export const getNonEmptyUsers = (
   return [...nonEmptyUsers];
 };
 
+// Pure transformation: groups users contributing less than `thresholdPercent` into OTHERS_KEY.
+export const applyUserThreshold = (
+  values: Record<string, Record<string, number>>,
+  thresholdPercent: number
+): Record<string, Record<string, number>> => {
+  if (!values || thresholdPercent <= 0) {
+    return values;
+  }
+
+  const timeKeys = Object.keys(values);
+  const userSet = new Set<string>();
+  let grandTotal = 0;
+
+  // Single pass to collect users and compute totals
+  timeKeys.forEach((timeKey) => {
+    const bucket = values[timeKey];
+    Object.entries(bucket).forEach(([user, value]) => {
+      grandTotal += value;
+      userSet.add(user);
+    });
+  });
+
+  if (grandTotal === 0) {
+    return values;
+  }
+
+  // Compute per-user totals
+  const userTotals: Record<string, number> = {};
+  timeKeys.forEach((timeKey) => {
+    const bucket = values[timeKey];
+    Object.entries(bucket).forEach(([user, value]) => {
+      userTotals[user] = (userTotals[user] || 0) + value;
+    });
+  });
+
+  // Determine ignored users
+  const ignored = new Set<string>();
+  Array.from(userSet).forEach((user) => {
+    const relative = ((userTotals[user] || 0) / grandTotal) * 100;
+    if (relative < thresholdPercent) {
+      ignored.add(user);
+    }
+  });
+
+  if (ignored.size === 0) {
+    return values;
+  }
+
+  // Build new structure
+  const next: Record<string, Record<string, number>> = {};
+  timeKeys.forEach((timeKey) => {
+    const bucket = values[timeKey];
+    const out: Record<string, number> = {};
+    let others = 0;
+    Object.entries(bucket).forEach(([user, value]) => {
+      if (ignored.has(user)) {
+        others += value;
+      } else {
+        out[user] = value;
+      }
+    });
+    out[OTHERS_KEY] = others;
+    next[timeKey] = out;
+  });
+
+  return next;
+};
+
 export const getDataCategories = (
   aggregateBy: Aggregation,
   userKeyMap: Record<string, string>,
@@ -36,10 +106,10 @@ export const getDataCategories = (
     const userCategories = getNonEmptyUsers(userKeyMap, values);
 
     // add others to the end of the categories
-    if (userCategories.includes("others")) {
-      userCategories.splice(userCategories.indexOf("others"), 1);
+    if (userCategories.includes(OTHERS_KEY)) {
+      userCategories.splice(userCategories.indexOf(OTHERS_KEY), 1);
     }
-    userCategories.push("others");
+    userCategories.push(OTHERS_KEY);
     // sort based on the sumsWithPercentages
     const sumsWithPercentages = calculateSumsAndPercentages(
       values,
@@ -53,10 +123,10 @@ export const getDataCategories = (
     });
 
     // move others to the end of the categories
-    if (userCategories.includes("others")) {
-      userCategories.splice(userCategories.indexOf("others"), 1);
+    if (userCategories.includes(OTHERS_KEY)) {
+      userCategories.splice(userCategories.indexOf(OTHERS_KEY), 1);
     }
-    userCategories.push("others");
+    userCategories.push(OTHERS_KEY);
 
     return userCategories;
   }
@@ -126,6 +196,8 @@ export const transformDataForTable = (
       Object.entries(userKeyMap).forEach(([userId, userName]) => {
         row[userName] = valObject[userId] || 0;
       });
+      // include others bucket if present
+      row[OTHERS_KEY] = valObject[OTHERS_KEY] || 0;
     } else {
       categories.forEach((category) => {
         row[category] = valObject[category] || 0;
@@ -148,12 +220,11 @@ const colors = schemeTableau10;
 
 export const getCategoryMap = (categories: string[]) => {
   const colorsOut: Record<string, string> = {};
-  Object.keys(categories).forEach((category, index) => {
+  categories.forEach((category, index) => {
     const color = colors[index % colors.length] || "#000";
-    const categoryValue = categories[index];
-    colorsOut[categoryValue] = color;
+    colorsOut[category] = color;
   });
-  colorsOut["others"] = theme.color.greyer;
+  colorsOut[OTHERS_KEY] = theme.color.greyer;
   return colorsOut;
 };
 
@@ -173,7 +244,7 @@ export const transformDataForChart = (
       categories.map((category, index) => [category, index])
     );
 
-    // categoryMap["others"] = categories.length - 1;
+    // categoryMap[OTHERS_KEY] = categories.length - 1;
 
     return Object.keys(values).map((timeKey) => {
       const valObject = values[timeKey];
@@ -185,6 +256,15 @@ export const transformDataForChart = (
 
         const userIndex = categoryMap[userName];
         userValues[userIndex] = { id: user, value };
+      }
+
+      // include others bucket if present
+      if (OTHERS_KEY in valObject) {
+        const othersIndex = categoryMap[OTHERS_KEY];
+        userValues[othersIndex] = {
+          id: OTHERS_KEY,
+          value: valObject[OTHERS_KEY],
+        };
       }
 
       return {

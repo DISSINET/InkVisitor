@@ -11,6 +11,7 @@ import { space1 } from "Theme/theme-space-shortcut";
 import { StatsChart } from "./StatsChart";
 import { initialState, statsReducer } from "./store";
 import { StatsTable } from "./StatsTable";
+import { OTHERS_KEY, applyUserThreshold } from "./utils";
 
 const Container = styled.div`
   padding: 20px;
@@ -76,9 +77,6 @@ export const StatsPage = () => {
   const [windowWidth, windowHeight] = useWindowSize();
 
   const [usersIgnoreBelowValue, setUsersIgnoreBelowValue] = useState<number>(0);
-  const usersIgnoreBelowValueString = useMemo<string>(() => {
-    return usersIgnoreBelowValue.toString();
-  }, [usersIgnoreBelowValue]);
 
   const statsRequest = useMemo<IRequestStats>(() => {
     return {
@@ -121,67 +119,12 @@ export const StatsPage = () => {
       return undefined;
     }
 
-    if (
-      usersIgnoreBelowValue > 0 &&
-      state.aggregate === Aggregation.USER &&
-      dataStats.values
-    ) {
-      const rawValues = dataStats.values;
-      const timeKeys = Object.keys(rawValues);
-
-      // Collect unique users
-      const userSet = new Set<string>();
-      timeKeys.forEach((timeKey) => {
-        Object.keys(rawValues[timeKey]).forEach((user) => userSet.add(user));
-      });
-      const users = Array.from(userSet);
-
-      // Compute total sum across all users and time buckets
-      let allSum = 0;
-      timeKeys.forEach((timeKey) => {
-        Object.values(rawValues[timeKey]).forEach((value) => {
-          allSum += value;
-        });
-      });
-
-      if (allSum === 0) {
-        return dataStats;
-      }
-
-      // Determine which users fall below the threshold
-      const ignoredUsers = users.filter((user) => {
-        let userSum = 0;
-        timeKeys.forEach((timeKey) => {
-          const value = rawValues[timeKey][user];
-          if (typeof value === "number") {
-            userSum += value;
-          }
-        });
-        const userRelative = (userSum / allSum) * 100;
-        return userRelative < usersIgnoreBelowValue;
-      });
-      const ignoredSet = new Set(ignoredUsers);
-
-      // Build a new nested structure without mutating the original
-      const newValues: Record<string, Record<string, number>> = {};
-      timeKeys.forEach((timeKey) => {
-        const source = rawValues[timeKey];
-        const nextBucket: Record<string, number> = {};
-        let belowSum = 0;
-
-        Object.entries(source).forEach(([user, value]) => {
-          if (ignoredSet.has(user)) {
-            belowSum += value;
-          } else {
-            nextBucket[user] = value;
-          }
-        });
-
-        nextBucket["others"] = belowSum;
-        newValues[timeKey] = nextBucket;
-      });
-
-      return { ...dataStats, values: newValues };
+    if (state.aggregate === Aggregation.USER && dataStats.values) {
+      const values = applyUserThreshold(
+        dataStats.values,
+        usersIgnoreBelowValue
+      );
+      return { ...dataStats, values };
     }
 
     return dataStats;
@@ -283,8 +226,15 @@ export const StatsPage = () => {
             <FieldLabel>Ignore users below %</FieldLabel>
             <Input
               type="number"
-              value={usersIgnoreBelowValueString}
-              onChangeFn={(value) => setUsersIgnoreBelowValue(Number(value))}
+              value={String(usersIgnoreBelowValue)}
+              onChangeFn={(value) => {
+                const num = Number(value);
+                const safe = Math.min(
+                  20,
+                  Math.max(0, Number.isFinite(num) ? num : 0)
+                );
+                setUsersIgnoreBelowValue(safe);
+              }}
               changeOnType
               min={0}
               max={20}
