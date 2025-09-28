@@ -1,17 +1,18 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 
-import { IRequestStats, IResponseAudit, IResponseStats } from "@shared/types";
+import { IRequestStats, IResponseStats } from "@shared/types";
 import { Aggregation, EventType, TimeUnit } from "@shared/types/stats";
 import { Button, ButtonGroup, Input } from "components";
 import { useWindowSize } from "hooks";
 import { useMemo, useReducer, useState } from "react";
 import styled from "styled-components";
 import { space1 } from "Theme/theme-space-shortcut";
+import { USER_THRESHOLD_MAX } from "./constants";
 import { StatsChart } from "./StatsChart";
-import { initialState, statsReducer } from "./store";
 import { StatsTable } from "./StatsTable";
-import { OTHERS_KEY, applyUserThreshold } from "./utils";
+import { initialState, statsReducer } from "./store";
+import { applyUserThreshold } from "./utils";
 
 const Container = styled.div`
   padding: 20px;
@@ -230,14 +231,14 @@ export const StatsPage = () => {
               onChangeFn={(value) => {
                 const num = Number(value);
                 const safe = Math.min(
-                  20,
+                  USER_THRESHOLD_MAX,
                   Math.max(0, Number.isFinite(num) ? num : 0)
                 );
                 setUsersIgnoreBelowValue(safe);
               }}
               changeOnType
               min={0}
-              max={20}
+              max={USER_THRESHOLD_MAX}
             />
           </Field>
         )}

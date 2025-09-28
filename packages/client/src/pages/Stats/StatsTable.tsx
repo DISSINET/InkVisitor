@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import { Column, useTable } from "react-table";
 import styled from "styled-components";
 import { getDataCategories, transformDataForTable } from "./utils";
+import { OTHERS_KEY, TABLE_PADDING } from "./constants";
 
 interface StatsTableProps {
   data: IResponseStats;
@@ -86,7 +87,7 @@ export const StatsTable = ({
 
   const userKeyMap = useMemo<Record<string, string>>(() => {
     const mapNames: Record<string, string> = {
-      others: "others",
+      [OTHERS_KEY]: OTHERS_KEY,
     };
     for (const user of dataUsers?.data || []) {
       mapNames[user.id] = user.name.replace(".", "_");
@@ -132,8 +133,8 @@ export const StatsTable = ({
     });
 
   return (
-    <TableContainer $height={height} $width={width - 0}>
-      <Table {...getTableProps()} $width={width - 30}>
+    <TableContainer $height={height} $width={width}>
+      <Table {...getTableProps()} $width={width - TABLE_PADDING}>
         <thead>
           {headerGroups.map((headerGroup) => {
             const { key, ...restHeaderGroupProps } =

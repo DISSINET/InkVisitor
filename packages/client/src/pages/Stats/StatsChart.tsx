@@ -1,6 +1,6 @@
 import { IRequestStats, IResponseStats } from "@shared/types";
 import { useQuery } from "@tanstack/react-query";
-import { color as d3Color, schemeTableau10 } from "d3";
+import { color as d3Color } from "d3";
 import { useCallback, useMemo, useState } from "react";
 import {
   Bar,
@@ -16,13 +16,13 @@ import {
 
 import api from "api";
 import theme from "Theme/theme";
+import { OTHERS_KEY } from "./constants";
 import {
   ChartDataPoint,
   getCategoryMap,
   getDataCategories,
   transformDataForChart,
 } from "./utils";
-import { ContentType } from "recharts/types/component/Tooltip";
 
 interface StatsChartProps {
   data: IResponseStats;
@@ -49,7 +49,7 @@ export const StatsChart = ({
 
   const userKeyMap = useMemo<Record<string, string>>(() => {
     const mapNames: Record<string, string> = {
-      others: "others",
+      [OTHERS_KEY]: OTHERS_KEY,
     };
     for (const user of dataUsers?.data || []) {
       mapNames[user.id] = user.name.replace(".", "_");
@@ -94,12 +94,11 @@ export const StatsChart = ({
 
   const BarEls = useMemo<React.ReactNode[]>(() => {
     return dataCategories.map((category, index) => {
-      console.log("dataCategory", category, index);
       const color = getColor(category);
 
       return (
         <Bar
-          key={index}
+          key={category}
           dataKey={(obj) => {
             return obj[index]?.value;
           }}
@@ -128,7 +127,6 @@ export const StatsChart = ({
     label,
     active,
   }: TooltipContentProps<number, string>): React.ReactNode => {
-    console.log(payload, label);
     if (!active) {
       return null;
     }
@@ -171,7 +169,6 @@ export const StatsChart = ({
         >
           {dataCategories.map((category, index) => {
             const payloadItem = payload?.[0]?.payload?.[index];
-            console.log(payload, category, index, payloadItem);
             const payloadValue = payloadItem?.value;
             const payloadName = payloadItem?.id;
 
