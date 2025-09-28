@@ -17,7 +17,12 @@ import {
 import api from "api";
 import theme from "Theme/theme";
 import { ContentType } from "recharts/types/component/DefaultLegendContent";
-import { getNonEmptyUsers } from "./utils";
+import {
+  ChartDataPoint,
+  getDataCategories,
+  getNonEmptyUsers,
+  transformDataForChart,
+} from "./utils";
 
 interface StatsChartProps {
   data: IResponseStats;
@@ -25,10 +30,6 @@ interface StatsChartProps {
   width: number;
   request: IRequestStats;
 }
-
-type ChartDataPoint = {
-  name: string;
-} & Record<string, number | string>;
 
 export const StatsChart = ({
   data,
@@ -78,7 +79,9 @@ export const StatsChart = ({
   });
 
   const userKeyMap = useMemo<Record<string, string>>(() => {
-    const mapNames: Record<string, string> = {};
+    const mapNames: Record<string, string> = {
+      others: "others",
+    };
     for (const user of dataUsers?.data || []) {
       mapNames[user.id] = user.name.replace(".", "_");
     }
@@ -87,21 +90,7 @@ export const StatsChart = ({
 
   const colors = schemeTableau10;
 
-  const dataCategories = useMemo<string[]>(() => {
-    const categoriesOut = [];
-
-    if (aggregateBy === Aggregation.ACTIVITY_TYPE) {
-      categoriesOut.push(EventType.EDIT);
-      categoriesOut.push(EventType.DELETE);
-      categoriesOut.push(EventType.CREATE);
-    }
-
-    if (aggregateBy === Aggregation.USER) {
-      const nonEmptyUsers = getNonEmptyUsers(userKeyMap, values);
-      categoriesOut.push(...nonEmptyUsers);
-    }
-    return categoriesOut;
-  }, [aggregateBy, userKeyMap]);
+  const dataCategories = getDataCategories(aggregateBy, userKeyMap, values);
 
   const categoryColors = useMemo<Record<string, string>>(() => {
     const colorsOut: Record<string, string> = {};
@@ -110,6 +99,7 @@ export const StatsChart = ({
       const categoryValue = dataCategories[index];
       colorsOut[categoryValue] = color;
     });
+    colorsOut["others"] = theme.color.greyer;
     return colorsOut;
     // if (aggregateBy === Aggregation.ACTIVITY_TYPE) {
     //   return {
@@ -127,41 +117,17 @@ export const StatsChart = ({
     //   return userColors;
     // }
     // return {};
-  }, [aggregateBy, userKeyMap, colors]);
+  }, [aggregateBy, userKeyMap, colors, values, dataCategories]);
 
   // console.log(categoryColors);
   const dataChart = useMemo<ChartDataPoint[]>(() => {
-    if (aggregateBy === Aggregation.USER) {
-      return Object.keys(values).map((timeKey) => {
-        const valObject = values[timeKey];
-
-        const userValues: Record<string, number> = {};
-        for (const user of dataUsers?.data || []) {
-          const value = valObject[user.id];
-          const userName = userKeyMap[user.id];
-
-          userValues[userName] = value;
-        }
-
-        return {
-          name: timeKey,
-          ...userValues,
-        };
-      });
-    }
-    if (aggregateBy === Aggregation.ACTIVITY_TYPE) {
-      return Object.keys(values).map((timeKey) => {
-        const valObject = values[timeKey];
-
-        return {
-          name: timeKey,
-          ...valObject,
-        };
-      });
-    }
-
-    return [];
-  }, [values, dataUsers, userKeyMap, aggregateBy]);
+    return transformDataForChart(
+      values,
+      dataCategories,
+      aggregateBy,
+      userKeyMap
+    );
+  }, [values, dataCategories, aggregateBy, userKeyMap]);
 
   const handleMouseEnter = useCallback((payload: LegendPayload) => {
     setHoveringDataKey(payload.dataKey as string);
@@ -207,7 +173,16 @@ export const StatsChart = ({
   }, [values]);
 
   return (
-    <BarChart width={width} height={height - 30} data={dataChart}>
+    <BarChart
+      width={width}
+      height={height - 30}
+      data={dataChart}
+      onMouseLeave={() => {
+        if (hoveringDataKey) {
+          handleMouseLeave();
+        }
+      }}
+    >
       {gridEl}
       {xAxisEl}
       {yAxisEl}
@@ -275,48 +250,4 @@ export const StatsChart = ({
       {BarEls}
     </BarChart>
   );
-
-  // return (
-  //   <div style={{ position: "relative" }}>
-  //     <svg width={width} height={height} style={{ position: "absolute" }}>
-  //       <g transform={`translate(${xAxisPadding}, ${height - yAxisPadding})`}>
-  //         <Axis
-  //           scale={xScale}
-  //           orient={Orient.bottom}
-  //           tickFormat={(d: string) => d}
-  //           tickSize={10}
-  //         />
-  //       </g>
-  //       <g transform={`translate(${xAxisPadding}, ${0})`}>
-  //         <Axis scale={yScale} orient={Orient.left} tickSize={10} />
-  //       </g>
-  //     </svg>
-  //     <svg width={width} height={height} style={{ position: "absolute" }}>
-  //       <g>
-  //         {Object.keys(values).map((timeKey) => {
-  //           const timeValues = values[timeKey];
-
-  //           return Object.keys(timeValues).map((categoryKey) => {
-  //             const value = timeValues[categoryKey];
-  //             const x = xScale(timeKey);
-  //             const y = yScale(value);
-  //             const barH = height - yScale(value);
-
-  //             return (
-  //               <rect
-  //                 key={`${timeKey}-${categoryKey}`}
-  //                 x={x}
-  //                 y={y}
-  //                 width={barW}
-  //                 height={barH}
-  //                 fill={categoryColors[categoryKey]}
-  //                 fillOpacity={0.5}
-  //               />
-  //             );
-  //           });
-  //         })}
-  //       </g>
-  //     </svg>
-  //   </div>
-  // );
 };

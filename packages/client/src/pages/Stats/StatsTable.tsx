@@ -1,5 +1,4 @@
 import { IRequestStats, IResponseStats } from "@shared/types";
-import { Aggregation } from "@shared/types/stats";
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
 import { useMemo } from "react";
@@ -86,7 +85,9 @@ export const StatsTable = ({
   });
 
   const userKeyMap = useMemo<Record<string, string>>(() => {
-    const mapNames: Record<string, string> = {};
+    const mapNames: Record<string, string> = {
+      others: "others",
+    };
     for (const user of dataUsers?.data || []) {
       mapNames[user.id] = user.name.replace(".", "_");
     }
@@ -95,13 +96,13 @@ export const StatsTable = ({
 
   const dataCategories = useMemo(
     () => getDataCategories(aggregateBy, userKeyMap, values),
-    [aggregateBy, userKeyMap, values]
+    [aggregateBy, userKeyMap, JSON.stringify(values)]
   );
 
   const tableData = useMemo(
     () =>
       transformDataForTable(values, dataCategories, aggregateBy, userKeyMap),
-    [values, dataCategories, aggregateBy, userKeyMap]
+    [values, dataCategories, aggregateBy, userKeyMap, JSON.stringify(values)]
   );
 
   const columns = useMemo<Column<TableRow>[]>(

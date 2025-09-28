@@ -116,15 +116,82 @@ export const StatsPage = () => {
     },
   });
 
+  const data = useMemo<IResponseStats | undefined>(() => {
+    if (!dataStats) {
+      return undefined;
+    }
+
+    if (
+      usersIgnoreBelowValue > 0 &&
+      state.aggregate === Aggregation.USER &&
+      dataStats.values
+    ) {
+      const rawValues = dataStats.values;
+      const timeKeys = Object.keys(rawValues);
+
+      // Collect unique users
+      const userSet = new Set<string>();
+      timeKeys.forEach((timeKey) => {
+        Object.keys(rawValues[timeKey]).forEach((user) => userSet.add(user));
+      });
+      const users = Array.from(userSet);
+
+      // Compute total sum across all users and time buckets
+      let allSum = 0;
+      timeKeys.forEach((timeKey) => {
+        Object.values(rawValues[timeKey]).forEach((value) => {
+          allSum += value;
+        });
+      });
+
+      if (allSum === 0) {
+        return dataStats;
+      }
+
+      // Determine which users fall below the threshold
+      const ignoredUsers = users.filter((user) => {
+        let userSum = 0;
+        timeKeys.forEach((timeKey) => {
+          const value = rawValues[timeKey][user];
+          if (typeof value === "number") {
+            userSum += value;
+          }
+        });
+        const userRelative = (userSum / allSum) * 100;
+        return userRelative < usersIgnoreBelowValue;
+      });
+      const ignoredSet = new Set(ignoredUsers);
+
+      // Build a new nested structure without mutating the original
+      const newValues: Record<string, Record<string, number>> = {};
+      timeKeys.forEach((timeKey) => {
+        const source = rawValues[timeKey];
+        const nextBucket: Record<string, number> = {};
+        let belowSum = 0;
+
+        Object.entries(source).forEach(([user, value]) => {
+          if (ignoredSet.has(user)) {
+            belowSum += value;
+          } else {
+            nextBucket[user] = value;
+          }
+        });
+
+        nextBucket["others"] = belowSum;
+        newValues[timeKey] = nextBucket;
+      });
+
+      return { ...dataStats, values: newValues };
+    }
+
+    return dataStats;
+  }, [dataStats, usersIgnoreBelowValue, state.aggregate]);
+
   const isLoading = isLoadingStats;
   const isError = isErrorStats && !isLoadingStats;
 
   const isNoData = !isLoadingStats && !isErrorStats && !dataStats;
   const isReady = !isLoadingStats && !isErrorStats && dataStats;
-
-  const data = useMemo<IResponseAudit | undefined>(() => {
-    return dataStats;
-  }, [dataStats]);
 
   return (
     <Container>
@@ -212,11 +279,14 @@ export const StatsPage = () => {
           </ButtonGroup>
         </Field>
         <Field>
-          <FieldLabel>Users Ignore Below Value</FieldLabel>
+          <FieldLabel>Ignore users below %</FieldLabel>
           <Input
             type="number"
             value={usersIgnoreBelowValueString}
             onChangeFn={(value) => setUsersIgnoreBelowValue(Number(value))}
+            changeOnType
+            min={0}
+            max={20}
           />
         </Field>
         <div>
@@ -239,7 +309,7 @@ export const StatsPage = () => {
           <>
             <ResultsChart>
               <StatsChart
-                data={dataStats as unknown as IResponseStats}
+                data={data as unknown as IResponseStats}
                 height={windowHeight / 3}
                 width={windowWidth - 50}
                 request={statsRequest}
@@ -247,7 +317,7 @@ export const StatsPage = () => {
             </ResultsChart>
             <ResultsTable>
               <StatsTable
-                data={dataStats as unknown as IResponseStats}
+                data={data as unknown as IResponseStats}
                 height={windowHeight / 3}
                 width={windowWidth - 50}
                 request={statsRequest}

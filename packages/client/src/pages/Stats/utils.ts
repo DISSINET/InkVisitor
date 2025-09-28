@@ -4,7 +4,7 @@ import { IResponseStats } from "@shared/types";
 export const getNonEmptyUsers = (
   userKeyMap: Record<string, string>,
   values: Record<string, Record<string, number>>
-) => {
+): string[] => {
   const nonEmptyUsers: string[] = [];
   Object.keys(userKeyMap).forEach((userKey) => {
     const userValue = userKeyMap[userKey];
@@ -19,7 +19,7 @@ export const getNonEmptyUsers = (
       nonEmptyUsers.push(userValue);
     }
   });
-  return nonEmptyUsers;
+  return [...nonEmptyUsers];
 };
 
 export const getDataCategories = (
@@ -31,7 +31,14 @@ export const getDataCategories = (
     return [EventType.EDIT, EventType.DELETE, EventType.CREATE];
   }
   if (aggregateBy === Aggregation.USER) {
-    return getNonEmptyUsers(userKeyMap, values);
+    const userCategories = getNonEmptyUsers(userKeyMap, values);
+
+    // add others to the end of the categories
+    if (userCategories.includes("others")) {
+      userCategories.splice(userCategories.indexOf("others"), 1);
+    }
+    userCategories.push("others");
+    return userCategories;
   }
   return [];
 };
@@ -116,31 +123,44 @@ export const transformDataForTable = (
   return rows;
 };
 
+export type ChartDataPoint = {
+  name: string;
+} & Record<string, number | string>;
+
 export const transformDataForChart = (
   values: IResponseStats["values"],
   categories: string[],
   aggregateBy: Aggregation,
   userKeyMap: Record<string, string>
 ) => {
-  interface ChartPoint {
-    name: string;
-    [key: string]: string | number;
+  if (aggregateBy === Aggregation.USER) {
+    return Object.keys(values).map((timeKey) => {
+      const valObject = values[timeKey];
+
+      const userValues: Record<string, number> = {};
+      for (const user of Object.keys(userKeyMap)) {
+        const value = valObject[user];
+        const userName = userKeyMap[user];
+
+        userValues[userName] = value;
+      }
+
+      return {
+        name: timeKey,
+        ...userValues,
+      };
+    });
+  }
+  if (aggregateBy === Aggregation.ACTIVITY_TYPE) {
+    return Object.keys(values).map((timeKey) => {
+      const valObject = values[timeKey];
+
+      return {
+        name: timeKey,
+        ...valObject,
+      };
+    });
   }
 
-  return Object.keys(values).map((timeKey) => {
-    const valObject = values[timeKey];
-    const chartPoint: ChartPoint = { name: timeKey };
-
-    if (aggregateBy === Aggregation.USER) {
-      Object.entries(userKeyMap).forEach(([userId, userName]) => {
-        chartPoint[userName] = valObject[userId] || 0;
-      });
-    } else {
-      categories.forEach((category) => {
-        chartPoint[category] = valObject[category] || 0;
-      });
-    }
-
-    return chartPoint;
-  });
+  return [];
 };
