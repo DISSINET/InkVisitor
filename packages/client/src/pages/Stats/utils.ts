@@ -26,7 +26,6 @@ export const getNonEmptyUsers = (
   return [...nonEmptyUsers];
 };
 
-// Pure transformation: groups users contributing less than `thresholdPercent` into OTHERS_KEY.
 export const applyUserThreshold = (
   values: Record<string, Record<string, number>>,
   thresholdPercent: number
@@ -36,15 +35,14 @@ export const applyUserThreshold = (
   }
 
   const timeKeys = Object.keys(values);
-  const userSet = new Set<string>();
-  let grandTotal = 0;
 
-  // Single pass to collect users and compute totals
+  const userTotals: Record<string, number> = {};
+  let grandTotal = 0;
   timeKeys.forEach((timeKey) => {
     const bucket = values[timeKey];
     Object.entries(bucket).forEach(([user, value]) => {
       grandTotal += value;
-      userSet.add(user);
+      userTotals[user] = (userTotals[user] || 0) + value;
     });
   });
 
@@ -52,19 +50,10 @@ export const applyUserThreshold = (
     return values;
   }
 
-  // Compute per-user totals
-  const userTotals: Record<string, number> = {};
-  timeKeys.forEach((timeKey) => {
-    const bucket = values[timeKey];
-    Object.entries(bucket).forEach(([user, value]) => {
-      userTotals[user] = (userTotals[user] || 0) + value;
-    });
-  });
-
   // Determine ignored users
   const ignored = new Set<string>();
-  Array.from(userSet).forEach((user) => {
-    const relative = ((userTotals[user] || 0) / grandTotal) * 100;
+  Object.entries(userTotals).forEach(([user, total]) => {
+    const relative = (total / grandTotal) * 100;
     if (relative < thresholdPercent) {
       ignored.add(user);
     }

@@ -98,7 +98,7 @@ export const StatsChart = ({
 
       return (
         <Bar
-          key={category}
+          key={index}
           dataKey={(obj) => {
             return obj[index]?.value;
           }}
