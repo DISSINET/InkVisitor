@@ -1,5 +1,5 @@
-import { Aggregation, EventType } from "@shared/types/stats";
 import { IResponseStats } from "@shared/types";
+import { Aggregation, EventType } from "@shared/types/stats";
 
 export const getNonEmptyUsers = (
   userKeyMap: Record<string, string>,

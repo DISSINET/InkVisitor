@@ -6,7 +6,6 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
-  Cell,
   Legend,
   LegendPayload,
   Tooltip,
@@ -39,37 +38,6 @@ export const StatsChart = ({
   const [hoveringDataKey, setHoveringDataKey] = useState<string | null>(null);
   const { aggregateBy, eventType } = request;
 
-  // const xScale = useMemo(() => {
-  //   const minPx = xAxisPadding;
-  //   const maxPx = width - xAxisPadding;
-
-  //   const minValue = new Date(Object.keys(values)[0]);
-  //   const maxValue = new Date(
-  //     Object.keys(values)[Object.keys(values).length - 1]
-  //   );
-
-  //   return scaleBand().domain(Object.keys(values)).range([minPx, maxPx]);
-  // }, [data, width, xAxisPadding, values]);
-
-  // const yScale = useMemo(() => {
-  //   const minPx = yAxisPadding;
-  //   const maxPx = height - yAxisPadding;
-
-  //   const minValue = 0;
-
-  //   const groupValues = Object.values(values);
-  //   const maxValue = Math.max(
-  //     ...groupValues.map((d) =>
-  //       Object.values(d).reduce((acc, curr) => acc + curr, 0)
-  //     )
-  //   );
-
-  //   return scaleLinear()
-  //     .domain([minValue, maxValue])
-  //     .nice()
-  //     .range([maxPx, minPx]);
-  // }, [data, height, values, yAxisPadding]);
-
   const { data: dataUsers } = useQuery({
     queryKey: ["users-stats"],
     queryFn: () => api.usersGetMore({}),
@@ -99,25 +67,8 @@ export const StatsChart = ({
     });
     colorsOut["others"] = theme.color.greyer;
     return colorsOut;
-    // if (aggregateBy === Aggregation.ACTIVITY_TYPE) {
-    //   return {
-    //     [EventType.EDIT]: colors[0],
-    //     [EventType.DELETE]: colors[1],
-    //     [EventType.CREATE]: colors[2],
-    //   };
-    // }
-
-    // if (aggregateBy === Aggregation.USER) {
-    //   const userColors: Record<string, string> = {};
-    //   Object.values(userKeyMap).forEach((user, index) => {
-    //     userColors[user] = colors[index % colors.length] || "#000";
-    //   });
-    //   return userColors;
-    // }
-    // return {};
   }, [aggregateBy, userKeyMap, colors, values, dataCategories]);
 
-  // console.log(categoryColors);
   const dataChart = useMemo<ChartDataPoint[]>(() => {
     return transformDataForChart(
       values,
@@ -127,7 +78,6 @@ export const StatsChart = ({
     );
   }, [values, dataCategories, aggregateBy, userKeyMap]);
 
-  console.log("dataChart", dataChart);
   const handleMouseEnter = useCallback((payload: LegendPayload) => {
     setHoveringDataKey(payload.dataKey as string);
   }, []);
@@ -146,7 +96,6 @@ export const StatsChart = ({
       const catColor = categoryColors[category];
 
       return isActive ? d3Color(catColor)?.formatHex() : theme.color.gray[500];
-      // : d3Color(catColor)?.brighter(3).formatHex();
     },
     [hoveringDataKey, categoryColors]
   );
@@ -154,8 +103,6 @@ export const StatsChart = ({
   const BarEls = useMemo<React.ReactNode[]>(() => {
     return dataCategories.map((category, index) => {
       const color = getColor(category);
-
-      console.log("category", category);
 
       return (
         <Bar
