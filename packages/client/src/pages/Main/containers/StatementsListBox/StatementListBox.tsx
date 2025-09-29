@@ -147,8 +147,11 @@ export const StatementListBox: React.FC = () => {
   } = useQuery({
     queryKey: ["user", userId],
     queryFn: async () => {
-      const res = await api.usersGet(userId as string);
-      return res.data ?? undefined;
+      if (userId) {
+        const res = await api.usersGet(userId);
+        return res.data ?? undefined;
+      }
+      return undefined;
     },
     enabled: api.isLoggedIn() && !!userId,
   });
@@ -718,7 +721,7 @@ export const StatementListBox: React.FC = () => {
     orderCorrection?: StatementOrderCorrection;
     isAnchored?: boolean;
   })[] = useMemo(() => {
-    if (!selectedDocument || !statements.length) return statements;
+    if (!selectedDocument || !statements?.length) return statements ?? [];
 
     // Collect anchors from the document and remove duplicates
     const statementAnchors = Array.from(
