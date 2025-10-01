@@ -110,10 +110,8 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   } = useQuery({
     queryKey: ["user", userId],
     queryFn: async () => {
-      if (userId) {
-        const res = await api.usersGet(userId);
-        return res.data;
-      }
+      const res = await api.usersGet(userId as string);
+      return res.data ?? undefined;
     },
     enabled: !!userId && api.isLoggedIn(),
   });
@@ -266,12 +264,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
     }
   };
 
-  const {
-    status: templateStatus,
-    data: templates,
-    error: templateError,
-    isFetching: isFetchingTemplates,
-  } = useQuery({
+  const { data: templates } = useQuery({
     queryKey: ["entity-templates", "templates", selectedCategory],
     queryFn: async () => {
       if (selectedCategory) {
@@ -280,7 +273,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
           class: selectedCategory,
         });
 
-        const templates = res.data;
+        const templates = res.data ?? [];
         templates.sort((a: IEntity, b: IEntity) =>
           a.labels[0].toLocaleLowerCase() > b.labels[0].toLocaleLowerCase()
             ? 1

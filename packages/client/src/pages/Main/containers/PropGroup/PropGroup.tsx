@@ -87,7 +87,7 @@ export const PropGroup: React.FC<PropGroup> = ({
     queryFn: async () => {
       if (territoryId) {
         const res = await api.entityIdsInTerritory(territoryId);
-        return res.data;
+        return res.data ?? [];
       } else {
         return [];
       }

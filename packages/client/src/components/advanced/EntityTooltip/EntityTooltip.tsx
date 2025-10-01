@@ -118,7 +118,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
     queryKey: ["tooltip", entityId, allowFetch],
     queryFn: async () => {
       const res = await api.tooltipGet(entityId);
-      setTooltipData(res.data);
+      setTooltipData(res.data ?? false);
       return res.data;
     },
     enabled: api.isLoggedIn() && !!entityId && allowFetch,

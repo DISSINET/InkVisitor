@@ -59,18 +59,11 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
 
   // get user data
   const userId = localStorage.getItem("userid");
-  const {
-    status: statusUser,
-    data: user,
-    error: errorUser,
-    isFetching: isFetchingUser,
-  } = useQuery({
+  const { data: user } = useQuery({
     queryKey: ["user", userId],
     queryFn: async () => {
-      if (userId) {
-        const res = await api.usersGet(userId);
-        return res.data;
-      }
+      const res = await api.usersGet(userId as string);
+      return res.data ?? undefined;
     },
     enabled: !!userId && api.isLoggedIn(),
   });

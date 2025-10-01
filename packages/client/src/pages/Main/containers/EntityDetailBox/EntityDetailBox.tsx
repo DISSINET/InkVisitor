@@ -43,7 +43,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     queryKey: ["detail-tab-entities", detailIdArray],
     queryFn: async () => {
       const res = await api.entitiesSearch({ entityIds: detailIdArray });
-      return res.data;
+      return res.data ?? [];
     },
     enabled: api.isLoggedIn() && detailIdArray.length > 0,
   });

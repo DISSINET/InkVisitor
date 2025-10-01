@@ -75,7 +75,7 @@ interface TextAnnotatorProps {
   dataDocumentError: Error | null;
   showStatementList?: boolean;
 
-  statementCreateMutation: UseMutationResult<
+  statementCreateMutation?: UseMutationResult<
     AxiosResponse<IResponseGeneric<IStatement>, any>,
     Error,
     IStatement,
@@ -105,7 +105,7 @@ export const TextAnnotator = ({
   dataDocumentError,
   showStatementList,
 
-  statementCreateMutation,
+  statementCreateMutation = undefined,
   userData,
 }: TextAnnotatorProps) => {
   const queryClient = useQueryClient();
@@ -204,7 +204,7 @@ export const TextAnnotator = ({
       language: EntityEnums.Language;
     }
   ) => {
-    if (dataDocument) {
+    if (dataDocument && statementCreateMutation) {
       // take order from the anchors in the document
       // filter only Statements
       const statementAnchors = Array.from(
@@ -257,7 +257,7 @@ export const TextAnnotator = ({
             statementId,
             newOrder
           );
-          statementCreateMutation.mutate(newStatement);
+          statementCreateMutation?.mutate(newStatement);
         } else {
           const newStatement: IStatement = CStatement(
             localStorage.getItem("userrole") as UserEnums.Role,
@@ -268,7 +268,7 @@ export const TextAnnotator = ({
             statementId,
             newOrder
           );
-          statementCreateMutation.mutate(newStatement);
+          statementCreateMutation?.mutate(newStatement);
         }
       }
     }
@@ -426,22 +426,25 @@ export const TextAnnotator = ({
     }
   }, [pendingSelection, isSelectingText]);
 
-  const { data: anchorEntities, isFetching: isFetchingAnchorEntities } =
-    useQuery({
-      queryKey: ["anchorEntities", selectedAnchors],
-      queryFn: async () => {
-        const uniqueAnchors = [...new Set(selectedAnchors)];
-        const entities = await api.entitiesGet(uniqueAnchors);
-        setStoredEntities(
-          entities.data.reduce((acc, entity) => {
-            acc[entity.id] = entity;
-            return acc;
-          }, {} as Record<string, IEntity>)
-        );
-        return entities.data;
-      },
-      enabled: api.isLoggedIn() && selectedAnchors.length > 0,
-    });
+  const { isFetching: isFetchingAnchorEntities } = useQuery({
+    queryKey: ["anchorEntities", selectedAnchors],
+    queryFn: async () => {
+      const uniqueAnchors = [...new Set(selectedAnchors)];
+      const entities = await api.entitiesGet(uniqueAnchors);
+
+      const data = entities.data ?? [];
+
+      setStoredEntities(
+        data.reduce((acc, entity) => {
+          acc[entity.id] = entity;
+          return acc;
+        }, {} as Record<string, IEntity>)
+      );
+
+      return data;
+    },
+    enabled: api.isLoggedIn() && selectedAnchors.length > 0,
+  });
 
   const handleAddAnchor = (entityId: string) => {
     // TODO: handle adding a new statement - preserve the order

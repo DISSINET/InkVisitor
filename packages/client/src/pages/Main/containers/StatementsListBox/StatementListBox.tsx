@@ -11,12 +11,12 @@ import {
   ITerritory,
   Relation,
 } from "@shared/types";
-import { IAnchorsNode } from "@shared/types/document";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { CustomScrollbar, Loader, Submit, ToastWithLink } from "components";
 import { CStatement } from "constructors";
-import { useResizeObserver, useSearchParams, useDebounce } from "hooks";
+import { useResizeObserver, useSearchParams } from "hooks";
+import useAnnotator from "hooks/useAnnotator";
 import React, { useEffect, useMemo, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { toast } from "react-toastify";
@@ -25,20 +25,13 @@ import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlic
 import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import {
-  COLLAPSED_PANEL_WIDTH,
-  COLLAPSED_TABLE_WIDTH,
-  SECOND_PANEL_MIN_WIDTH,
-} from "Theme/constants";
+import { COLLAPSED_TABLE_WIDTH, SECOND_PANEL_MIN_WIDTH } from "Theme/constants";
 import {
   EntitiesDeleteSuccessResponse,
   StatementListDisplayMode,
   StatementOrderCorrection,
 } from "types";
-import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
-import { StatementListTable } from "./StatementListTable/StatementListTable";
-import { StatementListTextAnnotator } from "./StatementListTextAnnotator/StatementListTextAnnotator";
-import useAnnotator from "hooks/useAnnotator";
+import { collectStatementAnchors, getStatementOrderByIndex } from "utils/utils";
 import {
   StyledContentWrapper,
   StyledEmptyState,
@@ -46,7 +39,9 @@ import {
   StyledLoaderWrap,
   StyledTableWrapper,
 } from "./StatementListBoxStyles";
-import { collectStatementAnchors, getStatementOrderByIndex } from "utils/utils";
+import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
+import { StatementListTable } from "./StatementListTable/StatementListTable";
+import { StatementListTextAnnotator } from "./StatementListTextAnnotator/StatementListTextAnnotator";
 
 const initialData: {
   statements: IResponseStatement[];
@@ -154,8 +149,9 @@ export const StatementListBox: React.FC = () => {
     queryFn: async () => {
       if (userId) {
         const res = await api.usersGet(userId);
-        return res.data;
+        return res.data ?? undefined;
       }
+      return undefined;
     },
     enabled: api.isLoggedIn() && !!userId,
   });
@@ -329,14 +325,14 @@ export const StatementListBox: React.FC = () => {
     data: selectedDocument,
     error: selectedDocumentError,
     isFetching: selectedDocumentIsFetching,
-  } = useQuery<IDocument | false>({
+  } = useQuery({
     queryKey: ["document", selectedDocumentId],
     queryFn: async () => {
       if (selectedDocumentId) {
         const res = await api.documentGet(selectedDocumentId);
-        return res.data;
+        return res.data ?? undefined;
       }
-      return false;
+      return undefined;
     },
     enabled: api.isLoggedIn() && !!selectedDocumentId,
   });
@@ -725,7 +721,7 @@ export const StatementListBox: React.FC = () => {
     orderCorrection?: StatementOrderCorrection;
     isAnchored?: boolean;
   })[] = useMemo(() => {
-    if (!selectedDocument || !statements.length) return statements;
+    if (!selectedDocument || !statements?.length) return statements ?? [];
 
     // Collect anchors from the document and remove duplicates
     const statementAnchors = Array.from(

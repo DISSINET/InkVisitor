@@ -84,7 +84,6 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
   });
 
   const {
-    status: settingsStatus,
     data: settings,
     error: settingsError,
     isFetching: settingsIsFetching,
@@ -92,7 +91,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
     queryKey: ["settings"],
     queryFn: async () => {
       const res = await api.settingGroupGet("validations");
-      return res.data.data?.settings;
+      return res.data.data?.settings ?? [];
     },
     enabled: api.isLoggedIn(),
   });
