@@ -1,11 +1,11 @@
 import { IRequestStats, IResponseStats } from "@shared/types";
-import { Aggregation } from "@shared/types/stats";
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
 import { useMemo } from "react";
 import { Column, useTable } from "react-table";
 import styled from "styled-components";
 import { getDataCategories, transformDataForTable } from "./utils";
+import { OTHERS_KEY, TABLE_PADDING } from "./constants";
 
 interface StatsTableProps {
   data: IResponseStats;
@@ -98,13 +98,13 @@ export const StatsTable = ({
 
   const dataCategories = useMemo(
     () => getDataCategories(aggregateBy, userKeyMap, values),
-    [aggregateBy, userKeyMap, values]
+    [aggregateBy, userKeyMap, JSON.stringify(values)]
   );
 
   const tableData = useMemo(
     () =>
       transformDataForTable(values, dataCategories, aggregateBy, userKeyMap),
-    [values, dataCategories, aggregateBy, userKeyMap]
+    [values, dataCategories, aggregateBy, userKeyMap, JSON.stringify(values)]
   );
 
   const columns = useMemo<Column<TableRow>[]>(
@@ -135,7 +135,7 @@ export const StatsTable = ({
 
   return (
     <TableContainer $height={height} $width={width}>
-      <Table {...getTableProps()} $width={width}>
+      <Table {...getTableProps()} $width={width - TABLE_PADDING}>
         <thead>
           {headerGroups.map((headerGroup) => {
             const { key, ...restHeaderGroupProps } =

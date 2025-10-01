@@ -5,12 +5,14 @@ import { IRequestStats, IResponseStats } from "@shared/types";
 import { Aggregation, EventType, TimeUnit } from "@shared/types/stats";
 import { Button, ButtonGroup, Input } from "components";
 import { useWindowSize } from "hooks";
-import { useMemo, useReducer } from "react";
+import { useMemo, useReducer, useState } from "react";
 import styled from "styled-components";
 import { space1 } from "Theme/theme-space-shortcut";
+import { USER_THRESHOLD_MAX } from "./constants";
 import { StatsChart } from "./StatsChart";
-import { initialState, statsReducer } from "./store";
 import { StatsTable } from "./StatsTable";
+import { initialState, statsReducer } from "./store";
+import { applyUserThreshold } from "./utils";
 
 const Container = styled.div`
   padding: 20px;
@@ -75,6 +77,8 @@ export const StatsPage = () => {
 
   const [windowWidth, windowHeight] = useWindowSize();
 
+  const [usersIgnoreBelowValue, setUsersIgnoreBelowValue] = useState<number>(0);
+
   const statsRequest = useMemo<IRequestStats>(() => {
     return {
       fromDate: new Date(state.timeFrom).getTime(),
@@ -110,6 +114,22 @@ export const StatsPage = () => {
       return response.data;
     },
   });
+
+  const data = useMemo<IResponseStats | undefined>(() => {
+    if (!dataStats) {
+      return undefined;
+    }
+
+    if (state.aggregate === Aggregation.USER && dataStats.values) {
+      const values = applyUserThreshold(
+        dataStats.values,
+        usersIgnoreBelowValue
+      );
+      return { ...dataStats, values };
+    }
+
+    return dataStats;
+  }, [dataStats, usersIgnoreBelowValue, state.aggregate]);
 
   const isLoading = isLoadingStats;
   const isError = isErrorStats && !isLoadingStats;
@@ -202,6 +222,26 @@ export const StatsPage = () => {
             ))}
           </ButtonGroup>
         </Field>
+        {state.aggregate === Aggregation.USER && (
+          <Field>
+            <FieldLabel>Ignore users below %</FieldLabel>
+            <Input
+              type="number"
+              value={String(usersIgnoreBelowValue)}
+              onChangeFn={(value) => {
+                const num = Number(value);
+                const safe = Math.min(
+                  USER_THRESHOLD_MAX,
+                  Math.max(0, Number.isFinite(num) ? num : 0)
+                );
+                setUsersIgnoreBelowValue(safe);
+              }}
+              changeOnType
+              min={0}
+              max={USER_THRESHOLD_MAX}
+            />
+          </Field>
+        )}
         <div>
           <Button
             color="success"
@@ -222,7 +262,7 @@ export const StatsPage = () => {
           <>
             <ResultsChart>
               <StatsChart
-                data={dataStats as unknown as IResponseStats}
+                data={data as unknown as IResponseStats}
                 height={windowHeight / 3}
                 width={windowWidth - 50}
                 request={statsRequest}
@@ -230,7 +270,7 @@ export const StatsPage = () => {
             </ResultsChart>
             <ResultsTable>
               <StatsTable
-                data={dataStats as unknown as IResponseStats}
+                data={data as unknown as IResponseStats}
                 height={windowHeight / 3}
                 width={windowWidth - 50}
                 request={statsRequest}

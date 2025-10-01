@@ -1,7 +1,6 @@
 import { IRequestStats, IResponseStats } from "@shared/types";
-import { Aggregation, EventType } from "@shared/types/stats";
 import { useQuery } from "@tanstack/react-query";
-import { color as d3Color, schemeTableau10 } from "d3";
+import { color as d3Color } from "d3";
 import { useCallback, useMemo, useState } from "react";
 import {
   Bar,
@@ -10,14 +9,20 @@ import {
   Legend,
   LegendPayload,
   Tooltip,
+  TooltipContentProps,
   XAxis,
   YAxis,
 } from "recharts";
 
 import api from "api";
 import theme from "Theme/theme";
-import { ContentType } from "recharts/types/component/DefaultLegendContent";
-import { getNonEmptyUsers } from "./utils";
+import { OTHERS_KEY } from "./constants";
+import {
+  ChartDataPoint,
+  getCategoryMap,
+  getDataCategories,
+  transformDataForChart,
+} from "./utils";
 
 interface StatsChartProps {
   data: IResponseStats;
@@ -25,10 +30,6 @@ interface StatsChartProps {
   width: number;
   request: IRequestStats;
 }
-
-type ChartDataPoint = {
-  name: string;
-} & Record<string, number | string>;
 
 export const StatsChart = ({
   data,
@@ -40,37 +41,6 @@ export const StatsChart = ({
   const [hoveringDataKey, setHoveringDataKey] = useState<string | null>(null);
   const { aggregateBy, eventType } = request;
 
-  // const xScale = useMemo(() => {
-  //   const minPx = xAxisPadding;
-  //   const maxPx = width - xAxisPadding;
-
-  //   const minValue = new Date(Object.keys(values)[0]);
-  //   const maxValue = new Date(
-  //     Object.keys(values)[Object.keys(values).length - 1]
-  //   );
-
-  //   return scaleBand().domain(Object.keys(values)).range([minPx, maxPx]);
-  // }, [data, width, xAxisPadding, values]);
-
-  // const yScale = useMemo(() => {
-  //   const minPx = yAxisPadding;
-  //   const maxPx = height - yAxisPadding;
-
-  //   const minValue = 0;
-
-  //   const groupValues = Object.values(values);
-  //   const maxValue = Math.max(
-  //     ...groupValues.map((d) =>
-  //       Object.values(d).reduce((acc, curr) => acc + curr, 0)
-  //     )
-  //   );
-
-  //   return scaleLinear()
-  //     .domain([minValue, maxValue])
-  //     .nice()
-  //     .range([maxPx, minPx]);
-  // }, [data, height, values, yAxisPadding]);
-
   const { data: dataUsers } = useQuery({
     queryKey: ["users-stats"],
     queryFn: () => api.usersGetMore({}),
@@ -78,90 +48,27 @@ export const StatsChart = ({
   });
 
   const userKeyMap = useMemo<Record<string, string>>(() => {
-    const mapNames: Record<string, string> = {};
+    const mapNames: Record<string, string> = {
+      [OTHERS_KEY]: OTHERS_KEY,
+    };
     for (const user of dataUsers?.data || []) {
       mapNames[user.id] = user.name.replace(".", "_");
     }
     return mapNames;
   }, [dataUsers]);
 
-  const colors = schemeTableau10;
+  const dataCategories = getDataCategories(aggregateBy, userKeyMap, values);
 
-  const dataCategories = useMemo<string[]>(() => {
-    const categoriesOut = [];
+  const categoryColors = getCategoryMap(dataCategories);
 
-    if (aggregateBy === Aggregation.ACTIVITY_TYPE) {
-      categoriesOut.push(EventType.EDIT);
-      categoriesOut.push(EventType.DELETE);
-      categoriesOut.push(EventType.CREATE);
-    }
-
-    if (aggregateBy === Aggregation.USER) {
-      const nonEmptyUsers = getNonEmptyUsers(userKeyMap, values);
-      categoriesOut.push(...nonEmptyUsers);
-    }
-    return categoriesOut;
-  }, [aggregateBy, userKeyMap]);
-
-  const categoryColors = useMemo<Record<string, string>>(() => {
-    const colorsOut: Record<string, string> = {};
-    Object.keys(dataCategories).forEach((category, index) => {
-      const color = colors[index % colors.length] || "#000";
-      const categoryValue = dataCategories[index];
-      colorsOut[categoryValue] = color;
-    });
-    return colorsOut;
-    // if (aggregateBy === Aggregation.ACTIVITY_TYPE) {
-    //   return {
-    //     [EventType.EDIT]: colors[0],
-    //     [EventType.DELETE]: colors[1],
-    //     [EventType.CREATE]: colors[2],
-    //   };
-    // }
-
-    // if (aggregateBy === Aggregation.USER) {
-    //   const userColors: Record<string, string> = {};
-    //   Object.values(userKeyMap).forEach((user, index) => {
-    //     userColors[user] = colors[index % colors.length] || "#000";
-    //   });
-    //   return userColors;
-    // }
-    // return {};
-  }, [aggregateBy, userKeyMap, colors]);
-
-  // console.log(categoryColors);
   const dataChart = useMemo<ChartDataPoint[]>(() => {
-    if (aggregateBy === Aggregation.USER) {
-      return Object.keys(values).map((timeKey) => {
-        const valObject = values[timeKey];
-
-        const userValues: Record<string, number> = {};
-        for (const user of dataUsers?.data || []) {
-          const value = valObject[user.id];
-          const userName = userKeyMap[user.id];
-
-          userValues[userName] = value;
-        }
-
-        return {
-          name: timeKey,
-          ...userValues,
-        };
-      });
-    }
-    if (aggregateBy === Aggregation.ACTIVITY_TYPE) {
-      return Object.keys(values).map((timeKey) => {
-        const valObject = values[timeKey];
-
-        return {
-          name: timeKey,
-          ...valObject,
-        };
-      });
-    }
-
-    return [];
-  }, [values, dataUsers, userKeyMap, aggregateBy]);
+    return transformDataForChart(
+      values,
+      dataCategories,
+      aggregateBy,
+      userKeyMap
+    );
+  }, [values, dataCategories, aggregateBy, userKeyMap]);
 
   const handleMouseEnter = useCallback((payload: LegendPayload) => {
     setHoveringDataKey(payload.dataKey as string);
@@ -181,16 +88,25 @@ export const StatsChart = ({
       const catColor = categoryColors[category];
 
       return isActive ? d3Color(catColor)?.formatHex() : theme.color.gray[500];
-      // : d3Color(catColor)?.brighter(3).formatHex();
     },
     [hoveringDataKey, categoryColors]
   );
 
   const BarEls = useMemo<React.ReactNode[]>(() => {
-    return dataCategories.map((category) => {
+    return dataCategories.map((category, index) => {
       const color = getColor(category);
 
-      return <Bar key={category} dataKey={category} fill={color} stackId="a" />;
+      return (
+        <Bar
+          key={index}
+          dataKey={(obj) => {
+            return obj[index]?.value;
+          }}
+          order={index}
+          fill={color}
+          stackId="a"
+        />
+      );
     });
   }, [dataCategories, getColor]);
 
@@ -206,12 +122,116 @@ export const StatsChart = ({
     return <CartesianGrid strokeDasharray="3 3" />;
   }, [values]);
 
+  const TooltipEl = ({
+    payload,
+    label,
+    active,
+  }: TooltipContentProps<number, string>): React.ReactNode => {
+    if (!active) {
+      return null;
+    }
+    return (
+      <div
+        className="custom-tooltip"
+        style={{
+          visibility: "visible",
+          display: "flex",
+          flexDirection: "column",
+          gap: theme.space[2],
+          backgroundColor: theme.color.gray[100],
+          padding: theme.space[4],
+          borderRadius: theme.space[2],
+          width: "100%",
+          opacity: 0.85,
+        }}
+      >
+        {/* label */}
+        <div
+          style={{
+            fontSize: theme.fontSize.sm,
+            color: theme.color.gray[100],
+            width: "fit-content",
+            backgroundColor: theme.color.gray[600],
+            padding: theme.space[1] + " " + theme.space[2],
+            borderRadius: theme.space[2],
+          }}
+        >
+          {label}
+        </div>
+        {/* payload */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: theme.space[1],
+            paddingLeft: theme.space[1],
+          }}
+        >
+          {dataCategories.map((category, index) => {
+            const payloadItem = payload?.[0]?.payload?.[index];
+            const payloadValue = payloadItem?.value;
+            const payloadName = payloadItem?.id;
+
+            if (!payloadValue) {
+              return null;
+            }
+
+            return (
+              <div
+                key={index}
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: theme.space[1],
+                }}
+              >
+                <span
+                  style={{
+                    backgroundColor: categoryColors[category],
+                    width: theme.space[6],
+                    height: theme.space[4],
+                  }}
+                />
+                <span
+                  style={{
+                    fontSize: theme.fontSize.xs,
+                    fontWeight: theme.fontWeight.medium,
+                  }}
+                >
+                  {category}
+                </span>
+                <span
+                  style={{
+                    fontSize: theme.fontSize.xs,
+                    fontWeight: theme.fontWeight.bold,
+                  }}
+                >
+                  {payloadValue}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <BarChart width={width} height={height - 30} data={dataChart}>
+    <BarChart
+      width={width}
+      height={height - 30}
+      data={dataChart}
+      onMouseLeave={() => {
+        if (hoveringDataKey) {
+          handleMouseLeave();
+        }
+      }}
+    >
       {gridEl}
       {xAxisEl}
       {yAxisEl}
-      <Tooltip wrapperStyle={{ zIndex: 200 }} />
+      <Tooltip wrapperStyle={{ zIndex: 200 }} content={TooltipEl} />
       <Legend
         content={() => (
           <div
@@ -275,48 +295,4 @@ export const StatsChart = ({
       {BarEls}
     </BarChart>
   );
-
-  // return (
-  //   <div style={{ position: "relative" }}>
-  //     <svg width={width} height={height} style={{ position: "absolute" }}>
-  //       <g transform={`translate(${xAxisPadding}, ${height - yAxisPadding})`}>
-  //         <Axis
-  //           scale={xScale}
-  //           orient={Orient.bottom}
-  //           tickFormat={(d: string) => d}
-  //           tickSize={10}
-  //         />
-  //       </g>
-  //       <g transform={`translate(${xAxisPadding}, ${0})`}>
-  //         <Axis scale={yScale} orient={Orient.left} tickSize={10} />
-  //       </g>
-  //     </svg>
-  //     <svg width={width} height={height} style={{ position: "absolute" }}>
-  //       <g>
-  //         {Object.keys(values).map((timeKey) => {
-  //           const timeValues = values[timeKey];
-
-  //           return Object.keys(timeValues).map((categoryKey) => {
-  //             const value = timeValues[categoryKey];
-  //             const x = xScale(timeKey);
-  //             const y = yScale(value);
-  //             const barH = height - yScale(value);
-
-  //             return (
-  //               <rect
-  //                 key={`${timeKey}-${categoryKey}`}
-  //                 x={x}
-  //                 y={y}
-  //                 width={barW}
-  //                 height={barH}
-  //                 fill={categoryColors[categoryKey]}
-  //                 fillOpacity={0.5}
-  //               />
-  //             );
-  //           });
-  //         })}
-  //       </g>
-  //     </svg>
-  //   </div>
-  // );
 };
