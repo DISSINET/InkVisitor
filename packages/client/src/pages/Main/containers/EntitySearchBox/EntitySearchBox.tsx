@@ -266,6 +266,7 @@ export const EntitySearchBox: React.FC = () => {
 
   const userRole = localStorage.getItem("userrole");
 
+  console.log("users", users);
   const userOptions = useMemo(() => {
     const usersOptionsOut: DropdownItem[] =
       users

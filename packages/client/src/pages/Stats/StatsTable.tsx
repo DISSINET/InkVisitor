@@ -81,13 +81,16 @@ export const StatsTable = ({
 
   const { data: dataUsers } = useQuery({
     queryKey: ["users"],
-    queryFn: () => api.usersGetMore({}),
+    queryFn: async () => {
+      const res = await api.usersGetMore({});
+      return res.data;
+    },
     enabled: api.isLoggedIn(),
   });
 
   const userKeyMap = useMemo<Record<string, string>>(() => {
     const mapNames: Record<string, string> = {};
-    for (const user of dataUsers?.data || []) {
+    for (const user of dataUsers || []) {
       mapNames[user.id] = user.name.replace(".", "_");
     }
     return mapNames;
