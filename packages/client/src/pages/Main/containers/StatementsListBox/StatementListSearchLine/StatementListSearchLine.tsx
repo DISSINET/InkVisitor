@@ -2,7 +2,7 @@ import { Annotator, EditMode } from "@inkvisitor/annotator/src/lib";
 import { IDocument, IResponseEntity } from "@shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Button, IconWithTooltip, Input, Checkbox } from "components";
+import { Button, Checkbox, IconWithTooltip, Input } from "components";
 import {
   AttributeButtonGroup,
   EntitySuggester,
@@ -16,7 +16,7 @@ import {
   FaRegArrowAltCircleUp,
 } from "react-icons/fa";
 import { FaAnchorCircleCheck } from "react-icons/fa6";
-import { LuReplace, LuReplaceAll } from "react-icons/lu";
+import { LuRegex, LuReplace, LuReplaceAll } from "react-icons/lu";
 import { TbReplace } from "react-icons/tb";
 import { toast } from "react-toastify";
 import { useTheme } from "styled-components";
@@ -26,6 +26,7 @@ import {
   StyledSearchLine,
   StyledSearchResults,
 } from "../StatementListBoxStyles";
+import { StyledCheckboxWrapper } from "./StatementListSearchLineStyles";
 
 interface StatementListSearchLine {
   searchTerm: string;
@@ -193,20 +194,15 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
               clearable
             />
 
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                marginLeft: "0.5rem",
-              }}
-            >
+            <StyledCheckboxWrapper>
               <Checkbox
                 value={isRegexMode}
                 onChangeFn={(checked: boolean) => setIsRegexMode(checked)}
-                label=".*"
+                // label=".*"
+                icon={<LuRegex />}
                 tooltipLabel="Enable regex mode"
               />
-            </div>
+            </StyledCheckboxWrapper>
 
             {searchOccurences !== null && (
               <StyledSearchResults

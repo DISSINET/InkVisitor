@@ -14,6 +14,7 @@ interface Checkbox {
   value: boolean;
   onChangeFn?: (value: boolean) => void;
   label?: string;
+  icon?: React.ReactNode;
   size?: number;
   tooltipLabel?: string;
 }
@@ -21,6 +22,7 @@ export const Checkbox: React.FC<Checkbox> = ({
   value,
   onChangeFn = () => {},
   label,
+  icon,
   size = 18,
   tooltipLabel,
 }) => {
@@ -59,12 +61,15 @@ export const Checkbox: React.FC<Checkbox> = ({
             />
           )}
         </StyledCheckboxWrapper>
-        <StyledLabel
-          ref={setReferenceElement}
-          onClick={() => setChecked(!checked)}
-        >
-          {label}
-        </StyledLabel>
+        {(label || icon) && (
+          <StyledLabel
+            ref={setReferenceElement}
+            onClick={() => setChecked(!checked)}
+          >
+            {label}
+            {icon}
+          </StyledLabel>
+        )}
       </StyledCheckbox>
 
       {tooltipLabel && (

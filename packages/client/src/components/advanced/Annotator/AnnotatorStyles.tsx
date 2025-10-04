@@ -156,4 +156,5 @@ export const StyledDisplayModeButtonIconWrapper = styled.div<StyledDisplayModeBu
 export const StyledAnnotatorButtons = styled.div`
   display: flex;
   justify-content: space-between;
+  padding-left: ${({ theme }) => theme.space[1]};
 `;
