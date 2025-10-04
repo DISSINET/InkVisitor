@@ -70,6 +70,7 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
         <StyledEntityContainer>
           {!selectedResource && (
             <EntitySuggester
+              placeholder="select resource"
               categoryTypes={[EntityEnums.Class.Resource]}
               preSuggestions={resources}
               onPicked={(entity) => {

@@ -42,6 +42,7 @@ import {
   StyledEmptyState,
   StyledInfoWrapper,
   StyledLoaderWrap,
+  StyledStatementListBox,
   StyledTableWrapper,
 } from "./StatementListBoxStyles";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
@@ -851,7 +852,7 @@ export const StatementListBox: React.FC = () => {
   }, [displayMode, contentWidth, isListNonEmpty, statementListTableIsLoading]);
 
   return (
-    <div ref={statementListBoxRef}>
+    <StyledStatementListBox ref={statementListBoxRef}>
       {showStatementList && (
         <>
           {territory && (
@@ -1032,7 +1033,7 @@ export const StatementListBox: React.FC = () => {
           />
         </>
       )}
-    </div>
+    </StyledStatementListBox>
   );
 };
 

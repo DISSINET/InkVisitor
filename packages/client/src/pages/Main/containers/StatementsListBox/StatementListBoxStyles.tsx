@@ -1,6 +1,13 @@
 import styled from "styled-components";
 import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
 
+export const StyledStatementListBox = styled.div`
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: auto;
+`;
+
 export const StyledContentWrapper = styled.div`
   display: flex;
   height: 100%;
