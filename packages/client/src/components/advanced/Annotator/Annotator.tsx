@@ -754,6 +754,7 @@ export const TextAnnotator = ({
     | { segmentIndex: number; lineIndex: number; start: number; end: number }[]
     | null
   >(null);
+  const [isRegexMode, setIsRegexMode] = useState<boolean>(false);
   const [searchActiveOccurence, setSearchActiveOccurence] = useState<number>(0);
 
   // annotate tool
@@ -800,7 +801,7 @@ export const TextAnnotator = ({
 
   useEffect(() => {
     if (annotator && debouncedSearchTerm.length > 2) {
-      const occurrences = annotator.search(debouncedSearchTerm);
+      const occurrences = annotator.search(debouncedSearchTerm, isRegexMode);
       setSearchOccurences(occurrences);
 
       // Only reset to first occurrence if this is a new search term
@@ -815,7 +816,7 @@ export const TextAnnotator = ({
       setSelectedText("");
       annotator?.clearSelection();
     }
-  }, [debouncedSearchTerm]);
+  }, [debouncedSearchTerm, isRegexMode]);
 
   // Re-run search when width changes to update occurrence positions
   useEffect(() => {
@@ -823,11 +824,11 @@ export const TextAnnotator = ({
       // Force a redraw first to recalculate text layout, then search
       setTimeout(() => {
         annotator.draw();
-        const occurrences = annotator.search(debouncedSearchTerm);
+        const occurrences = annotator.search(debouncedSearchTerm, isRegexMode);
         setSearchOccurences(occurrences);
       }, 0);
     }
-  }, [width, debouncedSearchTerm]);
+  }, [width, debouncedSearchTerm, isRegexMode]);
 
   const isSearchAllowed = useMemo<boolean>(() => {
     return annotator !== undefined && !!dataDocument;
@@ -854,6 +855,8 @@ export const TextAnnotator = ({
           annotatorMode={annotatorMode}
           selectedText={selectedText}
           setSearchOccurences={setSearchOccurences}
+          isRegexMode={isRegexMode}
+          setIsRegexMode={setIsRegexMode}
         />
       )}
 

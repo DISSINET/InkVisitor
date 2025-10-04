@@ -2,7 +2,7 @@ import { Annotator, EditMode } from "@inkvisitor/annotator/src/lib";
 import { IDocument, IResponseEntity } from "@shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Button, IconWithTooltip, Input } from "components";
+import { Button, IconWithTooltip, Input, Checkbox } from "components";
 import {
   AttributeButtonGroup,
   EntitySuggester,
@@ -64,6 +64,8 @@ interface StatementListSearchLine {
       | null
     >
   >;
+  isRegexMode: boolean;
+  setIsRegexMode: React.Dispatch<React.SetStateAction<boolean>>;
 }
 export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
   searchTerm,
@@ -84,6 +86,8 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
   annotatorMode,
   selectedText,
   setSearchOccurences,
+  isRegexMode,
+  setIsRegexMode,
 }) => {
   const theme = useTheme();
 
@@ -188,6 +192,21 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
               minWidth={50}
               clearable
             />
+
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                marginLeft: "0.5rem",
+              }}
+            >
+              <Checkbox
+                value={isRegexMode}
+                onChangeFn={(checked: boolean) => setIsRegexMode(checked)}
+                label=".*"
+                tooltipLabel="Enable regex mode"
+              />
+            </div>
 
             {searchOccurences !== null && (
               <StyledSearchResults
