@@ -56,7 +56,7 @@ import { RATIO, TerritoryCreateModalType, W_SCROLL } from "./types";
 import { StatementListSearchLine } from "pages/Main/containers/StatementsListBox/StatementListSearchLine/StatementListSearchLine";
 interface TextAnnotatorProps {
   width: number;
-  annotatorWidthTooSmall?: boolean;
+  annotatorWidthTooNarrow?: boolean;
   height: number;
   displayLineNumbers: boolean;
   hlEntities?: EntityEnums.Class[];
@@ -87,7 +87,7 @@ interface TextAnnotatorProps {
 
 export const TextAnnotator = ({
   width = 400,
-  annotatorWidthTooSmall = false,
+  annotatorWidthTooNarrow = false,
   height = 500,
   displayLineNumbers = true,
   hlEntities = Object.values(EntityEnums.Class),
@@ -844,7 +844,7 @@ export const TextAnnotator = ({
           searchOccurences={searchOccurences}
           searchActiveOccurence={searchActiveOccurence}
           isSearchAllowed={isSearchAllowed}
-          annotatorWidthTooSmall={annotatorWidthTooSmall}
+          annotatorWidthTooNarrow={annotatorWidthTooNarrow}
           setSearchActiveOccurence={setSearchActiveOccurence}
           annotator={annotator}
           documentId={documentId}
@@ -962,12 +962,12 @@ export const TextAnnotator = ({
                 key={EditMode.HIGHLIGHT}
                 icon={
                   <StyledDisplayModeButtonIconWrapper
-                    $annotatorWidthTooSmall={annotatorWidthTooSmall}
+                    $annotatorWidthTooNarrow={annotatorWidthTooNarrow}
                   >
                     <FaPen size={11} />
                   </StyledDisplayModeButtonIconWrapper>
                 }
-                label={!annotatorWidthTooSmall ? EditMode.HIGHLIGHT : ""}
+                label={!annotatorWidthTooNarrow ? EditMode.HIGHLIGHT : ""}
                 color="success"
                 inverted={annotatorMode !== EditMode.HIGHLIGHT}
                 onClick={() => {
@@ -982,13 +982,13 @@ export const TextAnnotator = ({
                 key={EditMode.SEMI}
                 icon={
                   <StyledDisplayModeButtonIconWrapper
-                    $annotatorWidthTooSmall={annotatorWidthTooSmall}
+                    $annotatorWidthTooNarrow={annotatorWidthTooNarrow}
                   >
                     <BsFileTextFill size={11} />
                   </StyledDisplayModeButtonIconWrapper>
                 }
                 color="success"
-                label={!annotatorWidthTooSmall ? "text edit" : ""}
+                label={!annotatorWidthTooNarrow ? "text edit" : ""}
                 inverted={annotatorMode !== EditMode.SEMI}
                 onClick={() => {
                   annotator.setMode(EditMode.SEMI);
@@ -1002,13 +1002,13 @@ export const TextAnnotator = ({
                 key={EditMode.RAW}
                 icon={
                   <StyledDisplayModeButtonIconWrapper
-                    $annotatorWidthTooSmall={annotatorWidthTooSmall}
+                    $annotatorWidthTooNarrow={annotatorWidthTooNarrow}
                   >
                     <HiCodeBracket size={11} />
                   </StyledDisplayModeButtonIconWrapper>
                 }
                 color="success"
-                label={!annotatorWidthTooSmall ? "XML" : ""}
+                label={!annotatorWidthTooNarrow ? "XML" : ""}
                 inverted={annotatorMode !== EditMode.RAW}
                 onClick={() => {
                   annotator.setMode(EditMode.RAW);

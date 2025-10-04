@@ -871,7 +871,7 @@ export const StatementListBox: React.FC = () => {
               deleteStatementsMutation={deleteStatementsMutation}
               relationsCreateMutation={relationsCreateMutation}
               favoritedTerritoryIds={favoritedTerritoryIds}
-              contentWidthTooSmall={contentWidth < SECOND_PANEL_MIN_WIDTH + 60}
+              contentWidthTooNarrow={contentWidth < SECOND_PANEL_MIN_WIDTH + 60}
               statementsWithOrder={statementsWithOrder}
               autoOrderStatementsMutation={autoOrderStatementsMutation}
             />

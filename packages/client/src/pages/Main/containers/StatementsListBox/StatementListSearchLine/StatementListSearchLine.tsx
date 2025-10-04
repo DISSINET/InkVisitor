@@ -41,7 +41,7 @@ interface StatementListSearchLine {
   searchActiveOccurence: number;
   setSearchActiveOccurence: (searchActiveOccurence: number) => void;
   isSearchAllowed: boolean;
-  annotatorWidthTooSmall: boolean;
+  annotatorWidthTooNarrow: boolean;
   showStatementList: boolean;
   annotator?: Annotator;
   documentId?: string;
@@ -73,7 +73,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
   searchOccurences,
   searchActiveOccurence,
   isSearchAllowed,
-  annotatorWidthTooSmall,
+  annotatorWidthTooNarrow,
   setSearchActiveOccurence,
   showStatementList,
   annotator,
@@ -188,7 +188,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                 setSearchTerm(newText);
               }}
               changeOnType
-              width={annotatorWidthTooSmall ? 100 : 130}
+              width={annotatorWidthTooNarrow ? 100 : 130}
               minWidth={50}
               clearable
             />
@@ -210,7 +210,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
 
             {searchOccurences !== null && (
               <StyledSearchResults
-                $annotatorWidthTooSmall={annotatorWidthTooSmall}
+                $annotatorWidthTooNarrow={annotatorWidthTooNarrow}
               >
                 {searchOccurences.length === 0 ? (
                   <div style={{ marginLeft: "0.2rem" }}>no results</div>
@@ -241,7 +241,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
             )}
           </StyledSearchContainer>
 
-          {annotatorWidthTooSmall ? (
+          {annotatorWidthTooNarrow ? (
             <div style={{ width: "1rem" }}></div>
           ) : (
             <AttributeButtonGroup
@@ -299,7 +299,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                   onPicked={(entity) => {
                     setEntityToAnchor(entity);
                   }}
-                  inputWidth={annotatorWidthTooSmall ? 70 : 100}
+                  inputWidth={annotatorWidthTooNarrow ? 70 : 100}
                 />
               ) : (
                 <EntityTag
@@ -319,7 +319,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                 onChangeFn={(value: string) => {
                   setReplaceWith(value);
                 }}
-                width={annotatorWidthTooSmall ? 100 : 130}
+                width={annotatorWidthTooNarrow ? 100 : 130}
                 minWidth={50}
                 clearable
               />

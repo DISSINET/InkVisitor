@@ -152,7 +152,7 @@ export const StatementListTextAnnotator: React.FC<
       : contentWidth;
   }, [contentWidth, showStatementList]);
 
-  const annotatorWidthTooSmall = useMemo<boolean>(() => {
+  const annotatorWidthTooNarrow = useMemo<boolean>(() => {
     return annotatorWidth < ANNOTATOR_TOO_SMALL_BREAKPOINT;
   }, [annotatorWidth]);
 
@@ -170,7 +170,7 @@ export const StatementListTextAnnotator: React.FC<
           resources={resources || []}
           showStatementList={showStatementList}
           userCanEdit={userCanEdit}
-          annotatorWidthTooSmall={annotatorWidthTooSmall}
+          annotatorWidthTooNarrow={annotatorWidthTooNarrow}
           contentWidth={contentWidth}
           handleHlEntitiesChange={handleHlEntitiesChange}
           hlEntities={hlEntities}
@@ -183,7 +183,7 @@ export const StatementListTextAnnotator: React.FC<
           {selectedDocumentId && selectedDocument && (
             <TextAnnotator
               width={annotatorWidth}
-              annotatorWidthTooSmall={annotatorWidthTooSmall}
+              annotatorWidthTooNarrow={annotatorWidthTooNarrow}
               hlEntities={hlEntities}
               forwardAnnotator={(newAnnotator) => {
                 setAnnotator(newAnnotator);

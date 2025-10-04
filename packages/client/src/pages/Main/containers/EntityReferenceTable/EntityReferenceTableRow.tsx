@@ -39,7 +39,7 @@ interface EntityReferenceTableRow {
   territoryParentId?: string;
   alwaysShowCreateModal?: boolean;
   openDetailOnCreate?: boolean;
-  editorWidthTooSmall: boolean;
+  editorWidthTooNarrow: boolean;
 
   hasOrder: boolean;
   index: number;
@@ -64,7 +64,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
   territoryParentId,
   openDetailOnCreate,
   alwaysShowCreateModal,
-  editorWidthTooSmall,
+  editorWidthTooNarrow,
 
   hasOrder,
   index,
@@ -142,7 +142,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
           openDetailOnCreate={openDetailOnCreate}
           alwaysShowCreateModal={alwaysShowCreateModal}
           initResourceTyped={initResourceTyped}
-          editorWidthTooSmall={editorWidthTooSmall}
+          editorWidthTooNarrow={editorWidthTooNarrow}
           disabled={disabled}
         />
         <EntityReferenceTableValue
@@ -155,7 +155,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
           openDetailOnCreate={openDetailOnCreate}
           territoryParentId={territoryParentId}
           initValueTyped={initValueTyped}
-          editorWidthTooSmall={editorWidthTooSmall}
+          editorWidthTooNarrow={editorWidthTooNarrow}
           disabled={disabled}
         />
         <span>

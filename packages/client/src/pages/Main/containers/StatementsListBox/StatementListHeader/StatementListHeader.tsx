@@ -133,7 +133,7 @@ interface StatementListHeader {
     isAnchored?: boolean;
   })[];
   favoritedTerritoryIds: string[];
-  contentWidthTooSmall: boolean;
+  contentWidthTooNarrow: boolean;
 }
 export const StatementListHeader: React.FC<StatementListHeader> = ({
   territory,
@@ -156,7 +156,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   autoOrderStatementsMutation,
   statementsWithOrder,
   favoritedTerritoryIds,
-  contentWidthTooSmall,
+  contentWidthTooNarrow,
 }) => {
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
@@ -511,7 +511,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                   disableTemplatesAccept
                   filterEditorRights
                   inputWidth={
-                    selectedRows.length > 0 && contentWidthTooSmall ? 36 : 80
+                    selectedRows.length > 0 && contentWidthTooNarrow ? 36 : 80
                   }
                   disableCreate
                   categoryTypes={[EntityEnums.Class.Territory]}

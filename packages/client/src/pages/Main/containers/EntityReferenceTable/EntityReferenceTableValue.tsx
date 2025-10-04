@@ -23,7 +23,7 @@ interface EntityReferenceTableValue {
   alwaysShowCreateModal?: boolean;
   openDetailOnCreate?: boolean;
   initValueTyped?: string;
-  editorWidthTooSmall: boolean;
+  editorWidthTooNarrow: boolean;
 
   disabled?: boolean;
 }
@@ -37,14 +37,14 @@ export const EntityReferenceTableValue: React.FC<EntityReferenceTableValue> = ({
   alwaysShowCreateModal,
   openDetailOnCreate,
   initValueTyped,
-  editorWidthTooSmall,
+  editorWidthTooNarrow,
 
   disabled,
 }) => {
   return (
     <StyledGridValue
       style={{
-        minWidth: editorWidthTooSmall ? "10rem" : "",
+        minWidth: editorWidthTooNarrow ? "10rem" : "",
       }}
     >
       {valueEntity ? (
@@ -80,7 +80,7 @@ export const EntityReferenceTableValue: React.FC<EntityReferenceTableValue> = ({
         </EntityDropzone>
       ) : (
         <EntitySuggester
-          inputWidth={editorWidthTooSmall ? "full" : 100}
+          inputWidth={editorWidthTooNarrow ? "full" : 100}
           alwaysShowCreateModal={alwaysShowCreateModal}
           placeholder={resourceEntity?.data?.partValueLabel}
           excludedEntityClasses={excludedSuggesterEntities}
