@@ -6,6 +6,7 @@ import {
   IReference,
   IResponseEntity,
   IResponseStatement,
+  IResponseTree,
   IStatement,
   IStatementDataTerritory,
   ITerritory,
@@ -31,7 +32,11 @@ import {
   StatementListDisplayMode,
   StatementOrderCorrection,
 } from "types";
-import { collectStatementAnchors, getStatementOrderByIndex } from "utils/utils";
+import {
+  collectStatementAnchors,
+  getStatementOrderByIndex,
+  searchTree,
+} from "utils/utils";
 import {
   StyledContentWrapper,
   StyledEmptyState,
@@ -801,8 +806,25 @@ export const StatementListBox: React.FC = () => {
 
   const isListNonEmpty = statements.length > 0;
 
+  // Check if there are statements to determine if the list is loading
+  const treeData: IResponseTree | undefined = queryClient.getQueryData([
+    "tree",
+  ]);
+  const statementsCount = useMemo(() => {
+    if (treeData) {
+      const currentTerritory = searchTree(treeData, territoryId);
+      if (currentTerritory) {
+        return currentTerritory.statementsCount;
+      }
+      return 0;
+    }
+  }, [treeData, territoryId]);
+
+  const isListLoading =
+    statementsCount && statementsCount > 0 && isFetchingTerritory;
+
   const statementListTableIsLoading =
-    isFetchingTerritory ||
+    isListLoading ||
     isLoading ||
     deleteStatementMutation.isPending ||
     addStatementAtTheEndMutation.isPending ||
