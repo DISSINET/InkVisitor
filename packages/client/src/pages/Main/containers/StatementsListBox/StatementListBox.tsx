@@ -60,6 +60,7 @@ const initialData: {
 
 export const StatementListBox: React.FC = () => {
   const queryClient = useQueryClient();
+  const statementListBoxRef = React.useRef<HTMLDivElement>(null);
 
   const dispatch = useAppDispatch();
   const rowsExpanded: string[] = useAppSelector(
@@ -850,7 +851,7 @@ export const StatementListBox: React.FC = () => {
   }, [displayMode, contentWidth, isListNonEmpty, statementListTableIsLoading]);
 
   return (
-    <>
+    <div ref={statementListBoxRef}>
       {showStatementList && (
         <>
           {territory && (
@@ -986,6 +987,7 @@ export const StatementListBox: React.FC = () => {
                   }
                   userCanEdit={userCanEdit}
                   userData={userData}
+                  statementListBoxRef={statementListBoxRef}
                 />
               )}
 
@@ -1030,7 +1032,7 @@ export const StatementListBox: React.FC = () => {
           />
         </>
       )}
-    </>
+    </div>
   );
 };
 

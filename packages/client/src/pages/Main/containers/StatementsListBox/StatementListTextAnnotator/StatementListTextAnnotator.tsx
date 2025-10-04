@@ -34,6 +34,7 @@ interface StatementListTextAnnotator {
     IStatement,
     unknown
   >;
+  statementListBoxRef?: React.RefObject<HTMLDivElement | null>;
 
   storedAnnotatorScroll: number;
   setStoredAnnotatorScroll?: React.Dispatch<React.SetStateAction<number>>;
@@ -70,6 +71,7 @@ export const StatementListTextAnnotator: React.FC<
   statementId,
   addStatementAtCertainIndex,
   statementCreateMutation,
+  statementListBoxRef,
 
   storedAnnotatorScroll,
   setStoredAnnotatorScroll = () => {},
@@ -201,6 +203,7 @@ export const StatementListTextAnnotator: React.FC<
               dataDocumentError={selectedDocumentError}
               showStatementList={showStatementList}
               userData={userData}
+              statementListBoxRef={statementListBoxRef}
             />
           )}
         </AnnotatorProvider>

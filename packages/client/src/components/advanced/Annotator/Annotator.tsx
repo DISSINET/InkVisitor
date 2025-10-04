@@ -83,11 +83,13 @@ interface TextAnnotatorProps {
   >;
 
   userData?: IResponseUser;
+  statementListBoxRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 export const TextAnnotator = ({
   width = 400,
   annotatorWidthTooNarrow = false,
+  statementListBoxRef,
   height = 500,
   displayLineNumbers = true,
   hlEntities = Object.values(EntityEnums.Class),
@@ -723,7 +725,8 @@ export const TextAnnotator = ({
         isMenuDisplayed &&
         menuRef.current &&
         !menuRef.current.contains(event.target as Node) &&
-        !mainCanvas.current?.contains(event.target as Node)
+        !mainCanvas.current?.contains(event.target as Node) &&
+        !statementListBoxRef?.current?.contains(event.target as Node)
       ) {
         setSelectedText("");
         annotator?.clearSelection();
@@ -737,7 +740,7 @@ export const TextAnnotator = ({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isMenuDisplayed, annotator]);
+  }, [isMenuDisplayed, annotator, statementListBoxRef]);
 
   if (dataDocumentError) {
     return (
