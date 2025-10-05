@@ -183,7 +183,7 @@ export const EntityTag: React.FC<EntityTag> = ({
           label={getEntityLabel(entity)}
           labelItalic={isFirstLabelEmpty(entity.labels)}
           status={entity.status}
-          ltype={entity?.data?.logicalType ?? "1"}
+          ltype={entity?.data?.logicalType ?? EntityEnums.LogicalType.Definite}
           isTemplate={entity.isTemplate}
           isDiscouraged={entity.status === EntityEnums.Status.Discouraged}
           entity={entity}

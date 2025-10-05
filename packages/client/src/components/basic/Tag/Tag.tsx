@@ -32,8 +32,8 @@ interface TagProps {
   labelItalic?: boolean;
 
   entityClass?: EntityEnums.ExtendedClass;
-  status?: string;
-  ltype?: string;
+  status?: EntityEnums.Status;
+  ltype?: EntityEnums.LogicalType;
   entity?: IEntity;
 
   borderStyle?: "solid" | "dashed" | "dotted";
@@ -65,8 +65,8 @@ export const Tag: React.FC<TagProps> = ({
   label = "",
   labelItalic = false,
   entityClass = EntityEnums.Extension.NoClass,
-  status = "1",
-  ltype = "1",
+  status = EntityEnums.Status.Approved,
+  ltype = EntityEnums.LogicalType.Definite,
   entity,
   borderStyle = "solid",
   button,

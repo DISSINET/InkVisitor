@@ -98,7 +98,7 @@ export const StyledAnnotatorItemTitle = styled.div`
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
   font-variant-caps: small-caps;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: ${({ theme }) => theme.space[1]};
 `;
 

@@ -1,10 +1,11 @@
+import { EntityEnums } from "@shared/enums";
 import { ThemeColor } from "Theme/theme";
 import styled from "styled-components";
 
 interface StyledTagWrapper {
   $borderStyle: "solid" | "dashed" | "dotted";
-  $status: string;
-  $ltype: string;
+  $status: EntityEnums.Status;
+  $ltype: EntityEnums.LogicalType;
   $dragDisabled?: boolean;
 }
 export const StyledTagWrapper = styled.div<StyledTagWrapper>`
@@ -12,7 +13,7 @@ export const StyledTagWrapper = styled.div<StyledTagWrapper>`
   overflow: hidden;
   border: ${({ theme }) => theme.borderWidth[2]};
   border-style: ${({ $borderStyle }) => $borderStyle};
-  border-color: ${({ theme, $status }) => theme.color[$status]};
+  border-color: ${({ theme, $status }) => theme.color.tagStatus[$status]};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
   cursor: ${({ $dragDisabled }) => ($dragDisabled ? "default" : "move")};
   border-style: ${({ theme, $ltype }) =>
@@ -80,7 +81,7 @@ interface StyledLabel {
   $invertedLabel: boolean;
   $borderStyle: "solid" | "dashed" | "dotted";
   $fullWidth: boolean;
-  $status: string;
+  $status: EntityEnums.Status;
   $isFavorited: boolean;
   $labelOnly?: boolean;
   $isItalic: boolean;
@@ -100,7 +101,7 @@ export const StyledLabel = styled.div<StyledLabel>`
   border-left-width: ${({ theme, $labelOnly }) =>
     $labelOnly ? 0 : theme.borderWidth[2]};
   border-left-style: ${({ $borderStyle }) => $borderStyle};
-  border-left-color: ${({ theme, $status }) => theme.color[$status]};
+  border-left-color: ${({ theme, $status }) => theme.color.tagStatus[$status]};
   max-width: ${({ theme, $fullWidth }) =>
     $fullWidth ? "100%" : theme.space[30]};
   font-weight: ${({ theme, $invertedLabel }) =>
@@ -108,14 +109,15 @@ export const StyledLabel = styled.div<StyledLabel>`
 `;
 
 interface StyledButtonWrapper {
-  $status: string;
+  $status: EntityEnums.Status;
 }
 export const StyledButtonWrapper = styled.div<StyledButtonWrapper>`
   display: flex;
   button {
     border-width: 0;
     border-left-width: ${({ theme }) => theme.borderWidth[2]};
-    border-left-color: ${({ theme, $status }) => theme.color[$status]};
+    border-left-color: ${({ theme, $status }) =>
+      theme.color.tagStatus[$status]};
     border-left-style: solid;
   }
 `;
