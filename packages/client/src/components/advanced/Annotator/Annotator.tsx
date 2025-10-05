@@ -284,6 +284,13 @@ export const TextAnnotator = ({
     number | undefined
   >(undefined);
 
+  const [selectionAfterRefresh, setSelectionAfterRefresh] = useState<{
+    selectStart: any;
+    selectEnd: any;
+    selectedText: string;
+    selectedAnchors: Tag[];
+  } | null>(null);
+
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
   const { refs, floatingStyles } = useFloating({
@@ -377,6 +384,16 @@ export const TextAnnotator = ({
   const handleSaveNewContent = (quiet: boolean) => {
     const scrollBeforeUpdated = annotator?.viewport?.lineStart;
     setScrollAfterRefresh(scrollBeforeUpdated);
+
+    // Capture current selection state to restore after save
+    if (annotator?.cursor?.selectStart && annotator?.cursor?.selectEnd) {
+      setSelectionAfterRefresh({
+        selectStart: { ...annotator.cursor.selectStart },
+        selectEnd: { ...annotator.cursor.selectEnd },
+        selectedText: selectedText,
+        selectedAnchors: [...selectedAnchors],
+      });
+    }
 
     if (annotator && documentId) {
       setIsSaving(true);
@@ -603,6 +620,16 @@ export const TextAnnotator = ({
       } else if (scrollTo.anchor) {
         newAnnotator.scrollToAnchor(scrollTo.anchor);
       }
+
+      // Restore selection if it was captured before save
+      if (selectionAfterRefresh) {
+        newAnnotator.cursor.selectStart = selectionAfterRefresh.selectStart;
+        newAnnotator.cursor.selectEnd = selectionAfterRefresh.selectEnd;
+        setSelectedText(selectionAfterRefresh.selectedText);
+        setSelectedAnchors(selectionAfterRefresh.selectedAnchors);
+        setSelectionAfterRefresh(null); // Clear the captured selection
+        newAnnotator.draw(); // Redraw to show the restored selection
+      }
     }, 200);
 
     newAnnotator.setMode(originalMode);
@@ -715,6 +742,11 @@ export const TextAnnotator = ({
     setSelectedText("");
     annotator?.clearSelection();
     handleRefreshEntityAndStatement(anchor);
+  };
+
+  const onUpdateAnchor = (anchor: Tag, elvl: EntityEnums.Elvl) => {
+    annotator?.updateAnchor(anchor, { elvl });
+    handleSaveNewContent(true);
   };
 
   const isMenuDisplayed = useMemo<boolean>(() => {
@@ -876,6 +908,7 @@ export const TextAnnotator = ({
                     onCreateTerritory={onCreateTerritory}
                     onCreateStatement={onCreateStatement}
                     onRemoveAnchor={onRemoveAnchor}
+                    onUpdateAnchor={onUpdateAnchor}
                     isTextInsideThisT={selectedAnchors.some(
                       (anchor) => anchor.getTagName() === thisTerritoryEntityId
                     )}

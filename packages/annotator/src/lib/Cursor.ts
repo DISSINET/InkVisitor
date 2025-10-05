@@ -188,7 +188,7 @@ export default class Cursor
     this.xLine = newX;
     this.yLine = newY;
   }
- 
+
   /**
    * fixOutOfBounds moves the cursor to the next line if the current line is too short
    * @param viewport
@@ -207,9 +207,9 @@ export default class Cursor
         this.yLine++;
         this.xLine = this.xLine - line.length;
       }
-    } while (!line ||line.length < this.xLine)
+    } while (!line || line.length < this.xLine);
   }
-  
+
   /**
    * move the cursor to start of the next line
    */

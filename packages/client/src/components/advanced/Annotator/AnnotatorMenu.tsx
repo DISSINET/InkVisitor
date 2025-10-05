@@ -33,7 +33,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "hooks";
 import useKeypress from "hooks/useKeyPress";
 import { ElvlButtonGroup } from "../IconButtonGroups/ElvlButtonGroup";
-import { Tag } from "@inkvisitor/annotator/src/lib";
+import { Annotator, Tag } from "@inkvisitor/annotator/src/lib";
 
 interface TextAnnotatorMenuProps {
   text: string;
@@ -64,6 +64,7 @@ interface TextAnnotatorMenuProps {
   territory?: IResponseTerritory;
   onEscapePressed: () => void;
   disableCreate?: boolean;
+  onUpdateAnchor?: (anchor: Tag, elvl: EntityEnums.Elvl) => void;
 }
 
 export const TextAnnotatorMenu = ({
@@ -75,6 +76,7 @@ export const TextAnnotatorMenu = ({
   onCreateTerritory = undefined,
   onCreateActiveTAnchor = undefined,
   onRemoveAnchor = undefined,
+  onUpdateAnchor = undefined,
   canCreateActiveTAnchor,
   isLoadingEntities,
   hasParentT,
@@ -333,7 +335,7 @@ export const TextAnnotatorMenu = ({
                         <ElvlButtonGroup
                           value={anchor.attributes.elvl as EntityEnums.Elvl}
                           onChange={(elvl) => {
-                            console.log(elvl);
+                            onUpdateAnchor?.(anchor, elvl);
                           }}
                         />
                       }
