@@ -1,10 +1,15 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 
 import { IDocument, IEntity, IResponseTerritory } from "@shared/types";
-import { Loader } from "components";
+import { IconWithTooltip, Loader } from "components";
 import { Button } from "components/basic/Button/Button";
 import { BsSegmentedNav } from "react-icons/bs";
-import { FaBolt, FaClipboard, FaPlus } from "react-icons/fa";
+import {
+  FaBolt,
+  FaClipboard,
+  FaExclamationTriangle,
+  FaPlus,
+} from "react-icons/fa";
 import { PiSelectionFill } from "react-icons/pi";
 import { TbAnchor } from "react-icons/tb";
 import { toast } from "react-toastify";
@@ -94,6 +99,17 @@ export const TextAnnotatorMenu = ({
   );
   const [territoryElvl, setTerritoryElvl] = useState<EntityEnums.Elvl>(
     EntityEnums.Elvl.Textual
+  );
+
+  const someAnchorsWithoutElvl = useMemo(
+    () =>
+      anchors.some(
+        (anchor) =>
+          anchor.attributes.elvl === undefined ||
+          anchor.attributes.elvl === null ||
+          anchor.attributes.elvl === ""
+      ),
+    [anchors]
   );
 
   return (
@@ -281,6 +297,15 @@ export const TextAnnotatorMenu = ({
           <PiSelectionFill size={13} />
           Anchors in selection
           <Loader show={isLoadingEntities} size={13} />
+          <div style={{ marginLeft: "0.5rem" }}>
+            {someAnchorsWithoutElvl && (
+              <IconWithTooltip
+                color="warning"
+                icon={<FaExclamationTriangle size={13} />}
+                tooltipLabel="Selection contains anchor/s which do not have epistemic level selected."
+              />
+            )}
+          </div>
         </StyledAnnotatorItemTitle>
         <StyledAnnotatorItemContent>
           <StyledAnnotatorAnchorListWrap>
