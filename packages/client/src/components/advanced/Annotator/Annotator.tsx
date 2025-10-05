@@ -18,7 +18,7 @@ import { FaPen, FaRegSave, FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 
-import { Annotator, EditMode } from "@inkvisitor/annotator/src/lib";
+import { Annotator, EditMode, Tag } from "@inkvisitor/annotator/src/lib";
 import {
   IDocument,
   IEntity,
@@ -188,7 +188,7 @@ export const TextAnnotator = ({
   }, [annotatorMode]);
 
   const [selectedText, setSelectedText] = useState<string>("");
-  const [selectedAnchors, setSelectedAnchors] = useState<string[]>([]);
+  const [selectedAnchors, setSelectedAnchors] = useState<Tag[]>([]);
   const [selectionStartIndex, setSelectionStartIndex] = useState<number>(-1);
   const [storedEntities, setStoredEntities] = useState<
     Record<string, IEntity | false>
@@ -403,15 +403,11 @@ export const TextAnnotator = ({
 
   const [pendingSelection, setPendingSelection] = useState<{
     text: string;
-    anchors: string[];
+    anchors: Tag[];
     index: number;
   } | null>(null);
 
-  const handleTextSelection = (
-    text: string,
-    anchors: string[],
-    index: number
-  ) => {
+  const handleTextSelection = (text: string, anchors: Tag[], index: number) => {
     if (annotatorMode === EditMode.HIGHLIGHT) {
       setPendingSelection({ text, anchors, index });
     }
@@ -434,7 +430,9 @@ export const TextAnnotator = ({
       queryKey: ["anchorEntities", selectedAnchors],
       queryFn: async () => {
         const uniqueAnchors = [...new Set(selectedAnchors)];
-        const entities = await api.entitiesGet(uniqueAnchors);
+        const entities = await api.entitiesGet(
+          uniqueAnchors.map((anchor) => anchor.getTagName())
+        );
         setStoredEntities(
           entities.data.reduce((acc, entity) => {
             acc[entity.id] = entity;
@@ -765,7 +763,9 @@ export const TextAnnotator = ({
     if (!entityToAnchor) {
       setCurrentAnchorExist(false);
     } else if (
-      selectedAnchors.some((anchorId) => anchorId === entityToAnchor?.id)
+      selectedAnchors.some(
+        (anchor) => anchor.getTagName() === entityToAnchor?.id
+      )
     ) {
       setCurrentAnchorExist(true);
     } else {
@@ -877,7 +877,7 @@ export const TextAnnotator = ({
                     onCreateStatement={onCreateStatement}
                     onRemoveAnchor={onRemoveAnchor}
                     isTextInsideThisT={selectedAnchors.some(
-                      (anchor) => anchor === thisTerritoryEntityId
+                      (anchor) => anchor.getTagName() === thisTerritoryEntityId
                     )}
                     activeTerritoryId={thisTerritoryEntityId}
                     onCreateActiveTAnchor={(elvl) => {

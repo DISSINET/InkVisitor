@@ -28,11 +28,12 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "hooks";
 import useKeypress from "hooks/useKeyPress";
 import { ElvlButtonGroup } from "../IconButtonGroups/ElvlButtonGroup";
+import { Tag } from "@inkvisitor/annotator/src/lib";
 
 interface TextAnnotatorMenuProps {
   text: string;
   documentData: IDocument;
-  anchors: string[];
+  anchors: Tag[];
   entities: Record<string, IEntity | false>;
   onAnchorAdd: (entityId: string, elvl: EntityEnums.Elvl) => void;
   onCreateStatement?: (
@@ -290,30 +291,31 @@ export const TextAnnotatorMenu = ({
             )}
             <StyledAnnotatorAnchorList>
               {anchors.map((anchor) => {
-                if (entities[anchor]) {
+                const anchorTagName = anchor.getTagName();
+                if (entities[anchorTagName]) {
                   return (
                     <EntityTag
                       unlinkButton={{
                         onClick: () => {
                           if (onRemoveAnchor) {
-                            onRemoveAnchor(anchor);
+                            onRemoveAnchor(anchorTagName);
                           }
                         },
                       }}
-                      key={anchor}
-                      entity={entities[anchor] as IEntity}
-                      // elvlButtonGroup={
-                      //   <ElvlButtonGroup
-                      //     value={entities[anchor]?.anchorElvl}
-                      //     onChange={(elvl) => {
-                      //       console.log(elvl);
-                      //     }}
-                      //   />
-                      // }
+                      key={anchorTagName}
+                      entity={entities[anchorTagName] as IEntity}
+                      elvlButtonGroup={
+                        <ElvlButtonGroup
+                          value={anchor.attributes.elvl as EntityEnums.Elvl}
+                          onChange={(elvl) => {
+                            console.log(elvl);
+                          }}
+                        />
+                      }
                     />
                   );
                 } else {
-                  return <React.Fragment key={anchor} />;
+                  return <React.Fragment key={anchorTagName} />;
                 }
               })}
             </StyledAnnotatorAnchorList>
