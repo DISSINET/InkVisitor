@@ -909,6 +909,46 @@ export class Annotator {
     }
   }
 
+  updateAnchor(tag: Tag, attributes?: Record<string, string>) {
+    // Only accept opening tags
+    if (tag.closing) {
+      throw new Error('updateAnchor only accepts opening tags');
+    }
+    
+    // Find the tag in the raw text using its position
+    const tagPosition = tag.position;
+    
+    // Build the original tag string using the tag's current attributes
+    const originalTag = new Tag(0, tag.getTagName(), false);
+    originalTag.attributes = tag.attributes;
+    const originalTagString = originalTag.getTag();
+    const originalTagLength = originalTagString.length;
+    
+    // Build the new tag string with updated attributes
+    const newTag = new Tag(0, tag.getTagName(), false);
+    if (attributes) {
+      newTag.attributes = attributes;
+    } else {
+      newTag.attributes = {};
+    }
+    const newTagString = newTag.getTag();
+    
+    // Replace the old tag with the new tag in the raw text
+    const rawText = this.text.value;
+    const beforeText = rawText.slice(0, tagPosition);
+    const afterText = rawText.slice(tagPosition + originalTagLength);
+    
+    this.text.value = beforeText + newTagString + afterText;
+    
+    // Update segments and recalculate lines
+    this.text.prepareSegments();
+    this.text.calculateLines();
+    
+    // Trigger callbacks and redraw
+    this.warnings.onTextChanged(this.text.value);
+    this.draw();
+  }
+
   scrollToAnchor(tag: string, index: number = 0) {
     const pos = this.text.getTagPosition(tag, index);
     if (pos.length !== 2) {

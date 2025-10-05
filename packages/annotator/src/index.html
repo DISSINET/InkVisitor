@@ -107,6 +107,22 @@
         <button id="scrollToAnchor">scroll</button>
       </fieldset>
       <fieldset>
+        <label>update anchor </label>
+        <input type="text" id="updateAnchorText" placeholder="Anchor name to update" />
+        <div style="margin-top: 5px;">
+          <label>New Attributes (key-value pairs):</label>
+          <div id="updateAttributeFields" style="margin-top: 5px;">
+            <div class="update-attribute-row" style="margin-bottom: 5px;">
+              <input type="text" placeholder="Key" class="update-attr-key" style="width: 100px; margin-right: 5px;" />
+              <input type="text" placeholder="Value" class="update-attr-value" style="width: 100px; margin-right: 5px;" />
+              <button type="button" class="remove-update-attr" style="background: #ff6b6b; color: white; border: none; padding: 2px 6px; cursor: pointer;">×</button>
+            </div>
+          </div>
+          <button type="button" id="addUpdateAttribute" style="background: #4ecdc4; color: white; border: none; padding: 4px 8px; cursor: pointer; margin-top: 5px;">+ Add Attribute</button>
+        </div>
+        <button id="updateAnchor" style="margin-top: 10px;">update</button>
+      </fieldset>
+      <fieldset>
         <label>update text</label>
         <textarea id="newText" cols="100" rows="10"></textarea>
         <button id="updateText">Update</button>
@@ -265,6 +281,83 @@
           document.getElementById("scrollToAnchorText").value,
           0
         );
+      };
+
+      // Function to add a new attribute row for update anchor
+      document.getElementById("addUpdateAttribute").onclick = () => {
+        const updateAttributeFields = document.getElementById("updateAttributeFields");
+        const newRow = document.createElement("div");
+        newRow.className = "update-attribute-row";
+        newRow.style.marginBottom = "5px";
+        newRow.innerHTML = `
+          <input type="text" placeholder="Key" class="update-attr-key" style="width: 100px; margin-right: 5px;" />
+          <input type="text" placeholder="Value" class="update-attr-value" style="width: 100px; margin-right: 5px;" />
+          <button type="button" class="remove-update-attr" style="background: #ff6b6b; color: white; border: none; padding: 2px 6px; cursor: pointer;">×</button>
+        `;
+        updateAttributeFields.appendChild(newRow);
+        
+        // Add click handler for the remove button
+        newRow.querySelector(".remove-update-attr").onclick = () => {
+          newRow.remove();
+        };
+      };
+
+      // Add click handlers for existing remove buttons in update section
+      document.querySelectorAll(".remove-update-attr").forEach(btn => {
+        btn.onclick = () => {
+          btn.parentElement.remove();
+        };
+      });
+
+      // Function to collect attributes from the update form
+      function collectUpdateAttributes() {
+        const attributes = {};
+        document.querySelectorAll(".update-attribute-row").forEach(row => {
+          const keyInput = row.querySelector(".update-attr-key");
+          const valueInput = row.querySelector(".update-attr-value");
+          if (keyInput.value.trim() && valueInput.value.trim()) {
+            attributes[keyInput.value.trim()] = valueInput.value.trim();
+          }
+        });
+        return Object.keys(attributes).length > 0 ? attributes : undefined;
+      }
+
+      document.getElementById("updateAnchor").onclick = () => {
+        const anchorName = document.getElementById("updateAnchorText").value;
+        if (!anchorName) {
+          alert("Please enter an anchor name to update");
+          return;
+        }
+
+        // Find the first occurrence of the anchor in the text
+        const tagPositions = annotator.text.getTagPosition(anchorName, 0);
+        if (tagPositions.length < 2) {
+          alert(`Anchor "${anchorName}" not found in the text`);
+          return;
+        }
+
+        // Get the attributes from the form
+        const newAttributes = collectUpdateAttributes();
+        
+        // Find the tag in the segments
+        let targetTag = null;
+        for (const segment of annotator.text.segments) {
+          for (const tag of segment.openingTags) {
+            if (tag.getTagName() === anchorName) {
+              targetTag = tag;
+              break;
+            }
+          }
+          if (targetTag) break;
+        }
+
+        if (!targetTag) {
+          alert(`Opening tag for "${anchorName}" not found`);
+          return;
+        }
+
+        // Call updateAnchor with the original tag and new attributes
+        annotator.updateAnchor(targetTag, newAttributes);
       };
 
       document.getElementById("newText").onchange = () => {
