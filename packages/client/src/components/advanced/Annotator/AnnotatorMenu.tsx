@@ -317,11 +317,12 @@ export const TextAnnotatorMenu = ({
               </StyledAnnotatorNoAnchors>
             )}
             <StyledAnnotatorAnchorList>
-              {anchors.map((anchor) => {
+              {anchors.map((anchor, key) => {
                 const anchorTagName = anchor.getTagName();
                 if (entities[anchorTagName]) {
                   return (
                     <EntityTag
+                      key={key}
                       unlinkButton={{
                         onClick: () => {
                           if (onRemoveAnchor) {
@@ -329,7 +330,6 @@ export const TextAnnotatorMenu = ({
                           }
                         },
                       }}
-                      key={anchorTagName}
                       entity={entities[anchorTagName] as IEntity}
                       elvlButtonGroup={
                         <ElvlButtonGroup
@@ -342,7 +342,7 @@ export const TextAnnotatorMenu = ({
                     />
                   );
                 } else {
-                  return <React.Fragment key={anchorTagName} />;
+                  return <React.Fragment key={key} />;
                 }
               })}
             </StyledAnnotatorAnchorList>

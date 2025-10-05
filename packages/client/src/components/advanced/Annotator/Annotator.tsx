@@ -657,15 +657,7 @@ export const TextAnnotator = ({
         line: storedAnnotatorScroll,
       });
     }
-  }, [theme, dataDocumentIsFetching, isSaving]);
-
-  useEffect(() => {
-    if (!dataDocumentIsFetching && !isSaving) {
-      refreshAnnotator({
-        line: storedAnnotatorScroll,
-      });
-    }
-  }, [hlEntities, isSaving]);
+  }, [theme, hlEntities, dataDocumentIsFetching, isSaving]);
 
   useEffect(() => {
     if (mainCanvas.current) {
@@ -745,6 +737,7 @@ export const TextAnnotator = ({
   };
 
   const onUpdateAnchor = (anchor: Tag, elvl: EntityEnums.Elvl) => {
+    console.log("onUpdateAnchor", anchor, elvl);
     annotator?.updateAnchor(anchor, { elvl });
     handleSaveNewContent(true);
   };
