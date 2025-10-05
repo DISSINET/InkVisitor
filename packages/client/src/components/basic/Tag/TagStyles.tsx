@@ -65,7 +65,7 @@ const getColor = (
   $invertedLabel: boolean,
   $isFavorited: boolean,
   $isItalic: boolean
-): string => {
+): keyof ThemeColor => {
   if ($invertedLabel) {
     if ($isFavorited) {
       return "warning";
