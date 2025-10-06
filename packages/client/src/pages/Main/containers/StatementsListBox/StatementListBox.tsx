@@ -42,6 +42,7 @@ import {
   StyledEmptyState,
   StyledInfoWrapper,
   StyledLoaderWrap,
+  StyledStatementListBox,
   StyledTableWrapper,
 } from "./StatementListBoxStyles";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
@@ -60,6 +61,7 @@ const initialData: {
 
 export const StatementListBox: React.FC = () => {
   const queryClient = useQueryClient();
+  const statementListBoxRef = React.useRef<HTMLDivElement>(null);
 
   const dispatch = useAppDispatch();
   const rowsExpanded: string[] = useAppSelector(
@@ -850,7 +852,7 @@ export const StatementListBox: React.FC = () => {
   }, [displayMode, contentWidth, isListNonEmpty, statementListTableIsLoading]);
 
   return (
-    <>
+    <StyledStatementListBox ref={statementListBoxRef}>
       {showStatementList && (
         <>
           {territory && (
@@ -871,7 +873,7 @@ export const StatementListBox: React.FC = () => {
               deleteStatementsMutation={deleteStatementsMutation}
               relationsCreateMutation={relationsCreateMutation}
               favoritedTerritoryIds={favoritedTerritoryIds}
-              contentWidthTooSmall={contentWidth < SECOND_PANEL_MIN_WIDTH + 60}
+              contentWidthTooNarrow={contentWidth < SECOND_PANEL_MIN_WIDTH + 60}
               statementsWithOrder={statementsWithOrder}
               autoOrderStatementsMutation={autoOrderStatementsMutation}
             />
@@ -986,6 +988,7 @@ export const StatementListBox: React.FC = () => {
                   }
                   userCanEdit={userCanEdit}
                   userData={userData}
+                  statementListBoxRef={statementListBoxRef}
                 />
               )}
 
@@ -1030,7 +1033,7 @@ export const StatementListBox: React.FC = () => {
           />
         </>
       )}
-    </>
+    </StyledStatementListBox>
   );
 };
 

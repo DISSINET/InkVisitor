@@ -1,6 +1,13 @@
 import styled from "styled-components";
 import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
 
+export const StyledStatementListBox = styled.div`
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: auto;
+`;
+
 export const StyledContentWrapper = styled.div`
   display: flex;
   height: 100%;
@@ -115,7 +122,7 @@ export const StyledSearchIcon = styled.div`
 `;
 
 interface StyledSearchResults {
-  $annotatorWidthTooSmall?: boolean;
+  $annotatorWidthTooNarrow?: boolean;
 }
 export const StyledSearchResults = styled.div<StyledSearchResults>`
   display: flex;
@@ -126,8 +133,8 @@ export const StyledSearchResults = styled.div<StyledSearchResults>`
   font-size: ${({ theme }) => theme.fontSize.xxs};
   font-weight: ${({ theme }) => theme.fontWeight.bold};
   white-space: nowrap;
-  flex-wrap: ${({ $annotatorWidthTooSmall }) =>
-    $annotatorWidthTooSmall ? "wrap" : "nowrap"};
+  flex-wrap: ${({ $annotatorWidthTooNarrow }) =>
+    $annotatorWidthTooNarrow ? "wrap" : "nowrap"};
   /* flex-wrap: wrap; */
 `;
 

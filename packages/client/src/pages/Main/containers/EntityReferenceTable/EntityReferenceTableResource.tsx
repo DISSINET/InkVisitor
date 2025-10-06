@@ -22,7 +22,7 @@ interface EntityReferenceTableResource {
   openDetailOnCreate?: boolean;
 
   initResourceTyped?: string;
-  editorWidthTooSmall: boolean;
+  editorWidthTooNarrow: boolean;
 
   disabled?: boolean;
 }
@@ -38,12 +38,12 @@ export const EntityReferenceTableResource: React.FC<
   openDetailOnCreate,
 
   initResourceTyped,
-  editorWidthTooSmall,
+  editorWidthTooNarrow,
 
   disabled,
 }) => {
   return (
-    <StyledGridValue style={{ minWidth: editorWidthTooSmall ? "10rem" : "" }}>
+    <StyledGridValue style={{ minWidth: editorWidthTooNarrow ? "10rem" : "" }}>
       {resourceEntity ? (
         <EntityDropzone
           onSelected={(newSelectedId: string) => {
@@ -73,7 +73,7 @@ export const EntityReferenceTableResource: React.FC<
         </EntityDropzone>
       ) : (
         <EntitySuggester
-          inputWidth={editorWidthTooSmall ? "full" : 100}
+          inputWidth={editorWidthTooNarrow ? "full" : 100}
           alwaysShowCreateModal={alwaysShowCreateModal}
           openDetailOnCreate={openDetailOnCreate}
           territoryActants={[]}

@@ -56,7 +56,7 @@ import { RATIO, TerritoryCreateModalType, W_SCROLL } from "./types";
 import { StatementListSearchLine } from "pages/Main/containers/StatementsListBox/StatementListSearchLine/StatementListSearchLine";
 interface TextAnnotatorProps {
   width: number;
-  annotatorWidthTooSmall?: boolean;
+  annotatorWidthTooNarrow?: boolean;
   height: number;
   displayLineNumbers: boolean;
   hlEntities?: EntityEnums.Class[];
@@ -83,11 +83,13 @@ interface TextAnnotatorProps {
   >;
 
   userData?: IResponseUser;
+  statementListBoxRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 export const TextAnnotator = ({
   width = 400,
-  annotatorWidthTooSmall = false,
+  annotatorWidthTooNarrow = false,
+  statementListBoxRef,
   height = 500,
   displayLineNumbers = true,
   hlEntities = Object.values(EntityEnums.Class),
@@ -723,7 +725,8 @@ export const TextAnnotator = ({
         isMenuDisplayed &&
         menuRef.current &&
         !menuRef.current.contains(event.target as Node) &&
-        !mainCanvas.current?.contains(event.target as Node)
+        !mainCanvas.current?.contains(event.target as Node) &&
+        !statementListBoxRef?.current?.contains(event.target as Node)
       ) {
         setSelectedText("");
         annotator?.clearSelection();
@@ -737,7 +740,7 @@ export const TextAnnotator = ({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isMenuDisplayed, annotator]);
+  }, [isMenuDisplayed, annotator, statementListBoxRef]);
 
   if (dataDocumentError) {
     return (
@@ -754,6 +757,7 @@ export const TextAnnotator = ({
     | { segmentIndex: number; lineIndex: number; start: number; end: number }[]
     | null
   >(null);
+  const [isRegexMode, setIsRegexMode] = useState<boolean>(false);
   const [searchActiveOccurence, setSearchActiveOccurence] = useState<number>(0);
 
   // annotate tool
@@ -800,7 +804,7 @@ export const TextAnnotator = ({
 
   useEffect(() => {
     if (annotator && debouncedSearchTerm.length > 2) {
-      const occurrences = annotator.search(debouncedSearchTerm);
+      const occurrences = annotator.search(debouncedSearchTerm, isRegexMode);
       setSearchOccurences(occurrences);
 
       // Only reset to first occurrence if this is a new search term
@@ -815,7 +819,7 @@ export const TextAnnotator = ({
       setSelectedText("");
       annotator?.clearSelection();
     }
-  }, [debouncedSearchTerm]);
+  }, [debouncedSearchTerm, isRegexMode]);
 
   // Re-run search when width changes to update occurrence positions
   useEffect(() => {
@@ -823,11 +827,11 @@ export const TextAnnotator = ({
       // Force a redraw first to recalculate text layout, then search
       setTimeout(() => {
         annotator.draw();
-        const occurrences = annotator.search(debouncedSearchTerm);
+        const occurrences = annotator.search(debouncedSearchTerm, isRegexMode);
         setSearchOccurences(occurrences);
       }, 0);
     }
-  }, [width, debouncedSearchTerm]);
+  }, [width, debouncedSearchTerm, isRegexMode]);
 
   const isSearchAllowed = useMemo<boolean>(() => {
     return annotator !== undefined && !!dataDocument;
@@ -843,7 +847,7 @@ export const TextAnnotator = ({
           searchOccurences={searchOccurences}
           searchActiveOccurence={searchActiveOccurence}
           isSearchAllowed={isSearchAllowed}
-          annotatorWidthTooSmall={annotatorWidthTooSmall}
+          annotatorWidthTooNarrow={annotatorWidthTooNarrow}
           setSearchActiveOccurence={setSearchActiveOccurence}
           annotator={annotator}
           documentId={documentId}
@@ -854,6 +858,8 @@ export const TextAnnotator = ({
           annotatorMode={annotatorMode}
           selectedText={selectedText}
           setSearchOccurences={setSearchOccurences}
+          isRegexMode={isRegexMode}
+          setIsRegexMode={setIsRegexMode}
         />
       )}
 
@@ -959,12 +965,12 @@ export const TextAnnotator = ({
                 key={EditMode.HIGHLIGHT}
                 icon={
                   <StyledDisplayModeButtonIconWrapper
-                    $annotatorWidthTooSmall={annotatorWidthTooSmall}
+                    $annotatorWidthTooNarrow={annotatorWidthTooNarrow}
                   >
                     <FaPen size={11} />
                   </StyledDisplayModeButtonIconWrapper>
                 }
-                label={!annotatorWidthTooSmall ? EditMode.HIGHLIGHT : ""}
+                label={!annotatorWidthTooNarrow ? EditMode.HIGHLIGHT : ""}
                 color="success"
                 inverted={annotatorMode !== EditMode.HIGHLIGHT}
                 onClick={() => {
@@ -979,13 +985,13 @@ export const TextAnnotator = ({
                 key={EditMode.SEMI}
                 icon={
                   <StyledDisplayModeButtonIconWrapper
-                    $annotatorWidthTooSmall={annotatorWidthTooSmall}
+                    $annotatorWidthTooNarrow={annotatorWidthTooNarrow}
                   >
                     <BsFileTextFill size={11} />
                   </StyledDisplayModeButtonIconWrapper>
                 }
                 color="success"
-                label={!annotatorWidthTooSmall ? "text edit" : ""}
+                label={!annotatorWidthTooNarrow ? "text edit" : ""}
                 inverted={annotatorMode !== EditMode.SEMI}
                 onClick={() => {
                   annotator.setMode(EditMode.SEMI);
@@ -999,13 +1005,13 @@ export const TextAnnotator = ({
                 key={EditMode.RAW}
                 icon={
                   <StyledDisplayModeButtonIconWrapper
-                    $annotatorWidthTooSmall={annotatorWidthTooSmall}
+                    $annotatorWidthTooNarrow={annotatorWidthTooNarrow}
                   >
                     <HiCodeBracket size={11} />
                   </StyledDisplayModeButtonIconWrapper>
                 }
                 color="success"
-                label={!annotatorWidthTooSmall ? "XML" : ""}
+                label={!annotatorWidthTooNarrow ? "XML" : ""}
                 inverted={annotatorMode !== EditMode.RAW}
                 onClick={() => {
                   annotator.setMode(EditMode.RAW);

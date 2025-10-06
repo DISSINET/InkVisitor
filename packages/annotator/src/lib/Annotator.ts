@@ -18,10 +18,12 @@ export const closingTagRegex = /<\/([a-zA-Z0-9\-_]+)>/g;
 // General tag removal regex
 export const tagRemovalRegex = /<\/?[^<>]+?>/g;
 // Creates a new regex instance for opening tags (no shared state)
-export const createOpeningTagRegex = () => new RegExp(openingTagRegex.source, openingTagRegex.flags);
+export const createOpeningTagRegex = () =>
+  new RegExp(openingTagRegex.source, openingTagRegex.flags);
 
 // Opening tag with specific name and optional attributes: <tagname attr="value"> or <tagname>
-export const createSpecificOpeningTagRegex = (tagName: string) => new RegExp(`<${tagName}(?:\\s+[^>]*)?>`, 'g');
+export const createSpecificOpeningTagRegex = (tagName: string) =>
+  new RegExp(`<${tagName}(?:\\s+[^>]*)?>`, "g");
 
 // Occurrence holds exact position of a point in text
 export interface Occurrence {
@@ -776,18 +778,18 @@ export class Annotator {
 
   /**
    * Adds an anchor tag around the currently selected text.
-   * 
+   *
    * This function wraps the selected text with opening and closing XML-like tags.
    * It handles text selection bounds, sanitizes the envelope range to avoid
    * including unwanted neighboring tags, and updates the text content accordingly.
-   * 
+   *
    * @param anchor - The tag name to wrap around the selected text (e.g., "person", "location")
    * @param attributes - Optional attributes to add to the opening tag (e.g., {id: "123", type: "proper"})
-   * 
+   *
    * @example
    * // Wrap selected text with a person tag
    * addAnchor("person");
-   * 
+   *
    * // Wrap selected text with a location tag and attributes
    * addAnchor("location", {id: "loc1", type: "city"});
    */
@@ -871,28 +873,60 @@ export class Annotator {
   }
 
   /**
-   * searches for substring in the whole text, returning prepared Occurrence data
+   * searches for substring or regex pattern in the whole text, returning prepared Occurrence data
    * @param toFind
+   * @param isRegex
    * @returns
    */
-  search(toFind: string): Occurrence[] {
+  search(toFind: string, isRegex: boolean = false): Occurrence[] {
     const occurrences = [];
 
     for (const segmentI in this.text.segments) {
       for (const lineI in this.text.segments[segmentI].lines) {
-        let startIndex = 0;
         const line = this.text.segments[segmentI].lines[lineI];
-        while (startIndex < line.length) {
-          const index = line.indexOf(toFind, startIndex);
-          if (index === -1) break;
 
-          occurrences.push({
-            segmentIndex: parseInt(segmentI),
-            lineIndex: parseInt(lineI),
-            start: index,
-            end: index + toFind.length,
-          });
-          startIndex = index + 1;
+        if (isRegex) {
+          try {
+            const regex = new RegExp(toFind, "g");
+            let match;
+            while ((match = regex.exec(line)) !== null) {
+              occurrences.push({
+                segmentIndex: parseInt(segmentI),
+                lineIndex: parseInt(lineI),
+                start: match.index,
+                end: match.index + match[0].length,
+              });
+            }
+          } catch (error) {
+            // If regex is invalid, treat as literal string
+            let startIndex = 0;
+            while (startIndex < line.length) {
+              const index = line.indexOf(toFind, startIndex);
+              if (index === -1) break;
+
+              occurrences.push({
+                segmentIndex: parseInt(segmentI),
+                lineIndex: parseInt(lineI),
+                start: index,
+                end: index + toFind.length,
+              });
+              startIndex = index + 1;
+            }
+          }
+        } else {
+          let startIndex = 0;
+          while (startIndex < line.length) {
+            const index = line.indexOf(toFind, startIndex);
+            if (index === -1) break;
+
+            occurrences.push({
+              segmentIndex: parseInt(segmentI),
+              lineIndex: parseInt(lineI),
+              start: index,
+              end: index + toFind.length,
+            });
+            startIndex = index + 1;
+          }
         }
       }
     }
@@ -1076,17 +1110,17 @@ export class Annotator {
     if (openingMatch && openingMatch.index === 0) {
       // Selection starts with an opening tag
       const openingTagEnd = indexStart + openingMatch[0].length;
-      
+
       // Check if the selection contains the complete tag (opening + content + closing)
       const selectionAfterOpening = text.slice(openingTagEnd, indexEnd);
       closingTagRegex.lastIndex = 0; // Reset regex
       const closingMatch = closingTagRegex.exec(selectionAfterOpening);
-      
+
       if (closingMatch) {
         // Complete tag is within selection
         const closingTagStart = openingTagEnd + closingMatch.index;
         const closingTagEnd = closingTagStart + closingMatch[0].length;
-        
+
         // If selection extends beyond the complete tag, keep the entire selection
         // If selection is exactly the complete tag or smaller, keep the entire tag
         if (indexEnd >= closingTagEnd) {
@@ -1101,7 +1135,7 @@ export class Annotator {
         indexStart = openingTagEnd;
       }
     }
-    
+
     // Case 2: Check if selection ends with closing tags that don't belong to content within the selection
     const updatedSelection = text.slice(indexStart, indexEnd);
     if (updatedSelection.endsWith(">") && updatedSelection.includes("</")) {
@@ -1127,14 +1161,19 @@ export class Annotator {
         let hasMatchingOpeningInSelection = false;
 
         // Check if there's a matching opening tag within the selection
-        while ((openingMatch = openingPattern.exec(updatedSelection)) !== null) {
+        while (
+          (openingMatch = openingPattern.exec(updatedSelection)) !== null
+        ) {
           const openingTagStart = indexStart + openingMatch.index;
           const openingTagEnd = openingTagStart + openingMatch[0].length;
-          
+
           // Only keep the closing tag if the opening tag is completely within the selection
           // and the opening tag comes before the closing tag
-          if (openingTagStart >= indexStart && openingTagEnd <= closingTag.start && 
-              openingTagEnd <= indexEnd) {
+          if (
+            openingTagStart >= indexStart &&
+            openingTagEnd <= closingTag.start &&
+            openingTagEnd <= indexEnd
+          ) {
             hasMatchingOpeningInSelection = true;
             break;
           }
@@ -1149,5 +1188,4 @@ export class Annotator {
 
     return [indexStart, indexEnd];
   }
-
 }

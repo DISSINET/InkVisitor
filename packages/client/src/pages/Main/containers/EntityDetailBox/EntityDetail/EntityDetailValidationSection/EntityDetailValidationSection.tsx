@@ -48,7 +48,7 @@ interface EntityDetailValidationSection {
   territoryParentId: string | undefined;
   entity: IResponseDetail;
   setLoadingValidations: React.Dispatch<React.SetStateAction<boolean>>;
-  widthTooSmall: boolean;
+  widthTooNarrow: boolean;
   isValidationExpanded: boolean;
   setIsValidationExpanded: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -63,7 +63,7 @@ export const EntityDetailValidationSection: React.FC<
   territoryParentId,
   entity,
   setLoadingValidations,
-  widthTooSmall,
+  widthTooNarrow,
   isValidationExpanded,
   setIsValidationExpanded,
 }) => {
@@ -150,7 +150,7 @@ export const EntityDetailValidationSection: React.FC<
                 ? entity.data.validations.length === 0
                 : true
             }
-            widthTooSmall={widthTooSmall}
+            widthTooNarrow={widthTooNarrow}
             handleCopyFromEntity={(pickedEntity, replace) => {
               setLoadingValidations(true);
               api.detailGet(pickedEntity.id).then((data) => {
@@ -205,7 +205,7 @@ export const EntityDetailValidationSection: React.FC<
                   removeValidationRule={() => setTempIndexToRemove(key)}
                   isInsideTemplate={isInsideTemplate}
                   territoryParentId={territoryParentId}
-                  widthTooSmall={widthTooSmall}
+                  widthTooNarrow={widthTooNarrow}
                   userCanEdit={userCanEdit}
                 />
                 {key !== validations.length - 1 && <StyledBlockSeparator />}

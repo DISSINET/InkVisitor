@@ -696,7 +696,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     (state) => state.layout.mainPage.thirdPanelRealWidth
   );
 
-  const editorWidthTooSmall = editorWidth < EDITOR_TOO_SMALL_BREAKPOINT;
+  const editorWidthTooNarrow = editorWidth < EDITOR_TOO_SMALL_BREAKPOINT;
 
   return (
     <>
@@ -887,7 +887,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         </StyledEditorPreBlock>
 
         {statement.warnings.length > 0 && (
-          <StyledEditorSection $widthTooSmall={editorWidthTooSmall}>
+          <StyledEditorSection $widthTooNarrow={editorWidthTooNarrow}>
             <StyledEditorSectionHeader>
               <StyledEditorSectionHeading>
                 {statement.warnings.length} Warnings{" "}
@@ -929,7 +929,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           $metaSection
           key="editor-section-actions"
           id="action-section"
-          $widthTooSmall={editorWidthTooSmall}
+          $widthTooNarrow={editorWidthTooNarrow}
         >
           <StyledEditorSectionHeader>
             <StyledEditorSectionHeading>Actions</StyledEditorSectionHeading>
@@ -942,7 +942,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 setShowSubmitSection={setShowSubmitSection}
                 handleAttributeChange={handleAttributeChange}
                 handleDataAttributeChange={handleDataAttributeChange}
-                editorWidthTooSmall={editorWidthTooSmall}
+                editorWidthTooNarrow={editorWidthTooNarrow}
               />
             )}
           </StyledEditorSectionHeader>
@@ -981,7 +981,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           $metaSection
           key="editor-section-actants"
           id="actant-section"
-          $widthTooSmall={editorWidthTooSmall}
+          $widthTooNarrow={editorWidthTooNarrow}
         >
           <StyledEditorSectionHeader>
             <StyledEditorSectionHeading>Actants</StyledEditorSectionHeading>
@@ -994,7 +994,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 setShowSubmitSection={setShowSubmitSection}
                 handleAttributeChange={handleAttributeChange}
                 handleDataAttributeChange={handleDataAttributeChange}
-                editorWidthTooSmall={editorWidthTooSmall}
+                editorWidthTooNarrow={editorWidthTooNarrow}
               />
             )}
           </StyledEditorSectionHeader>
@@ -1033,7 +1033,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         {/* Refs */}
         <StyledEditorSection
           key="editor-section-refs"
-          $widthTooSmall={editorWidthTooSmall}
+          $widthTooNarrow={editorWidthTooNarrow}
         >
           <StyledEditorSectionHeader>
             <StyledEditorSectionHeading>References</StyledEditorSectionHeading>
@@ -1046,7 +1046,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 setShowSubmitSection={setShowSubmitSection}
                 handleAttributeChange={handleAttributeChange}
                 handleDataAttributeChange={handleDataAttributeChange}
-                editorWidthTooSmall={editorWidthTooSmall}
+                editorWidthTooNarrow={editorWidthTooNarrow}
               />
             )}
           </StyledEditorSectionHeader>
@@ -1069,7 +1069,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               entities={statement.entities ?? {}}
               entityId={statement.id}
               userCanEdit={userCanEdit}
-              editorWidthTooSmall={editorWidthTooSmall}
+              editorWidthTooNarrow={editorWidthTooNarrow}
             />
           </StyledEditorSectionContent>
         </StyledEditorSection>
@@ -1077,7 +1077,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         {/* Tags */}
         <StyledEditorSection
           key="editor-section-tags"
-          $widthTooSmall={editorWidthTooSmall}
+          $widthTooNarrow={editorWidthTooNarrow}
         >
           <StyledEditorSectionHeader>
             <StyledEditorSectionHeading>Tags</StyledEditorSectionHeading>
@@ -1135,7 +1135,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         <StyledEditorSection
           key="editor-section-notes"
           $lastSection
-          $widthTooSmall={editorWidthTooSmall}
+          $widthTooNarrow={editorWidthTooNarrow}
         >
           <StyledEditorSectionHeader>Notes</StyledEditorSectionHeader>
           <StyledEditorSectionContent>
@@ -1153,7 +1153,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         {/* Audits */}
         <StyledEditorSection
           key="editor-section-audits"
-          $widthTooSmall={editorWidthTooSmall}
+          $widthTooNarrow={editorWidthTooNarrow}
         >
           <StyledEditorSectionHeader>Audits</StyledEditorSectionHeader>
           <StyledEditorSectionContent>
@@ -1164,7 +1164,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         {/* JSON */}
         <StyledEditorSection
           key="editor-section-json"
-          $widthTooSmall={editorWidthTooSmall}
+          $widthTooNarrow={editorWidthTooNarrow}
         >
           <StyledEditorSectionHeader>JSON</StyledEditorSectionHeader>
           <StyledEditorSectionContent>
