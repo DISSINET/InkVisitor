@@ -191,11 +191,22 @@ export default class Relation implements IRelationModel {
       this.type
     );
     relationByType.forEach((rel) => {
-      if (
-        rel.entityIds[0] === this.entityIds[0] &&
-        rel.entityIds[1] === this.entityIds[1]
-      ) {
-        throw new RelationPathExist();
+      if (this.type === RelationEnums.Type.Synonym) {
+        // For SYN check if both arrays have the same length and contain the same elements
+        if (
+          this.entityIds.length === rel.entityIds.length &&
+          this.entityIds.every((id) => rel.entityIds.includes(id))
+        ) {
+          throw new RelationPathExist();
+        }
+      } else {
+        // For all other relation types, check the first two entityIds
+        if (
+          rel.entityIds[0] === this.entityIds[0] &&
+          rel.entityIds[1] === this.entityIds[1]
+        ) {
+          throw new RelationPathExist();
+        }
       }
     });
 

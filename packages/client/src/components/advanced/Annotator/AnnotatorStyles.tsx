@@ -100,7 +100,6 @@ export const StyledAnnotatorItemTitle = styled.div`
   font-variant-caps: small-caps;
   display: flex;
   align-items: center;
-  /* align-items: baseline; */
   gap: ${({ theme }) => theme.space[1]};
 `;
 
@@ -145,17 +144,18 @@ export const StyledInfoText = styled.div`
 `;
 
 interface StyledDisplayModeButtonIconWrapper {
-  $annotatorWidthTooSmall?: boolean;
+  $annotatorWidthTooNarrow?: boolean;
 }
 export const StyledDisplayModeButtonIconWrapper = styled.div<StyledDisplayModeButtonIconWrapper>`
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: ${({ $annotatorWidthTooSmall }) =>
-    $annotatorWidthTooSmall ? "0 0.5rem" : ""};
+  padding: ${({ $annotatorWidthTooNarrow }) =>
+    $annotatorWidthTooNarrow ? "0 0.5rem" : ""};
 `;
 
 export const StyledAnnotatorButtons = styled.div`
   display: flex;
   justify-content: space-between;
+  padding-left: ${({ theme }) => theme.space[1]};
 `;

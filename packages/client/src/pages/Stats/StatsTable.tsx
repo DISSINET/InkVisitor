@@ -1,11 +1,11 @@
 import { IRequestStats, IResponseStats } from "@shared/types";
-import { Aggregation } from "@shared/types/stats";
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
 import { useMemo } from "react";
 import { Column, useTable } from "react-table";
 import styled from "styled-components";
 import { getDataCategories, transformDataForTable } from "./utils";
+import { OTHERS_KEY, TABLE_PADDING } from "./constants";
 
 interface StatsTableProps {
   data: IResponseStats;
@@ -80,14 +80,17 @@ export const StatsTable = ({
   const { aggregateBy } = request;
 
   const { data: dataUsers } = useQuery({
-    queryKey: ["users-stats"],
-    queryFn: () => api.usersGetMore({}),
+    queryKey: ["users"],
+    queryFn: async () => {
+      const res = await api.usersGetMore({});
+      return res.data;
+    },
     enabled: api.isLoggedIn(),
   });
 
   const userKeyMap = useMemo<Record<string, string>>(() => {
     const mapNames: Record<string, string> = {};
-    for (const user of dataUsers?.data || []) {
+    for (const user of dataUsers || []) {
       mapNames[user.id] = user.name.replace(".", "_");
     }
     return mapNames;
@@ -95,13 +98,13 @@ export const StatsTable = ({
 
   const dataCategories = useMemo(
     () => getDataCategories(aggregateBy, userKeyMap, values),
-    [aggregateBy, userKeyMap, values]
+    [aggregateBy, userKeyMap, JSON.stringify(values)]
   );
 
   const tableData = useMemo(
     () =>
       transformDataForTable(values, dataCategories, aggregateBy, userKeyMap),
-    [values, dataCategories, aggregateBy, userKeyMap]
+    [values, dataCategories, aggregateBy, userKeyMap, JSON.stringify(values)]
   );
 
   const columns = useMemo<Column<TableRow>[]>(
@@ -132,28 +135,39 @@ export const StatsTable = ({
 
   return (
     <TableContainer $height={height} $width={width}>
-      <Table {...getTableProps()} $width={width}>
+      <Table {...getTableProps()} $width={width - TABLE_PADDING}>
         <thead>
-          {headerGroups.map((headerGroup) => (
-            <tr {...headerGroup.getHeaderGroupProps()}>
-              {headerGroup.headers.map((column, index) => (
-                <Th {...column.getHeaderProps()} $isSticky={index === 0}>
-                  {column.render("Header")}
-                </Th>
-              ))}
-            </tr>
-          ))}
+          {headerGroups.map((headerGroup) => {
+            const { key, ...restHeaderGroupProps } =
+              headerGroup.getHeaderGroupProps();
+            return (
+              <tr key={key} {...restHeaderGroupProps}>
+                {headerGroup.headers.map((column, index) => {
+                  const { key, ...restHeaderProps } = column.getHeaderProps();
+                  return (
+                    <Th key={key} {...restHeaderProps} $isSticky={index === 0}>
+                      {column.render("Header")}
+                    </Th>
+                  );
+                })}
+              </tr>
+            );
+          })}
         </thead>
         <tbody {...getTableBodyProps()}>
           {rows.map((row) => {
             prepareRow(row);
+            const { key, ...restRowProps } = row.getRowProps();
             return (
-              <tr {...row.getRowProps()}>
-                {row.cells.map((cell, index) => (
-                  <Td {...cell.getCellProps()} $isSticky={index === 0}>
-                    {cell.render("Cell")}
-                  </Td>
-                ))}
+              <tr key={key} {...restRowProps}>
+                {row.cells.map((cell, index) => {
+                  const { key, ...restCellProps } = cell.getCellProps();
+                  return (
+                    <Td key={key} {...restCellProps} $isSticky={index === 0}>
+                      {cell.render("Cell")}
+                    </Td>
+                  );
+                })}
               </tr>
             );
           })}

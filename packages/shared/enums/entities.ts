@@ -225,6 +225,7 @@ export namespace EntityEnums {
     MiddleEnglish = "enm",
     MiddleFrench = "frm",
     MiddleHighGerman = "gmh",
+    EarlyNewHighGerman = "enhg",
     Occitan = "oci",
     OldChurchSlavonic = "chu", // same as the Church Slavic
     OldEnglish = "ang",

@@ -16,6 +16,7 @@ import { PropSpecKind } from "@shared/types/prop";
 import { IWarningPositionSection } from "@shared/types/warning";
 import { Connection } from "rethinkdb-ts";
 import Entity from "./entity";
+import { Setting } from "@models/setting/setting";
 
 export default class EntityWarnings {
   entityId: string;
@@ -53,21 +54,28 @@ export default class EntityWarnings {
    * @returns
    */
   async getWarnings(conn: Connection): Promise<IWarning[]> {
+    const settings = await Setting.getSettingsAll(conn);
+
     const warnings: IWarning[] = [];
 
-    const sclmWarning = await this.hasSCLM(conn);
-    if (sclmWarning) {
-      warnings.push(sclmWarning);
+    if (settings.find((s) => s.id === "validation_SCLM")?.value === true) {
+      const sclmWarning = await this.hasSCLM(conn);
+      if (sclmWarning) {
+        warnings.push(sclmWarning);
+      }
     }
 
+    if (settings.find((s) => s.id === "validation_MAEE")?.value === true) {
+      const maeeWarning = await this.hasMAEE(conn);
+      if (maeeWarning) {
+        warnings.push(maeeWarning);
+      }
+    }
+
+    // these rules cannot be disabled
     const isyncWarning = await this.hasISYNC(conn);
     if (isyncWarning) {
       warnings.push(isyncWarning);
-    }
-
-    const mvalWarning = await this.hasMVAL(conn);
-    if (mvalWarning) {
-      warnings.push(mvalWarning);
     }
 
     const avalWarnings = await this.hasAVAL(conn);
@@ -75,9 +83,9 @@ export default class EntityWarnings {
       avalWarnings.forEach((w) => warnings.push(w));
     }
 
-    const maeeWarning = await this.hasMAEE(conn);
-    if (maeeWarning) {
-      warnings.push(maeeWarning);
+    const mvalWarning = await this.hasMVAL(conn);
+    if (mvalWarning) {
+      warnings.push(mvalWarning);
     }
 
     const psmWarning = await this.hasPSM(conn);
@@ -103,6 +111,7 @@ export default class EntityWarnings {
     entity: Entity,
     rootTerritory: ITerritory
   ): Promise<IWarning[]> {
+    const settings = await Setting.getSettingsAll(conn);
     const classificationRels =
       await Classification.getClassificationForwardConnections(
         conn,
@@ -111,18 +120,22 @@ export default class EntityWarnings {
         1,
         0
       );
+
     const classificationEs: IConcept[] = await getEntitiesByIds<IConcept>(
       conn,
       classificationRels.map((c) => c.entityIds[1])
     );
+
     const propValueEs = await getEntitiesByIds<IEntity>(
       conn,
       Entity.extractIdsFromProps(entity.props, [PropSpecKind.VALUE])
     );
+
     return entity.getTBasedWarnings(
       [rootTerritory],
       classificationEs,
-      propValueEs
+      propValueEs,
+      settings
     );
   }
 

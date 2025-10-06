@@ -27,6 +27,7 @@ import { IRequest } from "src/custom_typings/request";
 import Entity from "../entity/entity";
 import { PositionRules } from "./PositionRules";
 import Statement from "./statement";
+import { Setting } from "@models/setting/setting";
 
 export class ResponseStatement extends Statement implements IResponseStatement {
   entities: { [key: string]: IEntity };
@@ -65,7 +66,9 @@ export class ResponseStatement extends Statement implements IResponseStatement {
 
   prepareEntitiesSync(preloadedEntities: Record<string, IEntity>) {
     const wantedEntityIds = this.getEntitiesIds();
-    const wantedAnchorEntityIds = Entity.extractIdsFromAnchors(this.usedInDocuments);
+    const wantedAnchorEntityIds = Entity.extractIdsFromAnchors(
+      this.usedInDocuments
+    );
     const entities: IEntity[] = [];
     const anchorEntities: IEntity[] = [];
 
@@ -220,6 +223,8 @@ export class ResponseStatement extends Statement implements IResponseStatement {
   async getTValidationWarnings(req: IRequest): Promise<IWarning[]> {
     let warnings: IWarning[] = [];
 
+    const settings = await Setting.getSettingsAll(req.db.connection);
+
     let allEntities = [
       ...this.data.actants.map((a) => a.entityId),
       ...this.data.actions.map((a) => a.actionId),
@@ -276,7 +281,8 @@ export class ResponseStatement extends Statement implements IResponseStatement {
           const eWarnings = entity.getTBasedWarnings(
             territoryEs,
             classificationEs,
-            propValueEs
+            propValueEs,
+            settings
           );
           if (eWarnings.length) {
             warnings = warnings.concat(eWarnings);
@@ -293,8 +299,22 @@ export class ResponseStatement extends Statement implements IResponseStatement {
    * @param position
    * @returns list of warnings
    */
-  getWarningsForPosition(position: EntityEnums.Position): IWarning[] {
+  getWarningsForPosition(
+    position: EntityEnums.Position,
+    settings: Setting[]
+  ): IWarning[] {
     const warnings: IWarning[] = [];
+
+    const isMAEnabled =
+      settings.find((s) => s.id === "validation_MA")?.value === true;
+    const isWAEnabled =
+      settings.find((s) => s.id === "validation_WA")?.value === true;
+    const isANAEnabled =
+      settings.find((s) => s.id === "validationANAC")?.value === true;
+    const isWACEnabled =
+      settings.find((s) => s.id === "validation_WAC")?.value === true;
+    const isAVUEnabled =
+      settings.find((s) => s.id === "validation_AVU")?.value === true;
 
     // actantId / entityId could be empty, ignore them
     const actions = this.data.actions.filter((a) => !!a.actionId);
@@ -308,35 +328,41 @@ export class ResponseStatement extends Statement implements IResponseStatement {
     );
 
     if (rules.mismatch) {
-      warnings.push(
-        this.newStatementWarning(WarningTypeEnums.WAC, {
-          section: IWarningPositionSection.Statement,
-          subSection: `${position}`,
-        })
-      );
-    }
-
-    if (!rules.mismatch && !actants.length) {
-      if (!rules.allowsEmpty() && !rules.allUndefined) {
+      if (isWACEnabled) {
         warnings.push(
-          this.newStatementWarning(WarningTypeEnums.MA, {
+          this.newStatementWarning(WarningTypeEnums.WAC, {
             section: IWarningPositionSection.Statement,
             subSection: `${position}`,
           })
         );
+      }
+    }
+
+    if (!rules.mismatch && !actants.length) {
+      if (!rules.allowsEmpty() && !rules.allUndefined) {
+        if (isMAEnabled) {
+          warnings.push(
+            this.newStatementWarning(WarningTypeEnums.MA, {
+              section: IWarningPositionSection.Statement,
+              subSection: `${position}`,
+            })
+          );
+        }
       } else if (rules.allUndefined) {
         return warnings;
       }
     }
 
     rules.undefinedActions.forEach((actionId) => {
-      warnings.push(
-        this.newStatementWarning(WarningTypeEnums.AVU, {
-          section: IWarningPositionSection.Statement,
-          subSection: position,
-          entityId: actionId,
-        })
-      );
+      if (isAVUEnabled) {
+        warnings.push(
+          this.newStatementWarning(WarningTypeEnums.AVU, {
+            section: IWarningPositionSection.Statement,
+            subSection: position,
+            entityId: actionId,
+          })
+        );
+      }
     });
 
     if (rules.allUndefined || rules.mismatch) {
@@ -355,23 +381,27 @@ export class ResponseStatement extends Statement implements IResponseStatement {
         if (!actionRules) {
           // action rules undefined for this position - only common warning should be returned (AVU)
         } else if (PositionRules.allowsOnlyEmpty(actionRules)) {
-          warnings.push(
-            this.newStatementWarning(WarningTypeEnums.ANA, {
-              section: IWarningPositionSection.Statement,
-              subSection: `${position}`,
-              actantId: stActant.id,
-              entityId: action.id,
-            })
-          );
+          if (isANAEnabled) {
+            warnings.push(
+              this.newStatementWarning(WarningTypeEnums.ANA, {
+                section: IWarningPositionSection.Statement,
+                subSection: `${position}`,
+                actantId: stActant.id,
+                entityId: action.id,
+              })
+            );
+          }
         } else if (!actionRules.includes(actant.class)) {
-          warnings.push(
-            this.newStatementWarning(WarningTypeEnums.WA, {
-              section: IWarningPositionSection.Statement,
-              subSection: `${position}`,
-              actantId: stActant.id,
-              entityId: action.id,
-            })
-          );
+          if (isWAEnabled) {
+            warnings.push(
+              this.newStatementWarning(WarningTypeEnums.WA, {
+                section: IWarningPositionSection.Statement,
+                subSection: `${position}`,
+                actantId: stActant.id,
+                entityId: action.id,
+              })
+            );
+          }
         }
       }
     }
@@ -384,13 +414,20 @@ export class ResponseStatement extends Statement implements IResponseStatement {
    * @returns list of warnings
    */
   async getWarnings(req: IRequest): Promise<IWarning[]> {
+    const settings = await Setting.getSettingsAll(req.db.connection);
+
+    const isNAEnabled =
+      settings.find((s) => s.id === "validation_NA")?.value === true;
+
     let warnings: IWarning[] = [];
 
     const tbasedWarnings = await this.getTValidationWarnings(req);
     warnings = warnings.concat(tbasedWarnings);
 
     if (!this.data.actions.length) {
-      warnings.push(this.newStatementWarning(WarningTypeEnums.NA, {}));
+      if (isNAEnabled) {
+        warnings.push(this.newStatementWarning(WarningTypeEnums.NA, {}));
+      }
       return warnings;
     }
 
@@ -399,7 +436,9 @@ export class ResponseStatement extends Statement implements IResponseStatement {
       EntityEnums.Position.Actant2,
       EntityEnums.Position.Subject,
     ]) {
-      warnings = warnings.concat(this.getWarningsForPosition(position));
+      warnings = warnings.concat(
+        this.getWarningsForPosition(position, settings)
+      );
     }
 
     return warnings;

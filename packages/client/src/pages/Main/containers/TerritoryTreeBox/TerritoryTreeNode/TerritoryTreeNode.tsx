@@ -69,6 +69,9 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   updateUserMutation,
 }) => {
   const dispatch = useAppDispatch();
+  const detailBoxState: DetailBoxState = useAppSelector(
+    (state) => state.layout.mainPage.detailBoxState
+  );
   const treeInitialized = useAppSelector((state) => state.treeInitialized);
   const queryClient = useQueryClient();
 
@@ -205,8 +208,10 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     if (hasChildren) {
       setIsExpanded((prevIsExpanded) => !prevIsExpanded);
     }
-    dispatch(setDetailBoxState(DetailBoxState.Normal));
-  }, [hasChildren, territoryId]);
+    if (detailBoxState === DetailBoxState.FullHeight) {
+      dispatch(setDetailBoxState(DetailBoxState.Normal));
+    }
+  }, [hasChildren, territoryId, detailBoxState]);
 
   const moveStatementsMutation = useMutation({
     mutationFn: async (data: {

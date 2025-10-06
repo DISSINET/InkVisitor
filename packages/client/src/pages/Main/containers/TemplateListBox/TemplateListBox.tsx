@@ -44,7 +44,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
     (state) => state.layout.mainPage.fourthPanelBoxesOpened
   );
   const fourthPanelWidth = useDebounce(useSelector(selectPanelWidth(3)), 200);
-  const widthTooSmall = fourthPanelWidth < 220;
+  const widthTooNarrow = fourthPanelWidth < 220;
 
   const {
     status,
@@ -66,7 +66,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
 
       const res = await api.entitiesSearch(filters);
 
-      const templates = res.data;
+      const templates = res.data ?? [];
       templates.sort((a: IEntity, b: IEntity) =>
         a.labels[0].toLocaleLowerCase() > b.labels[0].toLocaleLowerCase()
           ? 1
@@ -131,7 +131,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
                 <Dropdown.Single.Entity
                   value={filterByClass}
                   options={
-                    widthTooSmall
+                    widthTooNarrow
                       ? allEntityOptions.map((c) => {
                           return {
                             value: c.value,
@@ -145,7 +145,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
                   }}
                   width="full"
                   disableTyping
-                  disableTooltip={!widthTooSmall}
+                  disableTooltip={!widthTooNarrow}
                 />
                 <TypeBar entityLetter={filterByClass} />
               </div>

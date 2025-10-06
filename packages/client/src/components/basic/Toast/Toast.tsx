@@ -9,7 +9,7 @@ export const Toast: React.FC<Toast> = () => {
       hideProgressBar
       closeButton={false}
       position={"top-center"}
-      autoClose={2500}
+      autoClose={4500}
       pauseOnHover
     />
   );

@@ -59,17 +59,18 @@ interface StyledEditorSection {
   $lastSection?: boolean;
   $metaSection?: boolean;
   $marginRight?: boolean;
-  $widthTooSmall?: boolean;
+  $widthTooNarrow?: boolean;
 }
 export const StyledEditorSection = styled.div<StyledEditorSection>`
   padding: ${({ theme }) => theme.space[6]};
-  padding-left: ${({ theme, $widthTooSmall }) =>
-    $widthTooSmall ? theme.space[4] : theme.space[6]};
+  padding-left: ${({ theme, $widthTooNarrow }) =>
+    $widthTooNarrow ? theme.space[4] : theme.space[6]};
   padding-right: ${({ $metaSection }) => ($metaSection ? 0 : "")};
   padding-right: ${({ $marginRight }) => ($marginRight ? "0.5rem" : "")};
   margin-top: 0.2rem;
   margin-bottom: 0.2rem;
-  margin-left: ${({ $widthTooSmall }) => ($widthTooSmall ? "1.5rem" : "2rem")};
+  margin-left: ${({ $widthTooNarrow }) =>
+    $widthTooNarrow ? "1.5rem" : "2rem"};
   border-bottom-width: ${({ theme }) => theme.borderWidth[1]};
   border-bottom-color: ${({ theme }) => theme.color["gray"][500]};
   border-bottom-style: solid;

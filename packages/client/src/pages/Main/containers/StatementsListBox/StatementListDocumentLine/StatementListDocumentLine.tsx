@@ -34,7 +34,7 @@ interface StatementListDocumentLine {
   // is list non empty
   showStatementList: boolean;
   userCanEdit: boolean;
-  annotatorWidthTooSmall: boolean;
+  annotatorWidthTooNarrow: boolean;
 
   // highlight
   contentWidth: number;
@@ -53,7 +53,7 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
   resources,
   showStatementList,
   userCanEdit,
-  annotatorWidthTooSmall,
+  annotatorWidthTooNarrow,
 
   contentWidth,
   handleHlEntitiesChange,
@@ -70,6 +70,7 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
         <StyledEntityContainer>
           {!selectedResource && (
             <EntitySuggester
+              placeholder="select resource"
               categoryTypes={[EntityEnums.Class.Resource]}
               preSuggestions={resources}
               onPicked={(entity) => {
@@ -82,7 +83,7 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
             <div
               style={{
                 display: "flex",
-                maxWidth: annotatorWidthTooSmall ? "9rem" : "10rem",
+                maxWidth: annotatorWidthTooNarrow ? "9rem" : "10rem",
               }}
             >
               <EntityTag
@@ -101,7 +102,7 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
 
         <StyledDocumentTitleContainer
           style={{
-            maxWidth: annotatorWidthTooSmall ? "10rem" : "12rem",
+            maxWidth: annotatorWidthTooNarrow ? "10rem" : "12rem",
           }}
         >
           {selectedDocument && <DocumentTitle title={selectedDocument.title} />}
@@ -167,12 +168,12 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
                 value={hlEntities}
                 noOptionsMessage="No entity classes to highlight"
                 width={
-                  annotatorWidthTooSmall
+                  annotatorWidthTooNarrow
                     ? contentWidth / 2.7
                     : contentWidth / 2.5
                 }
                 limitSelectedItems={
-                  annotatorWidthTooSmall
+                  annotatorWidthTooNarrow
                     ? Math.floor((contentWidth / 2.7 - 110) / 37)
                     : Math.floor((contentWidth / 2.5 - 110) / 37)
                 }

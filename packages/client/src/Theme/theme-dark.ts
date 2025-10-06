@@ -1,3 +1,4 @@
+import { EntityEnums } from "@shared/enums";
 import theme from "./theme";
 
 const darkTheme = {
@@ -105,11 +106,13 @@ const darkTheme = {
     },
 
     // tag status
-    0: "#5f6c7b", // pending
-    1: "#ddd", // approved
-    2: "#7F1D1D", // discouraged
-    3: "#9F7F1D", // warning
-    4: "#a6593a", // unfinished
+    tagStatus: {
+      [EntityEnums.Status.Pending]: "#5f6c7b", // pending
+      [EntityEnums.Status.Approved]: "#ddd", // approved
+      [EntityEnums.Status.Discouraged]: "#7F1D1D", // discouraged
+      [EntityEnums.Status.Warning]: "#9F7F1D", // warning
+      [EntityEnums.Status.Unfinished]: "#a6593a", // unfinished
+    },
   },
   background: {
     stripes:

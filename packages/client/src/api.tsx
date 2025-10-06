@@ -13,6 +13,7 @@ import {
   IResponseGeneric,
   IResponsePermission,
   IResponseStatement,
+  IResponseStats,
   IResponseTerritory,
   IResponseTree,
   IResponseUser,
@@ -32,7 +33,6 @@ import axios, {
   AxiosRequestConfig,
   AxiosResponse,
 } from "axios";
-import React from "react";
 import { toast } from "react-toastify";
 import io, { Socket } from "socket.io-client";
 import {
@@ -907,7 +907,7 @@ class Api {
   async statsGet(
     data: IRequestStats,
     options?: IApiOptions
-  ): Promise<AxiosResponse<IResponseAudit>> {
+  ): Promise<AxiosResponse<IResponseStats>> {
     try {
       const response = await this.connection.post(`/stats`, data, options);
       return response;

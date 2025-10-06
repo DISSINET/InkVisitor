@@ -77,7 +77,7 @@ interface EntityDetailFormSection {
   handleAskForTemplateApply: (templateIdToApply: string) => void;
   isTerritoryWithParent: (entity: IResponseDetail) => boolean;
   isStatementWithTerritory: (entity: IResponseDetail) => boolean;
-  widthTooSmall: boolean;
+  widthTooNarrow: boolean;
 }
 export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
   entity,
@@ -93,7 +93,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
   handleAskForTemplateApply,
   isTerritoryWithParent,
   isStatementWithTerritory,
-  widthTooSmall,
+  widthTooNarrow,
 }) => {
   const { status: documentsStatus, data: documents } = useQuery({
     queryKey: ["documents"],
@@ -355,7 +355,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                         filterEditorRights
                         inputWidth={
                           80
-                          // selectedRows.length > 0 && contentWidthTooSmall ? 36 : 80
+                          // selectedRows.length > 0 && contentWidthTooNarrow ? 36 : 80
                         }
                         disableCreate
                         categoryTypes={[EntityEnums.Class.Territory]}
@@ -396,7 +396,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
             <StyledDetailContentRowValue>
               <AttributeButtonGroup
                 noMargin
-                iconsOnly={widthTooSmall}
+                iconsOnly={widthTooNarrow}
                 disabled={
                   !userCanAdmin || (entity.id === rootTerritoryId && !isOwner)
                 }
@@ -406,7 +406,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                   return {
                     longValue: entityStatusOption["label"],
                     shortValue: entityStatusOption["label"],
-                    icon: widthTooSmall ? icon : undefined,
+                    icon: widthTooNarrow ? icon : undefined,
                     onClick: () => {
                       updateEntityMutation.mutate({
                         status: entityStatusOption["value"],

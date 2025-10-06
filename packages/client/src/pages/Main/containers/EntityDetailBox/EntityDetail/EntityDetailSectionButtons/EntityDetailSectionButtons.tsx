@@ -16,7 +16,7 @@ interface EntityDetailSectionButtons {
   suggesterCategoryTypes?: EntityEnums.Class[];
   removeBtnTooltip: string;
   removeBtnDisabled: boolean;
-  widthTooSmall?: boolean;
+  widthTooNarrow?: boolean;
 }
 export const EntityDetailSectionButtons: React.FC<
   EntityDetailSectionButtons
@@ -27,7 +27,7 @@ export const EntityDetailSectionButtons: React.FC<
   suggesterCategoryTypes = classesAll,
   removeBtnTooltip,
   removeBtnDisabled,
-  widthTooSmall,
+  widthTooNarrow,
 }) => {
   const [replaceSection, setReplaceSection] = useState(false);
 
@@ -72,7 +72,7 @@ export const EntityDetailSectionButtons: React.FC<
         }
         excludedActantIds={[entityId]}
         disableCreate
-        inputWidth={widthTooSmall ? 46 : 85}
+        inputWidth={widthTooNarrow ? 46 : 85}
         placeholder="another entity"
         disableTemplateInstantiation
       />

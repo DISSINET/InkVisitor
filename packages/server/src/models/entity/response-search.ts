@@ -13,6 +13,8 @@ import { Connection, r, RDatum, RTable } from "rethinkdb-ts";
 import { IRequest } from "src/custom_typings/request";
 import Entity from "./entity";
 import { ResponseEntity } from "./response";
+import { IRequestSearchRootValidity } from "@shared/types/request-search";
+import { Setting } from "@models/setting/setting";
 
 /**
  * SearchQuery is customized builder for search queries, allowing to build query by chaining prepared filters
@@ -442,26 +444,46 @@ export class SearchQuery {
 
     if (req.createdDate) {
       await this._updateEntityIdsFromAudits(req, () =>
-        Audit.getByCreatedDate(this.connection, req.createdDate!)
+        Audit.getByCreatedDate(this.connection, req.createdDate as Date)
       );
     }
 
     if (req.updatedDate) {
       await this._updateEntityIdsFromAudits(req, () =>
-        Audit.getByUpdatedDate(this.connection, req.updatedDate!)
+        Audit.getByUpdatedDate(this.connection, req.updatedDate as Date)
       );
     }
 
     if (req.createdBy) {
       await this._updateEntityIdsFromAudits(req, () =>
-        Audit.getByCreatedBy(this.connection, req.createdBy!)
+        Audit.getByCreatedBy(this.connection, req.createdBy as string)
       );
     }
 
     if (req.updatedBy) {
       await this._updateEntityIdsFromAudits(req, () =>
-        Audit.getByUpdatedBy(this.connection, req.updatedBy!)
+        Audit.getByUpdatedBy(this.connection, req.updatedBy as string)
       );
+    }
+
+    if (req.editedBy) {
+      const updatedBy = await Audit.getByUpdatedBy(
+        this.connection,
+        req.editedBy as string
+      );
+      const createdBy = await Audit.getByCreatedBy(
+        this.connection,
+        req.editedBy as string
+      );
+
+      const auditEntityIds = updatedBy.concat(createdBy).map((a) => a.entityId);
+
+      if (!req.entityIds) {
+        req.entityIds = auditEntityIds;
+      } else {
+        const auditEntityIdsSet = new Set(auditEntityIds);
+        req.entityIds = req.entityIds.filter((id) => auditEntityIdsSet.has(id));
+      }
     }
 
     if (req.usedTemplate) {
@@ -524,11 +546,15 @@ export class ResponseSearch {
    */
   async prepare(httpRequest: IRequest): Promise<ResponseEntity[]> {
     const query = new SearchQuery(httpRequest.db.connection);
+    const settings = await Setting.getSettingsAll(httpRequest.db.connection);
     await query.fromRequest(this.request);
     let entities = await query.do();
 
     // Handling this search condition here while it is reusing the entity method
-    if (this.request.isRootInvalid === true) {
+    if (
+      this.request.isRootInvalid === IRequestSearchRootValidity.Valid ||
+      this.request.isRootInvalid === IRequestSearchRootValidity.Invalid
+    ) {
       const rootT = treeCache.tree.getRootTerritory() as ITerritory;
       const conn = httpRequest.db.connection;
 
@@ -558,10 +584,20 @@ export class ResponseSearch {
         const warnings = entityModel.getTBasedWarnings(
           [rootT],
           classificationEs,
-          propValueEs
+          propValueEs,
+          settings
         );
-        if (warnings.length > 0) {
-          entities.push(entity);
+
+        if (this.request.isRootInvalid === IRequestSearchRootValidity.Valid) {
+          if (warnings.length === 0) {
+            entities.push(entity);
+          }
+        } else if (
+          this.request.isRootInvalid === IRequestSearchRootValidity.Invalid
+        ) {
+          if (warnings.length > 0) {
+            entities.push(entity);
+          }
         }
       }
     }

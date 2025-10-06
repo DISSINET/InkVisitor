@@ -6,6 +6,7 @@ import {
   IReference,
   IResponseEntity,
   IResponseStatement,
+  IResponseTree,
   IStatement,
   IStatementDataTerritory,
   ITerritory,
@@ -31,12 +32,17 @@ import {
   StatementListDisplayMode,
   StatementOrderCorrection,
 } from "types";
-import { collectStatementAnchors, getStatementOrderByIndex } from "utils/utils";
+import {
+  collectStatementAnchors,
+  getStatementOrderByIndex,
+  searchTree,
+} from "utils/utils";
 import {
   StyledContentWrapper,
   StyledEmptyState,
   StyledInfoWrapper,
   StyledLoaderWrap,
+  StyledStatementListBox,
   StyledTableWrapper,
 } from "./StatementListBoxStyles";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
@@ -55,6 +61,7 @@ const initialData: {
 
 export const StatementListBox: React.FC = () => {
   const queryClient = useQueryClient();
+  const statementListBoxRef = React.useRef<HTMLDivElement>(null);
 
   const dispatch = useAppDispatch();
   const rowsExpanded: string[] = useAppSelector(
@@ -149,8 +156,9 @@ export const StatementListBox: React.FC = () => {
     queryFn: async () => {
       if (userId) {
         const res = await api.usersGet(userId);
-        return res.data;
+        return res.data ?? undefined;
       }
+      return undefined;
     },
     enabled: api.isLoggedIn() && !!userId,
   });
@@ -324,14 +332,14 @@ export const StatementListBox: React.FC = () => {
     data: selectedDocument,
     error: selectedDocumentError,
     isFetching: selectedDocumentIsFetching,
-  } = useQuery<IDocument | false>({
+  } = useQuery({
     queryKey: ["document", selectedDocumentId],
     queryFn: async () => {
       if (selectedDocumentId) {
         const res = await api.documentGet(selectedDocumentId);
-        return res.data;
+        return res.data ?? undefined;
       }
-      return false;
+      return undefined;
     },
     enabled: api.isLoggedIn() && !!selectedDocumentId,
   });
@@ -720,7 +728,7 @@ export const StatementListBox: React.FC = () => {
     orderCorrection?: StatementOrderCorrection;
     isAnchored?: boolean;
   })[] = useMemo(() => {
-    if (!selectedDocument || !statements.length) return statements;
+    if (!selectedDocument || !statements?.length) return statements ?? [];
 
     // Collect anchors from the document and remove duplicates
     const statementAnchors = Array.from(
@@ -800,8 +808,25 @@ export const StatementListBox: React.FC = () => {
 
   const isListNonEmpty = statements.length > 0;
 
+  // Check if there are statements to determine if the list is loading
+  const treeData: IResponseTree | undefined = queryClient.getQueryData([
+    "tree",
+  ]);
+  const statementsCount = useMemo(() => {
+    if (treeData) {
+      const currentTerritory = searchTree(treeData, territoryId);
+      if (currentTerritory) {
+        return currentTerritory.statementsCount;
+      }
+      return 0;
+    }
+  }, [treeData, territoryId]);
+
+  const isListLoading =
+    statementsCount && statementsCount > 0 && isFetchingTerritory;
+
   const statementListTableIsLoading =
-    isFetchingTerritory ||
+    isListLoading ||
     isLoading ||
     deleteStatementMutation.isPending ||
     addStatementAtTheEndMutation.isPending ||
@@ -827,7 +852,7 @@ export const StatementListBox: React.FC = () => {
   }, [displayMode, contentWidth, isListNonEmpty, statementListTableIsLoading]);
 
   return (
-    <>
+    <StyledStatementListBox ref={statementListBoxRef}>
       {showStatementList && (
         <>
           {territory && (
@@ -848,7 +873,7 @@ export const StatementListBox: React.FC = () => {
               deleteStatementsMutation={deleteStatementsMutation}
               relationsCreateMutation={relationsCreateMutation}
               favoritedTerritoryIds={favoritedTerritoryIds}
-              contentWidthTooSmall={contentWidth < SECOND_PANEL_MIN_WIDTH + 60}
+              contentWidthTooNarrow={contentWidth < SECOND_PANEL_MIN_WIDTH + 60}
               statementsWithOrder={statementsWithOrder}
               autoOrderStatementsMutation={autoOrderStatementsMutation}
             />
@@ -963,6 +988,7 @@ export const StatementListBox: React.FC = () => {
                   }
                   userCanEdit={userCanEdit}
                   userData={userData}
+                  statementListBoxRef={statementListBoxRef}
                 />
               )}
 
@@ -1007,7 +1033,7 @@ export const StatementListBox: React.FC = () => {
           />
         </>
       )}
-    </>
+    </StyledStatementListBox>
   );
 };
 

@@ -20,7 +20,9 @@ interface Input {
     | "select"
     | "password"
     | "datetime-local"
-    | "date";
+    | "date"
+    | "number";
+
   rows?: number;
   cols?: number;
   width?: number | "full";
@@ -48,6 +50,10 @@ interface Input {
   minWidth?: number;
   fullHeight?: boolean;
   clearable?: boolean;
+
+  // Number props
+  min?: number;
+  max?: number;
 }
 
 export const Input: React.FC<Input> = ({
@@ -78,6 +84,8 @@ export const Input: React.FC<Input> = ({
   minWidth,
   fullHeight = false,
   clearable = false,
+  min,
+  max,
 }) => {
   const [displayValue, setDisplayValue] = useState(value);
   useEffect(() => {
@@ -195,6 +203,8 @@ export const Input: React.FC<Input> = ({
               onChangeFn(e.currentTarget.value);
             }
           }}
+          $noBorder={noBorder}
+          $borderColor={borderColor}
           onFocus={(event: React.FocusEvent<HTMLInputElement>) =>
             onFocus(event)
           }
@@ -204,6 +214,23 @@ export const Input: React.FC<Input> = ({
             }
             onBlur();
           }}
+        />
+      )}
+      {type === "number" && (
+        <StyledInput
+          type={type}
+          min={min}
+          max={max}
+          value={displayValue}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            setDisplayValue(e.currentTarget.value);
+
+            if (changeOnType) {
+              onChangeFn(e.currentTarget.value);
+            }
+          }}
+          $noBorder={noBorder}
+          $borderColor={borderColor}
         />
       )}
     </StyledWrapper>

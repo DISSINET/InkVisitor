@@ -2,7 +2,7 @@ import { Annotator, EditMode } from "@inkvisitor/annotator/src/lib";
 import { IDocument, IResponseEntity } from "@shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Button, IconWithTooltip, Input } from "components";
+import { Button, Checkbox, IconWithTooltip, Input } from "components";
 import {
   AttributeButtonGroup,
   EntitySuggester,
@@ -16,7 +16,7 @@ import {
   FaRegArrowAltCircleUp,
 } from "react-icons/fa";
 import { FaAnchorCircleCheck } from "react-icons/fa6";
-import { LuReplace, LuReplaceAll } from "react-icons/lu";
+import { LuRegex, LuReplace, LuReplaceAll } from "react-icons/lu";
 import { TbReplace } from "react-icons/tb";
 import { toast } from "react-toastify";
 import { useTheme } from "styled-components";
@@ -26,6 +26,7 @@ import {
   StyledSearchLine,
   StyledSearchResults,
 } from "../StatementListBoxStyles";
+import { StyledCheckboxWrapper } from "./StatementListSearchLineStyles";
 
 interface StatementListSearchLine {
   searchTerm: string;
@@ -41,7 +42,7 @@ interface StatementListSearchLine {
   searchActiveOccurence: number;
   setSearchActiveOccurence: (searchActiveOccurence: number) => void;
   isSearchAllowed: boolean;
-  annotatorWidthTooSmall: boolean;
+  annotatorWidthTooNarrow: boolean;
   showStatementList: boolean;
   annotator?: Annotator;
   documentId?: string;
@@ -64,6 +65,8 @@ interface StatementListSearchLine {
       | null
     >
   >;
+  isRegexMode: boolean;
+  setIsRegexMode: React.Dispatch<React.SetStateAction<boolean>>;
 }
 export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
   searchTerm,
@@ -71,7 +74,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
   searchOccurences,
   searchActiveOccurence,
   isSearchAllowed,
-  annotatorWidthTooSmall,
+  annotatorWidthTooNarrow,
   setSearchActiveOccurence,
   showStatementList,
   annotator,
@@ -84,6 +87,8 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
   annotatorMode,
   selectedText,
   setSearchOccurences,
+  isRegexMode,
+  setIsRegexMode,
 }) => {
   const theme = useTheme();
 
@@ -184,14 +189,24 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                 setSearchTerm(newText);
               }}
               changeOnType
-              width={annotatorWidthTooSmall ? 100 : 130}
+              width={annotatorWidthTooNarrow ? 100 : 130}
               minWidth={50}
               clearable
             />
 
+            <StyledCheckboxWrapper>
+              <Checkbox
+                value={isRegexMode}
+                onChangeFn={(checked: boolean) => setIsRegexMode(checked)}
+                // label=".*"
+                icon={<LuRegex />}
+                tooltipLabel="Enable regex mode"
+              />
+            </StyledCheckboxWrapper>
+
             {searchOccurences !== null && (
               <StyledSearchResults
-                $annotatorWidthTooSmall={annotatorWidthTooSmall}
+                $annotatorWidthTooNarrow={annotatorWidthTooNarrow}
               >
                 {searchOccurences.length === 0 ? (
                   <div style={{ marginLeft: "0.2rem" }}>no results</div>
@@ -222,7 +237,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
             )}
           </StyledSearchContainer>
 
-          {annotatorWidthTooSmall ? (
+          {annotatorWidthTooNarrow ? (
             <div style={{ width: "1rem" }}></div>
           ) : (
             <AttributeButtonGroup
@@ -280,7 +295,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                   onPicked={(entity) => {
                     setEntityToAnchor(entity);
                   }}
-                  inputWidth={annotatorWidthTooSmall ? 70 : 100}
+                  inputWidth={annotatorWidthTooNarrow ? 70 : 100}
                 />
               ) : (
                 <EntityTag
@@ -300,7 +315,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                 onChangeFn={(value: string) => {
                   setReplaceWith(value);
                 }}
-                width={annotatorWidthTooSmall ? 100 : 130}
+                width={annotatorWidthTooNarrow ? 100 : 130}
                 minWidth={50}
                 clearable
               />

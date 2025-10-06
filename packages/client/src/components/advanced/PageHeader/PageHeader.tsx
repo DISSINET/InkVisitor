@@ -12,7 +12,7 @@ import { toast } from "react-toastify";
 import { setTheme } from "redux/features/themeSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { getUserIcon } from "utils/iconUtils";
-import { Menu } from "..";
+import { Menu, GlobalValidationsModal } from "..";
 import packageJson from "../../../../package.json";
 import {
   StyledFlexColumn,
@@ -35,7 +35,6 @@ import {
   StyledUsername,
 } from "./PageHeaderStyles";
 import { IoSettingsSharp } from "react-icons/io5";
-import { GlobalValidationsModal } from "../GlobalValidationsModal/GlobalValidationsModal";
 
 interface LeftHeader {
   tempLocation: string | false;

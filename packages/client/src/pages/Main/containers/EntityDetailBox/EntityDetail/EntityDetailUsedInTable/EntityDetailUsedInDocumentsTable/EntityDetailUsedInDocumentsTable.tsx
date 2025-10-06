@@ -29,7 +29,7 @@ interface EntityDetailUsedInDocumentsTable {
   title: { singular: string; plural: string };
   perPage?: number;
   entity: IResponseDetail;
-  widthTooSmall: boolean;
+  widthTooNarrow: boolean;
 }
 export const EntityDetailUsedInDocumentsTable: React.FC<
   EntityDetailUsedInDocumentsTable
@@ -37,7 +37,7 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
   title,
   perPage,
   entity,
-  widthTooSmall,
+  widthTooNarrow,
 }: EntityDetailUsedInDocumentsTable) => {
   const detailBoxState: DetailBoxState = useAppSelector(
     (state) => state.layout.mainPage.detailBoxState
@@ -198,7 +198,7 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
           return document ? (
             <DocumentTitle
               title={document.title}
-              width={widthTooSmall ? 60 : "full"}
+              width={widthTooNarrow ? 60 : "full"}
             />
           ) : (
             <></>
@@ -246,7 +246,7 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
       entityClass,
       entityId,
       territoryId,
-      widthTooSmall,
+      widthTooNarrow,
     ]
   );
 

@@ -56,7 +56,7 @@ import { RATIO, TerritoryCreateModalType, W_SCROLL } from "./types";
 import { StatementListSearchLine } from "pages/Main/containers/StatementsListBox/StatementListSearchLine/StatementListSearchLine";
 interface TextAnnotatorProps {
   width: number;
-  annotatorWidthTooSmall?: boolean;
+  annotatorWidthTooNarrow?: boolean;
   height: number;
   displayLineNumbers: boolean;
   hlEntities?: EntityEnums.Class[];
@@ -84,11 +84,13 @@ interface TextAnnotatorProps {
 
   userData?: IResponseUser;
   disableCreate?: boolean;
+  statementListBoxRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 export const TextAnnotator = ({
   width = 400,
-  annotatorWidthTooSmall = false,
+  annotatorWidthTooNarrow = false,
+  statementListBoxRef,
   height = 500,
   displayLineNumbers = true,
   hlEntities = Object.values(EntityEnums.Class),
@@ -106,7 +108,7 @@ export const TextAnnotator = ({
   dataDocumentError,
   showStatementList,
 
-  statementCreateMutation,
+  statementCreateMutation = undefined,
   userData,
   disableCreate = false,
 }: TextAnnotatorProps) => {
@@ -173,6 +175,7 @@ export const TextAnnotator = ({
   const mainCanvas = useRef<HTMLCanvasElement>(null);
   const scroller = useRef<HTMLDivElement>(null);
   const lines = useRef<HTMLCanvasElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const [annotatorMode, setAnnotatorMode] = useState<EditMode>(
     EditMode.HIGHLIGHT
@@ -207,7 +210,7 @@ export const TextAnnotator = ({
       language: EntityEnums.Language;
     }
   ) => {
-    if (dataDocument) {
+    if (dataDocument && statementCreateMutation) {
       // take order from the anchors in the document
       // filter only Statements
       const statementAnchors = Array.from(
@@ -260,7 +263,7 @@ export const TextAnnotator = ({
             statementId,
             newOrder
           );
-          statementCreateMutation.mutate(newStatement);
+          statementCreateMutation?.mutate(newStatement);
         } else {
           const newStatement: IStatement = CStatement(
             localStorage.getItem("userrole") as UserEnums.Role,
@@ -271,7 +274,7 @@ export const TextAnnotator = ({
             statementId,
             newOrder
           );
-          statementCreateMutation.mutate(newStatement);
+          statementCreateMutation?.mutate(newStatement);
         }
       }
     }
@@ -442,24 +445,27 @@ export const TextAnnotator = ({
     }
   }, [pendingSelection, isSelectingText]);
 
-  const { data: anchorEntities, isFetching: isFetchingAnchorEntities } =
-    useQuery({
-      queryKey: ["anchorEntities", selectedAnchors],
-      queryFn: async () => {
-        const uniqueAnchors = [...new Set(selectedAnchors)];
-        const entities = await api.entitiesGet(
-          uniqueAnchors.map((anchor) => anchor.getTagName())
-        );
-        setStoredEntities(
-          entities.data.reduce((acc, entity) => {
-            acc[entity.id] = entity;
-            return acc;
-          }, {} as Record<string, IEntity>)
-        );
-        return entities.data;
-      },
-      enabled: api.isLoggedIn() && selectedAnchors.length > 0,
-    });
+  const { isFetching: isFetchingAnchorEntities } = useQuery({
+    queryKey: ["anchorEntities", selectedAnchors],
+    queryFn: async () => {
+      const uniqueAnchors = [...new Set(selectedAnchors)];
+      const entities = await api.entitiesGet(
+        uniqueAnchors.map((anchor) => anchor.getTagName())
+      );
+
+      const data = entities.data ?? [];
+
+      setStoredEntities(
+        data.reduce((acc, entity) => {
+          acc[entity.id] = entity;
+          return acc;
+        }, {} as Record<string, IEntity>)
+      );
+
+      return data;
+    },
+    enabled: api.isLoggedIn() && selectedAnchors.length > 0,
+  });
 
   const handleAddAnchor = (entityId: string, elvl?: EntityEnums.Elvl) => {
     // TODO: handle adding a new statement - preserve the order
@@ -751,6 +757,30 @@ export const TextAnnotator = ({
     );
   }, [annotatorMode, selectedText, isSelectingText, dataDocument]);
 
+  // Handle click outside menu to close it
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        isMenuDisplayed &&
+        menuRef.current &&
+        !menuRef.current.contains(event.target as Node) &&
+        !mainCanvas.current?.contains(event.target as Node) &&
+        !statementListBoxRef?.current?.contains(event.target as Node)
+      ) {
+        setSelectedText("");
+        annotator?.clearSelection();
+      }
+    };
+
+    if (isMenuDisplayed) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isMenuDisplayed, annotator, statementListBoxRef]);
+
   if (dataDocumentError) {
     return (
       <StyledInfoText>
@@ -766,6 +796,7 @@ export const TextAnnotator = ({
     | { segmentIndex: number; lineIndex: number; start: number; end: number }[]
     | null
   >(null);
+  const [isRegexMode, setIsRegexMode] = useState<boolean>(false);
   const [searchActiveOccurence, setSearchActiveOccurence] = useState<number>(0);
 
   // annotate tool
@@ -814,7 +845,7 @@ export const TextAnnotator = ({
 
   useEffect(() => {
     if (annotator && debouncedSearchTerm.length > 2) {
-      const occurrences = annotator.search(debouncedSearchTerm);
+      const occurrences = annotator.search(debouncedSearchTerm, isRegexMode);
       setSearchOccurences(occurrences);
 
       // Only reset to first occurrence if this is a new search term
@@ -829,7 +860,7 @@ export const TextAnnotator = ({
       setSelectedText("");
       annotator?.clearSelection();
     }
-  }, [debouncedSearchTerm]);
+  }, [debouncedSearchTerm, isRegexMode]);
 
   // Re-run search when width changes to update occurrence positions
   useEffect(() => {
@@ -837,11 +868,11 @@ export const TextAnnotator = ({
       // Force a redraw first to recalculate text layout, then search
       setTimeout(() => {
         annotator.draw();
-        const occurrences = annotator.search(debouncedSearchTerm);
+        const occurrences = annotator.search(debouncedSearchTerm, isRegexMode);
         setSearchOccurences(occurrences);
       }, 0);
     }
-  }, [width, debouncedSearchTerm]);
+  }, [width, debouncedSearchTerm, isRegexMode]);
 
   const isSearchAllowed = useMemo<boolean>(() => {
     return annotator !== undefined && !!dataDocument;
@@ -857,7 +888,7 @@ export const TextAnnotator = ({
           searchOccurences={searchOccurences}
           searchActiveOccurence={searchActiveOccurence}
           isSearchAllowed={isSearchAllowed}
-          annotatorWidthTooSmall={annotatorWidthTooSmall}
+          annotatorWidthTooNarrow={annotatorWidthTooNarrow}
           setSearchActiveOccurence={setSearchActiveOccurence}
           annotator={annotator}
           documentId={documentId}
@@ -868,6 +899,8 @@ export const TextAnnotator = ({
           annotatorMode={annotatorMode}
           selectedText={selectedText}
           setSearchOccurences={setSearchOccurences}
+          isRegexMode={isRegexMode}
+          setIsRegexMode={setIsRegexMode}
         />
       )}
 
@@ -884,7 +917,10 @@ export const TextAnnotator = ({
           {isMenuDisplayed && (
             <FloatingPortal id="page">
               <StyledAnnotatorMenu
-                ref={refs.setFloating}
+                ref={(node) => {
+                  refs.setFloating(node);
+                  menuRef.current = node;
+                }}
                 style={floatingStyles}
               >
                 {dataDocument && (
@@ -972,12 +1008,12 @@ export const TextAnnotator = ({
                 key={EditMode.HIGHLIGHT}
                 icon={
                   <StyledDisplayModeButtonIconWrapper
-                    $annotatorWidthTooSmall={annotatorWidthTooSmall}
+                    $annotatorWidthTooNarrow={annotatorWidthTooNarrow}
                   >
                     <FaPen size={11} />
                   </StyledDisplayModeButtonIconWrapper>
                 }
-                label={!annotatorWidthTooSmall ? EditMode.HIGHLIGHT : ""}
+                label={!annotatorWidthTooNarrow ? EditMode.HIGHLIGHT : ""}
                 color="success"
                 inverted={annotatorMode !== EditMode.HIGHLIGHT}
                 onClick={() => {
@@ -992,13 +1028,13 @@ export const TextAnnotator = ({
                 key={EditMode.SEMI}
                 icon={
                   <StyledDisplayModeButtonIconWrapper
-                    $annotatorWidthTooSmall={annotatorWidthTooSmall}
+                    $annotatorWidthTooNarrow={annotatorWidthTooNarrow}
                   >
                     <BsFileTextFill size={11} />
                   </StyledDisplayModeButtonIconWrapper>
                 }
                 color="success"
-                label={!annotatorWidthTooSmall ? "text edit" : ""}
+                label={!annotatorWidthTooNarrow ? "text edit" : ""}
                 inverted={annotatorMode !== EditMode.SEMI}
                 onClick={() => {
                   annotator.setMode(EditMode.SEMI);
@@ -1012,13 +1048,13 @@ export const TextAnnotator = ({
                 key={EditMode.RAW}
                 icon={
                   <StyledDisplayModeButtonIconWrapper
-                    $annotatorWidthTooSmall={annotatorWidthTooSmall}
+                    $annotatorWidthTooNarrow={annotatorWidthTooNarrow}
                   >
                     <HiCodeBracket size={11} />
                   </StyledDisplayModeButtonIconWrapper>
                 }
                 color="success"
-                label={!annotatorWidthTooSmall ? "XML" : ""}
+                label={!annotatorWidthTooNarrow ? "XML" : ""}
                 inverted={annotatorMode !== EditMode.RAW}
                 onClick={() => {
                   annotator.setMode(EditMode.RAW);

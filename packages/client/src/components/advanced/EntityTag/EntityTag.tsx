@@ -72,21 +72,16 @@ export const EntityTag: React.FC<EntityTag> = ({
   const draggedEntity: DraggedEntityReduxItem = useAppSelector(
     (state) => state.draggedEntity
   );
-  if (entity === undefined) {
-    return null;
-  }
-
-  if (!entity) {
-    return null;
-  }
-
-  const classId = entity.class;
-
   const [buttonHovered, setButtonHovered] = useState(false);
   const [elvlHovered, setElvlHovered] = useState(false);
   const [tagHovered, setTagHovered] = useState(false);
-
   const referenceEl = useRef<HTMLDivElement | null>(null);
+
+  if (entity === undefined || !entity) {
+    return <></>;
+  }
+
+  const classId = entity.class;
 
   const renderUnlinkButton = (unlinkButton: UnlinkButton) => {
     return (
@@ -183,7 +178,7 @@ export const EntityTag: React.FC<EntityTag> = ({
           label={getEntityLabel(entity)}
           labelItalic={isFirstLabelEmpty(entity.labels)}
           status={entity.status}
-          ltype={entity?.data?.logicalType ?? "1"}
+          ltype={entity?.data?.logicalType ?? EntityEnums.LogicalType.Definite}
           isTemplate={entity.isTemplate}
           isDiscouraged={entity.status === EntityEnums.Status.Discouraged}
           entity={entity}

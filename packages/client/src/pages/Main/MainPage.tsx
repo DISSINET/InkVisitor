@@ -34,7 +34,6 @@ import { FaHighlighter, FaList, FaPlus } from "react-icons/fa";
 import { FaDiagramNext } from "react-icons/fa6";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { VscCloseAll } from "react-icons/vsc";
-import { setDetailBoxMinimized } from "redux/features/layout/mainPage/detailBoxMinimizedSlice";
 import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
 import { setFirstPanelExpanded } from "redux/features/layout/mainPage/firstPanelExpandedSlice";
 import { setFourthPanelBoxesOpened } from "redux/features/layout/mainPage/fourthPanelBoxesOpenedSlice";
@@ -102,9 +101,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
   );
   const statementListOpened: boolean = useAppSelector(
     (state) => state.layout.mainPage.statementListOpened
-  );
-  const detailBoxMinimized: boolean = useAppSelector(
-    (state) => state.layout.mainPage.detailBoxMinimized
   );
   const detailBoxState: DetailBoxState = useAppSelector(
     (state) => state.layout.mainPage.detailBoxState
@@ -315,10 +311,8 @@ const MainPage: React.FC<MainPage> = ({}) => {
   } = useQuery({
     queryKey: ["user", userId],
     queryFn: async () => {
-      if (userId) {
-        const res = await api.usersGet(userId);
-        return res.data;
-      }
+      const res = await api.usersGet(userId as string);
+      return res.data ?? undefined;
     },
     enabled: !!userId && api.isLoggedIn(),
   });
@@ -363,18 +357,8 @@ const MainPage: React.FC<MainPage> = ({}) => {
           dispatch(setStatementListOpened(true));
         }
       }
-
-      if (detailBoxState === DetailBoxState.Minimized) {
-        if (!detailBoxMinimized) {
-          dispatch(setDetailBoxMinimized(true));
-        }
-      } else {
-        if (detailBoxMinimized) {
-          dispatch(setDetailBoxMinimized(false));
-        }
-      }
     }
-  }, [detailBoxState, statementListOpened, detailBoxMinimized, detailIdArray]);
+  }, [detailBoxState, statementListOpened, detailIdArray]);
 
   const handleMaximizeDetailBox = () => {
     if (detailBoxState === DetailBoxState.Normal) {
@@ -886,6 +870,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
                     label={`list`}
                     onClick={() => {
                       setAnnotatorOpened(false);
+                      dispatch(setDetailBoxState(DetailBoxState.Normal));
                     }}
                     inverted={!!annotatorOpened}
                   ></Button>
@@ -895,6 +880,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
                     label="annotator"
                     onClick={() => {
                       setAnnotatorOpened(true);
+                      dispatch(setDetailBoxState(DetailBoxState.Normal));
                     }}
                     inverted={!annotatorOpened}
                   ></Button>

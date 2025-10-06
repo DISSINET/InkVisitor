@@ -31,6 +31,7 @@ import { DocumentTitle } from "./DocumentTitle/DocumentTitle";
 import { LayoutSeparatorVertical } from "./PanelSeparator/LayoutSeparatorVertical";
 import { LayoutSeparatorHorizontal } from "./PanelSeparator/LayoutSeparatorHorizontal";
 import { PaginationControls } from "./PaginationControls/PaginationControls";
+import { GlobalValidationsModal } from "./GlobalValidationsModal/GlobalValidationsModal";
 
 const Dropdown = {
   Single: {
@@ -75,4 +76,5 @@ export {
   MoodVariantButtonGroup,
   PositionButtonGroup,
   LogicButtonGroup,
+  GlobalValidationsModal,
 };

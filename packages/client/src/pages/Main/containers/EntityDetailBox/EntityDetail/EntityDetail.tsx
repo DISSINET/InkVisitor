@@ -157,7 +157,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
           class: entity?.class,
         });
 
-        const templates = res.data;
+        const templates = res.data ?? [];
         templates.sort((a: IEntity, b: IEntity) =>
           a.labels[0].toLocaleLowerCase() > b.labels[0].toLocaleLowerCase()
             ? 1
@@ -606,7 +606,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
   const contentWidth = useAppSelector(
     (state) => state.layout.mainPage.secondPanelRealWidth
   );
-  const widthTooSmall = contentWidth < 516;
+  const widthTooNarrow = contentWidth < 516;
 
   const isRootTerritory = selectedDetailId === rootTerritoryId;
   const isOwner =
@@ -663,7 +663,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                     setShowTypeSubmit={setShowTypeSubmit}
                     templateOptions={templateOptions}
                     updateEntityMutation={updateEntityMutation}
-                    widthTooSmall={widthTooSmall}
+                    widthTooNarrow={widthTooNarrow}
                   />
                 </StyledDetailSectionContent>
               </StyledDetailSection>
@@ -716,7 +716,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                     territoryParentId={getTerritoryId(entity)}
                     entity={entity}
                     setLoadingValidations={setLoadingValidations}
-                    widthTooSmall={widthTooSmall}
+                    widthTooNarrow={widthTooNarrow}
                   />
                 </StyledDetailSection>
               )}
@@ -986,7 +986,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                     }}
                     perPage={10}
                     entity={entity}
-                    widthTooSmall={widthTooSmall}
+                    widthTooNarrow={widthTooNarrow}
                   />
                 )}
               </StyledDetailSection>

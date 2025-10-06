@@ -45,6 +45,7 @@ export const EntityDetailCloudRelation: React.FC<EntityDetailCloudRelation> = ({
       const newEntityIds = relations[0].entityIds.filter(
         (eId) => eId !== entityId
       );
+      console.log("newEntityIds", newEntityIds);
       relationUpdateMutation.mutate({
         relationId: relations[0].id,
         changes: { entityIds: newEntityIds },

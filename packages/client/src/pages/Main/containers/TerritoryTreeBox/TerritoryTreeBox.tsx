@@ -34,7 +34,7 @@ const initFilterSettings: ITerritoryFilter = {
   withSubterritories: false,
   withStatements: false,
   filter: "",
-  operator: "and",
+  operator: "or",
 };
 export const TerritoryTreeBox: React.FC = () => {
   const firstPanelExpanded: boolean = useAppSelector(
@@ -66,10 +66,8 @@ export const TerritoryTreeBox: React.FC = () => {
   } = useQuery({
     queryKey: ["user", userId],
     queryFn: async () => {
-      if (userId) {
-        const res = await api.usersGet(userId);
-        return res.data;
-      }
+      const res = await api.usersGet(userId as string);
+      return res.data ?? undefined;
     },
     enabled: api.isLoggedIn() && !!userId,
   });
@@ -248,7 +246,7 @@ export const TerritoryTreeBox: React.FC = () => {
 
   const treeWidth = useDebounce(useSelector(selectPanelWidth(0)), 200);
 
-  const treeWidthTooSmall = treeWidth < 140;
+  const treeWidthTooNarrow = treeWidth < 140;
 
   // delay of show content for fluent animation on open
   const [showTerritoryTree, setShowTerritoryTree] = useState(true);
@@ -271,19 +269,19 @@ export const TerritoryTreeBox: React.FC = () => {
             {(userRole === UserEnums.Role.Admin ||
               userRole === UserEnums.Role.Owner) && (
               <Button
-                label={!treeWidthTooSmall ? "new" : ""}
+                label={!treeWidthTooNarrow ? "new" : ""}
                 iconRight={<span style={{ marginLeft: 5 }}>{"\u0054"}</span>}
                 icon={<FaPlus />}
                 onClick={() => setShowCreate(true)}
                 fullWidth
-                tooltipLabel={treeWidthTooSmall ? "create new territory" : ""}
+                tooltipLabel={treeWidthTooNarrow ? "create new territory" : ""}
               />
             )}
             <div
               style={{ display: "flex", alignItems: "center", width: "100%" }}
             >
               <Button
-                label={!treeWidthTooSmall ? "filter" : ""}
+                label={!treeWidthTooNarrow ? "filter" : ""}
                 onClick={() => {
                   if (treeFilterOpen) {
                     dispatch(setFilterOpen(false));
@@ -298,7 +296,7 @@ export const TerritoryTreeBox: React.FC = () => {
                 inverted={!treeFilterOpen}
                 fullWidth
                 icon={<BsFilter size={14} />}
-                tooltipLabel={treeWidthTooSmall ? "filter" : ""}
+                tooltipLabel={treeWidthTooNarrow ? "filter" : ""}
                 tooltipPosition="right"
               />
             </div>
