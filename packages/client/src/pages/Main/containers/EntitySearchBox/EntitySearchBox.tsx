@@ -266,16 +266,17 @@ export const EntitySearchBox: React.FC = () => {
 
   const userRole = localStorage.getItem("userrole");
 
-  console.log("users", users);
   const userOptions = useMemo(() => {
-    const usersOptionsOut: DropdownItem[] =
+    const usersOptionsOut: DropdownItem[] = [
+      { label: "any", value: "" },
+    ].concat(
       users
         ?.filter((user) => user && user.id && user.name)
         .map((user) => ({
           label: user.name,
           value: user.id,
-        })) ?? [];
-    usersOptionsOut.push({ label: "any", value: "" });
+        })) ?? []
+    );
     return usersOptionsOut;
   }, [users]);
 
