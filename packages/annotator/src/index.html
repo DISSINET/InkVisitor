@@ -329,8 +329,9 @@
           return;
         }
 
+        const occurence = 1
         // Find the first occurrence of the anchor in the text
-        const tagPositions = annotator.text.getTagPosition(anchorName, 0);
+        const tagPositions = annotator.text.getTagPosition(anchorName, occurence);
         if (tagPositions.length < 2) {
           alert(`Anchor "${anchorName}" not found in the text`);
           return;
@@ -339,13 +340,17 @@
         // Get the attributes from the form
         const newAttributes = collectUpdateAttributes();
         
-        // Find the tag in the segments
+        // Find the tag in the segments based on occurrence
         let targetTag = null;
+        let currentOccurrence = 0;
         for (const segment of annotator.text.segments) {
           for (const tag of segment.openingTags) {
             if (tag.getTagName() === anchorName) {
-              targetTag = tag;
-              break;
+              if (currentOccurrence === occurence) {
+                targetTag = tag;
+                break;
+              }
+              currentOccurrence++;
             }
           }
           if (targetTag) break;

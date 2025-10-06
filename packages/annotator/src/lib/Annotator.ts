@@ -496,21 +496,32 @@ export class Annotator {
       end = start;
     }
 
+    // Helper function to calculate absolute text index from tag position and segment index
+    const getAbsoluteTextIndex = (tag: Tag): number => {
+      let absoluteIndex = tag.position;
+      // Add lengths of all previous segments
+      for (let i = 0; i < tag.segmentIndex; i++) {
+        absoluteIndex += this.text.segments[i].raw.length + 1; // +1 for newline between segments
+      }
+      return absoluteIndex;
+    };
+
     // Helper function to create a unique identifier for a tag
-    const getTagId = (tag: Tag, segmentIndex: number): string => {
-      return `${segmentIndex}-${tag.position}-${tag.getTagName()}-${tag.closing ? 'close' : 'open'}`;
+    const getTagId = (tag: Tag): string => {
+      return `${tag.segmentIndex}-${tag.position}-${tag.getTagName()}-${tag.closing ? 'close' : 'open'}`;
     };
 
     // Helper function to find the closest opening tag for a given tag name
-    const findClosestOpeningTag = (tagName: string, beforePosition: number): Tag | null => {
+    const findClosestOpeningTag = (tagName: string, beforeAbsolutePosition: number): Tag | null => {
       let closestTag: Tag | null = null;
       let closestDistance = Infinity;
 
       for (let i = 0; i <= end!.segmentIndex; i++) {
         const segment = this.text.segments[i];
         for (const tag of segment.openingTags) {
-          if (tag.getTagName() === tagName && tag.position < beforePosition) {
-            const distance = beforePosition - tag.position;
+          const tagAbsolutePosition = getAbsoluteTextIndex(tag);
+          if (tag.getTagName() === tagName && tagAbsolutePosition < beforeAbsolutePosition) {
+            const distance = beforeAbsolutePosition - tagAbsolutePosition;
             if (distance < closestDistance) {
               closestDistance = distance;
               closestTag = tag;
@@ -524,7 +535,7 @@ export class Annotator {
 
     // Helper function to add tag to final list if not already processed
     const addToFinal = (tag: Tag) => {
-      const tagId = getTagId(tag, tag.position);
+      const tagId = getTagId(tag);
       if (!processedTags.has(tagId)) {
         finalTags.push(tag);
         processedTags.add(tagId);
@@ -625,18 +636,32 @@ export class Annotator {
           continue;
         } else {
           // Orphaned closing tag - find closest opening tag and use it instead
-          const closestOpening = findClosestOpeningTag(tag.getTagName(), tag.position);
-          if (closestOpening) {
-            processedFinalTags.push(closestOpening);
-            processedTagNames.add(tag.getTagName());
+          // Use the segmentIndex from the tag
+          const tagSegmentIndex = tag.segmentIndex;
+          if (tagSegmentIndex !== -1) {
+            const tagAbsolutePosition = getAbsoluteTextIndex(tag);
+            const closestOpening = findClosestOpeningTag(tag.getTagName(), tagAbsolutePosition);
+            if (closestOpening) {
+              processedFinalTags.push(closestOpening);
+              processedTagNames.add(tag.getTagName());
+            }
           }
           // If no opening tag found, skip this closing tag entirely
         }
       }
     }
 
-    // Sort tags by their position for consistent ordering
-    return processedFinalTags.sort((a, b) => a.position - b.position);
+    // Sort tags by their absolute position for consistent ordering
+    return processedFinalTags.sort((a, b) => {
+      // Use the segmentIndex from the tags
+      const aSegmentIndex = a.segmentIndex;
+      const bSegmentIndex = b.segmentIndex;
+      
+      const aAbsolutePosition = aSegmentIndex !== -1 ? getAbsoluteTextIndex(a) : a.position;
+      const bAbsolutePosition = bSegmentIndex !== -1 ? getAbsoluteTextIndex(b) : b.position;
+      
+      return aAbsolutePosition - bAbsolutePosition;
+    });
   }
 
   /**
@@ -869,11 +894,11 @@ export class Annotator {
     }
 
     // Construct the Tag at the start
-    const openTag = new Tag(0, anchor, false);
+    const openTag = new Tag(0, anchor, false, undefined, -1);
     if (attributes) {
-      openTag.attributes = attributes;
+      openTag.setAttributes(attributes);
     }
-    const closeTag = new Tag(0, anchor, true);
+    const closeTag = new Tag(0, anchor, true, undefined, -1);
 
     // get bounds of the selection
     let [start, end] = this.cursor.getAbsBounds();
@@ -917,28 +942,39 @@ export class Annotator {
       throw new Error('updateAnchor only accepts opening tags');
     }
     
-    // Find the tag in the raw text using its position
-    const tagPosition = tag.position;
+    // Use the segmentIndex from the tag
+    const tagSegmentIndex = tag.segmentIndex;
+    
+    if (tagSegmentIndex === -1) {
+      throw new Error('Tag segmentIndex not set');
+    }
+    
+    // Calculate the absolute text index from the tag's position within its segment
+    let absoluteTagPosition = tag.position;
+    // Add lengths of all previous segments
+    for (let i = 0; i < tagSegmentIndex; i++) {
+      absoluteTagPosition += this.text.segments[i].raw.length + 1; // +1 for newline between segments
+    }
     
     // Build the original tag string using the tag's current attributes
-    const originalTag = new Tag(0, tag.getTagName(), false);
-    originalTag.attributes = tag.attributes;
+    const originalTag = new Tag(0, tag.getTagName(), false, undefined, -1);
+    originalTag.setAttributes(tag.attributes);
     const originalTagString = originalTag.getTag();
     const originalTagLength = originalTagString.length;
     
     // Build the new tag string with updated attributes
-    const newTag = new Tag(0, tag.getTagName(), false);
+    const newTag = new Tag(0, tag.getTagName(), false, undefined, -1);
     if (attributes) {
-      newTag.attributes = attributes;
+      newTag.setAttributes(attributes);
     } else {
-      newTag.attributes = {};
+      newTag.setAttributes({});
     }
     const newTagString = newTag.getTag();
     
     // Replace the old tag with the new tag in the raw text
     const rawText = this.text.value;
-    const beforeText = rawText.slice(0, tagPosition);
-    const afterText = rawText.slice(tagPosition + originalTagLength);
+    const beforeText = rawText.slice(0, absoluteTagPosition);
+    const afterText = rawText.slice(absoluteTagPosition + originalTagLength);
     
     this.text.value = beforeText + newTagString + afterText;
     

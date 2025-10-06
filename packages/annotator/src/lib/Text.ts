@@ -8,11 +8,14 @@ import { closingTagRegex, createOpeningTagRegex, tagRemovalRegex } from "./Annot
  * Tags can be opening or closing tags and may contain attributes.
  */
 export class Tag {
-  position: number; // raw position in whole text
+  readonly position: number; // raw position in segment text
+  readonly relativeParsedPosition: number; // relative position in parsed segment text
+  readonly closing?: boolean;
+  readonly segmentIndex: number; // index of the segment containing this tag
+
   private tagContent: string; // div id="12"
-  closing?: boolean;
   attributes: Record<string, string>;
-  relativeParsedPosition: number; // relative position in parsed segment text
+
 
   /**
    * Creates a new Tag instance.
@@ -21,11 +24,13 @@ export class Tag {
    * @param tag - The tag name (e.g., "person", "location" along with attributes)
    * @param closing - Whether this is a closing tag (default: false)
    * @param segment - Optional segment reference for calculating relative position
+   * @param segmentIndex - The index of the segment containing this tag
    */
-  constructor(position: number, tag: string, closing?: boolean, segment?: Segment) {
+  constructor(position: number, tag: string, closing?: boolean, segment?: Segment, segmentIndex?: number) {
     this.position = position;
     this.tagContent = tag;
     this.closing = closing;
+    this.segmentIndex = segmentIndex ?? -1; // Default to -1 if not provided
     this.attributes = this.parseAttributes(tag);
     this.relativeParsedPosition = this.calculateRelativeParsedPosition(segment);
   }
@@ -139,6 +144,25 @@ export class Tag {
     // Split by whitespace and take the first part (the tag name)
     return this.tagContent.trim().split(/\s+/)[0];
   }
+
+  /**
+   * Sets the attributes for this tag.
+   * 
+   * Updates the attributes object with the provided key-value pairs.
+   * This method allows modifying tag attributes after the tag has been created.
+   * 
+   * @param attributes - Object containing the new attributes to set
+   * 
+   * @example
+   * // Set new attributes
+   * tag.setAttributes({id: "123", class: "highlight"});
+   * 
+   * // Update existing attributes
+   * tag.setAttributes({id: "456"});
+   */
+  setAttributes(attributes: Record<string, string>): void {
+    this.attributes = { ...this.attributes, ...attributes };
+  }
 }
 
 /**
@@ -153,14 +177,17 @@ export class Segment {
   openingTags: Tag[] = [];
   closingTags: Tag[] = [];
   lines: string[] = [];
+  segmentIndex: number = -1; // index of this segment in the text
 
   /**
    * Creates a new Segment from raw text.
    * 
    * @param text - The raw text content for this segment
+   * @param segmentIndex - The index of this segment in the text
    */
-  constructor(text: string) {
+  constructor(text: string, segmentIndex: number = -1) {
     this.raw = text;
+    this.segmentIndex = segmentIndex;
     this.parseText();
   }
 
@@ -182,12 +209,12 @@ export class Segment {
     // Find opening tags
     let match;
     while ((match = openingRegex.exec(this.raw)) !== null) {
-      this.openingTags.push(new Tag(match.index, match[1], false, this));
+      this.openingTags.push(new Tag(match.index, match[1], false, this, this.segmentIndex));
     }
 
     // Find closing tags
     while ((match = closingRegex.exec(this.raw)) !== null) {
-      this.closingTags.push(new Tag(match.index, match[1], true, this));
+      this.closingTags.push(new Tag(match.index, match[1], true, this, this.segmentIndex));
     }
 
     // Remove tags from the text
@@ -384,7 +411,7 @@ class Text {
 
     for (let i = 0; i < segmentsArray.length; i++) {
       const segmentText = segmentsArray[i];
-      segments.push(new Segment(segmentText));
+      segments.push(new Segment(segmentText, i));
     }
 
     this.segments = segments;
