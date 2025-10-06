@@ -468,7 +468,6 @@ export const TextAnnotator = ({
   });
 
   const handleAddAnchor = (entityId: string, elvl?: EntityEnums.Elvl) => {
-    // TODO: handle adding a new statement - preserve the order
     annotator?.addAnchor(
       entityId,
       elvl
