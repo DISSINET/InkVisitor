@@ -7,6 +7,7 @@ export namespace DbEnums {
     StatementDataProps = "statement.data_props_recursive",
     AuditEntityId = "entityId",
     AuditDate = "date",
+    AuditDateTypeUser = "date_type_user",
     EntityUsedTemplate = "usedTemplate",
     PropsRecursive = "props.recursive",
     RelationsEntityIds = "entityIds"
