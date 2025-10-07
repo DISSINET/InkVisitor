@@ -60,7 +60,7 @@ interface TextAnnotatorProps {
   height: number;
   displayLineNumbers: boolean;
   hlEntities?: EntityEnums.Class[];
-  documentId: string;
+  documentId?: string;
   initialScrollEntityId?: string;
   thisTerritoryEntityId?: string;
 
@@ -93,7 +93,7 @@ export const TextAnnotator = ({
   height = 500,
   displayLineNumbers = true,
   hlEntities = Object.values(EntityEnums.Class),
-  documentId,
+  documentId = undefined,
   initialScrollEntityId = undefined,
   thisTerritoryEntityId = undefined,
 
