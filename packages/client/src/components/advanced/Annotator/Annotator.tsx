@@ -745,14 +745,6 @@ export const TextAnnotator = ({
     };
   }, [isMenuDisplayed, annotator, statementListBoxRef]);
 
-  if (dataDocumentError) {
-    return (
-      <StyledInfoText>
-        Error loading document: {dataDocumentError.message}
-      </StyledInfoText>
-    );
-  }
-
   const hasParentT = territory?.data?.parent !== undefined;
 
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -839,6 +831,14 @@ export const TextAnnotator = ({
   const isSearchAllowed = useMemo<boolean>(() => {
     return annotator !== undefined && !!dataDocument;
   }, [annotator, dataDocument]);
+
+  if (dataDocumentError) {
+    return (
+      <StyledInfoText>
+        Error loading document: {dataDocumentError.message}
+      </StyledInfoText>
+    );
+  }
 
   return (
     <>
