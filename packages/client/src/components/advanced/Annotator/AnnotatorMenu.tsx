@@ -126,9 +126,7 @@ export const TextAnnotatorMenu = ({
                 }}
                 tooltipLabel="Create anchor for active territory"
               />
-              {activeTerritory && (
-                <EntityTag entity={activeTerritory as IEntity} />
-              )}
+              {activeTerritory && <EntityTag entity={activeTerritory} />}
             </StyledAnnotatorItemContentLine>
           )}
         </StyledAnnotatorItemContent>
@@ -248,7 +246,7 @@ export const TextAnnotatorMenu = ({
                         },
                       }}
                       key={anchor}
-                      entity={entities[anchor] as IEntity}
+                      entity={entities[anchor]}
                     />
                   );
                 } else {
