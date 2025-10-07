@@ -130,8 +130,11 @@ export const TextAnnotator = ({
   const { data: dataParentTerritory } = useQuery({
     queryKey: ["territory", parentTerritoryId as string],
     queryFn: async () => {
-      const res = await api.entityGet(parentTerritoryId as string);
-      return res.data;
+      if (parentTerritoryId) {
+        const res = await api.entityGet(parentTerritoryId);
+        return res.data ?? undefined;
+      }
+      return undefined;
     },
     enabled: !!parentTerritoryId,
   });
