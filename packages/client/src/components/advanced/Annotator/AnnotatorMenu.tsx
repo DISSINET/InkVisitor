@@ -166,9 +166,7 @@ export const TextAnnotatorMenu = ({
                   }}
                   tooltipLabel="Create anchor for active territory"
                 />
-                {activeTerritory && (
-                  <EntityTag entity={activeTerritory as IEntity} />
-                )}
+                {activeTerritory && <EntityTag entity={activeTerritory} />}
                 <ElvlButtonGroup
                   border
                   value={activeTerritoryElvl}
@@ -330,7 +328,7 @@ export const TextAnnotatorMenu = ({
                           }
                         },
                       }}
-                      entity={entities[anchorTagName] as IEntity}
+                      entity={entities[anchorTagName]}
                       elvlButtonGroup={
                         <ElvlButtonGroup
                           value={anchor.attributes.elvl as EntityEnums.Elvl}

@@ -643,12 +643,14 @@ export const TextAnnotator = ({
   useEffect(() => {
     if (!dataDocumentIsFetching && !isSaving) {
       if (scrollAfterRefresh !== undefined) {
-        refreshAnnotator({
-          line: scrollAfterRefresh,
-        });
+        // console.log("useEffect 1.1");
+        // refreshAnnotator({
+        //   line: scrollAfterRefresh,
+        // });
         // Clear scrollAfterRefresh after it's been used to prevent it from overriding future scrolls
         setScrollAfterRefresh(undefined);
       } else {
+        console.log("useEffect 1.2");
         refreshAnnotator({
           line: storedAnnotatorScroll,
         });
@@ -656,21 +658,24 @@ export const TextAnnotator = ({
     }
   }, [dataDocumentIsFetching, dataDocument, isSaving]);
 
-  useEffect(() => {
-    if (!dataDocumentIsFetching && !isSaving) {
-      refreshAnnotator({
-        line: storedAnnotatorScroll,
-      });
-    }
-  }, [theme, hlEntities, dataDocumentIsFetching, isSaving]);
+  // useEffect(() => {
+  //   if (!dataDocumentIsFetching && !isSaving) {
+  //     console.log("useEffect 2.1");
+  //     refreshAnnotator({
+  //       line: storedAnnotatorScroll,
+  //     });
+  //   }
+  // }, [theme, hlEntities, dataDocumentIsFetching, isSaving]);
 
   useEffect(() => {
     if (mainCanvas.current) {
       if (storedAnnotatorScroll) {
+        console.log("useEffect 3.1");
         refreshAnnotator({
           line: storedAnnotatorScroll,
         });
       } else if (initialScrollEntityId) {
+        console.log("useEffect 3.2");
         refreshAnnotator({
           anchor: initialScrollEntityId,
         });
