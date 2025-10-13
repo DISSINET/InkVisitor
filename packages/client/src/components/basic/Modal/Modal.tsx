@@ -162,9 +162,18 @@ export const ModalContent: FC<ModalContent> = ({
 interface ModalFooter {
   children?: ReactNode;
   column?: boolean;
+  spaceBetween?: boolean;
 }
-export const ModalFooter: FC<ModalFooter> = ({ children, column = false }) => {
-  return <StyledFooter $column={column}>{children}</StyledFooter>;
+export const ModalFooter: FC<ModalFooter> = ({
+  children,
+  column = false,
+  spaceBetween = false,
+}) => {
+  return (
+    <StyledFooter $column={column} $spaceBetween={spaceBetween}>
+      {children}
+    </StyledFooter>
+  );
 };
 
 // Input form helpers
