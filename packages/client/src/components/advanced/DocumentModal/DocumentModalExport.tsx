@@ -87,7 +87,7 @@ const DocumentModalExport: React.FC<DocumentModalExportProps> = ({
             : "no label"
         }"`}
       />
-      <ModalContent>
+      <ModalContent enableScroll>
         <div>
           {document && (
             <div>
@@ -175,13 +175,13 @@ const DocumentModalExport: React.FC<DocumentModalExportProps> = ({
               </StyledExportDocumentContainer>
             </div>
           )}
-          <StyledExportStatsSection>
-            <b>{sumAnchorsToExport}</b> anchors will be exported
-          </StyledExportStatsSection>
           {!document && <div>Document not found</div>}
         </div>
       </ModalContent>
-      <ModalFooter>
+      <ModalFooter spaceBetween>
+        <StyledExportStatsSection>
+          <b>{sumAnchorsToExport}</b> anchors will be exported
+        </StyledExportStatsSection>
         <ButtonGroup>
           <Button
             key="cancel"
