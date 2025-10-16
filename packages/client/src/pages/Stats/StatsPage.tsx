@@ -5,7 +5,7 @@ import { IRequestStats, IResponseStats } from "@shared/types";
 import { Aggregation, EventType, TimeUnit } from "@shared/types/stats";
 import { Button, ButtonGroup, Input } from "components";
 import { useWindowSize } from "hooks";
-import { useMemo, useReducer, useState } from "react";
+import { useEffect, useMemo, useReducer, useState } from "react";
 import styled from "styled-components";
 import { space1 } from "Theme/theme-space-shortcut";
 import { USER_THRESHOLD_MAX } from "./constants";
@@ -78,6 +78,14 @@ export const StatsPage = () => {
   const [windowWidth, windowHeight] = useWindowSize();
 
   const [usersIgnoreBelowValue, setUsersIgnoreBelowValue] = useState<number>(0);
+
+  // Update timeTo to current time when navigating to this page to correctly refresh the data
+  useEffect(() => {
+    dispatch({
+      type: "timeToUpdate",
+      payload: new Date().toISOString(),
+    });
+  }, []);
 
   const statsRequest = useMemo<IRequestStats>(() => {
     return {
@@ -248,7 +256,11 @@ export const StatsPage = () => {
             label="Refresh"
             disabled={isLoading}
             onClick={() => {
-              client.invalidateQueries({ queryKey: ["stats", statsRequest] });
+              // Update timeTo to current time before refreshing
+              dispatch({
+                type: "timeToUpdate",
+                payload: new Date().toISOString(),
+              });
             }}
           />
         </div>
