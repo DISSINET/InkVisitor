@@ -3,7 +3,7 @@ import api from "api";
 
 import { IRequestStats, IResponseStats } from "@shared/types";
 import { Aggregation, EventType, TimeUnit } from "@shared/types/stats";
-import { Button, ButtonGroup, Input } from "components";
+import { Button, ButtonGroup, Input, Loader } from "components";
 import { useWindowSize } from "hooks";
 import { useEffect, useMemo, useReducer, useState } from "react";
 import styled from "styled-components";
@@ -13,6 +13,7 @@ import { StatsChart } from "./StatsChart";
 import { StatsTable } from "./StatsTable";
 import { initialState, statsReducer } from "./store";
 import { applyUserThreshold } from "./utils";
+import { useAppSelector } from "redux/hooks";
 
 const Container = styled.div`
   padding: 20px;
@@ -75,7 +76,13 @@ export const StatsPage = () => {
   const client = useQueryClient();
   const [state, dispatch] = useReducer(statsReducer, initialState);
 
-  const [windowWidth, windowHeight] = useWindowSize();
+  // const [windowWidth, windowHeight] = useWindowSize();
+  const layoutWidth: number = useAppSelector(
+    (state) => state.layout.layoutWidth
+  );
+  const contentHeight: number = useAppSelector(
+    (state) => state.layout.contentHeight
+  );
 
   const [usersIgnoreBelowValue, setUsersIgnoreBelowValue] = useState<number>(0);
 
@@ -86,6 +93,14 @@ export const StatsPage = () => {
       payload: new Date().toISOString(),
     });
   }, []);
+
+  // Helper function to update timeTo to current time
+  const updateToCurrentTime = () => {
+    dispatch({
+      type: "timeToUpdate",
+      payload: new Date().toISOString(),
+    });
+  };
 
   const statsRequest = useMemo<IRequestStats>(() => {
     return {
@@ -184,12 +199,13 @@ export const StatsPage = () => {
               <Button
                 key={unit}
                 label={String(unit)}
-                onClick={() =>
+                onClick={() => {
                   dispatch({
                     type: "timeUnitUpdate",
                     payload: unit as TimeUnit,
-                  })
-                }
+                  });
+                  updateToCurrentTime();
+                }}
                 color={state.timeUnit === unit ? "primary" : "grey"}
               />
             ))}
@@ -203,12 +219,13 @@ export const StatsPage = () => {
               <Button
                 key={eventType}
                 label={String(eventType)}
-                onClick={() =>
+                onClick={() => {
                   dispatch({
                     type: "eventTypeUpdate",
                     payload: eventType,
-                  })
-                }
+                  });
+                  updateToCurrentTime();
+                }}
                 color={state.eventType.includes(eventType) ? "primary" : "grey"}
               />
             ))}
@@ -222,9 +239,10 @@ export const StatsPage = () => {
               <Button
                 key={agg}
                 label={String(agg)}
-                onClick={() =>
-                  dispatch({ type: "aggregateUpdate", payload: agg })
-                }
+                onClick={() => {
+                  dispatch({ type: "aggregateUpdate", payload: agg });
+                  updateToCurrentTime();
+                }}
                 color={state.aggregate === agg ? "primary" : "grey"}
               />
             ))}
@@ -255,36 +273,34 @@ export const StatsPage = () => {
             color="success"
             label="Refresh"
             disabled={isLoading}
-            onClick={() => {
-              // Update timeTo to current time before refreshing
-              dispatch({
-                type: "timeToUpdate",
-                payload: new Date().toISOString(),
-              });
-            }}
+            onClick={updateToCurrentTime}
           />
         </div>
       </FieldGroup>
 
       <ResponseSection>
         {isError && <StyledQueryState>Error</StyledQueryState>}
-        {isLoading && <StyledQueryState>Loading...</StyledQueryState>}
+        {isLoading && (
+          <StyledQueryState>
+            <Loader show />
+          </StyledQueryState>
+        )}
         {isNoData && <StyledQueryState>No data</StyledQueryState>}
-        {isReady && (
+        {dataStats && (
           <>
             <ResultsChart>
               <StatsChart
                 data={data as unknown as IResponseStats}
-                height={windowHeight / 3}
-                width={windowWidth - 50}
+                height={contentHeight / 3}
+                width={layoutWidth - 50}
                 request={statsRequest}
               />
             </ResultsChart>
             <ResultsTable>
               <StatsTable
                 data={data as unknown as IResponseStats}
-                height={windowHeight / 3}
-                width={windowWidth - 50}
+                height={contentHeight / 3}
+                width={layoutWidth - 50}
                 request={statsRequest}
               />
             </ResultsTable>
