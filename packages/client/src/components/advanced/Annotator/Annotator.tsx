@@ -147,9 +147,8 @@ export const TextAnnotator = ({
       queryClient.invalidateQueries({ queryKey: ["document"] });
       queryClient.invalidateQueries({ queryKey: ["documents"] });
       toast.info("Document content saved");
-      setIsSaving(false);
     },
-    onError: (error) => {
+    onSettled: () => {
       setIsSaving(false);
     },
   });
@@ -160,9 +159,8 @@ export const TextAnnotator = ({
     onSuccess: (variables, data) => {
       queryClient.invalidateQueries({ queryKey: ["document"] });
       queryClient.invalidateQueries({ queryKey: ["documents"] });
-      setIsSaving(false);
     },
-    onError: (error) => {
+    onSettled: () => {
       setIsSaving(false);
     },
   });
@@ -643,29 +641,28 @@ export const TextAnnotator = ({
   useEffect(() => {
     if (!dataDocumentIsFetching && !isSaving) {
       if (scrollAfterRefresh !== undefined) {
-        // console.log("useEffect 1.1");
-        // refreshAnnotator({
-        //   line: scrollAfterRefresh,
-        // });
+        console.log("useEffect 1.1");
+        refreshAnnotator({
+          // is set in handleSaveNewContent
+          line: scrollAfterRefresh,
+        });
         // Clear scrollAfterRefresh after it's been used to prevent it from overriding future scrolls
         setScrollAfterRefresh(undefined);
       } else {
         console.log("useEffect 1.2");
         refreshAnnotator({
+          // is set in refreshAnnotator
           line: storedAnnotatorScroll,
         });
       }
     }
-  }, [dataDocumentIsFetching, dataDocument, isSaving]);
-
-  // useEffect(() => {
-  //   if (!dataDocumentIsFetching && !isSaving) {
-  //     console.log("useEffect 2.1");
-  //     refreshAnnotator({
-  //       line: storedAnnotatorScroll,
-  //     });
-  //   }
-  // }, [theme, hlEntities, dataDocumentIsFetching, isSaving]);
+  }, [
+    theme,
+    hlEntities ?? [],
+    dataDocumentIsFetching ?? false,
+    dataDocument,
+    isSaving,
+  ]);
 
   useEffect(() => {
     if (mainCanvas.current) {
