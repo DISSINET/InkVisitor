@@ -12,7 +12,7 @@ InkVisitor is an open-source browser-based application for the manual entry of c
 
 InkVisitor has been developed in the [Dissident Networks Project (DISSINET)](https://dissinet.cz), a historical and social scientific research project focusing on medieval religious dissidence, inquisition, and inquisitorial records. The development has received substantial funding from the Czech Science Foundation (EXPRO project No. GX19-26975X “Dissident Religious Cultures in Medieval Europe from the Perspective of Social Network Analysis and Geographic Information Systems”) and the European Research Council (ERC Consolidator Grant, project No. 101000442 “Networks of Dissent: Computational Modelling of Dissident and Inquisitorial Cultures in Medieval Europe”).
 
-The lead developer of the application is [Petr Hanák](https://github.com/ptrhnk/). Other contributors of code include Adam Mertel, Ján Mertel and others. The lead authors of the data model are David Zbíral and Robert L. J. Shaw. Other contributors to the data model and testers include Tomáš Hampejs, Jan Král, Katia Riccardo and others.
+The lead developer of the application is [Petr Hanák](https://github.com/ptrhnk/). Other contributors of code include [Adam Mertel](https://github.com/adammertel/), [Ján Mertel](https://github.com/jancimertel/) and others. The lead authors of the data model are David Zbíral and Robert L. J. Shaw. Other contributors to the data model and testers include Tomáš Hampejs, Jan Král, Katia Riccardo and others.
 
 ## Data model
 
