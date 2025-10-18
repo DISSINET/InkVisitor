@@ -145,4 +145,11 @@ const relationsIndexes: ((table: RTable) => any)[] = [
   (table: RTable) => table.indexCreate(DbEnums.Indexes.RelationsEntityIds, { multi: true }),
 ];
 
-export { entitiesIndexes, auditsIndexes, relationsIndexes };
+// Materialized stats indexes for each time unit
+const materializedStatsIndexes: ((table: RTable) => any)[] = [
+  (table: RTable) => table.indexCreate("date"),
+  (table: RTable) => table.indexCreate("lastUpdated"),
+  (table: RTable) => table.indexCreate("date_eventType_aggregateBy", [r.row("date"), r.row("eventType"), r.row("aggregateBy")]),
+];
+
+export { entitiesIndexes, auditsIndexes, relationsIndexes, materializedStatsIndexes };
