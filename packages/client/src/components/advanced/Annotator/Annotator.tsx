@@ -61,7 +61,6 @@ interface TextAnnotatorProps {
   displayLineNumbers: boolean;
   hlEntities?: EntityEnums.Class[];
   documentId: string;
-  initialScrollEntityId?: string;
   thisTerritoryEntityId?: string;
 
   forwardAnnotator?: (annotator?: Annotator) => void;
@@ -95,7 +94,6 @@ export const TextAnnotator = ({
   displayLineNumbers = true,
   hlEntities = Object.values(EntityEnums.Class),
   documentId,
-  initialScrollEntityId = undefined,
   thisTerritoryEntityId = undefined,
 
   storedAnnotatorScroll = 0,
@@ -663,22 +661,6 @@ export const TextAnnotator = ({
     dataDocument,
     isSaving,
   ]);
-
-  useEffect(() => {
-    if (mainCanvas.current) {
-      if (storedAnnotatorScroll) {
-        console.log("useEffect 3.1");
-        refreshAnnotator({
-          line: storedAnnotatorScroll,
-        });
-      } else if (initialScrollEntityId) {
-        console.log("useEffect 3.2");
-        refreshAnnotator({
-          anchor: initialScrollEntityId,
-        });
-      }
-    }
-  }, [initialScrollEntityId, mainCanvas.current]);
 
   const isChangeMade = useMemo<boolean>(() => {
     return annotator?.text?.value !== dataDocument?.content;
