@@ -3,7 +3,7 @@ import api from "api";
 
 import { IRequestStats, IResponseStats } from "@shared/types";
 import { Aggregation, EventType, TimeUnit } from "@shared/types/stats";
-import { Button, ButtonGroup, Input, Loader } from "components";
+import { Button, ButtonGroup, Input, Loader, Checkbox } from "components";
 import { useWindowSize } from "hooks";
 import { useEffect, useMemo, useReducer, useState } from "react";
 import styled from "styled-components";
@@ -72,6 +72,19 @@ const StyledQueryState = styled.div`
   font-size: ${({ theme }) => theme.fontSize.sm};
 `;
 
+const EndpointStatus = styled.div<{ $isMaterialized: boolean }>`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: ${({ theme }) => theme.fontSize.xs};
+  font-weight: ${({ theme }) => theme.fontWeight.bold};
+  background-color: ${({ theme, $isMaterialized }) => 
+    $isMaterialized ? theme.color.success : theme.color.warning};
+  color: ${({ theme }) => theme.color.white};
+`;
+
 export const StatsPage = () => {
   const client = useQueryClient();
   const [state, dispatch] = useReducer(statsReducer, initialState);
@@ -85,6 +98,8 @@ export const StatsPage = () => {
   );
 
   const [usersIgnoreBelowValue, setUsersIgnoreBelowValue] = useState<number>(0);
+  const [isAggregating, setIsAggregating] = useState<boolean>(false);
+  const [aggregateMessage, setAggregateMessage] = useState<string>("");
 
   // Update timeTo to current time when navigating to this page to correctly refresh the data
   useEffect(() => {
@@ -100,6 +115,31 @@ export const StatsPage = () => {
       type: "timeToUpdate",
       payload: new Date().toISOString(),
     });
+  };
+
+  // Helper function to trigger manual aggregation
+  const triggerAggregation = async () => {
+    setIsAggregating(true);
+    setAggregateMessage("");
+    
+    try {
+      const response = await api.statsAggregate({
+        fromDate: new Date(state.timeFrom).getTime(),
+        toDate: new Date(state.timeTo).getTime(),
+        timeUnits: [state.timeUnit],
+        aggregateBy: [state.aggregate],
+      });
+      
+      setAggregateMessage(response.data.message);
+      
+      // Invalidate stats queries to refresh data
+      client.invalidateQueries({ queryKey: ["stats"] });
+      
+    } catch (error) {
+      setAggregateMessage(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsAggregating(false);
+    }
   };
 
   const statsRequest = useMemo<IRequestStats>(() => {
@@ -131,9 +171,11 @@ export const StatsPage = () => {
     isLoading: isLoadingStats,
     isError: isErrorStats,
   } = useQuery({
-    queryKey: ["stats", statsRequest],
+    queryKey: ["stats", statsRequest, state.useMaterialized],
     queryFn: async () => {
-      const response = await api.statsGet(statsRequest);
+      const response = state.useMaterialized 
+        ? await api.statsMaterializedGet(statsRequest)
+        : await api.statsGet(statsRequest);
       return response.data;
     },
   });
@@ -162,7 +204,12 @@ export const StatsPage = () => {
 
   return (
     <Container>
-      <Heading>Statistics</Heading>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Heading>Statistics</Heading>
+        <EndpointStatus $isMaterialized={state.useMaterialized}>
+          {state.useMaterialized ? "⚡ Materialized" : "🔄 Live Data"}
+        </EndpointStatus>
+      </div>
 
       <FieldGroup>
         <Field>
@@ -268,6 +315,37 @@ export const StatsPage = () => {
             />
           </Field>
         )}
+        <Field>
+          <FieldLabel>Use Materialized Data</FieldLabel>
+          <Checkbox
+            value={state.useMaterialized}
+            onChangeFn={(value) =>
+              dispatch({
+                type: "useMaterializedUpdate",
+                payload: value,
+              })
+            }
+            label={state.useMaterialized ? "Fast (Materialized)" : "Classic (Live)"}
+            tooltipLabel={state.useMaterialized 
+              ? "Using pre-aggregated materialized data for faster performance" 
+              : "Using live data from audit table (slower but always up-to-date)"
+            }
+          />
+        </Field>
+        <Field>
+          <FieldLabel>Aggregate Options</FieldLabel>
+          <Checkbox
+            value={state.showAggregateOptions}
+            onChangeFn={(value) =>
+              dispatch({
+                type: "showAggregateOptionsUpdate",
+                payload: value,
+              })
+            }
+            label="Show Advanced Options"
+            tooltipLabel="Show options for manually triggering data aggregation"
+          />
+        </Field>
         <div>
           <Button
             color="success"
@@ -277,6 +355,52 @@ export const StatsPage = () => {
           />
         </div>
       </FieldGroup>
+
+      {state.showAggregateOptions && (
+        <div style={{ 
+          padding: '20px', 
+          backgroundColor: '#f8f9fa', 
+          borderRadius: '8px', 
+          border: '1px solid #dee2e6',
+          marginBottom: '20px'
+        }}>
+          <h3 style={{ margin: '0 0 15px 0', color: '#495057' }}>Manual Data Aggregation</h3>
+          <p style={{ margin: '0 0 15px 0', color: '#6c757d', fontSize: '14px' }}>
+            Manually trigger aggregation of stats data for the current date range and settings. 
+            This will populate the materialized tables with pre-calculated data for faster queries.
+          </p>
+          
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px' }}>
+            <Button
+              color="primary"
+              label={isAggregating ? "Aggregating..." : "Aggregate Data"}
+              disabled={isAggregating || isLoading}
+              onClick={triggerAggregation}
+            />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+              <span style={{ fontSize: '12px', color: '#6c757d' }}>
+                Range: {new Date(state.timeFrom).toLocaleDateString()} - {new Date(state.timeTo).toLocaleDateString()}
+              </span>
+              <span style={{ fontSize: '12px', color: '#6c757d' }}>
+                Settings: {state.timeUnit} | {state.aggregate} | {state.eventType.join(', ')}
+              </span>
+            </div>
+          </div>
+          
+          {aggregateMessage && (
+            <div style={{ 
+              padding: '10px', 
+              backgroundColor: aggregateMessage.includes('Error') ? '#f8d7da' : '#d1edff',
+              border: `1px solid ${aggregateMessage.includes('Error') ? '#f5c6cb' : '#b8daff'}`,
+              borderRadius: '4px',
+              fontSize: '14px',
+              color: aggregateMessage.includes('Error') ? '#721c24' : '#004085'
+            }}>
+              {aggregateMessage}
+            </div>
+          )}
+        </div>
+      )}
 
       <ResponseSection>
         {isError && <StyledQueryState>Error</StyledQueryState>}

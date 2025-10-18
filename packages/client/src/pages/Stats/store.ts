@@ -7,6 +7,8 @@ export interface StatsStore {
   timeUnit: TimeUnit;
   aggregate: Aggregation;
   eventType: EventType[];
+  useMaterialized: boolean;
+  showAggregateOptions: boolean;
 }
 
 export type StatsStoreAction =
@@ -14,7 +16,9 @@ export type StatsStoreAction =
   | { type: "timeToUpdate"; payload: string }
   | { type: "timeUnitUpdate"; payload: TimeUnit }
   | { type: "aggregateUpdate"; payload: Aggregation }
-  | { type: "eventTypeUpdate"; payload: EventType };
+  | { type: "eventTypeUpdate"; payload: EventType }
+  | { type: "useMaterializedUpdate"; payload: boolean }
+  | { type: "showAggregateOptionsUpdate"; payload: boolean };
 
 export const initialState: StatsStore = {
   timeFrom: new Date(
@@ -24,6 +28,8 @@ export const initialState: StatsStore = {
   timeUnit: TimeUnit.YEAR,
   aggregate: Aggregation.USER,
   eventType: [EventType.EDIT, EventType.DELETE, EventType.CREATE],
+  useMaterialized: true, // Default to materialized for better performance
+  showAggregateOptions: false, // Hidden by default
 };
 
 export const statsReducer = (
@@ -48,6 +54,10 @@ export const statsReducer = (
         ? state.eventType.filter((type) => type !== eventTypeToHandle)
         : [...state.eventType, eventTypeToHandle];
       return { ...state, eventType: newEventTypes };
+    case "useMaterializedUpdate":
+      return { ...state, useMaterialized: action.payload };
+    case "showAggregateOptionsUpdate":
+      return { ...state, showAggregateOptions: action.payload };
     default:
       return state;
   }
