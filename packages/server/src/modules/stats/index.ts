@@ -72,6 +72,7 @@ export default Router()
         toDate,
         timeUnit,
         aggregateBy,
+        eventType,
         values
       };
 

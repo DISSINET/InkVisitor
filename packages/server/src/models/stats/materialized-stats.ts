@@ -118,6 +118,7 @@ export class MaterializedStats implements IMaterializedStats {
         rethink.expr(eventTypes).contains(doc("eventType"))
       )
       .filter((doc: any) => doc("aggregateBy").eq(aggregateBy))
+      .orderBy("date")
       .run(db);
 
     return result.map((data) => new MaterializedStats(data));
