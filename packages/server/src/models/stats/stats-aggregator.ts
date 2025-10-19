@@ -145,19 +145,39 @@ export class StatsAggregator {
     for (const timeUnit of timeUnits) {
       try {
         const latestUpdate = await MaterializedStats.getLatestUpdateDate(this.db, timeUnit);
-        const fromDate = latestUpdate || new Date(Date.now() - 365 * 24 * 60 * 60 * 1000); // 1 year ago if no data
-        const toDate = new Date();
+        let fromDate: Date;
         
+        if (latestUpdate) {
+          // Use the latest update date if materialized data exists
+          fromDate = latestUpdate;
+        } else {
+          // If no materialized data exists, start from the very first audit entry
+          const earliestAuditDate = await Audit.getEarliestDate(this.db);
+          fromDate = earliestAuditDate || new Date(Date.now() - 365 * 24 * 60 * 60 * 1000); // Fallback to 1 year ago if no audit data
+          
+          if (earliestAuditDate) {
+            console.log(`No materialized data found for ${timeUnit}, starting from first audit entry: ${earliestAuditDate.toISOString()}`);
+          } else {
+            console.log(`No audit data found, using fallback date: ${fromDate.toISOString()}`);
+          }
+        }
+        
+        const toDate = new Date();
         console.log(`Aggregating missing ${timeUnit} data from ${fromDate.toISOString()} to ${toDate.toISOString()}`);
         
         for (const aggregateBy of aggregateByOptions) {
-          await this.aggregateForDateRange(
+          const stats = await this.aggregateForDateRange(
             fromDate,
             toDate,
             timeUnit,
             eventTypes,
             aggregateBy
           );
+
+          if (stats.length > 0) {
+            await MaterializedStats.bulkInsert(this.db, timeUnit, stats);
+            console.log(`Inserted ${stats.length} ${timeUnit} stats records for ${aggregateBy}`);
+          }
         }
       } catch (error) {
         console.error(`Error aggregating missing ${timeUnit} data:`, error);
