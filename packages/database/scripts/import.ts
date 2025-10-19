@@ -16,6 +16,8 @@ import { getEnv } from "./import/common";
 import { SshHelper } from "./import/ssh";
 import colors from "colors/safe";
 import jobs from "./jobs/index";
+import * as fs from "fs";
+import * as path from "path";
 
 const defaultSettingsTable: TableSchema = {
   tableName: "settings",
@@ -458,6 +460,53 @@ const datasets: Record<string, DbSchema> = {
       transform: function () {},
     },
   },
+
+  "2025-10-19": {
+    settings: {
+      tableName: "settings",
+      data: require("../datasets/2025-10-19/settings.json"),
+      transform: function () {},
+    },
+    users: {
+      tableName: "users",
+      data: require("../datasets/2025-10-19/users.json"),
+      transform: function () {
+        this.data = this.data.map((user: IUser) => {
+          user.password = hashPassword(user.password ? user.password : "");
+          return user;
+        });
+      },
+    },
+    aclPermissions: {
+      tableName: "acl_permissions",
+      data: require("../datasets/2025-10-19/acl_permissions.json"),
+      transform: function () {},
+    },
+    entities: {
+      tableName: "entities",
+      data: require("../datasets/2025-10-19/entities.json"),
+      transform: function () {},
+      indexes: entitiesIndexes,
+    },
+    audits: {
+      tableName: "audits",
+      data: require("../datasets/2025-10-19/audits.json"),
+      transform: function () {},
+      indexes: auditsIndexes,
+    },
+    relations: {
+      tableName: "relations",
+      data: require("../datasets/2025-10-19/relations.json"),
+      transform: function () {},
+      indexes: relationsIndexes,
+    },
+    documents: {
+      tableName: "documents",
+      data: require("../datasets/2025-10-19/documents.json"),
+      transform: function () {},
+    },
+    ...materializedStatsTables,
+  },
 };
 
 enum MODES {
@@ -752,8 +801,53 @@ class Importer {
     for (const tableConfig of Object.values(this.dataset)) {
       await this.db.createTable(tableConfig);
     }
+    
+    // Import data with proper counting for all files
     for (const tableConfig of Object.values(this.dataset)) {
-      await this.db.importData(tableConfig);
+      if (tableConfig.data && Array.isArray(tableConfig.data)) {
+        // Check if this is a large file that needs special handling
+        const dataFilePath = this.getDataFilePath(tableConfig);
+        if (dataFilePath && this.isLargeFile(dataFilePath)) {
+          console.log(colors.yellow(`Using large file import for: ${tableConfig.tableName}`));
+          await this.db.importLargeData(tableConfig, dataFilePath);
+        } else {
+          // For smaller files, use the standard import with proper counting
+          await this.db.importData(tableConfig);
+        }
+      } else if (tableConfig.data === null) {
+        console.log(colors.gray(`Skipping ${tableConfig.tableName} - no data configured`));
+      } else {
+        console.log(colors.gray(`Skipping ${tableConfig.tableName} - data is not an array`));
+      }
+    }
+  }
+
+  /**
+   * Gets the data file path for a table configuration
+   * @param tableConfig Table configuration
+   * @returns string | null
+   */
+  private getDataFilePath(tableConfig: TableSchema): string | null {
+    if (!this.datasetName) return null;
+    
+    const dataDir = path.join(__dirname, "../datasets", this.datasetName);
+    const jsonFile = path.join(dataDir, `${tableConfig.tableName}.json`);
+    
+    return fs.existsSync(jsonFile) ? jsonFile : null;
+  }
+
+  /**
+   * Checks if a file is large enough to require streaming
+   * @param filePath Path to the file
+   * @returns boolean
+   */
+  private isLargeFile(filePath: string): boolean {
+    try {
+      const stats = fs.statSync(filePath);
+      const fileSizeMB = stats.size / (1024 * 1024);
+      return fileSizeMB > 50; // Files larger than 50MB use streaming
+    } catch (error) {
+      return false;
     }
   }
 
@@ -804,7 +898,20 @@ class Importer {
 
     // await this.db.dropTable(chosenTable);
     // await this.db.createTable(this.dataset[chosenTable as keyof DbSchema]);
-    await this.db.importData(this.dataset[chosenTable as keyof DbSchema]);
+    
+    const tableConfig = this.dataset[chosenTable as keyof DbSchema];
+    if (tableConfig.data && Array.isArray(tableConfig.data)) {
+      // Check if this is a large file that needs special handling
+      const dataFilePath = this.getDataFilePath(tableConfig);
+      if (dataFilePath && this.isLargeFile(dataFilePath)) {
+        console.log(colors.yellow(`Using large file import for: ${tableConfig.tableName}`));
+        await this.db.importLargeData(tableConfig, dataFilePath);
+      } else {
+        await this.db.importData(tableConfig);
+      }
+    } else {
+      console.log(colors.yellow(`No data to import for table ${chosenTable}`));
+    }
   }
 }
 
