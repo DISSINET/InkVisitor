@@ -13,7 +13,13 @@ import { UseMutationResult } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import TextAnnotator from "components/advanced/Annotator/Annotator";
 import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   ANNOTATOR_SELECTOR_HEIGHT,
   ANNOTATOR_TOO_SMALL_BREAKPOINT,
@@ -117,9 +123,22 @@ export const StatementListTextAnnotator: React.FC<
     delay: 300,
   });
 
+  // Track previous values to only scroll when territoryId or statementId actually change
+  const prevTerritoryIdRef = useRef<string | undefined>(undefined);
+  const prevStatementIdRef = useRef<string | undefined>(undefined);
+
   // INIT + react to url changes
   useEffect(() => {
-    if (annotator && selectedDocument) {
+    // Only scroll when territoryId or statementId actually changed
+    const territoryChanged = prevTerritoryIdRef.current !== territoryId;
+    const statementChanged = prevStatementIdRef.current !== statementId;
+
+    if (
+      annotator &&
+      selectedDocument &&
+      (territoryChanged || statementChanged)
+    ) {
+      console.log("useEffect URL react");
       const scrollToId =
         statementId && selectedDocument.entityIds.S?.includes(statementId)
           ? statementId
@@ -129,8 +148,12 @@ export const StatementListTextAnnotator: React.FC<
       setTimeout(() => {
         annotator.scrollToAnchor(scrollToId);
       }, 100);
+
+      // Update refs
+      prevTerritoryIdRef.current = territoryId;
+      prevStatementIdRef.current = statementId;
     }
-  }, [statementId, annotator, territoryId, selectedDocument]);
+  }, [selectedDocument, territoryId, statementId, annotator]);
 
   const thisTHasAnchor = useMemo<boolean>(() => {
     if (selectedDocument) {

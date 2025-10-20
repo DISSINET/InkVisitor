@@ -508,14 +508,7 @@ export const TextAnnotator = ({
 
     // If content hasn't changed and we have an existing annotator, just redraw it
     if (annotator && currentContent === newContent) {
-      // Preserve current selection state
-      const currentSelection = {
-        selectStart: annotator.cursor?.selectStart,
-        selectEnd: annotator.cursor?.selectEnd,
-        selectedText: selectedText,
-        selectedAnchors: selectedAnchors,
-      };
-
+      console.log("refreshAnnotator currentContent === newContent");
       // Update theme colors for existing annotator
       annotator.fontColor = theme.color.black;
       annotator.bgColor = "transparent";
@@ -543,23 +536,6 @@ export const TextAnnotator = ({
       });
 
       annotator.draw();
-
-      // Restore selection if it existed
-      if (currentSelection.selectStart && currentSelection.selectEnd) {
-        annotator.cursor.selectStart = currentSelection.selectStart;
-        annotator.cursor.selectEnd = currentSelection.selectEnd;
-        setSelectedText(currentSelection.selectedText);
-        setSelectedAnchors(currentSelection.selectedAnchors);
-      }
-
-      // Handle scrolling if needed
-      setTimeout(() => {
-        if (scrollTo.line) {
-          annotator.scrollToLine(scrollTo.line);
-        } else if (scrollTo.anchor) {
-          annotator.scrollToAnchor(scrollTo.anchor);
-        }
-      }, 200);
 
       return;
     }
@@ -635,6 +611,8 @@ export const TextAnnotator = ({
 
     newAnnotator.setMode(originalMode);
   };
+
+  // ------------------------------------------------------------
 
   useEffect(() => {
     if (!dataDocumentIsFetching && !isSaving) {
@@ -726,7 +704,6 @@ export const TextAnnotator = ({
   };
 
   const onUpdateAnchor = (anchor: Tag, elvl: EntityEnums.Elvl) => {
-    console.log("onUpdateAnchor", anchor, elvl);
     annotator?.updateAnchor(anchor, { elvl });
     handleSaveNewContent(true);
   };
