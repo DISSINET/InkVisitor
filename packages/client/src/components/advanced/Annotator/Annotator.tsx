@@ -280,17 +280,6 @@ export const TextAnnotator = ({
   const [territoryCreateModalType, setTerritoryCreateModalType] =
     useState<TerritoryCreateModalType>(false);
 
-  const [scrollAfterRefresh, setScrollAfterRefresh] = useState<
-    number | undefined
-  >(undefined);
-
-  const [selectionAfterRefresh, setSelectionAfterRefresh] = useState<{
-    selectStart: any;
-    selectEnd: any;
-    selectedText: string;
-    selectedAnchors: Tag[];
-  } | null>(null);
-
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
   const { refs, floatingStyles } = useFloating({
@@ -382,19 +371,6 @@ export const TextAnnotator = ({
 
   // quiet does not trigger a toast notification
   const handleSaveNewContent = (quiet: boolean) => {
-    const scrollBeforeUpdated = annotator?.viewport?.lineStart;
-    setScrollAfterRefresh(scrollBeforeUpdated);
-
-    // Capture current selection state to restore after save
-    if (annotator?.cursor?.selectStart && annotator?.cursor?.selectEnd) {
-      setSelectionAfterRefresh({
-        selectStart: { ...annotator.cursor.selectStart },
-        selectEnd: { ...annotator.cursor.selectEnd },
-        selectedText: selectedText,
-        selectedAnchors: [...selectedAnchors],
-      });
-    }
-
     if (annotator && documentId) {
       setIsSaving(true);
 
@@ -498,7 +474,7 @@ export const TextAnnotator = ({
     }
   };
 
-  const refreshAnnotator = (scrollTo: { line?: number; anchor?: string }) => {
+  const refreshAnnotator = () => {
     if (!mainCanvas.current) {
       return;
     }
@@ -509,7 +485,6 @@ export const TextAnnotator = ({
 
     // If content hasn't changed and we have an existing annotator, just redraw it
     if (annotator && currentContent === newContent) {
-      console.log("refreshAnnotator currentContent === newContent");
       // Update theme colors for existing annotator
       annotator.fontColor = theme.color.black;
       annotator.bgColor = "transparent";
@@ -592,46 +567,12 @@ export const TextAnnotator = ({
       setStoredAnnotatorScroll(newAnnotator.viewport.lineStart);
     });
 
-    setTimeout(() => {
-      if (scrollTo.line) {
-        newAnnotator.scrollToLine(scrollTo.line);
-      } else if (scrollTo.anchor) {
-        newAnnotator.scrollToAnchor(scrollTo.anchor);
-      }
-
-      // Restore selection if it was captured before save
-      if (selectionAfterRefresh) {
-        newAnnotator.cursor.selectStart = selectionAfterRefresh.selectStart;
-        newAnnotator.cursor.selectEnd = selectionAfterRefresh.selectEnd;
-        setSelectedText(selectionAfterRefresh.selectedText);
-        setSelectedAnchors(selectionAfterRefresh.selectedAnchors);
-        setSelectionAfterRefresh(null); // Clear the captured selection
-        newAnnotator.draw(); // Redraw to show the restored selection
-      }
-    }, 200);
-
     newAnnotator.setMode(originalMode);
   };
 
-  // ------------------------------------------------------------
-
   useEffect(() => {
     if (!dataDocumentIsFetching && !isSaving) {
-      if (scrollAfterRefresh !== undefined) {
-        console.log("useEffect 1.1");
-        refreshAnnotator({
-          // is set in handleSaveNewContent
-          line: scrollAfterRefresh,
-        });
-        // Clear scrollAfterRefresh after it's been used to prevent it from overriding future scrolls
-        setScrollAfterRefresh(undefined);
-      } else {
-        console.log("useEffect 1.2");
-        refreshAnnotator({
-          // is set in refreshAnnotator
-          line: storedAnnotatorScroll,
-        });
-      }
+      refreshAnnotator();
     }
   }, [
     theme,
@@ -1028,7 +969,7 @@ export const TextAnnotator = ({
             </ButtonGroup>
 
             <ButtonGroup $marginTop style={{ marginLeft: "0.5rem" }}>
-              <div style={{ display: "flex", position: "relative" }}>
+              <span style={{ display: "flex", position: "relative" }}>
                 <Button
                   label="save"
                   color="primary"
@@ -1039,7 +980,7 @@ export const TextAnnotator = ({
                   }}
                 />
                 <Loader show={isSaving || dataDocumentIsFetching} size={14} />
-              </div>
+              </span>
               <Button
                 label="discard"
                 color="warning"

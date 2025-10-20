@@ -138,18 +138,22 @@ export const StatementListTextAnnotator: React.FC<
       selectedDocument &&
       (territoryChanged || statementChanged)
     ) {
+      const isStatementInDocument =
+        statementId && selectedDocument.entityIds.S?.includes(statementId);
       console.log(
         "URL scroll - is statement in document?",
-        selectedDocument.entityIds.S?.includes(statementId)
+        isStatementInDocument
       );
-      const scrollToId =
-        statementId && selectedDocument.entityIds.S?.includes(statementId)
-          ? statementId
-          : territoryId;
+      const scrollToId = isStatementInDocument ? statementId : territoryId;
 
       // ensure the annotator is fully initialized
       annotator.scrollToAnchor(scrollToId);
-      console.log("scrolled to", scrollToId);
+
+      if (isStatementInDocument) {
+        console.log("scrolled to statement", scrollToId);
+      } else {
+        console.log("scrolled to territory", scrollToId);
+      }
 
       // Update refs
       prevTerritoryIdRef.current = territoryId;
