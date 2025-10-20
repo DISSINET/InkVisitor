@@ -54,6 +54,7 @@ import {
 import { annotatorHighlight } from "./highlight";
 import { RATIO, TerritoryCreateModalType, W_SCROLL } from "./types";
 import { StatementListSearchLine } from "pages/Main/containers/StatementsListBox/StatementListSearchLine/StatementListSearchLine";
+import { Loader } from "components";
 interface TextAnnotatorProps {
   width: number;
   annotatorWidthTooNarrow?: boolean;
@@ -1027,20 +1028,23 @@ export const TextAnnotator = ({
             </ButtonGroup>
 
             <ButtonGroup $marginTop style={{ marginLeft: "0.5rem" }}>
-              <Button
-                label="save"
-                color="primary"
-                icon={<FaRegSave />}
-                disabled={!isChangeMade}
-                onClick={() => {
-                  handleSaveNewContent(false);
-                }}
-              />
+              <div style={{ display: "flex", position: "relative" }}>
+                <Button
+                  label="save"
+                  color="primary"
+                  icon={<FaRegSave />}
+                  disabled={!isChangeMade || isSaving || dataDocumentIsFetching}
+                  onClick={() => {
+                    handleSaveNewContent(false);
+                  }}
+                />
+                <Loader show={isSaving || dataDocumentIsFetching} size={14} />
+              </div>
               <Button
                 label="discard"
                 color="warning"
                 icon={<FaTrash />}
-                disabled={!isChangeMade}
+                disabled={!isChangeMade || isSaving || dataDocumentIsFetching}
                 onClick={() => {
                   if (dataDocument?.content) {
                     annotator?.updateText(dataDocument?.content);

@@ -147,7 +147,9 @@ export const StatementListTextAnnotator: React.FC<
           ? statementId
           : territoryId;
 
+      // ensure the annotator is fully initialized
       annotator.scrollToAnchor(scrollToId);
+      console.log("scrolled to", scrollToId);
 
       // Update refs
       prevTerritoryIdRef.current = territoryId;
