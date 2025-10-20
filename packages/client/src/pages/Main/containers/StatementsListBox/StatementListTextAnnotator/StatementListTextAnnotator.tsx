@@ -126,40 +126,52 @@ export const StatementListTextAnnotator: React.FC<
   // Track previous values to only scroll when territoryId or statementId actually change
   const prevTerritoryIdRef = useRef<string | undefined>(undefined);
   const prevStatementIdRef = useRef<string | undefined>(undefined);
+  const lastScrolledAnnotatorRef = useRef<Annotator | undefined>(undefined);
 
   // Initial scroll + react to url changes
   useEffect(() => {
     // Only scroll when territoryId or statementId actually changed
     const territoryChanged = prevTerritoryIdRef.current !== territoryId;
     const statementChanged = prevStatementIdRef.current !== statementId;
+    const annotatorChanged = lastScrolledAnnotatorRef.current !== annotator;
+
+    // Check if the selectedDocument actually corresponds to the current territoryId
+    const documentMatchesTerritory =
+      selectedDocument && selectedDocument.entityIds.T.includes(territoryId);
+
+    // Scroll if: IDs changed OR annotator was recreated (and we haven't scrolled this annotator yet)
+    const shouldScroll =
+      territoryChanged ||
+      statementChanged ||
+      (annotatorChanged && prevTerritoryIdRef.current !== undefined);
 
     if (
       annotator &&
       selectedDocument &&
-      (territoryChanged || statementChanged)
+      documentMatchesTerritory &&
+      !selectedDocumentIsFetching &&
+      shouldScroll
     ) {
       const isStatementInDocument =
         statementId && selectedDocument.entityIds.S?.includes(statementId);
-      console.log(
-        "URL scroll - is statement in document?",
-        isStatementInDocument
-      );
+
       const scrollToId = isStatementInDocument ? statementId : territoryId;
 
-      // ensure the annotator is fully initialized
+      // Perform the scroll
       annotator.scrollToAnchor(scrollToId);
 
-      if (isStatementInDocument) {
-        console.log("scrolled to statement", scrollToId);
-      } else {
-        console.log("scrolled to territory", scrollToId);
-      }
-
-      // Update refs
+      // Update refs AFTER scroll
       prevTerritoryIdRef.current = territoryId;
       prevStatementIdRef.current = statementId;
+      lastScrolledAnnotatorRef.current = annotator;
     }
-  }, [selectedDocument, territoryId, statementId, annotator]);
+  }, [
+    selectedDocument,
+    selectedDocumentIsFetching,
+    territoryId,
+    statementId,
+    annotator,
+  ]);
 
   const thisTHasAnchor = useMemo<boolean>(() => {
     if (selectedDocument) {

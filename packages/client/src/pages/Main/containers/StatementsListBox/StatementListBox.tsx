@@ -958,7 +958,6 @@ export const StatementListBox: React.FC = () => {
 
               {displayMode === StatementListDisplayMode.TEXT && (
                 <StatementListTextAnnotator
-                  key={territoryId}
                   contentHeight={contentHeight}
                   contentWidth={contentWidth - 10}
                   territoryId={territoryId}
