@@ -126,6 +126,12 @@ export const TextAnnotator = ({
     return forwardAnnotator(undefined);
   }, []);
 
+  // Clear annotator when documentId changes to ensure fresh initialization
+  useEffect(() => {
+    setAnnotator(null);
+    forwardAnnotator(undefined);
+  }, [documentId]);
+
   const parentTerritoryId = territory?.data?.parent
     ? territory?.data?.parent?.territoryId
     : undefined;
@@ -575,6 +581,7 @@ export const TextAnnotator = ({
       refreshAnnotator();
     }
   }, [
+    documentId,
     theme,
     hlEntities ?? [],
     dataDocumentIsFetching ?? false,
