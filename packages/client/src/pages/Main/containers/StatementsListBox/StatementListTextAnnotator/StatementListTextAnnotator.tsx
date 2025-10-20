@@ -127,7 +127,7 @@ export const StatementListTextAnnotator: React.FC<
   const prevTerritoryIdRef = useRef<string | undefined>(undefined);
   const prevStatementIdRef = useRef<string | undefined>(undefined);
 
-  // INIT + react to url changes
+  // Initial scroll + react to url changes
   useEffect(() => {
     // Only scroll when territoryId or statementId actually changed
     const territoryChanged = prevTerritoryIdRef.current !== territoryId;
@@ -138,16 +138,16 @@ export const StatementListTextAnnotator: React.FC<
       selectedDocument &&
       (territoryChanged || statementChanged)
     ) {
-      console.log("useEffect URL react");
+      console.log(
+        "URL scroll - is statement in document?",
+        selectedDocument.entityIds.S?.includes(statementId)
+      );
       const scrollToId =
         statementId && selectedDocument.entityIds.S?.includes(statementId)
           ? statementId
           : territoryId;
 
-      // ensure the annotator is fully initialized
-      setTimeout(() => {
-        annotator.scrollToAnchor(scrollToId);
-      }, 100);
+      annotator.scrollToAnchor(scrollToId);
 
       // Update refs
       prevTerritoryIdRef.current = territoryId;
