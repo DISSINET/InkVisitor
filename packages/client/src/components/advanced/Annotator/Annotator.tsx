@@ -184,6 +184,9 @@ export const TextAnnotator = ({
     EditMode.HIGHLIGHT
   );
 
+  // Track previous width to detect changes
+  const prevWidthRef = useRef<number>(width);
+
   useEffect(() => {
     if (annotator) {
       annotator.setMode(annotatorMode);
@@ -489,8 +492,14 @@ export const TextAnnotator = ({
     const currentContent = annotator?.text?.value;
     const newContent = dataDocument?.content ?? "no text";
 
-    // If content hasn't changed and we have an existing annotator, just redraw it
-    if (annotator && currentContent === newContent) {
+    // Check if width has changed
+    const widthChanged = prevWidthRef.current !== width;
+    if (widthChanged) {
+      prevWidthRef.current = width;
+    }
+
+    // If content hasn't changed, width hasn't changed, and we have an existing annotator, just redraw it
+    if (annotator && currentContent === newContent && !widthChanged) {
       // Update theme colors for existing annotator
       annotator.fontColor = theme.color.black;
       annotator.bgColor = "transparent";
@@ -582,6 +591,8 @@ export const TextAnnotator = ({
     }
   }, [
     documentId,
+    width,
+    displayLineNumbers,
     theme,
     hlEntities ?? [],
     dataDocumentIsFetching ?? false,
