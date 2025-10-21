@@ -30,6 +30,7 @@ export const ModalKeyPress: React.FC<ModalKeyPress> = ({
       }
     },
     [dependencyArr, isReady],
+    // ctrlKeyCombo
     true
   );
 
