@@ -28,6 +28,7 @@ import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice"
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { COLLAPSED_TABLE_WIDTH, SECOND_PANEL_MIN_WIDTH } from "Theme/constants";
 import {
+  DetailBoxState,
   EntitiesDeleteSuccessResponse,
   StatementListDisplayMode,
   StatementOrderCorrection,
@@ -95,6 +96,7 @@ export const StatementListBox: React.FC = () => {
     setTerritoryId,
     statementId,
     setStatementId,
+    selectedDetailId,
     detailIdArray,
     removeDetailId,
     appendDetailId,
@@ -709,19 +711,24 @@ export const StatementListBox: React.FC = () => {
     },
   });
 
-  // TODO: migrate to annotator to limit updates in statement list box
-  const {
-    ref: contentRef,
-    // TODO: calculate height - contentHeight / 2 - StatementListHeader height ?
-    height: contentHeight = 0,
-    // width: contentWidth = 0,
-  } = useResizeObserver<HTMLDivElement>({
-    debounceDelay: 50,
-  });
-
   const contentWidth = useAppSelector(
     (state) => state.layout.mainPage.secondPanelRealWidth
   );
+  const contentHeight = useAppSelector((state) => state.layout.contentHeight);
+  const detailBoxState = useAppSelector(
+    (state) => state.layout.mainPage.detailBoxState
+  );
+
+  const statementListHeaderHeight = 103;
+  const contentHeightAnnotator = useMemo(() => {
+    if (!selectedDetailId) {
+      return contentHeight - statementListHeaderHeight;
+    } else if (detailBoxState === DetailBoxState.Normal) {
+      return contentHeight / 2 - statementListHeaderHeight;
+    } else if (detailBoxState === DetailBoxState.Minimized) {
+      return contentHeight - statementListHeaderHeight - 56; // 56 is the height of the submit button
+    }
+  }, [contentHeight, detailBoxState, selectedDetailId]);
 
   // adds object orderCorrection to each statement with info about the order in the list vs the annotator
   const statementsWithOrder: (IResponseStatement & {
@@ -903,7 +910,9 @@ export const StatementListBox: React.FC = () => {
             )}
 
           {territoryId && (
-            <StyledContentWrapper ref={contentRef}>
+            <StyledContentWrapper
+            // ref={contentRef}
+            >
               <CustomScrollbar
                 scrollerId="Statements"
                 elementId="Statements-box-table"
@@ -958,7 +967,7 @@ export const StatementListBox: React.FC = () => {
 
               {displayMode === StatementListDisplayMode.TEXT && (
                 <StatementListTextAnnotator
-                  contentHeight={contentHeight}
+                  contentHeight={contentHeightAnnotator || 0}
                   contentWidth={contentWidth - 10}
                   territoryId={territoryId}
                   territory={territory}
@@ -993,13 +1002,14 @@ export const StatementListBox: React.FC = () => {
 
               {statementListTableIsLoading &&
                 tableWidth > 0 &&
-                contentHeight > 0 && (
+                contentHeightAnnotator &&
+                contentHeightAnnotator > 0 && (
                   <StyledLoaderWrap
                     $width={tableWidth + 4}
                     $height={
                       displayMode === StatementListDisplayMode.TEXT
-                        ? contentHeight - 56
-                        : contentHeight + 4
+                        ? contentHeightAnnotator - 56
+                        : contentHeightAnnotator + 4
                     }
                   >
                     <Loader show size={50} />
