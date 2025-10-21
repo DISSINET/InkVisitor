@@ -268,6 +268,7 @@ export const StatementListTextAnnotator: React.FC<
                 showStatementList={showStatementList}
                 userData={userData}
                 statementListBoxRef={statementListBoxRef}
+                territoryId={territoryId}
               />
             )}
           </AnnotatorProvider>

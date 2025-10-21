@@ -70,6 +70,8 @@ interface TextAnnotatorProps {
   setStoredAnnotatorScroll?: React.Dispatch<React.SetStateAction<number>>;
 
   territory?: IResponseTerritory;
+  // territoryId is from URL params and is used to reset the annotator when the territory changes
+  territoryId?: string;
   dataDocument?: IDocument;
   dataDocumentIsFetching?: boolean;
   dataDocumentError: Error | null;
@@ -102,6 +104,7 @@ export const TextAnnotator = ({
   setStoredAnnotatorScroll = () => {},
 
   territory,
+  territoryId,
   dataDocument,
   dataDocumentIsFetching,
   dataDocumentError,
@@ -126,11 +129,11 @@ export const TextAnnotator = ({
     return forwardAnnotator(undefined);
   }, []);
 
-  // Clear annotator when documentId changes to ensure fresh initialization
+  // Clear annotator when territoryId changes to ensure fresh initialization
   useEffect(() => {
     setAnnotator(null);
     forwardAnnotator(undefined);
-  }, [documentId]);
+  }, [territoryId]);
 
   const parentTerritoryId = territory?.data?.parent
     ? territory?.data?.parent?.territoryId
@@ -184,8 +187,9 @@ export const TextAnnotator = ({
     EditMode.HIGHLIGHT
   );
 
-  // Track previous width to detect changes
+  // Track previous width and height to detect changes
   const prevWidthRef = useRef<number>(width);
+  const prevHeightRef = useRef<number>(height);
 
   useEffect(() => {
     if (annotator) {
@@ -492,14 +496,23 @@ export const TextAnnotator = ({
     const currentContent = annotator?.text?.value;
     const newContent = dataDocument?.content ?? "no text";
 
-    // Check if width has changed
+    // Check if width or height has changed
     const widthChanged = prevWidthRef.current !== width;
+    const heightChanged = prevHeightRef.current !== height;
     if (widthChanged) {
       prevWidthRef.current = width;
     }
+    if (heightChanged) {
+      prevHeightRef.current = height;
+    }
 
-    // If content hasn't changed, width hasn't changed, and we have an existing annotator, just redraw it
-    if (annotator && currentContent === newContent && !widthChanged) {
+    // If content hasn't changed, dimensions haven't changed, and we have an existing annotator, just redraw it
+    if (
+      annotator &&
+      currentContent === newContent &&
+      !widthChanged &&
+      !heightChanged
+    ) {
       // Update theme colors for existing annotator
       annotator.fontColor = theme.color.black;
       annotator.bgColor = "transparent";
@@ -592,6 +605,7 @@ export const TextAnnotator = ({
   }, [
     documentId,
     width,
+    height,
     displayLineNumbers,
     theme,
     hlEntities ?? [],
