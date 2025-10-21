@@ -1,5 +1,5 @@
 import useKeypress from "hooks/useKeyPress";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 interface ModalKeyPress {
   onEnter?: () => void;
@@ -11,21 +11,36 @@ export const ModalKeyPress: React.FC<ModalKeyPress> = ({
   onEscape = () => {},
   dependencyArr,
 }) => {
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    // Delay key handler activation to prevent capturing the same keypress that opened the modal
+    const timer = setTimeout(() => {
+      setIsReady(true);
+    }, 200);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   useKeypress(
     "Enter",
     () => {
-      onEnter();
+      if (isReady) {
+        onEnter();
+      }
     },
-    [dependencyArr],
+    [dependencyArr, isReady],
     true
   );
 
   useKeypress(
     "Escape",
     () => {
-      onEscape();
+      if (isReady) {
+        onEscape();
+      }
     },
-    [dependencyArr]
+    [dependencyArr, isReady]
   );
   return <></>;
 };
