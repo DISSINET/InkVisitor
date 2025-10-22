@@ -119,37 +119,39 @@ export const StatementListTextAnnotator: React.FC<
   // Initial scroll + react to url changes
   useEffect(() => {
     // Only scroll when territoryId or statementId actually changed
-    const territoryChanged = prevTerritoryIdRef.current !== territoryId;
-    const statementChanged = prevStatementIdRef.current !== statementId;
-    const annotatorChanged = lastScrolledAnnotatorRef.current !== annotator;
+    if (territory) {
+      const territoryChanged = prevTerritoryIdRef.current !== territory.id;
+      const statementChanged = prevStatementIdRef.current !== statementId;
+      const annotatorChanged = lastScrolledAnnotatorRef.current !== annotator;
 
-    // Scroll if: IDs changed OR annotator was recreated (and we haven't scrolled this annotator yet)
-    const shouldScroll =
-      territoryChanged ||
-      statementChanged ||
-      (annotatorChanged && prevTerritoryIdRef.current !== undefined);
+      // Scroll if: IDs changed OR annotator was recreated (and we haven't scrolled this annotator yet)
+      const shouldScroll =
+        territoryChanged ||
+        statementChanged ||
+        (annotatorChanged && prevTerritoryIdRef.current !== undefined);
 
-    if (annotator && selectedDocument && shouldScroll) {
-      const isStatementInDocument =
-        statementId && selectedDocument.entityIds.S?.includes(statementId);
-      const isStatementInTerritory = territory?.statements?.some(
-        (statement) => statement.id === statementId
-      );
+      if (annotator && selectedDocument && shouldScroll) {
+        const isStatementInDocument =
+          statementId && selectedDocument.entityIds.S?.includes(statementId);
+        const isStatementInTerritory = territory?.statements?.some(
+          (statement) => statement.id === statementId
+        );
 
-      const scrollToId =
-        isStatementInDocument && isStatementInTerritory
-          ? statementId
-          : territoryId;
+        const scrollToId =
+          isStatementInDocument && isStatementInTerritory
+            ? statementId
+            : territoryId;
 
-      // Perform the scroll
-      annotator.scrollToAnchor(scrollToId);
+        // Perform the scroll
+        annotator.scrollToAnchor(scrollToId);
 
-      // Update refs AFTER scroll
-      prevTerritoryIdRef.current = territoryId;
-      prevStatementIdRef.current = statementId;
-      lastScrolledAnnotatorRef.current = annotator;
+        // Update refs AFTER scroll
+        prevTerritoryIdRef.current = territory.id;
+        prevStatementIdRef.current = statementId;
+        lastScrolledAnnotatorRef.current = annotator;
+      }
     }
-  }, [selectedDocument, territoryId, statementId, annotator]);
+  }, [selectedDocument, statementId, annotator, territory]);
 
   const thisTHasAnchor = useMemo<boolean>(() => {
     if (selectedDocument) {

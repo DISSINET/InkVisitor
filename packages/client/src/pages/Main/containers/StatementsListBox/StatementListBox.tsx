@@ -140,6 +140,18 @@ export const StatementListBox: React.FC = () => {
     enabled: !!territoryId && api.isLoggedIn() && statementListOpened,
   });
 
+  // Debug logging for territory query
+  // console.log("Territory query debug:", {
+  //   territoryId,
+  //   statementListOpened,
+  //   isLoggedIn: api.isLoggedIn(),
+  //   queryEnabled: !!territoryId && api.isLoggedIn() && statementListOpened,
+  //   status,
+  //   territory,
+  //   error,
+  //   isFetchingTerritory,
+  // });
+
   const { statements, entities, right } = territory || initialData;
 
   useEffect(() => {
