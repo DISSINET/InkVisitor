@@ -58,7 +58,7 @@ import {
 } from "./StatementListHeaderStyles";
 
 interface StatementListHeader {
-  territory: IResponseTerritory;
+  territory?: IResponseTerritory;
   isFetchingTerritory: boolean;
 
   isAllSelected: boolean;
@@ -388,8 +388,8 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
     (s) => s.isAnchored && s.orderCorrection && s.orderCorrection.distance > 0
   );
 
-  const oldParentTerritory = territory.data.parent
-    ? territory.entities[territory.data.parent.territoryId]
+  const oldParentTerritory = territory?.data.parent
+    ? territory?.entities[territory.data.parent.territoryId]
     : undefined;
 
   return (
@@ -522,7 +522,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
         )}
       </StyledHeader>
 
-      {oldParentTerritory && showTActionModal && (
+      {oldParentTerritory && showTActionModal && territory && (
         <TerritoryActionModal
           territory={territory}
           oldParentTerritory={oldParentTerritory}

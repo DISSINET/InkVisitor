@@ -14,7 +14,6 @@ export const StyledContentWrapper = styled.div`
   overflow: hidden;
 `;
 export const StyledInfoWrapper = styled.div`
-  margin-top: 2rem;
   display: flex;
   flex-direction: column;
   align-items: center;

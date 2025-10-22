@@ -413,7 +413,7 @@ export const StatementEditorBox: React.FC = () => {
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                marginTop: "2rem",
+                marginTop: "6.8rem",
               }}
             >
               <StyledEditorEmptyState>
