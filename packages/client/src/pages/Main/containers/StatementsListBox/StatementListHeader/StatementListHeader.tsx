@@ -105,16 +105,6 @@ interface StatementListHeader {
     },
     unknown
   >;
-  // duplicateTerritoryMutation: UseMutationResult<
-  //   AxiosResponse<IResponseGeneric<any>, any>,
-  //   Error,
-  //   {
-  //     territoryId: string;
-  //     targets: string[];
-  //     withChildren: boolean;
-  //   },
-  //   unknown
-  // >;
   deleteStatementsMutation: UseMutationResult<
     (EntitiesDeleteSuccessResponse | EntitiesDeleteErrorResponse)[],
     Error,
@@ -149,7 +139,6 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   appendReferencesMutation,
 
   updateTerritoryMutation,
-  // duplicateTerritoryMutation,
 
   deleteStatementsMutation,
   relationsCreateMutation,
@@ -378,13 +367,12 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
             ?.concat(territoryId)
             .map((tId: string, key: number) => {
               return (
-                <React.Fragment key={key}>
-                  <BreadcrumbItem
-                    territoryId={tId}
-                    isFavorited={favoritedTerritoryIds?.includes(tId)}
-                    isSelected={tId === territoryId}
-                  />
-                </React.Fragment>
+                <BreadcrumbItem
+                  key={key}
+                  territoryId={tId}
+                  isFavorited={favoritedTerritoryIds?.includes(tId)}
+                  isSelected={tId === territoryId}
+                />
               );
             })}
       </React.Fragment>
