@@ -182,14 +182,13 @@ export const TextAnnotator = ({
   const scroller = useRef<HTMLDivElement>(null);
   const lines = useRef<HTMLCanvasElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  // Track previous width and height to detect changes
+  const prevWidthRef = useRef<number>(width);
+  const prevHeightRef = useRef<number>(height);
 
   const [annotatorMode, setAnnotatorMode] = useState<EditMode>(
     EditMode.HIGHLIGHT
   );
-
-  // Track previous width and height to detect changes
-  const prevWidthRef = useRef<number>(width);
-  const prevHeightRef = useRef<number>(height);
 
   useEffect(() => {
     if (annotator) {

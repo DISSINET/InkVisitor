@@ -10,14 +10,11 @@ export const StyledHeaderBreadcrumbRow = styled.div`
   display: inline-flex;
   align-items: center;
   justify-content: left;
+  margin-top: 0.2rem;
   height: 2.7rem;
   margin-bottom: 0.8rem;
 `;
 
-export const StyledHeaderBreadcrumbRowLeft = styled.div`
-  display: inline-flex;
-  align-items: center;
-`;
 export const StyledMoveToParent = styled(animated.div)`
   position: relative;
   font-size: ${({ theme }) => theme.fontSize["sm"]};
@@ -45,7 +42,7 @@ export const StyledSuggesterRow = styled.div`
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   padding-right: 0.5rem;
   height: 2.5rem;
-  margin-bottom: 0.8rem;
+  margin-bottom: 0.6rem;
 `;
 export const StyledActionsWrapper = styled.div`
   padding-left: 0.5rem;

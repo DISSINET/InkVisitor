@@ -103,6 +103,7 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
         <StyledDocumentTitleContainer
           style={{
             maxWidth: annotatorWidthTooNarrow ? "10rem" : "12rem",
+            minWidth: "2rem",
           }}
         >
           {selectedDocument && <DocumentTitle title={selectedDocument.title} />}

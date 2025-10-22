@@ -154,8 +154,14 @@ export const StatementListTextAnnotator: React.FC<
     ) {
       const isStatementInDocument =
         statementId && selectedDocument.entityIds.S?.includes(statementId);
+      const isStatementInTerritory = territory?.statements?.some(
+        (statement) => statement.id === statementId
+      );
 
-      const scrollToId = isStatementInDocument ? statementId : territoryId;
+      const scrollToId =
+        isStatementInDocument && isStatementInTerritory
+          ? statementId
+          : territoryId;
 
       // Perform the scroll
       annotator.scrollToAnchor(scrollToId);
