@@ -505,7 +505,6 @@ const datasets: Record<string, DbSchema> = {
       data: require("../datasets/2025-10-19/documents.json"),
       transform: function () {},
     },
-    ...materializedStatsTables,
   },
 };
 
