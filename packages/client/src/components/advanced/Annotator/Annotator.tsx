@@ -814,29 +814,27 @@ export const TextAnnotator = ({
 
   return (
     <>
-      {annotator && (
-        <StatementListSearchLine
-          showStatementList={showStatementList ?? false}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          searchOccurences={searchOccurences}
-          searchActiveOccurence={searchActiveOccurence}
-          isSearchAllowed={isSearchAllowed}
-          annotatorWidthTooNarrow={annotatorWidthTooNarrow}
-          setSearchActiveOccurence={setSearchActiveOccurence}
-          annotator={annotator}
-          documentId={documentId}
-          dataDocument={dataDocument || undefined}
-          setEntityToAnchor={setEntityToAnchor}
-          entityToAnchor={entityToAnchor}
-          currentAnchorExist={currentAnchorExist}
-          annotatorMode={annotatorMode}
-          selectedText={selectedText}
-          setSearchOccurences={setSearchOccurences}
-          isRegexMode={isRegexMode}
-          setIsRegexMode={setIsRegexMode}
-        />
-      )}
+      <StatementListSearchLine
+        showStatementList={showStatementList ?? false}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        searchOccurences={searchOccurences}
+        searchActiveOccurence={searchActiveOccurence}
+        isSearchAllowed={isSearchAllowed}
+        annotatorWidthTooNarrow={annotatorWidthTooNarrow}
+        setSearchActiveOccurence={setSearchActiveOccurence}
+        annotator={annotator}
+        documentId={documentId}
+        dataDocument={dataDocument || undefined}
+        setEntityToAnchor={setEntityToAnchor}
+        entityToAnchor={entityToAnchor}
+        currentAnchorExist={currentAnchorExist}
+        annotatorMode={annotatorMode}
+        selectedText={selectedText}
+        setSearchOccurences={setSearchOccurences}
+        isRegexMode={isRegexMode}
+        setIsRegexMode={setIsRegexMode}
+      />
 
       <div
         style={{ width: width, position: "relative" }}

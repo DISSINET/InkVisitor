@@ -414,6 +414,8 @@ export const StatementEditorBox: React.FC = () => {
                 flexDirection: "column",
                 alignItems: "center",
                 marginTop: "6.8rem",
+                padding: "2rem",
+                paddingTop: "0",
               }}
             >
               <StyledEditorEmptyState>

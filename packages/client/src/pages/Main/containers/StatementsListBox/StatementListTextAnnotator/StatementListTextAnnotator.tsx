@@ -204,29 +204,26 @@ export const StatementListTextAnnotator: React.FC<
   return (
     <>
       <animated.div style={animatedStyle}>
-        {contentWidth > 0 && (
-          <StatementListDocumentLine
-            selectedResource={selectedResource}
-            setSelectedResourceId={setSelectedResourceId}
-            selectedDocumentIsFetching={selectedDocumentIsFetching}
-            selectedDocument={selectedDocument}
-            activeTHasAnchor={activeTHasAnchor}
-            annotator={annotator}
-            territoryId={territoryId}
-            resources={resources || []}
-            showStatementList={showStatementList}
-            userCanEdit={userCanEdit}
-            annotatorWidthTooNarrow={annotatorWidthTooNarrow}
-            contentWidth={contentWidth}
-            handleHlEntitiesChange={handleHlEntitiesChange}
-            hlEntities={hlEntities}
-          />
-        )}
+        <StatementListDocumentLine
+          selectedResource={selectedResource}
+          setSelectedResourceId={setSelectedResourceId}
+          selectedDocumentIsFetching={selectedDocumentIsFetching}
+          selectedDocument={selectedDocument}
+          activeTHasAnchor={activeTHasAnchor}
+          annotator={annotator}
+          territoryId={territoryId}
+          resources={resources || []}
+          showStatementList={showStatementList}
+          userCanEdit={userCanEdit}
+          annotatorWidthTooNarrow={annotatorWidthTooNarrow}
+          contentWidth={contentWidth}
+          handleHlEntitiesChange={handleHlEntitiesChange}
+          hlEntities={hlEntities}
+        />
 
         {!selectedDocumentId && (
           <div
             style={{
-              // width: "100%",
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
