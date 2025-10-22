@@ -1026,7 +1026,7 @@ export const TextAnnotator = ({
                     handleSaveNewContent(false);
                   }}
                 />
-                <Loader show={isSaving || dataDocumentIsFetching} size={14} />
+                <Loader show={isSaving} size={14} />
               </span>
               <Button
                 label="discard"

@@ -114,6 +114,7 @@ export const StatementListTextAnnotator: React.FC<
   // Track previous values to only scroll when territoryId or statementId actually change
   const prevTerritoryIdRef = useRef<string | undefined>(undefined);
   const prevStatementIdRef = useRef<string | undefined>(undefined);
+  // Tracking Annotator changes is necessary to keep the position in the text after resizing
   const lastScrolledAnnotatorRef = useRef<Annotator | undefined>(undefined);
 
   // Initial scroll + react to url changes
