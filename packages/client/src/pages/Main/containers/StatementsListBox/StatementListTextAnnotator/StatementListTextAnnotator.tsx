@@ -104,24 +104,12 @@ export const StatementListTextAnnotator: React.FC<
   userCanEdit,
   userData,
 }) => {
-  const [showAnnotator, setShowAnnotator] = useState(false);
-
-  useEffect(() => {
-    setShowAnnotator(true);
-  }, []);
-
   const handleHlEntitiesChange = useCallback(
     (newHlEntities: EntityEnums.Class[]) => {
       setHlEntities(newHlEntities);
     },
     []
   );
-
-  const animatedStyle = useSpring({
-    opacity: showAnnotator ? 1 : 0,
-    width: "100%",
-    delay: 300,
-  });
 
   // Track previous values to only scroll when territoryId or statementId actually change
   const prevTerritoryIdRef = useRef<string | undefined>(undefined);
@@ -135,23 +123,13 @@ export const StatementListTextAnnotator: React.FC<
     const statementChanged = prevStatementIdRef.current !== statementId;
     const annotatorChanged = lastScrolledAnnotatorRef.current !== annotator;
 
-    // Check if the selectedDocument actually corresponds to the current territoryId
-    const documentMatchesTerritory =
-      selectedDocument && selectedDocument.entityIds.T.includes(territoryId);
-
     // Scroll if: IDs changed OR annotator was recreated (and we haven't scrolled this annotator yet)
     const shouldScroll =
       territoryChanged ||
       statementChanged ||
       (annotatorChanged && prevTerritoryIdRef.current !== undefined);
 
-    if (
-      annotator &&
-      selectedDocument &&
-      documentMatchesTerritory &&
-      !selectedDocumentIsFetching &&
-      shouldScroll
-    ) {
+    if (annotator && selectedDocument && shouldScroll) {
       const isStatementInDocument =
         statementId && selectedDocument.entityIds.S?.includes(statementId);
       const isStatementInTerritory = territory?.statements?.some(
@@ -171,13 +149,7 @@ export const StatementListTextAnnotator: React.FC<
       prevStatementIdRef.current = statementId;
       lastScrolledAnnotatorRef.current = annotator;
     }
-  }, [
-    selectedDocument,
-    selectedDocumentIsFetching,
-    territoryId,
-    statementId,
-    annotator,
-  ]);
+  }, [selectedDocument, territoryId, statementId, annotator]);
 
   const thisTHasAnchor = useMemo<boolean>(() => {
     if (selectedDocument) {
@@ -209,7 +181,7 @@ export const StatementListTextAnnotator: React.FC<
 
   return (
     <>
-      <animated.div style={animatedStyle}>
+      <div style={{ width: "100%" }}>
         <StatementListDocumentLine
           selectedResource={selectedResource}
           setSelectedResourceId={setSelectedResourceId}
@@ -276,7 +248,7 @@ export const StatementListTextAnnotator: React.FC<
             )}
           </AnnotatorProvider>
         </div>
-      </animated.div>
+      </div>
     </>
   );
 };

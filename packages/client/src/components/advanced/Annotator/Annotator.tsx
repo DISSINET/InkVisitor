@@ -125,15 +125,33 @@ export const TextAnnotator = ({
 
   const [territoryElvl, setTerritoryElvl] = useState<EntityEnums.Elvl>();
 
+  // Track previous values to detect when territory changes with different document
+  const prevTerritoryIdRef = useRef<string | undefined>(undefined);
+  const prevDocumentIdRef = useRef<string | undefined>(undefined);
+
   useEffect(() => {
     return forwardAnnotator(undefined);
   }, []);
 
-  // Clear annotator when territoryId changes to ensure fresh initialization
+  // Clear annotator when territory changes AND document is different from previous territory
   useEffect(() => {
-    setAnnotator(null);
-    forwardAnnotator(undefined);
-  }, [territoryId]);
+    const territoryChanged = prevTerritoryIdRef.current !== territoryId;
+    const documentChanged = prevDocumentIdRef.current !== documentId;
+
+    // Only clear annotator if territory changed AND document is different
+    if (
+      territoryChanged &&
+      documentChanged &&
+      prevTerritoryIdRef.current !== undefined
+    ) {
+      setAnnotator(null);
+      forwardAnnotator(undefined);
+    }
+
+    // Update refs
+    prevTerritoryIdRef.current = territoryId;
+    prevDocumentIdRef.current = documentId;
+  }, [territoryId, documentId]);
 
   const parentTerritoryId = territory?.data?.parent
     ? territory?.data?.parent?.territoryId
