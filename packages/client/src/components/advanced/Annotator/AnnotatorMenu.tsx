@@ -88,7 +88,15 @@ export const TextAnnotatorMenu = ({
   const activeTerritory = entities[activeTerritoryId ?? ""];
   const queryClient = useQueryClient();
   const { setStatementId } = useSearchParams();
-  useKeypress("Escape", onEscapePressed);
+  useKeypress("Escape", () => {
+    // Check if any modal is open before handling escape
+    // Use Escape key for the EntityCreateModal first
+    const isModalOpen =
+      document.querySelector('[data-attribute-modal="true"]') !== null;
+    if (!isModalOpen) {
+      onEscapePressed();
+    }
+  });
 
   const [activeTerritoryElvl, setActiveTerritoryElvl] =
     useState<EntityEnums.Elvl>(EntityEnums.Elvl.Textual);
