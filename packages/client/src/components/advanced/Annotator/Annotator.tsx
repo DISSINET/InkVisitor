@@ -737,8 +737,14 @@ export const TextAnnotator = ({
         !mainCanvas.current?.contains(event.target as Node) &&
         !statementListBoxRef?.current?.contains(event.target as Node)
       ) {
-        setSelectedText("");
-        annotator?.clearSelection();
+        // Check if click is within Modal
+        const target = event.target as Element;
+        const isWithinModal = target.closest("[data-attribute-modal]") !== null;
+
+        if (!isWithinModal) {
+          setSelectedText("");
+          annotator?.clearSelection();
+        }
       }
     };
 

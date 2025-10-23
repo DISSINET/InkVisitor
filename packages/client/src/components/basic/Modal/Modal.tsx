@@ -32,6 +32,8 @@ interface Modal {
   isLoading?: boolean;
   fullHeight?: boolean;
   lowerZIndex?: boolean;
+  // dataAttribute is used to prevent closing of the annotator highlight menu
+  // while interacting with EntityCreateModal
 }
 export const Modal: FC<Modal> = ({
   children,
@@ -56,7 +58,10 @@ export const Modal: FC<Modal> = ({
       {showModal && (
         <>
           {ReactDOM.createPortal(
-            <StyledModalWrap $lowerZIndex={lowerZIndex}>
+            <StyledModalWrap
+              $lowerZIndex={lowerZIndex}
+              data-attribute-modal="true"
+            >
               {!disableBackground && (
                 <StyledBackground
                   style={animatedMount}
