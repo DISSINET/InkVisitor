@@ -1,9 +1,13 @@
 import React, { useMemo, useState } from "react";
 
+import { Tag } from "@inkvisitor/annotator/src/lib";
+import { EntityEnums } from "@shared/enums";
 import { IDocument, IEntity, IResponseTerritory } from "@shared/types";
+import { useQueryClient } from "@tanstack/react-query";
 import { IconWithTooltip, Loader } from "components";
 import { Button } from "components/basic/Button/Button";
-import { BsSegmentedNav } from "react-icons/bs";
+import { useSearchParams } from "hooks";
+import useKeypress from "hooks/useKeyPress";
 import {
   FaBolt,
   FaClipboard,
@@ -16,6 +20,7 @@ import { toast } from "react-toastify";
 import { ButtonSize, classesAnnotator } from "types";
 import { EntitySuggester } from "../EntitySuggester/EntitySuggester";
 import { EntityTag } from "../EntityTag/EntityTag";
+import { ElvlButtonGroup } from "../IconButtonGroups/ElvlButtonGroup";
 import {
   StyledAnnotatorAnchorList,
   StyledAnnotatorAnchorListWrap,
@@ -28,12 +33,6 @@ import {
   StyledTerritorySubsectionTitle,
 } from "./AnnotatorStyles";
 import { TerritoryCreateModalType } from "./types";
-import { EntityEnums } from "@shared/enums";
-import { useQueryClient } from "@tanstack/react-query";
-import { useSearchParams } from "hooks";
-import useKeypress from "hooks/useKeyPress";
-import { ElvlButtonGroup } from "../IconButtonGroups/ElvlButtonGroup";
-import { Annotator, Tag } from "@inkvisitor/annotator/src/lib";
 
 interface TextAnnotatorMenuProps {
   text: string;

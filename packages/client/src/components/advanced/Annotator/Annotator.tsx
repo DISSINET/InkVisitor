@@ -620,7 +620,6 @@ export const TextAnnotator = ({
       refreshAnnotator();
     }
   }, [
-    documentId,
     width,
     height,
     displayLineNumbers,
@@ -1044,6 +1043,7 @@ export const TextAnnotator = ({
         )}
       </div>
 
+      {/* TODO: Load elvl from the button group in annotator menu  */}
       {territory && territoryCreateModalType && (
         <EntityCreateModal
           closeModal={() => {
