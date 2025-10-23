@@ -21,6 +21,7 @@ import {
   StyledDocumentLine,
 } from "../StatementListBoxStyles";
 import { StyledInfoText } from "../StatementListHeader/StatementListHeaderStyles";
+import { toast } from "react-toastify";
 
 interface StatementListDocumentLine {
   selectedResource: IEntity | false;
@@ -74,7 +75,11 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
               categoryTypes={[EntityEnums.Class.Resource]}
               preSuggestions={resources}
               onPicked={(entity) => {
-                setSelectedResourceId(entity.id);
+                if (resources.some((r) => r.id === entity.id)) {
+                  setSelectedResourceId(entity.id);
+                } else {
+                  toast.warning("Resource does not have a document");
+                }
               }}
               isHidden={!userCanEdit}
             />
