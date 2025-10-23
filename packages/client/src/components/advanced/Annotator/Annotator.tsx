@@ -176,6 +176,7 @@ export const TextAnnotator = ({
     },
     onSettled: () => {
       setIsSaving(false);
+      setIsSavingWithoutRefresh(false);
     },
   });
 
@@ -188,6 +189,7 @@ export const TextAnnotator = ({
     },
     onSettled: () => {
       setIsSaving(false);
+      setIsSavingWithoutRefresh(false);
     },
   });
 
@@ -310,7 +312,12 @@ export const TextAnnotator = ({
   const [territoryCreateModalType, setTerritoryCreateModalType] =
     useState<TerritoryCreateModalType>(false);
 
+  // isSaving controls refresh of the annotator
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  // isSavingWithoutRefresh is the way to preserve the saving state while not refreshing the annotator
+  // e.g. when updating an anchor elvl
+  const [isSavingWithoutRefresh, setIsSavingWithoutRefresh] =
+    useState<boolean>(false);
 
   const { refs, floatingStyles } = useFloating({
     placement: "bottom",
@@ -400,9 +407,16 @@ export const TextAnnotator = ({
   ]);
 
   // quiet does not trigger a toast notification
-  const handleSaveNewContent = (quiet: boolean) => {
+  const handleSaveNewContent = (
+    quiet: boolean,
+    skipRefresh: boolean = false
+  ) => {
     if (annotator && documentId) {
-      setIsSaving(true);
+      if (skipRefresh) {
+        setIsSavingWithoutRefresh(true);
+      } else {
+        setIsSaving(true);
+      }
 
       if (quiet) {
         updateDocumentMutationQuiet.mutate({
@@ -631,8 +645,14 @@ export const TextAnnotator = ({
   ]);
 
   const isChangeMade = useMemo<boolean>(() => {
-    return annotator?.text?.value !== dataDocument?.content;
-  }, [annotator?.text?.value, dataDocument?.content, localTextContent]);
+    if (annotatorMode === EditMode.HIGHLIGHT) {
+      // Don't track text changes in highlight mode
+      // anchors are updated instantly and elvl is being added under the hood
+      return false;
+    } else {
+      return annotator?.text?.value !== dataDocument?.content;
+    }
+  }, [annotator?.text?.value, dataDocument?.content]);
 
   const onCreateTerritory = (
     mode: TerritoryCreateModalType,
@@ -695,7 +715,7 @@ export const TextAnnotator = ({
 
   const onUpdateAnchor = (anchor: Tag, elvl: EntityEnums.Elvl) => {
     annotator?.updateAnchor(anchor, { elvl });
-    handleSaveNewContent(true);
+    handleSaveNewContent(true, true);
   };
 
   const isMenuDisplayed = useMemo<boolean>(() => {
@@ -1020,18 +1040,28 @@ export const TextAnnotator = ({
                   label="save"
                   color="primary"
                   icon={<FaRegSave />}
-                  disabled={!isChangeMade || isSaving || dataDocumentIsFetching}
+                  disabled={
+                    !isChangeMade ||
+                    isSaving ||
+                    isSavingWithoutRefresh ||
+                    dataDocumentIsFetching
+                  }
                   onClick={() => {
                     handleSaveNewContent(false);
                   }}
                 />
-                <Loader show={isSaving} size={14} />
+                <Loader show={isSaving || isSavingWithoutRefresh} size={14} />
               </span>
               <Button
                 label="discard"
                 color="warning"
                 icon={<FaTrash />}
-                disabled={!isChangeMade || isSaving || dataDocumentIsFetching}
+                disabled={
+                  !isChangeMade ||
+                  isSaving ||
+                  isSavingWithoutRefresh ||
+                  dataDocumentIsFetching
+                }
                 onClick={() => {
                   if (dataDocument?.content) {
                     annotator?.updateText(dataDocument?.content);
