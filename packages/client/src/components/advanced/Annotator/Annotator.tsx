@@ -129,7 +129,7 @@ export const TextAnnotator = ({
 
   const isChangeMade = useMemo<boolean>(() => {
     if (annotatorMode === EditMode.HIGHLIGHT) {
-      // Don't track text changes in highlight mode
+      // Don't track text changes in highlight mode where it's not relevant
       // anchors are updated instantly and elvl is being added under the hood
       return false;
     } else {
@@ -140,23 +140,27 @@ export const TextAnnotator = ({
   const [territoryElvl, setTerritoryElvl] = useState<EntityEnums.Elvl>();
 
   const resetAnnotator = () => {
-    console.log("reset annotator");
     setAnnotator(null);
     forwardAnnotator(undefined);
   };
 
   // reset annotator on unmount
   useEffect(() => {
-    return resetAnnotator();
+    return resetAnnotator;
   }, []);
 
-  // TODO: loader over the annotator
   const [annotatorIsLoading, setAnnotatorIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     setAnnotatorMode(EditMode.HIGHLIGHT);
     setAnnotatorIsLoading(true);
   }, [territoryId]);
+
+  useEffect(() => {
+    if (!dataDocumentIsFetching) {
+      setAnnotatorIsLoading(false);
+    }
+  }, [dataDocumentIsFetching]);
 
   const parentTerritoryId = territory?.data?.parent
     ? territory?.data?.parent?.territoryId
@@ -879,7 +883,7 @@ export const TextAnnotator = ({
           }
         }}
       >
-        <StyledCanvasWrapper>
+        <StyledCanvasWrapper style={{ position: "relative" }}>
           {isMenuDisplayed && (
             <FloatingPortal id="page">
               <StyledAnnotatorMenu
@@ -965,6 +969,8 @@ export const TextAnnotator = ({
               }}
             />
           </StyledScrollerViewport>
+
+          <Loader show={annotatorIsLoading} size={40} />
         </StyledCanvasWrapper>
 
         <StyledAnnotatorButtons>

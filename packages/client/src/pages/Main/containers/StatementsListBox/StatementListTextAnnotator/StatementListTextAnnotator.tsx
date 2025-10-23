@@ -55,7 +55,7 @@ interface StatementListTextAnnotator {
   annotator?: Annotator;
   setAnnotator?: React.Dispatch<React.SetStateAction<Annotator | undefined>>;
 
-  selectedDocument?: IDocument | false;
+  selectedDocument?: IDocument;
   selectedResource: IResponseEntity | false;
   resources?: IResponseEntity[];
   setSelectedResourceId: React.Dispatch<React.SetStateAction<string | false>>;
@@ -225,12 +225,12 @@ export const StatementListTextAnnotator: React.FC<
                 thisTerritoryEntityId={territoryId}
                 displayLineNumbers={true}
                 height={annotatorHeight}
-                documentId={selectedDocumentId}
+                documentId={selectedDocumentId ?? ""}
                 statementCreateMutation={statementCreateMutation}
                 storedAnnotatorScroll={storedAnnotatorScroll}
                 setStoredAnnotatorScroll={setStoredAnnotatorScroll}
                 territory={territory}
-                dataDocument={selectedDocument}
+                dataDocument={selectedDocument ?? undefined}
                 dataDocumentIsFetching={selectedDocumentIsFetching}
                 dataDocumentError={selectedDocumentError}
                 showStatementList={showStatementList}
