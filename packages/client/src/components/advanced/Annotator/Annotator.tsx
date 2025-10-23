@@ -149,18 +149,9 @@ export const TextAnnotator = ({
     return resetAnnotator;
   }, []);
 
-  const [annotatorIsLoading, setAnnotatorIsLoading] = useState<boolean>(false);
-
   useEffect(() => {
     setAnnotatorMode(EditMode.HIGHLIGHT);
-    setAnnotatorIsLoading(true);
   }, [territoryId]);
-
-  useEffect(() => {
-    if (!dataDocumentIsFetching) {
-      setAnnotatorIsLoading(false);
-    }
-  }, [dataDocumentIsFetching]);
 
   const parentTerritoryId = territory?.data?.parent
     ? territory?.data?.parent?.territoryId
@@ -970,7 +961,7 @@ export const TextAnnotator = ({
             />
           </StyledScrollerViewport>
 
-          <Loader show={annotatorIsLoading} size={40} />
+          <Loader show={dataDocumentIsFetching} size={40} />
         </StyledCanvasWrapper>
 
         <StyledAnnotatorButtons>

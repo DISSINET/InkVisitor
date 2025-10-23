@@ -1,5 +1,4 @@
 import { Annotator } from "@inkvisitor/annotator/src/lib";
-import { animated, useSpring } from "@react-spring/web";
 import { EntityEnums } from "@shared/enums";
 import {
   IDocument,
@@ -13,21 +12,15 @@ import { UseMutationResult } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import TextAnnotator from "components/advanced/Annotator/Annotator";
 import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import { BsInfoCircle } from "react-icons/bs";
 import {
   ANNOTATOR_SELECTOR_HEIGHT,
   ANNOTATOR_TOO_SMALL_BREAKPOINT,
   COLLAPSED_TABLE_WIDTH,
 } from "Theme/constants";
-import StatementListDocumentLine from "../StatementListDocumentLine/StatementListDocumentLine";
 import { StyledEmptyState } from "../StatementListBoxStyles";
-import { BsInfoCircle } from "react-icons/bs";
+import StatementListDocumentLine from "../StatementListDocumentLine/StatementListDocumentLine";
 
 interface StatementListTextAnnotator {
   // it's faster than the territory entity so it's better to pass territoryId separately
