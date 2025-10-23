@@ -232,6 +232,7 @@ export const StatementListBox: React.FC = () => {
       useAnnotatorSetAnnotator(annotator);
     }
   }, [annotator, useAnnotatorSetAnnotator]);
+
   const {
     data: resources,
     error: resourcesError,

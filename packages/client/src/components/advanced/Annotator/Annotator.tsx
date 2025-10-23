@@ -121,37 +121,42 @@ export const TextAnnotator = ({
 
   const { annotator, setAnnotator } = useAnnotator();
 
+  const [annotatorMode, setAnnotatorMode] = useState<EditMode>(
+    EditMode.HIGHLIGHT
+  );
+
   const [localTextContent, setLocalTextContent] = useState<string>("");
+
+  const isChangeMade = useMemo<boolean>(() => {
+    if (annotatorMode === EditMode.HIGHLIGHT) {
+      // Don't track text changes in highlight mode
+      // anchors are updated instantly and elvl is being added under the hood
+      return false;
+    } else {
+      return localTextContent !== dataDocument?.content;
+    }
+  }, [localTextContent, dataDocument?.content]);
 
   const [territoryElvl, setTerritoryElvl] = useState<EntityEnums.Elvl>();
 
-  // Track previous values to detect when territory changes with different document
-  const prevTerritoryIdRef = useRef<string | undefined>(undefined);
-  const prevDocumentIdRef = useRef<string | undefined>(undefined);
+  const resetAnnotator = () => {
+    console.log("reset annotator");
+    setAnnotator(null);
+    forwardAnnotator(undefined);
+  };
 
+  // reset annotator on unmount
   useEffect(() => {
-    return forwardAnnotator(undefined);
+    return resetAnnotator();
   }, []);
 
-  // Clear annotator when territory changes AND document is different from previous territory
+  // TODO: loader over the annotator
+  const [annotatorIsLoading, setAnnotatorIsLoading] = useState<boolean>(false);
+
   useEffect(() => {
-    const territoryChanged = prevTerritoryIdRef.current !== territoryId;
-    const documentChanged = prevDocumentIdRef.current !== documentId;
-
-    // Only clear annotator if territory changed AND document is different
-    if (
-      territoryChanged &&
-      documentChanged &&
-      prevTerritoryIdRef.current !== undefined
-    ) {
-      setAnnotator(null);
-      forwardAnnotator(undefined);
-    }
-
-    // Update refs
-    prevTerritoryIdRef.current = territoryId;
-    prevDocumentIdRef.current = documentId;
-  }, [territoryId, documentId]);
+    setAnnotatorMode(EditMode.HIGHLIGHT);
+    setAnnotatorIsLoading(true);
+  }, [territoryId]);
 
   const parentTerritoryId = territory?.data?.parent
     ? territory?.data?.parent?.territoryId
@@ -206,16 +211,13 @@ export const TextAnnotator = ({
   const prevWidthRef = useRef<number>(width);
   const prevHeightRef = useRef<number>(height);
 
-  const [annotatorMode, setAnnotatorMode] = useState<EditMode>(
-    EditMode.HIGHLIGHT
-  );
-
   useEffect(() => {
     if (annotator) {
       annotator.setMode(annotatorMode);
       setSearchOccurences(null);
       setSearchActiveOccurence(0);
       setSearchTerm("");
+      annotator.draw();
     }
   }, [annotatorMode]);
 
@@ -644,16 +646,6 @@ export const TextAnnotator = ({
     isSaving,
   ]);
 
-  const isChangeMade = useMemo<boolean>(() => {
-    if (annotatorMode === EditMode.HIGHLIGHT) {
-      // Don't track text changes in highlight mode
-      // anchors are updated instantly and elvl is being added under the hood
-      return false;
-    } else {
-      return annotator?.text?.value !== dataDocument?.content;
-    }
-  }, [annotator?.text?.value, dataDocument?.content]);
-
   const onCreateTerritory = (
     mode: TerritoryCreateModalType,
     elvl: EntityEnums.Elvl
@@ -975,93 +967,70 @@ export const TextAnnotator = ({
           </StyledScrollerViewport>
         </StyledCanvasWrapper>
 
-        {annotator && (
-          <StyledAnnotatorButtons>
-            <ButtonGroup $marginTop>
-              <Button
-                key={EditMode.HIGHLIGHT}
-                icon={
-                  <StyledDisplayModeButtonIconWrapper
-                    $annotatorWidthTooNarrow={annotatorWidthTooNarrow}
-                  >
-                    <FaPen size={11} />
-                  </StyledDisplayModeButtonIconWrapper>
-                }
-                label={!annotatorWidthTooNarrow ? EditMode.HIGHLIGHT : ""}
-                color="success"
-                inverted={annotatorMode !== EditMode.HIGHLIGHT}
-                onClick={() => {
-                  annotator.setMode(EditMode.HIGHLIGHT);
-                  setAnnotatorMode(EditMode.HIGHLIGHT);
-                  annotator.draw();
-                }}
-                tooltipLabel="highlight (activate syntax highlighting mode)"
-                tooltipPosition="top"
-              />
-              <Button
-                key={EditMode.SEMI}
-                icon={
-                  <StyledDisplayModeButtonIconWrapper
-                    $annotatorWidthTooNarrow={annotatorWidthTooNarrow}
-                  >
-                    <BsFileTextFill size={11} />
-                  </StyledDisplayModeButtonIconWrapper>
-                }
-                color="success"
-                label={!annotatorWidthTooNarrow ? "text edit" : ""}
-                inverted={annotatorMode !== EditMode.SEMI}
-                onClick={() => {
-                  annotator.setMode(EditMode.SEMI);
-                  setAnnotatorMode(EditMode.SEMI);
-                  annotator.draw();
-                }}
-                tooltipLabel="text edit (activate semi mode)"
-                tooltipPosition="top"
-              />
-              <Button
-                key={EditMode.RAW}
-                icon={
-                  <StyledDisplayModeButtonIconWrapper
-                    $annotatorWidthTooNarrow={annotatorWidthTooNarrow}
-                  >
-                    <HiCodeBracket size={11} />
-                  </StyledDisplayModeButtonIconWrapper>
-                }
-                color="success"
-                label={!annotatorWidthTooNarrow ? "XML" : ""}
-                inverted={annotatorMode !== EditMode.RAW}
-                onClick={() => {
-                  annotator.setMode(EditMode.RAW);
-                  setAnnotatorMode(EditMode.RAW);
-                  annotator.draw();
-                }}
-                tooltipLabel="XML (activate edit mode)"
-                tooltipPosition="top"
-              />
-            </ButtonGroup>
+        <StyledAnnotatorButtons>
+          <ButtonGroup $marginTop>
+            <Button
+              key={EditMode.HIGHLIGHT}
+              icon={
+                <StyledDisplayModeButtonIconWrapper
+                  $annotatorWidthTooNarrow={annotatorWidthTooNarrow}
+                >
+                  <FaPen size={11} />
+                </StyledDisplayModeButtonIconWrapper>
+              }
+              label={!annotatorWidthTooNarrow ? EditMode.HIGHLIGHT : ""}
+              color="success"
+              inverted={annotatorMode !== EditMode.HIGHLIGHT}
+              onClick={() => {
+                setAnnotatorMode(EditMode.HIGHLIGHT);
+              }}
+              tooltipLabel="highlight (activate syntax highlighting mode)"
+              tooltipPosition="top"
+            />
+            <Button
+              key={EditMode.SEMI}
+              icon={
+                <StyledDisplayModeButtonIconWrapper
+                  $annotatorWidthTooNarrow={annotatorWidthTooNarrow}
+                >
+                  <BsFileTextFill size={11} />
+                </StyledDisplayModeButtonIconWrapper>
+              }
+              color="success"
+              label={!annotatorWidthTooNarrow ? "text edit" : ""}
+              inverted={annotatorMode !== EditMode.SEMI}
+              onClick={() => {
+                setAnnotatorMode(EditMode.SEMI);
+              }}
+              tooltipLabel="text edit (activate semi mode)"
+              tooltipPosition="top"
+            />
+            <Button
+              key={EditMode.RAW}
+              icon={
+                <StyledDisplayModeButtonIconWrapper
+                  $annotatorWidthTooNarrow={annotatorWidthTooNarrow}
+                >
+                  <HiCodeBracket size={11} />
+                </StyledDisplayModeButtonIconWrapper>
+              }
+              color="success"
+              label={!annotatorWidthTooNarrow ? "XML" : ""}
+              inverted={annotatorMode !== EditMode.RAW}
+              onClick={() => {
+                setAnnotatorMode(EditMode.RAW);
+              }}
+              tooltipLabel="XML (activate edit mode)"
+              tooltipPosition="top"
+            />
+          </ButtonGroup>
 
-            <ButtonGroup $marginTop style={{ marginLeft: "0.5rem" }}>
-              <span style={{ display: "flex", position: "relative" }}>
-                <Button
-                  label="save"
-                  color="primary"
-                  icon={<FaRegSave />}
-                  disabled={
-                    !isChangeMade ||
-                    isSaving ||
-                    isSavingWithoutRefresh ||
-                    dataDocumentIsFetching
-                  }
-                  onClick={() => {
-                    handleSaveNewContent(false);
-                  }}
-                />
-                <Loader show={isSaving || isSavingWithoutRefresh} size={14} />
-              </span>
+          <ButtonGroup $marginTop style={{ marginLeft: "0.5rem" }}>
+            <span style={{ display: "flex", position: "relative" }}>
               <Button
-                label="discard"
-                color="warning"
-                icon={<FaTrash />}
+                label="save"
+                color="primary"
+                icon={<FaRegSave />}
                 disabled={
                   !isChangeMade ||
                   isSaving ||
@@ -1069,14 +1038,29 @@ export const TextAnnotator = ({
                   dataDocumentIsFetching
                 }
                 onClick={() => {
-                  if (dataDocument?.content) {
-                    annotator?.updateText(dataDocument?.content);
-                  }
+                  handleSaveNewContent(false);
                 }}
               />
-            </ButtonGroup>
-          </StyledAnnotatorButtons>
-        )}
+              <Loader show={isSaving || isSavingWithoutRefresh} size={14} />
+            </span>
+            <Button
+              label="discard"
+              color="warning"
+              icon={<FaTrash />}
+              disabled={
+                !isChangeMade ||
+                isSaving ||
+                isSavingWithoutRefresh ||
+                dataDocumentIsFetching
+              }
+              onClick={() => {
+                if (dataDocument?.content) {
+                  annotator?.updateText(dataDocument?.content);
+                }
+              }}
+            />
+          </ButtonGroup>
+        </StyledAnnotatorButtons>
       </div>
 
       {/* TODO: Load elvl from the button group in annotator menu  */}

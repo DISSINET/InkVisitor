@@ -127,10 +127,7 @@ export const StatementListTextAnnotator: React.FC<
 
       // Scroll if: IDs changed OR annotator was recreated (and we haven't scrolled this annotator yet)
       const shouldScroll =
-        territoryChanged ||
-        statementChanged ||
-        (annotatorChanged && prevTerritoryIdRef.current !== undefined);
-
+        territoryChanged || statementChanged || annotatorChanged;
       if (annotator && selectedDocument && shouldScroll) {
         const isStatementInDocument =
           statementId && selectedDocument.entityIds.S?.includes(statementId);
@@ -153,13 +150,6 @@ export const StatementListTextAnnotator: React.FC<
       }
     }
   }, [selectedDocument, statementId, annotator, territory]);
-
-  const thisTHasAnchor = useMemo<boolean>(() => {
-    if (selectedDocument) {
-      return selectedDocument?.entityIds.T.includes(territoryId);
-    }
-    return false;
-  }, [selectedDocument, territoryId]);
 
   const activeTHasAnchor = useMemo<boolean>(() => {
     if (selectedDocument) {
