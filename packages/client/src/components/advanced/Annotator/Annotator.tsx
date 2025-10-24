@@ -205,9 +205,6 @@ export const TextAnnotator = ({
   const scroller = useRef<HTMLDivElement>(null);
   const lines = useRef<HTMLCanvasElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
-  // Track previous width and height to detect changes
-  const prevWidthRef = useRef<number>(width);
-  const prevHeightRef = useRef<number>(height);
 
   useEffect(() => {
     if (annotator) {
@@ -518,6 +515,10 @@ export const TextAnnotator = ({
     }
   };
 
+  // useEffect(() => {
+  //   console.log("storedAnnotatorScroll", storedAnnotatorScroll);
+  // }, [storedAnnotatorScroll]);
+
   const refreshAnnotator = () => {
     if (!mainCanvas.current) {
       return;
@@ -527,22 +528,12 @@ export const TextAnnotator = ({
     const currentContent = annotator?.text?.value;
     const newContent = dataDocument?.content ?? "no text";
 
-    // Check if width or height has changed
-    const widthChanged = prevWidthRef.current !== width;
-    const heightChanged = prevHeightRef.current !== height;
-    if (widthChanged) {
-      prevWidthRef.current = width;
-    }
-    if (heightChanged) {
-      prevHeightRef.current = height;
-    }
-
     // If content hasn't changed, dimensions haven't changed, and we have an existing annotator, just redraw it
     if (
       annotator &&
-      currentContent === newContent &&
-      !widthChanged &&
-      !heightChanged
+      currentContent === newContent
+      // && !widthChanged &&
+      // !heightChanged
     ) {
       // Update theme colors for existing annotator
       annotator.fontColor = theme.color.black;
@@ -622,9 +613,9 @@ export const TextAnnotator = ({
     setAnnotator(newAnnotator);
     forwardAnnotator(newAnnotator);
 
-    newAnnotator.onScroll(() => {
-      setStoredAnnotatorScroll(newAnnotator.viewport.lineStart);
-    });
+    // newAnnotator.onScroll(() => {
+    //   setStoredAnnotatorScroll(newAnnotator.viewport.lineStart);
+    // });
 
     newAnnotator.setMode(originalMode);
   };
@@ -634,8 +625,6 @@ export const TextAnnotator = ({
       refreshAnnotator();
     }
   }, [
-    width,
-    height,
     displayLineNumbers,
     theme,
     hlEntities ?? [],
@@ -643,6 +632,24 @@ export const TextAnnotator = ({
     dataDocument,
     isSaving,
   ]);
+
+  // Track previous width and height to detect changes
+  // const prevWidthRef = useRef<number>(width);
+  // const prevHeightRef = useRef<number>(height);
+
+  // useEffect(() => {
+  //   const widthChanged = prevWidthRef.current !== width;
+  //   const heightChanged = prevHeightRef.current !== height;
+  //   if (widthChanged || heightChanged) {
+  //     prevWidthRef.current = width;
+  //     prevHeightRef.current = height;
+  //     setTimeout(() => {
+  //       console.log("scroll to line", storedAnnotatorScroll);
+  //       annotator?.scrollToLine(storedAnnotatorScroll ?? 0);
+  //       annotator?.draw();
+  //     }, 500);
+  //   }
+  // }, [width, height]);
 
   const onCreateTerritory = (
     mode: TerritoryCreateModalType,

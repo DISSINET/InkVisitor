@@ -71,7 +71,6 @@ const DocumentModalEdit: React.FC<DocumentModalEdit> = ({
               height={windowHeight - 203}
               displayLineNumbers={true}
               hlEntities={[EntityEnums.Class.Territory]}
-              storedAnnotatorScroll={0}
               forwardAnnotator={(newAnnotator) => {
                 anchor?.entityId &&
                   newAnnotator?.scrollToAnchor(

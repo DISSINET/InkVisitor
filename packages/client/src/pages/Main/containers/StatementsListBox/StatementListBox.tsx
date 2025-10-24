@@ -195,20 +195,20 @@ export const StatementListBox: React.FC = () => {
   const [storedAnnotatorResourceId, setStoredAnnotatorResourceId] = useState<
     string | false
   >(false);
-  const [storedAnnotatorScroll, setStoredAnnotatorScroll] = useState<number>(0);
+  // const [storedAnnotatorScroll, setStoredAnnotatorScroll] = useState<number>(0);
 
   // so the annotator jumps to the anchor
   useEffect(() => {
     setStoredAnnotatorResourceId(false);
-    setStoredAnnotatorScroll(0);
+    // setStoredAnnotatorScroll(0);
   }, [territoryId]);
 
   // its needed as the scroll event is executed even when the annotator is not active
-  useEffect(() => {
-    if (!storedAnnotatorResourceId) {
-      setStoredAnnotatorScroll(0);
-    }
-  }, [storedAnnotatorResourceId]);
+  // useEffect(() => {
+  // if (!storedAnnotatorResourceId) {
+  // setStoredAnnotatorScroll(0);
+  // }
+  // }, [storedAnnotatorResourceId]);
 
   // delay of show content for fluent animation on open
   const [showStatementList, setShowStatementList] = useState(true);
@@ -983,12 +983,12 @@ export const StatementListBox: React.FC = () => {
                   territoryId={territoryId}
                   territory={territory}
                   statementId={statementId}
-                  storedAnnotatorScroll={storedAnnotatorScroll}
-                  setStoredAnnotatorScroll={(newScroll) => {
-                    if (storedAnnotatorResourceId) {
-                      setStoredAnnotatorScroll(newScroll);
-                    }
-                  }}
+                  // storedAnnotatorScroll={storedAnnotatorScroll}
+                  // setStoredAnnotatorScroll={(newScroll) => {
+                  //   if (storedAnnotatorResourceId) {
+                  //     setStoredAnnotatorScroll(newScroll);
+                  //   }
+                  // }}
                   hlEntities={hlEntities}
                   setHlEntities={setHlEntities}
                   addStatementAtCertainIndex={addStatementAtCertainIndex}

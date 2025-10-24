@@ -83,7 +83,8 @@ export const StyledDocumentLine = styled.div<StyledDocumentSearchLine>`
   align-items: center;
   justify-content: space-between;
   height: 3rem;
-  padding: 0.2rem 0.5rem;
+  padding: 0rem 0.5rem;
+  margin-bottom: 0.2rem;
   padding-right: 0.5rem;
   overflow: hidden;
   white-space: nowrap;

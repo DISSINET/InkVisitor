@@ -36,8 +36,8 @@ interface StatementListTextAnnotator {
   >;
   statementListBoxRef?: React.RefObject<HTMLDivElement | null>;
 
-  storedAnnotatorScroll: number;
-  setStoredAnnotatorScroll?: React.Dispatch<React.SetStateAction<number>>;
+  // storedAnnotatorScroll: number;
+  // setStoredAnnotatorScroll?: React.Dispatch<React.SetStateAction<number>>;
 
   hlEntities: EntityEnums.Class[];
   setHlEntities: React.Dispatch<React.SetStateAction<EntityEnums.Class[]>>;
@@ -73,8 +73,8 @@ export const StatementListTextAnnotator: React.FC<
   statementCreateMutation,
   statementListBoxRef,
 
-  storedAnnotatorScroll,
-  setStoredAnnotatorScroll = () => {},
+  // storedAnnotatorScroll,
+  // setStoredAnnotatorScroll = () => {},
 
   hlEntities,
   setHlEntities,
@@ -205,35 +205,33 @@ export const StatementListTextAnnotator: React.FC<
         )}
 
         {/* Annotator */}
-        <div style={{ marginTop: "0.2rem" }}>
-          <AnnotatorProvider>
-            {selectedDocumentId && selectedDocument && (
-              <TextAnnotator
-                width={annotatorWidth}
-                annotatorWidthTooNarrow={annotatorWidthTooNarrow}
-                hlEntities={hlEntities}
-                forwardAnnotator={(newAnnotator) => {
-                  setAnnotator(newAnnotator);
-                }}
-                thisTerritoryEntityId={territoryId}
-                displayLineNumbers={true}
-                height={annotatorHeight}
-                documentId={selectedDocumentId || undefined}
-                statementCreateMutation={statementCreateMutation}
-                storedAnnotatorScroll={storedAnnotatorScroll}
-                setStoredAnnotatorScroll={setStoredAnnotatorScroll}
-                territory={territory}
-                dataDocument={selectedDocument ?? undefined}
-                dataDocumentIsFetching={selectedDocumentIsFetching}
-                dataDocumentError={selectedDocumentError}
-                showStatementList={showStatementList}
-                userData={userData}
-                statementListBoxRef={statementListBoxRef}
-                territoryId={territoryId}
-              />
-            )}
-          </AnnotatorProvider>
-        </div>
+        <AnnotatorProvider>
+          {selectedDocumentId && selectedDocument && (
+            <TextAnnotator
+              width={annotatorWidth}
+              annotatorWidthTooNarrow={annotatorWidthTooNarrow}
+              hlEntities={hlEntities}
+              forwardAnnotator={(newAnnotator) => {
+                setAnnotator(newAnnotator);
+              }}
+              thisTerritoryEntityId={territoryId}
+              displayLineNumbers={true}
+              height={annotatorHeight}
+              documentId={selectedDocumentId || undefined}
+              statementCreateMutation={statementCreateMutation}
+              // storedAnnotatorScroll={storedAnnotatorScroll}
+              // setStoredAnnotatorScroll={setStoredAnnotatorScroll}
+              territory={territory}
+              dataDocument={selectedDocument ?? undefined}
+              dataDocumentIsFetching={selectedDocumentIsFetching}
+              dataDocumentError={selectedDocumentError}
+              showStatementList={showStatementList}
+              userData={userData}
+              statementListBoxRef={statementListBoxRef}
+              territoryId={territoryId}
+            />
+          )}
+        </AnnotatorProvider>
       </div>
     </>
   );
