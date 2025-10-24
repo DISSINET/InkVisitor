@@ -61,7 +61,7 @@ interface TextAnnotatorProps {
   height: number;
   displayLineNumbers: boolean;
   hlEntities?: EntityEnums.Class[];
-  documentId: string;
+  documentId?: string;
   thisTerritoryEntityId?: string;
 
   forwardAnnotator?: (annotator?: Annotator) => void;
@@ -96,7 +96,7 @@ export const TextAnnotator = ({
   height = 500,
   displayLineNumbers = true,
   hlEntities = Object.values(EntityEnums.Class),
-  documentId,
+  documentId = undefined,
   thisTerritoryEntityId = undefined,
 
   storedAnnotatorScroll = 0,
@@ -160,8 +160,11 @@ export const TextAnnotator = ({
   const { data: dataParentTerritory } = useQuery({
     queryKey: ["territory", parentTerritoryId as string],
     queryFn: async () => {
-      const res = await api.entityGet(parentTerritoryId as string);
-      return res.data;
+      if (parentTerritoryId) {
+        const res = await api.entityGet(parentTerritoryId);
+        return res.data ?? undefined;
+      }
+      return undefined;
     },
     enabled: !!parentTerritoryId,
   });
@@ -744,14 +747,6 @@ export const TextAnnotator = ({
     };
   }, [isMenuDisplayed, annotator, statementListBoxRef]);
 
-  if (dataDocumentError) {
-    return (
-      <StyledInfoText>
-        Error loading document: {dataDocumentError.message}
-      </StyledInfoText>
-    );
-  }
-
   const hasParentT = territory?.data?.parent !== undefined;
 
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -840,6 +835,14 @@ export const TextAnnotator = ({
   const isSearchAllowed = useMemo<boolean>(() => {
     return annotator !== undefined && !!dataDocument;
   }, [annotator, dataDocument]);
+
+  if (dataDocumentError) {
+    return (
+      <StyledInfoText>
+        Error loading document: {dataDocumentError.message}
+      </StyledInfoText>
+    );
+  }
 
   return (
     <>

@@ -122,6 +122,7 @@ export const StyledCardBody = styled.section<StyledCardBody>`
 `;
 interface StyledFooter {
   $column?: boolean;
+  $spaceBetween?: boolean;
 }
 export const StyledFooter = styled.div<StyledFooter>`
   border-top-style: solid;
@@ -131,7 +132,8 @@ export const StyledFooter = styled.div<StyledFooter>`
 
   display: flex;
   flex-shrink: 0;
-  justify-content: flex-end;
+  justify-content: ${({ $spaceBetween }) =>
+    $spaceBetween ? "space-between" : "flex-end"};
   flex-direction: ${({ $column }) => ($column ? "column" : "row")};
   padding: ${({ theme }) => theme.space[4]};
 `;

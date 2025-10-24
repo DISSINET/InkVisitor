@@ -1,4 +1,10 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import { EntityEnums } from "@shared/enums";
 import { IDocument } from "@shared/types";
@@ -17,7 +23,7 @@ import {
   FaRegSave,
   FaRegSquare,
 } from "react-icons/fa";
-import { MdLibraryAddCheck } from "react-icons/md";
+import { MdLibraryAddCheck, MdOutlineLibraryAddCheck } from "react-icons/md";
 import { EntityColors } from "types";
 import { getShortLabelByLetterCount } from "utils/utils";
 import {
@@ -78,6 +84,36 @@ const DocumentModalExport: React.FC<DocumentModalExportProps> = ({
     }, 0);
   }, [exportedClasses]);
 
+  const SelectAllComponent = useCallback(() => {
+    return (
+      <React.Fragment>
+        <>
+          {!allClassesSelected ? (
+            <MdLibraryAddCheck
+              onClick={() => {
+                handleSelectAll();
+              }}
+            />
+          ) : (
+            <MdOutlineLibraryAddCheck
+              onClick={() => {
+                handleUnselectAll();
+              }}
+            />
+          )}
+        </>
+        <StyledExportDocumentClassLabel
+          $selected={false}
+          onClick={() => {
+            !allClassesSelected ? handleSelectAll() : handleUnselectAll();
+          }}
+        >
+          {!allClassesSelected ? "Select all" : "Deselect all"}
+        </StyledExportDocumentClassLabel>
+      </React.Fragment>
+    );
+  }, [allClassesSelected]);
+
   return (
     <Modal width={500} showModal={show} onClose={onClose}>
       <ModalHeader
@@ -87,11 +123,12 @@ const DocumentModalExport: React.FC<DocumentModalExportProps> = ({
             : "no label"
         }"`}
       />
-      <ModalContent>
+      <ModalContent enableScroll>
         <div>
           {document && (
             <div>
               <StyledExportDocumentContainer>
+                <SelectAllComponent /> <span></span>
                 {/* <StyledExportDocumentContainerTH key={"1"}>
                 Entity type
               </StyledExportDocumentContainerTH>
@@ -101,7 +138,6 @@ const DocumentModalExport: React.FC<DocumentModalExportProps> = ({
               <StyledExportDocumentContainerTH key={"3"}>
                 Document Anchors
               </StyledExportDocumentContainerTH> */}
-
                 {Object.values(EntityEnums.Class).map((entityClassId) => {
                   const classItem = EntityColors[entityClassId];
                   const classLabel = classItem?.label || entityClassId;
@@ -150,38 +186,18 @@ const DocumentModalExport: React.FC<DocumentModalExportProps> = ({
                     </React.Fragment>
                   );
                 })}
-
-                <React.Fragment>
-                  <MdLibraryAddCheck
-                    onClick={() => {
-                      !allClassesSelected
-                        ? handleSelectAll()
-                        : handleUnselectAll();
-                    }}
-                  />
-                  <StyledExportDocumentClassLabel
-                    $selected={false}
-                    onClick={() => {
-                      !allClassesSelected
-                        ? handleSelectAll()
-                        : handleUnselectAll();
-                    }}
-                  >
-                    {!allClassesSelected ? "Select all" : "Deselect all"}
-                  </StyledExportDocumentClassLabel>
-                </React.Fragment>
-
+                <SelectAllComponent />
                 <span></span>
               </StyledExportDocumentContainer>
             </div>
           )}
-          <StyledExportStatsSection>
-            <b>{sumAnchorsToExport}</b> anchors will be exported
-          </StyledExportStatsSection>
           {!document && <div>Document not found</div>}
         </div>
       </ModalContent>
-      <ModalFooter>
+      <ModalFooter spaceBetween>
+        <StyledExportStatsSection>
+          <b>{sumAnchorsToExport}</b> anchors will be exported
+        </StyledExportStatsSection>
         <ButtonGroup>
           <Button
             key="cancel"

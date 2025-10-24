@@ -130,17 +130,6 @@ export const TextAnnotatorMenu = ({
         </StyledAnnotatorItemTitle>
         <StyledAnnotatorItemContent>
           <StyledAnnotatorItemContentLine>
-            {/* <Button
-              icon={<BsSegmentedNav size={13} />}
-              size={ButtonSize.Small}
-              color="primary"
-              onClick={() => {
-                console.log("Segment selection into Statements");
-              }}
-              label={"Segment"}
-              tooltipLabel="Segment selection into Statements"
-              disabled
-            /> */}
             <Button
               icon={<FaClipboard size={10} />}
               size={ButtonSize.Small}
@@ -309,7 +298,7 @@ export const TextAnnotatorMenu = ({
               <IconWithTooltip
                 color="warning"
                 icon={<FaExclamationTriangle size={13} />}
-                tooltipLabel="Selection contains anchor/s which do not have epistemic level selected."
+                tooltipLabel="Selection contains anchors which do not have epistemic level selected."
               />
             )}
           </div>

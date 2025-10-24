@@ -78,7 +78,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
   setSearchActiveOccurence,
   showStatementList,
   annotator,
-  documentId,
+  documentId = undefined,
   dataDocument,
 
   currentAnchorExist,

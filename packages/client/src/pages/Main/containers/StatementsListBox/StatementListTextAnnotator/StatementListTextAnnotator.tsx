@@ -54,7 +54,7 @@ interface StatementListTextAnnotator {
   setSelectedResourceId: React.Dispatch<React.SetStateAction<string | false>>;
 
   // useQuery for selectedDocument
-  selectedDocumentId: string | undefined;
+  selectedDocumentId?: string;
   selectedDocumentIsFetching: boolean;
   selectedDocumentError: Error | null;
 
@@ -218,7 +218,7 @@ export const StatementListTextAnnotator: React.FC<
                 thisTerritoryEntityId={territoryId}
                 displayLineNumbers={true}
                 height={annotatorHeight}
-                documentId={selectedDocumentId ?? ""}
+                documentId={selectedDocumentId || undefined}
                 statementCreateMutation={statementCreateMutation}
                 storedAnnotatorScroll={storedAnnotatorScroll}
                 setStoredAnnotatorScroll={setStoredAnnotatorScroll}
