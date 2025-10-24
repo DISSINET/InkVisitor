@@ -97,12 +97,26 @@ export const StatementListTextAnnotator: React.FC<
   userCanEdit,
   userData,
 }) => {
-  const handleHlEntitiesChange = useCallback(
-    (newHlEntities: EntityEnums.Class[]) => {
-      setHlEntities(newHlEntities);
-    },
-    []
-  );
+  const annotatorHeight = useMemo<number>(() => {
+    return contentHeight - 70 - ANNOTATOR_SELECTOR_HEIGHT;
+  }, [contentHeight]);
+
+  const annotatorWidth = useMemo<number>(() => {
+    return showStatementList
+      ? contentWidth - COLLAPSED_TABLE_WIDTH
+      : contentWidth;
+  }, [contentWidth, showStatementList]);
+
+  const annotatorWidthTooNarrow = useMemo<boolean>(() => {
+    return annotatorWidth < ANNOTATOR_TOO_SMALL_BREAKPOINT;
+  }, [annotatorWidth]);
+
+  const activeTHasAnchor = useMemo<boolean>(() => {
+    if (selectedDocument) {
+      return selectedDocument?.entityIds.T.includes(territoryId);
+    }
+    return false;
+  }, [selectedDocument, territoryId]);
 
   // Track previous values to only scroll when territoryId or statementId actually change
   const prevTerritoryIdRef = useRef<string | undefined>(undefined);
@@ -144,27 +158,6 @@ export const StatementListTextAnnotator: React.FC<
     }
   }, [selectedDocument, statementId, annotator, territory]);
 
-  const activeTHasAnchor = useMemo<boolean>(() => {
-    if (selectedDocument) {
-      return selectedDocument?.entityIds.T.includes(territoryId);
-    }
-    return false;
-  }, [selectedDocument, territoryId]);
-
-  const annotatorHeight = useMemo<number>(() => {
-    return contentHeight - 70 - ANNOTATOR_SELECTOR_HEIGHT;
-  }, [contentHeight]);
-
-  const annotatorWidth = useMemo<number>(() => {
-    return showStatementList
-      ? contentWidth - COLLAPSED_TABLE_WIDTH
-      : contentWidth;
-  }, [contentWidth, showStatementList]);
-
-  const annotatorWidthTooNarrow = useMemo<boolean>(() => {
-    return annotatorWidth < ANNOTATOR_TOO_SMALL_BREAKPOINT;
-  }, [annotatorWidth]);
-
   return (
     <>
       <div style={{ width: "100%" }}>
@@ -181,7 +174,7 @@ export const StatementListTextAnnotator: React.FC<
           userCanEdit={userCanEdit}
           annotatorWidthTooNarrow={annotatorWidthTooNarrow}
           contentWidth={contentWidth}
-          handleHlEntitiesChange={handleHlEntitiesChange}
+          setHlEntities={setHlEntities}
           hlEntities={hlEntities}
         />
 

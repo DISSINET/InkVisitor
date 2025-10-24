@@ -7,7 +7,7 @@ import Dropdown, {
   EntitySuggester,
   EntityTag,
 } from "components/advanced";
-import React from "react";
+import React, { useCallback } from "react";
 import { FaHighlighter, FaLongArrowAltRight } from "react-icons/fa";
 import { GrDocumentMissing } from "react-icons/gr";
 import { TbAnchor, TbAnchorOff } from "react-icons/tb";
@@ -39,8 +39,8 @@ interface StatementListDocumentLine {
 
   // highlight
   contentWidth: number;
-  handleHlEntitiesChange: (entities: EntityEnums.Class[]) => void;
   hlEntities: EntityEnums.Class[];
+  setHlEntities: React.Dispatch<React.SetStateAction<EntityEnums.Class[]>>;
 }
 
 const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
@@ -57,8 +57,9 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
   annotatorWidthTooNarrow,
 
   contentWidth,
-  handleHlEntitiesChange,
+
   hlEntities,
+  setHlEntities,
 }) => {
   return (
     <StyledDocumentLine $marginLeft={showStatementList}>
@@ -170,7 +171,7 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
                 isClearable={true}
                 disableAny={true}
                 closeMenuOnSelect={false}
-                onChange={handleHlEntitiesChange}
+                onChange={setHlEntities}
                 value={hlEntities}
                 noOptionsMessage="No entity classes to highlight"
                 width={
