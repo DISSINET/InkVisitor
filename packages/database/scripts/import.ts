@@ -460,52 +460,6 @@ const datasets: Record<string, DbSchema> = {
       transform: function () {},
     },
   },
-
-  "2025-10-19": {
-    settings: {
-      tableName: "settings",
-      data: require("../datasets/2025-10-19/settings.json"),
-      transform: function () {},
-    },
-    users: {
-      tableName: "users",
-      data: require("../datasets/2025-10-19/users.json"),
-      transform: function () {
-        this.data = this.data.map((user: IUser) => {
-          user.password = hashPassword(user.password ? user.password : "");
-          return user;
-        });
-      },
-    },
-    aclPermissions: {
-      tableName: "acl_permissions",
-      data: require("../datasets/2025-10-19/acl_permissions.json"),
-      transform: function () {},
-    },
-    entities: {
-      tableName: "entities",
-      data: require("../datasets/2025-10-19/entities.json"),
-      transform: function () {},
-      indexes: entitiesIndexes,
-    },
-    audits: {
-      tableName: "audits",
-      data: require("../datasets/2025-10-19/audits.json"),
-      transform: function () {},
-      indexes: auditsIndexes,
-    },
-    relations: {
-      tableName: "relations",
-      data: require("../datasets/2025-10-19/relations.json"),
-      transform: function () {},
-      indexes: relationsIndexes,
-    },
-    documents: {
-      tableName: "documents",
-      data: require("../datasets/2025-10-19/documents.json"),
-      transform: function () {},
-    },
-  },
 };
 
 enum MODES {
