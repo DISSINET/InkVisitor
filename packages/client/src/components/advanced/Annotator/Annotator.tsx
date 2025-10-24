@@ -633,7 +633,6 @@ export const TextAnnotator = ({
       setTimeout(() => {
         mainCanvas.current?.focus();
         annotator?.draw();
-        console.log("focus");
       }, 200);
     }
   }, [width, height]);
