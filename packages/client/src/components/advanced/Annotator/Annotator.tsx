@@ -66,8 +66,8 @@ interface TextAnnotatorProps {
 
   forwardAnnotator?: (annotator?: Annotator) => void;
 
-  storedAnnotatorScroll?: number;
-  setStoredAnnotatorScroll?: React.Dispatch<React.SetStateAction<number>>;
+  // storedAnnotatorScroll?: number;
+  // setStoredAnnotatorScroll?: React.Dispatch<React.SetStateAction<number>>;
 
   territory?: IResponseTerritory;
   // territoryId is from URL params and is used to reset the annotator when the territory changes
@@ -99,9 +99,9 @@ export const TextAnnotator = ({
   documentId = undefined,
   thisTerritoryEntityId = undefined,
 
-  storedAnnotatorScroll = 0,
   forwardAnnotator = (undefined) => {},
-  setStoredAnnotatorScroll = () => {},
+  // storedAnnotatorScroll = 0,
+  // setStoredAnnotatorScroll = () => {},
 
   territory,
   territoryId,
@@ -124,7 +124,6 @@ export const TextAnnotator = ({
   const [annotatorMode, setAnnotatorMode] = useState<EditMode>(
     EditMode.HIGHLIGHT
   );
-
   const [localTextContent, setLocalTextContent] = useState<string>("");
 
   const isChangeMade = useMemo<boolean>(() => {
@@ -316,6 +315,7 @@ export const TextAnnotator = ({
   const [isSavingWithoutRefresh, setIsSavingWithoutRefresh] =
     useState<boolean>(false);
 
+  // floating highlight menu
   const { refs, floatingStyles } = useFloating({
     placement: "bottom",
     whileElementsMounted: autoUpdate,
@@ -338,6 +338,7 @@ export const TextAnnotator = ({
     ],
   });
 
+  // calculate highlight menu position
   useEffect(() => {
     if (annotator?.cursor?.selectStart && annotator?.cursor?.selectEnd) {
       const canvas = mainCanvas.current;
@@ -515,10 +516,6 @@ export const TextAnnotator = ({
     }
   };
 
-  // useEffect(() => {
-  //   console.log("storedAnnotatorScroll", storedAnnotatorScroll);
-  // }, [storedAnnotatorScroll]);
-
   const refreshAnnotator = () => {
     if (!mainCanvas.current) {
       return;
@@ -529,12 +526,7 @@ export const TextAnnotator = ({
     const newContent = dataDocument?.content ?? "no text";
 
     // If content hasn't changed, dimensions haven't changed, and we have an existing annotator, just redraw it
-    if (
-      annotator &&
-      currentContent === newContent
-      // && !widthChanged &&
-      // !heightChanged
-    ) {
+    if (annotator && currentContent === newContent) {
       // Update theme colors for existing annotator
       annotator.fontColor = theme.color.black;
       annotator.bgColor = "transparent";
@@ -633,23 +625,18 @@ export const TextAnnotator = ({
     isSaving,
   ]);
 
-  // Track previous width and height to detect changes
-  // const prevWidthRef = useRef<number>(width);
-  // const prevHeightRef = useRef<number>(height);
-
-  // useEffect(() => {
-  //   const widthChanged = prevWidthRef.current !== width;
-  //   const heightChanged = prevHeightRef.current !== height;
-  //   if (widthChanged || heightChanged) {
-  //     prevWidthRef.current = width;
-  //     prevHeightRef.current = height;
-  //     setTimeout(() => {
-  //       console.log("scroll to line", storedAnnotatorScroll);
-  //       annotator?.scrollToLine(storedAnnotatorScroll ?? 0);
-  //       annotator?.draw();
-  //     }, 500);
-  //   }
-  // }, [width, height]);
+  // FIXME: Resizing the css width or height of the canvas puts the scroll position to 0
+  // Workaround to keep the scroll position after resize
+  useEffect(() => {
+    if (annotator && mainCanvas.current) {
+      // Focus the canvas to ensure position updates correctly after resize
+      setTimeout(() => {
+        mainCanvas.current?.focus();
+        annotator?.draw();
+        console.log("focus");
+      }, 200);
+    }
+  }, [width, height]);
 
   const onCreateTerritory = (
     mode: TerritoryCreateModalType,
@@ -1070,7 +1057,6 @@ export const TextAnnotator = ({
         </StyledAnnotatorButtons>
       </div>
 
-      {/* TODO: Load elvl from the button group in annotator menu  */}
       {territory && territoryCreateModalType && (
         <EntityCreateModal
           closeModal={() => {
