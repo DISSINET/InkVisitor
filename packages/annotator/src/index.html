@@ -78,7 +78,7 @@
       </fieldset>
       <fieldset>
         <label>toggle highlight</label>
-        <input type="checkbox" checked id="highlightToggle" />
+        <input type="checkbox" id="highlightToggle" />
       </fieldset>
       <fieldset>
         <label>add anchor </label>
@@ -150,7 +150,7 @@
       const searchInput = document.getElementById("search");
       const searchTriggerInput = document.getElementById("search-trigger");
 
-      let highlightEnabled = true;
+      let highlightEnabled = false;
       const annotator = new Annotator(
         document.getElementById("canvas"),
         exampleTxt,
@@ -218,6 +218,7 @@
 
       document.getElementById("highlightToggle").onclick = (e) => {
         highlightEnabled = e.target.checked;
+        annotator.draw();
       };
 
       document.getElementById("mode").onchange = (e) => {
