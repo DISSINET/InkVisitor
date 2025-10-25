@@ -632,6 +632,7 @@ export const TextAnnotator = ({
       // Focus the canvas to ensure position updates correctly after resize
       setTimeout(() => {
         mainCanvas.current?.focus();
+        annotator?.resize();
         annotator?.draw();
       }, 200);
     }

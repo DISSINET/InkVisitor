@@ -123,10 +123,6 @@ export class Annotator {
 
     this.lineHeight = 15 * this.ratio;
 
-    // observe canvas element for resize
-    const resizeObserver = new ResizeObserver(this.onCanvasResize.bind(this));
-    resizeObserver.observe(this.element);
-
     this.ctx = ctx;
     this.width =
       Number(this.element.style.width.replace("px", "")) * this.ratio;
@@ -169,6 +165,10 @@ export class Annotator {
     this.previousRenderViewportLineStart = 0;
 
     this.draw();
+
+    setTimeout(() => {
+      this.resize();
+    });
   }
 
   setSelectStyle(
@@ -271,7 +271,7 @@ export class Annotator {
     }
   }
 
-  onCanvasResize(entries: ResizeObserverEntry[]) {
+  onCanvasResize() {
     this.width =
       Number(this.element.style.width.replace("px", "")) * this.ratio;
     this.height =
@@ -306,6 +306,10 @@ export class Annotator {
     );
 
     this.draw();
+  }
+
+  resize(): void {
+    this.onCanvasResize();
   }
 
   onHighlight(cb: (entityId: string) => HighlightSchema | void): void {

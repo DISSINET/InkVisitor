@@ -132,6 +132,10 @@
         <input type="text" id="replaceText" placeholder="Text to replace selection" />
         <button id="replaceTextBtn">Replace</button>
       </fieldset>
+      <fieldset>
+        <label>resize</label>
+        <button id="resizeBtn">Resize Annotator</button>
+      </fieldset>
     </div>
 
     <p>Text from textfile.txt:</p>
@@ -375,6 +379,10 @@
         if (replaceText) {
           annotator.onReplaceText(replaceText);
         }
+      };
+
+      document.getElementById("resizeBtn").onclick = () => {
+        annotator.resize();
       };
 
       let searchOccurrence = 0;
