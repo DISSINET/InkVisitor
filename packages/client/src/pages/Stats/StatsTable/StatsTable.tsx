@@ -3,67 +3,22 @@ import { useQuery } from "@tanstack/react-query";
 import api from "api";
 import { useMemo } from "react";
 import { Column, useTable } from "react-table";
-import styled from "styled-components";
-import { getDataCategories, transformDataForTable } from "./utils";
-import { OTHERS_KEY, TABLE_PADDING } from "./constants";
+import { TABLE_PADDING } from "../constants";
+import { getDataCategories, transformDataForTable } from "../utils";
+import {
+  StyledTable,
+  StyledTableContainer,
+  StyledTd,
+  StyledTh,
+} from "./StatsTableStyles";
 
 interface StatsTableProps {
   data: IResponseStats;
   height: number;
   width: number;
   request: IRequestStats;
+  isLoading: boolean;
 }
-
-const TableContainer = styled.div<{ $height: number; $width: number }>`
-  width: ${(props) => props.$width}px;
-  height: ${(props) => props.$height}px;
-  overflow: auto;
-  border: 1px solid ${(props) => props.theme.color.gray[200]};
-  border-radius: ${(props) => props.theme.borderRadius.md};
-`;
-
-const Table = styled.table<{ $width: number }>`
-  border-collapse: collapse;
-  width: ${(props) => props.$width}px;
-  table-layout: fixed;
-`;
-
-const Th = styled.th<{ $isSticky?: boolean }>`
-  background: ${(props) => props.theme.color.gray[100]};
-  padding: ${(props) => props.theme.space[2]};
-  text-align: left;
-  font-weight: ${(props) => props.theme.fontWeight.bold};
-  border-bottom: 2px solid ${(props) => props.theme.color.gray[200]};
-  white-space: nowrap;
-  font-size: 14px;
-  width: 150px;
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  ${(props) =>
-    props.$isSticky &&
-    `
-    left: 0;
-    z-index: 2;
-    `}
-`;
-
-const Td = styled.td<{ $isSticky?: boolean }>`
-  padding: ${(props) => props.theme.space[2]};
-  border-bottom: 1px solid ${(props) => props.theme.color.gray[200]};
-  width: 100px;
-  font-size: 13px;
-
-  ${(props) =>
-    props.$isSticky &&
-    `
-    position: sticky;
-    left: 0;
-    background: ${props.theme.color.gray[100]};
-    z-index: 1;
-    font-weight: ${props.theme.fontWeight.bold};
-    `}
-`;
 
 interface TableRow {
   timeKey: string;
@@ -134,8 +89,8 @@ export const StatsTable = ({
     });
 
   return (
-    <TableContainer $height={height} $width={width}>
-      <Table {...getTableProps()} $width={width - TABLE_PADDING}>
+    <StyledTableContainer $height={height} $width={width}>
+      <StyledTable {...getTableProps()} $width={width - TABLE_PADDING}>
         <thead>
           {headerGroups.map((headerGroup) => {
             const { key, ...restHeaderGroupProps } =
@@ -145,9 +100,13 @@ export const StatsTable = ({
                 {headerGroup.headers.map((column, index) => {
                   const { key, ...restHeaderProps } = column.getHeaderProps();
                   return (
-                    <Th key={key} {...restHeaderProps} $isSticky={index === 0}>
+                    <StyledTh
+                      key={key}
+                      {...restHeaderProps}
+                      $isSticky={index === 0}
+                    >
                       {column.render("Header")}
-                    </Th>
+                    </StyledTh>
                   );
                 })}
               </tr>
@@ -163,16 +122,20 @@ export const StatsTable = ({
                 {row.cells.map((cell, index) => {
                   const { key, ...restCellProps } = cell.getCellProps();
                   return (
-                    <Td key={key} {...restCellProps} $isSticky={index === 0}>
+                    <StyledTd
+                      key={key}
+                      {...restCellProps}
+                      $isSticky={index === 0}
+                    >
                       {cell.render("Cell")}
-                    </Td>
+                    </StyledTd>
                   );
                 })}
               </tr>
             );
           })}
         </tbody>
-      </Table>
-    </TableContainer>
+      </StyledTable>
+    </StyledTableContainer>
   );
 };

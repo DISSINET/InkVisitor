@@ -28,7 +28,7 @@ export const initialState: StatsStore = {
   timeUnit: TimeUnit.YEAR,
   aggregate: Aggregation.USER,
   eventType: [EventType.EDIT, EventType.DELETE, EventType.CREATE],
-  useMaterialized: true, // Default to materialized for better performance
+  useMaterialized: false, // Default to materialized for better performance
   showAggregateOptions: false, // Hidden by default
 };
 

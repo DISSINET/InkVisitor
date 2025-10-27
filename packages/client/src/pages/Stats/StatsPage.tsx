@@ -9,8 +9,8 @@ import { useEffect, useMemo, useReducer, useState } from "react";
 import styled from "styled-components";
 import { space1 } from "Theme/theme-space-shortcut";
 import { USER_THRESHOLD_MAX } from "./constants";
-import { StatsChart } from "./StatsChart";
-import { StatsTable } from "./StatsTable";
+import { StatsChart } from "./StatsChart/StatsChart";
+import { StatsTable } from "./StatsTable/StatsTable";
 import { initialState, statsReducer } from "./store";
 import { applyUserThreshold } from "./utils";
 import { useAppSelector } from "redux/hooks";
@@ -80,7 +80,7 @@ const EndpointStatus = styled.div<{ $isMaterialized: boolean }>`
   border-radius: 4px;
   font-size: ${({ theme }) => theme.fontSize.xs};
   font-weight: ${({ theme }) => theme.fontWeight.bold};
-  background-color: ${({ theme, $isMaterialized }) => 
+  background-color: ${({ theme, $isMaterialized }) =>
     $isMaterialized ? theme.color.success : theme.color.warning};
   color: ${({ theme }) => theme.color.white};
 `;
@@ -121,7 +121,7 @@ export const StatsPage = () => {
   const triggerAggregation = async () => {
     setIsAggregating(true);
     setAggregateMessage("");
-    
+
     try {
       const response = await api.statsAggregate({
         fromDate: new Date(state.timeFrom).getTime(),
@@ -129,14 +129,15 @@ export const StatsPage = () => {
         timeUnits: [state.timeUnit],
         aggregateBy: [state.aggregate],
       });
-      
+
       setAggregateMessage(response.data.message);
-      
+
       // Invalidate stats queries to refresh data
       client.invalidateQueries({ queryKey: ["stats"] });
-      
     } catch (error) {
-      setAggregateMessage(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setAggregateMessage(
+        `Error: ${error instanceof Error ? error.message : "Unknown error"}`
+      );
     } finally {
       setIsAggregating(false);
     }
@@ -173,7 +174,7 @@ export const StatsPage = () => {
   } = useQuery({
     queryKey: ["stats", statsRequest, state.useMaterialized],
     queryFn: async () => {
-      const response = state.useMaterialized 
+      const response = state.useMaterialized
         ? await api.statsMaterializedGet(statsRequest)
         : await api.statsGet(statsRequest);
       return response.data;
@@ -196,7 +197,6 @@ export const StatsPage = () => {
     return dataStats;
   }, [dataStats, usersIgnoreBelowValue, state.aggregate]);
 
-  const isLoading = isLoadingStats;
   const isError = isErrorStats && !isLoadingStats;
 
   const isNoData = !isLoadingStats && !isErrorStats && !dataStats;
@@ -204,11 +204,29 @@ export const StatsPage = () => {
 
   return (
     <Container>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
         <Heading>Statistics</Heading>
-        <EndpointStatus $isMaterialized={state.useMaterialized}>
-          {state.useMaterialized ? "⚡ Materialized" : "🔄 Live Data"}
-        </EndpointStatus>
+
+        <ButtonGroup>
+          <span>
+            <EndpointStatus $isMaterialized={state.useMaterialized}>
+              {state.useMaterialized ? "⚡ Materialized" : "🔄 Live Data"}
+            </EndpointStatus>
+          </span>
+
+          <Button
+            color="success"
+            label="Refresh"
+            disabled={isLoadingStats}
+            onClick={updateToCurrentTime}
+          />
+        </ButtonGroup>
       </div>
 
       <FieldGroup>
@@ -325,10 +343,13 @@ export const StatsPage = () => {
                 payload: value,
               })
             }
-            label={state.useMaterialized ? "Fast (Materialized)" : "Classic (Live)"}
-            tooltipLabel={state.useMaterialized 
-              ? "Using pre-aggregated materialized data for faster performance" 
-              : "Using live data from audit table (slower but always up-to-date)"
+            label={
+              state.useMaterialized ? "Fast (Materialized)" : "Classic (Live)"
+            }
+            tooltipLabel={
+              state.useMaterialized
+                ? "Using pre-aggregated materialized data for faster performance"
+                : "Using live data from audit table (slower but always up-to-date)"
             }
           />
         </Field>
@@ -346,56 +367,74 @@ export const StatsPage = () => {
             tooltipLabel="Show options for manually triggering data aggregation"
           />
         </Field>
-        <div>
-          <Button
-            color="success"
-            label="Refresh"
-            disabled={isLoading}
-            onClick={updateToCurrentTime}
-          />
-        </div>
       </FieldGroup>
 
       {state.showAggregateOptions && (
-        <div style={{ 
-          padding: '20px', 
-          backgroundColor: '#f8f9fa', 
-          borderRadius: '8px', 
-          border: '1px solid #dee2e6',
-          marginBottom: '20px'
-        }}>
-          <h3 style={{ margin: '0 0 15px 0', color: '#495057' }}>Manual Data Aggregation</h3>
-          <p style={{ margin: '0 0 15px 0', color: '#6c757d', fontSize: '14px' }}>
-            Manually trigger aggregation of stats data for the current date range and settings. 
-            This will populate the materialized tables with pre-calculated data for faster queries.
+        <div
+          style={{
+            padding: "20px",
+            backgroundColor: "#f8f9fa",
+            borderRadius: "8px",
+            border: "1px solid #dee2e6",
+            marginBottom: "20px",
+          }}
+        >
+          <h3 style={{ margin: "0 0 15px 0", color: "#495057" }}>
+            Manual Data Aggregation
+          </h3>
+          <p
+            style={{ margin: "0 0 15px 0", color: "#6c757d", fontSize: "14px" }}
+          >
+            Manually trigger aggregation of stats data for the current date
+            range and settings. This will populate the materialized tables with
+            pre-calculated data for faster queries.
           </p>
-          
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px' }}>
+
+          <div
+            style={{
+              display: "flex",
+              gap: "10px",
+              alignItems: "center",
+              marginBottom: "10px",
+            }}
+          >
             <Button
               color="primary"
               label={isAggregating ? "Aggregating..." : "Aggregate Data"}
-              disabled={isAggregating || isLoading}
+              disabled={isAggregating || isLoadingStats}
               onClick={triggerAggregation}
             />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-              <span style={{ fontSize: '12px', color: '#6c757d' }}>
-                Range: {new Date(state.timeFrom).toLocaleDateString()} - {new Date(state.timeTo).toLocaleDateString()}
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "2px" }}
+            >
+              <span style={{ fontSize: "12px", color: "#6c757d" }}>
+                Range: {new Date(state.timeFrom).toLocaleDateString()} -{" "}
+                {new Date(state.timeTo).toLocaleDateString()}
               </span>
-              <span style={{ fontSize: '12px', color: '#6c757d' }}>
-                Settings: {state.timeUnit} | {state.aggregate} | {state.eventType.join(', ')}
+              <span style={{ fontSize: "12px", color: "#6c757d" }}>
+                Settings: {state.timeUnit} | {state.aggregate} |{" "}
+                {state.eventType.join(", ")}
               </span>
             </div>
           </div>
-          
+
           {aggregateMessage && (
-            <div style={{ 
-              padding: '10px', 
-              backgroundColor: aggregateMessage.includes('Error') ? '#f8d7da' : '#d1edff',
-              border: `1px solid ${aggregateMessage.includes('Error') ? '#f5c6cb' : '#b8daff'}`,
-              borderRadius: '4px',
-              fontSize: '14px',
-              color: aggregateMessage.includes('Error') ? '#721c24' : '#004085'
-            }}>
+            <div
+              style={{
+                padding: "10px",
+                backgroundColor: aggregateMessage.includes("Error")
+                  ? "#f8d7da"
+                  : "#d1edff",
+                border: `1px solid ${
+                  aggregateMessage.includes("Error") ? "#f5c6cb" : "#b8daff"
+                }`,
+                borderRadius: "4px",
+                fontSize: "14px",
+                color: aggregateMessage.includes("Error")
+                  ? "#721c24"
+                  : "#004085",
+              }}
+            >
               {aggregateMessage}
             </div>
           )}
@@ -404,28 +443,30 @@ export const StatsPage = () => {
 
       <ResponseSection>
         {isError && <StyledQueryState>Error</StyledQueryState>}
-        {isLoading && (
+        {isLoadingStats && (
           <StyledQueryState>
             <Loader show />
           </StyledQueryState>
         )}
         {isNoData && <StyledQueryState>No data</StyledQueryState>}
-        {dataStats && (
+        {data && (
           <>
             <ResultsChart>
               <StatsChart
-                data={data as unknown as IResponseStats}
+                data={data}
                 height={contentHeight / 3}
                 width={layoutWidth - 50}
                 request={statsRequest}
+                isLoading={isLoadingStats}
               />
             </ResultsChart>
             <ResultsTable>
               <StatsTable
-                data={data as unknown as IResponseStats}
+                data={data}
                 height={contentHeight / 3}
                 width={layoutWidth - 50}
                 request={statsRequest}
+                isLoading={isLoadingStats}
               />
             </ResultsTable>
           </>

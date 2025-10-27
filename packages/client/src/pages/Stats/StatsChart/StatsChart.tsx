@@ -16,19 +16,30 @@ import {
 
 import api from "api";
 import theme from "Theme/theme";
-import { OTHERS_KEY } from "./constants";
+import { OTHERS_KEY } from "../constants";
 import {
   ChartDataPoint,
   getCategoryMap,
   getDataCategories,
   transformDataForChart,
-} from "./utils";
+} from "../utils";
+import {
+  StyledCustomTooltip,
+  StyledLabel,
+  StyledLegendColorBox,
+  StyledLegendItem,
+  StyledLegendText,
+  StyledLegendWrapper,
+  StyledPayload,
+  StyledPayloadItem,
+} from "./StatsChartStyles";
 
 interface StatsChartProps {
   data: IResponseStats;
   height: number;
   width: number;
   request: IRequestStats;
+  isLoading: boolean;
 }
 
 export const StatsChart = ({
@@ -36,6 +47,7 @@ export const StatsChart = ({
   height,
   width,
   request,
+  isLoading,
 }: StatsChartProps) => {
   const values = data.values;
   const [hoveringDataKey, setHoveringDataKey] = useState<string | null>(null);
@@ -131,42 +143,9 @@ export const StatsChart = ({
       return null;
     }
     return (
-      <div
-        className="custom-tooltip"
-        style={{
-          visibility: "visible",
-          display: "flex",
-          flexDirection: "column",
-          gap: theme.space[2],
-          backgroundColor: theme.color.gray[100],
-          padding: theme.space[4],
-          borderRadius: theme.space[2],
-          width: "100%",
-          opacity: 0.85,
-        }}
-      >
-        {/* label */}
-        <div
-          style={{
-            fontSize: theme.fontSize.sm,
-            color: theme.color.gray[100],
-            width: "fit-content",
-            backgroundColor: theme.color.gray[600],
-            padding: theme.space[1] + " " + theme.space[2],
-            borderRadius: theme.space[2],
-          }}
-        >
-          {label}
-        </div>
-        {/* payload */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: theme.space[1],
-            paddingLeft: theme.space[1],
-          }}
-        >
+      <StyledCustomTooltip>
+        <StyledLabel>{label}</StyledLabel>
+        <StyledPayload>
           {dataCategories.map((category, index) => {
             const payloadItem = payload?.[0]?.payload?.[index];
             const payloadValue = payloadItem?.value;
@@ -177,15 +156,7 @@ export const StatsChart = ({
             }
 
             return (
-              <div
-                key={index}
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: theme.space[1],
-                }}
-              >
+              <StyledPayloadItem key={index}>
                 <span
                   style={{
                     backgroundColor: categoryColors[category],
@@ -209,11 +180,11 @@ export const StatsChart = ({
                 >
                   {payloadValue}
                 </span>
-              </div>
+              </StyledPayloadItem>
             );
           })}
-        </div>
-      </div>
+        </StyledPayload>
+      </StyledCustomTooltip>
     );
   };
 
@@ -234,31 +205,14 @@ export const StatsChart = ({
       <Tooltip wrapperStyle={{ zIndex: 200 }} content={TooltipEl} />
       <Legend
         content={() => (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              gap: theme.space[1],
-              flexWrap: "wrap",
-              zIndex: 2,
-            }}
-          >
+          <StyledLegendWrapper>
             {dataCategories.map((category) => {
               const isActive = hoveringDataKey === category;
               const color = getColor(category);
 
               return (
-                <div
+                <StyledLegendItem
                   key={category}
-                  style={{
-                    flexShrink: 0,
-                    display: "flex",
-                    flexDirection: "row",
-                    alignItems: "center",
-                    cursor: "pointer",
-                    padding: `${theme.space[0]} ${theme.space[5]}`,
-                    gap: theme.space[2],
-                  }}
                   onMouseEnter={() => {
                     if (!isActive) {
                       handleMouseEnter({ dataKey: category, value: category });
@@ -270,25 +224,12 @@ export const StatsChart = ({
                     }
                   }}
                 >
-                  <div
-                    style={{
-                      backgroundColor: color,
-                      width: theme.space[6],
-                      height: theme.space[6],
-                    }}
-                  />
-                  <span
-                    style={{
-                      fontSize: theme.fontSize.base,
-                      color: color,
-                    }}
-                  >
-                    {category}
-                  </span>
-                </div>
+                  <StyledLegendColorBox $color={color} />
+                  <StyledLegendText $color={color}>{category}</StyledLegendText>
+                </StyledLegendItem>
               );
             })}
-          </div>
+          </StyledLegendWrapper>
         )}
         wrapperStyle={{ paddingTop: 20, paddingBottom: 10 }}
       />
