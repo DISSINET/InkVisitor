@@ -121,26 +121,26 @@ export const StatsPage = () => {
     },
   });
 
-  const data = useMemo<IResponseStats | undefined>(() => {
-    if (!dataStats) {
-      return undefined;
-    }
+  const [data, setData] = useState<IResponseStats | undefined>(undefined);
 
-    if (state.aggregate === Aggregation.USER && dataStats.values) {
-      const values = applyUserThreshold(
-        dataStats.values,
-        usersIgnoreBelowValue
-      );
-      return { ...dataStats, values };
+  useEffect(() => {
+    if (dataStats) {
+      if (state.aggregate === Aggregation.USER && dataStats.values) {
+        const values = applyUserThreshold(
+          dataStats.values,
+          usersIgnoreBelowValue
+        );
+        setData({ ...dataStats, values });
+      } else {
+        setData(dataStats);
+      }
+    } else if (!isLoadingStats) {
+      setData(undefined);
     }
-
-    return dataStats;
-  }, [dataStats, usersIgnoreBelowValue, state.aggregate]);
+  }, [dataStats, usersIgnoreBelowValue, state.aggregate, isLoadingStats]);
 
   const isError = isErrorStats && !isLoadingStats;
-
-  const isNoData = !isLoadingStats && !isErrorStats && !dataStats;
-  const isReady = !isLoadingStats && !isErrorStats && dataStats;
+  const isNoData = !isLoadingStats && !isErrorStats && !data;
 
   return (
     <StyledContainer>
