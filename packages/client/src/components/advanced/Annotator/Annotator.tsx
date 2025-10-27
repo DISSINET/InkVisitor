@@ -605,6 +605,7 @@ export const TextAnnotator = ({
     setAnnotator(newAnnotator);
     forwardAnnotator(newAnnotator);
 
+    // Probably not necessary, this is sending many updates to component on scroll
     // newAnnotator.onScroll(() => {
     //   setStoredAnnotatorScroll(newAnnotator.viewport.lineStart);
     // });
@@ -625,16 +626,10 @@ export const TextAnnotator = ({
     isSaving,
   ]);
 
-  // FIXME: Resizing the css width or height of the canvas puts the scroll position to 0
-  // Workaround to keep the scroll position after resize
+  // Resize the annotator when the width or height changes
   useEffect(() => {
     if (annotator && mainCanvas.current) {
-      // Focus the canvas to ensure position updates correctly after resize
-      setTimeout(() => {
-        mainCanvas.current?.focus();
-        annotator?.resize();
-        annotator?.draw();
-      }, 200);
+      annotator?.resize();
     }
   }, [width, height]);
 
