@@ -3,87 +3,27 @@ import api from "api";
 
 import { IRequestStats, IResponseStats } from "@shared/types";
 import { Aggregation, EventType, TimeUnit } from "@shared/types/stats";
-import { Button, ButtonGroup, Input, Loader, Checkbox } from "components";
-import { useWindowSize } from "hooks";
+import { Button, ButtonGroup, Checkbox, Input, Loader } from "components";
 import { useEffect, useMemo, useReducer, useState } from "react";
-import styled from "styled-components";
-import { space1 } from "Theme/theme-space-shortcut";
+import { useAppSelector } from "redux/hooks";
 import { USER_THRESHOLD_MAX } from "./constants";
 import { StatsChart } from "./StatsChart/StatsChart";
 import { StatsTable } from "./StatsTable/StatsTable";
 import { initialState, statsReducer } from "./store";
 import { applyUserThreshold } from "./utils";
-import { useAppSelector } from "redux/hooks";
-
-const Container = styled.div`
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  width: 100%;
-`;
-
-const Heading = styled.h1`
-  color: ${({ theme }) => theme.color["primary"]};
-`;
-
-const FieldGroup = styled.div`
-  display: grid;
-  width: 100%;
-  padding-bottom: 10px;
-  grid-template-columns: repeat(6, auto);
-  gap: ${(props) => props.theme.space[5]};
-  align-items: end;
-`;
-
-const Field = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-`;
-
-const FieldLabel = styled.div`
-  text-align: right;
-  justify-content: flex-end;
-  margin-right: ${space1};
-  vertical-align: top;
-  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
-  display: flex;
-  align-items: flex-end;
-  font-size: ${({ theme }) => theme.fontSize["sm"]};
-  color: ${({ theme }) => theme.color["primary"]};
-`;
-
-const ResultsChart = styled.div`
-  width: 100%;
-`;
-
-const ResultsTable = styled.div`
-  color: ${({ theme }) => theme.color["primary"]};
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: ${(props) => props.theme.space[5]};
-`;
-
-const ResponseSection = styled.div``;
-
-const StyledQueryState = styled.div`
-  color: ${({ theme }) => theme.color.primary};
-  font-size: ${({ theme }) => theme.fontSize.sm};
-`;
-
-const EndpointStatus = styled.div<{ $isMaterialized: boolean }>`
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-size: ${({ theme }) => theme.fontSize.xs};
-  font-weight: ${({ theme }) => theme.fontWeight.bold};
-  background-color: ${({ theme, $isMaterialized }) =>
-    $isMaterialized ? theme.color.success : theme.color.warning};
-  color: ${({ theme }) => theme.color.white};
-`;
+import {
+  StyledContainer,
+  StyledEndpointStatus,
+  StyledField,
+  StyledFieldGroup,
+  StyledFieldLabel,
+  StyledHeader,
+  StyledHeading,
+  StyledResponseSection,
+  StyledResultsChart,
+  StyledResultsTable,
+  StyledStyledQueryState,
+} from "./StatsPageStyles";
 
 export const StatsPage = () => {
   const client = useQueryClient();
@@ -203,21 +143,15 @@ export const StatsPage = () => {
   const isReady = !isLoadingStats && !isErrorStats && dataStats;
 
   return (
-    <Container>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <Heading>Statistics</Heading>
+    <StyledContainer>
+      <StyledHeader>
+        <StyledHeading>Statistics</StyledHeading>
 
         <ButtonGroup>
           <span>
-            <EndpointStatus $isMaterialized={state.useMaterialized}>
+            <StyledEndpointStatus $isMaterialized={state.useMaterialized}>
               {state.useMaterialized ? "⚡ Materialized" : "🔄 Live Data"}
-            </EndpointStatus>
+            </StyledEndpointStatus>
           </span>
 
           <Button
@@ -227,11 +161,11 @@ export const StatsPage = () => {
             onClick={updateToCurrentTime}
           />
         </ButtonGroup>
-      </div>
+      </StyledHeader>
 
-      <FieldGroup>
-        <Field>
-          <FieldLabel>From date</FieldLabel>
+      <StyledFieldGroup>
+        <StyledField>
+          <StyledFieldLabel>From date</StyledFieldLabel>
           <Input
             type="datetime-local"
             value={state.timeFrom.slice(0, 16)}
@@ -242,9 +176,9 @@ export const StatsPage = () => {
               })
             }
           />
-        </Field>
-        <Field>
-          <FieldLabel>To date</FieldLabel>
+        </StyledField>
+        <StyledField>
+          <StyledFieldLabel>To date</StyledFieldLabel>
           <Input
             type="datetime-local"
             value={state.timeTo.slice(0, 16)}
@@ -255,10 +189,10 @@ export const StatsPage = () => {
               })
             }
           />
-        </Field>
+        </StyledField>
 
-        <Field>
-          <FieldLabel>Time Unit</FieldLabel>
+        <StyledField>
+          <StyledFieldLabel>Time Unit</StyledFieldLabel>
           <ButtonGroup $marginTop $noMarginRight>
             {Object.values(TimeUnit).map((unit) => (
               <Button
@@ -275,10 +209,10 @@ export const StatsPage = () => {
               />
             ))}
           </ButtonGroup>
-        </Field>
+        </StyledField>
 
-        <Field>
-          <FieldLabel>Event type</FieldLabel>
+        <StyledField>
+          <StyledFieldLabel>Event type</StyledFieldLabel>
           <ButtonGroup $marginTop $noMarginRight>
             {Object.values(EventType).map((eventType) => (
               <Button
@@ -295,10 +229,10 @@ export const StatsPage = () => {
               />
             ))}
           </ButtonGroup>
-        </Field>
+        </StyledField>
 
-        <Field>
-          <FieldLabel>Aggregate By</FieldLabel>
+        <StyledField>
+          <StyledFieldLabel>Aggregate By</StyledFieldLabel>
           <ButtonGroup $marginTop $noMarginRight>
             {Object.values(Aggregation).map((agg) => (
               <Button
@@ -312,10 +246,10 @@ export const StatsPage = () => {
               />
             ))}
           </ButtonGroup>
-        </Field>
+        </StyledField>
         {state.aggregate === Aggregation.USER && (
-          <Field>
-            <FieldLabel>Ignore users below %</FieldLabel>
+          <StyledField>
+            <StyledFieldLabel>Ignore users below %</StyledFieldLabel>
             <Input
               type="number"
               value={String(usersIgnoreBelowValue)}
@@ -331,10 +265,10 @@ export const StatsPage = () => {
               min={0}
               max={USER_THRESHOLD_MAX}
             />
-          </Field>
+          </StyledField>
         )}
-        <Field>
-          <FieldLabel>Use Materialized Data</FieldLabel>
+        <StyledField>
+          <StyledFieldLabel>Use Materialized Data</StyledFieldLabel>
           <Checkbox
             value={state.useMaterialized}
             onChangeFn={(value) =>
@@ -352,9 +286,9 @@ export const StatsPage = () => {
                 : "Using live data from audit table (slower but always up-to-date)"
             }
           />
-        </Field>
-        <Field>
-          <FieldLabel>Aggregate Options</FieldLabel>
+        </StyledField>
+        <StyledField>
+          <StyledFieldLabel>Aggregate Options</StyledFieldLabel>
           <Checkbox
             value={state.showAggregateOptions}
             onChangeFn={(value) =>
@@ -366,8 +300,8 @@ export const StatsPage = () => {
             label="Show Advanced Options"
             tooltipLabel="Show options for manually triggering data aggregation"
           />
-        </Field>
-      </FieldGroup>
+        </StyledField>
+      </StyledFieldGroup>
 
       {state.showAggregateOptions && (
         <div
@@ -400,6 +334,9 @@ export const StatsPage = () => {
           >
             <Button
               color="primary"
+              inverted
+              radiusLeft
+              radiusRight
               label={isAggregating ? "Aggregating..." : "Aggregate Data"}
               disabled={isAggregating || isLoadingStats}
               onClick={triggerAggregation}
@@ -441,17 +378,17 @@ export const StatsPage = () => {
         </div>
       )}
 
-      <ResponseSection>
-        {isError && <StyledQueryState>Error</StyledQueryState>}
+      <StyledResponseSection>
+        {isError && <StyledStyledQueryState>Error</StyledStyledQueryState>}
         {isLoadingStats && (
-          <StyledQueryState>
+          <StyledStyledQueryState>
             <Loader show />
-          </StyledQueryState>
+          </StyledStyledQueryState>
         )}
-        {isNoData && <StyledQueryState>No data</StyledQueryState>}
+        {isNoData && <StyledStyledQueryState>No data</StyledStyledQueryState>}
         {data && (
           <>
-            <ResultsChart>
+            <StyledResultsChart>
               <StatsChart
                 data={data}
                 height={contentHeight / 3}
@@ -459,8 +396,8 @@ export const StatsPage = () => {
                 request={statsRequest}
                 isLoading={isLoadingStats}
               />
-            </ResultsChart>
-            <ResultsTable>
+            </StyledResultsChart>
+            <StyledResultsTable>
               <StatsTable
                 data={data}
                 height={contentHeight / 3}
@@ -468,10 +405,10 @@ export const StatsPage = () => {
                 request={statsRequest}
                 isLoading={isLoadingStats}
               />
-            </ResultsTable>
+            </StyledResultsTable>
           </>
         )}
-      </ResponseSection>
-    </Container>
+      </StyledResponseSection>
+    </StyledContainer>
   );
 };
