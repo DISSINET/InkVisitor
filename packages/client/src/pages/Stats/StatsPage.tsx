@@ -6,6 +6,7 @@ import { Aggregation, EventType, TimeUnit } from "@shared/types/stats";
 import { Button, ButtonGroup, Checkbox, Input, Loader } from "components";
 import { useEffect, useMemo, useReducer, useState } from "react";
 import { useAppSelector } from "redux/hooks";
+import { FaCalendarPlus, FaTimes } from "react-icons/fa";
 import { USER_THRESHOLD_MAX } from "./constants";
 import { StatsChart } from "./StatsChart/StatsChart";
 import { StatsTable } from "./StatsTable/StatsTable";
@@ -13,10 +14,12 @@ import { initialState, statsReducer } from "./store";
 import { applyUserThreshold } from "./utils";
 import {
   StyledContainer,
+  StyledDateInputWrapper,
   StyledEndpointStatus,
   StyledField,
   StyledFieldGroup,
   StyledFieldLabel,
+  StyledFieldLValueSmall,
   StyledHeader,
   StyledHeading,
   StyledResponseSection,
@@ -148,11 +151,11 @@ export const StatsPage = () => {
         <StyledHeading>Statistics</StyledHeading>
 
         <ButtonGroup>
-          {/* <span>
+          <span>
             <StyledEndpointStatus $isMaterialized={state.useMaterialized}>
               {state.useMaterialized ? "⚡ Materialized" : "🔄 Live Data"}
             </StyledEndpointStatus>
-          </span> */}
+          </span>
 
           <Button
             color="success"
@@ -165,30 +168,104 @@ export const StatsPage = () => {
 
       <StyledFieldGroup>
         <StyledField>
-          <StyledFieldLabel>From date</StyledFieldLabel>
-          <Input
-            type="datetime-local"
-            value={state.timeFrom.slice(0, 16)}
-            onChangeFn={(value) =>
-              dispatch({
-                type: "timeFromUpdate",
-                payload: new Date(value).toISOString(),
-              })
-            }
-          />
+          <StyledFieldLabel>Date From</StyledFieldLabel>
+          {!state.showDateFromRangePicker ? (
+            <StyledDateInputWrapper>
+              <StyledFieldLValueSmall>Since Forever</StyledFieldLValueSmall>
+              <Button
+                icon={<FaCalendarPlus />}
+                onClick={() =>
+                  dispatch({
+                    type: "showDateFromRangePickerUpdate",
+                    payload: true,
+                  })
+                }
+                color="primary"
+                inverted
+                tooltipLabel="Add custom date from"
+                noBorder
+              />
+            </StyledDateInputWrapper>
+          ) : (
+            <StyledDateInputWrapper>
+              <Input
+                type="date"
+                value={state.timeFrom.slice(0, 16)}
+                onChangeFn={(value) =>
+                  dispatch({
+                    type: "timeFromUpdate",
+                    payload: new Date(value).toISOString(),
+                  })
+                }
+              />
+              <Button
+                icon={<FaTimes />}
+                onClick={() => {
+                  dispatch({
+                    type: "showDateFromRangePickerUpdate",
+                    payload: false,
+                  });
+                  dispatch({
+                    type: "timeFromUpdate",
+                    payload: new Date(0).toISOString(),
+                  });
+                  updateToCurrentTime();
+                }}
+                color="primary"
+                inverted
+                tooltipLabel="Reset to Since Forever"
+                noBackground
+              />
+            </StyledDateInputWrapper>
+          )}
         </StyledField>
         <StyledField>
-          <StyledFieldLabel>To date</StyledFieldLabel>
-          <Input
-            type="datetime-local"
-            value={state.timeTo.slice(0, 16)}
-            onChangeFn={(value) =>
-              dispatch({
-                type: "timeToUpdate",
-                payload: new Date(value).toISOString(),
-              })
-            }
-          />
+          <StyledFieldLabel>Date To</StyledFieldLabel>
+          {!state.showDateToRangePicker ? (
+            <StyledDateInputWrapper>
+              <StyledFieldLValueSmall>Until Now</StyledFieldLValueSmall>
+              <Button
+                icon={<FaCalendarPlus />}
+                onClick={() =>
+                  dispatch({
+                    type: "showDateToRangePickerUpdate",
+                    payload: true,
+                  })
+                }
+                color="primary"
+                inverted
+                tooltipLabel="Add custom date to"
+                noBorder
+              />
+            </StyledDateInputWrapper>
+          ) : (
+            <StyledDateInputWrapper>
+              <Input
+                type="date"
+                value={state.timeTo.slice(0, 16)}
+                onChangeFn={(value) =>
+                  dispatch({
+                    type: "timeToUpdate",
+                    payload: new Date(value).toISOString(),
+                  })
+                }
+              />
+              <Button
+                icon={<FaTimes />}
+                onClick={() => {
+                  dispatch({
+                    type: "showDateToRangePickerUpdate",
+                    payload: false,
+                  });
+                  updateToCurrentTime();
+                }}
+                color="primary"
+                inverted
+                tooltipLabel="Reset to Until Now"
+                noBackground
+              />
+            </StyledDateInputWrapper>
+          )}
         </StyledField>
 
         <StyledField>
@@ -269,7 +346,7 @@ export const StatsPage = () => {
         )}
 
         {/* Materialized Data */}
-        {/* <StyledField>
+        <StyledField>
           <StyledFieldLabel>Use Materialized Data</StyledFieldLabel>
           <Checkbox
             value={state.useMaterialized}
@@ -302,10 +379,10 @@ export const StatsPage = () => {
             label="Show Advanced Options"
             tooltipLabel="Show options for manually triggering data aggregation"
           />
-        </StyledField> */}
+        </StyledField>
       </StyledFieldGroup>
 
-      {/* {state.swhowAggregateOptions && (
+      {state.showAggregateOptions && (
         <div
           style={{
             padding: "20px",
@@ -378,15 +455,10 @@ export const StatsPage = () => {
             </div>
           )}
         </div>
-      )} */}
+      )}
 
       <StyledResponseSection>
         {isError && <StyledStyledQueryState>Error</StyledStyledQueryState>}
-        {/* {isLoadingStats && (
-          <StyledStyledQueryState>
-            <Loader show />
-          </StyledStyledQueryState>
-        )} */}
         {isNoData && <StyledStyledQueryState>No data</StyledStyledQueryState>}
         {data && (
           <>

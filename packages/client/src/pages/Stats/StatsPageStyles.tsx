@@ -46,6 +46,17 @@ export const StyledFieldLabel = styled.div`
   color: ${({ theme }) => theme.color["primary"]};
 `;
 
+export const StyledDateInputWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+export const StyledFieldLValueSmall = styled.i`
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  color: ${({ theme }) => theme.color["info"]};
+`;
+
 export const StyledResultsChart = styled.div`
   width: 100%;
   position: relative;
