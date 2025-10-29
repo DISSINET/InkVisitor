@@ -1,4 +1,4 @@
-import Cursor, { DIRECTION } from "./Cursor";
+  import Cursor, { DIRECTION } from "./Cursor";
 import Highlighter, { IAbsCoordinates, CursorStyle } from "./Highlighter";
 import Keys from "./Keys";
 import { Lines } from "./Lines";
@@ -1265,331 +1265,364 @@ export class Annotator {
     indexStart: number,
     indexEnd: number
   ): [number, number] {
-    const text = this.text.value;
+    const raw = this.text.value;
 
-    // Special case: Handle selection that spans multiple separate tags within a parent
-    // This handles the specific test case: "<div><p> License.</p><p>Toulouse 1245-46</p></div>"
-    // where selection 17-50 should become 21-44
-    const handleMultipleTagsCase = (): [number, number] | null => {
-      // Find all tag pairs
-      const openingTagRegex = createOpeningTagRegex();
-      const tagPairs: Array<{ tagName: string; openingStart: number; openingEnd: number; closingStart: number; closingEnd: number }> = [];
-      const stack: Array<{ tagName: string; start: number; end: number }> = [];
+    // Utility functions
+    const clamp = (i: number): number => Math.max(0, Math.min(i, raw.length));
+
+    // Find tag positions only within the selection boundary
+    const findRelevantTagPositions = (): Array<{start: number, end: number, name: string, isOpen: boolean}> => {
+      const positions: Array<{start: number, end: number, name: string, isOpen: boolean}> = [];
       
-      // Parse opening tags
+      // Search only within the selection range
+      const searchText = raw.slice(start, end);
+      
+      // Use existing regexes to find all tags in the search range
+      const openingRegex = new RegExp(openingTagRegex.source, openingTagRegex.flags);
+      const closingRegex = new RegExp(closingTagRegex.source, closingTagRegex.flags);
+      
+      // Find all opening tags
       let match;
-      const allTags: Array<{ tagName: string; start: number; end: number; isOpening: boolean }> = [];
-      while ((match = openingTagRegex.exec(text)) !== null) {
-        const capturedContent = match[1];
-        const tagName = capturedContent.split(/\s+/)[0];
-        allTags.push({
-          tagName,
-          start: match.index,
-          end: match.index + match[0].length,
-          isOpening: true
+      while ((match = openingRegex.exec(searchText)) !== null) {
+        const absoluteStart = start + match.index;
+        const absoluteEnd = start + match.index + match[0].length;
+        
+        positions.push({
+          start: absoluteStart,
+          end: absoluteEnd,
+          name: match[1].toLowerCase(),
+          isOpen: true
         });
       }
       
-      // Parse closing tags
-      closingTagRegex.lastIndex = 0;
-      while ((match = closingTagRegex.exec(text)) !== null) {
-        allTags.push({
-          tagName: match[1],
-          start: match.index,
-          end: match.index + match[0].length,
-          isOpening: false
+      // Find all closing tags
+      while ((match = closingRegex.exec(searchText)) !== null) {
+        const absoluteStart = start + match.index;
+        const absoluteEnd = start + match.index + match[0].length;
+        
+        positions.push({
+          start: absoluteStart,
+          end: absoluteEnd,
+          name: match[1].toLowerCase(),
+          isOpen: false
         });
       }
       
-      // Sort by position and build pairs
-      allTags.sort((a, b) => a.start - b.start);
-      for (const tag of allTags) {
-        if (tag.isOpening) {
-          stack.push({ tagName: tag.tagName, start: tag.start, end: tag.end });
-        } else {
-          const matchingIndex = stack.findLastIndex(t => t.tagName === tag.tagName);
-          if (matchingIndex !== -1) {
-            const openingTag = stack[matchingIndex];
-            tagPairs.push({
-              tagName: tag.tagName,
-              openingStart: openingTag.start,
-              openingEnd: openingTag.end,
-              closingStart: tag.start,
-              closingEnd: tag.end
-            });
-            stack.splice(matchingIndex, 1);
-          }
-        }
-      }
-      
-      // Check if selection spans multiple separate tags
-      let separateTagsWithinSelection = 0;
-      let firstTagEnd = -1;
-      let lastTagEnd = -1;
-      
-      for (const pair of tagPairs) {
-        // Check if this tag pair is completely within the selection
-        if (pair.openingStart >= indexStart && pair.closingEnd <= indexEnd) {
-          separateTagsWithinSelection++;
-          if (firstTagEnd === -1) {
-            firstTagEnd = pair.closingEnd;
-          }
-          lastTagEnd = pair.closingEnd;
-        }
-      }
-      
-      // If we have multiple separate tags within the selection, adjust to span just those tags
-      if (separateTagsWithinSelection > 1) {
-        // Find the first tag that starts at or after indexStart
-        let adjustedStart = indexStart;
-        for (const pair of tagPairs) {
-          if (pair.openingStart >= indexStart) {
-            adjustedStart = pair.openingStart;
-            break;
-          }
-        }
-        
-        // Find the last tag that ends at or before indexEnd
-        let adjustedEnd = indexEnd;
-        for (let i = tagPairs.length - 1; i >= 0; i--) {
-          const pair = tagPairs[i];
-          if (pair.closingEnd <= indexEnd) {
-            adjustedEnd = pair.closingEnd;
-            break;
-          }
-        }
-        
-        return [adjustedStart, adjustedEnd];
-      }
-      
-      // Special case: Handle the specific test case where selection starts at a closing tag
-      // and spans to the end of a parent tag, but should be adjusted to span only the child tags
-      // Example: "<div><p> License.</p><p>Toulouse 1245-46</p></div>" with selection 17-50 -> 21-44
-      if (indexStart >= 0 && indexEnd >= 0) {
-        // Find the tag that the selection starts at (the closing tag)
-        let startTag = null;
-        for (const pair of tagPairs) {
-          if (indexStart === pair.closingStart) {
-            startTag = pair;
-            break;
-          }
-        }
-        
-        // Find the tag that the selection ends at (the parent closing tag)
-        let endTag = null;
-        for (const pair of tagPairs) {
-          if (indexEnd === pair.closingEnd) {
-            endTag = pair;
-            break;
-          }
-        }
-        
-        // If we start at a closing tag and end at a parent tag, and there are child tags between them
-        if (startTag && endTag && startTag !== endTag) {
-          // Find all child tags that are completely within the selection
-          const childTags = tagPairs.filter(pair => 
-            pair.openingStart >= startTag.closingEnd && 
-            pair.closingEnd <= endTag.closingEnd
-          );
-          
-          if (childTags.length > 0) {
-            // Return the range from after the start tag to the end of the last child tag
-            const lastChildTag = childTags[childTags.length - 1];
-            return [startTag.closingEnd, lastChildTag.closingEnd];
-          }
-        }
-      }
-      
-      return null;
+      // Sort by position to maintain order
+      return positions.sort((a, b) => a.start - b.start);
     };
 
-    // Try the special case handler first
-    const specialCaseResult = handleMultipleTagsCase();
-    if (specialCaseResult) {
-      return specialCaseResult;
+    // Normalize and clamp
+    let start = clamp(indexStart);
+    let end = clamp(indexEnd);
+
+    if (start > end) {
+      [start, end] = [end, start];
     }
 
-    // Helper: Parse all tags and return structured data
-    const parseAllTags = (): Array<{ tagName: string; start: number; end: number; isOpening: boolean }> => {
-      const tags: Array<{ tagName: string; start: number; end: number; isOpening: boolean }> = [];
-      
-      // Parse opening tags
-      const openingTagRegex = createOpeningTagRegex();
-      let match;
-      while ((match = openingTagRegex.exec(text)) !== null) {
-        const capturedContent = match[1];
-        const tagName = capturedContent.split(/\s+/)[0];
-        tags.push({
-          tagName,
-          start: match.index,
-          end: match.index + match[0].length,
-          isOpening: true
-        });
+    if (start === end) {
+      return [start, end];
+    }
+
+    const tagPositions = findRelevantTagPositions();
+    // Check if start/end are inside text content (not inside tags)
+    const isInsideText = (pos: number): boolean => {
+      for (const tag of tagPositions) {
+        if (pos >= tag.start && pos < tag.end) {
+          return false; // Inside a tag (including at the start of a tag)
+        }
       }
-      
-      // Parse closing tags
-      closingTagRegex.lastIndex = 0;
-      while ((match = closingTagRegex.exec(text)) !== null) {
-        tags.push({
-          tagName: match[1],
-          start: match.index,
-          end: match.index + match[0].length,
-          isOpening: false
-        });
-      }
-      
-      // Sort by position
-      return tags.sort((a, b) => a.start - b.start);
+      return true; // Inside text content
     };
 
-    // Helper: Find the smallest tag that encloses or overlaps the selection
-    const findSmallestEnclosingTag = (tags: Array<{ tagName: string; start: number; end: number; isOpening: boolean }>) => {
-      const tagPairs: Array<{ tagName: string; openingStart: number; openingEnd: number; closingStart: number; closingEnd: number }> = [];
+    // If both boundaries are in text content, no adjustment needed
+    if (isInsideText(start) && isInsideText(end)) {
+      // But if the selection extends beyond the actual content, we should still contract it
+      // Only apply this logic if the selection is not a complete tag pair
+      let isCompleteTagPair = false;
       
-      // Build tag pairs by matching opening and closing tags
-      const stack: Array<{ tagName: string; start: number; end: number }> = [];
-      
-      for (const tag of tags) {
-        if (tag.isOpening) {
-          stack.push({ tagName: tag.tagName, start: tag.start, end: tag.end });
-        } else {
-          // Find matching opening tag
-          const matchingIndex = stack.findLastIndex(t => t.tagName === tag.tagName);
-          if (matchingIndex !== -1) {
-            const openingTag = stack[matchingIndex];
-            tagPairs.push({
-              tagName: tag.tagName,
-              openingStart: openingTag.start,
-              openingEnd: openingTag.end,
-              closingStart: tag.start,
-              closingEnd: tag.end
-            });
-            stack.splice(matchingIndex, 1);
+      // Check if this is a complete tag pair
+      for (const tag of tagPositions) {
+        if (tag.isOpen && start === tag.start) {
+          const closingTag = tagPositions.find(t => 
+            !t.isOpen && t.name === tag.name && t.start > tag.start
+          );
+          if (closingTag && end === closingTag.end) {
+            isCompleteTagPair = true;
+            break;
           }
         }
       }
       
-      // Find the best tag that contains or overlaps with the selection
-      // Priority: 1) Tags that encompass the selection, 2) Smallest overlapping tags
-      let bestEnclosingTag = null;
-      let bestScore = Infinity;
+      // Only contract if it's not a complete tag pair
+      if (!isCompleteTagPair) {
+        let contentStart = start;
+        let contentEnd = end;
+        
+        // Find the rightmost opening tag within our selection
+        for (const tag of tagPositions) {
+          if (tag.isOpen && tag.start >= start && tag.start < end) {
+            contentStart = Math.max(contentStart, tag.end);
+          }
+        }
+        
+        // Find the leftmost closing tag within our selection
+        for (const tag of tagPositions) {
+          if (!tag.isOpen && tag.end > start && tag.end <= end) {
+            contentEnd = Math.min(contentEnd, tag.start);
+          }
+        }
+        
+        // If we found valid content boundaries, use them
+        if (contentStart < contentEnd && contentStart >= start && contentEnd <= end) {
+          return [clamp(contentStart), clamp(contentEnd)];
+        }
+      }
       
-      for (const pair of tagPairs) {
-        const tagSize = pair.closingEnd - pair.openingStart;
-        const isInside = (indexStart >= pair.openingEnd && indexEnd <= pair.closingStart);
-        const encompasses = (indexStart <= pair.openingStart && indexEnd >= pair.closingEnd);
-        const overlaps = (
-          (indexStart < pair.openingEnd && indexEnd > pair.openingStart) ||
-          (indexStart < pair.closingEnd && indexEnd > pair.closingStart)
+      return [start, end];
+    }
+
+    // Find tags that overlap with our selection
+    const overlappingTags = tagPositions.filter(tag => 
+      tag.start < end && tag.end > start
+    );
+
+    // Remove immediate closing nodes from the left neighbor group
+    // This handles cases where selection starts with closing tags that should be excluded
+    const immediateClosingTags = overlappingTags.filter(tag => 
+      !tag.isOpen && tag.start === start
+    );
+    
+    // If selection starts with closing tags, remove them
+    if (immediateClosingTags.length > 0) {
+      // Find the rightmost closing tag (in case there are multiple at the same position)
+      const rightmostClosingTag = immediateClosingTags.reduce((max, current) => 
+        current.end > max.end ? current : max
+      );
+      
+      // Move start past the closing tag(s)
+      let adjustedStart = rightmostClosingTag.end;
+      
+      // Check if there's an opening tag immediately after the closing tag
+      // and if the selection extends beyond it, remove that too
+      const nextOpeningTag = overlappingTags.find(tag => 
+        tag.isOpen && tag.start === adjustedStart
+      );
+      
+      if (nextOpeningTag && end > nextOpeningTag.end) {
+        // Check if the selection ends with the matching closing tag for this opening tag
+        const matchingClosingTag = tagPositions.find(t => 
+          !t.isOpen && t.name === nextOpeningTag.name && t.start > nextOpeningTag.start
         );
         
-        if (isInside || encompasses || overlaps) {
-          // Calculate score: lower is better
-          // Priority 1: Tags that encompass the selection (score = 0)
-          // Priority 2: Tags that start at the selection start (score = 0.5)
-          // Priority 3: Tags that contain the selection (score = 1 + size/1000 to prefer smaller tags)  
-          // Priority 4: Other overlapping tags (score = 2 + distance from selection start)
-          let score;
-          if (encompasses) {
-            score = 0; // Highest priority
-          } else if (pair.openingStart === indexStart) {
-            // Special case: tag that starts exactly at the selection start
-            score = 0.5; // Very high priority for tags that start at selection
-          } else if (isInside) {
-            // For tags that contain the selection, prefer smaller ones
-            score = 1 + tagSize / 1000; // Third priority, smaller tags preferred
-          } else {
-            // For other overlapping tags, prefer those that start closer to the selection
-            const distanceFromStart = Math.abs(pair.openingStart - indexStart);
-            score = 2 + distanceFromStart / 1000; // Fourth priority, closer tags preferred
-          }
-          
-          if (score < bestScore) {
-            bestScore = score;
-            bestEnclosingTag = pair;
-          }
+        // Only remove the opening tag if the selection doesn't include the complete tag pair
+        if (!matchingClosingTag || end < matchingClosingTag.end) {
+          // Remove the opening tag as well
+          adjustedStart = nextOpeningTag.end;
+        } else {
+          // Keep the opening tag because selection includes complete tag pair
         }
       }
       
-      return bestEnclosingTag;
-    };
-
-    // Helper: Determine relationship and adjust accordingly
-    const adjustBasedOnRelationship = (enclosingTag: { tagName: string; openingStart: number; openingEnd: number; closingStart: number; closingEnd: number }): [number, number] => {
-      // Special case: Check if selection starts at a closing tag
-      // This handles the case where the new opening tag would be placed at the same position as an existing closing tag
-      for (const tag of parseAllTags()) {
-        if (!tag.isOpening && indexStart === tag.start) {
-          // Move the start to after the closing tag, then continue with normal logic
-          const newStart = tag.end;
-          // Check if the new start position overlaps with an opening tag
-          for (const openingTag of parseAllTags()) {
-            if (openingTag.isOpening && newStart >= openingTag.start && newStart < openingTag.end) {
-              // Don't move further if the selection would still encompass the tag
-              // Check if the original selection encompasses this opening tag's closing tag
-              const matchingClosingTag = parseAllTags().find(t => 
-                !t.isOpening && 
-                t.tagName === openingTag.tagName && 
-                t.start > openingTag.end
-              );
-              
-              if (matchingClosingTag && indexEnd >= matchingClosingTag.end) {
-                // The original selection encompasses the entire tag, so return the tag boundaries
-                // But preserve the original end position if it extends beyond the tag
-                const endPosition = Math.max(indexEnd, matchingClosingTag.end);
-                return [openingTag.start, endPosition] as [number, number];
-              } else {
-                // Move to after the opening tag
-                return [openingTag.end, Math.max(indexEnd, openingTag.end)] as [number, number];
-              }
-            }
-          }
-          return [newStart, Math.max(indexEnd, newStart)] as [number, number];
+      // Also check for closing tags at the end that should be removed
+      // But only remove them if they're not part of a complete tag pair
+      let adjustedEnd = end;
+      const closingTagsAtEnd = overlappingTags.filter(tag => 
+        !tag.isOpen && tag.end === end
+      );
+      
+      if (closingTagsAtEnd.length > 0) {
+        // Find the leftmost closing tag at the end
+        const leftmostClosingTagAtEnd = closingTagsAtEnd.reduce((min, current) => 
+          current.start < min.start ? current : min
+        );
+        
+        // Check if this closing tag is part of a complete tag pair
+        // Find the closest opening tag before this closing tag
+        const matchingOpeningTag = tagPositions
+          .filter(t => t.isOpen && t.name === leftmostClosingTagAtEnd.name && t.start < leftmostClosingTagAtEnd.start)
+          .reduce((closest, current) => 
+            current.start > closest.start ? current : closest
+          , { start: -1, end: -1, name: '', isOpen: false });
+        
+        // Only remove the closing tag if it's not part of a complete tag pair
+        if (!matchingOpeningTag || matchingOpeningTag.start < adjustedStart) {
+          // Move end before the closing tag(s)
+          adjustedEnd = leftmostClosingTagAtEnd.start;
+        } else {
+          // Keep the closing tag because it's part of complete tag pair
         }
       }
       
-      // Case 1: Selection is inside tag content (between opening and closing tags)
-      if (indexStart >= enclosingTag.openingEnd && indexEnd <= enclosingTag.closingStart) {
-        return [indexStart, indexEnd] as [number, number];
-      }
-      
-      // Case 2: Selection encompasses the entire tag
-      if (indexStart <= enclosingTag.openingStart && indexEnd >= enclosingTag.closingEnd) {
-        return [indexStart, indexEnd] as [number, number];
-      }
-      
-      // Case 3: Selection overlaps with tag boundaries - adjust to be inside
-      // Special handling: If selection starts at or overlaps with opening tag, move to after opening tag
-      let newIndexStart = indexStart;
-      let newIndexEnd = indexEnd;
-      
-      // If selection overlaps with opening tag, start after the opening tag
-      if (indexStart < enclosingTag.openingEnd) {
-        newIndexStart = enclosingTag.openingEnd;
-      }
-      
-      // If selection overlaps with closing tag, end before the closing tag
-      if (indexEnd > enclosingTag.closingStart) {
-        newIndexEnd = enclosingTag.closingStart;
-      }
-      
-      // Ensure we have a valid range
-      if (newIndexStart < newIndexEnd) {
-        return [newIndexStart, newIndexEnd] as [number, number];
-      }
-      
-      // If adjustment would result in invalid range, return original
-      return [indexStart, indexEnd] as [number, number];
-    };
-
-    // Main logic
-    const tags = parseAllTags();
-    const enclosingTag = findSmallestEnclosingTag(tags);
-    
-    if (!enclosingTag) {
-      return [indexStart, indexEnd]; // No tags found
+      return [clamp(adjustedStart), clamp(adjustedEnd)];
     }
+
+    // If no overlapping tags, return unchanged
+    if (overlappingTags.length === 0) {
+      return [start, end];
+    }
+
+    // Check if the selection exactly matches a complete tag pair
+    for (const tag of overlappingTags) {
+      if (tag.isOpen) {
+        // Find the matching closing tag
+        const closingTag = tagPositions.find(t => 
+          !t.isOpen && t.name === tag.name && t.start > tag.start
+        );
+        if (closingTag && start === tag.start && end === closingTag.end) {
+          // Selection exactly matches a complete tag pair, no adjustment needed
+          return [start, end];
+        }
+      }
+    }
+
+    // Check if selection spans multiple separate tags (should not adjust)
+    const openTags = overlappingTags.filter(tag => tag.isOpen);
+    const closeTags = overlappingTags.filter(tag => !tag.isOpen);
     
-    return adjustBasedOnRelationship(enclosingTag);
+    // If we have multiple separate tag pairs, don't adjust
+    if (openTags.length > 1 || closeTags.length > 1) {
+      // Check if they are separate (not nested)
+      let isSeparate = true;
+      for (let i = 0; i < openTags.length - 1; i++) {
+        for (let j = i + 1; j < openTags.length; j++) {
+          if (openTags[i].start < openTags[j].start && openTags[j].end < openTags[i].end) {
+            isSeparate = false;
+            break;
+          }
+        }
+        if (!isSeparate) break;
+      }
+      
+      if (isSeparate) {
+        return [start, end];
+      }
+    }
+
+    // Find the innermost overlapping tag (the one with the smallest range that still overlaps)
+    const innermostTag = overlappingTags.reduce((min, current) => {
+      const currentRange = current.end - current.start;
+      const minRange = min.end - min.start;
+      return currentRange < minRange ? current : min;
+    });
+
+    // Determine the best adjustment based on the innermost tag
+    let newStart = start;
+    let newEnd = end;
+
+    // If selection starts before the tag and ends after the tag starts
+    if (start <= innermostTag.start && end > innermostTag.start && end <= innermostTag.end) {
+      // Move start to after the tag (exclude the tag)
+      newStart = innermostTag.end;
+    }
+    // If selection starts with the tag and extends beyond it
+    else if (start === innermostTag.start && end > innermostTag.end) {
+      // Move start to after the opening tag
+      newStart = innermostTag.end;
+    }
+    // If selection starts before the tag ends and ends after the tag
+    else if (start >= innermostTag.start && start < innermostTag.end && end >= innermostTag.end) {
+      // Move end to before the tag (exclude the tag)
+      newEnd = innermostTag.start;
+    }
+    // If selection is completely inside the tag
+    else if (start >= innermostTag.start && end <= innermostTag.end) {
+      // Move start to after the opening tag and end to before the closing tag
+      if (innermostTag.isOpen) {
+        // This is an opening tag, find its closing tag
+        const closingTag = tagPositions.find(t => 
+          !t.isOpen && t.name === innermostTag.name && t.start > innermostTag.start
+        );
+        if (closingTag) {
+          newStart = innermostTag.end;
+          newEnd = closingTag.start;
+        }
+      } else {
+        // This is a closing tag, find its opening tag
+        const openingTag = tagPositions.find(t => 
+          t.isOpen && t.name === innermostTag.name && t.start < innermostTag.start
+        );
+        if (openingTag) {
+          newStart = openingTag.end;
+          newEnd = innermostTag.start;
+        }
+      }
+    }
+
+    // Additional logic: If the selection includes closing tags before the innermost tag,
+    // move the start to exclude them
+    if (newStart === start && newEnd === end) {
+      // Find closing tags that are before the innermost tag and within our selection
+      for (const tag of overlappingTags) {
+        if (!tag.isOpen && tag.end <= innermostTag.start && tag.start >= start) {
+          // This is a closing tag before the innermost tag, move start past it
+          newStart = Math.max(newStart, tag.end);
+        }
+      }
+    }
+
+    // Special case: If the selection starts with a closing tag and ends with a complete tag pair,
+    // move the start to exclude the closing tag
+    if (newStart === start && newEnd === end) {
+      // Check if selection starts with a closing tag
+      const startingClosingTag = overlappingTags.find(tag => 
+        !tag.isOpen && tag.start === start
+      );
+      
+      if (startingClosingTag) {
+        // Check if the end matches a complete tag pair
+        const endingTag = overlappingTags.find(tag => 
+          tag.isOpen && tag.start < end && tag.end === end
+        );
+        
+        if (endingTag) {
+          // Find the matching closing tag for the ending tag
+          const matchingClosingTag = tagPositions.find(t => 
+            !t.isOpen && t.name === endingTag.name && t.start > endingTag.start
+          );
+          
+          if (matchingClosingTag && matchingClosingTag.end === end) {
+            // This is a complete tag pair at the end, move start past the closing tag
+            newStart = startingClosingTag.end;
+          }
+        }
+      }
+    }
+
+    // Additional logic: If the selection extends beyond content, contract it to content boundaries
+    // This handles cases where selection goes beyond the actual content
+    if (newStart === start && newEnd === end) {
+      // Try to find the content boundaries within the selection
+      let contentStart = start;
+      let contentEnd = end;
+      
+      // Find the rightmost opening tag within our selection
+      for (const tag of tagPositions) {
+        if (tag.isOpen && tag.start >= start && tag.start < end) {
+          contentStart = Math.max(contentStart, tag.end);
+        }
+      }
+      
+      // Find the leftmost closing tag within our selection
+      for (const tag of tagPositions) {
+        if (!tag.isOpen && tag.end > start && tag.end <= end) {
+          contentEnd = Math.min(contentEnd, tag.start);
+        }
+      }
+      
+      // If we found valid content boundaries, use them
+      if (contentStart < contentEnd && contentStart >= start && contentEnd <= end) {
+        newStart = contentStart;
+        newEnd = contentEnd;
+      }
+    }
+
+    // Ensure the new range is valid
+    if (newStart >= newEnd) {
+      return [start, end]; // Return original if adjustment would be invalid
+    }
+
+    return [clamp(newStart), clamp(newEnd)];
   }
+
 }
