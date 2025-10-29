@@ -148,11 +148,11 @@ export const StatsPage = () => {
         <StyledHeading>Statistics</StyledHeading>
 
         <ButtonGroup>
-          <span>
+          {/* <span>
             <StyledEndpointStatus $isMaterialized={state.useMaterialized}>
               {state.useMaterialized ? "⚡ Materialized" : "🔄 Live Data"}
             </StyledEndpointStatus>
-          </span>
+          </span> */}
 
           <Button
             color="success"
@@ -267,7 +267,9 @@ export const StatsPage = () => {
             />
           </StyledField>
         )}
-        <StyledField>
+
+        {/* Materialized Data */}
+        {/* <StyledField>
           <StyledFieldLabel>Use Materialized Data</StyledFieldLabel>
           <Checkbox
             value={state.useMaterialized}
@@ -300,10 +302,10 @@ export const StatsPage = () => {
             label="Show Advanced Options"
             tooltipLabel="Show options for manually triggering data aggregation"
           />
-        </StyledField>
+        </StyledField> */}
       </StyledFieldGroup>
 
-      {state.showAggregateOptions && (
+      {/* {state.swhowAggregateOptions && (
         <div
           style={{
             padding: "20px",
@@ -376,7 +378,7 @@ export const StatsPage = () => {
             </div>
           )}
         </div>
-      )}
+      )} */}
 
       <StyledResponseSection>
         {isError && <StyledStyledQueryState>Error</StyledStyledQueryState>}

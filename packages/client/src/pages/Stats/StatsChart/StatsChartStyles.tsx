@@ -5,7 +5,7 @@ export const StyledCustomTooltip = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.space[2]};
-  background-color: ${({ theme }) => theme.color.gray[100]};
+  background-color: ${({ theme }) => theme.color.statsTooltipBackground};
   padding: ${({ theme }) => theme.space[4]};
   border-radius: ${({ theme }) => theme.borderRadius.md};
   width: 100%;
@@ -14,9 +14,9 @@ export const StyledCustomTooltip = styled.div`
 
 export const StyledLabel = styled.div`
   font-size: ${({ theme }) => theme.fontSize.sm};
-  color: ${({ theme }) => theme.color.gray[100]};
+  color: ${({ theme }) => theme.color.statsTooltipTextColor};
   width: fit-content;
-  background-color: ${({ theme }) => theme.color.gray[600]};
+  background-color: ${({ theme }) => theme.color.statsTooltipLabelBackground};
   padding: ${({ theme }) => theme.space[1]} ${({ theme }) => theme.space[2]};
   border-radius: ${({ theme }) => theme.borderRadius.md};
 `;

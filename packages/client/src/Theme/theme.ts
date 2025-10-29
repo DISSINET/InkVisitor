@@ -103,6 +103,10 @@ const theme = {
     tooltipBoxShadow: "rgba(0, 0, 0, 0.3)",
     tooltipArrowBoxShadow: "rgba(0, 0, 0, 0.1)",
 
+    statsTooltipTextColor: "#f7fafc",
+    statsTooltipBackground: "#f7fafc", // gray 100
+    statsTooltipLabelBackground: "#718096", // gray 600
+
     menuShadow: "rgba(0, 0, 0, 0.3)",
 
     closeBtnBackground: "rgba(130, 130, 130, 0.1)",
