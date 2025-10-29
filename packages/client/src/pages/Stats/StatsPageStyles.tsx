@@ -1,6 +1,7 @@
 import styled from "styled-components";
 
 export const StyledContainer = styled.div`
+  position: relative;
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -47,6 +48,7 @@ export const StyledFieldLabel = styled.div`
 
 export const StyledResultsChart = styled.div`
   width: 100%;
+  position: relative;
 `;
 
 export const StyledResultsTable = styled.div`
@@ -54,6 +56,7 @@ export const StyledResultsTable = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: ${(props) => props.theme.space[5]};
+  position: relative;
 `;
 
 export const StyledResponseSection = styled.div``;

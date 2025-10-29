@@ -11,13 +11,13 @@ import {
   StyledTd,
   StyledTh,
 } from "./StatsTableStyles";
+import { Loader } from "components/basic/Loader/Loader";
 
 interface StatsTableProps {
   data: IResponseStats;
   height: number;
   width: number;
   request: IRequestStats;
-  isLoading: boolean;
 }
 
 interface TableRow {

@@ -382,11 +382,11 @@ export const StatsPage = () => {
 
       <StyledResponseSection>
         {isError && <StyledStyledQueryState>Error</StyledStyledQueryState>}
-        {isLoadingStats && (
+        {/* {isLoadingStats && (
           <StyledStyledQueryState>
             <Loader show />
           </StyledStyledQueryState>
-        )}
+        )} */}
         {isNoData && <StyledStyledQueryState>No data</StyledStyledQueryState>}
         {data && (
           <>
@@ -396,7 +396,6 @@ export const StatsPage = () => {
                 height={contentHeight / 3}
                 width={layoutWidth - 50}
                 request={statsRequest}
-                isLoading={isLoadingStats}
               />
             </StyledResultsChart>
             <StyledResultsTable>
@@ -405,12 +404,13 @@ export const StatsPage = () => {
                 height={contentHeight / 3}
                 width={layoutWidth - 50}
                 request={statsRequest}
-                isLoading={isLoadingStats}
               />
             </StyledResultsTable>
           </>
         )}
       </StyledResponseSection>
+
+      <Loader show={isLoadingStats} />
     </StyledContainer>
   );
 };

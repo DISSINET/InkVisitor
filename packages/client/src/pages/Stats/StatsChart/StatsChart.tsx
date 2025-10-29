@@ -33,13 +33,13 @@ import {
   StyledPayload,
   StyledPayloadItem,
 } from "./StatsChartStyles";
+import { Loader } from "components/basic/Loader/Loader";
 
 interface StatsChartProps {
   data: IResponseStats;
   height: number;
   width: number;
   request: IRequestStats;
-  isLoading: boolean;
 }
 
 export const StatsChart = ({
@@ -47,7 +47,6 @@ export const StatsChart = ({
   height,
   width,
   request,
-  isLoading,
 }: StatsChartProps) => {
   const values = data.values;
   const [hoveringDataKey, setHoveringDataKey] = useState<string | null>(null);
