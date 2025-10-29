@@ -94,7 +94,7 @@ export default Router()
     asyncRouteHandler<{ message: string; recordsProcessed: number }>(async (request: IRequest<unknown, { fromDate: number; toDate: number; timeUnits?: TimeUnit[]; aggregateBy?: Aggregation[] }>) => {
       const { fromDate, toDate, timeUnits, aggregateBy } = request.body;
 
-      if (!fromDate || !toDate) {
+      if (fromDate === undefined || fromDate === null || toDate === undefined || toDate === null) {
         throw new Error("fromDate and toDate are required");
       }
 
