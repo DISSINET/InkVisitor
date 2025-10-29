@@ -24,6 +24,7 @@ import {
   transformDataForChart,
 } from "../utils";
 import {
+  StyledChartWrapper,
   StyledCustomTooltip,
   StyledLabel,
   StyledLegendColorBox,
@@ -188,51 +189,58 @@ export const StatsChart = ({
   };
 
   return (
-    <BarChart
-      width={width}
-      height={height - 30}
-      data={dataChart}
-      onMouseLeave={() => {
-        if (hoveringDataKey) {
-          handleMouseLeave();
-        }
-      }}
-    >
-      {gridEl}
-      {xAxisEl}
-      {yAxisEl}
-      <Tooltip wrapperStyle={{ zIndex: 200 }} content={TooltipEl} />
-      <Legend
-        content={() => (
-          <StyledLegendWrapper>
-            {dataCategories.map((category) => {
-              const isActive = hoveringDataKey === category;
-              const color = getColor(category);
+    <StyledChartWrapper>
+      <BarChart
+        width={width}
+        height={height - 30}
+        data={dataChart}
+        onMouseLeave={() => {
+          if (hoveringDataKey) {
+            handleMouseLeave();
+          }
+        }}
+      >
+        {gridEl}
+        {xAxisEl}
+        {yAxisEl}
+        <Tooltip wrapperStyle={{ zIndex: 200 }} content={TooltipEl} />
+        <Legend
+          content={() => (
+            <StyledLegendWrapper>
+              {dataCategories.map((category) => {
+                const isActive = hoveringDataKey === category;
+                const color = getColor(category);
 
-              return (
-                <StyledLegendItem
-                  key={category}
-                  onMouseEnter={() => {
-                    if (!isActive) {
-                      handleMouseEnter({ dataKey: category, value: category });
-                    }
-                  }}
-                  onMouseLeave={() => {
-                    if (isActive) {
-                      handleMouseLeave();
-                    }
-                  }}
-                >
-                  <StyledLegendColorBox $color={color} />
-                  <StyledLegendText $color={color}>{category}</StyledLegendText>
-                </StyledLegendItem>
-              );
-            })}
-          </StyledLegendWrapper>
-        )}
-        wrapperStyle={{ paddingTop: 20, paddingBottom: 10 }}
-      />
-      {BarEls}
-    </BarChart>
+                return (
+                  <StyledLegendItem
+                    key={category}
+                    onMouseEnter={() => {
+                      if (!isActive) {
+                        handleMouseEnter({
+                          dataKey: category,
+                          value: category,
+                        });
+                      }
+                    }}
+                    onMouseLeave={() => {
+                      if (isActive) {
+                        handleMouseLeave();
+                      }
+                    }}
+                  >
+                    <StyledLegendColorBox $color={color} />
+                    <StyledLegendText $color={color}>
+                      {category}
+                    </StyledLegendText>
+                  </StyledLegendItem>
+                );
+              })}
+            </StyledLegendWrapper>
+          )}
+          wrapperStyle={{ paddingTop: 20, paddingBottom: 10 }}
+        />
+        {BarEls}
+      </BarChart>
+    </StyledChartWrapper>
   );
 };

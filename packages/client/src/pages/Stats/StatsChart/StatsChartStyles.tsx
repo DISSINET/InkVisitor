@@ -1,5 +1,11 @@
 import styled from "styled-components";
 
+export const StyledChartWrapper = styled.div`
+  svg:focus {
+    outline: none;
+  }
+`;
+
 export const StyledCustomTooltip = styled.div`
   visibility: visible;
   display: flex;
