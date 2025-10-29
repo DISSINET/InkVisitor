@@ -12,6 +12,16 @@ import { StatsChart } from "./StatsChart/StatsChart";
 import { StatsTable } from "./StatsTable/StatsTable";
 import { initialState, statsReducer } from "./store";
 import { applyUserThreshold } from "./utils";
+
+// Helper functions for date conversion
+const isoToDatePicker = (isoString: string): string => {
+  return new Date(isoString).toISOString().split("T")[0];
+};
+
+const datePickerToIso = (dateString: string): string => {
+  return new Date(dateString).toISOString();
+};
+
 import {
   StyledContainer,
   StyledDateInputWrapper,
@@ -47,7 +57,7 @@ export const StatsPage = () => {
   // Update timeTo to current time when navigating to this page to correctly refresh the data
   useEffect(() => {
     dispatch({
-      type: "timeToUpdate",
+      type: "dateToUpdate",
       payload: new Date().toISOString(),
     });
   }, []);
@@ -55,7 +65,7 @@ export const StatsPage = () => {
   // Helper function to update timeTo to current time
   const updateToCurrentTime = () => {
     dispatch({
-      type: "timeToUpdate",
+      type: "dateToUpdate",
       payload: new Date().toISOString(),
     });
   };
@@ -67,8 +77,8 @@ export const StatsPage = () => {
 
     try {
       const response = await api.statsAggregate({
-        fromDate: new Date(state.timeFrom).getTime(),
-        toDate: new Date(state.timeTo).getTime(),
+        fromDate: new Date(state.dateFrom).getTime(),
+        toDate: new Date(state.dateTo).getTime(),
         timeUnits: [state.timeUnit],
         aggregateBy: [state.aggregate],
       });
@@ -88,8 +98,8 @@ export const StatsPage = () => {
 
   const statsRequest = useMemo<IRequestStats>(() => {
     return {
-      fromDate: new Date(state.timeFrom).getTime(),
-      toDate: new Date(state.timeTo).getTime(),
+      fromDate: new Date(state.dateFrom).getTime(),
+      toDate: new Date(state.dateTo).getTime(),
       timeUnit: state.timeUnit,
       aggregateBy: state.aggregate,
       eventType: state.eventType,
@@ -167,6 +177,7 @@ export const StatsPage = () => {
       </StyledHeader>
 
       <StyledFieldGroup>
+        {/* Date From */}
         <StyledField>
           <StyledFieldLabel>Date From</StyledFieldLabel>
           {!state.showDateFromRangePicker ? (
@@ -174,27 +185,34 @@ export const StatsPage = () => {
               <StyledFieldLValueSmall>Since Forever</StyledFieldLValueSmall>
               <Button
                 icon={<FaCalendarPlus />}
-                onClick={() =>
+                onClick={() => {
                   dispatch({
                     type: "showDateFromRangePickerUpdate",
                     payload: true,
-                  })
-                }
+                  });
+                  dispatch({
+                    type: "dateFromUpdate",
+                    payload: new Date(
+                      new Date().setFullYear(new Date().getFullYear() - 5)
+                    ).toISOString(),
+                  });
+                }}
                 color="primary"
                 inverted
                 tooltipLabel="Add custom date from"
                 noBorder
+                noBackground
               />
             </StyledDateInputWrapper>
           ) : (
             <StyledDateInputWrapper>
               <Input
                 type="date"
-                value={state.timeFrom.slice(0, 16)}
+                value={isoToDatePicker(state.dateFrom)}
                 onChangeFn={(value) =>
                   dispatch({
-                    type: "timeFromUpdate",
-                    payload: new Date(value).toISOString(),
+                    type: "dateFromUpdate",
+                    payload: datePickerToIso(value),
                   })
                 }
               />
@@ -206,10 +224,9 @@ export const StatsPage = () => {
                     payload: false,
                   });
                   dispatch({
-                    type: "timeFromUpdate",
+                    type: "dateFromUpdate",
                     payload: new Date(0).toISOString(),
                   });
-                  updateToCurrentTime();
                 }}
                 color="primary"
                 inverted
@@ -219,6 +236,8 @@ export const StatsPage = () => {
             </StyledDateInputWrapper>
           )}
         </StyledField>
+
+        {/* Date To */}
         <StyledField>
           <StyledFieldLabel>Date To</StyledFieldLabel>
           {!state.showDateToRangePicker ? (
@@ -226,39 +245,43 @@ export const StatsPage = () => {
               <StyledFieldLValueSmall>Until Now</StyledFieldLValueSmall>
               <Button
                 icon={<FaCalendarPlus />}
-                onClick={() =>
+                onClick={() => {
+                  dispatch({
+                    type: "dateToUpdate",
+                    payload: new Date().toISOString(),
+                  });
                   dispatch({
                     type: "showDateToRangePickerUpdate",
                     payload: true,
-                  })
-                }
+                  });
+                }}
                 color="primary"
                 inverted
                 tooltipLabel="Add custom date to"
                 noBorder
+                noBackground
               />
             </StyledDateInputWrapper>
           ) : (
             <StyledDateInputWrapper>
               <Input
                 type="date"
-                value={state.timeTo.slice(0, 16)}
+                value={isoToDatePicker(state.dateTo)}
                 onChangeFn={(value) =>
                   dispatch({
-                    type: "timeToUpdate",
-                    payload: new Date(value).toISOString(),
+                    type: "dateToUpdate",
+                    payload: datePickerToIso(value),
                   })
                 }
               />
               <Button
                 icon={<FaTimes />}
-                onClick={() => {
+                onClick={() =>
                   dispatch({
                     type: "showDateToRangePickerUpdate",
                     payload: false,
-                  });
-                  updateToCurrentTime();
-                }}
+                  })
+                }
                 color="primary"
                 inverted
                 tooltipLabel="Reset to Until Now"
@@ -424,8 +447,8 @@ export const StatsPage = () => {
               style={{ display: "flex", flexDirection: "column", gap: "2px" }}
             >
               <span style={{ fontSize: "12px", color: "#6c757d" }}>
-                Range: {new Date(state.timeFrom).toLocaleDateString()} -{" "}
-                {new Date(state.timeTo).toLocaleDateString()}
+                Range: {new Date(state.dateFrom).toLocaleDateString()} -{" "}
+                {new Date(state.dateTo).toLocaleDateString()}
               </span>
               <span style={{ fontSize: "12px", color: "#6c757d" }}>
                 Settings: {state.timeUnit} | {state.aggregate} |{" "}

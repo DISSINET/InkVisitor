@@ -1,8 +1,8 @@
 import { Aggregation, EventType, TimeUnit } from "@shared/types/stats";
 
 export interface StatsStore {
-  timeFrom: string;
-  timeTo: string;
+  dateFrom: string;
+  dateTo: string;
 
   timeUnit: TimeUnit;
   aggregate: Aggregation;
@@ -14,8 +14,8 @@ export interface StatsStore {
 }
 
 export type StatsStoreAction =
-  | { type: "timeFromUpdate"; payload: string }
-  | { type: "timeToUpdate"; payload: string }
+  | { type: "dateFromUpdate"; payload: string }
+  | { type: "dateToUpdate"; payload: string }
   | { type: "timeUnitUpdate"; payload: TimeUnit }
   | { type: "aggregateUpdate"; payload: Aggregation }
   | { type: "eventTypeUpdate"; payload: EventType }
@@ -25,8 +25,8 @@ export type StatsStoreAction =
   | { type: "showDateToRangePickerUpdate"; payload: boolean };
 
 export const initialState: StatsStore = {
-  timeFrom: new Date(0).toISOString(), // Unix epoch - "since forever"
-  timeTo: new Date().toISOString(),
+  dateFrom: new Date(0).toISOString(), // Unix epoch - "since forever"
+  dateTo: new Date().toISOString(),
   timeUnit: TimeUnit.YEAR,
   aggregate: Aggregation.USER,
   eventType: [EventType.EDIT, EventType.DELETE, EventType.CREATE],
@@ -41,10 +41,10 @@ export const statsReducer = (
   action: StatsStoreAction
 ): StatsStore => {
   switch (action.type) {
-    case "timeFromUpdate":
-      return { ...state, timeFrom: action.payload };
-    case "timeToUpdate":
-      return { ...state, timeTo: action.payload };
+    case "dateFromUpdate":
+      return { ...state, dateFrom: action.payload };
+    case "dateToUpdate":
+      return { ...state, dateTo: action.payload };
     case "timeUnitUpdate":
       return { ...state, timeUnit: action.payload };
     case "aggregateUpdate":
