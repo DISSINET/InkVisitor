@@ -25,7 +25,7 @@ export type StatsStoreAction =
   | { type: "showDateToRangePickerUpdate"; payload: boolean };
 
 export const initialState: StatsStore = {
-  dateFrom: new Date(0).toISOString(), // Unix epoch - "since forever"
+  dateFrom: new Date("2000-01-01").toISOString(),
   dateTo: new Date().toISOString(),
   timeUnit: TimeUnit.YEAR,
   aggregate: Aggregation.USER,
