@@ -225,7 +225,7 @@ export const StatsPage = () => {
                   });
                   dispatch({
                     type: "dateFromUpdate",
-                    payload: new Date(0).toISOString(),
+                    payload: new Date("2000-01-01").toISOString(),
                   });
                 }}
                 color="primary"
