@@ -2,6 +2,8 @@
 
 ### New Features:
 
+- Anchors now have the elvl attribute #2683
+- Import and editing of XML in Annotator #2510
 - Search by JS regex #2781
 - Replace all in annotator search #2583
 - Children territories are now paginated under the parents #1436
@@ -11,6 +13,9 @@
 
 ### Bug Fixes and Improvements:
 
+- Fixed Ctrl+Enter skipping the Entity create modal #2803
+- Fixed Stats not updating #2787
+- Stats default date since forever & until now #2788
 - Close annotator highlight menu on click outside of the statements list box #2765
 - Changed tree filter to "OR" by default #2759
 - Anchor overlap prevention #2403
@@ -25,6 +30,7 @@
 - Relabeled all to any in search #2746
 - Added Early New High German as Label language #2758
 - Validation rules do not apply to templates anymore #2531
+- Fixed document export dialog scrolling #2798
 
 ### Documentation:
 
