@@ -25,9 +25,17 @@ export const StyledFieldGroup = styled.div`
   width: 100%;
   padding-bottom: 10px;
   grid-template-columns: repeat(6, auto);
-  gap: 5rem;
   align-items: end;
   justify-content: center;
+  gap: 5rem;
+
+  @media (max-width: 1200px) {
+    gap: 4rem;
+  }
+
+  @media (max-width: 1000px) {
+    gap: 2rem;
+  }
 `;
 
 export const StyledField = styled.div`
@@ -43,6 +51,7 @@ export const StyledFieldLabel = styled.div`
   color: ${({ theme }) => theme.color["primary"]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+  white-space: nowrap;
 `;
 export const StyledFieldInput = styled.div`
   display: grid;
@@ -59,6 +68,7 @@ export const StyledDateInputWrapper = styled.div`
 export const StyledFieldLValueSmall = styled.i`
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   color: ${({ theme }) => theme.color["info"]};
+  white-space: nowrap;
 `;
 
 export const StyledResultsChart = styled.div`
