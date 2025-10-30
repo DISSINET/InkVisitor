@@ -6,7 +6,13 @@ import { Aggregation, EventType, TimeUnit } from "@shared/types/stats";
 import { Button, ButtonGroup, Checkbox, Input, Loader } from "components";
 import { useEffect, useMemo, useReducer, useState } from "react";
 import { useAppSelector } from "redux/hooks";
-import { FaCalendarPlus, FaTimes } from "react-icons/fa";
+import {
+  FaCalendarPlus,
+  FaDatabase,
+  FaSync,
+  FaSyncAlt,
+  FaTimes,
+} from "react-icons/fa";
 import { USER_THRESHOLD_MAX } from "./constants";
 import { StatsChart } from "./StatsChart/StatsChart";
 import { StatsTable } from "./StatsTable/StatsTable";
@@ -37,6 +43,7 @@ import {
   StyledResultsTable,
   StyledStyledQueryState,
 } from "./StatsPageStyles";
+import { AttributeButtonGroup } from "components/advanced/AttributeButtonGroup/AttributeButtonGroup";
 
 export const StatsPage = () => {
   const client = useQueryClient();
@@ -162,16 +169,44 @@ export const StatsPage = () => {
 
         <ButtonGroup>
           <span>
-            <StyledEndpointStatus $isMaterialized={state.useMaterialized}>
-              {state.useMaterialized ? "⚡ Materialized" : "🔄 Live Data"}
-            </StyledEndpointStatus>
+            <AttributeButtonGroup
+              noMargin
+              options={[
+                {
+                  icon: <FaSyncAlt size={10} />,
+                  longValue: "Classic (Live Data)",
+                  shortValue: "Classic",
+                  onClick: () => {
+                    dispatch({
+                      type: "useMaterializedUpdate",
+                      payload: false,
+                    });
+                  },
+                  selected: !state.useMaterialized,
+                },
+                {
+                  icon: <FaDatabase />,
+                  longValue: "Fast (Pre-calculated)",
+                  shortValue: "Fast",
+                  onClick: () => {
+                    dispatch({
+                      type: "useMaterializedUpdate",
+                      payload: true,
+                    });
+                  },
+                  selected: state.useMaterialized,
+                },
+              ]}
+            />
           </span>
 
           <Button
             color="success"
             label="Refresh"
             disabled={isLoadingStats}
-            onClick={updateToCurrentTime}
+            onClick={
+              state.useMaterialized ? triggerAggregation : updateToCurrentTime
+            }
           />
         </ButtonGroup>
       </StyledHeader>
@@ -367,9 +402,10 @@ export const StatsPage = () => {
             />
           </StyledField>
         )}
+      </StyledFieldGroup>
 
-        {/* Materialized Data */}
-        <StyledField>
+      {/* Materialized Data */}
+      {/* <StyledField>
           <StyledFieldLabel>Use Materialized Data</StyledFieldLabel>
           <Checkbox
             value={state.useMaterialized}
@@ -402,10 +438,9 @@ export const StatsPage = () => {
             label="Show Advanced Options"
             tooltipLabel="Show options for manually triggering data aggregation"
           />
-        </StyledField>
-      </StyledFieldGroup>
+        </StyledField> */}
 
-      {state.showAggregateOptions && (
+      {/* {state.showAggregateOptions && (
         <div
           style={{
             padding: "20px",
@@ -478,7 +513,7 @@ export const StatsPage = () => {
             </div>
           )}
         </div>
-      )}
+      )} */}
 
       <StyledResponseSection>
         {isError && <StyledStyledQueryState>Error</StyledStyledQueryState>}
