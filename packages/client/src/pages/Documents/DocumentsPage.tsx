@@ -187,7 +187,7 @@ export const DocumentsPage: React.FC = ({}) => {
               <input
                 ref={inputRef}
                 type="file"
-                accept=".txt"
+                accept=".txt,.xml"
                 title="x"
                 onChange={handleFileChange}
                 hidden
