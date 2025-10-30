@@ -1,5 +1,6 @@
 import { EntityEnums } from "@shared/enums";
 import { IAnchorsNode } from "@shared/types/document";
+import { createOpeningTagRegex, closingTagRegex, createAnyTagRegex } from "@common/regex";
 
 export class AnchorsNode implements IAnchorsNode {
   anchor: string;
@@ -35,15 +36,17 @@ export class AnchorsNode implements IAnchorsNode {
   * @returns
   */
   static buildAnchorsTree(content: string, entityIds: Record<EntityEnums.Class, string[]>): AnchorsNode[] {
-    const tagPattern = /<\/?([\w\-.]+)>/g; // Regex to match <tag> or </tag>
+    const anyTagPattern = createAnyTagRegex(); // Regex to match any tag with optional attributes
     const rootNodes: AnchorsNode[] = []; // List of root nodes
     const nodeStack: AnchorsNode[] = []; // Stack to keep track of the current node
 
     let lastIndex = 0;
     let match: RegExpExecArray | null;
 
-    while ((match = tagPattern.exec(content)) !== null) {
-      const tag = match[1];
+    while ((match = anyTagPattern.exec(content)) !== null) {
+      const tagContent = match[1];
+      // Extract only the tag name (first word before any attributes or spaces)
+      const tag = tagContent.split(/\s+/)[0];
       const isClosingTag = content[match.index + 1] === "/";
 
       // Add text content between tags to the parent node
@@ -91,7 +94,7 @@ export class AnchorsNode implements IAnchorsNode {
         }
       }
 
-      lastIndex = tagPattern.lastIndex;
+      lastIndex = anyTagPattern.lastIndex;
     }
 
     // Handle any remaining text after the last tag

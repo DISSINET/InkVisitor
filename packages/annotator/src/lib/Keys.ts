@@ -250,9 +250,13 @@ export default class Keys {
       return;
     }
     this.text.insertNewline(this.viewport, this.cursor);
-    this.cursor.moveToNewline();
-    if (!this.text.cursorToIndex(this.viewport, this.cursor)) {
-      this.cursor.move(0, -1);
+
+    if (this.cursor.yLine + 1 >= this.viewport.noLines) {
+    // either scroll to the end of the document
+      this.viewport.scrollTo(this.cursor.yLine + this.viewport.lineStart, this.text.noLines);
+    } else {
+      // or just move to the next line if viewport allows it
+      this.cursor.moveToNewline();
     }
   }
 

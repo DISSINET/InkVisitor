@@ -75,6 +75,7 @@ export const StyledAnnotatorItemContent = styled.div`
 
 export const StyledAnnotatorItemContentLine = styled.div`
   display: flex;
+  align-items: center;
   gap: ${({ theme }) => theme.space[2]};
 `;
 

@@ -10,7 +10,9 @@ import {
   space7,
 } from "Theme/theme-space-shortcut";
 
-interface ModalWrap {}
+interface ModalWrap {
+  $lowerZIndex: boolean;
+}
 export const StyledModalWrap = styled.div<ModalWrap>`
   display: flex;
   flex-direction: column;
@@ -22,7 +24,7 @@ export const StyledModalWrap = styled.div<ModalWrap>`
   left: 0;
   right: 0;
   top: 0;
-  z-index: 150;
+  z-index: ${({ $lowerZIndex }) => ($lowerZIndex ? "90" : "150")};
 `;
 export const StyledBackground = styled(animated.div)`
   position: absolute;

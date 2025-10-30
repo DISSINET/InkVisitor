@@ -28,6 +28,7 @@ import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice"
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { COLLAPSED_TABLE_WIDTH, SECOND_PANEL_MIN_WIDTH } from "Theme/constants";
 import {
+  DetailBoxState,
   EntitiesDeleteSuccessResponse,
   StatementListDisplayMode,
   StatementOrderCorrection,
@@ -95,6 +96,7 @@ export const StatementListBox: React.FC = () => {
     setTerritoryId,
     statementId,
     setStatementId,
+    selectedDetailId,
     detailIdArray,
     removeDetailId,
     appendDetailId,
@@ -137,6 +139,18 @@ export const StatementListBox: React.FC = () => {
     },
     enabled: !!territoryId && api.isLoggedIn() && statementListOpened,
   });
+
+  // Debug logging for territory query
+  // console.log("Territory query debug:", {
+  //   territoryId,
+  //   statementListOpened,
+  //   isLoggedIn: api.isLoggedIn(),
+  //   queryEnabled: !!territoryId && api.isLoggedIn() && statementListOpened,
+  //   status,
+  //   territory,
+  //   error,
+  //   isFetchingTerritory,
+  // });
 
   const { statements, entities, right } = territory || initialData;
 
@@ -181,20 +195,20 @@ export const StatementListBox: React.FC = () => {
   const [storedAnnotatorResourceId, setStoredAnnotatorResourceId] = useState<
     string | false
   >(false);
-  const [storedAnnotatorScroll, setStoredAnnotatorScroll] = useState<number>(0);
+  // const [storedAnnotatorScroll, setStoredAnnotatorScroll] = useState<number>(0);
 
   // so the annotator jumps to the anchor
   useEffect(() => {
     setStoredAnnotatorResourceId(false);
-    setStoredAnnotatorScroll(0);
+    // setStoredAnnotatorScroll(0);
   }, [territoryId]);
 
   // its needed as the scroll event is executed even when the annotator is not active
-  useEffect(() => {
-    if (!storedAnnotatorResourceId) {
-      setStoredAnnotatorScroll(0);
-    }
-  }, [storedAnnotatorResourceId]);
+  // useEffect(() => {
+  // if (!storedAnnotatorResourceId) {
+  // setStoredAnnotatorScroll(0);
+  // }
+  // }, [storedAnnotatorResourceId]);
 
   // delay of show content for fluent animation on open
   const [showStatementList, setShowStatementList] = useState(true);
@@ -218,6 +232,7 @@ export const StatementListBox: React.FC = () => {
       useAnnotatorSetAnnotator(annotator);
     }
   }, [annotator, useAnnotatorSetAnnotator]);
+
   const {
     data: resources,
     error: resourcesError,
@@ -709,19 +724,24 @@ export const StatementListBox: React.FC = () => {
     },
   });
 
-  // TODO: migrate to annotator to limit updates in statement list box
-  const {
-    ref: contentRef,
-    // TODO: calculate height - contentHeight / 2 - StatementListHeader height ?
-    height: contentHeight = 0,
-    // width: contentWidth = 0,
-  } = useResizeObserver<HTMLDivElement>({
-    debounceDelay: 50,
-  });
-
   const contentWidth = useAppSelector(
     (state) => state.layout.mainPage.secondPanelRealWidth
   );
+  const contentHeight = useAppSelector((state) => state.layout.contentHeight);
+  const detailBoxState = useAppSelector(
+    (state) => state.layout.mainPage.detailBoxState
+  );
+
+  const statementListHeaderHeight = 103;
+  const contentHeightAnnotator = useMemo(() => {
+    if (!selectedDetailId) {
+      return contentHeight - statementListHeaderHeight;
+    } else if (detailBoxState === DetailBoxState.Normal) {
+      return contentHeight / 2 - statementListHeaderHeight;
+    } else if (detailBoxState === DetailBoxState.Minimized) {
+      return contentHeight - statementListHeaderHeight - 56; // 56 is the height of the submit button
+    }
+  }, [contentHeight, detailBoxState, selectedDetailId]);
 
   // adds object orderCorrection to each statement with info about the order in the list vs the annotator
   const statementsWithOrder: (IResponseStatement & {
@@ -855,29 +875,27 @@ export const StatementListBox: React.FC = () => {
     <StyledStatementListBox ref={statementListBoxRef}>
       {showStatementList && (
         <>
-          {territory && (
-            <StatementListHeader
-              territory={territory}
-              isFetchingTerritory={isFetchingTerritory}
-              selectedRows={selectedRows}
-              setSelectedRows={setSelectedRows}
-              isAllSelected={
-                isListNonEmpty && selectedRows.length === statements.length
-              }
-              moveStatementsMutation={moveStatementsMutation}
-              duplicateStatementsMutation={duplicateStatementsMutation}
-              replaceReferencesMutation={replaceReferencesMutation}
-              appendReferencesMutation={appendReferencesMutation}
-              updateTerritoryMutation={updateTerritoryMutation}
-              // duplicateTerritoryMutation={duplicateTerritoryMutation}
-              deleteStatementsMutation={deleteStatementsMutation}
-              relationsCreateMutation={relationsCreateMutation}
-              favoritedTerritoryIds={favoritedTerritoryIds}
-              contentWidthTooNarrow={contentWidth < SECOND_PANEL_MIN_WIDTH + 60}
-              statementsWithOrder={statementsWithOrder}
-              autoOrderStatementsMutation={autoOrderStatementsMutation}
-            />
-          )}
+          <StatementListHeader
+            territory={territory}
+            isFetchingTerritory={isFetchingTerritory}
+            selectedRows={selectedRows}
+            setSelectedRows={setSelectedRows}
+            isAllSelected={
+              isListNonEmpty && selectedRows.length === statements.length
+            }
+            moveStatementsMutation={moveStatementsMutation}
+            duplicateStatementsMutation={duplicateStatementsMutation}
+            replaceReferencesMutation={replaceReferencesMutation}
+            appendReferencesMutation={appendReferencesMutation}
+            updateTerritoryMutation={updateTerritoryMutation}
+            // duplicateTerritoryMutation={duplicateTerritoryMutation}
+            deleteStatementsMutation={deleteStatementsMutation}
+            relationsCreateMutation={relationsCreateMutation}
+            favoritedTerritoryIds={favoritedTerritoryIds}
+            contentWidthTooNarrow={contentWidth < SECOND_PANEL_MIN_WIDTH + 60}
+            statementsWithOrder={statementsWithOrder}
+            autoOrderStatementsMutation={autoOrderStatementsMutation}
+          />
           {!territoryId && (
             <StyledInfoWrapper>
               <StyledEmptyState>
@@ -903,7 +921,9 @@ export const StatementListBox: React.FC = () => {
             )}
 
           {territoryId && (
-            <StyledContentWrapper ref={contentRef}>
+            <StyledContentWrapper
+            // ref={contentRef}
+            >
               <CustomScrollbar
                 scrollerId="Statements"
                 elementId="Statements-box-table"
@@ -958,18 +978,17 @@ export const StatementListBox: React.FC = () => {
 
               {displayMode === StatementListDisplayMode.TEXT && (
                 <StatementListTextAnnotator
-                  key={territoryId}
-                  contentHeight={contentHeight}
+                  contentHeight={contentHeightAnnotator || 0}
                   contentWidth={contentWidth - 10}
                   territoryId={territoryId}
                   territory={territory}
                   statementId={statementId}
-                  storedAnnotatorScroll={storedAnnotatorScroll}
-                  setStoredAnnotatorScroll={(newScroll) => {
-                    if (storedAnnotatorResourceId) {
-                      setStoredAnnotatorScroll(newScroll);
-                    }
-                  }}
+                  // storedAnnotatorScroll={storedAnnotatorScroll}
+                  // setStoredAnnotatorScroll={(newScroll) => {
+                  //   if (storedAnnotatorResourceId) {
+                  //     setStoredAnnotatorScroll(newScroll);
+                  //   }
+                  // }}
                   hlEntities={hlEntities}
                   setHlEntities={setHlEntities}
                   addStatementAtCertainIndex={addStatementAtCertainIndex}
@@ -994,13 +1013,14 @@ export const StatementListBox: React.FC = () => {
 
               {statementListTableIsLoading &&
                 tableWidth > 0 &&
-                contentHeight > 0 && (
+                contentHeightAnnotator &&
+                contentHeightAnnotator > 0 && (
                   <StyledLoaderWrap
                     $width={tableWidth + 4}
                     $height={
                       displayMode === StatementListDisplayMode.TEXT
-                        ? contentHeight - 56
-                        : contentHeight + 4
+                        ? contentHeightAnnotator - 56
+                        : contentHeightAnnotator + 4
                     }
                   >
                     <Loader show size={50} />

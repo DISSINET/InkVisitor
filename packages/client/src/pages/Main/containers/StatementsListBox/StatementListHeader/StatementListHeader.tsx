@@ -58,7 +58,7 @@ import {
 } from "./StatementListHeaderStyles";
 
 interface StatementListHeader {
-  territory: IResponseTerritory;
+  territory?: IResponseTerritory;
   isFetchingTerritory: boolean;
 
   isAllSelected: boolean;
@@ -105,16 +105,6 @@ interface StatementListHeader {
     },
     unknown
   >;
-  // duplicateTerritoryMutation: UseMutationResult<
-  //   AxiosResponse<IResponseGeneric<any>, any>,
-  //   Error,
-  //   {
-  //     territoryId: string;
-  //     targets: string[];
-  //     withChildren: boolean;
-  //   },
-  //   unknown
-  // >;
   deleteStatementsMutation: UseMutationResult<
     (EntitiesDeleteSuccessResponse | EntitiesDeleteErrorResponse)[],
     Error,
@@ -149,7 +139,6 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   appendReferencesMutation,
 
   updateTerritoryMutation,
-  // duplicateTerritoryMutation,
 
   deleteStatementsMutation,
   relationsCreateMutation,
@@ -378,13 +367,12 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
             ?.concat(territoryId)
             .map((tId: string, key: number) => {
               return (
-                <React.Fragment key={key}>
-                  <BreadcrumbItem
-                    territoryId={tId}
-                    isFavorited={favoritedTerritoryIds?.includes(tId)}
-                    isSelected={tId === territoryId}
-                  />
-                </React.Fragment>
+                <BreadcrumbItem
+                  key={key}
+                  territoryId={tId}
+                  isFavorited={favoritedTerritoryIds?.includes(tId)}
+                  isSelected={tId === territoryId}
+                />
               );
             })}
       </React.Fragment>
@@ -400,8 +388,8 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
     (s) => s.isAnchored && s.orderCorrection && s.orderCorrection.distance > 0
   );
 
-  const oldParentTerritory = territory.data.parent
-    ? territory.entities[territory.data.parent.territoryId]
+  const oldParentTerritory = territory?.data.parent
+    ? territory?.entities[territory.data.parent.territoryId]
     : undefined;
 
   return (
@@ -534,7 +522,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
         )}
       </StyledHeader>
 
-      {oldParentTerritory && showTActionModal && (
+      {oldParentTerritory && showTActionModal && territory && (
         <TerritoryActionModal
           territory={territory}
           oldParentTerritory={oldParentTerritory}

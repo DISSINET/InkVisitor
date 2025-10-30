@@ -5,20 +5,16 @@ export const StyledHeader = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
-  padding: ${({ theme }) => theme.space[3]};
 `;
 export const StyledHeaderBreadcrumbRow = styled.div`
   display: inline-flex;
   align-items: center;
-  flex-wrap: wrap;
   justify-content: left;
-  margin-bottom: 0.3rem;
+  margin-top: 0.2rem;
+  height: 2.7rem;
+  margin-bottom: 0.8rem;
 `;
 
-export const StyledHeaderBreadcrumbRowLeft = styled.div`
-  display: inline-flex;
-  align-items: center;
-`;
 export const StyledMoveToParent = styled(animated.div)`
   position: relative;
   font-size: ${({ theme }) => theme.fontSize["sm"]};
@@ -44,7 +40,9 @@ export const StyledSuggesterRow = styled.div`
   align-items: center;
   color: ${({ theme }) => theme.color["info"]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
+  padding-right: 0.5rem;
   height: 2.5rem;
+  margin-bottom: 0.6rem;
 `;
 export const StyledActionsWrapper = styled.div`
   padding-left: 0.5rem;

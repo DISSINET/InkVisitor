@@ -8,24 +8,29 @@ import { closingTagRegex, createOpeningTagRegex, tagRemovalRegex } from "./Annot
  * Tags can be opening or closing tags and may contain attributes.
  */
 export class Tag {
-  position: number;
-  tag: string;
-  closing?: boolean;
+  readonly position: number; // raw position in segment text
+  readonly relativeParsedPosition: number; // relative position in parsed segment text
+  readonly closing?: boolean;
+  readonly segmentIndex: number; // index of the segment containing this tag
+
+  private tagContent: string; // div id="12"
   attributes: Record<string, string>;
-  relativeParsedPosition: number;
+
 
   /**
    * Creates a new Tag instance.
    * 
    * @param position - The absolute position of the tag in the raw text
-   * @param tag - The tag name (e.g., "person", "location")
+   * @param tag - The tag name (e.g., "person", "location" along with attributes)
    * @param closing - Whether this is a closing tag (default: false)
    * @param segment - Optional segment reference for calculating relative position
+   * @param segmentIndex - The index of the segment containing this tag
    */
-  constructor(position: number, tag: string, closing?: boolean, segment?: Segment) {
+  constructor(position: number, tag: string, closing?: boolean, segment?: Segment, segmentIndex?: number) {
     this.position = position;
-    this.tag = tag;
+    this.tagContent = tag;
     this.closing = closing;
+    this.segmentIndex = segmentIndex ?? -1; // Default to -1 if not provided
     this.attributes = this.parseAttributes(tag);
     this.relativeParsedPosition = this.calculateRelativeParsedPosition(segment);
   }
@@ -93,14 +98,14 @@ export class Tag {
     // Subtract length of all opening tags before this position
     for (const tag of segment.openingTags) {
       if (tag.position < this.position) {
-        parsedPosition -= tag.tag.length + 2; // +2 for < and >
+        parsedPosition -= tag.getTag().length; 
       }
     }
     
     // Subtract length of all closing tags before this position
     for (const tag of segment.closingTags) {
       if (tag.position < this.position) {
-        parsedPosition -= tag.tag.length + 3; // +3 for </ and >
+        parsedPosition -= tag.getTag().length;
       }
     }
     
@@ -117,14 +122,46 @@ export class Tag {
    */
   getTag(): string {
     if (this.closing) {
-      return `</${this.tag}>`;
+      return `</${this.getTagName()}>`;
     }
-    let openTag = `<${this.tag}`;
+    let openTag = `<${this.getTagName()}`;
     for (const [key, value] of Object.entries(this.attributes)) {
       openTag += ` ${key}="${value}"`;
     }
     openTag += '>';
     return openTag;
+  }
+
+  /**
+   * Gets the base tag name without attributes.
+   * 
+   * Extracts just the tag name from the parsed tag content.
+   * For example, if tag contains "div id='123' class='container'", this returns "div".
+   * 
+   * @returns The base tag name
+   */
+  getTagName(): string {
+    // Split by whitespace and take the first part (the tag name)
+    return this.tagContent.trim().split(/\s+/)[0];
+  }
+
+  /**
+   * Sets the attributes for this tag.
+   * 
+   * Updates the attributes object with the provided key-value pairs.
+   * This method allows modifying tag attributes after the tag has been created.
+   * 
+   * @param attributes - Object containing the new attributes to set
+   * 
+   * @example
+   * // Set new attributes
+   * tag.setAttributes({id: "123", class: "highlight"});
+   * 
+   * // Update existing attributes
+   * tag.setAttributes({id: "456"});
+   */
+  setAttributes(attributes: Record<string, string>): void {
+    this.attributes = { ...this.attributes, ...attributes };
   }
 }
 
@@ -140,14 +177,17 @@ export class Segment {
   openingTags: Tag[] = [];
   closingTags: Tag[] = [];
   lines: string[] = [];
+  segmentIndex: number = -1; // index of this segment in the text
 
   /**
    * Creates a new Segment from raw text.
    * 
    * @param text - The raw text content for this segment
+   * @param segmentIndex - The index of this segment in the text
    */
-  constructor(text: string) {
+  constructor(text: string, segmentIndex: number = -1) {
     this.raw = text;
+    this.segmentIndex = segmentIndex;
     this.parseText();
   }
 
@@ -169,12 +209,12 @@ export class Segment {
     // Find opening tags
     let match;
     while ((match = openingRegex.exec(this.raw)) !== null) {
-      this.openingTags.push(new Tag(match.index, match[1], false, this));
+      this.openingTags.push(new Tag(match.index, match[1], false, this, this.segmentIndex));
     }
 
     // Find closing tags
     while ((match = closingRegex.exec(this.raw)) !== null) {
-      this.closingTags.push(new Tag(match.index, match[1], true, this));
+      this.closingTags.push(new Tag(match.index, match[1], true, this, this.segmentIndex));
     }
 
     // Remove tags from the text
@@ -265,12 +305,12 @@ export class Segment {
     let parsedTextOpenPosition = this.openingTags
       .filter((t) => t.position < tag.position)
       .reduce((acc, cur) => {
-        return acc - cur.tag.length - 2;
+        return acc - cur.getTag().length;
       }, tag.position);
     parsedTextOpenPosition = this.closingTags
       .filter((t) => t.position < tag.position)
       .reduce((acc, cur) => {
-        return acc - cur.tag.length - 3;
+        return acc - cur.getTag().length;
       }, parsedTextOpenPosition);
 
     // fold text-lines to get line-based positon (2d instead of 1d coordinates)
@@ -371,7 +411,7 @@ class Text {
 
     for (let i = 0; i < segmentsArray.length; i++) {
       const segmentText = segmentsArray[i];
-      segments.push(new Segment(segmentText));
+      segments.push(new Segment(segmentText, i));
     }
 
     this.segments = segments;
@@ -454,9 +494,6 @@ class Text {
       }
     }
 
-    // Performance check
-    // const time2 = performance.now();
-    // console.log(`${time2 - time1} ms `);
     this.noLines = this.segments.reduce<number>(
       (a, c) => a + c.lines.length,
       0
@@ -571,7 +608,7 @@ class Text {
 
           for (const tag of tags) {
             if (tag.position <= rawTextIndex) {
-              parsedTextIndex -= tag.tag.length + (tag.closing ? 3 : 2);
+              parsedTextIndex -= tag.getTag().length;
             }
           }
         }
@@ -715,7 +752,7 @@ class Text {
             ? tag.position < rawTextIndex
             : tag.position <= rawTextIndex
         ) {
-          rawTextIndex += tag.tag.length + (tag.closing ? 3 : 2);
+          rawTextIndex += tag.getTag().length;
         }
       }
     }
@@ -1084,7 +1121,7 @@ class Text {
     // Search for the opening tag
     for (const segment of this.segments) {
       for (const openingTag of segment.openingTags) {
-        if (openingTag.tag === tag) {
+        if (openingTag.getTagName() === tag) {
           if (openingTagIndex === index) {
             openingTagMatch = { tag: openingTag, segment };
             break;
@@ -1098,7 +1135,7 @@ class Text {
     // Search for the closing tag
     for (const segment of this.segments) {
       for (const closingTag of segment.closingTags) {
-        if (closingTag.tag === tag) {
+        if (closingTag.getTagName() === tag) {
           if (closingTagIndex === index) {
             closingTagMatch = { tag: closingTag, segment };
             break;

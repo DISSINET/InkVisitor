@@ -39,7 +39,13 @@ const DocumentModalEdit: React.FC<DocumentModalEdit> = ({
   });
 
   return (
-    <Modal width={1000} showModal={show} onClose={onClose} fullHeight>
+    <Modal
+      width={1000}
+      showModal={show}
+      onClose={onClose}
+      fullHeight
+      lowerZIndex
+    >
       <ModalHeader
         title={
           dataDocumentIsFetching
@@ -65,7 +71,6 @@ const DocumentModalEdit: React.FC<DocumentModalEdit> = ({
               height={windowHeight - 203}
               displayLineNumbers={true}
               hlEntities={[EntityEnums.Class.Territory]}
-              storedAnnotatorScroll={0}
               forwardAnnotator={(newAnnotator) => {
                 anchor?.entityId &&
                   newAnnotator?.scrollToAnchor(
@@ -74,6 +79,7 @@ const DocumentModalEdit: React.FC<DocumentModalEdit> = ({
                   );
               }}
               thisTerritoryEntityId={anchor?.entityId}
+              disableCreate
             />
           </AnnotatorProvider>
         ) : (

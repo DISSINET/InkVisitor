@@ -44,7 +44,7 @@ interface StatementListSearchLine {
   isSearchAllowed: boolean;
   annotatorWidthTooNarrow: boolean;
   showStatementList: boolean;
-  annotator?: Annotator;
+  annotator: Annotator | null;
   documentId?: string;
   dataDocument?: IDocument;
   currentAnchorExist: boolean;
@@ -354,10 +354,10 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
 
                     occurrencesToReplace.forEach((occurrence) => {
                       // Select the occurrence
-                      annotator.selectSearchOccurrence(occurrence);
+                      annotator?.selectSearchOccurrence(occurrence);
 
                       // Replace the text
-                      annotator.onReplaceText(replaceWith);
+                      annotator?.onReplaceText(replaceWith);
 
                       replacedCount++;
                     });

@@ -56,6 +56,7 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
       api.documentRemoveAnchor(data.documentId, entityId, data.anchorIndex),
     onSuccess(data, variables, context) {
       queryClient.invalidateQueries({ queryKey: ["entity"] });
+      queryClient.invalidateQueries({ queryKey: ["document"] });
     },
   });
 
