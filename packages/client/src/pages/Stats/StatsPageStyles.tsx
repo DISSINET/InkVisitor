@@ -3,10 +3,11 @@ import styled from "styled-components";
 export const StyledContainer = styled.div`
   position: relative;
   padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  display: grid;
+  grid-template-rows: auto auto 1fr 1fr;
+  gap: 1rem;
   width: 100%;
+  height: 100%;
 `;
 
 export const StyledHeader = styled.div`
@@ -58,8 +59,13 @@ export const StyledFieldLValueSmall = styled.i`
 `;
 
 export const StyledResultsChart = styled.div`
+  display: grid;
   width: 100%;
-  position: relative;
+  height: 100%;
+  /* Allow shrinking inside CSS Grid */
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
 `;
 
 export const StyledResultsTable = styled.div`
@@ -67,7 +73,12 @@ export const StyledResultsTable = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: ${(props) => props.theme.space[5]};
-  position: relative;
+  width: 100%;
+  height: 100%;
+  /* Allow shrinking inside CSS Grid */
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
 `;
 
 export const StyledResponseSection = styled.div``;

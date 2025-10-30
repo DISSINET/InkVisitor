@@ -45,7 +45,8 @@ export const StyledPayloadItem = styled.div`
 export const StyledLegendWrapper = styled.div`
   display: flex;
   flex-direction: row;
-  gap: ${({ theme }) => theme.space[1]};
+  column-gap: ${({ theme }) => theme.space[1]};
+  row-gap: ${({ theme }) => theme.space[2]};
   flex-wrap: wrap;
   z-index: 2;
 `;

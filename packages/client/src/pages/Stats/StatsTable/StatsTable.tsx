@@ -11,7 +11,6 @@ import {
   StyledTd,
   StyledTh,
 } from "./StatsTableStyles";
-import { Loader } from "components/basic/Loader/Loader";
 
 interface StatsTableProps {
   data: IResponseStats;

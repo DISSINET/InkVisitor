@@ -192,7 +192,7 @@ export const StatsChart = ({
     <StyledChartWrapper>
       <BarChart
         width={width}
-        height={height - 30}
+        height={height}
         data={dataChart}
         onMouseLeave={() => {
           if (hoveringDataKey) {

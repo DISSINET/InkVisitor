@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 
 import { IRequestStats, IResponseStats } from "@shared/types";
@@ -44,6 +44,7 @@ import {
   StyledStyledQueryState,
 } from "./StatsPageStyles";
 import { AttributeButtonGroup } from "components/advanced/AttributeButtonGroup/AttributeButtonGroup";
+import { useResizeObserver } from "hooks";
 
 export const StatsPage = () => {
   const client = useQueryClient();
@@ -58,8 +59,6 @@ export const StatsPage = () => {
   );
 
   const [usersIgnoreBelowValue, setUsersIgnoreBelowValue] = useState<number>(0);
-  const [isAggregating, setIsAggregating] = useState<boolean>(false);
-  const [aggregateMessage, setAggregateMessage] = useState<string>("");
 
   // Update timeTo to current time when navigating to this page to correctly refresh the data
   useEffect(() => {
@@ -77,31 +76,24 @@ export const StatsPage = () => {
     });
   };
 
-  // Helper function to trigger manual aggregation
-  const triggerAggregation = async () => {
-    setIsAggregating(true);
-    setAggregateMessage("");
-
-    try {
-      const response = await api.statsAggregate({
-        fromDate: new Date(state.dateFrom).getTime(),
-        toDate: new Date(state.dateTo).getTime(),
-        timeUnits: [state.timeUnit],
-        aggregateBy: [state.aggregate],
-      });
-
-      setAggregateMessage(response.data.message);
-
-      // Invalidate stats queries to refresh data
-      client.invalidateQueries({ queryKey: ["stats"] });
-    } catch (error) {
-      setAggregateMessage(
-        `Error: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
-    } finally {
-      setIsAggregating(false);
-    }
-  };
+  // Manual aggregation via mutation (triggered on demand)
+  type StatsAggregateResponse = { message: string };
+  const { mutateAsync: aggregateMutateAsync, isPending: isAggregating } =
+    useMutation<StatsAggregateResponse, Error, void>({
+      mutationFn: async () => {
+        const response = await api.statsAggregate({
+          fromDate: new Date(state.dateFrom).getTime(),
+          toDate: new Date(state.dateTo).getTime(),
+          timeUnits: [state.timeUnit],
+          aggregateBy: [state.aggregate],
+        });
+        return response.data as StatsAggregateResponse;
+      },
+      onSuccess: (data) => {
+        client.invalidateQueries({ queryKey: ["stats"] });
+      },
+      onError: (error) => {},
+    });
 
   const statsRequest = useMemo<IRequestStats>(() => {
     return {
@@ -162,6 +154,21 @@ export const StatsPage = () => {
   const isError = isErrorStats && !isLoadingStats;
   const isNoData = !isLoadingStats && !isErrorStats && !data;
 
+  const {
+    ref: chartRef,
+    width: chartWidth,
+    height: chartHeight,
+  } = useResizeObserver<HTMLDivElement>({
+    debounceDelay: 50,
+  });
+  const {
+    ref: tableRef,
+    width: tableWidth,
+    height: tableHeight,
+  } = useResizeObserver<HTMLDivElement>({
+    debounceDelay: 50,
+  });
+
   return (
     <StyledContainer>
       <StyledHeader>
@@ -203,9 +210,11 @@ export const StatsPage = () => {
           <Button
             color="success"
             label="Refresh"
-            disabled={isLoadingStats}
+            disabled={isLoadingStats || isAggregating}
             onClick={
-              state.useMaterialized ? triggerAggregation : updateToCurrentTime
+              state.useMaterialized
+                ? () => void aggregateMutateAsync()
+                : updateToCurrentTime
             }
           />
         </ButtonGroup>
@@ -404,141 +413,30 @@ export const StatsPage = () => {
         )}
       </StyledFieldGroup>
 
-      {/* Materialized Data */}
-      {/* <StyledField>
-          <StyledFieldLabel>Use Materialized Data</StyledFieldLabel>
-          <Checkbox
-            value={state.useMaterialized}
-            onChangeFn={(value) =>
-              dispatch({
-                type: "useMaterializedUpdate",
-                payload: value,
-              })
-            }
-            label={
-              state.useMaterialized ? "Fast (Materialized)" : "Classic (Live)"
-            }
-            tooltipLabel={
-              state.useMaterialized
-                ? "Using pre-aggregated materialized data for faster performance"
-                : "Using live data from audit table (slower but always up-to-date)"
-            }
-          />
-        </StyledField>
-        <StyledField>
-          <StyledFieldLabel>Aggregate Options</StyledFieldLabel>
-          <Checkbox
-            value={state.showAggregateOptions}
-            onChangeFn={(value) =>
-              dispatch({
-                type: "showAggregateOptionsUpdate",
-                payload: value,
-              })
-            }
-            label="Show Advanced Options"
-            tooltipLabel="Show options for manually triggering data aggregation"
-          />
-        </StyledField> */}
-
-      {/* {state.showAggregateOptions && (
-        <div
-          style={{
-            padding: "20px",
-            backgroundColor: "#f8f9fa",
-            borderRadius: "8px",
-            border: "1px solid #dee2e6",
-            marginBottom: "20px",
-          }}
-        >
-          <h3 style={{ margin: "0 0 15px 0", color: "#495057" }}>
-            Manual Data Aggregation
-          </h3>
-          <p
-            style={{ margin: "0 0 15px 0", color: "#6c757d", fontSize: "14px" }}
-          >
-            Manually trigger aggregation of stats data for the current date
-            range and settings. This will populate the materialized tables with
-            pre-calculated data for faster queries.
-          </p>
-
-          <div
-            style={{
-              display: "flex",
-              gap: "10px",
-              alignItems: "center",
-              marginBottom: "10px",
-            }}
-          >
-            <Button
-              color="primary"
-              inverted
-              radiusLeft
-              radiusRight
-              label={isAggregating ? "Aggregating..." : "Aggregate Data"}
-              disabled={isAggregating || isLoadingStats}
-              onClick={triggerAggregation}
+      {/* <StyledResponseSection> */}
+      {/* {isError && <StyledStyledQueryState>Error</StyledStyledQueryState>} */}
+      {/* {isNoData && <StyledStyledQueryState>No data</StyledStyledQueryState>} */}
+      {data && (
+        <>
+          <StyledResultsChart ref={chartRef}>
+            <StatsChart
+              data={data}
+              height={chartHeight ? Math.max(0, chartHeight) : 0}
+              width={chartWidth ? Math.max(0, chartWidth - 50) : 0}
+              request={statsRequest}
             />
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "2px" }}
-            >
-              <span style={{ fontSize: "12px", color: "#6c757d" }}>
-                Range: {new Date(state.dateFrom).toLocaleDateString()} -{" "}
-                {new Date(state.dateTo).toLocaleDateString()}
-              </span>
-              <span style={{ fontSize: "12px", color: "#6c757d" }}>
-                Settings: {state.timeUnit} | {state.aggregate} |{" "}
-                {state.eventType.join(", ")}
-              </span>
-            </div>
-          </div>
-
-          {aggregateMessage && (
-            <div
-              style={{
-                padding: "10px",
-                backgroundColor: aggregateMessage.includes("Error")
-                  ? "#f8d7da"
-                  : "#d1edff",
-                border: `1px solid ${
-                  aggregateMessage.includes("Error") ? "#f5c6cb" : "#b8daff"
-                }`,
-                borderRadius: "4px",
-                fontSize: "14px",
-                color: aggregateMessage.includes("Error")
-                  ? "#721c24"
-                  : "#004085",
-              }}
-            >
-              {aggregateMessage}
-            </div>
-          )}
-        </div>
-      )} */}
-
-      <StyledResponseSection>
-        {isError && <StyledStyledQueryState>Error</StyledStyledQueryState>}
-        {isNoData && <StyledStyledQueryState>No data</StyledStyledQueryState>}
-        {data && (
-          <>
-            <StyledResultsChart>
-              <StatsChart
-                data={data}
-                height={contentHeight / 3}
-                width={layoutWidth - 50}
-                request={statsRequest}
-              />
-            </StyledResultsChart>
-            <StyledResultsTable>
-              <StatsTable
-                data={data}
-                height={contentHeight / 3}
-                width={layoutWidth - 50}
-                request={statsRequest}
-              />
-            </StyledResultsTable>
-          </>
-        )}
-      </StyledResponseSection>
+          </StyledResultsChart>
+          <StyledResultsTable ref={tableRef}>
+            <StatsTable
+              data={data}
+              height={tableHeight ? Math.max(0, tableHeight) : 0}
+              width={tableWidth ? Math.max(0, tableWidth - 50) : 0}
+              request={statsRequest}
+            />
+          </StyledResultsTable>
+        </>
+      )}
+      {/* </StyledResponseSection> */}
 
       <Loader show={isLoadingStats} />
     </StyledContainer>

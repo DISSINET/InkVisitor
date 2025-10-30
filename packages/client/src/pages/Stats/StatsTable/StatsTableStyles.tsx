@@ -5,7 +5,7 @@ interface StyledTableContainer {
   $width: number;
 }
 export const StyledTableContainer = styled.div<StyledTableContainer>`
-  position: relative;
+  /* display: flex; */
   width: ${({ $width }) => $width}px;
   height: ${({ $height }) => $height}px;
   overflow: auto;
