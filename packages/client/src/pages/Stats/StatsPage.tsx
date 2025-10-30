@@ -45,6 +45,7 @@ import {
 } from "./StatsPageStyles";
 import { AttributeButtonGroup } from "components/advanced/AttributeButtonGroup/AttributeButtonGroup";
 import { useResizeObserver } from "hooks";
+import { toast } from "react-toastify";
 
 export const StatsPage = () => {
   const client = useQueryClient();
@@ -153,6 +154,12 @@ export const StatsPage = () => {
 
   const isError = isErrorStats && !isLoadingStats;
   const isNoData = !isLoadingStats && !isErrorStats && !data;
+
+  useEffect(() => {
+    if (isError) {
+      toast.error("Error loading stats");
+    }
+  }, [isError]);
 
   const {
     ref: chartRef,
@@ -413,9 +420,6 @@ export const StatsPage = () => {
         )}
       </StyledFieldGroup>
 
-      {/* <StyledResponseSection> */}
-      {/* {isError && <StyledStyledQueryState>Error</StyledStyledQueryState>} */}
-      {/* {isNoData && <StyledStyledQueryState>No data</StyledStyledQueryState>} */}
       {data && (
         <>
           <StyledResultsChart ref={chartRef}>
@@ -436,7 +440,6 @@ export const StatsPage = () => {
           </StyledResultsTable>
         </>
       )}
-      {/* </StyledResponseSection> */}
 
       <Loader show={isLoadingStats} />
     </StyledContainer>
