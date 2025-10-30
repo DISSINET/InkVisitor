@@ -24,7 +24,7 @@ export const StyledFieldGroup = styled.div`
   display: grid;
   width: 100%;
   padding-bottom: 10px;
-  grid-template-columns: repeat(6, auto);
+  grid-template-columns: repeat(7, auto);
   align-items: end;
   justify-content: center;
   gap: 5rem;

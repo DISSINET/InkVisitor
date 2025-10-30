@@ -228,17 +228,6 @@ export const StatsPage = () => {
               />
             </span>
           )}
-
-          <Button
-            color="success"
-            label="Refresh"
-            disabled={isLoadingStats || isAggregating}
-            onClick={
-              state.useMaterialized
-                ? () => void aggregateMutateAsync()
-                : updateToCurrentTime
-            }
-          />
         </ButtonGroup>
       </StyledHeader>
 
@@ -433,6 +422,17 @@ export const StatsPage = () => {
             />
           </StyledField>
         )}
+
+        <Button
+          color="success"
+          label="Refresh"
+          disabled={isLoadingStats || isAggregating}
+          onClick={
+            state.useMaterialized
+              ? () => void aggregateMutateAsync()
+              : updateToCurrentTime
+          }
+        />
       </StyledFieldGroup>
 
       {data && (
