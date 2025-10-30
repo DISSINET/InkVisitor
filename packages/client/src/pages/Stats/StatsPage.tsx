@@ -230,7 +230,7 @@ export const StatsPage = () => {
       <StyledFieldGroup>
         {/* Date From */}
         <StyledField>
-          <StyledFieldLabel>Date From</StyledFieldLabel>
+          <StyledFieldLabel>From Date</StyledFieldLabel>
           {!state.showDateFromRangePicker ? (
             <StyledDateInputWrapper>
               <StyledFieldLValueSmall>Since Forever</StyledFieldLValueSmall>
@@ -290,7 +290,7 @@ export const StatsPage = () => {
 
         {/* Date To */}
         <StyledField>
-          <StyledFieldLabel>Date To</StyledFieldLabel>
+          <StyledFieldLabel>To Date</StyledFieldLabel>
           {!state.showDateToRangePicker ? (
             <StyledDateInputWrapper>
               <StyledFieldLValueSmall>Until Now</StyledFieldLValueSmall>
@@ -344,7 +344,7 @@ export const StatsPage = () => {
 
         <StyledField>
           <StyledFieldLabel>Time Unit</StyledFieldLabel>
-          <ButtonGroup $marginTop $noMarginRight>
+          <ButtonGroup $noMarginRight>
             {Object.values(TimeUnit).map((unit) => (
               <Button
                 key={unit}
@@ -364,7 +364,7 @@ export const StatsPage = () => {
 
         <StyledField>
           <StyledFieldLabel>Event type</StyledFieldLabel>
-          <ButtonGroup $marginTop $noMarginRight>
+          <ButtonGroup $noMarginRight>
             {Object.values(EventType).map((eventType) => (
               <Button
                 key={eventType}
@@ -384,7 +384,7 @@ export const StatsPage = () => {
 
         <StyledField>
           <StyledFieldLabel>Aggregate By</StyledFieldLabel>
-          <ButtonGroup $marginTop $noMarginRight>
+          <ButtonGroup $noMarginRight>
             {Object.values(Aggregation).map((agg) => (
               <Button
                 key={agg}

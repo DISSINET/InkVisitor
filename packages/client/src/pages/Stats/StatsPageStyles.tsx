@@ -25,32 +25,35 @@ export const StyledFieldGroup = styled.div`
   width: 100%;
   padding-bottom: 10px;
   grid-template-columns: repeat(6, auto);
-  gap: ${(props) => props.theme.space[5]};
+  gap: 5rem;
   align-items: end;
+  justify-content: center;
 `;
 
 export const StyledField = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  display: grid;
+  grid-template-columns: auto;
+  grid-template-rows: auto 2.5rem;
+  justify-content: start;
+  align-items: center;
 `;
 
 export const StyledFieldLabel = styled.div`
-  text-align: right;
-  justify-content: flex-end;
-  margin-right: ${({ theme }) => theme.space[1]};
-  vertical-align: top;
-  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
   display: flex;
-  align-items: flex-end;
-  font-size: ${({ theme }) => theme.fontSize["sm"]};
   color: ${({ theme }) => theme.color["primary"]};
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
 `;
-
+export const StyledFieldInput = styled.div`
+  display: grid;
+  justify-content: start;
+  align-items: center;
+`;
 export const StyledDateInputWrapper = styled.div`
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  height: 100%;
 `;
 
 export const StyledFieldLValueSmall = styled.i`
