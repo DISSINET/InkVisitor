@@ -77,44 +77,6 @@ export const EntityTag: React.FC<EntityTag> = ({
   const [tagHovered, setTagHovered] = useState(false);
   const referenceEl = useRef<HTMLDivElement | null>(null);
 
-  if (entity === undefined || !entity) {
-    return <></>;
-  }
-
-  const classId = entity.class;
-
-  const renderUnlinkButton = (unlinkButton: UnlinkButton) => {
-    return (
-      <Button
-        key="d"
-        tooltipLabel={
-          unlinkButton.tooltipLabel
-            ? unlinkButton.tooltipLabel
-            : "unlink entity"
-        }
-        icon={unlinkButton.icon ? unlinkButton.icon : <FaUnlink />}
-        color={unlinkButton.color ? unlinkButton.color : "plain"}
-        inverted
-        onClick={unlinkButton.onClick}
-      />
-    );
-  };
-
-  if (!isValidEntityClass(entity.class)) {
-    // labels needs to have length and first label needs to be non-empty
-    return (
-      <Tag
-        propId={entity.id}
-        entityClass={EntityEnums.Extension.Invalid}
-        label={getEntityLabel(entity)}
-        labelItalic={isFirstLabelEmpty(entity.labels)}
-        // button={unlinkButton && renderUnlinkButton(unlinkButton)}
-        disableDrag
-        disableDoubleClick
-      />
-    );
-  }
-
   const handleTagHovered = useCallback(() => {
     setTagHovered(true);
   }, []);
@@ -134,6 +96,44 @@ export const EntityTag: React.FC<EntityTag> = ({
     setButtonHovered(false);
     setTagHovered(false);
   }, []);
+
+  if (entity === undefined || !entity) {
+    return <></>;
+  }
+
+  const classId = entity.class;
+
+  const renderUnlinkButton = useCallback((unlinkButton: UnlinkButton) => {
+    return (
+      <Button
+        key="d"
+        tooltipLabel={
+          unlinkButton.tooltipLabel
+            ? unlinkButton.tooltipLabel
+            : "unlink entity"
+        }
+        icon={unlinkButton.icon ? unlinkButton.icon : <FaUnlink />}
+        color={unlinkButton.color ? unlinkButton.color : "plain"}
+        inverted
+        onClick={unlinkButton.onClick}
+      />
+    );
+  }, []);
+
+  if (!isValidEntityClass(entity.class)) {
+    // labels needs to have length and first label needs to be non-empty
+    return (
+      <Tag
+        propId={entity.id}
+        entityClass={EntityEnums.Extension.Invalid}
+        label={getEntityLabel(entity)}
+        labelItalic={isFirstLabelEmpty(entity.labels)}
+        // button={unlinkButton && renderUnlinkButton(unlinkButton)}
+        disableDrag
+        disableDoubleClick
+      />
+    );
+  }
 
   return (
     <>
