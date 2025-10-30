@@ -8,6 +8,7 @@ import api from "api";
 import {
   Button,
   ButtonGroup,
+  Checkbox,
   Input,
   Loader,
   Modal,
@@ -45,6 +46,7 @@ interface DataObject {
   defaultStatementLanguage: EntityEnums.Language;
   searchLanguages: EntityEnums.Language[];
   defaultTerritory?: string | null;
+  allowMaterializedStats: boolean;
 }
 interface UserCustomizationModal {
   user: IResponseUser;
@@ -80,6 +82,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
         options.defaultStatementLanguage ?? EntityEnums.Language.Empty,
       searchLanguages: options.searchLanguages,
       defaultTerritory: options.defaultTerritory,
+      allowMaterializedStats: options.allowMaterializedStats ?? false,
     };
   }, [user]);
 
@@ -167,6 +170,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
           defaultStatementLanguage: data.defaultStatementLanguage,
           searchLanguages: data.searchLanguages.map((sL) => sL),
           defaultTerritory: data.defaultTerritory || "",
+          allowMaterializedStats: data.allowMaterializedStats,
         },
       });
     }
@@ -455,6 +459,21 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                 </StyledRightsWrap>
               </StyledUserRightItem>
             </StyledUserRights>
+
+            <StyledRightsHeading>
+              <b>{"Statistics"}</b>
+            </StyledRightsHeading>
+            <ModalInputForm>
+              <ModalInputLabel>{"allow materialized data"}</ModalInputLabel>
+              <ModalInputWrap width={165}>
+                <Checkbox
+                  value={data.allowMaterializedStats}
+                  onChangeFn={(value) =>
+                    handleChange("allowMaterializedStats", value)
+                  }
+                />
+              </ModalInputWrap>
+            </ModalInputForm>
 
             <Loader show={passwordUpdateMutation.isPending} />
           </div>

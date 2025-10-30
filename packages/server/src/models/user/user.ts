@@ -34,6 +34,7 @@ export class UserOptions implements IUserOptions {
   defaultLanguage: EntityEnums.Language = EntityEnums.Language.Empty;
   searchLanguages: EntityEnums.Language[] = [];
   hideStatementElementsOrderTable?: boolean = false;
+  allowMaterializedStats: boolean = false;
 
   constructor(data: Partial<IUserOptions>) {
     fillFlatObject(this, data);

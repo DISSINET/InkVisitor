@@ -176,43 +176,58 @@ export const StatsPage = () => {
     debounceDelay: 50,
   });
 
+  // get user data
+  const userId = localStorage.getItem("userid");
+  const { data: user } = useQuery({
+    queryKey: ["user", userId],
+    queryFn: async () => {
+      const res = await api.usersGet(userId as string);
+      return res.data ?? undefined;
+    },
+    enabled: !!userId && api.isLoggedIn(),
+  });
+
+  const allowMaterializedStats = user?.options.allowMaterializedStats ?? false;
+
   return (
     <StyledContainer>
       <StyledHeader>
         <StyledHeading>Statistics</StyledHeading>
 
         <ButtonGroup>
-          <span>
-            <AttributeButtonGroup
-              noMargin
-              options={[
-                {
-                  icon: <FaSyncAlt size={10} />,
-                  longValue: "Classic (Live Data)",
-                  shortValue: "Classic",
-                  onClick: () => {
-                    dispatch({
-                      type: "useMaterializedUpdate",
-                      payload: false,
-                    });
+          {allowMaterializedStats && (
+            <span>
+              <AttributeButtonGroup
+                noMargin
+                options={[
+                  {
+                    icon: <FaSyncAlt size={10} />,
+                    longValue: "Classic (Live Data)",
+                    shortValue: "Classic",
+                    onClick: () => {
+                      dispatch({
+                        type: "useMaterializedUpdate",
+                        payload: false,
+                      });
+                    },
+                    selected: !state.useMaterialized,
                   },
-                  selected: !state.useMaterialized,
-                },
-                {
-                  icon: <FaDatabase />,
-                  longValue: "Fast (Pre-calculated)",
-                  shortValue: "Fast",
-                  onClick: () => {
-                    dispatch({
-                      type: "useMaterializedUpdate",
-                      payload: true,
-                    });
+                  {
+                    icon: <FaDatabase />,
+                    longValue: "Fast (Pre-calculated)",
+                    shortValue: "Fast",
+                    onClick: () => {
+                      dispatch({
+                        type: "useMaterializedUpdate",
+                        payload: true,
+                      });
+                    },
+                    selected: state.useMaterialized,
                   },
-                  selected: state.useMaterialized,
-                },
-              ]}
-            />
-          </span>
+                ]}
+              />
+            </span>
+          )}
 
           <Button
             color="success"

@@ -12,6 +12,7 @@ export const StyledUserRights = styled.div`
 `;
 export const StyledRightsHeading = styled.div`
   margin-top: ${({ theme }) => theme.space[4]};
+  margin-bottom: ${({ theme }) => theme.space[2]};
   width: 100%;
   text-align: center;
 `;
