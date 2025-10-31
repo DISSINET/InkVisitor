@@ -279,7 +279,7 @@ export class Segment {
     const openedTags: Tag[] = [];
     const closedTags: Tag[] = [];
     for (const tag of this.openingTags) {
-      if (tag.position < endRawIndex && tag.position >= startRawIndex) {
+      if (tag.position < endRawIndex) {
         openedTags.push(tag);
       }
     }
