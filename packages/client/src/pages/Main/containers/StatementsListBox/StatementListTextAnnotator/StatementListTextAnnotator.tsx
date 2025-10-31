@@ -12,7 +12,7 @@ import { UseMutationResult } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import TextAnnotator from "components/advanced/Annotator/Annotator";
 import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
-import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import {
   ANNOTATOR_SELECTOR_HEIGHT,
@@ -27,7 +27,6 @@ interface StatementListTextAnnotator {
   territoryId: string;
   territory?: IResponseTerritory;
   statementId: string;
-  addStatementAtCertainIndex: (index: number) => Promise<void>;
   statementCreateMutation: UseMutationResult<
     AxiosResponse<IResponseGeneric<IStatement>, any>,
     Error,
@@ -69,7 +68,6 @@ export const StatementListTextAnnotator: React.FC<
   territoryId,
   territory,
   statementId,
-  addStatementAtCertainIndex,
   statementCreateMutation,
   statementListBoxRef,
 

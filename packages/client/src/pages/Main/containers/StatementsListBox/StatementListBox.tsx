@@ -991,7 +991,6 @@ export const StatementListBox: React.FC = () => {
                   // }}
                   hlEntities={hlEntities}
                   setHlEntities={setHlEntities}
-                  addStatementAtCertainIndex={addStatementAtCertainIndex}
                   statementCreateMutation={statementCreateMutation}
                   annotator={annotator}
                   setAnnotator={setAnnotator}
