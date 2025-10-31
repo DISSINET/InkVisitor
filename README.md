@@ -14,7 +14,7 @@ InkVisitor has been developed in the [Dissident Networks Project (DISSINET)](htt
 
 The lead developer of the application is [Petr Hanák](https://github.com/ptrhnk/). Other contributors of code include [Adam Mertel](https://github.com/adammertel/), [Ján Mertel](https://github.com/jancimertel/) and others. The lead authors of the data model are David Zbíral and Robert L. J. Shaw. Other contributors to the data model and testers include Tomáš Hampejs, Jan Král, Katia Riccardo and others.
 
-External documentation can be found [here](https://docs.religionistika.phil.muni.cz/books/from-texts-to-structured-data-building-knowledge-graphs-through-computer-assisted-semantic-text-modelling-castemo){:target="\_blank"}
+External documentation can be found [here](https://docs.religionistika.phil.muni.cz/books/from-texts-to-structured-data-building-knowledge-graphs-through-computer-assisted-semantic-text-modelling-castemo).
 
 ## Data model
 
