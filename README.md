@@ -4,8 +4,6 @@
 
 <!-- [![deploy staging](https://github.com/DISSINET/InkVisitor/actions/workflows/dev.yml/badge.svg?branch=dev)](https://github.com/DISSINET/InkVisitor/actions/workflows/dev.yml) -->
 
-[Documentation](https://docs.religionistika.phil.muni.cz/books/from-texts-to-structured-data-building-knowledge-graphs-through-computer-assisted-semantic-text-modelling-castemo)
-
 ## Description
 
 InkVisitor is an open-source browser-based application for the manual entry of complex structured data from textual resources in the humanities and the social sciences. The data are entered in the form of statements, which interconnect entities of various different classes into semantic quadruples (subject, verb, object 1, object 2) following the syntactic structure of texts. InkVisitor serves as a data-entry front-end for [RethinkDB](https://rethinkdb.com/) research databases which then allow for various kinds of quantitative and computational analyses of the data to be performed.
@@ -15,6 +13,8 @@ InkVisitor is an open-source browser-based application for the manual entry of c
 InkVisitor has been developed in the [Dissident Networks Project (DISSINET)](https://dissinet.cz), a historical and social scientific research project focusing on medieval religious dissidence, inquisition, and inquisitorial records. The development has received substantial funding from the Czech Science Foundation (EXPRO project No. GX19-26975X “Dissident Religious Cultures in Medieval Europe from the Perspective of Social Network Analysis and Geographic Information Systems”) and the European Research Council (ERC Consolidator Grant, project No. 101000442 “Networks of Dissent: Computational Modelling of Dissident and Inquisitorial Cultures in Medieval Europe”).
 
 The lead developer of the application is [Petr Hanák](https://github.com/ptrhnk/). Other contributors of code include [Adam Mertel](https://github.com/adammertel/), [Ján Mertel](https://github.com/jancimertel/) and others. The lead authors of the data model are David Zbíral and Robert L. J. Shaw. Other contributors to the data model and testers include Tomáš Hampejs, Jan Král, Katia Riccardo and others.
+
+External documentation can be found [here](https://docs.religionistika.phil.muni.cz/books/from-texts-to-structured-data-building-knowledge-graphs-through-computer-assisted-semantic-text-modelling-castemo){:target="\_blank"}
 
 ## Data model
 
