@@ -31,6 +31,7 @@
 - Added Early New High German as Label language #2758
 - Validation rules do not apply to templates anymore #2531
 - Fixed document export dialog scrolling #2798
+- Fixed error when attempting removal from synonym cloud of more than 2 entities #2808
 
 ### Documentation:
 
