@@ -331,12 +331,13 @@ export const StatsPage = () => {
               />
               <Button
                 icon={<FaTimes />}
-                onClick={() =>
+                onClick={() => {
                   dispatch({
                     type: "showDateToRangePickerUpdate",
                     payload: false,
-                  })
-                }
+                  });
+                  updateToCurrentTime();
+                }}
                 color="primary"
                 inverted
                 tooltipLabel="Reset to Until Now"
@@ -358,7 +359,6 @@ export const StatsPage = () => {
                     type: "timeUnitUpdate",
                     payload: unit as TimeUnit,
                   });
-                  updateToCurrentTime();
                 }}
                 color={state.timeUnit === unit ? "primary" : "grey"}
               />
@@ -378,7 +378,6 @@ export const StatsPage = () => {
                     type: "eventTypeUpdate",
                     payload: eventType,
                   });
-                  updateToCurrentTime();
                 }}
                 color={state.eventType.includes(eventType) ? "primary" : "grey"}
               />
@@ -395,7 +394,6 @@ export const StatsPage = () => {
                 label={String(agg)}
                 onClick={() => {
                   dispatch({ type: "aggregateUpdate", payload: agg });
-                  updateToCurrentTime();
                 }}
                 color={state.aggregate === agg ? "primary" : "grey"}
               />
