@@ -2,7 +2,9 @@
     <img width="50%" src="./logo/logo-full.png" style="background: transparent;">
 </p>
 
-[![deploy staging](https://github.com/DISSINET/InkVisitor/actions/workflows/dev.yml/badge.svg?branch=dev)](https://github.com/DISSINET/InkVisitor/actions/workflows/dev.yml)
+<!-- [![deploy staging](https://github.com/DISSINET/InkVisitor/actions/workflows/dev.yml/badge.svg?branch=dev)](https://github.com/DISSINET/InkVisitor/actions/workflows/dev.yml) -->
+
+[Documentation](https://docs.religionistika.phil.muni.cz/books/from-texts-to-structured-data-building-knowledge-graphs-through-computer-assisted-semantic-text-modelling-castemo)
 
 ## Description
 
