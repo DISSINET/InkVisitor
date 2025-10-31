@@ -292,7 +292,7 @@ export const TextAnnotatorMenu = ({
         <StyledAnnotatorItemTitle>
           <PiSelectionFill size={13} />
           Anchors in selection
-          <Loader show={isLoadingEntities} size={13} />
+          {/* <Loader show={isLoadingEntities} size={13} /> */}
           <div style={{ marginLeft: "0.5rem" }}>
             {someAnchorsWithoutElvl && (
               <IconWithTooltip
@@ -340,6 +340,8 @@ export const TextAnnotatorMenu = ({
                 }
               })}
             </StyledAnnotatorAnchorList>
+
+            <Loader show={isLoadingEntities} size={20} />
           </StyledAnnotatorAnchorListWrap>
         </StyledAnnotatorItemContent>
       </StyledAnnotatorItem>

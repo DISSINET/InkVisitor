@@ -90,6 +90,7 @@ export const StyledAnnotatorAnchorListWrap = styled.div`
   padding-bottom: ${({ theme }) => theme.space[4]};
   border-radius: ${({ theme }) => theme.borderRadius.sm};
   margin-left: ${({ theme }) => theme.space["-2"]};
+  position: relative;
 `;
 
 export const StyledAnnotatorItemTitle = styled.div`
