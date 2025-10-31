@@ -60,6 +60,48 @@ describe("test ResponseAudit.getFirstForEntity", function () {
   });
 });
 
+describe("test Audit.getEarliestDate", function () {
+  const db = new Db();
+  const rand = Math.random().toString();
+  const entityId = `entity-${rand}`;
+
+  const a1Date = new Date("2023-01-01");
+  const a2Date = new Date("2023-01-02");
+  const a3Date = new Date("2023-01-03");
+
+  const [, a1] = prepareAudit(entityId, a1Date);
+  const [, a2] = prepareAudit(entityId, a2Date);
+  const [, a3] = prepareAudit(entityId, a3Date);
+
+  beforeAll(async () => {
+    await db.initDb();
+    // Insert in reverse order to test that it finds the earliest
+    await a3.save(db.connection);
+    await a2.save(db.connection);
+    await a1.save(db.connection);
+  });
+
+  afterAll(async () => await clean(db));
+
+  it("should return the earliest audit entry date", async () => {
+    const earliestDate = await Audit.getEarliestDate(db.connection);
+    expect(earliestDate).not.toBe(null);
+    if (earliestDate) {
+      expect(earliestDate.getTime()).toBe(a1Date.getTime());
+    }
+  });
+
+  it("should return null when no audit entries exist", async () => {
+    const emptyDb = new Db();
+    await emptyDb.initDb();
+    
+    const earliestDate = await Audit.getEarliestDate(emptyDb.connection);
+    expect(earliestDate).toBe(null);
+    
+    await clean(emptyDb);
+  });
+});
+
 describe("test ResponseAudit.getLastNForEntity", function () {
   const db = new Db();
   const rand = Math.random().toString();

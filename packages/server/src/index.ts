@@ -8,11 +8,17 @@ import server from "./Server";
 import { prepareTreeCache } from "@service/treeCache";
 import "@service/mailer";
 import { Db } from "@service/rethink";
+import { CronService } from "@service/cron";
 
 (async () => {
   const db = new Db();
   await db.initDb();
   await prepareTreeCache(db.connection);
+  
+  // Initialize cron service for stats aggregation
+  const cronService = new CronService(db.connection);
+  cronService.start();
+  
   const port = Number(process.env.PORT || 3000);
   const useHttps = process.env.HTTPS === "1";
 

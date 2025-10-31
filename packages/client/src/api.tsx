@@ -917,6 +917,36 @@ class Api {
   }
 
   /**
+   * Stats Materialized
+   */
+  async statsMaterializedGet(
+    data: IRequestStats,
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseStats>> {
+    try {
+      const response = await this.connection.post(`/stats/materialized`, data, options);
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  /**
+   * Stats Aggregate - Manual aggregation trigger
+   */
+  async statsAggregate(
+    data: { fromDate: number; toDate: number; timeUnits?: string[]; aggregateBy?: string[] },
+    options?: IApiOptions
+  ): Promise<AxiosResponse<{ message: string; recordsProcessed: number }>> {
+    try {
+      const response = await this.connection.post(`/stats/aggregate`, data, options);
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  /**
    * Audit
    */
   async auditGet(

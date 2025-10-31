@@ -16,13 +16,25 @@ import {
 
 import api from "api";
 import theme from "Theme/theme";
-import { OTHERS_KEY } from "./constants";
+import { OTHERS_KEY } from "../constants";
 import {
   ChartDataPoint,
   getCategoryMap,
   getDataCategories,
   transformDataForChart,
-} from "./utils";
+} from "../utils";
+import {
+  StyledChartWrapper,
+  StyledCustomTooltip,
+  StyledLabel,
+  StyledLegendColorBox,
+  StyledLegendItem,
+  StyledLegendText,
+  StyledLegendWrapper,
+  StyledPayload,
+  StyledPayloadItem,
+} from "./StatsChartStyles";
+import { Loader } from "components/basic/Loader/Loader";
 
 interface StatsChartProps {
   data: IResponseStats;
@@ -131,42 +143,9 @@ export const StatsChart = ({
       return null;
     }
     return (
-      <div
-        className="custom-tooltip"
-        style={{
-          visibility: "visible",
-          display: "flex",
-          flexDirection: "column",
-          gap: theme.space[2],
-          backgroundColor: theme.color.gray[100],
-          padding: theme.space[4],
-          borderRadius: theme.space[2],
-          width: "100%",
-          opacity: 0.85,
-        }}
-      >
-        {/* label */}
-        <div
-          style={{
-            fontSize: theme.fontSize.sm,
-            color: theme.color.gray[100],
-            width: "fit-content",
-            backgroundColor: theme.color.gray[600],
-            padding: theme.space[1] + " " + theme.space[2],
-            borderRadius: theme.space[2],
-          }}
-        >
-          {label}
-        </div>
-        {/* payload */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: theme.space[1],
-            paddingLeft: theme.space[1],
-          }}
-        >
+      <StyledCustomTooltip>
+        <StyledLabel>{label}</StyledLabel>
+        <StyledPayload>
           {dataCategories.map((category, index) => {
             const payloadItem = payload?.[0]?.payload?.[index];
             const payloadValue = payloadItem?.value;
@@ -177,15 +156,7 @@ export const StatsChart = ({
             }
 
             return (
-              <div
-                key={index}
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: theme.space[1],
-                }}
-              >
+              <StyledPayloadItem key={index}>
                 <span
                   style={{
                     backgroundColor: categoryColors[category],
@@ -209,90 +180,67 @@ export const StatsChart = ({
                 >
                   {payloadValue}
                 </span>
-              </div>
+              </StyledPayloadItem>
             );
           })}
-        </div>
-      </div>
+        </StyledPayload>
+      </StyledCustomTooltip>
     );
   };
 
   return (
-    <BarChart
-      width={width}
-      height={height - 30}
-      data={dataChart}
-      onMouseLeave={() => {
-        if (hoveringDataKey) {
-          handleMouseLeave();
-        }
-      }}
-    >
-      {gridEl}
-      {xAxisEl}
-      {yAxisEl}
-      <Tooltip wrapperStyle={{ zIndex: 200 }} content={TooltipEl} />
-      <Legend
-        content={() => (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              gap: theme.space[1],
-              flexWrap: "wrap",
-              zIndex: 2,
-            }}
-          >
-            {dataCategories.map((category) => {
-              const isActive = hoveringDataKey === category;
-              const color = getColor(category);
+    <StyledChartWrapper>
+      <BarChart
+        width={width}
+        height={height}
+        data={dataChart}
+        onMouseLeave={() => {
+          if (hoveringDataKey) {
+            handleMouseLeave();
+          }
+        }}
+      >
+        {gridEl}
+        {xAxisEl}
+        {yAxisEl}
+        <Tooltip wrapperStyle={{ zIndex: 200 }} content={TooltipEl} />
+        <Legend
+          content={() => (
+            <StyledLegendWrapper>
+              {dataCategories.map((category) => {
+                const isActive = hoveringDataKey === category;
+                const color = getColor(category);
 
-              return (
-                <div
-                  key={category}
-                  style={{
-                    flexShrink: 0,
-                    display: "flex",
-                    flexDirection: "row",
-                    alignItems: "center",
-                    cursor: "pointer",
-                    padding: `${theme.space[0]} ${theme.space[5]}`,
-                    gap: theme.space[2],
-                  }}
-                  onMouseEnter={() => {
-                    if (!isActive) {
-                      handleMouseEnter({ dataKey: category, value: category });
-                    }
-                  }}
-                  onMouseLeave={() => {
-                    if (isActive) {
-                      handleMouseLeave();
-                    }
-                  }}
-                >
-                  <div
-                    style={{
-                      backgroundColor: color,
-                      width: theme.space[6],
-                      height: theme.space[6],
+                return (
+                  <StyledLegendItem
+                    key={category}
+                    onMouseEnter={() => {
+                      if (!isActive) {
+                        handleMouseEnter({
+                          dataKey: category,
+                          value: category,
+                        });
+                      }
                     }}
-                  />
-                  <span
-                    style={{
-                      fontSize: theme.fontSize.base,
-                      color: color,
+                    onMouseLeave={() => {
+                      if (isActive) {
+                        handleMouseLeave();
+                      }
                     }}
                   >
-                    {category}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        )}
-        wrapperStyle={{ paddingTop: 20, paddingBottom: 10 }}
-      />
-      {BarEls}
-    </BarChart>
+                    <StyledLegendColorBox $color={color} />
+                    <StyledLegendText $color={color}>
+                      {category}
+                    </StyledLegendText>
+                  </StyledLegendItem>
+                );
+              })}
+            </StyledLegendWrapper>
+          )}
+          wrapperStyle={{ paddingTop: 20, paddingBottom: 10 }}
+        />
+        {BarEls}
+      </BarChart>
+    </StyledChartWrapper>
   );
 };

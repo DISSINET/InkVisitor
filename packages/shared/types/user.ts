@@ -14,7 +14,7 @@ export interface IUser {
   active: boolean; // enabled/disabled - set to true in activation, but can be toggled in admin
   verified: boolean; // email verified - set to true in activation
 
-  deletedAt?: Date
+  deletedAt?: Date;
 }
 
 export interface IUserRight {
@@ -31,6 +31,8 @@ export interface IUserOptions {
   // the language of the source documents
   defaultStatementLanguage?: EntityEnums.Language;
   searchLanguages: EntityEnums.Language[];
+
+  allowMaterializedStats: boolean;
 }
 
 export interface IStoredTerritory {

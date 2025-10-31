@@ -14,6 +14,9 @@ importers:
       '@types/cli-color':
         specifier: ^2.0.2
         version: 2.0.6
+      '@types/node-cron':
+        specifier: ^3.0.11
+        version: 3.0.11
       axios:
         specifier: ^1.12.0
         version: 1.12.0
@@ -71,6 +74,9 @@ importers:
       morgan:
         specifier: ^1.10.0
         version: 1.10.0
+      node-cron:
+        specifier: ^4.2.1
+        version: 4.2.1
       node-fetch:
         specifier: ^3.3.2
         version: 3.3.2
@@ -623,6 +629,9 @@ packages:
 
   '@types/morgan@1.9.9':
     resolution: {integrity: sha512-iRYSDKVaC6FkGSpEVVIvrRGw0DfJMiQzIn3qr2G5B3C//AWkulhXgaBd7tS9/J79GWSYMTHGs7PfI5b3Y8m+RQ==}
+
+  '@types/node-cron@3.0.11':
+    resolution: {integrity: sha512-0ikrnug3/IyneSHqCBeslAhlK2aBfYek1fGo4bP4QnZPmiqSGRK+Oy7ZMisLWkesffJvQ1cqAcBnJC+8+nxIAg==}
 
   '@types/node@14.18.63':
     resolution: {integrity: sha512-fAtCfv4jJg+ExtXhvCkCqUKZ+4ok/JQk01qDKhL5BDDoS3AxKXhV5/MAVUZyQnSEd2GT92fkgZl0pz0Q0AzcIQ==}
@@ -2078,6 +2087,10 @@ packages:
     resolution: {integrity: sha512-0L9FvHG3nfnnmaEQPjT9xhfN4ISk0A8/2j4M37Np4mcDesJjHgEUfgPhdCyZuFI954tjokaIj/A3NdpFNdEh4Q==}
     engines: {node: '>=4.0.0'}
 
+  node-cron@4.2.1:
+    resolution: {integrity: sha512-lgimEHPE/QDgFlywTd8yTR61ptugX3Qer29efeyWw2rv259HtGBNn1vZVmp8lB9uo9wC0t/AT4iGqXxia+CJFg==}
+    engines: {node: '>=6.0.0'}
+
   node-domexception@1.0.0:
     resolution: {integrity: sha512-/jKZoMpw0F8GRwl4/eLROPA3cfcXtLApP0QzLmUT/HuPCZWyB7IY9ZrMeKw2O/nFIqPQB3PVM9aYm0F312AXDQ==}
     engines: {node: '>=10.5.0'}
@@ -3369,6 +3382,8 @@ snapshots:
   '@types/morgan@1.9.9':
     dependencies:
       '@types/node': 14.18.63
+
+  '@types/node-cron@3.0.11': {}
 
   '@types/node@14.18.63': {}
 
@@ -5127,6 +5142,8 @@ snapshots:
   next-tick@1.1.0: {}
 
   nocache@2.1.0: {}
+
+  node-cron@4.2.1: {}
 
   node-domexception@1.0.0: {}
 

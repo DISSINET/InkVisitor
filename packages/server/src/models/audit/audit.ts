@@ -118,6 +118,25 @@ export default class Audit implements IAudit, IDbModel {
   }
 
   /**
+   * Gets the earliest audit entry date in the database
+   * @param db rethinkdb Connection
+   * @returns Promise<Date | null>
+   */
+  static async getEarliestDate(db: Connection): Promise<Date | null> {
+    try {
+      const result = await rethink
+        .table(Audit.table)
+        .min("date")
+        .run(db);
+
+      return result ? new Date((result as any).date) : null;
+    } catch (error) {
+      // Table might not exist yet or be empty
+      return null;
+    }
+  }
+
+  /**
    * Retrieves last created audit entry for entity.
    * Last audit entry stands for updated-at entry.
    * @param db rethinkdb Connection

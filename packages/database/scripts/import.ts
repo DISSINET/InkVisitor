@@ -8,6 +8,7 @@ import {
   auditsIndexes,
   entitiesIndexes,
   relationsIndexes,
+  materializedStatsIndexes,
 } from "./import/indexes";
 import { EntityEnums } from "@shared/enums";
 import { question } from "./import/prompts";
@@ -23,6 +24,34 @@ const defaultSettingsTable: TableSchema = {
   tableName: "settings",
   data: require("../datasets/default/settings.json"),
   transform: function () {},
+};
+
+// Materialized stats tables for each time unit
+const materializedStatsTables = {
+  statsMaterializedDay: {
+    tableName: "stats_materialized_day",
+    data: [],
+    transform: function () {},
+    indexes: materializedStatsIndexes,
+  },
+  statsMaterializedWeek: {
+    tableName: "stats_materialized_week",
+    data: [],
+    transform: function () {},
+    indexes: materializedStatsIndexes,
+  },
+  statsMaterializedMonth: {
+    tableName: "stats_materialized_month",
+    data: [],
+    transform: function () {},
+    indexes: materializedStatsIndexes,
+  },
+  statsMaterializedYear: {
+    tableName: "stats_materialized_year",
+    data: [],
+    transform: function () {},
+    indexes: materializedStatsIndexes,
+  },
 };
 
 const datasets: Record<string, DbSchema> = {
@@ -58,6 +87,7 @@ const datasets: Record<string, DbSchema> = {
       data: require("../datasets/dissinet-documents/documents.json"),
       transform: function () {},
     },
+    ...materializedStatsTables,
   },
 
   empty: {
@@ -113,6 +143,7 @@ const datasets: Record<string, DbSchema> = {
       data: require("../datasets/default/documents.json"),
       transform: function () {},
     },
+    ...materializedStatsTables,
   },
 
   relationstest: {
@@ -190,6 +221,7 @@ const datasets: Record<string, DbSchema> = {
       data: require("../datasets/default/documents.json"),
       transform: function () {},
     },
+    ...materializedStatsTables,
   },
 
   allparsed: {
@@ -264,6 +296,7 @@ const datasets: Record<string, DbSchema> = {
       data: require("../datasets/default/documents.json"),
       transform: function () {},
     },
+    ...materializedStatsTables,
   },
 
   initial_c: {
@@ -301,6 +334,7 @@ const datasets: Record<string, DbSchema> = {
       data: null,
       transform: function () {},
     },
+    ...materializedStatsTables,
   },
 
   initial_a: {
@@ -338,6 +372,7 @@ const datasets: Record<string, DbSchema> = {
       data: null,
       transform: function () {},
     },
+    ...materializedStatsTables,
   },
 
   acr: {
@@ -375,6 +410,7 @@ const datasets: Record<string, DbSchema> = {
       data: null,
       transform: function () {},
     },
+    ...materializedStatsTables,
   },
 
   niort: {
@@ -417,6 +453,7 @@ const datasets: Record<string, DbSchema> = {
       data: [],
       transform: function () {},
     },
+    ...materializedStatsTables,
   },
 
   production: {
@@ -459,6 +496,7 @@ const datasets: Record<string, DbSchema> = {
       data: require("../datasets/production/documents.json"),
       transform: function () {},
     },
+    ...materializedStatsTables,
   },
 };
 
