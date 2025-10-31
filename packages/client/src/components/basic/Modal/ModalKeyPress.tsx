@@ -11,25 +11,12 @@ export const ModalKeyPress: React.FC<ModalKeyPress> = ({
   onEscape = () => {},
   dependencyArr,
 }) => {
-  const [isReady, setIsReady] = useState(false);
-
-  useEffect(() => {
-    // Delay key handler activation to prevent capturing the same keypress that opened the modal
-    const timer = setTimeout(() => {
-      setIsReady(true);
-    }, 200);
-
-    return () => clearTimeout(timer);
-  }, []);
-
   useKeypress(
     "Enter",
     () => {
-      if (isReady) {
-        onEnter();
-      }
+      onEnter();
     },
-    [dependencyArr, isReady],
+    [dependencyArr],
     // ctrlKeyCombo
     true
   );
@@ -37,11 +24,9 @@ export const ModalKeyPress: React.FC<ModalKeyPress> = ({
   useKeypress(
     "Escape",
     () => {
-      if (isReady) {
-        onEscape();
-      }
+      onEscape();
     },
-    [dependencyArr, isReady]
+    [dependencyArr]
   );
   return <></>;
 };

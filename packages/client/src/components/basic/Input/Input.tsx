@@ -120,7 +120,9 @@ export const Input: React.FC<Input> = ({
             onKeyDown={(event: React.KeyboardEvent) => {
               switch (event.key) {
                 case "Enter":
-                  onEnterPressFn();
+                  if (!event.ctrlKey && !event.metaKey) {
+                    onEnterPressFn();
+                  }
                   return;
                 case "ArrowUp":
                   event.preventDefault();
