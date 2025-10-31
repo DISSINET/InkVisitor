@@ -774,7 +774,7 @@ export class Annotator {
     }
 
     if (this.text.mode === EditMode.HIGHLIGHT && this.onHighlightCb) {
-      const startPos = this.text.getSegmentPosition(this.viewport.lineStart, 0);
+      const startPos = this.text.getSegmentPosition(this.viewport.lineStart, 0, true);
       const endPos = this.text.getSegmentPosition(
         this.viewport.lineEnd,
         this.text.charsAtLine

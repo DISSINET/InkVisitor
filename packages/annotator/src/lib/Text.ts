@@ -246,19 +246,19 @@ export class Segment {
   /**
    * Returns all opening and closing tags that appear after a given position.
    * 
-   * @param rawIndex - The raw text index to check after
+   * @param rawIndex - The raw text index to check after (inclusive)
    * @returns Tuple containing [openingTags, closingTags] that appear after the index
    */
   getTagsAfterPosition(rawIndex: number): [Tag[], Tag[]] {
     const openedTags: Tag[] = [];
     const closedTags: Tag[] = [];
     for (const tag of this.openingTags) {
-      if (tag.position > rawIndex) {
+      if (tag.position >= rawIndex) {
         openedTags.push(tag);
       }
     }
     for (const tag of this.closingTags) {
-      if (tag.position > rawIndex) {
+      if (tag.position >= rawIndex) {
         closedTags.push(tag);
       }
     }
@@ -279,12 +279,12 @@ export class Segment {
     const openedTags: Tag[] = [];
     const closedTags: Tag[] = [];
     for (const tag of this.openingTags) {
-      if (tag.position < endRawIndex && tag.position > startRawIndex) {
+      if (tag.position < endRawIndex && tag.position >= startRawIndex) {
         openedTags.push(tag);
       }
     }
     for (const tag of this.closingTags) {
-      if (tag.position < endRawIndex && tag.position > startRawIndex) {
+      if (tag.position < endRawIndex && tag.position >= startRawIndex) {
         closedTags.push(tag);
       }
     }
