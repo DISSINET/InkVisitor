@@ -32,6 +32,7 @@
 - Validation rules do not apply to templates anymore #2531
 - Fixed document export dialog scrolling #2798
 - Fixed error when attempting removal from synonym cloud of more than 2 entities #2808
+- Fixed applying template in metaproperty event forces the same template to T #2810
 
 ### Documentation:
 
