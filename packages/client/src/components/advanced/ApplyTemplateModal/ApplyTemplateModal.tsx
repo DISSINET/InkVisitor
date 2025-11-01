@@ -1,6 +1,6 @@
 import { entitiesDictKeys } from "@shared/dictionaries";
 import { UserEnums } from "@shared/enums";
-import { IEntity, IResponseGeneric } from "@shared/types";
+import { IEntity, IResponseGeneric, Relation } from "@shared/types";
 import {
   UseMutationResult,
   useQuery,
@@ -22,9 +22,6 @@ import { applyTemplate, InstRelations } from "constructors";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { getShortLabelByLetterCount } from "utils/utils";
-import { Relation } from "@shared/types";
-import { RelationEnums } from "@shared/enums";
-import { v4 as uuidv4 } from "uuid";
 
 interface ApplyTemplateModal {
   showModal: boolean;
@@ -129,10 +126,19 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModal> = ({
     >
       <ModalHeader title="Apply Template" />
       <ModalContent>
-        <ModalInputForm>{`Apply template?`}</ModalInputForm>
-        <div style={{ marginLeft: "0.5rem" }}>
-          <EntityTag disableDrag entity={templateToApply} />
-        </div>
+        <ModalInputForm>
+          <div style={{ display: "flex", alignItems: "center" }}>
+            {`Are you sure you want to apply template`}
+            <div style={{ margin: "0 0.5rem" }}>
+              <EntityTag disableDrag entity={templateToApply} />
+            </div>
+            to the entity
+            <div style={{ margin: "0 0.5rem" }}>
+              <EntityTag disableDrag entity={entity} />
+            </div>
+            ?
+          </div>
+        </ModalInputForm>
         {/* here goes the info about template #951 */}
       </ModalContent>
       <ModalFooter>
