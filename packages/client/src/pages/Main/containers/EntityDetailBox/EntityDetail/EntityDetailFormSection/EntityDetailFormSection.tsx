@@ -234,14 +234,13 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
             </StyledDetailContentRowLabel>
             <StyledDetailContentRowValue>
               <Dropdown.Single.Basic
+                key={"template-dropdown-" + entity.id}
                 placeholder="select template.."
                 disabled={isTemplateDisabled}
                 width="full"
                 value={null}
                 options={templateOptions}
-                onChange={(templateToApply) => {
-                  handleAskForTemplateApply(templateToApply);
-                }}
+                onChange={handleAskForTemplateApply}
               />
             </StyledDetailContentRowValue>
           </StyledDetailContentRow>
