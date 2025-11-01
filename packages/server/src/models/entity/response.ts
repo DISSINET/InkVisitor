@@ -179,6 +179,7 @@ export class ResponseEntityDetail
 
     this.walkStatementsDataProps(statementsByPropsValueType);
 
+    this.addLinkedEntities(this.usedTemplate);
     this.addLinkedEntities(this.usedAsTemplate);
 
     await this.populateInStatementsRelations(
