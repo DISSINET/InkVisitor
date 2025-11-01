@@ -484,6 +484,7 @@ export class Annotator {
     const finalTags: Tag[] = [];
     const processedTags = new Set<string>(); // Track processed tag instances by position
     const tagPairs = new Map<string, { opening?: Tag; closing?: Tag }>(); // Track tag pairs
+    const closingToOpeningMap = new Map<Tag, Tag>(); // Map each closing tag to its matched opening tag
 
     // sanitize case without start
     if (!start) {
@@ -549,33 +550,7 @@ export class Annotator {
     // Process all segments from beginning to end position
     for (let i = 0; i <= end.segmentIndex; i++) {
       const segment = this.text.segments[i];
-      let openingTags: Tag[] = [];
-      let closingTags: Tag[] = [];
-
-      if (i < start.segmentIndex) {
-        // Before start segment - process all tags to build stack
-        [openingTags, closingTags] = [segment.openingTags, segment.closingTags];
-      } else if (i === start.segmentIndex) {
-        // At start segment - process tags based on position
-        if (start.segmentIndex === end.segmentIndex) {
-          // Same segment for start and end
-          [openingTags, closingTags] = segment.getTagsInPosition(
-            start.rawTextIndex,
-            end.rawTextIndex
-          );
-        } else {
-          // Different segments - get tags after start position
-          [openingTags, closingTags] = segment.getTagsAfterPosition(
-            start.rawTextIndex
-          );
-        }
-      } else if (i === end.segmentIndex) {
-        // At end segment - get tags before end position
-        [openingTags, closingTags] = segment.getTagsBeforePosition(end.rawTextIndex);
-      } else {
-        // Between start and end segments - process all tags
-        [openingTags, closingTags] = [segment.openingTags, segment.closingTags];
-      }
+      const [openingTags, closingTags] = [segment.openingTags, segment.closingTags];
 
       // Process opening tags
       for (const tag of openingTags) {
@@ -589,7 +564,11 @@ export class Annotator {
         tagPairs.get(tag.getTagName())!.opening = tag;
         
         // Add to final list if within selection range
-        if (i >= start.segmentIndex) {
+        // Check: tag must be at/after start AND before end position
+        const tagInSelection = i > start.segmentIndex || 
+          (i === start.segmentIndex && tag.position >= start.rawTextIndex && 
+           (i < end.segmentIndex || (i === end.segmentIndex && tag.position < end.rawTextIndex)));
+        if (tagInSelection) {
           addToFinal(tag);
         }
       }
@@ -602,8 +581,32 @@ export class Annotator {
         );
         
         if (matchingIndex !== -1) {
-          // Found matching opening tag - remove from stack
+          // Found matching opening tag - record the pairing and remove from stack
+          const matchedOpeningTag = tagStack[matchingIndex];
+          closingToOpeningMap.set(tag, matchedOpeningTag);
           tagStack.splice(matchingIndex, 1);
+          
+          // Check if closing tag is within the selection range
+          const closingTagInSelection = 
+            (i > start.segmentIndex || (i === start.segmentIndex && tag.position >= start.rawTextIndex)) &&
+            (i < end.segmentIndex || (i === end.segmentIndex && tag.position < end.rawTextIndex));
+          
+          // Check if opening tag opened before end position (could span the selection)
+          const openingTagOpenedBeforeEnd = matchedOpeningTag.segmentIndex < end.segmentIndex ||
+            (matchedOpeningTag.segmentIndex === end.segmentIndex && 
+             matchedOpeningTag.position < end.rawTextIndex);
+          
+          // Include the opening tag if:
+          // 1. Closing tag is within selection range, OR
+          // 2. Opening tag opened before end AND closing tag is after start (tag spans the selection)
+          const shouldIncludeOpeningTag = closingTagInSelection ||
+            (openingTagOpenedBeforeEnd && 
+             (i > start.segmentIndex || (i === start.segmentIndex && tag.position >= start.rawTextIndex)));
+          
+          if (shouldIncludeOpeningTag) {
+            // Tag is active in the selection (either closes within selection or spans it)
+            addToFinal(matchedOpeningTag);
+          }
         }
         
         // Track in pairs map
@@ -612,42 +615,69 @@ export class Annotator {
         }
         tagPairs.get(tag.getTagName())!.closing = tag;
         
-        // Add to final list if within selection range
-        if (i >= start.segmentIndex) {
+        // Add closing tag to final list only if within selection range
+        // Check: closing tag must be at/after start AND before end position
+        // (closing tags are included for post-processing, but will be removed later)
+        const closingTagInSelection = 
+          (i > start.segmentIndex || (i === start.segmentIndex && tag.position >= start.rawTextIndex)) &&
+          (i < end.segmentIndex || (i === end.segmentIndex && tag.position < end.rawTextIndex));
+        if (closingTagInSelection) {
           addToFinal(tag);
         }
       }
     }
-
     // Add any remaining unclosed tags from the stack
+    // These are tags that opened before or within the selection and are still open at the end
+    // Only include tags that opened before the end position (tags after end are not in selection)
     for (const unclosedTag of tagStack) {
-      addToFinal(unclosedTag);
+      // Check if the tag opened before the end position
+      // Tags that opened after end position should not be included
+      const tagOpenedBeforeEnd = unclosedTag.segmentIndex < end.segmentIndex ||
+        (unclosedTag.segmentIndex === end.segmentIndex && 
+         unclosedTag.position < end.rawTextIndex);
+      
+      if (tagOpenedBeforeEnd) {
+        // Tag opened before end position and is still unclosed, so it's active in the selection
+        addToFinal(unclosedTag);
+      }
     }
 
     // Post-process to remove closing tags and replace orphaned closing tags
     const processedFinalTags: Tag[] = [];
-    const processedTagNames = new Set<string>();
+    const processedTagIds = new Set<string>(); // Track processed tags by their unique IDs
 
     for (const tag of finalTags) {
       if (!tag.closing) {
-        // Opening tag - add it
-        processedFinalTags.push(tag);
-        processedTagNames.add(tag.getTagName());
+        // Opening tag - add it if not already processed
+        const tagId = getTagId(tag);
+        if (!processedTagIds.has(tagId)) {
+          processedFinalTags.push(tag);
+          processedTagIds.add(tagId);
+        }
       } else {
-        // Closing tag - check if we have the corresponding opening tag
-        if (processedTagNames.has(tag.getTagName())) {
-          // We already have the opening tag, skip this closing tag
-          continue;
+        // Closing tag - find its matched opening tag
+        const matchedOpeningTag = closingToOpeningMap.get(tag);
+        
+        if (matchedOpeningTag) {
+          // We have a recorded pairing - add the opening tag if not already processed
+          const openingTagId = getTagId(matchedOpeningTag);
+          if (!processedTagIds.has(openingTagId)) {
+            processedFinalTags.push(matchedOpeningTag);
+            processedTagIds.add(openingTagId);
+          }
+          // Skip the closing tag itself (we only want opening tags in the result)
         } else {
-          // Orphaned closing tag - find closest opening tag and use it instead
-          // Use the segmentIndex from the tag
+          // Orphaned closing tag (no recorded pairing) - find closest opening tag and use it instead
           const tagSegmentIndex = tag.segmentIndex;
           if (tagSegmentIndex !== -1) {
             const tagAbsolutePosition = getAbsoluteTextIndex(tag);
             const closestOpening = findClosestOpeningTag(tag.getTagName(), tagAbsolutePosition);
             if (closestOpening) {
-              processedFinalTags.push(closestOpening);
-              processedTagNames.add(tag.getTagName());
+              const closestOpeningId = getTagId(closestOpening);
+              if (!processedTagIds.has(closestOpeningId)) {
+                processedFinalTags.push(closestOpening);
+                processedTagIds.add(closestOpeningId);
+              }
             }
           }
           // If no opening tag found, skip this closing tag entirely
