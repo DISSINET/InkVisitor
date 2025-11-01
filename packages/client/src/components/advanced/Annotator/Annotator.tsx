@@ -903,10 +903,14 @@ export const TextAnnotator = ({
                         thisTerritoryEntityId ?? ""
                       )
                     }
-                    isLoadingEntities={isFetchingAnchorEntities}
                     hasParentT={hasParentT}
                     territory={territory}
                     disableCreate={disableCreate}
+                    isLoading={
+                      isFetchingAnchorEntities ||
+                      isSaving ||
+                      (dataDocumentIsFetching ?? false)
+                    }
                   />
                 )}
               </StyledAnnotatorMenu>

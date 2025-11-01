@@ -56,7 +56,6 @@ interface TextAnnotatorMenuProps {
   onRemoveAnchor?: (anchor: string) => void;
   canCreateActiveTAnchor: boolean;
   onCreateActiveTAnchor?: (elvl: EntityEnums.Elvl) => void;
-  isLoadingEntities: boolean;
   hasParentT: boolean;
   isTextInsideThisT: boolean;
   activeTerritoryId: string | undefined;
@@ -64,6 +63,8 @@ interface TextAnnotatorMenuProps {
   onEscapePressed: () => void;
   disableCreate?: boolean;
   onUpdateAnchor?: (anchor: Tag, elvl: EntityEnums.Elvl) => void;
+
+  isLoading: boolean;
 }
 
 export const TextAnnotatorMenu = ({
@@ -77,13 +78,14 @@ export const TextAnnotatorMenu = ({
   onRemoveAnchor = undefined,
   onUpdateAnchor = undefined,
   canCreateActiveTAnchor,
-  isLoadingEntities,
   hasParentT,
   isTextInsideThisT,
   activeTerritoryId,
   territory,
   onEscapePressed,
   disableCreate,
+
+  isLoading = false,
 }: TextAnnotatorMenuProps) => {
   const activeTerritory = entities[activeTerritoryId ?? ""];
   const queryClient = useQueryClient();
@@ -292,7 +294,6 @@ export const TextAnnotatorMenu = ({
         <StyledAnnotatorItemTitle>
           <PiSelectionFill size={13} />
           Anchors in selection
-          {/* <Loader show={isLoadingEntities} size={13} /> */}
           <div style={{ marginLeft: "0.5rem" }}>
             {someAnchorsWithoutElvl && (
               <IconWithTooltip
@@ -340,9 +341,8 @@ export const TextAnnotatorMenu = ({
                 }
               })}
             </StyledAnnotatorAnchorList>
-
-            <Loader show={isLoadingEntities} size={20} />
           </StyledAnnotatorAnchorListWrap>
+          <Loader show={isLoading} size={20} />
         </StyledAnnotatorItemContent>
       </StyledAnnotatorItem>
     </>

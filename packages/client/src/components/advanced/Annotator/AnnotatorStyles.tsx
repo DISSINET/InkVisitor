@@ -71,6 +71,7 @@ export const StyledAnnotatorItemContent = styled.div`
   margin-left: ${({ theme }) => theme.space[3]};
   margin-bottom: ${({ theme }) => theme.space[2]};
   flex-wrap: wrap;
+  position: relative;
 `;
 
 export const StyledAnnotatorItemContentLine = styled.div`
@@ -90,7 +91,6 @@ export const StyledAnnotatorAnchorListWrap = styled.div`
   padding-bottom: ${({ theme }) => theme.space[4]};
   border-radius: ${({ theme }) => theme.borderRadius.sm};
   margin-left: ${({ theme }) => theme.space["-2"]};
-  position: relative;
 `;
 
 export const StyledAnnotatorItemTitle = styled.div`
