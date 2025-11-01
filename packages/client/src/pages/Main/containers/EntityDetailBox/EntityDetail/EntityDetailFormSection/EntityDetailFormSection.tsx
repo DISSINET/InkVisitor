@@ -167,6 +167,16 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
     },
   });
 
+  const isTemplateDisabled = useMemo<boolean>(() => {
+    return !userCanEdit || templateOptions.length === 0;
+  }, [userCanEdit, templateOptions]);
+
+  const templateApplied = useMemo<IEntity | undefined>(() => {
+    return entity.usedTemplate && entity.usedTemplate in entity.entities
+      ? entity.entities[entity.usedTemplate]
+      : undefined;
+  }, [entity.usedTemplate, entity.entities]);
+
   return (
     <>
       <StyledFormWrapper>
@@ -225,7 +235,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
             <StyledDetailContentRowValue>
               <Dropdown.Single.Basic
                 placeholder="select template.."
-                disabled={!userCanEdit || templateOptions.length === 0}
+                disabled={isTemplateDisabled}
                 width="full"
                 value={null}
                 options={templateOptions}
@@ -236,17 +246,14 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
             </StyledDetailContentRowValue>
           </StyledDetailContentRow>
 
-          {entity.usedTemplate && entity.usedTemplate in entity.entities && (
+          {templateApplied && (
             <StyledDetailContentRow>
               <StyledDetailContentRowLabel>
                 Applied Template
               </StyledDetailContentRowLabel>
               <StyledDetailContentRowValue>
                 <StyledTagWrap>
-                  <EntityTag
-                    entity={entity.entities[entity.usedTemplate]}
-                    fullWidth
-                  />
+                  <EntityTag entity={templateApplied} fullWidth />
                 </StyledTagWrap>
               </StyledDetailContentRowValue>
             </StyledDetailContentRow>
