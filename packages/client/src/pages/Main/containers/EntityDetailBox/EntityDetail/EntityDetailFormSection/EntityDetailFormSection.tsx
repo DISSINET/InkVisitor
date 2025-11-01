@@ -167,6 +167,16 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
     },
   });
 
+  const isTemplateDisabled = useMemo<boolean>(() => {
+    return !userCanEdit || templateOptions.length === 0;
+  }, [userCanEdit, templateOptions]);
+
+  const templateApplied = useMemo<IEntity | undefined>(() => {
+    return entity.usedTemplate && entity.usedTemplate in entity.entities
+      ? entity.entities[entity.usedTemplate]
+      : undefined;
+  }, [entity.usedTemplate, entity.entities]);
+
   return (
     <>
       <StyledFormWrapper>
@@ -224,29 +234,25 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
             </StyledDetailContentRowLabel>
             <StyledDetailContentRowValue>
               <Dropdown.Single.Basic
+                key={"template-dropdown-" + entity.id}
                 placeholder="select template.."
-                disabled={!userCanEdit || templateOptions.length === 0}
+                disabled={isTemplateDisabled}
                 width="full"
                 value={null}
                 options={templateOptions}
-                onChange={(templateToApply) => {
-                  handleAskForTemplateApply(templateToApply);
-                }}
+                onChange={handleAskForTemplateApply}
               />
             </StyledDetailContentRowValue>
           </StyledDetailContentRow>
 
-          {entity.usedTemplate && entity.usedTemplate in entity.entities && (
+          {templateApplied && (
             <StyledDetailContentRow>
               <StyledDetailContentRowLabel>
                 Applied Template
               </StyledDetailContentRowLabel>
               <StyledDetailContentRowValue>
                 <StyledTagWrap>
-                  <EntityTag
-                    entity={entity.entities[entity.usedTemplate]}
-                    fullWidth
-                  />
+                  <EntityTag entity={templateApplied} fullWidth />
                 </StyledTagWrap>
               </StyledDetailContentRowValue>
             </StyledDetailContentRow>
