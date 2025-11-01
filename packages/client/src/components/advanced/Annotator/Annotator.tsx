@@ -906,11 +906,7 @@ export const TextAnnotator = ({
                     hasParentT={hasParentT}
                     territory={territory}
                     disableCreate={disableCreate}
-                    isLoading={
-                      isFetchingAnchorEntities ||
-                      isSaving ||
-                      (dataDocumentIsFetching ?? false)
-                    }
+                    isLoading={isSaving || isSavingWithoutRefresh}
                   />
                 )}
               </StyledAnnotatorMenu>
