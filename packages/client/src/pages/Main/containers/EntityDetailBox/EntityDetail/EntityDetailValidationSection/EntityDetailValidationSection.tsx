@@ -1,26 +1,25 @@
+import { EntityEnums } from "@shared/enums";
 import { IEntity, IResponseDetail, IResponseGeneric } from "@shared/types";
 import {
   EProtocolTieType,
-  ITerritory,
   ITerritoryValidation,
 } from "@shared/types/territory";
 import { UseMutationResult } from "@tanstack/react-query";
+import api from "api";
 import { AxiosResponse } from "axios";
 import { Button, Submit } from "components";
+import { ValidationRule } from "components/advanced";
 import React, { useState } from "react";
-import { FaChevronCircleDown, FaChevronCircleUp, FaPlus } from "react-icons/fa";
+import { FaChevronCircleRight, FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { deepCopy } from "utils/utils";
+import { EntityDetailSectionButtons } from "../EntityDetailSectionButtons/EntityDetailSectionButtons";
 import {
   StyledBlockSeparator,
   StyledDetailSectionHeader,
   StyledExpandIcon,
   StyledValidationList,
 } from "../EntityDetailStyles";
-import { ValidationRule } from "components/advanced";
-import { EntityDetailSectionButtons } from "../EntityDetailSectionButtons/EntityDetailSectionButtons";
-import { EntityEnums } from "@shared/enums";
-import api from "api";
 
 const initValidation: ITerritoryValidation = {
   detail: "",
@@ -119,16 +118,19 @@ export const EntityDetailValidationSection: React.FC<
   return (
     <>
       <StyledDetailSectionHeader>
-        Validation rules
         <StyledExpandIcon
           onClick={() => setIsValidationExpanded(!isValidationExpanded)}
         >
-          {isValidationExpanded ? (
-            <FaChevronCircleUp size={16} />
-          ) : (
-            <FaChevronCircleDown size={16} />
-          )}
+          <FaChevronCircleRight
+            size={16}
+            style={{
+              transition: "transform 0.2s ease",
+              cursor: "pointer",
+              transform: `rotate(${isValidationExpanded ? "90deg" : "0deg"})`,
+            }}
+          />
         </StyledExpandIcon>
+        Validation rules
         {userCanEdit && isValidationExpanded && (
           <span style={{ marginLeft: "1rem", marginRight: "1rem" }}>
             <Button

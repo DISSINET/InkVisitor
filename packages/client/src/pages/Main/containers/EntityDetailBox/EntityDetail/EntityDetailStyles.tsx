@@ -48,7 +48,7 @@ export const StyledDetailSectionHeading = styled.div`
 `;
 
 export const StyledExpandIcon = styled.div`
-  margin-left: ${({ theme }) => theme.space[2]};
+  margin-right: ${({ theme }) => theme.space[2]};
   display: flex;
   align-items: center;
   transition: transform 0.2s ease;
