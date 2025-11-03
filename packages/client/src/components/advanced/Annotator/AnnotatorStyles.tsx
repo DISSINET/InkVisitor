@@ -43,7 +43,7 @@ export const StyledAnnotatorMenu = styled.div<StyledAnnotatorMenuProps>`
   width: 40rem;
   background: ${({ theme }) => theme.color.blue["100"]};
   padding: ${({ theme }) => theme.space[2]};
-  z-index: 200;
+  z-index: 100;
   border-radius: ${({ theme }) => theme.borderRadius["default"]};
   box-shadow: ${({ theme }) => theme.boxShadow.high};
   opacity: 0.95;
@@ -71,10 +71,12 @@ export const StyledAnnotatorItemContent = styled.div`
   margin-left: ${({ theme }) => theme.space[3]};
   margin-bottom: ${({ theme }) => theme.space[2]};
   flex-wrap: wrap;
+  position: relative;
 `;
 
 export const StyledAnnotatorItemContentLine = styled.div`
   display: flex;
+  align-items: center;
   gap: ${({ theme }) => theme.space[2]};
 `;
 
@@ -98,7 +100,7 @@ export const StyledAnnotatorItemTitle = styled.div`
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
   font-variant-caps: small-caps;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: ${({ theme }) => theme.space[1]};
 `;
 
@@ -143,17 +145,18 @@ export const StyledInfoText = styled.div`
 `;
 
 interface StyledDisplayModeButtonIconWrapper {
-  $annotatorWidthTooSmall?: boolean;
+  $annotatorWidthTooNarrow?: boolean;
 }
 export const StyledDisplayModeButtonIconWrapper = styled.div<StyledDisplayModeButtonIconWrapper>`
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: ${({ $annotatorWidthTooSmall }) =>
-    $annotatorWidthTooSmall ? "0 0.5rem" : ""};
+  padding: ${({ $annotatorWidthTooNarrow }) =>
+    $annotatorWidthTooNarrow ? "0 0.5rem" : ""};
 `;
 
 export const StyledAnnotatorButtons = styled.div`
   display: flex;
   justify-content: space-between;
+  padding-left: ${({ theme }) => theme.space[1]};
 `;

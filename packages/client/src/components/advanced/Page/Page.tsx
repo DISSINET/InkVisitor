@@ -19,7 +19,6 @@ import { setUsername } from "redux/features/usernameSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { ThemeColor } from "Theme/theme";
 import { StyledPage, StyledPageContent } from "./PageStyles";
-import { JSX } from "react";
 
 interface Page {
   children?: React.ReactNode;
@@ -32,7 +31,7 @@ export const Page: React.FC<Page> = ({ children }) => {
   );
   const userId = localStorage.getItem("userid");
   const userRole = localStorage.getItem("userrole") as UserEnums.Role;
-  const { cleanAllParams } = useSearchParams();
+  const { cleanAllParams, setLogoutState } = useSearchParams();
 
   const contentHeight: number = useAppSelector(
     (state) => state.layout.contentHeight
@@ -42,7 +41,6 @@ export const Page: React.FC<Page> = ({ children }) => {
   );
 
   const environmentName = window.appConfig.env || "";
-
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -60,10 +58,8 @@ export const Page: React.FC<Page> = ({ children }) => {
   } = useQuery({
     queryKey: ["user", userId],
     queryFn: async () => {
-      if (userId) {
-        const res = await api.usersGet(userId);
-        return res.data;
-      }
+      const res = await api.usersGet(userId as string);
+      return res.data ?? undefined;
     },
     enabled: api.isLoggedIn() && !disableRightHeader,
   });
@@ -85,6 +81,9 @@ export const Page: React.FC<Page> = ({ children }) => {
   const logOutMutation = useMutation({
     mutationFn: async () => await api.signOut(),
     onSuccess: (data, variables) => {
+      // Set logout state to prevent navigation conflicts in React 19
+      setLogoutState(true);
+
       dispatch(setUsername(""));
       queryClient.removeQueries();
       toast.success("You've been successfully logged out!");
@@ -92,6 +91,11 @@ export const Page: React.FC<Page> = ({ children }) => {
       cleanAllParams();
 
       navigate("/login");
+
+      // Reset the logout flag after navigation completes
+      setTimeout(() => {
+        setLogoutState(false);
+      }, 100);
     },
   });
 
@@ -103,17 +107,17 @@ export const Page: React.FC<Page> = ({ children }) => {
   useKeypress("Shift", () => document.body.classList.add("no-select"));
   useKeyLift("Shift", () => document.body.classList.remove("no-select"));
 
-  useQuery({
-    queryKey: ["ping"],
-    queryFn: async () => {
+  useEffect(() => {
+    const updatePing = () => {
       const localPing = api.getPing();
       if (localPing) {
         dispatch(setPing(localPing));
       }
-      return localPing;
-    },
-    refetchInterval: 5000,
-  });
+    };
+    updatePing();
+    const interval = setInterval(updatePing, 5000);
+    return () => clearInterval(interval);
+  }, [dispatch]);
 
   const headerLeft = useMemo(
     () => <LeftHeader tempLocation={tempLocation} />,
@@ -159,9 +163,9 @@ export const Page: React.FC<Page> = ({ children }) => {
         color={
           environmentName === "production"
             ? "muni"
-            : environmentName === ""
-            ? "medhate"
-            : (environmentName as keyof ThemeColor)
+            : environmentName
+            ? (environmentName as keyof ThemeColor)
+            : "black"
         }
         left={headerLeft}
         right={headerRight}

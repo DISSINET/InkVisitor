@@ -33,7 +33,7 @@ export const DocumentsPage: React.FC = ({}) => {
     queryKey: ["documents"],
     queryFn: async () => {
       const res = await api.documentsGet({});
-      return res.data;
+      return res.data ?? [];
     },
     enabled: api.isLoggedIn(),
   });
@@ -48,7 +48,7 @@ export const DocumentsPage: React.FC = ({}) => {
       const res = await api.entitiesSearch({
         resourceHasDocument: true,
       });
-      return res.data;
+      return res.data ?? [];
     },
     enabled: api.isLoggedIn(),
   });
@@ -131,7 +131,6 @@ export const DocumentsPage: React.FC = ({}) => {
   const [editedDocumentId, setEditedDocumentId] = useState<string | false>(
     false
   );
-  const editedDocument = documents?.find((doc) => doc.id === editedDocumentId);
 
   const handleDocumentEdit = (id: string) => {
     setEditedDocumentId(id);
@@ -188,7 +187,7 @@ export const DocumentsPage: React.FC = ({}) => {
               <input
                 ref={inputRef}
                 type="file"
-                accept=".txt"
+                accept=".txt,.xml"
                 title="x"
                 onChange={handleFileChange}
                 hidden

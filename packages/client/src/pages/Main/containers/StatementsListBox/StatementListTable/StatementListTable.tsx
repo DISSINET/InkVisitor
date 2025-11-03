@@ -119,7 +119,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   isLoading,
 }) => {
   const dispatch = useAppDispatch();
-  const { territoryId, setStatementId } = useSearchParams();
+  const { territoryId, statementId, setStatementId } = useSearchParams();
   const rowsExpanded: string[] = useAppSelector(
     (state) => state.statementList.rowsExpanded
   );
@@ -256,7 +256,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         Header: "",
         Cell: ({ row }: CellType) => {
           const statement = row.original;
-          return <EntityTag entity={statement as IEntity} showOnly="entity" />;
+          return <EntityTag entity={statement} showOnly="entity" />;
         },
       },
       {
@@ -381,7 +381,9 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                   noPadding
                   onClick={(e) => {
                     e.stopPropagation();
-                    setStatementId(row.id);
+                    if (row.id !== statementId) {
+                      setStatementId(row.id);
+                    }
                     dispatch(setShowWarnings(true));
                   }}
                 />
@@ -539,12 +541,6 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   const handleRowClickWithAnnotator = useCallback(
     (rowId: string) => {
       handleRowClick(rowId);
-
-      // If annotator is available, highlight the statement in the annotator
-      if (annotator) {
-        // Use the scrollToAnchor method to highlight the statement
-        annotator.scrollToAnchor(rowId);
-      }
     },
     [handleRowClick, annotator]
   );

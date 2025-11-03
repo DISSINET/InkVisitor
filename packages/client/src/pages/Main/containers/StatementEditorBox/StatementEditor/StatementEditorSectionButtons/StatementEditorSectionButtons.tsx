@@ -34,7 +34,7 @@ interface StatementEditorSectionButtons {
     changes: Partial<IStatementData>,
     instantUpdate: boolean
   ) => void;
-  editorWidthTooSmall: boolean;
+  editorWidthTooNarrow: boolean;
 }
 export const StatementEditorSectionButtons: React.FC<
   StatementEditorSectionButtons
@@ -46,7 +46,7 @@ export const StatementEditorSectionButtons: React.FC<
 
   handleAttributeChange,
   handleDataAttributeChange,
-  editorWidthTooSmall,
+  editorWidthTooNarrow,
 }) => {
   const [replaceSection, setReplaceSection] = useState(false);
 
@@ -115,14 +115,14 @@ export const StatementEditorSectionButtons: React.FC<
         />
         <StyledSectionButtonsBorder />
         <AttributeButtonGroup
-          iconsOnly={editorWidthTooSmall}
+          iconsOnly={editorWidthTooNarrow}
           options={[
             {
               longValue: "append",
               shortValue: "",
               onClick: () => setReplaceSection(false),
               selected: !replaceSection,
-              icon: editorWidthTooSmall ? <FaPlus /> : undefined,
+              icon: editorWidthTooNarrow ? <FaPlus /> : undefined,
               shortIcon: <FaPlus />,
             },
             {
@@ -130,14 +130,14 @@ export const StatementEditorSectionButtons: React.FC<
               shortValue: "",
               onClick: () => setReplaceSection(true),
               selected: replaceSection,
-              icon: editorWidthTooSmall ? <TbReplace /> : undefined,
+              icon: editorWidthTooNarrow ? <TbReplace /> : undefined,
               shortIcon: <TbReplace />,
             },
           ]}
         />
         <Button
           icon={<FaClone />}
-          label={!editorWidthTooSmall ? "previous S" : ""}
+          label={!editorWidthTooNarrow ? "previous S" : ""}
           disabled={!previousStatement}
           tooltipLabel={`copy ${section} from the previous statement`}
           inverted
@@ -153,7 +153,7 @@ export const StatementEditorSectionButtons: React.FC<
         }
         excludedActantIds={[statement.id]}
         disableCreate
-        inputWidth={editorWidthTooSmall ? 60 : 76}
+        inputWidth={editorWidthTooNarrow ? 60 : 76}
         placeholder="another S"
         disableTemplateInstantiation
       />

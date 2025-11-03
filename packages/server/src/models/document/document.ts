@@ -1,12 +1,12 @@
 import { IDbModel } from "@models/common";
 import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
-import { IDocument, IEntity } from "@shared/types";
+import { IDocument } from "@shared/types";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import { InternalServerError, ModelNotValidError } from "@shared/types/errors";
 import User from "@models/user/user";
-import { findEntityById } from "@service/shorthands";
 import { AnchorsNode } from "./anchors";
 import Entity from "@models/entity/entity";
+import { createOpeningTagRegex, createSpecificOpeningTagRegex, closingTagRegex } from "@common/regex";
 
 export default class Document implements IDocument, IDbModel {
   static table = "documents";
@@ -60,14 +60,15 @@ export default class Document implements IDocument, IDbModel {
    * @returns unique list of entity IDs
    */
   gatherEntityIds(): string[] {
-    // Match opening tags that contain entity IDs
-    // Entity IDs can contain letters, numbers, hyphens, dots, and underscores
-    const regex = /<([\w\-\._]+)>/g;
+    // Match opening tags that contain entity IDs using standardized regex
+    const regex = createOpeningTagRegex();
     const entities = new Set<string>();
     let match;
 
     while ((match = regex.exec(this.content)) !== null) {
-      entities.add(match[1]);
+      // Extract only the tag name (first word before any attributes or spaces)
+      const tagName = match[1].split(/\s+/)[0];
+      entities.add(tagName);
     }
 
     return Array.from(entities);
@@ -170,7 +171,6 @@ export default class Document implements IDocument, IDbModel {
     db: Connection | undefined,
     updateData: Partial<IDocument>
   ): Promise<WriteResult> {
-    console.log("updateData", { ...updateData, content: " " });
     this.updatedAt = updateData.updatedAt = new Date();
     delete updateData.createdAt;
     return rethink
@@ -253,9 +253,13 @@ export default class Document implements IDocument, IDbModel {
 
   removeAnchors(entityIds: string[]) {
     for (const entityId of entityIds) {
-      const tagRegex = new RegExp(`<\\/?${entityId}(>|$)`, "g");
-      const updatedContent = this.content.replace(tagRegex, "");
-      this.content = updatedContent;
+      // Remove opening tags with attributes
+      const openingTagRegex = createSpecificOpeningTagRegex(entityId);
+      this.content = this.content.replace(openingTagRegex, "");
+      
+      // Remove closing tags
+      const closingTagRegexInstance = new RegExp(`</${entityId}>`, "g");
+      this.content = this.content.replace(closingTagRegexInstance, "");
 
       // Search and remove the id from all class arrays
       Object.keys(this.entityIds).forEach((classKey) => {
@@ -267,24 +271,30 @@ export default class Document implements IDocument, IDbModel {
   }
 
   removeAnchor(entityId: string, index: number) {
-    const tagRegex = new RegExp(`<\\/?${entityId}(>|$)`, "g");
+    const openingTagRegex = createSpecificOpeningTagRegex(entityId);
+    const closingTagRegexInstance = new RegExp(`</${entityId}>`, "g");
+    
     let match;
     let count = 0;
-    const positions: { start: number; end: number }[] = [];
+    const positions: { start: number; end: number; openingTagLength: number }[] = [];
 
-    // Find all matching tags in the content
-    while ((match = tagRegex.exec(this.content)) !== null) {
-      if (match[0] === `<${entityId}>`) {
-        // Start tag position
-        positions.push({ start: match.index, end: -1 });
-      } else if (match[0] === `</${entityId}>`) {
-        // End tag position
-        if (
-          positions.length > 0 &&
-          positions[positions.length - 1].end === -1
-        ) {
-          positions[positions.length - 1].end = match.index + match[0].length;
+    // Find all opening tags in the content
+    while ((match = openingTagRegex.exec(this.content)) !== null) {
+      positions.push({ 
+        start: match.index, 
+        end: -1, 
+        openingTagLength: match[0].length 
+      });
+    }
+
+    // Find corresponding closing tags
+    while ((match = closingTagRegexInstance.exec(this.content)) !== null) {
+      // Find the matching opening tag (the one without an end position)
+      for (let i = positions.length - 1; i >= 0; i--) {
+        if (positions[i].end === -1) {
+          positions[i].end = match.index + match[0].length;
           count++;
+          break;
         }
       }
     }
@@ -299,7 +309,7 @@ export default class Document implements IDocument, IDbModel {
       this.content =
         this.content.slice(0, targetTag.start) +
         this.content.slice(
-          targetTag.start + `<${entityId}>`.length,
+          targetTag.start + targetTag.openingTagLength,
           targetTag.end - `</${entityId}>`.length
         ) +
         this.content.slice(targetTag.end);

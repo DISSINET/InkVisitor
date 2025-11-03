@@ -1,4 +1,5 @@
 import {
+  classesAll,
   dropdownWildCard,
   entitiesDictKeys,
 } from "@shared/dictionaries/entity";
@@ -26,7 +27,7 @@ import { deepCopy } from "utils/utils";
 import { AddTerritoryModal, EntityCreateModal } from "..";
 
 interface EntitySuggester {
-  categoryTypes: EntityEnums.Class[];
+  categoryTypes?: EntityEnums.Class[];
   onSelected?: (id: string) => void;
   onPicked?: (entity: IEntity) => void;
   onChangeCategory?: (
@@ -42,7 +43,19 @@ interface EntitySuggester {
   filterEditorRights?: boolean;
   isInsideTemplate?: boolean;
   isInsideStatement?: boolean;
+  // used for instantiating template T, entity suggestions
   territoryParentId?: string;
+  // used for create entity modal
+  parentTerritory?: IEntity;
+  // not obligatory, only for specific creation like from annotator where calculation of order is needed
+  onCreateStatement?: (entityCreateModalProps?: {
+    label: string;
+    detail: string;
+    territoryId: string;
+    language: EntityEnums.Language;
+  }) => void;
+  onEntityCreateMutationSuccess?: (entity: IEntity) => void;
+  entityCreateStatementOrder?: number;
 
   button?: React.ReactNode;
   preSuggestions?: IEntity[];
@@ -68,7 +81,7 @@ interface EntitySuggester {
 }
 
 export const EntitySuggester: React.FC<EntitySuggester> = ({
-  categoryTypes,
+  categoryTypes = classesAll,
   onSelected = () => {},
   onPicked = () => {},
   onChangeCategory,
@@ -83,6 +96,10 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   isInsideTemplate = false,
   isInsideStatement = false,
   territoryParentId,
+  parentTerritory,
+  onCreateStatement,
+  onEntityCreateMutationSuccess,
+  entityCreateStatementOrder,
 
   button,
   preSuggestions,
@@ -159,10 +176,8 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   } = useQuery({
     queryKey: ["user", userId],
     queryFn: async () => {
-      if (userId) {
-        const res = await api.usersGet(userId);
-        return res.data;
-      }
+      const res = await api.usersGet(userId as string);
+      return res.data ?? undefined;
     },
     enabled: !!userId && api.isLoggedIn(),
   });
@@ -192,7 +207,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
           : undefined,
       });
 
-      return filterSuggestions(resSuggestions.data);
+      return filterSuggestions(resSuggestions.data ?? []);
     },
     enabled:
       debouncedTyped.length > 1 &&
@@ -274,6 +289,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     if (entity.class === EntityEnums.Class.Territory) {
       queryClient.invalidateQueries({ queryKey: ["tree"] });
     }
+    onEntityCreateMutationSuccess && onEntityCreateMutationSuccess(entity);
   };
 
   const entityCreateMutation = useMutation({
@@ -516,6 +532,9 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
           closeModal={() => setShowCreateModal(false)}
           onMutationSuccess={(entity) => onMutationSuccess(entity)}
           allowedEntityClasses={categoryTypes}
+          parentTerritory={parentTerritory}
+          entityCreateStatementOrder={entityCreateStatementOrder}
+          onCreateStatement={onCreateStatement}
         />
       )}
     </>

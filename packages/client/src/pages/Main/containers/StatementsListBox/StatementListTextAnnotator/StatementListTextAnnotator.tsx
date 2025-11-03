@@ -1,31 +1,42 @@
 import { Annotator } from "@inkvisitor/annotator/src/lib";
-import { animated, useSpring } from "@react-spring/web";
-import { entitiesDict } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
-import { IDocument, IResponseEntity, IResponseTerritory } from "@shared/types";
-import Dropdown from "components/advanced";
+import {
+  IDocument,
+  IResponseEntity,
+  IResponseGeneric,
+  IResponseTerritory,
+  IResponseUser,
+  IStatement,
+} from "@shared/types";
+import { UseMutationResult } from "@tanstack/react-query";
+import { AxiosResponse } from "axios";
 import TextAnnotator from "components/advanced/Annotator/Annotator";
 import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
-import { useDebounce, useTheme } from "hooks";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
+import { BsInfoCircle } from "react-icons/bs";
 import {
   ANNOTATOR_SELECTOR_HEIGHT,
   ANNOTATOR_TOO_SMALL_BREAKPOINT,
   COLLAPSED_TABLE_WIDTH,
 } from "Theme/constants";
-import StatementListDocumentSearchLine from "../StatementListDocumentSearchLine/StatementListDocumentSearchLine";
-import { StyledInfoText } from "../StatementListHeader/StatementListHeaderStyles";
+import { StyledEmptyState } from "../StatementListBoxStyles";
+import StatementListDocumentLine from "../StatementListDocumentLine/StatementListDocumentLine";
 
 interface StatementListTextAnnotator {
   // it's faster than the territory entity so it's better to pass territoryId separately
   territoryId: string;
   territory?: IResponseTerritory;
   statementId: string;
-  addStatementAtCertainIndex: (index: number) => Promise<void>;
-  handleCreateStatement: (detail?: string, statementId?: string) => void;
+  statementCreateMutation: UseMutationResult<
+    AxiosResponse<IResponseGeneric<IStatement>, any>,
+    Error,
+    IStatement,
+    unknown
+  >;
+  statementListBoxRef?: React.RefObject<HTMLDivElement | null>;
 
-  storedAnnotatorScroll: number;
-  setStoredAnnotatorScroll?: React.Dispatch<React.SetStateAction<number>>;
+  // storedAnnotatorScroll: number;
+  // setStoredAnnotatorScroll?: React.Dispatch<React.SetStateAction<number>>;
 
   hlEntities: EntityEnums.Class[];
   setHlEntities: React.Dispatch<React.SetStateAction<EntityEnums.Class[]>>;
@@ -36,18 +47,19 @@ interface StatementListTextAnnotator {
   annotator?: Annotator;
   setAnnotator?: React.Dispatch<React.SetStateAction<Annotator | undefined>>;
 
-  selectedDocument?: IDocument | false;
+  selectedDocument?: IDocument;
   selectedResource: IResponseEntity | false;
   resources?: IResponseEntity[];
   setSelectedResourceId: React.Dispatch<React.SetStateAction<string | false>>;
 
   // useQuery for selectedDocument
-  selectedDocumentId: string | undefined;
+  selectedDocumentId?: string;
   selectedDocumentIsFetching: boolean;
   selectedDocumentError: Error | null;
 
   showStatementList: boolean;
   userCanEdit: boolean;
+  userData?: IResponseUser;
 }
 
 export const StatementListTextAnnotator: React.FC<
@@ -56,11 +68,11 @@ export const StatementListTextAnnotator: React.FC<
   territoryId,
   territory,
   statementId,
-  addStatementAtCertainIndex,
-  handleCreateStatement,
+  statementCreateMutation,
+  statementListBoxRef,
 
-  storedAnnotatorScroll,
-  setStoredAnnotatorScroll = () => {},
+  // storedAnnotatorScroll,
+  // setStoredAnnotatorScroll = () => {},
 
   hlEntities,
   setHlEntities,
@@ -81,101 +93,8 @@ export const StatementListTextAnnotator: React.FC<
   selectedDocumentError,
   showStatementList,
   userCanEdit,
+  userData,
 }) => {
-  const [showAnnotator, setShowAnnotator] = useState(false);
-
-  useEffect(() => {
-    setShowAnnotator(true);
-  }, []);
-
-  const handleHlEntitiesChange = useCallback(
-    (newHlEntities: EntityEnums.Class[]) => {
-      setHlEntities(newHlEntities);
-    },
-    []
-  );
-
-  const [searchTerm, setSearchTerm] = useState<string>("");
-  const [searchOccurences, setSearchOccurences] = useState<
-    { segmentIndex: number; lineIndex: number; start: number; end: number }[]
-  >([]);
-  const [searchActiveOccurence, setSearchActiveOccurence] = useState<number>(0);
-
-  useEffect(() => {
-    const newSelectedOccurence = searchOccurences[searchActiveOccurence];
-
-    if (newSelectedOccurence) {
-      annotator?.selectSearchOccurrence(newSelectedOccurence);
-    }
-  }, [searchActiveOccurence, searchOccurences]);
-
-  const dSearchTerm = useDebounce(searchTerm, 1000);
-
-  const isSearchTermValid = useMemo<boolean>(() => {
-    return dSearchTerm.length > 2;
-  }, [dSearchTerm]);
-
-  useEffect(() => {
-    if (annotator) {
-      if (isSearchTermValid) {
-        annotator?.search(searchTerm);
-        const occurences = annotator?.search(searchTerm);
-
-        setSearchOccurences(occurences);
-
-        setTimeout(() => {
-          setSearchActiveOccurence(0);
-        }, 1000);
-
-        // if (occurences.length > 0) {
-        //   annotator?.selectSearchOccurence(
-        //     searchOccurences[searchActiveOccurence]
-        //   );
-        // }
-      }
-    }
-  }, [dSearchTerm]);
-
-  const animatedStyle = useSpring({
-    opacity: showAnnotator ? 1 : 0,
-    delay: 300,
-  });
-
-  // INIT + react to url changes
-  useEffect(() => {
-    if (annotator && selectedDocument) {
-      const scrollToId =
-        statementId && selectedDocument.entityIds.S?.includes(statementId)
-          ? statementId
-          : territoryId;
-
-      // ensure the annotator is fully initialized
-      setTimeout(() => {
-        annotator.scrollToAnchor(scrollToId);
-      }, 100);
-    }
-  }, [statementId, annotator, territoryId, selectedDocument]);
-
-  const thisTHasAnchor = useMemo<boolean>(() => {
-    if (selectedDocument) {
-      return selectedDocument?.entityIds.T.includes(territoryId);
-    }
-    return false;
-  }, [selectedDocument, territoryId]);
-
-  const activeTHasAnchor = useMemo<boolean>(() => {
-    if (selectedDocument) {
-      return selectedDocument?.entityIds.T.includes(territoryId);
-    }
-    return false;
-  }, [selectedDocument, territoryId]);
-
-  const theme = useTheme();
-
-  const isSearchAllowed = useMemo<boolean>(() => {
-    return annotator !== undefined && !!selectedDocument;
-  }, [annotator, selectedDocument]);
-
   const annotatorHeight = useMemo<number>(() => {
     return contentHeight - 70 - ANNOTATOR_SELECTOR_HEIGHT;
   }, [contentHeight]);
@@ -186,14 +105,61 @@ export const StatementListTextAnnotator: React.FC<
       : contentWidth;
   }, [contentWidth, showStatementList]);
 
-  const annotatorWidthTooSmall = useMemo<boolean>(() => {
+  const annotatorWidthTooNarrow = useMemo<boolean>(() => {
     return annotatorWidth < ANNOTATOR_TOO_SMALL_BREAKPOINT;
   }, [annotatorWidth]);
 
+  const activeTHasAnchor = useMemo<boolean>(() => {
+    if (selectedDocument) {
+      return selectedDocument?.entityIds.T.includes(territoryId);
+    }
+    return false;
+  }, [selectedDocument, territoryId]);
+
+  // Track previous values to only scroll when territoryId or statementId actually change
+  const prevTerritoryIdRef = useRef<string | undefined>(undefined);
+  const prevStatementIdRef = useRef<string | undefined>(undefined);
+  // Tracking Annotator changes is necessary to keep the position in the text after resizing
+  const lastScrolledAnnotatorRef = useRef<Annotator | undefined>(undefined);
+
+  // Initial scroll + react to url changes
+  useEffect(() => {
+    // Only scroll when territoryId or statementId actually changed
+    if (territory) {
+      const territoryChanged = prevTerritoryIdRef.current !== territory.id;
+      const statementChanged = prevStatementIdRef.current !== statementId;
+      const annotatorChanged = lastScrolledAnnotatorRef.current !== annotator;
+
+      // Scroll if: IDs changed OR annotator was recreated (and we haven't scrolled this annotator yet)
+      const shouldScroll =
+        territoryChanged || statementChanged || annotatorChanged;
+      if (annotator && selectedDocument && shouldScroll) {
+        const isStatementInDocument =
+          statementId && selectedDocument.entityIds.S?.includes(statementId);
+        const isStatementInTerritory = territory?.statements?.some(
+          (statement) => statement.id === statementId
+        );
+
+        const scrollToId =
+          isStatementInDocument && isStatementInTerritory
+            ? statementId
+            : territoryId;
+
+        // Perform the scroll
+        annotator.scrollToAnchor(scrollToId);
+
+        // Update refs AFTER scroll
+        prevTerritoryIdRef.current = territory.id;
+        prevStatementIdRef.current = statementId;
+        lastScrolledAnnotatorRef.current = annotator;
+      }
+    }
+  }, [selectedDocument, statementId, annotator, territory]);
+
   return (
-    <animated.div style={animatedStyle}>
-      {contentWidth > 0 && (
-        <StatementListDocumentSearchLine
+    <>
+      <div style={{ width: "100%" }}>
+        <StatementListDocumentLine
           selectedResource={selectedResource}
           setSelectedResourceId={setSelectedResourceId}
           selectedDocumentIsFetching={selectedDocumentIsFetching}
@@ -201,62 +167,40 @@ export const StatementListTextAnnotator: React.FC<
           activeTHasAnchor={activeTHasAnchor}
           annotator={annotator}
           territoryId={territoryId}
-          isSearchAllowed={isSearchAllowed}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          isSearchTermValid={isSearchTermValid}
-          hasNoSearchResults={searchOccurences.length === 0}
-          searchActiveOccurence={searchActiveOccurence}
-          searchOccurences={searchOccurences}
-          setSearchActiveOccurence={setSearchActiveOccurence}
           resources={resources || []}
           showStatementList={showStatementList}
           userCanEdit={userCanEdit}
-          annotatorWidthTooSmall={annotatorWidthTooSmall}
+          annotatorWidthTooNarrow={annotatorWidthTooNarrow}
+          contentWidth={contentWidth}
+          setHlEntities={setHlEntities}
+          hlEntities={hlEntities}
         />
-      )}
 
-      {/* Class selector */}
-      {selectedResource !== false && selectedResource?.data?.documentId && (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: theme.space[4],
-            paddingRight: theme.space[2],
-            marginBottom: theme.space[2],
-            marginLeft: showStatementList ? `-${COLLAPSED_TABLE_WIDTH}px` : "0",
-          }}
-        >
-          {/* this condition helps initial render in firefox */}
-          {contentWidth > 0 && (
-            <>
-              <StyledInfoText style={{ textWrap: "nowrap" }}>
-                Highlight
-              </StyledInfoText>
-              <Dropdown.Multi.Entity
-                options={entitiesDict}
-                disableEmpty={true}
-                isClearable={true}
-                disableAny={true}
-                onChange={handleHlEntitiesChange}
-                value={hlEntities}
-                noOptionsMessage="No entity classes to highlight"
-                width={contentWidth - 71}
-                limitSelectedItems={Math.floor((contentWidth - 145) / 80)}
-              />
-            </>
-          )}
-        </div>
-      )}
+        {!selectedDocumentId && (
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              marginTop: "2rem",
+            }}
+          >
+            <StyledEmptyState>
+              <BsInfoCircle size="23" />
+            </StyledEmptyState>
+            <StyledEmptyState>
+              {"No document selected yet. Pick one from the suggester"}
+            </StyledEmptyState>
+          </div>
+        )}
 
-      {/* Annotator */}
-      <div style={{ marginTop: "0.2rem" }}>
+        {/* Annotator */}
         <AnnotatorProvider>
           {selectedDocumentId && selectedDocument && (
             <TextAnnotator
               width={annotatorWidth}
-              annotatorWidthTooSmall={annotatorWidthTooSmall}
+              annotatorWidthTooNarrow={annotatorWidthTooNarrow}
               hlEntities={hlEntities}
               forwardAnnotator={(newAnnotator) => {
                 setAnnotator(newAnnotator);
@@ -264,18 +208,22 @@ export const StatementListTextAnnotator: React.FC<
               thisTerritoryEntityId={territoryId}
               displayLineNumbers={true}
               height={annotatorHeight}
-              documentId={selectedDocumentId as string}
-              handleCreateStatement={handleCreateStatement}
-              storedAnnotatorScroll={storedAnnotatorScroll}
-              setStoredAnnotatorScroll={setStoredAnnotatorScroll}
+              documentId={selectedDocumentId || undefined}
+              statementCreateMutation={statementCreateMutation}
+              // storedAnnotatorScroll={storedAnnotatorScroll}
+              // setStoredAnnotatorScroll={setStoredAnnotatorScroll}
               territory={territory}
-              dataDocument={selectedDocument}
+              dataDocument={selectedDocument ?? undefined}
               dataDocumentIsFetching={selectedDocumentIsFetching}
               dataDocumentError={selectedDocumentError}
+              showStatementList={showStatementList}
+              userData={userData}
+              statementListBoxRef={statementListBoxRef}
+              territoryId={territoryId}
             />
           )}
         </AnnotatorProvider>
       </div>
-    </animated.div>
+    </>
   );
 };

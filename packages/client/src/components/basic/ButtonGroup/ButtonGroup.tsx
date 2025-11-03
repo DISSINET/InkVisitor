@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { space2 } from "Theme/constants";
+import { space2 } from "Theme/theme-space-shortcut";
 
 interface ButtonGroup {
   $noMarginRight?: boolean;

@@ -12,6 +12,7 @@ import {
   ITerritory,
   Relation,
 } from "@shared/types";
+import { ITerritoryProtocol } from "@shared/types/territory";
 import { UserOptions } from "@shared/types/response-user";
 
 import {
@@ -21,6 +22,17 @@ import {
 import api from "api";
 import { deepCopy } from "utils/utils";
 import { v4 as uuidv4 } from "uuid";
+
+export const CEmptyProtocol = (): ITerritoryProtocol => ({
+  project: "",
+  dataCollectionMethods: [],
+  description: "",
+  guidelines: [],
+  detailedProtocols: [],
+  startDate: "",
+  endDate: "",
+  relatedDataPublications: [],
+});
 
 export const CBookmarkFolder = (bookmarkName: string): IBookmarkFolder => ({
   id: uuidv4(),
@@ -573,7 +585,7 @@ export const CStatement = (
   detail?: string,
   territoryId: string | undefined = undefined,
   id: string | undefined = undefined,
-  lastInT: boolean = true
+  order: number = EntityEnums.Order.Last
 ): IStatement => {
   const newStatement: IStatement = {
     id: id ?? uuidv4(),
@@ -599,7 +611,7 @@ export const CStatement = (
   if (territoryId) {
     newStatement.data.territory = {
       territoryId: territoryId,
-      order: lastInT ? EntityEnums.Order.Last : EntityEnums.Order.First,
+      order: order,
     };
   }
   return newStatement;
@@ -622,6 +634,7 @@ export const CTerritory = (
   notes: [],
   data: {
     parent: { territoryId: parentId, order: parentOrder },
+    protocol: CEmptyProtocol(),
   },
   status:
     userRole === UserEnums.Role.Admin || userRole === UserEnums.Role.Owner

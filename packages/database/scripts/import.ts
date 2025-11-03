@@ -8,6 +8,7 @@ import {
   auditsIndexes,
   entitiesIndexes,
   relationsIndexes,
+  materializedStatsIndexes,
 } from "./import/indexes";
 import { EntityEnums } from "@shared/enums";
 import { question } from "./import/prompts";
@@ -16,11 +17,41 @@ import { getEnv } from "./import/common";
 import { SshHelper } from "./import/ssh";
 import colors from "colors/safe";
 import jobs from "./jobs/index";
+import * as fs from "fs";
+import * as path from "path";
 
 const defaultSettingsTable: TableSchema = {
   tableName: "settings",
   data: require("../datasets/default/settings.json"),
   transform: function () {},
+};
+
+// Materialized stats tables for each time unit
+const materializedStatsTables = {
+  statsMaterializedDay: {
+    tableName: "stats_materialized_day",
+    data: [],
+    transform: function () {},
+    indexes: materializedStatsIndexes,
+  },
+  statsMaterializedWeek: {
+    tableName: "stats_materialized_week",
+    data: [],
+    transform: function () {},
+    indexes: materializedStatsIndexes,
+  },
+  statsMaterializedMonth: {
+    tableName: "stats_materialized_month",
+    data: [],
+    transform: function () {},
+    indexes: materializedStatsIndexes,
+  },
+  statsMaterializedYear: {
+    tableName: "stats_materialized_year",
+    data: [],
+    transform: function () {},
+    indexes: materializedStatsIndexes,
+  },
 };
 
 const datasets: Record<string, DbSchema> = {
@@ -56,6 +87,7 @@ const datasets: Record<string, DbSchema> = {
       data: require("../datasets/dissinet-documents/documents.json"),
       transform: function () {},
     },
+    ...materializedStatsTables,
   },
 
   empty: {
@@ -111,6 +143,7 @@ const datasets: Record<string, DbSchema> = {
       data: require("../datasets/default/documents.json"),
       transform: function () {},
     },
+    ...materializedStatsTables,
   },
 
   relationstest: {
@@ -188,6 +221,7 @@ const datasets: Record<string, DbSchema> = {
       data: require("../datasets/default/documents.json"),
       transform: function () {},
     },
+    ...materializedStatsTables,
   },
 
   allparsed: {
@@ -262,6 +296,7 @@ const datasets: Record<string, DbSchema> = {
       data: require("../datasets/default/documents.json"),
       transform: function () {},
     },
+    ...materializedStatsTables,
   },
 
   initial_c: {
@@ -299,6 +334,7 @@ const datasets: Record<string, DbSchema> = {
       data: null,
       transform: function () {},
     },
+    ...materializedStatsTables,
   },
 
   initial_a: {
@@ -336,6 +372,7 @@ const datasets: Record<string, DbSchema> = {
       data: null,
       transform: function () {},
     },
+    ...materializedStatsTables,
   },
 
   acr: {
@@ -373,6 +410,7 @@ const datasets: Record<string, DbSchema> = {
       data: null,
       transform: function () {},
     },
+    ...materializedStatsTables,
   },
 
   niort: {
@@ -415,6 +453,7 @@ const datasets: Record<string, DbSchema> = {
       data: [],
       transform: function () {},
     },
+    ...materializedStatsTables,
   },
 
   production: {
@@ -457,6 +496,7 @@ const datasets: Record<string, DbSchema> = {
       data: require("../datasets/production/documents.json"),
       transform: function () {},
     },
+    ...materializedStatsTables,
   },
 };
 
@@ -752,8 +792,53 @@ class Importer {
     for (const tableConfig of Object.values(this.dataset)) {
       await this.db.createTable(tableConfig);
     }
+    
+    // Import data with proper counting for all files
     for (const tableConfig of Object.values(this.dataset)) {
-      await this.db.importData(tableConfig);
+      if (tableConfig.data && Array.isArray(tableConfig.data)) {
+        // Check if this is a large file that needs special handling
+        const dataFilePath = this.getDataFilePath(tableConfig);
+        if (dataFilePath && this.isLargeFile(dataFilePath)) {
+          console.log(colors.yellow(`Using large file import for: ${tableConfig.tableName}`));
+          await this.db.importLargeData(tableConfig, dataFilePath);
+        } else {
+          // For smaller files, use the standard import with proper counting
+          await this.db.importData(tableConfig);
+        }
+      } else if (tableConfig.data === null) {
+        console.log(colors.gray(`Skipping ${tableConfig.tableName} - no data configured`));
+      } else {
+        console.log(colors.gray(`Skipping ${tableConfig.tableName} - data is not an array`));
+      }
+    }
+  }
+
+  /**
+   * Gets the data file path for a table configuration
+   * @param tableConfig Table configuration
+   * @returns string | null
+   */
+  private getDataFilePath(tableConfig: TableSchema): string | null {
+    if (!this.datasetName) return null;
+    
+    const dataDir = path.join(__dirname, "../datasets", this.datasetName);
+    const jsonFile = path.join(dataDir, `${tableConfig.tableName}.json`);
+    
+    return fs.existsSync(jsonFile) ? jsonFile : null;
+  }
+
+  /**
+   * Checks if a file is large enough to require streaming
+   * @param filePath Path to the file
+   * @returns boolean
+   */
+  private isLargeFile(filePath: string): boolean {
+    try {
+      const stats = fs.statSync(filePath);
+      const fileSizeMB = stats.size / (1024 * 1024);
+      return fileSizeMB > 50; // Files larger than 50MB use streaming
+    } catch (error) {
+      return false;
     }
   }
 
@@ -804,7 +889,20 @@ class Importer {
 
     // await this.db.dropTable(chosenTable);
     // await this.db.createTable(this.dataset[chosenTable as keyof DbSchema]);
-    await this.db.importData(this.dataset[chosenTable as keyof DbSchema]);
+    
+    const tableConfig = this.dataset[chosenTable as keyof DbSchema];
+    if (tableConfig.data && Array.isArray(tableConfig.data)) {
+      // Check if this is a large file that needs special handling
+      const dataFilePath = this.getDataFilePath(tableConfig);
+      if (dataFilePath && this.isLargeFile(dataFilePath)) {
+        console.log(colors.yellow(`Using large file import for: ${tableConfig.tableName}`));
+        await this.db.importLargeData(tableConfig, dataFilePath);
+      } else {
+        await this.db.importData(tableConfig);
+      }
+    } else {
+      console.log(colors.yellow(`No data to import for table ${chosenTable}`));
+    }
   }
 }
 

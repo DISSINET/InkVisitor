@@ -1,3 +1,4 @@
+// Regular imports - no lazy loading
 import { AboutPage } from "pages/About/AboutPage";
 import AclPage from "pages/Acl/AclPage";
 import ActivatePage from "pages/Activate/ActivatePage";

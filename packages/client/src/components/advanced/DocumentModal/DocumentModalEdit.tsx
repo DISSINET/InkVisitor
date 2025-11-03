@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from "react";
 
 import { EntityEnums } from "@shared/enums";
-import { IDocument, IDocumentMeta } from "@shared/types";
+import { useQuery } from "@tanstack/react-query";
+import api from "api";
 import { Modal, ModalContent, ModalHeader } from "components";
 import { useWindowSize } from "hooks/useWindowSize";
 import { getShortLabelByLetterCount } from "utils/utils";
 import TextAnnotator from "../Annotator/Annotator";
 import AnnotatorProvider from "../Annotator/AnnotatorProvider";
-import { useQuery } from "@tanstack/react-query";
-import api from "api";
 
 interface DocumentModalEdit {
   documentId: string;
@@ -40,7 +39,13 @@ const DocumentModalEdit: React.FC<DocumentModalEdit> = ({
   });
 
   return (
-    <Modal width={1000} showModal={show} onClose={onClose} fullHeight>
+    <Modal
+      width={1000}
+      showModal={show}
+      onClose={onClose}
+      fullHeight
+      lowerZIndex
+    >
       <ModalHeader
         title={
           dataDocumentIsFetching
@@ -54,7 +59,7 @@ const DocumentModalEdit: React.FC<DocumentModalEdit> = ({
         onClose={onClose}
       />
 
-      <ModalContent>
+      <ModalContent column>
         {document ? (
           <AnnotatorProvider>
             <TextAnnotator
@@ -63,10 +68,9 @@ const DocumentModalEdit: React.FC<DocumentModalEdit> = ({
               dataDocumentIsFetching={dataDocumentIsFetching}
               dataDocumentError={errorDocument}
               width={965}
-              height={windowHeight - 180}
+              height={windowHeight - 203}
               displayLineNumbers={true}
               hlEntities={[EntityEnums.Class.Territory]}
-              storedAnnotatorScroll={0}
               forwardAnnotator={(newAnnotator) => {
                 anchor?.entityId &&
                   newAnnotator?.scrollToAnchor(
@@ -75,6 +79,7 @@ const DocumentModalEdit: React.FC<DocumentModalEdit> = ({
                   );
               }}
               thisTerritoryEntityId={anchor?.entityId}
+              disableCreate
             />
           </AnnotatorProvider>
         ) : (

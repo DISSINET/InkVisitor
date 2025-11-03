@@ -6,6 +6,7 @@ export const StyledCheckbox = styled.div`
   align-items: center;
 `;
 export const StyledCheckboxWrapper = styled.span`
+  display: flex;
   cursor: pointer;
 `;
 export const StyledLabel = styled.label`

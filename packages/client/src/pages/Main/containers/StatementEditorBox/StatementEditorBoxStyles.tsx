@@ -59,17 +59,18 @@ interface StyledEditorSection {
   $lastSection?: boolean;
   $metaSection?: boolean;
   $marginRight?: boolean;
-  $widthTooSmall?: boolean;
+  $widthTooNarrow?: boolean;
 }
 export const StyledEditorSection = styled.div<StyledEditorSection>`
   padding: ${({ theme }) => theme.space[6]};
-  padding-left: ${({ theme, $widthTooSmall }) =>
-    $widthTooSmall ? theme.space[4] : theme.space[6]};
+  padding-left: ${({ theme, $widthTooNarrow }) =>
+    $widthTooNarrow ? theme.space[4] : theme.space[6]};
   padding-right: ${({ $metaSection }) => ($metaSection ? 0 : "")};
   padding-right: ${({ $marginRight }) => ($marginRight ? "0.5rem" : "")};
   margin-top: 0.2rem;
   margin-bottom: 0.2rem;
-  margin-left: ${({ $widthTooSmall }) => ($widthTooSmall ? "1.5rem" : "2rem")};
+  margin-left: ${({ $widthTooNarrow }) =>
+    $widthTooNarrow ? "1.5rem" : "2rem"};
   border-bottom-width: ${({ theme }) => theme.borderWidth[1]};
   border-bottom-color: ${({ theme }) => theme.color["gray"][500]};
   border-bottom-style: solid;
@@ -97,7 +98,6 @@ interface StyledEditorSectionHeader {}
 export const StyledEditorSectionHeader = styled.div<StyledEditorSectionHeader>`
   display: flex;
   align-items: center;
-  font-weight: ${({ theme }) => theme.fontWeight.regular};
   font-size: ${({ theme }) => theme.fontSize.lg};
   margin-bottom: ${({ theme }) => theme.space["4"]};
   color: ${({ theme }) => theme.color["primary"]};
@@ -259,7 +259,6 @@ export const StyledAnchorText = styled.div<StyledAnchorText>`
   margin-bottom: ${({ theme }) => theme.space[2]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   font-weight: ${({ theme }) => theme.fontWeight.medium};
-  font-family: mono;
 `;
 
 interface StyledAnchorMeta {}

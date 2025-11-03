@@ -47,12 +47,7 @@ export const AuditTableRow: React.FC<AuditTableRow> = ({
   changes,
   mode,
 }) => {
-  const {
-    status: userStatus,
-    data: userData,
-    error: userError,
-    isFetching: isFetchingUser,
-  } = useQuery({
+  const { data: userData, isFetching: isFetchingUser } = useQuery({
     queryKey: ["user", user],
     queryFn: async () => {
       const res = await api.withoutToaster().usersGet(user as string);

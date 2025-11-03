@@ -30,6 +30,8 @@ import { AbbreviatedTextWithTooltip } from "./AbbreviatedTextWithTooltip/Abbrevi
 import { DocumentTitle } from "./DocumentTitle/DocumentTitle";
 import { LayoutSeparatorVertical } from "./PanelSeparator/LayoutSeparatorVertical";
 import { LayoutSeparatorHorizontal } from "./PanelSeparator/LayoutSeparatorHorizontal";
+import { PaginationControls } from "./PaginationControls/PaginationControls";
+import { GlobalValidationsModal } from "./GlobalValidationsModal/GlobalValidationsModal";
 
 const Dropdown = {
   Single: {
@@ -73,4 +75,6 @@ export {
   TerritoryActionModal,
   UserCustomizationModal,
   ValidationRule,
+  PaginationControls,
+  GlobalValidationsModal,
 };

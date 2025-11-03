@@ -10,6 +10,7 @@ import { toast } from "react-toastify";
 import { StatementEditor } from "./StatementEditor/StatementEditor";
 import { StyledEditorEmptyState } from "./StatementEditorBoxStyles";
 import { useAppSelector } from "redux/hooks";
+import { computeDifferences } from "utils/utils";
 
 export const StatementEditorBox: React.FC = () => {
   const thirdPanelExpanded: boolean = useAppSelector(
@@ -30,10 +31,8 @@ export const StatementEditorBox: React.FC = () => {
   } = useQuery({
     queryKey: ["user", userId],
     queryFn: async () => {
-      if (userId) {
-        const res = await api.usersGet(userId);
-        return res.data;
-      }
+      const res = await api.usersGet(userId as string);
+      return res.data ?? undefined;
     },
     enabled: !!userId && api.isLoggedIn(),
   });
@@ -64,17 +63,19 @@ export const StatementEditorBox: React.FC = () => {
 
   // MUTATIONS
   const updateStatementMutation = useMutation({
-    mutationFn: async (changes: IStatement) => {
+    mutationFn: async (changes: Partial<IStatement>) => {
       await api.entityUpdate(statementId, changes);
     },
     onSuccess: (data, variables) => {
-      if (selectedDetailId === statementId) {
-        queryClient.invalidateQueries({ queryKey: ["entity"] });
-      }
+      console.log(data);
+      console.log(variables);
+      // if (selectedDetailId === statementId ) {
+      queryClient.invalidateQueries({ queryKey: ["entity"] });
+      // }
       queryClient.invalidateQueries({ queryKey: ["statement"] });
       queryClient.invalidateQueries({ queryKey: ["territory"] });
 
-      if (variables.labels[0] !== undefined) {
+      if (variables.labels?.[0] !== undefined) {
         queryClient.invalidateQueries({ queryKey: ["detail-tab-entities"] });
       }
       if (statement && statement.isTemplate) {
@@ -107,17 +108,36 @@ export const StatementEditorBox: React.FC = () => {
   });
 
   const [tempObject, setTempObject] = useState<IResponseStatement>();
+  const [lastSentData, setLastSentData] = useState<string>("");
 
   useEffect(() => {
     if (JSON.stringify(statement) !== JSON.stringify(tempObject)) {
       setTempObject(statement);
+      // Reset last sent data when statement changes
+      setLastSentData("");
     }
   }, [statement]);
 
   const sendChangesToBackend = (changes: IResponseStatement) => {
     if (statement && JSON.stringify(statement) !== JSON.stringify(changes)) {
-      const { entities, warnings, right, ...newStatement } = changes;
-      updateStatementMutation.mutate(newStatement);
+      // Remove response-specific fields
+      const { entities, warnings, right, ...cleanChanges } = changes;
+
+      // Compute only the differences between original statement and current changes
+      const differences = computeDifferences(statement, cleanChanges);
+
+      // Create a hash of the differences to check for duplicates
+      const differencesHash = JSON.stringify(differences);
+
+      // Only send if there are actual differences and we haven't sent this exact change before
+      if (
+        Object.keys(differences).length > 0 &&
+        differencesHash !== lastSentData
+      ) {
+        updateStatementMutation.mutate(differences);
+        setLastSentData(differencesHash);
+        setChangesPending(false);
+      }
     }
   };
 
@@ -371,7 +391,13 @@ export const StatementEditorBox: React.FC = () => {
         <>
           {tempObject && thirdPanelExpanded ? (
             <CustomScrollbar>
-              <div onMouseLeave={() => sendChangesToBackend(tempObject)}>
+              <div
+                onMouseLeave={() => {
+                  if (changesPending && tempObject) {
+                    sendChangesToBackend(tempObject);
+                  }
+                }}
+              >
                 <StatementEditor
                   statement={tempObject}
                   updateStatementMutation={updateStatementMutation}
@@ -387,7 +413,9 @@ export const StatementEditorBox: React.FC = () => {
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                marginTop: "2rem",
+                marginTop: "6.8rem",
+                padding: "2rem",
+                paddingTop: "0",
               }}
             >
               <StyledEditorEmptyState>

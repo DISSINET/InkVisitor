@@ -33,7 +33,7 @@ interface StyledDetailSectionHeader {
 export const StyledDetailSectionHeader = styled.div<StyledDetailSectionHeader>`
   display: flex;
   align-items: center;
-  font-weight: ${({ theme }) => theme.fontWeight.regular};
+  font-weight: ${({ theme }) => theme.fontWeight.normal};
   font-size: ${({ theme, $secondary }) =>
     $secondary ? theme.fontSize["base"] : theme.fontSize.lg};
   margin-top: ${({ theme, $secondary }) => ($secondary ? theme.space[12] : "")};
@@ -45,6 +45,19 @@ export const StyledDetailSectionHeading = styled.div`
   margin-right: ${({ theme }) => theme.space[2]};
   align-items: center;
   display: flex;
+`;
+
+export const StyledExpandIcon = styled.div`
+  margin-left: ${({ theme }) => theme.space[2]};
+  display: flex;
+  align-items: center;
+  transition: transform 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    color: ${({ theme }) => theme.color["primary"]};
+    opacity: 0.8;
+  }
 `;
 
 export const StyledDetailWarnings = styled.div`

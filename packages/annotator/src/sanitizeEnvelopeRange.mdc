@@ -1,0 +1,193 @@
+---
+alwaysApply: true
+---
+
+lets rewrite the sanitizeEnvelopeRange completely. 
+
+some hints:
+- treat neighboring tags (open and close) next to each other (right next to each other ,no newline or space) ale skippable if needed
+- method is guaranteed to obtain indexes that encompass the leftmost/rightmost groups completely (start encompasses from the left, end encompasses from the right) because of the hint just above. This case is true only if indexes are on the so called position already
+- if index is not at some group position, it is on the "content" and SHOULD NOT BE MOVED
+- dont use any constants just so tests are passing
+- use regexps defined at start of this file
+
+---
+Definitions and assumptions
+Indices are character offsets into the raw string. Use half-open interval semantics [start, end) where start is inclusive and end is exclusive. A "tag token" is any sequence that begins with '<' and ends with the matching '>' considering quotes and special constructs; treat comments, CDATA, and processing instructions as atomic tag tokens. A "text node" (content) is any run of characters between a '>' and the next '<'. A "group" or "neighboring group" is either a text node, a self-closing tag token, or an element node consisting of an opening tag token, its inner content (which may include nested groups), and its closing tag token. The raw input may be malformed (crossing tags, mismatched opens/closes); the algorithm is best-effort and will not attempt global repair.
+
+High-level goal
+Given raw string S and indices indexStart, indexEnd, return [newStart, newEnd) that:
+
+do not cut through tag tokens (no boundary inside '<...>'),
+
+preserve content positions when an index lies inside a text node (do not move that index across that text node),
+
+produce a minimally changed range that contains only whole groups and where possible yields balanced tags for the selected slice,
+
+newStart, newEnd should never expand the selection - newStart could only be moved to the right, and newEnd to the left (if required),
+
+respect the "neighboring-group" restriction: indexes may only move by crossing whole adjacent groups at the same nesting level,
+
+operate deterministically with defined tie-breakers,
+
+behave best-effort on malformed input (may return an unbalanced slice if no safe local fix exists).
+
+Utility functions you must implement
+
+clamp(i): clamp index to [0, len(S)].
+
+quote-aware findTagStartLeft(pos): find index of nearest '<' to the left of pos that actually starts a tag token (skip '<' occurrences inside quotes or comments).
+
+quote-aware findTagEndRight(pos): find index of nearest '>' to the right of pos that actually ends a tag token (skip '>' inside quotes).
+
+tokenize(S): produce an ordered list of nodes of form:
+
+{type: "tag", start, end, rawText, kind: "open"|"close"|"selfclose"|"comment"|"cdata"|"pi", name: tagNameOrNull}
+
+{type: "text", start, end, rawText}
+The tokenizer must be quote-aware and treat comment/CDAT/PI as tag tokens. For tags, extract tag name (lowercase or as-is depending on app) and whether it's opening (<a ...>), closing (</a>), or self-closing (<br/>).
+
+mapIndexToNode(index): return the node index and whether the index is inside that node. For tag nodes, "inside" means strictly between node.start and node.end. For text nodes, inside means node.start <= index < node.end.
+
+nodesAtDepth(nodes): nodes annotated with depth computed by a stack-scan (push on open, pop on matching close if possible). For malformed input, still assign depths based on push/pop simulation; record unmatched opens/closes.
+
+Primary algorithm (step-by-step)
+
+Normalize and clamp:
+
+Let start = clamp(indexStart), end = clamp(indexEnd).
+
+If start > end swap them.
+
+If start == end return [start, end] (empty selection is valid; caller can handle it).
+
+Tokenize and annotate:
+
+nodes = tokenize(S).
+
+Compute a depth value for each node using a left-to-right stack simulation. For unmatched closes or crossing tags mark them as unmatched and record the minimal "crossing span" covering related tokens.
+
+For each node record parent depth and group boundaries for group-level decisions.
+
+Protect content-boundaries:
+
+If start lies inside a text node (node.type == "text" and node.start <= start < node.end) mark startLocked = true.
+
+If end lies inside a text node (node.type == "text" and node.start < end <= node.end) mark endLocked = true. Treat index exactly equal to node.start as not strictly inside (but still content-side valid); treat index exactly at node.end as boundary at next tag — do not move that boundary.
+
+If start or end equals a tag boundary exactly at '>' or '<' treat them as content-side valid and set corresponding lock = true.
+
+If a boundary is strictly inside a tag token:
+
+If start is inside a tag token (node.type == "tag" and node.start < start < node.end) and not startLocked (it cannot be locked because text node takes precedence), set start to node.end (move to just after '>').
+
+If end is inside a tag token and not endLocked, set end to node.start (move to just before '<').
+
+Do these moves only to escape tag token interior. After each move, remap into nodes and update locks accordingly (recompute whether new start/end are inside text nodes).
+
+Build the covered node set:
+
+Determine node indices nodeStart = mapIndexToNode(start) and nodeEnd = mapIndexToNode(end-1) (end-1 because half-open).
+
+Build coveredNodes = all nodes whose span intersects [start, end). Also record which covered nodes are fully covered vs partially covered.
+
+If coveredNodes contains only text nodes and both boundaries are in content and there is no unmatched tag token inside the slice, return [start, end] unchanged.
+
+Innermost-to-outermost reduction loop:
+
+Repeat until no change occurs:
+a) Let maxDepth = maximum depth among covered nodes.
+b) For current depth d from maxDepth down to 0:
+i) Find all element groups at depth d that are partially covered by [start,end). A group at depth d is a sequence starting with an opening tag node at depth d and ending with its corresponding closing tag node, or for a self-closing tag it is the single tag node. For malformed spans where matching close is missing, treat the crossing/malformed span as an atomic group bounded by earliest involved '<' and latest involved '>'.
+ii) For each partially covered group G:
+- If the boundary that intersects G sits inside a text node that belongs to G and that boundary is locked (startLocked or endLocked), do not move that boundary. If both boundaries that would be moved are locked, skip G (cannot resolve).
+- Compute candidate movements that are allowed under "neighboring-group" restriction:
+* distanceToExcludeLeft: move start forward to just after G.end (i.e., set startCandidate = G.end) if start <= G.start (meaning excluding from left side).
+* distanceToExcludeRight: move end backward to just before G.start (i.e., set endCandidate = G.start) if end >= G.end (excluding from right side).
+* distanceToIncludeLeft: move start backward to G.start (include G by moving start left) if start > G.start.
+* distanceToIncludeRight: move end forward to G.end (include G by moving end right) if end < G.end.
+Note: Only propose movements that cross whole neighboring groups at the same parent depth. Do not propose moving start to G.start if that would cross a text node lock.
+- For each viable movement compute absolute delta = |startCandidate - start| + |endCandidate - end| (only one side will move in each candidate).
+- Choose the movement with minimal delta. Tie-break deterministically: prefer excluding by moving start forward over moving end backward; prefer contracting (exclude) over expanding (include) when deltas equal; if two include candidates tie, prefer moving end forward rather than start backward. If the chosen candidate would violate a locked boundary, discard it and pick the next-best candidate.
+- Apply the chosen movement (update start or end) and mark G as resolved/ignored for subsequent iterations. After applying movement, remap start/end to nodes and recompute coveredNodes. Break to outermost loop to restart scanning depths from the new maxDepth.
+c) If no partially covered groups found at any depth, break the reduction loop.
+
+Final balancing pass:
+
+Tokenize the substring S[start:end] and simulate a stack to match open/close tags inside that slice.
+
+If stack underflow occurs early (i.e., unmatched close tags at the start of the slice), and start is not locked, advance start forward past those unmatched close tag tokens (move start to just after each unmatched close token) until underflow resolves or start becomes locked. Each advance must cross whole groups.
+
+If unmatched opens remain at end of slice, and end is not locked, attempt to move end forward to include their matching closes if such closes exist nearby (but do not cross into a parent container at a higher level than the original covered sibling group). If a match cannot be found locally or moving end would cross a locked boundary, prefer contracting start to exclude the unmatched opens when possible.
+
+Use same deterministic tie-breaker as before when choosing moves.
+
+If no safe move resolves remaining unbalanced tags without violating locks, accept the best-effort slice (possibly still unbalanced) and return.
+
+Final sanitize and return:
+
+Clamp and sanitize the final indices [start,end) again to ensure they are within bounds.
+
+Return [start, end).
+
+Rules to preserve user intent and determinism
+
+If an index is inside a text node (content), never move that index across the text node. This is the highest-priority protection.
+
+Movement is allowed only across whole neighboring groups at the same parent depth; do not leap across multiple sibling groups in one move.
+
+When multiple minimal movements are possible choose deterministically:
+
+Prefer moving start forward (excluding start-side groups) over moving end backward.
+
+Prefer contracting (exclude) over expanding (include) when deltas equal.
+
+If both sides can be expanded equally, prefer moving end forward rather than start backward.
+
+Treat index exactly at '>' or at '<' as content-side boundary and do not move it.
+
+Handling special constructs and tokenization caveats
+
+The tokenizer must be quote-aware. Quotes inside attributes may contain '>' characters; these should not be mistaken for tag endings.
+
+Treat HTML/XML comments <!-- ... -->, CDATA <![CDATA[ ... ]]>, and processing instructions <? ... ?> as single tag tokens that are atomic; if an index lands inside one of these, handle it like being inside a tag token and move out unless the index is considered locked by being in content (rare).
+
+Self-closing tags are atomic and count as both open and close for balancing.
+
+Do not attempt full parsing or DOM reconstruction for malformed crossing tags; record unmatched opens/closes and treat crossing spans as atomic groups for include/exclude decisions.
+
+Complexity and performance
+
+Tokenization and initial depth computation is O(n) where n = length(S).
+
+The innermost-to-outermost reduction iterates over partially-covered groups; in worst case may revisit groups but each resolved group is marked and not revisited. Overall behavior is near-linear in the number of nodes covered by the initial selection plus small surrounding context for balancing.
+
+Keep operations local: you only need to search for matching closes when attempting to include a group; cap the search distance to a reasonable threshold relative to document size if performance is a concern.
+
+Tests to include with the implementation
+
+Balanced nested tags where selection is already valid: returns unchanged.
+
+Selection boundaries inside text nodes: indices unchanged.
+
+Selection overlapping sibling boundaries like </p><p>: adjust to include the correct sibling only.
+
+Example given: "<div><p> License.</p><p>Toulouse 1245-46</p></div>" with initial 17-50 -> result 21-44.
+
+Self-closing tags inside selection boundaries.
+
+Malformed crossing tags like "<p>text<div></p> another</div> word</p>" with selections touching different parts of crossing span: ensure algorithm treats crossing span atomically and returns deterministic result.
+
+Tag tokens with '>' inside quotes in attributes: ensure tokenizer is quote-aware.
+
+Very small selections at exact tag boundaries: ensure they are preserved as content-side and not moved.
+
+Notes for implementers or an AI code generator
+
+Implement the tokenizer carefully; many errors arise from naive regexes that ignore quoted '>' or nested comment terminators.
+
+Keep operations modular: tokenize, compute depths and unmatched spans, map indices to nodes, reduction loop, final balancing.
+
+Make the deterministic tie-breaker and "neighboring-group" policy explicit in code comments and tests so behavior is predictable and repeatable.
+
+Document that sanitizeEnvelopeRange is best-effort on malformed input and that callers who require full document repair should run a separate sanitizer prior to calling this function.

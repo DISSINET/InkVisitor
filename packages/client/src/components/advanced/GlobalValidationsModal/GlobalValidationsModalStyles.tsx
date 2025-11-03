@@ -23,7 +23,7 @@ export const StyledGridFormLabel = styled.div<StyledGridFormLabel>`
   display: grid;
   justify-content: end;
   align-items: center;
-  color: ${({ theme, $disabled }) => ($disabled ? theme.color["greyer"] : "")};
+  color: ${({ theme, $disabled }) => ($disabled ? theme.color["grey"] : "")};
 `;
 export const StyledValidationList = styled.div`
   display: flex;
@@ -45,7 +45,7 @@ export const StyledToggleWrap = styled.div<StyledToggleWrap>`
   gap: 0.5rem;
   color: ${({ theme, $active, $disabled }) =>
     $disabled
-      ? theme.color["greyer"]
+      ? theme.color["grey"]
       : $active
       ? theme.color["info"]
       : theme.color["danger"]};
@@ -56,7 +56,7 @@ export const StyledSectionHeader = styled.div`
   display: flex;
   align-items: center;
   gap: 1rem;
-  font-weight: ${({ theme }) => theme.fontWeight.regular};
+  font-weight: ${({ theme }) => theme.fontWeight.normal};
   font-size: ${({ theme }) => theme.fontSize.lg};
   margin-bottom: ${({ theme }) => theme.space[4]};
   color: ${({ theme }) => theme.color["primary"]};

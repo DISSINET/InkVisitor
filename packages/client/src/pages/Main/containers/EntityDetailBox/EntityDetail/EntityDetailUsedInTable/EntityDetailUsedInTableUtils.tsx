@@ -1,6 +1,5 @@
 import { IEntity } from "@shared/types";
 import { EntityTag } from "components/advanced";
-import React from "react";
 import { StyledTagWrap } from "../EntityDetailStyles";
 import { StyledTableTextGridCell } from "./EntityDetailUsedInTableStyles";
 

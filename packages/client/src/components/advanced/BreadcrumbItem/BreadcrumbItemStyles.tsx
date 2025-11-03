@@ -5,7 +5,7 @@ export const StyledItemBox = styled.div`
   display: grid;
   grid-template-columns: auto auto;
   align-items: center;
+  min-width: 5rem;
 
   color: ${({ theme }) => theme.color["info"]};
-  margin-bottom: ${({ theme }) => theme.space[2]};
 `;

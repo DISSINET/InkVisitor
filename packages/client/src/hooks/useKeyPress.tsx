@@ -6,20 +6,21 @@ export default function useKeypress(
   dependencyArr?: any[],
   ctrlKeyCombo?: boolean
 ) {
-  const checkKeyPress = useCallback(() => {}, [dependencyArr]);
-
-  function downHandler(e: any) {
-    if (e.key === targetKey) {
-      if (!ctrlKeyCombo || (ctrlKeyCombo && (e.ctrlKey || e.metaKey))) {
-        handleKeyPress();
+  const downHandler = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === targetKey) {
+        if (!ctrlKeyCombo || (ctrlKeyCombo && (e.ctrlKey || e.metaKey))) {
+          handleKeyPress();
+        }
       }
-    }
-  }
+    },
+    [targetKey, handleKeyPress, ctrlKeyCombo, dependencyArr]
+  );
 
   useEffect(() => {
     window.addEventListener("keydown", downHandler);
     return () => {
       window.removeEventListener("keydown", downHandler);
     };
-  }, [checkKeyPress]);
+  }, [downHandler]);
 }

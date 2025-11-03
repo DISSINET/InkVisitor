@@ -1,11 +1,10 @@
-import { BaseDropdown } from "components";
-import React, { useState } from "react";
-import { OptionProps, components } from "react-select";
-import { EntityColors } from "types";
-import { StyledEntityValue } from "./DropdownStyles";
-import { Tooltip } from "components";
 import { entitiesDictKeys } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
+import { BaseDropdown, Tooltip } from "components";
+import React, { useState } from "react";
+import { components, OptionProps } from "react-select";
+import { EntityColors } from "types";
+import { StyledEntityValue } from "./DropdownStyles";
 
 interface EntitySingleDropdown<T = string> {
   width?: number | "full";
@@ -54,7 +53,7 @@ export const EntitySingleDropdown = <T extends string>({
       autoFocus={autoFocus}
       loggerId={loggerId}
       customComponents={{
-        Option: (props) => (
+        Option: (props: any) => (
           <Option {...props} disableTooltip={disableTooltip} />
         ),
       }}
@@ -80,22 +79,20 @@ const Option = ({
       >
         {props.data.label}
       </StyledEntityValue>
-      <Tooltip
-        label={
-          props.data.value !== EntityEnums.Extension.Any
-            ? entitiesDictKeys[
+      {!disableTooltip &&
+        props.data.value !== EntityEnums.Extension.Any &&
+        props.data.value !== "" && (
+          <Tooltip
+            label={
+              entitiesDictKeys[
                 props.data.value as keyof typeof entitiesDictKeys
-              ].label
-            : ""
-        }
-        visible={
-          showTooltip &&
-          !disableTooltip &&
-          props.data.value !== EntityEnums.Extension.Any
-        }
-        referenceElement={referenceElement}
-        position="left"
-      />
+              ]?.label
+            }
+            visible={showTooltip}
+            referenceElement={referenceElement}
+            position="left"
+          />
+        )}
     </components.Option>
   );
 };

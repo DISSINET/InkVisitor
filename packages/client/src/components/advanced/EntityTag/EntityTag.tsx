@@ -42,7 +42,7 @@ interface EntityTag {
   flexListMargin?: boolean;
 
   unlinkButton?: UnlinkButton | false;
-  customTooltipAttributes?: { partLabel?: string };
+  customTooltipAttributes?: { partLabel?: string; childCount?: number };
 }
 
 export const EntityTag: React.FC<EntityTag> = ({
@@ -72,53 +72,10 @@ export const EntityTag: React.FC<EntityTag> = ({
   const draggedEntity: DraggedEntityReduxItem = useAppSelector(
     (state) => state.draggedEntity
   );
-  if (entity === undefined) {
-    return null;
-  }
-
-  if (!entity) {
-    return null;
-  }
-
-  const classId = entity.class;
-
   const [buttonHovered, setButtonHovered] = useState(false);
   const [elvlHovered, setElvlHovered] = useState(false);
   const [tagHovered, setTagHovered] = useState(false);
-
   const referenceEl = useRef<HTMLDivElement | null>(null);
-
-  const renderUnlinkButton = (unlinkButton: UnlinkButton) => {
-    return (
-      <Button
-        key="d"
-        tooltipLabel={
-          unlinkButton.tooltipLabel
-            ? unlinkButton.tooltipLabel
-            : "unlink entity"
-        }
-        icon={unlinkButton.icon ? unlinkButton.icon : <FaUnlink />}
-        color={unlinkButton.color ? unlinkButton.color : "plain"}
-        inverted
-        onClick={unlinkButton.onClick}
-      />
-    );
-  };
-
-  if (!isValidEntityClass(entity.class)) {
-    // labels needs to have length and first label needs to be non-empty
-    return (
-      <Tag
-        propId={entity.id}
-        entityClass={EntityEnums.Extension.Invalid}
-        label={getEntityLabel(entity)}
-        labelItalic={isFirstLabelEmpty(entity.labels)}
-        // button={unlinkButton && renderUnlinkButton(unlinkButton)}
-        disableDrag
-        disableDoubleClick
-      />
-    );
-  }
 
   const handleTagHovered = useCallback(() => {
     setTagHovered(true);
@@ -139,6 +96,44 @@ export const EntityTag: React.FC<EntityTag> = ({
     setButtonHovered(false);
     setTagHovered(false);
   }, []);
+
+  if (entity === undefined || !entity) {
+    return <></>;
+  }
+
+  const classId = entity.class;
+
+  const renderUnlinkButton = useCallback((unlinkButton: UnlinkButton) => {
+    return (
+      <Button
+        key="d"
+        tooltipLabel={
+          unlinkButton.tooltipLabel
+            ? unlinkButton.tooltipLabel
+            : "unlink entity"
+        }
+        icon={unlinkButton.icon ? unlinkButton.icon : <FaUnlink />}
+        color={unlinkButton.color ? unlinkButton.color : "plain"}
+        inverted
+        onClick={unlinkButton.onClick}
+      />
+    );
+  }, []);
+
+  if (!isValidEntityClass(entity.class)) {
+    // labels needs to have length and first label needs to be non-empty
+    return (
+      <Tag
+        propId={entity.id}
+        entityClass={EntityEnums.Extension.Invalid}
+        label={getEntityLabel(entity)}
+        labelItalic={isFirstLabelEmpty(entity.labels)}
+        // button={unlinkButton && renderUnlinkButton(unlinkButton)}
+        disableDrag
+        disableDoubleClick
+      />
+    );
+  }
 
   return (
     <>
@@ -183,7 +178,7 @@ export const EntityTag: React.FC<EntityTag> = ({
           label={getEntityLabel(entity)}
           labelItalic={isFirstLabelEmpty(entity.labels)}
           status={entity.status}
-          ltype={entity?.data?.logicalType ?? "1"}
+          ltype={entity?.data?.logicalType ?? EntityEnums.LogicalType.Definite}
           isTemplate={entity.isTemplate}
           isDiscouraged={entity.status === EntityEnums.Status.Discouraged}
           entity={entity}

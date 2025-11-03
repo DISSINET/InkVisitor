@@ -1,6 +1,6 @@
 import styled from "styled-components";
-import { space1, space2 } from "Theme/constants";
-import { ThemeColor, ThemeFontSize } from "Theme/theme";
+import { ThemeBorderWidth, ThemeColor, ThemeFontSize } from "Theme/theme";
+import { space1, space2 } from "Theme/theme-space-shortcut";
 
 interface IValueStyle {
   $inverted?: boolean;
@@ -9,8 +9,10 @@ interface IValueStyle {
   width?: number | "full";
   $noBorder?: boolean;
   $borderColor?: keyof ThemeColor;
+  $borderWidth?: keyof ThemeBorderWidth;
   $autocomplete?: string;
   $fullHeight?: boolean;
+  $paddingRight?: boolean;
 }
 const getWidth = (width?: number | "full") => {
   if (width) {
@@ -51,8 +53,12 @@ export const StyledInput = styled.input<IValueStyle>`
     $inverted ? theme.color["white"] : theme.color["primary"]};
   background-color: ${({ $inverted, theme }) =>
     $inverted ? theme.color["primary"] : theme.color["white"]};
-  border-width: ${({ theme, $inverted }) =>
-    $inverted ? 0 : theme.borderWidth[1]};
+  border-width: ${({ theme, $inverted, $borderWidth }) =>
+    $inverted
+      ? 0
+      : $borderWidth
+      ? theme.borderWidth[$borderWidth]
+      : theme.borderWidth[1]};
   border-color: ${({ theme, $suggester, $borderColor }) =>
     $suggester
       ? theme.color["primary"]
@@ -61,12 +67,17 @@ export const StyledInput = styled.input<IValueStyle>`
       : theme.color["gray"]["400"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   padding-left: ${({ theme }) => theme.space[2]};
+
+  padding-right: ${({ theme, $paddingRight }) =>
+    $paddingRight ? theme.space[7] : theme.space[1]};
+
   width: ${({ width }) => getWidth(width)};
   min-width: ${({ theme }) => theme.space[6]};
   background: ${({ disabled, theme }) =>
     disabled ? theme.background["stripes"] : ""};
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "")};
   resize: none;
+
   &:hover {
     border-color: ${({ theme, disabled }) =>
       !disabled ? theme.color["info"] : ""};
@@ -80,6 +91,35 @@ export const StyledInput = styled.input<IValueStyle>`
   }
   &::placeholder {
     font-size: 1.1rem;
+  }
+
+  /* Theming for native datetime picker icon */
+  &[type="datetime-local"] {
+    /* Hint the UA to render internal controls in the correct scheme */
+    /* color-scheme: ${({ theme }) => theme.color.primary}; */
+  }
+
+  /* Chrome/Safari specific calendar icon */
+  &[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    /* Fallback coloring so the icon remains visible in dark mode */
+    filter: ${({ theme }) =>
+      theme.color.white === "#060c26" ? "invert(1) brightness(0.9)" : "none"};
+    opacity: 0.85;
+  }
+  &[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+  }
+  /* Chrome/Safari specific calendar icon */
+  &[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    /* Fallback coloring so the icon remains visible in dark mode */
+    filter: ${({ theme }) =>
+      theme.color.white === "#060c26" ? "invert(1) brightness(0.9)" : "none"};
+    opacity: 0.85;
+  }
+  &[type="date"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
   }
 `;
 
@@ -118,5 +158,15 @@ export const StyledTextArea = styled.textarea<StyledTextArea>`
   &:hover {
     border-color: ${({ theme, disabled }) =>
       !disabled ? theme.color["info"] : ""};
+  }
+`;
+
+interface StyledClearableInputButton {}
+export const StyledClearableInputButton = styled.div<StyledClearableInputButton>`
+  position: absolute;
+  right: 0.25rem;
+  top: 4px;
+  svg {
+    color: ${({ theme }) => theme.color["danger"]};
   }
 `;

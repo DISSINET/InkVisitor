@@ -4,6 +4,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import api from "api";
 import { Toast } from "components";
 import { Page } from "components/advanced";
+import ErrorBoundary from "components/ErrorBoundary";
 import { useDebounce } from "hooks";
 import { SearchParamsProvider } from "hooks/useSearchParamsContext";
 import { useWindowSize } from "hooks/useWindowSize";
@@ -18,6 +19,7 @@ import {
   PasswordResetPage,
   UsersPage,
 } from "pages";
+import { StatsPage } from "pages/Stats/StatsPage";
 import React, { useEffect, useMemo } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
@@ -105,7 +107,7 @@ export const App: React.FC = () => {
   }, [debouncedWidth]);
 
   return (
-    <>
+    <ErrorBoundary>
       <Helmet>
         <meta charSet="utf-8" />
         <title>InkVisitor</title>
@@ -181,6 +183,14 @@ export const App: React.FC = () => {
                       }
                     />
                     <Route
+                      path="/stats"
+                      element={
+                        <RequireAuth>
+                          <StatsPage />
+                        </RequireAuth>
+                      }
+                    />
+                    <Route
                       path="/documents"
                       element={
                         <RequireAuth>
@@ -207,6 +217,6 @@ export const App: React.FC = () => {
           </DndProvider>
         </QueryClientProvider>
       </ThemeProvider>
-    </>
+    </ErrorBoundary>
   );
 };

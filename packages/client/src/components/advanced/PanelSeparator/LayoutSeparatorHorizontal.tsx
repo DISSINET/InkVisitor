@@ -1,5 +1,5 @@
 import { useSpring } from "@react-spring/web";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { springConfig } from "Theme/constants";
 import { StyledLayoutSeparatorHorizontal } from "./SeparatorStyles";
 
@@ -8,16 +8,20 @@ interface LayoutSeparatorHorizontal {
   topPositionMax: number;
   // set custom one related to specific page
   separatorYPosition: number;
-  setSeparatorYPosition: (xPosition: number) => void;
+  setSeparatorYPosition: (yPosition: number) => void;
+  onMaxHeightReached?: () => void;
+  onMinHeightReached?: () => void;
 }
 export const LayoutSeparatorHorizontal: React.FC<LayoutSeparatorHorizontal> = ({
   topPositionMin,
   topPositionMax,
   separatorYPosition,
   setSeparatorYPosition,
+  onMaxHeightReached,
+  onMinHeightReached,
 }) => {
-  const [separatorXTempPosition, setSeparatorXTempPosition] = useState<
-    undefined | number
+  const [separatorYTempPosition, setSeparatorYTempPosition] = useState<
+    number | undefined
   >(undefined);
   const [topPosition, setTopPosition] = useState<number>(separatorYPosition);
   const [dragging, setDragging] = useState(false);
@@ -29,51 +33,69 @@ export const LayoutSeparatorHorizontal: React.FC<LayoutSeparatorHorizontal> = ({
   });
 
   useEffect(() => {
-    if (topPosition !== separatorYPosition) {
+    if (topPosition !== separatorYPosition && !dragging) {
       setTopPosition(separatorYPosition);
     }
-
     window.getSelection()?.removeAllRanges();
-  }, [separatorYPosition]);
-
-  useEffect(() => {
-    if (!dragging && topPosition !== separatorYPosition) {
-      setSeparatorYPosition(topPosition);
-    }
-  }, [topPosition, dragging]);
+  }, [separatorYPosition, dragging]);
 
   const onMouseDown = (e: React.MouseEvent) => {
-    setSeparatorXTempPosition(e.clientY);
-    setDragging(true);
     document.body.classList.add("no-select");
+    setSeparatorYTempPosition(e.clientY);
+    setDragging(true);
   };
 
-  const onMove = (clientY: number) => {
-    if (dragging && topPosition && separatorXTempPosition) {
-      const newtopPosition = topPosition + clientY - separatorXTempPosition;
-      setSeparatorXTempPosition(clientY);
-      if (newtopPosition < topPositionMin) {
-        setTopPosition(topPositionMin);
-        return;
+  const onMove = useCallback(
+    (clientY: number) => {
+      if (dragging && topPosition && separatorYTempPosition) {
+        const newTopPosition = topPosition + clientY - separatorYTempPosition;
+
+        setSeparatorYTempPosition(clientY);
+
+        // Clamp the new position between min and max
+        const clampedPosition = Math.min(
+          Math.max(newTopPosition, topPositionMin),
+          topPositionMax
+        );
+        setTopPosition(clampedPosition);
+
+        // Notify parent when max height is reached
+        if (clampedPosition === topPositionMax && onMaxHeightReached) {
+          onMaxHeightReached();
+        }
+        // Notify parent when min height is reached
+        if (clampedPosition === topPositionMin && onMinHeightReached) {
+          onMinHeightReached();
+        }
       }
+    },
+    [
+      dragging,
+      topPosition,
+      separatorYTempPosition,
+      topPositionMin,
+      topPositionMax,
+      onMaxHeightReached,
+      onMinHeightReached,
+    ]
+  );
 
-      if (newtopPosition > topPositionMax) {
-        setTopPosition(topPositionMax);
-        return;
-      }
-      setTopPosition(newtopPosition);
-    }
-  };
+  const onMouseMove = useCallback(
+    (e: MouseEvent) => {
+      e.preventDefault();
+      onMove(e.clientY);
+    },
+    [onMove]
+  );
 
-  const onMouseMove = (e: MouseEvent) => {
-    e.preventDefault();
-    onMove(e.clientY);
-  };
-
-  const onMouseUp = () => {
+  const onMouseUp = useCallback(() => {
     setDragging(false);
     document.body.classList.remove("no-select");
-  };
+    // Apply the final position
+    if (topPosition !== separatorYPosition) {
+      setSeparatorYPosition(topPosition);
+    }
+  }, [topPosition, separatorYPosition, setSeparatorYPosition]);
 
   useEffect(() => {
     if (hovered || dragging) {
@@ -85,7 +107,7 @@ export const LayoutSeparatorHorizontal: React.FC<LayoutSeparatorHorizontal> = ({
         document.removeEventListener("mouseup", onMouseUp);
       };
     }
-  }, [hovered, dragging]);
+  }, [hovered, dragging, onMouseMove, onMouseUp]);
 
   return (
     <StyledLayoutSeparatorHorizontal

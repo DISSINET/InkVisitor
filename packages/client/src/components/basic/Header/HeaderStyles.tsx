@@ -1,6 +1,6 @@
 import styled from "styled-components";
-import { space3, space10 } from "Theme/constants";
 import { ThemeColor } from "Theme/theme";
+import { space10, space3 } from "Theme/theme-space-shortcut";
 
 interface StyledHeader {
   $color: keyof ThemeColor;

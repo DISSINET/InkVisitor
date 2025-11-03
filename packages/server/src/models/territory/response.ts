@@ -10,6 +10,7 @@ import Statement from "@models/statement/statement";
 import { ResponseStatement } from "@models/statement/response";
 import Entity from "@models/entity/entity";
 import { IRequest } from "src/custom_typings/request";
+import { findEntityById } from "@service/shorthands";
 
 export class ResponseTerritory extends Territory implements IResponseTerritory {
   statements: IResponseStatement[];
@@ -22,13 +23,25 @@ export class ResponseTerritory extends Territory implements IResponseTerritory {
     this.entities = {};
   }
 
-  async prepare(req: IRequest, usePreload: boolean = false, useWarnings: boolean = false): Promise<void> {
+  async prepare(
+    req: IRequest,
+    usePreload: boolean = false,
+    useWarnings: boolean = false
+  ): Promise<void> {
     this.right = this.getUserRoleMode(req.getUserOrFail());
 
-    this.statements = await this.prepareStatements(req, usePreload, useWarnings);
+    this.statements = await this.prepareStatements(
+      req,
+      usePreload,
+      useWarnings
+    );
   }
 
-  async prepareStatements(req: IRequest, usePreload: boolean = false, useWarnings: boolean = false): Promise<ResponseStatement[]> {
+  async prepareStatements(
+    req: IRequest,
+    usePreload: boolean = false,
+    useWarnings: boolean = false
+  ): Promise<ResponseStatement[]> {
     const statements = await Statement.findStatementsInTerritory(
       req.db.connection,
       this.id
@@ -39,8 +52,16 @@ export class ResponseTerritory extends Territory implements IResponseTerritory {
     if (usePreload) {
       // prepare all entity ids required for statements
       const preloadedEntities: Record<string, IEntity | undefined> = {};
+
+      // Add parent territory entity ID if it exists
+      if (this.data.parent) {
+        preloadedEntities[this.data.parent.territoryId] = undefined;
+      }
+
       for (const statement of statements) {
-        const responseStatement = new ResponseStatement(new Statement(statement));
+        const responseStatement = new ResponseStatement(
+          new Statement(statement)
+        );
         responseStatements.push(responseStatement);
 
         for (const entityId of responseStatement.getEntitiesIds()) {
@@ -49,21 +70,40 @@ export class ResponseTerritory extends Territory implements IResponseTerritory {
       }
 
       // fetch all entities required for statements
-      for (const entity of await Entity.findEntitiesByIds(req.db.connection, Object.keys(preloadedEntities))) {
+      for (const entity of await Entity.findEntitiesByIds(
+        req.db.connection,
+        Object.keys(preloadedEntities)
+      )) {
         preloadedEntities[entity.id] = entity;
       }
 
       this.entities = preloadedEntities as { [key: string]: IEntity };
-      
+
       for (const responseStatement of responseStatements) {
-        responseStatement.prepareSync(req, preloadedEntities as Record<string, IEntity>);
+        responseStatement.prepareSync(
+          req,
+          preloadedEntities as Record<string, IEntity>
+        );
         if (useWarnings && !this.isTemplate) {
           responseStatement.warnings = await responseStatement.getWarnings(req);
         }
       }
     } else {
+      // Add parent territory entity if it exists
+      if (this.data.parent) {
+        const parentEntity = await findEntityById(
+          req.db.connection,
+          this.data.parent.territoryId
+        );
+        if (parentEntity) {
+          this.entities[this.data.parent.territoryId] = parentEntity;
+        }
+      }
+
       for (const statement of statements) {
-        const responseStatement = new ResponseStatement(new Statement(statement));
+        const responseStatement = new ResponseStatement(
+          new Statement(statement)
+        );
         await responseStatement.prepare(req);
 
         for (const entityId of Object.keys(responseStatement.entities)) {

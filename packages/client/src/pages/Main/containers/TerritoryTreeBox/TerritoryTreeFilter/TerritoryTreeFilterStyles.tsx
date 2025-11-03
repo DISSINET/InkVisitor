@@ -3,6 +3,7 @@ import styled from "styled-components";
 export const StyledFilterWrap = styled.div`
   display: flex;
   flex-direction: column;
+  margin-top: ${({ theme }) => theme.space[2]};
 `;
 export const StyledFilterList = styled.div`
   display: flex;

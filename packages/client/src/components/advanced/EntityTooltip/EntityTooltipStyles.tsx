@@ -21,6 +21,7 @@ export const StyledDetail = styled.div`
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: ${({ theme }) => theme.space[2]};
 `;
 
@@ -65,7 +66,6 @@ export const StyledAnchorText = styled.div`
   color: ${({ theme }) => theme.color["tooltipColor"]};
   margin-bottom: ${({ theme }) => theme.space[1]};
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
-  font-family: mono;
   padding-left: ${({ theme }) => theme.space[2]};
   padding-bottom: ${({ theme }) => theme.space[1]};
 `;
@@ -76,4 +76,12 @@ export const StyledAnchorEmptyState = styled.div`
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   font-style: italic;
   text-align: center;
+`;
+
+export const StyledMoreText = styled.div`
+  color: ${({ theme }) => theme.color["tooltipColor"]};
+  font-size: ${({ theme }) => theme.fontSize["xxs"]};
+  font-style: italic;
+  padding-left: ${({ theme }) => theme.space[2]};
+  margin-top: ${({ theme }) => theme.space[1]};
 `;

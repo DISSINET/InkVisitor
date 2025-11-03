@@ -9,8 +9,13 @@ import {
 } from "@tanstack/react-query";
 import { rootTerritoryId } from "Theme/constants";
 import api from "api";
-import { EntityDropzone, EntityTag } from "components/advanced";
+import {
+  EntityDropzone,
+  EntityTag,
+  PaginationControls,
+} from "components/advanced";
 import { useSearchParams, useTheme } from "hooks";
+import { usePagination } from "hooks/usePagination";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -18,6 +23,7 @@ import { setDisableTreeScroll } from "redux/features/territoryTree/disableTreeSc
 import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import {
+  DetailBoxState,
   DraggedEntityReduxItem,
   EntityDragItem,
   IExtendedResponseTree,
@@ -30,6 +36,7 @@ import {
   StyledIconWrap,
   StyledTerritoryTagWrap,
 } from "./TerritoryTreeNodeStyles";
+import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
 
 interface TerritoryTreeNode {
   territory: ITerritory;
@@ -62,6 +69,9 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   updateUserMutation,
 }) => {
   const dispatch = useAppDispatch();
+  const detailBoxState: DetailBoxState = useAppSelector(
+    (state) => state.layout.mainPage.detailBoxState
+  );
   const treeInitialized = useAppSelector((state) => state.treeInitialized);
   const queryClient = useQueryClient();
 
@@ -165,6 +175,26 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   const parent = data.parent as IParentTerritory;
   const isFavorited = storedTerritories?.includes(id);
 
+  // Pagination hook
+  const {
+    currentPage,
+    totalPages,
+    totalItems,
+    paginatedItems: paginatedChildren,
+    showPagination,
+    handlePreviousPage,
+    handleNextPage,
+  } = usePagination({
+    items: childTerritories,
+    itemsPerPage: 10,
+    level: lvl,
+  });
+
+  // Use all children when pagination is disabled (level 0), otherwise use paginated children
+  const childrenToRender = showPagination
+    ? paginatedChildren
+    : childTerritories;
+
   const handleMenuOpen = useCallback(() => {
     setContextMenuOpen(true);
   }, []);
@@ -178,7 +208,10 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     if (hasChildren) {
       setIsExpanded((prevIsExpanded) => !prevIsExpanded);
     }
-  }, [hasChildren, territoryId]);
+    if (detailBoxState === DetailBoxState.FullHeight) {
+      dispatch(setDetailBoxState(DetailBoxState.Normal));
+    }
+  }, [hasChildren, territoryId, detailBoxState]);
 
   const moveStatementsMutation = useMutation({
     mutationFn: async (data: {
@@ -243,6 +276,9 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                 isFavorited={isFavorited}
                 showOnly="label"
                 tooltipPosition="right"
+                customTooltipAttributes={{
+                  childCount: children.length,
+                }}
               />
             </EntityDropzone>
             <TerritoryTreeContextMenu
@@ -264,10 +300,10 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
       <StyledChildrenWrap>
         {!hideChildTerritories &&
           isExpanded &&
-          childTerritories.map((child: IExtendedResponseTree, key: number) => (
+          childrenToRender.map((child: IExtendedResponseTree, key: number) => (
             <MemoizedTerritoryTreeNode
-              key={key}
-              index={key}
+              key={showPagination ? (currentPage - 1) * 10 + key : key}
+              index={showPagination ? (currentPage - 1) * 10 + key : key}
               propId={child.territory.id}
               territory={child.territory}
               children={child.children}
@@ -282,6 +318,14 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
               updateUserMutation={updateUserMutation}
             />
           ))}
+        {!hideChildTerritories && isExpanded && showPagination && (
+          <PaginationControls
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPreviousPage={handlePreviousPage}
+            onNextPage={handleNextPage}
+          />
+        )}
       </StyledChildrenWrap>
     </>
   );

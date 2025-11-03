@@ -6,33 +6,37 @@ import {
   entityStatusDict,
   languageDict,
 } from "@shared/dictionaries";
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums, UserEnums } from "@shared/enums";
 import {
   IActionData,
   IEntity,
   IResponseDetail,
   IResponseGeneric,
+  ITerritory,
 } from "@shared/types";
 import { IConceptData } from "@shared/types/concept";
-import { UseMutationResult, useQuery } from "@tanstack/react-query";
+import {
+  useMutation,
+  UseMutationResult,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { MIN_LABEL_LENGTH_MESSAGE, rootTerritoryId } from "Theme/constants";
 import api from "api";
 import { AxiosResponse } from "axios";
 import { Button, Input, MultiInput, TypeBar } from "components";
-import Dropdown, { AttributeButtonGroup, EntityTag } from "components/advanced";
+import Dropdown, {
+  AttributeButtonGroup,
+  EntitySuggester,
+  EntityTag,
+  TerritoryActionModal,
+} from "components/advanced";
 import React, { useEffect, useMemo, useState } from "react";
-import {
-  FaExternalLinkAlt,
-  FaPlus,
-  FaRegCopy,
-  FaClock,
-  FaCheck,
-  FaTimes,
-  FaExclamationTriangle,
-  FaEdit,
-} from "react-icons/fa";
+import { FaExternalLinkAlt, FaPlus, FaRegCopy } from "react-icons/fa";
+import { TbHomeMove } from "react-icons/tb";
 import { toast } from "react-toastify";
 import { DropdownItem } from "types";
+import { getEntityStatusIcon } from "utils/iconUtils";
 import {
   StyledDetailContentRow,
   StyledDetailContentRowLabel,
@@ -51,7 +55,6 @@ import {
   StyledCloseIcon,
   StyledGreyBar,
 } from "./EntityDetailFormSectionStyles";
-import { getEntityStatusIcon } from "utils/iconUtils";
 
 interface EntityDetailFormSection {
   entity: IResponseDetail;
@@ -74,7 +77,7 @@ interface EntityDetailFormSection {
   handleAskForTemplateApply: (templateIdToApply: string) => void;
   isTerritoryWithParent: (entity: IResponseDetail) => boolean;
   isStatementWithTerritory: (entity: IResponseDetail) => boolean;
-  widthTooSmall: boolean;
+  widthTooNarrow: boolean;
 }
 export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
   entity,
@@ -90,7 +93,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
   handleAskForTemplateApply,
   isTerritoryWithParent,
   isStatementWithTerritory,
-  widthTooSmall,
+  widthTooNarrow,
 }) => {
   const { status: documentsStatus, data: documents } = useQuery({
     queryKey: ["documents"],
@@ -131,6 +134,48 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
     false | number
   >(false);
   const alternativeLabels = entity.labels.slice(1);
+
+  const isOwner =
+    (localStorage.getItem("userrole") as UserEnums.Role) ===
+    UserEnums.Role.Owner;
+
+  const [showTActionModal, setShowTActionModal] = useState(false);
+  const [moveToParentEntity, setMoveToParentEntity] = useState<IEntity | false>(
+    false
+  );
+  const excludedMoveTerritories = useMemo(
+    () =>
+      entity.class === EntityEnums.Class.Territory
+        ? entity.data.parent?.territoryId
+          ? [rootTerritoryId, entity.data.parent.territoryId]
+          : [rootTerritoryId]
+        : [],
+    [entity.class, entity.data.parent?.territoryId]
+  );
+
+  const queryClient = useQueryClient();
+
+  const updateTerritoryMutation = useMutation({
+    mutationFn: async (tObject: {
+      territoryId: string;
+      changes: Partial<ITerritory>;
+    }) => await api.entityUpdate(tObject?.territoryId, tObject?.changes),
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["tree"] });
+      queryClient.invalidateQueries({ queryKey: ["territory"] });
+      queryClient.invalidateQueries({ queryKey: ["entity"] });
+    },
+  });
+
+  const isTemplateDisabled = useMemo<boolean>(() => {
+    return !userCanEdit || templateOptions.length === 0;
+  }, [userCanEdit, templateOptions]);
+
+  const templateApplied = useMemo<IEntity | undefined>(() => {
+    return entity.usedTemplate && entity.usedTemplate in entity.entities
+      ? entity.entities[entity.usedTemplate]
+      : undefined;
+  }, [entity.usedTemplate, entity.entities]);
 
   return (
     <>
@@ -189,29 +234,25 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
             </StyledDetailContentRowLabel>
             <StyledDetailContentRowValue>
               <Dropdown.Single.Basic
+                key={"template-dropdown-" + entity.id}
                 placeholder="select template.."
-                disabled={!userCanEdit || templateOptions.length === 0}
+                disabled={isTemplateDisabled}
                 width="full"
                 value={null}
                 options={templateOptions}
-                onChange={(templateToApply) => {
-                  handleAskForTemplateApply(templateToApply);
-                }}
+                onChange={handleAskForTemplateApply}
               />
             </StyledDetailContentRowValue>
           </StyledDetailContentRow>
 
-          {entity.usedTemplate && entity.usedTemplate in entity.entities && (
+          {templateApplied && (
             <StyledDetailContentRow>
               <StyledDetailContentRowLabel>
                 Applied Template
               </StyledDetailContentRowLabel>
               <StyledDetailContentRowValue>
                 <StyledTagWrap>
-                  <EntityTag
-                    entity={entity.entities[entity.usedTemplate]}
-                    fullWidth
-                  />
+                  <EntityTag entity={templateApplied} fullWidth />
                 </StyledTagWrap>
               </StyledDetailContentRowValue>
             </StyledDetailContentRow>
@@ -298,18 +339,47 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                 <StyledTagWrap>
                   <EntityTag
                     fullWidth
-                    entity={entity.entities[entity.data.parent.territoryId]}
+                    entity={entity.entities[entity.data.parent?.territoryId]}
                     disableDoubleClick={
-                      entity.data.parent.territoryId === rootTerritoryId
+                      entity.data.parent?.territoryId === rootTerritoryId
                     }
                     disableDrag={
-                      entity.data.parent.territoryId === rootTerritoryId
+                      entity.data.parent?.territoryId === rootTerritoryId
                     }
                     disableTooltip={
-                      entity.data.parent.territoryId === rootTerritoryId
+                      entity.data.parent?.territoryId === rootTerritoryId
                     }
                   />
                 </StyledTagWrap>
+                {/* move to different parent territory */}
+                {entity.class === EntityEnums.Class.Territory &&
+                  entity.data.parent.territoryId !== rootTerritoryId && (
+                    <div style={{ marginTop: "0.5rem" }}>
+                      <EntitySuggester
+                        placeholder="move"
+                        disableTemplatesAccept
+                        filterEditorRights
+                        inputWidth={
+                          80
+                          // selectedRows.length > 0 && contentWidthTooNarrow ? 36 : 80
+                        }
+                        disableCreate
+                        categoryTypes={[EntityEnums.Class.Territory]}
+                        onPicked={(selectedEntity) => {
+                          setMoveToParentEntity(selectedEntity);
+                          setShowTActionModal(true);
+                        }}
+                        excludedActantIds={excludedMoveTerritories}
+                        button={
+                          <Button
+                            icon={<TbHomeMove size={14} />}
+                            onClick={() => setShowTActionModal(true)}
+                            tooltipLabel="move current territory"
+                          />
+                        }
+                      />
+                    </div>
+                  )}
               </StyledDetailContentRowValue>
             </StyledDetailContentRow>
           )}
@@ -322,7 +392,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
               </StyledDetailContentRowLabel>
               <StyledDetailContentRowValue>
                 <EntityTag
-                  entity={entity.entities[entity.data.territory.territoryId]}
+                  entity={entity.entities[entity.data.territory?.territoryId]}
                 />
               </StyledDetailContentRowValue>
             </StyledDetailContentRow>
@@ -332,15 +402,17 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
             <StyledDetailContentRowValue>
               <AttributeButtonGroup
                 noMargin
-                iconsOnly={widthTooSmall}
-                disabled={!userCanAdmin}
+                iconsOnly={widthTooNarrow}
+                disabled={
+                  !userCanAdmin || (entity.id === rootTerritoryId && !isOwner)
+                }
                 options={entityStatusDict.map((entityStatusOption) => {
                   const icon = getEntityStatusIcon(entityStatusOption["value"]);
 
                   return {
                     longValue: entityStatusOption["label"],
                     shortValue: entityStatusOption["label"],
-                    icon: widthTooSmall ? icon : undefined,
+                    icon: widthTooNarrow ? icon : undefined,
                     onClick: () => {
                       updateEntityMutation.mutate({
                         status: entityStatusOption["value"],
@@ -729,6 +801,19 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
           )}
         </StyledDetailForm>
       </StyledFormWrapper>
+
+      {showTActionModal && (
+        <TerritoryActionModal
+          territory={entity}
+          oldParentTerritory={entity.entities[entity.data.parent.territoryId]}
+          selectedParentEntity={moveToParentEntity}
+          onClose={() => setShowTActionModal(false)}
+          setMoveToParentEntity={setMoveToParentEntity}
+          showModal={showTActionModal}
+          updateTerritoryMutation={updateTerritoryMutation}
+          excludedMoveTerritories={excludedMoveTerritories}
+        />
+      )}
     </>
   );
 };

@@ -4,6 +4,10 @@ import { IEntity } from "./entity";
 export interface ITerritory extends IEntity {
   class: EntityEnums.Class.Territory;
   data: ITerritoryData;
+  findChilds(
+    db: any,
+    isDeep?: boolean
+  ): Promise<Record<number | string, ITerritory>>;
 }
 
 export interface ITerritoryData {

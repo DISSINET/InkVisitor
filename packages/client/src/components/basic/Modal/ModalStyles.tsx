@@ -1,10 +1,18 @@
 import { animated } from "@react-spring/web";
 import { IoClose } from "react-icons/io5";
 import styled from "styled-components";
-import { space2, space4, space5, space6, space7 } from "Theme/constants";
 import { ThemeColor } from "Theme/theme";
+import {
+  space2,
+  space4,
+  space5,
+  space6,
+  space7,
+} from "Theme/theme-space-shortcut";
 
-interface ModalWrap {}
+interface ModalWrap {
+  $lowerZIndex: boolean;
+}
 export const StyledModalWrap = styled.div<ModalWrap>`
   display: flex;
   flex-direction: column;
@@ -16,7 +24,7 @@ export const StyledModalWrap = styled.div<ModalWrap>`
   left: 0;
   right: 0;
   top: 0;
-  z-index: 150;
+  z-index: ${({ $lowerZIndex }) => ($lowerZIndex ? "90" : "150")};
 `;
 export const StyledBackground = styled(animated.div)`
   position: absolute;
@@ -72,8 +80,8 @@ export const StyledCardHeader = styled.header<StyledCardHeader>`
   align-items: center;
   flex-shrink: 0;
   padding: ${space4} ${space6} ${space2} ${space6};
-  background-color: ${({ theme, color }) =>
-    color ? theme.color[color] : "transparent"};
+  background-color: ${({ theme, $color }) =>
+    $color ? theme.color[$color] : "transparent"};
   border-top-left-radius: ${({ theme }) => theme.borderRadius["sm"]};
   border-top-right-radius: ${({ theme }) => theme.borderRadius["sm"]};
 
@@ -83,7 +91,9 @@ export const StyledCardHeader = styled.header<StyledCardHeader>`
   min-height: ${({ theme }) => theme.space[12]};
 `;
 export const StyledCardIcon = styled.div`
-  font-size: 24;
+  display: flex;
+  flex-shrink: 0;
+  font-size: 2.4rem;
   margin-right: 0.5rem;
 `;
 interface StyledCardTitle {
@@ -112,6 +122,7 @@ export const StyledCardBody = styled.section<StyledCardBody>`
 `;
 interface StyledFooter {
   $column?: boolean;
+  $spaceBetween?: boolean;
 }
 export const StyledFooter = styled.div<StyledFooter>`
   border-top-style: solid;
@@ -121,7 +132,8 @@ export const StyledFooter = styled.div<StyledFooter>`
 
   display: flex;
   flex-shrink: 0;
-  justify-content: flex-end;
+  justify-content: ${({ $spaceBetween }) =>
+    $spaceBetween ? "space-between" : "flex-end"};
   flex-direction: ${({ $column }) => ($column ? "column" : "row")};
   padding: ${({ theme }) => theme.space[4]};
 `;

@@ -36,6 +36,7 @@ import { Connection, RDatum, WriteResult, r as rethink } from "rethinkdb-ts";
 import { IRequest } from "../../custom_typings/request";
 import Reference from "./reference";
 import { AnchorsNode } from "@models/document/anchors";
+import { Setting } from "@models/setting/setting";
 
 export default class Entity implements IEntity, IDbModel {
   static table = "entities";
@@ -385,7 +386,8 @@ export default class Entity implements IEntity, IDbModel {
   getTBasedWarnings(
     territoryEs: ITerritory[],
     classificationEs: IConcept[],
-    propValueEs: IEntity[]
+    propValueEs: IEntity[],
+    settings: Setting[]
   ): IWarning[] {
     const warnings: IWarning[] = [];
 
@@ -401,15 +403,21 @@ export default class Entity implements IEntity, IDbModel {
       teritoryId: string,
       tValidation: ITerritoryValidation
     ) => {
-      warnings.push({
-        type: warningType,
-        origin: teritoryId,
-        validation: tValidation,
-        position: {
-          section: IWarningPositionSection.Entity,
-          entityId: this.id,
-        },
-      });
+      const isEnabled =
+        settings.find((s) => s.id === `validation_${warningType}`)?.value ===
+        true;
+
+      if (isEnabled) {
+        warnings.push({
+          type: warningType,
+          origin: teritoryId,
+          validation: tValidation,
+          position: {
+            section: IWarningPositionSection.Entity,
+            entityId: this.id,
+          },
+        });
+      }
     };
 
     validations.forEach(([tId, validation]) => {

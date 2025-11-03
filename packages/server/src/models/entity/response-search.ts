@@ -13,6 +13,8 @@ import { Connection, r, RDatum, RTable } from "rethinkdb-ts";
 import { IRequest } from "src/custom_typings/request";
 import Entity from "./entity";
 import { ResponseEntity } from "./response";
+import { IRequestSearchRootValidity } from "@shared/types/request-search";
+import { Setting } from "@models/setting/setting";
 
 /**
  * SearchQuery is customized builder for search queries, allowing to build query by chaining prepared filters
@@ -368,6 +370,28 @@ export class SearchQuery {
   }
 
   /**
+   * Fetches audits and updates the request's entityIds by intersecting with the audit results.
+   * This is a helper to abstract away the repeated logic for filtering by audit data.
+   * It also improves performance by using a Set for intersection.
+   * @param req The request search object, will be mutated.
+   * @param getAudits A function that returns a promise of audits.
+   */
+  private async _updateEntityIdsFromAudits(
+    req: RequestSearch,
+    getAudits: () => Promise<{ entityId: string }[]>
+  ) {
+    const audits = await getAudits();
+    const auditEntityIds = audits.map((a) => a.entityId);
+
+    if (!req.entityIds) {
+      req.entityIds = auditEntityIds;
+    } else {
+      const auditEntityIdsSet = new Set(auditEntityIds);
+      req.entityIds = req.entityIds.filter((id) => auditEntityIdsSet.has(id));
+    }
+  }
+
+  /**
    * prepares the query according to request
    * @param req
    */
@@ -393,7 +417,8 @@ export class SearchQuery {
       if (req.subTerritorySearch) {
         const childs = Object.values(
           await new Territory({ id: req.territoryId }).findChilds(
-            this.connection
+            this.connection,
+            true
           )
         );
         territoryIds = territoryIds.concat(childs.map((ch) => ch.id));
@@ -418,36 +443,46 @@ export class SearchQuery {
     }
 
     if (req.createdDate) {
-      const audits = await Audit.getByCreatedDate(
-        this.connection,
-        req.createdDate
+      await this._updateEntityIdsFromAudits(req, () =>
+        Audit.getByCreatedDate(this.connection, req.createdDate as Date)
       );
-      if (!req.entityIds) {
-        req.entityIds = audits.map((a) => a.entityId);
-      } else {
-        req.entityIds = req.entityIds.reduce((acc, curr) => {
-          if (audits.find((a) => a.entityId === curr)) {
-            acc.push(curr);
-          }
-          return acc;
-        }, [] as string[]);
-      }
     }
 
     if (req.updatedDate) {
-      const audits = await Audit.getByUpdatedDate(
-        this.connection,
-        req.updatedDate
+      await this._updateEntityIdsFromAudits(req, () =>
+        Audit.getByUpdatedDate(this.connection, req.updatedDate as Date)
       );
+    }
+
+    if (req.createdBy) {
+      await this._updateEntityIdsFromAudits(req, () =>
+        Audit.getByCreatedBy(this.connection, req.createdBy as string)
+      );
+    }
+
+    if (req.updatedBy) {
+      await this._updateEntityIdsFromAudits(req, () =>
+        Audit.getByUpdatedBy(this.connection, req.updatedBy as string)
+      );
+    }
+
+    if (req.editedBy) {
+      const updatedBy = await Audit.getByUpdatedBy(
+        this.connection,
+        req.editedBy as string
+      );
+      const createdBy = await Audit.getByCreatedBy(
+        this.connection,
+        req.editedBy as string
+      );
+
+      const auditEntityIds = updatedBy.concat(createdBy).map((a) => a.entityId);
+
       if (!req.entityIds) {
-        req.entityIds = audits.map((a) => a.entityId);
+        req.entityIds = auditEntityIds;
       } else {
-        req.entityIds = req.entityIds.reduce((acc, curr) => {
-          if (audits.find((a) => a.entityId === curr)) {
-            acc.push(curr);
-          }
-          return acc;
-        }, [] as string[]);
+        const auditEntityIdsSet = new Set(auditEntityIds);
+        req.entityIds = req.entityIds.filter((id) => auditEntityIdsSet.has(id));
       }
     }
 
@@ -511,11 +546,15 @@ export class ResponseSearch {
    */
   async prepare(httpRequest: IRequest): Promise<ResponseEntity[]> {
     const query = new SearchQuery(httpRequest.db.connection);
+    const settings = await Setting.getSettingsAll(httpRequest.db.connection);
     await query.fromRequest(this.request);
     let entities = await query.do();
 
     // Handling this search condition here while it is reusing the entity method
-    if (this.request.isRootInvalid === true) {
+    if (
+      this.request.isRootInvalid === IRequestSearchRootValidity.Valid ||
+      this.request.isRootInvalid === IRequestSearchRootValidity.Invalid
+    ) {
       const rootT = treeCache.tree.getRootTerritory() as ITerritory;
       const conn = httpRequest.db.connection;
 
@@ -545,10 +584,20 @@ export class ResponseSearch {
         const warnings = entityModel.getTBasedWarnings(
           [rootT],
           classificationEs,
-          propValueEs
+          propValueEs,
+          settings
         );
-        if (warnings.length > 0) {
-          entities.push(entity);
+
+        if (this.request.isRootInvalid === IRequestSearchRootValidity.Valid) {
+          if (warnings.length === 0) {
+            entities.push(entity);
+          }
+        } else if (
+          this.request.isRootInvalid === IRequestSearchRootValidity.Invalid
+        ) {
+          if (warnings.length > 0) {
+            entities.push(entity);
+          }
         }
       }
     }

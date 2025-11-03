@@ -15,6 +15,7 @@ import {
   IResponsePermission,
   IResponseQuery,
   IResponseStatement,
+  IResponseStats,
   IResponseTerritory,
   IResponseTree,
   IResponseUser,
@@ -962,9 +963,39 @@ class Api {
   async statsGet(
     data: IRequestStats,
     options?: IApiOptions
-  ): Promise<AxiosResponse<IResponseAudit>> {
+  ): Promise<AxiosResponse<IResponseStats>> {
     try {
       const response = await this.connection.post(`/stats`, data, options);
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  /**
+   * Stats Materialized
+   */
+  async statsMaterializedGet(
+    data: IRequestStats,
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseStats>> {
+    try {
+      const response = await this.connection.post(`/stats/materialized`, data, options);
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  /**
+   * Stats Aggregate - Manual aggregation trigger
+   */
+  async statsAggregate(
+    data: { fromDate: number; toDate: number; timeUnits?: string[]; aggregateBy?: string[] },
+    options?: IApiOptions
+  ): Promise<AxiosResponse<{ message: string; recordsProcessed: number }>> {
+    try {
+      const response = await this.connection.post(`/stats/aggregate`, data, options);
       return response;
     } catch (err) {
       throw this.handleError(err);
@@ -1312,7 +1343,8 @@ class Api {
 
   async documentExport(
     documentId: string,
-    exportedEntities: EntityEnums.Class[]
+    exportedEntities: EntityEnums.Class[],
+    fileName: string
   ): Promise<any> {
     try {
       const response = await this.connection.post(
@@ -1323,15 +1355,6 @@ class Api {
         },
         { responseType: "blob" }
       );
-
-      let fileName = `${documentId}-`;
-      if (Object.keys(EntityEnums.Class).length === exportedEntities.length) {
-        fileName += "all_anchors";
-      } else if (exportedEntities.length > 0) {
-        fileName += exportedEntities.join("");
-      } else {
-        fileName += "no_anchors";
-      }
 
       const url = window.URL.createObjectURL(response.data);
       const a = document.createElement("a");

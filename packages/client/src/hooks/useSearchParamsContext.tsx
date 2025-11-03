@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import api from "api";
 import React, {
   createContext,
@@ -7,8 +8,7 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { maxTabCount } from "Theme/constants";
 
 const UNINITIALISED = (): void => {
@@ -28,6 +28,7 @@ const INITIAL_CONTEXT = {
   removeDetailId: UNINITIALISED,
   clearAllDetailIds: UNINITIALISED,
   cleanAllParams: UNINITIALISED,
+  setLogoutState: UNINITIALISED,
 
   annotatorOpened: false,
   setAnnotatorOpened: UNINITIALISED,
@@ -46,6 +47,7 @@ interface SearchParamsContext {
   removeDetailId: (id: string) => void;
   clearAllDetailIds: () => void;
   cleanAllParams: () => void;
+  setLogoutState: (isLoggingOut: boolean) => void;
 
   annotatorOpened: boolean;
   setAnnotatorOpened: (opened: boolean) => void;
@@ -63,11 +65,25 @@ export const SearchParamsProvider = ({
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const params = new URLSearchParams(location.hash.substring(1));
-  const parsedParams = Object.fromEntries(params);
 
-  const paramsSearch = new URLSearchParams(location.search);
-  const parsedParamsSearch = Object.fromEntries(paramsSearch);
+  // Add error handling for URL parsing
+  let params: URLSearchParams;
+  let parsedParams: Record<string, string>;
+  let paramsSearch: URLSearchParams;
+  let parsedParamsSearch: Record<string, string>;
+
+  try {
+    params = new URLSearchParams(location.hash.substring(1));
+    parsedParams = Object.fromEntries(params);
+    paramsSearch = new URLSearchParams(location.search);
+    parsedParamsSearch = Object.fromEntries(paramsSearch);
+  } catch (error) {
+    console.error("Error parsing URL parameters:", error);
+    params = new URLSearchParams();
+    parsedParams = {};
+    paramsSearch = new URLSearchParams();
+    parsedParamsSearch = {};
+  }
 
   const [territoryId, setTerritoryId] = useState<string>(
     typeof parsedParams.territory === "string" ? parsedParams.territory : ""
@@ -101,6 +117,8 @@ export const SearchParamsProvider = ({
   );
 
   const [disablePush, setDisablePush] = useState(false);
+  const isLoggingOutRef = React.useRef(false);
+  const isHandlingLocationChangeRef = React.useRef(false);
 
   const getDetailIdArray = () => {
     return detailId.length > 0 ? detailId.split(arrJoinChar) : [];
@@ -204,7 +222,11 @@ export const SearchParamsProvider = ({
   };
 
   const handleHistoryPush = () => {
-    if (!disablePush) {
+    if (
+      !disablePush &&
+      !isLoggingOutRef.current &&
+      !isHandlingLocationChangeRef.current
+    ) {
       const hashString = params.toString();
       // Remove the = symbol for annotatorOpened parameter
       const cleanHash = hashString
@@ -222,6 +244,10 @@ export const SearchParamsProvider = ({
     setStatementId("");
     setTerritoryId("");
     setAnnotatorOpened(false);
+  };
+
+  const setLogoutState = (isLoggingOut: boolean) => {
+    isLoggingOutRef.current = isLoggingOut;
   };
 
   const hasSearchParams = useMemo(
@@ -252,37 +278,46 @@ export const SearchParamsProvider = ({
     }
   }, [territoryId, statementId, selectedDetailId, detailId, annotatorOpened]);
 
-  // const handleLocationChange = (location: any) => {
-  //   const paramsTemp = new URLSearchParams(location.hash.substring(1));
-  //   const parsedParamsTemp = Object.fromEntries(paramsTemp);
+  const handleLocationChange = (location: any) => {
+    try {
+      const paramsTemp = new URLSearchParams(location.hash.substring(1));
+      const parsedParamsTemp = Object.fromEntries(paramsTemp);
 
-  //   parsedParamsTemp.territory
-  //     ? setTerritoryId(parsedParamsTemp.territory)
-  //     : setTerritoryId("");
+      parsedParamsTemp.territory
+        ? setTerritoryId(parsedParamsTemp.territory)
+        : setTerritoryId("");
 
-  //   parsedParamsTemp.statement
-  //     ? setStatementId(parsedParamsTemp.statement)
-  //     : setStatementId("");
+      parsedParamsTemp.statement
+        ? setStatementId(parsedParamsTemp.statement)
+        : setStatementId("");
 
-  //   parsedParamsTemp.selectedDetail
-  //     ? setSelectedDetailId(parsedParamsTemp.selectedDetail)
-  //     : setSelectedDetailId("");
+      parsedParamsTemp.selectedDetail
+        ? setSelectedDetailId(parsedParamsTemp.selectedDetail)
+        : setSelectedDetailId("");
 
-  //   parsedParamsTemp.detail
-  //     ? setDetailId(parsedParamsTemp.detail)
-  //     : setDetailId("");
-  // };
+      parsedParamsTemp.detail
+        ? setDetailId(parsedParamsTemp.detail)
+        : setDetailId("");
 
-  // useEffect(() => {
-  // Should be only change from the url => add state to switch of listener
-  // this condition is for redirect - don't use our lifecycle when params are set by search query (?)
-  // if (!hasSearchParams) {
-  //   setDisablePush(true);
-  //   handleLocationChange(location);
-  //   setDisablePush(false);
-  // }
-  // }),
-  // [location];
+      // Handle annotatorOpened parameter
+      setAnnotatorOpened("annotatorOpened" in parsedParamsTemp);
+    } catch (error) {
+      console.error("Error parsing location hash:", error);
+    }
+  };
+
+  useEffect(() => {
+    // Listen for URL changes (back/forward button, direct navigation)
+    // This condition is for redirect - don't use our lifecycle when params are set by search query
+    if (!hasSearchParams) {
+      isHandlingLocationChangeRef.current = true;
+      handleLocationChange(location);
+      // Use setTimeout to ensure state updates have completed before allowing history pushes
+      setTimeout(() => {
+        isHandlingLocationChangeRef.current = false;
+      }, 0);
+    }
+  }, [location, hasSearchParams]);
 
   return (
     <SearchParamsContext.Provider
@@ -300,6 +335,7 @@ export const SearchParamsProvider = ({
         removeDetailId,
         clearAllDetailIds,
         cleanAllParams,
+        setLogoutState,
 
         annotatorOpened,
         setAnnotatorOpened,

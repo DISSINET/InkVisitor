@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, ButtonGroup, CustomScrollbar, Loader } from "components";
 import { EntityCreateModal } from "components/advanced";
-import { useSearchParams } from "hooks";
+import { useDebounce, useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { BsFilter } from "react-icons/bs";
 import { FaPlus } from "react-icons/fa";
@@ -21,18 +21,20 @@ import { TerritoryTreeFilter } from "./TerritoryTreeFilter/TerritoryTreeFilter";
 import {
   filterTreeByFavorites,
   filterTreeByLabel,
-  filterTreeNonEmpty,
+  filterTreeWithStatements,
+  filterTreeWithSubterritories,
   filterTreeWithWriteRights,
   markNodesWithFilters,
 } from "./TerritoryTreeFilterUtils";
 import { MemoizedTerritoryTreeNode } from "./TerritoryTreeNode/TerritoryTreeNode";
-import { useDebounce } from "hooks";
 
 const initFilterSettings: ITerritoryFilter = {
-  nonEmpty: false,
   starred: false,
   editorRights: false,
+  withSubterritories: false,
+  withStatements: false,
   filter: "",
+  operator: "or",
 };
 export const TerritoryTreeBox: React.FC = () => {
   const firstPanelExpanded: boolean = useAppSelector(
@@ -64,10 +66,8 @@ export const TerritoryTreeBox: React.FC = () => {
   } = useQuery({
     queryKey: ["user", userId],
     queryFn: async () => {
-      if (userId) {
-        const res = await api.usersGet(userId);
-        return res.data;
-      }
+      const res = await api.usersGet(userId as string);
+      return res.data ?? undefined;
     },
     enabled: api.isLoggedIn() && !!userId,
   });
@@ -129,37 +129,95 @@ export const TerritoryTreeBox: React.FC = () => {
     if (treeData) {
       let newFilteredTreeData: IResponseTree | null = treeData;
 
-      if (filterSettings.nonEmpty) {
-        // NON EMPTY
-        const nonEmptyTreeData = filterTreeNonEmpty(newFilteredTreeData);
-        newFilteredTreeData = nonEmptyTreeData;
+      // Check if any filters are active
+      const hasActiveFilters =
+        filterSettings.starred ||
+        filterSettings.editorRights ||
+        filterSettings.withStatements ||
+        filterSettings.withSubterritories ||
+        filterSettings.filter.length > 0;
+
+      if (!hasActiveFilters) {
+        // No filters active, return tree without highlighting
+        return newFilteredTreeData;
       }
-      if (filterSettings.starred) {
-        // STARED
-        if (userData) {
+
+      if (filterSettings.operator === "or") {
+        // OR logic: apply each filter independently and merge results
+        const filteredResults: (IResponseTree | null)[] = [];
+
+        if (filterSettings.starred && userData) {
+          const starredTreeData = filterTreeByFavorites(
+            treeData,
+            userData.storedTerritories.map((t) => t.territory.id)
+          );
+          if (starredTreeData) filteredResults.push(starredTreeData);
+        }
+
+        if (filterSettings.editorRights) {
+          const editorRightsTreeData = filterTreeWithWriteRights(treeData);
+          if (editorRightsTreeData) filteredResults.push(editorRightsTreeData);
+        }
+
+        if (filterSettings.withStatements) {
+          const withStatementsTreeData = filterTreeWithStatements(treeData);
+          if (withStatementsTreeData)
+            filteredResults.push(withStatementsTreeData);
+        }
+
+        if (filterSettings.withSubterritories) {
+          const withSubterritoriesTreeData =
+            filterTreeWithSubterritories(treeData);
+          if (withSubterritoriesTreeData)
+            filteredResults.push(withSubterritoriesTreeData);
+        }
+
+        if (filterSettings.filter.length > 0) {
+          const labelFilterTreeData = filterTreeByLabel(
+            treeData,
+            filterSettings.filter
+          );
+          if (labelFilterTreeData) filteredResults.push(labelFilterTreeData);
+        }
+
+        // Merge OR results (this is a simplified merge - we might need more sophisticated logic)
+        if (filteredResults.length > 0) {
+          newFilteredTreeData = filteredResults[0]; // For now, use first result
+        }
+      } else {
+        // AND logic: apply filters sequentially
+        if (filterSettings.starred && userData) {
           const starredTreeData = filterTreeByFavorites(
             newFilteredTreeData,
             userData.storedTerritories.map((t) => t.territory.id)
           );
           newFilteredTreeData = starredTreeData;
         }
-      }
-      if (filterSettings.editorRights) {
-        // EDITOR RIGHTS
-        const editorRightsTreeData =
-          filterTreeWithWriteRights(newFilteredTreeData);
-        newFilteredTreeData = editorRightsTreeData;
-      }
-      if (filterSettings.filter.length > 0) {
-        // LABEL FILTER
-        const labelFilterTreeData = filterTreeByLabel(
-          newFilteredTreeData,
-          filterSettings.filter
-        );
-        newFilteredTreeData = labelFilterTreeData;
+        if (filterSettings.editorRights) {
+          const editorRightsTreeData =
+            filterTreeWithWriteRights(newFilteredTreeData);
+          newFilteredTreeData = editorRightsTreeData;
+        }
+        if (filterSettings.withStatements) {
+          const withStatementsTreeData =
+            filterTreeWithStatements(newFilteredTreeData);
+          newFilteredTreeData = withStatementsTreeData;
+        }
+        if (filterSettings.withSubterritories) {
+          const withSubterritoriesTreeData =
+            filterTreeWithSubterritories(newFilteredTreeData);
+          newFilteredTreeData = withSubterritoriesTreeData;
+        }
+        if (filterSettings.filter.length > 0) {
+          const labelFilterTreeData = filterTreeByLabel(
+            newFilteredTreeData,
+            filterSettings.filter
+          );
+          newFilteredTreeData = labelFilterTreeData;
+        }
       }
 
-      // Mark tree data when all selected conditions are satisfied
+      // Mark tree data for highlighting
       if (newFilteredTreeData && userData) {
         const markedTreeData = markNodesWithFilters(
           newFilteredTreeData,
@@ -188,93 +246,122 @@ export const TerritoryTreeBox: React.FC = () => {
 
   const treeWidth = useDebounce(useSelector(selectPanelWidth(0)), 200);
 
-  const treeWidthTooSmall = treeWidth < 140;
+  const treeWidthTooNarrow = treeWidth < 140;
+
+  // delay of show content for fluent animation on open
+  const [showTerritoryTree, setShowTerritoryTree] = useState(true);
+
+  useEffect(() => {
+    if (firstPanelExpanded) {
+      setTimeout(() => {
+        setShowTerritoryTree(true);
+      }, 500);
+    } else {
+      setShowTerritoryTree(false);
+    }
+  }, [firstPanelExpanded]);
 
   return (
     <>
-      <ButtonGroup>
-        {(userRole === UserEnums.Role.Admin ||
-          userRole === UserEnums.Role.Owner) && (
-          <Button
-            label={!treeWidthTooSmall ? "new" : ""}
-            iconRight={<span style={{ marginLeft: 5 }}>{"\u0054"}</span>}
-            icon={<FaPlus />}
-            onClick={() => setShowCreate(true)}
-            fullWidth
-            tooltipLabel={treeWidthTooSmall ? "create new territory" : ""}
-          />
-        )}
-        <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-          <Button
-            label={!treeWidthTooSmall ? "filter" : ""}
-            onClick={() => {
-              if (treeFilterOpen) {
-                dispatch(setFilterOpen(false));
-                setFilteredTreeData(treeData);
-                setFilterSettings(initFilterSettings);
-                dispatch(setTreeInitialized(false));
-              } else {
-                dispatch(setFilterOpen(true));
-              }
-            }}
-            color="success"
-            inverted={!treeFilterOpen}
-            fullWidth
-            icon={<BsFilter size={14} />}
-            tooltipLabel={treeWidthTooSmall ? "filter" : ""}
-            tooltipPosition="right"
-          />
-        </div>
-      </ButtonGroup>
-
-      {treeFilterOpen && (
-        <TerritoryTreeFilter
-          filterData={filterSettings}
-          handleFilterChange={(key, value) => handleFilterChange(key, value)}
-          userRole={userRole}
-        />
-      )}
-
-      {firstPanelExpanded && (
-        <CustomScrollbar
-          scrollerId="Territories"
-          elementId="Territories-box-content"
-        >
-          <StyledTreeWrapper
-          // id="Territories-box-content"
-          >
-            {filteredTreeData && (
-              <MemoizedTerritoryTreeNode
-                right={filteredTreeData.right}
-                territory={filteredTreeData.territory}
-                children={filteredTreeData.children}
-                lvl={filteredTreeData.lvl}
-                statementsCount={filteredTreeData.statementsCount}
-                initExpandedNodes={selectedTerritoryPath}
-                empty={filteredTreeData.empty}
-                storedTerritories={storedTerritoryIds ? storedTerritoryIds : []}
-                updateUserMutation={updateUserMutation}
+      {showTerritoryTree && (
+        <>
+          <ButtonGroup>
+            {(userRole === UserEnums.Role.Admin ||
+              userRole === UserEnums.Role.Owner) && (
+              <Button
+                label={!treeWidthTooNarrow ? "new" : ""}
+                iconRight={<span style={{ marginLeft: 5 }}>{"\u0054"}</span>}
+                icon={<FaPlus />}
+                onClick={() => setShowCreate(true)}
+                fullWidth
+                tooltipLabel={treeWidthTooNarrow ? "create new territory" : ""}
               />
             )}
+            <div
+              style={{ display: "flex", alignItems: "center", width: "100%" }}
+            >
+              <Button
+                label={!treeWidthTooNarrow ? "filter" : ""}
+                onClick={() => {
+                  if (treeFilterOpen) {
+                    dispatch(setFilterOpen(false));
+                    setFilteredTreeData(treeData);
+                    setFilterSettings(initFilterSettings);
+                    dispatch(setTreeInitialized(false));
+                  } else {
+                    dispatch(setFilterOpen(true));
+                  }
+                }}
+                color="success"
+                inverted={!treeFilterOpen}
+                fullWidth
+                icon={<BsFilter size={14} />}
+                tooltipLabel={treeWidthTooNarrow ? "filter" : ""}
+                tooltipPosition="right"
+              />
+            </div>
+          </ButtonGroup>
 
-            {/* No results */}
-            {treeFilterOpen && !filteredTreeData && (
-              <StyledNoResults>{"No results"}</StyledNoResults>
-            )}
-          </StyledTreeWrapper>
-        </CustomScrollbar>
-      )}
+          {treeFilterOpen && (
+            <TerritoryTreeFilter
+              filterData={filterSettings}
+              handleFilterChange={(key, value) =>
+                handleFilterChange(key, value)
+              }
+              userRole={userRole}
+            />
+          )}
 
-      {showCreate && (
-        <EntityCreateModal
-          closeModal={() => setShowCreate(false)}
-          allowedEntityClasses={[EntityEnums.Class.Territory]}
-          onMutationSuccess={() =>
-            queryClient.invalidateQueries({ queryKey: ["tree"] })
-          }
-        />
+          {firstPanelExpanded && (
+            <CustomScrollbar
+              scrollerId="Territories"
+              elementId="Territories-box-content"
+            >
+              <StyledTreeWrapper
+              // id="Territories-box-content"
+              >
+                {filteredTreeData && (
+                  <MemoizedTerritoryTreeNode
+                    right={filteredTreeData.right}
+                    territory={filteredTreeData.territory}
+                    children={filteredTreeData.children}
+                    lvl={filteredTreeData.lvl}
+                    statementsCount={filteredTreeData.statementsCount}
+                    initExpandedNodes={selectedTerritoryPath}
+                    empty={filteredTreeData.empty}
+                    storedTerritories={
+                      storedTerritoryIds ? storedTerritoryIds : []
+                    }
+                    updateUserMutation={updateUserMutation}
+                  />
+                )}
+
+                {/* No results */}
+                {treeFilterOpen && !filteredTreeData && (
+                  <StyledNoResults>{"No results"}</StyledNoResults>
+                )}
+              </StyledTreeWrapper>
+            </CustomScrollbar>
+          )}
+
+          {showCreate && (
+            <EntityCreateModal
+              closeModal={() => setShowCreate(false)}
+              allowedEntityClasses={[EntityEnums.Class.Territory]}
+              onMutationSuccess={() =>
+                queryClient.invalidateQueries({ queryKey: ["tree"] })
+              }
+            />
+          )}
+        </>
       )}
-      <Loader show={isFetching || updateUserMutation.isPending} />
+      <Loader
+        show={
+          isFetching ||
+          updateUserMutation.isPending ||
+          (firstPanelExpanded && !showTerritoryTree)
+        }
+      />
     </>
   );
 };

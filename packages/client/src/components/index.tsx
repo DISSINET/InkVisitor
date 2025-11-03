@@ -38,6 +38,8 @@ import { Tooltip } from "./basic/Tooltip/Tooltip";
 import { TypeBar } from "./basic/TypeBar/TypeBar";
 import { ContactOwnerFooting } from "./basic/ContactOwnerFooting/ContactOwnerFooting";
 import { CustomScrollbar } from "./basic/CustomScrollbar/CustomScrollbar";
+import ErrorBoundary from "./ErrorBoundary";
+import { IconWithTooltip } from "./basic/IconWithTooltip/IconWithTooltip";
 
 export {
   AttributeIcon,
@@ -52,9 +54,11 @@ export {
   Cloud,
   CustomScrollbar,
   Dropzone,
+  ErrorBoundary,
   Header,
   IconButtonGroup,
   IconFont,
+  IconWithTooltip,
   Input,
   LetterIcon,
   Loader,

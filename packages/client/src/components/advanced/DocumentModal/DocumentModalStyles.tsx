@@ -62,6 +62,7 @@ export const StyledExportDocumentButton = styled.div`
 `;
 
 export const StyledExportStatsSection = styled.div`
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
   padding: 1rem;
   font-style: italic;
 `;

@@ -6,7 +6,12 @@ import { FaStar } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import theme from "Theme/theme";
-import { DraggedEntityReduxItem, EntityColors, EntityDragItem } from "types";
+import {
+  DetailBoxState,
+  DraggedEntityReduxItem,
+  EntityColors,
+  EntityDragItem,
+} from "types";
 import { getShortLabelByLetterCount } from "utils/utils";
 import {
   StyledButtonWrapper,
@@ -18,6 +23,7 @@ import {
   StyledTagWrapper,
 } from "./TagStyles";
 import useDragDrop from "./useDragDrop";
+import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
 
 interface TagProps {
   propId: string;
@@ -26,8 +32,8 @@ interface TagProps {
   labelItalic?: boolean;
 
   entityClass?: EntityEnums.ExtendedClass;
-  status?: string;
-  ltype?: string;
+  status?: EntityEnums.Status;
+  ltype?: EntityEnums.LogicalType;
   entity?: IEntity;
 
   borderStyle?: "solid" | "dashed" | "dotted";
@@ -59,8 +65,8 @@ export const Tag: React.FC<TagProps> = ({
   label = "",
   labelItalic = false,
   entityClass = EntityEnums.Extension.NoClass,
-  status = "1",
-  ltype = "1",
+  status = EntityEnums.Status.Approved,
+  ltype = EntityEnums.LogicalType.Definite,
   entity,
   borderStyle = "solid",
   button,
@@ -87,6 +93,9 @@ export const Tag: React.FC<TagProps> = ({
   const dispatch = useAppDispatch();
   const draggedEntity: DraggedEntityReduxItem = useAppSelector(
     (state) => state.draggedEntity
+  );
+  const detailBoxState: DetailBoxState = useAppSelector(
+    (state) => state.layout.mainPage.detailBoxState
   );
 
   const [clickedOnce, setClickedOnce] = useState(false);
@@ -222,7 +231,12 @@ export const Tag: React.FC<TagProps> = ({
       onDoubleClick={(e) => {
         e.stopPropagation();
         setClickedOnce(false);
-        !disableDoubleClick && appendDetailId(propId);
+        if (!disableDoubleClick) {
+          appendDetailId(propId);
+          if (detailBoxState === DetailBoxState.Minimized) {
+            dispatch(setDetailBoxState(DetailBoxState.Normal));
+          }
+        }
       }}
     >
       {renderTag}

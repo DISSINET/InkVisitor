@@ -116,7 +116,15 @@ export const ExtentedEntityColors: { [key: string]: IEntityColor } = {
 export type EntityKeys = keyof typeof EntityColors;
 
 export interface IPage {
-  id: "main" | "users" | "acl" | "about" | "documents" | "customize" | "query";
+  id:
+    | "main"
+    | "users"
+    | "acl"
+    | "about"
+    | "documents"
+    | "customize"
+    | "stats"
+    | "query";
   label: string;
   color: "info" | "success" | "danger" | "warning";
   href: string | false;
@@ -384,10 +392,12 @@ export interface FilteredActionObject {
 }
 
 export interface ITerritoryFilter {
-  nonEmpty: boolean;
   starred: boolean;
   editorRights: boolean;
+  withSubterritories: boolean;
+  withStatements: boolean;
   filter: string;
+  operator?: "and" | "or"; // "and" on default
 }
 
 export interface IExtendedResponseTree extends IResponseTree {

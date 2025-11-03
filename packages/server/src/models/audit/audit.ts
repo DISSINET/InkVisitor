@@ -118,6 +118,25 @@ export default class Audit implements IAudit, IDbModel {
   }
 
   /**
+   * Gets the earliest audit entry date in the database
+   * @param db rethinkdb Connection
+   * @returns Promise<Date | null>
+   */
+  static async getEarliestDate(db: Connection): Promise<Date | null> {
+    try {
+      const result = await rethink
+        .table(Audit.table)
+        .min("date")
+        .run(db);
+
+      return result ? new Date((result as any).date) : null;
+    } catch (error) {
+      // Table might not exist yet or be empty
+      return null;
+    }
+  }
+
+  /**
    * Retrieves last created audit entry for entity.
    * Last audit entry stands for updated-at entry.
    * @param db rethinkdb Connection
@@ -234,6 +253,42 @@ export default class Audit implements IAudit, IDbModel {
     }
 
     return withValidDate;
+  }
+
+  /**
+   * Retrieves Audit entries that are created by specific user
+   * @param db rethinkdb Connection
+   * @param createdBy string
+   * @returns Promise<Audit[]> list of Audit entries
+   */
+  static async getByCreatedBy(
+    db: Connection,
+    createdBy: string
+  ): Promise<Audit[]> {
+    const result = await rethink
+      .table(Audit.table)
+      .filter(rethink.row("type").eq(EventType.CREATE))
+      .filter(rethink.row("user").eq(createdBy))
+      .run(db);
+    return result.map((data) => new Audit(data)) as Audit[];
+  }
+
+  /**
+   * Retrieves Audit entries that are updated by specific user
+   * @param db rethinkdb Connection
+   * @param updatedBy string
+   * @returns Promise<Audit[]> list of Audit entries
+   */
+  static async getByUpdatedBy(
+    db: Connection,
+    updatedBy: string
+  ): Promise<Audit[]> {
+    const result = await rethink
+      .table(Audit.table)
+      .filter(rethink.row("type").eq(EventType.EDIT))
+      .filter(rethink.row("user").eq(updatedBy))
+      .run(db);
+    return result.map((data) => new Audit(data)) as Audit[];
   }
 
   /**

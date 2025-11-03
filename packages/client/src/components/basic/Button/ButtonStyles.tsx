@@ -1,9 +1,15 @@
 import styled from "styled-components";
-import { space1, space2 } from "Theme/constants";
-import { ThemeColor } from "Theme/theme";
+import { InvertedBgColor, ThemeColor } from "Theme/theme";
 import { ButtonSize } from "types";
 
-const getRadius = ($radiusLeft?: boolean, $radiusRight?: boolean) => {
+const getRadius = (
+  $radiusLeft?: boolean,
+  $radiusRight?: boolean,
+  $circular?: boolean
+) => {
+  if ($circular) {
+    return "50%";
+  }
   if ($radiusLeft && $radiusRight) {
     return "7px";
   } else if ($radiusLeft) {
@@ -58,6 +64,7 @@ interface IButtonStyle {
   $radiusRight?: boolean;
   $noPadding?: boolean;
   $fullHeight?: boolean;
+  $circular?: boolean;
 }
 export const StyledButton = styled.button.attrs(({ ref }) => ({
   ref: ref,
@@ -65,8 +72,34 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: ${({ $fullWidth }) => ($fullWidth ? "100%" : "auto")};
-  height: ${({ $fullHeight }) => ($fullHeight ? "100%" : "")};
+  width: ${({ $fullWidth, $circular, $size }) => {
+    if ($fullWidth) return "100%";
+    if ($circular) {
+      switch ($size) {
+        case ButtonSize.Small:
+          return "2rem";
+        case ButtonSize.Medium:
+          return "2.5rem";
+        case ButtonSize.Large:
+          return "3rem";
+      }
+    }
+    return "auto";
+  }};
+  height: ${({ $fullHeight, $circular, $size }) => {
+    if ($fullHeight) return "100%";
+    if ($circular) {
+      switch ($size) {
+        case ButtonSize.Small:
+          return "2rem";
+        case ButtonSize.Medium:
+          return "2.5rem";
+        case ButtonSize.Large:
+          return "3rem";
+      }
+    }
+    return "";
+  }};
   font-size: ${({ theme, $size }) => theme.fontSize[getFontSize($size)]};
   font-weight: ${({ $disabled, $textRegular }) =>
     $disabled ? 400 : $textRegular ? 500 : 900};
@@ -81,8 +114,8 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
     $disabled ? theme.color["gray"][400] : theme.color[$color]};
   border-width: ${({ $noBorder }) => ($noBorder ? 0 : "thin")};
   border-style: solid;
-  border-radius: ${({ $radiusLeft, $radiusRight }) =>
-    getRadius($radiusLeft, $radiusRight)};
+  border-radius: ${({ $radiusLeft, $radiusRight, $circular }) =>
+    getRadius($radiusLeft, $radiusRight, $circular)};
   color: ${({ theme, $disabled, $color, $inverted }) => {
     if ($disabled) {
       return theme.color["gray"][800];
@@ -100,7 +133,7 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
       return theme.background["stripes"];
     }
     if ($inverted) {
-      return theme.color["invertedBg"][$color];
+      return theme.color.invertedBg[$color as keyof InvertedBgColor];
     }
 
     return theme.color[$color];

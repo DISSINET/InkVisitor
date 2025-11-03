@@ -26,7 +26,6 @@ import treeInitializeSlice from "./features/territoryTree/treeInitializeSlice";
 import themeSlice from "./features/themeSlice";
 import usernameSlice from "./features/usernameSlice";
 import detailBoxStateSlice from "./features/layout/mainPage/detailBoxStateSlice";
-import detailBoxMinimizedSlice from "./features/layout/mainPage/detailBoxMinimizedSlice";
 import panelWidthsSlice from "./features/layout/mainPage/panelWidthsSlice";
 import thirdPanelExpandedSlice from "./features/layout/mainPage/thirdPanelExpandedSlice";
 
@@ -68,7 +67,6 @@ const store: Store = configureStore({
         fourthPanelExpanded: fourthPanelExpandedSlice,
         fourthPanelBoxesOpened: fourthPanelBoxesOpenedSlice,
         statementListOpened: statementListOpenedSlice,
-        detailBoxMinimized: detailBoxMinimizedSlice,
         secondPanelRealWidth: secondPanelRealWidthSlice,
         thirdPanelRealWidth: thirdPanelRealWidthSlice,
         detailBoxState: detailBoxStateSlice,

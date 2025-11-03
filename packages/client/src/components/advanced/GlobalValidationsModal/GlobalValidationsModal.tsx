@@ -1,4 +1,13 @@
 import {
+  entityKeys,
+  globalValidationsDict,
+  territoryKeys,
+  valencyKeys,
+  ValidationKey,
+} from "@shared/enums/warning";
+import { IEntity } from "@shared/types";
+import { ISetting } from "@shared/types/settings";
+import {
   EProtocolTieType,
   ITerritoryValidation,
 } from "@shared/types/territory";
@@ -16,31 +25,19 @@ import {
 } from "components";
 import { ValidationRule } from "components/advanced";
 import React, { useEffect, useMemo, useState } from "react";
-import { FaPlus, FaToggleOff, FaToggleOn } from "react-icons/fa";
+import { FaPlus } from "react-icons/fa";
+import { toast } from "react-toastify";
 import { rootTerritoryId } from "Theme/constants";
+import { deepCopy } from "utils/utils";
 import {
   StyledBlockSeparator,
   StyledGridForm,
-  StyledGridFormLabel,
   StyledGridSectionHeading,
   StyledSectionHeader,
-  StyledToggleWrap,
   StyledValidationCount,
   StyledValidationList,
 } from "./GlobalValidationsModalStyles";
-import { deepCopy } from "utils/utils";
-import { IEntity } from "@shared/types";
-import { useSearchParams } from "hooks";
-import {
-  entityKeys,
-  territoryKeys,
-  valencyKeys,
-  globalValidationsDict,
-  ValidationKey,
-} from "@shared/enums/warning";
 import { GlobalValidationsSettingsRow } from "./GlobalValidationsSettingsRow";
-import { ISetting } from "@shared/types/settings";
-import { toast } from "react-toastify";
 
 const initialRulesState: Record<ValidationKey, boolean> = Object.keys(
   globalValidationsDict
@@ -87,7 +84,6 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
   });
 
   const {
-    status: settingsStatus,
     data: settings,
     error: settingsError,
     isFetching: settingsIsFetching,
@@ -95,7 +91,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
     queryKey: ["settings"],
     queryFn: async () => {
       const res = await api.settingGroupGet("validations");
-      return res.data.data?.settings;
+      return res.data.data?.settings ?? [];
     },
     enabled: api.isLoggedIn(),
   });
@@ -119,13 +115,17 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
 
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["settings"] });
-      toast.success("settings updated");
+      queryClient.invalidateQueries({ queryKey: ["entity"] });
+      queryClient.invalidateQueries({ queryKey: ["statement"] });
+      // toast.success("settings updated");
     },
   });
 
   const [tempIndexToRemove, setTempIndexToRemove] = useState<false | number>(
     false
   );
+
+  console.log("settings", settings);
 
   const initValidationRule = () => {
     updateEntityMutation.mutate({
@@ -169,26 +169,14 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
     });
   };
 
-  const [rules, setRules] =
-    useState<Record<ValidationKey, boolean>>(initialRulesState);
-
-  const settingsKeyValue = useMemo(
-    () =>
-      settings?.reduce((acc, setting) => {
-        acc[setting.id as ValidationKey] = setting.value as boolean;
-        return acc;
-      }, {} as Record<ValidationKey, boolean>),
-    [settings]
-  );
-
-  useEffect(() => {
-    if (settingsKeyValue) {
-      setRules(settingsKeyValue);
-    }
-  }, [JSON.stringify(settingsKeyValue)]);
+  const settingsKeyVal = (key: ValidationKey) => {
+    return settings?.find((setting) => setting.id === key)?.value as boolean;
+  };
 
   const toggleRule = (key: ValidationKey) => {
-    setRules((prev) => ({ ...prev, [key]: !prev[key] }));
+    const oldValue = settingsKeyVal(key);
+    updateSettingsMutation.mutate([{ id: key, value: !oldValue }]);
+    // setRules((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   // useEffect(() => {
@@ -211,7 +199,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
           onClose={() => setShowGlobalValidations(false)}
         />
         <ModalContent column enableScroll>
-          {/* <StyledGridForm>
+          <StyledGridForm>
             <StyledGridSectionHeading>
               Valency validations
             </StyledGridSectionHeading>
@@ -220,7 +208,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
               <GlobalValidationsSettingsRow
                 key={key}
                 validation={val}
-                active={rules[val]}
+                active={settingsKeyVal(val)}
                 toggleRule={() => toggleRule(val)}
               />
             ))}
@@ -233,7 +221,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
               <GlobalValidationsSettingsRow
                 key={key}
                 validation={val}
-                active={rules[val]}
+                active={settingsKeyVal(val)}
                 toggleRule={() => toggleRule(val)}
               />
             ))}
@@ -246,11 +234,11 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
               <GlobalValidationsSettingsRow
                 key={key}
                 validation={val}
-                active={rules[val]}
+                active={settingsKeyVal(val)}
                 toggleRule={() => toggleRule(val)}
               />
             ))}
-          </StyledGridForm> */}
+          </StyledGridForm>
 
           {rootTerritory && (
             <>

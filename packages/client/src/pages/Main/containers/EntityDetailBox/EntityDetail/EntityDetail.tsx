@@ -30,10 +30,11 @@ import {
   JSONExplorer,
 } from "components/advanced";
 import { CMetaProp, DProps } from "constructors";
-import { useDebounce, useSearchParams } from "hooks";
+import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
-import { FaPlus } from "react-icons/fa";
+import { FaPlus, FaChevronCircleDown, FaChevronCircleUp } from "react-icons/fa";
 import { toast } from "react-toastify";
+import { useAppSelector } from "redux/hooks";
 import {
   DraggedPropRowCategory,
   DropdownItem,
@@ -60,18 +61,17 @@ import {
   StyledPropGroupWrap,
   StyledUsedAsHeading,
   StyledUsedAsTitle,
+  StyledExpandIcon,
 } from "./EntityDetailStyles";
 import { EntityDetailClassificationTable } from "./EntityDetailUsedInTable/EntityDetailClassificationTable/EntityDetailClassificationTable";
 import { EntityDetailIdentificationTable } from "./EntityDetailUsedInTable/EntityDetailIdentificationTable/EntityDetailIdentificationTable";
 import { EntityDetailMetaPropsTable } from "./EntityDetailUsedInTable/EntityDetailMetaPropsTable/EntityDetailMetaPropsTable";
 import { EntityDetailStatementPropsTable } from "./EntityDetailUsedInTable/EntityDetailStatementPropsTable/EntityDetailStatementPropsTable";
 import { EntityDetailStatementsTable } from "./EntityDetailUsedInTable/EntityDetailStatementsTable/EntityDetailStatementsTable";
+import { EntityDetailUsedInDocumentsTable } from "./EntityDetailUsedInTable/EntityDetailUsedInDocumentsTable/EntityDetailUsedInDocumentsTable";
 import { EntityDetailValency } from "./EntityDetailValency/EntityDetailValency";
 import { EntityDetailValidationSection } from "./EntityDetailValidationSection/EntityDetailValidationSection";
-import { EntityDetailUsedInDocumentsTable } from "./EntityDetailUsedInTable/EntityDetailUsedInDocumentsTable/EntityDetailUsedInDocumentsTable";
-import { useSelector } from "react-redux";
-import { selectPanelWidth } from "redux/features/layout/mainPage/panelWidthsSlice";
-import { useAppSelector } from "redux/hooks";
+import { rootTerritoryId } from "Theme/constants";
 
 const allowedEntityChangeClasses = [
   EntityEnums.Class.Value,
@@ -170,7 +170,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
           class: entity?.class,
         });
 
-        const templates = res.data;
+        const templates = res.data ?? [];
         templates.sort((a: IEntity, b: IEntity) =>
           a.labels[0].toLocaleLowerCase() > b.labels[0].toLocaleLowerCase()
             ? 1
@@ -613,6 +613,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({
   const [showBatchRemovePropSubmit, setShowBatchRemovePropSubmit] =
     useState(false);
   const [loadingValidations, setLoadingValidations] = useState(false);
+  const [isProtocolExpanded, setIsProtocolExpanded] = useState(false);
+  const [isValidationExpanded, setIsValidationExpanded] = useState(false);
 
   const [
     showValidationsBatchRemoveSubmit,
@@ -632,7 +634,14 @@ export const EntityDetail: React.FC<EntityDetail> = ({
   const contentWidth = useAppSelector(
     (state) => state.layout.mainPage.secondPanelRealWidth
   );
-  const widthTooSmall = contentWidth < 516;
+  const widthTooNarrow = contentWidth < 516;
+
+  const isRootTerritory = selectedDetailId === rootTerritoryId;
+  const isOwner =
+    (localStorage.getItem("userrole") as UserEnums.Role) ===
+    UserEnums.Role.Owner;
+  const disableAttributesForNonOwnersInRoot = isRootTerritory && !isOwner;
+  const canEditEntity = userCanEdit && !disableAttributesForNonOwnersInRoot;
 
   return (
     <>
@@ -646,7 +655,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
           <>
             <EntityDetailHeaderRow
               entity={entity}
-              userCanEdit={userCanEdit}
+              userCanEdit={canEditEntity}
               mayBeRemoved={mayBeRemoved}
               setShowRemoveSubmit={setShowRemoveSubmit}
               setCreateTemplateModal={setCreateTemplateModal}
@@ -670,7 +679,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                   </StyledDetailWarnings>
                   <EntityDetailFormSection
                     entity={entity}
-                    userCanEdit={userCanEdit}
+                    userCanEdit={canEditEntity}
                     userCanAdmin={userCanAdmin}
                     actantMode={actantMode}
                     isStatementWithTerritory={isStatementWithTerritory}
@@ -682,7 +691,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                     setShowTypeSubmit={setShowTypeSubmit}
                     templateOptions={templateOptions}
                     updateEntityMutation={updateEntityMutation}
-                    widthTooSmall={widthTooSmall}
+                    widthTooNarrow={widthTooNarrow}
                   />
                 </StyledDetailSectionContent>
               </StyledDetailSection>
@@ -691,16 +700,29 @@ export const EntityDetail: React.FC<EntityDetail> = ({
               {entity.class === EntityEnums.Class.Territory && (
                 <StyledDetailSection>
                   <StyledDetailSectionHeader>
-                    Protocol
+                    <StyledDetailSectionHeading>
+                      Protocol
+                    </StyledDetailSectionHeading>
+                    <StyledExpandIcon
+                      onClick={() => setIsProtocolExpanded(!isProtocolExpanded)}
+                    >
+                      {isProtocolExpanded ? (
+                        <FaChevronCircleUp size={16} />
+                      ) : (
+                        <FaChevronCircleDown size={16} />
+                      )}
+                    </StyledExpandIcon>
                   </StyledDetailSectionHeader>
-                  <StyledDetailSectionContent>
-                    <EntityDetailProtocol
-                      territory={entity}
-                      updateEntityMutation={updateEntityMutation}
-                      isInsideTemplate={isInsideTemplate}
-                      userCanEdit={userCanEdit}
-                    />
-                  </StyledDetailSectionContent>
+                  {isProtocolExpanded && (
+                    <StyledDetailSectionContent>
+                      <EntityDetailProtocol
+                        territory={entity}
+                        updateEntityMutation={updateEntityMutation}
+                        isInsideTemplate={isInsideTemplate}
+                        userCanEdit={canEditEntity}
+                      />
+                    </StyledDetailSectionContent>
+                  )}
                 </StyledDetailSection>
               )}
 
@@ -708,6 +730,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({
               {entity.class === EntityEnums.Class.Territory && (
                 <StyledDetailSection>
                   <EntityDetailValidationSection
+                    isValidationExpanded={isValidationExpanded}
+                    setIsValidationExpanded={setIsValidationExpanded}
                     validations={
                       entity.data.validations as
                         | ITerritoryValidation[]
@@ -715,12 +739,12 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                     }
                     entities={entity.entities}
                     updateEntityMutation={updateEntityMutation}
-                    userCanEdit={userCanEdit}
+                    userCanEdit={canEditEntity}
                     isInsideTemplate={isInsideTemplate}
                     territoryParentId={getTerritoryId(entity)}
                     entity={entity}
                     setLoadingValidations={setLoadingValidations}
-                    widthTooSmall={widthTooSmall}
+                    widthTooNarrow={widthTooNarrow}
                   />
                 </StyledDetailSection>
               )}
@@ -744,7 +768,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                   <StyledDetailSectionContent>
                     <EntityDetailValency
                       entity={entity}
-                      userCanEdit={userCanEdit}
+                      userCanEdit={canEditEntity}
                       updateEntityMutation={updateEntityMutation}
                       relationCreateMutation={relationCreateMutation}
                       relationUpdateMutation={relationUpdateMutation}
@@ -775,7 +799,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                     relationCreateMutation={relationCreateMutation}
                     relationUpdateMutation={relationUpdateMutation}
                     relationDeleteMutation={relationDeleteMutation}
-                    userCanEdit={userCanEdit}
+                    userCanEdit={canEditEntity}
                   />
                 </StyledDetailSectionContent>
               </StyledDetailSection>
@@ -786,7 +810,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                   <StyledDetailSectionHeading>
                     Metaproperties
                   </StyledDetailSectionHeading>
-                  {userCanEdit && (
+                  {canEditEntity && (
                     <EntityDetailSectionButtons
                       entityId={entity.id}
                       setShowSubmit={setShowBatchRemovePropSubmit}
@@ -834,7 +858,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                           props: [...entity.props, newProp],
                         });
                       }}
-                      userCanEdit={userCanEdit}
+                      userCanEdit={canEditEntity}
                       movePropToIndex={(propId, oldIndex, newIndex) => {
                         movePropToIndex(propId, oldIndex, newIndex);
                       }}
@@ -852,7 +876,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                       alwaysShowCreateModal
                     />
                   </StyledPropGroupWrap>
-                  {userCanEdit && (
+                  {canEditEntity && (
                     <Button
                       color="primary"
                       label="new metaproperty"
@@ -875,7 +899,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                 </StyledDetailSectionHeader>
                 <StyledDetailSectionContent>
                   <EntityReferenceTable
-                    disabled={!userCanEdit}
+                    disabled={!canEditEntity}
                     references={entity.references ?? []}
                     entities={entity.entities}
                     entityId={entity.id}
@@ -883,7 +907,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                       updateEntityMutation.mutate({ references: newValues });
                     }}
                     isInsideTemplate={isInsideTemplate}
-                    userCanEdit={userCanEdit}
+                    userCanEdit={canEditEntity}
                     alwaysShowCreateModal
                   />
                 </StyledDetailSectionContent>
@@ -990,7 +1014,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                     }}
                     perPage={10}
                     entity={entity}
-                    widthTooSmall={widthTooSmall}
+                    widthTooNarrow={widthTooNarrow}
                   />
                 )}
               </StyledDetailSection>
@@ -1079,7 +1103,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
           setCreateTemplateModal={setCreateTemplateModal}
           entity={entity}
           showModal={createTemplateModal}
-          userCanEdit={userCanEdit}
+          userCanEdit={canEditEntity}
           updateEntityMutation={updateEntityMutation}
         />
       )}

@@ -2,7 +2,7 @@ import morgan from "morgan";
 import helmet from "helmet";
 import express, { NextFunction, Router } from "express";
 import cors from "cors";
-import { apiPath } from "@common/constants";
+import { apiPath, apiPathOld } from "@common/constants";
 import EntitiesRouter from "@modules/entities";
 import AuditsRouter from "@modules/audits";
 import RelationsRouter from "@modules/relations";
@@ -19,6 +19,7 @@ import Acl from "@middlewares/acl";
 import customizeRequest from "@middlewares/request";
 import dbMiddleware from "@middlewares/db";
 import profilerMiddleware from "@middlewares/profiler";
+import headersProtectionMiddleware from "@middlewares/headers-protection";
 import errorsMiddleware, { catchAll } from "@middlewares/errors";
 import { validateJwt } from "@common/auth";
 import compression from "compression";
@@ -100,6 +101,7 @@ if (!!process.env.STATIC_PATH) {
 
 server.use(express.json({ limit: "150mb" }));
 server.use(express.urlencoded({ extended: true, limit: "150mb" }));
+server.use(timeout("20s"));
 
 // Show routes called in console during development
 if (process.env.NODE_ENV === "development") {
@@ -111,28 +113,52 @@ if (process.env.NODE_ENV === "production") {
   server.use(helmet());
 }
 
-// Rate limited for signin
+// Rate limited for signin (disabled in development)
+if (process.env.NODE_ENV !== "development") {
+  server.use(
+    `${apiPath}/users/signin`,
+    rateLimit({
+      windowMs: 5 * 60 * 1000, // 5 minutes window
+      max: 5, // Limit each IP to 5 requests per windowMs
+      handler: (req: Request, res: Response, next: NextFunction, options) => {
+        throw new TooManyRequestsError(
+          `${TooManyRequestsError.title}: try again in 5 minutes`
+        );
+      },
+      standardHeaders: true,
+      legacyHeaders: false,
+    })
+  );
+}
+
+
+server.use(headersProtectionMiddleware);
+server.use(profilerMiddleware);
+server.use(apiPath, dbMiddleware);
+
+// uncomment this to enable auth
 server.use(
-  `${apiPath}/users/signin`,
-  rateLimit({
-    windowMs: 5 * 60 * 1000, // 5 minutes window
-    max: 5, // Limit each IP to 5 requests per windowMs
-    handler: (req: Request, res: Response, next: NextFunction, options) => {
-      throw new TooManyRequestsError(
-        `${TooManyRequestsError.title}: try again in 5 minutes`
-      );
-    },
-    standardHeaders: true,
-    legacyHeaders: false,
+  validateJwt().unless({
+    path: [
+      /api(\/[^\/]+)?\/users\/password_reset/,
+      /api(\/[^\/]+)?\/users\/signin/,
+      /api(\/[^\/]+)?\/users\/activation/,
+      /api(\/[^\/]+)?\/users\/password/,
+      /api(\/[^\/]+)?\/users\/owner/,
+      /api(\/[^\/]+)?\/pythondata/,
+      /api(\/[^\/]+)?\/health/,
+    ],
   })
 );
+server.use(customizeRequest);
 
-server.use(timeout("30s"));
-server.use(profilerMiddleware);
-server.use(dbMiddleware);
+// Routing
+const router = Router();
+server.use(apiPath, router);
+server.use(apiPathOld, router); // DEPRECATED , legacy reasons
 
 // Health route
-server.get("/api/health", async function (req, res) {
+router.get("/health", async function (req, res) {
   await rethink.tableList().run(req.db.connection);
   res.json({
     result: true,
@@ -148,43 +174,22 @@ server.get("/api/health", async function (req, res) {
   });
 });
 
-// uncomment this to enable auth
-server.use(
-  validateJwt().unless({
-    path: [
-      /api\/v1\/users\/password_reset/,
-      /api\/v1\/users\/signin/,
-      /api\/v1\/users\/activation/,
-      /api\/v1\/users\/password/,
-      /api\/v1\/users\/owner/,
-      /api\/v1\/pythondata/,
-    ],
-  })
-);
-server.use(customizeRequest);
-
-// Routing
-const routerV1 = Router();
-
-server.use(apiPath, routerV1);
-
 // uncomment this to enable acl
-const acl = new Acl();
-routerV1.use(acl.authorize);
+ const acl = new Acl();
+ router.use(acl.authorize);
 
-//routerV1.use('/statements', StatementRouter);
-routerV1.use("/acls", AclRouter);
-routerV1.use("/users", UsersRouter);
-routerV1.use("/entities", EntitiesRouter);
-routerV1.use("/audits", AuditsRouter);
-routerV1.use("/relations", RelationsRouter);
-routerV1.use("/territories", TerritoriesRouter);
-routerV1.use("/statements", StatementsRouter);
-routerV1.use("/tree", TreeRouter);
-routerV1.use("/stats", StatsRouter);
-routerV1.use("/documents", DocumentsRouter);
-routerV1.use("/pythondata", PythonApiRouter);
-routerV1.use("/settings", SettingsRouter);
+router.use("/acls", AclRouter);
+router.use("/users", UsersRouter);
+router.use("/entities", EntitiesRouter);
+router.use("/audits", AuditsRouter);
+router.use("/relations", RelationsRouter);
+router.use("/territories", TerritoriesRouter);
+router.use("/statements", StatementsRouter);
+router.use("/tree", TreeRouter);
+router.use("/stats", StatsRouter);
+router.use("/documents", DocumentsRouter);
+router.use("/pythondata", PythonApiRouter);
+router.use("/settings", SettingsRouter);
 
 // unknown paths (after jwt check) should return 404
 server.all("*", catchAll);
@@ -192,6 +197,6 @@ server.all("*", catchAll);
 // Errors
 server.use(errorsMiddleware);
 
-acl.assignRoutes(routerV1);
+acl.assignRoutes(router);
 
 export default server;

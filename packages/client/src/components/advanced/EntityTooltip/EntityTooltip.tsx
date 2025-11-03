@@ -39,11 +39,13 @@ import {
   StyledIconWrap,
   StyledLabel,
   StyledLetterIconWrap,
+  StyledMoreText,
   StyledRelationTypeBlock,
   StyledRelations,
   StyledRow,
 } from "./EntityTooltipStyles";
 import { DocumentTitle } from "..";
+import { RiNodeTree } from "react-icons/ri";
 
 interface EntityTooltip {
   // entity
@@ -66,7 +68,7 @@ interface EntityTooltip {
   tagHovered: boolean;
 
   referenceElement: HTMLDivElement | null;
-  customTooltipAttributes?: { partLabel?: string };
+  customTooltipAttributes?: { partLabel?: string; childCount?: number };
   isTemplate?: boolean;
 }
 
@@ -116,7 +118,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
     queryKey: ["tooltip", entityId, allowFetch],
     queryFn: async () => {
       const res = await api.tooltipGet(entityId);
-      setTooltipData(res.data);
+      setTooltipData(res.data ?? false);
       return res.data;
     },
     enabled: api.isLoggedIn() && !!entityId && allowFetch,
@@ -185,10 +187,20 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                 <StyledDetail>{itemsCount}</StyledDetail>
               </StyledRow>
             )}
+            {(customTooltipAttributes?.childCount ?? 0) > 0 && (
+              <StyledRow>
+                <StyledIconWrap>
+                  <RiNodeTree size={12} />
+                </StyledIconWrap>
+                <StyledDetail>
+                  {customTooltipAttributes?.childCount}
+                </StyledDetail>
+              </StyledRow>
+            )}
             {alternativeLabels && alternativeLabels.length > 0 && (
               <StyledRow>
                 <StyledIconWrap>
-                  <AiOutlineTags size={12} />
+                  <AiOutlineTags size={11} />
                 </StyledIconWrap>
                 <StyledDetail>
                   {alternativeLabels.map((altLabel, key) => {
@@ -208,7 +220,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                   <BsCardText />
                 </StyledIconWrap>
                 <StyledDetail>
-                  {anchors.map((documentAnchor, index) => {
+                  {anchors.slice(0, 8).map((documentAnchor, index) => {
                     return (
                       <StyledAnchorItem key={index}>
                         <DocumentTitle
@@ -221,6 +233,11 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                       </StyledAnchorItem>
                     );
                   })}
+                  {anchors.length > 8 && (
+                    <StyledMoreText>
+                      +{anchors.length - 8} more anchors
+                    </StyledMoreText>
+                  )}
                 </StyledDetail>
               </StyledRow>
             )}

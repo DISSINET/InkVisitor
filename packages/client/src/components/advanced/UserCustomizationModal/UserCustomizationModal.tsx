@@ -8,6 +8,8 @@ import api from "api";
 import {
   Button,
   ButtonGroup,
+  Checkbox,
+  IconWithTooltip,
   Input,
   Loader,
   Modal,
@@ -37,6 +39,7 @@ import {
   StyledUserRights,
 } from "./UserCustomizationModalStyles";
 import { UserRightItem } from "./UserRightItem/UserRightItem";
+import { FaQuestion } from "react-icons/fa";
 
 interface DataObject {
   name: string;
@@ -45,6 +48,7 @@ interface DataObject {
   defaultStatementLanguage: EntityEnums.Language;
   searchLanguages: EntityEnums.Language[];
   defaultTerritory?: string | null;
+  allowMaterializedStats: boolean;
 }
 interface UserCustomizationModal {
   user: IResponseUser;
@@ -80,6 +84,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
         options.defaultStatementLanguage ?? EntityEnums.Language.Empty,
       searchLanguages: options.searchLanguages,
       defaultTerritory: options.defaultTerritory,
+      allowMaterializedStats: options.allowMaterializedStats ?? false,
     };
   }, [user]);
 
@@ -136,7 +141,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
           defaultTerritory?.id !== data.defaultTerritory)
       ) {
         const res = await api.entityGet(data.defaultTerritory);
-        setDefaultTerritory(res.data);
+        setDefaultTerritory(res.data ?? null);
       }
     },
     enabled: !!data.defaultTerritory && api.isLoggedIn(),
@@ -167,6 +172,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
           defaultStatementLanguage: data.defaultStatementLanguage,
           searchLanguages: data.searchLanguages.map((sL) => sL),
           defaultTerritory: data.defaultTerritory || "",
+          allowMaterializedStats: data.allowMaterializedStats,
         },
       });
     }
@@ -455,6 +461,28 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                 </StyledRightsWrap>
               </StyledUserRightItem>
             </StyledUserRights>
+
+            <StyledRightsHeading>
+              <b>{"Statistics"}</b>
+            </StyledRightsHeading>
+            <ModalInputForm>
+              <ModalInputLabel>{"allow materialized data"}</ModalInputLabel>
+              <ModalInputWrap width={165}>
+                <div style={{ display: "flex", alignItems: "center" }}>
+                  <Checkbox
+                    value={data.allowMaterializedStats}
+                    onChangeFn={(value) =>
+                      handleChange("allowMaterializedStats", value)
+                    }
+                  />
+                  <IconWithTooltip
+                    color="success"
+                    icon={<FaQuestion />}
+                    tooltipLabel="Turns on the option that allows to choose between classic and pre-calculated (materialized) data. As opposed to classic data where the data are calculated on every load, materialized data are significantly faster to load and filter. Data are recalculated daily at midnight but it's also possible to run the data recalculation manually with the refresh button."
+                  />
+                </div>
+              </ModalInputWrap>
+            </ModalInputForm>
 
             <Loader show={passwordUpdateMutation.isPending} />
           </div>

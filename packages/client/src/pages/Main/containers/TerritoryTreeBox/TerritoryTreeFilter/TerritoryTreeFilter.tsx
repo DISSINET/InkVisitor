@@ -1,12 +1,11 @@
 import { UserEnums } from "@shared/enums";
 import { Checkbox, Input } from "components";
+import { AttributeButtonGroup } from "components/advanced";
 import { useTheme } from "hooks";
 import React from "react";
 import { FaSearch } from "react-icons/fa";
-import { MdCancel } from "react-icons/md";
 import { ITerritoryFilter } from "types";
 import {
-  StyledCancelButton,
   StyledFilterList,
   StyledFilterWrap,
   StyledInputWrap,
@@ -29,12 +28,26 @@ export const TerritoryTreeFilter: React.FC<TerritoryTreeFilter> = ({
 
   return (
     <StyledFilterWrap>
-      <StyledFilterList>
-        <Checkbox
-          label="non empty"
-          value={filterData.nonEmpty}
-          onChangeFn={(value: boolean) => handleFilterChange("nonEmpty", value)}
+      <div style={{ marginBottom: "0.3rem", padding: "0 0.5rem" }}>
+        <AttributeButtonGroup
+          fullWidth
+          options={[
+            {
+              longValue: "OR",
+              shortValue: "OR",
+              onClick: () => handleFilterChange("operator", "or"),
+              selected: filterData.operator === "or",
+            },
+            {
+              longValue: "AND",
+              shortValue: "AND",
+              onClick: () => handleFilterChange("operator", "and"),
+              selected: filterData.operator === "and",
+            },
+          ]}
         />
+      </div>
+      <StyledFilterList>
         <Checkbox
           label="starred"
           value={filterData.starred}
@@ -51,6 +64,21 @@ export const TerritoryTreeFilter: React.FC<TerritoryTreeFilter> = ({
               }
             />
           )}
+        <Checkbox
+          label="with subterritories"
+          value={filterData.withSubterritories}
+          onChangeFn={(value: boolean) =>
+            handleFilterChange("withSubterritories", value)
+          }
+          tooltipLabel="first-level Territories (directly under root) which have sub-Territories"
+        />
+        <Checkbox
+          label="with statements"
+          value={filterData.withStatements}
+          onChangeFn={(value: boolean) =>
+            handleFilterChange("withStatements", value)
+          }
+        />
         <StyledInputWrap>
           <FaSearch
             style={{ flexShrink: 0 }}
@@ -63,15 +91,8 @@ export const TerritoryTreeFilter: React.FC<TerritoryTreeFilter> = ({
             onChangeFn={(value: string) => handleFilterChange("filter", value)}
             changeOnType
             width="full"
+            clearable
           />
-          {filterData.filter.length > 0 && (
-            <StyledCancelButton>
-              <MdCancel
-                size={16}
-                onClick={() => handleFilterChange("filter", "")}
-              />
-            </StyledCancelButton>
-          )}
         </StyledInputWrap>
       </StyledFilterList>
     </StyledFilterWrap>

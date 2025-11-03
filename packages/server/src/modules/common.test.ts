@@ -77,6 +77,9 @@ export function getITerritoryMock(): ITerritory {
     props: [],
     class: EntityEnums.Class.Territory,
     references: [],
+    findChilds: async (db: any, isDeep?: boolean): Promise<Record<number | string, ITerritory>> => {
+      return {};
+    },
   };
 }
 

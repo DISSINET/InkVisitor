@@ -1,5 +1,5 @@
 import { EntityEnums, UserEnums } from "@shared/enums";
-import { IStatement } from "@shared/types";
+import { IResponseTree, IStatement } from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   COLLAPSED_PANEL_WIDTH,
@@ -31,9 +31,9 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { BiHide, BiRefresh, BiShow } from "react-icons/bi";
 import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
 import { FaHighlighter, FaList, FaPlus } from "react-icons/fa";
+import { FaDiagramNext } from "react-icons/fa6";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { VscCloseAll } from "react-icons/vsc";
-import { setDetailBoxMinimized } from "redux/features/layout/mainPage/detailBoxMinimizedSlice";
 import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
 import { setFirstPanelExpanded } from "redux/features/layout/mainPage/firstPanelExpandedSlice";
 import { setFourthPanelBoxesOpened } from "redux/features/layout/mainPage/fourthPanelBoxesOpenedSlice";
@@ -48,7 +48,7 @@ import { setDisableStatementListScroll } from "redux/features/statementList/disa
 import { setIsLoading } from "redux/features/statementList/isLoadingSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { DetailBoxState } from "types";
-import { floorNumberToOneDecimal } from "utils/utils";
+import { floorNumberToOneDecimal, searchTree } from "utils/utils";
 import { MemoizedEntityBookmarkBox } from "./containers/EntityBookmarkBox/EntityBookmarkBox";
 import { MemoizedEntityDetailBox } from "./containers/EntityDetailBox/EntityDetailBox";
 import { MemoizedEntitySearchBox } from "./containers/EntitySearchBox/EntitySearchBox";
@@ -69,6 +69,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
     selectedDetailId,
     appendDetailId,
     setStatementId,
+    setTerritoryId,
     annotatorOpened,
     setAnnotatorOpened,
   } = useSearchParams();
@@ -100,9 +101,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
   );
   const statementListOpened: boolean = useAppSelector(
     (state) => state.layout.mainPage.statementListOpened
-  );
-  const detailBoxMinimized: boolean = useAppSelector(
-    (state) => state.layout.mainPage.detailBoxMinimized
   );
   const detailBoxState: DetailBoxState = useAppSelector(
     (state) => state.layout.mainPage.detailBoxState
@@ -313,10 +311,8 @@ const MainPage: React.FC<MainPage> = ({}) => {
   } = useQuery({
     queryKey: ["user", userId],
     queryFn: async () => {
-      if (userId) {
-        const res = await api.usersGet(userId);
-        return res.data;
-      }
+      const res = await api.usersGet(userId as string);
+      return res.data ?? undefined;
     },
     enabled: !!userId && api.isLoggedIn(),
   });
@@ -361,18 +357,8 @@ const MainPage: React.FC<MainPage> = ({}) => {
           dispatch(setStatementListOpened(true));
         }
       }
-
-      if (detailBoxState === DetailBoxState.Minimized) {
-        if (!detailBoxMinimized) {
-          dispatch(setDetailBoxMinimized(true));
-        }
-      } else {
-        if (detailBoxMinimized) {
-          dispatch(setDetailBoxMinimized(false));
-        }
-      }
     }
-  }, [detailBoxState, statementListOpened, detailBoxMinimized, detailIdArray]);
+  }, [detailBoxState, statementListOpened, detailIdArray]);
 
   const handleMaximizeDetailBox = () => {
     if (detailBoxState === DetailBoxState.Normal) {
@@ -708,6 +694,47 @@ const MainPage: React.FC<MainPage> = ({}) => {
     }
   }, [layoutWidth]);
 
+  const treeData: IResponseTree | undefined = queryClient.getQueryData([
+    "tree",
+  ]);
+
+  const selectedTerritoryPath = useAppSelector(
+    (state) => state.territoryTree.selectedTerritoryPath
+  );
+
+  // Get sibling territories at the same level
+  const siblingTerritories = useMemo(() => {
+    const parentId = selectedTerritoryPath[selectedTerritoryPath.length - 1];
+    if (treeData) {
+      const parentTerritory = searchTree(treeData, parentId);
+      if (parentTerritory) {
+        return parentTerritory.children.map((child) => child.territory.id);
+      }
+    }
+    return [];
+  }, [selectedTerritoryPath, treeData]);
+
+  // Get previous and next territory IDs
+  const previousTerritoryId = useMemo(() => {
+    if (!territoryId || siblingTerritories.length === 0) return null;
+
+    const currentIndex = siblingTerritories.indexOf(territoryId);
+    if (currentIndex > 0) {
+      return siblingTerritories[currentIndex - 1];
+    }
+    return null;
+  }, [territoryId, siblingTerritories]);
+
+  const nextTerritoryId = useMemo(() => {
+    if (!territoryId || siblingTerritories.length === 0) return null;
+
+    const currentIndex = siblingTerritories.indexOf(territoryId);
+    if (currentIndex < siblingTerritories.length - 1) {
+      return siblingTerritories[currentIndex + 1];
+    }
+    return null;
+  }, [territoryId, siblingTerritories]);
+
   return (
     <>
       <ScrollHandler />
@@ -804,29 +831,61 @@ const MainPage: React.FC<MainPage> = ({}) => {
           height={getStatementListBoxHeight()}
           buttons={[
             <>
-              <ButtonGroup
-                style={{ marginLeft: "0.5rem", marginRight: "0.5rem" }}
-              >
-                <Button
-                  color="success"
-                  icon={<FaList />}
-                  // label={`list (${territory.statements.length})`}
-                  label={`list`}
-                  onClick={() => {
-                    setAnnotatorOpened(false);
-                  }}
-                  inverted={!!annotatorOpened}
-                ></Button>
-                <Button
-                  color="success"
-                  icon={<FaHighlighter />}
-                  label="annotator"
-                  onClick={() => {
-                    setAnnotatorOpened(true);
-                  }}
-                  inverted={!annotatorOpened}
-                ></Button>
-              </ButtonGroup>
+              {territoryId && (
+                <ButtonGroup style={{ marginRight: "0.5rem" }}>
+                  <Button
+                    color="info"
+                    icon={
+                      <FaDiagramNext style={{ transform: "rotate(180deg)" }} />
+                    }
+                    tooltipLabel="go to previous territory"
+                    onClick={() => {
+                      if (previousTerritoryId) {
+                        setTerritoryId(previousTerritoryId);
+                      }
+                    }}
+                    disabled={!previousTerritoryId}
+                  />
+                  <Button
+                    color="info"
+                    icon={<FaDiagramNext />}
+                    tooltipLabel="go to next territory"
+                    onClick={() => {
+                      if (nextTerritoryId) {
+                        setTerritoryId(nextTerritoryId);
+                      }
+                    }}
+                    disabled={!nextTerritoryId}
+                  />
+                </ButtonGroup>
+              )}
+              {territoryId && (
+                <ButtonGroup
+                  style={{ marginLeft: "0.5rem", marginRight: "0.5rem" }}
+                >
+                  <Button
+                    color="success"
+                    icon={<FaList />}
+                    // label={`list (${territory.statements.length})`}
+                    label={`list`}
+                    onClick={() => {
+                      setAnnotatorOpened(false);
+                      dispatch(setDetailBoxState(DetailBoxState.Normal));
+                    }}
+                    inverted={!!annotatorOpened}
+                  ></Button>
+                  <Button
+                    color="success"
+                    icon={<FaHighlighter />}
+                    label="annotator"
+                    onClick={() => {
+                      setAnnotatorOpened(true);
+                      dispatch(setDetailBoxState(DetailBoxState.Normal));
+                    }}
+                    inverted={!annotatorOpened}
+                  ></Button>
+                </ButtonGroup>
+              )}
               {/* Admin / Owner / Editor with writer rights */}
               {hasWriteRightsToSelectedTerritory && territoryId && (
                 <ButtonGroup

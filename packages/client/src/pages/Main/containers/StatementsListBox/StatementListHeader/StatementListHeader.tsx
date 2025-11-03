@@ -105,16 +105,6 @@ interface StatementListHeader {
     },
     unknown
   >;
-  duplicateTerritoryMutation: UseMutationResult<
-    AxiosResponse<IResponseGeneric<any>, any>,
-    Error,
-    {
-      territoryId: string;
-      targets: string[];
-      withChildren: boolean;
-    },
-    unknown
-  >;
   deleteStatementsMutation: UseMutationResult<
     (EntitiesDeleteSuccessResponse | EntitiesDeleteErrorResponse)[],
     Error,
@@ -133,7 +123,7 @@ interface StatementListHeader {
     isAnchored?: boolean;
   })[];
   favoritedTerritoryIds: string[];
-  contentWidthTooSmall: boolean;
+  contentWidthTooNarrow: boolean;
 }
 export const StatementListHeader: React.FC<StatementListHeader> = ({
   territory,
@@ -149,14 +139,13 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   appendReferencesMutation,
 
   updateTerritoryMutation,
-  duplicateTerritoryMutation,
 
   deleteStatementsMutation,
   relationsCreateMutation,
   autoOrderStatementsMutation,
   statementsWithOrder,
   favoritedTerritoryIds,
-  contentWidthTooSmall,
+  contentWidthTooNarrow,
 }) => {
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
@@ -185,7 +174,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
     {
       value: BatchOption.delete_S,
       label: `delete`,
-      info: "",
+      info: undefined,
     },
     {
       value: BatchOption.replace_R,
@@ -276,10 +265,8 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   } = useQuery({
     queryKey: ["user", userId],
     queryFn: async () => {
-      if (userId) {
-        const res = await api.usersGet(userId);
-        return res.data;
-      }
+      const res = await api.usersGet(userId as string);
+      return res.data ?? undefined;
     },
     enabled: !!userId && api.isLoggedIn(),
   });
@@ -314,7 +301,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
     }
   }, [treeData, territoryId]);
 
-  const selectedTerritoryPath = useAppSelector(
+  const selectedTerritoryPath: string[] = useAppSelector(
     (state) => state.territoryTree.selectedTerritoryPath
   );
 
@@ -380,13 +367,12 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
             ?.concat(territoryId)
             .map((tId: string, key: number) => {
               return (
-                <React.Fragment key={key}>
-                  <BreadcrumbItem
-                    territoryId={tId}
-                    isFavorited={favoritedTerritoryIds?.includes(tId)}
-                    isSelected={tId === territoryId}
-                  />
-                </React.Fragment>
+                <BreadcrumbItem
+                  key={key}
+                  territoryId={tId}
+                  isFavorited={favoritedTerritoryIds?.includes(tId)}
+                  isSelected={tId === territoryId}
+                />
               );
             })}
       </React.Fragment>
@@ -401,6 +387,10 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   const hasAnchoredStatementsOutOfOrder = statementsWithOrder.some(
     (s) => s.isAnchored && s.orderCorrection && s.orderCorrection.distance > 0
   );
+
+  const oldParentTerritory = territory?.data.parent
+    ? territory?.entities[territory.data.parent.territoryId]
+    : undefined;
 
   return (
     <>
@@ -509,7 +499,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                   disableTemplatesAccept
                   filterEditorRights
                   inputWidth={
-                    selectedRows.length > 0 && contentWidthTooSmall ? 36 : 80
+                    selectedRows.length > 0 && contentWidthTooNarrow ? 36 : 80
                   }
                   disableCreate
                   categoryTypes={[EntityEnums.Class.Territory]}
@@ -522,7 +512,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                     <Button
                       icon={<TbHomeMove size={14} />}
                       onClick={() => setShowTActionModal(true)}
-                      tooltipLabel="move or duplicate current territory"
+                      tooltipLabel="move current territory"
                     />
                   }
                 />
@@ -532,16 +522,17 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
         )}
       </StyledHeader>
 
-      {showTActionModal && (
+      {oldParentTerritory && showTActionModal && territory && (
         <TerritoryActionModal
+          territory={territory}
+          oldParentTerritory={oldParentTerritory}
           onClose={() => setShowTActionModal(false)}
           selectedParentEntity={moveToParentEntity}
           setMoveToParentEntity={setMoveToParentEntity}
           showModal={showTActionModal}
-          territory={territory}
           updateTerritoryMutation={updateTerritoryMutation}
           excludedMoveTerritories={excludedMoveTerritories}
-          duplicateTerritoryMutation={duplicateTerritoryMutation}
+          // duplicateTerritoryMutation={duplicateTerritoryMutation}
           isFetchingTerritory={isFetchingTerritory}
         />
       )}

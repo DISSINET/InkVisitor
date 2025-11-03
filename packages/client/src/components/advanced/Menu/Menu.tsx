@@ -9,6 +9,7 @@ import {
   FaBookOpen,
   FaInfo,
   FaSearchengin,
+  FaRegChartBar,
   FaUsers,
 } from "react-icons/fa";
 import { useLocation, useNavigate } from "react-router";
@@ -81,6 +82,14 @@ export const Menu: React.FC<Menu> = ({
       icon: <FaSearchengin />,
     },
     {
+      id: "stats",
+      label: "Statistics",
+      color: "info",
+      href: "/stats",
+      admin: true,
+      icon: <FaRegChartBar size={18} />,
+    },
+    {
       id: "customize",
       label: "Customize",
       color: "info",
@@ -108,7 +117,13 @@ export const Menu: React.FC<Menu> = ({
     >
       <Button
         icon={
-          <animated.div style={rotateMenuIcon}>
+          <animated.div
+            style={{
+              ...rotateMenuIcon,
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
             <FaBars size={14} />
           </animated.div>
         }

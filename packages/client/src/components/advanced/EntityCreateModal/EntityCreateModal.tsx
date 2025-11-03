@@ -43,6 +43,13 @@ import { StyledNote } from "./EntityCreateModalStyles";
 const defaultDropdownValue = "empty";
 interface EntityCreateModal {
   closeModal: () => void;
+  // not obligatory, only for specific creation like from annotator where calculation of order is needed
+  onCreateStatement?: (entityCreateModalProps?: {
+    label: string;
+    detail: string;
+    territoryId: string;
+    language: EntityEnums.Language;
+  }) => void;
   onMutationSuccess?: (entity: IEntity) => void;
 
   labelTyped?: string;
@@ -50,16 +57,19 @@ interface EntityCreateModal {
   languageSelected?: EntityEnums.Language;
   // init for create T / S
   parentTerritory?: IEntity;
+  entityCreateStatementOrder?: number;
 
   allowedEntityClasses?: EntityEnums.Class[];
 }
 export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   closeModal,
+  onCreateStatement = undefined,
   onMutationSuccess = () => {},
   labelTyped = "",
   categorySelected,
   languageSelected,
   parentTerritory,
+  entityCreateStatementOrder,
   allowedEntityClasses,
 }) => {
   const entityClasses = allowedEntityClasses
@@ -100,10 +110,8 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   } = useQuery({
     queryKey: ["user", userId],
     queryFn: async () => {
-      if (userId) {
-        const res = await api.usersGet(userId);
-        return res.data;
-      }
+      const res = await api.usersGet(userId as string);
+      return res.data ?? undefined;
     },
     enabled: !!userId && api.isLoggedIn(),
   });
@@ -173,18 +181,29 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
         newCreated.entityClass === EntityEnums.Class.Statement &&
         newCreated.territoryId
       ) {
-        const newStatement = CStatement(
-          userRole,
-          {
-            ...user.options,
-            defaultLanguage:
-              newCreated.language || user.options.defaultLanguage,
-          },
-          newCreated.label,
-          newCreated.detail,
-          newCreated.territoryId
-        );
-        entityCreateMutation.mutate(newStatement);
+        if (onCreateStatement) {
+          onCreateStatement({
+            label: newCreated.label,
+            detail: newCreated.detail || "",
+            territoryId: newCreated.territoryId,
+            language: newCreated.language || user.options.defaultLanguage,
+          });
+        } else {
+          const newStatement = CStatement(
+            userRole,
+            {
+              ...user.options,
+              defaultLanguage:
+                newCreated.language || user.options.defaultLanguage,
+            },
+            newCreated.label,
+            newCreated.detail,
+            newCreated.territoryId,
+            undefined,
+            entityCreateStatementOrder ?? EntityEnums.Order.Last
+          );
+          entityCreateMutation.mutate(newStatement);
+        }
       } else if (newCreated.entityClass === EntityEnums.Class.Territory) {
         const newTerritory = CTerritory(
           userRole,
@@ -245,12 +264,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
     }
   };
 
-  const {
-    status: templateStatus,
-    data: templates,
-    error: templateError,
-    isFetching: isFetchingTemplates,
-  } = useQuery({
+  const { data: templates } = useQuery({
     queryKey: ["entity-templates", "templates", selectedCategory],
     queryFn: async () => {
       if (selectedCategory) {
@@ -259,7 +273,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
           class: selectedCategory,
         });
 
-        const templates = res.data;
+        const templates = res.data ?? [];
         templates.sort((a: IEntity, b: IEntity) =>
           a.labels[0].toLocaleLowerCase() > b.labels[0].toLocaleLowerCase()
             ? 1

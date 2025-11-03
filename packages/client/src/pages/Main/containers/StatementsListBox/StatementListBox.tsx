@@ -6,16 +6,19 @@ import {
   IReference,
   IResponseEntity,
   IResponseStatement,
+  IResponseTerritory,
+  IResponseTree,
   IStatement,
+  IStatementDataTerritory,
   ITerritory,
   Relation,
 } from "@shared/types";
-import { IAnchorsNode } from "@shared/types/document";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { CustomScrollbar, Loader, Submit, ToastWithLink } from "components";
 import { CStatement } from "constructors";
-import { useResizeObserver, useSearchParams, useDebounce } from "hooks";
+import { useResizeObserver, useSearchParams } from "hooks";
+import useAnnotator from "hooks/useAnnotator";
 import React, { useEffect, useMemo, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { toast } from "react-toastify";
@@ -24,21 +27,29 @@ import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlic
 import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { COLLAPSED_TABLE_WIDTH, SECOND_PANEL_MIN_WIDTH } from "Theme/constants";
 import {
-  COLLAPSED_PANEL_WIDTH,
-  COLLAPSED_TABLE_WIDTH,
-  SECOND_PANEL_MIN_WIDTH,
-} from "Theme/constants";
-import {
+  DetailBoxState,
   EntitiesDeleteSuccessResponse,
   StatementListDisplayMode,
   StatementOrderCorrection,
 } from "types";
+import {
+  collectStatementAnchors,
+  getStatementOrderByIndex,
+  searchTree,
+} from "utils/utils";
+import {
+  StyledContentWrapper,
+  StyledEmptyState,
+  StyledInfoWrapper,
+  StyledLoaderWrap,
+  StyledStatementListBox,
+  StyledTableWrapper,
+} from "./StatementListBoxStyles";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StatementListTextAnnotator } from "./StatementListTextAnnotator/StatementListTextAnnotator";
-import useAnnotator from "hooks/useAnnotator";
-import { StyledEmptyState, StyledTableWrapper } from "./StatementListBoxStyles";
 
 const initialData: {
   statements: IResponseStatement[];
@@ -52,6 +63,7 @@ const initialData: {
 
 export const StatementListBox: React.FC = () => {
   const queryClient = useQueryClient();
+  const statementListBoxRef = React.useRef<HTMLDivElement>(null);
 
   const dispatch = useAppDispatch();
   const rowsExpanded: string[] = useAppSelector(
@@ -85,6 +97,7 @@ export const StatementListBox: React.FC = () => {
     setTerritoryId,
     statementId,
     setStatementId,
+    selectedDetailId,
     detailIdArray,
     removeDetailId,
     appendDetailId,
@@ -128,6 +141,18 @@ export const StatementListBox: React.FC = () => {
     enabled: !!territoryId && api.isLoggedIn() && statementListOpened,
   });
 
+  // Debug logging for territory query
+  // console.log("Territory query debug:", {
+  //   territoryId,
+  //   statementListOpened,
+  //   isLoggedIn: api.isLoggedIn(),
+  //   queryEnabled: !!territoryId && api.isLoggedIn() && statementListOpened,
+  //   status,
+  //   territory,
+  //   error,
+  //   isFetchingTerritory,
+  // });
+
   const { statements, entities, right } = territory || initialData;
 
   useEffect(() => {
@@ -146,8 +171,9 @@ export const StatementListBox: React.FC = () => {
     queryFn: async () => {
       if (userId) {
         const res = await api.usersGet(userId);
-        return res.data;
+        return res.data ?? undefined;
       }
+      return undefined;
     },
     enabled: api.isLoggedIn() && !!userId,
   });
@@ -166,6 +192,173 @@ export const StatementListBox: React.FC = () => {
       setTerritoryId("");
     }
   }, [error]);
+
+  const [storedAnnotatorResourceId, setStoredAnnotatorResourceId] = useState<
+    string | false
+  >(false);
+  // const [storedAnnotatorScroll, setStoredAnnotatorScroll] = useState<number>(0);
+
+  // so the annotator jumps to the anchor
+  useEffect(() => {
+    setStoredAnnotatorResourceId(false);
+    // setStoredAnnotatorScroll(0);
+  }, [territoryId]);
+
+  // its needed as the scroll event is executed even when the annotator is not active
+  // useEffect(() => {
+  // if (!storedAnnotatorResourceId) {
+  // setStoredAnnotatorScroll(0);
+  // }
+  // }, [storedAnnotatorResourceId]);
+
+  // delay of show content for fluent animation on open
+  const [showStatementList, setShowStatementList] = useState(true);
+
+  useEffect(() => {
+    if (statementListOpened) {
+      setTimeout(() => {
+        setShowStatementList(true);
+      }, 500);
+    } else {
+      setShowStatementList(false);
+    }
+  }, [statementListOpened]);
+
+  const [annotator, setAnnotator] = useState<Annotator | undefined>(undefined);
+
+  const { setAnnotator: useAnnotatorSetAnnotator } = useAnnotator();
+
+  useEffect(() => {
+    if (annotator) {
+      useAnnotatorSetAnnotator(annotator);
+    }
+  }, [annotator, useAnnotatorSetAnnotator]);
+
+  const {
+    data: resources,
+    error: resourcesError,
+    isFetching: resourcesIsFetching,
+  } = useQuery({
+    queryKey: ["resourcesWithDocuments"],
+    queryFn: async () => {
+      const res = await api.entitiesSearch({
+        resourceHasDocument: true,
+      });
+      return res.data;
+    },
+    enabled: api.isLoggedIn(),
+  });
+
+  const {
+    data: documents,
+    error: documentsError,
+    isFetching: documentsIsFetching,
+  } = useQuery<IDocument[]>({
+    queryKey: ["documents"],
+    queryFn: async () => {
+      const res = await api.documentsGet({});
+      return res.data;
+    },
+    enabled: api.isLoggedIn(),
+  });
+
+  const [selectedResourceId, setSelectedResourceId] = useState<string | false>(
+    storedAnnotatorResourceId
+  );
+
+  useEffect(() => {
+    if (selectedResourceId) {
+      setStoredAnnotatorResourceId(selectedResourceId);
+    }
+  }, [selectedResourceId]);
+
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  const selectedTerritoryPath: string[] = useAppSelector(
+    (state) => state.territoryTree.selectedTerritoryPath
+  );
+
+  const loadDefaultResource = () => {
+    if (resources && documents && !isInitialized) {
+      // First try to find resource with document containing territoryId
+      let resourceWithAnchor = resources.find((resource) => {
+        if (resource.data.documentId) {
+          const document = documents.find(
+            (d) => d.id === resource.data.documentId
+          );
+          if (document) {
+            return document.entityIds.T.includes(territoryId);
+          }
+        }
+        return false;
+      });
+
+      // If not found, try each territory in the path in reverse order
+      if (!resourceWithAnchor) {
+        for (let i = selectedTerritoryPath.length - 1; i > 0; i--) {
+          const territoryInPath = selectedTerritoryPath[i];
+          resourceWithAnchor = resources.find((resource) => {
+            if (resource.data.documentId) {
+              const document = documents.find(
+                (d) => d.id === resource.data.documentId
+              );
+              if (document) {
+                return document.entityIds.T.includes(territoryInPath);
+              }
+            }
+            return false;
+          });
+          if (resourceWithAnchor) break;
+        }
+      }
+
+      if (resourceWithAnchor) {
+        setSelectedResourceId(resourceWithAnchor.id);
+      } else {
+        setSelectedResourceId(false);
+      }
+
+      setIsInitialized(true);
+    }
+  };
+
+  useEffect(() => {
+    loadDefaultResource();
+  }, [resources, documents, isInitialized, territoryId]);
+
+  useEffect(() => {
+    setIsInitialized(false);
+  }, [territoryId]);
+
+  const selectedResource = useMemo<IResponseEntity | false>(() => {
+    if (selectedResourceId && resources) {
+      return resources?.find((r) => r.id === selectedResourceId) ?? false;
+    }
+    return false;
+  }, [selectedResourceId, resources]);
+
+  const selectedDocumentId = useMemo<string | undefined>(() => {
+    if (selectedResource) {
+      return selectedResource.data.documentId;
+    }
+    return undefined;
+  }, [selectedResource]);
+
+  const {
+    data: selectedDocument,
+    error: selectedDocumentError,
+    isFetching: selectedDocumentIsFetching,
+  } = useQuery({
+    queryKey: ["document", selectedDocumentId],
+    queryFn: async () => {
+      if (selectedDocumentId) {
+        const res = await api.documentGet(selectedDocumentId);
+        return res.data ?? undefined;
+      }
+      return undefined;
+    },
+    enabled: api.isLoggedIn() && !!selectedDocumentId,
+  });
 
   const deleteStatementMutation = useMutation({
     mutationFn: async (sId: string) =>
@@ -252,51 +445,119 @@ export const StatementListBox: React.FC = () => {
   const statementCreateMutation = useMutation({
     mutationFn: async (newStatement: IStatement) =>
       await api.entityCreate(newStatement),
+    // OPTIMISTIC MUTATION to locate statement correctly in the annotator
+    onMutate: async (newStatement: IStatement) => {
+      // Cancel any outgoing refetches to avoid overwriting optimistic update
+      await queryClient.cancelQueries({
+        queryKey: ["territory", "statement-list", territoryId],
+      });
+      await queryClient.cancelQueries({
+        queryKey: ["document", selectedDocumentId],
+      });
+
+      // Snapshot the previous values for rollback
+      const previousTerritory = queryClient.getQueryData<IResponseTerritory>([
+        "territory",
+        "statement-list",
+        territoryId,
+        statementListOpened,
+      ]);
+      const previousDocument = queryClient.getQueryData<IDocument | undefined>([
+        "document",
+        selectedDocumentId,
+      ]);
+
+      // Optimistically update territory cache
+      if (previousTerritory && newStatement.data.territory) {
+        const optimisticStatement: IResponseStatement = {
+          ...newStatement,
+          entities: {},
+          usedInDocuments: [],
+          warnings: [],
+          right: previousTerritory.right,
+        };
+
+        const updatedStatements = [...previousTerritory.statements];
+        // Insert statement at correct position based on order
+        const order = newStatement.data.territory.order;
+        const insertIndex = updatedStatements.findIndex(
+          (s) => (s.data.territory?.order ?? 0) > order
+        );
+        if (insertIndex === -1) {
+          updatedStatements.push(optimisticStatement);
+        } else {
+          updatedStatements.splice(insertIndex, 0, optimisticStatement);
+        }
+
+        queryClient.setQueryData<IResponseTerritory>(
+          ["territory", "statement-list", territoryId, statementListOpened],
+          {
+            ...previousTerritory,
+            statements: updatedStatements,
+          }
+        );
+      }
+
+      // Optimistically update document cache
+      if (previousDocument && selectedDocumentId) {
+        const statementId = newStatement.id;
+        const currentStatementIds =
+          previousDocument.entityIds[EntityEnums.Class.Statement] || [];
+
+        if (!currentStatementIds.includes(statementId)) {
+          queryClient.setQueryData<IDocument>(
+            ["document", selectedDocumentId],
+            {
+              ...previousDocument,
+              entityIds: {
+                ...previousDocument.entityIds,
+                [EntityEnums.Class.Statement]: [
+                  ...currentStatementIds,
+                  statementId,
+                ],
+              },
+            }
+          );
+        }
+      }
+
+      // Return context with snapshot values for potential rollback
+      return { previousTerritory, previousDocument };
+    },
+    onError: (error, variables, context) => {
+      // Rollback optimistic updates on error
+      if (context?.previousTerritory) {
+        queryClient.setQueryData<IResponseTerritory>(
+          ["territory", "statement-list", territoryId, statementListOpened],
+          context.previousTerritory
+        );
+      }
+      if (context?.previousDocument) {
+        queryClient.setQueryData<IDocument | undefined>(
+          ["document", selectedDocumentId],
+          context.previousDocument
+        );
+      }
+      toast.error(`Error: Statement not created!`);
+    },
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({
         queryKey: ["territory", "statement-list", territoryId],
       });
+      if (selectedDocumentId) {
+        queryClient.invalidateQueries({
+          queryKey: ["document", selectedDocumentId],
+        });
+      }
       setStatementId(variables.id);
       queryClient.invalidateQueries({ queryKey: ["tree"] });
       dispatch(setDisableStatementListScroll(false));
     },
-    onError: () => {
-      toast.error(`Error: Statement not created!`);
-    },
   });
 
   const addStatementAtCertainIndex = async (index: number) => {
-    let newOrder: number | false = false;
-
     if (userData) {
-      if (index + 1 > statements.length) {
-        // last one
-        newOrder = EntityEnums.Order.Last;
-      } else {
-        if (index < 1 && statements[0].data.territory) {
-          // first one
-          newOrder = EntityEnums.Order.First;
-        } else if (
-          statements[index - 1].data.territory &&
-          statements[index].data.territory
-        ) {
-          // somewhere between
-          newOrder =
-            ((
-              statements[index - 1].data.territory as {
-                order: number;
-                territoryId: string;
-              }
-            ).order +
-              (
-                statements[index].data.territory as {
-                  order: number;
-                  territoryId: string;
-                }
-              ).order) /
-            2;
-        }
-      }
+      let newOrder = getStatementOrderByIndex(index, statements);
 
       if (newOrder) {
         const newStatement: IStatement = CStatement(
@@ -306,9 +567,8 @@ export const StatementListBox: React.FC = () => {
           "",
           territoryId
         );
-        (
-          newStatement.data.territory as { order: number; territoryId: string }
-        ).order = newOrder;
+        (newStatement.data.territory as IStatementDataTerritory).order =
+          newOrder;
 
         statementCreateMutation.mutate(newStatement);
       }
@@ -381,23 +641,6 @@ export const StatementListBox: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ["statement"] });
     },
   });
-
-  const handleCreateStatement = (
-    text: string = "",
-    statementId: string | undefined = undefined
-  ) => {
-    if (userData && territory) {
-      const newStatement: IStatement = CStatement(
-        localStorage.getItem("userrole") as UserEnums.Role,
-        userData.options,
-        text,
-        "",
-        territoryId,
-        statementId
-      );
-      addStatementAtTheEndMutation.mutate(newStatement);
-    }
-  };
 
   const updateTerritoryMutation = useMutation({
     mutationFn: async (tObject: {
@@ -516,8 +759,14 @@ export const StatementListBox: React.FC = () => {
           ])
         ).values()
       );
+      // only filter the statement anchors that are in the statements list
+      const statementIds = new Set(statements.map((s) => s.id));
+      const statementAnchorsInList = statementAnchors.filter((anchor) =>
+        statementIds.has(anchor.anchor)
+      );
+
       const correctPositionMap = new Map(
-        statementAnchors.map((anchor, index) => [anchor.anchor, index])
+        statementAnchorsInList.map((anchor, index) => [anchor.anchor, index])
       );
 
       // Separate anchored and non-anchored statements
@@ -573,209 +822,31 @@ export const StatementListBox: React.FC = () => {
     },
   });
 
-  // TODO: migrate to annotator to limit updates in statement list box
-  const {
-    ref: contentRef,
-    // TODO: calculate height - contentHeight / 2 - StatementListHeader height ?
-    height: contentHeight = 0,
-    // width: contentWidth = 0,
-  } = useResizeObserver<HTMLDivElement>({
-    debounceDelay: 50,
-  });
-
   const contentWidth = useAppSelector(
     (state) => state.layout.mainPage.secondPanelRealWidth
   );
-
-  const [storedAnnotatorResourceId, setStoredAnnotatorResourceId] = useState<
-    string | false
-  >(false);
-  const [storedAnnotatorScroll, setStoredAnnotatorScroll] = useState<number>(0);
-
-  // so the annotator jumps to the anchor
-  useEffect(() => {
-    setStoredAnnotatorResourceId(false);
-    setStoredAnnotatorScroll(0);
-  }, [territoryId]);
-
-  // its needed as the scroll event is executed even when the annotator is not active
-  useEffect(() => {
-    if (!storedAnnotatorResourceId) {
-      setStoredAnnotatorScroll(0);
-    }
-  }, [storedAnnotatorResourceId]);
-
-  // delay of show content for fluent animation on open
-  const [showStatementList, setShowStatementList] = useState(true);
-
-  useEffect(() => {
-    if (statementListOpened) {
-      setTimeout(() => {
-        setShowStatementList(true);
-      }, 500);
-    } else {
-      setShowStatementList(false);
-    }
-  }, [statementListOpened]);
-
-  const [annotator, setAnnotator] = useState<Annotator | undefined>(undefined);
-
-  const { setAnnotator: useAnnotatorSetAnnotator } = useAnnotator();
-
-  useEffect(() => {
-    if (annotator) {
-      useAnnotatorSetAnnotator(annotator);
-    }
-  }, [annotator, useAnnotatorSetAnnotator]);
-  const {
-    data: resources,
-    error: resourcesError,
-    isFetching: resourcesIsFetching,
-  } = useQuery({
-    queryKey: ["resourcesWithDocuments"],
-    queryFn: async () => {
-      const res = await api.entitiesSearch({
-        resourceHasDocument: true,
-      });
-      return res.data;
-    },
-    enabled: api.isLoggedIn(),
-  });
-
-  const {
-    data: documents,
-    error: documentsError,
-    isFetching: documentsIsFetching,
-  } = useQuery<IDocument[]>({
-    queryKey: ["documents"],
-    queryFn: async () => {
-      const res = await api.documentsGet({});
-      return res.data;
-    },
-    enabled: api.isLoggedIn(),
-  });
-
-  const [selectedResourceId, setSelectedResourceId] = useState<string | false>(
-    storedAnnotatorResourceId
+  const contentHeight = useAppSelector((state) => state.layout.contentHeight);
+  const detailBoxState = useAppSelector(
+    (state) => state.layout.mainPage.detailBoxState
   );
 
-  useEffect(() => {
-    if (selectedResourceId) {
-      setStoredAnnotatorResourceId(selectedResourceId);
+  const statementListHeaderHeight = 103;
+  const contentHeightAnnotator = useMemo(() => {
+    if (!selectedDetailId) {
+      return contentHeight - statementListHeaderHeight;
+    } else if (detailBoxState === DetailBoxState.Normal) {
+      return contentHeight / 2 - statementListHeaderHeight;
+    } else if (detailBoxState === DetailBoxState.Minimized) {
+      return contentHeight - statementListHeaderHeight - 56; // 56 is the height of the submit button
     }
-  }, [selectedResourceId]);
-
-  const [isInitialized, setIsInitialized] = useState(false);
-
-  const selectedTerritoryPath: string[] = useAppSelector(
-    (state) => state.territoryTree.selectedTerritoryPath
-  );
-
-  const loadDefaultResource = () => {
-    if (resources && documents && !isInitialized) {
-      // First try to find resource with document containing territoryId
-      let resourceWithAnchor = resources.find((resource) => {
-        if (resource.data.documentId) {
-          const document = documents.find(
-            (d) => d.id === resource.data.documentId
-          );
-          if (document) {
-            return document.entityIds.T.includes(territoryId);
-          }
-        }
-        return false;
-      });
-
-      // If not found, try each territory in the path in reverse order
-      if (!resourceWithAnchor) {
-        for (let i = selectedTerritoryPath.length - 1; i > 0; i--) {
-          const territoryInPath = selectedTerritoryPath[i];
-          resourceWithAnchor = resources.find((resource) => {
-            if (resource.data.documentId) {
-              const document = documents.find(
-                (d) => d.id === resource.data.documentId
-              );
-              if (document) {
-                return document.entityIds.T.includes(territoryInPath);
-              }
-            }
-            return false;
-          });
-          if (resourceWithAnchor) break;
-        }
-      }
-
-      if (resourceWithAnchor) {
-        setSelectedResourceId(resourceWithAnchor.id);
-      } else {
-        setSelectedResourceId(false);
-      }
-
-      setIsInitialized(true);
-    }
-  };
-
-  useEffect(() => {
-    loadDefaultResource();
-  }, [resources, documents, isInitialized, territoryId]);
-
-  useEffect(() => {
-    setIsInitialized(false);
-  }, [territoryId]);
-
-  const selectedResource = useMemo<IResponseEntity | false>(() => {
-    if (selectedResourceId && resources) {
-      return resources?.find((r) => r.id === selectedResourceId) ?? false;
-    }
-    return false;
-  }, [selectedResourceId, resources]);
-
-  const selectedDocumentId = useMemo<string | undefined>(() => {
-    if (selectedResource) {
-      return selectedResource.data.documentId;
-    }
-    return undefined;
-  }, [selectedResource]);
-
-  const {
-    data: selectedDocument,
-    error: selectedDocumentError,
-    isFetching: selectedDocumentIsFetching,
-  } = useQuery<IDocument | false>({
-    queryKey: ["document", selectedDocumentId],
-    queryFn: async () => {
-      if (selectedDocumentId) {
-        const res = await api.documentGet(selectedDocumentId);
-        return res.data;
-      }
-      return false;
-    },
-    enabled: api.isLoggedIn() && !!selectedDocumentId,
-  });
-
-  // collect all statement anchors that are in the statements list
-  const collectStatementAnchors = (anchors: IAnchorsNode[]): IAnchorsNode[] => {
-    const statementIds = new Set(statements.map((s) => s.id));
-    return anchors.reduce((acc: any[], anchor) => {
-      if (
-        anchor.class === EntityEnums.Class.Statement &&
-        statementIds.has(anchor.anchor)
-      ) {
-        acc.push(anchor);
-      }
-      if (anchor.children) {
-        acc.push(...collectStatementAnchors(anchor.children));
-      }
-      return acc;
-    }, []);
-  };
+  }, [contentHeight, detailBoxState, selectedDetailId]);
 
   // adds object orderCorrection to each statement with info about the order in the list vs the annotator
   const statementsWithOrder: (IResponseStatement & {
     orderCorrection?: StatementOrderCorrection;
     isAnchored?: boolean;
   })[] = useMemo(() => {
-    if (!selectedDocument || !statements.length) return statements;
+    if (!selectedDocument || !statements?.length) return statements ?? [];
 
     // Collect anchors from the document and remove duplicates
     const statementAnchors = Array.from(
@@ -786,11 +857,15 @@ export const StatementListBox: React.FC = () => {
         ])
       ).values()
     );
+    const statementIds = new Set(statements.map((s) => s.id));
+    const statementAnchorsInList = statementAnchors.filter((anchor) =>
+      statementIds.has(anchor.anchor)
+    );
 
     // Create a map of statement IDs to their correct positions
     const correctPositionMap = new Map(
       // this index is the position of the statement IN THE DOCUMENT
-      statementAnchors.map((anchor, index) => [anchor.anchor, index])
+      statementAnchorsInList.map((anchor, index) => [anchor.anchor, index])
     );
 
     // First, create a map of all statements with their original indexes
@@ -851,8 +926,25 @@ export const StatementListBox: React.FC = () => {
 
   const isListNonEmpty = statements.length > 0;
 
+  // Check if there are statements to determine if the list is loading
+  const treeData: IResponseTree | undefined = queryClient.getQueryData([
+    "tree",
+  ]);
+  const statementsCount = useMemo(() => {
+    if (treeData) {
+      const currentTerritory = searchTree(treeData, territoryId);
+      if (currentTerritory) {
+        return currentTerritory.statementsCount;
+      }
+      return 0;
+    }
+  }, [treeData, territoryId]);
+
+  const isListLoading =
+    statementsCount && statementsCount > 0 && isFetchingTerritory;
+
   const statementListTableIsLoading =
-    isFetchingTerritory ||
+    isListLoading ||
     isLoading ||
     deleteStatementMutation.isPending ||
     addStatementAtTheEndMutation.isPending ||
@@ -878,48 +970,39 @@ export const StatementListBox: React.FC = () => {
   }, [displayMode, contentWidth, isListNonEmpty, statementListTableIsLoading]);
 
   return (
-    <>
+    <StyledStatementListBox ref={statementListBoxRef}>
       {showStatementList && (
         <>
-          {territoryId && (
-            <StatementListHeader
-              territory={territory}
-              isFetchingTerritory={isFetchingTerritory}
-              selectedRows={selectedRows}
-              setSelectedRows={setSelectedRows}
-              isAllSelected={
-                isListNonEmpty && selectedRows.length === statements.length
-              }
-              moveStatementsMutation={moveStatementsMutation}
-              duplicateStatementsMutation={duplicateStatementsMutation}
-              replaceReferencesMutation={replaceReferencesMutation}
-              appendReferencesMutation={appendReferencesMutation}
-              updateTerritoryMutation={updateTerritoryMutation}
-              duplicateTerritoryMutation={duplicateTerritoryMutation}
-              deleteStatementsMutation={deleteStatementsMutation}
-              relationsCreateMutation={relationsCreateMutation}
-              favoritedTerritoryIds={favoritedTerritoryIds}
-              contentWidthTooSmall={contentWidth < SECOND_PANEL_MIN_WIDTH + 60}
-              statementsWithOrder={statementsWithOrder}
-              autoOrderStatementsMutation={autoOrderStatementsMutation}
-            />
-          )}
+          <StatementListHeader
+            territory={territory}
+            isFetchingTerritory={isFetchingTerritory}
+            selectedRows={selectedRows}
+            setSelectedRows={setSelectedRows}
+            isAllSelected={
+              isListNonEmpty && selectedRows.length === statements.length
+            }
+            moveStatementsMutation={moveStatementsMutation}
+            duplicateStatementsMutation={duplicateStatementsMutation}
+            replaceReferencesMutation={replaceReferencesMutation}
+            appendReferencesMutation={appendReferencesMutation}
+            updateTerritoryMutation={updateTerritoryMutation}
+            // duplicateTerritoryMutation={duplicateTerritoryMutation}
+            deleteStatementsMutation={deleteStatementsMutation}
+            relationsCreateMutation={relationsCreateMutation}
+            favoritedTerritoryIds={favoritedTerritoryIds}
+            contentWidthTooNarrow={contentWidth < SECOND_PANEL_MIN_WIDTH + 60}
+            statementsWithOrder={statementsWithOrder}
+            autoOrderStatementsMutation={autoOrderStatementsMutation}
+          />
           {!territoryId && (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                marginTop: "2rem",
-              }}
-            >
+            <StyledInfoWrapper>
               <StyledEmptyState>
                 <BsInfoCircle size="23" />
               </StyledEmptyState>
               <StyledEmptyState>
                 {"No territory selected yet. Pick one from the territory tree"}
               </StyledEmptyState>
-            </div>
+            </StyledInfoWrapper>
           )}
 
           {territoryId &&
@@ -936,14 +1019,8 @@ export const StatementListBox: React.FC = () => {
             )}
 
           {territoryId && (
-            <div
-              style={{
-                display: "flex",
-                height: "100%",
-                // maxHeight: "calc(100%)",
-                overflow: "hidden",
-              }}
-              ref={contentRef}
+            <StyledContentWrapper
+            // ref={contentRef}
             >
               <CustomScrollbar
                 scrollerId="Statements"
@@ -955,7 +1032,7 @@ export const StatementListBox: React.FC = () => {
                   // fix for overheight because of marginTop which is necessary to make space for annotator header
                   marginTop:
                     displayMode === StatementListDisplayMode.TEXT
-                      ? "6rem"
+                      ? "6.2rem"
                       : undefined,
                   height:
                     displayMode === StatementListDisplayMode.TEXT
@@ -999,22 +1076,20 @@ export const StatementListBox: React.FC = () => {
 
               {displayMode === StatementListDisplayMode.TEXT && (
                 <StatementListTextAnnotator
-                  key={territoryId}
-                  contentHeight={contentHeight}
+                  contentHeight={contentHeightAnnotator || 0}
                   contentWidth={contentWidth - 10}
-                  handleCreateStatement={handleCreateStatement}
                   territoryId={territoryId}
                   territory={territory}
                   statementId={statementId}
-                  storedAnnotatorScroll={storedAnnotatorScroll}
-                  setStoredAnnotatorScroll={(newScroll) => {
-                    if (storedAnnotatorResourceId) {
-                      setStoredAnnotatorScroll(newScroll);
-                    }
-                  }}
+                  // storedAnnotatorScroll={storedAnnotatorScroll}
+                  // setStoredAnnotatorScroll={(newScroll) => {
+                  //   if (storedAnnotatorResourceId) {
+                  //     setStoredAnnotatorScroll(newScroll);
+                  //   }
+                  // }}
                   hlEntities={hlEntities}
                   setHlEntities={setHlEntities}
-                  addStatementAtCertainIndex={addStatementAtCertainIndex}
+                  statementCreateMutation={statementCreateMutation}
                   annotator={annotator}
                   setAnnotator={setAnnotator}
                   selectedDocumentId={selectedDocumentId}
@@ -1028,30 +1103,27 @@ export const StatementListBox: React.FC = () => {
                     isListNonEmpty || statementListTableIsLoading
                   }
                   userCanEdit={userCanEdit}
+                  userData={userData}
+                  statementListBoxRef={statementListBoxRef}
                 />
               )}
 
               {statementListTableIsLoading &&
                 tableWidth > 0 &&
-                contentHeight > 0 && (
-                  <div
-                    style={{
-                      width: tableWidth + 4,
-                      height:
-                        displayMode === StatementListDisplayMode.TEXT
-                          ? contentHeight - 56
-                          : contentHeight + 4,
-                      flexShrink: 0,
-                      position: "absolute",
-                      bottom: 0,
-                      left: 0,
-                      zIndex: 1,
-                    }}
+                contentHeightAnnotator &&
+                contentHeightAnnotator > 0 && (
+                  <StyledLoaderWrap
+                    $width={tableWidth + 4}
+                    $height={
+                      displayMode === StatementListDisplayMode.TEXT
+                        ? contentHeightAnnotator - 56
+                        : contentHeightAnnotator + 4
+                    }
                   >
                     <Loader show size={50} />
-                  </div>
+                  </StyledLoaderWrap>
                 )}
-            </div>
+            </StyledContentWrapper>
           )}
 
           <Submit
@@ -1078,7 +1150,7 @@ export const StatementListBox: React.FC = () => {
           />
         </>
       )}
-    </>
+    </StyledStatementListBox>
   );
 };
 

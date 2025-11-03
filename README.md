@@ -2,7 +2,7 @@
     <img width="50%" src="./logo/logo-full.png" style="background: transparent;">
 </p>
 
-[![deploy staging](https://github.com/DISSINET/InkVisitor/actions/workflows/dev.yml/badge.svg?branch=dev)](https://github.com/DISSINET/InkVisitor/actions/workflows/dev.yml)
+<!-- [![deploy staging](https://github.com/DISSINET/InkVisitor/actions/workflows/dev.yml/badge.svg?branch=dev)](https://github.com/DISSINET/InkVisitor/actions/workflows/dev.yml) -->
 
 ## Description
 
@@ -12,7 +12,9 @@ InkVisitor is an open-source browser-based application for the manual entry of c
 
 InkVisitor has been developed in the [Dissident Networks Project (DISSINET)](https://dissinet.cz), a historical and social scientific research project focusing on medieval religious dissidence, inquisition, and inquisitorial records. The development has received substantial funding from the Czech Science Foundation (EXPRO project No. GX19-26975X “Dissident Religious Cultures in Medieval Europe from the Perspective of Social Network Analysis and Geographic Information Systems”) and the European Research Council (ERC Consolidator Grant, project No. 101000442 “Networks of Dissent: Computational Modelling of Dissident and Inquisitorial Cultures in Medieval Europe”).
 
-The lead developer of the application is [Adam Mertel](https://github.com/adammertel/). Other contributors of code include Petr Hanák, Ján Mertel and others. The lead authors of the data model are David Zbíral and Robert L. J. Shaw. Other contributors to the data model and testers include Tomáš Hampejs, Jan Král, Katia Riccardo and others.
+The lead developer of the application is [Petr Hanák](https://github.com/ptrhnk/). Other contributors of code include [Adam Mertel](https://github.com/adammertel/), [Ján Mertel](https://github.com/jancimertel/) and others. The lead authors of the data model are David Zbíral and Robert L. J. Shaw. Other contributors to the data model and testers include Tomáš Hampejs, Jan Král, Katia Riccardo and others.
+
+External documentation can be found [here](https://docs.religionistika.phil.muni.cz/books/from-texts-to-structured-data-building-knowledge-graphs-through-computer-assisted-semantic-text-modelling-castemo).
 
 ## Data model
 
@@ -55,17 +57,18 @@ The uses of properties include:
 
 ## User Administration
 
-The environment supports three user roles:
+The environment supports four user roles:
 
+- owner,
 - admin,
 - editor,
 - viewer.
 
-Further, admins may grant particular users (editors and viewers) access rights for specified territories. Editor role may be granted by "edit" rights, viewer role has "view" rights.
+Further, owners and admins may grant particular users (editors and viewers) access rights for specified territories. Editor role may be granted by "edit" rights, viewer role has "view" rights.
 
 **Entity Detail** is accessible to all roles. The viewer is not allowed to change any value, while the editor may change label, detail, notes, language and add, remove and edit property statements with the status of "pending." Moreover, all metaprops in detail that he creates are getting status "pending." Admin has full access to internal attributes of the entity (status, class) and metaprops. All metaprops he creates have the status "approved."
 
-Only admin and editor with edit rights in the parent **Territory** (T) may edit, add or remove a child T. Editors and viewers do not see T they have no rights to in the T Tree. Only "edit" rights for the T grant the rights to add a new Statement under that particular T, or any other child of that T. That means that the admin has first to create a T and grant edit rights to editors.
+Owner, admin and editor with edit rights in the parent **Territory** (T) may edit, add or remove a child T. Editors and viewers do not see T they have no rights to in the T Tree. Only "edit" rights for the T grant the rights to add a new Statement under that particular T, or any other child of that T. That means that the admin has first to create a T and grant edit rights to editors.
 
 To administrate the users rights, admin roles may access the **administration window**, where they can append new territories to editors and viewers. They can also create new users, change roles, see passwords or delete users. Admin role is not possible to be assigned or deleted through this environment.
 
@@ -105,14 +108,14 @@ To deploy the Inkvisitor instance, you can use Docker (or Podman), host it on Ku
 To use docker to deploy the InkVisitor application:
 [Dockerfile](./Dockerfile) will build required apps in packages directory: `annotator`, `client` and `server`.
 
-1.  Install [docker](https://docs.docker.com/get-docker/), [docker-compose tool](https://docs.docker.com/compose/install/).
+1.  Install [docker](https://docs.docker.com/get-docker/), which includes [Docker Compose](https://docs.docker.com/compose/install/).
 2.  For client app - prepare `.env.<ENV>` file in [client/env](./packages/client/env) directory, that should identify the appropriate environment. See build argument `ENV` in [Makefile](./Makefile) or [docker compose](./docker-compose.yml) as it maps to build command in client package (`pnpm build:${ENV}`). See the client's [README.md](https://github.com/DISSINET/InkVisitor/blob/dev/packages/client/README.md) and [example.env](https://github.com/DISSINET/InkVisitor/blob/dev/packages/client/env/example.env) files to ensure you have included all the necessary configuration information.
     - important: `latest` tag uses base .env (without suffix). So if you are building `dissinet/inkvisitor:latest`, provide `client/env/.env` file.
 3.  For server - prepare `.env` file for servers listed under `env_file` sections in `docker-compose.yml` file. Check the server's [README.md](https://github.com/DISSINET/InkVisitor/blob/dev/packages/server/README.md) and [example.env](https://github.com/DISSINET/InkVisitor/blob/dev/packages/server/env/example.env) files for more information. This environment file will be used as run argument during docker container startup - not during build time.
-4.  Run the database - first, prepare `.env` file according to the documentation. Then, run either as a standalone service or containerized using `docker-compose up -d database`. Now, you have to create a database `inkvisitor` - one option is to navigate to `http://localhost:8080/#dataexplorer` and run query `r.dbCreate("inkvisitor")`.
+4.  Run the database - first, prepare `.env` file according to the documentation. Then, run either as a standalone service or containerized using `docker compose up -d database`. Now, you have to create a database `inkvisitor` - one option is to navigate to `http://localhost:8080/#dataexplorer` and run query `r.dbCreate("inkvisitor")`.
 5.  The database will be now empty, so to set up the database structure and import some testing data, go to `packages/database` and run `pnpm start` (`pnpm i` might be needed as well). Following the information in the prompt - first, choose database `inkvisitor` by pressing the `L` key, then pick a dataset to import using the `D` key. We recommend to use the `empty` dataset for the first run. Then, press `X` to process the import. Navigate to `http://localhost:8080/#dataexplorer` and enter query `r.db('inkvisitor').table('entities')` to check if the import went fine.
-6.  Build app image by running `docker-compose build inkvisitor` or `make build-inkvisitor` (both are using `ENV=production` build arg).
-7.  Run the containerized application with the command `docker-compose up inkvisitor`.
+6.  Build app image by running `docker compose build inkvisitor` or `make build-inkvisitor` (both are using `ENV=production` build arg).
+7.  Run the containerized application with the command `docker compose up inkvisitor`.
 
 ### Kubernetes
 

@@ -1,5 +1,5 @@
 import useKeypress from "hooks/useKeyPress";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 interface ModalKeyPress {
   onEnter?: () => void;
@@ -17,6 +17,7 @@ export const ModalKeyPress: React.FC<ModalKeyPress> = ({
       onEnter();
     },
     [dependencyArr],
+    // ctrlKeyCombo
     true
   );
 

@@ -37,7 +37,7 @@ interface ValidationRule {
   removeValidationRule: () => void;
   isInsideTemplate: boolean;
   territoryParentId?: string;
-  widthTooSmall?: boolean;
+  widthTooNarrow?: boolean;
   userCanEdit: boolean;
 }
 export const ValidationRule: React.FC<ValidationRule> = ({
@@ -47,7 +47,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
   removeValidationRule,
   isInsideTemplate,
   territoryParentId,
-  widthTooSmall = false,
+  widthTooNarrow = false,
   userCanEdit,
 }) => {
   const {
@@ -223,7 +223,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
         <div>
           <AttributeButtonGroup
             noMargin
-            iconsOnly={widthTooSmall}
+            iconsOnly={widthTooNarrow}
             disabled={!userCanEdit}
             canSelectMultiple={true}
             options={entityStatusDict.map((entityStatusOption) => {
@@ -231,7 +231,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
               return {
                 longValue: entityStatusOption["label"],
                 shortValue: entityStatusOption["label"],
-                icon: widthTooSmall ? icon : undefined,
+                icon: widthTooNarrow ? icon : undefined,
                 onClick: () => {
                   let newStatus: EntityEnums.Status[] = [
                     ...(entityStatuses ?? []),

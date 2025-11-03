@@ -1,8 +1,4 @@
-export type ThemeType = typeof theme;
-export type ThemeColor = typeof theme.color;
-export type ElementTypeColor = typeof theme.color.elementType;
-export type ThemeFontSize = typeof theme.fontSize;
-export type PingColor = typeof theme.color.ping;
+import { EntityEnums } from "@shared/enums";
 
 const theme = {
   color: {
@@ -114,6 +110,10 @@ const theme = {
     tooltipBoxShadow: "rgba(0, 0, 0, 0.3)",
     tooltipArrowBoxShadow: "rgba(0, 0, 0, 0.1)",
 
+    statsTooltipTextColor: "#f7fafc",
+    statsTooltipBackground: "#f7fafc", // gray 100
+    statsTooltipLabelBackground: "#718096", // gray 600
+
     menuShadow: "rgba(0, 0, 0, 0.3)",
 
     closeBtnBackground: "rgba(130, 130, 130, 0.1)",
@@ -138,11 +138,13 @@ const theme = {
     },
 
     // tag status
-    "0": "#a0aec0", // pending
-    "1": "#000", // approved
-    "2": "#BA2525", //discouraged
-    "3": "#D8AA37", //warning
-    "4": "#f27a43", //unfinished
+    tagStatus: {
+      [EntityEnums.Status.Pending]: "#a0aec0", // pending
+      [EntityEnums.Status.Approved]: "#000", // approved
+      [EntityEnums.Status.Discouraged]: "#BA2525", //discouraged
+      [EntityEnums.Status.Warning]: "#D8AA37", //warning
+      [EntityEnums.Status.Unfinished]: "#f27a43", //unfinished
+    },
   },
   space: {
     "-4": "-1rem",
@@ -224,10 +226,10 @@ const theme = {
   },
   borderStyle: {
     //logical type
-    1: "solid", //definite
-    2: "dotted", //indefinite
-    3: "dashed", //hypothetical
-    4: "none", //generic
+    [EntityEnums.LogicalType.Definite]: "solid", //definite
+    [EntityEnums.LogicalType.Indefinite]: "dotted", //indefinite
+    [EntityEnums.LogicalType.Hypothetical]: "dashed", //hypothetical
+    [EntityEnums.LogicalType.Generic]: "none", //generic
   },
   background: {
     stripes:
@@ -241,5 +243,13 @@ const theme = {
       "0 2px 0px hsl(220, 7%, 83%, 0.5), inset 0 2px 2px hsla(0, 0%, 0%, 0.1)",
   },
 };
+
+export type ThemeType = typeof theme;
+export type ThemeColor = typeof theme.color;
+export type ThemeBorderWidth = typeof theme.borderWidth;
+export type InvertedBgColor = typeof theme.color.invertedBg;
+export type ElementTypeColor = typeof theme.color.elementType;
+export type ThemeFontSize = typeof theme.fontSize;
+export type PingColor = typeof theme.color.ping;
 
 export default theme;

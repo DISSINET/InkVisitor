@@ -1,8 +1,7 @@
 import { certaintyDict } from "./certainty";
 import { elvlDict } from "./elvl";
 import { languageDict } from "./language";
-import { entitiesDictKeys } from "./entity";
-import { entitiesDict } from "./entity";
+import { entitiesDictKeys, entitiesDict } from "./entity";
 import { actantLogicalTypeDict } from "./logicaltype";
 import { actantPositionDict } from "./actantposition";
 import { userRoleDict } from "./userroles";

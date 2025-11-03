@@ -25,6 +25,7 @@ interface AttributeButtonGroup {
   disabledBtnsTooltip?: string;
   canSelectMultiple?: boolean;
   iconsOnly?: boolean;
+  fullWidth?: boolean;
 }
 
 export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
@@ -36,6 +37,7 @@ export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
   disabledBtnsTooltip,
   canSelectMultiple = false,
   iconsOnly = false,
+  fullWidth = false,
 }) => {
   return (
     <StyledWrap>
@@ -53,7 +55,7 @@ export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
           $leftMargin={!noMargin}
           $rightMargin={!noMargin}
           $border
-          $iconsOnly={iconsOnly}
+          $fullWidth={iconsOnly || fullWidth}
         >
           {options.map((option, oi) => {
             const firstInRow = oi === 0;
@@ -64,7 +66,7 @@ export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
                 disabled={
                   option.optionDisabled || (disabled && !option.selected)
                 }
-                fullWidth={iconsOnly}
+                fullWidth={iconsOnly || fullWidth}
                 label={
                   iconsOnly
                     ? undefined

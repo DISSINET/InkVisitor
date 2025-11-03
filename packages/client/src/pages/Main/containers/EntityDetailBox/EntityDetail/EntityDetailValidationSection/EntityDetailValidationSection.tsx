@@ -8,18 +8,19 @@ import { UseMutationResult } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import { Button, Submit } from "components";
 import React, { useState } from "react";
+import { FaChevronCircleDown, FaChevronCircleUp, FaPlus } from "react-icons/fa";
+import { toast } from "react-toastify";
 import { deepCopy } from "utils/utils";
 import {
   StyledBlockSeparator,
   StyledDetailSectionHeader,
+  StyledExpandIcon,
   StyledValidationList,
 } from "../EntityDetailStyles";
 import { ValidationRule } from "components/advanced";
-import { FaPlus } from "react-icons/fa";
 import { EntityDetailSectionButtons } from "../EntityDetailSectionButtons/EntityDetailSectionButtons";
 import { EntityEnums } from "@shared/enums";
 import api from "api";
-import { toast } from "react-toastify";
 
 const initValidation: ITerritoryValidation = {
   detail: "",
@@ -47,7 +48,9 @@ interface EntityDetailValidationSection {
   territoryParentId?: string | undefined;
   entity: IResponseDetail;
   setLoadingValidations: React.Dispatch<React.SetStateAction<boolean>>;
-  widthTooSmall: boolean;
+  widthTooNarrow: boolean;
+  isValidationExpanded: boolean;
+  setIsValidationExpanded: React.Dispatch<React.SetStateAction<boolean>>;
 }
 export const EntityDetailValidationSection: React.FC<
   EntityDetailValidationSection
@@ -60,7 +63,9 @@ export const EntityDetailValidationSection: React.FC<
   territoryParentId,
   entity,
   setLoadingValidations,
-  widthTooSmall,
+  widthTooNarrow,
+  isValidationExpanded,
+  setIsValidationExpanded,
 }) => {
   const [tempIndexToRemove, setTempIndexToRemove] = useState<false | number>(
     false
@@ -115,7 +120,16 @@ export const EntityDetailValidationSection: React.FC<
     <>
       <StyledDetailSectionHeader>
         Validation rules
-        {userCanEdit && (
+        <StyledExpandIcon
+          onClick={() => setIsValidationExpanded(!isValidationExpanded)}
+        >
+          {isValidationExpanded ? (
+            <FaChevronCircleUp size={16} />
+          ) : (
+            <FaChevronCircleDown size={16} />
+          )}
+        </StyledExpandIcon>
+        {userCanEdit && isValidationExpanded && (
           <span style={{ marginLeft: "1rem", marginRight: "1rem" }}>
             <Button
               color="primary"
@@ -125,7 +139,7 @@ export const EntityDetailValidationSection: React.FC<
             />
           </span>
         )}
-        {userCanEdit && (
+        {userCanEdit && isValidationExpanded && (
           <EntityDetailSectionButtons
             entityId={entity.id}
             suggesterCategoryTypes={[EntityEnums.Class.Territory]}
@@ -136,7 +150,7 @@ export const EntityDetailValidationSection: React.FC<
                 ? entity.data.validations.length === 0
                 : true
             }
-            widthTooSmall={widthTooSmall}
+            widthTooNarrow={widthTooNarrow}
             handleCopyFromEntity={(pickedEntity, replace) => {
               setLoadingValidations(true);
               api.detailGet(pickedEntity.id).then((data) => {
@@ -174,7 +188,7 @@ export const EntityDetailValidationSection: React.FC<
         )}
       </StyledDetailSectionHeader>
 
-      {validations && (
+      {isValidationExpanded && validations && (
         <StyledValidationList>
           {(validations as ITerritoryValidation[]).map((validation, key) => {
             return (
@@ -191,7 +205,7 @@ export const EntityDetailValidationSection: React.FC<
                   removeValidationRule={() => setTempIndexToRemove(key)}
                   isInsideTemplate={isInsideTemplate}
                   territoryParentId={territoryParentId}
-                  widthTooSmall={widthTooSmall}
+                  widthTooNarrow={widthTooNarrow}
                   userCanEdit={userCanEdit}
                 />
                 {key !== validations.length - 1 && <StyledBlockSeparator />}
@@ -201,18 +215,25 @@ export const EntityDetailValidationSection: React.FC<
         </StyledValidationList>
       )}
 
-      {userCanEdit && validations && validations.length > 0 && (
-        <div
-          style={{ marginLeft: "1rem", marginRight: "1rem", marginTop: "2rem" }}
-        >
-          <Button
-            color="primary"
-            label="validation rule"
-            icon={<FaPlus />}
-            onClick={initValidationRule}
-          />
-        </div>
-      )}
+      {userCanEdit &&
+        isValidationExpanded &&
+        validations &&
+        validations.length > 0 && (
+          <div
+            style={{
+              marginLeft: "1rem",
+              marginRight: "1rem",
+              marginTop: "2rem",
+            }}
+          >
+            <Button
+              color="primary"
+              label="validation rule"
+              icon={<FaPlus />}
+              onClick={initValidationRule}
+            />
+          </div>
+        )}
 
       <Submit
         show={tempIndexToRemove !== false}

@@ -6,10 +6,10 @@ import { useTheme } from "hooks";
 import React from "react";
 import { FaCheckSquare, FaRegSquare } from "react-icons/fa";
 import {
+  components,
   MultiValueProps,
   OptionProps,
   ValueContainerProps,
-  components,
 } from "react-select";
 import { DropdownItem, EntityColors } from "types";
 import {
@@ -37,6 +37,8 @@ interface EntityMultiDropdown<T = string> {
   limitSelectedItems?: number;
 
   loggerId?: string;
+  closeMenuOnSelect?: boolean;
+  shortLabel?: boolean;
 }
 export const EntityMultiDropdown = <T extends string>({
   width,
@@ -55,6 +57,8 @@ export const EntityMultiDropdown = <T extends string>({
   limitSelectedItems,
 
   loggerId,
+  closeMenuOnSelect = true,
+  shortLabel = false,
 }: EntityMultiDropdown<T>) => {
   const getValues = (items: DropdownItem[]) => items.map((i) => i.value as T);
 
@@ -138,8 +142,14 @@ export const EntityMultiDropdown = <T extends string>({
       disableTyping={disableTyping}
       disabled={disabled}
       loggerId={loggerId}
-      customComponents={{ Option, MultiValue, ValueContainer }}
+      customComponents={{
+        Option,
+        MultiValue: MultiValue as typeof components.MultiValue,
+        ValueContainer,
+      }}
       limitSelectedItems={limitSelectedItems}
+      closeMenuOnSelect={closeMenuOnSelect}
+      shortLabel={shortLabel}
     />
   );
 };
@@ -196,15 +206,15 @@ const ValueContainer = ({
   );
 };
 
-const MultiValue = (
-  props: MultiValueProps<any> & { selectProps: StyledSelect }
-): React.ReactElement => {
+const MultiValue = (props: any): React.ReactElement => {
+  const shortLabel = props.selectProps?.shortLabel;
+
   return (
     <components.MultiValue {...props}>
       <StyledEntityMultiValue
         $color={EntityColors[props.data.value]?.color ?? "transparent"}
       >
-        {props.data.label}
+        {shortLabel ? props.data.value : props.data.label}
       </StyledEntityMultiValue>
     </components.MultiValue>
   );

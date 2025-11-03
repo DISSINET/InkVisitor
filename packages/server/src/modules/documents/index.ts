@@ -12,6 +12,7 @@ import {
 import { Router } from "express";
 import { IRequest } from "src/custom_typings/request";
 import { asyncRouteHandler } from "../index";
+import { createOpeningTagRegex, closingTagRegex } from "@common/regex";
 
 export default Router()
   /**
@@ -80,27 +81,89 @@ export default Router()
     // Anchors with entityId that are not in exportedEntities should be removed
     // When removing the anchors, the text between the anchors should be kept
     //
-    const filteredContent = document.content.replace(/<[^<>]+>/g, (match) => {
-      // remove <, >, and / from the match
-      const entityId = match.slice(1, -1).replace("/", "");
+    const openingTagRegex = createOpeningTagRegex();
+    const closingTagRegexInstance = closingTagRegex;
+    
+    let filteredContent = document.content;
+    let match;
+    
+    // Process opening tags
+    while ((match = openingTagRegex.exec(document.content)) !== null) {
+      const fullTag = match[0];
+      const tagContent = match[1];
+      // Extract only the tag name (first word before any attributes or spaces)
+      const entityId = tagContent.split(/\s+/)[0];
+      
       let validEntityClass = false;
+      let isUnknownEntity = true;
+      
+      // Check if entity exists in any entity class
       exportedEntities.forEach((entityClass) => {
-        document.entityIds[entityClass].forEach((id) => {
-          if (id === entityId) {
-            validEntityClass = true;
-          }
-        });
+        if (document.entityIds[entityClass]) {
+          document.entityIds[entityClass].forEach((id) => {
+            if (id === entityId) {
+              validEntityClass = true;
+              isUnknownEntity = false;
+            }
+          });
+        }
+      });
+      
+      // Also check all entity classes to determine if this is an unknown entity
+      Object.values(EntityEnums.Class).forEach((entityClass) => {
+        if (document.entityIds[entityClass]) {
+          document.entityIds[entityClass].forEach((id) => {
+            if (id === entityId) {
+              isUnknownEntity = false;
+            }
+          });
+        }
       });
 
-      if (validEntityClass) {
-        return match;
-      } else {
-        // return the text inbetween the anchors
-        return "";
+      // Keep the tag if it's in exported entities OR if it's an unknown entity
+      if (!validEntityClass && !isUnknownEntity) {
+        // Remove the opening tag if entity is not in exported entities and is not unknown
+        filteredContent = filteredContent.replace(fullTag, "");
       }
-    });
+    }
+    
+    // Process closing tags
+    while ((match = closingTagRegexInstance.exec(document.content)) !== null) {
+      const fullTag = match[0];
+      const entityId = match[1];
+      
+      let validEntityClass = false;
+      let isUnknownEntity = true;
+      
+      // Check if entity exists in any entity class
+      exportedEntities.forEach((entityClass) => {
+        if (document.entityIds[entityClass]) {
+          document.entityIds[entityClass].forEach((id) => {
+            if (id === entityId) {
+              validEntityClass = true;
+              isUnknownEntity = false;
+            }
+          });
+        }
+      });
+      
+      // Also check all entity classes to determine if this is an unknown entity
+      Object.values(EntityEnums.Class).forEach((entityClass) => {
+        if (document.entityIds[entityClass]) {
+          document.entityIds[entityClass].forEach((id) => {
+            if (id === entityId) {
+              isUnknownEntity = false;
+            }
+          });
+        }
+      });
 
-    // TODO: filtering of anchors should happen here
+      // Keep the tag if it's in exported entities OR if it's an unknown entity
+      if (!validEntityClass && !isUnknownEntity) {
+        // Remove the closing tag if entity is not in exported entities and is not unknown
+        filteredContent = filteredContent.replace(fullTag, "");
+      }
+    }
 
     res.setHeader("content-type", "text/plain");
     res.setHeader("Content-Disposition", `attachment; filename="export.txt"`);
