@@ -7,9 +7,9 @@
 - Search by JS regex #2781
 - Replace all in annotator search #2583
 - Children territories are now paginated under the parents #1436
-- Added settings to turn off global validations #1989
 - Display of In-statement properties in detail now diferentiates the levels #1563
 - Added checkbox ignore less than x contribution to stats #2757
+- Added settings to turn off global validations for Owner (global settings modal window) #1989
 
 ### Bug Fixes and Improvements:
 

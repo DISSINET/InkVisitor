@@ -155,8 +155,7 @@ export const EntityDetailValidationSection: React.FC<
               setLoadingValidations(true);
               api.detailGet(pickedEntity.id).then((data) => {
                 setLoadingValidations(false);
-                const otherValidations = (data.data as ITerritory).data
-                  .validations;
+                const otherValidations = data.data.data?.validations;
                 if (otherValidations && otherValidations.length > 0) {
                   if (replace) {
                     updateEntityMutation.mutate({
