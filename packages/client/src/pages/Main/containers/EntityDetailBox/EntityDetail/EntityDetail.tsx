@@ -87,6 +87,7 @@ const initValidation: ITerritoryValidation = {
   entityClassifications: [],
   entityLanguages: [],
   entityStatuses: [],
+  entitySOEs: [],
   allowedEntities: [],
   allowedClasses: [],
   propType: [],

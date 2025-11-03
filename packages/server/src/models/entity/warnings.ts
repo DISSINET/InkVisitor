@@ -1,6 +1,7 @@
 import Classification from "@models/relation/classification";
 import Relation from "@models/relation/relation";
 import Superclass from "@models/relation/superclass";
+import { Setting } from "@models/setting/setting";
 import { findEntityById, getEntitiesByIds } from "@service/shorthands";
 import { EntityEnums, RelationEnums, WarningTypeEnums } from "@shared/enums";
 import {
@@ -16,7 +17,6 @@ import { PropSpecKind } from "@shared/types/prop";
 import { IWarningPositionSection } from "@shared/types/warning";
 import { Connection } from "rethinkdb-ts";
 import Entity from "./entity";
-import { Setting } from "@models/setting/setting";
 
 export default class EntityWarnings {
   entityId: string;
@@ -121,11 +121,22 @@ export default class EntityWarnings {
         0
       );
 
+    const soeRels = await Relation.findForEntities(
+      conn,
+      [entity.id],
+      RelationEnums.Type.SuperordinateEntity,
+      0
+    );
+
     const classificationEs: IConcept[] = await getEntitiesByIds<IConcept>(
       conn,
       classificationRels.map((c) => c.entityIds[1])
     );
 
+    const soeEs = await getEntitiesByIds<IEntity>(
+      conn,
+      soeRels.map((s) => s.entityIds[1])
+    );
     const propValueEs = await getEntitiesByIds<IEntity>(
       conn,
       Entity.extractIdsFromProps(entity.props, [PropSpecKind.VALUE])
@@ -134,6 +145,7 @@ export default class EntityWarnings {
     return entity.getTBasedWarnings(
       [rootTerritory],
       classificationEs,
+      soeEs,
       propValueEs,
       settings
     );

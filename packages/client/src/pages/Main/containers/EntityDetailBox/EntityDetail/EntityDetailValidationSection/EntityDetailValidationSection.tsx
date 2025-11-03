@@ -25,6 +25,7 @@ const initValidation: ITerritoryValidation = {
   detail: "",
   entityClasses: [],
   entityClassifications: [],
+  entitySOEs: [],
   entityLanguages: [],
   entityStatuses: [],
   allowedEntities: [],
@@ -106,6 +107,7 @@ export const EntityDetailValidationSection: React.FC<
       updatedObject,
       ...validationsCopy.slice(key + 1),
     ];
+    console.log("changes", changes, newValidation);
     updateEntityMutation?.mutate({
       data: {
         validations: newValidation,

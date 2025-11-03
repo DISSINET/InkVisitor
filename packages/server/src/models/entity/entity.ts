@@ -5,6 +5,8 @@ import Prop from "@models/prop/prop";
 import User from "@models/user/user";
 import { findEntityById } from "@service/shorthands";
 
+import { AnchorsNode } from "@models/document/anchors";
+import { Setting } from "@models/setting/setting";
 import {
   DbEnums,
   EntityEnums,
@@ -35,8 +37,6 @@ import { IWarningPositionSection } from "@shared/types/warning";
 import { Connection, RDatum, WriteResult, r as rethink } from "rethinkdb-ts";
 import { IRequest } from "../../custom_typings/request";
 import Reference from "./reference";
-import { AnchorsNode } from "@models/document/anchors";
-import { Setting } from "@models/setting/setting";
 
 export default class Entity implements IEntity, IDbModel {
   static table = "entities";
@@ -386,6 +386,7 @@ export default class Entity implements IEntity, IDbModel {
   getTBasedWarnings(
     territoryEs: ITerritory[],
     classificationEs: IConcept[],
+    soeEs: IEntity[],
     propValueEs: IEntity[],
     settings: Setting[]
   ): IWarning[] {
@@ -424,6 +425,7 @@ export default class Entity implements IEntity, IDbModel {
       const {
         entityClasses,
         entityClassifications,
+        entitySOEs,
         entityLanguages,
         entityStatuses,
         tieType,
@@ -449,7 +451,16 @@ export default class Entity implements IEntity, IDbModel {
       const statusCheck =
         !entityStatuses?.length || entityStatuses.includes(this.status);
 
-      if (entityCheck && classificationCheck && languageCheck && statusCheck) {
+      const soeCheck =
+        !entitySOEs?.length || soeEs.some((e) => entitySOEs.includes(e.id));
+
+      if (
+        entityCheck &&
+        classificationCheck &&
+        languageCheck &&
+        statusCheck &&
+        soeCheck
+      ) {
         // CLASSIFICATION TIE
         if (tieType === EProtocolTieType.Classification) {
           if (!allowedEntities || !allowedEntities.length) {

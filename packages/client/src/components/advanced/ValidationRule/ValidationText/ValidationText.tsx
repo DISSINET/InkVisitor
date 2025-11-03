@@ -28,6 +28,7 @@ export const ValidationText: React.FC<ValidationText> = ({
     detail,
     entityClasses,
     entityClassifications,
+    entitySOEs,
     entityLanguages,
     entityStatuses,
     tieType,
@@ -146,6 +147,12 @@ export const ValidationText: React.FC<ValidationText> = ({
         <>
           {` classified as `}
           {renderEntityList(entityClassifications ?? [])}
+        </>
+      )}
+      {entitySOEs && entitySOEs.length > 0 && (
+        <>
+          {` having superordinate entity `}
+          {renderEntityList(entitySOEs ?? [])}
         </>
       )}
       {entityLanguages && entityLanguages.length > 0 && (

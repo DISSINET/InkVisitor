@@ -54,6 +54,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
     detail,
     entityClasses,
     entityClassifications,
+    entitySOEs,
     entityLanguages,
     entityStatuses,
     tieType,
@@ -162,6 +163,50 @@ export const ValidationRule: React.FC<ValidationRule> = ({
               disabled={
                 !userCanEdit || tieType === EProtocolTieType.Classification
               }
+            />
+          )}
+        </StyledFlexList>
+
+        {/* Entity SOE */}
+        <StyledLabel>having superordinate entity</StyledLabel>
+        <StyledFlexList>
+          {entitySOEs?.map((soe, key) => (
+            <EntityTag
+              key={key}
+              flexListMargin
+              entity={entities[soe]}
+              unlinkButton={
+                userCanEdit && {
+                  onClick: () =>
+                    updateValidationRule({
+                      entitySOEs: entitySOEs.filter((s) => s !== soe),
+                    }),
+                }
+              }
+            />
+          ))}
+          {!(!userCanEdit && entitySOEs && entitySOEs?.length > 0) && (
+            <EntitySuggester
+              inputWidth="full"
+              alwaysShowCreateModal
+              excludedActantIds={entitySOEs}
+              categoryTypes={[
+                EntityEnums.Class.Location,
+                EntityEnums.Class.Object,
+                EntityEnums.Class.Event,
+                EntityEnums.Class.Group,
+                EntityEnums.Class.Statement,
+                EntityEnums.Class.Value,
+                EntityEnums.Class.Resource,
+                EntityEnums.Class.Person,
+                EntityEnums.Class.Being,
+              ]}
+              onPicked={(entity) =>
+                updateValidationRule({
+                  entitySOEs: [...(entitySOEs ?? []), entity.id],
+                })
+              }
+              disabled={!userCanEdit}
             />
           )}
         </StyledFlexList>

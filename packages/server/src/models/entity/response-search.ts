@@ -6,7 +6,7 @@ import Statement from "@models/statement/statement";
 import Territory from "@models/territory/territory";
 import { getEntitiesByIds } from "@service/shorthands";
 import treeCache from "@service/treeCache";
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums, RelationEnums } from "@shared/enums";
 import { IConcept, IEntity, ITerritory, RequestSearch } from "@shared/types";
 import { PropSpecKind } from "@shared/types/prop";
 import { Connection, r, RDatum, RTable } from "rethinkdb-ts";
@@ -15,6 +15,7 @@ import Entity from "./entity";
 import { ResponseEntity } from "./response";
 import { IRequestSearchRootValidity } from "@shared/types/request-search";
 import { Setting } from "@models/setting/setting";
+import Relation from "@models/relation/relation";
 
 /**
  * SearchQuery is customized builder for search queries, allowing to build query by chaining prepared filters
@@ -574,6 +575,17 @@ export class ResponseSearch {
           conn,
           classificationRels.map((c) => c.entityIds[1])
         );
+
+        const soeRels = await Relation.findForEntities(
+          conn,
+          [entity.id],
+          RelationEnums.Type.SuperordinateEntity,
+          0
+        );
+        const soeEs = await getEntitiesByIds<IEntity>(
+          conn,
+          soeRels.map((s) => s.entityIds[1])
+        );
         const propValueEs = await getEntitiesByIds<IEntity>(
           conn,
           Entity.extractIdsFromProps(entity.props, [PropSpecKind.VALUE])
@@ -584,6 +596,7 @@ export class ResponseSearch {
         const warnings = entityModel.getTBasedWarnings(
           [rootT],
           classificationEs,
+          soeEs,
           propValueEs,
           settings
         );
