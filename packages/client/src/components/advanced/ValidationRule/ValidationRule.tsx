@@ -84,14 +84,13 @@ export const ValidationRule: React.FC<ValidationRule> = ({
     if (!allowedEntities) {
       return false;
     }
+    return true;
 
-    if (tieType === EProtocolTieType.Reference) {
-      // we do not want to allow multiple resources
-      // should be fixed in the future by introducing logic
-      return allowedEntities?.length !== 1;
-    } else {
-      return true;
-    }
+    // if (tieType === EProtocolTieType.Reference) {
+    //   return allowedEntities?.length !== 1;
+    // } else {
+    //   return true;
+    // }
   }, [tieType, allowedEntities, userCanEdit]);
 
   return (

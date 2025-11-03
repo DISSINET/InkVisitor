@@ -130,7 +130,7 @@ export const EntityDetailValidationSection: React.FC<
             }}
           />
         </StyledExpandIcon>
-        Validation rules
+        Validation rules ({validations?.length ?? 0})
         {userCanEdit && isValidationExpanded && (
           <span style={{ marginLeft: "1rem", marginRight: "1rem" }}>
             <Button

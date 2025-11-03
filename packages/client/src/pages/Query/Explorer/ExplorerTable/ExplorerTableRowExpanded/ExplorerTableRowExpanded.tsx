@@ -1,6 +1,6 @@
 import { languageDict } from "@shared/dictionaries";
 import { EntityEnums } from "@shared/enums";
-import { IEntity, IProp } from "@shared/types";
+import { IEntity, IProp, IResponseDetail } from "@shared/types";
 import { Explore } from "@shared/types/query";
 import { ITerritoryValidation } from "@shared/types/territory";
 import { useQuery } from "@tanstack/react-query";
@@ -29,7 +29,6 @@ import {
   StyledExpRowSectionContent,
   StyledExpRowSectionHeader,
 } from "./ExplorerTableRowExpandedStyles";
-import { getEntityLabel } from "utils/utils";
 
 interface ExplorerTableRowExpanded {
   rowEntity: IEntity;
@@ -131,6 +130,32 @@ export const ExplorerTableRowExpanded: React.FC<ExplorerTableRowExpanded> = ({
         />
       </div>
     );
+  };
+
+  const isTerritoryWithParent = (entity: IResponseDetail): boolean => {
+    return (
+      entity.class === EntityEnums.Class.Territory &&
+      entity.data.parent &&
+      Object.keys(entity.entities).includes(entity.data.parent.territoryId)
+    );
+  };
+
+  const isStatementWithTerritory = (entity: IResponseDetail): boolean => {
+    return (
+      entity.class === EntityEnums.Class.Statement &&
+      entity.data.territory &&
+      Object.keys(entity.entities).includes(entity.data.territory.territoryId)
+    );
+  };
+
+  const getTerritoryId = (entity: IResponseDetail) => {
+    if (isTerritoryWithParent(entity)) {
+      return entity.entities[entity.data.parent.territoryId].id;
+    } else if (isStatementWithTerritory(entity)) {
+      return entity.entities[entity.data.territory.territoryId].id;
+    } else {
+      return undefined;
+    }
   };
 
   const alternativeLabels = entity?.labels.slice(1);
@@ -257,12 +282,13 @@ export const ExplorerTableRowExpanded: React.FC<ExplorerTableRowExpanded> = ({
                         | undefined
                     }
                     entities={entity.entities}
+                    entity={entity}
+                    updateEntityMutation={updateEntityMutation}
                     userCanEdit={false}
-                    // entity={entity}
-                    // updateEntityMutation={updateEntityMutation}
-                    // isInsideTemplate={isInsideTemplate}
-                    // territoryParentId={getTerritoryId(entity)}
-                    // setLoadingValidations={setLoadingValidations}
+                    isInsideTemplate={false}
+                    territoryParentId={getTerritoryId(entity)}
+                    setLoadingValidations={setLoadingValidations}
+                    widthTooNarrow={false}
                   />
                 )}
                 <Loader show={isFetching} size={40} />

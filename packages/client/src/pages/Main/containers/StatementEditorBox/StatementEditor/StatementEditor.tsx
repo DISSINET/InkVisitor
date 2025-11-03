@@ -42,6 +42,7 @@ import useAnnotator from "hooks/useAnnotator";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   AiOutlineCaretDown,
+  AiOutlineCaretRight,
   AiOutlineCaretUp,
   AiOutlineWarning,
 } from "react-icons/ai";
@@ -890,16 +891,20 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           <StyledEditorSection $widthTooNarrow={editorWidthTooNarrow}>
             <StyledEditorSectionHeader>
               <StyledEditorSectionHeading>
-                {statement.warnings.length} Warnings{" "}
-                {statement.warnings.length > 0 && (
-                  <TiWarningOutline size={16} style={{ marginLeft: "3px" }} />
-                )}
+                Warnings ({statement.warnings.length})
               </StyledEditorSectionHeading>
               <Button
                 iconRight={
-                  showWarnings ? <AiOutlineCaretUp /> : <AiOutlineCaretDown />
+                  <AiOutlineCaretRight
+                    style={{
+                      transform: showWarnings
+                        ? `rotate(90deg)`
+                        : `rotate(0deg)`,
+                      transition: "transform 0.2s ease",
+                    }}
+                  />
                 }
-                label={showWarnings ? "hide warnings" : "show warnings"}
+                label={showWarnings ? "hide" : "show"}
                 onClick={() => dispatch(setShowWarnings(!showWarnings))}
                 color="warning"
                 tooltipPosition="right"
