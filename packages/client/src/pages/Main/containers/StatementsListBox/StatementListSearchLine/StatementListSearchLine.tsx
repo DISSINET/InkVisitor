@@ -67,6 +67,7 @@ interface StatementListSearchLine {
   >;
   isRegexMode: boolean;
   setIsRegexMode: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsSaving: React.Dispatch<React.SetStateAction<boolean>>;
 }
 export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
   searchTerm,
@@ -89,6 +90,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
   setSearchOccurences,
   isRegexMode,
   setIsRegexMode,
+  setIsSaving,
 }) => {
   const theme = useTheme();
 
@@ -346,30 +348,91 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                     searchOccurences &&
                     searchOccurences.length > 0
                   ) {
-                    // Replace all occurrences from last to first to avoid position shifting issues
-                    const occurrencesToReplace = [
-                      ...searchOccurences,
-                    ].reverse();
-                    let replacedCount = 0;
+                    setIsSaving(true);
 
-                    occurrencesToReplace.forEach((occurrence) => {
-                      // Select the occurrence
-                      annotator?.selectSearchOccurrence(occurrence);
+                    try {
+                      // Get the current text content
+                      const currentText = annotator.text.value;
 
-                      // Replace the text
-                      annotator?.onReplaceText(replaceWith);
+                      // Convert all occurrences to absolute text positions
+                      // Process from end to start to avoid position shifting issues
+                      const replacements: Array<{
+                        startIndex: number;
+                        endIndex: number;
+                      }> = [];
 
-                      replacedCount++;
-                    });
+                      for (const occurrence of searchOccurences) {
+                        // Validate segment exists
+                        const segment =
+                          annotator.text.segments[occurrence.segmentIndex];
+                        if (!segment) continue;
 
-                    // Clear search occurrences since they're all replaced
-                    setSearchOccurences(null);
-                    setSearchActiveOccurence(0);
+                        // Convert occurrence to absolute coordinates
+                        const absLineStart =
+                          segment.lineStart + occurrence.lineIndex;
+                        const absLineEnd = absLineStart;
 
-                    // Save the content
-                    handleSaveNewContent(
-                      `${replacedCount} occurrences replaced`
-                    );
+                        // Get segment positions for start and end
+                        const startSegment = annotator.text.getSegmentPosition(
+                          absLineStart,
+                          occurrence.start
+                        );
+                        const endSegment = annotator.text.getSegmentPosition(
+                          absLineEnd,
+                          occurrence.end
+                        );
+
+                        if (startSegment && endSegment) {
+                          const startIndex =
+                            annotator.text.getAbsTextIndexFromPosition(
+                              startSegment
+                            );
+                          const endIndex =
+                            annotator.text.getAbsTextIndexFromPosition(
+                              endSegment
+                            );
+
+                          if (startIndex >= 0 && endIndex >= 0) {
+                            replacements.push({ startIndex, endIndex });
+                          }
+                        }
+                      }
+
+                      // Sort by endIndex descending to process from end to start
+                      replacements.sort((a, b) => b.endIndex - a.endIndex);
+
+                      // Apply all replacements to the text string
+                      let newText = currentText;
+                      for (const { startIndex, endIndex } of replacements) {
+                        if (
+                          startIndex >= 0 &&
+                          endIndex >= startIndex &&
+                          endIndex <= newText.length
+                        ) {
+                          newText =
+                            newText.slice(0, startIndex) +
+                            replaceWith +
+                            newText.slice(endIndex);
+                        }
+                      }
+
+                      // Update the text once with all replacements
+                      annotator.updateText(newText);
+
+                      // Clear search occurrences since they're all replaced
+                      setSearchOccurences(null);
+                      setSearchActiveOccurence(0);
+
+                      // Save the content
+                      handleSaveNewContent(
+                        `${replacements.length} occurrences replaced`
+                      );
+                    } catch (error) {
+                      console.error("Error replacing all occurrences:", error);
+                      toast.error("Failed to replace all occurrences");
+                    } finally {
+                      setIsSaving(false);
+                    }
                   }
                 }}
                 disabled={
