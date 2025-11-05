@@ -2,9 +2,7 @@ import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import { Button, ButtonGroup } from "components";
 import { EntityTag } from "components/advanced";
-import React from "react";
 import { FaLink, FaPlusSquare } from "react-icons/fa";
-import { areEqual } from "react-window";
 import { EntitySuggestion } from "types";
 import {
   StyledSuggestionLineActions,
@@ -16,30 +14,32 @@ import {
 
 export type SuggestionRowEntityItemData = {
   items: EntitySuggestion[];
-  onPick: (entity: IEntity, duplicate?: boolean) => void;
+};
+
+interface SuggestionRowEntityProps {
+  data: SuggestionRowEntityItemData;
+  index: number;
+  style: any;
   selected: number;
   isInsideTemplate: boolean;
   territoryParentId: string | undefined;
   disableButtons: boolean;
   disableTemplateInstantiation: boolean;
-};
-
-interface EntityRow {
-  data: SuggestionRowEntityItemData;
-  index: number;
-  style: any;
+  onPick: (entity: IEntity, duplicate?: boolean) => void;
 }
 
-const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
-  const {
-    items,
-    onPick,
-    selected,
-    isInsideTemplate,
-    territoryParentId,
-    disableButtons,
-    disableTemplateInstantiation,
-  } = data;
+export const SuggestionRowEntityRow: React.FC<SuggestionRowEntityProps> = ({
+  data,
+  index,
+  style,
+  selected,
+  isInsideTemplate,
+  territoryParentId,
+  disableButtons,
+  disableTemplateInstantiation,
+  onPick,
+}) => {
+  const { items } = data;
   const { entity, icons } = items[index];
   const isNotDiscouraged = entity.status !== EntityEnums.Status.Discouraged;
   const territoryWithoutParent =
@@ -129,5 +129,3 @@ const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
     </StyledSuggestionRow>
   );
 };
-
-export const MemoizedEntityRow = React.memo(EntityRow, areEqual);

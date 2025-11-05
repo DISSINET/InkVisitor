@@ -22,7 +22,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { DropTargetMonitor, useDrop } from "react-dnd";
 import { FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
-import { FixedSizeList as List } from "react-window";
+import { List, ListProps } from "react-window";
 import {
   EntityDragItem,
   EntitySingleDropdownItem,
@@ -41,7 +41,7 @@ import {
   SuggesterHidden,
 } from "./SuggesterStyles";
 import {
-  MemoizedEntityRow,
+  SuggestionRowEntityRow,
   SuggestionRowEntityItemData,
 } from "./SuggestionRow/SuggestionRow";
 
@@ -253,33 +253,35 @@ export const Suggester: React.FC<Suggester> = ({
   };
 
   const renderEntitySuggestions = (suggestions: EntitySuggestion[]) => {
-    const itemData: SuggestionRowEntityItemData = {
-      items: suggestions,
-      onPick,
-      selected,
-      isInsideTemplate,
-      territoryParentId,
-      disableButtons,
-      disableTemplateInstantiation,
-    };
-
     const rowHeight = 25;
 
     return (
-      <List
-        itemData={itemData as SuggestionRowEntityItemData}
-        height={
-          suggestions.length > 7
-            ? rowHeight * 8
-            : rowHeight * suggestions.length
-        }
-        itemCount={suggestions.length}
-        itemSize={rowHeight}
-        width="100%"
+      <List<SuggestionRowEntityItemData>
+        // height={
+        //   suggestions.length > 7
+        //     ? rowHeight * 8
+        //     : rowHeight * suggestions.length
+        // }
+        rowProps={{ items: suggestions }}
+        rowCount={suggestions.length}
+        rowHeight={rowHeight}
+        style={{ maxHeight: "20rem" }}
         overscanCount={scrollOverscanCount}
-      >
-        {MemoizedEntityRow}
-      </List>
+        rowComponent={(props) => {
+          return (
+            <SuggestionRowEntityRow
+              {...props}
+              data={{ items: suggestions }}
+              selected={selected}
+              isInsideTemplate={isInsideTemplate}
+              territoryParentId={territoryParentId}
+              disableButtons={disableButtons}
+              disableTemplateInstantiation={disableTemplateInstantiation}
+              onPick={onPick}
+            />
+          );
+        }}
+      />
     );
   };
 

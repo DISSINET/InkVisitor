@@ -5,7 +5,7 @@ import { Button } from "components";
 import { EntityTag } from "components/advanced";
 import { useSearchParams, useTheme } from "hooks";
 import React, { useMemo } from "react";
-import { VariableSizeList as List } from "react-window";
+import { List } from "react-window";
 import { FaEdit } from "react-icons/fa";
 import { renderEntityTag } from "../EntityDetailUsedInTableUtils";
 import {
@@ -163,19 +163,29 @@ export const EntityDetailStatementPropsTable: React.FC<
           </StyledTableHeader>
 
           <List
-            height={totalHeight}
-            width="100%"
-            itemCount={useCases.length}
-            itemSize={(index) => itemSizes[index] || 30}
-            itemData={{
-              useCases,
-              entities,
-              handleEditClick,
-              separatorHeight,
+            rowCount={useCases.length}
+            rowHeight={(index) => itemSizes[index] || 30}
+            rowProps={{
+              data: {
+                useCases,
+                entities,
+                handleEditClick,
+                separatorHeight,
+              },
             }}
-          >
-            {RowRenderer}
-          </List>
+            style={{ maxHeight: `${totalHeight}px` }}
+            rowComponent={(props) => (
+              <RowRenderer
+                {...props}
+                data={{
+                  useCases,
+                  entities,
+                  handleEditClick,
+                  separatorHeight,
+                }}
+              />
+            )}
+          />
         </StyledTableWrapper>
       )}
     </>
