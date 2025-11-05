@@ -8,7 +8,7 @@ import {
   EntitySuggester,
   EntityTag,
 } from "components/advanced";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { BiSearch } from "react-icons/bi";
 import {
   FaAnchor,
@@ -67,7 +67,7 @@ interface StatementListSearchLine {
   >;
   isRegexMode: boolean;
   setIsRegexMode: React.Dispatch<React.SetStateAction<boolean>>;
-  setIsSaving: React.Dispatch<React.SetStateAction<boolean>>;
+  dataDocumentIsFetching?: boolean;
 }
 export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
   searchTerm,
@@ -90,10 +90,11 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
   setSearchOccurences,
   isRegexMode,
   setIsRegexMode,
-  // setIsSaving,
+  dataDocumentIsFetching,
 }) => {
   const theme = useTheme();
-  const [isReplacing, setIsReplacing] = useState<boolean>(false);
+  const [isReplacingOne, setIsReplacingOne] = useState<boolean>(false);
+  const [isReplacingAll, setIsReplacingAll] = useState<boolean>(false);
   const replaceSection = useMemo<boolean>(() => {
     return annotatorMode !== EditMode.HIGHLIGHT;
   }, [annotatorMode]);
@@ -116,7 +117,8 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
       }
     },
     onSettled: () => {
-      setIsReplacing(false);
+      setIsReplacingOne(false);
+      setIsReplacingAll(false);
     },
   });
 
@@ -152,13 +154,13 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
   }, [searchOccurences]);
 
   const replaceOccurence = () => {
-    setIsReplacing(true);
+    setIsReplacingOne(true);
     annotator?.onReplaceText(replaceWith);
 
     // Store the current search state before saving
     const currentSearchActiveOccurence = searchActiveOccurence;
     if (searchOccurences === null) {
-      setIsReplacing(false);
+      setIsReplacingOne(false);
       return;
     }
     const newOccurrences = searchOccurences.filter(
@@ -187,7 +189,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
   };
 
   const replaceAllOccurences = () => {
-    setIsReplacing(true);
+    setIsReplacingAll(true);
     if (annotator && searchOccurences && searchOccurences.length > 0) {
       try {
         // Get the current text content
@@ -264,10 +266,10 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
       } catch (error) {
         console.error("Error replacing all occurrences:", error);
         toast.error("Failed to replace all occurrences");
-        setIsReplacing(false);
+        setIsReplacingAll(false);
       }
     } else {
-      setIsReplacing(false);
+      setIsReplacingAll(false);
     }
   };
 
@@ -416,45 +418,53 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                 minWidth={50}
                 clearable
               />
-              <Button
-                circular
-                color="info"
-                inverted
-                tooltipLabel="replace one occurence"
-                noBackground
-                icon={<LuReplace size={12} />}
-                onClick={replaceOccurence}
-                disabled={
-                  searchOccurences === null ||
-                  searchOccurences.length === 0 ||
-                  replaceWith.length === 0 ||
-                  isReplacing
-                }
-              />
-              <Button
-                circular
-                color="info"
-                inverted
-                tooltipLabel="replace all occurences"
-                noBackground
-                icon={<LuReplaceAll size={12} />}
-                onClick={replaceAllOccurences}
-                disabled={
-                  searchOccurences === null ||
-                  searchOccurences.length === 0 ||
-                  replaceWith.length === 0 ||
-                  isReplacing
-                }
-              />
               <div
                 style={{
                   position: "relative",
-                  width: "1rem",
-                  height: "1rem",
-                  marginLeft: "0.5rem",
                 }}
               >
-                <Loader show={isReplacing} size={17} noBackground />
+                <Button
+                  circular
+                  color="info"
+                  inverted
+                  tooltipLabel="replace one occurence"
+                  noBackground
+                  icon={<LuReplace size={12} />}
+                  onClick={replaceOccurence}
+                  disabled={
+                    searchOccurences === null ||
+                    searchOccurences.length === 0 ||
+                    replaceWith.length === 0 ||
+                    isReplacingOne ||
+                    isReplacingAll ||
+                    dataDocumentIsFetching
+                  }
+                />
+                <Loader show={isReplacingOne} size={12} noBackground />
+              </div>
+              <div
+                style={{
+                  position: "relative",
+                }}
+              >
+                <Button
+                  circular
+                  color="info"
+                  inverted
+                  tooltipLabel="replace all occurences"
+                  noBackground
+                  icon={<LuReplaceAll size={12} />}
+                  onClick={replaceAllOccurences}
+                  disabled={
+                    searchOccurences === null ||
+                    searchOccurences.length === 0 ||
+                    replaceWith.length === 0 ||
+                    isReplacingOne ||
+                    isReplacingAll ||
+                    dataDocumentIsFetching
+                  }
+                />
+                <Loader show={isReplacingAll} size={12} noBackground />
               </div>
             </>
           )}

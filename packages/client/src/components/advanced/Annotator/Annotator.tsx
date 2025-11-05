@@ -865,7 +865,7 @@ export const TextAnnotator = ({
         setSearchOccurences={setSearchOccurences}
         isRegexMode={isRegexMode}
         setIsRegexMode={setIsRegexMode}
-        setIsSaving={setIsSavingWithoutRefresh}
+        dataDocumentIsFetching={dataDocumentIsFetching}
       />
 
       <div
