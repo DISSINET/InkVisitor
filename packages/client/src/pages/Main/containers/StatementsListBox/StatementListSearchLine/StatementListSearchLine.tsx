@@ -343,13 +343,12 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                 noBackground
                 icon={<LuReplaceAll size={12} />}
                 onClick={() => {
+                  setIsSaving(true);
                   if (
                     annotator &&
                     searchOccurences &&
                     searchOccurences.length > 0
                   ) {
-                    setIsSaving(true);
-
                     try {
                       // Get the current text content
                       const currentText = annotator.text.value;
@@ -423,6 +422,9 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                       setSearchOccurences(null);
                       setSearchActiveOccurence(0);
 
+                      // Clear the selection/highlight
+                      annotator.clearSelection();
+
                       // Save the content
                       handleSaveNewContent(
                         `${replacements.length} occurrences replaced`
@@ -431,9 +433,9 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                       console.error("Error replacing all occurrences:", error);
                       toast.error("Failed to replace all occurrences");
                     } finally {
-                      setIsSaving(false);
                     }
                   }
+                  setIsSaving(false);
                 }}
                 disabled={
                   searchOccurences === null ||
