@@ -2,13 +2,13 @@ import { Annotator, EditMode } from "@inkvisitor/annotator/src/lib";
 import { IDocument, IResponseEntity } from "@shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Button, Checkbox, IconWithTooltip, Input } from "components";
+import { Button, Checkbox, IconWithTooltip, Input, Loader } from "components";
 import {
   AttributeButtonGroup,
   EntitySuggester,
   EntityTag,
 } from "components/advanced";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { BiSearch } from "react-icons/bi";
 import {
   FaAnchor,
@@ -90,10 +90,10 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
   setSearchOccurences,
   isRegexMode,
   setIsRegexMode,
-  setIsSaving,
+  // setIsSaving,
 }) => {
   const theme = useTheme();
-
+  const [isReplacing, setIsReplacing] = useState<boolean>(false);
   const replaceSection = useMemo<boolean>(() => {
     return annotatorMode !== EditMode.HIGHLIGHT;
   }, [annotatorMode]);
@@ -114,6 +114,9 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
       if (data.successMessage) {
         toast.info(data.successMessage);
       }
+    },
+    onSettled: () => {
+      setIsReplacing(false);
     },
   });
 
@@ -149,12 +152,15 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
   }, [searchOccurences]);
 
   const replaceOccurence = () => {
-    setIsSaving(true);
+    setIsReplacing(true);
     annotator?.onReplaceText(replaceWith);
 
     // Store the current search state before saving
     const currentSearchActiveOccurence = searchActiveOccurence;
-    if (searchOccurences === null) return;
+    if (searchOccurences === null) {
+      setIsReplacing(false);
+      return;
+    }
     const newOccurrences = searchOccurences.filter(
       (_, index) => index !== searchActiveOccurence
     );
@@ -178,11 +184,10 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
 
     // Save the content
     handleSaveNewContent();
-    setIsSaving(false);
   };
 
   const replaceAllOccurences = () => {
-    setIsSaving(true);
+    setIsReplacing(true);
     if (annotator && searchOccurences && searchOccurences.length > 0) {
       try {
         // Get the current text content
@@ -259,10 +264,11 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
       } catch (error) {
         console.error("Error replacing all occurrences:", error);
         toast.error("Failed to replace all occurrences");
-      } finally {
+        setIsReplacing(false);
       }
+    } else {
+      setIsReplacing(false);
     }
-    setIsSaving(false);
   };
 
   return (
@@ -421,7 +427,8 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                 disabled={
                   searchOccurences === null ||
                   searchOccurences.length === 0 ||
-                  replaceWith.length === 0
+                  replaceWith.length === 0 ||
+                  isReplacing
                 }
               />
               <Button
@@ -435,9 +442,20 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                 disabled={
                   searchOccurences === null ||
                   searchOccurences.length === 0 ||
-                  replaceWith.length === 0
+                  replaceWith.length === 0 ||
+                  isReplacing
                 }
               />
+              <div
+                style={{
+                  position: "relative",
+                  width: "1rem",
+                  height: "1rem",
+                  marginLeft: "0.5rem",
+                }}
+              >
+                <Loader show={isReplacing} size={17} noBackground />
+              </div>
             </>
           )}
         </>
