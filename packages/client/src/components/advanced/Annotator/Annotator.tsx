@@ -136,12 +136,6 @@ export const TextAnnotator = ({
     }
   }, [localTextContent, dataDocument?.content]);
 
-  useEffect(() => {
-    console.log("isChangeMade", isChangeMade);
-    console.log("localTextContent", localTextContent);
-    console.log("dataDocument?.content", dataDocument?.content);
-  }, [isChangeMade, localTextContent, dataDocument?.content]);
-
   const [territoryElvl, setTerritoryElvl] = useState<EntityEnums.Elvl>();
 
   const resetAnnotator = () => {
