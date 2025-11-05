@@ -300,6 +300,9 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                 // label=".*"
                 icon={<LuRegex />}
                 tooltipLabel="Enable regex mode"
+                tooltipContent={
+                  <p>Example of selecting whole word: [^ ]*word[^ .,]*</p>
+                }
               />
             </StyledCheckboxWrapper>
 
