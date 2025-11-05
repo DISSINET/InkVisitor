@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { useEffect, useMemo, useReducer, useRef, useState } from "react";
 
-import { Query } from "@shared/types";
+import { IResponseQuery, Query } from "@shared/types";
 import { Explore } from "@shared/types/query";
 import api from "api";
 import { Box, Button, Loader, Panel } from "components";
@@ -83,23 +83,6 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     exploreStateInitial
   );
 
-  const prevQueryState = useRef<Query.INode>(queryState);
-  const prevExploreState = useRef<Explore.IExplore>(exploreState);
-
-  useEffect(() => {
-    if (queryDiff(prevQueryState.current, queryState)) {
-      prevQueryState.current = queryState;
-      handleInvalidateQuery();
-    }
-  }, [queryState]);
-
-  useEffect(() => {
-    if (exploreDiff(prevExploreState.current, exploreState)) {
-      prevExploreState.current = exploreState;
-      handleInvalidateQuery();
-    }
-  }, [exploreState]);
-
   const handleInvalidateQuery = () => {
     queryClient.invalidateQueries({
       queryKey: ["query"],
@@ -128,6 +111,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
       }
     },
     staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 30,
     enabled: queryStateValidity.isValid && api.isLoggedIn(),
   });
 
@@ -141,6 +125,48 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
   const handleExport = (rowIndices: number[]) => {
     toast.success("Exporting data...");
     api.queryExport(queryState, exploreState, rowIndices);
+  };
+
+  const invalidateActiveQuery = () => {
+    queryClient.invalidateQueries({
+      queryKey: [
+        "query",
+        {
+          query: queryState,
+          explore: exploreState,
+        },
+      ],
+      exact: true,
+    });
+  };
+
+  const prefetchWindow = (offset: number, limit: number) => {
+    const exploreWithWindow: Explore.IExplore = {
+      ...exploreState,
+      offset,
+      limit,
+    };
+
+    return queryClient.prefetchQuery({
+      queryKey: [
+        "query",
+        {
+          query: queryState,
+          explore: exploreWithWindow,
+        },
+      ],
+      queryFn: async () => {
+        if (queryStateValidity.isValid && api.isLoggedIn()) {
+          const res = await api.query({
+            query: queryState,
+            explore: exploreWithWindow,
+          });
+          return res.data;
+        }
+      },
+      staleTime: 1000 * 60 * 5,
+      gcTime: 1000 * 60 * 30,
+    });
   };
 
   const handleSeparatorYPositionChange = (xPosition: number) => {
@@ -232,10 +258,12 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
             state={exploreState}
             height={contentHeight - querySeparatorYPosition}
             dispatch={exploreStateDispatch}
-            data={queryData}
+            data={queryData as IResponseQuery | undefined}
             isQueryFetching={queryIsFetching}
             queryError={queryError}
             onExport={handleExport}
+            onPrefetchWindow={prefetchWindow}
+            invalidateActiveQuery={invalidateActiveQuery}
           />
           <Loader show={queryIsFetching} />
         </Box>

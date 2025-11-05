@@ -19,6 +19,7 @@ import api from "api";
 import { EntitySuggester, EntityTag } from "components/advanced";
 import { deleteProp, deleteRef } from "constructors";
 
+import { EntityEnums } from "@shared/enums";
 import {
   StyledCell,
   StyledCheckboxWrapper,
@@ -28,7 +29,6 @@ import {
   StyledUserTag,
 } from "./ExplorerTableStyles";
 import { WIDTH_COLUMN_DEFAULT, WIDTH_COLUMN_FIRST } from "./types";
-import { EntityEnums } from "@shared/enums";
 
 interface ExplorerTableRowProps {
   rowId: number;
@@ -46,6 +46,7 @@ interface ExplorerTableRowProps {
   isSelected?: boolean;
   isLastClicked?: boolean;
   isExpanded?: boolean;
+  invalidateActiveQuery?: () => void;
 }
 const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
   rowId,
@@ -59,6 +60,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
   isSelected = false,
   isLastClicked = false,
   isExpanded = false,
+  invalidateActiveQuery,
 }) => {
   const themeContext = useContext(ThemeContext);
 
@@ -70,10 +72,14 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
       changes: Partial<IEntity>;
     }) => await api.entityUpdate(variables.entityId, variables.changes),
 
-    onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: ["query"],
-      });
+    onSuccess: () => {
+      if (invalidateActiveQuery) {
+        invalidateActiveQuery();
+      } else {
+        queryClient.invalidateQueries({
+          queryKey: ["query"],
+        });
+      }
     },
   });
 
@@ -318,5 +324,4 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
   );
 };
 
-const MemoizedExplorerTableRow = React.memo(ExplorerTableRow);
-export default MemoizedExplorerTableRow;
+export default React.memo(ExplorerTableRow);

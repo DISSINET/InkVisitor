@@ -28,7 +28,7 @@ import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 import { CMetaProp } from "constructors";
 
 import { ExploreAction, ExploreActionType } from "../state";
-import MemoizedExplorerTableRow from "./ExplorerTableRow";
+import ExplorerTableRow from "./ExplorerTableRow";
 import { ExplorerTableRowExpanded } from "./ExplorerTableRowExpanded/ExplorerTableRowExpanded";
 import {
   StyledBody,
@@ -52,6 +52,9 @@ import {
   WIDTH_COLUMN_FIRST,
 } from "./types";
 import { useResizeObserver } from "hooks";
+import { BeatLoader } from "react-spinners";
+
+const OVERSCAN_ROWS = 20;
 
 const initialNewColumn: Explore.IExploreColumn = {
   id: uuidv4(),
@@ -68,6 +71,8 @@ interface ExplorerTable {
   queryError: Error | null;
   height: number;
   onExport: (rowsSelected: number[]) => void;
+  onPrefetchWindow?: (offset: number, limit: number) => void;
+  invalidateActiveQuery?: () => void;
 }
 export const ExplorerTable: React.FC<ExplorerTable> = ({
   state,
@@ -77,6 +82,8 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   queryError,
   height: heightBox,
   onExport,
+  onPrefetchWindow,
+  invalidateActiveQuery,
 }) => {
   const { entities, total: incomingTotal } = data ?? {
     entities: [],
@@ -114,10 +121,14 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       changes: Partial<IEntity>;
     }) => await api.entityUpdate(variables.entityId, variables.changes),
 
-    onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: ["query"],
-      });
+    onSuccess: () => {
+      if (invalidateActiveQuery) {
+        invalidateActiveQuery();
+      } else {
+        queryClient.invalidateQueries({
+          queryKey: ["query"],
+        });
+      }
     },
   });
 
@@ -254,66 +265,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     [columns]
   );
 
-  // const renderPaging = () => {
-  //   return (
-  //     <StyledPagination style={{ display: "flex", alignItems: "center" }}>
-  //       <span
-  //         style={{ marginRight: "1rem" }}
-  //       >{`page ${pageNumber} of ${totalPages}`}</span>
-  //       <span
-  //         style={{ marginRight: "1rem" }}
-  //       >{`records ${startRecord}-${endRecord} of ${total}`}</span>
-  //       {state.limit < total && (
-  //         <span
-  //           style={{
-  //             display: "inline-grid",
-  //             gap: "0.5rem",
-  //             gridTemplateColumns: "repeat(4,auto)",
-  //             marginRight: "1rem",
-  //           }}
-  //         >
-  //           <Button
-  //             onClick={handleFirstPage}
-  //             disabled={!canGoToPreviousPage}
-  //             icon={<LuChevronFirst size={13} />}
-  //             inverted
-  //             color="greyer"
-  //             radiusLeft
-  //             radiusRight
-  //           />
-  //           <Button
-  //             onClick={handlePreviousPage}
-  //             disabled={!canGoToPreviousPage}
-  //             icon={<LuChevronLeft size={13} />}
-  //             inverted
-  //             color="greyer"
-  //             radiusLeft
-  //             radiusRight
-  //           />
-  //           <Button
-  //             onClick={handleNextPage}
-  //             disabled={!canGoToNextPage}
-  //             icon={<LuChevronRight size={13} />}
-  //             inverted
-  //             color="greyer"
-  //             radiusLeft
-  //             radiusRight
-  //           />
-  //           <Button
-  //             onClick={handleLastPage}
-  //             disabled={!canGoToNextPage}
-  //             icon={<LuChevronLast size={13} />}
-  //             inverted
-  //             color="greyer"
-  //             radiusLeft
-  //             radiusRight
-  //           />
-  //         </span>
-  //       )}
-  //     </StyledPagination>
-  //   );
-  // };
-
   // const renderTableFooter = () => {
   //   return <StyledTableFooter>{renderPaging()}</StyledTableFooter>;
   // };
@@ -417,6 +368,10 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     setVisibleItems(visible);
   };
 
+  const windowUpdateTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
+
   useEffect(() => {
     if (visibleItems.length === 0) return;
 
@@ -424,18 +379,43 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     const topItem = Math.min(...indices);
     const bottomItem = Math.max(...indices);
 
-    const newOffset = topItem;
-    const newLimit = bottomItem - topItem + 1;
+    const bufferedTop = Math.max(0, topItem - OVERSCAN_ROWS);
+    const bufferedBottom = Math.min(total - 1, bottomItem + OVERSCAN_ROWS);
+    const newOffset = bufferedTop;
+    const newLimit = Math.max(1, bufferedBottom - bufferedTop + 1);
 
-    // console.log("new scroll items", newOffset, newLimit, visibleItems);
-
-    if (newOffset !== offset || newLimit !== limit) {
-      dispatch({
-        type: ExploreActionType.setLimitAndOffset,
-        payload: { offset: newOffset, limit: newLimit },
-      });
+    if (windowUpdateTimeoutRef.current) {
+      clearTimeout(windowUpdateTimeoutRef.current);
     }
-  }, [visibleItems.join("-")]);
+
+    windowUpdateTimeoutRef.current = setTimeout(() => {
+      if (newOffset !== offset || newLimit !== limit) {
+        dispatch({
+          type: ExploreActionType.setLimitAndOffset,
+          payload: { offset: newOffset, limit: newLimit },
+        });
+
+        // Prefetch neighboring windows if handler provided
+        if (onPrefetchWindow && total > 0) {
+          const neighborLimit = newLimit;
+          const nextOffset = Math.min(
+            Math.max(0, total - neighborLimit),
+            newOffset + newLimit
+          );
+          const prevOffset = Math.max(0, newOffset - neighborLimit);
+
+          if (nextOffset !== newOffset) {
+            onPrefetchWindow(nextOffset, neighborLimit);
+          }
+          if (prevOffset !== newOffset) {
+            onPrefetchWindow(prevOffset, neighborLimit);
+          }
+        }
+      }
+    }, 120);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visibleItems.join("-"), total, onPrefetchWindow]);
 
   const [scrollTableX, setScrollTableX] = useState<number>(0);
   const [scrollTableXScrolling, setScrollTableXScrolling] =
@@ -458,6 +438,22 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       }}
       ref={contentRef}
     >
+      {isQueryFetching && (
+        <div
+          style={{
+            position: "absolute",
+            right: 24,
+            top: 24,
+            display: "flex",
+            alignItems: "center",
+            gap: "0.4rem",
+            pointerEvents: "none",
+          }}
+        >
+          <BeatLoader size={6} margin={3} color="#bbb" />
+          <span style={{ fontSize: 12, color: "#bbb" }}>fetching…</span>
+        </div>
+      )}
       <StyledTableWrapper>
         <ExploreTableControl
           setIsNewColumnOpen={setIsNewColumnOpen}
@@ -625,7 +621,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                       $isSelected={isSelected}
                     >
                       {isVisible && (
-                        <MemoizedExplorerTableRow
+                        <ExplorerTableRow
                           rowId={rowI}
                           responseData={responseData}
                           columns={columns}
@@ -635,6 +631,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                           isSelected={isSelected}
                           isLastClicked={rowLastClicked === rowI}
                           isExpanded={isExpanded}
+                          invalidateActiveQuery={invalidateActiveQuery}
                         />
                       )}
                     </StyledRow>
