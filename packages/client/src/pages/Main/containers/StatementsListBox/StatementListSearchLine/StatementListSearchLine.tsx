@@ -111,7 +111,9 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
     onSuccess: (variables, data) => {
       queryClient.invalidateQueries({ queryKey: ["document"] });
       queryClient.invalidateQueries({ queryKey: ["documents"] });
-      toast.info(data.successMessage || "Anchor saved");
+      if (data.successMessage) {
+        toast.info(data.successMessage);
+      }
     },
   });
 
@@ -174,7 +176,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
     setSearchActiveOccurence(newActiveOccurence);
 
     // Save the content
-    handleSaveNewContent("occurrence replaced");
+    handleSaveNewContent();
   };
   return (
     <StyledSearchLine $marginLeft={showStatementList}>
@@ -282,7 +284,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                   onClick={() => {
                     if (entityToAnchor) {
                       annotator?.addAnchor(entityToAnchor.id);
-                      handleSaveNewContent();
+                      handleSaveNewContent("Anchor saved");
                       goToNextOccurence();
                     }
                   }}
