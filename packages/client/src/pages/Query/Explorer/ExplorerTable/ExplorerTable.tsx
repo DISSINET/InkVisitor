@@ -6,7 +6,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { FaEye, FaEyeSlash, FaTrashAlt } from "react-icons/fa";
+import { FaEyeSlash } from "react-icons/fa";
 import { GrClose } from "react-icons/gr";
 import { MdOutlineEdit } from "react-icons/md";
 import { TbColumnInsertRight } from "react-icons/tb";
@@ -71,7 +71,6 @@ interface ExplorerTable {
   queryError: Error | null;
   height: number;
   onExport: (rowsSelected: number[]) => void;
-  onPrefetchWindow?: (offset: number, limit: number) => void;
   invalidateActiveQuery?: () => void;
 }
 export const ExplorerTable: React.FC<ExplorerTable> = ({
@@ -82,7 +81,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   queryError,
   height: heightBox,
   onExport,
-  onPrefetchWindow,
   invalidateActiveQuery,
 }) => {
   const { entities, total: incomingTotal } = data ?? {
@@ -94,10 +92,10 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     return Array.from({ length: incomingTotal }).map((_, i) => i);
   }, [incomingTotal]);
 
-  const { columns, filters, limit, offset, sort, view } = state;
+  const { columns, limit, offset } = state;
 
   const [total, setTotal] = useState(0);
-  const totalPages = useMemo(() => Math.ceil(total / limit), [total, limit]);
+  // const totalPages = useMemo(() => Math.ceil(total / limit), [total, limit]);
 
   const [rowLastClicked, setRowLastClicked] = useState<number>(-1);
   const [rowsSelected, setRowsSelected] = useState<number[]>([]);
@@ -341,6 +339,9 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   const rowsRefs = useRef<HTMLDivElement[]>([]);
   const refTable = useRef<HTMLDivElement>(null);
   const [visibleItems, setVisibleItems] = useState<string[]>([]);
+  const windowUpdateTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
 
   useEffect(() => {
     setTimeout(() => {
@@ -368,10 +369,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     setVisibleItems(visible);
   };
 
-  const windowUpdateTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null
-  );
-
   useEffect(() => {
     if (visibleItems.length === 0) return;
 
@@ -394,28 +391,11 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           type: ExploreActionType.setLimitAndOffset,
           payload: { offset: newOffset, limit: newLimit },
         });
-
-        // Prefetch neighboring windows if handler provided
-        if (onPrefetchWindow && total > 0) {
-          const neighborLimit = newLimit;
-          const nextOffset = Math.min(
-            Math.max(0, total - neighborLimit),
-            newOffset + newLimit
-          );
-          const prevOffset = Math.max(0, newOffset - neighborLimit);
-
-          if (nextOffset !== newOffset) {
-            onPrefetchWindow(nextOffset, neighborLimit);
-          }
-          if (prevOffset !== newOffset) {
-            onPrefetchWindow(prevOffset, neighborLimit);
-          }
-        }
       }
     }, 120);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visibleItems.join("-"), total, onPrefetchWindow]);
+  }, [visibleItems.join("-"), total]);
 
   const [scrollTableX, setScrollTableX] = useState<number>(0);
   const [scrollTableXScrolling, setScrollTableXScrolling] =

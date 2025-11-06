@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import React, { useEffect, useMemo, useReducer, useRef, useState } from "react";
+import React, { useEffect, useMemo, useReducer, useState } from "react";
 
 import { IResponseQuery, Query } from "@shared/types";
 import { Explore } from "@shared/types/query";
@@ -9,13 +9,9 @@ import { LayoutSeparatorHorizontal } from "components/advanced";
 import { useAppSelector } from "redux/hooks";
 import { floorNumberToOneDecimal } from "utils/utils";
 import { MemoizedExplorerBox } from "./Explorer/ExplorerBox";
-import {
-  exploreDiff,
-  exploreReducer,
-  exploreStateInitial,
-} from "./Explorer/state";
+import { exploreReducer, exploreStateInitial } from "./Explorer/state";
 import { MemoizedQueryBox } from "./Query/QueryBox";
-import { queryDiff, queryReducer, queryStateInitial } from "./Query/state";
+import { queryReducer, queryStateInitial } from "./Query/state";
 import { getAllEdges, getAllNodes } from "./Query/utils";
 import { QueryValidity, QueryValidityProblem } from "./types";
 import { BiRefresh } from "react-icons/bi";
@@ -115,7 +111,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     enabled: queryStateValidity.isValid && api.isLoggedIn(),
   });
 
-  console.log("explore", queryData?.entities);
+  // console.debug("explore", queryData?.entities);
 
   const onePercentOfContentHeight = useMemo(
     () => contentHeight / 100,
@@ -137,35 +133,6 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
         },
       ],
       exact: true,
-    });
-  };
-
-  const prefetchWindow = (offset: number, limit: number) => {
-    const exploreWithWindow: Explore.IExplore = {
-      ...exploreState,
-      offset,
-      limit,
-    };
-
-    return queryClient.prefetchQuery({
-      queryKey: [
-        "query",
-        {
-          query: queryState,
-          explore: exploreWithWindow,
-        },
-      ],
-      queryFn: async () => {
-        if (queryStateValidity.isValid && api.isLoggedIn()) {
-          const res = await api.query({
-            query: queryState,
-            explore: exploreWithWindow,
-          });
-          return res.data;
-        }
-      },
-      staleTime: 1000 * 60 * 5,
-      gcTime: 1000 * 60 * 30,
     });
   };
 
@@ -262,7 +229,6 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
             isQueryFetching={queryIsFetching}
             queryError={queryError}
             onExport={handleExport}
-            onPrefetchWindow={prefetchWindow}
             invalidateActiveQuery={invalidateActiveQuery}
           />
           <Loader show={queryIsFetching} />

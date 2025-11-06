@@ -13,7 +13,6 @@ interface ExplorerBoxProps {
   queryError: Error | null;
   height: number;
   onExport: (rowsSelected: number[]) => void;
-  onPrefetchWindow?: (offset: number, limit: number) => void;
   invalidateActiveQuery?: () => void;
 }
 export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
@@ -24,7 +23,6 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   queryError,
   height,
   onExport,
-  onPrefetchWindow,
   invalidateActiveQuery,
 }) => {
   return (
@@ -36,7 +34,6 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
       queryError={queryError}
       height={height}
       onExport={onExport}
-      onPrefetchWindow={onPrefetchWindow}
       invalidateActiveQuery={invalidateActiveQuery}
     />
   );
