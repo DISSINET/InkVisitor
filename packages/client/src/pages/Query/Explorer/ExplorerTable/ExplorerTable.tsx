@@ -11,6 +11,7 @@ import { GrClose } from "react-icons/gr";
 import { MdOutlineEdit } from "react-icons/md";
 import { TbColumnInsertRight } from "react-icons/tb";
 import Scrollbar from "react-scrollbars-custom";
+import { List } from "react-window";
 import { v4 as uuidv4 } from "uuid";
 
 import { EntityEnums } from "@shared/enums";
@@ -192,13 +193,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     }
   };
 
-  const toggleSortDirection = (columnId: string) => {
-    if (sort && sort.columnId === columnId) {
-      if (sort.direction === "asc") return "desc";
-      if (sort.direction === "desc") return undefined; // No sort
-    }
-    return "asc";
-  };
+  // Sorting controls are currently disabled; toggleSortDirection removed
 
   const handleEditColumn = useCallback(
     (rowEntity: IEntity, columnId: string, newEntity: IEntity) => {
@@ -324,10 +319,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     }
   };
 
-  const handleScrollTable = (values: any) => {
-    checkVisibility();
-  };
-
   const handleExport = () => {
     onExport(rowsSelected);
   };
@@ -336,78 +327,54 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     return columns.length * WIDTH_COLUMN_DEFAULT + WIDTH_COLUMN_FIRST;
   }, [columns]);
 
-  const rowsRefs = useRef<HTMLDivElement[]>([]);
-  const refTable = useRef<HTMLDivElement>(null);
-  const [visibleItems, setVisibleItems] = useState<string[]>([]);
   const windowUpdateTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
     null
   );
 
-  useEffect(() => {
-    setTimeout(() => {
-      checkVisibility();
-    }, 100);
-  }, [contentHeight]);
+  const rowSizeCacheRef = useRef<Record<number, number>>({});
+  const [rowHeightsVersion, setRowHeightsVersion] = useState(0);
 
-  const checkVisibility = () => {
-    if (!refTable.current) return;
-
-    const containerRect = refTable.current.getBoundingClientRect();
-    const visible = rowsRefs.current
-      .filter((item) => {
-        if (!item) return false;
-        const itemRect = item.getBoundingClientRect();
-
-        // Check if item at least partly visible
-        return (
-          itemRect.top < containerRect.bottom &&
-          itemRect.bottom > containerRect.top
-        );
-      })
-      .map((item) => item.id);
-
-    setVisibleItems(visible);
+  const getItemSize = (index: number) => {
+    return rowSizeCacheRef.current[index] ?? HEIGHT_ROW_DEFAULT;
   };
 
-  useEffect(() => {
-    if (visibleItems.length === 0) return;
+  const setItemSize = (index: number, size: number) => {
+    const prev = rowSizeCacheRef.current[index];
+    if (prev !== size) {
+      rowSizeCacheRef.current[index] = size;
+      setRowHeightsVersion((v) => v + 1);
+    }
+  };
 
-    const indices = visibleItems.map((item) => parseInt(item));
-    const topItem = Math.min(...indices);
-    const bottomItem = Math.max(...indices);
-
-    const bufferedTop = Math.max(0, topItem - OVERSCAN_ROWS);
-    const bufferedBottom = Math.min(total - 1, bottomItem + OVERSCAN_ROWS);
+  const handleRowsRendered = ({ startIndex, stopIndex }: any) => {
+    const bufferedTop = Math.max(0, (startIndex ?? 0) - OVERSCAN_ROWS);
+    const bufferedBottom = Math.min(
+      total - 1,
+      (stopIndex ?? 0) + OVERSCAN_ROWS
+    );
     const newOffset = bufferedTop;
     const newLimit = Math.max(1, bufferedBottom - bufferedTop + 1);
+
+    // Cap fetch size to a reasonable window based on viewport height
+    const approxRowsVisible = Math.ceil(spaceTableBody / HEIGHT_ROW_DEFAULT);
+    const maxFetch = Math.max(approxRowsVisible + 2 * OVERSCAN_ROWS, 50);
+    const cappedLimit = Math.min(newLimit, maxFetch, total);
 
     if (windowUpdateTimeoutRef.current) {
       clearTimeout(windowUpdateTimeoutRef.current);
     }
 
     windowUpdateTimeoutRef.current = setTimeout(() => {
-      if (newOffset !== offset || newLimit !== limit) {
+      if (newOffset !== offset || cappedLimit !== limit) {
         dispatch({
           type: ExploreActionType.setLimitAndOffset,
-          payload: { offset: newOffset, limit: newLimit },
+          payload: { offset: newOffset, limit: cappedLimit },
         });
       }
     }, 120);
+  };
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visibleItems.join("-"), total]);
-
-  const [scrollTableX, setScrollTableX] = useState<number>(0);
-  const [scrollTableXScrolling, setScrollTableXScrolling] =
-    useState<boolean>(false);
-
-  const scrollYLeft = useMemo<number>(() => {
-    if (scrollTableXScrolling) {
-      return -10;
-    } else {
-      return scrollTableX + (contentWidth ?? 0) - 10;
-    }
-  }, [contentWidth, scrollTableX, scrollTableXScrolling]);
+  // horizontal scroll is handled by outer Scrollbar only
 
   return (
     <div
@@ -453,14 +420,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
             width: contentWidth,
             height: heightBox - 70,
           }}
-          onScroll={() => {
-            setScrollTableXScrolling(true);
-          }}
-          onScrollStop={(values) => {
-            // @ts-ignore
-            setScrollTableX(values.scrollLeft);
-            setScrollTableXScrolling(false);
-          }}
+          contentProps={{ style: { overflow: "visible" } }}
           noScrollY
         >
           {/* HEADER */}
@@ -488,41 +448,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                     )}
                     {column.name}
 
-                    {/* SORT */}
-                    {/* <span style={{ marginLeft: "0.5rem" }}>
-                            <Button
-                              noBorder
-                              noBackground
-                              inverted
-                              icon={
-                                sort && sort.columnId === column.id ? (
-                                  sort.direction === "asc" ? (
-                                    <FaSortUp color={"white"} />
-                                  ) : sort.direction === "desc" ? (
-                                    <FaSortDown color={"white"} />
-                                  ) : (
-                                    <FaSort color={"white"} />
-                                  )
-                                ) : (
-                                  <FaSort color={"white"} />
-                                  )
-                              }
-                              onClick={() => {
-                                const newDirection = toggleSortDirection(column.id);
-                                dispatch({
-                                  type: ExploreActionType.sort,
-                                  payload:
-                                    newDirection === undefined
-                                      ? undefined
-                                      : {
-                                          columnId: column.id,
-                                          direction: newDirection,
-                                        },
-                                });
-                              }}
-                              tooltipLabel="sort"
-                              />
-                              </span> */}
+                    {/* SORT controls intentionally removed/disabled in this phase */}
 
                     <span style={{ marginLeft: "0.5rem" }}>
                       <Button
@@ -544,89 +470,74 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
               );
             })}
           </StyledHeader>
-          <StyledBody ref={refTable}>
-            <Scrollbar
-              style={{
-                width: widthTable,
-                height: spaceTableBody,
-              }}
-              trackYProps={{
-                renderer: (props) => {
-                  const { elementRef, style, ...restProps } = props;
-                  const trackStyle: React.CSSProperties = {
-                    ...style,
-                    left: scrollYLeft,
-                  };
+          <StyledBody
+            style={{
+              height: spaceTableBody,
+            }}
+          >
+            <List
+              // tie to version so heights recompute when rows expand/collapse
+              key={rowHeightsVersion}
+              rowCount={total}
+              rowHeight={(index: number) => getItemSize(index)}
+              overscanCount={OVERSCAN_ROWS}
+              onRowsRendered={handleRowsRendered}
+              rowProps={{ items: entities, offset }}
+              rowComponent={(props: any) => {
+                const { index, style } = props;
+                const isOdd = Boolean(index % 2);
+                const isSelected = rowsSelected.includes(index);
+                const isExpanded = rowsExpanded.includes(index);
 
-                  return (
-                    <span
-                      {...restProps}
-                      style={{ ...trackStyle }}
-                      ref={elementRef}
-                      className="trackY"
-                    />
-                  );
-                },
-              }}
-              noScrollX
-              onScrollStop={(values) => {
-                handleScrollTable(values);
-              }}
-            >
-              {/* ROWS */}
-              {Array.from({ length: total }).map((_, rowI) => {
-                const responseI = rowI - offset;
-                const isOdd = Boolean(rowI % 2);
+                const expandedMeasureRef = (el: HTMLDivElement | null) => {
+                  if (el) {
+                    const expandedHeight = el.getBoundingClientRect().height;
+                    const newSize = HEIGHT_ROW_DEFAULT + expandedHeight;
+                    setItemSize(index, newSize);
+                  } else if (!isExpanded) {
+                    setItemSize(index, HEIGHT_ROW_DEFAULT);
+                  }
+                };
 
-                const responseData: IResponseQueryEntity | undefined =
-                  entities[responseI];
-
-                const isVisible = visibleItems.includes(rowI.toString());
-                const isSelected = rowsSelected.includes(rowI);
-                const isExpanded = rowsExpanded.includes(rowI);
-
+                // Ensure default size when not expanded
+                if (!isExpanded && getItemSize(index) !== HEIGHT_ROW_DEFAULT) {
+                  setItemSize(index, HEIGHT_ROW_DEFAULT);
+                }
                 return (
-                  <StyledRowWrapper
-                    key={`${rowI}`}
-                    ref={(el) => {
-                      // @ts-ignore
-                      rowsRefs.current[rowI] = el;
-                    }}
-                    id={`${rowI}`}
-                  >
+                  <div style={style}>
                     <StyledRow
                       $width={widthTable}
                       $height={HEIGHT_ROW_DEFAULT}
                       $isOdd={isOdd}
                       $isSelected={isSelected}
                     >
-                      {isVisible && (
-                        <ExplorerTableRow
-                          rowId={rowI}
-                          responseData={responseData}
-                          columns={columns}
-                          handleEditColumn={handleEditColumn}
-                          onRowSelect={handleRowSelect}
-                          onExpand={handleRowExpand}
-                          isSelected={isSelected}
-                          isLastClicked={rowLastClicked === rowI}
-                          isExpanded={isExpanded}
-                          invalidateActiveQuery={invalidateActiveQuery}
-                        />
-                      )}
-                    </StyledRow>
-
-                    {isExpanded && responseData && (
-                      <ExplorerTableRowExpanded
-                        rowEntity={responseData.entity}
+                      <ExplorerTableRow
+                        rowId={index}
+                        items={entities}
+                        offset={offset}
                         columns={columns}
-                        isOdd={isOdd}
+                        handleEditColumn={handleEditColumn}
+                        onRowSelect={handleRowSelect}
+                        onExpand={handleRowExpand}
+                        isSelected={isSelected}
+                        isLastClicked={rowLastClicked === index}
+                        isExpanded={isExpanded}
+                        invalidateActiveQuery={invalidateActiveQuery}
                       />
+                    </StyledRow>
+                    {isExpanded && entities[index - offset] && (
+                      <div ref={expandedMeasureRef}>
+                        <ExplorerTableRowExpanded
+                          rowEntity={entities[index - offset].entity}
+                          columns={columns}
+                          isOdd={isOdd}
+                        />
+                      </div>
                     )}
-                  </StyledRowWrapper>
+                  </div>
                 );
-              })}
-            </Scrollbar>
+              }}
+            />
           </StyledBody>
         </Scrollbar>
         {/* {renderTableFooter()} */}

@@ -32,7 +32,8 @@ import { WIDTH_COLUMN_DEFAULT, WIDTH_COLUMN_FIRST } from "./types";
 
 interface ExplorerTableRowProps {
   rowId: number;
-  responseData: IResponseQueryEntity | undefined;
+  items: IResponseQueryEntity[];
+  offset: number;
   columns: Explore.IExploreColumn[];
   handleEditColumn: (
     entity: IEntity,
@@ -50,7 +51,8 @@ interface ExplorerTableRowProps {
 }
 const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
   rowId,
-  responseData,
+  items,
+  offset,
   columns,
   handleEditColumn,
 
@@ -82,6 +84,8 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
       }
     },
   });
+
+  const responseData: IResponseQueryEntity | undefined = items[rowId - offset];
 
   if (!responseData) {
     return (
