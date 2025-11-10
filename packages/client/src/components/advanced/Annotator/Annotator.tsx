@@ -837,6 +837,19 @@ export const TextAnnotator = ({
           searchTermRef.current = debouncedSearchTerm;
         }
         return;
+      } else if (annotatorMode !== EditMode.HIGHLIGHT && isWholeWordOnlyMode) {
+        const escapedTerm = debouncedSearchTerm.replace(
+          /[.*+?^${}()|[\]\\]/g,
+          "\\$&"
+        );
+        const regexPattern = `\\b${escapedTerm}\\b`;
+        const occurrences = annotator.search(regexPattern, true);
+        setSearchOccurences(occurrences);
+        if (searchTermRef.current !== debouncedSearchTerm) {
+          setSearchActiveOccurence(0);
+          searchTermRef.current = debouncedSearchTerm;
+        }
+        return;
       }
 
       const occurrences = annotator.search(debouncedSearchTerm, isRegexMode);
