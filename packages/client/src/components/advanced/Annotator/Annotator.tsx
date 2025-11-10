@@ -754,6 +754,10 @@ export const TextAnnotator = ({
     | null
   >(null);
   const [isRegexMode, setIsRegexMode] = useState<boolean>(false);
+  const [isExtendToWholeWordMode, setIsExtendToWholeWordMode] =
+    useState<boolean>(false);
+  const [isWholeWordOnlyMode, setIsWholeWordOnlyMode] =
+    useState<boolean>(false);
   const [searchActiveOccurence, setSearchActiveOccurence] = useState<number>(0);
 
   // annotate tool
@@ -866,6 +870,10 @@ export const TextAnnotator = ({
         isRegexMode={isRegexMode}
         setIsRegexMode={setIsRegexMode}
         dataDocumentIsFetching={dataDocumentIsFetching}
+        isExtendToWholeWordMode={isExtendToWholeWordMode}
+        setIsExtendToWholeWordMode={setIsExtendToWholeWordMode}
+        isWholeWordOnlyMode={isWholeWordOnlyMode}
+        setIsWholeWordOnlyMode={setIsWholeWordOnlyMode}
       />
 
       <div

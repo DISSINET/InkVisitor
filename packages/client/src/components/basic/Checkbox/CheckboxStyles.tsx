@@ -11,7 +11,9 @@ export const StyledCheckboxWrapper = styled.span`
 `;
 export const StyledLabel = styled.label`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
-  margin-left: ${({ theme }) => theme.space[1]};
+  margin-left: 0.2rem;
   user-select: none;
   cursor: pointer;
+  display: flex;
+  align-items: center;
 `;
