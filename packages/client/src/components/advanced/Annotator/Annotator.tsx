@@ -803,37 +803,76 @@ export const TextAnnotator = ({
 
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const searchTermRef = useRef<string>("");
+  const previousWidthRef = useRef<number | null>(null);
 
+  // Execute search, react to widtch changes as well
   useEffect(() => {
-    if (annotator && debouncedSearchTerm.length > 2) {
-      const occurrences = annotator.search(debouncedSearchTerm, isRegexMode);
-      setSearchOccurences(occurrences);
+    if (!annotator) {
+      previousWidthRef.current = width;
+      return;
+    }
 
-      // Only reset to first occurrence if this is a new search term
-      if (searchTermRef.current !== debouncedSearchTerm) {
-        setSearchActiveOccurence(0);
-        searchTermRef.current = debouncedSearchTerm;
-      }
-    } else if (debouncedSearchTerm.length <= 2) {
+    if (debouncedSearchTerm.length <= 2) {
       setSearchOccurences(null);
       setSearchActiveOccurence(0);
       searchTermRef.current = "";
       setSelectedText("");
       annotator?.clearSelection();
+      previousWidthRef.current = width;
+      return;
     }
-  }, [debouncedSearchTerm, isRegexMode]);
 
-  // Re-run search when width changes to update occurrence positions
-  useEffect(() => {
-    if (annotator && debouncedSearchTerm.length > 2) {
-      // Force a redraw first to recalculate text layout, then search
-      setTimeout(() => {
-        annotator.draw();
-        const occurrences = annotator.search(debouncedSearchTerm, isRegexMode);
+    const executeSearch = () => {
+      if (annotatorMode === EditMode.HIGHLIGHT && isExtendToWholeWordMode) {
+        const escapedTerm = debouncedSearchTerm.replace(
+          /[.*+?^${}()|[\]\\]/g,
+          "\\$&"
+        );
+        const regexPattern = `\\b\\w*${escapedTerm}\\w*\\b`;
+        const occurrences = annotator.search(regexPattern, true);
         setSearchOccurences(occurrences);
+
+        if (searchTermRef.current !== debouncedSearchTerm) {
+          setSearchActiveOccurence(0);
+          searchTermRef.current = debouncedSearchTerm;
+        }
+        return;
+      }
+
+      const occurrences = annotator.search(debouncedSearchTerm, isRegexMode);
+      setSearchOccurences(occurrences);
+
+      if (searchTermRef.current !== debouncedSearchTerm) {
+        setSearchActiveOccurence(0);
+        searchTermRef.current = debouncedSearchTerm;
+      }
+    };
+
+    const hasWidthChanged =
+      previousWidthRef.current !== null && previousWidthRef.current !== width;
+
+    previousWidthRef.current = width;
+
+    if (hasWidthChanged) {
+      const timeoutId = window.setTimeout(() => {
+        annotator.draw();
+        executeSearch();
       }, 0);
+
+      return () => {
+        window.clearTimeout(timeoutId);
+      };
     }
-  }, [width, debouncedSearchTerm, isRegexMode]);
+
+    executeSearch();
+  }, [
+    annotator,
+    debouncedSearchTerm,
+    isRegexMode,
+    width,
+    isExtendToWholeWordMode,
+    isWholeWordOnlyMode,
+  ]);
 
   const isSearchAllowed = useMemo<boolean>(() => {
     return annotator !== undefined && !!dataDocument;

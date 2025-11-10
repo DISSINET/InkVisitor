@@ -302,13 +302,6 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
             />
 
             <StyledCheckboxWrapper>
-              <Checkbox
-                value={isRegexMode}
-                onChangeFn={(checked: boolean) => setIsRegexMode(checked)}
-                icon={<LuRegex />}
-                tooltipLabel="enable regex mode"
-              />
-
               {annotatorMode === EditMode.HIGHLIGHT && (
                 <Checkbox
                   value={isExtendToWholeWordMode}
@@ -330,6 +323,13 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                   tooltipLabel="whole word only"
                 />
               )}
+
+              <Checkbox
+                value={isRegexMode}
+                onChangeFn={(checked: boolean) => setIsRegexMode(checked)}
+                icon={<LuRegex />}
+                tooltipLabel="enable regex mode"
+              />
             </StyledCheckboxWrapper>
 
             {searchOccurences !== null && (
