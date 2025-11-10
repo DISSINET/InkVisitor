@@ -553,6 +553,11 @@ export const TextAnnotator = ({
         }
       });
 
+      // Ensure localTextContent is set (in case it wasn't set on initial load)
+      if (localTextContent !== newContent) {
+        setLocalTextContent(newContent);
+      }
+
       annotator.draw();
 
       return;
@@ -600,6 +605,11 @@ export const TextAnnotator = ({
     newAnnotator.onTextChanged((text) => {
       setLocalTextContent(text);
     });
+
+    // Set initial text content
+    const initialContent = dataDocument?.content ?? "no text";
+    setLocalTextContent(initialContent);
+
     newAnnotator.draw();
 
     setAnnotator(newAnnotator);
@@ -855,6 +865,7 @@ export const TextAnnotator = ({
         setSearchOccurences={setSearchOccurences}
         isRegexMode={isRegexMode}
         setIsRegexMode={setIsRegexMode}
+        dataDocumentIsFetching={dataDocumentIsFetching}
       />
 
       <div

@@ -17,6 +17,7 @@ interface Checkbox {
   icon?: React.ReactNode;
   size?: number;
   tooltipLabel?: string;
+  tooltipContent?: React.ReactNode;
 }
 export const Checkbox: React.FC<Checkbox> = ({
   value,
@@ -25,6 +26,7 @@ export const Checkbox: React.FC<Checkbox> = ({
   icon,
   size = 18,
   tooltipLabel,
+  tooltipContent,
 }) => {
   const [checked, setChecked] = useState(value);
   const [referenceElement, setReferenceElement] = useState<HTMLElement | null>(
@@ -77,6 +79,7 @@ export const Checkbox: React.FC<Checkbox> = ({
           label={tooltipLabel}
           visible={showTooltip}
           referenceElement={referenceElement}
+          content={<p>{tooltipContent}</p>}
         />
       )}
     </>
