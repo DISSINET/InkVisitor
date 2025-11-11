@@ -388,7 +388,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
           </StyledSearchContainer>
 
           {annotatorWidthTooNarrow ? (
-            <div style={{ width: "1rem" }}></div>
+            <></>
           ) : (
             <AttributeButtonGroup
               disabled
@@ -405,7 +405,6 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                   shortValue: "",
                   onClick: () => {},
                   selected: !replaceSection,
-                  // shortIcon: <FaPlus />,
                   icon: <FaAnchor />,
                 },
               ]}

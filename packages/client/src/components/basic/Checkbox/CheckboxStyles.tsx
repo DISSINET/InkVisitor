@@ -28,14 +28,10 @@ export const StyledIconOnlyCheckbox = styled.div<StyledIconOnlyCheckbox>`
   align-items: center;
   justify-content: center;
   cursor: pointer;
+
   border: 1px solid
     ${({ theme, $checked }) => ($checked ? theme.color["info"] : "transparent")};
-  background-color: ${({ theme, $checked }) =>
-    $checked
-      ? `rgba(${theme.color["info"].replace("#", "")}, 0.1)`
-      : "transparent"};
   border-radius: 0.2rem;
-
   color: ${({ theme, $checked }) =>
     $checked ? theme.color["info"] : theme.color["gray"][600]};
 `;

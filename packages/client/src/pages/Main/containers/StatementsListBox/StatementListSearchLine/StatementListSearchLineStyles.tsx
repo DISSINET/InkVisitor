@@ -4,6 +4,5 @@ export const StyledCheckboxWrapper = styled.div`
   display: flex;
   align-items: center;
   margin-left: 0.2rem;
-  margin-right: 0.5rem;
   gap: 0.2rem;
 `;
