@@ -754,6 +754,7 @@ export const TextAnnotator = ({
     | null
   >(null);
   const [isRegexMode, setIsRegexMode] = useState<boolean>(false);
+  const [isCaseSensitiveMode, setIsCaseSensitiveMode] = useState<boolean>(true);
   const [isExtendToWholeWordMode, setIsExtendToWholeWordMode] =
     useState<boolean>(false);
   const [isWholeWordOnlyMode, setIsWholeWordOnlyMode] =
@@ -926,6 +927,8 @@ export const TextAnnotator = ({
         setIsExtendToWholeWordMode={setIsExtendToWholeWordMode}
         isWholeWordOnlyMode={isWholeWordOnlyMode}
         setIsWholeWordOnlyMode={setIsWholeWordOnlyMode}
+        isCaseSensitiveMode={isCaseSensitiveMode}
+        setIsCaseSensitiveMode={setIsCaseSensitiveMode}
       />
 
       <div

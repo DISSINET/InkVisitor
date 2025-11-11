@@ -16,7 +16,13 @@ import {
   FaRegArrowAltCircleUp,
 } from "react-icons/fa";
 import { FaAnchorCircleCheck, FaExpand } from "react-icons/fa6";
-import { LuRegex, LuReplace, LuReplaceAll, LuWholeWord } from "react-icons/lu";
+import {
+  LuCaseSensitive,
+  LuRegex,
+  LuReplace,
+  LuReplaceAll,
+  LuWholeWord,
+} from "react-icons/lu";
 import { TbReplace } from "react-icons/tb";
 import { toast } from "react-toastify";
 import { useTheme } from "styled-components";
@@ -72,6 +78,8 @@ interface StatementListSearchLine {
   setIsExtendToWholeWordMode: React.Dispatch<React.SetStateAction<boolean>>;
   isWholeWordOnlyMode: boolean;
   setIsWholeWordOnlyMode: React.Dispatch<React.SetStateAction<boolean>>;
+  isCaseSensitiveMode: boolean;
+  setIsCaseSensitiveMode: React.Dispatch<React.SetStateAction<boolean>>;
 }
 export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
   searchTerm,
@@ -99,6 +107,8 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
   setIsExtendToWholeWordMode,
   isWholeWordOnlyMode,
   setIsWholeWordOnlyMode,
+  isCaseSensitiveMode,
+  setIsCaseSensitiveMode,
 }) => {
   const theme = useTheme();
   const [isReplacingOne, setIsReplacingOne] = useState<boolean>(false);
@@ -287,7 +297,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
         <>
           <StyledSearchContainer>
             <StyledSearchIcon>
-              <BiSearch color={theme.color.info} />
+              <BiSearch size={18} color={theme.color.info} />
             </StyledSearchIcon>
 
             <Input
@@ -302,19 +312,30 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
             />
 
             <StyledCheckboxWrapper>
+              <Checkbox
+                iconOnly
+                value={isCaseSensitiveMode}
+                onChangeFn={(checked: boolean) =>
+                  setIsCaseSensitiveMode(checked)
+                }
+                icon={<LuCaseSensitive size={16} />}
+                tooltipLabel="enable case sensitive mode"
+              />
               {annotatorMode === EditMode.HIGHLIGHT && (
                 <Checkbox
+                  iconOnly
                   value={isExtendToWholeWordMode}
                   onChangeFn={(checked: boolean) =>
                     setIsExtendToWholeWordMode(checked)
                   }
-                  icon={<FaExpand />}
+                  icon={<FaExpand size={12} />}
                   tooltipLabel="extend to whole word"
                 />
               )}
 
               {annotatorMode !== EditMode.HIGHLIGHT && (
                 <Checkbox
+                  iconOnly
                   value={isWholeWordOnlyMode}
                   onChangeFn={(checked: boolean) =>
                     setIsWholeWordOnlyMode(checked)
@@ -325,9 +346,10 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
               )}
 
               <Checkbox
+                iconOnly
                 value={isRegexMode}
                 onChangeFn={(checked: boolean) => setIsRegexMode(checked)}
-                icon={<LuRegex />}
+                icon={<LuRegex size={14} />}
                 tooltipLabel="enable regex mode"
               />
             </StyledCheckboxWrapper>
