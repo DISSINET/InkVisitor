@@ -55,6 +55,10 @@ import { annotatorHighlight } from "./highlight";
 import { RATIO, TerritoryCreateModalType, W_SCROLL } from "./types";
 import { StatementListSearchLine } from "pages/Main/containers/StatementsListBox/StatementListSearchLine/StatementListSearchLine";
 import { Loader } from "components";
+
+const UNICODE_WORD_CHAR_CLASS = "[\\p{L}\\p{M}\\p{N}_]";
+const UNICODE_WORD_START_BOUNDARY = `(?<!${UNICODE_WORD_CHAR_CLASS})`;
+const UNICODE_WORD_END_BOUNDARY = `(?!${UNICODE_WORD_CHAR_CLASS})`;
 interface TextAnnotatorProps {
   width: number;
   annotatorWidthTooNarrow?: boolean;
@@ -829,8 +833,7 @@ export const TextAnnotator = ({
           /[.*+?^${}()|[\]\\]/g,
           "\\$&"
         );
-        const unicodeWordChar = "[\\p{L}\\p{M}\\p{N}_]";
-        const regexPattern = `\\b${unicodeWordChar}*${escapedTerm}${unicodeWordChar}*\\b`;
+        const regexPattern = `${UNICODE_WORD_START_BOUNDARY}${UNICODE_WORD_CHAR_CLASS}*${escapedTerm}${UNICODE_WORD_CHAR_CLASS}*${UNICODE_WORD_END_BOUNDARY}`;
         const occurrences = annotator.search(
           regexPattern,
           true,
@@ -848,7 +851,7 @@ export const TextAnnotator = ({
           /[.*+?^${}()|[\]\\]/g,
           "\\$&"
         );
-        const regexPattern = `\\b${escapedTerm}\\b`;
+        const regexPattern = `${UNICODE_WORD_START_BOUNDARY}${escapedTerm}${UNICODE_WORD_END_BOUNDARY}`;
         const occurrences = annotator.search(
           regexPattern,
           true,
