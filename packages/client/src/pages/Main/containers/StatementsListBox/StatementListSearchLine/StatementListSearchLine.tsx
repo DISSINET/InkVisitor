@@ -388,7 +388,11 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
           </StyledSearchContainer>
 
           {annotatorWidthTooNarrow ? (
-            <></>
+            searchOccurences === null ? (
+              <div style={{ width: "1rem" }} />
+            ) : (
+              <></>
+            )
           ) : (
             <AttributeButtonGroup
               disabled

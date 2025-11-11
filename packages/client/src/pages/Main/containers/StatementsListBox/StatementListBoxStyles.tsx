@@ -135,7 +135,6 @@ export const StyledSearchResults = styled.div<StyledSearchResults>`
   white-space: nowrap;
   flex-wrap: ${({ $annotatorWidthTooNarrow }) =>
     $annotatorWidthTooNarrow ? "wrap" : "nowrap"};
-  margin: 0 0.5rem;
 `;
 
 export const StyledSearchNavigation = styled.div`
