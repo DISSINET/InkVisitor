@@ -829,7 +829,8 @@ export const TextAnnotator = ({
           /[.*+?^${}()|[\]\\]/g,
           "\\$&"
         );
-        const regexPattern = `\\b\\w*${escapedTerm}\\w*\\b`;
+        const unicodeWordChar = "[\\p{L}\\p{M}\\p{N}_]";
+        const regexPattern = `\\b${unicodeWordChar}*${escapedTerm}${unicodeWordChar}*\\b`;
         const occurrences = annotator.search(
           regexPattern,
           true,

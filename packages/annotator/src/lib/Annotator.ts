@@ -1130,7 +1130,7 @@ export class Annotator {
 
         if (isRegex) {
           try {
-            const regexFlags = isCaseSensitive ? "g" : "gi";
+            const regexFlags = isCaseSensitive ? "gu" : "giu";
             const regex = new RegExp(toFind, regexFlags);
             let match;
             while ((match = regex.exec(line)) !== null) {
