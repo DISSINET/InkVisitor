@@ -10,6 +10,11 @@ import {
   StyledIconOnlyCheckbox,
   StyledLabel,
 } from "./CheckboxStyles";
+import {
+  AutoPlacement,
+  BasePlacement,
+  VariationPlacement,
+} from "@popperjs/core";
 
 interface Checkbox {
   value: boolean;
@@ -19,6 +24,7 @@ interface Checkbox {
   size?: number;
   tooltipLabel?: string;
   tooltipContent?: React.ReactNode;
+  tooltipPosition?: AutoPlacement | BasePlacement | VariationPlacement;
   iconOnly?: boolean;
 }
 export const Checkbox: React.FC<Checkbox> = ({
@@ -30,6 +36,7 @@ export const Checkbox: React.FC<Checkbox> = ({
   tooltipLabel,
   tooltipContent,
   iconOnly = false,
+  tooltipPosition = "bottom",
 }) => {
   const [checked, setChecked] = useState(value);
   const [referenceElement, setReferenceElement] = useState<HTMLElement | null>(
@@ -99,6 +106,7 @@ export const Checkbox: React.FC<Checkbox> = ({
           visible={showTooltip}
           referenceElement={referenceElement}
           content={<p>{tooltipContent}</p>}
+          position={tooltipPosition}
         />
       )}
     </>

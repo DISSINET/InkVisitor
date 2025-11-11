@@ -319,7 +319,8 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                   setIsCaseSensitiveMode(checked)
                 }
                 icon={<LuCaseSensitive size={16} />}
-                tooltipLabel="enable case sensitive mode"
+                tooltipLabel="case sensitive mode"
+                tooltipPosition="top"
               />
               {annotatorMode === EditMode.HIGHLIGHT && (
                 <Checkbox
@@ -330,6 +331,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                   }
                   icon={<FaExpand size={12} />}
                   tooltipLabel="extend to whole word"
+                  tooltipPosition="top"
                 />
               )}
 
@@ -342,6 +344,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                   }
                   icon={<LuWholeWord size={16} />}
                   tooltipLabel="whole word only"
+                  tooltipPosition="top"
                 />
               )}
 
@@ -350,7 +353,8 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                 value={isRegexMode}
                 onChangeFn={(checked: boolean) => setIsRegexMode(checked)}
                 icon={<LuRegex size={14} />}
-                tooltipLabel="enable regex mode"
+                tooltipLabel="regex mode"
+                tooltipPosition="top"
               />
             </StyledCheckboxWrapper>
 
