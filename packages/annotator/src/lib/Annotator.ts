@@ -1,4 +1,4 @@
-  import Cursor, { DIRECTION } from "./Cursor";
+import Cursor, { DIRECTION } from "./Cursor";
 import Highlighter, { IAbsCoordinates, CursorStyle } from "./Highlighter";
 import Keys from "./Keys";
 import { Lines } from "./Lines";
@@ -208,7 +208,7 @@ export class Annotator {
 
       const anchors = this.getAnnotations(startSegment, endSegment);
 
-      if (anchors.some(tag => tag.getTagName() === anchor)) {
+      if (anchors.some((tag) => tag.getTagName() === anchor)) {
         // find if open tag for given anchor is part of selection, otherwise find the last occurence of that anchor in the text before the selection
         const openTagSegment = this.text.segments
           .slice(0, endSegment.segmentIndex + 1)
@@ -513,11 +513,16 @@ export class Annotator {
 
     // Helper function to create a unique identifier for a tag
     const getTagId = (tag: Tag): string => {
-      return `${tag.segmentIndex}-${tag.position}-${tag.getTagName()}-${tag.closing ? 'close' : 'open'}`;
+      return `${tag.segmentIndex}-${tag.position}-${tag.getTagName()}-${
+        tag.closing ? "close" : "open"
+      }`;
     };
 
     // Helper function to find the closest opening tag for a given tag name
-    const findClosestOpeningTag = (tagName: string, beforeAbsolutePosition: number): Tag | null => {
+    const findClosestOpeningTag = (
+      tagName: string,
+      beforeAbsolutePosition: number
+    ): Tag | null => {
       let closestTag: Tag | null = null;
       let closestDistance = Infinity;
 
@@ -525,7 +530,10 @@ export class Annotator {
         const segment = this.text.segments[i];
         for (const tag of segment.openingTags) {
           const tagAbsolutePosition = getAbsoluteTextIndex(tag);
-          if (tag.getTagName() === tagName && tagAbsolutePosition < beforeAbsolutePosition) {
+          if (
+            tag.getTagName() === tagName &&
+            tagAbsolutePosition < beforeAbsolutePosition
+          ) {
             const distance = beforeAbsolutePosition - tagAbsolutePosition;
             if (distance < closestDistance) {
               closestDistance = distance;
@@ -550,24 +558,30 @@ export class Annotator {
     // Process all segments from beginning to end position
     for (let i = 0; i <= end.segmentIndex; i++) {
       const segment = this.text.segments[i];
-      const [openingTags, closingTags] = [segment.openingTags, segment.closingTags];
+      const [openingTags, closingTags] = [
+        segment.openingTags,
+        segment.closingTags,
+      ];
 
       // Process opening tags
       for (const tag of openingTags) {
         // Add to stack for pairing
         tagStack.push(tag);
-        
+
         // Track in pairs map
         if (!tagPairs.has(tag.getTagName())) {
           tagPairs.set(tag.getTagName(), {});
         }
         tagPairs.get(tag.getTagName())!.opening = tag;
-        
+
         // Add to final list if within selection range
         // Check: tag must be at/after start AND before end position
-        const tagInSelection = i > start.segmentIndex || 
-          (i === start.segmentIndex && tag.position >= start.rawTextIndex && 
-           (i < end.segmentIndex || (i === end.segmentIndex && tag.position < end.rawTextIndex)));
+        const tagInSelection =
+          i > start.segmentIndex ||
+          (i === start.segmentIndex &&
+            tag.position >= start.rawTextIndex &&
+            (i < end.segmentIndex ||
+              (i === end.segmentIndex && tag.position < end.rawTextIndex)));
         if (tagInSelection) {
           addToFinal(tag);
         }
@@ -577,50 +591,60 @@ export class Annotator {
       for (const tag of closingTags) {
         // Find matching opening tag in stack
         const matchingIndex = tagStack.findLastIndex(
-          (stackTag) => stackTag.getTagName() === tag.getTagName() && !stackTag.closing
+          (stackTag) =>
+            stackTag.getTagName() === tag.getTagName() && !stackTag.closing
         );
-        
+
         if (matchingIndex !== -1) {
           // Found matching opening tag - record the pairing and remove from stack
           const matchedOpeningTag = tagStack[matchingIndex];
           closingToOpeningMap.set(tag, matchedOpeningTag);
           tagStack.splice(matchingIndex, 1);
-          
+
           // Check if closing tag is within the selection range
-          const closingTagInSelection = 
-            (i > start.segmentIndex || (i === start.segmentIndex && tag.position >= start.rawTextIndex)) &&
-            (i < end.segmentIndex || (i === end.segmentIndex && tag.position < end.rawTextIndex));
-          
+          const closingTagInSelection =
+            (i > start.segmentIndex ||
+              (i === start.segmentIndex &&
+                tag.position >= start.rawTextIndex)) &&
+            (i < end.segmentIndex ||
+              (i === end.segmentIndex && tag.position < end.rawTextIndex));
+
           // Check if opening tag opened before end position (could span the selection)
-          const openingTagOpenedBeforeEnd = matchedOpeningTag.segmentIndex < end.segmentIndex ||
-            (matchedOpeningTag.segmentIndex === end.segmentIndex && 
-             matchedOpeningTag.position < end.rawTextIndex);
-          
+          const openingTagOpenedBeforeEnd =
+            matchedOpeningTag.segmentIndex < end.segmentIndex ||
+            (matchedOpeningTag.segmentIndex === end.segmentIndex &&
+              matchedOpeningTag.position < end.rawTextIndex);
+
           // Include the opening tag if:
           // 1. Closing tag is within selection range, OR
           // 2. Opening tag opened before end AND closing tag is after start (tag spans the selection)
-          const shouldIncludeOpeningTag = closingTagInSelection ||
-            (openingTagOpenedBeforeEnd && 
-             (i > start.segmentIndex || (i === start.segmentIndex && tag.position >= start.rawTextIndex)));
-          
+          const shouldIncludeOpeningTag =
+            closingTagInSelection ||
+            (openingTagOpenedBeforeEnd &&
+              (i > start.segmentIndex ||
+                (i === start.segmentIndex &&
+                  tag.position >= start.rawTextIndex)));
+
           if (shouldIncludeOpeningTag) {
             // Tag is active in the selection (either closes within selection or spans it)
             addToFinal(matchedOpeningTag);
           }
         }
-        
+
         // Track in pairs map
         if (!tagPairs.has(tag.getTagName())) {
           tagPairs.set(tag.getTagName(), {});
         }
         tagPairs.get(tag.getTagName())!.closing = tag;
-        
+
         // Add closing tag to final list only if within selection range
         // Check: closing tag must be at/after start AND before end position
         // (closing tags are included for post-processing, but will be removed later)
-        const closingTagInSelection = 
-          (i > start.segmentIndex || (i === start.segmentIndex && tag.position >= start.rawTextIndex)) &&
-          (i < end.segmentIndex || (i === end.segmentIndex && tag.position < end.rawTextIndex));
+        const closingTagInSelection =
+          (i > start.segmentIndex ||
+            (i === start.segmentIndex && tag.position >= start.rawTextIndex)) &&
+          (i < end.segmentIndex ||
+            (i === end.segmentIndex && tag.position < end.rawTextIndex));
         if (closingTagInSelection) {
           addToFinal(tag);
         }
@@ -632,10 +656,11 @@ export class Annotator {
     for (const unclosedTag of tagStack) {
       // Check if the tag opened before the end position
       // Tags that opened after end position should not be included
-      const tagOpenedBeforeEnd = unclosedTag.segmentIndex < end.segmentIndex ||
-        (unclosedTag.segmentIndex === end.segmentIndex && 
-         unclosedTag.position < end.rawTextIndex);
-      
+      const tagOpenedBeforeEnd =
+        unclosedTag.segmentIndex < end.segmentIndex ||
+        (unclosedTag.segmentIndex === end.segmentIndex &&
+          unclosedTag.position < end.rawTextIndex);
+
       if (tagOpenedBeforeEnd) {
         // Tag opened before end position and is still unclosed, so it's active in the selection
         addToFinal(unclosedTag);
@@ -657,7 +682,7 @@ export class Annotator {
       } else {
         // Closing tag - find its matched opening tag
         const matchedOpeningTag = closingToOpeningMap.get(tag);
-        
+
         if (matchedOpeningTag) {
           // We have a recorded pairing - add the opening tag if not already processed
           const openingTagId = getTagId(matchedOpeningTag);
@@ -671,7 +696,10 @@ export class Annotator {
           const tagSegmentIndex = tag.segmentIndex;
           if (tagSegmentIndex !== -1) {
             const tagAbsolutePosition = getAbsoluteTextIndex(tag);
-            const closestOpening = findClosestOpeningTag(tag.getTagName(), tagAbsolutePosition);
+            const closestOpening = findClosestOpeningTag(
+              tag.getTagName(),
+              tagAbsolutePosition
+            );
             if (closestOpening) {
               const closestOpeningId = getTagId(closestOpening);
               if (!processedTagIds.has(closestOpeningId)) {
@@ -690,10 +718,12 @@ export class Annotator {
       // Use the segmentIndex from the tags
       const aSegmentIndex = a.segmentIndex;
       const bSegmentIndex = b.segmentIndex;
-      
-      const aAbsolutePosition = aSegmentIndex !== -1 ? getAbsoluteTextIndex(a) : a.position;
-      const bAbsolutePosition = bSegmentIndex !== -1 ? getAbsoluteTextIndex(b) : b.position;
-      
+
+      const aAbsolutePosition =
+        aSegmentIndex !== -1 ? getAbsoluteTextIndex(a) : a.position;
+      const bAbsolutePosition =
+        bSegmentIndex !== -1 ? getAbsoluteTextIndex(b) : b.position;
+
       return aAbsolutePosition - bAbsolutePosition;
     });
   }
@@ -804,7 +834,11 @@ export class Annotator {
     }
 
     if (this.text.mode === EditMode.HIGHLIGHT && this.onHighlightCb) {
-      const startPos = this.text.getSegmentPosition(this.viewport.lineStart, 0, true);
+      const startPos = this.text.getSegmentPosition(
+        this.viewport.lineStart,
+        0,
+        true
+      );
       const endPos = this.text.getSegmentPosition(
         this.viewport.lineEnd,
         this.text.charsAtLine
@@ -973,29 +1007,29 @@ export class Annotator {
   updateAnchor(tag: Tag, attributes?: Record<string, string>) {
     // Only accept opening tags
     if (tag.closing) {
-      throw new Error('updateAnchor only accepts opening tags');
+      throw new Error("updateAnchor only accepts opening tags");
     }
-    
+
     // Use the segmentIndex from the tag
     const tagSegmentIndex = tag.segmentIndex;
-    
+
     if (tagSegmentIndex === -1) {
-      throw new Error('Tag segmentIndex not set');
+      throw new Error("Tag segmentIndex not set");
     }
-    
+
     // Calculate the absolute text index from the tag's position within its segment
     let absoluteTagPosition = tag.position;
     // Add lengths of all previous segments
     for (let i = 0; i < tagSegmentIndex; i++) {
       absoluteTagPosition += this.text.segments[i].raw.length + 1; // +1 for newline between segments
     }
-    
+
     // Build the original tag string using the tag's current attributes
     const originalTag = new Tag(0, tag.getTagName(), false, undefined, -1);
     originalTag.setAttributes(tag.attributes);
     const originalTagString = originalTag.getTag();
     const originalTagLength = originalTagString.length;
-    
+
     // Build the new tag string with updated attributes
     const newTag = new Tag(0, tag.getTagName(), false, undefined, -1);
     if (attributes) {
@@ -1004,18 +1038,18 @@ export class Annotator {
       newTag.setAttributes({});
     }
     const newTagString = newTag.getTag();
-    
+
     // Replace the old tag with the new tag in the raw text
     const rawText = this.text.value;
     const beforeText = rawText.slice(0, absoluteTagPosition);
     const afterText = rawText.slice(absoluteTagPosition + originalTagLength);
-    
+
     this.text.value = beforeText + newTagString + afterText;
-    
+
     // Update segments and recalculate lines
     this.text.prepareSegments();
     this.text.calculateLines();
-    
+
     // Trigger callbacks and redraw
     this.warnings.onTextChanged(this.text.value);
     this.draw();
@@ -1057,8 +1091,38 @@ export class Annotator {
    * @param isRegex
    * @returns
    */
-  search(toFind: string, isRegex: boolean = false): Occurrence[] {
+  search(
+    toFind: string,
+    isRegex: boolean = false,
+    isCaseSensitive: boolean = true
+  ): Occurrence[] {
     const occurrences = [];
+    const normalizedTerm = isCaseSensitive ? toFind : toFind.toLowerCase();
+
+    const collectLiteralOccurrences = (
+      line: string,
+      segmentIndex: number,
+      lineIndex: number
+    ) => {
+      const normalizedLine = isCaseSensitive ? line : line.toLowerCase();
+      let startIndex = 0;
+
+      while (startIndex < normalizedLine.length) {
+        const index = normalizedLine.indexOf(normalizedTerm, startIndex);
+        if (index === -1) {
+          break;
+        }
+
+        occurrences.push({
+          segmentIndex,
+          lineIndex,
+          start: index,
+          end: index + toFind.length,
+        });
+
+        startIndex = index + 1;
+      }
+    };
 
     for (const segmentI in this.text.segments) {
       for (const lineI in this.text.segments[segmentI].lines) {
@@ -1066,7 +1130,8 @@ export class Annotator {
 
         if (isRegex) {
           try {
-            const regex = new RegExp(toFind, "g");
+            const regexFlags = isCaseSensitive ? "g" : "gi";
+            const regex = new RegExp(toFind, regexFlags);
             let match;
             while ((match = regex.exec(line)) !== null) {
               occurrences.push({
@@ -1078,34 +1143,18 @@ export class Annotator {
             }
           } catch (error) {
             // If regex is invalid, treat as literal string
-            let startIndex = 0;
-            while (startIndex < line.length) {
-              const index = line.indexOf(toFind, startIndex);
-              if (index === -1) break;
-
-              occurrences.push({
-                segmentIndex: parseInt(segmentI),
-                lineIndex: parseInt(lineI),
-                start: index,
-                end: index + toFind.length,
-              });
-              startIndex = index + 1;
-            }
+            collectLiteralOccurrences(
+              line,
+              parseInt(segmentI, 10),
+              parseInt(lineI, 10)
+            );
           }
         } else {
-          let startIndex = 0;
-          while (startIndex < line.length) {
-            const index = line.indexOf(toFind, startIndex);
-            if (index === -1) break;
-
-            occurrences.push({
-              segmentIndex: parseInt(segmentI),
-              lineIndex: parseInt(lineI),
-              start: index,
-              end: index + toFind.length,
-            });
-            startIndex = index + 1;
-          }
+          collectLiteralOccurrences(
+            line,
+            parseInt(segmentI, 10),
+            parseInt(lineI, 10)
+          );
         }
       }
     }
@@ -1271,26 +1320,26 @@ export class Annotator {
 
   /**
    * Sanitizes the envelope range to prevent creating broken XML structure.
-   * 
+   *
    * When adding a new tag around selected text, this function ensures the new tag
    * doesn't split existing tag pairs. If the selection is smaller than a parent tag
    * that encompasses it, the indices are adjusted inward so the new tag is nested
    * INSIDE the parent tag rather than crossing its boundaries.
-   * 
+   *
    * Example:
    * - Text: `<p>test</p>`, parsed: "test"
    * - Selection "te" (indices 0-5 in raw text) should create: `<p><new>te</new>st</p>` ✓
    * - Not: `<new><p>te</new>st</p>` ✗
-   * 
+   *
    * Additional notes:
    * - Opening tags and closing tags as immediate neighbors are considered as they are on the same "parsed" position
    * - Arguments are always sanitized before calling this method that they are on the leftmost / rightmost possible position to encompass all tags on the conflicting positions
    * - We expect returned indexes to be moved so they are crossing as little tags (open + content + close) as possible
-   * 
+   *
    * @param indexStart The current start index of the text range
    * @param indexEnd The current end index of the text range
    * @returns Adjusted [indexStart, indexEnd] to ensure proper nesting
-  */
+   */
   private sanitizeEnvelopeRange(
     indexStart: number,
     indexEnd: number
@@ -1301,43 +1350,59 @@ export class Annotator {
     const clamp = (i: number): number => Math.max(0, Math.min(i, raw.length));
 
     // Find tag positions only within the selection boundary
-    const findRelevantTagPositions = (): Array<{start: number, end: number, name: string, isOpen: boolean}> => {
-      const positions: Array<{start: number, end: number, name: string, isOpen: boolean}> = [];
-      
+    const findRelevantTagPositions = (): Array<{
+      start: number;
+      end: number;
+      name: string;
+      isOpen: boolean;
+    }> => {
+      const positions: Array<{
+        start: number;
+        end: number;
+        name: string;
+        isOpen: boolean;
+      }> = [];
+
       // Search only within the selection range
       const searchText = raw.slice(start, end);
-      
+
       // Use existing regexes to find all tags in the search range
-      const openingRegex = new RegExp(openingTagRegex.source, openingTagRegex.flags);
-      const closingRegex = new RegExp(closingTagRegex.source, closingTagRegex.flags);
-      
+      const openingRegex = new RegExp(
+        openingTagRegex.source,
+        openingTagRegex.flags
+      );
+      const closingRegex = new RegExp(
+        closingTagRegex.source,
+        closingTagRegex.flags
+      );
+
       // Find all opening tags
       let match;
       while ((match = openingRegex.exec(searchText)) !== null) {
         const absoluteStart = start + match.index;
         const absoluteEnd = start + match.index + match[0].length;
-        
+
         positions.push({
           start: absoluteStart,
           end: absoluteEnd,
           name: match[1].toLowerCase(),
-          isOpen: true
+          isOpen: true,
         });
       }
-      
+
       // Find all closing tags
       while ((match = closingRegex.exec(searchText)) !== null) {
         const absoluteStart = start + match.index;
         const absoluteEnd = start + match.index + match[0].length;
-        
+
         positions.push({
           start: absoluteStart,
           end: absoluteEnd,
           name: match[1].toLowerCase(),
-          isOpen: false
+          isOpen: false,
         });
       }
-      
+
       // Sort by position to maintain order
       return positions.sort((a, b) => a.start - b.start);
     };
@@ -1370,12 +1435,12 @@ export class Annotator {
       // But if the selection extends beyond the actual content, we should still contract it
       // Only apply this logic if the selection is not a complete tag pair
       let isCompleteTagPair = false;
-      
+
       // Check if this is a complete tag pair
       for (const tag of tagPositions) {
         if (tag.isOpen && start === tag.start) {
-          const closingTag = tagPositions.find(t => 
-            !t.isOpen && t.name === tag.name && t.start > tag.start
+          const closingTag = tagPositions.find(
+            (t) => !t.isOpen && t.name === tag.name && t.start > tag.start
           );
           if (closingTag && end === closingTag.end) {
             isCompleteTagPair = true;
@@ -1383,68 +1448,75 @@ export class Annotator {
           }
         }
       }
-      
+
       // Only contract if it's not a complete tag pair
       if (!isCompleteTagPair) {
         let contentStart = start;
         let contentEnd = end;
-        
+
         // Find the rightmost opening tag within our selection
         for (const tag of tagPositions) {
           if (tag.isOpen && tag.start >= start && tag.start < end) {
             contentStart = Math.max(contentStart, tag.end);
           }
         }
-        
+
         // Find the leftmost closing tag within our selection
         for (const tag of tagPositions) {
           if (!tag.isOpen && tag.end > start && tag.end <= end) {
             contentEnd = Math.min(contentEnd, tag.start);
           }
         }
-        
+
         // If we found valid content boundaries, use them
-        if (contentStart < contentEnd && contentStart >= start && contentEnd <= end) {
+        if (
+          contentStart < contentEnd &&
+          contentStart >= start &&
+          contentEnd <= end
+        ) {
           return [clamp(contentStart), clamp(contentEnd)];
         }
       }
-      
+
       return [start, end];
     }
 
     // Find tags that overlap with our selection
-    const overlappingTags = tagPositions.filter(tag => 
-      tag.start < end && tag.end > start
+    const overlappingTags = tagPositions.filter(
+      (tag) => tag.start < end && tag.end > start
     );
 
     // Remove immediate closing nodes from the left neighbor group
     // This handles cases where selection starts with closing tags that should be excluded
-    const immediateClosingTags = overlappingTags.filter(tag => 
-      !tag.isOpen && tag.start === start
+    const immediateClosingTags = overlappingTags.filter(
+      (tag) => !tag.isOpen && tag.start === start
     );
-    
+
     // If selection starts with closing tags, remove them
     if (immediateClosingTags.length > 0) {
       // Find the rightmost closing tag (in case there are multiple at the same position)
-      const rightmostClosingTag = immediateClosingTags.reduce((max, current) => 
+      const rightmostClosingTag = immediateClosingTags.reduce((max, current) =>
         current.end > max.end ? current : max
       );
-      
+
       // Move start past the closing tag(s)
       let adjustedStart = rightmostClosingTag.end;
-      
+
       // Check if there's an opening tag immediately after the closing tag
       // and if the selection extends beyond it, remove that too
-      const nextOpeningTag = overlappingTags.find(tag => 
-        tag.isOpen && tag.start === adjustedStart
+      const nextOpeningTag = overlappingTags.find(
+        (tag) => tag.isOpen && tag.start === adjustedStart
       );
-      
+
       if (nextOpeningTag && end > nextOpeningTag.end) {
         // Check if the selection ends with the matching closing tag for this opening tag
-        const matchingClosingTag = tagPositions.find(t => 
-          !t.isOpen && t.name === nextOpeningTag.name && t.start > nextOpeningTag.start
+        const matchingClosingTag = tagPositions.find(
+          (t) =>
+            !t.isOpen &&
+            t.name === nextOpeningTag.name &&
+            t.start > nextOpeningTag.start
         );
-        
+
         // Only remove the opening tag if the selection doesn't include the complete tag pair
         if (!matchingClosingTag || end < matchingClosingTag.end) {
           // Remove the opening tag as well
@@ -1453,28 +1525,35 @@ export class Annotator {
           // Keep the opening tag because selection includes complete tag pair
         }
       }
-      
+
       // Also check for closing tags at the end that should be removed
       // But only remove them if they're not part of a complete tag pair
       let adjustedEnd = end;
-      const closingTagsAtEnd = overlappingTags.filter(tag => 
-        !tag.isOpen && tag.end === end
+      const closingTagsAtEnd = overlappingTags.filter(
+        (tag) => !tag.isOpen && tag.end === end
       );
-      
+
       if (closingTagsAtEnd.length > 0) {
         // Find the leftmost closing tag at the end
-        const leftmostClosingTagAtEnd = closingTagsAtEnd.reduce((min, current) => 
-          current.start < min.start ? current : min
+        const leftmostClosingTagAtEnd = closingTagsAtEnd.reduce(
+          (min, current) => (current.start < min.start ? current : min)
         );
-        
+
         // Check if this closing tag is part of a complete tag pair
         // Find the closest opening tag before this closing tag
         const matchingOpeningTag = tagPositions
-          .filter(t => t.isOpen && t.name === leftmostClosingTagAtEnd.name && t.start < leftmostClosingTagAtEnd.start)
-          .reduce((closest, current) => 
-            current.start > closest.start ? current : closest
-          , { start: -1, end: -1, name: '', isOpen: false });
-        
+          .filter(
+            (t) =>
+              t.isOpen &&
+              t.name === leftmostClosingTagAtEnd.name &&
+              t.start < leftmostClosingTagAtEnd.start
+          )
+          .reduce(
+            (closest, current) =>
+              current.start > closest.start ? current : closest,
+            { start: -1, end: -1, name: "", isOpen: false }
+          );
+
         // Only remove the closing tag if it's not part of a complete tag pair
         if (!matchingOpeningTag || matchingOpeningTag.start < adjustedStart) {
           // Move end before the closing tag(s)
@@ -1483,7 +1562,7 @@ export class Annotator {
           // Keep the closing tag because it's part of complete tag pair
         }
       }
-      
+
       return [clamp(adjustedStart), clamp(adjustedEnd)];
     }
 
@@ -1496,8 +1575,8 @@ export class Annotator {
     for (const tag of overlappingTags) {
       if (tag.isOpen) {
         // Find the matching closing tag
-        const closingTag = tagPositions.find(t => 
-          !t.isOpen && t.name === tag.name && t.start > tag.start
+        const closingTag = tagPositions.find(
+          (t) => !t.isOpen && t.name === tag.name && t.start > tag.start
         );
         if (closingTag && start === tag.start && end === closingTag.end) {
           // Selection exactly matches a complete tag pair, no adjustment needed
@@ -1507,23 +1586,26 @@ export class Annotator {
     }
 
     // Check if selection spans multiple separate tags (should not adjust)
-    const openTags = overlappingTags.filter(tag => tag.isOpen);
-    const closeTags = overlappingTags.filter(tag => !tag.isOpen);
-    
+    const openTags = overlappingTags.filter((tag) => tag.isOpen);
+    const closeTags = overlappingTags.filter((tag) => !tag.isOpen);
+
     // If we have multiple separate tag pairs, don't adjust
     if (openTags.length > 1 || closeTags.length > 1) {
       // Check if they are separate (not nested)
       let isSeparate = true;
       for (let i = 0; i < openTags.length - 1; i++) {
         for (let j = i + 1; j < openTags.length; j++) {
-          if (openTags[i].start < openTags[j].start && openTags[j].end < openTags[i].end) {
+          if (
+            openTags[i].start < openTags[j].start &&
+            openTags[j].end < openTags[i].end
+          ) {
             isSeparate = false;
             break;
           }
         }
         if (!isSeparate) break;
       }
-      
+
       if (isSeparate) {
         return [start, end];
       }
@@ -1541,7 +1623,11 @@ export class Annotator {
     let newEnd = end;
 
     // If selection starts before the tag and ends after the tag starts
-    if (start <= innermostTag.start && end > innermostTag.start && end <= innermostTag.end) {
+    if (
+      start <= innermostTag.start &&
+      end > innermostTag.start &&
+      end <= innermostTag.end
+    ) {
       // Move start to after the tag (exclude the tag)
       newStart = innermostTag.end;
     }
@@ -1551,7 +1637,11 @@ export class Annotator {
       newStart = innermostTag.end;
     }
     // If selection starts before the tag ends and ends after the tag
-    else if (start >= innermostTag.start && start < innermostTag.end && end >= innermostTag.end) {
+    else if (
+      start >= innermostTag.start &&
+      start < innermostTag.end &&
+      end >= innermostTag.end
+    ) {
       // Move end to before the tag (exclude the tag)
       newEnd = innermostTag.start;
     }
@@ -1560,8 +1650,11 @@ export class Annotator {
       // Move start to after the opening tag and end to before the closing tag
       if (innermostTag.isOpen) {
         // This is an opening tag, find its closing tag
-        const closingTag = tagPositions.find(t => 
-          !t.isOpen && t.name === innermostTag.name && t.start > innermostTag.start
+        const closingTag = tagPositions.find(
+          (t) =>
+            !t.isOpen &&
+            t.name === innermostTag.name &&
+            t.start > innermostTag.start
         );
         if (closingTag) {
           newStart = innermostTag.end;
@@ -1569,8 +1662,11 @@ export class Annotator {
         }
       } else {
         // This is a closing tag, find its opening tag
-        const openingTag = tagPositions.find(t => 
-          t.isOpen && t.name === innermostTag.name && t.start < innermostTag.start
+        const openingTag = tagPositions.find(
+          (t) =>
+            t.isOpen &&
+            t.name === innermostTag.name &&
+            t.start < innermostTag.start
         );
         if (openingTag) {
           newStart = openingTag.end;
@@ -1584,7 +1680,11 @@ export class Annotator {
     if (newStart === start && newEnd === end) {
       // Find closing tags that are before the innermost tag and within our selection
       for (const tag of overlappingTags) {
-        if (!tag.isOpen && tag.end <= innermostTag.start && tag.start >= start) {
+        if (
+          !tag.isOpen &&
+          tag.end <= innermostTag.start &&
+          tag.start >= start
+        ) {
           // This is a closing tag before the innermost tag, move start past it
           newStart = Math.max(newStart, tag.end);
         }
@@ -1595,22 +1695,25 @@ export class Annotator {
     // move the start to exclude the closing tag
     if (newStart === start && newEnd === end) {
       // Check if selection starts with a closing tag
-      const startingClosingTag = overlappingTags.find(tag => 
-        !tag.isOpen && tag.start === start
+      const startingClosingTag = overlappingTags.find(
+        (tag) => !tag.isOpen && tag.start === start
       );
-      
+
       if (startingClosingTag) {
         // Check if the end matches a complete tag pair
-        const endingTag = overlappingTags.find(tag => 
-          tag.isOpen && tag.start < end && tag.end === end
+        const endingTag = overlappingTags.find(
+          (tag) => tag.isOpen && tag.start < end && tag.end === end
         );
-        
+
         if (endingTag) {
           // Find the matching closing tag for the ending tag
-          const matchingClosingTag = tagPositions.find(t => 
-            !t.isOpen && t.name === endingTag.name && t.start > endingTag.start
+          const matchingClosingTag = tagPositions.find(
+            (t) =>
+              !t.isOpen &&
+              t.name === endingTag.name &&
+              t.start > endingTag.start
           );
-          
+
           if (matchingClosingTag && matchingClosingTag.end === end) {
             // This is a complete tag pair at the end, move start past the closing tag
             newStart = startingClosingTag.end;
@@ -1625,23 +1728,27 @@ export class Annotator {
       // Try to find the content boundaries within the selection
       let contentStart = start;
       let contentEnd = end;
-      
+
       // Find the rightmost opening tag within our selection
       for (const tag of tagPositions) {
         if (tag.isOpen && tag.start >= start && tag.start < end) {
           contentStart = Math.max(contentStart, tag.end);
         }
       }
-      
+
       // Find the leftmost closing tag within our selection
       for (const tag of tagPositions) {
         if (!tag.isOpen && tag.end > start && tag.end <= end) {
           contentEnd = Math.min(contentEnd, tag.start);
         }
       }
-      
+
       // If we found valid content boundaries, use them
-      if (contentStart < contentEnd && contentStart >= start && contentEnd <= end) {
+      if (
+        contentStart < contentEnd &&
+        contentStart >= start &&
+        contentEnd <= end
+      ) {
         newStart = contentStart;
         newEnd = contentEnd;
       }
@@ -1654,5 +1761,4 @@ export class Annotator {
 
     return [clamp(newStart), clamp(newEnd)];
   }
-
 }

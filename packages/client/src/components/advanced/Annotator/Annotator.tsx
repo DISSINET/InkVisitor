@@ -830,7 +830,11 @@ export const TextAnnotator = ({
           "\\$&"
         );
         const regexPattern = `\\b\\w*${escapedTerm}\\w*\\b`;
-        const occurrences = annotator.search(regexPattern, true);
+        const occurrences = annotator.search(
+          regexPattern,
+          true,
+          isCaseSensitiveMode
+        );
         setSearchOccurences(occurrences);
 
         if (searchTermRef.current !== debouncedSearchTerm) {
@@ -844,7 +848,11 @@ export const TextAnnotator = ({
           "\\$&"
         );
         const regexPattern = `\\b${escapedTerm}\\b`;
-        const occurrences = annotator.search(regexPattern, true);
+        const occurrences = annotator.search(
+          regexPattern,
+          true,
+          isCaseSensitiveMode
+        );
         setSearchOccurences(occurrences);
         if (searchTermRef.current !== debouncedSearchTerm) {
           setSearchActiveOccurence(0);
@@ -853,7 +861,11 @@ export const TextAnnotator = ({
         return;
       }
 
-      const occurrences = annotator.search(debouncedSearchTerm, isRegexMode);
+      const occurrences = annotator.search(
+        debouncedSearchTerm,
+        isRegexMode,
+        isCaseSensitiveMode
+      );
       setSearchOccurences(occurrences);
 
       if (searchTermRef.current !== debouncedSearchTerm) {
@@ -886,6 +898,7 @@ export const TextAnnotator = ({
     width,
     isExtendToWholeWordMode,
     isWholeWordOnlyMode,
+    isCaseSensitiveMode,
   ]);
 
   const isSearchAllowed = useMemo<boolean>(() => {
