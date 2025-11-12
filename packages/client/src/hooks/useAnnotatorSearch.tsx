@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react";
-import { Annotator, EditMode } from "@inkvisitor/annotator/src/lib";
+import { useCallback, useEffect, useRef } from "react";
+import { Annotator, EditMode, Occurrence } from "@inkvisitor/annotator/src/lib";
 
 const UNICODE_WORD_CHAR_CLASS = "[\\p{L}\\p{M}\\p{N}_]";
 const UNICODE_WORD_START_BOUNDARY = `(?<!${UNICODE_WORD_CHAR_CLASS})`;
@@ -113,6 +113,32 @@ export const useAnnotatorSearch = ({
   const searchTermRef = useRef<string>("");
   const previousWidthRef = useRef<number | null>(null);
 
+  const resetActiveOccurrenceOnSearchTermChange = useCallback(() => {
+    // If the search term has changed, reset the active occurrence to 0
+    if (searchTermRef.current !== debouncedSearchTerm) {
+      setSearchActiveOccurence(0);
+      searchTermRef.current = debouncedSearchTerm;
+    }
+  }, [debouncedSearchTerm, setSearchActiveOccurence]);
+
+  const distributeSearchResults = useCallback(
+    (occurrences: Occurrence[]) => {
+      setSearchOccurences(occurrences);
+      // If no occurrences, clear the previous highlight
+      if (occurrences.length === 0) {
+        setSelectedText("");
+        annotator?.clearSelection();
+      }
+      resetActiveOccurrenceOnSearchTermChange();
+    },
+    [debouncedSearchTerm, setSearchOccurences, setSearchActiveOccurence]
+  );
+
+  const handleResetSearchResults = useCallback(() => {
+    setSearchOccurences([]);
+    resetActiveOccurrenceOnSearchTermChange();
+  }, [setSearchOccurences, resetActiveOccurrenceOnSearchTermChange]);
+
   useEffect(() => {
     if (!annotator) {
       previousWidthRef.current = width;
@@ -139,11 +165,7 @@ export const useAnnotatorSearch = ({
         isRegexMode &&
         !isValidRegexPattern(debouncedSearchTerm, regexFlags)
       ) {
-        setSearchOccurences([]);
-        if (searchTermRef.current !== debouncedSearchTerm) {
-          setSearchActiveOccurence(0);
-          searchTermRef.current = debouncedSearchTerm;
-        }
+        handleResetSearchResults();
         return;
       }
 
@@ -157,11 +179,7 @@ export const useAnnotatorSearch = ({
 
         // Validate the final combined regex pattern before executing to prevent freezes
         if (!isValidRegexPattern(regexPattern, regexFlags)) {
-          setSearchOccurences([]);
-          if (searchTermRef.current !== debouncedSearchTerm) {
-            setSearchActiveOccurence(0);
-            searchTermRef.current = debouncedSearchTerm;
-          }
+          handleResetSearchResults();
           return;
         }
 
@@ -170,12 +188,7 @@ export const useAnnotatorSearch = ({
           true,
           isCaseSensitiveMode
         );
-        setSearchOccurences(occurrences);
-
-        if (searchTermRef.current !== debouncedSearchTerm) {
-          setSearchActiveOccurence(0);
-          searchTermRef.current = debouncedSearchTerm;
-        }
+        distributeSearchResults(occurrences);
         return;
       } else if (annotatorMode !== EditMode.HIGHLIGHT && isWholeWordOnlyMode) {
         // If regex mode is enabled, use the user's regex pattern without escaping
@@ -187,11 +200,7 @@ export const useAnnotatorSearch = ({
 
         // Validate the final combined regex pattern before executing to prevent freezes
         if (!isValidRegexPattern(regexPattern, regexFlags)) {
-          setSearchOccurences([]);
-          if (searchTermRef.current !== debouncedSearchTerm) {
-            setSearchActiveOccurence(0);
-            searchTermRef.current = debouncedSearchTerm;
-          }
+          handleResetSearchResults();
           return;
         }
 
@@ -200,11 +209,7 @@ export const useAnnotatorSearch = ({
           true,
           isCaseSensitiveMode
         );
-        setSearchOccurences(occurrences);
-        if (searchTermRef.current !== debouncedSearchTerm) {
-          setSearchActiveOccurence(0);
-          searchTermRef.current = debouncedSearchTerm;
-        }
+        distributeSearchResults(occurrences);
         return;
       }
 
@@ -214,12 +219,7 @@ export const useAnnotatorSearch = ({
         isRegexMode,
         isCaseSensitiveMode
       );
-      setSearchOccurences(occurrences);
-
-      if (searchTermRef.current !== debouncedSearchTerm) {
-        setSearchActiveOccurence(0);
-        searchTermRef.current = debouncedSearchTerm;
-      }
+      distributeSearchResults(occurrences);
     };
 
     const hasWidthChanged =
