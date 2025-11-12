@@ -829,11 +829,12 @@ export const TextAnnotator = ({
 
     const executeSearch = () => {
       if (annotatorMode === EditMode.HIGHLIGHT && isExtendToWholeWordMode) {
-        const escapedTerm = debouncedSearchTerm.replace(
-          /[.*+?^${}()|[\]\\]/g,
-          "\\$&"
-        );
-        const regexPattern = `${UNICODE_WORD_START_BOUNDARY}${UNICODE_WORD_CHAR_CLASS}*${escapedTerm}${UNICODE_WORD_CHAR_CLASS}*${UNICODE_WORD_END_BOUNDARY}`;
+        // If regex mode is enabled, use the user's regex pattern without escaping
+        // Otherwise, escape the search term as a literal string
+        const userPattern = isRegexMode
+          ? debouncedSearchTerm
+          : debouncedSearchTerm.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const regexPattern = `${UNICODE_WORD_START_BOUNDARY}${UNICODE_WORD_CHAR_CLASS}*${userPattern}${UNICODE_WORD_CHAR_CLASS}*${UNICODE_WORD_END_BOUNDARY}`;
         const occurrences = annotator.search(
           regexPattern,
           true,
@@ -847,11 +848,12 @@ export const TextAnnotator = ({
         }
         return;
       } else if (annotatorMode !== EditMode.HIGHLIGHT && isWholeWordOnlyMode) {
-        const escapedTerm = debouncedSearchTerm.replace(
-          /[.*+?^${}()|[\]\\]/g,
-          "\\$&"
-        );
-        const regexPattern = `${UNICODE_WORD_START_BOUNDARY}${escapedTerm}${UNICODE_WORD_END_BOUNDARY}`;
+        // If regex mode is enabled, use the user's regex pattern without escaping
+        // Otherwise, escape the search term as a literal string
+        const userPattern = isRegexMode
+          ? debouncedSearchTerm
+          : debouncedSearchTerm.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const regexPattern = `${UNICODE_WORD_START_BOUNDARY}${userPattern}${UNICODE_WORD_END_BOUNDARY}`;
         const occurrences = annotator.search(
           regexPattern,
           true,
