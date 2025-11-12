@@ -33,7 +33,12 @@ import { AxiosResponse } from "axios";
 import { Button } from "components/basic/Button/Button";
 import { ButtonGroup } from "components/basic/ButtonGroup/ButtonGroup";
 import { CStatement } from "constructors";
-import { useDebounce, useSearchParams, useTheme } from "hooks";
+import {
+  useDebounce,
+  useSearchParams,
+  useTheme,
+  useAnnotatorSearch,
+} from "hooks";
 import { BsFileTextFill } from "react-icons/bs";
 import { HiCodeBracket } from "react-icons/hi2";
 import { collectStatementAnchors, getStatementOrderByIndex } from "utils/utils";
@@ -56,9 +61,6 @@ import { RATIO, TerritoryCreateModalType, W_SCROLL } from "./types";
 import { StatementListSearchLine } from "pages/Main/containers/StatementsListBox/StatementListSearchLine/StatementListSearchLine";
 import { Loader } from "components";
 
-const UNICODE_WORD_CHAR_CLASS = "[\\p{L}\\p{M}\\p{N}_]";
-const UNICODE_WORD_START_BOUNDARY = `(?<!${UNICODE_WORD_CHAR_CLASS})`;
-const UNICODE_WORD_END_BOUNDARY = `(?!${UNICODE_WORD_CHAR_CLASS})`;
 interface TextAnnotatorProps {
   width: number;
   annotatorWidthTooNarrow?: boolean;
@@ -807,97 +809,9 @@ export const TextAnnotator = ({
   }, [searchActiveOccurence, searchOccurences]);
 
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
-  const searchTermRef = useRef<string>("");
-  const previousWidthRef = useRef<number | null>(null);
 
-  // Execute search, react to widtch changes as well
-  useEffect(() => {
-    if (!annotator) {
-      previousWidthRef.current = width;
-      return;
-    }
-
-    if (debouncedSearchTerm.length <= 2) {
-      setSearchOccurences(null);
-      setSearchActiveOccurence(0);
-      searchTermRef.current = "";
-      setSelectedText("");
-      annotator?.clearSelection();
-      previousWidthRef.current = width;
-      return;
-    }
-
-    const executeSearch = () => {
-      if (annotatorMode === EditMode.HIGHLIGHT && isExtendToWholeWordMode) {
-        // If regex mode is enabled, use the user's regex pattern without escaping
-        // Otherwise, escape the search term as a literal string
-        const userPattern = isRegexMode
-          ? debouncedSearchTerm
-          : debouncedSearchTerm.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-        const regexPattern = `${UNICODE_WORD_START_BOUNDARY}${UNICODE_WORD_CHAR_CLASS}*${userPattern}${UNICODE_WORD_CHAR_CLASS}*${UNICODE_WORD_END_BOUNDARY}`;
-        const occurrences = annotator.search(
-          regexPattern,
-          true,
-          isCaseSensitiveMode
-        );
-        setSearchOccurences(occurrences);
-
-        if (searchTermRef.current !== debouncedSearchTerm) {
-          setSearchActiveOccurence(0);
-          searchTermRef.current = debouncedSearchTerm;
-        }
-        return;
-      } else if (annotatorMode !== EditMode.HIGHLIGHT && isWholeWordOnlyMode) {
-        // If regex mode is enabled, use the user's regex pattern without escaping
-        // Otherwise, escape the search term as a literal string
-        const userPattern = isRegexMode
-          ? debouncedSearchTerm
-          : debouncedSearchTerm.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-        const regexPattern = `${UNICODE_WORD_START_BOUNDARY}${userPattern}${UNICODE_WORD_END_BOUNDARY}`;
-        const occurrences = annotator.search(
-          regexPattern,
-          true,
-          isCaseSensitiveMode
-        );
-        setSearchOccurences(occurrences);
-        if (searchTermRef.current !== debouncedSearchTerm) {
-          setSearchActiveOccurence(0);
-          searchTermRef.current = debouncedSearchTerm;
-        }
-        return;
-      }
-
-      const occurrences = annotator.search(
-        debouncedSearchTerm,
-        isRegexMode,
-        isCaseSensitiveMode
-      );
-      setSearchOccurences(occurrences);
-
-      if (searchTermRef.current !== debouncedSearchTerm) {
-        setSearchActiveOccurence(0);
-        searchTermRef.current = debouncedSearchTerm;
-      }
-    };
-
-    const hasWidthChanged =
-      previousWidthRef.current !== null && previousWidthRef.current !== width;
-
-    previousWidthRef.current = width;
-
-    if (hasWidthChanged) {
-      const timeoutId = window.setTimeout(() => {
-        annotator.draw();
-        executeSearch();
-      }, 0);
-
-      return () => {
-        window.clearTimeout(timeoutId);
-      };
-    }
-
-    executeSearch();
-  }, [
+  // Execute search, react to width changes
+  useAnnotatorSearch({
     annotator,
     debouncedSearchTerm,
     isRegexMode,
@@ -905,7 +819,11 @@ export const TextAnnotator = ({
     isExtendToWholeWordMode,
     isWholeWordOnlyMode,
     isCaseSensitiveMode,
-  ]);
+    annotatorMode,
+    setSearchOccurences,
+    setSearchActiveOccurence,
+    setSelectedText,
+  });
 
   const isSearchAllowed = useMemo<boolean>(() => {
     return annotator !== undefined && !!dataDocument;
