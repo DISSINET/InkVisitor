@@ -15,8 +15,14 @@ import {
   FaRegArrowAltCircleDown,
   FaRegArrowAltCircleUp,
 } from "react-icons/fa";
-import { FaAnchorCircleCheck } from "react-icons/fa6";
-import { LuRegex, LuReplace, LuReplaceAll } from "react-icons/lu";
+import { FaAnchorCircleCheck, FaExpand } from "react-icons/fa6";
+import {
+  LuCaseSensitive,
+  LuRegex,
+  LuReplace,
+  LuReplaceAll,
+  LuWholeWord,
+} from "react-icons/lu";
 import { TbReplace } from "react-icons/tb";
 import { toast } from "react-toastify";
 import { useTheme } from "styled-components";
@@ -68,6 +74,12 @@ interface StatementListSearchLine {
   isRegexMode: boolean;
   setIsRegexMode: React.Dispatch<React.SetStateAction<boolean>>;
   dataDocumentIsFetching?: boolean;
+  isExtendToWholeWordMode: boolean;
+  setIsExtendToWholeWordMode: React.Dispatch<React.SetStateAction<boolean>>;
+  isWholeWordOnlyMode: boolean;
+  setIsWholeWordOnlyMode: React.Dispatch<React.SetStateAction<boolean>>;
+  isCaseSensitiveMode: boolean;
+  setIsCaseSensitiveMode: React.Dispatch<React.SetStateAction<boolean>>;
 }
 export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
   searchTerm,
@@ -91,6 +103,12 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
   isRegexMode,
   setIsRegexMode,
   dataDocumentIsFetching,
+  isExtendToWholeWordMode,
+  setIsExtendToWholeWordMode,
+  isWholeWordOnlyMode,
+  setIsWholeWordOnlyMode,
+  isCaseSensitiveMode,
+  setIsCaseSensitiveMode,
 }) => {
   const theme = useTheme();
   const [isReplacingOne, setIsReplacingOne] = useState<boolean>(false);
@@ -279,7 +297,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
         <>
           <StyledSearchContainer>
             <StyledSearchIcon>
-              <BiSearch color={theme.color.info} />
+              <BiSearch size={18} color={theme.color.info} />
             </StyledSearchIcon>
 
             <Input
@@ -295,14 +313,48 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
 
             <StyledCheckboxWrapper>
               <Checkbox
+                iconOnly
+                value={isCaseSensitiveMode}
+                onChangeFn={(checked: boolean) =>
+                  setIsCaseSensitiveMode(checked)
+                }
+                icon={<LuCaseSensitive size={16} />}
+                tooltipLabel="case sensitive mode"
+                tooltipPosition="top"
+              />
+              {annotatorMode === EditMode.HIGHLIGHT && (
+                <Checkbox
+                  iconOnly
+                  value={isExtendToWholeWordMode}
+                  onChangeFn={(checked: boolean) =>
+                    setIsExtendToWholeWordMode(checked)
+                  }
+                  icon={<FaExpand size={12} />}
+                  tooltipLabel="extend to whole word(s)"
+                  tooltipPosition="top"
+                />
+              )}
+
+              {annotatorMode !== EditMode.HIGHLIGHT && (
+                <Checkbox
+                  iconOnly
+                  value={isWholeWordOnlyMode}
+                  onChangeFn={(checked: boolean) =>
+                    setIsWholeWordOnlyMode(checked)
+                  }
+                  icon={<LuWholeWord size={16} />}
+                  tooltipLabel="whole word only"
+                  tooltipPosition="top"
+                />
+              )}
+
+              <Checkbox
+                iconOnly
                 value={isRegexMode}
                 onChangeFn={(checked: boolean) => setIsRegexMode(checked)}
-                // label=".*"
-                icon={<LuRegex />}
-                tooltipLabel="Enable regex mode"
-                tooltipContent={
-                  <p>Example of selecting whole word: [^ ]*word[^ .,]*</p>
-                }
+                icon={<LuRegex size={14} />}
+                tooltipLabel="regex mode"
+                tooltipPosition="top"
               />
             </StyledCheckboxWrapper>
 
@@ -340,7 +392,11 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
           </StyledSearchContainer>
 
           {annotatorWidthTooNarrow ? (
-            <div style={{ width: "1rem" }}></div>
+            searchOccurences === null ? (
+              <div style={{ width: "1rem" }} />
+            ) : (
+              <></>
+            )
           ) : (
             <AttributeButtonGroup
               disabled
@@ -357,7 +413,6 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                   shortValue: "",
                   onClick: () => {},
                   selected: !replaceSection,
-                  // shortIcon: <FaPlus />,
                   icon: <FaAnchor />,
                 },
               ]}

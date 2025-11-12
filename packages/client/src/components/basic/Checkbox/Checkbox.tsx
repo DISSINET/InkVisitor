@@ -7,8 +7,14 @@ import { Tooltip } from "components";
 import {
   StyledCheckbox,
   StyledCheckboxWrapper,
+  StyledIconOnlyCheckbox,
   StyledLabel,
 } from "./CheckboxStyles";
+import {
+  AutoPlacement,
+  BasePlacement,
+  VariationPlacement,
+} from "@popperjs/core";
 
 interface Checkbox {
   value: boolean;
@@ -18,6 +24,8 @@ interface Checkbox {
   size?: number;
   tooltipLabel?: string;
   tooltipContent?: React.ReactNode;
+  tooltipPosition?: AutoPlacement | BasePlacement | VariationPlacement;
+  iconOnly?: boolean;
 }
 export const Checkbox: React.FC<Checkbox> = ({
   value,
@@ -27,6 +35,8 @@ export const Checkbox: React.FC<Checkbox> = ({
   size = 18,
   tooltipLabel,
   tooltipContent,
+  iconOnly = false,
+  tooltipPosition = "bottom",
 }) => {
   const [checked, setChecked] = useState(value);
   const [referenceElement, setReferenceElement] = useState<HTMLElement | null>(
@@ -40,39 +50,55 @@ export const Checkbox: React.FC<Checkbox> = ({
 
   return (
     <>
-      <StyledCheckbox
-        onMouseEnter={() => setShowTooltip(true)}
-        onMouseLeave={() => setShowTooltip(false)}
-      >
-        <StyledCheckboxWrapper style={{ cursor: "pointer" }}>
-          {checked ? (
-            <MdOutlineCheckBox
-              size={size}
-              onClick={(e) => {
-                e.stopPropagation();
-                setChecked(false);
-              }}
-            />
-          ) : (
-            <MdOutlineCheckBoxOutlineBlank
-              size={size}
-              onClick={(e) => {
-                e.stopPropagation();
-                setChecked(true);
-              }}
-            />
+      {iconOnly && (
+        <StyledIconOnlyCheckbox
+          ref={setReferenceElement}
+          onMouseEnter={() => setShowTooltip(true)}
+          onMouseLeave={() => setShowTooltip(false)}
+          $checked={checked}
+          onClick={(e) => {
+            e.stopPropagation();
+            setChecked(!checked);
+          }}
+        >
+          {icon}
+        </StyledIconOnlyCheckbox>
+      )}
+      {!iconOnly && (
+        <StyledCheckbox
+          onMouseEnter={() => setShowTooltip(true)}
+          onMouseLeave={() => setShowTooltip(false)}
+        >
+          <StyledCheckboxWrapper style={{ cursor: "pointer" }}>
+            {checked ? (
+              <MdOutlineCheckBox
+                size={size}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setChecked(false);
+                }}
+              />
+            ) : (
+              <MdOutlineCheckBoxOutlineBlank
+                size={size}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setChecked(true);
+                }}
+              />
+            )}
+          </StyledCheckboxWrapper>
+          {(label || icon) && (
+            <StyledLabel
+              ref={setReferenceElement}
+              onClick={() => setChecked(!checked)}
+            >
+              {label}
+              {icon}
+            </StyledLabel>
           )}
-        </StyledCheckboxWrapper>
-        {(label || icon) && (
-          <StyledLabel
-            ref={setReferenceElement}
-            onClick={() => setChecked(!checked)}
-          >
-            {label}
-            {icon}
-          </StyledLabel>
-        )}
-      </StyledCheckbox>
+        </StyledCheckbox>
+      )}
 
       {tooltipLabel && (
         <Tooltip
@@ -80,6 +106,7 @@ export const Checkbox: React.FC<Checkbox> = ({
           visible={showTooltip}
           referenceElement={referenceElement}
           content={<p>{tooltipContent}</p>}
+          position={tooltipPosition}
         />
       )}
     </>
