@@ -167,6 +167,7 @@ export const StyledClearableInputButton = styled.div<StyledClearableInputButton>
   right: 0.25rem;
   top: 4px;
   svg {
-    color: ${({ theme }) => theme.color["danger"]};
+    color: ${({ theme }) => theme.color["info"]};
+    opacity: 0.7;
   }
 `;

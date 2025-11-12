@@ -330,7 +330,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                     setIsExtendToWholeWordMode(checked)
                   }
                   icon={<FaExpand size={12} />}
-                  tooltipLabel="extend to whole word"
+                  tooltipLabel="extend to whole word(s)"
                   tooltipPosition="top"
                 />
               )}
