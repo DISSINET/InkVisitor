@@ -73,7 +73,7 @@ interface TextAnnotatorProps {
   // territoryId is from URL params and is used to reset the annotator when the territory changes
   territoryId?: string;
   dataDocument?: IDocument;
-  dataDocumentIsFetching?: boolean;
+  dataDocumentIsFetching: boolean;
   dataDocumentError: Error | null;
   showStatementList?: boolean;
 
@@ -106,7 +106,7 @@ export const TextAnnotator = ({
   territory,
   territoryId,
   dataDocument,
-  dataDocumentIsFetching,
+  dataDocumentIsFetching = false,
   dataDocumentError,
   showStatementList,
 
@@ -631,7 +631,7 @@ export const TextAnnotator = ({
     displayLineNumbers,
     theme,
     hlEntities ?? [],
-    dataDocumentIsFetching ?? false,
+    dataDocumentIsFetching,
     dataDocument,
     isSaving,
   ]);
@@ -916,7 +916,11 @@ export const TextAnnotator = ({
                     hasParentT={hasParentT}
                     territory={territory}
                     disableCreate={disableCreate}
-                    isLoading={isSaving || isSavingWithoutRefresh}
+                    isLoading={
+                      isSaving ||
+                      isSavingWithoutRefresh ||
+                      isFetchingAnchorEntities
+                    }
                   />
                 )}
               </StyledAnnotatorMenu>
