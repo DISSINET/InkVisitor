@@ -894,7 +894,6 @@ export const TextAnnotator = ({
                       annotator?.clearSelection();
                     }}
                     anchors={selectedAnchors}
-                    documentData={dataDocument}
                     text={selectedText}
                     entities={storedEntities}
                     onAnchorAdd={handleAddAnchor}

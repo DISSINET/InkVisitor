@@ -36,7 +36,6 @@ import { TerritoryCreateModalType } from "./types";
 
 interface TextAnnotatorMenuProps {
   text: string;
-  documentData: IDocument;
   anchors: Tag[];
   entities: Record<string, IEntity | false>;
   onAnchorAdd: (entityId: string, elvl: EntityEnums.Elvl) => void;
