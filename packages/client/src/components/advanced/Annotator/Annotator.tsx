@@ -33,7 +33,12 @@ import { AxiosResponse } from "axios";
 import { Button } from "components/basic/Button/Button";
 import { ButtonGroup } from "components/basic/ButtonGroup/ButtonGroup";
 import { CStatement } from "constructors";
-import { useDebounce, useSearchParams, useTheme } from "hooks";
+import {
+  useDebounce,
+  useSearchParams,
+  useTheme,
+  useAnnotatorSearch,
+} from "hooks";
 import { BsFileTextFill } from "react-icons/bs";
 import { HiCodeBracket } from "react-icons/hi2";
 import { collectStatementAnchors, getStatementOrderByIndex } from "utils/utils";
@@ -55,6 +60,7 @@ import { annotatorHighlight } from "./highlight";
 import { RATIO, TerritoryCreateModalType, W_SCROLL } from "./types";
 import { StatementListSearchLine } from "pages/Main/containers/StatementsListBox/StatementListSearchLine/StatementListSearchLine";
 import { Loader } from "components";
+
 interface TextAnnotatorProps {
   width: number;
   annotatorWidthTooNarrow?: boolean;
@@ -553,6 +559,11 @@ export const TextAnnotator = ({
         }
       });
 
+      // Ensure localTextContent is set (in case it wasn't set on initial load)
+      if (localTextContent !== newContent) {
+        setLocalTextContent(newContent);
+      }
+
       annotator.draw();
 
       return;
@@ -600,6 +611,11 @@ export const TextAnnotator = ({
     newAnnotator.onTextChanged((text) => {
       setLocalTextContent(text);
     });
+
+    // Set initial text content
+    const initialContent = dataDocument?.content ?? "no text";
+    setLocalTextContent(initialContent);
+
     newAnnotator.draw();
 
     setAnnotator(newAnnotator);
@@ -744,6 +760,11 @@ export const TextAnnotator = ({
     | null
   >(null);
   const [isRegexMode, setIsRegexMode] = useState<boolean>(false);
+  const [isCaseSensitiveMode, setIsCaseSensitiveMode] = useState<boolean>(true);
+  const [isExtendToWholeWordMode, setIsExtendToWholeWordMode] =
+    useState<boolean>(false);
+  const [isWholeWordOnlyMode, setIsWholeWordOnlyMode] =
+    useState<boolean>(false);
   const [searchActiveOccurence, setSearchActiveOccurence] = useState<number>(0);
 
   // annotate tool
@@ -788,38 +809,21 @@ export const TextAnnotator = ({
   }, [searchActiveOccurence, searchOccurences]);
 
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
-  const searchTermRef = useRef<string>("");
 
-  useEffect(() => {
-    if (annotator && debouncedSearchTerm.length > 2) {
-      const occurrences = annotator.search(debouncedSearchTerm, isRegexMode);
-      setSearchOccurences(occurrences);
-
-      // Only reset to first occurrence if this is a new search term
-      if (searchTermRef.current !== debouncedSearchTerm) {
-        setSearchActiveOccurence(0);
-        searchTermRef.current = debouncedSearchTerm;
-      }
-    } else if (debouncedSearchTerm.length <= 2) {
-      setSearchOccurences(null);
-      setSearchActiveOccurence(0);
-      searchTermRef.current = "";
-      setSelectedText("");
-      annotator?.clearSelection();
-    }
-  }, [debouncedSearchTerm, isRegexMode]);
-
-  // Re-run search when width changes to update occurrence positions
-  useEffect(() => {
-    if (annotator && debouncedSearchTerm.length > 2) {
-      // Force a redraw first to recalculate text layout, then search
-      setTimeout(() => {
-        annotator.draw();
-        const occurrences = annotator.search(debouncedSearchTerm, isRegexMode);
-        setSearchOccurences(occurrences);
-      }, 0);
-    }
-  }, [width, debouncedSearchTerm, isRegexMode]);
+  // Execute search, react to width changes
+  useAnnotatorSearch({
+    annotator,
+    debouncedSearchTerm,
+    isRegexMode,
+    width,
+    isExtendToWholeWordMode,
+    isWholeWordOnlyMode,
+    isCaseSensitiveMode,
+    annotatorMode,
+    setSearchOccurences,
+    setSearchActiveOccurence,
+    setSelectedText,
+  });
 
   const isSearchAllowed = useMemo<boolean>(() => {
     return annotator !== undefined && !!dataDocument;
@@ -855,6 +859,13 @@ export const TextAnnotator = ({
         setSearchOccurences={setSearchOccurences}
         isRegexMode={isRegexMode}
         setIsRegexMode={setIsRegexMode}
+        dataDocumentIsFetching={dataDocumentIsFetching}
+        isExtendToWholeWordMode={isExtendToWholeWordMode}
+        setIsExtendToWholeWordMode={setIsExtendToWholeWordMode}
+        isWholeWordOnlyMode={isWholeWordOnlyMode}
+        setIsWholeWordOnlyMode={setIsWholeWordOnlyMode}
+        isCaseSensitiveMode={isCaseSensitiveMode}
+        setIsCaseSensitiveMode={setIsCaseSensitiveMode}
       />
 
       <div

@@ -1,4 +1,4 @@
-import { ThemeColor, ThemeFontSize } from "Theme/theme";
+import theme, { ThemeColor, ThemeFontSize } from "Theme/theme";
 import React, { useEffect, useState } from "react";
 import { MdCancel } from "react-icons/md";
 import {
@@ -155,7 +155,7 @@ export const Input: React.FC<Input> = ({
           {displayValue.length > 0 && clearable && (
             <StyledClearableInputButton>
               <MdCancel
-                size={16}
+                size={15}
                 onClick={() => {
                   setDisplayValue("");
                   onChangeFn("");

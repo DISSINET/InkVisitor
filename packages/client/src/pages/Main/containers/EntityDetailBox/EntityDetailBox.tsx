@@ -103,7 +103,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     if (!detailBoxMinimized) {
       setTimeout(() => {
         setShowContent(true);
-      }, 800);
+      }, 500);
     } else {
       setShowContent(false);
     }

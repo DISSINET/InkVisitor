@@ -165,8 +165,12 @@ interface StyledClearableInputButton {}
 export const StyledClearableInputButton = styled.div<StyledClearableInputButton>`
   position: absolute;
   right: 0.25rem;
-  top: 4px;
+  display: flex;
+  cursor: pointer;
+  top: 50%;
+  transform: translateY(-50%);
   svg {
-    color: ${({ theme }) => theme.color["danger"]};
+    color: ${({ theme }) => theme.color["info"]};
+    opacity: 0.7;
   }
 `;
