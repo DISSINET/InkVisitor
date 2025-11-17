@@ -73,6 +73,8 @@ interface ExplorerTable {
   height: number;
   onExport: (rowsSelected: number[]) => void;
   invalidateActiveQuery?: () => void;
+  stableSignature?: string;
+  onPrefetchWindow?: (offset: number, limit: number) => void;
 }
 export const ExplorerTable: React.FC<ExplorerTable> = ({
   state,
@@ -83,11 +85,20 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   height: heightBox,
   onExport,
   invalidateActiveQuery,
+  stableSignature,
+  onPrefetchWindow,
 }) => {
-  const { entities, total: incomingTotal } = data ?? {
-    entities: [],
-    total: 0,
-  };
+  // Keep last successful data to avoid resetting the list when a new window is fetching
+  const [lastData, setLastData] = useState<IResponseQuery | undefined>(
+    undefined
+  );
+  useEffect(() => {
+    if (data && typeof data.total === "number") {
+      setLastData(data);
+    }
+  }, [data]);
+  const { entities, total: incomingTotal } = data ??
+    lastData ?? { entities: [], total: 0 };
 
   const rowIndices = useMemo(() => {
     return Array.from({ length: incomingTotal }).map((_, i) => i);
@@ -113,14 +124,19 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   }, [incomingTotal, isQueryFetching]);
 
   const queryClient = useQueryClient();
-
   const updateEntityMutation = useMutation({
     mutationFn: async (variables: {
       entityId: string;
       changes: Partial<IEntity>;
     }) => await api.entityUpdate(variables.entityId, variables.changes),
 
-    onSuccess: () => {
+    onSuccess: (_data, _variables) => {
+      if (stableSignature) {
+        queryClient.setQueriesData(
+          { queryKey: ["query", stableSignature] },
+          (old: IResponseQuery | undefined) => old
+        );
+      }
       if (invalidateActiveQuery) {
         invalidateActiveQuery();
       } else {
@@ -334,9 +350,19 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   const rowSizeCacheRef = useRef<Record<number, number>>({});
   const [rowHeightsVersion, setRowHeightsVersion] = useState(0);
 
+  // Use server rows
+  const items: Array<IResponseQueryEntity | null> =
+    (entities as IResponseQueryEntity[]) || [];
+  const stableEmptyRowProps = useMemo(() => ({}), []);
+
   const getItemSize = (index: number) => {
     return rowSizeCacheRef.current[index] ?? HEIGHT_ROW_DEFAULT;
   };
+
+  const getRowHeight = useCallback(
+    (index: number) => getItemSize(index),
+    [rowHeightsVersion]
+  );
 
   const setItemSize = (index: number, size: number) => {
     const prev = rowSizeCacheRef.current[index];
@@ -352,30 +378,31 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       total - 1,
       (stopIndex ?? 0) + OVERSCAN_ROWS
     );
-    const newOffset = bufferedTop;
-    const newLimit = Math.max(1, bufferedBottom - bufferedTop + 1);
+    const desiredOffset = bufferedTop;
+    const desiredLimit = Math.max(1, bufferedBottom - bufferedTop + 1);
 
     // Cap fetch size to a reasonable window based on viewport height
     const approxRowsVisible = Math.ceil(spaceTableBody / HEIGHT_ROW_DEFAULT);
     const maxFetch = Math.max(approxRowsVisible + 2 * OVERSCAN_ROWS, 50);
-    const cappedLimit = Math.min(newLimit, maxFetch, total);
+    const cappedLimit = Math.min(desiredLimit, maxFetch, total);
 
     if (windowUpdateTimeoutRef.current) {
       clearTimeout(windowUpdateTimeoutRef.current);
     }
-
     windowUpdateTimeoutRef.current = setTimeout(() => {
-      if (newOffset !== offset || cappedLimit !== limit) {
+      if (desiredOffset !== offset || cappedLimit !== limit) {
         dispatch({
           type: ExploreActionType.setLimitAndOffset,
-          payload: { offset: newOffset, limit: cappedLimit },
+          payload: { offset: desiredOffset, limit: cappedLimit },
         });
+        // Skip neighbor prefetch here to avoid extra calls while scrolling
       }
     }, 120);
   };
 
   // horizontal scroll is handled by outer Scrollbar only
 
+  const isLoading = isQueryFetching;
   return (
     <div
       style={{
@@ -385,7 +412,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       }}
       ref={contentRef}
     >
-      {isQueryFetching && (
+      {/* {isLoading && (
         <div
           style={{
             position: "absolute",
@@ -400,7 +427,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           <BeatLoader size={6} margin={3} color="#bbb" />
           <span style={{ fontSize: 12, color: "#bbb" }}>fetching…</span>
         </div>
-      )}
+      )} */}
       <StyledTableWrapper>
         <ExploreTableControl
           setIsNewColumnOpen={setIsNewColumnOpen}
@@ -408,7 +435,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           batchActionSelected={batchActionSelected}
           setBatchActionSelected={setBatchActionSelected}
           rowsSelected={rowsSelected}
-          entities={entities}
+          entities={(items.filter(Boolean) as IResponseQueryEntity[]) || []}
           setRowLastClicked={setRowLastClicked}
           rowsTotal={total}
           onAllRowsSelect={handleAllRowsSelect}
@@ -476,13 +503,11 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
             }}
           >
             <List
-              // tie to version so heights recompute when rows expand/collapse
-              key={rowHeightsVersion}
               rowCount={total}
-              rowHeight={(index: number) => getItemSize(index)}
+              rowHeight={getRowHeight}
               overscanCount={OVERSCAN_ROWS}
               onRowsRendered={handleRowsRendered}
-              rowProps={{ items: entities, offset }}
+              rowProps={stableEmptyRowProps}
               rowComponent={(props: any) => {
                 const { index, style } = props;
                 const isOdd = Boolean(index % 2);
@@ -513,7 +538,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                     >
                       <ExplorerTableRow
                         rowId={index}
-                        items={entities}
+                        items={items as IResponseQueryEntity[]}
                         offset={offset}
                         columns={columns}
                         handleEditColumn={handleEditColumn}
@@ -525,10 +550,13 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                         invalidateActiveQuery={invalidateActiveQuery}
                       />
                     </StyledRow>
-                    {isExpanded && entities[index - offset] && (
+                    {isExpanded && items[index - offset] && (
                       <div ref={expandedMeasureRef}>
                         <ExplorerTableRowExpanded
-                          rowEntity={entities[index - offset].entity}
+                          rowEntity={
+                            (items[index - offset] as IResponseQueryEntity)
+                              .entity
+                          }
                           columns={columns}
                           isOdd={isOdd}
                         />

@@ -48,7 +48,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
     queryKey: ["entity", node.params.entityId ?? ""],
     queryFn: async () => {
       if (node.params.entityId) {
-        const res = await api.entitiesGet(node.params.entityId);
+        const res = await api.entityGet(node.params.entityId);
         return res.data;
       } else {
         return undefined;

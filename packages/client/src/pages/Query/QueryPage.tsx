@@ -1,5 +1,5 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { useEffect, useMemo, useReducer, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { IResponseQuery, Query } from "@shared/types";
 import { Explore } from "@shared/types/query";
@@ -16,6 +16,7 @@ import { getAllEdges, getAllNodes } from "./Query/utils";
 import { QueryValidity, QueryValidityProblem } from "./types";
 import { BiRefresh } from "react-icons/bi";
 import { toast } from "react-toastify";
+import { buildStableSignature } from "./collection";
 
 interface QueryPage {}
 export const QueryPage: React.FC<QueryPage> = ({}) => {
@@ -25,8 +26,6 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
   const contentHeight: number = useAppSelector(
     (state) => state.layout.contentHeight
   );
-
-  const queryClient = useQueryClient();
 
   const [queryState, queryStateDispatch] = useReducer(
     queryReducer,
@@ -79,39 +78,19 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     exploreStateInitial
   );
 
+  const queryClient = useQueryClient();
   const handleInvalidateQuery = () => {
     queryClient.invalidateQueries({
       queryKey: ["query"],
     });
   };
 
-  const {
-    data: queryData,
-    error: queryError,
-    isFetching: queryIsFetching,
-  } = useQuery({
-    queryKey: [
-      "query",
-      {
-        query: queryState,
-        explore: exploreState,
-      },
-    ],
-    queryFn: async () => {
-      if (queryStateValidity.isValid && api.isLoggedIn()) {
-        const res = await api.query({
-          query: queryState,
-          explore: exploreState,
-        });
-        return res.data;
-      }
-    },
-    staleTime: 1000 * 60 * 5,
-    gcTime: 1000 * 60 * 30,
-    enabled: queryStateValidity.isValid && api.isLoggedIn(),
-  });
+  const [queryIsFetching, setQueryIsFetching] = useState(false);
+  const [queryError, setQueryError] = useState<Error | null>(null);
 
-  // console.debug("explore", queryData?.entities);
+  const stableSignature = useMemo(() => {
+    return buildStableSignature(queryState as any, exploreState as any);
+  }, [queryState, exploreState]);
 
   const onePercentOfContentHeight = useMemo(
     () => contentHeight / 100,
@@ -125,14 +104,24 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
 
   const invalidateActiveQuery = () => {
     queryClient.invalidateQueries({
-      queryKey: [
-        "query",
-        {
+      queryKey: ["query", stableSignature],
+      exact: false,
+    });
+  };
+
+  const prefetchWindow = (offset: number, limit: number) => {
+    return queryClient.prefetchQuery({
+      queryKey: ["query", stableSignature, { offset, limit }],
+      queryFn: async () => {
+        if (!queryStateValidity.isValid || !api.isLoggedIn()) return;
+        const res = await api.query({
           query: queryState,
-          explore: exploreState,
-        },
-      ],
-      exact: true,
+          explore: { ...exploreState, offset, limit },
+        });
+        return res.data;
+      },
+      staleTime: 1000 * 60 * 5,
+      gcTime: 1000 * 60 * 30,
     });
   };
 
@@ -177,6 +166,36 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     );
     setCurrentContentHeight(contentHeight);
   }, [contentHeight]);
+
+  const {
+    data: queryData,
+    error: rqError,
+    isFetching: rqIsFetching,
+  } = useQuery({
+    queryKey: [
+      "query",
+      stableSignature,
+      { offset: exploreState.offset, limit: exploreState.limit },
+    ],
+    queryFn: async () => {
+      if (!queryStateValidity.isValid || !api.isLoggedIn()) return;
+      const res = await api.query({
+        query: queryState,
+        explore: exploreState,
+      });
+      return res.data;
+    },
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 30,
+    enabled: queryStateValidity.isValid && api.isLoggedIn(),
+  });
+
+  useEffect(() => {
+    setQueryIsFetching(rqIsFetching);
+  }, [rqIsFetching]);
+  useEffect(() => {
+    setQueryError((rqError as Error) ?? null);
+  }, [rqError]);
 
   return (
     <>
@@ -225,11 +244,13 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
             state={exploreState}
             height={contentHeight - querySeparatorYPosition}
             dispatch={exploreStateDispatch}
-            data={queryData as IResponseQuery | undefined}
+            data={queryData}
             isQueryFetching={queryIsFetching}
             queryError={queryError}
             onExport={handleExport}
             invalidateActiveQuery={invalidateActiveQuery}
+            stableSignature={stableSignature}
+            onPrefetchWindow={prefetchWindow}
           />
           <Loader show={queryIsFetching} />
         </Box>
