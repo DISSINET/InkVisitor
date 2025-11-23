@@ -14,7 +14,6 @@ interface ExplorerBoxProps {
   onExport: (rowsSelected: number[]) => void;
   invalidateActiveQuery?: () => void;
   stableSignature?: string;
-  onPrefetchWindow?: (offset: number, limit: number) => void;
 }
 export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   state,
@@ -26,7 +25,6 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   onExport,
   invalidateActiveQuery,
   stableSignature,
-  onPrefetchWindow,
 }) => {
   return (
     <ExplorerTable
@@ -39,7 +37,6 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
       onExport={onExport}
       invalidateActiveQuery={invalidateActiveQuery}
       stableSignature={stableSignature}
-      onPrefetchWindow={onPrefetchWindow}
     />
   );
 };

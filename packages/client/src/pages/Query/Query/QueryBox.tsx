@@ -17,7 +17,6 @@ import { getAllEdges, getAllNodes } from "./utils";
 interface QueryBoxProps {
   state: Query.INode;
   dispatch: React.Dispatch<QueryAction>;
-  data: IResponseQuery | undefined;
   isQueryFetching: boolean;
   queryError: Error | null;
   queryStateValidity: QueryValidity;
@@ -26,7 +25,6 @@ interface QueryBoxProps {
 export const QueryBox: React.FC<QueryBoxProps> = ({
   state,
   dispatch,
-  data,
   isQueryFetching,
   queryError,
   queryStateValidity,

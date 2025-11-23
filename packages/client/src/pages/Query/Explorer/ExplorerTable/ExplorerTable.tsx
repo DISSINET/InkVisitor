@@ -5,12 +5,12 @@ import React, {
   useMemo,
   useRef,
   useState,
+  useTransition,
 } from "react";
 import { FaEyeSlash } from "react-icons/fa";
 import { GrClose } from "react-icons/gr";
 import { MdOutlineEdit } from "react-icons/md";
 import { TbColumnInsertRight } from "react-icons/tb";
-import Scrollbar from "react-scrollbars-custom";
 import { List } from "react-window";
 import { v4 as uuidv4 } from "uuid";
 
@@ -24,24 +24,17 @@ import {
 } from "@shared/types";
 import { Explore } from "@shared/types/query";
 import api from "api";
-import { Button, ButtonGroup, Checkbox, Input } from "components";
+import { Button } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 import { CMetaProp } from "constructors";
 
 import { ExploreAction, ExploreActionType } from "../state";
 import ExplorerTableRow from "./ExplorerTableRow";
 import { ExplorerTableRowExpanded } from "./ExplorerTableRowExpanded/ExplorerTableRowExpanded";
+import ExplorerTableNewColumnPanel from "./ExplorerTableNewColumnPanel";
 import {
   StyledBody,
-  StyledColumn,
   StyledHeader,
-  StyledNewColumn,
-  StyledNewColumnContent,
-  StyledNewColumnHeader,
-  StyledNewColumnLabel,
-  StyledNewColumnValue,
-  StyledRow,
-  StyledRowWrapper,
   StyledTableWrapper,
 } from "./ExplorerTableStyles";
 import ExploreTableControl from "./ExploreTableControl";
@@ -55,7 +48,61 @@ import {
 import { useResizeObserver } from "hooks";
 import { BeatLoader } from "react-spinners";
 
-const OVERSCAN_ROWS = 20;
+const OVERSCAN_ROWS = 3;
+
+// light CSS classes (avoid dynamic styled props in hot path)
+import "../../styles.css";
+
+// Memoized header to avoid unnecessary re-renders during scroll
+const MemoizedTableHeader: React.FC<{
+  columns: Explore.IExploreColumn[];
+  onRemoveColumn: (id: string) => void;
+}> = React.memo(({ columns, onRemoveColumn }) => {
+  return (
+    <StyledHeader>
+      <div
+        className="qt-col qt-col-header"
+        style={{
+          width: WIDTH_COLUMN_FIRST,
+          minWidth: WIDTH_COLUMN_FIRST,
+          maxWidth: WIDTH_COLUMN_FIRST,
+        }}
+      >
+        Entity
+      </div>
+      {columns.map((column, key) => {
+        return (
+          <div
+            key={key}
+            className="qt-col qt-col-header"
+            style={{
+              width: WIDTH_COLUMN_DEFAULT,
+              minWidth: WIDTH_COLUMN_DEFAULT,
+              maxWidth: WIDTH_COLUMN_DEFAULT,
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            {column.editable && (
+              <MdOutlineEdit size={14} style={{ marginRight: "0.3rem" }} />
+            )}
+            {column.name}
+            <span style={{ marginLeft: "0.5rem" }}>
+              <Button
+                noBorder
+                noBackground
+                inverted
+                icon={<FaEyeSlash color={"white"} />}
+                onClick={() => onRemoveColumn(column.id)}
+                tooltipLabel="remove column"
+              />
+            </span>
+          </div>
+        );
+      })}
+    </StyledHeader>
+  );
+});
 
 const initialNewColumn: Explore.IExploreColumn = {
   id: uuidv4(),
@@ -74,7 +121,6 @@ interface ExplorerTable {
   onExport: (rowsSelected: number[]) => void;
   invalidateActiveQuery?: () => void;
   stableSignature?: string;
-  onPrefetchWindow?: (offset: number, limit: number) => void;
 }
 export const ExplorerTable: React.FC<ExplorerTable> = ({
   state,
@@ -86,8 +132,8 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   onExport,
   invalidateActiveQuery,
   stableSignature,
-  onPrefetchWindow,
 }) => {
+  const [isTransitionPending, startTransition] = useTransition();
   // Keep last successful data to avoid resetting the list when a new window is fetching
   const [lastData, setLastData] = useState<IResponseQuery | undefined>(
     undefined
@@ -95,14 +141,18 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   useEffect(() => {
     if (data && typeof data.total === "number") {
       setLastData(data);
+      // Track the window (offset/limit) that corresponds to the data we will render
+      setRenderWindow({ offset, limit });
     }
   }, [data]);
+
   const { entities, total: incomingTotal } = data ??
     lastData ?? { entities: [], total: 0 };
 
-  const rowIndices = useMemo(() => {
-    return Array.from({ length: incomingTotal }).map((_, i) => i);
-  }, [incomingTotal]);
+  // console.log(
+  //   "entities",
+  //   entities?.map((e) => e.entity.labels[0])
+  // );
 
   const { columns, limit, offset } = state;
 
@@ -111,11 +161,24 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
 
   const [rowLastClicked, setRowLastClicked] = useState<number>(-1);
   const [rowsSelected, setRowsSelected] = useState<number[]>([]);
+  const rowsSelectedSet = useMemo(() => new Set(rowsSelected), [rowsSelected]);
+  const rowLastClickedRef = useRef<number>(-1);
+  useEffect(() => {
+    rowLastClickedRef.current = rowLastClicked;
+  }, [rowLastClicked]);
+  // Keep offset/limit for the data currently rendered to avoid flashing incorrect rows
+  const [renderWindow, setRenderWindow] = useState<{
+    offset: number;
+    limit: number;
+  }>({
+    offset: 0,
+    limit: 0,
+  });
 
   const [batchActionSelected, setBatchActionSelected] = useState<BatchAction>(
     batchOptions[0].value
   );
-  const [rowsExpanded, setRowsExpanded] = useState<number[]>([]);
+  const [detailsRowIndex, setDetailsRowIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (!isQueryFetching) {
@@ -278,18 +341,9 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   //   return <StyledTableFooter>{renderPaging()}</StyledTableFooter>;
   // };
 
-  const handleRowExpand = useCallback(
-    (rowId: number) => {
-      if (rowsExpanded.includes(rowId)) {
-        setRowsExpanded(
-          rowsExpanded.filter((expandedRow) => expandedRow !== rowId)
-        );
-      } else {
-        setRowsExpanded([...rowsExpanded, rowId]);
-      }
-    },
-    [rowsExpanded]
-  );
+  const handleRowExpand = useCallback((rowId: number) => {
+    setDetailsRowIndex(rowId);
+  }, []);
 
   const {
     ref: contentRef,
@@ -308,13 +362,15 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
 
         let newSelection = isRowAlreadySelected ? [] : [rowId];
 
-        if (isWithShift && rowLastClicked !== -1 && rowLastClicked !== rowId) {
-          newSelection =
-            rowLastClicked < rowId
-              ? // clicked after last
-                rowIndices.slice(rowLastClicked, rowId + 1)
-              : // clicked before last
-                rowIndices.slice(rowId, rowLastClicked + 1);
+        if (
+          isWithShift &&
+          rowLastClickedRef.current !== -1 &&
+          rowLastClickedRef.current !== rowId
+        ) {
+          const start = Math.min(rowLastClickedRef.current, rowId);
+          const end = Math.max(rowLastClickedRef.current, rowId);
+          const rangeSize = end - start + 1;
+          newSelection = Array.from({ length: rangeSize }, (_, i) => start + i);
         }
 
         if (isRowAlreadySelected) {
@@ -324,7 +380,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
         }
       });
     },
-    [rowLastClicked, rowIndices]
+    []
   );
 
   const handleAllRowsSelect = (isSelected: boolean) => {
@@ -339,6 +395,16 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     onExport(rowsSelected);
   };
 
+  const handleRemoveColumn = useCallback(
+    (id: string) => {
+      dispatch({
+        type: ExploreActionType.removeColumn,
+        payload: { id },
+      });
+    },
+    [dispatch]
+  );
+
   const widthTable = useMemo(() => {
     return columns.length * WIDTH_COLUMN_DEFAULT + WIDTH_COLUMN_FIRST;
   }, [columns]);
@@ -347,62 +413,131 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     null
   );
 
-  const rowSizeCacheRef = useRef<Record<number, number>>({});
-  const [rowHeightsVersion, setRowHeightsVersion] = useState(0);
+  // Fixed row height - no dynamic measuring
 
   // Use server rows
   const items: Array<IResponseQueryEntity | null> =
     (entities as IResponseQueryEntity[]) || [];
   const stableEmptyRowProps = useMemo(() => ({}), []);
 
-  const getItemSize = (index: number) => {
-    return rowSizeCacheRef.current[index] ?? HEIGHT_ROW_DEFAULT;
-  };
+  const getRowHeight = useCallback(() => HEIGHT_ROW_DEFAULT, []);
 
-  const getRowHeight = useCallback(
-    (index: number) => getItemSize(index),
-    [rowHeightsVersion]
+  // Fast-scroll placeholder state
+  const [isSeeking, setIsSeeking] = useState(false);
+  const seekTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastRowsRenderedAtRef = useRef<number>(0);
+
+  // Stable row renderer to avoid recreating the function on every render
+  const renderRow = useCallback(
+    (props: any) => {
+      const { index, style } = props;
+      const isOdd = Boolean(index % 2 === 0);
+
+      const isSelected = rowsSelectedSet.has(index);
+      const isExpanded = false;
+      const dataOffset = renderWindow.offset;
+      const itemIndex = index - dataOffset;
+      const rowItem =
+        itemIndex >= 0 && itemIndex < items.length
+          ? (items[itemIndex] as IResponseQueryEntity)
+          : null;
+
+      const isPlaceholder = isSeeking || !rowItem;
+
+      return (
+        <div
+          style={{ ...style, width: widthTable, height: HEIGHT_ROW_DEFAULT }}
+          className={`qt-row ${isOdd ? " qt-row-odd" : ""}${
+            isSelected ? " qt-row-selected" : ""
+          }${isPlaceholder ? " qt-placeholder" : ""}`}
+        >
+          {isPlaceholder ? (
+            <span style={{ opacity: 0.7 }}>
+              {rowItem?.entity?.labels?.[0] ??
+                rowItem?.entity?.id ??
+                `Row ${index}`}
+            </span>
+          ) : (
+            <ExplorerTableRow
+              rowId={index}
+              rowItem={rowItem}
+              columns={columns}
+              handleEditColumn={handleEditColumn}
+              onRowSelect={handleRowSelect}
+              onExpand={handleRowExpand}
+              isSelected={isSelected}
+              isLastClicked={rowLastClicked === index}
+              isExpanded={isExpanded}
+              invalidateActiveQuery={invalidateActiveQuery}
+            />
+          )}
+        </div>
+      );
+    },
+    [
+      rowsSelectedSet,
+      renderWindow.offset,
+      items,
+      widthTable,
+      columns,
+      handleEditColumn,
+      handleRowSelect,
+      handleRowExpand,
+      rowLastClicked,
+      invalidateActiveQuery,
+    ]
   );
 
-  const setItemSize = (index: number, size: number) => {
-    const prev = rowSizeCacheRef.current[index];
-    if (prev !== size) {
-      rowSizeCacheRef.current[index] = size;
-      setRowHeightsVersion((v) => v + 1);
-    }
-  };
-
   const handleRowsRendered = ({ startIndex, stopIndex }: any) => {
-    const bufferedTop = Math.max(0, (startIndex ?? 0) - OVERSCAN_ROWS);
-    const bufferedBottom = Math.min(
-      total - 1,
-      (stopIndex ?? 0) + OVERSCAN_ROWS
-    );
-    const desiredOffset = bufferedTop;
-    const desiredLimit = Math.max(1, bufferedBottom - bufferedTop + 1);
+    // Fast scroll detection (simple velocity heuristic)
+    const now = performance.now();
+    const sinceLast = now - (lastRowsRenderedAtRef.current || 0);
+    lastRowsRenderedAtRef.current = now;
+    if (sinceLast < 50 && !isSeeking) {
+      setIsSeeking(true);
+    }
+    if (seekTimeoutRef.current) clearTimeout(seekTimeoutRef.current);
+    seekTimeoutRef.current = setTimeout(() => setIsSeeking(false), 150);
 
-    // Cap fetch size to a reasonable window based on viewport height
-    const approxRowsVisible = Math.ceil(spaceTableBody / HEIGHT_ROW_DEFAULT);
-    const maxFetch = Math.max(approxRowsVisible + 2 * OVERSCAN_ROWS, 50);
-    const cappedLimit = Math.min(desiredLimit, maxFetch, total);
+    // Compute a small, capped target window around the visible range
+    const visibleStart = startIndex ?? 0;
+    const visibleEnd = stopIndex ?? visibleStart;
+    const targetStart = Math.max(0, visibleStart - OVERSCAN_ROWS);
+    const targetEnd = Math.min(total - 1, visibleEnd + OVERSCAN_ROWS);
+    const targetLimit = Math.max(1, targetEnd - targetStart + 1);
+
+    const approxVisible = Math.ceil(spaceTableBody / HEIGHT_ROW_DEFAULT);
+    const maxFetch = Math.max(approxVisible + 2 * OVERSCAN_ROWS, 30);
+    const cappedLimit = Math.min(targetLimit, maxFetch, total);
+
+    // Update only when we meaningfully extend beyond the currently rendered window
+    const currStart = renderWindow.offset;
+    const currEnd = renderWindow.offset + items.length - 1;
+    const minDelta = 5;
+    const extendsAbove = targetStart < currStart - minDelta;
+    const extendsBelow = targetEnd > currEnd + minDelta;
+    const offsetChanged = Math.abs(targetStart - offset) >= minDelta;
+    const limitChanged = Math.abs(cappedLimit - limit) >= minDelta;
+    const shouldUpdate =
+      extendsAbove || extendsBelow || offsetChanged || limitChanged;
 
     if (windowUpdateTimeoutRef.current) {
       clearTimeout(windowUpdateTimeoutRef.current);
     }
-    windowUpdateTimeoutRef.current = setTimeout(() => {
-      if (desiredOffset !== offset || cappedLimit !== limit) {
-        dispatch({
-          type: ExploreActionType.setLimitAndOffset,
-          payload: { offset: desiredOffset, limit: cappedLimit },
+    if (shouldUpdate) {
+      windowUpdateTimeoutRef.current = setTimeout(() => {
+        startTransition(() => {
+          dispatch({
+            type: ExploreActionType.setLimitAndOffset,
+            payload: { offset: targetStart, limit: cappedLimit },
+          });
         });
-        // Skip neighbor prefetch here to avoid extra calls while scrolling
-      }
-    }, 120);
+      }, 200);
+    }
   };
 
   // horizontal scroll is handled by outer Scrollbar only
 
-  const isLoading = isQueryFetching;
   return (
     <div
       style={{
@@ -442,247 +577,103 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           onExport={handleExport}
         />
 
-        <Scrollbar
+        <div
           style={{
             width: contentWidth,
             height: heightBox - 70,
+            overflowX: "auto",
+            overflowY: "hidden",
           }}
-          contentProps={{ style: { overflow: "visible" } }}
-          noScrollY
         >
-          {/* HEADER */}
-          <StyledHeader
-            style={{
-              width: widthTable,
-            }}
-          >
-            <StyledColumn $isHeader={true} $width={WIDTH_COLUMN_FIRST}>
-              Entity
-            </StyledColumn>
-            {columns.map((column, key) => {
-              return (
-                <StyledColumn
-                  $isHeader={true}
-                  $width={WIDTH_COLUMN_DEFAULT}
-                  key={key}
-                >
-                  <div style={{ display: "flex", alignItems: "center" }}>
-                    {column.editable && (
-                      <MdOutlineEdit
-                        size={14}
-                        style={{ marginRight: "0.3rem" }}
-                      />
-                    )}
-                    {column.name}
-
-                    {/* SORT controls intentionally removed/disabled in this phase */}
-
-                    <span style={{ marginLeft: "0.5rem" }}>
-                      <Button
-                        noBorder
-                        noBackground
-                        inverted
-                        icon={<FaEyeSlash color={"white"} />}
-                        onClick={() =>
-                          dispatch({
-                            type: ExploreActionType.removeColumn,
-                            payload: { id: column.id },
-                          })
-                        }
-                        tooltipLabel="remove column"
-                      />
-                    </span>
-                  </div>
-                </StyledColumn>
-              );
-            })}
-          </StyledHeader>
-          <StyledBody
-            style={{
-              height: spaceTableBody,
-            }}
-          >
-            <List
-              rowCount={total}
-              rowHeight={getRowHeight}
-              overscanCount={OVERSCAN_ROWS}
-              onRowsRendered={handleRowsRendered}
-              rowProps={stableEmptyRowProps}
-              rowComponent={(props: any) => {
-                const { index, style } = props;
-                const isOdd = Boolean(index % 2);
-                const isSelected = rowsSelected.includes(index);
-                const isExpanded = rowsExpanded.includes(index);
-
-                const expandedMeasureRef = (el: HTMLDivElement | null) => {
-                  if (el) {
-                    const expandedHeight = el.getBoundingClientRect().height;
-                    const newSize = HEIGHT_ROW_DEFAULT + expandedHeight;
-                    setItemSize(index, newSize);
-                  } else if (!isExpanded) {
-                    setItemSize(index, HEIGHT_ROW_DEFAULT);
-                  }
-                };
-
-                // Ensure default size when not expanded
-                if (!isExpanded && getItemSize(index) !== HEIGHT_ROW_DEFAULT) {
-                  setItemSize(index, HEIGHT_ROW_DEFAULT);
-                }
-                return (
-                  <div style={style}>
-                    <StyledRow
-                      $width={widthTable}
-                      $height={HEIGHT_ROW_DEFAULT}
-                      $isOdd={isOdd}
-                      $isSelected={isSelected}
-                    >
-                      <ExplorerTableRow
-                        rowId={index}
-                        items={items as IResponseQueryEntity[]}
-                        offset={offset}
-                        columns={columns}
-                        handleEditColumn={handleEditColumn}
-                        onRowSelect={handleRowSelect}
-                        onExpand={handleRowExpand}
-                        isSelected={isSelected}
-                        isLastClicked={rowLastClicked === index}
-                        isExpanded={isExpanded}
-                        invalidateActiveQuery={invalidateActiveQuery}
-                      />
-                    </StyledRow>
-                    {isExpanded && items[index - offset] && (
-                      <div ref={expandedMeasureRef}>
-                        <ExplorerTableRowExpanded
-                          rowEntity={
-                            (items[index - offset] as IResponseQueryEntity)
-                              .entity
-                          }
-                          columns={columns}
-                          isOdd={isOdd}
-                        />
-                      </div>
-                    )}
-                  </div>
-                );
-              }}
+          {/* HEADER (sticky at top of vertical area, shared horizontal scroll) */}
+          <div style={{ width: widthTable }}>
+            {/* Alternatively, use the memoized header component below to minimize re-renders */}
+            <MemoizedTableHeader
+              columns={columns}
+              onRemoveColumn={handleRemoveColumn}
             />
-          </StyledBody>
-        </Scrollbar>
+
+            {/* BODY (List handles Y; shares X with header via parent Scrollbar) */}
+            <StyledBody
+              style={{
+                height: spaceTableBody,
+              }}
+            >
+              <List
+                style={{
+                  overflowX: "hidden",
+                }}
+                rowCount={total}
+                rowHeight={getRowHeight}
+                overscanCount={OVERSCAN_ROWS}
+                onRowsRendered={handleRowsRendered}
+                rowProps={stableEmptyRowProps}
+                rowComponent={renderRow}
+              />
+            </StyledBody>
+          </div>
+        </div>
+
         {/* {renderTableFooter()} */}
       </StyledTableWrapper>
 
-      {/* NEW COLUMN */}
-      {isNewColumnOpen && (
-        <StyledNewColumn>
-          <StyledNewColumnHeader>
-            <div style={{ display: "flex", alignItems: "center" }}>
-              <TbColumnInsertRight size={17} />
-              <p style={{ marginLeft: "0.5rem" }}>New column</p>
-            </div>
-            <div>
-              <Button
-                icon={<GrClose size={14} />}
-                onClick={() => setIsNewColumnOpen(false)}
-                noBorder
-                color="white"
-                noBackground
-                inverted
-              />
-            </div>
-          </StyledNewColumnHeader>
-          <StyledNewColumnContent>
-            <StyledNewColumnLabel>Column name</StyledNewColumnLabel>
-            <StyledNewColumnValue>
-              <Input
-                width="full"
-                value={columnName}
-                onChangeFn={(value) => setColumnName(value)}
-                changeOnType
-              />
-            </StyledNewColumnValue>
-            <StyledNewColumnLabel>Column type</StyledNewColumnLabel>
-            <StyledNewColumnValue>
-              <Dropdown.Single.Basic
-                width="full"
-                value={columnType}
-                options={Object.keys(Explore.EExploreColumnType)
-                  .map(
-                    (key) =>
-                      Explore.EExploreColumnType[
-                        key as keyof typeof Explore.EExploreColumnType
-                      ]
-                  )
-                  .map((value) => {
-                    return {
-                      value: value,
-                      label: Explore.EExploreColumnTypeLabels[value],
-                      isDisabled:
-                        Explore.EExploreColumnTypeDisabled[value].disabled,
-                    };
-                  })}
-                onChange={(value) => setColumnType(value)}
-              />
-            </StyledNewColumnValue>
-            {columnType === Explore.EExploreColumnType.EPV && (
-              <>
-                <StyledNewColumnLabel>Property type</StyledNewColumnLabel>
-                <StyledNewColumnValue>
-                  {propertyType ? (
-                    <EntityTag
-                      fullWidth
-                      entity={propertyType}
-                      unlinkButton={{
-                        onClick: () => setPropertyType(undefined),
-                      }}
-                      disableDoubleClick
-                    />
-                  ) : (
-                    <EntitySuggester
-                      categoryTypes={[EntityEnums.Class.Concept]}
-                      onPicked={(entity) => setPropertyType(entity)}
-                    />
-                  )}
-                </StyledNewColumnValue>
-              </>
-            )}
-            <StyledNewColumnLabel>
-              <MdOutlineEdit size={14} style={{ marginRight: "0.3rem" }} />
-              Editable
-            </StyledNewColumnLabel>
-            <StyledNewColumnValue>
-              <Checkbox
-                value={editable}
-                onChangeFn={(value) => setEditable(value)}
-              />
-            </StyledNewColumnValue>
-          </StyledNewColumnContent>
-
-          <span
+      {/* DETAILS MODAL */}
+      {detailsRowIndex !== null &&
+        items[detailsRowIndex - renderWindow.offset] && (
+          <div
             style={{
-              width: "100%",
+              position: "fixed",
+              inset: 0,
+              background: "rgba(0,0,0,0.5)",
               display: "flex",
-              justifyContent: "flex-end",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 1000,
             }}
+            onClick={() => setDetailsRowIndex(null)}
           >
-            <ButtonGroup style={{ marginLeft: "1rem", marginTop: "1rem" }}>
-              <Button
-                color="warning"
-                label="cancel"
-                onClick={() => setIsNewColumnOpen(false)}
-              />
-              <Button
-                label="create column"
-                onClick={handleCreateColumn}
-                disabled={
-                  !columnName.length ||
-                  (columnType === Explore.EExploreColumnType.EPV &&
-                    !propertyTypeId)
+            <div
+              style={{
+                background: "#1e1e1e",
+                color: "#fff",
+                borderRadius: 8,
+                padding: "1rem",
+                maxWidth: "80vw",
+                maxHeight: "80vh",
+                overflow: "auto",
+                boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                <Button
+                  label="Close"
+                  onClick={() => setDetailsRowIndex(null)}
+                  noBorder
+                  inverted
+                />
+              </div>
+              <ExplorerTableRowExpanded
+                rowEntity={
+                  (
+                    items[
+                      detailsRowIndex - renderWindow.offset
+                    ] as IResponseQueryEntity
+                  ).entity
                 }
+                columns={columns}
+                isOdd={false}
               />
-            </ButtonGroup>
-          </span>
-        </StyledNewColumn>
-      )}
+            </div>
+          </div>
+        )}
+
+      {/* NEW COLUMN */}
+      <ExplorerTableNewColumnPanel
+        open={isNewColumnOpen}
+        onClose={() => setIsNewColumnOpen(false)}
+        onCreateColumn={handleCreateColumn}
+      />
     </div>
   );
 };

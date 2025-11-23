@@ -1,0 +1,65 @@
+/* Lightweight row styles to avoid dynamic styled-components in the hot path */
+.qt-row {
+  display: flex;
+  align-items: stretch;
+  box-sizing: border-box;
+  border-bottom: 1px solid white;
+  padding: 0;
+}
+.qt-row-odd {
+  background: rgba(255, 255, 255, 0.2);
+}
+.qt-row-selected {
+  background: rgba(255, 255, 255, 0.25);
+}
+.qt-placeholder {
+  color: #999;
+}
+
+/* New column panel */
+.qt-newcol {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  width: 360px;
+  background: #1e1e1e;
+  color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  padding: 0.75rem 0.75rem 0.5rem 0.75rem;
+  z-index: 900;
+}
+.qt-newcol-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+.qt-newcol-content {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  grid-auto-rows: minmax(28px, auto);
+  gap: 0.5rem 0.5rem;
+}
+.qt-newcol-label {
+  display: flex;
+  align-items: center;
+  color: #bbb;
+  font-size: 0.9rem;
+}
+.qt-newcol-value {
+  display: flex;
+  align-items: center;
+}
+
+/* Header/column cells to replace StyledColumn in hot path */
+.qt-col {
+  display: inline-flex;
+  padding: 0.3rem;
+  padding-left: 1rem;
+  align-items: center;
+  gap: 0.25rem;
+}
+.qt-col-header {
+  font-weight: 600;
+}

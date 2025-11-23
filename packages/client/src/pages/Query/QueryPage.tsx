@@ -1,22 +1,21 @@
-import React, { useEffect, useMemo, useReducer, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import React, { useEffect, useMemo, useReducer, useState } from "react";
 
-import { IResponseQuery, Query } from "@shared/types";
-import { Explore } from "@shared/types/query";
+import { Query } from "@shared/types";
 import api from "api";
-import { Box, Button, Loader, Panel } from "components";
+import { Box, Button, Panel } from "components";
 import { LayoutSeparatorHorizontal } from "components/advanced";
+import { BiRefresh } from "react-icons/bi";
+import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
 import { floorNumberToOneDecimal } from "utils/utils";
+import { buildStableSignature } from "./utils";
 import { MemoizedExplorerBox } from "./Explorer/ExplorerBox";
 import { exploreReducer, exploreStateInitial } from "./Explorer/state";
 import { MemoizedQueryBox } from "./Query/QueryBox";
 import { queryReducer, queryStateInitial } from "./Query/state";
 import { getAllEdges, getAllNodes } from "./Query/utils";
 import { QueryValidity, QueryValidityProblem } from "./types";
-import { BiRefresh } from "react-icons/bi";
-import { toast } from "react-toastify";
-import { buildStableSignature } from "./collection";
 
 interface QueryPage {}
 export const QueryPage: React.FC<QueryPage> = ({}) => {
@@ -85,7 +84,6 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     });
   };
 
-  const [queryIsFetching, setQueryIsFetching] = useState(false);
   const [queryError, setQueryError] = useState<Error | null>(null);
 
   const stableSignature = useMemo(() => {
@@ -106,22 +104,6 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     queryClient.invalidateQueries({
       queryKey: ["query", stableSignature],
       exact: false,
-    });
-  };
-
-  const prefetchWindow = (offset: number, limit: number) => {
-    return queryClient.prefetchQuery({
-      queryKey: ["query", stableSignature, { offset, limit }],
-      queryFn: async () => {
-        if (!queryStateValidity.isValid || !api.isLoggedIn()) return;
-        const res = await api.query({
-          query: queryState,
-          explore: { ...exploreState, offset, limit },
-        });
-        return res.data;
-      },
-      staleTime: 1000 * 60 * 5,
-      gcTime: 1000 * 60 * 30,
     });
   };
 
@@ -170,7 +152,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
   const {
     data: queryData,
     error: rqError,
-    isFetching: rqIsFetching,
+    isFetching: queryIsFetching,
   } = useQuery({
     queryKey: [
       "query",
@@ -178,6 +160,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
       { offset: exploreState.offset, limit: exploreState.limit },
     ],
     queryFn: async () => {
+      console.log("queryFn", exploreState.offset);
       if (!queryStateValidity.isValid || !api.isLoggedIn()) return;
       const res = await api.query({
         query: queryState,
@@ -185,14 +168,11 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
       });
       return res.data;
     },
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 1,
     gcTime: 1000 * 60 * 30,
     enabled: queryStateValidity.isValid && api.isLoggedIn(),
   });
 
-  useEffect(() => {
-    setQueryIsFetching(rqIsFetching);
-  }, [rqIsFetching]);
   useEffect(() => {
     setQueryError((rqError as Error) ?? null);
   }, [rqError]);
@@ -219,7 +199,6 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
           <MemoizedQueryBox
             state={queryState}
             dispatch={queryStateDispatch}
-            data={queryData}
             isQueryFetching={queryIsFetching}
             queryError={queryError}
             queryStateValidity={queryStateValidity}
@@ -250,9 +229,8 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
             onExport={handleExport}
             invalidateActiveQuery={invalidateActiveQuery}
             stableSignature={stableSignature}
-            onPrefetchWindow={prefetchWindow}
           />
-          <Loader show={queryIsFetching} />
+          {/* <Loader show={queryIsFetching} /> */}
         </Box>
       </Panel>
     </>

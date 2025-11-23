@@ -39,37 +39,7 @@ export const StyledHeader = styled.div`
 
 export const StyledBody = styled.div``;
 
-interface StyledColumn {
-  $isHeader?: boolean;
-  $width: number;
-}
-export const StyledColumn = styled.div<StyledColumn>`
-  display: inline-flex;
-  width: ${({ $width }) => `${$width}px`};
-  min-width: ${({ $width }) => `${$width}px`};
-  max-width: ${({ $width }) => `${$width}px`};
-  font-weight: ${({ theme, $isHeader }) =>
-    $isHeader ? theme.fontWeight["bold"] : theme.fontWeight["normal"]};
-  height: ${({ theme }) => theme.space[18]};
-
-  padding: 0.3rem;
-  padding-left: 1rem;
-  align-items: center;
-  border: 1px solid white;
-  gap: ${({ theme }) => theme.space[2]};
-`;
-
-export const StyledColumnContent = styled.div`
-  display: flex;
-  justify-content: start;
-  align-items: center;
-  overflow-x: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  gap: ${({ theme }) => theme.space[2]};
-`;
-
-export const StyledCell = styled.div``;
+// StyledColumn removed in favor of lightweight classes in styles.css
 
 export const StyledNewColumn = styled.div`
   position: absolute;

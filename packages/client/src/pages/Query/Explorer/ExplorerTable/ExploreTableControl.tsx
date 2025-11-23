@@ -141,4 +141,4 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
   );
 };
 
-export default ExploreTableControl;
+export default React.memo(ExploreTableControl);
