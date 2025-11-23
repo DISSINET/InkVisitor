@@ -4,12 +4,7 @@ import { IAudit, IEntity } from "../../shared/types";
 import { Relation } from "../../shared/types/relation";
 import { confirm } from "./import/prompts";
 import { DbSchema, checkRelation, TableSchema } from "./import/common";
-import {
-  auditsIndexes,
-  entitiesIndexes,
-  relationsIndexes,
-  materializedStatsIndexes,
-} from "./import/indexes";
+import { DbSchemaIndexes } from "./import/indexes";
 import { EntityEnums } from "@shared/enums";
 import { question } from "./import/prompts";
 import { DbHelper } from "./import/db";
@@ -23,73 +18,56 @@ import * as path from "path";
 const defaultSettingsTable: TableSchema = {
   tableName: "settings",
   data: require("../datasets/default/settings.json"),
-  transform: function () {},
 };
 
 // Materialized stats tables for each time unit
 const materializedStatsTables = {
   statsMaterializedDay: {
     tableName: "stats_materialized_day",
-    data: [],
-    transform: function () {},
-    indexes: materializedStatsIndexes,
   },
   statsMaterializedWeek: {
     tableName: "stats_materialized_week",
-    data: [],
-    transform: function () {},
-    indexes: materializedStatsIndexes,
   },
   statsMaterializedMonth: {
     tableName: "stats_materialized_month",
-    data: [],
-    transform: function () {},
-    indexes: materializedStatsIndexes,
   },
   statsMaterializedYear: {
     tableName: "stats_materialized_year",
-    data: [],
-    transform: function () {},
-    indexes: materializedStatsIndexes,
   },
 };
 
-const datasets: Record<string, DbSchema> = {
-  dissinet_documents: {
-    settings: defaultSettingsTable,
-    users: {
-      tableName: "users",
-      data: null,
-      transform: function () {},
-    },
-    aclPermissions: {
-      tableName: "acl_permissions",
-      data: null,
-      transform: function () {},
-    },
-    entities: {
-      tableName: "entities",
-      data: null,
-      transform: function () {},
-    },
-    audits: {
-      tableName: "audits",
-      data: null,
-      transform: function () {},
-    },
-    relations: {
-      tableName: "relations",
-      data: null,
-      transform: function () {},
-    },
-    documents: {
-      tableName: "documents",
-      data: require("../datasets/dissinet-documents/documents.json"),
-      transform: function () {},
-    },
-    ...materializedStatsTables,
-  },
+/**
+ * Scans the datasets directory and finds directories that match keys in the datasets object
+ * These can be used as 'raw' datasets
+ * @returns Array of raw dataset names (directory names that match dataset keys)
+ */
+function findRawDatasets(): string[] {
+  const datasetsDir = path.join(__dirname, "../datasets");
+  const rawDatasets: string[] = [];
 
+  if (!fs.existsSync(datasetsDir)) {
+    return rawDatasets;
+  }
+
+  const datasetKeys = Object.keys(datasets);
+  const entries = fs.readdirSync(datasetsDir, { withFileTypes: true });
+  
+  for (const entry of entries) {
+    if (entry.isDirectory()) {
+      const dirName = entry.name;
+      
+      if (
+        !datasetKeys.includes(dirName)
+      ) {
+        rawDatasets.push(dirName);
+      }
+    }
+  }
+
+  return rawDatasets;
+}
+
+const datasets: Record<string, DbSchema> = {
   empty: {
     settings: defaultSettingsTable,
     users: {
@@ -105,7 +83,6 @@ const datasets: Record<string, DbSchema> = {
     aclPermissions: {
       tableName: "acl_permissions",
       data: require("../datasets/default/acl_permissions.json"),
-      transform: function () {},
     },
     entities: {
       tableName: "entities",
@@ -118,9 +95,7 @@ const datasets: Record<string, DbSchema> = {
           return entity;
         });
       },
-      indexes: entitiesIndexes,
     },
-
     audits: {
       tableName: "audits",
       data: require("../datasets/empty/audits.json"),
@@ -130,18 +105,14 @@ const datasets: Record<string, DbSchema> = {
           return audit;
         });
       },
-      indexes: auditsIndexes,
     },
     relations: {
       tableName: "relations",
       data: require("../datasets/empty/relations.json"),
-      transform: function () {},
-      indexes: relationsIndexes,
     },
     documents: {
       tableName: "documents",
       data: require("../datasets/default/documents.json"),
-      transform: function () {},
     },
     ...materializedStatsTables,
   },
@@ -170,7 +141,6 @@ const datasets: Record<string, DbSchema> = {
     aclPermissions: {
       tableName: "acl_permissions",
       data: require("../datasets/default/acl_permissions.json"),
-      transform: function () {},
     },
     entities: {
       tableName: "entities",
@@ -183,7 +153,6 @@ const datasets: Record<string, DbSchema> = {
           return entity;
         });
       },
-      indexes: entitiesIndexes,
     },
     audits: {
       tableName: "audits",
@@ -194,7 +163,6 @@ const datasets: Record<string, DbSchema> = {
           return audit;
         });
       },
-      indexes: auditsIndexes,
     },
     relations: {
       tableName: "relations",
@@ -214,21 +182,19 @@ const datasets: Record<string, DbSchema> = {
           return relation;
         });
       },
-      indexes: relationsIndexes,
     },
     documents: {
       tableName: "documents",
       data: require("../datasets/default/documents.json"),
-      transform: function () {},
     },
     ...materializedStatsTables,
   },
 
-  allparsed: {
+  all_parsed: {
     settings: defaultSettingsTable,
     users: {
       tableName: "users",
-      data: require("../datasets/all-parsed/users.json"),
+      data: require("../datasets/all_parsed/users.json"),
       transform: function () {
         this.data = this.data.map((user: IUser) => {
           user.password = hashPassword(user.password ? user.password : "");
@@ -239,11 +205,10 @@ const datasets: Record<string, DbSchema> = {
     aclPermissions: {
       tableName: "acl_permissions",
       data: require("../datasets/default/acl_permissions.json"),
-      transform: function () {},
     },
     entities: {
       tableName: "entities",
-      data: require("../datasets/all-parsed/entities.json"),
+      data: require("../datasets/all_parsed/entities.json"),
       transform: function () {
         this.data = this.data.map((entity: IEntity) => {
           if (!entity.createdAt) {
@@ -265,22 +230,20 @@ const datasets: Record<string, DbSchema> = {
           return entity;
         });
       },
-      indexes: entitiesIndexes,
     },
     audits: {
       tableName: "audits",
-      data: require("../datasets/all-parsed/audits.json"),
+      data: require("../datasets/all_parsed/audits.json"),
       transform: function () {
         this.data = this.data.map((audit: IAudit) => {
           audit.date = new Date(audit.date);
           return audit;
         });
       },
-      indexes: auditsIndexes,
     },
     relations: {
       tableName: "relations",
-      data: require("../datasets/all-parsed/relations.json"),
+      data: require("../datasets/all_parsed/relations.json"),
       transform: function () {
         this.data = this.data.map((relation: Relation.IRelation) => {
           if (!relation.order) {
@@ -289,212 +252,10 @@ const datasets: Record<string, DbSchema> = {
           return relation;
         });
       },
-      indexes: relationsIndexes,
     },
     documents: {
       tableName: "documents",
       data: require("../datasets/default/documents.json"),
-      transform: function () {},
-    },
-    ...materializedStatsTables,
-  },
-
-  initial_c: {
-    settings: defaultSettingsTable,
-    users: {
-      tableName: "users",
-      data: null,
-      transform: function () {},
-    },
-    aclPermissions: {
-      tableName: "acl_permissions",
-      data: null,
-      transform: function () {},
-    },
-    entities: {
-      tableName: "entities",
-      data: require("../datasets/initial-c/entities.json"),
-      transform: function () {},
-      indexes: entitiesIndexes,
-    },
-    audits: {
-      tableName: "audits",
-      data: null,
-      transform: function () {},
-      indexes: auditsIndexes,
-    },
-    relations: {
-      tableName: "relations",
-      data: null,
-      transform: function () {},
-      indexes: relationsIndexes,
-    },
-    documents: {
-      tableName: "documents",
-      data: null,
-      transform: function () {},
-    },
-    ...materializedStatsTables,
-  },
-
-  initial_a: {
-    settings: defaultSettingsTable,
-    users: {
-      tableName: "users",
-      data: null,
-      transform: function () {},
-    },
-    aclPermissions: {
-      tableName: "acl_permissions",
-      data: null,
-      transform: function () {},
-    },
-    entities: {
-      tableName: "entities",
-      data: require("../datasets/initial-a/entities.json"),
-      transform: function () {},
-      indexes: entitiesIndexes,
-    },
-    audits: {
-      tableName: "audits",
-      data: null,
-      transform: function () {},
-      indexes: auditsIndexes,
-    },
-    relations: {
-      tableName: "relations",
-      data: null,
-      transform: function () {},
-      indexes: relationsIndexes,
-    },
-    documents: {
-      tableName: "documents",
-      data: null,
-      transform: function () {},
-    },
-    ...materializedStatsTables,
-  },
-
-  acr: {
-    settings: defaultSettingsTable,
-    users: {
-      tableName: "users",
-      data: null,
-      transform: function () {},
-    },
-    aclPermissions: {
-      tableName: "acl_permissions",
-      data: null,
-      transform: function () {},
-    },
-    entities: {
-      tableName: "entities",
-      data: require("../datasets/acr/entities.json"),
-      transform: function () {},
-      indexes: entitiesIndexes,
-    },
-    audits: {
-      tableName: "audits",
-      data: null,
-      transform: function () {},
-      indexes: auditsIndexes,
-    },
-    relations: {
-      tableName: "relations",
-      data: require("../datasets/acr/relations.json"),
-      transform: function () {},
-      indexes: relationsIndexes,
-    },
-    documents: {
-      tableName: "documents",
-      data: null,
-      transform: function () {},
-    },
-    ...materializedStatsTables,
-  },
-
-  niort: {
-    settings: defaultSettingsTable,
-    users: {
-      tableName: "users",
-      data: require("../datasets/niort/users.json"),
-      transform: function () {
-        this.data = this.data.map((user: IUser) => {
-          user.password = hashPassword(user.password ? user.password : "");
-          return user;
-        });
-      },
-    },
-    aclPermissions: {
-      tableName: "acl_permissions",
-      data: require("../datasets/default/acl_permissions.json"),
-      transform: function () {},
-    },
-    entities: {
-      tableName: "entities",
-      data: require("../datasets/niort/entities.json"),
-      transform: function () {},
-      indexes: entitiesIndexes,
-    },
-    audits: {
-      tableName: "audits",
-      data: [],
-      transform: function () {},
-      indexes: auditsIndexes,
-    },
-    relations: {
-      tableName: "relations",
-      data: require("../datasets/niort/relations.json"),
-      transform: function () {},
-      indexes: relationsIndexes,
-    },
-    documents: {
-      tableName: "documents",
-      data: [],
-      transform: function () {},
-    },
-    ...materializedStatsTables,
-  },
-
-  production: {
-    settings: defaultSettingsTable,
-    users: {
-      tableName: "users",
-      data: require("../datasets/production/users.json"),
-      transform: function () {
-        this.data = this.data.map((user: IUser) => {
-          user.password = hashPassword(user.password ? user.password : "");
-          return user;
-        });
-      },
-    },
-    aclPermissions: {
-      tableName: "acl_permissions",
-      data: require("../datasets/default/acl_permissions.json"),
-      transform: function () {},
-    },
-    entities: {
-      tableName: "entities",
-      data: require("../datasets/production/entities.json"),
-      transform: function () {},
-      indexes: entitiesIndexes,
-    },
-    audits: {
-      tableName: "audits",
-      data: require("../datasets/production/audits.json"),
-      transform: function () {},
-      indexes: auditsIndexes,
-    },
-    relations: {
-      tableName: "relations",
-      data: require("../datasets/production/relations.json"),
-      transform: function () {},
-      indexes: relationsIndexes,
-    },
-    documents: {
-      tableName: "documents",
-      data: require("../datasets/production/documents.json"),
-      transform: function () {},
     },
     ...materializedStatsTables,
   },
@@ -727,27 +488,112 @@ class Importer {
    * @returns Promise<void>
    */
   async selectDataset(): Promise<void> {
+    const regularDatasets = Object.keys(datasets);
+    const rawDatasets = findRawDatasets();
+    
+    // Combine regular and raw datasets for display
+    const allDatasetOptions: Array<{ name: string; isRaw: boolean; index: number }> = [];
+    
+    regularDatasets.forEach((key, i) => {
+      allDatasetOptions.push({ name: key, isRaw: false, index: i + 1 });
+    });
+    
+    rawDatasets.forEach((key, i) => {
+      allDatasetOptions.push({ name: key, isRaw: true, index: regularDatasets.length + i + 1 });
+    });
+
     console.log(
       `Datasets: ${[
         "",
-        ...Object.keys(datasets).map((key, i) => `${key} (${i + 1})`),
+        ...allDatasetOptions.map((opt) => 
+          `${opt.name}${opt.isRaw ? " (raw)" : ""} (${opt.index})`
+        ),
       ].join("\n- ")}`
     );
 
     const dataset = await question<string>(
       "Choose the dataset (name/number)",
       (input: string): string | undefined => {
-        if (parseInt(input) > 0) {
-          input = Object.keys(datasets)[parseInt(input) - 1];
+        const num = parseInt(input);
+        if (num > 0 && num <= allDatasetOptions.length) {
+          const selected = allDatasetOptions[num - 1];
+          return selected.name;
         }
 
-        return Object.keys(datasets).find((key) => key === input);
+        const found = allDatasetOptions.find((opt) => opt.name === input);
+        return found ? found.name : undefined;
       },
       ""
     );
 
-    this.dataset = datasets[dataset];
-    this.datasetName = dataset;
+    const selectedOption = allDatasetOptions.find((opt) => opt.name === dataset);
+    
+    if (selectedOption?.isRaw) {
+      // Handle raw dataset
+      this.datasetName = dataset;
+      this.dataset = await this.prepareRawDataset(dataset);
+    
+    } else {
+      // Handle regular dataset
+      this.dataset = datasets[dataset];
+      for (const table of Object.values(this.dataset)) {
+        if (!table.indexes) {
+          table.indexes = DbSchemaIndexes[table.tableName as keyof DbSchema];
+        }
+      }
+      this.datasetName = dataset;
+    }
+  }
+
+  snakeToCamel(str: string): string {
+    return str.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
+  }
+
+  /**
+   * Prepares a raw dataset from a directory
+   * @param datasetName Name of the raw dataset directory
+   * @returns Promise<void>
+   */
+  async prepareRawDataset(datasetName: string): Promise<DbSchema> {
+    const entries = fs.readdirSync(path.join(__dirname, "../datasets", datasetName), { withFileTypes: true });
+    const datasetTables: DbSchema = {
+      settings: {
+        tableName: "settings",
+      },
+      users: {
+        tableName: "users",
+      },
+      aclPermissions: {
+        tableName: "acl_permissions",
+      },
+      entities: {
+        tableName: "entities",
+      },
+      audits: {
+        tableName: "audits",
+      },
+      relations: {
+        tableName: "relations",
+      },
+      documents: {
+        tableName: "documents",
+      },
+      ...materializedStatsTables,
+    };
+
+    for (const entry of entries) {
+      if (entry.isFile() && entry.name.endsWith(".json")) {
+        const dataFilePath = path.join(path.join(__dirname, "../datasets", datasetName), entry.name);
+        if (fs.existsSync(dataFilePath)) {
+          const data = JSON.parse(fs.readFileSync(dataFilePath, "utf8"));
+          const tableKey = this.snakeToCamel(entry.name.replace(".json", ""));
+          datasetTables[tableKey as keyof DbSchema].data = data,
+          datasetTables[tableKey as keyof DbSchema].indexes = DbSchemaIndexes[tableKey as keyof DbSchema];
+        }
+      }
+    }
+
+    return datasetTables;
   }
 
   async selectJob(): Promise<void> {
@@ -789,6 +635,7 @@ class Importer {
 
     await this.db.dbDrop();
     await this.db.dbCreate();
+
     for (const tableConfig of Object.values(this.dataset)) {
       await this.db.createTable(tableConfig);
     }
@@ -808,6 +655,7 @@ class Importer {
       } else if (tableConfig.data === null) {
         console.log(colors.gray(`Skipping ${tableConfig.tableName} - no data configured`));
       } else {
+        console.log(tableConfig.data);
         console.log(colors.gray(`Skipping ${tableConfig.tableName} - data is not an array`));
       }
     }
