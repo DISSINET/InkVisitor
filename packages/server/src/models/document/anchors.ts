@@ -13,11 +13,18 @@ export class AnchorsNode implements IAnchorsNode {
 
   constructor(anchor: string, content: string, children: IAnchorsNode[], anchorClass: EntityEnums.Class) {
     this.anchor = anchor;
-    this.content = content;
+    this.addContent(content);
     this.children = (children || []).map((child) => new AnchorsNode(child.anchor, child.content, child.children, child.class));
     this.class = anchorClass;
     this.indexStart = -1;
     this.indexEnd = -1;
+  }
+
+  addContent(content: string) {
+    this.content += content;
+    if (this.content.length > AnchorsNode.MAX_CONTENT_LENGTH) {
+      this.content = this.content.slice(0, AnchorsNode.MAX_CONTENT_LENGTH) + "...";
+    }
   }
 
   /**
@@ -53,7 +60,7 @@ export class AnchorsNode implements IAnchorsNode {
       if (match.index > lastIndex) {
         const text = content.slice(lastIndex, match.index);
         if (text.length > 0 && nodeStack.length > 0) {
-          nodeStack[nodeStack.length - 1].content += text;
+          nodeStack[nodeStack.length - 1].addContent(text);
         }
       }
 
@@ -90,7 +97,7 @@ export class AnchorsNode implements IAnchorsNode {
 
         // If there's a parent node, merge the content of the closed node into its parent (remove tag, keep content)
         if (closedNode && nodeStack.length > 0) {
-          nodeStack[nodeStack.length - 1].content += closedNode.content;
+          nodeStack[nodeStack.length - 1].addContent(closedNode.content);
         }
       }
 
@@ -101,7 +108,7 @@ export class AnchorsNode implements IAnchorsNode {
     if (lastIndex < content.length) {
       const remainingText = content.slice(lastIndex).trim();
       if (remainingText.length > 0 && nodeStack.length > 0) {
-        nodeStack[nodeStack.length - 1].content += remainingText;
+        nodeStack[nodeStack.length - 1].addContent(remainingText);
       }
     }
 
