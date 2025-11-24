@@ -4,7 +4,7 @@
 
 import { IEntity, IResponseEntity, IStatement, IWarning, Relation } from ".";
 import { EntityEnums } from "../enums";
-import { IDocumentMeta } from "./document";
+import { IDocument } from "./document";
 import {
   IStatementClassification,
   IStatementIdentification,
@@ -40,7 +40,7 @@ export interface ITerritoryValidationNode {
 // model is reapeated for each anchor in each document,
 // so e.g., when the entity is used in 2 documents, and in one document it is used in 3 anchors, in the second is used in 1 anchor, model will be repeated 4 times
 export interface IResponseUsedInDocument {
-  document: IDocumentMeta;
+  document: Omit<IDocument, "content">;
   anchorText: string; // content of the anchor
   resourceId: string; // resource linked to the document
   parentTerritoryId: string; // id of the closest territory anchor in the document, "" if no territory is found

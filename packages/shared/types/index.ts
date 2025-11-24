@@ -54,7 +54,6 @@ import { IResponseStoredTerritory, IResponseUser } from "./response-user";
 
 import {
   IDocument,
-  IDocumentMeta,
 } from "./document";
 import { IRequestStats } from "./request-stats";
 import { IResponseEntity } from "./response-entity";
@@ -87,7 +86,6 @@ export type {
   IConcept,
   IdentificationOrder,
   IDocument,
-  IDocumentMeta,
   IEntity,
   IEvent,
   IEventData,

@@ -1,6 +1,6 @@
 import { EntityEnums } from "@shared/enums";
 import { IAnchorsNode } from "@shared/types/document";
-import { createOpeningTagRegex, closingTagRegex, createAnyTagRegex } from "@common/regex";
+import { createAnyTagRegex } from "@shared/lib/regex";
 
 export class AnchorsNode implements IAnchorsNode {
   anchor: string;
@@ -43,10 +43,13 @@ export class AnchorsNode implements IAnchorsNode {
   * @returns
   */
   static buildAnchorsTree(content: string, entityIds: Record<EntityEnums.Class, string[]>): AnchorsNode[] {
+    if (!content || !entityIds) {
+      return [];
+    }
+    const start = performance.now();
     const anyTagPattern = createAnyTagRegex(); // Regex to match any tag with optional attributes
     const rootNodes: AnchorsNode[] = []; // List of root nodes
     const nodeStack: AnchorsNode[] = []; // Stack to keep track of the current node
-
     let lastIndex = 0;
     let match: RegExpExecArray | null;
 
@@ -111,6 +114,9 @@ export class AnchorsNode implements IAnchorsNode {
         nodeStack[nodeStack.length - 1].addContent(remainingText);
       }
     }
+
+    const end = performance.now();
+    console.log(`[AnchorsNode.buildAnchorsTree] took ${end - start}ms`);
 
     return rootNodes;
   }

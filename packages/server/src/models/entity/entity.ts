@@ -35,7 +35,7 @@ import { IWarningPositionSection } from "@shared/types/warning";
 import { Connection, RDatum, WriteResult, r as rethink } from "rethinkdb-ts";
 import { IRequest } from "../../custom_typings/request";
 import Reference from "./reference";
-import { AnchorsNode } from "@models/document/anchors";
+import { AnchorsNode } from "@shared/lib/anchors";
 import { Setting } from "@models/setting/setting";
 
 export default class Entity implements IEntity, IDbModel {
@@ -600,7 +600,6 @@ export default class Entity implements IEntity, IDbModel {
           for (const node of nodes) {
             if (node.anchor === this.id) {
               const { content, ...documentMeta } = docData;
-
               out.push({
                 document: documentMeta,
                 anchorText: node.getShortContent(),
@@ -618,7 +617,7 @@ export default class Entity implements IEntity, IDbModel {
           }
         };
 
-        traverse(doc.anchors);
+        traverse(AnchorsNode.buildAnchorsTree(doc.content, doc.entityIds));
       })
     );
 

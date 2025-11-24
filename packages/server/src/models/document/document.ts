@@ -4,9 +4,9 @@ import { IDocument } from "@shared/types";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import { InternalServerError, ModelNotValidError } from "@shared/types/errors";
 import User from "@models/user/user";
-import { AnchorsNode } from "./anchors";
+import { AnchorsNode } from "../../../../shared/lib/anchors";
 import Entity from "@models/entity/entity";
-import { createOpeningTagRegex, createSpecificOpeningTagRegex, closingTagRegex } from "@common/regex";
+import { createOpeningTagRegex, createSpecificOpeningTagRegex } from "@shared/lib/regex";
 
 export default class Document implements IDocument, IDbModel {
   static table = "documents";
@@ -18,7 +18,6 @@ export default class Document implements IDocument, IDbModel {
   updatedAt?: Date;
 
   // following fields are populated in preprocess method (before save)
-  anchors: AnchorsNode[];
   entityIds: Record<EntityEnums.Class, string[]>;
 
   constructor(data: Partial<IDocument>) {
@@ -26,7 +25,6 @@ export default class Document implements IDocument, IDbModel {
     this.title = data.title || "";
     this.content = data.content || "";
     this.entityIds = data.entityIds || {} as Record<EntityEnums.Class, string[]>;
-    this.anchors = data.anchors?.map((anchor) => new AnchorsNode(anchor.anchor, anchor.content, anchor.children, anchor.class)) || [];
 
     this.createdAt = data.createdAt || new Date();
     if (data.updatedAt !== undefined) {
@@ -35,24 +33,12 @@ export default class Document implements IDocument, IDbModel {
   }
 
   /**
-   * Preprocesses the document to find entity ids and build anchors tree
+   * Preprocesses the document to find entity ids
    * @param conn Connection
    * @returns Promise<void>
    */
   async preprocess(conn: Connection): Promise<void> {
-    const gatherStart = performance.now();
-    const entityIds = this.gatherEntityIds();
-    const gatherTime = performance.now() - gatherStart;
-    
-    const findStart = performance.now();
-    this.entityIds = await this.findReferencedEntityIds(conn, entityIds);
-    const findTime = performance.now() - findStart;
-    
-    const buildStart = performance.now();
-    this.anchors = AnchorsNode.buildAnchorsTree(this.content, this.entityIds);
-    const buildTime = performance.now() - buildStart;
-    
-    console.log(`[Document preprocess] ${this.id}: gatherEntityIds took ${gatherTime.toFixed(5)}ms, findReferencedEntityIds took ${findTime.toFixed(5)}ms, buildAnchorsTree took ${buildTime.toFixed(5)}ms`);
+    this.entityIds = await this.findReferencedEntityIds(conn, this.gatherEntityIds());
   }
 
   /**
@@ -134,7 +120,7 @@ export default class Document implements IDocument, IDbModel {
       return null;
     };
 
-    const result = traverse(this.anchors);
+    const result = traverse(AnchorsNode.buildAnchorsTree(this.content, this.entityIds));
     return result;
   }
 

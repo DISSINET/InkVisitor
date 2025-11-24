@@ -23,6 +23,7 @@ import {
   Relation,
   RequestPermissionUpdate,
 } from "@shared/types";
+import { AnchorsNode } from "@shared/lib/anchors";
 import * as errors from "@shared/types/errors";
 import { IRequestSearch } from "@shared/types/request-search";
 import { ISetting, ISettingGroup } from "@shared/types/settings";
@@ -1233,6 +1234,9 @@ class Api {
         ...options,
         params: filter,
       });
+      response.data.forEach((doc: IDocument) => {
+        doc.anchors = AnchorsNode.buildAnchorsTree(doc.content, doc.entityIds);
+      });
       return response;
     } catch (err) {
       throw this.handleError(err);
@@ -1248,6 +1252,7 @@ class Api {
         `/documents/${documentId}`,
         options
       );
+      response.data.anchors = AnchorsNode.buildAnchorsTree(response.data.content, response.data.entityIds);
       return response;
     } catch (err) {
       throw this.handleError(err);

@@ -1,7 +1,7 @@
 import { mergeDeep } from "@common/functions";
 import Document from "@models/document/document";
 import { EntityEnums } from "@shared/enums";
-import { IDocument, IDocumentMeta, IResponseGeneric } from "@shared/types";
+import { IDocument, IResponseGeneric } from "@shared/types";
 import {
   BadParams,
   DocumentDoesNotExist,
@@ -12,7 +12,7 @@ import {
 import { Router } from "express";
 import { IRequest } from "src/custom_typings/request";
 import { asyncRouteHandler } from "../index";
-import { createOpeningTagRegex, closingTagRegex } from "@common/regex";
+import { createOpeningTagRegex, closingTagRegex } from "@shared/lib/regex";
 
 export default Router()
   /**
@@ -43,18 +43,17 @@ export default Router()
    */
   .get(
     "/",
-    asyncRouteHandler<IDocumentMeta[]>(async (request: IRequest) => {
+    asyncRouteHandler<IDocument[]>(async (request: IRequest) => {
       const docs = await Document.getAll(request.db.connection);
 
-      const docResponses: IDocumentMeta[] = [];
+      const docResponses: IDocument[] = [];
       for (const d of docs) {
         const document = new Document(d);
-        if (!document.anchors || document.anchors.length === 0) {
-          await document.preprocess(request.db.connection);
-        }
+        // @ts-ignore - this is temporary, until we are consistend on the anchors field
+        delete(document["anchors"]);
 
-        // @ts-ignore 
-        delete document.content;
+        await document.preprocess(request.db.connection);
+
         docResponses.push(document);
       }
 
@@ -216,6 +215,9 @@ export default Router()
         throw DocumentDoesNotExist.forId(id);
       }
 
+      // @ts-ignore - this is temporary, until we are consistend on the anchors field
+      delete(document["anchors"]);
+      
       await document.preprocess(request.db.connection);
 
       return document;
