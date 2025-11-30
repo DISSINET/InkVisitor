@@ -5,7 +5,6 @@ import React, {
   useMemo,
   useRef,
   useState,
-  useTransition,
 } from "react";
 import { FaEyeSlash } from "react-icons/fa";
 import { MdOutlineEdit } from "react-icons/md";
@@ -135,7 +134,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   stableSignature,
 }) => {
   const themeContext = useTheme();
-  const [isTransitionPending, startTransition] = useTransition();
   // Keep last successful data to avoid resetting the list when a new window is fetching
   const [lastData, setLastData] = useState<IResponseQuery | undefined>(
     undefined
@@ -525,11 +523,9 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     }
     if (shouldUpdate) {
       windowUpdateTimeoutRef.current = setTimeout(() => {
-        startTransition(() => {
-          dispatch({
-            type: ExploreActionType.setLimitAndOffset,
-            payload: { offset: targetStart, limit: cappedLimit },
-          });
+        dispatch({
+          type: ExploreActionType.setLimitAndOffset,
+          payload: { offset: targetStart, limit: cappedLimit },
         });
       }, SCROLL_WINDOW_UPDATE_DEBOUNCE_MS);
     }

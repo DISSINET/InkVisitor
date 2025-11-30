@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { IResponseQuery, IResponseQueryEntity } from "@shared/types";
 import { Explore, Query } from "@shared/types/query";
 import api from "api";
@@ -69,9 +69,9 @@ export const useQueryData = ({
 
   /**
    * Check if all requested rows are in the cache.
-   * If yes, return the data from cache and set it in React Query cache.
+   * If yes, return the data from cache and seed React Query's cache.
    */
-  const checkAndReturnCachedRows = (
+  const checkAndSeedCache = (
     targetOffset: number,
     targetLimit: number
   ): IResponseQuery | undefined => {
@@ -109,13 +109,7 @@ export const useQueryData = ({
     };
 
     console.log(
-      `✅ Cache hit: All rows [${targetOffset}-${targetEnd}] found in cache (${rowCache.rows.size} total rows) - skipping fetch`
-    );
-
-    // Set this data in React Query cache to prevent fetching
-    queryClient.setQueryData(
-      ["query", stableSignature, { offset: targetOffset, limit: targetLimit }],
-      cachedData
+      `✅ Cache hit: All rows [${targetOffset}-${targetEnd}] found in cache (${rowCache.rows.size} total rows) - skip fetch`
     );
 
     return cachedData;
@@ -145,19 +139,6 @@ export const useQueryData = ({
     );
   };
 
-  // Before running the query, check if we have all rows cached
-  useEffect(() => {
-    if (queryStateValidity.isValid && api.isLoggedIn()) {
-      checkAndReturnCachedRows(exploreState.offset, exploreState.limit);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    exploreState.offset,
-    exploreState.limit,
-    stableSignature,
-    queryStateValidity.isValid,
-  ]);
-
   const {
     data,
     error: rqError,
@@ -169,6 +150,17 @@ export const useQueryData = ({
       { offset: exploreState.offset, limit: exploreState.limit },
     ],
     queryFn: async () => {
+      // First check if we have all rows in our row cache
+      const cachedData = checkAndSeedCache(
+        exploreState.offset,
+        exploreState.limit
+      );
+      if (cachedData) {
+        // Return cached data immediately - no network fetch
+        return cachedData;
+      }
+
+      // Cache miss - fetch from network
       console.log(
         "🔄 Fetching new window:",
         exploreState.offset,
@@ -193,22 +185,33 @@ export const useQueryData = ({
       return res.data;
     },
     // Never consider cached windows stale - keep them indefinitely per session
-    // Each window (offset/limit) is cached separately, so scrolling back uses cached data
     staleTime: Infinity,
     // Keep in memory for 30 minutes after last access
     gcTime: 1000 * 60 * 30,
     enabled: queryStateValidity.isValid && api.isLoggedIn(),
   });
 
-  // When signature changes (query/explore config changes), clear the row cache
+  // When signature changes (query/explore config changes), clear both caches
   const prevSignatureRef = useRef(stableSignature);
   useEffect(() => {
     if (prevSignatureRef.current !== stableSignature) {
-      console.log("🗑️ Signature changed, clearing row cache for old signature");
+      console.log(
+        "🗑️ Query criteria changed - clearing all cached data for old signature:",
+        prevSignatureRef.current
+      );
+
+      // Clear row cache
       rowCacheStore.delete(prevSignatureRef.current);
+
+      // Clear React Query cache for old signature
+      queryClient.removeQueries({
+        queryKey: ["query", prevSignatureRef.current],
+        exact: false,
+      });
+
       prevSignatureRef.current = stableSignature;
     }
-  }, [stableSignature]);
+  }, [stableSignature, queryClient]);
 
   return {
     data,
