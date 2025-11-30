@@ -121,6 +121,7 @@ interface ExplorerTable {
   onExport: (rowsSelected: number[]) => void;
   invalidateActiveQuery?: () => void;
   stableSignature?: string;
+  getCachedEntity?: (rowIndex: number) => IResponseQueryEntity | undefined;
 }
 export const ExplorerTable: React.FC<ExplorerTable> = ({
   state,
@@ -128,23 +129,22 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   data,
   isQueryFetching,
   queryError,
+  getCachedEntity,
   height: heightBox,
   onExport,
   invalidateActiveQuery,
   stableSignature,
 }) => {
   const themeContext = useTheme();
-  // Keep last successful data to avoid resetting the list when a new window is fetching
   const [lastData, setLastData] = useState<IResponseQuery | undefined>(
     undefined
   );
   useEffect(() => {
     if (data && typeof data.total === "number") {
       setLastData(data);
-      // Track the window (offset/limit) that corresponds to the data we will render
-      setRenderWindow({ offset, limit });
+      setRenderWindow({ offset: state.offset, limit: state.limit });
     }
-  }, [data]);
+  }, [data, state.offset, state.limit]);
 
   const { entities, total: incomingTotal } = data ??
     lastData ?? { entities: [], total: 0 };
@@ -174,6 +174,11 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     offset: 0,
     limit: 0,
   });
+
+  // Compute the offset that matches the CURRENT data source (data or lastData)
+  // This fixes the lag where renderWindow.offset is stale during the render cycle
+  const dataSourceOffset =
+    data && data.entities?.length > 0 ? offset : renderWindow.offset;
 
   const [batchActionSelected, setBatchActionSelected] = useState<BatchAction>(
     batchOptions[0].value
@@ -422,7 +427,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
 
   const getRowHeight = useCallback(() => HEIGHT_ROW_DEFAULT, []);
 
-  // Stable row renderer to avoid recreating the function on every render
   const renderRow = useCallback(
     (props: any) => {
       const { index, style } = props;
@@ -430,12 +434,21 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
 
       const isSelected = rowsSelectedSet.has(index);
       const isExpanded = false;
-      const dataOffset = renderWindow.offset;
+      const dataOffset = dataSourceOffset;
       const itemIndex = index - dataOffset;
-      const rowItem =
+
+      let rowItem: IResponseQueryEntity | null =
         itemIndex >= 0 && itemIndex < items.length
           ? (items[itemIndex] as IResponseQueryEntity)
           : null;
+
+      // If not in current window, try direct cache lookup
+      if (!rowItem && getCachedEntity) {
+        const cachedEntity = getCachedEntity(index);
+        if (cachedEntity) {
+          rowItem = cachedEntity;
+        }
+      }
 
       const isPlaceholder = !rowItem;
       const placeholderLabel = rowItem?.entity?.labels?.[0] ?? index;
@@ -467,7 +480,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           ) : (
             <ExplorerTableRow
               rowId={index}
-              rowItem={rowItem}
+              rowItem={rowItem!}
               columns={columns}
               handleEditColumn={handleEditColumn}
               onRowSelect={handleRowSelect}
@@ -483,7 +496,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     },
     [
       rowsSelectedSet,
-      renderWindow.offset,
+      dataSourceOffset,
       items,
       widthTable,
       columns,
@@ -492,11 +505,11 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       handleRowExpand,
       rowLastClicked,
       invalidateActiveQuery,
+      getCachedEntity,
     ]
   );
 
   const handleRowsRendered = ({ startIndex, stopIndex }: any) => {
-    // Compute a small, capped target window around the visible range
     const visibleStart = startIndex ?? 0;
     const visibleEnd = stopIndex ?? visibleStart;
     const targetStart = Math.max(0, visibleStart - OVERSCAN_ROWS);
@@ -507,7 +520,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     const maxFetch = Math.max(approxVisible + 2 * OVERSCAN_ROWS, 30);
     const cappedLimit = Math.min(targetLimit, maxFetch, total);
 
-    // Update only when we meaningfully extend beyond the currently rendered window
     const currStart = renderWindow.offset;
     const currEnd = renderWindow.offset + items.length - 1;
     const minDelta = 5;

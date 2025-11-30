@@ -1,5 +1,6 @@
 import React from "react";
 
+import { IResponseQueryEntity } from "@shared/types";
 import { Explore } from "@shared/types/query";
 import { ExplorerTable } from "./ExplorerTable/ExplorerTable";
 import { ExploreAction } from "./state";
@@ -14,6 +15,7 @@ interface ExplorerBoxProps {
   onExport: (rowsSelected: number[]) => void;
   invalidateActiveQuery?: () => void;
   stableSignature?: string;
+  getCachedEntity?: (rowIndex: number) => IResponseQueryEntity | undefined;
 }
 export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   state,
@@ -25,6 +27,7 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   onExport,
   invalidateActiveQuery,
   stableSignature,
+  getCachedEntity,
 }) => {
   return (
     <ExplorerTable
@@ -37,6 +40,7 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
       onExport={onExport}
       invalidateActiveQuery={invalidateActiveQuery}
       stableSignature={stableSignature}
+      getCachedEntity={getCachedEntity}
     />
   );
 };

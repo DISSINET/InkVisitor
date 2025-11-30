@@ -152,6 +152,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     data: queryData,
     error: queryError,
     isFetching: queryIsFetching,
+    getCachedEntity,
   } = useQueryData({
     queryState,
     exploreState,
@@ -211,6 +212,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
             onExport={handleExport}
             invalidateActiveQuery={invalidateActiveQuery}
             stableSignature={stableSignature}
+            getCachedEntity={getCachedEntity}
           />
           {/* <Loader show={queryIsFetching} /> */}
         </Box>
