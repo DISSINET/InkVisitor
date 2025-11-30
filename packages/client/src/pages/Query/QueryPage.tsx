@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import React, { useEffect, useMemo, useReducer, useState } from "react";
 
 import { Query } from "@shared/types";
@@ -16,6 +16,7 @@ import { MemoizedQueryBox } from "./Query/QueryBox";
 import { queryReducer, queryStateInitial } from "./Query/state";
 import { getAllEdges, getAllNodes } from "./Query/utils";
 import { QueryValidity, QueryValidityProblem } from "./types";
+import { useQueryData } from "./useQueryData";
 
 interface QueryPage {}
 export const QueryPage: React.FC<QueryPage> = ({}) => {
@@ -84,8 +85,6 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     });
   };
 
-  const [queryError, setQueryError] = useState<Error | null>(null);
-
   const stableSignature = useMemo(() => {
     return buildStableSignature(queryState as any, exploreState as any);
   }, [queryState, exploreState]);
@@ -151,31 +150,14 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
 
   const {
     data: queryData,
-    error: rqError,
+    error: queryError,
     isFetching: queryIsFetching,
-  } = useQuery({
-    queryKey: [
-      "query",
-      stableSignature,
-      { offset: exploreState.offset, limit: exploreState.limit },
-    ],
-    queryFn: async () => {
-      console.log("queryFn", exploreState.offset);
-      if (!queryStateValidity.isValid || !api.isLoggedIn()) return;
-      const res = await api.query({
-        query: queryState,
-        explore: exploreState,
-      });
-      return res.data;
-    },
-    staleTime: 1000 * 60 * 1,
-    gcTime: 1000 * 60 * 30,
-    enabled: queryStateValidity.isValid && api.isLoggedIn(),
+  } = useQueryData({
+    queryState,
+    exploreState,
+    stableSignature,
+    queryStateValidity,
   });
-
-  useEffect(() => {
-    setQueryError((rqError as Error) ?? null);
-  }, [rqError]);
 
   return (
     <>

@@ -19,14 +19,13 @@
 /* New column panel */
 .qt-newcol {
   position: fixed;
-  right: 1rem;
-  bottom: 1rem;
+  right: 3rem;
+  bottom: 3rem;
   width: 360px;
-  background: #1e1e1e;
-  color: #fff;
+  background: #ccc5b9;
   border-radius: 8px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-  padding: 0.75rem 0.75rem 0.5rem 0.75rem;
+  padding: 1rem;
   z-index: 900;
 }
 .qt-newcol-header {
@@ -44,7 +43,7 @@
 .qt-newcol-label {
   display: flex;
   align-items: center;
-  color: #bbb;
+  color: #403d39;
   font-size: 0.9rem;
 }
 .qt-newcol-value {

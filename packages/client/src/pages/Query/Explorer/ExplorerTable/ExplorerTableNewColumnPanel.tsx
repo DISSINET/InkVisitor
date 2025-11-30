@@ -73,7 +73,7 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
             icon={<GrClose size={14} />}
             onClick={onClose}
             noBorder
-            color="white"
+            color="black"
             noBackground
             inverted
           />
@@ -155,7 +155,7 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
         }}
       >
         <ButtonGroup style={{ marginLeft: "1rem", marginTop: "1rem" }}>
-          <Button color="warning" label="cancel" onClick={onClose} />
+          <Button color="query2" label="cancel" onClick={onClose} />
           <Button
             label="create column"
             onClick={handleCreate}

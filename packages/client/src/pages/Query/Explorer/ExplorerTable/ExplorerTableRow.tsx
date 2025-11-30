@@ -200,20 +200,23 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
     ): React.ReactElement => {
       if (Array.isArray(cellData)) {
         return (
-          <div>
-            {cellData.map((cellEntity, key) => {
-              return (
-                <React.Fragment
-                  key={
-                    (cellEntity as IEntity)?.id
-                      ? (cellEntity as IEntity).id
-                      : key
-                  }
-                >
-                  {renderCellValue(cellEntity, recordEntity, column)}
-                </React.Fragment>
-              );
-            })}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.25rem" }}>
+            {cellData
+              // todo: this limits the number of entities displayed in the cell
+              .filter((_, i) => i < 3)
+              .map((cellEntity, key) => {
+                return (
+                  <React.Fragment
+                    key={
+                      (cellEntity as IEntity)?.id
+                        ? (cellEntity as IEntity).id
+                        : key
+                    }
+                  >
+                    {renderCellValue(cellEntity, recordEntity, column)}
+                  </React.Fragment>
+                );
+              })}
           </div>
         );
       } else {

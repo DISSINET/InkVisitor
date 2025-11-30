@@ -28,14 +28,14 @@ import {
   StyledExpRowSection,
   StyledExpRowSectionContent,
   StyledExpRowSectionHeader,
-} from "./ExplorerTableRowExpandedStyles";
+} from "./ExplorerTableDetailStyles";
 
-interface ExplorerTableRowExpanded {
+interface ExplorerTableDetail {
   rowEntity: IEntity;
   columns: Explore.IExploreColumn[];
   isOdd: boolean;
 }
-export const ExplorerTableRowExpanded: React.FC<ExplorerTableRowExpanded> = ({
+export const ExplorerTableDetail: React.FC<ExplorerTableDetail> = ({
   rowEntity,
   columns,
   isOdd,
@@ -274,7 +274,7 @@ export const ExplorerTableRowExpanded: React.FC<ExplorerTableRowExpanded> = ({
                 Validation rules
               </StyledExpRowSectionHeader>
               <StyledExpRowSectionContent>
-                {entity && (
+                {/* {entity && (
                   <EntityDetailValidationSection
                     validations={
                       entity.data.validations as
@@ -290,7 +290,7 @@ export const ExplorerTableRowExpanded: React.FC<ExplorerTableRowExpanded> = ({
                     setLoadingValidations={setLoadingValidations}
                     widthTooNarrow={false}
                   />
-                )}
+                )} */}
                 <Loader show={isFetching} size={40} />
               </StyledExpRowSectionContent>
             </StyledExpRowSection>

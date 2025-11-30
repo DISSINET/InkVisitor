@@ -8,13 +8,10 @@ import React, {
   useTransition,
 } from "react";
 import { FaEyeSlash } from "react-icons/fa";
-import { GrClose } from "react-icons/gr";
 import { MdOutlineEdit } from "react-icons/md";
-import { TbColumnInsertRight } from "react-icons/tb";
 import { List } from "react-window";
 import { v4 as uuidv4 } from "uuid";
 
-import { EntityEnums } from "@shared/enums";
 import {
   IEntity,
   IProp,
@@ -24,13 +21,12 @@ import {
 } from "@shared/types";
 import { Explore } from "@shared/types/query";
 import api from "api";
-import { Button } from "components";
-import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
+import { Button, Loader } from "components";
 import { CMetaProp } from "constructors";
 
+import { useResizeObserver } from "hooks";
 import { ExploreAction, ExploreActionType } from "../state";
-import ExplorerTableRow from "./ExplorerTableRow";
-import { ExplorerTableRowExpanded } from "./ExplorerTableRowExpanded/ExplorerTableRowExpanded";
+import { ExplorerTableDetail } from "./ExplorerTableDetail/ExplorerTableDetail";
 import ExplorerTableNewColumnPanel from "./ExplorerTableNewColumnPanel";
 import {
   StyledBody,
@@ -45,13 +41,18 @@ import {
   WIDTH_COLUMN_DEFAULT,
   WIDTH_COLUMN_FIRST,
 } from "./types";
-import { useResizeObserver } from "hooks";
-import { BeatLoader } from "react-spinners";
 
-const OVERSCAN_ROWS = 3;
+const OVERSCAN_ROWS = 10;
+
+/**
+ * Debounce delay before dispatching offset/limit changes during scroll.
+ */
+const SCROLL_WINDOW_UPDATE_DEBOUNCE_MS = 150;
 
 // light CSS classes (avoid dynamic styled props in hot path)
+import { useTheme } from "styled-components";
 import "../../styles.css";
+import ExplorerTableRow from "./ExplorerTableRow";
 
 // Memoized header to avoid unnecessary re-renders during scroll
 const MemoizedTableHeader: React.FC<{
@@ -133,6 +134,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   invalidateActiveQuery,
   stableSignature,
 }) => {
+  const themeContext = useTheme();
   const [isTransitionPending, startTransition] = useTransition();
   // Keep last successful data to avoid resetting the list when a new window is fetching
   const [lastData, setLastData] = useState<IResponseQuery | undefined>(
@@ -422,11 +424,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
 
   const getRowHeight = useCallback(() => HEIGHT_ROW_DEFAULT, []);
 
-  // Fast-scroll placeholder state
-  const [isSeeking, setIsSeeking] = useState(false);
-  const seekTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const lastRowsRenderedAtRef = useRef<number>(0);
-
   // Stable row renderer to avoid recreating the function on every render
   const renderRow = useCallback(
     (props: any) => {
@@ -442,7 +439,8 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           ? (items[itemIndex] as IResponseQueryEntity)
           : null;
 
-      const isPlaceholder = isSeeking || !rowItem;
+      const isPlaceholder = !rowItem;
+      const placeholderLabel = rowItem?.entity?.labels?.[0] ?? index;
 
       return (
         <div
@@ -452,11 +450,22 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           }${isPlaceholder ? " qt-placeholder" : ""}`}
         >
           {isPlaceholder ? (
-            <span style={{ opacity: 0.7 }}>
-              {rowItem?.entity?.labels?.[0] ??
-                rowItem?.entity?.id ??
-                `Row ${index}`}
-            </span>
+            <div
+              style={{
+                color: themeContext?.color.query3,
+                display: "flex",
+                fontSize: themeContext?.fontSize.sm,
+                flexDirection: "row",
+                gap: "0.25rem",
+                alignItems: "center",
+                paddingLeft: "1rem",
+                width: "100%",
+              }}
+            >
+              <div>loading row</div>
+              <div style={{ fontWeight: "bold" }}>{placeholderLabel}</div>
+              <Loader size={16} color={"query3"} show={true} />
+            </div>
           ) : (
             <ExplorerTableRow
               rowId={index}
@@ -489,16 +498,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   );
 
   const handleRowsRendered = ({ startIndex, stopIndex }: any) => {
-    // Fast scroll detection (simple velocity heuristic)
-    const now = performance.now();
-    const sinceLast = now - (lastRowsRenderedAtRef.current || 0);
-    lastRowsRenderedAtRef.current = now;
-    if (sinceLast < 50 && !isSeeking) {
-      setIsSeeking(true);
-    }
-    if (seekTimeoutRef.current) clearTimeout(seekTimeoutRef.current);
-    seekTimeoutRef.current = setTimeout(() => setIsSeeking(false), 150);
-
     // Compute a small, capped target window around the visible range
     const visibleStart = startIndex ?? 0;
     const visibleEnd = stopIndex ?? visibleStart;
@@ -532,7 +531,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
             payload: { offset: targetStart, limit: cappedLimit },
           });
         });
-      }, 200);
+      }, SCROLL_WINDOW_UPDATE_DEBOUNCE_MS);
     }
   };
 
@@ -653,7 +652,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                   inverted
                 />
               </div>
-              <ExplorerTableRowExpanded
+              <ExplorerTableDetail
                 rowEntity={
                   (
                     items[
@@ -669,11 +668,13 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
         )}
 
       {/* NEW COLUMN */}
-      <ExplorerTableNewColumnPanel
-        open={isNewColumnOpen}
-        onClose={() => setIsNewColumnOpen(false)}
-        onCreateColumn={handleCreateColumn}
-      />
+      <div style={{ position: "relative" }}>
+        <ExplorerTableNewColumnPanel
+          open={isNewColumnOpen}
+          onClose={() => setIsNewColumnOpen(false)}
+          onCreateColumn={handleCreateColumn}
+        />
+      </div>
     </div>
   );
 };

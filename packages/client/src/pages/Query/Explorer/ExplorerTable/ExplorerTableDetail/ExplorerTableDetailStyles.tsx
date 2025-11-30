@@ -65,7 +65,7 @@ export const StyledExpRowFormGrid = styled.div`
 export const StyledExpRowSectionHeader = styled.div`
   display: flex;
   align-items: center;
-  font-weight: ${({ theme }) => theme.fontWeight.regular};
+  font-weight: ${({ theme }) => theme.fontWeight.normal};
   font-size: ${({ theme }) => theme.fontSize.lg};
   margin-bottom: ${({ theme }) => theme.space[4]};
   color: ${({ theme }) => theme.color["primary"]};

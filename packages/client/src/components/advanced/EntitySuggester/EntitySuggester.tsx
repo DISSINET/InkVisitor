@@ -17,6 +17,7 @@ import { Suggester, Button } from "components";
 import { CEntity, InstTemplate } from "constructors";
 import { useDebounce, useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useDrop } from "react-dnd";
 import { FaHome } from "react-icons/fa";
 import { LuScanSearch } from "react-icons/lu";
 import {
@@ -24,6 +25,7 @@ import {
   EntityDragItem,
   EntitySingleDropdownItem,
   SuggesterItemToCreate,
+  ItemTypes,
 } from "types";
 import { deepCopy } from "utils/utils";
 import { AddTerritoryModal, EntityCreateModal } from "..";
@@ -84,7 +86,12 @@ interface EntitySuggesterProps {
 /**
  * Internal heavy component. Use the wrapper export below to optionally defer mounting.
  */
-const EntitySuggesterFull: React.FC<EntitySuggesterProps> = ({
+const EntitySuggesterFull: React.FC<
+  EntitySuggesterProps & {
+    externalDroppedItem?: EntityDragItem | null;
+    onConsumeExternalDrop?: () => void;
+  }
+> = ({
   categoryTypes = classesAll,
   onSelected = () => {},
   onPicked = () => {},
@@ -124,6 +131,8 @@ const EntitySuggesterFull: React.FC<EntitySuggesterProps> = ({
 
   disabled = false,
   isHidden = false,
+  externalDroppedItem,
+  onConsumeExternalDrop,
 }) => {
   const [typed, setTyped] = useState<string>(initTyped ?? "");
   const debouncedTyped = useDebounce(typed, 100);
@@ -501,6 +510,8 @@ const EntitySuggesterFull: React.FC<EntitySuggesterProps> = ({
         button={button}
         disableTemplateInstantiation={disableTemplateInstantiation}
         isHidden={isHidden}
+        externalDroppedItem={externalDroppedItem}
+        onConsumeExternalDrop={onConsumeExternalDrop}
       />
       {showAddTerritoryModal && (
         <AddTerritoryModal
@@ -556,6 +567,56 @@ export const EntitySuggester: React.FC<
 > = ({ compactUntilHover = false, ...rest }) => {
   const [isMinified, setIsMinified] = useState<boolean>(true);
   const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [pendingDropItem, setPendingDropItem] = useState<EntityDragItem | null>(
+    null
+  );
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  const isDropValid = (item: EntityDragItem): boolean => {
+    const {
+      excludedActantIds = [],
+      excludedEntityClasses = [],
+      disableTemplatesAccept = false,
+      isInsideTemplate = false,
+      isInsideStatement = false,
+      disabled = false,
+      categoryTypes = classesAll,
+    } = rest;
+
+    if (disabled) return false;
+    if (item.isDiscouraged) return false;
+    if (disableTemplatesAccept && item.isTemplate) return false;
+    if (excludedActantIds.includes(item.id)) return false;
+    if (excludedEntityClasses.includes(item.entityClass)) return false;
+    if (
+      (item.entityClass === EntityEnums.Class.Territory ||
+        item.entityClass === EntityEnums.Class.Statement) &&
+      isInsideStatement &&
+      isInsideTemplate &&
+      item.isTemplate
+    ) {
+      return false;
+    }
+    // Allow only classes permitted by this suggester's categoryTypes
+    if (!categoryTypes.includes(item.entityClass)) return false;
+    return true;
+  };
+
+  const [, drop] = useDrop({
+    accept: ItemTypes.TAG,
+    canDrop: (item: EntityDragItem) => isDropValid(item),
+    hover: (item, monitor) => {
+      if (monitor.canDrop()) {
+        setIsMinified(false);
+      }
+    },
+    drop: (item: EntityDragItem, monitor) => {
+      if (monitor.canDrop()) {
+        setPendingDropItem(item);
+        setIsMinified(false);
+      }
+    },
+  });
 
   const clearHideTimeout = () => {
     if (hideTimeoutRef.current) {
@@ -565,8 +626,11 @@ export const EntitySuggester: React.FC<
   };
 
   useEffect(() => {
+    if (containerRef.current) {
+      drop(containerRef);
+    }
     return () => clearHideTimeout();
-  }, []);
+  }, [drop]);
 
   if (!compactUntilHover) {
     return <EntitySuggesterFull {...rest} />;
@@ -574,6 +638,7 @@ export const EntitySuggester: React.FC<
 
   return (
     <div
+      ref={containerRef}
       onMouseEnter={() => {
         clearHideTimeout();
         setIsMinified(false);
@@ -598,7 +663,11 @@ export const EntitySuggester: React.FC<
           noBorder
         />
       ) : (
-        <EntitySuggesterFull {...rest} />
+        <EntitySuggesterFull
+          {...rest}
+          externalDroppedItem={pendingDropItem}
+          onConsumeExternalDrop={() => setPendingDropItem(null)}
+        />
       )}
     </div>
   );
