@@ -19,20 +19,17 @@ import api from "api";
 import { EntitySuggester, EntityTag } from "components/advanced";
 import { deleteProp, deleteRef } from "constructors";
 
+import { EntityEnums } from "@shared/enums";
 import {
-  StyledCell,
   StyledCheckboxWrapper,
-  StyledColumn,
-  StyledColumnContent,
   StyledFocusedCircle,
   StyledUserTag,
 } from "./ExplorerTableStyles";
 import { WIDTH_COLUMN_DEFAULT, WIDTH_COLUMN_FIRST } from "./types";
-import { EntityEnums } from "@shared/enums";
 
 interface ExplorerTableRowProps {
   rowId: number;
-  responseData: IResponseQueryEntity | undefined;
+  rowItem: IResponseQueryEntity;
   columns: Explore.IExploreColumn[];
   handleEditColumn: (
     entity: IEntity,
@@ -46,10 +43,11 @@ interface ExplorerTableRowProps {
   isSelected?: boolean;
   isLastClicked?: boolean;
   isExpanded?: boolean;
+  invalidateActiveQuery?: () => void;
 }
 const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
   rowId,
-  responseData,
+  rowItem,
   columns,
   handleEditColumn,
 
@@ -59,8 +57,19 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
   isSelected = false,
   isLastClicked = false,
   isExpanded = false,
+  invalidateActiveQuery,
 }) => {
   const themeContext = useContext(ThemeContext);
+  const handleCheckboxClick = React.useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onRowSelect(rowId, (e as React.MouseEvent).shiftKey);
+    },
+    [onRowSelect, rowId]
+  );
+  const handleExpandClick = React.useCallback(() => {
+    onExpand(rowId);
+  }, [onExpand, rowId]);
 
   const queryClient = useQueryClient();
 
@@ -70,205 +79,198 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
       changes: Partial<IEntity>;
     }) => await api.entityUpdate(variables.entityId, variables.changes),
 
-    onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: ["query"],
-      });
+    onSuccess: () => {
+      if (invalidateActiveQuery) {
+        invalidateActiveQuery();
+      } else {
+        queryClient.invalidateQueries({
+          queryKey: ["query"],
+        });
+      }
     },
   });
 
-  if (!responseData) {
-    return (
-      <>
-        <div
-          style={{
-            display: "flex",
-            gap: "0.5rem",
-            justifyContent: "start",
-            marginLeft: "2.5rem",
-            color: themeContext?.color["primary"],
-          }}
-        >
-          <BeatLoader
-            size={7}
-            margin={4}
-            style={{ marginLeft: "0.3rem", marginTop: "0.1rem" }}
-            color={themeContext?.color["primary"]}
-          />
-          <div>{`loading ${rowId}...`}</div>
-        </div>
-      </>
-    );
-  }
+  const { entity: rowEntity, columnData } = rowItem ?? {};
 
-  const { entity: rowEntity, columnData } = responseData;
+  const handleUnlinkEntity = React.useCallback(
+    (sourceEntity: IEntity, entityToRemove: IEntity, columnId: string) => {
+      const column = columns.find((column) => column.id === columnId);
 
-  const handleUnlinkEntity = (
-    sourceEntity: IEntity,
-    entityToRemove: IEntity,
-    columnId: string
-  ) => {
-    const column = columns.find((column) => column.id === columnId);
+      if (column?.type === Explore.EExploreColumnType.EPT) {
+        const newEntity = deleteProp(sourceEntity, {
+          typeEntityId: entityToRemove.id,
+        });
 
-    if (column?.type === Explore.EExploreColumnType.EPT) {
-      const newEntity = deleteProp(sourceEntity, {
-        typeEntityId: entityToRemove.id,
-      });
+        updateEntityMutation.mutate({
+          entityId: sourceEntity.id,
+          changes: {
+            props: newEntity.props,
+          },
+        });
+      }
 
-      updateEntityMutation.mutate({
-        entityId: sourceEntity.id,
-        changes: {
-          props: newEntity.props,
-        },
-      });
-    }
+      if (column?.type === Explore.EExploreColumnType.EPV) {
+        const newEntity = deleteProp(sourceEntity, {
+          valueEntityId: entityToRemove.id,
+        });
 
-    if (column?.type === Explore.EExploreColumnType.EPV) {
-      const newEntity = deleteProp(sourceEntity, {
-        valueEntityId: entityToRemove.id,
-      });
+        updateEntityMutation.mutate({
+          entityId: sourceEntity.id,
+          changes: {
+            props: newEntity.props,
+          },
+        });
+      }
 
-      updateEntityMutation.mutate({
-        entityId: sourceEntity.id,
-        changes: {
-          props: newEntity.props,
-        },
-      });
-    }
+      if (column?.type === Explore.EExploreColumnType.ERR) {
+        const newEntity = deleteRef(sourceEntity, {
+          resourceId: entityToRemove.id,
+        });
 
-    if (column?.type === Explore.EExploreColumnType.ERR) {
-      const newEntity = deleteRef(sourceEntity, {
-        resourceId: entityToRemove.id,
-      });
+        updateEntityMutation.mutate({
+          entityId: sourceEntity.id,
+          changes: {
+            references: newEntity.references,
+          },
+        });
+      }
+    },
+    [columns, updateEntityMutation]
+  );
 
-      updateEntityMutation.mutate({
-        entityId: sourceEntity.id,
-        changes: {
-          references: newEntity.references,
-        },
-      });
-    }
-  };
-
-  const renderCellValue = (
-    cellValue: IEntity | number | string | IUser,
-    recordEntity: IEntity,
-    column: Explore.IExploreColumn
-  ): React.ReactElement => {
-    if (typeof (cellValue as IEntity)?.class !== "undefined") {
-      return (
-        <EntityTag
-          entity={cellValue as IEntity}
-          unlinkButton={
-            column.editable && {
-              onClick: () => {
-                handleUnlinkEntity(
-                  recordEntity,
-                  cellValue as IEntity,
-                  column.id
-                );
-              },
+  const renderCellValue = React.useCallback(
+    (
+      cellValue: IEntity | number | string | IUser,
+      recordEntity: IEntity,
+      column: Explore.IExploreColumn
+    ): React.ReactElement => {
+      if (typeof (cellValue as IEntity)?.class !== "undefined") {
+        return (
+          <EntityTag
+            entity={cellValue as IEntity}
+            unlinkButton={
+              column.editable && {
+                onClick: () => {
+                  handleUnlinkEntity(
+                    recordEntity,
+                    cellValue as IEntity,
+                    column.id
+                  );
+                },
+              }
             }
-          }
-          disableDoubleClick
-        />
-      );
-    } else if (typeof (cellValue as IUser)?.email !== "undefined") {
-      // is type IUser[]
-      return (
-        <StyledUserTag>
-          <FaUserAlt
-            size={14}
-            // onClick={() => setUserCustomizationOpen(true)}
-          />
-          <span>{(cellValue as IUser).name}</span>
-        </StyledUserTag>
-      );
-    } else {
-      return (
-        <div>
-          <span>{cellValue as string}</span>
-        </div>
-      );
-    }
-  };
-
-  const renderCell = (
-    recordEntity: IEntity,
-    cellData:
-      | IEntity
-      | IEntity[]
-      | number
-      | number[]
-      | string
-      | string[]
-      | IUser
-      | IUser[],
-    column: Explore.IExploreColumn
-  ): React.ReactElement => {
-    if (Array.isArray(cellData)) {
-      return (
-        <StyledCell>
-          {cellData.map((cellEntity, key) => {
-            return (
-              <React.Fragment key={key}>
-                {renderCellValue(cellEntity, recordEntity, column)}
-              </React.Fragment>
-            );
-          })}
-        </StyledCell>
-      );
-    } else {
-      return renderCellValue(cellData, recordEntity, column);
-    }
-  };
-
-  const renderEditSection = (
-    rowEntity: IEntity,
-    column: Explore.IExploreColumn
-  ): React.ReactElement | null => {
-    if (column.editable) {
-      if (column.type === Explore.EExploreColumnType.EPV) {
-        return (
-          <EntitySuggester
-            categoryTypes={classesAll}
-            onPicked={(newEntity) => {
-              handleEditColumn(rowEntity, column.id, newEntity);
-            }}
+            disableDoubleClick
           />
         );
-      }
-      if (column.type === Explore.EExploreColumnType.ERR) {
+      } else if (typeof (cellValue as IUser)?.email !== "undefined") {
+        // is type IUser[]
         return (
-          <EntitySuggester
-            categoryTypes={[EntityEnums.Class.Resource]}
-            onPicked={(newEntity) => {
-              handleEditColumn(rowEntity, column.id, newEntity);
-            }}
-          />
+          <StyledUserTag>
+            <FaUserAlt
+              size={14}
+              // onClick={() => setUserCustomizationOpen(true)}
+            />
+            <span>{(cellValue as IUser).name}</span>
+          </StyledUserTag>
+        );
+      } else {
+        return (
+          <div>
+            <span>{cellValue as string}</span>
+          </div>
         );
       }
-    }
-    return null;
-  };
+    },
+    [handleUnlinkEntity]
+  );
+
+  const renderCell = React.useCallback(
+    (
+      recordEntity: IEntity,
+      cellData:
+        | IEntity
+        | IEntity[]
+        | number
+        | number[]
+        | string
+        | string[]
+        | IUser
+        | IUser[],
+      column: Explore.IExploreColumn
+    ): React.ReactElement => {
+      if (Array.isArray(cellData)) {
+        return (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.25rem" }}>
+            {cellData
+              // todo: this limits the number of entities displayed in the cell
+              .filter((_, i) => i < 3)
+              .map((cellEntity, key) => {
+                return (
+                  <React.Fragment
+                    key={
+                      (cellEntity as IEntity)?.id
+                        ? (cellEntity as IEntity).id
+                        : key
+                    }
+                  >
+                    {renderCellValue(cellEntity, recordEntity, column)}
+                  </React.Fragment>
+                );
+              })}
+          </div>
+        );
+      } else {
+        return renderCellValue(cellData, recordEntity, column);
+      }
+    },
+    [renderCellValue]
+  );
+
+  const renderEditSection = React.useCallback(
+    (
+      rowEntity: IEntity,
+      column: Explore.IExploreColumn
+    ): React.ReactElement | null => {
+      if (column.editable) {
+        if (column.type === Explore.EExploreColumnType.EPV) {
+          return (
+            <EntitySuggester
+              categoryTypes={classesAll}
+              onPicked={(newEntity) => {
+                handleEditColumn(rowEntity, column.id, newEntity);
+              }}
+              compactUntilHover
+            />
+          );
+        }
+        if (column.type === Explore.EExploreColumnType.ERR) {
+          return (
+            <EntitySuggester
+              categoryTypes={[EntityEnums.Class.Resource]}
+              onPicked={(newEntity) => {
+                handleEditColumn(rowEntity, column.id, newEntity);
+              }}
+              compactUntilHover
+            />
+          );
+        }
+      }
+      return null;
+    },
+    [handleEditColumn]
+  );
 
   return (
     <React.Fragment>
-      <StyledColumn
-        $width={WIDTH_COLUMN_FIRST}
-        style={
-          {
-            // TODO make it stick the left side
-            // display: "sticky",
-          }
-        }
+      <div
+        className="qt-col"
+        style={{
+          width: WIDTH_COLUMN_FIRST,
+          minWidth: WIDTH_COLUMN_FIRST,
+          maxWidth: WIDTH_COLUMN_FIRST,
+        }}
       >
-        <StyledCheckboxWrapper
-          onClick={(e) => {
-            e.stopPropagation();
-            onRowSelect(rowId, e.shiftKey);
-          }}
-        >
+        <StyledCheckboxWrapper onClick={handleCheckboxClick}>
           {isLastClicked && <StyledFocusedCircle />}
           {isSelected ? (
             <MdOutlineCheckBox />
@@ -283,9 +285,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
             display: "flex",
             alignItems: "center",
           }}
-          onClick={() => {
-            onExpand(rowId);
-          }}
+          onClick={handleExpandClick}
         >
           {isExpanded ? (
             <FaChevronCircleUp color={themeContext?.color.warning} />
@@ -302,21 +302,55 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
         >
           <EntityTag entity={rowEntity} fullWidth disableDoubleClick />
         </span>
-      </StyledColumn>
+      </div>
 
       {columns.map((column, key) => {
         return (
-          <StyledColumn key={key} $width={WIDTH_COLUMN_DEFAULT}>
-            <StyledColumnContent>
+          <div
+            key={key}
+            className="qt-col"
+            style={{
+              width: WIDTH_COLUMN_DEFAULT,
+              minWidth: WIDTH_COLUMN_DEFAULT,
+              maxWidth: WIDTH_COLUMN_DEFAULT,
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "start",
+                alignItems: "center",
+                overflowX: "hidden",
+                overflowY: "hidden",
+                whiteSpace: "nowrap",
+                textOverflow: "ellipsis",
+                gap: "0.25rem",
+              }}
+            >
               {renderCell(rowEntity, columnData[column.id], column)}
               {renderEditSection(rowEntity, column)}
-            </StyledColumnContent>
-          </StyledColumn>
+            </div>
+          </div>
         );
       })}
     </React.Fragment>
   );
 };
 
-const MemoizedExplorerTableRow = React.memo(ExplorerTableRow);
-export default MemoizedExplorerTableRow;
+function areRowsEqual(
+  prev: Readonly<React.ComponentProps<typeof ExplorerTableRow>>,
+  next: Readonly<React.ComponentProps<typeof ExplorerTableRow>>
+) {
+  if (prev.rowId !== next.rowId) return false;
+  const prevEntityId = prev.rowItem?.entity.id;
+  const nextEntityId = next.rowItem?.entity.id;
+  if (prevEntityId !== nextEntityId) return false;
+  if (prev.isSelected !== next.isSelected) return false;
+  if (prev.isLastClicked !== next.isLastClicked) return false;
+  if (prev.isExpanded !== next.isExpanded) return false;
+  // Re-render when columns array identity changes (e.g., add/remove)
+  if (prev.columns !== next.columns) return false;
+  return true;
+}
+
+export default React.memo(ExplorerTableRow, areRowsEqual);

@@ -1,6 +1,6 @@
 import React from "react";
 
-import { IResponseQuery } from "@shared/types";
+import { IResponseQueryEntity } from "@shared/types";
 import { Explore } from "@shared/types/query";
 import { ExplorerTable } from "./ExplorerTable/ExplorerTable";
 import { ExploreAction } from "./state";
@@ -8,11 +8,14 @@ import { ExploreAction } from "./state";
 interface ExplorerBoxProps {
   state: Explore.IExplore;
   dispatch: React.Dispatch<ExploreAction>;
-  data: IResponseQuery | undefined;
+  data: any | undefined;
   isQueryFetching: boolean;
   queryError: Error | null;
   height: number;
   onExport: (rowsSelected: number[]) => void;
+  invalidateActiveQuery?: () => void;
+  stableSignature?: string;
+  getCachedEntity?: (rowIndex: number) => IResponseQueryEntity | undefined;
 }
 export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   state,
@@ -22,6 +25,9 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   queryError,
   height,
   onExport,
+  invalidateActiveQuery,
+  stableSignature,
+  getCachedEntity,
 }) => {
   return (
     <ExplorerTable
@@ -32,6 +38,9 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
       queryError={queryError}
       height={height}
       onExport={onExport}
+      invalidateActiveQuery={invalidateActiveQuery}
+      stableSignature={stableSignature}
+      getCachedEntity={getCachedEntity}
     />
   );
 };

@@ -13,20 +13,24 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { wildCardChar } from "Theme/constants";
 import api from "api";
-import { Suggester } from "components";
+import { Suggester, Button } from "components";
 import { CEntity, InstTemplate } from "constructors";
 import { useDebounce, useSearchParams } from "hooks";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useDrop } from "react-dnd";
 import { FaHome } from "react-icons/fa";
+import { LuScanSearch } from "react-icons/lu";
 import {
+  ButtonSize,
   EntityDragItem,
   EntitySingleDropdownItem,
   SuggesterItemToCreate,
+  ItemTypes,
 } from "types";
 import { deepCopy } from "utils/utils";
 import { AddTerritoryModal, EntityCreateModal } from "..";
 
-interface EntitySuggester {
+interface EntitySuggesterProps {
   categoryTypes?: EntityEnums.Class[];
   onSelected?: (id: string) => void;
   onPicked?: (entity: IEntity) => void;
@@ -79,8 +83,15 @@ interface EntitySuggester {
   disabled?: boolean;
   isHidden?: boolean;
 }
-
-export const EntitySuggester: React.FC<EntitySuggester> = ({
+/**
+ * Internal heavy component. Use the wrapper export below to optionally defer mounting.
+ */
+const EntitySuggesterFull: React.FC<
+  EntitySuggesterProps & {
+    externalDroppedItem?: EntityDragItem | null;
+    onConsumeExternalDrop?: () => void;
+  }
+> = ({
   categoryTypes = classesAll,
   onSelected = () => {},
   onPicked = () => {},
@@ -120,6 +131,8 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
 
   disabled = false,
   isHidden = false,
+  externalDroppedItem,
+  onConsumeExternalDrop,
 }) => {
   const [typed, setTyped] = useState<string>(initTyped ?? "");
   const debouncedTyped = useDebounce(typed, 100);
@@ -497,6 +510,8 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         button={button}
         disableTemplateInstantiation={disableTemplateInstantiation}
         isHidden={isHidden}
+        externalDroppedItem={externalDroppedItem}
+        onConsumeExternalDrop={onConsumeExternalDrop}
       />
       {showAddTerritoryModal && (
         <AddTerritoryModal
@@ -540,5 +555,120 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     </>
   ) : (
     <div />
+  );
+};
+
+/**
+ * Wrapper that can defer mounting the heavy suggester until user interaction.
+ * compactUntilHover: when true, show a small button; mount full suggester on hover/click.
+ */
+export const EntitySuggester: React.FC<
+  EntitySuggesterProps & { compactUntilHover?: boolean }
+> = ({ compactUntilHover = false, ...rest }) => {
+  const [isMinified, setIsMinified] = useState<boolean>(true);
+  const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [pendingDropItem, setPendingDropItem] = useState<EntityDragItem | null>(
+    null
+  );
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  const isDropValid = (item: EntityDragItem): boolean => {
+    const {
+      excludedActantIds = [],
+      excludedEntityClasses = [],
+      disableTemplatesAccept = false,
+      isInsideTemplate = false,
+      isInsideStatement = false,
+      disabled = false,
+      categoryTypes = classesAll,
+    } = rest;
+
+    if (disabled) return false;
+    if (item.isDiscouraged) return false;
+    if (disableTemplatesAccept && item.isTemplate) return false;
+    if (excludedActantIds.includes(item.id)) return false;
+    if (excludedEntityClasses.includes(item.entityClass)) return false;
+    if (
+      (item.entityClass === EntityEnums.Class.Territory ||
+        item.entityClass === EntityEnums.Class.Statement) &&
+      isInsideStatement &&
+      isInsideTemplate &&
+      item.isTemplate
+    ) {
+      return false;
+    }
+    // Allow only classes permitted by this suggester's categoryTypes
+    if (!categoryTypes.includes(item.entityClass)) return false;
+    return true;
+  };
+
+  const [, drop] = useDrop({
+    accept: ItemTypes.TAG,
+    canDrop: (item: EntityDragItem) => isDropValid(item),
+    hover: (item, monitor) => {
+      if (monitor.canDrop()) {
+        setIsMinified(false);
+      }
+    },
+    drop: (item: EntityDragItem, monitor) => {
+      if (monitor.canDrop()) {
+        setPendingDropItem(item);
+        setIsMinified(false);
+      }
+    },
+  });
+
+  const clearHideTimeout = () => {
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
+      hideTimeoutRef.current = null;
+    }
+  };
+
+  useEffect(() => {
+    if (containerRef.current) {
+      drop(containerRef);
+    }
+    return () => clearHideTimeout();
+  }, [drop]);
+
+  if (!compactUntilHover) {
+    return <EntitySuggesterFull {...rest} />;
+  }
+
+  return (
+    <div
+      ref={containerRef}
+      onMouseEnter={() => {
+        clearHideTimeout();
+        setIsMinified(false);
+      }}
+      onMouseLeave={() => {
+        clearHideTimeout();
+        hideTimeoutRef.current = setTimeout(() => {
+          setIsMinified(true);
+        }, 1000);
+      }}
+      style={{ display: "inline-flex", alignItems: "center" }}
+    >
+      {isMinified ? (
+        <Button
+          tooltipLabel="Open suggester"
+          icon={<LuScanSearch color="black" />}
+          color="gray"
+          radiusLeft
+          radiusRight
+          size={ButtonSize.Medium}
+          // inverted
+          noBorder
+        />
+      ) : (
+        <EntitySuggesterFull
+          {...rest}
+          externalDroppedItem={pendingDropItem}
+          onConsumeExternalDrop={() => setPendingDropItem(null)}
+        />
+      )}
+    </div>
   );
 };

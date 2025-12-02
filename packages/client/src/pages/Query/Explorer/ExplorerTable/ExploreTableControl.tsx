@@ -129,16 +129,15 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
         </div>
         {/* {renderPaging()} */}
       </div>
-      {!isNewColumnOpen && (
-        <Button
-          icon={<TbColumnInsertRight size={17} />}
-          label="new column"
-          color="query3"
-          onClick={() => setIsNewColumnOpen(!isNewColumnOpen)}
-        />
-      )}
+      <Button
+        icon={<TbColumnInsertRight size={17} />}
+        label="new column"
+        color="query3"
+        inverted={isNewColumnOpen}
+        onClick={() => setIsNewColumnOpen(!isNewColumnOpen)}
+      />
     </StyledTableControl>
   );
 };
 
-export default ExploreTableControl;
+export default React.memo(ExploreTableControl);

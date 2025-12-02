@@ -85,6 +85,9 @@ interface Suggester {
   button?: React.ReactNode;
   disableTemplateInstantiation?: boolean;
   isHidden?: boolean;
+  // Optional: allow parent to inject a dropped item (e.g., from a minified wrapper)
+  externalDroppedItem?: EntityDragItem | null;
+  onConsumeExternalDrop?: () => void;
 }
 
 export const Suggester: React.FC<Suggester> = ({
@@ -125,6 +128,8 @@ export const Suggester: React.FC<Suggester> = ({
   button,
   disableTemplateInstantiation = false,
   isHidden = false,
+  externalDroppedItem,
+  onConsumeExternalDrop,
 }) => {
   const [selected, setSelected] = useState(-1);
   const [isFocused, setIsFocused] = useState(false);
@@ -190,6 +195,32 @@ export const Suggester: React.FC<Suggester> = ({
   });
 
   drop(dropRef);
+
+  // Handle externally injected drop (e.g., drop on minified button)
+  useEffect(() => {
+    if (!externalDroppedItem) return;
+    // First notify hover so parent can compute isWrongDropCategory
+    onHover && onHover(externalDroppedItem);
+    const handle = requestAnimationFrame(() => {
+      if (!isWrongDropCategory) {
+        if (!externalDroppedItem.isTemplate) {
+          onDrop(externalDroppedItem);
+        } else if (externalDroppedItem.isTemplate && !isInsideTemplate) {
+          onDrop(externalDroppedItem, true);
+        } else if (externalDroppedItem.isTemplate && isInsideTemplate) {
+          if (externalDroppedItem.entityClass === EntityEnums.Class.Territory) {
+            onDrop(externalDroppedItem);
+          } else {
+            setTempDropItem(externalDroppedItem);
+            setShowTemplateModal(true);
+          }
+        }
+      }
+      onConsumeExternalDrop && onConsumeExternalDrop();
+    });
+    return () => cancelAnimationFrame(handle);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [externalDroppedItem]);
 
   const handleEnterPress = () => {
     if (selected === -1 && typed.length > 0) {

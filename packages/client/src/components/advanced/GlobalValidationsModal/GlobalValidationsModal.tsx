@@ -126,8 +126,6 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
     false
   );
 
-  console.log("settings", settings);
-
   const initValidationRule = () => {
     updateEntityMutation.mutate({
       data: {

@@ -1,25 +1,22 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import React, { useEffect, useMemo, useReducer, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import React, { useEffect, useMemo, useReducer, useState } from "react";
 
 import { Query } from "@shared/types";
-import { Explore } from "@shared/types/query";
 import api from "api";
-import { Box, Button, Loader, Panel } from "components";
+import { Box, Button, Panel } from "components";
 import { LayoutSeparatorHorizontal } from "components/advanced";
-import { useAppSelector } from "redux/hooks";
-import { floorNumberToOneDecimal } from "utils/utils";
-import { MemoizedExplorerBox } from "./Explorer/ExplorerBox";
-import {
-  exploreDiff,
-  exploreReducer,
-  exploreStateInitial,
-} from "./Explorer/state";
-import { MemoizedQueryBox } from "./Query/QueryBox";
-import { queryDiff, queryReducer, queryStateInitial } from "./Query/state";
-import { getAllEdges, getAllNodes } from "./Query/utils";
-import { QueryValidity, QueryValidityProblem } from "./types";
 import { BiRefresh } from "react-icons/bi";
 import { toast } from "react-toastify";
+import { useAppSelector } from "redux/hooks";
+import { floorNumberToOneDecimal } from "utils/utils";
+import { buildStableSignature } from "./utils";
+import { MemoizedExplorerBox } from "./Explorer/ExplorerBox";
+import { exploreReducer, exploreStateInitial } from "./Explorer/state";
+import { MemoizedQueryBox } from "./Query/QueryBox";
+import { queryReducer, queryStateInitial } from "./Query/state";
+import { getAllEdges, getAllNodes } from "./Query/utils";
+import { QueryValidity, QueryValidityProblem } from "./types";
+import { useQueryData } from "./useQueryData";
 
 interface QueryPage {}
 export const QueryPage: React.FC<QueryPage> = ({}) => {
@@ -29,8 +26,6 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
   const contentHeight: number = useAppSelector(
     (state) => state.layout.contentHeight
   );
-
-  const queryClient = useQueryClient();
 
   const [queryState, queryStateDispatch] = useReducer(
     queryReducer,
@@ -83,55 +78,16 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     exploreStateInitial
   );
 
-  const prevQueryState = useRef<Query.INode>(queryState);
-  const prevExploreState = useRef<Explore.IExplore>(exploreState);
-
-  useEffect(() => {
-    if (queryDiff(prevQueryState.current, queryState)) {
-      prevQueryState.current = queryState;
-      handleInvalidateQuery();
-    }
-  }, [queryState]);
-
-  useEffect(() => {
-    if (exploreDiff(prevExploreState.current, exploreState)) {
-      prevExploreState.current = exploreState;
-      handleInvalidateQuery();
-    }
-  }, [exploreState]);
-
+  const queryClient = useQueryClient();
   const handleInvalidateQuery = () => {
     queryClient.invalidateQueries({
       queryKey: ["query"],
     });
   };
 
-  const {
-    data: queryData,
-    error: queryError,
-    isFetching: queryIsFetching,
-  } = useQuery({
-    queryKey: [
-      "query",
-      {
-        query: queryState,
-        explore: exploreState,
-      },
-    ],
-    queryFn: async () => {
-      if (queryStateValidity.isValid && api.isLoggedIn()) {
-        const res = await api.query({
-          query: queryState,
-          explore: exploreState,
-        });
-        return res.data;
-      }
-    },
-    staleTime: 1000 * 60 * 5,
-    enabled: queryStateValidity.isValid && api.isLoggedIn(),
-  });
-
-  console.log("explore", queryData?.entities);
+  const stableSignature = useMemo(() => {
+    return buildStableSignature(queryState as any, exploreState as any);
+  }, [queryState, exploreState]);
 
   const onePercentOfContentHeight = useMemo(
     () => contentHeight / 100,
@@ -141,6 +97,13 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
   const handleExport = (rowIndices: number[]) => {
     toast.success("Exporting data...");
     api.queryExport(queryState, exploreState, rowIndices);
+  };
+
+  const invalidateActiveQuery = () => {
+    queryClient.invalidateQueries({
+      queryKey: ["query", stableSignature],
+      exact: false,
+    });
   };
 
   const handleSeparatorYPositionChange = (xPosition: number) => {
@@ -185,6 +148,18 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     setCurrentContentHeight(contentHeight);
   }, [contentHeight]);
 
+  const {
+    data: queryData,
+    error: queryError,
+    isFetching: queryIsFetching,
+    getCachedEntity,
+  } = useQueryData({
+    queryState,
+    exploreState,
+    stableSignature,
+    queryStateValidity,
+  });
+
   return (
     <>
       {querySeparatorYPosition > 0 && (
@@ -207,7 +182,6 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
           <MemoizedQueryBox
             state={queryState}
             dispatch={queryStateDispatch}
-            data={queryData}
             isQueryFetching={queryIsFetching}
             queryError={queryError}
             queryStateValidity={queryStateValidity}
@@ -236,8 +210,11 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
             isQueryFetching={queryIsFetching}
             queryError={queryError}
             onExport={handleExport}
+            invalidateActiveQuery={invalidateActiveQuery}
+            stableSignature={stableSignature}
+            getCachedEntity={getCachedEntity}
           />
-          <Loader show={queryIsFetching} />
+          {/* <Loader show={queryIsFetching} /> */}
         </Box>
       </Panel>
     </>
