@@ -5,12 +5,13 @@ interface StyledExpandedRow {
   $isOdd: boolean;
 }
 export const StyledExpandedRow = styled.div<StyledExpandedRow>`
+  overflow: auto;
   grid-column: ${({ $columnsSpan }) => `span ${$columnsSpan}`};
   gap: 1rem;
   padding: 0.5rem;
   padding-left: 1rem;
   min-height: 5rem;
-  border-right: 1px solid ${({ theme }) => theme.color["black"]};
+  /* border-right: 1px solid ${({ theme }) => theme.color["black"]}; */
   /* background-color: ${({ theme }) => theme.color["white"]}; */
 
   background-color: ${({ theme, $isOdd }) =>

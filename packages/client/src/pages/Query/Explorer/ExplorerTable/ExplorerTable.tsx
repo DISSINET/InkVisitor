@@ -20,7 +20,14 @@ import {
 } from "@shared/types";
 import { Explore } from "@shared/types/query";
 import api from "api";
-import { Button, Loader } from "components";
+import {
+  Button,
+  Loader,
+  Modal,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+} from "components";
 import { CMetaProp } from "constructors";
 
 import { useResizeObserver } from "hooks";
@@ -627,39 +634,52 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       {/* DETAILS MODAL */}
       {detailsRowIndex !== null &&
         items[detailsRowIndex - renderWindow.offset] && (
-          <div
-            style={{
-              position: "fixed",
-              inset: 0,
-              background: "rgba(0,0,0,0.5)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              zIndex: 1000,
-            }}
-            onClick={() => setDetailsRowIndex(null)}
+          // <div
+          //   style={{
+          //     position: "fixed",
+          //     inset: 0,
+          //     background: "rgba(0,0,0,0.5)",
+          //     display: "flex",
+          //     alignItems: "center",
+          //     justifyContent: "center",
+          //     zIndex: 1000,
+          //   }}
+          //   onClick={() => setDetailsRowIndex(null)}
+          // >
+          //   <div
+          //     style={{
+          //       background: "#1e1e1e",
+          //       color: "#fff",
+          //       borderRadius: 8,
+          //       padding: "1rem",
+          //       maxWidth: "80vw",
+          //       maxHeight: "80vh",
+          //       overflow: "auto",
+          //       boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
+          //     }}
+          //     onClick={(e) => e.stopPropagation()}
+          //   >
+          //     <div style={{ display: "flex", justifyContent: "flex-end" }}>
+          // <Button
+          //   label="Close"
+          //   onClick={() => setDetailsRowIndex(null)}
+          //   noBorder
+          //   inverted
+          // />
+          // </div>
+          <Modal
+            showModal={
+              detailsRowIndex !== null &&
+              items[detailsRowIndex - renderWindow.offset] !== null
+            }
+            width={"fat"}
+            onClose={() => setDetailsRowIndex(null)}
           >
-            <div
-              style={{
-                background: "#1e1e1e",
-                color: "#fff",
-                borderRadius: 8,
-                padding: "1rem",
-                maxWidth: "80vw",
-                maxHeight: "80vh",
-                overflow: "auto",
-                boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
-              }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                <Button
-                  label="Close"
-                  onClick={() => setDetailsRowIndex(null)}
-                  noBorder
-                  inverted
-                />
-              </div>
+            <ModalHeader
+              title="Detail"
+              onClose={() => setDetailsRowIndex(null)}
+            />
+            <ModalContent enableScroll noPadding>
               <ExplorerTableDetail
                 rowEntity={
                   (
@@ -671,8 +691,13 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                 columns={columns}
                 isOdd={false}
               />
-            </div>
-          </div>
+            </ModalContent>
+            <ModalFooter>
+              <Button label="Close" onClick={() => setDetailsRowIndex(null)} />
+            </ModalFooter>
+          </Modal>
+          //   </div>
+          // </div>
         )}
 
       {/* NEW COLUMN */}

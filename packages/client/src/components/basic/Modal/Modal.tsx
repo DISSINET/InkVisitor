@@ -146,6 +146,7 @@ interface ModalContent {
   enableScroll?: boolean;
   centered?: boolean;
   isLoading?: boolean;
+  noPadding?: boolean;
 }
 export const ModalContent: FC<ModalContent> = ({
   children,
@@ -153,11 +154,13 @@ export const ModalContent: FC<ModalContent> = ({
   enableScroll = false,
   centered,
   isLoading,
+  noPadding = false,
 }) => {
   return (
     <StyledCardBody
       $column={column}
       $enableScroll={enableScroll}
+      $noPadding={noPadding}
       centered={centered}
     >
       {children}
