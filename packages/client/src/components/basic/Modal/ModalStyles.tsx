@@ -168,7 +168,10 @@ export const StyledModalInputWrap = styled.div<StyledModalInputWrap>`
 
 export const StyledCloseIconWrap = styled.span`
   position: absolute;
-  right: 1rem;
+  top: 0.6rem;
+  right: 0.5rem;
+  height: 2.6rem;
+  width: 2.6rem;
   padding: 0.3rem;
   cursor: pointer;
   border-radius: 5rem;

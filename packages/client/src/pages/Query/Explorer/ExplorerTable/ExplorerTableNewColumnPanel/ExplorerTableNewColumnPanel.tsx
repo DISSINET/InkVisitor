@@ -8,6 +8,7 @@ import { Button, ButtonGroup, Checkbox, Input } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 import { v4 as uuidv4 } from "uuid";
 import {
+  StyledCloseIconWrap,
   StyledContent,
   StyledHeader,
   StyledLabel,
@@ -75,7 +76,7 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
           <TbColumnInsertRight size={17} />
           <p style={{ marginLeft: "0.5rem" }}>New column</p>
         </div>
-        <div>
+        <StyledCloseIconWrap>
           <Button
             icon={<GrClose size={14} />}
             onClick={onClose}
@@ -84,7 +85,7 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
             noBackground
             inverted
           />
-        </div>
+        </StyledCloseIconWrap>
       </StyledHeader>
       <StyledContent>
         <StyledLabel>Column name</StyledLabel>
@@ -162,7 +163,7 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
         }}
       >
         <ButtonGroup style={{ marginLeft: "1rem", marginTop: "1rem" }}>
-          <Button color="query2" label="cancel" onClick={onClose} />
+          <Button color="warning" label="cancel" onClick={onClose} />
           <Button
             label="create column"
             onClick={handleCreate}

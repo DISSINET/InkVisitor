@@ -43,3 +43,19 @@ export const StyledValue = styled.div`
   align-items: center;
   color: ${({ theme }) => theme.color.black};
 `;
+
+export const StyledCloseIconWrap = styled.span`
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  height: 2.5rem;
+  width: 2.5rem;
+  padding: 0.3rem;
+  cursor: pointer;
+  border-radius: 5rem;
+  transition: 0.3s;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.color.closeBtnBackground};
+  }
+`;

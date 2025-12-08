@@ -123,7 +123,13 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
           {
             // renderBatchAction()
             batchActionSelected === BatchAction.export_csv && (
-              <Button label="export" color="query3" onClick={onExport} />
+              <Button
+                label="export"
+                color="primary"
+                inverted
+                onClick={onExport}
+                disabled={rowsSelected.length === 0}
+              />
             )
           }
         </div>
@@ -132,8 +138,8 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
       <Button
         icon={<TbColumnInsertRight size={17} />}
         label="new column"
-        color="query3"
-        inverted={isNewColumnOpen}
+        color="primary"
+        inverted={!isNewColumnOpen}
         onClick={() => setIsNewColumnOpen(!isNewColumnOpen)}
       />
     </StyledTableControl>

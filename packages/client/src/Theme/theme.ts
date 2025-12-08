@@ -58,6 +58,7 @@ const theme = {
     tagSelectedColor: "#fff",
     tagItalic: "#4a5568",
 
+    /* query explorer colors */
     query1: "#FFFCF2",
     query2: "#CCC5B9",
     query3: "#403D39",
