@@ -72,7 +72,6 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
 
   return (
     <div>
-      <div id="query-header"></div>
       <div
         style={{
           padding: "10px",

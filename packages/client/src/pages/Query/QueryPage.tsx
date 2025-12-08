@@ -175,6 +175,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
 
       <Panel width={layoutWidth}>
         <Box
+          noFrame
           borderColor="white"
           height={querySeparatorYPosition}
           label="Search"
@@ -188,6 +189,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
           />
         </Box>
         <Box
+          noFrame
           borderColor="white"
           height={contentHeight - querySeparatorYPosition}
           label="Explorer"

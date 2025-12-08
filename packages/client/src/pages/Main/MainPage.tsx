@@ -816,7 +816,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
             refreshBoxButton(["tree", "user"], !firstPanelExpanded),
             firstPanelButton(),
           ]}
-          noPadding
+          noFrame
           onHeaderClick={toggleFirstPanel}
         >
           <MemoizedTerritoryTreeBox />

@@ -363,7 +363,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     height: contentHeight,
   } = useResizeObserver<HTMLDivElement>();
 
-  const spaceTableBody = heightBox - 150;
+  const spaceTableBody = heightBox - 105;
 
   const handleRowSelect = useCallback(
     (rowId: number, isWithShift: boolean = false) => {
@@ -553,31 +553,32 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   // horizontal scroll is handled by outer Scrollbar only
 
   return (
-    <div
-      style={{
-        height: heightBox - 20,
-        margin: "1rem",
-        overflow: "hidden",
-      }}
-      ref={contentRef}
-    >
+    // <div>
+    <>
       {/* {isLoading && (
-        <div
-          style={{
-            position: "absolute",
-            right: 24,
-            top: 24,
-            display: "flex",
-            alignItems: "center",
-            gap: "0.4rem",
-            pointerEvents: "none",
-          }}
-        >
-          <BeatLoader size={6} margin={3} color="#bbb" />
-          <span style={{ fontSize: 12, color: "#bbb" }}>fetching…</span>
-        </div>
-      )} */}
-      <StyledTableWrapper>
+          <div
+            style={{
+              position: "absolute",
+              right: 24,
+              top: 24,
+              display: "flex",
+              alignItems: "center",
+              gap: "0.4rem",
+              pointerEvents: "none",
+            }}
+          >
+            <BeatLoader size={6} margin={3} color="#bbb" />
+            <span style={{ fontSize: 12, color: "#bbb" }}>fetching…</span>
+          </div>
+        )} */}
+      <StyledTableWrapper
+        style={{
+          height: heightBox - 20,
+          margin: "0.5rem 0.5rem 0 0.5rem",
+          overflow: "hidden",
+        }}
+        ref={contentRef}
+      >
         <ExploreTableControl
           setIsNewColumnOpen={setIsNewColumnOpen}
           isNewColumnOpen={isNewColumnOpen}
@@ -673,6 +674,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           onCreateColumn={handleCreateColumn}
         />
       </div>
-    </div>
+    </>
+    // </div>
   );
 };
