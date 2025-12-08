@@ -7,6 +7,13 @@ import { Explore } from "@shared/types/query";
 import { Button, ButtonGroup, Checkbox, Input } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 import { v4 as uuidv4 } from "uuid";
+import {
+  StyledContent,
+  StyledHeader,
+  StyledLabel,
+  StyledPanel,
+  StyledValue,
+} from "./ExplorerTableNewColumnPanelStyles";
 
 interface Props {
   open: boolean;
@@ -59,11 +66,11 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
     onClose();
   };
 
-  if (!open) return null;
+  if (!open) return <React.Fragment />;
 
   return (
-    <div className="qt-newcol">
-      <div className="qt-newcol-header">
+    <StyledPanel>
+      <StyledHeader>
         <div style={{ display: "flex", alignItems: "center" }}>
           <TbColumnInsertRight size={17} />
           <p style={{ marginLeft: "0.5rem" }}>New column</p>
@@ -78,19 +85,19 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
             inverted
           />
         </div>
-      </div>
-      <div className="qt-newcol-content">
-        <div className="qt-newcol-label">Column name</div>
-        <div className="qt-newcol-value">
+      </StyledHeader>
+      <StyledContent>
+        <StyledLabel>Column name</StyledLabel>
+        <StyledValue>
           <Input
             width="full"
             value={name}
             onChangeFn={(v) => setName(v)}
             changeOnType
           />
-        </div>
-        <div className="qt-newcol-label">Column type</div>
-        <div className="qt-newcol-value">
+        </StyledValue>
+        <StyledLabel>Column type</StyledLabel>
+        <StyledValue>
           <Dropdown.Single.Basic
             width="full"
             value={type}
@@ -111,11 +118,11 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
               })}
             onChange={(v) => setType(v)}
           />
-        </div>
+        </StyledValue>
         {type === Explore.EExploreColumnType.EPV && (
           <>
-            <div className="qt-newcol-label">Property type</div>
-            <div className="qt-newcol-value">
+            <StyledLabel>Property type</StyledLabel>
+            <StyledValue>
               {propertyType ? (
                 <EntityTag
                   fullWidth
@@ -131,10 +138,10 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
                   onPicked={(e) => setPropertyType(e)}
                 />
               )}
-            </div>
+            </StyledValue>
           </>
         )}
-        <div className="qt-newcol-label">
+        <StyledLabel>
           <span style={{ display: "inline-flex", alignItems: "center" }}>
             <span style={{ marginRight: "0.3rem" }}>
               {/* icon is small; leave it inline to avoid styled overhead */}
@@ -142,11 +149,11 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
             </span>
             Editable
           </span>
-        </div>
-        <div className="qt-newcol-value">
+        </StyledLabel>
+        <StyledValue>
           <Checkbox value={editable} onChangeFn={(v) => setEditable(v)} />
-        </div>
-      </div>
+        </StyledValue>
+      </StyledContent>
       <span
         style={{
           width: "100%",
@@ -163,7 +170,7 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
           />
         </ButtonGroup>
       </span>
-    </div>
+    </StyledPanel>
   );
 };
 

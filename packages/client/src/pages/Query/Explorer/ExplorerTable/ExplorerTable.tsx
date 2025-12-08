@@ -33,7 +33,7 @@ import { CMetaProp } from "constructors";
 import { useResizeObserver } from "hooks";
 import { ExploreAction, ExploreActionType } from "../state";
 import { ExplorerTableDetail } from "./ExplorerTableDetail/ExplorerTableDetail";
-import ExplorerTableNewColumnPanel from "./ExplorerTableNewColumnPanel";
+import ExplorerTableNewColumnPanel from "./ExplorerTableNewColumnPanel/ExplorerTableNewColumnPanel";
 import {
   StyledBody,
   StyledHeader,
@@ -634,39 +634,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       {/* DETAILS MODAL */}
       {detailsRowIndex !== null &&
         items[detailsRowIndex - renderWindow.offset] && (
-          // <div
-          //   style={{
-          //     position: "fixed",
-          //     inset: 0,
-          //     background: "rgba(0,0,0,0.5)",
-          //     display: "flex",
-          //     alignItems: "center",
-          //     justifyContent: "center",
-          //     zIndex: 1000,
-          //   }}
-          //   onClick={() => setDetailsRowIndex(null)}
-          // >
-          //   <div
-          //     style={{
-          //       background: "#1e1e1e",
-          //       color: "#fff",
-          //       borderRadius: 8,
-          //       padding: "1rem",
-          //       maxWidth: "80vw",
-          //       maxHeight: "80vh",
-          //       overflow: "auto",
-          //       boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
-          //     }}
-          //     onClick={(e) => e.stopPropagation()}
-          //   >
-          //     <div style={{ display: "flex", justifyContent: "flex-end" }}>
-          // <Button
-          //   label="Close"
-          //   onClick={() => setDetailsRowIndex(null)}
-          //   noBorder
-          //   inverted
-          // />
-          // </div>
           <Modal
             showModal={
               detailsRowIndex !== null &&
@@ -696,8 +663,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
               <Button label="Close" onClick={() => setDetailsRowIndex(null)} />
             </ModalFooter>
           </Modal>
-          //   </div>
-          // </div>
         )}
 
       {/* NEW COLUMN */}
