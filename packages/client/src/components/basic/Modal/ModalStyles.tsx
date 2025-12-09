@@ -79,6 +79,7 @@ export const StyledCardHeader = styled.header<StyledCardHeader>`
   justify-content: flex-start;
   align-items: center;
   flex-shrink: 0;
+  gap: 1rem;
   padding: ${space4} ${space6} ${space2} ${space6};
   background-color: ${({ theme, $color }) =>
     $color ? theme.color[$color] : "transparent"};
@@ -100,9 +101,14 @@ interface StyledCardTitle {
   $boldTitle?: boolean;
 }
 export const StyledCardTitle = styled.h2<StyledCardTitle>`
+  white-space: nowrap;
   font-weight: ${({ theme, $boldTitle }) =>
     $boldTitle ? theme.fontWeight["bold"] : theme.fontWeight["medium"]};
   font-size: ${({ theme }) => theme.fontSize["xl"]};
+`;
+export const StyledCardContent = styled.div`
+  display: flex;
+  margin-right: 3rem;
 `;
 interface StyledCardBody {
   $column?: boolean;

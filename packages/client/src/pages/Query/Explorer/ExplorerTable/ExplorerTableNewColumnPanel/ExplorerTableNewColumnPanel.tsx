@@ -170,6 +170,7 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
                 <EntitySuggester
                   categoryTypes={[EntityEnums.Class.Concept]}
                   onPicked={(e) => setPropertyType(e)}
+                  inputWidth={"full"}
                 />
               )}
             </StyledValue>
@@ -179,7 +180,7 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
           <span style={{ display: "inline-flex", alignItems: "center" }}>
             Editable
             <span style={{ marginLeft: "0.3rem" }}>
-              (<MdOutlineEdit size={12} />)
+              <MdOutlineEdit size={14} />
             </span>
           </span>
         </StyledLabel>

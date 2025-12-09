@@ -58,6 +58,7 @@ const SCROLL_WINDOW_UPDATE_DEBOUNCE_MS = 150;
 // light CSS classes (avoid dynamic styled props in hot path)
 import "../../styles.css";
 import ExplorerTableRow from "./ExplorerTableRow";
+import { EntityTag } from "components/advanced/EntityTag/EntityTag";
 
 // Memoized header to avoid unnecessary re-renders during scroll
 const MemoizedTableHeader: React.FC<{
@@ -155,11 +156,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
 
   const { entities, total: incomingTotal } = data ??
     lastData ?? { entities: [], total: 0 };
-
-  // console.log(
-  //   "entities",
-  //   entities?.map((e) => e.entity.labels[0])
-  // );
 
   const { columns, limit, offset } = state;
 
@@ -621,6 +617,20 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           >
             <ModalHeader
               title="Entity Detail"
+              content={
+                <div style={{ display: "grid" }}>
+                  <EntityTag
+                    fullWidth
+                    entity={
+                      (
+                        items[
+                          detailsRowIndex - renderWindow.offset
+                        ] as IResponseQueryEntity
+                      )?.entity
+                    }
+                  />
+                </div>
+              }
               onClose={() => setDetailsRowIndex(null)}
             />
             <ModalContent enableScroll noPadding>
