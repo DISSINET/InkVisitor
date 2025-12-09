@@ -3,7 +3,10 @@ import styled from "styled-components";
 interface StyledTableWrapper {
   // $height: number;
 }
-export const StyledTableWrapper = styled.div<StyledTableWrapper>``;
+export const StyledTableWrapper = styled.div<StyledTableWrapper>`
+  margin: 0.5rem 1rem 0 1rem;
+  overflow: hidden;
+`;
 export const StyledRowWrapper = styled.div`
   display: block;
 `;

@@ -1,11 +1,18 @@
-import React, { useMemo, useState } from "react";
-import { GrClose } from "react-icons/gr";
-import { TbColumnInsertRight } from "react-icons/tb";
 import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import { Explore } from "@shared/types/query";
 import { Button, ButtonGroup, Checkbox, Input } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { GrClose } from "react-icons/gr";
+import { MdOutlineEdit } from "react-icons/md";
+import { TbColumnInsertRight } from "react-icons/tb";
 import { v4 as uuidv4 } from "uuid";
 import {
   StyledCloseIconWrap,
@@ -35,6 +42,7 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
   onClose,
   onCreateColumn,
 }) => {
+  const panelRef = useRef<HTMLDivElement>(null);
   const [name, setName] = useState(initial.name);
   const [type, setType] = useState(initial.type);
   const [editable, setEditable] = useState<boolean>(initial.editable);
@@ -60,17 +68,42 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
     };
     onCreateColumn(col);
     // reset local state
+    handleClose();
+  };
+
+  const handleClose = useCallback(() => {
     setName("");
     setType(Explore.EExploreColumnType.EPV);
     setEditable(false);
     setPropertyType(undefined);
     onClose();
-  };
+  }, [onClose]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        panelRef.current &&
+        !panelRef.current.contains(event.target as Node)
+      ) {
+        handleClose();
+      }
+    };
+
+    if (open) {
+      // Add event listener when panel is open
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      // Cleanup event listener on unmount or when panel closes
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [open, handleClose]);
 
   if (!open) return <React.Fragment />;
 
   return (
-    <StyledPanel>
+    <StyledPanel ref={panelRef}>
       <StyledHeader>
         <div style={{ display: "flex", alignItems: "center" }}>
           <TbColumnInsertRight size={17} />
@@ -79,7 +112,7 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
         <StyledCloseIconWrap>
           <Button
             icon={<GrClose size={14} />}
-            onClick={onClose}
+            onClick={handleClose}
             noBorder
             color="black"
             noBackground
@@ -144,11 +177,10 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
         )}
         <StyledLabel>
           <span style={{ display: "inline-flex", alignItems: "center" }}>
-            <span style={{ marginRight: "0.3rem" }}>
-              {/* icon is small; leave it inline to avoid styled overhead */}
-              <span>✎</span>
-            </span>
             Editable
+            <span style={{ marginLeft: "0.3rem" }}>
+              (<MdOutlineEdit size={12} />)
+            </span>
           </span>
         </StyledLabel>
         <StyledValue>
@@ -163,7 +195,7 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
         }}
       >
         <ButtonGroup style={{ marginLeft: "1rem", marginTop: "1rem" }}>
-          <Button color="warning" label="cancel" onClick={onClose} />
+          <Button color="warning" label="cancel" onClick={handleClose} />
           <Button
             label="create column"
             onClick={handleCreate}

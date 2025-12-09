@@ -30,7 +30,7 @@ import {
 } from "components";
 import { CMetaProp } from "constructors";
 
-import { useResizeObserver } from "hooks";
+import { useResizeObserver, useTheme } from "hooks";
 import { ExploreAction, ExploreActionType } from "../state";
 import { ExplorerTableDetail } from "./ExplorerTableDetail/ExplorerTableDetail";
 import ExplorerTableNewColumnPanel from "./ExplorerTableNewColumnPanel/ExplorerTableNewColumnPanel";
@@ -56,7 +56,6 @@ const OVERSCAN_ROWS = 10;
 const SCROLL_WINDOW_UPDATE_DEBOUNCE_MS = 150;
 
 // light CSS classes (avoid dynamic styled props in hot path)
-import { useTheme } from "styled-components";
 import "../../styles.css";
 import ExplorerTableRow from "./ExplorerTableRow";
 
@@ -65,6 +64,7 @@ const MemoizedTableHeader: React.FC<{
   columns: Explore.IExploreColumn[];
   onRemoveColumn: (id: string) => void;
 }> = React.memo(({ columns, onRemoveColumn }) => {
+  const theme = useTheme();
   return (
     <StyledHeader>
       <div
@@ -99,7 +99,7 @@ const MemoizedTableHeader: React.FC<{
                 noBorder
                 noBackground
                 inverted
-                icon={<FaEyeSlash color={"white"} />}
+                icon={<FaEyeSlash color={theme.color.white} />}
                 onClick={() => onRemoveColumn(column.id)}
                 tooltipLabel="remove column"
               />
@@ -164,7 +164,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   const { columns, limit, offset } = state;
 
   const [total, setTotal] = useState(0);
-  // const totalPages = useMemo(() => Math.ceil(total / limit), [total, limit]);
 
   const [rowLastClicked, setRowLastClicked] = useState<number>(-1);
   const [rowsSelected, setRowsSelected] = useState<number[]>([]);
@@ -284,8 +283,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     }
   };
 
-  // Sorting controls are currently disabled; toggleSortDirection removed
-
   const handleEditColumn = useCallback(
     (rowEntity: IEntity, columnId: string, newEntity: IEntity) => {
       const column = columns.find((column) => column.id === columnId);
@@ -348,10 +345,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     },
     [columns]
   );
-
-  // const renderTableFooter = () => {
-  //   return <StyledTableFooter>{renderPaging()}</StyledTableFooter>;
-  // };
 
   const handleRowExpand = useCallback((rowId: number) => {
     setDetailsRowIndex(rowId);
@@ -470,7 +463,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           {isPlaceholder ? (
             <div
               style={{
-                color: themeContext?.color.query3,
+                color: themeContext?.color.primary,
                 display: "flex",
                 fontSize: themeContext?.fontSize.sm,
                 flexDirection: "row",
@@ -482,7 +475,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
             >
               <div>loading row</div>
               <div style={{ fontWeight: "bold" }}>{placeholderLabel}</div>
-              <Loader size={16} color={"query3"} show={true} />
+              <Loader size={16} color={"primary"} show />
             </div>
           ) : (
             <ExplorerTableRow
@@ -550,32 +543,15 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     }
   };
 
-  // horizontal scroll is handled by outer Scrollbar only
+  useEffect(() => {
+    console.log("isQueryFetching", isQueryFetching);
+  }, [isQueryFetching]);
 
   return (
-    // <div>
     <>
-      {/* {isLoading && (
-          <div
-            style={{
-              position: "absolute",
-              right: 24,
-              top: 24,
-              display: "flex",
-              alignItems: "center",
-              gap: "0.4rem",
-              pointerEvents: "none",
-            }}
-          >
-            <BeatLoader size={6} margin={3} color="#bbb" />
-            <span style={{ fontSize: 12, color: "#bbb" }}>fetching…</span>
-          </div>
-        )} */}
       <StyledTableWrapper
         style={{
           height: heightBox - 20,
-          margin: "0.5rem 0.5rem 0 0.5rem",
-          overflow: "hidden",
         }}
         ref={contentRef}
       >
@@ -644,7 +620,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
             onClose={() => setDetailsRowIndex(null)}
           >
             <ModalHeader
-              title="Detail"
+              title="Entity Detail"
               onClose={() => setDetailsRowIndex(null)}
             />
             <ModalContent enableScroll noPadding>

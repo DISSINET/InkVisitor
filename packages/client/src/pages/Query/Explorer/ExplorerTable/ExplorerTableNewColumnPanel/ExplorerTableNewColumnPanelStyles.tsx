@@ -10,7 +10,7 @@ export const StyledPanel = styled.div`
   border-radius: 8px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
   padding: 1rem;
-  z-index: 900;
+  z-index: 150;
   background-color: ${({ theme }) => theme.color.blue[100]};
 
   /* opacity: 0.8;
