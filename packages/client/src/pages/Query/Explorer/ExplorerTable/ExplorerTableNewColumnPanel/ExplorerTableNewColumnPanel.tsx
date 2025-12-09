@@ -81,9 +81,15 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+
+      // Check if click is on the toggle button or its children
+      const isToggleButton = target.closest('[data-new-column-toggle="true"]');
+
       if (
         panelRef.current &&
-        !panelRef.current.contains(event.target as Node)
+        !panelRef.current.contains(target) &&
+        !isToggleButton
       ) {
         handleClose();
       }

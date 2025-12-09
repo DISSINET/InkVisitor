@@ -85,10 +85,10 @@ export const StyledNewColumnValue = styled.div`
 `;
 export const StyledUserTag = styled.div`
   background-color: ${({ theme }) => theme.color["tagColor"]};
-  color: ${({ theme }) => theme.color["white"]};
-  padding: ${({ theme }) => theme.space[1] + " " + theme.space[2]};
+  color: ${({ theme }) => theme.color["tagBackground"]};
   display: flex;
   align-items: center;
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
   padding: ${({ theme }) => theme.space[2]};
   gap: ${({ theme }) => theme.space[3]};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
