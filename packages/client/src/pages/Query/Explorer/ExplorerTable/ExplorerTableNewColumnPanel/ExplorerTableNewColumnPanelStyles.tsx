@@ -27,13 +27,13 @@ export const StyledContent = styled.div`
   gap: 0.5rem 0.5rem;
 `;
 export const StyledLabel = styled.div`
-  display: flex;
+  display: grid;
   align-items: center;
   color: ${({ theme }) => theme.color.black};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
 `;
 export const StyledValue = styled.div`
-  display: flex;
+  display: grid;
   align-items: center;
   color: ${({ theme }) => theme.color.black};
 `;

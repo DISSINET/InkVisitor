@@ -9,7 +9,6 @@ import {
   MdOutlineCheckBox,
   MdOutlineCheckBoxOutlineBlank,
 } from "react-icons/md";
-import { BeatLoader } from "react-spinners";
 import { ThemeContext } from "styled-components";
 
 import { classesAll } from "@shared/dictionaries/entity";

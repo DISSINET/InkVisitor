@@ -217,66 +217,14 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     },
   });
 
-  const [columnName, setColumnName] = useState(initialNewColumn.name);
-  const [columnType, setColumnType] = useState(initialNewColumn.type);
-  const [editable, setEditable] = useState<boolean>(initialNewColumn?.editable);
-
-  const [propertyType, setPropertyType] = useState<IEntity | undefined>(
-    undefined
-  );
-  const propertyTypeId = useMemo<string>(() => {
-    return propertyType?.id || "";
-  }, [propertyType]);
-
   const [isNewColumnOpen, setIsNewColumnOpen] = useState(false);
 
-  const getNewColumn = (): Explore.IExploreColumn => {
-    return {
-      id: uuidv4(),
-      name: columnName.length
-        ? columnName
-        : Explore.EExploreColumnTypeLabels[columnType],
-      type: columnType,
-      editable: editable,
-      params: { propertyType: propertyTypeId },
-    };
-  };
-
-  const handleClearLocalState = () => {
-    setColumnName(initialNewColumn.name);
-    setColumnType(initialNewColumn.type);
-    setEditable(initialNewColumn.editable);
-    setPropertyType(undefined);
-  };
-
-  const handleCreateColumn = () => {
+  const handleCreateColumn = (column: Explore.IExploreColumn) => {
     dispatch({
       type: ExploreActionType.addColumn,
-      payload: getNewColumn(),
+      payload: column,
     });
-    handleClearLocalState();
     setIsNewColumnOpen(false);
-  };
-
-  const handleFirstPage = () => {
-    dispatch({ type: ExploreActionType.setOffset, payload: 0 });
-  };
-
-  const handleLastPage = () => {
-    const lastPageOffset = Math.floor((total - 1) / limit) * limit;
-    dispatch({ type: ExploreActionType.setOffset, payload: lastPageOffset });
-  };
-
-  const handleNextPage = () => {
-    if (offset + limit < total) {
-      dispatch({ type: ExploreActionType.setOffset, payload: offset + limit });
-    }
-  };
-
-  const handlePreviousPage = () => {
-    if (offset - limit >= 0) {
-      dispatch({ type: ExploreActionType.setOffset, payload: offset - limit });
-    }
   };
 
   const handleEditColumn = useCallback(
@@ -474,9 +422,23 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                 width: "100%",
               }}
             >
+              <div
+                style={{
+                  position: "relative",
+                  display: "flex",
+                  width: "4rem",
+                }}
+              >
+                <Loader
+                  size={5}
+                  color={"primary"}
+                  show
+                  loaderStyle="beat"
+                  noBackground
+                />
+              </div>
               <div>loading row</div>
               <div style={{ fontWeight: "bold" }}>{placeholderLabel}</div>
-              <Loader size={16} color={"primary"} show />
             </div>
           ) : (
             <ExplorerTableRow
@@ -579,7 +541,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           }}
         >
           {/* HEADER (sticky at top of vertical area, shared horizontal scroll) */}
-          <div style={{ width: widthTable }}>
+          <div style={{ width: widthTable, minWidth: "100%" }}>
             {/* Alternatively, use the memoized header component below to minimize re-renders */}
             <MemoizedTableHeader
               columns={columns}
