@@ -451,7 +451,12 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
 
       return (
         <div
-          style={{ ...style, width: widthTable, height: HEIGHT_ROW_DEFAULT }}
+          style={{
+            ...style,
+            width: widthTable,
+            minWidth: "100%",
+            height: HEIGHT_ROW_DEFAULT,
+          }}
           className={`qt-row ${isOdd ? " qt-row-odd" : ""}${
             isSelected ? " qt-row-selected" : ""
           }${isPlaceholder ? " qt-placeholder" : ""}`}
@@ -567,6 +572,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
         <div
           style={{
             width: contentWidth,
+            minWidth: "100%",
             height: heightBox - 70,
             overflowX: "auto",
             overflowY: "hidden",

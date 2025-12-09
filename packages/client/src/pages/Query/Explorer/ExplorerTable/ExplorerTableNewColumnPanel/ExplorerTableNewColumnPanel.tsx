@@ -79,32 +79,33 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
     onClose();
   }, [onClose]);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
+  // Click outside detection
+  // useEffect(() => {
+  //   const handleClickOutside = (event: MouseEvent) => {
+  //     const target = event.target as HTMLElement;
 
-      // Check if click is on the toggle button or its children
-      const isToggleButton = target.closest('[data-new-column-toggle="true"]');
+  //     // Check if click is on the toggle button or its children
+  //     const isToggleButton = target.closest('[data-new-column-toggle="true"]');
 
-      if (
-        panelRef.current &&
-        !panelRef.current.contains(target) &&
-        !isToggleButton
-      ) {
-        handleClose();
-      }
-    };
+  //     if (
+  //       panelRef.current &&
+  //       !panelRef.current.contains(target) &&
+  //       !isToggleButton
+  //     ) {
+  //       handleClose();
+  //     }
+  //   };
 
-    if (open) {
-      // Add event listener when panel is open
-      document.addEventListener("mousedown", handleClickOutside);
-    }
+  //   if (open) {
+  //     // Add event listener when panel is open
+  //     document.addEventListener("mousedown", handleClickOutside);
+  //   }
 
-    return () => {
-      // Cleanup event listener on unmount or when panel closes
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [open, handleClose]);
+  //   return () => {
+  //     // Cleanup event listener on unmount or when panel closes
+  //     document.removeEventListener("mousedown", handleClickOutside);
+  //   };
+  // }, [open, handleClose]);
 
   if (!open) return <React.Fragment />;
 

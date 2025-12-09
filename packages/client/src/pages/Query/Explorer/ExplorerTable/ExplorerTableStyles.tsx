@@ -103,11 +103,7 @@ export const StyledTableControl = styled(StyledSpaceBetween)`
   padding: ${({ theme }) => theme.space[2]};
   padding-top: 0.2rem;
   margin-right: 2rem;
-
-  /* position: sticky; */
-  /* top: 0; */
   background-color: ${({ theme }) => theme.color["gray"][200]};
-  box-shadow: 0 2px 3px -2px rgba(0, 0, 0, 0.3);
   z-index: 20;
 `;
 export const StyledTableFooter = styled(StyledSpaceBetween)`
