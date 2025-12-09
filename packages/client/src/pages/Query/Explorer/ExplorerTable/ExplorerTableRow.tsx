@@ -25,6 +25,8 @@ import {
   StyledUserTag,
 } from "./ExplorerTableStyles";
 import { WIDTH_COLUMN_DEFAULT, WIDTH_COLUMN_FIRST } from "./types";
+import { HiMiniDocumentMagnifyingGlass } from "react-icons/hi2";
+import { Button } from "components";
 
 interface ExplorerTableRowProps {
   rowId: number;
@@ -55,7 +57,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
 
   isSelected = false,
   isLastClicked = false,
-  isExpanded = false,
+  // isExpanded = false,
   invalidateActiveQuery,
 }) => {
   const themeContext = useContext(ThemeContext);
@@ -278,20 +280,17 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
           )}
         </StyledCheckboxWrapper>
 
-        <div
-          style={{
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-          }}
+        <Button
+          noBackground
+          noBorder
+          icon={
+            <HiMiniDocumentMagnifyingGlass
+              size={20}
+              color={themeContext?.color.primary}
+            />
+          }
           onClick={handleExpandClick}
-        >
-          {isExpanded ? (
-            <FaChevronCircleUp color={themeContext?.color.warning} />
-          ) : (
-            <FaChevronCircleDown color={themeContext?.color.primary} />
-          )}
-        </div>
+        />
 
         <span
           style={{
