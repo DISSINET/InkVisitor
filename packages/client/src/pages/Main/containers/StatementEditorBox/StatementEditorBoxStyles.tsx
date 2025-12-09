@@ -172,6 +172,7 @@ export const StyledBreadcrumbWrap = styled.div`
   min-height: 2rem;
   position: relative;
   margin-top: ${({ theme }) => theme.space[2]};
+  row-gap: ${({ theme }) => theme.space[2]};
 `;
 
 export const StyledEditorStatementInfo = styled.div`
