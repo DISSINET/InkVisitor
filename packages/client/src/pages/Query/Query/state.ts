@@ -190,16 +190,27 @@ const addNode = (state: Query.INode, parentId: string): Query.INode => {
       edges: [],
     },
   };
-  const updatedState = { ...state };
 
-  const parentNode = getAllNodes(updatedState).find(
-    (node) => node.id === parentId
-  );
-  if (!parentNode) {
-    return updatedState;
-  }
-  parentNode.edges.push(newEdge);
-  return updatedState;
+  // Recursively clone the node tree, adding the new edge to the parent node
+  const cloneNode = (node: Query.INode): Query.INode => {
+    if (node.id === parentId) {
+      // Found the parent node - create a new node with the new edge added
+      return {
+        ...node,
+        edges: [...node.edges, newEdge],
+      };
+    }
+    // Not the parent - recursively clone children
+    return {
+      ...node,
+      edges: node.edges.map((edge) => ({
+        ...edge,
+        node: cloneNode(edge.node),
+      })),
+    };
+  };
+
+  return cloneNode(state);
 };
 
 const queryDiff = (state1: Query.INode, state2: Query.INode) => {
