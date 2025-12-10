@@ -31,6 +31,7 @@ import {
 } from "./types";
 import { HiMiniDocumentMagnifyingGlass } from "react-icons/hi2";
 import { Button } from "components";
+import { clearRowCache } from "pages/Query/useQueryData";
 
 interface ExplorerTableRowProps {
   rowId: number;
@@ -85,13 +86,19 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
     }) => await api.entityUpdate(variables.entityId, variables.changes),
 
     onSuccess: () => {
-      if (invalidateActiveQuery) {
-        invalidateActiveQuery();
-      } else {
-        queryClient.invalidateQueries({
-          queryKey: ["query"],
-        });
-      }
+      // if (invalidateActiveQuery) {
+      //   invalidateActiveQuery();
+      // } else {
+      // Clear the custom row cache store
+      clearRowCache();
+      // Invalidate React Query cache
+      queryClient.invalidateQueries({
+        queryKey: ["query"],
+      });
+      queryClient.removeQueries({
+        queryKey: ["query"],
+      });
+      // }
     },
   });
 

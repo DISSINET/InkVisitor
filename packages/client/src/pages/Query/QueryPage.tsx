@@ -107,7 +107,15 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
   };
 
   const invalidateActiveQuery = () => {
-    queryClient.invalidateQueries({
+    // Clear the custom row cache store for this specific signature
+    clearRowCache(stableSignature);
+    // Remove queries to force refetch (invalidateQueries won't work with staleTime: Infinity)
+    queryClient.removeQueries({
+      queryKey: ["query", stableSignature],
+      exact: false,
+    });
+    // Force refetch of the active query
+    queryClient.refetchQueries({
       queryKey: ["query", stableSignature],
       exact: false,
     });

@@ -511,10 +511,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     }
   };
 
-  useEffect(() => {
-    console.log("isQueryFetching", isQueryFetching);
-  }, [isQueryFetching]);
-
   return (
     <>
       <StyledTableWrapper
