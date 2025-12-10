@@ -231,7 +231,6 @@ export default class Cursor
     viewport: Viewport,
     text: Text,
     drawingOptions: DrawingOptions,
-    editMode: EditMode
   ) {
     if (this.xLine === -1 && this.yLine === -1) {
       return;

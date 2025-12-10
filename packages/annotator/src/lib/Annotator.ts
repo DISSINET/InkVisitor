@@ -729,7 +729,6 @@ export class Annotator {
    * TODO - this should be done in conjunction with requestAnimationFrame
    */
   draw() {
-    // @ts-ignore
     this.ctx.reset();
 
     this.ctx.fillStyle = this.bgColor;
@@ -739,12 +738,9 @@ export class Annotator {
     this.ctx.fillStyle = this.fontColor;
 
     const textToRender = this.text.getViewportText(this.viewport);
-
-    for (
-      let renderLine = 0;
-      renderLine <= this.viewport.lineEnd - this.viewport.lineStart;
-      renderLine++
-    ) {
+    const renderEndCond = this.viewport.lineEnd - this.viewport.lineStart
+    for (let renderLine = 0; renderLine <= renderEndCond; renderLine++) {
+      console.log(`Rendering line ${renderLine}`, textToRender[renderLine]);
       const textLine = textToRender[renderLine];
       if (textLine) {
         this.ctx.fillText(textLine, 0, (renderLine + 1) * this.lineHeight);
@@ -766,7 +762,6 @@ export class Annotator {
           charWidth: this.charWidth,
           charsAtLine: this.text.charsAtLine,
         },
-        this.text.mode
       );
     }
 
@@ -868,7 +863,6 @@ export class Annotator {
             charWidth: this.charWidth,
             charsAtLine: this.text.charsAtLine,
           },
-          this.text.mode
         );
       }
     }
@@ -1654,5 +1648,4 @@ export class Annotator {
 
     return [clamp(newStart), clamp(newEnd)];
   }
-
 }

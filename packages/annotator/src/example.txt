@@ -1,64 +1,27 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<TEI xmlns="http://www.tei-c.org/ns/1.0" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:svg="http://www.w3.org/2000/svg" xml:id="MS609-0004.xml">
-   
-   <teiHeader xml:id="MS609-0004-HD" corresp="MS609-0000.xml">
-      <fileDesc>
-         <titleStmt corresp="#Rehr_MS609">
-                <title/>
-            </titleStmt>
-         <publicationStmt corresp="#copyright-cc-by-nc-sa-4.0">
-            <p corresp="#http://creativecommons.org/licenses/by-nc-sa/4.0/">The author of this document is Jean-Paul Rehr who makes this work 
-                available as of 2018-11-10 under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.</p>
-         </publicationStmt>
-         <!--sourceDesc-->
-         <xi:include href="includes_sourcedesc.xml"/>
-      </fileDesc>
-      <!--encodingDesc-->
-      <xi:include href="includes_encodingdesc.xml"/>
-      
-   </teiHeader>
-   
-   <text xml:id="MS609-0004">
-      <front>
-         <!-- registry entry metadata -->
-         <div type="inquisition">
-            <p>Toulouse 1245-46</p>
-         </div>
-         <div type="source" subtype="manuscript" corresp="#MS-TOULOUSE-MS609" n="MS609"/>
-         <div type="registry_ordinal" n="0004"/>
-         <div type="folio" n="1r"/>
-         <div type="doc_type" subtype="Deposition"/>
-         <div type="ms_subgroup" corresp="#De_Manso_Sanctarum_Puellarum" n="1"/>
-         <div type="intro">
-            <p/>
-         </div>
-         <div type="image">
-            <list xml:base="#codes_folio_images.xml">
-               <item facs="#img_609_0009"/>
-            </list>
-         </div>
-      </front>
-      
-      <body>
-         <!-- Latin text -->
-         <p xml:id="MS609-0004-LA" xml:lang="LA">
-            <!-- event 1 -->
-            <seg type="dep_event" subtype="denial" xml:id="MS609-0004-1">
-               <lb break="y" n="36"/>Item.
-               <date type="deposition_date" sameAs="#MS609-0001.xml" cert="medium">Anno et die quo supra.</date> 
-               <persName nymRef="#P_Lapassa_Senior_MSP-AU" ana="#neg_declare_dep" role="dep">P. Lapassa Senior</persName> testis iuratus dixit idem per omnia quod predictus 
-               <persName nymRef="#Hugo_de_Mamiros_MSP-AU" role="none">Hugo de Mamiros</persName>. <seg type="witnesses" sameAs="#MS609-0001.xml" cert="medium">Testes: 
-                  predicti</seg>.
-            </seg>
-         </p>
-      </body>
-      <back>
-         <!-- English translation in corresponding segments -->
-         <p xml:id="MS609-0004-EN" xml:lang="EN">
-            <!-- event 1 -->
-            <seg type="trans" corresp="#MS609-0004-1">Item. Year and day as above. The sworn witness P. Lapassa Senior
-               said the same for everything as Hugo de Mamiros stated above. Witnesses: as stated above.</seg>
-         </p>
-      </back>
-   </text>
-</TEI>
+first
+second
+third
+fourth
+5th
+6th
+7th
+8th
+9th
+10th
+11th
+12th
+13th
+14th
+15th
+16th
+17th
+18th
+19th
+20th
+21th
+22th
+23th
+24th
+25th
+26th
+27th
