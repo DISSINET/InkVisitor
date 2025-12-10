@@ -9,11 +9,15 @@ import { Query } from "@shared/types/query";
 import api from "api";
 import { Button } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
-import theme from "Theme/theme";
 
 import { INodeItem, QueryValidityProblem } from "../../types";
 import { QueryAction, QueryActionType } from "../state";
-import { StyledGraphNode, StyledNodeTypeSelect } from "./QueryStyles";
+import {
+  StyledGraphNode,
+  StyledNodeContainer,
+  StyledNodeTypeSelect,
+} from "./QueryStyles";
+import { useTheme } from "styled-components";
 
 interface QueryGridNodeProps {
   node: INodeItem;
@@ -30,6 +34,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
   problems,
   isRoot = false,
 }) => {
+  const theme = useTheme();
   const isValid = problems.length === 0;
 
   const nodeTypeOptions = Object.values(Query.NodeType).map((type) => ({
@@ -65,7 +70,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
       }
     }
     return "none";
-  }, [isValid, isRoot]);
+  }, [theme, isValid, isRoot]);
 
   const nodeColor = useMemo(() => {
     if (isValid) {
@@ -76,20 +81,10 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
     } else {
       return theme.color.queryInvalid;
     }
-  }, [isValid, isRoot]);
+  }, [theme, isValid, isRoot]);
 
   return (
-    <div
-      style={{
-        borderColor: "white",
-        borderWidth: 2,
-        display: "flex",
-        alignItems: "center",
-        gap: "5px",
-        width: "100%",
-        height: "100%",
-      }}
-    >
+    <StyledNodeContainer>
       <StyledGraphNode
         style={{
           backgroundColor: nodeColor,
@@ -221,6 +216,6 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
           />
         </div>
       )}
-    </div>
+    </StyledNodeContainer>
   );
 };

@@ -1,5 +1,13 @@
 import styled from "styled-components";
 
+export const StyledNodeContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  height: 100%;
+`;
+
 export const StyledGraphNode = styled.div`
   border-radius: 25px;
   height: ${({ theme }) => theme.space[18]};
@@ -7,13 +15,10 @@ export const StyledGraphNode = styled.div`
   font-weight: bold;
   display: flex;
   align-items: center;
-  justify-content: between;
   gap: ${({ theme }) => theme.space[4]};
-  .react-select__control,
-  input {
-    background-color: ${({ theme }) => theme.color.white};
-    border-color: ${({ theme }) => theme.color.grey};
-    // border-radius: ${({ theme }) => theme.space[2]};
+
+  .react-select__input-container {
+    color: ${({ theme }) => theme.color.white};
   }
 `;
 

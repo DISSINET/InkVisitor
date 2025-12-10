@@ -8,8 +8,8 @@ import {
   QUERY_GRID_WIDTH,
   QueryValidityProblem,
 } from "../../types";
-import theme from "Theme/theme";
 import { Query } from "@shared/types/query";
+import { useTheme } from "styled-components";
 
 interface QueryGridEdgeProps {
   node: INodeItem;
@@ -24,6 +24,7 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
   dispatch,
   problems,
 }) => {
+  const theme = useTheme();
   const validEdgesTypes = Query.findValidEdgeTypesForSourceNode(node);
 
   const edgeTypeOptions = validEdgesTypes.map((type) => ({

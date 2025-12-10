@@ -54,7 +54,7 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
 
   const renderHeaderCheckBox = () => {
     const size = 18;
-    const isAllSelected = rowsTotal === rowsSelected.length;
+    const isAllSelected = rowsTotal > 0 && rowsTotal === rowsSelected.length;
 
     if (isAllSelected) {
       return (
