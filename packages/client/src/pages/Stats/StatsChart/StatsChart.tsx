@@ -15,7 +15,7 @@ import {
 } from "recharts";
 
 import api from "api";
-import theme from "Theme/theme";
+import { useTheme } from "styled-components";
 import { OTHERS_KEY } from "../constants";
 import {
   ChartDataPoint,
@@ -34,7 +34,6 @@ import {
   StyledPayload,
   StyledPayloadItem,
 } from "./StatsChartStyles";
-import { Loader } from "components/basic/Loader/Loader";
 
 interface StatsChartProps {
   data: IResponseStats;
@@ -49,6 +48,7 @@ export const StatsChart = ({
   width,
   request,
 }: StatsChartProps) => {
+  const theme = useTheme();
   const values = data.values;
   const [hoveringDataKey, setHoveringDataKey] = useState<string | null>(null);
   const { aggregateBy, eventType } = request;

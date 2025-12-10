@@ -1,11 +1,10 @@
 import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
-import { useSearchParams } from "hooks";
+import { useSearchParams, useTheme } from "hooks";
 import React, { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { FaStar } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import theme from "Theme/theme";
 import {
   DetailBoxState,
   DraggedEntityReduxItem,
@@ -89,6 +88,7 @@ export const Tag: React.FC<TagProps> = ({
   onButtonOut,
   onBtnClick,
 }) => {
+  const theme = useTheme();
   const { appendDetailId } = useSearchParams();
   const dispatch = useAppDispatch();
   const draggedEntity: DraggedEntityReduxItem = useAppSelector(

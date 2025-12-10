@@ -7,13 +7,13 @@ import {
 } from "reactflow";
 import "reactflow/dist/style.css";
 
+import { certaintyDict } from "@shared/dictionaries";
 import { LetterIcon, Tooltip } from "components";
 import React, { useMemo, useState } from "react";
-import { certaintyDict } from "@shared/dictionaries";
 
-import { Relation } from "@shared/types/relation";
 import { RelationEnums } from "@shared/enums";
-import theme from "Theme/theme";
+import { Relation } from "@shared/types/relation";
+import { useTheme } from "styled-components";
 
 const certaintyStyles: Record<
   EntityEnums.Certainty,
@@ -38,6 +38,7 @@ export const GraphEdge: React.FC<EdgeProps> = ({
   targetPosition,
   data,
 }) => {
+  const theme = useTheme();
   const [referenceElement, setReferenceElement] =
     useState<HTMLDivElement | null>(null);
 
@@ -71,7 +72,7 @@ export const GraphEdge: React.FC<EdgeProps> = ({
         stroke: theme.color.info,
       };
     }
-  }, [data.certainty]);
+  }, [theme, data.certainty]);
 
   return (
     <>

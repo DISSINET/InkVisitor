@@ -98,6 +98,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
             tooltipLabel="node type"
             width={30}
             noDropDownIndicator
+            disableTyping
             onChange={(newValue) => {
               dispatch({
                 type: QueryActionType.updateNodeType,
