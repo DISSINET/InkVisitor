@@ -13,6 +13,7 @@ import { QueryGridEdge } from "./components/QueryGridEdge";
 import { QueryGridNode } from "./components/QueryGridNode";
 import { QueryAction } from "./state";
 import { getAllEdges, getAllNodes } from "./utils";
+import { StyledQueryBox } from "./QueryBoxStyles";
 
 interface QueryBoxProps {
   state: Query.INode;
@@ -71,70 +72,59 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
   }, [state]);
 
   return (
-    <div>
-      <div
-        style={{
-          padding: "10px",
-          display: "grid",
-          gridTemplateColumns: `repeat(${
-            gridWeight + 1
-          }, ${QUERY_GRID_WIDTH}px)`,
-          gridTemplateRows: `repeat(${nodeItems.length}, ${QUERY_GRID_HEIGHT}px)`,
-        }}
-      >
-        {[...Array(gridWeight + 1).keys()].map((wi) => {
-          return [...Array(nodeItems.length).keys()].map((hi) => {
-            const nextCellNode = nodeItems.find(
-              (node) => node.gridX === wi + 1 && node.gridY === hi
-            );
-            const thisCellNode = nodeItems.find(
-              (node) => node.gridX === wi && node.gridY === hi
-            );
-            const associatedEdge =
-              thisCellNode &&
-              allEdges.find((edge) => edge.node.id === thisCellNode.id);
+    <StyledQueryBox gridWeight={gridWeight} nodeItems={nodeItems}>
+      {[...Array(gridWeight + 1).keys()].map((wi) => {
+        return [...Array(nodeItems.length).keys()].map((hi) => {
+          const nextCellNode = nodeItems.find(
+            (node) => node.gridX === wi + 1 && node.gridY === hi
+          );
+          const thisCellNode = nodeItems.find(
+            (node) => node.gridX === wi && node.gridY === hi
+          );
+          const associatedEdge =
+            thisCellNode &&
+            allEdges.find((edge) => edge.node.id === thisCellNode.id);
 
-            const nextCellAssociatedEdge =
-              nextCellNode &&
-              allEdges.find((edge) => edge.node.id === nextCellNode.id);
+          const nextCellAssociatedEdge =
+            nextCellNode &&
+            allEdges.find((edge) => edge.node.id === nextCellNode.id);
 
-            return (
-              <div
-                key={`${wi}-${hi}`}
-                style={{
-                  gridColumn: wi + 1,
-                  gridRow: hi + 1,
-                  width: QUERY_GRID_WIDTH,
-                  height: QUERY_GRID_HEIGHT,
-                }}
-              >
-                {thisCellNode && (
-                  <QueryGridNode
-                    node={thisCellNode}
-                    isRoot={wi === 0}
-                    dispatch={dispatch}
-                    edge={associatedEdge}
-                    problems={queryStateValidity.problems.filter(
-                      (problem) => problem.source === thisCellNode.id
-                    )}
-                  />
-                )}
-                {nextCellAssociatedEdge && (
-                  <QueryGridEdge
-                    node={nextCellNode}
-                    dispatch={dispatch}
-                    edge={nextCellAssociatedEdge}
-                    problems={queryStateValidity.problems.filter(
-                      (problem) => problem.source === nextCellAssociatedEdge.id
-                    )}
-                  />
-                )}
-              </div>
-            );
-          });
-        })}
-      </div>
-    </div>
+          return (
+            <div
+              key={`${wi}-${hi}`}
+              style={{
+                gridColumn: wi + 1,
+                gridRow: hi + 1,
+                width: QUERY_GRID_WIDTH,
+                height: QUERY_GRID_HEIGHT,
+              }}
+            >
+              {thisCellNode && (
+                <QueryGridNode
+                  node={thisCellNode}
+                  isRoot={wi === 0}
+                  dispatch={dispatch}
+                  edge={associatedEdge}
+                  problems={queryStateValidity.problems.filter(
+                    (problem) => problem.source === thisCellNode.id
+                  )}
+                />
+              )}
+              {nextCellAssociatedEdge && (
+                <QueryGridEdge
+                  node={nextCellNode}
+                  dispatch={dispatch}
+                  edge={nextCellAssociatedEdge}
+                  problems={queryStateValidity.problems.filter(
+                    (problem) => problem.source === nextCellAssociatedEdge.id
+                  )}
+                />
+              )}
+            </div>
+          );
+        });
+      })}
+    </StyledQueryBox>
   );
 };
 

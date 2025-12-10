@@ -116,6 +116,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
         </StyledNodeTypeSelect>
         {(paramEntityClass || isRoot) && (
           <Dropdown.Multi.Entity
+            shortLabel
             value={node.params.entityClasses ?? [entitiesDict[0].value]}
             disableEmpty
             onChange={(newValue) => {
@@ -134,9 +135,10 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                     paramEntityClass.allowedClasses.includes(ecl.value)
                   )
             }
-            width={150}
+            width={270}
             noOptionsMessage="entity class"
             disabled={node.params.entityId !== undefined}
+            limitSelectedItems={Math.floor((270 - 110) / 37)}
           />
         )}
         {paramEntityId && (
