@@ -16,7 +16,7 @@ import { MemoizedQueryBox } from "./Query/QueryBox";
 import { queryReducer, queryStateInitial } from "./Query/state";
 import { getAllEdges, getAllNodes } from "./Query/utils";
 import { QueryValidity, QueryValidityProblem } from "./types";
-import { useQueryData } from "./useQueryData";
+import { useQueryData, clearRowCache } from "./useQueryData";
 
 interface QueryPage {}
 export const QueryPage: React.FC<QueryPage> = ({}) => {
@@ -80,7 +80,14 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
 
   const queryClient = useQueryClient();
   const handleInvalidateQuery = () => {
+    // Clear the custom row cache store
+    clearRowCache();
+    // Invalidate React Query cache
     queryClient.invalidateQueries({
+      queryKey: ["query"],
+    });
+    // Remove all query-related queries to force refetch
+    queryClient.removeQueries({
       queryKey: ["query"],
     });
   };
