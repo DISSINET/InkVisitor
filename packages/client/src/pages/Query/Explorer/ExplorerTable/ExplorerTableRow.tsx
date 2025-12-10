@@ -24,7 +24,11 @@ import {
   StyledFocusedCircle,
   StyledUserTag,
 } from "./ExplorerTableStyles";
-import { WIDTH_COLUMN_DEFAULT, WIDTH_COLUMN_FIRST } from "./types";
+import {
+  WIDTH_COLUMN_DEFAULT,
+  WIDTH_COLUMN_EUC,
+  WIDTH_COLUMN_FIRST,
+} from "./types";
 import { HiMiniDocumentMagnifyingGlass } from "react-icons/hi2";
 import { Button } from "components";
 
@@ -308,8 +312,11 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
             key={key}
             className="qt-col"
             style={{
-              width: WIDTH_COLUMN_DEFAULT,
-              minWidth: WIDTH_COLUMN_DEFAULT,
+              width:
+                column.type === Explore.EExploreColumnType.EUC
+                  ? WIDTH_COLUMN_EUC
+                  : WIDTH_COLUMN_DEFAULT,
+              minWidth: WIDTH_COLUMN_EUC,
               maxWidth: WIDTH_COLUMN_DEFAULT,
             }}
           >

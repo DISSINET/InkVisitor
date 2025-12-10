@@ -45,6 +45,7 @@ import {
   batchOptions,
   HEIGHT_ROW_DEFAULT,
   WIDTH_COLUMN_DEFAULT,
+  WIDTH_COLUMN_EUC,
   WIDTH_COLUMN_FIRST,
 } from "./types";
 
@@ -84,8 +85,11 @@ const MemoizedTableHeader: React.FC<{
             key={key}
             className="qt-col qt-col-header"
             style={{
-              width: WIDTH_COLUMN_DEFAULT,
-              minWidth: WIDTH_COLUMN_DEFAULT,
+              width:
+                column.type === Explore.EExploreColumnType.EUC
+                  ? WIDTH_COLUMN_EUC
+                  : WIDTH_COLUMN_DEFAULT,
+              minWidth: WIDTH_COLUMN_EUC,
               maxWidth: WIDTH_COLUMN_DEFAULT,
               display: "flex",
               alignItems: "center",
@@ -112,13 +116,6 @@ const MemoizedTableHeader: React.FC<{
   );
 });
 
-const initialNewColumn: Explore.IExploreColumn = {
-  id: uuidv4(),
-  name: "",
-  type: Explore.EExploreColumnType.EPV,
-  editable: false,
-  params: {},
-};
 interface ExplorerTable {
   state: Explore.IExplore;
   dispatch: React.Dispatch<ExploreAction>;
@@ -354,8 +351,15 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     [dispatch]
   );
 
+  // created by columns are smaller than the default columns, subtract the difference
   const widthTable = useMemo(() => {
-    return columns.length * WIDTH_COLUMN_DEFAULT + WIDTH_COLUMN_FIRST;
+    return (
+      columns.length * WIDTH_COLUMN_DEFAULT +
+      WIDTH_COLUMN_FIRST -
+      columns.filter((column) => column.type === Explore.EExploreColumnType.EUC)
+        .length *
+        (WIDTH_COLUMN_DEFAULT - WIDTH_COLUMN_EUC)
+    );
   }, [columns]);
 
   const windowUpdateTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(

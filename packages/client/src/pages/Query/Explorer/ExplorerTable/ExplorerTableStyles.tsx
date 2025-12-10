@@ -35,7 +35,7 @@ export const StyledRow = styled.div<StyledRow>`
 export const StyledHeader = styled.div`
   display: flex;
   z-index: 1;
-  height: ${({ theme }) => theme.space[14]};
+  height: ${({ theme }) => theme.space[12]};
   background-color: ${({ theme }) => theme.color["success"]};
   color: ${({ theme }) => theme.color["white"]};
   border-top-left-radius: ${({ theme }) => theme.borderRadius["default"]};
@@ -88,8 +88,9 @@ export const StyledUserTag = styled.div`
   color: ${({ theme }) => theme.color["tagBackground"]};
   display: flex;
   align-items: center;
+  height: 2.6rem;
   font-size: ${({ theme }) => theme.fontSize["sm"]};
-  padding: ${({ theme }) => theme.space[2]};
+  padding: ${({ theme }) => "0rem " + theme.space[2]};
   gap: ${({ theme }) => theme.space[3]};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
 `;
