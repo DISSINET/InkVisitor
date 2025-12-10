@@ -57,14 +57,11 @@ export const SuggestionRowEntityRow: React.FC<SuggestionRowEntityProps> = ({
             color="black"
             key="link entity"
             noIconMargin
-            icon={
-              <FaLink
-                onClick={() => {
-                  // onPick nonTemplate entity
-                  onPick(entity);
-                }}
-              />
-            }
+            onClick={() => {
+              // onPick nonTemplate entity
+              onPick(entity);
+            }}
+            icon={<FaLink />}
           />
         )}
         {entity.isTemplate &&
@@ -75,14 +72,11 @@ export const SuggestionRowEntityRow: React.FC<SuggestionRowEntityProps> = ({
               inverted
               noBorder
               noBackground
-              icon={
-                <FaPlusSquare
-                  onClick={() => {
-                    // onPick template inside nonTemplate
-                    onPick(entity, true);
-                  }}
-                />
-              }
+              onClick={() => {
+                // onPick template inside nonTemplate
+                onPick(entity, true);
+              }}
+              icon={<FaPlusSquare />}
             />
           )}
         {entity.isTemplate && isInsideTemplate && (
@@ -92,14 +86,11 @@ export const SuggestionRowEntityRow: React.FC<SuggestionRowEntityProps> = ({
             inverted
             noBorder
             noBackground
-            icon={
-              <FaLink
-                onClick={() => {
-                  // onPick template entity
-                  onPick(entity);
-                }}
-              />
-            }
+            onClick={() => {
+              // onPick template entity
+              onPick(entity);
+            }}
+            icon={<FaLink />}
           />
         )}
       </ButtonGroup>
