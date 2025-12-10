@@ -201,7 +201,6 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
           height={contentHeight - querySeparatorYPosition}
           label="Explorer"
           buttons={[
-            // doesn't refresh the detail data for individual entities
             <Button
               key="refresh queries"
               tooltipLabel="refresh data"
