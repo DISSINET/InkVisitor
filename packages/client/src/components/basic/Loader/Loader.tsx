@@ -13,7 +13,7 @@ interface Loader {
 }
 export const Loader: React.FC<Loader> = ({
   show = false,
-  size = 60,
+  size = 50,
   noBackground = false,
   color = "primary",
   loaderStyle = "default",

@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useReducer, useState } from "react";
 
 import { Query } from "@shared/types";
 import api from "api";
-import { Box, Button, Panel } from "components";
+import { Box, Button, Loader, Panel } from "components";
 import { LayoutSeparatorHorizontal } from "components/advanced";
 import { BiRefresh } from "react-icons/bi";
 import { toast } from "react-toastify";
@@ -223,7 +223,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
             stableSignature={stableSignature}
             getCachedEntity={getCachedEntity}
           />
-          {/* <Loader show={queryIsFetching} /> */}
+          <Loader show={queryIsFetching} />
         </Box>
       </Panel>
     </>
