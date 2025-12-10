@@ -297,7 +297,8 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     height: contentHeight,
   } = useResizeObserver<HTMLDivElement>();
 
-  const spaceTableBody = heightBox - 105;
+  const headerHeight = 100;
+  const heightTableBody = heightBox - headerHeight;
 
   const handleRowSelect = useCallback(
     (rowId: number, isWithShift: boolean = false) => {
@@ -483,7 +484,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     const targetEnd = Math.min(total - 1, visibleEnd + OVERSCAN_ROWS);
     const targetLimit = Math.max(1, targetEnd - targetStart + 1);
 
-    const approxVisible = Math.ceil(spaceTableBody / HEIGHT_ROW_DEFAULT);
+    const approxVisible = Math.ceil(heightTableBody / HEIGHT_ROW_DEFAULT);
     const maxFetch = Math.max(approxVisible + 2 * OVERSCAN_ROWS, 30);
     const cappedLimit = Math.min(targetLimit, maxFetch, total);
 
@@ -555,7 +556,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
             {/* BODY (List handles Y; shares X with header via parent Scrollbar) */}
             <StyledBody
               style={{
-                height: spaceTableBody,
+                height: heightTableBody,
               }}
             >
               <List
