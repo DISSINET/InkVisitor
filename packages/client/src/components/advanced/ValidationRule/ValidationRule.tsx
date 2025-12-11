@@ -169,7 +169,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
 
         {/* Entity SOE */}
         <StyledLabel>having superordinate entity</StyledLabel>
-        <StyledFlexList>
+        <StyledValue>
           {entitySOEs?.map((soe, key) => (
             <EntityTag
               key={key}
@@ -209,7 +209,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
               disabled={!userCanEdit}
             />
           )}
-        </StyledFlexList>
+        </StyledValue>
 
         {/* Entity Languages */}
         <StyledLabel>having language</StyledLabel>
