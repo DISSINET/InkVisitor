@@ -208,7 +208,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
           }}
         />
       </div>
-      {node.gridX !== 0 && node.gridY !== 0 && (
+      {node.gridX !== 0 && node.gridY !== 0 && edge && (
         <div>
           <Button
             icon={<FaTrash style={{ fontSize: "16px", padding: "2px" }} />}
@@ -218,7 +218,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
               dispatch({
                 type: QueryActionType.removeEdge,
                 payload: {
-                  edgeId: edge?.id,
+                  edgeId: edge.id,
                 },
               });
             }}

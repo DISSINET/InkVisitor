@@ -30,12 +30,6 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
   queryError,
   queryStateValidity,
 }) => {
-  const queryClient = useQueryClient();
-
-  const contentHeight: number = useAppSelector(
-    (state) => state.layout.contentHeight
-  );
-
   const gridWeight = useMemo<number>(() => {
     let maxNodeDepth = 1;
 

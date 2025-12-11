@@ -97,12 +97,12 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
             options={edgeTypeOptions}
             width={200}
             noDropDownIndicator
-            value={edge?.type}
+            value={edge.type}
             onChange={(newValue) => {
               dispatch({
                 type: QueryActionType.updateEdgeType,
                 payload: {
-                  edgeId: edge?.id,
+                  edgeId: edge.id,
                   newType: newValue,
                 },
               });

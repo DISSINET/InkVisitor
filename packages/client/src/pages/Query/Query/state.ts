@@ -33,10 +33,6 @@ const queryStateInitial: Query.INode = {
   ],
 };
 
-interface QueryAction {
-  type: QueryActionType;
-  payload: any;
-}
 enum QueryActionType {
   addNode,
   removeEdge,
@@ -45,6 +41,32 @@ enum QueryActionType {
   updateNodeClass,
   updateNodeEntityId,
 }
+
+type QueryAction =
+  | {
+      type: QueryActionType.addNode;
+      payload: { parentId: string };
+    }
+  | {
+      type: QueryActionType.removeEdge;
+      payload: { edgeId: string };
+    }
+  | {
+      type: QueryActionType.updateEdgeType;
+      payload: { edgeId: string; newType: Query.EdgeType };
+    }
+  | {
+      type: QueryActionType.updateNodeType;
+      payload: { nodeId: string; newType: Query.NodeType };
+    }
+  | {
+      type: QueryActionType.updateNodeClass;
+      payload: { nodeId: string; newEntityClasses: EntityEnums.Class[] };
+    }
+  | {
+      type: QueryActionType.updateNodeEntityId;
+      payload: { nodeId: string; newEntityId: string | undefined };
+    };
 
 const queryReducer = (state: Query.INode, action: QueryAction) => {
   switch (action.type) {
