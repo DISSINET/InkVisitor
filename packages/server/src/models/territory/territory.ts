@@ -74,11 +74,11 @@ export class TerritoryData implements ITerritoryData, IModel {
     }
     if (data.protocol) {
       this.protocol = new TerritoryProtocol(data.protocol || {});
-      if (data.validations) {
-        this.validations = data.validations.map(
-          (p) => new TerritoryValidation(p)
-        );
-      }
+    }
+    if (data.validations) {
+      this.validations = data.validations.map(
+        (p) => new TerritoryValidation(p)
+      );
     }
   }
 
