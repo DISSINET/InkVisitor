@@ -153,11 +153,14 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
   );
 
   const initValidationRule = () => {
+    if (!rootTerritory) {
+      return;
+    }
+
+    const currentValidations = rootTerritory.data.validations || [];
     updateEntityMutation.mutate({
       data: {
-        validations: validations
-          ? [...validations, initValidation]
-          : [initValidation],
+        validations: [...currentValidations, initValidation],
       },
     });
   };
@@ -277,6 +280,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
                       label="new validation rule"
                       color="primary"
                       onClick={initValidationRule}
+                      disabled={updateEntityMutation.isPending}
                     />
                   </span>
                 </StyledSectionHeader>
@@ -314,6 +318,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
                     label="new validation rule"
                     color="primary"
                     onClick={initValidationRule}
+                    disabled={updateEntityMutation.isPending}
                   />
                 </div>
               </>
