@@ -20,7 +20,7 @@ import React, { useMemo } from "react";
 import { FaTrashAlt } from "react-icons/fa";
 import {
   StyledBorderLeft,
-  StyledFlexList,
+  StyledValue,
   StyledGrid,
   StyledLabel,
   StyledLanguageList,
@@ -124,7 +124,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
 
         {/* Entity Classifications */}
         <StyledLabel>classified as</StyledLabel>
-        <StyledFlexList>
+        <StyledValue>
           {entityClassifications?.map((classification, key) => (
             <EntityTag
               key={key}
@@ -165,7 +165,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
               }
             />
           )}
-        </StyledFlexList>
+        </StyledValue>
 
         {/* Entity SOE */}
         <StyledLabel>having superordinate entity</StyledLabel>
@@ -213,7 +213,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
 
         {/* Entity Languages */}
         <StyledLabel>having language</StyledLabel>
-        <StyledFlexList>
+        <StyledValue>
           <StyledLanguageList>
             {entityLanguages?.map((language, key) => (
               <LanguageTag
@@ -260,7 +260,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
               }}
             />
           )}
-        </StyledFlexList>
+        </StyledValue>
 
         {/* Entity Statuses */}
         <StyledLabel>having status</StyledLabel>
@@ -363,7 +363,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
         {tieType === EProtocolTieType.Property && (
           <>
             <StyledLabel>Prop type</StyledLabel>
-            <StyledFlexList>
+            <StyledValue>
               {propType?.map((entityId, key) => (
                 <EntityTag
                   key={key}
@@ -395,7 +395,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
                   disabled={!userCanEdit}
                 />
               )}
-            </StyledFlexList>
+            </StyledValue>
           </>
         )}
 
@@ -423,7 +423,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
           {tieType === EProtocolTieType.Property &&
             "Entities allowed in property value"}
         </StyledLabel>
-        <StyledFlexList>
+        <StyledValue>
           {allowedEntities?.map((entityId, key) => (
             <EntityTag
               key={key}
@@ -459,7 +459,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
               disabled={!userCanEdit}
             />
           )}
-        </StyledFlexList>
+        </StyledValue>
 
         {/* Detail */}
         <StyledLabel>Detail / Notes</StyledLabel>

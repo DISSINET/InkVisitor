@@ -1,5 +1,6 @@
 import { r, RDatum, RTable, RValue } from "rethinkdb-ts";
 import { DbEnums } from "@shared/enums";
+import { DbSchema } from "./common";
 
 const entitiesIndexes: ((table: RTable) => any)[] = [
   // if the prop object is missing value/type/children attrs, this wont work! model should handle this
@@ -152,4 +153,16 @@ const materializedStatsIndexes: ((table: RTable) => any)[] = [
   (table: RTable) => table.indexCreate("date_eventType_aggregateBy", [r.row("date"), r.row("eventType"), r.row("aggregateBy")]),
 ];
 
-export { entitiesIndexes, auditsIndexes, relationsIndexes, materializedStatsIndexes };
+export const DbSchemaIndexes:{ [key in keyof DbSchema]: ((table: RTable) => any)[] } = {
+  entities: entitiesIndexes,
+  audits: auditsIndexes,
+  relations: relationsIndexes,
+  documents: [],
+  settings: [],
+  users: [],
+  aclPermissions: [],
+  statsMaterializedDay: materializedStatsIndexes,
+  statsMaterializedMonth: materializedStatsIndexes,
+  statsMaterializedWeek: materializedStatsIndexes,
+  statsMaterializedYear: materializedStatsIndexes,
+};

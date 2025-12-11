@@ -56,18 +56,16 @@ export const StyledSentenceEntity = styled.span`
 `;
 
 export const StyledLabel = styled.div`
-  display: grid;
+  display: flex;
+  justify-content: right;
   text-align: right;
   align-items: start;
   margin-top: 0.2rem;
+  white-space: pre-wrap;
   color: ${({ theme }) => theme.color["info"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
 `;
 export const StyledValue = styled.div`
-  display: grid;
-  align-items: center;
-`;
-export const StyledFlexList = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: ${({ theme }) => theme.space[2]};

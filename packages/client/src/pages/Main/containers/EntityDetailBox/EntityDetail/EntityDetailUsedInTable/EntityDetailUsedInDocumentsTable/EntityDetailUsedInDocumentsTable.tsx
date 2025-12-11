@@ -199,7 +199,7 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
           return document ? (
             <DocumentTitle
               title={document.title}
-              width={widthTooNarrow ? 60 : "full"}
+              width={widthTooNarrow ? 60 : 100}
             />
           ) : (
             <></>

@@ -10,14 +10,19 @@ export interface DbSchema {
   relations: TableSchema;
   documents: TableSchema;
   settings: TableSchema;
+  statsMaterializedDay: TableSchema;
+  statsMaterializedWeek: TableSchema;
+  statsMaterializedMonth: TableSchema;
+  statsMaterializedYear: TableSchema;
 }
-
 export interface TableSchema {
   tableName: RValue<string>;
-  data: any;
-  transform: () => void;
-  indexes?: ((table: RTable) => any)[];
+  data?: any;
+  transform?: () => void;
+  indexes?: IndexBuilder[];
 }
+
+export type IndexBuilder = (table: RTable) => any;
 
 export function parseArgs(): [datasetId: string, env: string] {
   const datasetId: string = process.argv[2];
@@ -26,7 +31,7 @@ export function parseArgs(): [datasetId: string, env: string] {
   return [datasetId, env];
 }
 
-const [datasetId, env] = parseArgs();
+const [env] = parseArgs();
 const envFile = `env/.env${env ? "." + env : ""}`;
 const envData = require("dotenv").config({ path: envFile }).parsed;
 

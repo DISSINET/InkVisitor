@@ -147,7 +147,9 @@ export class DbHelper {
    * @returns Promise<void>
    */
   async importData(table: TableSchema): Promise<void> {
-    table.transform();
+    if (table.transform) {
+      table.transform();
+    }
 
     if (!table.data || !Array.isArray(table.data)) {
       console.log(colors.yellow(`No data to import for table ${table.tableName}`));
@@ -247,7 +249,9 @@ export class DbHelper {
         // Apply transformations if needed
         if (table.transform && typeof table.transform === 'function') {
           const tempTable = { ...table, data: batch };
-          tempTable.transform();
+          if (tempTable.transform) {
+            tempTable.transform();
+          }
           batch.splice(0, batch.length, ...tempTable.data);
         }
         

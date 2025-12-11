@@ -328,27 +328,53 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
             </StyledRightsHeading>
 
             <ModalInputForm>
-              <ModalInputLabel>{"entity default language"}</ModalInputLabel>
+              <ModalInputLabel>default entity label language</ModalInputLabel>
               <ModalInputWrap width={165}>
-                <Dropdown.Single.Basic
-                  width="full"
-                  value={defaultLanguage}
-                  onChange={(newValue) =>
-                    handleChange("defaultLanguage", newValue)
-                  }
-                  options={languageDict}
-                />
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                  }}
+                >
+                  <Dropdown.Single.Basic
+                    width="full"
+                    value={defaultLanguage}
+                    onChange={(newValue) =>
+                      handleChange("defaultLanguage", newValue)
+                    }
+                    options={languageDict}
+                  />
+                  <IconWithTooltip
+                    color="success"
+                    icon={<FaQuestion />}
+                    tooltipLabel="Default language used for labeling entities."
+                  />
+                </div>
               </ModalInputWrap>
-              <ModalInputLabel>{"statement default language"}</ModalInputLabel>
+              <ModalInputLabel>default source language</ModalInputLabel>
               <ModalInputWrap width={165}>
-                <Dropdown.Single.Basic
-                  width="full"
-                  value={defaultStatementLanguage}
-                  onChange={(newValue) =>
-                    handleChange("defaultStatementLanguage", newValue)
-                  }
-                  options={languageDict}
-                />
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                  }}
+                >
+                  <Dropdown.Single.Basic
+                    width="full"
+                    value={defaultStatementLanguage}
+                    onChange={(newValue) =>
+                      handleChange("defaultStatementLanguage", newValue)
+                    }
+                    options={languageDict}
+                  />
+                  <IconWithTooltip
+                    color="success"
+                    icon={<FaQuestion />}
+                    tooltipLabel="Dominant language of the source texts being coded into statements"
+                  />
+                </div>
               </ModalInputWrap>
 
               {/* NOT USED NOW */}
