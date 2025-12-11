@@ -382,7 +382,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       const isOdd = Boolean(index % 2 === 0);
 
       const isSelected = rowsSelectedSet.has(index);
-      const isExpanded = false;
       const dataOffset = dataSourceOffset;
       const itemIndex = index - dataOffset;
 
@@ -455,8 +454,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
               onExpand={handleRowExpand}
               isSelected={isSelected}
               isLastClicked={rowLastClicked === index}
-              isExpanded={isExpanded}
-              invalidateActiveQuery={invalidateActiveQuery}
             />
           )}
         </div>

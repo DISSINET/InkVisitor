@@ -48,8 +48,6 @@ interface ExplorerTableRowProps {
 
   isSelected?: boolean;
   isLastClicked?: boolean;
-  isExpanded?: boolean;
-  invalidateActiveQuery?: () => void;
 }
 const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
   rowId,
@@ -62,8 +60,6 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
 
   isSelected = false,
   isLastClicked = false,
-  // isExpanded = false,
-  invalidateActiveQuery,
 }) => {
   const themeContext = useContext(ThemeContext);
   const handleCheckboxClick = React.useCallback(
@@ -86,9 +82,6 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
     }) => await api.entityUpdate(variables.entityId, variables.changes),
 
     onSuccess: () => {
-      // if (invalidateActiveQuery) {
-      //   invalidateActiveQuery();
-      // } else {
       // Clear the custom row cache store
       clearRowCache();
       // Invalidate React Query cache
@@ -98,7 +91,6 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
       queryClient.removeQueries({
         queryKey: ["query"],
       });
-      // }
     },
   });
 
@@ -358,7 +350,6 @@ function areRowsEqual(
   if (prevEntityId !== nextEntityId) return false;
   if (prev.isSelected !== next.isSelected) return false;
   if (prev.isLastClicked !== next.isLastClicked) return false;
-  if (prev.isExpanded !== next.isExpanded) return false;
   // Re-render when columns array identity changes (e.g., add/remove)
   if (prev.columns !== next.columns) return false;
   return true;

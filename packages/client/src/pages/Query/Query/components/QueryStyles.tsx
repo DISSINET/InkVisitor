@@ -12,6 +12,7 @@ export const StyledGraphNode = styled.div`
   border-radius: 25px;
   height: ${({ theme }) => theme.space[18]};
   padding: ${({ theme }) => theme.space[4] + " " + theme.space[8]};
+  padding-left: 0.8rem;
   font-weight: bold;
   display: flex;
   align-items: center;
