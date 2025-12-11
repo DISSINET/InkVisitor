@@ -1,8 +1,5 @@
-import { IResponseQuery } from "@shared/types";
 import { Query } from "@shared/types/query";
-import { useQueryClient } from "@tanstack/react-query";
 import React, { useMemo } from "react";
-import { useAppSelector } from "redux/hooks";
 import {
   INodeItem,
   QUERY_GRID_HEIGHT,
@@ -11,9 +8,9 @@ import {
 } from "../types";
 import { QueryGridEdge } from "./components/QueryGridEdge";
 import { QueryGridNode } from "./components/QueryGridNode";
+import { StyledQueryBox } from "./QueryBoxStyles";
 import { QueryAction } from "./state";
 import { getAllEdges, getAllNodes } from "./utils";
-import { StyledQueryBox } from "./QueryBoxStyles";
 
 interface QueryBoxProps {
   state: Query.INode;
