@@ -1,4 +1,4 @@
-import { EntityEnums, UserEnums } from "@shared/enums";
+import { EntityEnums, RelationEnums, UserEnums } from "@shared/enums";
 import {
   IAction,
   IConcept,
@@ -14,6 +14,7 @@ import {
 } from "@shared/types/warning";
 
 import { ActionEntity } from "@models/action/action";
+import Relation from "@models/relation/relation";
 import Classification from "@models/relation/classification";
 import { findEntityById, getEntitiesByIds } from "@service/shorthands";
 import treeCache from "@service/treeCache";
@@ -270,9 +271,21 @@ export class ResponseStatement extends Statement implements IResponseStatement {
               1,
               0
             );
+          const soeRels = await Relation.findForEntities(
+            req.db.connection,
+            [entity.id],
+            RelationEnums.Type.SuperordinateEntity,
+            0
+          );
+
           const classificationEs: IConcept[] = await getEntitiesByIds<IConcept>(
             req.db.connection,
             classificationRels.map((c) => c.entityIds[1])
+          );
+
+          const soeEs = await getEntitiesByIds<IEntity>(
+            req.db.connection,
+            soeRels.map((s) => s.entityIds[1])
           );
           const propValueEs = await getEntitiesByIds<IEntity>(
             req.db.connection,
@@ -281,6 +294,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
           const eWarnings = entity.getTBasedWarnings(
             territoryEs,
             classificationEs,
+            soeEs,
             propValueEs,
             settings
           );

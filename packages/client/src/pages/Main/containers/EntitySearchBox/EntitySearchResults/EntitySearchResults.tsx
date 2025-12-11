@@ -1,18 +1,18 @@
+import { useSpring } from "@react-spring/web";
+import { EntityEnums } from "@shared/enums";
 import { IResponseEntity } from "@shared/types";
+import { Button } from "components";
 import { EntityTag } from "components/advanced";
+import { useSearchParams } from "hooks";
 import React, { useMemo } from "react";
-import { config, useSpring } from "@react-spring/web";
-import { areEqual, FixedSizeList as List } from "react-window";
-import { scrollOverscanCount, springConfig } from "Theme/constants";
+import { FaEdit } from "react-icons/fa";
+import { List } from "react-window";
+import { scrollOverscanCount } from "Theme/constants";
 import { StyledResultItem } from "../EntitySearchBoxStyles";
 import {
   StyledResultsAnimatedWrap,
   StyledRow,
 } from "./EntitySearchResultsStyles";
-import { Button } from "components";
-import { FaEdit } from "react-icons/fa";
-import { useSearchParams } from "hooks";
-import { EntityEnums } from "@shared/enums";
 
 interface EntitySearchResults {
   results?: IResponseEntity[];
@@ -33,15 +33,12 @@ export const EntitySearchResults: React.FC<EntitySearchResults> = ({
       {results?.length && (
         <StyledResultsAnimatedWrap style={animatedHeight}>
           <List
-            height={height}
-            itemCount={results.length}
-            itemData={data}
-            itemSize={25}
-            width="100%"
+            rowProps={{ data }}
+            rowCount={results.length}
+            rowHeight={25}
             overscanCount={scrollOverscanCount}
-          >
-            {MemoizedRow}
-          </List>
+            rowComponent={(props) => <Row {...props} />}
+          />
         </StyledResultsAnimatedWrap>
       )}
     </>
@@ -81,5 +78,3 @@ const Row: React.FC<Row> = ({ data, index, style }) => {
     </StyledRow>
   );
 };
-
-export const MemoizedRow = React.memo(Row, areEqual);

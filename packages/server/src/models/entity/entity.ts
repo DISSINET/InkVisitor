@@ -5,6 +5,8 @@ import Prop from "@models/prop/prop";
 import User from "@models/user/user";
 import { findEntityById } from "@service/shorthands";
 
+import { AnchorsNode } from "@models/document/anchors";
+import { Setting } from "@models/setting/setting";
 import {
   DbEnums,
   EntityEnums,
@@ -35,8 +37,6 @@ import { IWarningPositionSection } from "@shared/types/warning";
 import { Connection, RDatum, WriteResult, r as rethink } from "rethinkdb-ts";
 import { IRequest } from "../../custom_typings/request";
 import Reference from "./reference";
-import { AnchorsNode } from "@models/document/anchors";
-import { Setting } from "@models/setting/setting";
 
 export default class Entity implements IEntity, IDbModel {
   static table = "entities";
@@ -348,7 +348,14 @@ export default class Entity implements IEntity, IDbModel {
       out = out.concat(Entity.extractIdsFromProps(prop.children, accepted, cb));
     }
 
-    return out;
+    // only unique values
+    const uniqueOut: Record<string, null> = {};
+    out.forEach((id) => {
+      if (id) {
+        uniqueOut[id] = null;
+      }
+    });
+    return Object.keys(uniqueOut);
   }
 
   static async findEntitiesByIds(
@@ -356,19 +363,30 @@ export default class Entity implements IEntity, IDbModel {
     ids: string[]
   ): Promise<IEntity[]> {
     if (ids.findIndex((id) => !id) !== -1) {
-      console.trace("Passed empty id to Entity.findEntitiesByIds");
+      console.trace("Passed empty id to Entity.findEntitiesByIds", ids);
     }
 
-    const data =
-      ids.length > 0
-        ? await rethink.table(Entity.table).getAll(rethink.args(ids)).run(con)
-        : [];
-    return data;
+    const data = await rethink
+      .table(Entity.table)
+      .getAll(rethink.args(ids.filter((id) => id)))
+      .run(con);
+
+    // sort data by ids
+    const sortedData: IEntity[] = [];
+    ids.forEach((id) => {
+      const entity = data.find((e: IEntity) => e.id === id);
+      if (entity) {
+        sortedData.push(entity);
+      }
+    });
+
+    return sortedData;
   }
 
   getTBasedWarnings(
     territoryEs: ITerritory[],
     classificationEs: IConcept[],
+    soeEs: IEntity[],
     propValueEs: IEntity[],
     settings: Setting[]
   ): IWarning[] {
@@ -407,6 +425,7 @@ export default class Entity implements IEntity, IDbModel {
       const {
         entityClasses,
         entityClassifications,
+        entitySOEs,
         entityLanguages,
         entityStatuses,
         tieType,
@@ -432,7 +451,16 @@ export default class Entity implements IEntity, IDbModel {
       const statusCheck =
         !entityStatuses?.length || entityStatuses.includes(this.status);
 
-      if (entityCheck && classificationCheck && languageCheck && statusCheck) {
+      const soeCheck =
+        !entitySOEs?.length || soeEs.some((e) => entitySOEs.includes(e.id));
+
+      if (
+        entityCheck &&
+        classificationCheck &&
+        languageCheck &&
+        statusCheck &&
+        soeCheck
+      ) {
         // CLASSIFICATION TIE
         if (tieType === EProtocolTieType.Classification) {
           if (!allowedEntities || !allowedEntities.length) {

@@ -33,6 +33,7 @@ import { heightHeader } from "Theme/constants";
 import GlobalStyle from "Theme/global";
 import theme from "Theme/theme";
 import { darkTheme } from "Theme/theme-dark";
+import { QueryPage } from "pages";
 
 const clockPerformance = (
   profilerId: any,
@@ -194,6 +195,14 @@ export const App: React.FC = () => {
                       element={
                         <RequireAuth>
                           <DocumentsPage />
+                        </RequireAuth>
+                      }
+                    />
+                    <Route
+                      path="/query"
+                      element={
+                        <RequireAuth>
+                          <QueryPage />
                         </RequireAuth>
                       }
                     />

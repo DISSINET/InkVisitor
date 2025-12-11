@@ -41,8 +41,8 @@ import { IResponsePermission } from "./response-permission";
 import {
   ClassificationOrder,
   EntityOrder,
-  IdentificationOrder,
   IResponseStatement,
+  IdentificationOrder,
   PropOrder,
 } from "./response-statement";
 import { IResponseTerritory } from "./response-territory";
@@ -67,13 +67,16 @@ import {
   IUserRight,
 } from "./user";
 
+import { Query } from "./query";
+import { IRequestActivationData } from "./request-activation";
 import {
   IRequestPasswordReset,
   IRequestPasswordResetData,
 } from "./request-password-reset";
+import { IRequestQuery } from "./request-query";
+import { IResponseQuery, IResponseQueryEntity } from "./response-query";
 
-import { IRequestActivationData } from "./request-activation";
-
+export { Query, Relation, RequestPermissionUpdate, RequestSearch };
 export type {
   ClassificationOrder,
   EntityOrder,
@@ -85,7 +88,6 @@ export type {
   IBeingData,
   IBookmarkFolder,
   IConcept,
-  IdentificationOrder,
   IDocument,
   IDocumentMeta,
   IEntity,
@@ -107,6 +109,7 @@ export type {
   IRequestActivationData,
   IRequestPasswordReset,
   IRequestPasswordResetData,
+  IRequestQuery,
   IRequestStats,
   IResource,
   IResourceData,
@@ -116,6 +119,8 @@ export type {
   IResponseEntity,
   IResponseGeneric,
   IResponsePermission,
+  IResponseQuery,
+  IResponseQueryEntity,
   IResponseStatement,
   IResponseStats,
   IResponseStoredTerritory,
@@ -140,7 +145,6 @@ export type {
   IValueData,
   IWarning,
   IWarningPosition,
+  IdentificationOrder,
   PropOrder,
 };
-
-export { Relation, RequestPermissionUpdate, RequestSearch };

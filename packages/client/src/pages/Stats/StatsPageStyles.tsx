@@ -28,6 +28,7 @@ export const StyledFieldGroup = styled.div`
   align-items: end;
   justify-content: center;
   gap: 5rem;
+  position: relative;
 
   @media (max-width: 1200px) {
     gap: 4rem;

@@ -3,7 +3,6 @@ import Relation from "./relation";
 import { Relation as RelationTypes } from "@shared/types";
 import { Connection } from "rethinkdb-ts";
 import Superclass from "./superclass";
-import { ModelNotValidError } from "@shared/types/errors";
 
 export default class ActionEventEquivalent
   extends Relation

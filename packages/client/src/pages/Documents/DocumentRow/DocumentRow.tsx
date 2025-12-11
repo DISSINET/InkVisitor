@@ -7,8 +7,9 @@ import {
 } from "@tanstack/react-query";
 import api from "api";
 import { AxiosResponse } from "axios";
-import { Button, ButtonGroup, Input, Tooltip } from "components";
+import { Button, ButtonGroup, Input } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
+import { useResizeObserver, useTheme } from "hooks";
 import React, {
   Dispatch,
   SetStateAction,
@@ -18,6 +19,7 @@ import React, {
 } from "react";
 import { FaSave, FaTrash } from "react-icons/fa";
 import { RiFileEditFill } from "react-icons/ri";
+import { EntityColors } from "types";
 import {
   StyledCount,
   StyledCountTag,
@@ -25,9 +27,6 @@ import {
   StyledTitle,
   StyledTitleWrap,
 } from "../DocumentsPageStyles";
-import theme from "Theme/theme";
-import { EntityColors } from "types";
-import { useResizeObserver } from "hooks";
 
 interface DocumentRow {
   document: IDocument;
@@ -59,15 +58,14 @@ export const DocumentRow: React.FC<DocumentRow> = ({
   setEditMode,
   cancelEditMode,
 }) => {
+  const theme = useTheme();
   const [localTitle, setLocalTitle] = useState<string>("");
 
   const countTotal = useMemo(() => {
     let total = 0;
     Object.keys(document.entityIds).forEach((key) => {
       const classEntities =
-        document.entityIds[
-          key as keyof typeof document.entityIds
-        ];
+        document.entityIds[key as keyof typeof document.entityIds];
 
       const classNo =
         classEntities && Array.isArray(classEntities)
@@ -164,6 +162,7 @@ export const DocumentRow: React.FC<DocumentRow> = ({
               onClick: () => removeResourceMutation.mutate(resource.id),
             }}
             fullWidth
+            disableDoubleClick
           />
         ) : (
           <EntitySuggester

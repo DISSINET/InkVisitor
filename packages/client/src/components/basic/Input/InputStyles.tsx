@@ -79,8 +79,10 @@ export const StyledInput = styled.input<IValueStyle>`
   resize: none;
 
   &:hover {
-    border-color: ${({ theme }) => theme.color["info"]};
-    border-width: ${({ theme }) => theme.borderWidth[1]};
+    border-color: ${({ theme, disabled }) =>
+      !disabled ? theme.color["info"] : ""};
+    border-width: ${({ theme, disabled }) =>
+      !disabled ? theme.borderWidth[1] : ""};
   }
   &:focus {
     outline: 0;
@@ -146,6 +148,7 @@ export const StyledTextArea = styled.textarea<StyledTextArea>`
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "default")};
   resize: none;
   line-height: 1.2;
+
   &:focus {
     outline: 0;
     border-color: ${({ theme }) => theme.color["success"]};
@@ -153,7 +156,8 @@ export const StyledTextArea = styled.textarea<StyledTextArea>`
       $noBorder ? 0 : theme.borderWidth[1]};
   }
   &:hover {
-    border-color: ${({ theme }) => theme.color["info"]};
+    border-color: ${({ theme, disabled }) =>
+      !disabled ? theme.color["info"] : ""};
   }
 `;
 
@@ -161,8 +165,12 @@ interface StyledClearableInputButton {}
 export const StyledClearableInputButton = styled.div<StyledClearableInputButton>`
   position: absolute;
   right: 0.25rem;
-  top: 4px;
+  display: flex;
+  cursor: pointer;
+  top: 50%;
+  transform: translateY(-50%);
   svg {
-    color: ${({ theme }) => theme.color["danger"]};
+    color: ${({ theme }) => theme.color["gray"][500]};
+    opacity: 0.7;
   }
 `;

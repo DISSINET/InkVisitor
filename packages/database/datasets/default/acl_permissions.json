@@ -270,6 +270,11 @@
     "roles": ["*"]
   },
   {
+    "controller": "users",
+    "route": "query",
+    "method": "POST"
+  },
+  {
     "controller":"documents",
     "route": ":documentId/removeAnchors",
     "method": "PATCH",

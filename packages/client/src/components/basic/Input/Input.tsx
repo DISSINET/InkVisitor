@@ -1,4 +1,4 @@
-import { ThemeColor, ThemeFontSize } from "Theme/theme";
+import theme, { ThemeColor, ThemeFontSize } from "Theme/theme";
 import React, { useEffect, useState } from "react";
 import { MdCancel } from "react-icons/md";
 import {
@@ -111,6 +111,9 @@ export const Input: React.FC<Input> = ({
             className="value"
             placeholder={placeholder}
             value={displayValue}
+            onClick={(e: React.MouseEvent<HTMLInputElement>) =>
+              e.stopPropagation()
+            }
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               setDisplayValue(e.currentTarget.value);
               if (changeOnType) {
@@ -152,7 +155,7 @@ export const Input: React.FC<Input> = ({
           {displayValue.length > 0 && clearable && (
             <StyledClearableInputButton>
               <MdCancel
-                size={16}
+                size={15}
                 onClick={() => {
                   setDisplayValue("");
                   onChangeFn("");
@@ -173,15 +176,13 @@ export const Input: React.FC<Input> = ({
           rows={rows}
           cols={cols}
           width={width}
-          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+          onChange={(e) => {
             setDisplayValue(e.target.value);
             if (changeOnType) {
               onChangeFn(e.currentTarget.value);
             }
           }}
-          onFocus={(event: React.FocusEvent<HTMLTextAreaElement>) =>
-            onFocus(event)
-          }
+          onFocus={(e) => onFocus(e)}
           onBlur={() => {
             if (displayValue !== value && !changeOnType) {
               onChangeFn(displayValue);

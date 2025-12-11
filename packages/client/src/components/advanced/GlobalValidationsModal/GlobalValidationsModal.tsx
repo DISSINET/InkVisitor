@@ -24,7 +24,7 @@ import {
   Submit,
 } from "components";
 import { ValidationRule } from "components/advanced";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { rootTerritoryId } from "Theme/constants";
@@ -52,6 +52,7 @@ const initValidation: ITerritoryValidation = {
   entityClassifications: [],
   entityLanguages: [],
   entityStatuses: [],
+  entitySOEs: [],
   allowedEntities: [],
   allowedClasses: [],
   propType: [],
@@ -100,6 +101,9 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
 
   const queryClient = useQueryClient();
 
+  const modalContentRef = useRef<HTMLDivElement>(null);
+  const prevValidationsLengthRef = useRef<number>(0);
+
   const updateEntityMutation = useMutation({
     mutationFn: async (changes: Partial<IEntity>) =>
       await api.entityUpdate(rootTerritoryId, changes),
@@ -108,6 +112,29 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
       queryClient.invalidateQueries({ queryKey: ["entity"] });
     },
   });
+
+  // Scroll to bottom when a new validation is added
+  useEffect(() => {
+    const currentLength = validations?.length || 0;
+    if (currentLength > prevValidationsLengthRef.current) {
+      // Find the scrollable container by traversing up the DOM tree
+      let element = modalContentRef.current?.parentElement;
+      while (element) {
+        const style = window.getComputedStyle(element);
+        if (style.overflow === "auto" || style.overflowY === "auto") {
+          setTimeout(() => {
+            element?.scrollTo({
+              top: element.scrollHeight,
+              behavior: "smooth",
+            });
+          }, 100);
+          break;
+        }
+        element = element.parentElement;
+      }
+    }
+    prevValidationsLengthRef.current = currentLength;
+  }, [validations?.length]);
 
   const updateSettingsMutation = useMutation({
     mutationFn: async (newSettings: Omit<ISetting, "public">[]) =>
@@ -125,14 +152,15 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
     false
   );
 
-  console.log("settings", settings);
-
   const initValidationRule = () => {
+    if (!rootTerritory) {
+      return;
+    }
+
+    const currentValidations = rootTerritory.data.validations || [];
     updateEntityMutation.mutate({
       data: {
-        validations: validations
-          ? [...validations, initValidation]
-          : [initValidation],
+        validations: [...currentValidations, initValidation],
       },
     });
   };
@@ -199,101 +227,103 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
           onClose={() => setShowGlobalValidations(false)}
         />
         <ModalContent column enableScroll>
-          <StyledGridForm>
-            <StyledGridSectionHeading>
-              Valency validations
-            </StyledGridSectionHeading>
-            <div />
-            {valencyKeys.map((val, key) => (
-              <GlobalValidationsSettingsRow
-                key={key}
-                validation={val}
-                active={settingsKeyVal(val)}
-                toggleRule={() => toggleRule(val)}
-              />
-            ))}
+          <div ref={modalContentRef}>
+            <StyledGridForm>
+              <StyledGridSectionHeading>
+                Valency validations
+              </StyledGridSectionHeading>
+              <div />
+              {valencyKeys.map((val, key) => (
+                <GlobalValidationsSettingsRow
+                  key={key}
+                  validation={val}
+                  active={settingsKeyVal(val)}
+                  toggleRule={() => toggleRule(val)}
+                />
+              ))}
 
-            <StyledGridSectionHeading>
-              Entity validations
-            </StyledGridSectionHeading>
-            <div />
-            {entityKeys.map((val, key) => (
-              <GlobalValidationsSettingsRow
-                key={key}
-                validation={val}
-                active={settingsKeyVal(val)}
-                toggleRule={() => toggleRule(val)}
-              />
-            ))}
+              <StyledGridSectionHeading>
+                Entity validations
+              </StyledGridSectionHeading>
+              <div />
+              {entityKeys.map((val, key) => (
+                <GlobalValidationsSettingsRow
+                  key={key}
+                  validation={val}
+                  active={settingsKeyVal(val)}
+                  toggleRule={() => toggleRule(val)}
+                />
+              ))}
 
-            <StyledGridSectionHeading>
-              Territory validations
-            </StyledGridSectionHeading>
-            <div />
-            {territoryKeys.map((val, key) => (
-              <GlobalValidationsSettingsRow
-                key={key}
-                validation={val}
-                active={settingsKeyVal(val)}
-                toggleRule={() => toggleRule(val)}
-              />
-            ))}
-          </StyledGridForm>
+              <StyledGridSectionHeading>
+                Territory validations
+              </StyledGridSectionHeading>
+              <div />
+              {territoryKeys.map((val, key) => (
+                <GlobalValidationsSettingsRow
+                  key={key}
+                  validation={val}
+                  active={settingsKeyVal(val)}
+                  toggleRule={() => toggleRule(val)}
+                />
+              ))}
+            </StyledGridForm>
 
-          {rootTerritory && (
-            <>
-              <StyledSectionHeader>
-                <b>Root T validation</b>
-                <StyledValidationCount>{`${validations?.length} Root T validations`}</StyledValidationCount>
-                <span>
+            {rootTerritory && (
+              <>
+                <StyledSectionHeader>
+                  <b>Root T validation</b>
+                  <StyledValidationCount>{`${validations?.length} Root T validations`}</StyledValidationCount>
+                  <span>
+                    <Button
+                      icon={<FaPlus />}
+                      label="new validation rule"
+                      color="primary"
+                      onClick={initValidationRule}
+                    />
+                  </span>
+                </StyledSectionHeader>
+                <StyledValidationList>
+                  {(validations as ITerritoryValidation[])?.map(
+                    (validation, key) => {
+                      return (
+                        <React.Fragment key={key}>
+                          <ValidationRule
+                            key={key}
+                            validation={validation}
+                            entities={rootTerritory.entities}
+                            updateValidationRule={(
+                              changes: Partial<ITerritoryValidation>
+                            ) => {
+                              handleUpdateValidation(key, changes);
+                            }}
+                            removeValidationRule={() => {
+                              setTempIndexToRemove(key);
+                            }}
+                            isInsideTemplate={false}
+                            userCanEdit
+                          />
+                          {key !== validations.length - 1 && (
+                            <StyledBlockSeparator />
+                          )}
+                        </React.Fragment>
+                      );
+                    }
+                  )}
+                </StyledValidationList>
+                <div style={{ marginTop: "2rem" }}>
                   <Button
                     icon={<FaPlus />}
                     label="new validation rule"
                     color="primary"
                     onClick={initValidationRule}
                   />
-                </span>
-              </StyledSectionHeader>
-              <StyledValidationList>
-                {(validations as ITerritoryValidation[])?.map(
-                  (validation, key) => {
-                    return (
-                      <React.Fragment key={key}>
-                        <ValidationRule
-                          key={key}
-                          validation={validation}
-                          entities={rootTerritory.entities}
-                          updateValidationRule={(
-                            changes: Partial<ITerritoryValidation>
-                          ) => {
-                            handleUpdateValidation(key, changes);
-                          }}
-                          removeValidationRule={() => {
-                            setTempIndexToRemove(key);
-                          }}
-                          isInsideTemplate={false}
-                          userCanEdit
-                        />
-                        {key !== validations.length - 1 && (
-                          <StyledBlockSeparator />
-                        )}
-                      </React.Fragment>
-                    );
-                  }
-                )}
-              </StyledValidationList>
-              <div style={{ marginTop: "2rem" }}>
-                <Button
-                  icon={<FaPlus />}
-                  label="new validation rule"
-                  color="primary"
-                  onClick={initValidationRule}
-                />
-              </div>
-            </>
-          )}
+                </div>
+              </>
+            )}
 
-          <Loader show={isFetching || updateEntityMutation.isPending} />
+            <Loader show={isFetching || updateEntityMutation.isPending} />
+          </div>
         </ModalContent>
         <ModalFooter>
           <ButtonGroup>

@@ -112,7 +112,10 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
         ref={setReferenceElement}
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
-        onClick={() => setShowTooltip(false)}
+        onClick={(e) => {
+          e.stopPropagation();
+          setShowTooltip(false);
+        }}
       >
         <StyledSelect
           // menuIsOpen={loggerId === ""}
@@ -123,6 +126,9 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
           isMulti={isMulti}
           isDisabled={disabled || isOneOptionSingleEntitySelect}
           isOneOptionSingleEntitySelect={isOneOptionSingleEntitySelect}
+          isOptionDisabled={(option) =>
+            (option as DropdownItem).isDisabled ? true : false
+          }
           attributeDropdown={attributeDropdown}
           entityDropdown={entityDropdown}
           wildCardChar={
@@ -156,6 +162,7 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
           }}
           menuPortalTarget={document.getElementById("page")!}
           menuPosition="absolute"
+          menuPlacement="auto"
           onChange={(selected: unknown, event: ActionMeta<unknown>) => {
             const selectedOptions: DropdownItem[] = Array.isArray(selected)
               ? selected

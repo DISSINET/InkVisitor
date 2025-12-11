@@ -1,33 +1,33 @@
 import { RelationEnums } from "@shared/enums";
 import { IResponseDetail, IResponseGeneric, Relation } from "@shared/types";
-import { AxiosResponse } from "axios";
-import React, { useEffect, useState } from "react";
 import { UseMutationResult } from "@tanstack/react-query";
+import { AxiosResponse } from "axios";
+import { StyledEditorEmptyState } from "pages/Main/containers/StatementEditorBox/StatementEditorBoxStyles";
+import React, { useMemo } from "react";
+import { BsInfoCircle } from "react-icons/bs";
 import { getEntityRelationRules } from "utils/utils";
 import { EntityDetailInverseRelations } from "./EntityDetailInverseRelations/EntityDetailInverseRelations";
 import { StyledRelationsGrid } from "./EntityDetailRelationsStyles";
 import { EntityDetailRelationTypeBlock } from "./EntityDetailRelationTypeBlock/EntityDetailRelationTypeBlock";
-import { StyledEditorEmptyState } from "pages/Main/containers/StatementEditorBox/StatementEditorBoxStyles";
-import { BsInfoCircle } from "react-icons/bs";
 
 interface EntityDetailRelations {
   entity: IResponseDetail;
-  relationCreateMutation: UseMutationResult<
+  relationCreateMutation?: UseMutationResult<
     AxiosResponse<IResponseGeneric>,
     unknown,
     Relation.IRelation,
     unknown
   >;
-  relationUpdateMutation: UseMutationResult<
+  relationUpdateMutation?: UseMutationResult<
     AxiosResponse<IResponseGeneric>,
     unknown,
     {
       relationId: string;
-      changes: Partial<Relation.IRelation>;
+      changes: Partial<Relation.IRelation | Relation.IIdentification>;
     },
     unknown
   >;
-  relationDeleteMutation: UseMutationResult<
+  relationDeleteMutation?: UseMutationResult<
     AxiosResponse<IResponseGeneric>,
     unknown,
     string,
@@ -43,17 +43,12 @@ export const EntityDetailRelations: React.FC<EntityDetailRelations> = ({
   relationDeleteMutation,
   userCanEdit,
 }) => {
-  const [filteredRelationTypes, setFilteredRelationTypes] = useState<
-    RelationEnums.Type[]
-  >([]);
-
-  useEffect(() => {
-    const filteredTypes = getEntityRelationRules(
+  const relationTypes = useMemo<RelationEnums.Type[]>(() => {
+    return getEntityRelationRules(
       entity.class,
       RelationEnums.EntityDetailTypes,
       entity.isTemplate
     );
-    setFilteredRelationTypes(filteredTypes);
   }, [entity]);
 
   const { relations, entities } = entity;
@@ -61,7 +56,7 @@ export const EntityDetailRelations: React.FC<EntityDetailRelations> = ({
   return (
     <>
       <StyledRelationsGrid>
-        {filteredRelationTypes.length === 0 && (
+        {relationTypes.length === 0 && (
           <>
             <StyledEditorEmptyState>
               <BsInfoCircle size="20" style={{ marginRight: "5px" }} />
@@ -69,7 +64,7 @@ export const EntityDetailRelations: React.FC<EntityDetailRelations> = ({
             </StyledEditorEmptyState>
           </>
         )}
-        {filteredRelationTypes.map((relationType, key) => {
+        {relationTypes.map((relationType, key) => {
           const selectedRelations = relations[relationType]?.connections;
 
           return (

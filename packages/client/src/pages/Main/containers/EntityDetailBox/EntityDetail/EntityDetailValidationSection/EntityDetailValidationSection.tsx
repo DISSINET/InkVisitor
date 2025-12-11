@@ -2,15 +2,15 @@ import { EntityEnums } from "@shared/enums";
 import { IEntity, IResponseDetail, IResponseGeneric } from "@shared/types";
 import {
   EProtocolTieType,
-  ITerritory,
   ITerritoryValidation,
 } from "@shared/types/territory";
 import { UseMutationResult } from "@tanstack/react-query";
 import api from "api";
 import { AxiosResponse } from "axios";
 import { Button, Submit } from "components";
+import { ValidationRule } from "components/advanced";
 import React, { useState } from "react";
-import { FaChevronCircleDown, FaChevronCircleUp, FaPlus } from "react-icons/fa";
+import { FaChevronCircleRight, FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { deepCopy } from "utils/utils";
 import { EntityDetailSectionButtons } from "../EntityDetailSectionButtons/EntityDetailSectionButtons";
@@ -20,12 +20,12 @@ import {
   StyledExpandIcon,
   StyledValidationList,
 } from "../EntityDetailStyles";
-import { ValidationRule } from "components/advanced";
 
 const initValidation: ITerritoryValidation = {
   detail: "",
   entityClasses: [],
   entityClassifications: [],
+  entitySOEs: [],
   entityLanguages: [],
   entityStatuses: [],
   allowedEntities: [],
@@ -44,8 +44,8 @@ interface EntityDetailValidationSection {
     unknown
   >;
   userCanEdit: boolean;
-  isInsideTemplate: boolean;
-  territoryParentId: string | undefined;
+  isInsideTemplate?: boolean;
+  territoryParentId?: string | undefined;
   entity: IResponseDetail;
   setLoadingValidations: React.Dispatch<React.SetStateAction<boolean>>;
   widthTooNarrow: boolean;
@@ -59,7 +59,7 @@ export const EntityDetailValidationSection: React.FC<
   entities,
   updateEntityMutation,
   userCanEdit,
-  isInsideTemplate,
+  isInsideTemplate = false,
   territoryParentId,
   entity,
   setLoadingValidations,
@@ -85,7 +85,7 @@ export const EntityDetailValidationSection: React.FC<
   };
 
   const removeValidationRule = (indexToRemove: number) => {
-    updateEntityMutation.mutate({
+    updateEntityMutation?.mutate({
       data: {
         validations: validations?.filter((_, index) => index !== indexToRemove),
       },
@@ -107,7 +107,8 @@ export const EntityDetailValidationSection: React.FC<
       updatedObject,
       ...validationsCopy.slice(key + 1),
     ];
-    updateEntityMutation.mutate({
+    console.log("changes", changes, newValidation);
+    updateEntityMutation?.mutate({
       data: {
         validations: newValidation,
       },
@@ -119,16 +120,19 @@ export const EntityDetailValidationSection: React.FC<
   return (
     <>
       <StyledDetailSectionHeader>
-        Validation rules
         <StyledExpandIcon
           onClick={() => setIsValidationExpanded(!isValidationExpanded)}
         >
-          {isValidationExpanded ? (
-            <FaChevronCircleUp size={16} />
-          ) : (
-            <FaChevronCircleDown size={16} />
-          )}
+          <FaChevronCircleRight
+            size={16}
+            style={{
+              transition: "transform 0.2s ease",
+              cursor: "pointer",
+              transform: `rotate(${isValidationExpanded ? "90deg" : "0deg"})`,
+            }}
+          />
         </StyledExpandIcon>
+        Validation rules ({validations?.length ?? 0})
         {userCanEdit && isValidationExpanded && (
           <span style={{ marginLeft: "1rem", marginRight: "1rem" }}>
             <Button

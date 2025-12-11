@@ -4,6 +4,9 @@ import styled from "styled-components";
 export const StyledScrollbar = styled(Scrollbar)`
   .ScrollbarsCustom-Wrapper {
     .ScrollbarsCustom-Scroller {
+      .ScrollbarsCustom-Content {
+        padding-right: 0.1rem !important;
+      }
     }
   }
   .ScrollbarsCustom-Track {

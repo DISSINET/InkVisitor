@@ -1,5 +1,10 @@
 import { classesAll } from "@shared/dictionaries/entity";
-import { EntityEnums, RelationEnums, WarningTypeEnums } from "@shared/enums";
+import {
+  EntityEnums,
+  RelationEnums,
+  UserEnums,
+  WarningTypeEnums,
+} from "@shared/enums";
 import {
   EntityTooltip,
   IEntity,
@@ -14,6 +19,9 @@ import {
 import { IAnchorsNode } from "@shared/types/document";
 import React from "react";
 import { DropTargetMonitor, XYCoord } from "react-dnd";
+import { FaUserEdit } from "react-icons/fa";
+
+import { FaUserGear, FaUserTag, FaUserTie } from "react-icons/fa6";
 import { DragItem, EntityDragItem } from "types";
 
 // is used to render italic for S, could be handled other way when first label "" is obligatory
@@ -337,6 +345,21 @@ export const normalizeURL = (url: string) => {
 
 export const floorNumberToOneDecimal = (numberToFloor: number) => {
   return Math.floor(numberToFloor * 10) / 10;
+};
+
+export const getUserIcon = (
+  userRole: UserEnums.Role,
+  // size can be determined in parent component font-size instead
+  size?: number
+): React.ReactNode => {
+  if (userRole === UserEnums.Role.Owner) {
+    return <FaUserGear size={size} />;
+  } else if (userRole === UserEnums.Role.Admin) {
+    return <FaUserTie size={size} />;
+  } else if (userRole === UserEnums.Role.Editor) {
+    return <FaUserEdit size={size} />;
+  }
+  return <FaUserTag size={size} />;
 };
 
 export const isWarningTBased = (warning: IWarning) => {

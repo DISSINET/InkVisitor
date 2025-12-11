@@ -13,7 +13,6 @@ import {
   isFirstLabelEmpty,
   isValidEntityClass,
 } from "utils/utils";
-import { StyledEntityTagWrap } from "./EntityTagStyles";
 
 interface UnlinkButton {
   onClick: () => void;
@@ -45,7 +44,7 @@ interface EntityTag {
   customTooltipAttributes?: { partLabel?: string; childCount?: number };
 }
 
-export const EntityTag: React.FC<EntityTag> = ({
+const EntityTagComponent: React.FC<EntityTag> = ({
   entity,
   parentId,
   showOnly,
@@ -69,13 +68,27 @@ export const EntityTag: React.FC<EntityTag> = ({
   unlinkButton,
   customTooltipAttributes,
 }) => {
-  const draggedEntity: DraggedEntityReduxItem = useAppSelector(
-    (state) => state.draggedEntity
-  );
+  // Select a minimal boolean to avoid frequent re-renders on large objects
+  const isDragging: boolean = useAppSelector((state) => {
+    const anyState = state as unknown as {
+      draggedEntity?: DraggedEntityReduxItem;
+    };
+    return Boolean(
+      anyState.draggedEntity && Object.keys(anyState.draggedEntity).length
+    );
+  });
   const [buttonHovered, setButtonHovered] = useState(false);
   const [elvlHovered, setElvlHovered] = useState(false);
   const [tagHovered, setTagHovered] = useState(false);
   const referenceEl = useRef<HTMLDivElement | null>(null);
+  const wrapperStyle = React.useMemo<React.CSSProperties>(() => {
+    return {
+      display: "inline-flex",
+      overflow: "hidden",
+      marginRight: flexListMargin ? "0.5rem" : undefined,
+      marginBottom: flexListMargin ? "0.5rem" : undefined,
+    };
+  }, [flexListMargin]);
 
   const handleTagHovered = useCallback(() => {
     setTagHovered(true);
@@ -136,85 +149,105 @@ export const EntityTag: React.FC<EntityTag> = ({
   }
 
   return (
-    <>
-      <StyledEntityTagWrap
-        $flexListMargin={flexListMargin}
-        ref={referenceEl}
-        onMouseEnter={handleTagHovered}
-        onMouseLeave={handleTagUnhovered}
-      >
-        {tagHovered && !disableTooltip && (
-          <EntityTooltip
-            entityId={entity.id}
-            entityClass={entity.class}
-            label={(entity.labels && entity.labels[0]) || <i>{"no label"}</i>}
-            alternativeLabels={
-              entity.labels && entity.labels.length > 1
-                ? entity.labels.slice(1)
-                : undefined
-            }
-            language={entity.language}
-            detail={entity.detail}
-            text={
-              entity.class === EntityEnums.Class.Statement
-                ? entity.data.text
-                : undefined
-            }
-            isTemplate={entity.isTemplate}
-            partOfSpeech={entity.data.pos}
-            itemsCount={statementsCount}
-            position={tooltipPosition}
-            disabled={
-              (button !== null && (buttonHovered || elvlHovered)) ||
-              Object.keys(draggedEntity).length !== 0
-            }
-            tagHovered={tagHovered}
-            referenceElement={referenceEl.current}
-            customTooltipAttributes={customTooltipAttributes}
-          />
-        )}
-        <Tag
-          propId={entity.id}
-          label={getEntityLabel(entity)}
-          labelItalic={isFirstLabelEmpty(entity.labels)}
-          status={entity.status}
-          ltype={entity?.data?.logicalType ?? EntityEnums.LogicalType.Definite}
+    <div
+      style={wrapperStyle}
+      ref={referenceEl}
+      onMouseEnter={handleTagHovered}
+      onMouseLeave={handleTagUnhovered}
+    >
+      {tagHovered && !disableTooltip && (
+        <EntityTooltip
+          entityId={entity.id}
+          entityClass={entity.class}
+          label={(entity.labels && entity.labels[0]) || <i>{"no label"}</i>}
+          alternativeLabels={
+            entity.labels && entity.labels.length > 1
+              ? entity.labels.slice(1)
+              : undefined
+          }
+          language={entity.language}
+          detail={entity.detail}
+          text={
+            entity.class === EntityEnums.Class.Statement
+              ? entity.data.text
+              : undefined
+          }
           isTemplate={entity.isTemplate}
-          isDiscouraged={entity.status === EntityEnums.Status.Discouraged}
-          entity={entity}
-          showOnly={showOnly}
-          button={
-            button ? button : unlinkButton && renderUnlinkButton(unlinkButton)
+          partOfSpeech={entity.data.pos}
+          itemsCount={statementsCount}
+          position={tooltipPosition}
+          disabled={
+            (button !== null && (buttonHovered || elvlHovered)) || isDragging
           }
-          moveFn={moveFn}
-          entityClass={classId}
-          borderStyle="solid"
-          invertedLabel={isSelected}
-          index={index}
-          disableDoubleClick={disableDoubleClick}
-          disableDrag={disableDrag}
-          updateOrderFn={updateOrderFn}
-          parentId={parentId}
-          lvl={lvl}
-          fullWidth={fullWidth}
-          isFavorited={isFavorited}
-          onButtonOver={handleButtonHovered}
-          onButtonOut={handleButtonUnhovered}
-          onBtnClick={handleBtnClick}
-          elvlButtonGroup={
-            elvlButtonGroup ? (
-              <div
-                onMouseOver={() => setElvlHovered(true)}
-                onMouseOut={() => setElvlHovered(false)}
-              >
-                {elvlButtonGroup}
-              </div>
-            ) : (
-              false
-            )
-          }
+          tagHovered={tagHovered}
+          referenceElement={referenceEl.current}
+          customTooltipAttributes={customTooltipAttributes}
         />
-      </StyledEntityTagWrap>
-    </>
+      )}
+      <Tag
+        propId={entity.id}
+        label={getEntityLabel(entity)}
+        labelItalic={isFirstLabelEmpty(entity.labels)}
+        status={entity.status}
+        ltype={entity?.data?.logicalType ?? EntityEnums.LogicalType.Definite}
+        isTemplate={entity.isTemplate}
+        isDiscouraged={entity.status === EntityEnums.Status.Discouraged}
+        entity={entity}
+        showOnly={showOnly}
+        button={
+          button ? button : unlinkButton && renderUnlinkButton(unlinkButton)
+        }
+        moveFn={moveFn}
+        entityClass={classId}
+        borderStyle="solid"
+        invertedLabel={isSelected}
+        index={index}
+        disableDoubleClick={disableDoubleClick}
+        disableDrag={disableDrag}
+        updateOrderFn={updateOrderFn}
+        parentId={parentId}
+        lvl={lvl}
+        fullWidth={fullWidth}
+        isFavorited={isFavorited}
+        onButtonOver={handleButtonHovered}
+        onButtonOut={handleButtonUnhovered}
+        onBtnClick={handleBtnClick}
+        elvlButtonGroup={
+          elvlButtonGroup ? (
+            <div
+              onMouseOver={() => setElvlHovered(true)}
+              onMouseOut={() => setElvlHovered(false)}
+            >
+              {elvlButtonGroup}
+            </div>
+          ) : (
+            false
+          )
+        }
+      />
+    </div>
   );
 };
+
+function areEntityTagsEqual(
+  prev: Readonly<React.ComponentProps<typeof EntityTagComponent>>,
+  next: Readonly<React.ComponentProps<typeof EntityTagComponent>>
+) {
+  // Compare minimal fields that affect rendering
+  if (prev.isSelected !== next.isSelected) return false;
+  if (prev.showOnly !== next.showOnly) return false;
+  if (prev.fullWidth !== next.fullWidth) return false;
+  if (prev.disableTooltip !== next.disableTooltip) return false;
+  if (prev.disableDoubleClick !== next.disableDoubleClick) return false;
+  if (Boolean(prev.button) !== Boolean(next.button)) return false;
+  if (Boolean(prev.unlinkButton) !== Boolean(next.unlinkButton)) return false;
+  // Entity-based checks
+  if (prev.entity.id !== next.entity.id) return false;
+  if (prev.entity.status !== next.entity.status) return false;
+  const prevLabel = getEntityLabel(prev.entity);
+  const nextLabel = getEntityLabel(next.entity);
+  if (prevLabel !== nextLabel) return false;
+  return true;
+}
+
+export const EntityTag = React.memo(EntityTagComponent, areEntityTagsEqual);

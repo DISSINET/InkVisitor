@@ -28,6 +28,7 @@ export const ValidationText: React.FC<ValidationText> = ({
     detail,
     entityClasses,
     entityClassifications,
+    entitySOEs,
     entityLanguages,
     entityStatuses,
     tieType,
@@ -68,17 +69,28 @@ export const ValidationText: React.FC<ValidationText> = ({
 
   const renderEntityStatusList = useCallback(
     (statusList: EntityEnums.Status[]) => {
-      return statusList.map((status, index) => {
-        const statusItem = entityStatusDict[status];
-
-        const last: boolean = index === statusList.length - 1;
+      if (statusList.length === 5) {
+        return <>{` `}</>;
+      } else {
         return (
-          <span key={statusItem.value}>
-            <StyledSentenceEntity>{statusItem.label}</StyledSentenceEntity>
-            {!last && " or "}
-          </span>
+          <>
+            {` with status `}
+            {statusList.map((status, index) => {
+              const statusItem = entityStatusDict[status];
+
+              const last: boolean = index === statusList.length - 1;
+              return (
+                <span key={statusItem.value}>
+                  <StyledSentenceEntity>
+                    {statusItem.label}
+                  </StyledSentenceEntity>
+                  {!last && " or "}
+                </span>
+              );
+            })}
+          </>
         );
-      });
+      }
     },
     [entitiesDictKeys]
   );
@@ -148,6 +160,12 @@ export const ValidationText: React.FC<ValidationText> = ({
           {renderEntityList(entityClassifications ?? [])}
         </>
       )}
+      {entitySOEs && entitySOEs.length > 0 && (
+        <>
+          {` having superordinate entity `}
+          {renderEntityList(entitySOEs ?? [])}
+        </>
+      )}
       {entityLanguages && entityLanguages.length > 0 && (
         <>
           {` with language `}
@@ -155,10 +173,7 @@ export const ValidationText: React.FC<ValidationText> = ({
         </>
       )}
       {entityStatuses && entityStatuses.length > 0 && (
-        <>
-          {` with status `}
-          {renderEntityStatusList(entityStatuses ?? [])}
-        </>
+        <>{renderEntityStatusList(entityStatuses ?? [])}</>
       )}
 
       {tieType === EProtocolTieType.Property && (

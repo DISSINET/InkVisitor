@@ -1,0 +1,29 @@
+/* Lightweight row styles to avoid dynamic styled-components in the hot path */
+.qt-row {
+  display: flex;
+  align-items: stretch;
+  box-sizing: border-box;
+  border-bottom: 1px solid white;
+  padding: 0;
+}
+.qt-row-odd {
+  background: rgba(255, 255, 255, 0.2);
+}
+.qt-row-selected {
+  background: rgba(255, 255, 255, 0.25);
+}
+.qt-placeholder {
+  color: #999;
+}
+
+/* Header/column cells to replace StyledColumn in hot path */
+.qt-col {
+  display: inline-flex;
+  padding: 0.3rem;
+  padding-left: 1rem;
+  align-items: center;
+  gap: 0.25rem;
+}
+.qt-col-header {
+  font-weight: 600;
+}

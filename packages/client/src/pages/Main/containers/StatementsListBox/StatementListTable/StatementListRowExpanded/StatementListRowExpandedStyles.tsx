@@ -1,6 +1,5 @@
 import { BsArrowReturnRight } from "react-icons/bs";
-import styled from "styled-components";
-import theme from "Theme/theme";
+import styled, { useTheme } from "styled-components";
 
 export const StyledSubRow = styled.div`
   width: 100%;
@@ -12,6 +11,7 @@ export const StyledSubRow = styled.div`
 `;
 
 const getIndentation = (level: 1 | 2 | 3) => {
+  const theme = useTheme();
   switch (level) {
     case 1:
       return theme.space[5];
@@ -30,7 +30,7 @@ export const StyledPropGridRow = styled.div<StyledPropGridRow>`
   margin-bottom: ${({ theme, $disableBottomMargin }) =>
     $disableBottomMargin ? 0 : theme.space[1]};
   display: grid;
-  grid-template-columns: auto auto;
+  grid-template-columns: auto 1fr;
   overflow: hidden;
 `;
 interface StyledPropRow {

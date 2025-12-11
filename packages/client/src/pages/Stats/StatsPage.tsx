@@ -3,21 +3,30 @@ import api from "api";
 
 import { IRequestStats, IResponseStats } from "@shared/types";
 import { Aggregation, EventType, TimeUnit } from "@shared/types/stats";
-import { Button, ButtonGroup, Checkbox, Input, Loader } from "components";
+import { Button, ButtonGroup, Input, Loader } from "components";
 import { useEffect, useMemo, useReducer, useState } from "react";
+import { FaCalendarPlus, FaDatabase, FaSyncAlt, FaTimes } from "react-icons/fa";
 import { useAppSelector } from "redux/hooks";
-import {
-  FaCalendarPlus,
-  FaDatabase,
-  FaSync,
-  FaSyncAlt,
-  FaTimes,
-} from "react-icons/fa";
 import { USER_THRESHOLD_MAX } from "./constants";
 import { StatsChart } from "./StatsChart/StatsChart";
 import { StatsTable } from "./StatsTable/StatsTable";
 import { initialState, statsReducer } from "./store";
 import { applyUserThreshold } from "./utils";
+import { AttributeButtonGroup } from "components/advanced/AttributeButtonGroup/AttributeButtonGroup";
+import { useResizeObserver } from "hooks";
+import { toast } from "react-toastify";
+import {
+  StyledContainer,
+  StyledDateInputWrapper,
+  StyledField,
+  StyledFieldGroup,
+  StyledFieldLabel,
+  StyledFieldLValueSmall,
+  StyledHeader,
+  StyledHeading,
+  StyledResultsChart,
+  StyledResultsTable,
+} from "./StatsPageStyles";
 
 // Helper functions for date conversion
 const isoToDatePicker = (isoString: string): string => {
@@ -27,25 +36,6 @@ const isoToDatePicker = (isoString: string): string => {
 const datePickerToIso = (dateString: string): string => {
   return new Date(dateString).toISOString();
 };
-
-import {
-  StyledContainer,
-  StyledDateInputWrapper,
-  StyledEndpointStatus,
-  StyledField,
-  StyledFieldGroup,
-  StyledFieldLabel,
-  StyledFieldLValueSmall,
-  StyledHeader,
-  StyledHeading,
-  StyledResponseSection,
-  StyledResultsChart,
-  StyledResultsTable,
-  StyledStyledQueryState,
-} from "./StatsPageStyles";
-import { AttributeButtonGroup } from "components/advanced/AttributeButtonGroup/AttributeButtonGroup";
-import { useResizeObserver } from "hooks";
-import { toast } from "react-toastify";
 
 export const StatsPage = () => {
   const client = useQueryClient();
@@ -196,7 +186,7 @@ export const StatsPage = () => {
 
         <ButtonGroup>
           {allowMaterializedStats && (
-            <span>
+            <span style={{ zIndex: 30 }}>
               <AttributeButtonGroup
                 noMargin
                 options={[
@@ -423,7 +413,7 @@ export const StatsPage = () => {
 
         <Button
           color="success"
-          label="Refresh"
+          label={state.useMaterialized ? "Aggregate" : "Refresh"}
           disabled={isLoadingStats || isAggregating}
           onClick={
             state.useMaterialized
@@ -454,7 +444,7 @@ export const StatsPage = () => {
         </>
       )}
 
-      <Loader show={isLoadingStats} />
+      <Loader show={isLoadingStats || isAggregating} />
     </StyledContainer>
   );
 };

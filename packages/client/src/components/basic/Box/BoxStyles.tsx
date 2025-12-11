@@ -17,7 +17,7 @@ export const StyledBox = styled(animated.div)<StyledBox>`
 interface StyledHead {
   $color?: keyof ThemeColor;
   $borderColor?: keyof ThemeColor;
-  $noPadding: boolean;
+  $noFrame: boolean;
   $isExpanded: boolean;
   $hasHeaderClick: boolean;
 }
@@ -39,8 +39,8 @@ export const StyledHead = styled(animated.div)<StyledHead>`
   border-right-color: ${({ theme, $borderColor }) =>
     $borderColor ? theme.color[$borderColor] : theme.color["gray"][200]};
   border-right-style: solid;
-  border-width: ${({ theme, $noPadding, $isExpanded }) =>
-    $noPadding || !$isExpanded ? theme.borderWidth[1] : theme.borderWidth[4]};
+  border-width: ${({ theme, $noFrame, $isExpanded }) =>
+    $noFrame || !$isExpanded ? theme.borderWidth[1] : theme.borderWidth[4]};
   cursor: ${({ $hasHeaderClick }) => ($hasHeaderClick ? "pointer" : "")};
 `;
 export const StyledLabel = styled(animated.div)`
@@ -59,7 +59,7 @@ export const StyledButtonWrap = styled.div<StyledButtonWrap>`
   right: ${({ theme }) => theme.space[2]};
 `;
 interface StyledContent {
-  $noPadding: boolean;
+  $noFrame: boolean;
   $color?: keyof ThemeColor;
   $borderColor?: keyof ThemeColor;
   $isExpanded: boolean;
@@ -79,8 +79,8 @@ export const StyledContent = styled(animated.div)<StyledContent>`
         : theme.color["gray"]["200"]
       : ""};
   border-style: ${({ $isExpanded }) => ($isExpanded ? "solid" : "")};
-  border-width: ${({ theme, $noPadding, $isExpanded }) =>
-    $noPadding || !$isExpanded ? theme.borderWidth[1] : theme.borderWidth[4]};
+  border-width: ${({ theme, $noFrame, $isExpanded }) =>
+    $noFrame || !$isExpanded ? theme.borderWidth[1] : theme.borderWidth[4]};
   border-top: none;
 `;
 interface StyledContentAnimationWrap {

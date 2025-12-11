@@ -54,6 +54,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
     detail,
     entityClasses,
     entityClassifications,
+    entitySOEs,
     entityLanguages,
     entityStatuses,
     tieType,
@@ -81,21 +82,16 @@ export const ValidationRule: React.FC<ValidationRule> = ({
   }, [validation.active]);
 
   const isAllowedEntitiesSuggesterVisible = useMemo<boolean>(() => {
-    if (!userCanEdit) {
-      return false;
-    }
-
     if (!allowedEntities) {
       return false;
     }
+    return true;
 
-    if (tieType === EProtocolTieType.Reference) {
-      // we do not want to allow multiple resources
-      // should be fixed in the future by introducing logic
-      return allowedEntities?.length !== 1;
-    } else {
-      return true;
-    }
+    // if (tieType === EProtocolTieType.Reference) {
+    //   return allowedEntities?.length !== 1;
+    // } else {
+    //   return true;
+    // }
   }, [tieType, allowedEntities, userCanEdit]);
 
   return (
@@ -167,6 +163,50 @@ export const ValidationRule: React.FC<ValidationRule> = ({
               disabled={
                 !userCanEdit || tieType === EProtocolTieType.Classification
               }
+            />
+          )}
+        </StyledValue>
+
+        {/* Entity SOE */}
+        <StyledLabel>having superordinate entity</StyledLabel>
+        <StyledValue>
+          {entitySOEs?.map((soe, key) => (
+            <EntityTag
+              key={key}
+              flexListMargin
+              entity={entities[soe]}
+              unlinkButton={
+                userCanEdit && {
+                  onClick: () =>
+                    updateValidationRule({
+                      entitySOEs: entitySOEs.filter((s) => s !== soe),
+                    }),
+                }
+              }
+            />
+          ))}
+          {!(!userCanEdit && entitySOEs && entitySOEs?.length > 0) && (
+            <EntitySuggester
+              inputWidth="full"
+              alwaysShowCreateModal
+              excludedActantIds={entitySOEs}
+              categoryTypes={[
+                EntityEnums.Class.Location,
+                EntityEnums.Class.Object,
+                EntityEnums.Class.Event,
+                EntityEnums.Class.Group,
+                EntityEnums.Class.Statement,
+                EntityEnums.Class.Value,
+                EntityEnums.Class.Resource,
+                EntityEnums.Class.Person,
+                EntityEnums.Class.Being,
+              ]}
+              onPicked={(entity) =>
+                updateValidationRule({
+                  entitySOEs: [...(entitySOEs ?? []), entity.id],
+                })
+              }
+              disabled={!userCanEdit}
             />
           )}
         </StyledValue>

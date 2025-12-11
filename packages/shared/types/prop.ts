@@ -1,5 +1,10 @@
 import { EntityEnums } from "../enums";
 
+export enum PropSpecKind {
+  TypeKind = "type",
+  ValueKind = "value",
+}
+
 export interface IProp {
   id: string;
   elvl: EntityEnums.Elvl;

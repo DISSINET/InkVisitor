@@ -8,6 +8,7 @@ import {
   FaBars,
   FaBookOpen,
   FaInfo,
+  FaSearchengin,
   FaRegChartBar,
   FaUsers,
 } from "react-icons/fa";
@@ -71,6 +72,14 @@ export const Menu: React.FC<Menu> = ({
       href: "/documents",
       admin: true,
       icon: <CgFileDocument size={18} />,
+    },
+    {
+      id: "query",
+      label: "Query",
+      color: "info",
+      href: "/query",
+      admin: true,
+      icon: <FaSearchengin />,
     },
     {
       id: "stats",

@@ -5,7 +5,6 @@ import { Tooltip } from "components/basic/Tooltip/Tooltip";
 import React, { useState } from "react";
 import { FaX } from "react-icons/fa6";
 import { styled } from "styled-components";
-import theme from "Theme/theme";
 
 interface LanguageTagProps {
   languageValue: EntityEnums.Language;
@@ -59,6 +58,6 @@ const StyledLanguageTag = styled.div`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.space[1]};
-  background-color: ${theme.color.blue["200"]};
-  color: ${theme.color.gray["900"]};
+  background-color: ${({ theme }) => theme.color.blue["200"]};
+  color: ${({ theme }) => theme.color.gray["900"]};
 `;

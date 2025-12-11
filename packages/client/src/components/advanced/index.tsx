@@ -3,8 +3,8 @@ import { ApplyTemplateModal } from "./ApplyTemplateModal/ApplyTemplateModal";
 import { AttributeButtonGroup } from "./AttributeButtonGroup/AttributeButtonGroup";
 import { AuditTable } from "./AuditTable/AuditTable";
 import { BreadcrumbItem } from "./BreadcrumbItem/BreadcrumbItem";
-import DocumentModalExport from "./DocumentModal/DocumentModalExport";
 import DocumentModalEdit from "./DocumentModal/DocumentModalEdit";
+import DocumentModalExport from "./DocumentModal/DocumentModalExport";
 import { AttributeMultiDropdown } from "./Dropdowns/AttributeMultiDropdown";
 import { BasicDropdown } from "./Dropdowns/BasicDropdown";
 import { EntityMultiDropdown } from "./Dropdowns/EntityMultiDropdown";
@@ -52,9 +52,10 @@ export {
   AbbreviatedTextWithTooltip,
   AuditTable,
   BreadcrumbItem,
-  DocumentModalExport,
   DocumentTitle,
   DocumentModalEdit,
+  DocumentModalExport,
+  ElvlButtonGroup,
   EmptyTag,
   EntityCreateModal,
   EntityDropzone,
@@ -64,17 +65,16 @@ export {
   JSONExplorer,
   LayoutSeparatorVertical,
   LayoutSeparatorHorizontal,
-  Menu,
-  Page,
   LeftHeader,
+  LogicButtonGroup,
+  Menu,
+  MoodVariantButtonGroup,
+  Page,
+  PositionButtonGroup,
   RightHeader,
   TerritoryActionModal,
   UserCustomizationModal,
   ValidationRule,
   PaginationControls,
-  ElvlButtonGroup,
-  MoodVariantButtonGroup,
-  PositionButtonGroup,
-  LogicButtonGroup,
   GlobalValidationsModal,
 };

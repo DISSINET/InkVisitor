@@ -7,6 +7,7 @@ import {
   StyledBackground,
   StyledCard,
   StyledCardBody,
+  StyledCardContent,
   StyledCardHeader,
   StyledCardIcon,
   StyledCardTitle,
@@ -117,6 +118,7 @@ interface ModalHeader {
   icon?: React.ReactNode;
   onClose?: () => void;
   boldTitle?: boolean;
+  content?: React.ReactNode;
 }
 export const ModalHeader: FC<ModalHeader> = ({
   title,
@@ -124,12 +126,14 @@ export const ModalHeader: FC<ModalHeader> = ({
   icon,
   onClose,
   boldTitle,
+  content,
 }) => {
   return (
     <>
       <StyledCardHeader $color={color}>
         {icon && <StyledCardIcon>{icon}</StyledCardIcon>}
         <StyledCardTitle $boldTitle={boldTitle}>{title}</StyledCardTitle>
+        {content && <StyledCardContent>{content}</StyledCardContent>}
         {onClose && (
           <StyledCloseIconWrap onClick={onClose}>
             <StyledIoClose size={20} />
@@ -146,6 +150,7 @@ interface ModalContent {
   enableScroll?: boolean;
   centered?: boolean;
   isLoading?: boolean;
+  noPadding?: boolean;
 }
 export const ModalContent: FC<ModalContent> = ({
   children,
@@ -153,11 +158,13 @@ export const ModalContent: FC<ModalContent> = ({
   enableScroll = false,
   centered,
   isLoading,
+  noPadding = false,
 }) => {
   return (
     <StyledCardBody
       $column={column}
       $enableScroll={enableScroll}
+      $noPadding={noPadding}
       centered={centered}
     >
       {children}

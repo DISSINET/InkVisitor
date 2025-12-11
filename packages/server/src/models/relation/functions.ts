@@ -1,9 +1,10 @@
 import { getRelationClass } from "@models/factory";
 import { EntityEnums, RelationEnums } from "@shared/enums";
-import { EntityTooltip, Relation as RelationTypes } from "@shared/types";
-import { Connection } from "rethinkdb-ts";
 import { IRequest } from "src/custom_typings/request";
+import { Relation as RelationTypes } from "@shared/types";
 import Relation from "./relation";
+import { Connection } from "rethinkdb-ts";
+import { EntityTooltip } from "@shared/types";
 
 const MAX_NEST_LVL = 3;
 
@@ -233,10 +234,9 @@ export const copyRelations = async (
   targetEntity: string,
   types: RelationEnums.Type[]
 ): Promise<void> => {
-  const relations = await Relation.findForEntities(
-    request.db.connection,
-    [originalEntity]
-  );
+  const relations = await Relation.findForEntities(request.db.connection, [
+    originalEntity,
+  ]);
 
   for (let i = 0; i < relations.length; i++) {
     const relation = getRelationClass(relations[i]);

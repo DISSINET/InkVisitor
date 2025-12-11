@@ -37,6 +37,7 @@ export interface ITerritoryValidation {
   territoryId?: string;
   entityClasses?: EntityEnums.Class[];
   entityClassifications?: string[];
+  entitySOEs?: string[];
   entityLanguages?: EntityEnums.Language[];
   entityStatuses?: EntityEnums.Status[];
 

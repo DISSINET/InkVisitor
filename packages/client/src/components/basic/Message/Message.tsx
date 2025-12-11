@@ -3,7 +3,6 @@ import { TiWarningOutline } from "react-icons/ti";
 
 import { WarningTypeEnums } from "@shared/enums";
 import { IEntity, IWarning } from "@shared/types";
-import theme from "Theme/theme";
 import api from "api";
 import { EntityTag } from "components/advanced";
 import { EntityColors } from "types";
@@ -14,6 +13,7 @@ import {
 } from "./MessageStyles";
 import { isWarningTBased } from "utils/utils";
 import { wildCardChar } from "Theme/constants";
+import { useTheme } from "styled-components";
 
 interface Message {
   warning: IWarning;
@@ -22,6 +22,7 @@ interface Message {
   };
 }
 export const Message: React.FC<Message> = ({ warning, entities }) => {
+  const theme = useTheme();
   const positionObject: { [key: string]: string } = {
     s: "Subject",
     a1: "Actant1",

@@ -79,6 +79,7 @@ export const StyledCardHeader = styled.header<StyledCardHeader>`
   justify-content: flex-start;
   align-items: center;
   flex-shrink: 0;
+  gap: 1rem;
   padding: ${space4} ${space6} ${space2} ${space6};
   background-color: ${({ theme, $color }) =>
     $color ? theme.color[$color] : "transparent"};
@@ -100,14 +101,20 @@ interface StyledCardTitle {
   $boldTitle?: boolean;
 }
 export const StyledCardTitle = styled.h2<StyledCardTitle>`
+  white-space: nowrap;
   font-weight: ${({ theme, $boldTitle }) =>
     $boldTitle ? theme.fontWeight["bold"] : theme.fontWeight["medium"]};
   font-size: ${({ theme }) => theme.fontSize["xl"]};
+`;
+export const StyledCardContent = styled.div`
+  display: flex;
+  margin-right: 3rem;
 `;
 interface StyledCardBody {
   $column?: boolean;
   $enableScroll: boolean;
   centered?: boolean;
+  $noPadding?: boolean;
 }
 export const StyledCardBody = styled.section<StyledCardBody>`
   position: relative;
@@ -116,7 +123,7 @@ export const StyledCardBody = styled.section<StyledCardBody>`
   flex-direction: ${({ $column }) => ($column ? "column" : "row")};
   align-items: ${({ centered }) => (centered ? "center" : "")};
   justify-content: ${({ centered }) => (centered ? "center" : "")};
-  padding: ${space5} ${space7};
+  padding: ${({ $noPadding }) => ($noPadding ? "0" : `${space5} ${space7}`)};
   overflow: ${({ $enableScroll }) => ($enableScroll ? "auto" : "initial")};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
@@ -167,9 +174,10 @@ export const StyledModalInputWrap = styled.div<StyledModalInputWrap>`
 
 export const StyledCloseIconWrap = styled.span`
   position: absolute;
-  display: flex;
-  top: 0.6rem;
+  top: 0.7rem;
   right: 0.6rem;
+  height: 2.6rem;
+  width: 2.6rem;
   padding: 0.3rem;
   cursor: pointer;
   border-radius: 5rem;

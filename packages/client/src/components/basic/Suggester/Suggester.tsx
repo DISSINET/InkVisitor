@@ -22,7 +22,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { DropTargetMonitor, useDrop } from "react-dnd";
 import { FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
-import { FixedSizeList as List } from "react-window";
+import { List, ListProps } from "react-window";
 import {
   EntityDragItem,
   EntitySingleDropdownItem,
@@ -41,7 +41,7 @@ import {
   SuggesterHidden,
 } from "./SuggesterStyles";
 import {
-  MemoizedEntityRow,
+  SuggestionRowEntityRow,
   SuggestionRowEntityItemData,
 } from "./SuggestionRow/SuggestionRow";
 
@@ -85,6 +85,9 @@ interface Suggester {
   button?: React.ReactNode;
   disableTemplateInstantiation?: boolean;
   isHidden?: boolean;
+  // Optional: allow parent to inject a dropped item (e.g., from a minified wrapper)
+  externalDroppedItem?: EntityDragItem | null;
+  onConsumeExternalDrop?: () => void;
 }
 
 export const Suggester: React.FC<Suggester> = ({
@@ -125,6 +128,8 @@ export const Suggester: React.FC<Suggester> = ({
   button,
   disableTemplateInstantiation = false,
   isHidden = false,
+  externalDroppedItem,
+  onConsumeExternalDrop,
 }) => {
   const [selected, setSelected] = useState(-1);
   const [isFocused, setIsFocused] = useState(false);
@@ -191,6 +196,32 @@ export const Suggester: React.FC<Suggester> = ({
 
   drop(dropRef);
 
+  // Handle externally injected drop (e.g., drop on minified button)
+  useEffect(() => {
+    if (!externalDroppedItem) return;
+    // First notify hover so parent can compute isWrongDropCategory
+    onHover && onHover(externalDroppedItem);
+    const handle = requestAnimationFrame(() => {
+      if (!isWrongDropCategory) {
+        if (!externalDroppedItem.isTemplate) {
+          onDrop(externalDroppedItem);
+        } else if (externalDroppedItem.isTemplate && !isInsideTemplate) {
+          onDrop(externalDroppedItem, true);
+        } else if (externalDroppedItem.isTemplate && isInsideTemplate) {
+          if (externalDroppedItem.entityClass === EntityEnums.Class.Territory) {
+            onDrop(externalDroppedItem);
+          } else {
+            setTempDropItem(externalDroppedItem);
+            setShowTemplateModal(true);
+          }
+        }
+      }
+      onConsumeExternalDrop && onConsumeExternalDrop();
+    });
+    return () => cancelAnimationFrame(handle);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [externalDroppedItem]);
+
   const handleEnterPress = () => {
     if (selected === -1 && typed.length > 0) {
       if (!disableCreate) {
@@ -253,33 +284,35 @@ export const Suggester: React.FC<Suggester> = ({
   };
 
   const renderEntitySuggestions = (suggestions: EntitySuggestion[]) => {
-    const itemData: SuggestionRowEntityItemData = {
-      items: suggestions,
-      onPick,
-      selected,
-      isInsideTemplate,
-      territoryParentId,
-      disableButtons,
-      disableTemplateInstantiation,
-    };
-
     const rowHeight = 25;
 
     return (
-      <List
-        itemData={itemData as SuggestionRowEntityItemData}
-        height={
-          suggestions.length > 7
-            ? rowHeight * 8
-            : rowHeight * suggestions.length
-        }
-        itemCount={suggestions.length}
-        itemSize={rowHeight}
-        width="100%"
+      <List<SuggestionRowEntityItemData>
+        // height={
+        //   suggestions.length > 7
+        //     ? rowHeight * 8
+        //     : rowHeight * suggestions.length
+        // }
+        rowProps={{ items: suggestions }}
+        rowCount={suggestions.length}
+        rowHeight={rowHeight}
+        style={{ maxHeight: "20rem" }}
         overscanCount={scrollOverscanCount}
-      >
-        {MemoizedEntityRow}
-      </List>
+        rowComponent={(props) => {
+          return (
+            <SuggestionRowEntityRow
+              {...props}
+              data={{ items: suggestions }}
+              selected={selected}
+              isInsideTemplate={isInsideTemplate}
+              territoryParentId={territoryParentId}
+              disableButtons={disableButtons}
+              disableTemplateInstantiation={disableTemplateInstantiation}
+              onPick={onPick}
+            />
+          );
+        }}
+      />
     );
   };
 
@@ -388,6 +421,12 @@ export const Suggester: React.FC<Suggester> = ({
           <FloatingPortal id="page">
             <StyledSuggesterList
               ref={refs.setFloating}
+              data-suggester-portal="true"
+              onMouseDown={(event) => {
+                // Prevent annotator click-away handlers from closing while interacting
+                // with the suggester dropdown rendered in a portal. (e.g. annotator highlight menu)
+                event.stopPropagation();
+              }}
               onMouseEnter={() => setIsHovered(true)}
               onMouseLeave={() => setIsHovered(false)}
               style={{

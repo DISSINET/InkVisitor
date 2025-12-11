@@ -32,7 +32,7 @@ const GlobalStyle = createGlobalStyle<GlobalStyle>`
     -moz-osx-font-smoothing: grayscale;
   }
   .no-select {
-    user-select: none;  
+    user-select: none;
   }
   h1 {
     font-size: ${({ theme }) => theme.fontSize["4xl"]};
@@ -89,6 +89,9 @@ const GlobalStyle = createGlobalStyle<GlobalStyle>`
     }
     .react-select__option--is-focused {
       background-color: ${({ theme }) => theme.color["invertedBg"]["primary"]};
+    }
+    .react-select__option--is-disabled {
+      color: ${({ theme }) => theme.color["gray"][500]};
     }
   }
 

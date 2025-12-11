@@ -41,7 +41,7 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
   @nonenumerable
   entityClass: EntityEnums.Class;
   @nonenumerable
-  maxNestLvl = 10;
+  maxNestLvl = 3;
   @nonenumerable
   maxListLen = 10;
 

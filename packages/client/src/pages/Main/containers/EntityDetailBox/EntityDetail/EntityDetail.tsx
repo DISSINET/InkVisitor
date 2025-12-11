@@ -7,7 +7,10 @@ import {
   IResponseDetail,
   Relation,
 } from "@shared/types";
-import { ITerritoryValidation } from "@shared/types/territory";
+import {
+  EProtocolTieType,
+  ITerritoryValidation,
+} from "@shared/types/territory";
 import { IWarningPositionSection } from "@shared/types/warning";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
@@ -28,9 +31,10 @@ import {
 import { CMetaProp, DProps } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
-import { FaPlus, FaChevronCircleDown, FaChevronCircleUp } from "react-icons/fa";
+import { FaChevronCircleRight, FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
+import { rootTerritoryId } from "Theme/constants";
 import {
   DraggedPropRowCategory,
   DropdownItem,
@@ -54,10 +58,10 @@ import {
   StyledDetailSectionHeading,
   StyledDetailWarnings,
   StyledDetailWrapper,
+  StyledExpandIcon,
   StyledPropGroupWrap,
   StyledUsedAsHeading,
   StyledUsedAsTitle,
-  StyledExpandIcon,
 } from "./EntityDetailStyles";
 import { EntityDetailClassificationTable } from "./EntityDetailUsedInTable/EntityDetailClassificationTable/EntityDetailClassificationTable";
 import { EntityDetailIdentificationTable } from "./EntityDetailUsedInTable/EntityDetailIdentificationTable/EntityDetailIdentificationTable";
@@ -67,7 +71,6 @@ import { EntityDetailStatementsTable } from "./EntityDetailUsedInTable/EntityDet
 import { EntityDetailUsedInDocumentsTable } from "./EntityDetailUsedInTable/EntityDetailUsedInDocumentsTable/EntityDetailUsedInDocumentsTable";
 import { EntityDetailValency } from "./EntityDetailValency/EntityDetailValency";
 import { EntityDetailValidationSection } from "./EntityDetailValidationSection/EntityDetailValidationSection";
-import { rootTerritoryId } from "Theme/constants";
 
 const allowedEntityChangeClasses = [
   EntityEnums.Class.Value,
@@ -78,6 +81,18 @@ const allowedEntityChangeClasses = [
   EntityEnums.Class.Location,
   EntityEnums.Class.Object,
 ];
+const initValidation: ITerritoryValidation = {
+  detail: "",
+  entityClasses: [],
+  entityClassifications: [],
+  entityLanguages: [],
+  entityStatuses: [],
+  entitySOEs: [],
+  allowedEntities: [],
+  allowedClasses: [],
+  propType: [],
+  tieType: EProtocolTieType.Property,
+};
 
 interface EntityDetail {
   detailId: string;
@@ -603,6 +618,21 @@ export const EntityDetail: React.FC<EntityDetail> = ({
   const [isProtocolExpanded, setIsProtocolExpanded] = useState(false);
   const [isValidationExpanded, setIsValidationExpanded] = useState(false);
 
+  const [
+    showValidationsBatchRemoveSubmit,
+    setShowValidationsBatchRemoveSubmit,
+  ] = useState(false);
+
+  const initValidationRule = () => {
+    const { validations } = entity.data;
+    updateEntityMutation?.mutate({
+      data: {
+        validations: validations
+          ? [...validations, initValidation]
+          : [initValidation],
+      },
+    });
+  };
   const contentWidth = useAppSelector(
     (state) => state.layout.mainPage.secondPanelRealWidth
   );
@@ -672,18 +702,23 @@ export const EntityDetail: React.FC<EntityDetail> = ({
               {entity.class === EntityEnums.Class.Territory && (
                 <StyledDetailSection>
                   <StyledDetailSectionHeader>
-                    <StyledDetailSectionHeading>
-                      Protocol
-                    </StyledDetailSectionHeading>
                     <StyledExpandIcon
                       onClick={() => setIsProtocolExpanded(!isProtocolExpanded)}
                     >
-                      {isProtocolExpanded ? (
-                        <FaChevronCircleUp size={16} />
-                      ) : (
-                        <FaChevronCircleDown size={16} />
-                      )}
+                      <FaChevronCircleRight
+                        size={16}
+                        style={{
+                          transition: "transform 0.2s ease",
+                          cursor: "pointer",
+                          transform: `rotate(${
+                            isProtocolExpanded ? "90deg" : "0deg"
+                          })`,
+                        }}
+                      />
                     </StyledExpandIcon>
+                    <StyledDetailSectionHeading>
+                      Protocol
+                    </StyledDetailSectionHeading>
                   </StyledDetailSectionHeader>
                   {isProtocolExpanded && (
                     <StyledDetailSectionContent>
