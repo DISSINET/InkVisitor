@@ -351,7 +351,7 @@ const parseUseCase = async () => {
         id: "1",
         name: "admin",
         email: "admin@admin.com",
-        password: "qYZrrj2EtTpH9aL93T",
+        password: "admin",
         active: true,
         verified: true,
         options: {
