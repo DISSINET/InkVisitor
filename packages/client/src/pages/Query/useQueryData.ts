@@ -28,6 +28,17 @@ interface RowCache {
 
 const rowCacheStore = new Map<string, RowCache>();
 
+/**
+ * Clears the row cache store for all queries or a specific signature
+ */
+export const clearRowCache = (signature?: string) => {
+  if (signature) {
+    rowCacheStore.delete(signature);
+  } else {
+    rowCacheStore.clear();
+  }
+};
+
 export const useQueryData = ({
   queryState,
   exploreState,

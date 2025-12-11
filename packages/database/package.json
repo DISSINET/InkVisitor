@@ -1,6 +1,6 @@
 {
   "name": "database",
-  "version": "1.4.3.1",
+  "version": "1.5 beta",
   "description": "Package with gui-like app for manipulating rethinkdb",
   "engines": {
     "node": "^22.11.0",

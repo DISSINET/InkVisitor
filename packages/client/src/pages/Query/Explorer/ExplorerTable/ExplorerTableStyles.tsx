@@ -3,7 +3,10 @@ import styled from "styled-components";
 interface StyledTableWrapper {
   // $height: number;
 }
-export const StyledTableWrapper = styled.div<StyledTableWrapper>``;
+export const StyledTableWrapper = styled.div<StyledTableWrapper>`
+  margin: 0.5rem 1rem 0 1rem;
+  overflow: hidden;
+`;
 export const StyledRowWrapper = styled.div`
   display: block;
 `;
@@ -32,9 +35,11 @@ export const StyledRow = styled.div<StyledRow>`
 export const StyledHeader = styled.div`
   display: flex;
   z-index: 1;
-  height: ${({ theme }) => theme.space[18]};
+  height: ${({ theme }) => theme.space[12]};
   background-color: ${({ theme }) => theme.color["success"]};
   color: ${({ theme }) => theme.color["white"]};
+  border-top-left-radius: ${({ theme }) => theme.borderRadius["default"]};
+  border-top-right-radius: ${({ theme }) => theme.borderRadius["default"]};
 `;
 
 export const StyledBody = styled.div``;
@@ -80,11 +85,12 @@ export const StyledNewColumnValue = styled.div`
 `;
 export const StyledUserTag = styled.div`
   background-color: ${({ theme }) => theme.color["tagColor"]};
-  color: ${({ theme }) => theme.color["white"]};
-  padding: ${({ theme }) => theme.space[1] + " " + theme.space[2]};
+  color: ${({ theme }) => theme.color["tagBackground"]};
   display: flex;
   align-items: center;
-  padding; ${({ theme }) => theme.space[2]};
+  height: 2.6rem;
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  padding: ${({ theme }) => "0rem " + theme.space[2]};
   gap: ${({ theme }) => theme.space[3]};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
 `;
@@ -98,11 +104,7 @@ export const StyledTableControl = styled(StyledSpaceBetween)`
   padding: ${({ theme }) => theme.space[2]};
   padding-top: 0.2rem;
   margin-right: 2rem;
-
-  /* position: sticky; */
-  /* top: 0; */
   background-color: ${({ theme }) => theme.color["gray"][200]};
-  box-shadow: 0 2px 3px -2px rgba(0, 0, 0, 0.3);
   z-index: 20;
 `;
 export const StyledTableFooter = styled(StyledSpaceBetween)`

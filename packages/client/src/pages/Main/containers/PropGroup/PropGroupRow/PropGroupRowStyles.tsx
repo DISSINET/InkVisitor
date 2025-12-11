@@ -1,6 +1,5 @@
 import { FaGripVertical } from "react-icons/fa";
-import styled from "styled-components";
-import theme from "Theme/theme";
+import styled, { useTheme } from "styled-components";
 
 interface StyledGrid {
   $tempDisabled?: boolean;
@@ -36,6 +35,7 @@ export const StyledListHeaderColumn = styled.div<StyledListHeaderColumn>`
 `;
 
 const getIndentation = (level: 0 | 1 | 2 | 3, $lowIdent?: boolean) => {
+  const theme = useTheme();
   switch (level) {
     case 0:
       return 0;

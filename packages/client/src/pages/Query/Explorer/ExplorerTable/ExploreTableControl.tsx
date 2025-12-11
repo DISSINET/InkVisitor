@@ -54,7 +54,7 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
 
   const renderHeaderCheckBox = () => {
     const size = 18;
-    const isAllSelected = rowsTotal === rowsSelected.length;
+    const isAllSelected = rowsTotal > 0 && rowsTotal === rowsSelected.length;
 
     if (isAllSelected) {
       return (
@@ -123,19 +123,29 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
           {
             // renderBatchAction()
             batchActionSelected === BatchAction.export_csv && (
-              <Button label="export" color="query3" onClick={onExport} />
+              <Button
+                label="export"
+                color="primary"
+                inverted
+                onClick={onExport}
+                disabled={rowsSelected.length === 0}
+              />
             )
           }
         </div>
-        {/* {renderPaging()} */}
       </div>
-      <Button
-        icon={<TbColumnInsertRight size={17} />}
-        label="new column"
-        color="query3"
-        inverted={isNewColumnOpen}
-        onClick={() => setIsNewColumnOpen(!isNewColumnOpen)}
-      />
+
+      <div data-new-column-toggle="true">
+        <Button
+          icon={<TbColumnInsertRight size={17} />}
+          label="new column"
+          color="primary"
+          inverted={!isNewColumnOpen}
+          onClick={() => {
+            setIsNewColumnOpen(!isNewColumnOpen);
+          }}
+        />
+      </div>
     </StyledTableControl>
   );
 };

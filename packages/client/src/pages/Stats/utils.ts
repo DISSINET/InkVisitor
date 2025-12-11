@@ -1,6 +1,7 @@
 import { IResponseStats } from "@shared/types";
 import { Aggregation, EventType } from "@shared/types/stats";
 import { schemeTableau10 } from "d3";
+import { useTheme } from "styled-components";
 import theme from "Theme/theme";
 
 export const OTHERS_KEY = "others";
@@ -208,6 +209,7 @@ export const transformDataForTable = (
 const colors = schemeTableau10;
 
 export const getCategoryMap = (categories: string[]) => {
+  const theme = useTheme();
   const colorsOut: Record<string, string> = {};
   categories.forEach((category, index) => {
     const color = colors[index % colors.length] || "#000";

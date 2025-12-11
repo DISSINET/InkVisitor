@@ -162,6 +162,7 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
           }}
           menuPortalTarget={document.getElementById("page")!}
           menuPosition="absolute"
+          menuPlacement="auto"
           onChange={(selected: unknown, event: ActionMeta<unknown>) => {
             const selectedOptions: DropdownItem[] = Array.isArray(selected)
               ? selected

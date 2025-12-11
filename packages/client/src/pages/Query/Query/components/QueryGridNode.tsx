@@ -9,11 +9,15 @@ import { Query } from "@shared/types/query";
 import api from "api";
 import { Button } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
-import theme from "Theme/theme";
 
 import { INodeItem, QueryValidityProblem } from "../../types";
 import { QueryAction, QueryActionType } from "../state";
-import { StyledGraphNode, StyledNodeTypeSelect } from "./QueryStyles";
+import {
+  StyledGraphNode,
+  StyledNodeContainer,
+  StyledNodeTypeSelect,
+} from "./QueryStyles";
+import { useTheme } from "styled-components";
 
 interface QueryGridNodeProps {
   node: INodeItem;
@@ -30,6 +34,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
   problems,
   isRoot = false,
 }) => {
+  const theme = useTheme();
   const isValid = problems.length === 0;
 
   const nodeTypeOptions = Object.values(Query.NodeType).map((type) => ({
@@ -65,7 +70,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
       }
     }
     return "none";
-  }, [isValid, isRoot]);
+  }, [theme, isValid, isRoot]);
 
   const nodeColor = useMemo(() => {
     if (isValid) {
@@ -76,20 +81,10 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
     } else {
       return theme.color.queryInvalid;
     }
-  }, [isValid, isRoot]);
+  }, [theme, isValid, isRoot]);
 
   return (
-    <div
-      style={{
-        borderColor: "white",
-        borderWidth: 2,
-        display: "flex",
-        alignItems: "center",
-        gap: "5px",
-        width: "100%",
-        height: "100%",
-      }}
-    >
+    <StyledNodeContainer>
       <StyledGraphNode
         style={{
           backgroundColor: nodeColor,
@@ -103,6 +98,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
             tooltipLabel="node type"
             width={30}
             noDropDownIndicator
+            disableTyping
             onChange={(newValue) => {
               dispatch({
                 type: QueryActionType.updateNodeType,
@@ -116,6 +112,8 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
         </StyledNodeTypeSelect>
         {(paramEntityClass || isRoot) && (
           <Dropdown.Multi.Entity
+            shortLabel
+            closeMenuOnSelect={false}
             value={node.params.entityClasses ?? [entitiesDict[0].value]}
             disableEmpty
             onChange={(newValue) => {
@@ -134,9 +132,17 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                     paramEntityClass.allowedClasses.includes(ecl.value)
                   )
             }
-            width={150}
+            width={
+              node.params.entityClasses && node.params.entityClasses.length > 4
+                ? 270
+                : node.params.entityClasses &&
+                  node.params.entityClasses.length > 0
+                ? node.params.entityClasses.length * 37 + 60
+                : 110
+            }
             noOptionsMessage="entity class"
             disabled={node.params.entityId !== undefined}
+            limitSelectedItems={Math.floor((270 - 110) / 37)}
           />
         )}
         {paramEntityId && (
@@ -151,7 +157,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                         type: QueryActionType.updateNodeEntityId,
                         payload: {
                           nodeId: node.id,
-                          newType: undefined,
+                          newEntityId: undefined,
                         },
                       });
                     },
@@ -202,7 +208,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
           }}
         />
       </div>
-      {node.gridX !== 0 && node.gridY !== 0 && (
+      {node.gridX !== 0 && node.gridY !== 0 && edge && (
         <div>
           <Button
             icon={<FaTrash style={{ fontSize: "16px", padding: "2px" }} />}
@@ -212,13 +218,13 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
               dispatch({
                 type: QueryActionType.removeEdge,
                 payload: {
-                  edgeId: edge?.id,
+                  edgeId: edge.id,
                 },
               });
             }}
           />
         </div>
       )}
-    </div>
+    </StyledNodeContainer>
   );
 };

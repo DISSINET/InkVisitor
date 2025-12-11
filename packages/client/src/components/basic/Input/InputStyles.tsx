@@ -170,7 +170,7 @@ export const StyledClearableInputButton = styled.div<StyledClearableInputButton>
   top: 50%;
   transform: translateY(-50%);
   svg {
-    color: ${({ theme }) => theme.color["info"]};
+    color: ${({ theme }) => theme.color["gray"][500]};
     opacity: 0.7;
   }
 `;

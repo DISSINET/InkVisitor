@@ -18,7 +18,7 @@ interface Box {
   color?: keyof ThemeColor;
   borderColor?: keyof ThemeColor;
   height?: number;
-  noPadding?: boolean;
+  noFrame?: boolean;
   isExpanded?: boolean;
   buttons?: ReactNode[];
   children?: ReactNode;
@@ -32,7 +32,7 @@ export const Box: React.FC<Box> = ({
   color,
   borderColor,
   height = 0,
-  noPadding = false,
+  noFrame = false,
   isExpanded = true,
   buttons,
   children,
@@ -69,7 +69,7 @@ export const Box: React.FC<Box> = ({
         $borderColor={borderColor}
         $isExpanded={isExpanded}
         $color={color}
-        $noPadding={noPadding}
+        $noFrame={noFrame}
         $hasHeaderClick={
           onHeaderClick !== undefined &&
           !disableOpenBoxHeaderClick &&
@@ -96,7 +96,7 @@ export const Box: React.FC<Box> = ({
         id={`box-content-${label.toLowerCase()}`}
         $color={color}
         $borderColor={borderColor}
-        $noPadding={noPadding}
+        $noFrame={noFrame}
         $isExpanded={isExpanded}
       >
         <StyledContentAnimationWrap

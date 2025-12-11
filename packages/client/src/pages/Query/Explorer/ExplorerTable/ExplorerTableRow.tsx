@@ -9,7 +9,6 @@ import {
   MdOutlineCheckBox,
   MdOutlineCheckBoxOutlineBlank,
 } from "react-icons/md";
-import { BeatLoader } from "react-spinners";
 import { ThemeContext } from "styled-components";
 
 import { classesAll } from "@shared/dictionaries/entity";
@@ -25,7 +24,14 @@ import {
   StyledFocusedCircle,
   StyledUserTag,
 } from "./ExplorerTableStyles";
-import { WIDTH_COLUMN_DEFAULT, WIDTH_COLUMN_FIRST } from "./types";
+import {
+  WIDTH_COLUMN_DEFAULT,
+  WIDTH_COLUMN_EUC,
+  WIDTH_COLUMN_FIRST,
+} from "./types";
+import { HiMiniDocumentMagnifyingGlass } from "react-icons/hi2";
+import { Button } from "components";
+import { clearRowCache } from "pages/Query/useQueryData";
 
 interface ExplorerTableRowProps {
   rowId: number;
@@ -42,8 +48,6 @@ interface ExplorerTableRowProps {
 
   isSelected?: boolean;
   isLastClicked?: boolean;
-  isExpanded?: boolean;
-  invalidateActiveQuery?: () => void;
 }
 const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
   rowId,
@@ -56,8 +60,6 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
 
   isSelected = false,
   isLastClicked = false,
-  isExpanded = false,
-  invalidateActiveQuery,
 }) => {
   const themeContext = useContext(ThemeContext);
   const handleCheckboxClick = React.useCallback(
@@ -80,13 +82,15 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
     }) => await api.entityUpdate(variables.entityId, variables.changes),
 
     onSuccess: () => {
-      if (invalidateActiveQuery) {
-        invalidateActiveQuery();
-      } else {
-        queryClient.invalidateQueries({
-          queryKey: ["query"],
-        });
-      }
+      // Clear the custom row cache store
+      clearRowCache();
+      // Invalidate React Query cache
+      queryClient.invalidateQueries({
+        queryKey: ["query"],
+      });
+      queryClient.removeQueries({
+        queryKey: ["query"],
+      });
     },
   });
 
@@ -217,6 +221,9 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
                   </React.Fragment>
                 );
               })}
+            {cellData.length > 3 && (
+              <span style={{ color: themeContext?.color.primary }}>...</span>
+            )}
           </div>
         );
       } else {
@@ -279,20 +286,17 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
           )}
         </StyledCheckboxWrapper>
 
-        <div
-          style={{
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-          }}
+        <Button
+          noBackground
+          noBorder
+          icon={
+            <HiMiniDocumentMagnifyingGlass
+              size={20}
+              color={themeContext?.color.primary}
+            />
+          }
           onClick={handleExpandClick}
-        >
-          {isExpanded ? (
-            <FaChevronCircleUp color={themeContext?.color.warning} />
-          ) : (
-            <FaChevronCircleDown color={themeContext?.color.primary} />
-          )}
-        </div>
+        />
 
         <span
           style={{
@@ -310,8 +314,11 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
             key={key}
             className="qt-col"
             style={{
-              width: WIDTH_COLUMN_DEFAULT,
-              minWidth: WIDTH_COLUMN_DEFAULT,
+              width:
+                column.type === Explore.EExploreColumnType.EUC
+                  ? WIDTH_COLUMN_EUC
+                  : WIDTH_COLUMN_DEFAULT,
+              minWidth: WIDTH_COLUMN_EUC,
               maxWidth: WIDTH_COLUMN_DEFAULT,
             }}
           >
@@ -320,8 +327,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
                 display: "flex",
                 justifyContent: "start",
                 alignItems: "center",
-                overflowX: "hidden",
-                overflowY: "hidden",
+                overflow: "hidden",
                 whiteSpace: "nowrap",
                 textOverflow: "ellipsis",
                 gap: "0.25rem",
@@ -347,7 +353,6 @@ function areRowsEqual(
   if (prevEntityId !== nextEntityId) return false;
   if (prev.isSelected !== next.isSelected) return false;
   if (prev.isLastClicked !== next.isLastClicked) return false;
-  if (prev.isExpanded !== next.isExpanded) return false;
   // Re-render when columns array identity changes (e.g., add/remove)
   if (prev.columns !== next.columns) return false;
   return true;

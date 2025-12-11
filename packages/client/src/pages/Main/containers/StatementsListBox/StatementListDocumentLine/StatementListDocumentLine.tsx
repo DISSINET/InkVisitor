@@ -165,11 +165,11 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
                 />
               </StyledInfoText>
               <Dropdown.Multi.Entity
-                shortLabel={true}
+                shortLabel
                 options={entitiesDict}
-                disableEmpty={true}
-                isClearable={true}
-                disableAny={true}
+                disableEmpty
+                isClearable
+                disableAny
                 closeMenuOnSelect={false}
                 onChange={setHlEntities}
                 value={hlEntities}

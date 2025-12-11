@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useReducer, useState } from "react";
 
 import { Query } from "@shared/types";
 import api from "api";
-import { Box, Button, Panel } from "components";
+import { Box, Button, Loader, Panel } from "components";
 import { LayoutSeparatorHorizontal } from "components/advanced";
 import { BiRefresh } from "react-icons/bi";
 import { toast } from "react-toastify";
@@ -16,7 +16,7 @@ import { MemoizedQueryBox } from "./Query/QueryBox";
 import { queryReducer, queryStateInitial } from "./Query/state";
 import { getAllEdges, getAllNodes } from "./Query/utils";
 import { QueryValidity, QueryValidityProblem } from "./types";
-import { useQueryData } from "./useQueryData";
+import { useQueryData, clearRowCache } from "./useQueryData";
 
 interface QueryPage {}
 export const QueryPage: React.FC<QueryPage> = ({}) => {
@@ -79,8 +79,18 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
   );
 
   const queryClient = useQueryClient();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
   const handleInvalidateQuery = () => {
+    setIsRefreshing(true);
+    // Clear the custom row cache store
+    clearRowCache();
+    // Invalidate React Query cache
     queryClient.invalidateQueries({
+      queryKey: ["query"],
+    });
+    // Remove all query-related queries to force refetch
+    queryClient.removeQueries({
       queryKey: ["query"],
     });
   };
@@ -100,7 +110,15 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
   };
 
   const invalidateActiveQuery = () => {
-    queryClient.invalidateQueries({
+    // Clear the custom row cache store for this specific signature
+    clearRowCache(stableSignature);
+    // Remove queries to force refetch (invalidateQueries won't work with staleTime: Infinity)
+    queryClient.removeQueries({
+      queryKey: ["query", stableSignature],
+      exact: false,
+    });
+    // Force refetch of the active query
+    queryClient.refetchQueries({
       queryKey: ["query", stableSignature],
       exact: false,
     });
@@ -160,6 +178,16 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     queryStateValidity,
   });
 
+  // Clear refresh flag when fetch completes
+  useEffect(() => {
+    if (isRefreshing && !queryIsFetching) {
+      setIsRefreshing(false);
+    }
+  }, [isRefreshing, queryIsFetching]);
+
+  // Show loader only when refresh button was clicked and fetching
+  const shouldShowLoader = isRefreshing && queryIsFetching;
+
   return (
     <>
       {querySeparatorYPosition > 0 && (
@@ -175,6 +203,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
 
       <Panel width={layoutWidth}>
         <Box
+          noFrame
           borderColor="white"
           height={querySeparatorYPosition}
           label="Search"
@@ -188,11 +217,11 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
           />
         </Box>
         <Box
+          noFrame
           borderColor="white"
           height={contentHeight - querySeparatorYPosition}
           label="Explorer"
           buttons={[
-            // doesn't refresh the detail data for individual entities
             <Button
               key="refresh queries"
               tooltipLabel="refresh data"
@@ -214,7 +243,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
             stableSignature={stableSignature}
             getCachedEntity={getCachedEntity}
           />
-          {/* <Loader show={queryIsFetching} /> */}
+          <Loader show={shouldShowLoader} />
         </Box>
       </Panel>
     </>

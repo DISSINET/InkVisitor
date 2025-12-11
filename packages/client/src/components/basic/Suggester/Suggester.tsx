@@ -421,6 +421,12 @@ export const Suggester: React.FC<Suggester> = ({
           <FloatingPortal id="page">
             <StyledSuggesterList
               ref={refs.setFloating}
+              data-suggester-portal="true"
+              onMouseDown={(event) => {
+                // Prevent annotator click-away handlers from closing while interacting
+                // with the suggester dropdown rendered in a portal. (e.g. annotator highlight menu)
+                event.stopPropagation();
+              }}
               onMouseEnter={() => setIsHovered(true)}
               onMouseLeave={() => setIsHovered(false)}
               style={{

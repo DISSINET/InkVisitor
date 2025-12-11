@@ -30,10 +30,10 @@ import {
 } from "components";
 import { CMetaProp } from "constructors";
 
-import { useResizeObserver } from "hooks";
+import { useResizeObserver, useTheme } from "hooks";
 import { ExploreAction, ExploreActionType } from "../state";
 import { ExplorerTableDetail } from "./ExplorerTableDetail/ExplorerTableDetail";
-import ExplorerTableNewColumnPanel from "./ExplorerTableNewColumnPanel";
+import ExplorerTableNewColumnPanel from "./ExplorerTableNewColumnPanel/ExplorerTableNewColumnPanel";
 import {
   StyledBody,
   StyledHeader,
@@ -45,6 +45,7 @@ import {
   batchOptions,
   HEIGHT_ROW_DEFAULT,
   WIDTH_COLUMN_DEFAULT,
+  WIDTH_COLUMN_EUC,
   WIDTH_COLUMN_FIRST,
 } from "./types";
 
@@ -56,15 +57,16 @@ const OVERSCAN_ROWS = 10;
 const SCROLL_WINDOW_UPDATE_DEBOUNCE_MS = 150;
 
 // light CSS classes (avoid dynamic styled props in hot path)
-import { useTheme } from "styled-components";
 import "../../styles.css";
 import ExplorerTableRow from "./ExplorerTableRow";
+import { EntityTag } from "components/advanced/EntityTag/EntityTag";
 
 // Memoized header to avoid unnecessary re-renders during scroll
 const MemoizedTableHeader: React.FC<{
   columns: Explore.IExploreColumn[];
   onRemoveColumn: (id: string) => void;
 }> = React.memo(({ columns, onRemoveColumn }) => {
+  const theme = useTheme();
   return (
     <StyledHeader>
       <div
@@ -83,8 +85,11 @@ const MemoizedTableHeader: React.FC<{
             key={key}
             className="qt-col qt-col-header"
             style={{
-              width: WIDTH_COLUMN_DEFAULT,
-              minWidth: WIDTH_COLUMN_DEFAULT,
+              width:
+                column.type === Explore.EExploreColumnType.EUC
+                  ? WIDTH_COLUMN_EUC
+                  : WIDTH_COLUMN_DEFAULT,
+              minWidth: WIDTH_COLUMN_EUC,
               maxWidth: WIDTH_COLUMN_DEFAULT,
               display: "flex",
               alignItems: "center",
@@ -99,7 +104,7 @@ const MemoizedTableHeader: React.FC<{
                 noBorder
                 noBackground
                 inverted
-                icon={<FaEyeSlash color={"white"} />}
+                icon={<FaEyeSlash color={theme.color.white} />}
                 onClick={() => onRemoveColumn(column.id)}
                 tooltipLabel="remove column"
               />
@@ -111,13 +116,6 @@ const MemoizedTableHeader: React.FC<{
   );
 });
 
-const initialNewColumn: Explore.IExploreColumn = {
-  id: uuidv4(),
-  name: "",
-  type: Explore.EExploreColumnType.EPV,
-  editable: false,
-  params: {},
-};
 interface ExplorerTable {
   state: Explore.IExplore;
   dispatch: React.Dispatch<ExploreAction>;
@@ -156,15 +154,9 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   const { entities, total: incomingTotal } = data ??
     lastData ?? { entities: [], total: 0 };
 
-  // console.log(
-  //   "entities",
-  //   entities?.map((e) => e.entity.labels[0])
-  // );
-
   const { columns, limit, offset } = state;
 
   const [total, setTotal] = useState(0);
-  // const totalPages = useMemo(() => Math.ceil(total / limit), [total, limit]);
 
   const [rowLastClicked, setRowLastClicked] = useState<number>(-1);
   const [rowsSelected, setRowsSelected] = useState<number[]>([]);
@@ -222,69 +214,15 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     },
   });
 
-  const [columnName, setColumnName] = useState(initialNewColumn.name);
-  const [columnType, setColumnType] = useState(initialNewColumn.type);
-  const [editable, setEditable] = useState<boolean>(initialNewColumn?.editable);
-
-  const [propertyType, setPropertyType] = useState<IEntity | undefined>(
-    undefined
-  );
-  const propertyTypeId = useMemo<string>(() => {
-    return propertyType?.id || "";
-  }, [propertyType]);
-
   const [isNewColumnOpen, setIsNewColumnOpen] = useState(false);
 
-  const getNewColumn = (): Explore.IExploreColumn => {
-    return {
-      id: uuidv4(),
-      name: columnName.length
-        ? columnName
-        : Explore.EExploreColumnTypeLabels[columnType],
-      type: columnType,
-      editable: editable,
-      params: { propertyType: propertyTypeId },
-    };
-  };
-
-  const handleClearLocalState = () => {
-    setColumnName(initialNewColumn.name);
-    setColumnType(initialNewColumn.type);
-    setEditable(initialNewColumn.editable);
-    setPropertyType(undefined);
-  };
-
-  const handleCreateColumn = () => {
+  const handleCreateColumn = (column: Explore.IExploreColumn) => {
     dispatch({
       type: ExploreActionType.addColumn,
-      payload: getNewColumn(),
+      payload: column,
     });
-    handleClearLocalState();
     setIsNewColumnOpen(false);
   };
-
-  const handleFirstPage = () => {
-    dispatch({ type: ExploreActionType.setOffset, payload: 0 });
-  };
-
-  const handleLastPage = () => {
-    const lastPageOffset = Math.floor((total - 1) / limit) * limit;
-    dispatch({ type: ExploreActionType.setOffset, payload: lastPageOffset });
-  };
-
-  const handleNextPage = () => {
-    if (offset + limit < total) {
-      dispatch({ type: ExploreActionType.setOffset, payload: offset + limit });
-    }
-  };
-
-  const handlePreviousPage = () => {
-    if (offset - limit >= 0) {
-      dispatch({ type: ExploreActionType.setOffset, payload: offset - limit });
-    }
-  };
-
-  // Sorting controls are currently disabled; toggleSortDirection removed
 
   const handleEditColumn = useCallback(
     (rowEntity: IEntity, columnId: string, newEntity: IEntity) => {
@@ -349,10 +287,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     [columns]
   );
 
-  // const renderTableFooter = () => {
-  //   return <StyledTableFooter>{renderPaging()}</StyledTableFooter>;
-  // };
-
   const handleRowExpand = useCallback((rowId: number) => {
     setDetailsRowIndex(rowId);
   }, []);
@@ -363,7 +297,8 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     height: contentHeight,
   } = useResizeObserver<HTMLDivElement>();
 
-  const spaceTableBody = heightBox - 150;
+  const headerHeight = 100;
+  const heightTableBody = heightBox - headerHeight;
 
   const handleRowSelect = useCallback(
     (rowId: number, isWithShift: boolean = false) => {
@@ -417,8 +352,15 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     [dispatch]
   );
 
+  // created by columns are smaller than the default columns, subtract the difference
   const widthTable = useMemo(() => {
-    return columns.length * WIDTH_COLUMN_DEFAULT + WIDTH_COLUMN_FIRST;
+    return (
+      columns.length * WIDTH_COLUMN_DEFAULT +
+      WIDTH_COLUMN_FIRST -
+      columns.filter((column) => column.type === Explore.EExploreColumnType.EUC)
+        .length *
+        (WIDTH_COLUMN_DEFAULT - WIDTH_COLUMN_EUC)
+    );
   }, [columns]);
 
   const windowUpdateTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
@@ -440,7 +382,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       const isOdd = Boolean(index % 2 === 0);
 
       const isSelected = rowsSelectedSet.has(index);
-      const isExpanded = false;
       const dataOffset = dataSourceOffset;
       const itemIndex = index - dataOffset;
 
@@ -462,7 +403,12 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
 
       return (
         <div
-          style={{ ...style, width: widthTable, height: HEIGHT_ROW_DEFAULT }}
+          style={{
+            ...style,
+            width: widthTable,
+            minWidth: "100%",
+            height: HEIGHT_ROW_DEFAULT,
+          }}
           className={`qt-row ${isOdd ? " qt-row-odd" : ""}${
             isSelected ? " qt-row-selected" : ""
           }${isPlaceholder ? " qt-placeholder" : ""}`}
@@ -470,7 +416,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           {isPlaceholder ? (
             <div
               style={{
-                color: themeContext?.color.query3,
+                color: themeContext?.color.primary,
                 display: "flex",
                 fontSize: themeContext?.fontSize.sm,
                 flexDirection: "row",
@@ -480,9 +426,23 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                 width: "100%",
               }}
             >
+              <div
+                style={{
+                  position: "relative",
+                  display: "flex",
+                  width: "4rem",
+                }}
+              >
+                <Loader
+                  size={5}
+                  color={"primary"}
+                  show
+                  loaderStyle="beat"
+                  noBackground
+                />
+              </div>
               <div>loading row</div>
               <div style={{ fontWeight: "bold" }}>{placeholderLabel}</div>
-              <Loader size={16} color={"query3"} show={true} />
             </div>
           ) : (
             <ExplorerTableRow
@@ -494,8 +454,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
               onExpand={handleRowExpand}
               isSelected={isSelected}
               isLastClicked={rowLastClicked === index}
-              isExpanded={isExpanded}
-              invalidateActiveQuery={invalidateActiveQuery}
             />
           )}
         </div>
@@ -523,7 +481,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     const targetEnd = Math.min(total - 1, visibleEnd + OVERSCAN_ROWS);
     const targetLimit = Math.max(1, targetEnd - targetStart + 1);
 
-    const approxVisible = Math.ceil(spaceTableBody / HEIGHT_ROW_DEFAULT);
+    const approxVisible = Math.ceil(heightTableBody / HEIGHT_ROW_DEFAULT);
     const maxFetch = Math.max(approxVisible + 2 * OVERSCAN_ROWS, 30);
     const cappedLimit = Math.min(targetLimit, maxFetch, total);
 
@@ -550,34 +508,14 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     }
   };
 
-  // horizontal scroll is handled by outer Scrollbar only
-
   return (
-    <div
-      style={{
-        height: heightBox - 20,
-        margin: "1rem",
-        overflow: "hidden",
-      }}
-      ref={contentRef}
-    >
-      {/* {isLoading && (
-        <div
-          style={{
-            position: "absolute",
-            right: 24,
-            top: 24,
-            display: "flex",
-            alignItems: "center",
-            gap: "0.4rem",
-            pointerEvents: "none",
-          }}
-        >
-          <BeatLoader size={6} margin={3} color="#bbb" />
-          <span style={{ fontSize: 12, color: "#bbb" }}>fetching…</span>
-        </div>
-      )} */}
-      <StyledTableWrapper>
+    <>
+      <StyledTableWrapper
+        style={{
+          height: heightBox - 20,
+        }}
+        ref={contentRef}
+      >
         <ExploreTableControl
           setIsNewColumnOpen={setIsNewColumnOpen}
           isNewColumnOpen={isNewColumnOpen}
@@ -594,13 +532,14 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
         <div
           style={{
             width: contentWidth,
+            minWidth: "100%",
             height: heightBox - 70,
             overflowX: "auto",
             overflowY: "hidden",
           }}
         >
           {/* HEADER (sticky at top of vertical area, shared horizontal scroll) */}
-          <div style={{ width: widthTable }}>
+          <div style={{ width: widthTable, minWidth: "100%" }}>
             {/* Alternatively, use the memoized header component below to minimize re-renders */}
             <MemoizedTableHeader
               columns={columns}
@@ -610,7 +549,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
             {/* BODY (List handles Y; shares X with header via parent Scrollbar) */}
             <StyledBody
               style={{
-                height: spaceTableBody,
+                height: heightTableBody,
               }}
             >
               <List
@@ -634,39 +573,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       {/* DETAILS MODAL */}
       {detailsRowIndex !== null &&
         items[detailsRowIndex - renderWindow.offset] && (
-          // <div
-          //   style={{
-          //     position: "fixed",
-          //     inset: 0,
-          //     background: "rgba(0,0,0,0.5)",
-          //     display: "flex",
-          //     alignItems: "center",
-          //     justifyContent: "center",
-          //     zIndex: 1000,
-          //   }}
-          //   onClick={() => setDetailsRowIndex(null)}
-          // >
-          //   <div
-          //     style={{
-          //       background: "#1e1e1e",
-          //       color: "#fff",
-          //       borderRadius: 8,
-          //       padding: "1rem",
-          //       maxWidth: "80vw",
-          //       maxHeight: "80vh",
-          //       overflow: "auto",
-          //       boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
-          //     }}
-          //     onClick={(e) => e.stopPropagation()}
-          //   >
-          //     <div style={{ display: "flex", justifyContent: "flex-end" }}>
-          // <Button
-          //   label="Close"
-          //   onClick={() => setDetailsRowIndex(null)}
-          //   noBorder
-          //   inverted
-          // />
-          // </div>
           <Modal
             showModal={
               detailsRowIndex !== null &&
@@ -676,7 +582,21 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
             onClose={() => setDetailsRowIndex(null)}
           >
             <ModalHeader
-              title="Detail"
+              title="Entity Detail"
+              content={
+                <div style={{ display: "grid" }}>
+                  <EntityTag
+                    fullWidth
+                    entity={
+                      (
+                        items[
+                          detailsRowIndex - renderWindow.offset
+                        ] as IResponseQueryEntity
+                      )?.entity
+                    }
+                  />
+                </div>
+              }
               onClose={() => setDetailsRowIndex(null)}
             />
             <ModalContent enableScroll noPadding>
@@ -696,8 +616,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
               <Button label="Close" onClick={() => setDetailsRowIndex(null)} />
             </ModalFooter>
           </Modal>
-          //   </div>
-          // </div>
         )}
 
       {/* NEW COLUMN */}
@@ -708,6 +626,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           onCreateColumn={handleCreateColumn}
         />
       </div>
-    </div>
+    </>
+    // </div>
   );
 };

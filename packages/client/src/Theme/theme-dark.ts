@@ -65,6 +65,13 @@ const darkTheme = {
     treeNodeRead: "#718096",
     treeNodeWrite: "#f7fafc",
 
+    /* query explorer colors */
+    query1: "#1E2A3A",
+    query2: "#6174C2",
+    query3: "#324185",
+    query4: "#1A2332",
+    queryInvalid: "#EF4444",
+
     tableOddRow: "#0A1B2E",
     tableOpened: "#0b3a59",
     tableSelection: "#4c82a1",

@@ -1,14 +1,8 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import { EntityEnums } from "@shared/enums";
 import { IDocument } from "@shared/types";
-import theme from "Theme/theme";
+import api from "api";
 import {
   Button,
   ButtonGroup,
@@ -24,6 +18,7 @@ import {
   FaRegSquare,
 } from "react-icons/fa";
 import { MdLibraryAddCheck, MdOutlineLibraryAddCheck } from "react-icons/md";
+import { useTheme } from "styled-components";
 import { EntityColors } from "types";
 import { getShortLabelByLetterCount } from "utils/utils";
 import {
@@ -33,7 +28,6 @@ import {
   StyledExportDocumentContainer,
   StyledExportStatsSection,
 } from "./DocumentModalStyles";
-import api from "api";
 
 interface DocumentModalExportProps {
   document: IDocument | undefined;
@@ -43,6 +37,7 @@ const DocumentModalExport: React.FC<DocumentModalExportProps> = ({
   onClose,
   document,
 }) => {
+  const theme = useTheme();
   const [show, setShow] = useState(false);
 
   useEffect(() => {

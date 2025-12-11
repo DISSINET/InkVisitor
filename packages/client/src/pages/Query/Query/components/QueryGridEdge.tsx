@@ -8,8 +8,8 @@ import {
   QUERY_GRID_WIDTH,
   QueryValidityProblem,
 } from "../../types";
-import theme from "Theme/theme";
 import { Query } from "@shared/types/query";
+import { useTheme } from "styled-components";
 
 interface QueryGridEdgeProps {
   node: INodeItem;
@@ -24,6 +24,7 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
   dispatch,
   problems,
 }) => {
+  const theme = useTheme();
   const validEdgesTypes = Query.findValidEdgeTypesForSourceNode(node);
 
   const edgeTypeOptions = validEdgesTypes.map((type) => ({
@@ -96,13 +97,20 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
             options={edgeTypeOptions}
             width={200}
             noDropDownIndicator
-            value={edge?.type}
+            value={edge.type}
             onChange={(newValue) => {
               dispatch({
                 type: QueryActionType.updateEdgeType,
                 payload: {
-                  edgeId: edge?.id,
+                  edgeId: edge.id,
                   newType: newValue,
+                },
+              });
+              dispatch({
+                type: QueryActionType.updateNodeEntityId,
+                payload: {
+                  nodeId: node.id,
+                  newEntityId: undefined,
                 },
               });
             }}

@@ -1,12 +1,27 @@
-import React, { useMemo, useState } from "react";
-import { GrClose } from "react-icons/gr";
-import { TbColumnInsertRight } from "react-icons/tb";
 import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import { Explore } from "@shared/types/query";
 import { Button, ButtonGroup, Checkbox, Input } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { GrClose } from "react-icons/gr";
+import { MdOutlineEdit } from "react-icons/md";
+import { TbColumnInsertRight } from "react-icons/tb";
 import { v4 as uuidv4 } from "uuid";
+import {
+  StyledCloseIconWrap,
+  StyledContent,
+  StyledHeader,
+  StyledLabel,
+  StyledPanel,
+  StyledValue,
+} from "./ExplorerTableNewColumnPanelStyles";
 
 interface Props {
   open: boolean;
@@ -27,6 +42,7 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
   onClose,
   onCreateColumn,
 }) => {
+  const panelRef = useRef<HTMLDivElement>(null);
   const [name, setName] = useState(initial.name);
   const [type, setType] = useState(initial.type);
   const [editable, setEditable] = useState<boolean>(initial.editable);
@@ -52,45 +68,77 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
     };
     onCreateColumn(col);
     // reset local state
+    handleClose();
+  };
+
+  const handleClose = useCallback(() => {
     setName("");
     setType(Explore.EExploreColumnType.EPV);
     setEditable(false);
     setPropertyType(undefined);
     onClose();
-  };
+  }, [onClose]);
 
-  if (!open) return null;
+  // Click outside detection
+  // useEffect(() => {
+  //   const handleClickOutside = (event: MouseEvent) => {
+  //     const target = event.target as HTMLElement;
+
+  //     // Check if click is on the toggle button or its children
+  //     const isToggleButton = target.closest('[data-new-column-toggle="true"]');
+
+  //     if (
+  //       panelRef.current &&
+  //       !panelRef.current.contains(target) &&
+  //       !isToggleButton
+  //     ) {
+  //       handleClose();
+  //     }
+  //   };
+
+  //   if (open) {
+  //     // Add event listener when panel is open
+  //     document.addEventListener("mousedown", handleClickOutside);
+  //   }
+
+  //   return () => {
+  //     // Cleanup event listener on unmount or when panel closes
+  //     document.removeEventListener("mousedown", handleClickOutside);
+  //   };
+  // }, [open, handleClose]);
+
+  if (!open) return <React.Fragment />;
 
   return (
-    <div className="qt-newcol">
-      <div className="qt-newcol-header">
+    <StyledPanel ref={panelRef}>
+      <StyledHeader>
         <div style={{ display: "flex", alignItems: "center" }}>
           <TbColumnInsertRight size={17} />
           <p style={{ marginLeft: "0.5rem" }}>New column</p>
         </div>
-        <div>
+        <StyledCloseIconWrap>
           <Button
             icon={<GrClose size={14} />}
-            onClick={onClose}
+            onClick={handleClose}
             noBorder
             color="black"
             noBackground
             inverted
           />
-        </div>
-      </div>
-      <div className="qt-newcol-content">
-        <div className="qt-newcol-label">Column name</div>
-        <div className="qt-newcol-value">
+        </StyledCloseIconWrap>
+      </StyledHeader>
+      <StyledContent>
+        <StyledLabel>Column name</StyledLabel>
+        <StyledValue>
           <Input
             width="full"
             value={name}
             onChangeFn={(v) => setName(v)}
             changeOnType
           />
-        </div>
-        <div className="qt-newcol-label">Column type</div>
-        <div className="qt-newcol-value">
+        </StyledValue>
+        <StyledLabel>Column type</StyledLabel>
+        <StyledValue>
           <Dropdown.Single.Basic
             width="full"
             value={type}
@@ -111,11 +159,11 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
               })}
             onChange={(v) => setType(v)}
           />
-        </div>
+        </StyledValue>
         {type === Explore.EExploreColumnType.EPV && (
           <>
-            <div className="qt-newcol-label">Property type</div>
-            <div className="qt-newcol-value">
+            <StyledLabel>Property type</StyledLabel>
+            <StyledValue>
               {propertyType ? (
                 <EntityTag
                   fullWidth
@@ -129,24 +177,24 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
                 <EntitySuggester
                   categoryTypes={[EntityEnums.Class.Concept]}
                   onPicked={(e) => setPropertyType(e)}
+                  inputWidth={"full"}
                 />
               )}
-            </div>
+            </StyledValue>
           </>
         )}
-        <div className="qt-newcol-label">
+        <StyledLabel>
           <span style={{ display: "inline-flex", alignItems: "center" }}>
-            <span style={{ marginRight: "0.3rem" }}>
-              {/* icon is small; leave it inline to avoid styled overhead */}
-              <span>✎</span>
-            </span>
             Editable
+            <span style={{ marginLeft: "0.3rem" }}>
+              <MdOutlineEdit size={14} />
+            </span>
           </span>
-        </div>
-        <div className="qt-newcol-value">
+        </StyledLabel>
+        <StyledValue>
           <Checkbox value={editable} onChangeFn={(v) => setEditable(v)} />
-        </div>
-      </div>
+        </StyledValue>
+      </StyledContent>
       <span
         style={{
           width: "100%",
@@ -155,7 +203,7 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
         }}
       >
         <ButtonGroup style={{ marginLeft: "1rem", marginTop: "1rem" }}>
-          <Button color="query2" label="cancel" onClick={onClose} />
+          <Button color="warning" label="cancel" onClick={handleClose} />
           <Button
             label="create column"
             onClick={handleCreate}
@@ -163,7 +211,7 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
           />
         </ButtonGroup>
       </span>
-    </div>
+    </StyledPanel>
   );
 };
 
