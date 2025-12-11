@@ -157,7 +157,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                         type: QueryActionType.updateNodeEntityId,
                         payload: {
                           nodeId: node.id,
-                          newType: undefined,
+                          newEntityId: undefined,
                         },
                       });
                     },

@@ -106,6 +106,13 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
                   newType: newValue,
                 },
               });
+              dispatch({
+                type: QueryActionType.updateNodeEntityId,
+                payload: {
+                  nodeId: node.id,
+                  newEntityId: undefined,
+                },
+              });
             }}
           />
         </div>
