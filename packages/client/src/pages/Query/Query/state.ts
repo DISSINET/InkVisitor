@@ -2,34 +2,32 @@ import { EntityEnums } from "@shared/enums";
 import { Query } from "@shared/types";
 import { v4 as uuidv4 } from "uuid";
 import { getAllEdges, getAllNodes } from "./utils";
-import { update } from "@react-spring/web";
 
 const queryStateInitial: Query.INode = {
   type: Query.NodeType.E,
   id: "root",
   params: {
-    entityClasses: [EntityEnums.Class.Person],
-    label: "",
+    entityClasses: [EntityEnums.Class.Concept],
   },
   operator: Query.NodeOperator.And,
   edges: [
-    {
-      type: Query.EdgeType["EP:T"],
-      params: {},
-      logic: Query.EdgeLogic.Positive,
-      id: "e1",
-      node: {
-        id: "n1",
-        type: Query.NodeType.E,
-        params: {
-          entityId: "4ce5e669-d421-40c9-b1ce-f476fdd171fe", //sex
-          entityClasses: [],
-          label: "",
-        },
-        operator: Query.NodeOperator.And,
-        edges: [],
-      },
-    },
+    // {
+    //   type: Query.EdgeType["EP:T"],
+    //   params: {},
+    //   logic: Query.EdgeLogic.Positive,
+    //   id: "e1",
+    //   node: {
+    //     id: "n1",
+    //     type: Query.NodeType.E,
+    //     params: {
+    //       entityId: "4ce5e669-d421-40c9-b1ce-f476fdd171fe", //sex
+    //       entityClasses: [],
+    //       label: "",
+    //     },
+    //     operator: Query.NodeOperator.And,
+    //     edges: [],
+    //   },
+    // },
   ],
 };
 

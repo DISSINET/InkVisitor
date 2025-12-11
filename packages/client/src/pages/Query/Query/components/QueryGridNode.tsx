@@ -114,7 +114,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
           <Dropdown.Multi.Entity
             shortLabel
             closeMenuOnSelect={false}
-            value={node.params.entityClasses ?? [entitiesDict[0].value]}
+            value={node.params.entityClasses ?? []}
             disableEmpty
             onChange={(newValue) => {
               dispatch({

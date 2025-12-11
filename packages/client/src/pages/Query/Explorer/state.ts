@@ -3,29 +3,29 @@ import { Explore } from "@shared/types/query";
 const exploreStateInitial: Explore.IExplore = {
   view: { mode: Explore.EViewMode.Table },
   columns: [
-    {
-      id: "1",
-      name: "Sex",
-      type: Explore.EExploreColumnType.EPV,
-      editable: true,
-      params: {
-        propertyType: "4ce5e669-d421-40c9-b1ce-f476fdd171fe",
-      },
-    },
-    {
-      id: "2",
-      name: "Creator",
-      type: Explore.EExploreColumnType.EUC,
-      editable: false,
-      params: {},
-    },
-    {
-      id: "3",
-      name: "Types",
-      type: Explore.EExploreColumnType.EPT,
-      editable: true,
-      params: {},
-    },
+    // {
+    //   id: "1",
+    //   name: "Sex",
+    //   type: Explore.EExploreColumnType.EPV,
+    //   editable: true,
+    //   params: {
+    //     propertyType: "4ce5e669-d421-40c9-b1ce-f476fdd171fe",
+    //   },
+    // },
+    // {
+    //   id: "2",
+    //   name: "Creator",
+    //   type: Explore.EExploreColumnType.EUC,
+    //   editable: false,
+    //   params: {},
+    // },
+    // {
+    //   id: "3",
+    //   name: "Types",
+    //   type: Explore.EExploreColumnType.EPT,
+    //   editable: true,
+    //   params: {},
+    // },
   ],
   sort: undefined,
   filters: [],
