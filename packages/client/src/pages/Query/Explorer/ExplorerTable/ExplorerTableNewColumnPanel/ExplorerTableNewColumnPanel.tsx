@@ -3,13 +3,7 @@ import { IEntity } from "@shared/types";
 import { Explore } from "@shared/types/query";
 import { Button, ButtonGroup, Checkbox, Input } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { GrClose } from "react-icons/gr";
 import { MdOutlineEdit } from "react-icons/md";
 import { TbColumnInsertRight } from "react-icons/tb";
@@ -78,34 +72,6 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
     setPropertyType(undefined);
     onClose();
   }, [onClose]);
-
-  // Click outside detection
-  // useEffect(() => {
-  //   const handleClickOutside = (event: MouseEvent) => {
-  //     const target = event.target as HTMLElement;
-
-  //     // Check if click is on the toggle button or its children
-  //     const isToggleButton = target.closest('[data-new-column-toggle="true"]');
-
-  //     if (
-  //       panelRef.current &&
-  //       !panelRef.current.contains(target) &&
-  //       !isToggleButton
-  //     ) {
-  //       handleClose();
-  //     }
-  //   };
-
-  //   if (open) {
-  //     // Add event listener when panel is open
-  //     document.addEventListener("mousedown", handleClickOutside);
-  //   }
-
-  //   return () => {
-  //     // Cleanup event listener on unmount or when panel closes
-  //     document.removeEventListener("mousedown", handleClickOutside);
-  //   };
-  // }, [open, handleClose]);
 
   if (!open) return <React.Fragment />;
 

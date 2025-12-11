@@ -135,17 +135,13 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
         </div>
       </div>
 
-      <div data-new-column-toggle="true">
-        <Button
-          icon={<TbColumnInsertRight size={17} />}
-          label="new column"
-          color="primary"
-          inverted={!isNewColumnOpen}
-          onClick={() => {
-            setIsNewColumnOpen(!isNewColumnOpen);
-          }}
-        />
-      </div>
+      <Button
+        icon={<TbColumnInsertRight size={17} />}
+        label="new column"
+        color="primary"
+        inverted={!isNewColumnOpen}
+        onClick={() => setIsNewColumnOpen(!isNewColumnOpen)}
+      />
     </StyledTableControl>
   );
 };
