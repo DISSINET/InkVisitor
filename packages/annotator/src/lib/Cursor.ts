@@ -250,7 +250,7 @@ export default class Cursor
       // selection active, iterate over displayed lines
       for (
         let i = 0;
-        i < Math.min(viewport.lineEnd, text.noLines) - viewport.lineStart;
+        i <= Math.min(viewport.lineEnd, text.noLines) - viewport.lineStart;
         i++
       ) {
         const currY = viewport.lineStart + i;

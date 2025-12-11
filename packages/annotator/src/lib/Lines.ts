@@ -52,9 +52,11 @@ export class Lines {
 
     this.ctx.font = this.font;
     this.ctx.fillStyle = this.fontColor;
+
     for (
       let renderLine = 1;
-      renderLine <= viewport.lineEnd - viewport.lineStart;
+      renderLine <= viewport.noLines + 1 &&
+      (viewport.lineEnd <= viewport.noLines || renderLine <= viewport.noLines);
       renderLine++
     ) {
       this.ctx.fillText(
