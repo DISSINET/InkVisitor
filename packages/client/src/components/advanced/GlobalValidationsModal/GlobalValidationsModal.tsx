@@ -280,7 +280,6 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
                       label="new validation rule"
                       color="primary"
                       onClick={initValidationRule}
-                      disabled={updateEntityMutation.isPending}
                     />
                   </span>
                 </StyledSectionHeader>
@@ -318,7 +317,6 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
                     label="new validation rule"
                     color="primary"
                     onClick={initValidationRule}
-                    disabled={updateEntityMutation.isPending}
                   />
                 </div>
               </>
