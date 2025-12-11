@@ -79,7 +79,10 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
   );
 
   const queryClient = useQueryClient();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
   const handleInvalidateQuery = () => {
+    setIsRefreshing(true);
     // Clear the custom row cache store
     clearRowCache();
     // Invalidate React Query cache
@@ -175,6 +178,16 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     queryStateValidity,
   });
 
+  // Clear refresh flag when fetch completes
+  useEffect(() => {
+    if (isRefreshing && !queryIsFetching) {
+      setIsRefreshing(false);
+    }
+  }, [isRefreshing, queryIsFetching]);
+
+  // Show loader only when refresh button was clicked and fetching
+  const shouldShowLoader = isRefreshing && queryIsFetching;
+
   return (
     <>
       {querySeparatorYPosition > 0 && (
@@ -230,7 +243,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
             stableSignature={stableSignature}
             getCachedEntity={getCachedEntity}
           />
-          <Loader show={queryIsFetching} />
+          <Loader show={shouldShowLoader} />
         </Box>
       </Panel>
     </>
