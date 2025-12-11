@@ -221,6 +221,9 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
                   </React.Fragment>
                 );
               })}
+            {cellData.length > 3 && (
+              <span style={{ color: themeContext?.color.primary }}>...</span>
+            )}
           </div>
         );
       } else {
