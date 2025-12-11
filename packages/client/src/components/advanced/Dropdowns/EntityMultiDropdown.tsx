@@ -173,15 +173,19 @@ const ValueContainer = ({
 
     const limit = props.selectProps.limitSelectedItems;
     // Show limited number of entities and add ellipsis if there are more
-    const visibleChildren = limit
-      ? filteredChildren.slice(0, limit)
-      : filteredChildren;
     const remainingCount = limit ? filteredChildren.length - limit : 0;
+
+    // If there's only 1 remaining, show it instead of "+1 more"
+    // Only show "+X more" when there are 2 or more remaining
+    const visibleChildren = limit
+      ? filteredChildren.slice(0, remainingCount === 1 ? limit + 1 : limit)
+      : filteredChildren;
+    const displayRemainingCount = remainingCount > 1 ? remainingCount : 0;
 
     toBeRendered = [
       [
         ...visibleChildren,
-        ...(remainingCount > 0
+        ...(displayRemainingCount > 0
           ? [
               <div
                 key="ellipsis"
@@ -190,7 +194,7 @@ const ValueContainer = ({
                   color: theme.color.primary,
                 }}
               >
-                +{remainingCount} more
+                +{displayRemainingCount} more
               </div>,
             ]
           : []),
