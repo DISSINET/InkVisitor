@@ -1,7 +1,7 @@
 import { DrawingOptions } from "./Annotator";
 import Text from "./Text";
 import Viewport from "./Viewport";
-import { EditMode, HighlightMode } from "./constants";
+import { HighlightMode } from "./constants";
 
 // Absolute coordinates point to virtual position not limited by viewport - first line is first line of input
 export interface IAbsCoordinates {
@@ -145,7 +145,6 @@ export default class Highlighter {
     viewport: Viewport,
     text: Text,
     drawingOptions: DrawingOptions,
-    editMode: EditMode
   ) {
     const { charsAtLine } = drawingOptions;
 

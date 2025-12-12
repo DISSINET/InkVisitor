@@ -231,7 +231,6 @@ export default class Cursor
     viewport: Viewport,
     text: Text,
     drawingOptions: DrawingOptions,
-    editMode: EditMode
   ) {
     if (this.xLine === -1 && this.yLine === -1) {
       return;
@@ -251,7 +250,7 @@ export default class Cursor
       // selection active, iterate over displayed lines
       for (
         let i = 0;
-        i < Math.min(viewport.lineEnd, text.noLines) - viewport.lineStart;
+        i <= Math.min(viewport.lineEnd, text.noLines) - viewport.lineStart;
         i++
       ) {
         const currY = viewport.lineStart + i;
