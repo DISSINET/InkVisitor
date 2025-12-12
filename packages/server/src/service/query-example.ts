@@ -3,7 +3,7 @@ import { Query } from "@shared/types";
 
 const exampleQuery: Query.INode = {
   type: Query.NodeType.E,
-  params: { classes: [EntityEnums.Class.Object] },
+  params: { entityClasses: [EntityEnums.Class.Object] },
   operator: Query.NodeOperator.And,
   id: "n1",
   edges: [
@@ -16,7 +16,7 @@ const exampleQuery: Query.INode = {
       node: {
         id: "n2",
         type: Query.NodeType.E,
-        params: { classes: [EntityEnums.Class.Concept] },
+        params: { entityClasses: [EntityEnums.Class.Concept] },
         operator: Query.NodeOperator.And,
         edges: [
           {
@@ -27,7 +27,7 @@ const exampleQuery: Query.INode = {
             node: {
               id: "n3",
               type: Query.NodeType.E,
-              params: { classes: [EntityEnums.Class.Concept], label: "fruit" },
+              params: { entityClasses: [EntityEnums.Class.Concept], label: "fruit" },
               operator: Query.NodeOperator.And,
               edges: [],
             },
@@ -45,7 +45,7 @@ const exampleQuery: Query.INode = {
       node: {
         id: "n4",
         type: Query.NodeType.E,
-        params: { classes: [EntityEnums.Class.Statement] },
+        params: { entityClasses: [EntityEnums.Class.Statement] },
         operator: Query.NodeOperator.And,
         edges: [
           {
@@ -56,7 +56,7 @@ const exampleQuery: Query.INode = {
             node: {
               id: "n5",
               type: Query.NodeType.E,
-              params: { classes: [EntityEnums.Class.Territory], id: "XY" },
+              params: { entityClasses: [EntityEnums.Class.Territory], entityId: "XY" },
               operator: Query.NodeOperator.And,
               edges: [],
             },
