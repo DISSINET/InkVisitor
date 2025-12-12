@@ -102,7 +102,8 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
   const queryClient = useQueryClient();
 
   const modalContentRef = useRef<HTMLDivElement>(null);
-  const prevValidationsLengthRef = useRef<number>(0);
+  const prevValidationsLengthRef = useRef<number | null>(null);
+  const isInitialMountRef = useRef<boolean>(true);
 
   const updateEntityMutation = useMutation({
     mutationFn: async (changes: Partial<IEntity>) =>
@@ -113,8 +114,23 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
     },
   });
 
-  // Scroll to bottom when a new validation is added
+  // Initialize the ref with the initial length on first load
   useEffect(() => {
+    if (isInitialMountRef.current && validations !== undefined) {
+      prevValidationsLengthRef.current = validations?.length || 0;
+      isInitialMountRef.current = false;
+    }
+  }, [validations]);
+
+  // Scroll to bottom when a new validation is added (not on initial load)
+  useEffect(() => {
+    if (
+      isInitialMountRef.current ||
+      prevValidationsLengthRef.current === null
+    ) {
+      return;
+    }
+
     const currentLength = validations?.length || 0;
     if (currentLength > prevValidationsLengthRef.current) {
       // Find the scrollable container by traversing up the DOM tree
