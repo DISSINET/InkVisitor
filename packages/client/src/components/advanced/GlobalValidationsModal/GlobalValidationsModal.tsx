@@ -102,8 +102,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
   const queryClient = useQueryClient();
 
   const modalContentRef = useRef<HTMLDivElement>(null);
-  const prevValidationsLengthRef = useRef<number | null>(null);
-  const isInitialMountRef = useRef<boolean>(true);
+  const prevValidationsLengthRef = useRef<number>(0);
 
   const updateEntityMutation = useMutation({
     mutationFn: async (changes: Partial<IEntity>) =>
@@ -111,46 +110,30 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
 
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["entity"] });
+
+      // Check if a new validation was added and scroll to bottom
+      const newValidations = variables.data?.validations;
+      if (newValidations && Array.isArray(newValidations)) {
+        const currentLength = newValidations.length;
+        if (currentLength > prevValidationsLengthRef.current) {
+          setTimeout(() => {
+            modalContentRef.current?.parentElement?.scrollTo({
+              top: modalContentRef.current?.parentElement?.scrollHeight,
+              behavior: "smooth",
+            });
+          }, 100);
+        }
+        prevValidationsLengthRef.current = currentLength;
+      }
     },
   });
 
   // Initialize the ref with the initial length on first load
   useEffect(() => {
-    if (isInitialMountRef.current && validations !== undefined) {
-      prevValidationsLengthRef.current = validations?.length || 0;
-      isInitialMountRef.current = false;
+    if (prevValidationsLengthRef.current === 0 && validations) {
+      prevValidationsLengthRef.current = validations.length || 0;
     }
   }, [validations]);
-
-  // Scroll to bottom when a new validation is added (not on initial load)
-  useEffect(() => {
-    if (
-      isInitialMountRef.current ||
-      prevValidationsLengthRef.current === null
-    ) {
-      return;
-    }
-
-    const currentLength = validations?.length || 0;
-    if (currentLength > prevValidationsLengthRef.current) {
-      // Find the scrollable container by traversing up the DOM tree
-      let element = modalContentRef.current?.parentElement;
-      while (element) {
-        const style = window.getComputedStyle(element);
-        if (style.overflow === "auto" || style.overflowY === "auto") {
-          setTimeout(() => {
-            element?.scrollTo({
-              top: element.scrollHeight,
-              behavior: "smooth",
-            });
-          }, 100);
-          break;
-        }
-        element = element.parentElement;
-      }
-    }
-    prevValidationsLengthRef.current = currentLength;
-  }, [validations?.length]);
 
   const updateSettingsMutation = useMutation({
     mutationFn: async (newSettings: Omit<ISetting, "public">[]) =>
