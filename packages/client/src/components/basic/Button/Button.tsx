@@ -10,7 +10,6 @@ import React, {
   KeyboardEvent,
   MouseEventHandler,
   ReactElement,
-  useRef,
   useState,
 } from "react";
 import { ButtonSize } from "types";
@@ -73,37 +72,18 @@ export const Button: React.FC<ButtonProps> = ({
   const [referenceElement, setReferenceElement] =
     useState<HTMLButtonElement | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
-  const handledRef = useRef(false);
-
-  // Prevent input blur when clicking buttons (in case of suggester list)
-  const handleClick = (e: React.MouseEvent<HTMLElement>) => {
-    if (!disabled && !handledRef.current) {
-      handledRef.current = true;
-      e.stopPropagation();
-      hideTooltipOnClick && setShowTooltip(false);
-      onClick(e);
-      setShowTooltip(false);
-      // Reset the flag after a short delay to allow for normal clicks
-      setTimeout(() => {
-        handledRef.current = false;
-      }, 0);
-    }
-  };
 
   return (
     <>
       <StyledButton
         ref={setReferenceElement}
-        onMouseDown={(e) => {
-          // Prevent input blur when clicking buttons
-          // Handle click on mousedown to avoid blur interference
-          if (!disabled && e.button === 0) {
-            e.preventDefault();
-            handleClick(e as unknown as React.MouseEvent<HTMLElement>);
-          }
-        }}
         onClick={(e) => {
-          handleClick(e);
+          e.stopPropagation();
+          if (!disabled) {
+            hideTooltipOnClick && setShowTooltip(false);
+            onClick(e);
+            setShowTooltip(false);
+          }
         }}
         $size={size}
         $iconButton={icon !== undefined && label?.length === 0}
