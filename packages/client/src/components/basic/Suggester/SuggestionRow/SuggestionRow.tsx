@@ -47,7 +47,13 @@ export const SuggestionRowEntityRow: React.FC<SuggestionRowEntityProps> = ({
 
   const renderIcons = () => {
     return (
-      <ButtonGroup $noMarginRight>
+      <ButtonGroup
+        $noMarginRight
+        onMouseDown={(e) => {
+          // Prevent input blur when clicking buttons
+          e.preventDefault();
+        }}
+      >
         {!entity.isTemplate && (
           <Button
             tooltipLabel="link entity"
