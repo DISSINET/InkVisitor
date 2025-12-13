@@ -184,13 +184,13 @@ export default class Relation implements IRelationModel {
    * Use this method for doing asynchronous operation/checks before the save operation
    * @param request
    */
-  async beforeSave(request: IRequest): Promise<void> {
+  async beforeSave(request: IRequest): Promise<void> {    
     // check for already existing relations with same ids
     const relationByType = await Relation.getByType(
       request.db.connection,
       this.type
     );
-    relationByType.forEach((rel) => {
+    relationByType.filter(rel => rel.id !== this.id).forEach((rel) => {
       if (this.type === RelationEnums.Type.Synonym) {
         // For SYN check if both arrays have the same length and contain the same elements
         if (
