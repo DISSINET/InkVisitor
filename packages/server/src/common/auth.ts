@@ -33,6 +33,7 @@ export function generateUuid(): string {
 
 /**
  * Wrapper around bcrypt method for checking raw ~ hashed password
+ * Also handles plain text passwords for backward compatibility (local dev)
  * @param rawPassword
  * @param storedHash
  * @returns
@@ -41,7 +42,17 @@ export function checkPassword(
   rawPassword: string,
   storedHash: string
 ): boolean {
-  return bcrypt.compareSync(rawPassword, storedHash); // true
+  // Check if stored password is a bcrypt hash (starts with $2a$, $2b$, or $2y$)
+  const isBcryptHash = /^\$2[ayb]\$\d{2}\$/.test(storedHash);
+
+  if (isBcryptHash) {
+    // Use bcrypt comparison for hashed passwords
+    return bcrypt.compareSync(rawPassword, storedHash);
+  } else {
+    // Fallback to direct comparison for plain text passwords (local dev only)
+    // This allows the database to work with plain text passwords during development
+    return rawPassword === storedHash;
+  }
 }
 
 const defaultJwtAlgo = "HS256";

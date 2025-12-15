@@ -186,8 +186,14 @@ class Api {
         }
 
         if (error.status === 401) {
-          // if handled by react router, then the toast could be visible
-          window.location.pathname = (process.env.ROOT_URL || "") + "/login";
+          // Don't redirect on 401 for signin endpoint - let the login page handle the error
+          const requestUrl = error.config?.url || "";
+          const isSignInRequest = requestUrl.includes("/users/signin");
+
+          if (!isSignInRequest) {
+            // if handled by react router, then the toast could be visible
+            window.location.pathname = (process.env.ROOT_URL || "") + "/login";
+          }
         }
 
         return Promise.reject(error);
@@ -980,7 +986,11 @@ class Api {
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseStats>> {
     try {
-      const response = await this.connection.post(`/stats/materialized`, data, options);
+      const response = await this.connection.post(
+        `/stats/materialized`,
+        data,
+        options
+      );
       return response;
     } catch (err) {
       throw this.handleError(err);
@@ -991,11 +1001,20 @@ class Api {
    * Stats Aggregate - Manual aggregation trigger
    */
   async statsAggregate(
-    data: { fromDate: number; toDate: number; timeUnits?: string[]; aggregateBy?: string[] },
+    data: {
+      fromDate: number;
+      toDate: number;
+      timeUnits?: string[];
+      aggregateBy?: string[];
+    },
     options?: IApiOptions
   ): Promise<AxiosResponse<{ message: string; recordsProcessed: number }>> {
     try {
-      const response = await this.connection.post(`/stats/aggregate`, data, options);
+      const response = await this.connection.post(
+        `/stats/aggregate`,
+        data,
+        options
+      );
       return response;
     } catch (err) {
       throw this.handleError(err);

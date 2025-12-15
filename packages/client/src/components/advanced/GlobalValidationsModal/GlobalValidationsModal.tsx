@@ -104,8 +104,10 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
   const prevValidationsLengthRef = useRef<number>(0);
 
   const updateEntityMutation = useMutation({
-    mutationFn: async (changes: Partial<IEntity>) =>
-      await api.entityUpdate(rootTerritoryId, changes),
+    mutationFn: async (changes: Partial<IEntity>) => {
+      const res = await api.entityUpdate(rootTerritoryId, changes);
+      return res.data;
+    },
 
     onSuccess: (data: IResponseGeneric, variables: Partial<IEntity>) => {
       queryClient.invalidateQueries({ queryKey: ["entity"] });
