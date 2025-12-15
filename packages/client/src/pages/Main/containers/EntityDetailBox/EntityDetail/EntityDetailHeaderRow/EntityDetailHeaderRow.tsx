@@ -1,35 +1,40 @@
 import { EntityEnums, UserEnums } from "@shared/enums";
-import { IEntity, IStatement } from "@shared/types";
+import { IEntity, IResponseGeneric, IStatement } from "@shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Button, ButtonGroup } from "components";
+import { Button, ButtonGroup, Submit } from "components";
 import { AddTerritoryModal, EntityTag } from "components/advanced";
 import { InstTemplate } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useState } from "react";
 import { AiOutlineLink } from "react-icons/ai";
 import { CgListTree } from "react-icons/cg";
-import { FaClone, FaEdit, FaTrashAlt } from "react-icons/fa";
+import { FaBroom, FaClone, FaEdit, FaTrashAlt } from "react-icons/fa";
 import { toast } from "react-toastify";
 import {
   StyledActantHeaderRow,
   StyledGrClone,
   StyledTagWrap,
 } from "./EntityDetailHeaderRowStyles";
+import { MdCleaningServices } from "react-icons/md";
 
 interface EntityDetailHeaderRow {
   entity: IEntity;
   userCanEdit: boolean;
+  userCanAdmin: boolean;
   mayBeRemoved?: boolean;
   setShowRemoveSubmit: React.Dispatch<React.SetStateAction<boolean>>;
   setCreateTemplateModal: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsCleaningEntityPrompt: React.Dispatch<React.SetStateAction<boolean>>;
 }
 export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
   entity,
   userCanEdit,
+  userCanAdmin,
   mayBeRemoved,
   setShowRemoveSubmit,
   setCreateTemplateModal,
+  setIsCleaningEntityPrompt,
 }) => {
   const queryClient = useQueryClient();
 
@@ -37,7 +42,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
 
   const cloneEntityMutation = useMutation({
     mutationFn: async (entityId: string) => await api.entityClone(entityId),
-    onSuccess: (data, variables) => {
+    onSuccess: (data: IResponseGeneric) => {
       appendDetailId(data.data.data.id);
       toast.info(`Entity duplicated!`);
       queryClient.invalidateQueries({ queryKey: ["templates"] });
@@ -209,6 +214,17 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
                   `${window.location.protocol}//${window.location.host}${window.location.pathname}#selectedDetail=${entity.id}&detail=${entity.id}`
                 );
                 toast.info("Link to detail copied to clipboard");
+              }}
+            />
+          )}
+          {userCanAdmin && (
+            <Button
+              color="primary"
+              icon={<MdCleaningServices size={14} />}
+              tooltipLabel="clean all entity details"
+              inverted
+              onClick={() => {
+                setIsCleaningEntityPrompt(true);
               }}
             />
           )}
