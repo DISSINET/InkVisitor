@@ -77,7 +77,9 @@ export const applyUserThreshold = (
         out[user] = value;
       }
     });
-    out[OTHERS_KEY] = others;
+    if (others > 0) {
+      out[OTHERS_KEY] = others;
+    }
     next[timeKey] = out;
   });
 
@@ -112,11 +114,20 @@ export const getDataCategories = (
       return sumsWithPercentages.sums[b] - sumsWithPercentages.sums[a];
     });
 
-    // move others to the end of the categories
-    if (userCategories.includes(OTHERS_KEY)) {
-      userCategories.splice(userCategories.indexOf(OTHERS_KEY), 1);
+    const hasOthers = sumsWithPercentages.sums[OTHERS_KEY] > 0;
+
+    if (hasOthers) {
+      // move others to the end of the categories
+      if (userCategories.includes(OTHERS_KEY)) {
+        userCategories.splice(userCategories.indexOf(OTHERS_KEY), 1);
+      }
+      userCategories.push(OTHERS_KEY);
+    } else {
+      // remove others from the categories
+      if (userCategories.includes(OTHERS_KEY)) {
+        userCategories.splice(userCategories.indexOf(OTHERS_KEY), 1);
+      }
     }
-    userCategories.push(OTHERS_KEY);
 
     return userCategories;
   }

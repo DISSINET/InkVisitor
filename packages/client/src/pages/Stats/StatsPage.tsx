@@ -80,10 +80,10 @@ export const StatsPage = () => {
         });
         return response.data as StatsAggregateResponse;
       },
-      onSuccess: (data) => {
+      onSuccess: () => {
         client.invalidateQueries({ queryKey: ["stats"] });
       },
-      onError: (error) => {},
+      onError: () => {},
     });
 
   const statsRequest = useMemo<IRequestStats>(() => {

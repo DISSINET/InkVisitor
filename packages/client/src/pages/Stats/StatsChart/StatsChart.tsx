@@ -53,6 +53,10 @@ export const StatsChart = ({
   const [hoveringDataKey, setHoveringDataKey] = useState<string | null>(null);
   const { aggregateBy, eventType } = request;
 
+  const hasOthers = useMemo<boolean>(() => {
+    return values && Object.keys(values).some((key) => key === OTHERS_KEY);
+  }, [values]);
+
   const { data: dataUsers } = useQuery({
     queryKey: ["users-stats"],
     queryFn: () => api.usersGetMore({}),
@@ -60,9 +64,12 @@ export const StatsChart = ({
   });
 
   const userKeyMap = useMemo<Record<string, string>>(() => {
-    const mapNames: Record<string, string> = {
-      [OTHERS_KEY]: OTHERS_KEY,
-    };
+    const mapNames: Record<string, string> = {};
+
+    if (hasOthers) {
+      mapNames[OTHERS_KEY] = OTHERS_KEY;
+    }
+
     for (const user of dataUsers?.data || []) {
       mapNames[user.id] = user.name.replace(".", "_");
     }
