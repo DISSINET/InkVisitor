@@ -13,6 +13,7 @@ import {
   isFirstLabelEmpty,
   isValidEntityClass,
 } from "utils/utils";
+import { StyledEntityTagWrap } from "./EntityTagStyles";
 
 interface UnlinkButton {
   onClick: () => void;
@@ -81,14 +82,6 @@ const EntityTagComponent: React.FC<EntityTag> = ({
   const [elvlHovered, setElvlHovered] = useState(false);
   const [tagHovered, setTagHovered] = useState(false);
   const referenceEl = useRef<HTMLDivElement | null>(null);
-  const wrapperStyle = React.useMemo<React.CSSProperties>(() => {
-    return {
-      display: "inline-flex",
-      overflow: "hidden",
-      marginRight: flexListMargin ? "0.5rem" : undefined,
-      marginBottom: flexListMargin ? "0.5rem" : undefined,
-    };
-  }, [flexListMargin]);
 
   const handleTagHovered = useCallback(() => {
     setTagHovered(true);
@@ -149,8 +142,8 @@ const EntityTagComponent: React.FC<EntityTag> = ({
   }
 
   return (
-    <div
-      style={wrapperStyle}
+    <StyledEntityTagWrap
+      $flexListMargin={flexListMargin}
       ref={referenceEl}
       onMouseEnter={handleTagHovered}
       onMouseLeave={handleTagUnhovered}
@@ -225,29 +218,31 @@ const EntityTagComponent: React.FC<EntityTag> = ({
           )
         }
       />
-    </div>
+    </StyledEntityTagWrap>
   );
 };
 
-function areEntityTagsEqual(
-  prev: Readonly<React.ComponentProps<typeof EntityTagComponent>>,
-  next: Readonly<React.ComponentProps<typeof EntityTagComponent>>
-) {
-  // Compare minimal fields that affect rendering
-  if (prev.isSelected !== next.isSelected) return false;
-  if (prev.showOnly !== next.showOnly) return false;
-  if (prev.fullWidth !== next.fullWidth) return false;
-  if (prev.disableTooltip !== next.disableTooltip) return false;
-  if (prev.disableDoubleClick !== next.disableDoubleClick) return false;
-  if (Boolean(prev.button) !== Boolean(next.button)) return false;
-  if (Boolean(prev.unlinkButton) !== Boolean(next.unlinkButton)) return false;
-  // Entity-based checks
-  if (prev.entity.id !== next.entity.id) return false;
-  if (prev.entity.status !== next.entity.status) return false;
-  const prevLabel = getEntityLabel(prev.entity);
-  const nextLabel = getEntityLabel(next.entity);
-  if (prevLabel !== nextLabel) return false;
-  return true;
-}
+// TODO: add this carefully without breaking the app
+// function areEntityTagsEqual(
+//   prev: Readonly<React.ComponentProps<typeof EntityTagComponent>>,
+//   next: Readonly<React.ComponentProps<typeof EntityTagComponent>>
+// ) {
+//   // Compare minimal fields that affect rendering
+//   if (prev.isSelected !== next.isSelected) return false;
+//   if (prev.showOnly !== next.showOnly) return false;
+//   if (prev.fullWidth !== next.fullWidth) return false;
+//   if (prev.disableTooltip !== next.disableTooltip) return false;
+//   if (prev.disableDoubleClick !== next.disableDoubleClick) return false;
+//   if (Boolean(prev.button) !== Boolean(next.button)) return false;
+//   if (Boolean(prev.unlinkButton) !== Boolean(next.unlinkButton)) return false;
+//   // Entity-based checks
+//   if (prev.entity.id !== next.entity.id) return false;
+//   if (prev.entity.status !== next.entity.status) return false;
+//   const prevLabel = getEntityLabel(prev.entity);
+//   const nextLabel = getEntityLabel(next.entity);
+//   if (prevLabel !== nextLabel) return false;
+//   return true;
+// }
 
-export const EntityTag = React.memo(EntityTagComponent, areEntityTagsEqual);
+// export const EntityTag = React.memo(EntityTagComponent, areEntityTagsEqual);
+export const EntityTag = EntityTagComponent;
