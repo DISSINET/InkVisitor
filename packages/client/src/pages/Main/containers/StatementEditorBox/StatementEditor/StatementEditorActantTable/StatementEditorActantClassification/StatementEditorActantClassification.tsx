@@ -71,7 +71,7 @@ export const StatementEditorActantClassification: React.FC<
     );
   };
 
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
   return (
     <StyledBorderLeft $borderColor="class" $padding $marginBottom>

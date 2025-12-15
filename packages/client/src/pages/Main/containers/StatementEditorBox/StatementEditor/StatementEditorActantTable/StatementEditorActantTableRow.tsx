@@ -113,6 +113,9 @@ export const StatementEditorActantTableRow: React.FC<
 
   handleDataAttributeChange,
 }) => {
+  const theme = useTheme();
+  const dispatch = useAppDispatch();
+
   const isInsideTemplate = statement.isTemplate || false;
   const { statementId, territoryId } = useSearchParams();
   const {
@@ -122,7 +125,7 @@ export const StatementEditorActantTableRow: React.FC<
     actant?: IEntity;
     sActant: IStatementActant;
   } = filteredActant.data;
-  const dispatch = useAppDispatch();
+
   const draggedActantRow: DraggedActantRowItem = useAppSelector(
     (state) => state.rowDnd.draggedActantRow
   );
@@ -377,11 +380,9 @@ export const StatementEditorActantTableRow: React.FC<
     draggedActantRow.category &&
     draggedActantRow.category === DraggedPropRowCategory.ACTANT;
 
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
   const { classifications, identifications } = filteredActant.data.sActant;
-
-  const theme = useTheme();
 
   return (
     <StyledRow

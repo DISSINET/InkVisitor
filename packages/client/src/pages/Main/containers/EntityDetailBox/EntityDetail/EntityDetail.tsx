@@ -172,7 +172,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
           class: entity?.class,
         });
 
-        const templates = res.data ?? [];
+        const templates: IEntity[] = res.data ?? [];
         templates.sort((a: IEntity, b: IEntity) =>
           a.labels[0].toLocaleLowerCase() > b.labels[0].toLocaleLowerCase()
             ? 1
@@ -188,8 +188,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({
     const options =
       entity !== undefined && templates
         ? templates
-            .filter((template) => template.id !== entity.id)
-            .map((template) => ({
+            .filter((template: IEntity) => template.id !== entity.id)
+            .map((template: IEntity) => ({
               value: template.id,
               label: getShortLabelByLetterCount(getEntityLabel(template), 200),
             }))
@@ -870,13 +870,13 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                         movePropToIndex(propId, oldIndex, newIndex);
                       }}
                       category={DraggedPropRowCategory.META_PROP}
-                      disabledAttributes={
-                        {
-                          statement: ["moodvariant", "mood", "bundleOperator"],
-                          type: ["logic", "virtuality", "partitivity"],
-                          value: ["logic", "virtuality", "partitivity"],
-                        } as PropAttributeFilter
-                      }
+                      // disabledAttributes={
+                      //   {
+                      //     statement: ["moodvariant", "mood", "bundleOperator"],
+                      //     type: ["logic", "virtuality", "partitivity"],
+                      //     value: ["logic", "virtuality", "partitivity"],
+                      //   } as PropAttributeFilter
+                      // }
                       isInsideTemplate={isInsideTemplate}
                       territoryParentId={getTerritoryId(entity)}
                       lowIdent

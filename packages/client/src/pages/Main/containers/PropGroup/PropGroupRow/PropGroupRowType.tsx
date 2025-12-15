@@ -147,7 +147,7 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
             placeholder="type"
             openDetailOnCreate={openDetailOnCreate}
             categoryTypes={classesPropType}
-            inputWidth={80}
+            inputWidth={90}
             excludedEntityClasses={excludedSuggesterEntities}
             isInsideTemplate={isInsideTemplate}
             territoryParentId={territoryParentId}
@@ -157,7 +157,7 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
           />
         )}
       </StyledTagGrid>
-      {isExpanded && (
+      {/* {isExpanded && (
         <>
           <StyledAttributesFlexRow>
             {!disabledAttributes.type?.includes("logic") && (
@@ -211,7 +211,7 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
             )}
           </StyledAttributesFlexRow>
         </>
-      )}
+      )} */}
     </StyledAttributesFlexColumn>
   );
 };
