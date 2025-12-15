@@ -222,27 +222,35 @@ const EntityTagComponent: React.FC<EntityTag> = ({
   );
 };
 
-// TODO: add this carefully without breaking the app
-// function areEntityTagsEqual(
-//   prev: Readonly<React.ComponentProps<typeof EntityTagComponent>>,
-//   next: Readonly<React.ComponentProps<typeof EntityTagComponent>>
-// ) {
-//   // Compare minimal fields that affect rendering
-//   if (prev.isSelected !== next.isSelected) return false;
-//   if (prev.showOnly !== next.showOnly) return false;
-//   if (prev.fullWidth !== next.fullWidth) return false;
-//   if (prev.disableTooltip !== next.disableTooltip) return false;
-//   if (prev.disableDoubleClick !== next.disableDoubleClick) return false;
-//   if (Boolean(prev.button) !== Boolean(next.button)) return false;
-//   if (Boolean(prev.unlinkButton) !== Boolean(next.unlinkButton)) return false;
-//   // Entity-based checks
-//   if (prev.entity.id !== next.entity.id) return false;
-//   if (prev.entity.status !== next.entity.status) return false;
-//   const prevLabel = getEntityLabel(prev.entity);
-//   const nextLabel = getEntityLabel(next.entity);
-//   if (prevLabel !== nextLabel) return false;
-//   return true;
-// }
+function areEntityTagsEqual(
+  prev: Readonly<React.ComponentProps<typeof EntityTagComponent>>,
+  next: Readonly<React.ComponentProps<typeof EntityTagComponent>>
+) {
+  // Compare minimal fields that affect rendering
+  if (prev.isSelected !== next.isSelected) return false;
+  if (prev.showOnly !== next.showOnly) return false;
+  if (prev.fullWidth !== next.fullWidth) return false;
+  if (prev.disableTooltip !== next.disableTooltip) return false;
+  if (prev.disableDoubleClick !== next.disableDoubleClick) return false;
+  if (Boolean(prev.button) !== Boolean(next.button)) return false;
+  if (Boolean(prev.unlinkButton) !== Boolean(next.unlinkButton)) return false;
+  // Compare unlinkButton onClick function reference to ensure handlers are up-to-date
+  if (
+    prev.unlinkButton &&
+    next.unlinkButton &&
+    prev.unlinkButton.onClick !== next.unlinkButton.onClick
+  )
+    return false;
+  // Compare function references to ensure they're up-to-date
+  if (prev.moveFn !== next.moveFn) return false;
+  if (prev.updateOrderFn !== next.updateOrderFn) return false;
+  // Entity-based checks
+  if (prev.entity.id !== next.entity.id) return false;
+  if (prev.entity.status !== next.entity.status) return false;
+  const prevLabel = getEntityLabel(prev.entity);
+  const nextLabel = getEntityLabel(next.entity);
+  if (prevLabel !== nextLabel) return false;
+  return true;
+}
 
-// export const EntityTag = React.memo(EntityTagComponent, areEntityTagsEqual);
-export const EntityTag = EntityTagComponent;
+export const EntityTag = React.memo(EntityTagComponent, areEntityTagsEqual);
