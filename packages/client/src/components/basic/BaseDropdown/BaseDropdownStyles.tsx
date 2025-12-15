@@ -134,4 +134,6 @@ export const StyledValueIconWrap = styled.div`
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   margin-left: ${({ theme }) => theme.space[1]};
   color: ${({ theme }) => theme.color["greyer"]};
+  align-items: center;
+  display: flex;
 `;
