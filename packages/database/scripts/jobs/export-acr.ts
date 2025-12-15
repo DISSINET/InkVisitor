@@ -20,6 +20,7 @@ import { IJob } from ".";
 import Generator from "./Generator";
 import Audit from "@models/audit/audit";
 import fs from "fs";
+
 export async function getEntitiesDataByClass<T>(
   db: Connection,
   entityClass: EntityEnums.Class
