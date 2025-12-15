@@ -1,11 +1,10 @@
 import {
   entityKeys,
   globalValidationsDict,
-  territoryKeys,
   valencyKeys,
   ValidationKey,
 } from "@shared/enums/warning";
-import { IEntity } from "@shared/types";
+import { IEntity, IResponseGeneric } from "@shared/types";
 import { ISetting } from "@shared/types/settings";
 import {
   EProtocolTieType,
@@ -24,9 +23,9 @@ import {
   Submit,
 } from "components";
 import { ValidationRule } from "components/advanced";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FaPlus } from "react-icons/fa";
-import { toast } from "react-toastify";
+import { PiSealCheckFill } from "react-icons/pi";
 import { rootTerritoryId } from "Theme/constants";
 import { deepCopy } from "utils/utils";
 import {
@@ -108,7 +107,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
     mutationFn: async (changes: Partial<IEntity>) =>
       await api.entityUpdate(rootTerritoryId, changes),
 
-    onSuccess: (data, variables) => {
+    onSuccess: (data: IResponseGeneric, variables: Partial<IEntity>) => {
       queryClient.invalidateQueries({ queryKey: ["entity"] });
 
       // Check if a new validation was added and scroll to bottom
@@ -139,7 +138,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
     mutationFn: async (newSettings: Omit<ISetting, "public">[]) =>
       await api.settingGroupUpdate("validations", newSettings),
 
-    onSuccess: (data, variables) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["settings"] });
       queryClient.invalidateQueries({ queryKey: ["entity"] });
       queryClient.invalidateQueries({ queryKey: ["statement"] });
@@ -197,7 +196,8 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
   };
 
   const settingsKeyVal = (key: ValidationKey) => {
-    return settings?.find((setting) => setting.id === key)?.value as boolean;
+    return settings?.find((setting: ISetting) => setting.id === key)
+      ?.value as boolean;
   };
 
   const toggleRule = (key: ValidationKey) => {
@@ -222,6 +222,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
       >
         <ModalHeader
           title="Global validations"
+          icon={<PiSealCheckFill size={20} style={{ marginTop: "-2px" }} />}
           boldTitle
           onClose={() => setShowGlobalValidations(false)}
         />
@@ -254,7 +255,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
                 />
               ))}
 
-              <StyledGridSectionHeading>
+              {/* <StyledGridSectionHeading>
                 Territory validations
               </StyledGridSectionHeading>
               <div />
@@ -265,7 +266,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
                   active={settingsKeyVal(val)}
                   toggleRule={() => toggleRule(val)}
                 />
-              ))}
+              ))} */}
             </StyledGridForm>
 
             {rootTerritory && (

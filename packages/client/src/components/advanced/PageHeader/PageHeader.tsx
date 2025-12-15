@@ -6,13 +6,14 @@ import LogoInkvisitor from "assets/logos/inkvisitor.svg";
 import { Button, Loader } from "components";
 import React, { useEffect, useState } from "react";
 import { MdDarkMode, MdSunny } from "react-icons/md";
+import { PiSealCheckFill } from "react-icons/pi";
 import { useLocation, useNavigate } from "react-router";
 import { BeatLoader } from "react-spinners";
 import { toast } from "react-toastify";
 import { setTheme } from "redux/features/themeSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { getUserIcon } from "utils/iconUtils";
-import { Menu, GlobalValidationsModal } from "..";
+import { GlobalValidationsModal, Menu } from "..";
 import packageJson from "../../../../package.json";
 import {
   StyledFlexColumn,
@@ -34,7 +35,6 @@ import {
   StyledUserIconWrap,
   StyledUsername,
 } from "./PageHeaderStyles";
-import { IoSettingsSharp } from "react-icons/io5";
 
 interface LeftHeader {
   tempLocation: string | false;
@@ -229,7 +229,7 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
                 radiusLeft
                 radiusRight
                 label="global validations"
-                icon={<IoSettingsSharp />}
+                icon={<PiSealCheckFill size={14} />}
                 onClick={() => setShowGlobalValidations(true)}
                 color="greyer"
                 inverted

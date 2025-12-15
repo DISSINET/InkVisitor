@@ -79,7 +79,7 @@ export const StyledCardHeader = styled.header<StyledCardHeader>`
   justify-content: flex-start;
   align-items: center;
   flex-shrink: 0;
-  gap: 1rem;
+  gap: 0.5rem;
   padding: ${space4} ${space6} ${space2} ${space6};
   background-color: ${({ theme, $color }) =>
     $color ? theme.color[$color] : "transparent"};
