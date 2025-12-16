@@ -1,3 +1,4 @@
+import { EntityEnums } from "@shared/enums";
 import { IEntity, IProp } from "@shared/types";
 import { AttributeIcon, Button, ButtonGroup } from "components";
 import React, { useEffect, useRef, useState } from "react";
@@ -8,7 +9,7 @@ import {
   useDrop,
 } from "react-dnd";
 import { FaPlus, FaTrashAlt } from "react-icons/fa";
-import { TbSettingsAutomation, TbSettingsFilled } from "react-icons/tb";
+import { FaCaretDown } from "react-icons/fa6";
 import { setDraggedPropRow } from "redux/features/rowDnd/draggedPropRowSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import {
@@ -235,10 +236,29 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
               buttons={
                 <>
                   <ButtonGroup $height={19} $noMarginRight>
+                    {prop.logic == "2" && (
+                      <Button
+                        tooltipLabel="Negative logic"
+                        color="danger"
+                        inverted
+                        noBorder
+                        icon={<AttributeIcon attributeName={"negation"} />}
+                      />
+                    )}
+
+                    {prop.bundleOperator != EntityEnums.Operator.And && (
+                      <Button
+                        tooltipLabel="Logical operator type"
+                        color="success"
+                        inverted
+                        noBorder
+                        icon={prop.bundleOperator}
+                      />
+                    )}
                     {(level === 1 || level === 2) && userCanEdit && (
                       <Button
                         key="add"
-                        icon={<FaPlus />}
+                        icon={<FaPlus size={8} />}
                         label="p"
                         noIconMargin
                         color="primary"
@@ -249,43 +269,19 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                         }}
                       />
                     )}
-                    {prop.logic == "2" ? (
-                      <Button
-                        key="neg"
-                        tooltipLabel="Negative logic"
-                        color="danger"
-                        inverted
-                        noBorder
-                        icon={<AttributeIcon attributeName={"negation"} />}
-                      />
-                    ) : (
-                      <div />
-                    )}
-                    {prop.bundleOperator ? (
-                      <Button
-                        key="oper"
-                        tooltipLabel="Logical operator type"
-                        color="success"
-                        inverted
-                        noBorder
-                        icon={prop.bundleOperator}
-                      />
-                    ) : (
-                      <div />
-                    )}
                   </ButtonGroup>
                   <Button
                     inverted
                     onClick={() => setIsExpanded(!isExpanded)}
+                    color={isExpanded ? "success" : "plain"}
                     icon={
-                      isExpanded ? (
-                        <TbSettingsFilled size={16} />
-                      ) : (
-                        <TbSettingsAutomation
-                          size={16}
-                          style={{ transform: "rotate(90deg)" }}
-                        />
-                      )
+                      <FaCaretDown
+                        size={12}
+                        style={{
+                          transform: `rotate(${isExpanded ? "90deg" : "0deg"})`,
+                          transition: "transform 0.8s ease",
+                        }}
+                      />
                     }
                     hideTooltipOnClick
                     tooltipContent={

@@ -901,13 +901,13 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                         movePropToIndex(propId, oldIndex, newIndex);
                       }}
                       category={DraggedPropRowCategory.META_PROP}
-                      disabledAttributes={
-                        {
-                          statement: ["moodvariant", "mood", "bundleOperator"],
-                          type: ["logic", "virtuality", "partitivity"],
-                          value: ["logic", "virtuality", "partitivity"],
-                        } as PropAttributeFilter
-                      }
+                      // disabledAttributes={
+                      //   {
+                      //     statement: ["moodvariant", "mood", "bundleOperator"],
+                      //     type: ["logic", "virtuality", "partitivity"],
+                      //     value: ["logic", "virtuality", "partitivity"],
+                      //   } as PropAttributeFilter
+                      // }
                       isInsideTemplate={isInsideTemplate}
                       territoryParentId={getTerritoryId(entity)}
                       lowIdent

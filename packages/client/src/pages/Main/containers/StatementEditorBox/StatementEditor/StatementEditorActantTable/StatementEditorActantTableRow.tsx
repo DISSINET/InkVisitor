@@ -35,8 +35,12 @@ import {
   useDrag,
   useDrop,
 } from "react-dnd";
-import { FaGripVertical, FaPlus, FaTrashAlt } from "react-icons/fa";
-import { TbSettingsAutomation, TbSettingsFilled } from "react-icons/tb";
+import {
+  FaCaretDown,
+  FaGripVertical,
+  FaPlus,
+  FaTrashAlt,
+} from "react-icons/fa";
 import { setDraggedActantRow } from "redux/features/rowDnd/draggedActantRowSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import {
@@ -109,6 +113,9 @@ export const StatementEditorActantTableRow: React.FC<
 
   handleDataAttributeChange,
 }) => {
+  const theme = useTheme();
+  const dispatch = useAppDispatch();
+
   const isInsideTemplate = statement.isTemplate || false;
   const { statementId, territoryId } = useSearchParams();
   const {
@@ -118,7 +125,7 @@ export const StatementEditorActantTableRow: React.FC<
     actant?: IEntity;
     sActant: IStatementActant;
   } = filteredActant.data;
-  const dispatch = useAppDispatch();
+
   const draggedActantRow: DraggedActantRowItem = useAppSelector(
     (state) => state.rowDnd.draggedActantRow
   );
@@ -373,11 +380,9 @@ export const StatementEditorActantTableRow: React.FC<
     draggedActantRow.category &&
     draggedActantRow.category === DraggedPropRowCategory.ACTANT;
 
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
   const { classifications, identifications } = filteredActant.data.sActant;
-
-  const theme = useTheme();
 
   return (
     <StyledRow
@@ -423,15 +428,15 @@ export const StatementEditorActantTableRow: React.FC<
               <Button
                 inverted
                 onClick={() => setIsExpanded(!isExpanded)}
+                color={isExpanded ? "success" : "plain"}
                 icon={
-                  isExpanded ? (
-                    <TbSettingsFilled size={16} />
-                  ) : (
-                    <TbSettingsAutomation
-                      size={16}
-                      style={{ transform: "rotate(90deg)" }}
-                    />
-                  )
+                  <FaCaretDown
+                    size={12}
+                    style={{
+                      transform: `rotate(${isExpanded ? "90deg" : "0deg"})`,
+                      transition: "transform 0.8s ease",
+                    }}
+                  />
                 }
                 tooltipContent={
                   <TooltipAttributes

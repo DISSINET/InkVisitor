@@ -5,7 +5,7 @@ import {
   IStatementActant,
   IStatementClassification,
 } from "@shared/types/statement";
-import { AttributeIcon, Button, ButtonGroup } from "components";
+import { AttributeIcon, Button } from "components";
 import Dropdown, {
   ElvlButtonGroup,
   EntityDropzone,
@@ -17,7 +17,7 @@ import Dropdown, {
 import { TooltipAttributes } from "pages/Main/containers";
 import React, { useState } from "react";
 import { FaTrashAlt } from "react-icons/fa";
-import { TbSettingsAutomation, TbSettingsFilled } from "react-icons/tb";
+import { FaCaretDown } from "react-icons/fa6";
 import { AttributeData } from "types";
 import {
   StyledBorderLeft,
@@ -71,7 +71,7 @@ export const StatementEditorActantClassification: React.FC<
     );
   };
 
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
   return (
     <StyledBorderLeft $borderColor="class" $padding $marginBottom>
@@ -143,15 +143,15 @@ export const StatementEditorActantClassification: React.FC<
         <Button
           inverted
           onClick={() => setIsExpanded(!isExpanded)}
+          color={isExpanded ? "gray" : "plain"}
           icon={
-            isExpanded ? (
-              <TbSettingsFilled size={16} />
-            ) : (
-              <TbSettingsAutomation
-                size={16}
-                style={{ transform: "rotate(90deg)" }}
-              />
-            )
+            <FaCaretDown
+              size={12}
+              style={{
+                transform: `rotate(${isExpanded ? "90deg" : "0deg"})`,
+                transition: "transform 0.8s ease",
+              }}
+            />
           }
           tooltipContent={
             <TooltipAttributes

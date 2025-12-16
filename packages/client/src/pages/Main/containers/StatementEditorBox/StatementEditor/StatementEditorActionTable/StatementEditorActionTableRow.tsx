@@ -51,6 +51,7 @@ import {
   StyledGrid,
   StyledGridColumn,
 } from "./StatementEditorActionTableStyles";
+import { FaCaretDown } from "react-icons/fa6";
 
 interface StatementEditorActionTableRow {
   filteredAction: FilteredActionObject;
@@ -371,15 +372,15 @@ export const StatementEditorActionTableRow: React.FC<
               <Button
                 inverted
                 onClick={() => setIsExpanded(!isExpanded)}
+                color={isExpanded ? "gray" : "plain"}
                 icon={
-                  isExpanded ? (
-                    <TbSettingsFilled size={16} />
-                  ) : (
-                    <TbSettingsAutomation
-                      size={16}
-                      style={{ transform: "rotate(90deg)" }}
-                    />
-                  )
+                  <FaCaretDown
+                    size={12}
+                    style={{
+                      transform: `rotate(${isExpanded ? "90deg" : "0deg"})`,
+                      transition: "transform 0.8s ease",
+                    }}
+                  />
                 }
                 tooltipContent={
                   <TooltipAttributes
