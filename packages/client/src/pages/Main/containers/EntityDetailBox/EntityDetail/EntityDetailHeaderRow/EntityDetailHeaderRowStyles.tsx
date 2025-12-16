@@ -11,7 +11,7 @@ export const StyledActantHeaderRow = styled.div<StyledActantHeaderRow>`
   gap: 0.7rem;
   width: 100%;
   margin-top: 1.8rem;
-  padding-bottom: ${({ theme }) => theme.space[4]};
+  padding-bottom: ${({ theme }) => theme.space[3]};
   padding-right: ${({ theme }) => theme.space[6]};
   padding-left: 2rem;
   padding-left: ${({ $widthTooNarrow }) =>

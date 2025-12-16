@@ -699,10 +699,9 @@ export const EntityDetail: React.FC<EntityDetail> = ({
               {/* form section */}
               <StyledDetailSection $firstSection>
                 <StyledDetailSectionContent $firstSection>
-                  <StyledDetailWarnings $paddingLeft={!widthTooNarrow}>
-                    {entity.warnings &&
-                      entity.warnings.length > 0 &&
-                      entity.warnings
+                  {entity.warnings && entity.warnings.length > 0 && (
+                    <StyledDetailWarnings $paddingLeft={!widthTooNarrow}>
+                      {entity.warnings
                         .filter(
                           (w) =>
                             w.position?.section ===
@@ -711,7 +710,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                         .map((warning, key) => {
                           return <Message key={key} warning={warning} />;
                         })}
-                  </StyledDetailWarnings>
+                    </StyledDetailWarnings>
+                  )}
 
                   <EntityDetailFormSection
                     entity={entity}
