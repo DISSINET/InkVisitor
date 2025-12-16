@@ -235,7 +235,7 @@ export const getEntityRelationRules = (
   entityClass: EntityEnums.Class,
   relationTypes?: RelationEnums.Type[],
   isTemplate: boolean = false
-) => {
+): RelationEnums.Type[] => {
   const typesToFilter = relationTypes ? relationTypes : RelationEnums.AllTypes;
 
   // A and C entity classes cannot have any relations, other classes might have only Classification and Related

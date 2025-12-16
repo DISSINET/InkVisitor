@@ -1,5 +1,5 @@
 import { entitiesDictKeys } from "@shared/dictionaries";
-import { EntityEnums, UserEnums } from "@shared/enums";
+import { EntityEnums, RelationEnums, UserEnums } from "@shared/enums";
 import {
   IEntity,
   IProp,
@@ -40,7 +40,11 @@ import {
   DropdownItem,
   PropAttributeFilter,
 } from "types";
-import { getEntityLabel, getShortLabelByLetterCount } from "utils/utils";
+import {
+  getEntityLabel,
+  getEntityRelationRules,
+  getShortLabelByLetterCount,
+} from "utils/utils";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
 import { PropGroup } from "../../PropGroup/PropGroup";
 import { EntityDetailCreateTemplateModal } from "./EntityDetailCreateTemplateModal/EntityDetailCreateTemplateModal";
@@ -128,6 +132,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({
     useState<EntityEnums.Class>();
   const [createTemplateModal, setCreateTemplateModal] =
     useState<boolean>(false);
+  const [isCleaningEntityPrompt, setIsCleaningEntityPrompt] =
+    useState<boolean>(false);
   const [showRemoveSubmit, setShowRemoveSubmit] = useState<boolean>(false);
   const [showTypeSubmit, setShowTypeSubmit] = useState(false);
   const [showApplyTemplateModal, setShowApplyTemplateModal] =
@@ -172,7 +178,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
           class: entity?.class,
         });
 
-        const templates = res.data ?? [];
+        const templates: IEntity[] = res.data ?? [];
         templates.sort((a: IEntity, b: IEntity) =>
           a.labels[0].toLocaleLowerCase() > b.labels[0].toLocaleLowerCase()
             ? 1
@@ -184,12 +190,12 @@ export const EntityDetail: React.FC<EntityDetail> = ({
     enabled: !!entity && api.isLoggedIn(),
   });
 
-  const templateOptions: DropdownItem[] = useMemo(() => {
+  const templateOptions = useMemo<DropdownItem[]>(() => {
     const options =
       entity !== undefined && templates
         ? templates
-            .filter((template) => template.id !== entity.id)
-            .map((template) => ({
+            .filter((template: IEntity) => template.id !== entity.id)
+            .map((template: IEntity) => ({
               value: template.id,
               label: getShortLabelByLetterCount(getEntityLabel(template), 200),
             }))
@@ -371,13 +377,13 @@ export const EntityDetail: React.FC<EntityDetail> = ({
 
       removeDetailId(entityId);
     },
-    onError: async (error) => {
+    onError: async (error: any) => {
       if (
-        (error as any).error === "InvalidDeleteError" &&
-        (error as any).data &&
-        (error as any).data.length > 0
+        error.error === "InvalidDeleteError" &&
+        error.data &&
+        error.data.length > 0
       ) {
-        const { data } = error as any;
+        const { data } = error;
         toast.info("Click to open conflicting entity in detail", {
           autoClose: 6000,
           onClick: () => {
@@ -387,6 +393,29 @@ export const EntityDetail: React.FC<EntityDetail> = ({
       }
     },
   });
+
+  const handleCleanEntityDetails = () => {
+    // remove all props and references
+    updateEntityMutation.mutate({ props: [], references: [] });
+
+    // remove all relations
+    const relationTypes = getEntityRelationRules(
+      entity.class,
+      RelationEnums.EntityDetailTypes,
+      entity.isTemplate
+    );
+    relationTypes.forEach((relationType: RelationEnums.Type) => {
+      entity.relations[
+        relationType as keyof Relation.IUsedRelations
+      ]?.connections.forEach(
+        (connection: Relation.IConnection<Relation.IRelation>) => {
+          relationDeleteMutation.mutate(connection.id);
+        }
+      );
+    });
+
+    setIsCleaningEntityPrompt(false);
+  };
 
   // Props handling
 
@@ -583,7 +612,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
   const relationCreateMutation = useMutation({
     mutationFn: async (newRelation: Relation.IRelation) =>
       await api.relationCreate(newRelation),
-    onSuccess: (data, variables) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["entity"] });
     },
   });
@@ -597,7 +626,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
         relationObject.relationId,
         relationObject.changes
       ),
-    onSuccess: (data, variables) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["entity"] });
     },
   });
@@ -605,7 +634,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
     mutationFn: async (relationId: string) =>
       await api.relationDelete(relationId),
 
-    onSuccess: (data, variables) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["entity"] });
     },
   });
@@ -658,9 +687,11 @@ export const EntityDetail: React.FC<EntityDetail> = ({
             <EntityDetailHeaderRow
               entity={entity}
               userCanEdit={canEditEntity}
+              userCanAdmin={userCanAdmin}
               mayBeRemoved={mayBeRemoved}
               setShowRemoveSubmit={setShowRemoveSubmit}
               setCreateTemplateModal={setCreateTemplateModal}
+              setIsCleaningEntityPrompt={setIsCleaningEntityPrompt}
             />
 
             <StyledDetailWrapper>
@@ -1114,6 +1145,17 @@ export const EntityDetail: React.FC<EntityDetail> = ({
           updateEntityMutation={updateEntityMutation}
         />
       )}
+
+      <Submit
+        show={isCleaningEntityPrompt}
+        title="Clean all entity details"
+        text="Do you really want to clean all entity details? This action will remove all entity meta properties, relations and references."
+        submitLabel="Clean"
+        onSubmit={() => {
+          handleCleanEntityDetails();
+        }}
+        onCancel={() => setIsCleaningEntityPrompt(false)}
+      />
     </>
   );
 };
