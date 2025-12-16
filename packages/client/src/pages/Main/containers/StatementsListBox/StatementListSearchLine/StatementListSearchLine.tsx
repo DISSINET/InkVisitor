@@ -482,7 +482,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                 }}
               >
                 <Button
-                  circular
+                  shape="circle"
                   color="info"
                   inverted
                   tooltipLabel="replace one occurence"
@@ -506,7 +506,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                 }}
               >
                 <Button
-                  circular
+                  shape="circle"
                   color="info"
                   inverted
                   tooltipLabel="replace all occurences"

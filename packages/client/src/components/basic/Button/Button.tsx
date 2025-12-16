@@ -39,12 +39,12 @@ interface ButtonProps {
   hideTooltipOnClick?: boolean;
   dataTestId?: string;
   noPadding?: boolean;
-  circular?: boolean;
-  width?: number;
+  shape?: "square" | "circle";
 }
 
 export const Button: React.FC<ButtonProps> = ({
   size = ButtonSize.Small,
+  shape = undefined,
   tooltipLabel,
   tooltipContent,
   label = "",
@@ -68,8 +68,6 @@ export const Button: React.FC<ButtonProps> = ({
   hideTooltipOnClick = false,
   dataTestId,
   noPadding = false,
-  circular = false,
-  width = undefined,
 }) => {
   const [referenceElement, setReferenceElement] =
     useState<HTMLButtonElement | null>(null);
@@ -104,8 +102,7 @@ export const Button: React.FC<ButtonProps> = ({
         onKeyPress={(e: KeyboardEvent<HTMLButtonElement>) => e.preventDefault()}
         data-testid={dataTestId}
         $noPadding={noPadding}
-        $circular={circular}
-        $width={width}
+        $shape={shape}
       >
         {icon}
         {label && (

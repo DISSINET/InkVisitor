@@ -8,7 +8,9 @@ interface StyledActantHeaderRow {
 export const StyledActantHeaderRow = styled.div<StyledActantHeaderRow>`
   width: 100%;
   display: flex;
-  gap: 0.7rem;
+  justify-content: ${({ $widthTooNarrow }) =>
+    $widthTooNarrow ? "center" : "flex-start"};
+  gap: 0.6rem;
   width: 100%;
   margin-top: 1.8rem;
   padding-bottom: ${({ theme }) => theme.space[3]};

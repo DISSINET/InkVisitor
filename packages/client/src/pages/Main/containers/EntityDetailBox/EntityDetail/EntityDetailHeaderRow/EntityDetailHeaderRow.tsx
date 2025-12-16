@@ -17,6 +17,7 @@ import {
   StyledGrClone,
   StyledTagWrap,
 } from "./EntityDetailHeaderRowStyles";
+import { ButtonSize } from "types";
 
 interface EntityDetailHeaderRow {
   entity: IEntity;
@@ -104,6 +105,9 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
         <ButtonGroup style={{ height: "2.2rem" }}>
           {userCanEdit && (
             <Button
+              key="delete-entity"
+              size={ButtonSize.Medium}
+              shape="square"
               color="primary"
               icon={<FaTrashAlt size={14} />}
               disabled={!mayBeRemoved}
@@ -124,6 +128,8 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
             <>
               <Button
                 key="template-create-template"
+                size={ButtonSize.Medium}
+                shape="square"
                 icon={<FaClone size={14} />}
                 tooltipLabel="create a new template from template"
                 inverted
@@ -134,6 +140,8 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
               />
               <Button
                 key="instantiate-template"
+                size={ButtonSize.Medium}
+                shape="square"
                 icon={<StyledGrClone size={14} $color={"black"} />}
                 tooltipLabel="create entity from template"
                 inverted
@@ -152,6 +160,8 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
             <>
               <Button
                 key="entity-duplicate"
+                size={ButtonSize.Medium}
+                shape="square"
                 icon={<FaClone size={14} />}
                 color="primary"
                 disabled={entity.class === EntityEnums.Class.Statement}
@@ -165,6 +175,8 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
               />
               <Button
                 key="entity-create-template"
+                size={ButtonSize.Medium}
+                shape="square"
                 icon={<StyledGrClone size={14} $color={"black"} />}
                 tooltipLabel="create template from entity"
                 inverted
@@ -178,6 +190,8 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
           {entity.class === EntityEnums.Class.Statement && (
             <Button
               key="edit"
+              size={ButtonSize.Medium}
+              shape="square"
               icon={<FaEdit size={14} />}
               tooltipLabel="open statement in editor"
               inverted
@@ -196,6 +210,8 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
           {entity.class === EntityEnums.Class.Territory && (
             <Button
               key="open-territory"
+              size={ButtonSize.Medium}
+              shape="square"
               icon={<CgListTree />}
               tooltipLabel="open territory in tree"
               inverted
@@ -208,6 +224,9 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
           )}
           {userCanEdit && (
             <Button
+              key="copy-link"
+              size={ButtonSize.Medium}
+              shape="square"
               color="primary"
               icon={<AiOutlineLink size={16} />}
               tooltipLabel={"copy link to detail"}
@@ -222,6 +241,9 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
           )}
           {userCanAdmin && (
             <Button
+              key="clean-entity"
+              size={ButtonSize.Medium}
+              shape="square"
               color="primary"
               icon={<MdCleaningServices size={14} />}
               tooltipLabel="clean all entity details"
