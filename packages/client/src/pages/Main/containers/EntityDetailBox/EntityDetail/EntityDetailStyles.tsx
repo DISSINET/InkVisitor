@@ -60,11 +60,14 @@ export const StyledExpandIcon = styled.div`
   }
 `;
 
-export const StyledDetailWarnings = styled.div`
+interface StyledDetailWarnings {
+  $paddingLeft?: boolean;
+}
+export const StyledDetailWarnings = styled.div<StyledDetailWarnings>`
   display: grid;
   grid-gap: ${({ theme }) => theme.space[1]};
   grid-auto-flow: row;
-  margin-top: ${({ theme }) => theme.space[4]};
+  padding-left: ${({ $paddingLeft }) => ($paddingLeft ? "9.4rem" : "0")};
 `;
 
 export const StyledDetailContentRowValueID = styled.div`

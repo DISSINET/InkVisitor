@@ -699,7 +699,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
               {/* form section */}
               <StyledDetailSection $firstSection>
                 <StyledDetailSectionContent $firstSection>
-                  <StyledDetailWarnings>
+                  <StyledDetailWarnings $paddingLeft={!widthTooNarrow}>
                     {entity.warnings &&
                       entity.warnings.length > 0 &&
                       entity.warnings

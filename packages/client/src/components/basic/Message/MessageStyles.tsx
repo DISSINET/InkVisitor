@@ -6,7 +6,7 @@ export const StyledMessage = styled.div<StyledMessage>`
   align-items: center;
   color: ${({ theme }) => theme.color["warningText"]};
   background-color: ${({ theme }) => theme.color["warningMessage"]};
-  padding: ${({ theme }) => theme.space[3]};
+  padding: 0.5rem 0.75rem;
   border-radius: ${({ theme }) => theme.borderRadius["md"]};
   margin-top: ${({ theme }) => theme.space[1]};
   margin-bottom: ${({ theme }) => theme.space[1]};
