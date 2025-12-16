@@ -244,7 +244,7 @@ export const ExplorerTableDetail: React.FC<ExplorerTableDetail> = ({
             <StyledExpRowFormGridColumnLabel>
               Alternative labels:
             </StyledExpRowFormGridColumnLabel>
-            {alternativeLabels?.map((label, key) => {
+            {alternativeLabels?.map((label: string, key: number) => {
               return <>{label}</>;
             })}
           </StyledExpRowFormGrid>

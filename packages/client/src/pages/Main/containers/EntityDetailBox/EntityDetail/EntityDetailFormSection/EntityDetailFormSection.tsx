@@ -9,6 +9,7 @@ import {
 import { EntityEnums, UserEnums } from "@shared/enums";
 import {
   IActionData,
+  IDocument,
   IEntity,
   IResponseDetail,
   IResponseGeneric,
@@ -54,6 +55,9 @@ import {
   StyledAlternativeLabelWrap,
   StyledCloseIcon,
   StyledGreyBar,
+  StyledPromoteIcon,
+  StyledPromoteIconFilled,
+  StyledPromoteIconOutline,
 } from "./EntityDetailFormSectionStyles";
 
 interface EntityDetailFormSection {
@@ -95,7 +99,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
   isStatementWithTerritory,
   widthTooNarrow,
 }) => {
-  const { status: documentsStatus, data: documents } = useQuery({
+  const { data: documents } = useQuery({
     queryKey: ["documents"],
     queryFn: async () => {
       const res = await api.documentsGet({});
@@ -110,7 +114,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
   };
   const documentOptions: DropdownItem[] = useMemo(() => {
     const options = [noDocumentLinkedItem];
-    documents?.forEach((doc) => {
+    documents?.forEach((doc: IDocument) => {
       options.push({
         value: doc.id,
         label: doc.title,
@@ -123,13 +127,20 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
     return entity.data.documentId ?? noDocumentLinkedItem.value;
   }, [documentOptions, entity.data.documentId]);
 
+  // make the selected label the first one so it will be displayed as the main one
+  const handlePromoteLabel = (label: string) => {
+    updateEntityMutation.mutate({
+      labels: [label, ...entity.labels.filter((l) => l !== label)],
+    });
+  };
+
   const [newLabel, setNewLabel] = useState<string>(entity.labels[0]);
 
   useEffect(() => {
     setNewLabel(entity.labels[0]);
   }, [entity.labels[0]]);
 
-  const [newAltLabel, setNewAltLabel] = useState("");
+  const [newAltLabel, setNewAltLabel] = useState<string>("");
   const [currentlyEditedAltLabel, setCurrentlyEditedAltLabel] = useState<
     false | number
   >(false);
@@ -160,11 +171,14 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
       territoryId: string;
       changes: Partial<ITerritory>;
     }) => await api.entityUpdate(tObject?.territoryId, tObject?.changes),
-    onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["tree"] });
-      queryClient.invalidateQueries({ queryKey: ["territory"] });
-      queryClient.invalidateQueries({ queryKey: ["entity"] });
-    },
+    onSuccess: () =>
+      // data: IResponseGeneric,
+      // variables: { territoryId: string; changes: Partial<ITerritory> }
+      {
+        queryClient.invalidateQueries({ queryKey: ["tree"] });
+        queryClient.invalidateQueries({ queryKey: ["territory"] });
+        queryClient.invalidateQueries({ queryKey: ["entity"] });
+      },
   });
 
   const isTemplateDisabled = useMemo<boolean>(() => {
@@ -748,18 +762,24 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                           )}
                         </StyledAlternativeLabel>
 
-                        <div>
-                          <StyledCloseIcon
-                            size={14}
-                            onClick={() => {
-                              updateEntityMutation.mutate({
-                                labels: entity.labels.filter(
-                                  (l) => l !== label
-                                ),
-                              });
-                            }}
-                          />
-                        </div>
+                        <StyledCloseIcon
+                          title="Remove label"
+                          size={14}
+                          onClick={() => {
+                            updateEntityMutation.mutate({
+                              labels: entity.labels.filter((l) => l !== label),
+                            });
+                          }}
+                        />
+                        <StyledPromoteIcon
+                          title="Promote label"
+                          onClick={() => {
+                            handlePromoteLabel(label);
+                          }}
+                        >
+                          <StyledPromoteIconOutline size={12} />
+                          <StyledPromoteIconFilled size={12} />
+                        </StyledPromoteIcon>
                       </StyledAlternativeLabelWrap>
                     );
                   })}
