@@ -68,6 +68,7 @@ export const StyledDetailWarnings = styled.div<StyledDetailWarnings>`
   grid-gap: ${({ theme }) => theme.space[1]};
   grid-auto-flow: row;
   padding-left: ${({ $paddingLeft }) => ($paddingLeft ? "8.4rem" : "0")};
+  margin-top: ${({ theme }) => theme.space[1]};
 `;
 
 export const StyledDetailContentRowValueID = styled.div`

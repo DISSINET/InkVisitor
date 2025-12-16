@@ -12,8 +12,8 @@ export const StyledActantHeaderRow = styled.div<StyledActantHeaderRow>`
     $widthTooNarrow ? "center" : "flex-start"};
   gap: 0.6rem;
   width: 100%;
-  margin-top: 1.8rem;
-  padding-bottom: ${({ theme }) => theme.space[3]};
+  margin-top: 1.6rem;
+  padding-bottom: ${({ theme }) => theme.space[2]};
   padding-right: ${({ theme }) => theme.space[6]};
   padding-left: 2rem;
   padding-left: ${({ $widthTooNarrow }) =>
