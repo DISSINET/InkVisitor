@@ -1,4 +1,4 @@
-## 1.5 Changelog [Dec 12, 2025]
+## 1.5 Changelog [Dec 13, 2025]
 
 ### New Features:
 
