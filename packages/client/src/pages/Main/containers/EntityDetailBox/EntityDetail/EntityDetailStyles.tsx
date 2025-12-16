@@ -62,7 +62,7 @@ export const StyledExpandIcon = styled.div`
 
 export const StyledDetailWarnings = styled.div`
   display: grid;
-  grid-gap: ${({ theme }) => theme.space["1"]};
+  grid-gap: ${({ theme }) => theme.space[1]};
   grid-auto-flow: row;
   margin-top: ${({ theme }) => theme.space[4]};
 `;

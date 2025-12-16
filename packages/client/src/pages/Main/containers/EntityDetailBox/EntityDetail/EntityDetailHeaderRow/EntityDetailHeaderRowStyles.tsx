@@ -2,20 +2,24 @@ import { ThemeColor } from "Theme/theme";
 import { GrClone } from "react-icons/gr";
 import styled from "styled-components";
 
-interface StyledActantHeaderRow {}
+interface StyledActantHeaderRow {
+  $widthTooNarrow: boolean;
+}
 export const StyledActantHeaderRow = styled.div<StyledActantHeaderRow>`
-  display: flex;
   width: 100%;
-  padding-bottom: ${({ theme }) => theme.space[3]};
+  display: flex;
+  gap: 0.7rem;
+  width: 100%;
+  margin-top: 1.8rem;
   padding-right: ${({ theme }) => theme.space[6]};
-  padding-left: ${({ theme }) => theme.space[8]};
+  padding-left: 2rem;
+  padding-left: ${({ $widthTooNarrow }) =>
+    $widthTooNarrow ? "2rem" : "10.9rem"};
   background: ${({ theme }) => theme.color["gray"][200]};
   box-shadow: 4px 7px 5px -8px rgba(0, 0, 0, 0.5);
   z-index: 10;
 `;
 export const StyledTagWrap = styled.div`
-  margin-right: ${({ theme }) => theme.space[2]};
-  margin-top: ${({ theme }) => theme.space[4]};
   display: inline-flex;
   overflow: hidden;
   max-width: 100%;

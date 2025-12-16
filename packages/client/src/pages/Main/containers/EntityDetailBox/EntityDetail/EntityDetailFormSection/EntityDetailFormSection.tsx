@@ -736,11 +736,10 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                     return (
                       <StyledAlternativeLabelWrap key={key}>
                         <StyledGreyBar />
-                        <StyledAlternativeLabel
-                          onClick={() => setCurrentlyEditedAltLabel(key)}
-                        >
+                        <>
                           {currentlyEditedAltLabel === key ? (
                             <Input
+                              fullHeight
                               autoFocus
                               value={label}
                               onChangeFn={(value) => {
@@ -758,9 +757,23 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                               }}
                             />
                           ) : (
-                            <>{label}</>
+                            <StyledAlternativeLabel
+                              onClick={() => setCurrentlyEditedAltLabel(key)}
+                            >
+                              {label}
+                            </StyledAlternativeLabel>
                           )}
-                        </StyledAlternativeLabel>
+                        </>
+
+                        <StyledPromoteIcon
+                          title="Promote label"
+                          onClick={() => {
+                            handlePromoteLabel(label);
+                          }}
+                        >
+                          <StyledPromoteIconOutline size={12} />
+                          <StyledPromoteIconFilled size={12} />
+                        </StyledPromoteIcon>
 
                         <StyledCloseIcon
                           title="Remove label"
@@ -771,15 +784,6 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                             });
                           }}
                         />
-                        <StyledPromoteIcon
-                          title="Promote label"
-                          onClick={() => {
-                            handlePromoteLabel(label);
-                          }}
-                        >
-                          <StyledPromoteIconOutline size={12} />
-                          <StyledPromoteIconFilled size={12} />
-                        </StyledPromoteIcon>
                       </StyledAlternativeLabelWrap>
                     );
                   })}

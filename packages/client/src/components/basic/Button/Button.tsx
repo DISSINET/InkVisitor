@@ -40,6 +40,7 @@ interface ButtonProps {
   dataTestId?: string;
   noPadding?: boolean;
   circular?: boolean;
+  width?: number;
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -68,6 +69,7 @@ export const Button: React.FC<ButtonProps> = ({
   dataTestId,
   noPadding = false,
   circular = false,
+  width = undefined,
 }) => {
   const [referenceElement, setReferenceElement] =
     useState<HTMLButtonElement | null>(null);
@@ -103,6 +105,7 @@ export const Button: React.FC<ButtonProps> = ({
         data-testid={dataTestId}
         $noPadding={noPadding}
         $circular={circular}
+        $width={width}
       >
         {icon}
         {label && (

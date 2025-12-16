@@ -51,7 +51,6 @@ const getHorizontalMargin = ($size: ButtonSize, $iconButton?: boolean) => {
   }
 };
 interface IButtonStyle {
-  $size: ButtonSize;
   $iconButton?: boolean;
   $fullWidth?: boolean;
   $noBorder?: boolean;
@@ -64,7 +63,12 @@ interface IButtonStyle {
   $radiusRight?: boolean;
   $noPadding?: boolean;
   $fullHeight?: boolean;
+
   $circular?: boolean;
+  // size only works for circular buttons
+  $size: ButtonSize;
+  // width only works for non-circular buttons
+  $width?: number;
 }
 export const StyledButton = styled.button.attrs(({ ref }) => ({
   ref: ref,

@@ -2,21 +2,21 @@ import { EntityEnums, UserEnums } from "@shared/enums";
 import { IEntity, IResponseGeneric, IStatement } from "@shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Button, ButtonGroup, Submit } from "components";
+import { Button, ButtonGroup } from "components";
 import { AddTerritoryModal, EntityTag } from "components/advanced";
 import { InstTemplate } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useState } from "react";
 import { AiOutlineLink } from "react-icons/ai";
 import { CgListTree } from "react-icons/cg";
-import { FaBroom, FaClone, FaEdit, FaTrashAlt } from "react-icons/fa";
+import { FaClone, FaEdit, FaTrashAlt } from "react-icons/fa";
+import { MdCleaningServices } from "react-icons/md";
 import { toast } from "react-toastify";
 import {
   StyledActantHeaderRow,
   StyledGrClone,
   StyledTagWrap,
 } from "./EntityDetailHeaderRowStyles";
-import { MdCleaningServices } from "react-icons/md";
 
 interface EntityDetailHeaderRow {
   entity: IEntity;
@@ -26,6 +26,7 @@ interface EntityDetailHeaderRow {
   setShowRemoveSubmit: React.Dispatch<React.SetStateAction<boolean>>;
   setCreateTemplateModal: React.Dispatch<React.SetStateAction<boolean>>;
   setIsCleaningEntityPrompt: React.Dispatch<React.SetStateAction<boolean>>;
+  widthTooNarrow: boolean;
 }
 export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
   entity,
@@ -35,13 +36,15 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
   setShowRemoveSubmit,
   setCreateTemplateModal,
   setIsCleaningEntityPrompt,
+  widthTooNarrow,
 }) => {
   const queryClient = useQueryClient();
 
   const { setStatementId, setTerritoryId, appendDetailId } = useSearchParams();
 
   const cloneEntityMutation = useMutation({
-    mutationFn: async (entityId: string) => await api.entityClone(entityId),
+    mutationFn: async (entityId: string) =>
+      (await api.entityClone(entityId)).data,
     onSuccess: (data: IResponseGeneric) => {
       appendDetailId(data.data.data.id);
       toast.info(`Entity duplicated!`);
@@ -94,15 +97,15 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
 
   return (
     <>
-      <StyledActantHeaderRow>
+      <StyledActantHeaderRow $widthTooNarrow={widthTooNarrow}>
         <StyledTagWrap>
           <EntityTag entity={entity} fullWidth />
         </StyledTagWrap>
-        <ButtonGroup $marginTop={true}>
+        <ButtonGroup style={{ height: "2.2rem" }}>
           {userCanEdit && (
             <Button
               color="primary"
-              icon={<FaTrashAlt />}
+              icon={<FaTrashAlt size={14} />}
               disabled={!mayBeRemoved}
               tooltipLabel={
                 mayBeRemoved

@@ -10,6 +10,8 @@ export const StyledAlternativeLabelWrap = styled.div`
   position: relative;
   display: flex;
   align-items: center;
+  height: 2.4rem;
+  padding-left: 0.2rem;
   color: ${({ theme }) => theme.color["black"]};
   border: 1px solid ${({ theme }) => theme.color["black"]};
   background-color: ${({ theme }) => theme.color["white"]};
@@ -47,7 +49,10 @@ export const StyledAlternativeLabel = styled.div`
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 1;
 
-  padding: 0.1rem 0.3rem 0.1rem 0.7rem;
+  display: flex;
+  align-items: center;
+  margin-left: 0.5rem;
+  padding-right: 0.3rem;
   z-index: 1;
   transition: color 0.2s ease;
 
@@ -71,10 +76,9 @@ export const StyledCloseIcon = styled(IoClose)`
 export const StyledPromoteIcon = styled.div`
   position: relative;
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
   width: 1.2rem;
   height: 1.2rem;
+  margin-bottom: 0.15rem;
   cursor: pointer;
   transition: transform 0.2s ease;
 
