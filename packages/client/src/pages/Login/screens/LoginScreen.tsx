@@ -77,12 +77,7 @@ export const LoginScreen: React.FC<LoginScreen> = ({
 
   return (
     <>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleLogIn();
-        }}
-      >
+      <form>
         <StyledInputRow>
           <StyledTbMailFilled size={14} $isError={error !== false} />
           <Input
