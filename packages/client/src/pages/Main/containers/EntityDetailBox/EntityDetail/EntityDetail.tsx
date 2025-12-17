@@ -693,6 +693,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
               setCreateTemplateModal={setCreateTemplateModal}
               setIsCleaningEntityPrompt={setIsCleaningEntityPrompt}
               widthTooNarrow={widthTooNarrow}
+              hasWarnings={entity.warnings && entity.warnings.length > 0}
             />
 
             <StyledDetailWrapper>

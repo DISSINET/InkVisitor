@@ -4,12 +4,13 @@ import styled from "styled-components";
 
 interface StyledActantHeaderRow {
   $widthTooNarrow: boolean;
+  $hasWarnings: boolean;
 }
 export const StyledActantHeaderRow = styled.div<StyledActantHeaderRow>`
   width: 100%;
   display: flex;
-  justify-content: ${({ $widthTooNarrow }) =>
-    $widthTooNarrow ? "center" : "flex-start"};
+  justify-content: ${({ $widthTooNarrow, $hasWarnings }) =>
+    $widthTooNarrow && !$hasWarnings ? "center" : "flex-start"};
   gap: 0.6rem;
   width: 100%;
   margin-top: 1.6rem;

@@ -28,6 +28,7 @@ interface EntityDetailHeaderRow {
   setCreateTemplateModal: React.Dispatch<React.SetStateAction<boolean>>;
   setIsCleaningEntityPrompt: React.Dispatch<React.SetStateAction<boolean>>;
   widthTooNarrow: boolean;
+  hasWarnings: boolean;
 }
 export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
   entity,
@@ -38,6 +39,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
   setCreateTemplateModal,
   setIsCleaningEntityPrompt,
   widthTooNarrow,
+  hasWarnings,
 }) => {
   const queryClient = useQueryClient();
 
@@ -98,7 +100,10 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
 
   return (
     <>
-      <StyledActantHeaderRow $widthTooNarrow={widthTooNarrow}>
+      <StyledActantHeaderRow
+        $widthTooNarrow={widthTooNarrow}
+        $hasWarnings={hasWarnings}
+      >
         <StyledTagWrap>
           <EntityTag entity={entity} fullWidth />
         </StyledTagWrap>

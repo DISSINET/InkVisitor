@@ -11,8 +11,9 @@ export const StyledMessage = styled.div<StyledMessage>`
   margin-top: ${({ theme }) => theme.space[1]};
   margin-bottom: ${({ theme }) => theme.space[1]};
   margin-right: ${({ theme }) => theme.space[1]};
-  font-size: 1.1rem;
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
   border: 1.5px solid ${({ theme }) => theme.color["warningBorder"]};
+  gap: 0.5rem;
 `;
 
 export const StyledMessageTValidationContent = styled.div`
@@ -31,7 +32,7 @@ export const StyledMessageOrigin = styled.div`
 export const StyledWarningIconWrap = styled.div`
   display: flex;
   align-items: center;
-  width: 2.5rem;
+  transform: translate(0, -1px);
 `;
 export const StyledMessageContent = styled.div`
   display: inline-flex;
