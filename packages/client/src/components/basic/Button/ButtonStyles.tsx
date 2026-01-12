@@ -5,9 +5,9 @@ import { ButtonSize } from "types";
 const getRadius = (
   $radiusLeft?: boolean,
   $radiusRight?: boolean,
-  $circular?: boolean
+  $shape?: "square" | "circle"
 ) => {
-  if ($circular) {
+  if ($shape === "circle") {
     return "50%";
   }
   if ($radiusLeft && $radiusRight) {
@@ -51,7 +51,6 @@ const getHorizontalMargin = ($size: ButtonSize, $iconButton?: boolean) => {
   }
 };
 interface IButtonStyle {
-  $size: ButtonSize;
   $iconButton?: boolean;
   $fullWidth?: boolean;
   $noBorder?: boolean;
@@ -64,7 +63,9 @@ interface IButtonStyle {
   $radiusRight?: boolean;
   $noPadding?: boolean;
   $fullHeight?: boolean;
-  $circular?: boolean;
+
+  $shape?: "square" | "circle";
+  $size: ButtonSize;
 }
 export const StyledButton = styled.button.attrs(({ ref }) => ({
   ref: ref,
@@ -72,28 +73,28 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: ${({ $fullWidth, $circular, $size }) => {
+  width: ${({ $fullWidth, $shape, $size }) => {
     if ($fullWidth) return "100%";
-    if ($circular) {
+    if ($shape) {
       switch ($size) {
         case ButtonSize.Small:
           return "2rem";
         case ButtonSize.Medium:
-          return "2.5rem";
+          return "2.25rem";
         case ButtonSize.Large:
           return "3rem";
       }
     }
     return "auto";
   }};
-  height: ${({ $fullHeight, $circular, $size }) => {
+  height: ${({ $fullHeight, $shape, $size }) => {
     if ($fullHeight) return "100%";
-    if ($circular) {
+    if ($shape) {
       switch ($size) {
         case ButtonSize.Small:
           return "2rem";
         case ButtonSize.Medium:
-          return "2.5rem";
+          return "2.25rem";
         case ButtonSize.Large:
           return "3rem";
       }
@@ -103,8 +104,8 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
   font-size: ${({ theme, $size }) => theme.fontSize[getFontSize($size)]};
   font-weight: ${({ $disabled, $textRegular }) =>
     $disabled ? 400 : $textRegular ? 500 : 900};
-  padding: ${({ $iconButton, $size, $noPadding }) =>
-    $noPadding
+  padding: ${({ $iconButton, $size, $noPadding, $shape }) =>
+    $noPadding || $shape
       ? "0"
       : `${getVerticalMargin($size)} ${getHorizontalMargin(
           $size,
@@ -114,8 +115,8 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
     $disabled ? theme.color["gray"][400] : theme.color[$color]};
   border-width: ${({ $noBorder }) => ($noBorder ? 0 : "thin")};
   border-style: solid;
-  border-radius: ${({ $radiusLeft, $radiusRight, $circular }) =>
-    getRadius($radiusLeft, $radiusRight, $circular)};
+  border-radius: ${({ $radiusLeft, $radiusRight, $shape }) =>
+    getRadius($radiusLeft, $radiusRight, $shape)};
   color: ${({ theme, $disabled, $color, $inverted }) => {
     if ($disabled) {
       return theme.color["gray"][800];

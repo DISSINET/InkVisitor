@@ -10,6 +10,8 @@ import {
   StyledMessage,
   StyledMessageTValidationContent,
   StyledMessageOrigin,
+  StyledWarningIconWrap,
+  StyledMessageContent,
 } from "./MessageStyles";
 import { isWarningTBased } from "utils/utils";
 import { wildCardChar } from "Theme/constants";
@@ -342,16 +344,10 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
 
   return (
     <StyledMessage>
-      <div style={{ display: "flex", alignItems: "center", width: "3rem" }}>
-        <TiWarningOutline size={20} style={{ marginRight: "0.5rem" }} />
-      </div>
-      <div
-        style={{
-          display: "inline-flex",
-          flexWrap: "wrap",
-          gap: theme.space[2],
-        }}
-      >
+      <StyledWarningIconWrap>
+        <TiWarningOutline size={20} />
+      </StyledWarningIconWrap>
+      <StyledMessageContent>
         {getWarningMessage()}
         {isWarningTBased(warning) && originEntity && (
           <StyledMessageOrigin>
@@ -359,7 +355,7 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
             <EntityTag entity={originEntity} showOnly="label" />
           </StyledMessageOrigin>
         )}
-      </div>
+      </StyledMessageContent>
     </StyledMessage>
   );
 };

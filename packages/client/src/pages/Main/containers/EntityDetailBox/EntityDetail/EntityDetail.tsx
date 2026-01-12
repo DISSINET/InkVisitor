@@ -692,15 +692,17 @@ export const EntityDetail: React.FC<EntityDetail> = ({
               setShowRemoveSubmit={setShowRemoveSubmit}
               setCreateTemplateModal={setCreateTemplateModal}
               setIsCleaningEntityPrompt={setIsCleaningEntityPrompt}
+              widthTooNarrow={widthTooNarrow}
+              hasWarnings={entity.warnings && entity.warnings.length > 0}
             />
 
             <StyledDetailWrapper>
               {/* form section */}
               <StyledDetailSection $firstSection>
                 <StyledDetailSectionContent $firstSection>
-                  <StyledDetailWarnings>
-                    {entity.warnings &&
-                      entity.warnings
+                  {entity.warnings && entity.warnings.length > 0 && (
+                    <StyledDetailWarnings $paddingLeft={!widthTooNarrow}>
+                      {entity.warnings
                         .filter(
                           (w) =>
                             w.position?.section ===
@@ -709,7 +711,9 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                         .map((warning, key) => {
                           return <Message key={key} warning={warning} />;
                         })}
-                  </StyledDetailWarnings>
+                    </StyledDetailWarnings>
+                  )}
+
                   <EntityDetailFormSection
                     entity={entity}
                     userCanEdit={canEditEntity}

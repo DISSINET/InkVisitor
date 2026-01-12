@@ -2,21 +2,22 @@ import { EntityEnums, UserEnums } from "@shared/enums";
 import { IEntity, IResponseGeneric, IStatement } from "@shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Button, ButtonGroup, Submit } from "components";
+import { Button, ButtonGroup } from "components";
 import { AddTerritoryModal, EntityTag } from "components/advanced";
 import { InstTemplate } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useState } from "react";
 import { AiOutlineLink } from "react-icons/ai";
 import { CgListTree } from "react-icons/cg";
-import { FaBroom, FaClone, FaEdit, FaTrashAlt } from "react-icons/fa";
+import { FaClone, FaEdit, FaTrashAlt } from "react-icons/fa";
+import { MdCleaningServices } from "react-icons/md";
 import { toast } from "react-toastify";
 import {
   StyledActantHeaderRow,
   StyledGrClone,
   StyledTagWrap,
 } from "./EntityDetailHeaderRowStyles";
-import { MdCleaningServices } from "react-icons/md";
+import { ButtonSize } from "types";
 
 interface EntityDetailHeaderRow {
   entity: IEntity;
@@ -26,6 +27,8 @@ interface EntityDetailHeaderRow {
   setShowRemoveSubmit: React.Dispatch<React.SetStateAction<boolean>>;
   setCreateTemplateModal: React.Dispatch<React.SetStateAction<boolean>>;
   setIsCleaningEntityPrompt: React.Dispatch<React.SetStateAction<boolean>>;
+  widthTooNarrow: boolean;
+  hasWarnings: boolean;
 }
 export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
   entity,
@@ -35,13 +38,16 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
   setShowRemoveSubmit,
   setCreateTemplateModal,
   setIsCleaningEntityPrompt,
+  widthTooNarrow,
+  hasWarnings,
 }) => {
   const queryClient = useQueryClient();
 
   const { setStatementId, setTerritoryId, appendDetailId } = useSearchParams();
 
   const cloneEntityMutation = useMutation({
-    mutationFn: async (entityId: string) => await api.entityClone(entityId),
+    mutationFn: async (entityId: string) =>
+      (await api.entityClone(entityId)).data,
     onSuccess: (data: IResponseGeneric) => {
       appendDetailId(data.data.data.id);
       toast.info(`Entity duplicated!`);
@@ -94,15 +100,21 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
 
   return (
     <>
-      <StyledActantHeaderRow>
+      <StyledActantHeaderRow
+        $widthTooNarrow={widthTooNarrow}
+        $hasWarnings={hasWarnings}
+      >
         <StyledTagWrap>
           <EntityTag entity={entity} fullWidth />
         </StyledTagWrap>
-        <ButtonGroup $marginTop={true}>
+        <ButtonGroup style={{ height: "2.25rem" }}>
           {userCanEdit && (
             <Button
+              key="delete-entity"
+              size={ButtonSize.Medium}
+              shape="square"
               color="primary"
-              icon={<FaTrashAlt />}
+              icon={<FaTrashAlt size={13} />}
               disabled={!mayBeRemoved}
               tooltipLabel={
                 mayBeRemoved
@@ -121,7 +133,9 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
             <>
               <Button
                 key="template-create-template"
-                icon={<FaClone size={14} />}
+                size={ButtonSize.Medium}
+                shape="square"
+                icon={<FaClone size={13} />}
                 tooltipLabel="create a new template from template"
                 inverted
                 color="primary"
@@ -131,7 +145,9 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
               />
               <Button
                 key="instantiate-template"
-                icon={<StyledGrClone size={14} $color={"black"} />}
+                size={ButtonSize.Medium}
+                shape="square"
+                icon={<StyledGrClone size={13} $color={"black"} />}
                 tooltipLabel="create entity from template"
                 inverted
                 color="primary"
@@ -149,7 +165,9 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
             <>
               <Button
                 key="entity-duplicate"
-                icon={<FaClone size={14} />}
+                size={ButtonSize.Medium}
+                shape="square"
+                icon={<FaClone size={13} />}
                 color="primary"
                 disabled={entity.class === EntityEnums.Class.Statement}
                 tooltipLabel="duplicate entity"
@@ -162,7 +180,9 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
               />
               <Button
                 key="entity-create-template"
-                icon={<StyledGrClone size={14} $color={"black"} />}
+                size={ButtonSize.Medium}
+                shape="square"
+                icon={<StyledGrClone size={13} $color={"black"} />}
                 tooltipLabel="create template from entity"
                 inverted
                 color="primary"
@@ -175,6 +195,8 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
           {entity.class === EntityEnums.Class.Statement && (
             <Button
               key="edit"
+              size={ButtonSize.Medium}
+              shape="square"
               icon={<FaEdit size={14} />}
               tooltipLabel="open statement in editor"
               inverted
@@ -193,7 +215,9 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
           {entity.class === EntityEnums.Class.Territory && (
             <Button
               key="open-territory"
-              icon={<CgListTree />}
+              size={ButtonSize.Medium}
+              shape="square"
+              icon={<CgListTree size={14} />}
               tooltipLabel="open territory in tree"
               inverted
               color="primary"
@@ -205,8 +229,11 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
           )}
           {userCanEdit && (
             <Button
+              key="copy-link"
+              size={ButtonSize.Medium}
+              shape="square"
               color="primary"
-              icon={<AiOutlineLink size={16} />}
+              icon={<AiOutlineLink size={17} />}
               tooltipLabel={"copy link to detail"}
               inverted
               onClick={async () => {
@@ -219,8 +246,11 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
           )}
           {userCanAdmin && (
             <Button
+              key="clean-entity"
+              size={ButtonSize.Medium}
+              shape="square"
               color="primary"
-              icon={<MdCleaningServices size={14} />}
+              icon={<MdCleaningServices size={15} />}
               tooltipLabel="clean all entity details"
               inverted
               onClick={() => {
