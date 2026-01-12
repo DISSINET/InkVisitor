@@ -9,6 +9,7 @@ interface StyledActantHeaderRow {
 export const StyledActantHeaderRow = styled.div<StyledActantHeaderRow>`
   width: 100%;
   display: flex;
+  align-items: center;
   justify-content: ${({ $widthTooNarrow, $hasWarnings }) =>
     $widthTooNarrow && !$hasWarnings ? "center" : "flex-start"};
   gap: 0.6rem;
