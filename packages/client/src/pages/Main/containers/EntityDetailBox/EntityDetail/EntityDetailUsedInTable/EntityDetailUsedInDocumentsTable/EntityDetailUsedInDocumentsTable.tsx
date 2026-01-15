@@ -4,7 +4,7 @@ import {
 } from "@shared/types/response-detail";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Button, Table } from "components";
+import { Button, IconWithTooltip, Table } from "components";
 import {
   AbbreviatedTextWithTooltip,
   DocumentTitle,
@@ -23,6 +23,7 @@ import { DetailBoxState } from "types";
 import { EntityEnums } from "@shared/enums";
 import useAnnotator from "hooks/useAnnotator";
 import { setStatementListOpened } from "redux/features/layout/mainPage/statementListOpenedSlice";
+import { TbAnchorOff } from "react-icons/tb";
 
 type CellType = CellProps<IResponseUsedInDocument>;
 interface EntityDetailUsedInDocumentsTable {
@@ -73,9 +74,15 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
         Cell: ({ row }: CellType) => {
           const { parentTerritoryId } = row.original;
           return (
-            <>
-              {(parentTerritoryId ||
-                entityClass === EntityEnums.Class.Territory) && (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              {parentTerritoryId ||
+              entityClass === EntityEnums.Class.Territory ? (
                 <Button
                   tooltipLabel="locate in annotator"
                   onClick={() => {
@@ -115,8 +122,14 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
                   noBorder
                   noIconMargin
                 />
+              ) : (
+                <IconWithTooltip
+                  color="greyer"
+                  icon={<TbAnchorOff size={16} />}
+                  tooltipLabel="anchor without parent territory cannot be located in annotator"
+                />
               )}
-            </>
+            </div>
           );
         },
       },
