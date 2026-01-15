@@ -60,6 +60,7 @@ const SCROLL_WINDOW_UPDATE_DEBOUNCE_MS = 150;
 import "../../styles.css";
 import ExplorerTableRow from "./ExplorerTableRow";
 import { EntityTag } from "components/advanced/EntityTag/EntityTag";
+import { clearRowCache } from "pages/Query/useQueryData";
 
 // Memoized header to avoid unnecessary re-renders during scroll
 const MemoizedTableHeader: React.FC<{
@@ -204,13 +205,16 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           (old: IResponseQuery | undefined) => old
         );
       }
-      if (invalidateActiveQuery) {
-        invalidateActiveQuery();
-      } else {
-        queryClient.invalidateQueries({
-          queryKey: ["query"],
-        });
-      }
+
+      // Clear the custom row cache store
+      clearRowCache();
+      // Invalidate React Query cache
+      queryClient.invalidateQueries({
+        queryKey: ["query"],
+      });
+      queryClient.removeQueries({
+        queryKey: ["query"],
+      });
     },
   });
 
