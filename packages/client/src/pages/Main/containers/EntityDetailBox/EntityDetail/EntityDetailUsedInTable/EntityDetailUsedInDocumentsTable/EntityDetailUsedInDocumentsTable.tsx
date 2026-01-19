@@ -126,7 +126,7 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
                 <IconWithTooltip
                   color="greyer"
                   icon={<TbAnchorOff size={16} />}
-                  tooltipLabel="anchor without parent territory cannot be located in annotator"
+                  tooltipLabel="anchor without parent territory cannot be located in Annotator"
                 />
               )}
             </div>
