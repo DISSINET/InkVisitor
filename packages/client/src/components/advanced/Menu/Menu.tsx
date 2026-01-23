@@ -12,7 +12,7 @@ import {
   FaRegChartBar,
   FaUsers,
 } from "react-icons/fa";
-import { useLocation, useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router-dom";
 import { IPage } from "types";
 import { MenuItem } from "./MenuItem";
 import { StyledMenuGroup, StyledMenuGroupWrapper } from "./MenuStyles";

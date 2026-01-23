@@ -4,13 +4,13 @@ import {
   getErrorByCode,
 } from "@shared/types/errors";
 import api from "api";
-import { Button, ContactOwnerFooting, Modal, ModalContent } from "components";
+import { Button, Modal, ModalContent } from "components";
+import { StyledButtonWrap, StyledErrorText } from "pages/AuthModalSharedStyles";
 import React, { useEffect, useState } from "react";
 import { TbArrowForwardUp } from "react-icons/tb";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { PasswordScreen } from "./screens/PasswordScreen";
 import { UsernameScreen } from "./screens/UsernameScreen";
-import { StyledButtonWrap, StyledErrorText } from "pages/AuthModalSharedStyles";
 
 const ActivatePage: React.FC = ({}) => {
   const navigate = useNavigate();

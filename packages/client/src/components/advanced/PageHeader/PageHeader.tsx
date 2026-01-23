@@ -7,7 +7,7 @@ import { Button, Loader } from "components";
 import React, { useEffect, useState } from "react";
 import { MdDarkMode, MdSunny } from "react-icons/md";
 import { PiSealCheckFill } from "react-icons/pi";
-import { useLocation, useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router-dom";
 import { BeatLoader } from "react-spinners";
 import { toast } from "react-toastify";
 import { setTheme } from "redux/features/themeSlice";

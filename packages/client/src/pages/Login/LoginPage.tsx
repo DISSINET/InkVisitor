@@ -3,7 +3,7 @@ import { AttributeButtonGroup } from "components/advanced";
 import React, { useMemo, useState } from "react";
 import { FiLogIn } from "react-icons/fi";
 import { IoEnter, IoReloadCircle } from "react-icons/io5";
-import { Navigate } from "react-router";
+import { Navigate } from "react-router-dom";
 import { StyledAttrBtnGroupWrap, StyledContentWrap } from "./LoginPageStyles";
 import { GuestScreen } from "./screens/GuestScreen";
 import { LoginScreen } from "./screens/LoginScreen";

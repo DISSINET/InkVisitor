@@ -32,7 +32,7 @@ import {
   TbLockPlus,
   TbMailFilled,
 } from "react-icons/tb";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { isSafePassword } from "utils/utils";
 
 interface PasswordResetPage {}

@@ -11,7 +11,7 @@ import { useSearchParams } from "hooks";
 import useKeyLift from "hooks/useKeyLift";
 import useKeypress from "hooks/useKeyPress";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useLocation, useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Id, toast } from "react-toastify";
 import { setPing } from "redux/features/pingSlice";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";

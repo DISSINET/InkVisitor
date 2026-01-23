@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { FaUserTag } from "react-icons/fa";
 import { FiLogIn } from "react-icons/fi";
 import { TbMailFilled } from "react-icons/tb";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import {
   StyledFaTag,
   StyledUserActivatedDescription,
