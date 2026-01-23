@@ -77,8 +77,12 @@ export const FirstLevelPropGroupRow: React.FC<FirstLevelPropGroupRow> = ({
   }, []);
 
   return (
-    <React.Fragment key={prop1.id}>
+    <React.Fragment
+      key={pi1}
+      // key={prop1.id}
+    >
       <PropGroupRow
+        key={pi1}
         id={prop1.id}
         index={pi1}
         itemType={ItemTypes.PROP_ROW1}

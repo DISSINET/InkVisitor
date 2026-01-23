@@ -126,7 +126,10 @@ export const PropGroup: React.FC<PropGroup> = ({
       hasOrder: boolean,
       isLast: boolean
     ) => (
-      <React.Fragment key={prop1.id}>
+      <React.Fragment
+        key={pi1}
+        // key={prop1.id}
+      >
         <FirstLevelPropGroupRow
           prop1={prop1}
           pi1={pi1}
@@ -151,8 +154,8 @@ export const PropGroup: React.FC<PropGroup> = ({
           territoryParentId={territoryParentId}
           lowIdent={lowIdent}
           alwaysShowCreateModal={alwaysShowCreateModal}
-          initTypeTyped={isLast ? initTypeTyped : undefined}
-          initValueTyped={isLast ? initValueTyped : undefined}
+          // initTypeTyped={isLast ? initTypeTyped : undefined}
+          // initValueTyped={isLast ? initValueTyped : undefined}
         />
         {/* 2nd level */}
         <SecondLevelPropGroup
@@ -176,8 +179,12 @@ export const PropGroup: React.FC<PropGroup> = ({
       hasOrder: boolean
     ) => {
       return (
-        <React.Fragment key={prop2.id}>
+        <React.Fragment
+          key={pi2}
+          // key={prop2.id}
+        >
           <PropGroupRow
+            key={pi2}
             id={prop2.id}
             index={pi2}
             itemType={ItemTypes.PROP_ROW2}
@@ -223,8 +230,12 @@ export const PropGroup: React.FC<PropGroup> = ({
       hasOrder: boolean
     ) => {
       return (
-        <React.Fragment key={prop3.id}>
+        <React.Fragment
+          key={pi3}
+          // key={prop3.id}
+        >
           <PropGroupRow
+            key={pi3}
             id={prop3.id}
             index={pi3}
             itemType={ItemTypes.PROP_ROW3}
