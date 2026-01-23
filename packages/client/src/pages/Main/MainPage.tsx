@@ -842,6 +842,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
                     onClick={() => {
                       if (previousTerritoryId) {
                         setTerritoryId(previousTerritoryId);
+                        if (!statementListOpened) {
+                          dispatch(setDetailBoxState(DetailBoxState.Normal));
+                        }
                       }
                     }}
                     disabled={!previousTerritoryId}
@@ -853,6 +856,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
                     onClick={() => {
                       if (nextTerritoryId) {
                         setTerritoryId(nextTerritoryId);
+                        if (!statementListOpened) {
+                          dispatch(setDetailBoxState(DetailBoxState.Normal));
+                        }
                       }
                     }}
                     disabled={!nextTerritoryId}
@@ -969,11 +975,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
                 tooltipLabel="close all tabs"
                 icon={<VscCloseAll style={{ transform: "scale(1.3)" }} />}
                 onClick={() => {
-                  // First ensure statement list is opened
-                  dispatch(setStatementListOpened(true));
-                  localStorage.setItem("statementListOpened", "true");
-
-                  // Then clear the detail IDs
                   clearAllDetailIds();
                   dispatch(setDetailBoxState(DetailBoxState.Normal));
                 }}
