@@ -96,10 +96,6 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
   initTypeTyped,
   initValueTyped,
 }) => {
-  useEffect(() => {
-    console.log("index", index);
-  }, [index]);
-
   const propTypeEntity: IEntity | undefined = entities[prop.type.entityId];
   const propValueEntity: IEntity | undefined = entities[prop.value.entityId];
 
@@ -151,13 +147,14 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
       isDragging: monitor.isDragging(),
     }),
     end: (item: DragItem | undefined, monitor: DragSourceMonitor) => {
-      console.log("draggedPropRow", draggedPropRow);
       if (
         item &&
         draggedPropRow.index !== undefined &&
         item.index !== undefined
       )
-        movePropToIndex(id, draggedPropRow.index, item.index);
+        if (draggedPropRow.index !== item.index) {
+          movePropToIndex(id, draggedPropRow.index, item.index);
+        }
     },
   });
 
