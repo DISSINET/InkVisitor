@@ -261,7 +261,6 @@ export const EntityDetail: React.FC<EntityDetail> = ({
   const updateEntityMutation = useMutation({
     mutationFn: async (changes: Partial<IEntity>) =>
       await api.entityUpdate(detailId, changes),
-
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["entity"] });
 
@@ -547,7 +546,6 @@ export const EntityDetail: React.FC<EntityDetail> = ({
     if (entity !== undefined) {
       const newProps = [...entity.props];
       changeOrder(propId, newProps, oldIndex, newIndex);
-
       updateEntityMutation.mutate({ props: newProps });
     }
   };

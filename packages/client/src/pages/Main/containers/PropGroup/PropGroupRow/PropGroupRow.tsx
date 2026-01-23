@@ -99,6 +99,11 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
   const propTypeEntity: IEntity | undefined = entities[prop.type.entityId];
   const propValueEntity: IEntity | undefined = entities[prop.value.entityId];
 
+  const dropRef = useRef<HTMLDivElement>(null);
+  const dragRef = useRef<HTMLDivElement>(null);
+  const draggedPropRowRef = useRef<DraggedPropRowItem>({});
+
+  const dispatch = useAppDispatch();
   const draggedPropRow: DraggedPropRowItem = useAppSelector(
     (state) => state.rowDnd.draggedPropRow
   );
@@ -114,11 +119,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
     } else {
       setTempDisabled(false);
     }
-  }, [draggedPropRow]);
-
-  const dispatch = useAppDispatch();
-  const dropRef = useRef<HTMLDivElement>(null);
-  const dragRef = useRef<HTMLDivElement>(null);
+  }, [draggedPropRow.parentId, draggedPropRow.category, parentId, category]);
 
   const [{ handlerId }, drop] = useDrop<
     DragItem,
@@ -149,9 +150,11 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
       if (
         item &&
         draggedPropRow.index !== undefined &&
-        item.index !== draggedPropRow.index
+        item.index !== undefined
       )
-        movePropToIndex(id, draggedPropRow.index, item.index);
+        if (draggedPropRow.index !== item.index) {
+          movePropToIndex(id, draggedPropRow.index, item.index);
+        }
     },
   });
 
@@ -160,10 +163,11 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
 
   useEffect(() => {
     if (isDragging) {
-      dispatch(
-        setDraggedPropRow({ id, index, lvl: level, parentId, category })
-      );
+      const dragData = { id, index, lvl: level, parentId, category };
+      draggedPropRowRef.current = dragData;
+      dispatch(setDraggedPropRow(dragData));
     } else {
+      draggedPropRowRef.current = {};
       dispatch(setDraggedPropRow({}));
     }
   }, [isDragging]);
@@ -180,7 +184,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
         style={{ opacity: opacity }}
       >
         <StyledGrid
-          key={level + "|" + index + "|" + id}
+          key={level + "|" + id}
           $tempDisabled={tempDisabled && category === draggedPropRow.category}
         >
           <StyledPropLineColumn $level={level} $lowIdent={lowIdent}>
