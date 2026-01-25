@@ -11,8 +11,14 @@ export const StyledHeading = styled.div`
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   color: ${({ theme }) => theme.color["info"]};
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto 1fr auto;
   grid-gap: ${({ theme }) => `0 ${theme.space[2]}`};
+  align-items: center;
+`;
+
+export const StyledPaginationWrapper = styled.div`
+  display: flex;
+  justify-content: flex-end;
 `;
 export const StyledTagWrapper = styled.div`
   padding-right: ${({ theme }) => theme.space[2]};

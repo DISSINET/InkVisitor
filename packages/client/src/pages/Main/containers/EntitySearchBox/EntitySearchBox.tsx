@@ -248,6 +248,7 @@ export const EntitySearchBox: React.FC = () => {
 
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
 
+
   useEffect(() => {
     if (!showAdvancedOptions) {
       setSearchData({
@@ -695,6 +696,9 @@ export const EntitySearchBox: React.FC = () => {
         <StyledResultsHeader>
           {sortedEntities.length > 0 && (
             <>{`Results (${sortedEntities.length})`}</>
+          )}
+          {sortedEntities.length === 0 && (
+            <p style={{ fontStyle: "italic", fontSize: "1.4rem", margin: "0.5rem", padding: "2rem" }}>{`No results found`}</p>
           )}
         </StyledResultsHeader>
 
