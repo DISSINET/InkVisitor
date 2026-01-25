@@ -16,6 +16,7 @@ export enum WarningTypeEnums {
   IELVL = "IELVL", // Inconsistent Epistemic levels for the Property
   SCLM = "SCLM", // Superclass missing
   ISYNC = "ISYNC", // Inconsistent superclasses in the synonym cloud
+  ISYNCAEE = "ISYNCAEE", // Inconsistent action-event equivalents in the synonym cloud
   MVAL = "MVAL", // Missing at least one entity-type valency
   AVAL = "AVAL", // Asymmetrical valency
   MAEE = "MAEE", // Missing action/event equivalent
@@ -131,6 +132,13 @@ export const globalValidationsDict: IWarningWithDescription = {
     label: "Inconsistent superclasses in the SYN cloud",
     description:
       "All Concepts in the SYN cloud (SYN Relation) have exactly the same SCL Relations.",
+    editAllowed: false,
+    section: "entity",
+  },
+  validation_ISYNCAEE: {
+    label: "Inconsistent action-event equivalents in the SYN cloud",
+    description:
+      "All Actions in the SYN cloud (SYN Relation) have AEE Relations pointing to the same entity or to synonym entities.",
     editAllowed: false,
     section: "entity",
   },

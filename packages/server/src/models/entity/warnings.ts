@@ -78,6 +78,11 @@ export default class EntityWarnings {
       warnings.push(isyncWarning);
     }
 
+    const isyncaeeWarning = await this.hasISYNCAEE(conn);
+    if (isyncaeeWarning) {
+      warnings.push(isyncaeeWarning);
+    }
+
     const avalWarnings = await this.hasAVAL(conn);
     if (avalWarnings) {
       avalWarnings.forEach((w) => warnings.push(w));
@@ -296,6 +301,133 @@ export default class EntityWarnings {
         if (!areSynonyms) {
           return this.newWarning(
             WarningTypeEnums.ISYNC,
+            IWarningPositionSection.Relations
+          );
+        }
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Tests if there is ISYNCAEE warning and returns it
+   * ISYNCAEE warning should pop when actions in the synonym cloud have inconsistent AEE relations.
+   *
+   * Warning IS raised when (for synonyms a1 and a2):
+   * - a1 has AEE ae1 and a2 has AEE ae2 but ae1 and ae2 are NOT synonyms
+   * - a1 has AEE ae1 but a2 has no AEE (asymmetric AEE)
+   *
+   * Warning is NOT raised when:
+   * - a1 has AEE ae1 and a2 has AEE ae2 and ae1 and ae2 are synonyms
+   * - Both a1 and a2 have no AEE
+   * - Both a1 and a2 have AEE relation to the same entity
+   *
+   * @param conn
+   * @returns
+   */
+  async hasISYNCAEE(conn: Connection): Promise<IWarning | null> {
+    if (this.class !== EntityEnums.Class.Action) {
+      return null;
+    }
+
+    // Get all synonym relations for this entity
+    const synonymRelations = await Relation.findForEntities(
+      conn,
+      [this.entityId],
+      RelationEnums.Type.Synonym
+    );
+
+    // Collect all action IDs in the synonym cloud
+    let actionIds: string[] = [];
+    for (const syn of synonymRelations) {
+      actionIds = actionIds.concat(syn.entityIds);
+    }
+    actionIds = Array.from(new Set(actionIds));
+
+    // If only one action (no synonyms), no warning needed
+    if (actionIds.length <= 1) {
+      return null;
+    }
+
+    // Find AEE relations for actions in the synonym cloud (action at index 0)
+    const aeeRels = await Relation.findForEntities(
+      conn,
+      actionIds,
+      RelationEnums.Type.ActionEventEquivalent,
+      0
+    );
+
+    // Group AEE targets by action
+    const aeeTargetsByAction: Record<string, string[]> = {};
+    for (const actionId of actionIds) {
+      aeeTargetsByAction[actionId] = [];
+    }
+    for (const aee of aeeRels) {
+      const actionId = aee.entityIds[0];
+      const eventId = aee.entityIds[1];
+      if (!aeeTargetsByAction[actionId].includes(eventId)) {
+        aeeTargetsByAction[actionId].push(eventId);
+      }
+    }
+
+    // Separate actions with and without AEE
+    const actionsWithAEE = actionIds.filter(
+      (id) => aeeTargetsByAction[id].length > 0
+    );
+    const actionsWithoutAEE = actionIds.filter(
+      (id) => aeeTargetsByAction[id].length === 0
+    );
+
+    // If some have AEE and others don't → WARNING
+    if (actionsWithAEE.length > 0 && actionsWithoutAEE.length > 0) {
+      return this.newWarning(
+        WarningTypeEnums.ISYNCAEE,
+        IWarningPositionSection.Relations
+      );
+    }
+
+    // If none have AEE → OK
+    if (actionsWithAEE.length === 0) {
+      return null;
+    }
+
+    // All have AEE - collect all unique AEE targets
+    const allAeeTargetsSet: Set<string> = new Set();
+    for (const targets of Object.values(aeeTargetsByAction)) {
+      for (const target of targets) {
+        allAeeTargetsSet.add(target);
+      }
+    }
+    const allAeeTargets: string[] = Array.from(allAeeTargetsSet);
+
+    // If only one unique target → OK (all point to the same event)
+    if (allAeeTargets.length === 1) {
+      return null;
+    }
+
+    // Check if all AEE targets are synonyms of each other
+    const targetSynonymRelations = await Relation.findForEntities(
+      conn,
+      allAeeTargets,
+      RelationEnums.Type.Synonym
+    );
+
+    // For each pair of AEE targets, verify they're synonyms
+    for (let i = 0; i < allAeeTargets.length; i++) {
+      for (let j = i + 1; j < allAeeTargets.length; j++) {
+        const target1 = allAeeTargets[i];
+        const target2 = allAeeTargets[j];
+
+        // Check if they're in the same synonym relation
+        const areSynonyms = targetSynonymRelations.some(
+          (rel) =>
+            rel.entityIds.includes(target1) && rel.entityIds.includes(target2)
+        );
+
+        if (!areSynonyms) {
+          return this.newWarning(
+            WarningTypeEnums.ISYNCAEE,
             IWarningPositionSection.Relations
           );
         }
