@@ -109,3 +109,9 @@ Don't remove
 ## Web app
 
 Use `http://<machine ip>:7474/browser/`. Default user is `neo4j`.
+
+# Load production data
+
+- dump production JSONs following the guide in the private repo
+- load the JSONs into pre-prepared local database using cli `rethinkdb import -c localhost:32769 -f relations.json  --table test.relations --format json --force`
+-

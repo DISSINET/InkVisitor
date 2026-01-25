@@ -2,3 +2,6 @@ sheetcache
 rethinkdb_data
 .env
 .cmd.*
+datasets/production-12_2025
+datasets/acr-04_2025
+datasets/acr-12_2025
