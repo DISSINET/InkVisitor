@@ -236,6 +236,8 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
         return <b>Superclass missing</b>;
       case WarningTypeEnums.ISYNC:
         return <b>Inconsistent superclasses in the synonym cloud</b>;
+      case WarningTypeEnums.ISYNCAEE:
+        return <b>Inconsistent action-event equivalents in the synonym cloud</b>;
       case WarningTypeEnums.MVAL:
         return <b>Missing at least one entity-type valency</b>;
       case WarningTypeEnums.AVAL:
