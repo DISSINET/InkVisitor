@@ -26,7 +26,7 @@ export const PaginationControls: React.FC<PaginationControlsProps> = ({
         radiusLeft
         radiusRight
       />
-      <span>
+      <span style={{ textAlign: "center" }}>
         {currentPage} of {totalPages}
       </span>
       <Button
