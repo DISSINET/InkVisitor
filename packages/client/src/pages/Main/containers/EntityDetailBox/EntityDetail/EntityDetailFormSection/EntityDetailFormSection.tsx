@@ -734,7 +734,10 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                 <StyledAlternativeLabels>
                   {alternativeLabels.map((label, key) => {
                     return (
-                      <StyledAlternativeLabelWrap key={key}>
+                      <StyledAlternativeLabelWrap
+                        key={key}
+                        $isEditing={currentlyEditedAltLabel === key}
+                      >
                         <StyledGreyBar />
                         <>
                           {currentlyEditedAltLabel === key ? (
@@ -743,6 +746,10 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                               autoFocus
                               value={label}
                               onChangeFn={(value) => {
+                                if (value.length < 1) {
+                                  toast.error("Label cannot be empty");
+                                  return;
+                                }
                                 updateEntityMutation.mutate({
                                   labels: [
                                     newLabel,
@@ -772,25 +779,31 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                           )}
                         </>
 
-                        <StyledPromoteIcon
-                          title="Promote label"
-                          onClick={() => {
-                            handlePromoteLabel(label);
-                          }}
-                        >
-                          <StyledPromoteIconOutline size={12} />
-                          <StyledPromoteIconFilled size={12} />
-                        </StyledPromoteIcon>
+                        {currentlyEditedAltLabel !== key && (
+                          <>
+                            <StyledPromoteIcon
+                              title="Promote label"
+                              onClick={() => {
+                                handlePromoteLabel(label);
+                              }}
+                            >
+                              <StyledPromoteIconOutline size={12} />
+                              <StyledPromoteIconFilled size={12} />
+                            </StyledPromoteIcon>
 
-                        <StyledCloseIcon
-                          title="Remove label"
-                          size={14}
-                          onClick={() => {
-                            updateEntityMutation.mutate({
-                              labels: entity.labels.filter((l) => l !== label),
-                            });
-                          }}
-                        />
+                            <StyledCloseIcon
+                              title="Remove label"
+                              size={14}
+                              onClick={() => {
+                                updateEntityMutation.mutate({
+                                  labels: entity.labels.filter(
+                                    (l) => l !== label
+                                  ),
+                                });
+                              }}
+                            />
+                          </>
+                        )}
                       </StyledAlternativeLabelWrap>
                     );
                   })}

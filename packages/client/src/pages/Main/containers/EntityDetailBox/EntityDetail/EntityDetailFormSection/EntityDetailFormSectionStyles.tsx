@@ -6,7 +6,10 @@ export const StyledAlternativeLabels = styled.div`
   flex-wrap: wrap;
   gap: 0.5rem;
 `;
-export const StyledAlternativeLabelWrap = styled.div`
+interface StyledAlternativeLabelWrapProps {
+  $isEditing: boolean;
+}
+export const StyledAlternativeLabelWrap = styled.div<StyledAlternativeLabelWrapProps>`
   position: relative;
   display: flex;
   align-items: center;
@@ -19,7 +22,7 @@ export const StyledAlternativeLabelWrap = styled.div`
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
   border-radius: 0.35rem;
   gap: 0.15rem;
-  padding-right: 0.5rem;
+  padding-right: ${({ $isEditing }) => ($isEditing ? "0" : "0.5rem")};
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   transition: background-color 0.2s ease, border-color 0.2s ease,
     box-shadow 0.2s ease;
