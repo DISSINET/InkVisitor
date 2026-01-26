@@ -763,6 +763,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                                 setCurrentlyEditedAltLabel(false);
                               }}
                               allowCtrlEnter
+                              showSaveExitIcons
                               onEnterPressFn={() => {
                                 setCurrentlyEditedAltLabel(false);
                               }}

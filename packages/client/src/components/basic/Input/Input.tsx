@@ -1,12 +1,14 @@
 import theme, { ThemeColor, ThemeFontSize } from "Theme/theme";
 import React, { useEffect, useState } from "react";
-import { MdCancel } from "react-icons/md";
+import { MdCancel, MdCheck, MdClose } from "react-icons/md";
 import {
   Label,
   StyledClearableInputButton,
   StyledInput,
   StyledTextArea,
   StyledWrapper,
+  StyledActionButtonGroup,
+  StyledActionButton,
 } from "./InputStyles";
 
 interface Input {
@@ -52,6 +54,7 @@ interface Input {
   minWidth?: number;
   fullHeight?: boolean;
   clearable?: boolean;
+  showSaveExitIcons?: boolean;
 
   // Number props
   min?: number;
@@ -88,6 +91,7 @@ export const Input: React.FC<Input> = ({
   minWidth,
   fullHeight = false,
   clearable = false,
+  showSaveExitIcons = false,
   min,
   max,
 }) => {
@@ -161,7 +165,13 @@ export const Input: React.FC<Input> = ({
             $borderColor={borderColor}
             $autocomplete={autocomplete}
             required={required}
-            $paddingRight={clearable && displayValue.length > 0}
+            $iconCount={
+              clearable && displayValue.length > 0
+                ? 1
+                : showSaveExitIcons
+                ? 2
+                : 0
+            }
           />
 
           {displayValue.length > 0 && clearable && (
@@ -174,6 +184,46 @@ export const Input: React.FC<Input> = ({
                 }}
               />
             </StyledClearableInputButton>
+          )}
+
+          {showSaveExitIcons && (
+            <StyledActionButtonGroup>
+              {onEnterPressFn && (
+                <StyledActionButton
+                  $isEnter={true}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (displayValue !== value && !changeOnType) {
+                      onChangeFn(displayValue);
+                    }
+                    onEnterPressFn();
+                  }}
+                  title="Save (Enter)"
+                >
+                  <MdCheck size={16} />
+                </StyledActionButton>
+              )}
+              {onEscapePressFn && (
+                <StyledActionButton
+                  $isEnter={false}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEscapePressFn();
+                  }}
+                  title="Cancel (Esc)"
+                >
+                  <MdClose size={16} />
+                </StyledActionButton>
+              )}
+            </StyledActionButtonGroup>
           )}
         </div>
       )}
