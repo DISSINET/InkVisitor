@@ -39,7 +39,8 @@ export const StyledGreyBar = styled.div`
   left: 0;
   transition: background-color 0.2s ease;
 
-  ${StyledAlternativeLabelWrap}:hover & {
+  ${StyledAlternativeLabelWrap}:hover &,
+  ${StyledAlternativeLabelWrap}:focus-within & {
     background-color: ${({ theme }) => theme.color["primary"]};
   }
 `;
@@ -66,7 +67,7 @@ export const StyledCloseIcon = styled(IoClose)`
   transition: color 0.2s ease, transform 0.2s ease;
 
   &:hover {
-    color: ${({ theme }) => theme.color["warning"]};
+    color: ${({ theme }) => theme.color["danger"]};
   }
 
   ${StyledAlternativeLabelWrap}:hover & {
@@ -106,7 +107,7 @@ export const StyledPromoteIconOutline = styled(IoStarOutline)`
 `;
 
 export const StyledPromoteIconFilled = styled(IoStar)`
-  color: ${({ theme }) => theme.color["primary"]};
+  color: ${({ theme }) => theme.color["warning"]};
   transition: opacity 0.2s ease;
   opacity: 0;
 

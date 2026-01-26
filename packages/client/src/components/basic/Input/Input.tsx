@@ -27,7 +27,9 @@ interface Input {
   cols?: number;
   width?: number | "full";
   onChangeFn: (value: string) => void;
+  allowCtrlEnter?: boolean;
   onEnterPressFn?: () => void;
+  onEscapePressFn?: () => void;
   onFocus?: (
     event: React.FocusEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -67,6 +69,8 @@ export const Input: React.FC<Input> = ({
   width,
   changeOnType = false,
   onEnterPressFn = () => {},
+  allowCtrlEnter = false,
+  onEscapePressFn = () => {},
   onChangeFn,
   placeholder,
   autoFocus = false,
@@ -123,8 +127,16 @@ export const Input: React.FC<Input> = ({
             onKeyDown={(event: React.KeyboardEvent) => {
               switch (event.key) {
                 case "Enter":
-                  if (!event.ctrlKey && !event.metaKey) {
+                  if ((!event.ctrlKey && !event.metaKey) || allowCtrlEnter) {
+                    if (displayValue !== value && !changeOnType) {
+                      onChangeFn(displayValue);
+                    }
                     onEnterPressFn();
+                  }
+                  return;
+                case "Escape":
+                  if (!event.ctrlKey && !event.metaKey) {
+                    onEscapePressFn();
                   }
                   return;
                 case "ArrowUp":

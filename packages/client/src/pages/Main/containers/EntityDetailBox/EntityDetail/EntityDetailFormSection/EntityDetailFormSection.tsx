@@ -755,6 +755,13 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                               onBlur={() => {
                                 setCurrentlyEditedAltLabel(false);
                               }}
+                              allowCtrlEnter
+                              onEnterPressFn={() => {
+                                setCurrentlyEditedAltLabel(false);
+                              }}
+                              onEscapePressFn={() => {
+                                setCurrentlyEditedAltLabel(false);
+                              }}
                             />
                           ) : (
                             <StyledAlternativeLabel
@@ -792,6 +799,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                 <StyledAddLabel $marginTop={entity.labels.length > 1}>
                   <Input
                     placeholder="add label"
+                    allowCtrlEnter
                     disabled={!userCanEdit}
                     changeOnType
                     value={newAltLabel}
