@@ -190,7 +190,6 @@ export const Input: React.FC<Input> = ({
             <StyledActionButtonGroup>
               {onEnterPressFn && (
                 <StyledActionButton
-                  $isEnter={true}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -204,12 +203,11 @@ export const Input: React.FC<Input> = ({
                   }}
                   title="Save (Enter)"
                 >
-                  <MdCheck size={16} />
+                  <MdCheck size={14} />
                 </StyledActionButton>
               )}
               {onEscapePressFn && (
                 <StyledActionButton
-                  $isEnter={false}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -220,7 +218,7 @@ export const Input: React.FC<Input> = ({
                   }}
                   title="Cancel (Esc)"
                 >
-                  <MdClose size={16} />
+                  <MdClose size={14} />
                 </StyledActionButton>
               )}
             </StyledActionButtonGroup>

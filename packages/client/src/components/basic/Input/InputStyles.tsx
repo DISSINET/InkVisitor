@@ -180,26 +180,21 @@ export const StyledClearableInputButton = styled.div<StyledClearableInputButton>
 
 export const StyledActionButtonGroup = styled.div`
   position: absolute;
-  right: 0.25rem;
+  right: 0.4rem;
   display: flex;
   top: 50%;
   transform: translateY(-50%);
   z-index: 1;
 `;
 
-interface StyledActionButtonProps {
-  $isEnter: boolean;
-}
-export const StyledActionButton = styled.button<StyledActionButtonProps>`
+export const StyledActionButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   background: transparent;
   border: none;
-  padding: 0.2rem;
-  border-radius: 0.2rem;
-  transition: background-color 0.2s ease, opacity 0.2s ease;
+  transition: opacity 0.2s ease;
   opacity: 0.7;
 
   svg {
@@ -207,8 +202,6 @@ export const StyledActionButton = styled.button<StyledActionButtonProps>`
   }
 
   &:hover {
-    color: ${({ theme, $isEnter }) =>
-      $isEnter ? theme.color["success"] : theme.color["danger"]};
     opacity: 1;
   }
 
