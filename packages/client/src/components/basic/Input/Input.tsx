@@ -10,6 +10,7 @@ import {
   StyledActionButtonGroup,
   StyledActionButton,
 } from "./InputStyles";
+import { IconWithTooltip } from "components";
 
 interface Input {
   label?: string;
@@ -201,9 +202,11 @@ export const Input: React.FC<Input> = ({
                     }
                     onEnterPressFn();
                   }}
-                  title="Save (Enter)"
                 >
-                  <MdCheck size={14} />
+                  <IconWithTooltip
+                    icon={<MdCheck size={14} />}
+                    tooltipLabel="Save changes (Enter)"
+                  />
                 </StyledActionButton>
               )}
               {onEscapePressFn && (
@@ -216,9 +219,11 @@ export const Input: React.FC<Input> = ({
                     e.stopPropagation();
                     onEscapePressFn();
                   }}
-                  title="Cancel (Esc)"
                 >
-                  <MdClose size={14} />
+                  <IconWithTooltip
+                    icon={<MdClose size={14} />}
+                    tooltipLabel="Cancel changes (Esc)"
+                  />
                 </StyledActionButton>
               )}
             </StyledActionButtonGroup>

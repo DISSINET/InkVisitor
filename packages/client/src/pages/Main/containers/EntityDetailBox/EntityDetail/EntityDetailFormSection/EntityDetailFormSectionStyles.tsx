@@ -23,6 +23,8 @@ export const StyledAlternativeLabelWrap = styled.div<StyledAlternativeLabelWrapP
   border-radius: 0.35rem;
   gap: 0.15rem;
   padding-right: ${({ $isEditing }) => ($isEditing ? "0" : "0.5rem")};
+  flex-basis: ${({ $isEditing }) => ($isEditing ? "100%" : "auto")};
+  min-width: ${({ $isEditing }) => ($isEditing ? "100%" : "auto")};
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   transition: background-color 0.2s ease, border-color 0.2s ease,
     box-shadow 0.2s ease;

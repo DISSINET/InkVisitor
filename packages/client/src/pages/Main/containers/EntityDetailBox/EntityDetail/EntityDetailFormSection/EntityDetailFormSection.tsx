@@ -742,6 +742,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                         <>
                           {currentlyEditedAltLabel === key ? (
                             <Input
+                              width="full"
                               fullHeight
                               autoFocus
                               value={label}
