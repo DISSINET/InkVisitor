@@ -25,7 +25,13 @@ import {
 import { MIN_LABEL_LENGTH_MESSAGE, rootTerritoryId } from "Theme/constants";
 import api from "api";
 import { AxiosResponse } from "axios";
-import { Button, Input, MultiInput, TypeBar } from "components";
+import {
+  Button,
+  IconWithTooltip,
+  Input,
+  MultiInput,
+  TypeBar,
+} from "components";
 import Dropdown, {
   AttributeButtonGroup,
   EntitySuggester,
@@ -54,11 +60,13 @@ import {
   StyledAlternativeLabels,
   StyledAlternativeLabelWrap,
   StyledCloseIcon,
+  StyledDangerOnHoverButton,
   StyledGreyBar,
   StyledPromoteIcon,
   StyledPromoteIconFilled,
   StyledPromoteIconOutline,
 } from "./EntityDetailFormSectionStyles";
+import { MdClose } from "react-icons/md";
 
 interface EntityDetailFormSection {
   entity: IResponseDetail;
@@ -803,17 +811,23 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                               <StyledPromoteIconFilled size={12} />
                             </StyledPromoteIcon>
 
-                            <StyledCloseIcon
-                              title="Remove label"
-                              size={15}
-                              onClick={() => {
-                                updateEntityMutation.mutate({
-                                  labels: entity.labels.filter(
-                                    (l) => l !== label
-                                  ),
-                                });
-                              }}
-                            />
+                            <StyledDangerOnHoverButton>
+                              <Button
+                                inverted
+                                noBackground
+                                noBorder
+                                noPadding
+                                onClick={() => {
+                                  updateEntityMutation.mutate({
+                                    labels: entity.labels.filter(
+                                      (l) => l !== label
+                                    ),
+                                  });
+                                }}
+                                icon={<MdClose size={15} />}
+                                tooltipLabel="Remove label"
+                              />
+                            </StyledDangerOnHoverButton>
                           </div>
                         )}
                       </StyledAlternativeLabelWrap>

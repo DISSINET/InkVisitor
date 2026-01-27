@@ -43,7 +43,7 @@ export const StyledGreyBar = styled.div`
   bottom: 0;
   left: 0;
   transition: background-color 0.2s ease;
-  border-radius: 0.35rem 0 0 0.35rem;
+  border-radius: 0.25rem 0 0 0.25rem;
 
   ${StyledAlternativeLabelWrap}:hover &,
   ${StyledAlternativeLabelWrap}:focus-within & {
@@ -125,4 +125,19 @@ export const StyledAddLabel = styled.div<StyledAddLabel>`
   gap: 0.5rem;
   align-items: center;
   margin-top: ${({ $marginTop }) => ($marginTop ? "1.5rem" : "")};
+`;
+
+export const StyledDangerOnHoverButton = styled.div`
+  display: flex;
+  align-items: center;
+  & > button {
+    border-color: ${({ theme }) => theme.color["black"]} !important;
+    color: ${({ theme }) => theme.color["black"]} !important;
+    transition: border-color 0.2s, color 0.2s, background-color 0.2s;
+
+    &:hover:not(:disabled) {
+      border-color: ${({ theme }) => theme.color["danger"]} !important;
+      color: ${({ theme }) => theme.color["danger"]} !important;
+    }
+  }
 `;
