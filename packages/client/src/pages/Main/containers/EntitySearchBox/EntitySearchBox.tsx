@@ -1,3 +1,9 @@
+import {
+  FloatingPortal,
+  autoUpdate,
+  offset,
+  useFloating,
+} from "@floating-ui/react";
 import { animated, config, useSpring } from "@react-spring/web";
 import { entityStatusDict, languageDict } from "@shared/dictionaries";
 import { entitiesDict } from "@shared/dictionaries/entity";
@@ -251,6 +257,9 @@ export const EntitySearchBox: React.FC = () => {
 
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(true);
   const [expandedOptions, setExpandedOptions] = useState<string[]>([]);
+  const [showBubblesMenu, setShowBubblesMenu] = useState(false);
+  const [portalMounted, setPortalMounted] = useState(false);
+  const [timeoutId, setTimeoutId] = useState<number | null>(null);
 
   useEffect(() => {
     if (!showAdvancedOptions) {
@@ -267,6 +276,42 @@ export const EntitySearchBox: React.FC = () => {
     transform: showAdvancedOptions ? "rotate(180deg)" : "rotate(0deg)",
     config: config.stiff,
   });
+
+  const handleBubblesMouseEnter = () => {
+    setPortalMounted(true);
+    setShowBubblesMenu(true);
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+      setTimeoutId(null);
+    }
+  };
+
+  const handleBubblesMouseLeave = () => {
+    const id = window.setTimeout(() => {
+      setShowBubblesMenu(false);
+    }, 150);
+    setTimeoutId(id);
+  };
+
+  useEffect(() => {
+    if (!showBubblesMenu && portalMounted) {
+      setTimeout(() => {
+        setPortalMounted(false);
+      }, 300);
+    }
+  }, [showBubblesMenu, portalMounted]);
+
+  const animatedBubblesMount = useSpring({
+    opacity: showBubblesMenu ? 1 : 0,
+    config: config.stiff,
+  });
+
+  const { refs: bubblesRefs, floatingStyles: bubblesFloatingStyles } =
+    useFloating({
+      placement: "left",
+      whileElementsMounted: autoUpdate,
+      middleware: [offset({ mainAxis: 4 })],
+    });
 
   const userRole = localStorage.getItem("userrole");
 
@@ -331,31 +376,51 @@ export const EntitySearchBox: React.FC = () => {
             </div>
           </StyledRow>
 
-          <StyledAdvancedOptions>
-            {/* <div style={{ height: "100%", width: "100%" }}> */}
+          <StyledAdvancedOptions
+            ref={bubblesRefs.setReference}
+            onMouseEnter={handleBubblesMouseEnter}
+            onMouseLeave={handleBubblesMouseLeave}
+          >
             <StyledAdvancedOptionsSign>
               <CgOptions size={12} />
               <i>advanced options</i>
             </StyledAdvancedOptionsSign>
-            {/* </div> */}
           </StyledAdvancedOptions>
 
-          <StyledBubblesContainer>
-            {advancedOptions.map((option) => (
-              <>
-                {!expandedOptions.includes(option) && (
-                  <StyledBubble
-                    key={option}
-                    onClick={() =>
-                      setExpandedOptions([...expandedOptions, option])
-                    }
-                  >
-                    <StyledBubbleLabel>{option}</StyledBubbleLabel>
-                  </StyledBubble>
-                )}
-              </>
-            ))}
-          </StyledBubblesContainer>
+          {portalMounted && (
+            <FloatingPortal id="page">
+              <div
+                ref={bubblesRefs.setFloating}
+                style={{
+                  ...bubblesFloatingStyles,
+                  zIndex: 1000,
+                  maxWidth: "250px",
+                  padding: "4px",
+                }}
+                onMouseEnter={handleBubblesMouseEnter}
+                onMouseLeave={handleBubblesMouseLeave}
+              >
+                <animated.div style={animatedBubblesMount}>
+                  <StyledBubblesContainer>
+                    {advancedOptions.map((option) => (
+                      <>
+                        {!expandedOptions.includes(option) && (
+                          <StyledBubble
+                            key={option}
+                            onClick={() =>
+                              setExpandedOptions([...expandedOptions, option])
+                            }
+                          >
+                            <StyledBubbleLabel>{option}</StyledBubbleLabel>
+                          </StyledBubble>
+                        )}
+                      </>
+                    ))}
+                  </StyledBubblesContainer>
+                </animated.div>
+              </div>
+            </FloatingPortal>
+          )}
 
           {/* ADVANCED OPTIONS */}
           {/* {showAdvancedOptions && ( */}
