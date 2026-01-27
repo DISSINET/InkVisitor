@@ -204,7 +204,7 @@ export const Input: React.FC<Input> = ({
                   }}
                 >
                   <IconWithTooltip
-                    icon={<MdCheck size={14} />}
+                    icon={<MdCheck size={15} />}
                     tooltipLabel="Save changes (Enter)"
                   />
                 </StyledActionButton>
@@ -221,7 +221,7 @@ export const Input: React.FC<Input> = ({
                   }}
                 >
                   <IconWithTooltip
-                    icon={<MdClose size={14} />}
+                    icon={<MdClose size={15} />}
                     tooltipLabel="Cancel changes (Esc)"
                   />
                 </StyledActionButton>

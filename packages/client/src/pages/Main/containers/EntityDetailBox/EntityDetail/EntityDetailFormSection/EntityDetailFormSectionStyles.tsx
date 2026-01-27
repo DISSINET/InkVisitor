@@ -51,14 +51,10 @@ export const StyledGreyBar = styled.div`
 `;
 export const StyledAlternativeLabel = styled.div`
   overflow: hidden;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 1;
-
-  display: flex;
-  align-items: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
   margin-left: 0.5rem;
-  padding-right: 0.3rem;
   z-index: 1;
   transition: color 0.2s ease;
 

@@ -773,16 +773,26 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                               }}
                             />
                           ) : (
-                            <StyledAlternativeLabel
-                              onClick={() => setCurrentlyEditedAltLabel(key)}
-                            >
-                              {label}
-                            </StyledAlternativeLabel>
+                            // grid is used to wrap the label if it is too long (text-overflow: ellipsis doesn't work without the grid)
+                            <div style={{ maxWidth: "100%", display: "grid" }}>
+                              <StyledAlternativeLabel
+                                onClick={() => setCurrentlyEditedAltLabel(key)}
+                              >
+                                {label}
+                              </StyledAlternativeLabel>
+                            </div>
                           )}
                         </>
 
                         {currentlyEditedAltLabel !== key && (
-                          <>
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "0.1rem",
+                              paddingLeft: "0.5rem",
+                            }}
+                          >
                             <StyledPromoteIcon
                               title="Promote label"
                               onClick={() => {
@@ -795,7 +805,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
 
                             <StyledCloseIcon
                               title="Remove label"
-                              size={14}
+                              size={15}
                               onClick={() => {
                                 updateEntityMutation.mutate({
                                   labels: entity.labels.filter(
@@ -804,7 +814,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                                 });
                               }}
                             />
-                          </>
+                          </div>
                         )}
                       </StyledAlternativeLabelWrap>
                     );
