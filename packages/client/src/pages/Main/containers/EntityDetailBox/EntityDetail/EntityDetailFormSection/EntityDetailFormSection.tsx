@@ -25,7 +25,13 @@ import {
 import { MIN_LABEL_LENGTH_MESSAGE, rootTerritoryId } from "Theme/constants";
 import api from "api";
 import { AxiosResponse } from "axios";
-import { Button, Input, MultiInput, TypeBar } from "components";
+import {
+  Button,
+  IconWithTooltip,
+  Input,
+  MultiInput,
+  TypeBar,
+} from "components";
 import Dropdown, {
   AttributeButtonGroup,
   EntitySuggester,
@@ -51,14 +57,18 @@ import {
 import {
   StyledAddLabel,
   StyledAlternativeLabel,
+  StyledAlternativeLabelButtons,
   StyledAlternativeLabels,
   StyledAlternativeLabelWrap,
   StyledCloseIcon,
+  StyledDangerOnHoverButton,
   StyledGreyBar,
   StyledPromoteIcon,
   StyledPromoteIconFilled,
   StyledPromoteIconOutline,
 } from "./EntityDetailFormSectionStyles";
+import { MdClose } from "react-icons/md";
+import { IoStar } from "react-icons/io5";
 
 interface EntityDetailFormSection {
   entity: IResponseDetail;
@@ -785,36 +795,40 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                         </>
 
                         {currentlyEditedAltLabel !== key && (
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "0.1rem",
-                              paddingLeft: "0.5rem",
-                            }}
-                          >
+                          <StyledAlternativeLabelButtons>
                             <StyledPromoteIcon
-                              title="Promote label"
                               onClick={() => {
                                 handlePromoteLabel(label);
                               }}
                             >
                               <StyledPromoteIconOutline size={12} />
-                              <StyledPromoteIconFilled size={12} />
+                              <StyledPromoteIconFilled>
+                                <IconWithTooltip
+                                  icon={<IoStar size={12} />}
+                                  tooltipLabel="Promote label"
+                                  color="info"
+                                />
+                              </StyledPromoteIconFilled>
                             </StyledPromoteIcon>
 
-                            <StyledCloseIcon
-                              title="Remove label"
-                              size={15}
-                              onClick={() => {
-                                updateEntityMutation.mutate({
-                                  labels: entity.labels.filter(
-                                    (l) => l !== label
-                                  ),
-                                });
-                              }}
-                            />
-                          </div>
+                            <StyledDangerOnHoverButton>
+                              <Button
+                                inverted
+                                noBackground
+                                noBorder
+                                noPadding
+                                onClick={() => {
+                                  updateEntityMutation.mutate({
+                                    labels: entity.labels.filter(
+                                      (l) => l !== label
+                                    ),
+                                  });
+                                }}
+                                icon={<MdClose size={15} />}
+                                tooltipLabel="Remove label"
+                              />
+                            </StyledDangerOnHoverButton>
+                          </StyledAlternativeLabelButtons>
                         )}
                       </StyledAlternativeLabelWrap>
                     );

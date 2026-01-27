@@ -43,7 +43,7 @@ export const StyledGreyBar = styled.div`
   bottom: 0;
   left: 0;
   transition: background-color 0.2s ease;
-  border-radius: 0.35rem 0 0 0.35rem;
+  border-radius: 0.25rem 0 0 0.25rem;
 
   ${StyledAlternativeLabelWrap}:hover &,
   ${StyledAlternativeLabelWrap}:focus-within & {
@@ -63,6 +63,14 @@ export const StyledAlternativeLabel = styled.div`
     color: ${({ theme }) => theme.color["primary"]};
   }
 `;
+
+export const StyledAlternativeLabelButtons = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.1rem;
+  padding-left: 0.5rem;
+`;
+
 export const StyledCloseIcon = styled(IoClose)`
   cursor: pointer;
   color: ${({ theme }) => theme.color["black"]};
@@ -108,13 +116,25 @@ export const StyledPromoteIconOutline = styled(IoStarOutline)`
   }
 `;
 
-export const StyledPromoteIconFilled = styled(IoStar)`
-  color: ${({ theme }) => theme.color["warning"]};
+export const StyledPromoteIconFilled = styled.div`
   transition: opacity 0.2s ease;
   opacity: 0;
 
   ${StyledPromoteIcon}:hover & {
     opacity: 1;
+  }
+
+  /* Ensure tooltip works even when icon is transitioning */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: auto;
+  & > div {
+    width: 100%;
+    height: 100%;
+    pointer-events: auto;
   }
 `;
 interface StyledAddLabel {
@@ -125,4 +145,19 @@ export const StyledAddLabel = styled.div<StyledAddLabel>`
   gap: 0.5rem;
   align-items: center;
   margin-top: ${({ $marginTop }) => ($marginTop ? "1.5rem" : "")};
+`;
+
+export const StyledDangerOnHoverButton = styled.div`
+  display: flex;
+  align-items: center;
+  & > button {
+    border-color: ${({ theme }) => theme.color["black"]} !important;
+    color: ${({ theme }) => theme.color["black"]} !important;
+    transition: border-color 0.2s, color 0.2s, background-color 0.2s;
+
+    &:hover:not(:disabled) {
+      border-color: ${({ theme }) => theme.color["danger"]} !important;
+      color: ${({ theme }) => theme.color["danger"]} !important;
+    }
+  }
 `;
