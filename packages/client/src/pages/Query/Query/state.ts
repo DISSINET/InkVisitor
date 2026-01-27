@@ -6,29 +6,39 @@ import { getAllEdges, getAllNodes } from "./utils";
 const queryStateInitial: Query.INode = {
   type: Query.NodeType.E,
   id: "root",
-  params: {
-    entityClasses: [EntityEnums.Class.Concept],
-  },
+  params:
+    // only show in development mode
+    process.env.NODE_ENV === "development"
+      ? {
+          entityClasses: [EntityEnums.Class.Person],
+        }
+      : {
+          entityClasses: [EntityEnums.Class.Concept],
+        },
   operator: Query.NodeOperator.And,
-  edges: [
-    // {
-    //   type: Query.EdgeType["EP:T"],
-    //   params: {},
-    //   logic: Query.EdgeLogic.Positive,
-    //   id: "e1",
-    //   node: {
-    //     id: "n1",
-    //     type: Query.NodeType.E,
-    //     params: {
-    //       entityId: "4ce5e669-d421-40c9-b1ce-f476fdd171fe", //sex
-    //       entityClasses: [],
-    //       label: "",
-    //     },
-    //     operator: Query.NodeOperator.And,
-    //     edges: [],
-    //   },
-    // },
-  ],
+  edges:
+    // only show in development mode
+    process.env.NODE_ENV === "development"
+      ? [
+          {
+            type: Query.EdgeType["EP:T"],
+            params: {},
+            logic: Query.EdgeLogic.Positive,
+            id: "e1",
+            node: {
+              id: "n1",
+              type: Query.NodeType.E,
+              params: {
+                entityId: "4ce5e669-d421-40c9-b1ce-f476fdd171fe", //sex
+                entityClasses: [],
+                label: "",
+              },
+              operator: Query.NodeOperator.And,
+              edges: [],
+            },
+          },
+        ]
+      : [],
 };
 
 enum QueryActionType {
