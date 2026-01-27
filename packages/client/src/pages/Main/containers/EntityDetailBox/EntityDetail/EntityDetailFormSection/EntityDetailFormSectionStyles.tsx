@@ -43,6 +43,7 @@ export const StyledGreyBar = styled.div`
   bottom: 0;
   left: 0;
   transition: background-color 0.2s ease;
+  border-radius: 0.35rem 0 0 0.35rem;
 
   ${StyledAlternativeLabelWrap}:hover &,
   ${StyledAlternativeLabelWrap}:focus-within & {
