@@ -91,7 +91,6 @@ export const StyledDateTagText = styled.div`
 export const StyledDateTagButton = styled(Button)``;
 
 export const StyledAdvancedOptionsSign = styled.div`
-  // width: 100%;
   height: 50%;
   display: flex;
   align-items: center;
@@ -101,7 +100,6 @@ export const StyledAdvancedOptionsSign = styled.div`
   padding-right: 0.2rem;
   padding-left: 0.3rem;
   padding-bottom: 0.1rem;
-  // border-bottom: 1px solid ${({ theme }) => theme.color.primary};
   color: ${({ theme }) => theme.color.primary};
   font-weight: ${({ theme }) => theme.fontWeight.medium};
 `;
@@ -116,16 +114,17 @@ export const StyledBubblesContainer = styled.div`
   background-color: ${({ theme }) => theme.color["white"]};
   border-radius: ${({ theme }) => theme.borderRadius.md};
   padding: ${({ theme }) => theme.space[3]};
-  /* border: 1px solid ${({ theme }) => theme.color["gray"][300]}; */
 `;
-export const StyledBubble = styled.div`
+export const StyledBubble = styled.div<{ $selected?: boolean }>`
   display: inline-flex;
   align-items: center;
   cursor: pointer;
   padding: 0.25rem 0.5rem;
   border-radius: 2rem;
   background-color: ${({ theme }) => theme.color["gray"][100]};
-  /* border: 1px solid ${({ theme }) => theme.color["gray"][300]}; */
+  border: 1px solid
+    ${({ theme, $selected }) =>
+      $selected ? theme.color["primary"] : theme.color["gray"][300]};
   user-select: none;
 
   &:hover {

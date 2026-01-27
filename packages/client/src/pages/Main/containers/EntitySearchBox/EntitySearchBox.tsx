@@ -402,20 +402,26 @@ export const EntitySearchBox: React.FC = () => {
               >
                 <animated.div style={animatedBubblesMount}>
                   <StyledBubblesContainer>
-                    {advancedOptions.map((option) => (
-                      <>
-                        {!expandedOptions.includes(option) && (
-                          <StyledBubble
-                            key={option}
-                            onClick={() =>
-                              setExpandedOptions([...expandedOptions, option])
+                    {advancedOptions.map((option) => {
+                      const isSelected = expandedOptions.includes(option);
+                      return (
+                        <StyledBubble
+                          key={option}
+                          $selected={isSelected}
+                          onClick={() => {
+                            if (isSelected) {
+                              setExpandedOptions(
+                                expandedOptions.filter((o) => o !== option)
+                              );
+                            } else {
+                              setExpandedOptions([...expandedOptions, option]);
                             }
-                          >
-                            <StyledBubbleLabel>{option}</StyledBubbleLabel>
-                          </StyledBubble>
-                        )}
-                      </>
-                    ))}
+                          }}
+                        >
+                          <StyledBubbleLabel>{option}</StyledBubbleLabel>
+                        </StyledBubble>
+                      );
+                    })}
                   </StyledBubblesContainer>
                 </animated.div>
               </div>
