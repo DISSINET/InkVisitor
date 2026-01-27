@@ -27,7 +27,9 @@ export const StyledAdvancedOptions = styled.div`
   margin-bottom: 0.5rem;
   margin-left: 0.7rem;
 `;
-export const StyledRowHeader = styled.div`
+
+export const StyledRowHeader = styled.div<{ $normalCursor?: boolean }>`
+  cursor: ${({ $normalCursor }) => ($normalCursor ? "default" : "pointer")};
   color: ${({ theme }) => theme.color["black"]};
   display: block;
   margin-right: ${({ theme }) => theme.space[2]};
@@ -96,5 +98,34 @@ export const StyledAdvancedOptionsSign = styled.div`
   padding-bottom: 0.1rem;
   border-bottom: 1px solid ${({ theme }) => theme.color.primary};
   color: ${({ theme }) => theme.color.primary};
+  font-weight: ${({ theme }) => theme.fontWeight.medium};
+`;
+
+export const StyledBubblesContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${({ theme }) => theme.space[1]};
+  align-items: flex-start;
+  justify-content: center;
+  margin-bottom: ${({ theme }) => theme.space[2]};
+`;
+export const StyledBubble = styled.div`
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 2rem;
+  background-color: ${({ theme }) => theme.color["gray"][100]};
+  /* border: 1px solid ${({ theme }) => theme.color["gray"][300]}; */
+  user-select: none;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.color["gray"][200]};
+  }
+`;
+
+export const StyledBubbleLabel = styled.div`
+  color: ${({ theme }) => theme.color["black"]};
+  font-size: ${({ theme }) => theme.fontSize["xxs"]};
   font-weight: ${({ theme }) => theme.fontWeight.medium};
 `;

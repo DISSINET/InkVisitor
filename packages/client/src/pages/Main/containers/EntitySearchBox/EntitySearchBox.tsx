@@ -33,6 +33,9 @@ import {
   StyledAdvancedOptions,
   StyledAdvancedOptionsSign,
   StyledBoxContent,
+  StyledBubble,
+  StyledBubbleLabel,
+  StyledBubblesContainer,
   StyledOptions,
   StyledResultsHeader,
   StyledResultsWrapper,
@@ -246,8 +249,8 @@ export const EntitySearchBox: React.FC = () => {
   //   return options;
   // }, [templates]);
 
-  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
-
+  const [showAdvancedOptions, setShowAdvancedOptions] = useState(true);
+  const [expandedOptions, setExpandedOptions] = useState<string[]>([]);
 
   useEffect(() => {
     if (!showAdvancedOptions) {
@@ -281,12 +284,27 @@ export const EntitySearchBox: React.FC = () => {
     return usersOptionsOut;
   }, [users]);
 
+  const advancedOptions = [
+    "class",
+    "status",
+    "language",
+    "territory",
+    "co-occurrence",
+    "referenced to",
+    "created at",
+    "udpated at",
+    "created by",
+    "updated by",
+    "edited by",
+    "root validity",
+  ];
+
   return (
     <>
       <StyledBoxContent>
         <StyledOptions>
           <StyledRow>
-            <StyledRowHeader>label or uuid</StyledRowHeader>
+            <StyledRowHeader $normalCursor>label or uuid</StyledRowHeader>
             <div
               style={{
                 display: "grid",
@@ -313,41 +331,38 @@ export const EntitySearchBox: React.FC = () => {
             </div>
           </StyledRow>
 
-          <StyledAdvancedOptions>
-            <div style={{ height: "100%", width: "100%" }}>
-              <StyledAdvancedOptionsSign>
-                <CgOptions />
-                <i>advanced options</i>
-              </StyledAdvancedOptionsSign>
-            </div>
-            <div>
-              <Button
-                icon={
-                  <div style={{ display: "inline-flex", alignItems: "center" }}>
-                    <p style={{ margin: "0 0.3rem" }}>
-                      {showAdvancedOptions ? "hide" : "show"}
-                    </p>
-                    <animated.div
-                      style={{
-                        ...rotateOptionsIcon,
-                        display: "flex",
-                        alignItems: "center",
-                      }}
-                    >
-                      <IoMdArrowDropdownCircle size={16} />
-                    </animated.div>
-                  </div>
-                }
-                onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
-                inverted
-              />
-            </div>
-          </StyledAdvancedOptions>
+          <StyledBubblesContainer>
+            {advancedOptions.map((option) => (
+              <>
+                {!expandedOptions.includes(option) && (
+                  <StyledBubble
+                    key={option}
+                    //  $isExpanded={expandedOptions.includes(option)}
+                    onClick={() =>
+                      setExpandedOptions([...expandedOptions, option])
+                    }
+                  >
+                    <StyledBubbleLabel>{option}</StyledBubbleLabel>
+                  </StyledBubble>
+                )}
+              </>
+            ))}
+          </StyledBubblesContainer>
 
-          {showAdvancedOptions && (
-            <>
+          {/* ADVANCED OPTIONS */}
+          {/* {showAdvancedOptions && ( */}
+          <>
+            {expandedOptions.includes("class") && (
               <StyledRow>
-                <StyledRowHeader>class</StyledRowHeader>
+                <StyledRowHeader
+                  onClick={() =>
+                    setExpandedOptions(
+                      expandedOptions.filter((o) => o !== "class")
+                    )
+                  }
+                >
+                  class
+                </StyledRowHeader>
                 <div style={{ position: "relative" }}>
                   <Dropdown.Single.Entity
                     placeholder={""}
@@ -366,9 +381,19 @@ export const EntitySearchBox: React.FC = () => {
                   <TypeBar entityLetter={classOption} />
                 </div>
               </StyledRow>
+            )}
 
+            {expandedOptions.includes("status") && (
               <StyledRow>
-                <StyledRowHeader>status</StyledRowHeader>
+                <StyledRowHeader
+                  onClick={() =>
+                    setExpandedOptions(
+                      expandedOptions.filter((o) => o !== "status")
+                    )
+                  }
+                >
+                  status
+                </StyledRowHeader>
                 <div style={{ position: "relative" }}>
                   <Dropdown.Single.Basic
                     placeholder={""}
@@ -384,8 +409,18 @@ export const EntitySearchBox: React.FC = () => {
                   <TypeBar entityLetter={classOption} />
                 </div>
               </StyledRow>
+            )}
+            {expandedOptions.includes("language") && (
               <StyledRow>
-                <StyledRowHeader>language</StyledRowHeader>
+                <StyledRowHeader
+                  onClick={() =>
+                    setExpandedOptions(
+                      expandedOptions.filter((o) => o !== "language")
+                    )
+                  }
+                >
+                  language
+                </StyledRowHeader>
                 <div style={{ position: "relative" }}>
                   <Dropdown.Single.Basic
                     placeholder={""}
@@ -401,8 +436,9 @@ export const EntitySearchBox: React.FC = () => {
                   <TypeBar entityLetter={classOption} />
                 </div>
               </StyledRow>
-              {/* NOT USED NOW */}
-              {/* <StyledRow>
+            )}
+            {/* NOT USED NOW */}
+            {/* <StyledRow>
               <StyledRowHeader>template</StyledRowHeader>
                <Dropdown.Single.Attribute
                 placeholder={""}
@@ -415,8 +451,17 @@ export const EntitySearchBox: React.FC = () => {
                 }}
               />
             </StyledRow> */}
+            {expandedOptions.includes("territory") && (
               <StyledRow>
-                <StyledRowHeader>territory</StyledRowHeader>
+                <StyledRowHeader
+                  onClick={() =>
+                    setExpandedOptions(
+                      expandedOptions.filter((o) => o !== "territory")
+                    )
+                  }
+                >
+                  territory
+                </StyledRowHeader>
                 {territoryEntity ? (
                   <>
                     {territoryEntity && (
@@ -453,33 +498,43 @@ export const EntitySearchBox: React.FC = () => {
                   </div>
                 )}
               </StyledRow>
-              {territoryEntity && (
-                <StyledRow>
-                  <StyledRowHeader>Territory children</StyledRowHeader>
-                  <AttributeButtonGroup
-                    options={[
-                      {
-                        longValue: "included",
-                        shortValue: "included",
-                        onClick: () => {
-                          handleChange({ subTerritorySearch: true });
-                        },
-                        selected: searchData.subTerritorySearch === true,
-                      },
-                      {
-                        longValue: "not included",
-                        shortValue: "not included",
-                        onClick: () => {
-                          handleChange({ subTerritorySearch: undefined });
-                        },
-                        selected: searchData.subTerritorySearch !== true,
-                      },
-                    ]}
-                  />
-                </StyledRow>
-              )}
+            )}
+            {territoryEntity && (
               <StyledRow>
-                <StyledRowHeader>co-occurrence</StyledRowHeader>
+                <StyledRowHeader>Territory children</StyledRowHeader>
+                <AttributeButtonGroup
+                  options={[
+                    {
+                      longValue: "included",
+                      shortValue: "included",
+                      onClick: () => {
+                        handleChange({ subTerritorySearch: true });
+                      },
+                      selected: searchData.subTerritorySearch === true,
+                    },
+                    {
+                      longValue: "not included",
+                      shortValue: "not included",
+                      onClick: () => {
+                        handleChange({ subTerritorySearch: undefined });
+                      },
+                      selected: searchData.subTerritorySearch !== true,
+                    },
+                  ]}
+                />
+              </StyledRow>
+            )}
+            {expandedOptions.includes("co-occurrence") && (
+              <StyledRow>
+                <StyledRowHeader
+                  onClick={() =>
+                    setExpandedOptions(
+                      expandedOptions.filter((o) => o !== "co-occurrence")
+                    )
+                  }
+                >
+                  co-occurrence
+                </StyledRowHeader>
                 {cooccurrenceEntity ? (
                   <EntityTag
                     entity={cooccurrenceEntity}
@@ -522,8 +577,18 @@ export const EntitySearchBox: React.FC = () => {
                   </div>
                 )}
               </StyledRow>
+            )}
+            {expandedOptions.includes("referenced to") && (
               <StyledRow>
-                <StyledRowHeader>referenced to</StyledRowHeader>
+                <StyledRowHeader
+                  onClick={() =>
+                    setExpandedOptions(
+                      expandedOptions.filter((o) => o !== "referenced to")
+                    )
+                  }
+                >
+                  referenced to
+                </StyledRowHeader>
                 {referencedTo ? (
                   <EntityTag
                     entity={referencedTo}
@@ -550,8 +615,18 @@ export const EntitySearchBox: React.FC = () => {
                   />
                 )}
               </StyledRow>
+            )}
+            {expandedOptions.includes("created at") && (
               <StyledRow>
-                <StyledRowHeader>created at</StyledRowHeader>
+                <StyledRowHeader
+                  onClick={() =>
+                    setExpandedOptions(
+                      expandedOptions.filter((o) => o !== "created at")
+                    )
+                  }
+                >
+                  created at
+                </StyledRowHeader>
 
                 <Input
                   type="date"
@@ -571,10 +646,19 @@ export const EntitySearchBox: React.FC = () => {
                   }}
                   clearable
                 />
-                {/* )} */}
               </StyledRow>
+            )}
+            {expandedOptions.includes("udpated at") && (
               <StyledRow>
-                <StyledRowHeader>udpated at</StyledRowHeader>
+                <StyledRowHeader
+                  onClick={() =>
+                    setExpandedOptions(
+                      expandedOptions.filter((o) => o !== "udpated at")
+                    )
+                  }
+                >
+                  udpated at
+                </StyledRowHeader>
 
                 <Input
                   type="date"
@@ -596,9 +680,19 @@ export const EntitySearchBox: React.FC = () => {
                   clearable
                 />
               </StyledRow>
+            )}
 
+            {expandedOptions.includes("created by") && (
               <StyledRow>
-                <StyledRowHeader>created by</StyledRowHeader>
+                <StyledRowHeader
+                  onClick={() =>
+                    setExpandedOptions(
+                      expandedOptions.filter((o) => o !== "created by")
+                    )
+                  }
+                >
+                  created by
+                </StyledRowHeader>
                 <Dropdown.Single.Basic
                   width="full"
                   options={userOptions}
@@ -608,9 +702,19 @@ export const EntitySearchBox: React.FC = () => {
                   }}
                 />
               </StyledRow>
+            )}
 
+            {expandedOptions.includes("updated by") && (
               <StyledRow>
-                <StyledRowHeader>updated by</StyledRowHeader>
+                <StyledRowHeader
+                  onClick={() =>
+                    setExpandedOptions(
+                      expandedOptions.filter((o) => o !== "updated by")
+                    )
+                  }
+                >
+                  updated by
+                </StyledRowHeader>
                 <Dropdown.Single.Basic
                   width="full"
                   options={userOptions}
@@ -620,9 +724,19 @@ export const EntitySearchBox: React.FC = () => {
                   }}
                 />
               </StyledRow>
+            )}
 
+            {expandedOptions.includes("edited by") && (
               <StyledRow>
-                <StyledRowHeader>edited by</StyledRowHeader>
+                <StyledRowHeader
+                  onClick={() =>
+                    setExpandedOptions(
+                      expandedOptions.filter((o) => o !== "edited by")
+                    )
+                  }
+                >
+                  edited by
+                </StyledRowHeader>
                 <Dropdown.Single.Basic
                   width="full"
                   options={userOptions}
@@ -632,9 +746,19 @@ export const EntitySearchBox: React.FC = () => {
                   }}
                 />
               </StyledRow>
+            )}
 
+            {expandedOptions.includes("root validity") && (
               <StyledRow>
-                <StyledRowHeader>root validity</StyledRowHeader>
+                <StyledRowHeader
+                  onClick={() =>
+                    setExpandedOptions(
+                      expandedOptions.filter((o) => o !== "root validity")
+                    )
+                  }
+                >
+                  root validity
+                </StyledRowHeader>
 
                 <AttributeButtonGroup
                   noMargin
@@ -689,8 +813,9 @@ export const EntitySearchBox: React.FC = () => {
                   ]}
                 />
               </StyledRow>
-            </>
-          )}
+            )}
+          </>
+          {/* )} */}
         </StyledOptions>
 
         <StyledResultsHeader>
@@ -698,7 +823,14 @@ export const EntitySearchBox: React.FC = () => {
             <>{`Results (${sortedEntities.length})`}</>
           )}
           {sortedEntities.length === 0 && (
-            <p style={{ fontStyle: "italic", fontSize: "1.4rem", margin: "0.5rem", padding: "2rem" }}>{`No results found`}</p>
+            <p
+              style={{
+                fontStyle: "italic",
+                fontSize: "1.4rem",
+                margin: "0.5rem",
+                padding: "2rem",
+              }}
+            >{`No results found`}</p>
           )}
         </StyledResultsHeader>
 
