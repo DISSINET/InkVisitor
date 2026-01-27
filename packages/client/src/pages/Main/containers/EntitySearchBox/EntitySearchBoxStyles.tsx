@@ -23,9 +23,14 @@ export const StyledRow = styled.div`
 export const StyledAdvancedOptions = styled.div`
   display: flex;
   align-items: center;
-  height: 3.3rem;
+  justify-content: center;
+  height: 3rem;
   margin-bottom: 0.5rem;
   margin-left: 0.7rem;
+  border: 1px solid ${({ theme }) => theme.color["gray"][300]};
+  border-radius: 5rem;
+  cursor: pointer;
+  /* padding: ${({ theme }) => theme.space[2]}; */
 `;
 
 export const StyledRowHeader = styled.div<{ $normalCursor?: boolean }>`
@@ -86,7 +91,7 @@ export const StyledDateTagText = styled.div`
 export const StyledDateTagButton = styled(Button)``;
 
 export const StyledAdvancedOptionsSign = styled.div`
-  width: 100%;
+  // width: 100%;
   height: 50%;
   display: flex;
   align-items: center;
@@ -96,7 +101,7 @@ export const StyledAdvancedOptionsSign = styled.div`
   padding-right: 0.2rem;
   padding-left: 0.3rem;
   padding-bottom: 0.1rem;
-  border-bottom: 1px solid ${({ theme }) => theme.color.primary};
+  // border-bottom: 1px solid ${({ theme }) => theme.color.primary};
   color: ${({ theme }) => theme.color.primary};
   font-weight: ${({ theme }) => theme.fontWeight.medium};
 `;

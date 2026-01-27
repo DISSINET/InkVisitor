@@ -331,6 +331,15 @@ export const EntitySearchBox: React.FC = () => {
             </div>
           </StyledRow>
 
+          <StyledAdvancedOptions>
+            {/* <div style={{ height: "100%", width: "100%" }}> */}
+            <StyledAdvancedOptionsSign>
+              <CgOptions size={12} />
+              <i>advanced options</i>
+            </StyledAdvancedOptionsSign>
+            {/* </div> */}
+          </StyledAdvancedOptions>
+
           <StyledBubblesContainer>
             {advancedOptions.map((option) => (
               <>
