@@ -57,6 +57,7 @@ import {
 import {
   StyledAddLabel,
   StyledAlternativeLabel,
+  StyledAlternativeLabelButtons,
   StyledAlternativeLabels,
   StyledAlternativeLabelWrap,
   StyledCloseIcon,
@@ -67,6 +68,7 @@ import {
   StyledPromoteIconOutline,
 } from "./EntityDetailFormSectionStyles";
 import { MdClose } from "react-icons/md";
+import { IoStar } from "react-icons/io5";
 
 interface EntityDetailFormSection {
   entity: IResponseDetail;
@@ -793,22 +795,20 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                         </>
 
                         {currentlyEditedAltLabel !== key && (
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "0.1rem",
-                              paddingLeft: "0.5rem",
-                            }}
-                          >
+                          <StyledAlternativeLabelButtons>
                             <StyledPromoteIcon
-                              title="Promote label"
                               onClick={() => {
                                 handlePromoteLabel(label);
                               }}
                             >
                               <StyledPromoteIconOutline size={12} />
-                              <StyledPromoteIconFilled size={12} />
+                              <StyledPromoteIconFilled>
+                                <IconWithTooltip
+                                  icon={<IoStar size={12} />}
+                                  tooltipLabel="Promote label"
+                                  color="info"
+                                />
+                              </StyledPromoteIconFilled>
                             </StyledPromoteIcon>
 
                             <StyledDangerOnHoverButton>
@@ -828,7 +828,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                                 tooltipLabel="Remove label"
                               />
                             </StyledDangerOnHoverButton>
-                          </div>
+                          </StyledAlternativeLabelButtons>
                         )}
                       </StyledAlternativeLabelWrap>
                     );

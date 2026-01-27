@@ -63,6 +63,14 @@ export const StyledAlternativeLabel = styled.div`
     color: ${({ theme }) => theme.color["primary"]};
   }
 `;
+
+export const StyledAlternativeLabelButtons = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.1rem;
+  padding-left: 0.5rem;
+`;
+
 export const StyledCloseIcon = styled(IoClose)`
   cursor: pointer;
   color: ${({ theme }) => theme.color["black"]};
@@ -108,13 +116,25 @@ export const StyledPromoteIconOutline = styled(IoStarOutline)`
   }
 `;
 
-export const StyledPromoteIconFilled = styled(IoStar)`
-  color: ${({ theme }) => theme.color["info"]};
+export const StyledPromoteIconFilled = styled.div`
   transition: opacity 0.2s ease;
   opacity: 0;
 
   ${StyledPromoteIcon}:hover & {
     opacity: 1;
+  }
+
+  /* Ensure tooltip works even when icon is transitioning */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: auto;
+  & > div {
+    width: 100%;
+    height: 100%;
+    pointer-events: auto;
   }
 `;
 interface StyledAddLabel {
