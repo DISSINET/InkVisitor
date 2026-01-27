@@ -337,7 +337,6 @@ export const EntitySearchBox: React.FC = () => {
                 {!expandedOptions.includes(option) && (
                   <StyledBubble
                     key={option}
-                    //  $isExpanded={expandedOptions.includes(option)}
                     onClick={() =>
                       setExpandedOptions([...expandedOptions, option])
                     }
@@ -354,15 +353,24 @@ export const EntitySearchBox: React.FC = () => {
           <>
             {expandedOptions.includes("class") && (
               <StyledRow>
-                <StyledRowHeader
-                  onClick={() =>
-                    setExpandedOptions(
-                      expandedOptions.filter((o) => o !== "class")
-                    )
-                  }
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    alignItems: "center",
+                    marginRight: "0.5rem",
+                  }}
                 >
-                  class
-                </StyledRowHeader>
+                  <StyledBubble
+                    onClick={() =>
+                      setExpandedOptions(
+                        expandedOptions.filter((o) => o !== "class")
+                      )
+                    }
+                  >
+                    <StyledBubbleLabel>class</StyledBubbleLabel>
+                  </StyledBubble>
+                </div>
                 <div style={{ position: "relative" }}>
                   <Dropdown.Single.Entity
                     placeholder={""}
