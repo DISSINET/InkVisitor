@@ -1,13 +1,16 @@
 import theme, { ThemeColor, ThemeFontSize } from "Theme/theme";
 import React, { useEffect, useState } from "react";
-import { MdCancel } from "react-icons/md";
+import { MdCancel, MdCheck, MdClose } from "react-icons/md";
 import {
   Label,
   StyledClearableInputButton,
   StyledInput,
   StyledTextArea,
   StyledWrapper,
+  StyledActionButtonGroup,
+  StyledActionButton,
 } from "./InputStyles";
+import { IconWithTooltip } from "components";
 
 interface Input {
   label?: string;
@@ -27,7 +30,9 @@ interface Input {
   cols?: number;
   width?: number | "full";
   onChangeFn: (value: string) => void;
+  allowCtrlEnter?: boolean;
   onEnterPressFn?: () => void;
+  onEscapePressFn?: () => void;
   onFocus?: (
     event: React.FocusEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -50,6 +55,7 @@ interface Input {
   minWidth?: number;
   fullHeight?: boolean;
   clearable?: boolean;
+  showSaveExitIcons?: boolean;
 
   // Number props
   min?: number;
@@ -67,6 +73,8 @@ export const Input: React.FC<Input> = ({
   width,
   changeOnType = false,
   onEnterPressFn = () => {},
+  allowCtrlEnter = false,
+  onEscapePressFn = () => {},
   onChangeFn,
   placeholder,
   autoFocus = false,
@@ -84,6 +92,7 @@ export const Input: React.FC<Input> = ({
   minWidth,
   fullHeight = false,
   clearable = false,
+  showSaveExitIcons = false,
   min,
   max,
 }) => {
@@ -123,8 +132,16 @@ export const Input: React.FC<Input> = ({
             onKeyDown={(event: React.KeyboardEvent) => {
               switch (event.key) {
                 case "Enter":
-                  if (!event.ctrlKey && !event.metaKey) {
+                  if ((!event.ctrlKey && !event.metaKey) || allowCtrlEnter) {
+                    if (displayValue !== value && !changeOnType) {
+                      onChangeFn(displayValue);
+                    }
                     onEnterPressFn();
+                  }
+                  return;
+                case "Escape":
+                  if (!event.ctrlKey && !event.metaKey) {
+                    onEscapePressFn();
                   }
                   return;
                 case "ArrowUp":
@@ -149,7 +166,13 @@ export const Input: React.FC<Input> = ({
             $borderColor={borderColor}
             $autocomplete={autocomplete}
             required={required}
-            $paddingRight={clearable && displayValue.length > 0}
+            $iconCount={
+              clearable && displayValue.length > 0
+                ? 1
+                : showSaveExitIcons
+                ? 2
+                : 0
+            }
           />
 
           {displayValue.length > 0 && clearable && (
@@ -162,6 +185,48 @@ export const Input: React.FC<Input> = ({
                 }}
               />
             </StyledClearableInputButton>
+          )}
+
+          {showSaveExitIcons && (
+            <StyledActionButtonGroup>
+              {onEnterPressFn && (
+                <StyledActionButton
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (displayValue !== value && !changeOnType) {
+                      onChangeFn(displayValue);
+                    }
+                    onEnterPressFn();
+                  }}
+                >
+                  <IconWithTooltip
+                    icon={<MdCheck size={15} />}
+                    tooltipLabel="Save changes (Enter)"
+                  />
+                </StyledActionButton>
+              )}
+              {onEscapePressFn && (
+                <StyledActionButton
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEscapePressFn();
+                  }}
+                >
+                  <IconWithTooltip
+                    icon={<MdClose size={15} />}
+                    tooltipLabel="Cancel changes (Esc)"
+                  />
+                </StyledActionButton>
+              )}
+            </StyledActionButtonGroup>
           )}
         </div>
       )}

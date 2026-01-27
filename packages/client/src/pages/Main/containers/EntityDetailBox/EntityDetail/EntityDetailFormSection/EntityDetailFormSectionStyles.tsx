@@ -6,7 +6,10 @@ export const StyledAlternativeLabels = styled.div`
   flex-wrap: wrap;
   gap: 0.5rem;
 `;
-export const StyledAlternativeLabelWrap = styled.div`
+interface StyledAlternativeLabelWrapProps {
+  $isEditing: boolean;
+}
+export const StyledAlternativeLabelWrap = styled.div<StyledAlternativeLabelWrapProps>`
   position: relative;
   display: flex;
   align-items: center;
@@ -19,7 +22,9 @@ export const StyledAlternativeLabelWrap = styled.div`
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
   border-radius: 0.35rem;
   gap: 0.15rem;
-  padding-right: 0.5rem;
+  padding-right: ${({ $isEditing }) => ($isEditing ? "0" : "0.5rem")};
+  flex-basis: ${({ $isEditing }) => ($isEditing ? "100%" : "auto")};
+  min-width: ${({ $isEditing }) => ($isEditing ? "100%" : "auto")};
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   transition: background-color 0.2s ease, border-color 0.2s ease,
     box-shadow 0.2s ease;
@@ -39,20 +44,17 @@ export const StyledGreyBar = styled.div`
   left: 0;
   transition: background-color 0.2s ease;
 
-  ${StyledAlternativeLabelWrap}:hover & {
+  ${StyledAlternativeLabelWrap}:hover &,
+  ${StyledAlternativeLabelWrap}:focus-within & {
     background-color: ${({ theme }) => theme.color["primary"]};
   }
 `;
 export const StyledAlternativeLabel = styled.div`
   overflow: hidden;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 1;
-
-  display: flex;
-  align-items: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
   margin-left: 0.5rem;
-  padding-right: 0.3rem;
   z-index: 1;
   transition: color 0.2s ease;
 
@@ -66,7 +68,7 @@ export const StyledCloseIcon = styled(IoClose)`
   transition: color 0.2s ease, transform 0.2s ease;
 
   &:hover {
-    color: ${({ theme }) => theme.color["warning"]};
+    color: ${({ theme }) => theme.color["danger"]};
   }
 
   ${StyledAlternativeLabelWrap}:hover & {
@@ -106,7 +108,7 @@ export const StyledPromoteIconOutline = styled(IoStarOutline)`
 `;
 
 export const StyledPromoteIconFilled = styled(IoStar)`
-  color: ${({ theme }) => theme.color["primary"]};
+  color: ${({ theme }) => theme.color["warning"]};
   transition: opacity 0.2s ease;
   opacity: 0;
 

@@ -12,7 +12,7 @@ interface IValueStyle {
   $borderWidth?: keyof ThemeBorderWidth;
   $autocomplete?: string;
   $fullHeight?: boolean;
-  $paddingRight?: boolean;
+  $iconCount?: number;
 }
 const getWidth = (width?: number | "full") => {
   if (width) {
@@ -68,8 +68,11 @@ export const StyledInput = styled.input<IValueStyle>`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   padding-left: ${({ theme }) => theme.space[2]};
 
-  padding-right: ${({ theme, $paddingRight }) =>
-    $paddingRight ? theme.space[7] : theme.space[1]};
+  padding-right: ${({ theme, $iconCount }) => {
+    if (!$iconCount) return theme.space[1];
+    // 1 icon = space[7], 2 icons = space[10]
+    return $iconCount === 1 ? theme.space[7] : theme.space[14];
+  }};
 
   width: ${({ width }) => getWidth(width)};
   min-width: ${({ theme }) => theme.space[6]};
@@ -172,5 +175,37 @@ export const StyledClearableInputButton = styled.div<StyledClearableInputButton>
   svg {
     color: ${({ theme }) => theme.color["gray"][500]};
     opacity: 0.7;
+  }
+`;
+
+export const StyledActionButtonGroup = styled.div`
+  position: absolute;
+  right: 0.4rem;
+  display: flex;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+`;
+
+export const StyledActionButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  transition: opacity 0.2s ease;
+  opacity: 0.7;
+
+  svg {
+    color: ${({ theme }) => theme.color["primary"]};
+  }
+
+  &:hover {
+    opacity: 1;
+  }
+
+  &:focus {
+    outline: none;
   }
 `;

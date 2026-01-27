@@ -734,15 +734,23 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                 <StyledAlternativeLabels>
                   {alternativeLabels.map((label, key) => {
                     return (
-                      <StyledAlternativeLabelWrap key={key}>
+                      <StyledAlternativeLabelWrap
+                        key={key}
+                        $isEditing={currentlyEditedAltLabel === key}
+                      >
                         <StyledGreyBar />
                         <>
                           {currentlyEditedAltLabel === key ? (
                             <Input
+                              width="full"
                               fullHeight
                               autoFocus
                               value={label}
                               onChangeFn={(value) => {
+                                if (value.length < 1) {
+                                  toast.error("Label cannot be empty");
+                                  return;
+                                }
                                 updateEntityMutation.mutate({
                                   labels: [
                                     newLabel,
@@ -755,35 +763,59 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                               onBlur={() => {
                                 setCurrentlyEditedAltLabel(false);
                               }}
+                              allowCtrlEnter
+                              showSaveExitIcons
+                              onEnterPressFn={() => {
+                                setCurrentlyEditedAltLabel(false);
+                              }}
+                              onEscapePressFn={() => {
+                                setCurrentlyEditedAltLabel(false);
+                              }}
                             />
                           ) : (
-                            <StyledAlternativeLabel
-                              onClick={() => setCurrentlyEditedAltLabel(key)}
-                            >
-                              {label}
-                            </StyledAlternativeLabel>
+                            // grid is used to wrap the label if it is too long (text-overflow: ellipsis doesn't work without the grid)
+                            <div style={{ maxWidth: "100%", display: "grid" }}>
+                              <StyledAlternativeLabel
+                                onClick={() => setCurrentlyEditedAltLabel(key)}
+                              >
+                                {label}
+                              </StyledAlternativeLabel>
+                            </div>
                           )}
                         </>
 
-                        <StyledPromoteIcon
-                          title="Promote label"
-                          onClick={() => {
-                            handlePromoteLabel(label);
-                          }}
-                        >
-                          <StyledPromoteIconOutline size={12} />
-                          <StyledPromoteIconFilled size={12} />
-                        </StyledPromoteIcon>
+                        {currentlyEditedAltLabel !== key && (
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "0.1rem",
+                              paddingLeft: "0.5rem",
+                            }}
+                          >
+                            <StyledPromoteIcon
+                              title="Promote label"
+                              onClick={() => {
+                                handlePromoteLabel(label);
+                              }}
+                            >
+                              <StyledPromoteIconOutline size={12} />
+                              <StyledPromoteIconFilled size={12} />
+                            </StyledPromoteIcon>
 
-                        <StyledCloseIcon
-                          title="Remove label"
-                          size={14}
-                          onClick={() => {
-                            updateEntityMutation.mutate({
-                              labels: entity.labels.filter((l) => l !== label),
-                            });
-                          }}
-                        />
+                            <StyledCloseIcon
+                              title="Remove label"
+                              size={15}
+                              onClick={() => {
+                                updateEntityMutation.mutate({
+                                  labels: entity.labels.filter(
+                                    (l) => l !== label
+                                  ),
+                                });
+                              }}
+                            />
+                          </div>
+                        )}
                       </StyledAlternativeLabelWrap>
                     );
                   })}
@@ -792,6 +824,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                 <StyledAddLabel $marginTop={entity.labels.length > 1}>
                   <Input
                     placeholder="add label"
+                    allowCtrlEnter
                     disabled={!userCanEdit}
                     changeOnType
                     value={newAltLabel}
