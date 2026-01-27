@@ -109,7 +109,7 @@ export const StyledPromoteIconOutline = styled(IoStarOutline)`
 `;
 
 export const StyledPromoteIconFilled = styled(IoStar)`
-  color: ${({ theme }) => theme.color["warning"]};
+  color: ${({ theme }) => theme.color["info"]};
   transition: opacity 0.2s ease;
   opacity: 0;
 
