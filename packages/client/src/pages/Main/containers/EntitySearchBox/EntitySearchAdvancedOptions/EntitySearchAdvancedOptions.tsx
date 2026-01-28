@@ -67,7 +67,7 @@ export const EntitySearchAdvancedOptions: React.FC<
     hideTimeoutRef.current = window.setTimeout(() => {
       setShowBubblesMenu(false);
       hideTimeoutRef.current = null;
-    }, 300);
+    }, 400);
   };
 
   useEffect(() => {
@@ -76,7 +76,7 @@ export const EntitySearchAdvancedOptions: React.FC<
       unmountTimeoutRef.current = window.setTimeout(() => {
         setPortalMounted(false);
         unmountTimeoutRef.current = null;
-      }, 400);
+      }, 500);
       return () => {
         clearUnmountTimeout();
       };

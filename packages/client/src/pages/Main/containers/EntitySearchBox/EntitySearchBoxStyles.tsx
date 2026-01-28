@@ -29,8 +29,7 @@ export const StyledAdvancedOptions = styled.div`
   margin-left: 0.7rem;
   border: 1px solid ${({ theme }) => theme.color["gray"][300]};
   border-radius: 5rem;
-  cursor: pointer;
-  /* padding: ${({ theme }) => theme.space[2]}; */
+  cursor: default;
 `;
 
 export const StyledRowHeader = styled.div<{ $normalCursor?: boolean }>`
@@ -115,6 +114,7 @@ export const StyledBubblesContainer = styled.div`
   border-radius: ${({ theme }) => theme.borderRadius.md};
   padding: ${({ theme }) => theme.space[3]};
   border: 1px solid ${({ theme }) => theme.color["gray"][300]};
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
 `;
 export const StyledBubble = styled.div<{ $selected?: boolean }>`
   display: inline-flex;
