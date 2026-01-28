@@ -25,13 +25,7 @@ import {
 import { MIN_LABEL_LENGTH_MESSAGE, rootTerritoryId } from "Theme/constants";
 import api from "api";
 import { AxiosResponse } from "axios";
-import {
-  Button,
-  IconWithTooltip,
-  Input,
-  MultiInput,
-  TypeBar,
-} from "components";
+import { Button, Input, MultiInput, TypeBar } from "components";
 import Dropdown, {
   AttributeButtonGroup,
   EntitySuggester,
@@ -39,7 +33,7 @@ import Dropdown, {
   TerritoryActionModal,
 } from "components/advanced";
 import React, { useEffect, useMemo, useState } from "react";
-import { FaExternalLinkAlt, FaPlus, FaRegCopy } from "react-icons/fa";
+import { FaExternalLinkAlt, FaRegCopy } from "react-icons/fa";
 import { TbHomeMove } from "react-icons/tb";
 import { toast } from "react-toastify";
 import { DropdownItem } from "types";
@@ -54,21 +48,7 @@ import {
   StyledRelativePosition,
   StyledTagWrap,
 } from "../EntityDetailStyles";
-import {
-  StyledAddLabel,
-  StyledAlternativeLabel,
-  StyledAlternativeLabelButtons,
-  StyledAlternativeLabels,
-  StyledAlternativeLabelWrap,
-  StyledCloseIcon,
-  StyledDangerOnHoverButton,
-  StyledGreyBar,
-  StyledPromoteIcon,
-  StyledPromoteIconFilled,
-  StyledPromoteIconOutline,
-} from "./EntityDetailFormSectionStyles";
-import { MdClose } from "react-icons/md";
-import { IoStar } from "react-icons/io5";
+import { EntityDetailFormSectionAlternativeLabels } from "./EntityDetailFormSectionAlternativeLabels/EntityDetailFormSectionAlternativeLabels";
 
 interface EntityDetailFormSection {
   entity: IResponseDetail;
@@ -149,12 +129,6 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
   useEffect(() => {
     setNewLabel(entity.labels[0]);
   }, [entity.labels[0]]);
-
-  const [newAltLabel, setNewAltLabel] = useState<string>("");
-  const [currentlyEditedAltLabel, setCurrentlyEditedAltLabel] = useState<
-    false | number
-  >(false);
-  const alternativeLabels = entity.labels.slice(1);
 
   const isOwner =
     (localStorage.getItem("userrole") as UserEnums.Role) ===
@@ -741,132 +715,13 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                 Alternative labels
               </StyledDetailContentRowLabel>
               <StyledDetailContentRowValue>
-                <StyledAlternativeLabels>
-                  {alternativeLabels.map((label, key) => {
-                    return (
-                      <StyledAlternativeLabelWrap
-                        key={key}
-                        $isEditing={currentlyEditedAltLabel === key}
-                      >
-                        <StyledGreyBar />
-                        <>
-                          {currentlyEditedAltLabel === key ? (
-                            <Input
-                              width="full"
-                              fullHeight
-                              autoFocus
-                              value={label}
-                              onChangeFn={(value) => {
-                                if (value.length < 1) {
-                                  toast.error("Label cannot be empty");
-                                  return;
-                                }
-                                updateEntityMutation.mutate({
-                                  labels: [
-                                    newLabel,
-                                    ...alternativeLabels.map((label, index) =>
-                                      index === key ? value : label
-                                    ),
-                                  ],
-                                });
-                              }}
-                              onBlur={() => {
-                                setCurrentlyEditedAltLabel(false);
-                              }}
-                              allowCtrlEnter
-                              showSaveExitIcons
-                              onEnterPressFn={() => {
-                                setCurrentlyEditedAltLabel(false);
-                              }}
-                              onEscapePressFn={() => {
-                                setCurrentlyEditedAltLabel(false);
-                              }}
-                            />
-                          ) : (
-                            // grid is used to wrap the label if it is too long (text-overflow: ellipsis doesn't work without the grid)
-                            <div style={{ maxWidth: "100%", display: "grid" }}>
-                              <StyledAlternativeLabel
-                                onClick={() => setCurrentlyEditedAltLabel(key)}
-                              >
-                                {label}
-                              </StyledAlternativeLabel>
-                            </div>
-                          )}
-                        </>
-
-                        {currentlyEditedAltLabel !== key && (
-                          <StyledAlternativeLabelButtons>
-                            <StyledPromoteIcon
-                              onClick={() => {
-                                handlePromoteLabel(label);
-                              }}
-                            >
-                              <StyledPromoteIconOutline size={12} />
-                              <StyledPromoteIconFilled>
-                                <IconWithTooltip
-                                  icon={<IoStar size={12} />}
-                                  tooltipLabel="Promote label"
-                                  color="info"
-                                />
-                              </StyledPromoteIconFilled>
-                            </StyledPromoteIcon>
-
-                            <StyledDangerOnHoverButton>
-                              <Button
-                                inverted
-                                noBackground
-                                noBorder
-                                noPadding
-                                onClick={() => {
-                                  updateEntityMutation.mutate({
-                                    labels: entity.labels.filter(
-                                      (l) => l !== label
-                                    ),
-                                  });
-                                }}
-                                icon={<MdClose size={15} />}
-                                tooltipLabel="Remove label"
-                              />
-                            </StyledDangerOnHoverButton>
-                          </StyledAlternativeLabelButtons>
-                        )}
-                      </StyledAlternativeLabelWrap>
-                    );
-                  })}
-                </StyledAlternativeLabels>
-
-                <StyledAddLabel $marginTop={entity.labels.length > 1}>
-                  <Input
-                    placeholder="add label"
-                    allowCtrlEnter
-                    disabled={!userCanEdit}
-                    changeOnType
-                    value={newAltLabel}
-                    onChangeFn={(newLabel: string) => setNewAltLabel(newLabel)}
-                    onEnterPressFn={() => {
-                      updateEntityMutation.mutate({
-                        labels: [...entity.labels, newAltLabel],
-                      });
-                      setNewAltLabel("");
-                    }}
-                  />
-                  <span>
-                    <Button
-                      disabled={
-                        newAltLabel.length === 0 ||
-                        entity.labels.includes(newAltLabel)
-                      }
-                      color="black"
-                      icon={<FaPlus />}
-                      onClick={() => {
-                        updateEntityMutation.mutate({
-                          labels: [...entity.labels, newAltLabel],
-                        });
-                        setNewAltLabel("");
-                      }}
-                    />
-                  </span>
-                </StyledAddLabel>
+                <EntityDetailFormSectionAlternativeLabels
+                  entity={entity}
+                  newLabel={newLabel}
+                  updateEntityMutation={updateEntityMutation}
+                  handlePromoteLabel={handlePromoteLabel}
+                  userCanEdit={userCanEdit}
+                />
               </StyledDetailContentRowValue>
             </StyledDetailContentRow>
           )}

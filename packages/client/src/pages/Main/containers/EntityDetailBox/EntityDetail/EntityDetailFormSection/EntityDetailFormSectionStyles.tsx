@@ -13,16 +13,16 @@ export const StyledAlternativeLabelWrap = styled.div<StyledAlternativeLabelWrapP
   position: relative;
   display: flex;
   align-items: center;
-  height: 2.4rem;
+  gap: 0.15rem;
+  height: 2.2rem;
   padding-left: 0.2rem;
+  padding-right: ${({ $isEditing }) => ($isEditing ? "0" : "0.3rem")};
   color: ${({ theme }) => theme.color["black"]};
   border: 1px solid ${({ theme }) => theme.color["black"]};
   background-color: ${({ theme }) => theme.color["white"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
   border-radius: 0.35rem;
-  gap: 0.15rem;
-  padding-right: ${({ $isEditing }) => ($isEditing ? "0" : "0.5rem")};
   flex-basis: ${({ $isEditing }) => ($isEditing ? "100%" : "auto")};
   min-width: ${({ $isEditing }) => ($isEditing ? "100%" : "auto")};
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
@@ -68,7 +68,7 @@ export const StyledAlternativeLabelButtons = styled.div`
   display: flex;
   align-items: center;
   gap: 0.1rem;
-  padding-left: 0.5rem;
+  padding-left: 0.6rem;
 `;
 
 export const StyledCloseIcon = styled(IoClose)`
