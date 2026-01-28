@@ -114,6 +114,7 @@ export const StyledBubblesContainer = styled.div`
   background-color: ${({ theme }) => theme.color["white"]};
   border-radius: ${({ theme }) => theme.borderRadius.md};
   padding: ${({ theme }) => theme.space[3]};
+  border: 1px solid ${({ theme }) => theme.color["gray"][300]};
 `;
 export const StyledBubble = styled.div<{ $selected?: boolean }>`
   display: inline-flex;

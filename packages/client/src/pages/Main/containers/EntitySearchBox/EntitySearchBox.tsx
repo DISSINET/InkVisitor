@@ -49,6 +49,7 @@ import {
   StyledRowHeader,
 } from "./EntitySearchBoxStyles";
 import { EntitySearchResults } from "./EntitySearchResults/EntitySearchResults";
+import { EntitySearchAdvancedOptions } from "./EntitySearchAdvancedOptions/EntitySearchAdvancedOptions";
 
 const initSearchValues: IRequestSearch = {
   labelOrId: "",
@@ -255,63 +256,9 @@ export const EntitySearchBox: React.FC = () => {
   //   return options;
   // }, [templates]);
 
-  const [showAdvancedOptions, setShowAdvancedOptions] = useState(true);
   const [expandedOptions, setExpandedOptions] = useState<string[]>([]);
-  const [showBubblesMenu, setShowBubblesMenu] = useState(false);
-  const [portalMounted, setPortalMounted] = useState(false);
-  const [timeoutId, setTimeoutId] = useState<number | null>(null);
-
-  useEffect(() => {
-    if (!showAdvancedOptions) {
-      setSearchData({
-        labelOrId: searchData.labelOrId,
-      });
-      setClassOption(defaultClassOption.value as EntityEnums.Class);
-    }
-  }, [showAdvancedOptions]);
 
   const [showEntityCreateModal, setShowEntityCreateModal] = useState(false);
-
-  const rotateOptionsIcon = useSpring({
-    transform: showAdvancedOptions ? "rotate(180deg)" : "rotate(0deg)",
-    config: config.stiff,
-  });
-
-  const handleBubblesMouseEnter = () => {
-    setPortalMounted(true);
-    setShowBubblesMenu(true);
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-      setTimeoutId(null);
-    }
-  };
-
-  const handleBubblesMouseLeave = () => {
-    const id = window.setTimeout(() => {
-      setShowBubblesMenu(false);
-    }, 150);
-    setTimeoutId(id);
-  };
-
-  useEffect(() => {
-    if (!showBubblesMenu && portalMounted) {
-      setTimeout(() => {
-        setPortalMounted(false);
-      }, 300);
-    }
-  }, [showBubblesMenu, portalMounted]);
-
-  const animatedBubblesMount = useSpring({
-    opacity: showBubblesMenu ? 1 : 0,
-    config: config.stiff,
-  });
-
-  const { refs: bubblesRefs, floatingStyles: bubblesFloatingStyles } =
-    useFloating({
-      placement: "left",
-      whileElementsMounted: autoUpdate,
-      middleware: [offset({ mainAxis: 4 })],
-    });
 
   const userRole = localStorage.getItem("userrole");
 
@@ -328,21 +275,6 @@ export const EntitySearchBox: React.FC = () => {
     );
     return usersOptionsOut;
   }, [users]);
-
-  const advancedOptions = [
-    "class",
-    "status",
-    "language",
-    "territory",
-    "co-occurrence",
-    "referenced to",
-    "created at",
-    "udpated at",
-    "created by",
-    "updated by",
-    "edited by",
-    "root validity",
-  ];
 
   return (
     <>
@@ -376,60 +308,12 @@ export const EntitySearchBox: React.FC = () => {
             </div>
           </StyledRow>
 
-          <StyledAdvancedOptions
-            ref={bubblesRefs.setReference}
-            onMouseEnter={handleBubblesMouseEnter}
-            onMouseLeave={handleBubblesMouseLeave}
-          >
-            <StyledAdvancedOptionsSign>
-              <CgOptions size={12} />
-              <i>advanced options</i>
-            </StyledAdvancedOptionsSign>
-          </StyledAdvancedOptions>
-
-          {portalMounted && (
-            <FloatingPortal id="page">
-              <div
-                ref={bubblesRefs.setFloating}
-                style={{
-                  ...bubblesFloatingStyles,
-                  zIndex: 1000,
-                  maxWidth: "250px",
-                  padding: "4px",
-                }}
-                onMouseEnter={handleBubblesMouseEnter}
-                onMouseLeave={handleBubblesMouseLeave}
-              >
-                <animated.div style={animatedBubblesMount}>
-                  <StyledBubblesContainer>
-                    {advancedOptions.map((option) => {
-                      const isSelected = expandedOptions.includes(option);
-                      return (
-                        <StyledBubble
-                          key={option}
-                          $selected={isSelected}
-                          onClick={() => {
-                            if (isSelected) {
-                              setExpandedOptions(
-                                expandedOptions.filter((o) => o !== option)
-                              );
-                            } else {
-                              setExpandedOptions([...expandedOptions, option]);
-                            }
-                          }}
-                        >
-                          <StyledBubbleLabel>{option}</StyledBubbleLabel>
-                        </StyledBubble>
-                      );
-                    })}
-                  </StyledBubblesContainer>
-                </animated.div>
-              </div>
-            </FloatingPortal>
-          )}
+          <EntitySearchAdvancedOptions
+            expandedOptions={expandedOptions}
+            setExpandedOptions={setExpandedOptions}
+          />
 
           {/* ADVANCED OPTIONS */}
-          {/* {showAdvancedOptions && ( */}
           <>
             {expandedOptions.includes("class") && (
               <StyledRow>
@@ -438,15 +322,18 @@ export const EntitySearchBox: React.FC = () => {
                     display: "flex",
                     justifyContent: "flex-end",
                     alignItems: "center",
-                    marginRight: "0.5rem",
+                    marginRight: "0.25rem",
                   }}
                 >
                   <StyledBubble
-                    onClick={() =>
+                    onClick={() => {
                       setExpandedOptions(
                         expandedOptions.filter((o) => o !== "class")
-                      )
-                    }
+                      );
+                      setClassOption(
+                        defaultClassOption.value as EntityEnums.Class
+                      );
+                    }}
                   >
                     <StyledBubbleLabel>class</StyledBubbleLabel>
                   </StyledBubble>
@@ -474,11 +361,14 @@ export const EntitySearchBox: React.FC = () => {
             {expandedOptions.includes("status") && (
               <StyledRow>
                 <StyledRowHeader
-                  onClick={() =>
+                  onClick={() => {
                     setExpandedOptions(
                       expandedOptions.filter((o) => o !== "status")
-                    )
-                  }
+                    );
+                    handleChange({
+                      status: undefined,
+                    });
+                  }}
                 >
                   status
                 </StyledRowHeader>
