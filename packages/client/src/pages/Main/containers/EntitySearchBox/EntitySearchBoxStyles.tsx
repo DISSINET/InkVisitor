@@ -101,6 +101,7 @@ export const StyledAdvancedOptionsSign = styled.div`
   padding-bottom: 0.1rem;
   color: ${({ theme }) => theme.color.primary};
   font-weight: ${({ theme }) => theme.fontWeight.medium};
+  font-size: 1.1rem;
 `;
 
 export const StyledFloatingContainer = styled.div`

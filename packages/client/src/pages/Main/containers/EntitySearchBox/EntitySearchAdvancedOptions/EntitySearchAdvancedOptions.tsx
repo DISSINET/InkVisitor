@@ -58,7 +58,7 @@ export const EntitySearchAdvancedOptions: React.FC<
   setClassOption,
   defaultClassOption,
 }) => {
-  const [showBubblesMenu, setShowBubblesMenu] = useState(false);
+  const [showPillsMenu, setShowPillsMenu] = useState(false);
   const [portalMounted, setPortalMounted] = useState(false);
   const hideTimeoutRef = useRef<number | null>(null);
   const unmountTimeoutRef = useRef<number | null>(null);
@@ -77,23 +77,23 @@ export const EntitySearchAdvancedOptions: React.FC<
     }
   };
 
-  const handleBubblesMouseEnter = () => {
+  const handlePillsMouseEnter = () => {
     clearHideTimeout();
     clearUnmountTimeout();
     setPortalMounted(true);
-    setShowBubblesMenu(true);
+    setShowPillsMenu(true);
   };
 
-  const handleBubblesMouseLeave = () => {
+  const handlePillsMouseLeave = () => {
     clearHideTimeout();
     hideTimeoutRef.current = window.setTimeout(() => {
-      setShowBubblesMenu(false);
+      setShowPillsMenu(false);
       hideTimeoutRef.current = null;
     }, 400);
   };
 
   useEffect(() => {
-    if (!showBubblesMenu && portalMounted) {
+    if (!showPillsMenu && portalMounted) {
       clearUnmountTimeout();
       unmountTimeoutRef.current = window.setTimeout(() => {
         setPortalMounted(false);
@@ -103,7 +103,7 @@ export const EntitySearchAdvancedOptions: React.FC<
         clearUnmountTimeout();
       };
     }
-  }, [showBubblesMenu, portalMounted]);
+  }, [showPillsMenu, portalMounted]);
 
   useEffect(() => {
     return () => {
@@ -112,17 +112,16 @@ export const EntitySearchAdvancedOptions: React.FC<
     };
   }, []);
 
-  const animatedBubblesMount = useSpring({
-    opacity: showBubblesMenu ? 1 : 0,
+  const animatedPillsMount = useSpring({
+    opacity: showPillsMenu ? 1 : 0,
     config: config.stiff,
   });
 
-  const { refs: bubblesRefs, floatingStyles: bubblesFloatingStyles } =
-    useFloating({
-      placement: "left",
-      whileElementsMounted: autoUpdate,
-      middleware: [offset({ mainAxis: 4 })],
-    });
+  const { refs: PillsRefs, floatingStyles: PillsFloatingStyles } = useFloating({
+    placement: "left",
+    whileElementsMounted: autoUpdate,
+    middleware: [offset({ mainAxis: 4 })],
+  });
 
   const renderBatchButtons = () => {
     return (
@@ -164,9 +163,9 @@ export const EntitySearchAdvancedOptions: React.FC<
   return (
     <>
       <StyledAdvancedOptions
-        ref={bubblesRefs.setReference}
-        onMouseEnter={handleBubblesMouseEnter}
-        onMouseLeave={handleBubblesMouseLeave}
+        ref={PillsRefs.setReference}
+        onMouseEnter={handlePillsMouseEnter}
+        onMouseLeave={handlePillsMouseLeave}
       >
         <StyledAdvancedOptionsSign>
           <div
@@ -187,20 +186,20 @@ export const EntitySearchAdvancedOptions: React.FC<
       {portalMounted && (
         <FloatingPortal id="page">
           <div
-            ref={bubblesRefs.setFloating}
+            ref={PillsRefs.setFloating}
             style={{
-              ...bubblesFloatingStyles,
+              ...PillsFloatingStyles,
               zIndex: 1000,
               maxWidth: "250px",
               pointerEvents: "auto",
             }}
-            onMouseEnter={handleBubblesMouseEnter}
-            onMouseLeave={handleBubblesMouseLeave}
+            onMouseEnter={handlePillsMouseEnter}
+            onMouseLeave={handlePillsMouseLeave}
           >
             <animated.div
               style={{
-                ...animatedBubblesMount,
-                pointerEvents: showBubblesMenu ? "auto" : "none",
+                ...animatedPillsMount,
+                pointerEvents: showPillsMenu ? "auto" : "none",
               }}
             >
               <StyledFloatingContainer>
