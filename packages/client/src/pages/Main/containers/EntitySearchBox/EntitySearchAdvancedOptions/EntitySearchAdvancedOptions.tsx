@@ -4,16 +4,24 @@ import {
   offset,
   useFloating,
 } from "@floating-ui/react";
+import { Button } from "components";
 import React, { useEffect, useRef, useState } from "react";
+import { BiSelectMultiple } from "react-icons/bi";
 import { CgOptions } from "react-icons/cg";
+import { MdFilterNone } from "react-icons/md";
 import { animated, config, useSpring } from "react-spring";
+import { ButtonSize } from "types";
 import {
   StyledAdvancedOptions,
   StyledAdvancedOptionsSign,
-  StyledBubblesContainer,
-  StyledBubble,
-  StyledBubbleLabel,
+  StyledButtonsContainer,
+  StyledFloatingContainer,
+  StyledPill,
+  StyledPillLabel,
+  StyledPillsContainer,
 } from "../EntitySearchBoxStyles";
+import { IRequestSearch } from "@shared/types/request-search";
+import { EntityEnums } from "@shared/enums";
 
 const advancedOptions = [
   "class",
@@ -32,10 +40,26 @@ const advancedOptions = [
 interface EntitySearchAdvancedOptions {
   expandedOptions: string[];
   setExpandedOptions: (options: string[]) => void;
+  searchData: IRequestSearch;
+  setSearchData: (data: IRequestSearch) => void;
+  classOption: EntityEnums.Class;
+  setClassOption: (option: EntityEnums.Class) => void;
+  defaultClassOption: {
+    label: string;
+    value: EntityEnums.Class;
+  };
 }
 export const EntitySearchAdvancedOptions: React.FC<
   EntitySearchAdvancedOptions
-> = ({ expandedOptions, setExpandedOptions }) => {
+> = ({
+  expandedOptions,
+  setExpandedOptions,
+  searchData,
+  setSearchData,
+  classOption,
+  setClassOption,
+  defaultClassOption,
+}) => {
   const [showBubblesMenu, setShowBubblesMenu] = useState(false);
   const [portalMounted, setPortalMounted] = useState(false);
   const hideTimeoutRef = useRef<number | null>(null);
@@ -134,28 +158,62 @@ export const EntitySearchAdvancedOptions: React.FC<
                 pointerEvents: showBubblesMenu ? "auto" : "none",
               }}
             >
-              <StyledBubblesContainer>
-                {advancedOptions.map((option) => {
-                  const isSelected = expandedOptions.includes(option);
-                  return (
-                    <StyledBubble
-                      key={option}
-                      $selected={isSelected}
-                      onClick={() => {
-                        if (isSelected) {
-                          setExpandedOptions(
-                            expandedOptions.filter((o) => o !== option)
-                          );
-                        } else {
-                          setExpandedOptions([...expandedOptions, option]);
-                        }
-                      }}
-                    >
-                      <StyledBubbleLabel>{option}</StyledBubbleLabel>
-                    </StyledBubble>
-                  );
-                })}
-              </StyledBubblesContainer>
+              <StyledFloatingContainer>
+                <StyledButtonsContainer>
+                  <Button
+                    inverted
+                    noBackground
+                    noBorder
+                    noPadding
+                    icon={<BiSelectMultiple size={20} />}
+                    size={ButtonSize.Small}
+                    onClick={() => {
+                      setExpandedOptions([...advancedOptions]);
+                    }}
+                    tooltipLabel="Select All"
+                  />
+                  <Button
+                    inverted
+                    noBackground
+                    noBorder
+                    noPadding
+                    icon={<MdFilterNone size={17} />}
+                    size={ButtonSize.Small}
+                    onClick={() => {
+                      setExpandedOptions([]);
+                      setSearchData({
+                        labelOrId: searchData.labelOrId,
+                      });
+                      setClassOption(
+                        defaultClassOption.value as EntityEnums.Class
+                      );
+                    }}
+                    tooltipLabel="Deselect All"
+                  />
+                </StyledButtonsContainer>
+                <StyledPillsContainer>
+                  {advancedOptions.map((option) => {
+                    const isSelected = expandedOptions.includes(option);
+                    return (
+                      <StyledPill
+                        key={option}
+                        $selected={isSelected}
+                        onClick={() => {
+                          if (isSelected) {
+                            setExpandedOptions(
+                              expandedOptions.filter((o) => o !== option)
+                            );
+                          } else {
+                            setExpandedOptions([...expandedOptions, option]);
+                          }
+                        }}
+                      >
+                        <StyledPillLabel>{option}</StyledPillLabel>
+                      </StyledPill>
+                    );
+                  })}
+                </StyledPillsContainer>
+              </StyledFloatingContainer>
             </animated.div>
           </div>
         </FloatingPortal>

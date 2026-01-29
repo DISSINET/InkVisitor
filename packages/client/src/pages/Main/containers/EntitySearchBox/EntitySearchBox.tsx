@@ -1,10 +1,3 @@
-import {
-  FloatingPortal,
-  autoUpdate,
-  offset,
-  useFloating,
-} from "@floating-ui/react";
-import { animated, config, useSpring } from "@react-spring/web";
 import { entityStatusDict, languageDict } from "@shared/dictionaries";
 import { entitiesDict } from "@shared/dictionaries/entity";
 import { EntityEnums, UserEnums } from "@shared/enums";
@@ -24,24 +17,20 @@ import Dropdown, {
   EntityTag,
 } from "components/advanced";
 import { useDebounce, useResizeObserver, useSearchParams } from "hooks";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   BsShieldExclamation,
   BsShieldFillCheck,
   BsShieldShaded,
 } from "react-icons/bs";
-import { CgOptions } from "react-icons/cg";
 import { FaPlus } from "react-icons/fa";
-import { IoMdArrowDropdownCircle } from "react-icons/io";
 import { RiCloseFill } from "react-icons/ri";
 import { DropdownItem } from "types";
+import { EntitySearchAdvancedOptions } from "./EntitySearchAdvancedOptions/EntitySearchAdvancedOptions";
 import {
-  StyledAdvancedOptions,
-  StyledAdvancedOptionsSign,
   StyledBoxContent,
-  StyledBubble,
-  StyledBubbleLabel,
-  StyledBubblesContainer,
+  StyledPill,
+  StyledPillLabel,
   StyledOptions,
   StyledResultsHeader,
   StyledResultsWrapper,
@@ -49,7 +38,6 @@ import {
   StyledRowHeader,
 } from "./EntitySearchBoxStyles";
 import { EntitySearchResults } from "./EntitySearchResults/EntitySearchResults";
-import { EntitySearchAdvancedOptions } from "./EntitySearchAdvancedOptions/EntitySearchAdvancedOptions";
 
 const initSearchValues: IRequestSearch = {
   labelOrId: "",
@@ -311,6 +299,11 @@ export const EntitySearchBox: React.FC = () => {
           <EntitySearchAdvancedOptions
             expandedOptions={expandedOptions}
             setExpandedOptions={setExpandedOptions}
+            searchData={searchData}
+            setSearchData={setSearchData}
+            classOption={classOption}
+            setClassOption={setClassOption}
+            defaultClassOption={defaultClassOption}
           />
 
           {/* ADVANCED OPTIONS */}
@@ -325,18 +318,22 @@ export const EntitySearchBox: React.FC = () => {
                     marginRight: "0.25rem",
                   }}
                 >
-                  <StyledBubble
+                  <StyledPill
                     onClick={() => {
-                      setExpandedOptions(
-                        expandedOptions.filter((o) => o !== "class")
-                      );
                       setClassOption(
                         defaultClassOption.value as EntityEnums.Class
                       );
+                      setExpandedOptions(
+                        expandedOptions.filter((o) => o !== "class")
+                      );
+                      handleChange({
+                        class: undefined,
+                        usedTemplate: defaultClassOption.value,
+                      });
                     }}
                   >
-                    <StyledBubbleLabel>class</StyledBubbleLabel>
-                  </StyledBubble>
+                    <StyledPillLabel>class</StyledPillLabel>
+                  </StyledPill>
                 </div>
                 <div style={{ position: "relative" }}>
                   <Dropdown.Single.Entity

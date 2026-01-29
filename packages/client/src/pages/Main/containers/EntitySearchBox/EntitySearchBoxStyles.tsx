@@ -103,10 +103,10 @@ export const StyledAdvancedOptionsSign = styled.div`
   font-weight: ${({ theme }) => theme.fontWeight.medium};
 `;
 
-export const StyledBubblesContainer = styled.div`
+export const StyledFloatingContainer = styled.div`
   display: flex;
-  flex-wrap: wrap;
-  gap: ${({ theme }) => theme.space[1]};
+  flex-direction: column;
+  gap: ${({ theme }) => theme.space[2]};
   align-items: flex-start;
   justify-content: center;
   margin-bottom: ${({ theme }) => theme.space[2]};
@@ -116,7 +116,24 @@ export const StyledBubblesContainer = styled.div`
   border: 1px solid ${({ theme }) => theme.color["gray"][300]};
   box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
 `;
-export const StyledBubble = styled.div<{ $selected?: boolean }>`
+
+export const StyledButtonsContainer = styled.div`
+  display: flex;
+  gap: ${({ theme }) => theme.space[1]};
+  width: 100%;
+  justify-content: flex-end;
+`;
+
+export const StyledPillsContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${({ theme }) => theme.space[1]};
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
+`;
+
+export const StyledPill = styled.div<{ $selected?: boolean }>`
   display: inline-flex;
   align-items: center;
   cursor: pointer;
@@ -133,7 +150,7 @@ export const StyledBubble = styled.div<{ $selected?: boolean }>`
   }
 `;
 
-export const StyledBubbleLabel = styled.div`
+export const StyledPillLabel = styled.div`
   color: ${({ theme }) => theme.color["black"]};
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
   font-weight: ${({ theme }) => theme.fontWeight.medium};
