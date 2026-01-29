@@ -33,7 +33,7 @@ export const StyledAdvancedOptions = styled.div`
   cursor: default;
 `;
 
-export const StyledRowHeader = styled.div<{ $normalCursor?: boolean }>`
+export const StyledRowHeader = styled.div`
   color: ${({ theme }) => theme.color["black"]};
   display: block;
   margin-right: ${({ theme }) => theme.space[2]};

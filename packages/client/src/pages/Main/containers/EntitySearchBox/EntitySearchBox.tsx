@@ -292,12 +292,18 @@ export const EntitySearchBox: React.FC = () => {
     }
   }, [searchData.class]);
 
+  useEffect(() => {
+    if (!expandedOptions.includes("territory")) {
+      setTerritoryEntity(false);
+    }
+  }, [expandedOptions.includes("territory")]);
+
   return (
     <>
       <StyledBoxContent>
         <StyledOptions>
           <StyledRow>
-            <StyledRowHeader $normalCursor>label or uuid</StyledRowHeader>
+            <StyledRowHeader>label or uuid</StyledRowHeader>
             <div
               style={{
                 display: "grid",
