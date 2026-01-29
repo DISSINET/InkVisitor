@@ -36,6 +36,7 @@ import {
   StyledResultsWrapper,
   StyledRow,
   StyledRowHeader,
+  StyledPillWrap,
 } from "./EntitySearchBoxStyles";
 import { EntitySearchResults } from "./EntitySearchResults/EntitySearchResults";
 
@@ -310,14 +311,7 @@ export const EntitySearchBox: React.FC = () => {
           <>
             {expandedOptions.includes("class") && (
               <StyledRow>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    alignItems: "center",
-                    marginRight: "0.25rem",
-                  }}
-                >
+                <StyledPillWrap>
                   <StyledPill
                     onClick={() => {
                       setClassOption(
@@ -334,7 +328,7 @@ export const EntitySearchBox: React.FC = () => {
                   >
                     <StyledPillLabel>class</StyledPillLabel>
                   </StyledPill>
-                </div>
+                </StyledPillWrap>
                 <div style={{ position: "relative" }}>
                   <Dropdown.Single.Entity
                     placeholder={""}

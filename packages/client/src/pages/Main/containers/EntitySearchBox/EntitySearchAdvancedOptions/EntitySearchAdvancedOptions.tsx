@@ -4,11 +4,11 @@ import {
   offset,
   useFloating,
 } from "@floating-ui/react";
-import { Button } from "components";
+import { EntityEnums } from "@shared/enums";
+import { IRequestSearch } from "@shared/types/request-search";
+import { Button, ButtonGroup } from "components";
 import React, { useEffect, useRef, useState } from "react";
-import { BiSelectMultiple } from "react-icons/bi";
-import { CgOptions } from "react-icons/cg";
-import { MdFilterNone } from "react-icons/md";
+import { CgOptions, CgPlayListAdd, CgPlayListRemove } from "react-icons/cg";
 import { animated, config, useSpring } from "react-spring";
 import { ButtonSize } from "types";
 import {
@@ -20,8 +20,6 @@ import {
   StyledPillLabel,
   StyledPillsContainer,
 } from "../EntitySearchBoxStyles";
-import { IRequestSearch } from "@shared/types/request-search";
-import { EntityEnums } from "@shared/enums";
 
 const advancedOptions = [
   "class",
@@ -126,6 +124,43 @@ export const EntitySearchAdvancedOptions: React.FC<
       middleware: [offset({ mainAxis: 4 })],
     });
 
+  const renderBatchButtons = () => {
+    return (
+      <ButtonGroup $noMarginRight>
+        <Button
+          inverted
+          noBackground
+          noBorder
+          noPadding
+          icon={<CgPlayListAdd size={20} />}
+          size={ButtonSize.Small}
+          onClick={() => {
+            setExpandedOptions([...advancedOptions]);
+          }}
+          tooltipLabel="Add All"
+          disabled={expandedOptions.length === advancedOptions.length}
+        />
+        <Button
+          inverted
+          noBackground
+          noBorder
+          noPadding
+          icon={<CgPlayListRemove size={20} />}
+          size={ButtonSize.Small}
+          onClick={() => {
+            setExpandedOptions([]);
+            setSearchData({
+              labelOrId: searchData.labelOrId,
+            });
+            setClassOption(defaultClassOption.value as EntityEnums.Class);
+          }}
+          tooltipLabel="Clear All"
+          disabled={expandedOptions.length === 0}
+        />
+      </ButtonGroup>
+    );
+  };
+
   return (
     <>
       <StyledAdvancedOptions
@@ -134,9 +169,19 @@ export const EntitySearchAdvancedOptions: React.FC<
         onMouseLeave={handleBubblesMouseLeave}
       >
         <StyledAdvancedOptionsSign>
-          <CgOptions size={12} />
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "1.4rem",
+            }}
+          >
+            <CgOptions size={12} />
+          </div>
           <i>advanced options</i>
         </StyledAdvancedOptionsSign>
+        {renderBatchButtons()}
       </StyledAdvancedOptions>
 
       {portalMounted && (
@@ -159,38 +204,15 @@ export const EntitySearchAdvancedOptions: React.FC<
               }}
             >
               <StyledFloatingContainer>
-                <StyledButtonsContainer>
-                  <Button
-                    inverted
-                    noBackground
-                    noBorder
-                    noPadding
-                    icon={<BiSelectMultiple size={20} />}
-                    size={ButtonSize.Small}
-                    onClick={() => {
-                      setExpandedOptions([...advancedOptions]);
-                    }}
-                    tooltipLabel="Select All"
-                  />
-                  <Button
-                    inverted
-                    noBackground
-                    noBorder
-                    noPadding
-                    icon={<MdFilterNone size={17} />}
-                    size={ButtonSize.Small}
-                    onClick={() => {
-                      setExpandedOptions([]);
-                      setSearchData({
-                        labelOrId: searchData.labelOrId,
-                      });
-                      setClassOption(
-                        defaultClassOption.value as EntityEnums.Class
-                      );
-                    }}
-                    tooltipLabel="Deselect All"
-                  />
-                </StyledButtonsContainer>
+                <div
+                  style={{
+                    width: "100%",
+                    display: "flex",
+                    justifyContent: "flex-end",
+                  }}
+                >
+                  {renderBatchButtons()}
+                </div>
                 <StyledPillsContainer>
                   {advancedOptions.map((option) => {
                     const isSelected = expandedOptions.includes(option);

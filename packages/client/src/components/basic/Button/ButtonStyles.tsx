@@ -119,7 +119,7 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
     getRadius($radiusLeft, $radiusRight, $shape)};
   color: ${({ theme, $disabled, $color, $inverted }) => {
     if ($disabled) {
-      return theme.color["gray"][800];
+      return theme.color["gray"][500];
     }
     if ($inverted) {
       return theme.color[$color];
@@ -142,7 +142,7 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
   cursor: ${({ $disabled }) => ($disabled ? "not-allowed" : "pointer")};
   white-space: nowrap;
 
-  transition: border-color 0.2s, color 0.2s, background-color 0.2s;
+  transition: border-color 0.2s, color 0.2s, background-color 0.2s, opacity 0.2s;
   &:focus {
     outline: 0;
   }

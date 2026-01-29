@@ -23,7 +23,8 @@ export const StyledRow = styled.div`
 export const StyledAdvancedOptions = styled.div`
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  padding: 0 ${({ theme }) => theme.space[4]};
   height: 3rem;
   margin-bottom: 0.5rem;
   margin-left: 0.7rem;
@@ -90,7 +91,6 @@ export const StyledDateTagText = styled.div`
 export const StyledDateTagButton = styled(Button)``;
 
 export const StyledAdvancedOptionsSign = styled.div`
-  height: 50%;
   display: flex;
   align-items: center;
   font-size: ${({ theme }) => theme.fontSize.xxs};
@@ -113,6 +113,7 @@ export const StyledFloatingContainer = styled.div`
   background-color: ${({ theme }) => theme.color["white"]};
   border-radius: ${({ theme }) => theme.borderRadius.md};
   padding: ${({ theme }) => theme.space[3]};
+  padding-bottom: ${({ theme }) => theme.space[5]};
   border: 1px solid ${({ theme }) => theme.color["gray"][300]};
   box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
 `;
@@ -120,8 +121,6 @@ export const StyledFloatingContainer = styled.div`
 export const StyledButtonsContainer = styled.div`
   display: flex;
   gap: ${({ theme }) => theme.space[1]};
-  width: 100%;
-  justify-content: flex-end;
 `;
 
 export const StyledPillsContainer = styled.div`
@@ -133,6 +132,12 @@ export const StyledPillsContainer = styled.div`
   width: 100%;
 `;
 
+export const StyledPillWrap = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-right: 0.25rem;
+`;
 export const StyledPill = styled.div<{ $selected?: boolean }>`
   display: inline-flex;
   align-items: center;
