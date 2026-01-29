@@ -34,7 +34,6 @@ export const StyledAdvancedOptions = styled.div`
 `;
 
 export const StyledRowHeader = styled.div<{ $normalCursor?: boolean }>`
-  cursor: ${({ $normalCursor }) => ($normalCursor ? "default" : "pointer")};
   color: ${({ theme }) => theme.color["black"]};
   display: block;
   margin-right: ${({ theme }) => theme.space[2]};
@@ -103,6 +102,13 @@ export const StyledAdvancedOptionsSign = styled.div`
   font-weight: ${({ theme }) => theme.fontWeight.medium};
   font-size: 1.1rem;
 `;
+export const StyledAdvancedOptionsIconWrap = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4rem;
+  margin-right: 0.1rem;
+`;
 
 export const StyledFloatingContainer = styled.div`
   display: flex;
@@ -160,4 +166,5 @@ export const StyledPillLabel = styled.div`
   color: ${({ theme }) => theme.color["black"]};
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
   font-weight: ${({ theme }) => theme.fontWeight.medium};
+  white-space: nowrap;
 `;

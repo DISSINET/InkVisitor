@@ -17,7 +17,7 @@ import Dropdown, {
   EntityTag,
 } from "components/advanced";
 import { useDebounce, useResizeObserver, useSearchParams } from "hooks";
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   BsShieldExclamation,
   BsShieldFillCheck,
@@ -77,8 +77,6 @@ export const EntitySearchBox: React.FC = () => {
   const [classOption, setClassOption] = useState<EntityEnums.Class>(
     defaultClassOption.value as EntityEnums.Class
   );
-  const [templateOption, setTemplateOption] =
-    useState<DropdownItem>(defaultClassOption);
   const [searchData, setSearchData] =
     useState<IRequestSearch>(initSearchValues);
   const debouncedValues = useDebounce<IRequestSearch>(searchData, debounceTime);
@@ -130,12 +128,12 @@ export const EntitySearchBox: React.FC = () => {
   } = useQuery({
     queryKey: ["search", { searchData: JSON.stringify(debouncedValues) }],
     queryFn: async () => {
-      if (debouncedValues.usedTemplate === "Any") {
-        const { usedTemplate, ...filters } = debouncedValues;
-        filters.onlyTemplates = true;
-        const res = await api.entitiesSearch(filters);
-        return res.data;
-      }
+      // if (debouncedValues.usedTemplate === "Any") {
+      //   const { usedTemplate, ...filters } = debouncedValues;
+      //   filters.onlyTemplates = true;
+      //   const res = await api.entitiesSearch(filters);
+      //   return res.data;
+      // }
       const labelWithWildCard =
         debouncedValues.labelOrId && debouncedValues.labelOrId?.length > 0
           ? debouncedValues.labelOrId + wildCardChar
@@ -265,6 +263,35 @@ export const EntitySearchBox: React.FC = () => {
     return usersOptionsOut;
   }, [users]);
 
+  const renderOptionLabel = useCallback(
+    (option: string) => {
+      return (
+        <StyledPillWrap>
+          <StyledPill
+            onClick={() => {
+              setExpandedOptions(expandedOptions.filter((o) => o !== option));
+              handleChange({
+                [option]: undefined,
+              });
+            }}
+          >
+            <StyledPillLabel>{option}</StyledPillLabel>
+          </StyledPill>
+        </StyledPillWrap>
+      );
+    },
+    [expandedOptions, setExpandedOptions, handleChange]
+  );
+
+  // If used as template is implemented, it'll be set here
+  useEffect(() => {
+    if (searchData.class) {
+      setClassOption(searchData.class as EntityEnums.Class);
+    } else {
+      setClassOption(defaultClassOption.value as EntityEnums.Class);
+    }
+  }, [searchData.class]);
+
   return (
     <>
       <StyledBoxContent>
@@ -302,33 +329,13 @@ export const EntitySearchBox: React.FC = () => {
             setExpandedOptions={setExpandedOptions}
             searchData={searchData}
             setSearchData={setSearchData}
-            classOption={classOption}
-            setClassOption={setClassOption}
-            defaultClassOption={defaultClassOption}
           />
 
           {/* ADVANCED OPTIONS */}
           <>
             {expandedOptions.includes("class") && (
               <StyledRow>
-                <StyledPillWrap>
-                  <StyledPill
-                    onClick={() => {
-                      setClassOption(
-                        defaultClassOption.value as EntityEnums.Class
-                      );
-                      setExpandedOptions(
-                        expandedOptions.filter((o) => o !== "class")
-                      );
-                      handleChange({
-                        class: undefined,
-                        usedTemplate: defaultClassOption.value,
-                      });
-                    }}
-                  >
-                    <StyledPillLabel>class</StyledPillLabel>
-                  </StyledPill>
-                </StyledPillWrap>
+                {renderOptionLabel("class")}
                 <div style={{ position: "relative" }}>
                   <Dropdown.Single.Entity
                     placeholder={""}
@@ -336,11 +343,8 @@ export const EntitySearchBox: React.FC = () => {
                     options={[defaultClassOption].concat(entitiesDict)}
                     value={classOption}
                     onChange={(selectedOption) => {
-                      setClassOption(selectedOption as EntityEnums.Class);
-                      setTemplateOption(defaultClassOption);
                       handleChange({
                         class: selectedOption,
-                        usedTemplate: defaultClassOption.value,
                       });
                     }}
                   />
@@ -351,18 +355,7 @@ export const EntitySearchBox: React.FC = () => {
 
             {expandedOptions.includes("status") && (
               <StyledRow>
-                <StyledRowHeader
-                  onClick={() => {
-                    setExpandedOptions(
-                      expandedOptions.filter((o) => o !== "status")
-                    );
-                    handleChange({
-                      status: undefined,
-                    });
-                  }}
-                >
-                  status
-                </StyledRowHeader>
+                {renderOptionLabel("status")}
                 <div style={{ position: "relative" }}>
                   <Dropdown.Single.Basic
                     placeholder={""}
@@ -381,15 +374,7 @@ export const EntitySearchBox: React.FC = () => {
             )}
             {expandedOptions.includes("language") && (
               <StyledRow>
-                <StyledRowHeader
-                  onClick={() =>
-                    setExpandedOptions(
-                      expandedOptions.filter((o) => o !== "language")
-                    )
-                  }
-                >
-                  language
-                </StyledRowHeader>
+                {renderOptionLabel("language")}
                 <div style={{ position: "relative" }}>
                   <Dropdown.Single.Basic
                     placeholder={""}
@@ -422,15 +407,7 @@ export const EntitySearchBox: React.FC = () => {
             </StyledRow> */}
             {expandedOptions.includes("territory") && (
               <StyledRow>
-                <StyledRowHeader
-                  onClick={() =>
-                    setExpandedOptions(
-                      expandedOptions.filter((o) => o !== "territory")
-                    )
-                  }
-                >
-                  territory
-                </StyledRowHeader>
+                {renderOptionLabel("territory")}
                 {territoryEntity ? (
                   <>
                     {territoryEntity && (
@@ -495,15 +472,7 @@ export const EntitySearchBox: React.FC = () => {
             )}
             {expandedOptions.includes("co-occurrence") && (
               <StyledRow>
-                <StyledRowHeader
-                  onClick={() =>
-                    setExpandedOptions(
-                      expandedOptions.filter((o) => o !== "co-occurrence")
-                    )
-                  }
-                >
-                  co-occurrence
-                </StyledRowHeader>
+                {renderOptionLabel("co-occurrence")}
                 {cooccurrenceEntity ? (
                   <EntityTag
                     entity={cooccurrenceEntity}
@@ -549,15 +518,7 @@ export const EntitySearchBox: React.FC = () => {
             )}
             {expandedOptions.includes("referenced to") && (
               <StyledRow>
-                <StyledRowHeader
-                  onClick={() =>
-                    setExpandedOptions(
-                      expandedOptions.filter((o) => o !== "referenced to")
-                    )
-                  }
-                >
-                  referenced to
-                </StyledRowHeader>
+                {renderOptionLabel("referenced to")}
                 {referencedTo ? (
                   <EntityTag
                     entity={referencedTo}
@@ -587,15 +548,7 @@ export const EntitySearchBox: React.FC = () => {
             )}
             {expandedOptions.includes("created at") && (
               <StyledRow>
-                <StyledRowHeader
-                  onClick={() =>
-                    setExpandedOptions(
-                      expandedOptions.filter((o) => o !== "created at")
-                    )
-                  }
-                >
-                  created at
-                </StyledRowHeader>
+                {renderOptionLabel("created at")}
 
                 <Input
                   type="date"
@@ -619,15 +572,7 @@ export const EntitySearchBox: React.FC = () => {
             )}
             {expandedOptions.includes("udpated at") && (
               <StyledRow>
-                <StyledRowHeader
-                  onClick={() =>
-                    setExpandedOptions(
-                      expandedOptions.filter((o) => o !== "udpated at")
-                    )
-                  }
-                >
-                  udpated at
-                </StyledRowHeader>
+                {renderOptionLabel("udpated at")}
 
                 <Input
                   type="date"
@@ -653,15 +598,7 @@ export const EntitySearchBox: React.FC = () => {
 
             {expandedOptions.includes("created by") && (
               <StyledRow>
-                <StyledRowHeader
-                  onClick={() =>
-                    setExpandedOptions(
-                      expandedOptions.filter((o) => o !== "created by")
-                    )
-                  }
-                >
-                  created by
-                </StyledRowHeader>
+                {renderOptionLabel("created by")}
                 <Dropdown.Single.Basic
                   width="full"
                   options={userOptions}
@@ -675,15 +612,7 @@ export const EntitySearchBox: React.FC = () => {
 
             {expandedOptions.includes("updated by") && (
               <StyledRow>
-                <StyledRowHeader
-                  onClick={() =>
-                    setExpandedOptions(
-                      expandedOptions.filter((o) => o !== "updated by")
-                    )
-                  }
-                >
-                  updated by
-                </StyledRowHeader>
+                {renderOptionLabel("updated by")}
                 <Dropdown.Single.Basic
                   width="full"
                   options={userOptions}
@@ -697,15 +626,7 @@ export const EntitySearchBox: React.FC = () => {
 
             {expandedOptions.includes("edited by") && (
               <StyledRow>
-                <StyledRowHeader
-                  onClick={() =>
-                    setExpandedOptions(
-                      expandedOptions.filter((o) => o !== "edited by")
-                    )
-                  }
-                >
-                  edited by
-                </StyledRowHeader>
+                {renderOptionLabel("edited by")}
                 <Dropdown.Single.Basic
                   width="full"
                   options={userOptions}
@@ -719,15 +640,7 @@ export const EntitySearchBox: React.FC = () => {
 
             {expandedOptions.includes("root validity") && (
               <StyledRow>
-                <StyledRowHeader
-                  onClick={() =>
-                    setExpandedOptions(
-                      expandedOptions.filter((o) => o !== "root validity")
-                    )
-                  }
-                >
-                  root validity
-                </StyledRowHeader>
+                {renderOptionLabel("root validity")}
 
                 <AttributeButtonGroup
                   noMargin

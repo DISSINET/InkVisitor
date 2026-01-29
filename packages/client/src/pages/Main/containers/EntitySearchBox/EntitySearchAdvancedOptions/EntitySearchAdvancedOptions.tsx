@@ -7,12 +7,13 @@ import {
 import { EntityEnums } from "@shared/enums";
 import { IRequestSearch } from "@shared/types/request-search";
 import { Button, ButtonGroup } from "components";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { CgOptions, CgPlayListAdd, CgPlayListRemove } from "react-icons/cg";
 import { animated, config, useSpring } from "react-spring";
 import { ButtonSize } from "types";
 import {
   StyledAdvancedOptions,
+  StyledAdvancedOptionsIconWrap,
   StyledAdvancedOptionsSign,
   StyledButtonsContainer,
   StyledFloatingContainer,
@@ -40,24 +41,10 @@ interface EntitySearchAdvancedOptions {
   setExpandedOptions: (options: string[]) => void;
   searchData: IRequestSearch;
   setSearchData: (data: IRequestSearch) => void;
-  classOption: EntityEnums.Class;
-  setClassOption: (option: EntityEnums.Class) => void;
-  defaultClassOption: {
-    label: string;
-    value: EntityEnums.Class;
-  };
 }
 export const EntitySearchAdvancedOptions: React.FC<
   EntitySearchAdvancedOptions
-> = ({
-  expandedOptions,
-  setExpandedOptions,
-  searchData,
-  setSearchData,
-  classOption,
-  setClassOption,
-  defaultClassOption,
-}) => {
+> = ({ expandedOptions, setExpandedOptions, searchData, setSearchData }) => {
   const [showPillsMenu, setShowPillsMenu] = useState(false);
   const [portalMounted, setPortalMounted] = useState(false);
   const hideTimeoutRef = useRef<number | null>(null);
@@ -123,7 +110,7 @@ export const EntitySearchAdvancedOptions: React.FC<
     middleware: [offset({ mainAxis: 4 })],
   });
 
-  const renderBatchButtons = () => {
+  const renderBatchButtons = useCallback(() => {
     return (
       <ButtonGroup $noMarginRight>
         <Button
@@ -151,14 +138,13 @@ export const EntitySearchAdvancedOptions: React.FC<
             setSearchData({
               labelOrId: searchData.labelOrId,
             });
-            setClassOption(defaultClassOption.value as EntityEnums.Class);
           }}
           tooltipLabel="Clear All"
           disabled={expandedOptions.length === 0}
         />
       </ButtonGroup>
     );
-  };
+  }, [expandedOptions, setExpandedOptions, setSearchData, searchData]);
 
   return (
     <>
@@ -168,16 +154,9 @@ export const EntitySearchAdvancedOptions: React.FC<
         onMouseLeave={handlePillsMouseLeave}
       >
         <StyledAdvancedOptionsSign>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "1.4rem",
-            }}
-          >
+          <StyledAdvancedOptionsIconWrap>
             <CgOptions size={12} />
-          </div>
+          </StyledAdvancedOptionsIconWrap>
           <i>advanced options</i>
         </StyledAdvancedOptionsSign>
         {renderBatchButtons()}
