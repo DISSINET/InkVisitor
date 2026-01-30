@@ -31,6 +31,7 @@ import {
   StyledBoxContent,
   StyledPill,
   StyledPillLabel,
+  StyledPillCloseIcon,
   StyledOptions,
   StyledResultsHeader,
   StyledResultsWrapper,
@@ -276,6 +277,9 @@ export const EntitySearchBox: React.FC = () => {
             }}
           >
             <StyledPillLabel>{option}</StyledPillLabel>
+            <StyledPillCloseIcon>
+              <RiCloseFill />
+            </StyledPillCloseIcon>
           </StyledPill>
         </StyledPillWrap>
       );

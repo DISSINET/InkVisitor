@@ -28,9 +28,13 @@ export const StyledAdvancedOptions = styled.div`
   height: 3rem;
   margin-bottom: 0.5rem;
   margin-left: 0.7rem;
-  border: 1px solid ${({ theme }) => theme.color["gray"][300]};
+  border: 1px dashed ${({ theme }) => theme.color["gray"][300]};
   border-radius: 5rem;
   cursor: default;
+
+  &:hover {
+    border-style: solid;
+  }
 `;
 
 export const StyledRowHeader = styled.div`
@@ -167,4 +171,17 @@ export const StyledPillLabel = styled.div`
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
   font-weight: ${({ theme }) => theme.fontWeight.medium};
   white-space: nowrap;
+`;
+
+export const StyledPillCloseIcon = styled.div`
+  display: none;
+  align-items: center;
+  justify-content: center;
+  margin-left: ${({ theme }) => theme.space[1]};
+  color: ${({ theme }) => theme.color["gray"][600]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  
+  ${StyledPill}:hover & {
+    display: flex;
+  }
 `;
