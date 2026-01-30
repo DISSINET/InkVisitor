@@ -17,6 +17,7 @@ import {
   StyledAdvancedOptionsSign,
   StyledButtonsContainer,
   StyledFloatingContainer,
+  StyledFloatingContainerTitle,
   StyledPill,
   StyledPillLabel,
   StyledPillsContainer,
@@ -182,15 +183,9 @@ export const EntitySearchAdvancedOptions: React.FC<
               }}
             >
               <StyledFloatingContainer>
-                <div
-                  style={{
-                    width: "100%",
-                    display: "flex",
-                    justifyContent: "flex-end",
-                  }}
-                >
-                  {renderBatchButtons()}
-                </div>
+                <StyledFloatingContainerTitle>
+                  Select active filters
+                </StyledFloatingContainerTitle>
                 <StyledPillsContainer>
                   {advancedOptions.map((option) => {
                     const isSelected = expandedOptions.includes(option);

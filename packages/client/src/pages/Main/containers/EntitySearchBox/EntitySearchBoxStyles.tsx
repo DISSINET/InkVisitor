@@ -129,6 +129,13 @@ export const StyledFloatingContainer = styled.div`
   box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
 `;
 
+export const StyledFloatingContainerTitle = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  color: ${({ theme }) => theme.color["black"]};
+`;
+
 export const StyledButtonsContainer = styled.div`
   display: flex;
   gap: ${({ theme }) => theme.space[1]};
@@ -180,7 +187,7 @@ export const StyledPillCloseIcon = styled.div`
   margin-left: ${({ theme }) => theme.space[1]};
   color: ${({ theme }) => theme.color["gray"][600]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
-  
+
   ${StyledPill}:hover & {
     display: flex;
   }
