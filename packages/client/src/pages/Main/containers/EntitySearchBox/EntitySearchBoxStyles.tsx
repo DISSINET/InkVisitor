@@ -157,6 +157,7 @@ export const StyledPillWrap = styled.div`
   margin-right: 0.25rem;
 `;
 export const StyledPill = styled.div<{ $selected?: boolean }>`
+  position: relative;
   display: inline-flex;
   align-items: center;
   cursor: pointer;
@@ -181,14 +182,29 @@ export const StyledPillLabel = styled.div`
 `;
 
 export const StyledPillCloseIcon = styled.div`
-  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: ${({ theme }) => theme.space[1]};
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
   color: ${({ theme }) => theme.color["gray"][600]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
+  cursor: pointer;
+  background-color: ${({ theme }) => theme.color["gray"][100]};
+  border-radius: 2rem;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
 
-  ${StyledPill}:hover & {
-    display: flex;
+  ${StyledPill}:hover &,
+  ${StyledPill}:active &,
+  ${StyledPill}:focus & {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
   }
 `;

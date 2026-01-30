@@ -9,7 +9,7 @@ import {
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { wildCardChar } from "Theme/constants";
 import api from "api";
-import { Button, Input, Loader, TypeBar } from "components";
+import { Button, IconWithTooltip, Input, Loader, TypeBar } from "components";
 import Dropdown, {
   AttributeButtonGroup,
   EntityCreateModal,
@@ -268,23 +268,28 @@ export const EntitySearchBox: React.FC = () => {
     (option: string) => {
       return (
         <StyledPillWrap>
-          <StyledPill
-            onClick={() => {
-              setExpandedOptions(expandedOptions.filter((o) => o !== option));
-              handleChange({
-                [option]: undefined,
-              });
-            }}
-          >
+          <StyledPill>
             <StyledPillLabel>{option}</StyledPillLabel>
-            <StyledPillCloseIcon>
-              <RiCloseFill />
+            <StyledPillCloseIcon
+              onClick={() => {
+                setExpandedOptions(expandedOptions.filter((o) => o !== option));
+                handleChange({
+                  [option]: undefined,
+                });
+              }}
+            >
+              <IconWithTooltip
+                tooltipLabel={`Clear [${option}] filter`}
+                icon={<RiCloseFill size={15} />}
+                fullWidth
+                tooltipPosition="left"
+              />
             </StyledPillCloseIcon>
           </StyledPill>
         </StyledPillWrap>
       );
     },
-    [expandedOptions, setExpandedOptions, handleChange]
+    [expandedOptions]
   );
 
   // If used as template is implemented, it'll be set here
