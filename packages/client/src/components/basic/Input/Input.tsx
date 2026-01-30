@@ -262,7 +262,14 @@ export const Input: React.FC<Input> = ({
         />
       )}
       {(type === "datetime-local" || type === "date") && (
-        <div style={{ position: "relative", width: "100%", display: "flex" }}>
+        <div
+          style={{
+            position: "relative",
+            width: "100%",
+            minWidth: "10.2rem",
+            display: "grid",
+          }}
+        >
           <StyledInput
             type={type}
             value={displayValue}
