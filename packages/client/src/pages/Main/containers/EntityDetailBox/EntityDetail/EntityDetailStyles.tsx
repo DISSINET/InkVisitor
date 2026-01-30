@@ -37,14 +37,21 @@ export const StyledDetailSectionHeader = styled.div<StyledDetailSectionHeader>`
   font-size: ${({ theme, $secondary }) =>
     $secondary ? theme.fontSize["base"] : theme.fontSize.lg};
   margin-top: ${({ theme, $secondary }) => ($secondary ? theme.space[12] : "")};
-  margin-bottom: ${({ theme }) => theme.space[4]};
-  color: ${({ theme }) => theme.color["primary"]};
+  color: ${({ theme }) => theme.color["gray"]["600"]};
+  cursor: pointer;
+
+  &:hover {
+    color: ${({ theme }) => theme.color["primary"]};
+  }
 `;
 
 export const StyledDetailSectionHeading = styled.div`
   margin-right: ${({ theme }) => theme.space[2]};
   align-items: center;
   display: flex;
+  /* color: ${({ theme }) => theme.color["gray"]["600"]}; */
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  text-transform: uppercase;
 `;
 
 export const StyledExpandIcon = styled.div`
@@ -52,12 +59,7 @@ export const StyledExpandIcon = styled.div`
   display: flex;
   align-items: center;
   transition: transform 0.2s ease;
-  cursor: pointer;
-
-  &:hover {
-    color: ${({ theme }) => theme.color["primary"]};
-    opacity: 0.8;
-  }
+  /* color: ${({ theme }) => theme.color["gray"]["600"]}; */
 `;
 
 interface StyledDetailWarnings {
@@ -111,7 +113,7 @@ export const StyledDetailSectionContent = styled.div<StyledDetailSectionContent>
   padding-left: ${({ theme, $firstSection = false }) =>
     $firstSection ? "" : theme.space[4]};
   padding-top: ${({ theme, $firstSection }) =>
-    $firstSection ? 0 : theme.space[4]};
+    $firstSection ? 0 : theme.space[6]};
 `;
 
 // usedIn section

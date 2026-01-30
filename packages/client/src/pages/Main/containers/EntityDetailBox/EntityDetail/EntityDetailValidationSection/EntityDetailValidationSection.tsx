@@ -16,7 +16,9 @@ import { deepCopy } from "utils/utils";
 import { EntityDetailSectionButtons } from "../EntityDetailSectionButtons/EntityDetailSectionButtons";
 import {
   StyledBlockSeparator,
+  StyledDetailSectionContent,
   StyledDetailSectionHeader,
+  StyledDetailSectionHeading,
   StyledExpandIcon,
   StyledValidationList,
 } from "../EntityDetailStyles";
@@ -119,10 +121,10 @@ export const EntityDetailValidationSection: React.FC<
 
   return (
     <>
-      <StyledDetailSectionHeader>
-        <StyledExpandIcon
-          onClick={() => setIsValidationExpanded(!isValidationExpanded)}
-        >
+      <StyledDetailSectionHeader
+        onClick={() => setIsValidationExpanded(!isValidationExpanded)}
+      >
+        <StyledExpandIcon>
           <FaChevronCircleRight
             size={16}
             style={{
@@ -132,7 +134,9 @@ export const EntityDetailValidationSection: React.FC<
             }}
           />
         </StyledExpandIcon>
-        Validation rules ({validations?.length ?? 0})
+        <StyledDetailSectionHeading>
+          Validation rules ({validations?.length ?? 0})
+        </StyledDetailSectionHeading>
         {userCanEdit && isValidationExpanded && (
           <span style={{ marginLeft: "1rem", marginRight: "1rem" }}>
             <Button
@@ -192,30 +196,32 @@ export const EntityDetailValidationSection: React.FC<
       </StyledDetailSectionHeader>
 
       {isValidationExpanded && validations && (
-        <StyledValidationList>
-          {(validations as ITerritoryValidation[]).map((validation, key) => {
-            return (
-              <React.Fragment key={key}>
-                <ValidationRule
-                  key={key}
-                  validation={validation}
-                  entities={entities}
-                  updateValidationRule={(
-                    changes: Partial<ITerritoryValidation>
-                  ) => {
-                    handleUpdateValidation(key, changes);
-                  }}
-                  removeValidationRule={() => setTempIndexToRemove(key)}
-                  isInsideTemplate={isInsideTemplate}
-                  territoryParentId={territoryParentId}
-                  widthTooNarrow={widthTooNarrow}
-                  userCanEdit={userCanEdit}
-                />
-                {key !== validations.length - 1 && <StyledBlockSeparator />}
-              </React.Fragment>
-            );
-          })}
-        </StyledValidationList>
+        <StyledDetailSectionContent>
+          <StyledValidationList>
+            {(validations as ITerritoryValidation[]).map((validation, key) => {
+              return (
+                <React.Fragment key={key}>
+                  <ValidationRule
+                    key={key}
+                    validation={validation}
+                    entities={entities}
+                    updateValidationRule={(
+                      changes: Partial<ITerritoryValidation>
+                    ) => {
+                      handleUpdateValidation(key, changes);
+                    }}
+                    removeValidationRule={() => setTempIndexToRemove(key)}
+                    isInsideTemplate={isInsideTemplate}
+                    territoryParentId={territoryParentId}
+                    widthTooNarrow={widthTooNarrow}
+                    userCanEdit={userCanEdit}
+                  />
+                  {key !== validations.length - 1 && <StyledBlockSeparator />}
+                </React.Fragment>
+              );
+            })}
+          </StyledValidationList>
+        </StyledDetailSectionContent>
       )}
 
       {userCanEdit &&
