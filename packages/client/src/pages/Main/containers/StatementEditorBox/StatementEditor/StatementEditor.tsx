@@ -1142,7 +1142,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           $lastSection
           $widthTooNarrow={editorWidthTooNarrow}
         >
-          <StyledEditorSectionHeader>Notes</StyledEditorSectionHeader>
+          <StyledEditorSectionHeader>
+            <StyledEditorSectionHeading>Notes</StyledEditorSectionHeading>
+          </StyledEditorSectionHeader>
           <StyledEditorSectionContent>
             <MultiInput
               width="full"
@@ -1160,7 +1162,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           key="editor-section-audits"
           $widthTooNarrow={editorWidthTooNarrow}
         >
-          <StyledEditorSectionHeader>Audits</StyledEditorSectionHeader>
+          <StyledEditorSectionHeader>
+            <StyledEditorSectionHeading>Audits</StyledEditorSectionHeading>
+          </StyledEditorSectionHeader>
           <StyledEditorSectionContent>
             {audit && <AuditTable {...audit} />}
           </StyledEditorSectionContent>
@@ -1171,7 +1175,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           key="editor-section-json"
           $widthTooNarrow={editorWidthTooNarrow}
         >
-          <StyledEditorSectionHeader>JSON</StyledEditorSectionHeader>
+          <StyledEditorSectionHeader>
+            <StyledEditorSectionHeading>JSON</StyledEditorSectionHeading>
+          </StyledEditorSectionHeader>
           <StyledEditorSectionContent>
             {statement && <JSONExplorer data={statement} />}
           </StyledEditorSectionContent>

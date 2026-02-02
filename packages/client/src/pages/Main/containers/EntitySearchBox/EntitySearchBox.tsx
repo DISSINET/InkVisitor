@@ -1,7 +1,6 @@
-import { animated, config, useSpring } from "@react-spring/web";
 import { entityStatusDict, languageDict } from "@shared/dictionaries";
 import { entitiesDict } from "@shared/dictionaries/entity";
-import { EntityEnums, UserEnums } from "@shared/enums";
+import { EntityEnums, SearchEnums, UserEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import {
   IRequestSearch,
@@ -10,7 +9,7 @@ import {
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { wildCardChar } from "Theme/constants";
 import api from "api";
-import { Button, Input, Loader, TypeBar } from "components";
+import { Button, IconWithTooltip, Input, Loader, TypeBar } from "components";
 import Dropdown, {
   AttributeButtonGroup,
   EntityCreateModal,
@@ -18,26 +17,27 @@ import Dropdown, {
   EntityTag,
 } from "components/advanced";
 import { useDebounce, useResizeObserver, useSearchParams } from "hooks";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   BsShieldExclamation,
   BsShieldFillCheck,
   BsShieldShaded,
 } from "react-icons/bs";
-import { CgOptions } from "react-icons/cg";
 import { FaPlus } from "react-icons/fa";
-import { IoMdArrowDropdownCircle } from "react-icons/io";
 import { RiCloseFill } from "react-icons/ri";
 import { DropdownItem } from "types";
+import { EntitySearchAdvancedOptions } from "./EntitySearchAdvancedOptions/EntitySearchAdvancedOptions";
 import {
-  StyledAdvancedOptions,
-  StyledAdvancedOptionsSign,
   StyledBoxContent,
+  StyledPill,
+  StyledPillLabel,
+  StyledPillCloseIcon,
   StyledOptions,
   StyledResultsHeader,
   StyledResultsWrapper,
   StyledRow,
   StyledRowHeader,
+  StyledPillWrap,
 } from "./EntitySearchBoxStyles";
 import { EntitySearchResults } from "./EntitySearchResults/EntitySearchResults";
 
@@ -78,8 +78,6 @@ export const EntitySearchBox: React.FC = () => {
   const [classOption, setClassOption] = useState<EntityEnums.Class>(
     defaultClassOption.value as EntityEnums.Class
   );
-  const [templateOption, setTemplateOption] =
-    useState<DropdownItem>(defaultClassOption);
   const [searchData, setSearchData] =
     useState<IRequestSearch>(initSearchValues);
   const debouncedValues = useDebounce<IRequestSearch>(searchData, debounceTime);
@@ -131,12 +129,12 @@ export const EntitySearchBox: React.FC = () => {
   } = useQuery({
     queryKey: ["search", { searchData: JSON.stringify(debouncedValues) }],
     queryFn: async () => {
-      if (debouncedValues.usedTemplate === "Any") {
-        const { usedTemplate, ...filters } = debouncedValues;
-        filters.onlyTemplates = true;
-        const res = await api.entitiesSearch(filters);
-        return res.data;
-      }
+      // if (debouncedValues.usedTemplate === "Any") {
+      //   const { usedTemplate, ...filters } = debouncedValues;
+      //   filters.onlyTemplates = true;
+      //   const res = await api.entitiesSearch(filters);
+      //   return res.data;
+      // }
       const labelWithWildCard =
         debouncedValues.labelOrId && debouncedValues.labelOrId?.length > 0
           ? debouncedValues.labelOrId + wildCardChar
@@ -246,24 +244,9 @@ export const EntitySearchBox: React.FC = () => {
   //   return options;
   // }, [templates]);
 
-  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
-
-
-  useEffect(() => {
-    if (!showAdvancedOptions) {
-      setSearchData({
-        labelOrId: searchData.labelOrId,
-      });
-      setClassOption(defaultClassOption.value as EntityEnums.Class);
-    }
-  }, [showAdvancedOptions]);
+  const [expandedOptions, setExpandedOptions] = useState<SearchEnums.AdvancedOption[]>([]);
 
   const [showEntityCreateModal, setShowEntityCreateModal] = useState(false);
-
-  const rotateOptionsIcon = useSpring({
-    transform: showAdvancedOptions ? "rotate(180deg)" : "rotate(0deg)",
-    config: config.stiff,
-  });
 
   const userRole = localStorage.getItem("userrole");
 
@@ -280,6 +263,49 @@ export const EntitySearchBox: React.FC = () => {
     );
     return usersOptionsOut;
   }, [users]);
+
+  const renderOptionLabel = useCallback(
+    (option: string) => {
+      return (
+        <StyledPillWrap>
+          <StyledPill>
+            <StyledPillLabel>{option}</StyledPillLabel>
+            <StyledPillCloseIcon
+              onClick={() => {
+                setExpandedOptions(expandedOptions.filter((o) => o !== option));
+                handleChange({
+                  [option]: undefined,
+                });
+              }}
+            >
+              <IconWithTooltip
+                tooltipLabel={`Clear [${option}] filter`}
+                icon={<RiCloseFill size={15} />}
+                fullWidth
+                tooltipPosition="left"
+              />
+            </StyledPillCloseIcon>
+          </StyledPill>
+        </StyledPillWrap>
+      );
+    },
+    [expandedOptions]
+  );
+
+  // If used as template is implemented, it'll be set here
+  useEffect(() => {
+    if (searchData.class) {
+      setClassOption(searchData.class as EntityEnums.Class);
+    } else {
+      setClassOption(defaultClassOption.value as EntityEnums.Class);
+    }
+  }, [searchData.class]);
+
+  useEffect(() => {
+    if (!expandedOptions.includes(SearchEnums.AdvancedOption.Territory)) {
+      setTerritoryEntity(false);
+    }
+  }, [expandedOptions.includes(SearchEnums.AdvancedOption.Territory)]);
 
   return (
     <>
@@ -313,41 +339,18 @@ export const EntitySearchBox: React.FC = () => {
             </div>
           </StyledRow>
 
-          <StyledAdvancedOptions>
-            <div style={{ height: "100%", width: "100%" }}>
-              <StyledAdvancedOptionsSign>
-                <CgOptions />
-                <i>advanced options</i>
-              </StyledAdvancedOptionsSign>
-            </div>
-            <div>
-              <Button
-                icon={
-                  <div style={{ display: "inline-flex", alignItems: "center" }}>
-                    <p style={{ margin: "0 0.3rem" }}>
-                      {showAdvancedOptions ? "hide" : "show"}
-                    </p>
-                    <animated.div
-                      style={{
-                        ...rotateOptionsIcon,
-                        display: "flex",
-                        alignItems: "center",
-                      }}
-                    >
-                      <IoMdArrowDropdownCircle size={16} />
-                    </animated.div>
-                  </div>
-                }
-                onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
-                inverted
-              />
-            </div>
-          </StyledAdvancedOptions>
+          <EntitySearchAdvancedOptions
+            expandedOptions={expandedOptions}
+            setExpandedOptions={setExpandedOptions}
+            searchData={searchData}
+            setSearchData={setSearchData}
+          />
 
-          {showAdvancedOptions && (
-            <>
+          {/* ADVANCED OPTIONS */}
+          <>
+            {expandedOptions.includes(SearchEnums.AdvancedOption.Class) && (
               <StyledRow>
-                <StyledRowHeader>class</StyledRowHeader>
+                {renderOptionLabel(SearchEnums.AdvancedOption.Class)}
                 <div style={{ position: "relative" }}>
                   <Dropdown.Single.Entity
                     placeholder={""}
@@ -355,20 +358,19 @@ export const EntitySearchBox: React.FC = () => {
                     options={[defaultClassOption].concat(entitiesDict)}
                     value={classOption}
                     onChange={(selectedOption) => {
-                      setClassOption(selectedOption as EntityEnums.Class);
-                      setTemplateOption(defaultClassOption);
                       handleChange({
                         class: selectedOption,
-                        usedTemplate: defaultClassOption.value,
                       });
                     }}
                   />
                   <TypeBar entityLetter={classOption} />
                 </div>
               </StyledRow>
+            )}
 
+            {expandedOptions.includes(SearchEnums.AdvancedOption.Status) && (
               <StyledRow>
-                <StyledRowHeader>status</StyledRowHeader>
+                {renderOptionLabel(SearchEnums.AdvancedOption.Status)}
                 <div style={{ position: "relative" }}>
                   <Dropdown.Single.Basic
                     placeholder={""}
@@ -384,8 +386,10 @@ export const EntitySearchBox: React.FC = () => {
                   <TypeBar entityLetter={classOption} />
                 </div>
               </StyledRow>
+            )}
+            {expandedOptions.includes(SearchEnums.AdvancedOption.Language) && (
               <StyledRow>
-                <StyledRowHeader>language</StyledRowHeader>
+                {renderOptionLabel(SearchEnums.AdvancedOption.Language)}
                 <div style={{ position: "relative" }}>
                   <Dropdown.Single.Basic
                     placeholder={""}
@@ -401,8 +405,9 @@ export const EntitySearchBox: React.FC = () => {
                   <TypeBar entityLetter={classOption} />
                 </div>
               </StyledRow>
-              {/* NOT USED NOW */}
-              {/* <StyledRow>
+            )}
+            {/* NOT USED NOW */}
+            {/* <StyledRow>
               <StyledRowHeader>template</StyledRowHeader>
                <Dropdown.Single.Attribute
                 placeholder={""}
@@ -415,8 +420,9 @@ export const EntitySearchBox: React.FC = () => {
                 }}
               />
             </StyledRow> */}
+            {expandedOptions.includes(SearchEnums.AdvancedOption.Territory) && (
               <StyledRow>
-                <StyledRowHeader>territory</StyledRowHeader>
+                {renderOptionLabel(SearchEnums.AdvancedOption.Territory)}
                 {territoryEntity ? (
                   <>
                     {territoryEntity && (
@@ -453,33 +459,35 @@ export const EntitySearchBox: React.FC = () => {
                   </div>
                 )}
               </StyledRow>
-              {territoryEntity && (
-                <StyledRow>
-                  <StyledRowHeader>Territory children</StyledRowHeader>
-                  <AttributeButtonGroup
-                    options={[
-                      {
-                        longValue: "included",
-                        shortValue: "included",
-                        onClick: () => {
-                          handleChange({ subTerritorySearch: true });
-                        },
-                        selected: searchData.subTerritorySearch === true,
-                      },
-                      {
-                        longValue: "not included",
-                        shortValue: "not included",
-                        onClick: () => {
-                          handleChange({ subTerritorySearch: undefined });
-                        },
-                        selected: searchData.subTerritorySearch !== true,
-                      },
-                    ]}
-                  />
-                </StyledRow>
-              )}
+            )}
+            {territoryEntity && (
               <StyledRow>
-                <StyledRowHeader>co-occurrence</StyledRowHeader>
+                <StyledRowHeader>Territory children</StyledRowHeader>
+                <AttributeButtonGroup
+                  options={[
+                    {
+                      longValue: "included",
+                      shortValue: "included",
+                      onClick: () => {
+                        handleChange({ subTerritorySearch: true });
+                      },
+                      selected: searchData.subTerritorySearch === true,
+                    },
+                    {
+                      longValue: "not included",
+                      shortValue: "not included",
+                      onClick: () => {
+                        handleChange({ subTerritorySearch: undefined });
+                      },
+                      selected: searchData.subTerritorySearch !== true,
+                    },
+                  ]}
+                />
+              </StyledRow>
+            )}
+            {expandedOptions.includes(SearchEnums.AdvancedOption.CoOccurrence) && (
+              <StyledRow>
+                {renderOptionLabel(SearchEnums.AdvancedOption.CoOccurrence)}
                 {cooccurrenceEntity ? (
                   <EntityTag
                     entity={cooccurrenceEntity}
@@ -522,8 +530,10 @@ export const EntitySearchBox: React.FC = () => {
                   </div>
                 )}
               </StyledRow>
+            )}
+            {expandedOptions.includes(SearchEnums.AdvancedOption.ReferencedTo) && (
               <StyledRow>
-                <StyledRowHeader>referenced to</StyledRowHeader>
+                {renderOptionLabel(SearchEnums.AdvancedOption.ReferencedTo)}
                 {referencedTo ? (
                   <EntityTag
                     entity={referencedTo}
@@ -550,8 +560,10 @@ export const EntitySearchBox: React.FC = () => {
                   />
                 )}
               </StyledRow>
+            )}
+            {expandedOptions.includes(SearchEnums.AdvancedOption.CreatedAt) && (
               <StyledRow>
-                <StyledRowHeader>created at</StyledRowHeader>
+                {renderOptionLabel(SearchEnums.AdvancedOption.CreatedAt)}
 
                 <Input
                   type="date"
@@ -571,10 +583,11 @@ export const EntitySearchBox: React.FC = () => {
                   }}
                   clearable
                 />
-                {/* )} */}
               </StyledRow>
+            )}
+            {expandedOptions.includes(SearchEnums.AdvancedOption.UpdatedAt) && (
               <StyledRow>
-                <StyledRowHeader>udpated at</StyledRowHeader>
+                {renderOptionLabel(SearchEnums.AdvancedOption.UpdatedAt)}
 
                 <Input
                   type="date"
@@ -596,9 +609,11 @@ export const EntitySearchBox: React.FC = () => {
                   clearable
                 />
               </StyledRow>
+            )}
 
+            {expandedOptions.includes(SearchEnums.AdvancedOption.CreatedBy) && (
               <StyledRow>
-                <StyledRowHeader>created by</StyledRowHeader>
+                {renderOptionLabel(SearchEnums.AdvancedOption.CreatedBy)}
                 <Dropdown.Single.Basic
                   width="full"
                   options={userOptions}
@@ -608,9 +623,11 @@ export const EntitySearchBox: React.FC = () => {
                   }}
                 />
               </StyledRow>
+            )}
 
+            {expandedOptions.includes(SearchEnums.AdvancedOption.UpdatedBy) && (
               <StyledRow>
-                <StyledRowHeader>updated by</StyledRowHeader>
+                {renderOptionLabel(SearchEnums.AdvancedOption.UpdatedBy)}
                 <Dropdown.Single.Basic
                   width="full"
                   options={userOptions}
@@ -620,9 +637,11 @@ export const EntitySearchBox: React.FC = () => {
                   }}
                 />
               </StyledRow>
+            )}
 
+            {expandedOptions.includes(SearchEnums.AdvancedOption.EditedBy) && (
               <StyledRow>
-                <StyledRowHeader>edited by</StyledRowHeader>
+                {renderOptionLabel(SearchEnums.AdvancedOption.EditedBy)}
                 <Dropdown.Single.Basic
                   width="full"
                   options={userOptions}
@@ -632,9 +651,11 @@ export const EntitySearchBox: React.FC = () => {
                   }}
                 />
               </StyledRow>
+            )}
 
+            {expandedOptions.includes(SearchEnums.AdvancedOption.RootValidity) && (
               <StyledRow>
-                <StyledRowHeader>root validity</StyledRowHeader>
+                {renderOptionLabel(SearchEnums.AdvancedOption.RootValidity)}
 
                 <AttributeButtonGroup
                   noMargin
@@ -689,8 +710,9 @@ export const EntitySearchBox: React.FC = () => {
                   ]}
                 />
               </StyledRow>
-            </>
-          )}
+            )}
+          </>
+          {/* )} */}
         </StyledOptions>
 
         <StyledResultsHeader>
@@ -698,7 +720,14 @@ export const EntitySearchBox: React.FC = () => {
             <>{`Results (${sortedEntities.length})`}</>
           )}
           {sortedEntities.length === 0 && (
-            <p style={{ fontStyle: "italic", fontSize: "1.4rem", margin: "0.5rem", padding: "2rem" }}>{`No results found`}</p>
+            <p
+              style={{
+                fontStyle: "italic",
+                fontSize: "1.4rem",
+                margin: "0.5rem",
+                padding: "2rem",
+              }}
+            >{`No results found`}</p>
           )}
         </StyledResultsHeader>
 

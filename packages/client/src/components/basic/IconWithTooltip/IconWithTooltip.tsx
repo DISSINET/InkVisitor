@@ -1,17 +1,26 @@
+import {
+  AutoPlacement,
+  BasePlacement,
+  VariationPlacement,
+} from "@popperjs/core";
 import { Tooltip } from "components";
 import { useTheme } from "hooks";
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import { ThemeColor } from "Theme/theme";
 
 interface IconWithTooltip {
   icon: React.ReactNode;
   tooltipLabel: string;
+  tooltipPosition?: AutoPlacement | BasePlacement | VariationPlacement;
   color?: keyof ThemeColor;
+  fullWidth?: boolean;
 }
 export const IconWithTooltip: React.FC<IconWithTooltip> = ({
   icon,
   tooltipLabel,
+  tooltipPosition = "bottom",
   color = "black",
+  fullWidth = false,
 }) => {
   const [referenceElement, setReferenceElement] =
     useState<HTMLDivElement | null>(null);
@@ -24,7 +33,9 @@ export const IconWithTooltip: React.FC<IconWithTooltip> = ({
       <div
         style={{
           display: "flex",
+          justifyContent: "center",
           color: theme.color[color] as string,
+          width: fullWidth ? "100%" : "auto",
         }}
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
@@ -37,7 +48,7 @@ export const IconWithTooltip: React.FC<IconWithTooltip> = ({
           label={tooltipLabel}
           visible={showTooltip}
           referenceElement={referenceElement}
-          position="bottom"
+          position={tooltipPosition}
         />
       )}
     </>

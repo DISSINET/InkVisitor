@@ -108,6 +108,11 @@ export const StyledEditorSectionHeading = styled.div`
   align-items: center;
   display: flex;
   white-space: nowrap;
+  color: ${({ theme }) => theme.color["gray"]["600"]};
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  text-transform: uppercase;
+  /* font-weight: bold; */
+  /* font-family: Muni; */
 `;
 
 interface StyledEditorSectionContent {}

@@ -35,11 +35,7 @@ import { FaChevronCircleRight, FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
 import { rootTerritoryId } from "Theme/constants";
-import {
-  DraggedPropRowCategory,
-  DropdownItem,
-  PropAttributeFilter,
-} from "types";
+import { DraggedPropRowCategory, DropdownItem } from "types";
 import {
   getEntityLabel,
   getEntityRelationRules,
@@ -734,10 +730,10 @@ export const EntityDetail: React.FC<EntityDetail> = ({
               {/* Protocol */}
               {entity.class === EntityEnums.Class.Territory && (
                 <StyledDetailSection>
-                  <StyledDetailSectionHeader>
-                    <StyledExpandIcon
-                      onClick={() => setIsProtocolExpanded(!isProtocolExpanded)}
-                    >
+                  <StyledDetailSectionHeader
+                    onClick={() => setIsProtocolExpanded(!isProtocolExpanded)}
+                  >
+                    <StyledExpandIcon>
                       <FaChevronCircleRight
                         size={16}
                         style={{
@@ -792,7 +788,11 @@ export const EntityDetail: React.FC<EntityDetail> = ({
               {/* Valency (A) */}
               {entity.class === EntityEnums.Class.Action && (
                 <StyledDetailSection>
-                  <StyledDetailSectionHeader>Valency</StyledDetailSectionHeader>
+                  <StyledDetailSectionHeader>
+                    <StyledDetailSectionHeading>
+                      Valency
+                    </StyledDetailSectionHeading>
+                  </StyledDetailSectionHeader>
                   <StyledDetailWarnings>
                     {entity.warnings &&
                       entity.warnings
@@ -820,10 +820,14 @@ export const EntityDetail: React.FC<EntityDetail> = ({
 
               {/* Relations */}
               <StyledDetailSection>
-                <StyledDetailSectionHeader>Relations</StyledDetailSectionHeader>
-                <StyledDetailWarnings>
-                  {entity.warnings &&
-                    entity.warnings
+                <StyledDetailSectionHeader>
+                  <StyledDetailSectionHeading>
+                    Relations
+                  </StyledDetailSectionHeading>
+                </StyledDetailSectionHeader>
+                {entity.warnings && entity.warnings.length > 0 && (
+                  <StyledDetailWarnings>
+                    {entity.warnings
                       .filter(
                         (w) =>
                           w.position?.section ===
@@ -832,7 +836,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                       .map((warning, key) => {
                         return <Message key={key} warning={warning} />;
                       })}
-                </StyledDetailWarnings>
+                  </StyledDetailWarnings>
+                )}
                 <StyledDetailSectionContent>
                   <EntityDetailRelations
                     entity={entity}
@@ -935,7 +940,9 @@ export const EntityDetail: React.FC<EntityDetail> = ({
               {/* reference section */}
               <StyledDetailSection>
                 <StyledDetailSectionHeader>
-                  References
+                  <StyledDetailSectionHeading>
+                    References
+                  </StyledDetailSectionHeading>
                 </StyledDetailSectionHeader>
                 <StyledDetailSectionContent>
                   <EntityReferenceTable
@@ -954,114 +961,124 @@ export const EntityDetail: React.FC<EntityDetail> = ({
               </StyledDetailSection>
 
               <StyledDetailSection>
-                <StyledDetailSectionHeader>Used in:</StyledDetailSectionHeader>
+                <StyledDetailSectionHeader>
+                  <StyledDetailSectionHeading>
+                    Used in:
+                  </StyledDetailSectionHeading>
+                </StyledDetailSectionHeader>
 
-                {/* used as template */}
-                {entity.isTemplate && entity.usedAsTemplate && (
-                  <StyledDetailSectionContentUsedIn key="as template">
-                    <StyledUsedAsHeading>
-                      <StyledUsedAsTitle>
-                        <b>{entity.usedAsTemplate.length}</b> As a template
-                      </StyledUsedAsTitle>
-                    </StyledUsedAsHeading>
-                    <StyledDetailSectionEntityList>
-                      {entity.usedAsTemplate.map((entityId) => (
-                        <React.Fragment key={entityId}>
-                          <div style={{ display: "inline-grid" }}>
-                            <EntityTag
-                              entity={entity.entities[entityId]}
-                              fullWidth
-                            />
-                          </div>
-                        </React.Fragment>
-                      ))}
-                    </StyledDetailSectionEntityList>
-                  </StyledDetailSectionContentUsedIn>
-                )}
+                <StyledDetailSectionContent>
+                  {/* used as template */}
+                  {entity.isTemplate && entity.usedAsTemplate && (
+                    <>
+                      <StyledUsedAsHeading>
+                        <StyledUsedAsTitle>
+                          <b>{entity.usedAsTemplate.length}</b> As a template
+                        </StyledUsedAsTitle>
+                      </StyledUsedAsHeading>
+                      <StyledDetailSectionEntityList>
+                        {entity.usedAsTemplate.map((entityId) => (
+                          <React.Fragment key={entityId}>
+                            <div style={{ display: "inline-grid" }}>
+                              <EntityTag
+                                entity={entity.entities[entityId]}
+                                fullWidth
+                              />
+                            </div>
+                          </React.Fragment>
+                        ))}
+                      </StyledDetailSectionEntityList>
+                    </>
+                  )}
 
-                {/* usedIn props */}
-                {!entity.isTemplate && (
-                  <EntityDetailMetaPropsTable
-                    title={{
-                      singular: "Metaproperty",
-                      plural: "Metaproperties",
-                    }}
-                    entities={entity.entities}
-                    useCases={entity.usedInMetaProps}
-                    key="MetaProp"
-                    perPage={10}
-                  />
-                )}
+                  {/* usedIn props */}
+                  {!entity.isTemplate && (
+                    <EntityDetailMetaPropsTable
+                      title={{
+                        singular: "Metaproperty",
+                        plural: "Metaproperties",
+                      }}
+                      entities={entity.entities}
+                      useCases={entity.usedInMetaProps}
+                      key="MetaProp"
+                      perPage={10}
+                    />
+                  )}
 
-                {/* usedIn statements */}
-                {!entity.isTemplate && (
-                  <EntityDetailStatementsTable
-                    title={{ singular: "Statement", plural: "Statements" }}
-                    entities={entity.entities}
-                    useCases={entity.usedInStatements}
-                    key="Statement"
-                    perPage={10}
-                  />
-                )}
+                  {/* usedIn statements */}
+                  {!entity.isTemplate && (
+                    <EntityDetailStatementsTable
+                      title={{ singular: "Statement", plural: "Statements" }}
+                      entities={entity.entities}
+                      useCases={entity.usedInStatements}
+                      key="Statement"
+                      perPage={10}
+                    />
+                  )}
 
-                {/* usedIn statement props */}
-                {!entity.isTemplate && (
-                  <EntityDetailStatementPropsTable
-                    title={{
-                      singular: "In-statement Property",
-                      plural: "In-statement Properties",
-                    }}
-                    entities={entity.entities}
-                    useCases={entity.usedInStatementProps}
-                    key="StatementProp"
-                    perPage={10}
-                  />
-                )}
+                  {/* usedIn statement props */}
+                  {!entity.isTemplate && (
+                    <EntityDetailStatementPropsTable
+                      title={{
+                        singular: "In-statement Property",
+                        plural: "In-statement Properties",
+                      }}
+                      entities={entity.entities}
+                      useCases={entity.usedInStatementProps}
+                      key="StatementProp"
+                      perPage={10}
+                    />
+                  )}
 
-                {/* usedIn statement identification */}
-                {!entity.isTemplate && (
-                  <EntityDetailIdentificationTable
-                    title={{
-                      singular: "In-statement Identification",
-                      plural: "In-statement Identifications",
-                    }}
-                    entities={entity.entities}
-                    useCases={entity.usedInStatementIdentifications}
-                    key="StatementIdentification"
-                    perPage={10}
-                  />
-                )}
+                  {/* usedIn statement identification */}
+                  {!entity.isTemplate && (
+                    <EntityDetailIdentificationTable
+                      title={{
+                        singular: "In-statement Identification",
+                        plural: "In-statement Identifications",
+                      }}
+                      entities={entity.entities}
+                      useCases={entity.usedInStatementIdentifications}
+                      key="StatementIdentification"
+                      perPage={10}
+                    />
+                  )}
 
-                {/* usedIn statement classification */}
-                {!entity.isTemplate && (
-                  <EntityDetailClassificationTable
-                    title={{
-                      singular: "In-statement Classification",
-                      plural: "In-statement Classifications",
-                    }}
-                    entities={entity.entities}
-                    useCases={entity.usedInStatementClassifications}
-                    key="StatementClassification"
-                    perPage={10}
-                  />
-                )}
+                  {/* usedIn statement classification */}
+                  {!entity.isTemplate && (
+                    <EntityDetailClassificationTable
+                      title={{
+                        singular: "In-statement Classification",
+                        plural: "In-statement Classifications",
+                      }}
+                      entities={entity.entities}
+                      useCases={entity.usedInStatementClassifications}
+                      key="StatementClassification"
+                      perPage={10}
+                    />
+                  )}
 
-                {!entity.isTemplate && (
-                  <EntityDetailUsedInDocumentsTable
-                    title={{
-                      singular: "Anchor",
-                      plural: "Anchors",
-                    }}
-                    perPage={10}
-                    entity={entity}
-                    widthTooNarrow={widthTooNarrow}
-                  />
-                )}
+                  {!entity.isTemplate && (
+                    <EntityDetailUsedInDocumentsTable
+                      title={{
+                        singular: "Anchor",
+                        plural: "Anchors",
+                      }}
+                      perPage={10}
+                      entity={entity}
+                      widthTooNarrow={widthTooNarrow}
+                    />
+                  )}
+                </StyledDetailSectionContent>
               </StyledDetailSection>
 
               {/* Audits */}
               <StyledDetailSection key="editor-section-audits">
-                <StyledDetailSectionHeader>Audits</StyledDetailSectionHeader>
+                <StyledDetailSectionHeader>
+                  <StyledDetailSectionHeading>
+                    Audits
+                  </StyledDetailSectionHeading>
+                </StyledDetailSectionHeader>
                 <StyledDetailSectionContent>
                   {audit && <AuditTable {...audit} />}
                 </StyledDetailSectionContent>
@@ -1069,7 +1086,9 @@ export const EntityDetail: React.FC<EntityDetail> = ({
 
               {/* JSON */}
               <StyledDetailSection key="editor-section-json">
-                <StyledDetailSectionHeader>JSON</StyledDetailSectionHeader>
+                <StyledDetailSectionHeader>
+                  <StyledDetailSectionHeading>JSON</StyledDetailSectionHeading>
+                </StyledDetailSectionHeader>
                 <StyledDetailSectionContent>
                   {entity && <JSONExplorer data={entity} />}
                 </StyledDetailSectionContent>

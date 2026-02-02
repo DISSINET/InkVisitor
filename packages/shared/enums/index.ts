@@ -7,6 +7,7 @@ import { EnumValidators } from "./validators";
 import { HttpMethods } from "./request";
 import { StatementEnums } from "./statement";
 import { WarningTypeEnums } from "./warning";
+import { SearchEnums } from "./search";
 
 export {
   InterfaceEnums,
@@ -18,4 +19,5 @@ export {
   HttpMethods,
   StatementEnums,
   WarningTypeEnums,
+  SearchEnums,
 };
