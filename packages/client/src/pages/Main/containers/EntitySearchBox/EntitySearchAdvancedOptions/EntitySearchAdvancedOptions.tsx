@@ -4,7 +4,7 @@ import {
   offset,
   useFloating,
 } from "@floating-ui/react";
-import { EntityEnums } from "@shared/enums";
+import { SearchEnums } from "@shared/enums";
 import { IRequestSearch } from "@shared/types/request-search";
 import { Button, ButtonGroup } from "components";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -15,7 +15,6 @@ import {
   StyledAdvancedOptions,
   StyledAdvancedOptionsIconWrap,
   StyledAdvancedOptionsSign,
-  StyledButtonsContainer,
   StyledFloatingContainer,
   StyledFloatingContainerTitle,
   StyledPill,
@@ -23,23 +22,10 @@ import {
   StyledPillsContainer,
 } from "../EntitySearchBoxStyles";
 
-const advancedOptions = [
-  "class",
-  "status",
-  "language",
-  "territory",
-  "co-occurrence",
-  "referenced to",
-  "created at",
-  "udpated at",
-  "created by",
-  "updated by",
-  "edited by",
-  "root validity",
-];
+const advancedOptions = SearchEnums.AdvancedOptions;
 interface EntitySearchAdvancedOptions {
-  expandedOptions: string[];
-  setExpandedOptions: (options: string[]) => void;
+  expandedOptions: SearchEnums.AdvancedOption[];
+  setExpandedOptions: (options: SearchEnums.AdvancedOption[]) => void;
   searchData: IRequestSearch;
   setSearchData: (data: IRequestSearch) => void;
 }
