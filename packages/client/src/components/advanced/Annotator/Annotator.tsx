@@ -1033,12 +1033,14 @@ export const TextAnnotator = ({
 
           <ButtonGroup $marginTop style={{ marginLeft: "0.5rem" }}>
             <Button
-              // inverted
+              inverted
               color="info"
               icon={<FaDownload />}
               onClick={() => {
                 setShowExportModal(true);
               }}
+              tooltipLabel="export document"
+              tooltipPosition="top"
             />
             <span style={{ display: "flex", position: "relative" }}>
               <Button
