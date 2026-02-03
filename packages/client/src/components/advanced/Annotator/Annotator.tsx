@@ -42,7 +42,7 @@ import {
 import { BsFileTextFill } from "react-icons/bs";
 import { HiCodeBracket } from "react-icons/hi2";
 import { collectStatementAnchors, getStatementOrderByIndex } from "utils/utils";
-import { EntityCreateModal } from "..";
+import { DocumentModalExport, EntityCreateModal } from "..";
 import { useAnnotator } from "./AnnotatorContext";
 import TextAnnotatorMenu from "./AnnotatorMenu";
 import {
@@ -830,6 +830,8 @@ export const TextAnnotator = ({
     return annotator !== undefined && !!dataDocument;
   }, [annotator, dataDocument]);
 
+  const [showExportModal, setShowExportModal] = useState<boolean>(false);
+
   if (dataDocumentError) {
     return (
       <StyledInfoText>
@@ -1035,7 +1037,7 @@ export const TextAnnotator = ({
               color="info"
               icon={<FaDownload />}
               onClick={() => {
-                // handleDocumentExport(documentId);
+                setShowExportModal(true);
               }}
             />
             <span style={{ display: "flex", position: "relative" }}>
@@ -1096,6 +1098,13 @@ export const TextAnnotator = ({
             queryClient.invalidateQueries({ queryKey: ["tree"] });
             appendDetailId(entity.id);
           }}
+        />
+      )}
+
+      {showExportModal && (
+        <DocumentModalExport
+          document={dataDocument}
+          onClose={() => setShowExportModal(false)}
         />
       )}
     </>
