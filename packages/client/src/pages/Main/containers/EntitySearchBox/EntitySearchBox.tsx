@@ -17,6 +17,8 @@ import Dropdown, {
   EntityTag,
 } from "components/advanced";
 import { useDebounce, useResizeObserver, useSearchParams } from "hooks";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { setExpandedOptions } from "redux/features/entitySearch/expandedOptionsSlice";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   BsShieldExclamation,
@@ -244,7 +246,10 @@ export const EntitySearchBox: React.FC = () => {
   //   return options;
   // }, [templates]);
 
-  const [expandedOptions, setExpandedOptions] = useState<SearchEnums.AdvancedOption[]>([]);
+  const dispatch = useAppDispatch();
+  const expandedOptions = useAppSelector(
+    (state) => state.entitySearch.expandedOptions
+  );
 
   const [showEntityCreateModal, setShowEntityCreateModal] = useState(false);
 
@@ -264,6 +269,13 @@ export const EntitySearchBox: React.FC = () => {
     return usersOptionsOut;
   }, [users]);
 
+  const handleSetExpandedOptions = useCallback(
+    (options: SearchEnums.AdvancedOption[]) => {
+      dispatch(setExpandedOptions(options));
+    },
+    [dispatch]
+  );
+
   const renderOptionLabel = useCallback(
     (option: string) => {
       return (
@@ -272,7 +284,11 @@ export const EntitySearchBox: React.FC = () => {
             <StyledPillLabel>{option}</StyledPillLabel>
             <StyledPillCloseIcon
               onClick={() => {
-                setExpandedOptions(expandedOptions.filter((o) => o !== option));
+                handleSetExpandedOptions(
+                  expandedOptions.filter(
+                    (o: SearchEnums.AdvancedOption) => o !== option
+                  )
+                );
                 handleChange({
                   [option]: undefined,
                 });
@@ -289,7 +305,7 @@ export const EntitySearchBox: React.FC = () => {
         </StyledPillWrap>
       );
     },
-    [expandedOptions]
+    [expandedOptions, handleSetExpandedOptions]
   );
 
   // If used as template is implemented, it'll be set here
@@ -341,7 +357,7 @@ export const EntitySearchBox: React.FC = () => {
 
           <EntitySearchAdvancedOptions
             expandedOptions={expandedOptions}
-            setExpandedOptions={setExpandedOptions}
+            setExpandedOptions={handleSetExpandedOptions}
             searchData={searchData}
             setSearchData={setSearchData}
           />
@@ -485,7 +501,9 @@ export const EntitySearchBox: React.FC = () => {
                 />
               </StyledRow>
             )}
-            {expandedOptions.includes(SearchEnums.AdvancedOption.CoOccurrence) && (
+            {expandedOptions.includes(
+              SearchEnums.AdvancedOption.CoOccurrence
+            ) && (
               <StyledRow>
                 {renderOptionLabel(SearchEnums.AdvancedOption.CoOccurrence)}
                 {cooccurrenceEntity ? (
@@ -531,7 +549,9 @@ export const EntitySearchBox: React.FC = () => {
                 )}
               </StyledRow>
             )}
-            {expandedOptions.includes(SearchEnums.AdvancedOption.ReferencedTo) && (
+            {expandedOptions.includes(
+              SearchEnums.AdvancedOption.ReferencedTo
+            ) && (
               <StyledRow>
                 {renderOptionLabel(SearchEnums.AdvancedOption.ReferencedTo)}
                 {referencedTo ? (
@@ -653,7 +673,9 @@ export const EntitySearchBox: React.FC = () => {
               </StyledRow>
             )}
 
-            {expandedOptions.includes(SearchEnums.AdvancedOption.RootValidity) && (
+            {expandedOptions.includes(
+              SearchEnums.AdvancedOption.RootValidity
+            ) && (
               <StyledRow>
                 {renderOptionLabel(SearchEnums.AdvancedOption.RootValidity)}
 

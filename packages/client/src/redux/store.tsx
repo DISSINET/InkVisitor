@@ -28,12 +28,16 @@ import usernameSlice from "./features/usernameSlice";
 import detailBoxStateSlice from "./features/layout/mainPage/detailBoxStateSlice";
 import panelWidthsSlice from "./features/layout/mainPage/panelWidthsSlice";
 import thirdPanelExpandedSlice from "./features/layout/mainPage/thirdPanelExpandedSlice";
+import expandedOptionsSlice from "./features/entitySearch/expandedOptionsSlice";
 
 const store: Store = configureStore({
   reducer: {
     theme: themeSlice,
     username: usernameSlice,
     ping: pingSlice,
+    entitySearch: combineReducers({
+      expandedOptions: expandedOptionsSlice,
+    }),
     draggedEntity: draggedEntitySlice,
     territoryTree: combineReducers({
       selectedTerritoryPath: selectedTerritoryPathSlice,
