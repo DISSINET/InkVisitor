@@ -14,7 +14,7 @@ import {
 } from "@tanstack/react-query";
 import api from "api";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { FaPen, FaRegSave, FaTrash } from "react-icons/fa";
+import { FaDownload, FaPen, FaRegSave, FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 
@@ -60,6 +60,7 @@ import { annotatorHighlight } from "./highlight";
 import { RATIO, TerritoryCreateModalType, W_SCROLL } from "./types";
 import { StatementListSearchLine } from "pages/Main/containers/StatementsListBox/StatementListSearchLine/StatementListSearchLine";
 import { Loader } from "components";
+import { IoMdDownload } from "react-icons/io";
 
 interface TextAnnotatorProps {
   width: number;
@@ -1029,6 +1030,14 @@ export const TextAnnotator = ({
           </ButtonGroup>
 
           <ButtonGroup $marginTop style={{ marginLeft: "0.5rem" }}>
+            <Button
+              // inverted
+              color="info"
+              icon={<FaDownload />}
+              onClick={() => {
+                // handleDocumentExport(documentId);
+              }}
+            />
             <span style={{ display: "flex", position: "relative" }}>
               <Button
                 label="save"

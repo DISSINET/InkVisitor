@@ -14,7 +14,7 @@ import {
 import {
   FaCheckSquare,
   FaCircle,
-  FaRegSave,
+  FaDownload,
   FaRegSquare,
 } from "react-icons/fa";
 import { MdLibraryAddCheck, MdOutlineLibraryAddCheck } from "react-icons/md";
@@ -213,9 +213,9 @@ const DocumentModalExport: React.FC<DocumentModalExportProps> = ({
                 );
               }
             }}
-            icon={<FaRegSave size={20} style={{ marginRight: "3px" }} />}
+            icon={<FaDownload size={16} style={{ marginRight: "3px" }} />}
             label={`export`}
-            color="primary"
+            color="info"
           />
         </ButtonGroup>
       </ModalFooter>
