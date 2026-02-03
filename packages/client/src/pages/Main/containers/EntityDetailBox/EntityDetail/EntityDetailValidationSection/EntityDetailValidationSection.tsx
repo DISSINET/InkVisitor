@@ -10,16 +10,16 @@ import { AxiosResponse } from "axios";
 import { Button, Submit } from "components";
 import { ValidationRule } from "components/advanced";
 import React, { useState } from "react";
-import { FaChevronCircleRight, FaPlus } from "react-icons/fa";
+import { FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { deepCopy } from "utils/utils";
+import { EntityDetailExpandIcon } from "../EntityDetailExpandIcon/EntityDetailExpandIcon";
 import { EntityDetailSectionButtons } from "../EntityDetailSectionButtons/EntityDetailSectionButtons";
 import {
   StyledBlockSeparator,
   StyledDetailSectionContent,
   StyledDetailSectionHeader,
   StyledDetailSectionHeading,
-  StyledExpandIcon,
   StyledValidationList,
 } from "../EntityDetailStyles";
 
@@ -52,7 +52,7 @@ interface EntityDetailValidationSection {
   setLoadingValidations: React.Dispatch<React.SetStateAction<boolean>>;
   widthTooNarrow: boolean;
   isValidationExpanded: boolean;
-  setIsValidationExpanded: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsValidationExpanded: () => void;
 }
 export const EntityDetailValidationSection: React.FC<
   EntityDetailValidationSection
@@ -121,19 +121,8 @@ export const EntityDetailValidationSection: React.FC<
 
   return (
     <>
-      <StyledDetailSectionHeader
-        onClick={() => setIsValidationExpanded(!isValidationExpanded)}
-      >
-        <StyledExpandIcon>
-          <FaChevronCircleRight
-            size={16}
-            style={{
-              transition: "transform 0.2s ease",
-              cursor: "pointer",
-              transform: `rotate(${isValidationExpanded ? "90deg" : "0deg"})`,
-            }}
-          />
-        </StyledExpandIcon>
+      <StyledDetailSectionHeader onClick={setIsValidationExpanded}>
+        <EntityDetailExpandIcon isExpanded={isValidationExpanded} />
         <StyledDetailSectionHeading>
           Validation rules ({validations?.length ?? 0})
         </StyledDetailSectionHeading>

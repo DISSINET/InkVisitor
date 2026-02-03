@@ -31,7 +31,7 @@ import {
 import { CMetaProp, DProps } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
-import { FaChevronCircleRight, FaPlus } from "react-icons/fa";
+import { FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
 import { rootTerritoryId } from "Theme/constants";
@@ -44,6 +44,7 @@ import {
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
 import { PropGroup } from "../../PropGroup/PropGroup";
 import { EntityDetailCreateTemplateModal } from "./EntityDetailCreateTemplateModal/EntityDetailCreateTemplateModal";
+import { EntityDetailExpandIcon } from "./EntityDetailExpandIcon/EntityDetailExpandIcon";
 import { EntityDetailFormSection } from "./EntityDetailFormSection/EntityDetailFormSection";
 import { EntityDetailHeaderRow } from "./EntityDetailHeaderRow/EntityDetailHeaderRow";
 import { EntityDetailProtocol } from "./EntityDetailProtocol/EntityDetailProtocol";
@@ -58,7 +59,6 @@ import {
   StyledDetailSectionHeading,
   StyledDetailWarnings,
   StyledDetailWrapper,
-  StyledExpandIcon,
   StyledPropGroupWrap,
   StyledUsedAsHeading,
   StyledUsedAsTitle,
@@ -93,6 +93,18 @@ const initValidation: ITerritoryValidation = {
   propType: [],
   tieType: EProtocolTieType.Property,
 };
+
+enum EntityDetailSection {
+  Protocol = "protocol",
+  Validation = "validation",
+  Valency = "valency",
+  Relations = "relations",
+  Metaproperties = "metaproperties",
+  References = "references",
+  UsedIn = "usedIn",
+  Audits = "audits",
+  Json = "json",
+}
 
 interface EntityDetail {
   detailId: string;
@@ -638,8 +650,26 @@ export const EntityDetail: React.FC<EntityDetail> = ({
   const [showBatchRemovePropSubmit, setShowBatchRemovePropSubmit] =
     useState(false);
   const [loadingValidations, setLoadingValidations] = useState(false);
-  const [isProtocolExpanded, setIsProtocolExpanded] = useState(false);
-  const [isValidationExpanded, setIsValidationExpanded] = useState(false);
+
+  // Single state to manage collapsed sections
+  const [collapsedSections, setCollapsedSections] = useState<
+    Set<EntityDetailSection>
+  >(new Set([EntityDetailSection.Protocol, EntityDetailSection.Validation]));
+
+  const toggleSection = (sectionId: EntityDetailSection) => {
+    setCollapsedSections((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(sectionId)) {
+        newSet.delete(sectionId);
+      } else {
+        newSet.add(sectionId);
+      }
+      return newSet;
+    });
+  };
+
+  const isSectionExpanded = (sectionId: EntityDetailSection) =>
+    !collapsedSections.has(sectionId);
 
   const [
     showValidationsBatchRemoveSubmit,
@@ -731,25 +761,18 @@ export const EntityDetail: React.FC<EntityDetail> = ({
               {entity.class === EntityEnums.Class.Territory && (
                 <StyledDetailSection>
                   <StyledDetailSectionHeader
-                    onClick={() => setIsProtocolExpanded(!isProtocolExpanded)}
+                    onClick={() => toggleSection(EntityDetailSection.Protocol)}
                   >
-                    <StyledExpandIcon>
-                      <FaChevronCircleRight
-                        size={16}
-                        style={{
-                          transition: "transform 0.2s ease",
-                          cursor: "pointer",
-                          transform: `rotate(${
-                            isProtocolExpanded ? "90deg" : "0deg"
-                          })`,
-                        }}
-                      />
-                    </StyledExpandIcon>
+                    <EntityDetailExpandIcon
+                      isExpanded={isSectionExpanded(
+                        EntityDetailSection.Protocol
+                      )}
+                    />
                     <StyledDetailSectionHeading>
                       Protocol
                     </StyledDetailSectionHeading>
                   </StyledDetailSectionHeader>
-                  {isProtocolExpanded && (
+                  {isSectionExpanded(EntityDetailSection.Protocol) && (
                     <StyledDetailSectionContent>
                       <EntityDetailProtocol
                         territory={entity}
@@ -766,8 +789,12 @@ export const EntityDetail: React.FC<EntityDetail> = ({
               {entity.class === EntityEnums.Class.Territory && (
                 <StyledDetailSection>
                   <EntityDetailValidationSection
-                    isValidationExpanded={isValidationExpanded}
-                    setIsValidationExpanded={setIsValidationExpanded}
+                    isValidationExpanded={isSectionExpanded(
+                      EntityDetailSection.Validation
+                    )}
+                    setIsValidationExpanded={() =>
+                      toggleSection(EntityDetailSection.Validation)
+                    }
                     validations={
                       entity.data.validations as
                         | ITerritoryValidation[]
@@ -788,310 +815,374 @@ export const EntityDetail: React.FC<EntityDetail> = ({
               {/* Valency (A) */}
               {entity.class === EntityEnums.Class.Action && (
                 <StyledDetailSection>
-                  <StyledDetailSectionHeader>
+                  <StyledDetailSectionHeader
+                    onClick={() => toggleSection(EntityDetailSection.Valency)}
+                  >
+                    <EntityDetailExpandIcon
+                      isExpanded={isSectionExpanded(
+                        EntityDetailSection.Valency
+                      )}
+                    />
                     <StyledDetailSectionHeading>
                       Valency
                     </StyledDetailSectionHeading>
                   </StyledDetailSectionHeader>
-                  <StyledDetailWarnings>
-                    {entity.warnings &&
-                      entity.warnings
-                        .filter(
-                          (w) =>
-                            w.position?.section ===
-                            IWarningPositionSection.Valencies
-                        )
-                        .map((warning, key) => {
-                          return <Message key={key} warning={warning} />;
-                        })}
-                  </StyledDetailWarnings>
-                  <StyledDetailSectionContent>
-                    <EntityDetailValency
-                      entity={entity}
-                      userCanEdit={canEditEntity}
-                      updateEntityMutation={updateEntityMutation}
-                      relationCreateMutation={relationCreateMutation}
-                      relationUpdateMutation={relationUpdateMutation}
-                      relationDeleteMutation={relationDeleteMutation}
-                    />
-                  </StyledDetailSectionContent>
+                  {isSectionExpanded(EntityDetailSection.Valency) && (
+                    <>
+                      <StyledDetailWarnings>
+                        {entity.warnings &&
+                          entity.warnings
+                            .filter(
+                              (w) =>
+                                w.position?.section ===
+                                IWarningPositionSection.Valencies
+                            )
+                            .map((warning, key) => {
+                              return <Message key={key} warning={warning} />;
+                            })}
+                      </StyledDetailWarnings>
+                      <StyledDetailSectionContent>
+                        <EntityDetailValency
+                          entity={entity}
+                          userCanEdit={canEditEntity}
+                          updateEntityMutation={updateEntityMutation}
+                          relationCreateMutation={relationCreateMutation}
+                          relationUpdateMutation={relationUpdateMutation}
+                          relationDeleteMutation={relationDeleteMutation}
+                        />
+                      </StyledDetailSectionContent>
+                    </>
+                  )}
                 </StyledDetailSection>
               )}
 
               {/* Relations */}
               <StyledDetailSection>
-                <StyledDetailSectionHeader>
+                <StyledDetailSectionHeader
+                  onClick={() => toggleSection(EntityDetailSection.Relations)}
+                >
+                  <EntityDetailExpandIcon
+                    isExpanded={isSectionExpanded(
+                      EntityDetailSection.Relations
+                    )}
+                  />
                   <StyledDetailSectionHeading>
                     Relations
                   </StyledDetailSectionHeading>
                 </StyledDetailSectionHeader>
-                {entity.warnings && entity.warnings.length > 0 && (
-                  <StyledDetailWarnings>
-                    {entity.warnings
-                      .filter(
-                        (w) =>
-                          w.position?.section ===
-                          IWarningPositionSection.Relations
-                      )
-                      .map((warning, key) => {
-                        return <Message key={key} warning={warning} />;
-                      })}
-                  </StyledDetailWarnings>
+                {isSectionExpanded(EntityDetailSection.Relations) && (
+                  <>
+                    {entity.warnings && entity.warnings.length > 0 && (
+                      <StyledDetailWarnings>
+                        {entity.warnings
+                          .filter(
+                            (w) =>
+                              w.position?.section ===
+                              IWarningPositionSection.Relations
+                          )
+                          .map((warning, key) => {
+                            return <Message key={key} warning={warning} />;
+                          })}
+                      </StyledDetailWarnings>
+                    )}
+                    <StyledDetailSectionContent>
+                      <EntityDetailRelations
+                        entity={entity}
+                        relationCreateMutation={relationCreateMutation}
+                        relationUpdateMutation={relationUpdateMutation}
+                        relationDeleteMutation={relationDeleteMutation}
+                        userCanEdit={canEditEntity}
+                      />
+                    </StyledDetailSectionContent>
+                  </>
                 )}
-                <StyledDetailSectionContent>
-                  <EntityDetailRelations
-                    entity={entity}
-                    relationCreateMutation={relationCreateMutation}
-                    relationUpdateMutation={relationUpdateMutation}
-                    relationDeleteMutation={relationDeleteMutation}
-                    userCanEdit={canEditEntity}
-                  />
-                </StyledDetailSectionContent>
               </StyledDetailSection>
 
               {/* metaprops section */}
               <StyledDetailSection $metaSection>
-                <StyledDetailSectionHeader>
+                <StyledDetailSectionHeader
+                  onClick={() =>
+                    toggleSection(EntityDetailSection.Metaproperties)
+                  }
+                >
+                  <EntityDetailExpandIcon
+                    isExpanded={isSectionExpanded(
+                      EntityDetailSection.Metaproperties
+                    )}
+                  />
                   <StyledDetailSectionHeading>
                     Metaproperties
                   </StyledDetailSectionHeading>
-                  {canEditEntity && (
-                    <EntityDetailSectionButtons
-                      entityId={entity.id}
-                      setShowSubmit={setShowBatchRemovePropSubmit}
-                      removeBtnTooltip="remove all metaproperties from entity"
-                      removeBtnDisabled={!entity.props.length}
-                      handleCopyFromEntity={(pickedEntity, replace) => {
-                        if (pickedEntity.props.length === 0) {
-                          toast.info("no metaprops");
-                        } else {
-                          if (replace) {
-                            updateEntityMutation.mutate({
-                              props: DProps(pickedEntity.props),
-                            });
+                  {canEditEntity &&
+                    isSectionExpanded(EntityDetailSection.Metaproperties) && (
+                      <EntityDetailSectionButtons
+                        entityId={entity.id}
+                        setShowSubmit={setShowBatchRemovePropSubmit}
+                        removeBtnTooltip="remove all metaproperties from entity"
+                        removeBtnDisabled={!entity.props.length}
+                        handleCopyFromEntity={(pickedEntity, replace) => {
+                          if (pickedEntity.props.length === 0) {
+                            toast.info("no metaprops");
                           } else {
-                            updateEntityMutation.mutate({
-                              props: [
-                                ...entity.props,
-                                ...DProps(pickedEntity.props),
-                              ],
-                            });
+                            if (replace) {
+                              updateEntityMutation.mutate({
+                                props: DProps(pickedEntity.props),
+                              });
+                            } else {
+                              updateEntityMutation.mutate({
+                                props: [
+                                  ...entity.props,
+                                  ...DProps(pickedEntity.props),
+                                ],
+                              });
+                            }
                           }
-                        }
-                      }}
-                    />
-                  )}
+                        }}
+                      />
+                    )}
                 </StyledDetailSectionHeader>
 
-                <StyledDetailSectionContent>
-                  <StyledPropGroupWrap>
-                    <PropGroup
-                      boxEntity={entity}
-                      originId={entity.id}
-                      entities={entity.entities}
-                      props={entity.props}
-                      territoryId={territoryId}
-                      updateProp={updateProp}
-                      removeProp={removeProp}
-                      addProp={addMetaProp}
-                      addPropWithEntityId={(variables: {
-                        typeEntityId?: string;
-                        valueEntityId?: string;
-                      }) => {
-                        const newProp = CMetaProp(variables);
-                        updateEntityMutation.mutate({
-                          props: [...entity.props, newProp],
-                        });
-                      }}
-                      userCanEdit={canEditEntity}
-                      movePropToIndex={(propId, oldIndex, newIndex) => {
-                        movePropToIndex(propId, oldIndex, newIndex);
-                      }}
-                      category={DraggedPropRowCategory.META_PROP}
-                      // disabledAttributes={
-                      //   {
-                      //     statement: ["moodvariant", "mood", "bundleOperator"],
-                      //     type: ["logic", "virtuality", "partitivity"],
-                      //     value: ["logic", "virtuality", "partitivity"],
-                      //   } as PropAttributeFilter
-                      // }
-                      isInsideTemplate={isInsideTemplate}
-                      territoryParentId={getTerritoryId(entity)}
-                      lowIdent
-                      alwaysShowCreateModal
-                    />
-                  </StyledPropGroupWrap>
-                  {canEditEntity && (
-                    <Button
-                      color="primary"
-                      label="new metaproperty"
-                      icon={<FaPlus />}
-                      onClick={() => {
-                        const newProp = CMetaProp();
-                        updateEntityMutation.mutate({
-                          props: [...entity.props, newProp],
-                        });
-                      }}
-                    />
-                  )}
-                </StyledDetailSectionContent>
+                {isSectionExpanded(EntityDetailSection.Metaproperties) && (
+                  <StyledDetailSectionContent>
+                    <StyledPropGroupWrap>
+                      <PropGroup
+                        boxEntity={entity}
+                        originId={entity.id}
+                        entities={entity.entities}
+                        props={entity.props}
+                        territoryId={territoryId}
+                        updateProp={updateProp}
+                        removeProp={removeProp}
+                        addProp={addMetaProp}
+                        addPropWithEntityId={(variables: {
+                          typeEntityId?: string;
+                          valueEntityId?: string;
+                        }) => {
+                          const newProp = CMetaProp(variables);
+                          updateEntityMutation.mutate({
+                            props: [...entity.props, newProp],
+                          });
+                        }}
+                        userCanEdit={canEditEntity}
+                        movePropToIndex={(propId, oldIndex, newIndex) => {
+                          movePropToIndex(propId, oldIndex, newIndex);
+                        }}
+                        category={DraggedPropRowCategory.META_PROP}
+                        // disabledAttributes={
+                        //   {
+                        //     statement: ["moodvariant", "mood", "bundleOperator"],
+                        //     type: ["logic", "virtuality", "partitivity"],
+                        //     value: ["logic", "virtuality", "partitivity"],
+                        //   } as PropAttributeFilter
+                        // }
+                        isInsideTemplate={isInsideTemplate}
+                        territoryParentId={getTerritoryId(entity)}
+                        lowIdent
+                        alwaysShowCreateModal
+                      />
+                    </StyledPropGroupWrap>
+                    {canEditEntity && (
+                      <Button
+                        color="primary"
+                        label="new metaproperty"
+                        icon={<FaPlus />}
+                        onClick={() => {
+                          const newProp = CMetaProp();
+                          updateEntityMutation.mutate({
+                            props: [...entity.props, newProp],
+                          });
+                        }}
+                      />
+                    )}
+                  </StyledDetailSectionContent>
+                )}
               </StyledDetailSection>
 
               {/* reference section */}
               <StyledDetailSection>
-                <StyledDetailSectionHeader>
+                <StyledDetailSectionHeader
+                  onClick={() => toggleSection(EntityDetailSection.References)}
+                >
+                  <EntityDetailExpandIcon
+                    isExpanded={isSectionExpanded(
+                      EntityDetailSection.References
+                    )}
+                  />
                   <StyledDetailSectionHeading>
                     References
                   </StyledDetailSectionHeading>
                 </StyledDetailSectionHeader>
-                <StyledDetailSectionContent>
-                  <EntityReferenceTable
-                    disabled={!canEditEntity}
-                    references={entity.references ?? []}
-                    entities={entity.entities}
-                    entityId={entity.id}
-                    onChange={(newValues: IReference[]) => {
-                      updateEntityMutation.mutate({ references: newValues });
-                    }}
-                    isInsideTemplate={isInsideTemplate}
-                    userCanEdit={canEditEntity}
-                    alwaysShowCreateModal
-                  />
-                </StyledDetailSectionContent>
+                {isSectionExpanded(EntityDetailSection.References) && (
+                  <StyledDetailSectionContent>
+                    <EntityReferenceTable
+                      disabled={!canEditEntity}
+                      references={entity.references ?? []}
+                      entities={entity.entities}
+                      entityId={entity.id}
+                      onChange={(newValues: IReference[]) => {
+                        updateEntityMutation.mutate({ references: newValues });
+                      }}
+                      isInsideTemplate={isInsideTemplate}
+                      userCanEdit={canEditEntity}
+                      alwaysShowCreateModal
+                    />
+                  </StyledDetailSectionContent>
+                )}
               </StyledDetailSection>
 
               <StyledDetailSection>
-                <StyledDetailSectionHeader>
+                <StyledDetailSectionHeader
+                  onClick={() => toggleSection(EntityDetailSection.UsedIn)}
+                >
+                  <EntityDetailExpandIcon
+                    isExpanded={isSectionExpanded(EntityDetailSection.UsedIn)}
+                  />
                   <StyledDetailSectionHeading>
                     Used in:
                   </StyledDetailSectionHeading>
                 </StyledDetailSectionHeader>
 
-                <StyledDetailSectionContent>
-                  {/* used as template */}
-                  {entity.isTemplate && entity.usedAsTemplate && (
-                    <>
-                      <StyledUsedAsHeading>
-                        <StyledUsedAsTitle>
-                          <b>{entity.usedAsTemplate.length}</b> As a template
-                        </StyledUsedAsTitle>
-                      </StyledUsedAsHeading>
-                      <StyledDetailSectionEntityList>
-                        {entity.usedAsTemplate.map((entityId) => (
-                          <React.Fragment key={entityId}>
-                            <div style={{ display: "inline-grid" }}>
-                              <EntityTag
-                                entity={entity.entities[entityId]}
-                                fullWidth
-                              />
-                            </div>
-                          </React.Fragment>
-                        ))}
-                      </StyledDetailSectionEntityList>
-                    </>
-                  )}
+                {isSectionExpanded(EntityDetailSection.UsedIn) && (
+                  <StyledDetailSectionContent>
+                    {/* used as template */}
+                    {entity.isTemplate && entity.usedAsTemplate && (
+                      <>
+                        <StyledUsedAsHeading>
+                          <StyledUsedAsTitle>
+                            <b>{entity.usedAsTemplate.length}</b> As a template
+                          </StyledUsedAsTitle>
+                        </StyledUsedAsHeading>
+                        <StyledDetailSectionEntityList>
+                          {entity.usedAsTemplate.map((entityId) => (
+                            <React.Fragment key={entityId}>
+                              <div style={{ display: "inline-grid" }}>
+                                <EntityTag
+                                  entity={entity.entities[entityId]}
+                                  fullWidth
+                                />
+                              </div>
+                            </React.Fragment>
+                          ))}
+                        </StyledDetailSectionEntityList>
+                      </>
+                    )}
 
-                  {/* usedIn props */}
-                  {!entity.isTemplate && (
-                    <EntityDetailMetaPropsTable
-                      title={{
-                        singular: "Metaproperty",
-                        plural: "Metaproperties",
-                      }}
-                      entities={entity.entities}
-                      useCases={entity.usedInMetaProps}
-                      key="MetaProp"
-                      perPage={10}
-                    />
-                  )}
+                    {/* usedIn props */}
+                    {!entity.isTemplate && (
+                      <EntityDetailMetaPropsTable
+                        title={{
+                          singular: "Metaproperty",
+                          plural: "Metaproperties",
+                        }}
+                        entities={entity.entities}
+                        useCases={entity.usedInMetaProps}
+                        key="MetaProp"
+                        perPage={10}
+                      />
+                    )}
 
-                  {/* usedIn statements */}
-                  {!entity.isTemplate && (
-                    <EntityDetailStatementsTable
-                      title={{ singular: "Statement", plural: "Statements" }}
-                      entities={entity.entities}
-                      useCases={entity.usedInStatements}
-                      key="Statement"
-                      perPage={10}
-                    />
-                  )}
+                    {/* usedIn statements */}
+                    {!entity.isTemplate && (
+                      <EntityDetailStatementsTable
+                        title={{ singular: "Statement", plural: "Statements" }}
+                        entities={entity.entities}
+                        useCases={entity.usedInStatements}
+                        key="Statement"
+                        perPage={10}
+                      />
+                    )}
 
-                  {/* usedIn statement props */}
-                  {!entity.isTemplate && (
-                    <EntityDetailStatementPropsTable
-                      title={{
-                        singular: "In-statement Property",
-                        plural: "In-statement Properties",
-                      }}
-                      entities={entity.entities}
-                      useCases={entity.usedInStatementProps}
-                      key="StatementProp"
-                      perPage={10}
-                    />
-                  )}
+                    {/* usedIn statement props */}
+                    {!entity.isTemplate && (
+                      <EntityDetailStatementPropsTable
+                        title={{
+                          singular: "In-statement Property",
+                          plural: "In-statement Properties",
+                        }}
+                        entities={entity.entities}
+                        useCases={entity.usedInStatementProps}
+                        key="StatementProp"
+                        perPage={10}
+                      />
+                    )}
 
-                  {/* usedIn statement identification */}
-                  {!entity.isTemplate && (
-                    <EntityDetailIdentificationTable
-                      title={{
-                        singular: "In-statement Identification",
-                        plural: "In-statement Identifications",
-                      }}
-                      entities={entity.entities}
-                      useCases={entity.usedInStatementIdentifications}
-                      key="StatementIdentification"
-                      perPage={10}
-                    />
-                  )}
+                    {/* usedIn statement identification */}
+                    {!entity.isTemplate && (
+                      <EntityDetailIdentificationTable
+                        title={{
+                          singular: "In-statement Identification",
+                          plural: "In-statement Identifications",
+                        }}
+                        entities={entity.entities}
+                        useCases={entity.usedInStatementIdentifications}
+                        key="StatementIdentification"
+                        perPage={10}
+                      />
+                    )}
 
-                  {/* usedIn statement classification */}
-                  {!entity.isTemplate && (
-                    <EntityDetailClassificationTable
-                      title={{
-                        singular: "In-statement Classification",
-                        plural: "In-statement Classifications",
-                      }}
-                      entities={entity.entities}
-                      useCases={entity.usedInStatementClassifications}
-                      key="StatementClassification"
-                      perPage={10}
-                    />
-                  )}
+                    {/* usedIn statement classification */}
+                    {!entity.isTemplate && (
+                      <EntityDetailClassificationTable
+                        title={{
+                          singular: "In-statement Classification",
+                          plural: "In-statement Classifications",
+                        }}
+                        entities={entity.entities}
+                        useCases={entity.usedInStatementClassifications}
+                        key="StatementClassification"
+                        perPage={10}
+                      />
+                    )}
 
-                  {!entity.isTemplate && (
-                    <EntityDetailUsedInDocumentsTable
-                      title={{
-                        singular: "Anchor",
-                        plural: "Anchors",
-                      }}
-                      perPage={10}
-                      entity={entity}
-                      widthTooNarrow={widthTooNarrow}
-                    />
-                  )}
-                </StyledDetailSectionContent>
+                    {!entity.isTemplate && (
+                      <EntityDetailUsedInDocumentsTable
+                        title={{
+                          singular: "Anchor",
+                          plural: "Anchors",
+                        }}
+                        perPage={10}
+                        entity={entity}
+                        widthTooNarrow={widthTooNarrow}
+                      />
+                    )}
+                  </StyledDetailSectionContent>
+                )}
               </StyledDetailSection>
 
               {/* Audits */}
               <StyledDetailSection key="editor-section-audits">
-                <StyledDetailSectionHeader>
+                <StyledDetailSectionHeader
+                  onClick={() => toggleSection(EntityDetailSection.Audits)}
+                >
+                  <EntityDetailExpandIcon
+                    isExpanded={isSectionExpanded(EntityDetailSection.Audits)}
+                  />
                   <StyledDetailSectionHeading>
                     Audits
                   </StyledDetailSectionHeading>
                 </StyledDetailSectionHeader>
-                <StyledDetailSectionContent>
-                  {audit && <AuditTable {...audit} />}
-                </StyledDetailSectionContent>
+                {isSectionExpanded(EntityDetailSection.Audits) && (
+                  <StyledDetailSectionContent>
+                    {audit && <AuditTable {...audit} />}
+                  </StyledDetailSectionContent>
+                )}
               </StyledDetailSection>
 
               {/* JSON */}
               <StyledDetailSection key="editor-section-json">
-                <StyledDetailSectionHeader>
+                <StyledDetailSectionHeader
+                  onClick={() => toggleSection(EntityDetailSection.Json)}
+                >
+                  <EntityDetailExpandIcon
+                    isExpanded={isSectionExpanded(EntityDetailSection.Json)}
+                  />
                   <StyledDetailSectionHeading>JSON</StyledDetailSectionHeading>
                 </StyledDetailSectionHeader>
-                <StyledDetailSectionContent>
-                  {entity && <JSONExplorer data={entity} />}
-                </StyledDetailSectionContent>
+                {isSectionExpanded(EntityDetailSection.Json) && (
+                  <StyledDetailSectionContent>
+                    {entity && <JSONExplorer data={entity} />}
+                  </StyledDetailSectionContent>
+                )}
               </StyledDetailSection>
             </StyledDetailWrapper>
           </>
