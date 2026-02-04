@@ -108,7 +108,6 @@ export const StyledCardTitle = styled.h2<StyledCardTitle>`
 `;
 export const StyledCardContent = styled.div`
   display: flex;
-  margin-right: 3rem;
 `;
 interface StyledCardBody {
   $column?: boolean;

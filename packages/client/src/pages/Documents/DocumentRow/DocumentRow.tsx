@@ -17,7 +17,7 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { FaSave, FaTrash } from "react-icons/fa";
+import { FaDownload, FaTrash } from "react-icons/fa";
 import { RiFileEditFill } from "react-icons/ri";
 import { EntityColors } from "types";
 import {
@@ -132,7 +132,7 @@ export const DocumentRow: React.FC<DocumentRow> = ({
       </StyledTitleWrap>
       <ButtonGroup>
         <Button
-          icon={<FaSave />}
+          icon={<FaDownload />}
           color="primary"
           inverted
           tooltipLabel="export document"

@@ -54,9 +54,9 @@ export const StyledReference = styled.div`
 export const StyledHeading = styled.div`
   color: ${({ theme }) => theme.color["black"]};
   font-size: ${({ theme }) => theme.fontSize["lg"]};
-  text-decoration: underline;
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
   margin-bottom: ${({ theme }) => theme.space[2]};
+  padding-left: ${({ theme }) => theme.space[1]};
 `;
 export const StyledCount = styled.div`
   color: ${({ theme }) => theme.color["black"]};

@@ -14,7 +14,7 @@ import {
 } from "@tanstack/react-query";
 import api from "api";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { FaPen, FaRegSave, FaTrash } from "react-icons/fa";
+import { FaDownload, FaPen, FaRegSave, FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 
@@ -42,7 +42,7 @@ import {
 import { BsFileTextFill } from "react-icons/bs";
 import { HiCodeBracket } from "react-icons/hi2";
 import { collectStatementAnchors, getStatementOrderByIndex } from "utils/utils";
-import { EntityCreateModal } from "..";
+import { DocumentModalExport, EntityCreateModal } from "..";
 import { useAnnotator } from "./AnnotatorContext";
 import TextAnnotatorMenu from "./AnnotatorMenu";
 import {
@@ -60,6 +60,7 @@ import { annotatorHighlight } from "./highlight";
 import { RATIO, TerritoryCreateModalType, W_SCROLL } from "./types";
 import { StatementListSearchLine } from "pages/Main/containers/StatementsListBox/StatementListSearchLine/StatementListSearchLine";
 import { Loader } from "components";
+import { IoMdDownload } from "react-icons/io";
 
 interface TextAnnotatorProps {
   width: number;
@@ -829,6 +830,8 @@ export const TextAnnotator = ({
     return annotator !== undefined && !!dataDocument;
   }, [annotator, dataDocument]);
 
+  const [showExportModal, setShowExportModal] = useState<boolean>(false);
+
   if (dataDocumentError) {
     return (
       <StyledInfoText>
@@ -1029,11 +1032,22 @@ export const TextAnnotator = ({
           </ButtonGroup>
 
           <ButtonGroup $marginTop style={{ marginLeft: "0.5rem" }}>
+            <Button
+              inverted
+              color="info"
+              label="export"
+              icon={<FaDownload size={11} />}
+              onClick={() => {
+                setShowExportModal(true);
+              }}
+              // tooltipLabel="export document"
+              // tooltipPosition="top"
+            />
             <span style={{ display: "flex", position: "relative" }}>
               <Button
                 label="save"
                 color="primary"
-                icon={<FaRegSave />}
+                icon={<FaRegSave size={14} />}
                 disabled={
                   !isChangeMade ||
                   isSaving ||
@@ -1087,6 +1101,13 @@ export const TextAnnotator = ({
             queryClient.invalidateQueries({ queryKey: ["tree"] });
             appendDetailId(entity.id);
           }}
+        />
+      )}
+
+      {showExportModal && dataDocument && (
+        <DocumentModalExport
+          document={dataDocument}
+          onClose={() => setShowExportModal(false)}
         />
       )}
     </>

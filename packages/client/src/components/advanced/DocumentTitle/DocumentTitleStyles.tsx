@@ -18,7 +18,7 @@ export const StyledDocumentTag = styled.div<{
   color: white;
   font-size: ${({ theme, $size }) =>
     $size === "sm"
-      ? theme.fontSize["2xs"]
+      ? theme.fontSize["xxs"]
       : $size === "md"
       ? theme.fontSize["xs"]
       : theme.fontSize["sm"]};

@@ -205,7 +205,7 @@ export const DocumentsPage: React.FC = ({}) => {
           onClose={handleModalClose}
         />
       )}
-      {exportedDocumentId && (
+      {exportedDocumentId && exportedDocument && (
         <DocumentModalExport
           document={exportedDocument}
           onClose={handleModalClose}
