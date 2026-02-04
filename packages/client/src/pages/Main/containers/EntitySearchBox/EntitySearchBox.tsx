@@ -179,7 +179,7 @@ export const EntitySearchBox: React.FC = () => {
     Object.keys(changes).forEach((changeKey) => {
       const value = changes[changeKey];
       if (value === undefined) {
-        delete changes[changeKey];
+        delete (newSearch as any)[changeKey];
       }
     });
 
@@ -276,8 +276,32 @@ export const EntitySearchBox: React.FC = () => {
     [dispatch]
   );
 
+  // Map AdvancedOption enum values to IRequestSearch property names
+  const getPropertyNameFromOption = useCallback(
+    (option: SearchEnums.AdvancedOption): keyof IRequestSearch => {
+      const mapping: Record<SearchEnums.AdvancedOption, keyof IRequestSearch> =
+        {
+          [SearchEnums.AdvancedOption.Class]: "class",
+          [SearchEnums.AdvancedOption.Status]: "status",
+          [SearchEnums.AdvancedOption.Language]: "language",
+          [SearchEnums.AdvancedOption.Territory]: "territoryId",
+          [SearchEnums.AdvancedOption.CoOccurrence]: "cooccurrenceId",
+          [SearchEnums.AdvancedOption.ReferencedTo]: "haveReferenceTo",
+          [SearchEnums.AdvancedOption.CreatedAt]: "createdDate",
+          [SearchEnums.AdvancedOption.UpdatedAt]: "updatedDate",
+          [SearchEnums.AdvancedOption.CreatedBy]: "createdBy",
+          [SearchEnums.AdvancedOption.UpdatedBy]: "updatedBy",
+          [SearchEnums.AdvancedOption.EditedBy]: "editedBy",
+          [SearchEnums.AdvancedOption.RootValidity]: "isRootInvalid",
+        };
+      return mapping[option];
+    },
+    []
+  );
+
   const renderOptionLabel = useCallback(
-    (option: string) => {
+    (option: SearchEnums.AdvancedOption) => {
+      const propertyName = getPropertyNameFromOption(option);
       return (
         <StyledPillWrap>
           <StyledPill>
@@ -289,9 +313,28 @@ export const EntitySearchBox: React.FC = () => {
                     (o: SearchEnums.AdvancedOption) => o !== option
                   )
                 );
-                handleChange({
-                  [option]: undefined,
-                });
+                // Special handling for different options
+                if (option === SearchEnums.AdvancedOption.Territory) {
+                  handleChange({
+                    territoryId: undefined,
+                    subTerritorySearch: undefined,
+                  });
+                  setTerritoryEntity(false);
+                } else if (option === SearchEnums.AdvancedOption.CoOccurrence) {
+                  handleChange({
+                    cooccurrenceId: undefined,
+                  });
+                  setCooccurrenceEntity(false);
+                } else if (option === SearchEnums.AdvancedOption.ReferencedTo) {
+                  handleChange({
+                    haveReferenceTo: undefined,
+                  });
+                  setReferencedTo(false);
+                } else {
+                  handleChange({
+                    [propertyName]: undefined,
+                  });
+                }
               }}
             >
               <IconWithTooltip
@@ -305,7 +348,7 @@ export const EntitySearchBox: React.FC = () => {
         </StyledPillWrap>
       );
     },
-    [expandedOptions, handleSetExpandedOptions]
+    [expandedOptions]
   );
 
   // If used as template is implemented, it'll be set here
