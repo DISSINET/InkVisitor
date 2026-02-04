@@ -26,7 +26,10 @@ export const DocumentTitle: React.FC<DocumentTitle> = ({
         onMouseEnter={() => setIsTooltipOpen(true)}
         onMouseLeave={() => setIsTooltipOpen(false)}
       >
-        <TiDocumentText style={{ marginRight: "0.2rem", flexShrink: "0" }} />
+        <TiDocumentText
+          size={16}
+          style={{ marginRight: "0.2rem", flexShrink: "0" }}
+        />
 
         <StyledDocumentTitle>{title}</StyledDocumentTitle>
       </StyledDocumentTag>

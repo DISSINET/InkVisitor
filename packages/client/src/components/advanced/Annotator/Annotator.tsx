@@ -1035,18 +1035,19 @@ export const TextAnnotator = ({
             <Button
               inverted
               color="info"
-              icon={<FaDownload />}
+              label="export"
+              icon={<FaDownload size={11} />}
               onClick={() => {
                 setShowExportModal(true);
               }}
-              tooltipLabel="export document"
-              tooltipPosition="top"
+              // tooltipLabel="export document"
+              // tooltipPosition="top"
             />
             <span style={{ display: "flex", position: "relative" }}>
               <Button
                 label="save"
                 color="primary"
-                icon={<FaRegSave />}
+                icon={<FaRegSave size={14} />}
                 disabled={
                   !isChangeMade ||
                   isSaving ||
@@ -1103,7 +1104,7 @@ export const TextAnnotator = ({
         />
       )}
 
-      {showExportModal && (
+      {showExportModal && dataDocument && (
         <DocumentModalExport
           document={dataDocument}
           onClose={() => setShowExportModal(false)}

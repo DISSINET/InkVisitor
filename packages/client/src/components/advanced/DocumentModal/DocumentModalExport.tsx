@@ -28,12 +28,13 @@ import {
   StyledExportDocumentContainer,
   StyledExportStatsSection,
 } from "./DocumentModalStyles";
+import { DocumentTitle } from "..";
 
-interface DocumentModalExportProps {
-  document: IDocument | undefined;
+interface DocumentModalExport {
+  document: IDocument;
   onClose: () => void;
 }
-const DocumentModalExport: React.FC<DocumentModalExportProps> = ({
+const DocumentModalExport: React.FC<DocumentModalExport> = ({
   onClose,
   document,
 }) => {
@@ -112,11 +113,12 @@ const DocumentModalExport: React.FC<DocumentModalExportProps> = ({
   return (
     <Modal width={500} showModal={show} onClose={onClose}>
       <ModalHeader
-        title={`Export document "${
-          document
-            ? getShortLabelByLetterCount(document?.title, 90)
-            : "no label"
-        }"`}
+        title={`Export document`}
+        content={
+          <div style={{ display: "grid" }}>
+            <DocumentTitle title={document.title} />
+          </div>
+        }
       />
       <ModalContent enableScroll>
         <div>

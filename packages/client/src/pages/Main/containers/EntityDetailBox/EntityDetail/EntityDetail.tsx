@@ -671,21 +671,6 @@ export const EntityDetail: React.FC<EntityDetail> = ({
   const isSectionExpanded = (sectionId: EntityDetailSection) =>
     !collapsedSections.has(sectionId);
 
-  const [
-    showValidationsBatchRemoveSubmit,
-    setShowValidationsBatchRemoveSubmit,
-  ] = useState(false);
-
-  const initValidationRule = () => {
-    const { validations } = entity.data;
-    updateEntityMutation?.mutate({
-      data: {
-        validations: validations
-          ? [...validations, initValidation]
-          : [initValidation],
-      },
-    });
-  };
   const contentWidth = useAppSelector(
     (state) => state.layout.mainPage.secondPanelRealWidth
   );
