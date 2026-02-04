@@ -1073,6 +1073,7 @@ export const TextAnnotator = ({
               onClick={() => {
                 if (dataDocument?.content) {
                   annotator?.updateText(dataDocument?.content);
+                  setLocalTextContent(dataDocument.content);
                 }
               }}
             />
