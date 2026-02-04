@@ -348,7 +348,12 @@ export const EntitySearchBox: React.FC = () => {
         </StyledPillWrap>
       );
     },
-    [expandedOptions]
+    [
+      expandedOptions,
+      handleSetExpandedOptions,
+      getPropertyNameFromOption,
+      handleChange,
+    ]
   );
 
   // If used as template is implemented, it'll be set here
