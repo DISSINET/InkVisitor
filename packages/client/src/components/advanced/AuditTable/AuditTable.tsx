@@ -14,7 +14,8 @@ import {
 import { Button } from "components/basic/Button/Button";
 
 export const AuditTable: React.FC<IResponseAudit> = ({
-  entityId,
+  modelId,
+  auditScope,
   last,
   first,
 }) => {
@@ -41,7 +42,7 @@ type AuditTableRow = { mode: "edit" | "create" } & IAudit;
 
 export const AuditTableRow: React.FC<AuditTableRow> = ({
   id,
-  entityId,
+  modelId,
   user,
   date,
   changes,

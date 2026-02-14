@@ -1,7 +1,10 @@
 import { mergeDeep } from "@common/functions";
+import Audit from "@models/audit/audit";
+import { ResponseDocumentAudit } from "@models/audit/response";
 import Document from "@models/document/document";
 import { EntityEnums } from "@shared/enums";
-import { IDocument, IDocumentMeta, IResponseGeneric } from "@shared/types";
+import { IDocument, IDocumentMeta, IResponseAudit, IResponseGeneric } from "@shared/types";
+import { EventType } from "@shared/types/stats";
 import {
   BadParams,
   DocumentDoesNotExist,
@@ -61,7 +64,48 @@ export default Router()
       return docResponses;
     })
   )
+  .get(
+    "/:documentId/audits",
+    asyncRouteHandler<IResponseAudit>(async (request: IRequest) => {
+      const documentId = request.params.documentId;
+      if (!documentId) {
+        throw new BadParams("document id has to be set");
+      }
+      const existingDocument = await Document.getDocumentById(
+        request.db.connection,
+        documentId
+      );
+      if (!existingDocument) {
+        throw DocumentDoesNotExist.forId(documentId);
+      }
+      const response = new ResponseDocumentAudit(documentId);
+      await response.prepare(request.db.connection);
+      return response;
+    })
+  )
+  .get(
+    "/:documentId",
+    asyncRouteHandler<IDocument>(async (request: IRequest) => {
+      const id = request.params.documentId;
 
+      if (!id) {
+        throw new BadParams("document id has to be set");
+      }
+
+      const document = await Document.getDocumentById(
+        request.db.connection,
+        id
+      );
+
+      if (!document) {
+        throw DocumentDoesNotExist.forId(id);
+      }
+
+      await document.preprocess(request.db.connection);
+
+      return document;
+    })
+  )
   .post("/export", async (request: IRequest, res: any) => {
     const id = request.body.documentId;
     const exportedEntities = request.body
@@ -77,27 +121,20 @@ export default Router()
       throw DocumentDoesNotExist.forId(id);
     }
 
-    // Search document for anchors <entityId>text</entityId>
-    // Anchors with entityId that are not in exportedEntities should be removed
-    // When removing the anchors, the text between the anchors should be kept
-    //
     const openingTagRegex = createOpeningTagRegex();
     const closingTagRegexInstance = closingTagRegex;
     
     let filteredContent = document.content;
     let match;
     
-    // Process opening tags
     while ((match = openingTagRegex.exec(document.content)) !== null) {
       const fullTag = match[0];
       const tagContent = match[1];
-      // Extract only the tag name (first word before any attributes or spaces)
       const entityId = tagContent.split(/\s+/)[0];
       
       let validEntityClass = false;
       let isUnknownEntity = true;
       
-      // Check if entity exists in any entity class
       exportedEntities.forEach((entityClass) => {
         if (document.entityIds[entityClass]) {
           document.entityIds[entityClass].forEach((id) => {
@@ -109,7 +146,6 @@ export default Router()
         }
       });
       
-      // Also check all entity classes to determine if this is an unknown entity
       Object.values(EntityEnums.Class).forEach((entityClass) => {
         if (document.entityIds[entityClass]) {
           document.entityIds[entityClass].forEach((id) => {
@@ -120,14 +156,11 @@ export default Router()
         }
       });
 
-      // Keep the tag if it's in exported entities OR if it's an unknown entity
       if (!validEntityClass && !isUnknownEntity) {
-        // Remove the opening tag if entity is not in exported entities and is not unknown
         filteredContent = filteredContent.replace(fullTag, "");
       }
     }
     
-    // Process closing tags
     while ((match = closingTagRegexInstance.exec(document.content)) !== null) {
       const fullTag = match[0];
       const entityId = match[1];
@@ -135,7 +168,6 @@ export default Router()
       let validEntityClass = false;
       let isUnknownEntity = true;
       
-      // Check if entity exists in any entity class
       exportedEntities.forEach((entityClass) => {
         if (document.entityIds[entityClass]) {
           document.entityIds[entityClass].forEach((id) => {
@@ -169,58 +201,6 @@ export default Router()
     res.setHeader("Content-Disposition", `attachment; filename="export.txt"`);
     res.send(filteredContent);
   })
-  /**
-   * @openapi
-   * /documents/{documentId}:
-   *   put:
-   *     description: Retrieves an existing document entry
-   *     tags:
-   *       - documents
-   *     parameters:
-   *       - in: path
-   *         name: documentId
-   *         schema:
-   *           type: string
-   *         required: true
-   *         description: ID of the document entry
-   *     requestBody:
-   *       description: Document object
-   *       content:
-   *         application/json:
-   *           schema:
-   *             allOf:
-   *               - $ref: "#/components/schemas/IDocument"
-   *     responses:
-   *       200:
-   *         description: Returns generic response
-   *         content:
-   *           application/json:
-   *             schema:
-   *               $ref: "#/components/schemas/IDocument"
-   */
-  .get(
-    "/:documentId",
-    asyncRouteHandler<IDocument>(async (request: IRequest) => {
-      const id = request.params.documentId;
-
-      if (!id) {
-        throw new BadParams("document id has to be set");
-      }
-
-      const document = await Document.getDocumentById(
-        request.db.connection,
-        id
-      );
-
-      if (!document) {
-        throw DocumentDoesNotExist.forId(id);
-      }
-
-      await document.preprocess(request.db.connection);
-
-      return document;
-    })
-  )
   /**
    * @openapi
    * /documents/:
@@ -344,6 +324,35 @@ export default Router()
       const result = await model.update(request.db.connection, model);
 
       if (result.replaced || result.unchanged) {
+        if (existingDocument.content !== model.content) {
+          await Audit.createNewForDocument(
+            request,
+            documentId,
+            EventType.TEXT_EDIT,
+            {}
+          );
+        }
+        const flattenEntityIds = (
+          entityIds: Record<EntityEnums.Class, string[]>
+        ): string[] =>
+          (Object.values(entityIds || {}) as string[][]).reduce(
+            (acc, arr) => acc.concat(arr),
+            [] as string[]
+          );
+        const existingIds = new Set(
+          flattenEntityIds(existingDocument.entityIds || ({} as Record<EntityEnums.Class, string[]>))
+        );
+        const addedAnchorEntityIds = flattenEntityIds(model.entityIds).filter(
+          (id) => !existingIds.has(id)
+        );
+        if (addedAnchorEntityIds.length > 0) {
+          await Audit.createNewForDocument(
+            request,
+            documentId,
+            EventType.ANCHOR_ADD,
+            { addedAnchorEntityIds }
+          );
+        }
         return {
           result: true,
         };

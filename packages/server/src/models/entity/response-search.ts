@@ -379,10 +379,12 @@ export class SearchQuery {
    */
   private async _updateEntityIdsFromAudits(
     req: RequestSearch,
-    getAudits: () => Promise<{ entityId: string }[]>
+    getAudits: () => Promise<Audit[]>
   ) {
     const audits = await getAudits();
-    const auditEntityIds = audits.map((a) => a.entityId);
+    const auditEntityIds = audits
+      .filter((a) => a.auditScope === "entity")
+      .map((a) => a.modelId);
 
     if (!req.entityIds) {
       req.entityIds = auditEntityIds;
@@ -477,7 +479,10 @@ export class SearchQuery {
         req.editedBy as string
       );
 
-      const auditEntityIds = updatedBy.concat(createdBy).map((a) => a.entityId);
+      const auditEntityIds = updatedBy
+        .concat(createdBy)
+        .filter((a) => a.auditScope === "entity")
+        .map((a) => a.modelId);
 
       if (!req.entityIds) {
         req.entityIds = auditEntityIds;

@@ -3,26 +3,42 @@ import { IAudit, IResponseAudit } from "@shared/types";
 import Audit from "./audit";
 
 export class ResponseAudit implements IResponseAudit {
-  entityId: string;
-  last: IAudit[];
+  modelId: string;
+  auditScope: IResponseAudit["auditScope"] = "entity";
+  last: IAudit[] = [];
   first?: IAudit;
 
   constructor(entityId: string) {
-    this.entityId = entityId;
-    this.last = [];
+    this.modelId = entityId;
   }
 
-  /**
-   * Fills fields for this response
-   * @param db rethinkdb Connection
-   * @returns Promise<void>
-   */
   async prepare(db: Connection): Promise<void> {
-    this.last = await Audit.getLastNForEntity(db, this.entityId, 5);
+    this.last = await Audit.getLastNForEntity(db, this.modelId, 5);
     if (this.last.length) {
-      const firstEntity = await Audit.getFirstForEntity(db, this.entityId);
+      const firstEntity = await Audit.getFirstForEntity(db, this.modelId);
       if (firstEntity) {
         this.first = firstEntity;
+      }
+    }
+  }
+}
+
+export class ResponseDocumentAudit implements IResponseAudit {
+  modelId: string;
+  auditScope: IResponseAudit["auditScope"] = "document";
+  last: IAudit[] = [];
+  first?: IAudit;
+
+  constructor(documentId: string) {
+    this.modelId = documentId;
+  }
+
+  async prepare(db: Connection): Promise<void> {
+    this.last = await Audit.getLastNForDocument(db, this.modelId, 5);
+    if (this.last.length) {
+      const firstDoc = await Audit.getFirstForDocument(db, this.modelId);
+      if (firstDoc) {
+        this.first = firstDoc;
       }
     }
   }

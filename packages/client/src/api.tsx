@@ -1039,6 +1039,21 @@ class Api {
     }
   }
 
+  async auditGetByDocument(
+    documentId: string,
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseAudit>> {
+    try {
+      const response = await this.connection.get(
+        `/documents/${documentId}/audits`,
+        options
+      );
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
   async auditGetFirst(
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseGeneric<IAudit>>> {

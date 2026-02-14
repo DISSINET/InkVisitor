@@ -48,12 +48,14 @@ describe("Entities restoration", function () {
     const [, entity] = prepareEntity();
     const [, differentEntity] = prepareEntity();
     const audit = new Audit({
-      entityId: entity.id,
+      modelId: entity.id,
+      auditScope: "entity",
       changes: JSON.parse(JSON.stringify(entity)),
     });
     const randomId = Math.random().toString();
     const validAudit = new Audit({
-      entityId: `entity-${randomId}`,
+      modelId: `entity-${randomId}`,
+      auditScope: "entity",
       changes: {
         ...JSON.parse(JSON.stringify(entity)),
         id: `entity-${randomId}`,
@@ -94,14 +96,14 @@ describe("Entities restoration", function () {
     it("should restore the entity from valid audit and return successful IResponseGeneric", async () => {
       await request(app)
         .post(
-          `${apiPath}/entities/${validAudit.entityId}/restoration?fromAuditId=${validAudit.id}`
+          `${apiPath}/entities/${validAudit.modelId}/restoration?fromAuditId=${validAudit.id}`
         )
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
         .expect("Content-Type", /json/)
         .expect(successfulGenericResponse);
 
-      const restored = await findEntityById(db.connection, validAudit.entityId);
+      const restored = await findEntityById(db.connection, validAudit.modelId);
       expect(restored).toBeTruthy();
     });
   });

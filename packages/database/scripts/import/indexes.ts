@@ -137,9 +137,17 @@ const entitiesIndexes: ((table: RTable) => any)[] = [
 ];
 
 const auditsIndexes: ((table: RTable) => any)[] = [
-  (table: RTable) => table.indexCreate(DbEnums.Indexes.AuditEntityId),
+  (table: RTable) =>
+    table.indexCreate(DbEnums.Indexes.AuditScopeModelId, [
+      r.row("auditScope"),
+      r.row("modelId"),
+    ]),
   (table: RTable) => table.indexCreate(DbEnums.Indexes.AuditDate),
-  (table: RTable) => table.indexCreate(DbEnums.Indexes.AuditDateTypeUser, [r.row("date"), r.row("type"), r.row("user")]),
+  (table: RTable) => table.indexCreate(DbEnums.Indexes.AuditDateTypeUser, [
+    r.row("date"),
+    r.row("type"),
+    r.row("user"),
+  ]),
 ];
 
 const relationsIndexes: ((table: RTable) => any)[] = [

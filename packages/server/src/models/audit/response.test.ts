@@ -6,7 +6,8 @@ import Audit from "./audit";
 function prepareAudit(forEntityId: string, date: Date): [string, Audit] {
   const id = Math.random().toFixed();
   const a = new Audit({
-    entityId: forEntityId,
+    modelId: forEntityId,
+    auditScope: "entity",
     date: date,
   });
   return [id, a];

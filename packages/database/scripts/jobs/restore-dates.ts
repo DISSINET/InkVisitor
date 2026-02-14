@@ -10,8 +10,18 @@ const restoreDatesJob: IJob = async (db: Connection): Promise<void> => {
   run(db) as IEntity[];
 
   for (const entity of entitiesWithoutCreatedAt) {
-    const firstAudit: IAudit[] = await r.table("audits").filter({ entityId: entity.id }).orderBy(r.asc("date")).limit(1).run(db)
-    const lastAudit: IAudit[] = await r.table("audits").filter({ entityId: entity.id }).orderBy(r.desc("date")).limit(1).run(db);
+    const firstAudit: IAudit[] = await r
+      .table("audits")
+      .getAll(["entity", entity.id], { index: "auditScope_modelId" })
+      .orderBy(r.asc("date"))
+      .limit(1)
+      .run(db);
+    const lastAudit: IAudit[] = await r
+      .table("audits")
+      .getAll(["entity", entity.id], { index: "auditScope_modelId" })
+      .orderBy(r.desc("date"))
+      .limit(1)
+      .run(db);
     if (!firstAudit.length) {
       continue
     }

@@ -1,4 +1,4 @@
-import { IAudit } from "./audit";
+import { IAudit, AuditScope } from "./audit";
 import { ILabel } from "./label";
 import { IReference } from "./reference";
 import { IValue, IValueData } from "./value";
@@ -78,6 +78,7 @@ import { IResponseQuery, IResponseQueryEntity } from "./response-query";
 
 export { Query, Relation, RequestPermissionUpdate, RequestSearch };
 export type {
+  AuditScope,
   ClassificationOrder,
   EntityOrder,
   EntityTooltip,
