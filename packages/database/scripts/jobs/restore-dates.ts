@@ -1,4 +1,4 @@
-import { IAudit, IEntity } from "@shared/types";
+import { IAudit, IEntity, AuditScope } from "@shared/types";
 import { r, Connection } from "rethinkdb-ts";
 import { IJob } from ".";
 
@@ -12,13 +12,13 @@ const restoreDatesJob: IJob = async (db: Connection): Promise<void> => {
   for (const entity of entitiesWithoutCreatedAt) {
     const firstAudit: IAudit[] = await r
       .table("audits")
-      .getAll(["entity", entity.id], { index: "auditScope_modelId" })
+      .getAll([AuditScope.Entity, entity.id], { index: "auditScope_modelId" })
       .orderBy(r.asc("date"))
       .limit(1)
       .run(db);
     const lastAudit: IAudit[] = await r
       .table("audits")
-      .getAll(["entity", entity.id], { index: "auditScope_modelId" })
+      .getAll([AuditScope.Entity, entity.id], { index: "auditScope_modelId" })
       .orderBy(r.desc("date"))
       .limit(1)
       .run(db);

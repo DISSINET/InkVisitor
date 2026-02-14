@@ -1,10 +1,10 @@
 import { Connection } from "rethinkdb-ts";
-import { IAudit, IResponseAudit } from "@shared/types";
+import { IAudit, IResponseAudit, AuditScope } from "@shared/types";
 import Audit from "./audit";
 
 export class ResponseAudit implements IResponseAudit {
   modelId: string;
-  auditScope: IResponseAudit["auditScope"] = "entity";
+  auditScope: AuditScope = AuditScope.Entity;
   last: IAudit[] = [];
   first?: IAudit;
 
@@ -25,7 +25,7 @@ export class ResponseAudit implements IResponseAudit {
 
 export class ResponseDocumentAudit implements IResponseAudit {
   modelId: string;
-  auditScope: IResponseAudit["auditScope"] = "document";
+  auditScope: AuditScope = AuditScope.Document;
   last: IAudit[] = [];
   first?: IAudit;
 

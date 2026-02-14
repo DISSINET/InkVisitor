@@ -7,7 +7,7 @@ import Territory from "@models/territory/territory";
 import { getEntitiesByIds } from "@service/shorthands";
 import treeCache from "@service/treeCache";
 import { EntityEnums, RelationEnums } from "@shared/enums";
-import { IConcept, IEntity, ITerritory, RequestSearch } from "@shared/types";
+import { IConcept, IEntity, ITerritory, RequestSearch, AuditScope } from "@shared/types";
 import { PropSpecKind } from "@shared/types/prop";
 import { Connection, r, RDatum, RTable } from "rethinkdb-ts";
 import { IRequest } from "src/custom_typings/request";
@@ -383,7 +383,7 @@ export class SearchQuery {
   ) {
     const audits = await getAudits();
     const auditEntityIds = audits
-      .filter((a) => a.auditScope === "entity")
+      .filter((a) => a.auditScope === AuditScope.Entity)
       .map((a) => a.modelId);
 
     if (!req.entityIds) {
@@ -481,7 +481,7 @@ export class SearchQuery {
 
       const auditEntityIds = updatedBy
         .concat(createdBy)
-        .filter((a) => a.auditScope === "entity")
+        .filter((a) => a.auditScope === AuditScope.Entity)
         .map((a) => a.modelId);
 
       if (!req.entityIds) {

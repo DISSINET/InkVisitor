@@ -15,6 +15,7 @@ import { findEntityById } from "@service/shorthands";
 import { Db } from "@service/rethink";
 import "ts-jest";
 import { prepareEntity } from "@models/entity/entity.test";
+import { AuditScope } from "@shared/types";
 import Audit from "@models/audit/audit";
 import { pool } from "@middlewares/db";
 
@@ -49,13 +50,13 @@ describe("Entities restoration", function () {
     const [, differentEntity] = prepareEntity();
     const audit = new Audit({
       modelId: entity.id,
-      auditScope: "entity",
+      auditScope: AuditScope.Entity,
       changes: JSON.parse(JSON.stringify(entity)),
     });
     const randomId = Math.random().toString();
     const validAudit = new Audit({
       modelId: `entity-${randomId}`,
-      auditScope: "entity",
+      auditScope: AuditScope.Entity,
       changes: {
         ...JSON.parse(JSON.stringify(entity)),
         id: `entity-${randomId}`,

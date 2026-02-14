@@ -1,5 +1,5 @@
 import { Connection, r } from "rethinkdb-ts";
-import { DbEnums } from "@shared/enums";
+import { AuditScope } from "@shared/types";
 import { IJob } from ".";
 
 const BATCH_SIZE = 500;
@@ -8,7 +8,7 @@ const migrateAuditsToModelIdScopeJob: IJob = async (db: Connection): Promise<voi
   const table = r.table("audits");
   const cursor = await table.run(db);
   let updated = 0;
-  let batch: Array<{ id: string; modelId: string; auditScope: "entity" | "document" }> = [];
+  let batch: Array<{ id: string; modelId: string; auditScope: AuditScope }> = [];
 
   for await (const row of cursor) {
     const doc = row as Record<string, unknown>;
@@ -16,13 +16,13 @@ const migrateAuditsToModelIdScopeJob: IJob = async (db: Connection): Promise<voi
     const entityId = doc.entityId as string | undefined;
     const documentId = doc.documentId as string | undefined;
     let modelId: string;
-    let auditScope: "entity" | "document";
+    let auditScope: AuditScope;
     if (entityId != null && entityId !== "") {
       modelId = entityId;
-      auditScope = "entity";
+      auditScope = AuditScope.Entity;
     } else if (documentId != null && documentId !== "") {
       modelId = documentId;
-      auditScope = "document";
+      auditScope = AuditScope.Document;
     } else {
       continue;
     }

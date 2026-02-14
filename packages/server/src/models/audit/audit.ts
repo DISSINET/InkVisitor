@@ -1,20 +1,17 @@
 import { IDbModel, fillFlatObject } from "@models/common";
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
-import { IAudit } from "@shared/types";
+import { IAudit, AuditScope } from "@shared/types";
 import { InternalServerError } from "@shared/types/errors";
 import { IRequest } from "../../custom_typings/request";
 import { DbEnums } from "@shared/enums";
 import { EventType } from "@shared/types/stats";
-
-const ENTITY: IAudit["auditScope"] = "entity";
-const DOCUMENT: IAudit["auditScope"] = "document";
 
 export default class Audit implements IAudit, IDbModel {
   static table = "audits";
 
   id = "";
   modelId = "";
-  auditScope: IAudit["auditScope"] = ENTITY;
+  auditScope: AuditScope = AuditScope.Entity;
   user = "";
   date: Date = new Date();
   changes: object = {};
@@ -30,10 +27,10 @@ export default class Audit implements IAudit, IDbModel {
     const d = data as Record<string, unknown>;
     if (!this.modelId && d.entityId != null) {
       this.modelId = String(d.entityId);
-      this.auditScope = ENTITY;
+      this.auditScope = AuditScope.Entity;
     } else if (!this.modelId && d.documentId != null) {
       this.modelId = String(d.documentId);
-      this.auditScope = DOCUMENT;
+      this.auditScope = AuditScope.Document;
     }
   }
 
@@ -101,7 +98,7 @@ export default class Audit implements IAudit, IDbModel {
   ): Promise<boolean> {
     const entry = new Audit({
       modelId: entityId,
-      auditScope: ENTITY,
+      auditScope: AuditScope.Entity,
       user: req.getUserOrFail().id,
       changes: updateData,
       type: type,
@@ -117,7 +114,7 @@ export default class Audit implements IAudit, IDbModel {
   ): Promise<boolean> {
     const entry = new Audit({
       modelId: documentId,
-      auditScope: DOCUMENT,
+      auditScope: AuditScope.Document,
       user: req.getUserOrFail().id,
       changes,
       type,
@@ -138,7 +135,7 @@ export default class Audit implements IAudit, IDbModel {
   ): Promise<Audit | null> {
     const result = await rethink
       .table(Audit.table)
-      .getAll([ENTITY, entityId], {
+      .getAll([AuditScope.Entity, entityId], {
         index: DbEnums.Indexes.AuditScopeModelId,
       })
       .orderBy(rethink.asc("date"))
@@ -180,7 +177,7 @@ export default class Audit implements IAudit, IDbModel {
   ): Promise<Audit | null> {
     const result = await rethink
       .table(Audit.table)
-      .getAll([ENTITY, entityId], {
+      .getAll([AuditScope.Entity, entityId], {
         index: DbEnums.Indexes.AuditScopeModelId,
       })
       .orderBy(rethink.desc("date"))
@@ -204,7 +201,7 @@ export default class Audit implements IAudit, IDbModel {
   ): Promise<Audit[]> {
     const result = await rethink
       .table(Audit.table)
-      .getAll([ENTITY, entityId], {
+      .getAll([AuditScope.Entity, entityId], {
         index: DbEnums.Indexes.AuditScopeModelId,
       })
       .orderBy(rethink.desc("date"))
@@ -221,7 +218,7 @@ export default class Audit implements IAudit, IDbModel {
   ): Promise<Audit[]> {
     const result = await rethink
       .table(Audit.table)
-      .getAll([DOCUMENT, documentId], {
+      .getAll([AuditScope.Document, documentId], {
         index: DbEnums.Indexes.AuditScopeModelId,
       })
       .orderBy(rethink.desc("date"))
@@ -237,7 +234,7 @@ export default class Audit implements IAudit, IDbModel {
   ): Promise<Audit | null> {
     const result = await rethink
       .table(Audit.table)
-      .getAll([DOCUMENT, documentId], {
+      .getAll([AuditScope.Document, documentId], {
         index: DbEnums.Indexes.AuditScopeModelId,
       })
       .orderBy(rethink.asc("date"))
@@ -261,7 +258,7 @@ export default class Audit implements IAudit, IDbModel {
       .run(db);
 
     const audits = result.map((data) => new Audit(data)) as Audit[];
-    const entityAudits = audits.filter((a) => a.auditScope === ENTITY);
+    const entityAudits = audits.filter((a) => a.auditScope === AuditScope.Entity);
     const byEntity = Object.values(
       entityAudits.reduce((acc, curr) => {
         if (!curr.modelId) return acc;
@@ -302,7 +299,7 @@ export default class Audit implements IAudit, IDbModel {
       .run(db);
 
     const audits = result.map((data) => new Audit(data)) as Audit[];
-    const entityAudits = audits.filter((a) => a.auditScope === ENTITY);
+    const entityAudits = audits.filter((a) => a.auditScope === AuditScope.Entity);
     const byEntity = Object.values(
       entityAudits.reduce((acc, curr) => {
         if (!curr.modelId) return acc;

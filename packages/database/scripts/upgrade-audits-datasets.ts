@@ -1,6 +1,8 @@
 import * as fs from "fs";
 import * as path from "path";
 
+import { AuditScope } from "@shared/types";
+
 const DATASETS_DIR = path.join(__dirname, "../datasets");
 
 function findAuditsJsonFiles(dir: string): string[] {
@@ -25,13 +27,13 @@ function upgradeAudit(obj: Record<string, unknown>): Record<string, unknown> {
   const entityId = obj.entityId as string | undefined;
   const documentId = obj.documentId as string | undefined;
   let modelId: string;
-  let auditScope: "entity" | "document";
+  let auditScope: AuditScope;
   if (entityId != null && entityId !== "") {
     modelId = entityId;
-    auditScope = "entity";
+    auditScope = AuditScope.Entity;
   } else if (documentId != null && documentId !== "") {
     modelId = documentId;
-    auditScope = "document";
+    auditScope = AuditScope.Document;
   } else {
     return obj;
   }

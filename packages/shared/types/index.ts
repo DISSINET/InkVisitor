@@ -77,8 +77,8 @@ import { IRequestQuery } from "./request-query";
 import { IResponseQuery, IResponseQueryEntity } from "./response-query";
 
 export { Query, Relation, RequestPermissionUpdate, RequestSearch };
+export { AuditScope };
 export type {
-  AuditScope,
   ClassificationOrder,
   EntityOrder,
   EntityTooltip,
