@@ -324,6 +324,7 @@ export default Router()
       const result = await model.update(request.db.connection, model);
 
       if (result.replaced || result.unchanged) {
+        let auditCreated = false;
         if (existingDocument.content !== model.content) {
           await Audit.createNewForDocument(
             request,
@@ -331,6 +332,7 @@ export default Router()
             EventType.TEXT_EDIT,
             {}
           );
+          auditCreated = true;
         }
         const flattenEntityIds = (
           entityIds: Record<EntityEnums.Class, string[]>
@@ -351,6 +353,15 @@ export default Router()
             documentId,
             EventType.ANCHOR_ADD,
             { addedAnchorEntityIds }
+          );
+          auditCreated = true;
+        }
+        if (!auditCreated) {
+          await Audit.createNewForDocument(
+            request,
+            documentId,
+            EventType.EDIT,
+            documentData as object
           );
         }
         return {
