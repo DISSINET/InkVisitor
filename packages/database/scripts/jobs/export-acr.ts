@@ -11,6 +11,7 @@ import {
   IResource,
   IValue,
   Relation as RelationTypes,
+  AuditScope,
 } from "@shared/types";
 import * as path from "path";
 import { Connection, r as rethink } from "rethinkdb-ts";
@@ -298,7 +299,7 @@ const exportACR: IJob = async (db: Connection): Promise<void> => {
   const auditsAll: Audit[] = await rethink.table("audits").run(db);
 
   const audits = auditsAll
-    .filter((a) => allIds.includes(a.entityId))
+    .filter((a) => a.auditScope === AuditScope.Entity && allIds.includes(a.modelId))
     .map((a) => {
       a.changes = {};
       return a;

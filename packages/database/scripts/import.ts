@@ -15,6 +15,8 @@ import jobs from "./jobs/index";
 import * as fs from "fs";
 import * as path from "path";
 
+const MAX_LOAD_JSON_BYTES = 100 * 1024 * 1024;
+
 const defaultSettingsTable: TableSchema = {
   tableName: "settings",
   data: require("../datasets/default/settings.json"),
@@ -585,10 +587,15 @@ class Importer {
       if (entry.isFile() && entry.name.endsWith(".json")) {
         const dataFilePath = path.join(path.join(__dirname, "../datasets", datasetName), entry.name);
         if (fs.existsSync(dataFilePath)) {
-          const data = JSON.parse(fs.readFileSync(dataFilePath, "utf8"));
           const tableKey = this.snakeToCamel(entry.name.replace(".json", ""));
-          datasetTables[tableKey as keyof DbSchema].data = data,
-          datasetTables[tableKey as keyof DbSchema].indexes = DbSchemaIndexes[tableKey as keyof DbSchema];
+          const tableConfig = datasetTables[tableKey as keyof DbSchema];
+          tableConfig.indexes = DbSchemaIndexes[tableKey as keyof DbSchema];
+          const stat = fs.statSync(dataFilePath);
+          if (stat.size > MAX_LOAD_JSON_BYTES) {
+            tableConfig.dataFilePath = dataFilePath;
+          } else {
+            tableConfig.data = JSON.parse(fs.readFileSync(dataFilePath, "utf8"));
+          }
         }
       }
     }
@@ -640,22 +647,22 @@ class Importer {
       await this.db.createTable(tableConfig);
     }
     
-    // Import data with proper counting for all files
     for (const tableConfig of Object.values(this.dataset)) {
+      const dataFilePath = this.getDataFilePath(tableConfig);
+      const useLargeImport = dataFilePath && this.isLargeFile(dataFilePath);
       if (tableConfig.data && Array.isArray(tableConfig.data)) {
-        // Check if this is a large file that needs special handling
-        const dataFilePath = this.getDataFilePath(tableConfig);
-        if (dataFilePath && this.isLargeFile(dataFilePath)) {
+        if (useLargeImport) {
           console.log(colors.yellow(`Using large file import for: ${tableConfig.tableName}`));
-          await this.db.importLargeData(tableConfig, dataFilePath);
+          await this.db.importLargeData(tableConfig, dataFilePath!);
         } else {
-          // For smaller files, use the standard import with proper counting
           await this.db.importData(tableConfig);
         }
+      } else if (dataFilePath && useLargeImport) {
+        console.log(colors.yellow(`Using large file import for: ${tableConfig.tableName}`));
+        await this.db.importLargeData(tableConfig, dataFilePath);
       } else if (tableConfig.data === null) {
         console.log(colors.gray(`Skipping ${tableConfig.tableName} - no data configured`));
       } else {
-        console.log(tableConfig.data);
         console.log(colors.gray(`Skipping ${tableConfig.tableName} - data is not an array`));
       }
     }
@@ -667,11 +674,10 @@ class Importer {
    * @returns string | null
    */
   private getDataFilePath(tableConfig: TableSchema): string | null {
+    if (tableConfig.dataFilePath) return tableConfig.dataFilePath;
     if (!this.datasetName) return null;
-    
     const dataDir = path.join(__dirname, "../datasets", this.datasetName);
     const jsonFile = path.join(dataDir, `${tableConfig.tableName}.json`);
-    
     return fs.existsSync(jsonFile) ? jsonFile : null;
   }
 

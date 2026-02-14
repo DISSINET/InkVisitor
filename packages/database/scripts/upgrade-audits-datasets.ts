@@ -1,8 +1,14 @@
 import * as fs from "fs";
 import * as path from "path";
+import { createReadStream } from "fs";
 
 import { AuditScope } from "@shared/types";
 
+const StreamArray = require("stream-json/streamers/StreamArray.js") as {
+  withParser: (opts?: unknown) => NodeJS.ReadWriteStream;
+};
+
+const MAX_LOAD_BYTES = 100 * 1024 * 1024;
 const DATASETS_DIR = path.join(__dirname, "../datasets");
 
 function findAuditsJsonFiles(dir: string): string[] {
@@ -64,19 +70,67 @@ function writeAuditsJsonStream(
   });
 }
 
+function upgradeFileStreaming(file: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const outPath = file + ".tmp";
+    const writeStream = fs.createWriteStream(outPath, { encoding: "utf8" });
+    writeStream.write("[\n");
+    let first = true;
+    const pipeline = createReadStream(file).pipe(StreamArray.withParser());
+    pipeline.on("data", ({ value }: { value: Record<string, unknown> }) => {
+      const upgraded = upgradeAudit(value);
+      const line =
+        (first ? "  " : "  ,") +
+        JSON.stringify(upgraded, null, 4).split("\n").join("\n  ") +
+        "\n";
+      first = false;
+      if (!writeStream.write(line)) {
+        pipeline.pause();
+        writeStream.once("drain", () => pipeline.resume());
+      }
+    });
+    pipeline.on("end", () => {
+      writeStream.write("]\n");
+      writeStream.end();
+    });
+    pipeline.on("error", (err) => {
+      writeStream.destroy();
+      reject(err);
+    });
+    writeStream.on("finish", () => {
+      fs.renameSync(outPath, file);
+      resolve();
+    });
+    writeStream.on("error", (err) => {
+      try {
+        fs.unlinkSync(outPath);
+      } catch {
+        /* ignore */
+      }
+      reject(err);
+    });
+  });
+}
+
 async function run(): Promise<void> {
   const files = findAuditsJsonFiles(DATASETS_DIR);
   console.log(`Found ${files.length} audits.json file(s).`);
   for (const file of files) {
-    const data = JSON.parse(fs.readFileSync(file, "utf8"));
-    if (!Array.isArray(data)) {
-      console.log(`Skip ${file}: not an array`);
-      continue;
+    const stat = fs.statSync(file);
+    if (stat.size > MAX_LOAD_BYTES) {
+      console.log(`Upgrading ${file} (streaming, ${(stat.size / 1024 / 1024).toFixed(1)} MB)...`);
+      await upgradeFileStreaming(file);
+    } else {
+      const data = JSON.parse(fs.readFileSync(file, "utf8"));
+      if (!Array.isArray(data)) {
+        console.log(`Skip ${file}: not an array`);
+        continue;
+      }
+      const upgraded = data.map((item: Record<string, unknown>) =>
+        upgradeAudit(item)
+      );
+      await writeAuditsJsonStream(file, upgraded);
     }
-    const upgraded = data.map((item: Record<string, unknown>) =>
-      upgradeAudit(item)
-    );
-    await writeAuditsJsonStream(file, upgraded);
     console.log(`Upgraded ${file}`);
   }
   console.log("Done.");
