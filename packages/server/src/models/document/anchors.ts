@@ -1,31 +1,7 @@
 import { EntityEnums } from "@shared/enums";
 import { IAnchorsNode } from "@shared/types/document";
 import { IDocumentAuditAnchorChanges, IAnchorUpdate } from "@shared/types";
-import { createOpeningTagRegex, createAnyTagRegex } from "@common/regex";
-
-export function getEntityIdsFromContent(content: string): Record<EntityEnums.Class, string[]> {
-  const regex = createOpeningTagRegex();
-  const tagNames = new Set<string>();
-  let match: RegExpExecArray | null;
-  while ((match = regex.exec(content)) !== null) {
-    tagNames.add(match[1].split(/\s+/)[0]);
-  }
-  const result: Record<EntityEnums.Class, string[]> = {
-    [EntityEnums.Class.Action]: [],
-    [EntityEnums.Class.Resource]: [],
-    [EntityEnums.Class.Concept]: Array.from(tagNames),
-    [EntityEnums.Class.Person]: [],
-    [EntityEnums.Class.Location]: [],
-    [EntityEnums.Class.Event]: [],
-    [EntityEnums.Class.Object]: [],
-    [EntityEnums.Class.Territory]: [],
-    [EntityEnums.Class.Statement]: [],
-    [EntityEnums.Class.Value]: [],
-    [EntityEnums.Class.Being]: [],
-    [EntityEnums.Class.Group]: [],
-  };
-  return result;
-}
+import { createAnyTagRegex } from "@common/regex";
 
 interface IOrderedAnchorItem {
   anchor: string;
@@ -144,15 +120,11 @@ export class AnchorsNode implements IAnchorsNode {
     return rootNodes;
   }
 
-  static getOrderedAnchorList(
-    content: string,
-    entityIds: Record<EntityEnums.Class, string[]>
-  ): IOrderedAnchorItem[] {
-    const tree = AnchorsNode.buildAnchorsTree(content, entityIds);
+  static getOrderedAnchorListFromTree(nodes: IAnchorsNode[]): IOrderedAnchorItem[] {
     const list: IOrderedAnchorItem[] = [];
     const countByAnchor: Record<string, number> = {};
-    const traverse = (nodes: AnchorsNode[], path: string[] = []) => {
-      for (const node of nodes) {
+    const traverse = (treeNodes: IAnchorsNode[], path: string[] = []) => {
+      for (const node of treeNodes) {
         const occ = countByAnchor[node.anchor] ?? 0;
         countByAnchor[node.anchor] = occ + 1;
         const k = `${node.anchor}:${occ}`;
@@ -163,21 +135,26 @@ export class AnchorsNode implements IAnchorsNode {
           content: node.content,
           path: nodePath,
         });
-        traverse(node.children, nodePath);
+        traverse(node.children || [], nodePath);
       }
     };
-    traverse(tree);
+    traverse(nodes);
     return list;
   }
 
-  static compareAnchors(
-    oldContent: string,
-    oldEntityIds: Record<EntityEnums.Class, string[]>,
-    newContent: string,
-    newEntityIds: Record<EntityEnums.Class, string[]>
+  static compareAnchorTrees(
+    oldTree: IAnchorsNode[],
+    newTree: IAnchorsNode[]
   ): IDocumentAuditAnchorChanges {
-    const oldList = AnchorsNode.getOrderedAnchorList(oldContent, oldEntityIds);
-    const newList = AnchorsNode.getOrderedAnchorList(newContent, newEntityIds);
+    const oldList = AnchorsNode.getOrderedAnchorListFromTree(oldTree);
+    const newList = AnchorsNode.getOrderedAnchorListFromTree(newTree);
+    return AnchorsNode.diffOrderedAnchorLists(oldList, newList);
+  }
+
+  static diffOrderedAnchorLists(
+    oldList: IOrderedAnchorItem[],
+    newList: IOrderedAnchorItem[]
+  ): IDocumentAuditAnchorChanges {
     const oldByKey = new Map<string, IOrderedAnchorItem>();
     const newByKey = new Map<string, IOrderedAnchorItem>();
     for (const x of oldList) {

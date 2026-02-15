@@ -2,7 +2,7 @@ import { mergeDeep } from "@common/functions";
 import Audit from "@models/audit/audit";
 import { ResponseDocumentAudit } from "@models/audit/response";
 import Document from "@models/document/document";
-import { AnchorsNode, getEntityIdsFromContent } from "@models/document/anchors";
+import { AnchorsNode } from "@models/document/anchors";
 import { EntityEnums } from "@shared/enums";
 import {
   IDocument,
@@ -312,7 +312,10 @@ export default Router()
         throw DocumentDoesNotExist.forId(documentId);
       }
 
-      const oldContent = existingDocument.content;
+      await existingDocument.preprocess(request.db.connection);
+      const oldOrderedList = AnchorsNode.getOrderedAnchorListFromTree(
+        existingDocument.anchors
+      );
 
       const model = new Document({
         ...mergeDeep(existingDocument, documentData),
@@ -321,7 +324,6 @@ export default Router()
 
       await model.preprocess(request.db.connection);
 
-      // checking the validity of the final model (already has updated data)
       if (!model.isValid()) {
         throw new ModelNotValidError("");
       }
@@ -333,11 +335,9 @@ export default Router()
       const result = await model.update(request.db.connection, model);
 
       if (result.replaced || result.unchanged) {
-        const anchorDiff = AnchorsNode.compareAnchors(
-          oldContent,
-          getEntityIdsFromContent(oldContent),
-          model.content,
-          getEntityIdsFromContent(model.content)
+        const anchorDiff = AnchorsNode.diffOrderedAnchorLists(
+          oldOrderedList,
+          AnchorsNode.getOrderedAnchorListFromTree(model.anchors)
         );
         const auditData: IDocumentAuditAnchorChanges = {
           changes: anchorDiff.changes.map(

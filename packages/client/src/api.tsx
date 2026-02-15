@@ -1039,6 +1039,20 @@ class Api {
     }
   }
 
+  /**
+   * Document audits response: IResponseAudit
+   * - modelId: documentId
+   * - auditScope: "document"
+   * - last: IAudit[] (up to 5 most recent)
+   * - first?: IAudit (oldest, if any)
+   *
+   * Each IAudit when auditScope is document:
+   * - id, modelId, auditScope, user, date, type: EventType
+   * - changes: IDocumentAuditAnchorChanges
+   *   - changes: { anchor: string, occurrence: number }[]  (anchors whose content was edited)
+   *   - additions: { anchor: string, occurrence: number }[]
+   *   - removals: { anchor: string, occurrence: number }[]
+   */
   async auditGetByDocument(
     documentId: string,
     options?: IApiOptions
