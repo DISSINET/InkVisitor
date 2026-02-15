@@ -1,4 +1,9 @@
-import { IAudit, AuditScope } from "./audit";
+import {
+  IAudit,
+  IAnchorUpdate,
+  IDocumentAuditAnchorChanges,
+  AuditScope,
+} from "./audit";
 import { ILabel } from "./label";
 import { IReference } from "./reference";
 import { IValue, IValueData } from "./value";
@@ -84,7 +89,9 @@ export type {
   EntityTooltip,
   IAction,
   IActionData,
+  IAnchorUpdate,
   IAudit,
+  IDocumentAuditAnchorChanges,
   IBeing,
   IBeingData,
   IBookmarkFolder,

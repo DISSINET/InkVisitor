@@ -2,8 +2,16 @@ import { mergeDeep } from "@common/functions";
 import Audit from "@models/audit/audit";
 import { ResponseDocumentAudit } from "@models/audit/response";
 import Document from "@models/document/document";
+import { AnchorsNode, getEntityIdsFromContent } from "@models/document/anchors";
 import { EntityEnums } from "@shared/enums";
-import { IDocument, IDocumentMeta, IResponseAudit, IResponseGeneric } from "@shared/types";
+import {
+  IDocument,
+  IDocumentMeta,
+  IResponseAudit,
+  IResponseGeneric,
+  IAnchorUpdate,
+  IDocumentAuditAnchorChanges,
+} from "@shared/types";
 import { EventType } from "@shared/types/stats";
 import {
   BadParams,
@@ -304,7 +312,8 @@ export default Router()
         throw DocumentDoesNotExist.forId(documentId);
       }
 
-      // get correct IDbModel implementation
+      const oldContent = existingDocument.content;
+
       const model = new Document({
         ...mergeDeep(existingDocument, documentData),
         id: documentId,
@@ -324,46 +333,29 @@ export default Router()
       const result = await model.update(request.db.connection, model);
 
       if (result.replaced || result.unchanged) {
-        let auditCreated = false;
-        if (existingDocument.content !== model.content) {
-          await Audit.createNewForDocument(
-            request,
-            documentId,
-            EventType.TEXT_EDIT,
-            {}
-          );
-          auditCreated = true;
-        }
-        const flattenEntityIds = (
-          entityIds: Record<EntityEnums.Class, string[]>
-        ): string[] =>
-          (Object.values(entityIds || {}) as string[][]).reduce(
-            (acc, arr) => acc.concat(arr),
-            [] as string[]
-          );
-        const existingIds = new Set(
-          flattenEntityIds(existingDocument.entityIds || ({} as Record<EntityEnums.Class, string[]>))
+        const anchorDiff = AnchorsNode.compareAnchors(
+          oldContent,
+          getEntityIdsFromContent(oldContent),
+          model.content,
+          getEntityIdsFromContent(model.content)
         );
-        const addedAnchorEntityIds = flattenEntityIds(model.entityIds).filter(
-          (id) => !existingIds.has(id)
+        const auditData: IDocumentAuditAnchorChanges = {
+          changes: anchorDiff.changes.map(
+            (a): IAnchorUpdate => ({ anchor: a.anchor, occurrence: a.occurrence })
+          ),
+          additions: anchorDiff.additions.map(
+            (a): IAnchorUpdate => ({ anchor: a.anchor, occurrence: a.occurrence })
+          ),
+          removals: anchorDiff.removals.map(
+            (a): IAnchorUpdate => ({ anchor: a.anchor, occurrence: a.occurrence })
+          ),
+        };
+        await Audit.createNewForDocument(
+          request,
+          documentId,
+          EventType.EDIT,
+          auditData
         );
-        if (addedAnchorEntityIds.length > 0) {
-          await Audit.createNewForDocument(
-            request,
-            documentId,
-            EventType.ANCHOR_ADD,
-            { addedAnchorEntityIds }
-          );
-          auditCreated = true;
-        }
-        if (!auditCreated) {
-          await Audit.createNewForDocument(
-            request,
-            documentId,
-            EventType.EDIT,
-            documentData as object
-          );
-        }
         return {
           result: true,
         };
