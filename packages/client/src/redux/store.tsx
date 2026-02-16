@@ -29,12 +29,14 @@ import detailBoxStateSlice from "./features/layout/mainPage/detailBoxStateSlice"
 import panelWidthsSlice from "./features/layout/mainPage/panelWidthsSlice";
 import thirdPanelExpandedSlice from "./features/layout/mainPage/thirdPanelExpandedSlice";
 import expandedOptionsSlice from "./features/entitySearch/expandedOptionsSlice";
+import modalOpenSlice from "./features/modalOpenSlice";
 
 const store: Store = configureStore({
   reducer: {
     theme: themeSlice,
     username: usernameSlice,
     ping: pingSlice,
+    modalOpen: modalOpenSlice,
     entitySearch: combineReducers({
       expandedOptions: expandedOptionsSlice,
     }),

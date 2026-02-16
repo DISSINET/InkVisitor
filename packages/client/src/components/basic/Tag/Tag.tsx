@@ -99,6 +99,7 @@ export const Tag: React.FC<TagProps> = ({
   );
 
   const [clickedOnce, setClickedOnce] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const ref = useRef<HTMLDivElement>(null!);
 
   const [isDragging, canDrag, drag, drop] = useDragDrop({
@@ -116,6 +117,44 @@ export const Tag: React.FC<TagProps> = ({
     moveFn,
     ref,
   });
+
+  // Get modal open state from Redux
+  const isModalOpen = useAppSelector((state) => state.modalOpen);
+
+  // Track mouse position when modal is open to detect hover even when tag is overlayed
+  useEffect(() => {
+    if (!isModalOpen || !canDrag) {
+      setIsHovered(false);
+      return;
+    }
+
+    const checkMouseOverTag = (e: MouseEvent) => {
+      if (!ref.current) {
+        setIsHovered(false);
+        return;
+      }
+
+      const rect = ref.current.getBoundingClientRect();
+      const mouseX = e.clientX;
+      const mouseY = e.clientY;
+
+      // Check if mouse is within tag's bounding box
+      const isOverTag =
+        mouseX >= rect.left &&
+        mouseX <= rect.right &&
+        mouseY >= rect.top &&
+        mouseY <= rect.bottom;
+
+      setIsHovered(isOverTag);
+    };
+
+    // Use mousemove to track position continuously
+    document.addEventListener("mousemove", checkMouseOverTag);
+
+    return () => {
+      document.removeEventListener("mousemove", checkMouseOverTag);
+    };
+  }, [isModalOpen, canDrag]);
 
   useEffect(() => {
     if (!clickedOnce) return;
@@ -224,6 +263,8 @@ export const Tag: React.FC<TagProps> = ({
       $status={status}
       $ltype={ltype}
       $borderStyle={borderStyle}
+      // Tag hovered && modalOpen && draggable
+      $isModalOpen={isModalOpen && canDrag && isHovered}
       onClick={(e) => {
         e.stopPropagation();
         if (!disableCopyLabel) setClickedOnce(true);

@@ -1,7 +1,9 @@
 import { config, useSpring } from "@react-spring/web";
 import { ThemeColor } from "Theme/theme";
 import { Loader } from "components";
-import React, { FC, ReactNode } from "react";
+import React, { FC, ReactNode, useEffect } from "react";
+import { useAppDispatch } from "redux/hooks";
+import { setModalOpen } from "redux/features/modalOpenSlice";
 import { ModalKeyPress } from "./ModalKeyPress";
 import {
   StyledBackground,
@@ -47,6 +49,13 @@ export const Modal: FC<Modal> = ({
   fullHeight = false,
   lowerZIndex = false,
 }) => {
+  const dispatch = useAppDispatch();
+
+  // Update global modal state when showModal changes
+  useEffect(() => {
+    dispatch(setModalOpen(showModal));
+  }, [showModal, dispatch]);
+
   const animatedMount = useSpring({
     opacity: showModal ? 1 : 0,
     config: config.stiff,

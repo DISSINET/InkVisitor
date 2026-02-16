@@ -7,6 +7,7 @@ interface StyledTagWrapper {
   $status: EntityEnums.Status;
   $ltype: EntityEnums.LogicalType;
   $dragDisabled?: boolean;
+  $isModalOpen?: boolean;
 }
 export const StyledTagWrapper = styled.div<StyledTagWrapper>`
   display: inline-flex;
@@ -21,6 +22,8 @@ export const StyledTagWrapper = styled.div<StyledTagWrapper>`
   color: ${({ theme }) => theme.color["black"]};
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
   height: 2.25rem;
+  position: relative;
+  z-index: ${({ $isModalOpen }) => ($isModalOpen ? "151" : "1")};
 `;
 
 interface StyledEntityTag {
