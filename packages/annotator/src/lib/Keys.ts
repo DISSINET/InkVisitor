@@ -249,6 +249,15 @@ export default class Keys {
     if (this.text.mode === EditMode.HIGHLIGHT) {
       return;
     }
+    const area = this.cursor.getSelectedArea();
+    if (area) {
+      this.text.deleteRangeText(area[0], area[1]);
+      this.cursor.reset();
+      this.cursor.setPosition(
+        area[0].xLine,
+        area[0].yLine - this.viewport.lineStart
+      );
+    }
     this.text.insertNewline(this.viewport, this.cursor);
 
     if (this.cursor.yLine + 1 >= this.viewport.noLines) {
@@ -672,6 +681,15 @@ export default class Keys {
             return;
           }
 
+          const area = this.cursor.getSelectedArea();
+          if (area) {
+            this.text.deleteRangeText(area[0], area[1]);
+            this.cursor.reset();
+            this.cursor.setPosition(
+              area[0].xLine,
+              area[0].yLine - this.viewport.lineStart
+            );
+          }
           this.text.insertText(this.viewport, this.cursor, key);
           if (this.annotator.onTextChangeCb) {
             this.annotator.onTextChangeCb(this.text.value);
