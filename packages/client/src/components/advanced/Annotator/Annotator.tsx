@@ -1035,13 +1035,12 @@ export const TextAnnotator = ({
             <Button
               inverted
               color="info"
-              label="export"
               icon={<FaDownload size={11} />}
               onClick={() => {
                 setShowExportModal(true);
               }}
-              // tooltipLabel="export document"
-              // tooltipPosition="top"
+              tooltipLabel="export document"
+              tooltipPosition="top"
             />
             <span style={{ display: "flex", position: "relative" }}>
               <Button
