@@ -17,8 +17,6 @@ import Dropdown, {
   EntityTag,
 } from "components/advanced";
 import { useDebounce, useResizeObserver, useSearchParams } from "hooks";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { setExpandedOptions } from "redux/features/entitySearch/expandedOptionsSlice";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   BsShieldExclamation,
@@ -27,19 +25,21 @@ import {
 } from "react-icons/bs";
 import { FaPlus } from "react-icons/fa";
 import { RiCloseFill } from "react-icons/ri";
+import { setExpandedOptions } from "redux/features/entitySearch/expandedOptionsSlice";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { DropdownItem } from "types";
 import { EntitySearchAdvancedOptions } from "./EntitySearchAdvancedOptions/EntitySearchAdvancedOptions";
 import {
   StyledBoxContent,
-  StyledPill,
-  StyledPillLabel,
-  StyledPillCloseIcon,
   StyledOptions,
+  StyledPill,
+  StyledPillCloseIcon,
+  StyledPillLabel,
+  StyledPillWrap,
   StyledResultsHeader,
   StyledResultsWrapper,
   StyledRow,
   StyledRowHeader,
-  StyledPillWrap,
 } from "./EntitySearchBoxStyles";
 import { EntitySearchResults } from "./EntitySearchResults/EntitySearchResults";
 
@@ -370,6 +370,35 @@ export const EntitySearchBox: React.FC = () => {
       setTerritoryEntity(false);
     }
   }, [expandedOptions.includes(SearchEnums.AdvancedOption.Territory)]);
+
+  // Save expanded options to local storage
+  const debouncedExpandedOptions = useDebounce<SearchEnums.AdvancedOption[]>(
+    expandedOptions,
+    1000
+  );
+
+  const ENTITY_SEARCH_EXPANDED_OPTIONS_SETTING_KEY_PREFIX =
+    "entitySearchExpandedOptions";
+  useEffect(() => {
+    if (debouncedExpandedOptions.length > 0) {
+      localStorage.setItem(
+        ENTITY_SEARCH_EXPANDED_OPTIONS_SETTING_KEY_PREFIX,
+        JSON.stringify(expandedOptions)
+      );
+    }
+  }, [debouncedExpandedOptions]);
+
+  useEffect(() => {
+    const expandedOptionsSetting = localStorage.getItem(
+      ENTITY_SEARCH_EXPANDED_OPTIONS_SETTING_KEY_PREFIX
+    );
+    if (expandedOptionsSetting) {
+      const options = JSON.parse(
+        expandedOptionsSetting
+      ) as SearchEnums.AdvancedOption[];
+      handleSetExpandedOptions(options);
+    }
+  }, []);
 
   return (
     <>
