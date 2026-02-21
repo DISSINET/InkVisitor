@@ -17,15 +17,7 @@ import Dropdown, {
   EntityTag,
 } from "components/advanced";
 import { useDebounce, useResizeObserver, useSearchParams } from "hooks";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { setExpandedOptions } from "redux/features/entitySearch/expandedOptionsSlice";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   BsShieldExclamation,
   BsShieldFillCheck,
@@ -33,19 +25,21 @@ import {
 } from "react-icons/bs";
 import { FaPlus } from "react-icons/fa";
 import { RiCloseFill } from "react-icons/ri";
+import { setExpandedOptions } from "redux/features/entitySearch/expandedOptionsSlice";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { DropdownItem } from "types";
 import { EntitySearchAdvancedOptions } from "./EntitySearchAdvancedOptions/EntitySearchAdvancedOptions";
 import {
   StyledBoxContent,
-  StyledPill,
-  StyledPillLabel,
-  StyledPillCloseIcon,
   StyledOptions,
+  StyledPill,
+  StyledPillCloseIcon,
+  StyledPillLabel,
+  StyledPillWrap,
   StyledResultsHeader,
   StyledResultsWrapper,
   StyledRow,
   StyledRowHeader,
-  StyledPillWrap,
 } from "./EntitySearchBoxStyles";
 import { EntitySearchResults } from "./EntitySearchResults/EntitySearchResults";
 
