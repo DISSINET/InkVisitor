@@ -1,23 +1,6 @@
 import { EntityEnums, UserEnums } from "@shared/enums";
 import { IResponseTree, IStatement } from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  COLLAPSED_PANEL_WIDTH,
-  FIRST_PANEL_MIN_WIDTH,
-  FOURTH_PANEL_MIN_WIDTH,
-  fourthPanelBoxesHeightThirds,
-  hiddenBoxHeight,
-  INIT_PERCENT_PANEL_WIDTHS,
-  INIT_PERCENT_PANEL_WIDTHS_LARGE_SCREEN,
-  INIT_PERCENT_PANEL_WIDTHS_SMALL_SCREEN,
-  LARGE_SCREEN_LIMIT,
-  MAIN_PAGE_CENTER_SEPARATOR_X_PERCENT_POSITION,
-  MAIN_PAGE_SEARCH_SEPARATOR_X_PERCENT_POSITION,
-  MAIN_PAGE_TREE_SEPARATOR_X_PERCENT_POSITION,
-  SECOND_PANEL_MIN_WIDTH,
-  SMALL_SCREEN_LIMIT,
-  THIRD_PANEL_MIN_WIDTH,
-} from "Theme/constants";
 import api from "api";
 import { Box, Button, ButtonGroup, Panel } from "components";
 import {
@@ -47,6 +30,23 @@ import { setThirdPanelRealWidth } from "redux/features/layout/mainPage/thirdPane
 import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 import { setIsLoading } from "redux/features/statementList/isLoadingSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
+import {
+  COLLAPSED_PANEL_WIDTH,
+  FIRST_PANEL_MIN_WIDTH,
+  FOURTH_PANEL_MIN_WIDTH,
+  fourthPanelBoxesHeightThirds,
+  hiddenBoxHeight,
+  INIT_PERCENT_PANEL_WIDTHS,
+  INIT_PERCENT_PANEL_WIDTHS_LARGE_SCREEN,
+  INIT_PERCENT_PANEL_WIDTHS_SMALL_SCREEN,
+  LARGE_SCREEN_LIMIT,
+  MAIN_PAGE_CENTER_SEPARATOR_X_PERCENT_POSITION,
+  MAIN_PAGE_SEARCH_SEPARATOR_X_PERCENT_POSITION,
+  MAIN_PAGE_TREE_SEPARATOR_X_PERCENT_POSITION,
+  SECOND_PANEL_MIN_WIDTH,
+  SMALL_SCREEN_LIMIT,
+  THIRD_PANEL_MIN_WIDTH,
+} from "Theme/constants";
 import { DetailBoxState } from "types";
 import { floorNumberToOneDecimal, searchTree } from "utils/utils";
 import { MemoizedEntityBookmarkBox } from "./containers/EntityBookmarkBox/EntityBookmarkBox";
@@ -56,6 +56,10 @@ import { MemoizedStatementEditorBox } from "./containers/StatementEditorBox/Stat
 import { MemoizedStatementListBox } from "./containers/StatementsListBox/StatementListBox";
 import { MemoizedTemplateListBox } from "./containers/TemplateListBox/TemplateListBox";
 import { MemoizedTerritoryTreeBox } from "./containers/TerritoryTreeBox/TerritoryTreeBox";
+import {
+  StyledListAnnotatorTab,
+  StyledListAnnotatorTabGroup,
+} from "./MainPageStyles";
 
 type FourthPanelBoxes = "search" | "bookmarks" | "templates";
 
@@ -866,31 +870,30 @@ const MainPage: React.FC<MainPage> = ({}) => {
                 </ButtonGroup>
               )}
               {territoryId && (
-                <ButtonGroup
-                  style={{ marginLeft: "0.5rem", marginRight: "0.5rem" }}
-                >
-                  <Button
-                    color="success"
-                    icon={<FaList />}
-                    // label={`list (${territory.statements.length})`}
-                    label={`list`}
+                <StyledListAnnotatorTabGroup>
+                  <StyledListAnnotatorTab
+                    type="button"
+                    $isSelected={!annotatorOpened}
                     onClick={() => {
                       setAnnotatorOpened(false);
                       dispatch(setDetailBoxState(DetailBoxState.Normal));
                     }}
-                    inverted={!!annotatorOpened}
-                  ></Button>
-                  <Button
-                    color="success"
-                    icon={<FaHighlighter />}
-                    label="annotator"
+                  >
+                    <FaList />
+                    list
+                  </StyledListAnnotatorTab>
+                  <StyledListAnnotatorTab
+                    type="button"
+                    $isSelected={!!annotatorOpened}
                     onClick={() => {
                       setAnnotatorOpened(true);
                       dispatch(setDetailBoxState(DetailBoxState.Normal));
                     }}
-                    inverted={!annotatorOpened}
-                  ></Button>
-                </ButtonGroup>
+                  >
+                    <FaHighlighter />
+                    annotator
+                  </StyledListAnnotatorTab>
+                </StyledListAnnotatorTabGroup>
               )}
               {/* Admin / Owner / Editor with writer rights */}
               {hasWriteRightsToSelectedTerritory && territoryId && (
