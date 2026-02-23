@@ -247,6 +247,8 @@ function areEntityTagsEqual(
   // Entity-based checks
   if (prev.entity.id !== next.entity.id) return false;
   if (prev.entity.status !== next.entity.status) return false;
+  if (prev.entity?.data?.logicalType !== next.entity?.data?.logicalType)
+    return false;
   const prevLabel = getEntityLabel(prev.entity);
   const nextLabel = getEntityLabel(next.entity);
   if (prevLabel !== nextLabel) return false;
