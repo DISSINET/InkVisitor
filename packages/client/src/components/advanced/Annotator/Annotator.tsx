@@ -381,7 +381,14 @@ export const TextAnnotator = ({
 
         // Use end position for backwards selection, start position for forwards selection
         const menuX = isBackwardsSelection ? endX : startX;
-        const menuY = isBackwardsSelection ? endY : startY;
+        let menuY = isBackwardsSelection ? endY : startY;
+
+        // Never position menu on first or second row — start from third row
+        const thirdRowY =
+          rect.top + (2 * annotator.lineHeight) / RATIO;
+        if (!isFullSelection && menuY < thirdRowY) {
+          menuY = thirdRowY;
+        }
 
         // Create a virtual element for the reference point that represents the selection
         const virtualElement = {
