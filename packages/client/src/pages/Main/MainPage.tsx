@@ -833,6 +833,12 @@ const MainPage: React.FC<MainPage> = ({}) => {
           label="Statements"
           borderColor="white"
           height={getStatementListBoxHeight()}
+          onHeaderClick={() => {
+            if (detailBoxState === DetailBoxState.FullHeight) {
+              dispatch(setDetailBoxState(DetailBoxState.Normal));
+            }
+          }}
+          disableHeaderClick={detailBoxState !== DetailBoxState.FullHeight}
           buttons={[
             <>
               {territoryId && (
@@ -917,6 +923,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
                             territoryId
                           )
                         );
+                        if (detailBoxState === DetailBoxState.FullHeight) {
+                          dispatch(setDetailBoxState(DetailBoxState.Normal));
+                        }
                       }
                     }}
                   />
@@ -935,6 +944,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
             label="Detail"
             borderColor="white"
             onHeaderClick={handleMaximizeDetailBox}
+            disableHeaderClick={detailBoxState === DetailBoxState.FullHeight}
             height={getDetailBoxHeight()}
             // Scroll is disabled because of the tabs and is handled inside the EntityDetail component
             disableScroll
@@ -1033,7 +1043,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
             hideFourthPanelButton(),
           ]}
           onHeaderClick={toggleFourthPanel}
-          disableOpenBoxHeaderClick
+          disableHeaderClick
         >
           <MemoizedEntitySearchBox />
         </Box>
@@ -1048,7 +1058,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
             hideFourthPanelButton(),
           ]}
           onHeaderClick={toggleFourthPanel}
-          disableOpenBoxHeaderClick
+          disableHeaderClick
         >
           <MemoizedEntityBookmarkBox />
         </Box>
@@ -1063,7 +1073,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
             hideFourthPanelButton(),
           ]}
           onHeaderClick={toggleFourthPanel}
-          disableOpenBoxHeaderClick
+          disableHeaderClick
         >
           <MemoizedTemplateListBox />
         </Box>

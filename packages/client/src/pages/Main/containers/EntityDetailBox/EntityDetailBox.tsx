@@ -8,11 +8,13 @@ import { StyledTabGroup } from "./EntityDetailBoxStyles";
 import { EntityDetailTab } from "./EntityDetailTab/EntityDetailTab";
 import update from "immutability-helper";
 import { Loader } from "components";
-import { useAppSelector } from "redux/hooks";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
 import { DetailBoxState } from "types";
 
 interface EntityDetailBox {}
 export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
+  const dispatch = useAppDispatch();
   const ping: number = useAppSelector((state) => state.ping);
   const detailBoxState: DetailBoxState = useAppSelector(
     (state) => state.layout.mainPage.detailBoxState
@@ -134,7 +136,12 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                 key={key}
                 index={key}
                 entity={entity}
-                onClick={() => setSelectedDetailId(entity.id)}
+                onClick={() => {
+                  if (detailBoxMinimized) {
+                    dispatch(setDetailBoxState(DetailBoxState.Normal));
+                  }
+                  setSelectedDetailId(entity.id);
+                }}
                 onClose={() => handleClose(entity.id)}
                 isSelected={selectedDetailId === entity.id}
                 moveRow={moveRow}
