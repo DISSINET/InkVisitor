@@ -1,3 +1,8 @@
+import {
+  AutoPlacement,
+  BasePlacement,
+  VariationPlacement,
+} from "@popperjs/core";
 import { BaseDropdown } from "components";
 import React from "react";
 
@@ -9,6 +14,7 @@ interface BasicDropdown<T = string> {
   icon?: React.ReactNode;
   placeholder?: string;
   tooltipLabel?: string;
+  tooltipPosition?: AutoPlacement | BasePlacement | VariationPlacement;
   disableTyping?: boolean;
   disabled?: boolean;
 
@@ -23,6 +29,7 @@ export const BasicDropdown = <T extends string>({
   icon,
   placeholder,
   tooltipLabel,
+  tooltipPosition,
   disableTyping = false,
   disabled,
   loggerId,
@@ -36,6 +43,7 @@ export const BasicDropdown = <T extends string>({
       options={options}
       placeholder={placeholder}
       tooltipLabel={tooltipLabel}
+      tooltipPosition={tooltipPosition}
       icon={icon}
       noDropDownIndicator={noDropDownIndicator}
       disableTyping={disableTyping}

@@ -1,3 +1,8 @@
+import {
+  AutoPlacement,
+  BasePlacement,
+  VariationPlacement,
+} from "@popperjs/core";
 import { allEntities } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
 import { heightHeader } from "Theme/constants";
@@ -7,7 +12,6 @@ import {
   ActionMeta,
   ControlProps,
   DropdownIndicatorProps,
-  GroupBase,
   MultiValueProps,
   OptionProps,
   SingleValueProps,
@@ -17,9 +21,9 @@ import {
 import { DropdownItem } from "types";
 import {
   StyledFaChevronDown,
-  StyledValueIconWrap,
   StyledSelect,
   StyledSelectWrapper,
+  StyledValueIconWrap,
 } from "./BaseDropdownStyles";
 
 interface BaseDropdown {
@@ -35,6 +39,7 @@ interface BaseDropdown {
   noOptionsMessage?: string;
   icon?: React.ReactNode;
   tooltipLabel?: string;
+  tooltipPosition?: AutoPlacement | BasePlacement | VariationPlacement;
   // single entity dropdown props
   onFocus?: () => void;
   onBlur?: () => void;
@@ -80,6 +85,7 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
 
   icon,
   tooltipLabel,
+  tooltipPosition = "top",
   entityDropdown = false,
   attributeDropdown,
 
@@ -215,7 +221,7 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
           }
           visible={showTooltip}
           referenceElement={referenceElement}
-          position="top"
+          position={tooltipPosition}
         />
       )}
     </>
