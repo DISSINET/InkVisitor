@@ -38,6 +38,7 @@ interface StyledTr {
   $isOpened?: boolean;
   $isSelected?: boolean;
   opacity?: number;
+  $listMode?: boolean;
 }
 export const StyledTr = styled.tr<StyledTr>`
   height: ${({ theme }) => theme.space[16]};
@@ -53,7 +54,8 @@ export const StyledTr = styled.tr<StyledTr>`
   border-top: 1px solid ${({ theme }) => theme.color["gray"][500]};
   border-left: ${({ theme, $isOpened }) =>
     $isOpened ? "4px solid " + theme.color["success"] : ""};
-  cursor: ${({ $isOpened }) => ($isOpened ? "default" : "pointer")};
+  cursor: ${({ $isOpened, $listMode }) =>
+    $isOpened && $listMode ? "default" : "pointer"};
   td:first-child {
     padding-left: ${({ $isOpened }) => (!$isOpened ? "0.9rem" : "")};
     width: 1%;

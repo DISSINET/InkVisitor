@@ -117,6 +117,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
     <React.Fragment key={row.original.data.territory?.order}>
       <StyledTr
         ref={dropRef}
+        $listMode={displayMode === StatementListDisplayMode.LIST}
         opacity={opacity}
         $isOpened={row.original.id === statementId}
         $isSelected={isSelected}
