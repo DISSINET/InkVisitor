@@ -2,7 +2,7 @@ import { Placement } from "@popperjs/core";
 import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import { ThemeColor } from "Theme/theme";
-import { Button, Tag } from "components";
+import { Button, ButtonGroup, Tag } from "components";
 import { EntityTooltip } from "components/advanced";
 import React, { ReactNode, useCallback, useRef, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
@@ -188,7 +188,10 @@ const EntityTagComponent: React.FC<EntityTag> = ({
         entity={entity}
         showOnly={showOnly}
         button={
-          button ? button : unlinkButton && renderUnlinkButton(unlinkButton)
+          <>
+            {button && button}
+            {unlinkButton && renderUnlinkButton(unlinkButton)}
+          </>
         }
         moveFn={moveFn}
         entityClass={classId}
