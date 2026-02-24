@@ -761,7 +761,8 @@ export const TextAnnotator = ({
     | null
   >(null);
   const [isRegexMode, setIsRegexMode] = useState<boolean>(false);
-  const [isCaseSensitiveMode, setIsCaseSensitiveMode] = useState<boolean>(true);
+  const [isCaseSensitiveMode, setIsCaseSensitiveMode] =
+    useState<boolean>(false);
   const [isExtendToWholeWordMode, setIsExtendToWholeWordMode] =
     useState<boolean>(false);
   const [isWholeWordOnlyMode, setIsWholeWordOnlyMode] =
