@@ -625,6 +625,41 @@ class Text {
     return this.segments[segment.segmentIndex].lines[segment.lineIndex] || "";
   }
 
+  getLineAndCharFromSegmentParsedIndex(
+    segmentIndex: number,
+    parsedIndex: number
+  ): { lineIndex: number; charInLineIndex: number } | null {
+    const segment = this.segments[segmentIndex];
+    if (!segment) return null;
+    const parsed = Math.max(0, Math.min(parsedIndex, segment.parsed.length));
+    let remaining = parsed;
+    for (let i = 0; i < segment.lines.length; i++) {
+      const lineLen = segment.lines[i].length;
+      if (remaining < lineLen) {
+        return { lineIndex: i, charInLineIndex: remaining };
+      }
+      remaining -= lineLen;
+    }
+    const last = segment.lines.length - 1;
+    return {
+      lineIndex: last,
+      charInLineIndex: segment.lines[last]?.length ?? 0,
+    };
+  }
+
+  positionToCursor(
+    viewport: Viewport,
+    pos: SegmentPosition
+  ): { xLine: number; yLine: number } | null {
+    const segment = this.segments[pos.segmentIndex];
+    if (!segment) return null;
+    const absLine = segment.lineStart + pos.lineIndex;
+    return {
+      xLine: pos.charInLineIndex,
+      yLine: absLine - viewport.lineStart,
+    };
+  }
+
   /**
    * Converts absolute line index to segment position.
    * 
@@ -786,24 +821,66 @@ class Text {
     return out;
   }
 
-  /**
-   * Finds word boundaries around a given text index.
-   * 
-   * @param text - The text to search in
-   * @param index - The character index within the text
-   * @returns Tuple of [startOffset, endOffset] relative to the word boundaries
-   */
-  findWordOffsets(text: string, index: number): [number, number] {
-    const wordRegex = /[^\s,.]+/g; // Match any sequence of characters that are not whitespace, comma, or dot
+  findWordOffsetsInXml(text: string, index: number): [number, number] {
+    let i = index - 1;
+    while (i >= 0 && text[i] !== "<" && text[i] !== ">") {
+      i--;
+    }
+    const leftBound = i < 0 ? ">" : text[i];
+    const tagStart = i;
+    if (leftBound === "<") {
+      const close = text.indexOf(">", tagStart);
+      if (close !== -1) {
+        if (index <= close) {
+          return [-(index - tagStart), close - index];
+        }
+      }
+    }
+    const contentRegex = /[^\s,.<>]+/g;
     let match;
+    const matches: { start: number; end: number }[] = [];
+    while ((match = contentRegex.exec(text)) !== null) {
+      matches.push({ start: match.index, end: match.index + match[0].length });
+    }
+    for (const { start, end } of matches) {
+      if (index >= start && index < end) {
+        return [-(index - start), end - index];
+      }
+      if (index === end && text[index] === "<") {
+        const close = text.indexOf(">", index);
+        if (close !== -1) {
+          return [-(index - start), close - index + 1];
+        }
+        return [-(index - start), 0];
+      }
+      if (index === start - 1 && text[index] === ">") {
+        const nextAngle = text.indexOf("<", index + 1);
+        if (nextAngle !== -1) {
+          return [0, nextAngle - index];
+        }
+        return [0, end - index];
+      }
+    }
+    if (index < text.length && text[index] === "<") {
+      const close = text.indexOf(">", index);
+      if (close !== -1) {
+        return [0, close - index + 1];
+      }
+      return [-1, 1];
+    }
+    if (index < text.length && text[index] === ">") {
+      return [-1, 1];
+    }
+    return [0, 0];
+  }
 
-    // Find all matches of words in the text
+  findWordOffsets(text: string, index: number): [number, number] {
+    const wordRegex = /[^\s,.]+/g;
+    let match;
     const matches = [];
     while ((match = wordRegex.exec(text)) !== null) {
       matches.push({ start: match.index, end: match.index + match[0].length });
     }
-
-    // Find the word containing the given index
     let wordIndices;
     for (let i = 0; i < matches.length; i++) {
       const { start, end } = matches[i];
@@ -812,16 +889,11 @@ class Text {
         break;
       }
     }
-
-    // If no word contains the given index, return default offsets
     if (!wordIndices) {
       return [0, 0];
     }
-
-    // Calculate offsets relative to the word's start and end indices
     const startOffset = index - wordIndices.start;
     const endOffset = wordIndices.end - index;
-
     return [-startOffset, endOffset];
   }
 
@@ -847,9 +919,9 @@ class Text {
     if (this.mode === EditMode.RAW) {
       text = this.segments[position.segmentIndex].raw;
       textIndex = position.rawTextIndex;
+      return this.findWordOffsetsInXml(text, textIndex);
     }
-
-    return this.findWordOffsets(text, textIndex);
+    return this.findWordOffsetsInXml(text, textIndex);
   }
 
   /**
