@@ -65,7 +65,7 @@ export class Annotator {
   ctx: CanvasRenderingContext2D;
 
   // TODO: different font, different sizes
-  font: string = "12px Monospace";
+  font: string = '14px "SUSE Mono", monospace';
 
   fontColor: string = "black";
   bgColor: string = "white";
@@ -119,9 +119,9 @@ export class Annotator {
     }
 
     this.ratio = ratio;
-    this.font = `${12 * this.ratio}px Monospace`;
+    this.font = `${13 * this.ratio}px "SUSE Mono", monospace`;
 
-    this.lineHeight = 15 * this.ratio;
+    this.lineHeight = 16 * this.ratio;
 
     this.ctx = ctx;
     this.width =
@@ -768,7 +768,7 @@ export class Annotator {
     this.ctx.fillStyle = this.fontColor;
 
     const textToRender = this.text.getViewportText(this.viewport);
-    const renderEndCond = this.viewport.lineEnd - this.viewport.lineStart
+    const renderEndCond = this.viewport.lineEnd - this.viewport.lineStart;
     for (let renderLine = 0; renderLine <= renderEndCond; renderLine++) {
       const textLine = textToRender[renderLine];
       if (textLine) {
@@ -782,16 +782,11 @@ export class Annotator {
       // fix cursor position to end of the line (cursor.xLine could be virtually infinity)
       this.cursor.xLine = textSegment.charInLineIndex;
 
-      this.cursor.draw(
-        this.ctx,
-        this.viewport,
-        this.text,
-        {
-          lineHeight: this.lineHeight,
-          charWidth: this.charWidth,
-          charsAtLine: this.text.charsAtLine,
-        },
-      );
+      this.cursor.draw(this.ctx, this.viewport, this.text, {
+        lineHeight: this.lineHeight,
+        charWidth: this.charWidth,
+        charsAtLine: this.text.charsAtLine,
+      });
     }
 
     // if (this.onSelectTextCb && this.cursor.isSelected()) {
@@ -887,16 +882,11 @@ export class Annotator {
 
         highlighter.selectStart = item.start;
         highlighter.selectEnd = item.end;
-        highlighter.draw(
-          this.ctx,
-          this.viewport,
-          this.text,
-          {
-            lineHeight: this.lineHeight,
-            charWidth: this.charWidth,
-            charsAtLine: this.text.charsAtLine,
-          },
-        );
+        highlighter.draw(this.ctx, this.viewport, this.text, {
+          lineHeight: this.lineHeight,
+          charWidth: this.charWidth,
+          charsAtLine: this.text.charsAtLine,
+        });
       }
     }
 

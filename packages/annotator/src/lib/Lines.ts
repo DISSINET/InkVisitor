@@ -10,7 +10,7 @@ export class Lines {
   ctx: CanvasRenderingContext2D;
 
   // TODO: different font, different sizes
-  font: string = "12px Monospace";
+  font: string = '13px "SUSE Mono", monospace';
   fontColor: string = "black";
 
   bgColor: string = "white";
