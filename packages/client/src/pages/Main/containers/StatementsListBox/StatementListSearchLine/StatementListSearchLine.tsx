@@ -118,10 +118,10 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
   useKeypress(
     "f",
     () => {
-        if (isSearchAllowed) {
-          searchInputRef.current?.focus();
-          searchInputRef.current?.select();
-        }
+      if (isSearchAllowed) {
+        searchInputRef.current?.focus();
+        searchInputRef.current?.select();
+      }
     },
     [isSearchAllowed],
     // ctrlKeyCombo is true to allow the focus to work on any page
@@ -314,7 +314,11 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
         <>
           <StyledSearchContainer>
             <StyledSearchIcon>
-              <BiSearch size={18} color={theme.color.info} />
+              <IconWithTooltip
+                icon={<BiSearch size={18} color={theme.color.info} />}
+                tooltipLabel="ctrl + f to search"
+                tooltipPosition="left"
+              />
             </StyledSearchIcon>
 
             <Input
@@ -325,7 +329,6 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
               changeOnType
               width={annotatorWidthTooNarrow ? 100 : 130}
               minWidth={50}
-              clearable
               inputRef={searchInputRef}
             />
 
