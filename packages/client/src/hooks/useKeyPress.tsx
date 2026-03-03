@@ -8,11 +8,12 @@ export default function useKeypress(
 ) {
   const downHandler = useCallback(
     (e: KeyboardEvent) => {
-      if (e.key === targetKey) {
-        if (!ctrlKeyCombo || (ctrlKeyCombo && (e.ctrlKey || e.metaKey))) {
-          handleKeyPress();
-        }
-      }
+      if (e.key !== targetKey) return;
+      const shouldHandleKeyPress =
+        !ctrlKeyCombo || (ctrlKeyCombo && (e.ctrlKey || e.metaKey));
+      if (!shouldHandleKeyPress) return;
+      e.preventDefault();
+      handleKeyPress();
     },
     [targetKey, handleKeyPress, ctrlKeyCombo, dependencyArr]
   );
