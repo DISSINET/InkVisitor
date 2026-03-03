@@ -1,5 +1,6 @@
 import { useCallback, useEffect } from "react";
 
+//TODO: make this hook more intuitive to read and use. Now it's very difficult to see the key combos.
 export default function useKeypress(
   targetKey: string,
   handleKeyPress: () => void,
