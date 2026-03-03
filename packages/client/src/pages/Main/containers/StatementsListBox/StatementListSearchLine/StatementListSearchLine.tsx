@@ -8,7 +8,7 @@ import {
   EntitySuggester,
   EntityTag,
 } from "components/advanced";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { BiSearch } from "react-icons/bi";
 import {
   FaAnchor,
@@ -33,6 +33,7 @@ import {
   StyledSearchResults,
 } from "../StatementListBoxStyles";
 import { StyledCheckboxWrapper } from "./StatementListSearchLineStyles";
+import useKeypress from "hooks/useKeyPress";
 
 interface StatementListSearchLine {
   searchTerm: string;
@@ -111,6 +112,21 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
   setIsCaseSensitiveMode,
 }) => {
   const theme = useTheme();
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Cmd+F / Ctrl+F focuses the search input from anywhere on the page
+  useKeypress(
+    "f",
+    () => {
+      if (isSearchAllowed) {
+        searchInputRef.current?.focus();
+      }
+    },
+    [isSearchAllowed],
+    // ctrlKeyCombo is true to allow the focus to work on any page
+    true
+  );
+
   const [isReplacingOne, setIsReplacingOne] = useState<boolean>(false);
   const [isReplacingAll, setIsReplacingAll] = useState<boolean>(false);
   const replaceSection = useMemo<boolean>(() => {
@@ -309,6 +325,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
               width={annotatorWidthTooNarrow ? 100 : 130}
               minWidth={50}
               clearable
+              inputRef={searchInputRef}
             />
 
             <StyledCheckboxWrapper>
