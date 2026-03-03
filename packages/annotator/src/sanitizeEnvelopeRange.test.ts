@@ -50,6 +50,13 @@ describe('sanitizeEnvelopeRange', () => {
   });
 
   describe('Case 2: Selection equals parent tag', () => {
+    test('should keep full selection when selecting all text that contains an inner tag (wrap outer anchor)', () => {
+      annotator = new Annotator(mockCanvas, 'some text example <1> previously wrapped </1> more text ');
+
+      const result = sanitizeEnvelopeRange(0, 56);
+      expect(result).toEqual([0, 56]);
+    });
+
     test('should keep selection unchanged when selecting entire tag including tags', () => {
       // Text: "<p>test</p>", parsed: "test"
       // User selects entire tag including opening and closing tags (indices 0-11)
@@ -148,11 +155,10 @@ describe('sanitizeEnvelopeRange', () => {
     });
 
     test('should handle text with < symbols that are not tags', () => {
-      // Text contains < symbols in mathematical expressions and comparisons
       annotator = new Annotator(mockCanvas, 'Math: 5 < 10 and <p>real tag</p> with < symbol');
 
-      const result = sanitizeEnvelopeRange(0, 50); // entire text
-      expect(result).toEqual([20, 28]); // Should adjust to content of the real tag, ignoring < symbols in math
+      const result = sanitizeEnvelopeRange(0, 50);
+      expect(result).toEqual([0, 46]);
     });
   });
 

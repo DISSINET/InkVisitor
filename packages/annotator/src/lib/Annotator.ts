@@ -975,7 +975,31 @@ export class Annotator {
       // after this we have envelope around neighboring tags
       indexEnd = this.skipTagsOnRight(indexEnd);
       // Sanitize envelope range by removing enveloping tags from both left and right sides
-      [indexStart, indexEnd] = this.sanitizeEnvelopeRange(indexStart, indexEnd);
+      const raw = this.text.value;
+      let minTagStart = raw.length;
+      let maxTagEnd = 0;
+      const openR = new RegExp(openingTagRegex.source, openingTagRegex.flags);
+      const closeR = new RegExp(closingTagRegex.source, closingTagRegex.flags);
+      let m: RegExpExecArray | null;
+      while ((m = openR.exec(raw)) !== null) {
+        minTagStart = Math.min(minTagStart, m.index);
+        maxTagEnd = Math.max(maxTagEnd, m.index + m[0].length);
+      }
+      while ((m = closeR.exec(raw)) !== null) {
+        minTagStart = Math.min(minTagStart, m.index);
+        maxTagEnd = Math.max(maxTagEnd, m.index + m[0].length);
+      }
+      const selectionEncompassesAllTags =
+        minTagStart <= maxTagEnd &&
+        indexStart <= minTagStart &&
+        indexEnd >= maxTagEnd;
+      if (selectionEncompassesAllTags) {
+        if (indexStart === 0) {
+          indexEnd = raw.length;
+        }
+      } else {
+        [indexStart, indexEnd] = this.sanitizeEnvelopeRange(indexStart, indexEnd);
+      }
 
       // could be '<tag>text .... text</tag> (closing tag always included if present)
       const selectedRawText = this.text.value.slice(indexStart, indexEnd);
@@ -1342,13 +1366,10 @@ export class Annotator {
     // Utility functions
     const clamp = (i: number): number => Math.max(0, Math.min(i, raw.length));
 
-    // Find tag positions only within the selection boundary
-    const findRelevantTagPositions = (): Array<{
-      start: number;
-      end: number;
-      name: string;
-      isOpen: boolean;
-    }> => {
+    const findAllTagPositionsInRange = (
+      rangeStart: number,
+      rangeEnd: number
+    ): Array<{ start: number; end: number; name: string; isOpen: boolean }> => {
       const positions: Array<{
         start: number;
         end: number;
@@ -1357,7 +1378,7 @@ export class Annotator {
       }> = [];
 
       // Search only within the selection range
-      const searchText = raw.slice(start, end);
+      const searchText = raw.slice(rangeStart, rangeEnd);
 
       // Use existing regexes to find all tags in the search range
       const openingRegex = new RegExp(
@@ -1372,9 +1393,8 @@ export class Annotator {
       // Find all opening tags
       let match;
       while ((match = openingRegex.exec(searchText)) !== null) {
-        const absoluteStart = start + match.index;
-        const absoluteEnd = start + match.index + match[0].length;
-
+        const absoluteStart = rangeStart + match.index;
+        const absoluteEnd = rangeStart + match.index + match[0].length;
         positions.push({
           start: absoluteStart,
           end: absoluteEnd,
@@ -1385,9 +1405,8 @@ export class Annotator {
 
       // Find all closing tags
       while ((match = closingRegex.exec(searchText)) !== null) {
-        const absoluteStart = start + match.index;
-        const absoluteEnd = start + match.index + match[0].length;
-
+        const absoluteStart = rangeStart + match.index;
+        const absoluteEnd = rangeStart + match.index + match[0].length;
         positions.push({
           start: absoluteStart,
           end: absoluteEnd,
@@ -1399,6 +1418,13 @@ export class Annotator {
       // Sort by position to maintain order
       return positions.sort((a, b) => a.start - b.start);
     };
+
+    const findRelevantTagPositions = (): Array<{
+      start: number;
+      end: number;
+      name: string;
+      isOpen: boolean;
+    }> => findAllTagPositionsInRange(start, end);
 
     // Normalize and clamp
     let start = clamp(indexStart);
@@ -1425,8 +1451,10 @@ export class Annotator {
 
     // If both boundaries are in text content, no adjustment needed
     if (isInsideText(start) && isInsideText(end)) {
-      // But if the selection extends beyond the actual content, we should still contract it
-      // Only apply this logic if the selection is not a complete tag pair
+      if (start === 0 && end === raw.length) {
+        return [start, end];
+      }
+
       let isCompleteTagPair = false;
 
       // Check if this is a complete tag pair
