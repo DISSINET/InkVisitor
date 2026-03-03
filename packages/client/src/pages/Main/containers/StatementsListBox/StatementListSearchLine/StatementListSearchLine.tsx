@@ -128,6 +128,32 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
     true
   );
 
+  // F3 goes to the next occurrence
+  useKeypress(
+    "F3",
+    () => {
+      if (isSearchAllowed) {
+        goToNextOccurence();
+      }
+    },
+    [isSearchAllowed]
+  );
+
+  // Shift + F3 goes to the previous occurrence
+  useKeypress(
+    "F3",
+    () => {
+      if (isSearchAllowed) {
+        goToPreviousOccurence();
+      }
+    },
+    [isSearchAllowed],
+    // ctrl
+    false,
+    // shift
+    true
+  );
+
   const [isReplacingOne, setIsReplacingOne] = useState<boolean>(false);
   const [isReplacingAll, setIsReplacingAll] = useState<boolean>(false);
   const replaceSection = useMemo<boolean>(() => {
