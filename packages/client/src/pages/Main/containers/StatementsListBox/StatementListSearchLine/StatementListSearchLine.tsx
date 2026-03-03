@@ -118,9 +118,10 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
   useKeypress(
     "f",
     () => {
-      if (isSearchAllowed) {
-        searchInputRef.current?.focus();
-      }
+        if (isSearchAllowed) {
+          searchInputRef.current?.focus();
+          searchInputRef.current?.select();
+        }
     },
     [isSearchAllowed],
     // ctrlKeyCombo is true to allow the focus to work on any page
