@@ -98,14 +98,14 @@ export class Tag {
     // Subtract length of all opening tags before this position
     for (const tag of segment.openingTags) {
       if (tag.position < this.position) {
-        parsedPosition -= tag.getTag().length; 
+        parsedPosition -= tag.getTagLength(); 
       }
     }
     
     // Subtract length of all closing tags before this position
     for (const tag of segment.closingTags) {
       if (tag.position < this.position) {
-        parsedPosition -= tag.getTag().length;
+        parsedPosition -= tag.getTagLength();
       }
     }
     
@@ -130,6 +130,10 @@ export class Tag {
     }
     openTag += '>';
     return openTag;
+  }
+
+  getTagLength(): number {
+    return this.getTag().length;
   }
 
   /**
@@ -235,12 +239,12 @@ export class Segment {
     let parsedTextOpenPosition = this.openingTags
       .filter((t) => t.position < tag.position)
       .reduce((acc, cur) => {
-        return acc - cur.getTag().length;
+        return acc - cur.getTagLength();
       }, tag.position);
     parsedTextOpenPosition = this.closingTags
       .filter((t) => t.position < tag.position)
       .reduce((acc, cur) => {
-        return acc - cur.getTag().length;
+        return acc - cur.getTagLength();
       }, parsedTextOpenPosition);
 
     // fold text-lines to get line-based positon (2d instead of 1d coordinates)
@@ -682,7 +686,7 @@ class Text {
             ? tag.position < rawTextIndex
             : tag.position <= rawTextIndex
         ) {
-          rawTextIndex += tag.getTag().length;
+          rawTextIndex += tag.getTagLength();
         }
       }
     }

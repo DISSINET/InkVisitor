@@ -923,6 +923,14 @@ export class Annotator {
    * @param mode
    */
   setMode(mode: EditMode) {
+    let absIndex: number | null = null;
+    if (this.cursor.xLine >= 0 && this.cursor.yLine >= 0) {
+      const segPos = this.text.cursorToIndex(this.viewport, this.cursor);
+      if (segPos !== null) {
+        absIndex = this.text.getAbsTextIndexFromPosition(segPos);
+      }
+    }
+
     this.element.classList.remove(this.text.mode);
     this.element.classList.add(mode);
 
@@ -930,6 +938,20 @@ export class Annotator {
     this.cursor.reset();
     this.text.prepareSegments();
     this.text.calculateLines();
+
+    if (absIndex !== null && absIndex >= 0) {
+      const segPos = this.text.getSegmentFromAbsTextIndex(absIndex);
+      if (segPos !== null) {
+        const coords = this.text.positionToCursor(this.viewport, segPos);
+        if (coords !== null) {
+          this.cursor.setPosition(coords.xLine, coords.yLine);
+          const absY = coords.yLine + this.viewport.lineStart;
+          if (absY < this.viewport.lineStart || absY > this.viewport.lineEnd - 1) {
+            this.viewport.scrollTo(absY, this.text.noLines);
+          }
+        }
+      }
+    }
   }
 
   /**
