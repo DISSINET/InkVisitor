@@ -1063,6 +1063,27 @@ export class Annotator {
     this.draw();
   }
 
+  /**
+   * Returns the absolute character index in raw text that corresponds to the start of the viewport (first visible character at the top of the canvas).
+   */
+  getViewportStartInRawText(): number {
+    const pos = this.text.getSegmentPosition(this.viewport.lineStart, 0);
+    if (!pos) return 0;
+    return this.text.getAbsTextIndexFromPosition(pos);
+  }
+
+  /**
+   * Scrolls the viewport so that the given raw text character index is at the top of the visible area.
+   */
+  scrollToRawPosition(rawIndex: number): void {
+    const pos = this.text.getSegmentFromAbsTextIndex(rawIndex);
+    if (!pos) return;
+    const segment = this.text.segments[pos.segmentIndex];
+    const absLine = segment.lineStart + pos.lineIndex;
+    this.viewport.scrollTo(absLine, this.text.noLines);
+    this.draw();
+  }
+
   updateText(newText: string) {
     const positionBeforeChange = this.viewport.lineStart;
 
