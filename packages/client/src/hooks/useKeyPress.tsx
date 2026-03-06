@@ -6,8 +6,10 @@ export default function useKeypress(
   handleKeyPress: () => void,
   dependencyArr?: any[],
   ctrlKeyCombo?: boolean,
-  /** When true: only handle with Shift. When false: only handle without Shift. Omit: don't check. */
-  requireShift?: boolean
+  /** When true: only handle with Shift. When false: only handle without Shift. */
+  requireShift: boolean = false,
+  /** When true: only handle with Alt. When false: only handle without Alt. */
+  requireAlt: boolean = false
 ) {
   const downHandler = useCallback(
     (e: KeyboardEvent) => {
@@ -17,11 +19,19 @@ export default function useKeypress(
         !ctrlKeyCombo || (ctrlKeyCombo && (e.ctrlKey || e.metaKey));
       // If requireShift is true, only handle with shiftKey
       if (!shouldHandleKeyPress) return;
-      if (requireShift !== undefined && e.shiftKey !== requireShift) return;
+      if (e.shiftKey !== requireShift) return;
+      if (e.altKey !== requireAlt) return;
       e.preventDefault();
       handleKeyPress();
     },
-    [targetKey, handleKeyPress, ctrlKeyCombo, requireShift, dependencyArr]
+    [
+      targetKey,
+      handleKeyPress,
+      ctrlKeyCombo,
+      requireShift,
+      requireAlt,
+      dependencyArr,
+    ]
   );
 
   useEffect(() => {
