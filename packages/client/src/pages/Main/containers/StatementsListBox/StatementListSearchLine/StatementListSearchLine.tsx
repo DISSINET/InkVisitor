@@ -362,9 +362,10 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
               <Checkbox
                 iconOnly
                 value={isCaseSensitiveMode}
-                onChangeFn={(checked: boolean) =>
-                  setIsCaseSensitiveMode(checked)
-                }
+                onChangeFn={(checked: boolean) => {
+                  setIsCaseSensitiveMode(checked);
+                  searchInputRef.current?.focus();
+                }}
                 icon={<LuCaseSensitive size={16} />}
                 tooltipLabel="case sensitive mode"
                 tooltipPosition="top"
@@ -373,9 +374,10 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                 <Checkbox
                   iconOnly
                   value={isExtendToWholeWordMode}
-                  onChangeFn={(checked: boolean) =>
-                    setIsExtendToWholeWordMode(checked)
-                  }
+                  onChangeFn={(checked: boolean) => {
+                    setIsExtendToWholeWordMode(checked);
+                    searchInputRef.current?.focus();
+                  }}
                   icon={<FaExpand size={12} />}
                   tooltipLabel="extend to whole word(s)"
                   tooltipPosition="top"
@@ -386,9 +388,10 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                 <Checkbox
                   iconOnly
                   value={isWholeWordOnlyMode}
-                  onChangeFn={(checked: boolean) =>
-                    setIsWholeWordOnlyMode(checked)
-                  }
+                  onChangeFn={(checked: boolean) => {
+                    setIsWholeWordOnlyMode(checked);
+                    searchInputRef.current?.focus();
+                  }}
                   icon={<LuWholeWord size={16} />}
                   tooltipLabel="whole word only"
                   tooltipPosition="top"
@@ -398,7 +401,10 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
               <Checkbox
                 iconOnly
                 value={isRegexMode}
-                onChangeFn={(checked: boolean) => setIsRegexMode(checked)}
+                onChangeFn={(checked: boolean) => {
+                  setIsRegexMode(checked);
+                  searchInputRef.current?.focus();
+                }}
                 icon={<LuRegex size={14} />}
                 tooltipLabel="regex mode"
                 tooltipPosition="top"
