@@ -35,8 +35,10 @@ interface StatementListTextAnnotator {
   >;
   statementListBoxRef?: React.RefObject<HTMLDivElement | null>;
 
-  // storedAnnotatorScroll: number;
-  // setStoredAnnotatorScroll?: React.Dispatch<React.SetStateAction<number>>;
+  storedAnnotatorScrollPosition: number | null;
+  setStoredAnnotatorScrollPosition: React.Dispatch<
+    React.SetStateAction<number | null>
+  >;
 
   hlEntities: EntityEnums.Class[];
   setHlEntities: React.Dispatch<React.SetStateAction<EntityEnums.Class[]>>;
@@ -71,8 +73,8 @@ export const StatementListTextAnnotator: React.FC<
   statementCreateMutation,
   statementListBoxRef,
 
-  // storedAnnotatorScroll,
-  // setStoredAnnotatorScroll = () => {},
+  storedAnnotatorScrollPosition,
+  setStoredAnnotatorScrollPosition,
 
   hlEntities,
   setHlEntities,
@@ -146,7 +148,7 @@ export const StatementListTextAnnotator: React.FC<
             : territoryId;
 
         // Perform the scroll
-        annotator.scrollToAnchor(scrollToId);
+        // annotator.scrollToAnchor(scrollToId);
 
         // Update refs AFTER scroll
         prevTerritoryIdRef.current = territory.id;
@@ -210,8 +212,10 @@ export const StatementListTextAnnotator: React.FC<
               height={annotatorHeight}
               documentId={selectedDocumentId || undefined}
               statementCreateMutation={statementCreateMutation}
-              // storedAnnotatorScroll={storedAnnotatorScroll}
-              // setStoredAnnotatorScroll={setStoredAnnotatorScroll}
+              storedAnnotatorScrollPosition={storedAnnotatorScrollPosition}
+              setStoredAnnotatorScrollPosition={
+                setStoredAnnotatorScrollPosition
+              }
               territory={territory}
               dataDocument={selectedDocument ?? undefined}
               dataDocumentIsFetching={selectedDocumentIsFetching}
