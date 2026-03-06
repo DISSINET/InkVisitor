@@ -356,6 +356,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
               width={annotatorWidthTooNarrow ? 100 : 130}
               minWidth={50}
               inputRef={searchInputRef}
+              clearable
             />
 
             <StyledCheckboxWrapper>
