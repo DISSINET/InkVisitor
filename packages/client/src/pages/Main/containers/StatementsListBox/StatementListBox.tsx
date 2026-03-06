@@ -225,6 +225,11 @@ export const StatementListBox: React.FC = () => {
   }, [statementListOpened]);
 
   const [annotator, setAnnotator] = useState<Annotator | undefined>(undefined);
+  const [storedAnnotatorScrollPosition, setStoredAnnotatorScrollPosition] =
+    useState<number | null>(null);
+  useEffect(() => {
+    console.log("storedAnnotatorScrollPosition", storedAnnotatorScrollPosition);
+  }, [storedAnnotatorScrollPosition]);
 
   const { setAnnotator: useAnnotatorSetAnnotator } = useAnnotator();
 
@@ -1081,12 +1086,10 @@ export const StatementListBox: React.FC = () => {
                   territoryId={territoryId}
                   territory={territory}
                   statementId={statementId}
-                  // storedAnnotatorScroll={storedAnnotatorScroll}
-                  // setStoredAnnotatorScroll={(newScroll) => {
-                  //   if (storedAnnotatorResourceId) {
-                  //     setStoredAnnotatorScroll(newScroll);
-                  //   }
-                  // }}
+                  storedAnnotatorScrollPosition={storedAnnotatorScrollPosition}
+                  setStoredAnnotatorScrollPosition={
+                    setStoredAnnotatorScrollPosition
+                  }
                   hlEntities={hlEntities}
                   setHlEntities={setHlEntities}
                   statementCreateMutation={statementCreateMutation}

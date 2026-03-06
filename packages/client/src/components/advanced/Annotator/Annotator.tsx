@@ -37,6 +37,7 @@ import { CStatement } from "constructors";
 import {
   useAnnotatorSearch,
   useDebounce,
+  useDebouncedCallback,
   useSearchParams,
   useTheme,
 } from "hooks";
@@ -72,8 +73,10 @@ interface TextAnnotatorProps {
 
   forwardAnnotator?: (annotator?: Annotator) => void;
 
-  // storedAnnotatorScroll?: number;
-  // setStoredAnnotatorScroll?: React.Dispatch<React.SetStateAction<number>>;
+  storedAnnotatorScrollPosition?: number | null;
+  setStoredAnnotatorScrollPosition?: React.Dispatch<
+    React.SetStateAction<number | null>
+  >;
 
   territory?: IResponseTerritory;
   // territoryId is from URL params and is used to reset the annotator when the territory changes
@@ -106,8 +109,8 @@ export const TextAnnotator = ({
   thisTerritoryEntityId = undefined,
 
   forwardAnnotator = (undefined) => {},
-  // storedAnnotatorScroll = 0,
-  // setStoredAnnotatorScroll = () => {},
+  storedAnnotatorScrollPosition = null,
+  setStoredAnnotatorScrollPosition,
 
   territory,
   territoryId,
@@ -210,6 +213,24 @@ export const TextAnnotator = ({
   const scroller = useRef<HTMLDivElement>(null);
   const lines = useRef<HTMLCanvasElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const annotatorRef = useRef<Annotator | null>(null);
+  annotatorRef.current = annotator;
+
+  const saveScrollPositionOnScrollEnd = useDebouncedCallback(() => {
+    const a = annotatorRef.current;
+    if (a && setStoredAnnotatorScrollPosition) {
+      setStoredAnnotatorScrollPosition(a.getViewportStartInRawText());
+    }
+  }, 200);
+
+  useEffect(() => {
+    if (!annotator || !setStoredAnnotatorScrollPosition) return;
+    annotator.onScroll(() => saveScrollPositionOnScrollEnd());
+  }, [
+    annotator,
+    setStoredAnnotatorScrollPosition,
+    saveScrollPositionOnScrollEnd,
+  ]);
 
   useEffect(() => {
     if (annotator) {
@@ -627,13 +648,12 @@ export const TextAnnotator = ({
 
     newAnnotator.draw();
 
+    if (storedAnnotatorScrollPosition != null) {
+      newAnnotator.scrollToRawPosition(storedAnnotatorScrollPosition);
+    }
+
     setAnnotator(newAnnotator);
     forwardAnnotator(newAnnotator);
-
-    // Probably not necessary, this is sending many updates to component on scroll
-    // newAnnotator.onScroll(() => {
-    //   setStoredAnnotatorScroll(newAnnotator.viewport.lineStart);
-    // });
 
     newAnnotator.setMode(originalMode);
   };
