@@ -190,7 +190,9 @@ export const StatementListTextAnnotator: React.FC<
               <BsInfoCircle size="23" />
             </StyledEmptyState>
             <StyledEmptyState>
-              {"No document selected yet. Pick one from the suggester"}
+              {
+                "No document selected yet. Pick a resource from the resource suggester"
+              }
             </StyledEmptyState>
           </div>
         )}

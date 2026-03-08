@@ -4,10 +4,40 @@ export const StyledContainer = styled.div`
   position: relative;
   padding: 20px;
   display: grid;
-  grid-template-rows: auto auto 1fr 1fr;
+  grid-template-rows: auto 1fr;
   gap: 1.5rem;
   width: 100%;
   height: 100%;
+`;
+
+export const StyledTabsContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+`;
+
+export const StyledTabContent = styled.div`
+  display: grid;
+  grid-template-rows: auto 1fr 1fr;
+  gap: 1.5rem;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+`;
+
+export const StyledDocumentSelector = styled.div`
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+`;
+
+export const StyledDocumentAuditContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  overflow: auto;
+  padding-right: 0.5rem;
 `;
 
 export const StyledHeader = styled.div`

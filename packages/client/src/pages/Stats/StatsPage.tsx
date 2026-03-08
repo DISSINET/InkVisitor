@@ -7,7 +7,9 @@ import { Button, ButtonGroup, Input, Loader } from "components";
 import { useEffect, useMemo, useReducer, useState } from "react";
 import { FaCalendarPlus, FaDatabase, FaSyncAlt, FaTimes } from "react-icons/fa";
 import { useAppSelector } from "redux/hooks";
+import { ButtonSize } from "types";
 import { USER_THRESHOLD_MAX } from "./constants";
+import { DocumentTable } from "./DocumentTable/DocumentTable";
 import { StatsChart } from "./StatsChart/StatsChart";
 import { StatsTable } from "./StatsTable/StatsTable";
 import { initialState, statsReducer } from "./store";
@@ -26,7 +28,11 @@ import {
   StyledHeading,
   StyledResultsChart,
   StyledResultsTable,
+  StyledTabContent,
+  StyledTabsContainer,
 } from "./StatsPageStyles";
+
+type StatsTab = "entities" | "documents";
 
 // Helper functions for date conversion
 const isoToDatePicker = (isoString: string): string => {
@@ -40,6 +46,7 @@ const datePickerToIso = (dateString: string): string => {
 export const StatsPage = () => {
   const client = useQueryClient();
   const [state, dispatch] = useReducer(statsReducer, initialState);
+  const [activeTab, setActiveTab] = useState<StatsTab>("entities");
 
   // const [windowWidth, windowHeight] = useWindowSize();
   const layoutWidth: number = useAppSelector(
@@ -184,8 +191,23 @@ export const StatsPage = () => {
       <StyledHeader>
         <StyledHeading>Statistics</StyledHeading>
 
-        <ButtonGroup>
-          {allowMaterializedStats && (
+        <StyledTabsContainer>
+          <ButtonGroup>
+            <Button
+              label="Entities"
+              size={ButtonSize.Large}
+              onClick={() => setActiveTab("entities")}
+              color={activeTab === "entities" ? "primary" : "grey"}
+            />
+            <Button
+              label="Documents"
+              size={ButtonSize.Large}
+              onClick={() => setActiveTab("documents")}
+              color={activeTab === "documents" ? "primary" : "grey"}
+            />
+          </ButtonGroup>
+
+          {activeTab === "entities" && allowMaterializedStats && (
             <span style={{ zIndex: 30 }}>
               <AttributeButtonGroup
                 noMargin
@@ -218,233 +240,241 @@ export const StatsPage = () => {
               />
             </span>
           )}
-        </ButtonGroup>
+        </StyledTabsContainer>
       </StyledHeader>
 
-      <StyledFieldGroup>
-        {/* Date From */}
-        <StyledField>
-          <StyledFieldLabel>From Date</StyledFieldLabel>
-          {!state.showDateFromRangePicker ? (
-            <StyledDateInputWrapper>
-              <StyledFieldLValueSmall>Since Forever</StyledFieldLValueSmall>
-              <Button
-                icon={<FaCalendarPlus />}
-                onClick={() => {
-                  dispatch({
-                    type: "showDateFromRangePickerUpdate",
-                    payload: true,
-                  });
-                  dispatch({
-                    type: "dateFromUpdate",
-                    payload: new Date(
-                      new Date().setFullYear(new Date().getFullYear() - 5)
-                    ).toISOString(),
-                  });
-                }}
-                color="primary"
-                inverted
-                tooltipLabel="Add custom date from"
-                noBorder
-                noBackground
-              />
-            </StyledDateInputWrapper>
-          ) : (
-            <StyledDateInputWrapper>
-              <Input
-                type="date"
-                value={isoToDatePicker(state.dateFrom)}
-                onChangeFn={(value) =>
-                  dispatch({
-                    type: "dateFromUpdate",
-                    payload: datePickerToIso(value),
-                  })
-                }
-              />
-              <Button
-                icon={<FaTimes />}
-                onClick={() => {
-                  dispatch({
-                    type: "showDateFromRangePickerUpdate",
-                    payload: false,
-                  });
-                  dispatch({
-                    type: "dateFromUpdate",
-                    payload: new Date("2000-01-01").toISOString(),
-                  });
-                }}
-                color="primary"
-                inverted
-                tooltipLabel="Reset to Since Forever"
-                noBackground
-              />
-            </StyledDateInputWrapper>
+      {activeTab === "entities" && (
+        <StyledTabContent>
+          <StyledFieldGroup>
+            {/* Date From */}
+            <StyledField>
+              <StyledFieldLabel>From Date</StyledFieldLabel>
+              {!state.showDateFromRangePicker ? (
+                <StyledDateInputWrapper>
+                  <StyledFieldLValueSmall>Since Forever</StyledFieldLValueSmall>
+                  <Button
+                    icon={<FaCalendarPlus />}
+                    onClick={() => {
+                      dispatch({
+                        type: "showDateFromRangePickerUpdate",
+                        payload: true,
+                      });
+                      dispatch({
+                        type: "dateFromUpdate",
+                        payload: new Date(
+                          new Date().setFullYear(new Date().getFullYear() - 5)
+                        ).toISOString(),
+                      });
+                    }}
+                    color="primary"
+                    inverted
+                    tooltipLabel="Add custom date from"
+                    noBorder
+                    noBackground
+                  />
+                </StyledDateInputWrapper>
+              ) : (
+                <StyledDateInputWrapper>
+                  <Input
+                    type="date"
+                    value={isoToDatePicker(state.dateFrom)}
+                    onChangeFn={(value) =>
+                      dispatch({
+                        type: "dateFromUpdate",
+                        payload: datePickerToIso(value),
+                      })
+                    }
+                  />
+                  <Button
+                    icon={<FaTimes />}
+                    onClick={() => {
+                      dispatch({
+                        type: "showDateFromRangePickerUpdate",
+                        payload: false,
+                      });
+                      dispatch({
+                        type: "dateFromUpdate",
+                        payload: new Date("2000-01-01").toISOString(),
+                      });
+                    }}
+                    color="primary"
+                    inverted
+                    tooltipLabel="Reset to Since Forever"
+                    noBackground
+                  />
+                </StyledDateInputWrapper>
+              )}
+            </StyledField>
+
+            {/* Date To */}
+            <StyledField>
+              <StyledFieldLabel>To Date</StyledFieldLabel>
+              {!state.showDateToRangePicker ? (
+                <StyledDateInputWrapper>
+                  <StyledFieldLValueSmall>Until Now</StyledFieldLValueSmall>
+                  <Button
+                    icon={<FaCalendarPlus />}
+                    onClick={() => {
+                      dispatch({
+                        type: "dateToUpdate",
+                        payload: new Date().toISOString(),
+                      });
+                      dispatch({
+                        type: "showDateToRangePickerUpdate",
+                        payload: true,
+                      });
+                    }}
+                    color="primary"
+                    inverted
+                    tooltipLabel="Add custom date to"
+                    noBorder
+                    noBackground
+                  />
+                </StyledDateInputWrapper>
+              ) : (
+                <StyledDateInputWrapper>
+                  <Input
+                    type="date"
+                    value={isoToDatePicker(state.dateTo)}
+                    onChangeFn={(value) =>
+                      dispatch({
+                        type: "dateToUpdate",
+                        payload: datePickerToIso(value),
+                      })
+                    }
+                  />
+                  <Button
+                    icon={<FaTimes />}
+                    onClick={() => {
+                      dispatch({
+                        type: "showDateToRangePickerUpdate",
+                        payload: false,
+                      });
+                      updateToCurrentTime();
+                    }}
+                    color="primary"
+                    inverted
+                    tooltipLabel="Reset to Until Now"
+                    noBackground
+                  />
+                </StyledDateInputWrapper>
+              )}
+            </StyledField>
+
+            <StyledField>
+              <StyledFieldLabel>Time Unit</StyledFieldLabel>
+              <ButtonGroup $noMarginRight>
+                {Object.values(TimeUnit).map((unit) => (
+                  <Button
+                    key={unit}
+                    label={String(unit)}
+                    onClick={() => {
+                      dispatch({
+                        type: "timeUnitUpdate",
+                        payload: unit as TimeUnit,
+                      });
+                    }}
+                    color={state.timeUnit === unit ? "primary" : "grey"}
+                  />
+                ))}
+              </ButtonGroup>
+            </StyledField>
+
+            <StyledField>
+              <StyledFieldLabel>Event type</StyledFieldLabel>
+              <ButtonGroup $noMarginRight>
+                {Object.values(EventType).map((eventType) => (
+                  <Button
+                    key={eventType}
+                    label={String(eventType)}
+                    onClick={() => {
+                      dispatch({
+                        type: "eventTypeUpdate",
+                        payload: eventType,
+                      });
+                    }}
+                    color={
+                      state.eventType.includes(eventType) ? "primary" : "grey"
+                    }
+                  />
+                ))}
+              </ButtonGroup>
+            </StyledField>
+
+            <StyledField>
+              <StyledFieldLabel>Aggregate By</StyledFieldLabel>
+              <ButtonGroup $noMarginRight>
+                {Object.values(Aggregation).map((agg) => (
+                  <Button
+                    key={agg}
+                    label={String(agg)}
+                    onClick={() => {
+                      dispatch({ type: "aggregateUpdate", payload: agg });
+                    }}
+                    color={state.aggregate === agg ? "primary" : "grey"}
+                  />
+                ))}
+              </ButtonGroup>
+            </StyledField>
+            {state.aggregate === Aggregation.USER && (
+              <StyledField>
+                <StyledFieldLabel>Ignore users below %</StyledFieldLabel>
+                <Input
+                  type="number"
+                  value={String(usersIgnoreBelowValue)}
+                  onChangeFn={(value) => {
+                    const num = Number(value);
+                    const safe = Math.min(
+                      USER_THRESHOLD_MAX,
+                      Math.max(0, Number.isFinite(num) ? num : 0)
+                    );
+                    setUsersIgnoreBelowValue(safe);
+                  }}
+                  changeOnType
+                  min={0}
+                  max={USER_THRESHOLD_MAX}
+                />
+              </StyledField>
+            )}
+
+            <Button
+              color="success"
+              label={state.useMaterialized ? "Aggregate" : "Refresh"}
+              disabled={isLoadingStats || isAggregating}
+              onClick={
+                state.useMaterialized
+                  ? () => void aggregateMutateAsync()
+                  : updateToCurrentTime
+              }
+            />
+          </StyledFieldGroup>
+
+          {data && (
+            <>
+              <StyledResultsChart ref={chartRef}>
+                <StatsChart
+                  data={data}
+                  height={chartHeight ? Math.max(0, chartHeight) : 0}
+                  width={chartWidth ? Math.max(0, chartWidth - 50) : 0}
+                  request={statsRequest}
+                />
+              </StyledResultsChart>
+              <StyledResultsTable ref={tableRef}>
+                <StatsTable
+                  data={data}
+                  height={tableHeight ? Math.max(0, tableHeight) : 0}
+                  width={tableWidth ? Math.max(0, tableWidth - 50) : 0}
+                  request={statsRequest}
+                />
+              </StyledResultsTable>
+            </>
           )}
-        </StyledField>
 
-        {/* Date To */}
-        <StyledField>
-          <StyledFieldLabel>To Date</StyledFieldLabel>
-          {!state.showDateToRangePicker ? (
-            <StyledDateInputWrapper>
-              <StyledFieldLValueSmall>Until Now</StyledFieldLValueSmall>
-              <Button
-                icon={<FaCalendarPlus />}
-                onClick={() => {
-                  dispatch({
-                    type: "dateToUpdate",
-                    payload: new Date().toISOString(),
-                  });
-                  dispatch({
-                    type: "showDateToRangePickerUpdate",
-                    payload: true,
-                  });
-                }}
-                color="primary"
-                inverted
-                tooltipLabel="Add custom date to"
-                noBorder
-                noBackground
-              />
-            </StyledDateInputWrapper>
-          ) : (
-            <StyledDateInputWrapper>
-              <Input
-                type="date"
-                value={isoToDatePicker(state.dateTo)}
-                onChangeFn={(value) =>
-                  dispatch({
-                    type: "dateToUpdate",
-                    payload: datePickerToIso(value),
-                  })
-                }
-              />
-              <Button
-                icon={<FaTimes />}
-                onClick={() => {
-                  dispatch({
-                    type: "showDateToRangePickerUpdate",
-                    payload: false,
-                  });
-                  updateToCurrentTime();
-                }}
-                color="primary"
-                inverted
-                tooltipLabel="Reset to Until Now"
-                noBackground
-              />
-            </StyledDateInputWrapper>
-          )}
-        </StyledField>
-
-        <StyledField>
-          <StyledFieldLabel>Time Unit</StyledFieldLabel>
-          <ButtonGroup $noMarginRight>
-            {Object.values(TimeUnit).map((unit) => (
-              <Button
-                key={unit}
-                label={String(unit)}
-                onClick={() => {
-                  dispatch({
-                    type: "timeUnitUpdate",
-                    payload: unit as TimeUnit,
-                  });
-                }}
-                color={state.timeUnit === unit ? "primary" : "grey"}
-              />
-            ))}
-          </ButtonGroup>
-        </StyledField>
-
-        <StyledField>
-          <StyledFieldLabel>Event type</StyledFieldLabel>
-          <ButtonGroup $noMarginRight>
-            {Object.values(EventType).map((eventType) => (
-              <Button
-                key={eventType}
-                label={String(eventType)}
-                onClick={() => {
-                  dispatch({
-                    type: "eventTypeUpdate",
-                    payload: eventType,
-                  });
-                }}
-                color={state.eventType.includes(eventType) ? "primary" : "grey"}
-              />
-            ))}
-          </ButtonGroup>
-        </StyledField>
-
-        <StyledField>
-          <StyledFieldLabel>Aggregate By</StyledFieldLabel>
-          <ButtonGroup $noMarginRight>
-            {Object.values(Aggregation).map((agg) => (
-              <Button
-                key={agg}
-                label={String(agg)}
-                onClick={() => {
-                  dispatch({ type: "aggregateUpdate", payload: agg });
-                }}
-                color={state.aggregate === agg ? "primary" : "grey"}
-              />
-            ))}
-          </ButtonGroup>
-        </StyledField>
-        {state.aggregate === Aggregation.USER && (
-          <StyledField>
-            <StyledFieldLabel>Ignore users below %</StyledFieldLabel>
-            <Input
-              type="number"
-              value={String(usersIgnoreBelowValue)}
-              onChangeFn={(value) => {
-                const num = Number(value);
-                const safe = Math.min(
-                  USER_THRESHOLD_MAX,
-                  Math.max(0, Number.isFinite(num) ? num : 0)
-                );
-                setUsersIgnoreBelowValue(safe);
-              }}
-              changeOnType
-              min={0}
-              max={USER_THRESHOLD_MAX}
-            />
-          </StyledField>
-        )}
-
-        <Button
-          color="success"
-          label={state.useMaterialized ? "Aggregate" : "Refresh"}
-          disabled={isLoadingStats || isAggregating}
-          onClick={
-            state.useMaterialized
-              ? () => void aggregateMutateAsync()
-              : updateToCurrentTime
-          }
-        />
-      </StyledFieldGroup>
-
-      {data && (
-        <>
-          <StyledResultsChart ref={chartRef}>
-            <StatsChart
-              data={data}
-              height={chartHeight ? Math.max(0, chartHeight) : 0}
-              width={chartWidth ? Math.max(0, chartWidth - 50) : 0}
-              request={statsRequest}
-            />
-          </StyledResultsChart>
-          <StyledResultsTable ref={tableRef}>
-            <StatsTable
-              data={data}
-              height={tableHeight ? Math.max(0, tableHeight) : 0}
-              width={tableWidth ? Math.max(0, tableWidth - 50) : 0}
-              request={statsRequest}
-            />
-          </StyledResultsTable>
-        </>
+          <Loader show={isLoadingStats || isAggregating} />
+        </StyledTabContent>
       )}
 
-      <Loader show={isLoadingStats || isAggregating} />
+      {activeTab === "documents" && <DocumentTable />}
     </StyledContainer>
   );
 };
