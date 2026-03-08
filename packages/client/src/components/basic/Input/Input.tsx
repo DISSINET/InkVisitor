@@ -60,6 +60,9 @@ interface Input {
   // Number props
   min?: number;
   max?: number;
+
+  /** Optional ref to focus the underlying input (e.g. for Cmd+F / Ctrl+F) */
+  inputRef?: React.RefObject<HTMLInputElement | null>;
 }
 
 export const Input: React.FC<Input> = ({
@@ -95,6 +98,7 @@ export const Input: React.FC<Input> = ({
   showSaveExitIcons = false,
   min,
   max,
+  inputRef,
 }) => {
   const [displayValue, setDisplayValue] = useState(value);
   useEffect(() => {
@@ -112,6 +116,7 @@ export const Input: React.FC<Input> = ({
       {(type === "text" || type === "password") && (
         <div style={{ position: "relative", width: "100%", display: "flex" }}>
           <StyledInput
+            ref={inputRef}
             disabled={disabled}
             type={type}
             width={width}

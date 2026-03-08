@@ -8,7 +8,7 @@ import {
   EntitySuggester,
   EntityTag,
 } from "components/advanced";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { BiSearch } from "react-icons/bi";
 import {
   FaAnchor,
@@ -33,6 +33,7 @@ import {
   StyledSearchResults,
 } from "../StatementListBoxStyles";
 import { StyledCheckboxWrapper } from "./StatementListSearchLineStyles";
+import useKeypress from "hooks/useKeyPress";
 
 interface StatementListSearchLine {
   searchTerm: string;
@@ -111,6 +112,48 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
   setIsCaseSensitiveMode,
 }) => {
   const theme = useTheme();
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Cmd+F / Ctrl+F focuses the search input from anywhere on the page
+  useKeypress(
+    "f",
+    () => {
+      if (isSearchAllowed) {
+        searchInputRef.current?.focus();
+        searchInputRef.current?.select();
+      }
+    },
+    [isSearchAllowed],
+    // ctrlKeyCombo is true to allow the focus to work on any page
+    true
+  );
+
+  // F3 goes to the next occurrence
+  useKeypress(
+    "F3",
+    () => {
+      if (isSearchAllowed) {
+        goToNextOccurence();
+      }
+    },
+    [isSearchAllowed]
+  );
+
+  // Shift + F3 goes to the previous occurrence
+  useKeypress(
+    "F3",
+    () => {
+      if (isSearchAllowed) {
+        goToPreviousOccurence();
+      }
+    },
+    [isSearchAllowed],
+    // ctrl
+    false,
+    // shift
+    true
+  );
+
   const [isReplacingOne, setIsReplacingOne] = useState<boolean>(false);
   const [isReplacingAll, setIsReplacingAll] = useState<boolean>(false);
   const replaceSection = useMemo<boolean>(() => {
@@ -297,7 +340,11 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
         <>
           <StyledSearchContainer>
             <StyledSearchIcon>
-              <BiSearch size={18} color={theme.color.info} />
+              <IconWithTooltip
+                icon={<BiSearch size={18} color={theme.color.info} />}
+                tooltipLabel="ctrl + f to search"
+                tooltipPosition="left"
+              />
             </StyledSearchIcon>
 
             <Input
@@ -308,6 +355,7 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
               changeOnType
               width={annotatorWidthTooNarrow ? 100 : 130}
               minWidth={50}
+              inputRef={searchInputRef}
               clearable
             />
 
@@ -315,9 +363,10 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
               <Checkbox
                 iconOnly
                 value={isCaseSensitiveMode}
-                onChangeFn={(checked: boolean) =>
-                  setIsCaseSensitiveMode(checked)
-                }
+                onChangeFn={(checked: boolean) => {
+                  setIsCaseSensitiveMode(checked);
+                  searchInputRef.current?.focus();
+                }}
                 icon={<LuCaseSensitive size={16} />}
                 tooltipLabel="case sensitive mode"
                 tooltipPosition="top"
@@ -326,9 +375,10 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                 <Checkbox
                   iconOnly
                   value={isExtendToWholeWordMode}
-                  onChangeFn={(checked: boolean) =>
-                    setIsExtendToWholeWordMode(checked)
-                  }
+                  onChangeFn={(checked: boolean) => {
+                    setIsExtendToWholeWordMode(checked);
+                    searchInputRef.current?.focus();
+                  }}
                   icon={<FaExpand size={12} />}
                   tooltipLabel="extend to whole word(s)"
                   tooltipPosition="top"
@@ -339,9 +389,10 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                 <Checkbox
                   iconOnly
                   value={isWholeWordOnlyMode}
-                  onChangeFn={(checked: boolean) =>
-                    setIsWholeWordOnlyMode(checked)
-                  }
+                  onChangeFn={(checked: boolean) => {
+                    setIsWholeWordOnlyMode(checked);
+                    searchInputRef.current?.focus();
+                  }}
                   icon={<LuWholeWord size={16} />}
                   tooltipLabel="whole word only"
                   tooltipPosition="top"
@@ -351,7 +402,10 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
               <Checkbox
                 iconOnly
                 value={isRegexMode}
-                onChangeFn={(checked: boolean) => setIsRegexMode(checked)}
+                onChangeFn={(checked: boolean) => {
+                  setIsRegexMode(checked);
+                  searchInputRef.current?.focus();
+                }}
                 icon={<LuRegex size={14} />}
                 tooltipLabel="regex mode"
                 tooltipPosition="top"
