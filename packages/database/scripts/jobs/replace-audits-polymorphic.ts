@@ -22,7 +22,7 @@ function toPolymorphicDoc(
   } else {
     return null;
   }
-  const out = { ...doc, modelId, auditScope };
+  const out: Record<string, unknown> = { ...doc, modelId, auditScope };
   delete out.entityId;
   delete out.documentId;
   return out;
