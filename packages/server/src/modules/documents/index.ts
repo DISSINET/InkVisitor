@@ -74,11 +74,20 @@ export default Router()
   )
   .get(
     "/:documentId/audits",
-    asyncRouteHandler<IResponseAudit>(async (request: IRequest) => {
+    asyncRouteHandler<IResponseAudit>(
+      async (request: IRequest<{ documentId: string }, unknown, { noAudits?: string }>) => {
       const documentId = request.params.documentId;
       if (!documentId) {
         throw new BadParams("document id has to be set");
       }
+      const requestedNoAudits = request.query.noAudits;
+      const parsedNoAudits = requestedNoAudits
+        ? Number.parseInt(requestedNoAudits, 10)
+        : 5;
+      const noAudits =
+        Number.isFinite(parsedNoAudits) && parsedNoAudits > 0
+          ? parsedNoAudits
+          : 5;
       const existingDocument = await Document.getDocumentById(
         request.db.connection,
         documentId
@@ -87,9 +96,10 @@ export default Router()
         throw DocumentDoesNotExist.forId(documentId);
       }
       const response = new ResponseDocumentAudit(documentId);
-      await response.prepare(request.db.connection);
+      await response.prepare(request.db.connection, noAudits);
       return response;
-    })
+      }
+    )
   )
   .get(
     "/:documentId",

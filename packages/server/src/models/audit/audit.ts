@@ -214,7 +214,7 @@ export default class Audit implements IAudit, IDbModel {
   static async getLastNForDocument(
     dbConn: Connection,
     documentId: string,
-    n = 5
+    n = 10
   ): Promise<Audit[]> {
     const result = await rethink
       .table(Audit.table)

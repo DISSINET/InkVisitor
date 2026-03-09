@@ -154,7 +154,8 @@ export const DocumentTable: React.FC = () => {
       queryKey: ["auditByDocument", selectedDocument?.value],
       queryFn: async () => {
         const res = await api.auditGetByDocument(
-          selectedDocument!.value as string
+          selectedDocument!.value as string,
+          30
         );
         return res.data;
       },
@@ -196,6 +197,7 @@ export const DocumentTable: React.FC = () => {
     if (!dataAudits?.last) return [];
     return dataAudits.last;
   }, [dataAudits]);
+  const hasAudits = auditTableData.length > 0;
 
   return (
     <StyledTabContent>
@@ -217,7 +219,7 @@ export const DocumentTable: React.FC = () => {
 
       {selectedDocument && (
         <StyledDocumentAuditContainer>
-          {dataAudits?.first && (
+          {dataAudits?.first && hasAudits && (
             <StyledDocumentFirstAudit>
               <StyledFieldLabel>First Audit Entry</StyledFieldLabel>
               <StyledDocumentInfoText>
@@ -232,19 +234,30 @@ export const DocumentTable: React.FC = () => {
             </StyledDocumentFirstAudit>
           )}
 
-          <StyledFieldLabel>
-            Recent Changes ({auditTableData.length} entries)
-          </StyledFieldLabel>
-          <Table
-            data={auditTableData}
-            columns={auditTableColumns}
-            perPage={10}
-            entityTitle={{
-              singular: "Audit Entry",
-              plural: "Audit Entries",
-            }}
-            isLoading={isLoadingAudit}
-          />
+          {hasAudits ? (
+            <>
+              <StyledFieldLabel>
+                Recent Changes ({auditTableData.length} entries)
+              </StyledFieldLabel>
+              <Table
+                data={auditTableData}
+                columns={auditTableColumns}
+                perPage={10}
+                entityTitle={{
+                  singular: "Audit Entry",
+                  plural: "Audit Entries",
+                }}
+                isLoading={isLoadingAudit}
+              />
+            </>
+          ) : (
+            !isLoadingAudit && (
+              <StyledDocumentEmptyState>
+                No audit entries were found for this document. Please choose
+                another document.
+              </StyledDocumentEmptyState>
+            )
+          )}
         </StyledDocumentAuditContainer>
       )}
 

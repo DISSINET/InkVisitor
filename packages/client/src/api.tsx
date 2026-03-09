@@ -1043,7 +1043,7 @@ class Api {
    * Document audits response: IResponseAudit
    * - modelId: documentId
    * - auditScope: "document"
-   * - last: IAudit[] (up to 5 most recent)
+   * - last: IAudit[] (up to noAudits most recent, default 5)
    * - first?: IAudit (oldest, if any)
    *
    * Each IAudit when auditScope is document:
@@ -1055,12 +1055,19 @@ class Api {
    */
   async auditGetByDocument(
     documentId: string,
+    noAudits = 5,
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseAudit>> {
     try {
       const response = await this.connection.get(
         `/documents/${documentId}/audits`,
-        options
+        {
+          ...options,
+          params: {
+            ...(options?.params as Record<string, unknown>),
+            noAudits,
+          },
+        }
       );
       return response;
     } catch (err) {

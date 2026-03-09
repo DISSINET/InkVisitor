@@ -33,8 +33,8 @@ export class ResponseDocumentAudit implements IResponseAudit {
     this.modelId = documentId;
   }
 
-  async prepare(db: Connection): Promise<void> {
-    this.last = await Audit.getLastNForDocument(db, this.modelId, 5);
+  async prepare(db: Connection, noAudits = 5): Promise<void> {
+    this.last = await Audit.getLastNForDocument(db, this.modelId, noAudits);
     if (this.last.length) {
       const firstDoc = await Audit.getFirstForDocument(db, this.modelId);
       if (firstDoc) {
