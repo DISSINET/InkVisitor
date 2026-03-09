@@ -672,6 +672,10 @@ export const TextAnnotator = ({
   useEffect(() => {
     if (annotator && mainCanvas.current) {
       annotator?.resize();
+      // hold the position on width resize
+      if (storedAnnotatorScrollPosition !== null) {
+        annotator?.scrollToRawPosition(storedAnnotatorScrollPosition);
+      }
     }
   }, [width, height]);
 

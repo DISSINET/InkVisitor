@@ -229,6 +229,10 @@ export const StatementListBox: React.FC = () => {
     useState<number | null>(null);
 
   useEffect(() => {
+    console.log("storedAnnotatorScrollPosition", storedAnnotatorScrollPosition);
+  }, [storedAnnotatorScrollPosition]);
+
+  useEffect(() => {
     setStoredAnnotatorScrollPosition(null);
   }, [territoryId]);
 
@@ -837,13 +841,16 @@ export const StatementListBox: React.FC = () => {
   );
 
   const statementListHeaderHeight = 103;
-  const contentHeightAnnotator = useMemo(() => {
+  const [contentHeightAnnotator, setContentHeightAnnotator] = useState<number>(
+    contentHeight - statementListHeaderHeight
+  );
+  useEffect(() => {
     if (!selectedDetailId) {
-      return contentHeight - statementListHeaderHeight;
+      setContentHeightAnnotator(contentHeight - statementListHeaderHeight);
     } else if (detailBoxState === DetailBoxState.Normal) {
-      return contentHeight / 2 - statementListHeaderHeight;
+      setContentHeightAnnotator(contentHeight / 2 - statementListHeaderHeight);
     } else if (detailBoxState === DetailBoxState.Minimized) {
-      return contentHeight - statementListHeaderHeight - 56; // 56 is the height of the submit button
+      setContentHeightAnnotator(contentHeight - statementListHeaderHeight - 56); // 56 is the height of the submit button
     }
   }, [contentHeight, detailBoxState, selectedDetailId]);
 
