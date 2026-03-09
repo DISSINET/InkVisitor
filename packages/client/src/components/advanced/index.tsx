@@ -24,6 +24,7 @@ import { Menu } from "./Menu/Menu";
 import { Page } from "./Page/Page";
 import { LeftHeader, RightHeader } from "./PageHeader/PageHeader";
 import { TerritoryActionModal } from "./TerritoryActionModal/TerritoryActionModal";
+import { UserTag } from "./UserTag/UserTag";
 import { UserCustomizationModal } from "./UserCustomizationModal/UserCustomizationModal";
 import { ValidationRule } from "./ValidationRule/ValidationRule";
 import { AbbreviatedTextWithTooltip } from "./AbbreviatedTextWithTooltip/AbbreviatedTextWithTooltip";
@@ -73,6 +74,7 @@ export {
   PositionButtonGroup,
   RightHeader,
   TerritoryActionModal,
+  UserTag,
   UserCustomizationModal,
   ValidationRule,
   PaginationControls,
