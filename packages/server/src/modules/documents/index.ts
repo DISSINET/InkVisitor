@@ -76,28 +76,28 @@ export default Router()
     "/:documentId/audits",
     asyncRouteHandler<IResponseAudit>(
       async (request: IRequest<{ documentId: string }, unknown, { noAudits?: string }>) => {
-      const documentId = request.params.documentId;
-      if (!documentId) {
-        throw new BadParams("document id has to be set");
-      }
-      const requestedNoAudits = request.query.noAudits;
-      const parsedNoAudits = requestedNoAudits
-        ? Number.parseInt(requestedNoAudits, 10)
-        : 5;
-      const noAudits =
-        Number.isFinite(parsedNoAudits) && parsedNoAudits > 0
-          ? parsedNoAudits
+        const documentId = request.params.documentId;
+        if (!documentId) {
+          throw new BadParams("document id has to be set");
+        }
+        const requestedNoAudits = request.query.noAudits;
+        const parsedNoAudits = requestedNoAudits
+          ? Number.parseInt(requestedNoAudits, 10)
           : 5;
-      const existingDocument = await Document.getDocumentById(
-        request.db.connection,
-        documentId
-      );
-      if (!existingDocument) {
-        throw DocumentDoesNotExist.forId(documentId);
-      }
-      const response = new ResponseDocumentAudit(documentId);
-      await response.prepare(request.db.connection, noAudits);
-      return response;
+        const noAudits =
+          Number.isFinite(parsedNoAudits) && parsedNoAudits > 0
+            ? parsedNoAudits
+            : 5;
+        const existingDocument = await Document.getDocumentById(
+          request.db.connection,
+          documentId
+        );
+        if (!existingDocument) {
+          throw DocumentDoesNotExist.forId(documentId);
+        }
+        const response = new ResponseDocumentAudit(documentId);
+        await response.prepare(request.db.connection, noAudits);
+        return response;
       }
     )
   )
@@ -141,18 +141,18 @@ export default Router()
 
     const openingTagRegex = createOpeningTagRegex();
     const closingTagRegexInstance = closingTagRegex;
-    
+
     let filteredContent = document.content;
     let match;
-    
+
     while ((match = openingTagRegex.exec(document.content)) !== null) {
       const fullTag = match[0];
       const tagContent = match[1];
       const entityId = tagContent.split(/\s+/)[0];
-      
+
       let validEntityClass = false;
       let isUnknownEntity = true;
-      
+
       exportedEntities.forEach((entityClass) => {
         if (document.entityIds[entityClass]) {
           document.entityIds[entityClass].forEach((id) => {
@@ -163,7 +163,7 @@ export default Router()
           });
         }
       });
-      
+
       Object.values(EntityEnums.Class).forEach((entityClass) => {
         if (document.entityIds[entityClass]) {
           document.entityIds[entityClass].forEach((id) => {
@@ -178,14 +178,14 @@ export default Router()
         filteredContent = filteredContent.replace(fullTag, "");
       }
     }
-    
+
     while ((match = closingTagRegexInstance.exec(document.content)) !== null) {
       const fullTag = match[0];
       const entityId = match[1];
-      
+
       let validEntityClass = false;
       let isUnknownEntity = true;
-      
+
       exportedEntities.forEach((entityClass) => {
         if (document.entityIds[entityClass]) {
           document.entityIds[entityClass].forEach((id) => {
@@ -196,7 +196,7 @@ export default Router()
           });
         }
       });
-      
+
       // Also check all entity classes to determine if this is an unknown entity
       Object.values(EntityEnums.Class).forEach((entityClass) => {
         if (document.entityIds[entityClass]) {
@@ -298,7 +298,7 @@ export default Router()
    */
   .put(
     "/:documentId",
-    asyncRouteHandler<IResponseGeneric>(async (request: IRequest<{documentId: string}, IDocument>) => {
+    asyncRouteHandler<IResponseGeneric>(async (request: IRequest<{ documentId: string }, IDocument>) => {
       const documentId = request.params.documentId;
       const documentData = request.body;
 

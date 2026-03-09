@@ -1,16 +1,13 @@
+import { UserEnums } from "@shared/enums";
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
-import { ThemeFontSize } from "Theme/theme";
 import { Tag } from "components/basic/Tag/Tag";
 import React from "react";
-import { FaUser } from "react-icons/fa";
 import { useTheme } from "styled-components";
+import { ThemeFontSize } from "Theme/theme";
+import { getUserIcon } from "utils/iconUtils";
 import { StyledUserIcon, StyledUserTagWrap } from "./UserTagStyles";
-import {
-  getUserLabel,
-  getVariantColors,
-  UserTagVariant,
-} from "./utils";
+import { getUserLabel, getVariantColors, UserTagVariant } from "./utils";
 
 interface UserTagProps {
   userId: string;
@@ -59,7 +56,7 @@ export const UserTag: React.FC<UserTagProps> = ({
         button={
           hasIcon ? (
             <StyledUserIcon $color={variantColors.icon} $size={size}>
-              <FaUser size="1em" />
+              {getUserIcon(dataUser?.role ?? UserEnums.Role.Viewer)}
             </StyledUserIcon>
           ) : undefined
         }

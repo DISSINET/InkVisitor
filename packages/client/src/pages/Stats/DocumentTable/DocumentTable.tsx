@@ -223,13 +223,14 @@ export const DocumentTable: React.FC = () => {
             <StyledDocumentFirstAudit>
               <StyledFieldLabel>First Audit Entry</StyledFieldLabel>
               <StyledDocumentInfoText>
-                Created by{" "}
+                <span>Created by</span>
                 <UserTag
                   userId={dataAudits.first.user}
-                  variant="bordered"
+                  variant="filled"
                   hasIcon
-                />{" "}
-                on <Timestamp value={dataAudits.first.date} format="stamp" />
+                />
+                <span>on</span>
+                <Timestamp value={dataAudits.first.date} format="stamp" />
               </StyledDocumentInfoText>
             </StyledDocumentFirstAudit>
           )}

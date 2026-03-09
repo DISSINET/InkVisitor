@@ -47,6 +47,9 @@ export const StyledDocumentFirstAudit = styled.div`
 export const StyledDocumentInfoText = styled.p`
   font-size: ${({ theme }) => theme.fontSize.xs};
   color: ${({ theme }) => theme.color.plain};
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 `;
 
 export const StyledDocumentEmptyState = styled.p`
