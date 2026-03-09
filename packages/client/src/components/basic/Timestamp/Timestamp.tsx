@@ -16,6 +16,8 @@ interface TimestampProps {
   locale?: string;
   options?: Intl.DateTimeFormatOptions;
   agoThreshold?: number;
+  cutSeconds?: boolean;
+  cutTime?: boolean;
 }
 
 export const Timestamp: React.FC<TimestampProps> = ({
@@ -26,8 +28,10 @@ export const Timestamp: React.FC<TimestampProps> = ({
   locale,
   options = DEFAULT_STAMP_OPTIONS,
   agoThreshold = DEFAULT_AGO_THRESHOLD_DAYS,
+  cutSeconds = false,
+  cutTime = false,
 }) => {
-  const { display, stampTitle } = useMemo(
+  const { display, tooltipTitle } = useMemo(
     () =>
       formatTimestampDisplay({
         value,
@@ -35,12 +39,14 @@ export const Timestamp: React.FC<TimestampProps> = ({
         locale,
         stampOptions: options,
         agoThreshold,
+        cutSeconds,
+        cutTime,
       }),
-    [value, format, locale, options, agoThreshold]
+    [value, format, locale, options, agoThreshold, cutSeconds, cutTime]
   );
 
   return (
-    <StyledTimestamp title={stampTitle} $size={size}>
+    <StyledTimestamp title={tooltipTitle} $size={size}>
       {label && <StyledTimestampLabel>{label}:</StyledTimestampLabel>}
       <span>{display}</span>
     </StyledTimestamp>

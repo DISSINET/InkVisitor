@@ -161,7 +161,7 @@ const materializedStatsIndexes: ((table: RTable) => any)[] = [
   (table: RTable) => table.indexCreate("date_eventType_aggregateBy", [r.row("date"), r.row("eventType"), r.row("aggregateBy")]),
 ];
 
-export const DbSchemaIndexes:{ [key in keyof DbSchema]: ((table: RTable) => any)[] } = {
+export const DbSchemaIndexes: { [key in keyof DbSchema]: ((table: RTable) => any)[] } = {
   entities: entitiesIndexes,
   audits: auditsIndexes,
   relations: relationsIndexes,

@@ -14,6 +14,7 @@ import {
 import { getShortLabelByLetterCount } from "utils/utils";
 import {
   StyledButtonWrapper,
+  StyledButtonWrapperLeft,
   StyledElvlWrapper,
   StyledEntityTag,
   StyledLabel,
@@ -37,6 +38,7 @@ interface TagProps {
 
   borderStyle?: "solid" | "dashed" | "dotted";
   button?: ReactNode;
+  buttonPosition?: "right" | "left" | "light";
   elvlButtonGroup?: ReactNode | false;
   invertedLabel?: boolean;
   showOnly?: "entity" | "label";
@@ -69,6 +71,7 @@ export const Tag: React.FC<TagProps> = ({
   entity,
   borderStyle = "solid",
   button,
+  buttonPosition = "right",
   elvlButtonGroup,
   invertedLabel = false,
   showOnly,
@@ -185,17 +188,31 @@ export const Tag: React.FC<TagProps> = ({
       </StyledButtonWrapper>
     );
 
+    const isLeftButton = buttonPosition === "left" || buttonPosition === "light";
+    const leftButtonWrap = button && (
+      <StyledButtonWrapperLeft
+        $status={status}
+        onMouseEnter={onButtonOver}
+        onMouseLeave={onButtonOut}
+        onClick={onBtnClick}
+      >
+        {button}
+      </StyledButtonWrapperLeft>
+    );
+
     return showOnly ? (
       <>
+        {isLeftButton && leftButtonWrap}
         {showOnly === "entity" ? entityTag : labelWrap}
-        {buttonWrap}
+        {!isLeftButton && buttonWrap}
       </>
     ) : (
       <>
+        {isLeftButton && leftButtonWrap}
         {entityTag}
         {labelWrap}
         {elvlWrapper}
-        {buttonWrap}
+        {!isLeftButton && buttonWrap}
       </>
     );
   }, [
@@ -210,6 +227,7 @@ export const Tag: React.FC<TagProps> = ({
     showOnly,
     status,
     button,
+    buttonPosition,
     isTemplate,
     onButtonOver,
     onButtonOut,

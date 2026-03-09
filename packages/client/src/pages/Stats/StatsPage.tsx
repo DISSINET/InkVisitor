@@ -3,7 +3,7 @@ import api from "api";
 
 import { IRequestStats, IResponseStats } from "@shared/types";
 import { Aggregation, EventType, TimeUnit } from "@shared/types/stats";
-import { Button, ButtonGroup, Input, Loader } from "components";
+import { Button, ButtonGroup, Input, Loader, Timestamp } from "components";
 import { useEffect, useMemo, useReducer, useState } from "react";
 import { FaCalendarPlus, FaDatabase, FaSyncAlt, FaTimes } from "react-icons/fa";
 import { useAppSelector } from "redux/hooks";
@@ -23,7 +23,6 @@ import {
   StyledField,
   StyledFieldGroup,
   StyledFieldLabel,
-  StyledFieldLValueSmall,
   StyledHeader,
   StyledHeading,
   StyledResultsChart,
@@ -251,7 +250,7 @@ export const StatsPage = () => {
               <StyledFieldLabel>From Date</StyledFieldLabel>
               {!state.showDateFromRangePicker ? (
                 <StyledDateInputWrapper>
-                  <StyledFieldLValueSmall>Since Forever</StyledFieldLValueSmall>
+                  <Timestamp label="From" value={state.dateFrom} />
                   <Button
                     icon={<FaCalendarPlus />}
                     onClick={() => {
@@ -311,7 +310,7 @@ export const StatsPage = () => {
               <StyledFieldLabel>To Date</StyledFieldLabel>
               {!state.showDateToRangePicker ? (
                 <StyledDateInputWrapper>
-                  <StyledFieldLValueSmall>Until Now</StyledFieldLValueSmall>
+                  <Timestamp label="To" value={state.dateTo} />
                   <Button
                     icon={<FaCalendarPlus />}
                     onClick={() => {

@@ -40,6 +40,56 @@ export const StyledDocumentAuditContainer = styled.div`
   padding-right: 0.5rem;
 `;
 
+export const StyledDocumentFirstAudit = styled.div`
+  margin-bottom: ${({ theme }) => theme.space[4]};
+`;
+
+export const StyledDocumentInfoText = styled.p`
+  font-size: ${({ theme }) => theme.fontSize.xs};
+  color: ${({ theme }) => theme.color.plain};
+`;
+
+export const StyledDocumentEmptyState = styled.p`
+  color: ${({ theme }) => theme.color.plain};
+  font-style: italic;
+`;
+
+export const StyledDocumentChangesList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.space[1]};
+`;
+
+export const StyledDocumentChangesRow = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: ${({ theme }) => theme.space[2]};
+`;
+
+export const StyledDocumentChangesLabel = styled.span`
+  color: ${({ theme }) => theme.color.primary};
+  font-size: ${({ theme }) => theme.fontSize.xs};
+  font-weight: ${({ theme }) => theme.fontWeight.bold};
+  min-width: 6rem;
+`;
+
+export const StyledDocumentChangesTags = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${({ theme }) => theme.space[1]};
+`;
+
+export const StyledDocumentChangeFallback = styled.span`
+  display: inline-flex;
+  align-items: center;
+  padding: ${({ theme }) => `${theme.space[1]} ${theme.space[2]}`};
+  border-radius: ${({ theme }) => theme.borderRadius.sm};
+  border: ${({ theme }) => `1px solid ${theme.color.gray[400]}`};
+  color: ${({ theme }) => theme.color.plain};
+  background: ${({ theme }) => theme.color.gray[100]};
+  font-size: ${({ theme }) => theme.fontSize.xxs};
+`;
+
 export const StyledHeader = styled.div`
   display: flex;
   justify-content: space-between;
@@ -94,12 +144,6 @@ export const StyledDateInputWrapper = styled.div`
   align-items: center;
   gap: 0.5rem;
   height: 100%;
-`;
-
-export const StyledFieldLValueSmall = styled.i`
-  font-size: ${({ theme }) => theme.fontSize["sm"]};
-  color: ${({ theme }) => theme.color["info"]};
-  white-space: nowrap;
 `;
 
 export const StyledResultsChart = styled.div`

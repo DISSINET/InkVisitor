@@ -6,6 +6,8 @@ export interface TimestampDisplayOptions {
   locale?: string;
   stampOptions?: Intl.DateTimeFormatOptions;
   agoThreshold?: number;
+  cutSeconds?: boolean;
+  cutTime?: boolean;
 }
 
 export const DEFAULT_STAMP_OPTIONS: Intl.DateTimeFormatOptions = {
@@ -47,6 +49,37 @@ export const formatStamp = (
   return date.toLocaleString(locale, options);
 };
 
+export const formatAbsoluteTimestamp = (date: Date): string => {
+  return `${date.toDateString()} ${date.toTimeString()}`;
+};
+
+const getStampOptions = ({
+  stampOptions,
+  cutSeconds,
+  cutTime,
+}: {
+  stampOptions: Intl.DateTimeFormatOptions;
+  cutSeconds: boolean;
+  cutTime: boolean;
+}): Intl.DateTimeFormatOptions => {
+  if (cutTime) {
+    return {
+      year: stampOptions.year ?? "numeric",
+      month: stampOptions.month ?? "short",
+      day: stampOptions.day ?? "2-digit",
+    };
+  }
+
+  if (!cutSeconds) {
+    return stampOptions;
+  }
+
+  return {
+    ...stampOptions,
+    second: undefined,
+  };
+};
+
 export const formatAgo = (date: Date, locale?: string): string => {
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
@@ -71,20 +104,29 @@ export const formatTimestampDisplay = ({
   locale,
   stampOptions = DEFAULT_STAMP_OPTIONS,
   agoThreshold = DEFAULT_AGO_THRESHOLD_DAYS,
-}: TimestampDisplayOptions): { display: string; stampTitle: string } => {
+  cutSeconds = false,
+  cutTime = false,
+}: TimestampDisplayOptions): { display: string; tooltipTitle: string } => {
   const parsedValue = toDate(value);
 
   if (!parsedValue) {
     const fallback = String(value);
     return {
       display: fallback,
-      stampTitle: fallback,
+      tooltipTitle: fallback,
     };
   }
 
-  const stampValue = formatStamp(parsedValue, locale, stampOptions);
+  const resolvedStampOptions = getStampOptions({
+    stampOptions,
+    cutSeconds,
+    cutTime,
+  });
+  const stampValue = formatStamp(parsedValue, locale, resolvedStampOptions);
+  const tooltipTitle = formatAbsoluteTimestamp(parsedValue);
+
   if (format === "stamp") {
-    return { display: stampValue, stampTitle: stampValue };
+    return { display: stampValue, tooltipTitle };
   }
 
   const absDiffMs = Math.abs(Date.now() - parsedValue.getTime());
@@ -93,6 +135,6 @@ export const formatTimestampDisplay = ({
 
   return {
     display: shouldUseAgo ? formatAgo(parsedValue, locale) : stampValue,
-    stampTitle: stampValue,
+    tooltipTitle,
   };
 };

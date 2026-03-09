@@ -121,6 +121,17 @@ export const StyledButtonWrapper = styled.div<StyledButtonWrapper>`
     border-left-style: solid;
   }
 `;
+
+export const StyledButtonWrapperLeft = styled.div<StyledButtonWrapper>`
+  display: flex;
+  button {
+    border-width: 0;
+    border-right-width: ${({ theme }) => theme.borderWidth[2]};
+    border-right-color: ${({ theme, $status }) =>
+      theme.color.tagStatus[$status]};
+    border-right-style: solid;
+  }
+`;
 export const StyledElvlWrapper = styled.div`
   display: flex;
   > div {

@@ -23,7 +23,7 @@ export const LoginPage: React.FC = () => {
   const [emailLocal, setEmailLocal] = useState("");
 
   const [loginMode, setLoginMode] = useState<LoginMode>(
-    isGuestAccess ? LoginMode.guest : LoginMode.login
+    isGuestAccess ? LoginMode.guest : LoginMode.login,
   );
   const [restartScreen, setRestartScreen] = useState(false);
   const [redirectToMain, setRedirectToMain] = useState(false);
@@ -69,6 +69,7 @@ export const LoginPage: React.FC = () => {
 
   const loginTitle = process.env.LOGIN_TITLE;
   const loginText = process.env.LOGIN_TEXT;
+  const loginCitation = process.env.LOGIN_CITATION;
 
   return redirectToMain ? (
     <Navigate to="/" />
@@ -85,6 +86,19 @@ export const LoginPage: React.FC = () => {
             }}
           >
             {loginText}
+          </p>
+        )}
+        {loginCitation && (
+          <p
+            style={{
+              fontSize: "1.2rem",
+              color: "var(--color-greyer)",
+              marginBottom: "0.5rem",
+              fontFamily: "monospace",
+            }}
+          >
+            Citation:
+            {loginCitation}
           </p>
         )}
         <StyledAttrBtnGroupWrap>

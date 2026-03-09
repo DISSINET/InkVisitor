@@ -1,27 +1,139 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import api from "api";
 
 import { IDocument } from "@shared/types";
-import { IAudit } from "@shared/types/audit";
+import {
+  IAnchorUpdate,
+  IAudit,
+  IDocumentAuditAnchorChanges,
+} from "@shared/types/audit";
+import { IResponseEntity } from "@shared/types/response-entity";
 import { IResponseAudit } from "@shared/types/response-audit";
-import { BaseDropdown, Loader, Table } from "components";
+import { BaseDropdown, Loader, Table, Timestamp } from "components";
+import { EntityTag } from "components/advanced";
+import { UserTag } from "components/advanced/UserTag/UserTag";
 import { useMemo, useState } from "react";
 import { Column } from "react-table";
 import { DropdownItem } from "types";
 import {
+  StyledDocumentChangeFallback,
   StyledDocumentAuditContainer,
+  StyledDocumentChangesLabel,
+  StyledDocumentChangesList,
+  StyledDocumentChangesRow,
+  StyledDocumentChangesTags,
+  StyledDocumentEmptyState,
+  StyledDocumentFirstAudit,
+  StyledDocumentInfoText,
   StyledDocumentSelector,
   StyledField,
   StyledFieldLabel,
   StyledTabContent,
 } from "../StatsPageStyles";
 
+type ChangeSectionKey = keyof IDocumentAuditAnchorChanges;
+
+const changeSectionConfig: Array<{ key: ChangeSectionKey; label: string }> = [
+  { key: "additions", label: "Added" },
+  { key: "changes", label: "Changed" },
+  { key: "removals", label: "Removed" },
+];
+
+const getChangeSections = (
+  changes: object
+): Array<{ key: ChangeSectionKey; label: string; anchors: string[] }> => {
+  const parsed = changes as Partial<IDocumentAuditAnchorChanges>;
+  return changeSectionConfig
+    .map(({ key, label }) => {
+      const raw = parsed[key];
+      const anchors = (Array.isArray(raw) ? raw : [])
+        .map((item) => (item as IAnchorUpdate)?.anchor)
+        .filter((anchor): anchor is string => Boolean(anchor));
+      return { key, label, anchors };
+    })
+    .filter((section) => section.anchors.length > 0);
+};
+
+const AuditChangesCell: React.FC<{ changes: object }> = ({ changes }) => {
+  const sections = useMemo(() => getChangeSections(changes), [changes]);
+  const anchorIds = useMemo(
+    () => Array.from(new Set(sections.flatMap((section) => section.anchors))),
+    [sections]
+  );
+
+  const entityQueries = useQueries({
+    queries: anchorIds.map((entityId) => ({
+      queryKey: ["entity", entityId],
+      queryFn: async () => {
+        const res = await api.entityGet(entityId);
+        return res.data;
+      },
+      enabled: !!entityId,
+      staleTime: 5 * 60 * 1000,
+    })),
+  });
+
+  const entitiesById = useMemo(
+    () =>
+      anchorIds.reduce<Record<string, IResponseEntity>>(
+        (acc, entityId, index) => {
+          const data = entityQueries[index]?.data;
+          if (data) {
+            acc[entityId] = data;
+          }
+          return acc;
+        },
+        {}
+      ),
+    [anchorIds, entityQueries]
+  );
+
+  if (sections.length === 0) {
+    return <StyledDocumentChangeFallback>-</StyledDocumentChangeFallback>;
+  }
+
+  return (
+    <StyledDocumentChangesList>
+      {sections.map((section) => (
+        <StyledDocumentChangesRow key={section.key}>
+          <StyledDocumentChangesLabel>
+            {section.label}
+          </StyledDocumentChangesLabel>
+          <StyledDocumentChangesTags>
+            {section.anchors.map((anchor, index) => {
+              const entity = entitiesById[anchor];
+              if (entity) {
+                return (
+                  <EntityTag
+                    key={`${section.key}-${anchor}-${index}`}
+                    entity={entity}
+                    disableDoubleClick
+                    disableDrag
+                  />
+                );
+              }
+
+              return (
+                <StyledDocumentChangeFallback
+                  key={`${section.key}-${anchor}-${index}`}
+                >
+                  {anchor}
+                </StyledDocumentChangeFallback>
+              );
+            })}
+          </StyledDocumentChangesTags>
+        </StyledDocumentChangesRow>
+      ))}
+    </StyledDocumentChangesList>
+  );
+};
+
 export const DocumentTable: React.FC = () => {
   const [selectedDocument, setSelectedDocument] = useState<DropdownItem | null>(
     null
   );
 
-  const { data: documents, isLoading: isLoadingDocuments } = useQuery({
+  const { data: dataDocuments, isLoading: isLoadingDocuments } = useQuery({
     queryKey: ["documents"],
     queryFn: async () => {
       const res = await api.documentsGet({});
@@ -30,14 +142,14 @@ export const DocumentTable: React.FC = () => {
   });
 
   const documentOptions: DropdownItem[] = useMemo(() => {
-    if (!documents) return [];
-    return documents.map((doc: IDocument) => ({
+    if (!dataDocuments) return [];
+    return dataDocuments.map((doc: IDocument) => ({
       value: doc.id,
       label: doc.title || doc.id,
     }));
-  }, [documents]);
+  }, [dataDocuments]);
 
-  const { data: auditData, isLoading: isLoadingAudit } =
+  const { data: dataAudits, isLoading: isLoadingAudit } =
     useQuery<IResponseAudit>({
       queryKey: ["auditByDocument", selectedDocument?.value],
       queryFn: async () => {
@@ -54,33 +166,36 @@ export const DocumentTable: React.FC = () => {
       {
         Header: "Date",
         accessor: "date",
-        Cell: ({ value }: { value: Date }) => new Date(value).toLocaleString(),
+        Cell: ({ value }: { value: string | number | Date }) => (
+          <Timestamp value={value} format="mixed" size="xs" />
+        ),
       },
       {
         Header: "User",
         accessor: "user",
+        Cell: ({ value }: { value: string }) => (
+          <UserTag userId={value} variant="filled" hasIcon />
+        ),
       },
       {
         Header: "Type",
         accessor: "type",
       },
       {
-        Header: "Changes",
+        Header: "Anchor Changes",
         accessor: "changes",
-        Cell: ({ value }: { value: object }) => {
-          const keys = Object.keys(value || {});
-          if (keys.length === 0) return "-";
-          return keys.join(", ");
-        },
+        Cell: ({ value }: { value: object }) => (
+          <AuditChangesCell changes={value} />
+        ),
       },
     ],
     []
   );
 
   const auditTableData: IAudit[] = useMemo(() => {
-    if (!auditData?.last) return [];
-    return auditData.last;
-  }, [auditData]);
+    if (!dataAudits?.last) return [];
+    return dataAudits.last;
+  }, [dataAudits]);
 
   return (
     <StyledTabContent>
@@ -102,16 +217,19 @@ export const DocumentTable: React.FC = () => {
 
       {selectedDocument && (
         <StyledDocumentAuditContainer>
-          {auditData?.first && (
-            <div style={{ marginBottom: "1rem" }}>
+          {dataAudits?.first && (
+            <StyledDocumentFirstAudit>
               <StyledFieldLabel>First Audit Entry</StyledFieldLabel>
-              <p style={{ fontSize: "0.875rem", color: "#666" }}>
-                Created by <strong>{auditData.first.user}</strong> on{" "}
-                <strong>
-                  {new Date(auditData.first.date).toLocaleString()}
-                </strong>
-              </p>
-            </div>
+              <StyledDocumentInfoText>
+                Created by{" "}
+                <UserTag
+                  userId={dataAudits.first.user}
+                  variant="bordered"
+                  hasIcon
+                />{" "}
+                on <Timestamp value={dataAudits.first.date} format="stamp" />
+              </StyledDocumentInfoText>
+            </StyledDocumentFirstAudit>
           )}
 
           <StyledFieldLabel>
@@ -131,9 +249,9 @@ export const DocumentTable: React.FC = () => {
       )}
 
       {!selectedDocument && !isLoadingDocuments && (
-        <p style={{ color: "#666", fontStyle: "italic" }}>
+        <StyledDocumentEmptyState>
           Select a document to view its audit history.
-        </p>
+        </StyledDocumentEmptyState>
       )}
 
       <Loader show={isLoadingDocuments || isLoadingAudit} />

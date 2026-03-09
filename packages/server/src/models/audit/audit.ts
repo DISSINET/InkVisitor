@@ -276,7 +276,7 @@ export default class Audit implements IAudit, IDbModel {
       if (
         firstAudit &&
         firstAudit.date.toISOString().split("T")[0] ===
-          audit.date.toISOString().split("T")[0]
+        audit.date.toISOString().split("T")[0]
       ) {
         withValidDate.push(firstAudit);
       }
@@ -317,7 +317,7 @@ export default class Audit implements IAudit, IDbModel {
       if (
         firstAudit &&
         firstAudit.date.toISOString().split("T")[0] ===
-          audit.date.toISOString().split("T")[0]
+        audit.date.toISOString().split("T")[0]
       ) {
         withValidDate.push(firstAudit);
       }

@@ -6,12 +6,15 @@ import React from "react";
 import { FaUser } from "react-icons/fa";
 import { useTheme } from "styled-components";
 import { StyledUserIcon, StyledUserTagWrap } from "./UserTagStyles";
-import { getUserLabel, getVariantColors, UserTagColor, UserTagVariant } from "./utils";
+import {
+  getUserLabel,
+  getVariantColors,
+  UserTagVariant,
+} from "./utils";
 
 interface UserTagProps {
   userId: string;
   hasIcon?: boolean;
-  color?: UserTagColor;
   variant?: UserTagVariant;
   size?: keyof ThemeFontSize;
 }
@@ -19,12 +22,13 @@ interface UserTagProps {
 export const UserTag: React.FC<UserTagProps> = ({
   userId,
   hasIcon = false,
-  color = "primary",
   variant = "light",
   size = "xxs",
 }) => {
   const theme = useTheme();
-  const { data: user } = useQuery({
+  const currentUserId = localStorage.getItem("userid");
+  const color = currentUserId === userId ? "primary" : "info";
+  const { data: dataUser } = useQuery({
     queryKey: ["user-tag", userId],
     queryFn: async () => {
       const res = await api.usersGet(userId);
@@ -34,7 +38,7 @@ export const UserTag: React.FC<UserTagProps> = ({
   });
 
   const variantColors = getVariantColors(theme, color, variant);
-  const label = getUserLabel(user, userId);
+  const label = getUserLabel(dataUser, userId);
 
   return (
     <StyledUserTagWrap
@@ -47,6 +51,7 @@ export const UserTag: React.FC<UserTagProps> = ({
       <Tag
         propId={userId}
         label={label}
+        buttonPosition="left"
         showOnly="label"
         disableCopyLabel
         disableDoubleClick
