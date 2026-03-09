@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
+import { ThemeFontSize } from "Theme/theme";
 import { Tag } from "components/basic/Tag/Tag";
 import React from "react";
 import { FaUser } from "react-icons/fa";
@@ -12,6 +13,7 @@ interface UserTagProps {
   hasIcon?: boolean;
   color?: UserTagColor;
   variant?: UserTagVariant;
+  size?: keyof ThemeFontSize;
 }
 
 export const UserTag: React.FC<UserTagProps> = ({
@@ -19,6 +21,7 @@ export const UserTag: React.FC<UserTagProps> = ({
   hasIcon = false,
   color = "primary",
   variant = "light",
+  size = "xxs",
 }) => {
   const theme = useTheme();
   const { data: user } = useQuery({
@@ -39,6 +42,7 @@ export const UserTag: React.FC<UserTagProps> = ({
       $borderColor={variantColors.border}
       $backgroundColor={variantColors.background}
       $textColor={variantColors.text}
+      $size={size}
     >
       <Tag
         propId={userId}
@@ -49,8 +53,8 @@ export const UserTag: React.FC<UserTagProps> = ({
         disableDrag
         button={
           hasIcon ? (
-            <StyledUserIcon $color={variantColors.icon}>
-              <FaUser size={10} />
+            <StyledUserIcon $color={variantColors.icon} $size={size}>
+              <FaUser size="1em" />
             </StyledUserIcon>
           ) : undefined
         }

@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { ThemeFontSize } from "Theme/theme";
 import { UserTagVariant } from "./utils";
 
 interface StyledUserTagWrapProps {
@@ -6,6 +7,7 @@ interface StyledUserTagWrapProps {
   $backgroundColor: string;
   $textColor: string;
   $variant: UserTagVariant;
+  $size: keyof ThemeFontSize;
 }
 
 export const StyledUserTagWrap = styled.span<StyledUserTagWrapProps>`
@@ -15,6 +17,7 @@ export const StyledUserTagWrap = styled.span<StyledUserTagWrapProps>`
   .tag {
     border-color: ${({ $borderColor }) => $borderColor};
     border-style: solid;
+    font-size: ${({ theme, $size }) => theme.fontSize[$size]};
   }
 
   .tag > div {
@@ -30,6 +33,7 @@ export const StyledUserTagWrap = styled.span<StyledUserTagWrapProps>`
 
 interface StyledUserIconProps {
   $color: string;
+  $size: keyof ThemeFontSize;
 }
 
 export const StyledUserIcon = styled.span<StyledUserIconProps>`
@@ -37,5 +41,6 @@ export const StyledUserIcon = styled.span<StyledUserIconProps>`
   align-items: center;
   justify-content: center;
   color: ${({ $color }) => $color};
+  font-size: ${({ theme, $size }) => theme.fontSize[$size]};
   padding: 0 ${({ theme }) => theme.space[2]};
 `;
