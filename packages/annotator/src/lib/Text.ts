@@ -273,25 +273,33 @@ export interface SegmentPosition {
  * different edit modes (RAW, HIGHLIGHT, SEMI), and providing methods for
  * text manipulation, line calculation, and position tracking.
  */
+/** Measures text width in pixels (e.g. ctx.measureText with font set). */
+export type MeasureTextFn = (str: string) => number;
+
 class Text {
   mode: EditMode = EditMode.RAW;
   segments: Segment[];
   dirtySegment?: number;
   value: string;
-  charsAtLine: number;
+  /** Maximum line width in pixels for text wrapping (proportional fonts). */
+  lineWidthPx: number;
+  /** Measure function for current canvas font. */
+  measureText: MeasureTextFn;
   noLines: number;
-  
+
   /**
    * Creates a new Text instance from raw text content.
-   * 
+   *
    * @param value - The raw text content
-   * @param charsAtLine - Maximum characters per line for text wrapping
+   * @param lineWidthPx - Maximum line width in pixels for wrapping
+   * @param measureText - Function to measure string width in pixels (uses current font)
    */
-  constructor(value: string, charsAtLine: number) {
+  constructor(value: string, lineWidthPx: number, measureText: MeasureTextFn) {
     this.value = value;
+    this.lineWidthPx = lineWidthPx;
+    this.measureText = measureText;
     this.segments = [];
     this.prepareSegments();
-    this.charsAtLine = charsAtLine;
     this.noLines = 0;
     this.calculateLines();
   }
@@ -320,12 +328,12 @@ class Text {
   }
 
   /**
-   * Updates the maximum characters per line and recalculates line breaks.
-   * 
-   * @param charsAtLine - New maximum characters per line
+   * Updates the maximum line width in pixels and recalculates line breaks.
+   *
+   * @param lineWidthPx - New maximum line width in pixels
    */
-  updateCharsAtLine(charsAtLine: number) {
-    this.charsAtLine = charsAtLine;
+  updateLineWidth(lineWidthPx: number) {
+    this.lineWidthPx = lineWidthPx;
     this.calculateLines();
   }
 
@@ -359,16 +367,10 @@ class Text {
   }
 
   /**
-   * Calculates line breaks and organizes text into displayable lines.
-   * 
-   * This method processes each segment, applies text wrapping based on
-   * charsAtLine, handles different edit modes (RAW/HIGHLIGHT/SEMI), and
-   * updates line numbering for all segments.
-   * 
-   * TODO: Optimize to avoid full recalculation after single character changes
+   * Calculates line breaks by measured pixel width (supports proportional fonts).
+   * Uses token-based wrapping (words/tags) and measureText for accurate width.
    */
   calculateLines(): void {
-    const time1 = performance.now();
     for (
       let segmentIndex = 0;
       segmentIndex < this.segments.length;
@@ -376,14 +378,6 @@ class Text {
     ) {
       const segment = this.segments[segmentIndex];
 
-      /* if (
-        this.dirtySegment !== undefined &&
-        parseInt(segmentIndex) < this.dirtySegment
-      ) {
-        currentLineNumber += segment.lines.length;
-        continue;
-      }
-*/
       segment.lineStart =
         segmentIndex === 0 ? 0 : this.segments[segmentIndex - 1].lineEnd;
       segment.lines = [];
@@ -396,25 +390,23 @@ class Text {
       const regex: RegExp = /(<[^>]+>)|([\w']+)/g;
       const tokens = text.split(regex).filter((t) => !!t);
       let currentLine: string[] = [];
-      let currentLineLength = 0;
+      let currentLineWidthPx = 0;
+
       for (let iToken = 0; iToken < tokens.length; iToken++) {
         const token = tokens[iToken];
-        const tokenLength = token.length;
-        if (currentLineLength + tokenLength > this.charsAtLine) {
-          // Join the current line into a string and push it to lines
+        const tokenWidthPx = this.measureText(token);
+
+        if (currentLineWidthPx + tokenWidthPx > this.lineWidthPx && currentLine.length > 0) {
           segment.lines.push(currentLine.join(""));
-          currentLine = [token]; // Start a new line with the current word
-          currentLineLength = tokenLength; // Reset the length (+1 for the space)
+          currentLine = [token];
+          currentLineWidthPx = tokenWidthPx;
         } else {
           currentLine.push(token);
-          currentLineLength += tokenLength; // +1 for the space
+          currentLineWidthPx += tokenWidthPx;
         }
 
-        if (iToken + 1 === tokens.length) {
-          // Add the last line if it's not empty
-          if (currentLine.length > 0) {
-            segment.lines.push(currentLine.join(""));
-          }
+        if (iToken + 1 === tokens.length && currentLine.length > 0) {
+          segment.lines.push(currentLine.join(""));
         }
       }
       segment.lineEnd = segment.lineStart + (segment.lines.length || 1);

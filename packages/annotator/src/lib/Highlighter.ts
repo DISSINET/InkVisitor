@@ -60,10 +60,6 @@ export default class Highlighter {
     return Math.round((y / lineHeight) * this.ratio - 1);
   }
 
-  xToCharI(x: number, charWidth: number): number {
-    return Math.floor((Math.max(x, 0) / charWidth) * this.ratio);
-  }
-
   /**
    * getSelected is getter for absolute selected coordinates
    * @returns
@@ -85,22 +81,20 @@ export default class Highlighter {
   }
 
   /**
-   * drawLine is shorthand around drawing highlighted areas simply by providing relative coordinates
-   * @param ctx
-   * @param relLine
-   * @param xStart
-   * @param xEnd
-   * @param options
+   * drawLine draws a highlighted range using character indices and measureText (proportional fonts).
    */
   drawLine(
     ctx: CanvasRenderingContext2D,
     relLine: number,
-    xStart: number,
-    xEnd: number,
+    lineText: string,
+    startChar: number,
+    endChar: number,
     options: DrawingOptions
   ) {
-    const { charWidth, lineHeight, color: colorOverride } = options;
-    const width = (xEnd - xStart) * charWidth;
+    const { measureText, lineHeight, color: colorOverride } = options;
+    const xStartPx = measureText(lineText.substring(0, startChar));
+    const xEndPx = measureText(lineText.substring(0, endChar));
+    const width = Math.max(xEndPx - xStartPx, 1);
     const height = this.hlMode === HighlightMode.UNDERLINE ? 3 : lineHeight;
 
     ctx.fillStyle = colorOverride || this.style.color;
@@ -108,25 +102,25 @@ export default class Highlighter {
 
     if (this.hlMode === "focus") {
       ctx.globalCompositeOperation = "xor";
-      ctx.fillRect(xStart * charWidth, relLine * lineHeight, width, height);
+      ctx.fillRect(xStartPx, relLine * lineHeight, width, height);
     } else if (this.hlMode === "underline") {
       ctx.globalCompositeOperation = "multiply";
       ctx.fillRect(
-        xStart * charWidth,
+        xStartPx,
         (relLine + 1) * lineHeight,
         width,
         height
       );
     } else if (this.hlMode === "background") {
       ctx.globalCompositeOperation = "multiply";
-      ctx.fillRect(xStart * charWidth, relLine * lineHeight + 1, width, height);
+      ctx.fillRect(xStartPx, relLine * lineHeight + 1, width, height);
     } else if (this.hlMode === "select") {
       ctx.globalCompositeOperation = "color";
       ctx.globalAlpha = 1;
       ctx.fillRect(
-        xStart * charWidth,
+        xStartPx,
         relLine * lineHeight,
-        width || 1,
+        width,
         height
       );
     }
@@ -146,8 +140,6 @@ export default class Highlighter {
     text: Text,
     drawingOptions: DrawingOptions,
   ) {
-    const { charsAtLine } = drawingOptions;
-
     let [hStart, hEnd] = this.getAbsBounds();
     if (hStart && hEnd) {
       if (hStart.yLine > hEnd.yLine) {
@@ -162,11 +154,12 @@ export default class Highlighter {
         i++
       ) {
         const currY = viewport.lineStart + i;
-        const lastCharX = text.getLine(currY).length;
+        const lineText = text.getLine(currY);
+        const lastCharX = lineText.length;
 
         if (this.hlMode === "focus") {
           if (currY < hStart.yLine || currY > hEnd.yLine) {
-            rowsToDraw.push({ rowI: i, start: 0, end: charsAtLine });
+            rowsToDraw.push({ rowI: i, start: 0, end: lastCharX });
           }
           if (currY === hStart.yLine) {
             rowsToDraw.push({ rowI: i, start: 0, end: hStart.xLine });
@@ -174,8 +167,8 @@ export default class Highlighter {
           if (currY === hEnd.yLine) {
             rowsToDraw.push({
               rowI: i,
-              start: lastCharX,
-              end: hEnd.xLine,
+              start: hEnd.xLine,
+              end: lastCharX,
             });
           }
         } else {
@@ -200,9 +193,8 @@ export default class Highlighter {
       }
 
       for (const row of rowsToDraw) {
-        this.drawLine(ctx, row.rowI, row.start, row.end, drawingOptions);
-        //this.xLine = row.end
-        // this.yLine = row.rowI
+        const lineText = text.getLine(viewport.lineStart + row.rowI);
+        this.drawLine(ctx, row.rowI, lineText, row.start, row.end, drawingOptions);
       }
     }
     ctx.globalAlpha = 1;

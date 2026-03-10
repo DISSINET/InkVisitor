@@ -35,7 +35,6 @@ export interface AnnotatorCallbacks {
   onPasteText(): void;
   draw(): void;
   width: number;
-  charWidth: number;
   cursor: Cursor;
   viewport: Viewport;
   text: Text;
@@ -418,8 +417,8 @@ export default class Keys {
           this.cursor.move(-1, 0);
           if (this.cursor.xLine <= 0) {
             this.cursor.yLine = Math.max(0, this.cursor.yLine - 1);
-            this.cursor.xLine =
-              Math.floor(this.annotator.width / this.annotator.charWidth) - 1;
+            const prevLine = this.text.getLine(this.viewport.lineStart + this.cursor.yLine) ?? "";
+            this.cursor.xLine = prevLine.length;
           }
         }
       }
@@ -502,19 +501,17 @@ export default class Keys {
         );
         if (!offsetRight) {
           this.cursor.move(1, 0);
-          if (
-            this.cursor.xLine >
-            Math.floor(this.annotator.width / this.annotator.charWidth)
-          ) {
+          const lineLen = (this.text.getLine(this.viewport.lineStart + this.cursor.yLine) ?? "").length;
+          if (this.cursor.xLine > lineLen) {
             this.cursor.xLine = 0;
             this.cursor.yLine++;
           }
-        } else if (
-          offsetRight + this.cursor.xLine >
-          Math.floor(this.annotator.width / this.annotator.charWidth)
-        ) {
-          this.cursor.xLine = 0;
-          this.cursor.yLine++;
+        } else {
+          const lineLen = (this.text.getLine(this.viewport.lineStart + this.cursor.yLine) ?? "").length;
+          if (offsetRight + this.cursor.xLine > lineLen) {
+            this.cursor.xLine = 0;
+            this.cursor.yLine++;
+          }
         }
 
         if (this.cursor.yLine > this.viewport.noLines) {

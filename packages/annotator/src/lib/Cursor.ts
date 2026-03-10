@@ -76,11 +76,6 @@ export default class Cursor
     this.yLine = lineY;
   }
 
-  setPositionFromEvent(evt: MouseEvent, lineHeight: number, charWidth: number) {
-    this.xLine = this.xToCharI(evt.offsetX, charWidth);
-    this.yLine = this.yToLineI(evt.offsetY, lineHeight);
-  }
-
   /**
    * isSelecting is predicate for testing if any mouse-move event should update selected area (click+move)
    * @returns
@@ -241,13 +236,12 @@ export default class Cursor
     const rowsToDraw: { rowI: number; start: number; end: number }[] = [];
 
     if (!this.isSelected()) {
-      // in case there is no area selected, just drop a cursor at some
-      this.drawLine(ctx, this.yLine, this.xLine, this.xLine, {
+      const lineText = text.getLine(viewport.lineStart + this.yLine) ?? "";
+      this.drawLine(ctx, this.yLine, lineText, this.xLine, this.xLine, {
         ...drawingOptions,
         color: this.style.selectorColor,
       });
     } else if (hStart && hEnd) {
-      // selection active, iterate over displayed lines
       for (
         let i = 0;
         i <= Math.min(viewport.lineEnd, text.noLines) - viewport.lineStart;
@@ -258,17 +252,14 @@ export default class Cursor
 
         if (hStart.yLine <= currY && hEnd.yLine >= currY) {
           if (hStart.yLine === currY) {
-            // opening highlight line
             rowsToDraw.push({
               rowI: i,
               start: hStart.xLine,
               end: hStart.yLine === hEnd.yLine ? hEnd.xLine : lastCharX + 1,
             });
           } else if (hEnd.yLine === currY) {
-            // closing highlight line
             rowsToDraw.push({ rowI: i, start: 0, end: hEnd.xLine });
           } else {
-            // full line highlight (between open & end)
             rowsToDraw.push({
               rowI: i,
               start: 0,
@@ -278,9 +269,9 @@ export default class Cursor
         }
       }
 
-      // draw selections or cursor
       for (const row of rowsToDraw) {
-        this.drawLine(ctx, row.rowI, row.start, row.end, drawingOptions);
+        const lineText = text.getLine(viewport.lineStart + row.rowI) ?? "";
+        this.drawLine(ctx, row.rowI, lineText, row.start, row.end, drawingOptions);
       }
     }
 

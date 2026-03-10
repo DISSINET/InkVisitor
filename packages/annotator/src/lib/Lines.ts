@@ -9,13 +9,11 @@ export class Lines {
   // cached canvas contex
   ctx: CanvasRenderingContext2D;
 
-  // TODO: different font, different sizes
-  font: string = "12px Monospace";
+  font: string = "12px Roboto, sans-serif";
   fontColor: string = "black";
 
   bgColor: string = "white";
 
-  charWidth: number = 0;
   lineHeight: number = 15;
 
   // size for virtual area inside the canvas element
@@ -26,7 +24,7 @@ export class Lines {
     element: HTMLCanvasElement,
     ratio: number,
     lineHeight: number,
-    charWidth: number
+    font: string
   ) {
     this.element = element;
     const ctx = this.element.getContext("2d");
@@ -40,7 +38,7 @@ export class Lines {
     this.bgColor = this.element.style.backgroundColor || "white";
     this.fontColor = this.element.style.color || "black";
 
-    this.charWidth = charWidth;
+    this.font = font;
     this.lineHeight = lineHeight / ratio;
   }
 

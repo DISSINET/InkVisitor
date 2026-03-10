@@ -3,7 +3,7 @@ import Highlighter, { IAbsCoordinates, CursorStyle } from "./Highlighter";
 import Keys from "./Keys";
 import { Lines } from "./Lines";
 import Scroller from "./Scroller";
-import Text, { Tag, SegmentPosition } from "./Text";
+import Text, { Tag, SegmentPosition, MeasureTextFn } from "./Text";
 import Viewport from "./Viewport";
 import { Warnings } from "./warnings";
 import { EditMode, HighlightMode } from "./constants";
@@ -43,9 +43,9 @@ export interface HighlightSchema {
 
 // DrawingOptions bundles required sizes shared by multiple components while drawing into canvas
 export interface DrawingOptions {
-  charWidth: number;
   lineHeight: number;
-  charsAtLine: number;
+  /** Measure text width in pixels (current font). Used for proportional font cursor/selection. */
+  measureText: MeasureTextFn;
   color?: string; // override
 }
 
@@ -65,14 +65,13 @@ export class Annotator {
   ctx: CanvasRenderingContext2D;
 
   // TODO: different font, different sizes
-  font: string = "12px Monospace";
+  font: string = "12px Roboto, sans-serif";
 
   fontColor: string = "black";
   bgColor: string = "white";
   selectColor: string = "rgba(0, 0, 0)";
   selectOpacity: number = 0.5;
 
-  charWidth: number = 0;
   lineHeight: number = 15;
 
   inputText: string = "";
@@ -119,7 +118,7 @@ export class Annotator {
     }
 
     this.ratio = ratio;
-    this.font = `${12 * this.ratio}px Monospace`;
+    this.font = `${12 * this.ratio}px Roboto, sans-serif`;
 
     this.lineHeight = 15 * this.ratio;
 
@@ -132,16 +131,12 @@ export class Annotator {
     this.element.width = this.width;
     this.element.height = this.height;
 
-    this.setCharWidth("abcdefghijklmnopqrstuvwxyz0123456789");
-
-    const charsAtLine = Math.floor(this.width / this.charWidth);
-
     const noLinesViewport = Math.ceil(this.height / this.lineHeight) - 1;
 
     this.viewport = new Viewport(0, noLinesViewport);
 
     this.inputText = inputText;
-    this.text = new Text(this.inputText, charsAtLine);
+    this.text = new Text(this.inputText, this.width, this.measureText.bind(this));
 
     this.cursor = new Cursor(this.ratio, 0, 0);
 
@@ -280,15 +275,12 @@ export class Annotator {
     this.element.width = this.width;
     this.element.height = this.height;
 
-    this.setCharWidth("abcdefghijklmnopqrstuvwxyz0123456789");
-
     const noLinesViewport = Math.ceil(this.height / this.lineHeight) - 1;
-    const charsAtLine = Math.floor(this.width / this.charWidth);
 
     const positionBeforeRel = this.viewport.lineStart / this.text.noLines;
 
     this.viewport.updateLineEnd(noLinesViewport);
-    this.text.updateCharsAtLine(charsAtLine);
+    this.text.updateLineWidth(this.width);
 
     // this function tries to keep the same relative position of the text even its not perfect
     // FIXME: Ideally we should find the exact text at the top of the viewport and try to keep it on top after the resize
@@ -345,14 +337,34 @@ export class Annotator {
   }
 
   /**
-   * setCharWidth sets the initial size for characters
-   * This is true for monospace font
-   * @param txt
+   * measureText returns the width in pixels of the given string in the current font.
+   * Used for proportional font line wrapping, cursor positioning, and selection drawing.
    */
-  setCharWidth(txt: string) {
+  measureText(str: string): number {
     this.ctx.font = this.font;
-    const textW = this.ctx.measureText(txt).width;
-    this.charWidth = textW / txt.length;
+    return this.ctx.measureText(str).width;
+  }
+
+  /**
+   * Returns the character index in the line that corresponds to the given pixel X (for proportional fonts).
+   */
+  getCharIndexFromPixelX(lineText: string, pixelX: number): number {
+    const measure = this.measureText.bind(this);
+    if (lineText.length === 0) return 0;
+    if (pixelX <= 0) return 0;
+    const fullWidth = measure(lineText);
+    if (pixelX >= fullWidth) return lineText.length;
+    let lo = 0;
+    let hi = lineText.length;
+    while (lo + 1 < hi) {
+      const mid = (lo + hi) >> 1;
+      const w = measure(lineText.substring(0, mid));
+      if (w <= pixelX) lo = mid;
+      else hi = mid;
+    }
+    const wLo = measure(lineText.substring(0, lo));
+    const wHi = lo + 1 <= lineText.length ? measure(lineText.substring(0, lo + 1)) : fullWidth;
+    return pixelX - wLo <= wHi - pixelX ? lo : Math.min(lo + 1, lineText.length);
   }
 
   /**
@@ -360,13 +372,16 @@ export class Annotator {
    * @param e
    */
   onMouseDown(e: MouseEvent) {
-    // move the cursor to selected position, but dont allow to move over the line boundaries (x axis)
-    this.cursor.setPositionFromEvent(e, this.lineHeight, this.charWidth);
+    const yLine = this.cursor.yToLineI(e.offsetY, this.lineHeight);
+    const line = this.text.getLine(this.viewport.lineStart + yLine) ?? "";
+    const xLine = this.getCharIndexFromPixelX(line, e.offsetX);
+    this.cursor.setPosition(Math.min(xLine, line.length), yLine);
+
     const segment = this.text.cursorToIndex(this.viewport, this.cursor);
     if (segment) {
-      const line = this.text.getLineFromPosition(segment);
-      if (line.length < this.cursor.xLine) {
-        this.cursor.xLine = line.length;
+      const lineFromPos = this.text.getLineFromPosition(segment);
+      if (lineFromPos.length < this.cursor.xLine) {
+        this.cursor.xLine = lineFromPos.length;
       }
     }
 
@@ -385,13 +400,16 @@ export class Annotator {
    * @param e
    */
   onMouseUp(e: MouseEvent) {
-    // move the cursor to selected position, but dont allow to move over the line boundaries (x axis)
-    this.cursor.setPositionFromEvent(e, this.lineHeight, this.charWidth);
+    const yLine = this.cursor.yToLineI(e.offsetY, this.lineHeight);
+    const line = this.text.getLine(this.viewport.lineStart + yLine) ?? "";
+    const xLine = this.getCharIndexFromPixelX(line, e.offsetX);
+    this.cursor.setPosition(Math.min(xLine, line.length), yLine);
+
     const segment = this.text.cursorToIndex(this.viewport, this.cursor);
     if (segment) {
-      const line = this.text.getLineFromPosition(segment);
-      if (line.length < this.cursor.xLine) {
-        this.cursor.xLine = line.length;
+      const lineFromPos = this.text.getLineFromPosition(segment);
+      if (lineFromPos.length < this.cursor.xLine) {
+        this.cursor.xLine = lineFromPos.length;
       }
     }
 
@@ -405,13 +423,16 @@ export class Annotator {
    */
   onMouseMove(e: MouseEvent) {
     if (this.cursor.isSelecting()) {
-      // move the cursor to selected position, but dont allow to move over the line boundaries (x axis)
-      this.cursor.setPositionFromEvent(e, this.lineHeight, this.charWidth);
+      const yLine = this.cursor.yToLineI(e.offsetY, this.lineHeight);
+      const line = this.text.getLine(this.viewport.lineStart + yLine) ?? "";
+      const xLine = this.getCharIndexFromPixelX(line, e.offsetX);
+      this.cursor.setPosition(Math.min(xLine, line.length), yLine);
+
       const segment = this.text.cursorToIndex(this.viewport, this.cursor);
       if (segment) {
-        const line = this.text.getLineFromPosition(segment);
-        if (line.length < this.cursor.xLine) {
-          this.cursor.xLine = line.length;
+        const lineFromPos = this.text.getLineFromPosition(segment);
+        if (lineFromPos.length < this.cursor.xLine) {
+          this.cursor.xLine = lineFromPos.length;
         }
       }
 
@@ -421,13 +442,16 @@ export class Annotator {
   }
 
   onMouseDoubleClick(e: MouseEvent) {
-    // move the cursor to selected position, but dont allow to move over the line boundaries (x axis)
-    this.cursor.setPositionFromEvent(e, this.lineHeight, this.charWidth);
+    const yLine = this.cursor.yToLineI(e.offsetY, this.lineHeight);
+    const line = this.text.getLine(this.viewport.lineStart + yLine) ?? "";
+    const xLine = this.getCharIndexFromPixelX(line, e.offsetX);
+    this.cursor.setPosition(Math.min(xLine, line.length), yLine);
+
     const segment = this.text.cursorToIndex(this.viewport, this.cursor);
     if (segment) {
-      const line = this.text.getLineFromPosition(segment);
-      if (line.length < this.cursor.xLine) {
-        this.cursor.xLine = line.length;
+      const lineFromPos = this.text.getLineFromPosition(segment);
+      if (lineFromPos.length < this.cursor.xLine) {
+        this.cursor.xLine = lineFromPos.length;
       }
     }
 
@@ -471,7 +495,7 @@ export class Annotator {
       canvasElement,
       this.ratio,
       this.lineHeight,
-      this.charWidth
+      this.font
     );
   }
 
@@ -788,8 +812,7 @@ export class Annotator {
         this.text,
         {
           lineHeight: this.lineHeight,
-          charWidth: this.charWidth,
-          charsAtLine: this.text.charsAtLine,
+          measureText: this.measureText.bind(this),
         },
       );
     }
@@ -833,9 +856,12 @@ export class Annotator {
         0,
         true
       );
+      const lastLineIndex = Math.min(this.viewport.lineEnd, this.text.noLines) - 1;
+      const lastLineLen = lastLineIndex >= 0 ? this.text.getLine(lastLineIndex).length : 0;
       const endPos = this.text.getSegmentPosition(
-        this.viewport.lineEnd,
-        this.text.charsAtLine
+        lastLineIndex >= 0 ? lastLineIndex : 0,
+        lastLineLen,
+        true
       );
 
       const annotated: Tag[] = this.getAnnotations(startPos, endPos);
@@ -893,8 +919,7 @@ export class Annotator {
           this.text,
           {
             lineHeight: this.lineHeight,
-            charWidth: this.charWidth,
-            charsAtLine: this.text.charsAtLine,
+            measureText: this.measureText.bind(this),
           },
         );
       }
