@@ -1,7 +1,7 @@
 import { DrawingOptions } from "./Annotator";
 import Text from "./Text";
 import Viewport from "./Viewport";
-import { HighlightMode, HIGHLIGHT_HEIGHT_RATIO } from "./constants";
+import { HighlightMode, HIGHLIGHT_HEIGHT_RATIO, UNDERLINE_OFFSET_PX } from "./constants";
 
 // Absolute coordinates point to virtual position not limited by viewport - first line is first line of input
 export interface IAbsCoordinates {
@@ -121,7 +121,9 @@ export default class Highlighter {
       ctx.fillRect(xStartPx, relLine * lineHeight, width, lineHeight);
     } else if (this.hlMode === "underline") {
       ctx.globalCompositeOperation = "multiply";
-      ctx.fillRect(xStartPx, (relLine + 1) * lineHeight, width, height);
+      const offsetPx = UNDERLINE_OFFSET_PX * this.ratio;
+      const underlineY = (relLine + 1) * lineHeight - height - offsetPx;
+      ctx.fillRect(xStartPx, underlineY, width, height);
     } else if (this.hlMode === "background") {
       ctx.globalCompositeOperation = "multiply";
       ctx.fillRect(xStartPx, y, width, height);
