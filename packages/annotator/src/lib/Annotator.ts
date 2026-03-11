@@ -6,7 +6,7 @@ import Scroller from "./Scroller";
 import Text, { Tag, SegmentPosition, MeasureTextFn } from "./Text";
 import Viewport from "./Viewport";
 import { Warnings } from "./warnings";
-import { EditMode, HighlightMode } from "./constants";
+import { EditMode, FONT_SIZE, HighlightMode, LINE_HEIGHT } from "./constants";
 
 // Updated regex to properly handle tags with attributes
 // Opening tags: <tagname attr="value"> or <tagname>
@@ -65,7 +65,7 @@ export class Annotator {
   ctx: CanvasRenderingContext2D;
 
   // TODO: different font, different sizes
-  font: string = "14px Roboto, sans-serif";
+  font: string = `${FONT_SIZE}px Roboto, sans-serif`;
 
   fontColor: string = "black";
   bgColor: string = "white";
@@ -118,9 +118,9 @@ export class Annotator {
     }
 
     this.ratio = ratio;
-    this.font = `${14 * this.ratio}px Roboto, sans-serif`;
+    this.font = `${FONT_SIZE * this.ratio}px Roboto, sans-serif`;
 
-    this.lineHeight = 17 * this.ratio;
+    this.lineHeight = LINE_HEIGHT * this.ratio;
 
     this.ctx = ctx;
     this.width =
@@ -136,7 +136,11 @@ export class Annotator {
     this.viewport = new Viewport(0, noLinesViewport);
 
     this.inputText = inputText;
-    this.text = new Text(this.inputText, this.width, this.measureText.bind(this));
+    this.text = new Text(
+      this.inputText,
+      this.width,
+      this.measureText.bind(this)
+    );
 
     this.cursor = new Cursor(this.ratio, 0, 0);
 
@@ -373,8 +377,13 @@ export class Annotator {
       else hi = mid;
     }
     const wLo = measure(lineText.substring(0, lo));
-    const wHi = lo + 1 <= lineText.length ? measure(lineText.substring(0, lo + 1)) : fullWidth;
-    return pixelX - wLo <= wHi - pixelX ? lo : Math.min(lo + 1, lineText.length);
+    const wHi =
+      lo + 1 <= lineText.length
+        ? measure(lineText.substring(0, lo + 1))
+        : fullWidth;
+    return pixelX - wLo <= wHi - pixelX
+      ? lo
+      : Math.min(lo + 1, lineText.length);
   }
 
   /**
@@ -435,7 +444,10 @@ export class Annotator {
     if (this.cursor.isSelecting()) {
       const yLine = this.cursor.yToLineI(e.offsetY, this.lineHeight);
       const line = this.text.getLine(this.viewport.lineStart + yLine) ?? "";
-      const xLine = this.getCharIndexFromPixelX(line, this.getCanvasX(e.offsetX));
+      const xLine = this.getCharIndexFromPixelX(
+        line,
+        this.getCanvasX(e.offsetX)
+      );
       this.cursor.setPosition(Math.min(xLine, line.length), yLine);
 
       const segment = this.text.cursorToIndex(this.viewport, this.cursor);
@@ -802,7 +814,7 @@ export class Annotator {
     this.ctx.fillStyle = this.fontColor;
 
     const textToRender = this.text.getViewportText(this.viewport);
-    const renderEndCond = this.viewport.lineEnd - this.viewport.lineStart
+    const renderEndCond = this.viewport.lineEnd - this.viewport.lineStart;
     for (let renderLine = 0; renderLine <= renderEndCond; renderLine++) {
       const textLine = textToRender[renderLine];
       if (textLine) {
@@ -816,15 +828,10 @@ export class Annotator {
       // fix cursor position to end of the line (cursor.xLine could be virtually infinity)
       this.cursor.xLine = textSegment.charInLineIndex;
 
-      this.cursor.draw(
-        this.ctx,
-        this.viewport,
-        this.text,
-        {
-          lineHeight: this.lineHeight,
-          measureText: this.measureText.bind(this),
-        },
-      );
+      this.cursor.draw(this.ctx, this.viewport, this.text, {
+        lineHeight: this.lineHeight,
+        measureText: this.measureText.bind(this),
+      });
     }
 
     // if (this.onSelectTextCb && this.cursor.isSelected()) {
@@ -866,8 +873,10 @@ export class Annotator {
         0,
         true
       );
-      const lastLineIndex = Math.min(this.viewport.lineEnd, this.text.noLines) - 1;
-      const lastLineLen = lastLineIndex >= 0 ? this.text.getLine(lastLineIndex).length : 0;
+      const lastLineIndex =
+        Math.min(this.viewport.lineEnd, this.text.noLines) - 1;
+      const lastLineLen =
+        lastLineIndex >= 0 ? this.text.getLine(lastLineIndex).length : 0;
       const endPos = this.text.getSegmentPosition(
         lastLineIndex >= 0 ? lastLineIndex : 0,
         lastLineLen,
@@ -923,15 +932,10 @@ export class Annotator {
 
         highlighter.selectStart = item.start;
         highlighter.selectEnd = item.end;
-        highlighter.draw(
-          this.ctx,
-          this.viewport,
-          this.text,
-          {
-            lineHeight: this.lineHeight,
-            measureText: this.measureText.bind(this),
-          },
-        );
+        highlighter.draw(this.ctx, this.viewport, this.text, {
+          lineHeight: this.lineHeight,
+          measureText: this.measureText.bind(this),
+        });
       }
     }
 

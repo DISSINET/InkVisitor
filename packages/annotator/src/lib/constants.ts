@@ -10,3 +10,6 @@ export enum HighlightMode {
   FOCUS = "focus",
   UNDERLINE = "underline",
 }
+
+export const LINE_HEIGHT = 20;
+export const FONT_SIZE = 14;

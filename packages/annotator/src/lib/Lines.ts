@@ -1,3 +1,4 @@
+import { FONT_SIZE, LINE_HEIGHT } from "./constants";
 import Viewport from "./Viewport";
 
 /**
@@ -9,12 +10,12 @@ export class Lines {
   // cached canvas contex
   ctx: CanvasRenderingContext2D;
 
-  font: string = "14px Roboto, sans-serif";
+  font: string = `${FONT_SIZE}px Roboto, sans-serif`;
   fontColor: string = "black";
 
   bgColor: string = "white";
 
-  lineHeight: number = 17;
+  lineHeight: number = LINE_HEIGHT;
 
   // size for virtual area inside the canvas element
   width: number = 0;
