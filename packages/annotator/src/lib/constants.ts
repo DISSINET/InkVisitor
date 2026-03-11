@@ -11,5 +11,5 @@ export enum HighlightMode {
   UNDERLINE = "underline",
 }
 
-export const LINE_HEIGHT = 20;
+export const LINE_HEIGHT = 24;
 export const FONT_SIZE = 14;

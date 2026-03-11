@@ -40,7 +40,9 @@ export class Lines {
     this.fontColor = this.element.style.color || "black";
 
     this.font = font;
-    this.lineHeight = lineHeight / ratio;
+    // Use the same visual baseline spacing as the main annotator.
+    // The passed-in lineHeight is already in visual (CSS) pixels.
+    this.lineHeight = lineHeight;
   }
 
   draw(viewport: Viewport) {
