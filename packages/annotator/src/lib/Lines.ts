@@ -9,12 +9,12 @@ export class Lines {
   // cached canvas contex
   ctx: CanvasRenderingContext2D;
 
-  font: string = "12px Roboto, sans-serif";
+  font: string = "14px Roboto, sans-serif";
   fontColor: string = "black";
 
   bgColor: string = "white";
 
-  lineHeight: number = 15;
+  lineHeight: number = 17;
 
   // size for virtual area inside the canvas element
   width: number = 0;

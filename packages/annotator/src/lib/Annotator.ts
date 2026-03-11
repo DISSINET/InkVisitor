@@ -65,14 +65,14 @@ export class Annotator {
   ctx: CanvasRenderingContext2D;
 
   // TODO: different font, different sizes
-  font: string = "12px Roboto, sans-serif";
+  font: string = "14px Roboto, sans-serif";
 
   fontColor: string = "black";
   bgColor: string = "white";
   selectColor: string = "rgba(0, 0, 0)";
   selectOpacity: number = 0.5;
 
-  lineHeight: number = 15;
+  lineHeight: number = 17;
 
   inputText: string = "";
 
@@ -118,9 +118,9 @@ export class Annotator {
     }
 
     this.ratio = ratio;
-    this.font = `${12 * this.ratio}px Roboto, sans-serif`;
+    this.font = `${14 * this.ratio}px Roboto, sans-serif`;
 
-    this.lineHeight = 15 * this.ratio;
+    this.lineHeight = 17 * this.ratio;
 
     this.ctx = ctx;
     this.width =
