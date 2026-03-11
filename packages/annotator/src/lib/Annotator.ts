@@ -72,6 +72,7 @@ export class Annotator {
   selectColor: string = "rgba(0, 0, 0)";
   selectOpacity: number = 0.5;
 
+  // TODO: make it possible to change the line height
   lineHeight: number = 17;
 
   inputText: string = "";
