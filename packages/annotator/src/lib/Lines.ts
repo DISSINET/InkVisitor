@@ -53,6 +53,7 @@ export class Lines {
 
     this.ctx.font = this.font;
     this.ctx.fillStyle = this.fontColor;
+    this.ctx.textBaseline = "middle";
 
     for (
       let renderLine = 1;
@@ -63,7 +64,7 @@ export class Lines {
       this.ctx.fillText(
         (viewport.lineStart + renderLine).toString(),
         0,
-        renderLine * this.lineHeight
+        (renderLine - 0.5) * this.lineHeight
       );
     }
   }

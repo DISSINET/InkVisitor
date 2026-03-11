@@ -360,6 +360,13 @@ export class Annotator {
   }
 
   /**
+   * Converts mouse/pointer offset Y to canvas buffer Y (same scaling as getCanvasX).
+   */
+  getCanvasY(offsetY: number): number {
+    return offsetY * this.ratio;
+  }
+
+  /**
    * Returns the character index in the line that corresponds to the given pixel X (for proportional fonts).
    * pixelX must be in the same coordinate system as measureText (canvas buffer pixels).
    */
@@ -392,7 +399,7 @@ export class Annotator {
    * @param e
    */
   onMouseDown(e: MouseEvent) {
-    const yLine = this.cursor.yToLineI(e.offsetY, this.lineHeight);
+    const yLine = this.cursor.yToLineI(this.getCanvasY(e.offsetY), this.lineHeight);
     const line = this.text.getLine(this.viewport.lineStart + yLine) ?? "";
     const xLine = this.getCharIndexFromPixelX(line, this.getCanvasX(e.offsetX));
     this.cursor.setPosition(Math.min(xLine, line.length), yLine);
@@ -420,7 +427,7 @@ export class Annotator {
    * @param e
    */
   onMouseUp(e: MouseEvent) {
-    const yLine = this.cursor.yToLineI(e.offsetY, this.lineHeight);
+    const yLine = this.cursor.yToLineI(this.getCanvasY(e.offsetY), this.lineHeight);
     const line = this.text.getLine(this.viewport.lineStart + yLine) ?? "";
     const xLine = this.getCharIndexFromPixelX(line, this.getCanvasX(e.offsetX));
     this.cursor.setPosition(Math.min(xLine, line.length), yLine);
@@ -443,7 +450,7 @@ export class Annotator {
    */
   onMouseMove(e: MouseEvent) {
     if (this.cursor.isSelecting()) {
-      const yLine = this.cursor.yToLineI(e.offsetY, this.lineHeight);
+      const yLine = this.cursor.yToLineI(this.getCanvasY(e.offsetY), this.lineHeight);
       const line = this.text.getLine(this.viewport.lineStart + yLine) ?? "";
       const xLine = this.getCharIndexFromPixelX(
         line,
@@ -465,7 +472,7 @@ export class Annotator {
   }
 
   onMouseDoubleClick(e: MouseEvent) {
-    const yLine = this.cursor.yToLineI(e.offsetY, this.lineHeight);
+    const yLine = this.cursor.yToLineI(this.getCanvasY(e.offsetY), this.lineHeight);
     const line = this.text.getLine(this.viewport.lineStart + yLine) ?? "";
     const xLine = this.getCharIndexFromPixelX(line, this.getCanvasX(e.offsetX));
     this.cursor.setPosition(Math.min(xLine, line.length), yLine);
@@ -813,13 +820,18 @@ export class Annotator {
 
     this.ctx.font = this.font;
     this.ctx.fillStyle = this.fontColor;
+    this.ctx.textBaseline = "middle";
 
     const textToRender = this.text.getViewportText(this.viewport);
     const renderEndCond = this.viewport.lineEnd - this.viewport.lineStart;
     for (let renderLine = 0; renderLine <= renderEndCond; renderLine++) {
       const textLine = textToRender[renderLine];
       if (textLine) {
-        this.ctx.fillText(textLine, 0, (renderLine + 1) * this.lineHeight);
+        this.ctx.fillText(
+          textLine,
+          0,
+          (renderLine + 0.5) * this.lineHeight
+        );
       }
     }
 

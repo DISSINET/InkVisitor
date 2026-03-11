@@ -56,8 +56,13 @@ export default class Highlighter {
     this.style = { ...this.style, ...style };
   }
 
-  yToLineI(y: number, lineHeight: number): number {
-    return Math.round((y / lineHeight) * this.ratio - 1);
+  /**
+   * Converts canvas buffer Y and line height to viewport-relative line index.
+   * Line N occupies y in [N*lineHeight, (N+1)*lineHeight); use buffer coords for correct hit-testing.
+   */
+  yToLineI(canvasY: number, lineHeight: number): number {
+    const lineIndex = Math.floor(canvasY / lineHeight);
+    return Math.max(0, lineIndex);
   }
 
   /**
