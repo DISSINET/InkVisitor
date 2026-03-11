@@ -73,7 +73,7 @@ export class Annotator {
   selectOpacity: number = 0.5;
 
   // TODO: make it possible to change the line height
-  lineHeight: number = 17;
+  lineHeight: number = LINE_HEIGHT;
 
   inputText: string = "";
 
@@ -517,8 +517,8 @@ export class Annotator {
     this.lines = new Lines(
       canvasElement,
       this.ratio,
-      this.lineHeight,
-      this.font
+      this.lineHeight / this.ratio,
+      `${FONT_SIZE}px Roboto, sans-serif`
     );
   }
 
