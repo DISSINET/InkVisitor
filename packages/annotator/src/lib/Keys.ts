@@ -269,9 +269,28 @@ export default class Keys {
     }
   }
 
-  onArrowUp({ ctrlKey, shiftKey }: { ctrlKey?: boolean; shiftKey?: boolean }) {
+  onArrowUp({
+    ctrlKey,
+    shiftKey,
+    metaKey,
+  }: {
+    ctrlKey?: boolean;
+    shiftKey?: boolean;
+    metaKey?: boolean;
+  }) {
     const originalXLine = this.cursor.xLine;
     const originalAbsYline = this.viewport.lineStart + this.cursor.yLine;
+
+    if (metaKey && !shiftKey) {
+      // Cmd + Up: jump to very start of text (first line, col 0)
+      this.viewport.scrollTo(0, this.text.noLines);
+      this.cursor.yLine = 0;
+      this.cursor.xLine = 0;
+      this.cursor.selectStart = undefined;
+      this.cursor.selectEnd = undefined;
+      this.cursor.setTrueSelectionDirection();
+      return;
+    }
 
     if (this.cursor.yLine <= 0) {
       // scroll up if going outside of the viewport
@@ -331,12 +350,27 @@ export default class Keys {
   onArrowDown({
     ctrlKey,
     shiftKey,
+    metaKey,
   }: {
     ctrlKey?: boolean;
     shiftKey?: boolean;
+    metaKey?: boolean;
   }) {
     const originalXLine = this.cursor.xLine;
     const originalAbsYline = this.viewport.lineStart + this.cursor.yLine;
+
+    if (metaKey && !shiftKey) {
+      // Cmd + Down: jump to end of entire text
+      const lastLineIndex = this.text.noLines > 0 ? this.text.noLines - 1 : 0;
+      const lineText = this.text.getLine(lastLineIndex) ?? "";
+      this.viewport.scrollTo(this.text.noLines, this.text.noLines);
+      this.cursor.yLine = lastLineIndex - this.viewport.lineStart;
+      this.cursor.xLine = lineText.length;
+      this.cursor.selectStart = undefined;
+      this.cursor.selectEnd = undefined;
+      this.cursor.setTrueSelectionDirection();
+      return;
+    }
 
     this.cursor.move(0, 1);
 
