@@ -61,9 +61,7 @@ export default class Highlighter {
   }
 
   xToCharI(x: number, charWidth: number): number {
-    const rel = (Math.max(x, 0) / charWidth) * this.ratio;
-    // Place caret to the right when clicking on the right half of a character cell
-    return Math.floor(rel + 0.5);
+    return Math.floor((Math.max(x, 0) / charWidth) * this.ratio);
   }
 
   /**
@@ -146,7 +144,7 @@ export default class Highlighter {
     ctx: CanvasRenderingContext2D,
     viewport: Viewport,
     text: Text,
-    drawingOptions: DrawingOptions,
+    drawingOptions: DrawingOptions
   ) {
     const { charsAtLine } = drawingOptions;
 
