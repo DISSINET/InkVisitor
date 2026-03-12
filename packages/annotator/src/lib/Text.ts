@@ -630,6 +630,23 @@ class Text {
   }
 
   /**
+   * Converts a segment position to viewport-relative cursor coordinates.
+   * Returns xLine (character index in line) and yLine (line index relative to viewport start), or null if segment is missing.
+   */
+  positionToCursor(
+    viewport: Viewport,
+    pos: SegmentPosition
+  ): { xLine: number; yLine: number } | null {
+    const segment = this.segments[pos.segmentIndex];
+    if (!segment) return null;
+    const absLine = segment.lineStart + pos.lineIndex;
+    return {
+      xLine: pos.charInLineIndex,
+      yLine: absLine - viewport.lineStart,
+    };
+  }
+  
+  /**
    * Converts absolute line index to segment position.
    * 
    * This method finds the segment containing the given line and calculates
