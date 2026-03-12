@@ -60,4 +60,15 @@ export namespace RelationEnums {
     Type.Actant1Semantics,
     Type.Actant2Semantics,
   ];
+
+  export const BatchTypes: Type[] = [
+    Type.SuperordinateEntity,
+    Type.Classification,
+    Type.Superclass,
+    Type.SubjectSemantics,
+    Type.Actant1Semantics,
+    Type.Actant2Semantics,
+    Type.ActionEventEquivalent,
+    Type.Related
+  ];
 }

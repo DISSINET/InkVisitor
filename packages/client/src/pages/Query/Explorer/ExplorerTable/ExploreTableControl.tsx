@@ -29,7 +29,7 @@ interface ExploreTableControlProps {
 
   setRowLastClicked: (value: number) => void;
 
-  onExport: () => void;
+  onApplyBatchAction: () => void;
 }
 
 const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
@@ -46,7 +46,7 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
 
   setRowLastClicked,
 
-  onExport,
+  onApplyBatchAction,
 }) => {
   const handleSelectAll = (checked: boolean) => onAllRowsSelect(checked);
 
@@ -106,7 +106,7 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
           </div>
           <StyledCounter>{`${rowsSelected.length}/${rowsTotal}`}</StyledCounter>
           <Dropdown.Single.Basic
-            width={98}
+            width={140}
             disabled={rowsSelected.length === 0}
             value={batchActionSelected}
             onChange={(selectedOption) => {
@@ -120,18 +120,13 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
             }}
             options={batchOptions}
           />
-          {
-            // renderBatchAction()
-            batchActionSelected === BatchAction.export_csv && (
-              <Button
-                label="export"
-                color="primary"
-                inverted
-                onClick={onExport}
-                disabled={rowsSelected.length === 0}
-              />
-            )
-          }
+          <Button
+            label="apply"
+            color="primary"
+            inverted
+            onClick={onApplyBatchAction}
+            disabled={rowsSelected.length === 0}
+          />
         </div>
       </div>
 

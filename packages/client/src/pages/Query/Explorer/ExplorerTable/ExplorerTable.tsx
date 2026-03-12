@@ -40,6 +40,7 @@ import {
   StyledTableWrapper,
 } from "./ExplorerTableStyles";
 import ExploreTableControl from "./ExploreTableControl";
+import { ExplorerTableBatchActionModal } from "./ExplorerTableBatchActionModal/ExplorerTableBatchActionModal";
 import {
   BatchAction,
   batchOptions,
@@ -183,6 +184,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   const [batchActionSelected, setBatchActionSelected] = useState<BatchAction>(
     batchOptions[0].value
   );
+  const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
   const [detailsRowIndex, setDetailsRowIndex] = useState<number | null>(null);
 
   useEffect(() => {
@@ -346,6 +348,10 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     onExport(rowsSelected);
   };
 
+  const handleApplyBatchAction = () => {
+    setIsBatchModalOpen(true);
+  };
+
   const handleRemoveColumn = useCallback(
     (id: string) => {
       dispatch({
@@ -376,6 +382,18 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   // Use server rows
   const items: Array<IResponseQueryEntity | null> =
     (entities as IResponseQueryEntity[]) || [];
+
+  const selectedEntities = useMemo(() => {
+    return rowsSelected
+      .map((rowIndex) => {
+        const itemIndex = rowIndex - dataSourceOffset;
+        const item =
+          itemIndex >= 0 && itemIndex < items.length ? items[itemIndex] : null;
+        return item?.entity;
+      })
+      .filter(Boolean) as IEntity[];
+  }, [rowsSelected, dataSourceOffset, items]);
+
   const stableEmptyRowProps = useMemo(() => ({}), []);
 
   const getRowHeight = useCallback(() => HEIGHT_ROW_DEFAULT, []);
@@ -530,7 +548,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           setRowLastClicked={setRowLastClicked}
           rowsTotal={total}
           onAllRowsSelect={handleAllRowsSelect}
-          onExport={handleExport}
+          onApplyBatchAction={handleApplyBatchAction}
         />
 
         <div
@@ -622,6 +640,24 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           </Modal>
         )}
 
+      {/* BATCH ACTION MODAL */}
+      {isBatchModalOpen && (
+        <ExplorerTableBatchActionModal
+          batchAction={batchActionSelected}
+          selectedEntities={selectedEntities}
+          columns={columns}
+          onClose={() => setIsBatchModalOpen(false)}
+          onExport={() => {
+            handleExport();
+            setIsBatchModalOpen(false);
+          }}
+          onApplyAction={() => {
+            setIsBatchModalOpen(false);
+            invalidateActiveQuery?.();
+          }}
+        />
+      )}
+
       {/* NEW COLUMN */}
       <div style={{ position: "relative" }}>
         <ExplorerTableNewColumnPanel
@@ -631,6 +667,5 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
         />
       </div>
     </>
-    // </div>
   );
 };
