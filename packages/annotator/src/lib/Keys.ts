@@ -397,11 +397,25 @@ export default class Keys {
     ctrlKey,
     altKey,
     shiftKey,
+    metaKey,
   }: {
     ctrlKey?: boolean;
     altKey?: boolean;
     shiftKey?: boolean;
+    metaKey?: boolean;
   }) {
+    const absY = this.viewport.lineStart + this.cursor.yLine;
+    if (metaKey && shiftKey) {
+      this.cursor.selectStart = { xLine: 0, yLine: absY };
+      this.cursor.selectEnd = {
+        xLine: this.cursor.xLine,
+        yLine: absY,
+      };
+      this.cursor.xLine = 0;
+      this.cursor.setTrueSelectionDirection();
+      return;
+    }
+
     // default delta to the left
     let offsetLeft = -1;
 
@@ -490,11 +504,26 @@ export default class Keys {
     ctrlKey,
     altKey,
     shiftKey,
+    metaKey,
   }: {
     ctrlKey?: boolean;
     altKey?: boolean;
     shiftKey?: boolean;
+    metaKey?: boolean;
   }) {
+    const absY = this.viewport.lineStart + this.cursor.yLine;
+    const line = this.text.getLine(absY) ?? "";
+    if (metaKey && shiftKey) {
+      this.cursor.selectStart = {
+        xLine: this.cursor.xLine,
+        yLine: absY,
+      };
+      this.cursor.selectEnd = { xLine: line.length, yLine: absY };
+      this.cursor.xLine = line.length;
+      this.cursor.setTrueSelectionDirection();
+      return;
+    }
+
     // default delta to the right
     let offsetRight = 1;
 
