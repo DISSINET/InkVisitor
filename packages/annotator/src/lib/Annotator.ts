@@ -435,16 +435,18 @@ export class Annotator {
       this.viewport,
       this.cursor
     );
+    const absYLine = this.cursor.yLine + this.viewport.lineStart;
     this.cursor.selectStart = {
       xLine: this.cursor.xLine + offsetLeft,
-      yLine: this.cursor.yLine + this.viewport.lineStart,
+      yLine: absYLine,
     };
     this.cursor.selectEnd = {
       xLine: this.cursor.xLine + offsetRight,
-      yLine: this.cursor.yLine + this.viewport.lineStart,
+      yLine: absYLine,
     };
+    // keep cursor at the end of the word, but in viewport-relative coordinates
     this.cursor.xLine = this.cursor.selectEnd.xLine;
-    this.cursor.yLine = this.cursor.selectEnd.yLine;
+    this.cursor.yLine = absYLine - this.viewport.lineStart;
     this.cursor.selectDirection = DIRECTION.FORWARD;
     this.draw();
   }
@@ -923,6 +925,14 @@ export class Annotator {
    * @param mode
    */
   setMode(mode: EditMode) {
+    let absIndex: number | null = null;
+    if (this.cursor.xLine >= 0 && this.cursor.yLine >= 0) {
+      const segPos = this.text.cursorToIndex(this.viewport, this.cursor);
+      if (segPos !== null) {
+        absIndex = this.text.getAbsTextIndexFromPosition(segPos);
+      }
+    }
+
     this.element.classList.remove(this.text.mode);
     this.element.classList.add(mode);
 
@@ -930,6 +940,20 @@ export class Annotator {
     this.cursor.reset();
     this.text.prepareSegments();
     this.text.calculateLines();
+
+    if (absIndex !== null && absIndex >= 0) {
+      const segPos = this.text.getSegmentFromAbsTextIndex(absIndex);
+      if (segPos !== null) {
+        const coords = this.text.positionToCursor(this.viewport, segPos);
+        if (coords !== null) {
+          this.cursor.setPosition(coords.xLine, coords.yLine);
+          const absY = coords.yLine + this.viewport.lineStart;
+          if (absY < this.viewport.lineStart || absY > this.viewport.lineEnd - 1) {
+            this.viewport.scrollTo(absY, this.text.noLines);
+          }
+        }
+      }
+    }
   }
 
   /**
