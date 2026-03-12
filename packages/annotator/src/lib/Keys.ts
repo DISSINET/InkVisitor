@@ -281,7 +281,19 @@ export default class Keys {
     const originalXLine = this.cursor.xLine;
     const originalAbsYline = this.viewport.lineStart + this.cursor.yLine;
 
-    if (metaKey && !shiftKey) {
+    if (metaKey && shiftKey) {
+      // Cmd + Shift + Up: select from current position to very start of text
+      this.cursor.selectStart = { xLine: 0, yLine: 0 };
+      this.cursor.selectEnd = {
+        xLine: originalXLine,
+        yLine: originalAbsYline,
+      };
+      this.viewport.scrollTo(0, this.text.noLines);
+      this.cursor.yLine = 0;
+      this.cursor.xLine = 0;
+      this.cursor.setTrueSelectionDirection();
+      return;
+    } else if (metaKey && !shiftKey) {
       // Cmd + Up: jump to very start of text (first line, col 0)
       this.viewport.scrollTo(0, this.text.noLines);
       this.cursor.yLine = 0;
@@ -359,7 +371,24 @@ export default class Keys {
     const originalXLine = this.cursor.xLine;
     const originalAbsYline = this.viewport.lineStart + this.cursor.yLine;
 
-    if (metaKey && !shiftKey) {
+    if (metaKey && shiftKey) {
+      // Cmd + Shift + Down: select from current position to end of entire text
+      const lastLineIndex = this.text.noLines > 0 ? this.text.noLines - 1 : 0;
+      const lineText = this.text.getLine(lastLineIndex) ?? "";
+      this.cursor.selectStart = {
+        xLine: originalXLine,
+        yLine: originalAbsYline,
+      };
+      this.cursor.selectEnd = {
+        xLine: lineText.length,
+        yLine: lastLineIndex,
+      };
+      this.viewport.scrollTo(this.text.noLines, this.text.noLines);
+      this.cursor.yLine = lastLineIndex - this.viewport.lineStart;
+      this.cursor.xLine = lineText.length;
+      this.cursor.setTrueSelectionDirection();
+      return;
+    } else if (metaKey && !shiftKey) {
       // Cmd + Down: jump to end of entire text
       const lastLineIndex = this.text.noLines > 0 ? this.text.noLines - 1 : 0;
       const lineText = this.text.getLine(lastLineIndex) ?? "";
