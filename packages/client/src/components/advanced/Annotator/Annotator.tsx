@@ -353,15 +353,30 @@ export const TextAnnotator = ({
       const canvas = mainCanvas.current;
       if (canvas) {
         const rect = canvas.getBoundingClientRect();
-        const startX =
-          rect.left + annotator.cursor.selectStart.xLine * annotator.charWidth;
+        const startLineIndex = annotator.cursor.selectStart.yLine;
+        const endLineIndex = annotator.cursor.selectEnd.yLine;
+
+        const startLineText =
+          annotator.text.getLine(startLineIndex) ?? "";
+        const endLineText =
+          annotator.text.getLine(endLineIndex) ?? "";
+
+        const startOffsetPx =
+          annotator.measureText(
+            startLineText.substring(0, annotator.cursor.selectStart.xLine)
+          ) / RATIO;
+        const endOffsetPx =
+          annotator.measureText(
+            endLineText.substring(0, annotator.cursor.selectEnd.xLine)
+          ) / RATIO;
+
+        const startX = rect.left + startOffsetPx;
         const startY =
           rect.top +
           ((annotator.cursor.selectStart.yLine - annotator.viewport.lineStart) *
             annotator.lineHeight) /
             RATIO;
-        const endX =
-          rect.left + annotator.cursor.selectEnd.xLine * annotator.charWidth;
+        const endX = rect.left + endOffsetPx;
         const endY =
           rect.top +
           ((annotator.cursor.selectEnd.yLine - annotator.viewport.lineStart) *

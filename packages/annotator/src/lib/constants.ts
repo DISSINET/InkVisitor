@@ -18,4 +18,4 @@ export const FONT_SIZE = 13;
 export const HIGHLIGHT_HEIGHT_RATIO = 0.75;
 
 /** Pixels to raise the underline above the bottom of the line band (UNDERLINE mode). Larger = smaller margin below text. */
-export const UNDERLINE_OFFSET_PX = 3;
+export const UNDERLINE_OFFSET_PX = 2.5;
