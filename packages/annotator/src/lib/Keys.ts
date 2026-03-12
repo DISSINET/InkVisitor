@@ -144,7 +144,7 @@ export default class Keys {
       );
     } else {
       const before = this.cursor.getAbsolutePosition(this.viewport);
-      this.onArrowLeft({ ctrlKey, shiftKey });
+      this.onArrowLeft({ ctrlKey, shiftKey, altKey: false });
       const after = this.cursor.getAbsolutePosition(this.viewport);
 
       this.text.deleteRangeText(before, after);
@@ -269,9 +269,40 @@ export default class Keys {
     }
   }
 
-  onArrowUp({ ctrlKey, shiftKey }: { ctrlKey?: boolean; shiftKey?: boolean }) {
+  onArrowUp({
+    ctrlKey,
+    shiftKey,
+    metaKey,
+  }: {
+    ctrlKey?: boolean;
+    shiftKey?: boolean;
+    metaKey?: boolean;
+  }) {
     const originalXLine = this.cursor.xLine;
     const originalAbsYline = this.viewport.lineStart + this.cursor.yLine;
+
+    if (metaKey && shiftKey) {
+      // Cmd + Shift + Up: select from current position to very start of text
+      this.cursor.selectStart = { xLine: 0, yLine: 0 };
+      this.cursor.selectEnd = {
+        xLine: originalXLine,
+        yLine: originalAbsYline,
+      };
+      this.viewport.scrollTo(0, this.text.noLines);
+      this.cursor.yLine = 0;
+      this.cursor.xLine = 0;
+      this.cursor.setTrueSelectionDirection();
+      return;
+    } else if (metaKey && !shiftKey) {
+      // Cmd + Up: jump to very start of text (first line, col 0)
+      this.viewport.scrollTo(0, this.text.noLines);
+      this.cursor.yLine = 0;
+      this.cursor.xLine = 0;
+      this.cursor.selectStart = undefined;
+      this.cursor.selectEnd = undefined;
+      this.cursor.setTrueSelectionDirection();
+      return;
+    }
 
     if (this.cursor.yLine <= 0) {
       // scroll up if going outside of the viewport
@@ -331,12 +362,44 @@ export default class Keys {
   onArrowDown({
     ctrlKey,
     shiftKey,
+    metaKey,
   }: {
     ctrlKey?: boolean;
     shiftKey?: boolean;
+    metaKey?: boolean;
   }) {
     const originalXLine = this.cursor.xLine;
     const originalAbsYline = this.viewport.lineStart + this.cursor.yLine;
+
+    if (metaKey && shiftKey) {
+      // Cmd + Shift + Down: select from current position to end of entire text
+      const lastLineIndex = this.text.noLines > 0 ? this.text.noLines - 1 : 0;
+      const lineText = this.text.getLine(lastLineIndex) ?? "";
+      this.cursor.selectStart = {
+        xLine: originalXLine,
+        yLine: originalAbsYline,
+      };
+      this.cursor.selectEnd = {
+        xLine: lineText.length,
+        yLine: lastLineIndex,
+      };
+      this.viewport.scrollTo(this.text.noLines, this.text.noLines);
+      this.cursor.yLine = lastLineIndex - this.viewport.lineStart;
+      this.cursor.xLine = lineText.length;
+      this.cursor.setTrueSelectionDirection();
+      return;
+    } else if (metaKey && !shiftKey) {
+      // Cmd + Down: jump to end of entire text
+      const lastLineIndex = this.text.noLines > 0 ? this.text.noLines - 1 : 0;
+      const lineText = this.text.getLine(lastLineIndex) ?? "";
+      this.viewport.scrollTo(this.text.noLines, this.text.noLines);
+      this.cursor.yLine = lastLineIndex - this.viewport.lineStart;
+      this.cursor.xLine = lineText.length;
+      this.cursor.selectStart = undefined;
+      this.cursor.selectEnd = undefined;
+      this.cursor.setTrueSelectionDirection();
+      return;
+    }
 
     this.cursor.move(0, 1);
 
@@ -395,17 +458,42 @@ export default class Keys {
 
   onArrowLeft({
     ctrlKey,
+    altKey,
     shiftKey,
+    metaKey,
   }: {
     ctrlKey?: boolean;
+    altKey?: boolean;
     shiftKey?: boolean;
+    metaKey?: boolean;
   }) {
+    const absY = this.viewport.lineStart + this.cursor.yLine;
+    if (metaKey && shiftKey) {
+      this.cursor.selectStart = { xLine: 0, yLine: absY };
+      this.cursor.selectEnd = {
+        xLine: this.cursor.xLine,
+        yLine: absY,
+      };
+      this.cursor.xLine = 0;
+      this.cursor.setTrueSelectionDirection();
+      return;
+    } else if (metaKey && !shiftKey) {
+      // Cmd + Left: move caret to start of line, clear selection
+      this.cursor.xLine = 0;
+      this.cursor.selectStart = undefined;
+      this.cursor.selectEnd = undefined;
+      this.cursor.setTrueSelectionDirection();
+      return;
+    }
+
     // default delta to the left
     let offsetLeft = -1;
 
+    ctrlKey = ctrlKey || altKey;
     const originalXLine = this.cursor.xLine;
 
     if (ctrlKey) {
+      console.log("ctrlKey", ctrlKey);
       // ctrl key used - find last word to the left
       offsetLeft = 0;
       while (!offsetLeft) {
@@ -422,6 +510,8 @@ export default class Keys {
               Math.floor(this.annotator.width / this.annotator.charWidth) - 1;
           }
         }
+        console.log("offsetLeft", offsetLeft);
+
       }
     }
 
@@ -482,18 +572,42 @@ export default class Keys {
 
   onArrowRight({
     ctrlKey,
+    altKey,
     shiftKey,
+    metaKey,
   }: {
     ctrlKey?: boolean;
+    altKey?: boolean;
     shiftKey?: boolean;
+    metaKey?: boolean;
   }) {
+    const absY = this.viewport.lineStart + this.cursor.yLine;
+    const line = this.text.getLine(absY) ?? "";
+    if (metaKey && shiftKey) {
+      this.cursor.selectStart = {
+        xLine: this.cursor.xLine,
+        yLine: absY,
+      };
+      this.cursor.selectEnd = { xLine: line.length, yLine: absY };
+      this.cursor.xLine = line.length;
+      this.cursor.setTrueSelectionDirection();
+      return;
+    } else if (metaKey && !shiftKey) {
+      // Cmd + Right: move caret to end of line, clear selection
+      this.cursor.xLine = line.length;
+      this.cursor.selectStart = undefined;
+      this.cursor.selectEnd = undefined;
+      this.cursor.setTrueSelectionDirection();
+      return;
+    }
+
     // default delta to the right
     let offsetRight = 1;
 
+    ctrlKey = ctrlKey || altKey;
     const originalXLine = this.cursor.xLine;
 
     if (ctrlKey) {
-      // ctrl key used - find next word to the right
       offsetRight = 0;
       while (!offsetRight) {
         [, offsetRight] = this.text.getCursorWordOffsets(
@@ -509,12 +623,6 @@ export default class Keys {
             this.cursor.xLine = 0;
             this.cursor.yLine++;
           }
-        } else if (
-          offsetRight + this.cursor.xLine >
-          Math.floor(this.annotator.width / this.annotator.charWidth)
-        ) {
-          this.cursor.xLine = 0;
-          this.cursor.yLine++;
         }
 
         if (this.cursor.yLine > this.viewport.noLines) {
@@ -524,22 +632,55 @@ export default class Keys {
       }
     }
 
-    this.cursor.move(offsetRight, 0);
+    if (ctrlKey && offsetRight !== 0) {
+      const pos = this.text.cursorToIndex(this.viewport, this.cursor);
+      if (pos) {
+        if (this.text.mode === EditMode.RAW) {
+          const abs = this.text.getAbsTextIndexFromPosition(pos) + offsetRight;
+          const target = this.text.getSegmentFromAbsTextIndex(abs);
+          if (target) {
+            const coords = this.text.positionToCursor(this.viewport, target);
+            if (coords) {
+              this.cursor.xLine = coords.xLine;
+              this.cursor.yLine = coords.yLine;
+            }
+          }
+        } else {
+          const seg = this.text.segments[pos.segmentIndex];
+          const targetParsed = Math.max(
+            0,
+            Math.min(
+              pos.parsedTextIndex + offsetRight,
+              seg?.parsed?.length ?? 0
+            )
+          );
+          const lineChar = this.text.getLineAndCharFromSegmentParsedIndex(
+            pos.segmentIndex,
+            targetParsed
+          );
+          if (seg && lineChar) {
+            this.cursor.xLine = lineChar.charInLineIndex;
+            this.cursor.yLine =
+              seg.lineStart + lineChar.lineIndex - this.viewport.lineStart;
+          }
+        }
+      }
+    } else if (!ctrlKey) {
+      this.cursor.move(offsetRight, 0);
 
-    // check if we are at the end of the line -> move to next line
-    const line = this.text.getCurrentLine(this.viewport, this.cursor) || "";
-    let backupXLine = this.cursor.xLine;
-    let backupYLine = this.cursor.yLine;
+      const line = this.text.getCurrentLine(this.viewport, this.cursor) || "";
+      let backupXLine = this.cursor.xLine;
+      let backupYLine = this.cursor.yLine;
 
-    if (line.length < this.cursor.xLine) {
-      this.cursor.xLine = 0;
-      this.cursor.yLine++;
-    }
+      if (line.length < this.cursor.xLine) {
+        this.cursor.xLine = 0;
+        this.cursor.yLine++;
+      }
 
-    // revert if end of the document reached
-    if (!this.text.cursorToIndex(this.viewport, this.cursor)) {
-      this.cursor.xLine = backupXLine - 1;
-      this.cursor.yLine = backupYLine;
+      if (!this.text.cursorToIndex(this.viewport, this.cursor)) {
+        this.cursor.xLine = backupXLine - 1;
+        this.cursor.yLine = backupYLine;
+      }
     }
 
     if (shiftKey) {
