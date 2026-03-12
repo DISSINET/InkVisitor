@@ -435,16 +435,18 @@ export class Annotator {
       this.viewport,
       this.cursor
     );
+    const absYLine = this.cursor.yLine + this.viewport.lineStart;
     this.cursor.selectStart = {
       xLine: this.cursor.xLine + offsetLeft,
-      yLine: this.cursor.yLine + this.viewport.lineStart,
+      yLine: absYLine,
     };
     this.cursor.selectEnd = {
       xLine: this.cursor.xLine + offsetRight,
-      yLine: this.cursor.yLine + this.viewport.lineStart,
+      yLine: absYLine,
     };
+    // keep cursor at the end of the word, but in viewport-relative coordinates
     this.cursor.xLine = this.cursor.selectEnd.xLine;
-    this.cursor.yLine = this.cursor.selectEnd.yLine;
+    this.cursor.yLine = absYLine - this.viewport.lineStart;
     this.cursor.selectDirection = DIRECTION.FORWARD;
     this.draw();
   }
