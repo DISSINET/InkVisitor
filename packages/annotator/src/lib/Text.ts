@@ -1,7 +1,11 @@
 import Viewport from "./Viewport";
 import { IAbsCoordinates, IRelativeCoordinates } from "./Highlighter";
 import { EditMode } from "./constants";
-import { closingTagRegex, createOpeningTagRegex, tagRemovalRegex } from "./Annotator";
+import {
+  closingTagRegex,
+  createOpeningTagRegex,
+  tagRemovalRegex,
+} from "./Annotator";
 
 /**
  * Represents an XML-like tag within a text segment.
@@ -16,17 +20,22 @@ export class Tag {
   private tagContent: string; // div id="12"
   attributes: Record<string, string>;
 
-
   /**
    * Creates a new Tag instance.
-   * 
+   *
    * @param position - The absolute position of the tag in the raw text
    * @param tag - The tag name (e.g., "person", "location" along with attributes)
    * @param closing - Whether this is a closing tag (default: false)
    * @param segment - Optional segment reference for calculating relative position
    * @param segmentIndex - The index of the segment containing this tag
    */
-  constructor(position: number, tag: string, closing?: boolean, segment?: Segment, segmentIndex?: number) {
+  constructor(
+    position: number,
+    tag: string,
+    closing?: boolean,
+    segment?: Segment,
+    segmentIndex?: number
+  ) {
     this.position = position;
     this.tagContent = tag;
     this.closing = closing;
@@ -37,53 +46,55 @@ export class Tag {
 
   /**
    * Parses attributes from a tag string.
-   * 
+   *
    * Extracts key-value pairs from tag strings like "person id='123' type='proper'".
    * Handles both single and double quotes around attribute values.
-   * 
+   *
    * @param tagString - The tag string to parse attributes from
    * @returns Object containing parsed attributes
    */
   private parseAttributes(tagString: string): Record<string, string> {
     const attributes: Record<string, string> = {};
-    
+
     // Split the tag string to separate tag name from attributes
     const parts = tagString.trim().split(/\s+/);
-    
+
     // If there are no attributes, return empty object
     if (parts.length === 1) {
       return attributes;
     }
-    
+
     // Parse attributes from the remaining parts
     for (let i = 1; i < parts.length; i++) {
       const part = parts[i];
-      const equalIndex = part.indexOf('=');
-      
+      const equalIndex = part.indexOf("=");
+
       if (equalIndex > 0) {
         const key = part.substring(0, equalIndex);
         let value = part.substring(equalIndex + 1);
-        
+
         // Remove quotes if present
-        if ((value.startsWith('"') && value.endsWith('"')) || 
-            (value.startsWith("'") && value.endsWith("'"))) {
+        if (
+          (value.startsWith('"') && value.endsWith('"')) ||
+          (value.startsWith("'") && value.endsWith("'"))
+        ) {
           value = value.slice(1, -1);
         }
-        
+
         attributes[key] = value;
       }
     }
-    
+
     return attributes;
   }
 
   /**
    * Calculates the position of this tag in the parsed (tag-free) text.
-   * 
+   *
    * This method accounts for the length of all tags that appear before this tag
    * in the raw text, providing the position where this tag would appear in
    * the clean, parsed text without any XML-like tags.
-   * 
+   *
    * @param segment - The segment containing this tag
    * @returns The relative position in parsed text
    */
@@ -94,30 +105,30 @@ export class Tag {
 
     // Calculate the parsed position by subtracting the length of all tags that come before this tag
     let parsedPosition = this.position;
-    
+
     // Subtract length of all opening tags before this position
     for (const tag of segment.openingTags) {
       if (tag.position < this.position) {
-        parsedPosition -= tag.getTagLength(); 
+        parsedPosition -= tag.getTagLength();
       }
     }
-    
+
     // Subtract length of all closing tags before this position
     for (const tag of segment.closingTags) {
       if (tag.position < this.position) {
         parsedPosition -= tag.getTagLength();
       }
     }
-    
+
     return parsedPosition;
   }
 
   /**
    * Generates the complete tag string for this tag.
-   * 
+   *
    * For closing tags, returns the closing tag format (e.g., "</person>").
    * For opening tags, includes all attributes in the format (e.g., '<person id="123" type="proper">').
-   * 
+   *
    * @returns The complete tag string
    */
   getTag(): string {
@@ -128,7 +139,7 @@ export class Tag {
     for (const [key, value] of Object.entries(this.attributes)) {
       openTag += ` ${key}="${value}"`;
     }
-    openTag += '>';
+    openTag += ">";
     return openTag;
   }
 
@@ -138,10 +149,10 @@ export class Tag {
 
   /**
    * Gets the base tag name without attributes.
-   * 
+   *
    * Extracts just the tag name from the parsed tag content.
    * For example, if tag contains "div id='123' class='container'", this returns "div".
-   * 
+   *
    * @returns The base tag name
    */
   getTagName(): string {
@@ -151,16 +162,16 @@ export class Tag {
 
   /**
    * Sets the attributes for this tag.
-   * 
+   *
    * Updates the attributes object with the provided key-value pairs.
    * This method allows modifying tag attributes after the tag has been created.
-   * 
+   *
    * @param attributes - Object containing the new attributes to set
-   * 
+   *
    * @example
    * // Set new attributes
    * tag.setAttributes({id: "123", class: "highlight"});
-   * 
+   *
    * // Update existing attributes
    * tag.setAttributes({id: "456"});
    */
@@ -185,7 +196,7 @@ export class Segment {
 
   /**
    * Creates a new Segment from raw text.
-   * 
+   *
    * @param text - The raw text content for this segment
    * @param segmentIndex - The index of this segment in the text
    */
@@ -197,7 +208,7 @@ export class Segment {
 
   /**
    * Parses the raw text to extract tags and create clean parsed text.
-   * 
+   *
    * This method identifies opening and closing tags using regex patterns,
    * creates Tag objects for each found tag, and generates a clean parsed
    * version of the text with all tags removed.
@@ -208,17 +219,24 @@ export class Segment {
 
     // Create new regex instances to avoid global flag state issues
     const openingRegex = createOpeningTagRegex();
-    const closingRegex = new RegExp(closingTagRegex.source, closingTagRegex.flags);
+    const closingRegex = new RegExp(
+      closingTagRegex.source,
+      closingTagRegex.flags
+    );
 
     // Find opening tags
     let match;
     while ((match = openingRegex.exec(this.raw)) !== null) {
-      this.openingTags.push(new Tag(match.index, match[1], false, this, this.segmentIndex));
+      this.openingTags.push(
+        new Tag(match.index, match[1], false, this, this.segmentIndex)
+      );
     }
 
     // Find closing tags
     while ((match = closingRegex.exec(this.raw)) !== null) {
-      this.closingTags.push(new Tag(match.index, match[1], true, this, this.segmentIndex));
+      this.closingTags.push(
+        new Tag(match.index, match[1], true, this, this.segmentIndex)
+      );
     }
 
     // Remove tags from the text
@@ -227,10 +245,10 @@ export class Segment {
 
   /**
    * Finds the parsed position (line and character) of a tag in the clean text.
-   * 
+   *
    * This method calculates where a tag would appear in the parsed (tag-free) text
    * by accounting for the length of all preceding tags and converting to 2D coordinates.
-   * 
+   *
    * @param tag - The tag to find the position for
    * @returns Object with x (character) and y (line) coordinates in parsed text
    */
@@ -272,7 +290,7 @@ export interface SegmentPosition {
 
 /**
  * Text provides more abstract control over the provided raw text.
- * 
+ *
  * This class manages text content by breaking it into segments, handling
  * different edit modes (RAW, HIGHLIGHT, SEMI), and providing methods for
  * text manipulation, line calculation, and position tracking.
@@ -284,10 +302,10 @@ class Text {
   value: string;
   charsAtLine: number;
   noLines: number;
-  
+
   /**
    * Creates a new Text instance from raw text content.
-   * 
+   *
    * @param value - The raw text content
    * @param charsAtLine - Maximum characters per line for text wrapping
    */
@@ -325,7 +343,7 @@ class Text {
 
   /**
    * Updates the maximum characters per line and recalculates line breaks.
-   * 
+   *
    * @param charsAtLine - New maximum characters per line
    */
   updateCharsAtLine(charsAtLine: number) {
@@ -335,7 +353,7 @@ class Text {
 
   /**
    * Splits the raw text into segments based on newline characters.
-   * 
+   *
    * Each segment represents a line of text and gets parsed for tags.
    * This method is called when the text content changes.
    */
@@ -353,7 +371,7 @@ class Text {
 
   /**
    * Reconstructs the raw text value from all segments.
-   * 
+   *
    * This method joins all segment raw content with newlines and
    * triggers a recalculation of line breaks.
    */
@@ -364,11 +382,11 @@ class Text {
 
   /**
    * Calculates line breaks and organizes text into displayable lines.
-   * 
+   *
    * This method processes each segment, applies text wrapping based on
    * charsAtLine, handles different edit modes (RAW/HIGHLIGHT/SEMI), and
    * updates line numbering for all segments.
-   * 
+   *
    * TODO: Optimize to avoid full recalculation after single character changes
    */
   calculateLines(): void {
@@ -436,7 +454,7 @@ class Text {
 
   /**
    * Converts cursor position to segment position.
-   * 
+   *
    * @param viewport - The current viewport information
    * @param cursor - The relative cursor coordinates
    * @returns Segment position or null if invalid
@@ -455,7 +473,7 @@ class Text {
 
   /**
    * Gets the current line content at the cursor position.
-   * 
+   *
    * @param viewport - The current viewport information
    * @param cursor - The relative cursor coordinates
    * @returns The line content or null if invalid position
@@ -474,7 +492,7 @@ class Text {
 
   /**
    * Converts absolute coordinates to absolute text index.
-   * 
+   *
    * @param absCoords - The absolute coordinates (line, character)
    * @returns The absolute text index or -1 if invalid
    */
@@ -489,7 +507,7 @@ class Text {
 
   /**
    * Converts segment position to absolute text index.
-   * 
+   *
    * @param segment - The segment position
    * @returns The absolute text index or -1 if invalid
    */
@@ -506,10 +524,10 @@ class Text {
 
   /**
    * Converts absolute text index to segment position.
-   * 
+   *
    * This method finds which segment contains the given text index and
    * calculates the corresponding line and character positions within that segment.
-   * 
+   *
    * @param absTextIndex - The absolute text index
    * @returns Segment position or null if invalid
    */
@@ -621,7 +639,7 @@ class Text {
 
   /**
    * Gets the line content from a segment position.
-   * 
+   *
    * @param segment - The segment position
    * @returns The line content or empty string if invalid
    */
@@ -651,19 +669,6 @@ class Text {
     };
   }
 
-  positionToCursor(
-    viewport: Viewport,
-    pos: SegmentPosition
-  ): { xLine: number; yLine: number } | null {
-    const segment = this.segments[pos.segmentIndex];
-    if (!segment) return null;
-    const absLine = segment.lineStart + pos.lineIndex;
-    return {
-      xLine: pos.charInLineIndex,
-      yLine: absLine - viewport.lineStart,
-    };
-  }
-
   /**
    * Converts a segment position to viewport-relative cursor coordinates.
    * Returns xLine (character index in line) and yLine (line index relative to viewport start), or null if segment is missing.
@@ -680,13 +685,13 @@ class Text {
       yLine: absLine - viewport.lineStart,
     };
   }
-  
+
   /**
    * Converts absolute line index to segment position.
-   * 
+   *
    * This method finds the segment containing the given line and calculates
    * the corresponding positions, accounting for different edit modes and tags.
-   * 
+   *
    * @param absLineIndex - The absolute line index
    * @param charInLineIndex - Character position within the line (default: 0)
    * @param ignoreLastClosingTag - Whether to ignore the last closing tag (default: false)
@@ -754,7 +759,7 @@ class Text {
 
   /**
    * Gets the position of the last segment.
-   * 
+   *
    * @returns The last segment position or null if no segments exist
    */
   getLastSegmentPosition(): SegmentPosition | null {
@@ -811,7 +816,7 @@ class Text {
 
   /**
    * Gets the text content visible in the current viewport.
-   * 
+   *
    * @param viewport - The viewport information containing line range
    * @returns Array of lines visible in the viewport
    */
@@ -920,7 +925,7 @@ class Text {
 
   /**
    * Gets word boundaries for the word under the cursor.
-   * 
+   *
    * @param viewport - The current viewport information
    * @param cursor - The relative cursor coordinates
    * @returns Tuple of [startOffset, endOffset] for the word under cursor
@@ -947,7 +952,7 @@ class Text {
 
   /**
    * Inserts text at the cursor position.
-   * 
+   *
    * @param viewport - The current viewport information
    * @param cursorPosition - The relative cursor coordinates
    * @param textToInsert - The text to insert
@@ -989,7 +994,7 @@ class Text {
 
   /**
    * Inserts a newline character at the cursor position, creating a new segment.
-   * 
+   *
    * @param viewport - The current viewport information
    * @param cursorPosition - The relative cursor coordinates
    */
@@ -1019,7 +1024,7 @@ class Text {
 
   /**
    * Deletes a segment at the specified index.
-   * 
+   *
    * @param index - The index of the segment to delete
    */
   deleteSegment(index: number) {
@@ -1030,9 +1035,9 @@ class Text {
 
   /**
    * Deletes a single character at the cursor position.
-   * 
+   *
    * For deleting multiple characters, use deleteRangeText as it's more efficient.
-   * 
+   *
    * @param viewport - The current viewport information
    * @param cursorPosition - The relative cursor coordinates
    * @param forwardChar - Whether to delete forward (default: backward)
@@ -1075,7 +1080,7 @@ class Text {
 
   /**
    * Gets text content within the specified absolute coordinate range.
-   * 
+   *
    * @param start - The start coordinates of the range
    * @param end - The end coordinates of the range
    * @returns The text content within the range
@@ -1104,7 +1109,7 @@ class Text {
 
   /**
    * Deletes text within the specified absolute coordinate range.
-   * 
+   *
    * @param start - The start coordinates of the range to delete
    * @param end - The end coordinates of the range to delete
    */
@@ -1129,7 +1134,7 @@ class Text {
 
   /**
    * Finds the position of a specific tag occurrence.
-   * 
+   *
    * @param tag - The tag name to search for
    * @param index - The occurrence index (0-based, default: 0)
    * @returns Array containing start and end coordinates of the tag, or empty array if not found
