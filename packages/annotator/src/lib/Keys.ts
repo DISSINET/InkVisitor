@@ -414,6 +414,13 @@ export default class Keys {
       this.cursor.xLine = 0;
       this.cursor.setTrueSelectionDirection();
       return;
+    } else if (metaKey && !shiftKey) {
+      // Cmd + Left: move caret to start of line, clear selection
+      this.cursor.xLine = 0;
+      this.cursor.selectStart = undefined;
+      this.cursor.selectEnd = undefined;
+      this.cursor.setTrueSelectionDirection();
+      return;
     }
 
     // default delta to the left
@@ -520,6 +527,13 @@ export default class Keys {
       };
       this.cursor.selectEnd = { xLine: line.length, yLine: absY };
       this.cursor.xLine = line.length;
+      this.cursor.setTrueSelectionDirection();
+      return;
+    } else if (metaKey && !shiftKey) {
+      // Cmd + Right: move caret to end of line, clear selection
+      this.cursor.xLine = line.length;
+      this.cursor.selectStart = undefined;
+      this.cursor.selectEnd = undefined;
       this.cursor.setTrueSelectionDirection();
       return;
     }
