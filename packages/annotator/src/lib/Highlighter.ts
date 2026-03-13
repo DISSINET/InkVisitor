@@ -1,7 +1,7 @@
 import { DrawingOptions } from "./Annotator";
 import Text from "./Text";
 import Viewport from "./Viewport";
-import { HighlightMode } from "./constants";
+import { HIGHLIGHT_HEIGHT_RATIO, HighlightMode } from "./constants";
 
 // Absolute coordinates point to virtual position not limited by viewport - first line is first line of input
 export interface IAbsCoordinates {
@@ -101,14 +101,26 @@ export default class Highlighter {
   ) {
     const { charWidth, lineHeight, color: colorOverride } = options;
     const width = (xEnd - xStart) * charWidth;
-    const height = this.hlMode === HighlightMode.UNDERLINE ? 3 : lineHeight;
+    // const height = this.hlMode === HighlightMode.UNDERLINE ? 3 : lineHeight;
+
+    const isNarrowHighlight =
+      this.hlMode === HighlightMode.SELECT ||
+      this.hlMode === HighlightMode.BACKGROUND;
+    const height =
+      this.hlMode === HighlightMode.UNDERLINE
+        ? 3
+        : isNarrowHighlight
+        ? Math.max(1, lineHeight * HIGHLIGHT_HEIGHT_RATIO)
+        : lineHeight;
+    const yOffset = isNarrowHighlight ? (lineHeight - height) / 2 : 0;
+    const y = relLine * lineHeight + yOffset;
 
     ctx.fillStyle = colorOverride || this.style.color;
     ctx.globalAlpha = this.style.opacity;
 
     if (this.hlMode === "focus") {
       ctx.globalCompositeOperation = "xor";
-      ctx.fillRect(xStart * charWidth, relLine * lineHeight, width, height);
+      ctx.fillRect(xStart * charWidth, relLine * lineHeight, width, lineHeight);
     } else if (this.hlMode === "underline") {
       ctx.globalCompositeOperation = "multiply";
       ctx.fillRect(
@@ -119,16 +131,11 @@ export default class Highlighter {
       );
     } else if (this.hlMode === "background") {
       ctx.globalCompositeOperation = "multiply";
-      ctx.fillRect(xStart * charWidth, relLine * lineHeight + 1, width, height);
+      ctx.fillRect(xStart * charWidth, y, width, height);
     } else if (this.hlMode === "select") {
       ctx.globalCompositeOperation = "color";
       ctx.globalAlpha = 1;
-      ctx.fillRect(
-        xStart * charWidth,
-        relLine * lineHeight,
-        width || 1,
-        height
-      );
+      ctx.fillRect(xStart * charWidth, y, width || 1, height);
     }
   }
 
@@ -144,7 +151,7 @@ export default class Highlighter {
     ctx: CanvasRenderingContext2D,
     viewport: Viewport,
     text: Text,
-    drawingOptions: DrawingOptions,
+    drawingOptions: DrawingOptions
   ) {
     const { charsAtLine } = drawingOptions;
 
