@@ -11,6 +11,7 @@ import {
   DEFAULT_FONT_SIZE,
   EditMode,
   HighlightMode,
+  LINE_HEIGHT,
 } from "./constants";
 
 // Updated regex to properly handle tags with attributes
@@ -78,7 +79,7 @@ export class Annotator {
   selectOpacity: number = 0.5;
 
   charWidth: number = 0;
-  lineHeight: number = 15;
+  lineHeight: number = LINE_HEIGHT;
 
   inputText: string = "";
 
@@ -126,7 +127,7 @@ export class Annotator {
     this.ratio = ratio;
     this.font = `${DEFAULT_FONT_SIZE * this.ratio}px ${DEFAULT_FONT}`;
 
-    this.lineHeight = 16 * this.ratio;
+    this.lineHeight = LINE_HEIGHT * this.ratio;
 
     this.ctx = ctx;
     this.width =
@@ -358,6 +359,13 @@ export class Annotator {
     this.ctx.font = this.font;
     const textW = this.ctx.measureText(txt).width;
     this.charWidth = textW / txt.length;
+  }
+
+  /**
+   * Converts mouse/pointer offset Y to canvas buffer Y (same scaling as getCanvasX).
+   */
+  getCanvasY(offsetY: number): number {
+    return offsetY * this.ratio;
   }
 
   /**
@@ -771,13 +779,14 @@ export class Annotator {
 
     this.ctx.font = this.font;
     this.ctx.fillStyle = this.fontColor;
+    this.ctx.textBaseline = "middle";
 
     const textToRender = this.text.getViewportText(this.viewport);
     const renderEndCond = this.viewport.lineEnd - this.viewport.lineStart;
     for (let renderLine = 0; renderLine <= renderEndCond; renderLine++) {
       const textLine = textToRender[renderLine];
       if (textLine) {
-        this.ctx.fillText(textLine, 0, (renderLine + 1) * this.lineHeight);
+        this.ctx.fillText(textLine, 0, (renderLine + 0.5) * this.lineHeight);
       }
     }
 

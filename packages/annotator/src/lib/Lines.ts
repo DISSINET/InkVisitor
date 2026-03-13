@@ -1,4 +1,4 @@
-import { DEFAULT_FONT, DEFAULT_FONT_SIZE } from "./constants";
+import { DEFAULT_FONT, DEFAULT_FONT_SIZE, LINE_HEIGHT } from "./constants";
 import Viewport from "./Viewport";
 
 /**
@@ -17,7 +17,7 @@ export class Lines {
   bgColor: string = "white";
 
   charWidth: number = 0;
-  lineHeight: number = 15;
+  lineHeight: number = LINE_HEIGHT;
 
   // size for virtual area inside the canvas element
   width: number = 0;
@@ -53,6 +53,7 @@ export class Lines {
 
     this.ctx.font = this.font;
     this.ctx.fillStyle = this.fontColor;
+    this.ctx.textBaseline = "middle";
 
     for (
       let renderLine = 1;
@@ -63,7 +64,7 @@ export class Lines {
       this.ctx.fillText(
         (viewport.lineStart + renderLine).toString(),
         0,
-        renderLine * this.lineHeight
+        (renderLine - 0.5) * this.lineHeight
       );
     }
   }

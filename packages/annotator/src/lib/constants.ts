@@ -10,5 +10,6 @@ export enum HighlightMode {
   FOCUS = "focus",
   UNDERLINE = "underline",
 }
-export const DEFAULT_FONT_SIZE = 14;
+export const DEFAULT_FONT_SIZE = 13;
 export const DEFAULT_FONT = '"Roboto Mono", monospace';
+export const LINE_HEIGHT = 24;
