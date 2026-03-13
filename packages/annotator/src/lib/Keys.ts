@@ -125,9 +125,13 @@ export default class Keys {
 
   onKeyBackspace({
     ctrlKey,
+    altKey,
+    metaKey,
     shiftKey,
   }: {
     ctrlKey?: boolean;
+    altKey?: boolean;
+    metaKey?: boolean;
     shiftKey?: boolean;
   }) {
     if (this.text.mode === EditMode.HIGHLIGHT) {
@@ -142,9 +146,19 @@ export default class Keys {
         area[0].xLine,
         area[0].yLine - this.viewport.lineStart
       );
+    } else if (metaKey) {
+      // Meta+Backspace: delete from cursor to beginning of line
+      const end = this.cursor.getAbsolutePosition(this.viewport);
+      const start = { xLine: 0, yLine: end.yLine };
+      this.text.deleteRangeText(start, end);
+      this.cursor.setPosition(0, end.yLine - this.viewport.lineStart);
+      if (this.annotator.onTextChangeCb) {
+        this.annotator.onTextChangeCb(this.text.value);
+      }
     } else {
+      // Option+Backspace: pass altKey so word to the left is deleted (same as Ctrl+Backspace)
       const before = this.cursor.getAbsolutePosition(this.viewport);
-      this.onArrowLeft({ ctrlKey, shiftKey, altKey: false });
+      this.onArrowLeft({ ctrlKey, shiftKey, altKey });
       const after = this.cursor.getAbsolutePosition(this.viewport);
 
       this.text.deleteRangeText(before, after);
