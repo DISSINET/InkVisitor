@@ -61,11 +61,13 @@ export default class Highlighter {
   }
 
   yToLineI(y: number, lineHeight: number): number {
-    return Math.round((y / lineHeight) * this.ratio - 1);
+    return Math.max(0, Math.floor((y / lineHeight) * this.ratio));
   }
 
   xToCharI(x: number, charWidth: number): number {
-    return Math.floor((Math.max(x, 0) / charWidth) * this.ratio);
+    const rel = (Math.max(x, 0) / charWidth) * this.ratio;
+    // Place caret to the right when clicking on the right half of a character cell
+    return Math.floor(rel + 0.5);
   }
 
   /**
