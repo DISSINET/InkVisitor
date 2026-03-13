@@ -6,7 +6,12 @@ import Scroller from "./Scroller";
 import Text, { Tag, SegmentPosition } from "./Text";
 import Viewport from "./Viewport";
 import { Warnings } from "./warnings";
-import { EditMode, HighlightMode } from "./constants";
+import {
+  DEFAULT_FONT,
+  DEFAULT_FONT_SIZE,
+  EditMode,
+  HighlightMode,
+} from "./constants";
 
 // Updated regex to properly handle tags with attributes
 // Opening tags: <tagname attr="value"> or <tagname>
@@ -65,7 +70,7 @@ export class Annotator {
   ctx: CanvasRenderingContext2D;
 
   // TODO: different font, different sizes
-  font: string = '14px "SUSE Mono", monospace';
+  font: string = `${DEFAULT_FONT_SIZE}px ${DEFAULT_FONT}`;
 
   fontColor: string = "black";
   bgColor: string = "white";
@@ -119,7 +124,7 @@ export class Annotator {
     }
 
     this.ratio = ratio;
-    this.font = `${13 * this.ratio}px "SUSE Mono", monospace`;
+    this.font = `${DEFAULT_FONT_SIZE * this.ratio}px ${DEFAULT_FONT}`;
 
     this.lineHeight = 16 * this.ratio;
 

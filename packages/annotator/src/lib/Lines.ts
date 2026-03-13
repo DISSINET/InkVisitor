@@ -1,3 +1,4 @@
+import { DEFAULT_FONT, DEFAULT_FONT_SIZE } from "./constants";
 import Viewport from "./Viewport";
 
 /**
@@ -10,7 +11,7 @@ export class Lines {
   ctx: CanvasRenderingContext2D;
 
   // TODO: different font, different sizes
-  font: string = '13px "SUSE Mono", monospace';
+  font: string = `${DEFAULT_FONT_SIZE}px ${DEFAULT_FONT}`;
   fontColor: string = "black";
 
   bgColor: string = "white";
