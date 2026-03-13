@@ -1,10 +1,13 @@
 /**
  * Viewport represents currently visible part of the canvas.
  * Uses absolute coordinates.
+ * scrollOffsetY is the pixel offset for fluent scrolling (0 to lineHeight); content is drawn at -scrollOffsetY.
  */
 export default class Viewport {
   lineStart: number;
   noLines: number;
+  /** Pixel offset for smooth scroll (same units as line height). Content is translated by -scrollOffsetY. */
+  scrollOffsetY: number = 0;
 
   constructor(lineStart: number, lineEnd: number) {
     this.lineStart = lineStart;
@@ -24,6 +27,25 @@ export default class Viewport {
   }
 
   /**
+   * Accumulates pixel delta for fluent scrolling. Updates lineStart when scrollOffsetY crosses line boundaries.
+   * @param deltaY Pixel delta (e.g. wheel event deltaY in buffer/canvas units).
+   * @param lineHeight Line height in the same units as deltaY.
+   * @param maxLines Maximum line index (total line count).
+   */
+  addScrollOffset(deltaY: number, lineHeight: number, maxLines: number) {
+    this.scrollOffsetY += deltaY;
+    while (this.scrollOffsetY >= lineHeight && this.lineStart < maxLines - this.noLines) {
+      this.scrollOffsetY -= lineHeight;
+      this.lineStart += 1;
+    }
+    while (this.scrollOffsetY < 0 && this.lineStart > 0) {
+      this.scrollOffsetY += lineHeight;
+      this.lineStart -= 1;
+    }
+    this.scrollOffsetY = Math.max(0, Math.min(this.scrollOffsetY, lineHeight - 1));
+  }
+
+  /**
    * scrollDown moves the viewport window down using step-lines.
    * Constraint is the provided second argument, which should represent last line.
    * @param step
@@ -33,6 +55,7 @@ export default class Viewport {
     const move = Math.min(step, maxLines - this.lineStart - this.noLines);
     if (move > 0) {
       this.lineStart += move;
+      this.scrollOffsetY = 0;
     }
   }
 
@@ -47,6 +70,7 @@ export default class Viewport {
     } else {
       this.lineStart = 0;
     }
+    this.scrollOffsetY = 0;
   }
 
   /**
@@ -60,6 +84,8 @@ export default class Viewport {
       this.scrollDown(lineTo - lineFrom, maxLines);
     } else if (lineTo < lineFrom) {
       this.scrollUp(lineFrom - lineTo);
+    } else {
+      this.scrollOffsetY = 0;
     }
   }
 }

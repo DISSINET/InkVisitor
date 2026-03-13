@@ -374,7 +374,16 @@ export class Annotator {
    */
   onMouseDown(e: MouseEvent) {
     // move the cursor to selected position, but dont allow to move over the line boundaries (x axis)
-    this.cursor.setPositionFromEvent(e, this.lineHeight, this.charWidth);
+    this.cursor.setPositionFromEvent(
+      e,
+      this.lineHeight,
+      this.charWidth,
+      this.viewport.scrollOffsetY
+    );
+    this.cursor.yLine = Math.max(
+      0,
+      Math.min(this.cursor.yLine, this.viewport.noLines)
+    );
     const segment = this.text.cursorToIndex(this.viewport, this.cursor);
     if (segment) {
       const line = this.text.getLineFromPosition(segment);
@@ -399,7 +408,16 @@ export class Annotator {
    */
   onMouseUp(e: MouseEvent) {
     // move the cursor to selected position, but dont allow to move over the line boundaries (x axis)
-    this.cursor.setPositionFromEvent(e, this.lineHeight, this.charWidth);
+    this.cursor.setPositionFromEvent(
+      e,
+      this.lineHeight,
+      this.charWidth,
+      this.viewport.scrollOffsetY
+    );
+    this.cursor.yLine = Math.max(
+      0,
+      Math.min(this.cursor.yLine, this.viewport.noLines)
+    );
     const segment = this.text.cursorToIndex(this.viewport, this.cursor);
     if (segment) {
       const line = this.text.getLineFromPosition(segment);
@@ -419,7 +437,16 @@ export class Annotator {
   onMouseMove(e: MouseEvent) {
     if (this.cursor.isSelecting()) {
       // move the cursor to selected position, but dont allow to move over the line boundaries (x axis)
-      this.cursor.setPositionFromEvent(e, this.lineHeight, this.charWidth);
+      this.cursor.setPositionFromEvent(
+        e,
+        this.lineHeight,
+        this.charWidth,
+        this.viewport.scrollOffsetY
+      );
+      this.cursor.yLine = Math.max(
+        0,
+        Math.min(this.cursor.yLine, this.viewport.noLines)
+      );
       const segment = this.text.cursorToIndex(this.viewport, this.cursor);
       if (segment) {
         const line = this.text.getLineFromPosition(segment);
@@ -435,7 +462,16 @@ export class Annotator {
 
   onMouseDoubleClick(e: MouseEvent) {
     // move the cursor to selected position, but dont allow to move over the line boundaries (x axis)
-    this.cursor.setPositionFromEvent(e, this.lineHeight, this.charWidth);
+    this.cursor.setPositionFromEvent(
+      e,
+      this.lineHeight,
+      this.charWidth,
+      this.viewport.scrollOffsetY
+    );
+    this.cursor.yLine = Math.max(
+      0,
+      Math.min(this.cursor.yLine, this.viewport.noLines)
+    );
     const segment = this.text.cursorToIndex(this.viewport, this.cursor);
     if (segment) {
       const line = this.text.getLineFromPosition(segment);
@@ -465,17 +501,13 @@ export class Annotator {
   }
 
   /**
-   * onWheel is handler for mouse-wheel-event
+   * onWheel is handler for mouse-wheel-event. Uses fluent scroll: accumulates deltaY
+   * so text and line numbers scroll smoothly together.
    * @param e
    */
   onWheel(e: WheelEvent) {
-    const down = e.deltaY < 0 ? false : true;
-
-    if (down) {
-      this.viewport.scrollDown(1, this.text.noLines);
-    } else if (!down) {
-      this.viewport.scrollUp(1);
-    }
+    const deltaBufferPx = e.deltaY * this.ratio;
+    this.viewport.addScrollOffset(deltaBufferPx, this.lineHeight, this.text.noLines);
 
     e.preventDefault();
     this.draw();
@@ -779,6 +811,9 @@ export class Annotator {
     this.ctx.fillStyle = this.bgColor;
     this.ctx.fillRect(0, 0, this.width, this.height);
 
+    this.ctx.save();
+    this.ctx.translate(0, -this.viewport.scrollOffsetY);
+
     this.ctx.font = this.font;
     this.ctx.fillStyle = this.fontColor;
     this.ctx.textBaseline = "middle";
@@ -905,6 +940,8 @@ export class Annotator {
         });
       }
     }
+
+    this.ctx.restore();
 
     if (this.scroller) {
       this.scroller.update(

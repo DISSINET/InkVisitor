@@ -76,9 +76,17 @@ export default class Cursor
     this.yLine = lineY;
   }
 
-  setPositionFromEvent(evt: MouseEvent, lineHeight: number, charWidth: number) {
+  setPositionFromEvent(
+    evt: MouseEvent,
+    lineHeight: number,
+    charWidth: number,
+    scrollOffsetY: number = 0
+  ) {
     this.xLine = this.xToCharI(evt.offsetX, charWidth);
-    this.yLine = this.yToLineI(evt.offsetY, lineHeight);
+    this.yLine = Math.max(
+      0,
+      Math.floor((evt.offsetY * this.ratio + scrollOffsetY) / lineHeight)
+    );
   }
 
   /**

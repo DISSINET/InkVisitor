@@ -51,6 +51,9 @@ export class Lines {
     this.ctx.fillStyle = this.bgColor;
     this.ctx.fillRect(0, 0, this.width, this.height);
 
+    this.ctx.save();
+    this.ctx.translate(0, -viewport.scrollOffsetY);
+
     this.ctx.font = this.font;
     this.ctx.fillStyle = this.fontColor;
     this.ctx.textBaseline = "middle";
@@ -65,5 +68,7 @@ export class Lines {
         (renderLine - 0.5) * this.lineHeight
       );
     }
+
+    this.ctx.restore();
   }
 }
