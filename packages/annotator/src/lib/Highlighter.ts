@@ -166,11 +166,12 @@ export default class Highlighter {
 
       const rowsToDraw: { rowI: number; start: number; end: number }[] = [];
 
-      for (
-        let i = 0;
-        i < Math.min(viewport.lineEnd, text.noLines) - viewport.lineStart;
-        i++
-      ) {
+      // Use the same line count as the main text renderer to avoid off-by-one
+      // issues where the last visible line has no highlight.
+      const visibleLinesCount =
+        Math.min(viewport.lineEnd, text.noLines) - viewport.lineStart;
+
+      for (let i = 0; i <= visibleLinesCount; i++) {
         const currY = viewport.lineStart + i;
         const lastCharX = text.getLine(currY).length;
 

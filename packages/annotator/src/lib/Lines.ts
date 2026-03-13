@@ -55,12 +55,10 @@ export class Lines {
     this.ctx.fillStyle = this.fontColor;
     this.ctx.textBaseline = "middle";
 
-    for (
-      let renderLine = 1;
-      renderLine <= viewport.noLines + 1 &&
-      (viewport.lineEnd <= viewport.noLines || renderLine <= viewport.noLines);
-      renderLine++
-    ) {
+    // Draw the same number of rows as the main text canvas.
+    // Viewport.noLines is used as an "end index", so we add 1 to get
+    // the number of visible rows.
+    for (let renderLine = 1; renderLine <= viewport.noLines + 1; renderLine++) {
       this.ctx.fillText(
         (viewport.lineStart + renderLine).toString(),
         0,
