@@ -6,7 +6,13 @@ import Scroller from "./Scroller";
 import Text, { Tag, SegmentPosition } from "./Text";
 import Viewport from "./Viewport";
 import { Warnings } from "./warnings";
-import { EditMode, HighlightMode } from "./constants";
+import {
+  DEFAULT_FONT,
+  DEFAULT_FONT_SIZE,
+  EditMode,
+  HighlightMode,
+  LINE_HEIGHT,
+} from "./constants";
 
 // Updated regex to properly handle tags with attributes
 // Opening tags: <tagname attr="value"> or <tagname>
@@ -65,7 +71,7 @@ export class Annotator {
   ctx: CanvasRenderingContext2D;
 
   // TODO: different font, different sizes
-  font: string = "12px Monospace";
+  font: string = `${DEFAULT_FONT_SIZE}px ${DEFAULT_FONT}`;
 
   fontColor: string = "black";
   bgColor: string = "white";
@@ -73,7 +79,7 @@ export class Annotator {
   selectOpacity: number = 0.5;
 
   charWidth: number = 0;
-  lineHeight: number = 15;
+  lineHeight: number = LINE_HEIGHT;
 
   inputText: string = "";
 
@@ -119,9 +125,9 @@ export class Annotator {
     }
 
     this.ratio = ratio;
-    this.font = `${12 * this.ratio}px Monospace`;
+    this.font = `${DEFAULT_FONT_SIZE * this.ratio}px ${DEFAULT_FONT}`;
 
-    this.lineHeight = 15 * this.ratio;
+    this.lineHeight = LINE_HEIGHT * this.ratio;
 
     this.ctx = ctx;
     this.width =
@@ -353,6 +359,13 @@ export class Annotator {
     this.ctx.font = this.font;
     const textW = this.ctx.measureText(txt).width;
     this.charWidth = textW / txt.length;
+  }
+
+  /**
+   * Converts mouse/pointer offset Y to canvas buffer Y (same scaling as getCanvasX).
+   */
+  getCanvasY(offsetY: number): number {
+    return offsetY * this.ratio;
   }
 
   /**
@@ -768,13 +781,14 @@ export class Annotator {
 
     this.ctx.font = this.font;
     this.ctx.fillStyle = this.fontColor;
+    this.ctx.textBaseline = "middle";
 
     const textToRender = this.text.getViewportText(this.viewport);
-    const renderEndCond = this.viewport.lineEnd - this.viewport.lineStart
+    const renderEndCond = this.viewport.lineEnd - this.viewport.lineStart;
     for (let renderLine = 0; renderLine <= renderEndCond; renderLine++) {
       const textLine = textToRender[renderLine];
       if (textLine) {
-        this.ctx.fillText(textLine, 0, (renderLine + 1) * this.lineHeight);
+        this.ctx.fillText(textLine, 0, (renderLine + 0.5) * this.lineHeight);
       }
     }
 
@@ -784,16 +798,11 @@ export class Annotator {
       // fix cursor position to end of the line (cursor.xLine could be virtually infinity)
       this.cursor.xLine = textSegment.charInLineIndex;
 
-      this.cursor.draw(
-        this.ctx,
-        this.viewport,
-        this.text,
-        {
-          lineHeight: this.lineHeight,
-          charWidth: this.charWidth,
-          charsAtLine: this.text.charsAtLine,
-        },
-      );
+      this.cursor.draw(this.ctx, this.viewport, this.text, {
+        lineHeight: this.lineHeight,
+        charWidth: this.charWidth,
+        charsAtLine: this.text.charsAtLine,
+      });
     }
 
     // if (this.onSelectTextCb && this.cursor.isSelected()) {
@@ -889,16 +898,11 @@ export class Annotator {
 
         highlighter.selectStart = item.start;
         highlighter.selectEnd = item.end;
-        highlighter.draw(
-          this.ctx,
-          this.viewport,
-          this.text,
-          {
-            lineHeight: this.lineHeight,
-            charWidth: this.charWidth,
-            charsAtLine: this.text.charsAtLine,
-          },
-        );
+        highlighter.draw(this.ctx, this.viewport, this.text, {
+          lineHeight: this.lineHeight,
+          charWidth: this.charWidth,
+          charsAtLine: this.text.charsAtLine,
+        });
       }
     }
 
