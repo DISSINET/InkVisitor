@@ -782,14 +782,21 @@ export class Annotator {
   addScroller(scrollerDiv: HTMLDivElement) {
     this.scroller = new Scroller(scrollerDiv);
     this.scroller.onChange((percentage: number) => {
-      const toLine = Math.floor(
-        ((this.text.noLines -
-          (this.viewport.lineEnd - this.viewport.lineStart)) /
-          100) *
-          percentage
+      const viewportLines = this.viewport.lineEnd - this.viewport.lineStart;
+      const scrollableLines = Math.max(
+        0,
+        this.text.noLines - viewportLines
       );
+      const scrollablePx = scrollableLines * this.lineHeight;
+      const targetPx = (percentage / 100) * scrollablePx;
+      const targetLineFrac = scrollablePx > 0 ? targetPx / this.lineHeight : 0;
 
-      this.viewport.scrollTo(toLine, this.text.noLines);
+      this.viewport.setScrollPosition(
+        targetLineFrac,
+        0,
+        this.lineHeight,
+        this.text.noLines
+      );
       this.draw();
     });
     this.scroller?.setRunnerSize(
@@ -947,7 +954,9 @@ export class Annotator {
       this.scroller.update(
         this.viewport.lineStart,
         this.viewport.lineEnd,
-        this.text.noLines
+        this.text.noLines,
+        this.viewport.scrollOffsetY,
+        this.lineHeight
       );
     }
     if (this.lines) {

@@ -88,4 +88,23 @@ export default class Viewport {
       this.scrollOffsetY = 0;
     }
   }
+
+  /**
+   * Sets scroll position with sub-line pixel offset (for fluent scroll bar).
+   * Clamps lineStart and scrollOffsetY to valid ranges.
+   */
+  setScrollPosition(
+    lineStart: number,
+    scrollOffsetY: number,
+    lineHeight: number,
+    maxLines: number
+  ) {
+    const maxStart = Math.max(0, maxLines - this.noLines);
+    this.lineStart = Math.max(0, Math.min(maxStart, Math.floor(lineStart)));
+    const frac = lineStart - this.lineStart;
+    this.scrollOffsetY = Math.max(
+      0,
+      Math.min(lineHeight - 1, frac * lineHeight)
+    );
+  }
 }
