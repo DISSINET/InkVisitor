@@ -18,6 +18,7 @@ export class Lines {
 
   charWidth: number = 0;
   lineHeight: number = LINE_HEIGHT;
+  ratio: number = 1;
 
   // size for virtual area inside the canvas element
   width: number = 0;
@@ -30,6 +31,7 @@ export class Lines {
     charWidth: number
   ) {
     this.element = element;
+    this.ratio = ratio;
     const ctx = this.element.getContext("2d");
     if (!ctx) {
       throw new Error("Cannot get 2d context");
@@ -52,7 +54,8 @@ export class Lines {
     this.ctx.fillRect(0, 0, this.width, this.height);
 
     this.ctx.save();
-    this.ctx.translate(0, -viewport.scrollOffsetY);
+    // scrollOffsetY is in main canvas (buffer) pixels; Lines canvas may use different scale, so scale the translation
+    this.ctx.translate(0, -viewport.scrollOffsetY / this.ratio);
 
     this.ctx.font = this.font;
     this.ctx.fillStyle = this.fontColor;
