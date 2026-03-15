@@ -1470,6 +1470,22 @@ export class Annotator {
         }
       }
 
+      const hasCompleteTagPairFullyContained = tagPositions.some((tag) => {
+        if (!tag.isOpen) return false;
+        const closingTag = tagPositions.find(
+          (t) => !t.isOpen && t.name === tag.name && t.start > tag.start
+        );
+        return (
+          closingTag != null &&
+          start <= tag.start &&
+          end >= closingTag.end
+        );
+      });
+
+      if (hasCompleteTagPairFullyContained) {
+        return [start, end];
+      }
+
       // Only contract if it's not a complete tag pair
       if (!isCompleteTagPair) {
         let contentStart = start;
@@ -1599,8 +1615,11 @@ export class Annotator {
         const closingTag = tagPositions.find(
           (t) => !t.isOpen && t.name === tag.name && t.start > tag.start
         );
-        if (closingTag && start === tag.start && end === closingTag.end) {
-          // Selection exactly matches a complete tag pair, no adjustment needed
+        if (
+          closingTag &&
+          start === tag.start &&
+          end >= closingTag.end
+        ) {
           return [start, end];
         }
       }

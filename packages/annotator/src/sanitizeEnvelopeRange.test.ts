@@ -57,6 +57,34 @@ describe('sanitizeEnvelopeRange', () => {
       expect(result).toEqual([0, 56]);
     });
 
+    test('should keep selection when range fully encompasses existing tag (e.g. 5-44 wraps <first>...</first>)', () => {
+      annotator = new Annotator(mockCanvas, 'ahoj ako sa mas <first> nejake meno </first> tu');
+
+      const result = sanitizeEnvelopeRange(5, 44);
+      expect(result).toEqual([5, 44]);
+    });
+
+    test('selection enveloping tag completely (space on left and right) should remain unchanged', () => {
+      annotator = new Annotator(mockCanvas, 'ahoj ako sa mas <first> nejake meno </first> tu');
+
+      const result = sanitizeEnvelopeRange(4, 46);
+      expect(result).toEqual([4, 46]);
+    });
+
+    test('selection enveloping tag with space only on left, end at end of closing tag should remain unchanged', () => {
+      annotator = new Annotator(mockCanvas, 'ahoj ako sa mas <first> nejake meno </first> test');
+
+      const result = sanitizeEnvelopeRange(5, 44);
+      expect(result).toEqual([5, 44]);
+    });
+
+    test('selection enveloping tag with space only on right, start at start of opening tag should remain unchanged', () => {
+      annotator = new Annotator(mockCanvas, 'ahoj ako sa mas <first> nejake meno </first> tu');
+
+      const result = sanitizeEnvelopeRange(16, 46);
+      expect(result).toEqual([16, 46]);
+    });
+
     test('should keep selection unchanged when selecting entire tag including tags', () => {
       // Text: "<p>test</p>", parsed: "test"
       // User selects entire tag including opening and closing tags (indices 0-11)
