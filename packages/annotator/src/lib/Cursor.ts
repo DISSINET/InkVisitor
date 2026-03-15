@@ -14,14 +14,16 @@ export enum DIRECTION {
   BACKWARD = "BACKWARD",
 }
 /**
- * Cursor represents active position in the viewport with highlighting capabilities (marking start - end in absolute coordinates)
+ * Cursor represents active position in the document with highlighting capabilities.
+ * xLine and yLine are always in absolute (document) coordinates, like Google Docs.
  */
 export default class Cursor
   extends Highlighter
   implements IRelativeCoordinates
 {
-  // relative!
+  /** Absolute character index within the line (0-based). */
   xLine: number;
+  /** Absolute line index in the document (0-based). */
   yLine: number;
 
   selectDirection?: DIRECTION;
@@ -76,17 +78,23 @@ export default class Cursor
     this.yLine = lineY;
   }
 
+  /**
+   * Sets cursor position from a mouse event. Stores absolute document coordinates.
+   * @param viewportLineStart - Absolute line index of the first visible line (used to convert click to absolute yLine).
+   */
   setPositionFromEvent(
     evt: MouseEvent,
     lineHeight: number,
     charWidth: number,
-    scrollOffsetY: number = 0
+    scrollOffsetY: number = 0,
+    viewportLineStart: number = 0
   ) {
     this.xLine = this.xToCharI(evt.offsetX, charWidth);
-    this.yLine = Math.max(
+    const relY = Math.max(
       0,
       Math.floor((evt.offsetY * this.ratio + scrollOffsetY) / lineHeight)
     );
+    this.yLine = viewportLineStart + relY;
   }
 
   /**
@@ -149,19 +157,18 @@ export default class Cursor
   }
 
   /**
-   * selectArea updates selected area's coordinates, either both start/end (set initial position) or just end (moving)
-   * @param yOffset
+   * Updates selected area to current cursor position (absolute coordinates).
+   * Either sets both start/end (initial click) or only end (dragging).
    */
-  selectArea(yOffset: number) {
+  selectArea() {
     if (!this.selecting) {
-      this.selectStart = { xLine: this.xLine, yLine: yOffset + this.yLine };
-      this.selectEnd = { xLine: this.xLine, yLine: yOffset + this.yLine };
+      this.selectStart = { xLine: this.xLine, yLine: this.yLine };
+      this.selectEnd = { xLine: this.xLine, yLine: this.yLine };
       this.selecting = true;
     } else {
-      this.selectEnd = { xLine: this.xLine, yLine: yOffset + this.yLine };
+      this.selectEnd = { xLine: this.xLine, yLine: this.yLine };
     }
 
-    // test direction from selectArea call
     this.setTrueSelectionDirection();
   }
 
@@ -249,11 +256,14 @@ export default class Cursor
     const rowsToDraw: { rowI: number; start: number; end: number }[] = [];
 
     if (!this.isSelected()) {
-      // in case there is no area selected, just drop a cursor at some
-      this.drawLine(ctx, this.yLine, this.xLine, this.xLine, {
-        ...drawingOptions,
-        color: this.style.selectorColor,
-      });
+      // Draw caret at viewport-relative row (cursor stores absolute position)
+      const relY = this.yLine - viewport.lineStart;
+      if (relY >= 0 && relY <= viewport.noLines) {
+        this.drawLine(ctx, relY, this.xLine, this.xLine, {
+          ...drawingOptions,
+          color: this.style.selectorColor,
+        });
+      }
     } else if (hStart && hEnd) {
       // selection active, iterate over displayed lines
       for (
@@ -305,10 +315,12 @@ export default class Cursor
     this.yLine = -1;
   }
 
-  getAbsolutePosition(viewport: Viewport): IAbsCoordinates {
-    return {
-      xLine: this.xLine,
-      yLine: this.yLine + viewport.lineStart,
-    };
+  getAbsolutePosition(_viewport?: Viewport): IAbsCoordinates {
+    return { xLine: this.xLine, yLine: this.yLine };
+  }
+
+  /** Viewport-relative line index for drawing; -1 if above view, > noLines if below. */
+  getViewportY(viewport: Viewport): number {
+    return this.yLine - viewport.lineStart;
   }
 }

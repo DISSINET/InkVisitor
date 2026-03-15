@@ -459,14 +459,15 @@ class Text {
    * @param cursor - The relative cursor coordinates
    * @returns Segment position or null if invalid
    */
+  /**
+   * Converts cursor position to segment position.
+   * Cursor is expected to use absolute (document) coordinates for yLine.
+   */
   cursorToIndex(
-    viewport: Viewport,
+    _viewport: Viewport,
     cursor: IRelativeCoordinates
   ): SegmentPosition | null {
-    const pos = this.getSegmentPosition(
-      cursor.yLine + viewport.lineStart,
-      cursor.xLine
-    );
+    const pos = this.getSegmentPosition(cursor.yLine, cursor.xLine);
 
     return pos;
   }

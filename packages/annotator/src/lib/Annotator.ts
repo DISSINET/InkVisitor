@@ -373,16 +373,16 @@ export class Annotator {
    * @param e
    */
   onMouseDown(e: MouseEvent) {
-    // move the cursor to selected position, but dont allow to move over the line boundaries (x axis)
     this.cursor.setPositionFromEvent(
       e,
       this.lineHeight,
       this.charWidth,
-      this.viewport.scrollOffsetY
+      this.viewport.scrollOffsetY,
+      this.viewport.lineStart
     );
     this.cursor.yLine = Math.max(
       0,
-      Math.min(this.cursor.yLine, this.viewport.noLines)
+      Math.min(this.cursor.yLine, Math.max(0, this.text.noLines - 1))
     );
     const segment = this.text.cursorToIndex(this.viewport, this.cursor);
     if (segment) {
@@ -392,7 +392,7 @@ export class Annotator {
       }
     }
 
-    this.cursor.selectArea(this.viewport.lineStart);
+    this.cursor.selectArea();
 
     this.annotatedPosition = this.text.cursorToIndex(
       this.viewport,
@@ -407,16 +407,16 @@ export class Annotator {
    * @param e
    */
   onMouseUp(e: MouseEvent) {
-    // move the cursor to selected position, but dont allow to move over the line boundaries (x axis)
     this.cursor.setPositionFromEvent(
       e,
       this.lineHeight,
       this.charWidth,
-      this.viewport.scrollOffsetY
+      this.viewport.scrollOffsetY,
+      this.viewport.lineStart
     );
     this.cursor.yLine = Math.max(
       0,
-      Math.min(this.cursor.yLine, this.viewport.noLines)
+      Math.min(this.cursor.yLine, Math.max(0, this.text.noLines - 1))
     );
     const segment = this.text.cursorToIndex(this.viewport, this.cursor);
     if (segment) {
@@ -436,16 +436,16 @@ export class Annotator {
    */
   onMouseMove(e: MouseEvent) {
     if (this.cursor.isSelecting()) {
-      // move the cursor to selected position, but dont allow to move over the line boundaries (x axis)
       this.cursor.setPositionFromEvent(
         e,
         this.lineHeight,
         this.charWidth,
-        this.viewport.scrollOffsetY
+        this.viewport.scrollOffsetY,
+        this.viewport.lineStart
       );
       this.cursor.yLine = Math.max(
         0,
-        Math.min(this.cursor.yLine, this.viewport.noLines)
+        Math.min(this.cursor.yLine, Math.max(0, this.text.noLines - 1))
       );
       const segment = this.text.cursorToIndex(this.viewport, this.cursor);
       if (segment) {
@@ -455,22 +455,22 @@ export class Annotator {
         }
       }
 
-      this.cursor.selectArea(this.viewport.lineStart);
+      this.cursor.selectArea();
       this.draw();
     }
   }
 
   onMouseDoubleClick(e: MouseEvent) {
-    // move the cursor to selected position, but dont allow to move over the line boundaries (x axis)
     this.cursor.setPositionFromEvent(
       e,
       this.lineHeight,
       this.charWidth,
-      this.viewport.scrollOffsetY
+      this.viewport.scrollOffsetY,
+      this.viewport.lineStart
     );
     this.cursor.yLine = Math.max(
       0,
-      Math.min(this.cursor.yLine, this.viewport.noLines)
+      Math.min(this.cursor.yLine, Math.max(0, this.text.noLines - 1))
     );
     const segment = this.text.cursorToIndex(this.viewport, this.cursor);
     if (segment) {
@@ -484,18 +484,15 @@ export class Annotator {
       this.viewport,
       this.cursor
     );
-    const absYLine = this.cursor.yLine + this.viewport.lineStart;
     this.cursor.selectStart = {
       xLine: this.cursor.xLine + offsetLeft,
-      yLine: absYLine,
+      yLine: this.cursor.yLine,
     };
     this.cursor.selectEnd = {
       xLine: this.cursor.xLine + offsetRight,
-      yLine: absYLine,
+      yLine: this.cursor.yLine,
     };
-    // keep cursor at the end of the word, but in viewport-relative coordinates
     this.cursor.xLine = this.cursor.selectEnd.xLine;
-    this.cursor.yLine = absYLine - this.viewport.lineStart;
     this.cursor.selectDirection = DIRECTION.FORWARD;
     this.draw();
   }
@@ -837,7 +834,6 @@ export class Annotator {
     const textSegment = this.text.cursorToIndex(this.viewport, this.cursor);
 
     if (textSegment) {
-      // fix cursor position to end of the line (cursor.xLine could be virtually infinity)
       this.cursor.xLine = textSegment.charInLineIndex;
 
       this.cursor.draw(this.ctx, this.viewport, this.text, {
@@ -996,8 +992,8 @@ export class Annotator {
       if (segPos !== null) {
         const coords = this.text.positionToCursor(this.viewport, segPos);
         if (coords !== null) {
-          this.cursor.setPosition(coords.xLine, coords.yLine);
-          const absY = coords.yLine + this.viewport.lineStart;
+          const absY = this.viewport.lineStart + coords.yLine;
+          this.cursor.setPosition(coords.xLine, absY);
           if (absY < this.viewport.lineStart || absY > this.viewport.lineEnd - 1) {
             this.viewport.scrollTo(absY, this.text.noLines);
           }
@@ -1234,20 +1230,18 @@ export class Annotator {
    * @param occurence
    */
   selectSearchOccurrence(occurence: Occurrence) {
+    const absY =
+      this.text.segments[occurence.segmentIndex].lineStart + occurence.lineIndex;
     this.cursor.xLine = occurence.end;
-    this.cursor.yLine = occurence.lineIndex;
+    this.cursor.yLine = absY;
 
     this.cursor.selectStart = {
       xLine: occurence.start,
-      yLine:
-        this.text.segments[occurence.segmentIndex].lineStart +
-        occurence.lineIndex,
+      yLine: absY,
     };
     this.cursor.selectEnd = {
       xLine: occurence.end,
-      yLine:
-        this.text.segments[occurence.segmentIndex].lineStart +
-        occurence.lineIndex,
+      yLine: absY,
     };
 
     this.scrollToLine(this.cursor.selectStart.yLine);
@@ -1290,10 +1284,7 @@ export class Annotator {
         if (area) {
           this.text.deleteRangeText(area[0], area[1]);
           this.cursor.reset();
-          this.cursor.setPosition(
-            area[0].xLine,
-            area[0].yLine - this.viewport.lineStart
-          );
+          this.cursor.setPosition(area[0].xLine, area[0].yLine);
         }
         this.text.insertText(this.viewport, this.cursor, clipText);
         this.cursor.move(clipText.length, 0);
@@ -1312,10 +1303,7 @@ export class Annotator {
     if (area) {
       this.text.deleteRangeText(area[0], area[1]);
       this.cursor.reset();
-      this.cursor.setPosition(
-        area[0].xLine,
-        area[0].yLine - this.viewport.lineStart
-      );
+      this.cursor.setPosition(area[0].xLine, area[0].yLine);
     }
     this.text.insertText(this.viewport, this.cursor, text);
     this.cursor.move(text.length, 0);
