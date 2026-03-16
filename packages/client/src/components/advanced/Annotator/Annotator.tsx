@@ -40,7 +40,6 @@ import {
   useSearchParams,
   useTheme,
 } from "hooks";
-import { StatementListSearchLine } from "pages/Main/containers/StatementsListBox/StatementListSearchLine/StatementListSearchLine";
 import { BsFileTextFill } from "react-icons/bs";
 import { HiCodeBracket } from "react-icons/hi2";
 import { collectStatementAnchors, getStatementOrderByIndex } from "utils/utils";
@@ -60,6 +59,7 @@ import {
 } from "./AnnotatorStyles";
 import { annotatorHighlight } from "./highlight";
 import { RATIO, TerritoryCreateModalType, W_SCROLL } from "./types";
+import { AnnotatorSearchLine } from "./AnnotatorSearchLine/AnnotatorSearchLine";
 
 interface TextAnnotatorProps {
   width: number;
@@ -710,10 +710,9 @@ export const TextAnnotator = ({
   };
 
   const onRemoveAnchor = (anchor: string) => {
+    // FIX: when same id is anchored multiple times, the highlight in text doesn't get updated correctly
     annotator?.removeAnchorFromSelection(anchor);
     handleSaveNewContent(true);
-    setSelectedText("");
-    annotator?.clearSelection();
     handleRefreshEntityAndStatement(anchor);
   };
 
@@ -849,7 +848,7 @@ export const TextAnnotator = ({
 
   return (
     <>
-      <StatementListSearchLine
+      <AnnotatorSearchLine
         showStatementList={showStatementList ?? false}
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}

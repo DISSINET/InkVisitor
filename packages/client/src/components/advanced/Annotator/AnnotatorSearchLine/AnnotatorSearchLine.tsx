@@ -31,11 +31,11 @@ import {
   StyledSearchIcon,
   StyledSearchLine,
   StyledSearchResults,
-} from "../StatementListBoxStyles";
-import { StyledCheckboxWrapper } from "./StatementListSearchLineStyles";
+} from "../../../../pages/Main/containers/StatementsListBox/StatementListBoxStyles";
 import useKeypress from "hooks/useKeyPress";
+import { StyledCheckboxWrapper } from "./AnnotatorSearchLineStyles";
 
-interface StatementListSearchLine {
+interface AnnotatorSearchLine {
   searchTerm: string;
   setSearchTerm: (searchTerm: string) => void;
   searchOccurences:
@@ -82,7 +82,7 @@ interface StatementListSearchLine {
   isCaseSensitiveMode: boolean;
   setIsCaseSensitiveMode: React.Dispatch<React.SetStateAction<boolean>>;
 }
-export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
+export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
   searchTerm,
   setSearchTerm,
   searchOccurences,
