@@ -1395,10 +1395,12 @@ export class Annotator {
       while ((match = openingRegex.exec(searchText)) !== null) {
         const absoluteStart = rangeStart + match.index;
         const absoluteEnd = rangeStart + match.index + match[0].length;
+        const rawName = match[1] || "";
+        const normalizedName = rawName.split(/\s+/)[0].toLowerCase();
         positions.push({
           start: absoluteStart,
           end: absoluteEnd,
-          name: match[1].toLowerCase(),
+          name: normalizedName,
           isOpen: true,
         });
       }

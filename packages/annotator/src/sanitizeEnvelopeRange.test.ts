@@ -78,6 +78,27 @@ describe('sanitizeEnvelopeRange', () => {
       expect(result).toEqual([5, 44]);
     });
 
+    test('selection enveloping tag with attribute on opening tag (space only on left) should remain unchanged', () => {
+      annotator = new Annotator(mockCanvas, 'ahoj ako sa mas <first elvl="1"> nejake meno </first> test');
+
+      const result = sanitizeEnvelopeRange(5, 53); // selected "ako....</first>"
+      expect(result).toEqual([5, 53]);
+    });
+
+    test('selection enveloping tag with attribute (space on left and right) should remain unchanged', () => {
+      annotator = new Annotator(mockCanvas, 'ahoj ako sa mas <first elvl="1"> nejake meno </first> tu');
+
+      const result = sanitizeEnvelopeRange(5, 56);
+      expect(result).toEqual([5, 56]);
+    });
+
+    test('selection enveloping tag with attribute (space only on right, start at opening tag) should remain unchanged', () => {
+      annotator = new Annotator(mockCanvas, 'ahoj ako sa mas <first elvl="1"> nejake meno </first> tu');
+
+      const result = sanitizeEnvelopeRange(16, 56);
+      expect(result).toEqual([16, 56]);
+    });
+
     test('selection enveloping tag with space only on right, start at start of opening tag should remain unchanged', () => {
       annotator = new Annotator(mockCanvas, 'ahoj ako sa mas <first> nejake meno </first> tu');
 
