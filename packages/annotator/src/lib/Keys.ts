@@ -689,6 +689,11 @@ export default class Keys {
             break;
           }
         }
+
+        if (this.cursor.yLine >= this.text.noLines) {
+          this.cursor.yLine = Math.max(0, this.text.noLines - 1);
+          break;
+        }
       }
     }
 
