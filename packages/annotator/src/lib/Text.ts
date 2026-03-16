@@ -847,21 +847,30 @@ class Text {
     return out;
   }
 
+  /**
+   * Returns [leftOffset, rightOffset] for word/tag boundaries around `index`
+   * in XML-aware text. Tags (<...>) are treated as single tokens; content words
+   * are delimited by whitespace, commas, dots, and angle brackets.
+   * Returns [0, 0] when the index is on whitespace with no adjacent token.
+   */
   findWordOffsetsInXml(text: string, index: number): [number, number] {
+    // Walk left to find the nearest angle bracket
     let i = index - 1;
     while (i >= 0 && text[i] !== "<" && text[i] !== ">") {
       i--;
     }
     const leftBound = i < 0 ? ">" : text[i];
     const tagStart = i;
+
+    // Inside a tag: select from `<` to `>`
     if (leftBound === "<") {
       const close = text.indexOf(">", tagStart);
-      if (close !== -1) {
-        if (index <= close) {
-          return [-(index - tagStart), close - index];
-        }
+      if (close !== -1 && index <= close) {
+        return [-(index - tagStart), close - index];
       }
     }
+
+    // Match content words (anything except whitespace, commas, dots, angle brackets)
     const contentRegex = /[^\s,.<>]+/g;
     let match;
     const matches: { start: number; end: number }[] = [];
@@ -872,6 +881,7 @@ class Text {
       if (index >= start && index < end) {
         return [-(index - start), end - index];
       }
+      // Cursor at end of content word, immediately followed by a tag
       if (index === end && text[index] === "<") {
         const close = text.indexOf(">", index);
         if (close !== -1) {
@@ -879,6 +889,7 @@ class Text {
         }
         return [-(index - start), 0];
       }
+      // Cursor on `>` right before a content word
       if (index === start - 1 && text[index] === ">") {
         const nextAngle = text.indexOf("<", index + 1);
         if (nextAngle !== -1) {
@@ -887,6 +898,8 @@ class Text {
         return [0, end - index];
       }
     }
+
+    // Cursor directly on `<` with no preceding content match — select whole tag
     if (index < text.length && text[index] === "<") {
       const close = text.indexOf(">", index);
       if (close !== -1) {
@@ -897,6 +910,7 @@ class Text {
     if (index < text.length && text[index] === ">") {
       return [-1, 1];
     }
+
     return [0, 0];
   }
 

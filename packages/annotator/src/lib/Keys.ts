@@ -341,23 +341,18 @@ export default class Keys {
 
     if (shiftKey) {
       if (this.cursor.selectDirection === DIRECTION.FORWARD) {
-        // copy cursor's current position as selectEnd - going forward & using up arrow key => reduce area
         this.cursor.selectEnd = {
           xLine: this.cursor.xLine,
           yLine: this.viewport.lineStart + this.cursor.yLine,
         };
       } else if (this.cursor.selectDirection === DIRECTION.BACKWARD) {
-        // copy cursor's current position as selectEnd - going forward & using up arrow key => increase area
         this.cursor.selectEnd = {
           xLine: this.cursor.xLine,
           yLine: this.viewport.lineStart + this.cursor.yLine,
         };
       } else {
-        // select area not used yet - using up arrow:
-        // - start = original cursor position
-        // - end = current cursor position
         this.cursor.selectStart = {
-          xLine: originalXLine, // use original without alteration!
+          xLine: originalXLine,
           yLine: originalAbsYline,
         };
         this.cursor.selectEnd = {
@@ -438,23 +433,18 @@ export default class Keys {
 
     if (shiftKey) {
       if (this.cursor.selectDirection === DIRECTION.FORWARD) {
-        // copy cursor's current position as selectEnd - going forward & using down arrow key => increase area
         this.cursor.selectEnd = {
           xLine: this.cursor.xLine,
           yLine: this.viewport.lineStart + this.cursor.yLine,
         };
       } else if (this.cursor.selectDirection === DIRECTION.BACKWARD) {
-        // copy cursor's current position as selectEnd - going backward & using down arrow key => reduce area
         this.cursor.selectEnd = {
           xLine: this.cursor.xLine,
           yLine: this.viewport.lineStart + this.cursor.yLine,
         };
       } else {
-        // select area not used yet - using down arrow:
-        // - start = original cursor position
-        // - end = current cursor position
         this.cursor.selectStart = {
-          xLine: originalXLine, // use original without alteration!
+          xLine: originalXLine,
           yLine: originalAbsYline,
         };
         this.cursor.selectEnd = {
@@ -470,6 +460,13 @@ export default class Keys {
     this.cursor.setTrueSelectionDirection();
   }
 
+  /**
+   * Ctrl/Alt + Left: jump by word/tag. Line boundaries act as delimiters —
+   * when the cursor reaches position 0 it stops at the end of the previous line
+   * rather than continuing to scan for words across lines.
+   * In RAW mode the offset is applied directly to the line position;
+   * if it would cross a line boundary the absolute index is used instead.
+   */
   onArrowLeft({
     ctrlKey,
     altKey,
@@ -492,7 +489,6 @@ export default class Keys {
       this.cursor.setTrueSelectionDirection();
       return;
     } else if (metaKey && !shiftKey) {
-      // Cmd + Left: move caret to start of line, clear selection
       this.cursor.xLine = 0;
       this.cursor.selectStart = undefined;
       this.cursor.selectEnd = undefined;
@@ -500,16 +496,17 @@ export default class Keys {
       return;
     }
 
-    // default delta to the left
     let offsetLeft = -1;
 
     ctrlKey = ctrlKey || altKey;
     const originalXLine = this.cursor.xLine;
 
+    // Word-jump: scan left for the nearest word/tag boundary.
+    // Stops at line boundaries so each press crosses at most one line.
+    let ctrlHandled = false;
     if (ctrlKey) {
-      console.log("ctrlKey", ctrlKey);
-      // ctrl key used - find last word to the left
       offsetLeft = 0;
+      const startYLine = this.cursor.yLine;
       while (!offsetLeft) {
         [offsetLeft] = this.text.getCursorWordOffsets(
           this.viewport,
@@ -517,50 +514,99 @@ export default class Keys {
         );
 
         if (offsetLeft === -0) {
-          this.cursor.move(-1, 0);
+          // Reached start of line — jump to end of previous line and stop
           if (this.cursor.xLine <= 0) {
-            this.cursor.yLine = Math.max(0, this.cursor.yLine - 1);
-            this.cursor.xLine =
-              Math.floor(this.annotator.width / this.annotator.charWidth) - 1;
+            if (this.cursor.yLine > 0) {
+              this.cursor.yLine = this.cursor.yLine - 1;
+              const prevLine =
+                this.text.getCurrentLine(this.viewport, this.cursor);
+              this.cursor.xLine = prevLine?.length || 0;
+            }
+            ctrlHandled = true;
+            break;
+          }
+          this.cursor.move(-1, 0);
+          // Line wrapped during move — treat as line boundary
+          if (this.cursor.yLine !== startYLine) {
+            ctrlHandled = true;
+            break;
           }
         }
-        console.log("offsetLeft", offsetLeft);
-
       }
     }
 
-    // go 1 line up if at the start
-    if (this.cursor.xLine <= 0) {
-      // only if there is a way to go up
-      if (this.cursor.yLine > 0) {
-        this.cursor.yLine = Math.max(0, this.cursor.yLine - 1);
-        const line = this.text.getCurrentLine(this.viewport, this.cursor);
-        this.cursor.xLine = line?.length || 0;
+    // Apply the word offset to move the cursor
+    if (ctrlKey && offsetLeft !== 0) {
+      const pos = this.text.cursorToIndex(this.viewport, this.cursor);
+      if (pos) {
+        if (this.text.mode === EditMode.RAW) {
+          // offsetRight is relative to current cursor.xLine (may differ from
+          // originalXLine if the while-loop advanced past whitespace)
+          const desiredX = this.cursor.xLine + offsetLeft;
+          if (desiredX >= 0) {
+            this.cursor.xLine = desiredX;
+          } else {
+            // Crosses line boundary — resolve via absolute text index
+            const abs =
+              this.text.getAbsTextIndexFromPosition(pos) + offsetLeft;
+            const target = this.text.getSegmentFromAbsTextIndex(abs);
+            if (target) {
+              const coords = this.text.positionToCursor(this.viewport, target);
+              if (coords) {
+                this.cursor.xLine = coords.xLine;
+                this.cursor.yLine = coords.yLine;
+              }
+            }
+          }
+        } else {
+          const seg = this.text.segments[pos.segmentIndex];
+          const targetParsed = Math.max(
+            0,
+            Math.min(
+              pos.parsedTextIndex + offsetLeft,
+              seg?.parsed?.length ?? 0
+            )
+          );
+          const lineChar = this.text.getLineAndCharFromSegmentParsedIndex(
+            pos.segmentIndex,
+            targetParsed
+          );
+          if (seg && lineChar) {
+            this.cursor.xLine = lineChar.charInLineIndex;
+            this.cursor.yLine =
+              seg.lineStart + lineChar.lineIndex - this.viewport.lineStart;
+          }
+        }
       }
-    } else {
-      this.cursor.move(offsetLeft, 0);
+    } else if (!ctrlHandled) {
+      // Single-character left movement (no ctrl/alt)
+      if (this.cursor.xLine <= 0) {
+        if (this.cursor.yLine > 0) {
+          this.cursor.yLine = Math.max(0, this.cursor.yLine - 1);
+          const line = this.text.getCurrentLine(this.viewport, this.cursor);
+          this.cursor.xLine = line?.length || 0;
+        }
+      } else {
+        this.cursor.move(offsetLeft, 0);
+      }
     }
 
     if (shiftKey) {
       if (this.cursor.selectDirection === DIRECTION.FORWARD) {
-        // copy cursor's current position as selectEnd - going forward & using left arrow key => reduce area
         this.cursor.selectEnd = {
           xLine: this.cursor.xLine,
           yLine: this.viewport.lineStart + this.cursor.yLine,
         };
       } else if (this.cursor.selectDirection === DIRECTION.BACKWARD) {
-        // copy cursor's current position as selectEnd - going backward & using left arrow key => increase area
         this.cursor.selectEnd = {
           xLine: this.cursor.xLine,
           yLine: this.viewport.lineStart + this.cursor.yLine,
         };
       } else {
-        // select area not used yet - using left arrow:
-        // - start = original cursor position
-        // - end = current cursor position
+        // Use absY (captured before movement) so selection start stays on the original line
         this.cursor.selectStart = {
           xLine: originalXLine,
-          yLine: this.viewport.lineStart + this.cursor.yLine,
+          yLine: absY,
         };
         this.cursor.selectEnd = {
           xLine: this.cursor.xLine,
@@ -569,7 +615,6 @@ export default class Keys {
       }
     } else {
       if (this.cursor.isSelected()) {
-        // if something is selected -> move the cursor to leftmost position and cancel the selection
         this.cursor.xLine = this.cursor.selectStart?.xLine || this.cursor.xLine;
         this.cursor.yLine = this.cursor.selectStart
           ? this.cursor.selectStart.yLine - this.viewport.lineStart
@@ -584,6 +629,13 @@ export default class Keys {
     this.cursor.setTrueSelectionDirection();
   }
 
+  /**
+   * Ctrl/Alt + Right: jump by word/tag. Line boundaries act as delimiters —
+   * when the cursor reaches end-of-line it stops at position 0 of the next line
+   * rather than continuing to scan for words across lines.
+   * In RAW mode the offset is applied directly to the line position;
+   * if it would cross a line boundary the absolute index is used instead.
+   */
   onArrowRight({
     ctrlKey,
     altKey,
@@ -607,7 +659,6 @@ export default class Keys {
       this.cursor.setTrueSelectionDirection();
       return;
     } else if (metaKey && !shiftKey) {
-      // Cmd + Right: move caret to end of line, clear selection
       this.cursor.xLine = line.length;
       this.cursor.selectStart = undefined;
       this.cursor.selectEnd = undefined;
@@ -615,48 +666,68 @@ export default class Keys {
       return;
     }
 
-    // default delta to the right
     let offsetRight = 1;
 
     ctrlKey = ctrlKey || altKey;
     const originalXLine = this.cursor.xLine;
 
+    // Word-jump: scan right for the nearest word/tag boundary.
+    // Stops at line boundaries so each press crosses at most one line.
+    let ctrlRightHandled = false;
     if (ctrlKey) {
       offsetRight = 0;
+      const startYLine = this.cursor.yLine;
       while (!offsetRight) {
         [, offsetRight] = this.text.getCursorWordOffsets(
           this.viewport,
           this.cursor
         );
         if (!offsetRight) {
-          this.cursor.move(1, 0);
-          if (
-            this.cursor.xLine >
-            Math.floor(this.annotator.width / this.annotator.charWidth)
-          ) {
+          const lineText =
+            this.text.getCurrentLine(this.viewport, this.cursor) || "";
+          // Reached end of line — jump to start of next line and stop
+          if (this.cursor.xLine >= lineText.length) {
             this.cursor.xLine = 0;
             this.cursor.yLine++;
+            if (this.cursor.yLine > this.viewport.noLines) {
+              this.cursor.yLine = this.viewport.noLines - 1;
+            }
+            ctrlRightHandled = true;
+            break;
           }
-        }
-
-        if (this.cursor.yLine > this.viewport.noLines) {
-          this.cursor.yLine = this.viewport.noLines - 1;
-          break;
+          this.cursor.move(1, 0);
+          // Line wrapped during move — treat as line boundary
+          if (this.cursor.yLine !== startYLine) {
+            ctrlRightHandled = true;
+            break;
+          }
         }
       }
     }
 
+    // Apply the word offset to move the cursor
     if (ctrlKey && offsetRight !== 0) {
       const pos = this.text.cursorToIndex(this.viewport, this.cursor);
       if (pos) {
         if (this.text.mode === EditMode.RAW) {
-          const abs = this.text.getAbsTextIndexFromPosition(pos) + offsetRight;
-          const target = this.text.getSegmentFromAbsTextIndex(abs);
-          if (target) {
-            const coords = this.text.positionToCursor(this.viewport, target);
-            if (coords) {
-              this.cursor.xLine = coords.xLine;
-              this.cursor.yLine = coords.yLine;
+          const lineText =
+            this.text.getCurrentLine(this.viewport, this.cursor) || "";
+          // offsetRight is relative to current cursor.xLine (may differ from
+          // originalXLine if the while-loop advanced past whitespace)
+          const desiredX = this.cursor.xLine + offsetRight;
+          if (desiredX <= lineText.length) {
+            this.cursor.xLine = desiredX;
+          } else {
+            // Crosses line boundary — resolve via absolute text index
+            const abs =
+              this.text.getAbsTextIndexFromPosition(pos) + offsetRight;
+            const target = this.text.getSegmentFromAbsTextIndex(abs);
+            if (target) {
+              const coords = this.text.positionToCursor(this.viewport, target);
+              if (coords) {
+                this.cursor.xLine = coords.xLine;
+                this.cursor.yLine = coords.yLine;
+              }
             }
           }
         } else {
@@ -679,7 +750,8 @@ export default class Keys {
           }
         }
       }
-    } else if (!ctrlKey) {
+    } else if (!ctrlKey && !ctrlRightHandled) {
+      // Single-character right movement (no ctrl/alt)
       this.cursor.move(offsetRight, 0);
 
       const line = this.text.getCurrentLine(this.viewport, this.cursor) || "";
@@ -699,24 +771,20 @@ export default class Keys {
 
     if (shiftKey) {
       if (this.cursor.selectDirection === DIRECTION.FORWARD) {
-        // copy cursor's current position as selectEnd - going forward & using right arrow key => increase area
         this.cursor.selectEnd = {
           xLine: this.cursor.xLine,
           yLine: this.viewport.lineStart + this.cursor.yLine,
         };
       } else if (this.cursor.selectDirection === DIRECTION.BACKWARD) {
-        // copy cursor's current position as selectEnd - going backward & using right arrow key => reduce area
         this.cursor.selectEnd = {
           xLine: this.cursor.xLine,
           yLine: this.viewport.lineStart + this.cursor.yLine,
         };
       } else {
-        // select area not used yet - using right arrow:
-        // - start = original cursor position
-        // - end = current cursor position
+        // Use absY (captured before movement) so selection start stays on the original line
         this.cursor.selectStart = {
           xLine: originalXLine,
-          yLine: this.viewport.lineStart + this.cursor.yLine,
+          yLine: absY,
         };
         this.cursor.selectEnd = {
           xLine: this.cursor.xLine,
@@ -725,7 +793,6 @@ export default class Keys {
       }
     } else {
       if (this.cursor.isSelected()) {
-        // if something is selected -> move the cursor to rightmost position and cancel the selection
         this.cursor.xLine = this.cursor.selectEnd?.xLine || this.cursor.xLine;
         this.cursor.yLine = this.cursor.selectEnd
           ? this.cursor.selectEnd.yLine - this.viewport.lineStart
@@ -739,10 +806,7 @@ export default class Keys {
 
     this.cursor.setTrueSelectionDirection();
   }
-  /**
-   * onKeyDown is handler for pressed key event
-   * @param e
-   */
+
   onKeyDown(e: KeyboardEvent) {
     e.preventDefault();
     let key: Key = e.key as Key;
@@ -811,7 +875,6 @@ export default class Keys {
                 );
               }
             } else if (this.text.mode === EditMode.SEMI) {
-              // ctrl + x in semi mode - copy text and delete it
               this.annotator.onCopyText();
               this.onKeyDelete(e);
             }
