@@ -1,27 +1,19 @@
-<first>first</first>
-<second>second</second>
-third
-fourth
-5ththird third third
-6th
-7th
-8ththird
-9th
-10th
-11th
-12th
-13th
-14th
-15th
-16th
-17th
-18th
-19th
-20th
-21th
-22th
-23th
-24th
-25th
-26th
-27th
+<8bcbfeef-f973-4315-be40-d88f0edef980>
+<83d3f594-4ade-48c1-9462-76f416bd9b31>
+<cce14271-8fe8-49a6-8268-b223bb5d64f4>
+
+In <645bce7d-ecc7-49b4-9b3a-88eb22cf94d1 elvl="1">nomine  dasd da dasd asd dasdasdasdas   <e28f5da8-d49b-4d33-bd58-c9370cca0a13 elvl="1"><97d48220-068d-4d35-8816-8e74ab1d7b6a elvl="1">Domini amen</97d48220-068d-4d35-8816-8e74ab1d7b6a></645bce7d-ecc7-49b4-9b3a-88eb22cf94d1>. Anno</e28f5da8-d49b-4d33-bd58-c9370cca0a13> eiusdem millesimo ducentesimo nonagesimo primo, vigesimo nono die mensis madii.
+Onebene condam Aymerici Spiriti de Volta Mantuana qui nunc moratur in domibus sacerdotum Sancti Martini de Apposa  in civitate Bononie, constitutus in presentia fratris Galvani de Butrio, vicarii et subdelegati fratris Florii inquisitoris  hereticorum in Lombardia et marchia Ianuensi, et ab eodem fratre Galvano cytatus, iuravit in manibus dicti fratris Galvani mandata Ecclesie Romane et abiuravit omnem heresim et credentiam  hereticorum et iuravit dicere veritatem tam de se quam de aliis quem et quos sivisset peccare et peccasse in crimine heresis, et hoc sub pena excomunicationis et prestiti iuramenti et sub pena XXV. librarum, que tociens conmittatur quociens inventus fuerit veritatem non dixisse vel celiasse vel scienter in aliquo palliasse.
+Inter<a3fd86b2-0ebd-4c73-b3c2-d6c5c569d11f elvl="1">rogatus <543c92cd-9657-4e54-95e8-36f3c3a1a17b elvl="1"><a000cb0d-90f1-4bce-bfb4-e27c234c2eec elvl="1">sub penis</a000cb0d-90f1-4bce-bfb4-e27c234c2eec></a3fd86b2-0ebd-4c73-b3c2-d6c5c569d11f> predictis</543c92cd-9657-4e54-95e8-36f3c3a1a17b> si sit vel umquam scivit aliquem hereticum vel hereticam, credentem, fautorem, receptatorem, vel defensatorem hereticorum, respondit quod modo sunt XXV. anni vel circa, sicut credit de tempore, quod vidit duos hereticos in Bononia, scilicet Iohannem et Guidonem de Marcharia, in domo Iohannis bursarii de Feraria qui tunc temporis habitabat in domo que est iuxta fossatum Sancti Martini de Apposa iuxta domum fabrorum versus campum mercati, et ibi fecit dictis hereticis reverentiam pluries secundum morem hereticorum et accepit ab eis panem benedictum presentibus dicto Iohanne et Burghisino, qui fuit de Mantua, qui Burghisinus fuit cruce signatus pro crimine  heresis. Item dicit quod modo sunt duo anni vel circa, sicut credit, quod vidit in domo Bonigrini de Verona, in contrata Sancti Thome de Mercato, duos hereticos, silicet Benevenutum de Cremona et Matheum modo sunt quatuor anni vel circa, sicut credit de tempore, et ibi eis fecit reverentiam pluries secundum morem hereticorum et accepit ab eis panem benedictum, presente dicto Bonigrino et uxore eius  et eandem reverentiam facientibus dictis hereticis, dicto teste presente et vidente. Item dicit quod modo sunt decem anni, sicut credit de tempore, quod dictus testis vidit in domo Munighini de Mantua draperii, in strata Sancti Stephani in capite Vivarii de Bononia, duos fratres hereticos secte de Bagnolo, qui cognominantur Rusiti de Mantua et erant pelliçarii, quorum  nomina ignorat, et fecit eisdem hereticis reverentiam pluries et accepit panem benedictum ab eisdem pluries sciens eos esse  hereticos, presente dicto Munighino et uxore dicti Munighini et eandem reverentiam facientem, et presente Albertino de Mantua calçolario, qui venit pro dicto teste ut duceret eum ad dictos hereticos. Item dicit quod modo sunt quatuor iam anni vel circa, sicut credit de tempore, quod vidit dominum Lanfranchinum de Monte Claro, septe de Bagnolo, in domo habitationis Iulliani  bursarii de Bononia, que posita est in capella Sancti Martini de Apposa, et eis fecit reverentiam et accepit panem benedictum pluries secundum ritum et morem hereticorum, presente dicto Iulliano et eandem reverentiam faciente, presente dicto teste et vidente. Item dicit quod vidit in domo habitationis Bonigrini predicti, Benvenutum hereticum predictum postquam exiverat de carcere fratrum predicatorum, et gavisus fuit valde et eidem Benevenuto fecit reverentiam, presente dicto Bonigrino et uxore eius  et eandem reverentiam faciente, dicto teste vidente. Item dicit quod modo sunt quatuor anni vel circa, sicut credit de tempore, quod vidit in domo Bençevene speciali duos hereticos, silicet Benvenutum et Matheum hereticos, et eisdem fecit reverentiam, presente dicto Bençevenne et uxore eius et filia. Item dicit quod modo sunt duo anni vel circa, sicut credit de tempore, quod ipse testis recepit in domo habitationis sue, que domus erat Benvenuti brentatoris in capella Sancti Symonis et lude iuxta ripam Appose, unam hereticam nomine Benvenutam, que vendebat merces, set non fecit ei reverentiam, et de domo sua ivit ad domum Iulliani bursarii predicti et ibi dictus testis ivit ad visitandum eam, set nullus alius venit secum. Interrogatus quomodo scivit eam esse hereticam, respondit quod ipsamet revelavit se ipsam sibi.
+Item dicit quod ipse nunquam recepit corpus Cristi. Interrogatus quare ista non manifestavit ut absolveretur ab excomunicatione et peccato, dicit quod hoc fecit timore pene et verecundia mundi. Item dicit quod bene sunt.XL. anni et ultra quod habuit noticiam et familiaritatem hereticorum in Mantua et quod audivit predicationem eorum, et commendabat vitam eorum et credebat eos esse bonos homines et pluries fecit eis reverentiam in dicta civitate et accepit ab eis panem benedictum, et maxime habuit noticiam cuiusdam Guilielmi de Funi de Bononia qui postea fuit conbustus pro crimine heresis, et pluries fecit ei reverentiam, presente domino Bererio et Guillielmo de Ansandris 1, in quorum domibus dictus hereticus stabat ad laborandum bursas.
+Item dicit quod modo sunt.XXX. anni vel circa quod in domo domini Gratiadei de Ripa de Mantua  vidit plures hereticos, set non recordatur de nominibus eorum nisi solum de domino Guerisio de Cremona heretico, cui dictus testis fecit reverentiam.
+Item dixit quod fecit reverentiam Belesmançe et Fogaçe, septe de Bagnolo, in domo domini Bonacursii de Grusulanis de Mantua.
+Item dicit quod dictus dominus Bonacursius fuit hereticus consolatus et eidem Bonacursio dictus testis fecit reverentiam.
+Item dicit quod Bergami vidit plures hereticos et familiariter stetit cum eis et spetialiter cum domino Bonacursio de Grusulanis predicto, qui tunc temporis erat Bergami et pluries fecit ei et aliis reverentiam in dicta terra, set non recordatur  in quorum domibus hoc fecerit.
+Item dicit quod pluries dedit hereticis predictis et aliis, de quorum nominibus non recordatur, auxilium consilium et favorem et dedit eis de bonis suis et recepit de bonis eorum.
+Item dicit quod nichil sit plus de vita et moribus hereticorum.
+Item dicit quod nunquam fuit requisitus ab aliquo inquisitore de crimine heresis nisi modo.
+Actum Bononie in domo inquisitoris, presentibus dominis Thadeo de Monte Alto archidiacono Sagonensi et Gregorio canonico Bolesclaviensi, qui intelligebant vulgare nostrum, scolares, et magistro Iohanne condam domini Martini de Polisino.
+</cce14271-8fe8-49a6-8268-b223bb5d64f4>
+<70f35aac-6e9b-4591-b758-05768ba9d2cd>
+
