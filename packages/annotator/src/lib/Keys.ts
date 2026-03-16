@@ -903,11 +903,17 @@ export default class Keys {
             this.cursor.reset();
             this.cursor.setPosition(area[0].xLine, area[0].yLine);
           }
+
           this.text.insertText(this.viewport, this.cursor, key);
           if (this.annotator.onTextChangeCb) {
             this.annotator.onTextChangeCb(this.text.value);
           }
           this.cursor.move(+1, 0);
+
+          // When typing moves the cursor outside of the current viewport,
+          // keep behaviour consistent with arrow keys and scroll so that
+          // the cursor line is visible again.
+          this.scrollCursorIntoView();
         }
     }
 
