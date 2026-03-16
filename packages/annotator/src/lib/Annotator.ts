@@ -1159,17 +1159,29 @@ export class Annotator {
 
   updateText(newText: string) {
     const positionBeforeChange = this.viewport.lineStart;
+    const scrollOffsetBeforeChange = this.viewport.scrollOffsetY;
 
     this.text.value = newText;
     this.text.prepareSegments();
     this.text.calculateLines();
     this.warnings.onTextChanged(this.text.value);
 
-    if (positionBeforeChange < this.text.noLines) {
-      this.scrollToLine(positionBeforeChange);
-    } else {
-      this.scrollToLine(this.text.noLines - 1);
-    }
+    // Preserve fluent scroll offset (deltaY) so updating text (e.g. discard)
+    // doesn't snap the viewport to the top of a line.
+    const clampedLineStart = Math.max(
+      0,
+      Math.min(positionBeforeChange, Math.max(0, this.text.noLines - 1))
+    );
+    const desiredLineStart =
+      clampedLineStart + (scrollOffsetBeforeChange || 0) / this.lineHeight;
+
+    this.viewport.setScrollPosition(
+      desiredLineStart,
+      0,
+      this.lineHeight,
+      this.text.noLines
+    );
+    this.draw();
   }
 
   /**
