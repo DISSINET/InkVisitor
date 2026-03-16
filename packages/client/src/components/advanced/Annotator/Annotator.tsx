@@ -712,7 +712,15 @@ export const TextAnnotator = ({
   const onRemoveAnchor = (anchor: string) => {
     // FIX: when same id is anchored multiple times, the highlight in text doesn't get updated correctly
     annotator?.removeAnchorFromSelection(anchor);
-    handleSaveNewContent(true);
+
+    // Remove only one occurrence of this anchor id from selectedAnchors
+    setSelectedAnchors((prev) => {
+      const idx = prev.findIndex((tag) => tag.getTagName() === anchor);
+      if (idx === -1) return prev;
+      return [...prev.slice(0, idx), ...prev.slice(idx + 1)];
+    });
+
+    handleSaveNewContent(true, true);
     handleRefreshEntityAndStatement(anchor);
   };
 
