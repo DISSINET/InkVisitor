@@ -798,6 +798,17 @@ export default class Keys {
   }
 
   onKeyDown(e: KeyboardEvent) {
+    // Allow browser-level refresh shortcuts to work normally, even when the
+    // annotator canvas is focused. This keeps standard behaviour for:
+    // - F5
+    // - Cmd+R / Ctrl+R (including with Shift, e.g. hard reload)
+    if (
+      e.key === "F5" ||
+      (e.key === "r" && (e.metaKey || e.ctrlKey))
+    ) {
+      return;
+    }
+
     e.preventDefault();
     let key: Key = e.key as Key;
 
