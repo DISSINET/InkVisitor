@@ -218,6 +218,9 @@ export const TextAnnotator = ({
       setSearchActiveOccurence(0);
       setSearchTerm("");
       annotator.draw();
+      if (mainCanvas.current) {
+        mainCanvas.current.focus();
+      }
     }
   }, [annotatorMode]);
 
@@ -384,8 +387,7 @@ export const TextAnnotator = ({
         let menuY = isBackwardsSelection ? endY : startY;
 
         // Never position menu on first or second row — start from third row
-        const thirdRowY =
-          rect.top + (2 * annotator.lineHeight) / RATIO;
+        const thirdRowY = rect.top + (2 * annotator.lineHeight) / RATIO;
         if (!isFullSelection && menuY < thirdRowY) {
           menuY = thirdRowY;
         }

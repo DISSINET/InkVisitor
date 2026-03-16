@@ -1,3 +1,4 @@
+import { DEFAULT_FONT, DEFAULT_FONT_SIZE, LINE_HEIGHT } from "./constants";
 import Viewport from "./Viewport";
 
 /**
@@ -10,13 +11,14 @@ export class Lines {
   ctx: CanvasRenderingContext2D;
 
   // TODO: different font, different sizes
-  font: string = "12px Monospace";
+  font: string = `${DEFAULT_FONT_SIZE}px ${DEFAULT_FONT}`;
   fontColor: string = "black";
 
   bgColor: string = "white";
 
   charWidth: number = 0;
-  lineHeight: number = 15;
+  lineHeight: number = LINE_HEIGHT;
+  ratio: number = 1;
 
   // size for virtual area inside the canvas element
   width: number = 0;
@@ -29,6 +31,7 @@ export class Lines {
     charWidth: number
   ) {
     this.element = element;
+    this.ratio = ratio;
     const ctx = this.element.getContext("2d");
     if (!ctx) {
       throw new Error("Cannot get 2d context");
@@ -50,20 +53,25 @@ export class Lines {
     this.ctx.fillStyle = this.bgColor;
     this.ctx.fillRect(0, 0, this.width, this.height);
 
+    this.ctx.save();
+    // scrollOffsetY is in main canvas (buffer) pixels; Lines canvas may use different scale, so scale the translation
+    this.ctx.translate(0, -viewport.scrollOffsetY / this.ratio);
+
     this.ctx.font = this.font;
     this.ctx.fillStyle = this.fontColor;
+    this.ctx.textBaseline = "middle";
 
-    for (
-      let renderLine = 1;
-      renderLine <= viewport.noLines + 1 &&
-      (viewport.lineEnd <= viewport.noLines || renderLine <= viewport.noLines);
-      renderLine++
-    ) {
+    // Draw the same number of rows as the main text canvas.
+    // Viewport.noLines is used as an "end index", so we add 1 to get
+    // the number of visible rows.
+    for (let renderLine = 1; renderLine <= viewport.noLines + 1; renderLine++) {
       this.ctx.fillText(
         (viewport.lineStart + renderLine).toString(),
         0,
-        renderLine * this.lineHeight
+        (renderLine - 0.5) * this.lineHeight
       );
     }
+
+    this.ctx.restore();
   }
 }
