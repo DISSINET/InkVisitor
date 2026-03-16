@@ -58,15 +58,29 @@ export default class Keys {
     this.annotator.element.onkeydown = this.onKeyDown.bind(this);
   }
 
+  /** Scroll so cursor line is 3rd from top when above viewport, 3rd from bottom when below. */
+  scrollCursorIntoView() {
+    const absY = this.cursor.yLine;
+    const noLines = this.viewport.noLines;
+    const maxStart = Math.max(0, this.text.noLines - noLines);
+
+    if (absY < this.viewport.lineStart) {
+      // cursor is before viewport -> scroll to the 3rd line of viewport
+      this.viewport.scrollTo(Math.max(0, absY - 2), this.text.noLines);
+    } else if (absY >= this.viewport.lineEnd) {
+      // cursor is after viewport -> scroll to the 3rd line from the end of viewport
+      const targetStart = Math.min(maxStart, absY - (noLines - 1 - 2));
+      this.viewport.scrollTo(Math.max(0, targetStart), this.text.noLines);
+    }
+  }
+
   onKeyHome({ ctrlKey, shiftKey }: { ctrlKey?: boolean; shiftKey?: boolean }) {
     const originalXLine = this.cursor.xLine;
-    const originalAbsYLine = this.viewport.lineStart + this.cursor.yLine;
+    const originalAbsYLine = this.cursor.yLine;
 
-    // always start of line
     this.cursor.xLine = 0;
 
     if (ctrlKey) {
-      // move to top line
       this.cursor.yLine = 0;
       this.viewport.lineStart = 0;
     }
@@ -80,7 +94,7 @@ export default class Keys {
       }
       this.cursor.selectEnd = {
         xLine: 0,
-        yLine: this.viewport.lineStart + this.cursor.yLine,
+        yLine: this.cursor.yLine,
       };
     } else {
       this.cursor.selectStart = undefined;
@@ -92,15 +106,14 @@ export default class Keys {
 
   onKeyEnd({ ctrlKey, shiftKey }: { ctrlKey?: boolean; shiftKey?: boolean }) {
     const originalXLine = this.cursor.xLine;
-    const originalAbsYLine = this.viewport.lineStart + this.cursor.yLine;
+    const originalAbsYLine = this.cursor.yLine;
 
     if (ctrlKey) {
-      // use last viewport line + scroll to last line using viewport
-      this.cursor.yLine = this.viewport.noLines - 1;
+      const lastLine = this.text.noLines > 0 ? this.text.noLines - 1 : 0;
+      this.cursor.yLine = lastLine;
       this.viewport.scrollTo(this.text.noLines, this.text.noLines);
     }
 
-    // use end of final line
     const line = this.text.getCurrentLine(this.viewport, this.cursor) || "";
     this.cursor.xLine = line.length;
 
@@ -113,7 +126,7 @@ export default class Keys {
       }
       this.cursor.selectEnd = {
         xLine: this.cursor.xLine,
-        yLine: this.viewport.lineStart + this.cursor.yLine,
+        yLine: this.cursor.yLine,
       };
     } else {
       this.cursor.selectStart = undefined;
@@ -142,24 +155,19 @@ export default class Keys {
     if (area) {
       this.text.deleteRangeText(area[0], area[1]);
       this.cursor.reset();
-      this.cursor.setPosition(
-        area[0].xLine,
-        area[0].yLine - this.viewport.lineStart
-      );
+      this.cursor.setPosition(area[0].xLine, area[0].yLine);
     } else if (metaKey) {
-      // Meta+Backspace: delete from cursor to beginning of line
-      const end = this.cursor.getAbsolutePosition(this.viewport);
+      const end = this.cursor.getAbsolutePosition();
       const start = { xLine: 0, yLine: end.yLine };
       this.text.deleteRangeText(start, end);
-      this.cursor.setPosition(0, end.yLine - this.viewport.lineStart);
+      this.cursor.setPosition(0, end.yLine);
       if (this.annotator.onTextChangeCb) {
         this.annotator.onTextChangeCb(this.text.value);
       }
     } else {
-      // Option+Backspace: pass altKey so word to the left is deleted (same as Ctrl+Backspace)
-      const before = this.cursor.getAbsolutePosition(this.viewport);
+      const before = this.cursor.getAbsolutePosition();
       this.onArrowLeft({ ctrlKey, shiftKey, altKey });
-      const after = this.cursor.getAbsolutePosition(this.viewport);
+      const after = this.cursor.getAbsolutePosition();
 
       this.text.deleteRangeText(before, after);
 
@@ -184,18 +192,15 @@ export default class Keys {
     if (area) {
       this.text.deleteRangeText(area[0], area[1]);
       this.cursor.reset();
-      this.cursor.setPosition(
-        area[0].xLine,
-        area[0].yLine - this.viewport.lineStart
-      );
+      this.cursor.setPosition(area[0].xLine, area[0].yLine);
     } else {
-      const before = this.cursor.getAbsolutePosition(this.viewport);
+      const before = this.cursor.getAbsolutePosition();
       this.onArrowRight({ ctrlKey, shiftKey });
-      const after = this.cursor.getAbsolutePosition(this.viewport);
+      const after = this.cursor.getAbsolutePosition();
 
       this.text.deleteRangeText(before, after);
       this.cursor.xLine = before.xLine;
-      this.cursor.yLine = before.yLine - this.viewport.lineStart;
+      this.cursor.yLine = before.yLine;
 
       if (this.annotator.onTextChangeCb) {
         this.annotator.onTextChangeCb(this.text.value);
@@ -215,7 +220,7 @@ export default class Keys {
     if (shiftKey) {
       this.cursor.selectEnd = {
         xLine: this.cursor.xLine,
-        yLine: this.viewport.lineStart + this.cursor.yLine,
+        yLine: this.cursor.yLine,
       };
     } else {
       this.cursor.selectStart = undefined;
@@ -236,7 +241,10 @@ export default class Keys {
     this.viewport.scrollDown(this.viewport.noLines, this.text.noLines);
 
     if (originalViewport === this.viewport.lineStart) {
-      this.cursor.yLine = this.viewport.noLines - 1;
+      this.cursor.yLine = Math.min(
+        this.text.noLines - 1,
+        this.viewport.lineEnd - 1
+      );
     }
     const line = this.text.getCurrentLine(this.viewport, this.cursor) || "";
     if (line.length < this.cursor.xLine) {
@@ -246,10 +254,7 @@ export default class Keys {
     if (shiftKey) {
       this.cursor.selectEnd = {
         xLine: this.cursor.xLine,
-        yLine:
-          originalViewport === this.viewport.lineStart
-            ? this.viewport.lineStart + this.viewport.noLines
-            : this.viewport.lineStart + this.cursor.yLine,
+        yLine: this.cursor.yLine,
       };
     } else {
       this.cursor.selectStart = undefined;
@@ -267,20 +272,12 @@ export default class Keys {
     if (area) {
       this.text.deleteRangeText(area[0], area[1]);
       this.cursor.reset();
-      this.cursor.setPosition(
-        area[0].xLine,
-        area[0].yLine - this.viewport.lineStart
-      );
+      this.cursor.setPosition(area[0].xLine, area[0].yLine);
     }
     this.text.insertNewline(this.viewport, this.cursor);
 
-    if (this.cursor.yLine + 1 >= this.viewport.noLines) {
-    // either scroll to the end of the document
-      this.viewport.scrollTo(this.cursor.yLine + this.viewport.lineStart, this.text.noLines);
-    } else {
-      // or just move to the next line if viewport allows it
-      this.cursor.moveToNewline();
-    }
+    this.cursor.moveToNewline();
+    this.scrollCursorIntoView();
   }
 
   onArrowUp({
@@ -293,10 +290,9 @@ export default class Keys {
     metaKey?: boolean;
   }) {
     const originalXLine = this.cursor.xLine;
-    const originalAbsYline = this.viewport.lineStart + this.cursor.yLine;
+    const originalAbsYline = this.cursor.yLine;
 
     if (metaKey && shiftKey) {
-      // Cmd + Shift + Up: select from current position to very start of text
       this.cursor.selectStart = { xLine: 0, yLine: 0 };
       this.cursor.selectEnd = {
         xLine: originalXLine,
@@ -319,18 +315,12 @@ export default class Keys {
     }
 
     if (this.cursor.yLine <= 0) {
-      // scroll up if going outside of the viewport
-      this.viewport.scrollTo(this.viewport.lineStart - 1, this.text.noLines);
       this.cursor.yLine = 0;
-    }
-
-    const isAbsTopLine = this.cursor.yLine + this.viewport.lineStart === 0;
-    if (isAbsTopLine) {
-      // if top line - move to start of the line
-      this.cursor.xLine = 0;
     } else {
-      // move cursor up
       this.cursor.move(0, -1);
+      if (this.cursor.yLine === 0) {
+        this.cursor.xLine = 0;
+      }
     }
 
     // cursor should not go being line bounds (right side)
@@ -343,12 +333,12 @@ export default class Keys {
       if (this.cursor.selectDirection === DIRECTION.FORWARD) {
         this.cursor.selectEnd = {
           xLine: this.cursor.xLine,
-          yLine: this.viewport.lineStart + this.cursor.yLine,
+          yLine: this.cursor.yLine,
         };
       } else if (this.cursor.selectDirection === DIRECTION.BACKWARD) {
         this.cursor.selectEnd = {
           xLine: this.cursor.xLine,
-          yLine: this.viewport.lineStart + this.cursor.yLine,
+          yLine: this.cursor.yLine,
         };
       } else {
         this.cursor.selectStart = {
@@ -357,7 +347,7 @@ export default class Keys {
         };
         this.cursor.selectEnd = {
           xLine: this.cursor.xLine,
-          yLine: this.viewport.lineStart + this.cursor.yLine,
+          yLine: this.cursor.yLine,
         };
       }
     } else {
@@ -365,6 +355,7 @@ export default class Keys {
       this.cursor.selectEnd = undefined;
     }
 
+    this.scrollCursorIntoView();
     this.cursor.setTrueSelectionDirection();
   }
 
@@ -378,10 +369,9 @@ export default class Keys {
     metaKey?: boolean;
   }) {
     const originalXLine = this.cursor.xLine;
-    const originalAbsYline = this.viewport.lineStart + this.cursor.yLine;
+    const originalAbsYline = this.cursor.yLine;
 
     if (metaKey && shiftKey) {
-      // Cmd + Shift + Down: select from current position to end of entire text
       const lastLineIndex = this.text.noLines > 0 ? this.text.noLines - 1 : 0;
       const lineText = this.text.getLine(lastLineIndex) ?? "";
       this.cursor.selectStart = {
@@ -393,16 +383,15 @@ export default class Keys {
         yLine: lastLineIndex,
       };
       this.viewport.scrollTo(this.text.noLines, this.text.noLines);
-      this.cursor.yLine = lastLineIndex - this.viewport.lineStart;
+      this.cursor.yLine = lastLineIndex;
       this.cursor.xLine = lineText.length;
       this.cursor.setTrueSelectionDirection();
       return;
     } else if (metaKey && !shiftKey) {
-      // Cmd + Down: jump to end of entire text
       const lastLineIndex = this.text.noLines > 0 ? this.text.noLines - 1 : 0;
       const lineText = this.text.getLine(lastLineIndex) ?? "";
       this.viewport.scrollTo(this.text.noLines, this.text.noLines);
-      this.cursor.yLine = lastLineIndex - this.viewport.lineStart;
+      this.cursor.yLine = lastLineIndex;
       this.cursor.xLine = lineText.length;
       this.cursor.selectStart = undefined;
       this.cursor.selectEnd = undefined;
@@ -412,21 +401,13 @@ export default class Keys {
 
     this.cursor.move(0, 1);
 
-    // if yLine is out of viewport => scroll down
-    if (this.cursor.yLine + this.viewport.lineStart > this.viewport.lineEnd) {
-      this.viewport.scrollTo(this.viewport.lineStart + 1, this.text.noLines);
-      this.cursor.yLine = this.viewport.lineEnd - this.viewport.lineStart;
-    }
-
     const line = this.text.getCurrentLine(this.viewport, this.cursor) || "";
 
-    // if out of lines - use last line's setup (last x char)
-    if (this.cursor.yLine + this.viewport.lineStart >= this.text.noLines) {
-      this.cursor.yLine = this.text.noLines - this.viewport.lineStart - 1;
+    if (this.cursor.yLine >= this.text.noLines) {
+      this.cursor.yLine = Math.max(0, this.text.noLines - 1);
       this.cursor.xLine = line.length;
     }
 
-    // cursor should not go being line bounds (right side)
     if (line.length < this.cursor.xLine) {
       this.cursor.xLine = line.length;
     }
@@ -435,12 +416,12 @@ export default class Keys {
       if (this.cursor.selectDirection === DIRECTION.FORWARD) {
         this.cursor.selectEnd = {
           xLine: this.cursor.xLine,
-          yLine: this.viewport.lineStart + this.cursor.yLine,
+          yLine: this.cursor.yLine,
         };
       } else if (this.cursor.selectDirection === DIRECTION.BACKWARD) {
         this.cursor.selectEnd = {
           xLine: this.cursor.xLine,
-          yLine: this.viewport.lineStart + this.cursor.yLine,
+          yLine: this.cursor.yLine,
         };
       } else {
         this.cursor.selectStart = {
@@ -449,7 +430,7 @@ export default class Keys {
         };
         this.cursor.selectEnd = {
           xLine: this.cursor.xLine,
-          yLine: this.viewport.lineStart + this.cursor.yLine,
+          yLine: this.cursor.yLine,
         };
       }
     } else {
@@ -457,6 +438,7 @@ export default class Keys {
       this.cursor.selectEnd = undefined;
     }
 
+    this.scrollCursorIntoView();
     this.cursor.setTrueSelectionDirection();
   }
 
@@ -478,7 +460,7 @@ export default class Keys {
     shiftKey?: boolean;
     metaKey?: boolean;
   }) {
-    const absY = this.viewport.lineStart + this.cursor.yLine;
+    const absY = this.cursor.yLine;
     if (metaKey && shiftKey) {
       this.cursor.selectStart = { xLine: 0, yLine: absY };
       this.cursor.selectEnd = {
@@ -595,12 +577,12 @@ export default class Keys {
       if (this.cursor.selectDirection === DIRECTION.FORWARD) {
         this.cursor.selectEnd = {
           xLine: this.cursor.xLine,
-          yLine: this.viewport.lineStart + this.cursor.yLine,
+          yLine: this.cursor.yLine,
         };
       } else if (this.cursor.selectDirection === DIRECTION.BACKWARD) {
         this.cursor.selectEnd = {
           xLine: this.cursor.xLine,
-          yLine: this.viewport.lineStart + this.cursor.yLine,
+          yLine: this.cursor.yLine,
         };
       } else {
         // Use absY (captured before movement) so selection start stays on the original line
@@ -610,15 +592,13 @@ export default class Keys {
         };
         this.cursor.selectEnd = {
           xLine: this.cursor.xLine,
-          yLine: this.viewport.lineStart + this.cursor.yLine,
+          yLine: this.cursor.yLine,
         };
       }
     } else {
       if (this.cursor.isSelected()) {
         this.cursor.xLine = this.cursor.selectStart?.xLine || this.cursor.xLine;
-        this.cursor.yLine = this.cursor.selectStart
-          ? this.cursor.selectStart.yLine - this.viewport.lineStart
-          : this.cursor.yLine;
+        this.cursor.yLine = this.cursor.selectStart?.yLine ?? this.cursor.yLine;
         offsetLeft = 0;
       }
 
@@ -626,6 +606,7 @@ export default class Keys {
       this.cursor.selectEnd = undefined;
     }
 
+    this.scrollCursorIntoView();
     this.cursor.setTrueSelectionDirection();
   }
 
@@ -647,7 +628,7 @@ export default class Keys {
     shiftKey?: boolean;
     metaKey?: boolean;
   }) {
-    const absY = this.viewport.lineStart + this.cursor.yLine;
+    const absY = this.cursor.yLine;
     const line = this.text.getLine(absY) ?? "";
     if (metaKey && shiftKey) {
       this.cursor.selectStart = {
@@ -708,6 +689,11 @@ export default class Keys {
             break;
           }
         }
+
+        if (this.cursor.yLine >= this.text.noLines) {
+          this.cursor.yLine = Math.max(0, this.text.noLines - 1);
+          break;
+        }
       }
     }
 
@@ -751,8 +737,7 @@ export default class Keys {
           );
           if (seg && lineChar) {
             this.cursor.xLine = lineChar.charInLineIndex;
-            this.cursor.yLine =
-              seg.lineStart + lineChar.lineIndex - this.viewport.lineStart;
+            this.cursor.yLine = seg.lineStart + lineChar.lineIndex;
           }
         }
       }
@@ -779,12 +764,12 @@ export default class Keys {
       if (this.cursor.selectDirection === DIRECTION.FORWARD) {
         this.cursor.selectEnd = {
           xLine: this.cursor.xLine,
-          yLine: this.viewport.lineStart + this.cursor.yLine,
+          yLine: this.cursor.yLine,
         };
       } else if (this.cursor.selectDirection === DIRECTION.BACKWARD) {
         this.cursor.selectEnd = {
           xLine: this.cursor.xLine,
-          yLine: this.viewport.lineStart + this.cursor.yLine,
+          yLine: this.cursor.yLine,
         };
       } else {
         // Use absY (captured before movement) so selection start stays on the original line
@@ -794,15 +779,13 @@ export default class Keys {
         };
         this.cursor.selectEnd = {
           xLine: this.cursor.xLine,
-          yLine: this.viewport.lineStart + this.cursor.yLine,
+          yLine: this.cursor.yLine,
         };
       }
     } else {
       if (this.cursor.isSelected()) {
         this.cursor.xLine = this.cursor.selectEnd?.xLine || this.cursor.xLine;
-        this.cursor.yLine = this.cursor.selectEnd
-          ? this.cursor.selectEnd.yLine - this.viewport.lineStart
-          : this.cursor.yLine;
+        this.cursor.yLine = this.cursor.selectEnd?.yLine ?? this.cursor.yLine;
         offsetRight = 0;
       }
 
@@ -810,6 +793,7 @@ export default class Keys {
       this.cursor.selectEnd = undefined;
     }
 
+    this.scrollCursorIntoView();
     this.cursor.setTrueSelectionDirection();
   }
 
@@ -875,10 +859,7 @@ export default class Keys {
               if (area) {
                 this.text.deleteRangeText(area[0], area[1]);
                 this.cursor.reset();
-                this.cursor.setPosition(
-                  area[0].xLine,
-                  area[0].yLine - this.viewport.lineStart
-                );
+                this.cursor.setPosition(area[0].xLine, area[0].yLine);
               }
             } else if (this.text.mode === EditMode.SEMI) {
               this.annotator.onCopyText();
@@ -909,10 +890,7 @@ export default class Keys {
           if (area) {
             this.text.deleteRangeText(area[0], area[1]);
             this.cursor.reset();
-            this.cursor.setPosition(
-              area[0].xLine,
-              area[0].yLine - this.viewport.lineStart
-            );
+            this.cursor.setPosition(area[0].xLine, area[0].yLine);
           }
           this.text.insertText(this.viewport, this.cursor, key);
           if (this.annotator.onTextChangeCb) {
