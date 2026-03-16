@@ -1,6 +1,8 @@
 /**
  * Scroller is component which renders scrollbar with runner
  */
+const MIN_RUNNER_HEIGHT_PX = 20;
+
 class Scroller {
   // container element
   element: HTMLDivElement;
@@ -36,7 +38,16 @@ class Scroller {
     this.viewPortSize = percentSize;
   }
   setRunnerSize(percentSize: number): void {
-    this.runner.style.height = `${Math.min(100, percentSize)}%`;
+    const clampedPercent = Math.min(100, percentSize);
+    const containerHeight = this.element.clientHeight;
+
+    if (containerHeight > 0) {
+      const minPercent = (MIN_RUNNER_HEIGHT_PX / containerHeight) * 100;
+      const finalPercent = Math.max(clampedPercent, minPercent);
+      this.runner.style.height = `${Math.min(100, finalPercent)}%`;
+    } else {
+      this.runner.style.height = `${clampedPercent}%`;
+    }
   }
 
   // convert px value to percentage considering the available height of the runner
