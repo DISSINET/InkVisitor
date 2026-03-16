@@ -203,6 +203,23 @@ describe("word/tag selection with ctrl/alt arrow keys in RAW mode", () => {
     });
   });
 
+  describe("end-of-text guard", () => {
+    test("shift+alt+ArrowRight at end of text does not wrap cursor", () => {
+      const text = "hello world";
+      annotator = new Annotator(mockCanvas, text);
+      annotator.setMode(EditMode.RAW);
+
+      moveCursorToAbsIndex(6);
+      annotator.keys.onArrowRight({ altKey: true, shiftKey: true });
+      const afterFirst = getCursorAbsIndex();
+      expect(afterFirst).toBe(11);
+
+      annotator.keys.onArrowRight({ altKey: true, shiftKey: true });
+      const afterSecond = getCursorAbsIndex();
+      expect(afterSecond).toBe(11);
+    });
+  });
+
   describe("line boundary with shift selection", () => {
     test("shift+alt+ArrowRight across line boundary creates valid selection", () => {
       const text = "first\nsecond";

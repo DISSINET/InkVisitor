@@ -685,8 +685,14 @@ export default class Keys {
         if (!offsetRight) {
           const lineText =
             this.text.getCurrentLine(this.viewport, this.cursor) || "";
-          // Reached end of line — jump to start of next line and stop
           if (this.cursor.xLine >= lineText.length) {
+            // At end of last line — nothing more to the right, bail out
+            const absLine = this.viewport.lineStart + this.cursor.yLine;
+            if (absLine >= this.text.noLines - 1) {
+              ctrlRightHandled = true;
+              break;
+            }
+            // Reached end of line — jump to start of next line and stop
             this.cursor.xLine = 0;
             this.cursor.yLine++;
             if (this.cursor.yLine > this.viewport.noLines) {
