@@ -827,7 +827,10 @@ export class Annotator {
     for (let renderLine = 0; renderLine <= renderEndCond; renderLine++) {
       const textLine = textToRender[renderLine];
       if (textLine) {
-        this.ctx.fillText(textLine, 0, (renderLine + 0.5) * this.lineHeight);
+        // Visually trim leading whitespace so rows never start with a visible space,
+        // while keeping internal text/indices unchanged.
+        const visualLine = textLine.replace(/^\s+/, "");
+        this.ctx.fillText(visualLine, 0, (renderLine + 0.5) * this.lineHeight);
       }
     }
 
