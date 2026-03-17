@@ -439,6 +439,38 @@ class Text {
           }
         }
       }
+
+      // Post-process lines so that no visual line starts with a bare ',' or '.'.
+      // If a line begins with optional whitespace followed by ',' or '.',
+      // move the *preceding word* from the previous line together with the
+      // punctuation to the beginning of this line (when the word fits).
+      for (let i = 1; i < segment.lines.length; i++) {
+        const line = segment.lines[i];
+        const match = line.match(/^(\s*)([.,])(.*)$/);
+        if (!match) {
+          continue;
+        }
+
+        const [, leadingSpaces, punct, rest] = match;
+        const prevLine = segment.lines[i - 1];
+
+        // Find the last "word" on the previous line (sequence of non-space chars).
+        const prevMatch = prevLine.match(/^(.*?)(\S+)\s*$/);
+        if (!prevMatch) {
+          continue;
+        }
+
+        const prevPrefix = prevMatch[1]; // everything before the last word
+        const lastWord = prevMatch[2];
+
+        // Only move the word if it is not longer than the line width,
+        // as requested.
+        if (lastWord.length <= this.charsAtLine) {
+          segment.lines[i - 1] = prevPrefix;
+          segment.lines[i] = `${leadingSpaces}${lastWord}${punct}${rest}`;
+        }
+      }
+
       segment.lineEnd = segment.lineStart + (segment.lines.length || 1);
 
       if (!segment.lines.length) {
