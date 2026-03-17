@@ -365,6 +365,8 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                 value={isCaseSensitiveMode}
                 onChangeFn={(checked: boolean) => {
                   setIsCaseSensitiveMode(checked);
+                }}
+                onClickFn={() => {
                   searchInputRef.current?.focus();
                 }}
                 icon={<LuCaseSensitive size={16} />}
@@ -377,6 +379,8 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                   value={isExtendToWholeWordMode}
                   onChangeFn={(checked: boolean) => {
                     setIsExtendToWholeWordMode(checked);
+                  }}
+                  onClickFn={() => {
                     searchInputRef.current?.focus();
                   }}
                   icon={<FaExpand size={12} />}
@@ -391,6 +395,8 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                   value={isWholeWordOnlyMode}
                   onChangeFn={(checked: boolean) => {
                     setIsWholeWordOnlyMode(checked);
+                  }}
+                  onClickFn={() => {
                     searchInputRef.current?.focus();
                   }}
                   icon={<LuWholeWord size={16} />}
@@ -404,6 +410,8 @@ export const StatementListSearchLine: React.FC<StatementListSearchLine> = ({
                 value={isRegexMode}
                 onChangeFn={(checked: boolean) => {
                   setIsRegexMode(checked);
+                }}
+                onClickFn={() => {
                   searchInputRef.current?.focus();
                 }}
                 icon={<LuRegex size={14} />}

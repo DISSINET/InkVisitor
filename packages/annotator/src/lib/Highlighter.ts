@@ -1,7 +1,11 @@
 import { DrawingOptions } from "./Annotator";
 import Text from "./Text";
 import Viewport from "./Viewport";
-import { HighlightMode } from "./constants";
+import {
+  HIGHLIGHT_HEIGHT_RATIO,
+  HighlightMode,
+  UNDERLINE_OFFSET_PX,
+} from "./constants";
 
 // Absolute coordinates point to virtual position not limited by viewport - first line is first line of input
 export interface IAbsCoordinates {
@@ -57,11 +61,13 @@ export default class Highlighter {
   }
 
   yToLineI(y: number, lineHeight: number): number {
-    return Math.round((y / lineHeight) * this.ratio - 1);
+    return Math.max(0, Math.floor((y / lineHeight) * this.ratio));
   }
 
   xToCharI(x: number, charWidth: number): number {
-    return Math.floor((Math.max(x, 0) / charWidth) * this.ratio);
+    const rel = (Math.max(x, 0) / charWidth) * this.ratio;
+    // Place caret to the right when clicking on the right half of a character cell
+    return Math.floor(rel + 0.5);
   }
 
   /**
@@ -101,34 +107,38 @@ export default class Highlighter {
   ) {
     const { charWidth, lineHeight, color: colorOverride } = options;
     const width = (xEnd - xStart) * charWidth;
-    const height = this.hlMode === HighlightMode.UNDERLINE ? 3 : lineHeight;
+    // const height = this.hlMode === HighlightMode.UNDERLINE ? 3 : lineHeight;
+
+    const isNarrowHighlight =
+      this.hlMode === HighlightMode.SELECT ||
+      this.hlMode === HighlightMode.BACKGROUND;
+    const height =
+      this.hlMode === HighlightMode.UNDERLINE
+        ? 3
+        : isNarrowHighlight
+        ? Math.max(1, lineHeight * HIGHLIGHT_HEIGHT_RATIO)
+        : lineHeight;
+    const yOffset = isNarrowHighlight ? (lineHeight - height) / 2 : 0;
+    const y = relLine * lineHeight + yOffset;
 
     ctx.fillStyle = colorOverride || this.style.color;
     ctx.globalAlpha = this.style.opacity;
 
     if (this.hlMode === "focus") {
       ctx.globalCompositeOperation = "xor";
-      ctx.fillRect(xStart * charWidth, relLine * lineHeight, width, height);
+      ctx.fillRect(xStart * charWidth, relLine * lineHeight, width, lineHeight);
     } else if (this.hlMode === "underline") {
       ctx.globalCompositeOperation = "multiply";
-      ctx.fillRect(
-        xStart * charWidth,
-        (relLine + 1) * lineHeight,
-        width,
-        height
-      );
+      const offsetPx = UNDERLINE_OFFSET_PX * this.ratio;
+      const underlineY = (relLine + 1) * lineHeight - height - offsetPx;
+      ctx.fillRect(xStart * charWidth, underlineY, width, height);
     } else if (this.hlMode === "background") {
       ctx.globalCompositeOperation = "multiply";
-      ctx.fillRect(xStart * charWidth, relLine * lineHeight + 1, width, height);
+      ctx.fillRect(xStart * charWidth, y, width, height);
     } else if (this.hlMode === "select") {
       ctx.globalCompositeOperation = "color";
       ctx.globalAlpha = 1;
-      ctx.fillRect(
-        xStart * charWidth,
-        relLine * lineHeight,
-        width || 1,
-        height
-      );
+      ctx.fillRect(xStart * charWidth, y, width || 1, height);
     }
   }
 
@@ -144,7 +154,7 @@ export default class Highlighter {
     ctx: CanvasRenderingContext2D,
     viewport: Viewport,
     text: Text,
-    drawingOptions: DrawingOptions,
+    drawingOptions: DrawingOptions
   ) {
     const { charsAtLine } = drawingOptions;
 
@@ -156,11 +166,12 @@ export default class Highlighter {
 
       const rowsToDraw: { rowI: number; start: number; end: number }[] = [];
 
-      for (
-        let i = 0;
-        i < Math.min(viewport.lineEnd, text.noLines) - viewport.lineStart;
-        i++
-      ) {
+      // Use the same line count as the main text renderer to avoid off-by-one
+      // issues where the last visible line has no highlight.
+      const visibleLinesCount =
+        Math.min(viewport.lineEnd, text.noLines) - viewport.lineStart;
+
+      for (let i = 0; i <= visibleLinesCount; i++) {
         const currY = viewport.lineStart + i;
         const lastCharX = text.getLine(currY).length;
 

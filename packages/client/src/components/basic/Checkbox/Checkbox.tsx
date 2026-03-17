@@ -26,6 +26,8 @@ interface Checkbox {
   tooltipContent?: React.ReactNode;
   tooltipPosition?: AutoPlacement | BasePlacement | VariationPlacement;
   iconOnly?: boolean;
+  // optional function to be called when the checkbox is clicked (onChangeFn is main function that returns value)
+  onClickFn?: () => void;
 }
 export const Checkbox: React.FC<Checkbox> = ({
   value,
@@ -37,6 +39,7 @@ export const Checkbox: React.FC<Checkbox> = ({
   tooltipContent,
   iconOnly = false,
   tooltipPosition = "bottom",
+  onClickFn = () => {},
 }) => {
   const [checked, setChecked] = useState(value);
   const [referenceElement, setReferenceElement] = useState<HTMLElement | null>(
@@ -59,6 +62,7 @@ export const Checkbox: React.FC<Checkbox> = ({
           onClick={(e) => {
             e.stopPropagation();
             setChecked(!checked);
+            onClickFn();
           }}
         >
           {icon}

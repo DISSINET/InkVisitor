@@ -123,11 +123,16 @@ export const useAnnotatorSearch = ({
 
   const distributeSearchResults = useCallback(
     (occurrences: Occurrence[]) => {
+      const termChanged = searchTermRef.current !== debouncedSearchTerm;
       setSearchOccurences(occurrences);
       // If no occurrences, clear the previous highlight
       if (occurrences.length === 0) {
         setSelectedText("");
-        annotator?.clearSelection();
+        // Only clear selection (and thus reset cursor) when the search term itself changed.
+        // Avoid clearing on reruns caused solely by annotatorMode changes.
+        if (termChanged) {
+          annotator?.clearSelection();
+        }
       }
       resetActiveOccurrenceOnSearchTermChange();
     },
@@ -146,11 +151,16 @@ export const useAnnotatorSearch = ({
     }
 
     if (debouncedSearchTerm.length <= 2) {
+      const termChanged = searchTermRef.current !== debouncedSearchTerm;
       setSearchOccurences(null);
       setSearchActiveOccurence(0);
-      searchTermRef.current = "";
+      searchTermRef.current = debouncedSearchTerm;
       setSelectedText("");
-      annotator?.clearSelection();
+      // Only clear selection (and thus reset cursor) when the search term actually changed.
+      // Prevent cursor disappearance on pure annotatorMode changes.
+      if (termChanged) {
+        annotator?.clearSelection();
+      }
       previousWidthRef.current = width;
       return;
     }

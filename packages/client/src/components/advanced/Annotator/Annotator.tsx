@@ -239,6 +239,9 @@ export const TextAnnotator = ({
       setSearchActiveOccurence(0);
       setSearchTerm("");
       annotator.draw();
+      if (mainCanvas.current) {
+        mainCanvas.current.focus();
+      }
     }
   }, [annotatorMode]);
 
