@@ -1,10 +1,11 @@
 import styled from "styled-components";
 
 export const StyledScrollerViewport = styled.div`
-  background: #ccc;
-  position: relative;
-  width: 16px;
   border-radius: ${({ theme }) => theme.borderRadius["default"]};
+  position: relative;
+  width: 10px;
+  margin-left: 0.6rem;
+  background-color: ${({ theme }) => theme.color.gray[200]};
 `;
 
 export const StyledScrollerCursor = styled.div`
@@ -19,6 +20,7 @@ export const StyledScrollerCursor = styled.div`
 export const StyledCanvasWrapper = styled.div`
   background-color: ${({ theme }) => theme.color.white};
   padding: 2px;
+  border-radius: 7px;
   display: flex;
   flex-direction: row;
 `;

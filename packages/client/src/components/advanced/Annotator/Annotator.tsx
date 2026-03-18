@@ -992,12 +992,7 @@ export const TextAnnotator = ({
               outline: "none",
             }}
           />
-          <StyledScrollerViewport
-            ref={scroller}
-            style={{
-              background: theme.color.grey,
-            }}
-          >
+          <StyledScrollerViewport ref={scroller}>
             <StyledScrollerCursor
               style={{
                 backgroundColor: theme.color.primary,

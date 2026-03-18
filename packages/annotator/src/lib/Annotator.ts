@@ -200,8 +200,6 @@ export class Annotator {
     const [start, end] = this.cursor.getAbsBounds();
 
     if (start && end) {
-      this.text.getSegmentPosition(start.yLine, start.xLine) as SegmentPosition;
-
       const startSegment = this.text.getSegmentPosition(
         start.yLine,
         start.xLine
@@ -516,7 +514,11 @@ export class Annotator {
    */
   onWheel(e: WheelEvent) {
     const deltaBufferPx = e.deltaY * this.ratio;
-    this.viewport.addScrollOffset(deltaBufferPx, this.lineHeight, this.text.noLines);
+    this.viewport.addScrollOffset(
+      deltaBufferPx,
+      this.lineHeight,
+      this.text.noLines
+    );
 
     e.preventDefault();
     this.draw();
@@ -792,10 +794,7 @@ export class Annotator {
     this.scroller = new Scroller(scrollerDiv);
     this.scroller.onChange((percentage: number) => {
       const viewportLines = this.viewport.lineEnd - this.viewport.lineStart;
-      const scrollableLines = Math.max(
-        0,
-        this.text.noLines - viewportLines
-      );
+      const scrollableLines = Math.max(0, this.text.noLines - viewportLines);
       const scrollablePx = scrollableLines * this.lineHeight;
       const targetPx = (percentage / 100) * scrollablePx;
       const targetLineFrac = scrollablePx > 0 ? targetPx / this.lineHeight : 0;
@@ -1006,7 +1005,10 @@ export class Annotator {
         if (coords !== null) {
           const absY = this.viewport.lineStart + coords.yLine;
           this.cursor.setPosition(coords.xLine, absY);
-          if (absY < this.viewport.lineStart || absY > this.viewport.lineEnd - 1) {
+          if (
+            absY < this.viewport.lineStart ||
+            absY > this.viewport.lineEnd - 1
+          ) {
             this.viewport.scrollTo(absY, this.text.noLines);
           }
         }
@@ -1080,7 +1082,10 @@ export class Annotator {
           indexEnd = raw.length;
         }
       } else {
-        [indexStart, indexEnd] = this.sanitizeEnvelopeRange(indexStart, indexEnd);
+        [indexStart, indexEnd] = this.sanitizeEnvelopeRange(
+          indexStart,
+          indexEnd
+        );
       }
 
       // could be '<tag>text .... text</tag> (closing tag always included if present)
@@ -1300,7 +1305,8 @@ export class Annotator {
    */
   selectSearchOccurrence(occurence: Occurrence) {
     const absY =
-      this.text.segments[occurence.segmentIndex].lineStart + occurence.lineIndex;
+      this.text.segments[occurence.segmentIndex].lineStart +
+      occurence.lineIndex;
     this.cursor.xLine = occurence.end;
     this.cursor.yLine = absY;
 
@@ -1585,9 +1591,7 @@ export class Annotator {
           (t) => !t.isOpen && t.name === tag.name && t.start > tag.start
         );
         return (
-          closingTag != null &&
-          start <= tag.start &&
-          end >= closingTag.end
+          closingTag != null && start <= tag.start && end >= closingTag.end
         );
       });
 
@@ -1724,11 +1728,7 @@ export class Annotator {
         const closingTag = tagPositions.find(
           (t) => !t.isOpen && t.name === tag.name && t.start > tag.start
         );
-        if (
-          closingTag &&
-          start === tag.start &&
-          end >= closingTag.end
-        ) {
+        if (closingTag && start === tag.start && end >= closingTag.end) {
           return [start, end];
         }
       }
