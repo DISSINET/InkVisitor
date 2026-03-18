@@ -221,7 +221,7 @@ export const TextAnnotator = ({
     if (a && setStoredAnnotatorScrollPosition) {
       setStoredAnnotatorScrollPosition(a.getViewportStartInRawText());
     }
-  }, 200);
+  }, 500);
 
   useEffect(() => {
     if (!annotator || !setStoredAnnotatorScrollPosition) return;
