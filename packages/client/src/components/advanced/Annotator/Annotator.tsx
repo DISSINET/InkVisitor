@@ -681,6 +681,12 @@ export const TextAnnotator = ({
     }
   }, [width, height]);
 
+  useEffect(() => {
+    if (storedAnnotatorScrollPosition !== null) {
+      annotator?.scrollToRawPosition(storedAnnotatorScrollPosition);
+    }
+  }, [width]);
+
   const onCreateTerritory = (
     mode: TerritoryCreateModalType,
     elvl: EntityEnums.Elvl

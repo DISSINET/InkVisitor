@@ -228,22 +228,9 @@ export const StatementListBox: React.FC = () => {
   const [storedAnnotatorScrollPosition, setStoredAnnotatorScrollPosition] =
     useState<number | null>(null);
 
-  // save scroll position to localStorage
-  // save territory ID as well to make sure to scroll in the right document
-  // useEffect(() => {
-  //   localStorage.setItem(
-  //     "storedAnnotatorScrollPosition",
-  //     JSON.stringify({
-  //       territoryId,
-  //       scrollPosition: storedAnnotatorScrollPosition,
-  //     })
-  //   );
-
-  //   console.log("storedAnnotatorScrollPosition", {
-  //     territoryId,
-  //     scrollPosition: storedAnnotatorScrollPosition,
-  //   });
-  // }, [storedAnnotatorScrollPosition]);
+  useEffect(() => {
+    console.log("storedAnnotatorScrollPosition", storedAnnotatorScrollPosition);
+  }, [storedAnnotatorScrollPosition]);
 
   useEffect(() => {
     setStoredAnnotatorScrollPosition(null);
