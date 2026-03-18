@@ -646,16 +646,19 @@ export const TextAnnotator = ({
     const initialContent = dataDocument?.content ?? "no text";
     setLocalTextContent(initialContent);
 
-    newAnnotator.draw();
+    // Ensure the initial render uses the current mode (e.g. HIGHLIGHT hides XML tags).
+    // Otherwise we may briefly draw in RAW mode and show tags on first load.
+    newAnnotator.setMode(originalMode);
 
     if (storedAnnotatorScrollPosition != null) {
+      // scrollToRawPosition triggers a draw
       newAnnotator.scrollToRawPosition(storedAnnotatorScrollPosition);
+    } else {
+      newAnnotator.draw();
     }
 
     setAnnotator(newAnnotator);
     forwardAnnotator(newAnnotator);
-
-    newAnnotator.setMode(originalMode);
   };
 
   useEffect(() => {

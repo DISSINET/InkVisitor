@@ -231,6 +231,10 @@ export const StatementListBox: React.FC = () => {
     console.log("storedAnnotatorScrollPosition", storedAnnotatorScrollPosition);
   }, [storedAnnotatorScrollPosition]);
 
+  useEffect(() => {
+    setStoredAnnotatorScrollPosition(null);
+  }, [territoryId]);
+
   const { setAnnotator: useAnnotatorSetAnnotator } = useAnnotator();
 
   useEffect(() => {
