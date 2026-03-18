@@ -138,7 +138,7 @@ export const StatementListBox: React.FC = () => {
       const res = await api.territoryGet(territoryId);
       return res.data;
     },
-    enabled: !!territoryId && api.isLoggedIn() && statementListOpened,
+    enabled: !!territoryId && api.isLoggedIn(),
   });
 
   // Debug logging for territory query
@@ -976,7 +976,7 @@ export const StatementListBox: React.FC = () => {
 
   return (
     <StyledStatementListBox ref={statementListBoxRef}>
-      {showStatementList && (
+      {
         <>
           <StatementListHeader
             territory={territory}
@@ -1152,7 +1152,7 @@ export const StatementListBox: React.FC = () => {
             loading={deleteStatementMutation.isPending}
           />
         </>
-      )}
+      }
     </StyledStatementListBox>
   );
 };
