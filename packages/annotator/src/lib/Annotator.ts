@@ -215,6 +215,8 @@ export class Annotator {
       const anchors = this.getAnnotations(startSegment, endSegment);
 
       if (anchors.some((tag) => tag.getTagName() === anchor)) {
+        const changedSegmentIndices = new Set<number>();
+
         // find if open tag for given anchor is part of selection, otherwise find the last occurence of that anchor in the text before the selection
         const openTagSegment = this.text.segments
           .slice(0, endSegment.segmentIndex + 1)
@@ -237,7 +239,9 @@ export class Annotator {
 
             this.text.segments[openTagsSegmentI].raw =
               openTagSegment.raw.replace(openTag.getTag(), "");
-            // this.text.segments[openTagsSegmentI].parseText();
+            if (openTagsSegmentI >= 0) {
+              changedSegmentIndices.add(openTagsSegmentI);
+            }
           }
         }
 
@@ -263,8 +267,16 @@ export class Annotator {
             this.text.segments[closeTagsSegmentI].raw =
               closeTagSegment.raw.replace(`</${anchor}>`, "");
 
-            // this.text.segments[closeTagsSegmentI].parseText();
+            if (closeTagsSegmentI >= 0) {
+              changedSegmentIndices.add(closeTagsSegmentI);
+            }
           }
+        }
+
+        // Re-parse tags for modified segments so subsequent `getAnnotations`
+        // (and thus `onSelectText`) reflects the updated anchors immediately.
+        for (const idx of changedSegmentIndices) {
+          this.text.segments[idx]?.parseText();
         }
 
         this.text.assignValueFromSegments();
