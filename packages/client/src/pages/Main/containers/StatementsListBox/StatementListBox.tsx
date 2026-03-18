@@ -212,15 +212,16 @@ export const StatementListBox: React.FC = () => {
   // }, [storedAnnotatorResourceId]);
 
   // delay of show content for fluent animation on open
-  const [showStatementList, setShowStatementList] = useState(true);
+  const [enableStatementListLoader, setEnableStatementListLoader] =
+    useState(true);
 
   useEffect(() => {
     if (statementListOpened) {
       setTimeout(() => {
-        setShowStatementList(true);
+        setEnableStatementListLoader(true);
       }, 500);
     } else {
-      setShowStatementList(false);
+      setEnableStatementListLoader(false);
     }
   }, [statementListOpened]);
 
@@ -968,7 +969,7 @@ export const StatementListBox: React.FC = () => {
     deleteStatementsMutation.isPending ||
     relationsCreateMutation.isPending ||
     autoOrderStatementsMutation.isPending ||
-    (statementListOpened && !showStatementList);
+    (statementListOpened && !enableStatementListLoader);
 
   const tableWidth = useMemo(() => {
     if (isListNonEmpty || statementListTableIsLoading) {
@@ -1030,6 +1031,7 @@ export const StatementListBox: React.FC = () => {
 
           {territoryId && (
             <StyledContentWrapper
+
             // ref={contentRef}
             >
               <CustomScrollbar
@@ -1119,7 +1121,8 @@ export const StatementListBox: React.FC = () => {
               {statementListTableIsLoading &&
                 tableWidth > 0 &&
                 contentHeightAnnotator &&
-                contentHeightAnnotator > 0 && (
+                contentHeightAnnotator > 0 &&
+                enableStatementListLoader && (
                   <StyledLoaderWrap
                     $width={tableWidth + 4}
                     $height={
