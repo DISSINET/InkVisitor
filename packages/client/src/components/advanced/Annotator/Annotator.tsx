@@ -37,6 +37,7 @@ import { CStatement } from "constructors";
 import {
   useAnnotatorSearch,
   useDebounce,
+  useDebouncedCallback,
   useSearchParams,
   useTheme,
 } from "hooks";
@@ -72,8 +73,10 @@ interface TextAnnotatorProps {
 
   forwardAnnotator?: (annotator?: Annotator) => void;
 
-  // storedAnnotatorScroll?: number;
-  // setStoredAnnotatorScroll?: React.Dispatch<React.SetStateAction<number>>;
+  storedAnnotatorScrollPosition?: number | null;
+  setStoredAnnotatorScrollPosition?: React.Dispatch<
+    React.SetStateAction<number | null>
+  >;
 
   territory?: IResponseTerritory;
   // territoryId is from URL params and is used to reset the annotator when the territory changes
@@ -106,8 +109,8 @@ export const TextAnnotator = ({
   thisTerritoryEntityId = undefined,
 
   forwardAnnotator = (undefined) => {},
-  // storedAnnotatorScroll = 0,
-  // setStoredAnnotatorScroll = () => {},
+  storedAnnotatorScrollPosition = null,
+  setStoredAnnotatorScrollPosition,
 
   territory,
   territoryId,
@@ -210,6 +213,24 @@ export const TextAnnotator = ({
   const scroller = useRef<HTMLDivElement>(null);
   const lines = useRef<HTMLCanvasElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const annotatorRef = useRef<Annotator | null>(null);
+  annotatorRef.current = annotator;
+
+  const saveScrollPositionOnScrollEnd = useDebouncedCallback(() => {
+    const a = annotatorRef.current;
+    if (a && setStoredAnnotatorScrollPosition) {
+      setStoredAnnotatorScrollPosition(a.getViewportStartInRawText());
+    }
+  }, 500);
+
+  useEffect(() => {
+    if (!annotator || !setStoredAnnotatorScrollPosition) return;
+    annotator.onScroll(() => saveScrollPositionOnScrollEnd());
+  }, [
+    annotator,
+    setStoredAnnotatorScrollPosition,
+    saveScrollPositionOnScrollEnd,
+  ]);
 
   useEffect(() => {
     if (annotator) {
@@ -625,17 +646,19 @@ export const TextAnnotator = ({
     const initialContent = dataDocument?.content ?? "no text";
     setLocalTextContent(initialContent);
 
-    newAnnotator.draw();
+    // Ensure the initial render uses the current mode (e.g. HIGHLIGHT hides XML tags).
+    // Otherwise we may briefly draw in RAW mode and show tags on first load.
+    newAnnotator.setMode(originalMode);
+
+    if (storedAnnotatorScrollPosition != null) {
+      // scrollToRawPosition triggers a draw
+      newAnnotator.scrollToRawPosition(storedAnnotatorScrollPosition);
+    } else {
+      newAnnotator.draw();
+    }
 
     setAnnotator(newAnnotator);
     forwardAnnotator(newAnnotator);
-
-    // Probably not necessary, this is sending many updates to component on scroll
-    // newAnnotator.onScroll(() => {
-    //   setStoredAnnotatorScroll(newAnnotator.viewport.lineStart);
-    // });
-
-    newAnnotator.setMode(originalMode);
   };
 
   useEffect(() => {
@@ -657,6 +680,12 @@ export const TextAnnotator = ({
       annotator?.resize();
     }
   }, [width, height]);
+
+  useEffect(() => {
+    if (storedAnnotatorScrollPosition !== null) {
+      annotator?.scrollToRawPosition(storedAnnotatorScrollPosition);
+    }
+  }, [width]);
 
   const onCreateTerritory = (
     mode: TerritoryCreateModalType,

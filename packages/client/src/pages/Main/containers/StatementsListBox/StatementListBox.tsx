@@ -138,7 +138,7 @@ export const StatementListBox: React.FC = () => {
       const res = await api.territoryGet(territoryId);
       return res.data;
     },
-    enabled: !!territoryId && api.isLoggedIn() && statementListOpened,
+    enabled: !!territoryId && api.isLoggedIn(),
   });
 
   // Debug logging for territory query
@@ -212,19 +212,30 @@ export const StatementListBox: React.FC = () => {
   // }, [storedAnnotatorResourceId]);
 
   // delay of show content for fluent animation on open
-  const [showStatementList, setShowStatementList] = useState(true);
+  const [enableStatementListLoader, setEnableStatementListLoader] =
+    useState(true);
 
   useEffect(() => {
     if (statementListOpened) {
       setTimeout(() => {
-        setShowStatementList(true);
+        setEnableStatementListLoader(true);
       }, 500);
     } else {
-      setShowStatementList(false);
+      setEnableStatementListLoader(false);
     }
   }, [statementListOpened]);
 
   const [annotator, setAnnotator] = useState<Annotator | undefined>(undefined);
+  const [storedAnnotatorScrollPosition, setStoredAnnotatorScrollPosition] =
+    useState<number | null>(null);
+
+  useEffect(() => {
+    console.log("storedAnnotatorScrollPosition", storedAnnotatorScrollPosition);
+  }, [storedAnnotatorScrollPosition]);
+
+  useEffect(() => {
+    setStoredAnnotatorScrollPosition(null);
+  }, [territoryId]);
 
   const { setAnnotator: useAnnotatorSetAnnotator } = useAnnotator();
 
@@ -958,7 +969,7 @@ export const StatementListBox: React.FC = () => {
     deleteStatementsMutation.isPending ||
     relationsCreateMutation.isPending ||
     autoOrderStatementsMutation.isPending ||
-    (statementListOpened && !showStatementList);
+    (statementListOpened && !enableStatementListLoader);
 
   const tableWidth = useMemo(() => {
     if (isListNonEmpty || statementListTableIsLoading) {
@@ -971,7 +982,7 @@ export const StatementListBox: React.FC = () => {
 
   return (
     <StyledStatementListBox ref={statementListBoxRef}>
-      {showStatementList && (
+      {
         <>
           <StatementListHeader
             territory={territory}
@@ -1020,6 +1031,7 @@ export const StatementListBox: React.FC = () => {
 
           {territoryId && (
             <StyledContentWrapper
+
             // ref={contentRef}
             >
               <CustomScrollbar
@@ -1081,12 +1093,10 @@ export const StatementListBox: React.FC = () => {
                   territoryId={territoryId}
                   territory={territory}
                   statementId={statementId}
-                  // storedAnnotatorScroll={storedAnnotatorScroll}
-                  // setStoredAnnotatorScroll={(newScroll) => {
-                  //   if (storedAnnotatorResourceId) {
-                  //     setStoredAnnotatorScroll(newScroll);
-                  //   }
-                  // }}
+                  storedAnnotatorScrollPosition={storedAnnotatorScrollPosition}
+                  setStoredAnnotatorScrollPosition={
+                    setStoredAnnotatorScrollPosition
+                  }
                   hlEntities={hlEntities}
                   setHlEntities={setHlEntities}
                   statementCreateMutation={statementCreateMutation}
@@ -1111,7 +1121,8 @@ export const StatementListBox: React.FC = () => {
               {statementListTableIsLoading &&
                 tableWidth > 0 &&
                 contentHeightAnnotator &&
-                contentHeightAnnotator > 0 && (
+                contentHeightAnnotator > 0 &&
+                enableStatementListLoader && (
                   <StyledLoaderWrap
                     $width={tableWidth + 4}
                     $height={
@@ -1149,7 +1160,7 @@ export const StatementListBox: React.FC = () => {
             loading={deleteStatementMutation.isPending}
           />
         </>
-      )}
+      }
     </StyledStatementListBox>
   );
 };
