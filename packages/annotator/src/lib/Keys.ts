@@ -500,8 +500,10 @@ export default class Keys {
           if (this.cursor.xLine <= 0) {
             if (this.cursor.yLine > 0) {
               this.cursor.yLine = this.cursor.yLine - 1;
-              const prevLine =
-                this.text.getCurrentLine(this.viewport, this.cursor);
+              const prevLine = this.text.getCurrentLine(
+                this.viewport,
+                this.cursor
+              );
               this.cursor.xLine = prevLine?.length || 0;
             }
             ctrlHandled = true;
@@ -529,8 +531,7 @@ export default class Keys {
             this.cursor.xLine = desiredX;
           } else {
             // Crosses line boundary — resolve via absolute text index
-            const abs =
-              this.text.getAbsTextIndexFromPosition(pos) + offsetLeft;
+            const abs = this.text.getAbsTextIndexFromPosition(pos) + offsetLeft;
             const target = this.text.getSegmentFromAbsTextIndex(abs);
             if (target) {
               const coords = this.text.positionToCursor(this.viewport, target);
@@ -544,10 +545,7 @@ export default class Keys {
           const seg = this.text.segments[pos.segmentIndex];
           const targetParsed = Math.max(
             0,
-            Math.min(
-              pos.parsedTextIndex + offsetLeft,
-              seg?.parsed?.length ?? 0
-            )
+            Math.min(pos.parsedTextIndex + offsetLeft, seg?.parsed?.length ?? 0)
           );
           const lineChar = this.text.getLineAndCharFromSegmentParsedIndex(
             pos.segmentIndex,
@@ -803,8 +801,13 @@ export default class Keys {
     // - F5
     // - Cmd+R / Ctrl+R (including with Shift, e.g. hard reload)
     if (
+      // refresh windows
       e.key === "F5" ||
-      (e.key === "r" && (e.metaKey || e.ctrlKey))
+      // refresh mac
+      (e.key === "r" && (e.metaKey || e.ctrlKey)) ||
+      // access dev tools mac
+      // Use `code` instead of `key` because `key` can vary by layout/case.
+      (e.code === "KeyI" && e.metaKey && e.altKey)
     ) {
       return;
     }
