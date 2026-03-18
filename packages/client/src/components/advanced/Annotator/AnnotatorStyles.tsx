@@ -11,18 +11,13 @@ export const StyledScrollerCursor = styled.div`
   cursor: move;
   position: absolute;
   width: 10px;
-  margin-left: ${({ theme }) => theme.space[1]};
+  left: 50%;
+  transform: translateX(-50%);
   border-radius: ${({ theme }) => theme.borderRadius["default"]};
 `;
 
-export const StyledHightlightedText = styled.pre`
-  padding: 10px;
-  border: 1px solid black;
-  margin-top: 10px;
-`;
-
 export const StyledCanvasWrapper = styled.div`
-  border: 1px solid black;
+  background-color: ${({ theme }) => theme.color.white};
   padding: 2px;
   display: flex;
   flex-direction: row;

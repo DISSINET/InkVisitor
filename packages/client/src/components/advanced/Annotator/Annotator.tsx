@@ -205,7 +205,7 @@ export const TextAnnotator = ({
   });
 
   const wLineNumbers = displayLineNumbers ? 50 : 0;
-  const wTextArea = width - wLineNumbers - W_SCROLL;
+  const wTextArea = Math.max(0, width - wLineNumbers - W_SCROLL);
 
   const [isSelectingText, setIsSelectingText] = useState<boolean>(false);
 
