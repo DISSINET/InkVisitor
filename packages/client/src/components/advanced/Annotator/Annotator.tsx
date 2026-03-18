@@ -527,8 +527,6 @@ export const TextAnnotator = ({
           }
         : {}
     );
-    setSelectedText("");
-    annotator?.clearSelection();
     handleSaveNewContent(true);
     handleRefreshEntityAndStatement(entityId);
     toast.info(`Anchor created ${entityId}.`);
