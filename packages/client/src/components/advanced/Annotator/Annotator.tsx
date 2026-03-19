@@ -993,11 +993,7 @@ export const TextAnnotator = ({
             }}
           />
           <StyledScrollerViewport ref={scroller}>
-            <StyledScrollerCursor
-              style={{
-                backgroundColor: theme.color.primary,
-              }}
-            />
+            <StyledScrollerCursor />
           </StyledScrollerViewport>
 
           <Loader show={dataDocumentIsFetching} size={40} />

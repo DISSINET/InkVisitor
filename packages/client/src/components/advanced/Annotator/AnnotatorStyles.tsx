@@ -15,6 +15,7 @@ export const StyledScrollerCursor = styled.div`
   left: 50%;
   transform: translateX(-50%);
   border-radius: ${({ theme }) => theme.borderRadius["default"]};
+  background-color: ${({ theme }) => theme.color.gray[600]};
 `;
 
 export const StyledCanvasWrapper = styled.div`
