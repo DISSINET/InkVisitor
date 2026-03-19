@@ -703,15 +703,19 @@ class Text {
     charInLineIndex: number = 0,
     ignoreLastClosingTag: boolean = false
   ): SegmentPosition | null {
-    // sanitize bounds
-    if (absLineIndex < 0) {
+    // sanitize bounds: absLineIndex is a valid line index in [0, noLines - 1]
+    if (this.noLines <= 0) {
       absLineIndex = 0;
-    } else if (absLineIndex > this.noLines) {
-      absLineIndex = this.noLines;
+    } else {
+      if (absLineIndex < 0) {
+        absLineIndex = 0;
+      } else if (absLineIndex >= this.noLines) {
+        absLineIndex = this.noLines - 1;
+      }
     }
 
     const segmentIndex = this.segments.findLastIndex(
-      (s) => s.lineStart <= absLineIndex && s.lineEnd >= absLineIndex
+      (s) => s.lineStart <= absLineIndex && s.lineEnd > absLineIndex
     );
 
     if (segmentIndex === -1) {
