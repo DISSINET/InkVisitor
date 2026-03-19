@@ -1,13 +1,6 @@
 import styled from "styled-components";
 
-export const StyledScrollerViewport = styled.div`
-  border-radius: ${({ theme }) => theme.borderRadius["default"]};
-  position: relative;
-  width: 10px;
-  margin-left: 0.6rem;
-  background-color: ${({ theme }) => theme.color.gray[200]};
-`;
-
+/** Defined before viewport so the parent can target it on hover. */
 export const StyledScrollerCursor = styled.div`
   cursor: move;
   position: absolute;
@@ -16,6 +9,25 @@ export const StyledScrollerCursor = styled.div`
   transform: translateX(-50%);
   border-radius: ${({ theme }) => theme.borderRadius["default"]};
   background-color: ${({ theme }) => theme.color.gray[600]};
+
+  transition: background-color 0.5s ease;
+`;
+
+export const StyledScrollerViewport = styled.div`
+  border-radius: ${({ theme }) => theme.borderRadius["default"]};
+  position: relative;
+  width: 10px;
+  margin-left: 0.6rem;
+  background-color: ${({ theme }) => theme.color.gray[200]};
+
+  /* transition: background-color 0.3s ease; */
+  /* &:hover {
+    background-color: ${({ theme }) => theme.color.gray[300]};
+  } */
+  /* Thumb highlights when hovering anywhere on the scroller track */
+  &:hover ${StyledScrollerCursor}, &:active ${StyledScrollerCursor} {
+    background-color: ${({ theme }) => theme.color.gray[700]};
+  }
 `;
 
 export const StyledCanvasWrapper = styled.div`
