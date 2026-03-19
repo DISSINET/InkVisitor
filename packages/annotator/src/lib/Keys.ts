@@ -668,16 +668,15 @@ export default class Keys {
             this.text.getCurrentLine(this.viewport, this.cursor) || "";
           if (this.cursor.xLine >= lineText.length) {
             // At end of last line — nothing more to the right, bail out
-            const absLine = this.viewport.lineStart + this.cursor.yLine;
-            if (absLine >= this.text.noLines - 1) {
+            if (this.cursor.yLine >= this.text.noLines - 1) {
               ctrlRightHandled = true;
               break;
             }
             // Reached end of line — jump to start of next line and stop
             this.cursor.xLine = 0;
             this.cursor.yLine++;
-            if (this.cursor.yLine > this.viewport.noLines) {
-              this.cursor.yLine = this.viewport.noLines - 1;
+            if (this.cursor.yLine >= this.text.noLines) {
+              this.cursor.yLine = this.text.noLines - 1;
             }
             ctrlRightHandled = true;
             break;
@@ -759,6 +758,17 @@ export default class Keys {
         this.cursor.yLine = backupYLine;
       }
     }
+
+    // Clamp cursor to document bounds.
+    // `cursor.yLine` and `cursor.xLine` should never exceed what the text
+    // actually contains; otherwise, selection/highlighting can drift by 1.
+    const maxAbsY = Math.max(0, this.text.noLines - 1);
+    this.cursor.yLine = Math.max(0, Math.min(this.cursor.yLine, maxAbsY));
+    const currentLine = this.text.getLine(this.cursor.yLine) ?? "";
+    this.cursor.xLine = Math.max(
+      0,
+      Math.min(this.cursor.xLine, currentLine.length)
+    );
 
     if (shiftKey) {
       if (this.cursor.selectDirection === DIRECTION.FORWARD) {
