@@ -407,7 +407,7 @@ class Text {
       }
 */
       segment.lineStart =
-        segmentIndex === 0 ? 0 : this.segments[segmentIndex - 1].lineEnd + 1;
+        segmentIndex === 0 ? 0 : this.segments[segmentIndex - 1].lineEnd;
       segment.lines = [];
 
       let text = segment.raw;
@@ -439,12 +439,11 @@ class Text {
           }
         }
       }
+      segment.lineEnd = segment.lineStart + (segment.lines.length || 1);
+
       if (!segment.lines.length) {
         segment.lines = [""];
       }
-
-      // `lineEnd` is inclusive. `lineStart` + (count - 1) is the last index.
-      segment.lineEnd = segment.lineStart + segment.lines.length - 1;
     }
 
     this.noLines = this.segments.reduce<number>(
@@ -707,11 +706,8 @@ class Text {
     // sanitize bounds
     if (absLineIndex < 0) {
       absLineIndex = 0;
-    } else if (this.noLines <= 0) {
-      return null;
-    } else if (absLineIndex >= this.noLines) {
-      // noLines is a count (valid indices are 0..noLines-1)
-      absLineIndex = this.noLines - 1;
+    } else if (absLineIndex > this.noLines) {
+      absLineIndex = this.noLines;
     }
 
     const segmentIndex = this.segments.findLastIndex(
