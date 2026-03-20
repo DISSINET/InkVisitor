@@ -523,11 +523,32 @@ export default class Keys {
   }) {
     const absY = this.cursor.yLine;
     if (metaKey && shiftKey) {
+      const [hStart, hEnd] = this.cursor.getAbsBounds();
+      const hasRange =
+        hStart &&
+        hEnd &&
+        (hStart.xLine !== hEnd.xLine || hStart.yLine !== hEnd.yLine);
+      const sameLineRange =
+        hasRange &&
+        hStart &&
+        hEnd &&
+        hStart.yLine === hEnd.yLine &&
+        hStart.yLine === absY;
+
+      const curX = this.cursor.xLine;
       this.cursor.selectStart = { xLine: 0, yLine: absY };
-      this.cursor.selectEnd = {
-        xLine: this.cursor.xLine,
-        yLine: absY,
-      };
+
+      if (
+        sameLineRange &&
+        hStart &&
+        hEnd &&
+        (curX === hEnd.xLine || curX === hStart.xLine)
+      ) {
+        // Caret at either end of a same-line range: grow to BOL…hEnd (word or line).
+        this.cursor.selectEnd = { xLine: hEnd.xLine, yLine: absY };
+      } else {
+        this.cursor.selectEnd = { xLine: curX, yLine: absY };
+      }
       this.cursor.xLine = 0;
       this.cursor.setTrueSelectionDirection();
       return;
@@ -683,10 +704,30 @@ export default class Keys {
     const absY = this.cursor.yLine;
     const line = this.text.getLine(absY) ?? "";
     if (metaKey && shiftKey) {
-      this.cursor.selectStart = {
-        xLine: this.cursor.xLine,
-        yLine: absY,
-      };
+      const [hStart, hEnd] = this.cursor.getAbsBounds();
+      const hasRange =
+        hStart &&
+        hEnd &&
+        (hStart.xLine !== hEnd.xLine || hStart.yLine !== hEnd.yLine);
+      const sameLineRange =
+        hasRange &&
+        hStart &&
+        hEnd &&
+        hStart.yLine === hEnd.yLine &&
+        hStart.yLine === absY;
+
+      const curX = this.cursor.xLine;
+      if (
+        sameLineRange &&
+        hStart &&
+        hEnd &&
+        (curX === hEnd.xLine || curX === hStart.xLine)
+      ) {
+        // Caret at either end of a same-line range: grow hStart…EOL (word or line).
+        this.cursor.selectStart = { xLine: hStart.xLine, yLine: absY };
+      } else {
+        this.cursor.selectStart = { xLine: curX, yLine: absY };
+      }
       this.cursor.selectEnd = { xLine: line.length, yLine: absY };
       this.cursor.xLine = line.length;
       this.cursor.setTrueSelectionDirection();
