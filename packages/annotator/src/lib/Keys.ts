@@ -539,7 +539,7 @@ export default class Keys {
               const coords = this.text.positionToCursor(this.viewport, target);
               if (coords) {
                 this.cursor.xLine = coords.xLine;
-                this.cursor.yLine = coords.yLine;
+                this.cursor.yLine = this.viewport.lineStart + coords.yLine;
               }
             }
           }
@@ -555,8 +555,7 @@ export default class Keys {
           );
           if (seg && lineChar) {
             this.cursor.xLine = lineChar.charInLineIndex;
-            this.cursor.yLine =
-              seg.lineStart + lineChar.lineIndex - this.viewport.lineStart;
+            this.cursor.yLine = seg.lineStart + lineChar.lineIndex;
           }
         }
       }
@@ -717,7 +716,7 @@ export default class Keys {
               const coords = this.text.positionToCursor(this.viewport, target);
               if (coords) {
                 this.cursor.xLine = coords.xLine;
-                this.cursor.yLine = coords.yLine;
+                this.cursor.yLine = this.viewport.lineStart + coords.yLine;
               }
             }
           }
