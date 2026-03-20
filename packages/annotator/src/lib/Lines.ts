@@ -55,6 +55,13 @@ export class Lines {
     this.width = this.element.width;
     this.height = this.element.height;
 
+    // React inline styles update on theme change; read them so we repaint correctly
+    // even when the annotator instance wasn’t updated via JS properties.
+    const inlineBg = this.element.style.backgroundColor;
+    const inlineFg = this.element.style.color;
+    if (inlineBg) this.bgColor = inlineBg;
+    if (inlineFg) this.fontColor = inlineFg;
+
     this.ctx.fillStyle = this.bgColor;
     this.ctx.fillRect(0, 0, this.width, this.height);
 

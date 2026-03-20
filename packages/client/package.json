@@ -22,7 +22,8 @@
     "build:staging": "vite build --mode staging",
     "build:data-import": "vite build --mode data-import",
     "build:data-import-persecutio": "vite build --mode data-import-persecutio",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "rebuild:annotator": "bash scripts/rebuild-annotator.sh"
   },
   "author": "",
   "license": "ISC",

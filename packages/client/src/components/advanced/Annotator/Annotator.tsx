@@ -566,12 +566,6 @@ export const TextAnnotator = ({
       annotator.bgColor = "transparent";
       annotator.setSelectStyle("turquoise", 0.8, theme.color.black);
 
-      // Update Lines component colors if it exists
-      if (annotator.lines) {
-        annotator.lines.fontColor = theme.color.plain;
-        annotator.lines.bgColor = theme.color.white;
-      }
-
       // Update highlight callback to use current theme
       annotator.onHighlight((entityId) => {
         if (dataDocument) {
@@ -665,9 +659,9 @@ export const TextAnnotator = ({
     }
   }, [
     displayLineNumbers,
-    theme,
     hlEntities ?? [],
     dataDocumentIsFetching,
+    theme,
     dataDocument,
     isSaving,
   ]);
