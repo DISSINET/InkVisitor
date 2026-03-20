@@ -812,6 +812,7 @@ export default class Keys {
     // annotator canvas is focused. This keeps standard behaviour for:
     // - F5
     // - Cmd+R / Ctrl+R (including with Shift, e.g. hard reload)
+    // - Cmd+Shift+F (hide browser header)
     if (
       // refresh windows
       e.key === "F5" ||
@@ -820,6 +821,7 @@ export default class Keys {
       // access dev tools mac
       // Use `code` instead of `key` because `key` can vary by layout/case.
       (e.code === "KeyI" && e.metaKey && e.altKey) ||
+      (e.code === "KeyF" && e.shiftKey && e.metaKey && !e.altKey) ||
       // zoom in / out / reset — Cmd on macOS, Ctrl on Windows/Linux (browser default)
       ((e.metaKey || e.ctrlKey) &&
         !e.altKey &&
