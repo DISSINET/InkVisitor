@@ -142,7 +142,7 @@ export class Annotator {
 
     const charsAtLine = Math.floor(this.width / this.charWidth);
 
-    const noLinesViewport = Math.ceil(this.height / this.lineHeight) - 1;
+    const noLinesViewport = this.viewportFullRowCount() + 1;
 
     this.viewport = new Viewport(0, noLinesViewport);
 
@@ -298,7 +298,7 @@ export class Annotator {
 
     this.setCharWidth("abcdefghijklmnopqrstuvwxyz0123456789");
 
-    const noLinesViewport = Math.ceil(this.height / this.lineHeight) - 1;
+    const noLinesViewport = this.viewportFullRowCount() + 1;
     const charsAtLine = Math.floor(this.width / this.charWidth);
 
     const positionBeforeRel = this.viewport.lineStart / this.text.noLines;
@@ -369,6 +369,16 @@ export class Annotator {
     this.ctx.font = this.font;
     const textW = this.ctx.measureText(txt).width;
     this.charWidth = textW / txt.length;
+  }
+
+  /**
+   * Whole text rows that fit in the backing-store height. The draw loop paints
+   * lines `lineStart` … `lineStart + viewport.noLines` (inclusive), i.e. this many rows.
+   * Using ceil would pretend a partial bottom row fits, which clips text/line numbers
+   * and makes `maxStart` too small so the document’s last line never reaches the bottom.
+   */
+  private viewportFullRowCount(): number {
+    return Math.max(1, Math.floor(this.height / this.lineHeight));
   }
 
   /**
@@ -827,7 +837,11 @@ export class Annotator {
 
     const parseCssPx = (v: string | undefined): number => {
       if (!v) return 0;
-      const n = Number(String(v).replace(/px\s*$/i, "").trim());
+      const n = Number(
+        String(v)
+          .replace(/px\s*$/i, "")
+          .trim()
+      );
       return Number.isFinite(n) ? n : 0;
     };
 
