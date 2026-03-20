@@ -24,17 +24,6 @@ export class Lines {
   width: number = 0;
   height: number = 0;
 
-  /**
-   * Canvas 2D drawing uses ctx.fillStyle, not CSS painting. We mirror CSS so theme works.
-   * styled-components set `background-color` / `color` on a class — those do NOT appear on
-   * `element.style.*` (only inline styles do), so we must use getComputedStyle.
-   */
-  private syncColorsFromCss(): void {
-    const cs = getComputedStyle(this.element);
-    this.bgColor = cs.backgroundColor || this.bgColor;
-    this.fontColor = cs.color || this.fontColor;
-  }
-
   constructor(
     element: HTMLCanvasElement,
     ratio: number,
