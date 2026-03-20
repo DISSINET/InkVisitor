@@ -967,7 +967,7 @@ export const TextAnnotator = ({
                 width: wLineNumbers,
                 height,
                 backgroundColor: theme?.color.white,
-                color: theme?.color.gray[400],
+                color: theme?.color.gray[450],
                 borderRadius: "4px 0px 0px 4px",
               }}
             />
