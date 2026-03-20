@@ -819,7 +819,15 @@ export default class Keys {
       (e.key === "r" && (e.metaKey || e.ctrlKey)) ||
       // access dev tools mac
       // Use `code` instead of `key` because `key` can vary by layout/case.
-      (e.code === "KeyI" && e.metaKey && e.altKey)
+      (e.code === "KeyI" && e.metaKey && e.altKey) ||
+      // zoom in / out / reset — Cmd on macOS, Ctrl on Windows/Linux (browser default)
+      ((e.metaKey || e.ctrlKey) &&
+        !e.altKey &&
+        (e.code === "Equal" ||
+          e.code === "Minus" ||
+          e.code === "NumpadAdd" ||
+          e.code === "NumpadSubtract" ||
+          e.code === "Digit0"))
     ) {
       return;
     }
