@@ -816,11 +816,57 @@ export class Annotator {
   }
 
   /**
+   * Line gutter must share the main canvas backing-store height (and horizontal scale).
+   * Using `height * RATIO` from React alone can differ from `style.height * ratio` on the
+   * main canvas → 1× vs 2× mismatch → line numbers look huge and rows don't align.
+   */
+  private syncLineNumbersCanvasToMain(): void {
+    if (!this.lines) return;
+    const mainEl = this.element;
+    const lineEl = this.lines.element;
+
+    const parseCssPx = (v: string | undefined): number => {
+      if (!v) return 0;
+      const n = Number(String(v).replace(/px\s*$/i, "").trim());
+      return Number.isFinite(n) ? n : 0;
+    };
+
+    const mainCssW = parseCssPx(mainEl.style.width) || mainEl.clientWidth || 1;
+    const gutterCssW =
+      parseCssPx(lineEl.style.width) || lineEl.clientWidth || 50;
+
+    if (mainEl.style.height) {
+      lineEl.style.height = mainEl.style.height;
+    }
+
+    const scale =
+      mainEl.width > 0 && mainCssW > 0 ? mainEl.width / mainCssW : this.ratio;
+    const nextW = Math.max(1, Math.round(gutterCssW * scale));
+    const nextH =
+      mainEl.height > 0
+        ? mainEl.height
+        : Math.max(
+            1,
+            Math.round(
+              (parseCssPx(mainEl.style.height) || mainEl.clientHeight) *
+                this.ratio
+            )
+          );
+
+    if (lineEl.width !== nextW || lineEl.height !== nextH) {
+      lineEl.width = nextW;
+      lineEl.height = nextH;
+    }
+  }
+
+  /**
    * draw resets the canvas and redraws the scene anew.
    * First draw lines with text, then allow each component to draw their own logic.
    * TODO - this should be done in conjunction with requestAnimationFrame
    */
   draw() {
+    this.syncLineNumbersCanvasToMain();
+
     this.ctx.reset();
 
     this.ctx.fillStyle = this.bgColor;
@@ -967,6 +1013,8 @@ export class Annotator {
       );
     }
     if (this.lines) {
+      this.lines.font = this.font;
+      this.lines.lineHeight = this.lineHeight;
       this.lines.draw(this.viewport);
     }
 

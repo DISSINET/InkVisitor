@@ -968,12 +968,13 @@ export const TextAnnotator = ({
           {displayLineNumbers && (
             <StyledLinesCanvas
               ref={lines}
-              width={wLineNumbers}
-              height={height}
               style={{
                 outline: "none",
+                width: wLineNumbers,
+                height,
                 backgroundColor: theme?.color.white,
-                color: theme?.color.plain,
+                color: theme?.color.gray[400],
+                borderRadius: "4px 0px 0px 4px",
               }}
             />
           )}

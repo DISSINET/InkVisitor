@@ -24,6 +24,17 @@ export class Lines {
   width: number = 0;
   height: number = 0;
 
+  /**
+   * Canvas 2D drawing uses ctx.fillStyle, not CSS painting. We mirror CSS so theme works.
+   * styled-components set `background-color` / `color` on a class — those do NOT appear on
+   * `element.style.*` (only inline styles do), so we must use getComputedStyle.
+   */
+  private syncColorsFromCss(): void {
+    const cs = getComputedStyle(this.element);
+    this.bgColor = cs.backgroundColor || this.bgColor;
+    this.fontColor = cs.color || this.fontColor;
+  }
+
   constructor(
     element: HTMLCanvasElement,
     ratio: number,
@@ -44,31 +55,34 @@ export class Lines {
     this.fontColor = this.element.style.color || "black";
 
     this.charWidth = charWidth;
-    this.lineHeight = lineHeight / ratio;
+    // Buffer-space line height (LINE_HEIGHT * ratio), same as Annotator.
+    this.lineHeight = lineHeight;
+    this.font = `${DEFAULT_FONT_SIZE * ratio}px ${DEFAULT_FONT}`;
   }
 
   draw(viewport: Viewport) {
     this.ctx.reset();
 
+    this.width = this.element.width;
+    this.height = this.element.height;
+
     this.ctx.fillStyle = this.bgColor;
     this.ctx.fillRect(0, 0, this.width, this.height);
 
     this.ctx.save();
-    // scrollOffsetY is in main canvas (buffer) pixels; Lines canvas may use different scale, so scale the translation
-    this.ctx.translate(0, -viewport.scrollOffsetY / this.ratio);
+    this.ctx.translate(0, -viewport.scrollOffsetY);
 
     this.ctx.font = this.font;
     this.ctx.fillStyle = this.fontColor;
     this.ctx.textBaseline = "middle";
 
-    // Draw the same number of rows as the main text canvas.
-    // Viewport.noLines is used as an "end index", so we add 1 to get
-    // the number of visible rows.
-    for (let renderLine = 1; renderLine <= viewport.noLines + 1; renderLine++) {
+    const renderEndCond = viewport.lineEnd - viewport.lineStart;
+    for (let row = 0; row <= renderEndCond; row++) {
+      // Same Y as Annotator.draw for each text row
       this.ctx.fillText(
-        (viewport.lineStart + renderLine).toString(),
+        String(viewport.lineStart + row + 1),
         0,
-        (renderLine - 0.5) * this.lineHeight
+        (row + 0.5) * this.lineHeight
       );
     }
 

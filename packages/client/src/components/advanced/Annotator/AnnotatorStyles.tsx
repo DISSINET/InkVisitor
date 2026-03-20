@@ -43,9 +43,8 @@ export const StyledMainCanvas = styled.canvas`
   cursor: text;
 `;
 
-export const StyledLinesCanvas = styled.canvas`
-  outline: none;
-`;
+// css doesn't load on the canvas element, so we use inline styles
+export const StyledLinesCanvas = styled.canvas``;
 
 interface StyledAnnotatorMenuProps {}
 export const StyledAnnotatorMenu = styled.div<StyledAnnotatorMenuProps>`
