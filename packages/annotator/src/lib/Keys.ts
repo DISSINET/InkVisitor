@@ -670,8 +670,11 @@ export default class Keys {
       }
     } else {
       if (this.cursor.isSelected()) {
-        this.cursor.xLine = this.cursor.selectStart?.xLine || this.cursor.xLine;
-        this.cursor.yLine = this.cursor.selectStart?.yLine ?? this.cursor.yLine;
+        const [docStart] = this.cursor.getAbsBounds();
+        if (docStart) {
+          this.cursor.xLine = docStart.xLine;
+          this.cursor.yLine = docStart.yLine;
+        }
         offsetLeft = 0;
       }
 
@@ -881,8 +884,11 @@ export default class Keys {
       }
     } else {
       if (this.cursor.isSelected()) {
-        this.cursor.xLine = this.cursor.selectEnd?.xLine || this.cursor.xLine;
-        this.cursor.yLine = this.cursor.selectEnd?.yLine ?? this.cursor.yLine;
+        const [, docEnd] = this.cursor.getAbsBounds();
+        if (docEnd) {
+          this.cursor.xLine = docEnd.xLine;
+          this.cursor.yLine = docEnd.yLine;
+        }
         offsetRight = 0;
       }
 
