@@ -59,6 +59,7 @@ export const StyledAnnotatorMenu = styled.div<StyledAnnotatorMenuProps>`
   width: 40rem;
   z-index: 100;
   pointer-events: none;
+  position: absolute;
 `;
 
 /** Inner drag layer only — keep transform off the Floating UI root */
@@ -90,8 +91,6 @@ export const StyledAnnotatorMenuDragHandle = styled.div`
   justify-content: center;
   gap: ${({ theme }) => theme.space[1]};
   padding: ${({ theme }) => theme.space[1]} 0 ${({ theme }) => theme.space[2]};
-  margin: ${({ theme }) => theme.space["-1"]}
-    ${({ theme }) => theme.space["-2"]} 0;
   border-radius: ${({ theme }) => theme.borderRadius.sm};
   color: ${({ theme }) => theme.color.gray["600"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
