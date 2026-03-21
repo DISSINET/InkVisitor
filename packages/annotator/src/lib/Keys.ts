@@ -207,19 +207,17 @@ export default class Keys {
       this.text.deleteRangeText(area[0], area[1]);
       this.cursor.reset();
       this.cursor.setPosition(area[0].xLine, area[0].yLine);
-    }
-    // else if (metaKey) {
-    //   const end = this.cursor.getAbsolutePosition();
-    //   const start = { xLine: 0, yLine: end.yLine };
-    //   this.text.deleteRangeText(start, end);
-    //   this.cursor.setPosition(0, end.yLine);
-    //   if (this.annotator.onTextChangeCb) {
-    //     this.annotator.onTextChangeCb(this.text.value);
-    //   }
-    // }
-    else {
+    } else {
+      // Word-wise backward delete: Ctrl/Alt (Windows/Linux + macOS ⌥) and Cmd
+      // (⌘) all use the same boundary logic as Ctrl/Alt+←. Do not pass metaKey
+      // into onArrowLeft or Cmd+⌫ would run the “jump to BOL” branch instead.
       const before = this.cursor.getAbsolutePosition();
-      this.onArrowLeft({ ctrlKey, shiftKey, altKey });
+      this.onArrowLeft({
+        ctrlKey: ctrlKey || altKey || metaKey,
+        shiftKey,
+        altKey: false,
+        metaKey: false,
+      });
       const after = this.cursor.getAbsolutePosition();
 
       this.text.deleteRangeText(before, after);
@@ -232,9 +230,13 @@ export default class Keys {
 
   onKeyDelete({
     ctrlKey,
+    altKey,
+    metaKey,
     shiftKey,
   }: {
     ctrlKey?: boolean;
+    altKey?: boolean;
+    metaKey?: boolean;
     shiftKey?: boolean;
   }) {
     if (this.text.mode === EditMode.HIGHLIGHT) {
@@ -248,7 +250,12 @@ export default class Keys {
       this.cursor.setPosition(area[0].xLine, area[0].yLine);
     } else {
       const before = this.cursor.getAbsolutePosition();
-      this.onArrowRight({ ctrlKey, shiftKey });
+      this.onArrowRight({
+        ctrlKey: ctrlKey || altKey || metaKey,
+        shiftKey,
+        altKey: false,
+        metaKey: false,
+      });
       const after = this.cursor.getAbsolutePosition();
 
       this.text.deleteRangeText(before, after);
