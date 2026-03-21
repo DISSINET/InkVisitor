@@ -14,7 +14,7 @@ import {
   FaExclamationTriangle,
   FaPlus,
 } from "react-icons/fa";
-import { MdDone, MdOutlineDone } from "react-icons/md";
+import { MdDragIndicator, MdOutlineDone } from "react-icons/md";
 import { PiSelectionFill } from "react-icons/pi";
 import { TbAnchor } from "react-icons/tb";
 import { toast } from "react-toastify";
@@ -30,6 +30,7 @@ import {
   StyledAnnotatorItemContent,
   StyledAnnotatorItemContentLine,
   StyledAnnotatorItemTitle,
+  StyledAnnotatorMenuDragHandle,
   StyledAnnotatorNoAnchors,
   StyledTerritorySubsection,
   StyledTerritorySubsectionTitle,
@@ -66,6 +67,9 @@ interface TextAnnotatorMenuProps {
   onUpdateAnchor?: (anchor: Tag, elvl: EntityEnums.Elvl) => void;
 
   isLoading: boolean;
+
+  /** Pointer handlers for the top drag handle (menu repositioning). */
+  menuDragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
 }
 
 export const TextAnnotatorMenu = ({
@@ -87,6 +91,8 @@ export const TextAnnotatorMenu = ({
   disableCreate,
 
   isLoading = false,
+
+  menuDragHandleProps,
 }: TextAnnotatorMenuProps) => {
   const activeTerritory = entities[activeTerritoryId ?? ""];
   const queryClient = useQueryClient();
@@ -128,6 +134,15 @@ export const TextAnnotatorMenu = ({
 
   return (
     <>
+      {menuDragHandleProps && (
+        <StyledAnnotatorMenuDragHandle
+          title="Drag to move menu"
+          {...menuDragHandleProps}
+        >
+          <MdDragIndicator size={18} />
+          <span>Drag to move</span>
+        </StyledAnnotatorMenuDragHandle>
+      )}
       <StyledAnnotatorDoneButton>
         <Button
           color="primary"

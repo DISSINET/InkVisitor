@@ -13,7 +13,13 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import api from "api";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { FaPen, FaRegSave, FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
@@ -50,6 +56,7 @@ import TextAnnotatorMenu from "./AnnotatorMenu";
 import {
   StyledAnnotatorButtons,
   StyledAnnotatorMenu,
+  StyledAnnotatorMenuDraggable,
   StyledCanvasWrapper,
   StyledDisplayModeButtonIconWrapper,
   StyledInfoText,
@@ -438,6 +445,66 @@ export const TextAnnotator = ({
     annotator?.viewport?.noLines,
     annotator?.viewport?.lineStart,
   ]);
+
+  // implementation of draggable menu
+  const [menuDragOffset, setMenuDragOffset] = useState({ x: 0, y: 0 });
+  const menuDragOffsetRef = useRef(menuDragOffset);
+  menuDragOffsetRef.current = menuDragOffset;
+
+  const menuDragSessionRef = useRef<{
+    pointerId: number;
+    startClientX: number;
+    startClientY: number;
+    originX: number;
+    originY: number;
+  } | null>(null);
+
+  useEffect(() => {
+    setMenuDragOffset({ x: 0, y: 0 });
+  }, [selectedText, selectionStartIndex]);
+
+  const handleMenuDragPointerDown = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      if (e.button !== 0) return;
+      e.preventDefault();
+      e.currentTarget.setPointerCapture(e.pointerId);
+      menuDragSessionRef.current = {
+        pointerId: e.pointerId,
+        startClientX: e.clientX,
+        startClientY: e.clientY,
+        originX: menuDragOffsetRef.current.x,
+        originY: menuDragOffsetRef.current.y,
+      };
+    },
+    []
+  );
+
+  const handleMenuDragPointerMove = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      const session = menuDragSessionRef.current;
+      if (!session || e.pointerId !== session.pointerId) return;
+      e.preventDefault();
+      setMenuDragOffset({
+        x: session.originX + (e.clientX - session.startClientX),
+        y: session.originY + (e.clientY - session.startClientY),
+      });
+    },
+    []
+  );
+
+  const handleMenuDragPointerUp = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      const session = menuDragSessionRef.current;
+      if (!session || e.pointerId !== session.pointerId) return;
+      try {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      } catch {
+        /* capture already released */
+      }
+      menuDragSessionRef.current = null;
+    },
+    []
+  );
 
   // quiet does not trigger a toast notification
   const handleSaveNewContent = (
@@ -881,49 +948,62 @@ export const TextAnnotator = ({
         <StyledCanvasWrapper style={{ position: "relative" }}>
           {isMenuDisplayed && (
             <FloatingPortal id="page">
-              <StyledAnnotatorMenu
-                ref={(node) => {
-                  refs.setFloating(node);
+              <StyledAnnotatorMenuDraggable
+                style={{
+                  transform: `translate(${menuDragOffset.x}px, ${menuDragOffset.y}px)`,
                 }}
-                style={floatingStyles}
               >
-                {dataDocument && (
-                  <TextAnnotatorMenu
-                    onEscapePressed={() => {
-                      setSelectedText("");
-                      annotator?.clearSelection();
-                    }}
-                    anchors={selectedAnchors}
-                    text={selectedText}
-                    entities={storedEntities}
-                    onAnchorAdd={handleAddAnchor}
-                    onCreateTerritory={onCreateTerritory}
-                    onCreateStatement={onCreateStatement}
-                    onRemoveAnchor={onRemoveAnchor}
-                    onUpdateAnchor={onUpdateAnchor}
-                    isTextInsideThisT={selectedAnchors.some(
-                      (anchor) => anchor.getTagName() === thisTerritoryEntityId
-                    )}
-                    activeTerritoryId={thisTerritoryEntityId}
-                    onCreateActiveTAnchor={(elvl) => {
-                      handleAddAnchor(thisTerritoryEntityId ?? "", elvl);
-                    }}
-                    canCreateActiveTAnchor={
-                      !dataDocument?.entityIds.T.includes(
-                        thisTerritoryEntityId ?? ""
-                      )
-                    }
-                    hasParentT={hasParentT}
-                    territory={territory}
-                    disableCreate={disableCreate}
-                    isLoading={
-                      isSaving ||
-                      isSavingWithoutRefresh ||
-                      isFetchingAnchorEntities
-                    }
-                  />
-                )}
-              </StyledAnnotatorMenu>
+                <StyledAnnotatorMenu
+                  ref={(node) => {
+                    refs.setFloating(node);
+                  }}
+                  style={floatingStyles}
+                >
+                  {dataDocument && (
+                    <TextAnnotatorMenu
+                      menuDragHandleProps={{
+                        onPointerDown: handleMenuDragPointerDown,
+                        onPointerMove: handleMenuDragPointerMove,
+                        onPointerUp: handleMenuDragPointerUp,
+                        onPointerCancel: handleMenuDragPointerUp,
+                      }}
+                      onEscapePressed={() => {
+                        setSelectedText("");
+                        annotator?.clearSelection();
+                      }}
+                      anchors={selectedAnchors}
+                      text={selectedText}
+                      entities={storedEntities}
+                      onAnchorAdd={handleAddAnchor}
+                      onCreateTerritory={onCreateTerritory}
+                      onCreateStatement={onCreateStatement}
+                      onRemoveAnchor={onRemoveAnchor}
+                      onUpdateAnchor={onUpdateAnchor}
+                      isTextInsideThisT={selectedAnchors.some(
+                        (anchor) =>
+                          anchor.getTagName() === thisTerritoryEntityId
+                      )}
+                      activeTerritoryId={thisTerritoryEntityId}
+                      onCreateActiveTAnchor={(elvl) => {
+                        handleAddAnchor(thisTerritoryEntityId ?? "", elvl);
+                      }}
+                      canCreateActiveTAnchor={
+                        !dataDocument?.entityIds.T.includes(
+                          thisTerritoryEntityId ?? ""
+                        )
+                      }
+                      hasParentT={hasParentT}
+                      territory={territory}
+                      disableCreate={disableCreate}
+                      isLoading={
+                        isSaving ||
+                        isSavingWithoutRefresh ||
+                        isFetchingAnchorEntities
+                      }
+                    />
+                  )}
+                </StyledAnnotatorMenu>
+              </StyledAnnotatorMenuDraggable>
             </FloatingPortal>
           )}
 

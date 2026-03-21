@@ -73,6 +73,34 @@ export const StyledAnnotatorMenu = styled.div<StyledAnnotatorMenuProps>`
   transition: opacity 0.5s, box-shadow 0.3s;
 `;
 
+/** Inner shell: holds padding/background so the drag layer can translate without clipping shadow. */
+export const StyledAnnotatorMenuDraggable = styled.div``;
+
+export const StyledAnnotatorMenuDragHandle = styled.div`
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: ${({ theme }) => theme.space[1]};
+  padding: ${({ theme }) => theme.space[1]} 0 ${({ theme }) => theme.space[2]};
+  margin: ${({ theme }) => theme.space["-1"]}
+    ${({ theme }) => theme.space["-2"]} 0;
+  border-radius: ${({ theme }) => theme.borderRadius.sm};
+  color: ${({ theme }) => theme.color.gray["600"]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  flex-shrink: 0;
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  &:hover {
+    background: ${({ theme }) => theme.color.blue["150"]};
+  }
+`;
+
 export const StyledAnnotatorItem = styled.div`
   display: flex;
   flex-direction: column;
