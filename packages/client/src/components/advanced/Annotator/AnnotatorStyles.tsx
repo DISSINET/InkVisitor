@@ -59,7 +59,6 @@ export const StyledAnnotatorMenu = styled.div<StyledAnnotatorMenuProps>`
   width: 40rem;
   z-index: 100;
   pointer-events: none;
-  position: absolute;
 `;
 
 /** Inner drag layer only — keep transform off the Floating UI root */
@@ -108,9 +107,8 @@ export const StyledAnnotatorMenuDragHandle = styled.div`
 export const StyledAnnotatorItem = styled.div`
   display: flex;
   flex-direction: column;
-  /* gap: 0.5rem; */
   padding: ${({ theme }) => theme.space[2]};
-  border-radius: ${({ theme }) => theme.borderRadius.xs};
+  border-radius: ${({ theme }) => theme.borderRadius.sm};
 
   &:hover {
     background: ${({ theme }) => theme.color.blue["150"]};
