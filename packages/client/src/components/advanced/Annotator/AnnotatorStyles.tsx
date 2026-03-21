@@ -56,9 +56,6 @@ export const StyledAnnotatorDoneButton = styled.div`
 `;
 
 export const StyledAnnotatorMenu = styled.div<StyledAnnotatorMenuProps>`
-  display: flex;
-  flex-direction: column;
-  position: absolute;
   width: 40rem;
   z-index: 100;
   pointer-events: none;
