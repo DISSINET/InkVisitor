@@ -207,13 +207,20 @@ export default class Keys {
       this.text.deleteRangeText(area[0], area[1]);
       this.cursor.reset();
       this.cursor.setPosition(area[0].xLine, area[0].yLine);
+    } else if (metaKey && !altKey && !ctrlKey) {
+      // Cmd+Backspace: delete from beginning of line to caret (macOS-style).
+      const end = this.cursor.getAbsolutePosition();
+      const start = { xLine: 0, yLine: end.yLine };
+      this.text.deleteRangeText(start, end);
+      this.cursor.setPosition(0, end.yLine);
+      if (this.annotator.onTextChangeCb) {
+        this.annotator.onTextChangeCb(this.text.value);
+      }
     } else {
-      // Word-wise backward delete: Ctrl/Alt (Windows/Linux + macOS ⌥) and Cmd
-      // (⌘) all use the same boundary logic as Ctrl/Alt+←. Do not pass metaKey
-      // into onArrowLeft or Cmd+⌫ would run the “jump to BOL” branch instead.
+      // Delete word-wise: Ctrl / Alt / ⌥+⌘ + ←  or Ctrl+Alt + ← on Windows
       const before = this.cursor.getAbsolutePosition();
       this.onArrowLeft({
-        ctrlKey: ctrlKey || altKey || metaKey,
+        ctrlKey: ctrlKey || altKey,
         shiftKey,
         altKey: false,
         metaKey: false,
@@ -248,10 +255,19 @@ export default class Keys {
       this.text.deleteRangeText(area[0], area[1]);
       this.cursor.reset();
       this.cursor.setPosition(area[0].xLine, area[0].yLine);
+    } else if (metaKey && !altKey && !ctrlKey) {
+      const before = this.cursor.getAbsolutePosition();
+      const line = this.text.getCurrentLine(this.viewport, this.cursor) || "";
+      const end = { xLine: line.length, yLine: before.yLine };
+      this.text.deleteRangeText(before, end);
+      this.cursor.setPosition(before.xLine, before.yLine);
+      if (this.annotator.onTextChangeCb) {
+        this.annotator.onTextChangeCb(this.text.value);
+      }
     } else {
       const before = this.cursor.getAbsolutePosition();
       this.onArrowRight({
-        ctrlKey: ctrlKey || altKey || metaKey,
+        ctrlKey: ctrlKey || altKey,
         shiftKey,
         altKey: false,
         metaKey: false,
