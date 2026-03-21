@@ -212,7 +212,6 @@ export const TextAnnotator = ({
   const mainCanvas = useRef<HTMLCanvasElement>(null);
   const scroller = useRef<HTMLDivElement>(null);
   const lines = useRef<HTMLCanvasElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
   const annotatorRef = useRef<Annotator | null>(null);
   annotatorRef.current = annotator;
 
@@ -753,36 +752,6 @@ export const TextAnnotator = ({
     );
   }, [annotatorMode, selectedText, isSelectingText, dataDocument]);
 
-  // Handle click outside menu to close it
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        isMenuDisplayed &&
-        menuRef.current &&
-        !menuRef.current.contains(event.target as Node) &&
-        !mainCanvas.current?.contains(event.target as Node) &&
-        !statementListBoxRef?.current?.contains(event.target as Node)
-      ) {
-        // Check if click is within Modal
-        const target = event.target as Element;
-        const isWithinModal = target.closest("[data-attribute-modal]") !== null;
-
-        if (!isWithinModal) {
-          setSelectedText("");
-          annotator?.clearSelection();
-        }
-      }
-    };
-
-    if (isMenuDisplayed) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isMenuDisplayed, annotator, statementListBoxRef]);
-
   const hasParentT = territory?.data?.parent !== undefined;
 
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -915,7 +884,6 @@ export const TextAnnotator = ({
               <StyledAnnotatorMenu
                 ref={(node) => {
                   refs.setFloating(node);
-                  menuRef.current = node;
                 }}
                 style={floatingStyles}
               >

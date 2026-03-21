@@ -47,7 +47,18 @@ export const StyledMainCanvas = styled.canvas`
 export const StyledLinesCanvas = styled.canvas``;
 
 interface StyledAnnotatorMenuProps {}
+export const StyledAnnotatorDoneButton = styled.div`
+  position: absolute;
+  top: ${({ theme }) => theme.space[4]};
+  right: ${({ theme }) => theme.space[4]};
+  z-index: 101;
+  color: ${({ theme }) => theme.color.primary};
+`;
+
 export const StyledAnnotatorMenu = styled.div<StyledAnnotatorMenuProps>`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
   position: absolute;
   width: 40rem;
   background: ${({ theme }) => theme.color.blue["100"]};
@@ -63,9 +74,11 @@ export const StyledAnnotatorMenu = styled.div<StyledAnnotatorMenuProps>`
 `;
 
 export const StyledAnnotatorItem = styled.div`
+  display: flex;
+  flex-direction: column;
+  /* gap: 0.5rem; */
   padding: ${({ theme }) => theme.space[2]};
   border-radius: ${({ theme }) => theme.borderRadius.xs};
-  margin-bottom: ${({ theme }) => theme.space[2]};
 
   &:hover {
     background: ${({ theme }) => theme.color.blue["150"]};
