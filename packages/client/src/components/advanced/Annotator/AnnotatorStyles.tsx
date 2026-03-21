@@ -58,23 +58,31 @@ export const StyledAnnotatorDoneButton = styled.div`
 export const StyledAnnotatorMenu = styled.div<StyledAnnotatorMenuProps>`
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
   position: absolute;
   width: 40rem;
+  z-index: 100;
+  pointer-events: none;
+`;
+
+/** Inner drag layer only — keep transform off the Floating UI root */
+export const StyledAnnotatorMenuDraggable = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  pointer-events: auto;
+  gap: 0.5rem;
   background: ${({ theme }) => theme.color.blue["100"]};
   padding: ${({ theme }) => theme.space[2]};
-  z-index: 100;
-  border-radius: ${({ theme }) => theme.borderRadius["default"]};
   box-shadow: ${({ theme }) => theme.boxShadow.high};
+  border-radius: ${({ theme }) => theme.borderRadius["default"]};
+
   opacity: 0.95;
+
   &:hover {
     opacity: 1;
   }
   transition: opacity 0.5s, box-shadow 0.3s;
 `;
-
-/** Inner shell: holds padding/background so the drag layer can translate without clipping shadow. */
-export const StyledAnnotatorMenuDraggable = styled.div``;
 
 export const StyledAnnotatorMenuDragHandle = styled.div`
   cursor: grab;

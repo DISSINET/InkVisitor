@@ -948,16 +948,16 @@ export const TextAnnotator = ({
         <StyledCanvasWrapper style={{ position: "relative" }}>
           {isMenuDisplayed && (
             <FloatingPortal id="page">
-              <StyledAnnotatorMenuDraggable
-                style={{
-                  transform: `translate(${menuDragOffset.x}px, ${menuDragOffset.y}px)`,
+              <StyledAnnotatorMenu
+                ref={(node) => {
+                  refs.setFloating(node);
                 }}
+                style={floatingStyles}
               >
-                <StyledAnnotatorMenu
-                  ref={(node) => {
-                    refs.setFloating(node);
+                <StyledAnnotatorMenuDraggable
+                  style={{
+                    transform: `translate(${menuDragOffset.x}px, ${menuDragOffset.y}px)`,
                   }}
-                  style={floatingStyles}
                 >
                   {dataDocument && (
                     <TextAnnotatorMenu
@@ -1002,8 +1002,8 @@ export const TextAnnotator = ({
                       }
                     />
                   )}
-                </StyledAnnotatorMenu>
-              </StyledAnnotatorMenuDraggable>
+                </StyledAnnotatorMenuDraggable>
+              </StyledAnnotatorMenu>
             </FloatingPortal>
           )}
 
