@@ -96,6 +96,19 @@ export default class Keys {
     }
   }
 
+  private compareDocPoints(a: CaretPoint, b: CaretPoint): number {
+    if (a.yLine !== b.yLine) return a.yLine - b.yLine;
+    return a.xLine - b.xLine;
+  }
+
+  private docCaretMin(a: CaretPoint, b: CaretPoint): CaretPoint {
+    return this.compareDocPoints(a, b) <= 0 ? { ...a } : { ...b };
+  }
+
+  private docCaretMax(a: CaretPoint, b: CaretPoint): CaretPoint {
+    return this.compareDocPoints(a, b) >= 0 ? { ...a } : { ...b };
+  }
+
   /** Scroll so cursor line is 3rd from top when above viewport, 3rd from bottom when below. */
   scrollCursorIntoView() {
     const absY = this.cursor.yLine;
@@ -528,25 +541,19 @@ export default class Keys {
         hStart &&
         hEnd &&
         (hStart.xLine !== hEnd.xLine || hStart.yLine !== hEnd.yLine);
-      const sameLineRange =
-        hasRange &&
-        hStart &&
-        hEnd &&
-        hStart.yLine === hEnd.yLine &&
-        hStart.yLine === absY;
 
       const curX = this.cursor.xLine;
-      this.cursor.selectStart = { xLine: 0, yLine: absY };
-
-      if (
-        sameLineRange &&
-        hStart &&
-        hEnd &&
-        (curX === hEnd.xLine || curX === hStart.xLine)
-      ) {
-        // Caret at either end of a same-line range: grow to BOL…hEnd (word or line).
-        this.cursor.selectEnd = { xLine: hEnd.xLine, yLine: absY };
+      // Line segment: BOL of current row → caret (before move). Union with any
+      // existing range so multi-line selections are not replaced / “reversed”.
+      if (hasRange && hStart && hEnd) {
+        const segLo: CaretPoint = { xLine: 0, yLine: absY };
+        const segHi: CaretPoint = { xLine: curX, yLine: absY };
+        const u0 = this.docCaretMin(hStart, segLo);
+        const u1 = this.docCaretMax(hEnd, segHi);
+        this.cursor.selectStart = { ...u0 };
+        this.cursor.selectEnd = { ...u1 };
       } else {
+        this.cursor.selectStart = { xLine: 0, yLine: absY };
         this.cursor.selectEnd = { xLine: curX, yLine: absY };
       }
       this.cursor.xLine = 0;
@@ -712,26 +719,20 @@ export default class Keys {
         hStart &&
         hEnd &&
         (hStart.xLine !== hEnd.xLine || hStart.yLine !== hEnd.yLine);
-      const sameLineRange =
-        hasRange &&
-        hStart &&
-        hEnd &&
-        hStart.yLine === hEnd.yLine &&
-        hStart.yLine === absY;
 
       const curX = this.cursor.xLine;
-      if (
-        sameLineRange &&
-        hStart &&
-        hEnd &&
-        (curX === hEnd.xLine || curX === hStart.xLine)
-      ) {
-        // Caret at either end of a same-line range: grow hStart…EOL (word or line).
-        this.cursor.selectStart = { xLine: hStart.xLine, yLine: absY };
+      const lineLen = line.length;
+      if (hasRange && hStart && hEnd) {
+        const segLo: CaretPoint = { xLine: curX, yLine: absY };
+        const segHi: CaretPoint = { xLine: lineLen, yLine: absY };
+        const u0 = this.docCaretMin(hStart, segLo);
+        const u1 = this.docCaretMax(hEnd, segHi);
+        this.cursor.selectStart = { ...u0 };
+        this.cursor.selectEnd = { ...u1 };
       } else {
         this.cursor.selectStart = { xLine: curX, yLine: absY };
+        this.cursor.selectEnd = { xLine: lineLen, yLine: absY };
       }
-      this.cursor.selectEnd = { xLine: line.length, yLine: absY };
       this.cursor.xLine = line.length;
       this.cursor.setTrueSelectionDirection();
       return;
