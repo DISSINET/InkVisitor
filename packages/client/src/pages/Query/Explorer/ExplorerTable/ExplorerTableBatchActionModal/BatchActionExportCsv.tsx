@@ -9,9 +9,9 @@ import {
   MdOutlineIndeterminateCheckBox,
 } from "react-icons/md";
 import {
-  batchWrapperStyle,
-  batchSectionStyle,
-  batchFooterStyle,
+  StyledBatchWrapper,
+  StyledBatchSection,
+  StyledBatchFooter,
   StyledBatchSectionLabel,
   StyledBatchMessage,
 } from "./styles";
@@ -91,10 +91,11 @@ export const BatchActionExportCsv: React.FC<BatchActionExportCsvProps> = ({
   };
 
   return (
-    <div style={batchWrapperStyle}>
-      <div style={batchSectionStyle}>
+    <StyledBatchWrapper>
+      <StyledBatchSection>
         <StyledBatchSectionLabel>Columns to export</StyledBatchSectionLabel>
 
+        {/* TODO: rewrite to styled component */}
         <div
           style={{
             display: "flex",
@@ -136,11 +137,11 @@ export const BatchActionExportCsv: React.FC<BatchActionExportCsvProps> = ({
             </div>
           );
         })}
-      </div>
+      </StyledBatchSection>
 
       <StyledBatchMessage>{message}</StyledBatchMessage>
 
-      <div style={batchFooterStyle}>
+      <StyledBatchFooter>
         <Button label="Cancel" color="greyer" inverted onClick={onClose} />
         <Button
           label="Export"
@@ -148,7 +149,7 @@ export const BatchActionExportCsv: React.FC<BatchActionExportCsvProps> = ({
           onClick={() => onExport(selectedColumnIds)}
           disabled={selectedColumnIds.length === 0}
         />
-      </div>
-    </div>
+      </StyledBatchFooter>
+    </StyledBatchWrapper>
   );
 };

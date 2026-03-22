@@ -7,9 +7,9 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { toast } from "react-toastify";
 import {
-  batchWrapperStyle,
-  batchSectionStyle,
-  batchFooterStyle,
+  StyledBatchWrapper,
+  StyledBatchSection,
+  StyledBatchFooter,
   StyledBatchSectionLabel,
   StyledBatchMessage,
 } from "./styles";
@@ -68,8 +68,8 @@ export const BatchActionAddReference: React.FC<
   }, [resourceEntity, valueEntity, selectedEntities]);
 
   return (
-    <div style={batchWrapperStyle}>
-      <div style={batchSectionStyle}>
+    <StyledBatchWrapper>
+      <StyledBatchSection>
         <StyledBatchSectionLabel>Resource (required)</StyledBatchSectionLabel>
         {resourceEntity ? (
           <EntityTag
@@ -84,9 +84,9 @@ export const BatchActionAddReference: React.FC<
             inputWidth="full"
           />
         )}
-      </div>
+      </StyledBatchSection>
 
-      <div style={batchSectionStyle}>
+      <StyledBatchSection>
         <StyledBatchSectionLabel>Value (optional)</StyledBatchSectionLabel>
         {valueEntity ? (
           <EntityTag
@@ -101,11 +101,11 @@ export const BatchActionAddReference: React.FC<
             inputWidth="full"
           />
         )}
-      </div>
+      </StyledBatchSection>
 
       <StyledBatchMessage>{message}</StyledBatchMessage>
 
-      <div style={batchFooterStyle}>
+      <StyledBatchFooter>
         <Button label="Cancel" color="greyer" inverted onClick={onClose} />
         <Button
           label="Apply"
@@ -113,7 +113,7 @@ export const BatchActionAddReference: React.FC<
           onClick={handleApply}
           disabled={!resourceEntity || batchMutation.isPending}
         />
-      </div>
-    </div>
+      </StyledBatchFooter>
+    </StyledBatchWrapper>
   );
 };

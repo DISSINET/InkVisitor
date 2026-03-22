@@ -8,13 +8,13 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { toast } from "react-toastify";
 import {
-  batchWrapperStyle,
-  batchSectionStyle,
-  batchFooterStyle,
-  batchWarningSectionStyle,
+  StyledBatchWrapper,
+  StyledBatchSection,
+  StyledBatchFooter,
   StyledBatchSectionLabel,
   StyledBatchWarningLabel,
   StyledBatchMessage,
+  StyledBatchWarningSection,
 } from "./styles";
 import { getRelationLabel, isRelationTypeEligible } from "./utils";
 
@@ -145,9 +145,9 @@ export const BatchActionAddRelation: React.FC<BatchActionAddRelationProps> = ({
   ]);
 
   return (
-    <div style={batchWrapperStyle}>
+    <StyledBatchWrapper>
       {/* RELATION TYPE */}
-      <div style={batchSectionStyle}>
+      <StyledBatchSection>
         <StyledBatchSectionLabel>Relation type</StyledBatchSectionLabel>
         <Dropdown.Single.Basic
           value={activeType || null}
@@ -159,11 +159,11 @@ export const BatchActionAddRelation: React.FC<BatchActionAddRelationProps> = ({
           placeholder="select relation type..."
           width="full"
         />
-      </div>
+      </StyledBatchSection>
 
       {/* APPLICABILITY WARNING */}
       {activeType && invalidEntities.length > 0 && (
-        <div style={batchWarningSectionStyle}>
+        <StyledBatchWarningSection>
           <StyledBatchWarningLabel>
             Partial applicability
           </StyledBatchWarningLabel>
@@ -198,11 +198,11 @@ export const BatchActionAddRelation: React.FC<BatchActionAddRelationProps> = ({
               No entities in the selection are eligible for this relation type.
             </span>
           )}
-        </div>
+        </StyledBatchWarningSection>
       )}
 
       {/* TARGET ENTITY */}
-      <div style={batchSectionStyle}>
+      <StyledBatchSection>
         <StyledBatchSectionLabel>Target entity</StyledBatchSectionLabel>
         {targetEntity ? (
           <EntityTag
@@ -217,12 +217,12 @@ export const BatchActionAddRelation: React.FC<BatchActionAddRelationProps> = ({
             disabled={!activeType || validEntities.length === 0}
           />
         )}
-      </div>
+      </StyledBatchSection>
 
       {/* SUMMARY */}
       {message && <StyledBatchMessage>{message}</StyledBatchMessage>}
 
-      <div style={batchFooterStyle}>
+      <StyledBatchFooter>
         <Button label="Cancel" color="greyer" inverted onClick={onClose} />
         <Button
           label="Apply"
@@ -235,7 +235,7 @@ export const BatchActionAddRelation: React.FC<BatchActionAddRelationProps> = ({
             batchMutation.isPending
           }
         />
-      </div>
-    </div>
+      </StyledBatchFooter>
+    </StyledBatchWrapper>
   );
 };

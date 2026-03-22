@@ -19,12 +19,12 @@ import Dropdown, {
 import React, { useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import {
-  batchAttrRowStyle,
-  batchFooterStyle,
-  batchSectionStyle,
-  batchWrapperStyle,
+  StyledBatchAttrRow,
+  StyledBatchFooter,
   StyledBatchMessage,
+  StyledBatchSection,
   StyledBatchSectionLabel,
+  StyledBatchWrapper,
 } from "./styles";
 
 interface BatchActionAddMetapropProps {
@@ -124,9 +124,9 @@ export const BatchActionAddMetaprop: React.FC<BatchActionAddMetapropProps> = ({
   }, [typeEntity, valueEntity, selectedEntities]);
 
   return (
-    <div style={batchWrapperStyle}>
+    <StyledBatchWrapper>
       {/* TYPE */}
-      <div style={batchSectionStyle}>
+      <StyledBatchSection>
         <StyledBatchSectionLabel>Type (required)</StyledBatchSectionLabel>
         {typeEntity ? (
           <EntityTag
@@ -142,7 +142,7 @@ export const BatchActionAddMetaprop: React.FC<BatchActionAddMetapropProps> = ({
           />
         )}
         {typeEntity && (
-          <div style={batchAttrRowStyle}>
+          <StyledBatchAttrRow>
             <ElvlButtonGroup
               border
               value={typeSpec.elvl}
@@ -171,12 +171,12 @@ export const BatchActionAddMetaprop: React.FC<BatchActionAddMetapropProps> = ({
               value={typeSpec.partitivity}
               onChange={(v) => setTypeSpec((s) => ({ ...s, partitivity: v }))}
             />
-          </div>
+          </StyledBatchAttrRow>
         )}
-      </div>
+      </StyledBatchSection>
 
       {/* VALUE */}
-      <div style={batchSectionStyle}>
+      <StyledBatchSection>
         <StyledBatchSectionLabel>Value (optional)</StyledBatchSectionLabel>
         {valueEntity ? (
           <EntityTag
@@ -191,7 +191,7 @@ export const BatchActionAddMetaprop: React.FC<BatchActionAddMetapropProps> = ({
           />
         )}
         {valueEntity && (
-          <div style={batchAttrRowStyle}>
+          <StyledBatchAttrRow>
             <ElvlButtonGroup
               border
               value={valueSpec.elvl}
@@ -220,14 +220,14 @@ export const BatchActionAddMetaprop: React.FC<BatchActionAddMetapropProps> = ({
               value={valueSpec.partitivity}
               onChange={(v) => setValueSpec((s) => ({ ...s, partitivity: v }))}
             />
-          </div>
+          </StyledBatchAttrRow>
         )}
-      </div>
+      </StyledBatchSection>
 
       {/* STATEMENT-LEVEL ATTRIBUTES */}
-      <div style={batchSectionStyle}>
+      <StyledBatchSection>
         <StyledBatchSectionLabel>Statement attributes</StyledBatchSectionLabel>
-        <div style={batchAttrRowStyle}>
+        <StyledBatchAttrRow>
           <LogicButtonGroup border value={logic} onChange={setLogic} />
           <Dropdown.Single.Basic
             width={122}
@@ -252,13 +252,13 @@ export const BatchActionAddMetaprop: React.FC<BatchActionAddMetapropProps> = ({
             value={moodvariant}
             onChange={setMoodvariant}
           />
-        </div>
-      </div>
+        </StyledBatchAttrRow>
+      </StyledBatchSection>
 
       {/* MESSAGE + ACTIONS */}
       <StyledBatchMessage>{message}</StyledBatchMessage>
 
-      <div style={batchFooterStyle}>
+      <StyledBatchFooter>
         <Button label="Cancel" color="greyer" inverted onClick={onClose} />
         <Button
           label="Apply"
@@ -266,7 +266,7 @@ export const BatchActionAddMetaprop: React.FC<BatchActionAddMetapropProps> = ({
           onClick={handleApply}
           disabled={!typeEntity || batchMutation.isPending}
         />
-      </div>
-    </div>
+      </StyledBatchFooter>
+    </StyledBatchWrapper>
   );
 };

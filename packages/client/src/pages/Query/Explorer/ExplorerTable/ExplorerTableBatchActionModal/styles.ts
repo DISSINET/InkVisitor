@@ -14,39 +14,38 @@ export const StyledBatchMessage = styled.label`
   font-style: italic;
 `;
 
-export const batchSectionStyle: React.CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  gap: "0.5rem",
-  padding: "0.75rem",
-  borderRadius: "4px",
-  border: `1px solid ${theme.color.grey}`,
-};
+export const StyledBatchSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border-radius: 4px;
+  border: 1px solid ${theme.color.grey};
+`;
 
-export const batchAttrRowStyle: React.CSSProperties = {
-  display: "flex",
-  flexWrap: "wrap",
-  gap: "0.4rem",
-  alignItems: "center",
-};
+export const StyledBatchAttrRow = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+`;
 
-export const batchFooterStyle: React.CSSProperties = {
-  display: "flex",
-  gap: "0.5rem",
-  justifyContent: "flex-end",
-};
+export const StyledBatchFooter = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+`;
 
-export const batchWrapperStyle: React.CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  gap: "1rem",
-};
+export const StyledBatchWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+`;
 
-export const batchWarningSectionStyle: React.CSSProperties = {
-  ...batchSectionStyle,
-  borderColor: theme.color.warning,
-  backgroundColor: `${theme.color.warning}11`,
-};
+export const StyledBatchWarningSection = styled(StyledBatchSection)`
+  border-color: ${theme.color.warning};
+  background-color: ${theme.color.warning}11;
+`;
 
 export const StyledBatchWarningLabel = styled(StyledBatchSectionLabel)`
   color: ${({ theme }) => theme.color.warning};
