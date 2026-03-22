@@ -947,7 +947,7 @@ export const TextAnnotator = ({
       >
         <StyledCanvasWrapper style={{ position: "relative" }}>
           {isMenuDisplayed && (
-            <FloatingPortal id="page">
+            <FloatingPortal id="app">
               <StyledAnnotatorMenu
                 ref={(node) => {
                   refs.setFloating(node);
