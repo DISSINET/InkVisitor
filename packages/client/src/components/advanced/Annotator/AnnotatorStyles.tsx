@@ -49,8 +49,8 @@ export const StyledLinesCanvas = styled.canvas``;
 interface StyledAnnotatorMenuProps {}
 export const StyledAnnotatorDoneButton = styled.div`
   position: absolute;
-  top: ${({ theme }) => theme.space[4]};
-  right: ${({ theme }) => theme.space[4]};
+  top: 4.5rem;
+  right: 1.5rem;
   z-index: 101;
   color: ${({ theme }) => theme.color.primary};
   background-color: ${({ theme }) => theme.color.inherit};
