@@ -1,14 +1,38 @@
+import {
+  certaintyDict,
+  moodDict,
+  partitivityDict,
+  virtualityDict,
+} from "@shared/dictionaries";
 import { EntityEnums } from "@shared/enums";
-import { IEntity } from "@shared/types";
-import React, { useState } from "react";
-import { Button } from "components";
-import { EntitySuggester } from "components/advanced";
+import { IEntity, IPropSpec } from "@shared/types";
+import theme from "Theme/theme";
+import { AttributeIcon, Button } from "components";
+import Dropdown, {
+  ElvlButtonGroup,
+  EntitySuggester,
+  EntityTag,
+  LogicButtonGroup,
+  MoodVariantButtonGroup,
+} from "components/advanced";
+import React, { useMemo, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import api from "api";
+import { toast } from "react-toastify";
 
 interface BatchActionAddMetapropProps {
   selectedEntities: IEntity[];
   onClose: () => void;
   onApply: () => void;
 }
+
+const defaultPropSpec = (entityId = ""): IPropSpec => ({
+  entityId,
+  elvl: EntityEnums.Elvl.Inferential,
+  logic: EntityEnums.Logic.Positive,
+  virtuality: EntityEnums.Virtuality.Reality,
+  partitivity: EntityEnums.Partitivity.Unison,
+});
 
 export const BatchActionAddMetaprop: React.FC<BatchActionAddMetapropProps> = ({
   selectedEntities,
@@ -18,42 +42,248 @@ export const BatchActionAddMetaprop: React.FC<BatchActionAddMetapropProps> = ({
   const [typeEntity, setTypeEntity] = useState<IEntity | undefined>();
   const [valueEntity, setValueEntity] = useState<IEntity | undefined>();
 
+  const [logic, setLogic] = useState<EntityEnums.Logic>(EntityEnums.Logic.Positive);
+  const [certainty, setCertainty] = useState<EntityEnums.Certainty>(EntityEnums.Certainty.Empty);
+  const [mood, setMood] = useState<EntityEnums.Mood[]>([EntityEnums.Mood.Indication]);
+  const [moodvariant, setMoodvariant] = useState<EntityEnums.MoodVariant>(EntityEnums.MoodVariant.Realis);
+
+  const [typeSpec, setTypeSpec] = useState<Omit<IPropSpec, "entityId">>({
+    elvl: EntityEnums.Elvl.Inferential,
+    logic: EntityEnums.Logic.Positive,
+    virtuality: EntityEnums.Virtuality.Reality,
+    partitivity: EntityEnums.Partitivity.Unison,
+  });
+
+  const [valueSpec, setValueSpec] = useState<Omit<IPropSpec, "entityId">>({
+    elvl: EntityEnums.Elvl.Inferential,
+    logic: EntityEnums.Logic.Positive,
+    virtuality: EntityEnums.Virtuality.Reality,
+    partitivity: EntityEnums.Partitivity.Unison,
+  });
+
+  const queryClient = useQueryClient();
+
+  const batchMutation = useMutation({
+    mutationFn: async () => {
+      if (!typeEntity) return;
+      const entityIds = selectedEntities.map((e) => e.id);
+      return api.batchEntityAddMetaprop(entityIds, {
+        logic,
+        certainty,
+        mood,
+        moodvariant,
+        type: { ...typeSpec, entityId: typeEntity.id },
+        value: {
+          ...(valueEntity ? valueSpec : defaultPropSpec()),
+          entityId: valueEntity?.id || "",
+        },
+      });
+    },
+    onSuccess: (res) => {
+      toast.success(res?.data?.message || "Metaprop added");
+      queryClient.invalidateQueries({ queryKey: ["query"] });
+      onApply();
+    },
+    onError: () => {
+      toast.error("Failed to add metaprop");
+    },
+  });
+
   const handleApply = () => {
     if (!typeEntity) return;
-    // TODO: implement mutation to add metaprop to all selected entities
-    onApply();
+    batchMutation.mutate();
+  };
+
+  const message = useMemo<string>(() => {
+    const entityCount = selectedEntities.length;
+    const typeLabel = typeEntity?.labels[0];
+    const valueLabel = valueEntity?.labels[0];
+
+    if (!typeLabel) {
+      return `Add a new metaproperty to ${entityCount} selected entities.`;
+    }
+    if (valueLabel) {
+      return `Add metaproperty "${typeLabel}" with value "${valueLabel}" to ${entityCount} selected entities.`;
+    }
+    return `Add metaproperty "${typeLabel}" to ${entityCount} selected entities.`;
+  }, [typeEntity, valueEntity, selectedEntities]);
+
+  const sectionStyle: React.CSSProperties = {
+    display: "flex",
+    flexDirection: "column",
+    gap: "0.5rem",
+    padding: "0.75rem",
+    borderRadius: "4px",
+    border: `1px solid ${theme.color.grey}`,
+  };
+
+  const labelStyle: React.CSSProperties = {
+    fontSize: theme.fontSize.xs,
+    fontWeight: theme.fontWeight.bold,
+    color: theme.color.black,
+  };
+
+  const attrRowStyle: React.CSSProperties = {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "0.4rem",
+    alignItems: "center",
   };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-      <p>
-        Add a new metaproperty to <b>{selectedEntities.length}</b> selected
-        entities.
-      </p>
+      {/* TYPE */}
+      <div style={sectionStyle}>
+        <span style={labelStyle}>Type (required)</span>
+        {typeEntity ? (
+          <EntityTag
+            entity={typeEntity}
+            unlinkButton={{ onClick: () => setTypeEntity(undefined) }}
+          />
+        ) : (
+          <EntitySuggester
+            categoryTypes={[EntityEnums.Class.Concept]}
+            onPicked={(entity) => setTypeEntity(entity)}
+            placeholder="select metaprop type..."
+            inputWidth="full"
+          />
+        )}
+        {typeEntity && (
+          <div style={attrRowStyle}>
+            <ElvlButtonGroup
+              border
+              value={typeSpec.elvl}
+              onChange={(elvl) => setTypeSpec((s) => ({ ...s, elvl }))}
+            />
+            <LogicButtonGroup
+              border
+              value={typeSpec.logic}
+              onChange={(logic) => setTypeSpec((s) => ({ ...s, logic }))}
+            />
+            <Dropdown.Single.Basic
+              width={100}
+              placeholder="virtuality"
+              tooltipLabel="virtuality"
+              icon={<AttributeIcon attributeName="virtuality" />}
+              options={virtualityDict}
+              value={typeSpec.virtuality}
+              onChange={(v) =>
+                setTypeSpec((s) => ({ ...s, virtuality: v }))
+              }
+            />
+            <Dropdown.Single.Basic
+              width={150}
+              placeholder="partitivity"
+              tooltipLabel="partitivity"
+              icon={<AttributeIcon attributeName="partitivity" />}
+              options={partitivityDict}
+              value={typeSpec.partitivity}
+              onChange={(v) =>
+                setTypeSpec((s) => ({ ...s, partitivity: v }))
+              }
+            />
+          </div>
+        )}
+      </div>
 
-      <div
+      {/* VALUE */}
+      <div style={sectionStyle}>
+        <span style={labelStyle}>Value (optional)</span>
+        {valueEntity ? (
+          <EntityTag
+            entity={valueEntity}
+            unlinkButton={{ onClick: () => setValueEntity(undefined) }}
+          />
+        ) : (
+          <EntitySuggester
+            onPicked={(entity) => setValueEntity(entity)}
+            placeholder="select value..."
+            inputWidth="full"
+          />
+        )}
+        {valueEntity && (
+          <div style={attrRowStyle}>
+            <ElvlButtonGroup
+              border
+              value={valueSpec.elvl}
+              onChange={(elvl) => setValueSpec((s) => ({ ...s, elvl }))}
+            />
+            <LogicButtonGroup
+              border
+              value={valueSpec.logic}
+              onChange={(logic) => setValueSpec((s) => ({ ...s, logic }))}
+            />
+            <Dropdown.Single.Basic
+              width={100}
+              placeholder="virtuality"
+              tooltipLabel="virtuality"
+              icon={<AttributeIcon attributeName="virtuality" />}
+              options={virtualityDict}
+              value={valueSpec.virtuality}
+              onChange={(v) =>
+                setValueSpec((s) => ({ ...s, virtuality: v }))
+              }
+            />
+            <Dropdown.Single.Basic
+              width={150}
+              placeholder="partitivity"
+              tooltipLabel="partitivity"
+              icon={<AttributeIcon attributeName="partitivity" />}
+              options={partitivityDict}
+              value={valueSpec.partitivity}
+              onChange={(v) =>
+                setValueSpec((s) => ({ ...s, partitivity: v }))
+              }
+            />
+          </div>
+        )}
+      </div>
+
+      {/* STATEMENT-LEVEL ATTRIBUTES */}
+      <div style={sectionStyle}>
+        <span style={labelStyle}>Statement attributes</span>
+        <div style={attrRowStyle}>
+          <LogicButtonGroup
+            border
+            value={logic}
+            onChange={setLogic}
+          />
+          <Dropdown.Single.Basic
+            width={122}
+            placeholder="certainty"
+            tooltipLabel="certainty"
+            icon={<AttributeIcon attributeName="certainty" />}
+            options={certaintyDict}
+            value={certainty}
+            onChange={(v) => setCertainty(v)}
+          />
+          <Dropdown.Multi.Attribute
+            width={131}
+            placeholder="mood"
+            tooltipLabel="mood"
+            icon={<AttributeIcon attributeName="mood" />}
+            options={moodDict}
+            value={mood}
+            onChange={(newValues) => setMood(newValues)}
+          />
+          <MoodVariantButtonGroup
+            border
+            value={moodvariant}
+            onChange={setMoodvariant}
+          />
+        </div>
+      </div>
+
+      {/* MESSAGE + ACTIONS */}
+      <label
         style={{
-          display: "grid",
-          gridTemplateColumns: "auto 1fr",
-          gap: "0.75rem",
-          alignItems: "center",
+          fontSize: theme.fontSize.sm,
+          color: theme.color.greyer,
+          fontStyle: "italic",
         }}
       >
-        <label>Type (required):</label>
-        <EntitySuggester
-          categoryTypes={[EntityEnums.Class.Concept]}
-          onPicked={(entity) => setTypeEntity(entity)}
-          placeholder="select metaprop type..."
-          inputWidth="full"
-        />
-
-        <label>Value (optional):</label>
-        <EntitySuggester
-          onPicked={(entity) => setValueEntity(entity)}
-          placeholder="select value..."
-          inputWidth="full"
-        />
-      </div>
+        {message}
+      </label>
 
       <div
         style={{ display: "flex", gap: "0.5rem", justifyContent: "flex-end" }}
@@ -63,7 +293,7 @@ export const BatchActionAddMetaprop: React.FC<BatchActionAddMetapropProps> = ({
           label="Apply"
           color="primary"
           onClick={handleApply}
-          disabled={!typeEntity}
+          disabled={!typeEntity || batchMutation.isPending}
         />
       </div>
     </div>

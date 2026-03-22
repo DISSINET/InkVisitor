@@ -11,10 +11,12 @@ import Relation from "@models/relation/relation";
 import { getAuditByEntityId } from "@modules/audits";
 import QuerySearch from "@service/query/search";
 import { findEntityById } from "@service/shorthands";
-import { RelationEnums } from "@shared/enums";
+import { EntityEnums, RelationEnums } from "@shared/enums";
 import {
   EntityTooltip,
   IEntity,
+  IProp,
+  IPropSpec,
   IResponseDetail,
   IResponseEntity,
   IResponseGeneric,
@@ -45,6 +47,7 @@ import { Router } from "express";
 import { IRequest } from "src/custom_typings/request";
 import { asyncRouteHandler } from "../index";
 import User from "@models/user/user";
+import { randomUUID } from "crypto";
 
 export default Router()
   /**
@@ -785,6 +788,131 @@ export default Router()
           "result \t" + explore.columns.map((c) => c.name).join("\t");
 
         return { tsvText: tsvHeader + "\n" + tsvBodyRows };
+      }
+    )
+  )
+
+  .post(
+    "/batchAddMetaprop",
+    asyncRouteHandler<IResponseGeneric>(
+      async (
+        request: IRequest<
+          unknown,
+          {
+            entityIds: string[];
+            propData: {
+              logic: string;
+              certainty: string;
+              mood: string[];
+              moodvariant: string;
+              type: IPropSpec;
+              value: IPropSpec;
+            };
+          }
+        >
+      ) => {
+        const { entityIds, propData } = request.body;
+
+        if (
+          !entityIds ||
+          !Array.isArray(entityIds) ||
+          entityIds.length === 0 ||
+          !propData?.type?.entityId
+        ) {
+          throw new BadParams(
+            "entityIds array and propData.type.entityId must be provided"
+          );
+        }
+
+        await request.db.lock();
+
+        const entities = await Entity.findEntitiesByIds(
+          request.db.connection,
+          entityIds
+        );
+
+        if (entities.length === 0) {
+          throw new EntityDoesNotExist(
+            "none of the provided entities were found",
+            entityIds[0]
+          );
+        }
+
+        const user = request.getUserOrFail();
+        const errors: Record<string, string> = {};
+        let updated = 0;
+
+        for (const entityData of entities) {
+          const newProp: IProp = {
+            id: randomUUID(),
+            elvl: EntityEnums.Elvl.Inferential,
+            certainty: (propData.certainty as EntityEnums.Certainty) || EntityEnums.Certainty.Empty,
+            logic: (propData.logic as EntityEnums.Logic) || EntityEnums.Logic.Positive,
+            mood: (propData.mood as EntityEnums.Mood[]) || [EntityEnums.Mood.Indication],
+            moodvariant: (propData.moodvariant as EntityEnums.MoodVariant) || EntityEnums.MoodVariant.Realis,
+            bundleOperator: EntityEnums.Operator.And,
+            bundleStart: false,
+            bundleEnd: false,
+            children: [],
+            type: {
+              entityId: propData.type.entityId,
+              elvl: (propData.type.elvl as EntityEnums.Elvl) || EntityEnums.Elvl.Inferential,
+              logic: (propData.type.logic as EntityEnums.Logic) || EntityEnums.Logic.Positive,
+              virtuality: (propData.type.virtuality as EntityEnums.Virtuality) || EntityEnums.Virtuality.Reality,
+              partitivity: (propData.type.partitivity as EntityEnums.Partitivity) || EntityEnums.Partitivity.Unison,
+            },
+            value: {
+              entityId: propData.value?.entityId || "",
+              elvl: (propData.value?.elvl as EntityEnums.Elvl) || EntityEnums.Elvl.Inferential,
+              logic: (propData.value?.logic as EntityEnums.Logic) || EntityEnums.Logic.Positive,
+              virtuality: (propData.value?.virtuality as EntityEnums.Virtuality) || EntityEnums.Virtuality.Reality,
+              partitivity: (propData.value?.partitivity as EntityEnums.Partitivity) || EntityEnums.Partitivity.Unison,
+            },
+          };
+
+          const updatedProps = [...entityData.props, newProp];
+          const updateData: Partial<IEntity> = { props: updatedProps };
+
+          const model = getEntityClass({
+            ...mergeDeep(entityData, updateData),
+            class: entityData.class,
+            id: entityData.id,
+          });
+
+          if (!model.isValid()) {
+            errors[entityData.id] = "model not valid";
+            continue;
+          }
+
+          if (!model.canBeEditedByUser(user)) {
+            errors[entityData.id] = "permission denied";
+            continue;
+          }
+
+          await model.beforeSave(request.db.connection);
+          const result = await model.update(request.db.connection, updateData);
+
+          if (result.replaced || result.unchanged) {
+            await Audit.createNew(
+              request,
+              entityData.id,
+              updateData,
+              EventType.EDIT
+            );
+            updated++;
+          } else {
+            errors[entityData.id] = "update failed";
+          }
+        }
+
+        return {
+          result: updated > 0,
+          message: `Updated ${updated}/${entities.length} entities${
+            Object.keys(errors).length
+              ? `. Errors: ${JSON.stringify(errors)}`
+              : ""
+          }`,
+        };
       }
     )
   )

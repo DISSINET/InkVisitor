@@ -13,6 +13,7 @@ import {
   IResponseEntity,
   IResponseGeneric,
   IResponsePermission,
+  IPropSpec,
   IResponseQuery,
   IResponseStatement,
   IResponseStats,
@@ -1568,6 +1569,30 @@ class Api {
   ): Promise<AxiosResponse<IResponseGeneric<string>>> {
     try {
       const response = await this.connection.get(`/users/owner`, options);
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  async batchEntityAddMetaprop(
+    entityIds: string[],
+    propData: {
+      logic: EntityEnums.Logic;
+      certainty: EntityEnums.Certainty;
+      mood: EntityEnums.Mood[];
+      moodvariant: EntityEnums.MoodVariant;
+      type: IPropSpec;
+      value: IPropSpec;
+    },
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      const response = await this.connection.post(
+        `/entities/batchAddMetaprop`,
+        { entityIds, propData },
+        options
+      );
       return response;
     } catch (err) {
       throw this.handleError(err);
