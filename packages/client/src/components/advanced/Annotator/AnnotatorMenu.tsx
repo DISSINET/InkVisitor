@@ -1,8 +1,9 @@
 import React, { useCallback, useMemo, useState } from "react";
+import { List } from "react-window";
 
 import { Tag } from "@inkvisitor/annotator/src/lib";
 import { EntityEnums } from "@shared/enums";
-import { IDocument, IEntity, IResponseTerritory } from "@shared/types";
+import { IEntity, IResponseTerritory } from "@shared/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { IconWithTooltip, Loader } from "components";
 import { Button } from "components/basic/Button/Button";
@@ -18,12 +19,12 @@ import { MdDragIndicator, MdOutlineDone } from "react-icons/md";
 import { PiSelectionFill } from "react-icons/pi";
 import { TbAnchor } from "react-icons/tb";
 import { toast } from "react-toastify";
+import { scrollOverscanCount } from "Theme/constants";
 import { ButtonSize, classesAnnotator } from "types";
 import { EntitySuggester } from "../EntitySuggester/EntitySuggester";
 import { EntityTag } from "../EntityTag/EntityTag";
 import { ElvlButtonGroup } from "../IconButtonGroups/ElvlButtonGroup";
 import {
-  StyledAnnotatorAnchorList,
   StyledAnnotatorAnchorListWrap,
   StyledAnnotatorDoneButton,
   StyledAnnotatorItem,
@@ -36,6 +37,13 @@ import {
   StyledTerritorySubsectionTitle,
 } from "./AnnotatorStyles";
 import { TerritoryCreateModalType } from "./types";
+import {
+  ANCHOR_GRID_COLUMNS,
+  ANCHOR_GRID_ROW_HEIGHT,
+  AnnotatorAnchorGridRow,
+  AnnotatorAnchorGridRowData,
+  AnnotatorAnchorListItem,
+} from "./AnnotatorMenuAnchorListRow";
 
 interface TextAnnotatorMenuProps {
   text: string;
@@ -130,6 +138,27 @@ export const TextAnnotatorMenu = ({
           anchor.attributes.elvl === ""
       ),
     [anchors]
+  );
+
+  const resolvedAnchors = useMemo((): AnnotatorAnchorListItem[] => {
+    const out: AnnotatorAnchorListItem[] = [];
+    for (const anchor of anchors) {
+      const anchorTagName = anchor.getTagName();
+      if (entities[anchorTagName]) {
+        out.push({ anchor, anchorTagName });
+      }
+    }
+    return out;
+  }, [anchors, entities]);
+
+  const anchorGridRowData = useMemo(
+    (): AnnotatorAnchorGridRowData => ({
+      items: resolvedAnchors,
+      entities,
+      onRemoveAnchor,
+      onUpdateAnchor,
+    }),
+    [resolvedAnchors, entities, onRemoveAnchor, onUpdateAnchor]
   );
 
   return (
@@ -353,36 +382,18 @@ export const TextAnnotatorMenu = ({
                 no anchors in selection
               </StyledAnnotatorNoAnchors>
             )}
-            <StyledAnnotatorAnchorList>
-              {anchors.map((anchor, key) => {
-                const anchorTagName = anchor.getTagName();
-                if (entities[anchorTagName]) {
-                  return (
-                    <EntityTag
-                      key={key}
-                      unlinkButton={{
-                        onClick: () => {
-                          if (onRemoveAnchor) {
-                            onRemoveAnchor(anchorTagName);
-                          }
-                        },
-                      }}
-                      entity={entities[anchorTagName]}
-                      elvlButtonGroup={
-                        <ElvlButtonGroup
-                          value={anchor.attributes.elvl as EntityEnums.Elvl}
-                          onChange={(elvl) => {
-                            onUpdateAnchor?.(anchor, elvl);
-                          }}
-                        />
-                      }
-                    />
-                  );
-                } else {
-                  return <React.Fragment key={key} />;
-                }
-              })}
-            </StyledAnnotatorAnchorList>
+            {resolvedAnchors.length > 0 && (
+              <List
+                rowProps={{ data: anchorGridRowData }}
+                rowCount={Math.ceil(
+                  resolvedAnchors.length / ANCHOR_GRID_COLUMNS
+                )}
+                rowHeight={ANCHOR_GRID_ROW_HEIGHT}
+                overscanCount={scrollOverscanCount}
+                style={{ maxHeight: "13rem", width: "100%" }}
+                rowComponent={(props) => <AnnotatorAnchorGridRow {...props} />}
+              />
+            )}
           </StyledAnnotatorAnchorListWrap>
           <Loader show={isLoading} size={20} />
         </StyledAnnotatorItemContent>

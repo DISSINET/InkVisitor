@@ -137,7 +137,8 @@ export const StyledAnnotatorItemContentLine = styled.div`
 export const StyledAnnotatorAnchorListWrap = styled.div`
   display: flex;
   flex-direction: column;
-  overflow: auto;
+  overflow: hidden;
+  min-height: 0;
   max-height: 13rem;
   border-radius: ${({ theme }) => theme.borderRadius.xs};
   background-color: ${({ theme }) => theme.color.gray["500"]};
@@ -156,13 +157,6 @@ export const StyledAnnotatorItemTitle = styled.div`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.space[1]};
-`;
-
-export const StyledAnnotatorAnchorList = styled.div`
-  display: flex;
-  gap: ${({ theme }) => theme.space[2]};
-  flex-wrap: wrap;
-  padding: ${({ theme }) => theme.space[1]};
 `;
 
 export const StyledTerritorySubsection = styled.div`
