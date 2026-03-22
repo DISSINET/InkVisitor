@@ -196,95 +196,60 @@ export class Annotator {
    * removeAnchorFromSelection removes anchor from selected text
    * @param anchor
    */
-  removeAnchorFromSelection(anchor: string) {
-    const [start, end] = this.cursor.getAbsBounds();
+  removeAnchorFromSelection(anchorTag: Tag) {
+    const anchor = anchorTag.getTagName();
+    const anchorSegIdx = anchorTag.segmentIndex;
+    const anchorPos = anchorTag.position;
 
-    if (start && end) {
-      const startSegment = this.text.getSegmentPosition(
-        start.yLine,
-        start.xLine
-      ) as SegmentPosition;
+    const changedSegmentIndices = new Set<number>();
 
-      const endSegment = this.text.getSegmentPosition(
-        end.yLine,
-        end.xLine
-      ) as SegmentPosition;
+    const openSegment = this.text.segments[anchorSegIdx];
+    if (!openSegment) {
+      return;
+    }
 
-      const anchors = this.getAnnotations(startSegment, endSegment);
+    const openTag = openSegment.openingTags.find(
+      (tag) =>
+        tag.getTagName() === anchor && tag.position === anchorPos
+    );
 
-      if (anchors.some((tag) => tag.getTagName() === anchor)) {
-        const changedSegmentIndices = new Set<number>();
-
-        // find if open tag for given anchor is part of selection, otherwise find the last occurence of that anchor in the text before the selection
-        const openTagSegment = this.text.segments
-          .slice(0, endSegment.segmentIndex + 1)
-          .reverse()
-          .find((segment) =>
-            segment.openingTags.find((tag) => tag.getTagName() === anchor)
-          );
-
-        // replace open tag with empty string in the openTagSegment
-        if (openTagSegment) {
-          const openTag = openTagSegment.openingTags.find(
-            (tag) => tag.getTagName() === anchor
-          );
-          if (openTag) {
-            const openTagsSegmentI = this.text.segments.findIndex(
-              (i) =>
-                i.lineStart === openTagSegment.lineStart &&
-                i.lineEnd === openTagSegment.lineEnd
-            );
-
-            this.text.segments[openTagsSegmentI].raw =
-              openTagSegment.raw.replace(openTag.getTag(), "");
-            if (openTagsSegmentI >= 0) {
-              changedSegmentIndices.add(openTagsSegmentI);
-            }
-          }
-        }
-
-        // do similar for close tag
-        const closeTagSegment = this.text.segments
-          .slice(startSegment.segmentIndex, this.text.segments.length)
-          .find((segment) =>
-            segment.closingTags.find((tag) => tag.getTagName() === anchor)
-          );
-
-        if (closeTagSegment) {
-          const closeTag = closeTagSegment.closingTags.find(
-            (tag) => tag.getTagName() === anchor
-          );
-          if (closeTag) {
-            const closeTagsSegmentI =
-              this.text.segments.findIndex(
-                (i) =>
-                  i.lineStart === closeTagSegment.lineStart &&
-                  i.lineEnd === closeTagSegment.lineEnd
-              ) || 0;
-
-            this.text.segments[closeTagsSegmentI].raw =
-              closeTagSegment.raw.replace(`</${anchor}>`, "");
-
-            if (closeTagsSegmentI >= 0) {
-              changedSegmentIndices.add(closeTagsSegmentI);
-            }
-          }
-        }
-
-        // Re-parse tags for modified segments so subsequent `getAnnotations`
-        // (and thus `onSelectText`) reflects the updated anchors immediately.
-        for (const idx of changedSegmentIndices) {
-          this.text.segments[idx]?.parseText();
-        }
-
-        this.text.assignValueFromSegments();
-
-        // update annotator
-        // this.text.prepareSegments();
-        this.warnings.onTextChanged(this.text.value);
-        this.draw();
+    let closeTag: Tag | undefined;
+    let closeSegIdx = -1;
+    for (let i = anchorSegIdx; i < this.text.segments.length; i++) {
+      const seg = this.text.segments[i];
+      const candidates = i === anchorSegIdx
+        ? seg.closingTags.filter((t) => t.position > anchorPos)
+        : seg.closingTags;
+      closeTag = candidates.find((tag) => tag.getTagName() === anchor);
+      if (closeTag) {
+        closeSegIdx = i;
+        break;
       }
     }
+
+    if (closeTag && closeSegIdx !== -1) {
+      const closeSeg = this.text.segments[closeSegIdx];
+      const closePos = closeTag.position;
+      closeSeg.raw =
+        closeSeg.raw.slice(0, closePos) +
+        closeSeg.raw.slice(closePos + closeTag.getTagLength());
+      changedSegmentIndices.add(closeSegIdx);
+    }
+
+    if (openTag) {
+      openSegment.raw =
+        openSegment.raw.slice(0, anchorPos) +
+        openSegment.raw.slice(anchorPos + openTag.getTagLength());
+      changedSegmentIndices.add(anchorSegIdx);
+    }
+
+    for (const idx of changedSegmentIndices) {
+      this.text.segments[idx]?.parseText();
+    }
+
+    this.text.assignValueFromSegments();
+    this.warnings.onTextChanged(this.text.value);
+    this.draw();
   }
 
   onCanvasResize() {

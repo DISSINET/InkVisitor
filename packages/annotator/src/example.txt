@@ -1,3 +1,6 @@
-
+<first>
+<second>
 
 In <645bce7d-ecc7-49b4-9b3a-88eb22cf94d1 elvl="1">nomine <e28f5da8-d49b-4d33-bd58-c9370cca0a13 elvl="1"><97d48220-068d-4d35-8816-8e74ab1d7b6a elvl="1">Domini amen</97d48220-068d-4d35-8816-8e74ab1d7b6a></645bce7d-ecc7-49b4-9b3a-88eb22cf94d1>. Anno</e28f5da8-d49b-4d33-bd58-c9370cca0a13> eiusdem millesimo ducentesimo nonagesimo primo, vigesimo nono die mensis madii.Onebene condam Aymerici Spiriti de <645bce7d-ecc7-49b4-9b3a-88eb22cf94d1 elvl="1">Volta</645bce7d-ecc7-49b4-9b3a-88eb22cf94d1> <645bce7d-ecc7-49b4-9b3a-88eb22cf94d3 elvl="1">Mantuana</645bce7d-ecc7-49b4-9b3a-88eb22cf94d3> <31fa1d8f-bc6f-4db6-939f-72aac06f0647 elvl="1">qui</31fa1d8f-bc6f-4db6-939f-72aac06f0647> nunc moratur in domibus sacerdotum Sancti M
+</second>
+</first>
