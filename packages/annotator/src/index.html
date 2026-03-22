@@ -16,7 +16,7 @@
   <body style="background-color: black">
     <div style="padding: 20px; background-color: #ccc">
       <div style="display: flex; flex-direction: row">
-        <div class="canvasses-wrapper">
+        <div id="annotator-container" class="canvasses-wrapper">
           <div style="display: flex">
             <canvas
               id="lines"
@@ -135,6 +135,13 @@
       <fieldset>
         <label>resize</label>
         <button id="resizeBtn">Resize Annotator</button>
+      </fieldset>
+      <fieldset>
+        <label>viewport position</label>
+        <input type="checkbox" id="usePositionStorage" checked />
+        <label for="usePositionStorage">store & restore position</label>
+        <button id="collapseStoreBtn">Collapse & store position</button>
+        <button id="restorePositionBtn">Restore</button>
       </fieldset>
     </div>
 
@@ -383,6 +390,35 @@
 
       document.getElementById("resizeBtn").onclick = () => {
         annotator.resize();
+      };
+
+      let storedScrollPosition = null;
+      let annotatorContainerParent = null;
+      const annotatorContainer = document.getElementById("annotator-container");
+
+      document.getElementById("collapseStoreBtn").onclick = () => {
+        if (document.getElementById("usePositionStorage").checked) {
+          storedScrollPosition = annotator.getViewportStartInRawText();
+          console.log("Storing position:", storedScrollPosition);
+        } else {
+          storedScrollPosition = null;
+          console.log("Position not stored (checkbox unchecked)");
+        }
+        annotatorContainerParent = annotatorContainer.parentNode;
+        annotatorContainer.remove();
+      };
+
+      document.getElementById("restorePositionBtn").onclick = () => {
+        if (annotatorContainerParent) {
+          annotatorContainerParent.appendChild(annotatorContainer);
+        }
+        if (document.getElementById("usePositionStorage").checked && storedScrollPosition != null) {
+          console.log("Loading position:", storedScrollPosition);
+          annotator.scrollToRawPosition(storedScrollPosition);
+        } else {
+          console.log("Restoring to top (no position loaded)");
+          annotator.scrollToLine(0);
+        }
       };
 
       let searchOccurrence = 0;

@@ -6,7 +6,13 @@ import Scroller from "./Scroller";
 import Text, { Tag, SegmentPosition } from "./Text";
 import Viewport from "./Viewport";
 import { Warnings } from "./warnings";
-import { EditMode, HighlightMode } from "./constants";
+import {
+  DEFAULT_FONT,
+  DEFAULT_FONT_SIZE,
+  EditMode,
+  HighlightMode,
+  LINE_HEIGHT,
+} from "./constants";
 
 // Updated regex to properly handle tags with attributes
 // Opening tags: <tagname attr="value"> or <tagname>
@@ -65,7 +71,7 @@ export class Annotator {
   ctx: CanvasRenderingContext2D;
 
   // TODO: different font, different sizes
-  font: string = "12px Monospace";
+  font: string = `${DEFAULT_FONT_SIZE}px ${DEFAULT_FONT}`;
 
   fontColor: string = "black";
   bgColor: string = "white";
@@ -73,7 +79,7 @@ export class Annotator {
   selectOpacity: number = 0.5;
 
   charWidth: number = 0;
-  lineHeight: number = 15;
+  lineHeight: number = LINE_HEIGHT;
 
   inputText: string = "";
 
@@ -119,9 +125,9 @@ export class Annotator {
     }
 
     this.ratio = ratio;
-    this.font = `${12 * this.ratio}px Monospace`;
+    this.font = `${DEFAULT_FONT_SIZE * this.ratio}px ${DEFAULT_FONT}`;
 
-    this.lineHeight = 15 * this.ratio;
+    this.lineHeight = LINE_HEIGHT * this.ratio;
 
     this.ctx = ctx;
     this.width =
@@ -136,7 +142,7 @@ export class Annotator {
 
     const charsAtLine = Math.floor(this.width / this.charWidth);
 
-    const noLinesViewport = Math.ceil(this.height / this.lineHeight) - 1;
+    const noLinesViewport = this.viewportFullRowCount() + 1;
 
     this.viewport = new Viewport(0, noLinesViewport);
 
@@ -194,8 +200,6 @@ export class Annotator {
     const [start, end] = this.cursor.getAbsBounds();
 
     if (start && end) {
-      this.text.getSegmentPosition(start.yLine, start.xLine) as SegmentPosition;
-
       const startSegment = this.text.getSegmentPosition(
         start.yLine,
         start.xLine
@@ -209,6 +213,8 @@ export class Annotator {
       const anchors = this.getAnnotations(startSegment, endSegment);
 
       if (anchors.some((tag) => tag.getTagName() === anchor)) {
+        const changedSegmentIndices = new Set<number>();
+
         // find if open tag for given anchor is part of selection, otherwise find the last occurence of that anchor in the text before the selection
         const openTagSegment = this.text.segments
           .slice(0, endSegment.segmentIndex + 1)
@@ -231,7 +237,9 @@ export class Annotator {
 
             this.text.segments[openTagsSegmentI].raw =
               openTagSegment.raw.replace(openTag.getTag(), "");
-            // this.text.segments[openTagsSegmentI].parseText();
+            if (openTagsSegmentI >= 0) {
+              changedSegmentIndices.add(openTagsSegmentI);
+            }
           }
         }
 
@@ -257,8 +265,16 @@ export class Annotator {
             this.text.segments[closeTagsSegmentI].raw =
               closeTagSegment.raw.replace(`</${anchor}>`, "");
 
-            // this.text.segments[closeTagsSegmentI].parseText();
+            if (closeTagsSegmentI >= 0) {
+              changedSegmentIndices.add(closeTagsSegmentI);
+            }
           }
+        }
+
+        // Re-parse tags for modified segments so subsequent `getAnnotations`
+        // (and thus `onSelectText`) reflects the updated anchors immediately.
+        for (const idx of changedSegmentIndices) {
+          this.text.segments[idx]?.parseText();
         }
 
         this.text.assignValueFromSegments();
@@ -282,7 +298,7 @@ export class Annotator {
 
     this.setCharWidth("abcdefghijklmnopqrstuvwxyz0123456789");
 
-    const noLinesViewport = Math.ceil(this.height / this.lineHeight) - 1;
+    const noLinesViewport = this.viewportFullRowCount() + 1;
     const charsAtLine = Math.floor(this.width / this.charWidth);
 
     const positionBeforeRel = this.viewport.lineStart / this.text.noLines;
@@ -356,12 +372,38 @@ export class Annotator {
   }
 
   /**
+   * Whole text rows that fit in the backing-store height. The draw loop paints
+   * lines `lineStart` … `lineStart + viewport.noLines` (inclusive), i.e. this many rows.
+   * Using ceil would pretend a partial bottom row fits, which clips text/line numbers
+   * and makes `maxStart` too small so the document’s last line never reaches the bottom.
+   */
+  private viewportFullRowCount(): number {
+    return Math.max(1, Math.floor(this.height / this.lineHeight));
+  }
+
+  /**
+   * Converts mouse/pointer offset Y to canvas buffer Y (same scaling as getCanvasX).
+   */
+  getCanvasY(offsetY: number): number {
+    return offsetY * this.ratio;
+  }
+
+  /**
    * onMouseDown is handler for pressed mouse-key event
    * @param e
    */
   onMouseDown(e: MouseEvent) {
-    // move the cursor to selected position, but dont allow to move over the line boundaries (x axis)
-    this.cursor.setPositionFromEvent(e, this.lineHeight, this.charWidth);
+    this.cursor.setPositionFromEvent(
+      e,
+      this.lineHeight,
+      this.charWidth,
+      this.viewport.scrollOffsetY,
+      this.viewport.lineStart
+    );
+    this.cursor.yLine = Math.max(
+      0,
+      Math.min(this.cursor.yLine, Math.max(0, this.text.noLines - 1))
+    );
     const segment = this.text.cursorToIndex(this.viewport, this.cursor);
     if (segment) {
       const line = this.text.getLineFromPosition(segment);
@@ -370,7 +412,7 @@ export class Annotator {
       }
     }
 
-    this.cursor.selectArea(this.viewport.lineStart);
+    this.cursor.selectArea();
 
     this.annotatedPosition = this.text.cursorToIndex(
       this.viewport,
@@ -385,8 +427,17 @@ export class Annotator {
    * @param e
    */
   onMouseUp(e: MouseEvent) {
-    // move the cursor to selected position, but dont allow to move over the line boundaries (x axis)
-    this.cursor.setPositionFromEvent(e, this.lineHeight, this.charWidth);
+    this.cursor.setPositionFromEvent(
+      e,
+      this.lineHeight,
+      this.charWidth,
+      this.viewport.scrollOffsetY,
+      this.viewport.lineStart
+    );
+    this.cursor.yLine = Math.max(
+      0,
+      Math.min(this.cursor.yLine, Math.max(0, this.text.noLines - 1))
+    );
     const segment = this.text.cursorToIndex(this.viewport, this.cursor);
     if (segment) {
       const line = this.text.getLineFromPosition(segment);
@@ -405,8 +456,17 @@ export class Annotator {
    */
   onMouseMove(e: MouseEvent) {
     if (this.cursor.isSelecting()) {
-      // move the cursor to selected position, but dont allow to move over the line boundaries (x axis)
-      this.cursor.setPositionFromEvent(e, this.lineHeight, this.charWidth);
+      this.cursor.setPositionFromEvent(
+        e,
+        this.lineHeight,
+        this.charWidth,
+        this.viewport.scrollOffsetY,
+        this.viewport.lineStart
+      );
+      this.cursor.yLine = Math.max(
+        0,
+        Math.min(this.cursor.yLine, Math.max(0, this.text.noLines - 1))
+      );
       const segment = this.text.cursorToIndex(this.viewport, this.cursor);
       if (segment) {
         const line = this.text.getLineFromPosition(segment);
@@ -415,14 +475,23 @@ export class Annotator {
         }
       }
 
-      this.cursor.selectArea(this.viewport.lineStart);
+      this.cursor.selectArea();
       this.draw();
     }
   }
 
   onMouseDoubleClick(e: MouseEvent) {
-    // move the cursor to selected position, but dont allow to move over the line boundaries (x axis)
-    this.cursor.setPositionFromEvent(e, this.lineHeight, this.charWidth);
+    this.cursor.setPositionFromEvent(
+      e,
+      this.lineHeight,
+      this.charWidth,
+      this.viewport.scrollOffsetY,
+      this.viewport.lineStart
+    );
+    this.cursor.yLine = Math.max(
+      0,
+      Math.min(this.cursor.yLine, Math.max(0, this.text.noLines - 1))
+    );
     const segment = this.text.cursorToIndex(this.viewport, this.cursor);
     if (segment) {
       const line = this.text.getLineFromPosition(segment);
@@ -437,30 +506,29 @@ export class Annotator {
     );
     this.cursor.selectStart = {
       xLine: this.cursor.xLine + offsetLeft,
-      yLine: this.cursor.yLine + this.viewport.lineStart,
+      yLine: this.cursor.yLine,
     };
     this.cursor.selectEnd = {
       xLine: this.cursor.xLine + offsetRight,
-      yLine: this.cursor.yLine + this.viewport.lineStart,
+      yLine: this.cursor.yLine,
     };
     this.cursor.xLine = this.cursor.selectEnd.xLine;
-    this.cursor.yLine = this.cursor.selectEnd.yLine;
     this.cursor.selectDirection = DIRECTION.FORWARD;
     this.draw();
   }
 
   /**
-   * onWheel is handler for mouse-wheel-event
+   * onWheel is handler for mouse-wheel-event. Uses fluent scroll: accumulates deltaY
+   * so text and line numbers scroll smoothly together.
    * @param e
    */
   onWheel(e: WheelEvent) {
-    const down = e.deltaY < 0 ? false : true;
-
-    if (down) {
-      this.viewport.scrollDown(1, this.text.noLines);
-    } else if (!down) {
-      this.viewport.scrollUp(1);
-    }
+    const deltaBufferPx = e.deltaY * this.ratio;
+    this.viewport.addScrollOffset(
+      deltaBufferPx,
+      this.lineHeight,
+      this.text.noLines
+    );
 
     e.preventDefault();
     this.draw();
@@ -735,14 +803,18 @@ export class Annotator {
   addScroller(scrollerDiv: HTMLDivElement) {
     this.scroller = new Scroller(scrollerDiv);
     this.scroller.onChange((percentage: number) => {
-      const toLine = Math.floor(
-        ((this.text.noLines -
-          (this.viewport.lineEnd - this.viewport.lineStart)) /
-          100) *
-          percentage
-      );
+      const viewportLines = this.viewport.lineEnd - this.viewport.lineStart;
+      const scrollableLines = Math.max(0, this.text.noLines - viewportLines);
+      const scrollablePx = scrollableLines * this.lineHeight;
+      const targetPx = (percentage / 100) * scrollablePx;
+      const targetLineFrac = scrollablePx > 0 ? targetPx / this.lineHeight : 0;
 
-      this.viewport.scrollTo(toLine, this.text.noLines);
+      this.viewport.setScrollPosition(
+        targetLineFrac,
+        0,
+        this.lineHeight,
+        this.text.noLines
+      );
       this.draw();
     });
     this.scroller?.setRunnerSize(
@@ -754,44 +826,92 @@ export class Annotator {
   }
 
   /**
+   * Line gutter must share the main canvas backing-store height (and horizontal scale).
+   * Using `height * RATIO` from React alone can differ from `style.height * ratio` on the
+   * main canvas → 1× vs 2× mismatch → line numbers look huge and rows don't align.
+   */
+  private syncLineNumbersCanvasToMain(): void {
+    if (!this.lines) return;
+    const mainEl = this.element;
+    const lineEl = this.lines.element;
+
+    const parseCssPx = (v: string | undefined): number => {
+      if (!v) return 0;
+      const n = Number(
+        String(v)
+          .replace(/px\s*$/i, "")
+          .trim()
+      );
+      return Number.isFinite(n) ? n : 0;
+    };
+
+    const mainCssW = parseCssPx(mainEl.style.width) || mainEl.clientWidth || 1;
+    const gutterCssW =
+      parseCssPx(lineEl.style.width) || lineEl.clientWidth || 50;
+
+    if (mainEl.style.height) {
+      lineEl.style.height = mainEl.style.height;
+    }
+
+    const scale =
+      mainEl.width > 0 && mainCssW > 0 ? mainEl.width / mainCssW : this.ratio;
+    const nextW = Math.max(1, Math.round(gutterCssW * scale));
+    const nextH =
+      mainEl.height > 0
+        ? mainEl.height
+        : Math.max(
+            1,
+            Math.round(
+              (parseCssPx(mainEl.style.height) || mainEl.clientHeight) *
+                this.ratio
+            )
+          );
+
+    if (lineEl.width !== nextW || lineEl.height !== nextH) {
+      lineEl.width = nextW;
+      lineEl.height = nextH;
+    }
+  }
+
+  /**
    * draw resets the canvas and redraws the scene anew.
    * First draw lines with text, then allow each component to draw their own logic.
    * TODO - this should be done in conjunction with requestAnimationFrame
    */
   draw() {
+    this.syncLineNumbersCanvasToMain();
+
     this.ctx.reset();
 
     this.ctx.fillStyle = this.bgColor;
     this.ctx.fillRect(0, 0, this.width, this.height);
 
+    this.ctx.save();
+    this.ctx.translate(0, -this.viewport.scrollOffsetY);
+
     this.ctx.font = this.font;
     this.ctx.fillStyle = this.fontColor;
+    this.ctx.textBaseline = "middle";
 
     const textToRender = this.text.getViewportText(this.viewport);
-    const renderEndCond = this.viewport.lineEnd - this.viewport.lineStart
+    const renderEndCond = this.viewport.lineEnd - this.viewport.lineStart;
     for (let renderLine = 0; renderLine <= renderEndCond; renderLine++) {
       const textLine = textToRender[renderLine];
       if (textLine) {
-        this.ctx.fillText(textLine, 0, (renderLine + 1) * this.lineHeight);
+        this.ctx.fillText(textLine, 0, (renderLine + 0.5) * this.lineHeight);
       }
     }
 
     const textSegment = this.text.cursorToIndex(this.viewport, this.cursor);
 
     if (textSegment) {
-      // fix cursor position to end of the line (cursor.xLine could be virtually infinity)
       this.cursor.xLine = textSegment.charInLineIndex;
 
-      this.cursor.draw(
-        this.ctx,
-        this.viewport,
-        this.text,
-        {
-          lineHeight: this.lineHeight,
-          charWidth: this.charWidth,
-          charsAtLine: this.text.charsAtLine,
-        },
-      );
+      this.cursor.draw(this.ctx, this.viewport, this.text, {
+        lineHeight: this.lineHeight,
+        charWidth: this.charWidth,
+        charsAtLine: this.text.charsAtLine,
+      });
     }
 
     // if (this.onSelectTextCb && this.cursor.isSelected()) {
@@ -887,27 +1007,28 @@ export class Annotator {
 
         highlighter.selectStart = item.start;
         highlighter.selectEnd = item.end;
-        highlighter.draw(
-          this.ctx,
-          this.viewport,
-          this.text,
-          {
-            lineHeight: this.lineHeight,
-            charWidth: this.charWidth,
-            charsAtLine: this.text.charsAtLine,
-          },
-        );
+        highlighter.draw(this.ctx, this.viewport, this.text, {
+          lineHeight: this.lineHeight,
+          charWidth: this.charWidth,
+          charsAtLine: this.text.charsAtLine,
+        });
       }
     }
+
+    this.ctx.restore();
 
     if (this.scroller) {
       this.scroller.update(
         this.viewport.lineStart,
         this.viewport.lineEnd,
-        this.text.noLines
+        this.text.noLines,
+        this.viewport.scrollOffsetY,
+        this.lineHeight
       );
     }
     if (this.lines) {
+      this.lines.font = this.font;
+      this.lines.lineHeight = this.lineHeight;
       this.lines.draw(this.viewport);
     }
 
@@ -923,6 +1044,14 @@ export class Annotator {
    * @param mode
    */
   setMode(mode: EditMode) {
+    let absIndex: number | null = null;
+    if (this.cursor.xLine >= 0 && this.cursor.yLine >= 0) {
+      const segPos = this.text.cursorToIndex(this.viewport, this.cursor);
+      if (segPos !== null) {
+        absIndex = this.text.getAbsTextIndexFromPosition(segPos);
+      }
+    }
+
     this.element.classList.remove(this.text.mode);
     this.element.classList.add(mode);
 
@@ -930,6 +1059,23 @@ export class Annotator {
     this.cursor.reset();
     this.text.prepareSegments();
     this.text.calculateLines();
+
+    if (absIndex !== null && absIndex >= 0) {
+      const segPos = this.text.getSegmentFromAbsTextIndex(absIndex);
+      if (segPos !== null) {
+        const coords = this.text.positionToCursor(this.viewport, segPos);
+        if (coords !== null) {
+          const absY = this.viewport.lineStart + coords.yLine;
+          this.cursor.setPosition(coords.xLine, absY);
+          if (
+            absY < this.viewport.lineStart ||
+            absY > this.viewport.lineEnd - 1
+          ) {
+            this.viewport.scrollTo(absY, this.text.noLines);
+          }
+        }
+      }
+    }
   }
 
   /**
@@ -975,7 +1121,34 @@ export class Annotator {
       // after this we have envelope around neighboring tags
       indexEnd = this.skipTagsOnRight(indexEnd);
       // Sanitize envelope range by removing enveloping tags from both left and right sides
-      [indexStart, indexEnd] = this.sanitizeEnvelopeRange(indexStart, indexEnd);
+      const raw = this.text.value;
+      let minTagStart = raw.length;
+      let maxTagEnd = 0;
+      const openR = new RegExp(openingTagRegex.source, openingTagRegex.flags);
+      const closeR = new RegExp(closingTagRegex.source, closingTagRegex.flags);
+      let m: RegExpExecArray | null;
+      while ((m = openR.exec(raw)) !== null) {
+        minTagStart = Math.min(minTagStart, m.index);
+        maxTagEnd = Math.max(maxTagEnd, m.index + m[0].length);
+      }
+      while ((m = closeR.exec(raw)) !== null) {
+        minTagStart = Math.min(minTagStart, m.index);
+        maxTagEnd = Math.max(maxTagEnd, m.index + m[0].length);
+      }
+      const selectionEncompassesAllTags =
+        minTagStart <= maxTagEnd &&
+        indexStart <= minTagStart &&
+        indexEnd >= maxTagEnd;
+      if (selectionEncompassesAllTags) {
+        if (indexStart === 0) {
+          indexEnd = raw.length;
+        }
+      } else {
+        [indexStart, indexEnd] = this.sanitizeEnvelopeRange(
+          indexStart,
+          indexEnd
+        );
+      }
 
       // could be '<tag>text .... text</tag> (closing tag always included if present)
       const selectedRawText = this.text.value.slice(indexStart, indexEnd);
@@ -1063,19 +1236,52 @@ export class Annotator {
     this.draw();
   }
 
+  /**
+   * Returns the absolute character index in raw text that corresponds to the start of the viewport (first visible character at the top of the canvas).
+   */
+  getViewportStartInRawText(): number {
+    const pos = this.text.getSegmentPosition(this.viewport.lineStart, 0);
+    if (!pos) return 0;
+    return this.text.getAbsTextIndexFromPosition(pos);
+  }
+
+  /**
+   * Scrolls the viewport so that the given raw text character index is at the top of the visible area.
+   */
+  scrollToRawPosition(rawIndex: number): void {
+    const pos = this.text.getSegmentFromAbsTextIndex(rawIndex);
+    if (!pos) return;
+    const segment = this.text.segments[pos.segmentIndex];
+    const absLine = segment.lineStart + pos.lineIndex;
+    this.viewport.scrollTo(absLine, this.text.noLines);
+    this.draw();
+  }
+
   updateText(newText: string) {
     const positionBeforeChange = this.viewport.lineStart;
+    const scrollOffsetBeforeChange = this.viewport.scrollOffsetY;
 
     this.text.value = newText;
     this.text.prepareSegments();
     this.text.calculateLines();
     this.warnings.onTextChanged(this.text.value);
 
-    if (positionBeforeChange < this.text.noLines) {
-      this.scrollToLine(positionBeforeChange);
-    } else {
-      this.scrollToLine(this.text.noLines - 1);
-    }
+    // Preserve fluent scroll offset (deltaY) so updating text (e.g. discard)
+    // doesn't snap the viewport to the top of a line.
+    const clampedLineStart = Math.max(
+      0,
+      Math.min(positionBeforeChange, Math.max(0, this.text.noLines - 1))
+    );
+    const desiredLineStart =
+      clampedLineStart + (scrollOffsetBeforeChange || 0) / this.lineHeight;
+
+    this.viewport.setScrollPosition(
+      desiredLineStart,
+      0,
+      this.lineHeight,
+      this.text.noLines
+    );
+    this.draw();
   }
 
   /**
@@ -1160,20 +1366,19 @@ export class Annotator {
    * @param occurence
    */
   selectSearchOccurrence(occurence: Occurrence) {
+    const absY =
+      this.text.segments[occurence.segmentIndex].lineStart +
+      occurence.lineIndex;
     this.cursor.xLine = occurence.end;
-    this.cursor.yLine = occurence.lineIndex;
+    this.cursor.yLine = absY;
 
     this.cursor.selectStart = {
       xLine: occurence.start,
-      yLine:
-        this.text.segments[occurence.segmentIndex].lineStart +
-        occurence.lineIndex,
+      yLine: absY,
     };
     this.cursor.selectEnd = {
       xLine: occurence.end,
-      yLine:
-        this.text.segments[occurence.segmentIndex].lineStart +
-        occurence.lineIndex,
+      yLine: absY,
     };
 
     this.scrollToLine(this.cursor.selectStart.yLine);
@@ -1216,10 +1421,7 @@ export class Annotator {
         if (area) {
           this.text.deleteRangeText(area[0], area[1]);
           this.cursor.reset();
-          this.cursor.setPosition(
-            area[0].xLine,
-            area[0].yLine - this.viewport.lineStart
-          );
+          this.cursor.setPosition(area[0].xLine, area[0].yLine);
         }
         this.text.insertText(this.viewport, this.cursor, clipText);
         this.cursor.move(clipText.length, 0);
@@ -1238,10 +1440,7 @@ export class Annotator {
     if (area) {
       this.text.deleteRangeText(area[0], area[1]);
       this.cursor.reset();
-      this.cursor.setPosition(
-        area[0].xLine,
-        area[0].yLine - this.viewport.lineStart
-      );
+      this.cursor.setPosition(area[0].xLine, area[0].yLine);
     }
     this.text.insertText(this.viewport, this.cursor, text);
     this.cursor.move(text.length, 0);
@@ -1342,13 +1541,10 @@ export class Annotator {
     // Utility functions
     const clamp = (i: number): number => Math.max(0, Math.min(i, raw.length));
 
-    // Find tag positions only within the selection boundary
-    const findRelevantTagPositions = (): Array<{
-      start: number;
-      end: number;
-      name: string;
-      isOpen: boolean;
-    }> => {
+    const findAllTagPositionsInRange = (
+      rangeStart: number,
+      rangeEnd: number
+    ): Array<{ start: number; end: number; name: string; isOpen: boolean }> => {
       const positions: Array<{
         start: number;
         end: number;
@@ -1357,7 +1553,7 @@ export class Annotator {
       }> = [];
 
       // Search only within the selection range
-      const searchText = raw.slice(start, end);
+      const searchText = raw.slice(rangeStart, rangeEnd);
 
       // Use existing regexes to find all tags in the search range
       const openingRegex = new RegExp(
@@ -1372,22 +1568,22 @@ export class Annotator {
       // Find all opening tags
       let match;
       while ((match = openingRegex.exec(searchText)) !== null) {
-        const absoluteStart = start + match.index;
-        const absoluteEnd = start + match.index + match[0].length;
-
+        const absoluteStart = rangeStart + match.index;
+        const absoluteEnd = rangeStart + match.index + match[0].length;
+        const rawName = match[1] || "";
+        const normalizedName = rawName.split(/\s+/)[0].toLowerCase();
         positions.push({
           start: absoluteStart,
           end: absoluteEnd,
-          name: match[1].toLowerCase(),
+          name: normalizedName,
           isOpen: true,
         });
       }
 
       // Find all closing tags
       while ((match = closingRegex.exec(searchText)) !== null) {
-        const absoluteStart = start + match.index;
-        const absoluteEnd = start + match.index + match[0].length;
-
+        const absoluteStart = rangeStart + match.index;
+        const absoluteEnd = rangeStart + match.index + match[0].length;
         positions.push({
           start: absoluteStart,
           end: absoluteEnd,
@@ -1399,6 +1595,13 @@ export class Annotator {
       // Sort by position to maintain order
       return positions.sort((a, b) => a.start - b.start);
     };
+
+    const findRelevantTagPositions = (): Array<{
+      start: number;
+      end: number;
+      name: string;
+      isOpen: boolean;
+    }> => findAllTagPositionsInRange(start, end);
 
     // Normalize and clamp
     let start = clamp(indexStart);
@@ -1425,8 +1628,10 @@ export class Annotator {
 
     // If both boundaries are in text content, no adjustment needed
     if (isInsideText(start) && isInsideText(end)) {
-      // But if the selection extends beyond the actual content, we should still contract it
-      // Only apply this logic if the selection is not a complete tag pair
+      if (start === 0 && end === raw.length) {
+        return [start, end];
+      }
+
       let isCompleteTagPair = false;
 
       // Check if this is a complete tag pair
@@ -1440,6 +1645,20 @@ export class Annotator {
             break;
           }
         }
+      }
+
+      const hasCompleteTagPairFullyContained = tagPositions.some((tag) => {
+        if (!tag.isOpen) return false;
+        const closingTag = tagPositions.find(
+          (t) => !t.isOpen && t.name === tag.name && t.start > tag.start
+        );
+        return (
+          closingTag != null && start <= tag.start && end >= closingTag.end
+        );
+      });
+
+      if (hasCompleteTagPairFullyContained) {
+        return [start, end];
       }
 
       // Only contract if it's not a complete tag pair
@@ -1571,8 +1790,7 @@ export class Annotator {
         const closingTag = tagPositions.find(
           (t) => !t.isOpen && t.name === tag.name && t.start > tag.start
         );
-        if (closingTag && start === tag.start && end === closingTag.end) {
-          // Selection exactly matches a complete tag pair, no adjustment needed
+        if (closingTag && start === tag.start && end >= closingTag.end) {
           return [start, end];
         }
       }

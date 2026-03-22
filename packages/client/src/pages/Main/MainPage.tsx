@@ -606,7 +606,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
   // postponing the dispatch so the panel resizing happens before the rerender which minifies the content
   const debouncedSetSecondPanelWidth = useDebouncedCallback((width: number) => {
     dispatch(setSecondPanelRealWidth(width));
-  }, 400);
+  }, 0);
 
   const secondPanelWidth = useMemo(() => {
     const width =

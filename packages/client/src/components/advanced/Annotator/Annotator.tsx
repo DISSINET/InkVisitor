@@ -37,10 +37,10 @@ import { CStatement } from "constructors";
 import {
   useAnnotatorSearch,
   useDebounce,
+  useDebouncedCallback,
   useSearchParams,
   useTheme,
 } from "hooks";
-import { StatementListSearchLine } from "pages/Main/containers/StatementsListBox/StatementListSearchLine/StatementListSearchLine";
 import { BsFileTextFill } from "react-icons/bs";
 import { HiCodeBracket } from "react-icons/hi2";
 import { collectStatementAnchors, getStatementOrderByIndex } from "utils/utils";
@@ -60,6 +60,7 @@ import {
 } from "./AnnotatorStyles";
 import { annotatorHighlight } from "./highlight";
 import { RATIO, TerritoryCreateModalType, W_SCROLL } from "./types";
+import { AnnotatorSearchLine } from "./AnnotatorSearchLine/AnnotatorSearchLine";
 
 interface TextAnnotatorProps {
   width: number;
@@ -72,8 +73,10 @@ interface TextAnnotatorProps {
 
   forwardAnnotator?: (annotator?: Annotator) => void;
 
-  // storedAnnotatorScroll?: number;
-  // setStoredAnnotatorScroll?: React.Dispatch<React.SetStateAction<number>>;
+  storedAnnotatorScrollPosition?: number | null;
+  setStoredAnnotatorScrollPosition?: React.Dispatch<
+    React.SetStateAction<number | null>
+  >;
 
   territory?: IResponseTerritory;
   // territoryId is from URL params and is used to reset the annotator when the territory changes
@@ -106,8 +109,8 @@ export const TextAnnotator = ({
   thisTerritoryEntityId = undefined,
 
   forwardAnnotator = (undefined) => {},
-  // storedAnnotatorScroll = 0,
-  // setStoredAnnotatorScroll = () => {},
+  storedAnnotatorScrollPosition = null,
+  setStoredAnnotatorScrollPosition,
 
   territory,
   territoryId,
@@ -202,14 +205,31 @@ export const TextAnnotator = ({
   });
 
   const wLineNumbers = displayLineNumbers ? 50 : 0;
-  const wTextArea = width - wLineNumbers - W_SCROLL;
+  const wTextArea = Math.max(0, width - wLineNumbers - W_SCROLL);
 
   const [isSelectingText, setIsSelectingText] = useState<boolean>(false);
 
   const mainCanvas = useRef<HTMLCanvasElement>(null);
   const scroller = useRef<HTMLDivElement>(null);
   const lines = useRef<HTMLCanvasElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
+  const annotatorRef = useRef<Annotator | null>(null);
+  annotatorRef.current = annotator;
+
+  const saveScrollPositionOnScrollEnd = useDebouncedCallback(() => {
+    const a = annotatorRef.current;
+    if (a && setStoredAnnotatorScrollPosition) {
+      setStoredAnnotatorScrollPosition(a.getViewportStartInRawText());
+    }
+  }, 500);
+
+  useEffect(() => {
+    if (!annotator || !setStoredAnnotatorScrollPosition) return;
+    annotator.onScroll(() => saveScrollPositionOnScrollEnd());
+  }, [
+    annotator,
+    setStoredAnnotatorScrollPosition,
+    saveScrollPositionOnScrollEnd,
+  ]);
 
   useEffect(() => {
     if (annotator) {
@@ -218,6 +238,9 @@ export const TextAnnotator = ({
       setSearchActiveOccurence(0);
       setSearchTerm("");
       annotator.draw();
+      if (mainCanvas.current) {
+        mainCanvas.current.focus();
+      }
     }
   }, [annotatorMode]);
 
@@ -384,8 +407,7 @@ export const TextAnnotator = ({
         let menuY = isBackwardsSelection ? endY : startY;
 
         // Never position menu on first or second row — start from third row
-        const thirdRowY =
-          rect.top + (2 * annotator.lineHeight) / RATIO;
+        const thirdRowY = rect.top + (2 * annotator.lineHeight) / RATIO;
         if (!isFullSelection && menuY < thirdRowY) {
           menuY = thirdRowY;
         }
@@ -504,8 +526,6 @@ export const TextAnnotator = ({
           }
         : {}
     );
-    setSelectedText("");
-    annotator?.clearSelection();
     handleSaveNewContent(true);
     handleRefreshEntityAndStatement(entityId);
     toast.info(`Anchor created ${entityId}.`);
@@ -544,12 +564,6 @@ export const TextAnnotator = ({
       annotator.fontColor = theme.color.black;
       annotator.bgColor = "transparent";
       annotator.setSelectStyle("turquoise", 0.8, theme.color.black);
-
-      // Update Lines component colors if it exists
-      if (annotator.lines) {
-        annotator.lines.fontColor = theme.color.plain;
-        annotator.lines.bgColor = theme.color.white;
-      }
 
       // Update highlight callback to use current theme
       annotator.onHighlight((entityId) => {
@@ -623,17 +637,19 @@ export const TextAnnotator = ({
     const initialContent = dataDocument?.content ?? "no text";
     setLocalTextContent(initialContent);
 
-    newAnnotator.draw();
+    // Ensure the initial render uses the current mode (e.g. HIGHLIGHT hides XML tags).
+    // Otherwise we may briefly draw in RAW mode and show tags on first load.
+    newAnnotator.setMode(originalMode);
+
+    if (storedAnnotatorScrollPosition != null) {
+      // scrollToRawPosition triggers a draw
+      newAnnotator.scrollToRawPosition(storedAnnotatorScrollPosition);
+    } else {
+      newAnnotator.draw();
+    }
 
     setAnnotator(newAnnotator);
     forwardAnnotator(newAnnotator);
-
-    // Probably not necessary, this is sending many updates to component on scroll
-    // newAnnotator.onScroll(() => {
-    //   setStoredAnnotatorScroll(newAnnotator.viewport.lineStart);
-    // });
-
-    newAnnotator.setMode(originalMode);
   };
 
   useEffect(() => {
@@ -642,9 +658,9 @@ export const TextAnnotator = ({
     }
   }, [
     displayLineNumbers,
-    theme,
     hlEntities ?? [],
     dataDocumentIsFetching,
+    theme,
     dataDocument,
     isSaving,
   ]);
@@ -655,6 +671,12 @@ export const TextAnnotator = ({
       annotator?.resize();
     }
   }, [width, height]);
+
+  useEffect(() => {
+    if (storedAnnotatorScrollPosition !== null) {
+      annotator?.scrollToRawPosition(storedAnnotatorScrollPosition);
+    }
+  }, [width]);
 
   const onCreateTerritory = (
     mode: TerritoryCreateModalType,
@@ -709,9 +731,10 @@ export const TextAnnotator = ({
 
   const onRemoveAnchor = (anchor: string) => {
     annotator?.removeAnchorFromSelection(anchor);
-    handleSaveNewContent(true);
-    setSelectedText("");
-    annotator?.clearSelection();
+    // TODO: Remove only one occurrence of this anchor id from selectedAnchors (entity can be anchored multiple times)
+    // FIX: when same id is anchored multiple times, the highlight in text doesn't get updated correctly
+
+    handleSaveNewContent(true, true);
     handleRefreshEntityAndStatement(anchor);
   };
 
@@ -728,36 +751,6 @@ export const TextAnnotator = ({
       dataDocument !== undefined
     );
   }, [annotatorMode, selectedText, isSelectingText, dataDocument]);
-
-  // Handle click outside menu to close it
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        isMenuDisplayed &&
-        menuRef.current &&
-        !menuRef.current.contains(event.target as Node) &&
-        !mainCanvas.current?.contains(event.target as Node) &&
-        !statementListBoxRef?.current?.contains(event.target as Node)
-      ) {
-        // Check if click is within Modal
-        const target = event.target as Element;
-        const isWithinModal = target.closest("[data-attribute-modal]") !== null;
-
-        if (!isWithinModal) {
-          setSelectedText("");
-          annotator?.clearSelection();
-        }
-      }
-    };
-
-    if (isMenuDisplayed) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isMenuDisplayed, annotator, statementListBoxRef]);
 
   const hasParentT = territory?.data?.parent !== undefined;
 
@@ -847,7 +840,7 @@ export const TextAnnotator = ({
 
   return (
     <>
-      <StatementListSearchLine
+      <AnnotatorSearchLine
         showStatementList={showStatementList ?? false}
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
@@ -891,7 +884,6 @@ export const TextAnnotator = ({
               <StyledAnnotatorMenu
                 ref={(node) => {
                   refs.setFloating(node);
-                  menuRef.current = node;
                 }}
                 style={floatingStyles}
               >
@@ -938,12 +930,13 @@ export const TextAnnotator = ({
           {displayLineNumbers && (
             <StyledLinesCanvas
               ref={lines}
-              width={wLineNumbers}
-              height={height}
               style={{
                 outline: "none",
+                width: wLineNumbers,
+                height,
                 backgroundColor: theme?.color.white,
-                color: theme?.color.plain,
+                color: theme?.color.gray[450],
+                borderRadius: "4px 0px 0px 4px",
               }}
             />
           )}
@@ -962,17 +955,8 @@ export const TextAnnotator = ({
               outline: "none",
             }}
           />
-          <StyledScrollerViewport
-            ref={scroller}
-            style={{
-              background: theme.color.grey,
-            }}
-          >
-            <StyledScrollerCursor
-              style={{
-                backgroundColor: theme.color.primary,
-              }}
-            />
+          <StyledScrollerViewport ref={scroller}>
+            <StyledScrollerCursor />
           </StyledScrollerViewport>
 
           <Loader show={dataDocumentIsFetching} size={40} />
