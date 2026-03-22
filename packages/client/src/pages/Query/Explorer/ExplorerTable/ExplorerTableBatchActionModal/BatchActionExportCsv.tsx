@@ -1,6 +1,5 @@
 import { IEntity } from "@shared/types";
 import { Explore } from "@shared/types/query";
-import theme from "Theme/theme";
 import React, { useMemo, useState } from "react";
 import { Button } from "components";
 import {
@@ -15,6 +14,7 @@ import {
   StyledBatchSectionLabel,
   StyledBatchMessage,
 } from "./styles";
+import { useTheme } from "hooks";
 
 interface BatchActionExportCsvProps {
   selectedEntities: IEntity[];
@@ -57,6 +57,8 @@ export const BatchActionExportCsv: React.FC<BatchActionExportCsvProps> = ({
   const message = useMemo(() => {
     return `Export ${selectedEntities.length} entities with ${selectedColumnIds.length} of ${columns.length} columns.`;
   }, [selectedEntities.length, selectedColumnIds.length, columns.length]);
+
+  const theme = useTheme();
 
   const renderCheckboxIcon = (checked: boolean) =>
     checked ? (
