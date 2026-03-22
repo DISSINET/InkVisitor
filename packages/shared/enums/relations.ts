@@ -60,4 +60,22 @@ export namespace RelationEnums {
     Type.Actant1Semantics,
     Type.Actant2Semantics,
   ];
+
+  export const RelationTypeLabels: Record<Type, string> = {
+    [Type.Superclass]: "Superclass",
+    [Type.Synonym]: "Synonym",
+    [Type.Antonym]: "Antonym",
+    [Type.Holonym]: "Holonym",
+    [Type.PropertyReciprocal]: "Property Reciprocal",
+    [Type.SubjectActant1Reciprocal]: "Subject-Actant1 Reciprocal",
+    [Type.ActionEventEquivalent]: "Action-Event Equivalent",
+    [Type.Classification]: "Classification",
+    [Type.Identification]: "Identification",
+    [Type.Implication]: "Implication",
+    [Type.SuperordinateEntity]: "Superordinate Entity",
+    [Type.SubjectSemantics]: "Subject Semantics",
+    [Type.Actant1Semantics]: "Actant1 Semantics",
+    [Type.Actant2Semantics]: "Actant2 Semantics",
+    [Type.Related]: "Related",
+  };
 }
