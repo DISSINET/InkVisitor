@@ -1616,6 +1616,23 @@ class Api {
       throw this.handleError(err);
     }
   }
+  async batchEntityAddRelation(
+    entityIds: string[],
+    relationType: string,
+    targetEntityId: string,
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      const response = await this.connection.post(
+        `/entities/batchAddRelation`,
+        { entityIds, relationType, targetEntityId },
+        options
+      );
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
 }
 
 const apiSingleton = new Api();

@@ -13,7 +13,7 @@ interface ExplorerTableBatchActionModalProps {
   selectedEntities: IEntity[];
   columns: Explore.IExploreColumn[];
   onClose: () => void;
-  onExport: () => void;
+  onExport: (selectedColumnIds: string[]) => void;
   onApplyAction: () => void;
 }
 

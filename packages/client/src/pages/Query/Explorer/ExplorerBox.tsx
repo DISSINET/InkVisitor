@@ -12,7 +12,7 @@ interface ExplorerBoxProps {
   isQueryFetching: boolean;
   queryError: Error | null;
   height: number;
-  onExport: (rowsSelected: number[]) => void;
+  onExport: (rowsSelected: number[], selectedColumnIds?: string[]) => void;
   invalidateActiveQuery?: () => void;
   stableSignature?: string;
   getCachedEntity?: (rowIndex: number) => IResponseQueryEntity | undefined;

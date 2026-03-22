@@ -1016,6 +1016,115 @@ export default Router()
     )
   )
 
+  .post(
+    "/batchAddRelation",
+    asyncRouteHandler<IResponseGeneric>(
+      async (
+        request: IRequest<
+          unknown,
+          {
+            entityIds: string[];
+            relationType: string;
+            targetEntityId: string;
+          }
+        >
+      ) => {
+        const { entityIds, relationType, targetEntityId } = request.body;
+
+        if (
+          !entityIds ||
+          !Array.isArray(entityIds) ||
+          entityIds.length === 0 ||
+          !relationType ||
+          !targetEntityId
+        ) {
+          throw new BadParams(
+            "entityIds, relationType and targetEntityId must be provided"
+          );
+        }
+
+        await request.db.lock();
+
+        const entities = await Entity.findEntitiesByIds(
+          request.db.connection,
+          entityIds
+        );
+
+        if (entities.length === 0) {
+          throw new EntityDoesNotExist(
+            "none of the provided entities were found",
+            entityIds[0]
+          );
+        }
+
+        const targetEntity = await findEntityById(
+          request.db,
+          targetEntityId
+        );
+        if (!targetEntity) {
+          throw new EntityDoesNotExist(
+            "target entity was not found",
+            targetEntityId
+          );
+        }
+
+        const user = request.getUserOrFail();
+        const errors: Record<string, string> = {};
+        let created = 0;
+
+        for (const entityData of entities) {
+          try {
+            const model = getRelationClass({
+              type: relationType as RelationEnums.Type,
+              entityIds: [entityData.id, targetEntityId],
+            });
+
+            if (!model.isValid()) {
+              errors[entityData.id] = "relation not valid for this entity type";
+              continue;
+            }
+
+            model.entities = await Entity.findEntitiesByIds(
+              request.db.connection,
+              model.entityIds
+            );
+            if (model.entities.length !== model.entityIds.length) {
+              errors[entityData.id] = "entity not found for relation";
+              continue;
+            }
+
+            if (!model.canBeCreatedByUser(user)) {
+              errors[entityData.id] = "permission denied";
+              continue;
+            }
+
+            await model.beforeSave(request);
+
+            if (!(await model.save(request.db.connection))) {
+              errors[entityData.id] = "save failed";
+              continue;
+            }
+
+            await model.afterSave(request);
+            created++;
+          } catch (e) {
+            errors[entityData.id] =
+              e instanceof Error ? e.message : "unknown error";
+          }
+        }
+
+        return {
+          result: created > 0,
+          message: `Created ${created}/${entities.length} relations${
+            Object.keys(errors).length
+              ? `. Errors: ${JSON.stringify(errors)}`
+              : ""
+          }`,
+        };
+      }
+    )
+  )
+
   /**
    * @openapi
    * /entities/batch:

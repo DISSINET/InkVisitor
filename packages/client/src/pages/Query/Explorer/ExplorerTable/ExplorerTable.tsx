@@ -125,7 +125,7 @@ interface ExplorerTable {
   isQueryFetching: boolean;
   queryError: Error | null;
   height: number;
-  onExport: (rowsSelected: number[]) => void;
+  onExport: (rowsSelected: number[], selectedColumnIds?: string[]) => void;
   invalidateActiveQuery?: () => void;
   stableSignature?: string;
   getCachedEntity?: (rowIndex: number) => IResponseQueryEntity | undefined;
@@ -344,8 +344,8 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     }
   };
 
-  const handleExport = () => {
-    onExport(rowsSelected);
+  const handleExport = (selectedColumnIds?: string[]) => {
+    onExport(rowsSelected, selectedColumnIds);
   };
 
   const handleApplyBatchAction = () => {
@@ -647,8 +647,8 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           selectedEntities={selectedEntities}
           columns={columns}
           onClose={() => setIsBatchModalOpen(false)}
-          onExport={() => {
-            handleExport();
+          onExport={(selectedColumnIds) => {
+            handleExport(selectedColumnIds);
             setIsBatchModalOpen(false);
           }}
           onApplyAction={() => {
