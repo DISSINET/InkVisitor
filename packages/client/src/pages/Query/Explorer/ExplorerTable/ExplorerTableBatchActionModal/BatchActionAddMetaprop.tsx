@@ -6,6 +6,8 @@ import {
 } from "@shared/dictionaries";
 import { EntityEnums } from "@shared/enums";
 import { IEntity, IPropSpec } from "@shared/types";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import api from "api";
 import { AttributeIcon, Button } from "components";
 import Dropdown, {
   ElvlButtonGroup,
@@ -15,16 +17,14 @@ import Dropdown, {
   MoodVariantButtonGroup,
 } from "components/advanced";
 import React, { useMemo, useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import api from "api";
 import { toast } from "react-toastify";
 import {
-  batchWrapperStyle,
-  batchSectionStyle,
-  batchSectionLabelStyle,
   batchAttrRowStyle,
-  batchMessageStyle,
   batchFooterStyle,
+  batchSectionStyle,
+  batchWrapperStyle,
+  StyledBatchMessage,
+  StyledBatchSectionLabel,
 } from "./styles";
 
 interface BatchActionAddMetapropProps {
@@ -49,10 +49,18 @@ export const BatchActionAddMetaprop: React.FC<BatchActionAddMetapropProps> = ({
   const [typeEntity, setTypeEntity] = useState<IEntity | undefined>();
   const [valueEntity, setValueEntity] = useState<IEntity | undefined>();
 
-  const [logic, setLogic] = useState<EntityEnums.Logic>(EntityEnums.Logic.Positive);
-  const [certainty, setCertainty] = useState<EntityEnums.Certainty>(EntityEnums.Certainty.Empty);
-  const [mood, setMood] = useState<EntityEnums.Mood[]>([EntityEnums.Mood.Indication]);
-  const [moodvariant, setMoodvariant] = useState<EntityEnums.MoodVariant>(EntityEnums.MoodVariant.Realis);
+  const [logic, setLogic] = useState<EntityEnums.Logic>(
+    EntityEnums.Logic.Positive
+  );
+  const [certainty, setCertainty] = useState<EntityEnums.Certainty>(
+    EntityEnums.Certainty.Empty
+  );
+  const [mood, setMood] = useState<EntityEnums.Mood[]>([
+    EntityEnums.Mood.Indication,
+  ]);
+  const [moodvariant, setMoodvariant] = useState<EntityEnums.MoodVariant>(
+    EntityEnums.MoodVariant.Realis
+  );
 
   const [typeSpec, setTypeSpec] = useState<Omit<IPropSpec, "entityId">>({
     elvl: EntityEnums.Elvl.Inferential,
@@ -119,7 +127,7 @@ export const BatchActionAddMetaprop: React.FC<BatchActionAddMetapropProps> = ({
     <div style={batchWrapperStyle}>
       {/* TYPE */}
       <div style={batchSectionStyle}>
-        <span style={batchSectionLabelStyle}>Type (required)</span>
+        <StyledBatchSectionLabel>Type (required)</StyledBatchSectionLabel>
         {typeEntity ? (
           <EntityTag
             entity={typeEntity}
@@ -152,9 +160,7 @@ export const BatchActionAddMetaprop: React.FC<BatchActionAddMetapropProps> = ({
               icon={<AttributeIcon attributeName="virtuality" />}
               options={virtualityDict}
               value={typeSpec.virtuality}
-              onChange={(v) =>
-                setTypeSpec((s) => ({ ...s, virtuality: v }))
-              }
+              onChange={(v) => setTypeSpec((s) => ({ ...s, virtuality: v }))}
             />
             <Dropdown.Single.Basic
               width={150}
@@ -163,9 +169,7 @@ export const BatchActionAddMetaprop: React.FC<BatchActionAddMetapropProps> = ({
               icon={<AttributeIcon attributeName="partitivity" />}
               options={partitivityDict}
               value={typeSpec.partitivity}
-              onChange={(v) =>
-                setTypeSpec((s) => ({ ...s, partitivity: v }))
-              }
+              onChange={(v) => setTypeSpec((s) => ({ ...s, partitivity: v }))}
             />
           </div>
         )}
@@ -173,7 +177,7 @@ export const BatchActionAddMetaprop: React.FC<BatchActionAddMetapropProps> = ({
 
       {/* VALUE */}
       <div style={batchSectionStyle}>
-        <span style={batchSectionLabelStyle}>Value (optional)</span>
+        <StyledBatchSectionLabel>Value (optional)</StyledBatchSectionLabel>
         {valueEntity ? (
           <EntityTag
             entity={valueEntity}
@@ -205,9 +209,7 @@ export const BatchActionAddMetaprop: React.FC<BatchActionAddMetapropProps> = ({
               icon={<AttributeIcon attributeName="virtuality" />}
               options={virtualityDict}
               value={valueSpec.virtuality}
-              onChange={(v) =>
-                setValueSpec((s) => ({ ...s, virtuality: v }))
-              }
+              onChange={(v) => setValueSpec((s) => ({ ...s, virtuality: v }))}
             />
             <Dropdown.Single.Basic
               width={150}
@@ -216,9 +218,7 @@ export const BatchActionAddMetaprop: React.FC<BatchActionAddMetapropProps> = ({
               icon={<AttributeIcon attributeName="partitivity" />}
               options={partitivityDict}
               value={valueSpec.partitivity}
-              onChange={(v) =>
-                setValueSpec((s) => ({ ...s, partitivity: v }))
-              }
+              onChange={(v) => setValueSpec((s) => ({ ...s, partitivity: v }))}
             />
           </div>
         )}
@@ -226,13 +226,9 @@ export const BatchActionAddMetaprop: React.FC<BatchActionAddMetapropProps> = ({
 
       {/* STATEMENT-LEVEL ATTRIBUTES */}
       <div style={batchSectionStyle}>
-        <span style={batchSectionLabelStyle}>Statement attributes</span>
+        <StyledBatchSectionLabel>Statement attributes</StyledBatchSectionLabel>
         <div style={batchAttrRowStyle}>
-          <LogicButtonGroup
-            border
-            value={logic}
-            onChange={setLogic}
-          />
+          <LogicButtonGroup border value={logic} onChange={setLogic} />
           <Dropdown.Single.Basic
             width={122}
             placeholder="certainty"
@@ -260,7 +256,7 @@ export const BatchActionAddMetaprop: React.FC<BatchActionAddMetapropProps> = ({
       </div>
 
       {/* MESSAGE + ACTIONS */}
-      <label style={batchMessageStyle}>{message}</label>
+      <StyledBatchMessage>{message}</StyledBatchMessage>
 
       <div style={batchFooterStyle}>
         <Button label="Cancel" color="greyer" inverted onClick={onClose} />

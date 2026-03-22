@@ -11,9 +11,9 @@ import {
 import {
   batchWrapperStyle,
   batchSectionStyle,
-  batchSectionLabelStyle,
-  batchMessageStyle,
   batchFooterStyle,
+  StyledBatchSectionLabel,
+  StyledBatchMessage,
 } from "./styles";
 
 interface BatchActionExportCsvProps {
@@ -93,7 +93,7 @@ export const BatchActionExportCsv: React.FC<BatchActionExportCsvProps> = ({
   return (
     <div style={batchWrapperStyle}>
       <div style={batchSectionStyle}>
-        <span style={batchSectionLabelStyle}>Columns to export</span>
+        <StyledBatchSectionLabel>Columns to export</StyledBatchSectionLabel>
 
         <div
           style={{
@@ -132,15 +132,13 @@ export const BatchActionExportCsv: React.FC<BatchActionExportCsvProps> = ({
               onClick={() => handleToggleColumn(column.id)}
             >
               {renderCheckboxIcon(isSelected)}
-              <span style={{ fontSize: theme.fontSize.sm }}>
-                {column.name}
-              </span>
+              <span style={{ fontSize: theme.fontSize.sm }}>{column.name}</span>
             </div>
           );
         })}
       </div>
 
-      <label style={batchMessageStyle}>{message}</label>
+      <StyledBatchMessage>{message}</StyledBatchMessage>
 
       <div style={batchFooterStyle}>
         <Button label="Cancel" color="greyer" inverted onClick={onClose} />

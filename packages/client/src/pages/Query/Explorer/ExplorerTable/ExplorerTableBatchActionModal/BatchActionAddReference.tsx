@@ -9,9 +9,9 @@ import { toast } from "react-toastify";
 import {
   batchWrapperStyle,
   batchSectionStyle,
-  batchSectionLabelStyle,
-  batchMessageStyle,
   batchFooterStyle,
+  StyledBatchSectionLabel,
+  StyledBatchMessage,
 } from "./styles";
 
 interface BatchActionAddReferenceProps {
@@ -70,7 +70,7 @@ export const BatchActionAddReference: React.FC<
   return (
     <div style={batchWrapperStyle}>
       <div style={batchSectionStyle}>
-        <span style={batchSectionLabelStyle}>Resource (required)</span>
+        <StyledBatchSectionLabel>Resource (required)</StyledBatchSectionLabel>
         {resourceEntity ? (
           <EntityTag
             entity={resourceEntity}
@@ -87,7 +87,7 @@ export const BatchActionAddReference: React.FC<
       </div>
 
       <div style={batchSectionStyle}>
-        <span style={batchSectionLabelStyle}>Value (optional)</span>
+        <StyledBatchSectionLabel>Value (optional)</StyledBatchSectionLabel>
         {valueEntity ? (
           <EntityTag
             entity={valueEntity}
@@ -103,7 +103,7 @@ export const BatchActionAddReference: React.FC<
         )}
       </div>
 
-      <label style={batchMessageStyle}>{message}</label>
+      <StyledBatchMessage>{message}</StyledBatchMessage>
 
       <div style={batchFooterStyle}>
         <Button label="Cancel" color="greyer" inverted onClick={onClose} />

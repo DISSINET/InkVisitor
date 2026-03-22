@@ -1,5 +1,18 @@
 import React from "react";
+import styled from "styled-components";
 import theme from "Theme/theme";
+
+export const StyledBatchSectionLabel = styled.span`
+  font-size: ${({ theme }) => theme.fontSize.xs};
+  font-weight: ${({ theme }) => theme.fontWeight.bold};
+  color: ${({ theme }) => theme.color.black};
+`;
+
+export const StyledBatchMessage = styled.label`
+  font-size: ${({ theme }) => theme.fontSize.sm};
+  color: ${({ theme }) => theme.color.greyer};
+  font-style: italic;
+`;
 
 export const batchSectionStyle: React.CSSProperties = {
   display: "flex",
@@ -10,23 +23,11 @@ export const batchSectionStyle: React.CSSProperties = {
   border: `1px solid ${theme.color.grey}`,
 };
 
-export const batchSectionLabelStyle: React.CSSProperties = {
-  fontSize: theme.fontSize.xs,
-  fontWeight: theme.fontWeight.bold,
-  color: theme.color.black,
-};
-
 export const batchAttrRowStyle: React.CSSProperties = {
   display: "flex",
   flexWrap: "wrap",
   gap: "0.4rem",
   alignItems: "center",
-};
-
-export const batchMessageStyle: React.CSSProperties = {
-  fontSize: theme.fontSize.sm,
-  color: theme.color.greyer,
-  fontStyle: "italic",
 };
 
 export const batchFooterStyle: React.CSSProperties = {
@@ -47,7 +48,6 @@ export const batchWarningSectionStyle: React.CSSProperties = {
   backgroundColor: `${theme.color.warning}11`,
 };
 
-export const batchWarningLabelStyle: React.CSSProperties = {
-  ...batchSectionLabelStyle,
-  color: theme.color.warning,
-};
+export const StyledBatchWarningLabel = styled(StyledBatchSectionLabel)`
+  color: ${({ theme }) => theme.color.warning};
+`;
