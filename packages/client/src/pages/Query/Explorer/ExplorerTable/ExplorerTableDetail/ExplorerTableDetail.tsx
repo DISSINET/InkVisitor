@@ -2,7 +2,6 @@ import { languageDict } from "@shared/dictionaries";
 import { EntityEnums } from "@shared/enums";
 import { IEntity, IProp, IResponseDetail } from "@shared/types";
 import { Explore } from "@shared/types/query";
-import { ITerritoryValidation } from "@shared/types/territory";
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
 import { Button, Input, Loader } from "components";
@@ -14,7 +13,6 @@ import { EntityDetailIdentificationTable } from "pages/Main/containers/EntityDet
 import { EntityDetailMetaPropsTable } from "pages/Main/containers/EntityDetailBox/EntityDetail/EntityDetailUsedInTable/EntityDetailMetaPropsTable/EntityDetailMetaPropsTable";
 import { EntityDetailStatementPropsTable } from "pages/Main/containers/EntityDetailBox/EntityDetail/EntityDetailUsedInTable/EntityDetailStatementPropsTable/EntityDetailStatementPropsTable";
 import { EntityDetailStatementsTable } from "pages/Main/containers/EntityDetailBox/EntityDetail/EntityDetailUsedInTable/EntityDetailStatementsTable/EntityDetailStatementsTable";
-import { EntityDetailValidationSection } from "pages/Main/containers/EntityDetailBox/EntityDetail/EntityDetailValidationSection/EntityDetailValidationSection";
 import { StatementListRowExpandedPropGroup } from "pages/Main/containers/StatementsListBox/StatementListTable/StatementListRowExpanded/StatementListRowExpandedPropGroup";
 import React from "react";
 import { FaRegCopy } from "react-icons/fa";
