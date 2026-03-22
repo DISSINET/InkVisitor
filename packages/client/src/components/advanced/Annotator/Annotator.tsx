@@ -2,6 +2,7 @@ import {
   autoUpdate,
   flip,
   FloatingPortal,
+  limitShift,
   offset,
   shift,
   useFloating,
@@ -16,6 +17,7 @@ import api from "api";
 import React, {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -104,6 +106,8 @@ interface TextAnnotatorProps {
   disableCreate?: boolean;
   statementListBoxRef?: React.RefObject<HTMLDivElement | null>;
 }
+
+const ANNOTATOR_MENU_PAGE_PADDING = 4;
 
 export const TextAnnotator = ({
   width = 400,
@@ -351,101 +355,6 @@ export const TextAnnotator = ({
   const [isSavingWithoutRefresh, setIsSavingWithoutRefresh] =
     useState<boolean>(false);
 
-  // floating highlight menu
-  const { refs, floatingStyles } = useFloating({
-    placement: "bottom",
-    whileElementsMounted: autoUpdate,
-    middleware: [
-      offset({
-        mainAxis: annotator?.lineHeight
-          ? (annotator.lineHeight / RATIO) * 1.2
-          : 30,
-        // crossAxis: wTextArea / 2 + 100,
-        // crossAxis: 100,
-      }),
-      flip({
-        padding: 10,
-        fallbackPlacements: ["top"],
-      }),
-      shift({
-        padding: 10,
-        crossAxis: true,
-      }),
-    ],
-  });
-
-  // calculate highlight menu position
-  useEffect(() => {
-    if (annotator?.cursor?.selectStart && annotator?.cursor?.selectEnd) {
-      const canvas = mainCanvas.current;
-      if (canvas) {
-        const rect = canvas.getBoundingClientRect();
-        const startX =
-          rect.left + annotator.cursor.selectStart.xLine * annotator.charWidth;
-        const startY =
-          rect.top +
-          ((annotator.cursor.selectStart.yLine - annotator.viewport.lineStart) *
-            annotator.lineHeight) /
-            RATIO;
-        const endX =
-          rect.left + annotator.cursor.selectEnd.xLine * annotator.charWidth;
-        const endY =
-          rect.top +
-          ((annotator.cursor.selectEnd.yLine - annotator.viewport.lineStart) *
-            annotator.lineHeight) /
-            RATIO;
-
-        // Check if selection spans the entire document
-        const isFullSelection =
-          annotator.cursor.selectStart.yLine === 0 &&
-          annotator.cursor.selectEnd.yLine >= annotator.viewport.noLines - 1;
-
-        // Determine if selection is backwards (end to start)
-        const isBackwardsSelection =
-          annotator.cursor.selectEnd.yLine <
-            annotator.cursor.selectStart.yLine ||
-          (annotator.cursor.selectEnd.yLine ===
-            annotator.cursor.selectStart.yLine &&
-            annotator.cursor.selectEnd.xLine <
-              annotator.cursor.selectStart.xLine);
-
-        // Use end position for backwards selection, start position for forwards selection
-        const menuX = isBackwardsSelection ? endX : startX;
-        let menuY = isBackwardsSelection ? endY : startY;
-
-        // Never position menu on first or second row — start from third row
-        const thirdRowY = rect.top + (2 * annotator.lineHeight) / RATIO;
-        if (!isFullSelection && menuY < thirdRowY) {
-          menuY = thirdRowY;
-        }
-
-        // Create a virtual element for the reference point that represents the selection
-        const virtualElement = {
-          getBoundingClientRect: () => ({
-            x: menuX,
-            y: isFullSelection ? rect.top + rect.height / 2 : menuY,
-            width: Math.abs(endX - startX),
-            height: isFullSelection ? 0 : Math.abs(endY - startY),
-            top: isFullSelection ? rect.top + rect.height / 2 : menuY,
-            right: Math.max(startX, endX),
-            bottom: isFullSelection
-              ? rect.top + rect.height / 2
-              : Math.max(startY, endY),
-            left: Math.min(startX, endX),
-          }),
-        };
-
-        refs.setPositionReference(virtualElement);
-      }
-    }
-  }, [
-    annotator?.cursor?.selectStart,
-    annotator?.cursor?.selectEnd,
-    annotator?.lineHeight,
-    annotator?.viewport?.noLines,
-    annotator?.viewport?.lineStart,
-  ]);
-
   // implementation of draggable menu
   const [menuDragOffset, setMenuDragOffset] = useState({ x: 0, y: 0 });
   const menuDragOffsetRef = useRef(menuDragOffset);
@@ -459,9 +368,7 @@ export const TextAnnotator = ({
     originY: number;
   } | null>(null);
 
-  useEffect(() => {
-    setMenuDragOffset({ x: 0, y: 0 });
-  }, [selectedText, selectionStartIndex]);
+  const menuDraggableRef = useRef<HTMLDivElement | null>(null);
 
   const handleMenuDragPointerDown = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
@@ -484,10 +391,31 @@ export const TextAnnotator = ({
       const session = menuDragSessionRef.current;
       if (!session || e.pointerId !== session.pointerId) return;
       e.preventDefault();
-      setMenuDragOffset({
-        x: session.originX + (e.clientX - session.startClientX),
-        y: session.originY + (e.clientY - session.startClientY),
-      });
+      const page = document.getElementById("page");
+      const menuEl = menuDraggableRef.current;
+      let px = session.originX + (e.clientX - session.startClientX);
+      let py = session.originY + (e.clientY - session.startClientY);
+
+      if (page && menuEl) {
+        const pr = page.getBoundingClientRect();
+        const pad = ANNOTATOR_MENU_PAGE_PADDING;
+        const mr = menuEl.getBoundingClientRect();
+        const cur = menuDragOffsetRef.current;
+        const innerLeft = (x: number) => mr.left + (x - cur.x);
+        const innerTop = (y: number) => mr.top + (y - cur.y);
+        for (let i = 0; i < 4; i++) {
+          const l = innerLeft(px);
+          const t = innerTop(py);
+          const r = l + mr.width;
+          const b = t + mr.height;
+          if (l < pr.left + pad) px += pr.left + pad - l;
+          if (t < pr.top + pad) py += pr.top + pad - t;
+          if (r > pr.right - pad) px -= r - (pr.right - pad);
+          if (b > pr.bottom - pad) py -= b - (pr.bottom - pad);
+        }
+      }
+
+      setMenuDragOffset({ x: px, y: py });
     },
     []
   );
@@ -819,6 +747,53 @@ export const TextAnnotator = ({
     );
   }, [annotatorMode, selectedText, isSelectingText, dataDocument]);
 
+  const annotatorMenuMiddleware = useMemo(() => {
+    if (typeof document === "undefined") return [];
+    const page = document.getElementById("page");
+    const centerOnPoint = offset(({ rects }) => ({
+      mainAxis: -(rects.floating.height || 0) / 2,
+      crossAxis: -(rects.floating.width || 0) / 2,
+    }));
+    if (!page) return [centerOnPoint];
+    return [
+      centerOnPoint,
+      flip({
+        boundary: page,
+        padding: ANNOTATOR_MENU_PAGE_PADDING,
+      }),
+      shift({
+        boundary: page,
+        padding: ANNOTATOR_MENU_PAGE_PADDING,
+        crossAxis: true,
+        limiter: limitShift(),
+      }),
+    ];
+  }, [isMenuDisplayed]);
+
+  const { refs: menuFloatingRefs, floatingStyles: menuFloatingStyles } =
+    useFloating({
+      open: isMenuDisplayed,
+      placement: "bottom",
+      strategy: "fixed",
+      whileElementsMounted: autoUpdate,
+      middleware: annotatorMenuMiddleware,
+    });
+
+  useLayoutEffect(() => {
+    if (!isMenuDisplayed) return;
+    const page = document.getElementById("page");
+    if (!page) return;
+    menuFloatingRefs.setPositionReference({
+      getBoundingClientRect() {
+        const r = page.getBoundingClientRect();
+        const cx = r.left + r.width / 2;
+        const cy = r.top + r.height / 2;
+        return new DOMRect(cx, cy, 0, 0);
+      },
+      contextElement: page,
+    });
+  }, [isMenuDisplayed]);
+
   const hasParentT = territory?.data?.parent !== undefined;
 
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -950,11 +925,12 @@ export const TextAnnotator = ({
             <FloatingPortal id="app">
               <StyledAnnotatorMenu
                 ref={(node) => {
-                  refs.setFloating(node);
+                  menuFloatingRefs.setFloating(node);
                 }}
-                style={floatingStyles}
+                style={menuFloatingStyles}
               >
                 <StyledAnnotatorMenuDraggable
+                  ref={menuDraggableRef}
                   style={{
                     transform: `translate(${menuDragOffset.x}px, ${menuDragOffset.y}px)`,
                   }}

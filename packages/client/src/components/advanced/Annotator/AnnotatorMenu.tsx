@@ -164,10 +164,7 @@ export const TextAnnotatorMenu = ({
   return (
     <>
       {menuDragHandleProps && (
-        <StyledAnnotatorMenuDragHandle
-          title="Drag to move menu"
-          {...menuDragHandleProps}
-        >
+        <StyledAnnotatorMenuDragHandle {...menuDragHandleProps}>
           <MdDragIndicator size={18} />
           <span>Drag to move</span>
         </StyledAnnotatorMenuDragHandle>
