@@ -6,7 +6,6 @@ import {
 } from "@shared/dictionaries";
 import { EntityEnums } from "@shared/enums";
 import { IEntity, IPropSpec } from "@shared/types";
-import theme from "Theme/theme";
 import { AttributeIcon, Button } from "components";
 import Dropdown, {
   ElvlButtonGroup,
@@ -19,6 +18,14 @@ import React, { useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { toast } from "react-toastify";
+import {
+  batchWrapperStyle,
+  batchSectionStyle,
+  batchSectionLabelStyle,
+  batchAttrRowStyle,
+  batchMessageStyle,
+  batchFooterStyle,
+} from "./styles";
 
 interface BatchActionAddMetapropProps {
   selectedEntities: IEntity[];
@@ -108,33 +115,11 @@ export const BatchActionAddMetaprop: React.FC<BatchActionAddMetapropProps> = ({
     return `Add metaproperty "${typeLabel}" to ${entityCount} selected entities.`;
   }, [typeEntity, valueEntity, selectedEntities]);
 
-  const sectionStyle: React.CSSProperties = {
-    display: "flex",
-    flexDirection: "column",
-    gap: "0.5rem",
-    padding: "0.75rem",
-    borderRadius: "4px",
-    border: `1px solid ${theme.color.grey}`,
-  };
-
-  const labelStyle: React.CSSProperties = {
-    fontSize: theme.fontSize.xs,
-    fontWeight: theme.fontWeight.bold,
-    color: theme.color.black,
-  };
-
-  const attrRowStyle: React.CSSProperties = {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: "0.4rem",
-    alignItems: "center",
-  };
-
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+    <div style={batchWrapperStyle}>
       {/* TYPE */}
-      <div style={sectionStyle}>
-        <span style={labelStyle}>Type (required)</span>
+      <div style={batchSectionStyle}>
+        <span style={batchSectionLabelStyle}>Type (required)</span>
         {typeEntity ? (
           <EntityTag
             entity={typeEntity}
@@ -149,7 +134,7 @@ export const BatchActionAddMetaprop: React.FC<BatchActionAddMetapropProps> = ({
           />
         )}
         {typeEntity && (
-          <div style={attrRowStyle}>
+          <div style={batchAttrRowStyle}>
             <ElvlButtonGroup
               border
               value={typeSpec.elvl}
@@ -187,8 +172,8 @@ export const BatchActionAddMetaprop: React.FC<BatchActionAddMetapropProps> = ({
       </div>
 
       {/* VALUE */}
-      <div style={sectionStyle}>
-        <span style={labelStyle}>Value (optional)</span>
+      <div style={batchSectionStyle}>
+        <span style={batchSectionLabelStyle}>Value (optional)</span>
         {valueEntity ? (
           <EntityTag
             entity={valueEntity}
@@ -202,7 +187,7 @@ export const BatchActionAddMetaprop: React.FC<BatchActionAddMetapropProps> = ({
           />
         )}
         {valueEntity && (
-          <div style={attrRowStyle}>
+          <div style={batchAttrRowStyle}>
             <ElvlButtonGroup
               border
               value={valueSpec.elvl}
@@ -240,9 +225,9 @@ export const BatchActionAddMetaprop: React.FC<BatchActionAddMetapropProps> = ({
       </div>
 
       {/* STATEMENT-LEVEL ATTRIBUTES */}
-      <div style={sectionStyle}>
-        <span style={labelStyle}>Statement attributes</span>
-        <div style={attrRowStyle}>
+      <div style={batchSectionStyle}>
+        <span style={batchSectionLabelStyle}>Statement attributes</span>
+        <div style={batchAttrRowStyle}>
           <LogicButtonGroup
             border
             value={logic}
@@ -275,19 +260,9 @@ export const BatchActionAddMetaprop: React.FC<BatchActionAddMetapropProps> = ({
       </div>
 
       {/* MESSAGE + ACTIONS */}
-      <label
-        style={{
-          fontSize: theme.fontSize.sm,
-          color: theme.color.greyer,
-          fontStyle: "italic",
-        }}
-      >
-        {message}
-      </label>
+      <label style={batchMessageStyle}>{message}</label>
 
-      <div
-        style={{ display: "flex", gap: "0.5rem", justifyContent: "flex-end" }}
-      >
+      <div style={batchFooterStyle}>
         <Button label="Cancel" color="greyer" inverted onClick={onClose} />
         <Button
           label="Apply"

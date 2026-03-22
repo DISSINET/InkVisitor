@@ -8,6 +8,13 @@ import {
   MdOutlineCheckBoxOutlineBlank,
   MdOutlineIndeterminateCheckBox,
 } from "react-icons/md";
+import {
+  batchWrapperStyle,
+  batchSectionStyle,
+  batchSectionLabelStyle,
+  batchMessageStyle,
+  batchFooterStyle,
+} from "./styles";
 
 interface BatchActionExportCsvProps {
   selectedEntities: IEntity[];
@@ -15,6 +22,8 @@ interface BatchActionExportCsvProps {
   onExport: (selectedColumnIds: string[]) => void;
   onClose: () => void;
 }
+
+const checkboxSize = 18;
 
 export const BatchActionExportCsv: React.FC<BatchActionExportCsvProps> = ({
   selectedEntities,
@@ -43,29 +52,11 @@ export const BatchActionExportCsv: React.FC<BatchActionExportCsvProps> = ({
   };
 
   const isAllSelected = selectedColumnIds.length === columns.length;
-  const isSomeSelected =
-    selectedColumnIds.length > 0 && !isAllSelected;
+  const isSomeSelected = selectedColumnIds.length > 0 && !isAllSelected;
 
   const message = useMemo(() => {
     return `Export ${selectedEntities.length} entities with ${selectedColumnIds.length} of ${columns.length} columns.`;
   }, [selectedEntities.length, selectedColumnIds.length, columns.length]);
-
-  const sectionStyle: React.CSSProperties = {
-    display: "flex",
-    flexDirection: "column",
-    gap: "0.5rem",
-    padding: "0.75rem",
-    borderRadius: "4px",
-    border: `1px solid ${theme.color.grey}`,
-  };
-
-  const labelStyle: React.CSSProperties = {
-    fontSize: theme.fontSize.xs,
-    fontWeight: theme.fontWeight.bold,
-    color: theme.color.black,
-  };
-
-  const checkboxSize = 18;
 
   const renderCheckboxIcon = (checked: boolean) =>
     checked ? (
@@ -100,9 +91,9 @@ export const BatchActionExportCsv: React.FC<BatchActionExportCsvProps> = ({
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-      <div style={sectionStyle}>
-        <span style={labelStyle}>Columns to export</span>
+    <div style={batchWrapperStyle}>
+      <div style={batchSectionStyle}>
+        <span style={batchSectionLabelStyle}>Columns to export</span>
 
         <div
           style={{
@@ -149,19 +140,9 @@ export const BatchActionExportCsv: React.FC<BatchActionExportCsvProps> = ({
         })}
       </div>
 
-      <label
-        style={{
-          fontSize: theme.fontSize.sm,
-          color: theme.color.greyer,
-          fontStyle: "italic",
-        }}
-      >
-        {message}
-      </label>
+      <label style={batchMessageStyle}>{message}</label>
 
-      <div
-        style={{ display: "flex", gap: "0.5rem", justifyContent: "flex-end" }}
-      >
+      <div style={batchFooterStyle}>
         <Button label="Cancel" color="greyer" inverted onClick={onClose} />
         <Button
           label="Export"
