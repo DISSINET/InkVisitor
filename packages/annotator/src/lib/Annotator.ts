@@ -142,7 +142,7 @@ export class Annotator {
 
     const charsAtLine = Math.floor(this.width / this.charWidth);
 
-    const noLinesViewport = Math.ceil(this.height / this.lineHeight) - 1;
+    const noLinesViewport = this.viewportFullRowCount() + 1;
 
     this.viewport = new Viewport(0, noLinesViewport);
 
@@ -298,7 +298,7 @@ export class Annotator {
 
     this.setCharWidth("abcdefghijklmnopqrstuvwxyz0123456789");
 
-    const noLinesViewport = Math.ceil(this.height / this.lineHeight) - 1;
+    const noLinesViewport = this.viewportFullRowCount() + 1;
     const charsAtLine = Math.floor(this.width / this.charWidth);
 
     const positionBeforeRel = this.viewport.lineStart / this.text.noLines;
@@ -369,6 +369,16 @@ export class Annotator {
     this.ctx.font = this.font;
     const textW = this.ctx.measureText(txt).width;
     this.charWidth = textW / txt.length;
+  }
+
+  /**
+   * Whole text rows that fit in the backing-store height. The draw loop paints
+   * lines `lineStart` … `lineStart + viewport.noLines` (inclusive), i.e. this many rows.
+   * Using ceil would pretend a partial bottom row fits, which clips text/line numbers
+   * and makes `maxStart` too small so the document’s last line never reaches the bottom.
+   */
+  private viewportFullRowCount(): number {
+    return Math.max(1, Math.floor(this.height / this.lineHeight));
   }
 
   /**
@@ -799,11 +809,61 @@ export class Annotator {
   }
 
   /**
+   * Line gutter must share the main canvas backing-store height (and horizontal scale).
+   * Using `height * RATIO` from React alone can differ from `style.height * ratio` on the
+   * main canvas → 1× vs 2× mismatch → line numbers look huge and rows don't align.
+   */
+  private syncLineNumbersCanvasToMain(): void {
+    if (!this.lines) return;
+    const mainEl = this.element;
+    const lineEl = this.lines.element;
+
+    const parseCssPx = (v: string | undefined): number => {
+      if (!v) return 0;
+      const n = Number(
+        String(v)
+          .replace(/px\s*$/i, "")
+          .trim()
+      );
+      return Number.isFinite(n) ? n : 0;
+    };
+
+    const mainCssW = parseCssPx(mainEl.style.width) || mainEl.clientWidth || 1;
+    const gutterCssW =
+      parseCssPx(lineEl.style.width) || lineEl.clientWidth || 50;
+
+    if (mainEl.style.height) {
+      lineEl.style.height = mainEl.style.height;
+    }
+
+    const scale =
+      mainEl.width > 0 && mainCssW > 0 ? mainEl.width / mainCssW : this.ratio;
+    const nextW = Math.max(1, Math.round(gutterCssW * scale));
+    const nextH =
+      mainEl.height > 0
+        ? mainEl.height
+        : Math.max(
+            1,
+            Math.round(
+              (parseCssPx(mainEl.style.height) || mainEl.clientHeight) *
+                this.ratio
+            )
+          );
+
+    if (lineEl.width !== nextW || lineEl.height !== nextH) {
+      lineEl.width = nextW;
+      lineEl.height = nextH;
+    }
+  }
+
+  /**
    * draw resets the canvas and redraws the scene anew.
    * First draw lines with text, then allow each component to draw their own logic.
    * TODO - this should be done in conjunction with requestAnimationFrame
    */
   draw() {
+    this.syncLineNumbersCanvasToMain();
+
     this.ctx.reset();
 
     this.ctx.fillStyle = this.bgColor;
@@ -955,6 +1015,8 @@ export class Annotator {
       );
     }
     if (this.lines) {
+      this.lines.font = this.font;
+      this.lines.lineHeight = this.lineHeight;
       this.lines.draw(this.viewport);
     }
 

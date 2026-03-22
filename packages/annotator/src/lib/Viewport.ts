@@ -34,12 +34,9 @@ export default class Viewport {
    */
   addScrollOffset(deltaY: number, lineHeight: number, maxLines: number) {
     this.scrollOffsetY += deltaY;
-    // viewport window is inclusive: visible indices are [lineStart .. lineStart + noLines]
-    // so total visible count = (noLines + 1).
-    while (
-      this.scrollOffsetY >= lineHeight &&
-      this.lineStart < maxLines - (this.noLines + 1)
-    ) {
+    // maxLines is a total line count; the last valid line index is (maxLines - 1)
+    const maxStart = Math.max(0, maxLines - 1 - this.noLines);
+    while (this.scrollOffsetY >= lineHeight && this.lineStart < maxStart) {
       this.scrollOffsetY -= lineHeight;
       this.lineStart += 1;
     }
@@ -57,10 +54,9 @@ export default class Viewport {
    * @param maxLines
    */
   scrollDown(step: number, maxLines: number) {
-    const move = Math.min(
-      step,
-      maxLines - this.lineStart - (this.noLines + 1)
-    );
+    // maxLines is a total line count; the last valid line index is (maxLines - 1)
+    const maxStart = Math.max(0, maxLines - 1 - this.noLines);
+    const move = Math.min(step, maxStart - this.lineStart);
     if (move > 0) {
       this.lineStart += move;
       this.scrollOffsetY = 0;
@@ -107,9 +103,8 @@ export default class Viewport {
     lineHeight: number,
     maxLines: number
   ) {
-    // maxStart is the highest lineStart such that:
-    // lineEnd = lineStart + noLines <= (maxLines - 1)
-    const maxStart = Math.max(0, maxLines - (this.noLines + 1));
+    // maxLines is a total line count; the last valid line index is (maxLines - 1)
+    const maxStart = Math.max(0, maxLines - 1 - this.noLines);
     this.lineStart = Math.max(0, Math.min(maxStart, Math.floor(lineStart)));
     const frac = lineStart - this.lineStart;
     this.scrollOffsetY = Math.max(

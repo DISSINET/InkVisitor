@@ -437,6 +437,7 @@ export enum ButtonSize {
   Small = "S",
   Medium = "M",
   Large = "L",
+  ExtraLarge = "XL",
 }
 
 export enum DetailBoxState {

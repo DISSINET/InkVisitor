@@ -1,13 +1,6 @@
 import styled from "styled-components";
 
-export const StyledScrollerViewport = styled.div`
-  border-radius: ${({ theme }) => theme.borderRadius["default"]};
-  position: relative;
-  width: 10px;
-  margin-left: 0.6rem;
-  background-color: ${({ theme }) => theme.color.gray[200]};
-`;
-
+/** Defined before viewport so the parent can target it on hover. */
 export const StyledScrollerCursor = styled.div`
   cursor: move;
   position: absolute;
@@ -15,6 +8,26 @@ export const StyledScrollerCursor = styled.div`
   left: 50%;
   transform: translateX(-50%);
   border-radius: ${({ theme }) => theme.borderRadius["default"]};
+  background-color: ${({ theme }) => theme.color.gray[600]};
+
+  transition: background-color 0.5s ease;
+`;
+
+export const StyledScrollerViewport = styled.div`
+  border-radius: ${({ theme }) => theme.borderRadius["default"]};
+  position: relative;
+  width: 10px;
+  margin-left: 0.6rem;
+  background-color: ${({ theme }) => theme.color.gray[200]};
+
+  /* transition: background-color 0.3s ease; */
+  /* &:hover {
+    background-color: ${({ theme }) => theme.color.gray[300]};
+  } */
+  /* Thumb highlights when hovering anywhere on the scroller track */
+  &:hover ${StyledScrollerCursor}, &:active ${StyledScrollerCursor} {
+    background-color: ${({ theme }) => theme.color.gray[700]};
+  }
 `;
 
 export const StyledCanvasWrapper = styled.div`
@@ -30,12 +43,22 @@ export const StyledMainCanvas = styled.canvas`
   cursor: text;
 `;
 
-export const StyledLinesCanvas = styled.canvas`
-  outline: none;
-`;
+// css doesn't load on the canvas element, so we use inline styles
+export const StyledLinesCanvas = styled.canvas``;
 
 interface StyledAnnotatorMenuProps {}
+export const StyledAnnotatorDoneButton = styled.div`
+  position: absolute;
+  top: ${({ theme }) => theme.space[4]};
+  right: ${({ theme }) => theme.space[4]};
+  z-index: 101;
+  color: ${({ theme }) => theme.color.primary};
+`;
+
 export const StyledAnnotatorMenu = styled.div<StyledAnnotatorMenuProps>`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
   position: absolute;
   width: 40rem;
   background: ${({ theme }) => theme.color.blue["100"]};
@@ -51,9 +74,11 @@ export const StyledAnnotatorMenu = styled.div<StyledAnnotatorMenuProps>`
 `;
 
 export const StyledAnnotatorItem = styled.div`
+  display: flex;
+  flex-direction: column;
+  /* gap: 0.5rem; */
   padding: ${({ theme }) => theme.space[2]};
   border-radius: ${({ theme }) => theme.borderRadius.xs};
-  margin-bottom: ${({ theme }) => theme.space[2]};
 
   &:hover {
     background: ${({ theme }) => theme.color.blue["150"]};

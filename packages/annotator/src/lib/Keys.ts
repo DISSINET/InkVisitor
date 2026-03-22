@@ -3,6 +3,9 @@ import Cursor, { DIRECTION } from "./Cursor";
 import Text from "./Text";
 import Viewport from "./Viewport";
 
+/** Snapshot of caret before an arrow-key nudge (absolute line / column). */
+type CaretPoint = { xLine: number; yLine: number };
+
 enum Key {
   CapsLock = "CapsLock",
   Shift = "Shift",
@@ -56,6 +59,54 @@ export default class Keys {
     this.text = this.annotator.text;
 
     this.annotator.element.onkeydown = this.onKeyDown.bind(this);
+  }
+
+  /**
+   * After shift+arrow, only the selection endpoint that was at the caret should
+   * move. Cmd+Shift+Left leaves the caret at line start while selectDirection is
+   * FORWARD (start before end on the same line), so updating selectEnd would drop
+   * the line-end anchor — match the pre-move caret to start or end instead.
+   */
+  private extendShiftSelectionToCaret(prev: CaretPoint): void {
+    const s = this.cursor.selectStart;
+    const e = this.cursor.selectEnd;
+    if (!s || !e) {
+      return;
+    }
+
+    const next: CaretPoint = {
+      xLine: this.cursor.xLine,
+      yLine: this.cursor.yLine,
+    };
+
+    const atStart = prev.xLine === s.xLine && prev.yLine === s.yLine;
+    const atEnd = prev.xLine === e.xLine && prev.yLine === e.yLine;
+
+    if (atStart && !atEnd) {
+      this.cursor.selectStart = { ...next };
+    } else if (atEnd && !atStart) {
+      this.cursor.selectEnd = { ...next };
+    } else if (atStart && atEnd) {
+      this.cursor.selectStart = { xLine: prev.xLine, yLine: prev.yLine };
+      this.cursor.selectEnd = { ...next };
+    } else if (this.cursor.selectDirection === DIRECTION.BACKWARD) {
+      this.cursor.selectStart = { ...next };
+    } else {
+      this.cursor.selectEnd = { ...next };
+    }
+  }
+
+  private compareDocPoints(a: CaretPoint, b: CaretPoint): number {
+    if (a.yLine !== b.yLine) return a.yLine - b.yLine;
+    return a.xLine - b.xLine;
+  }
+
+  private docCaretMin(a: CaretPoint, b: CaretPoint): CaretPoint {
+    return this.compareDocPoints(a, b) <= 0 ? { ...a } : { ...b };
+  }
+
+  private docCaretMax(a: CaretPoint, b: CaretPoint): CaretPoint {
+    return this.compareDocPoints(a, b) >= 0 ? { ...a } : { ...b };
   }
 
   /** Scroll so cursor line is 3rd from top when above viewport, 3rd from bottom when below. */
@@ -156,19 +207,24 @@ export default class Keys {
       this.text.deleteRangeText(area[0], area[1]);
       this.cursor.reset();
       this.cursor.setPosition(area[0].xLine, area[0].yLine);
-    }
-    // else if (metaKey) {
-    //   const end = this.cursor.getAbsolutePosition();
-    //   const start = { xLine: 0, yLine: end.yLine };
-    //   this.text.deleteRangeText(start, end);
-    //   this.cursor.setPosition(0, end.yLine);
-    //   if (this.annotator.onTextChangeCb) {
-    //     this.annotator.onTextChangeCb(this.text.value);
-    //   }
-    // }
-    else {
+    } else if (metaKey && !altKey && !ctrlKey) {
+      // Cmd+Backspace: delete from beginning of line to caret (macOS-style).
+      const end = this.cursor.getAbsolutePosition();
+      const start = { xLine: 0, yLine: end.yLine };
+      this.text.deleteRangeText(start, end);
+      this.cursor.setPosition(0, end.yLine);
+      if (this.annotator.onTextChangeCb) {
+        this.annotator.onTextChangeCb(this.text.value);
+      }
+    } else {
+      // Delete word-wise: Ctrl / Alt / ⌥+⌘ + ←  or Ctrl+Alt + ← on Windows
       const before = this.cursor.getAbsolutePosition();
-      this.onArrowLeft({ ctrlKey, shiftKey, altKey });
+      this.onArrowLeft({
+        ctrlKey: ctrlKey || altKey,
+        shiftKey,
+        altKey: false,
+        metaKey: false,
+      });
       const after = this.cursor.getAbsolutePosition();
 
       this.text.deleteRangeText(before, after);
@@ -181,9 +237,13 @@ export default class Keys {
 
   onKeyDelete({
     ctrlKey,
+    altKey,
+    metaKey,
     shiftKey,
   }: {
     ctrlKey?: boolean;
+    altKey?: boolean;
+    metaKey?: boolean;
     shiftKey?: boolean;
   }) {
     if (this.text.mode === EditMode.HIGHLIGHT) {
@@ -195,9 +255,23 @@ export default class Keys {
       this.text.deleteRangeText(area[0], area[1]);
       this.cursor.reset();
       this.cursor.setPosition(area[0].xLine, area[0].yLine);
+    } else if (metaKey && !altKey && !ctrlKey) {
+      const before = this.cursor.getAbsolutePosition();
+      const line = this.text.getCurrentLine(this.viewport, this.cursor) || "";
+      const end = { xLine: line.length, yLine: before.yLine };
+      this.text.deleteRangeText(before, end);
+      this.cursor.setPosition(before.xLine, before.yLine);
+      if (this.annotator.onTextChangeCb) {
+        this.annotator.onTextChangeCb(this.text.value);
+      }
     } else {
       const before = this.cursor.getAbsolutePosition();
-      this.onArrowRight({ ctrlKey, shiftKey });
+      this.onArrowRight({
+        ctrlKey: ctrlKey || altKey,
+        shiftKey,
+        altKey: false,
+        metaKey: false,
+      });
       const after = this.cursor.getAbsolutePosition();
 
       this.text.deleteRangeText(before, after);
@@ -295,11 +369,27 @@ export default class Keys {
     const originalAbsYline = this.cursor.yLine;
 
     if (metaKey && shiftKey) {
+      const [hStart, hEnd] = this.cursor.getAbsBounds();
+      const hasRange =
+        hStart &&
+        hEnd &&
+        (hStart.xLine !== hEnd.xLine || hStart.yLine !== hEnd.yLine);
+
+      // Extend to document start while keeping the far end of the current
+      // range (not the caret alone — after Cmd+Shift+Right the caret is at EOL
+      // but the passive anchor must stay at the line-start column).
       this.cursor.selectStart = { xLine: 0, yLine: 0 };
-      this.cursor.selectEnd = {
-        xLine: originalXLine,
-        yLine: originalAbsYline,
-      };
+      if (hasRange && hEnd) {
+        this.cursor.selectEnd = {
+          xLine: hEnd.xLine,
+          yLine: hEnd.yLine,
+        };
+      } else {
+        this.cursor.selectEnd = {
+          xLine: originalXLine,
+          yLine: originalAbsYline,
+        };
+      }
       this.viewport.scrollTo(0, this.text.noLines);
       this.cursor.yLine = 0;
       this.cursor.xLine = 0;
@@ -332,17 +422,7 @@ export default class Keys {
     }
 
     if (shiftKey) {
-      if (this.cursor.selectDirection === DIRECTION.FORWARD) {
-        this.cursor.selectEnd = {
-          xLine: this.cursor.xLine,
-          yLine: this.cursor.yLine,
-        };
-      } else if (this.cursor.selectDirection === DIRECTION.BACKWARD) {
-        this.cursor.selectEnd = {
-          xLine: this.cursor.xLine,
-          yLine: this.cursor.yLine,
-        };
-      } else {
+      if (!this.cursor.selectStart || !this.cursor.selectEnd) {
         this.cursor.selectStart = {
           xLine: originalXLine,
           yLine: originalAbsYline,
@@ -351,6 +431,11 @@ export default class Keys {
           xLine: this.cursor.xLine,
           yLine: this.cursor.yLine,
         };
+      } else {
+        this.extendShiftSelectionToCaret({
+          xLine: originalXLine,
+          yLine: originalAbsYline,
+        });
       }
     } else {
       this.cursor.selectStart = undefined;
@@ -376,10 +461,25 @@ export default class Keys {
     if (metaKey && shiftKey) {
       const lastLineIndex = this.text.noLines > 0 ? this.text.noLines - 1 : 0;
       const lineText = this.text.getLine(lastLineIndex) ?? "";
-      this.cursor.selectStart = {
-        xLine: originalXLine,
-        yLine: originalAbsYline,
-      };
+      const [hStart, hEnd] = this.cursor.getAbsBounds();
+      const hasRange =
+        hStart &&
+        hEnd &&
+        (hStart.xLine !== hEnd.xLine || hStart.yLine !== hEnd.yLine);
+
+      // Extend to EOF while keeping the document-ordered start of the range
+      // (caret may be at EOL after Cmd+Shift+Right; anchor stays at oldX).
+      if (hasRange && hStart) {
+        this.cursor.selectStart = {
+          xLine: hStart.xLine,
+          yLine: hStart.yLine,
+        };
+      } else {
+        this.cursor.selectStart = {
+          xLine: originalXLine,
+          yLine: originalAbsYline,
+        };
+      }
       this.cursor.selectEnd = {
         xLine: lineText.length,
         yLine: lastLineIndex,
@@ -415,17 +515,7 @@ export default class Keys {
     }
 
     if (shiftKey) {
-      if (this.cursor.selectDirection === DIRECTION.FORWARD) {
-        this.cursor.selectEnd = {
-          xLine: this.cursor.xLine,
-          yLine: this.cursor.yLine,
-        };
-      } else if (this.cursor.selectDirection === DIRECTION.BACKWARD) {
-        this.cursor.selectEnd = {
-          xLine: this.cursor.xLine,
-          yLine: this.cursor.yLine,
-        };
-      } else {
+      if (!this.cursor.selectStart || !this.cursor.selectEnd) {
         this.cursor.selectStart = {
           xLine: originalXLine,
           yLine: originalAbsYline,
@@ -434,6 +524,11 @@ export default class Keys {
           xLine: this.cursor.xLine,
           yLine: this.cursor.yLine,
         };
+      } else {
+        this.extendShiftSelectionToCaret({
+          xLine: originalXLine,
+          yLine: originalAbsYline,
+        });
       }
     } else {
       this.cursor.selectStart = undefined;
@@ -464,11 +559,26 @@ export default class Keys {
   }) {
     const absY = this.cursor.yLine;
     if (metaKey && shiftKey) {
-      this.cursor.selectStart = { xLine: 0, yLine: absY };
-      this.cursor.selectEnd = {
-        xLine: this.cursor.xLine,
-        yLine: absY,
-      };
+      const [hStart, hEnd] = this.cursor.getAbsBounds();
+      const hasRange =
+        hStart &&
+        hEnd &&
+        (hStart.xLine !== hEnd.xLine || hStart.yLine !== hEnd.yLine);
+
+      const curX = this.cursor.xLine;
+      // Line segment: BOL of current row → caret (before move). Union with any
+      // existing range so multi-line selections are not replaced / “reversed”.
+      if (hasRange && hStart && hEnd) {
+        const segLo: CaretPoint = { xLine: 0, yLine: absY };
+        const segHi: CaretPoint = { xLine: curX, yLine: absY };
+        const u0 = this.docCaretMin(hStart, segLo);
+        const u1 = this.docCaretMax(hEnd, segHi);
+        this.cursor.selectStart = { ...u0 };
+        this.cursor.selectEnd = { ...u1 };
+      } else {
+        this.cursor.selectStart = { xLine: 0, yLine: absY };
+        this.cursor.selectEnd = { xLine: curX, yLine: absY };
+      }
       this.cursor.xLine = 0;
       this.cursor.setTrueSelectionDirection();
       return;
@@ -539,7 +649,7 @@ export default class Keys {
               const coords = this.text.positionToCursor(this.viewport, target);
               if (coords) {
                 this.cursor.xLine = coords.xLine;
-                this.cursor.yLine = coords.yLine;
+                this.cursor.yLine = this.viewport.lineStart + coords.yLine;
               }
             }
           }
@@ -555,8 +665,7 @@ export default class Keys {
           );
           if (seg && lineChar) {
             this.cursor.xLine = lineChar.charInLineIndex;
-            this.cursor.yLine =
-              seg.lineStart + lineChar.lineIndex - this.viewport.lineStart;
+            this.cursor.yLine = seg.lineStart + lineChar.lineIndex;
           }
         }
       }
@@ -574,18 +683,7 @@ export default class Keys {
     }
 
     if (shiftKey) {
-      if (this.cursor.selectDirection === DIRECTION.FORWARD) {
-        this.cursor.selectEnd = {
-          xLine: this.cursor.xLine,
-          yLine: this.cursor.yLine,
-        };
-      } else if (this.cursor.selectDirection === DIRECTION.BACKWARD) {
-        this.cursor.selectEnd = {
-          xLine: this.cursor.xLine,
-          yLine: this.cursor.yLine,
-        };
-      } else {
-        // Use absY (captured before movement) so selection start stays on the original line
+      if (!this.cursor.selectStart || !this.cursor.selectEnd) {
         this.cursor.selectStart = {
           xLine: originalXLine,
           yLine: absY,
@@ -594,11 +692,19 @@ export default class Keys {
           xLine: this.cursor.xLine,
           yLine: this.cursor.yLine,
         };
+      } else {
+        this.extendShiftSelectionToCaret({
+          xLine: originalXLine,
+          yLine: absY,
+        });
       }
     } else {
       if (this.cursor.isSelected()) {
-        this.cursor.xLine = this.cursor.selectStart?.xLine || this.cursor.xLine;
-        this.cursor.yLine = this.cursor.selectStart?.yLine ?? this.cursor.yLine;
+        const [docStart] = this.cursor.getAbsBounds();
+        if (docStart) {
+          this.cursor.xLine = docStart.xLine;
+          this.cursor.yLine = docStart.yLine;
+        }
         offsetLeft = 0;
       }
 
@@ -631,11 +737,25 @@ export default class Keys {
     const absY = this.cursor.yLine;
     const line = this.text.getLine(absY) ?? "";
     if (metaKey && shiftKey) {
-      this.cursor.selectStart = {
-        xLine: this.cursor.xLine,
-        yLine: absY,
-      };
-      this.cursor.selectEnd = { xLine: line.length, yLine: absY };
+      const [hStart, hEnd] = this.cursor.getAbsBounds();
+      const hasRange =
+        hStart &&
+        hEnd &&
+        (hStart.xLine !== hEnd.xLine || hStart.yLine !== hEnd.yLine);
+
+      const curX = this.cursor.xLine;
+      const lineLen = line.length;
+      if (hasRange && hStart && hEnd) {
+        const segLo: CaretPoint = { xLine: curX, yLine: absY };
+        const segHi: CaretPoint = { xLine: lineLen, yLine: absY };
+        const u0 = this.docCaretMin(hStart, segLo);
+        const u1 = this.docCaretMax(hEnd, segHi);
+        this.cursor.selectStart = { ...u0 };
+        this.cursor.selectEnd = { ...u1 };
+      } else {
+        this.cursor.selectStart = { xLine: curX, yLine: absY };
+        this.cursor.selectEnd = { xLine: lineLen, yLine: absY };
+      }
       this.cursor.xLine = line.length;
       this.cursor.setTrueSelectionDirection();
       return;
@@ -717,7 +837,7 @@ export default class Keys {
               const coords = this.text.positionToCursor(this.viewport, target);
               if (coords) {
                 this.cursor.xLine = coords.xLine;
-                this.cursor.yLine = coords.yLine;
+                this.cursor.yLine = this.viewport.lineStart + coords.yLine;
               }
             }
           }
@@ -771,18 +891,7 @@ export default class Keys {
     );
 
     if (shiftKey) {
-      if (this.cursor.selectDirection === DIRECTION.FORWARD) {
-        this.cursor.selectEnd = {
-          xLine: this.cursor.xLine,
-          yLine: this.cursor.yLine,
-        };
-      } else if (this.cursor.selectDirection === DIRECTION.BACKWARD) {
-        this.cursor.selectEnd = {
-          xLine: this.cursor.xLine,
-          yLine: this.cursor.yLine,
-        };
-      } else {
-        // Use absY (captured before movement) so selection start stays on the original line
+      if (!this.cursor.selectStart || !this.cursor.selectEnd) {
         this.cursor.selectStart = {
           xLine: originalXLine,
           yLine: absY,
@@ -791,11 +900,19 @@ export default class Keys {
           xLine: this.cursor.xLine,
           yLine: this.cursor.yLine,
         };
+      } else {
+        this.extendShiftSelectionToCaret({
+          xLine: originalXLine,
+          yLine: absY,
+        });
       }
     } else {
       if (this.cursor.isSelected()) {
-        this.cursor.xLine = this.cursor.selectEnd?.xLine || this.cursor.xLine;
-        this.cursor.yLine = this.cursor.selectEnd?.yLine ?? this.cursor.yLine;
+        const [, docEnd] = this.cursor.getAbsBounds();
+        if (docEnd) {
+          this.cursor.xLine = docEnd.xLine;
+          this.cursor.yLine = docEnd.yLine;
+        }
         offsetRight = 0;
       }
 
@@ -812,6 +929,7 @@ export default class Keys {
     // annotator canvas is focused. This keeps standard behaviour for:
     // - F5
     // - Cmd+R / Ctrl+R (including with Shift, e.g. hard reload)
+    // - Cmd+Shift+F (hide browser header)
     if (
       // refresh windows
       e.key === "F5" ||
@@ -819,7 +937,16 @@ export default class Keys {
       (e.key === "r" && (e.metaKey || e.ctrlKey)) ||
       // access dev tools mac
       // Use `code` instead of `key` because `key` can vary by layout/case.
-      (e.code === "KeyI" && e.metaKey && e.altKey)
+      (e.code === "KeyI" && e.metaKey && e.altKey) ||
+      (e.code === "KeyF" && e.shiftKey && e.metaKey && !e.altKey) ||
+      // zoom in / out / reset — Cmd on macOS, Ctrl on Windows/Linux (browser default)
+      ((e.metaKey || e.ctrlKey) &&
+        !e.altKey &&
+        (e.code === "Equal" ||
+          e.code === "Minus" ||
+          e.code === "NumpadAdd" ||
+          e.code === "NumpadSubtract" ||
+          e.code === "Digit0"))
     ) {
       return;
     }

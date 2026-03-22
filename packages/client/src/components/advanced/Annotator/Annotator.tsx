@@ -212,7 +212,6 @@ export const TextAnnotator = ({
   const mainCanvas = useRef<HTMLCanvasElement>(null);
   const scroller = useRef<HTMLDivElement>(null);
   const lines = useRef<HTMLCanvasElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
   const annotatorRef = useRef<Annotator | null>(null);
   annotatorRef.current = annotator;
 
@@ -566,12 +565,6 @@ export const TextAnnotator = ({
       annotator.bgColor = "transparent";
       annotator.setSelectStyle("turquoise", 0.8, theme.color.black);
 
-      // Update Lines component colors if it exists
-      if (annotator.lines) {
-        annotator.lines.fontColor = theme.color.plain;
-        annotator.lines.bgColor = theme.color.white;
-      }
-
       // Update highlight callback to use current theme
       annotator.onHighlight((entityId) => {
         if (dataDocument) {
@@ -665,9 +658,9 @@ export const TextAnnotator = ({
     }
   }, [
     displayLineNumbers,
-    theme,
     hlEntities ?? [],
     dataDocumentIsFetching,
+    theme,
     dataDocument,
     isSaving,
   ]);
@@ -758,36 +751,6 @@ export const TextAnnotator = ({
       dataDocument !== undefined
     );
   }, [annotatorMode, selectedText, isSelectingText, dataDocument]);
-
-  // Handle click outside menu to close it
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        isMenuDisplayed &&
-        menuRef.current &&
-        !menuRef.current.contains(event.target as Node) &&
-        !mainCanvas.current?.contains(event.target as Node) &&
-        !statementListBoxRef?.current?.contains(event.target as Node)
-      ) {
-        // Check if click is within Modal
-        const target = event.target as Element;
-        const isWithinModal = target.closest("[data-attribute-modal]") !== null;
-
-        if (!isWithinModal) {
-          setSelectedText("");
-          annotator?.clearSelection();
-        }
-      }
-    };
-
-    if (isMenuDisplayed) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isMenuDisplayed, annotator, statementListBoxRef]);
 
   const hasParentT = territory?.data?.parent !== undefined;
 
@@ -921,7 +884,6 @@ export const TextAnnotator = ({
               <StyledAnnotatorMenu
                 ref={(node) => {
                   refs.setFloating(node);
-                  menuRef.current = node;
                 }}
                 style={floatingStyles}
               >
@@ -968,12 +930,13 @@ export const TextAnnotator = ({
           {displayLineNumbers && (
             <StyledLinesCanvas
               ref={lines}
-              width={wLineNumbers}
-              height={height}
               style={{
                 outline: "none",
+                width: wLineNumbers,
+                height,
                 backgroundColor: theme?.color.white,
-                color: theme?.color.plain,
+                color: theme?.color.gray[450],
+                borderRadius: "4px 0px 0px 4px",
               }}
             />
           )}
@@ -993,11 +956,7 @@ export const TextAnnotator = ({
             }}
           />
           <StyledScrollerViewport ref={scroller}>
-            <StyledScrollerCursor
-              style={{
-                backgroundColor: theme.color.primary,
-              }}
-            />
+            <StyledScrollerCursor />
           </StyledScrollerViewport>
 
           <Loader show={dataDocumentIsFetching} size={40} />

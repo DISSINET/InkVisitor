@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 
 import { Tag } from "@inkvisitor/annotator/src/lib";
 import { EntityEnums } from "@shared/enums";
@@ -14,6 +14,7 @@ import {
   FaExclamationTriangle,
   FaPlus,
 } from "react-icons/fa";
+import { MdDone, MdOutlineDone } from "react-icons/md";
 import { PiSelectionFill } from "react-icons/pi";
 import { TbAnchor } from "react-icons/tb";
 import { toast } from "react-toastify";
@@ -24,6 +25,7 @@ import { ElvlButtonGroup } from "../IconButtonGroups/ElvlButtonGroup";
 import {
   StyledAnnotatorAnchorList,
   StyledAnnotatorAnchorListWrap,
+  StyledAnnotatorDoneButton,
   StyledAnnotatorItem,
   StyledAnnotatorItemContent,
   StyledAnnotatorItemContentLine,
@@ -89,15 +91,17 @@ export const TextAnnotatorMenu = ({
   const activeTerritory = entities[activeTerritoryId ?? ""];
   const queryClient = useQueryClient();
   const { setStatementId } = useSearchParams();
-  useKeypress("Escape", () => {
-    // Check if any modal is open before handling escape
-    // Use Escape key for the EntityCreateModal first
+
+  const tryCloseMenu = useCallback(() => {
     const isModalOpen =
       document.querySelector('[data-attribute-modal="true"]') !== null;
     if (!isModalOpen) {
       onEscapePressed();
     }
-  });
+  }, [onEscapePressed]);
+
+  useKeypress("Escape", tryCloseMenu);
+  useKeypress("Enter", tryCloseMenu, undefined, true);
 
   const [activeTerritoryElvl, setActiveTerritoryElvl] =
     useState<EntityEnums.Elvl>(EntityEnums.Elvl.Textual);
@@ -124,6 +128,22 @@ export const TextAnnotatorMenu = ({
 
   return (
     <>
+      <StyledAnnotatorDoneButton>
+        <Button
+          color="primary"
+          inverted
+          icon={<MdOutlineDone size={25} />}
+          size={ButtonSize.ExtraLarge}
+          radiusRight
+          radiusLeft
+          shape="square"
+          noBackground
+          onClick={() => onEscapePressed()}
+          tooltipLabel="Close selection menu"
+          tooltipContent={[<p>(Esc, Ctrl+Enter or ⌘+Enter)</p>]}
+          tooltipPosition="left"
+        />
+      </StyledAnnotatorDoneButton>
       <StyledAnnotatorItem>
         <StyledAnnotatorItemTitle>
           <FaBolt size={13} />
@@ -151,8 +171,9 @@ export const TextAnnotatorMenu = ({
             <FaPlus size={13} />
             Create Anchors
           </StyledAnnotatorItemTitle>
-          <StyledAnnotatorItemContent>
-            {canCreateActiveTAnchor && onCreateActiveTAnchor && (
+          {/* Active Territory */}
+          {canCreateActiveTAnchor && onCreateActiveTAnchor && (
+            <StyledAnnotatorItemContent>
               <StyledAnnotatorItemContentLine>
                 <Button
                   label="Active Territory"
@@ -172,8 +193,9 @@ export const TextAnnotatorMenu = ({
                   }}
                 />
               </StyledAnnotatorItemContentLine>
-            )}
-          </StyledAnnotatorItemContent>
+            </StyledAnnotatorItemContent>
+          )}
+          {/* New Statement */}
           <StyledAnnotatorItemContent>
             {onCreateStatement && (
               <StyledAnnotatorItemContentLine>
@@ -195,6 +217,9 @@ export const TextAnnotatorMenu = ({
                 />
               </StyledAnnotatorItemContentLine>
             )}
+          </StyledAnnotatorItemContent>
+          {/* Entity Suggester */}
+          <StyledAnnotatorItemContent>
             <StyledAnnotatorItemContentLine>
               <EntitySuggester
                 categoryTypes={classesAnnotator}
@@ -226,6 +251,9 @@ export const TextAnnotatorMenu = ({
                 }}
               />
             </StyledAnnotatorItemContentLine>
+          </StyledAnnotatorItemContent>
+          {/* Territory Sibling or Child */}
+          <StyledAnnotatorItemContent>
             <StyledAnnotatorItemContentLine>
               {onCreateTerritory && (
                 <StyledTerritorySubsection>
