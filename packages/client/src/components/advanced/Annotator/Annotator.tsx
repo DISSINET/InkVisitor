@@ -752,7 +752,6 @@ export const TextAnnotator = ({
     const page = document.getElementById("page");
     const centerOnPoint = offset(({ rects }) => ({
       mainAxis: -(rects.floating.height || 0) / 2,
-      crossAxis: -(rects.floating.width || 0) / 2,
     }));
     if (!page) return [centerOnPoint];
     return [
