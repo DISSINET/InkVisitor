@@ -53,6 +53,8 @@ export const StyledAnnotatorDoneButton = styled.div`
   right: ${({ theme }) => theme.space[4]};
   z-index: 101;
   color: ${({ theme }) => theme.color.primary};
+  background-color: ${({ theme }) => theme.color.inherit};
+  border-radius: 7px;
 `;
 
 export const StyledAnnotatorMenu = styled.div<StyledAnnotatorMenuProps>`
