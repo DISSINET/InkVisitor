@@ -17,6 +17,7 @@ import {
   IEntity,
   IProp,
   IPropSpec,
+  IReference,
   IResponseDetail,
   IResponseEntity,
   IResponseGeneric,
@@ -872,6 +873,104 @@ export default Router()
 
           const updatedProps = [...entityData.props, newProp];
           const updateData: Partial<IEntity> = { props: updatedProps };
+
+          const model = getEntityClass({
+            ...mergeDeep(entityData, updateData),
+            class: entityData.class,
+            id: entityData.id,
+          });
+
+          if (!model.isValid()) {
+            errors[entityData.id] = "model not valid";
+            continue;
+          }
+
+          if (!model.canBeEditedByUser(user)) {
+            errors[entityData.id] = "permission denied";
+            continue;
+          }
+
+          await model.beforeSave(request.db.connection);
+          const result = await model.update(request.db.connection, updateData);
+
+          if (result.replaced || result.unchanged) {
+            await Audit.createNew(
+              request,
+              entityData.id,
+              updateData,
+              EventType.EDIT
+            );
+            updated++;
+          } else {
+            errors[entityData.id] = "update failed";
+          }
+        }
+
+        return {
+          result: updated > 0,
+          message: `Updated ${updated}/${entities.length} entities${
+            Object.keys(errors).length
+              ? `. Errors: ${JSON.stringify(errors)}`
+              : ""
+          }`,
+        };
+      }
+    )
+  )
+
+  .post(
+    "/batchAddReference",
+    asyncRouteHandler<IResponseGeneric>(
+      async (
+        request: IRequest<
+          unknown,
+          {
+            entityIds: string[];
+            resourceEntityId: string;
+            valueEntityId?: string;
+          }
+        >
+      ) => {
+        const { entityIds, resourceEntityId, valueEntityId } = request.body;
+
+        if (
+          !entityIds ||
+          !Array.isArray(entityIds) ||
+          entityIds.length === 0 ||
+          !resourceEntityId
+        ) {
+          throw new BadParams(
+            "entityIds array and resourceEntityId must be provided"
+          );
+        }
+
+        await request.db.lock();
+
+        const entities = await Entity.findEntitiesByIds(
+          request.db.connection,
+          entityIds
+        );
+
+        if (entities.length === 0) {
+          throw new EntityDoesNotExist(
+            "none of the provided entities were found",
+            entityIds[0]
+          );
+        }
+
+        const user = request.getUserOrFail();
+        const errors: Record<string, string> = {};
+        let updated = 0;
+
+        for (const entityData of entities) {
+          const newRef: IReference = {
+            id: randomUUID(),
+            resource: resourceEntityId,
+            value: valueEntityId || "",
+          };
+
+          const updatedRefs = [...entityData.references, newRef];
+          const updateData: Partial<IEntity> = { references: updatedRefs };
 
           const model = getEntityClass({
             ...mergeDeep(entityData, updateData),
