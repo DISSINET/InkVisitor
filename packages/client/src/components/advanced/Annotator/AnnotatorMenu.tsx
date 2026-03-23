@@ -168,22 +168,7 @@ export const TextAnnotatorMenu = ({
           <span>Drag to move</span>
         </StyledAnnotatorMenuDragHandle>
       )}
-      <StyledAnnotatorDoneButton>
-        <Button
-          color="primary"
-          inverted
-          icon={<MdOutlineDone size={25} />}
-          size={ButtonSize.ExtraLarge}
-          radiusRight
-          radiusLeft
-          shape="square"
-          noBackground
-          onClick={() => onEscapePressed()}
-          tooltipLabel="Close selection menu"
-          tooltipContent={[<p>(Esc, Ctrl+Enter or ⌘+Enter)</p>]}
-          tooltipPosition="right"
-        />
-      </StyledAnnotatorDoneButton>
+
       <StyledAnnotatorItem>
         <StyledAnnotatorItemTitle>
           <FaBolt size={13} />
@@ -202,6 +187,23 @@ export const TextAnnotatorMenu = ({
               label={"clipboard"}
               tooltipLabel="Copy selected text to clipboard"
             />
+            {/* Done Button */}
+            <StyledAnnotatorDoneButton>
+              <Button
+                color="primary"
+                inverted
+                icon={<MdOutlineDone size={25} />}
+                size={ButtonSize.ExtraLarge}
+                radiusRight
+                radiusLeft
+                shape="square"
+                noBackground
+                onClick={() => onEscapePressed()}
+                tooltipLabel="Close selection menu"
+                tooltipContent={[<p>(Esc, Ctrl+Enter or ⌘+Enter)</p>]}
+                tooltipPosition="right"
+              />
+            </StyledAnnotatorDoneButton>
           </StyledAnnotatorItemContentLine>
         </StyledAnnotatorItemContent>
       </StyledAnnotatorItem>

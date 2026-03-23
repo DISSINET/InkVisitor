@@ -49,12 +49,13 @@ export const StyledLinesCanvas = styled.canvas``;
 interface StyledAnnotatorMenuProps {}
 export const StyledAnnotatorDoneButton = styled.div`
   position: absolute;
-  top: 4.5rem;
-  right: 1.5rem;
+  top: 0rem;
+  right: 0.5em;
+  transform: translate(0, -50%);
   z-index: 101;
   color: ${({ theme }) => theme.color.primary};
-  background-color: ${({ theme }) => theme.color.inherit};
   border-radius: 7px;
+  background-color: ${({ theme }) => theme.color.gray[100]};
 `;
 
 export const StyledAnnotatorMenu = styled.div<StyledAnnotatorMenuProps>`
