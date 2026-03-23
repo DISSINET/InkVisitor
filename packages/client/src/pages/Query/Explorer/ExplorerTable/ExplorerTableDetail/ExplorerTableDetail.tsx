@@ -332,27 +332,27 @@ export const ExplorerTableDetail: React.FC<ExplorerTableDetail> = ({
             <StyledExpRowSectionContent>
               <StyledReferenceTable>
                 {entity &&
-                  references.map((reference, key) => {
+                  entity.references.map((reference, key) => {
                     return (
                       <StyledReferenceRow key={key}>
-                        {reference.resource &&
-                          entity.entities[reference.resource] && (
-                            <div style={{ display: "grid" }}>
+                        <div style={{ display: "grid" }}>
+                          {reference.resource &&
+                            entity.entities[reference.resource] && (
                               <EntityTag
                                 fullWidth
                                 entity={entity.entities[reference.resource]}
                               />
-                            </div>
-                          )}
-                        {reference.value &&
-                          entity.entities[reference.value] && (
-                            <div style={{ display: "grid" }}>
+                            )}
+                        </div>
+                        <div style={{ display: "grid" }}>
+                          {reference.value &&
+                            entity.entities[reference.value] && (
                               <EntityTag
                                 fullWidth
                                 entity={entity.entities[reference.value]}
                               />
-                            </div>
-                          )}
+                            )}
+                        </div>
                       </StyledReferenceRow>
                     );
                   })}

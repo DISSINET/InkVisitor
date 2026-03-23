@@ -114,7 +114,7 @@ export const StyledReferenceTable = styled.div`
 `;
 export const StyledReferenceRow = styled.div`
   display: inline-grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 0.5rem;
   max-width: 100%;
 `;
