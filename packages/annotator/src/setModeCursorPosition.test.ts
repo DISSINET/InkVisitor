@@ -95,3 +95,100 @@ describe('setMode cursor position', () => {
     expect(parsed.slice(seg!.parsedTextIndex, seg!.parsedTextIndex + 5)).toBe(' dfsd');
   });
 });
+
+function getViewportTopSegment(annotator: Annotator): { segmentIndex: number; lineIndex: number } | null {
+  return annotator.text.getSegmentPosition(annotator.viewport.lineStart, 0);
+}
+
+function makeLongText(lineCount: number): string {
+  return Array.from({ length: lineCount }, (_, i) => `<p>Line number ${i}</p>`).join('\n');
+}
+
+describe('setMode viewport preservation', () => {
+  let annotator: Annotator;
+  let mockCanvas: HTMLCanvasElement;
+
+  beforeEach(() => {
+    mockCanvas = createMockCanvas();
+    document.body.appendChild(mockCanvas);
+  });
+
+  afterEach(() => {
+    if (mockCanvas?.parentNode) {
+      mockCanvas.parentNode.removeChild(mockCanvas);
+    }
+  });
+
+  test('viewport shows same segment after switching highlight to raw', () => {
+    const text = makeLongText(40);
+    annotator = new Annotator(mockCanvas, text);
+    annotator.setMode(EditMode.HIGHLIGHT);
+    annotator.viewport.lineStart = 10;
+
+    const before = getViewportTopSegment(annotator);
+    expect(before).not.toBeNull();
+
+    annotator.setMode(EditMode.RAW);
+
+    const after = getViewportTopSegment(annotator);
+    expect(after).not.toBeNull();
+    expect(after!.segmentIndex).toBe(before!.segmentIndex);
+    expect(after!.lineIndex).toBe(before!.lineIndex);
+  });
+
+  test('viewport shows same segment after switching raw to highlight', () => {
+    const text = makeLongText(40);
+    annotator = new Annotator(mockCanvas, text);
+    annotator.setMode(EditMode.RAW);
+    annotator.viewport.lineStart = 10;
+
+    const before = getViewportTopSegment(annotator);
+    expect(before).not.toBeNull();
+
+    annotator.setMode(EditMode.HIGHLIGHT);
+
+    const after = getViewportTopSegment(annotator);
+    expect(after).not.toBeNull();
+    expect(after!.segmentIndex).toBe(before!.segmentIndex);
+    expect(after!.lineIndex).toBe(before!.lineIndex);
+  });
+
+  test('viewport shows same segment after switching highlight to semi', () => {
+    const text = makeLongText(40);
+    annotator = new Annotator(mockCanvas, text);
+    annotator.setMode(EditMode.HIGHLIGHT);
+    annotator.viewport.lineStart = 10;
+
+    const before = getViewportTopSegment(annotator);
+
+    annotator.setMode(EditMode.SEMI);
+
+    const after = getViewportTopSegment(annotator);
+    expect(after).not.toBeNull();
+    expect(after!.segmentIndex).toBe(before!.segmentIndex);
+    expect(after!.lineIndex).toBe(before!.lineIndex);
+  });
+
+  test('preserves scrollOffsetY across mode switch', () => {
+    const text = makeLongText(40);
+    annotator = new Annotator(mockCanvas, text);
+    annotator.setMode(EditMode.HIGHLIGHT);
+    annotator.viewport.lineStart = 5;
+    annotator.viewport.scrollOffsetY = 5;
+
+    annotator.setMode(EditMode.RAW);
+
+    expect(annotator.viewport.scrollOffsetY).toBe(5);
+  });
+
+  test('viewport at start stays at start after mode switch', () => {
+    const text = makeLongText(40);
+    annotator = new Annotator(mockCanvas, text);
+    annotator.setMode(EditMode.HIGHLIGHT);
+    annotator.viewport.lineStart = 0;
+
+    annotator.setMode(EditMode.RAW);
+
+    expect(annotator.viewport.lineStart).toBe(0);
+  });
+});
