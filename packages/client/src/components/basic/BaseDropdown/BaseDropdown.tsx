@@ -166,7 +166,7 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
               zIndex: 9999,
             }),
           }}
-          menuPortalTarget={document.getElementById("page")!}
+          menuPortalTarget={document.getElementById("page-content")!}
           menuPosition="absolute"
           menuPlacement="auto"
           onChange={(selected: unknown, event: ActionMeta<unknown>) => {

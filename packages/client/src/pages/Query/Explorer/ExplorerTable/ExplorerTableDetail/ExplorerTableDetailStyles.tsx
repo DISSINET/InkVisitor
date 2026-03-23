@@ -19,9 +19,10 @@ export const StyledExpandedRow = styled.div<StyledExpandedRow>`
 `;
 export const StyledExpRowSection = styled.div`
   position: relative;
-  display: inline-flex;
+  display: flex;
   flex-direction: column;
   width: 100%;
+  min-width: 0;
   margin-bottom: 1rem;
 
   border: 1px dotted ${({ theme }) => theme.color["grey"]};
@@ -34,22 +35,18 @@ export const StyledExpRowSection = styled.div`
   }
 `;
 
+/* Use grid instead of multicol — Firefox has layout bugs with column-count/inline-flex */
 export const ColumnsContainer = styled.div`
-  column-count: 1;
-  column-gap: 1rem;
-  column-width: 100px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
 
   @media (min-width: 900px) {
-    column-count: 2;
-  }
-
-  @media (min-width: 1080px) {
-    column-count: 2;
-    column-width: 100px;
+    grid-template-columns: repeat(2, 1fr);
   }
 
   @media (min-width: 1450px) {
-    column-count: 3;
+    grid-template-columns: repeat(3, 1fr);
   }
 `;
 export const StyledColumnItem = styled.div`
@@ -58,9 +55,14 @@ export const StyledColumnItem = styled.div`
 `;
 
 export const StyledExpRowFormGrid = styled.div`
-  display: inline-grid;
-  grid-template-columns: auto 1fr;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr); /* minmax(0,1fr) prevents FF column blowout */
   gap: 0.5rem;
+  min-width: 0;
+
+  > * {
+    min-width: 0; /* allow value cells to shrink in constrained columns */
+  }
 `;
 
 export const StyledExpRowSectionHeader = styled.div`
@@ -94,10 +96,11 @@ export const StyledExpRowFormGridColumnValue = styled.div`
 `;
 export const StyledExpRowFormGridColumnValueID = styled.div`
   color: ${({ theme }) => theme.color["primary"]};
-  display: inline-flex;
+  display: flex;
   align-items: flex-end;
   font-style: italic;
   font-size: ${({ theme }) => theme.fontSize["xs"]};
+  min-width: 0;
 
   button {
     margin-left: ${({ theme }) => theme.space["2"]};

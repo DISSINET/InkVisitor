@@ -109,7 +109,7 @@ export const Tooltip: React.FC<Tooltip> = ({
     <>
       {!disabled && (showTooltip || tooltipHovered) && (
         <>
-          <FloatingPortal id="page">
+          <FloatingPortal id="page-content">
             <StyledContainer
               ref={setPopperElement}
               style={{ ...styles.popper, ...animatedTooltip }}

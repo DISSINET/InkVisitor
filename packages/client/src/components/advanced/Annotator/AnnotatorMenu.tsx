@@ -1,8 +1,9 @@
 import React, { useCallback, useMemo, useState } from "react";
+import { List } from "react-window";
 
 import { Tag } from "@inkvisitor/annotator/src/lib";
 import { EntityEnums } from "@shared/enums";
-import { IDocument, IEntity, IResponseTerritory } from "@shared/types";
+import { IEntity, IResponseTerritory } from "@shared/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { IconWithTooltip, Loader } from "components";
 import { Button } from "components/basic/Button/Button";
@@ -14,7 +15,7 @@ import {
   FaExclamationTriangle,
   FaPlus,
 } from "react-icons/fa";
-import { MdDone, MdOutlineDone } from "react-icons/md";
+import { MdDragIndicator, MdOutlineDone } from "react-icons/md";
 import { PiSelectionFill } from "react-icons/pi";
 import { TbAnchor } from "react-icons/tb";
 import { toast } from "react-toastify";
@@ -23,13 +24,20 @@ import { EntitySuggester } from "../EntitySuggester/EntitySuggester";
 import { EntityTag } from "../EntityTag/EntityTag";
 import { ElvlButtonGroup } from "../IconButtonGroups/ElvlButtonGroup";
 import {
-  StyledAnnotatorAnchorList,
+  ANCHOR_GRID_COLUMNS,
+  ANCHOR_GRID_ROW_HEIGHT,
+  AnnotatorAnchorGridRow,
+  AnnotatorAnchorGridRowData,
+  AnnotatorAnchorListItem,
+} from "./AnnotatorMenuAnchorListRow";
+import {
   StyledAnnotatorAnchorListWrap,
   StyledAnnotatorDoneButton,
   StyledAnnotatorItem,
   StyledAnnotatorItemContent,
   StyledAnnotatorItemContentLine,
   StyledAnnotatorItemTitle,
+  StyledAnnotatorMenuDragHandle,
   StyledAnnotatorNoAnchors,
   StyledTerritorySubsection,
   StyledTerritorySubsectionTitle,
@@ -66,6 +74,9 @@ interface TextAnnotatorMenuProps {
   onUpdateAnchor?: (anchor: Tag, elvl: EntityEnums.Elvl) => void;
 
   isLoading: boolean;
+
+  /** Pointer handlers for the top drag handle (menu repositioning). */
+  menuDragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
 }
 
 export const TextAnnotatorMenu = ({
@@ -87,6 +98,8 @@ export const TextAnnotatorMenu = ({
   disableCreate,
 
   isLoading = false,
+
+  menuDragHandleProps,
 }: TextAnnotatorMenuProps) => {
   const activeTerritory = entities[activeTerritoryId ?? ""];
   const queryClient = useQueryClient();
@@ -126,24 +139,36 @@ export const TextAnnotatorMenu = ({
     [anchors]
   );
 
+  const resolvedAnchors = useMemo((): AnnotatorAnchorListItem[] => {
+    const out: AnnotatorAnchorListItem[] = [];
+    for (const anchor of anchors) {
+      const anchorTagName = anchor.getTagName();
+      if (entities[anchorTagName]) {
+        out.push({ anchor, anchorTagName });
+      }
+    }
+    return out;
+  }, [anchors, entities]);
+
+  const anchorGridRowData = useMemo(
+    (): AnnotatorAnchorGridRowData => ({
+      items: resolvedAnchors,
+      entities,
+      onRemoveAnchor,
+      onUpdateAnchor,
+    }),
+    [resolvedAnchors, entities, onRemoveAnchor, onUpdateAnchor]
+  );
+
   return (
     <>
-      <StyledAnnotatorDoneButton>
-        <Button
-          color="primary"
-          inverted
-          icon={<MdOutlineDone size={25} />}
-          size={ButtonSize.ExtraLarge}
-          radiusRight
-          radiusLeft
-          shape="square"
-          noBackground
-          onClick={() => onEscapePressed()}
-          tooltipLabel="Close selection menu"
-          tooltipContent={[<p>(Esc, Ctrl+Enter or ⌘+Enter)</p>]}
-          tooltipPosition="left"
-        />
-      </StyledAnnotatorDoneButton>
+      {menuDragHandleProps && (
+        <StyledAnnotatorMenuDragHandle {...menuDragHandleProps}>
+          <MdDragIndicator size={18} />
+          <span>Drag to move</span>
+        </StyledAnnotatorMenuDragHandle>
+      )}
+
       <StyledAnnotatorItem>
         <StyledAnnotatorItemTitle>
           <FaBolt size={13} />
@@ -162,6 +187,23 @@ export const TextAnnotatorMenu = ({
               label={"clipboard"}
               tooltipLabel="Copy selected text to clipboard"
             />
+            {/* Done Button */}
+            <StyledAnnotatorDoneButton>
+              <Button
+                color="primary"
+                inverted
+                icon={<MdOutlineDone size={25} />}
+                size={ButtonSize.ExtraLarge}
+                radiusRight
+                radiusLeft
+                shape="square"
+                noBackground
+                onClick={() => onEscapePressed()}
+                tooltipLabel="Close selection menu"
+                tooltipContent={[<p>(Esc, Ctrl+Enter or ⌘+Enter)</p>]}
+                tooltipPosition="right"
+              />
+            </StyledAnnotatorDoneButton>
           </StyledAnnotatorItemContentLine>
         </StyledAnnotatorItemContent>
       </StyledAnnotatorItem>
@@ -338,36 +380,18 @@ export const TextAnnotatorMenu = ({
                 no anchors in selection
               </StyledAnnotatorNoAnchors>
             )}
-            <StyledAnnotatorAnchorList>
-              {anchors.map((anchor, key) => {
-                const anchorTagName = anchor.getTagName();
-                if (entities[anchorTagName]) {
-                  return (
-                    <EntityTag
-                      key={key}
-                      unlinkButton={{
-                        onClick: () => {
-                          if (onRemoveAnchor) {
-                            onRemoveAnchor(anchor);
-                          }
-                        },
-                      }}
-                      entity={entities[anchorTagName]}
-                      elvlButtonGroup={
-                        <ElvlButtonGroup
-                          value={anchor.attributes.elvl as EntityEnums.Elvl}
-                          onChange={(elvl) => {
-                            onUpdateAnchor?.(anchor, elvl);
-                          }}
-                        />
-                      }
-                    />
-                  );
-                } else {
-                  return <React.Fragment key={key} />;
-                }
-              })}
-            </StyledAnnotatorAnchorList>
+            {resolvedAnchors.length > 0 && (
+              <List
+                rowProps={{ data: anchorGridRowData }}
+                rowCount={Math.ceil(
+                  resolvedAnchors.length / ANCHOR_GRID_COLUMNS
+                )}
+                rowHeight={ANCHOR_GRID_ROW_HEIGHT}
+                overscanCount={8}
+                style={{ maxHeight: "13rem", width: "100%" }}
+                rowComponent={(props) => <AnnotatorAnchorGridRow {...props} />}
+              />
+            )}
           </StyledAnnotatorAnchorListWrap>
           <Loader show={isLoading} size={20} />
         </StyledAnnotatorItemContent>
