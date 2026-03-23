@@ -1,9 +1,9 @@
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums, RelationEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import { Explore } from "@shared/types/query";
 import { Button, ButtonGroup, Checkbox, Input } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { GrClose } from "react-icons/gr";
 import { MdOutlineEdit } from "react-icons/md";
 import { TbColumnInsertRight } from "react-icons/tb";
@@ -40,28 +40,52 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
   const [name, setName] = useState(initial.name);
   const [type, setType] = useState(initial.type);
   const [editable, setEditable] = useState<boolean>(initial.editable);
-  const [propertyType, setPropertyType] = useState<IEntity | undefined>(
-    undefined
-  );
-  const propertyTypeId = useMemo(() => propertyType?.id || "", [propertyType]);
+  const [paramValues, setParamValues] = useState<Record<string, unknown>>({});
 
-  const canCreate =
-    name.length > 0 &&
-    (type !== Explore.EExploreColumnType.EPV || Boolean(propertyTypeId));
+  const paramsDef = Explore.EExploreColumnTypeConfig[type].paramsDef ?? [];
+
+  // Reset param values when column type changes
+  useEffect(() => {
+    setParamValues({});
+  }, [type]);
+
+  const setParamValue = useCallback((paramId: string, value: unknown) => {
+    setParamValues((prev) => ({ ...prev, [paramId]: value }));
+  }, []);
+
+  const canCreate = useMemo(() => {
+    if (name.length === 0) return false;
+    for (const def of paramsDef) {
+      if (def.isRequired) {
+        const val = paramValues[def.id];
+        if (val === undefined || val === null || val === "") return false;
+      }
+    }
+    return true;
+  }, [name, paramsDef, paramValues]);
 
   const handleCreate = () => {
+    const params =
+      paramsDef.length > 0
+        ? Object.fromEntries(
+            paramsDef.map((def) => {
+              const val = paramValues[def.id];
+              const serialized =
+                def.type === "entity" && val && typeof val === "object" && "id" in val
+                  ? (val as IEntity).id
+                  : val;
+              return [def.id, serialized];
+            })
+          )
+        : {};
     const col: Explore.IExploreColumn = {
       id: uuidv4(),
-      name: name.length ? name : Explore.EExploreColumnTypeLabels[type],
+      name: name.length ? name : Explore.EExploreColumnTypeConfig[type].label,
       type,
       editable,
-      params:
-        type === Explore.EExploreColumnType.EPV
-          ? { propertyType: propertyTypeId }
-          : {},
+      params: params as Explore.IExploreColumnParams<typeof type>,
     };
     onCreateColumn(col);
-    // reset local state
     handleClose();
   };
 
@@ -69,9 +93,50 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
     setName("");
     setType(Explore.EExploreColumnType.EPV);
     setEditable(false);
-    setPropertyType(undefined);
+    setParamValues({});
     onClose();
   }, [onClose]);
+
+  const renderParamField = (def: Explore.IExploreColumnParamDef) => {
+    switch (def.type) {
+      case "relationType": {
+        const value = paramValues[def.id] as RelationEnums.Type | undefined;
+        return (
+          <Dropdown.Single.Basic
+            width="full"
+            value={value ?? null}
+            placeholder="Select relation type"
+            options={RelationEnums.AllTypes.map((t) => ({
+              value: t,
+              label: RelationEnums.RelationTypeLabels[t],
+            }))}
+            onChange={(v) => setParamValue(def.id, v)}
+          />
+        );
+      }
+      case "entity": {
+        const entity = paramValues[def.id] as IEntity | undefined;
+        return entity ? (
+          <EntityTag
+            fullWidth
+            entity={entity}
+            unlinkButton={{
+              onClick: () => setParamValue(def.id, undefined),
+            }}
+            disableDoubleClick
+          />
+        ) : (
+          <EntitySuggester
+            categoryTypes={[EntityEnums.Class.Concept]}
+            onPicked={(e) => setParamValue(def.id, e)}
+            inputWidth="full"
+          />
+        );
+      }
+      default:
+        return null;
+    }
+  };
 
   if (!open) return <React.Fragment />;
 
@@ -115,40 +180,20 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
                     key as keyof typeof Explore.EExploreColumnType
                   ]
               )
-              .map((value) => {
-                return {
-                  value: value,
-                  label: Explore.EExploreColumnTypeLabels[value],
-                  isDisabled:
-                    Explore.EExploreColumnTypeDisabled[value].disabled,
-                };
-              })}
+              .map((value) => ({
+                value,
+                label: Explore.EExploreColumnTypeConfig[value].label,
+                isDisabled: Explore.EExploreColumnTypeConfig[value].isDisabled,
+              }))}
             onChange={(v) => setType(v)}
           />
         </StyledValue>
-        {type === Explore.EExploreColumnType.EPV && (
-          <>
-            <StyledLabel>Property type</StyledLabel>
-            <StyledValue>
-              {propertyType ? (
-                <EntityTag
-                  fullWidth
-                  entity={propertyType}
-                  unlinkButton={{
-                    onClick: () => setPropertyType(undefined),
-                  }}
-                  disableDoubleClick
-                />
-              ) : (
-                <EntitySuggester
-                  categoryTypes={[EntityEnums.Class.Concept]}
-                  onPicked={(e) => setPropertyType(e)}
-                  inputWidth={"full"}
-                />
-              )}
-            </StyledValue>
-          </>
-        )}
+        {paramsDef.map((def) => (
+          <React.Fragment key={def.id}>
+            <StyledLabel>{def.label}</StyledLabel>
+            <StyledValue>{renderParamField(def)}</StyledValue>
+          </React.Fragment>
+        ))}
         <StyledLabel>
           <span style={{ display: "inline-flex", alignItems: "center" }}>
             Editable

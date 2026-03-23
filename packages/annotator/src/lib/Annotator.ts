@@ -196,95 +196,60 @@ export class Annotator {
    * removeAnchorFromSelection removes anchor from selected text
    * @param anchor
    */
-  removeAnchorFromSelection(anchor: string) {
-    const [start, end] = this.cursor.getAbsBounds();
+  removeAnchorFromSelection(anchorTag: Tag) {
+    const anchor = anchorTag.getTagName();
+    const anchorSegIdx = anchorTag.segmentIndex;
+    const anchorPos = anchorTag.position;
 
-    if (start && end) {
-      const startSegment = this.text.getSegmentPosition(
-        start.yLine,
-        start.xLine
-      ) as SegmentPosition;
+    const changedSegmentIndices = new Set<number>();
 
-      const endSegment = this.text.getSegmentPosition(
-        end.yLine,
-        end.xLine
-      ) as SegmentPosition;
+    const openSegment = this.text.segments[anchorSegIdx];
+    if (!openSegment) {
+      return;
+    }
 
-      const anchors = this.getAnnotations(startSegment, endSegment);
+    const openTag = openSegment.openingTags.find(
+      (tag) =>
+        tag.getTagName() === anchor && tag.position === anchorPos
+    );
 
-      if (anchors.some((tag) => tag.getTagName() === anchor)) {
-        const changedSegmentIndices = new Set<number>();
-
-        // find if open tag for given anchor is part of selection, otherwise find the last occurence of that anchor in the text before the selection
-        const openTagSegment = this.text.segments
-          .slice(0, endSegment.segmentIndex + 1)
-          .reverse()
-          .find((segment) =>
-            segment.openingTags.find((tag) => tag.getTagName() === anchor)
-          );
-
-        // replace open tag with empty string in the openTagSegment
-        if (openTagSegment) {
-          const openTag = openTagSegment.openingTags.find(
-            (tag) => tag.getTagName() === anchor
-          );
-          if (openTag) {
-            const openTagsSegmentI = this.text.segments.findIndex(
-              (i) =>
-                i.lineStart === openTagSegment.lineStart &&
-                i.lineEnd === openTagSegment.lineEnd
-            );
-
-            this.text.segments[openTagsSegmentI].raw =
-              openTagSegment.raw.replace(openTag.getTag(), "");
-            if (openTagsSegmentI >= 0) {
-              changedSegmentIndices.add(openTagsSegmentI);
-            }
-          }
-        }
-
-        // do similar for close tag
-        const closeTagSegment = this.text.segments
-          .slice(startSegment.segmentIndex, this.text.segments.length)
-          .find((segment) =>
-            segment.closingTags.find((tag) => tag.getTagName() === anchor)
-          );
-
-        if (closeTagSegment) {
-          const closeTag = closeTagSegment.closingTags.find(
-            (tag) => tag.getTagName() === anchor
-          );
-          if (closeTag) {
-            const closeTagsSegmentI =
-              this.text.segments.findIndex(
-                (i) =>
-                  i.lineStart === closeTagSegment.lineStart &&
-                  i.lineEnd === closeTagSegment.lineEnd
-              ) || 0;
-
-            this.text.segments[closeTagsSegmentI].raw =
-              closeTagSegment.raw.replace(`</${anchor}>`, "");
-
-            if (closeTagsSegmentI >= 0) {
-              changedSegmentIndices.add(closeTagsSegmentI);
-            }
-          }
-        }
-
-        // Re-parse tags for modified segments so subsequent `getAnnotations`
-        // (and thus `onSelectText`) reflects the updated anchors immediately.
-        for (const idx of changedSegmentIndices) {
-          this.text.segments[idx]?.parseText();
-        }
-
-        this.text.assignValueFromSegments();
-
-        // update annotator
-        // this.text.prepareSegments();
-        this.warnings.onTextChanged(this.text.value);
-        this.draw();
+    let closeTag: Tag | undefined;
+    let closeSegIdx = -1;
+    for (let i = anchorSegIdx; i < this.text.segments.length; i++) {
+      const seg = this.text.segments[i];
+      const candidates = i === anchorSegIdx
+        ? seg.closingTags.filter((t) => t.position > anchorPos)
+        : seg.closingTags;
+      closeTag = candidates.find((tag) => tag.getTagName() === anchor);
+      if (closeTag) {
+        closeSegIdx = i;
+        break;
       }
     }
+
+    if (closeTag && closeSegIdx !== -1) {
+      const closeSeg = this.text.segments[closeSegIdx];
+      const closePos = closeTag.position;
+      closeSeg.raw =
+        closeSeg.raw.slice(0, closePos) +
+        closeSeg.raw.slice(closePos + closeTag.getTagLength());
+      changedSegmentIndices.add(closeSegIdx);
+    }
+
+    if (openTag) {
+      openSegment.raw =
+        openSegment.raw.slice(0, anchorPos) +
+        openSegment.raw.slice(anchorPos + openTag.getTagLength());
+      changedSegmentIndices.add(anchorSegIdx);
+    }
+
+    for (const idx of changedSegmentIndices) {
+      this.text.segments[idx]?.parseText();
+    }
+
+    this.text.assignValueFromSegments();
+    this.warnings.onTextChanged(this.text.value);
+    this.draw();
   }
 
   onCanvasResize() {
@@ -626,95 +591,78 @@ export class Annotator {
     // Process all segments from beginning to end position
     for (let i = 0; i <= end.segmentIndex; i++) {
       const segment = this.text.segments[i];
-      const [openingTags, closingTags] = [
-        segment.openingTags,
-        segment.closingTags,
-      ];
 
-      // Process opening tags
-      for (const tag of openingTags) {
-        // Add to stack for pairing
-        tagStack.push(tag);
+      const allTags = segment.openingTags
+        .concat(segment.closingTags)
+        .sort((a, b) => a.position - b.position);
 
-        // Track in pairs map
-        if (!tagPairs.has(tag.getTagName())) {
-          tagPairs.set(tag.getTagName(), {});
-        }
-        tagPairs.get(tag.getTagName())!.opening = tag;
+      for (const tag of allTags) {
+        if (!tag.closing) {
+          tagStack.push(tag);
 
-        // Add to final list if within selection range
-        // Check: tag must be at/after start AND before end position
-        const tagInSelection =
-          i > start.segmentIndex ||
-          (i === start.segmentIndex &&
-            tag.position >= start.rawTextIndex &&
-            (i < end.segmentIndex ||
-              (i === end.segmentIndex && tag.position < end.rawTextIndex)));
-        if (tagInSelection) {
-          addToFinal(tag);
-        }
-      }
+          if (!tagPairs.has(tag.getTagName())) {
+            tagPairs.set(tag.getTagName(), {});
+          }
+          tagPairs.get(tag.getTagName())!.opening = tag;
 
-      // Process closing tags
-      for (const tag of closingTags) {
-        // Find matching opening tag in stack
-        const matchingIndex = tagStack.findLastIndex(
-          (stackTag) =>
-            stackTag.getTagName() === tag.getTagName() && !stackTag.closing
-        );
+          const tagInSelection =
+            i > start.segmentIndex ||
+            (i === start.segmentIndex &&
+              tag.position >= start.rawTextIndex &&
+              (i < end.segmentIndex ||
+                (i === end.segmentIndex && tag.position < end.rawTextIndex)));
+          if (tagInSelection) {
+            addToFinal(tag);
+          }
+        } else {
+          const matchingIndex = tagStack.findLastIndex(
+            (stackTag) =>
+              stackTag.getTagName() === tag.getTagName() && !stackTag.closing
+          );
 
-        if (matchingIndex !== -1) {
-          // Found matching opening tag - record the pairing and remove from stack
-          const matchedOpeningTag = tagStack[matchingIndex];
-          closingToOpeningMap.set(tag, matchedOpeningTag);
-          tagStack.splice(matchingIndex, 1);
+          if (matchingIndex !== -1) {
+            const matchedOpeningTag = tagStack[matchingIndex];
+            closingToOpeningMap.set(tag, matchedOpeningTag);
+            tagStack.splice(matchingIndex, 1);
 
-          // Check if closing tag is within the selection range
+            const closingTagInSelection =
+              (i > start.segmentIndex ||
+                (i === start.segmentIndex &&
+                  tag.position >= start.rawTextIndex)) &&
+              (i < end.segmentIndex ||
+                (i === end.segmentIndex && tag.position < end.rawTextIndex));
+
+            const openingTagOpenedBeforeEnd =
+              matchedOpeningTag.segmentIndex < end.segmentIndex ||
+              (matchedOpeningTag.segmentIndex === end.segmentIndex &&
+                matchedOpeningTag.position < end.rawTextIndex);
+
+            const shouldIncludeOpeningTag =
+              closingTagInSelection ||
+              (openingTagOpenedBeforeEnd &&
+                (i > start.segmentIndex ||
+                  (i === start.segmentIndex &&
+                    tag.position >= start.rawTextIndex)));
+
+            if (shouldIncludeOpeningTag) {
+              addToFinal(matchedOpeningTag);
+            }
+          }
+
+          if (!tagPairs.has(tag.getTagName())) {
+            tagPairs.set(tag.getTagName(), {});
+          }
+          tagPairs.get(tag.getTagName())!.closing = tag;
+
           const closingTagInSelection =
             (i > start.segmentIndex ||
               (i === start.segmentIndex &&
                 tag.position >= start.rawTextIndex)) &&
             (i < end.segmentIndex ||
               (i === end.segmentIndex && tag.position < end.rawTextIndex));
-
-          // Check if opening tag opened before end position (could span the selection)
-          const openingTagOpenedBeforeEnd =
-            matchedOpeningTag.segmentIndex < end.segmentIndex ||
-            (matchedOpeningTag.segmentIndex === end.segmentIndex &&
-              matchedOpeningTag.position < end.rawTextIndex);
-
-          // Include the opening tag if:
-          // 1. Closing tag is within selection range, OR
-          // 2. Opening tag opened before end AND closing tag is after start (tag spans the selection)
-          const shouldIncludeOpeningTag =
-            closingTagInSelection ||
-            (openingTagOpenedBeforeEnd &&
-              (i > start.segmentIndex ||
-                (i === start.segmentIndex &&
-                  tag.position >= start.rawTextIndex)));
-
-          if (shouldIncludeOpeningTag) {
-            // Tag is active in the selection (either closes within selection or spans it)
-            addToFinal(matchedOpeningTag);
+          if (closingTagInSelection) {
+            addToFinal(tag);
           }
-        }
-
-        // Track in pairs map
-        if (!tagPairs.has(tag.getTagName())) {
-          tagPairs.set(tag.getTagName(), {});
-        }
-        tagPairs.get(tag.getTagName())!.closing = tag;
-
-        // Add closing tag to final list only if within selection range
-        // Check: closing tag must be at/after start AND before end position
-        // (closing tags are included for post-processing, but will be removed later)
-        const closingTagInSelection =
-          (i > start.segmentIndex ||
-            (i === start.segmentIndex && tag.position >= start.rawTextIndex)) &&
-          (i < end.segmentIndex ||
-            (i === end.segmentIndex && tag.position < end.rawTextIndex));
-        if (closingTagInSelection) {
-          addToFinal(tag);
         }
       }
     }
@@ -964,14 +912,19 @@ export class Annotator {
         start: IAbsCoordinates;
         end: IAbsCoordinates;
       }[] = [];
+      const processedTagNames = new Set<string>();
       for (const tag of annotated) {
-        const hlSchema = this.onHighlightCb(tag.getTagName());
+        const tagName = tag.getTagName();
+        if (processedTagNames.has(tagName)) {
+          continue;
+        }
+        processedTagNames.add(tagName);
+        const hlSchema = this.onHighlightCb(tagName);
         if (hlSchema) {
-          // iterate over all tag occurrences
           let occurence: IAbsCoordinates[];
           let i = 0;
           do {
-            occurence = this.text.getTagPosition(tag.getTagName(), i);
+            occurence = this.text.getTagPosition(tagName, i);
             if (occurence.length > 1) {
               higlightItems.push({
                 schema: hlSchema,

@@ -6,8 +6,6 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { FaEyeSlash } from "react-icons/fa";
-import { MdOutlineEdit } from "react-icons/md";
 import { List } from "react-window";
 import { v4 as uuidv4 } from "uuid";
 
@@ -32,15 +30,13 @@ import { CMetaProp } from "constructors";
 
 import { useResizeObserver, useTheme } from "hooks";
 import { ExploreAction, ExploreActionType } from "../state";
+import { ExplorerTableBatchActionModal } from "./ExplorerTableBatchActionModal/ExplorerTableBatchActionModal";
 import { ExplorerTableDetail } from "./ExplorerTableDetail/ExplorerTableDetail";
 import ExplorerTableNewColumnPanel from "./ExplorerTableNewColumnPanel/ExplorerTableNewColumnPanel";
-import {
-  StyledBody,
-  StyledHeader,
-  StyledTableWrapper,
-} from "./ExplorerTableStyles";
+import { StyledBody, StyledTableWrapper } from "./ExplorerTableStyles";
 import ExploreTableControl from "./ExploreTableControl";
-import { ExplorerTableBatchActionModal } from "./ExplorerTableBatchActionModal/ExplorerTableBatchActionModal";
+
+import ExploreTableHeader from "./ExploreTableHeader";
 import {
   BatchAction,
   batchOptions,
@@ -58,65 +54,10 @@ const OVERSCAN_ROWS = 10;
 const SCROLL_WINDOW_UPDATE_DEBOUNCE_MS = 150;
 
 // light CSS classes (avoid dynamic styled props in hot path)
-import "../../styles.css";
-import ExplorerTableRow from "./ExplorerTableRow";
 import { EntityTag } from "components/advanced/EntityTag/EntityTag";
 import { clearRowCache } from "pages/Query/useQueryData";
-
-// Memoized header to avoid unnecessary re-renders during scroll
-const MemoizedTableHeader: React.FC<{
-  columns: Explore.IExploreColumn[];
-  onRemoveColumn: (id: string) => void;
-}> = React.memo(({ columns, onRemoveColumn }) => {
-  const theme = useTheme();
-  return (
-    <StyledHeader>
-      <div
-        className="qt-col qt-col-header"
-        style={{
-          width: WIDTH_COLUMN_FIRST,
-          minWidth: WIDTH_COLUMN_FIRST,
-          maxWidth: WIDTH_COLUMN_FIRST,
-        }}
-      >
-        Entity
-      </div>
-      {columns.map((column, key) => {
-        return (
-          <div
-            key={key}
-            className="qt-col qt-col-header"
-            style={{
-              width:
-                column.type === Explore.EExploreColumnType.EUC
-                  ? WIDTH_COLUMN_EUC
-                  : WIDTH_COLUMN_DEFAULT,
-              minWidth: WIDTH_COLUMN_EUC,
-              maxWidth: WIDTH_COLUMN_DEFAULT,
-              display: "flex",
-              alignItems: "center",
-            }}
-          >
-            {column.editable && (
-              <MdOutlineEdit size={14} style={{ marginRight: "0.3rem" }} />
-            )}
-            {column.name}
-            <span style={{ marginLeft: "0.5rem" }}>
-              <Button
-                noBorder
-                noBackground
-                inverted
-                icon={<FaEyeSlash color={theme.color.white} />}
-                onClick={() => onRemoveColumn(column.id)}
-                tooltipLabel="remove column"
-              />
-            </span>
-          </div>
-        );
-      })}
-    </StyledHeader>
-  );
-});
+import "../../styles.css";
+import ExplorerTableRow from "./ExplorerTableRow";
 
 interface ExplorerTable {
   state: Explore.IExplore;
@@ -563,7 +504,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           {/* HEADER (sticky at top of vertical area, shared horizontal scroll) */}
           <div style={{ width: widthTable, minWidth: "100%" }}>
             {/* Alternatively, use the memoized header component below to minimize re-renders */}
-            <MemoizedTableHeader
+            <ExploreTableHeader
               columns={columns}
               onRemoveColumn={handleRemoveColumn}
             />
