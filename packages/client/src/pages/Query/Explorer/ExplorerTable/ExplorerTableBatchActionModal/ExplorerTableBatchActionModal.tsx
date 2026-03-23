@@ -72,15 +72,5 @@ export const ExplorerTableBatchActionModal: React.FC<
     }
   };
 
-  return (
-    <Modal showModal onClose={onClose} width="fat">
-      <ModalHeader
-        title={`${titleMap[batchAction]} (${selectedEntities.length} entities)`}
-        onClose={onClose}
-      />
-      <ModalContent column enableScroll>
-        {renderContent()}
-      </ModalContent>
-    </Modal>
-  );
+  return <>{renderContent()}</>;
 };

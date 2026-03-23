@@ -1,6 +1,13 @@
 import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
-import { Button } from "components";
+import {
+  Button,
+  ButtonGroup,
+  Modal,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+} from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
 import React, { useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -68,52 +75,63 @@ export const BatchActionAddReference: React.FC<
   }, [resourceEntity, valueEntity, selectedEntities]);
 
   return (
-    <StyledBatchWrapper>
-      <StyledBatchSection>
-        <StyledBatchSectionLabel>Resource (required)</StyledBatchSectionLabel>
-        {resourceEntity ? (
-          <EntityTag
-            entity={resourceEntity}
-            unlinkButton={{ onClick: () => setResourceEntity(undefined) }}
-          />
-        ) : (
-          <EntitySuggester
-            categoryTypes={[EntityEnums.Class.Resource]}
-            onPicked={(entity) => setResourceEntity(entity)}
-            placeholder="select resource..."
-            inputWidth="full"
-          />
-        )}
-      </StyledBatchSection>
+    <Modal showModal onClose={onClose} width="fat">
+      <ModalHeader
+        title={`Add Reference (${selectedEntities.length} entities)`}
+        onClose={onClose}
+      />
+      <ModalContent column enableScroll>
+        <StyledBatchWrapper>
+          <StyledBatchSection>
+            <StyledBatchSectionLabel>
+              Resource (required)
+            </StyledBatchSectionLabel>
+            {resourceEntity ? (
+              <EntityTag
+                entity={resourceEntity}
+                unlinkButton={{ onClick: () => setResourceEntity(undefined) }}
+              />
+            ) : (
+              <EntitySuggester
+                categoryTypes={[EntityEnums.Class.Resource]}
+                onPicked={(entity) => setResourceEntity(entity)}
+                placeholder="select resource..."
+                inputWidth="full"
+              />
+            )}
+          </StyledBatchSection>
 
-      <StyledBatchSection>
-        <StyledBatchSectionLabel>Value (optional)</StyledBatchSectionLabel>
-        {valueEntity ? (
-          <EntityTag
-            entity={valueEntity}
-            unlinkButton={{ onClick: () => setValueEntity(undefined) }}
-          />
-        ) : (
-          <EntitySuggester
-            categoryTypes={[EntityEnums.Class.Value]}
-            onPicked={(entity) => setValueEntity(entity)}
-            placeholder="select value..."
-            inputWidth="full"
-          />
-        )}
-      </StyledBatchSection>
+          <StyledBatchSection>
+            <StyledBatchSectionLabel>Value (optional)</StyledBatchSectionLabel>
+            {valueEntity ? (
+              <EntityTag
+                entity={valueEntity}
+                unlinkButton={{ onClick: () => setValueEntity(undefined) }}
+              />
+            ) : (
+              <EntitySuggester
+                categoryTypes={[EntityEnums.Class.Value]}
+                onPicked={(entity) => setValueEntity(entity)}
+                placeholder="select value..."
+                inputWidth="full"
+              />
+            )}
+          </StyledBatchSection>
 
-      <StyledBatchMessage>{message}</StyledBatchMessage>
-
-      <StyledBatchFooter>
-        <Button label="Cancel" color="greyer" inverted onClick={onClose} />
-        <Button
-          label="Apply"
-          color="primary"
-          onClick={handleApply}
-          disabled={!resourceEntity || batchMutation.isPending}
-        />
-      </StyledBatchFooter>
-    </StyledBatchWrapper>
+          <StyledBatchMessage>{message}</StyledBatchMessage>
+        </StyledBatchWrapper>
+      </ModalContent>
+      <ModalFooter>
+        <ButtonGroup>
+          <Button label="Cancel" color="greyer" inverted onClick={onClose} />
+          <Button
+            label="Apply"
+            color="primary"
+            onClick={handleApply}
+            disabled={!resourceEntity || batchMutation.isPending}
+          />
+        </ButtonGroup>
+      </ModalFooter>
+    </Modal>
   );
 };

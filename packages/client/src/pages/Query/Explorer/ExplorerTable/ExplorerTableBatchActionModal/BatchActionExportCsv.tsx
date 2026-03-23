@@ -1,7 +1,14 @@
 import { IEntity } from "@shared/types";
 import { Explore } from "@shared/types/query";
 import React, { useMemo, useState } from "react";
-import { Button } from "components";
+import {
+  Button,
+  ButtonGroup,
+  Modal,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+} from "components";
 import {
   MdOutlineCheckBox,
   MdOutlineCheckBoxOutlineBlank,
@@ -93,57 +100,65 @@ export const BatchActionExportCsv: React.FC<BatchActionExportCsvProps> = ({
   };
 
   return (
-    <StyledBatchWrapper>
-      <StyledBatchSection>
-        <StyledBatchSectionLabel>Columns to export</StyledBatchSectionLabel>
+    <Modal showModal onClose={onClose} width="fat">
+      <ModalHeader
+        title={`Export as CSV (${selectedEntities.length} entities)`}
+        onClose={onClose}
+      />
+      <ModalContent column enableScroll>
+        <StyledBatchWrapper>
+          <StyledBatchSection>
+            <StyledBatchSectionLabel>Columns to export</StyledBatchSectionLabel>
 
-        {/* TODO: rewrite to styled component */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "0.5rem",
-            cursor: "pointer",
-            padding: "0.3rem 0",
-            borderBottom: `1px solid ${theme.color.grey}`,
-          }}
-          onClick={handleToggleAll}
-        >
-          {renderSelectAllIcon()}
-          <span
-            style={{
-              fontSize: theme.fontSize.sm,
-              fontWeight: theme.fontWeight.bold,
-            }}
-          >
-            {isAllSelected ? "Deselect all" : "Select all"}
-          </span>
-        </div>
-
-        {columns.map((column) => {
-          const isSelected = selectedColumnIds.includes(column.id);
-          return (
+            {/* TODO: rewrite to styled component */}
             <div
-              key={column.id}
               style={{
                 display: "flex",
                 alignItems: "center",
                 gap: "0.5rem",
                 cursor: "pointer",
-                padding: "0.2rem 0",
+                padding: "0.3rem 0",
+                borderBottom: `1px solid ${theme.color.grey}`,
               }}
-              onClick={() => handleToggleColumn(column.id)}
+              onClick={handleToggleAll}
             >
-              {renderCheckboxIcon(isSelected)}
-              <span style={{ fontSize: theme.fontSize.sm }}>{column.name}</span>
+              {renderSelectAllIcon()}
+              <span
+                style={{
+                  fontSize: theme.fontSize.sm,
+                  fontWeight: theme.fontWeight.bold,
+                }}
+              >
+                {isAllSelected ? "Deselect all" : "Select all"}
+              </span>
             </div>
-          );
-        })}
-      </StyledBatchSection>
 
-      <StyledBatchMessage>{message}</StyledBatchMessage>
+            {columns.map((column) => {
+              const isSelected = selectedColumnIds.includes(column.id);
+              return (
+                <div
+                  key={column.id}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    cursor: "pointer",
+                    padding: "0.2rem 0",
+                  }}
+                  onClick={() => handleToggleColumn(column.id)}
+                >
+                  {renderCheckboxIcon(isSelected)}
+                  <span style={{ fontSize: theme.fontSize.sm }}>
+                    {column.name}
+                  </span>
+                </div>
+              );
+            })}
+          </StyledBatchSection>
 
-      <StyledBatchFooter>
+          <StyledBatchMessage>{message}</StyledBatchMessage>
+
+          {/* <StyledBatchFooter>
         <Button label="Cancel" color="greyer" inverted onClick={onClose} />
         <Button
           label="Export"
@@ -151,7 +166,20 @@ export const BatchActionExportCsv: React.FC<BatchActionExportCsvProps> = ({
           onClick={() => onExport(selectedColumnIds)}
           disabled={selectedColumnIds.length === 0}
         />
-      </StyledBatchFooter>
-    </StyledBatchWrapper>
+      </StyledBatchFooter> */}
+        </StyledBatchWrapper>
+      </ModalContent>
+      <ModalFooter>
+        <ButtonGroup>
+          <Button label="Cancel" color="greyer" inverted onClick={onClose} />
+          <Button
+            label="Export"
+            color="primary"
+            onClick={() => onExport(selectedColumnIds)}
+            disabled={selectedColumnIds.length === 0}
+          />
+        </ButtonGroup>
+      </ModalFooter>
+    </Modal>
   );
 };

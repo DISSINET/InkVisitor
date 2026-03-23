@@ -8,7 +8,15 @@ import { EntityEnums } from "@shared/enums";
 import { IEntity, IPropSpec } from "@shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { AttributeIcon, Button } from "components";
+import {
+  AttributeIcon,
+  Button,
+  ButtonGroup,
+  Modal,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+} from "components";
 import Dropdown, {
   ElvlButtonGroup,
   EntitySuggester,
@@ -124,141 +132,157 @@ export const BatchActionAddMetaprop: React.FC<BatchActionAddMetapropProps> = ({
   }, [typeEntity, valueEntity, selectedEntities]);
 
   return (
-    <StyledBatchWrapper>
-      {/* TYPE */}
-      <StyledBatchSection>
-        <StyledBatchSectionLabel>Type (required)</StyledBatchSectionLabel>
-        {typeEntity ? (
-          <EntityTag
-            entity={typeEntity}
-            unlinkButton={{ onClick: () => setTypeEntity(undefined) }}
-          />
-        ) : (
-          <EntitySuggester
-            categoryTypes={[EntityEnums.Class.Concept]}
-            onPicked={(entity) => setTypeEntity(entity)}
-            placeholder="select metaprop type..."
-            inputWidth="full"
-          />
-        )}
-        {typeEntity && (
-          <StyledBatchAttrRow>
-            <ElvlButtonGroup
-              border
-              value={typeSpec.elvl}
-              onChange={(elvl) => setTypeSpec((s) => ({ ...s, elvl }))}
-            />
-            <LogicButtonGroup
-              border
-              value={typeSpec.logic}
-              onChange={(logic) => setTypeSpec((s) => ({ ...s, logic }))}
-            />
-            <Dropdown.Single.Basic
-              width={100}
-              placeholder="virtuality"
-              tooltipLabel="virtuality"
-              icon={<AttributeIcon attributeName="virtuality" />}
-              options={virtualityDict}
-              value={typeSpec.virtuality}
-              onChange={(v) => setTypeSpec((s) => ({ ...s, virtuality: v }))}
-            />
-            <Dropdown.Single.Basic
-              width={150}
-              placeholder="partitivity"
-              tooltipLabel="partitivity"
-              icon={<AttributeIcon attributeName="partitivity" />}
-              options={partitivityDict}
-              value={typeSpec.partitivity}
-              onChange={(v) => setTypeSpec((s) => ({ ...s, partitivity: v }))}
-            />
-          </StyledBatchAttrRow>
-        )}
-      </StyledBatchSection>
+    <Modal showModal onClose={onClose} width="fat">
+      <ModalHeader
+        title={`Add Metaproperty (${selectedEntities.length} entities)`}
+        onClose={onClose}
+      />
+      <ModalContent column enableScroll>
+        <StyledBatchWrapper>
+          {/* TYPE */}
+          <StyledBatchSection>
+            <StyledBatchSectionLabel>Type (required)</StyledBatchSectionLabel>
+            {typeEntity ? (
+              <EntityTag
+                entity={typeEntity}
+                unlinkButton={{ onClick: () => setTypeEntity(undefined) }}
+              />
+            ) : (
+              <EntitySuggester
+                categoryTypes={[EntityEnums.Class.Concept]}
+                onPicked={(entity) => setTypeEntity(entity)}
+                placeholder="select metaprop type..."
+                inputWidth="full"
+              />
+            )}
+            {typeEntity && (
+              <StyledBatchAttrRow>
+                <ElvlButtonGroup
+                  border
+                  value={typeSpec.elvl}
+                  onChange={(elvl) => setTypeSpec((s) => ({ ...s, elvl }))}
+                />
+                <LogicButtonGroup
+                  border
+                  value={typeSpec.logic}
+                  onChange={(logic) => setTypeSpec((s) => ({ ...s, logic }))}
+                />
+                <Dropdown.Single.Basic
+                  width={100}
+                  placeholder="virtuality"
+                  tooltipLabel="virtuality"
+                  icon={<AttributeIcon attributeName="virtuality" />}
+                  options={virtualityDict}
+                  value={typeSpec.virtuality}
+                  onChange={(v) =>
+                    setTypeSpec((s) => ({ ...s, virtuality: v }))
+                  }
+                />
+                <Dropdown.Single.Basic
+                  width={150}
+                  placeholder="partitivity"
+                  tooltipLabel="partitivity"
+                  icon={<AttributeIcon attributeName="partitivity" />}
+                  options={partitivityDict}
+                  value={typeSpec.partitivity}
+                  onChange={(v) =>
+                    setTypeSpec((s) => ({ ...s, partitivity: v }))
+                  }
+                />
+              </StyledBatchAttrRow>
+            )}
+          </StyledBatchSection>
 
-      {/* VALUE */}
-      <StyledBatchSection>
-        <StyledBatchSectionLabel>Value (optional)</StyledBatchSectionLabel>
-        {valueEntity ? (
-          <EntityTag
-            entity={valueEntity}
-            unlinkButton={{ onClick: () => setValueEntity(undefined) }}
-          />
-        ) : (
-          <EntitySuggester
-            onPicked={(entity) => setValueEntity(entity)}
-            placeholder="select value..."
-            inputWidth="full"
-          />
-        )}
-        {valueEntity && (
-          <StyledBatchAttrRow>
-            <ElvlButtonGroup
-              border
-              value={valueSpec.elvl}
-              onChange={(elvl) => setValueSpec((s) => ({ ...s, elvl }))}
-            />
-            <LogicButtonGroup
-              border
-              value={valueSpec.logic}
-              onChange={(logic) => setValueSpec((s) => ({ ...s, logic }))}
-            />
-            <Dropdown.Single.Basic
-              width={100}
-              placeholder="virtuality"
-              tooltipLabel="virtuality"
-              icon={<AttributeIcon attributeName="virtuality" />}
-              options={virtualityDict}
-              value={valueSpec.virtuality}
-              onChange={(v) => setValueSpec((s) => ({ ...s, virtuality: v }))}
-            />
-            <Dropdown.Single.Basic
-              width={150}
-              placeholder="partitivity"
-              tooltipLabel="partitivity"
-              icon={<AttributeIcon attributeName="partitivity" />}
-              options={partitivityDict}
-              value={valueSpec.partitivity}
-              onChange={(v) => setValueSpec((s) => ({ ...s, partitivity: v }))}
-            />
-          </StyledBatchAttrRow>
-        )}
-      </StyledBatchSection>
+          {/* VALUE */}
+          <StyledBatchSection>
+            <StyledBatchSectionLabel>Value (optional)</StyledBatchSectionLabel>
+            {valueEntity ? (
+              <EntityTag
+                entity={valueEntity}
+                unlinkButton={{ onClick: () => setValueEntity(undefined) }}
+              />
+            ) : (
+              <EntitySuggester
+                onPicked={(entity) => setValueEntity(entity)}
+                placeholder="select value..."
+                inputWidth="full"
+              />
+            )}
+            {valueEntity && (
+              <StyledBatchAttrRow>
+                <ElvlButtonGroup
+                  border
+                  value={valueSpec.elvl}
+                  onChange={(elvl) => setValueSpec((s) => ({ ...s, elvl }))}
+                />
+                <LogicButtonGroup
+                  border
+                  value={valueSpec.logic}
+                  onChange={(logic) => setValueSpec((s) => ({ ...s, logic }))}
+                />
+                <Dropdown.Single.Basic
+                  width={100}
+                  placeholder="virtuality"
+                  tooltipLabel="virtuality"
+                  icon={<AttributeIcon attributeName="virtuality" />}
+                  options={virtualityDict}
+                  value={valueSpec.virtuality}
+                  onChange={(v) =>
+                    setValueSpec((s) => ({ ...s, virtuality: v }))
+                  }
+                />
+                <Dropdown.Single.Basic
+                  width={150}
+                  placeholder="partitivity"
+                  tooltipLabel="partitivity"
+                  icon={<AttributeIcon attributeName="partitivity" />}
+                  options={partitivityDict}
+                  value={valueSpec.partitivity}
+                  onChange={(v) =>
+                    setValueSpec((s) => ({ ...s, partitivity: v }))
+                  }
+                />
+              </StyledBatchAttrRow>
+            )}
+          </StyledBatchSection>
 
-      {/* STATEMENT-LEVEL ATTRIBUTES */}
-      <StyledBatchSection>
-        <StyledBatchSectionLabel>Statement attributes</StyledBatchSectionLabel>
-        <StyledBatchAttrRow>
-          <LogicButtonGroup border value={logic} onChange={setLogic} />
-          <Dropdown.Single.Basic
-            width={122}
-            placeholder="certainty"
-            tooltipLabel="certainty"
-            icon={<AttributeIcon attributeName="certainty" />}
-            options={certaintyDict}
-            value={certainty}
-            onChange={(v) => setCertainty(v)}
-          />
-          <Dropdown.Multi.Attribute
-            width={131}
-            placeholder="mood"
-            tooltipLabel="mood"
-            icon={<AttributeIcon attributeName="mood" />}
-            options={moodDict}
-            value={mood}
-            onChange={(newValues) => setMood(newValues)}
-          />
-          <MoodVariantButtonGroup
-            border
-            value={moodvariant}
-            onChange={setMoodvariant}
-          />
-        </StyledBatchAttrRow>
-      </StyledBatchSection>
+          {/* STATEMENT-LEVEL ATTRIBUTES */}
+          <StyledBatchSection>
+            <StyledBatchSectionLabel>
+              Statement attributes
+            </StyledBatchSectionLabel>
+            <StyledBatchAttrRow>
+              <LogicButtonGroup border value={logic} onChange={setLogic} />
+              <Dropdown.Single.Basic
+                width={122}
+                placeholder="certainty"
+                tooltipLabel="certainty"
+                icon={<AttributeIcon attributeName="certainty" />}
+                options={certaintyDict}
+                value={certainty}
+                onChange={(v) => setCertainty(v)}
+              />
+              <Dropdown.Multi.Attribute
+                width={131}
+                placeholder="mood"
+                tooltipLabel="mood"
+                icon={<AttributeIcon attributeName="mood" />}
+                options={moodDict}
+                value={mood}
+                onChange={(newValues) => setMood(newValues)}
+              />
+              <MoodVariantButtonGroup
+                border
+                value={moodvariant}
+                onChange={setMoodvariant}
+              />
+            </StyledBatchAttrRow>
+          </StyledBatchSection>
 
-      {/* MESSAGE + ACTIONS */}
-      <StyledBatchMessage>{message}</StyledBatchMessage>
+          {/* MESSAGE + ACTIONS */}
+          <StyledBatchMessage>{message}</StyledBatchMessage>
 
-      <StyledBatchFooter>
+          {/* <StyledBatchFooter>
         <Button label="Cancel" color="greyer" inverted onClick={onClose} />
         <Button
           label="Apply"
@@ -266,7 +290,20 @@ export const BatchActionAddMetaprop: React.FC<BatchActionAddMetapropProps> = ({
           onClick={handleApply}
           disabled={!typeEntity || batchMutation.isPending}
         />
-      </StyledBatchFooter>
-    </StyledBatchWrapper>
+      </StyledBatchFooter> */}
+        </StyledBatchWrapper>
+      </ModalContent>
+      <ModalFooter>
+        <ButtonGroup>
+          <Button label="Cancel" color="greyer" inverted onClick={onClose} />
+          <Button
+            label="Apply"
+            color="primary"
+            onClick={handleApply}
+            disabled={!typeEntity || batchMutation.isPending}
+          />
+        </ButtonGroup>
+      </ModalFooter>
+    </Modal>
   );
 };
