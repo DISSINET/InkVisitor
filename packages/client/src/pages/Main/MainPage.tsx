@@ -222,19 +222,26 @@ const MainPage: React.FC<MainPage> = ({}) => {
       <></>
     ) : (
       <>
-        {queriesToRefresh.length && (
+        {queriesToRefresh.length > 0 ? (
           <Button
             key="refresh queries"
             tooltipLabel="refresh data"
             inverted
             icon={<BiRefresh />}
             onClick={() => {
+              const uid = localStorage.getItem("userid");
               queriesToRefresh.forEach((queryToRefresh) => {
-                queryClient.invalidateQueries({ queryKey: [queryToRefresh] });
+                if (queryToRefresh === "user" && uid) {
+                  queryClient.invalidateQueries({ queryKey: ["user", uid] });
+                } else {
+                  queryClient.invalidateQueries({
+                    queryKey: [queryToRefresh],
+                  });
+                }
               });
             }}
           />
-        )}
+        ) : null}
       </>
     );
   };

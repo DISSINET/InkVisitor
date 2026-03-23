@@ -231,6 +231,7 @@ function areEntityTagsEqual(
 ) {
   // Compare minimal fields that affect rendering
   if (prev.isSelected !== next.isSelected) return false;
+  if (prev.isFavorited !== next.isFavorited) return false;
   if (prev.showOnly !== next.showOnly) return false;
   if (prev.fullWidth !== next.fullWidth) return false;
   if (prev.disableTooltip !== next.disableTooltip) return false;
