@@ -26,13 +26,6 @@ export const ExplorerTableBatchActionModal: React.FC<
   onExport,
   onApplyAction,
 }) => {
-  const titleMap: Record<BatchAction, string> = {
-    [BatchAction.export_csv]: "Export as CSV",
-    [BatchAction.add_metaprop]: "Add Metaproperty",
-    [BatchAction.add_reference]: "Add Reference",
-    [BatchAction.add_relation]: "Add Relation",
-  };
-
   const renderContent = () => {
     switch (batchAction) {
       case BatchAction.export_csv:
