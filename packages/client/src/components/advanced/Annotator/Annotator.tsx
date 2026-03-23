@@ -73,7 +73,12 @@ import {
   StyledScrollerViewport,
 } from "./AnnotatorStyles";
 import { annotatorHighlight } from "./highlight";
-import { RATIO, TerritoryCreateModalType, W_SCROLL } from "./types";
+import {
+  ANNOTATOR_LEFT_MARGIN_PX,
+  RATIO,
+  TerritoryCreateModalType,
+  W_SCROLL,
+} from "./types";
 import { AnnotatorSearchLine } from "./AnnotatorSearchLine/AnnotatorSearchLine";
 
 interface TextAnnotatorProps {
@@ -221,7 +226,10 @@ export const TextAnnotator = ({
   });
 
   const wLineNumbers = displayLineNumbers ? 50 : 0;
-  const wTextArea = Math.max(0, width - wLineNumbers - W_SCROLL);
+  const wTextArea = Math.max(
+    0,
+    width - wLineNumbers - W_SCROLL - ANNOTATOR_LEFT_MARGIN_PX
+  );
 
   const [isSelectingText, setIsSelectingText] = useState<boolean>(false);
 
@@ -950,7 +958,11 @@ export const TextAnnotator = ({
       />
 
       <div
-        style={{ width: width, position: "relative" }}
+        style={{
+          width,
+          position: "relative",
+          paddingLeft: ANNOTATOR_LEFT_MARGIN_PX,
+        }}
         onKeyDown={(e) => {
           if (e.key === "Escape") {
             setSelectedText("");
