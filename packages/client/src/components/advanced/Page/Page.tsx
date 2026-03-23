@@ -156,7 +156,7 @@ export const Page: React.FC<Page> = ({ children }) => {
   }, [contentHeight, layoutWidth]);
 
   return (
-    <StyledPage onClick={handleClick}>
+    <StyledPage onClick={handleClick} id="page">
       <Header
         paddingY={0}
         paddingX={10}
@@ -171,7 +171,7 @@ export const Page: React.FC<Page> = ({ children }) => {
         right={headerRight}
       />
 
-      <StyledPageContent id="page">{contentEl}</StyledPageContent>
+      <StyledPageContent id="page-content">{contentEl}</StyledPageContent>
 
       {user && userCustomizationOpen && (
         <UserCustomizationModal

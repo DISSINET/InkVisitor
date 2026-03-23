@@ -77,7 +77,7 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
         <StyledCgMenuBoxed size={18} />
 
         {portalMounted && (
-          <FloatingPortal id="page">
+          <FloatingPortal id="page-content">
             <div
               ref={refs.setFloating}
               style={{

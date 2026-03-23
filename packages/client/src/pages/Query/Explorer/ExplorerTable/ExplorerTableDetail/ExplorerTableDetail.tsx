@@ -14,7 +14,7 @@ import { EntityDetailMetaPropsTable } from "pages/Main/containers/EntityDetailBo
 import { EntityDetailStatementPropsTable } from "pages/Main/containers/EntityDetailBox/EntityDetail/EntityDetailUsedInTable/EntityDetailStatementPropsTable/EntityDetailStatementPropsTable";
 import { EntityDetailStatementsTable } from "pages/Main/containers/EntityDetailBox/EntityDetail/EntityDetailUsedInTable/EntityDetailStatementsTable/EntityDetailStatementsTable";
 import { StatementListRowExpandedPropGroup } from "pages/Main/containers/StatementsListBox/StatementListTable/StatementListRowExpanded/StatementListRowExpandedPropGroup";
-import React from "react";
+import React, { useEffect } from "react";
 import { FaRegCopy } from "react-icons/fa";
 import { toast } from "react-toastify";
 import {
@@ -26,6 +26,8 @@ import {
   StyledExpRowSection,
   StyledExpRowSectionContent,
   StyledExpRowSectionHeader,
+  StyledReferenceRow,
+  StyledReferenceTable,
 } from "./ExplorerTableDetailStyles";
 
 interface ExplorerTableDetail {
@@ -157,6 +159,10 @@ export const ExplorerTableDetail: React.FC<ExplorerTableDetail> = ({
   };
 
   const alternativeLabels = entity?.labels.slice(1);
+
+  useEffect(() => {
+    console.log("references", references);
+  }, [references]);
 
   return (
     <StyledExpandedRow $columnsSpan={columns.length + 2} $isOdd={isOdd}>
@@ -324,28 +330,33 @@ export const ExplorerTableDetail: React.FC<ExplorerTableDetail> = ({
           <StyledExpRowSection>
             <StyledExpRowSectionHeader>References</StyledExpRowSectionHeader>
             <StyledExpRowSectionContent>
-              {entity &&
-                references.map((reference, key) => {
-                  return (
-                    <div
-                      style={{
-                        display: "inline-grid",
-                        gridTemplateColumns: "auto auto",
-                        gap: "0.5rem",
-                      }}
-                      key={key}
-                    >
-                      <span>
-                        <EntityTag
-                          entity={entity.entities[reference.resource]}
-                        />
-                      </span>
-                      <span>
-                        <EntityTag entity={entity.entities[reference.value]} />
-                      </span>
-                    </div>
-                  );
-                })}
+              <StyledReferenceTable>
+                {entity &&
+                  entity.references.map((reference, key) => {
+                    return (
+                      <StyledReferenceRow key={key}>
+                        <div style={{ display: "grid" }}>
+                          {reference.resource &&
+                            entity.entities[reference.resource] && (
+                              <EntityTag
+                                fullWidth
+                                entity={entity.entities[reference.resource]}
+                              />
+                            )}
+                        </div>
+                        <div style={{ display: "grid" }}>
+                          {reference.value &&
+                            entity.entities[reference.value] && (
+                              <EntityTag
+                                fullWidth
+                                entity={entity.entities[reference.value]}
+                              />
+                            )}
+                        </div>
+                      </StyledReferenceRow>
+                    );
+                  })}
+              </StyledReferenceTable>
 
               <Loader show={isFetching} size={40} />
             </StyledExpRowSectionContent>

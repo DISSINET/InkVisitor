@@ -418,7 +418,7 @@ export const Suggester: React.FC<Suggester> = ({
         )}
 
         {(isFocused || isHovered) && !middlewareData.hide?.referenceHidden && (
-          <FloatingPortal id="page">
+          <FloatingPortal id="page-content">
             <StyledSuggesterList
               ref={refs.setFloating}
               data-suggester-portal="true"

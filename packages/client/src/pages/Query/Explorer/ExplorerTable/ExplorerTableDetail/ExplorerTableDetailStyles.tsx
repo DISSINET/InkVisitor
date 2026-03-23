@@ -106,3 +106,15 @@ export const StyledExpRowFormGridColumnValueID = styled.div`
     margin-left: ${({ theme }) => theme.space["2"]};
   }
 `;
+export const StyledReferenceTable = styled.div`
+  display: grid;
+  grid-template-columns: auto;
+  gap: 0.5rem;
+  max-width: 100%;
+`;
+export const StyledReferenceRow = styled.div`
+  display: inline-grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  max-width: 100%;
+`;

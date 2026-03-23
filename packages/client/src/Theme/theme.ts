@@ -2,6 +2,7 @@ import { EntityEnums } from "@shared/enums";
 
 const theme = {
   color: {
+    inherit: "inherit",
     transparent: "transparent",
     blue: {
       50: "#e6eafa",
