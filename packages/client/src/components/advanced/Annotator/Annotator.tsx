@@ -26,12 +26,7 @@ import { FaPen, FaRegSave, FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 
-import {
-  Annotator,
-  EditMode,
-  Tag,
-  editModeDisplayLabel,
-} from "@inkvisitor/annotator/src/lib";
+import { Annotator, EditMode, Tag } from "@inkvisitor/annotator/src/lib";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import {
   IDocument,
@@ -1067,11 +1062,7 @@ export const TextAnnotator = ({
                   <FaPen size={11} />
                 </StyledDisplayModeButtonIconWrapper>
               }
-              label={
-                !annotatorWidthTooNarrow
-                  ? editModeDisplayLabel[EditMode.HIGHLIGHT]
-                  : ""
-              }
+              label={!annotatorWidthTooNarrow ? EditMode.HIGHLIGHT : ""}
               color="success"
               inverted={annotatorMode !== EditMode.HIGHLIGHT}
               onClick={() => {
@@ -1090,11 +1081,7 @@ export const TextAnnotator = ({
                 </StyledDisplayModeButtonIconWrapper>
               }
               color="success"
-              label={
-                !annotatorWidthTooNarrow
-                  ? editModeDisplayLabel[EditMode.SEMI]
-                  : ""
-              }
+              label={!annotatorWidthTooNarrow ? "text edit" : ""}
               inverted={annotatorMode !== EditMode.SEMI}
               onClick={() => {
                 setAnnotatorMode(EditMode.SEMI);
@@ -1112,9 +1099,7 @@ export const TextAnnotator = ({
                 </StyledDisplayModeButtonIconWrapper>
               }
               color="success"
-              label={
-                !annotatorWidthTooNarrow ? editModeDisplayLabel[EditMode.RAW] : ""
-              }
+              label={!annotatorWidthTooNarrow ? "XML" : ""}
               inverted={annotatorMode !== EditMode.RAW}
               onClick={() => {
                 setAnnotatorMode(EditMode.RAW);
