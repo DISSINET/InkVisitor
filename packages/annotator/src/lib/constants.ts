@@ -1,8 +1,14 @@
 export enum EditMode {
-  RAW = "raw",
+  RAW = "XML",
   HIGHLIGHT = "highlight",
-  SEMI = "semi",
+  SEMI = "text-edit",
 }
+
+export const editModeDisplayLabel: Record<EditMode, string> = {
+  [EditMode.RAW]: "XML",
+  [EditMode.HIGHLIGHT]: "highlight",
+  [EditMode.SEMI]: "text edit",
+};
 
 export enum HighlightMode {
   SELECT = "select",

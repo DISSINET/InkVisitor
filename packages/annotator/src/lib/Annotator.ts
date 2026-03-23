@@ -1005,6 +1005,9 @@ export class Annotator {
       }
     }
 
+    const viewportRawIndex = this.getViewportStartInRawText();
+    const scrollOffsetBefore = this.viewport.scrollOffsetY;
+
     this.element.classList.remove(this.text.mode);
     this.element.classList.add(mode);
 
@@ -1012,6 +1015,20 @@ export class Annotator {
     this.cursor.reset();
     this.text.prepareSegments();
     this.text.calculateLines();
+
+    const newPos = this.text.getSegmentFromAbsTextIndex(viewportRawIndex);
+    if (newPos) {
+      const segment = this.text.segments[newPos.segmentIndex];
+      const absLine = segment.lineStart + newPos.lineIndex;
+      this.viewport.lineStart = Math.max(
+        0,
+        Math.min(
+          absLine,
+          Math.max(0, this.text.noLines - 1 - this.viewport.noLines)
+        )
+      );
+      this.viewport.scrollOffsetY = scrollOffsetBefore;
+    }
 
     if (absIndex !== null && absIndex >= 0) {
       const segPos = this.text.getSegmentFromAbsTextIndex(absIndex);
