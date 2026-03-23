@@ -68,7 +68,7 @@ export const StatementListContextMenu: React.FC<StatementListContextMenu> = ({
           size={22}
         />
         {portalMounted && (
-          <FloatingPortal id="page">
+          <FloatingPortal id="page-content">
             <div
               ref={refs.setFloating}
               style={{

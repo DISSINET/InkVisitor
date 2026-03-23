@@ -150,7 +150,7 @@ export const EntitySearchAdvancedOptions: React.FC<
       </StyledAdvancedOptions>
 
       {portalMounted && (
-        <FloatingPortal id="page">
+        <FloatingPortal id="page-content">
           <div
             ref={PillsRefs.setFloating}
             style={{
