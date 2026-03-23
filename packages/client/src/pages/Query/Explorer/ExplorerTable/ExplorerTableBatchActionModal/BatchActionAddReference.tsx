@@ -1,5 +1,7 @@
 import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import api from "api";
 import {
   Button,
   ButtonGroup,
@@ -10,15 +12,12 @@ import {
 } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
 import React, { useMemo, useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import api from "api";
 import { toast } from "react-toastify";
 import {
-  StyledBatchWrapper,
-  StyledBatchSection,
-  StyledBatchFooter,
-  StyledBatchSectionLabel,
   StyledBatchMessage,
+  StyledBatchSection,
+  StyledBatchSectionLabel,
+  StyledBatchWrapper,
 } from "./styles";
 
 interface BatchActionAddReferenceProps {

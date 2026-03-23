@@ -1,6 +1,8 @@
 import { RelationEnums } from "@shared/enums";
 import { IEntity, Relation } from "@shared/types";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import theme from "Theme/theme";
+import api from "api";
 import {
   Button,
   ButtonGroup,
@@ -11,17 +13,14 @@ import {
 } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 import React, { useMemo, useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import api from "api";
 import { toast } from "react-toastify";
 import {
-  StyledBatchWrapper,
+  StyledBatchMessage,
   StyledBatchSection,
-  StyledBatchFooter,
   StyledBatchSectionLabel,
   StyledBatchWarningLabel,
-  StyledBatchMessage,
   StyledBatchWarningSection,
+  StyledBatchWrapper,
 } from "./styles";
 import { getRelationLabel, isRelationTypeEligible } from "./utils";
 

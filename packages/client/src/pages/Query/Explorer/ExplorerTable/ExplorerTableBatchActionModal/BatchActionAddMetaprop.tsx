@@ -28,7 +28,6 @@ import React, { useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import {
   StyledBatchAttrRow,
-  StyledBatchFooter,
   StyledBatchMessage,
   StyledBatchSection,
   StyledBatchSectionLabel,
@@ -281,16 +280,6 @@ export const BatchActionAddMetaprop: React.FC<BatchActionAddMetapropProps> = ({
 
           {/* MESSAGE + ACTIONS */}
           <StyledBatchMessage>{message}</StyledBatchMessage>
-
-          {/* <StyledBatchFooter>
-        <Button label="Cancel" color="greyer" inverted onClick={onClose} />
-        <Button
-          label="Apply"
-          color="primary"
-          onClick={handleApply}
-          disabled={!typeEntity || batchMutation.isPending}
-        />
-      </StyledBatchFooter> */}
         </StyledBatchWrapper>
       </ModalContent>
       <ModalFooter>

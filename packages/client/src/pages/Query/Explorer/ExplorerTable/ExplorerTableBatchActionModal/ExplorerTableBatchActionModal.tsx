@@ -1,12 +1,11 @@
 import { IEntity } from "@shared/types";
 import { Explore } from "@shared/types/query";
 import React from "react";
-import { Modal, ModalContent, ModalHeader } from "components";
 import { BatchAction } from "../types";
-import { BatchActionExportCsv } from "./BatchActionExportCsv";
 import { BatchActionAddMetaprop } from "./BatchActionAddMetaprop";
 import { BatchActionAddReference } from "./BatchActionAddReference";
 import { BatchActionAddRelation } from "./BatchActionAddRelation";
+import { BatchActionExportCsv } from "./BatchActionExportCsv";
 
 interface ExplorerTableBatchActionModalProps {
   batchAction: BatchAction;

@@ -30,12 +30,6 @@ export const StyledBatchAttrRow = styled.div`
   align-items: center;
 `;
 
-export const StyledBatchFooter = styled.div`
-  display: flex;
-  gap: 0.5rem;
-  justify-content: flex-end;
-`;
-
 export const StyledBatchWrapper = styled.div`
   display: flex;
   flex-direction: column;
@@ -50,4 +44,30 @@ export const StyledBatchWarningSection = styled(StyledBatchSection)`
 
 export const StyledBatchWarningLabel = styled(StyledBatchSectionLabel)`
   color: ${({ theme }) => theme.color.warning};
+`;
+
+export const StyledSelectAll = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding: 0.3rem 0;
+  border-bottom: 1px solid ${theme.color.grey};
+`;
+
+export const StyledSelectAllLabel = styled.span`
+  font-size: ${({ theme }) => theme.fontSize.sm};
+  font-weight: ${({ theme }) => theme.fontWeight.bold};
+`;
+
+export const StyledSelectColumn = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding: 0.3rem 0;
+`;
+
+export const StyledSelectColumnLabel = styled.span`
+  font-size: ${({ theme }) => theme.fontSize.sm};
 `;
