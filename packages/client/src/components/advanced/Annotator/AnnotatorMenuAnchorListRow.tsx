@@ -14,7 +14,7 @@ export type AnnotatorAnchorListItem = { anchor: Tag; anchorTagName: string };
 export type AnnotatorAnchorGridRowData = {
   items: AnnotatorAnchorListItem[];
   entities: Record<string, IEntity | false>;
-  onRemoveAnchor?: (anchor: string) => void;
+  onRemoveAnchor?: (anchor: Tag) => void;
   onUpdateAnchor?: (anchor: Tag, elvl: EntityEnums.Elvl) => void;
 };
 
@@ -43,7 +43,7 @@ export const AnnotatorAnchorGridRow = React.memo(
           fullWidth
           unlinkButton={{
             onClick: () => {
-              onRemoveAnchor?.(item.anchorTagName);
+              onRemoveAnchor?.(item.anchor);
             },
           }}
           entity={entity}

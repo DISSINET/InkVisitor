@@ -761,13 +761,10 @@ export const TextAnnotator = ({
     }
   };
 
-  const onRemoveAnchor = (anchor: string) => {
+  const onRemoveAnchor = (anchor: Tag) => {
     annotator?.removeAnchorFromSelection(anchor);
-    // TODO: Remove only one occurrence of this anchor id from selectedAnchors (entity can be anchored multiple times)
-    // FIX: when same id is anchored multiple times, the highlight in text doesn't get updated correctly
-
     handleSaveNewContent(true, true);
-    handleRefreshEntityAndStatement(anchor);
+    handleRefreshEntityAndStatement(anchor.getTagName());
   };
 
   const onUpdateAnchor = (anchor: Tag, elvl: EntityEnums.Elvl) => {

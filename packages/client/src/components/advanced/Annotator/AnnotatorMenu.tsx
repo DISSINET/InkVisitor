@@ -62,7 +62,7 @@ interface TextAnnotatorMenuProps {
     territoryCreateModalType: TerritoryCreateModalType,
     elvl: EntityEnums.Elvl
   ) => void;
-  onRemoveAnchor?: (anchor: string) => void;
+  onRemoveAnchor?: (anchor: Tag) => void;
   canCreateActiveTAnchor: boolean;
   onCreateActiveTAnchor?: (elvl: EntityEnums.Elvl) => void;
   hasParentT: boolean;
