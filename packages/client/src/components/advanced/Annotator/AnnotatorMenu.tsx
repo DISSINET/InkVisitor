@@ -19,11 +19,17 @@ import { MdDragIndicator, MdOutlineDone } from "react-icons/md";
 import { PiSelectionFill } from "react-icons/pi";
 import { TbAnchor } from "react-icons/tb";
 import { toast } from "react-toastify";
-import { scrollOverscanCount } from "Theme/constants";
 import { ButtonSize, classesAnnotator } from "types";
 import { EntitySuggester } from "../EntitySuggester/EntitySuggester";
 import { EntityTag } from "../EntityTag/EntityTag";
 import { ElvlButtonGroup } from "../IconButtonGroups/ElvlButtonGroup";
+import {
+  ANCHOR_GRID_COLUMNS,
+  ANCHOR_GRID_ROW_HEIGHT,
+  AnnotatorAnchorGridRow,
+  AnnotatorAnchorGridRowData,
+  AnnotatorAnchorListItem,
+} from "./AnnotatorMenuAnchorListRow";
 import {
   StyledAnnotatorAnchorListWrap,
   StyledAnnotatorDoneButton,
@@ -37,13 +43,6 @@ import {
   StyledTerritorySubsectionTitle,
 } from "./AnnotatorStyles";
 import { TerritoryCreateModalType } from "./types";
-import {
-  ANCHOR_GRID_COLUMNS,
-  ANCHOR_GRID_ROW_HEIGHT,
-  AnnotatorAnchorGridRow,
-  AnnotatorAnchorGridRowData,
-  AnnotatorAnchorListItem,
-} from "./AnnotatorMenuAnchorListRow";
 
 interface TextAnnotatorMenuProps {
   text: string;
@@ -386,7 +385,7 @@ export const TextAnnotatorMenu = ({
                   resolvedAnchors.length / ANCHOR_GRID_COLUMNS
                 )}
                 rowHeight={ANCHOR_GRID_ROW_HEIGHT}
-                overscanCount={scrollOverscanCount}
+                overscanCount={8}
                 style={{ maxHeight: "13rem", width: "100%" }}
                 rowComponent={(props) => <AnnotatorAnchorGridRow {...props} />}
               />
