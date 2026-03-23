@@ -368,22 +368,66 @@ export const TextAnnotator = ({
     originY: number;
   } | null>(null);
 
+  const menuDragHandleRef = useRef<HTMLDivElement | null>(null);
+  const menuDragWindowListenersRef = useRef<AbortController | null>(null);
+
   const menuDraggableRef = useRef<HTMLDivElement | null>(null);
+
+  const endMenuDrag = useCallback((ev?: { pointerId: number }) => {
+    const session = menuDragSessionRef.current;
+    if (!session) return;
+    if (ev !== undefined && ev.pointerId !== session.pointerId) return;
+
+    menuDragWindowListenersRef.current?.abort();
+    menuDragWindowListenersRef.current = null;
+
+    const el = menuDragHandleRef.current;
+    try {
+      el?.releasePointerCapture(session.pointerId);
+    } catch {
+      /* capture already released */
+    }
+    menuDragHandleRef.current = null;
+    menuDragSessionRef.current = null;
+  }, []);
 
   const handleMenuDragPointerDown = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
       if (e.button !== 0) return;
       e.preventDefault();
-      e.currentTarget.setPointerCapture(e.pointerId);
+      menuDragWindowListenersRef.current?.abort();
+      const ac = new AbortController();
+      menuDragWindowListenersRef.current = ac;
+      const signal = ac.signal;
+      const pointerId = e.pointerId;
+
+      menuDragHandleRef.current = e.currentTarget;
+      e.currentTarget.setPointerCapture(pointerId);
       menuDragSessionRef.current = {
-        pointerId: e.pointerId,
+        pointerId,
         startClientX: e.clientX,
         startClientY: e.clientY,
         originX: menuDragOffsetRef.current.x,
         originY: menuDragOffsetRef.current.y,
       };
+
+      const opts = { capture: true, signal } as const;
+      const onWindowPointerEnd = (wev: PointerEvent) => {
+        if (wev.pointerId !== pointerId) return;
+        endMenuDrag(wev);
+      };
+      window.addEventListener("pointerup", onWindowPointerEnd, opts);
+      window.addEventListener("pointercancel", onWindowPointerEnd, opts);
+      window.addEventListener("blur", () => endMenuDrag(), opts);
+      document.addEventListener(
+        "visibilitychange",
+        () => {
+          if (document.visibilityState === "hidden") endMenuDrag();
+        },
+        opts
+      );
     },
-    []
+    [endMenuDrag]
   );
 
   const handleMenuDragPointerMove = useCallback(
@@ -422,16 +466,9 @@ export const TextAnnotator = ({
 
   const handleMenuDragPointerUp = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
-      const session = menuDragSessionRef.current;
-      if (!session || e.pointerId !== session.pointerId) return;
-      try {
-        e.currentTarget.releasePointerCapture(e.pointerId);
-      } catch {
-        /* capture already released */
-      }
-      menuDragSessionRef.current = null;
+      endMenuDrag(e.nativeEvent);
     },
-    []
+    [endMenuDrag]
   );
 
   // quiet does not trigger a toast notification
