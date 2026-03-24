@@ -1,9 +1,5 @@
 ## 1.5.0.1 Changelog [Mar 23, 2026]
 
-### New Features:
-
-- Modular advanced search UI (Main page) #2845
-
 ### Annotator
 
 - Draggable annotator highlight menu modal #2866
@@ -23,6 +19,7 @@
 
 ### Bug Fixes and Improvements:
 
+- Modular advanced search options UI #2845
 - Added full-text export functionality also to Annotator #2850
 - Redesigned alternative labels + added shortcuts (and icons) for save edit or exit #2790
 - Added check for Action synonyms for same AEE or its SYN #2371
