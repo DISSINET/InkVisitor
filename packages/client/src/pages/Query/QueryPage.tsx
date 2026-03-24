@@ -104,24 +104,20 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     [contentHeight]
   );
 
-  const handleExport = (rowIndices: number[]) => {
+  const handleExport = (
+    rowIndices: number[],
+    selectedColumnIds?: string[]
+  ) => {
     toast.success("Exporting data...");
-    api.queryExport(queryState, exploreState, rowIndices);
-  };
-
-  const invalidateActiveQuery = () => {
-    // Clear the custom row cache store for this specific signature
-    clearRowCache(stableSignature);
-    // Remove queries to force refetch (invalidateQueries won't work with staleTime: Infinity)
-    queryClient.removeQueries({
-      queryKey: ["query", stableSignature],
-      exact: false,
-    });
-    // Force refetch of the active query
-    queryClient.refetchQueries({
-      queryKey: ["query", stableSignature],
-      exact: false,
-    });
+    const exportExplore = selectedColumnIds
+      ? {
+          ...exploreState,
+          columns: exploreState.columns.filter((c) =>
+            selectedColumnIds.includes(c.id)
+          ),
+        }
+      : exploreState;
+    api.queryExport(queryState, exportExplore, rowIndices);
   };
 
   const handleSeparatorYPositionChange = (xPosition: number) => {
@@ -239,7 +235,6 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
             isQueryFetching={queryIsFetching}
             queryError={queryError}
             onExport={handleExport}
-            invalidateActiveQuery={invalidateActiveQuery}
             stableSignature={stableSignature}
             getCachedEntity={getCachedEntity}
           />

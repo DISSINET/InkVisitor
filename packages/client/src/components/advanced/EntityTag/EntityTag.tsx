@@ -249,9 +249,9 @@ function areEntityTagsEqual(
   if (prev.moveFn !== next.moveFn) return false;
   if (prev.updateOrderFn !== next.updateOrderFn) return false;
   // Entity-based checks (fields that affect Tag/tooltip rendering)
-  if (prev.entity.id !== next.entity.id) return false;
-  if (prev.entity.class !== next.entity.class) return false;
-  if (prev.entity.status !== next.entity.status) return false;
+  if (prev.entity?.id !== next.entity.id) return false;
+  if (prev.entity?.class !== next.entity.class) return false;
+  if (prev.entity?.status !== next.entity.status) return false;
   if (prev.entity?.data?.logicalType !== next.entity?.data?.logicalType)
     return false;
   if (prev.entity.isTemplate !== next.entity.isTemplate) return false;
