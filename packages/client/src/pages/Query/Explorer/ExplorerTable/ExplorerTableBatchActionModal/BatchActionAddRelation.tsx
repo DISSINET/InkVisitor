@@ -221,7 +221,12 @@ export const BatchActionAddRelation: React.FC<BatchActionAddRelationProps> = ({
     (!isLoadingEntities && !isEntitiesFetchError && fetchedEntities);
 
   return (
-    <Modal showModal onClose={onClose} width="fat">
+    <Modal
+      showModal
+      onClose={onClose}
+      width="fat"
+      isLoading={batchMutation.isPending}
+    >
       <ModalHeader
         title={`Add Relation (${selectionCount} entities)`}
         onClose={onClose}

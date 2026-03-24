@@ -70,7 +70,12 @@ export const BatchActionAddReference: React.FC<
   }, [resourceEntity, valueEntity, selectedEntityIds.length]);
 
   return (
-    <Modal showModal onClose={onClose} width="fat">
+    <Modal
+      showModal
+      onClose={onClose}
+      width="fat"
+      isLoading={batchMutation.isPending}
+    >
       <ModalHeader
         title={`Add Reference (${selectedEntityIds.length} entities)`}
         onClose={onClose}

@@ -127,7 +127,12 @@ export const BatchActionAddMetaprop: React.FC<BatchActionAddMetapropProps> = ({
   }, [typeEntity, valueEntity, selectedEntityIds.length]);
 
   return (
-    <Modal showModal onClose={onClose} width="fat">
+    <Modal
+      showModal
+      onClose={onClose}
+      width="fat"
+      isLoading={batchMutation.isPending}
+    >
       <ModalHeader
         title={`Add Metaproperty (${selectedEntityIds.length} entities)`}
         onClose={onClose}
