@@ -13,7 +13,6 @@ interface ExplorerBoxProps {
   queryError: Error | null;
   height: number;
   onExport: (rowsSelected: number[], selectedColumnIds?: string[]) => void;
-  invalidateActiveQuery?: () => void;
   stableSignature?: string;
   getCachedEntity?: (rowIndex: number) => IResponseQueryEntity | undefined;
 }
@@ -25,7 +24,6 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   queryError,
   height,
   onExport,
-  invalidateActiveQuery,
   stableSignature,
   getCachedEntity,
 }) => {
@@ -38,7 +36,6 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
       queryError={queryError}
       height={height}
       onExport={onExport}
-      invalidateActiveQuery={invalidateActiveQuery}
       stableSignature={stableSignature}
       getCachedEntity={getCachedEntity}
     />

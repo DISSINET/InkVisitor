@@ -1,6 +1,6 @@
-import { RelationEnums } from "@shared/enums";
+import { EntityEnums, RelationEnums } from "@shared/enums";
 import { IEntity, Relation } from "@shared/types";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import theme from "Theme/theme";
 import api from "api";
 import {
@@ -24,29 +24,56 @@ import {
 } from "./styles";
 import { getRelationLabel, isRelationTypeEligible } from "./utils";
 
+/** Above this count we skip fetching entities for relation-type eligibility UI. */
+const RELATION_ELIGIBILITY_FETCH_MAX = 1000;
+
 interface BatchActionAddRelationProps {
-  selectedEntities: IEntity[];
+  selectedEntityIds: string[];
   onClose: () => void;
   onApply: () => void;
 }
 
 export const BatchActionAddRelation: React.FC<BatchActionAddRelationProps> = ({
-  selectedEntities,
+  selectedEntityIds,
   onClose,
   onApply,
 }) => {
-  const entityClasses = useMemo(
+  const isLargeSelection =
+    selectedEntityIds.length >= RELATION_ELIGIBILITY_FETCH_MAX;
+
+  const {
+    data: fetchedEntities,
+    isLoading: isLoadingEntities,
+    isError: isEntitiesFetchError,
+  } = useQuery({
+    queryKey: ["batchRelationEligibility", selectedEntityIds],
+    queryFn: async () => {
+      const res = await api.entitiesGet(selectedEntityIds);
+      return res.data;
+    },
+    enabled:
+      selectedEntityIds.length > 0 &&
+      selectedEntityIds.length < RELATION_ELIGIBILITY_FETCH_MAX,
+  });
+
+  const selectedEntities = useMemo<IEntity[]>(() => {
+    if (isLargeSelection || !fetchedEntities) return [];
+    return fetchedEntities;
+  }, [fetchedEntities, isLargeSelection]);
+
+  const entityClasses = useMemo<Set<EntityEnums.Class>>(
     () => new Set(selectedEntities.map((e) => e.class)),
     [selectedEntities]
   );
 
-  const firstValidType = useMemo(
-    () =>
-      RelationEnums.BatchTypes.find((t) =>
-        isRelationTypeEligible(t, entityClasses)
-      ),
-    [entityClasses]
-  );
+  const firstValidType = useMemo(() => {
+    if (isLargeSelection) {
+      return RelationEnums.BatchTypes[0];
+    }
+    return RelationEnums.BatchTypes.find((t) =>
+      isRelationTypeEligible(t, entityClasses)
+    );
+  }, [entityClasses, isLargeSelection]);
 
   const [relationType, setRelationType] = useState<
     RelationEnums.Type | undefined
@@ -62,6 +89,12 @@ export const BatchActionAddRelation: React.FC<BatchActionAddRelationProps> = ({
   );
 
   const { validEntities, invalidEntities } = useMemo(() => {
+    if (isLargeSelection) {
+      return {
+        validEntities: [] as IEntity[],
+        invalidEntities: [] as IEntity[],
+      };
+    }
     if (!rule) {
       return { validEntities: selectedEntities, invalidEntities: [] };
     }
@@ -92,7 +125,7 @@ export const BatchActionAddRelation: React.FC<BatchActionAddRelationProps> = ({
       },
       { validEntities: [], invalidEntities: [] }
     );
-  }, [selectedEntities, rule]);
+  }, [selectedEntities, rule, isLargeSelection]);
 
   const invalidClassCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -102,17 +135,22 @@ export const BatchActionAddRelation: React.FC<BatchActionAddRelationProps> = ({
     return counts;
   }, [invalidEntities]);
 
-  const queryClient = useQueryClient();
+  const validEntityIds = useMemo(() => {
+    if (isLargeSelection) return selectedEntityIds;
+    return validEntities.map((e) => e.id);
+  }, [isLargeSelection, selectedEntityIds, validEntities]);
 
   const batchMutation = useMutation({
     mutationFn: async () => {
       if (!activeType || !targetEntity) return;
-      const entityIds = validEntities.map((e) => e.id);
-      return api.batchEntityAddRelation(entityIds, activeType, targetEntity.id);
+      return api.batchEntityAddRelation(
+        validEntityIds,
+        activeType,
+        targetEntity.id
+      );
     },
     onSuccess: (res) => {
       toast.success(res?.data?.message || "Relations added");
-      queryClient.invalidateQueries({ queryKey: ["query"] });
       onApply();
     },
     onError: () => {
@@ -121,7 +159,7 @@ export const BatchActionAddRelation: React.FC<BatchActionAddRelationProps> = ({
   });
 
   const handleApply = () => {
-    if (!activeType || !targetEntity || validEntities.length === 0) return;
+    if (!activeType || !targetEntity || validEntityIds.length === 0) return;
     batchMutation.mutate();
   };
 
@@ -129,15 +167,20 @@ export const BatchActionAddRelation: React.FC<BatchActionAddRelationProps> = ({
     return RelationEnums.BatchTypes.map((type) => ({
       value: type,
       label: getRelationLabel(type),
-      isDisabled: !isRelationTypeEligible(type, entityClasses),
+      isDisabled: isLargeSelection
+        ? false
+        : !isRelationTypeEligible(type, entityClasses),
     }));
-  }, [entityClasses]);
+  }, [entityClasses, isLargeSelection]);
 
   const message = useMemo(() => {
     if (!activeType || !targetEntity) return "";
     const relationLabel = getRelationLabel(activeType);
     const targetLabel = targetEntity.labels[0];
 
+    if (isLargeSelection) {
+      return `Add "${relationLabel}" relation to "${targetLabel}" for ${selectedEntityIds.length} selected entities.`;
+    }
     if (invalidEntities.length === 0) {
       return `Add "${relationLabel}" relation to "${targetLabel}" for all ${validEntities.length} selected entities.`;
     }
@@ -147,17 +190,75 @@ export const BatchActionAddRelation: React.FC<BatchActionAddRelationProps> = ({
     targetEntity,
     validEntities,
     invalidEntities,
-    selectedEntities,
+    selectedEntities.length,
+    isLargeSelection,
+    selectedEntityIds.length,
   ]);
+
+  const allowedTargetEntityClasses = useMemo<EntityEnums.Class[]>(() => {
+    // if allowedEntitiesPattern is empty, return all entity classes
+    if (
+      activeType
+        ? Relation.RelationRules[activeType]?.allowedEntitiesPattern.length ===
+          0
+        : true
+    ) {
+      return EntityEnums.PLOGESTRBV;
+    }
+    const targetEntityClasses = new Set<EntityEnums.Class>();
+    activeType
+      ? Relation.RelationRules[activeType]?.allowedEntitiesPattern
+          .map((p) => p[1])
+          .filter((c) => c !== undefined)
+          .filter((c) => targetEntityClasses.add(c))
+      : ([] as EntityEnums.Class[]);
+    return [...targetEntityClasses];
+  }, [activeType, rule]);
+
+  const selectionCount = selectedEntityIds.length;
+  const eligibilityReady =
+    isLargeSelection ||
+    (!isLoadingEntities && !isEntitiesFetchError && fetchedEntities);
 
   return (
     <Modal showModal onClose={onClose} width="fat">
       <ModalHeader
-        title={`Add Relation (${selectedEntities.length} entities)`}
+        title={`Add Relation (${selectionCount} entities)`}
         onClose={onClose}
       />
       <ModalContent column enableScroll>
         <StyledBatchWrapper>
+          {isLargeSelection && (
+            <StyledBatchWarningSection>
+              <StyledBatchWarningLabel>Large selection</StyledBatchWarningLabel>
+              <span style={{ fontSize: theme.fontSize.sm }}>
+                Relation-type eligibility (by entity class) is not evaluated for{" "}
+                {RELATION_ELIGIBILITY_FETCH_MAX} or more selected entities. The
+                chosen relation will be applied to all selected entities.
+              </span>
+            </StyledBatchWarningSection>
+          )}
+
+          {!isLargeSelection && isEntitiesFetchError && (
+            <StyledBatchWarningSection>
+              <StyledBatchWarningLabel>
+                Could not load entities
+              </StyledBatchWarningLabel>
+              <span style={{ fontSize: theme.fontSize.sm }}>
+                Failed to load selected entities for eligibility checks. Try
+                again or reduce the selection.
+              </span>
+            </StyledBatchWarningSection>
+          )}
+
+          {!isLargeSelection && isLoadingEntities && (
+            <StyledBatchSection>
+              <span style={{ fontSize: theme.fontSize.sm }}>
+                Loading selected entities…
+              </span>
+            </StyledBatchSection>
+          )}
+
           {/* RELATION TYPE */}
           <StyledBatchSection>
             <StyledBatchSectionLabel>Relation type</StyledBatchSectionLabel>
@@ -170,49 +271,53 @@ export const BatchActionAddRelation: React.FC<BatchActionAddRelationProps> = ({
               }}
               placeholder="select relation type..."
               width="full"
+              disabled={!eligibilityReady}
             />
           </StyledBatchSection>
 
           {/* APPLICABILITY WARNING */}
-          {activeType && invalidEntities.length > 0 && (
-            <StyledBatchWarningSection>
-              <StyledBatchWarningLabel>
-                Partial applicability
-              </StyledBatchWarningLabel>
-              <span style={{ fontSize: theme.fontSize.sm }}>
-                <b>{getRelationLabel(activeType!)}</b> cannot be applied to{" "}
-                <b>{invalidEntities.length}</b> of {selectedEntities.length}{" "}
-                selected entities
-                {" — "}
-                {Object.entries(invalidClassCounts)
-                  .map(([cls, count]) => `${count}× ${cls}`)
-                  .join(", ")}
-                . These will be skipped.
-              </span>
-              {validEntities.length > 0 && (
-                <span
-                  style={{
-                    fontSize: theme.fontSize.sm,
-                    color: theme.color.success,
-                  }}
-                >
-                  <b>{validEntities.length}</b> entities are eligible.
+          {!isLargeSelection &&
+            activeType &&
+            invalidEntities.length > 0 &&
+            eligibilityReady && (
+              <StyledBatchWarningSection>
+                <StyledBatchWarningLabel>
+                  Partial applicability
+                </StyledBatchWarningLabel>
+                <span style={{ fontSize: theme.fontSize.sm }}>
+                  <b>{getRelationLabel(activeType!)}</b> cannot be applied to{" "}
+                  <b>{invalidEntities.length}</b> of {selectedEntities.length}{" "}
+                  selected entities
+                  {" — "}
+                  {Object.entries(invalidClassCounts)
+                    .map(([cls, count]) => `${count}× ${cls}`)
+                    .join(", ")}
+                  . These will be skipped.
                 </span>
-              )}
-              {validEntities.length === 0 && (
-                <span
-                  style={{
-                    fontSize: theme.fontSize.sm,
-                    color: theme.color.danger,
-                    fontWeight: theme.fontWeight.bold,
-                  }}
-                >
-                  No entities in the selection are eligible for this relation
-                  type.
-                </span>
-              )}
-            </StyledBatchWarningSection>
-          )}
+                {validEntities.length > 0 && (
+                  <span
+                    style={{
+                      fontSize: theme.fontSize.sm,
+                      color: theme.color.success,
+                    }}
+                  >
+                    <b>{validEntities.length}</b> entities are eligible.
+                  </span>
+                )}
+                {validEntities.length === 0 && (
+                  <span
+                    style={{
+                      fontSize: theme.fontSize.sm,
+                      color: theme.color.danger,
+                      fontWeight: theme.fontWeight.bold,
+                    }}
+                  >
+                    No entities in the selection are eligible for this relation
+                    type.
+                  </span>
+                )}
+              </StyledBatchWarningSection>
+            )}
 
           {/* TARGET ENTITY */}
           <StyledBatchSection>
@@ -227,7 +332,12 @@ export const BatchActionAddRelation: React.FC<BatchActionAddRelationProps> = ({
                 onPicked={(entity) => setTargetEntity(entity)}
                 placeholder="select target entity..."
                 inputWidth="full"
-                disabled={!activeType || validEntities.length === 0}
+                categoryTypes={allowedTargetEntityClasses}
+                disabled={
+                  !activeType ||
+                  validEntityIds.length === 0 ||
+                  !eligibilityReady
+                }
               />
             )}
           </StyledBatchSection>
@@ -246,8 +356,10 @@ export const BatchActionAddRelation: React.FC<BatchActionAddRelationProps> = ({
             disabled={
               !activeType ||
               !targetEntity ||
-              validEntities.length === 0 ||
-              batchMutation.isPending
+              validEntityIds.length === 0 ||
+              batchMutation.isPending ||
+              !eligibilityReady ||
+              (!isLargeSelection && isEntitiesFetchError)
             }
           />
         </ButtonGroup>

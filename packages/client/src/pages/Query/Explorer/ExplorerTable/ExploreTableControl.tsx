@@ -6,7 +6,6 @@ import {
 } from "react-icons/md";
 import { TbColumnInsertRight } from "react-icons/tb";
 
-import { IResponseQueryEntity } from "@shared/types";
 import { Button } from "components";
 import Dropdown from "components/advanced";
 
@@ -21,7 +20,6 @@ interface ExploreTableControlProps {
   rowsSelected: number[];
   onAllRowsSelect: (checked: boolean) => void;
 
-  entities: IResponseQueryEntity[];
   rowsTotal: number;
 
   batchActionSelected: BatchAction;

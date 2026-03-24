@@ -1,4 +1,3 @@
-import { IEntity } from "@shared/types";
 import { Explore } from "@shared/types/query";
 import {
   Button,
@@ -27,7 +26,7 @@ import {
 } from "./styles";
 
 interface BatchActionExportCsvProps {
-  selectedEntities: IEntity[];
+  selectedEntityIds: string[];
   columns: Explore.IExploreColumn[];
   onExport: (selectedColumnIds: string[]) => void;
   onClose: () => void;
@@ -36,7 +35,7 @@ interface BatchActionExportCsvProps {
 const checkboxSize = 18;
 
 export const BatchActionExportCsv: React.FC<BatchActionExportCsvProps> = ({
-  selectedEntities,
+  selectedEntityIds,
   columns,
   onExport,
   onClose,
@@ -65,8 +64,8 @@ export const BatchActionExportCsv: React.FC<BatchActionExportCsvProps> = ({
   const isSomeSelected = selectedColumnIds.length > 0 && !isAllSelected;
 
   const message = useMemo(() => {
-    return `Export ${selectedEntities.length} entities with ${selectedColumnIds.length} of ${columns.length} columns.`;
-  }, [selectedEntities.length, selectedColumnIds.length, columns.length]);
+    return `Export ${selectedEntityIds.length} entities with ${selectedColumnIds.length} of ${columns.length} columns.`;
+  }, [selectedEntityIds.length, selectedColumnIds.length, columns.length]);
 
   const theme = useTheme();
 
@@ -105,7 +104,7 @@ export const BatchActionExportCsv: React.FC<BatchActionExportCsvProps> = ({
   return (
     <Modal showModal onClose={onClose} width="fat">
       <ModalHeader
-        title={`Export as CSV (${selectedEntities.length} entities)`}
+        title={`Export as CSV (${selectedEntityIds.length} entities)`}
         onClose={onClose}
       />
       <ModalContent column enableScroll>

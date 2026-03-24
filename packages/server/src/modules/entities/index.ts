@@ -737,8 +737,11 @@ export default Router()
         const ids = await querySearch.run(request.db.connection);
         const results = await querySearch.getResults(request.db.connection);
 
+        const entityIds = querySearch.results?.items ?? [];
+
         return {
           query: request.body.query,
+          entityIds,
           entities: results,
           explore: querySearch.explore,
           total: ids.length,

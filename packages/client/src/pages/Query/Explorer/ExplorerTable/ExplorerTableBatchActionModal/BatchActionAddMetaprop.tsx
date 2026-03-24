@@ -6,7 +6,7 @@ import {
 } from "@shared/dictionaries";
 import { EntityEnums } from "@shared/enums";
 import { IEntity, IPropSpec } from "@shared/types";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import api from "api";
 import {
   AttributeIcon,
@@ -35,7 +35,7 @@ import {
 } from "./styles";
 
 interface BatchActionAddMetapropProps {
-  selectedEntities: IEntity[];
+  selectedEntityIds: string[];
   onClose: () => void;
   onApply: () => void;
 }
@@ -49,7 +49,7 @@ const defaultPropSpec = (entityId = ""): IPropSpec => ({
 });
 
 export const BatchActionAddMetaprop: React.FC<BatchActionAddMetapropProps> = ({
-  selectedEntities,
+  selectedEntityIds,
   onClose,
   onApply,
 }) => {
@@ -83,13 +83,10 @@ export const BatchActionAddMetaprop: React.FC<BatchActionAddMetapropProps> = ({
     partitivity: EntityEnums.Partitivity.Unison,
   });
 
-  const queryClient = useQueryClient();
-
   const batchMutation = useMutation({
     mutationFn: async () => {
       if (!typeEntity) return;
-      const entityIds = selectedEntities.map((e) => e.id);
-      return api.batchEntityAddMetaprop(entityIds, {
+      return api.batchEntityAddMetaprop(selectedEntityIds, {
         logic,
         certainty,
         mood,
@@ -103,7 +100,6 @@ export const BatchActionAddMetaprop: React.FC<BatchActionAddMetapropProps> = ({
     },
     onSuccess: (res) => {
       toast.success(res?.data?.message || "Metaprop added");
-      queryClient.invalidateQueries({ queryKey: ["query"] });
       onApply();
     },
     onError: () => {
@@ -117,7 +113,7 @@ export const BatchActionAddMetaprop: React.FC<BatchActionAddMetapropProps> = ({
   };
 
   const message = useMemo<string>(() => {
-    const entityCount = selectedEntities.length;
+    const entityCount = selectedEntityIds.length;
     const typeLabel = typeEntity?.labels[0];
     const valueLabel = valueEntity?.labels[0];
 
@@ -128,12 +124,12 @@ export const BatchActionAddMetaprop: React.FC<BatchActionAddMetapropProps> = ({
       return `Add metaproperty "${typeLabel}" with value "${valueLabel}" to ${entityCount} selected entities.`;
     }
     return `Add metaproperty "${typeLabel}" to ${entityCount} selected entities.`;
-  }, [typeEntity, valueEntity, selectedEntities]);
+  }, [typeEntity, valueEntity, selectedEntityIds.length]);
 
   return (
     <Modal showModal onClose={onClose} width="fat">
       <ModalHeader
-        title={`Add Metaproperty (${selectedEntities.length} entities)`}
+        title={`Add Metaproperty (${selectedEntityIds.length} entities)`}
         onClose={onClose}
       />
       <ModalContent column enableScroll>

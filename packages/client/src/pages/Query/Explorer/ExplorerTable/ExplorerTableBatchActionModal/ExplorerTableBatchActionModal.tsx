@@ -1,4 +1,3 @@
-import { IEntity } from "@shared/types";
 import { Explore } from "@shared/types/query";
 import React from "react";
 import { BatchAction } from "../types";
@@ -9,7 +8,7 @@ import { BatchActionExportCsv } from "./BatchActionExportCsv";
 
 interface ExplorerTableBatchActionModalProps {
   batchAction: BatchAction;
-  selectedEntities: IEntity[];
+  selectedEntityIds: string[];
   columns: Explore.IExploreColumn[];
   onClose: () => void;
   onExport: (selectedColumnIds: string[]) => void;
@@ -20,7 +19,7 @@ export const ExplorerTableBatchActionModal: React.FC<
   ExplorerTableBatchActionModalProps
 > = ({
   batchAction,
-  selectedEntities,
+  selectedEntityIds,
   columns,
   onClose,
   onExport,
@@ -31,7 +30,7 @@ export const ExplorerTableBatchActionModal: React.FC<
       case BatchAction.export_csv:
         return (
           <BatchActionExportCsv
-            selectedEntities={selectedEntities}
+            selectedEntityIds={selectedEntityIds}
             columns={columns}
             onExport={onExport}
             onClose={onClose}
@@ -40,7 +39,7 @@ export const ExplorerTableBatchActionModal: React.FC<
       case BatchAction.add_metaprop:
         return (
           <BatchActionAddMetaprop
-            selectedEntities={selectedEntities}
+            selectedEntityIds={selectedEntityIds}
             onClose={onClose}
             onApply={onApplyAction}
           />
@@ -48,7 +47,7 @@ export const ExplorerTableBatchActionModal: React.FC<
       case BatchAction.add_reference:
         return (
           <BatchActionAddReference
-            selectedEntities={selectedEntities}
+            selectedEntityIds={selectedEntityIds}
             onClose={onClose}
             onApply={onApplyAction}
           />
@@ -56,7 +55,7 @@ export const ExplorerTableBatchActionModal: React.FC<
       case BatchAction.add_relation:
         return (
           <BatchActionAddRelation
-            selectedEntities={selectedEntities}
+            selectedEntityIds={selectedEntityIds}
             onClose={onClose}
             onApply={onApplyAction}
           />

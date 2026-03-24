@@ -1,6 +1,6 @@
 import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import api from "api";
 import {
   Button,
@@ -21,32 +21,28 @@ import {
 } from "./styles";
 
 interface BatchActionAddReferenceProps {
-  selectedEntities: IEntity[];
+  selectedEntityIds: string[];
   onClose: () => void;
   onApply: () => void;
 }
 
 export const BatchActionAddReference: React.FC<
   BatchActionAddReferenceProps
-> = ({ selectedEntities, onClose, onApply }) => {
+> = ({ selectedEntityIds, onClose, onApply }) => {
   const [resourceEntity, setResourceEntity] = useState<IEntity | undefined>();
   const [valueEntity, setValueEntity] = useState<IEntity | undefined>();
-
-  const queryClient = useQueryClient();
 
   const batchMutation = useMutation({
     mutationFn: async () => {
       if (!resourceEntity) return;
-      const entityIds = selectedEntities.map((e) => e.id);
       return api.batchEntityAddReference(
-        entityIds,
+        selectedEntityIds,
         resourceEntity.id,
         valueEntity?.id
       );
     },
     onSuccess: (res) => {
       toast.success(res?.data?.message || "Reference added");
-      queryClient.invalidateQueries({ queryKey: ["query"] });
       onApply();
     },
     onError: () => {
@@ -60,7 +56,7 @@ export const BatchActionAddReference: React.FC<
   };
 
   const message = useMemo<string>(() => {
-    const count = selectedEntities.length;
+    const count = selectedEntityIds.length;
     const resLabel = resourceEntity?.labels[0];
     const valLabel = valueEntity?.labels[0];
 
@@ -71,12 +67,12 @@ export const BatchActionAddReference: React.FC<
       return `Add reference "${resLabel}" with value "${valLabel}" to ${count} selected entities.`;
     }
     return `Add reference "${resLabel}" to ${count} selected entities.`;
-  }, [resourceEntity, valueEntity, selectedEntities]);
+  }, [resourceEntity, valueEntity, selectedEntityIds.length]);
 
   return (
     <Modal showModal onClose={onClose} width="fat">
       <ModalHeader
-        title={`Add Reference (${selectedEntities.length} entities)`}
+        title={`Add Reference (${selectedEntityIds.length} entities)`}
         onClose={onClose}
       />
       <ModalContent column enableScroll>
