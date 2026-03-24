@@ -1,4 +1,4 @@
-## 1.5.0.1 Changelog [Mar 23, 2026]
+## 1.5.0.1 Changelog [Mar 24, 2026]
 
 ### Annotator
 
