@@ -12,6 +12,8 @@ import {
   EditMode,
   HighlightMode,
   LINE_HEIGHT,
+  SELECTION_EDGE_SCROLL_SPEED,
+  SELECTION_EDGE_SCROLL_ZONE_PX,
 } from "./constants";
 
 // Updated regex to properly handle tags with attributes
@@ -104,6 +106,10 @@ export class Annotator {
 
   previousRenderViewportLineStart: number;
 
+  private lastSelectPointer: { cx: number; cy: number } | null = null;
+
+  private selectionScrollRaf: number = 0;
+
   // callbacks
   onSelectTextCb?: (text: Selected) => void;
   onHighlightCb?: (entityId: string) => HighlightSchema | void;
@@ -159,8 +165,6 @@ export class Annotator {
 
     this.element.onwheel = this.onWheel.bind(this);
     this.element.onmousedown = this.onMouseDown.bind(this);
-    this.element.onmouseup = this.onMouseUp.bind(this);
-    this.element.onmousemove = this.onMouseMove.bind(this);
     this.element.addEventListener(
       "dblclick",
       this.onMouseDoubleClick.bind(this)
@@ -354,12 +358,34 @@ export class Annotator {
   }
 
   /**
-   * onMouseDown is handler for pressed mouse-key event
-   * @param e
+   * Offsets in the same space as MouseEvent.offsetX/Y (CSS px vs layout box).
+   * Cursor.xToCharI / setPositionFromCanvasOffsets already apply `ratio` for bitmap mapping.
    */
-  onMouseDown(e: MouseEvent) {
-    this.cursor.setPositionFromEvent(
-      e,
+  private clientCoordsToCanvasOffsets(
+    clientX: number,
+    clientY: number,
+    rect: DOMRect
+  ): { ox: number; oy: number } {
+    const ox =
+      Math.min(Math.max(clientX, rect.left), rect.right) - rect.left;
+    const oy =
+      Math.min(Math.max(clientY, rect.top), rect.bottom) - rect.top;
+    return { ox, oy };
+  }
+
+  /**
+   * Maps pointer position to cursor / selection end using the current viewport.
+   */
+  private applyPointerToCursor(clientX: number, clientY: number) {
+    const rect = this.element.getBoundingClientRect();
+    const { ox, oy } = this.clientCoordsToCanvasOffsets(
+      clientX,
+      clientY,
+      rect
+    );
+    this.cursor.setPositionFromCanvasOffsets(
+      ox,
+      oy,
       this.lineHeight,
       this.charWidth,
       this.viewport.scrollOffsetY,
@@ -378,6 +404,125 @@ export class Annotator {
     }
 
     this.cursor.selectArea();
+  }
+
+  private cancelSelectionEdgeScroll() {
+    if (this.selectionScrollRaf) {
+      cancelAnimationFrame(this.selectionScrollRaf);
+      this.selectionScrollRaf = 0;
+    }
+  }
+
+  private readonly tickSelectionEdgeScroll = () => {
+    this.selectionScrollRaf = 0;
+    if (!this.cursor.isSelecting() || !this.lastSelectPointer) {
+      return;
+    }
+
+    const rect = this.element.getBoundingClientRect();
+    const y = this.lastSelectPointer.cy - rect.top;
+    const h = rect.height;
+    const EDGE = SELECTION_EDGE_SCROLL_ZONE_PX;
+    const inTopZone = y < EDGE;
+    const inBottomZone = y > h - EDGE;
+    if (!inTopZone && !inBottomZone) {
+      return;
+    }
+
+    const lineStartBefore = this.viewport.lineStart;
+    const scrollOffBefore = this.viewport.scrollOffsetY;
+    const speed = this.lineHeight * SELECTION_EDGE_SCROLL_SPEED;
+
+    if (inTopZone) {
+      this.viewport.addScrollOffset(
+        -speed,
+        this.lineHeight,
+        this.text.noLines
+      );
+    } else if (inBottomZone) {
+      this.viewport.addScrollOffset(
+        speed,
+        this.lineHeight,
+        this.text.noLines
+      );
+    }
+
+    const scrolled =
+      this.viewport.lineStart !== lineStartBefore ||
+      this.viewport.scrollOffsetY !== scrollOffBefore;
+
+    if (scrolled) {
+      this.applyPointerToCursor(
+        this.lastSelectPointer.cx,
+        this.lastSelectPointer.cy
+      );
+      this.draw();
+    }
+
+    const inZone = inTopZone || inBottomZone;
+    if (
+      this.cursor.isSelecting() &&
+      this.lastSelectPointer &&
+      inZone &&
+      scrolled
+    ) {
+      this.selectionScrollRaf = requestAnimationFrame(
+        this.tickSelectionEdgeScroll
+      );
+    }
+  };
+
+  private ensureSelectionEdgeScrollRunning() {
+    if (!this.lastSelectPointer || !this.cursor.isSelecting()) {
+      return;
+    }
+    if (this.selectionScrollRaf) {
+      return;
+    }
+    const rect = this.element.getBoundingClientRect();
+    const y = this.lastSelectPointer.cy - rect.top;
+    const h = rect.height;
+    const EDGE = SELECTION_EDGE_SCROLL_ZONE_PX;
+    if (y < EDGE || y > h - EDGE) {
+      this.selectionScrollRaf = requestAnimationFrame(
+        this.tickSelectionEdgeScroll
+      );
+    }
+  }
+
+  private readonly onDocumentSelectMove = (e: MouseEvent) => {
+    if (!this.cursor.isSelecting()) {
+      return;
+    }
+    this.lastSelectPointer = { cx: e.clientX, cy: e.clientY };
+    this.applyPointerToCursor(e.clientX, e.clientY);
+    this.draw();
+    this.ensureSelectionEdgeScrollRunning();
+  };
+
+  private endSelectInteraction(e: MouseEvent) {
+    document.removeEventListener("mousemove", this.onDocumentSelectMove);
+    document.removeEventListener("mouseup", this.onDocumentSelectUp);
+    this.cancelSelectionEdgeScroll();
+    this.lastSelectPointer = null;
+    if (this.cursor.isSelecting()) {
+      this.applyPointerToCursor(e.clientX, e.clientY);
+      this.cursor.endSelection();
+      this.draw();
+    }
+  }
+
+  private readonly onDocumentSelectUp = (e: MouseEvent) => {
+    this.endSelectInteraction(e);
+  };
+
+  /**
+   * onMouseDown is handler for pressed mouse-key event
+   * @param e
+   */
+  onMouseDown(e: MouseEvent) {
+    this.lastSelectPointer = { cx: e.clientX, cy: e.clientY };
+    this.applyPointerToCursor(e.clientX, e.clientY);
 
     this.annotatedPosition = this.text.cursorToIndex(
       this.viewport,
@@ -385,6 +530,10 @@ export class Annotator {
     );
 
     this.draw();
+
+    document.addEventListener("mousemove", this.onDocumentSelectMove);
+    document.addEventListener("mouseup", this.onDocumentSelectUp);
+    this.ensureSelectionEdgeScrollRunning();
   }
 
   /**
@@ -392,27 +541,7 @@ export class Annotator {
    * @param e
    */
   onMouseUp(e: MouseEvent) {
-    this.cursor.setPositionFromEvent(
-      e,
-      this.lineHeight,
-      this.charWidth,
-      this.viewport.scrollOffsetY,
-      this.viewport.lineStart
-    );
-    this.cursor.yLine = Math.max(
-      0,
-      Math.min(this.cursor.yLine, Math.max(0, this.text.noLines - 1))
-    );
-    const segment = this.text.cursorToIndex(this.viewport, this.cursor);
-    if (segment) {
-      const line = this.text.getLineFromPosition(segment);
-      if (line.length < this.cursor.xLine) {
-        this.cursor.xLine = line.length;
-      }
-    }
-
-    this.cursor.endSelection();
-    this.draw();
+    this.endSelectInteraction(e);
   }
 
   /**
@@ -421,27 +550,7 @@ export class Annotator {
    */
   onMouseMove(e: MouseEvent) {
     if (this.cursor.isSelecting()) {
-      this.cursor.setPositionFromEvent(
-        e,
-        this.lineHeight,
-        this.charWidth,
-        this.viewport.scrollOffsetY,
-        this.viewport.lineStart
-      );
-      this.cursor.yLine = Math.max(
-        0,
-        Math.min(this.cursor.yLine, Math.max(0, this.text.noLines - 1))
-      );
-      const segment = this.text.cursorToIndex(this.viewport, this.cursor);
-      if (segment) {
-        const line = this.text.getLineFromPosition(segment);
-        if (line.length < this.cursor.xLine) {
-          this.cursor.xLine = line.length;
-        }
-      }
-
-      this.cursor.selectArea();
-      this.draw();
+      this.onDocumentSelectMove(e);
     }
   }
 
