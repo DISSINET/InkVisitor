@@ -445,6 +445,11 @@ export enum DetailBoxState {
   Normal = "normal",
   FullHeight = "fullHeight",
 }
+export enum EditorBoxState {
+  Minimized = "minimized",
+  Normal = "normal",
+  FullHeight = "fullHeight",
+}
 
 export type StatementOrderCorrection = {
   currentPosition: number;

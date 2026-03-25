@@ -29,6 +29,8 @@ import detailBoxStateSlice from "./features/layout/mainPage/detailBoxStateSlice"
 import panelWidthsSlice from "./features/layout/mainPage/panelWidthsSlice";
 import thirdPanelExpandedSlice from "./features/layout/mainPage/thirdPanelExpandedSlice";
 import expandedOptionsSlice from "./features/entitySearch/expandedOptionsSlice";
+import editorBoxStateSlice from "./features/layout/mainPage/editorBoxStateSlice";
+import annotatorOpenedSlice from "./features/layout/mainPage/annotatorOpenedSlice";
 
 const store: Store = configureStore({
   reducer: {
@@ -71,9 +73,11 @@ const store: Store = configureStore({
         fourthPanelExpanded: fourthPanelExpandedSlice,
         fourthPanelBoxesOpened: fourthPanelBoxesOpenedSlice,
         statementListOpened: statementListOpenedSlice,
+        annotatorOpened: annotatorOpenedSlice,
         secondPanelRealWidth: secondPanelRealWidthSlice,
         thirdPanelRealWidth: thirdPanelRealWidthSlice,
         detailBoxState: detailBoxStateSlice,
+        editorBoxState: editorBoxStateSlice,
       }),
     }),
   },

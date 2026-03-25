@@ -44,6 +44,7 @@ import {
   StyledTable,
   StyledTh,
 } from "./StatementListTableStyles";
+import useAnnotator from "hooks/useAnnotator";
 
 const HIDDEN_COLUMNS_FULL = ["id", "anchor"];
 const HIDDEN_COLUMNS_MINIFIED = [
@@ -96,7 +97,6 @@ interface StatementListTable {
 
   selectedRows: string[];
   setSelectedRows: React.Dispatch<React.SetStateAction<string[]>>;
-  annotator?: Annotator;
   isLoading: boolean;
 }
 export const StatementListTable: React.FC<StatementListTable> = ({
@@ -113,7 +113,6 @@ export const StatementListTable: React.FC<StatementListTable> = ({
 
   selectedRows,
   setSelectedRows,
-  annotator,
   isLoading,
 }) => {
   const dispatch = useAppDispatch();
@@ -529,13 +528,6 @@ export const StatementListTable: React.FC<StatementListTable> = ({
     }
   };
 
-  const handleRowClickWithAnnotator = useCallback(
-    (rowId: string) => {
-      handleRowClick(rowId);
-    },
-    [handleRowClick, annotator]
-  );
-
   return (
     <>
       <StyledTable {...getTableProps()}>
@@ -565,7 +557,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                 index={i}
                 moveRow={moveRow}
                 moveEndRow={moveEndRow}
-                handleClick={handleRowClickWithAnnotator}
+                handleClick={handleRowClick}
                 visibleColumns={visibleColumns}
                 entities={entities}
                 isSelected={selectedRows.includes(row.original.id)}

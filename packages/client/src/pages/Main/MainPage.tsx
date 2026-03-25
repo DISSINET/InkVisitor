@@ -13,7 +13,7 @@ import ScrollHandler from "hooks/ScrollHandler";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { BiHide, BiRefresh, BiShow } from "react-icons/bi";
 import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
-import { FaHighlighter, FaList, FaPlus } from "react-icons/fa";
+import { FaPlus } from "react-icons/fa";
 import { FaDiagramNext } from "react-icons/fa6";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { VscCloseAll } from "react-icons/vsc";
@@ -49,6 +49,7 @@ import {
 } from "Theme/constants";
 import { DetailBoxState } from "types";
 import { floorNumberToOneDecimal, searchTree } from "utils/utils";
+import { MemoizedAnnotatorBox } from "./containers/AnnotatorBox/AnnotatorBox";
 import { MemoizedEntityBookmarkBox } from "./containers/EntityBookmarkBox/EntityBookmarkBox";
 import { MemoizedEntityDetailBox } from "./containers/EntityDetailBox/EntityDetailBox";
 import { MemoizedEntitySearchBox } from "./containers/EntitySearchBox/EntitySearchBox";
@@ -56,11 +57,6 @@ import { MemoizedStatementEditorBox } from "./containers/StatementEditorBox/Stat
 import { MemoizedStatementListBox } from "./containers/StatementsListBox/StatementListBox";
 import { MemoizedTemplateListBox } from "./containers/TemplateListBox/TemplateListBox";
 import { MemoizedTerritoryTreeBox } from "./containers/TerritoryTreeBox/TerritoryTreeBox";
-import {
-  StyledListAnnotatorTab,
-  StyledListAnnotatorTabGroup,
-} from "./MainPageStyles";
-import { MemoizedAnnotatorBox } from "./containers/AnnotatorBox/AnnotatorBox";
 
 type FourthPanelBoxes = "search" | "bookmarks" | "templates";
 

@@ -147,14 +147,6 @@ export const Page: React.FC<Page> = ({ children }) => {
     }
   }, [lastClickedIndex]);
 
-  const contentEl = useMemo(() => {
-    if (contentHeight > 0 && layoutWidth > 0) {
-      return children;
-    } else {
-      return <Loader show />;
-    }
-  }, [contentHeight, layoutWidth]);
-
   return (
     <StyledPage onClick={handleClick} id="page">
       <Header
@@ -171,7 +163,9 @@ export const Page: React.FC<Page> = ({ children }) => {
         right={headerRight}
       />
 
-      <StyledPageContent id="page-content">{contentEl}</StyledPageContent>
+      <StyledPageContent id="page-content">
+        {contentHeight > 0 && layoutWidth > 0 ? children : <Loader show />}
+      </StyledPageContent>
 
       {user && userCustomizationOpen && (
         <UserCustomizationModal

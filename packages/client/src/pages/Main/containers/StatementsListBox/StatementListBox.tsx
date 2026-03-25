@@ -68,14 +68,7 @@ export const StatementListBox: React.FC = () => {
     (state) => state.statementList.isLoading
   );
 
-  const [annotator, setAnnotator] = useState<Annotator | undefined>(undefined);
-  const { setAnnotator: useAnnotatorSetAnnotator } = useAnnotator();
-
-  useEffect(() => {
-    if (annotator) {
-      useAnnotatorSetAnnotator(annotator);
-    }
-  }, [annotator, useAnnotatorSetAnnotator]);
+  const { scrollToAnchor } = useAnnotator();
 
   const {
     territoryId,
@@ -998,10 +991,7 @@ export const StatementListBox: React.FC = () => {
             )}
 
           {territoryId && (
-            <StyledContentWrapper
-
-            // ref={contentRef}
-            >
+            <StyledContentWrapper>
               <CustomScrollbar
                 scrollerId="Statements"
                 elementId="Statements-box-table"
@@ -1009,9 +999,6 @@ export const StatementListBox: React.FC = () => {
                 customStyle={{
                   display: "flex",
                   flexShrink: 0,
-                  // fix for overheight because of marginTop which is necessary to make space for annotator header
-                  marginTop: "6.2rem",
-                  height: "calc(100% - 6rem)",
                 }}
               >
                 <StyledTableWrapper>
@@ -1022,9 +1009,8 @@ export const StatementListBox: React.FC = () => {
                         dispatch(setShowWarnings(false));
                         if (statementId !== rowId) {
                           setStatementId(rowId);
-                        } else if (annotator) {
-                          annotator.scrollToAnchor(rowId);
                         }
+                        scrollToAnchor(rowId);
                       }}
                       actantsUpdateMutation={statementUpdateMutation}
                       entities={entities}
@@ -1035,7 +1021,6 @@ export const StatementListBox: React.FC = () => {
                       addStatementAtCertainIndex={addStatementAtCertainIndex}
                       selectedRows={selectedRows}
                       setSelectedRows={setSelectedRows}
-                      annotator={annotator}
                       isLoading={statementListTableIsLoading}
                     />
                   )}
@@ -1050,7 +1035,7 @@ export const StatementListBox: React.FC = () => {
                 statementId={statementId}
                 storedAnnotatorScrollPosition={storedAnnotatorScrollPosition}
                 setStoredAnnotatorScrollPosition={
-                  setStoredAnnotatorScrollPosition
+                  setStoredAnnotatorScrollPosition``
                 }
                 hlEntities={hlEntities}
                 setHlEntities={setHlEntities}

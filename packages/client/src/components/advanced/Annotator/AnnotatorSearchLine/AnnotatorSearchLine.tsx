@@ -8,7 +8,8 @@ import {
   EntitySuggester,
   EntityTag,
 } from "components/advanced";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import useKeypress from "hooks/useKeyPress";
+import React, { useMemo, useRef, useState } from "react";
 import { BiSearch } from "react-icons/bi";
 import {
   FaAnchor,
@@ -32,7 +33,6 @@ import {
   StyledSearchLine,
   StyledSearchResults,
 } from "../../../../pages/Main/containers/StatementsListBox/StatementListBoxStyles";
-import useKeypress from "hooks/useKeyPress";
 import { StyledCheckboxWrapper } from "./AnnotatorSearchLineStyles";
 
 interface AnnotatorSearchLine {

@@ -1,8 +1,6 @@
-import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
 import styled from "styled-components";
 
 export const StyledTable = styled.table`
-  min-width: ${({}) => `${COLLAPSED_TABLE_WIDTH / 10 - 2.5}rem`};
   height: 100%;
   border-spacing: 0;
   border-collapse: collapse;

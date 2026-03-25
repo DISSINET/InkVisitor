@@ -1,15 +1,23 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { StyledAnnotatorBox } from "./AnnotatorBoxStyles";
 import { AnnotatorContainer } from "./AnnotatorContainer/AnnotatorContainer";
-import { DetailBoxState } from "types";
+import { DetailBoxState, EditorBoxState } from "types";
 import { useAppSelector } from "redux/hooks";
 import { useSearchParams } from "hooks/useSearchParamsContext";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import api from "api";
 import { Annotator } from "@inkvisitor/annotator/src/lib/Annotator";
-import { useAnnotator } from "components/advanced/Annotator/AnnotatorContext";
+import useAnnotator from "hooks/useAnnotator";
 import { EntityEnums, UserEnums } from "@shared/enums";
-import { IDocument, IResponseEntity, IStatement } from "@shared/types";
+import {
+  IDocument,
+  IResponseEntity,
+  IResponseGeneric,
+  IStatement,
+} from "@shared/types";
+import { AxiosResponse } from "axios";
+import { UseMutationResult } from "@tanstack/react-query";
+import { COLLAPSED_PANEL_WIDTH } from "Theme/constants";
 
 export const AnnotatorBox: React.FC = () => {
   const {
@@ -23,12 +31,18 @@ export const AnnotatorBox: React.FC = () => {
     appendDetailId,
   } = useSearchParams();
 
-  const detailBoxState = useAppSelector(
-    (state) => state.layout.mainPage.detailBoxState
+  const editorBoxState = useAppSelector(
+    (state) => state.layout.mainPage.editorBoxState
   );
   const contentHeight = useAppSelector((state) => state.layout.contentHeight);
-  const contentWidth = useAppSelector(
-    (state) => state.layout.mainPage.secondPanelRealWidth
+  const panelWidths = useAppSelector(
+    (state) => state.layout.mainPage.panelWidths
+  );
+  const thirdPanelExpanded = useAppSelector(
+    (state) => state.layout.mainPage.thirdPanelExpanded
+  );
+  const fourthPanelExpanded = useAppSelector(
+    (state) => state.layout.mainPage.fourthPanelExpanded
   );
   const annotatorOpened: boolean = useAppSelector(
     (state) => state.layout.mainPage.annotatorOpened
@@ -71,14 +85,25 @@ export const AnnotatorBox: React.FC = () => {
   ]);
 
   const contentHeightAnnotator = useMemo(() => {
-    if (!selectedDetailId) {
+    if (!statementId) {
       return contentHeight;
-    } else if (detailBoxState === DetailBoxState.Normal) {
+    } else if (editorBoxState === EditorBoxState.Normal) {
       return contentHeight / 2;
-    } else if (detailBoxState === DetailBoxState.Minimized) {
+    } else if (editorBoxState === EditorBoxState.Minimized) {
       return contentHeight - 56; // 56 is the height of the submit button
     }
-  }, [contentHeight, detailBoxState]);
+    return contentHeight;
+  }, [contentHeight, editorBoxState, statementId]);
+
+  // Same width as MainPage third column (annotator + editor)
+  const contentWidth = useMemo(() => {
+    const w = !thirdPanelExpanded
+      ? COLLAPSED_PANEL_WIDTH
+      : fourthPanelExpanded
+      ? panelWidths[2]
+      : panelWidths[2] + panelWidths[3] - COLLAPSED_PANEL_WIDTH;
+    return Math.max(w - 10, 0);
+  }, [thirdPanelExpanded, fourthPanelExpanded, panelWidths]);
 
   // get user
   const userId = localStorage.getItem("userid");
@@ -190,16 +215,20 @@ export const AnnotatorBox: React.FC = () => {
     [territory]
   );
 
-  const statementCreateMutation = useMutation({
+  const statementCreateMutation: UseMutationResult<
+    AxiosResponse<IResponseGeneric<IStatement>, unknown>,
+    Error,
+    IStatement,
+    unknown
+  > = useMutation({
     mutationFn: async (statement: IStatement) => {
-      const res = await api.entityCreate(statement);
-      return res.data;
+      return api.entityCreate(statement);
     },
   });
 
   return (
     <StyledAnnotatorBox>
-      {/* <AnnotatorContainer
+      <AnnotatorContainer
         contentHeight={contentHeightAnnotator || 0}
         contentWidth={contentWidth - 10}
         territoryId={territoryId}
@@ -209,7 +238,7 @@ export const AnnotatorBox: React.FC = () => {
         setStoredAnnotatorScrollPosition={setStoredAnnotatorScrollPosition}
         hlEntities={hlEntities}
         setHlEntities={setHlEntities}
-        // statementCreateMutation={statementCreateMutation}
+        statementCreateMutation={statementCreateMutation}
         annotator={annotator}
         setAnnotator={setAnnotator}
         selectedDocumentId={selectedDocumentId}
@@ -221,7 +250,7 @@ export const AnnotatorBox: React.FC = () => {
         setSelectedResourceId={setSelectedResourceId}
         userCanEdit={userCanEdit}
         userData={userData}
-      /> */}
+      />
     </StyledAnnotatorBox>
   );
 };
