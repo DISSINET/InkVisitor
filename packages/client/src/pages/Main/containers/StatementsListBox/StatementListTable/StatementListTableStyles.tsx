@@ -1,10 +1,7 @@
 import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
 import styled from "styled-components";
 
-interface StyledTable {
-  $isListMode: boolean;
-}
-export const StyledTable = styled.table<StyledTable>`
+export const StyledTable = styled.table`
   min-width: ${({}) => `${COLLAPSED_TABLE_WIDTH / 10 - 2.5}rem`};
   height: 100%;
   border-spacing: 0;
@@ -13,9 +10,7 @@ export const StyledTable = styled.table<StyledTable>`
   border-style: solid;
   border-color: ${({ theme }) => theme.color["gray"][500]};
   box-shadow: ${({ theme }) => theme.boxShadow["subtle"]};
-  overflow-x: ${({ $isListMode }) => ($isListMode ? "auto" : "hidden")};
-  /* margin-top: ${({ theme, $isListMode }) =>
-    $isListMode ? "0" : theme.space[24]}; */
+  overflow-x: auto;
   margin-left: ${({ theme }) => theme.space[1]};
   margin-right: ${({ theme }) => theme.space[1]};
   transition: width 0.3s ease;
@@ -38,7 +33,6 @@ interface StyledTr {
   $isOpened?: boolean;
   $isSelected?: boolean;
   opacity?: number;
-  $listMode?: boolean;
 }
 export const StyledTr = styled.tr<StyledTr>`
   height: ${({ theme }) => theme.space[16]};
@@ -54,8 +48,7 @@ export const StyledTr = styled.tr<StyledTr>`
   border-top: 1px solid ${({ theme }) => theme.color["gray"][500]};
   border-left: ${({ theme, $isOpened }) =>
     $isOpened ? "4px solid " + theme.color["success"] : ""};
-  cursor: ${({ $isOpened, $listMode }) =>
-    $isOpened && $listMode ? "default" : "pointer"};
+  cursor: ${({ $isOpened }) => ($isOpened ? "default" : "pointer")};
   td:first-child {
     padding-left: ${({ $isOpened }) => (!$isOpened ? "0.9rem" : "")};
     width: 1%;

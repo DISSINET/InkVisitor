@@ -55,7 +55,6 @@ export const fourthPanelBoxesHeightThirds = {
 
 // the minimum pixels for the results section height
 export const MIN_SEARCH_RESULT_HEIGHT = 100;
-export const COLLAPSED_TABLE_WIDTH = 130;
 
 // LIMITS
 export const maxTabCount = 10;

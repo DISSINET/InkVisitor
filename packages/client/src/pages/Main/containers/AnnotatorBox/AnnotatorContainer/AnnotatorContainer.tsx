@@ -17,23 +17,21 @@ import { BsInfoCircle } from "react-icons/bs";
 import {
   ANNOTATOR_SELECTOR_HEIGHT,
   ANNOTATOR_TOO_SMALL_BREAKPOINT,
-  COLLAPSED_TABLE_WIDTH,
 } from "Theme/constants";
-import { StyledEmptyState } from "../StatementListBoxStyles";
-import StatementListDocumentLine from "../StatementListDocumentLine/StatementListDocumentLine";
+import { StyledEmptyState } from "../../StatementsListBox/StatementListBoxStyles";
+import StatementListDocumentLine from "../../StatementsListBox/StatementListDocumentLine/StatementListDocumentLine";
 
-interface StatementListTextAnnotator {
+interface AnnotatorContainer {
   // it's faster than the territory entity so it's better to pass territoryId separately
   territoryId: string;
   territory?: IResponseTerritory;
   statementId: string;
-  statementCreateMutation: UseMutationResult<
+  statementCreateMutation?: UseMutationResult<
     AxiosResponse<IResponseGeneric<IStatement>, any>,
     Error,
     IStatement,
     unknown
   >;
-  statementListBoxRef?: React.RefObject<HTMLDivElement | null>;
 
   storedAnnotatorScrollPosition: number | null;
   setStoredAnnotatorScrollPosition: React.Dispatch<
@@ -59,19 +57,15 @@ interface StatementListTextAnnotator {
   selectedDocumentIsFetching: boolean;
   selectedDocumentError: Error | null;
 
-  showStatementList: boolean;
   userCanEdit: boolean;
   userData?: IResponseUser;
 }
 
-export const StatementListTextAnnotator: React.FC<
-  StatementListTextAnnotator
-> = ({
+export const AnnotatorContainer: React.FC<AnnotatorContainer> = ({
   territoryId,
   territory,
   statementId,
   statementCreateMutation,
-  statementListBoxRef,
 
   storedAnnotatorScrollPosition,
   setStoredAnnotatorScrollPosition,
@@ -93,7 +87,6 @@ export const StatementListTextAnnotator: React.FC<
   selectedDocumentId,
   selectedDocumentIsFetching,
   selectedDocumentError,
-  showStatementList,
   userCanEdit,
   userData,
 }) => {
@@ -101,11 +94,10 @@ export const StatementListTextAnnotator: React.FC<
     return contentHeight - 70 - ANNOTATOR_SELECTOR_HEIGHT;
   }, [contentHeight]);
 
+  // TODO: get rid of this
   const annotatorWidth = useMemo<number>(() => {
-    return showStatementList
-      ? contentWidth - COLLAPSED_TABLE_WIDTH
-      : contentWidth;
-  }, [contentWidth, showStatementList]);
+    return contentWidth;
+  }, [contentWidth]);
 
   const annotatorWidthTooNarrow = useMemo<boolean>(() => {
     return annotatorWidth < ANNOTATOR_TOO_SMALL_BREAKPOINT;
@@ -172,7 +164,6 @@ export const StatementListTextAnnotator: React.FC<
           annotator={annotator}
           territoryId={territoryId}
           resources={resources || []}
-          showStatementList={showStatementList}
           userCanEdit={userCanEdit}
           annotatorWidthTooNarrow={annotatorWidthTooNarrow}
           contentWidth={contentWidth}
@@ -222,9 +213,7 @@ export const StatementListTextAnnotator: React.FC<
               dataDocument={selectedDocument ?? undefined}
               dataDocumentIsFetching={selectedDocumentIsFetching}
               dataDocumentError={selectedDocumentError}
-              showStatementList={showStatementList}
               userData={userData}
-              statementListBoxRef={statementListBoxRef}
               territoryId={territoryId}
             />
           )}

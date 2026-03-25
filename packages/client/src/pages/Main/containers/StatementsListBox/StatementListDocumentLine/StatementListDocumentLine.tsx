@@ -33,8 +33,6 @@ interface StatementListDocumentLine {
   annotator?: any;
   territoryId: string;
   resources: IEntity[];
-  // is list non empty
-  showStatementList: boolean;
   userCanEdit: boolean;
   annotatorWidthTooNarrow: boolean;
 
@@ -53,7 +51,6 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
   annotator,
   territoryId,
   resources,
-  showStatementList,
   userCanEdit,
   annotatorWidthTooNarrow,
 
@@ -66,7 +63,7 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
 
   return (
     <>
-      <StyledDocumentLine $marginLeft={showStatementList}>
+      <StyledDocumentLine>
         <div
           style={{
             display: "flex",

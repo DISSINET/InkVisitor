@@ -60,6 +60,7 @@ import {
   StyledListAnnotatorTab,
   StyledListAnnotatorTabGroup,
 } from "./MainPageStyles";
+import { MemoizedAnnotatorBox } from "./containers/AnnotatorBox/AnnotatorBox";
 
 type FourthPanelBoxes = "search" | "bookmarks" | "templates";
 
@@ -74,8 +75,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
     appendDetailId,
     setStatementId,
     setTerritoryId,
-    annotatorOpened,
-    setAnnotatorOpened,
   } = useSearchParams();
 
   const dispatch = useAppDispatch();
@@ -882,32 +881,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
                   />
                 </ButtonGroup>
               )}
-              {territoryId && (
-                <StyledListAnnotatorTabGroup>
-                  <StyledListAnnotatorTab
-                    type="button"
-                    $isSelected={!annotatorOpened}
-                    onClick={() => {
-                      setAnnotatorOpened(false);
-                      dispatch(setDetailBoxState(DetailBoxState.Normal));
-                    }}
-                  >
-                    <FaList />
-                    list
-                  </StyledListAnnotatorTab>
-                  <StyledListAnnotatorTab
-                    type="button"
-                    $isSelected={!!annotatorOpened}
-                    onClick={() => {
-                      setAnnotatorOpened(true);
-                      dispatch(setDetailBoxState(DetailBoxState.Normal));
-                    }}
-                  >
-                    <FaHighlighter />
-                    annotator
-                  </StyledListAnnotatorTab>
-                </StyledListAnnotatorTabGroup>
-              )}
               {/* Admin / Owner / Editor with writer rights */}
               {hasWriteRightsToSelectedTerritory && territoryId && (
                 <ButtonGroup
@@ -1023,7 +996,16 @@ const MainPage: React.FC<MainPage> = ({}) => {
       <Panel width={thirdPanelWidth}>
         <Box
           borderColor="white"
-          height={contentHeight}
+          label="Annotator"
+          height={contentHeight / 2}
+          isExpanded={thirdPanelExpanded}
+          buttons={[thirdPanelButton()]}
+        >
+          <MemoizedAnnotatorBox />
+        </Box>
+        <Box
+          borderColor="white"
+          height={contentHeight / 2}
           label="Editor"
           buttons={[thirdPanelButton()]}
           isExpanded={thirdPanelExpanded}

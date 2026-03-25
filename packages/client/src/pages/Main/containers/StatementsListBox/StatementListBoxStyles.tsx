@@ -1,5 +1,4 @@
 import styled from "styled-components";
-import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
 
 export const StyledStatementListBox = styled.div`
   display: flex;
@@ -51,14 +50,11 @@ export const StyledActionLabel = styled.div`
   text-overflow: ellipsis;
 `;
 
-interface StyledTableWrapper {
-  $isListMode?: boolean;
-}
-export const StyledTableWrapper = styled.div<StyledTableWrapper>`
+export const StyledTableWrapper = styled.div`
   display: flex;
   flex-direction: column;
   overflow: auto;
-  overflow-x: ${({ $isListMode }) => ($isListMode ? "auto" : "hidden")};
+  overflow-x: auto;
   flex-shrink: 0;
   padding-right: 0.1rem;
   padding-bottom: 0.5rem;
@@ -74,10 +70,7 @@ export const StyledEmptyState = styled.div`
   text-align: center;
 `;
 
-interface StyledDocumentSearchLine {
-  $marginLeft?: boolean;
-}
-export const StyledDocumentLine = styled.div<StyledDocumentSearchLine>`
+export const StyledDocumentLine = styled.div`
   display: flex;
   gap: 0.2rem;
   align-items: center;
@@ -88,16 +81,12 @@ export const StyledDocumentLine = styled.div<StyledDocumentSearchLine>`
   padding-right: 0.5rem;
   overflow: hidden;
   white-space: nowrap;
-  margin-left: ${({ $marginLeft }) =>
-    $marginLeft ? `-${COLLAPSED_TABLE_WIDTH / 10}rem` : "0"};
 `;
 
-export const StyledSearchLine = styled.div<StyledDocumentSearchLine>`
+export const StyledSearchLine = styled.div`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.space[2]};
-  margin-left: ${({ $marginLeft }) =>
-    $marginLeft ? `-${COLLAPSED_TABLE_WIDTH / 10}rem` : "0"};
   justify-content: center;
   height: 3rem;
 `;

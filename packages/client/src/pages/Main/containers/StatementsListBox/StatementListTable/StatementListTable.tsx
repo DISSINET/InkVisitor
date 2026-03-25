@@ -96,7 +96,6 @@ interface StatementListTable {
 
   selectedRows: string[];
   setSelectedRows: React.Dispatch<React.SetStateAction<string[]>>;
-  displayMode: StatementListDisplayMode;
   annotator?: Annotator;
   isLoading: boolean;
 }
@@ -114,7 +113,6 @@ export const StatementListTable: React.FC<StatementListTable> = ({
 
   selectedRows,
   setSelectedRows,
-  displayMode,
   annotator,
   isLoading,
 }) => {
@@ -473,10 +471,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
       data: statementsLocal,
       getRowId,
       initialState: {
-        hiddenColumns:
-          displayMode === StatementListDisplayMode.TEXT
-            ? HIDDEN_COLUMNS_MINIFIED
-            : HIDDEN_COLUMNS_FULL,
+        hiddenColumns: HIDDEN_COLUMNS_FULL,
       },
     },
     useExpanded,
@@ -484,14 +479,10 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   );
 
   useEffect(() => {
-    if (displayMode === StatementListDisplayMode.TEXT) {
-      setHiddenColumns(HIDDEN_COLUMNS_MINIFIED);
-    } else {
-      setTimeout(() => {
-        setHiddenColumns(HIDDEN_COLUMNS_FULL);
-      }, 450);
-    }
-  }, [displayMode]);
+    setTimeout(() => {
+      setHiddenColumns(HIDDEN_COLUMNS_FULL);
+    }, 450);
+  }, []);
 
   const moveRow = useCallback((dragIndex: number, hoverIndex: number) => {
     setStatementsLocal((prevStatementsLocal) =>
@@ -547,10 +538,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
 
   return (
     <>
-      <StyledTable
-        {...getTableProps()}
-        $isListMode={displayMode === StatementListDisplayMode.LIST}
-      >
+      <StyledTable {...getTableProps()}>
         <StyledTHead>
           {headerGroups.map((headerGroup, key) => (
             <tr {...headerGroup.getHeaderGroupProps()} key={key}>
@@ -563,9 +551,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                   <th key={key}></th>
                 )
               )}
-              {displayMode !== StatementListDisplayMode.TEXT && (
-                <StyledTh style={{ width: "50px" }} key={"expander"}></StyledTh>
-              )}
+              <StyledTh style={{ width: "50px" }} key={"expander"}></StyledTh>
             </tr>
           ))}
         </StyledTHead>
@@ -583,7 +569,6 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                 visibleColumns={visibleColumns}
                 entities={entities}
                 isSelected={selectedRows.includes(row.original.id)}
-                displayMode={displayMode}
               />
             );
           })}

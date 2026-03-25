@@ -103,7 +103,6 @@ interface TextAnnotatorProps {
   dataDocument?: IDocument;
   dataDocumentIsFetching: boolean;
   dataDocumentError: Error | null;
-  showStatementList?: boolean;
 
   statementCreateMutation?: UseMutationResult<
     AxiosResponse<IResponseGeneric<IStatement>, any>,
@@ -114,7 +113,6 @@ interface TextAnnotatorProps {
 
   userData?: IResponseUser;
   disableCreate?: boolean;
-  statementListBoxRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 const ANNOTATOR_MENU_PAGE_PADDING = 4;
@@ -122,7 +120,6 @@ const ANNOTATOR_MENU_PAGE_PADDING = 4;
 export const TextAnnotator = ({
   width = 400,
   annotatorWidthTooNarrow = false,
-  statementListBoxRef,
   height = 500,
   displayLineNumbers = true,
   hlEntities = Object.values(EntityEnums.Class),
@@ -138,7 +135,6 @@ export const TextAnnotator = ({
   dataDocument,
   dataDocumentIsFetching = false,
   dataDocumentError,
-  showStatementList,
 
   statementCreateMutation = undefined,
   userData,
@@ -929,7 +925,6 @@ export const TextAnnotator = ({
   return (
     <>
       <AnnotatorSearchLine
-        showStatementList={showStatementList ?? false}
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
         searchOccurences={searchOccurences}

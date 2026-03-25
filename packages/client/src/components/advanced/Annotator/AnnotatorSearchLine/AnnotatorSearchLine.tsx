@@ -50,7 +50,6 @@ interface AnnotatorSearchLine {
   setSearchActiveOccurence: (searchActiveOccurence: number) => void;
   isSearchAllowed: boolean;
   annotatorWidthTooNarrow: boolean;
-  showStatementList: boolean;
   annotator: Annotator | null;
   documentId?: string;
   dataDocument?: IDocument;
@@ -90,7 +89,6 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
   isSearchAllowed,
   annotatorWidthTooNarrow,
   setSearchActiveOccurence,
-  showStatementList,
   annotator,
   documentId = undefined,
   dataDocument,
@@ -335,7 +333,7 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
   };
 
   return (
-    <StyledSearchLine $marginLeft={showStatementList}>
+    <StyledSearchLine>
       {isSearchAllowed && (
         <>
           <StyledSearchContainer>

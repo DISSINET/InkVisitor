@@ -43,7 +43,6 @@ interface StatementListRow {
   visibleColumns: ColumnInstance<IResponseStatement>[];
   entities: { [key: string]: IEntity };
   isSelected: boolean;
-  displayMode: StatementListDisplayMode;
 }
 
 export const StatementListRow: React.FC<StatementListRow> = ({
@@ -55,7 +54,6 @@ export const StatementListRow: React.FC<StatementListRow> = ({
   visibleColumns,
   entities,
   isSelected,
-  displayMode,
 }) => {
   const dispatch = useAppDispatch();
 
@@ -117,7 +115,6 @@ export const StatementListRow: React.FC<StatementListRow> = ({
     <React.Fragment key={row.original.data.territory?.order}>
       <StyledTr
         ref={dropRef}
-        $listMode={displayMode === StatementListDisplayMode.LIST}
         opacity={opacity}
         $isOpened={row.original.id === statementId}
         $isSelected={isSelected}
@@ -164,39 +161,37 @@ export const StatementListRow: React.FC<StatementListRow> = ({
                 );
               }
             })}
-            {displayMode !== StatementListDisplayMode.TEXT && (
-              <StyledTd
+            <StyledTd
+              style={{
+                justifyContent: "center",
+              }}
+            >
+              <span
+                {...row.getToggleRowExpandedProps()}
                 style={{
-                  justifyContent: "center",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+                onClick={(e: React.MouseEvent) => {
+                  e.stopPropagation();
+                  const rowId = row.original.id;
+                  if (!rowsExpanded.includes(rowId)) {
+                    dispatch(setRowsExpanded(rowsExpanded.concat(rowId)));
+                  } else {
+                    dispatch(
+                      setRowsExpanded(rowsExpanded.filter((r) => r !== rowId))
+                    );
+                  }
                 }}
               >
-                <span
-                  {...row.getToggleRowExpandedProps()}
-                  style={{
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                  onClick={(e: React.MouseEvent) => {
-                    e.stopPropagation();
-                    const rowId = row.original.id;
-                    if (!rowsExpanded.includes(rowId)) {
-                      dispatch(setRowsExpanded(rowsExpanded.concat(rowId)));
-                    } else {
-                      dispatch(
-                        setRowsExpanded(rowsExpanded.filter((r) => r !== rowId))
-                      );
-                    }
-                  }}
-                >
-                  {rowsExpanded.includes(row.original.id) ? (
-                    <FaChevronCircleUp size={18} />
-                  ) : (
-                    <FaChevronCircleDown size={18} />
-                  )}
-                </span>
-              </StyledTd>
-            )}
+                {rowsExpanded.includes(row.original.id) ? (
+                  <FaChevronCircleUp size={18} />
+                ) : (
+                  <FaChevronCircleDown size={18} />
+                )}
+              </span>
+            </StyledTd>
           </React.Fragment>
         ) : (
           <StyledTd colSpan={visibleColumns.length + 1}>
@@ -217,15 +212,13 @@ export const StatementListRow: React.FC<StatementListRow> = ({
           </StyledTd>
         )}
       </StyledTr>
-      {rowsExpanded.includes(row.original.id) &&
-      !draggedRowId &&
-      displayMode === StatementListDisplayMode.LIST ? (
+      {rowsExpanded.includes(row.original.id) && !draggedRowId && (
         <StatementListRowExpanded
           row={row}
           visibleColumns={visibleColumns}
           entities={entities}
         />
-      ) : null}
+      )}
     </React.Fragment>
   );
 };

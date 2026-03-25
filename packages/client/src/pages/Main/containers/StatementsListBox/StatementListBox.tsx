@@ -15,9 +15,9 @@ import {
 } from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { CustomScrollbar, Loader, Submit, ToastWithLink } from "components";
+import { CustomScrollbar, Submit, ToastWithLink } from "components";
 import { CStatement } from "constructors";
-import { useResizeObserver, useSearchParams } from "hooks";
+import { useSearchParams } from "hooks";
 import useAnnotator from "hooks/useAnnotator";
 import React, { useEffect, useMemo, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
@@ -27,13 +27,8 @@ import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlic
 import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { COLLAPSED_TABLE_WIDTH, SECOND_PANEL_MIN_WIDTH } from "Theme/constants";
-import {
-  DetailBoxState,
-  EntitiesDeleteSuccessResponse,
-  StatementListDisplayMode,
-  StatementOrderCorrection,
-} from "types";
+import { SECOND_PANEL_MIN_WIDTH } from "Theme/constants";
+import { EntitiesDeleteSuccessResponse, StatementOrderCorrection } from "types";
 import {
   collectStatementAnchors,
   getStatementOrderByIndex,
@@ -43,13 +38,11 @@ import {
   StyledContentWrapper,
   StyledEmptyState,
   StyledInfoWrapper,
-  StyledLoaderWrap,
   StyledStatementListBox,
   StyledTableWrapper,
 } from "./StatementListBoxStyles";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
-import { StatementListTextAnnotator } from "./StatementListTextAnnotator/StatementListTextAnnotator";
 
 const initialData: {
   statements: IResponseStatement[];
@@ -63,7 +56,6 @@ const initialData: {
 
 export const StatementListBox: React.FC = () => {
   const queryClient = useQueryClient();
-  const statementListBoxRef = React.useRef<HTMLDivElement>(null);
 
   const dispatch = useAppDispatch();
   const rowsExpanded: string[] = useAppSelector(
@@ -76,21 +68,14 @@ export const StatementListBox: React.FC = () => {
     (state) => state.statementList.isLoading
   );
 
-  const [hlEntities, setHlEntities] = useState<EntityEnums.Class[]>([
-    EntityEnums.Class.Action,
-    EntityEnums.Class.Person,
-    EntityEnums.Class.Being,
-    EntityEnums.Class.Concept,
-    EntityEnums.Class.Group,
-    EntityEnums.Class.Location,
-    EntityEnums.Class.Object,
-    EntityEnums.Class.Event,
-    EntityEnums.Class.Resource,
-    EntityEnums.Class.Person,
-    EntityEnums.Class.Statement,
-    EntityEnums.Class.Value,
-    EntityEnums.Class.Territory,
-  ]);
+  const [annotator, setAnnotator] = useState<Annotator | undefined>(undefined);
+  const { setAnnotator: useAnnotatorSetAnnotator } = useAnnotator();
+
+  useEffect(() => {
+    if (annotator) {
+      useAnnotatorSetAnnotator(annotator);
+    }
+  }, [annotator, useAnnotatorSetAnnotator]);
 
   const {
     territoryId,
@@ -101,7 +86,6 @@ export const StatementListBox: React.FC = () => {
     detailIdArray,
     removeDetailId,
     appendDetailId,
-    annotatorOpened,
   } = useSearchParams();
 
   useEffect(() => {
@@ -118,14 +102,14 @@ export const StatementListBox: React.FC = () => {
   const [statementToDelete, setStatementToDelete] = useState<IStatement>();
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
 
-  const displayMode: StatementListDisplayMode = useMemo(() => {
-    if (annotatorOpened === null) {
-      return StatementListDisplayMode.TEXT;
-    }
-    return annotatorOpened
-      ? StatementListDisplayMode.TEXT
-      : StatementListDisplayMode.LIST;
-  }, [annotatorOpened]);
+  // const displayMode: StatementListDisplayMode = useMemo(() => {
+  //   if (annotatorOpened === null) {
+  //     return StatementListDisplayMode.TEXT;
+  //   }
+  //   return annotatorOpened
+  //     ? StatementListDisplayMode.TEXT
+  //     : StatementListDisplayMode.LIST;
+  // }, [annotatorOpened]);
 
   const {
     status,
@@ -196,20 +180,11 @@ export const StatementListBox: React.FC = () => {
   const [storedAnnotatorResourceId, setStoredAnnotatorResourceId] = useState<
     string | false
   >(false);
-  // const [storedAnnotatorScroll, setStoredAnnotatorScroll] = useState<number>(0);
 
   // so the annotator jumps to the anchor
   useEffect(() => {
     setStoredAnnotatorResourceId(false);
-    // setStoredAnnotatorScroll(0);
   }, [territoryId]);
-
-  // its needed as the scroll event is executed even when the annotator is not active
-  // useEffect(() => {
-  // if (!storedAnnotatorResourceId) {
-  // setStoredAnnotatorScroll(0);
-  // }
-  // }, [storedAnnotatorResourceId]);
 
   // delay of show content for fluent animation on open
   const [enableStatementListLoader, setEnableStatementListLoader] =
@@ -224,26 +199,6 @@ export const StatementListBox: React.FC = () => {
       setEnableStatementListLoader(false);
     }
   }, [statementListOpened]);
-
-  const [annotator, setAnnotator] = useState<Annotator | undefined>(undefined);
-  const [storedAnnotatorScrollPosition, setStoredAnnotatorScrollPosition] =
-    useState<number | null>(null);
-
-  // useEffect(() => {
-  //   console.log("storedAnnotatorScrollPosition", storedAnnotatorScrollPosition);
-  // }, [storedAnnotatorScrollPosition]);
-
-  useEffect(() => {
-    setStoredAnnotatorScrollPosition(null);
-  }, [territoryId]);
-
-  const { setAnnotator: useAnnotatorSetAnnotator } = useAnnotator();
-
-  useEffect(() => {
-    if (annotator) {
-      useAnnotatorSetAnnotator(annotator);
-    }
-  }, [annotator, useAnnotatorSetAnnotator]);
 
   const {
     data: resources,
@@ -341,35 +296,35 @@ export const StatementListBox: React.FC = () => {
     setIsInitialized(false);
   }, [territoryId]);
 
-  const selectedResource = useMemo<IResponseEntity | false>(() => {
-    if (selectedResourceId && resources) {
-      return resources?.find((r) => r.id === selectedResourceId) ?? false;
-    }
-    return false;
-  }, [selectedResourceId, resources]);
+  // const selectedResource = useMemo<IResponseEntity | false>(() => {
+  //   if (selectedResourceId && resources) {
+  //     return resources?.find((r) => r.id === selectedResourceId) ?? false;
+  //   }
+  //   return false;
+  // }, [selectedResourceId, resources]);
 
-  const selectedDocumentId = useMemo<string | undefined>(() => {
-    if (selectedResource) {
-      return selectedResource.data.documentId;
-    }
-    return undefined;
-  }, [selectedResource]);
+  // const selectedDocumentId = useMemo<string | undefined>(() => {
+  //   if (selectedResource) {
+  //     return selectedResource.data.documentId;
+  //   }
+  //   return undefined;
+  // }, [selectedResource]);
 
-  const {
-    data: selectedDocument,
-    error: selectedDocumentError,
-    isFetching: selectedDocumentIsFetching,
-  } = useQuery({
-    queryKey: ["document", selectedDocumentId],
-    queryFn: async () => {
-      if (selectedDocumentId) {
-        const res = await api.documentGet(selectedDocumentId);
-        return res.data ?? undefined;
-      }
-      return undefined;
-    },
-    enabled: api.isLoggedIn() && !!selectedDocumentId,
-  });
+  // const {
+  //   data: selectedDocument,
+  //   error: selectedDocumentError,
+  //   isFetching: selectedDocumentIsFetching,
+  // } = useQuery({
+  //   queryKey: ["document", selectedDocumentId],
+  //   queryFn: async () => {
+  //     if (selectedDocumentId) {
+  //       const res = await api.documentGet(selectedDocumentId);
+  //       return res.data ?? undefined;
+  //     }
+  //     return undefined;
+  //   },
+  //   enabled: api.isLoggedIn() && !!selectedDocumentId,
+  // });
 
   const deleteStatementMutation = useMutation({
     mutationFn: async (sId: string) =>
@@ -451,6 +406,42 @@ export const StatementListBox: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ["tree"] });
       dispatch(setDisableStatementListScroll(false));
     },
+  });
+
+  useEffect(() => {
+    if (selectedResourceId) {
+      setStoredAnnotatorResourceId(selectedResourceId);
+    }
+  }, [selectedResourceId]);
+
+  const selectedResource = useMemo<IResponseEntity | false>(() => {
+    if (selectedResourceId && resources) {
+      return resources?.find((r) => r.id === selectedResourceId) ?? false;
+    }
+    return false;
+  }, [selectedResourceId, resources]);
+
+  const selectedDocumentId = useMemo<string | undefined>(() => {
+    if (selectedResource) {
+      return selectedResource.data.documentId;
+    }
+    return undefined;
+  }, [selectedResource]);
+
+  const {
+    data: selectedDocument,
+    error: selectedDocumentError,
+    isFetching: selectedDocumentIsFetching,
+  } = useQuery({
+    queryKey: ["document", selectedDocumentId],
+    queryFn: async () => {
+      if (selectedDocumentId) {
+        const res = await api.documentGet(selectedDocumentId);
+        return res.data ?? undefined;
+      }
+      return undefined;
+    },
+    enabled: api.isLoggedIn() && !!selectedDocumentId,
   });
 
   const statementCreateMutation = useMutation({
@@ -836,21 +827,6 @@ export const StatementListBox: React.FC = () => {
   const contentWidth = useAppSelector(
     (state) => state.layout.mainPage.secondPanelRealWidth
   );
-  const contentHeight = useAppSelector((state) => state.layout.contentHeight);
-  const detailBoxState = useAppSelector(
-    (state) => state.layout.mainPage.detailBoxState
-  );
-
-  const statementListHeaderHeight = 103;
-  const contentHeightAnnotator = useMemo(() => {
-    if (!selectedDetailId) {
-      return contentHeight - statementListHeaderHeight;
-    } else if (detailBoxState === DetailBoxState.Normal) {
-      return contentHeight / 2 - statementListHeaderHeight;
-    } else if (detailBoxState === DetailBoxState.Minimized) {
-      return contentHeight - statementListHeaderHeight - 56; // 56 is the height of the submit button
-    }
-  }, [contentHeight, detailBoxState, selectedDetailId]);
 
   // adds object orderCorrection to each statement with info about the order in the list vs the annotator
   const statementsWithOrder: (IResponseStatement & {
@@ -971,17 +947,10 @@ export const StatementListBox: React.FC = () => {
     autoOrderStatementsMutation.isPending ||
     (statementListOpened && !enableStatementListLoader);
 
-  const tableWidth = useMemo(() => {
-    if (isListNonEmpty || statementListTableIsLoading) {
-      return displayMode === StatementListDisplayMode.LIST
-        ? contentWidth - 8
-        : COLLAPSED_TABLE_WIDTH;
-    }
-    return 0;
-  }, [displayMode, contentWidth, isListNonEmpty, statementListTableIsLoading]);
+  const tableWidth = contentWidth - 8;
 
   return (
-    <StyledStatementListBox ref={statementListBoxRef}>
+    <StyledStatementListBox>
       {
         <>
           <StatementListHeader
@@ -1018,7 +987,6 @@ export const StatementListBox: React.FC = () => {
 
           {territoryId &&
             statements.length === 0 &&
-            displayMode === StatementListDisplayMode.LIST &&
             statementListOpened &&
             !isFetchingTerritory && (
               <>
@@ -1042,19 +1010,11 @@ export const StatementListBox: React.FC = () => {
                   display: "flex",
                   flexShrink: 0,
                   // fix for overheight because of marginTop which is necessary to make space for annotator header
-                  marginTop:
-                    displayMode === StatementListDisplayMode.TEXT
-                      ? "6.2rem"
-                      : undefined,
-                  height:
-                    displayMode === StatementListDisplayMode.TEXT
-                      ? "calc(100% - 6rem)"
-                      : "100%",
+                  marginTop: "6.2rem",
+                  height: "calc(100% - 6rem)",
                 }}
               >
-                <StyledTableWrapper
-                  $isListMode={displayMode === StatementListDisplayMode.LIST}
-                >
+                <StyledTableWrapper>
                   {isListNonEmpty && (
                     <StatementListTable
                       statements={statementsWithOrder}
@@ -1062,10 +1022,7 @@ export const StatementListBox: React.FC = () => {
                         dispatch(setShowWarnings(false));
                         if (statementId !== rowId) {
                           setStatementId(rowId);
-                        } else if (
-                          displayMode === StatementListDisplayMode.TEXT &&
-                          annotator
-                        ) {
+                        } else if (annotator) {
                           annotator.scrollToAnchor(rowId);
                         }
                       }}
@@ -1078,7 +1035,6 @@ export const StatementListBox: React.FC = () => {
                       addStatementAtCertainIndex={addStatementAtCertainIndex}
                       selectedRows={selectedRows}
                       setSelectedRows={setSelectedRows}
-                      displayMode={displayMode}
                       annotator={annotator}
                       isLoading={statementListTableIsLoading}
                     />
@@ -1086,54 +1042,43 @@ export const StatementListBox: React.FC = () => {
                 </StyledTableWrapper>
               </CustomScrollbar>
 
-              {displayMode === StatementListDisplayMode.TEXT && (
-                <StatementListTextAnnotator
-                  contentHeight={contentHeightAnnotator || 0}
-                  contentWidth={contentWidth - 10}
-                  territoryId={territoryId}
-                  territory={territory}
-                  statementId={statementId}
-                  storedAnnotatorScrollPosition={storedAnnotatorScrollPosition}
-                  setStoredAnnotatorScrollPosition={
-                    setStoredAnnotatorScrollPosition
-                  }
-                  hlEntities={hlEntities}
-                  setHlEntities={setHlEntities}
-                  statementCreateMutation={statementCreateMutation}
-                  annotator={annotator}
-                  setAnnotator={setAnnotator}
-                  selectedDocumentId={selectedDocumentId}
-                  selectedDocument={selectedDocument}
-                  selectedDocumentIsFetching={selectedDocumentIsFetching}
-                  selectedDocumentError={selectedDocumentError}
-                  selectedResource={selectedResource}
-                  resources={resources}
-                  setSelectedResourceId={setSelectedResourceId}
-                  showStatementList={
-                    isListNonEmpty || statementListTableIsLoading
-                  }
-                  userCanEdit={userCanEdit}
-                  userData={userData}
-                  statementListBoxRef={statementListBoxRef}
-                />
-              )}
+              {/* <AnnotatorContainer
+                contentHeight={contentHeightAnnotator || 0}
+                contentWidth={contentWidth - 10}
+                territoryId={territoryId}
+                territory={territory}
+                statementId={statementId}
+                storedAnnotatorScrollPosition={storedAnnotatorScrollPosition}
+                setStoredAnnotatorScrollPosition={
+                  setStoredAnnotatorScrollPosition
+                }
+                hlEntities={hlEntities}
+                setHlEntities={setHlEntities}
+                statementCreateMutation={statementCreateMutation}
+                annotator={annotator}
+                setAnnotator={setAnnotator}
+                selectedDocumentId={selectedDocumentId}
+                selectedDocument={selectedDocument}
+                selectedDocumentIsFetching={selectedDocumentIsFetching}
+                selectedDocumentError={selectedDocumentError}
+                selectedResource={selectedResource}
+                resources={resources}
+                setSelectedResourceId={setSelectedResourceId}
+                userCanEdit={userCanEdit}
+                userData={userData}
+              /> */}
 
-              {statementListTableIsLoading &&
+              {/* TODO: add loader back in */}
+              {/* {statementListTableIsLoading &&
                 tableWidth > 0 &&
-                contentHeightAnnotator &&
-                contentHeightAnnotator > 0 &&
                 enableStatementListLoader && (
                   <StyledLoaderWrap
                     $width={tableWidth + 4}
-                    $height={
-                      displayMode === StatementListDisplayMode.TEXT
-                        ? contentHeightAnnotator - 56
-                        : contentHeightAnnotator + 4
-                    }
+                    $height={contentHeight}
                   >
                     <Loader show size={50} />
                   </StyledLoaderWrap>
-                )}
+                )} */}
             </StyledContentWrapper>
           )}
 

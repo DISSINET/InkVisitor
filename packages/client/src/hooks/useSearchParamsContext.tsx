@@ -29,9 +29,6 @@ const INITIAL_CONTEXT = {
   clearAllDetailIds: UNINITIALISED,
   cleanAllParams: UNINITIALISED,
   setLogoutState: UNINITIALISED,
-
-  annotatorOpened: false,
-  setAnnotatorOpened: UNINITIALISED,
 };
 interface SearchParamsContext {
   territoryId: string;
@@ -48,9 +45,6 @@ interface SearchParamsContext {
   clearAllDetailIds: () => void;
   cleanAllParams: () => void;
   setLogoutState: (isLoggingOut: boolean) => void;
-
-  annotatorOpened: boolean;
-  setAnnotatorOpened: (opened: boolean) => void;
 }
 const SearchParamsContext = createContext<SearchParamsContext>(INITIAL_CONTEXT);
 
@@ -111,10 +105,6 @@ export const SearchParamsProvider = ({
       return null;
     }
   };
-
-  const [annotatorOpened, setAnnotatorOpened] = useState<boolean>(
-    "annotatorOpened" in parsedParams ? true : false
-  );
 
   const [disablePush, setDisablePush] = useState(false);
   const isLoggingOutRef = React.useRef(false);
@@ -228,13 +218,8 @@ export const SearchParamsProvider = ({
       !isHandlingLocationChangeRef.current
     ) {
       const hashString = params.toString();
-      // Remove the = symbol for annotatorOpened parameter
-      const cleanHash = hashString
-        .replace(/annotatorOpened=&/g, "annotatorOpened&")
-        .replace(/&annotatorOpened=/g, "&annotatorOpened")
-        .replace(/^annotatorOpened=$/g, "annotatorOpened");
       navigate({
-        hash: cleanHash,
+        hash: hashString,
       });
     }
   };
@@ -243,7 +228,6 @@ export const SearchParamsProvider = ({
     clearAllDetailIds();
     setStatementId("");
     setTerritoryId("");
-    setAnnotatorOpened(false);
   };
 
   const setLogoutState = (isLoggingOut: boolean) => {
@@ -270,13 +254,9 @@ export const SearchParamsProvider = ({
         : params.delete("selectedDetail");
       detailId ? params.set("detail", detailId) : params.delete("detail");
 
-      annotatorOpened
-        ? params.set("annotatorOpened", "")
-        : params.delete("annotatorOpened");
-
       handleHistoryPush();
     }
-  }, [territoryId, statementId, selectedDetailId, detailId, annotatorOpened]);
+  }, [territoryId, statementId, selectedDetailId, detailId]);
 
   const handleLocationChange = (location: any) => {
     try {
@@ -298,9 +278,6 @@ export const SearchParamsProvider = ({
       parsedParamsTemp.detail
         ? setDetailId(parsedParamsTemp.detail)
         : setDetailId("");
-
-      // Handle annotatorOpened parameter
-      setAnnotatorOpened("annotatorOpened" in parsedParamsTemp);
     } catch (error) {
       console.error("Error parsing location hash:", error);
     }
@@ -336,9 +313,6 @@ export const SearchParamsProvider = ({
         clearAllDetailIds,
         cleanAllParams,
         setLogoutState,
-
-        annotatorOpened,
-        setAnnotatorOpened,
       }}
     >
       {children}
