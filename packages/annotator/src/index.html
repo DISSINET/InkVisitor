@@ -143,6 +143,19 @@
         <button id="collapseStoreBtn">Collapse & store position</button>
         <button id="restorePositionBtn">Restore</button>
       </fieldset>
+      <fieldset style="background: #fff3cd; border: 2px solid #ffc107;">
+        <legend style="font-weight: bold; color: #856404;">🔍 Hover Interaction Test (#2835)</legend>
+        <p style="margin: 5px 0; font-size: 12px;">
+          <strong>Mock Statement List:</strong> Hover over statements below to highlight anchors in annotator.<br>
+          Hover over anchored text in annotator to highlight corresponding statements here.
+        </p>
+        <div id="statementList" style="margin-top: 10px; max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 5px; background: white;">
+          <!-- Mock statements will be added here by JavaScript -->
+        </div>
+        <div id="hoverInfo" style="margin-top: 10px; padding: 5px; background: #e7f3ff; border: 1px solid #2196F3; font-size: 12px; min-height: 30px;">
+          <strong>Hover Status:</strong> <span id="hoverStatus">Move mouse over statements or anchored text</span>
+        </div>
+      </fieldset>
     </div>
 
     <p>Text from textfile.txt:</p>
@@ -226,6 +239,95 @@
       annotator.onSelectText((text) => {
          console.log("onSelectText", text);
       });
+
+      // ========== Hover Interaction Test (#2835) ==========
+      
+      // Mock statement list data (matching anchors in example.txt)
+      const mockStatements = [
+        { id: 'stmt-1', label: 'Statement about person A', anchorTag: 'a1' },
+        { id: 'stmt-2', label: 'Statement about location B', anchorTag: 'b2' },
+        { id: 'stmt-3', label: 'Statement about concept C', anchorTag: 'c3' },
+        { id: 'stmt-4', label: 'Statement about person D', anchorTag: 'd1' },
+        { id: 'stmt-5', label: 'Territory T marker', anchorTag: 'T1' },
+      ];
+
+      // Populate mock statement list
+      const statementListEl = document.getElementById('statementList');
+      const hoverStatusEl = document.getElementById('hoverStatus');
+      
+      mockStatements.forEach(stmt => {
+        const stmtDiv = document.createElement('div');
+        stmtDiv.id = stmt.id;
+        stmtDiv.className = 'statement-row';
+        stmtDiv.dataset.anchor = stmt.anchorTag;
+        stmtDiv.style.cssText = 'padding: 8px; margin: 3px 0; border: 1px solid #ddd; cursor: pointer; border-radius: 3px; transition: background-color 0.2s;';
+        stmtDiv.innerHTML = `<strong>${stmt.anchorTag}:</strong> ${stmt.label}`;
+        
+        // Part 1: Statement list → Annotator
+        // When hovering over statement, highlight anchor in annotator
+        stmtDiv.addEventListener('mouseenter', () => {
+          annotator.highlightAnchorByTag(stmt.anchorTag);
+          hoverStatusEl.textContent = `Hovering statement "${stmt.anchorTag}" → highlighting anchor in annotator`;
+          stmtDiv.style.backgroundColor = '#fff3cd';
+        });
+        
+        stmtDiv.addEventListener('mouseleave', () => {
+          annotator.clearHoverHighlight();
+          hoverStatusEl.textContent = 'Mouse left statement';
+          stmtDiv.style.backgroundColor = '';
+        });
+        
+        statementListEl.appendChild(stmtDiv);
+      });
+
+      // Part 2: Annotator → Statement list
+      // When hovering over anchored text, highlight corresponding statements
+      let currentlyHighlightedStatements = [];
+      
+      annotator.onAnchorHover((tags) => {
+        // Clear previous highlights
+        currentlyHighlightedStatements.forEach(stmtId => {
+          const stmtEl = document.getElementById(stmtId);
+          if (stmtEl) {
+            stmtEl.style.backgroundColor = '';
+            stmtEl.style.fontWeight = '';
+          }
+        });
+        currentlyHighlightedStatements = [];
+        
+        if (tags.length === 0) {
+          hoverStatusEl.textContent = 'Hovering over non-anchored text';
+          return;
+        }
+        
+        // Highlight statements that match the hovered tags
+        const tagNames = tags.map(tag => tag.getTagName());
+        hoverStatusEl.textContent = `Hovering anchored text: ${tagNames.join(', ')} → highlighting statement(s)`;
+        
+        tagNames.forEach(tagName => {
+          // Find matching statements
+          mockStatements.forEach(stmt => {
+            if (stmt.anchorTag === tagName) {
+              const stmtEl = document.getElementById(stmt.id);
+              if (stmtEl) {
+                stmtEl.style.backgroundColor = '#d1ecf1';
+                stmtEl.style.fontWeight = 'bold';
+                currentlyHighlightedStatements.push(stmt.id);
+              }
+            }
+          });
+        });
+        
+        if (currentlyHighlightedStatements.length === 0) {
+          hoverStatusEl.textContent = `Hovering anchor ${tagNames.join(', ')} (no matching statements in mock list)`;
+        }
+      });
+
+      console.log('✅ Hover interaction test initialized (#2835)');
+      console.log('- Part 1: Hover over statement list → highlights anchor in annotator');
+      console.log('- Part 2: Hover over anchored text → highlights statements in list');
+
+      // ========== End Hover Interaction Test ==========
 
       document.getElementById("highlightToggle").onclick = (e) => {
         highlightEnabled = e.target.checked;

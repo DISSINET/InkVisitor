@@ -11,6 +11,7 @@ import {
   DEFAULT_FONT_SIZE,
   EditMode,
   HighlightMode,
+  HOVER_DEBOUNCE_MS,
   LINE_HEIGHT,
 } from "./constants";
 
@@ -110,9 +111,11 @@ export class Annotator {
   onHighlightCb?: (entityId: string) => HighlightSchema | void;
   onTextChangeCb?: (text: string) => void;
   onScrollCb?: (line: number) => void;
+  onAnchorHoverCb?: (tags: Tag[]) => void; // Part 2 of #2835
 
   clickCount: number;
   clickTimeout?: NodeJS.Timeout;
+  hoverDebounceTimeout?: NodeJS.Timeout; // For debouncing mousemove events
 
   constructor(
     element: HTMLCanvasElement,
@@ -379,11 +382,102 @@ export class Annotator {
 
   /**
    * Clears the hover highlight (for statement list hover interaction).
-   * Part 1 of issue #2835.
    */
   clearHoverHighlight() {
     this.hoverHighlighter.reset();
     this.draw();
+  }
+
+  /**
+   * Detects anchors at the current mouse position and emits hover callback. When hovering over anchored text, emit tags to highlight statements.
+   * 
+   * @param e - Mouse event
+   */
+  private detectAndEmitAnchorHover(e: MouseEvent) {
+    if (!this.onAnchorHoverCb) {
+      return;
+    }
+
+    // Calculate cursor position from mouse event
+    const tempCursor = new Cursor(this.ratio, 0, 0);
+    tempCursor.setPositionFromEvent(
+      e,
+      this.lineHeight,
+      this.charWidth,
+      this.viewport.scrollOffsetY,
+      this.viewport.lineStart
+    );
+
+    // Clamp to valid line range
+    tempCursor.yLine = Math.max(
+      0,
+      Math.min(tempCursor.yLine, Math.max(0, this.text.noLines - 1))
+    );
+
+    // Get segment position at cursor
+    const segmentPos = this.text.getSegmentPosition(
+      tempCursor.yLine,
+      tempCursor.xLine
+    );
+
+    if (!segmentPos) {
+      this.onAnchorHoverCb([]);
+      return;
+    }
+
+    const segment = this.text.segments[segmentPos.segmentIndex];
+    if (!segment) {
+      this.onAnchorHoverCb([]);
+      return;
+    }
+
+    // Find all tags that span this position
+    // A position is inside a tag if it's after the opening tag and before the closing tag
+    const tagsAtPosition: Tag[] = [];
+
+    for (const openTag of segment.openingTags) {
+      // Check if cursor is after this opening tag
+      if (segmentPos.rawTextIndex < openTag.position) {
+        continue;
+      }
+
+      // Find corresponding closing tag
+      let closeTag: Tag | undefined;
+      let closeSegIdx = -1;
+
+      for (let i = segmentPos.segmentIndex; i < this.text.segments.length; i++) {
+        const seg = this.text.segments[i];
+        const candidates =
+          i === segmentPos.segmentIndex
+            ? seg.closingTags.filter((t) => t.position > openTag.position)
+            : seg.closingTags;
+        closeTag = candidates.find(
+          (tag) => tag.getTagName() === openTag.getTagName()
+        );
+        if (closeTag) {
+          closeSegIdx = i;
+          break;
+        }
+      }
+
+      if (!closeTag || closeSegIdx === -1) {
+        continue;
+      }
+
+      // Check if cursor is before the closing tag
+      if (closeSegIdx > segmentPos.segmentIndex) {
+        // Closing tag is in a later segment, so cursor is definitely inside
+        tagsAtPosition.push(openTag);
+      } else if (closeSegIdx === segmentPos.segmentIndex) {
+        // Closing tag is in the same segment, check position
+        if (segmentPos.rawTextIndex <= closeTag.position) {
+          tagsAtPosition.push(openTag);
+        }
+      }
+    }
+
+    // Emit callback with found tags (multiple tags if overlapping)
+    this.onAnchorHoverCb(tagsAtPosition);
   }
 
   onCanvasResize() {
@@ -457,6 +551,16 @@ export class Annotator {
 
   onScroll(cb: (line: number) => void) {
     this.onScrollCb = cb;
+  }
+
+  /**
+   * Registers callback for anchor hover events (Part 2 of #2835).
+   * Called when user hovers over anchored text in the annotator.
+   * 
+   * @param cb - Callback receiving array of Tags at the hover position
+   */
+  onAnchorHover(cb: (tags: Tag[]) => void) {
+    this.onAnchorHoverCb = cb;
   }
 
   /**
@@ -576,6 +680,19 @@ export class Annotator {
 
       this.cursor.selectArea();
       this.draw();
+    }
+
+    // Part 2 of #2835: Detect anchors at hover position
+    if (this.onAnchorHoverCb && !this.cursor.isSelecting()) {
+      // Clear existing debounce timeout
+      if (this.hoverDebounceTimeout) {
+        clearTimeout(this.hoverDebounceTimeout);
+      }
+
+      // Debounce the hover detection
+      this.hoverDebounceTimeout = setTimeout(() => {
+        this.detectAndEmitAnchorHover(e);
+      }, HOVER_DEBOUNCE_MS);
     }
   }
 
