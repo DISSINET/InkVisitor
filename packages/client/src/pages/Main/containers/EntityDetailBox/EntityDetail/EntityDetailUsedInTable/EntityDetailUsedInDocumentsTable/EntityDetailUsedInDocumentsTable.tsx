@@ -24,6 +24,7 @@ import { EntityEnums } from "@shared/enums";
 import useAnnotator from "hooks/useAnnotator";
 import { setStatementListOpened } from "redux/features/layout/mainPage/statementListOpenedSlice";
 import { TbAnchorOff } from "react-icons/tb";
+import { setAnnotatorOpened } from "redux/features/layout/mainPage/annotatorOpenedSlice";
 
 type CellType = CellProps<IResponseUsedInDocument>;
 interface EntityDetailUsedInDocumentsTable {
@@ -61,8 +62,7 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
     },
   });
 
-  const { setTerritoryId, setAnnotatorOpened, setStatementId, territoryId } =
-    useSearchParams();
+  const { setTerritoryId, setStatementId, territoryId } = useSearchParams();
   const dispatch = useAppDispatch();
 
   const { scrollToAnchor } = useAnnotator();
@@ -110,7 +110,7 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
                       dispatch(setStatementListOpened(true));
                       dispatch(setDetailBoxState(DetailBoxState.Normal));
                     }
-                    setAnnotatorOpened(true);
+                    dispatch(setAnnotatorOpened(true));
 
                     setTimeout(() => {
                       scrollToAnchor(entityId, row.original.anchorIndex);
