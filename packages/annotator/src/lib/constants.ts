@@ -25,3 +25,6 @@ export const HIGHLIGHT_HEIGHT_RATIO = 0.75;
 
 /** Pixels to raise the underline above the bottom of the line band (UNDERLINE mode). Larger = smaller margin below text. */
 export const UNDERLINE_OFFSET_PX = 2;
+
+/** Debounce delay in milliseconds for mousemove events (hover interactions). */
+export const HOVER_DEBOUNCE_MS = 50;

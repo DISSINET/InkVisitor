@@ -90,6 +90,7 @@ export class Annotator {
   // components here
   viewport: Viewport;
   cursor: Cursor;
+  hoverHighlighter: Highlighter; // For statement list hover interaction
   text: Text;
   scroller?: Scroller;
   lines?: Lines;
@@ -150,6 +151,17 @@ export class Annotator {
     this.text = new Text(this.inputText, charsAtLine);
 
     this.cursor = new Cursor(this.ratio, 0, 0);
+
+    // Initialize hover highlighter for statement list interaction (#2835)
+    this.hoverHighlighter = new Highlighter(
+      this.ratio,
+      {
+        color: "rgba(255, 200, 0, 0.3)", // Light yellow/orange
+        opacity: 0.3,
+        selectorColor: "rgba(255, 200, 0, 0.5)",
+      },
+      HighlightMode.BACKGROUND
+    );
 
     this.keys = new Keys(this);
     this.warnings = new Warnings();
@@ -249,6 +261,128 @@ export class Annotator {
 
     this.text.assignValueFromSegments();
     this.warnings.onTextChanged(this.text.value);
+    this.draw();
+  }
+
+  /**
+   * Highlights all anchors with the given tag name (for statement list hover interaction).
+   * Part 1 of issue #2835: When hovering over statement list, highlight the anchor in annotator.
+   * 
+   * @param tagName - The entity/tag name to highlight (e.g., "entity-id-123")
+   */
+  highlightAnchorByTag(tagName: string) {
+    if (!tagName) {
+      this.clearHoverHighlight();
+      return;
+    }
+
+    // Find all opening tags with this tag name across all segments
+    const matchingTags: Tag[] = [];
+    for (const segment of this.text.segments) {
+      const foundTags = segment.openingTags.filter(
+        (tag) => tag.getTagName() === tagName
+      );
+      matchingTags.push(...foundTags);
+    }
+
+    if (matchingTags.length === 0) {
+      this.clearHoverHighlight();
+      return;
+    }
+
+    // For each matching opening tag, find its corresponding closing tag
+    // and set highlight bounds to cover all occurrences
+    let minStartLine = Infinity;
+    let minStartChar = Infinity;
+    let maxEndLine = -Infinity;
+    let maxEndChar = -Infinity;
+
+    for (const openTag of matchingTags) {
+      const openSegIdx = openTag.segmentIndex;
+      const openSegment = this.text.segments[openSegIdx];
+      
+      if (!openSegment) continue;
+
+      // Find corresponding closing tag
+      let closeTag: Tag | undefined;
+      let closeSegIdx = -1;
+      
+      for (let i = openSegIdx; i < this.text.segments.length; i++) {
+        const seg = this.text.segments[i];
+        const candidates = i === openSegIdx
+          ? seg.closingTags.filter((t) => t.position > openTag.position)
+          : seg.closingTags;
+        closeTag = candidates.find((tag) => tag.getTagName() === tagName);
+        if (closeTag) {
+          closeSegIdx = i;
+          break;
+        }
+      }
+
+      if (!closeTag || closeSegIdx === -1) continue;
+
+      const closeSegment = this.text.segments[closeSegIdx];
+
+      // Convert tag positions to line/char coordinates
+      const startPos = this.text.getSegmentPosition(
+        openSegment.lineStart,
+        0
+      );
+      const endPos = this.text.getSegmentPosition(
+        closeSegment.lineEnd > 0 ? closeSegment.lineEnd - 1 : closeSegment.lineEnd,
+        0
+      );
+
+      if (!startPos || !endPos) continue;
+
+      // Calculate actual position within the segment's content
+      const openAbsIndex = this.text.getAbsTextIndexFromPosition(startPos) + openTag.position;
+      const closeAbsIndex = this.text.getAbsTextIndexFromPosition(endPos) + closeTag.position + closeTag.getTagLength();
+
+      const openSegPos = this.text.getSegmentFromAbsTextIndex(openAbsIndex);
+      const closeSegPos = this.text.getSegmentFromAbsTextIndex(closeAbsIndex);
+
+      if (!openSegPos || !closeSegPos) continue;
+
+      const openSegData = this.text.segments[openSegPos.segmentIndex];
+      const closeSegData = this.text.segments[closeSegPos.segmentIndex];
+
+      const startLine = openSegData.lineStart + openSegPos.lineIndex;
+      const startChar = openSegPos.charInLineIndex;
+      const endLine = closeSegData.lineStart + closeSegPos.lineIndex;
+      const endChar = closeSegPos.charInLineIndex;
+
+      // Track min/max to encompass all anchors with this tag
+      if (startLine < minStartLine || (startLine === minStartLine && startChar < minStartChar)) {
+        minStartLine = startLine;
+        minStartChar = startChar;
+      }
+      if (endLine > maxEndLine || (endLine === maxEndLine && endChar > maxEndChar)) {
+        maxEndLine = endLine;
+        maxEndChar = endChar;
+      }
+    }
+
+    // Set the hover highlighter bounds
+    if (minStartLine !== Infinity && maxEndLine !== -Infinity) {
+      this.hoverHighlighter.selectStart = {
+        xLine: minStartChar,
+        yLine: minStartLine,
+      };
+      this.hoverHighlighter.selectEnd = {
+        xLine: maxEndChar,
+        yLine: maxEndLine,
+      };
+      this.draw();
+    }
+  }
+
+  /**
+   * Clears the hover highlight (for statement list hover interaction).
+   * Part 1 of issue #2835.
+   */
+  clearHoverHighlight() {
+    this.hoverHighlighter.reset();
     this.draw();
   }
 
@@ -861,6 +995,13 @@ export class Annotator {
         charsAtLine: this.text.charsAtLine,
       });
     }
+
+    // Draw hover highlight for statement list interaction (#2835)
+    this.hoverHighlighter.draw(this.ctx, this.viewport, this.text, {
+      lineHeight: this.lineHeight,
+      charWidth: this.charWidth,
+      charsAtLine: this.text.charsAtLine,
+    });
 
     // if (this.onSelectTextCb && this.cursor.isSelected()) {
     if (this.onSelectTextCb) {
