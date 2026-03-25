@@ -212,17 +212,17 @@ export class Annotator {
     }
 
     const openTag = openSegment.openingTags.find(
-      (tag) =>
-        tag.getTagName() === anchor && tag.position === anchorPos
+      (tag) => tag.getTagName() === anchor && tag.position === anchorPos
     );
 
     let closeTag: Tag | undefined;
     let closeSegIdx = -1;
     for (let i = anchorSegIdx; i < this.text.segments.length; i++) {
       const seg = this.text.segments[i];
-      const candidates = i === anchorSegIdx
-        ? seg.closingTags.filter((t) => t.position > anchorPos)
-        : seg.closingTags;
+      const candidates =
+        i === anchorSegIdx
+          ? seg.closingTags.filter((t) => t.position > anchorPos)
+          : seg.closingTags;
       closeTag = candidates.find((tag) => tag.getTagName() === anchor);
       if (closeTag) {
         closeSegIdx = i;
@@ -365,10 +365,8 @@ export class Annotator {
     clientY: number,
     rect: DOMRect
   ): { ox: number; oy: number } {
-    const ox =
-      Math.min(Math.max(clientX, rect.left), rect.right) - rect.left;
-    const oy =
-      Math.min(Math.max(clientY, rect.top), rect.bottom) - rect.top;
+    const ox = Math.min(Math.max(clientX, rect.left), rect.right) - rect.left;
+    const oy = Math.min(Math.max(clientY, rect.top), rect.bottom) - rect.top;
     return { ox, oy };
   }
 
@@ -377,11 +375,7 @@ export class Annotator {
    */
   private applyPointerToCursor(clientX: number, clientY: number) {
     const rect = this.element.getBoundingClientRect();
-    const { ox, oy } = this.clientCoordsToCanvasOffsets(
-      clientX,
-      clientY,
-      rect
-    );
+    const { ox, oy } = this.clientCoordsToCanvasOffsets(clientX, clientY, rect);
     this.cursor.setPositionFromCanvasOffsets(
       ox,
       oy,
@@ -420,8 +414,7 @@ export class Annotator {
 
     const rect = this.element.getBoundingClientRect();
     const cy = this.lastSelectPointer.cy;
-    // Only autoscroll when the pointer has left the canvas vertically (not when
-    // sitting on the last/first row inside the viewport).
+    // Only autoscroll when the pointer has left the canvas vertically
     const inTopZone = cy < rect.top;
     const inBottomZone = cy > rect.bottom;
     if (!inTopZone && !inBottomZone) {
@@ -433,17 +426,9 @@ export class Annotator {
     const speed = this.lineHeight * SELECTION_EDGE_SCROLL_SPEED;
 
     if (inTopZone) {
-      this.viewport.addScrollOffset(
-        -speed,
-        this.lineHeight,
-        this.text.noLines
-      );
+      this.viewport.addScrollOffset(-speed, this.lineHeight, this.text.noLines);
     } else if (inBottomZone) {
-      this.viewport.addScrollOffset(
-        speed,
-        this.lineHeight,
-        this.text.noLines
-      );
+      this.viewport.addScrollOffset(speed, this.lineHeight, this.text.noLines);
     }
 
     const scrolled =
