@@ -19,12 +19,13 @@ import { StyledAnchorText } from "./EntityDetailUsedInDocumentsTableStyles";
 import { useSearchParams } from "hooks";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
-import { DetailBoxState } from "types";
+import { DetailBoxState, EditorBoxState } from "types";
 import { EntityEnums } from "@shared/enums";
 import useAnnotator from "hooks/useAnnotator";
 import { setStatementListOpened } from "redux/features/layout/mainPage/statementListOpenedSlice";
 import { TbAnchorOff } from "react-icons/tb";
 import { setAnnotatorOpened } from "redux/features/layout/mainPage/annotatorOpenedSlice";
+import { setEditorBoxState } from "redux/features/layout/mainPage/editorBoxStateSlice";
 
 type CellType = CellProps<IResponseUsedInDocument>;
 interface EntityDetailUsedInDocumentsTable {
@@ -44,7 +45,9 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
   const detailBoxState: DetailBoxState = useAppSelector(
     (state) => state.layout.mainPage.detailBoxState
   );
-
+  const editorBoxState: EditorBoxState = useAppSelector(
+    (state) => state.layout.mainPage.editorBoxState
+  );
   const {
     entities,
     usedInDocuments: uses,
@@ -104,13 +107,15 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
 
                     if (entityClass === EntityEnums.Class.Statement) {
                       setStatementId(entityId);
+                      if (detailBoxState === DetailBoxState.FullHeight) {
+                        dispatch(setStatementListOpened(true));
+                        dispatch(setDetailBoxState(DetailBoxState.Normal));
+                      }
                     }
-
-                    if (detailBoxState === DetailBoxState.FullHeight) {
-                      dispatch(setStatementListOpened(true));
-                      dispatch(setDetailBoxState(DetailBoxState.Normal));
+                    if (editorBoxState === EditorBoxState.FullHeight) {
+                      dispatch(setAnnotatorOpened(true));
+                      dispatch(setEditorBoxState(EditorBoxState.Normal));
                     }
-                    dispatch(setAnnotatorOpened(true));
 
                     setTimeout(() => {
                       scrollToAnchor(entityId, row.original.anchorIndex);
