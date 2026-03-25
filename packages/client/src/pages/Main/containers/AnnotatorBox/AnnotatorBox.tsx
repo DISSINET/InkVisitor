@@ -84,13 +84,15 @@ export const AnnotatorBox: React.FC = () => {
     EntityEnums.Class.Territory,
   ]);
 
+  const annotatorHeaderHeight = 32;
+
   const contentHeightAnnotator = useMemo(() => {
     if (!statementId) {
       return contentHeight;
     } else if (editorBoxState === EditorBoxState.Normal) {
-      return contentHeight / 2;
+      return contentHeight / 2 - annotatorHeaderHeight;
     } else if (editorBoxState === EditorBoxState.Minimized) {
-      return contentHeight - 56; // 56 is the height of the submit button
+      return contentHeight - 56 - annotatorHeaderHeight; // 56 is the height of the submit button
     }
     return contentHeight;
   }, [contentHeight, editorBoxState, statementId]);
@@ -230,7 +232,7 @@ export const AnnotatorBox: React.FC = () => {
     <StyledAnnotatorBox>
       <AnnotatorContainer
         contentHeight={contentHeightAnnotator || 0}
-        contentWidth={contentWidth - 10}
+        contentWidth={contentWidth}
         territoryId={territoryId}
         territory={territory}
         statementId={statementId}
