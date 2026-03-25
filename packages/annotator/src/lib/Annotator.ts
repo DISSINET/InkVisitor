@@ -13,7 +13,6 @@ import {
   HighlightMode,
   LINE_HEIGHT,
   SELECTION_EDGE_SCROLL_SPEED,
-  SELECTION_EDGE_SCROLL_ZONE_PX,
 } from "./constants";
 
 // Updated regex to properly handle tags with attributes
@@ -420,11 +419,11 @@ export class Annotator {
     }
 
     const rect = this.element.getBoundingClientRect();
-    const y = this.lastSelectPointer.cy - rect.top;
-    const h = rect.height;
-    const EDGE = SELECTION_EDGE_SCROLL_ZONE_PX;
-    const inTopZone = y < EDGE;
-    const inBottomZone = y > h - EDGE;
+    const cy = this.lastSelectPointer.cy;
+    // Only autoscroll when the pointer has left the canvas vertically (not when
+    // sitting on the last/first row inside the viewport).
+    const inTopZone = cy < rect.top;
+    const inBottomZone = cy > rect.bottom;
     if (!inTopZone && !inBottomZone) {
       return;
     }
@@ -480,10 +479,8 @@ export class Annotator {
       return;
     }
     const rect = this.element.getBoundingClientRect();
-    const y = this.lastSelectPointer.cy - rect.top;
-    const h = rect.height;
-    const EDGE = SELECTION_EDGE_SCROLL_ZONE_PX;
-    if (y < EDGE || y > h - EDGE) {
+    const cy = this.lastSelectPointer.cy;
+    if (cy < rect.top || cy > rect.bottom) {
       this.selectionScrollRaf = requestAnimationFrame(
         this.tickSelectionEdgeScroll
       );
