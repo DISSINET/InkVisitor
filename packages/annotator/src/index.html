@@ -143,14 +143,9 @@
         <button id="collapseStoreBtn">Collapse & store position</button>
         <button id="restorePositionBtn">Restore</button>
       </fieldset>
-      <fieldset style="background: #fff3cd; border: 2px solid #ffc107;">
-        <legend style="font-weight: bold; color: #856404;">🔍 Hover Interaction Test (#2835)</legend>
-        <p style="margin: 5px 0; font-size: 12px;">
-          <strong>Mock Statement List:</strong> Hover over statements below to highlight anchors in annotator.<br>
-          Hover over anchored text in annotator to highlight corresponding statements here.
-        </p>
+      <fieldset>
+        <legend style="font-weight: bold;">Hover Interaction</legend>
         <div id="statementList" style="margin-top: 10px; max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 5px; background: white;">
-          <!-- Mock statements will be added here by JavaScript -->
         </div>
         <div id="hoverInfo" style="margin-top: 10px; padding: 5px; background: #e7f3ff; border: 1px solid #2196F3; font-size: 12px; min-height: 30px;">
           <strong>Hover Status:</strong> <span id="hoverStatus">Move mouse over statements or anchored text</span>
@@ -242,14 +237,30 @@
 
       // ========== Hover Interaction Test (#2835) ==========
       
-      // Mock statement list data (matching anchors in example.txt)
-      const mockStatements = [
-        { id: 'stmt-1', label: 'Statement about person A', anchorTag: 'a1' },
-        { id: 'stmt-2', label: 'Statement about location B', anchorTag: 'b2' },
-        { id: 'stmt-3', label: 'Statement about concept C', anchorTag: 'c3' },
-        { id: 'stmt-4', label: 'Statement about person D', anchorTag: 'd1' },
-        { id: 'stmt-5', label: 'Territory T marker', anchorTag: 'T1' },
-      ];
+      // Extract actual anchor tags from the loaded example.txt
+      const extractAnchorsFromText = (text) => {
+        const anchorRegex = /<([a-zA-Z0-9\-_]+)(?:\s+[^>]*)?>/g;
+        const anchors = new Set();
+        let match;
+        
+        while ((match = anchorRegex.exec(text)) !== null) {
+          const tagName = match[1];
+          // Skip closing tags and add opening tags
+          if (!text.slice(match.index, match.index + match[0].length).includes('</')) {
+            anchors.add(tagName);
+          }
+        }
+        
+        return Array.from(anchors);
+      };
+      
+      // Generate mock statements from actual anchors in the text
+      const actualAnchors = extractAnchorsFromText(exampleTxt);
+      const mockStatements = actualAnchors.slice(0, 20).map((anchor, index) => ({
+        id: `stmt-${index + 1}`,
+        label: `Statement with anchor ${anchor.slice(0, 8)}...`,
+        anchorTag: anchor,
+      }));
 
       // Populate mock statement list
       const statementListEl = document.getElementById('statementList');
