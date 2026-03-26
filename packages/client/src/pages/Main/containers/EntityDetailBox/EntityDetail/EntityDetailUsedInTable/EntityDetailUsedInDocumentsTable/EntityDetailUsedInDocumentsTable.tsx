@@ -92,7 +92,7 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
                     let timeout = 0;
                     if (
                       territoryId !== parentTerritoryId ||
-                      detailBoxState === DetailBoxState.FullHeight
+                      editorBoxState === EditorBoxState.FullHeight
                     ) {
                       // set more time to open statement list, annotator and/or find the territory
                       timeout = 2000;
