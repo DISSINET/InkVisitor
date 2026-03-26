@@ -7,7 +7,7 @@ import {
 
 // info icon with text description
 // mostly for empty box component but can be used elsewhere
-// requires to be placed inside a wrapper to be positioned
+// use wrapper in the container for positioning / centering
 interface EmptyStateInfoDescription {
   label: string;
 }

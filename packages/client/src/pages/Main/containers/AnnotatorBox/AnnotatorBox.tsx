@@ -4,23 +4,28 @@ import {
   IDocument,
   IResponseEntity,
   IResponseGeneric,
+  IResponseStatement,
+  IResponseTerritory,
   IStatement,
 } from "@shared/types";
 import {
   useMutation,
   UseMutationResult,
   useQuery,
+  useQueryClient,
 } from "@tanstack/react-query";
 import api from "api";
 import { AxiosResponse } from "axios";
 import useAnnotator from "hooks/useAnnotator";
 import { useSearchParams } from "hooks/useSearchParamsContext";
 import React, { useEffect, useMemo, useState } from "react";
-import { useAppSelector } from "redux/hooks";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { COLLAPSED_PANEL_WIDTH } from "Theme/constants";
 import { EditorBoxState } from "types";
 import { StyledAnnotatorBox } from "./AnnotatorBoxStyles";
 import { AnnotatorContainer } from "./AnnotatorContainer/AnnotatorContainer";
+import { toast } from "react-toastify";
+import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 
 export const AnnotatorBox: React.FC = () => {
   const {
@@ -49,6 +54,9 @@ export const AnnotatorBox: React.FC = () => {
   );
   const annotatorOpened: boolean = useAppSelector(
     (state) => state.layout.mainPage.annotatorOpened
+  );
+  const statementListOpened: boolean = useAppSelector(
+    (state) => state.layout.mainPage.statementListOpened
   );
   const selectedTerritoryPath: string[] = useAppSelector(
     (state) => state.territoryTree.selectedTerritoryPath
@@ -277,15 +285,119 @@ export const AnnotatorBox: React.FC = () => {
     setIsInitialized(false);
   }, [territoryId]);
 
-  // TODO: migrate
-  const statementCreateMutation: UseMutationResult<
-    AxiosResponse<IResponseGeneric<IStatement>, unknown>,
-    Error,
-    IStatement,
-    unknown
-  > = useMutation({
-    mutationFn: async (statement: IStatement) => {
-      return api.entityCreate(statement);
+  const queryClient = useQueryClient();
+  const dispatch = useAppDispatch();
+
+  const statementCreateMutation = useMutation({
+    mutationFn: async (newStatement: IStatement) =>
+      await api.entityCreate(newStatement),
+    // OPTIMISTIC MUTATION to locate statement correctly in the annotator
+    onMutate: async (newStatement: IStatement) => {
+      // Cancel any outgoing refetches to avoid overwriting optimistic update
+      await queryClient.cancelQueries({
+        queryKey: ["territory", "statement-list", territoryId],
+      });
+      await queryClient.cancelQueries({
+        queryKey: ["document", selectedDocumentId],
+      });
+
+      // Snapshot the previous values for rollback
+      const previousTerritory = queryClient.getQueryData<IResponseTerritory>([
+        "territory",
+        "statement-list",
+        territoryId,
+        statementListOpened,
+      ]);
+      const previousDocument = queryClient.getQueryData<IDocument | undefined>([
+        "document",
+        selectedDocumentId,
+      ]);
+
+      // Optimistically update territory cache
+      if (previousTerritory && newStatement.data.territory) {
+        const optimisticStatement: IResponseStatement = {
+          ...newStatement,
+          entities: {},
+          usedInDocuments: [],
+          warnings: [],
+          right: previousTerritory.right,
+        };
+
+        const updatedStatements = [...previousTerritory.statements];
+        // Insert statement at correct position based on order
+        const order = newStatement.data.territory.order;
+        const insertIndex = updatedStatements.findIndex(
+          (s) => (s.data.territory?.order ?? 0) > order
+        );
+        if (insertIndex === -1) {
+          updatedStatements.push(optimisticStatement);
+        } else {
+          updatedStatements.splice(insertIndex, 0, optimisticStatement);
+        }
+
+        queryClient.setQueryData<IResponseTerritory>(
+          ["territory", "statement-list", territoryId, statementListOpened],
+          {
+            ...previousTerritory,
+            statements: updatedStatements,
+          }
+        );
+      }
+
+      // Optimistically update document cache
+      if (previousDocument && selectedDocumentId) {
+        const statementId = newStatement.id;
+        const currentStatementIds =
+          previousDocument.entityIds[EntityEnums.Class.Statement] || [];
+
+        if (!currentStatementIds.includes(statementId)) {
+          queryClient.setQueryData<IDocument>(
+            ["document", selectedDocumentId],
+            {
+              ...previousDocument,
+              entityIds: {
+                ...previousDocument.entityIds,
+                [EntityEnums.Class.Statement]: [
+                  ...currentStatementIds,
+                  statementId,
+                ],
+              },
+            }
+          );
+        }
+      }
+
+      // Return context with snapshot values for potential rollback
+      return { previousTerritory, previousDocument };
+    },
+    onError: (error, variables, context) => {
+      // Rollback optimistic updates on error
+      if (context?.previousTerritory) {
+        queryClient.setQueryData<IResponseTerritory>(
+          ["territory", "statement-list", territoryId, statementListOpened],
+          context.previousTerritory
+        );
+      }
+      if (context?.previousDocument) {
+        queryClient.setQueryData<IDocument | undefined>(
+          ["document", selectedDocumentId],
+          context.previousDocument
+        );
+      }
+      toast.error(`Error: Statement not created!`);
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["territory", "statement-list", territoryId],
+      });
+      if (selectedDocumentId) {
+        queryClient.invalidateQueries({
+          queryKey: ["document", selectedDocumentId],
+        });
+      }
+      setStatementId(variables.id);
+      queryClient.invalidateQueries({ queryKey: ["tree"] });
+      dispatch(setDisableStatementListScroll(false));
     },
   });
 

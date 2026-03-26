@@ -210,18 +210,18 @@ export const StatementListBox: React.FC = () => {
     enabled: api.isLoggedIn(),
   });
 
-  // const {
-  //   data: documents,
-  //   error: documentsError,
-  //   isFetching: documentsIsFetching,
-  // } = useQuery<IDocument[]>({
-  //   queryKey: ["documents"],
-  //   queryFn: async () => {
-  //     const res = await api.documentsGet({});
-  //     return res.data;
-  //   },
-  //   enabled: api.isLoggedIn(),
-  // });
+  const {
+    data: documents,
+    error: documentsError,
+    isFetching: documentsIsFetching,
+  } = useQuery<IDocument[]>({
+    queryKey: ["documents"],
+    queryFn: async () => {
+      const res = await api.documentsGet({});
+      return res.data;
+    },
+    enabled: api.isLoggedIn(),
+  });
 
   const [selectedResourceId, setSelectedResourceId] = useState<string | false>(
     storedAnnotatorResourceId
@@ -233,63 +233,63 @@ export const StatementListBox: React.FC = () => {
     }
   }, [selectedResourceId]);
 
-  // const [isInitialized, setIsInitialized] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  // const selectedTerritoryPath: string[] = useAppSelector(
-  //   (state) => state.territoryTree.selectedTerritoryPath
-  // );
+  const selectedTerritoryPath: string[] = useAppSelector(
+    (state) => state.territoryTree.selectedTerritoryPath
+  );
 
-  // const loadDefaultResource = () => {
-  //   if (resources && documents && !isInitialized) {
-  //     // First try to find resource with document containing territoryId
-  //     let resourceWithAnchor = resources.find((resource) => {
-  //       if (resource.data.documentId) {
-  //         const document = documents.find(
-  //           (d) => d.id === resource.data.documentId
-  //         );
-  //         if (document) {
-  //           return document.entityIds.T.includes(territoryId);
-  //         }
-  //       }
-  //       return false;
-  //     });
+  const loadDefaultResource = () => {
+    if (resources && documents && !isInitialized) {
+      // First try to find resource with document containing territoryId
+      let resourceWithAnchor = resources.find((resource) => {
+        if (resource.data.documentId) {
+          const document = documents.find(
+            (d) => d.id === resource.data.documentId
+          );
+          if (document) {
+            return document.entityIds.T.includes(territoryId);
+          }
+        }
+        return false;
+      });
 
-  //     // If not found, try each territory in the path in reverse order
-  //     if (!resourceWithAnchor) {
-  //       for (let i = selectedTerritoryPath.length - 1; i > 0; i--) {
-  //         const territoryInPath = selectedTerritoryPath[i];
-  //         resourceWithAnchor = resources.find((resource) => {
-  //           if (resource.data.documentId) {
-  //             const document = documents.find(
-  //               (d) => d.id === resource.data.documentId
-  //             );
-  //             if (document) {
-  //               return document.entityIds.T.includes(territoryInPath);
-  //             }
-  //           }
-  //           return false;
-  //         });
-  //         if (resourceWithAnchor) break;
-  //       }
-  //     }
+      // If not found, try each territory in the path in reverse order
+      if (!resourceWithAnchor) {
+        for (let i = selectedTerritoryPath.length - 1; i > 0; i--) {
+          const territoryInPath = selectedTerritoryPath[i];
+          resourceWithAnchor = resources.find((resource) => {
+            if (resource.data.documentId) {
+              const document = documents.find(
+                (d) => d.id === resource.data.documentId
+              );
+              if (document) {
+                return document.entityIds.T.includes(territoryInPath);
+              }
+            }
+            return false;
+          });
+          if (resourceWithAnchor) break;
+        }
+      }
 
-  //     if (resourceWithAnchor) {
-  //       setSelectedResourceId(resourceWithAnchor.id);
-  //     } else {
-  //       setSelectedResourceId(false);
-  //     }
+      if (resourceWithAnchor) {
+        setSelectedResourceId(resourceWithAnchor.id);
+      } else {
+        setSelectedResourceId(false);
+      }
 
-  //     setIsInitialized(true);
-  //   }
-  // };
+      setIsInitialized(true);
+    }
+  };
 
-  // useEffect(() => {
-  //   loadDefaultResource();
-  // }, [resources, documents, isInitialized, territoryId]);
+  useEffect(() => {
+    loadDefaultResource();
+  }, [resources, documents, isInitialized, territoryId]);
 
-  // useEffect(() => {
-  //   setIsInitialized(false);
-  // }, [territoryId]);
+  useEffect(() => {
+    setIsInitialized(false);
+  }, [territoryId]);
 
   // const selectedResource = useMemo<IResponseEntity | false>(() => {
   //   if (selectedResourceId && resources) {
@@ -442,113 +442,10 @@ export const StatementListBox: React.FC = () => {
   const statementCreateMutation = useMutation({
     mutationFn: async (newStatement: IStatement) =>
       await api.entityCreate(newStatement),
-    // OPTIMISTIC MUTATION to locate statement correctly in the annotator
-    onMutate: async (newStatement: IStatement) => {
-      // Cancel any outgoing refetches to avoid overwriting optimistic update
-      await queryClient.cancelQueries({
-        queryKey: ["territory", "statement-list", territoryId],
-      });
-      await queryClient.cancelQueries({
-        queryKey: ["document", selectedDocumentId],
-      });
-
-      // Snapshot the previous values for rollback
-      const previousTerritory = queryClient.getQueryData<IResponseTerritory>([
-        "territory",
-        "statement-list",
-        territoryId,
-        statementListOpened,
-      ]);
-      const previousDocument = queryClient.getQueryData<IDocument | undefined>([
-        "document",
-        selectedDocumentId,
-      ]);
-
-      // Optimistically update territory cache
-      if (previousTerritory && newStatement.data.territory) {
-        const optimisticStatement: IResponseStatement = {
-          ...newStatement,
-          entities: {},
-          usedInDocuments: [],
-          warnings: [],
-          right: previousTerritory.right,
-        };
-
-        const updatedStatements = [...previousTerritory.statements];
-        // Insert statement at correct position based on order
-        const order = newStatement.data.territory.order;
-        const insertIndex = updatedStatements.findIndex(
-          (s) => (s.data.territory?.order ?? 0) > order
-        );
-        if (insertIndex === -1) {
-          updatedStatements.push(optimisticStatement);
-        } else {
-          updatedStatements.splice(insertIndex, 0, optimisticStatement);
-        }
-
-        queryClient.setQueryData<IResponseTerritory>(
-          ["territory", "statement-list", territoryId, statementListOpened],
-          {
-            ...previousTerritory,
-            statements: updatedStatements,
-          }
-        );
-      }
-
-      // Optimistically update document cache
-      if (previousDocument && selectedDocumentId) {
-        const statementId = newStatement.id;
-        const currentStatementIds =
-          previousDocument.entityIds[EntityEnums.Class.Statement] || [];
-
-        if (!currentStatementIds.includes(statementId)) {
-          queryClient.setQueryData<IDocument>(
-            ["document", selectedDocumentId],
-            {
-              ...previousDocument,
-              entityIds: {
-                ...previousDocument.entityIds,
-                [EntityEnums.Class.Statement]: [
-                  ...currentStatementIds,
-                  statementId,
-                ],
-              },
-            }
-          );
-        }
-      }
-
-      // Return context with snapshot values for potential rollback
-      return { previousTerritory, previousDocument };
-    },
-    onError: (error, variables, context) => {
-      // Rollback optimistic updates on error
-      if (context?.previousTerritory) {
-        queryClient.setQueryData<IResponseTerritory>(
-          ["territory", "statement-list", territoryId, statementListOpened],
-          context.previousTerritory
-        );
-      }
-      if (context?.previousDocument) {
-        queryClient.setQueryData<IDocument | undefined>(
-          ["document", selectedDocumentId],
-          context.previousDocument
-        );
-      }
-      toast.error(`Error: Statement not created!`);
-    },
     onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: ["territory", "statement-list", territoryId],
-      });
-      if (selectedDocumentId) {
-        queryClient.invalidateQueries({
-          queryKey: ["document", selectedDocumentId],
-        });
-      }
       setStatementId(variables.id);
+      queryClient.invalidateQueries({ queryKey: ["territory"] });
       queryClient.invalidateQueries({ queryKey: ["tree"] });
-      dispatch(setDisableStatementListScroll(false));
     },
   });
 
