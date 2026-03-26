@@ -26,7 +26,6 @@ export const StyledSectionLabel = styled.div<StyledSectionLabel>`
 // Editor Section
 interface StyledEditorEmptyState {}
 export const StyledEditorEmptyState = styled.div<StyledEditorEmptyState>`
-  padding: ${({ theme }) => theme.space[3]};
   color: ${({ theme }) => theme.color["gray"][600]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   display: flex;

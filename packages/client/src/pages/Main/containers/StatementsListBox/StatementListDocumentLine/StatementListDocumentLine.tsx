@@ -71,21 +71,6 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
           }}
         >
           <StyledEntityContainer>
-            {!selectedResource && (
-              <EntitySuggester
-                placeholder="select resource"
-                categoryTypes={[EntityEnums.Class.Resource]}
-                preSuggestions={resources}
-                onPicked={(entity) => {
-                  if (resources.some((r) => r.id === entity.id)) {
-                    setSelectedResourceId(entity.id);
-                  } else {
-                    toast.warning("Resource does not have a document");
-                  }
-                }}
-                isHidden={!userCanEdit}
-              />
-            )}
             {selectedResource && (
               <div
                 style={{

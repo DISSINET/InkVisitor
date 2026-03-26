@@ -20,6 +20,8 @@ import {
 } from "Theme/constants";
 import { StyledEmptyState } from "../../StatementsListBox/StatementListBoxStyles";
 import StatementListDocumentLine from "../../StatementsListBox/StatementListDocumentLine/StatementListDocumentLine";
+import { EntitySuggester } from "components/advanced/EntitySuggester/EntitySuggester";
+import { toast } from "react-toastify";
 
 interface AnnotatorContainer {
   // it's faster than the territory entity so it's better to pass territoryId separately
@@ -178,7 +180,9 @@ export const AnnotatorContainer: React.FC<AnnotatorContainer> = ({
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
-              marginTop: "2rem",
+              padding: "0 1.5rem",
+              paddingTop: "3.7rem",
+              gap: "1.5rem",
             }}
           >
             <StyledEmptyState>
@@ -187,6 +191,24 @@ export const AnnotatorContainer: React.FC<AnnotatorContainer> = ({
             <StyledEmptyState>
               {"No document selected yet. Pick one from the suggester"}
             </StyledEmptyState>
+
+            {!selectedResource && resources && (
+              <div style={{ marginTop: "0.7rem" }}>
+                <EntitySuggester
+                  placeholder="select resource"
+                  categoryTypes={[EntityEnums.Class.Resource]}
+                  preSuggestions={resources}
+                  onPicked={(entity) => {
+                    if (resources.some((r) => r.id === entity.id)) {
+                      setSelectedResourceId(entity.id);
+                    } else {
+                      toast.warning("Resource does not have a document");
+                    }
+                  }}
+                  isHidden={!userCanEdit}
+                />
+              </div>
+            )}
           </div>
         )}
 

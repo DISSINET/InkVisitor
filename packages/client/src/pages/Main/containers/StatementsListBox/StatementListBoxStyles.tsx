@@ -16,6 +16,8 @@ export const StyledInfoWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
 `;
 export const StyledDots = styled.p`
   display: flex;
@@ -61,7 +63,6 @@ export const StyledTableWrapper = styled.div`
 `;
 
 export const StyledEmptyState = styled.div`
-  padding: ${({ theme }) => theme.space[3]};
   color: ${({ theme }) => theme.color["gray"][600]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   display: flex;
