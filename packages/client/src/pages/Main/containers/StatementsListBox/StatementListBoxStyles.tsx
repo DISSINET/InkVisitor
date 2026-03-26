@@ -17,7 +17,6 @@ export const StyledInfoWrapper = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1.5rem;
 `;
 export const StyledDots = styled.p`
   display: flex;

@@ -50,6 +50,9 @@ export const AnnotatorBox: React.FC = () => {
   const annotatorOpened: boolean = useAppSelector(
     (state) => state.layout.mainPage.annotatorOpened
   );
+  const selectedTerritoryPath: string[] = useAppSelector(
+    (state) => state.territoryTree.selectedTerritoryPath
+  );
 
   const [annotator, setAnnotator] = useState<Annotator | undefined>(undefined);
   const [storedAnnotatorScrollPosition, setStoredAnnotatorScrollPosition] =
@@ -220,6 +223,61 @@ export const AnnotatorBox: React.FC = () => {
     [territory]
   );
 
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  const loadDefaultResource = () => {
+    if (resources && documents && !isInitialized) {
+      // First try to find resource with document containing territoryId
+      let resourceWithAnchor = resources.find((resource) => {
+        if (resource.data.documentId) {
+          const document = documents.find(
+            (d) => d.id === resource.data.documentId
+          );
+          if (document) {
+            return document.entityIds.T.includes(territoryId);
+          }
+        }
+        return false;
+      });
+
+      // If not found, try each territory in the path in reverse order
+      if (!resourceWithAnchor) {
+        for (let i = selectedTerritoryPath.length - 1; i > 0; i--) {
+          const territoryInPath = selectedTerritoryPath[i];
+          resourceWithAnchor = resources.find((resource) => {
+            if (resource.data.documentId) {
+              const document = documents.find(
+                (d) => d.id === resource.data.documentId
+              );
+              if (document) {
+                return document.entityIds.T.includes(territoryInPath);
+              }
+            }
+            return false;
+          });
+          if (resourceWithAnchor) break;
+        }
+      }
+
+      if (resourceWithAnchor) {
+        setSelectedResourceId(resourceWithAnchor.id);
+      } else {
+        setSelectedResourceId(false);
+      }
+
+      setIsInitialized(true);
+    }
+  };
+
+  useEffect(() => {
+    loadDefaultResource();
+  }, [resources, documents, isInitialized, territoryId]);
+
+  useEffect(() => {
+    setIsInitialized(false);
+  }, [territoryId]);
+
+  // TODO: migrate
   const statementCreateMutation: UseMutationResult<
     AxiosResponse<IResponseGeneric<IStatement>, unknown>,
     Error,

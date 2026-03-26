@@ -178,21 +178,19 @@ export const AnnotatorContainer: React.FC<AnnotatorContainer> = ({
             <EmptyStateInfoDescription label="No document selected yet. Pick one from the suggester" />
 
             {!selectedResource && resources && (
-              <div style={{ marginTop: "0.7rem" }}>
-                <EntitySuggester
-                  placeholder="select resource"
-                  categoryTypes={[EntityEnums.Class.Resource]}
-                  preSuggestions={resources}
-                  onPicked={(entity) => {
-                    if (resources.some((r) => r.id === entity.id)) {
-                      setSelectedResourceId(entity.id);
-                    } else {
-                      toast.warning("Resource does not have a document");
-                    }
-                  }}
-                  isHidden={!userCanEdit}
-                />
-              </div>
+              <EntitySuggester
+                placeholder="select resource"
+                categoryTypes={[EntityEnums.Class.Resource]}
+                preSuggestions={resources}
+                onPicked={(entity) => {
+                  if (resources.some((r) => r.id === entity.id)) {
+                    setSelectedResourceId(entity.id);
+                  } else {
+                    toast.warning("Resource does not have a document");
+                  }
+                }}
+                isHidden={!userCanEdit}
+              />
             )}
           </StyledEmptyStateWrapper>
         )}

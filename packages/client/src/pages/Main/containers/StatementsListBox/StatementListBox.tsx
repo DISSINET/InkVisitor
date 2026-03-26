@@ -210,18 +210,18 @@ export const StatementListBox: React.FC = () => {
     enabled: api.isLoggedIn(),
   });
 
-  const {
-    data: documents,
-    error: documentsError,
-    isFetching: documentsIsFetching,
-  } = useQuery<IDocument[]>({
-    queryKey: ["documents"],
-    queryFn: async () => {
-      const res = await api.documentsGet({});
-      return res.data;
-    },
-    enabled: api.isLoggedIn(),
-  });
+  // const {
+  //   data: documents,
+  //   error: documentsError,
+  //   isFetching: documentsIsFetching,
+  // } = useQuery<IDocument[]>({
+  //   queryKey: ["documents"],
+  //   queryFn: async () => {
+  //     const res = await api.documentsGet({});
+  //     return res.data;
+  //   },
+  //   enabled: api.isLoggedIn(),
+  // });
 
   const [selectedResourceId, setSelectedResourceId] = useState<string | false>(
     storedAnnotatorResourceId
@@ -233,63 +233,63 @@ export const StatementListBox: React.FC = () => {
     }
   }, [selectedResourceId]);
 
-  const [isInitialized, setIsInitialized] = useState(false);
+  // const [isInitialized, setIsInitialized] = useState(false);
 
-  const selectedTerritoryPath: string[] = useAppSelector(
-    (state) => state.territoryTree.selectedTerritoryPath
-  );
+  // const selectedTerritoryPath: string[] = useAppSelector(
+  //   (state) => state.territoryTree.selectedTerritoryPath
+  // );
 
-  const loadDefaultResource = () => {
-    if (resources && documents && !isInitialized) {
-      // First try to find resource with document containing territoryId
-      let resourceWithAnchor = resources.find((resource) => {
-        if (resource.data.documentId) {
-          const document = documents.find(
-            (d) => d.id === resource.data.documentId
-          );
-          if (document) {
-            return document.entityIds.T.includes(territoryId);
-          }
-        }
-        return false;
-      });
+  // const loadDefaultResource = () => {
+  //   if (resources && documents && !isInitialized) {
+  //     // First try to find resource with document containing territoryId
+  //     let resourceWithAnchor = resources.find((resource) => {
+  //       if (resource.data.documentId) {
+  //         const document = documents.find(
+  //           (d) => d.id === resource.data.documentId
+  //         );
+  //         if (document) {
+  //           return document.entityIds.T.includes(territoryId);
+  //         }
+  //       }
+  //       return false;
+  //     });
 
-      // If not found, try each territory in the path in reverse order
-      if (!resourceWithAnchor) {
-        for (let i = selectedTerritoryPath.length - 1; i > 0; i--) {
-          const territoryInPath = selectedTerritoryPath[i];
-          resourceWithAnchor = resources.find((resource) => {
-            if (resource.data.documentId) {
-              const document = documents.find(
-                (d) => d.id === resource.data.documentId
-              );
-              if (document) {
-                return document.entityIds.T.includes(territoryInPath);
-              }
-            }
-            return false;
-          });
-          if (resourceWithAnchor) break;
-        }
-      }
+  //     // If not found, try each territory in the path in reverse order
+  //     if (!resourceWithAnchor) {
+  //       for (let i = selectedTerritoryPath.length - 1; i > 0; i--) {
+  //         const territoryInPath = selectedTerritoryPath[i];
+  //         resourceWithAnchor = resources.find((resource) => {
+  //           if (resource.data.documentId) {
+  //             const document = documents.find(
+  //               (d) => d.id === resource.data.documentId
+  //             );
+  //             if (document) {
+  //               return document.entityIds.T.includes(territoryInPath);
+  //             }
+  //           }
+  //           return false;
+  //         });
+  //         if (resourceWithAnchor) break;
+  //       }
+  //     }
 
-      if (resourceWithAnchor) {
-        setSelectedResourceId(resourceWithAnchor.id);
-      } else {
-        setSelectedResourceId(false);
-      }
+  //     if (resourceWithAnchor) {
+  //       setSelectedResourceId(resourceWithAnchor.id);
+  //     } else {
+  //       setSelectedResourceId(false);
+  //     }
 
-      setIsInitialized(true);
-    }
-  };
+  //     setIsInitialized(true);
+  //   }
+  // };
 
-  useEffect(() => {
-    loadDefaultResource();
-  }, [resources, documents, isInitialized, territoryId]);
+  // useEffect(() => {
+  //   loadDefaultResource();
+  // }, [resources, documents, isInitialized, territoryId]);
 
-  useEffect(() => {
-    setIsInitialized(false);
-  }, [territoryId]);
+  // useEffect(() => {
+  //   setIsInitialized(false);
+  // }, [territoryId]);
 
   // const selectedResource = useMemo<IResponseEntity | false>(() => {
   //   if (selectedResourceId && resources) {

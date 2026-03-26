@@ -1,6 +1,9 @@
 import React from "react";
 import { BsInfoCircle } from "react-icons/bs";
-import { StyledEmptyState } from "./EmptyStateInfoDescriptionStyles";
+import {
+  StyledEmptyState,
+  StyledEmptyStateItem,
+} from "./EmptyStateInfoDescriptionStyles";
 
 // info icon with text description
 // mostly for empty box component but can be used elsewhere
@@ -12,11 +15,11 @@ export const EmptyStateInfoDescription: React.FC<EmptyStateInfoDescription> = ({
   label,
 }) => {
   return (
-    <>
-      <StyledEmptyState>
+    <StyledEmptyState>
+      <StyledEmptyStateItem>
         <BsInfoCircle size="23" />
-      </StyledEmptyState>
-      <StyledEmptyState>{label}</StyledEmptyState>
-    </>
+      </StyledEmptyStateItem>
+      <StyledEmptyStateItem>{label}</StyledEmptyStateItem>
+    </StyledEmptyState>
   );
 };
