@@ -24,16 +24,6 @@ export const StyledSectionLabel = styled.div<StyledSectionLabel>`
 `;
 
 // Editor Section
-interface StyledEditorEmptyState {}
-export const StyledEditorEmptyState = styled.div<StyledEditorEmptyState>`
-  color: ${({ theme }) => theme.color["gray"][600]};
-  font-size: ${({ theme }) => theme.fontSize["sm"]};
-  display: flex;
-  align-self: center;
-  align-items: center;
-  text-align: center;
-`;
-
 export const StyledEditorPreBlock = styled.div`
   display: flex;
   flex-direction: column;
@@ -293,4 +283,13 @@ export const StyledAnchorEmptyState = styled.div<StyledAnchorEmptyState>`
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   font-style: italic;
   text-align: center;
+`;
+
+export const StyledEmptyStateWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 6.8rem;
+  padding: 0 1.5rem;
+  gap: 1.5rem;
 `;

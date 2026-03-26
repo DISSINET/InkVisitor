@@ -2,15 +2,14 @@ import { EntityEnums } from "@shared/enums";
 import { IResponseStatement, IStatement, IStatementData } from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { CustomScrollbar, Loader } from "components";
+import { CustomScrollbar, EmptyStateInfoDescription, Loader } from "components";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
-import { BsInfoCircle } from "react-icons/bs";
 import { toast } from "react-toastify";
-import { StatementEditor } from "./StatementEditor/StatementEditor";
-import { StyledEditorEmptyState } from "./StatementEditorBoxStyles";
 import { useAppSelector } from "redux/hooks";
 import { computeDifferences } from "utils/utils";
+import { StatementEditor } from "./StatementEditor/StatementEditor";
+import { StyledEmptyStateWrapper } from "./StatementEditorBoxStyles";
 
 export const StatementEditorBox: React.FC = () => {
   const thirdPanelExpanded: boolean = useAppSelector(
@@ -408,25 +407,9 @@ export const StatementEditorBox: React.FC = () => {
               </div>
             </CustomScrollbar>
           ) : (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                marginTop: "6.8rem",
-                padding: "0 1.5rem",
-                gap: "1.5rem",
-              }}
-            >
-              <StyledEditorEmptyState>
-                <BsInfoCircle size="23" />
-              </StyledEditorEmptyState>
-              <StyledEditorEmptyState>
-                {
-                  "No statement selected yet. Pick one from the statements table"
-                }
-              </StyledEditorEmptyState>
-            </div>
+            <StyledEmptyStateWrapper>
+              <EmptyStateInfoDescription label="No statement selected yet. Pick one from the statements table" />
+            </StyledEmptyStateWrapper>
           )}
         </>
       )}

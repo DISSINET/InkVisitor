@@ -1,13 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { StyledAnnotatorBox } from "./AnnotatorBoxStyles";
-import { AnnotatorContainer } from "./AnnotatorContainer/AnnotatorContainer";
-import { DetailBoxState, EditorBoxState } from "types";
-import { useAppSelector } from "redux/hooks";
-import { useSearchParams } from "hooks/useSearchParamsContext";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import api from "api";
 import { Annotator } from "@inkvisitor/annotator/src/lib/Annotator";
-import useAnnotator from "hooks/useAnnotator";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import {
   IDocument,
@@ -15,9 +6,21 @@ import {
   IResponseGeneric,
   IStatement,
 } from "@shared/types";
+import {
+  useMutation,
+  UseMutationResult,
+  useQuery,
+} from "@tanstack/react-query";
+import api from "api";
 import { AxiosResponse } from "axios";
-import { UseMutationResult } from "@tanstack/react-query";
+import useAnnotator from "hooks/useAnnotator";
+import { useSearchParams } from "hooks/useSearchParamsContext";
+import React, { useEffect, useMemo, useState } from "react";
+import { useAppSelector } from "redux/hooks";
 import { COLLAPSED_PANEL_WIDTH } from "Theme/constants";
+import { EditorBoxState } from "types";
+import { StyledAnnotatorBox } from "./AnnotatorBoxStyles";
+import { AnnotatorContainer } from "./AnnotatorContainer/AnnotatorContainer";
 
 export const AnnotatorBox: React.FC = () => {
   const {

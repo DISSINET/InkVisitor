@@ -12,16 +12,16 @@ import { UseMutationResult } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import TextAnnotator from "components/advanced/Annotator/Annotator";
 import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
+import { EntitySuggester } from "components/advanced/EntitySuggester/EntitySuggester";
+import { EmptyStateInfoDescription } from "components/basic/EmptyStateInfoDescription/EmptyStateInfoDescription";
 import React, { useEffect, useMemo, useRef } from "react";
-import { BsInfoCircle } from "react-icons/bs";
+import { toast } from "react-toastify";
 import {
   ANNOTATOR_SELECTOR_HEIGHT,
   ANNOTATOR_TOO_SMALL_BREAKPOINT,
 } from "Theme/constants";
-import { StyledEmptyState } from "../../StatementsListBox/StatementListBoxStyles";
 import StatementListDocumentLine from "../../StatementsListBox/StatementListDocumentLine/StatementListDocumentLine";
-import { EntitySuggester } from "components/advanced/EntitySuggester/EntitySuggester";
-import { toast } from "react-toastify";
+import { StyledEmptyStateWrapper } from "./AnnotatorContainerStyles";
 
 interface AnnotatorContainer {
   // it's faster than the territory entity so it's better to pass territoryId separately
@@ -174,23 +174,8 @@ export const AnnotatorContainer: React.FC<AnnotatorContainer> = ({
         />
 
         {!selectedDocumentId && (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: "0 1.5rem",
-              paddingTop: "3.7rem",
-              gap: "1.5rem",
-            }}
-          >
-            <StyledEmptyState>
-              <BsInfoCircle size="23" />
-            </StyledEmptyState>
-            <StyledEmptyState>
-              {"No document selected yet. Pick one from the suggester"}
-            </StyledEmptyState>
+          <StyledEmptyStateWrapper>
+            <EmptyStateInfoDescription label="No document selected yet. Pick one from the suggester" />
 
             {!selectedResource && resources && (
               <div style={{ marginTop: "0.7rem" }}>
@@ -209,7 +194,7 @@ export const AnnotatorContainer: React.FC<AnnotatorContainer> = ({
                 />
               </div>
             )}
-          </div>
+          </StyledEmptyStateWrapper>
         )}
 
         {/* Annotator */}

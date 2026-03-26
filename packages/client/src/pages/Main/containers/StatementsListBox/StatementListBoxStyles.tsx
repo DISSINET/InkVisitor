@@ -62,15 +62,6 @@ export const StyledTableWrapper = styled.div`
   padding-bottom: 0.5rem;
 `;
 
-export const StyledEmptyState = styled.div`
-  color: ${({ theme }) => theme.color["gray"][600]};
-  font-size: ${({ theme }) => theme.fontSize["sm"]};
-  display: flex;
-  align-self: center;
-  align-items: center;
-  text-align: center;
-`;
-
 export const StyledDocumentLine = styled.div`
   display: flex;
   gap: 0.2rem;

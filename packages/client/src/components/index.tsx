@@ -40,11 +40,13 @@ import { ContactOwnerFooting } from "./basic/ContactOwnerFooting/ContactOwnerFoo
 import { CustomScrollbar } from "./basic/CustomScrollbar/CustomScrollbar";
 import ErrorBoundary from "./ErrorBoundary";
 import { IconWithTooltip } from "./basic/IconWithTooltip/IconWithTooltip";
+import { EmptyStateInfoDescription } from "./basic/EmptyStateInfoDescription/EmptyStateInfoDescription";
 
 export {
   AttributeIcon,
   BaseDropdown,
   Box,
+  EmptyStateInfoDescription,
   BundleButtonGroup,
   Button,
   ButtonGroup,

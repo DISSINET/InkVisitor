@@ -1,4 +1,3 @@
-import { Annotator } from "@inkvisitor/annotator/src/lib";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import {
   IDocument,
@@ -15,12 +14,16 @@ import {
 } from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { CustomScrollbar, Submit, ToastWithLink } from "components";
+import {
+  CustomScrollbar,
+  EmptyStateInfoDescription,
+  Submit,
+  ToastWithLink,
+} from "components";
 import { CStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import useAnnotator from "hooks/useAnnotator";
 import React, { useEffect, useMemo, useState } from "react";
-import { BsInfoCircle } from "react-icons/bs";
 import { toast } from "react-toastify";
 import { setStatementListOpened } from "redux/features/layout/mainPage/statementListOpenedSlice";
 import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
@@ -36,7 +39,6 @@ import {
 } from "utils/utils";
 import {
   StyledContentWrapper,
-  StyledEmptyState,
   StyledInfoWrapper,
   StyledStatementListBox,
   StyledTableWrapper,
@@ -969,12 +971,7 @@ export const StatementListBox: React.FC = () => {
           />
           {!territoryId && (
             <StyledInfoWrapper>
-              <StyledEmptyState>
-                <BsInfoCircle size="23" />
-              </StyledEmptyState>
-              <StyledEmptyState>
-                {"No territory selected yet. Pick one from the territory tree"}
-              </StyledEmptyState>
+              <EmptyStateInfoDescription label="No territory selected yet. Pick one from the territory tree" />
             </StyledInfoWrapper>
           )}
 
@@ -983,10 +980,7 @@ export const StatementListBox: React.FC = () => {
             statementListOpened &&
             !isFetchingTerritory && (
               <>
-                <StyledEmptyState>
-                  <BsInfoCircle size="23" />
-                </StyledEmptyState>
-                <StyledEmptyState>{"No statements yet."}</StyledEmptyState>
+                <EmptyStateInfoDescription label="No statements yet." />
               </>
             )}
 

@@ -2,9 +2,8 @@ import { RelationEnums } from "@shared/enums";
 import { IResponseDetail, IResponseGeneric, Relation } from "@shared/types";
 import { UseMutationResult } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
-import { StyledEditorEmptyState } from "pages/Main/containers/StatementEditorBox/StatementEditorBoxStyles";
+import { EmptyStateInfoDescription } from "components";
 import React, { useMemo } from "react";
-import { BsInfoCircle } from "react-icons/bs";
 import { getEntityRelationRules } from "utils/utils";
 import { EntityDetailInverseRelations } from "./EntityDetailInverseRelations/EntityDetailInverseRelations";
 import { StyledRelationsGrid } from "./EntityDetailRelationsStyles";
@@ -58,10 +57,7 @@ export const EntityDetailRelations: React.FC<EntityDetailRelations> = ({
       <StyledRelationsGrid>
         {relationTypes.length === 0 && (
           <>
-            <StyledEditorEmptyState>
-              <BsInfoCircle size="20" style={{ marginRight: "5px" }} />
-              This entity cannot have any relations
-            </StyledEditorEmptyState>
+            <EmptyStateInfoDescription label="This entity cannot have any relations" />
           </>
         )}
         {relationTypes.map((relationType, key) => {
