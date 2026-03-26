@@ -28,7 +28,7 @@ interface AnnotatorContainer {
   territoryId: string;
   territory?: IResponseTerritory;
   statementId: string;
-  statementCreateMutation?: UseMutationResult<
+  statementCreateMutation: UseMutationResult<
     AxiosResponse<IResponseGeneric<IStatement>, any>,
     Error,
     IStatement,
