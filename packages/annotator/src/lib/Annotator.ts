@@ -231,23 +231,7 @@ export class Annotator {
       }
     }
 
-    if (closeTag && closeSegIdx !== -1) {
-      const closeSeg = this.text.segments[closeSegIdx];
-      const closePos = closeTag.position;
-      closeSeg.raw =
-        closeSeg.raw.slice(0, closePos) +
-        closeSeg.raw.slice(closePos + closeTag.getTagLength());
-      changedSegmentIndices.add(closeSegIdx);
-    }
-
-    if (openTag) {
-      openSegment.raw =
-        openSegment.raw.slice(0, anchorPos) +
-        openSegment.raw.slice(anchorPos + openTag.getTagLength());
-      changedSegmentIndices.add(anchorSegIdx);
-    }
-
-    // Get current selection bounds before recalculation (to maintain selection after removal)
+    // FIRST: Capture old selection bounds and tag positions BEFORE modifying anything
     const [start, end] = this.cursor.getAbsBounds();
     let hasSelection = false;
     let oldStartIndex: number | undefined;
@@ -263,8 +247,7 @@ export class Annotator {
       );
     }
 
-    // Calculate absolute positions of the tags we're removing
-    // by summing lengths of all previous segments plus position within current segment
+    // Calculate absolute positions of the tags we're removing (before modifying segments)
     let openTagAbsPos: number | undefined;
     if (openTag) {
       let absPos = 0;
@@ -283,6 +266,23 @@ export class Annotator {
       }
       absPos += closeTag.position;
       closeTagAbsPos = absPos;
+    }
+
+    // NOW: Remove the tags from segments
+    if (closeTag && closeSegIdx !== -1) {
+      const closeSeg = this.text.segments[closeSegIdx];
+      const closePos = closeTag.position;
+      closeSeg.raw =
+        closeSeg.raw.slice(0, closePos) +
+        closeSeg.raw.slice(closePos + closeTag.getTagLength());
+      changedSegmentIndices.add(closeSegIdx);
+    }
+
+    if (openTag) {
+      openSegment.raw =
+        openSegment.raw.slice(0, anchorPos) +
+        openSegment.raw.slice(anchorPos + openTag.getTagLength());
+      changedSegmentIndices.add(anchorSegIdx);
     }
 
     // Reparse segments and reassign text
