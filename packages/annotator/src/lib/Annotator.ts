@@ -1347,33 +1347,13 @@ export class Annotator {
       this.text.prepareSegments();
       this.text.calculateLines();
 
-      // Recalculate selection bounds to keep the menu open after anchor addition (issue #2899)
-      // We need to maintain the selection but adjust for the newly inserted tags
-      // The selection now spans from the start of the opening tag to the end of the closing tag
-      const newStartIndex = indexStart;
-      const newEndIndex = indexEnd + openTagString.length + closeTagString.length;
-
-      // Convert absolute text indices back to line/column coordinates
-      const newStartSegPos = this.text.getSegmentFromAbsTextIndex(newStartIndex);
-      const newEndSegPos = this.text.getSegmentFromAbsTextIndex(newEndIndex);
-
-      if (newStartSegPos && newEndSegPos) {
-        // Convert segment positions to absolute line coordinates
-        const startSegment = this.text.segments[newStartSegPos.segmentIndex];
-        const endSegment = this.text.segments[newEndSegPos.segmentIndex];
-
-        // Update cursor selection bounds with absolute coordinates
-        this.cursor.selectStart = {
-          xLine: newStartSegPos.charInLineIndex,
-          yLine: startSegment.lineStart + newStartSegPos.lineIndex,
-        };
-        this.cursor.selectEnd = {
-          xLine: newEndSegPos.charInLineIndex,
-          yLine: endSegment.lineStart + newEndSegPos.lineIndex,
-        };
+      // Find the newly added anchor and select it
+      const tagPosition = this.text.getTagPosition(openTag.name, 0);
+      if (tagPosition && tagPosition.length === 2) {
+        this.cursor.selectStart = tagPosition[0];
+        this.cursor.selectEnd = tagPosition[1];
         this.cursor.setTrueSelectionDirection();
       } else {
-        // If position calculation fails, reset cursor as fallback
         this.cursor.reset();
       }
 
