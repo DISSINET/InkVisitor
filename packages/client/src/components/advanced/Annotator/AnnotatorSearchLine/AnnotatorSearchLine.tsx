@@ -432,19 +432,31 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
                       {searchActiveOccurence + 1} of {searchOccurences.length}
                     </div>
                     <div style={{ display: "flex", gap: "0.5rem" }}>
-                      <FaRegArrowAltCircleUp
-                        size={15}
-                        color={theme.color.info}
-                        style={{ cursor: "pointer" }}
-                        title="previous occurence"
-                        onClick={goToPreviousOccurence}
+                      <IconWithTooltip
+                        icon={
+                          <FaRegArrowAltCircleUp
+                            size={15}
+                            color={theme.color.info}
+                            style={{ cursor: "pointer" }}
+                            onClick={goToPreviousOccurence}
+                          />
+                        }
+                        tooltipLabel="previous occurence"
+                        tooltipText="(Shift + F3)"
+                        tooltipPosition="top"
                       />
-                      <FaRegArrowAltCircleDown
-                        size={15}
-                        color={theme.color.info}
-                        style={{ cursor: "pointer" }}
-                        title="next occurence"
-                        onClick={goToNextOccurence}
+                      <IconWithTooltip
+                        icon={
+                          <FaRegArrowAltCircleDown
+                            size={15}
+                            color={theme.color.info}
+                            style={{ cursor: "pointer" }}
+                            onClick={goToNextOccurence}
+                          />
+                        }
+                        tooltipLabel="next occurence"
+                        tooltipText="(F3)"
+                        tooltipPosition="top"
                       />
                     </div>
                   </>
