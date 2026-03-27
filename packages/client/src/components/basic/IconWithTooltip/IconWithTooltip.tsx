@@ -14,6 +14,7 @@ interface IconWithTooltip {
   tooltipPosition?: AutoPlacement | BasePlacement | VariationPlacement;
   color?: keyof ThemeColor;
   fullWidth?: boolean;
+  tooltipText?: string;
 }
 export const IconWithTooltip: React.FC<IconWithTooltip> = ({
   icon,
@@ -21,6 +22,7 @@ export const IconWithTooltip: React.FC<IconWithTooltip> = ({
   tooltipPosition = "bottom",
   color = "black",
   fullWidth = false,
+  tooltipText,
 }) => {
   const [referenceElement, setReferenceElement] =
     useState<HTMLDivElement | null>(null);
@@ -49,6 +51,7 @@ export const IconWithTooltip: React.FC<IconWithTooltip> = ({
           visible={showTooltip}
           referenceElement={referenceElement}
           position={tooltipPosition}
+          content={<p>{tooltipText}</p>}
         />
       )}
     </>
