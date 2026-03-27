@@ -25,3 +25,6 @@ export const HIGHLIGHT_HEIGHT_RATIO = 0.75;
 
 /** Pixels to raise the underline above the bottom of the line band (UNDERLINE mode). Larger = smaller margin below text. */
 export const UNDERLINE_OFFSET_PX = 2;
+
+/** Fraction of one line height scrolled per frame while the pointer is outside the canvas (smooth autoscroll). */
+export const SELECTION_EDGE_SCROLL_SPEED = 0.22;
