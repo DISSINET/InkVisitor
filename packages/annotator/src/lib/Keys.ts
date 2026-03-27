@@ -43,6 +43,7 @@ export interface AnnotatorCallbacks {
   viewport: Viewport;
   text: Text;
   element: HTMLCanvasElement;
+  scrollExtentLineCount(): number;
 }
 
 export default class Keys {
@@ -113,15 +114,16 @@ export default class Keys {
   scrollCursorIntoView() {
     const absY = this.cursor.yLine;
     const noLines = this.viewport.noLines;
-    const maxStart = Math.max(0, this.text.noLines - noLines);
+    const extent = this.annotator.scrollExtentLineCount();
+    const maxStart = Math.max(0, extent - 1 - noLines);
 
     if (absY < this.viewport.lineStart) {
       // cursor is before viewport -> scroll to the 3rd line of viewport
-      this.viewport.scrollTo(Math.max(0, absY - 2), this.text.noLines);
+      this.viewport.scrollTo(Math.max(0, absY - 2), extent);
     } else if (absY >= this.viewport.lineEnd) {
       // cursor is after viewport -> scroll to the 3rd line from the end of viewport
       const targetStart = Math.min(maxStart, absY - (noLines - 1 - 2));
-      this.viewport.scrollTo(Math.max(0, targetStart), this.text.noLines);
+      this.viewport.scrollTo(Math.max(0, targetStart), extent);
     }
   }
 
@@ -162,7 +164,8 @@ export default class Keys {
     if (ctrlKey) {
       const lastLine = this.text.noLines > 0 ? this.text.noLines - 1 : 0;
       this.cursor.yLine = lastLine;
-      this.viewport.scrollTo(this.text.noLines, this.text.noLines);
+      const extent = this.annotator.scrollExtentLineCount();
+      this.viewport.scrollTo(extent, extent);
     }
 
     const line = this.text.getCurrentLine(this.viewport, this.cursor) || "";
@@ -314,7 +317,10 @@ export default class Keys {
     shiftKey?: boolean;
   }) {
     const originalViewport = this.viewport.lineStart;
-    this.viewport.scrollDown(this.viewport.noLines, this.text.noLines);
+    this.viewport.scrollDown(
+      this.viewport.noLines,
+      this.annotator.scrollExtentLineCount()
+    );
 
     if (originalViewport === this.viewport.lineStart) {
       this.cursor.yLine = Math.min(
@@ -390,14 +396,14 @@ export default class Keys {
           yLine: originalAbsYline,
         };
       }
-      this.viewport.scrollTo(0, this.text.noLines);
+      this.viewport.scrollTo(0, this.annotator.scrollExtentLineCount());
       this.cursor.yLine = 0;
       this.cursor.xLine = 0;
       this.cursor.setTrueSelectionDirection();
       return;
     } else if (metaKey && !shiftKey) {
       // Cmd + Up: jump to very start of text (first line, col 0)
-      this.viewport.scrollTo(0, this.text.noLines);
+      this.viewport.scrollTo(0, this.annotator.scrollExtentLineCount());
       this.cursor.yLine = 0;
       this.cursor.xLine = 0;
       this.cursor.selectStart = undefined;
@@ -484,7 +490,10 @@ export default class Keys {
         xLine: lineText.length,
         yLine: lastLineIndex,
       };
-      this.viewport.scrollTo(this.text.noLines, this.text.noLines);
+      this.viewport.scrollTo(
+        this.annotator.scrollExtentLineCount(),
+        this.annotator.scrollExtentLineCount()
+      );
       this.cursor.yLine = lastLineIndex;
       this.cursor.xLine = lineText.length;
       this.cursor.setTrueSelectionDirection();
@@ -492,7 +501,10 @@ export default class Keys {
     } else if (metaKey && !shiftKey) {
       const lastLineIndex = this.text.noLines > 0 ? this.text.noLines - 1 : 0;
       const lineText = this.text.getLine(lastLineIndex) ?? "";
-      this.viewport.scrollTo(this.text.noLines, this.text.noLines);
+      this.viewport.scrollTo(
+        this.annotator.scrollExtentLineCount(),
+        this.annotator.scrollExtentLineCount()
+      );
       this.cursor.yLine = lastLineIndex;
       this.cursor.xLine = lineText.length;
       this.cursor.selectStart = undefined;
