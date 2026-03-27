@@ -239,11 +239,12 @@ export class Annotator {
 
     if (start && end) {
       hasSelection = true;
+      // Use current mode (not forced raw mode) since cursor positions are in current mode
       oldStartIndex = this.text.getAbsTextIndexFromPosition(
-        this.text.getSegmentPosition(start.yLine, start.xLine, true)
+        this.text.getSegmentPosition(start.yLine, start.xLine)
       );
       oldEndIndex = this.text.getAbsTextIndexFromPosition(
-        this.text.getSegmentPosition(end.yLine, end.xLine, true)
+        this.text.getSegmentPosition(end.yLine, end.xLine)
       );
     }
 
