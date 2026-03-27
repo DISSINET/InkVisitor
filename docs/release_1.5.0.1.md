@@ -19,7 +19,8 @@
 
 ### Bug Fixes and Improvements:
 
-- Modular advanced search options UI #2845
+- Batch operations over search results in a list (explorer page): added metaprops, metarelations and references #2117
+- Advanced search options (main page) are now modular #2845
 - Added full-text export functionality also to Annotator #2850
 - Redesigned alternative labels + added shortcuts (and icons) for save edit or exit #2790
 - Added check for Action synonyms for same AEE or its SYN #2371

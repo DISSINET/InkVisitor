@@ -55,7 +55,7 @@ export const StyledAnnotatorDoneButton = styled.div`
   z-index: 101;
   color: ${({ theme }) => theme.color.primary};
   border-radius: 7px;
-  background-color: ${({ theme }) => theme.color.gray[100]};
+  background-color: ${({ theme }) => theme.color.blue[100]};
 `;
 
 export const StyledAnnotatorMenu = styled.div<StyledAnnotatorMenuProps>`
@@ -71,7 +71,7 @@ export const StyledAnnotatorMenuDraggable = styled.div`
   width: 100%;
   pointer-events: auto;
   gap: 0.5rem;
-  background: ${({ theme }) => theme.color.blue["100"]};
+  background-color: ${({ theme }) => theme.color.blue[100]};
   padding: ${({ theme }) => theme.space[2]};
   box-shadow: ${({ theme }) => theme.boxShadow.high};
   border-radius: ${({ theme }) => theme.borderRadius["default"]};

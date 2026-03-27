@@ -1,6 +1,8 @@
 export enum BatchAction {
-  fill_empty = "fill_empty",
   export_csv = "export_csv",
+  add_metaprop = "add_metaprop",
+  add_reference = "add_reference",
+  add_relation = "add_relation",
 }
 
 export type BatchOption = {
@@ -9,14 +11,10 @@ export type BatchOption = {
 };
 
 export const batchOptions: BatchOption[] = [
-  {
-    value: BatchAction.export_csv,
-    label: `export as csv`,
-  },
-  {
-    value: BatchAction.fill_empty,
-    label: `fill empty`,
-  },
+  { value: BatchAction.export_csv, label: "export as csv" },
+  { value: BatchAction.add_metaprop, label: "add metaprop" },
+  { value: BatchAction.add_reference, label: "add reference" },
+  { value: BatchAction.add_relation, label: "add relation" },
 ];
 
 export const WIDTH_COLUMN_FIRST = 400;

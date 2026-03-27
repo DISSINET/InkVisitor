@@ -17,6 +17,9 @@ export enum HighlightMode {
   UNDERLINE = "underline",
 }
 export const LINE_HEIGHT = 23;
+
+/** Extra empty rows after the last text line; scrollable, no line numbers in the gutter. */
+export const VIEWPORT_END_BUFFER_ROWS = 3;
 export const DEFAULT_FONT_SIZE = 13;
 export const DEFAULT_FONT = '"Roboto Mono", monospace';
 

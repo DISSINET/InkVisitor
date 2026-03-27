@@ -13,6 +13,7 @@ import {
   HighlightMode,
   LINE_HEIGHT,
   SELECTION_EDGE_SCROLL_SPEED,
+  VIEWPORT_END_BUFFER_ROWS,
 } from "./constants";
 
 // Updated regex to properly handle tags with attributes
@@ -269,7 +270,9 @@ export class Annotator {
     const noLinesViewport = this.viewportFullRowCount() + 1;
     const charsAtLine = Math.floor(this.width / this.charWidth);
 
-    const positionBeforeRel = this.viewport.lineStart / this.text.noLines;
+    const extent = this.scrollExtentLineCount();
+    const positionBeforeRel =
+      extent > 0 ? this.viewport.lineStart / Math.max(1, extent) : 0;
 
     this.viewport.updateLineEnd(noLinesViewport);
     this.text.updateCharsAtLine(charsAtLine);
@@ -277,16 +280,19 @@ export class Annotator {
     // this function tries to keep the same relative position of the text even its not perfect
     // FIXME: Ideally we should find the exact text at the top of the viewport and try to keep it on top after the resize
     this.viewport.scrollTo(
-      Math.floor(positionBeforeRel * this.text.noLines),
-      this.text.noLines
+      Math.floor(positionBeforeRel * this.scrollExtentLineCount()),
+      this.scrollExtentLineCount()
     );
 
     this.scroller?.setRunnerSize(
-      (this.viewport.noLines / this.text.noLines) * 100
+      (this.viewport.noLines / this.scrollExtentLineCount()) * 100
     );
 
     this.scroller?.setViewportSize(
-      Math.min(100, (this.viewport.noLines / this.text.noLines) * 100)
+      Math.min(
+        100,
+        (this.viewport.noLines / this.scrollExtentLineCount()) * 100
+      )
     );
 
     this.draw();
@@ -347,6 +353,14 @@ export class Annotator {
    */
   private viewportFullRowCount(): number {
     return Math.max(1, Math.floor(this.height / this.lineHeight));
+  }
+
+  /**
+   * Total line slots for scrolling (content lines + trailing buffer rows).
+   * Buffer rows are empty, scrollable, and drawn without line numbers.
+   */
+  scrollExtentLineCount(): number {
+    return this.text.noLines + VIEWPORT_END_BUFFER_ROWS;
   }
 
   /**
@@ -426,9 +440,17 @@ export class Annotator {
     const speed = this.lineHeight * SELECTION_EDGE_SCROLL_SPEED;
 
     if (inTopZone) {
-      this.viewport.addScrollOffset(-speed, this.lineHeight, this.text.noLines);
+      this.viewport.addScrollOffset(
+        -speed,
+        this.lineHeight,
+        this.scrollExtentLineCount()
+      );
     } else if (inBottomZone) {
-      this.viewport.addScrollOffset(speed, this.lineHeight, this.text.noLines);
+      this.viewport.addScrollOffset(
+        speed,
+        this.lineHeight,
+        this.scrollExtentLineCount()
+      );
     }
 
     const scrolled =
@@ -583,7 +605,7 @@ export class Annotator {
     this.viewport.addScrollOffset(
       deltaBufferPx,
       this.lineHeight,
-      this.text.noLines
+      this.scrollExtentLineCount()
     );
 
     e.preventDefault();
@@ -843,7 +865,10 @@ export class Annotator {
     this.scroller = new Scroller(scrollerDiv);
     this.scroller.onChange((percentage: number) => {
       const viewportLines = this.viewport.lineEnd - this.viewport.lineStart;
-      const scrollableLines = Math.max(0, this.text.noLines - viewportLines);
+      const scrollableLines = Math.max(
+        0,
+        this.scrollExtentLineCount() - viewportLines
+      );
       const scrollablePx = scrollableLines * this.lineHeight;
       const targetPx = (percentage / 100) * scrollablePx;
       const targetLineFrac = scrollablePx > 0 ? targetPx / this.lineHeight : 0;
@@ -852,15 +877,15 @@ export class Annotator {
         targetLineFrac,
         0,
         this.lineHeight,
-        this.text.noLines
+        this.scrollExtentLineCount()
       );
       this.draw();
     });
     this.scroller?.setRunnerSize(
-      (this.viewport.noLines / this.text.noLines) * 100
+      (this.viewport.noLines / this.scrollExtentLineCount()) * 100
     );
 
-    const viewportSize = this.viewport.noLines / this.text.noLines;
+    const viewportSize = this.viewport.noLines / this.scrollExtentLineCount();
     this.scroller?.setViewportSize(Math.min(100, viewportSize * 100));
   }
 
@@ -1065,7 +1090,7 @@ export class Annotator {
       this.scroller.update(
         this.viewport.lineStart,
         this.viewport.lineEnd,
-        this.text.noLines,
+        this.scrollExtentLineCount(),
         this.viewport.scrollOffsetY,
         this.lineHeight
       );
@@ -1073,7 +1098,7 @@ export class Annotator {
     if (this.lines) {
       this.lines.font = this.font;
       this.lines.lineHeight = this.lineHeight;
-      this.lines.draw(this.viewport);
+      this.lines.draw(this.viewport, this.text.noLines);
     }
 
     const thisRenderVieportLineStart = this.viewport.lineStart;
@@ -1115,7 +1140,7 @@ export class Annotator {
         0,
         Math.min(
           absLine,
-          Math.max(0, this.text.noLines - 1 - this.viewport.noLines)
+          Math.max(0, this.scrollExtentLineCount() - 1 - this.viewport.noLines)
         )
       );
       this.viewport.scrollOffsetY = scrollOffsetBefore;
@@ -1132,7 +1157,7 @@ export class Annotator {
             absY < this.viewport.lineStart ||
             absY > this.viewport.lineEnd - 1
           ) {
-            this.viewport.scrollTo(absY, this.text.noLines);
+            this.viewport.scrollTo(absY, this.scrollExtentLineCount());
           }
         }
       }
@@ -1288,12 +1313,12 @@ export class Annotator {
       return;
     }
 
-    this.viewport.scrollTo(pos[0].yLine, this.text.noLines);
+    this.viewport.scrollTo(pos[0].yLine, this.scrollExtentLineCount());
     this.draw();
   }
 
   scrollToLine(absLine: number) {
-    this.viewport.scrollTo(absLine, this.text.noLines);
+    this.viewport.scrollTo(absLine, this.scrollExtentLineCount());
     this.draw();
   }
 
@@ -1314,7 +1339,7 @@ export class Annotator {
     if (!pos) return;
     const segment = this.text.segments[pos.segmentIndex];
     const absLine = segment.lineStart + pos.lineIndex;
-    this.viewport.scrollTo(absLine, this.text.noLines);
+    this.viewport.scrollTo(absLine, this.scrollExtentLineCount());
     this.draw();
   }
 
@@ -1329,9 +1354,13 @@ export class Annotator {
 
     // Preserve fluent scroll offset (deltaY) so updating text (e.g. discard)
     // doesn't snap the viewport to the top of a line.
+    const maxLineStart = Math.max(
+      0,
+      this.scrollExtentLineCount() - 1 - this.viewport.noLines
+    );
     const clampedLineStart = Math.max(
       0,
-      Math.min(positionBeforeChange, Math.max(0, this.text.noLines - 1))
+      Math.min(positionBeforeChange, maxLineStart)
     );
     const desiredLineStart =
       clampedLineStart + (scrollOffsetBeforeChange || 0) / this.lineHeight;
@@ -1340,7 +1369,7 @@ export class Annotator {
       desiredLineStart,
       0,
       this.lineHeight,
-      this.text.noLines
+      this.scrollExtentLineCount()
     );
     this.draw();
   }
