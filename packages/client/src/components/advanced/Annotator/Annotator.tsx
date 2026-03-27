@@ -532,6 +532,7 @@ export const TextAnnotator = ({
     // isSelectingText didn't work as expected without the useEffect and pendingSelection so this implementation was necessary
     if (pendingSelection && !isSelectingText) {
       const { text, anchors, index } = pendingSelection;
+      console.log("pendingSelection", pendingSelection);
       setSelectedText(text);
       setSelectedAnchors(anchors);
       setSelectionStartIndex(index);
