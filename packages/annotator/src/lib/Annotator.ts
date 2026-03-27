@@ -263,23 +263,27 @@ export class Annotator {
       );
     }
 
-    // Get absolute positions of the tags we're removing
-    const openTagAbsPos = openTag
-      ? this.text.getAbsTextIndexFromPosition({
-          segmentIndex: anchorSegIdx,
-          lineIndex: 0,
-          charInLineIndex: anchorPos,
-        })
-      : undefined;
+    // Calculate absolute positions of the tags we're removing
+    // by summing lengths of all previous segments plus position within current segment
+    let openTagAbsPos: number | undefined;
+    if (openTag) {
+      let absPos = 0;
+      for (let i = 0; i < anchorSegIdx; i++) {
+        absPos += this.text.segments[i].raw.length + 1; // +1 for newline
+      }
+      absPos += anchorPos;
+      openTagAbsPos = absPos;
+    }
 
-    const closeTagAbsPos =
-      closeTag && closeSegIdx !== -1
-        ? this.text.getAbsTextIndexFromPosition({
-            segmentIndex: closeSegIdx,
-            lineIndex: 0,
-            charInLineIndex: closeTag.position,
-          })
-        : undefined;
+    let closeTagAbsPos: number | undefined;
+    if (closeTag && closeSegIdx !== -1) {
+      let absPos = 0;
+      for (let i = 0; i < closeSegIdx; i++) {
+        absPos += this.text.segments[i].raw.length + 1; // +1 for newline
+      }
+      absPos += closeTag.position;
+      closeTagAbsPos = absPos;
+    }
 
     // Reparse segments and reassign text
     for (const idx of changedSegmentIndices) {
