@@ -247,11 +247,101 @@ export class Annotator {
       changedSegmentIndices.add(anchorSegIdx);
     }
 
+    // Get current selection bounds before recalculation (to maintain selection after removal)
+    const [start, end] = this.cursor.getAbsBounds();
+    let hasSelection = false;
+    let oldStartIndex: number | undefined;
+    let oldEndIndex: number | undefined;
+
+    if (start && end) {
+      hasSelection = true;
+      oldStartIndex = this.text.getAbsTextIndexFromPosition(
+        this.text.getSegmentPosition(start.yLine, start.xLine, true)
+      );
+      oldEndIndex = this.text.getAbsTextIndexFromPosition(
+        this.text.getSegmentPosition(end.yLine, end.xLine, true)
+      );
+    }
+
+    // Get absolute positions of the tags we're removing
+    const openTagAbsPos = openTag
+      ? this.text.getAbsTextIndexFromPosition({
+          segmentIndex: anchorSegIdx,
+          lineIndex: 0,
+          charInLineIndex: anchorPos,
+        })
+      : undefined;
+
+    const closeTagAbsPos =
+      closeTag && closeSegIdx !== -1
+        ? this.text.getAbsTextIndexFromPosition({
+            segmentIndex: closeSegIdx,
+            lineIndex: 0,
+            charInLineIndex: closeTag.position,
+          })
+        : undefined;
+
+    // Reparse segments and reassign text
     for (const idx of changedSegmentIndices) {
       this.text.segments[idx]?.parseText();
     }
 
     this.text.assignValueFromSegments();
+    this.text.calculateLines();
+
+    // Recalculate selection bounds after anchor removal (issue #2899)
+    if (
+      hasSelection &&
+      oldStartIndex !== undefined &&
+      oldEndIndex !== undefined
+    ) {
+      let newStartIndex = oldStartIndex;
+      let newEndIndex = oldEndIndex;
+
+      // Adjust indices based on removed tag positions
+      const openTagLen = openTag ? openTag.getTagLength() : 0;
+      const closeTagLen = closeTag ? closeTag.getTagLength() : 0;
+
+      // If opening tag was before or at the start position, shift start back
+      if (openTagAbsPos !== undefined && openTagAbsPos <= oldStartIndex) {
+        newStartIndex -= openTagLen;
+      }
+
+      // If opening tag was before the end position, shift end back
+      if (openTagAbsPos !== undefined && openTagAbsPos < oldEndIndex) {
+        newEndIndex -= openTagLen;
+      }
+
+      // If closing tag was before the end position, shift end back further
+      if (closeTagAbsPos !== undefined && closeTagAbsPos < oldEndIndex) {
+        newEndIndex -= closeTagLen;
+      }
+
+      // Convert adjusted indices back to segment positions
+      const newStartSegPos =
+        this.text.getSegmentFromAbsTextIndex(newStartIndex);
+      const newEndSegPos = this.text.getSegmentFromAbsTextIndex(newEndIndex);
+
+      if (newStartSegPos && newEndSegPos) {
+        const startSegment = this.text.segments[newStartSegPos.segmentIndex];
+        const endSegment = this.text.segments[newEndSegPos.segmentIndex];
+
+        // Update cursor selection bounds
+        this.cursor.selectStart = {
+          xLine: newStartSegPos.charInLineIndex,
+          yLine: startSegment.lineStart + newStartSegPos.lineIndex,
+        };
+        this.cursor.selectEnd = {
+          xLine: newEndSegPos.charInLineIndex,
+          yLine: endSegment.lineStart + newEndSegPos.lineIndex,
+        };
+        this.cursor.setTrueSelectionDirection();
+      } else {
+        // Fallback: reset cursor if position calculation fails
+        this.cursor.reset();
+      }
+    }
+
     this.warnings.onTextChanged(this.text.value);
     this.draw();
   }
