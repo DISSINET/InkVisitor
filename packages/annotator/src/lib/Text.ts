@@ -826,28 +826,21 @@ class Text {
    * @returns Array of lines visible in the viewport
    */
   getViewportText(viewport: Viewport): string[] {
-    const posStart = this.getSegmentPosition(viewport.lineStart);
-    const posEnd =
-      this.getSegmentPosition(viewport.lineEnd) ||
-      this.getLastSegmentPosition();
-
-    if (!posStart || !posEnd) {
-      return [];
-    }
-
+    const renderEndCond = viewport.lineEnd - viewport.lineStart;
     const out: string[] = [];
-    for (let i = posStart.segmentIndex; i <= posEnd.segmentIndex; i++) {
-      if (this.segments[i].lines.length) {
-        if (i === posStart.segmentIndex) {
-          out.push(...this.segments[i].lines.slice(posStart.lineIndex));
-        } else if (i === posEnd.segmentIndex) {
-          out.push(...this.segments[i].lines.slice(0, posEnd.lineIndex + 1));
-        } else if (this.segments[i].lines.length > 0) {
-          out.push(...this.segments[i].lines);
-        } else {
-          console.warn("Should not happen");
-        }
+    for (let renderLine = 0; renderLine <= renderEndCond; renderLine++) {
+      const absLine = viewport.lineStart + renderLine;
+      if (this.noLines <= 0 || absLine < 0 || absLine >= this.noLines) {
+        out.push("");
+        continue;
       }
+      const pos = this.getSegmentPosition(absLine, 0);
+      if (!pos) {
+        out.push("");
+        continue;
+      }
+      const seg = this.segments[pos.segmentIndex];
+      out.push(seg.lines[pos.lineIndex] ?? "");
     }
     return out;
   }
