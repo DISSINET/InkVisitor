@@ -1080,11 +1080,12 @@ export class Annotator {
     // get bounds of the selection
     let [start, end] = this.cursor.getAbsBounds();
     if (start && end) {
+      // Use current mode (not forced raw mode) since cursor positions are in current mode
       let indexStart = this.text.getAbsTextIndexFromPosition(
-        this.text.getSegmentPosition(start.yLine, start.xLine, true)
+        this.text.getSegmentPosition(start.yLine, start.xLine)
       );
       let indexEnd = this.text.getAbsTextIndexFromPosition(
-        this.text.getSegmentPosition(end.yLine, end.xLine, true)
+        this.text.getSegmentPosition(end.yLine, end.xLine)
       );
 
       // Move endIndex after tags on the right to avoid gathering additional non-XML tag characters
