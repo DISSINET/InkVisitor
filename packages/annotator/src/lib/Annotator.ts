@@ -389,6 +389,67 @@ export class Annotator {
   }
 
   /**
+   * Finds the matching closing tag for an opening tag using depth-aware pairing.
+   *
+   * @param openTag - Opening tag to match
+   * @returns Matching closing tag with its segment index, or null
+   */
+  private findMatchingClosingTag(
+    openTag: Tag
+  ): { closeTag: Tag; closeSegIdx: number } | null {
+    const tagName = openTag.getTagName();
+    let depth = 0;
+
+    for (let i = openTag.segmentIndex; i < this.text.segments.length; i++) {
+      const seg = this.text.segments[i];
+      const events: { tag: Tag; isOpen: boolean }[] = [];
+
+      for (const candidateOpen of seg.openingTags) {
+        if (
+          candidateOpen.getTagName() === tagName &&
+          (i > openTag.segmentIndex || candidateOpen.position >= openTag.position)
+        ) {
+          events.push({ tag: candidateOpen, isOpen: true });
+        }
+      }
+
+      for (const candidateClose of seg.closingTags) {
+        if (
+          candidateClose.getTagName() === tagName &&
+          (i > openTag.segmentIndex || candidateClose.position > openTag.position)
+        ) {
+          events.push({ tag: candidateClose, isOpen: false });
+        }
+      }
+
+      events.sort((a, b) => {
+        if (a.tag.position === b.tag.position) {
+          if (a.isOpen === b.isOpen) return 0;
+          return a.isOpen ? 1 : -1;
+        }
+        return a.tag.position - b.tag.position;
+      });
+
+      for (const event of events) {
+        if (event.isOpen) {
+          depth++;
+          continue;
+        }
+
+        depth--;
+        if (depth === 0) {
+          return {
+            closeTag: event.tag,
+            closeSegIdx: i,
+          };
+        }
+      }
+    }
+
+    return null;
+  }
+
+  /**
    * Detects anchors at the current mouse position and emits hover callback. When hovering over anchored text, emit tags to highlight statements.
    * 
    * @param e - Mouse event
@@ -431,52 +492,29 @@ export class Annotator {
       return;
     }
 
-    // Find all tags that span this position
-    // A position is inside a tag if it's after the opening tag and before the closing tag
     const tagsAtPosition: Tag[] = [];
+    const hoverAbsRawIndex = this.text.getAbsTextIndexFromPosition(segmentPos);
 
-    for (const openTag of segment.openingTags) {
-      // Check if cursor is after this opening tag
-      if (segmentPos.rawTextIndex < openTag.position) {
-        continue;
-      }
-
-      // Find corresponding closing tag
-      let closeTag: Tag | undefined;
-      let closeSegIdx = -1;
-
-      for (let i = segmentPos.segmentIndex; i < this.text.segments.length; i++) {
-        const seg = this.text.segments[i];
-        const candidates =
-          i === segmentPos.segmentIndex
-            ? seg.closingTags.filter((t) => t.position > openTag.position)
-            : seg.closingTags;
-        closeTag = candidates.find(
-          (tag) => tag.getTagName() === openTag.getTagName()
-        );
-        if (closeTag) {
-          closeSegIdx = i;
-          break;
+    for (const currentSegment of this.text.segments) {
+      for (const openTag of currentSegment.openingTags) {
+        const match = this.findMatchingClosingTag(openTag);
+        if (!match) {
+          continue;
         }
-      }
 
-      if (!closeTag || closeSegIdx === -1) {
-        continue;
-      }
+        const openAbsRawStart = openTag.getAbsoluteTagPosition(this.text.segments);
+        const closeAbsRawStart = match.closeTag.getAbsoluteTagPosition(
+          this.text.segments
+        );
+        const contentStart = openAbsRawStart + openTag.getTagLength();
+        const contentEnd = closeAbsRawStart;
 
-      // Check if cursor is before the closing tag
-      if (closeSegIdx > segmentPos.segmentIndex) {
-        // Closing tag is in a later segment, so cursor is definitely inside
-        tagsAtPosition.push(openTag);
-      } else if (closeSegIdx === segmentPos.segmentIndex) {
-        // Closing tag is in the same segment, check position
-        if (segmentPos.rawTextIndex <= closeTag.position) {
+        if (hoverAbsRawIndex >= contentStart && hoverAbsRawIndex < contentEnd) {
           tagsAtPosition.push(openTag);
         }
       }
     }
 
-    // Emit callback with found tags (multiple tags if overlapping)
     this.onAnchorHoverCb(tagsAtPosition);
   }
 
