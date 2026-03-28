@@ -147,10 +147,8 @@ export const StatementListTextAnnotator: React.FC<
             ? statementId
             : territoryId;
 
-        // Perform the scroll
+        // Scroll to anchor, place caret at anchor content start; selection is preserved (Annotator.scrollToAnchor)
         annotator.scrollToAnchor(scrollToId);
-        annotator.cursor.reset();
-        annotator.draw();
 
         // Update refs AFTER scroll
         prevTerritoryIdRef.current = territory.id;
