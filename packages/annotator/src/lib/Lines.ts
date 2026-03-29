@@ -49,7 +49,8 @@ export class Lines {
     this.font = `${DEFAULT_FONT_SIZE * ratio}px ${DEFAULT_FONT}`;
   }
 
-  draw(viewport: Viewport) {
+  /** Rows at absolute index ≥ `contentLineCount` are blank in the gutter (e.g. trailing scroll buffer). */
+  draw(viewport: Viewport, contentLineCount: number) {
     this.ctx.reset();
 
     this.width = this.element.width;
@@ -74,9 +75,13 @@ export class Lines {
 
     const renderEndCond = viewport.lineEnd - viewport.lineStart;
     for (let row = 0; row <= renderEndCond; row++) {
+      const absLine = viewport.lineStart + row;
+      if (absLine >= contentLineCount) {
+        continue;
+      }
       // Same Y as Annotator.draw for each text row
       this.ctx.fillText(
-        String(viewport.lineStart + row + 1),
+        String(absLine + 1),
         0,
         (row + 0.5) * this.lineHeight
       );

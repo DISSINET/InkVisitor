@@ -12,6 +12,8 @@ import {
   EditMode,
   HighlightMode,
   LINE_HEIGHT,
+  SELECTION_EDGE_SCROLL_SPEED,
+  VIEWPORT_END_BUFFER_ROWS,
 } from "./constants";
 
 // Updated regex to properly handle tags with attributes
@@ -104,6 +106,10 @@ export class Annotator {
 
   previousRenderViewportLineStart: number;
 
+  private lastSelectPointer: { cx: number; cy: number } | null = null;
+
+  private selectionScrollRaf: number = 0;
+
   // callbacks
   onSelectTextCb?: (text: Selected) => void;
   onHighlightCb?: (entityId: string) => HighlightSchema | void;
@@ -159,8 +165,6 @@ export class Annotator {
 
     this.element.onwheel = this.onWheel.bind(this);
     this.element.onmousedown = this.onMouseDown.bind(this);
-    this.element.onmouseup = this.onMouseUp.bind(this);
-    this.element.onmousemove = this.onMouseMove.bind(this);
     this.element.addEventListener(
       "dblclick",
       this.onMouseDoubleClick.bind(this)
@@ -209,17 +213,17 @@ export class Annotator {
     }
 
     const openTag = openSegment.openingTags.find(
-      (tag) =>
-        tag.getTagName() === anchor && tag.position === anchorPos
+      (tag) => tag.getTagName() === anchor && tag.position === anchorPos
     );
 
     let closeTag: Tag | undefined;
     let closeSegIdx = -1;
     for (let i = anchorSegIdx; i < this.text.segments.length; i++) {
       const seg = this.text.segments[i];
-      const candidates = i === anchorSegIdx
-        ? seg.closingTags.filter((t) => t.position > anchorPos)
-        : seg.closingTags;
+      const candidates =
+        i === anchorSegIdx
+          ? seg.closingTags.filter((t) => t.position > anchorPos)
+          : seg.closingTags;
       closeTag = candidates.find((tag) => tag.getTagName() === anchor);
       if (closeTag) {
         closeSegIdx = i;
@@ -227,6 +231,45 @@ export class Annotator {
       }
     }
 
+    // FIRST: Capture old selection bounds and tag positions BEFORE modifying anything
+    const [start, end] = this.cursor.getAbsBounds();
+    let hasSelection = false;
+    let oldStartIndex: number | undefined;
+    let oldEndIndex: number | undefined;
+
+    if (start && end) {
+      hasSelection = true;
+      // Use current mode (not forced raw mode) since cursor positions are in current mode
+      oldStartIndex = this.text.getAbsTextIndexFromPosition(
+        this.text.getSegmentPosition(start.yLine, start.xLine)
+      );
+      oldEndIndex = this.text.getAbsTextIndexFromPosition(
+        this.text.getSegmentPosition(end.yLine, end.xLine)
+      );
+    }
+
+    // Calculate absolute positions of the tags we're removing (before modifying segments)
+    let openTagAbsPos: number | undefined;
+    if (openTag) {
+      let absPos = 0;
+      for (let i = 0; i < anchorSegIdx; i++) {
+        absPos += this.text.segments[i].raw.length + 1; // +1 for newline
+      }
+      absPos += anchorPos;
+      openTagAbsPos = absPos;
+    }
+
+    let closeTagAbsPos: number | undefined;
+    if (closeTag && closeSegIdx !== -1) {
+      let absPos = 0;
+      for (let i = 0; i < closeSegIdx; i++) {
+        absPos += this.text.segments[i].raw.length + 1; // +1 for newline
+      }
+      absPos += closeTag.position;
+      closeTagAbsPos = absPos;
+    }
+
+    // NOW: Remove the tags from segments
     if (closeTag && closeSegIdx !== -1) {
       const closeSeg = this.text.segments[closeSegIdx];
       const closePos = closeTag.position;
@@ -243,11 +286,67 @@ export class Annotator {
       changedSegmentIndices.add(anchorSegIdx);
     }
 
+    // Reparse segments and reassign text
     for (const idx of changedSegmentIndices) {
       this.text.segments[idx]?.parseText();
     }
 
     this.text.assignValueFromSegments();
+    this.text.calculateLines();
+
+    // Recalculate selection bounds after anchor removal (issue #2899)
+    if (
+      hasSelection &&
+      oldStartIndex !== undefined &&
+      oldEndIndex !== undefined
+    ) {
+      let newStartIndex = oldStartIndex;
+      let newEndIndex = oldEndIndex;
+
+      // Adjust indices based on removed tag positions
+      const openTagLen = openTag ? openTag.getTagLength() : 0;
+      const closeTagLen = closeTag ? closeTag.getTagLength() : 0;
+
+      // If opening tag was before or at the start position, shift start back
+      if (openTagAbsPos !== undefined && openTagAbsPos <= oldStartIndex) {
+        newStartIndex -= openTagLen;
+      }
+
+      // If opening tag was before the end position, shift end back
+      if (openTagAbsPos !== undefined && openTagAbsPos < oldEndIndex) {
+        newEndIndex -= openTagLen;
+      }
+
+      // If closing tag was before the end position, shift end back further
+      if (closeTagAbsPos !== undefined && closeTagAbsPos < oldEndIndex) {
+        newEndIndex -= closeTagLen;
+      }
+
+      // Convert adjusted indices back to segment positions
+      const newStartSegPos =
+        this.text.getSegmentFromAbsTextIndex(newStartIndex);
+      const newEndSegPos = this.text.getSegmentFromAbsTextIndex(newEndIndex);
+
+      if (newStartSegPos && newEndSegPos) {
+        const startSegment = this.text.segments[newStartSegPos.segmentIndex];
+        const endSegment = this.text.segments[newEndSegPos.segmentIndex];
+
+        // Update cursor selection bounds
+        this.cursor.selectStart = {
+          xLine: newStartSegPos.charInLineIndex,
+          yLine: startSegment.lineStart + newStartSegPos.lineIndex,
+        };
+        this.cursor.selectEnd = {
+          xLine: newEndSegPos.charInLineIndex,
+          yLine: endSegment.lineStart + newEndSegPos.lineIndex,
+        };
+        this.cursor.setTrueSelectionDirection();
+      } else {
+        // Fallback: reset cursor if position calculation fails
+        this.cursor.reset();
+      }
+    }
+
     this.warnings.onTextChanged(this.text.value);
     this.draw();
   }
@@ -266,7 +365,9 @@ export class Annotator {
     const noLinesViewport = this.viewportFullRowCount() + 1;
     const charsAtLine = Math.floor(this.width / this.charWidth);
 
-    const positionBeforeRel = this.viewport.lineStart / this.text.noLines;
+    const extent = this.scrollExtentLineCount();
+    const positionBeforeRel =
+      extent > 0 ? this.viewport.lineStart / Math.max(1, extent) : 0;
 
     this.viewport.updateLineEnd(noLinesViewport);
     this.text.updateCharsAtLine(charsAtLine);
@@ -274,16 +375,19 @@ export class Annotator {
     // this function tries to keep the same relative position of the text even its not perfect
     // FIXME: Ideally we should find the exact text at the top of the viewport and try to keep it on top after the resize
     this.viewport.scrollTo(
-      Math.floor(positionBeforeRel * this.text.noLines),
-      this.text.noLines
+      Math.floor(positionBeforeRel * this.scrollExtentLineCount()),
+      this.scrollExtentLineCount()
     );
 
     this.scroller?.setRunnerSize(
-      (this.viewport.noLines / this.text.noLines) * 100
+      (this.viewport.noLines / this.scrollExtentLineCount()) * 100
     );
 
     this.scroller?.setViewportSize(
-      Math.min(100, (this.viewport.noLines / this.text.noLines) * 100)
+      Math.min(
+        100,
+        (this.viewport.noLines / this.scrollExtentLineCount()) * 100
+      )
     );
 
     this.draw();
@@ -347,6 +451,14 @@ export class Annotator {
   }
 
   /**
+   * Total line slots for scrolling (content lines + trailing buffer rows).
+   * Buffer rows are empty, scrollable, and drawn without line numbers.
+   */
+  scrollExtentLineCount(): number {
+    return this.text.noLines + VIEWPORT_END_BUFFER_ROWS;
+  }
+
+  /**
    * Converts mouse/pointer offset Y to canvas buffer Y (same scaling as getCanvasX).
    */
   getCanvasY(offsetY: number): number {
@@ -354,12 +466,28 @@ export class Annotator {
   }
 
   /**
-   * onMouseDown is handler for pressed mouse-key event
-   * @param e
+   * Offsets in the same space as MouseEvent.offsetX/Y (CSS px vs layout box).
+   * Cursor.xToCharI / setPositionFromCanvasOffsets already apply `ratio` for bitmap mapping.
    */
-  onMouseDown(e: MouseEvent) {
-    this.cursor.setPositionFromEvent(
-      e,
+  private clientCoordsToCanvasOffsets(
+    clientX: number,
+    clientY: number,
+    rect: DOMRect
+  ): { ox: number; oy: number } {
+    const ox = Math.min(Math.max(clientX, rect.left), rect.right) - rect.left;
+    const oy = Math.min(Math.max(clientY, rect.top), rect.bottom) - rect.top;
+    return { ox, oy };
+  }
+
+  /**
+   * Maps pointer position to cursor / selection end using the current viewport.
+   */
+  private applyPointerToCursor(clientX: number, clientY: number) {
+    const rect = this.element.getBoundingClientRect();
+    const { ox, oy } = this.clientCoordsToCanvasOffsets(clientX, clientY, rect);
+    this.cursor.setPositionFromCanvasOffsets(
+      ox,
+      oy,
       this.lineHeight,
       this.charWidth,
       this.viewport.scrollOffsetY,
@@ -378,6 +506,122 @@ export class Annotator {
     }
 
     this.cursor.selectArea();
+  }
+
+  private cancelSelectionEdgeScroll() {
+    if (this.selectionScrollRaf) {
+      cancelAnimationFrame(this.selectionScrollRaf);
+      this.selectionScrollRaf = 0;
+    }
+  }
+
+  private readonly tickSelectionEdgeScroll = () => {
+    this.selectionScrollRaf = 0;
+    if (!this.cursor.isSelecting() || !this.lastSelectPointer) {
+      return;
+    }
+
+    const rect = this.element.getBoundingClientRect();
+    const cy = this.lastSelectPointer.cy;
+    // Only autoscroll when the pointer has left the canvas vertically
+    const inTopZone = cy < rect.top;
+    const inBottomZone = cy > rect.bottom;
+    if (!inTopZone && !inBottomZone) {
+      return;
+    }
+
+    const lineStartBefore = this.viewport.lineStart;
+    const scrollOffBefore = this.viewport.scrollOffsetY;
+    const speed = this.lineHeight * SELECTION_EDGE_SCROLL_SPEED;
+
+    if (inTopZone) {
+      this.viewport.addScrollOffset(
+        -speed,
+        this.lineHeight,
+        this.scrollExtentLineCount()
+      );
+    } else if (inBottomZone) {
+      this.viewport.addScrollOffset(
+        speed,
+        this.lineHeight,
+        this.scrollExtentLineCount()
+      );
+    }
+
+    const scrolled =
+      this.viewport.lineStart !== lineStartBefore ||
+      this.viewport.scrollOffsetY !== scrollOffBefore;
+
+    if (scrolled) {
+      this.applyPointerToCursor(
+        this.lastSelectPointer.cx,
+        this.lastSelectPointer.cy
+      );
+      this.draw();
+    }
+
+    const inZone = inTopZone || inBottomZone;
+    if (
+      this.cursor.isSelecting() &&
+      this.lastSelectPointer &&
+      inZone &&
+      scrolled
+    ) {
+      this.selectionScrollRaf = requestAnimationFrame(
+        this.tickSelectionEdgeScroll
+      );
+    }
+  };
+
+  private ensureSelectionEdgeScrollRunning() {
+    if (!this.lastSelectPointer || !this.cursor.isSelecting()) {
+      return;
+    }
+    if (this.selectionScrollRaf) {
+      return;
+    }
+    const rect = this.element.getBoundingClientRect();
+    const cy = this.lastSelectPointer.cy;
+    if (cy < rect.top || cy > rect.bottom) {
+      this.selectionScrollRaf = requestAnimationFrame(
+        this.tickSelectionEdgeScroll
+      );
+    }
+  }
+
+  private readonly onDocumentSelectMove = (e: MouseEvent) => {
+    if (!this.cursor.isSelecting()) {
+      return;
+    }
+    this.lastSelectPointer = { cx: e.clientX, cy: e.clientY };
+    this.applyPointerToCursor(e.clientX, e.clientY);
+    this.draw();
+    this.ensureSelectionEdgeScrollRunning();
+  };
+
+  private endSelectInteraction(e: MouseEvent) {
+    document.removeEventListener("mousemove", this.onDocumentSelectMove);
+    document.removeEventListener("mouseup", this.onDocumentSelectUp);
+    this.cancelSelectionEdgeScroll();
+    this.lastSelectPointer = null;
+    if (this.cursor.isSelecting()) {
+      this.applyPointerToCursor(e.clientX, e.clientY);
+      this.cursor.endSelection();
+      this.draw();
+    }
+  }
+
+  private readonly onDocumentSelectUp = (e: MouseEvent) => {
+    this.endSelectInteraction(e);
+  };
+
+  /**
+   * onMouseDown is handler for pressed mouse-key event
+   * @param e
+   */
+  onMouseDown(e: MouseEvent) {
+    this.lastSelectPointer = { cx: e.clientX, cy: e.clientY };
+    this.applyPointerToCursor(e.clientX, e.clientY);
 
     this.annotatedPosition = this.text.cursorToIndex(
       this.viewport,
@@ -385,6 +629,10 @@ export class Annotator {
     );
 
     this.draw();
+
+    document.addEventListener("mousemove", this.onDocumentSelectMove);
+    document.addEventListener("mouseup", this.onDocumentSelectUp);
+    this.ensureSelectionEdgeScrollRunning();
   }
 
   /**
@@ -392,27 +640,7 @@ export class Annotator {
    * @param e
    */
   onMouseUp(e: MouseEvent) {
-    this.cursor.setPositionFromEvent(
-      e,
-      this.lineHeight,
-      this.charWidth,
-      this.viewport.scrollOffsetY,
-      this.viewport.lineStart
-    );
-    this.cursor.yLine = Math.max(
-      0,
-      Math.min(this.cursor.yLine, Math.max(0, this.text.noLines - 1))
-    );
-    const segment = this.text.cursorToIndex(this.viewport, this.cursor);
-    if (segment) {
-      const line = this.text.getLineFromPosition(segment);
-      if (line.length < this.cursor.xLine) {
-        this.cursor.xLine = line.length;
-      }
-    }
-
-    this.cursor.endSelection();
-    this.draw();
+    this.endSelectInteraction(e);
   }
 
   /**
@@ -421,27 +649,7 @@ export class Annotator {
    */
   onMouseMove(e: MouseEvent) {
     if (this.cursor.isSelecting()) {
-      this.cursor.setPositionFromEvent(
-        e,
-        this.lineHeight,
-        this.charWidth,
-        this.viewport.scrollOffsetY,
-        this.viewport.lineStart
-      );
-      this.cursor.yLine = Math.max(
-        0,
-        Math.min(this.cursor.yLine, Math.max(0, this.text.noLines - 1))
-      );
-      const segment = this.text.cursorToIndex(this.viewport, this.cursor);
-      if (segment) {
-        const line = this.text.getLineFromPosition(segment);
-        if (line.length < this.cursor.xLine) {
-          this.cursor.xLine = line.length;
-        }
-      }
-
-      this.cursor.selectArea();
-      this.draw();
+      this.onDocumentSelectMove(e);
     }
   }
 
@@ -492,7 +700,7 @@ export class Annotator {
     this.viewport.addScrollOffset(
       deltaBufferPx,
       this.lineHeight,
-      this.text.noLines
+      this.scrollExtentLineCount()
     );
 
     e.preventDefault();
@@ -752,7 +960,10 @@ export class Annotator {
     this.scroller = new Scroller(scrollerDiv);
     this.scroller.onChange((percentage: number) => {
       const viewportLines = this.viewport.lineEnd - this.viewport.lineStart;
-      const scrollableLines = Math.max(0, this.text.noLines - viewportLines);
+      const scrollableLines = Math.max(
+        0,
+        this.scrollExtentLineCount() - viewportLines
+      );
       const scrollablePx = scrollableLines * this.lineHeight;
       const targetPx = (percentage / 100) * scrollablePx;
       const targetLineFrac = scrollablePx > 0 ? targetPx / this.lineHeight : 0;
@@ -761,15 +972,15 @@ export class Annotator {
         targetLineFrac,
         0,
         this.lineHeight,
-        this.text.noLines
+        this.scrollExtentLineCount()
       );
       this.draw();
     });
     this.scroller?.setRunnerSize(
-      (this.viewport.noLines / this.text.noLines) * 100
+      (this.viewport.noLines / this.scrollExtentLineCount()) * 100
     );
 
-    const viewportSize = this.viewport.noLines / this.text.noLines;
+    const viewportSize = this.viewport.noLines / this.scrollExtentLineCount();
     this.scroller?.setViewportSize(Math.min(100, viewportSize * 100));
   }
 
@@ -974,7 +1185,7 @@ export class Annotator {
       this.scroller.update(
         this.viewport.lineStart,
         this.viewport.lineEnd,
-        this.text.noLines,
+        this.scrollExtentLineCount(),
         this.viewport.scrollOffsetY,
         this.lineHeight
       );
@@ -982,7 +1193,7 @@ export class Annotator {
     if (this.lines) {
       this.lines.font = this.font;
       this.lines.lineHeight = this.lineHeight;
-      this.lines.draw(this.viewport);
+      this.lines.draw(this.viewport, this.text.noLines);
     }
 
     const thisRenderVieportLineStart = this.viewport.lineStart;
@@ -1024,7 +1235,7 @@ export class Annotator {
         0,
         Math.min(
           absLine,
-          Math.max(0, this.text.noLines - 1 - this.viewport.noLines)
+          Math.max(0, this.scrollExtentLineCount() - 1 - this.viewport.noLines)
         )
       );
       this.viewport.scrollOffsetY = scrollOffsetBefore;
@@ -1041,7 +1252,7 @@ export class Annotator {
             absY < this.viewport.lineStart ||
             absY > this.viewport.lineEnd - 1
           ) {
-            this.viewport.scrollTo(absY, this.text.noLines);
+            this.viewport.scrollTo(absY, this.scrollExtentLineCount());
           }
         }
       }
@@ -1080,11 +1291,12 @@ export class Annotator {
     // get bounds of the selection
     let [start, end] = this.cursor.getAbsBounds();
     if (start && end) {
+      // Use current mode (not forced raw mode) since cursor positions are in current mode
       let indexStart = this.text.getAbsTextIndexFromPosition(
-        this.text.getSegmentPosition(start.yLine, start.xLine, true)
+        this.text.getSegmentPosition(start.yLine, start.xLine)
       );
       let indexEnd = this.text.getAbsTextIndexFromPosition(
-        this.text.getSegmentPosition(end.yLine, end.xLine, true)
+        this.text.getSegmentPosition(end.yLine, end.xLine)
       );
 
       // Move endIndex after tags on the right to avoid gathering additional non-XML tag characters
@@ -1125,16 +1337,29 @@ export class Annotator {
       const beforeText = this.text.value.slice(0, indexStart);
       const afterText = this.text.value.slice(indexEnd);
 
+      const openTagString = openTag.getTag();
+      const closeTagString = closeTag.getTag();
+
       this.text.value =
         beforeText +
-        openTag.getTag() +
+        openTagString +
         selectedRawText +
-        closeTag.getTag() +
+        closeTagString +
         afterText;
 
       this.text.prepareSegments();
       this.text.calculateLines();
-      this.cursor.reset();
+
+      // Find the newly added anchor and select it
+      const tagPosition = this.text.getTagPosition(openTag.getTagName(), 0);
+      if (tagPosition && tagPosition.length === 2) {
+        this.cursor.selectStart = tagPosition[0];
+        this.cursor.selectEnd = tagPosition[1];
+        this.cursor.setTrueSelectionDirection();
+      } else {
+        this.cursor.reset();
+      }
+
       this.warnings.onTextChanged(this.text.value);
       this.draw();
     }
@@ -1191,18 +1416,29 @@ export class Annotator {
     this.draw();
   }
 
+  /**
+   * Scrolls the viewport to the anchor and moves the caret to the first character
+   * inside the anchor (parsed position after the opening tag).
+   * Does not reset the cursor; an existing text selection is preserved.
+   * Focuses the annotator canvas so subsequent keyboard input targets the text.
+   */
   scrollToAnchor(tag: string, index: number = 0) {
     const pos = this.text.getTagPosition(tag, index);
     if (pos.length !== 2) {
       return;
     }
 
-    this.viewport.scrollTo(pos[0].yLine, this.text.noLines);
+    this.viewport.scrollTo(pos[0].yLine, this.scrollExtentLineCount());
+    this.cursor.xLine = pos[0].xLine;
+    this.cursor.yLine = pos[0].yLine;
+    this.cursor.resetHighlight();
     this.draw();
+    // Move keyboard focus to the canvas so arrow keys / editing apply here, not the previous control.
+    this.element.focus({ preventScroll: true });
   }
 
   scrollToLine(absLine: number) {
-    this.viewport.scrollTo(absLine, this.text.noLines);
+    this.viewport.scrollTo(absLine, this.scrollExtentLineCount());
     this.draw();
   }
 
@@ -1223,7 +1459,7 @@ export class Annotator {
     if (!pos) return;
     const segment = this.text.segments[pos.segmentIndex];
     const absLine = segment.lineStart + pos.lineIndex;
-    this.viewport.scrollTo(absLine, this.text.noLines);
+    this.viewport.scrollTo(absLine, this.scrollExtentLineCount());
     this.draw();
   }
 
@@ -1238,9 +1474,13 @@ export class Annotator {
 
     // Preserve fluent scroll offset (deltaY) so updating text (e.g. discard)
     // doesn't snap the viewport to the top of a line.
+    const maxLineStart = Math.max(
+      0,
+      this.scrollExtentLineCount() - 1 - this.viewport.noLines
+    );
     const clampedLineStart = Math.max(
       0,
-      Math.min(positionBeforeChange, Math.max(0, this.text.noLines - 1))
+      Math.min(positionBeforeChange, maxLineStart)
     );
     const desiredLineStart =
       clampedLineStart + (scrollOffsetBeforeChange || 0) / this.lineHeight;
@@ -1249,7 +1489,7 @@ export class Annotator {
       desiredLineStart,
       0,
       this.lineHeight,
-      this.text.noLines
+      this.scrollExtentLineCount()
     );
     this.draw();
   }

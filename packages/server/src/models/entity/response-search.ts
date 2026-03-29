@@ -18,6 +18,27 @@ import { Setting } from "@models/setting/setting";
 import Relation from "@models/relation/relation";
 
 /**
+ * Statement.getEntitiesIds() appends territory lineage (ancestors toward root) for other features.
+ * Territory search aggregates those ids; strip ancestor territory ids so the root (or any parent T)
+ * is not implied when filtering by a child territory.
+ */
+function stripAncestorTerritoryIdsFromStatementLineage(
+  statementTerritoryId: string | undefined,
+  entityIds: Record<string, null>
+): void {
+  if (!statementTerritoryId) {
+    return;
+  }
+  const path = treeCache.tree.idMap[statementTerritoryId]?.path;
+  if (!path?.length) {
+    return;
+  }
+  for (const ancestorId of path) {
+    delete entityIds[ancestorId];
+  }
+}
+
+/**
  * SearchQuery is customized builder for search queries, allowing to build query by chaining prepared filters
  */
 export class SearchQuery {
@@ -67,6 +88,10 @@ export class SearchQuery {
       for (const id of st.getEntitiesIds()) {
         idsMap[id] = null;
       }
+      stripAncestorTerritoryIdsFromStatementLineage(
+        st.data.territory?.territoryId,
+        idsMap
+      );
     }
 
     return Object.keys(idsMap);

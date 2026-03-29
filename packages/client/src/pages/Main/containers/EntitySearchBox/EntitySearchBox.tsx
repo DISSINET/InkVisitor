@@ -45,7 +45,8 @@ import { EntitySearchResults } from "./EntitySearchResults/EntitySearchResults";
 
 const initSearchValues: IRequestSearch = {
   labelOrId: "",
-  cooccurrenceId: "",
+  cooccurrenceId: undefined,
+  territoryId: undefined,
   isRootInvalid: IRequestSearchRootValidity.Any,
 };
 const defaultClassOption = {
@@ -102,10 +103,17 @@ export const EntitySearchBox: React.FC = () => {
   }, [searchData.language]);
 
   // check whether the search should be executed
+  // it has to work also when label is not set but some of the options is selected #2913
   const validSearch = useMemo<boolean>(() => {
     return Boolean(
-      debouncedValues?.labelOrId?.length &&
-        debouncedValues?.labelOrId?.length > 1
+      (debouncedValues?.labelOrId?.length &&
+        debouncedValues?.labelOrId?.length > 1) ||
+        debouncedValues?.class ||
+        debouncedValues?.territoryId ||
+        debouncedValues?.cooccurrenceId ||
+        debouncedValues?.haveReferenceTo ||
+        debouncedValues?.createdDate !== undefined ||
+        debouncedValues?.updatedDate !== undefined
     );
   }, [debouncedValues]);
 
@@ -525,7 +533,7 @@ export const EntitySearchBox: React.FC = () => {
                         unlinkButton={{
                           onClick: () => {
                             handleChange({
-                              territoryId: "",
+                              territoryId: undefined,
                               subTerritorySearch: undefined,
                             });
                             setTerritoryEntity(false);
@@ -589,7 +597,7 @@ export const EntitySearchBox: React.FC = () => {
                     tooltipPosition="left"
                     unlinkButton={{
                       onClick: () => {
-                        handleChange({ cooccurrenceId: "" });
+                        handleChange({ cooccurrenceId: undefined });
                         setCooccurrenceEntity(false);
                       },
                       color: "danger",

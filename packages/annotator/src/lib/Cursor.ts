@@ -1,13 +1,12 @@
 import { DrawingOptions } from "./Annotator";
 import Highlighter, {
-  CursorStyle,
   defaultStyle,
   IAbsCoordinates,
   IRelativeCoordinates,
 } from "./Highlighter";
 import Text from "./Text";
 import Viewport from "./Viewport";
-import { EditMode, HighlightMode } from "./constants";
+import { HighlightMode } from "./constants";
 
 export enum DIRECTION {
   FORWARD = "FORWARD",
@@ -89,10 +88,31 @@ export default class Cursor
     scrollOffsetY: number = 0,
     viewportLineStart: number = 0
   ) {
-    this.xLine = this.xToCharI(evt.offsetX, charWidth);
+    this.setPositionFromCanvasOffsets(
+      evt.offsetX,
+      evt.offsetY,
+      lineHeight,
+      charWidth,
+      scrollOffsetY,
+      viewportLineStart
+    );
+  }
+
+  /**
+   * Same as setPositionFromEvent but with explicit canvas offsets (e.g. from client coords).
+   */
+  setPositionFromCanvasOffsets(
+    offsetX: number,
+    offsetY: number,
+    lineHeight: number,
+    charWidth: number,
+    scrollOffsetY: number = 0,
+    viewportLineStart: number = 0
+  ) {
+    this.xLine = this.xToCharI(offsetX, charWidth);
     const relY = Math.max(
       0,
-      Math.floor((evt.offsetY * this.ratio + scrollOffsetY) / lineHeight)
+      Math.floor((offsetY * this.ratio + scrollOffsetY) / lineHeight)
     );
     this.yLine = viewportLineStart + relY;
   }
@@ -245,7 +265,7 @@ export default class Cursor
     ctx: CanvasRenderingContext2D,
     viewport: Viewport,
     text: Text,
-    drawingOptions: DrawingOptions,
+    drawingOptions: DrawingOptions
   ) {
     if (this.xLine === -1 && this.yLine === -1) {
       return;
@@ -313,6 +333,11 @@ export default class Cursor
     this.selectEnd = undefined;
     this.xLine = -1;
     this.yLine = -1;
+  }
+
+  resetHighlight() {
+    this.selectStart = undefined;
+    this.selectEnd = undefined;
   }
 
   getAbsolutePosition(_viewport?: Viewport): IAbsCoordinates {

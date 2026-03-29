@@ -200,7 +200,7 @@ export const TextAnnotatorMenu = ({
                 noBackground
                 onClick={() => onEscapePressed()}
                 tooltipLabel="Close selection menu"
-                tooltipContent={[<p>(Esc, Ctrl+Enter or ⌘+Enter)</p>]}
+                tooltipContent={<p>(Esc, Ctrl+Enter or ⌘+Enter)</p>}
                 tooltipPosition="right"
               />
             </StyledAnnotatorDoneButton>
@@ -242,13 +242,13 @@ export const TextAnnotatorMenu = ({
             {onCreateStatement && (
               <StyledAnnotatorItemContentLine>
                 <Button
+                  label="New Statement"
+                  tooltipLabel="Create new Statement from selection"
                   icon={<TbAnchor size={15} />}
                   color="primary"
                   onClick={() => {
                     onCreateStatement(statementElvl);
                   }}
-                  label="New Statement"
-                  tooltipLabel="Create new Statement from selection"
                 />
                 <ElvlButtonGroup
                   border
@@ -284,6 +284,7 @@ export const TextAnnotatorMenu = ({
                   onCreateStatement &&
                   onCreateStatement(suggesterElvl, entityCreateModalProps)
                 }
+                disableCleanTypedAfterCreate
               />
               <ElvlButtonGroup
                 border
