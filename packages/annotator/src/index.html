@@ -143,6 +143,16 @@
         <button id="collapseStoreBtn">Collapse & store position</button>
         <button id="restorePositionBtn">Restore</button>
       </fieldset>
+      <fieldset style="background-color: #fff3cd; border: 2px solid #ffc107; padding: 15px;">
+        <legend style="font-weight: bold; color: #856404;">⚠️ Asymmetrical Anchor Detection</legend>
+        <button id="checkAnchorsBtn" style="background: #ffc107; color: #000; border: none; padding: 8px 16px; cursor: pointer; font-weight: bold; margin-bottom: 10px;">
+          Check for Broken Anchors
+        </button>
+        <div id="brokenAnchorsContainer" style="margin-top: 10px;">
+          <p id="noIssuesMessage" style="color: #28a745; display: none;">✓ No broken anchors found!</p>
+          <div id="brokenAnchorsList"></div>
+        </div>
+      </fieldset>
     </div>
 
     <p>Text from textfile.txt:</p>
@@ -452,6 +462,107 @@
       }
 
       resizeAnnotator();
+
+      // Asymmetrical anchor detection functionality
+      const brokenAnchorsList = document.getElementById("brokenAnchorsList");
+      const noIssuesMessage = document.getElementById("noIssuesMessage");
+
+      // Subscribe to asymmetrical anchor warnings
+      annotator.onAsymmetricalAnchors((anchors) => {
+        displayBrokenAnchors(anchors);
+      });
+
+      function displayBrokenAnchors(anchors) {
+        brokenAnchorsList.innerHTML = "";
+        
+        if (anchors.length === 0) {
+          noIssuesMessage.style.display = "block";
+          return;
+        }
+
+        noIssuesMessage.style.display = "none";
+
+        anchors.forEach((anchor, index) => {
+          const anchorDiv = document.createElement("div");
+          anchorDiv.style.cssText = `
+            background: white;
+            border: 1px solid #dc3545;
+            border-left: 4px solid #dc3545;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          `;
+
+          const infoDiv = document.createElement("div");
+          infoDiv.style.flex = "1";
+          
+          const typeLabel = anchor.type === "orphaned-opening" ? "Orphaned Opening Tag" : "Orphaned Closing Tag";
+          const typeColor = anchor.type === "orphaned-opening" ? "#dc3545" : "#fd7e14";
+          
+          infoDiv.innerHTML = `
+            <div style="font-weight: bold; color: ${typeColor}; margin-bottom: 4px;">
+              ${typeLabel}
+            </div>
+            <div style="font-family: monospace; font-size: 12px; color: #333;">
+              Tag: <strong>${anchor.tagName.substring(0, 40)}${anchor.tagName.length > 40 ? '...' : ''}</strong>
+            </div>
+            <div style="font-size: 11px; color: #666; margin-top: 4px;">
+              Segment: ${anchor.segmentIndex} | Position: ${anchor.position}
+              ${anchor.attributes && Object.keys(anchor.attributes).length > 0 
+                ? ` | Attributes: ${JSON.stringify(anchor.attributes)}`
+                : ''
+              }
+            </div>
+          `;
+
+          const removeBtn = document.createElement("button");
+          removeBtn.textContent = "Unlink";
+          removeBtn.style.cssText = `
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-left: 10px;
+          `;
+          removeBtn.onmouseover = () => {
+            removeBtn.style.background = "#c82333";
+          };
+          removeBtn.onmouseout = () => {
+            removeBtn.style.background = "#dc3545";
+          };
+          removeBtn.onclick = () => {
+            const success = annotator.removeAsymmetricalAnchor(anchor.tagName, anchor.position);
+            if (success) {
+              console.log(`Removed broken anchor: ${anchor.tagName} at position ${anchor.position}`);
+            } else {
+              alert("Failed to remove anchor. Please try again.");
+            }
+          };
+
+          anchorDiv.appendChild(infoDiv);
+          anchorDiv.appendChild(removeBtn);
+          brokenAnchorsList.appendChild(anchorDiv);
+        });
+      }
+
+      // Check anchors button handler
+      document.getElementById("checkAnchorsBtn").onclick = () => {
+        console.log("Checking for broken anchors...");
+        annotator.checkAnchors();
+        const issues = annotator.validateAnchors();
+        console.log(`Found ${issues.length} broken anchor(s):`, issues);
+      };
+
+      // Initial check on load
+      setTimeout(() => {
+        annotator.checkAnchors();
+      }, 500);
     </script>
   </body>
 </html>
