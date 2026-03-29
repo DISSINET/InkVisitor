@@ -500,6 +500,25 @@ export const TextAnnotator = ({
     [endMenuDrag]
   );
 
+  /** Keeps keyboard focus on the annotator canvas when using menu controls; skips inputs so EntitySuggester stays typable. */
+  const handleMenuPointerDownCapture = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      const target = e.target as HTMLElement;
+      if (
+        target.closest(
+          "input, textarea, select, [contenteditable='true'], label"
+        )
+      ) {
+        return;
+      }
+      e.preventDefault();
+      queueMicrotask(() => {
+        mainCanvas.current?.focus({ preventScroll: true });
+      });
+    },
+    []
+  );
+
   // quiet does not trigger a toast notification
   const handleSaveNewContent = (
     quiet: boolean,
@@ -1021,6 +1040,7 @@ export const TextAnnotator = ({
               >
                 <StyledAnnotatorMenuDraggable
                   ref={menuDraggableRef}
+                  onPointerDownCapture={handleMenuPointerDownCapture}
                   style={{
                     transform: `translate(${menuDragOffset.x}px, ${menuDragOffset.y}px)`,
                   }}
