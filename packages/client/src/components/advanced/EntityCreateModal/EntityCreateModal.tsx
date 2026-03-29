@@ -188,6 +188,10 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
             territoryId: newCreated.territoryId,
             language: newCreated.language || user.options.defaultLanguage,
           });
+          // when onCreateStatement is defined, we handle the statement creation in the parent component
+          // e.g. in the annotator suggester where we need to make additional calculations (like the order of the statement)
+          // so we need to close the modal here (is not done in onMutationSuccess)
+          closeModal();
         } else {
           const newStatement = CStatement(
             userRole,
