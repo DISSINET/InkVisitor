@@ -500,24 +500,24 @@ export const TextAnnotator = ({
     [endMenuDrag]
   );
 
-  /** Keeps keyboard focus on the annotator canvas when using menu controls; skips inputs so EntitySuggester stays typable. */
-  const handleMenuPointerDownCapture = useCallback(
-    (e: React.PointerEvent<HTMLDivElement>) => {
-      const target = e.target as HTMLElement;
-      if (
-        target.closest(
-          "input, textarea, select, [contenteditable='true'], label"
-        )
-      ) {
-        return;
-      }
-      e.preventDefault();
-      queueMicrotask(() => {
-        mainCanvas.current?.focus({ preventScroll: true });
-      });
-    },
-    []
-  );
+  /** Keeps keyboard focus on the annotator canvas when using menu controls; skips inputs and react-select (BaseDropdown) so they stay interactive. */
+  // const handleMenuPointerDownCapture = useCallback(
+  //   (e: React.PointerEvent<HTMLDivElement>) => {
+  //     const target = e.target as HTMLElement;
+  //     if (
+  //       target.closest(
+  //         "input, textarea, select, [contenteditable='true'], label, .react-select-container"
+  //       )
+  //     ) {
+  //       return;
+  //     }
+  //     e.preventDefault();
+  //     queueMicrotask(() => {
+  //       mainCanvas.current?.focus({ preventScroll: true });
+  //     });
+  //   },
+  //   []
+  // );
 
   // quiet does not trigger a toast notification
   const handleSaveNewContent = (
@@ -638,7 +638,9 @@ export const TextAnnotator = ({
     const currentContent = annotator?.text?.value;
     const newContent = dataDocument?.content ?? "no text";
 
-    const reuseExistingInstance = (contentForLocalState: string = newContent) => {
+    const reuseExistingInstance = (
+      contentForLocalState: string = newContent
+    ) => {
       if (!annotator) return;
       annotator.fontColor = theme.color.black;
       annotator.bgColor = "transparent";
@@ -1040,7 +1042,7 @@ export const TextAnnotator = ({
               >
                 <StyledAnnotatorMenuDraggable
                   ref={menuDraggableRef}
-                  onPointerDownCapture={handleMenuPointerDownCapture}
+                  // onPointerDownCapture={handleMenuPointerDownCapture}
                   style={{
                     transform: `translate(${menuDragOffset.x}px, ${menuDragOffset.y}px)`,
                   }}
