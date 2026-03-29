@@ -520,10 +520,10 @@ export const TextAnnotator = ({
   // );
 
   // quiet does not trigger a toast notification
-  const handleSaveNewContent = (
+  const handleSaveNewContent = async (
     quiet: boolean,
     skipRefresh: boolean = false
-  ) => {
+  ): Promise<void> => {
     if (annotator && documentId) {
       if (skipRefresh) {
         setIsSavingWithoutRefresh(true);
@@ -531,23 +531,17 @@ export const TextAnnotator = ({
         setIsSaving(true);
       }
 
-      if (quiet) {
-        updateDocumentMutationQuiet.mutate({
-          id: documentId,
-          doc: {
-            ...dataDocument,
-            content: annotator.text.value,
-          },
-        });
-      } else {
-        updateDocumentMutation.mutate({
-          id: documentId,
-          doc: {
-            ...dataDocument,
-            content: annotator.text.value,
-          },
-        });
-      }
+      const mutation = quiet
+        ? updateDocumentMutationQuiet
+        : updateDocumentMutation;
+
+      await mutation.mutateAsync({
+        id: documentId,
+        doc: {
+          ...dataDocument,
+          content: annotator.text.value,
+        },
+      });
     }
   };
 
@@ -597,7 +591,10 @@ export const TextAnnotator = ({
     enabled: api.isLoggedIn() && selectedAnchors.length > 0,
   });
 
-  const handleAddAnchor = (entityId: string, elvl?: EntityEnums.Elvl) => {
+  const handleAddAnchor = async (
+    entityId: string,
+    elvl?: EntityEnums.Elvl
+  ): Promise<void> => {
     annotator?.addAnchor(
       entityId,
       elvl
@@ -606,7 +603,7 @@ export const TextAnnotator = ({
           }
         : {}
     );
-    handleSaveNewContent(true);
+    await handleSaveNewContent(true);
     handleRefreshEntityAndStatement(entityId);
     toast.info(`Anchor created ${entityId}.`);
   };
@@ -804,7 +801,7 @@ export const TextAnnotator = ({
     return "new Territory";
   }, [territoryCreateModalType, territory]);
 
-  const onCreateStatement = (
+  const onCreateStatement = async (
     elvl: EntityEnums.Elvl,
     // following props are only for creation from EntitySuggester -> EntityCreateModal
     entityCreateModalProps?: {
@@ -813,10 +810,10 @@ export const TextAnnotator = ({
       territoryId: string;
       language: EntityEnums.Language;
     }
-  ) => {
+  ): Promise<void> => {
     if (handleCreateStatement && selectedText && selectionStartIndex !== -1) {
       const newStatementId = uuidv4();
-      handleAddAnchor(newStatementId, elvl);
+      await handleAddAnchor(newStatementId, elvl);
       // remove linebreaks from text
       const validatedText = selectedText.replace(/\n/g, " ");
       handleCreateStatement(
@@ -1072,8 +1069,8 @@ export const TextAnnotator = ({
                           anchor.getTagName() === thisTerritoryEntityId
                       )}
                       activeTerritoryId={thisTerritoryEntityId}
-                      onCreateActiveTAnchor={(elvl) => {
-                        handleAddAnchor(thisTerritoryEntityId ?? "", elvl);
+                      onCreateActiveTAnchor={async (elvl) => {
+                        await handleAddAnchor(thisTerritoryEntityId ?? "", elvl);
                       }}
                       canCreateActiveTAnchor={
                         !dataDocument?.entityIds.T.includes(
@@ -1253,8 +1250,8 @@ export const TextAnnotator = ({
               ? dataParentTerritory
               : territory
           }
-          onMutationSuccess={(entity) => {
-            handleAddAnchor(entity.id, territoryElvl);
+          onMutationSuccess={async (entity) => {
+            await handleAddAnchor(entity.id, territoryElvl);
             setTerritoryCreateModalType(false);
             setTerritoryElvl(EntityEnums.Elvl.Textual);
             toast.info(`${newTerritoryName} created!`);
