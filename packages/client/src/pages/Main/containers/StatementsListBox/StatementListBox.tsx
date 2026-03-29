@@ -443,6 +443,16 @@ export const StatementListBox: React.FC = () => {
     mutationFn: async (newStatement: IStatement) =>
       await api.entityCreate(newStatement),
     onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["territory", "statement-list", territoryId],
+      });
+      if (selectedDocumentId) {
+        queryClient.invalidateQueries({
+          queryKey: ["document", selectedDocumentId],
+        });
+      }
+      // TODO: only invalidate if text is highlighted (annotatorMenu is open)
+      queryClient.invalidateQueries({ queryKey: ["anchorEntities"] });
       setStatementId(variables.id);
       queryClient.invalidateQueries({ queryKey: ["territory"] });
       queryClient.invalidateQueries({ queryKey: ["tree"] });
