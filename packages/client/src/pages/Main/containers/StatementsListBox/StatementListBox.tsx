@@ -560,6 +560,8 @@ export const StatementListBox: React.FC = () => {
           queryKey: ["document", selectedDocumentId],
         });
       }
+      // TODO: only invalidate if text is highlighted (annotatorMenu is open)
+      queryClient.invalidateQueries({ queryKey: ["anchorEntities"] });
       setStatementId(variables.id);
       queryClient.invalidateQueries({ queryKey: ["tree"] });
       dispatch(setDisableStatementListScroll(false));

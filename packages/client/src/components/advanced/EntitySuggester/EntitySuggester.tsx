@@ -82,6 +82,7 @@ interface EntitySuggesterProps {
 
   disabled?: boolean;
   isHidden?: boolean;
+  disableCleanTypedAfterCreate?: boolean;
 }
 /**
  * Internal heavy component. Use the wrapper export below to optionally defer mounting.
@@ -133,6 +134,7 @@ const EntitySuggesterFull: React.FC<
   isHidden = false,
   externalDroppedItem,
   onConsumeExternalDrop,
+  disableCleanTypedAfterCreate = false,
 }) => {
   const [typed, setTyped] = useState<string>(initTyped ?? "");
   const debouncedTyped = useDebounce(typed, 100);
@@ -295,7 +297,9 @@ const EntitySuggesterFull: React.FC<
   const onMutationSuccess = (entity: IEntity) => {
     onSelected(entity.id);
     onPicked(entity);
-    handleClean();
+    if (!disableCleanTypedAfterCreate) {
+      handleClean();
+    }
     if (openDetailOnCreate && entity.class !== EntityEnums.Class.Value) {
       appendDetailId(entity.id);
     }

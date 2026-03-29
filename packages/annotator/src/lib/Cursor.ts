@@ -1,13 +1,12 @@
 import { DrawingOptions } from "./Annotator";
 import Highlighter, {
-  CursorStyle,
   defaultStyle,
   IAbsCoordinates,
   IRelativeCoordinates,
 } from "./Highlighter";
 import Text from "./Text";
 import Viewport from "./Viewport";
-import { EditMode, HighlightMode } from "./constants";
+import { HighlightMode } from "./constants";
 
 export enum DIRECTION {
   FORWARD = "FORWARD",
@@ -266,7 +265,7 @@ export default class Cursor
     ctx: CanvasRenderingContext2D,
     viewport: Viewport,
     text: Text,
-    drawingOptions: DrawingOptions,
+    drawingOptions: DrawingOptions
   ) {
     if (this.xLine === -1 && this.yLine === -1) {
       return;
