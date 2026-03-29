@@ -137,7 +137,7 @@ export const StatementListTextAnnotator: React.FC<
       } else if (territoryChanged) {
         console.log("territoryChanged", territory.id);
       } else if (annotatorChanged) {
-        console.log("annotatorChanged", annotator);
+        console.log("annotatorChanged");
       }
 
       // Scroll if: IDs changed OR annotator was recreated (and we haven't scrolled this annotator yet)
