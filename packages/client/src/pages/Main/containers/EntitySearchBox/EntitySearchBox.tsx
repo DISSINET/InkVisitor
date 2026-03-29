@@ -103,6 +103,7 @@ export const EntitySearchBox: React.FC = () => {
   }, [searchData.language]);
 
   // check whether the search should be executed
+  // it has to work also when label is not set but some of the options is selected #2913
   const validSearch = useMemo<boolean>(() => {
     return Boolean(
       (debouncedValues?.labelOrId?.length &&
