@@ -1213,6 +1213,86 @@ class Text {
       { xLine: end.x, yLine: end.y },
     ];
   }
+
+  /**
+   * Validate anchors and return asymmetrical (broken) anchors
+   * Detects orphaned opening tags and orphaned closing tags
+   */
+  validateAnchors(): Array<{
+    tagName: string;
+    type: 'orphaned-opening' | 'orphaned-closing';
+    segmentIndex: number;
+    position: number;
+    attributes?: Record<string, string>;
+  }> {
+    const issues: Array<{
+      tagName: string;
+      type: 'orphaned-opening' | 'orphaned-closing';
+      segmentIndex: number;
+      position: number;
+      attributes?: Record<string, string>;
+    }> = [];
+
+    const openingTagsByName = new Map<string, Tag[]>();
+    const closingTagsByName = new Map<string, Tag[]>();
+
+    // Collect all opening and closing tags
+    for (const segment of this.segments) {
+      for (const tag of segment.openingTags) {
+        const name = tag.getTagName();
+        if (!openingTagsByName.has(name)) {
+          openingTagsByName.set(name, []);
+        }
+        openingTagsByName.get(name)!.push(tag);
+      }
+
+      for (const tag of segment.closingTags) {
+        const name = tag.getTagName();
+        if (!closingTagsByName.has(name)) {
+          closingTagsByName.set(name, []);
+        }
+        closingTagsByName.get(name)!.push(tag);
+      }
+    }
+
+    // Find orphaned opening tags
+    for (const [tagName, openings] of openingTagsByName) {
+      const closings = closingTagsByName.get(tagName) || [];
+      if (openings.length > closings.length) {
+        // More openings than closings - last ones are orphaned
+        for (let i = closings.length; i < openings.length; i++) {
+          const orphan = openings[i];
+          issues.push({
+            tagName,
+            type: 'orphaned-opening',
+            segmentIndex: orphan.segmentIndex,
+            position: orphan.position,
+            attributes: orphan.attributes,
+          });
+        }
+      }
+    }
+
+    // Find orphaned closing tags
+    for (const [tagName, closings] of closingTagsByName) {
+      const openings = openingTagsByName.get(tagName) || [];
+      if (closings.length > openings.length) {
+        // More closings than openings - first ones are orphaned
+        for (let i = openings.length; i < closings.length; i++) {
+          const orphan = closings[i];
+          issues.push({
+            tagName,
+            type: 'orphaned-closing',
+            segmentIndex: orphan.segmentIndex,
+            position: orphan.position,
+            attributes: orphan.attributes,
+          });
+        }
+      }
+    }
+
+    return issues;
+  }
 }
 
 export default Text;

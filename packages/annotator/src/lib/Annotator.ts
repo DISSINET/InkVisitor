@@ -1942,4 +1942,99 @@ export class Annotator {
 
     return [clamp(newStart), clamp(newEnd)];
   }
+
+  /**
+   * Validate anchors and return asymmetrical (broken) anchors
+   */
+  validateAnchors() {
+    return this.text.validateAnchors();
+  }
+
+  /**
+   * Subscribe to asymmetrical anchor warnings
+   */
+  onAsymmetricalAnchors(
+    callback: (
+      anchors: Array<{
+        tagName: string;
+        type: "orphaned-opening" | "orphaned-closing";
+        segmentIndex: number;
+        position: number;
+        attributes?: Record<string, string>;
+      }>
+    ) => void
+  ): void {
+    this.warnings.onWarningData((data) => {
+      if (data.type === "asymmetrical-anchor") {
+        callback(data.anchors);
+      }
+    });
+  }
+
+  /**
+   * Remove an asymmetrical anchor by tag name
+   * Returns true if successfully removed
+   */
+  removeAsymmetricalAnchor(tagName: string, position: number): boolean {
+    const issues = this.validateAnchors();
+    const issue = issues.find(
+      (i) => i.tagName === tagName && i.position === position
+    );
+
+    if (!issue) {
+      return false;
+    }
+
+    const segment = this.text.segments[issue.segmentIndex];
+    if (!segment) {
+      return false;
+    }
+
+    // Find the tag to remove
+    const tagToRemove =
+      issue.type === "orphaned-opening"
+        ? segment.openingTags.find(
+            (t) => t.getTagName() === tagName && t.position === issue.position
+          )
+        : segment.closingTags.find(
+            (t) => t.getTagName() === tagName && t.position === issue.position
+          );
+
+    if (!tagToRemove) {
+      return false;
+    }
+
+    // Remove from raw text
+    const tagLength = tagToRemove.getTagLength();
+    const before = segment.raw.substring(0, tagToRemove.position);
+    const after = segment.raw.substring(tagToRemove.position + tagLength);
+    segment.raw = before + after;
+
+    // Re-parse the segment
+    segment.parseText();
+
+    // Update text value and recalculate
+    this.text.assignValueFromSegments();
+
+    // Redraw
+    this.draw();
+
+    // Re-check anchors
+    this.checkAnchors();
+
+    return true;
+  }
+
+  /**
+   * Check anchors and emit warnings if issues found
+   */
+  checkAnchors(): void {
+    const issues = this.validateAnchors();
+    if (issues.length > 0) {
+      this.warnings.emitAsymmetricalAnchors(issues);
+    } else {
+      this.warnings.clearWarnings();
+      this.warnings.emitAsymmetricalAnchors([]);
+    }
+  }
 }

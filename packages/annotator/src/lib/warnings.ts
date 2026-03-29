@@ -1,10 +1,28 @@
 /**
+ * Represents an asymmetrical (broken) anchor in the text
+ */
+export interface AsymmetricalAnchor {
+  tagName: string;
+  type: 'orphaned-opening' | 'orphaned-closing';
+  segmentIndex: number;
+  position: number;
+  attributes?: Record<string, string>;
+}
+
+export interface WarningData {
+  type: 'asymmetrical-anchor';
+  anchors: AsymmetricalAnchor[];
+}
+
+/**
  * Warnings system for the Annotator
  * Handles warning messages and notifications for various annotator operations
  */
 export class Warnings {
   private enabled: boolean = true;
   private onWarningCb?: (message: string) => void;
+  private onWarningDataCb?: (data: WarningData) => void;
+  private currentWarnings: WarningData | null = null;
 
   constructor(enabled: boolean = true) {
     this.enabled = enabled;
@@ -39,6 +57,13 @@ export class Warnings {
   }
 
   /**
+   * Set callback for structured warning data
+   */
+  onWarningData(cb: (data: WarningData) => void): void {
+    this.onWarningDataCb = cb;
+  }
+
+  /**
    * Trigger a warning
    */
   warn(message: string): void {
@@ -47,6 +72,36 @@ export class Warnings {
     }
     
     this.onWarningCb(message);
+  }
+
+  /**
+   * Emit asymmetrical anchor warnings
+   */
+  emitAsymmetricalAnchors(anchors: AsymmetricalAnchor[]): void {
+    if (!this.enabled || !this.onWarningDataCb) {
+      return;
+    }
+
+    this.currentWarnings = {
+      type: 'asymmetrical-anchor',
+      anchors,
+    };
+
+    this.onWarningDataCb(this.currentWarnings);
+  }
+
+  /**
+   * Get current warnings without triggering callback
+   */
+  getCurrentWarnings(): WarningData | null {
+    return this.currentWarnings;
+  }
+
+  /**
+   * Clear current warnings
+   */
+  clearWarnings(): void {
+    this.currentWarnings = null;
   }
 
   /**
