@@ -132,6 +132,13 @@ export const StatementListTextAnnotator: React.FC<
       const territoryChanged = prevTerritoryIdRef.current !== territory.id;
       const statementChanged = prevStatementIdRef.current !== statementId;
       const annotatorChanged = lastScrolledAnnotatorRef.current !== annotator;
+      if (statementChanged) {
+        console.log("statementChanged", statementId);
+      } else if (territoryChanged) {
+        console.log("territoryChanged", territory.id);
+      } else if (annotatorChanged) {
+        console.log("annotatorChanged", annotator);
+      }
 
       // Scroll if: IDs changed OR annotator was recreated (and we haven't scrolled this annotator yet)
       const shouldScroll =
