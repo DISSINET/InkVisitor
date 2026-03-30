@@ -826,7 +826,7 @@ export const EntitySearchBox: React.FC = () => {
           {sortedEntities.length > 0 && (
             <>{`Results (${sortedEntities.length})`}</>
           )}
-          {sortedEntities.length === 0 && (
+          {sortedEntities.length === 0 && !isFetching && (
             <p
               style={{
                 fontStyle: "italic",
