@@ -31,6 +31,7 @@ import { DropdownItem } from "types";
 import { EntitySearchAdvancedOptions } from "./EntitySearchAdvancedOptions/EntitySearchAdvancedOptions";
 import {
   StyledBoxContent,
+  StyledNoResults,
   StyledOptions,
   StyledPill,
   StyledPillCloseIcon,
@@ -827,14 +828,7 @@ export const EntitySearchBox: React.FC = () => {
             <>{`Results (${sortedEntities.length})`}</>
           )}
           {sortedEntities.length === 0 && !isFetching && (
-            <p
-              style={{
-                fontStyle: "italic",
-                fontSize: "1.4rem",
-                margin: "0.5rem",
-                padding: "2rem",
-              }}
-            >{`No results found`}</p>
+            <StyledNoResults>{`No results found`}</StyledNoResults>
           )}
         </StyledResultsHeader>
 
