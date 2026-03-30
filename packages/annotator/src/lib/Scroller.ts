@@ -18,6 +18,7 @@ class Scroller {
   runnerClickRelPosition: number = 0;
 
   viewPortSize: number = 0;
+  focusTarget?: HTMLElement;
 
   constructor(element: HTMLDivElement) {
     this.element = element;
@@ -36,6 +37,14 @@ class Scroller {
 
   setViewportSize(percentSize: number): void {
     this.viewPortSize = percentSize;
+  }
+
+  setFocusTarget(element: HTMLElement): void {
+    this.focusTarget = element;
+  }
+
+  focusMainCanvas(): void {
+    this.focusTarget?.focus({ preventScroll: true });
   }
   setRunnerSize(percentSize: number): void {
     const clampedPercent = Math.min(100, percentSize);
@@ -180,6 +189,7 @@ class Scroller {
     document.body.style.cursor = "initial";
 
     document.removeEventListener("mousemove", this.onMouseMove.bind(this));
+    this.focusMainCanvas();
   }
 
   /**
@@ -213,6 +223,7 @@ class Scroller {
         );
       }
     }
+    this.focusMainCanvas();
   }
 
   /**

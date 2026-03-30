@@ -958,6 +958,7 @@ export class Annotator {
    */
   addScroller(scrollerDiv: HTMLDivElement) {
     this.scroller = new Scroller(scrollerDiv);
+    this.scroller.setFocusTarget(this.element);
     this.scroller.onChange((percentage: number) => {
       const viewportLines = this.viewport.lineEnd - this.viewport.lineStart;
       const scrollableLines = Math.max(
