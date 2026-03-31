@@ -335,6 +335,11 @@ export default class Cursor
     this.yLine = -1;
   }
 
+  resetHighlight() {
+    this.selectStart = undefined;
+    this.selectEnd = undefined;
+  }
+
   getAbsolutePosition(_viewport?: Viewport): IAbsCoordinates {
     return { xLine: this.xLine, yLine: this.yLine };
   }

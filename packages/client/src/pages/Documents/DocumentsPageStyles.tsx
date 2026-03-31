@@ -21,6 +21,7 @@ export const StyledBackground = styled.div`
   border: 1px dashed ${({ theme }) => theme.color["black"]};
   background-color: ${({ theme }) => theme.color["white"]};
   box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.3);
+  overflow: auto;
 `;
 export const StyledGrid = styled.div`
   display: grid;
@@ -82,6 +83,7 @@ export const StyledInputWrap = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-shrink: 0;
   border-radius: ${({ theme }) => theme.borderRadius["default"]};
   cursor: pointer;
   font-size: ${({ theme }) => theme.fontSize["sm"]};

@@ -958,6 +958,7 @@ export class Annotator {
    */
   addScroller(scrollerDiv: HTMLDivElement) {
     this.scroller = new Scroller(scrollerDiv);
+    this.scroller.setFocusTarget(this.element);
     this.scroller.onChange((percentage: number) => {
       const viewportLines = this.viewport.lineEnd - this.viewport.lineStart;
       const scrollableLines = Math.max(
@@ -1420,6 +1421,7 @@ export class Annotator {
    * Scrolls the viewport to the anchor and moves the caret to the first character
    * inside the anchor (parsed position after the opening tag).
    * Does not reset the cursor; an existing text selection is preserved.
+   * Focuses the annotator canvas so subsequent keyboard input targets the text.
    */
   scrollToAnchor(tag: string, index: number = 0) {
     const pos = this.text.getTagPosition(tag, index);
@@ -1430,7 +1432,10 @@ export class Annotator {
     this.viewport.scrollTo(pos[0].yLine, this.scrollExtentLineCount());
     this.cursor.xLine = pos[0].xLine;
     this.cursor.yLine = pos[0].yLine;
+    this.cursor.resetHighlight();
     this.draw();
+    // Move keyboard focus to the canvas so arrow keys / editing apply here, not the previous control.
+    this.element.focus({ preventScroll: true });
   }
 
   scrollToLine(absLine: number) {

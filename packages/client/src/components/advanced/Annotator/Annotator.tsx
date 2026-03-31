@@ -164,7 +164,11 @@ export const TextAnnotator = ({
 
   const [territoryElvl, setTerritoryElvl] = useState<EntityEnums.Elvl>();
 
+  /** Which document id the current Annotator instance was built for (avoids rebasing canvas onto stale props on the same doc). */
+  const annotatorLoadedForDocIdRef = useRef<string | undefined>(undefined);
+
   const resetAnnotator = () => {
+    annotatorLoadedForDocIdRef.current = undefined;
     setAnnotator(null);
     forwardAnnotator(undefined);
   };
@@ -194,10 +198,21 @@ export const TextAnnotator = ({
     enabled: !!parentTerritoryId,
   });
 
+  const mergeSavedDocumentIntoCache = useCallback(
+    (variables: { id: string; doc: Partial<IDocument> }) => {
+      queryClient.setQueryData<IDocument | undefined>(
+        ["document", variables.id],
+        (old) => (old ? { ...old, ...variables.doc } : old)
+      );
+    },
+    [queryClient]
+  );
+
   const updateDocumentMutation = useMutation({
     mutationFn: async (data: { id: string; doc: Partial<IDocument> }) =>
       api.documentUpdate(data.id, data.doc),
-    onSuccess: (variables, data) => {
+    onSuccess: (_data, variables) => {
+      mergeSavedDocumentIntoCache(variables);
       queryClient.invalidateQueries({ queryKey: ["document"] });
       queryClient.invalidateQueries({ queryKey: ["documents"] });
       toast.info("Document content saved");
@@ -211,7 +226,8 @@ export const TextAnnotator = ({
   const updateDocumentMutationQuiet = useMutation({
     mutationFn: async (data: { id: string; doc: Partial<IDocument> }) =>
       api.documentUpdate(data.id, data.doc),
-    onSuccess: (variables, data) => {
+    onSuccess: (_data, variables) => {
+      mergeSavedDocumentIntoCache(variables);
       queryClient.invalidateQueries({ queryKey: ["document"] });
       queryClient.invalidateQueries({ queryKey: ["documents"] });
     },
@@ -480,11 +496,30 @@ export const TextAnnotator = ({
     [endMenuDrag]
   );
 
+  /** Keeps keyboard focus on the annotator canvas when using menu controls; skips inputs and react-select (BaseDropdown) so they stay interactive. */
+  // const handleMenuPointerDownCapture = useCallback(
+  //   (e: React.PointerEvent<HTMLDivElement>) => {
+  //     const target = e.target as HTMLElement;
+  //     if (
+  //       target.closest(
+  //         "input, textarea, select, [contenteditable='true'], label, .react-select-container"
+  //       )
+  //     ) {
+  //       return;
+  //     }
+  //     e.preventDefault();
+  //     queueMicrotask(() => {
+  //       mainCanvas.current?.focus({ preventScroll: true });
+  //     });
+  //   },
+  //   []
+  // );
+
   // quiet does not trigger a toast notification
-  const handleSaveNewContent = (
+  const handleSaveNewContent = async (
     quiet: boolean,
     skipRefresh: boolean = false
-  ) => {
+  ): Promise<void> => {
     if (annotator && documentId) {
       if (skipRefresh) {
         setIsSavingWithoutRefresh(true);
@@ -492,23 +527,17 @@ export const TextAnnotator = ({
         setIsSaving(true);
       }
 
-      if (quiet) {
-        updateDocumentMutationQuiet.mutate({
-          id: documentId,
-          doc: {
-            ...dataDocument,
-            content: annotator.text.value,
-          },
-        });
-      } else {
-        updateDocumentMutation.mutate({
-          id: documentId,
-          doc: {
-            ...dataDocument,
-            content: annotator.text.value,
-          },
-        });
-      }
+      const mutation = quiet
+        ? updateDocumentMutationQuiet
+        : updateDocumentMutation;
+
+      await mutation.mutateAsync({
+        id: documentId,
+        doc: {
+          ...dataDocument,
+          content: annotator.text.value,
+        },
+      });
     }
   };
 
@@ -558,7 +587,10 @@ export const TextAnnotator = ({
     enabled: api.isLoggedIn() && selectedAnchors.length > 0,
   });
 
-  const handleAddAnchor = (entityId: string, elvl?: EntityEnums.Elvl) => {
+  const handleAddAnchor = async (
+    entityId: string,
+    elvl?: EntityEnums.Elvl
+  ): Promise<void> => {
     annotator?.addAnchor(
       entityId,
       elvl
@@ -567,7 +599,7 @@ export const TextAnnotator = ({
           }
         : {}
     );
-    handleSaveNewContent(true);
+    await handleSaveNewContent(true);
     handleRefreshEntityAndStatement(entityId);
     toast.info(`Anchor created ${entityId}.`);
   };
@@ -599,14 +631,14 @@ export const TextAnnotator = ({
     const currentContent = annotator?.text?.value;
     const newContent = dataDocument?.content ?? "no text";
 
-    // If content hasn't changed, dimensions haven't changed, and we have an existing annotator, just redraw it
-    if (annotator && currentContent === newContent) {
-      // Update theme colors for existing annotator
+    const reuseExistingInstance = (
+      contentForLocalState: string = newContent
+    ) => {
+      if (!annotator) return;
       annotator.fontColor = theme.color.black;
       annotator.bgColor = "transparent";
       annotator.setSelectStyle("turquoise", 0.8, theme.color.black);
 
-      // Update highlight callback to use current theme
       annotator.onHighlight((entityId) => {
         if (dataDocument) {
           return annotatorHighlight(
@@ -621,13 +653,36 @@ export const TextAnnotator = ({
         }
       });
 
-      // Ensure localTextContent is set (in case it wasn't set on initial load)
-      if (localTextContent !== newContent) {
-        setLocalTextContent(newContent);
+      if (localTextContent !== contentForLocalState) {
+        setLocalTextContent(contentForLocalState);
       }
 
       annotator.draw();
+    };
 
+    // Same text as props — keep instance, refresh styling / callbacks only.
+    if (annotator && currentContent === newContent) {
+      reuseExistingInstance();
+      return;
+    }
+
+    // Props lag behind the live canvas (e.g. after anchor + save before cache/refetch catches up).
+    // Do not rebuild from stale dataDocument — sync cache from annotator and keep the instance.
+    if (
+      annotator &&
+      currentContent !== undefined &&
+      documentId &&
+      dataDocument?.id === documentId &&
+      annotatorLoadedForDocIdRef.current === documentId
+    ) {
+      queryClient.setQueryData<IDocument | undefined>(
+        ["document", documentId],
+        (old) => {
+          if (!old || old.id !== documentId) return old;
+          return { ...old, content: currentContent };
+        }
+      );
+      reuseExistingInstance(currentContent);
       return;
     }
 
@@ -691,6 +746,9 @@ export const TextAnnotator = ({
 
     setAnnotator(newAnnotator);
     forwardAnnotator(newAnnotator);
+    if (documentId) {
+      annotatorLoadedForDocIdRef.current = documentId;
+    }
   };
 
   useEffect(() => {
@@ -739,7 +797,7 @@ export const TextAnnotator = ({
     return "new Territory";
   }, [territoryCreateModalType, territory]);
 
-  const onCreateStatement = (
+  const onCreateStatement = async (
     elvl: EntityEnums.Elvl,
     // following props are only for creation from EntitySuggester -> EntityCreateModal
     entityCreateModalProps?: {
@@ -748,10 +806,10 @@ export const TextAnnotator = ({
       territoryId: string;
       language: EntityEnums.Language;
     }
-  ) => {
+  ): Promise<void> => {
     if (handleCreateStatement && selectedText && selectionStartIndex !== -1) {
       const newStatementId = uuidv4();
-      handleAddAnchor(newStatementId, elvl);
+      await handleAddAnchor(newStatementId, elvl);
       // remove linebreaks from text
       const validatedText = selectedText.replace(/\n/g, " ");
       handleCreateStatement(
@@ -967,7 +1025,7 @@ export const TextAnnotator = ({
       >
         <StyledCanvasWrapper style={{ position: "relative" }}>
           {isMenuDisplayed && (
-            <FloatingPortal id="app">
+            <FloatingPortal id="page">
               <StyledAnnotatorMenu
                 ref={(node) => {
                   menuFloatingRefs.setFloating(node);
@@ -976,6 +1034,7 @@ export const TextAnnotator = ({
               >
                 <StyledAnnotatorMenuDraggable
                   ref={menuDraggableRef}
+                  // onPointerDownCapture={handleMenuPointerDownCapture}
                   style={{
                     transform: `translate(${menuDragOffset.x}px, ${menuDragOffset.y}px)`,
                   }}
@@ -1005,8 +1064,8 @@ export const TextAnnotator = ({
                           anchor.getTagName() === thisTerritoryEntityId
                       )}
                       activeTerritoryId={thisTerritoryEntityId}
-                      onCreateActiveTAnchor={(elvl) => {
-                        handleAddAnchor(thisTerritoryEntityId ?? "", elvl);
+                      onCreateActiveTAnchor={async (elvl) => {
+                        await handleAddAnchor(thisTerritoryEntityId ?? "", elvl);
                       }}
                       canCreateActiveTAnchor={
                         !dataDocument?.entityIds.T.includes(
@@ -1186,8 +1245,8 @@ export const TextAnnotator = ({
               ? dataParentTerritory
               : territory
           }
-          onMutationSuccess={(entity) => {
-            handleAddAnchor(entity.id, territoryElvl);
+          onMutationSuccess={async (entity) => {
+            await handleAddAnchor(entity.id, territoryElvl);
             setTerritoryCreateModalType(false);
             setTerritoryElvl(EntityEnums.Elvl.Textual);
             toast.info(`${newTerritoryName} created!`);

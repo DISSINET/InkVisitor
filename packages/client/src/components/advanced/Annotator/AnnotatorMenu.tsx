@@ -200,7 +200,7 @@ export const TextAnnotatorMenu = ({
                 noBackground
                 onClick={() => onEscapePressed()}
                 tooltipLabel="Close selection menu"
-                tooltipContent={[<p>(Esc, Ctrl+Enter or ⌘+Enter)</p>]}
+                tooltipContent={<p>(Esc, Ctrl+Enter or ⌘+Enter)</p>}
                 tooltipPosition="right"
               />
             </StyledAnnotatorDoneButton>
