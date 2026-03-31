@@ -43,8 +43,17 @@ class Scroller {
     this.focusTarget = element;
   }
 
+  // Run focus() on the next macrotask with setTimeout(..., 0)
+  // so it happens after the default mousedown/focus behavior.
   focusMainCanvas(): void {
-    this.focusTarget?.focus({ preventScroll: true });
+    const target = this.focusTarget;
+    if (!target) {
+      return;
+    }
+    // Defer past mousedown default focus (scrollbar div) so the canvas stays focused for keys.
+    window.setTimeout(() => {
+      target.focus({ preventScroll: true });
+    }, 0);
   }
   setRunnerSize(percentSize: number): void {
     const clampedPercent = Math.min(100, percentSize);
@@ -97,10 +106,7 @@ class Scroller {
       const currentPx = startLine * lineHeight + scrollOffsetY;
       percentage = Math.min(100, Math.max(0, (currentPx / scrollablePx) * 100));
     } else {
-      percentage = Math.min(
-        100,
-        (startLine * 100) / scrollableLines
-      );
+      percentage = Math.min(100, (startLine * 100) / scrollableLines);
     }
 
     const availableHeight =
