@@ -1,4 +1,23 @@
-import styled from "styled-components";
+import styled, { css, keyframes } from "styled-components";
+
+/** One fade after row settles; delay + duration set on StyledTr */
+const rowActivateFlash = keyframes`
+  0% {
+    box-shadow: inset 0 0 0 9999px rgba(188, 229, 255, 0);
+  }
+  42% {
+    box-shadow: inset 0 0 0 9999px rgba(188, 229, 255, 0.42);
+  }
+  100% {
+    box-shadow: inset 0 0 0 9999px rgba(188, 229, 255, 0);
+  }
+`;
+
+export const ROW_FLASH_DELAY_MS = 200;
+export const ROW_FLASH_DURATION_MS = 1750;
+/** Clear React flash state shortly after CSS animation ends */
+export const ROW_FLASH_CLEAR_AFTER_MS =
+  ROW_FLASH_DELAY_MS + ROW_FLASH_DURATION_MS + 120;
 
 export const StyledTableWrapper = styled.div`
   position: relative;
@@ -36,6 +55,7 @@ interface StyledTr {
   opacity?: number;
   $isOwner: boolean;
   $isAdmin: boolean;
+  $flash?: boolean;
 }
 export const StyledTr = styled.tr<StyledTr>`
   background-color: ${({ theme, $isOwner, $isAdmin }) =>
@@ -48,6 +68,13 @@ export const StyledTr = styled.tr<StyledTr>`
   opacity: ${({ opacity }) => (opacity ? opacity : 1)};
   padding: ${({ theme }) => theme.space[1]};
   border: 1px solid ${({ theme }) => theme.color["gray"][400]};
+  position: relative;
+  ${({ $flash }) =>
+    $flash &&
+    css`
+      animation: ${rowActivateFlash} ${ROW_FLASH_DURATION_MS}ms ease-out
+        ${ROW_FLASH_DELAY_MS}ms forwards;
+    `}
 
   td:first-child {
     padding-left: ${({ theme }) => theme.space[2]};

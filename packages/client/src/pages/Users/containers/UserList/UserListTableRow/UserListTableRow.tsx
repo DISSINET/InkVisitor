@@ -7,18 +7,22 @@ import { UserEnums } from "@shared/enums";
 interface UserListTableRow {
   row: Row<IResponseUser>;
   index: number;
+  flash?: boolean;
 }
 
 export const UserListTableRow: React.FC<UserListTableRow> = ({
   row,
   index,
+  flash = false,
 }) => {
   return (
     <React.Fragment key={index}>
       <StyledTr
+        {...row.getRowProps()}
         $isOwner={row.original.role === UserEnums.Role.Owner}
         $isAdmin={row.original.role === UserEnums.Role.Admin}
         $isOdd={Boolean(index % 2)}
+        $flash={flash}
       >
         {row.cells.map((cell, key) => {
           return (

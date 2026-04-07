@@ -9,7 +9,13 @@ import {
   EntitySuggester,
   EntityTag,
 } from "components/advanced";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   FaEnvelopeOpenText,
   FaKey,
@@ -37,6 +43,7 @@ import {
   StyledUserNameColumn,
   StyledUserNameColumnIcon,
   StyledUserNameColumnText,
+  ROW_FLASH_CLEAR_AFTER_MS,
 } from "./UserListStyles";
 import { UserListTableRow } from "./UserListTableRow/UserListTableRow";
 import { UserListUsernameInput } from "./UserListUsernameInput/UserListUsernameInput";
@@ -55,8 +62,33 @@ interface UserList {}
 
 export const UserList: React.FC<UserList> = React.memo(() => {
   const [removingUserId, setRemovingUserId] = useState<false | string>("");
+  const [flashActivatedUserId, setFlashActivatedUserId] = useState<
+    string | null
+  >(null);
+  const flashClearTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
 
   const queryClient = useQueryClient();
+
+  const scheduleActivatedRowFlash = useCallback((userId: string) => {
+    if (flashClearTimeoutRef.current) {
+      clearTimeout(flashClearTimeoutRef.current);
+    }
+    setFlashActivatedUserId(userId);
+    flashClearTimeoutRef.current = setTimeout(() => {
+      setFlashActivatedUserId(null);
+      flashClearTimeoutRef.current = null;
+    }, ROW_FLASH_CLEAR_AFTER_MS);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (flashClearTimeoutRef.current) {
+        clearTimeout(flashClearTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const currentUserRole = localStorage.getItem("userrole") as UserEnums.Role;
   const canVerifyManually =
@@ -568,10 +600,17 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                 color={active ? "success" : "danger"}
                 tooltipLabel={activateTooltip}
                 onClick={() => {
-                  userMutation.mutate({
-                    id: userId,
-                    active: !active,
-                  });
+                  const nextActive = !active;
+                  userMutation.mutate(
+                    { id: userId, active: nextActive },
+                    {
+                      onSuccess: () => {
+                        if (nextActive) {
+                          scheduleActivatedRowFlash(userId);
+                        }
+                      },
+                    }
+                  );
                 }}
               />
             </ButtonGroup>
@@ -579,7 +618,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
         },
       },
     ],
-    [canVerifyManually]
+    [canVerifyManually, scheduleActivatedRowFlash]
   );
 
   const {
@@ -617,8 +656,8 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                 <UserListTableRow
                   index={i}
                   row={row}
-                  {...row.getRowProps()}
-                  key={i}
+                  flash={flashActivatedUserId === row.original.id}
+                  key={row.id}
                 />
               );
             })}
