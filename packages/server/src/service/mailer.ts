@@ -122,7 +122,7 @@ class Mailer {
     }
 
     try {
-      sendgrid.send({
+      await sendgrid.send({
         to: recipient,
         from: process.env.MAILER_SENDER || "",
         subject: tpl.subject,
