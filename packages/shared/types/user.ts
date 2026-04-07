@@ -5,7 +5,7 @@ export interface IUser {
   email: string;
   name: string;
   password?: string;
-  hash?: string;
+  hash?: string | null;
   role: UserEnums.Role;
   options: IUserOptions;
   bookmarks: IBookmarkFolder[];

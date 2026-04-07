@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { UserEnums } from "@shared/enums";
 import { IUser } from "@shared/types/user";
 import User from "@models/user/user";
 import {
@@ -625,6 +626,22 @@ export default Router()
           data.password = hashPassword(data.password);
         }
 
+        if (
+          data.verified !== undefined &&
+          data.verified !== existingUser.verified
+        ) {
+          const editor = req.getUserOrFail();
+          const canSetVerified = editor.hasRole([
+            UserEnums.Role.Owner,
+            UserEnums.Role.Admin,
+          ]);
+          if (!canSetVerified) {
+            delete data.verified;
+          } else if (data.verified === true && !existingUser.verified) {
+            data.hash = null;
+          }
+        }
+
         await req.db.lock();
 
         if (data.email) {
@@ -851,16 +868,15 @@ export default Router()
 
         console.log(`Password reset for ${user.email}`);
 
+        let emailSent = true;
         try {
           await mailer.sendTemplate(
             user.email,
             passwordAdminResetTemplate(user.name, rawPassword)
           );
         } catch (e) {
-          throw new EmailError(
-            "please check the logs",
-            (e as Error).toString()
-          );
+          console.error("Password reset email failed:", e);
+          emailSent = false;
         }
 
         return {

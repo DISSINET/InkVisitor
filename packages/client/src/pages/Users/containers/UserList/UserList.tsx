@@ -9,13 +9,20 @@ import {
   EntitySuggester,
   EntityTag,
 } from "components/advanced";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   FaEnvelopeOpenText,
   FaKey,
   FaToggleOff,
   FaToggleOn,
   FaTrashAlt,
+  FaUserCheck,
 } from "react-icons/fa";
 import { CellProps, Column, Row, useTable } from "react-table";
 import { toast } from "react-toastify";
@@ -36,6 +43,8 @@ import {
   StyledUserNameColumn,
   StyledUserNameColumnIcon,
   StyledUserNameColumnText,
+  ROW_FLASH_CLEAR_AFTER_MS,
+  UserListRowFlash,
 } from "./UserListStyles";
 import { UserListTableRow } from "./UserListTableRow/UserListTableRow";
 import { UserListUsernameInput } from "./UserListUsernameInput/UserListUsernameInput";
@@ -54,8 +63,42 @@ interface UserList {}
 
 export const UserList: React.FC<UserList> = React.memo(() => {
   const [removingUserId, setRemovingUserId] = useState<false | string>("");
+  const [rowFlash, setRowFlash] = useState<{
+    userId: string;
+    kind: Exclude<UserListRowFlash, false>;
+  } | null>(null);
+  const flashClearTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
 
   const queryClient = useQueryClient();
+
+  const scheduleRowFlash = useCallback(
+    (userId: string, kind: Exclude<UserListRowFlash, false>) => {
+      if (flashClearTimeoutRef.current) {
+        clearTimeout(flashClearTimeoutRef.current);
+      }
+      setRowFlash({ userId, kind });
+      flashClearTimeoutRef.current = setTimeout(() => {
+        setRowFlash(null);
+        flashClearTimeoutRef.current = null;
+      }, ROW_FLASH_CLEAR_AFTER_MS);
+    },
+    []
+  );
+
+  useEffect(() => {
+    return () => {
+      if (flashClearTimeoutRef.current) {
+        clearTimeout(flashClearTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const currentUserRole = localStorage.getItem("userrole") as UserEnums.Role;
+  const canVerifyManually =
+    currentUserRole === UserEnums.Role.Admin ||
+    currentUserRole === UserEnums.Role.Owner;
 
   const { data: users, isFetching } = useQuery({
     queryKey: ["users"],
@@ -99,15 +142,22 @@ export const UserList: React.FC<UserList> = React.memo(() => {
 
   const resetPasswordMutation = useMutation({
     mutationFn: async (userId: string) => await api.resetPassword(userId),
-    onSuccess: (data, variables) => {
-      const { message } = data.data;
+    onSuccess: (response) => {
+      const body = response.data;
+      const message = body.message ?? "";
+      const password =
+        typeof body.data === "string" && body.data.length > 0
+          ? body.data
+          : message.match(/'([^']+)'/)?.[1] ?? "";
 
       toast.info(message, {
         autoClose: 6000,
         closeOnClick: false,
         onClick: () => {
-          navigator.clipboard.writeText(message ? message.split("'")[1] : "");
-          toast.info("Password copied to clipboard");
+          if (password) {
+            navigator.clipboard.writeText(password);
+            toast.info("Password copied to clipboard");
+          }
         },
         closeButton: true,
         draggable: false,
@@ -517,13 +567,32 @@ export const UserList: React.FC<UserList> = React.memo(() => {
               />
               <Button
                 icon={<FaKey size={14} />}
-                tooltipLabel="reset password"
+                tooltipLabel="set a new random password (copy by clicking on the notification)"
                 color="warning"
-                disabled={!active || !verified}
+                disabled={!active}
                 onClick={() => {
                   resetPasswordMutation.mutate(userId);
                 }}
               />
+              {canVerifyManually && !verified && (
+                <Button
+                  key="verify"
+                  icon={<FaUserCheck size={14} />}
+                  tooltipLabel="manually verify email (when activation mail was not received)"
+                  color="info"
+                  disabled={userMutation.isPending}
+                  onClick={() => {
+                    userMutation.mutate(
+                      { id: userId, verified: true },
+                      {
+                        onSuccess: () => {
+                          toast.success("User marked as verified");
+                        },
+                      }
+                    );
+                  }}
+                />
+              )}
               <Button
                 icon={
                   active ? <FaToggleOn size={14} /> : <FaToggleOff size={14} />
@@ -536,10 +605,18 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                 color={active ? "success" : "danger"}
                 tooltipLabel={activateTooltip}
                 onClick={() => {
-                  userMutation.mutate({
-                    id: userId,
-                    active: !active,
-                  });
+                  const nextActive = !active;
+                  userMutation.mutate(
+                    { id: userId, active: nextActive },
+                    {
+                      onSuccess: () => {
+                        scheduleRowFlash(
+                          userId,
+                          nextActive ? "activate" : "deactivate"
+                        );
+                      },
+                    }
+                  );
                 }}
               />
             </ButtonGroup>
@@ -547,7 +624,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
         },
       },
     ],
-    []
+    [canVerifyManually, scheduleRowFlash]
   );
 
   const {
@@ -585,8 +662,12 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                 <UserListTableRow
                   index={i}
                   row={row}
-                  {...row.getRowProps()}
-                  key={i}
+                  flash={
+                    rowFlash?.userId === row.original.id
+                      ? rowFlash.kind
+                      : false
+                  }
+                  key={row.id}
                 />
               );
             })}
