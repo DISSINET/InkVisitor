@@ -13,6 +13,19 @@ const rowActivateFlash = keyframes`
   }
 `;
 
+/** Same timing as activate; warning-toned (deactivate) */
+const rowDeactivateFlash = keyframes`
+  0% {
+    box-shadow: inset 0 0 0 9999px rgba(216, 170, 55, 0);
+  }
+  42% {
+    box-shadow: inset 0 0 0 9999px rgba(216, 170, 55, 0.38);
+  }
+  100% {
+    box-shadow: inset 0 0 0 9999px rgba(216, 170, 55, 0);
+  }
+`;
+
 export const ROW_FLASH_DELAY_MS = 200;
 export const ROW_FLASH_DURATION_MS = 1750;
 /** Clear React flash state shortly after CSS animation ends */
@@ -50,12 +63,14 @@ export const StyledTh = styled.th`
   padding: ${({ theme }) => `${theme.space[2]} ${theme.space[4]}`};
 `;
 
+export type UserListRowFlash = "activate" | "deactivate" | false;
+
 interface StyledTr {
   $isOdd?: boolean;
   opacity?: number;
   $isOwner: boolean;
   $isAdmin: boolean;
-  $flash?: boolean;
+  $flash?: UserListRowFlash;
 }
 export const StyledTr = styled.tr<StyledTr>`
   background-color: ${({ theme, $isOwner, $isAdmin }) =>
@@ -70,9 +85,15 @@ export const StyledTr = styled.tr<StyledTr>`
   border: 1px solid ${({ theme }) => theme.color["gray"][400]};
   position: relative;
   ${({ $flash }) =>
-    $flash &&
+    $flash === "activate" &&
     css`
       animation: ${rowActivateFlash} ${ROW_FLASH_DURATION_MS}ms ease-out
+        ${ROW_FLASH_DELAY_MS}ms forwards;
+    `}
+  ${({ $flash }) =>
+    $flash === "deactivate" &&
+    css`
+      animation: ${rowDeactivateFlash} ${ROW_FLASH_DURATION_MS}ms ease-out
         ${ROW_FLASH_DELAY_MS}ms forwards;
     `}
 

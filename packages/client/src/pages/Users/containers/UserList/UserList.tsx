@@ -44,6 +44,7 @@ import {
   StyledUserNameColumnIcon,
   StyledUserNameColumnText,
   ROW_FLASH_CLEAR_AFTER_MS,
+  UserListRowFlash,
 } from "./UserListStyles";
 import { UserListTableRow } from "./UserListTableRow/UserListTableRow";
 import { UserListUsernameInput } from "./UserListUsernameInput/UserListUsernameInput";
@@ -62,25 +63,29 @@ interface UserList {}
 
 export const UserList: React.FC<UserList> = React.memo(() => {
   const [removingUserId, setRemovingUserId] = useState<false | string>("");
-  const [flashActivatedUserId, setFlashActivatedUserId] = useState<
-    string | null
-  >(null);
+  const [rowFlash, setRowFlash] = useState<{
+    userId: string;
+    kind: Exclude<UserListRowFlash, false>;
+  } | null>(null);
   const flashClearTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
     null
   );
 
   const queryClient = useQueryClient();
 
-  const scheduleActivatedRowFlash = useCallback((userId: string) => {
-    if (flashClearTimeoutRef.current) {
-      clearTimeout(flashClearTimeoutRef.current);
-    }
-    setFlashActivatedUserId(userId);
-    flashClearTimeoutRef.current = setTimeout(() => {
-      setFlashActivatedUserId(null);
-      flashClearTimeoutRef.current = null;
-    }, ROW_FLASH_CLEAR_AFTER_MS);
-  }, []);
+  const scheduleRowFlash = useCallback(
+    (userId: string, kind: Exclude<UserListRowFlash, false>) => {
+      if (flashClearTimeoutRef.current) {
+        clearTimeout(flashClearTimeoutRef.current);
+      }
+      setRowFlash({ userId, kind });
+      flashClearTimeoutRef.current = setTimeout(() => {
+        setRowFlash(null);
+        flashClearTimeoutRef.current = null;
+      }, ROW_FLASH_CLEAR_AFTER_MS);
+    },
+    []
+  );
 
   useEffect(() => {
     return () => {
@@ -605,9 +610,10 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                     { id: userId, active: nextActive },
                     {
                       onSuccess: () => {
-                        if (nextActive) {
-                          scheduleActivatedRowFlash(userId);
-                        }
+                        scheduleRowFlash(
+                          userId,
+                          nextActive ? "activate" : "deactivate"
+                        );
                       },
                     }
                   );
@@ -618,7 +624,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
         },
       },
     ],
-    [canVerifyManually, scheduleActivatedRowFlash]
+    [canVerifyManually, scheduleRowFlash]
   );
 
   const {
@@ -656,7 +662,11 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                 <UserListTableRow
                   index={i}
                   row={row}
-                  flash={flashActivatedUserId === row.original.id}
+                  flash={
+                    rowFlash?.userId === row.original.id
+                      ? rowFlash.kind
+                      : false
+                  }
                   key={row.id}
                 />
               );

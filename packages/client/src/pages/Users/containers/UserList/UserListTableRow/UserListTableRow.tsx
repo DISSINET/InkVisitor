@@ -1,13 +1,17 @@
 import { IResponseUser } from "@shared/types";
 import React from "react";
 import { Row } from "react-table";
-import { StyledTd, StyledTr } from "../UserListStyles";
+import {
+  StyledTd,
+  StyledTr,
+  UserListRowFlash,
+} from "../UserListStyles";
 import { UserEnums } from "@shared/enums";
 
 interface UserListTableRow {
   row: Row<IResponseUser>;
   index: number;
-  flash?: boolean;
+  flash?: UserListRowFlash;
 }
 
 export const UserListTableRow: React.FC<UserListTableRow> = ({
