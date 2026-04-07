@@ -164,9 +164,7 @@ export const DocumentsPage: React.FC = ({}) => {
           <StyledBackground>
             <StyledHeading>Documents</StyledHeading>
             <StyledGridScrollArea>
-              <CustomScrollbar
-                customStyle={{ height: "100%", width: "100%" }}
-              >
+              <CustomScrollbar customStyle={{ height: "100%", width: "100%" }}>
                 <StyledGrid>
                   {documentsWithResources.map(
                     (
