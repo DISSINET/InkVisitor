@@ -9,10 +9,12 @@ import React, { ChangeEvent, useMemo, useRef, useState } from "react";
 import { DocumentModalEdit, DocumentModalExport } from "components/advanced";
 import { DocumentRow } from "./DocumentRow/DocumentRow";
 import {
+  DocumentsStyledScrollbar,
   StyledBackground,
   StyledBoxWrap,
   StyledContent,
   StyledGrid,
+  StyledGridScrollArea,
   StyledHeading,
   StyledInputWrap,
 } from "./DocumentsPageStyles";
@@ -162,26 +164,35 @@ export const DocumentsPage: React.FC = ({}) => {
         <StyledBoxWrap>
           <StyledBackground>
             <StyledHeading>Documents</StyledHeading>
-            <StyledGrid>
-              {documentsWithResources.map(
-                (documentWithResource: DocumentWithResource, key: number) => {
-                  return (
-                    <DocumentRow
-                      key={key}
-                      document={documentWithResource.document}
-                      resource={documentWithResource.resource}
-                      handleDocumentEdit={handleDocumentEdit}
-                      handleDocumentExport={handleDocumentExport}
-                      setDocToDelete={setDocToDelete}
-                      updateDocumentMutation={updateDocumentMutation}
-                      editMode={editMode === key}
-                      setEditMode={() => setEditMode(key)}
-                      cancelEditMode={() => setEditMode(false)}
-                    />
-                  );
-                }
-              )}
-            </StyledGrid>
+            <StyledGridScrollArea>
+              <DocumentsStyledScrollbar
+                style={{ height: "100%", width: "100%" }}
+              >
+                <StyledGrid>
+                  {documentsWithResources.map(
+                    (
+                      documentWithResource: DocumentWithResource,
+                      key: number
+                    ) => {
+                      return (
+                        <DocumentRow
+                          key={key}
+                          document={documentWithResource.document}
+                          resource={documentWithResource.resource}
+                          handleDocumentEdit={handleDocumentEdit}
+                          handleDocumentExport={handleDocumentExport}
+                          setDocToDelete={setDocToDelete}
+                          updateDocumentMutation={updateDocumentMutation}
+                          editMode={editMode === key}
+                          setEditMode={() => setEditMode(key)}
+                          cancelEditMode={() => setEditMode(false)}
+                        />
+                      );
+                    }
+                  )}
+                </StyledGrid>
+              </DocumentsStyledScrollbar>
+            </StyledGridScrollArea>
             <StyledInputWrap onClick={() => inputRef.current?.click()}>
               Upload document
               <input
