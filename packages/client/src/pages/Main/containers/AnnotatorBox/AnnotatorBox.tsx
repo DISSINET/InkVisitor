@@ -91,15 +91,20 @@ export const AnnotatorBox: React.FC = () => {
     EntityEnums.Class.Territory,
   ]);
 
+  const annotatorToolbarHeight = 32;
+
   const contentHeightAnnotator = useMemo(() => {
     if (!statementId) {
       return contentHeight;
     } else if (editorBoxState === EditorBoxState.FullHeight) {
-      return 0;
+      return Math.max(0, BOX_HEADER_HEIGHT - annotatorToolbarHeight);
     } else if (editorBoxState === EditorBoxState.Normal) {
       return contentHeight / 2 - BOX_HEADER_HEIGHT;
     } else if (editorBoxState === EditorBoxState.Minimized) {
-      return contentHeight;
+      return Math.max(
+        0,
+        contentHeight - BOX_HEADER_HEIGHT - annotatorToolbarHeight
+      );
     }
     return contentHeight;
   }, [contentHeight, editorBoxState, statementId]);

@@ -422,11 +422,10 @@ export const StatementEditorBox: React.FC = () => {
 
       <Loader
         show={
-          isFetchingStatement ||
-          updateStatementMutation.isPending ||
-          (thirdPanelExpanded &&
-            !showEditor &&
-            !editorBoxMinimized)
+          !editorBoxMinimized &&
+          (isFetchingStatement ||
+            updateStatementMutation.isPending ||
+            (thirdPanelExpanded && !showEditor))
         }
       />
     </>

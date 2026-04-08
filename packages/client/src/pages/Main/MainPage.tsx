@@ -437,7 +437,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
       case EditorBoxState.Normal:
         return contentHeight / 2 + 20;
       case EditorBoxState.Minimized:
-        return contentHeight - BOX_HEADER_HEIGHT;
+        return Math.max(0, contentHeight - BOX_HEADER_HEIGHT);
     }
   };
 
@@ -448,7 +448,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
       case EditorBoxState.Normal:
         return contentHeight / 2 + 20;
       case EditorBoxState.Minimized:
-        return BOX_HEADER_HEIGHT + 22;
+        return BOX_HEADER_HEIGHT;
     }
   };
 
