@@ -19,6 +19,7 @@ import {
   ANNOTATOR_TOO_SMALL_BREAKPOINT,
   COLLAPSED_TABLE_WIDTH,
 } from "Theme/constants";
+import { collectStatementAnchors } from "utils/utils";
 import { StyledEmptyState } from "../StatementListBoxStyles";
 import StatementListDocumentLine from "../StatementListDocumentLine/StatementListDocumentLine";
 
@@ -136,21 +137,46 @@ export const StatementListTextAnnotator: React.FC<
       const shouldScroll =
         territoryChanged || statementChanged || annotatorChanged;
       if (annotator && selectedDocument && shouldScroll) {
-        const isStatementInDocument =
-          statementId && selectedDocument.entityIds.S?.includes(statementId);
+        const isStatementInDocument = Boolean(
+          statementId &&
+            selectedDocument.entityIds[EntityEnums.Class.Statement]?.includes(
+              statementId
+            )
+        );
         const isStatementInTerritory = territory?.statements?.some(
           (statement) => statement.id === statementId
         );
 
-        const scrollToId =
-          isStatementInDocument && isStatementInTerritory
-            ? statementId
-            : territoryId;
+        const scrollToStatement =
+          isStatementInDocument && isStatementInTerritory;
 
-        // Perform the scroll
-        annotator.scrollToAnchor(scrollToId);
-        annotator.cursor.reset();
-        annotator.draw();
+        const statementIsAnchoredInText =
+          scrollToStatement &&
+          collectStatementAnchors(selectedDocument.anchors).some(
+            (a) => a.anchor === statementId
+          );
+
+        const scrollToId = scrollToStatement ? statementId : territoryId;
+
+        const firstTerritoryScroll = prevTerritoryIdRef.current === undefined;
+
+        // Territory: only on first load or when territory changes — not when switching
+        // unanchored statements within the same territory.
+        const shouldScrollToTerritory =
+          territoryChanged || firstTerritoryScroll;
+
+        let performScroll = false;
+        if (scrollToStatement) {
+          if (statementIsAnchoredInText) {
+            performScroll = true;
+          }
+        } else if (shouldScrollToTerritory) {
+          performScroll = true;
+        }
+
+        if (performScroll) {
+          annotator.scrollToAnchor(scrollToId);
+        }
 
         // Update refs AFTER scroll
         prevTerritoryIdRef.current = territory.id;

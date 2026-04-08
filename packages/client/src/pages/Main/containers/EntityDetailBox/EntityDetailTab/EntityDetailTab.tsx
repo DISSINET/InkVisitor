@@ -145,6 +145,7 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
         visible={showTooltip}
         referenceElement={referenceElement}
         label={getEntityLabel(entity)}
+        position="top"
       />
     </>
   );

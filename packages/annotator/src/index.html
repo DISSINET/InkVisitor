@@ -539,9 +539,21 @@
       };
 
       document.getElementById("removeAnchor").onclick = () => {
-        annotator.removeAnchorFromSelection(
-          document.getElementById("removeAnchorText").value
-        );
+        const anchorName = document.getElementById("removeAnchorText").value;
+        let targetTag = null;
+        for (const segment of annotator.text.segments) {
+          for (const tag of segment.openingTags) {
+            if (tag.getTagName() === anchorName) {
+              targetTag = tag;
+              break;
+            }
+          }
+          if (targetTag) break;
+        }
+        if (!targetTag) {
+          return;
+        }
+        annotator.removeAnchorFromSelection(targetTag);
       };
 
       document.getElementById("scrollToAnchor").onclick = () => {

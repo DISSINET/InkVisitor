@@ -17,7 +17,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { CustomScrollbar, Loader, Submit, ToastWithLink } from "components";
 import { CStatement } from "constructors";
-import { useResizeObserver, useSearchParams } from "hooks";
+import { useSearchParams } from "hooks";
 import useAnnotator from "hooks/useAnnotator";
 import React, { useEffect, useMemo, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
@@ -560,6 +560,8 @@ export const StatementListBox: React.FC = () => {
           queryKey: ["document", selectedDocumentId],
         });
       }
+      // TODO: only invalidate if text is highlighted (annotatorMenu is open)
+      queryClient.invalidateQueries({ queryKey: ["anchorEntities"] });
       setStatementId(variables.id);
       queryClient.invalidateQueries({ queryKey: ["tree"] });
       dispatch(setDisableStatementListScroll(false));

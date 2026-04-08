@@ -31,6 +31,7 @@ import { DropdownItem } from "types";
 import { EntitySearchAdvancedOptions } from "./EntitySearchAdvancedOptions/EntitySearchAdvancedOptions";
 import {
   StyledBoxContent,
+  StyledNoResults,
   StyledOptions,
   StyledPill,
   StyledPillCloseIcon,
@@ -103,6 +104,7 @@ export const EntitySearchBox: React.FC = () => {
   }, [searchData.language]);
 
   // check whether the search should be executed
+  // it has to work also when label is not set but some of the options is selected #2913
   const validSearch = useMemo<boolean>(() => {
     return Boolean(
       (debouncedValues?.labelOrId?.length &&
@@ -825,15 +827,8 @@ export const EntitySearchBox: React.FC = () => {
           {sortedEntities.length > 0 && (
             <>{`Results (${sortedEntities.length})`}</>
           )}
-          {sortedEntities.length === 0 && (
-            <p
-              style={{
-                fontStyle: "italic",
-                fontSize: "1.4rem",
-                margin: "0.5rem",
-                padding: "2rem",
-              }}
-            >{`No results found`}</p>
+          {sortedEntities.length === 0 && !isFetching && (
+            <StyledNoResults>{`No results found`}</StyledNoResults>
           )}
         </StyledResultsHeader>
 

@@ -246,6 +246,45 @@ export class Annotator {
       }
     }
 
+    // FIRST: Capture old selection bounds and tag positions BEFORE modifying anything
+    const [start, end] = this.cursor.getAbsBounds();
+    let hasSelection = false;
+    let oldStartIndex: number | undefined;
+    let oldEndIndex: number | undefined;
+
+    if (start && end) {
+      hasSelection = true;
+      // Use current mode (not forced raw mode) since cursor positions are in current mode
+      oldStartIndex = this.text.getAbsTextIndexFromPosition(
+        this.text.getSegmentPosition(start.yLine, start.xLine)
+      );
+      oldEndIndex = this.text.getAbsTextIndexFromPosition(
+        this.text.getSegmentPosition(end.yLine, end.xLine)
+      );
+    }
+
+    // Calculate absolute positions of the tags we're removing (before modifying segments)
+    let openTagAbsPos: number | undefined;
+    if (openTag) {
+      let absPos = 0;
+      for (let i = 0; i < anchorSegIdx; i++) {
+        absPos += this.text.segments[i].raw.length + 1; // +1 for newline
+      }
+      absPos += anchorPos;
+      openTagAbsPos = absPos;
+    }
+
+    let closeTagAbsPos: number | undefined;
+    if (closeTag && closeSegIdx !== -1) {
+      let absPos = 0;
+      for (let i = 0; i < closeSegIdx; i++) {
+        absPos += this.text.segments[i].raw.length + 1; // +1 for newline
+      }
+      absPos += closeTag.position;
+      closeTagAbsPos = absPos;
+    }
+
+    // NOW: Remove the tags from segments
     if (closeTag && closeSegIdx !== -1) {
       const closeSeg = this.text.segments[closeSegIdx];
       const closePos = closeTag.position;
@@ -262,11 +301,67 @@ export class Annotator {
       changedSegmentIndices.add(anchorSegIdx);
     }
 
+    // Reparse segments and reassign text
     for (const idx of changedSegmentIndices) {
       this.text.segments[idx]?.parseText();
     }
 
     this.text.assignValueFromSegments();
+    this.text.calculateLines();
+
+    // Recalculate selection bounds after anchor removal (issue #2899)
+    if (
+      hasSelection &&
+      oldStartIndex !== undefined &&
+      oldEndIndex !== undefined
+    ) {
+      let newStartIndex = oldStartIndex;
+      let newEndIndex = oldEndIndex;
+
+      // Adjust indices based on removed tag positions
+      const openTagLen = openTag ? openTag.getTagLength() : 0;
+      const closeTagLen = closeTag ? closeTag.getTagLength() : 0;
+
+      // If opening tag was before or at the start position, shift start back
+      if (openTagAbsPos !== undefined && openTagAbsPos <= oldStartIndex) {
+        newStartIndex -= openTagLen;
+      }
+
+      // If opening tag was before the end position, shift end back
+      if (openTagAbsPos !== undefined && openTagAbsPos < oldEndIndex) {
+        newEndIndex -= openTagLen;
+      }
+
+      // If closing tag was before the end position, shift end back further
+      if (closeTagAbsPos !== undefined && closeTagAbsPos < oldEndIndex) {
+        newEndIndex -= closeTagLen;
+      }
+
+      // Convert adjusted indices back to segment positions
+      const newStartSegPos =
+        this.text.getSegmentFromAbsTextIndex(newStartIndex);
+      const newEndSegPos = this.text.getSegmentFromAbsTextIndex(newEndIndex);
+
+      if (newStartSegPos && newEndSegPos) {
+        const startSegment = this.text.segments[newStartSegPos.segmentIndex];
+        const endSegment = this.text.segments[newEndSegPos.segmentIndex];
+
+        // Update cursor selection bounds
+        this.cursor.selectStart = {
+          xLine: newStartSegPos.charInLineIndex,
+          yLine: startSegment.lineStart + newStartSegPos.lineIndex,
+        };
+        this.cursor.selectEnd = {
+          xLine: newEndSegPos.charInLineIndex,
+          yLine: endSegment.lineStart + newEndSegPos.lineIndex,
+        };
+        this.cursor.setTrueSelectionDirection();
+      } else {
+        // Fallback: reset cursor if position calculation fails
+        this.cursor.reset();
+      }
+    }
+
     this.warnings.onTextChanged(this.text.value);
     this.draw();
   }
@@ -555,7 +650,10 @@ export class Annotator {
     );
 
     this.scroller?.setViewportSize(
-      Math.min(100, (this.viewport.noLines / this.scrollExtentLineCount()) * 100)
+      Math.min(
+        100,
+        (this.viewport.noLines / this.scrollExtentLineCount()) * 100
+      )
     );
 
     this.draw();
@@ -1149,6 +1247,7 @@ export class Annotator {
    */
   addScroller(scrollerDiv: HTMLDivElement) {
     this.scroller = new Scroller(scrollerDiv);
+    this.scroller.setFocusTarget(this.element);
     this.scroller.onChange((percentage: number) => {
       const viewportLines = this.viewport.lineEnd - this.viewport.lineStart;
       const scrollableLines = Math.max(
@@ -1489,11 +1588,12 @@ export class Annotator {
     // get bounds of the selection
     let [start, end] = this.cursor.getAbsBounds();
     if (start && end) {
+      // Use current mode (not forced raw mode) since cursor positions are in current mode
       let indexStart = this.text.getAbsTextIndexFromPosition(
-        this.text.getSegmentPosition(start.yLine, start.xLine, true)
+        this.text.getSegmentPosition(start.yLine, start.xLine)
       );
       let indexEnd = this.text.getAbsTextIndexFromPosition(
-        this.text.getSegmentPosition(end.yLine, end.xLine, true)
+        this.text.getSegmentPosition(end.yLine, end.xLine)
       );
 
       // Move endIndex after tags on the right to avoid gathering additional non-XML tag characters
@@ -1534,16 +1634,29 @@ export class Annotator {
       const beforeText = this.text.value.slice(0, indexStart);
       const afterText = this.text.value.slice(indexEnd);
 
+      const openTagString = openTag.getTag();
+      const closeTagString = closeTag.getTag();
+
       this.text.value =
         beforeText +
-        openTag.getTag() +
+        openTagString +
         selectedRawText +
-        closeTag.getTag() +
+        closeTagString +
         afterText;
 
       this.text.prepareSegments();
       this.text.calculateLines();
-      this.cursor.reset();
+
+      // Find the newly added anchor and select it
+      const tagPosition = this.text.getTagPosition(openTag.getTagName(), 0);
+      if (tagPosition && tagPosition.length === 2) {
+        this.cursor.selectStart = tagPosition[0];
+        this.cursor.selectEnd = tagPosition[1];
+        this.cursor.setTrueSelectionDirection();
+      } else {
+        this.cursor.reset();
+      }
+
       this.warnings.onTextChanged(this.text.value);
       this.draw();
     }
@@ -1600,6 +1713,12 @@ export class Annotator {
     this.draw();
   }
 
+  /**
+   * Scrolls the viewport to the anchor and moves the caret to the first character
+   * inside the anchor (parsed position after the opening tag).
+   * Does not reset the cursor; an existing text selection is preserved.
+   * Focuses the annotator canvas so subsequent keyboard input targets the text.
+   */
   scrollToAnchor(tag: string, index: number = 0) {
     const pos = this.text.getTagPosition(tag, index);
     if (pos.length !== 2) {
@@ -1607,7 +1726,12 @@ export class Annotator {
     }
 
     this.viewport.scrollTo(pos[0].yLine, this.scrollExtentLineCount());
+    this.cursor.xLine = pos[0].xLine;
+    this.cursor.yLine = pos[0].yLine;
+    this.cursor.resetHighlight();
     this.draw();
+    // Move keyboard focus to the canvas so arrow keys / editing apply here, not the previous control.
+    this.element.focus({ preventScroll: true });
   }
 
   scrollToLine(absLine: number) {
