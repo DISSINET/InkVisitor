@@ -646,8 +646,7 @@ export const TextAnnotator = ({
         if (!cb) {
           return;
         }
-        const id =
-          tags.length > 0 ? tags[tags.length - 1].getTagName() : null;
+        const id = tags.length > 0 ? tags[tags.length - 1].getTagName() : null;
         cb(id);
       });
     };
@@ -657,9 +656,8 @@ export const TextAnnotator = ({
       a.bgColor = "transparent";
       a.setSelectStyle("turquoise", 0.8, theme.color.black);
       a.setHoverHighlightStyle({
-        color: theme.color.warning,
-        opacity: 0.35,
-        selectorColor: theme.color.warningBorder,
+        color: theme.color.entityS,
+        opacity: 0.25,
       });
     };
 
@@ -1101,7 +1099,10 @@ export const TextAnnotator = ({
                       )}
                       activeTerritoryId={thisTerritoryEntityId}
                       onCreateActiveTAnchor={async (elvl) => {
-                        await handleAddAnchor(thisTerritoryEntityId ?? "", elvl);
+                        await handleAddAnchor(
+                          thisTerritoryEntityId ?? "",
+                          elvl
+                        );
                       }}
                       canCreateActiveTAnchor={
                         !dataDocument?.entityIds.T.includes(
