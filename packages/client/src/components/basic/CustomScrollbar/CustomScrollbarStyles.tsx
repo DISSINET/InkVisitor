@@ -13,11 +13,21 @@ export const StyledScrollbar = styled(Scrollbar)`
 
   .ScrollbarsCustom-Track {
     background: transparent !important;
+  }
 
-    .ScrollbarsCustom-Thumb {
-      width: 80% !important;
-      margin-left: 0.1rem !important;
-    }
+  /* Vertical: inset thumb width (matches library’s thin track). */
+  .ScrollbarsCustom-TrackY .ScrollbarsCustom-ThumbY {
+    width: 80% !important;
+    margin-left: 0.1rem !important;
+  }
+
+  /*
+   * Horizontal: width is set in px by the library — do not set width here.
+   * Mirror the vertical look with height: 80% + top offset (same idea as width + margin on Y).
+   */
+  .ScrollbarsCustom-TrackX .ScrollbarsCustom-ThumbX {
+    height: 80% !important;
+    top: 10% !important;
   }
 
   .ScrollbarsCustom-ThumbY,

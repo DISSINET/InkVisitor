@@ -4,11 +4,12 @@ import { v4 as uuidv4 } from "uuid";
 import { IDocument, IResponseEntity } from "@shared/types";
 import { EntityEnums } from "@shared/enums";
 import api from "api";
-import { CustomScrollbar, Loader, Submit } from "components";
+import { Loader, Submit } from "components";
 import React, { ChangeEvent, useMemo, useRef, useState } from "react";
 import { DocumentModalEdit, DocumentModalExport } from "components/advanced";
 import { DocumentRow } from "./DocumentRow/DocumentRow";
 import {
+  DocumentsStyledScrollbar,
   StyledBackground,
   StyledBoxWrap,
   StyledContent,
@@ -164,7 +165,9 @@ export const DocumentsPage: React.FC = ({}) => {
           <StyledBackground>
             <StyledHeading>Documents</StyledHeading>
             <StyledGridScrollArea>
-              <CustomScrollbar customStyle={{ height: "100%", width: "100%" }}>
+              <DocumentsStyledScrollbar
+                style={{ height: "100%", width: "100%" }}
+              >
                 <StyledGrid>
                   {documentsWithResources.map(
                     (
@@ -188,7 +191,7 @@ export const DocumentsPage: React.FC = ({}) => {
                     }
                   )}
                 </StyledGrid>
-              </CustomScrollbar>
+              </DocumentsStyledScrollbar>
             </StyledGridScrollArea>
             <StyledInputWrap onClick={() => inputRef.current?.click()}>
               Upload document
