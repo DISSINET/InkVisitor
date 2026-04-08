@@ -46,7 +46,11 @@ export const EDITOR_TOO_SMALL_BREAKPOINT = 480;
 export const ANNOTATOR_SELECTOR_HEIGHT = 27;
 
 // BOXES
-export const hiddenBoxHeight = 33;
+/** Matches `StyledHead` height in Box (3.2rem); Box `height` prop uses this value / 10 → rem */
+export const BOX_HEADER_HEIGHT = 29;
+// Special case because of the border
+// TODO: unify, lowering the height should not narrow the border
+export const FOURTH_PANEL_BOX_HEADER_HEIGHT = 33;
 export const fourthPanelBoxesHeightThirds = {
   search: 40,
   bookmarks: 27,

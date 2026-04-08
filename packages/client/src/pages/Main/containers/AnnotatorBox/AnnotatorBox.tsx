@@ -15,7 +15,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { COLLAPSED_PANEL_WIDTH, hiddenBoxHeight } from "Theme/constants";
+import { COLLAPSED_PANEL_WIDTH, BOX_HEADER_HEIGHT } from "Theme/constants";
 import { EditorBoxState } from "types";
 import { StyledAnnotatorBox } from "./AnnotatorBoxStyles";
 import { AnnotatorContainer } from "./AnnotatorContainer/AnnotatorContainer";
@@ -91,17 +91,15 @@ export const AnnotatorBox: React.FC = () => {
     EntityEnums.Class.Territory,
   ]);
 
-  const annotatorHeaderHeight = 32;
-
   const contentHeightAnnotator = useMemo(() => {
     if (!statementId) {
       return contentHeight;
     } else if (editorBoxState === EditorBoxState.FullHeight) {
-      return Math.max(0, hiddenBoxHeight - annotatorHeaderHeight);
+      return 0;
     } else if (editorBoxState === EditorBoxState.Normal) {
-      return contentHeight / 2 - annotatorHeaderHeight;
+      return contentHeight / 2 - BOX_HEADER_HEIGHT;
     } else if (editorBoxState === EditorBoxState.Minimized) {
-      return contentHeight - 56 - annotatorHeaderHeight; // 56 is the height of the submit button
+      return contentHeight;
     }
     return contentHeight;
   }, [contentHeight, editorBoxState, statementId]);

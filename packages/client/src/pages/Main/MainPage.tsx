@@ -34,9 +34,9 @@ import { useAppDispatch, useAppSelector } from "redux/hooks";
 import {
   COLLAPSED_PANEL_WIDTH,
   FIRST_PANEL_MIN_WIDTH,
+  FOURTH_PANEL_BOX_HEADER_HEIGHT,
   FOURTH_PANEL_MIN_WIDTH,
   fourthPanelBoxesHeightThirds,
-  hiddenBoxHeight,
   INIT_PERCENT_PANEL_WIDTHS,
   INIT_PERCENT_PANEL_WIDTHS_LARGE_SCREEN,
   INIT_PERCENT_PANEL_WIDTHS_SMALL_SCREEN,
@@ -46,6 +46,7 @@ import {
   MAIN_PAGE_TREE_SEPARATOR_X_PERCENT_POSITION,
   SECOND_PANEL_MIN_WIDTH,
   SMALL_SCREEN_LIMIT,
+  BOX_HEADER_HEIGHT,
   THIRD_PANEL_MIN_WIDTH,
 } from "Theme/constants";
 import { DetailBoxState, EditorBoxState } from "types";
@@ -260,14 +261,14 @@ const MainPage: React.FC<MainPage> = ({}) => {
       // Hidden panel state
       return contentHeight / 3;
     } else if (isThisBoxHidden) {
-      return hiddenBoxHeight;
+      return FOURTH_PANEL_BOX_HEADER_HEIGHT;
     } else {
       if (openBoxesCount.length === 3) {
         return fourthPanelBoxesHeightThirds[box] * onePercentOfLayoutHeight;
       } else if (openBoxesCount.length === 2) {
-        return (contentHeight - hiddenBoxHeight) / 2;
+        return (contentHeight - FOURTH_PANEL_BOX_HEADER_HEIGHT) / 2;
       } else {
-        return contentHeight - 2 * hiddenBoxHeight;
+        return contentHeight - 2 * FOURTH_PANEL_BOX_HEADER_HEIGHT;
       }
     }
   };
@@ -350,11 +351,11 @@ const MainPage: React.FC<MainPage> = ({}) => {
     } else {
       switch (detailBoxState) {
         case DetailBoxState.FullHeight:
-          return hiddenBoxHeight;
+          return BOX_HEADER_HEIGHT;
         case DetailBoxState.Normal:
           return contentHeight / 2 + 20;
         case DetailBoxState.Minimized:
-          return contentHeight - hiddenBoxHeight;
+          return contentHeight - BOX_HEADER_HEIGHT;
       }
     }
   };
@@ -393,11 +394,11 @@ const MainPage: React.FC<MainPage> = ({}) => {
   const getDetailBoxHeight = () => {
     switch (detailBoxState) {
       case DetailBoxState.FullHeight:
-        return contentHeight - hiddenBoxHeight;
+        return contentHeight - BOX_HEADER_HEIGHT;
       case DetailBoxState.Normal:
         return contentHeight / 2 + 20;
       case DetailBoxState.Minimized:
-        return hiddenBoxHeight + 22;
+        return BOX_HEADER_HEIGHT + 22;
     }
   };
 
@@ -432,22 +433,22 @@ const MainPage: React.FC<MainPage> = ({}) => {
   const getAnnotatorBoxHeight = () => {
     switch (editorBoxState) {
       case EditorBoxState.FullHeight:
-        return hiddenBoxHeight;
+        return BOX_HEADER_HEIGHT;
       case EditorBoxState.Normal:
         return contentHeight / 2 + 20;
       case EditorBoxState.Minimized:
-        return contentHeight - hiddenBoxHeight;
+        return contentHeight - BOX_HEADER_HEIGHT;
     }
   };
 
   const getEditorBoxHeight = () => {
     switch (editorBoxState) {
       case EditorBoxState.FullHeight:
-        return contentHeight - hiddenBoxHeight;
+        return contentHeight - BOX_HEADER_HEIGHT;
       case EditorBoxState.Normal:
         return contentHeight / 2 + 20;
       case EditorBoxState.Minimized:
-        return hiddenBoxHeight + 22;
+        return BOX_HEADER_HEIGHT + 22;
     }
   };
 

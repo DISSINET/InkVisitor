@@ -7,6 +7,7 @@ import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
+import { EditorBoxState } from "types";
 import { computeDifferences } from "utils/utils";
 import { StatementEditor } from "./StatementEditor/StatementEditor";
 import { StyledEmptyStateWrapper } from "./StatementEditorBoxStyles";
@@ -15,6 +16,10 @@ export const StatementEditorBox: React.FC = () => {
   const thirdPanelExpanded: boolean = useAppSelector(
     (state) => state.layout.mainPage.thirdPanelExpanded
   );
+  const editorBoxState = useAppSelector(
+    (state) => state.layout.mainPage.editorBoxState
+  );
+  const editorBoxMinimized = editorBoxState === EditorBoxState.Minimized;
 
   const { statementId, setStatementId, selectedDetailId, setTerritoryId } =
     useSearchParams();
@@ -371,18 +376,19 @@ export const StatementEditorBox: React.FC = () => {
     }
   };
 
-  // delay of show content for fluent animation on open
-  const [showEditor, setShowEditor] = useState(true);
+  // delay of show content for fluent animation on open (same idea as EntityDetailBox)
+  const [showEditor, setShowEditor] = useState(false);
 
   useEffect(() => {
-    if (thirdPanelExpanded) {
-      setTimeout(() => {
+    if (editorBoxMinimized || !thirdPanelExpanded) {
+      setShowEditor(false);
+    } else {
+      const t = setTimeout(() => {
         setShowEditor(true);
       }, 500);
-    } else {
-      setShowEditor(false);
+      return () => clearTimeout(t);
     }
-  }, [thirdPanelExpanded]);
+  }, [thirdPanelExpanded, editorBoxMinimized]);
 
   return (
     <>
@@ -418,7 +424,9 @@ export const StatementEditorBox: React.FC = () => {
         show={
           isFetchingStatement ||
           updateStatementMutation.isPending ||
-          (thirdPanelExpanded && !showEditor)
+          (thirdPanelExpanded &&
+            !showEditor &&
+            !editorBoxMinimized)
         }
       />
     </>
