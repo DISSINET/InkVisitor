@@ -115,6 +115,9 @@ interface TextAnnotatorProps {
   userData?: IResponseUser;
   disableCreate?: boolean;
   statementListBoxRef?: React.RefObject<HTMLDivElement | null>;
+
+  /** When the pointer hovers anchored text, receives the innermost tag id or null (e.g. statement list sync). */
+  onStatementAnchorHover?: (statementId: string | null) => void;
 }
 
 const ANNOTATOR_MENU_PAGE_PADDING = 4;
@@ -143,6 +146,7 @@ export const TextAnnotator = ({
   statementCreateMutation = undefined,
   userData,
   disableCreate = false,
+  onStatementAnchorHover,
 }: TextAnnotatorProps) => {
   const queryClient = useQueryClient();
   const theme = useTheme();
@@ -170,6 +174,11 @@ export const TextAnnotator = ({
 
   /** Which document id the current Annotator instance was built for (avoids rebasing canvas onto stale props on the same doc). */
   const annotatorLoadedForDocIdRef = useRef<string | undefined>(undefined);
+
+  const onStatementAnchorHoverRef = useRef(onStatementAnchorHover);
+  useEffect(() => {
+    onStatementAnchorHoverRef.current = onStatementAnchorHover;
+  }, [onStatementAnchorHover]);
 
   const resetAnnotator = () => {
     annotatorLoadedForDocIdRef.current = undefined;
@@ -631,6 +640,27 @@ export const TextAnnotator = ({
       return;
     }
 
+    const registerAnchorHover = (a: Annotator) => {
+      a.onAnchorHover((tags: Tag[]) => {
+        const cb = onStatementAnchorHoverRef.current;
+        if (!cb) {
+          return;
+        }
+        const id = tags.length > 0 ? tags[tags.length - 1].getTagName() : null;
+        cb(id);
+      });
+    };
+
+    const applyCanvasTheme = (a: Annotator) => {
+      a.fontColor = theme.color.black;
+      a.bgColor = "transparent";
+      a.setSelectStyle("turquoise", 0.8, theme.color.black);
+      a.setHoverHighlightStyle({
+        color: theme.color.entityS,
+        opacity: 0.25,
+      });
+    };
+
     // Check if the document content has actually changed
     const currentContent = annotator?.text?.value;
     const newContent = dataDocument?.content ?? "no text";
@@ -639,9 +669,7 @@ export const TextAnnotator = ({
       contentForLocalState: string = newContent
     ) => {
       if (!annotator) return;
-      annotator.fontColor = theme.color.black;
-      annotator.bgColor = "transparent";
-      annotator.setSelectStyle("turquoise", 0.8, theme.color.black);
+      applyCanvasTheme(annotator);
 
       annotator.onHighlight((entityId) => {
         if (dataDocument) {
@@ -656,6 +684,8 @@ export const TextAnnotator = ({
           );
         }
       });
+
+      registerAnchorHover(annotator);
 
       if (localTextContent !== contentForLocalState) {
         setLocalTextContent(contentForLocalState);
@@ -698,10 +728,7 @@ export const TextAnnotator = ({
       RATIO
     );
 
-    newAnnotator.fontColor = theme.color.black;
-    newAnnotator.bgColor = "transparent";
-
-    newAnnotator.setSelectStyle("turquoise", 0.8, theme.color.black);
+    applyCanvasTheme(newAnnotator);
 
     if (scroller?.current) {
       newAnnotator.addScroller(scroller.current);
@@ -728,6 +755,8 @@ export const TextAnnotator = ({
         );
       }
     });
+
+    registerAnchorHover(newAnnotator);
 
     newAnnotator.onTextChanged((text) => {
       setLocalTextContent(text);
@@ -1070,7 +1099,10 @@ export const TextAnnotator = ({
                       )}
                       activeTerritoryId={thisTerritoryEntityId}
                       onCreateActiveTAnchor={async (elvl) => {
-                        await handleAddAnchor(thisTerritoryEntityId ?? "", elvl);
+                        await handleAddAnchor(
+                          thisTerritoryEntityId ?? "",
+                          elvl
+                        );
                       }}
                       canCreateActiveTAnchor={
                         !dataDocument?.entityIds.T.includes(

@@ -31,3 +31,6 @@ export const UNDERLINE_OFFSET_PX = 2;
 
 /** Fraction of one line height scrolled per frame while the pointer is outside the canvas (smooth autoscroll). */
 export const SELECTION_EDGE_SCROLL_SPEED = 0.22;
+
+/** Debounce delay in milliseconds for mousemove events (hover interactions). */
+export const HOVER_DEBOUNCE_MS = 50;

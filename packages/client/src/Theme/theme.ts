@@ -46,6 +46,8 @@ const theme = {
     greyer: "#4a5568",
     text: "#383737",
     primary: "#091034",
+    primaryRGBA: "rgba(9,16,52,1)",
+    primaryRGBA0: "rgba(9,16,52,0)",
     success: "#6174C2",
     warning: "#D8AA37",
     danger: "#99103B",

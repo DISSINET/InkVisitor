@@ -11,6 +11,7 @@ import {
   DEFAULT_FONT_SIZE,
   EditMode,
   HighlightMode,
+  HOVER_DEBOUNCE_MS,
   LINE_HEIGHT,
   SELECTION_EDGE_SCROLL_SPEED,
   VIEWPORT_END_BUFFER_ROWS,
@@ -92,6 +93,7 @@ export class Annotator {
   // components here
   viewport: Viewport;
   cursor: Cursor;
+  hoverHighlighter: Highlighter; // For statement list hover interaction
   text: Text;
   scroller?: Scroller;
   lines?: Lines;
@@ -115,9 +117,21 @@ export class Annotator {
   onHighlightCb?: (entityId: string) => HighlightSchema | void;
   onTextChangeCb?: (text: string) => void;
   onScrollCb?: (line: number) => void;
+  onAnchorHoverCb?: (tags: Tag[]) => void; // Part 2 of #2835
 
   clickCount: number;
   clickTimeout?: NodeJS.Timeout;
+  hoverDebounceTimeout?: NodeJS.Timeout; // For debouncing mousemove events
+
+  private readonly boundOnMouseMove = (e: MouseEvent) => this.onMouseMove(e);
+
+  private readonly boundOnCanvasMouseLeave = () => {
+    if (this.hoverDebounceTimeout) {
+      clearTimeout(this.hoverDebounceTimeout);
+      this.hoverDebounceTimeout = undefined;
+    }
+    this.onAnchorHoverCb?.([]);
+  };
 
   constructor(
     element: HTMLCanvasElement,
@@ -157,6 +171,17 @@ export class Annotator {
 
     this.cursor = new Cursor(this.ratio, 0, 0);
 
+    // Initialize hover highlighter for statement list interaction (#2835)
+    this.hoverHighlighter = new Highlighter(
+      this.ratio,
+      {
+        color: "rgba(255, 200, 0, 0.3)", // Light yellow/orange
+        opacity: 0.3,
+        selectorColor: "rgba(255, 200, 0, 0.5)",
+      },
+      HighlightMode.BACKGROUND
+    );
+
     this.keys = new Keys(this);
     this.warnings = new Warnings();
 
@@ -169,6 +194,8 @@ export class Annotator {
       "dblclick",
       this.onMouseDoubleClick.bind(this)
     );
+    this.element.addEventListener("mousemove", this.boundOnMouseMove);
+    this.element.addEventListener("mouseleave", this.boundOnCanvasMouseLeave);
 
     this.clickCount = 0;
 
@@ -194,6 +221,14 @@ export class Annotator {
       opacity: this.selectOpacity,
       selectorColor: selectorColor,
     } as CursorStyle;
+  }
+
+  /**
+   * Styles the hover highlight for statement-list → text anchor feedback (#2835).
+   * The library has no theme; pass colors from the app (e.g. React `useTheme()`).
+   */
+  setHoverHighlightStyle(style: Partial<CursorStyle>): void {
+    this.hoverHighlighter.setStyle(style);
   }
 
   /**
@@ -351,6 +386,244 @@ export class Annotator {
     this.draw();
   }
 
+  /**
+   * Highlights all anchors with the given tag name (for statement list hover interaction).
+   * Part 1 of issue #2835: When hovering over statement list, highlight the anchor in annotator.
+   * 
+   * @param tagName - The entity/tag name to highlight (e.g., "entity-id-123")
+   */
+  highlightAnchorByTag(tagName: string) {
+    if (!tagName) {
+      this.clearHoverHighlight();
+      return;
+    }
+
+    // Find all opening tags with this tag name across all segments
+    const matchingTags: Tag[] = [];
+    for (const segment of this.text.segments) {
+      const foundTags = segment.openingTags.filter(
+        (tag) => tag.getTagName() === tagName
+      );
+      matchingTags.push(...foundTags);
+    }
+
+    if (matchingTags.length === 0) {
+      this.clearHoverHighlight();
+      return;
+    }
+
+    // For each opening tag, pair with the correct closing tag (depth-aware), same as
+    // detectAndEmitAnchorHover. Raw content span: [openEnd, closeStart) — see Tag docs in Text.
+    let minStartLine = Infinity;
+    let minStartChar = Infinity;
+    let maxEndLine = -Infinity;
+    let maxEndExclusiveChar = -Infinity;
+
+    for (const openTag of matchingTags) {
+      const match = this.findMatchingClosingTag(openTag);
+      if (!match) {
+        continue;
+      }
+
+      const openAbsRaw = openTag.getAbsoluteTagPosition(this.text.segments);
+      const closeAbsRaw = match.closeTag.getAbsoluteTagPosition(this.text.segments);
+      const contentStartAbsRaw = openAbsRaw + openTag.getTagLength();
+      const contentEndExclusiveAbsRaw = closeAbsRaw;
+
+      if (contentStartAbsRaw >= contentEndExclusiveAbsRaw) {
+        continue;
+      }
+
+      const startSegPos = this.text.getSegmentFromAbsTextIndex(contentStartAbsRaw);
+      const lastCharAbsRaw = contentEndExclusiveAbsRaw - 1;
+      const lastSegPos = this.text.getSegmentFromAbsTextIndex(lastCharAbsRaw);
+
+      if (!startSegPos || !lastSegPos) {
+        continue;
+      }
+
+      const startSeg = this.text.segments[startSegPos.segmentIndex];
+      const lastSeg = this.text.segments[lastSegPos.segmentIndex];
+      if (!startSeg || !lastSeg) {
+        continue;
+      }
+
+      const startLine = startSeg.lineStart + startSegPos.lineIndex;
+      const startChar = startSegPos.charInLineIndex;
+      const endLine = lastSeg.lineStart + lastSegPos.lineIndex;
+      const endExclusiveChar = lastSegPos.charInLineIndex + 1;
+
+      if (
+        startLine < minStartLine ||
+        (startLine === minStartLine && startChar < minStartChar)
+      ) {
+        minStartLine = startLine;
+        minStartChar = startChar;
+      }
+      if (
+        endLine > maxEndLine ||
+        (endLine === maxEndLine && endExclusiveChar > maxEndExclusiveChar)
+      ) {
+        maxEndLine = endLine;
+        maxEndExclusiveChar = endExclusiveChar;
+      }
+    }
+
+    // Highlighter uses exclusive end xLine on the last line (see Highlighter.draw).
+    if (minStartLine === Infinity || maxEndLine === -Infinity) {
+      this.clearHoverHighlight();
+      return;
+    }
+
+    this.hoverHighlighter.selectStart = {
+      xLine: minStartChar,
+      yLine: minStartLine,
+    };
+    this.hoverHighlighter.selectEnd = {
+      xLine: maxEndExclusiveChar,
+      yLine: maxEndLine,
+    };
+    this.draw();
+  }
+
+  /**
+   * Clears the hover highlight (for statement list hover interaction).
+   */
+  clearHoverHighlight() {
+    this.hoverHighlighter.reset();
+    this.draw();
+  }
+
+  /**
+   * Finds the matching closing tag for an opening tag using depth-aware pairing.
+   *
+   * @param openTag - Opening tag to match
+   * @returns Matching closing tag with its segment index, or null
+   */
+  private findMatchingClosingTag(
+    openTag: Tag
+  ): { closeTag: Tag; closeSegIdx: number } | null {
+    const tagName = openTag.getTagName();
+    let depth = 0;
+
+    for (let i = openTag.segmentIndex; i < this.text.segments.length; i++) {
+      const seg = this.text.segments[i];
+      const events: { tag: Tag; isOpen: boolean }[] = [];
+
+      for (const candidateOpen of seg.openingTags) {
+        if (
+          candidateOpen.getTagName() === tagName &&
+          (i > openTag.segmentIndex || candidateOpen.position >= openTag.position)
+        ) {
+          events.push({ tag: candidateOpen, isOpen: true });
+        }
+      }
+
+      for (const candidateClose of seg.closingTags) {
+        if (
+          candidateClose.getTagName() === tagName &&
+          (i > openTag.segmentIndex || candidateClose.position > openTag.position)
+        ) {
+          events.push({ tag: candidateClose, isOpen: false });
+        }
+      }
+
+      events.sort((a, b) => {
+        if (a.tag.position === b.tag.position) {
+          if (a.isOpen === b.isOpen) return 0;
+          return a.isOpen ? 1 : -1;
+        }
+        return a.tag.position - b.tag.position;
+      });
+
+      for (const event of events) {
+        if (event.isOpen) {
+          depth++;
+          continue;
+        }
+
+        depth--;
+        if (depth === 0) {
+          return {
+            closeTag: event.tag,
+            closeSegIdx: i,
+          };
+        }
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Detects anchors at the current mouse position and emits hover callback. When hovering over anchored text, emit tags to highlight statements.
+   * 
+   * @param e - Mouse event
+   */
+  private detectAndEmitAnchorHover(e: MouseEvent) {
+    if (!this.onAnchorHoverCb) {
+      return;
+    }
+
+    // Calculate cursor position from mouse event
+    const tempCursor = new Cursor(this.ratio, 0, 0);
+    tempCursor.setPositionFromEvent(
+      e,
+      this.lineHeight,
+      this.charWidth,
+      this.viewport.scrollOffsetY,
+      this.viewport.lineStart
+    );
+
+    // Clamp to valid line range
+    tempCursor.yLine = Math.max(
+      0,
+      Math.min(tempCursor.yLine, Math.max(0, this.text.noLines - 1))
+    );
+
+    // Get segment position at cursor
+    const segmentPos = this.text.getSegmentPosition(
+      tempCursor.yLine,
+      tempCursor.xLine
+    );
+
+    if (!segmentPos) {
+      this.onAnchorHoverCb([]);
+      return;
+    }
+
+    const segment = this.text.segments[segmentPos.segmentIndex];
+    if (!segment) {
+      this.onAnchorHoverCb([]);
+      return;
+    }
+
+    const tagsAtPosition: Tag[] = [];
+    const hoverAbsRawIndex = this.text.getAbsTextIndexFromPosition(segmentPos);
+
+    for (const currentSegment of this.text.segments) {
+      for (const openTag of currentSegment.openingTags) {
+        const match = this.findMatchingClosingTag(openTag);
+        if (!match) {
+          continue;
+        }
+
+        const openAbsRawStart = openTag.getAbsoluteTagPosition(this.text.segments);
+        const closeAbsRawStart = match.closeTag.getAbsoluteTagPosition(
+          this.text.segments
+        );
+        const contentStart = openAbsRawStart + openTag.getTagLength();
+        const contentEnd = closeAbsRawStart;
+
+        if (hoverAbsRawIndex >= contentStart && hoverAbsRawIndex < contentEnd) {
+          tagsAtPosition.push(openTag);
+        }
+      }
+    }
+
+    this.onAnchorHoverCb(tagsAtPosition);
+  }
+
   onCanvasResize() {
     this.width =
       Number(this.element.style.width.replace("px", "")) * this.ratio;
@@ -427,6 +700,16 @@ export class Annotator {
 
   onScroll(cb: (line: number) => void) {
     this.onScrollCb = cb;
+  }
+
+  /**
+   * Registers callback for anchor hover events (Part 2 of #2835).
+   * Called when user hovers over anchored text in the annotator.
+   * 
+   * @param cb - Callback receiving array of Tags at the hover position
+   */
+  onAnchorHover(cb: (tags: Tag[]) => void) {
+    this.onAnchorHoverCb = cb;
   }
 
   /**
@@ -650,6 +933,19 @@ export class Annotator {
   onMouseMove(e: MouseEvent) {
     if (this.cursor.isSelecting()) {
       this.onDocumentSelectMove(e);
+    }
+
+    // Part 2 of #2835: Detect anchors at hover position
+    if (this.onAnchorHoverCb && !this.cursor.isSelecting()) {
+      // Clear existing debounce timeout
+      if (this.hoverDebounceTimeout) {
+        clearTimeout(this.hoverDebounceTimeout);
+      }
+
+      // Debounce the hover detection
+      this.hoverDebounceTimeout = setTimeout(() => {
+        this.detectAndEmitAnchorHover(e);
+      }, HOVER_DEBOUNCE_MS);
     }
   }
 
@@ -1074,6 +1370,13 @@ export class Annotator {
       });
     }
 
+    // Draw hover highlight for statement list interaction (#2835)
+    this.hoverHighlighter.draw(this.ctx, this.viewport, this.text, {
+      lineHeight: this.lineHeight,
+      charWidth: this.charWidth,
+      charsAtLine: this.text.charsAtLine,
+    });
+
     // if (this.onSelectTextCb && this.cursor.isSelected()) {
     if (this.onSelectTextCb) {
       const [start, end] = this.cursor.getAbsBounds();
@@ -1419,22 +1722,50 @@ export class Annotator {
 
   /**
    * Scrolls the viewport to the anchor and moves the caret to the first character
-   * inside the anchor (parsed position after the opening tag).
-   * Does not reset the cursor; an existing text selection is preserved.
-   * Focuses the annotator canvas so subsequent keyboard input targets the text.
+   * inside the anchor (after the opening tag in raw text).
+   * Uses {@link Text.getSegmentFromAbsTextIndex} so line/column match RAW/XML and
+   * highlight modes (see {@link Segment.findTagParsedPosition} vs wrapped lines).
+   * Clears selection, then focuses the canvas for keyboard input.
    */
   scrollToAnchor(tag: string, index: number = 0) {
-    const pos = this.text.getTagPosition(tag, index);
-    if (pos.length !== 2) {
+    let openingTag: Tag | undefined;
+    let occurrence = 0;
+    outer: for (const segment of this.text.segments) {
+      for (const open of segment.openingTags) {
+        if (open.getTagName() === tag) {
+          if (occurrence === index) {
+            openingTag = open;
+            break outer;
+          }
+          occurrence++;
+        }
+      }
+    }
+
+    if (!openingTag) {
       return;
     }
 
-    this.viewport.scrollTo(pos[0].yLine, this.scrollExtentLineCount());
-    this.cursor.xLine = pos[0].xLine;
-    this.cursor.yLine = pos[0].yLine;
+    const contentStartAbsRaw =
+      openingTag.getAbsoluteTagPosition(this.text.segments) +
+      openingTag.getTagLength();
+    const segPos = this.text.getSegmentFromAbsTextIndex(contentStartAbsRaw);
+    if (!segPos) {
+      return;
+    }
+
+    const segment = this.text.segments[segPos.segmentIndex];
+    if (!segment) {
+      return;
+    }
+
+    const absYLine = segment.lineStart + segPos.lineIndex;
+
+    this.viewport.scrollTo(absYLine, this.scrollExtentLineCount());
+    this.cursor.xLine = segPos.charInLineIndex;
+    this.cursor.yLine = absYLine;
     this.cursor.resetHighlight();
     this.draw();
-    // Move keyboard focus to the canvas so arrow keys / editing apply here, not the previous control.
     this.element.focus({ preventScroll: true });
   }
 

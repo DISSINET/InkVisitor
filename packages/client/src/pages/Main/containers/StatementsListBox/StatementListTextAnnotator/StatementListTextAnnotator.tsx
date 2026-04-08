@@ -63,6 +63,8 @@ interface StatementListTextAnnotator {
   showStatementList: boolean;
   userCanEdit: boolean;
   userData?: IResponseUser;
+
+  onStatementAnchorHover?: (statementId: string | null) => void;
 }
 
 export const StatementListTextAnnotator: React.FC<
@@ -97,6 +99,8 @@ export const StatementListTextAnnotator: React.FC<
   showStatementList,
   userCanEdit,
   userData,
+
+  onStatementAnchorHover,
 }) => {
   const annotatorHeight = useMemo<number>(() => {
     return contentHeight - 70 - ANNOTATOR_SELECTOR_HEIGHT;
@@ -252,6 +256,7 @@ export const StatementListTextAnnotator: React.FC<
               userData={userData}
               statementListBoxRef={statementListBoxRef}
               territoryId={territoryId}
+              onStatementAnchorHover={onStatementAnchorHover}
             />
           )}
         </AnnotatorProvider>

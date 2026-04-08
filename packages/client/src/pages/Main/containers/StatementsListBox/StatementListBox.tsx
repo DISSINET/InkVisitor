@@ -19,7 +19,7 @@ import { CustomScrollbar, Loader, Submit, ToastWithLink } from "components";
 import { CStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import useAnnotator from "hooks/useAnnotator";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { toast } from "react-toastify";
 import { setStatementListOpened } from "redux/features/layout/mainPage/statementListOpenedSlice";
@@ -117,6 +117,8 @@ export const StatementListBox: React.FC = () => {
   const [showSubmit, setShowSubmit] = useState(false);
   const [statementToDelete, setStatementToDelete] = useState<IStatement>();
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
+  const [annotatorHoveredStatementId, setAnnotatorHoveredStatementId] =
+    useState<string | null>(null);
 
   const displayMode: StatementListDisplayMode = useMemo(() => {
     if (annotatorOpened === null) {
@@ -154,6 +156,21 @@ export const StatementListBox: React.FC = () => {
   // });
 
   const { statements, entities, right } = territory || initialData;
+
+  const handleStatementAnchorHover = useCallback(
+    (id: string | null) => {
+      if (!id) {
+        setAnnotatorHoveredStatementId(null);
+        return;
+      }
+      if (statements.some((s) => s.id === id)) {
+        setAnnotatorHoveredStatementId(id);
+      } else {
+        setAnnotatorHoveredStatementId(null);
+      }
+    },
+    [statements]
+  );
 
   useEffect(() => {
     dispatch(setRowsExpanded([]));
@@ -354,6 +371,26 @@ export const StatementListBox: React.FC = () => {
     }
     return undefined;
   }, [selectedResource]);
+
+  useEffect(() => {
+    setAnnotatorHoveredStatementId(null);
+  }, [territoryId, selectedDocumentId]);
+
+  useEffect(() => {
+    if (!annotatorHoveredStatementId) {
+      return;
+    }
+    const statementInTable = document.getElementById(
+      `statement${annotatorHoveredStatementId}`
+    );
+    const statementBox = document.getElementById("Statements-box-table");
+    if (statementInTable && statementBox) {
+      statementBox.scrollTo({
+        behavior: "smooth",
+        top: statementInTable.offsetTop - 34,
+      });
+    }
+  }, [annotatorHoveredStatementId]);
 
   const {
     data: selectedDocument,
@@ -1083,6 +1120,7 @@ export const StatementListBox: React.FC = () => {
                       displayMode={displayMode}
                       annotator={annotator}
                       isLoading={statementListTableIsLoading}
+                      annotatorHoveredStatementId={annotatorHoveredStatementId}
                     />
                   )}
                 </StyledTableWrapper>
@@ -1117,6 +1155,7 @@ export const StatementListBox: React.FC = () => {
                   userCanEdit={userCanEdit}
                   userData={userData}
                   statementListBoxRef={statementListBoxRef}
+                  onStatementAnchorHover={handleStatementAnchorHover}
                 />
               )}
 
