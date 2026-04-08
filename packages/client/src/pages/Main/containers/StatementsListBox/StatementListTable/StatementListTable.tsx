@@ -1,7 +1,5 @@
-import { Annotator } from "@inkvisitor/annotator/src/lib";
 import { UserEnums } from "@shared/enums";
 import {
-  IDocument,
   IEntity,
   IResponseGeneric,
   IResponseStatement,
@@ -32,7 +30,7 @@ import {
 import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { StatementListDisplayMode, StatementOrderCorrection } from "types";
+import { StatementOrderCorrection } from "types";
 import { StatementListContextMenu } from "../StatementListContextMenu/StatementListContextMenu";
 import { StatementListRow } from "./StatementListRow";
 import {
@@ -44,20 +42,9 @@ import {
   StyledTable,
   StyledTh,
 } from "./StatementListTableStyles";
-import useAnnotator from "hooks/useAnnotator";
 
 const HIDDEN_COLUMNS_FULL = ["id", "anchor"];
-const HIDDEN_COLUMNS_MINIFIED = [
-  "id",
-  // "move",
-  "subject",
-  "actions",
-  "objects",
-  "text",
-  "warnings",
-  "lastEdit",
-  "menu",
-];
+
 type CellType = CellProps<
   IResponseStatement & {
     orderCorrection?: StatementOrderCorrection;
@@ -476,12 +463,6 @@ export const StatementListTable: React.FC<StatementListTable> = ({
     useExpanded,
     useRowSelect
   );
-
-  useEffect(() => {
-    setTimeout(() => {
-      setHiddenColumns(HIDDEN_COLUMNS_FULL);
-    }, 450);
-  }, []);
 
   const moveRow = useCallback((dragIndex: number, hoverIndex: number) => {
     setStatementsLocal((prevStatementsLocal) =>

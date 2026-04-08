@@ -18,6 +18,7 @@ import { FaDiagramNext } from "react-icons/fa6";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { VscCloseAll } from "react-icons/vsc";
 import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
+import { setEditorBoxState } from "redux/features/layout/mainPage/editorBoxStateSlice";
 import { setFirstPanelExpanded } from "redux/features/layout/mainPage/firstPanelExpandedSlice";
 import { setFourthPanelBoxesOpened } from "redux/features/layout/mainPage/fourthPanelBoxesOpenedSlice";
 import { setFourthPanelExpanded } from "redux/features/layout/mainPage/fourthPanelExpandedSlice";
@@ -47,7 +48,7 @@ import {
   SMALL_SCREEN_LIMIT,
   THIRD_PANEL_MIN_WIDTH,
 } from "Theme/constants";
-import { DetailBoxState } from "types";
+import { DetailBoxState, EditorBoxState } from "types";
 import { floorNumberToOneDecimal, searchTree } from "utils/utils";
 import { MemoizedAnnotatorBox } from "./containers/AnnotatorBox/AnnotatorBox";
 import { MemoizedEntityBookmarkBox } from "./containers/EntityBookmarkBox/EntityBookmarkBox";
@@ -104,7 +105,13 @@ const MainPage: React.FC<MainPage> = ({}) => {
   const detailBoxState: DetailBoxState = useAppSelector(
     (state) => state.layout.mainPage.detailBoxState
   );
+  const editorBoxState: EditorBoxState = useAppSelector(
+    (state) => state.layout.mainPage.editorBoxState
+  );
   const [lastState, setLastState] = useState(DetailBoxState.Normal);
+  const [lastEditorBoxState, setLastEditorBoxState] = useState(
+    EditorBoxState.Normal
+  );
 
   const toggleFirstPanel = () => {
     if (firstPanelExpanded) {
@@ -402,6 +409,56 @@ const MainPage: React.FC<MainPage> = ({}) => {
         return "maximize detail box";
       case DetailBoxState.Minimized:
         return "open detail box";
+    }
+  };
+
+  const handleMaximizeEditorBox = () => {
+    if (editorBoxState === EditorBoxState.Normal) {
+      dispatch(setEditorBoxState(EditorBoxState.FullHeight));
+    } else {
+      dispatch(setEditorBoxState(EditorBoxState.Normal));
+    }
+  };
+
+  const handleMinimizeEditorBox = () => {
+    if (editorBoxState === EditorBoxState.Minimized) {
+      dispatch(setEditorBoxState(lastEditorBoxState));
+    } else {
+      setLastEditorBoxState(editorBoxState);
+      dispatch(setEditorBoxState(EditorBoxState.Minimized));
+    }
+  };
+
+  const getAnnotatorBoxHeight = () => {
+    switch (editorBoxState) {
+      case EditorBoxState.FullHeight:
+        return hiddenBoxHeight;
+      case EditorBoxState.Normal:
+        return contentHeight / 2 + 20;
+      case EditorBoxState.Minimized:
+        return contentHeight - hiddenBoxHeight;
+    }
+  };
+
+  const getEditorBoxHeight = () => {
+    switch (editorBoxState) {
+      case EditorBoxState.FullHeight:
+        return contentHeight - hiddenBoxHeight;
+      case EditorBoxState.Normal:
+        return contentHeight / 2 + 20;
+      case EditorBoxState.Minimized:
+        return hiddenBoxHeight + 22;
+    }
+  };
+
+  const getEditorMaximizeBtnTooltip = () => {
+    switch (editorBoxState) {
+      case EditorBoxState.FullHeight:
+        return "shrink editor box";
+      case EditorBoxState.Normal:
+        return "maximize editor box";
+      case EditorBoxState.Minimized:
+        return "open editor box";
     }
   };
 
@@ -993,17 +1050,55 @@ const MainPage: React.FC<MainPage> = ({}) => {
         <Box
           borderColor="white"
           label="Annotator"
-          height={contentHeight / 2}
+          height={getAnnotatorBoxHeight()}
           isExpanded={thirdPanelExpanded}
+          onHeaderClick={() => {
+            if (editorBoxState === EditorBoxState.FullHeight) {
+              dispatch(setEditorBoxState(EditorBoxState.Normal));
+            }
+          }}
+          disableHeaderClick={editorBoxState !== EditorBoxState.FullHeight}
           buttons={[thirdPanelButton()]}
         >
           <MemoizedAnnotatorBox />
         </Box>
         <Box
           borderColor="white"
-          height={contentHeight / 2}
+          height={getEditorBoxHeight()}
           label="Editor"
-          buttons={[thirdPanelButton()]}
+          onHeaderClick={handleMaximizeEditorBox}
+          disableHeaderClick={editorBoxState === EditorBoxState.FullHeight}
+          buttons={[
+            ...(thirdPanelExpanded
+              ? [
+                  <Button
+                    key="maximize-editor-box"
+                    dataTestId="maximize-editor-box"
+                    inverted
+                    tooltipLabel={getEditorMaximizeBtnTooltip()}
+                    icon={
+                      editorBoxState === EditorBoxState.Normal ? (
+                        <BsSquareFill />
+                      ) : (
+                        <BsSquareHalf style={{ transform: "rotate(270deg)" }} />
+                      )
+                    }
+                    onClick={handleMaximizeEditorBox}
+                  />,
+                  <React.Fragment key="minimize-editor-box">
+                    {editorBoxState !== EditorBoxState.Minimized && (
+                      <Button
+                        tooltipLabel={"minimize editor box"}
+                        inverted
+                        icon={<BiHide />}
+                        onClick={handleMinimizeEditorBox}
+                      />
+                    )}
+                  </React.Fragment>,
+                ]
+              : []),
+            thirdPanelButton(),
+          ]}
           isExpanded={thirdPanelExpanded}
         >
           <MemoizedStatementEditorBox />

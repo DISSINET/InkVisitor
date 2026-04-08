@@ -3,29 +3,22 @@ import { EntityEnums, UserEnums } from "@shared/enums";
 import {
   IDocument,
   IResponseEntity,
-  IResponseGeneric,
   IResponseStatement,
   IResponseTerritory,
   IStatement,
 } from "@shared/types";
-import {
-  useMutation,
-  UseMutationResult,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { AxiosResponse } from "axios";
 import useAnnotator from "hooks/useAnnotator";
 import { useSearchParams } from "hooks/useSearchParamsContext";
 import React, { useEffect, useMemo, useState } from "react";
+import { toast } from "react-toastify";
+import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { COLLAPSED_PANEL_WIDTH } from "Theme/constants";
+import { COLLAPSED_PANEL_WIDTH, hiddenBoxHeight } from "Theme/constants";
 import { EditorBoxState } from "types";
 import { StyledAnnotatorBox } from "./AnnotatorBoxStyles";
 import { AnnotatorContainer } from "./AnnotatorContainer/AnnotatorContainer";
-import { toast } from "react-toastify";
-import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 
 export const AnnotatorBox: React.FC = () => {
   const {
@@ -103,6 +96,8 @@ export const AnnotatorBox: React.FC = () => {
   const contentHeightAnnotator = useMemo(() => {
     if (!statementId) {
       return contentHeight;
+    } else if (editorBoxState === EditorBoxState.FullHeight) {
+      return Math.max(0, hiddenBoxHeight - annotatorHeaderHeight);
     } else if (editorBoxState === EditorBoxState.Normal) {
       return contentHeight / 2 - annotatorHeaderHeight;
     } else if (editorBoxState === EditorBoxState.Minimized) {
