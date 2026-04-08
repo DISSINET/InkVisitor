@@ -14,8 +14,6 @@ export const StyledTable = styled.table<StyledTable>`
   border-color: ${({ theme }) => theme.color["gray"][500]};
   box-shadow: ${({ theme }) => theme.boxShadow["subtle"]};
   overflow-x: ${({ $isListMode }) => ($isListMode ? "auto" : "hidden")};
-  /* margin-top: ${({ theme, $isListMode }) =>
-    $isListMode ? "0" : theme.space[24]}; */
   margin-left: ${({ theme }) => theme.space[1]};
   margin-right: ${({ theme }) => theme.space[1]};
   transition: width 0.3s ease;
@@ -47,15 +45,16 @@ export const StyledTr = styled.tr<StyledTr>`
     $isOpened
       ? theme.color["tableOpened"]
       : $isSelected
-        ? theme.color["tableSelection"]
-        : theme.color["white"]};
+      ? theme.color["tableSelection"]
+      : theme.color["white"]};
   color: ${({ theme, $isOpened }) =>
     $isOpened ? theme.color["primary"] : theme.color["black"]};
   opacity: ${({ opacity }) => (opacity ? opacity : 1)};
+  transition: box-shadow 0.2s ease-in-out;
   box-shadow: ${({ theme, $isAnnotatorHovered }) =>
-    $isAnnotatorHovered
-      ? `inset 0 0 0 2px ${theme.color["primary"]}`
-      : "none"};
+    `inset 0 0 0 2px ${
+      $isAnnotatorHovered ? theme.color.primaryRGBA : theme.color.primaryRGBA0
+    }`};
   border-top: 1px solid ${({ theme }) => theme.color["gray"][500]};
   border-left: ${({ theme, $isOpened }) =>
     $isOpened ? "4px solid " + theme.color["success"] : ""};
@@ -73,8 +72,8 @@ export const StyledTr = styled.tr<StyledTr>`
       $isSelected
         ? theme.color["tableSelectionHover"]
         : $isOpened
-          ? theme.color["tableOpened"]
-          : theme.color["gray"][100]};
+        ? theme.color["tableOpened"]
+        : theme.color["gray"][100]};
   }
 `;
 
