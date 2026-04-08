@@ -376,6 +376,22 @@ export const StatementListBox: React.FC = () => {
     setAnnotatorHoveredStatementId(null);
   }, [territoryId, selectedDocumentId]);
 
+  useEffect(() => {
+    if (!annotatorHoveredStatementId) {
+      return;
+    }
+    const statementInTable = document.getElementById(
+      `statement${annotatorHoveredStatementId}`
+    );
+    const statementBox = document.getElementById("Statements-box-table");
+    if (statementInTable && statementBox) {
+      statementBox.scrollTo({
+        behavior: "smooth",
+        top: statementInTable.offsetTop - 34,
+      });
+    }
+  }, [annotatorHoveredStatementId]);
+
   const {
     data: selectedDocument,
     error: selectedDocumentError,
