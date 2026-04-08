@@ -22,7 +22,7 @@ export const StyledScrollbar = styled(Scrollbar)`
 
   .ScrollbarsCustom-ThumbY,
   .ScrollbarsCustom-ThumbX {
-    background-color: ${({ theme }) => theme.color.gray[600]} !important;
+    background-color: ${({ theme }) => theme.color.gray[500]} !important;
     transition: background-color 0.5s ease;
   }
 
