@@ -663,6 +663,11 @@ export const TextAnnotator = ({
       annotator.fontColor = theme.color.black;
       annotator.bgColor = "transparent";
       annotator.setSelectStyle("turquoise", 0.8, theme.color.black);
+      annotator.setHoverHighlightStyle({
+        color: theme.color.warning,
+        opacity: 0.35,
+        selectorColor: theme.color.warningBorder,
+      });
 
       annotator.onHighlight((entityId) => {
         if (dataDocument) {
@@ -725,6 +730,11 @@ export const TextAnnotator = ({
     newAnnotator.bgColor = "transparent";
 
     newAnnotator.setSelectStyle("turquoise", 0.8, theme.color.black);
+    newAnnotator.setHoverHighlightStyle({
+      color: theme.color.warning,
+      opacity: 0.35,
+      selectorColor: theme.color.warningBorder,
+    });
 
     if (scroller?.current) {
       newAnnotator.addScroller(scroller.current);

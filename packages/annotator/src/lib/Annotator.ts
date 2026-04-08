@@ -224,6 +224,14 @@ export class Annotator {
   }
 
   /**
+   * Styles the hover highlight for statement-list → text anchor feedback (#2835).
+   * The library has no theme; pass colors from the app (e.g. React `useTheme()`).
+   */
+  setHoverHighlightStyle(style: Partial<CursorStyle>): void {
+    this.hoverHighlighter.setStyle(style);
+  }
+
+  /**
    * removeAnchorFromSelection removes anchor from selected text
    * @param anchor
    */
