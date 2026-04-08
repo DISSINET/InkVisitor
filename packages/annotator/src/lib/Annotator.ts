@@ -404,91 +404,78 @@ export class Annotator {
       return;
     }
 
-    // For each matching opening tag, find its corresponding closing tag
-    // and set highlight bounds to cover all occurrences
+    // For each opening tag, pair with the correct closing tag (depth-aware), same as
+    // detectAndEmitAnchorHover. Raw content span: [openEnd, closeStart) — see Tag docs in Text.
     let minStartLine = Infinity;
     let minStartChar = Infinity;
     let maxEndLine = -Infinity;
-    let maxEndChar = -Infinity;
+    let maxEndExclusiveChar = -Infinity;
 
     for (const openTag of matchingTags) {
-      const openSegIdx = openTag.segmentIndex;
-      const openSegment = this.text.segments[openSegIdx];
-      
-      if (!openSegment) continue;
-
-      // Find corresponding closing tag
-      let closeTag: Tag | undefined;
-      let closeSegIdx = -1;
-      
-      for (let i = openSegIdx; i < this.text.segments.length; i++) {
-        const seg = this.text.segments[i];
-        const candidates = i === openSegIdx
-          ? seg.closingTags.filter((t) => t.position > openTag.position)
-          : seg.closingTags;
-        closeTag = candidates.find((tag) => tag.getTagName() === tagName);
-        if (closeTag) {
-          closeSegIdx = i;
-          break;
-        }
+      const match = this.findMatchingClosingTag(openTag);
+      if (!match) {
+        continue;
       }
 
-      if (!closeTag || closeSegIdx === -1) continue;
+      const openAbsRaw = openTag.getAbsoluteTagPosition(this.text.segments);
+      const closeAbsRaw = match.closeTag.getAbsoluteTagPosition(this.text.segments);
+      const contentStartAbsRaw = openAbsRaw + openTag.getTagLength();
+      const contentEndExclusiveAbsRaw = closeAbsRaw;
 
-      const closeSegment = this.text.segments[closeSegIdx];
+      if (contentStartAbsRaw >= contentEndExclusiveAbsRaw) {
+        continue;
+      }
 
-      // Convert tag positions to line/char coordinates
-      const startPos = this.text.getSegmentPosition(
-        openSegment.lineStart,
-        0
-      );
-      const endPos = this.text.getSegmentPosition(
-        closeSegment.lineEnd > 0 ? closeSegment.lineEnd - 1 : closeSegment.lineEnd,
-        0
-      );
+      const startSegPos = this.text.getSegmentFromAbsTextIndex(contentStartAbsRaw);
+      const lastCharAbsRaw = contentEndExclusiveAbsRaw - 1;
+      const lastSegPos = this.text.getSegmentFromAbsTextIndex(lastCharAbsRaw);
 
-      if (!startPos || !endPos) continue;
+      if (!startSegPos || !lastSegPos) {
+        continue;
+      }
 
-      // Calculate actual position within the segment's content
-      const openAbsIndex = this.text.getAbsTextIndexFromPosition(startPos) + openTag.position;
-      const closeAbsIndex = this.text.getAbsTextIndexFromPosition(endPos) + closeTag.position + closeTag.getTagLength();
+      const startSeg = this.text.segments[startSegPos.segmentIndex];
+      const lastSeg = this.text.segments[lastSegPos.segmentIndex];
+      if (!startSeg || !lastSeg) {
+        continue;
+      }
 
-      const openSegPos = this.text.getSegmentFromAbsTextIndex(openAbsIndex);
-      const closeSegPos = this.text.getSegmentFromAbsTextIndex(closeAbsIndex);
+      const startLine = startSeg.lineStart + startSegPos.lineIndex;
+      const startChar = startSegPos.charInLineIndex;
+      const endLine = lastSeg.lineStart + lastSegPos.lineIndex;
+      const endExclusiveChar = lastSegPos.charInLineIndex + 1;
 
-      if (!openSegPos || !closeSegPos) continue;
-
-      const openSegData = this.text.segments[openSegPos.segmentIndex];
-      const closeSegData = this.text.segments[closeSegPos.segmentIndex];
-
-      const startLine = openSegData.lineStart + openSegPos.lineIndex;
-      const startChar = openSegPos.charInLineIndex;
-      const endLine = closeSegData.lineStart + closeSegPos.lineIndex;
-      const endChar = closeSegPos.charInLineIndex;
-
-      // Track min/max to encompass all anchors with this tag
-      if (startLine < minStartLine || (startLine === minStartLine && startChar < minStartChar)) {
+      if (
+        startLine < minStartLine ||
+        (startLine === minStartLine && startChar < minStartChar)
+      ) {
         minStartLine = startLine;
         minStartChar = startChar;
       }
-      if (endLine > maxEndLine || (endLine === maxEndLine && endChar > maxEndChar)) {
+      if (
+        endLine > maxEndLine ||
+        (endLine === maxEndLine && endExclusiveChar > maxEndExclusiveChar)
+      ) {
         maxEndLine = endLine;
-        maxEndChar = endChar;
+        maxEndExclusiveChar = endExclusiveChar;
       }
     }
 
-    // Set the hover highlighter bounds
-    if (minStartLine !== Infinity && maxEndLine !== -Infinity) {
-      this.hoverHighlighter.selectStart = {
-        xLine: minStartChar,
-        yLine: minStartLine,
-      };
-      this.hoverHighlighter.selectEnd = {
-        xLine: maxEndChar,
-        yLine: maxEndLine,
-      };
-      this.draw();
+    // Highlighter uses exclusive end xLine on the last line (see Highlighter.draw).
+    if (minStartLine === Infinity || maxEndLine === -Infinity) {
+      this.clearHoverHighlight();
+      return;
     }
+
+    this.hoverHighlighter.selectStart = {
+      xLine: minStartChar,
+      yLine: minStartLine,
+    };
+    this.hoverHighlighter.selectEnd = {
+      xLine: maxEndExclusiveChar,
+      yLine: maxEndLine,
+    };
+    this.draw();
   }
 
   /**

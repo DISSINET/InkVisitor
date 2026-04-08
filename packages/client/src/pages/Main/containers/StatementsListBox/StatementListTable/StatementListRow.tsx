@@ -1,3 +1,4 @@
+import { Annotator } from "@inkvisitor/annotator/src/lib";
 import { IEntity, IResponseStatement, IStatement } from "@shared/types";
 import { useSearchParams, useTheme } from "hooks";
 import React, { useEffect, useRef } from "react";
@@ -45,6 +46,7 @@ interface StatementListRow {
   isSelected: boolean;
   displayMode: StatementListDisplayMode;
   isAnnotatorHovered?: boolean;
+  annotator?: Annotator;
 }
 
 export const StatementListRow: React.FC<StatementListRow> = ({
@@ -58,6 +60,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
   isSelected,
   displayMode,
   isAnnotatorHovered = false,
+  annotator,
 }) => {
   const dispatch = useAppDispatch();
 
@@ -127,6 +130,17 @@ export const StatementListRow: React.FC<StatementListRow> = ({
         onClick={(e) => {
           handleClick(row.original.id);
           e.stopPropagation();
+        }}
+        onMouseEnter={() => {
+          if (
+            displayMode === StatementListDisplayMode.TEXT &&
+            annotator
+          ) {
+            annotator.highlightAnchorByTag(row.original.id);
+          }
+        }}
+        onMouseLeave={() => {
+          annotator?.clearHoverHighlight();
         }}
         // for scrollTo fn
         id={`statement${row.original.id}`}

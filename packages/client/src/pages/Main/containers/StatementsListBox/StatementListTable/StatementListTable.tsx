@@ -589,6 +589,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                 isAnnotatorHovered={
                   annotatorHoveredStatementId === row.original.id
                 }
+                annotator={annotator}
               />
             );
           })}
