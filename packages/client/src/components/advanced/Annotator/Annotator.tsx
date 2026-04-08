@@ -652,6 +652,17 @@ export const TextAnnotator = ({
       });
     };
 
+    const applyCanvasTheme = (a: Annotator) => {
+      a.fontColor = theme.color.black;
+      a.bgColor = "transparent";
+      a.setSelectStyle("turquoise", 0.8, theme.color.black);
+      a.setHoverHighlightStyle({
+        color: theme.color.warning,
+        opacity: 0.35,
+        selectorColor: theme.color.warningBorder,
+      });
+    };
+
     // Check if the document content has actually changed
     const currentContent = annotator?.text?.value;
     const newContent = dataDocument?.content ?? "no text";
@@ -660,14 +671,7 @@ export const TextAnnotator = ({
       contentForLocalState: string = newContent
     ) => {
       if (!annotator) return;
-      annotator.fontColor = theme.color.black;
-      annotator.bgColor = "transparent";
-      annotator.setSelectStyle("turquoise", 0.8, theme.color.black);
-      annotator.setHoverHighlightStyle({
-        color: theme.color.warning,
-        opacity: 0.35,
-        selectorColor: theme.color.warningBorder,
-      });
+      applyCanvasTheme(annotator);
 
       annotator.onHighlight((entityId) => {
         if (dataDocument) {
@@ -726,15 +730,7 @@ export const TextAnnotator = ({
       RATIO
     );
 
-    newAnnotator.fontColor = theme.color.black;
-    newAnnotator.bgColor = "transparent";
-
-    newAnnotator.setSelectStyle("turquoise", 0.8, theme.color.black);
-    newAnnotator.setHoverHighlightStyle({
-      color: theme.color.warning,
-      opacity: 0.35,
-      selectorColor: theme.color.warningBorder,
-    });
+    applyCanvasTheme(newAnnotator);
 
     if (scroller?.current) {
       newAnnotator.addScroller(scroller.current);
