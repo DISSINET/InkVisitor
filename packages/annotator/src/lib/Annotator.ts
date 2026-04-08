@@ -1722,22 +1722,50 @@ export class Annotator {
 
   /**
    * Scrolls the viewport to the anchor and moves the caret to the first character
-   * inside the anchor (parsed position after the opening tag).
-   * Does not reset the cursor; an existing text selection is preserved.
-   * Focuses the annotator canvas so subsequent keyboard input targets the text.
+   * inside the anchor (after the opening tag in raw text).
+   * Uses {@link Text.getSegmentFromAbsTextIndex} so line/column match RAW/XML and
+   * highlight modes (see {@link Segment.findTagParsedPosition} vs wrapped lines).
+   * Clears selection, then focuses the canvas for keyboard input.
    */
   scrollToAnchor(tag: string, index: number = 0) {
-    const pos = this.text.getTagPosition(tag, index);
-    if (pos.length !== 2) {
+    let openingTag: Tag | undefined;
+    let occurrence = 0;
+    outer: for (const segment of this.text.segments) {
+      for (const open of segment.openingTags) {
+        if (open.getTagName() === tag) {
+          if (occurrence === index) {
+            openingTag = open;
+            break outer;
+          }
+          occurrence++;
+        }
+      }
+    }
+
+    if (!openingTag) {
       return;
     }
 
-    this.viewport.scrollTo(pos[0].yLine, this.scrollExtentLineCount());
-    this.cursor.xLine = pos[0].xLine;
-    this.cursor.yLine = pos[0].yLine;
+    const contentStartAbsRaw =
+      openingTag.getAbsoluteTagPosition(this.text.segments) +
+      openingTag.getTagLength();
+    const segPos = this.text.getSegmentFromAbsTextIndex(contentStartAbsRaw);
+    if (!segPos) {
+      return;
+    }
+
+    const segment = this.text.segments[segPos.segmentIndex];
+    if (!segment) {
+      return;
+    }
+
+    const absYLine = segment.lineStart + segPos.lineIndex;
+
+    this.viewport.scrollTo(absYLine, this.scrollExtentLineCount());
+    this.cursor.xLine = segPos.charInLineIndex;
+    this.cursor.yLine = absYLine;
     this.cursor.resetHighlight();
     this.draw();
-    // Move keyboard focus to the canvas so arrow keys / editing apply here, not the previous control.
     this.element.focus({ preventScroll: true });
   }
 
