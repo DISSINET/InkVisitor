@@ -115,6 +115,9 @@ interface TextAnnotatorProps {
   userData?: IResponseUser;
   disableCreate?: boolean;
   statementListBoxRef?: React.RefObject<HTMLDivElement | null>;
+
+  /** When the pointer hovers anchored text, receives the innermost tag id or null (e.g. statement list sync). */
+  onStatementAnchorHover?: (statementId: string | null) => void;
 }
 
 const ANNOTATOR_MENU_PAGE_PADDING = 4;
@@ -143,6 +146,7 @@ export const TextAnnotator = ({
   statementCreateMutation = undefined,
   userData,
   disableCreate = false,
+  onStatementAnchorHover,
 }: TextAnnotatorProps) => {
   const queryClient = useQueryClient();
   const theme = useTheme();
@@ -170,6 +174,11 @@ export const TextAnnotator = ({
 
   /** Which document id the current Annotator instance was built for (avoids rebasing canvas onto stale props on the same doc). */
   const annotatorLoadedForDocIdRef = useRef<string | undefined>(undefined);
+
+  const onStatementAnchorHoverRef = useRef(onStatementAnchorHover);
+  useEffect(() => {
+    onStatementAnchorHoverRef.current = onStatementAnchorHover;
+  }, [onStatementAnchorHover]);
 
   const resetAnnotator = () => {
     annotatorLoadedForDocIdRef.current = undefined;
@@ -631,6 +640,18 @@ export const TextAnnotator = ({
       return;
     }
 
+    const registerAnchorHover = (a: Annotator) => {
+      a.onAnchorHover((tags: Tag[]) => {
+        const cb = onStatementAnchorHoverRef.current;
+        if (!cb) {
+          return;
+        }
+        const id =
+          tags.length > 0 ? tags[tags.length - 1].getTagName() : null;
+        cb(id);
+      });
+    };
+
     // Check if the document content has actually changed
     const currentContent = annotator?.text?.value;
     const newContent = dataDocument?.content ?? "no text";
@@ -656,6 +677,8 @@ export const TextAnnotator = ({
           );
         }
       });
+
+      registerAnchorHover(annotator);
 
       if (localTextContent !== contentForLocalState) {
         setLocalTextContent(contentForLocalState);
@@ -728,6 +751,8 @@ export const TextAnnotator = ({
         );
       }
     });
+
+    registerAnchorHover(newAnnotator);
 
     newAnnotator.onTextChanged((text) => {
       setLocalTextContent(text);

@@ -123,6 +123,16 @@ export class Annotator {
   clickTimeout?: NodeJS.Timeout;
   hoverDebounceTimeout?: NodeJS.Timeout; // For debouncing mousemove events
 
+  private readonly boundOnMouseMove = (e: MouseEvent) => this.onMouseMove(e);
+
+  private readonly boundOnCanvasMouseLeave = () => {
+    if (this.hoverDebounceTimeout) {
+      clearTimeout(this.hoverDebounceTimeout);
+      this.hoverDebounceTimeout = undefined;
+    }
+    this.onAnchorHoverCb?.([]);
+  };
+
   constructor(
     element: HTMLCanvasElement,
     inputText: string,
@@ -184,6 +194,8 @@ export class Annotator {
       "dblclick",
       this.onMouseDoubleClick.bind(this)
     );
+    this.element.addEventListener("mousemove", this.boundOnMouseMove);
+    this.element.addEventListener("mouseleave", this.boundOnCanvasMouseLeave);
 
     this.clickCount = 0;
 

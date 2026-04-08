@@ -44,6 +44,7 @@ interface StatementListRow {
   entities: { [key: string]: IEntity };
   isSelected: boolean;
   displayMode: StatementListDisplayMode;
+  isAnnotatorHovered?: boolean;
 }
 
 export const StatementListRow: React.FC<StatementListRow> = ({
@@ -56,6 +57,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
   entities,
   isSelected,
   displayMode,
+  isAnnotatorHovered = false,
 }) => {
   const dispatch = useAppDispatch();
 
@@ -121,6 +123,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
         opacity={opacity}
         $isOpened={row.original.id === statementId}
         $isSelected={isSelected}
+        $isAnnotatorHovered={isAnnotatorHovered}
         onClick={(e) => {
           handleClick(row.original.id);
           e.stopPropagation();

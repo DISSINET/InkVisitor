@@ -37,6 +37,7 @@ export const StyledTh = styled.th`
 interface StyledTr {
   $isOpened?: boolean;
   $isSelected?: boolean;
+  $isAnnotatorHovered?: boolean;
   opacity?: number;
   $listMode?: boolean;
 }
@@ -46,11 +47,15 @@ export const StyledTr = styled.tr<StyledTr>`
     $isOpened
       ? theme.color["tableOpened"]
       : $isSelected
-      ? theme.color["tableSelection"]
-      : theme.color["white"]};
+        ? theme.color["tableSelection"]
+        : theme.color["white"]};
   color: ${({ theme, $isOpened }) =>
     $isOpened ? theme.color["primary"] : theme.color["black"]};
   opacity: ${({ opacity }) => (opacity ? opacity : 1)};
+  box-shadow: ${({ theme, $isAnnotatorHovered }) =>
+    $isAnnotatorHovered
+      ? `inset 0 0 0 2px ${theme.color["primary"]}`
+      : "none"};
   border-top: 1px solid ${({ theme }) => theme.color["gray"][500]};
   border-left: ${({ theme, $isOpened }) =>
     $isOpened ? "4px solid " + theme.color["success"] : ""};
@@ -64,10 +69,12 @@ export const StyledTr = styled.tr<StyledTr>`
     padding-right: ${({ theme }) => theme.space[4]};
   }
   &:hover {
-    background-color: ${({ theme, $isSelected }) =>
+    background-color: ${({ theme, $isOpened, $isSelected }) =>
       $isSelected
         ? theme.color["tableSelectionHover"]
-        : theme.color["gray"][100]};
+        : $isOpened
+          ? theme.color["tableOpened"]
+          : theme.color["gray"][100]};
   }
 `;
 
