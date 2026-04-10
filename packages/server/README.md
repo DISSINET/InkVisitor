@@ -37,8 +37,9 @@ Make sure to have appropriate `.env.<ENV_FILE>` file accessible (e.g., running `
 - `STATIC_PATH` = http relative path to client files served by the server, use '/' for files hosted in root path
 - `PORT` = port which should be used for this app
 - `SECRET` = for signing jwt token
-- `SENDGRID_API_KEY` = for sendgrid (mails) api integration
-- `MAILER_SENDER` = default address of the mail sender
+- `SMTP_HOST` / `SMTP_PORT` = SMTP relay (e.g. Mailjet `in-v3.mailjet.com`, port `587`)
+- `SMTP_USER` / `SMTP_SECRET` = SMTP credentials (Mailjet: API key and secret key from the dashboard)
+- `MAILER_SENDER` = From address; must match a verified sender at your provider
 - `PYTHON_API_HOST` = custom analytics api, optional
 
 ## API docs

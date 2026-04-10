@@ -1,15 +1,13 @@
 import { domainName, hostUrl } from "@common/functions";
-import sendgrid from "@sendgrid/mail";
+import nodemailer from "nodemailer";
 
-// ids for sendgrid templates
 export enum TplIds {
-  AccountCreated = "d-5b941a639a544c848f11240dfc3fc565",
-  PasswordAdminReset = "d-a67dbe3a40234b6b8dc929f559553fe3",
-  PasswordResetRequest = "d-9a386304d7eb45b6beba7fe1becba08d",
-  Test = "d-382f8760c7be4ec4aba6bd8caf252eed",
+  AccountCreated = "account-created",
+  PasswordAdminReset = "password-admin-reset",
+  PasswordResetRequest = "password-reset-request",
+  Test = "test",
 }
 
-// codenames for email subjects
 export enum EmailSubject {
   Test = "Test mail",
   PasswordResetRequest = "Password reset request",
@@ -23,12 +21,42 @@ interface DynamicTplRequest {
   subject: EmailSubject;
 }
 
-/**
- * Template which should be sent to the new user email after registration
- * @param email
- * @param link
- * @returns
- */
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function buildHtml(tpl: DynamicTplRequest): string {
+  const d = tpl.data;
+  switch (tpl.id) {
+    case TplIds.AccountCreated:
+      return `<p>Hello,</p><p>Your account was created for <strong>${escapeHtml(
+        d.email
+      )}</strong> on ${escapeHtml(d.domain)}.</p><p><a href="${escapeHtml(
+        d.link
+      )}">Activate your account</a></p>`;
+    case TplIds.PasswordResetRequest:
+      return `<p>Hello,</p><p>Password reset was requested for ${escapeHtml(
+        d.email
+      )} on ${escapeHtml(d.domain)}.</p><p><a href="${escapeHtml(
+        d.link
+      )}">Reset your password</a></p>`;
+    case TplIds.PasswordAdminReset:
+      return `<p>Hello ${escapeHtml(d.username)},</p><p>An administrator reset your password on ${escapeHtml(
+        d.domain
+      )}.</p><p>Your new password: <code>${escapeHtml(
+        d.rawPassword
+      )}</code></p><p>Please sign in and change it.</p>`;
+    case TplIds.Test:
+      return `<p>Test mail from ${escapeHtml(d.domain)}.</p>`;
+    default:
+      return "";
+  }
+}
+
 export function accountCreatedTemplate(
   email: string,
   link: string
@@ -44,12 +72,6 @@ export function accountCreatedTemplate(
   };
 }
 
-/**
- * Template which should be sent to the email which requested new password
- * @param email
- * @param link
- * @returns
- */
 export function passwordResetRequestTemplate(
   email: string,
   link: string
@@ -65,12 +87,6 @@ export function passwordResetRequestTemplate(
   };
 }
 
-/**
- * Template which should be sent to the user for which an admin reset their password
- * @param username
- * @param rawPassword
- * @returns
- */
 export function passwordAdminResetTemplate(
   username: string,
   rawPassword: string
@@ -100,13 +116,23 @@ class Mailer {
   lastEmailSubject?: string;
   lastEmailData?: any;
   devMode = true;
+  private transporter?: nodemailer.Transporter;
 
   constructor() {
-    if (process.env.SENDGRID_API_KEY && process.env.MAILER_SENDER) {
+    const user = process.env.SMTP_USER;
+    const pass = process.env.SMTP_SECRET;
+    const from = process.env.MAILER_SENDER;
+    const host = process.env.SMTP_HOST;
+    if (user && pass && from && host) {
       this.devMode = false;
+      const port = parseInt(process.env.SMTP_PORT || "587", 10);
+      this.transporter = nodemailer.createTransport({
+        host,
+        port,
+        secure: port === 465,
+        auth: { user, pass },
+      });
     }
-
-    sendgrid.setApiKey(process.env.SENDGRID_API_KEY || "");
 
     console.log(`[Mailer]: prepared${this.devMode ? " (dev mode)" : ""}`);
   }
@@ -121,13 +147,16 @@ class Mailer {
       return;
     }
 
+    if (!this.transporter) {
+      throw new Error("Mailer transporter not configured");
+    }
+
     try {
-      await sendgrid.send({
-        to: recipient,
+      const wat = await this.transporter.sendMail({
         from: process.env.MAILER_SENDER || "",
+        to: recipient,
         subject: tpl.subject,
-        templateId: tpl.id,
-        dynamicTemplateData: tpl.data,
+        html: buildHtml(tpl),
       });
     } catch (e) {
       throw new Error(`Email error for template ${tpl.subject}: ${e}`);
