@@ -17,9 +17,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { CustomScrollbar, Loader, Submit, ToastWithLink } from "components";
 import { CStatement } from "constructors";
-import { useResizeObserver, useSearchParams } from "hooks";
+import { useSearchParams } from "hooks";
 import useAnnotator from "hooks/useAnnotator";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { toast } from "react-toastify";
 import { setStatementListOpened } from "redux/features/layout/mainPage/statementListOpenedSlice";
@@ -117,6 +117,8 @@ export const StatementListBox: React.FC = () => {
   const [showSubmit, setShowSubmit] = useState(false);
   const [statementToDelete, setStatementToDelete] = useState<IStatement>();
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
+  const [annotatorHoveredStatementId, setAnnotatorHoveredStatementId] =
+    useState<string | null>(null);
 
   const displayMode: StatementListDisplayMode = useMemo(() => {
     if (annotatorOpened === null) {
@@ -138,7 +140,7 @@ export const StatementListBox: React.FC = () => {
       const res = await api.territoryGet(territoryId);
       return res.data;
     },
-    enabled: !!territoryId && api.isLoggedIn() && statementListOpened,
+    enabled: !!territoryId && api.isLoggedIn(),
   });
 
   // Debug logging for territory query
@@ -154,6 +156,21 @@ export const StatementListBox: React.FC = () => {
   // });
 
   const { statements, entities, right } = territory || initialData;
+
+  const handleStatementAnchorHover = useCallback(
+    (id: string | null) => {
+      if (!id) {
+        setAnnotatorHoveredStatementId(null);
+        return;
+      }
+      if (statements.some((s) => s.id === id)) {
+        setAnnotatorHoveredStatementId(id);
+      } else {
+        setAnnotatorHoveredStatementId(null);
+      }
+    },
+    [statements]
+  );
 
   useEffect(() => {
     dispatch(setRowsExpanded([]));
@@ -212,19 +229,30 @@ export const StatementListBox: React.FC = () => {
   // }, [storedAnnotatorResourceId]);
 
   // delay of show content for fluent animation on open
-  const [showStatementList, setShowStatementList] = useState(true);
+  const [enableStatementListLoader, setEnableStatementListLoader] =
+    useState(true);
 
   useEffect(() => {
     if (statementListOpened) {
       setTimeout(() => {
-        setShowStatementList(true);
+        setEnableStatementListLoader(true);
       }, 500);
     } else {
-      setShowStatementList(false);
+      setEnableStatementListLoader(false);
     }
   }, [statementListOpened]);
 
   const [annotator, setAnnotator] = useState<Annotator | undefined>(undefined);
+  const [storedAnnotatorScrollPosition, setStoredAnnotatorScrollPosition] =
+    useState<number | null>(null);
+
+  // useEffect(() => {
+  //   console.log("storedAnnotatorScrollPosition", storedAnnotatorScrollPosition);
+  // }, [storedAnnotatorScrollPosition]);
+
+  useEffect(() => {
+    setStoredAnnotatorScrollPosition(null);
+  }, [territoryId]);
 
   const { setAnnotator: useAnnotatorSetAnnotator } = useAnnotator();
 
@@ -343,6 +371,26 @@ export const StatementListBox: React.FC = () => {
     }
     return undefined;
   }, [selectedResource]);
+
+  useEffect(() => {
+    setAnnotatorHoveredStatementId(null);
+  }, [territoryId, selectedDocumentId]);
+
+  useEffect(() => {
+    if (!annotatorHoveredStatementId) {
+      return;
+    }
+    const statementInTable = document.getElementById(
+      `statement${annotatorHoveredStatementId}`
+    );
+    const statementBox = document.getElementById("Statements-box-table");
+    if (statementInTable && statementBox) {
+      statementBox.scrollTo({
+        behavior: "smooth",
+        top: statementInTable.offsetTop - 34,
+      });
+    }
+  }, [annotatorHoveredStatementId]);
 
   const {
     data: selectedDocument,
@@ -549,6 +597,8 @@ export const StatementListBox: React.FC = () => {
           queryKey: ["document", selectedDocumentId],
         });
       }
+      // TODO: only invalidate if text is highlighted (annotatorMenu is open)
+      queryClient.invalidateQueries({ queryKey: ["anchorEntities"] });
       setStatementId(variables.id);
       queryClient.invalidateQueries({ queryKey: ["tree"] });
       dispatch(setDisableStatementListScroll(false));
@@ -958,7 +1008,7 @@ export const StatementListBox: React.FC = () => {
     deleteStatementsMutation.isPending ||
     relationsCreateMutation.isPending ||
     autoOrderStatementsMutation.isPending ||
-    (statementListOpened && !showStatementList);
+    (statementListOpened && !enableStatementListLoader);
 
   const tableWidth = useMemo(() => {
     if (isListNonEmpty || statementListTableIsLoading) {
@@ -971,7 +1021,7 @@ export const StatementListBox: React.FC = () => {
 
   return (
     <StyledStatementListBox ref={statementListBoxRef}>
-      {showStatementList && (
+      {
         <>
           <StatementListHeader
             territory={territory}
@@ -1020,6 +1070,7 @@ export const StatementListBox: React.FC = () => {
 
           {territoryId && (
             <StyledContentWrapper
+
             // ref={contentRef}
             >
               <CustomScrollbar
@@ -1069,6 +1120,7 @@ export const StatementListBox: React.FC = () => {
                       displayMode={displayMode}
                       annotator={annotator}
                       isLoading={statementListTableIsLoading}
+                      annotatorHoveredStatementId={annotatorHoveredStatementId}
                     />
                   )}
                 </StyledTableWrapper>
@@ -1081,12 +1133,10 @@ export const StatementListBox: React.FC = () => {
                   territoryId={territoryId}
                   territory={territory}
                   statementId={statementId}
-                  // storedAnnotatorScroll={storedAnnotatorScroll}
-                  // setStoredAnnotatorScroll={(newScroll) => {
-                  //   if (storedAnnotatorResourceId) {
-                  //     setStoredAnnotatorScroll(newScroll);
-                  //   }
-                  // }}
+                  storedAnnotatorScrollPosition={storedAnnotatorScrollPosition}
+                  setStoredAnnotatorScrollPosition={
+                    setStoredAnnotatorScrollPosition
+                  }
                   hlEntities={hlEntities}
                   setHlEntities={setHlEntities}
                   statementCreateMutation={statementCreateMutation}
@@ -1105,13 +1155,15 @@ export const StatementListBox: React.FC = () => {
                   userCanEdit={userCanEdit}
                   userData={userData}
                   statementListBoxRef={statementListBoxRef}
+                  onStatementAnchorHover={handleStatementAnchorHover}
                 />
               )}
 
               {statementListTableIsLoading &&
                 tableWidth > 0 &&
                 contentHeightAnnotator &&
-                contentHeightAnnotator > 0 && (
+                contentHeightAnnotator > 0 &&
+                enableStatementListLoader && (
                   <StyledLoaderWrap
                     $width={tableWidth + 4}
                     $height={
@@ -1149,7 +1201,7 @@ export const StatementListBox: React.FC = () => {
             loading={deleteStatementMutation.isPending}
           />
         </>
-      )}
+      }
     </StyledStatementListBox>
   );
 };

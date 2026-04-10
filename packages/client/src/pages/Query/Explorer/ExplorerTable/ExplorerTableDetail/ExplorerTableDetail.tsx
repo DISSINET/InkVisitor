@@ -2,7 +2,6 @@ import { languageDict } from "@shared/dictionaries";
 import { EntityEnums } from "@shared/enums";
 import { IEntity, IProp, IResponseDetail } from "@shared/types";
 import { Explore } from "@shared/types/query";
-import { ITerritoryValidation } from "@shared/types/territory";
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
 import { Button, Input, Loader } from "components";
@@ -14,9 +13,8 @@ import { EntityDetailIdentificationTable } from "pages/Main/containers/EntityDet
 import { EntityDetailMetaPropsTable } from "pages/Main/containers/EntityDetailBox/EntityDetail/EntityDetailUsedInTable/EntityDetailMetaPropsTable/EntityDetailMetaPropsTable";
 import { EntityDetailStatementPropsTable } from "pages/Main/containers/EntityDetailBox/EntityDetail/EntityDetailUsedInTable/EntityDetailStatementPropsTable/EntityDetailStatementPropsTable";
 import { EntityDetailStatementsTable } from "pages/Main/containers/EntityDetailBox/EntityDetail/EntityDetailUsedInTable/EntityDetailStatementsTable/EntityDetailStatementsTable";
-import { EntityDetailValidationSection } from "pages/Main/containers/EntityDetailBox/EntityDetail/EntityDetailValidationSection/EntityDetailValidationSection";
 import { StatementListRowExpandedPropGroup } from "pages/Main/containers/StatementsListBox/StatementListTable/StatementListRowExpanded/StatementListRowExpandedPropGroup";
-import React from "react";
+import React, { useEffect } from "react";
 import { FaRegCopy } from "react-icons/fa";
 import { toast } from "react-toastify";
 import {
@@ -28,6 +26,8 @@ import {
   StyledExpRowSection,
   StyledExpRowSectionContent,
   StyledExpRowSectionHeader,
+  StyledReferenceRow,
+  StyledReferenceTable,
 } from "./ExplorerTableDetailStyles";
 
 interface ExplorerTableDetail {
@@ -159,6 +159,10 @@ export const ExplorerTableDetail: React.FC<ExplorerTableDetail> = ({
   };
 
   const alternativeLabels = entity?.labels.slice(1);
+
+  useEffect(() => {
+    console.log("references", references);
+  }, [references]);
 
   return (
     <StyledExpandedRow $columnsSpan={columns.length + 2} $isOdd={isOdd}>
@@ -326,28 +330,33 @@ export const ExplorerTableDetail: React.FC<ExplorerTableDetail> = ({
           <StyledExpRowSection>
             <StyledExpRowSectionHeader>References</StyledExpRowSectionHeader>
             <StyledExpRowSectionContent>
-              {entity &&
-                references.map((reference, key) => {
-                  return (
-                    <div
-                      style={{
-                        display: "inline-grid",
-                        gridTemplateColumns: "auto auto",
-                        gap: "0.5rem",
-                      }}
-                      key={key}
-                    >
-                      <span>
-                        <EntityTag
-                          entity={entity.entities[reference.resource]}
-                        />
-                      </span>
-                      <span>
-                        <EntityTag entity={entity.entities[reference.value]} />
-                      </span>
-                    </div>
-                  );
-                })}
+              <StyledReferenceTable>
+                {entity &&
+                  entity.references.map((reference, key) => {
+                    return (
+                      <StyledReferenceRow key={key}>
+                        <div style={{ display: "grid" }}>
+                          {reference.resource &&
+                            entity.entities[reference.resource] && (
+                              <EntityTag
+                                fullWidth
+                                entity={entity.entities[reference.resource]}
+                              />
+                            )}
+                        </div>
+                        <div style={{ display: "grid" }}>
+                          {reference.value &&
+                            entity.entities[reference.value] && (
+                              <EntityTag
+                                fullWidth
+                                entity={entity.entities[reference.value]}
+                              />
+                            )}
+                        </div>
+                      </StyledReferenceRow>
+                    );
+                  })}
+              </StyledReferenceTable>
 
               <Loader show={isFetching} size={40} />
             </StyledExpRowSectionContent>

@@ -95,7 +95,8 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
           <Dropdown.Single.Basic
             options={nodeTypeOptions}
             value={node.type}
-            tooltipLabel="node type"
+            tooltipLabel={`node type: ${node.type}`}
+            tooltipPosition="top"
             width={30}
             noDropDownIndicator
             disableTyping

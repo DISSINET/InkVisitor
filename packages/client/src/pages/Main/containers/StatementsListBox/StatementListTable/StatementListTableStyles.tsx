@@ -14,8 +14,6 @@ export const StyledTable = styled.table<StyledTable>`
   border-color: ${({ theme }) => theme.color["gray"][500]};
   box-shadow: ${({ theme }) => theme.boxShadow["subtle"]};
   overflow-x: ${({ $isListMode }) => ($isListMode ? "auto" : "hidden")};
-  /* margin-top: ${({ theme, $isListMode }) =>
-    $isListMode ? "0" : theme.space[24]}; */
   margin-left: ${({ theme }) => theme.space[1]};
   margin-right: ${({ theme }) => theme.space[1]};
   transition: width 0.3s ease;
@@ -37,7 +35,9 @@ export const StyledTh = styled.th`
 interface StyledTr {
   $isOpened?: boolean;
   $isSelected?: boolean;
+  $isAnnotatorHovered?: boolean;
   opacity?: number;
+  $listMode?: boolean;
 }
 export const StyledTr = styled.tr<StyledTr>`
   height: ${({ theme }) => theme.space[16]};
@@ -50,10 +50,16 @@ export const StyledTr = styled.tr<StyledTr>`
   color: ${({ theme, $isOpened }) =>
     $isOpened ? theme.color["primary"] : theme.color["black"]};
   opacity: ${({ opacity }) => (opacity ? opacity : 1)};
+  transition: box-shadow 0.2s ease-in-out;
+  box-shadow: ${({ theme, $isAnnotatorHovered }) =>
+    `inset 0 0 0 2px ${
+      $isAnnotatorHovered ? theme.color.primaryRGBA : theme.color.primaryRGBA0
+    }`};
   border-top: 1px solid ${({ theme }) => theme.color["gray"][500]};
   border-left: ${({ theme, $isOpened }) =>
     $isOpened ? "4px solid " + theme.color["success"] : ""};
-  cursor: ${({ $isOpened }) => ($isOpened ? "default" : "pointer")};
+  cursor: ${({ $isOpened, $listMode }) =>
+    $isOpened && $listMode ? "default" : "pointer"};
   td:first-child {
     padding-left: ${({ $isOpened }) => (!$isOpened ? "0.9rem" : "")};
     width: 1%;
@@ -62,9 +68,11 @@ export const StyledTr = styled.tr<StyledTr>`
     padding-right: ${({ theme }) => theme.space[4]};
   }
   &:hover {
-    background-color: ${({ theme, $isSelected }) =>
+    background-color: ${({ theme, $isOpened, $isSelected }) =>
       $isSelected
         ? theme.color["tableSelectionHover"]
+        : $isOpened
+        ? theme.color["tableOpened"]
         : theme.color["gray"][100]};
   }
 `;

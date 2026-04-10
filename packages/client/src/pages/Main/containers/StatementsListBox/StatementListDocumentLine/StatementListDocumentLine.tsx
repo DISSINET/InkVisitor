@@ -1,14 +1,15 @@
 import { entitiesDict } from "@shared/dictionaries";
 import { EntityEnums } from "@shared/enums";
-import { IEntity } from "@shared/types";
+import { IDocument, IEntity } from "@shared/types";
 import { Button, IconWithTooltip, Loader } from "components";
 import Dropdown, {
+  DocumentModalExport,
   DocumentTitle,
   EntitySuggester,
   EntityTag,
 } from "components/advanced";
-import React, { useCallback } from "react";
-import { FaHighlighter, FaLongArrowAltRight } from "react-icons/fa";
+import React, { useCallback, useState } from "react";
+import { FaDownload, FaHighlighter, FaLongArrowAltRight } from "react-icons/fa";
 import { GrDocumentMissing } from "react-icons/gr";
 import { TbAnchor, TbAnchorOff } from "react-icons/tb";
 import {
@@ -27,7 +28,7 @@ interface StatementListDocumentLine {
   selectedResource: IEntity | false;
   setSelectedResourceId: (id: string | false) => void;
   selectedDocumentIsFetching: boolean;
-  selectedDocument: any;
+  selectedDocument?: IDocument;
   activeTHasAnchor: boolean;
   annotator?: any;
   territoryId: string;
@@ -61,135 +62,175 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
   hlEntities,
   setHlEntities,
 }) => {
-  return (
-    <StyledDocumentLine $marginLeft={showStatementList}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-        }}
-      >
-        <StyledEntityContainer>
-          {!selectedResource && (
-            <EntitySuggester
-              placeholder="select resource"
-              categoryTypes={[EntityEnums.Class.Resource]}
-              preSuggestions={resources}
-              onPicked={(entity) => {
-                if (resources.some((r) => r.id === entity.id)) {
-                  setSelectedResourceId(entity.id);
-                } else {
-                  toast.warning("Resource does not have a document");
-                }
-              }}
-              isHidden={!userCanEdit}
-            />
-          )}
-          {selectedResource && (
-            <div
-              style={{
-                display: "flex",
-                maxWidth: annotatorWidthTooNarrow ? "9rem" : "10rem",
-              }}
-            >
-              <EntityTag
-                fullWidth
-                entity={selectedResource}
-                unlinkButton={{
-                  onClick: () => {
-                    setSelectedResourceId(false);
-                  },
-                  tooltipLabel: "use different resource",
-                }}
-              />
-            </div>
-          )}
-        </StyledEntityContainer>
+  const [showExportModal, setShowExportModal] = useState<boolean>(false);
 
-        <StyledDocumentTitleContainer
+  return (
+    <>
+      <StyledDocumentLine $marginLeft={showStatementList}>
+        <div
           style={{
-            maxWidth: annotatorWidthTooNarrow ? "10rem" : "12rem",
-            minWidth: "2rem",
+            display: "flex",
+            alignItems: "center",
           }}
         >
-          {selectedDocument && <DocumentTitle title={selectedDocument.title} />}
-          <Loader show={selectedDocumentIsFetching} size={16} />
-        </StyledDocumentTitleContainer>
-
-        {!selectedDocumentIsFetching &&
-          selectedResource !== false &&
-          selectedResource.data.documentId === undefined && (
-            <StyledNoDocumentMessage>
-              <GrDocumentMissing />
-              <i>This Resource does not have any document</i>
-            </StyledNoDocumentMessage>
-          )}
-
-        {selectedResource !== false && selectedResource?.data?.documentId && (
-          <StyledAnnotatorMenuBar>
-            {activeTHasAnchor ? (
-              <Button
-                label=""
-                iconRight={
-                  <div style={{ display: "flex", alignItems: "center" }}>
-                    <TbAnchor />
-                    <FaLongArrowAltRight />
-                  </div>
-                }
-                tooltipLabel="locate anchor"
-                inverted
-                onClick={() => {
-                  annotator?.scrollToAnchor(territoryId);
+          <StyledEntityContainer>
+            {!selectedResource && (
+              <EntitySuggester
+                placeholder="select resource"
+                categoryTypes={[EntityEnums.Class.Resource]}
+                preSuggestions={resources}
+                onPicked={(entity) => {
+                  if (resources.some((r) => r.id === entity.id)) {
+                    setSelectedResourceId(entity.id);
+                  } else {
+                    toast.warning("Resource does not have a document");
+                  }
                 }}
-                color="warning"
+                isHidden={!userCanEdit}
               />
-            ) : (
-              <StyledSearchNavigation>
-                <TbAnchorOff title="no anchor for T" />
-              </StyledSearchNavigation>
             )}
-          </StyledAnnotatorMenuBar>
-        )}
-      </div>
-
-      {/* Class selector - HIGHLIGHT */}
-      {selectedResource !== false && selectedResource?.data?.documentId && (
-        <StyledHighlightContainer>
-          {/* this condition helps initial render in firefox */}
-          {contentWidth > 0 && (
-            <>
-              <StyledInfoText style={{ textWrap: "nowrap" }}>
-                <IconWithTooltip
-                  icon={<FaHighlighter />}
-                  tooltipLabel="Highlight"
+            {selectedResource && (
+              <div
+                style={{
+                  display: "flex",
+                  maxWidth: annotatorWidthTooNarrow ? "10rem" : "15.5rem",
+                }}
+              >
+                <EntityTag
+                  fullWidth
+                  entity={selectedResource}
+                  button={
+                    selectedDocument && (
+                      <Button
+                        inverted
+                        color="info"
+                        icon={<FaDownload size={11} />}
+                        onClick={() => {
+                          setShowExportModal(true);
+                        }}
+                        tooltipLabel="export document"
+                        tooltipPosition="top"
+                      />
+                    )
+                  }
+                  unlinkButton={{
+                    onClick: () => {
+                      setSelectedResourceId(false);
+                    },
+                    tooltipLabel: "use different resource",
+                  }}
                 />
-              </StyledInfoText>
-              <Dropdown.Multi.Entity
-                shortLabel
-                options={entitiesDict}
-                disableEmpty
-                isClearable
-                disableAny
-                closeMenuOnSelect={false}
-                onChange={setHlEntities}
-                value={hlEntities}
-                noOptionsMessage="No entity classes to highlight"
-                width={
-                  annotatorWidthTooNarrow
-                    ? contentWidth / 2.7
-                    : contentWidth / 2.5
-                }
-                limitSelectedItems={
-                  annotatorWidthTooNarrow
-                    ? Math.floor((contentWidth / 2.7 - 110) / 37)
-                    : Math.floor((contentWidth / 2.5 - 110) / 37)
-                }
-              />
-            </>
+              </div>
+            )}
+          </StyledEntityContainer>
+
+          {/* {selectedDocument && (
+            <Button
+              inverted
+              color="info"
+              icon={<FaDownload size={11} />}
+              onClick={() => {
+                setShowExportModal(true);
+              }}
+              tooltipLabel="export document"
+              tooltipPosition="top"
+            />
+          )} */}
+
+          <StyledDocumentTitleContainer
+            style={{
+              maxWidth: annotatorWidthTooNarrow ? "9.5rem" : "14.5rem",
+              minWidth: "2rem",
+            }}
+          >
+            {selectedDocument && (
+              <DocumentTitle title={selectedDocument.title} />
+            )}
+            <Loader show={selectedDocumentIsFetching} size={16} />
+          </StyledDocumentTitleContainer>
+
+          {!selectedDocumentIsFetching &&
+            selectedResource !== false &&
+            selectedResource.data.documentId === undefined && (
+              <StyledNoDocumentMessage>
+                <GrDocumentMissing />
+                <i>This Resource does not have any document</i>
+              </StyledNoDocumentMessage>
+            )}
+
+          {selectedResource !== false && selectedResource?.data?.documentId && (
+            <StyledAnnotatorMenuBar>
+              {activeTHasAnchor ? (
+                <Button
+                  label=""
+                  iconRight={
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      <TbAnchor />
+                      <FaLongArrowAltRight />
+                    </div>
+                  }
+                  tooltipLabel="locate anchor"
+                  inverted
+                  onClick={() => {
+                    annotator?.scrollToAnchor(territoryId);
+                  }}
+                  color="warning"
+                />
+              ) : (
+                <StyledSearchNavigation>
+                  <TbAnchorOff title="no anchor for T" />
+                </StyledSearchNavigation>
+              )}
+            </StyledAnnotatorMenuBar>
           )}
-        </StyledHighlightContainer>
+        </div>
+
+        {/* Class selector - HIGHLIGHT */}
+        {selectedResource !== false && selectedResource?.data?.documentId && (
+          <StyledHighlightContainer>
+            {/* this condition helps initial render in firefox */}
+            {contentWidth > 0 && (
+              <>
+                <StyledInfoText style={{ textWrap: "nowrap" }}>
+                  <IconWithTooltip
+                    icon={<FaHighlighter />}
+                    tooltipLabel="Highlight"
+                  />
+                </StyledInfoText>
+                <Dropdown.Multi.Entity
+                  shortLabel
+                  options={entitiesDict}
+                  disableEmpty
+                  isClearable
+                  disableAny
+                  closeMenuOnSelect={false}
+                  onChange={setHlEntities}
+                  value={hlEntities}
+                  noOptionsMessage="No entity classes to highlight"
+                  width={
+                    annotatorWidthTooNarrow
+                      ? contentWidth / 2.7
+                      : contentWidth / 2.5
+                  }
+                  limitSelectedItems={
+                    annotatorWidthTooNarrow
+                      ? Math.floor((contentWidth / 2.7 - 110) / 37)
+                      : Math.floor((contentWidth / 2.5 - 110) / 37)
+                  }
+                />
+              </>
+            )}
+          </StyledHighlightContainer>
+        )}
+      </StyledDocumentLine>
+
+      {showExportModal && selectedDocument && (
+        <DocumentModalExport
+          document={selectedDocument}
+          onClose={() => setShowExportModal(false)}
+        />
       )}
-    </StyledDocumentLine>
+    </>
   );
 };
 

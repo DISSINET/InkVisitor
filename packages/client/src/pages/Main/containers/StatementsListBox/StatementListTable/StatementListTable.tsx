@@ -99,6 +99,7 @@ interface StatementListTable {
   displayMode: StatementListDisplayMode;
   annotator?: Annotator;
   isLoading: boolean;
+  annotatorHoveredStatementId?: string | null;
 }
 export const StatementListTable: React.FC<StatementListTable> = ({
   statements,
@@ -117,6 +118,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   displayMode,
   annotator,
   isLoading,
+  annotatorHoveredStatementId = null,
 }) => {
   const dispatch = useAppDispatch();
   const { territoryId, statementId, setStatementId } = useSearchParams();
@@ -584,6 +586,10 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                 entities={entities}
                 isSelected={selectedRows.includes(row.original.id)}
                 displayMode={displayMode}
+                isAnnotatorHovered={
+                  annotatorHoveredStatementId === row.original.id
+                }
+                annotator={annotator}
               />
             );
           })}

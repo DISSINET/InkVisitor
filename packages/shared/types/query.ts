@@ -982,52 +982,146 @@ export namespace Explore {
     EDC = "EDC", // Creation date
   }
 
-  export const EExploreColumnTypeLabels: Record<EExploreColumnType, string> = {
-    [EExploreColumnType.ER]: "Entity Relations",
-    [EExploreColumnType.EPV]: "Entity Property value",
-    [EExploreColumnType.EPT]: "Entity Property types",
-    [EExploreColumnType.ERR]: "Entity Reference Resources",
-    [EExploreColumnType.ERV]: "Entity Reference Values",
-    [EExploreColumnType.ES]: "Entity Statements",
-    [EExploreColumnType.CPV]: "Property values",
-    [EExploreColumnType.CPO]: "Property type origins",
-    [EExploreColumnType.EUC]: "Created by",
-    [EExploreColumnType.EUE]: "Edited by",
-    [EExploreColumnType.EUEN]: "Number of edits",
-    [EExploreColumnType.EDC]: "Creation date",
-  };
+  /** Param value types - determines which form control to render */
+  export type ExploreColumnParamValueType = "entity" | "relationType";
 
-  export const EExploreColumnTypeDisabled: Record<
-    EExploreColumnType,
-    { disabled: boolean }
-  > = {
-    [EExploreColumnType.ER]: { disabled: false },
-    [EExploreColumnType.EPV]: { disabled: false },
-    [EExploreColumnType.EPT]: { disabled: false },
-    [EExploreColumnType.ERR]: { disabled: false },
-    [EExploreColumnType.ERV]: { disabled: true },
-    [EExploreColumnType.ES]: { disabled: true },
-    [EExploreColumnType.CPV]: { disabled: true },
-    [EExploreColumnType.CPO]: { disabled: true },
-    [EExploreColumnType.EUC]: { disabled: false },
-    [EExploreColumnType.EUE]: { disabled: true },
-    [EExploreColumnType.EUEN]: { disabled: true },
-    [EExploreColumnType.EDC]: { disabled: true },
+  export interface IExploreColumnParamDef {
+    id: string;
+    type: ExploreColumnParamValueType;
+    label: string;
+    isRequired: boolean;
+  }
+
+  /** Params for column types that require configuration */
+  export interface IExploreColumnParamsER {
+    relationType: RelationEnums.Type;
+  }
+  export interface IExploreColumnParamsEPV {
+    propertyType: string;
+  }
+  /** Empty params for column types with no configuration */
+  export type IExploreColumnParamsEmpty = Record<string, never>;
+
+  export interface IEExploreColumnTypeConfigEntry<P = IExploreColumnParamsEmpty> {
+    label: string;
+    description: string;
+    isDisabled: boolean;
+    params: P;
+    paramsDef?: IExploreColumnParamDef[];
+  }
+
+  export interface IEExploreColumnTypeConfig {
+    [EExploreColumnType.ER]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsER>;
+    [EExploreColumnType.EPV]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEPV>;
+    [EExploreColumnType.EPT]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
+    [EExploreColumnType.ERR]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
+    [EExploreColumnType.ERV]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
+    [EExploreColumnType.ES]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
+    [EExploreColumnType.CPV]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
+    [EExploreColumnType.CPO]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
+    [EExploreColumnType.EUC]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
+    [EExploreColumnType.EUE]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
+    [EExploreColumnType.EUEN]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
+    [EExploreColumnType.EDC]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
+  }
+
+  export const EExploreColumnTypeConfig: IEExploreColumnTypeConfig = {
+    [EExploreColumnType.ER]: {
+      label: "Entity Relations",
+      description:
+        "Shows entities related to this row via the specified relation type (e.g. superclass, synonym).",
+      isDisabled: false,
+      params: { relationType: RelationEnums.Type.Superclass },
+      paramsDef: [
+        {
+          id: "relationType",
+          type: "relationType",
+          label: "Relation type",
+          isRequired: true,
+        },
+      ],
+    },
+    [EExploreColumnType.EPV]: {
+      label: "Entity Property value",
+      description:
+        "Shows the value of a metaproperty of a specific type. The property type is a Concept entity that defines which metaproperty is displayed.",
+      isDisabled: false,
+      params: { propertyType: "" },
+      paramsDef: [
+        {
+          id: "propertyType",
+          type: "entity",
+          label: "Property type",
+          isRequired: true,
+        },
+      ],
+    },
+    [EExploreColumnType.EPT]: {
+      label: "Entity Property types",
+      description:
+        "Shows the types (Concepts) of metaproperties attached to the entity. Editable: you can add or remove property types.",
+      isDisabled: false,
+      params: {},
+    },
+    [EExploreColumnType.ERR]: {
+      label: "Entity Reference Resources",
+      description:
+        "Shows the resource side of entity references (e.g. bibliographic sources). Editable: you can add or remove references.",
+      isDisabled: false,
+      params: {},
+    },
+    [EExploreColumnType.ERV]: {
+      label: "Entity Reference Values",
+      description: "Shows the value side of entity references.",
+      isDisabled: true,
+      params: {},
+    },
+    [EExploreColumnType.ES]: {
+      label: "Entity Statements",
+      description: "Shows statements that contain this entity.",
+      isDisabled: true,
+      params: {},
+    },
+    [EExploreColumnType.CPV]: {
+      label: "Property values",
+      description: "Shows property values within statements.",
+      isDisabled: true,
+      params: {},
+    },
+    [EExploreColumnType.CPO]: {
+      label: "Property type origins",
+      description: "Shows property type origins within statements.",
+      isDisabled: true,
+      params: {},
+    },
+    [EExploreColumnType.EUC]: {
+      label: "Created by",
+      description: "Shows the user who created this entity.",
+      isDisabled: false,
+      params: {},
+    },
+    [EExploreColumnType.EUE]: {
+      label: "Edited by",
+      description: "Shows the user who last edited this entity.",
+      isDisabled: true,
+      params: {},
+    },
+    [EExploreColumnType.EUEN]: {
+      label: "Number of edits",
+      description: "Shows the number of edits made to this entity.",
+      isDisabled: true,
+      params: {},
+    },
+    [EExploreColumnType.EDC]: {
+      label: "Creation date",
+      description: "Shows when this entity was created.",
+      isDisabled: true,
+      params: {},
+    },
   };
 
   export type ExploreColumnParamsMap = {
-    [EExploreColumnType.ER]: { relationType: RelationEnums.Type };
-    [EExploreColumnType.EPV]: { propertyType: string };
-    [EExploreColumnType.EPT]: {};
-    [EExploreColumnType.ERR]: {};
-    [EExploreColumnType.ERV]: {};
-    [EExploreColumnType.ES]: {};
-    [EExploreColumnType.CPV]: {};
-    [EExploreColumnType.CPO]: {};
-    [EExploreColumnType.EUC]: {};
-    [EExploreColumnType.EUE]: {};
-    [EExploreColumnType.EUEN]: {};
-    [EExploreColumnType.EDC]: {};
+    [K in EExploreColumnType]: IEExploreColumnTypeConfig[K]["params"];
   };
 
   export type IExploreColumnParams<

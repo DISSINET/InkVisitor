@@ -2,6 +2,7 @@ import {
   autoUpdate,
   flip,
   FloatingPortal,
+  limitShift,
   offset,
   shift,
   useFloating,
@@ -13,12 +14,25 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import api from "api";
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { FaDownload, FaPen, FaRegSave, FaTrash } from "react-icons/fa";
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { FaPen, FaRegSave, FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 
-import { Annotator, EditMode, Tag } from "@inkvisitor/annotator/src/lib";
+import {
+  Annotator,
+  EditMode,
+  editModeDisplayLabel,
+  Tag,
+} from "@inkvisitor/annotator/src/lib";
+import { EntityEnums, UserEnums } from "@shared/enums";
 import {
   IDocument,
   IEntity,
@@ -28,26 +42,28 @@ import {
   IResponseUser,
   IStatement,
 } from "@shared/types";
-import { EntityEnums, UserEnums } from "@shared/enums";
 import { AxiosResponse } from "axios";
+import { Loader } from "components";
 import { Button } from "components/basic/Button/Button";
 import { ButtonGroup } from "components/basic/ButtonGroup/ButtonGroup";
 import { CStatement } from "constructors";
 import {
+  useAnnotatorSearch,
   useDebounce,
+  useDebouncedCallback,
   useSearchParams,
   useTheme,
-  useAnnotatorSearch,
 } from "hooks";
 import { BsFileTextFill } from "react-icons/bs";
 import { HiCodeBracket } from "react-icons/hi2";
 import { collectStatementAnchors, getStatementOrderByIndex } from "utils/utils";
-import { DocumentModalExport, EntityCreateModal } from "..";
+import { EntityCreateModal } from "..";
 import { useAnnotator } from "./AnnotatorContext";
 import TextAnnotatorMenu from "./AnnotatorMenu";
 import {
   StyledAnnotatorButtons,
   StyledAnnotatorMenu,
+  StyledAnnotatorMenuDraggable,
   StyledCanvasWrapper,
   StyledDisplayModeButtonIconWrapper,
   StyledInfoText,
@@ -57,10 +73,13 @@ import {
   StyledScrollerViewport,
 } from "./AnnotatorStyles";
 import { annotatorHighlight } from "./highlight";
-import { RATIO, TerritoryCreateModalType, W_SCROLL } from "./types";
-import { StatementListSearchLine } from "pages/Main/containers/StatementsListBox/StatementListSearchLine/StatementListSearchLine";
-import { Loader } from "components";
-import { IoMdDownload } from "react-icons/io";
+import {
+  ANNOTATOR_LEFT_MARGIN_PX,
+  RATIO,
+  TerritoryCreateModalType,
+  W_SCROLL,
+} from "./types";
+import { AnnotatorSearchLine } from "./AnnotatorSearchLine/AnnotatorSearchLine";
 
 interface TextAnnotatorProps {
   width: number;
@@ -73,8 +92,10 @@ interface TextAnnotatorProps {
 
   forwardAnnotator?: (annotator?: Annotator) => void;
 
-  // storedAnnotatorScroll?: number;
-  // setStoredAnnotatorScroll?: React.Dispatch<React.SetStateAction<number>>;
+  storedAnnotatorScrollPosition?: number | null;
+  setStoredAnnotatorScrollPosition?: React.Dispatch<
+    React.SetStateAction<number | null>
+  >;
 
   territory?: IResponseTerritory;
   // territoryId is from URL params and is used to reset the annotator when the territory changes
@@ -94,7 +115,12 @@ interface TextAnnotatorProps {
   userData?: IResponseUser;
   disableCreate?: boolean;
   statementListBoxRef?: React.RefObject<HTMLDivElement | null>;
+
+  /** When the pointer hovers anchored text, receives the innermost tag id or null (e.g. statement list sync). */
+  onStatementAnchorHover?: (statementId: string | null) => void;
 }
+
+const ANNOTATOR_MENU_PAGE_PADDING = 4;
 
 export const TextAnnotator = ({
   width = 400,
@@ -107,8 +133,8 @@ export const TextAnnotator = ({
   thisTerritoryEntityId = undefined,
 
   forwardAnnotator = (undefined) => {},
-  // storedAnnotatorScroll = 0,
-  // setStoredAnnotatorScroll = () => {},
+  storedAnnotatorScrollPosition = null,
+  setStoredAnnotatorScrollPosition,
 
   territory,
   territoryId,
@@ -120,6 +146,7 @@ export const TextAnnotator = ({
   statementCreateMutation = undefined,
   userData,
   disableCreate = false,
+  onStatementAnchorHover,
 }: TextAnnotatorProps) => {
   const queryClient = useQueryClient();
   const theme = useTheme();
@@ -145,7 +172,16 @@ export const TextAnnotator = ({
 
   const [territoryElvl, setTerritoryElvl] = useState<EntityEnums.Elvl>();
 
+  /** Which document id the current Annotator instance was built for (avoids rebasing canvas onto stale props on the same doc). */
+  const annotatorLoadedForDocIdRef = useRef<string | undefined>(undefined);
+
+  const onStatementAnchorHoverRef = useRef(onStatementAnchorHover);
+  useEffect(() => {
+    onStatementAnchorHoverRef.current = onStatementAnchorHover;
+  }, [onStatementAnchorHover]);
+
   const resetAnnotator = () => {
+    annotatorLoadedForDocIdRef.current = undefined;
     setAnnotator(null);
     forwardAnnotator(undefined);
   };
@@ -175,10 +211,21 @@ export const TextAnnotator = ({
     enabled: !!parentTerritoryId,
   });
 
+  const mergeSavedDocumentIntoCache = useCallback(
+    (variables: { id: string; doc: Partial<IDocument> }) => {
+      queryClient.setQueryData<IDocument | undefined>(
+        ["document", variables.id],
+        (old) => (old ? { ...old, ...variables.doc } : old)
+      );
+    },
+    [queryClient]
+  );
+
   const updateDocumentMutation = useMutation({
     mutationFn: async (data: { id: string; doc: Partial<IDocument> }) =>
       api.documentUpdate(data.id, data.doc),
-    onSuccess: (variables, data) => {
+    onSuccess: (_data, variables) => {
+      mergeSavedDocumentIntoCache(variables);
       queryClient.invalidateQueries({ queryKey: ["document"] });
       queryClient.invalidateQueries({ queryKey: ["documents"] });
       toast.info("Document content saved");
@@ -192,7 +239,8 @@ export const TextAnnotator = ({
   const updateDocumentMutationQuiet = useMutation({
     mutationFn: async (data: { id: string; doc: Partial<IDocument> }) =>
       api.documentUpdate(data.id, data.doc),
-    onSuccess: (variables, data) => {
+    onSuccess: (_data, variables) => {
+      mergeSavedDocumentIntoCache(variables);
       queryClient.invalidateQueries({ queryKey: ["document"] });
       queryClient.invalidateQueries({ queryKey: ["documents"] });
     },
@@ -203,14 +251,34 @@ export const TextAnnotator = ({
   });
 
   const wLineNumbers = displayLineNumbers ? 50 : 0;
-  const wTextArea = width - wLineNumbers - W_SCROLL;
+  const wTextArea = Math.max(
+    0,
+    width - wLineNumbers - W_SCROLL - ANNOTATOR_LEFT_MARGIN_PX
+  );
 
   const [isSelectingText, setIsSelectingText] = useState<boolean>(false);
 
   const mainCanvas = useRef<HTMLCanvasElement>(null);
   const scroller = useRef<HTMLDivElement>(null);
   const lines = useRef<HTMLCanvasElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
+  const annotatorRef = useRef<Annotator | null>(null);
+  annotatorRef.current = annotator;
+
+  const saveScrollPositionOnScrollEnd = useDebouncedCallback(() => {
+    const a = annotatorRef.current;
+    if (a && setStoredAnnotatorScrollPosition) {
+      setStoredAnnotatorScrollPosition(a.getViewportStartInRawText());
+    }
+  }, 500);
+
+  useEffect(() => {
+    if (!annotator || !setStoredAnnotatorScrollPosition) return;
+    annotator.onScroll(() => saveScrollPositionOnScrollEnd());
+  }, [
+    annotator,
+    setStoredAnnotatorScrollPosition,
+    saveScrollPositionOnScrollEnd,
+  ]);
 
   useEffect(() => {
     if (annotator) {
@@ -219,6 +287,9 @@ export const TextAnnotator = ({
       setSearchActiveOccurence(0);
       setSearchTerm("");
       annotator.draw();
+      if (mainCanvas.current) {
+        mainCanvas.current.focus();
+      }
     }
   }, [annotatorMode]);
 
@@ -322,100 +393,146 @@ export const TextAnnotator = ({
   const [isSavingWithoutRefresh, setIsSavingWithoutRefresh] =
     useState<boolean>(false);
 
-  // floating highlight menu
-  const { refs, floatingStyles } = useFloating({
-    placement: "bottom",
-    whileElementsMounted: autoUpdate,
-    middleware: [
-      offset({
-        mainAxis: annotator?.lineHeight
-          ? (annotator.lineHeight / RATIO) * 1.2
-          : 30,
-        // crossAxis: wTextArea / 2 + 100,
-        // crossAxis: 100,
-      }),
-      flip({
-        padding: 10,
-        fallbackPlacements: ["top"],
-      }),
-      shift({
-        padding: 10,
-        crossAxis: true,
-      }),
-    ],
-  });
+  // implementation of draggable menu
+  const [menuDragOffset, setMenuDragOffset] = useState({ x: 0, y: 0 });
+  const menuDragOffsetRef = useRef(menuDragOffset);
+  menuDragOffsetRef.current = menuDragOffset;
 
-  // calculate highlight menu position
-  useEffect(() => {
-    if (annotator?.cursor?.selectStart && annotator?.cursor?.selectEnd) {
-      const canvas = mainCanvas.current;
-      if (canvas) {
-        const rect = canvas.getBoundingClientRect();
-        const startX =
-          rect.left + annotator.cursor.selectStart.xLine * annotator.charWidth;
-        const startY =
-          rect.top +
-          ((annotator.cursor.selectStart.yLine - annotator.viewport.lineStart) *
-            annotator.lineHeight) /
-            RATIO;
-        const endX =
-          rect.left + annotator.cursor.selectEnd.xLine * annotator.charWidth;
-        const endY =
-          rect.top +
-          ((annotator.cursor.selectEnd.yLine - annotator.viewport.lineStart) *
-            annotator.lineHeight) /
-            RATIO;
+  const menuDragSessionRef = useRef<{
+    pointerId: number;
+    startClientX: number;
+    startClientY: number;
+    originX: number;
+    originY: number;
+  } | null>(null);
 
-        // Check if selection spans the entire document
-        const isFullSelection =
-          annotator.cursor.selectStart.yLine === 0 &&
-          annotator.cursor.selectEnd.yLine >= annotator.viewport.noLines - 1;
+  const menuDragHandleRef = useRef<HTMLDivElement | null>(null);
+  const menuDragWindowListenersRef = useRef<AbortController | null>(null);
 
-        // Determine if selection is backwards (end to start)
-        const isBackwardsSelection =
-          annotator.cursor.selectEnd.yLine <
-            annotator.cursor.selectStart.yLine ||
-          (annotator.cursor.selectEnd.yLine ===
-            annotator.cursor.selectStart.yLine &&
-            annotator.cursor.selectEnd.xLine <
-              annotator.cursor.selectStart.xLine);
+  const menuDraggableRef = useRef<HTMLDivElement | null>(null);
 
-        // Use end position for backwards selection, start position for forwards selection
-        const menuX = isBackwardsSelection ? endX : startX;
-        const menuY = isBackwardsSelection ? endY : startY;
+  const endMenuDrag = useCallback((ev?: { pointerId: number }) => {
+    const session = menuDragSessionRef.current;
+    if (!session) return;
+    if (ev !== undefined && ev.pointerId !== session.pointerId) return;
 
-        // Create a virtual element for the reference point that represents the selection
-        const virtualElement = {
-          getBoundingClientRect: () => ({
-            x: menuX,
-            y: isFullSelection ? rect.top + rect.height / 2 : menuY,
-            width: Math.abs(endX - startX),
-            height: isFullSelection ? 0 : Math.abs(endY - startY),
-            top: isFullSelection ? rect.top + rect.height / 2 : menuY,
-            right: Math.max(startX, endX),
-            bottom: isFullSelection
-              ? rect.top + rect.height / 2
-              : Math.max(startY, endY),
-            left: Math.min(startX, endX),
-          }),
-        };
+    menuDragWindowListenersRef.current?.abort();
+    menuDragWindowListenersRef.current = null;
 
-        refs.setPositionReference(virtualElement);
-      }
+    const el = menuDragHandleRef.current;
+    try {
+      el?.releasePointerCapture(session.pointerId);
+    } catch {
+      /* capture already released */
     }
-  }, [
-    annotator?.cursor?.selectStart,
-    annotator?.cursor?.selectEnd,
-    annotator?.lineHeight,
-    annotator?.viewport?.noLines,
-    annotator?.viewport?.lineStart,
-  ]);
+    menuDragHandleRef.current = null;
+    menuDragSessionRef.current = null;
+  }, []);
+
+  const handleMenuDragPointerDown = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      if (e.button !== 0) return;
+      e.preventDefault();
+      menuDragWindowListenersRef.current?.abort();
+      const ac = new AbortController();
+      menuDragWindowListenersRef.current = ac;
+      const signal = ac.signal;
+      const pointerId = e.pointerId;
+
+      menuDragHandleRef.current = e.currentTarget;
+      e.currentTarget.setPointerCapture(pointerId);
+      menuDragSessionRef.current = {
+        pointerId,
+        startClientX: e.clientX,
+        startClientY: e.clientY,
+        originX: menuDragOffsetRef.current.x,
+        originY: menuDragOffsetRef.current.y,
+      };
+
+      const opts = { capture: true, signal } as const;
+      const onWindowPointerEnd = (wev: PointerEvent) => {
+        if (wev.pointerId !== pointerId) return;
+        endMenuDrag(wev);
+      };
+      window.addEventListener("pointerup", onWindowPointerEnd, opts);
+      window.addEventListener("pointercancel", onWindowPointerEnd, opts);
+      window.addEventListener("blur", () => endMenuDrag(), opts);
+      document.addEventListener(
+        "visibilitychange",
+        () => {
+          if (document.visibilityState === "hidden") endMenuDrag();
+        },
+        opts
+      );
+    },
+    [endMenuDrag]
+  );
+
+  const handleMenuDragPointerMove = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      const session = menuDragSessionRef.current;
+      if (!session || e.pointerId !== session.pointerId) return;
+      e.preventDefault();
+      const page = document.getElementById("page");
+      const menuEl = menuDraggableRef.current;
+      let px = session.originX + (e.clientX - session.startClientX);
+      let py = session.originY + (e.clientY - session.startClientY);
+
+      if (page && menuEl) {
+        const pr = page.getBoundingClientRect();
+        const pad = ANNOTATOR_MENU_PAGE_PADDING;
+        const mr = menuEl.getBoundingClientRect();
+        const cur = menuDragOffsetRef.current;
+        const innerLeft = (x: number) => mr.left + (x - cur.x);
+        const innerTop = (y: number) => mr.top + (y - cur.y);
+        for (let i = 0; i < 4; i++) {
+          const l = innerLeft(px);
+          const t = innerTop(py);
+          const r = l + mr.width;
+          const b = t + mr.height;
+          if (l < pr.left + pad) px += pr.left + pad - l;
+          if (t < pr.top + pad) py += pr.top + pad - t;
+          if (r > pr.right - pad) px -= r - (pr.right - pad);
+          if (b > pr.bottom - pad) py -= b - (pr.bottom - pad);
+        }
+      }
+
+      setMenuDragOffset({ x: px, y: py });
+    },
+    []
+  );
+
+  const handleMenuDragPointerUp = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      endMenuDrag(e.nativeEvent);
+    },
+    [endMenuDrag]
+  );
+
+  /** Keeps keyboard focus on the annotator canvas when using menu controls; skips inputs and react-select (BaseDropdown) so they stay interactive. */
+  // const handleMenuPointerDownCapture = useCallback(
+  //   (e: React.PointerEvent<HTMLDivElement>) => {
+  //     const target = e.target as HTMLElement;
+  //     if (
+  //       target.closest(
+  //         "input, textarea, select, [contenteditable='true'], label, .react-select-container"
+  //       )
+  //     ) {
+  //       return;
+  //     }
+  //     e.preventDefault();
+  //     queueMicrotask(() => {
+  //       mainCanvas.current?.focus({ preventScroll: true });
+  //     });
+  //   },
+  //   []
+  // );
 
   // quiet does not trigger a toast notification
-  const handleSaveNewContent = (
+  const handleSaveNewContent = async (
     quiet: boolean,
     skipRefresh: boolean = false
-  ) => {
+  ): Promise<void> => {
     if (annotator && documentId) {
       if (skipRefresh) {
         setIsSavingWithoutRefresh(true);
@@ -423,23 +540,17 @@ export const TextAnnotator = ({
         setIsSaving(true);
       }
 
-      if (quiet) {
-        updateDocumentMutationQuiet.mutate({
-          id: documentId,
-          doc: {
-            ...dataDocument,
-            content: annotator.text.value,
-          },
-        });
-      } else {
-        updateDocumentMutation.mutate({
-          id: documentId,
-          doc: {
-            ...dataDocument,
-            content: annotator.text.value,
-          },
-        });
-      }
+      const mutation = quiet
+        ? updateDocumentMutationQuiet
+        : updateDocumentMutation;
+
+      await mutation.mutateAsync({
+        id: documentId,
+        doc: {
+          ...dataDocument,
+          content: annotator.text.value,
+        },
+      });
     }
   };
 
@@ -489,7 +600,10 @@ export const TextAnnotator = ({
     enabled: api.isLoggedIn() && selectedAnchors.length > 0,
   });
 
-  const handleAddAnchor = (entityId: string, elvl?: EntityEnums.Elvl) => {
+  const handleAddAnchor = async (
+    entityId: string,
+    elvl?: EntityEnums.Elvl
+  ): Promise<void> => {
     annotator?.addAnchor(
       entityId,
       elvl
@@ -498,9 +612,7 @@ export const TextAnnotator = ({
           }
         : {}
     );
-    setSelectedText("");
-    annotator?.clearSelection();
-    handleSaveNewContent(true);
+    await handleSaveNewContent(true);
     handleRefreshEntityAndStatement(entityId);
     toast.info(`Anchor created ${entityId}.`);
   };
@@ -528,24 +640,37 @@ export const TextAnnotator = ({
       return;
     }
 
+    const registerAnchorHover = (a: Annotator) => {
+      a.onAnchorHover((tags: Tag[]) => {
+        const cb = onStatementAnchorHoverRef.current;
+        if (!cb) {
+          return;
+        }
+        const id = tags.length > 0 ? tags[tags.length - 1].getTagName() : null;
+        cb(id);
+      });
+    };
+
+    const applyCanvasTheme = (a: Annotator) => {
+      a.fontColor = theme.color.black;
+      a.bgColor = "transparent";
+      a.setSelectStyle("turquoise", 0.8, theme.color.black);
+      a.setHoverHighlightStyle({
+        color: theme.color.entityS,
+        opacity: 0.25,
+      });
+    };
+
     // Check if the document content has actually changed
     const currentContent = annotator?.text?.value;
     const newContent = dataDocument?.content ?? "no text";
 
-    // If content hasn't changed, dimensions haven't changed, and we have an existing annotator, just redraw it
-    if (annotator && currentContent === newContent) {
-      // Update theme colors for existing annotator
-      annotator.fontColor = theme.color.black;
-      annotator.bgColor = "transparent";
-      annotator.setSelectStyle("turquoise", 0.8, theme.color.black);
+    const reuseExistingInstance = (
+      contentForLocalState: string = newContent
+    ) => {
+      if (!annotator) return;
+      applyCanvasTheme(annotator);
 
-      // Update Lines component colors if it exists
-      if (annotator.lines) {
-        annotator.lines.fontColor = theme.color.plain;
-        annotator.lines.bgColor = theme.color.white;
-      }
-
-      // Update highlight callback to use current theme
       annotator.onHighlight((entityId) => {
         if (dataDocument) {
           return annotatorHighlight(
@@ -560,13 +685,38 @@ export const TextAnnotator = ({
         }
       });
 
-      // Ensure localTextContent is set (in case it wasn't set on initial load)
-      if (localTextContent !== newContent) {
-        setLocalTextContent(newContent);
+      registerAnchorHover(annotator);
+
+      if (localTextContent !== contentForLocalState) {
+        setLocalTextContent(contentForLocalState);
       }
 
       annotator.draw();
+    };
 
+    // Same text as props — keep instance, refresh styling / callbacks only.
+    if (annotator && currentContent === newContent) {
+      reuseExistingInstance();
+      return;
+    }
+
+    // Props lag behind the live canvas (e.g. after anchor + save before cache/refetch catches up).
+    // Do not rebuild from stale dataDocument — sync cache from annotator and keep the instance.
+    if (
+      annotator &&
+      currentContent !== undefined &&
+      documentId &&
+      dataDocument?.id === documentId &&
+      annotatorLoadedForDocIdRef.current === documentId
+    ) {
+      queryClient.setQueryData<IDocument | undefined>(
+        ["document", documentId],
+        (old) => {
+          if (!old || old.id !== documentId) return old;
+          return { ...old, content: currentContent };
+        }
+      );
+      reuseExistingInstance(currentContent);
       return;
     }
 
@@ -578,10 +728,7 @@ export const TextAnnotator = ({
       RATIO
     );
 
-    newAnnotator.fontColor = theme.color.black;
-    newAnnotator.bgColor = "transparent";
-
-    newAnnotator.setSelectStyle("turquoise", 0.8, theme.color.black);
+    applyCanvasTheme(newAnnotator);
 
     if (scroller?.current) {
       newAnnotator.addScroller(scroller.current);
@@ -609,6 +756,8 @@ export const TextAnnotator = ({
       }
     });
 
+    registerAnchorHover(newAnnotator);
+
     newAnnotator.onTextChanged((text) => {
       setLocalTextContent(text);
     });
@@ -617,17 +766,22 @@ export const TextAnnotator = ({
     const initialContent = dataDocument?.content ?? "no text";
     setLocalTextContent(initialContent);
 
-    newAnnotator.draw();
+    // Ensure the initial render uses the current mode (e.g. HIGHLIGHT hides XML tags).
+    // Otherwise we may briefly draw in RAW mode and show tags on first load.
+    newAnnotator.setMode(originalMode);
+
+    if (storedAnnotatorScrollPosition != null) {
+      // scrollToRawPosition triggers a draw
+      newAnnotator.scrollToRawPosition(storedAnnotatorScrollPosition);
+    } else {
+      newAnnotator.draw();
+    }
 
     setAnnotator(newAnnotator);
     forwardAnnotator(newAnnotator);
-
-    // Probably not necessary, this is sending many updates to component on scroll
-    // newAnnotator.onScroll(() => {
-    //   setStoredAnnotatorScroll(newAnnotator.viewport.lineStart);
-    // });
-
-    newAnnotator.setMode(originalMode);
+    if (documentId) {
+      annotatorLoadedForDocIdRef.current = documentId;
+    }
   };
 
   useEffect(() => {
@@ -636,9 +790,9 @@ export const TextAnnotator = ({
     }
   }, [
     displayLineNumbers,
-    theme,
     hlEntities ?? [],
     dataDocumentIsFetching,
+    theme,
     dataDocument,
     isSaving,
   ]);
@@ -649,6 +803,12 @@ export const TextAnnotator = ({
       annotator?.resize();
     }
   }, [width, height]);
+
+  useEffect(() => {
+    if (storedAnnotatorScrollPosition !== null) {
+      annotator?.scrollToRawPosition(storedAnnotatorScrollPosition);
+    }
+  }, [width]);
 
   const onCreateTerritory = (
     mode: TerritoryCreateModalType,
@@ -670,7 +830,7 @@ export const TextAnnotator = ({
     return "new Territory";
   }, [territoryCreateModalType, territory]);
 
-  const onCreateStatement = (
+  const onCreateStatement = async (
     elvl: EntityEnums.Elvl,
     // following props are only for creation from EntitySuggester -> EntityCreateModal
     entityCreateModalProps?: {
@@ -679,10 +839,10 @@ export const TextAnnotator = ({
       territoryId: string;
       language: EntityEnums.Language;
     }
-  ) => {
+  ): Promise<void> => {
     if (handleCreateStatement && selectedText && selectionStartIndex !== -1) {
       const newStatementId = uuidv4();
-      handleAddAnchor(newStatementId, elvl);
+      await handleAddAnchor(newStatementId, elvl);
       // remove linebreaks from text
       const validatedText = selectedText.replace(/\n/g, " ");
       handleCreateStatement(
@@ -701,12 +861,10 @@ export const TextAnnotator = ({
     }
   };
 
-  const onRemoveAnchor = (anchor: string) => {
+  const onRemoveAnchor = (anchor: Tag) => {
     annotator?.removeAnchorFromSelection(anchor);
-    handleSaveNewContent(true);
-    setSelectedText("");
-    annotator?.clearSelection();
-    handleRefreshEntityAndStatement(anchor);
+    handleSaveNewContent(true, true);
+    handleRefreshEntityAndStatement(anchor.getTagName());
   };
 
   const onUpdateAnchor = (anchor: Tag, elvl: EntityEnums.Elvl) => {
@@ -723,35 +881,51 @@ export const TextAnnotator = ({
     );
   }, [annotatorMode, selectedText, isSelectingText, dataDocument]);
 
-  // Handle click outside menu to close it
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        isMenuDisplayed &&
-        menuRef.current &&
-        !menuRef.current.contains(event.target as Node) &&
-        !mainCanvas.current?.contains(event.target as Node) &&
-        !statementListBoxRef?.current?.contains(event.target as Node)
-      ) {
-        // Check if click is within Modal
-        const target = event.target as Element;
-        const isWithinModal = target.closest("[data-attribute-modal]") !== null;
+  const annotatorMenuMiddleware = useMemo(() => {
+    if (typeof document === "undefined") return [];
+    const page = document.getElementById("page");
+    const centerOnPoint = offset(({ rects }) => ({
+      mainAxis: -(rects.floating.height || 0) / 2,
+    }));
+    if (!page) return [centerOnPoint];
+    return [
+      centerOnPoint,
+      flip({
+        boundary: page,
+        padding: ANNOTATOR_MENU_PAGE_PADDING,
+      }),
+      shift({
+        boundary: page,
+        padding: ANNOTATOR_MENU_PAGE_PADDING,
+        crossAxis: true,
+        limiter: limitShift(),
+      }),
+    ];
+  }, [isMenuDisplayed]);
 
-        if (!isWithinModal) {
-          setSelectedText("");
-          annotator?.clearSelection();
-        }
-      }
-    };
+  const { refs: menuFloatingRefs, floatingStyles: menuFloatingStyles } =
+    useFloating({
+      open: isMenuDisplayed,
+      placement: "bottom",
+      strategy: "fixed",
+      whileElementsMounted: autoUpdate,
+      middleware: annotatorMenuMiddleware,
+    });
 
-    if (isMenuDisplayed) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isMenuDisplayed, annotator, statementListBoxRef]);
+  useLayoutEffect(() => {
+    if (!isMenuDisplayed) return;
+    const page = document.getElementById("page");
+    if (!page) return;
+    menuFloatingRefs.setPositionReference({
+      getBoundingClientRect() {
+        const r = page.getBoundingClientRect();
+        const cx = r.left + r.width / 2;
+        const cy = r.top + r.height / 2;
+        return new DOMRect(cx, cy, 0, 0);
+      },
+      contextElement: page,
+    });
+  }, [isMenuDisplayed]);
 
   const hasParentT = territory?.data?.parent !== undefined;
 
@@ -761,7 +935,8 @@ export const TextAnnotator = ({
     | null
   >(null);
   const [isRegexMode, setIsRegexMode] = useState<boolean>(false);
-  const [isCaseSensitiveMode, setIsCaseSensitiveMode] = useState<boolean>(true);
+  const [isCaseSensitiveMode, setIsCaseSensitiveMode] =
+    useState<boolean>(false);
   const [isExtendToWholeWordMode, setIsExtendToWholeWordMode] =
     useState<boolean>(false);
   const [isWholeWordOnlyMode, setIsWholeWordOnlyMode] =
@@ -830,8 +1005,6 @@ export const TextAnnotator = ({
     return annotator !== undefined && !!dataDocument;
   }, [annotator, dataDocument]);
 
-  const [showExportModal, setShowExportModal] = useState<boolean>(false);
-
   if (dataDocumentError) {
     return (
       <StyledInfoText>
@@ -842,7 +1015,7 @@ export const TextAnnotator = ({
 
   return (
     <>
-      <StatementListSearchLine
+      <AnnotatorSearchLine
         showStatementList={showStatementList ?? false}
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
@@ -872,7 +1045,11 @@ export const TextAnnotator = ({
       />
 
       <div
-        style={{ width: width, position: "relative" }}
+        style={{
+          width,
+          position: "relative",
+          paddingLeft: ANNOTATOR_LEFT_MARGIN_PX,
+        }}
         onKeyDown={(e) => {
           if (e.key === "Escape") {
             setSelectedText("");
@@ -885,47 +1062,64 @@ export const TextAnnotator = ({
             <FloatingPortal id="page">
               <StyledAnnotatorMenu
                 ref={(node) => {
-                  refs.setFloating(node);
-                  menuRef.current = node;
+                  menuFloatingRefs.setFloating(node);
                 }}
-                style={floatingStyles}
+                style={menuFloatingStyles}
               >
-                {dataDocument && (
-                  <TextAnnotatorMenu
-                    onEscapePressed={() => {
-                      setSelectedText("");
-                      annotator?.clearSelection();
-                    }}
-                    anchors={selectedAnchors}
-                    text={selectedText}
-                    entities={storedEntities}
-                    onAnchorAdd={handleAddAnchor}
-                    onCreateTerritory={onCreateTerritory}
-                    onCreateStatement={onCreateStatement}
-                    onRemoveAnchor={onRemoveAnchor}
-                    onUpdateAnchor={onUpdateAnchor}
-                    isTextInsideThisT={selectedAnchors.some(
-                      (anchor) => anchor.getTagName() === thisTerritoryEntityId
-                    )}
-                    activeTerritoryId={thisTerritoryEntityId}
-                    onCreateActiveTAnchor={(elvl) => {
-                      handleAddAnchor(thisTerritoryEntityId ?? "", elvl);
-                    }}
-                    canCreateActiveTAnchor={
-                      !dataDocument?.entityIds.T.includes(
-                        thisTerritoryEntityId ?? ""
-                      )
-                    }
-                    hasParentT={hasParentT}
-                    territory={territory}
-                    disableCreate={disableCreate}
-                    isLoading={
-                      isSaving ||
-                      isSavingWithoutRefresh ||
-                      isFetchingAnchorEntities
-                    }
-                  />
-                )}
+                <StyledAnnotatorMenuDraggable
+                  ref={menuDraggableRef}
+                  // onPointerDownCapture={handleMenuPointerDownCapture}
+                  style={{
+                    transform: `translate(${menuDragOffset.x}px, ${menuDragOffset.y}px)`,
+                  }}
+                >
+                  {dataDocument && (
+                    <TextAnnotatorMenu
+                      menuDragHandleProps={{
+                        onPointerDown: handleMenuDragPointerDown,
+                        onPointerMove: handleMenuDragPointerMove,
+                        onPointerUp: handleMenuDragPointerUp,
+                        onPointerCancel: handleMenuDragPointerUp,
+                      }}
+                      onEscapePressed={() => {
+                        setSelectedText("");
+                        annotator?.clearSelection();
+                      }}
+                      anchors={selectedAnchors}
+                      text={selectedText}
+                      entities={storedEntities}
+                      onAnchorAdd={handleAddAnchor}
+                      onCreateTerritory={onCreateTerritory}
+                      onCreateStatement={onCreateStatement}
+                      onRemoveAnchor={onRemoveAnchor}
+                      onUpdateAnchor={onUpdateAnchor}
+                      isTextInsideThisT={selectedAnchors.some(
+                        (anchor) =>
+                          anchor.getTagName() === thisTerritoryEntityId
+                      )}
+                      activeTerritoryId={thisTerritoryEntityId}
+                      onCreateActiveTAnchor={async (elvl) => {
+                        await handleAddAnchor(
+                          thisTerritoryEntityId ?? "",
+                          elvl
+                        );
+                      }}
+                      canCreateActiveTAnchor={
+                        !dataDocument?.entityIds.T.includes(
+                          thisTerritoryEntityId ?? ""
+                        )
+                      }
+                      hasParentT={hasParentT}
+                      territory={territory}
+                      disableCreate={disableCreate}
+                      isLoading={
+                        isSaving ||
+                        isSavingWithoutRefresh ||
+                        isFetchingAnchorEntities
+                      }
+                    />
+                  )}
+                </StyledAnnotatorMenuDraggable>
               </StyledAnnotatorMenu>
             </FloatingPortal>
           )}
@@ -933,12 +1127,13 @@ export const TextAnnotator = ({
           {displayLineNumbers && (
             <StyledLinesCanvas
               ref={lines}
-              width={wLineNumbers}
-              height={height}
               style={{
                 outline: "none",
+                width: wLineNumbers,
+                height,
                 backgroundColor: theme?.color.white,
-                color: theme?.color.plain,
+                color: theme?.color.gray[450],
+                borderRadius: "4px 0px 0px 4px",
               }}
             />
           )}
@@ -957,17 +1152,8 @@ export const TextAnnotator = ({
               outline: "none",
             }}
           />
-          <StyledScrollerViewport
-            ref={scroller}
-            style={{
-              background: theme.color.grey,
-            }}
-          >
-            <StyledScrollerCursor
-              style={{
-                backgroundColor: theme.color.primary,
-              }}
-            />
+          <StyledScrollerViewport ref={scroller}>
+            <StyledScrollerCursor />
           </StyledScrollerViewport>
 
           <Loader show={dataDocumentIsFetching} size={40} />
@@ -984,7 +1170,11 @@ export const TextAnnotator = ({
                   <FaPen size={11} />
                 </StyledDisplayModeButtonIconWrapper>
               }
-              label={!annotatorWidthTooNarrow ? EditMode.HIGHLIGHT : ""}
+              label={
+                !annotatorWidthTooNarrow
+                  ? editModeDisplayLabel[EditMode.HIGHLIGHT]
+                  : ""
+              }
               color="success"
               inverted={annotatorMode !== EditMode.HIGHLIGHT}
               onClick={() => {
@@ -1003,7 +1193,11 @@ export const TextAnnotator = ({
                 </StyledDisplayModeButtonIconWrapper>
               }
               color="success"
-              label={!annotatorWidthTooNarrow ? "text edit" : ""}
+              label={
+                !annotatorWidthTooNarrow
+                  ? editModeDisplayLabel[EditMode.SEMI]
+                  : ""
+              }
               inverted={annotatorMode !== EditMode.SEMI}
               onClick={() => {
                 setAnnotatorMode(EditMode.SEMI);
@@ -1021,7 +1215,11 @@ export const TextAnnotator = ({
                 </StyledDisplayModeButtonIconWrapper>
               }
               color="success"
-              label={!annotatorWidthTooNarrow ? "XML" : ""}
+              label={
+                !annotatorWidthTooNarrow
+                  ? editModeDisplayLabel[EditMode.RAW]
+                  : ""
+              }
               inverted={annotatorMode !== EditMode.RAW}
               onClick={() => {
                 setAnnotatorMode(EditMode.RAW);
@@ -1033,36 +1231,9 @@ export const TextAnnotator = ({
 
           <ButtonGroup $marginTop style={{ marginLeft: "0.5rem" }}>
             <Button
-              inverted
-              color="info"
-              label="export"
-              icon={<FaDownload size={11} />}
-              onClick={() => {
-                setShowExportModal(true);
-              }}
-              // tooltipLabel="export document"
-              // tooltipPosition="top"
-            />
-            <span style={{ display: "flex", position: "relative" }}>
-              <Button
-                label="save"
-                color="primary"
-                icon={<FaRegSave size={14} />}
-                disabled={
-                  !isChangeMade ||
-                  isSaving ||
-                  isSavingWithoutRefresh ||
-                  dataDocumentIsFetching
-                }
-                onClick={() => {
-                  handleSaveNewContent(false);
-                }}
-              />
-              <Loader show={isSaving || isSavingWithoutRefresh} size={14} />
-            </span>
-            <Button
               label="discard"
-              color="warning"
+              color="greyer"
+              inverted
               icon={<FaTrash />}
               disabled={
                 !isChangeMade ||
@@ -1077,6 +1248,23 @@ export const TextAnnotator = ({
                 }
               }}
             />
+            <span style={{ display: "flex", position: "relative" }}>
+              <Button
+                label="save"
+                color="info"
+                icon={<FaRegSave size={14} />}
+                disabled={
+                  !isChangeMade ||
+                  isSaving ||
+                  isSavingWithoutRefresh ||
+                  dataDocumentIsFetching
+                }
+                onClick={() => {
+                  handleSaveNewContent(false);
+                }}
+              />
+              <Loader show={isSaving || isSavingWithoutRefresh} size={14} />
+            </span>
           </ButtonGroup>
         </StyledAnnotatorButtons>
       </div>
@@ -1094,21 +1282,14 @@ export const TextAnnotator = ({
               ? dataParentTerritory
               : territory
           }
-          onMutationSuccess={(entity) => {
-            handleAddAnchor(entity.id, territoryElvl);
+          onMutationSuccess={async (entity) => {
+            await handleAddAnchor(entity.id, territoryElvl);
             setTerritoryCreateModalType(false);
             setTerritoryElvl(EntityEnums.Elvl.Textual);
             toast.info(`${newTerritoryName} created!`);
             queryClient.invalidateQueries({ queryKey: ["tree"] });
             appendDetailId(entity.id);
           }}
-        />
-      )}
-
-      {showExportModal && dataDocument && (
-        <DocumentModalExport
-          document={dataDocument}
-          onClose={() => setShowExportModal(false)}
         />
       )}
     </>

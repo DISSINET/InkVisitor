@@ -1,4 +1,8 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  QueryClient,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { IResponseQuery, IResponseQueryEntity } from "@shared/types";
 import { Explore, Query } from "@shared/types/query";
@@ -24,6 +28,8 @@ interface RowCache {
   signature: string;
   rows: Map<number, IResponseQueryEntity>;
   total: number;
+  /** Full ordered ids for the query result (same length as total). */
+  entityIds: string[];
 }
 
 const rowCacheStore = new Map<string, RowCache>();
@@ -53,6 +59,7 @@ export const useQueryData = ({
         signature: stableSignature,
         rows: new Map(),
         total: 0,
+        entityIds: [],
       });
     }
     return rowCacheStore.get(stableSignature)!;
@@ -90,6 +97,7 @@ export const useQueryData = ({
     return {
       query: queryState,
       explore: exploreState,
+      entityIds: rowCache.entityIds ?? [],
       entities,
       total: rowCache.total,
     };
@@ -98,7 +106,8 @@ export const useQueryData = ({
   const storeFetchedRows = (
     offset: number,
     entities: IResponseQueryEntity[],
-    total: number
+    total: number,
+    entityIds: string[]
   ) => {
     const rowCache = getRowCache();
 
@@ -108,6 +117,9 @@ export const useQueryData = ({
     });
 
     rowCache.total = total;
+    if (entityIds.length > 0) {
+      rowCache.entityIds = entityIds;
+    }
   };
 
   const queryKey = useMemo(
@@ -139,8 +151,7 @@ export const useQueryData = ({
       }
 
       console.log(
-        `🔄 Fetching rows [${exploreState.offset}-${
-          exploreState.offset + exploreState.limit - 1
+        `🔄 Fetching rows [${exploreState.offset}-${exploreState.offset + exploreState.limit - 1
         }]`
       );
 
@@ -154,11 +165,11 @@ export const useQueryData = ({
         storeFetchedRows(
           exploreState.offset,
           res.data.entities,
-          res.data.total
+          res.data.total,
+          res.data.entityIds ?? []
         );
         console.log(
-          `📦 Stored ${res.data.entities.length} rows [${exploreState.offset}-${
-            exploreState.offset + res.data.entities.length - 1
+          `📦 Stored ${res.data.entities.length} rows [${exploreState.offset}-${exploreState.offset + res.data.entities.length - 1
           }]`
         );
       }
@@ -198,3 +209,31 @@ export const useQueryData = ({
     getCachedEntity,
   };
 };
+
+/**
+ * Clears row cache and forces the explorer query for this signature to refetch.
+ * Use `invalidateQueries` (not `removeQueries` + `refetchQueries`): after removal,
+ * there is nothing left in the cache for `refetchQueries` to run, so the table
+ * stays stale. Invalidation refetches active observers regardless of staleTime.
+ */
+export function invalidateExplorerQueryForSignature(
+  queryClient: QueryClient,
+  stableSignature: string
+): void {
+  clearRowCache(stableSignature);
+  void queryClient.invalidateQueries({
+    queryKey: ["query", stableSignature],
+    exact: false,
+    refetchType: "active",
+  });
+}
+
+export function useInvalidateExplorerQuery(
+  stableSignature: string | undefined
+): () => void {
+  const queryClient = useQueryClient();
+  return useCallback(() => {
+    if (!stableSignature) return;
+    invalidateExplorerQueryForSignature(queryClient, stableSignature);
+  }, [queryClient, stableSignature]);
+}

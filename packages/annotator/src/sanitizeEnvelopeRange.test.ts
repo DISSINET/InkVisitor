@@ -50,6 +50,62 @@ describe('sanitizeEnvelopeRange', () => {
   });
 
   describe('Case 2: Selection equals parent tag', () => {
+    test('should keep full selection when selecting all text that contains an inner tag (wrap outer anchor)', () => {
+      annotator = new Annotator(mockCanvas, 'some text example <1> previously wrapped </1> more text ');
+
+      const result = sanitizeEnvelopeRange(0, 56);
+      expect(result).toEqual([0, 56]);
+    });
+
+    test('should keep selection when range fully encompasses existing tag (e.g. 5-44 wraps <first>...</first>)', () => {
+      annotator = new Annotator(mockCanvas, 'ahoj ako sa mas <first> nejake meno </first> tu');
+
+      const result = sanitizeEnvelopeRange(5, 44);
+      expect(result).toEqual([5, 44]);
+    });
+
+    test('selection enveloping tag completely (space on left and right) should remain unchanged', () => {
+      annotator = new Annotator(mockCanvas, 'ahoj ako sa mas <first> nejake meno </first> tu');
+
+      const result = sanitizeEnvelopeRange(4, 46);
+      expect(result).toEqual([4, 46]);
+    });
+
+    test('selection enveloping tag with space only on left, end at end of closing tag should remain unchanged', () => {
+      annotator = new Annotator(mockCanvas, 'ahoj ako sa mas <first> nejake meno </first> test');
+
+      const result = sanitizeEnvelopeRange(5, 44);
+      expect(result).toEqual([5, 44]);
+    });
+
+    test('selection enveloping tag with attribute on opening tag (space only on left) should remain unchanged', () => {
+      annotator = new Annotator(mockCanvas, 'ahoj ako sa mas <first elvl="1"> nejake meno </first> test');
+
+      const result = sanitizeEnvelopeRange(5, 53); // selected "ako....</first>"
+      expect(result).toEqual([5, 53]);
+    });
+
+    test('selection enveloping tag with attribute (space on left and right) should remain unchanged', () => {
+      annotator = new Annotator(mockCanvas, 'ahoj ako sa mas <first elvl="1"> nejake meno </first> tu');
+
+      const result = sanitizeEnvelopeRange(5, 56);
+      expect(result).toEqual([5, 56]);
+    });
+
+    test('selection enveloping tag with attribute (space only on right, start at opening tag) should remain unchanged', () => {
+      annotator = new Annotator(mockCanvas, 'ahoj ako sa mas <first elvl="1"> nejake meno </first> tu');
+
+      const result = sanitizeEnvelopeRange(16, 56);
+      expect(result).toEqual([16, 56]);
+    });
+
+    test('selection enveloping tag with space only on right, start at start of opening tag should remain unchanged', () => {
+      annotator = new Annotator(mockCanvas, 'ahoj ako sa mas <first> nejake meno </first> tu');
+
+      const result = sanitizeEnvelopeRange(16, 46);
+      expect(result).toEqual([16, 46]);
+    });
+
     test('should keep selection unchanged when selecting entire tag including tags', () => {
       // Text: "<p>test</p>", parsed: "test"
       // User selects entire tag including opening and closing tags (indices 0-11)
@@ -148,11 +204,10 @@ describe('sanitizeEnvelopeRange', () => {
     });
 
     test('should handle text with < symbols that are not tags', () => {
-      // Text contains < symbols in mathematical expressions and comparisons
       annotator = new Annotator(mockCanvas, 'Math: 5 < 10 and <p>real tag</p> with < symbol');
 
-      const result = sanitizeEnvelopeRange(0, 50); // entire text
-      expect(result).toEqual([20, 28]); // Should adjust to content of the real tag, ignoring < symbols in math
+      const result = sanitizeEnvelopeRange(0, 50);
+      expect(result).toEqual([0, 46]);
     });
   });
 

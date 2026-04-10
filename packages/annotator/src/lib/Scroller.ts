@@ -1,6 +1,8 @@
 /**
  * Scroller is component which renders scrollbar with runner
  */
+const MIN_RUNNER_HEIGHT_PX = 20;
+
 class Scroller {
   // container element
   element: HTMLDivElement;
@@ -16,6 +18,7 @@ class Scroller {
   runnerClickRelPosition: number = 0;
 
   viewPortSize: number = 0;
+  focusTarget?: HTMLElement;
 
   constructor(element: HTMLDivElement) {
     this.element = element;
@@ -35,8 +38,34 @@ class Scroller {
   setViewportSize(percentSize: number): void {
     this.viewPortSize = percentSize;
   }
+
+  setFocusTarget(element: HTMLElement): void {
+    this.focusTarget = element;
+  }
+
+  // Run focus() on the next macrotask with setTimeout(..., 0)
+  // so it happens after the default mousedown/focus behavior.
+  focusMainCanvas(): void {
+    const target = this.focusTarget;
+    if (!target) {
+      return;
+    }
+    // Defer past mousedown default focus (scrollbar div) so the canvas stays focused for keys.
+    window.setTimeout(() => {
+      target.focus({ preventScroll: true });
+    }, 0);
+  }
   setRunnerSize(percentSize: number): void {
-    this.runner.style.height = `${Math.min(100, percentSize)}%`;
+    const clampedPercent = Math.min(100, percentSize);
+    const containerHeight = this.element.clientHeight;
+
+    if (containerHeight > 0) {
+      const minPercent = (MIN_RUNNER_HEIGHT_PX / containerHeight) * 100;
+      const finalPercent = Math.max(clampedPercent, minPercent);
+      this.runner.style.height = `${Math.min(100, finalPercent)}%`;
+    } else {
+      this.runner.style.height = `${clampedPercent}%`;
+    }
   }
 
   // convert px value to percentage considering the available height of the runner
@@ -48,17 +77,37 @@ class Scroller {
   }
 
   /**
-   * update refreshed variables after triggered mouse event (scroll or mouse-click)
+   * update refreshed variables after triggered mouse event (scroll or mouse-click).
+   * When scrollOffsetY and lineHeight are provided, the runner position reflects fluent (sub-line) scroll.
    * @param startLine
    * @param endLine
    * @param totalLines
+   * @param scrollOffsetY optional pixel offset within the current line (fluent scroll)
+   * @param lineHeight line height in same units as scrollOffsetY
    */
-  update(startLine: number, endLine: number, totalLines: number) {
-    const viewportLines = endLine - startLine + 1;
-    const percentage = Math.min(
-      100,
-      (startLine * 100) / (totalLines - viewportLines)
-    );
+  update(
+    startLine: number,
+    endLine: number,
+    totalLines: number,
+    scrollOffsetY?: number,
+    lineHeight?: number
+  ) {
+    const viewportLines = endLine - startLine;
+    const scrollableLines = Math.max(0, totalLines - viewportLines);
+    let percentage: number;
+    if (scrollableLines <= 0) {
+      percentage = 0;
+    } else if (
+      scrollOffsetY !== undefined &&
+      lineHeight !== undefined &&
+      lineHeight > 0
+    ) {
+      const scrollablePx = scrollableLines * lineHeight;
+      const currentPx = startLine * lineHeight + scrollOffsetY;
+      percentage = Math.min(100, Math.max(0, (currentPx / scrollablePx) * 100));
+    } else {
+      percentage = Math.min(100, (startLine * 100) / scrollableLines);
+    }
 
     const availableHeight =
       this.element.clientHeight - this.runner.clientHeight;
@@ -146,6 +195,7 @@ class Scroller {
     document.body.style.cursor = "initial";
 
     document.removeEventListener("mousemove", this.onMouseMove.bind(this));
+    this.focusMainCanvas();
   }
 
   /**
@@ -179,6 +229,7 @@ class Scroller {
         );
       }
     }
+    this.focusMainCanvas();
   }
 
   /**

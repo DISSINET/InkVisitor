@@ -5,7 +5,7 @@ import api from "api";
 import { Button, ButtonGroup, CustomScrollbar, Loader } from "components";
 import { EntityCreateModal } from "components/advanced";
 import { useDebounce, useSearchParams } from "hooks";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { BsFilter } from "react-icons/bs";
 import { FaPlus } from "react-icons/fa";
 import { useSelector } from "react-redux";
@@ -72,14 +72,12 @@ export const TerritoryTreeBox: React.FC = () => {
     enabled: api.isLoggedIn() && !!userId,
   });
 
-  const [storedTerritoryIds, setStoredTerritoryIds] = useState<string[]>([]);
-  useEffect(() => {
-    if (userData?.storedTerritories) {
-      setStoredTerritoryIds(
-        userData.storedTerritories.map((territory) => territory.territory.id)
-      );
-    }
-  }, [userData?.storedTerritories]);
+  const storedTerritoryIds = useMemo(
+    () =>
+      userData?.storedTerritories?.map((territory) => territory.territory.id) ??
+      [],
+    [userData]
+  );
 
   const updateUserMutation = useMutation({
     mutationFn: async (changes: Partial<IUser>) => {
@@ -89,7 +87,9 @@ export const TerritoryTreeBox: React.FC = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tree"] });
-      queryClient.invalidateQueries({ queryKey: ["user"] });
+      if (userId) {
+        queryClient.invalidateQueries({ queryKey: ["user", userId] });
+      }
     },
   });
 
@@ -329,9 +329,7 @@ export const TerritoryTreeBox: React.FC = () => {
                     statementsCount={filteredTreeData.statementsCount}
                     initExpandedNodes={selectedTerritoryPath}
                     empty={filteredTreeData.empty}
-                    storedTerritories={
-                      storedTerritoryIds ? storedTerritoryIds : []
-                    }
+                    storedTerritories={storedTerritoryIds}
                     updateUserMutation={updateUserMutation}
                   />
                 )}

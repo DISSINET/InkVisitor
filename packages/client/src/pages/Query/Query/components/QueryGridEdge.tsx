@@ -91,6 +91,7 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
           style={{
             backgroundColor: color,
             padding: theme.space[1],
+            marginTop: 10,
           }}
         >
           <Dropdown.Single.Basic

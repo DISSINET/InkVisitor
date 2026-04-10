@@ -1,3 +1,4 @@
+import { Annotator } from "@inkvisitor/annotator/src/lib";
 import { IEntity, IResponseStatement, IStatement } from "@shared/types";
 import { useSearchParams, useTheme } from "hooks";
 import React, { useEffect, useRef } from "react";
@@ -44,6 +45,8 @@ interface StatementListRow {
   entities: { [key: string]: IEntity };
   isSelected: boolean;
   displayMode: StatementListDisplayMode;
+  isAnnotatorHovered?: boolean;
+  annotator?: Annotator;
 }
 
 export const StatementListRow: React.FC<StatementListRow> = ({
@@ -56,6 +59,8 @@ export const StatementListRow: React.FC<StatementListRow> = ({
   entities,
   isSelected,
   displayMode,
+  isAnnotatorHovered = false,
+  annotator,
 }) => {
   const dispatch = useAppDispatch();
 
@@ -117,12 +122,25 @@ export const StatementListRow: React.FC<StatementListRow> = ({
     <React.Fragment key={row.original.data.territory?.order}>
       <StyledTr
         ref={dropRef}
+        $listMode={displayMode === StatementListDisplayMode.LIST}
         opacity={opacity}
         $isOpened={row.original.id === statementId}
         $isSelected={isSelected}
+        $isAnnotatorHovered={isAnnotatorHovered}
         onClick={(e) => {
           handleClick(row.original.id);
           e.stopPropagation();
+        }}
+        onMouseEnter={() => {
+          if (
+            displayMode === StatementListDisplayMode.TEXT &&
+            annotator
+          ) {
+            annotator.highlightAnchorByTag(row.original.id);
+          }
+        }}
+        onMouseLeave={() => {
+          annotator?.clearHoverHighlight();
         }}
         // for scrollTo fn
         id={`statement${row.original.id}`}

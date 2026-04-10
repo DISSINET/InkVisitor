@@ -124,7 +124,7 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
         )}
 
         {showTag && (
-          <FloatingPortal id="page">
+          <FloatingPortal id="page-content">
             <div
               ref={refs.setFloating}
               style={{
@@ -145,6 +145,7 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
         visible={showTooltip}
         referenceElement={referenceElement}
         label={getEntityLabel(entity)}
+        position="top"
       />
     </>
   );

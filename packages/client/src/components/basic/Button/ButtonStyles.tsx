@@ -28,6 +28,8 @@ const getFontSize = ($size: ButtonSize) => {
       return "base";
     case ButtonSize.Large:
       return "lg";
+    case ButtonSize.ExtraLarge:
+      return "xl";
   }
 };
 const getVerticalMargin = ($size: ButtonSize) => {
@@ -38,6 +40,8 @@ const getVerticalMargin = ($size: ButtonSize) => {
       return "0.3rem";
     case ButtonSize.Large:
       return "0.45rem";
+    case ButtonSize.ExtraLarge:
+      return "0.6rem";
   }
 };
 const getHorizontalMargin = ($size: ButtonSize, $iconButton?: boolean) => {
@@ -48,6 +52,8 @@ const getHorizontalMargin = ($size: ButtonSize, $iconButton?: boolean) => {
       return $iconButton ? "0.3rem" : "0.55rem";
     case ButtonSize.Large:
       return $iconButton ? "0.45rem" : "0.7rem";
+    case ButtonSize.ExtraLarge:
+      return $iconButton ? "0.6rem" : "0.9rem";
   }
 };
 interface IButtonStyle {
@@ -83,6 +89,8 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
           return "2.25rem";
         case ButtonSize.Large:
           return "3rem";
+        case ButtonSize.ExtraLarge:
+          return "3.9rem";
       }
     }
     return "auto";
@@ -97,6 +105,8 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
           return "2.25rem";
         case ButtonSize.Large:
           return "3rem";
+        case ButtonSize.ExtraLarge:
+          return "3.9rem";
       }
     }
     return "";

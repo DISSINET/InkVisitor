@@ -1,29 +1,39 @@
 import styled from "styled-components";
 
-export const StyledScrollerViewport = styled.div`
-  background: #ccc;
-  position: relative;
-  width: 16px;
-  border-radius: ${({ theme }) => theme.borderRadius["default"]};
-`;
-
+/** Defined before viewport so the parent can target it on hover. */
 export const StyledScrollerCursor = styled.div`
   cursor: move;
   position: absolute;
   width: 10px;
-  margin-left: ${({ theme }) => theme.space[1]};
+  left: 50%;
+  transform: translateX(-50%);
   border-radius: ${({ theme }) => theme.borderRadius["default"]};
+  background-color: ${({ theme }) => theme.color.gray[600]};
+
+  transition: background-color 0.5s ease;
 `;
 
-export const StyledHightlightedText = styled.pre`
-  padding: 10px;
-  border: 1px solid black;
-  margin-top: 10px;
+export const StyledScrollerViewport = styled.div`
+  border-radius: ${({ theme }) => theme.borderRadius["default"]};
+  position: relative;
+  width: 10px;
+  margin-left: 0.6rem;
+  background-color: ${({ theme }) => theme.color.gray[200]};
+
+  /* transition: background-color 0.3s ease; */
+  /* &:hover {
+    background-color: ${({ theme }) => theme.color.gray[300]};
+  } */
+  /* Thumb highlights when hovering anywhere on the scroller track */
+  &:hover ${StyledScrollerCursor}, &:active ${StyledScrollerCursor} {
+    background-color: ${({ theme }) => theme.color.gray[700]};
+  }
 `;
 
 export const StyledCanvasWrapper = styled.div`
-  border: 1px solid black;
+  background-color: ${({ theme }) => theme.color.white};
   padding: 2px;
+  border-radius: 7px;
   display: flex;
   flex-direction: row;
 `;
@@ -33,30 +43,75 @@ export const StyledMainCanvas = styled.canvas`
   cursor: text;
 `;
 
-export const StyledLinesCanvas = styled.canvas`
-  outline: none;
-`;
+// css doesn't load on the canvas element, so we use inline styles
+export const StyledLinesCanvas = styled.canvas``;
 
 interface StyledAnnotatorMenuProps {}
-export const StyledAnnotatorMenu = styled.div<StyledAnnotatorMenuProps>`
+export const StyledAnnotatorDoneButton = styled.div`
   position: absolute;
+  top: 0rem;
+  right: 0.5em;
+  transform: translate(0, -50%);
+  z-index: 101;
+  color: ${({ theme }) => theme.color.primary};
+  border-radius: 7px;
+  background-color: ${({ theme }) => theme.color.blue[100]};
+`;
+
+export const StyledAnnotatorMenu = styled.div<StyledAnnotatorMenuProps>`
   width: 40rem;
-  background: ${({ theme }) => theme.color.blue["100"]};
-  padding: ${({ theme }) => theme.space[2]};
   z-index: 100;
-  border-radius: ${({ theme }) => theme.borderRadius["default"]};
+  pointer-events: none;
+`;
+
+/** Inner drag layer only — keep transform off the Floating UI root */
+export const StyledAnnotatorMenuDraggable = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  pointer-events: auto;
+  gap: 0.5rem;
+  background-color: ${({ theme }) => theme.color.blue[100]};
+  padding: ${({ theme }) => theme.space[2]};
   box-shadow: ${({ theme }) => theme.boxShadow.high};
+  border-radius: ${({ theme }) => theme.borderRadius["default"]};
+
   opacity: 0.95;
+
   &:hover {
     opacity: 1;
   }
   transition: opacity 0.5s, box-shadow 0.3s;
 `;
 
+export const StyledAnnotatorMenuDragHandle = styled.div`
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: ${({ theme }) => theme.space[1]};
+  padding: ${({ theme }) => theme.space[1]} 0 ${({ theme }) => theme.space[2]};
+  border-radius: ${({ theme }) => theme.borderRadius.sm};
+  color: ${({ theme }) => theme.color.gray["600"]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  flex-shrink: 0;
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  &:hover {
+    background: ${({ theme }) => theme.color.blue["150"]};
+  }
+`;
+
 export const StyledAnnotatorItem = styled.div`
+  display: flex;
+  flex-direction: column;
   padding: ${({ theme }) => theme.space[2]};
-  border-radius: ${({ theme }) => theme.borderRadius.xs};
-  margin-bottom: ${({ theme }) => theme.space[2]};
+  border-radius: ${({ theme }) => theme.borderRadius.sm};
 
   &:hover {
     background: ${({ theme }) => theme.color.blue["150"]};
@@ -83,7 +138,8 @@ export const StyledAnnotatorItemContentLine = styled.div`
 export const StyledAnnotatorAnchorListWrap = styled.div`
   display: flex;
   flex-direction: column;
-  overflow: auto;
+  overflow: hidden;
+  min-height: 0;
   max-height: 13rem;
   border-radius: ${({ theme }) => theme.borderRadius.xs};
   background-color: ${({ theme }) => theme.color.gray["500"]};
@@ -102,13 +158,6 @@ export const StyledAnnotatorItemTitle = styled.div`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.space[1]};
-`;
-
-export const StyledAnnotatorAnchorList = styled.div`
-  display: flex;
-  gap: ${({ theme }) => theme.space[2]};
-  flex-wrap: wrap;
-  padding: ${({ theme }) => theme.space[1]};
 `;
 
 export const StyledTerritorySubsection = styled.div`

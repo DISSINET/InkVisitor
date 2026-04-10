@@ -23,7 +23,7 @@ interface Box {
   buttons?: ReactNode[];
   children?: ReactNode;
   onHeaderClick?: () => void;
-  disableOpenBoxHeaderClick?: boolean;
+  disableHeaderClick?: boolean;
   disableScroll?: boolean;
 }
 
@@ -37,7 +37,7 @@ export const Box: React.FC<Box> = ({
   buttons,
   children,
   onHeaderClick,
-  disableOpenBoxHeaderClick = false,
+  disableHeaderClick = false,
   disableScroll = false,
 }) => {
   const [hideContent, setHideContent] = useState<boolean>(false);
@@ -71,13 +71,9 @@ export const Box: React.FC<Box> = ({
         $color={color}
         $noFrame={noFrame}
         $hasHeaderClick={
-          onHeaderClick !== undefined &&
-          !disableOpenBoxHeaderClick &&
-          isExpanded
+          onHeaderClick !== undefined && !disableHeaderClick && isExpanded
         }
-        onClick={() =>
-          !disableOpenBoxHeaderClick && onHeaderClick && onHeaderClick()
-        }
+        onClick={() => !disableHeaderClick && onHeaderClick && onHeaderClick()}
       >
         {!hideContent && (
           <StyledLabel style={animatedExpand}>{label}</StyledLabel>

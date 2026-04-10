@@ -2,7 +2,7 @@ import { Placement } from "@popperjs/core";
 import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import { ThemeColor } from "Theme/theme";
-import { Button, Tag } from "components";
+import { Button, ButtonGroup, Tag } from "components";
 import { EntityTooltip } from "components/advanced";
 import React, { ReactNode, useCallback, useRef, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
@@ -188,7 +188,10 @@ const EntityTagComponent: React.FC<EntityTag> = ({
         entity={entity}
         showOnly={showOnly}
         button={
-          button ? button : unlinkButton && renderUnlinkButton(unlinkButton)
+          <>
+            {button && button}
+            {unlinkButton && renderUnlinkButton(unlinkButton)}
+          </>
         }
         moveFn={moveFn}
         entityClass={classId}
@@ -228,6 +231,7 @@ function areEntityTagsEqual(
 ) {
   // Compare minimal fields that affect rendering
   if (prev.isSelected !== next.isSelected) return false;
+  if (prev.isFavorited !== next.isFavorited) return false;
   if (prev.showOnly !== next.showOnly) return false;
   if (prev.fullWidth !== next.fullWidth) return false;
   if (prev.disableTooltip !== next.disableTooltip) return false;
@@ -244,9 +248,13 @@ function areEntityTagsEqual(
   // Compare function references to ensure they're up-to-date
   if (prev.moveFn !== next.moveFn) return false;
   if (prev.updateOrderFn !== next.updateOrderFn) return false;
-  // Entity-based checks
-  if (prev.entity.id !== next.entity.id) return false;
-  if (prev.entity.status !== next.entity.status) return false;
+  // Entity-based checks (fields that affect Tag/tooltip rendering)
+  if (prev.entity?.id !== next.entity.id) return false;
+  if (prev.entity?.class !== next.entity.class) return false;
+  if (prev.entity?.status !== next.entity.status) return false;
+  if (prev.entity?.data?.logicalType !== next.entity?.data?.logicalType)
+    return false;
+  if (prev.entity.isTemplate !== next.entity.isTemplate) return false;
   const prevLabel = getEntityLabel(prev.entity);
   const nextLabel = getEntityLabel(next.entity);
   if (prevLabel !== nextLabel) return false;
