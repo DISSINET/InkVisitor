@@ -7,8 +7,8 @@ import {
   IAudit,
   IDocumentAuditAnchorChanges,
 } from "@shared/types/audit";
-import { IResponseEntity } from "@shared/types/response-entity";
 import { IResponseAudit } from "@shared/types/response-audit";
+import { IResponseEntity } from "@shared/types/response-entity";
 import { BaseDropdown, Loader, Table, Timestamp } from "components";
 import { EntityTag } from "components/advanced";
 import { UserTag } from "components/advanced/UserTag/UserTag";
@@ -17,18 +17,16 @@ import { Column } from "react-table";
 import { DropdownItem } from "types";
 import {
   StyledDocumentChangeFallback,
-  StyledDocumentAuditContainer,
   StyledDocumentChangesLabel,
   StyledDocumentChangesList,
   StyledDocumentChangesRow,
   StyledDocumentChangesTags,
   StyledDocumentEmptyState,
-  StyledDocumentFirstAudit,
   StyledDocumentInfoText,
-  StyledDocumentSelector,
+  StyledDocumentRow,
   StyledField,
   StyledFieldLabel,
-  StyledTabContent,
+  StyledStatsContent,
 } from "../StatsPageStyles";
 
 type ChangeSectionKey = keyof IDocumentAuditAnchorChanges;
@@ -200,8 +198,8 @@ export const DocumentTable: React.FC = () => {
   const hasAudits = auditTableData.length > 0;
 
   return (
-    <StyledTabContent>
-      <StyledDocumentSelector>
+    <StyledStatsContent>
+      <StyledDocumentRow>
         <StyledField>
           <StyledFieldLabel>Select Document</StyledFieldLabel>
           <BaseDropdown
@@ -215,26 +213,30 @@ export const DocumentTable: React.FC = () => {
             disabled={isLoadingDocuments}
           />
         </StyledField>
-      </StyledDocumentSelector>
+
+        {selectedDocument && (
+          <>
+            {dataAudits?.first && hasAudits && (
+              <StyledField>
+                <StyledFieldLabel>First Audit Entry</StyledFieldLabel>
+                <StyledDocumentInfoText>
+                  <span>Created by</span>
+                  <UserTag
+                    userId={dataAudits.first.user}
+                    variant="filled"
+                    hasIcon
+                  />
+                  <span>on</span>
+                  <Timestamp value={dataAudits.first.date} format="stamp" />
+                </StyledDocumentInfoText>
+              </StyledField>
+            )}
+          </>
+        )}
+      </StyledDocumentRow>
 
       {selectedDocument && (
-        <StyledDocumentAuditContainer>
-          {dataAudits?.first && hasAudits && (
-            <StyledDocumentFirstAudit>
-              <StyledFieldLabel>First Audit Entry</StyledFieldLabel>
-              <StyledDocumentInfoText>
-                <span>Created by</span>
-                <UserTag
-                  userId={dataAudits.first.user}
-                  variant="filled"
-                  hasIcon
-                />
-                <span>on</span>
-                <Timestamp value={dataAudits.first.date} format="stamp" />
-              </StyledDocumentInfoText>
-            </StyledDocumentFirstAudit>
-          )}
-
+        <>
           {hasAudits ? (
             <>
               <StyledFieldLabel>
@@ -259,7 +261,7 @@ export const DocumentTable: React.FC = () => {
               </StyledDocumentEmptyState>
             )
           )}
-        </StyledDocumentAuditContainer>
+        </>
       )}
 
       {!selectedDocument && !isLoadingDocuments && (
@@ -269,6 +271,6 @@ export const DocumentTable: React.FC = () => {
       )}
 
       <Loader show={isLoadingDocuments || isLoadingAudit} />
-    </StyledTabContent>
+    </StyledStatsContent>
   );
 };

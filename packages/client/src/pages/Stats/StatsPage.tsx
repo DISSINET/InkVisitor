@@ -23,6 +23,7 @@ import { DocumentTable } from "./DocumentTable/DocumentTable";
 import { StatsChart } from "./StatsChart/StatsChart";
 import {
   StyledDateInputWrapper,
+  StyledEntitiesLayout,
   StyledField,
   StyledFieldGroup,
   StyledFieldLabel,
@@ -30,7 +31,6 @@ import {
   StyledResultsTable,
   StyledStatsTab,
   StyledStatsTabGroup,
-  StyledTabContent,
   StyledTabsContainer,
 } from "./StatsPageStyles";
 import { StatsTable } from "./StatsTable/StatsTable";
@@ -253,7 +253,7 @@ export const StatsPage = () => {
         ]}
       >
         {activeTab === "entities" && (
-          <StyledTabContent>
+          <StyledEntitiesLayout>
             <StyledFieldGroup>
               {/* Date From */}
               <StyledField>
@@ -480,7 +480,7 @@ export const StatsPage = () => {
             )}
 
             <Loader show={isLoadingStats || isAggregating} />
-          </StyledTabContent>
+          </StyledEntitiesLayout>
         )}
 
         {activeTab === "documents" && <DocumentTable />}

@@ -34,7 +34,13 @@ export const StyledStatsTab = styled.button<{ $isSelected: boolean }>`
   }
 `;
 
-export const StyledTabContent = styled.div`
+export const StyledStatsContent = styled.div`
+  width: 100%;
+  height: 100%;
+  padding: 0.5rem 1rem;
+`;
+export const StyledDocumentsLayout = styled.div``;
+export const StyledEntitiesLayout = styled.div`
   display: grid;
   grid-template-rows: auto 1fr 1fr;
   gap: 1.5rem;
@@ -42,25 +48,14 @@ export const StyledTabContent = styled.div`
   height: 100%;
   min-height: 0;
   overflow: hidden;
-  padding: 0.5rem 1rem;
 `;
 
-export const StyledDocumentSelector = styled.div`
+export const StyledDocumentRow = styled.div`
   display: flex;
-  align-items: flex-end;
+  justify-content: space-between;
+  align-items: center;
   gap: 1rem;
-`;
-
-export const StyledDocumentAuditContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  overflow: auto;
-  padding-right: 0.5rem;
-`;
-
-export const StyledDocumentFirstAudit = styled.div`
-  margin-bottom: ${({ theme }) => theme.space[4]};
+  margin-bottom: 1rem;
 `;
 
 export const StyledDocumentInfoText = styled.p`
@@ -72,6 +67,7 @@ export const StyledDocumentInfoText = styled.p`
 `;
 
 export const StyledDocumentEmptyState = styled.p`
+  font-size: ${({ theme }) => theme.fontSize.sm};
   color: ${({ theme }) => theme.color.plain};
   font-style: italic;
 `;
@@ -137,6 +133,7 @@ export const StyledFieldGroup = styled.div`
 
 export const StyledField = styled.div`
   display: grid;
+  gap: 0.3rem;
   grid-template-columns: auto;
   grid-template-rows: auto 2.5rem;
   justify-content: start;
