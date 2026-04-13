@@ -31,7 +31,6 @@ export const StyledContent = styled.div`
 `;
 interface StyledBoxWrap {}
 export const StyledBoxWrap = styled.div<StyledBoxWrap>`
-  width: 100%;
   max-width: 100%;
   height: 100%;
   min-height: 0;
@@ -42,11 +41,9 @@ export const StyledBoxWrap = styled.div<StyledBoxWrap>`
 export const StyledBackground = styled.div`
   display: flex;
   flex-direction: column;
-  flex: 1;
   min-height: 0;
   margin: 2rem;
   padding: 1rem;
-  padding-right: 0.1rem;
   border: 1px dashed ${({ theme }) => theme.color["black"]};
   background-color: ${({ theme }) => theme.color["white"]};
   box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.3);
@@ -54,7 +51,7 @@ export const StyledBackground = styled.div`
 `;
 
 export const StyledGridScrollArea = styled.div`
-  flex: 1;
+  padding-right: 0.5rem;
   min-height: 0;
   width: 100%;
   min-width: 0;
@@ -70,6 +67,7 @@ export const StyledGrid = styled.div`
   min-width: min-content;
   margin-bottom: 0.5rem;
   padding-right: 0.5rem;
+  overflow: auto;
 `;
 
 export const StyledTitleWrap = styled.div`
