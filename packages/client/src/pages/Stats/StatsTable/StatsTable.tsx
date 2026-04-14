@@ -1,6 +1,4 @@
 import { IRequestStats, IResponseStats } from "@shared/types";
-import { useQuery } from "@tanstack/react-query";
-import api from "api";
 import { useMemo } from "react";
 import { Column, useTable } from "react-table";
 import { TABLE_PADDING } from "../constants";
@@ -11,6 +9,7 @@ import {
   StyledTd,
   StyledTh,
 } from "./StatsTableStyles";
+import { useUsersGetMore } from "hooks/react-query/useUsersGetMore";
 
 interface StatsTableProps {
   data: IResponseStats;
@@ -33,14 +32,7 @@ export const StatsTable = ({
   const { values } = data;
   const { aggregateBy } = request;
 
-  const { data: dataUsers } = useQuery({
-    queryKey: ["users"],
-    queryFn: async () => {
-      const res = await api.usersGetMore({});
-      return res.data;
-    },
-    enabled: api.isLoggedIn(),
-  });
+  const { data: dataUsers } = useUsersGetMore();
 
   const userKeyMap = useMemo<Record<string, string>>(() => {
     const mapNames: Record<string, string> = {};
