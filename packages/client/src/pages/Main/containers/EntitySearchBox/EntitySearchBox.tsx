@@ -43,7 +43,7 @@ import {
   StyledRowHeader,
 } from "./EntitySearchBoxStyles";
 import { EntitySearchResults } from "./EntitySearchResults/EntitySearchResults";
-import { useUsersGetMore } from "hooks/react-query/useUsersGetMore";
+import { useUsersGetMoreQuery } from "hooks/react-query/useUsersGetMoreQuery";
 
 const initSearchValues: IRequestSearch = {
   labelOrId: "",
@@ -123,7 +123,7 @@ export const EntitySearchBox: React.FC = () => {
     data: users,
     isFetching: isFetchingUsers,
     error: usersError,
-  } = useUsersGetMore();
+  } = useUsersGetMoreQuery();
 
   const {
     status,

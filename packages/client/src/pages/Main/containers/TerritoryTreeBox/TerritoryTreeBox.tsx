@@ -27,7 +27,7 @@ import {
   markNodesWithFilters,
 } from "./TerritoryTreeFilterUtils";
 import { MemoizedTerritoryTreeNode } from "./TerritoryTreeNode/TerritoryTreeNode";
-import { useTreeData } from "hooks/react-query/useTreeData";
+import { useTreeQuery } from "hooks/react-query/useTreeQuery";
 
 const initFilterSettings: ITerritoryFilter = {
   starred: false,
@@ -44,7 +44,7 @@ export const TerritoryTreeBox: React.FC = () => {
 
   const queryClient = useQueryClient();
 
-  const { data: treeData, isFetching } = useTreeData();
+  const { data: treeData, isFetching } = useTreeQuery();
   const userId = localStorage.getItem("userid");
 
   const {

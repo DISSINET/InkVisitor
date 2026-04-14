@@ -1,4 +1,5 @@
 import { IRequestStats, IResponseStats } from "@shared/types";
+import { useUsersGetMoreQuery } from "hooks/react-query/useUsersGetMoreQuery";
 import { useMemo } from "react";
 import { Column, useTable } from "react-table";
 import { TABLE_PADDING } from "../constants";
@@ -9,7 +10,6 @@ import {
   StyledTd,
   StyledTh,
 } from "./StatsTableStyles";
-import { useUsersGetMore } from "hooks/react-query/useUsersGetMore";
 
 interface StatsTableProps {
   data: IResponseStats;
@@ -32,7 +32,7 @@ export const StatsTable = ({
   const { values } = data;
   const { aggregateBy } = request;
 
-  const { data: dataUsers } = useUsersGetMore();
+  const { data: dataUsers } = useUsersGetMoreQuery();
 
   const userKeyMap = useMemo<Record<string, string>>(() => {
     const mapNames: Record<string, string> = {};

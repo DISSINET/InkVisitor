@@ -1,5 +1,4 @@
 import { IRequestStats, IResponseStats } from "@shared/types";
-import { useQuery } from "@tanstack/react-query";
 import { color as d3Color } from "d3";
 import { useCallback, useMemo, useState } from "react";
 import {
@@ -14,7 +13,6 @@ import {
   YAxis,
 } from "recharts";
 
-import api from "api";
 import { useTheme } from "styled-components";
 import { OTHERS_KEY } from "../constants";
 import {
@@ -34,6 +32,7 @@ import {
   StyledPayload,
   StyledPayloadItem,
 } from "./StatsChartStyles";
+import { useUsersGetMoreQuery } from "hooks/react-query/useUsersGetMoreQuery";
 
 interface StatsChartProps {
   data: IResponseStats;
@@ -57,11 +56,7 @@ export const StatsChart = ({
     return values && Object.keys(values).some((key) => key === OTHERS_KEY);
   }, [values]);
 
-  const { data: dataUsers } = useQuery({
-    queryKey: ["users-stats"],
-    queryFn: () => api.usersGetMore({}),
-    enabled: api.isLoggedIn(),
-  });
+  const { data: dataUsers } = useUsersGetMoreQuery();
 
   const userKeyMap = useMemo<Record<string, string>>(() => {
     const mapNames: Record<string, string> = {};
@@ -70,7 +65,7 @@ export const StatsChart = ({
       mapNames[OTHERS_KEY] = OTHERS_KEY;
     }
 
-    for (const user of dataUsers?.data || []) {
+    for (const user of dataUsers || []) {
       mapNames[user.id] = user.name.replace(".", "_");
     }
     return mapNames;

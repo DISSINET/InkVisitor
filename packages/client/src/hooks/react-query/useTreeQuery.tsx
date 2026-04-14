@@ -1,12 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
 
-export function useUsersGetMore() {
+export function useTreeQuery() {
   return useQuery({
-    queryKey: ["users"],
+    queryKey: ["tree"],
     queryFn: async () => {
-      const res = await api.usersGetMore({});
-      return res.data ?? [];
+      const res = await api.treeGet();
+      return res.data;
     },
     enabled: api.isLoggedIn(),
   });
