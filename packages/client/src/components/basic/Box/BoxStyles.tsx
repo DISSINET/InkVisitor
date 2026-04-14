@@ -22,6 +22,9 @@ interface StyledHead {
   $hasHeaderClick: boolean;
 }
 export const StyledHead = styled(animated.div)<StyledHead>`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
   height: 3.2rem;
   background-color: ${({ theme, $color }) =>
     $color ? theme.color[$color] : ""};
@@ -44,19 +47,19 @@ export const StyledHead = styled(animated.div)<StyledHead>`
   cursor: ${({ $hasHeaderClick }) => ($hasHeaderClick ? "pointer" : "")};
 `;
 export const StyledLabel = styled(animated.div)`
-  display: inline-block;
-  vertical-align: middle;
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
   white-space: nowrap;
   overflow: hidden !important;
   text-overflow: ellipsis;
-  max-width: 100%;
-  padding-right: 4.3rem;
 `;
 interface StyledButtonWrap {}
 export const StyledButtonWrap = styled.div<StyledButtonWrap>`
-  position: absolute;
-  top: ${({ theme }) => theme.space[2]};
-  right: ${({ theme }) => theme.space[2]};
+  flex: 1 1 auto;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
 `;
 interface StyledContent {
   $noFrame: boolean;
