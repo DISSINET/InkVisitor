@@ -1,6 +1,5 @@
 import { IRequestStats, IResponseStats } from "@shared/types";
-import { useQuery } from "@tanstack/react-query";
-import api from "api";
+import { useUsersGetMoreQuery } from "hooks/react-query/useUsersGetMoreQuery";
 import { useMemo } from "react";
 import { Column, useTable } from "react-table";
 import { TABLE_PADDING } from "../../constants";
@@ -33,14 +32,7 @@ export const StatsTable = ({
   const { values } = data;
   const { aggregateBy } = request;
 
-  const { data: dataUsers } = useQuery({
-    queryKey: ["users"],
-    queryFn: async () => {
-      const res = await api.usersGetMore({});
-      return res.data;
-    },
-    enabled: api.isLoggedIn(),
-  });
+  const { data: dataUsers } = useUsersGetMoreQuery();
 
   const userKeyMap = useMemo<Record<string, string>>(() => {
     const mapNames: Record<string, string> = {};

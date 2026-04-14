@@ -1,10 +1,11 @@
+import { useQuery } from "@tanstack/react-query";
 import api from "api";
 import { useSearchParams } from "hooks";
 import { useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 import { setDisableTreeScroll } from "redux/features/territoryTree/disableTreeScrollSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { useTreeQuery } from "./react-query/useTreeQuery";
 
 const ScrollHandler = () => {
   const { statementId, territoryId } = useSearchParams();
@@ -39,14 +40,7 @@ const ScrollHandler = () => {
       enabled: !!territoryId && api.isLoggedIn() && statementListOpened,
     });
 
-  const { status: treeStatus, isFetching: isFetchingTree } = useQuery({
-    queryKey: ["tree"],
-    queryFn: async () => {
-      const res = await api.treeGet();
-      return res.data;
-    },
-    enabled: api.isLoggedIn(),
-  });
+  const { status: treeStatus, isFetching: isFetchingTree } = useTreeQuery();
 
   useEffect(() => {
     if (statementListStatus === "success" && !isFetchingStatementList) {

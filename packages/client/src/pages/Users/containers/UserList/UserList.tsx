@@ -663,9 +663,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                   index={i}
                   row={row}
                   flash={
-                    rowFlash?.userId === row.original.id
-                      ? rowFlash.kind
-                      : false
+                    rowFlash?.userId === row.original.id ? rowFlash.kind : false
                   }
                   key={row.id}
                 />
