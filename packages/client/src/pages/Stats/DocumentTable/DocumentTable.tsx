@@ -198,7 +198,7 @@ export const DocumentTable: React.FC = () => {
   const hasAudits = auditTableData.length > 0;
 
   return (
-    <StyledStatsContent>
+    <>
       <StyledDocumentRow>
         <StyledField>
           <StyledFieldLabel>Select Document</StyledFieldLabel>
@@ -271,6 +271,6 @@ export const DocumentTable: React.FC = () => {
       )}
 
       <Loader show={isLoadingDocuments || isLoadingAudit} />
-    </StyledStatsContent>
+    </>
   );
 };

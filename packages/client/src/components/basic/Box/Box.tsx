@@ -78,15 +78,15 @@ export const Box: React.FC<Box> = ({
         {!hideContent && (
           <StyledLabel style={animatedExpand}>{label}</StyledLabel>
         )}
-        <StyledButtonWrap>
-          {buttons && (
+        {buttons && (
+          <StyledButtonWrap>
             <ButtonGroup>
               {buttons.map((b, key) => (
                 <React.Fragment key={key}>{b}</React.Fragment>
               ))}
             </ButtonGroup>
-          )}
-        </StyledButtonWrap>
+          </StyledButtonWrap>
+        )}
       </StyledHead>
       <StyledContent
         id={`box-content-${label.toLowerCase()}`}

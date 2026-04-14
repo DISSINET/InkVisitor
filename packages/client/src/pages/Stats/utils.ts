@@ -2,7 +2,6 @@ import { IResponseStats } from "@shared/types";
 import { Aggregation, EventType } from "@shared/types/stats";
 import { schemeTableau10 } from "d3";
 import { useTheme } from "styled-components";
-import theme from "Theme/theme";
 
 export const OTHERS_KEY = "others";
 
@@ -299,4 +298,13 @@ export const transformDataForChart = (
   }
 
   return [];
+};
+
+// Helper functions for date conversion
+export const isoToDatePicker = (isoString: string): string => {
+  return new Date(isoString).toISOString().split("T")[0];
+};
+
+export const datePickerToIso = (dateString: string): string => {
+  return new Date(dateString).toISOString();
 };
