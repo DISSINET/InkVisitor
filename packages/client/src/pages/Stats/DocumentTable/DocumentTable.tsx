@@ -12,7 +12,7 @@ import { IResponseEntity } from "@shared/types/response-entity";
 import { BaseDropdown, Loader, Table, Timestamp } from "components";
 import { EntityTag } from "components/advanced";
 import { UserTag } from "components/advanced/UserTag/UserTag";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Column } from "react-table";
 import { DropdownItem } from "types";
 import {
@@ -126,10 +126,15 @@ const AuditChangesCell: React.FC<{ changes: object }> = ({ changes }) => {
   );
 };
 
-export const DocumentTable: React.FC = () => {
-  const [selectedDocument, setSelectedDocument] = useState<DropdownItem | null>(
-    null
-  );
+type DocumentTableProps = {
+  selectedDocument: DropdownItem | null;
+  setSelectedDocument: (document: DropdownItem | null) => void;
+};
+
+export const DocumentTable: React.FC<DocumentTableProps> = ({
+  selectedDocument,
+  setSelectedDocument,
+}) => {
 
   const { data: dataDocuments, isLoading: isLoadingDocuments } = useQuery({
     queryKey: ["documents"],

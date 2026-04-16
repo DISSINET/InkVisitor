@@ -1,6 +1,7 @@
 import { Box, Panel } from "components";
 import { useState } from "react";
 import { useAppSelector } from "redux/hooks";
+import { DropdownItem } from "types";
 import { DocumentTable } from "./DocumentTable/DocumentTable";
 import { EntitiesTab } from "./EntitiesTab/EntitiesTab";
 import {
@@ -21,6 +22,11 @@ export const StatsPage = () => {
   );
 
   const [activeTab, setActiveTab] = useState<StatsTab>("entities");
+  // selected document for document table
+  // state is here to preserve the selected document on tab switches
+  const [selectedDocument, setSelectedDocument] = useState<DropdownItem | null>(
+    null
+  );
 
   return (
     <Panel width={layoutWidth}>
@@ -51,7 +57,12 @@ export const StatsPage = () => {
       >
         <StyledStatsContent>
           {activeTab === "entities" && <EntitiesTab />}
-          {activeTab === "documents" && <DocumentTable />}
+          {activeTab === "documents" && (
+            <DocumentTable
+              selectedDocument={selectedDocument}
+              setSelectedDocument={setSelectedDocument}
+            />
+          )}
         </StyledStatsContent>
       </Box>
     </Panel>
