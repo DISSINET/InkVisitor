@@ -1,9 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
 import { Box, Panel } from "components";
-import { AttributeButtonGroup } from "components/advanced/AttributeButtonGroup/AttributeButtonGroup";
 import { useState } from "react";
-import { FaDatabase, FaSyncAlt } from "react-icons/fa";
 import { useAppSelector } from "redux/hooks";
 import { DocumentTable } from "./DocumentTable/DocumentTable";
 import { EntitiesTab } from "./EntitiesTab/EntitiesTab";
@@ -45,8 +43,9 @@ export const StatsPage = () => {
         label="Statistics"
         height={contentHeight}
         noFrame
-        buttons={[
+        headerComponent={
           <StyledTabsContainer>
+            {/* TODO: Add materialized stats button group */}
             {/* {activeTab === "entities" && allowMaterializedStats && (
               <span
                 style={{ display: "flex", zIndex: 30, marginRight: "4rem" }}
@@ -99,8 +98,8 @@ export const StatsPage = () => {
                 Documents
               </StyledStatsTab>
             </StyledStatsTabGroup>
-          </StyledTabsContainer>,
-        ]}
+          </StyledTabsContainer>
+        }
       >
         <StyledStatsContent>
           {activeTab === "entities" && <EntitiesTab />}

@@ -3,11 +3,13 @@ import styled from "styled-components";
 export const StyledTabsContainer = styled.div`
   display: flex;
   align-items: center;
+  width: 100%;
 `;
 
 export const StyledStatsTabGroup = styled.div`
   display: flex;
   margin-bottom: -1px;
+  width: 100%;
 `;
 
 export const StyledStatsTab = styled.button<{ $isSelected: boolean }>`
@@ -27,6 +29,7 @@ export const StyledStatsTab = styled.button<{ $isSelected: boolean }>`
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
   margin-right: 1px;
+  width: 100%;
 
   &:hover {
     color: ${({ theme }) => theme.color["black"]};

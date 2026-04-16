@@ -54,8 +54,8 @@ export const StyledLabel = styled(animated.div)`
   overflow: hidden !important;
   text-overflow: ellipsis;
 `;
-interface StyledButtonWrap {}
-export const StyledButtonWrap = styled.div<StyledButtonWrap>`
+interface StyledHeaderComponentWrap {}
+export const StyledHeaderComponentWrap = styled.div<StyledHeaderComponentWrap>`
   flex: 1 1 auto;
   display: flex;
   justify-content: flex-end;
