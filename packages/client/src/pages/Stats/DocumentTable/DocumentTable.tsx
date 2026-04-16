@@ -26,7 +26,6 @@ import {
   StyledDocumentRow,
   StyledField,
   StyledFieldLabel,
-  StyledStatsContent,
 } from "../StatsPageStyles";
 
 type ChangeSectionKey = keyof IDocumentAuditAnchorChanges;
@@ -135,7 +134,6 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
   selectedDocument,
   setSelectedDocument,
 }) => {
-
   const { data: dataDocuments, isLoading: isLoadingDocuments } = useQuery({
     queryKey: ["documents"],
     queryFn: async () => {
@@ -244,9 +242,6 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
         <>
           {hasAudits ? (
             <>
-              <StyledFieldLabel>
-                Recent Changes ({auditTableData.length} entries)
-              </StyledFieldLabel>
               <Table
                 data={auditTableData}
                 columns={auditTableColumns}
