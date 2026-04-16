@@ -157,10 +157,14 @@ export const StyledDocumentChangesList = styled.div`
 `;
 export const StyledDocumentChangesRow = styled.div`
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: ${({ theme }) => theme.space[2]};
 `;
 export const StyledDocumentChangesLabel = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-right: 0.3rem;
   color: ${({ theme }) => theme.color.primary};
   font-size: ${({ theme }) => theme.fontSize.xs};
   font-weight: ${({ theme }) => theme.fontWeight.bold};
