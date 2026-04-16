@@ -8,7 +8,7 @@ export const StyledTabsContainer = styled.div`
 
 export const StyledStatsTabGroup = styled.div`
   display: flex;
-  margin-bottom: -1px;
+  justify-content: flex-end;
   width: 100%;
 `;
 
@@ -30,6 +30,7 @@ export const StyledStatsTab = styled.button<{ $isSelected: boolean }>`
   border-top-right-radius: 5px;
   margin-right: 1px;
   width: 100%;
+  max-width: 20rem;
 
   &:hover {
     color: ${({ theme }) => theme.color["black"]};
