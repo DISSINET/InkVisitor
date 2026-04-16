@@ -5,8 +5,9 @@ import api from "api";
 import { Button, ButtonGroup, Input, Loader, Timestamp } from "components";
 import { useResizeObserver } from "hooks";
 import React, { useEffect, useMemo, useReducer, useState } from "react";
-import { FaCalendarPlus, FaDatabase, FaSyncAlt, FaTimes } from "react-icons/fa";
+import { FaCalendarPlus, FaTimes } from "react-icons/fa";
 import { toast } from "react-toastify";
+import { USER_THRESHOLD_MAX } from "../constants";
 import {
   StyledDateInputWrapper,
   StyledEntitiesLayout,
@@ -20,8 +21,6 @@ import { initialState, statsReducer } from "../store";
 import { applyUserThreshold, datePickerToIso, isoToDatePicker } from "../utils";
 import { StatsChart } from "./StatsChart/StatsChart";
 import { StatsTable } from "./StatsTable/StatsTable";
-import { USER_THRESHOLD_MAX } from "../constants";
-import { AttributeButtonGroup } from "components/advanced/AttributeButtonGroup/AttributeButtonGroup";
 
 export const EntitiesTab: React.FC = () => {
   const [state, dispatch] = useReducer(statsReducer, initialState);
@@ -193,7 +192,7 @@ export const EntitiesTab: React.FC = () => {
         </span>
       )} */}
       <StyledEntitiesLayout>
-        <StyledFieldGroup>
+        <StyledFieldGroup $columnCount={2}>
           {/* Date From */}
           <StyledField>
             <StyledFieldLabel>From Date</StyledFieldLabel>
@@ -308,7 +307,9 @@ export const EntitiesTab: React.FC = () => {
               </StyledDateInputWrapper>
             )}
           </StyledField>
+        </StyledFieldGroup>
 
+        <StyledFieldGroup style={{ marginBottom: "1rem" }}>
           <StyledField>
             <StyledFieldLabel>Time Unit</StyledFieldLabel>
             <ButtonGroup $noMarginRight>

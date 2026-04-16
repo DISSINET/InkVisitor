@@ -12,6 +12,7 @@ import { IResponseEntity } from "@shared/types/response-entity";
 import { BaseDropdown, Loader, Table, Timestamp } from "components";
 import { EntityTag } from "components/advanced";
 import { UserTag } from "components/advanced/UserTag/UserTag";
+import { useResizeObserver } from "hooks";
 import { useMemo } from "react";
 import { Column } from "react-table";
 import { DropdownItem } from "types";
@@ -29,6 +30,9 @@ import {
 } from "../StatsPageStyles";
 
 type ChangeSectionKey = keyof IDocumentAuditAnchorChanges;
+const DEFAULT_AUDITS_PER_PAGE = 10;
+const MIN_AUDITS_PER_PAGE = 5;
+const TABLE_ROW_HEIGHT = 34;
 
 const changeSectionConfig: Array<{ key: ChangeSectionKey; label: string }> = [
   { key: "additions", label: "Added" },
@@ -134,6 +138,11 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
   selectedDocument,
   setSelectedDocument,
 }) => {
+  const { ref: tableWrapperRef, height: tableWrapperHeight } =
+    useResizeObserver<HTMLDivElement>({
+      debounceDelay: 50,
+    });
+
   const { data: dataDocuments, isLoading: isLoadingDocuments } = useQuery({
     queryKey: ["documents"],
     queryFn: async () => {
@@ -245,7 +254,7 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
               <Table
                 data={auditTableData}
                 columns={auditTableColumns}
-                perPage={10}
+                perPage={DEFAULT_AUDITS_PER_PAGE}
                 entityTitle={{
                   singular: "Audit Entry",
                   plural: "Audit Entries",
