@@ -1,5 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
-import api from "api";
 import { Box, Panel } from "components";
 import { useState } from "react";
 import { useAppSelector } from "redux/hooks";
@@ -15,8 +13,6 @@ import {
 type StatsTab = "entities" | "documents";
 
 export const StatsPage = () => {
-  const [activeTab, setActiveTab] = useState<StatsTab>("entities");
-
   const layoutWidth: number = useAppSelector(
     (state) => state.layout.layoutWidth
   );
@@ -24,18 +20,7 @@ export const StatsPage = () => {
     (state) => state.layout.contentHeight
   );
 
-  // get user data
-  const userId = localStorage.getItem("userid");
-  const { data: user } = useQuery({
-    queryKey: ["user", userId],
-    queryFn: async () => {
-      const res = await api.usersGet(userId as string);
-      return res.data ?? undefined;
-    },
-    enabled: !!userId && api.isLoggedIn(),
-  });
-
-  const allowMaterializedStats = user?.options.allowMaterializedStats ?? false;
+  const [activeTab, setActiveTab] = useState<StatsTab>("entities");
 
   return (
     <Panel width={layoutWidth}>
@@ -45,43 +30,6 @@ export const StatsPage = () => {
         noFrame
         headerComponent={
           <StyledTabsContainer>
-            {/* TODO: Add materialized stats button group */}
-            {/* {activeTab === "entities" && allowMaterializedStats && (
-              <span
-                style={{ display: "flex", zIndex: 30, marginRight: "4rem" }}
-              >
-                <AttributeButtonGroup
-                  noMargin
-                  options={[
-                    {
-                      icon: <FaSyncAlt size={10} />,
-                      longValue: "Classic (Live Data)",
-                      shortValue: "Classic",
-                      onClick: () => {
-                        dispatch({
-                          type: "useMaterializedUpdate",
-                          payload: false,
-                        });
-                      },
-                      selected: !state.useMaterialized,
-                    },
-                    {
-                      icon: <FaDatabase />,
-                      longValue: "Fast (Pre-calculated)",
-                      shortValue: "Fast",
-                      onClick: () => {
-                        dispatch({
-                          type: "useMaterializedUpdate",
-                          payload: true,
-                        });
-                      },
-                      selected: state.useMaterialized,
-                    },
-                  ]}
-                />
-              </span>
-            )} */}
-
             <StyledStatsTabGroup>
               <StyledStatsTab
                 type="button"
