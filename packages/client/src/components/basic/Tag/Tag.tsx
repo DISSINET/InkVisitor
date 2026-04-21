@@ -4,6 +4,7 @@ import { useSearchParams, useTheme } from "hooks";
 import React, { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { FaStar } from "react-icons/fa";
 import { toast } from "react-toastify";
+import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import {
   DetailBoxState,
@@ -14,34 +15,36 @@ import {
 import { getShortLabelByLetterCount } from "utils/utils";
 import {
   StyledButtonWrapper,
-  StyledButtonWrapperLeft,
   StyledElvlWrapper,
   StyledEntityTag,
   StyledLabel,
   StyledLabelWrap,
   StyledStarWrap,
   StyledTagWrapper,
+  StyledUserTag,
 } from "./TagStyles";
 import useDragDrop from "./useDragDrop";
-import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
 
 interface TagProps {
+  tagType?: "entity" | "user";
   propId: string;
   parentId?: string;
   label?: string;
   labelItalic?: boolean;
 
+  entity?: IEntity;
   entityClass?: EntityEnums.ExtendedClass;
   status?: EntityEnums.Status;
   ltype?: EntityEnums.LogicalType;
-  entity?: IEntity;
+
+  // TODO: make obligatory
+  tagComponent?: ReactNode;
 
   borderStyle?: "solid" | "dashed" | "dotted";
   button?: ReactNode;
-  buttonPosition?: "right" | "left" | "light";
   elvlButtonGroup?: ReactNode | false;
   invertedLabel?: boolean;
-  showOnly?: "entity" | "label";
+  showOnly?: "tag" | "label";
   fullWidth?: boolean;
   index?: number;
   moveFn?: (dragIndex: number, hoverIndex: number) => void;
@@ -61,6 +64,7 @@ interface TagProps {
 }
 
 export const Tag: React.FC<TagProps> = ({
+  tagType = "entity",
   propId,
   parentId,
   label = "",
@@ -69,9 +73,9 @@ export const Tag: React.FC<TagProps> = ({
   status = EntityEnums.Status.Approved,
   ltype = EntityEnums.LogicalType.Definite,
   entity,
+  tagComponent,
   borderStyle = "solid",
   button,
-  buttonPosition = "right",
   elvlButtonGroup,
   invertedLabel = false,
   showOnly,
@@ -188,31 +192,25 @@ export const Tag: React.FC<TagProps> = ({
       </StyledButtonWrapper>
     );
 
-    const isLeftButton = buttonPosition === "left" || buttonPosition === "light";
-    const leftButtonWrap = button && (
-      <StyledButtonWrapperLeft
-        $status={status}
-        onMouseEnter={onButtonOver}
-        onMouseLeave={onButtonOut}
-        onClick={onBtnClick}
-      >
-        {button}
-      </StyledButtonWrapperLeft>
+    const userTag = tagComponent && (
+      <StyledUserTag>{tagComponent}</StyledUserTag>
     );
 
     return showOnly ? (
       <>
-        {isLeftButton && leftButtonWrap}
-        {showOnly === "entity" ? entityTag : labelWrap}
-        {!isLeftButton && buttonWrap}
+        {showOnly === "tag"
+          ? tagType === "user"
+            ? userTag
+            : entityTag
+          : labelWrap}
+        {buttonWrap}
       </>
     ) : (
       <>
-        {isLeftButton && leftButtonWrap}
-        {entityTag}
+        {tagType === "user" ? userTag : entityTag}
         {labelWrap}
         {elvlWrapper}
-        {!isLeftButton && buttonWrap}
+        {buttonWrap}
       </>
     );
   }, [
@@ -227,7 +225,7 @@ export const Tag: React.FC<TagProps> = ({
     showOnly,
     status,
     button,
-    buttonPosition,
+    tagType,
     isTemplate,
     onButtonOver,
     onButtonOut,

@@ -122,15 +122,8 @@ export const StyledButtonWrapper = styled.div<StyledButtonWrapper>`
   }
 `;
 
-export const StyledButtonWrapperLeft = styled.div<StyledButtonWrapper>`
+export const StyledUserTag = styled.div`
   display: flex;
-  button {
-    border-width: 0;
-    border-right-width: ${({ theme }) => theme.borderWidth[2]};
-    border-right-color: ${({ theme, $status }) =>
-      theme.color.tagStatus[$status]};
-    border-right-style: solid;
-  }
 `;
 export const StyledElvlWrapper = styled.div`
   display: flex;

@@ -24,7 +24,7 @@ interface UnlinkButton {
 interface EntityTag {
   entity: IEntity;
   parentId?: string;
-  showOnly?: "entity" | "label";
+  showOnly?: "tag" | "label";
   fullWidth?: boolean;
   button?: ReactNode;
   index?: number;

@@ -46,19 +46,16 @@ export const UserTag: React.FC<UserTagProps> = ({
       $size={size}
     >
       <Tag
+        tagType="user"
         propId={userId}
         label={label}
-        buttonPosition="left"
-        showOnly="label"
         disableCopyLabel
         disableDoubleClick
         disableDrag
-        button={
-          hasIcon ? (
-            <StyledUserIcon $color={variantColors.icon} $size={size}>
-              {getUserIcon(dataUser?.role ?? UserEnums.Role.Viewer)}
-            </StyledUserIcon>
-          ) : undefined
+        tagComponent={
+          <StyledUserIcon $color={variantColors.icon} $size={size}>
+            {getUserIcon(dataUser?.role ?? UserEnums.Role.Viewer)}
+          </StyledUserIcon>
         }
       />
     </StyledUserTagWrap>
