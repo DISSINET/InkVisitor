@@ -2,18 +2,24 @@ import { Placement } from "@popperjs/core";
 import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import { ThemeColor } from "Theme/theme";
-import { Button, ButtonGroup, Tag } from "components";
+import { Button, Tag } from "components";
 import { EntityTooltip } from "components/advanced";
-import React, { ReactNode, useCallback, useRef, useState } from "react";
+import React, {
+  ReactNode,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { FaUnlink } from "react-icons/fa";
 import { useAppSelector } from "redux/hooks";
-import { DraggedEntityReduxItem, EntityDragItem } from "types";
+import { DraggedEntityReduxItem, EntityColors, EntityDragItem } from "types";
 import {
   getEntityLabel,
   isFirstLabelEmpty,
   isValidEntityClass,
 } from "utils/utils";
-import { StyledEntityTagWrap } from "./EntityTagStyles";
+import { StyledEntityTag, StyledEntityTagWrap } from "./EntityTagStyles";
 
 interface UnlinkButton {
   onClick: () => void;
@@ -107,8 +113,6 @@ const EntityTagComponent: React.FC<EntityTag> = ({
     return <></>;
   }
 
-  const classId = entity.class;
-
   const renderUnlinkButton = useCallback((unlinkButton: UnlinkButton) => {
     return (
       <Button
@@ -140,6 +144,17 @@ const EntityTagComponent: React.FC<EntityTag> = ({
       />
     );
   }
+
+  const tagComponent = useMemo(() => {
+    return (
+      <StyledEntityTag
+        $color={EntityColors[entity.class].color}
+        $isTemplate={entity.isTemplate ?? false}
+      >
+        {entity.class}
+      </StyledEntityTag>
+    );
+  }, [entity]);
 
   return (
     <StyledEntityTagWrap
@@ -187,6 +202,7 @@ const EntityTagComponent: React.FC<EntityTag> = ({
         isDiscouraged={entity.status === EntityEnums.Status.Discouraged}
         entity={entity}
         showOnly={showOnly}
+        tagComponent={tagComponent}
         button={
           <>
             {button && button}
@@ -194,7 +210,7 @@ const EntityTagComponent: React.FC<EntityTag> = ({
           </>
         }
         moveFn={moveFn}
-        entityClass={classId}
+        entityClass={entity.class}
         borderStyle="solid"
         invertedLabel={isSelected}
         index={index}

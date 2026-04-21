@@ -6,22 +6,15 @@ import { FaStar } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import {
-  DetailBoxState,
-  DraggedEntityReduxItem,
-  EntityColors,
-  EntityDragItem,
-} from "types";
+import { DetailBoxState, DraggedEntityReduxItem, EntityDragItem } from "types";
 import { getShortLabelByLetterCount } from "utils/utils";
 import {
   StyledButtonWrapper,
   StyledElvlWrapper,
-  StyledEntityTag,
   StyledLabel,
   StyledLabelWrap,
   StyledStarWrap,
   StyledTagWrapper,
-  StyledUserTag,
 } from "./TagStyles";
 import useDragDrop from "./useDragDrop";
 
@@ -140,20 +133,6 @@ export const Tag: React.FC<TagProps> = ({
   }, [clickedOnce]);
 
   const renderTag = useMemo(() => {
-    const entityTag = (
-      <StyledEntityTag
-        $color={
-          entityClass !== EntityEnums.Extension.Invalid
-            ? EntityColors[entityClass].color
-            : "white"
-        }
-        $isTemplate={isTemplate}
-        $darkTheme={true}
-      >
-        {entityClass}
-      </StyledEntityTag>
-    );
-
     const elvlWrapper = elvlButtonGroup && (
       <StyledElvlWrapper>{elvlButtonGroup}</StyledElvlWrapper>
     );
@@ -194,22 +173,14 @@ export const Tag: React.FC<TagProps> = ({
       </StyledButtonWrapper>
     );
 
-    const userTag = tagComponent && (
-      <StyledUserTag>{tagComponent}</StyledUserTag>
-    );
-
     return showOnly ? (
       <>
-        {showOnly === "tag"
-          ? tagType === "user"
-            ? userTag
-            : entityTag
-          : labelWrap}
+        {showOnly === "tag" ? tagComponent : labelWrap}
         {buttonWrap}
       </>
     ) : (
       <>
-        {tagType === "user" ? userTag : entityTag}
+        {tagComponent}
         {labelWrap}
         {elvlWrapper}
         {buttonWrap}
@@ -221,6 +192,7 @@ export const Tag: React.FC<TagProps> = ({
     invertedLabel,
     label,
     labelItalic,
+    tagComponent,
     elvlButtonGroup,
     borderStyle,
     fullWidth,

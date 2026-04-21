@@ -22,7 +22,7 @@ export const TagGroup: React.FC<TagGroup> = ({
       <EntityTag
         key={key}
         entity={actantObject}
-        showOnly="entity"
+        showOnly="tag"
         tooltipPosition="bottom"
       />
     );

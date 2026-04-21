@@ -2,11 +2,15 @@ import { UserEnums } from "@shared/enums";
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
 import { Tag } from "components/basic/Tag/Tag";
-import React from "react";
+import React, { useMemo } from "react";
 import { useTheme } from "styled-components";
 import { ThemeFontSize } from "Theme/theme";
 import { getUserIcon } from "utils/iconUtils";
-import { StyledUserIcon, StyledUserTagWrap } from "./UserTagStyles";
+import {
+  StyledUserIcon,
+  StyledUserTag,
+  StyledUserTagWrap,
+} from "./UserTagStyles";
 import { getUserLabel, getVariantColors, UserTagVariant } from "./utils";
 
 interface UserTagProps {
@@ -38,6 +42,16 @@ export const UserTag: React.FC<UserTagProps> = ({
   const variantColors = getVariantColors(theme, color, variant);
   const label = getUserLabel(dataUser, userId);
 
+  const tagComponent = useMemo(() => {
+    return (
+      <StyledUserTag>
+        <StyledUserIcon $color={variantColors.icon}>
+          {getUserIcon(dataUser?.role ?? UserEnums.Role.Viewer, 16)}
+        </StyledUserIcon>
+      </StyledUserTag>
+    );
+  }, [variantColors, dataUser]);
+
   return (
     <StyledUserTagWrap
       $variant={variant}
@@ -54,11 +68,7 @@ export const UserTag: React.FC<UserTagProps> = ({
         disableDoubleClick
         disableDrag
         showOnly={showOnly}
-        tagComponent={
-          <StyledUserIcon $color={variantColors.icon}>
-            {getUserIcon(dataUser?.role ?? UserEnums.Role.Viewer, 16)}
-          </StyledUserIcon>
-        }
+        tagComponent={tagComponent}
       />
     </StyledUserTagWrap>
   );

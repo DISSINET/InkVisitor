@@ -23,25 +23,6 @@ export const StyledTagWrapper = styled.div<StyledTagWrapper>`
   height: 2.25rem;
 `;
 
-interface StyledEntityTag {
-  $color: keyof ThemeColor;
-  $isTemplate: boolean;
-  $darkTheme?: boolean;
-}
-export const StyledEntityTag = styled.div<StyledEntityTag>`
-  background: ${({ $color, $isTemplate, theme }) =>
-    $isTemplate
-      ? `linear-gradient(-45deg, ${theme.color[$color]} 0%, ${theme.color[$color]} 50%, ${theme.color["gray"][100]} 50%)`
-      : theme.color[$color]};
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-shrink: 0;
-  font-weight: ${({ theme, $darkTheme }) =>
-    $darkTheme ? theme.fontWeight["bold"] : theme.fontWeight["normal"]};
-  width: ${({ theme }) => theme.space[7]};
-`;
-
 interface StyledLabelWrap {
   $invertedLabel: boolean;
 }
@@ -124,9 +105,6 @@ export const StyledButtonWrapper = styled.div<StyledButtonWrapper>`
   }
 `;
 
-export const StyledUserTag = styled.div`
-  display: flex;
-`;
 export const StyledElvlWrapper = styled.div`
   display: flex;
   > div {

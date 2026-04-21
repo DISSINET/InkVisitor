@@ -31,6 +31,10 @@ export const StyledUserTagWrap = styled.span<StyledUserTagWrapProps>`
   }
 `;
 
+export const StyledUserTag = styled.div`
+  display: flex;
+`;
+
 interface StyledUserIconProps {
   $color: string;
 }
