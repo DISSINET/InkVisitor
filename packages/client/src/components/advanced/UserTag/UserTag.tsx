@@ -11,16 +11,17 @@ import { getUserLabel, getVariantColors, UserTagVariant } from "./utils";
 
 interface UserTagProps {
   userId: string;
-  hasIcon?: boolean;
   variant?: UserTagVariant;
+  // TODO: rather implement 3 or 4 sizes
   size?: keyof ThemeFontSize;
+  showOnly?: "tag" | "label";
 }
 
 export const UserTag: React.FC<UserTagProps> = ({
   userId,
-  hasIcon = false,
   variant = "light",
   size = "xxs",
+  showOnly,
 }) => {
   const theme = useTheme();
   const currentUserId = localStorage.getItem("userid");
@@ -52,9 +53,10 @@ export const UserTag: React.FC<UserTagProps> = ({
         disableCopyLabel
         disableDoubleClick
         disableDrag
+        showOnly={showOnly}
         tagComponent={
           <StyledUserIcon $color={variantColors.icon}>
-            {getUserIcon(dataUser?.role ?? UserEnums.Role.Viewer, 15)}
+            {getUserIcon(dataUser?.role ?? UserEnums.Role.Viewer, 16)}
           </StyledUserIcon>
         }
       />
