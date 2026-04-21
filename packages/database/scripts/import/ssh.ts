@@ -28,7 +28,8 @@ export class SshHelper {
  */
   async startSshTunnel(): Promise<void> {
     const tunnelOptions = {
-      autoClose:true
+      autoClose: true,
+      reconnectOnError: false,
     };
     const serverOptions = {
       port: this.sshConfig.localPort
