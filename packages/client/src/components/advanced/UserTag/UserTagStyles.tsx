@@ -33,7 +33,6 @@ export const StyledUserTagWrap = styled.span<StyledUserTagWrapProps>`
 
 interface StyledUserIconProps {
   $color: string;
-  $size: keyof ThemeFontSize;
 }
 
 export const StyledUserIcon = styled.span<StyledUserIconProps>`
@@ -41,6 +40,5 @@ export const StyledUserIcon = styled.span<StyledUserIconProps>`
   align-items: center;
   justify-content: center;
   color: ${({ $color }) => $color};
-  font-size: ${({ theme, $size }) => theme.fontSize[$size]};
-  padding: 0 ${({ theme }) => theme.space[2]};
+  padding-left: 0.3rem;
 `;

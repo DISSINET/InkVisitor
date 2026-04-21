@@ -32,6 +32,7 @@ interface TagProps {
   label?: string;
   labelItalic?: boolean;
 
+  // TODO: isolate entity logic to EntityTag
   entity?: IEntity;
   entityClass?: EntityEnums.ExtendedClass;
   status?: EntityEnums.Status;
@@ -168,6 +169,7 @@ export const Tag: React.FC<TagProps> = ({
           </StyledStarWrap>
         )}
         <StyledLabel
+          $tagType={tagType}
           $invertedLabel={invertedLabel}
           $status={status}
           $labelOnly={showOnly === "label"}

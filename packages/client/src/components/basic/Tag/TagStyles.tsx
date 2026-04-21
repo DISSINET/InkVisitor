@@ -78,6 +78,7 @@ const getColor = (
 };
 
 interface StyledLabel {
+  $tagType: "entity" | "user";
   $invertedLabel: boolean;
   $borderStyle: "solid" | "dashed" | "dotted";
   $fullWidth: boolean;
@@ -100,7 +101,8 @@ export const StyledLabel = styled.div<StyledLabel>`
     theme.color[getColor($invertedLabel, $isFavorited, $isItalic)]};
   border-left-width: ${({ theme, $labelOnly }) =>
     $labelOnly ? 0 : theme.borderWidth[2]};
-  border-left-style: ${({ $borderStyle }) => $borderStyle};
+  border-left-style: ${({ $borderStyle, $tagType }) =>
+    $tagType === "user" ? "none" : $borderStyle};
   border-left-color: ${({ theme, $status }) => theme.color.tagStatus[$status]};
   max-width: ${({ theme, $fullWidth }) =>
     $fullWidth ? "100%" : theme.space[30]};

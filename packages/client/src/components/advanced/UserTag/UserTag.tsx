@@ -53,8 +53,8 @@ export const UserTag: React.FC<UserTagProps> = ({
         disableDoubleClick
         disableDrag
         tagComponent={
-          <StyledUserIcon $color={variantColors.icon} $size={size}>
-            {getUserIcon(dataUser?.role ?? UserEnums.Role.Viewer)}
+          <StyledUserIcon $color={variantColors.icon}>
+            {getUserIcon(dataUser?.role ?? UserEnums.Role.Viewer, 15)}
           </StyledUserIcon>
         }
       />
