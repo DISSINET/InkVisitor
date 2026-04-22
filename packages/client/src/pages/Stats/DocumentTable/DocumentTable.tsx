@@ -170,7 +170,7 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
       {
         Header: "User",
         accessor: "user",
-        Cell: ({ value }: { value: string }) => <UserTag userId={value} variant="filled" />,
+        Cell: ({ value }: { value: string }) => <UserTag userId={value} />,
       },
       {
         Header: "Type",
@@ -215,7 +215,7 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
                 <StyledFieldLabel>First Audit Entry</StyledFieldLabel>
                 <StyledDocumentInfoText>
                   <span>Created by</span>
-                  <UserTag userId={dataAudits.first.user} variant="filled" />
+                  <UserTag userId={dataAudits.first.user} />
                   <span>on</span>
                   <Timestamp value={dataAudits.first.date} format="stamp" />
                 </StyledDocumentInfoText>

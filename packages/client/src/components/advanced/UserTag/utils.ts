@@ -1,7 +1,11 @@
 import { IResponseUser } from "@shared/types/response-user";
 import { ThemeType } from "Theme/theme";
 
-export type UserTagVariant = "bordered" | "light" | "filled";
+// bordered: border, inverted background, fontWeight normal
+// light: border, invertedBg background color (from theme), fontWeight normal
+// filled: no border, fontWeight bold
+// inverted: no border, inverted background (text and background are exchanged), fontWeight bold
+export type UserTagVariant = "bordered" | "light" | "filled" | "inverted";
 export type UserTagColor = "primary" | "success" | "warning" | "danger" | "info";
 
 export const getUserLabel = (user: IResponseUser | undefined, userId: string): string => {
@@ -37,6 +41,15 @@ export const getVariantColors = (
     };
   }
 
+  if (variant === "inverted") {
+    return {
+      border: theme.color.white,
+      background: theme.color.white,
+      text: base,
+      icon: base,
+    };
+  }
+
   if (variant === "light") {
     return {
       border: base,
@@ -46,6 +59,7 @@ export const getVariantColors = (
     };
   }
 
+  // bordered
   return {
     border: base,
     background: theme.color.white,

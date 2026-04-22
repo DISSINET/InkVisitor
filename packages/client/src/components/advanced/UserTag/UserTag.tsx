@@ -18,7 +18,7 @@ interface UserTagProps {
 
 export const UserTag: React.FC<UserTagProps> = ({
   userId,
-  variant = "light",
+  variant = "filled",
   // size = "xxs",
   showOnly,
 }) => {

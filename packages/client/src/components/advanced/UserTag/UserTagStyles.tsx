@@ -10,10 +10,10 @@ export const StyledUserTagWrap = styled.span<StyledUserTagWrapProps>`
   display: inline-flex;
   align-items: center;
 
-  /* TODO: migrate to tag component? */
   .tag {
     border-color: ${({ $borderColor }) => $borderColor};
     border-style: solid;
+    border-width: 1px;
     font-size: 1.1rem;
   }
 `;
@@ -53,5 +53,7 @@ export const StyledUserLabel = styled.div<StyledUserLabelProps>`
   background-color: ${({ $backgroundColor }) => $backgroundColor};
   color: ${({ $textColor }) => $textColor};
   font-weight: ${({ theme, $variant }) =>
-    $variant === "filled" ? theme.fontWeight.bold : theme.fontWeight.normal};
+    $variant === "filled" || $variant === "inverted"
+      ? theme.fontWeight.bold
+      : theme.fontWeight.normal};
 `;
