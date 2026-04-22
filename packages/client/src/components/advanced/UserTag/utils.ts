@@ -6,6 +6,11 @@ import { ThemeType } from "Theme/theme";
 // filled: no border, fontWeight bold
 // inverted: no border, inverted background (text and background are exchanged), fontWeight bold
 export type UserTagVariant = "bordered" | "light" | "filled" | "inverted";
+export enum UserTagSize {
+  Small = "S",
+  Medium = "M",
+  Large = "L",
+}
 export type UserTagColor = "primary" | "success" | "warning" | "danger" | "info";
 
 export const getUserLabel = (user: IResponseUser | undefined, userId: string): string => {

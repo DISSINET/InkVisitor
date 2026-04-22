@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { UserTagVariant } from "./utils";
+import { UserTagSize, UserTagVariant } from "./utils";
 
 interface StyledUserTagWrapProps {
   $borderColor: string;
@@ -36,13 +36,14 @@ export const StyledUserIcon = styled.span<StyledUserIconProps>`
   align-items: center;
   justify-content: center;
   color: ${({ $color }) => $color};
-  padding-left: 0.3rem;
+  padding-left: ${({ theme }) => theme.space[2]};
 `;
 
 interface StyledUserLabelProps {
   $backgroundColor: string;
   $textColor: string;
   $variant: UserTagVariant;
+  $size: UserTagSize;
 }
 
 export const StyledUserLabel = styled.div<StyledUserLabelProps>`
@@ -56,4 +57,12 @@ export const StyledUserLabel = styled.div<StyledUserLabelProps>`
     $variant === "filled" || $variant === "inverted"
       ? theme.fontWeight.bold
       : theme.fontWeight.normal};
+  font-size: ${({ theme, $size }) =>
+    $size === UserTagSize.Small
+      ? theme.fontSize.xs
+      : $size === UserTagSize.Medium
+      ? theme.fontSize.sm
+      : $size === UserTagSize.Large
+      ? theme.fontSize.base
+      : theme.fontSize.lg};
 `;

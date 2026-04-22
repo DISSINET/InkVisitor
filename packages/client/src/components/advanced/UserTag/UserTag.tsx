@@ -6,20 +6,21 @@ import React, { useMemo } from "react";
 import { useTheme } from "styled-components";
 import { getUserIcon } from "utils/iconUtils";
 import { StyledUserIcon, StyledUserLabel, StyledUserTag, StyledUserTagWrap } from "./UserTagStyles";
-import { getUserLabel, getVariantColors, UserTagVariant } from "./utils";
+import { getUserLabel, getVariantColors, UserTagSize, UserTagVariant } from "./utils";
 
 interface UserTagProps {
   userId: string;
   variant?: UserTagVariant;
-  // TODO: rather implement 3 or 4 sizes
-  // size?: keyof ThemeFontSize;
+  // TODO: for size to work properly, we need to control height of Tag component
+  // size currently controls only the font size and icon size
+  size?: UserTagSize;
   showOnly?: "tag" | "label";
 }
 
 export const UserTag: React.FC<UserTagProps> = ({
   userId,
   variant = "filled",
-  // size = "xxs",
+  size = UserTagSize.Small,
   showOnly,
 }) => {
   const theme = useTheme();
@@ -41,11 +42,11 @@ export const UserTag: React.FC<UserTagProps> = ({
     return (
       <StyledUserTag $backgroundColor={variantColors.background}>
         <StyledUserIcon $color={variantColors.icon}>
-          {getUserIcon(dataUser?.role ?? UserEnums.Role.Viewer, 17)}
+          {getUserIcon(dataUser?.role ?? UserEnums.Role.Viewer, size)}
         </StyledUserIcon>
       </StyledUserTag>
     );
-  }, [variantColors, dataUser]);
+  }, [variantColors, dataUser, size]);
 
   const labelComponent = useMemo(() => {
     return (
@@ -53,11 +54,12 @@ export const UserTag: React.FC<UserTagProps> = ({
         $backgroundColor={variantColors.background}
         $textColor={variantColors.text}
         $variant={variant}
+        $size={size}
       >
         {label}
       </StyledUserLabel>
     );
-  }, [label, variantColors]);
+  }, [label, variantColors, size]);
 
   return (
     <StyledUserTagWrap $borderColor={variantColors.border}>
