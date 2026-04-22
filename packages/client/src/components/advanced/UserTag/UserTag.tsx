@@ -53,7 +53,6 @@ export const UserTag: React.FC<UserTagProps> = ({
       $variant={variant}
       $borderColor={variantColors.border}
       $textColor={variantColors.text}
-      // $size={size}
     >
       <Tag
         tagType="user"

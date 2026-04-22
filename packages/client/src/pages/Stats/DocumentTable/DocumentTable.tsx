@@ -1,6 +1,5 @@
 import { useQueries, useQuery } from "@tanstack/react-query";
 import api from "api";
-
 import { IDocument } from "@shared/types";
 import { IAnchorUpdate, IAudit, IDocumentAuditAnchorChanges } from "@shared/types/audit";
 import { IResponseAudit } from "@shared/types/response-audit";
@@ -234,7 +233,6 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
                 <Table
                   data={auditTableData}
                   columns={auditTableColumns}
-                  // perPage={DEFAULT_AUDITS_PER_PAGE}
                   perPage={
                     tableContentHeight > 0
                       ? Math.floor((tableContentHeight - TABLE_HEADER_HEIGHT) / HEIGHT_TABLE_ROW)
