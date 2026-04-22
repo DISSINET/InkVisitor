@@ -62,7 +62,6 @@ export const UserTag: React.FC<UserTagProps> = ({
   return (
     <StyledUserTagWrap $borderColor={variantColors.border}>
       <Tag
-        tagType="user"
         propId={userId}
         label={label}
         disableCopyLabel

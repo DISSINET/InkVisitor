@@ -16,8 +16,7 @@ export const StyledTagWrapper = styled.div<StyledTagWrapper>`
   border-color: ${({ theme, $status }) => theme.color.tagStatus[$status]};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
   cursor: ${({ $dragDisabled }) => ($dragDisabled ? "default" : "move")};
-  border-style: ${({ theme, $ltype }) =>
-    "solid solid solid " + theme.borderStyle[$ltype]};
+  border-style: ${({ theme, $ltype }) => "solid solid solid " + theme.borderStyle[$ltype]};
   color: ${({ theme }) => theme.color["black"]};
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
   height: 2.25rem;
@@ -30,9 +29,7 @@ export const StyledLabelWrap = styled.div<StyledLabelWrap>`
   display: inline-flex;
   overflow: hidden;
   background-color: ${({ theme, $invertedLabel }) =>
-    $invertedLabel
-      ? theme.color.tagSelectedBackground
-      : theme.color.tagBackground};
+    $invertedLabel ? theme.color.tagSelectedBackground : theme.color.tagBackground};
 `;
 interface StyledStarWrap {}
 export const StyledStarWrap = styled.div<StyledStarWrap>`
@@ -59,7 +56,6 @@ const getColor = (
 };
 
 interface StyledLabel {
-  $tagType: "entity" | "user";
   $invertedLabel: boolean;
   $borderStyle: "solid" | "dashed" | "dotted";
   $fullWidth: boolean;
@@ -75,18 +71,13 @@ export const StyledLabel = styled.div<StyledLabel>`
   overflow: hidden !important;
   text-overflow: ellipsis;
   padding: ${({ theme }) => `${theme.space[1]} ${theme.space[2]}`};
-  padding-left: ${({ theme, $isFavorited }) =>
-    $isFavorited ? theme.space[1] : ""};
+  padding-left: ${({ theme, $isFavorited }) => ($isFavorited ? theme.space[1] : "")};
   font-style: ${({ $isItalic }) => `${$isItalic ? "italic" : "normal"}`};
   color: ${({ theme, $invertedLabel, $isItalic, $isFavorited }) =>
     theme.color[getColor($invertedLabel, $isFavorited, $isItalic)]};
-  border-left-width: ${({ theme, $labelOnly }) =>
-    $labelOnly ? 0 : theme.borderWidth[2]};
-  border-left-style: ${({ $borderStyle, $tagType }) =>
-    $tagType === "user" ? "none" : $borderStyle};
+  border-left-width: ${({ theme, $labelOnly }) => ($labelOnly ? 0 : theme.borderWidth[2])};
   border-left-color: ${({ theme, $status }) => theme.color.tagStatus[$status]};
-  max-width: ${({ theme, $fullWidth }) =>
-    $fullWidth ? "100%" : theme.space[30]};
+  max-width: ${({ theme, $fullWidth }) => ($fullWidth ? "100%" : theme.space[30])};
   font-weight: ${({ theme, $invertedLabel }) =>
     $invertedLabel ? theme.fontWeight["bold"] : theme.fontWeight["normal"]};
 `;
@@ -99,8 +90,7 @@ export const StyledButtonWrapper = styled.div<StyledButtonWrapper>`
   button {
     border-width: 0;
     border-left-width: ${({ theme }) => theme.borderWidth[2]};
-    border-left-color: ${({ theme, $status }) =>
-      theme.color.tagStatus[$status]};
+    border-left-color: ${({ theme, $status }) => theme.color.tagStatus[$status]};
     border-left-style: solid;
   }
 `;

@@ -19,7 +19,6 @@ import {
 import useDragDrop from "./useDragDrop";
 
 interface TagProps {
-  tagType?: "entity" | "user";
   propId: string;
   parentId?: string;
   label?: string;
@@ -58,7 +57,6 @@ interface TagProps {
 }
 
 export const Tag: React.FC<TagProps> = ({
-  tagType = "entity",
   propId,
   parentId,
   label = "",
@@ -142,7 +140,6 @@ export const Tag: React.FC<TagProps> = ({
           </StyledStarWrap>
         )}
         <StyledLabel
-          $tagType={tagType}
           $invertedLabel={invertedLabel}
           $status={status}
           $labelOnly={showOnly === "label"}
@@ -193,7 +190,6 @@ export const Tag: React.FC<TagProps> = ({
     showOnly,
     status,
     button,
-    tagType,
     isTemplate,
     onButtonOver,
     onButtonOut,
