@@ -1,13 +1,11 @@
 import styled from "styled-components";
-import { ThemeFontSize } from "Theme/theme";
 import { UserTagVariant } from "./utils";
 
 interface StyledUserTagWrapProps {
   $borderColor: string;
-  // $backgroundColor: string;
   $textColor: string;
   $variant: UserTagVariant;
-  $size: keyof ThemeFontSize;
+  // $size: keyof ThemeFontSize;
 }
 
 export const StyledUserTagWrap = styled.span<StyledUserTagWrapProps>`

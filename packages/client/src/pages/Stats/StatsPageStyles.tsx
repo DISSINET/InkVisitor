@@ -42,7 +42,15 @@ export const StyledStatsContent = styled.div`
   height: 100%;
   padding: 0.5rem 1rem;
 `;
-export const StyledDocumentsLayout = styled.div``;
+export const StyledDocumentsLayout = styled.div`
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 1rem;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+`;
 export const StyledEntitiesLayout = styled.div`
   display: grid;
   grid-template-rows: auto auto 1fr 1fr;
@@ -59,10 +67,7 @@ interface StyledFieldGroupProps {
 export const StyledFieldGroup = styled.div<StyledFieldGroupProps>`
   display: grid;
   width: 100%;
-  grid-template-columns: repeat(
-    ${({ $columnCount = 5 }) => $columnCount},
-    auto
-  );
+  grid-template-columns: repeat(${({ $columnCount = 5 }) => $columnCount}, auto);
   align-items: end;
   justify-content: center;
   gap: 5rem;
@@ -138,7 +143,7 @@ export const StyledDocumentRow = styled.div`
   gap: 1rem;
   margin-bottom: 1rem;
 `;
-export const StyledDocumentInfoText = styled.p`
+export const StyledDocumentInfoText = styled.div`
   font-size: ${({ theme }) => theme.fontSize.xs};
   color: ${({ theme }) => theme.color.plain};
   display: flex;

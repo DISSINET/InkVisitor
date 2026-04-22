@@ -6,25 +6,21 @@ import React, { useMemo } from "react";
 import { useTheme } from "styled-components";
 import { ThemeFontSize } from "Theme/theme";
 import { getUserIcon } from "utils/iconUtils";
-import {
-  StyledUserIcon,
-  StyledUserTag,
-  StyledUserTagWrap,
-} from "./UserTagStyles";
+import { StyledUserIcon, StyledUserTag, StyledUserTagWrap } from "./UserTagStyles";
 import { getUserLabel, getVariantColors, UserTagVariant } from "./utils";
 
 interface UserTagProps {
   userId: string;
   variant?: UserTagVariant;
   // TODO: rather implement 3 or 4 sizes
-  size?: keyof ThemeFontSize;
+  // size?: keyof ThemeFontSize;
   showOnly?: "tag" | "label";
 }
 
 export const UserTag: React.FC<UserTagProps> = ({
   userId,
   variant = "light",
-  size = "xxs",
+  // size = "xxs",
   showOnly,
 }) => {
   const theme = useTheme();
@@ -57,7 +53,7 @@ export const UserTag: React.FC<UserTagProps> = ({
       $variant={variant}
       $borderColor={variantColors.border}
       $textColor={variantColors.text}
-      $size={size}
+      // $size={size}
     >
       <Tag
         tagType="user"

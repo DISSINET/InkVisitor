@@ -2,11 +2,7 @@ import { useQueries, useQuery } from "@tanstack/react-query";
 import api from "api";
 
 import { IDocument } from "@shared/types";
-import {
-  IAnchorUpdate,
-  IAudit,
-  IDocumentAuditAnchorChanges,
-} from "@shared/types/audit";
+import { IAnchorUpdate, IAudit, IDocumentAuditAnchorChanges } from "@shared/types/audit";
 import { IResponseAudit } from "@shared/types/response-audit";
 import { IResponseEntity } from "@shared/types/response-entity";
 import { BaseDropdown, Loader, Table, Timestamp } from "components";
@@ -24,6 +20,7 @@ import {
   StyledDocumentChangesTags,
   StyledDocumentEmptyState,
   StyledDocumentInfoText,
+  StyledDocumentsLayout,
   StyledDocumentRow,
   StyledField,
   StyledFieldLabel,
@@ -31,8 +28,8 @@ import {
 
 type ChangeSectionKey = keyof IDocumentAuditAnchorChanges;
 const DEFAULT_AUDITS_PER_PAGE = 10;
-const MIN_AUDITS_PER_PAGE = 5;
-const TABLE_ROW_HEIGHT = 34;
+const HEIGHT_TABLE_ROW = 35;
+const TABLE_HEADER_HEIGHT = 60;
 
 const changeSectionConfig: Array<{ key: ChangeSectionKey; label: string }> = [
   { key: "additions", label: "Added" },
@@ -76,16 +73,13 @@ const AuditChangesCell: React.FC<{ changes: object }> = ({ changes }) => {
 
   const entitiesById = useMemo(
     () =>
-      anchorIds.reduce<Record<string, IResponseEntity>>(
-        (acc, entityId, index) => {
-          const data = entityQueries[index]?.data;
-          if (data) {
-            acc[entityId] = data;
-          }
-          return acc;
-        },
-        {}
-      ),
+      anchorIds.reduce<Record<string, IResponseEntity>>((acc, entityId, index) => {
+        const data = entityQueries[index]?.data;
+        if (data) {
+          acc[entityId] = data;
+        }
+        return acc;
+      }, {}),
     [anchorIds, entityQueries]
   );
 
@@ -97,9 +91,7 @@ const AuditChangesCell: React.FC<{ changes: object }> = ({ changes }) => {
     <StyledDocumentChangesList>
       {sections.map((section) => (
         <StyledDocumentChangesRow key={section.key}>
-          <StyledDocumentChangesLabel>
-            {section.label}
-          </StyledDocumentChangesLabel>
+          <StyledDocumentChangesLabel>{section.label}</StyledDocumentChangesLabel>
           <StyledDocumentChangesTags>
             {section.anchors.map((anchor, index) => {
               const entity = entitiesById[anchor];
@@ -115,9 +107,7 @@ const AuditChangesCell: React.FC<{ changes: object }> = ({ changes }) => {
               }
 
               return (
-                <StyledDocumentChangeFallback
-                  key={`${section.key}-${anchor}-${index}`}
-                >
+                <StyledDocumentChangeFallback key={`${section.key}-${anchor}-${index}`}>
                   {anchor}
                 </StyledDocumentChangeFallback>
               );
@@ -138,7 +128,8 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
   selectedDocument,
   setSelectedDocument,
 }) => {
-  const { ref: tableWrapperRef, height: tableWrapperHeight } =
+  // TODO: not refreshing when content height changes
+  const { ref: tableContentRef, height: tableContentHeight = 0 } =
     useResizeObserver<HTMLDivElement>({
       debounceDelay: 50,
     });
@@ -159,18 +150,14 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
     }));
   }, [dataDocuments]);
 
-  const { data: dataAudits, isLoading: isLoadingAudit } =
-    useQuery<IResponseAudit>({
-      queryKey: ["auditByDocument", selectedDocument?.value],
-      queryFn: async () => {
-        const res = await api.auditGetByDocument(
-          selectedDocument!.value as string,
-          30
-        );
-        return res.data;
-      },
-      enabled: !!selectedDocument?.value,
-    });
+  const { data: dataAudits, isLoading: isLoadingAudit } = useQuery<IResponseAudit>({
+    queryKey: ["auditByDocument", selectedDocument?.value],
+    queryFn: async () => {
+      const res = await api.auditGetByDocument(selectedDocument!.value as string, 30);
+      return res.data;
+    },
+    enabled: !!selectedDocument?.value,
+  });
 
   const auditTableColumns: Column<IAudit>[] = useMemo(
     () => [
@@ -184,9 +171,7 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
       {
         Header: "User",
         accessor: "user",
-        Cell: ({ value }: { value: string }) => (
-          <UserTag userId={value} variant="filled" />
-        ),
+        Cell: ({ value }: { value: string }) => <UserTag userId={value} variant="filled" />,
       },
       {
         Header: "Type",
@@ -195,9 +180,7 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
       {
         Header: "Anchor Changes",
         accessor: "changes",
-        Cell: ({ value }: { value: object }) => (
-          <AuditChangesCell changes={value} />
-        ),
+        Cell: ({ value }: { value: object }) => <AuditChangesCell changes={value} />,
       },
     ],
     []
@@ -210,7 +193,7 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
   const hasAudits = auditTableData.length > 0;
 
   return (
-    <>
+    <StyledDocumentsLayout>
       <StyledDocumentRow>
         <StyledField>
           <StyledFieldLabel>Select Document</StyledFieldLabel>
@@ -243,31 +226,37 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
         )}
       </StyledDocumentRow>
 
-      {selectedDocument && (
-        <>
-          {hasAudits ? (
-            <>
-              <Table
-                data={auditTableData}
-                columns={auditTableColumns}
-                perPage={DEFAULT_AUDITS_PER_PAGE}
-                entityTitle={{
-                  singular: "Audit Entry",
-                  plural: "Audit Entries",
-                }}
-                isLoading={isLoadingAudit}
-              />
-            </>
-          ) : (
-            !isLoadingAudit && (
-              <StyledDocumentEmptyState>
-                No audit entries were found for this document. Please choose
-                another document.
-              </StyledDocumentEmptyState>
-            )
-          )}
-        </>
-      )}
+      <div ref={tableContentRef} style={{ height: "100%", minHeight: 0 }}>
+        {selectedDocument && (
+          <>
+            {hasAudits ? (
+              <>
+                <Table
+                  data={auditTableData}
+                  columns={auditTableColumns}
+                  // perPage={DEFAULT_AUDITS_PER_PAGE}
+                  perPage={
+                    tableContentHeight > 0
+                      ? Math.floor((tableContentHeight - TABLE_HEADER_HEIGHT) / HEIGHT_TABLE_ROW)
+                      : DEFAULT_AUDITS_PER_PAGE
+                  }
+                  entityTitle={{
+                    singular: "Audit Entry",
+                    plural: "Audit Entries",
+                  }}
+                  isLoading={isLoadingAudit}
+                />
+              </>
+            ) : (
+              !isLoadingAudit && (
+                <StyledDocumentEmptyState>
+                  No audit entries were found for this document. Please choose another document.
+                </StyledDocumentEmptyState>
+              )
+            )}
+          </>
+        )}
+      </div>
 
       {!selectedDocument && !isLoadingDocuments && (
         <StyledDocumentEmptyState>
@@ -276,6 +265,6 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
       )}
 
       <Loader show={isLoadingDocuments || isLoadingAudit} />
-    </>
+    </StyledDocumentsLayout>
   );
 };
