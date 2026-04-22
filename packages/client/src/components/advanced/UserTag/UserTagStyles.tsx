@@ -4,7 +4,7 @@ import { UserTagVariant } from "./utils";
 
 interface StyledUserTagWrapProps {
   $borderColor: string;
-  $backgroundColor: string;
+  // $backgroundColor: string;
   $textColor: string;
   $variant: UserTagVariant;
   $size: keyof ThemeFontSize;
@@ -14,16 +14,14 @@ export const StyledUserTagWrap = styled.span<StyledUserTagWrapProps>`
   display: inline-flex;
   align-items: center;
 
+  /* TODO: migrate to tag component? */
   .tag {
     border-color: ${({ $borderColor }) => $borderColor};
     border-style: solid;
-    font-size: ${({ theme, $size }) => theme.fontSize[$size]};
+    font-size: 1.1rem;
   }
 
-  .tag > div {
-    background-color: ${({ $backgroundColor }) => $backgroundColor};
-  }
-
+  /* Tag label properties */
   .tag > div > div {
     color: ${({ $textColor }) => $textColor};
     font-weight: ${({ theme, $variant }) =>
@@ -31,8 +29,13 @@ export const StyledUserTagWrap = styled.span<StyledUserTagWrapProps>`
   }
 `;
 
-export const StyledUserTag = styled.div`
+interface StyledUserTagProps {
+  $backgroundColor: string;
+}
+
+export const StyledUserTag = styled.div<StyledUserTagProps>`
   display: flex;
+  background-color: ${({ $backgroundColor }) => $backgroundColor};
 `;
 
 interface StyledUserIconProps {
