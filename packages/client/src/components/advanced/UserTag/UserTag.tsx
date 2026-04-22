@@ -4,9 +4,8 @@ import api from "api";
 import { Tag } from "components/basic/Tag/Tag";
 import React, { useMemo } from "react";
 import { useTheme } from "styled-components";
-import { ThemeFontSize } from "Theme/theme";
 import { getUserIcon } from "utils/iconUtils";
-import { StyledUserIcon, StyledUserTag, StyledUserTagWrap } from "./UserTagStyles";
+import { StyledUserIcon, StyledUserLabel, StyledUserTag, StyledUserTagWrap } from "./UserTagStyles";
 import { getUserLabel, getVariantColors, UserTagVariant } from "./utils";
 
 interface UserTagProps {
@@ -42,18 +41,26 @@ export const UserTag: React.FC<UserTagProps> = ({
     return (
       <StyledUserTag $backgroundColor={variantColors.background}>
         <StyledUserIcon $color={variantColors.icon}>
-          {getUserIcon(dataUser?.role ?? UserEnums.Role.Viewer, 16)}
+          {getUserIcon(dataUser?.role ?? UserEnums.Role.Viewer, 17)}
         </StyledUserIcon>
       </StyledUserTag>
     );
   }, [variantColors, dataUser]);
 
+  const labelComponent = useMemo(() => {
+    return (
+      <StyledUserLabel
+        $backgroundColor={variantColors.background}
+        $textColor={variantColors.text}
+        $variant={variant}
+      >
+        {label}
+      </StyledUserLabel>
+    );
+  }, [label, variantColors]);
+
   return (
-    <StyledUserTagWrap
-      $variant={variant}
-      $borderColor={variantColors.border}
-      $textColor={variantColors.text}
-    >
+    <StyledUserTagWrap $borderColor={variantColors.border}>
       <Tag
         tagType="user"
         propId={userId}
@@ -63,6 +70,7 @@ export const UserTag: React.FC<UserTagProps> = ({
         disableDrag
         showOnly={showOnly}
         tagComponent={tagComponent}
+        labelComponent={labelComponent}
       />
     </StyledUserTagWrap>
   );

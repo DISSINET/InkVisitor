@@ -3,8 +3,6 @@ import { UserTagVariant } from "./utils";
 
 interface StyledUserTagWrapProps {
   $borderColor: string;
-  $textColor: string;
-  $variant: UserTagVariant;
   // $size: keyof ThemeFontSize;
 }
 
@@ -17,13 +15,6 @@ export const StyledUserTagWrap = styled.span<StyledUserTagWrapProps>`
     border-color: ${({ $borderColor }) => $borderColor};
     border-style: solid;
     font-size: 1.1rem;
-  }
-
-  /* Tag label properties */
-  .tag > div > div {
-    color: ${({ $textColor }) => $textColor};
-    font-weight: ${({ theme, $variant }) =>
-      $variant === "filled" ? theme.fontWeight.bold : theme.fontWeight.normal};
   }
 `;
 
@@ -46,4 +37,21 @@ export const StyledUserIcon = styled.span<StyledUserIconProps>`
   justify-content: center;
   color: ${({ $color }) => $color};
   padding-left: 0.3rem;
+`;
+
+interface StyledUserLabelProps {
+  $backgroundColor: string;
+  $textColor: string;
+  $variant: UserTagVariant;
+}
+
+export const StyledUserLabel = styled.div<StyledUserLabelProps>`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 ${({ theme }) => theme.space[2]};
+  background-color: ${({ $backgroundColor }) => $backgroundColor};
+  color: ${({ $textColor }) => $textColor};
+  font-weight: ${({ theme, $variant }) =>
+    $variant === "filled" ? theme.fontWeight.bold : theme.fontWeight.normal};
 `;

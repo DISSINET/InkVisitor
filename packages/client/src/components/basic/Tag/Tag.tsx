@@ -33,7 +33,7 @@ interface TagProps {
 
   // TODO: make obligatory
   tagComponent?: ReactNode;
-
+  labelComponent?: ReactNode;
   borderStyle?: "solid" | "dashed" | "dotted";
   button?: ReactNode;
   elvlButtonGroup?: ReactNode | false;
@@ -68,6 +68,7 @@ export const Tag: React.FC<TagProps> = ({
   ltype = EntityEnums.LogicalType.Definite,
   entity,
   tagComponent,
+  labelComponent,
   borderStyle = "solid",
   button,
   elvlButtonGroup,
@@ -92,9 +93,7 @@ export const Tag: React.FC<TagProps> = ({
   const theme = useTheme();
   const { appendDetailId } = useSearchParams();
   const dispatch = useAppDispatch();
-  const draggedEntity: DraggedEntityReduxItem = useAppSelector(
-    (state) => state.draggedEntity
-  );
+  const draggedEntity: DraggedEntityReduxItem = useAppSelector((state) => state.draggedEntity);
   const detailBoxState: DetailBoxState = useAppSelector(
     (state) => state.layout.mainPage.detailBoxState
   );
@@ -123,9 +122,7 @@ export const Tag: React.FC<TagProps> = ({
 
     const timeout = setTimeout(() => {
       navigator.clipboard.writeText(label);
-      toast.info(
-        `label [${getShortLabelByLetterCount(label, 200)}] copied to clipboard`
-      );
+      toast.info(`label [${getShortLabelByLetterCount(label, 200)}] copied to clipboard`);
       setClickedOnce(false);
     }, 500);
 
@@ -133,18 +130,15 @@ export const Tag: React.FC<TagProps> = ({
   }, [clickedOnce]);
 
   const renderTag = useMemo(() => {
-    const elvlWrapper = elvlButtonGroup && (
-      <StyledElvlWrapper>{elvlButtonGroup}</StyledElvlWrapper>
-    );
+    const elvlWrapper = elvlButtonGroup && <StyledElvlWrapper>{elvlButtonGroup}</StyledElvlWrapper>;
 
-    const labelWrap = (
+    const labelWrap = labelComponent ? (
+      labelComponent
+    ) : (
       <StyledLabelWrap $invertedLabel={invertedLabel}>
         {isFavorited && (
           <StyledStarWrap>
-            <FaStar
-              color={theme.color.warning}
-              style={{ marginBottom: "0.1rem" }}
-            />
+            <FaStar color={theme.color.warning} style={{ marginBottom: "0.1rem" }} />
           </StyledStarWrap>
         )}
         <StyledLabel
