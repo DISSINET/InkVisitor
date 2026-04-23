@@ -246,10 +246,7 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
                   columns={auditTableColumns}
                   perPage={
                     tableContentHeight > 0
-                      ? Math.max(
-                          1,
-                          Math.floor((tableContentHeight - TABLE_HEADER_HEIGHT) / HEIGHT_TABLE_ROW)
-                        )
+                      ? Math.floor((tableContentHeight - TABLE_HEADER_HEIGHT) / HEIGHT_TABLE_ROW)
                       : DEFAULT_AUDITS_PER_PAGE
                   }
                   entityTitle={{
