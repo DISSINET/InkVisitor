@@ -2,27 +2,18 @@ import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import { useSearchParams, useTheme } from "hooks";
 import React, { ReactNode, useEffect, useMemo, useRef, useState } from "react";
-import { FaStar } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { DetailBoxState, DraggedEntityReduxItem, EntityDragItem } from "types";
 import { getShortLabelByLetterCount } from "utils/utils";
-import {
-  StyledButtonWrapper,
-  StyledElvlWrapper,
-  StyledLabel,
-  StyledLabelWrap,
-  StyledStarWrap,
-  StyledTagWrapper,
-} from "./TagStyles";
+import { StyledButtonWrapper, StyledElvlWrapper, StyledTagWrapper } from "./TagStyles";
 import useDragDrop from "./useDragDrop";
 
 interface TagProps {
   propId: string;
   parentId?: string;
   label?: string;
-  labelItalic?: boolean;
 
   // TODO: isolate entity logic to EntityTag
   entity?: IEntity;
@@ -33,10 +24,8 @@ interface TagProps {
   // TODO: make obligatory
   tagComponent?: ReactNode;
   labelComponent?: ReactNode;
-  borderStyle?: "solid" | "dashed" | "dotted";
   button?: ReactNode;
   elvlButtonGroup?: ReactNode | false;
-  invertedLabel?: boolean;
   showOnly?: "tag" | "label";
   fullWidth?: boolean;
   index?: number;
@@ -46,7 +35,6 @@ interface TagProps {
   disableDrag?: boolean;
   updateOrderFn?: (item: EntityDragItem) => void;
   lvl?: number;
-  isFavorited?: boolean;
   isTemplate?: boolean;
   isDiscouraged?: boolean;
   disabled?: boolean;
@@ -60,17 +48,14 @@ export const Tag: React.FC<TagProps> = ({
   propId,
   parentId,
   label = "",
-  labelItalic = false,
   entityClass = EntityEnums.Extension.NoClass,
   status = EntityEnums.Status.Approved,
   ltype = EntityEnums.LogicalType.Definite,
   entity,
   tagComponent,
   labelComponent,
-  borderStyle = "solid",
   button,
   elvlButtonGroup,
-  invertedLabel = false,
   showOnly,
   fullWidth = false,
   index = -1,
@@ -79,7 +64,6 @@ export const Tag: React.FC<TagProps> = ({
   disableDoubleClick = false,
   disableDrag = false,
   updateOrderFn = () => {},
-  isFavorited = false,
   isTemplate = false,
   isDiscouraged = false,
   lvl,
@@ -130,29 +114,6 @@ export const Tag: React.FC<TagProps> = ({
   const renderTag = useMemo(() => {
     const elvlWrapper = elvlButtonGroup && <StyledElvlWrapper>{elvlButtonGroup}</StyledElvlWrapper>;
 
-    const labelWrap = labelComponent ? (
-      labelComponent
-    ) : (
-      <StyledLabelWrap $invertedLabel={invertedLabel}>
-        {isFavorited && (
-          <StyledStarWrap>
-            <FaStar color={theme.color.warning} style={{ marginBottom: "0.1rem" }} />
-          </StyledStarWrap>
-        )}
-        <StyledLabel
-          $invertedLabel={invertedLabel}
-          $status={status}
-          $labelOnly={showOnly === "label"}
-          $borderStyle={borderStyle}
-          $fullWidth={fullWidth}
-          $isFavorited={isFavorited}
-          $isItalic={labelItalic}
-        >
-          {label}
-        </StyledLabel>
-      </StyledLabelWrap>
-    );
-
     const buttonWrap = button && (
       <StyledButtonWrapper
         $status={status}
@@ -166,26 +127,22 @@ export const Tag: React.FC<TagProps> = ({
 
     return showOnly ? (
       <>
-        {showOnly === "tag" ? tagComponent : labelWrap}
+        {showOnly === "tag" ? tagComponent : labelComponent}
         {buttonWrap}
       </>
     ) : (
       <>
         {tagComponent}
-        {labelWrap}
+        {labelComponent}
         {elvlWrapper}
         {buttonWrap}
       </>
     );
   }, [
     entityClass,
-    isFavorited,
-    invertedLabel,
-    label,
-    labelItalic,
     tagComponent,
     elvlButtonGroup,
-    borderStyle,
+    labelComponent,
     fullWidth,
     showOnly,
     status,
@@ -203,7 +160,6 @@ export const Tag: React.FC<TagProps> = ({
       $dragDisabled={!canDrag}
       $status={status}
       $ltype={ltype}
-      $borderStyle={borderStyle}
       onClick={(e) => {
         e.stopPropagation();
         if (!disableCopyLabel) setClickedOnce(true);

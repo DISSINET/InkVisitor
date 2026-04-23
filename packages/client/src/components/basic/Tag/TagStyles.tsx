@@ -1,9 +1,7 @@
 import { EntityEnums } from "@shared/enums";
-import { ThemeColor } from "Theme/theme";
 import styled from "styled-components";
 
 interface StyledTagWrapper {
-  $borderStyle: "solid" | "dashed" | "dotted";
   $status: EntityEnums.Status;
   $ltype: EntityEnums.LogicalType;
   $dragDisabled?: boolean;
@@ -12,7 +10,6 @@ export const StyledTagWrapper = styled.div<StyledTagWrapper>`
   display: inline-flex;
   overflow: hidden;
   border: ${({ theme }) => theme.borderWidth[2]};
-  border-style: ${({ $borderStyle }) => $borderStyle};
   border-color: ${({ theme, $status }) => theme.color.tagStatus[$status]};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
   cursor: ${({ $dragDisabled }) => ($dragDisabled ? "default" : "move")};
@@ -20,66 +17,6 @@ export const StyledTagWrapper = styled.div<StyledTagWrapper>`
   color: ${({ theme }) => theme.color["black"]};
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
   height: 2.25rem;
-`;
-
-interface StyledLabelWrap {
-  $invertedLabel: boolean;
-}
-export const StyledLabelWrap = styled.div<StyledLabelWrap>`
-  display: inline-flex;
-  overflow: hidden;
-  background-color: ${({ theme, $invertedLabel }) =>
-    $invertedLabel ? theme.color.tagSelectedBackground : theme.color.tagBackground};
-`;
-interface StyledStarWrap {}
-export const StyledStarWrap = styled.div<StyledStarWrap>`
-  display: inline-flex;
-  align-items: center;
-  height: 100%;
-  margin-left: 0.2rem;
-`;
-
-const getColor = (
-  $invertedLabel: boolean,
-  $isFavorited: boolean,
-  $isItalic: boolean
-): keyof ThemeColor => {
-  if ($invertedLabel) {
-    if ($isFavorited) {
-      return "warning";
-    } else {
-      return "tagSelectedColor";
-    }
-  } else {
-    return $isItalic ? "tagItalic" : "tagColor";
-  }
-};
-
-interface StyledLabel {
-  $invertedLabel: boolean;
-  $borderStyle: "solid" | "dashed" | "dotted";
-  $fullWidth: boolean;
-  $status: EntityEnums.Status;
-  $isFavorited: boolean;
-  $labelOnly?: boolean;
-  $isItalic: boolean;
-}
-export const StyledLabel = styled.div<StyledLabel>`
-  display: inline-block;
-  vertical-align: middle;
-  white-space: nowrap;
-  overflow: hidden !important;
-  text-overflow: ellipsis;
-  padding: ${({ theme }) => `${theme.space[1]} ${theme.space[2]}`};
-  padding-left: ${({ theme, $isFavorited }) => ($isFavorited ? theme.space[1] : "")};
-  font-style: ${({ $isItalic }) => `${$isItalic ? "italic" : "normal"}`};
-  color: ${({ theme, $invertedLabel, $isItalic, $isFavorited }) =>
-    theme.color[getColor($invertedLabel, $isFavorited, $isItalic)]};
-  border-left-width: ${({ theme, $labelOnly }) => ($labelOnly ? 0 : theme.borderWidth[2])};
-  border-left-color: ${({ theme, $status }) => theme.color.tagStatus[$status]};
-  max-width: ${({ theme, $fullWidth }) => ($fullWidth ? "100%" : theme.space[30])};
-  font-weight: ${({ theme, $invertedLabel }) =>
-    $invertedLabel ? theme.fontWeight["bold"] : theme.fontWeight["normal"]};
 `;
 
 interface StyledButtonWrapper {

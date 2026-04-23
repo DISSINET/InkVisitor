@@ -4,22 +4,19 @@ import { IEntity } from "@shared/types";
 import { ThemeColor } from "Theme/theme";
 import { Button, Tag } from "components";
 import { EntityTooltip } from "components/advanced";
-import React, {
-  ReactNode,
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import { FaUnlink } from "react-icons/fa";
+import React, { ReactNode, useCallback, useMemo, useRef, useState } from "react";
+import { FaStar, FaUnlink } from "react-icons/fa";
 import { useAppSelector } from "redux/hooks";
 import { DraggedEntityReduxItem, EntityColors, EntityDragItem } from "types";
+import { getEntityLabel, isFirstLabelEmpty, isValidEntityClass } from "utils/utils";
 import {
-  getEntityLabel,
-  isFirstLabelEmpty,
-  isValidEntityClass,
-} from "utils/utils";
-import { StyledEntityTag, StyledEntityTagWrap } from "./EntityTagStyles";
+  StyledEntityTag,
+  StyledEntityTagWrap,
+  StyledFaStar,
+  StyledLabel,
+  StyledLabelWrap,
+  StyledStarWrap,
+} from "./EntityTagStyles";
 
 interface UnlinkButton {
   onClick: () => void;
@@ -80,9 +77,7 @@ const EntityTagComponent: React.FC<EntityTag> = ({
     const anyState = state as unknown as {
       draggedEntity?: DraggedEntityReduxItem;
     };
-    return Boolean(
-      anyState.draggedEntity && Object.keys(anyState.draggedEntity).length
-    );
+    return Boolean(anyState.draggedEntity && Object.keys(anyState.draggedEntity).length);
   });
   const [buttonHovered, setButtonHovered] = useState(false);
   const [elvlHovered, setElvlHovered] = useState(false);
@@ -117,11 +112,7 @@ const EntityTagComponent: React.FC<EntityTag> = ({
     return (
       <Button
         key="d"
-        tooltipLabel={
-          unlinkButton.tooltipLabel
-            ? unlinkButton.tooltipLabel
-            : "unlink entity"
-        }
+        tooltipLabel={unlinkButton.tooltipLabel ? unlinkButton.tooltipLabel : "unlink entity"}
         icon={unlinkButton.icon ? unlinkButton.icon : <FaUnlink />}
         color={unlinkButton.color ? unlinkButton.color : "plain"}
         inverted
@@ -129,21 +120,6 @@ const EntityTagComponent: React.FC<EntityTag> = ({
       />
     );
   }, []);
-
-  if (!isValidEntityClass(entity.class)) {
-    // labels needs to have length and first label needs to be non-empty
-    return (
-      <Tag
-        propId={entity.id}
-        entityClass={EntityEnums.Extension.Invalid}
-        label={getEntityLabel(entity)}
-        labelItalic={isFirstLabelEmpty(entity.labels)}
-        // button={unlinkButton && renderUnlinkButton(unlinkButton)}
-        disableDrag
-        disableDoubleClick
-      />
-    );
-  }
 
   const tagComponent = useMemo(() => {
     return (
@@ -155,6 +131,43 @@ const EntityTagComponent: React.FC<EntityTag> = ({
       </StyledEntityTag>
     );
   }, [entity]);
+
+  const labelComponent = useMemo(() => {
+    return (
+      <StyledLabelWrap $invertedLabel={isSelected ?? false}>
+        {isFavorited && (
+          <StyledStarWrap>
+            <StyledFaStar />
+          </StyledStarWrap>
+        )}
+        <StyledLabel
+          $invertedLabel={isSelected ?? false}
+          $status={entity.status}
+          $labelOnly={showOnly === "label"}
+          $fullWidth={fullWidth}
+          $isFavorited={isFavorited ?? false}
+          $isItalic={isFirstLabelEmpty(entity.labels)}
+        >
+          {getEntityLabel(entity)}
+        </StyledLabel>
+      </StyledLabelWrap>
+    );
+  }, [entity]);
+
+  if (!isValidEntityClass(entity.class)) {
+    // labels needs to have length and first label needs to be non-empty
+    return (
+      <Tag
+        propId={entity.id}
+        entityClass={EntityEnums.Extension.Invalid}
+        label={getEntityLabel(entity)}
+        labelComponent={labelComponent}
+        // button={unlinkButton && renderUnlinkButton(unlinkButton)}
+        disableDrag
+        disableDoubleClick
+      />
+    );
+  }
 
   return (
     <StyledEntityTagWrap
@@ -169,24 +182,16 @@ const EntityTagComponent: React.FC<EntityTag> = ({
           entityClass={entity.class}
           label={(entity.labels && entity.labels[0]) || <i>{"no label"}</i>}
           alternativeLabels={
-            entity.labels && entity.labels.length > 1
-              ? entity.labels.slice(1)
-              : undefined
+            entity.labels && entity.labels.length > 1 ? entity.labels.slice(1) : undefined
           }
           language={entity.language}
           detail={entity.detail}
-          text={
-            entity.class === EntityEnums.Class.Statement
-              ? entity.data.text
-              : undefined
-          }
+          text={entity.class === EntityEnums.Class.Statement ? entity.data.text : undefined}
           isTemplate={entity.isTemplate}
           partOfSpeech={entity.data.pos}
           itemsCount={statementsCount}
           position={tooltipPosition}
-          disabled={
-            (button !== null && (buttonHovered || elvlHovered)) || isDragging
-          }
+          disabled={(button !== null && (buttonHovered || elvlHovered)) || isDragging}
           tagHovered={tagHovered}
           referenceElement={referenceEl.current}
           customTooltipAttributes={customTooltipAttributes}
@@ -195,7 +200,6 @@ const EntityTagComponent: React.FC<EntityTag> = ({
       <Tag
         propId={entity.id}
         label={getEntityLabel(entity)}
-        labelItalic={isFirstLabelEmpty(entity.labels)}
         status={entity.status}
         ltype={entity?.data?.logicalType ?? EntityEnums.LogicalType.Definite}
         isTemplate={entity.isTemplate}
@@ -203,6 +207,7 @@ const EntityTagComponent: React.FC<EntityTag> = ({
         entity={entity}
         showOnly={showOnly}
         tagComponent={tagComponent}
+        labelComponent={labelComponent}
         button={
           <>
             {button && button}
@@ -211,8 +216,6 @@ const EntityTagComponent: React.FC<EntityTag> = ({
         }
         moveFn={moveFn}
         entityClass={entity.class}
-        borderStyle="solid"
-        invertedLabel={isSelected}
         index={index}
         disableDoubleClick={disableDoubleClick}
         disableDrag={disableDrag}
@@ -220,16 +223,12 @@ const EntityTagComponent: React.FC<EntityTag> = ({
         parentId={parentId}
         lvl={lvl}
         fullWidth={fullWidth}
-        isFavorited={isFavorited}
         onButtonOver={handleButtonHovered}
         onButtonOut={handleButtonUnhovered}
         onBtnClick={handleBtnClick}
         elvlButtonGroup={
           elvlButtonGroup ? (
-            <div
-              onMouseOver={() => setElvlHovered(true)}
-              onMouseOut={() => setElvlHovered(false)}
-            >
+            <div onMouseOver={() => setElvlHovered(true)} onMouseOut={() => setElvlHovered(false)}>
               {elvlButtonGroup}
             </div>
           ) : (
@@ -268,8 +267,7 @@ function areEntityTagsEqual(
   if (prev.entity?.id !== next.entity.id) return false;
   if (prev.entity?.class !== next.entity.class) return false;
   if (prev.entity?.status !== next.entity.status) return false;
-  if (prev.entity?.data?.logicalType !== next.entity?.data?.logicalType)
-    return false;
+  if (prev.entity?.data?.logicalType !== next.entity?.data?.logicalType) return false;
   if (prev.entity.isTemplate !== next.entity.isTemplate) return false;
   const prevLabel = getEntityLabel(prev.entity);
   const nextLabel = getEntityLabel(next.entity);
