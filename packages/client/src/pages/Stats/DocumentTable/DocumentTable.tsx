@@ -24,6 +24,7 @@ import {
   StyledField,
   StyledFieldLabel,
 } from "../StatsPageStyles";
+import { UserTagSize } from "components/advanced/UserTag/utils";
 
 type ChangeSectionKey = keyof IDocumentAuditAnchorChanges;
 const DEFAULT_AUDITS_PER_PAGE = 10;
