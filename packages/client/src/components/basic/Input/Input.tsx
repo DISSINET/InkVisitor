@@ -14,17 +14,11 @@ import { IconWithTooltip } from "components";
 
 interface Input {
   label?: string;
+  labelSpaceNoWrap?: boolean;
   value?: string;
   inverted?: boolean;
   suggester?: boolean;
-  type?:
-    | "text"
-    | "textarea"
-    | "select"
-    | "password"
-    | "datetime-local"
-    | "date"
-    | "number";
+  type?: "text" | "textarea" | "select" | "password" | "datetime-local" | "date" | "number";
 
   rows?: number;
   cols?: number;
@@ -34,9 +28,7 @@ interface Input {
   onEnterPressFn?: () => void;
   onEscapePressFn?: () => void;
   onFocus?: (
-    event: React.FocusEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => void;
   onBlur?: () => void;
   placeholder?: string;
@@ -67,6 +59,7 @@ interface Input {
 
 export const Input: React.FC<Input> = ({
   label = "",
+  labelSpaceNoWrap = false,
   inverted = false,
   suggester = false,
   value = "",
@@ -112,7 +105,11 @@ export const Input: React.FC<Input> = ({
       $minWidth={minWidth}
       $fullHeight={fullHeight}
     >
-      {label && <Label className="label">{label}</Label>}
+      {label && (
+        <Label className="label" $labelSpaceNoWrap={labelSpaceNoWrap}>
+          {label}
+        </Label>
+      )}
       {(type === "text" || type === "password") && (
         <div style={{ position: "relative", width: "100%", display: "flex" }}>
           <StyledInput
@@ -125,9 +122,7 @@ export const Input: React.FC<Input> = ({
             className="value"
             placeholder={placeholder}
             value={displayValue}
-            onClick={(e: React.MouseEvent<HTMLInputElement>) =>
-              e.stopPropagation()
-            }
+            onClick={(e: React.MouseEvent<HTMLInputElement>) => e.stopPropagation()}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               setDisplayValue(e.currentTarget.value);
               if (changeOnType) {
@@ -157,9 +152,7 @@ export const Input: React.FC<Input> = ({
                   return;
               }
             }}
-            onFocus={(event: React.FocusEvent<HTMLInputElement>) =>
-              onFocus(event)
-            }
+            onFocus={(event: React.FocusEvent<HTMLInputElement>) => onFocus(event)}
             onBlur={() => {
               if (displayValue !== value && !changeOnType) {
                 onChangeFn(displayValue);
@@ -171,13 +164,7 @@ export const Input: React.FC<Input> = ({
             $borderColor={borderColor}
             $autocomplete={autocomplete}
             required={required}
-            $iconCount={
-              clearable && displayValue.length > 0
-                ? 1
-                : showSaveExitIcons
-                ? 2
-                : 0
-            }
+            $iconCount={clearable && displayValue.length > 0 ? 1 : showSaveExitIcons ? 2 : 0}
           />
 
           {displayValue.length > 0 && clearable && (
@@ -288,22 +275,14 @@ export const Input: React.FC<Input> = ({
             $noBorder={noBorder}
             $borderColor={borderColor}
             disabled={disabled}
-            onFocus={(event: React.FocusEvent<HTMLInputElement>) =>
-              onFocus(event)
-            }
+            onFocus={(event: React.FocusEvent<HTMLInputElement>) => onFocus(event)}
             onBlur={() => {
               if (displayValue !== value && !changeOnType) {
                 onChangeFn(displayValue);
               }
               onBlur();
             }}
-            $iconCount={
-              clearable && displayValue.length > 0
-                ? 1
-                : showSaveExitIcons
-                ? 2
-                : 0
-            }
+            $iconCount={clearable && displayValue.length > 0 ? 1 : showSaveExitIcons ? 2 : 0}
           />
           {displayValue.length > 0 && clearable && (
             <StyledClearableInputButton>

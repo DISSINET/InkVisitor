@@ -1,8 +1,4 @@
-import {
-  IBookmarkFolder,
-  IEntity,
-  IResponseBookmarkFolder,
-} from "@shared/types";
+import { IBookmarkFolder, IEntity, IResponseBookmarkFolder } from "@shared/types";
 import api from "api";
 import {
   Button,
@@ -21,11 +17,7 @@ import { FaPlus } from "react-icons/fa";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
-import {
-  StyledContent,
-  StyledFolderList,
-  StyledHeader,
-} from "./EntityBookmarkBoxStyles";
+import { StyledContent, StyledFolderList, StyledHeader } from "./EntityBookmarkBoxStyles";
 import { EntityBookmarkFolder } from "./EntityBookmarkFolder/EntityBookmarkFolder";
 
 export const EntityBookmarkBox: React.FC = () => {
@@ -90,6 +82,22 @@ export const EntityBookmarkBox: React.FC = () => {
       !bookmarkFolders.map((b) => b.name).includes(editingFolderName)
     );
   }, [editingFolderName]);
+  const isEditMode = Boolean(editingFolder);
+  const isFolderModalOpen = isEditMode || creatingFolder;
+  const closeFolderModal = () => {
+    if (isEditMode) {
+      cancelEditingFolder();
+      return;
+    }
+    cancelCreatingFolder();
+  };
+  const submitFolderModal = () => {
+    if (isEditMode) {
+      acceptEditingFolderMutation.mutate();
+      return;
+    }
+    createFolderMutation.mutate();
+  };
 
   // methods
   const clickNewBookmarFolderkHandle = () => {
@@ -139,9 +147,7 @@ export const EntityBookmarkBox: React.FC = () => {
     mutationFn: async () => {
       const newBookmarks: IBookmarkFolder[] | false = getBookmarksCopy();
       if (newBookmarks) {
-        const newBookmarksAfterRemove = newBookmarks.filter(
-          (b) => b.id !== removingFolder
-        );
+        const newBookmarksAfterRemove = newBookmarks.filter((b) => b.id !== removingFolder);
         await api.usersUpdate("me", {
           bookmarks: newBookmarksAfterRemove,
         });
@@ -166,8 +172,7 @@ export const EntityBookmarkBox: React.FC = () => {
   const createFolderMutation = useMutation({
     mutationFn: async () => {
       if (bookmarkFolders) {
-        const newBookmarkFolder: IBookmarkFolder =
-          CBookmarkFolder(editingFolderName);
+        const newBookmarkFolder: IBookmarkFolder = CBookmarkFolder(editingFolderName);
 
         const newBookmarks: IBookmarkFolder[] | false = getBookmarksCopy();
         if (newBookmarks) {
@@ -197,42 +202,39 @@ export const EntityBookmarkBox: React.FC = () => {
       </StyledHeader>
       {bookmarkFolders && (
         <StyledFolderList>
-          {bookmarkFolders.map(
-            (bookmarkFolder: IResponseBookmarkFolder, key: number) => {
-              const open = openedFolders.includes(bookmarkFolder.id);
-              const empty = bookmarkFolder.entities.length === 0;
+          {bookmarkFolders.map((bookmarkFolder: IResponseBookmarkFolder, key: number) => {
+            const open = openedFolders.includes(bookmarkFolder.id);
+            const empty = bookmarkFolder.entities.length === 0;
 
-              return (
-                <EntityBookmarkFolder
-                  key={key}
-                  bookmarkFolder={bookmarkFolder}
-                  open={open}
-                  empty={empty}
-                  getBookmarksCopy={getBookmarksCopy}
-                  startEditingFolder={startEditingFolder}
-                  askRemoveFolder={askRemoveFolder}
-                  openedFolders={openedFolders}
-                  setOpenedFolders={setOpenedFolders}
-                />
-              );
-            }
-          )}
+            return (
+              <EntityBookmarkFolder
+                key={key}
+                bookmarkFolder={bookmarkFolder}
+                open={open}
+                empty={empty}
+                getBookmarksCopy={getBookmarksCopy}
+                startEditingFolder={startEditingFolder}
+                askRemoveFolder={askRemoveFolder}
+                openedFolders={openedFolders}
+                setOpenedFolders={setOpenedFolders}
+              />
+            );
+          })}
         </StyledFolderList>
       )}
       <Loader show={isFetching} />
 
-      {/* edit modal */}
       <Modal
-        key="new-bookmar-modal"
-        showModal={!!editingFolder}
-        width="auto"
-        onEnterPress={() => acceptEditingFolderMutation.mutate()}
-        onClose={cancelEditingFolder}
+        key="bookmark-folder-modal"
+        showModal={isFolderModalOpen}
+        onClose={closeFolderModal}
+        onEnterPress={submitFolderModal}
       >
         <ModalHeader title="Bookmark Folder" />
         <ModalContent>
           <Input
             label="Bookmark folder name: "
+            labelSpaceNoWrap
             placeholder=""
             onChangeFn={(newName: string) => setEditingFolderName(newName)}
             value={editingFolderName}
@@ -243,74 +245,18 @@ export const EntityBookmarkBox: React.FC = () => {
 
         <ModalFooter>
           <ButtonGroup>
-            <Button
-              key="cancel"
-              label="Cancel"
-              color="warning"
-              onClick={cancelEditingFolder}
-            />
+            <Button key="cancel" label="Cancel" color="warning" onClick={closeFolderModal} />
+
             <Button
               key="submit"
-              label="Submit"
+              label={isEditMode ? "Submit" : "Create"}
               color="primary"
-              onClick={() => {
-                acceptEditingFolderMutation.mutate();
-              }}
+              onClick={submitFolderModal}
               disabled={!editedFolderIsValid}
             />
           </ButtonGroup>
         </ModalFooter>
-      </Modal>
-
-      {/* create modal */}
-      <Modal
-        key="create-modal"
-        showModal={creatingFolder == true}
-        onClose={() => {
-          cancelCreatingFolder();
-        }}
-        onEnterPress={() => createFolderMutation.mutate()}
-      >
-        <ModalHeader title="Bookmark Folder" />
-        <ModalContent>
-          <Input
-            label="Bookmark folder name: "
-            placeholder=""
-            onChangeFn={(newName: string) => setEditingFolderName(newName)}
-            value={editingFolderName}
-            changeOnType
-            autoFocus
-          />
-        </ModalContent>
-
-        <ModalFooter>
-          <ButtonGroup>
-            <Button
-              key="cancel"
-              label="Cancel"
-              color="warning"
-              onClick={() => {
-                cancelCreatingFolder();
-              }}
-            />
-
-            <Button
-              key="create"
-              label="Create"
-              color="primary"
-              onClick={() => {
-                createFolderMutation.mutate();
-              }}
-              disabled={!editedFolderIsValid}
-            />
-          </ButtonGroup>
-        </ModalFooter>
-        <Loader
-          show={
-            createFolderMutation.isPending ||
-            acceptEditingFolderMutation.isPending
-          }
-        />
+        <Loader show={createFolderMutation.isPending || acceptEditingFolderMutation.isPending} />
       </Modal>
 
       <Submit

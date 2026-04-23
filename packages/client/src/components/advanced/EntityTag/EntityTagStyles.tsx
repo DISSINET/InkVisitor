@@ -8,6 +8,7 @@ interface StyledEntityTagWrap {
 }
 export const StyledEntityTagWrap = styled.div<StyledEntityTagWrap>`
   display: inline-flex;
+  vertical-align: top;
   overflow: hidden;
   cursor: ${({ $dragDisabled }) => ($dragDisabled ? "default" : "move")};
   user-select: none;
