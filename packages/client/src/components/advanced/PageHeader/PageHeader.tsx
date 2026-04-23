@@ -13,8 +13,9 @@ import { toast } from "react-toastify";
 import { setTheme } from "redux/features/themeSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { getUserIcon } from "utils/iconUtils";
-import { GlobalValidationsModal, Menu } from "..";
+import { GlobalValidationsModal, Menu, UserTag } from "..";
 import packageJson from "../../../../package.json";
+import { UserTagSize } from "../UserTag/utils";
 import {
   StyledFlexColumn,
   StyledFlexRow,
@@ -39,117 +40,115 @@ import {
 interface LeftHeader {
   tempLocation: string | false;
 }
-export const LeftHeader: React.FC<LeftHeader> = React.memo(
-  ({ tempLocation }) => {
-    const env = window.appConfig.env || "";
+export const LeftHeader: React.FC<LeftHeader> = React.memo(({ tempLocation }) => {
+  const env = window.appConfig.env || "";
 
-    const versionText = `v. ${packageJson.version}${
-      env ? ` | ${env}` : ``
-    } | built: ${process.env.BUILD_TIMESTAMP}`;
+  const versionText = `v. ${packageJson.version}${env ? ` | ${env}` : ``} | built: ${
+    process.env.BUILD_TIMESTAMP
+  }`;
 
-    const location = useLocation();
-    const navigate = useNavigate();
+  const location = useLocation();
+  const navigate = useNavigate();
 
-    const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
-    const ping: number = useAppSelector((state) => state.ping);
+  const ping: number = useAppSelector((state) => state.ping);
 
-    const [pingColor, setPingColor] = useState<keyof PingColor>("0");
-    const [waitingForServerRestart, setWaitingForServerRestart] =
-      useState(false);
+  const [pingColor, setPingColor] = useState<keyof PingColor>("0");
+  const [waitingForServerRestart, setWaitingForServerRestart] = useState(false);
 
-    useEffect(() => {
-      if ((ping === -1 || ping === -2) && !waitingForServerRestart) {
-        setWaitingForServerRestart(true);
-      } else if (ping >= 0 && waitingForServerRestart) {
-        queryClient.invalidateQueries();
-        setWaitingForServerRestart(false);
-      }
+  useEffect(() => {
+    if ((ping === -1 || ping === -2) && !waitingForServerRestart) {
+      setWaitingForServerRestart(true);
+    } else if (ping >= 0 && waitingForServerRestart) {
+      queryClient.invalidateQueries();
+      setWaitingForServerRestart(false);
+    }
 
-      switch (true) {
-        case ping === -2:
-          setPingColor("-2");
-          return;
-        case ping === -1:
-          setPingColor("-1");
-          return;
-        case ping < 100:
-          setPingColor("5");
-          return;
-        case ping < 200:
-          setPingColor("4");
-          return;
-        case ping < 300:
-          setPingColor("3");
-          return;
-        case ping < 500:
-          setPingColor("2");
-          return;
-        case ping < 1000:
-          setPingColor("1");
-          return;
-        case ping > 1000:
-          setPingColor("0");
-          return;
-      }
-    }, [ping]);
+    switch (true) {
+      case ping === -2:
+        setPingColor("-2");
+        return;
+      case ping === -1:
+        setPingColor("-1");
+        return;
+      case ping < 100:
+        setPingColor("5");
+        return;
+      case ping < 200:
+        setPingColor("4");
+        return;
+      case ping < 300:
+        setPingColor("3");
+        return;
+      case ping < 500:
+        setPingColor("2");
+        return;
+      case ping < 1000:
+        setPingColor("1");
+        return;
+      case ping > 1000:
+        setPingColor("0");
+        return;
+    }
+  }, [ping]);
 
-    return (
-      <StyledHeader>
-        <StyledHeaderLogo
-          height={heightHeader - 10}
-          src={LogoInkvisitor}
-          alt="Inkvisitor Logo"
+  return (
+    <StyledHeader>
+      <StyledHeaderLogo
+        height={heightHeader - 10}
+        src={LogoInkvisitor}
+        alt="Inkvisitor Logo"
+        onClick={async () => {
+          if (location.pathname !== "/") {
+            navigate({
+              pathname: "/",
+              hash: tempLocation ? tempLocation : "",
+            });
+          } else {
+            queryClient.invalidateQueries();
+          }
+        }}
+      />
+      <StyledFlexColumn>
+        <StyledHeaderTag
           onClick={async () => {
-            if (location.pathname !== "/") {
-              navigate({
-                pathname: "/",
-                hash: tempLocation ? tempLocation : "",
-              });
-            } else {
-              queryClient.invalidateQueries();
-            }
+            await navigator.clipboard.writeText(versionText);
+            toast.info("Inkvisitor version copied to clipboard");
           }}
-        />
-        <StyledFlexColumn>
-          <StyledHeaderTag
-            onClick={async () => {
-              await navigator.clipboard.writeText(versionText);
-              toast.info("Inkvisitor version copied to clipboard");
-            }}
-          >
-            {versionText}
-          </StyledHeaderTag>
-          <StyledFlexRow>
-            <StyledPingText style={{ marginLeft: "0.3rem" }}>
-              {ping === -10 && "loading"}
-              {ping === -2 && "Connection to server failed"}
-              {ping === -1 && "Server is down"}
-              {ping >= 0 && `Server connection latency:`}
-            </StyledPingText>
-            {ping === -10 && (
-              <BeatLoader
-                size={6}
-                margin={4}
-                style={{
-                  marginLeft: "0.3rem",
-                  marginTop: "0.1rem",
-                }}
-                color="white"
-              />
-            )}
-            {ping >= -2 && <StyledPingColor $pingColor={pingColor} />}
-            {ping >= 0 && <StyledPingText>{ping}ms</StyledPingText>}
-          </StyledFlexRow>
-        </StyledFlexColumn>
-      </StyledHeader>
-    );
-  }
-);
+        >
+          {versionText}
+        </StyledHeaderTag>
+        <StyledFlexRow>
+          <StyledPingText style={{ marginLeft: "0.3rem" }}>
+            {ping === -10 && "loading"}
+            {ping === -2 && "Connection to server failed"}
+            {ping === -1 && "Server is down"}
+            {ping >= 0 && `Server connection latency:`}
+          </StyledPingText>
+          {ping === -10 && (
+            <BeatLoader
+              size={6}
+              margin={4}
+              style={{
+                marginLeft: "0.3rem",
+                marginTop: "0.1rem",
+              }}
+              color="white"
+            />
+          )}
+          {ping >= -2 && <StyledPingColor $pingColor={pingColor} />}
+          {ping >= 0 && <StyledPingText>{ping}ms</StyledPingText>}
+        </StyledFlexRow>
+      </StyledFlexColumn>
+    </StyledHeader>
+  );
+});
 
 interface RightHeader {
   setUserCustomizationOpen: React.Dispatch<React.SetStateAction<boolean>>;
   userName: string;
+  userId: string;
   userRole: UserEnums.Role;
   tempLocation: string | false;
   setTempLocation: React.Dispatch<React.SetStateAction<string | false>>;
@@ -160,6 +159,7 @@ interface RightHeader {
 export const RightHeader: React.FC<RightHeader> = React.memo(
   ({
     setUserCustomizationOpen,
+    userId,
     userName,
     userRole,
     tempLocation,
@@ -170,9 +170,7 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
     const env = window.appConfig.env || "";
 
     const dispatch = useAppDispatch();
-    const selectedThemeId: InterfaceEnums.Theme = useAppSelector(
-      (state) => state.theme
-    );
+    const selectedThemeId: InterfaceEnums.Theme = useAppSelector((state) => state.theme);
 
     const handleThemeChange = (newTheme: InterfaceEnums.Theme) => {
       dispatch(setTheme(newTheme));
@@ -205,14 +203,10 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
               );
             }}
           >
-            <StyledThemeSwitcherIcon
-              selected={selectedThemeId === InterfaceEnums.Theme.Light}
-            >
+            <StyledThemeSwitcherIcon selected={selectedThemeId === InterfaceEnums.Theme.Light}>
               <MdSunny />
             </StyledThemeSwitcherIcon>
-            <StyledThemeSwitcherIcon
-              selected={selectedThemeId === InterfaceEnums.Theme.Dark}
-            >
+            <StyledThemeSwitcherIcon selected={selectedThemeId === InterfaceEnums.Theme.Dark}>
               <MdDarkMode />
             </StyledThemeSwitcherIcon>
           </StyledThemeSwitcher>
@@ -242,10 +236,8 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
               <StyledUser>
                 <StyledText>logged as</StyledText>
 
-                <StyledUserIconWrap
-                  onClick={() => setUserCustomizationOpen(true)}
-                >
-                  {getUserIcon(userRole, 19)}
+                <StyledUserIconWrap onClick={() => setUserCustomizationOpen(true)}>
+                  {getUserIcon(userRole, UserTagSize.Large)}
                 </StyledUserIconWrap>
                 <StyledUsername onClick={() => setUserCustomizationOpen(true)}>
                   {userName}
@@ -270,9 +262,7 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
         </StyledRightHeader>
 
         {showGlobalValidations && (
-          <GlobalValidationsModal
-            setShowGlobalValidations={setShowGlobalValidations}
-          />
+          <GlobalValidationsModal setShowGlobalValidations={setShowGlobalValidations} />
         )}
       </>
     );

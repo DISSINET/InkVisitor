@@ -15,6 +15,7 @@ interface UserTagProps {
   // size currently controls only the font size and icon size
   size?: UserTagSize;
   showOnly?: "tag" | "label";
+  fontWeight?: "normal" | "bold";
 }
 
 export const UserTag: React.FC<UserTagProps> = ({
@@ -22,6 +23,7 @@ export const UserTag: React.FC<UserTagProps> = ({
   variant = "filled",
   size = UserTagSize.Small,
   showOnly,
+  fontWeight = "bold",
 }) => {
   const theme = useTheme();
   const currentUserId = localStorage.getItem("userid");
@@ -55,6 +57,7 @@ export const UserTag: React.FC<UserTagProps> = ({
         $textColor={variantColors.text}
         $variant={variant}
         $size={size}
+        $fontWeight={fontWeight}
       >
         {label}
       </StyledUserLabel>

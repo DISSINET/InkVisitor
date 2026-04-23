@@ -44,6 +44,7 @@ interface StyledUserLabelProps {
   $textColor: string;
   $variant: UserTagVariant;
   $size: UserTagSize;
+  $fontWeight: "normal" | "bold";
 }
 
 export const StyledUserLabel = styled.div<StyledUserLabelProps>`
@@ -53,10 +54,8 @@ export const StyledUserLabel = styled.div<StyledUserLabelProps>`
   padding: 0 ${({ theme }) => theme.space[2]};
   background-color: ${({ $backgroundColor }) => $backgroundColor};
   color: ${({ $textColor }) => $textColor};
-  font-weight: ${({ theme, $variant }) =>
-    $variant === "filled" || $variant === "inverted"
-      ? theme.fontWeight.bold
-      : theme.fontWeight.normal};
+  font-weight: ${({ theme, $fontWeight }) =>
+    $fontWeight === "bold" ? theme.fontWeight.bold : theme.fontWeight.normal};
   font-size: ${({ theme, $size }) =>
     $size === UserTagSize.Small
       ? theme.fontSize.xs
@@ -64,5 +63,7 @@ export const StyledUserLabel = styled.div<StyledUserLabelProps>`
       ? theme.fontSize.sm
       : $size === UserTagSize.Large
       ? theme.fontSize.base
+      : $size === UserTagSize.ExtraLarge
+      ? theme.fontSize.lg
       : theme.fontSize.lg};
 `;

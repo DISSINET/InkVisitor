@@ -1,17 +1,33 @@
 import { IResponseUser } from "@shared/types/response-user";
 import { ThemeType } from "Theme/theme";
 
-// bordered: border, inverted background, fontWeight normal
-// light: border, invertedBg background color (from theme), fontWeight normal
-// filled: no border, fontWeight bold
-// inverted: no border, inverted background (text and background are exchanged), fontWeight bold
-export type UserTagVariant = "bordered" | "light" | "filled" | "inverted";
+// ----------- VARIANTS DESCRIPTION ------------
+// bordered: border, inverted background
+// light: border, invertedBg background color (from theme)
+// filled: no border
+// inverted: no border, inverted background (text and background are exchanged)
+// transparent: no border, no background
+// dark: dark background without theming
+// bright: bright background without theming
+
+export type UserTagVariant =
+  | "bordered"
+  | "light"
+  | "filled"
+  | "inverted"
+  | "transparent"
+  | "dark"
+  | "bright";
 export enum UserTagSize {
   Small = "S",
   Medium = "M",
   Large = "L",
+  ExtraLarge = "XL",
 }
 export type UserTagColor = "primary" | "success" | "warning" | "danger" | "info";
+
+const STATIC_DARK = "#091034"; // theme.color.primary
+const STATIC_BRIGHT = "#ffffff"; // theme.color.white
 
 export const getUserLabel = (user: IResponseUser | undefined, userId: string): string => {
   if (!user) return userId;
@@ -54,7 +70,31 @@ export const getVariantColors = (
       icon: base,
     };
   }
-
+  if (variant === "transparent") {
+    return {
+      border: "transparent",
+      background: "transparent",
+      text: base,
+      icon: base,
+    };
+  }
+  if (variant === "dark") {
+    return {
+      border: STATIC_DARK,
+      background: STATIC_DARK,
+      text: STATIC_BRIGHT,
+      icon: STATIC_BRIGHT,
+    };
+  }
+  if (variant === "bright") {
+    return {
+      border: STATIC_BRIGHT,
+      background: STATIC_BRIGHT,
+      text: STATIC_DARK,
+      icon: STATIC_DARK,
+    };
+  }
+  // bordered inverted background
   if (variant === "light") {
     return {
       border: base,
@@ -63,7 +103,6 @@ export const getVariantColors = (
       icon: base,
     };
   }
-
   // bordered
   return {
     border: base,

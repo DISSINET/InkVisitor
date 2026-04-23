@@ -143,7 +143,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
         );
       } else if (typeof (cellValue as IUser)?.email !== "undefined") {
         // is type IUser[]
-        return <UserTag userId={(cellValue as IUser).id} variant="inverted" />;
+        return <UserTag userId={(cellValue as IUser).id} variant="dark" />;
       } else {
         return (
           <div>
