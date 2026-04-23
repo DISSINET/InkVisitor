@@ -84,13 +84,6 @@ const EntityTagComponent: React.FC<EntityTag> = ({
   const detailBoxState: DetailBoxState = useAppSelector(
     (state) => state.layout.mainPage.detailBoxState
   );
-  // Select a minimal boolean to avoid frequent re-renders on large objects
-  // const isDragging: boolean = useAppSelector((state) => {
-  //   const anyState = state as unknown as {
-  //     draggedEntity?: DraggedEntityReduxItem;
-  //   };
-  //   return Boolean(anyState.draggedEntity && Object.keys(anyState.draggedEntity).length);
-  // });
   const [buttonHovered, setButtonHovered] = useState(false);
   const [elvlHovered, setElvlHovered] = useState(false);
   const [tagHovered, setTagHovered] = useState(false);
