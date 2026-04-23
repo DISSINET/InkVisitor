@@ -1,14 +1,14 @@
-import { useQueries, useQuery } from "@tanstack/react-query";
-import api from "api";
 import { IDocument } from "@shared/types";
 import { IAnchorUpdate, IAudit, IDocumentAuditAnchorChanges } from "@shared/types/audit";
 import { IResponseAudit } from "@shared/types/response-audit";
 import { IResponseEntity } from "@shared/types/response-entity";
+import { useQueries, useQuery } from "@tanstack/react-query";
+import api from "api";
 import { BaseDropdown, Loader, Table, Timestamp } from "components";
 import { EntityTag } from "components/advanced";
 import { UserTag } from "components/advanced/UserTag/UserTag";
 import { useResizeObserver } from "hooks";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Column } from "react-table";
 import { DropdownItem } from "types";
 import {
@@ -19,12 +19,11 @@ import {
   StyledDocumentChangesTags,
   StyledDocumentEmptyState,
   StyledDocumentInfoText,
-  StyledDocumentsLayout,
   StyledDocumentRow,
+  StyledDocumentsLayout,
   StyledField,
   StyledFieldLabel,
 } from "../StatsPageStyles";
-import { UserTagSize } from "components/advanced/UserTag/utils";
 
 type ChangeSectionKey = keyof IDocumentAuditAnchorChanges;
 const DEFAULT_AUDITS_PER_PAGE = 10;
@@ -128,11 +127,22 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
   selectedDocument,
   setSelectedDocument,
 }) => {
-  // TODO: not refreshing when content height changes
   const { ref: tableContentRef, height: tableContentHeight = 0 } =
     useResizeObserver<HTMLDivElement>({
       debounceDelay: 50,
     });
+
+  // const [perPage, setPerPage] = useState(DEFAULT_AUDITS_PER_PAGE);
+
+  // useEffect(() => {
+  //   const newPerPage =
+  //     tableContentHeight > 0
+  //       ? Math.floor((tableContentHeight - TABLE_HEADER_HEIGHT) / HEIGHT_TABLE_ROW)
+  //       : DEFAULT_AUDITS_PER_PAGE;
+  //   if (newPerPage !== perPage) {
+  //     setPerPage(newPerPage);
+  //   }
+  // }, [tableContentHeight]);
 
   const { data: dataDocuments, isLoading: isLoadingDocuments } = useQuery({
     queryKey: ["documents"],
@@ -236,7 +246,10 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
                   columns={auditTableColumns}
                   perPage={
                     tableContentHeight > 0
-                      ? Math.floor((tableContentHeight - TABLE_HEADER_HEIGHT) / HEIGHT_TABLE_ROW)
+                      ? Math.max(
+                          1,
+                          Math.floor((tableContentHeight - TABLE_HEADER_HEIGHT) / HEIGHT_TABLE_ROW)
+                        )
                       : DEFAULT_AUDITS_PER_PAGE
                   }
                   entityTitle={{

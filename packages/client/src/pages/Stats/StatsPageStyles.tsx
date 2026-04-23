@@ -41,6 +41,7 @@ export const StyledStatsContent = styled.div`
   width: 100%;
   height: 100%;
   padding: 0.5rem 1rem;
+  padding-bottom: 0;
 `;
 export const StyledDocumentsLayout = styled.div`
   display: grid;
