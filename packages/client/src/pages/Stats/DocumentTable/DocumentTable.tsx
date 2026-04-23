@@ -8,7 +8,7 @@ import { BaseDropdown, Loader, Table, Timestamp } from "components";
 import { EntityTag } from "components/advanced";
 import { UserTag } from "components/advanced/UserTag/UserTag";
 import { useResizeObserver } from "hooks";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Column } from "react-table";
 import { DropdownItem } from "types";
 import {
@@ -131,18 +131,6 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
     useResizeObserver<HTMLDivElement>({
       debounceDelay: 50,
     });
-
-  // const [perPage, setPerPage] = useState(DEFAULT_AUDITS_PER_PAGE);
-
-  // useEffect(() => {
-  //   const newPerPage =
-  //     tableContentHeight > 0
-  //       ? Math.floor((tableContentHeight - TABLE_HEADER_HEIGHT) / HEIGHT_TABLE_ROW)
-  //       : DEFAULT_AUDITS_PER_PAGE;
-  //   if (newPerPage !== perPage) {
-  //     setPerPage(newPerPage);
-  //   }
-  // }, [tableContentHeight]);
 
   const { data: dataDocuments, isLoading: isLoadingDocuments } = useQuery({
     queryKey: ["documents"],
