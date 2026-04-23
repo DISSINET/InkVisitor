@@ -4,11 +4,19 @@ import { IEntity } from "@shared/types";
 import { ThemeColor } from "Theme/theme";
 import { Button, Tag } from "components";
 import { EntityTooltip } from "components/advanced";
-import React, { ReactNode, useCallback, useMemo, useRef, useState } from "react";
-import { FaStar, FaUnlink } from "react-icons/fa";
-import { useAppSelector } from "redux/hooks";
-import { DraggedEntityReduxItem, EntityColors, EntityDragItem } from "types";
-import { getEntityLabel, isFirstLabelEmpty, isValidEntityClass } from "utils/utils";
+import { useSearchParams } from "hooks";
+import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { FaUnlink } from "react-icons/fa";
+import { toast } from "react-toastify";
+import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { DetailBoxState, DraggedEntityReduxItem, EntityColors, EntityDragItem } from "types";
+import {
+  getEntityLabel,
+  getShortLabelByLetterCount,
+  isFirstLabelEmpty,
+  isValidEntityClass,
+} from "utils/utils";
 import {
   StyledEntityTag,
   StyledEntityTagWrap,
@@ -72,6 +80,11 @@ const EntityTagComponent: React.FC<EntityTag> = ({
   unlinkButton,
   customTooltipAttributes,
 }) => {
+  const { appendDetailId } = useSearchParams();
+  const dispatch = useAppDispatch();
+  const detailBoxState: DetailBoxState = useAppSelector(
+    (state) => state.layout.mainPage.detailBoxState
+  );
   // Select a minimal boolean to avoid frequent re-renders on large objects
   const isDragging: boolean = useAppSelector((state) => {
     const anyState = state as unknown as {
@@ -82,7 +95,21 @@ const EntityTagComponent: React.FC<EntityTag> = ({
   const [buttonHovered, setButtonHovered] = useState(false);
   const [elvlHovered, setElvlHovered] = useState(false);
   const [tagHovered, setTagHovered] = useState(false);
+  const [clickedOnce, setClickedOnce] = useState(false);
   const referenceEl = useRef<HTMLDivElement | null>(null);
+  const entityLabel = useMemo(() => getEntityLabel(entity), [entity]);
+
+  useEffect(() => {
+    if (!clickedOnce) return;
+
+    const timeout = setTimeout(() => {
+      navigator.clipboard.writeText(entityLabel);
+      toast.info(`label [${getShortLabelByLetterCount(entityLabel, 200)}] copied to clipboard`);
+      setClickedOnce(false);
+    }, 500);
+
+    return () => clearTimeout(timeout);
+  }, [clickedOnce, entityLabel]);
 
   const handleTagHovered = useCallback(() => {
     setTagHovered(true);
@@ -148,11 +175,11 @@ const EntityTagComponent: React.FC<EntityTag> = ({
           $isFavorited={isFavorited ?? false}
           $isItalic={isFirstLabelEmpty(entity.labels)}
         >
-          {getEntityLabel(entity)}
+          {entityLabel}
         </StyledLabel>
       </StyledLabelWrap>
     );
-  }, [entity]);
+  }, [entity, entityLabel, isSelected, isFavorited, showOnly, fullWidth]);
 
   if (!isValidEntityClass(entity.class)) {
     // labels needs to have length and first label needs to be non-empty
@@ -160,11 +187,9 @@ const EntityTagComponent: React.FC<EntityTag> = ({
       <Tag
         propId={entity.id}
         entityClass={EntityEnums.Extension.Invalid}
-        label={getEntityLabel(entity)}
         labelComponent={labelComponent}
         // button={unlinkButton && renderUnlinkButton(unlinkButton)}
         disableDrag
-        disableDoubleClick
       />
     );
   }
@@ -175,6 +200,20 @@ const EntityTagComponent: React.FC<EntityTag> = ({
       ref={referenceEl}
       onMouseEnter={handleTagHovered}
       onMouseLeave={handleTagUnhovered}
+      onClick={(e) => {
+        e.stopPropagation();
+        setClickedOnce(true);
+      }}
+      onDoubleClick={(e) => {
+        e.stopPropagation();
+        setClickedOnce(false);
+        if (!disableDoubleClick) {
+          appendDetailId(entity.id);
+          if (detailBoxState === DetailBoxState.Minimized) {
+            dispatch(setDetailBoxState(DetailBoxState.Normal));
+          }
+        }
+      }}
     >
       {tagHovered && !disableTooltip && (
         <EntityTooltip
@@ -199,7 +238,6 @@ const EntityTagComponent: React.FC<EntityTag> = ({
       )}
       <Tag
         propId={entity.id}
-        label={getEntityLabel(entity)}
         status={entity.status}
         ltype={entity?.data?.logicalType ?? EntityEnums.LogicalType.Definite}
         isTemplate={entity.isTemplate}
@@ -217,7 +255,6 @@ const EntityTagComponent: React.FC<EntityTag> = ({
         moveFn={moveFn}
         entityClass={entity.class}
         index={index}
-        disableDoubleClick={disableDoubleClick}
         disableDrag={disableDrag}
         updateOrderFn={updateOrderFn}
         parentId={parentId}

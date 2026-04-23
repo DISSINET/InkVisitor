@@ -9,7 +9,7 @@ import { AttributeMultiDropdown } from "./Dropdowns/AttributeMultiDropdown";
 import { BasicDropdown } from "./Dropdowns/BasicDropdown";
 import { EntityMultiDropdown } from "./Dropdowns/EntityMultiDropdown";
 import { EntitySingleDropdown } from "./Dropdowns/EntitySingleDropdown";
-import { EmptyTag } from "./EmptyTag/EmptyTag";
+import { EmptyEntityTag } from "./EntityTag/EmptyEntityTag";
 import { EntityCreateModal } from "./EntityCreateModal/EntityCreateModal";
 import { EntityDropzone } from "./EntityDropzone/EntityDropzone";
 import { EntitySuggester } from "./EntitySuggester/EntitySuggester";
@@ -57,7 +57,7 @@ export {
   DocumentModalEdit,
   DocumentModalExport,
   ElvlButtonGroup,
-  EmptyTag,
+  EmptyEntityTag,
   EntityCreateModal,
   EntityDropzone,
   EntitySuggester,

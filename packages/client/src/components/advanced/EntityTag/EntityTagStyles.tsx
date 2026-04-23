@@ -27,6 +27,7 @@ export const StyledEntityTag = styled.div<StyledEntityTag>`
   align-items: center;
   flex-shrink: 0;
   width: ${({ theme }) => theme.space[7]};
+  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
 `;
 
 interface StyledLabelWrap {
@@ -88,6 +89,7 @@ export const StyledLabel = styled.div<StyledLabel>`
     theme.color[getColor($invertedLabel, $isFavorited, $isItalic)]};
   border-left-width: ${({ theme, $labelOnly }) => ($labelOnly ? 0 : theme.borderWidth[2])};
   border-left-color: ${({ theme, $status }) => theme.color.tagStatus[$status]};
+  border-left-style: solid;
   max-width: ${({ theme, $fullWidth }) => ($fullWidth ? "100%" : theme.space[30])};
   font-weight: ${({ theme, $invertedLabel }) =>
     $invertedLabel ? theme.fontWeight["bold"] : theme.fontWeight["normal"]};
