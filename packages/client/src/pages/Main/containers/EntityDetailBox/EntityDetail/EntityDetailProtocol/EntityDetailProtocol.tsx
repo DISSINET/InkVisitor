@@ -95,7 +95,6 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
               return (
                 <StyledTagWrap key={conceptId}>
                   <EntityTag
-                    flexListMargin
                     entity={entities[conceptId]}
                     unlinkButton={
                       userCanEdit && {
@@ -117,10 +116,7 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
               alwaysShowCreateModal
               onPicked={(newPicked) => {
                 updateProtocol({
-                  dataCollectionMethods: [
-                    ...dataCollectionMethods,
-                    newPicked.id,
-                  ],
+                  dataCollectionMethods: [...dataCollectionMethods, newPicked.id],
                 });
               }}
               excludedActantIds={dataCollectionMethods}
@@ -152,15 +148,12 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
               return (
                 <StyledTagWrap key={guidelineR}>
                   <EntityTag
-                    flexListMargin
                     entity={entities[guidelineR]}
                     unlinkButton={
                       userCanEdit && {
                         onClick: () =>
                           updateProtocol({
-                            guidelines: guidelines.filter(
-                              (id) => id !== guidelineR
-                            ),
+                            guidelines: guidelines.filter((id) => id !== guidelineR),
                           }),
                       }
                     }
@@ -194,15 +187,12 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
               return (
                 <StyledTagWrap key={resourceId}>
                   <EntityTag
-                    flexListMargin
                     entity={entities[resourceId]}
                     unlinkButton={
                       userCanEdit && {
                         onClick: () =>
                           updateProtocol({
-                            detailedProtocols: detailedProtocols.filter(
-                              (id) => id !== resourceId
-                            ),
+                            detailedProtocols: detailedProtocols.filter((id) => id !== resourceId),
                           }),
                       }
                     }
@@ -292,16 +282,14 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
               return (
                 <StyledTagWrap key={resourceId}>
                   <EntityTag
-                    flexListMargin
                     entity={entities[resourceId]}
                     unlinkButton={
                       userCanEdit && {
                         onClick: () =>
                           updateProtocol({
-                            relatedDataPublications:
-                              relatedDataPublications.filter(
-                                (id) => id !== resourceId
-                              ),
+                            relatedDataPublications: relatedDataPublications.filter(
+                              (id) => id !== resourceId
+                            ),
                           }),
                       }
                     }
@@ -315,10 +303,7 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
               alwaysShowCreateModal
               onPicked={(newPicked) => {
                 updateProtocol({
-                  relatedDataPublications: [
-                    ...relatedDataPublications,
-                    newPicked.id,
-                  ],
+                  relatedDataPublications: [...relatedDataPublications, newPicked.id],
                 });
               }}
               excludedActantIds={relatedDataPublications}

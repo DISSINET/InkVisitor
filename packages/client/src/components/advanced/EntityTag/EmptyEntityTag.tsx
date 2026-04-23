@@ -2,37 +2,42 @@ import { EntityEnums } from "@shared/enums";
 import { Tag } from "components";
 import React from "react";
 import { EntityColors } from "types";
-import { StyledEntityTag, StyledLabel, StyledLabelWrap } from "./EntityTagStyles";
+import {
+  StyledEntityTag,
+  StyledEntityTagWrap,
+  StyledLabel,
+  StyledLabelWrap,
+} from "./EntityTagStyles";
 
 interface EmptyEntityTag {
   label: string;
 }
 export const EmptyEntityTag: React.FC<EmptyEntityTag> = ({ label }) => {
   return (
-    <Tag
-      propId={label}
-      tagComponent={
-        <StyledEntityTag
-          $color={EntityColors[EntityEnums.Extension.NoClass].color}
-          $isTemplate={false}
-        >
-          {EntityEnums.Extension.NoClass}
-        </StyledEntityTag>
-      }
-      labelComponent={
-        <StyledLabelWrap $invertedLabel={false}>
-          <StyledLabel
-            $invertedLabel={false}
-            $fullWidth={false}
-            $status={EntityEnums.Status.Approved}
-            $isFavorited={false}
-            $isItalic={true}
+    <StyledEntityTagWrap $dragDisabled>
+      <Tag
+        tagComponent={
+          <StyledEntityTag
+            $color={EntityColors[EntityEnums.Extension.NoClass].color}
+            $isTemplate={false}
           >
-            {label}
-          </StyledLabel>
-        </StyledLabelWrap>
-      }
-      disableDrag
-    />
+            {EntityEnums.Extension.NoClass}
+          </StyledEntityTag>
+        }
+        labelComponent={
+          <StyledLabelWrap $invertedLabel={false}>
+            <StyledLabel
+              $isItalic={true}
+              $status={EntityEnums.Status.Approved}
+              $invertedLabel={false}
+              $fullWidth={false}
+              $isFavorited={false}
+            >
+              {label}
+            </StyledLabel>
+          </StyledLabelWrap>
+        }
+      />
+    </StyledEntityTagWrap>
   );
 };

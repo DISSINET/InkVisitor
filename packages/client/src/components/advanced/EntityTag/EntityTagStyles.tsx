@@ -4,13 +4,16 @@ import styled from "styled-components";
 import { ThemeColor } from "Theme/theme";
 
 interface StyledEntityTagWrap {
-  $flexListMargin: boolean;
+  $dragDisabled: boolean;
 }
 export const StyledEntityTagWrap = styled.div<StyledEntityTagWrap>`
   display: inline-flex;
   overflow: hidden;
-  margin-right: ${({ $flexListMargin }) => ($flexListMargin ? "0.5rem" : "")};
-  margin-bottom: ${({ $flexListMargin }) => ($flexListMargin ? "0.5rem" : "")};
+  cursor: ${({ $dragDisabled }) => ($dragDisabled ? "default" : "move")};
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 `;
 
 interface StyledEntityTag {

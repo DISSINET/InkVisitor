@@ -4,7 +4,7 @@ import styled from "styled-components";
 interface StyledTagWrapper {
   $status: EntityEnums.Status;
   $ltype: EntityEnums.LogicalType;
-  $dragDisabled?: boolean;
+  // $dragDisabled?: boolean;
 }
 export const StyledTagWrapper = styled.div<StyledTagWrapper>`
   display: inline-flex;
@@ -12,7 +12,6 @@ export const StyledTagWrapper = styled.div<StyledTagWrapper>`
   border: ${({ theme }) => theme.borderWidth[2]};
   border-color: ${({ theme, $status }) => theme.color.tagStatus[$status]};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
-  cursor: ${({ $dragDisabled }) => ($dragDisabled ? "default" : "move")};
   border-style: ${({ theme, $ltype }) => "solid solid solid " + theme.borderStyle[$ltype]};
   color: ${({ theme }) => theme.color["black"]};
   font-size: ${({ theme }) => theme.fontSize["xxs"]};

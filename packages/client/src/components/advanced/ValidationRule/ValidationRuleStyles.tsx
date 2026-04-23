@@ -42,8 +42,7 @@ interface StyledSentenceProps {
 export const StyledSentence = styled.p<StyledSentenceProps>`
   margin-top: 0.1rem;
   font-size: ${({ theme }) => theme.fontSize["xs"]};
-  color: ${({ theme, $active }) =>
-    $active ? theme.color.primary : theme.color.greyer};
+  color: ${({ theme, $active }) => ($active ? theme.color.primary : theme.color.greyer)};
   &::before {
     content: '"';
   }
@@ -68,7 +67,7 @@ export const StyledLabel = styled.div`
 export const StyledValue = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: ${({ theme }) => theme.space[2]};
+  gap: ${({ theme }) => theme.space[4]};
 `;
 
 export const StyledLanguageList = styled.div`
