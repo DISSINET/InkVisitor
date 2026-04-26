@@ -118,6 +118,10 @@ export class Annotator {
   onTextChangeCb?: (text: string) => void;
   onScrollCb?: (line: number) => void;
   onAnchorHoverCb?: (tags: Tag[]) => void; // Part 2 of #2835
+  onAnchorTagHoverCb?: (
+    tag: Tag | null,
+    position: { x: number; y: number } | null
+  ) => void;
 
   clickCount: number;
   clickTimeout?: NodeJS.Timeout;
@@ -131,6 +135,7 @@ export class Annotator {
       this.hoverDebounceTimeout = undefined;
     }
     this.onAnchorHoverCb?.([]);
+    this.onAnchorTagHoverCb?.(null, null);
   };
 
   constructor(
@@ -624,6 +629,73 @@ export class Annotator {
     this.onAnchorHoverCb(tagsAtPosition);
   }
 
+  /**
+   * Detects whether the mouse is over tag markup (`<tag>` or `</tag>`) and
+   * emits the owning opening Tag, or null when not over any markup.
+   * Only meaningful in RAW mode since HIGHLIGHT mode hides tag markup.
+   */
+  private detectAndEmitAnchorTagHover(e: MouseEvent) {
+    if (!this.onAnchorTagHoverCb) {
+      return;
+    }
+
+    const tempCursor = new Cursor(this.ratio, 0, 0);
+    tempCursor.setPositionFromEvent(
+      e,
+      this.lineHeight,
+      this.charWidth,
+      this.viewport.scrollOffsetY,
+      this.viewport.lineStart
+    );
+
+    tempCursor.yLine = Math.max(
+      0,
+      Math.min(tempCursor.yLine, Math.max(0, this.text.noLines - 1))
+    );
+
+    const segmentPos = this.text.getSegmentPosition(
+      tempCursor.yLine,
+      tempCursor.xLine
+    );
+
+    if (!segmentPos) {
+      this.onAnchorTagHoverCb(null, null);
+      return;
+    }
+
+    const position = { x: e.pageX, y: e.pageY };
+    const hoverAbsRawIndex = this.text.getAbsTextIndexFromPosition(segmentPos);
+
+    for (const segment of this.text.segments) {
+      for (const openTag of segment.openingTags) {
+        const openStart = openTag.getAbsoluteTagPosition(this.text.segments);
+        const openEnd = openStart + openTag.getTagLength();
+
+        if (hoverAbsRawIndex >= openStart && hoverAbsRawIndex < openEnd) {
+          this.onAnchorTagHoverCb(openTag, position);
+          return;
+        }
+
+        const match = this.findMatchingClosingTag(openTag);
+        if (!match) {
+          continue;
+        }
+
+        const closeStart = match.closeTag.getAbsoluteTagPosition(
+          this.text.segments
+        );
+        const closeEnd = closeStart + match.closeTag.getTagLength();
+
+        if (hoverAbsRawIndex >= closeStart && hoverAbsRawIndex < closeEnd) {
+          this.onAnchorTagHoverCb(openTag, position);
+          return;
+        }
+      }
+    }
+
+    this.onAnchorTagHoverCb(null, null);
+  }
+
   onCanvasResize() {
     this.width =
       Number(this.element.style.width.replace("px", "")) * this.ratio;
@@ -710,6 +782,18 @@ export class Annotator {
    */
   onAnchorHover(cb: (tags: Tag[]) => void) {
     this.onAnchorHoverCb = cb;
+  }
+
+  /**
+   * Registers callback fired when the mouse is over the tag markup itself
+   * (e.g. `<anchor>` or `</anchor>`), not the content between them.
+   * Emits the opening Tag for both opening and closing markup hits, or null
+   * when the pointer leaves any tag markup.
+   */
+  onAnchorTagHover(
+    cb: (tag: Tag | null, position: { x: number; y: number } | null) => void
+  ) {
+    this.onAnchorTagHoverCb = cb;
   }
 
   /**
@@ -936,7 +1020,10 @@ export class Annotator {
     }
 
     // Part 2 of #2835: Detect anchors at hover position
-    if (this.onAnchorHoverCb && !this.cursor.isSelecting()) {
+    if (
+      (this.onAnchorHoverCb || this.onAnchorTagHoverCb) &&
+      !this.cursor.isSelecting()
+    ) {
       // Clear existing debounce timeout
       if (this.hoverDebounceTimeout) {
         clearTimeout(this.hoverDebounceTimeout);
@@ -945,6 +1032,7 @@ export class Annotator {
       // Debounce the hover detection
       this.hoverDebounceTimeout = setTimeout(() => {
         this.detectAndEmitAnchorHover(e);
+        this.detectAndEmitAnchorTagHover(e);
       }, HOVER_DEBOUNCE_MS);
     }
   }

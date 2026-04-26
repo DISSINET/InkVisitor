@@ -51,7 +51,29 @@
     .toggle-icon.open {
       transform: rotate(90deg);
     }
-  </style>
+    #tagHoverPopup {
+      position: absolute;
+      display: none;
+      background: #222;
+      color: #fff;
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 12px;
+      pointer-events: none;
+      z-index: 1000;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      max-width: 300px;
+      word-break: break-word;
+    }
+    #tagHoverPopup .tag-name {
+      color: #ffd166;
+      font-weight: bold;
+    }
+    #tagHoverPopup .tag-attr {
+      color: #8ecae6;
+    }
+</style>
   <body style="background-color: black">
     <div style="padding: 20px; background-color: #ccc">
       <div style="display: flex; flex-direction: row">
@@ -280,6 +302,8 @@
       </div>
     </div>
 
+    <div id="tagHoverPopup"></div>
+
     <p>Text from textfile.txt:</p>
     <pre id="text-content"></pre>
 
@@ -477,9 +501,40 @@
         }
       });
 
+      const tagPopup = document.getElementById('tagHoverPopup');
+
+      annotator.onAnchorTagHover((tag, position) => {
+        if (tag && position) {
+          console.log('onAnchorTagHover →', tag.getTagName(), 'at', position, tag);
+
+          const attrs = tag.attributes || {};
+          const attrEntries = Object.entries(attrs);
+          const attrHtml = attrEntries.length
+            ? attrEntries
+                .map(
+                  ([k, v]) =>
+                    `<div class="tag-attr">${k}=<span>"${v}"</span></div>`
+                )
+                .join('')
+            : '<div style="opacity:0.6">(no attributes)</div>';
+
+          tagPopup.innerHTML =
+            `<div class="tag-name">&lt;${tag.getTagName()}&gt;</div>` + attrHtml;
+
+          // Offset slightly so the popup doesn't sit under the cursor
+          tagPopup.style.left = position.x + 12 + 'px';
+          tagPopup.style.top = position.y + 12 + 'px';
+          tagPopup.style.display = 'block';
+        } else {
+          console.log('onAnchorTagHover → null (left tag markup)');
+          tagPopup.style.display = 'none';
+        }
+      });
+
       console.log('✅ Hover interaction test initialized (#2835)');
       console.log('- Part 1: Hover over statement list → highlights anchor in annotator');
       console.log('- Part 2: Hover over anchored text → highlights statements in list');
+      console.log('- Part 3: Hover over tag markup (<tag>/</tag>) → console logs the Tag');
 
       // ========== End Hover Interaction Test ==========
 
