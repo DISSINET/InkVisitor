@@ -4,7 +4,7 @@ import { IEntity } from "@shared/types";
 import { ThemeColor } from "Theme/theme";
 import { Button, Tag } from "components";
 import { EntityTooltip } from "components/advanced";
-import { useSearchParams, useTheme } from "hooks";
+import { useSearchParams } from "hooks";
 import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
 import { toast } from "react-toastify";
