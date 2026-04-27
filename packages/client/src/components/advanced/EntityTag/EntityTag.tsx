@@ -4,7 +4,7 @@ import { IEntity } from "@shared/types";
 import { ThemeColor } from "Theme/theme";
 import { Button, Tag } from "components";
 import { EntityTooltip } from "components/advanced";
-import { useSearchParams } from "hooks";
+import { useSearchParams, useTheme } from "hooks";
 import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
 import { toast } from "react-toastify";
@@ -161,7 +161,7 @@ const EntityTagComponent: React.FC<EntityTag> = ({
         )}
         <StyledLabel
           $invertedLabel={isSelected ?? false}
-          $status={entity.status}
+          $tagStatusKey={entity.status}
           $labelOnly={showOnly === "label"}
           $fullWidth={fullWidth}
           $isFavorited={isFavorited ?? false}
@@ -238,8 +238,8 @@ const EntityTagComponent: React.FC<EntityTag> = ({
       <Tag
         ref={referenceEl}
         dragDisabled={!canDrag}
-        status={entity.status}
-        ltype={entity?.data?.logicalType ?? EntityEnums.LogicalType.Definite}
+        tagStatusKey={entity.status}
+        borderStyleKey={entity?.data?.logicalType as EntityEnums.LogicalType}
         showOnly={showOnly}
         tagComponent={tagComponent}
         labelComponent={labelComponent}

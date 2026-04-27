@@ -6,14 +6,17 @@ interface TagProps {
   ref?: React.RefObject<HTMLDivElement>;
   // for cursor style
   dragDisabled?: boolean;
-  // TODO: make move to parent
-  status?: EntityEnums.Status;
-  ltype?: EntityEnums.LogicalType;
-  // TODO: make obligatory
+  // key in theme.color.tagStatus to set color of border (e.g. EntityTag status)
+  tagStatusKey?: EntityEnums.Status;
+  // key in theme.borderStyle to set style of left border (e.g. EntityTag logical type)
+  borderStyleKey?: EntityEnums.LogicalType;
+  // components to render inside tag
   tagComponent?: ReactNode;
   labelComponent?: ReactNode;
-  button?: ReactNode;
+  // TODO: elvl button group is entity specific and should be moved to EntityTag
   elvlButtonGroup?: ReactNode | false;
+  button?: ReactNode;
+
   showOnly?: "tag" | "label";
 
   onClick?: () => void;
@@ -27,8 +30,10 @@ interface TagProps {
 
 export const Tag: React.FC<TagProps> = ({
   ref,
-  status = EntityEnums.Status.Approved,
-  ltype = EntityEnums.LogicalType.Definite,
+  // status = EntityEnums.Status.Approved,
+  tagStatusKey = EntityEnums.Status.Approved,
+  // ltype = EntityEnums.LogicalType.Definite,
+  borderStyleKey = EntityEnums.LogicalType.Definite,
   dragDisabled = false,
   tagComponent,
   labelComponent,
@@ -49,7 +54,7 @@ export const Tag: React.FC<TagProps> = ({
 
     const buttonWrap = button && (
       <StyledButtonWrapper
-        $status={status}
+        $tagStatusKey={tagStatusKey}
         onMouseEnter={onButtonOver}
         onMouseLeave={onButtonOut}
         onClick={onBtnClick}
@@ -76,7 +81,7 @@ export const Tag: React.FC<TagProps> = ({
     labelComponent,
     elvlButtonGroup,
     showOnly,
-    status,
+    tagStatusKey,
     button,
     onButtonOver,
     onButtonOut,
@@ -87,9 +92,8 @@ export const Tag: React.FC<TagProps> = ({
     <StyledTagWrapper
       ref={ref}
       className="tag"
-      // TODO: move to EntityTagStyles
-      $status={status}
-      $ltype={ltype}
+      $tagStatusKey={tagStatusKey}
+      $borderStyleKey={borderStyleKey}
       $dragDisabled={dragDisabled}
       onClick={(e) => {
         e.preventDefault();
