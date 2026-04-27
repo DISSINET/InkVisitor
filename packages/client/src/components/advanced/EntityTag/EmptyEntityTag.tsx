@@ -14,7 +14,7 @@ interface EmptyEntityTag {
 }
 export const EmptyEntityTag: React.FC<EmptyEntityTag> = ({ label }) => {
   return (
-    <StyledEntityTagWrap $dragDisabled>
+    <StyledEntityTagWrap>
       <Tag
         tagComponent={
           <StyledEntityTag
@@ -37,6 +37,7 @@ export const EmptyEntityTag: React.FC<EmptyEntityTag> = ({ label }) => {
             </StyledLabel>
           </StyledLabelWrap>
         }
+        dragDisabled
       />
     </StyledEntityTagWrap>
   );

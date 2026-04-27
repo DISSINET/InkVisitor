@@ -176,18 +176,21 @@ const EntityTagComponent: React.FC<EntityTag> = ({
   if (!isValidEntityClass(entity.class)) {
     // labels needs to have length and first label needs to be non-empty
     return (
-      <Tag
-        tagComponent={
-          <StyledEntityTag
-            $color={EntityColors[EntityEnums.Extension.Invalid].color}
-            $isTemplate={false}
-          >
-            {EntityEnums.Extension.Invalid}
-          </StyledEntityTag>
-        }
-        labelComponent={labelComponent}
-        // button={unlinkButton && renderUnlinkButton(unlinkButton)}
-      />
+      <StyledEntityTagWrap>
+        <Tag
+          tagComponent={
+            <StyledEntityTag
+              $color={EntityColors[EntityEnums.Extension.Invalid].color}
+              $isTemplate={false}
+            >
+              {EntityEnums.Extension.Invalid}
+            </StyledEntityTag>
+          }
+          labelComponent={labelComponent}
+          dragDisabled
+          // button={unlinkButton && renderUnlinkButton(unlinkButton)}
+        />
+      </StyledEntityTagWrap>
     );
   }
 
