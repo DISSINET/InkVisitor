@@ -4,9 +4,11 @@ import { StyledButtonWrapper, StyledElvlWrapper, StyledTagWrapper } from "./TagS
 
 interface TagProps {
   ref?: React.RefObject<HTMLDivElement>;
+  // for cursor style
+  dragDisabled?: boolean;
+  // TODO: make move to parent
   status?: EntityEnums.Status;
   ltype?: EntityEnums.LogicalType;
-
   // TODO: make obligatory
   tagComponent?: ReactNode;
   labelComponent?: ReactNode;
@@ -27,6 +29,7 @@ export const Tag: React.FC<TagProps> = ({
   ref,
   status = EntityEnums.Status.Approved,
   ltype = EntityEnums.LogicalType.Definite,
+  dragDisabled = false,
   tagComponent,
   labelComponent,
   button,
@@ -87,6 +90,7 @@ export const Tag: React.FC<TagProps> = ({
       // TODO: move to EntityTagStyles
       $status={status}
       $ltype={ltype}
+      $dragDisabled={dragDisabled}
       onClick={(e) => {
         e.preventDefault();
         onClick && onClick();

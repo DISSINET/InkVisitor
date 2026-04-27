@@ -3,19 +3,11 @@ import { FaStar } from "react-icons/fa";
 import styled from "styled-components";
 import { ThemeColor } from "Theme/theme";
 
-interface StyledEntityTagWrap {
-  $dragDisabled: boolean;
-}
+interface StyledEntityTagWrap {}
 export const StyledEntityTagWrap = styled.div<StyledEntityTagWrap>`
   display: inline-flex;
   vertical-align: top;
   overflow: hidden;
-  /* TODO: move to TagStyles */
-  cursor: ${({ $dragDisabled }) => ($dragDisabled ? "default" : "move")};
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
 `;
 
 interface StyledEntityTag {

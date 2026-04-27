@@ -210,7 +210,7 @@ const EntityTagComponent: React.FC<EntityTag> = ({
   });
 
   return (
-    <StyledEntityTagWrap $dragDisabled={!canDrag}>
+    <StyledEntityTagWrap>
       {tagHovered && !disableTooltip && (
         <EntityTooltip
           entityId={entity.id}
@@ -234,6 +234,7 @@ const EntityTagComponent: React.FC<EntityTag> = ({
       )}
       <Tag
         ref={referenceEl}
+        dragDisabled={!canDrag}
         status={entity.status}
         ltype={entity?.data?.logicalType ?? EntityEnums.LogicalType.Definite}
         showOnly={showOnly}
