@@ -10,6 +10,7 @@ export const StyledEntityTagWrap = styled.div<StyledEntityTagWrap>`
   display: inline-flex;
   vertical-align: top;
   overflow: hidden;
+  /* TODO: move to TagStyles */
   cursor: ${({ $dragDisabled }) => ($dragDisabled ? "default" : "move")};
   user-select: none;
   -webkit-user-select: none;

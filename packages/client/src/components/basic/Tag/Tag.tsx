@@ -3,6 +3,7 @@ import React, { ReactNode, useMemo } from "react";
 import { StyledButtonWrapper, StyledElvlWrapper, StyledTagWrapper } from "./TagStyles";
 
 interface TagProps {
+  ref?: React.RefObject<HTMLDivElement>;
   status?: EntityEnums.Status;
   ltype?: EntityEnums.LogicalType;
 
@@ -13,12 +14,17 @@ interface TagProps {
   elvlButtonGroup?: ReactNode | false;
   showOnly?: "tag" | "label";
 
+  onClick?: () => void;
+  onDoubleClick?: () => void;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
   onButtonOver?: () => void;
   onButtonOut?: () => void;
   onBtnClick?: () => void;
 }
 
 export const Tag: React.FC<TagProps> = ({
+  ref,
   status = EntityEnums.Status.Approved,
   ltype = EntityEnums.LogicalType.Definite,
   tagComponent,
@@ -27,6 +33,10 @@ export const Tag: React.FC<TagProps> = ({
   elvlButtonGroup,
   showOnly,
 
+  onClick,
+  onDoubleClick,
+  onMouseEnter,
+  onMouseLeave,
   onButtonOver,
   onButtonOut,
   onBtnClick,
@@ -71,7 +81,23 @@ export const Tag: React.FC<TagProps> = ({
   ]);
 
   return (
-    <StyledTagWrapper className="tag" $status={status} $ltype={ltype}>
+    <StyledTagWrapper
+      ref={ref}
+      className="tag"
+      // TODO: move to EntityTagStyles
+      $status={status}
+      $ltype={ltype}
+      onClick={(e) => {
+        e.preventDefault();
+        onClick && onClick();
+      }}
+      onDoubleClick={(e) => {
+        e.preventDefault();
+        onDoubleClick && onDoubleClick();
+      }}
+      onMouseEnter={onMouseEnter && onMouseEnter}
+      onMouseLeave={onMouseLeave && onMouseLeave}
+    >
       {renderTag}
     </StyledTagWrapper>
   );

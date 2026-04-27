@@ -210,26 +210,7 @@ const EntityTagComponent: React.FC<EntityTag> = ({
   });
 
   return (
-    <StyledEntityTagWrap
-      ref={referenceEl}
-      onMouseEnter={handleTagHovered}
-      onMouseLeave={handleTagUnhovered}
-      onClick={(e) => {
-        e.stopPropagation();
-        setClickedOnce(true);
-      }}
-      onDoubleClick={(e) => {
-        e.stopPropagation();
-        setClickedOnce(false);
-        if (!disableDoubleClick) {
-          appendDetailId(entity.id);
-          if (detailBoxState === DetailBoxState.Minimized) {
-            dispatch(setDetailBoxState(DetailBoxState.Normal));
-          }
-        }
-      }}
-      $dragDisabled={!canDrag}
-    >
+    <StyledEntityTagWrap $dragDisabled={!canDrag}>
       {tagHovered && !disableTooltip && (
         <EntityTooltip
           entityId={entity.id}
@@ -252,6 +233,7 @@ const EntityTagComponent: React.FC<EntityTag> = ({
         />
       )}
       <Tag
+        ref={referenceEl}
         status={entity.status}
         ltype={entity?.data?.logicalType ?? EntityEnums.LogicalType.Definite}
         showOnly={showOnly}
@@ -263,6 +245,18 @@ const EntityTagComponent: React.FC<EntityTag> = ({
             {unlinkButton && renderUnlinkButton(unlinkButton)}
           </>
         }
+        onClick={() => setClickedOnce(true)}
+        onDoubleClick={() => {
+          setClickedOnce(false);
+          if (!disableDoubleClick) {
+            appendDetailId(entity.id);
+            if (detailBoxState === DetailBoxState.Minimized) {
+              dispatch(setDetailBoxState(DetailBoxState.Normal));
+            }
+          }
+        }}
+        onMouseEnter={handleTagHovered}
+        onMouseLeave={handleTagUnhovered}
         onButtonOver={handleButtonHovered}
         onButtonOut={handleButtonUnhovered}
         onBtnClick={handleBtnClick}
