@@ -1,4 +1,9 @@
-import { IAudit } from "./audit";
+import {
+  IAudit,
+  IAnchorUpdate,
+  IDocumentAuditAnchorChanges,
+  AuditScope,
+} from "./audit";
 import { ILabel } from "./label";
 import { IReference } from "./reference";
 import { IValue, IValueData } from "./value";
@@ -77,13 +82,16 @@ import { IRequestQuery } from "./request-query";
 import { IResponseQuery, IResponseQueryEntity } from "./response-query";
 
 export { Query, Relation, RequestPermissionUpdate, RequestSearch };
+export { AuditScope };
 export type {
   ClassificationOrder,
   EntityOrder,
   EntityTooltip,
   IAction,
   IActionData,
+  IAnchorUpdate,
   IAudit,
+  IDocumentAuditAnchorChanges,
   IBeing,
   IBeingData,
   IBookmarkFolder,

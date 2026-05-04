@@ -1,6 +1,18 @@
 import { EntityEnums } from "@shared/enums";
 import { IAnchorsNode } from "@shared/types/document";
-import { createOpeningTagRegex, closingTagRegex, createAnyTagRegex } from "@common/regex";
+import { IDocumentAuditAnchorChanges, IAnchorUpdate } from "@shared/types";
+import { createAnyTagRegex } from "@common/regex";
+
+interface IOrderedAnchorItem {
+  anchor: string;
+  occurrence: number;
+  content: string;
+  path: string[];
+}
+
+function key(a: IAnchorUpdate): string {
+  return `${a.anchor}:${a.occurrence}`;
+}
 
 export class AnchorsNode implements IAnchorsNode {
   anchor: string;
@@ -106,5 +118,76 @@ export class AnchorsNode implements IAnchorsNode {
     }
 
     return rootNodes;
+  }
+
+  static getOrderedAnchorListFromTree(nodes: IAnchorsNode[]): IOrderedAnchorItem[] {
+    const list: IOrderedAnchorItem[] = [];
+    const countByAnchor: Record<string, number> = {};
+    const traverse = (treeNodes: IAnchorsNode[], path: string[] = []) => {
+      for (const node of treeNodes) {
+        const occ = countByAnchor[node.anchor] ?? 0;
+        countByAnchor[node.anchor] = occ + 1;
+        const k = `${node.anchor}:${occ}`;
+        const nodePath = path.concat(k);
+        list.push({
+          anchor: node.anchor,
+          occurrence: occ,
+          content: node.content,
+          path: nodePath,
+        });
+        traverse(node.children || [], nodePath);
+      }
+    };
+    traverse(nodes);
+    return list;
+  }
+
+  static compareAnchorTrees(
+    oldTree: IAnchorsNode[],
+    newTree: IAnchorsNode[]
+  ): IDocumentAuditAnchorChanges {
+    const oldList = AnchorsNode.getOrderedAnchorListFromTree(oldTree);
+    const newList = AnchorsNode.getOrderedAnchorListFromTree(newTree);
+    return AnchorsNode.diffOrderedAnchorLists(oldList, newList);
+  }
+
+  static diffOrderedAnchorLists(
+    oldList: IOrderedAnchorItem[],
+    newList: IOrderedAnchorItem[]
+  ): IDocumentAuditAnchorChanges {
+    const oldByKey = new Map<string, IOrderedAnchorItem>();
+    const newByKey = new Map<string, IOrderedAnchorItem>();
+    for (const x of oldList) {
+      oldByKey.set(key(x), x);
+    }
+    for (const x of newList) {
+      newByKey.set(key(x), x);
+    }
+    const additions: IAnchorUpdate[] = [];
+    const removals: IAnchorUpdate[] = [];
+    const allChanges: IOrderedAnchorItem[] = [];
+    for (const n of newList) {
+      const k = key(n);
+      if (!oldByKey.has(k)) {
+        additions.push({ anchor: n.anchor, occurrence: n.occurrence });
+      } else if (oldByKey.get(k)!.content !== n.content) {
+        allChanges.push(n);
+      }
+    }
+    const isAncestorOf = (ancestor: IOrderedAnchorItem, descendant: IOrderedAnchorItem) =>
+      descendant.path.length > ancestor.path.length &&
+      ancestor.path.every((v, i) => v === descendant.path[i]);
+    const changes: IAnchorUpdate[] = allChanges
+      .filter(
+        (c) => !allChanges.some((other) => other !== c && isAncestorOf(c, other))
+      )
+      .map((c) => ({ anchor: c.anchor, occurrence: c.occurrence }));
+    for (const o of oldList) {
+      const k = key(o);
+      if (!newByKey.has(k)) {
+        removals.push({ anchor: o.anchor, occurrence: o.occurrence });
+      }
+    }
+    return { changes, additions, removals };
   }
 } 

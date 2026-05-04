@@ -18,6 +18,7 @@ export interface DbSchema {
 export interface TableSchema {
   tableName: RValue<string>;
   data?: any;
+  dataFilePath?: string;
   transform?: () => void;
   indexes?: IndexBuilder[];
 }

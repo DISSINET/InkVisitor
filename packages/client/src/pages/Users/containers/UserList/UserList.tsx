@@ -4,18 +4,9 @@ import { IResponseUser, IUser, IUserRight } from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, ButtonGroup, Loader, Submit } from "components";
-import {
-  AttributeButtonGroup,
-  EntitySuggester,
-  EntityTag,
-} from "components/advanced";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { AttributeButtonGroup, EntitySuggester, EntityTag } from "components/advanced";
+import { UserTagSize } from "components/advanced/UserTag/utils";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   FaEnvelopeOpenText,
   FaKey,
@@ -30,8 +21,8 @@ import { getUserIcon } from "utils/iconUtils";
 import { UserListEmailInput } from "./UserListEmailInput/UserListEmailInput";
 import { UserListIcon } from "./UserListIcon/UserListIcon";
 import {
+  ROW_FLASH_CLEAR_AFTER_MS,
   StyledNotActiveText,
-  StyledTHead,
   StyledTable,
   StyledTableWrapper,
   StyledTerritoryColumn,
@@ -40,10 +31,10 @@ import {
   StyledTerritoryListItem,
   StyledTerritoryListItemMissing,
   StyledTh,
+  StyledTHead,
   StyledUserNameColumn,
   StyledUserNameColumnIcon,
   StyledUserNameColumnText,
-  ROW_FLASH_CLEAR_AFTER_MS,
   UserListRowFlash,
 } from "./UserListStyles";
 import { UserListTableRow } from "./UserListTableRow/UserListTableRow";
@@ -67,25 +58,20 @@ export const UserList: React.FC<UserList> = React.memo(() => {
     userId: string;
     kind: Exclude<UserListRowFlash, false>;
   } | null>(null);
-  const flashClearTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null
-  );
+  const flashClearTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const queryClient = useQueryClient();
 
-  const scheduleRowFlash = useCallback(
-    (userId: string, kind: Exclude<UserListRowFlash, false>) => {
-      if (flashClearTimeoutRef.current) {
-        clearTimeout(flashClearTimeoutRef.current);
-      }
-      setRowFlash({ userId, kind });
-      flashClearTimeoutRef.current = setTimeout(() => {
-        setRowFlash(null);
-        flashClearTimeoutRef.current = null;
-      }, ROW_FLASH_CLEAR_AFTER_MS);
-    },
-    []
-  );
+  const scheduleRowFlash = useCallback((userId: string, kind: Exclude<UserListRowFlash, false>) => {
+    if (flashClearTimeoutRef.current) {
+      clearTimeout(flashClearTimeoutRef.current);
+    }
+    setRowFlash({ userId, kind });
+    flashClearTimeoutRef.current = setTimeout(() => {
+      setRowFlash(null);
+      flashClearTimeoutRef.current = null;
+    }, ROW_FLASH_CLEAR_AFTER_MS);
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -97,8 +83,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
 
   const currentUserRole = localStorage.getItem("userrole") as UserEnums.Role;
   const canVerifyManually =
-    currentUserRole === UserEnums.Role.Admin ||
-    currentUserRole === UserEnums.Role.Owner;
+    currentUserRole === UserEnums.Role.Admin || currentUserRole === UserEnums.Role.Owner;
 
   const { data: users, isFetching } = useQuery({
     queryKey: ["users"],
@@ -132,9 +117,8 @@ export const UserList: React.FC<UserList> = React.memo(() => {
   }, [removingUserId]);
 
   const userMutation = useMutation({
-    mutationFn: async (
-      userChanges: Partial<Omit<IUser, "id">> & { id: IUser["id"] }
-    ) => await api.usersUpdate(userChanges.id, userChanges),
+    mutationFn: async (userChanges: Partial<Omit<IUser, "id">> & { id: IUser["id"] }) =>
+      await api.usersUpdate(userChanges.id, userChanges),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
     },
@@ -174,11 +158,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
     },
   });
 
-  const addRightToUser = (
-    user: IResponseUser,
-    territoryId: string,
-    mode: "read" | "write"
-  ) => {
+  const addRightToUser = (user: IResponseUser, territoryId: string, mode: "read" | "write") => {
     // remove this territory from the list if it was added before
     const newRights: IUserRight[] = [
       ...user.rights.filter((right) => right.territory !== territoryId),
@@ -218,7 +198,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                     !verified ? (
                       <FaEnvelopeOpenText size={16} />
                     ) : (
-                      getUserIcon(role)
+                      getUserIcon(role, UserTagSize.ExtraLarge)
                     )
                   }
                   tooltipLabel={role}
@@ -265,10 +245,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
         Cell: ({ row }: CellType) => {
           const { verified, email } = row.original;
           return verified ? (
-            <UserListEmailInput
-              user={row.original}
-              userMutation={userMutation}
-            />
+            <UserListEmailInput user={row.original} userMutation={userMutation} />
           ) : null;
         },
       },
@@ -279,10 +256,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
           const { id, role } = row.original;
           return (
             <AttributeButtonGroup
-              disabled={
-                id === localStorage.getItem("userid") ||
-                role === UserEnums.Role.Owner
-              }
+              disabled={id === localStorage.getItem("userid") || role === UserEnums.Role.Owner}
               options={
                 role === UserEnums.Role.Owner
                   ? [
@@ -349,14 +323,11 @@ export const UserList: React.FC<UserList> = React.memo(() => {
             role: userRole,
           } = row.original;
 
-          const readTerritories = rights.filter(
-            (r: IUserRight) => r.mode === "read"
-          );
+          const readTerritories = rights.filter((r: IUserRight) => r.mode === "read");
 
           return (
             <StyledTerritoryColumn>
-              {userRole !== UserEnums.Role.Admin &&
-              userRole !== UserEnums.Role.Owner ? (
+              {userRole !== UserEnums.Role.Admin && userRole !== UserEnums.Role.Owner ? (
                 <React.Fragment>
                   <EntitySuggester
                     disableTemplatesAccept
@@ -381,10 +352,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                               entity={territoryActant.territory}
                               unlinkButton={{
                                 onClick: () => {
-                                  removeRightFromUser(
-                                    row.original,
-                                    right.territory
-                                  );
+                                  removeRightFromUser(row.original, right.territory);
                                 },
                                 tooltipLabel: "remove territory from rights",
                               }}
@@ -401,10 +369,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                               color="danger"
                               noBorder
                               onClick={() => {
-                                removeRightFromUser(
-                                  row.original,
-                                  right.territory
-                                );
+                                removeRightFromUser(row.original, right.territory);
                               }}
                             />
                           </StyledTerritoryListItemMissing>
@@ -416,9 +381,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                   </StyledTerritoryList>
                 </React.Fragment>
               ) : (
-                <StyledTerritoryColumnAllLabel>
-                  all
-                </StyledTerritoryColumnAllLabel>
+                <StyledTerritoryColumnAllLabel>all</StyledTerritoryColumnAllLabel>
               )}
             </StyledTerritoryColumn>
           );
@@ -435,14 +398,11 @@ export const UserList: React.FC<UserList> = React.memo(() => {
             role: userRole,
           } = row.original;
 
-          const writeTerritories = rights.filter(
-            (r: IUserRight) => r.mode === "write"
-          );
+          const writeTerritories = rights.filter((r: IUserRight) => r.mode === "write");
 
           return (
             <StyledTerritoryColumn>
-              {userRole !== UserEnums.Role.Admin &&
-              userRole !== UserEnums.Role.Owner ? (
+              {userRole !== UserEnums.Role.Admin && userRole !== UserEnums.Role.Owner ? (
                 userRole === UserEnums.Role.Editor ? (
                   <React.Fragment>
                     <EntitySuggester
@@ -453,9 +413,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                       }}
                       categoryTypes={[EntityEnums.Class.Territory]}
                       placeholder={"assign a territory"}
-                      excludedActantIds={writeTerritories.map(
-                        (r) => r.territory
-                      )}
+                      excludedActantIds={writeTerritories.map((r) => r.territory)}
                     />
                     <StyledTerritoryList>
                       {writeTerritories.length && territoryActants ? (
@@ -464,17 +422,13 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                             (t) => t.territory.id === right.territory
                           );
 
-                          return territoryActant &&
-                            territoryActant.territory ? (
+                          return territoryActant && territoryActant.territory ? (
                             <StyledTerritoryListItem key={right.territory}>
                               <EntityTag
                                 entity={territoryActant.territory}
                                 unlinkButton={{
                                   onClick: () => {
-                                    removeRightFromUser(
-                                      row.original,
-                                      right.territory
-                                    );
+                                    removeRightFromUser(row.original, right.territory);
                                   },
                                   tooltipLabel: "remove territory from rights",
                                 }}
@@ -482,9 +436,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                               />
                             </StyledTerritoryListItem>
                           ) : (
-                            <StyledTerritoryListItemMissing
-                              key={right.territory}
-                            >
+                            <StyledTerritoryListItemMissing key={right.territory}>
                               invalid T {right.territory}
                               <Button
                                 key="d"
@@ -493,10 +445,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                                 color="danger"
                                 noBorder
                                 onClick={() => {
-                                  removeRightFromUser(
-                                    row.original,
-                                    right.territory
-                                  );
+                                  removeRightFromUser(row.original, right.territory);
                                 }}
                               />
                             </StyledTerritoryListItemMissing>
@@ -508,14 +457,10 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                     </StyledTerritoryList>
                   </React.Fragment>
                 ) : (
-                  <StyledTerritoryColumnAllLabel>
-                    -
-                  </StyledTerritoryColumnAllLabel>
+                  <StyledTerritoryColumnAllLabel>-</StyledTerritoryColumnAllLabel>
                 )
               ) : (
-                <StyledTerritoryColumnAllLabel>
-                  all
-                </StyledTerritoryColumnAllLabel>
+                <StyledTerritoryColumnAllLabel>all</StyledTerritoryColumnAllLabel>
               )}
             </StyledTerritoryColumn>
           );
@@ -558,8 +503,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                 color="danger"
                 tooltipLabel={deleteTooltip}
                 disabled={
-                  userId === localStorage.getItem("userid") ||
-                  role === UserEnums.Role.Owner
+                  userId === localStorage.getItem("userid") || role === UserEnums.Role.Owner
                 }
                 onClick={() => {
                   setRemovingUserId(userId);
@@ -594,9 +538,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                 />
               )}
               <Button
-                icon={
-                  active ? <FaToggleOn size={14} /> : <FaToggleOff size={14} />
-                }
+                icon={active ? <FaToggleOn size={14} /> : <FaToggleOff size={14} />}
                 disabled={
                   !verified ||
                   userId === localStorage.getItem("userid") ||
@@ -610,10 +552,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                     { id: userId, active: nextActive },
                     {
                       onSuccess: () => {
-                        scheduleRowFlash(
-                          userId,
-                          nextActive ? "activate" : "deactivate"
-                        );
+                        scheduleRowFlash(userId, nextActive ? "activate" : "deactivate");
                       },
                     }
                   );
@@ -627,18 +566,12 @@ export const UserList: React.FC<UserList> = React.memo(() => {
     [canVerifyManually, scheduleRowFlash]
   );
 
-  const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
-    rows,
-    prepareRow,
-    visibleColumns,
-  } = useTable({
-    columns,
-    data: localUsers,
-    getRowId,
-  });
+  const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow, visibleColumns } =
+    useTable({
+      columns,
+      data: localUsers,
+      getRowId,
+    });
 
   return (
     <>
@@ -662,9 +595,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                 <UserListTableRow
                   index={i}
                   row={row}
-                  flash={
-                    rowFlash?.userId === row.original.id ? rowFlash.kind : false
-                  }
+                  flash={rowFlash?.userId === row.original.id ? rowFlash.kind : false}
                   key={row.id}
                 />
               );
@@ -679,9 +610,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
 
       <Submit
         title={`Deleting user ${removingUser ? removingUser.name : ""}`}
-        text={`Do you really want to delete the user ${
-          removingUser ? removingUser.name : ""
-        }?`}
+        text={`Do you really want to delete the user ${removingUser ? removingUser.name : ""}?`}
         show={removingUser != false}
         onSubmit={() => removingUser && removeUserMutation.mutate(removingUser)}
         onCancel={() => {

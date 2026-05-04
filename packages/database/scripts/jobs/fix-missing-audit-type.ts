@@ -1,4 +1,4 @@
-import { IAudit } from "@shared/types";
+import { IAudit, AuditScope } from "@shared/types";
 import { EventType } from "@shared/types/stats";
 import { Connection, r, RDatum } from "rethinkdb-ts";
 import { IJob } from ".";
@@ -21,7 +21,10 @@ const fixMissingAuditTypeJob: IJob = async (db: Connection): Promise<void> => {
 
   // First pass: identify audits that need updating
   for (const audit of audits) {
-    const auditEntityId = audit.entityId;
+    const auditEntityId =
+      audit.auditScope === AuditScope.Entity
+        ? audit.modelId
+        : (audit as { entityId?: string }).entityId;
     if (!auditEntityId) continue;
 
     if (!audit.type) {

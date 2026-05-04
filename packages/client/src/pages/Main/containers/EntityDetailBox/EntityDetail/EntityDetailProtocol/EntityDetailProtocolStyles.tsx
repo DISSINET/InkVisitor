@@ -9,8 +9,7 @@ export const StyledGrid = styled.div`
 export const StyledFlexList = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: ${({ theme }) => theme.space[2]};
-  /* flex-grow: 1; */
+  gap: ${({ theme }) => theme.space[4]};
 `;
 export const StyledLabel = styled.div`
   display: grid;

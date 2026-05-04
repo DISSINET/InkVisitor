@@ -2,11 +2,7 @@ import { UserEnums } from "@shared/enums";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Header, Loader } from "components";
-import {
-  LeftHeader,
-  RightHeader,
-  UserCustomizationModal,
-} from "components/advanced";
+import { LeftHeader, RightHeader, UserCustomizationModal } from "components/advanced";
 import { useSearchParams } from "hooks";
 import useKeyLift from "hooks/useKeyLift";
 import useKeypress from "hooks/useKeyPress";
@@ -26,19 +22,13 @@ interface Page {
 export const Page: React.FC<Page> = ({ children }) => {
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
-  const lastClickedIndex: number = useAppSelector(
-    (state) => state.statementList.lastClickedIndex
-  );
+  const lastClickedIndex: number = useAppSelector((state) => state.statementList.lastClickedIndex);
   const userId = localStorage.getItem("userid");
   const userRole = localStorage.getItem("userrole") as UserEnums.Role;
   const { cleanAllParams, setLogoutState } = useSearchParams();
 
-  const contentHeight: number = useAppSelector(
-    (state) => state.layout.contentHeight
-  );
-  const layoutWidth: number = useAppSelector(
-    (state) => state.layout.layoutWidth
-  );
+  const contentHeight: number = useAppSelector((state) => state.layout.contentHeight);
+  const layoutWidth: number = useAppSelector((state) => state.layout.layoutWidth);
 
   const environmentName = window.appConfig.env || "";
   const location = useLocation();
@@ -65,8 +55,7 @@ export const Page: React.FC<Page> = ({ children }) => {
   });
 
   const toastId = React.useRef<Id | null>(null);
-  const notify = () =>
-    (toastId.current = toast.dark("you're offline", { autoClose: false }));
+  const notify = () => (toastId.current = toast.dark("you're offline", { autoClose: false }));
 
   useEffect(() => {
     if (isPaused) {
@@ -99,8 +88,7 @@ export const Page: React.FC<Page> = ({ children }) => {
     },
   });
 
-  const [userCustomizationOpen, setUserCustomizationOpen] =
-    useState<boolean>(false);
+  const [userCustomizationOpen, setUserCustomizationOpen] = useState<boolean>(false);
 
   const [tempLocation, setTempLocation] = useState<string | false>(false);
 
@@ -119,10 +107,7 @@ export const Page: React.FC<Page> = ({ children }) => {
     return () => clearInterval(interval);
   }, [dispatch]);
 
-  const headerLeft = useMemo(
-    () => <LeftHeader tempLocation={tempLocation} />,
-    [tempLocation]
-  );
+  const headerLeft = useMemo(() => <LeftHeader tempLocation={tempLocation} />, [tempLocation]);
 
   const headerRight = useMemo<undefined | React.ReactNode>(() => {
     if (disableRightHeader) {
@@ -131,6 +116,7 @@ export const Page: React.FC<Page> = ({ children }) => {
     return (
       <RightHeader
         setUserCustomizationOpen={setUserCustomizationOpen}
+        userId={userId ?? ""}
         handleLogOut={logOutMutation.mutate}
         userName={user?.name ?? ""}
         userRole={userRole || ""}
@@ -174,10 +160,7 @@ export const Page: React.FC<Page> = ({ children }) => {
       <StyledPageContent id="page-content">{contentEl}</StyledPageContent>
 
       {user && userCustomizationOpen && (
-        <UserCustomizationModal
-          user={user}
-          onClose={() => setUserCustomizationOpen(false)}
-        />
+        <UserCustomizationModal user={user} onClose={() => setUserCustomizationOpen(false)} />
       )}
     </StyledPage>
   );

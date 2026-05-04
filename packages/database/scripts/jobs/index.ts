@@ -10,6 +10,7 @@ import addAuditType from "./add-audit-type";
 import iterateDataset from "./iterate-dataset";
 import fixLabels from "./fix-labels";
 import fixMissingAuditTypeJob from "./fix-missing-audit-type";
+import replaceAuditsPolymorphicJob from "./replace-audits-polymorphic";
 
 export type IJob = (db: Connection) => Promise<void>;
 
@@ -25,6 +26,7 @@ const alljobs: Record<string, IJob> = {
   fixLabels,
   iterateDataset,
   fixMissingAuditTypeJob,
+  replaceAuditsPolymorphicJob,
 };
 
 export default alljobs;

@@ -8,6 +8,7 @@
   },
   "scripts": {
     "start": "npx ts-node -r tsconfig-paths/register scripts/import.ts",
+    "upgrade-audits-datasets": "npx ts-node -r tsconfig-paths/register scripts/upgrade-audits-datasets.ts",
     "benchmark": "npx ts-node -r tsconfig-paths/register scripts/index-benchmark.ts",
     "fix-labels": "npx ts-node -r tsconfig-paths/register scripts/fix-labels.ts",
     "parse-niort": "npx ts-node -r tsconfig-paths/register scripts/parse-casestudy.ts niort 36f5a334-4611-4da3-81c0-a7ec8d600a59 production tunnel"
@@ -23,6 +24,7 @@
     "readline-sync": "^1.4.10",
     "rethinkdb": "^2.4.2",
     "rethinkdb-ts": "^2.5.4",
+    "stream-json": "^1.7.5",
     "ssh2": "^1.13.0",
     "ts-json-schema-generator": "^1.2.0",
     "ts-node": "^10.9.1",

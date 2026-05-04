@@ -5,7 +5,7 @@ import { ButtonGroup } from "components";
 import React, { ReactNode, useState } from "react";
 import {
   StyledBox,
-  StyledButtonWrap,
+  StyledHeaderComponentWrap,
   StyledContent,
   StyledContentAnimationWrap,
   StyledHead,
@@ -20,6 +20,7 @@ interface Box {
   height?: number;
   noFrame?: boolean;
   isExpanded?: boolean;
+  headerComponent?: ReactNode;
   buttons?: ReactNode[];
   children?: ReactNode;
   onHeaderClick?: () => void;
@@ -34,6 +35,7 @@ export const Box: React.FC<Box> = ({
   height = 0,
   noFrame = false,
   isExpanded = true,
+  headerComponent,
   buttons,
   children,
   onHeaderClick,
@@ -78,15 +80,20 @@ export const Box: React.FC<Box> = ({
         {!hideContent && (
           <StyledLabel style={animatedExpand}>{label}</StyledLabel>
         )}
-        <StyledButtonWrap>
-          {buttons && (
+        {headerComponent && (
+          <StyledHeaderComponentWrap>
+            {headerComponent}
+          </StyledHeaderComponentWrap>
+        )}
+        {buttons && (
+          <StyledHeaderComponentWrap>
             <ButtonGroup>
               {buttons.map((b, key) => (
                 <React.Fragment key={key}>{b}</React.Fragment>
               ))}
             </ButtonGroup>
-          )}
-        </StyledButtonWrap>
+          </StyledHeaderComponentWrap>
+        )}
       </StyledHead>
       <StyledContent
         id={`box-content-${label.toLowerCase()}`}

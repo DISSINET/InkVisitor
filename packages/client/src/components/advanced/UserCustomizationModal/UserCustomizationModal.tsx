@@ -488,7 +488,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
               </StyledUserRightItem>
             </StyledUserRights>
 
-            <StyledRightsHeading>
+            {/* <StyledRightsHeading>
               <b>{"Statistics"}</b>
             </StyledRightsHeading>
             <ModalInputForm>
@@ -508,7 +508,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                   />
                 </div>
               </ModalInputWrap>
-            </ModalInputForm>
+            </ModalInputForm> */}
 
             <Loader show={passwordUpdateMutation.isPending} />
           </div>

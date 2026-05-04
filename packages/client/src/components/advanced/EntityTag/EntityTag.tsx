@@ -2,18 +2,30 @@ import { Placement } from "@popperjs/core";
 import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import { ThemeColor } from "Theme/theme";
-import { Button, ButtonGroup, Tag } from "components";
+import { Button, Tag } from "components";
 import { EntityTooltip } from "components/advanced";
-import React, { ReactNode, useCallback, useRef, useState } from "react";
+import { useSearchParams } from "hooks";
+import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
-import { useAppSelector } from "redux/hooks";
-import { DraggedEntityReduxItem, EntityDragItem } from "types";
+import { toast } from "react-toastify";
+import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { DetailBoxState, DraggedEntityReduxItem, EntityColors, EntityDragItem } from "types";
 import {
   getEntityLabel,
+  getShortLabelByLetterCount,
   isFirstLabelEmpty,
   isValidEntityClass,
 } from "utils/utils";
-import { StyledEntityTagWrap } from "./EntityTagStyles";
+import {
+  StyledEntityTag,
+  StyledEntityTagWrap,
+  StyledFaStar,
+  StyledLabel,
+  StyledLabelWrap,
+  StyledStarWrap,
+} from "./EntityTagStyles";
+import useDragDrop from "./useDragDrop";
 
 interface UnlinkButton {
   onClick: () => void;
@@ -24,7 +36,7 @@ interface UnlinkButton {
 interface EntityTag {
   entity: IEntity;
   parentId?: string;
-  showOnly?: "entity" | "label";
+  showOnly?: "tag" | "label";
   fullWidth?: boolean;
   button?: ReactNode;
   index?: number;
@@ -39,7 +51,6 @@ interface EntityTag {
   statementsCount?: number;
   isFavorited?: boolean;
   elvlButtonGroup?: ReactNode | false;
-  flexListMargin?: boolean;
 
   unlinkButton?: UnlinkButton | false;
   customTooltipAttributes?: { partLabel?: string; childCount?: number };
@@ -64,24 +75,33 @@ const EntityTagComponent: React.FC<EntityTag> = ({
   isFavorited,
 
   elvlButtonGroup = false,
-  flexListMargin = false,
 
   unlinkButton,
   customTooltipAttributes,
 }) => {
-  // Select a minimal boolean to avoid frequent re-renders on large objects
-  const isDragging: boolean = useAppSelector((state) => {
-    const anyState = state as unknown as {
-      draggedEntity?: DraggedEntityReduxItem;
-    };
-    return Boolean(
-      anyState.draggedEntity && Object.keys(anyState.draggedEntity).length
-    );
-  });
+  const { appendDetailId } = useSearchParams();
+  const dispatch = useAppDispatch();
+  const detailBoxState: DetailBoxState = useAppSelector(
+    (state) => state.layout.mainPage.detailBoxState
+  );
   const [buttonHovered, setButtonHovered] = useState(false);
   const [elvlHovered, setElvlHovered] = useState(false);
   const [tagHovered, setTagHovered] = useState(false);
-  const referenceEl = useRef<HTMLDivElement | null>(null);
+  const [clickedOnce, setClickedOnce] = useState(false);
+  const referenceEl = useRef<HTMLDivElement>(null!);
+  const entityLabel = useMemo(() => getEntityLabel(entity), [entity]);
+
+  useEffect(() => {
+    if (!clickedOnce) return;
+
+    const timeout = setTimeout(() => {
+      navigator.clipboard.writeText(entityLabel);
+      toast.info(`label [${getShortLabelByLetterCount(entityLabel, 200)}] copied to clipboard`);
+      setClickedOnce(false);
+    }, 500);
+
+    return () => clearTimeout(timeout);
+  }, [clickedOnce, entityLabel]);
 
   const handleTagHovered = useCallback(() => {
     setTagHovered(true);
@@ -107,17 +127,11 @@ const EntityTagComponent: React.FC<EntityTag> = ({
     return <></>;
   }
 
-  const classId = entity.class;
-
   const renderUnlinkButton = useCallback((unlinkButton: UnlinkButton) => {
     return (
       <Button
         key="d"
-        tooltipLabel={
-          unlinkButton.tooltipLabel
-            ? unlinkButton.tooltipLabel
-            : "unlink entity"
-        }
+        tooltipLabel={unlinkButton.tooltipLabel ? unlinkButton.tooltipLabel : "unlink entity"}
         icon={unlinkButton.icon ? unlinkButton.icon : <FaUnlink />}
         color={unlinkButton.color ? unlinkButton.color : "plain"}
         inverted
@@ -126,94 +140,133 @@ const EntityTagComponent: React.FC<EntityTag> = ({
     );
   }, []);
 
+  const tagComponent = useMemo(() => {
+    return (
+      <StyledEntityTag
+        $color={EntityColors[entity.class].color}
+        $isTemplate={entity.isTemplate ?? false}
+      >
+        {entity.class}
+      </StyledEntityTag>
+    );
+  }, [entity]);
+
+  const labelComponent = useMemo(() => {
+    return (
+      <StyledLabelWrap $invertedLabel={isSelected ?? false}>
+        {isFavorited && (
+          <StyledStarWrap>
+            <StyledFaStar />
+          </StyledStarWrap>
+        )}
+        <StyledLabel
+          $invertedLabel={isSelected ?? false}
+          $tagBorderColorKey={entity.status}
+          $labelOnly={showOnly === "label"}
+          $fullWidth={fullWidth}
+          $isFavorited={isFavorited ?? false}
+          $isItalic={isFirstLabelEmpty(entity.labels)}
+        >
+          {entityLabel}
+        </StyledLabel>
+      </StyledLabelWrap>
+    );
+  }, [entity, entityLabel, isSelected, isFavorited, showOnly, fullWidth]);
+
   if (!isValidEntityClass(entity.class)) {
     // labels needs to have length and first label needs to be non-empty
     return (
-      <Tag
-        propId={entity.id}
-        entityClass={EntityEnums.Extension.Invalid}
-        label={getEntityLabel(entity)}
-        labelItalic={isFirstLabelEmpty(entity.labels)}
-        // button={unlinkButton && renderUnlinkButton(unlinkButton)}
-        disableDrag
-        disableDoubleClick
-      />
+      <StyledEntityTagWrap>
+        <Tag
+          tagComponent={
+            <StyledEntityTag
+              $color={EntityColors[EntityEnums.Extension.Invalid].color}
+              $isTemplate={false}
+            >
+              {EntityEnums.Extension.Invalid}
+            </StyledEntityTag>
+          }
+          labelComponent={labelComponent}
+          dragDisabled
+          // button={unlinkButton && renderUnlinkButton(unlinkButton)}
+        />
+      </StyledEntityTagWrap>
     );
   }
 
+  const draggedEntity: DraggedEntityReduxItem = useAppSelector((state) => state.draggedEntity);
+
+  const [isDragging, canDrag, drag, drop] = useDragDrop({
+    entity,
+    isTemplate: entity.isTemplate ?? false,
+    isDiscouraged: entity.status === EntityEnums.Status.Discouraged,
+    propId: entity.id,
+    entityClass: entity.class,
+    disableDrag,
+    index: index ?? -1,
+    lvl,
+    updateOrderFn: updateOrderFn ?? (() => {}),
+    draggedEntity,
+    dispatch,
+    moveFn,
+    ref: referenceEl,
+  });
+
   return (
-    <StyledEntityTagWrap
-      $flexListMargin={flexListMargin}
-      ref={referenceEl}
-      onMouseEnter={handleTagHovered}
-      onMouseLeave={handleTagUnhovered}
-    >
+    <StyledEntityTagWrap>
       {tagHovered && !disableTooltip && (
         <EntityTooltip
           entityId={entity.id}
           entityClass={entity.class}
           label={(entity.labels && entity.labels[0]) || <i>{"no label"}</i>}
           alternativeLabels={
-            entity.labels && entity.labels.length > 1
-              ? entity.labels.slice(1)
-              : undefined
+            entity.labels && entity.labels.length > 1 ? entity.labels.slice(1) : undefined
           }
           language={entity.language}
           detail={entity.detail}
-          text={
-            entity.class === EntityEnums.Class.Statement
-              ? entity.data.text
-              : undefined
-          }
+          text={entity.class === EntityEnums.Class.Statement ? entity.data.text : undefined}
           isTemplate={entity.isTemplate}
           partOfSpeech={entity.data.pos}
           itemsCount={statementsCount}
           position={tooltipPosition}
-          disabled={
-            (button !== null && (buttonHovered || elvlHovered)) || isDragging
-          }
+          disabled={(button !== null && (buttonHovered || elvlHovered)) || Boolean(isDragging)}
           tagHovered={tagHovered}
           referenceElement={referenceEl.current}
           customTooltipAttributes={customTooltipAttributes}
         />
       )}
       <Tag
-        propId={entity.id}
-        label={getEntityLabel(entity)}
-        labelItalic={isFirstLabelEmpty(entity.labels)}
-        status={entity.status}
-        ltype={entity?.data?.logicalType ?? EntityEnums.LogicalType.Definite}
-        isTemplate={entity.isTemplate}
-        isDiscouraged={entity.status === EntityEnums.Status.Discouraged}
-        entity={entity}
+        ref={referenceEl}
+        dragDisabled={!canDrag}
+        tagBorderColorKey={entity.status}
+        borderStyleKey={entity?.data?.logicalType as EntityEnums.LogicalType}
         showOnly={showOnly}
+        tagComponent={tagComponent}
+        labelComponent={labelComponent}
         button={
           <>
             {button && button}
             {unlinkButton && renderUnlinkButton(unlinkButton)}
           </>
         }
-        moveFn={moveFn}
-        entityClass={classId}
-        borderStyle="solid"
-        invertedLabel={isSelected}
-        index={index}
-        disableDoubleClick={disableDoubleClick}
-        disableDrag={disableDrag}
-        updateOrderFn={updateOrderFn}
-        parentId={parentId}
-        lvl={lvl}
-        fullWidth={fullWidth}
-        isFavorited={isFavorited}
+        onClick={() => setClickedOnce(true)}
+        onDoubleClick={() => {
+          setClickedOnce(false);
+          if (!disableDoubleClick) {
+            appendDetailId(entity.id);
+            if (detailBoxState === DetailBoxState.Minimized) {
+              dispatch(setDetailBoxState(DetailBoxState.Normal));
+            }
+          }
+        }}
+        onMouseEnter={handleTagHovered}
+        onMouseLeave={handleTagUnhovered}
         onButtonOver={handleButtonHovered}
         onButtonOut={handleButtonUnhovered}
         onBtnClick={handleBtnClick}
         elvlButtonGroup={
           elvlButtonGroup ? (
-            <div
-              onMouseOver={() => setElvlHovered(true)}
-              onMouseOut={() => setElvlHovered(false)}
-            >
+            <div onMouseOver={() => setElvlHovered(true)} onMouseOut={() => setElvlHovered(false)}>
               {elvlButtonGroup}
             </div>
           ) : (
@@ -252,8 +305,7 @@ function areEntityTagsEqual(
   if (prev.entity?.id !== next.entity.id) return false;
   if (prev.entity?.class !== next.entity.class) return false;
   if (prev.entity?.status !== next.entity.status) return false;
-  if (prev.entity?.data?.logicalType !== next.entity?.data?.logicalType)
-    return false;
+  if (prev.entity?.data?.logicalType !== next.entity?.data?.logicalType) return false;
   if (prev.entity.isTemplate !== next.entity.isTemplate) return false;
   const prevLabel = getEntityLabel(prev.entity);
   const nextLabel = getEntityLabel(next.entity);

@@ -14,13 +14,13 @@ import {
 } from "recharts";
 
 import { useTheme } from "styled-components";
-import { OTHERS_KEY } from "../constants";
 import {
   ChartDataPoint,
   getCategoryMap,
   getDataCategories,
+  OTHERS_KEY,
   transformDataForChart,
-} from "../utils";
+} from "../../utils";
 import {
   StyledChartWrapper,
   StyledCustomTooltip,

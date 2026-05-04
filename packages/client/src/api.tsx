@@ -1040,6 +1040,42 @@ class Api {
     }
   }
 
+  /**
+   * Document audits response: IResponseAudit
+   * - modelId: documentId
+   * - auditScope: "document"
+   * - last: IAudit[] (up to noAudits most recent, default 5)
+   * - first?: IAudit (oldest, if any)
+   *
+   * Each IAudit when auditScope is document:
+   * - id, modelId, auditScope, user, date, type: EventType
+   * - changes: IDocumentAuditAnchorChanges
+   *   - changes: { anchor: string, occurrence: number }[]  (anchors whose content was edited)
+   *   - additions: { anchor: string, occurrence: number }[]
+   *   - removals: { anchor: string, occurrence: number }[]
+   */
+  async auditGetByDocument(
+    documentId: string,
+    noAudits = 5,
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseAudit>> {
+    try {
+      const response = await this.connection.get(
+        `/documents/${documentId}/audits`,
+        {
+          ...options,
+          params: {
+            ...(options?.params as Record<string, unknown>),
+            noAudits,
+          },
+        }
+      );
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
   async auditGetFirst(
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseGeneric<IAudit>>> {

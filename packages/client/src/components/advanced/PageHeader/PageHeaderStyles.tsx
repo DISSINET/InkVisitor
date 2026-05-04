@@ -37,6 +37,7 @@ export const StyledText = styled.div`
 export const StyledUsername = styled.div`
   cursor: pointer;
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+  font-size: ${({ theme }) => theme.fontSize["base"]};
 `;
 export const StyledRightHeader = styled.div`
   display: flex;
@@ -63,8 +64,7 @@ export const StyledThemeSwitcherIcon = styled.div<StyledThemeSwitcherIcon>`
   transition: 0.3s all;
   background-color: ${({ theme, selected }) =>
     selected ? theme.color.gray[800] : theme.color.gray[600]};
-  color: ${({ theme, selected }) =>
-    selected ? "white" : theme.color.gray[400]};
+  color: ${({ theme, selected }) => (selected ? "white" : theme.color.gray[400])};
 `;
 
 export const StyledUser = styled.div`

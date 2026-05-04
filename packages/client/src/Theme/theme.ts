@@ -142,13 +142,14 @@ const theme = {
       "5": "#1a9850",
     },
 
-    // tag status
-    tagStatus: {
+    tagBorderColor: {
+      // EntityTag status
       [EntityEnums.Status.Pending]: "#a0aec0", // pending
       [EntityEnums.Status.Approved]: "#000", // approved
       [EntityEnums.Status.Discouraged]: "#BA2525", //discouraged
       [EntityEnums.Status.Warning]: "#D8AA37", //warning
       [EntityEnums.Status.Unfinished]: "#f27a43", //unfinished
+      // UserTag ...
     },
   },
   space: {
@@ -237,15 +238,13 @@ const theme = {
     [EntityEnums.LogicalType.Generic]: "none", //generic
   },
   background: {
-    stripes:
-      "repeating-linear-gradient( -45deg, #cbd5e0, #cbd5e0, 1px, #fff 1px, #fff 12px)",
+    stripes: "repeating-linear-gradient( -45deg, #cbd5e0, #cbd5e0, 1px, #fff 1px, #fff 12px)",
   },
   boxShadow: {
     normal: "1px 1px 3px rgba(0, 0, 0, 0.4)",
     subtle: "0 1px 3px hsla(0,0%,0%,0.12), 0 1px 2px hsla(0,0%,0%,0.24)",
     high: "0 15px 25px hsla(0,0%,0%,0.15), 0 5px 10px hsla(0,0%,0%,0.05)",
-    inset:
-      "0 2px 0px hsl(220, 7%, 83%, 0.5), inset 0 2px 2px hsla(0, 0%, 0%, 0.1)",
+    inset: "0 2px 0px hsl(220, 7%, 83%, 0.5), inset 0 2px 2px hsla(0, 0%, 0%, 0.1)",
   },
 };
 

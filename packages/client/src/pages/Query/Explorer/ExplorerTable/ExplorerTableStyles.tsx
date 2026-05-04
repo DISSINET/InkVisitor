@@ -83,17 +83,6 @@ export const StyledNewColumnValue = styled.div`
   display: grid;
   align-items: center;
 `;
-export const StyledUserTag = styled.div`
-  background-color: ${({ theme }) => theme.color["tagColor"]};
-  color: ${({ theme }) => theme.color["tagBackground"]};
-  display: flex;
-  align-items: center;
-  height: 2.6rem;
-  font-size: ${({ theme }) => theme.fontSize["sm"]};
-  padding: ${({ theme }) => "0rem " + theme.space[2]};
-  gap: ${({ theme }) => theme.space[3]};
-  border-radius: ${({ theme }) => theme.borderRadius["sm"]};
-`;
 
 export const StyledSpaceBetween = styled.div`
   display: flex;

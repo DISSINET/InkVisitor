@@ -2,8 +2,8 @@ import { IRequestStats, IResponseStats } from "@shared/types";
 import { useUsersGetMoreQuery } from "hooks/react-query/useUsersGetMoreQuery";
 import { useMemo } from "react";
 import { Column, useTable } from "react-table";
-import { TABLE_PADDING } from "../constants";
-import { getDataCategories, transformDataForTable } from "../utils";
+import { TABLE_PADDING } from "../../constants";
+import { getDataCategories, transformDataForTable } from "../../utils";
 import {
   StyledTable,
   StyledTableContainer,
