@@ -142,13 +142,14 @@ const theme = {
       "5": "#1a9850",
     },
 
-    // tag status
-    tagStatus: {
+    tagBorderColor: {
+      // EntityTag status
       [EntityEnums.Status.Pending]: "#a0aec0", // pending
       [EntityEnums.Status.Approved]: "#000", // approved
       [EntityEnums.Status.Discouraged]: "#BA2525", //discouraged
       [EntityEnums.Status.Warning]: "#D8AA37", //warning
       [EntityEnums.Status.Unfinished]: "#f27a43", //unfinished
+      // UserTag ...
     },
   },
   space: {

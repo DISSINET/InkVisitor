@@ -6,8 +6,8 @@ interface TagProps {
   ref?: React.RefObject<HTMLDivElement>;
   // for cursor style
   dragDisabled?: boolean;
-  // key in theme.color.tagStatus to set color of border (e.g. EntityTag status)
-  tagStatusKey?: EntityEnums.Status;
+  // key in theme.color.tagBorderColor to set color of border (e.g. EntityTag status)
+  tagBorderColorKey?: EntityEnums.Status;
   // key in theme.borderStyle to set style of left border (e.g. EntityTag logical type)
   borderStyleKey?: EntityEnums.LogicalType;
   // components to render inside tag
@@ -30,8 +30,9 @@ interface TagProps {
 
 export const Tag: React.FC<TagProps> = ({
   ref,
+  // TODO: consider sending border color as a prop as key of theme.color instead of tagBorderColorKey
   // status = EntityEnums.Status.Approved,
-  tagStatusKey = EntityEnums.Status.Approved,
+  tagBorderColorKey = EntityEnums.Status.Approved,
   // ltype = EntityEnums.LogicalType.Definite,
   borderStyleKey = EntityEnums.LogicalType.Definite,
   dragDisabled = false,
@@ -54,7 +55,7 @@ export const Tag: React.FC<TagProps> = ({
 
     const buttonWrap = button && (
       <StyledButtonWrapper
-        $tagStatusKey={tagStatusKey}
+        $tagBorderColorKey={tagBorderColorKey}
         onMouseEnter={onButtonOver}
         onMouseLeave={onButtonOut}
         onClick={onBtnClick}
@@ -81,7 +82,7 @@ export const Tag: React.FC<TagProps> = ({
     labelComponent,
     elvlButtonGroup,
     showOnly,
-    tagStatusKey,
+    tagBorderColorKey,
     button,
     onButtonOver,
     onButtonOut,
@@ -92,7 +93,7 @@ export const Tag: React.FC<TagProps> = ({
     <StyledTagWrapper
       ref={ref}
       className="tag"
-      $tagStatusKey={tagStatusKey}
+      $tagBorderColorKey={tagBorderColorKey}
       $borderStyleKey={borderStyleKey}
       $dragDisabled={dragDisabled}
       onClick={(e) => {

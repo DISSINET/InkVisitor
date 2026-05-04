@@ -2,7 +2,7 @@ import { EntityEnums } from "@shared/enums";
 import styled from "styled-components";
 
 interface StyledTagWrapper {
-  $tagStatusKey: EntityEnums.Status;
+  $tagBorderColorKey: EntityEnums.Status;
   $borderStyleKey: EntityEnums.LogicalType;
   $dragDisabled: boolean;
 }
@@ -10,7 +10,8 @@ export const StyledTagWrapper = styled.div<StyledTagWrapper>`
   display: inline-flex;
   overflow: hidden;
   border: ${({ theme }) => theme.borderWidth[2]};
-  border-color: ${({ theme, $tagStatusKey }) => theme.color.tagStatus[$tagStatusKey]};
+  border-color: ${({ theme, $tagBorderColorKey }) =>
+    theme.color.tagBorderColor[$tagBorderColorKey]};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
   border-style: solid;
   border-left-style: ${({ theme, $borderStyleKey }) => theme.borderStyle[$borderStyleKey]};
@@ -23,14 +24,15 @@ export const StyledTagWrapper = styled.div<StyledTagWrapper>`
 `;
 
 interface StyledButtonWrapper {
-  $tagStatusKey: EntityEnums.Status;
+  $tagBorderColorKey: EntityEnums.Status;
 }
 export const StyledButtonWrapper = styled.div<StyledButtonWrapper>`
   display: flex;
   button {
     border-width: 0;
     border-left-width: ${({ theme }) => theme.borderWidth[2]};
-    border-left-color: ${({ theme, $tagStatusKey }) => theme.color.tagStatus[$tagStatusKey]};
+    border-left-color: ${({ theme, $tagBorderColorKey }) =>
+      theme.color.tagBorderColor[$tagBorderColorKey]};
     border-left-style: solid;
   }
 `;

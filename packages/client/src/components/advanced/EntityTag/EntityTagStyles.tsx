@@ -68,7 +68,7 @@ const getColor = (
 interface StyledLabel {
   $invertedLabel: boolean;
   $fullWidth: boolean;
-  $tagStatusKey: EntityEnums.Status;
+  $tagBorderColorKey: EntityEnums.Status;
   $isFavorited: boolean;
   $labelOnly?: boolean;
   $isItalic: boolean;
@@ -85,7 +85,8 @@ export const StyledLabel = styled.div<StyledLabel>`
   color: ${({ theme, $invertedLabel, $isItalic, $isFavorited }) =>
     theme.color[getColor($invertedLabel, $isFavorited, $isItalic)]};
   border-left-width: ${({ theme, $labelOnly }) => ($labelOnly ? 0 : theme.borderWidth[2])};
-  border-left-color: ${({ theme, $tagStatusKey }) => theme.color.tagStatus[$tagStatusKey]};
+  border-left-color: ${({ theme, $tagBorderColorKey }) =>
+    theme.color.tagBorderColor[$tagBorderColorKey]};
   border-left-style: solid;
   max-width: ${({ theme, $fullWidth }) => ($fullWidth ? "100%" : theme.space[30])};
   font-weight: ${({ theme, $invertedLabel }) =>

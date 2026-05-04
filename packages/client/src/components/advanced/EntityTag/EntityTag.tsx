@@ -161,7 +161,7 @@ const EntityTagComponent: React.FC<EntityTag> = ({
         )}
         <StyledLabel
           $invertedLabel={isSelected ?? false}
-          $tagStatusKey={entity.status}
+          $tagBorderColorKey={entity.status}
           $labelOnly={showOnly === "label"}
           $fullWidth={fullWidth}
           $isFavorited={isFavorited ?? false}
@@ -238,7 +238,7 @@ const EntityTagComponent: React.FC<EntityTag> = ({
       <Tag
         ref={referenceEl}
         dragDisabled={!canDrag}
-        tagStatusKey={entity.status}
+        tagBorderColorKey={entity.status}
         borderStyleKey={entity?.data?.logicalType as EntityEnums.LogicalType}
         showOnly={showOnly}
         tagComponent={tagComponent}
