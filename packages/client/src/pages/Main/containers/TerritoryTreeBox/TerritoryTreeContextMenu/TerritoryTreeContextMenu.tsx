@@ -3,6 +3,7 @@ import { config, useSpring } from "@react-spring/web";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import { IEntity, IUser } from "@shared/types";
 import { UseMutationResult, useQueryClient } from "@tanstack/react-query";
+import { rootTerritoryId } from "Theme/constants";
 import { Button } from "components";
 import React, { useEffect, useState } from "react";
 import { FaPlus, FaStar, FaTrashAlt } from "react-icons/fa";
@@ -60,6 +61,8 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
 
   const queryClient = useQueryClient();
 
+  const isRootTerritory = territoryActant.id === rootTerritoryId;
+
   return (
     <>
       <StyledWrapper
@@ -101,42 +104,44 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
                     }}
                   />
                 )}
-                <Button
-                  key="favorites"
-                  tooltipLabel={
-                    isFavorited ? "remove from favorites" : "add to favorites"
-                  }
-                  tooltipPosition="top"
-                  icon={<FaStar size={14} />}
-                  color={isFavorited ? "grey" : "warning"}
-                  onClick={() => {
-                    if (isFavorited) {
-                      // remove from favorites
-                      const newStored = storedTerritories
-                        .filter((id) => id !== territoryActant.id)
-                        .map((storedTerritory) => ({
-                          territoryId: storedTerritory,
-                        }));
-                      updateUserMutation.mutate({
-                        storedTerritories: newStored,
-                      });
-                    } else {
-                      // add to favorites
-                      const newStored = [
-                        ...storedTerritories.map((storedTerritory) => ({
-                          territoryId: storedTerritory,
-                        })),
-                        { territoryId: territoryActant.id },
-                      ];
-                      updateUserMutation.mutate({
-                        storedTerritories: newStored,
-                      });
+                {!isRootTerritory && (
+                  <Button
+                    key="favorites"
+                    tooltipLabel={
+                      isFavorited ? "remove from favorites" : "add to favorites"
                     }
+                    tooltipPosition="top"
+                    icon={<FaStar size={14} />}
+                    color={isFavorited ? "grey" : "warning"}
+                    onClick={() => {
+                      if (isFavorited) {
+                        // remove from favorites
+                        const newStored = storedTerritories
+                          .filter((id) => id !== territoryActant.id)
+                          .map((storedTerritory) => ({
+                            territoryId: storedTerritory,
+                          }));
+                        updateUserMutation.mutate({
+                          storedTerritories: newStored,
+                        });
+                      } else {
+                        // add to favorites
+                        const newStored = [
+                          ...storedTerritories.map((storedTerritory) => ({
+                            territoryId: storedTerritory,
+                          })),
+                          { territoryId: territoryActant.id },
+                        ];
+                        updateUserMutation.mutate({
+                          storedTerritories: newStored,
+                        });
+                      }
 
-                    setShowMenu(false);
-                    onMenuClose();
-                  }}
-                />
+                      setShowMenu(false);
+                      onMenuClose();
+                    }}
+                  />
+                )}
                 {((right === UserEnums.RoleMode.Admin && empty) ||
                   (right === UserEnums.RoleMode.Write && empty)) && (
                   <Button
