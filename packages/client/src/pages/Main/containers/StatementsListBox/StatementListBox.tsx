@@ -5,6 +5,7 @@ import {
   IEntity,
   IReference,
   IResponseEntity,
+  IResponseGeneric,
   IResponseStatement,
   IResponseTerritory,
   IResponseTree,
@@ -14,6 +15,7 @@ import {
   Relation,
 } from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { AxiosResponse } from "axios";
 import api from "api";
 import { CustomScrollbar, Loader, Submit, ToastWithLink } from "components";
 import { CStatement } from "constructors";
@@ -662,10 +664,16 @@ export const StatementListBox: React.FC = () => {
       newTerritoryId: string;
     }) => {
       if (!data.newTerritoryId) {
-        const cloneResponses = await Promise.all(
-          data.statements.map((statementId) => api.entityClone(statementId))
-        );
-        return cloneResponses[0];
+        // Sequential: parallel POST /clone hammers the server's single DB mutex and
+        // small connection pool → timeouts when several statements are selected.
+        let lastResponse: AxiosResponse<IResponseGeneric> | undefined;
+        for (const statementId of data.statements) {
+          lastResponse = await api.entityClone(statementId);
+        }
+        if (!lastResponse) {
+          throw new Error("No statements to clone");
+        }
+        return lastResponse;
       }
 
       return await api.statementsBatchCopy(data.statements, data.newTerritoryId);
@@ -682,6 +690,9 @@ export const StatementListBox: React.FC = () => {
       if (data.newTerritoryId) {
         setTerritoryId(data.newTerritoryId);
       }
+    },
+    onError: () => {
+      toast.error("Some statements could not be duplicated.");
     },
   });
 
