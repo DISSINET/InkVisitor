@@ -32,12 +32,7 @@ import { Explore } from "@shared/types/query";
 import { IRequestSearch } from "@shared/types/request-search";
 import { ISetting, ISettingGroup } from "@shared/types/settings";
 import { defaultPing } from "Theme/constants";
-import axios, {
-  AxiosError,
-  AxiosInstance,
-  AxiosRequestConfig,
-  AxiosResponse,
-} from "axios";
+import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import { toast } from "react-toastify";
 import io, { Socket } from "socket.io-client";
 import {
@@ -307,12 +302,7 @@ class Api {
     }
   }
 
-  saveLogin(
-    newToken: string,
-    newUserName: string,
-    newUserId: string,
-    newUserRole: string
-  ) {
+  saveLogin(newToken: string, newUserName: string, newUserId: string, newUserRole: string) {
     localStorage.setItem(this.tokenKey, newToken);
     localStorage.setItem("username", newUserName);
     localStorage.setItem("userid", newUserId);
@@ -331,11 +321,7 @@ class Api {
     return newApi;
   }
 
-  async signIn(
-    login: string,
-    password: string,
-    options?: IApiOptions
-  ): Promise<any> {
+  async signIn(login: string, password: string, options?: IApiOptions): Promise<any> {
     try {
       const response = await this.connection.post(
         "/users/signin",
@@ -348,12 +334,7 @@ class Api {
 
       if (response.status === 200) {
         const parsed = parseJwt(response.data.token);
-        this.saveLogin(
-          response.data.token,
-          parsed.user.name,
-          parsed.user.id,
-          parsed.user.role
-        );
+        this.saveLogin(response.data.token, parsed.user.name, parsed.user.id, parsed.user.role);
         toast.success("Logged in");
       }
       return { ...response.data };
@@ -418,20 +399,14 @@ class Api {
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
-      const response = await this.connection.get(
-        `/users/password_reset?hash=${hash}`,
-        options
-      );
+      const response = await this.connection.get(`/users/password_reset?hash=${hash}`, options);
       return response;
     } catch (err) {
       throw this.handleError(err);
     }
   }
 
-  async usersGet(
-    userId: string,
-    options?: IApiOptions
-  ): Promise<AxiosResponse<IResponseUser>> {
+  async usersGet(userId: string, options?: IApiOptions): Promise<AxiosResponse<IResponseUser>> {
     try {
       const response = await this.connection.get(`/users/${userId}`, options);
       return response;
@@ -445,10 +420,7 @@ class Api {
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseUser[]>> {
     try {
-      const response = await this.connection.get(
-        `/users?label=${filters.label || ""}`,
-        options
-      );
+      const response = await this.connection.get(`/users?label=${filters.label || ""}`, options);
       return response;
     } catch (err) {
       throw this.handleError(err);
@@ -475,11 +447,7 @@ class Api {
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
-      const response = await this.connection.put(
-        `/users/${userId}`,
-        changes,
-        options
-      );
+      const response = await this.connection.put(`/users/${userId}`, changes, options);
       return response;
     } catch (err) {
       throw this.handleError(err);
@@ -491,10 +459,7 @@ class Api {
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
-      const response = await this.connection.delete(
-        `/users/${userId}`,
-        options
-      );
+      const response = await this.connection.delete(`/users/${userId}`, options);
       return response;
     } catch (err) {
       throw this.handleError(err);
@@ -509,11 +474,7 @@ class Api {
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
-      const response = await this.connection.patch(
-        `/users/${userId}/password`,
-        undefined,
-        options
-      );
+      const response = await this.connection.patch(`/users/${userId}/password`, undefined, options);
       return response;
     } catch (err) {
       throw this.handleError(err);
@@ -555,9 +516,7 @@ class Api {
   */
   async testEmail(testEmail: string): Promise<AxiosResponse<IResponseGeneric>> {
     try {
-      const response = await this.connection.get(
-        `/users/me/emails/test?email=${testEmail}`
-      );
+      const response = await this.connection.get(`/users/me/emails/test?email=${testEmail}`);
       return response;
     } catch (err) {
       throw this.handleError(err);
@@ -573,10 +532,7 @@ class Api {
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseBookmarkFolder[]>> {
     try {
-      const response = await this.connection.get(
-        `/users/${userId}/bookmarks`,
-        options
-      );
+      const response = await this.connection.get(`/users/${userId}/bookmarks`, options);
       return response;
     } catch (err) {
       throw this.handleError(err);
@@ -592,10 +548,7 @@ class Api {
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseEntity>> {
     try {
-      const response = await this.connection.get(
-        `/entities/${entityId}`,
-        options
-      );
+      const response = await this.connection.get(`/entities/${entityId}`, options);
       return response;
     } catch (err) {
       throw this.handleError(err);
@@ -607,11 +560,7 @@ class Api {
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseEntity[]>> {
     try {
-      const response = await this.connection.post(
-        `/entities/batch`,
-        { ids: entityIds },
-        options
-      );
+      const response = await this.connection.post(`/entities/batch`, { ids: entityIds }, options);
       return response;
     } catch (err) {
       throw this.handleError(err);
@@ -641,11 +590,7 @@ class Api {
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
-      const response = await this.connection.post(
-        `/entities`,
-        newEntityData,
-        options
-      );
+      const response = await this.connection.post(`/entities`, newEntityData, options);
       return response;
     } catch (err) {
       throw this.handleError(err);
@@ -674,11 +619,7 @@ class Api {
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
-      const response = await this.connection.put(
-        `/entities/${entityId}`,
-        changes,
-        options
-      );
+      const response = await this.connection.put(`/entities/${entityId}`, changes, options);
       return response;
     } catch (err) {
       throw this.handleError(err);
@@ -690,10 +631,7 @@ class Api {
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
-      const response = await this.connection.delete(
-        `/entities/${entityId}`,
-        options
-      );
+      const response = await this.connection.delete(`/entities/${entityId}`, options);
       return response;
     } catch (err) {
       throw this.handleError(err);
@@ -704,8 +642,7 @@ class Api {
     entityIds: string[],
     options?: IApiOptions
   ): Promise<(EntitiesDeleteSuccessResponse | EntitiesDeleteErrorResponse)[]> {
-    const out: (EntitiesDeleteSuccessResponse | EntitiesDeleteErrorResponse)[] =
-      [];
+    const out: (EntitiesDeleteSuccessResponse | EntitiesDeleteErrorResponse)[] = [];
     try {
       const response = await this.connection.delete(`/entities/`, {
         data: {
@@ -713,11 +650,8 @@ class Api {
         },
         ...options,
       });
-      const data = (
-        response.data as IResponseGeneric<
-          Record<string, errors.CustomError | true>
-        >
-      ).data;
+      const data = (response.data as IResponseGeneric<Record<string, errors.CustomError | true>>)
+        .data;
       if (data) {
         for (const errorEntityId of Object.keys(data)) {
           if (data[errorEntityId] === true) {
@@ -745,13 +679,9 @@ class Api {
     return out;
   }
 
-  async entityRestore(
-    entityId: string
-  ): Promise<AxiosResponse<IResponseGeneric>> {
+  async entityRestore(entityId: string): Promise<AxiosResponse<IResponseGeneric>> {
     try {
-      const response = await this.connection.post(
-        `/entities/${entityId}/restore`
-      );
+      const response = await this.connection.post(`/entities/${entityId}/restore`);
       return response;
     } catch (err) {
       throw this.handleError(err);
@@ -767,10 +697,7 @@ class Api {
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseDetail>> {
     try {
-      const response = await this.connection.get(
-        `/entities/${entityId}/detail`,
-        options
-      );
+      const response = await this.connection.get(`/entities/${entityId}/detail`, options);
       return response;
     } catch (err) {
       throw this.handleError(err);
@@ -798,11 +725,7 @@ class Api {
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseQuery>> {
     try {
-      const response = await this.connection.post(
-        `/entities/query`,
-        queryData,
-        options
-      );
+      const response = await this.connection.post(`/entities/query`, queryData, options);
       return response;
     } catch (err) {
       throw this.handleError(err);
@@ -895,10 +818,7 @@ class Api {
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseStatement[]>> {
     try {
-      const response = await this.connection.get(
-        `/territories/${territoryId}/statements`,
-        options
-      );
+      const response = await this.connection.get(`/territories/${territoryId}/statements`, options);
       return response;
     } catch (err) {
       throw this.handleError(err);
@@ -914,10 +834,7 @@ class Api {
     options?: IApiOptions
   ): Promise<AxiosResponse<string[]>> {
     try {
-      const response = await this.connection.get(
-        `/territories/${territoryId}/entities`,
-        options
-      );
+      const response = await this.connection.get(`/territories/${territoryId}/entities`, options);
       return response;
     } catch (err) {
       throw this.handleError(err);
@@ -954,10 +871,7 @@ class Api {
     options?: IApiOptions
   ): Promise<AxiosResponse<EntityTooltip.IResponse>> {
     try {
-      const response = await this.connection.get(
-        `/entities/${entityId}/tooltip`,
-        options
-      );
+      const response = await this.connection.get(`/entities/${entityId}/tooltip`, options);
       return response;
     } catch (err) {
       throw this.handleError(err);
@@ -987,11 +901,7 @@ class Api {
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseStats>> {
     try {
-      const response = await this.connection.post(
-        `/stats/materialized`,
-        data,
-        options
-      );
+      const response = await this.connection.post(`/stats/materialized`, data, options);
       return response;
     } catch (err) {
       throw this.handleError(err);
@@ -1011,11 +921,7 @@ class Api {
     options?: IApiOptions
   ): Promise<AxiosResponse<{ message: string; recordsProcessed: number }>> {
     try {
-      const response = await this.connection.post(
-        `/stats/aggregate`,
-        data,
-        options
-      );
+      const response = await this.connection.post(`/stats/aggregate`, data, options);
       return response;
     } catch (err) {
       throw this.handleError(err);
@@ -1025,15 +931,9 @@ class Api {
   /**
    * Audit
    */
-  async auditGet(
-    entityId: string,
-    options?: IApiOptions
-  ): Promise<AxiosResponse<IResponseAudit>> {
+  async auditGet(entityId: string, options?: IApiOptions): Promise<AxiosResponse<IResponseAudit>> {
     try {
-      const response = await this.connection.get(
-        `/entities/${entityId}/audits`,
-        options
-      );
+      const response = await this.connection.get(`/entities/${entityId}/audits`, options);
       return response;
     } catch (err) {
       throw this.handleError(err);
@@ -1060,30 +960,22 @@ class Api {
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseAudit>> {
     try {
-      const response = await this.connection.get(
-        `/documents/${documentId}/audits`,
-        {
-          ...options,
-          params: {
-            ...(options?.params as Record<string, unknown>),
-            noAudits,
-          },
-        }
-      );
+      const response = await this.connection.get(`/documents/${documentId}/audits`, {
+        ...options,
+        params: {
+          ...(options?.params as Record<string, unknown>),
+          noAudits,
+        },
+      });
       return response;
     } catch (err) {
       throw this.handleError(err);
     }
   }
 
-  async auditGetFirst(
-    options?: IApiOptions
-  ): Promise<AxiosResponse<IResponseGeneric<IAudit>>> {
+  async auditGetFirst(options?: IApiOptions): Promise<AxiosResponse<IResponseGeneric<IAudit>>> {
     try {
-      const response = await this.connection.get(
-        `/audits?skip=0&take=1&from=1970`,
-        options
-      );
+      const response = await this.connection.get(`/audits?skip=0&take=1&from=1970`, options);
       return response;
     } catch (err) {
       throw this.handleError(err);
@@ -1099,10 +991,7 @@ class Api {
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseStatement>> {
     try {
-      const response = await this.connection.get(
-        `/statements/${statementId}`,
-        options
-      );
+      const response = await this.connection.get(`/statements/${statementId}`, options);
       return response;
     } catch (err) {
       throw this.handleError(err);
@@ -1130,10 +1019,55 @@ class Api {
 
   async statementsBatchCopy(
     statementsIds: string[],
-    territoryId: string,
+    territoryId?: string,
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
+      if (!territoryId) {
+        if (!statementsIds.length) {
+          throw new Error("No statements to duplicate");
+        }
+
+        let lastResponse: AxiosResponse<IResponseGeneric> | undefined;
+        let failureCount = 0;
+        const cloneOpts: IApiOptions = {
+          ...options,
+          ignoreErrorToast: options?.ignoreErrorToast ?? true,
+        };
+
+        for (const statementId of statementsIds) {
+          try {
+            lastResponse = await this.entityClone(statementId, cloneOpts);
+          } catch {
+            failureCount++;
+          }
+        }
+
+        // attach failure count to last response
+        const taggedLast = lastResponse as AxiosResponse<IResponseGeneric> & {
+          incompleteCloneFailures?: number;
+        };
+
+        if (taggedLast) {
+          taggedLast.incompleteCloneFailures = failureCount;
+        }
+
+        // show toast if some statements could not be duplicated
+        if (failureCount > 0) {
+          const failedLabel = failureCount === 1 ? "statement" : "statements";
+          toast.warning(
+            failureCount === statementsIds.length
+              ? `${failureCount} ${failedLabel} could not be duplicated.`
+              : `Some statements could not be duplicated (${failureCount} of ${statementsIds.length}).`
+          );
+          if (!lastResponse) {
+            throw new Error(`All statement duplicates failed (${failureCount}).`);
+          }
+        }
+
+        return lastResponse as AxiosResponse<IResponseGeneric>;
+      }
+
       const response = await this.connection.post(
         `/statements/batch-copy?ids=${statementsIds.join(",")}`,
         {
@@ -1141,7 +1075,6 @@ class Api {
         },
         options
       );
-      // response.data.data should have list of new ids
       return response;
     } catch (err) {
       throw this.handleError(err);
@@ -1186,9 +1119,7 @@ class Api {
    * Pernmissions
    */
 
-  async getAclPermissions(
-    options?: IApiOptions
-  ): Promise<AxiosResponse<IResponsePermission[]>> {
+  async getAclPermissions(options?: IApiOptions): Promise<AxiosResponse<IResponsePermission[]>> {
     try {
       const response = await this.connection.get(`/acls`, options);
       return response;
@@ -1203,11 +1134,7 @@ class Api {
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
-      const response = await this.connection.put(
-        `/acls/${permissionId}`,
-        data,
-        options
-      );
+      const response = await this.connection.put(`/acls/${permissionId}`, data, options);
       return response;
     } catch (err) {
       throw this.handleError(err);
@@ -1242,10 +1169,7 @@ class Api {
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
-      const response = await this.connection.get(
-        `/users/activation?hash=${hash}`,
-        options
-      );
+      const response = await this.connection.get(`/users/activation?hash=${hash}`, options);
       return response;
     } catch (err) {
       throw this.handleError(err);
@@ -1261,11 +1185,7 @@ class Api {
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
-      const response = await this.connection.put(
-        `/relations/${relationId}`,
-        changes,
-        options
-      );
+      const response = await this.connection.put(`/relations/${relationId}`, changes, options);
       return response;
     } catch (err) {
       throw this.handleError(err);
@@ -1277,11 +1197,7 @@ class Api {
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
-      const response = await this.connection.post(
-        `/relations`,
-        newRelation,
-        options
-      );
+      const response = await this.connection.post(`/relations`, newRelation, options);
       return response;
     } catch (err) {
       throw this.handleError(err);
@@ -1291,18 +1207,12 @@ class Api {
   async relationsCreate(
     newRelations: Relation.IRelation[],
     options?: IApiOptions
-  ): Promise<
-    (RelationsCreateSuccessResponse | RelationsCreateErrorResponse)[]
-  > {
+  ): Promise<(RelationsCreateSuccessResponse | RelationsCreateErrorResponse)[]> {
     const out = [];
 
     for (const newRelation of newRelations) {
       try {
-        const response = await this.connection.post(
-          `/relations`,
-          newRelation,
-          options
-        );
+        const response = await this.connection.post(`/relations`, newRelation, options);
         out.push({ relation: newRelation, details: response });
       } catch (err) {
         out.push({
@@ -1322,10 +1232,7 @@ class Api {
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
-      const response = await this.connection.delete(
-        `/relations/${relationId}`,
-        options
-      );
+      const response = await this.connection.delete(`/relations/${relationId}`, options);
       return response;
     } catch (err) {
       throw this.handleError(err);
@@ -1351,15 +1258,9 @@ class Api {
     }
   }
 
-  async documentGet(
-    documentId: string,
-    options?: IApiOptions
-  ): Promise<AxiosResponse<IDocument>> {
+  async documentGet(documentId: string, options?: IApiOptions): Promise<AxiosResponse<IDocument>> {
     try {
-      const response = await this.connection.get(
-        `/documents/${documentId}`,
-        options
-      );
+      const response = await this.connection.get(`/documents/${documentId}`, options);
       return response;
     } catch (err) {
       throw this.handleError(err);
@@ -1371,10 +1272,7 @@ class Api {
     options?: IApiOptions
   ): Promise<AxiosResponse<IDocument>> {
     try {
-      const response = await this.connection.delete(
-        `/documents/${documentId}`,
-        options
-      );
+      const response = await this.connection.delete(`/documents/${documentId}`, options);
       return response;
     } catch (err) {
       throw this.handleError(err);
@@ -1386,11 +1284,7 @@ class Api {
     options?: IApiOptions
   ): Promise<AxiosResponse<IDocument>> {
     try {
-      const response = await this.connection.post(
-        `/documents`,
-        document,
-        options
-      );
+      const response = await this.connection.post(`/documents`, document, options);
       return response;
     } catch (err) {
       throw this.handleError(err);
@@ -1493,11 +1387,7 @@ class Api {
     options?: IApiOptions
   ): Promise<AxiosResponse<IDocument>> {
     try {
-      const response = await this.connection.put(
-        `/documents/${documentId}`,
-        document,
-        options
-      );
+      const response = await this.connection.put(`/documents/${documentId}`, document, options);
       return response;
     } catch (err) {
       throw this.handleError(err);
@@ -1515,10 +1405,7 @@ class Api {
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseGeneric<ISetting>>> {
     try {
-      const response = await this.connection.get(
-        `/settings/${settingId}`,
-        options
-      );
+      const response = await this.connection.get(`/settings/${settingId}`, options);
       return response;
     } catch (err) {
       throw this.handleError(err);
@@ -1536,10 +1423,7 @@ class Api {
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseGeneric<ISettingGroup>>> {
     try {
-      const response = await this.connection.get(
-        `/settings/group/${settingGroupId}`,
-        options
-      );
+      const response = await this.connection.get(`/settings/group/${settingGroupId}`, options);
       return response;
     } catch (err) {
       throw this.handleError(err);
@@ -1583,11 +1467,7 @@ class Api {
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
-      const response = await this.connection.put(
-        `/settings/${settingId}`,
-        data,
-        options
-      );
+      const response = await this.connection.put(`/settings/${settingId}`, data, options);
       return response;
     } catch (err) {
       throw this.handleError(err);
@@ -1600,9 +1480,7 @@ class Api {
    * @param options
    * @returns
    */
-  async usersGetOwner(
-    options?: IApiOptions
-  ): Promise<AxiosResponse<IResponseGeneric<string>>> {
+  async usersGetOwner(options?: IApiOptions): Promise<AxiosResponse<IResponseGeneric<string>>> {
     try {
       const response = await this.connection.get(`/users/owner`, options);
       return response;

@@ -88,6 +88,7 @@ interface Suggester {
   // Optional: allow parent to inject a dropped item (e.g., from a minified wrapper)
   externalDroppedItem?: EntityDragItem | null;
   onConsumeExternalDrop?: () => void;
+  onEmptyAddButtonClick?: () => void;
 }
 
 export const Suggester: React.FC<Suggester> = ({
@@ -130,6 +131,7 @@ export const Suggester: React.FC<Suggester> = ({
   isHidden = false,
   externalDroppedItem,
   onConsumeExternalDrop,
+  onEmptyAddButtonClick,
 }) => {
   const [selected, setSelected] = useState(-1);
   const [isFocused, setIsFocused] = useState(false);
@@ -278,7 +280,11 @@ export const Suggester: React.FC<Suggester> = ({
         });
       }
     } else {
-      toast.info("Fill at least 1 character");
+      if (onEmptyAddButtonClick) {
+        onEmptyAddButtonClick();
+      } else {
+        toast.info("Fill at least 1 character");
+      }
     }
     setSelected(-1);
   };
