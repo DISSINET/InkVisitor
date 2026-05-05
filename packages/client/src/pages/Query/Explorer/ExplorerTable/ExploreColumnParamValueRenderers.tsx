@@ -3,7 +3,7 @@ import { IEntity } from "@shared/types";
 import { Explore } from "@shared/types/query";
 import { RelationEnums } from "@shared/enums";
 import { EntityTag } from "components/advanced";
-import { EntityTagById } from "./EntityTagById";
+import { EntityTagById } from "../../../../components/advanced/EntityTag/EntityTagById";
 
 export interface IExploreColumnParamRenderContext {
   value: unknown;
@@ -21,18 +21,17 @@ export const exploreColumnParamValueRenderers: Record<
 > = {
   relationType: ({ value }) => {
     if (value == null) return null;
-    return RelationEnums.RelationTypeLabels[
-      value as RelationEnums.Type
-    ] ?? String(value);
+    return (
+      RelationEnums.RelationTypeLabels[value as RelationEnums.Type] ??
+      String(value)
+    );
   },
   entity: ({ value, entities }) => {
     if (value == null) return null;
     const entityId = typeof value === "string" ? value : (value as IEntity)?.id;
     if (!entityId) return null;
     const entity = entities?.[entityId];
-    return (
-      <EntityTagById entityId={entityId} entity={entity} />
-    );
+    return <EntityTagById entityId={entityId} entity={entity} />;
   },
 };
 
