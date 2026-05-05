@@ -32,6 +32,7 @@ import { LayoutSeparatorVertical } from "./PanelSeparator/LayoutSeparatorVertica
 import { LayoutSeparatorHorizontal } from "./PanelSeparator/LayoutSeparatorHorizontal";
 import { PaginationControls } from "./PaginationControls/PaginationControls";
 import { GlobalValidationsModal } from "./GlobalValidationsModal/GlobalValidationsModal";
+import { EntityTagById } from "./EntityTag/EntityTagById";
 
 const Dropdown = {
   Single: {
@@ -61,6 +62,7 @@ export {
   EntityDropzone,
   EntitySuggester,
   EntityTag,
+  EntityTagById,
   EntityTooltip,
   JSONExplorer,
   LayoutSeparatorVertical,

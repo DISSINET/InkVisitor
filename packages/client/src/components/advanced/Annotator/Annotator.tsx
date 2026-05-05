@@ -56,6 +56,7 @@ import {
 } from "hooks";
 import { BsFileTextFill } from "react-icons/bs";
 import { HiCodeBracket } from "react-icons/hi2";
+import { EntityTagById } from "components/advanced/EntityTag/EntityTagById";
 import { collectStatementAnchors, getStatementOrderByIndex } from "utils/utils";
 import { EntityCreateModal } from "..";
 import { useAnnotator } from "./AnnotatorContext";
@@ -180,6 +181,11 @@ export const TextAnnotator = ({
     onStatementAnchorHoverRef.current = onStatementAnchorHover;
   }, [onStatementAnchorHover]);
 
+  const annotatorModeRef = useRef(annotatorMode);
+  useEffect(() => {
+    annotatorModeRef.current = annotatorMode;
+  }, [annotatorMode]);
+
   const resetAnnotator = () => {
     annotatorLoadedForDocIdRef.current = undefined;
     setAnnotator(null);
@@ -299,6 +305,61 @@ export const TextAnnotator = ({
   const [storedEntities, setStoredEntities] = useState<
     Record<string, IEntity | false>
   >({});
+
+  /** XML (RAW) mode: pointer over `<entityId>` / `</entityId>` markup → preview chip at cursor */
+  const [xmlMarkupAnchorHover, setXmlMarkupAnchorHover] = useState<{
+    entityId: string;
+    x: number;
+    y: number;
+  } | null>(null);
+
+  const xmlMarkupPreviewPointerInsideRef = useRef(false);
+  const xmlMarkupAnchorHoverClearTimerRef = useRef<ReturnType<
+    typeof setTimeout
+  > | null>(null);
+
+  const documentEntityIds = useMemo(() => {
+    const ids = new Set<string>();
+    if (dataDocument?.entityIds) {
+      for (const list of Object.values(dataDocument.entityIds)) {
+        for (const id of list) {
+          ids.add(id);
+        }
+      }
+    }
+    return ids;
+  }, [dataDocument?.entityIds]);
+
+  // following 3 useEffects are related to XML markup anchor hover preview
+  // necessary to preserve the EntityTag preview when leaving the <id> markup
+  useEffect(() => {
+    return () => {
+      if (xmlMarkupAnchorHoverClearTimerRef.current !== null) {
+        clearTimeout(xmlMarkupAnchorHoverClearTimerRef.current);
+        xmlMarkupAnchorHoverClearTimerRef.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (annotatorMode !== EditMode.RAW) {
+      if (xmlMarkupAnchorHoverClearTimerRef.current !== null) {
+        clearTimeout(xmlMarkupAnchorHoverClearTimerRef.current);
+        xmlMarkupAnchorHoverClearTimerRef.current = null;
+      }
+      xmlMarkupPreviewPointerInsideRef.current = false;
+      setXmlMarkupAnchorHover(null);
+    }
+  }, [annotatorMode]);
+
+  useEffect(() => {
+    if (xmlMarkupAnchorHoverClearTimerRef.current !== null) {
+      clearTimeout(xmlMarkupAnchorHoverClearTimerRef.current);
+      xmlMarkupAnchorHoverClearTimerRef.current = null;
+    }
+    xmlMarkupPreviewPointerInsideRef.current = false;
+    setXmlMarkupAnchorHover(null);
+  }, [dataDocument?.id]);
 
   const handleCreateStatement = (
     text: string = "",
@@ -651,6 +712,51 @@ export const TextAnnotator = ({
       });
     };
 
+    const registerAnchorTagMarkupHover = (a: Annotator) => {
+      a.onAnchorTagHover(
+        (tag: Tag | null, position: { x: number; y: number } | null) => {
+          if (annotatorModeRef.current !== EditMode.RAW) {
+            return;
+          }
+          const clearScheduled = xmlMarkupAnchorHoverClearTimerRef;
+          const cancelClear = () => {
+            if (clearScheduled.current !== null) {
+              clearTimeout(clearScheduled.current);
+              clearScheduled.current = null;
+            }
+          };
+          const scheduleClear = () => {
+            cancelClear();
+            clearScheduled.current = setTimeout(() => {
+              clearScheduled.current = null;
+              if (!xmlMarkupPreviewPointerInsideRef.current) {
+                setXmlMarkupAnchorHover(null);
+              }
+            }, 200);
+          };
+
+          if (!tag || !position) {
+            if (xmlMarkupPreviewPointerInsideRef.current) {
+              return;
+            }
+            scheduleClear();
+            return;
+          }
+          cancelClear();
+          const entityId = tag.getTagName();
+          if (!documentEntityIds.has(entityId)) {
+            setXmlMarkupAnchorHover(null);
+            return;
+          }
+          setXmlMarkupAnchorHover({
+            entityId,
+            x: position.x,
+            y: position.y,
+          });
+        }
+      );
+    };
+
     const applyCanvasTheme = (a: Annotator) => {
       a.fontColor = theme.color.black;
       a.bgColor = "transparent";
@@ -686,6 +792,7 @@ export const TextAnnotator = ({
       });
 
       registerAnchorHover(annotator);
+      registerAnchorTagMarkupHover(annotator);
 
       if (localTextContent !== contentForLocalState) {
         setLocalTextContent(contentForLocalState);
@@ -757,6 +864,7 @@ export const TextAnnotator = ({
     });
 
     registerAnchorHover(newAnnotator);
+    registerAnchorTagMarkupHover(newAnnotator);
 
     newAnnotator.onTextChanged((text) => {
       setLocalTextContent(text);
@@ -1123,6 +1231,54 @@ export const TextAnnotator = ({
               </StyledAnnotatorMenu>
             </FloatingPortal>
           )}
+
+          {xmlMarkupAnchorHover &&
+            annotatorMode === EditMode.RAW &&
+            api.isLoggedIn() && (
+              <FloatingPortal id="page">
+                <div
+                  style={{
+                    position: "fixed",
+                    left: xmlMarkupAnchorHover.x - 35,
+                    top: xmlMarkupAnchorHover.y + 12,
+                    zIndex: 10050,
+                    pointerEvents: "auto",
+                    maxWidth: 340,
+                    borderRadius: 4,
+                    backgroundColor: theme.color.white,
+                    boxShadow: "0 4px 14px rgba(0,0,0,0.12)",
+                    padding: "4px 8px",
+                  }}
+                  onMouseEnter={() => {
+                    xmlMarkupPreviewPointerInsideRef.current = true;
+                    if (xmlMarkupAnchorHoverClearTimerRef.current !== null) {
+                      clearTimeout(xmlMarkupAnchorHoverClearTimerRef.current);
+                      xmlMarkupAnchorHoverClearTimerRef.current = null;
+                    }
+                  }}
+                  onMouseLeave={() => {
+                    xmlMarkupPreviewPointerInsideRef.current = false;
+                    if (xmlMarkupAnchorHoverClearTimerRef.current !== null) {
+                      clearTimeout(xmlMarkupAnchorHoverClearTimerRef.current);
+                    }
+                    xmlMarkupAnchorHoverClearTimerRef.current = setTimeout(
+                      () => {
+                        xmlMarkupAnchorHoverClearTimerRef.current = null;
+                        if (!xmlMarkupPreviewPointerInsideRef.current) {
+                          setXmlMarkupAnchorHover(null);
+                        }
+                      },
+                      200
+                    );
+                  }}
+                >
+                  <EntityTagById
+                    entityId={xmlMarkupAnchorHover.entityId}
+                    disableTooltip={false}
+                  />
+                </div>
+              </FloatingPortal>
+            )}
 
           {displayLineNumbers && (
             <StyledLinesCanvas

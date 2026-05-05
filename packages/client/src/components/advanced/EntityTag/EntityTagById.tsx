@@ -8,6 +8,7 @@ import { Loader } from "components";
 interface EntityTagByIdProps {
   entityId: string;
   entity?: IEntity;
+  disableTooltip?: boolean;
 }
 
 /**
@@ -16,6 +17,7 @@ interface EntityTagByIdProps {
 export const EntityTagById: React.FC<EntityTagByIdProps> = ({
   entityId,
   entity: entityProp,
+  disableTooltip = true,
 }) => {
   const { data, isFetching } = useQuery({
     queryKey: ["entity", entityId],
@@ -34,5 +36,11 @@ export const EntityTagById: React.FC<EntityTagByIdProps> = ({
   if (!entity) {
     return <span>{entityId}</span>;
   }
-  return <EntityTag entity={entity} disableTooltip disableDoubleClick />;
+  return (
+    <EntityTag
+      entity={entity}
+      disableTooltip={disableTooltip}
+      disableDoubleClick
+    />
+  );
 };
