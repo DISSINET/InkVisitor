@@ -76,7 +76,7 @@ interface StatementListHeader {
     unknown,
     {
       statements: string[];
-      newTerritoryId: string;
+      newTerritoryId?: string;
     },
     unknown
   >;
