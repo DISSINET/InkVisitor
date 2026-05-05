@@ -660,7 +660,16 @@ export const StatementListBox: React.FC = () => {
     mutationFn: async (data: {
       statements: string[];
       newTerritoryId: string;
-    }) => await api.statementsBatchCopy(data.statements, data.newTerritoryId),
+    }) => {
+      if (!data.newTerritoryId) {
+        const cloneResponses = await Promise.all(
+          data.statements.map((statementId) => api.entityClone(statementId))
+        );
+        return cloneResponses[0];
+      }
+
+      return await api.statementsBatchCopy(data.statements, data.newTerritoryId);
+    },
     onSuccess: (variables, data) => {
       queryClient.invalidateQueries({ queryKey: ["territory"] });
       queryClient.invalidateQueries({ queryKey: ["tree"] });
@@ -670,7 +679,9 @@ export const StatementListBox: React.FC = () => {
         } duplicated`
       );
       setSelectedRows([]);
-      setTerritoryId(data.newTerritoryId);
+      if (data.newTerritoryId) {
+        setTerritoryId(data.newTerritoryId);
+      }
     },
   });
 

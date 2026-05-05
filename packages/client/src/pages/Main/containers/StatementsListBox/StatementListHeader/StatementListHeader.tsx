@@ -10,11 +10,7 @@ import {
   ITerritory,
   Relation,
 } from "@shared/types";
-import {
-  UseMutationResult,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { UseMutationResult, useQuery, useQueryClient } from "@tanstack/react-query";
 import { rootTerritoryId } from "Theme/constants";
 import api from "api";
 import { AxiosResponse } from "axios";
@@ -271,13 +267,9 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
     enabled: !!userId && api.isLoggedIn(),
   });
 
-  const treeData: IResponseTree | undefined = queryClient.getQueryData([
-    "tree",
-  ]);
+  const treeData: IResponseTree | undefined = queryClient.getQueryData(["tree"]);
 
-  const [excludedMoveTerritories, setExcludedMoveTerritories] = useState<
-    string[]
-  >([territoryId]);
+  const [excludedMoveTerritories, setExcludedMoveTerritories] = useState<string[]>([territoryId]);
 
   useEffect(() => {
     setSelectedRows([]);
@@ -307,9 +299,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
   const handleSelectAll = (checked: boolean) =>
     checked
-      ? setSelectedRows(
-          territory?.statements.map((statement) => statement.id) || []
-        )
+      ? setSelectedRows(territory?.statements.map((statement) => statement.id) || [])
       : setSelectedRows([]);
 
   const renderCheckBox = () => {
@@ -337,25 +327,15 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
         />
       );
     } else {
-      return (
-        <MdOutlineCheckBoxOutlineBlank
-          size={size}
-          onClick={() => handleSelectAll(true)}
-        />
-      );
+      return <MdOutlineCheckBoxOutlineBlank size={size} onClick={() => handleSelectAll(true)} />;
     }
   };
 
   const [batchAction, setBatchAction] = useState<DropdownItem>(batchOptions[0]);
   const [showTActionModal, setShowTActionModal] = useState(false);
-  const [moveToParentEntity, setMoveToParentEntity] = useState<IEntity | false>(
-    false
-  );
+  const [moveToParentEntity, setMoveToParentEntity] = useState<IEntity | false>(false);
 
-  const userCanEdit = useMemo(
-    () => territory?.right !== UserEnums.RoleMode.Read,
-    [territory]
-  );
+  const userCanEdit = useMemo(() => territory?.right !== UserEnums.RoleMode.Read, [territory]);
 
   const [showSubmit, setShowSubmit] = useState(false);
 
@@ -363,26 +343,19 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
     return (
       <React.Fragment>
         {territoryId.length > 0 &&
-          selectedTerritoryPath
-            ?.concat(territoryId)
-            .map((tId: string, key: number) => {
-              return (
-                <BreadcrumbItem
-                  key={key}
-                  territoryId={tId}
-                  isFavorited={favoritedTerritoryIds?.includes(tId)}
-                  isSelected={tId === territoryId}
-                />
-              );
-            })}
+          selectedTerritoryPath?.concat(territoryId).map((tId: string, key: number) => {
+            return (
+              <BreadcrumbItem
+                key={key}
+                territoryId={tId}
+                isFavorited={favoritedTerritoryIds?.includes(tId)}
+                isSelected={tId === territoryId}
+              />
+            );
+          })}
       </React.Fragment>
     );
-  }, [
-    territoryId,
-    selectedTerritoryPath.join(","),
-    territory?.labels,
-    favoritedTerritoryIds,
-  ]);
+  }, [territoryId, selectedTerritoryPath.join(","), territory?.labels, favoritedTerritoryIds]);
 
   const hasAnchoredStatementsOutOfOrder = statementsWithOrder.some(
     (s) => s.isAnchored && s.orderCorrection && s.orderCorrection.distance > 0
@@ -396,9 +369,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
     <>
       <StyledHeader>
         <div style={{ display: "grid", maxWidth: "100%" }}>
-          <StyledHeaderBreadcrumbRow>
-            {BreadcrumbItems}
-          </StyledHeaderBreadcrumbRow>
+          <StyledHeaderBreadcrumbRow>{BreadcrumbItems}</StyledHeaderBreadcrumbRow>
         </div>
 
         {userCanEdit && (
@@ -415,9 +386,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                     hasAnchoredStatementsOutOfOrder ? (
                       <i>leaves non-anchored statements in place</i>
                     ) : (
-                      <i>
-                        order of anchored statements corresponds to the document
-                      </i>
+                      <i>order of anchored statements corresponds to the document</i>
                     )
                   }
                   disabled={!hasAnchoredStatementsOutOfOrder}
@@ -427,9 +396,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                 territory &&
                 territory.statements.length > 0 && (
                   <>
-                    <StyledCheckboxWrapper>
-                      {renderCheckBox()}
-                    </StyledCheckboxWrapper>
+                    <StyledCheckboxWrapper>{renderCheckBox()}</StyledCheckboxWrapper>
 
                     {selectedRows.length > 0 && (
                       <StyledCounter>{`${selectedRows.length}/${territory.statements.length}`}</StyledCounter>
@@ -438,19 +405,13 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                     <StyledDropdownWrap>
                       <Dropdown.Single.Basic
                         tooltipLabel={
-                          batchAction.info === EntityEnums.Class.Resource
-                            ? batchAction.label
-                            : ""
+                          batchAction.info === EntityEnums.Class.Resource ? batchAction.label : ""
                         }
                         width={98}
                         disabled={selectedRows.length === 0}
                         value={batchAction.value}
                         onChange={(selectedOption) =>
-                          setBatchAction(
-                            batchOptions.find(
-                              (o) => o.value === selectedOption
-                            )!
-                          )
+                          setBatchAction(batchOptions.find((o) => o.value === selectedOption)!)
                         }
                         options={batchOptions}
                       />
@@ -471,19 +432,19 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                       <EntitySuggester
                         inputWidth={70}
                         placeholder={
-                          batchAction.info === EntityEnums.Class.Territory
-                            ? "to territory"
-                            : ""
+                          batchAction.info === EntityEnums.Class.Territory ? "to territory" : ""
                         }
                         disableTemplatesAccept
                         filterEditorRights
                         categoryTypes={[
-                          entitiesDictKeys[
-                            batchAction.info as EntityEnums.Class
-                          ].value,
+                          entitiesDictKeys[batchAction.info as EntityEnums.Class].value,
                         ]}
-                        onSelected={(newSelectedId: string) =>
-                          handleOnSelected(newSelectedId)
+                        onSelected={(newSelectedId: string) => handleOnSelected(newSelectedId)}
+                        onEmptyAddButtonClick={
+                          // allow duplicating to the same territory (empty suggester)
+                          batchAction.value === BatchOption.duplicate_S
+                            ? () => handleOnSelected("")
+                            : undefined
                         }
                         excludedActantIds={[territory.id]}
                         isHidden={selectedRows.length === 0}
@@ -498,9 +459,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                   placeholder="move"
                   disableTemplatesAccept
                   filterEditorRights
-                  inputWidth={
-                    selectedRows.length > 0 && contentWidthTooNarrow ? 36 : 80
-                  }
+                  inputWidth={selectedRows.length > 0 && contentWidthTooNarrow ? 36 : 80}
                   disableCreate
                   categoryTypes={[EntityEnums.Class.Territory]}
                   onPicked={(selectedEntity) => {

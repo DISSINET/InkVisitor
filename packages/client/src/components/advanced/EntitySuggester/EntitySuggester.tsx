@@ -83,6 +83,7 @@ interface EntitySuggesterProps {
   disabled?: boolean;
   isHidden?: boolean;
   disableCleanTypedAfterCreate?: boolean;
+  onEmptyAddButtonClick?: () => void;
 }
 /**
  * Internal heavy component. Use the wrapper export below to optionally defer mounting.
@@ -135,6 +136,7 @@ const EntitySuggesterFull: React.FC<
   externalDroppedItem,
   onConsumeExternalDrop,
   disableCleanTypedAfterCreate = false,
+  onEmptyAddButtonClick,
 }) => {
   const [typed, setTyped] = useState<string>(initTyped ?? "");
   const debouncedTyped = useDebounce(typed, 100);
@@ -516,6 +518,7 @@ const EntitySuggesterFull: React.FC<
         isHidden={isHidden}
         externalDroppedItem={externalDroppedItem}
         onConsumeExternalDrop={onConsumeExternalDrop}
+        onEmptyAddButtonClick={onEmptyAddButtonClick}
       />
       {showAddTerritoryModal && (
         <AddTerritoryModal
