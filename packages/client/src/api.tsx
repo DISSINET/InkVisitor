@@ -1024,14 +1024,48 @@ class Api {
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
       if (!territoryId) {
+        if (!statementsIds.length) {
+          throw new Error("No statements to duplicate");
+        }
+
         let lastResponse: AxiosResponse<IResponseGeneric> | undefined;
+        let failureCount = 0;
+        const cloneOpts: IApiOptions = {
+          ...options,
+          ignoreErrorToast: options?.ignoreErrorToast ?? true,
+        };
+
         for (const statementId of statementsIds) {
-          lastResponse = await this.entityClone(statementId, options);
+          try {
+            lastResponse = await this.entityClone(statementId, cloneOpts);
+          } catch {
+            failureCount++;
+          }
         }
-        if (!lastResponse) {
-          throw new Error("No statements to clone");
+
+        // attach failure count to last response
+        const taggedLast = lastResponse as AxiosResponse<IResponseGeneric> & {
+          incompleteCloneFailures?: number;
+        };
+
+        if (taggedLast) {
+          taggedLast.incompleteCloneFailures = failureCount;
         }
-        return lastResponse;
+
+        // show toast if some statements could not be duplicated
+        if (failureCount > 0) {
+          const failedLabel = failureCount === 1 ? "statement" : "statements";
+          toast.warning(
+            failureCount === statementsIds.length
+              ? `${failureCount} ${failedLabel} could not be duplicated.`
+              : `Some statements could not be duplicated (${failureCount} of ${statementsIds.length}).`
+          );
+          if (!lastResponse) {
+            throw new Error(`All statement duplicates failed (${failureCount}).`);
+          }
+        }
+
+        return lastResponse as AxiosResponse<IResponseGeneric>;
       }
 
       const response = await this.connection.post(
@@ -1041,7 +1075,6 @@ class Api {
         },
         options
       );
-      // response.data.data should have list of new ids
       return response;
     } catch (err) {
       throw this.handleError(err);

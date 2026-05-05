@@ -5,6 +5,7 @@ import {
   IEntity,
   IReference,
   IResponseEntity,
+  IResponseGeneric,
   IResponseStatement,
   IResponseTerritory,
   IResponseTree,
@@ -14,6 +15,7 @@ import {
   Relation,
 } from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { AxiosResponse } from "axios";
 import api from "api";
 import { CustomScrollbar, Loader, Submit, ToastWithLink } from "components";
 import { CStatement } from "constructors";
@@ -626,19 +628,24 @@ export const StatementListBox: React.FC = () => {
   const duplicateStatementsMutation = useMutation({
     mutationFn: async (data: { statements: string[]; newTerritoryId?: string }) =>
       await api.statementsBatchCopy(data.statements, data.newTerritoryId),
-    onSuccess: (variables, data) => {
+    onSuccess: (response, variables) => {
       queryClient.invalidateQueries({ queryKey: ["territory"] });
       queryClient.invalidateQueries({ queryKey: ["tree"] });
+      const incomplete =
+        (
+          response as AxiosResponse<IResponseGeneric> & {
+            incompleteCloneFailures?: number;
+          }
+        ).incompleteCloneFailures ?? 0;
+      const total = variables.statements.length;
+      const duplicated = total - incomplete;
       toast.info(
-        `${data.statements.length} statement${data.statements.length > 1 ? "s" : ""} duplicated`
+        `${duplicated} statement${duplicated !== 1 ? "s" : ""} duplicated`
       );
       setSelectedRows([]);
-      if (data.newTerritoryId) {
-        setTerritoryId(data.newTerritoryId);
+      if (variables.newTerritoryId) {
+        setTerritoryId(variables.newTerritoryId);
       }
-    },
-    onError: () => {
-      toast.error("Some statements could not be duplicated.");
     },
   });
 
