@@ -91,7 +91,6 @@ interface TextAnnotatorProps {
 
   userData?: IResponseUser;
   disableCreate?: boolean;
-  statementListBoxRef?: React.RefObject<HTMLDivElement | null>;
 
   /** When the pointer hovers anchored text, receives the innermost tag id or null (e.g. statement list sync). */
   onStatementAnchorHover?: (statementId: string | null) => void;
@@ -102,7 +101,6 @@ const ANNOTATOR_MENU_PAGE_PADDING = 4;
 export const TextAnnotator = ({
   width = 400,
   annotatorWidthTooNarrow = false,
-  statementListBoxRef,
   height = 500,
   displayLineNumbers = true,
   hlEntities = Object.values(EntityEnums.Class),
@@ -313,15 +311,6 @@ export const TextAnnotator = ({
       setXmlMarkupAnchorHover(null);
     }
   }, [annotatorMode]);
-
-  useEffect(() => {
-    if (xmlMarkupAnchorHoverClearTimerRef.current !== null) {
-      clearTimeout(xmlMarkupAnchorHoverClearTimerRef.current);
-      xmlMarkupAnchorHoverClearTimerRef.current = null;
-    }
-    xmlMarkupPreviewPointerInsideRef.current = false;
-    setXmlMarkupAnchorHover(null);
-  }, [dataDocument?.id]);
 
   const handleCreateStatement = (
     text: string = "",

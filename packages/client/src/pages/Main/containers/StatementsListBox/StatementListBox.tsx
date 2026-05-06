@@ -61,8 +61,6 @@ const initialData: {
 
 export const StatementListBox: React.FC = () => {
   const queryClient = useQueryClient();
-  const statementListBoxRef = React.useRef<HTMLDivElement>(null);
-
   const dispatch = useAppDispatch();
   const rowsExpanded: string[] = useAppSelector((state) => state.statementList.rowsExpanded);
   const statementListOpened: boolean = useAppSelector(
@@ -639,9 +637,7 @@ export const StatementListBox: React.FC = () => {
         ).incompleteCloneFailures ?? 0;
       const total = variables.statements.length;
       const duplicated = total - incomplete;
-      toast.info(
-        `${duplicated} statement${duplicated !== 1 ? "s" : ""} duplicated`
-      );
+      toast.info(`${duplicated} statement${duplicated !== 1 ? "s" : ""} duplicated`);
       setSelectedRows([]);
       if (variables.newTerritoryId) {
         setTerritoryId(variables.newTerritoryId);
@@ -943,7 +939,7 @@ export const StatementListBox: React.FC = () => {
   }, [displayMode, contentWidth, isListNonEmpty, statementListTableIsLoading]);
 
   return (
-    <StyledStatementListBox ref={statementListBoxRef}>
+    <StyledStatementListBox>
       {
         <>
           <StatementListHeader
@@ -1061,7 +1057,6 @@ export const StatementListBox: React.FC = () => {
                   showStatementList={isListNonEmpty || statementListTableIsLoading}
                   userCanEdit={userCanEdit}
                   userData={userData}
-                  statementListBoxRef={statementListBoxRef}
                   onStatementAnchorHover={handleStatementAnchorHover}
                 />
               )}
