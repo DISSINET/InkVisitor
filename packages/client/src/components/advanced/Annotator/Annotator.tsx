@@ -7,31 +7,14 @@ import {
   shift,
   useFloating,
 } from "@floating-ui/react";
-import {
-  useMutation,
-  UseMutationResult,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, UseMutationResult, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import React, {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { FaPen, FaRegSave, FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 
-import {
-  Annotator,
-  EditMode,
-  editModeDisplayLabel,
-  Tag,
-} from "@inkvisitor/annotator/src/lib";
+import { Annotator, EditMode, editModeDisplayLabel, Tag } from "@inkvisitor/annotator/src/lib";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import {
   IDocument,
@@ -74,12 +57,7 @@ import {
   StyledScrollerViewport,
 } from "./AnnotatorStyles";
 import { annotatorHighlight } from "./highlight";
-import {
-  ANNOTATOR_LEFT_MARGIN_PX,
-  RATIO,
-  TerritoryCreateModalType,
-  W_SCROLL,
-} from "./types";
+import { ANNOTATOR_LEFT_MARGIN_PX, RATIO, TerritoryCreateModalType, W_SCROLL } from "./types";
 import { AnnotatorSearchLine } from "./AnnotatorSearchLine/AnnotatorSearchLine";
 
 interface TextAnnotatorProps {
@@ -94,9 +72,7 @@ interface TextAnnotatorProps {
   forwardAnnotator?: (annotator?: Annotator) => void;
 
   storedAnnotatorScrollPosition?: number | null;
-  setStoredAnnotatorScrollPosition?: React.Dispatch<
-    React.SetStateAction<number | null>
-  >;
+  setStoredAnnotatorScrollPosition?: React.Dispatch<React.SetStateAction<number | null>>;
 
   territory?: IResponseTerritory;
   // territoryId is from URL params and is used to reset the annotator when the territory changes
@@ -156,9 +132,7 @@ export const TextAnnotator = ({
 
   const { annotator, setAnnotator } = useAnnotator();
 
-  const [annotatorMode, setAnnotatorMode] = useState<EditMode>(
-    EditMode.HIGHLIGHT
-  );
+  const [annotatorMode, setAnnotatorMode] = useState<EditMode>(EditMode.HIGHLIGHT);
   const [localTextContent, setLocalTextContent] = useState<string>("");
 
   const isChangeMade = useMemo<boolean>(() => {
@@ -219,9 +193,8 @@ export const TextAnnotator = ({
 
   const mergeSavedDocumentIntoCache = useCallback(
     (variables: { id: string; doc: Partial<IDocument> }) => {
-      queryClient.setQueryData<IDocument | undefined>(
-        ["document", variables.id],
-        (old) => (old ? { ...old, ...variables.doc } : old)
+      queryClient.setQueryData<IDocument | undefined>(["document", variables.id], (old) =>
+        old ? { ...old, ...variables.doc } : old
       );
     },
     [queryClient]
@@ -257,10 +230,7 @@ export const TextAnnotator = ({
   });
 
   const wLineNumbers = displayLineNumbers ? 50 : 0;
-  const wTextArea = Math.max(
-    0,
-    width - wLineNumbers - W_SCROLL - ANNOTATOR_LEFT_MARGIN_PX
-  );
+  const wTextArea = Math.max(0, width - wLineNumbers - W_SCROLL - ANNOTATOR_LEFT_MARGIN_PX);
 
   const [isSelectingText, setIsSelectingText] = useState<boolean>(false);
 
@@ -280,11 +250,7 @@ export const TextAnnotator = ({
   useEffect(() => {
     if (!annotator || !setStoredAnnotatorScrollPosition) return;
     annotator.onScroll(() => saveScrollPositionOnScrollEnd());
-  }, [
-    annotator,
-    setStoredAnnotatorScrollPosition,
-    saveScrollPositionOnScrollEnd,
-  ]);
+  }, [annotator, setStoredAnnotatorScrollPosition, saveScrollPositionOnScrollEnd]);
 
   useEffect(() => {
     if (annotator) {
@@ -302,9 +268,7 @@ export const TextAnnotator = ({
   const [selectedText, setSelectedText] = useState<string>("");
   const [selectedAnchors, setSelectedAnchors] = useState<Tag[]>([]);
   const [selectionStartIndex, setSelectionStartIndex] = useState<number>(-1);
-  const [storedEntities, setStoredEntities] = useState<
-    Record<string, IEntity | false>
-  >({});
+  const [storedEntities, setStoredEntities] = useState<Record<string, IEntity | false>>({});
 
   /** XML (RAW) mode: pointer over `<entityId>` / `</entityId>` markup → preview chip at cursor */
   const [xmlMarkupAnchorHover, setXmlMarkupAnchorHover] = useState<{
@@ -314,9 +278,7 @@ export const TextAnnotator = ({
   } | null>(null);
 
   const xmlMarkupPreviewPointerInsideRef = useRef(false);
-  const xmlMarkupAnchorHoverClearTimerRef = useRef<ReturnType<
-    typeof setTimeout
-  > | null>(null);
+  const xmlMarkupAnchorHoverClearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const documentEntityIds = useMemo(() => {
     const ids = new Set<string>();
@@ -379,10 +341,7 @@ export const TextAnnotator = ({
       // filter only Statements
       const statementAnchors = Array.from(
         new Map(
-          collectStatementAnchors(dataDocument.anchors).map((anchor) => [
-            anchor.anchor,
-            anchor,
-          ])
+          collectStatementAnchors(dataDocument.anchors).map((anchor) => [anchor.anchor, anchor])
         ).values()
       );
       const territoryStatements = territory?.statements || [];
@@ -406,15 +365,11 @@ export const TextAnnotator = ({
         territoryStatements.findIndex(
           (statement) => statement.id === lastAnchorBeforeIndex?.anchor
         ) ?? -1;
-      const newOrder = getStatementOrderByIndex(
-        lastIndexBeforeHighlight + 1,
-        territoryStatements
-      );
+      const newOrder = getStatementOrderByIndex(lastIndexBeforeHighlight + 1, territoryStatements);
 
       if (userData && territory && statementCreateMutation) {
         if (entityCreateModalProps) {
-          const { label, detail, territoryId, language } =
-            entityCreateModalProps;
+          const { label, detail, territoryId, language } = entityCreateModalProps;
           const newStatement: IStatement = CStatement(
             userData.role,
             {
@@ -451,8 +406,7 @@ export const TextAnnotator = ({
   const [isSaving, setIsSaving] = useState<boolean>(false);
   // isSavingWithoutRefresh is the way to preserve the saving state while not refreshing the annotator
   // e.g. when updating an anchor elvl
-  const [isSavingWithoutRefresh, setIsSavingWithoutRefresh] =
-    useState<boolean>(false);
+  const [isSavingWithoutRefresh, setIsSavingWithoutRefresh] = useState<boolean>(false);
 
   // implementation of draggable menu
   const [menuDragOffset, setMenuDragOffset] = useState({ x: 0, y: 0 });
@@ -529,39 +483,36 @@ export const TextAnnotator = ({
     [endMenuDrag]
   );
 
-  const handleMenuDragPointerMove = useCallback(
-    (e: React.PointerEvent<HTMLDivElement>) => {
-      const session = menuDragSessionRef.current;
-      if (!session || e.pointerId !== session.pointerId) return;
-      e.preventDefault();
-      const page = document.getElementById("page");
-      const menuEl = menuDraggableRef.current;
-      let px = session.originX + (e.clientX - session.startClientX);
-      let py = session.originY + (e.clientY - session.startClientY);
+  const handleMenuDragPointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    const session = menuDragSessionRef.current;
+    if (!session || e.pointerId !== session.pointerId) return;
+    e.preventDefault();
+    const page = document.getElementById("page");
+    const menuEl = menuDraggableRef.current;
+    let px = session.originX + (e.clientX - session.startClientX);
+    let py = session.originY + (e.clientY - session.startClientY);
 
-      if (page && menuEl) {
-        const pr = page.getBoundingClientRect();
-        const pad = ANNOTATOR_MENU_PAGE_PADDING;
-        const mr = menuEl.getBoundingClientRect();
-        const cur = menuDragOffsetRef.current;
-        const innerLeft = (x: number) => mr.left + (x - cur.x);
-        const innerTop = (y: number) => mr.top + (y - cur.y);
-        for (let i = 0; i < 4; i++) {
-          const l = innerLeft(px);
-          const t = innerTop(py);
-          const r = l + mr.width;
-          const b = t + mr.height;
-          if (l < pr.left + pad) px += pr.left + pad - l;
-          if (t < pr.top + pad) py += pr.top + pad - t;
-          if (r > pr.right - pad) px -= r - (pr.right - pad);
-          if (b > pr.bottom - pad) py -= b - (pr.bottom - pad);
-        }
+    if (page && menuEl) {
+      const pr = page.getBoundingClientRect();
+      const pad = ANNOTATOR_MENU_PAGE_PADDING;
+      const mr = menuEl.getBoundingClientRect();
+      const cur = menuDragOffsetRef.current;
+      const innerLeft = (x: number) => mr.left + (x - cur.x);
+      const innerTop = (y: number) => mr.top + (y - cur.y);
+      for (let i = 0; i < 4; i++) {
+        const l = innerLeft(px);
+        const t = innerTop(py);
+        const r = l + mr.width;
+        const b = t + mr.height;
+        if (l < pr.left + pad) px += pr.left + pad - l;
+        if (t < pr.top + pad) py += pr.top + pad - t;
+        if (r > pr.right - pad) px -= r - (pr.right - pad);
+        if (b > pr.bottom - pad) py -= b - (pr.bottom - pad);
       }
+    }
 
-      setMenuDragOffset({ x: px, y: py });
-    },
-    []
-  );
+    setMenuDragOffset({ x: px, y: py });
+  }, []);
 
   const handleMenuDragPointerUp = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
@@ -601,9 +552,7 @@ export const TextAnnotator = ({
         setIsSaving(true);
       }
 
-      const mutation = quiet
-        ? updateDocumentMutationQuiet
-        : updateDocumentMutation;
+      const mutation = quiet ? updateDocumentMutationQuiet : updateDocumentMutation;
 
       await mutation.mutateAsync({
         id: documentId,
@@ -643,9 +592,7 @@ export const TextAnnotator = ({
     queryKey: ["anchorEntities", selectedAnchors],
     queryFn: async () => {
       const uniqueAnchors = [...new Set(selectedAnchors)];
-      const entities = await api.entitiesGet(
-        uniqueAnchors.map((anchor) => anchor.getTagName())
-      );
+      const entities = await api.entitiesGet(uniqueAnchors.map((anchor) => anchor.getTagName()));
 
       const data = entities.data ?? [];
 
@@ -661,10 +608,7 @@ export const TextAnnotator = ({
     enabled: api.isLoggedIn() && selectedAnchors.length > 0,
   });
 
-  const handleAddAnchor = async (
-    entityId: string,
-    elvl?: EntityEnums.Elvl
-  ): Promise<void> => {
+  const handleAddAnchor = async (entityId: string, elvl?: EntityEnums.Elvl): Promise<void> => {
     annotator?.addAnchor(
       entityId,
       elvl
@@ -701,6 +645,7 @@ export const TextAnnotator = ({
       return;
     }
 
+    // statement anchor hover to highlight the statement in the statement list (HIGHLIGHT mode)
     const registerAnchorHover = (a: Annotator) => {
       a.onAnchorHover((tags: Tag[]) => {
         const cb = onStatementAnchorHoverRef.current;
@@ -712,49 +657,48 @@ export const TextAnnotator = ({
       });
     };
 
+    // XML markup anchor hover to preview the entity tag when hovering over the <id> markup (RAW mode)
     const registerAnchorTagMarkupHover = (a: Annotator) => {
-      a.onAnchorTagHover(
-        (tag: Tag | null, position: { x: number; y: number } | null) => {
-          if (annotatorModeRef.current !== EditMode.RAW) {
-            return;
-          }
-          const clearScheduled = xmlMarkupAnchorHoverClearTimerRef;
-          const cancelClear = () => {
-            if (clearScheduled.current !== null) {
-              clearTimeout(clearScheduled.current);
-              clearScheduled.current = null;
-            }
-          };
-          const scheduleClear = () => {
-            cancelClear();
-            clearScheduled.current = setTimeout(() => {
-              clearScheduled.current = null;
-              if (!xmlMarkupPreviewPointerInsideRef.current) {
-                setXmlMarkupAnchorHover(null);
-              }
-            }, 200);
-          };
-
-          if (!tag || !position) {
-            if (xmlMarkupPreviewPointerInsideRef.current) {
-              return;
-            }
-            scheduleClear();
-            return;
-          }
-          cancelClear();
-          const entityId = tag.getTagName();
-          if (!documentEntityIds.has(entityId)) {
-            setXmlMarkupAnchorHover(null);
-            return;
-          }
-          setXmlMarkupAnchorHover({
-            entityId,
-            x: position.x,
-            y: position.y,
-          });
+      a.onAnchorTagHover((tag: Tag | null, position: { x: number; y: number } | null) => {
+        if (annotatorModeRef.current !== EditMode.RAW) {
+          return;
         }
-      );
+        const clearScheduled = xmlMarkupAnchorHoverClearTimerRef;
+        const cancelClear = () => {
+          if (clearScheduled.current !== null) {
+            clearTimeout(clearScheduled.current);
+            clearScheduled.current = null;
+          }
+        };
+        const scheduleClear = () => {
+          cancelClear();
+          clearScheduled.current = setTimeout(() => {
+            clearScheduled.current = null;
+            if (!xmlMarkupPreviewPointerInsideRef.current) {
+              setXmlMarkupAnchorHover(null);
+            }
+          }, 200);
+        };
+
+        if (!tag || !position) {
+          if (xmlMarkupPreviewPointerInsideRef.current) {
+            return;
+          }
+          scheduleClear();
+          return;
+        }
+        cancelClear();
+        const entityId = tag.getTagName();
+        if (!documentEntityIds.has(entityId)) {
+          setXmlMarkupAnchorHover(null);
+          return;
+        }
+        setXmlMarkupAnchorHover({
+          entityId,
+          x: position.x,
+          y: position.y,
+        });
+      });
     };
 
     const applyCanvasTheme = (a: Annotator) => {
@@ -771,9 +715,7 @@ export const TextAnnotator = ({
     const currentContent = annotator?.text?.value;
     const newContent = dataDocument?.content ?? "no text";
 
-    const reuseExistingInstance = (
-      contentForLocalState: string = newContent
-    ) => {
+    const reuseExistingInstance = (contentForLocalState: string = newContent) => {
       if (!annotator) return;
       applyCanvasTheme(annotator);
 
@@ -816,13 +758,10 @@ export const TextAnnotator = ({
       dataDocument?.id === documentId &&
       annotatorLoadedForDocIdRef.current === documentId
     ) {
-      queryClient.setQueryData<IDocument | undefined>(
-        ["document", documentId],
-        (old) => {
-          if (!old || old.id !== documentId) return old;
-          return { ...old, content: currentContent };
-        }
-      );
+      queryClient.setQueryData<IDocument | undefined>(["document", documentId], (old) => {
+        if (!old || old.id !== documentId) return old;
+        return { ...old, content: currentContent };
+      });
       reuseExistingInstance(currentContent);
       return;
     }
@@ -896,14 +835,7 @@ export const TextAnnotator = ({
     if (!dataDocumentIsFetching && !isSaving) {
       refreshAnnotator();
     }
-  }, [
-    displayLineNumbers,
-    hlEntities ?? [],
-    dataDocumentIsFetching,
-    theme,
-    dataDocument,
-    isSaving,
-  ]);
+  }, [displayLineNumbers, hlEntities ?? [], dataDocumentIsFetching, theme, dataDocument, isSaving]);
 
   // Resize the annotator when the width or height changes
   useEffect(() => {
@@ -918,10 +850,7 @@ export const TextAnnotator = ({
     }
   }, [width]);
 
-  const onCreateTerritory = (
-    mode: TerritoryCreateModalType,
-    elvl: EntityEnums.Elvl
-  ) => {
+  const onCreateTerritory = (mode: TerritoryCreateModalType, elvl: EntityEnums.Elvl) => {
     setTerritoryCreateModalType(mode);
     setTerritoryElvl(elvl);
   };
@@ -1011,14 +940,13 @@ export const TextAnnotator = ({
     ];
   }, [isMenuDisplayed]);
 
-  const { refs: menuFloatingRefs, floatingStyles: menuFloatingStyles } =
-    useFloating({
-      open: isMenuDisplayed,
-      placement: "bottom",
-      strategy: "fixed",
-      whileElementsMounted: autoUpdate,
-      middleware: annotatorMenuMiddleware,
-    });
+  const { refs: menuFloatingRefs, floatingStyles: menuFloatingStyles } = useFloating({
+    open: isMenuDisplayed,
+    placement: "bottom",
+    strategy: "fixed",
+    whileElementsMounted: autoUpdate,
+    middleware: annotatorMenuMiddleware,
+  });
 
   useLayoutEffect(() => {
     if (!isMenuDisplayed) return;
@@ -1039,23 +967,17 @@ export const TextAnnotator = ({
 
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [searchOccurences, setSearchOccurences] = useState<
-    | { segmentIndex: number; lineIndex: number; start: number; end: number }[]
-    | null
+    { segmentIndex: number; lineIndex: number; start: number; end: number }[] | null
   >(null);
   const [isRegexMode, setIsRegexMode] = useState<boolean>(false);
-  const [isCaseSensitiveMode, setIsCaseSensitiveMode] =
-    useState<boolean>(false);
-  const [isExtendToWholeWordMode, setIsExtendToWholeWordMode] =
-    useState<boolean>(false);
-  const [isWholeWordOnlyMode, setIsWholeWordOnlyMode] =
-    useState<boolean>(false);
+  const [isCaseSensitiveMode, setIsCaseSensitiveMode] = useState<boolean>(false);
+  const [isExtendToWholeWordMode, setIsExtendToWholeWordMode] = useState<boolean>(false);
+  const [isWholeWordOnlyMode, setIsWholeWordOnlyMode] = useState<boolean>(false);
   const [searchActiveOccurence, setSearchActiveOccurence] = useState<number>(0);
 
   // annotate tool
   // entity to anchor
-  const [entityToAnchor, setEntityToAnchor] = useState<IResponseEntity | null>(
-    null
-  );
+  const [entityToAnchor, setEntityToAnchor] = useState<IResponseEntity | null>(null);
   // does the pre-selected anchor exist in the current selection
   const [currentAnchorExist, setCurrentAnchorExist] = useState(false);
 
@@ -1070,11 +992,7 @@ export const TextAnnotator = ({
   useEffect(() => {
     if (!entityToAnchor) {
       setCurrentAnchorExist(false);
-    } else if (
-      selectedAnchors.some(
-        (anchor) => anchor.getTagName() === entityToAnchor?.id
-      )
-    ) {
+    } else if (selectedAnchors.some((anchor) => anchor.getTagName() === entityToAnchor?.id)) {
       setCurrentAnchorExist(true);
     } else {
       setCurrentAnchorExist(false);
@@ -1114,11 +1032,7 @@ export const TextAnnotator = ({
   }, [annotator, dataDocument]);
 
   if (dataDocumentError) {
-    return (
-      <StyledInfoText>
-        Error loading document: {dataDocumentError.message}
-      </StyledInfoText>
-    );
+    return <StyledInfoText>Error loading document: {dataDocumentError.message}</StyledInfoText>;
   }
 
   return (
@@ -1202,29 +1116,19 @@ export const TextAnnotator = ({
                       onRemoveAnchor={onRemoveAnchor}
                       onUpdateAnchor={onUpdateAnchor}
                       isTextInsideThisT={selectedAnchors.some(
-                        (anchor) =>
-                          anchor.getTagName() === thisTerritoryEntityId
+                        (anchor) => anchor.getTagName() === thisTerritoryEntityId
                       )}
                       activeTerritoryId={thisTerritoryEntityId}
                       onCreateActiveTAnchor={async (elvl) => {
-                        await handleAddAnchor(
-                          thisTerritoryEntityId ?? "",
-                          elvl
-                        );
+                        await handleAddAnchor(thisTerritoryEntityId ?? "", elvl);
                       }}
                       canCreateActiveTAnchor={
-                        !dataDocument?.entityIds.T.includes(
-                          thisTerritoryEntityId ?? ""
-                        )
+                        !dataDocument?.entityIds.T.includes(thisTerritoryEntityId ?? "")
                       }
                       hasParentT={hasParentT}
                       territory={territory}
                       disableCreate={disableCreate}
-                      isLoading={
-                        isSaving ||
-                        isSavingWithoutRefresh ||
-                        isFetchingAnchorEntities
-                      }
+                      isLoading={isSaving || isSavingWithoutRefresh || isFetchingAnchorEntities}
                     />
                   )}
                 </StyledAnnotatorMenuDraggable>
@@ -1232,53 +1136,45 @@ export const TextAnnotator = ({
             </FloatingPortal>
           )}
 
-          {xmlMarkupAnchorHover &&
-            annotatorMode === EditMode.RAW &&
-            api.isLoggedIn() && (
-              <FloatingPortal id="page">
-                <div
-                  style={{
-                    position: "fixed",
-                    left: xmlMarkupAnchorHover.x - 35,
-                    top: xmlMarkupAnchorHover.y + 12,
-                    zIndex: 10050,
-                    pointerEvents: "auto",
-                    maxWidth: 340,
-                    borderRadius: 4,
-                    backgroundColor: theme.color.white,
-                    boxShadow: "0 4px 14px rgba(0,0,0,0.12)",
-                    padding: "4px 8px",
-                  }}
-                  onMouseEnter={() => {
-                    xmlMarkupPreviewPointerInsideRef.current = true;
-                    if (xmlMarkupAnchorHoverClearTimerRef.current !== null) {
-                      clearTimeout(xmlMarkupAnchorHoverClearTimerRef.current);
-                      xmlMarkupAnchorHoverClearTimerRef.current = null;
+          {xmlMarkupAnchorHover && annotatorMode === EditMode.RAW && api.isLoggedIn() && (
+            <FloatingPortal id="page">
+              <div
+                style={{
+                  position: "fixed",
+                  left: xmlMarkupAnchorHover.x - 35,
+                  top: xmlMarkupAnchorHover.y + 12,
+                  zIndex: 10050,
+                  pointerEvents: "auto",
+                  maxWidth: 340,
+                  borderRadius: 4,
+                  backgroundColor: theme.color.white,
+                  boxShadow: "0 4px 14px rgba(0,0,0,0.12)",
+                  padding: "4px 8px",
+                }}
+                onMouseEnter={() => {
+                  xmlMarkupPreviewPointerInsideRef.current = true;
+                  if (xmlMarkupAnchorHoverClearTimerRef.current !== null) {
+                    clearTimeout(xmlMarkupAnchorHoverClearTimerRef.current);
+                    xmlMarkupAnchorHoverClearTimerRef.current = null;
+                  }
+                }}
+                onMouseLeave={() => {
+                  xmlMarkupPreviewPointerInsideRef.current = false;
+                  if (xmlMarkupAnchorHoverClearTimerRef.current !== null) {
+                    clearTimeout(xmlMarkupAnchorHoverClearTimerRef.current);
+                  }
+                  xmlMarkupAnchorHoverClearTimerRef.current = setTimeout(() => {
+                    xmlMarkupAnchorHoverClearTimerRef.current = null;
+                    if (!xmlMarkupPreviewPointerInsideRef.current) {
+                      setXmlMarkupAnchorHover(null);
                     }
-                  }}
-                  onMouseLeave={() => {
-                    xmlMarkupPreviewPointerInsideRef.current = false;
-                    if (xmlMarkupAnchorHoverClearTimerRef.current !== null) {
-                      clearTimeout(xmlMarkupAnchorHoverClearTimerRef.current);
-                    }
-                    xmlMarkupAnchorHoverClearTimerRef.current = setTimeout(
-                      () => {
-                        xmlMarkupAnchorHoverClearTimerRef.current = null;
-                        if (!xmlMarkupPreviewPointerInsideRef.current) {
-                          setXmlMarkupAnchorHover(null);
-                        }
-                      },
-                      200
-                    );
-                  }}
-                >
-                  <EntityTagById
-                    entityId={xmlMarkupAnchorHover.entityId}
-                    disableTooltip={false}
-                  />
-                </div>
-              </FloatingPortal>
-            )}
+                  }, 200);
+                }}
+              >
+                <EntityTagById entityId={xmlMarkupAnchorHover.entityId} disableTooltip={false} />
+              </div>
+            </FloatingPortal>
+          )}
 
           {displayLineNumbers && (
             <StyledLinesCanvas
@@ -1326,11 +1222,7 @@ export const TextAnnotator = ({
                   <FaPen size={11} />
                 </StyledDisplayModeButtonIconWrapper>
               }
-              label={
-                !annotatorWidthTooNarrow
-                  ? editModeDisplayLabel[EditMode.HIGHLIGHT]
-                  : ""
-              }
+              label={!annotatorWidthTooNarrow ? editModeDisplayLabel[EditMode.HIGHLIGHT] : ""}
               color="success"
               inverted={annotatorMode !== EditMode.HIGHLIGHT}
               onClick={() => {
@@ -1349,11 +1241,7 @@ export const TextAnnotator = ({
                 </StyledDisplayModeButtonIconWrapper>
               }
               color="success"
-              label={
-                !annotatorWidthTooNarrow
-                  ? editModeDisplayLabel[EditMode.SEMI]
-                  : ""
-              }
+              label={!annotatorWidthTooNarrow ? editModeDisplayLabel[EditMode.SEMI] : ""}
               inverted={annotatorMode !== EditMode.SEMI}
               onClick={() => {
                 setAnnotatorMode(EditMode.SEMI);
@@ -1371,11 +1259,7 @@ export const TextAnnotator = ({
                 </StyledDisplayModeButtonIconWrapper>
               }
               color="success"
-              label={
-                !annotatorWidthTooNarrow
-                  ? editModeDisplayLabel[EditMode.RAW]
-                  : ""
-              }
+              label={!annotatorWidthTooNarrow ? editModeDisplayLabel[EditMode.RAW] : ""}
               inverted={annotatorMode !== EditMode.RAW}
               onClick={() => {
                 setAnnotatorMode(EditMode.RAW);
@@ -1392,10 +1276,7 @@ export const TextAnnotator = ({
               inverted
               icon={<FaTrash />}
               disabled={
-                !isChangeMade ||
-                isSaving ||
-                isSavingWithoutRefresh ||
-                dataDocumentIsFetching
+                !isChangeMade || isSaving || isSavingWithoutRefresh || dataDocumentIsFetching
               }
               onClick={() => {
                 if (dataDocument?.content) {
@@ -1410,10 +1291,7 @@ export const TextAnnotator = ({
                 color="info"
                 icon={<FaRegSave size={14} />}
                 disabled={
-                  !isChangeMade ||
-                  isSaving ||
-                  isSavingWithoutRefresh ||
-                  dataDocumentIsFetching
+                  !isChangeMade || isSaving || isSavingWithoutRefresh || dataDocumentIsFetching
                 }
                 onClick={() => {
                   handleSaveNewContent(false);
@@ -1434,9 +1312,7 @@ export const TextAnnotator = ({
           allowedEntityClasses={[EntityEnums.Class.Territory]}
           labelTyped={newTerritoryName}
           parentTerritory={
-            territoryCreateModalType === "sibling-T"
-              ? dataParentTerritory
-              : territory
+            territoryCreateModalType === "sibling-T" ? dataParentTerritory : territory
           }
           onMutationSuccess={async (entity) => {
             await handleAddAnchor(entity.id, territoryElvl);
