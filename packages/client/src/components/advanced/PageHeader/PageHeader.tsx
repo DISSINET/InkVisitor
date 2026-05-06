@@ -29,7 +29,6 @@ import {
   StyledRightHeader,
   StyledSandboxText,
   StyledSpace,
-  StyledText,
   StyledThemeSwitcher,
   StyledThemeSwitcherIcon,
   StyledUser,
@@ -234,8 +233,6 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
           <StyledLoggedAsWrap>
             {userName.length > 0 && (
               <StyledUser>
-                <StyledText>logged as</StyledText>
-
                 <StyledUserIconWrap onClick={() => setUserCustomizationOpen(true)}>
                   {getUserIcon(userRole, UserTagSize.Large)}
                 </StyledUserIconWrap>
