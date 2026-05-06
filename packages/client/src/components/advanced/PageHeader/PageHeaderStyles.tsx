@@ -30,10 +30,6 @@ export const StyledUserIconWrap = styled.div`
   margin-left: ${({ theme }) => theme.space[2]};
   margin-right: ${({ theme }) => theme.space[2]};
 `;
-export const StyledText = styled.div`
-  font-size: ${({ theme }) => theme.fontSize["sm"]};
-  white-space: nowrap;
-`;
 export const StyledUsername = styled.div`
   cursor: pointer;
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
