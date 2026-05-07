@@ -228,17 +228,25 @@ const MainPage: React.FC<MainPage> = ({}) => {
             tooltipLabel="refresh data"
             inverted
             icon={<BiRefresh />}
-            onClick={() => {
+            onClick={async () => {
               const uid = localStorage.getItem("userid");
-              queriesToRefresh.forEach((queryToRefresh) => {
+              for (const queryToRefresh of queriesToRefresh) {
                 if (queryToRefresh === "user" && uid) {
-                  queryClient.invalidateQueries({ queryKey: ["user", uid] });
+                  await queryClient.invalidateQueries({ queryKey: ["user", uid] });
+                  await queryClient.refetchQueries({
+                    queryKey: ["user", uid],
+                    type: "active",
+                  });
                 } else {
-                  queryClient.invalidateQueries({
+                  await queryClient.invalidateQueries({
                     queryKey: [queryToRefresh],
                   });
+                  await queryClient.refetchQueries({
+                    queryKey: [queryToRefresh],
+                    type: "active",
+                  });
                 }
-              });
+              }
             }}
           />
         ) : null}
@@ -824,7 +832,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
           label="Territories"
           isExpanded={firstPanelExpanded}
           buttons={[
-            refreshBoxButton(["tree", "user"], !firstPanelExpanded),
+            refreshBoxButton(["tree", "territory", "user"], !firstPanelExpanded),
             firstPanelButton(),
           ]}
           noFrame

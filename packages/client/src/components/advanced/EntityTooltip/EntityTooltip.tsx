@@ -396,7 +396,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
         {renderRelations}
       </>
     ),
-    [tooltipData]
+    [renderEntityInfo, renderRelations]
   );
 
   const [showTooltip, setShowTooltip] = useState(false);
