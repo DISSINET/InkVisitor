@@ -137,6 +137,12 @@ export const StyledFloatingContainerTitle = styled.div`
   color: ${({ theme }) => theme.color["black"]};
 `;
 
+export const StyledFloatingActions = styled.div`
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.8rem;
+`;
+
 export const StyledButtonsContainer = styled.div`
   display: flex;
   gap: ${({ theme }) => theme.space[1]};
