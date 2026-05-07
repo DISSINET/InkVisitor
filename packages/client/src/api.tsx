@@ -1081,6 +1081,24 @@ class Api {
     }
   }
 
+  async statementsBatchReorder(
+    updates: { id: string; order: number }[],
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      const response = await this.connection.put(
+        `/statements/batch-reorder`,
+        {
+          updates,
+        },
+        options
+      );
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
   async statementsReferencesReplace(
     statementsIds: string[],
     references: IReference[],

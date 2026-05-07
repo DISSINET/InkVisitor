@@ -337,6 +337,102 @@ export default Router()
 
   /**
    * @openapi
+   * /statements/batch-reorder:
+   *   put:
+   *     description: Reorder N statements by setting exact territory order values
+   *     tags:
+   *       - entities
+   *     requestBody:
+   *       description: list of statement ids with target order
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               updates:
+   *                 type: array
+   *                 items:
+   *                   type: object
+   *                   properties:
+   *                     id:
+   *                       type: string
+   *                     order:
+   *                       type: number
+   *     responses:
+   *       200:
+   *         description: Returns generic response
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/IResponseGeneric"
+   */
+  .put(
+    "/batch-reorder",
+    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
+      const updates = request.body?.updates as
+        | { id: string; order: number }[]
+        | undefined;
+
+      if (!updates || updates.constructor.name !== "Array" || !updates.length) {
+        throw new BadParams("updates are required");
+      }
+
+      if (
+        updates.some(
+          (item) =>
+            !item ||
+            typeof item.id !== "string" ||
+            item.id.length === 0 ||
+            typeof item.order !== "number" ||
+            Number.isNaN(item.order)
+        )
+      ) {
+        throw new BadParams("invalid updates payload");
+      }
+
+      const uniqueIds = Array.from(new Set(updates.map((item) => item.id)));
+      if (uniqueIds.length !== updates.length) {
+        throw new BadParams("duplicate statement ids are not allowed");
+      }
+
+      await request.db.lock();
+
+      const statements = await Entity.findEntitiesByIds(request.db.connection, uniqueIds);
+      const statementsCount = statements.reduce(
+        (acc, cur) => (cur.class === EntityEnums.Class.Statement ? acc + 1 : acc),
+        0
+      );
+      if (statementsCount !== uniqueIds.length) {
+        throw new StatementDoesNotExits("at least one statement not found", "");
+      }
+
+      const updatesMap = new Map(updates.map((item) => [item.id, item.order]));
+
+      for (const statementData of statements) {
+        const statement = new Statement(statementData as IStatement);
+        const nextOrder = updatesMap.get(statement.id);
+
+        if (nextOrder === undefined || statement.data.territory?.order === nextOrder) {
+          continue;
+        }
+
+        statement.data.territory = new StatementTerritory({
+          territoryId: statement.data.territory?.territoryId,
+          order: nextOrder,
+        });
+
+        await statement.update(request.db.connection, { data: statement.data });
+      }
+
+      return {
+        result: true,
+        message: `${updates.length} statements reordered`,
+      };
+    })
+  )
+
+  /**
+   * @openapi
    * /statements/references:
    *   put:
    *     description: Handles batch update for statements references according to replace flag
