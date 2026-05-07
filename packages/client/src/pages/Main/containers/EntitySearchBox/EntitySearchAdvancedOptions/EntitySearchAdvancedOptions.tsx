@@ -1,20 +1,17 @@
-import {
-  autoUpdate,
-  FloatingPortal,
-  offset,
-  useFloating,
-} from "@floating-ui/react";
+import { autoUpdate, FloatingPortal, offset, useFloating } from "@floating-ui/react";
 import { SearchEnums } from "@shared/enums";
-import { IRequestSearch } from "@shared/types/request-search";
+import { IRequestSearch, IRequestSearchRootValidity } from "@shared/types/request-search";
 import { Button, ButtonGroup } from "components";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { CgOptions, CgPlayListAdd, CgPlayListRemove } from "react-icons/cg";
+import { LuListTodo } from "react-icons/lu";
 import { animated, config, useSpring } from "react-spring";
 import { ButtonSize } from "types";
 import {
   StyledAdvancedOptions,
   StyledAdvancedOptionsIconWrap,
   StyledAdvancedOptionsSign,
+  StyledFloatingActions,
   StyledFloatingContainer,
   StyledFloatingContainerTitle,
   StyledPill,
@@ -29,9 +26,12 @@ interface EntitySearchAdvancedOptions {
   searchData: IRequestSearch;
   setSearchData: (data: IRequestSearch) => void;
 }
-export const EntitySearchAdvancedOptions: React.FC<
-  EntitySearchAdvancedOptions
-> = ({ expandedOptions, setExpandedOptions, searchData, setSearchData }) => {
+export const EntitySearchAdvancedOptions: React.FC<EntitySearchAdvancedOptions> = ({
+  expandedOptions,
+  setExpandedOptions,
+  searchData,
+  setSearchData,
+}) => {
   const [showPillsMenu, setShowPillsMenu] = useState(false);
   const [portalMounted, setPortalMounted] = useState(false);
   const hideTimeoutRef = useRef<number | null>(null);
@@ -97,6 +97,44 @@ export const EntitySearchAdvancedOptions: React.FC<
     middleware: [offset({ mainAxis: 4 })],
   });
 
+  const hasValueForOption = useCallback(
+    (option: SearchEnums.AdvancedOption) => {
+      switch (option) {
+        case SearchEnums.AdvancedOption.Class:
+          return Boolean(searchData.class);
+        case SearchEnums.AdvancedOption.Status:
+          return Boolean(searchData.status);
+        case SearchEnums.AdvancedOption.Language:
+          return Boolean(searchData.language);
+        case SearchEnums.AdvancedOption.Territory:
+          return Boolean(searchData.territoryId);
+        case SearchEnums.AdvancedOption.CoOccurrence:
+          return Boolean(searchData.cooccurrenceId);
+        case SearchEnums.AdvancedOption.ReferencedTo:
+          return Boolean(searchData.haveReferenceTo);
+        case SearchEnums.AdvancedOption.CreatedAt:
+          return searchData.createdDate !== undefined;
+        case SearchEnums.AdvancedOption.UpdatedAt:
+          return searchData.updatedDate !== undefined;
+        case SearchEnums.AdvancedOption.CreatedBy:
+          return Boolean(searchData.createdBy);
+        case SearchEnums.AdvancedOption.UpdatedBy:
+          return Boolean(searchData.updatedBy);
+        case SearchEnums.AdvancedOption.EditedBy:
+          return Boolean(searchData.editedBy);
+        case SearchEnums.AdvancedOption.RootValidity:
+          return (
+            searchData.isRootInvalid !== undefined &&
+            searchData.isRootInvalid !== null &&
+            searchData.isRootInvalid !== IRequestSearchRootValidity.Any
+          );
+        default:
+          return false;
+      }
+    },
+    [searchData]
+  );
+
   const renderBatchButtons = useCallback(() => {
     return (
       <ButtonGroup $noMarginRight>
@@ -113,6 +151,19 @@ export const EntitySearchAdvancedOptions: React.FC<
           tooltipLabel="Add All"
           disabled={expandedOptions.length === advancedOptions.length}
         />
+        {/* <Button
+          inverted
+          noBackground
+          noBorder
+          noPadding
+          icon={<LuListTodo size={17} />}
+          size={ButtonSize.Small}
+          onClick={() => {
+            setExpandedOptions(expandedOptions.filter((option) => hasValueForOption(option)));
+          }}
+          tooltipLabel="Clear empty filters"
+          disabled={expandedOptions.length === 0}
+        /> */}
         <Button
           inverted
           noBackground
@@ -131,7 +182,7 @@ export const EntitySearchAdvancedOptions: React.FC<
         />
       </ButtonGroup>
     );
-  }, [expandedOptions, setExpandedOptions, setSearchData, searchData]);
+  }, [expandedOptions, hasValueForOption, setExpandedOptions, setSearchData, searchData]);
 
   return (
     <>
@@ -169,9 +220,7 @@ export const EntitySearchAdvancedOptions: React.FC<
               }}
             >
               <StyledFloatingContainer>
-                <StyledFloatingContainerTitle>
-                  Select active filters
-                </StyledFloatingContainerTitle>
+                <StyledFloatingContainerTitle>Select active filters</StyledFloatingContainerTitle>
                 <StyledPillsContainer>
                   {advancedOptions.map((option) => {
                     const isSelected = expandedOptions.includes(option);
@@ -181,9 +230,7 @@ export const EntitySearchAdvancedOptions: React.FC<
                         $selected={isSelected}
                         onClick={() => {
                           if (isSelected) {
-                            setExpandedOptions(
-                              expandedOptions.filter((o) => o !== option)
-                            );
+                            setExpandedOptions(expandedOptions.filter((o) => o !== option));
                           } else {
                             setExpandedOptions([...expandedOptions, option]);
                           }
@@ -194,6 +241,23 @@ export const EntitySearchAdvancedOptions: React.FC<
                     );
                   })}
                 </StyledPillsContainer>
+                <StyledFloatingActions>
+                  <Button
+                    inverted
+                    noBackground
+                    noBorder
+                    noPadding
+                    icon={<LuListTodo size={18} />}
+                    size={ButtonSize.Small}
+                    onClick={() => {
+                      setExpandedOptions(
+                        expandedOptions.filter((option) => hasValueForOption(option))
+                      );
+                    }}
+                    tooltipLabel="Clear empty filters"
+                    disabled={expandedOptions.length === 0}
+                  />
+                </StyledFloatingActions>
               </StyledFloatingContainer>
             </animated.div>
           </div>

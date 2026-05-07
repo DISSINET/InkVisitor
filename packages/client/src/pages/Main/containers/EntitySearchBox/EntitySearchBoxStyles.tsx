@@ -115,6 +115,7 @@ export const StyledAdvancedOptionsIconWrap = styled.div`
 `;
 
 export const StyledFloatingContainer = styled.div`
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.space[2]};
@@ -134,6 +135,12 @@ export const StyledFloatingContainerTitle = styled.div`
   display: flex;
   justify-content: center;
   color: ${({ theme }) => theme.color["black"]};
+`;
+
+export const StyledFloatingActions = styled.div`
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.8rem;
 `;
 
 export const StyledButtonsContainer = styled.div`
@@ -165,8 +172,7 @@ export const StyledPill = styled.div<{ $selected?: boolean }>`
   border-radius: 2rem;
   background-color: ${({ theme }) => theme.color["gray"][100]};
   border: 1px solid
-    ${({ theme, $selected }) =>
-      $selected ? theme.color["primary"] : theme.color["gray"][300]};
+    ${({ theme, $selected }) => ($selected ? theme.color["primary"] : theme.color["gray"][300])};
   user-select: none;
 
   &:hover {
