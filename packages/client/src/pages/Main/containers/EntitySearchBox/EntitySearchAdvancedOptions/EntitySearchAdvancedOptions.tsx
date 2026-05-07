@@ -150,7 +150,7 @@ export const EntitySearchAdvancedOptions: React.FC<EntitySearchAdvancedOptions> 
           tooltipLabel="Add All"
           disabled={expandedOptions.length === advancedOptions.length}
         />
-        <Button
+        {/* <Button
           inverted
           noBackground
           noBorder
@@ -162,7 +162,7 @@ export const EntitySearchAdvancedOptions: React.FC<EntitySearchAdvancedOptions> 
           }}
           tooltipLabel="Clear empty filters"
           disabled={expandedOptions.length === 0}
-        />
+        /> */}
         <Button
           inverted
           noBackground
@@ -219,6 +219,23 @@ export const EntitySearchAdvancedOptions: React.FC<EntitySearchAdvancedOptions> 
               }}
             >
               <StyledFloatingContainer>
+                <div style={{ position: "absolute", bottom: "0.5rem", right: "0.8rem" }}>
+                  <Button
+                    inverted
+                    noBackground
+                    noBorder
+                    noPadding
+                    icon={<LuListTodo size={18} />}
+                    size={ButtonSize.Small}
+                    onClick={() => {
+                      setExpandedOptions(
+                        expandedOptions.filter((option) => hasValueForOption(option))
+                      );
+                    }}
+                    tooltipLabel="Clear empty filters"
+                    disabled={expandedOptions.length === 0}
+                  />
+                </div>
                 <StyledFloatingContainerTitle>Select active filters</StyledFloatingContainerTitle>
                 <StyledPillsContainer>
                   {advancedOptions.map((option) => {

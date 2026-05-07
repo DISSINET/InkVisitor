@@ -115,6 +115,7 @@ export const StyledAdvancedOptionsIconWrap = styled.div`
 `;
 
 export const StyledFloatingContainer = styled.div`
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.space[2]};
@@ -165,8 +166,7 @@ export const StyledPill = styled.div<{ $selected?: boolean }>`
   border-radius: 2rem;
   background-color: ${({ theme }) => theme.color["gray"][100]};
   border: 1px solid
-    ${({ theme, $selected }) =>
-      $selected ? theme.color["primary"] : theme.color["gray"][300]};
+    ${({ theme, $selected }) => ($selected ? theme.color["primary"] : theme.color["gray"][300])};
   user-select: none;
 
   &:hover {
