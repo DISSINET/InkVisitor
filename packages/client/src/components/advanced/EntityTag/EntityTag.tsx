@@ -289,6 +289,7 @@ function areEntityTagsEqual(
   if (prev.fullWidth !== next.fullWidth) return false;
   if (prev.disableTooltip !== next.disableTooltip) return false;
   if (prev.disableDoubleClick !== next.disableDoubleClick) return false;
+  if (prev.statementsCount !== next.statementsCount) return false;
   if (Boolean(prev.button) !== Boolean(next.button)) return false;
   if (Boolean(prev.unlinkButton) !== Boolean(next.unlinkButton)) return false;
   // Compare unlinkButton onClick function reference to ensure handlers are up-to-date
