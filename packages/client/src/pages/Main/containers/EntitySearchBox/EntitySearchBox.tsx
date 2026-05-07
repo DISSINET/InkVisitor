@@ -374,35 +374,6 @@ export const EntitySearchBox: React.FC = () => {
     }
   }, [expandedOptions.includes(SearchEnums.AdvancedOption.Territory)]);
 
-  // Save expanded options to local storage
-  const debouncedExpandedOptions = useDebounce<SearchEnums.AdvancedOption[]>(
-    expandedOptions,
-    1000
-  );
-
-  const ENTITY_SEARCH_EXPANDED_OPTIONS_SETTING_KEY_PREFIX =
-    "entitySearchExpandedOptions";
-  useEffect(() => {
-    if (debouncedExpandedOptions.length > 0) {
-      localStorage.setItem(
-        ENTITY_SEARCH_EXPANDED_OPTIONS_SETTING_KEY_PREFIX,
-        JSON.stringify(expandedOptions)
-      );
-    }
-  }, [debouncedExpandedOptions]);
-
-  useEffect(() => {
-    const expandedOptionsSetting = localStorage.getItem(
-      ENTITY_SEARCH_EXPANDED_OPTIONS_SETTING_KEY_PREFIX
-    );
-    if (expandedOptionsSetting) {
-      const options = JSON.parse(
-        expandedOptionsSetting
-      ) as SearchEnums.AdvancedOption[];
-      handleSetExpandedOptions(options);
-    }
-  }, []);
-
   return (
     <>
       <StyledBoxContent>
