@@ -36,8 +36,8 @@ export type AnnotatorAnchorGridRowData = {
   onCommitAnchorSpanEdits?: () => void;
   editingAnchorKey: string | null;
   hasPendingSpanEditChanges: boolean;
-  setEditingAnchorKey: (key: string | null) => void;
-  setHasPendingSpanEditChanges: (hasChanges: boolean) => void;
+  setEditingAnchorKey: React.Dispatch<React.SetStateAction<string | null>>;
+  setHasPendingSpanEditChanges: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export type AnnotatorAnchorGridRowProps = {
@@ -85,23 +85,7 @@ export const AnnotatorAnchorGridRow = React.memo(
           disableClick={isSpanEditActive}
           disableDoubleClick={isSpanEditActive}
           button={
-            <div
-              style={{ display: "flex", alignItems: "center" }}
-              onBlur={(event) => {
-                if (!isSpanEditActive) {
-                  return;
-                }
-                const nextFocused = event.relatedTarget as Node | null;
-                if (nextFocused && event.currentTarget.contains(nextFocused)) {
-                  return;
-                }
-                setEditingAnchorKey(null);
-                if (hasPendingSpanEditChanges) {
-                  onCommitAnchorSpanEdits?.();
-                  setHasPendingSpanEditChanges(false);
-                }
-              }}
-            >
+            <div style={{ display: "flex", alignItems: "center" }}>
               {isSpanEditActive && (
                 <>
                   <Button
@@ -176,6 +160,11 @@ export const AnnotatorAnchorGridRow = React.memo(
                     return;
                   }
                   if (!isSpanEditActive) {
+                    // Switching active span editor: commit previous anchor edits first.
+                    if (editingAnchorKey !== null && hasPendingSpanEditChanges) {
+                      onCommitAnchorSpanEdits?.();
+                    }
+
                     setHasPendingSpanEditChanges(false);
                     setEditingAnchorKey(anchorKey);
                   }
