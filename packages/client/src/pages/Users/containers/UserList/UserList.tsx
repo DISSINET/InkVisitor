@@ -88,7 +88,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
   const { data: users, isFetching } = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
-      const res = await api.usersGetMore({});
+      const res = await api.usersGetMore();
       return (res.data ?? []).sort((a, b) => (a.id > b.id ? 1 : -1));
     },
     enabled: api.isLoggedIn(),

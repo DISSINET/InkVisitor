@@ -417,10 +417,12 @@ class Api {
     }
   }
 
-  async usersGetMore(
-    filters: IFilterUsers,
+  async usersGetMore<TBasic extends boolean = false>(
+    filters: IFilterUsers & { basic?: TBasic } = {},
     options?: IApiOptions
-  ): Promise<AxiosResponse<IResponseUserBasic[]>> {
+  ): Promise<
+    AxiosResponse<TBasic extends true ? IResponseUserBasic[] : IResponseUser[]>
+  > {
     try {
       const response = await this.connection.get(
         `/users?label=${filters.label || ""}&basic=${filters.basic ? "true" : "false"}`,
