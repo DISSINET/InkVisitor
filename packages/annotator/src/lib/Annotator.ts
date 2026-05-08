@@ -1872,47 +1872,83 @@ export class Annotator {
       return false;
     }
 
+    const findTagEndFrom = (startIndex: number): number => {
+      const end = rawText.indexOf(">", startIndex);
+      return end;
+    };
+
+    const findTagStartFrom = (endIndex: number): number => {
+      const start = rawText.lastIndexOf("<", endIndex);
+      return start;
+    };
+
+    const findNextVisibleChar = (fromIndex: number, maxExclusive: number): number => {
+      let i = fromIndex;
+      while (i < maxExclusive) {
+        const ch = rawText[i];
+        if (ch === "<") {
+          const tagEnd = findTagEndFrom(i);
+          if (tagEnd === -1) return -1;
+          i = tagEnd + 1;
+          continue;
+        }
+        return i;
+      }
+      return -1;
+    };
+
+    const findPrevVisibleChar = (fromIndex: number, minInclusive: number): number => {
+      let i = fromIndex;
+      while (i >= minInclusive) {
+        const ch = rawText[i];
+        if (ch === ">") {
+          const tagStart = findTagStartFrom(i);
+          if (tagStart === -1) return -1;
+          i = tagStart - 1;
+          continue;
+        }
+        return i;
+      }
+      return -1;
+    };
+
     let nextRaw = rawText;
 
     if (boundary === "start" && direction === "right") {
-      const charIndex = openAbs + openLen;
-      if (charIndex >= closeAbs || charIndex >= rawText.length) return false;
-      const movedChar = rawText[charIndex];
-      if (movedChar === "<") return false;
+      const charIndex = findNextVisibleChar(openAbs + openLen, closeAbs);
+      if (charIndex === -1) return false;
+      const movedBlock = rawText.slice(openAbs + openLen, charIndex + 1);
       nextRaw =
         rawText.slice(0, openAbs) +
-        movedChar +
+        movedBlock +
         openTagString +
         rawText.slice(charIndex + 1);
     } else if (boundary === "start" && direction === "left") {
-      const charIndex = openAbs - 1;
-      if (charIndex < 0) return false;
-      const movedChar = rawText[charIndex];
-      if (movedChar === ">") return false;
+      const charIndex = findPrevVisibleChar(openAbs - 1, 0);
+      if (charIndex === -1) return false;
+      const movedBlock = rawText.slice(charIndex, openAbs);
       nextRaw =
         rawText.slice(0, charIndex) +
         openTagString +
-        movedChar +
+        movedBlock +
         rawText.slice(openAbs + openLen);
     } else if (boundary === "end" && direction === "right") {
-      const charIndex = closeAbs + closeLen;
-      if (charIndex >= rawText.length) return false;
-      const movedChar = rawText[charIndex];
-      if (movedChar === "<") return false;
+      const charIndex = findNextVisibleChar(closeAbs + closeLen, rawText.length);
+      if (charIndex === -1) return false;
+      const movedBlock = rawText.slice(closeAbs + closeLen, charIndex + 1);
       nextRaw =
         rawText.slice(0, closeAbs) +
-        movedChar +
+        movedBlock +
         closeTagString +
         rawText.slice(charIndex + 1);
     } else {
-      const charIndex = closeAbs - 1;
-      if (charIndex < openAbs + openLen || charIndex < 0) return false;
-      const movedChar = rawText[charIndex];
-      if (movedChar === ">") return false;
+      const charIndex = findPrevVisibleChar(closeAbs - 1, openAbs + openLen);
+      if (charIndex === -1) return false;
+      const movedBlock = rawText.slice(charIndex, closeAbs);
       nextRaw =
         rawText.slice(0, charIndex) +
         closeTagString +
-        movedChar +
+        movedBlock +
         rawText.slice(closeAbs + closeLen);
     }
 
