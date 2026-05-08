@@ -119,8 +119,11 @@ export const UserList: React.FC<UserList> = React.memo(() => {
   const userMutation = useMutation({
     mutationFn: async (userChanges: Partial<Omit<IUser, "id">> & { id: IUser["id"] }) =>
       await api.usersUpdate(userChanges.id, userChanges),
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
+      if (typeof variables.role !== "undefined") {
+        scheduleRowFlash(variables.id, "activate");
+      }
     },
   });
 

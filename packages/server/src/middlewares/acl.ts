@@ -4,9 +4,7 @@ import { CustomError, PermissionDeniedError } from "@shared/types/errors";
 import { Response, Request, NextFunction, Router } from "express";
 import { IRequest } from "src/custom_typings/request";
 
-export const permissionDeniedErr = new PermissionDeniedError(
-  "Endpoint not allowed"
-);
+export const permissionDeniedErr = new PermissionDeniedError("Endpoint not allowed");
 
 interface RouterLayer {
   stack: RouterLayer[];
@@ -76,7 +74,7 @@ class Acl {
    */
   public async validate(req: IRequest): Promise<CustomError | null> {
     const permissions = await this.getPermissions(req);
-    const user = req.user?.user;
+    const user = req.user ? req.getUserOrFail() : null;
     const controller = req.baseUrl.split("/").pop() || "";
     const route = req.route.path
       .split("/")
@@ -106,9 +104,7 @@ class Acl {
     }
 
     // allow admin/owner for any route
-    if (
-      req.getUserOrFail().hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin])
-    ) {
+    if (req.getUserOrFail().hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin])) {
       return null;
     }
 
