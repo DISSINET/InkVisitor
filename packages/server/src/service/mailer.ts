@@ -1,5 +1,11 @@
 import { domainName, hostUrl } from "@common/functions";
 import nodemailer from "nodemailer";
+import {
+  accountCreatedEmailTemplate,
+  passwordAdminResetEmailTemplate,
+  passwordResetRequestEmailTemplate,
+  testEmailTemplate,
+} from "./emailTemplates";
 
 export enum TplIds {
   AccountCreated = "account-created",
@@ -21,37 +27,17 @@ interface DynamicTplRequest {
   subject: EmailSubject;
 }
 
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
 function buildHtml(tpl: DynamicTplRequest): string {
   const d = tpl.data;
   switch (tpl.id) {
     case TplIds.AccountCreated:
-      return `<p>Hello,</p><p>Your account was created for <strong>${escapeHtml(
-        d.email
-      )}</strong> on ${escapeHtml(d.domain)}.</p><p><a href="${escapeHtml(
-        d.link
-      )}">Activate your account</a></p>`;
+      return accountCreatedEmailTemplate(d.email, d.domain, d.link);
     case TplIds.PasswordResetRequest:
-      return `<p>Hello,</p><p>Password reset was requested for ${escapeHtml(
-        d.email
-      )} on ${escapeHtml(d.domain)}.</p><p><a href="${escapeHtml(
-        d.link
-      )}">Reset your password</a></p>`;
+      return passwordResetRequestEmailTemplate(d.email, d.domain, d.link);
     case TplIds.PasswordAdminReset:
-      return `<p>Hello ${escapeHtml(d.username)},</p><p>An administrator reset your password on ${escapeHtml(
-        d.domain
-      )}.</p><p>Your new password: <code>${escapeHtml(
-        d.rawPassword
-      )}</code></p><p>Please sign in and change it.</p>`;
+      return passwordAdminResetEmailTemplate(d.username, d.rawPassword, d.domain);
     case TplIds.Test:
-      return `<p>Test mail from ${escapeHtml(d.domain)}.</p>`;
+      return testEmailTemplate(d.domain);
     default:
       return "";
   }
