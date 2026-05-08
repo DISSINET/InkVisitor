@@ -92,13 +92,12 @@ class Acl {
       return permissionDeniedErr;
     }
 
-    // allow editors with assigned rights to fetch users for filters (editedBy/updatedBy)
+    // allow basic users list (id + username only) for authenticated users
     if (
       controller === "users" &&
       route === "" &&
       method === HttpMethods.Get &&
-      user?.role === UserEnums.Role.Editor &&
-      (user.rights?.length || 0) > 0
+      (req.query.basic === "true" || req.query.basic === "1")
     ) {
       return null;
     }

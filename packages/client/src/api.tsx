@@ -20,6 +20,7 @@ import {
   IResponseTerritory,
   IResponseTree,
   IResponseUser,
+  IResponseUserBasic,
   IStatement,
   ITerritory,
   IUser,
@@ -48,6 +49,7 @@ interface IApiOptions extends AxiosRequestConfig<any> {
 
 type IFilterUsers = {
   label?: string;
+  basic?: boolean;
 };
 
 type IFilterDocuments = {
@@ -418,9 +420,12 @@ class Api {
   async usersGetMore(
     filters: IFilterUsers,
     options?: IApiOptions
-  ): Promise<AxiosResponse<IResponseUser[]>> {
+  ): Promise<AxiosResponse<IResponseUserBasic[]>> {
     try {
-      const response = await this.connection.get(`/users?label=${filters.label || ""}`, options);
+      const response = await this.connection.get(
+        `/users?label=${filters.label || ""}&basic=${filters.basic ? "true" : "false"}`,
+        options
+      );
       return response;
     } catch (err) {
       throw this.handleError(err);

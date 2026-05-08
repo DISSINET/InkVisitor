@@ -55,7 +55,11 @@ import {
   IResponseTree,
   IResponseTreeTerritoryComponent,
 } from "./response-tree";
-import { IResponseStoredTerritory, IResponseUser } from "./response-user";
+import {
+  IResponseStoredTerritory,
+  IResponseUser,
+  IResponseUserBasic,
+} from "./response-user";
 
 import {
   IDocument,
@@ -138,6 +142,7 @@ export type {
   IResponseUsedInMetaProp,
   IResponseUsedInStatement,
   IResponseUser,
+  IResponseUserBasic,
   IStatement,
   IStatementActant,
   IStatementAction,

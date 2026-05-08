@@ -12,6 +12,11 @@ export interface IResponseUser
   territoryRights: IResponseStoredTerritory[];
 }
 
+export interface IResponseUserBasic {
+  id: string;
+  name: string;
+}
+
 export interface UserOptions {
   defaultTerritory: string;
   defaultLanguage: EntityEnums.Language;

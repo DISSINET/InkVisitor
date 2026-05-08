@@ -22,6 +22,7 @@ import { asyncRouteHandler } from "..";
 import {
   IResponseBookmarkFolder,
   IResponseUser,
+  IResponseUserBasic,
   IResponseGeneric,
   IRequestPasswordReset,
   IRequestPasswordResetData,
@@ -473,8 +474,11 @@ export default Router()
    */
   .get(
     "/",
-    asyncRouteHandler<IResponseUser[]>(async (request: IRequest) => {
+    asyncRouteHandler<IResponseUser[] | IResponseUserBasic[]>(
+      async (request: IRequest) => {
       const label = (request.query.label as string) || "";
+      const basic =
+        request.query.basic === "true" || request.query.basic === "1";
 
       let userModels: User[];
       if (!label) {
@@ -485,6 +489,13 @@ export default Router()
         userModels = await User.findUsersByLabel(request.db.connection, label);
       }
 
+      if (basic) {
+        return userModels.map((user) => ({
+          id: user.id,
+          name: user.name,
+        }));
+      }
+
       const out: IResponseUser[] = [];
       for (const user of userModels) {
         const response = new ResponseUser(user);
@@ -493,7 +504,8 @@ export default Router()
       }
 
       return out;
-    })
+      }
+    )
   )
   /**
    * @openapi
