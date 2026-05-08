@@ -135,6 +135,9 @@ export const TextAnnotatorMenu = ({
   const [territoryElvl, setTerritoryElvl] = useState<EntityEnums.Elvl>(
     EntityEnums.Elvl.Textual
   );
+  const [editingAnchorKey, setEditingAnchorKey] = useState<string | null>(null);
+  const [hasPendingSpanEditChanges, setHasPendingSpanEditChanges] =
+    useState<boolean>(false);
 
   const someAnchorsWithoutElvl = useMemo(
     () =>
@@ -149,16 +152,17 @@ export const TextAnnotatorMenu = ({
 
   const resolvedAnchors = useMemo((): AnnotatorAnchorListItem[] => {
     const out: AnnotatorAnchorListItem[] = [];
-    let occurrence = 0;
+    const occurrenceByTagName = new Map<string, number>();
     for (const anchor of anchors) {
       const anchorTagName = anchor.getTagName();
       if (entities[anchorTagName]) {
+        const occurrenceForTag = occurrenceByTagName.get(anchorTagName) ?? 0;
         out.push({
           anchor,
           anchorTagName,
-          stableKey: `${anchorTagName}:${occurrence}`,
+          stableKey: `${anchorTagName}:${occurrenceForTag}`,
         });
-        occurrence += 1;
+        occurrenceByTagName.set(anchorTagName, occurrenceForTag + 1);
       }
     }
     return out;
@@ -172,6 +176,10 @@ export const TextAnnotatorMenu = ({
       onUpdateAnchor,
       onNudgeAnchorSpan,
       onCommitAnchorSpanEdits,
+      editingAnchorKey,
+      hasPendingSpanEditChanges,
+      setEditingAnchorKey,
+      setHasPendingSpanEditChanges,
     }),
     [
       resolvedAnchors,
@@ -180,6 +188,8 @@ export const TextAnnotatorMenu = ({
       onUpdateAnchor,
       onNudgeAnchorSpan,
       onCommitAnchorSpanEdits,
+      editingAnchorKey,
+      hasPendingSpanEditChanges,
     ]
   );
 

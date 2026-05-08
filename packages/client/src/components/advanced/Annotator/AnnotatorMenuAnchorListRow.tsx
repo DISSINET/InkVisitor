@@ -1,7 +1,7 @@
 import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import { Button } from "components/basic/Button/Button";
-import React, { useState } from "react";
+import React from "react";
 import {
   MdKeyboardDoubleArrowLeft,
   MdKeyboardDoubleArrowRight,
@@ -33,6 +33,10 @@ export type AnnotatorAnchorGridRowData = {
     direction: "left" | "right"
   ) => boolean;
   onCommitAnchorSpanEdits?: () => void;
+  editingAnchorKey: string | null;
+  hasPendingSpanEditChanges: boolean;
+  setEditingAnchorKey: (key: string | null) => void;
+  setHasPendingSpanEditChanges: (hasChanges: boolean) => void;
 };
 
 export type AnnotatorAnchorGridRowProps = {
@@ -50,9 +54,11 @@ export const AnnotatorAnchorGridRow = React.memo(
       onUpdateAnchor,
       onNudgeAnchorSpan,
       onCommitAnchorSpanEdits,
+      editingAnchorKey,
+      hasPendingSpanEditChanges,
+      setEditingAnchorKey,
+      setHasPendingSpanEditChanges,
     } = data;
-    const [editingAnchorKey, setEditingAnchorKey] = useState<string | null>(null);
-    const [hasPendingSpanEditChanges, setHasPendingSpanEditChanges] = useState(false);
     const left = items[index * ANCHOR_GRID_COLUMNS];
     const right = items[index * ANCHOR_GRID_COLUMNS + 1];
 
