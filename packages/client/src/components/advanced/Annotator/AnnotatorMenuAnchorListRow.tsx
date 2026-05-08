@@ -3,6 +3,7 @@ import { IEntity } from "@shared/types";
 import { Button } from "components/basic/Button/Button";
 import React from "react";
 import {
+  MdDone,
   MdKeyboardDoubleArrowLeft,
   MdKeyboardDoubleArrowRight,
   MdOutlineOpenWith,
@@ -85,7 +86,7 @@ export const AnnotatorAnchorGridRow = React.memo(
           disableDoubleClick={isSpanEditActive}
           button={
             <div
-              style={{ display: "flex", gap: "0.125rem", alignItems: "center" }}
+              style={{ display: "flex", alignItems: "center" }}
               onBlur={(event) => {
                 if (!isSpanEditActive) {
                   return;
@@ -101,25 +102,10 @@ export const AnnotatorAnchorGridRow = React.memo(
                 }
               }}
             >
-              <Button
-                color={isSpanEditActive ? "warning" : "plain"}
-                inverted
-                size={ButtonSize.Small}
-                icon={<MdOutlineOpenWith size={14} />}
-                tooltipLabel={
-                  isSpanEditActive ? "Anchor span edit mode active" : "Edit anchor span bounds"
-                }
-                onClick={() => {
-                  if (!isSpanEditActive) {
-                    setHasPendingSpanEditChanges(false);
-                    setEditingAnchorKey(anchorKey);
-                  }
-                }}
-              />
               {isSpanEditActive && (
                 <>
                   <Button
-                    color="plain"
+                    color="success"
                     inverted
                     size={ButtonSize.Small}
                     icon={<MdKeyboardDoubleArrowLeft size={14} />}
@@ -132,7 +118,7 @@ export const AnnotatorAnchorGridRow = React.memo(
                     }}
                   />
                   <Button
-                    color="plain"
+                    color="success"
                     inverted
                     size={ButtonSize.Small}
                     icon={<MdKeyboardDoubleArrowRight size={14} />}
@@ -145,7 +131,7 @@ export const AnnotatorAnchorGridRow = React.memo(
                     }}
                   />
                   <Button
-                    color="plain"
+                    color="info"
                     inverted
                     size={ButtonSize.Small}
                     icon={<MdKeyboardDoubleArrowLeft size={14} />}
@@ -158,7 +144,7 @@ export const AnnotatorAnchorGridRow = React.memo(
                     }}
                   />
                   <Button
-                    color="plain"
+                    color="info"
                     inverted
                     size={ButtonSize.Small}
                     icon={<MdKeyboardDoubleArrowRight size={14} />}
@@ -172,6 +158,29 @@ export const AnnotatorAnchorGridRow = React.memo(
                   />
                 </>
               )}
+              <Button
+                color={isSpanEditActive ? "warning" : "plain"}
+                inverted
+                size={ButtonSize.Small}
+                icon={isSpanEditActive ? <MdDone size={14} /> : <MdOutlineOpenWith size={14} />}
+                tooltipLabel={
+                  isSpanEditActive ? "Finish anchor span edit" : "Edit anchor span bounds"
+                }
+                onClick={() => {
+                  if (isSpanEditActive) {
+                    setEditingAnchorKey(null);
+                    if (hasPendingSpanEditChanges) {
+                      onCommitAnchorSpanEdits?.();
+                      setHasPendingSpanEditChanges(false);
+                    }
+                    return;
+                  }
+                  if (!isSpanEditActive) {
+                    setHasPendingSpanEditChanges(false);
+                    setEditingAnchorKey(anchorKey);
+                  }
+                }}
+              />
             </div>
           }
           elvlButtonGroup={
