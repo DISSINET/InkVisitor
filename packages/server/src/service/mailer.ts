@@ -1,5 +1,7 @@
 import { domainName, hostUrl } from "@common/functions";
+import fs from "fs";
 import nodemailer from "nodemailer";
+import path from "path";
 import {
   accountCreatedEmailTemplate,
   passwordAdminResetEmailTemplate,
@@ -25,6 +27,23 @@ interface DynamicTplRequest {
   id: TplIds;
   data: any;
   subject: EmailSubject;
+}
+
+const INLINE_LOGO_CID = "inkvisitor-logo";
+
+function getInlineLogoPath(): string | undefined {
+  const candidates = [
+    path.resolve(process.cwd(), "../client/public/assets/logos/inkvisitor.svg"),
+    path.resolve(process.cwd(), "packages/client/public/assets/logos/inkvisitor.svg"),
+  ];
+
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) {
+      return candidate;
+    }
+  }
+
+  return undefined;
 }
 
 function buildHtml(tpl: DynamicTplRequest): string {
@@ -138,12 +157,26 @@ class Mailer {
     }
 
     try {
+      const logoPath = getInlineLogoPath();
       const wat = await this.transporter.sendMail({
         from: process.env.MAILER_SENDER || "",
         to: recipient,
         subject: tpl.subject,
         html: buildHtml(tpl),
+        attachments: logoPath
+          ? [
+              {
+                filename: "inkvisitor.svg",
+                path: logoPath,
+                cid: INLINE_LOGO_CID,
+              },
+            ]
+          : [],
       });
+
+      if (!logoPath) {
+        console.warn("[Mailer] Inline logo not found, sending without logo");
+      }
     } catch (e) {
       throw new Error(`Email error for template ${tpl.subject}: ${e}`);
     }

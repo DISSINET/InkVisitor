@@ -3,6 +3,7 @@ interface EmailLayoutInput {
   preheader: string;
   intro: string;
   bodyHtml: string;
+  logoUrl?: string;
   ctaLabel?: string;
   ctaUrl?: string;
   footer?: string;
@@ -21,15 +22,17 @@ function renderLayout({
   preheader,
   intro,
   bodyHtml,
+  logoUrl,
   ctaLabel,
   ctaUrl,
   footer,
 }: EmailLayoutInput): string {
+  // service desk button color #1f6feb
   const cta =
     ctaLabel && ctaUrl
       ? `<p style="margin:24px 0 0;"><a href="${escapeHtml(
           ctaUrl
-        )}" style="background:#1f6feb;color:#ffffff;text-decoration:none;padding:10px 16px;border-radius:6px;display:inline-block;">${escapeHtml(
+        )}" style="background:#6174C2;color:#ffffff;text-decoration:none;padding:10px 16px;border-radius:6px;display:inline-block;">${escapeHtml(
           ctaLabel
         )}</a></p>`
       : "";
@@ -42,22 +45,29 @@ function renderLayout({
     <title>${escapeHtml(title)}</title>
   </head>
   <body style="margin:0;padding:24px;background:#f6f8fa;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#24292f;">
-    <div style="display:none;opacity:0;max-height:0;overflow:hidden;">${escapeHtml(
-      preheader
-    )}</div>
+    <div style="display:none;opacity:0;max-height:0;overflow:hidden;">${escapeHtml(preheader)}</div>
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
       <tr>
         <td align="center">
-          <table role="presentation" width="620" cellspacing="0" cellpadding="0" style="max-width:620px;background:#ffffff;border:1px solid #d0d7de;border-radius:10px;padding:24px;">
-            <tr><td>
+          <table role="presentation" width="620" cellspacing="0" cellpadding="0" style="max-width:620px;background:#ffffff;border:1px solid #d0d7de;border-radius:10px;overflow:hidden;">
+            <tr>
+              <td style="background:#091034;padding:16px 24px;">
+                ${
+                  logoUrl
+                    ? `<img src="${escapeHtml(
+                        logoUrl
+                      )}" alt="InkVisitor" style="display:block;height:32px;width:auto;" />`
+                    : ""
+                }
+              </td>
+            </tr>
+            <tr><td style="padding:24px;">
               <h2 style="margin:0 0 12px;font-size:22px;">${escapeHtml(title)}</h2>
               <p style="margin:0 0 16px;line-height:1.5;">${escapeHtml(intro)}</p>
               ${bodyHtml}
               ${cta}
               <p style="margin:28px 0 0;color:#57606a;font-size:12px;line-height:1.4;">
-                ${escapeHtml(
-                  footer || "If you did not request this email, you can ignore it."
-                )}
+                ${escapeHtml(footer || "If you did not request this email, you can ignore it.")}
               </p>
             </td></tr>
           </table>
@@ -68,21 +78,16 @@ function renderLayout({
 </html>`;
 }
 
-export function accountCreatedEmailTemplate(
-  email: string,
-  domain: string,
-  link: string
-): string {
+export function accountCreatedEmailTemplate(email: string, domain: string, link: string): string {
   return renderLayout({
+    logoUrl: "cid:inkvisitor-logo",
     title: "Account created",
     preheader: `Your ${domain} account is ready`,
     intro: "Your account has been created and is ready for activation.",
     bodyHtml: `<p style="margin:0;line-height:1.5;">Account: <strong>${escapeHtml(
       email
     )}</strong></p>
-<p style="margin:8px 0 0;line-height:1.5;">Domain: <strong>${escapeHtml(
-      domain
-    )}</strong></p>`,
+<p style="margin:8px 0 0;line-height:1.5;">Domain: <strong>${escapeHtml(domain)}</strong></p>`,
     ctaLabel: "Activate account",
     ctaUrl: link,
     footer: "Use the button above to activate your account.",
@@ -95,15 +100,14 @@ export function passwordResetRequestEmailTemplate(
   link: string
 ): string {
   return renderLayout({
+    logoUrl: "cid:inkvisitor-logo",
     title: "Password reset request",
     preheader: `Reset your ${domain} password`,
     intro: "We received a request to reset your password.",
     bodyHtml: `<p style="margin:0;line-height:1.5;">Account: <strong>${escapeHtml(
       email
     )}</strong></p>
-<p style="margin:8px 0 0;line-height:1.5;">Domain: <strong>${escapeHtml(
-      domain
-    )}</strong></p>`,
+<p style="margin:8px 0 0;line-height:1.5;">Domain: <strong>${escapeHtml(domain)}</strong></p>`,
     ctaLabel: "Reset password",
     ctaUrl: link,
     footer:
@@ -117,6 +121,7 @@ export function passwordAdminResetEmailTemplate(
   domain: string
 ): string {
   return renderLayout({
+    logoUrl: "cid:inkvisitor-logo",
     title: "Password reset",
     preheader: `Your ${domain} password was reset`,
     intro: "An administrator reset your password.",
@@ -132,6 +137,7 @@ export function passwordAdminResetEmailTemplate(
 
 export function testEmailTemplate(domain: string): string {
   return renderLayout({
+    logoUrl: "cid:inkvisitor-logo",
     title: "Test mail",
     preheader: `Mailer test from ${domain}`,
     intro: "This is a test email from the configured mailer service.",
