@@ -111,6 +111,25 @@ class Acl {
       return null;
     }
 
+    // allow editors to fetch entities (read-only routes)
+    if (
+      controller === "entities" &&
+      method === HttpMethods.Get &&
+      user?.role === UserEnums.Role.Editor
+    ) {
+      return null;
+    }
+
+    // allow editors to fetch entities by ids via /entities/batch
+    if (
+      controller === "entities" &&
+      route === "batch" &&
+      method === HttpMethods.Post &&
+      user?.role === UserEnums.Role.Editor
+    ) {
+      return null;
+    }
+
     // allow admin/owner for any route
     if (req.getUserOrFail().hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin])) {
       return null;
