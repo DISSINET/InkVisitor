@@ -72,6 +72,12 @@ interface TextAnnotatorMenuProps {
   onEscapePressed: () => void;
   disableCreate?: boolean;
   onUpdateAnchor?: (anchor: Tag, elvl: EntityEnums.Elvl) => void;
+  onNudgeAnchorSpan?: (
+    anchor: Tag,
+    boundary: "start" | "end",
+    direction: "left" | "right"
+  ) => boolean;
+  onCommitAnchorSpanEdits?: () => void;
 
   isLoading: boolean;
 
@@ -89,6 +95,8 @@ export const TextAnnotatorMenu = ({
   onCreateActiveTAnchor = undefined,
   onRemoveAnchor = undefined,
   onUpdateAnchor = undefined,
+  onNudgeAnchorSpan = undefined,
+  onCommitAnchorSpanEdits = undefined,
   canCreateActiveTAnchor,
   hasParentT,
   isTextInsideThisT,
@@ -141,10 +149,16 @@ export const TextAnnotatorMenu = ({
 
   const resolvedAnchors = useMemo((): AnnotatorAnchorListItem[] => {
     const out: AnnotatorAnchorListItem[] = [];
+    let occurrence = 0;
     for (const anchor of anchors) {
       const anchorTagName = anchor.getTagName();
       if (entities[anchorTagName]) {
-        out.push({ anchor, anchorTagName });
+        out.push({
+          anchor,
+          anchorTagName,
+          stableKey: `${anchorTagName}:${occurrence}`,
+        });
+        occurrence += 1;
       }
     }
     return out;
@@ -156,8 +170,17 @@ export const TextAnnotatorMenu = ({
       entities,
       onRemoveAnchor,
       onUpdateAnchor,
+      onNudgeAnchorSpan,
+      onCommitAnchorSpanEdits,
     }),
-    [resolvedAnchors, entities, onRemoveAnchor, onUpdateAnchor]
+    [
+      resolvedAnchors,
+      entities,
+      onRemoveAnchor,
+      onUpdateAnchor,
+      onNudgeAnchorSpan,
+      onCommitAnchorSpanEdits,
+    ]
   );
 
   return (

@@ -898,6 +898,18 @@ export const TextAnnotator = ({
     handleSaveNewContent(true, true);
   };
 
+  const onNudgeAnchorSpan = (
+    anchor: Tag,
+    boundary: "start" | "end",
+    direction: "left" | "right"
+  ): boolean => {
+    return Boolean(annotator?.nudgeAnchorBoundary(anchor, boundary, direction));
+  };
+
+  const onCommitAnchorSpanEdits = () => {
+    handleSaveNewContent(true, true);
+  };
+
   const isMenuDisplayed = useMemo<boolean>(() => {
     return (
       annotatorMode === EditMode.HIGHLIGHT &&
@@ -1104,6 +1116,8 @@ export const TextAnnotator = ({
                       onCreateStatement={onCreateStatement}
                       onRemoveAnchor={onRemoveAnchor}
                       onUpdateAnchor={onUpdateAnchor}
+                      onNudgeAnchorSpan={onNudgeAnchorSpan}
+                      onCommitAnchorSpanEdits={onCommitAnchorSpanEdits}
                       isTextInsideThisT={selectedAnchors.some(
                         (anchor) => anchor.getTagName() === thisTerritoryEntityId
                       )}

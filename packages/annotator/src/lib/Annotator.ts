@@ -1809,6 +1809,126 @@ export class Annotator {
   }
 
   /**
+   * Moves one anchor boundary by one character.
+   * Uses a safe tag/character swap to preserve markup validity.
+   */
+  nudgeAnchorBoundary(
+    anchorTag: Tag,
+    boundary: "start" | "end",
+    direction: "left" | "right"
+  ): boolean {
+    if (anchorTag.closing) {
+      throw new Error("nudgeAnchorBoundary only accepts opening tags");
+    }
+
+    const anchorName = anchorTag.getTagName();
+    const anchorSegIdx = anchorTag.segmentIndex;
+    const anchorPos = anchorTag.position;
+    const openSegment = this.text.segments[anchorSegIdx];
+    if (!openSegment) {
+      return false;
+    }
+
+    const openTag = openSegment.openingTags.find(
+      (tag) => tag.getTagName() === anchorName && tag.position === anchorPos
+    );
+    if (!openTag) {
+      return false;
+    }
+
+    let closeTag: Tag | undefined;
+    let closeSegIdx = -1;
+    for (let i = anchorSegIdx; i < this.text.segments.length; i++) {
+      const seg = this.text.segments[i];
+      const candidates =
+        i === anchorSegIdx
+          ? seg.closingTags.filter((t) => t.position > anchorPos)
+          : seg.closingTags;
+      closeTag = candidates.find((tag) => tag.getTagName() === anchorName);
+      if (closeTag) {
+        closeSegIdx = i;
+        break;
+      }
+    }
+
+    if (!closeTag || closeSegIdx === -1) {
+      return false;
+    }
+
+    const rawText = this.text.value;
+    const openTagString = openTag.getTag();
+    const closeTagString = closeTag.getTag();
+    const openLen = openTagString.length;
+    const closeLen = closeTagString.length;
+    const openAbs = openTag.getAbsoluteTagPosition(this.text.segments);
+    const closeAbs = closeTag.getAbsoluteTagPosition(this.text.segments);
+
+    if (
+      openAbs < 0 ||
+      closeAbs < 0 ||
+      openAbs + openLen > rawText.length ||
+      closeAbs + closeLen > rawText.length
+    ) {
+      return false;
+    }
+
+    let nextRaw = rawText;
+
+    if (boundary === "start" && direction === "right") {
+      const charIndex = openAbs + openLen;
+      if (charIndex >= closeAbs || charIndex >= rawText.length) return false;
+      const movedChar = rawText[charIndex];
+      if (movedChar === "<") return false;
+      nextRaw =
+        rawText.slice(0, openAbs) +
+        movedChar +
+        openTagString +
+        rawText.slice(charIndex + 1);
+    } else if (boundary === "start" && direction === "left") {
+      const charIndex = openAbs - 1;
+      if (charIndex < 0) return false;
+      const movedChar = rawText[charIndex];
+      if (movedChar === ">") return false;
+      nextRaw =
+        rawText.slice(0, charIndex) +
+        openTagString +
+        movedChar +
+        rawText.slice(openAbs + openLen);
+    } else if (boundary === "end" && direction === "right") {
+      const charIndex = closeAbs + closeLen;
+      if (charIndex >= rawText.length) return false;
+      const movedChar = rawText[charIndex];
+      if (movedChar === "<") return false;
+      nextRaw =
+        rawText.slice(0, closeAbs) +
+        movedChar +
+        closeTagString +
+        rawText.slice(charIndex + 1);
+    } else {
+      const charIndex = closeAbs - 1;
+      if (charIndex < openAbs + openLen || charIndex < 0) return false;
+      const movedChar = rawText[charIndex];
+      if (movedChar === ">") return false;
+      nextRaw =
+        rawText.slice(0, charIndex) +
+        closeTagString +
+        movedChar +
+        rawText.slice(closeAbs + closeLen);
+    }
+
+    if (nextRaw === rawText) {
+      return false;
+    }
+
+    this.text.value = nextRaw;
+    this.text.prepareSegments();
+    this.text.calculateLines();
+    this.warnings.onTextChanged(this.text.value);
+    this.draw();
+    return true;
+  }
+
+  /**
    * Scrolls the viewport to the anchor and moves the caret to the first character
    * inside the anchor (after the opening tag in raw text).
    * Uses {@link Text.getSegmentFromAbsTextIndex} so line/column match RAW/XML and
