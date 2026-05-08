@@ -75,6 +75,8 @@ export const AnnotatorAnchorGridRow = React.memo(
             },
           }}
           entity={entity}
+          disableClick={isSpanEditActive}
+          disableDoubleClick={isSpanEditActive}
           button={
             <div
               style={{ display: "flex", gap: "0.125rem", alignItems: "center" }}

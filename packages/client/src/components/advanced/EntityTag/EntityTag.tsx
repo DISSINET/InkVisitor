@@ -43,6 +43,7 @@ interface EntityTag {
   moveFn?: (dragIndex: number, hoverIndex: number) => void;
   isSelected?: boolean;
   disableTooltip?: boolean;
+  disableClick?: boolean;
   disableDoubleClick?: boolean;
   disableDrag?: boolean;
   tooltipPosition?: Placement;
@@ -66,6 +67,7 @@ const EntityTagComponent: React.FC<EntityTag> = ({
   moveFn,
   isSelected,
   disableTooltip = false,
+  disableClick = false,
   disableDrag = false,
   disableDoubleClick = false,
   tooltipPosition,
@@ -249,16 +251,18 @@ const EntityTagComponent: React.FC<EntityTag> = ({
             {unlinkButton && renderUnlinkButton(unlinkButton)}
           </>
         }
-        onClick={() => setClickedOnce(true)}
-        onDoubleClick={() => {
-          setClickedOnce(false);
-          if (!disableDoubleClick) {
-            appendDetailId(entity.id);
-            if (detailBoxState === DetailBoxState.Minimized) {
-              dispatch(setDetailBoxState(DetailBoxState.Normal));
-            }
-          }
-        }}
+        onClick={disableClick ? undefined : () => setClickedOnce(true)}
+        onDoubleClick={
+          disableDoubleClick
+            ? undefined
+            : () => {
+                setClickedOnce(false);
+                appendDetailId(entity.id);
+                if (detailBoxState === DetailBoxState.Minimized) {
+                  dispatch(setDetailBoxState(DetailBoxState.Normal));
+                }
+              }
+        }
         onMouseEnter={handleTagHovered}
         onMouseLeave={handleTagUnhovered}
         onButtonOver={handleButtonHovered}
@@ -288,6 +292,7 @@ function areEntityTagsEqual(
   if (prev.showOnly !== next.showOnly) return false;
   if (prev.fullWidth !== next.fullWidth) return false;
   if (prev.disableTooltip !== next.disableTooltip) return false;
+  if (prev.disableClick !== next.disableClick) return false;
   if (prev.disableDoubleClick !== next.disableDoubleClick) return false;
   if (prev.statementsCount !== next.statementsCount) return false;
   if (Boolean(prev.button) !== Boolean(next.button)) return false;
