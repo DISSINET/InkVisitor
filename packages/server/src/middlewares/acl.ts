@@ -102,6 +102,15 @@ class Acl {
       return null;
     }
 
+    // allow editors to fetch documents (read-only routes)
+    if (
+      controller === "documents" &&
+      method === HttpMethods.Get &&
+      user?.role === UserEnums.Role.Editor
+    ) {
+      return null;
+    }
+
     // allow admin/owner for any route
     if (req.getUserOrFail().hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin])) {
       return null;
