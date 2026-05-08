@@ -1,5 +1,13 @@
 import { domainName, hostUrl } from "@common/functions";
+import fs from "fs";
 import nodemailer from "nodemailer";
+import path from "path";
+import {
+  accountCreatedEmailTemplate,
+  passwordAdminResetEmailTemplate,
+  passwordResetRequestEmailTemplate,
+  testEmailTemplate,
+} from "./emailTemplates";
 
 export enum TplIds {
   AccountCreated = "account-created",
@@ -21,37 +29,34 @@ interface DynamicTplRequest {
   subject: EmailSubject;
 }
 
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+const INLINE_LOGO_CID = "inkvisitor-logo";
+
+function getInlineLogoPath(): string | undefined {
+  const candidates = [
+    path.resolve(process.cwd(), "../client/public/assets/logos/inkvisitor.svg"),
+    path.resolve(process.cwd(), "packages/client/public/assets/logos/inkvisitor.svg"),
+  ];
+
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) {
+      return candidate;
+    }
+  }
+
+  return undefined;
 }
 
 function buildHtml(tpl: DynamicTplRequest): string {
   const d = tpl.data;
   switch (tpl.id) {
     case TplIds.AccountCreated:
-      return `<p>Hello,</p><p>Your account was created for <strong>${escapeHtml(
-        d.email
-      )}</strong> on ${escapeHtml(d.domain)}.</p><p><a href="${escapeHtml(
-        d.link
-      )}">Activate your account</a></p>`;
+      return accountCreatedEmailTemplate(d.email, d.domain, d.link);
     case TplIds.PasswordResetRequest:
-      return `<p>Hello,</p><p>Password reset was requested for ${escapeHtml(
-        d.email
-      )} on ${escapeHtml(d.domain)}.</p><p><a href="${escapeHtml(
-        d.link
-      )}">Reset your password</a></p>`;
+      return passwordResetRequestEmailTemplate(d.email, d.domain, d.link);
     case TplIds.PasswordAdminReset:
-      return `<p>Hello ${escapeHtml(d.username)},</p><p>An administrator reset your password on ${escapeHtml(
-        d.domain
-      )}.</p><p>Your new password: <code>${escapeHtml(
-        d.rawPassword
-      )}</code></p><p>Please sign in and change it.</p>`;
+      return passwordAdminResetEmailTemplate(d.username, d.rawPassword, d.domain);
     case TplIds.Test:
-      return `<p>Test mail from ${escapeHtml(d.domain)}.</p>`;
+      return testEmailTemplate(d.domain);
     default:
       return "";
   }
@@ -152,12 +157,26 @@ class Mailer {
     }
 
     try {
+      const logoPath = getInlineLogoPath();
       const wat = await this.transporter.sendMail({
         from: process.env.MAILER_SENDER || "",
         to: recipient,
         subject: tpl.subject,
         html: buildHtml(tpl),
+        attachments: logoPath
+          ? [
+              {
+                filename: "inkvisitor.svg",
+                path: logoPath,
+                cid: INLINE_LOGO_CID,
+              },
+            ]
+          : [],
       });
+
+      if (!logoPath) {
+        console.warn("[Mailer] Inline logo not found, sending without logo");
+      }
     } catch (e) {
       throw new Error(`Email error for template ${tpl.subject}: ${e}`);
     }
