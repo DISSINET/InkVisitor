@@ -119,11 +119,27 @@ export const EntitySearchBox: React.FC = () => {
     );
   }, [debouncedValues]);
 
+  const dispatch = useAppDispatch();
+  const expandedOptions = useAppSelector(
+    (state) => state.entitySearch.expandedOptions
+  );
+  const areUserAdvancedOptionsVisible = useMemo(
+    () =>
+      expandedOptions.some((option: SearchEnums.AdvancedOption) =>
+        [
+          SearchEnums.AdvancedOption.CreatedBy,
+          SearchEnums.AdvancedOption.UpdatedBy,
+          SearchEnums.AdvancedOption.EditedBy,
+        ].includes(option)
+      ),
+    [expandedOptions]
+  );
+
   const {
     data: users,
     isFetching: isFetchingUsers,
     error: usersError,
-  } = useUsersGetMoreQuery();
+  } = useUsersGetMoreQuery({ enabled: areUserAdvancedOptionsVisible });
 
   const {
     status,
@@ -248,11 +264,6 @@ export const EntitySearchBox: React.FC = () => {
   //   }
   //   return options;
   // }, [templates]);
-
-  const dispatch = useAppDispatch();
-  const expandedOptions = useAppSelector(
-    (state) => state.entitySearch.expandedOptions
-  );
 
   const [showEntityCreateModal, setShowEntityCreateModal] = useState(false);
 

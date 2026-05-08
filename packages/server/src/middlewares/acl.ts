@@ -76,6 +76,13 @@ class Acl {
    */
   public async validate(req: IRequest): Promise<CustomError | null> {
     const permissions = await this.getPermissions(req);
+    const user = req.user?.user;
+    const controller = req.baseUrl.split("/").pop() || "";
+    const route = req.route.path
+      .split("/")
+      .filter((part) => !!part)
+      .join("/");
+    const method = req.method as HttpMethods;
 
     // allow public routes for all
     if (permissions.find((p) => p.public)) {
@@ -85,6 +92,17 @@ class Acl {
     // block not logged visitors
     if (!req.user) {
       return permissionDeniedErr;
+    }
+
+    // allow editors with assigned rights to fetch users for filters (editedBy/updatedBy)
+    if (
+      controller === "users" &&
+      route === "" &&
+      method === HttpMethods.Get &&
+      user?.role === UserEnums.Role.Editor &&
+      (user.rights?.length || 0) > 0
+    ) {
+      return null;
     }
 
     // allow admin/owner for any route
