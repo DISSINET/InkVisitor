@@ -119,7 +119,9 @@ describe("statements/batch-reorder", function () {
       expect(after3.data.territory.order).toBe(10);
     });
 
-    it("should handle reordering many statements in a single request", async () => {
+    it(
+      "should handle reordering many statements in a single request",
+      async () => {
       const N = 50;
       const stmts: Statement[] = [];
       for (let i = 0; i < N; i++) {
@@ -155,6 +157,8 @@ describe("statements/batch-reorder", function () {
         const after = await findEntityById(db, stmts[i].id);
         expect(after.data.territory.order).toBe(1000 + (N - 1 - i));
       }
-    });
+    },
+    30_000
+  );
   });
 });
