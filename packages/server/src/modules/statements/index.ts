@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { r as rethink } from "rethinkdb-ts";
 import { findEntityById } from "@service/shorthands";
 import {
   BadParams,
@@ -22,6 +23,7 @@ import Entity from "@models/entity/entity";
 import Reference from "@models/entity/reference";
 import Relation from "@models/relation/relation";
 import { getRelationClass } from "@models/factory";
+import treeCache from "@service/treeCache";
 
 export default Router()
   /**
@@ -409,20 +411,28 @@ export default Router()
       const updatesMap = new Map(updates.map((item) => [item.id, item.order]));
 
       for (const statementData of statements) {
-        const statement = new Statement(statementData as IStatement);
-        const nextOrder = updatesMap.get(statement.id);
+        const nextOrder = updatesMap.get(statementData.id);
+        const currentTerritoryId = (statementData as IStatement).data.territory?.territoryId;
 
-        if (nextOrder === undefined || statement.data.territory?.order === nextOrder) {
+        if (
+          nextOrder === undefined ||
+          !currentTerritoryId ||
+          (statementData as IStatement).data.territory?.order === nextOrder
+        ) {
           continue;
         }
 
-        statement.data.territory = new StatementTerritory({
-          territoryId: statement.data.territory?.territoryId,
-          order: nextOrder,
-        });
-
-        await statement.update(request.db.connection, { data: statement.data });
+        await rethink
+          .table(Entity.table)
+          .get(statementData.id)
+          .update({
+            data: { territory: { territoryId: currentTerritoryId, order: nextOrder } },
+            updatedAt: new Date(),
+          })
+          .run(request.db.connection);
       }
+
+      await treeCache.initialize();
 
       return {
         result: true,
