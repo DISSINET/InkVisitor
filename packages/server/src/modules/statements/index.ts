@@ -23,7 +23,6 @@ import Entity from "@models/entity/entity";
 import Reference from "@models/entity/reference";
 import Relation from "@models/relation/relation";
 import { getRelationClass } from "@models/factory";
-import treeCache from "@service/treeCache";
 
 export default Router()
   /**
@@ -442,8 +441,6 @@ export default Router()
           )
           .run(request.db.connection);
       }
-
-      await treeCache.initialize();
 
       return {
         result: true,
