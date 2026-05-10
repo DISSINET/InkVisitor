@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { r as rethink } from "rethinkdb-ts";
+import { r as rethink, RDatum } from "rethinkdb-ts";
 import { findEntityById } from "@service/shorthands";
 import {
   BadParams,
@@ -408,27 +408,38 @@ export default Router()
         throw new StatementDoesNotExits("at least one statement not found", "");
       }
 
-      const updatesMap = new Map(updates.map((item) => [item.id, item.order]));
+      const currentOrderById = new Map(
+        statements.map((s) => [s.id, (s as IStatement).data.territory?.order])
+      );
+      const territoryIdById = new Map(
+        statements.map((s) => [s.id, (s as IStatement).data.territory?.territoryId])
+      );
 
-      for (const statementData of statements) {
-        const nextOrder = updatesMap.get(statementData.id);
-        const currentTerritoryId = (statementData as IStatement).data.territory?.territoryId;
+      const updatesPayload = updates
+        .filter((u) => {
+          const tid = territoryIdById.get(u.id);
+          const current = currentOrderById.get(u.id);
+          return !!tid && current !== u.order;
+        })
+        .map((u) => ({
+          id: u.id,
+          territoryId: territoryIdById.get(u.id) as string,
+          order: u.order,
+        }));
 
-        if (
-          nextOrder === undefined ||
-          !currentTerritoryId ||
-          (statementData as IStatement).data.territory?.order === nextOrder
-        ) {
-          continue;
-        }
-
+      if (updatesPayload.length > 0) {
+        const now = new Date();
         await rethink
-          .table(Entity.table)
-          .get(statementData.id)
-          .update({
-            data: { territory: { territoryId: currentTerritoryId, order: nextOrder } },
-            updatedAt: new Date(),
-          })
+          .expr(updatesPayload)
+          .forEach((u: RDatum) =>
+            rethink
+              .table(Entity.table)
+              .get(u("id"))
+              .update({
+                data: { territory: { territoryId: u("territoryId"), order: u("order") } },
+                updatedAt: now,
+              })
+          )
           .run(request.db.connection);
       }
 
