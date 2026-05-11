@@ -774,21 +774,20 @@ export const StatementListBox: React.FC = () => {
         }
       });
 
-      // Update each statement's order
-      const updates = finalOrder.map((statement, index) => {
-        const order = index * 100; // Use increments of 100 to leave room for future insertions
-        return api.entityUpdate(statement.id, {
-          data: {
-            ...statement.data,
-            territory: {
-              ...statement.data.territory,
-              order,
-            },
-          },
-        });
-      });
+      const currentOrderMap = new Map(
+        statements.map((statement) => [statement.id, statement.data.territory?.order])
+      );
 
-      await Promise.all(updates);
+      const updates = finalOrder
+        .map((statement, index) => ({
+          id: statement.id,
+          order: index + 1,
+        }))
+        .filter(({ id, order }) => currentOrderMap.get(id) !== order);
+
+      if (updates.length) {
+        await api.statementsBatchReorder(updates);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["territory"] });
