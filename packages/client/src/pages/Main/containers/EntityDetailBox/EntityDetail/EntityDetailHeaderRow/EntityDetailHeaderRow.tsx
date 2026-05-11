@@ -12,11 +12,7 @@ import { CgListTree } from "react-icons/cg";
 import { FaClone, FaEdit, FaTrashAlt } from "react-icons/fa";
 import { MdCleaningServices } from "react-icons/md";
 import { toast } from "react-toastify";
-import {
-  StyledActantHeaderRow,
-  StyledGrClone,
-  StyledTagWrap,
-} from "./EntityDetailHeaderRowStyles";
+import { StyledActantHeaderRow, StyledGrClone, StyledTagWrap } from "./EntityDetailHeaderRowStyles";
 import { ButtonSize } from "types";
 
 interface EntityDetailHeaderRow {
@@ -43,16 +39,23 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
 }) => {
   const queryClient = useQueryClient();
 
-  const { setStatementId, setTerritoryId, appendDetailId } = useSearchParams();
+  const { setStatementId, setTerritoryId, appendDetailId, setSelectedDetailId } = useSearchParams();
 
   const cloneEntityMutation = useMutation({
-    mutationFn: async (entityId: string) =>
-      (await api.entityClone(entityId)).data,
-    onSuccess: (data: IResponseGeneric) => {
-      appendDetailId(data.data.data.id);
+    mutationFn: async (entityId: string) => await api.entityClone(entityId),
+    onSuccess: (data, variables) => {
+      const clonedEntity = (data as any)?.data?.data;
+
+      const clonedEntityId = clonedEntity?.id;
+      const clonedEntityClass = clonedEntity?.class ?? entity.class;
+
+      if (clonedEntityId) {
+        appendDetailId(clonedEntityId);
+        setSelectedDetailId(clonedEntityId);
+      }
       toast.info(`Entity duplicated!`);
       queryClient.invalidateQueries({ queryKey: ["templates"] });
-      if (data.data.data.class === EntityEnums.Class.Territory) {
+      if (clonedEntityClass === EntityEnums.Class.Territory) {
         queryClient.invalidateQueries({ queryKey: ["tree"] });
       }
     },
@@ -75,10 +78,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
         toast.info("Cannot create territory without parent");
       }
     } else {
-      newInstance = await InstTemplate(
-        entity,
-        localStorage.getItem("userrole") as UserEnums.Role
-      );
+      newInstance = await InstTemplate(entity, localStorage.getItem("userrole") as UserEnums.Role);
     }
 
     if (newInstance) {
@@ -100,10 +100,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
 
   return (
     <>
-      <StyledActantHeaderRow
-        $widthTooNarrow={widthTooNarrow}
-        $hasWarnings={hasWarnings}
-      >
+      <StyledActantHeaderRow $widthTooNarrow={widthTooNarrow} $hasWarnings={hasWarnings}>
         <StyledTagWrap>
           <EntityTag entity={entity} fullWidth />
         </StyledTagWrap>
@@ -203,10 +200,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
               color="primary"
               onClick={() => {
                 setStatementId(entity.id);
-                if (
-                  !entity.isTemplate &&
-                  (entity as IStatement).data.territory?.territoryId
-                ) {
+                if (!entity.isTemplate && (entity as IStatement).data.territory?.territoryId) {
                   setTerritoryId(entity.data.territory.territoryId);
                 }
               }}
