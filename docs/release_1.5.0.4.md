@@ -2,7 +2,7 @@
 
 ### New Features
 
-- Full text edits and anchor additions are now included into audits (#2137)
+- Included full text edits and anchor additions into audits and shown in Statistics page (#2137)
 - Added batch duplicate to current territory (#2941)
 - Annotator: mouse over of the id in xml mode now shows the anchored entity in popover (#2872)
 
