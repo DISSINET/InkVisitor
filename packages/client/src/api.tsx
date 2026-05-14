@@ -162,14 +162,53 @@ class Api {
   }
 
   /**
+   * Proxies / overload pages often return HTML while the client uses responseType "json".
+   * Axios then leaves the raw string in response.data (silent JSON parse). Callers assume
+   * objects and crash — coerce that to a failed request instead.
+   */
+  private rejectIfNonJsonApiBody(response: AxiosResponse): AxiosResponse | Promise<never> {
+    const rt = response.config?.responseType;
+    if (rt === "blob" || rt === "arraybuffer" || rt === "document" || rt === "stream") {
+      return response;
+    }
+
+    if (typeof response.data !== "string") {
+      return response;
+    }
+
+    const ctRaw = response.headers?.["content-type"] ?? response.headers?.["Content-Type"] ?? "";
+    const ct = String(ctRaw).toLowerCase();
+    const trimmed = response.data.trimStart();
+    const lowerHead = trimmed.slice(0, 16).toLowerCase();
+
+    if (
+      ct.includes("text/html") ||
+      lowerHead.startsWith("<!doctype html") ||
+      lowerHead.startsWith("<html") ||
+      lowerHead.startsWith("<body")
+    ) {
+      return Promise.reject(
+        new AxiosError(
+          "Server returned HTML instead of JSON (service may be overloaded).",
+          AxiosError.ERR_BAD_RESPONSE,
+          response.config,
+          response.request,
+          response
+        )
+      );
+    }
+
+    return response;
+  }
+
+  /**
    * Uses default response interceptors - mainly checking for error and shows the toaster
    */
   useDefaultResponseInterceptors() {
     this.connection.interceptors.response.use(
-      function (response) {
+      (response) => {
         // Any status code that lie within the range of 2xx cause this function to trigger
-        // Do something with response data
-        return response;
+        return this.rejectIfNonJsonApiBody(response);
       },
       (error: AxiosError) => {
         //@ts-ignore
@@ -227,35 +266,63 @@ class Api {
       if (err.response?.status === 503) {
         return new errors.NetworkError();
       }
-      return err.response?.data || new errors.NetworkError();
+      const data = err.response?.data;
+      if (typeof data === "string") {
+        return new errors.NetworkError();
+      }
+      return data || new errors.NetworkError();
     } else {
       return new errors.NetworkError();
     }
   };
 
   responseToError(responseData: unknown): errors.IErrorSignature {
-    console.log("responseData", responseData);
-    const out = {
+    const out: errors.IErrorSignature = {
       error: "",
       message: "",
     };
 
-    if (
-      responseData instanceof AxiosError &&
-      ((responseData as AxiosError).code === AxiosError.ERR_NETWORK ||
-        (responseData as AxiosError).code === AxiosError.ERR_BAD_RESPONSE)
-    ) {
-      // type doesn't get minified unlike the class name
-      out.error = errors.NetworkError.TYPE;
-    } else if (
-      responseData &&
-      (responseData as any).response &&
-      (responseData as any).response.data
-    ) {
-      out.error = (responseData as any).response.data.error;
-      out.message = (responseData as any).response.data.message;
+    const fillFromApiErrorPayload = (data: unknown): boolean => {
+      if (
+        data &&
+        typeof data === "object" &&
+        typeof (data as { error?: unknown }).error === "string"
+      ) {
+        out.error = (data as { error: string }).error;
+        const msg = (data as { message?: unknown }).message;
+        out.message = typeof msg === "string" ? msg : "";
+        return true;
+      }
+      return false;
+    };
+
+    if (responseData instanceof AxiosError) {
+      const ax = responseData;
+      if (ax.code === AxiosError.ERR_NETWORK || ax.code === AxiosError.ERR_BAD_RESPONSE) {
+        out.error = errors.NetworkError.TYPE;
+        return out;
+      }
+      const d = ax.response?.data;
+      if (typeof d === "string") {
+        out.error = errors.NetworkError.TYPE;
+        return out;
+      }
+      if (fillFromApiErrorPayload(d)) {
+        return out;
+      }
+      return out;
     }
 
+    const wrapped = responseData as { response?: { data?: unknown } } | null | undefined;
+    const nested = wrapped?.response?.data;
+    if (nested === undefined || nested === null) {
+      return out;
+    }
+    if (typeof nested === "string") {
+      out.error = errors.NetworkError.TYPE;
+      return out;
+    }
+    fillFromApiErrorPayload(nested);
     return out;
   }
 
