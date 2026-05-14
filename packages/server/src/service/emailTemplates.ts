@@ -37,21 +37,26 @@ function renderLayout({
         )}</a></p>`
       : "";
 
+  // Dark-mode clients (notably Gmail mobile) may recolor solid backgrounds. Meta
+  // color-scheme + bgcolor + gradient tricks improve odds but are not guaranteed.
+  const headerBg = "#091034";
   return `<!doctype html>
-<html>
+<html style="color-scheme:light;">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <meta name="supported-color-schemes" content="light" />
     <title>${escapeHtml(title)}</title>
   </head>
-  <body style="margin:0;padding:24px;background:#f6f8fa;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#24292f;">
+  <body style="margin:0;padding:24px;background:#f6f8fa;color-scheme:light;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#24292f;">
     <div style="display:none;opacity:0;max-height:0;overflow:hidden;">${escapeHtml(preheader)}</div>
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
       <tr>
         <td align="center">
           <table role="presentation" width="620" cellspacing="0" cellpadding="0" style="max-width:620px;background:#ffffff;border:1px solid #d0d7de;border-radius:10px;overflow:hidden;">
             <tr>
-              <td style="background:#091034;padding:16px 24px;">
+              <td bgcolor="${headerBg}" style="background-color:${headerBg};background-image:linear-gradient(${headerBg},${headerBg});padding:16px 24px;">
                 ${
                   logoUrl
                     ? `<img src="${escapeHtml(

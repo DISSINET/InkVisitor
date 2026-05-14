@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { r as rethink, RDatum } from "rethinkdb-ts";
 import { findEntityById } from "@service/shorthands";
 import {
   BadParams,
@@ -331,6 +332,119 @@ export default Router()
         result: true,
         message: msg,
         data: newIds,
+      };
+    })
+  )
+
+  /**
+   * @openapi
+   * /statements/batch-reorder:
+   *   put:
+   *     description: Reorder N statements by setting exact territory order values
+   *     tags:
+   *       - entities
+   *     requestBody:
+   *       description: list of statement ids with target order
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               updates:
+   *                 type: array
+   *                 items:
+   *                   type: object
+   *                   properties:
+   *                     id:
+   *                       type: string
+   *                     order:
+   *                       type: number
+   *     responses:
+   *       200:
+   *         description: Returns generic response
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/IResponseGeneric"
+   */
+  .put(
+    "/batch-reorder",
+    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
+      const updates = request.body?.updates as
+        | { id: string; order: number }[]
+        | undefined;
+
+      if (!updates || updates.constructor.name !== "Array" || !updates.length) {
+        throw new BadParams("updates are required");
+      }
+
+      if (
+        updates.some(
+          (item) =>
+            !item ||
+            typeof item.id !== "string" ||
+            item.id.length === 0 ||
+            typeof item.order !== "number" ||
+            Number.isNaN(item.order)
+        )
+      ) {
+        throw new BadParams("invalid updates payload");
+      }
+
+      const uniqueIds = Array.from(new Set(updates.map((item) => item.id)));
+      if (uniqueIds.length !== updates.length) {
+        throw new BadParams("duplicate statement ids are not allowed");
+      }
+
+      await request.db.lock();
+
+      const statements = await Entity.findEntitiesByIds(request.db.connection, uniqueIds);
+      const statementsCount = statements.reduce(
+        (acc, cur) => (cur.class === EntityEnums.Class.Statement ? acc + 1 : acc),
+        0
+      );
+      if (statementsCount !== uniqueIds.length) {
+        throw new StatementDoesNotExits("at least one statement not found", "");
+      }
+
+      const currentOrderById = new Map(
+        statements.map((s) => [s.id, (s as IStatement).data.territory?.order])
+      );
+      const territoryIdById = new Map(
+        statements.map((s) => [s.id, (s as IStatement).data.territory?.territoryId])
+      );
+
+      const updatesPayload = updates
+        .filter((u) => {
+          const tid = territoryIdById.get(u.id);
+          const current = currentOrderById.get(u.id);
+          return !!tid && current !== u.order;
+        })
+        .map((u) => ({
+          id: u.id,
+          territoryId: territoryIdById.get(u.id) as string,
+          order: u.order,
+        }));
+
+      if (updatesPayload.length > 0) {
+        const now = new Date();
+        await rethink
+          .expr(updatesPayload)
+          .forEach((u: RDatum) =>
+            rethink
+              .table(Entity.table)
+              .get(u("id"))
+              .update({
+                data: { territory: { territoryId: u("territoryId"), order: u("order") } },
+                updatedAt: now,
+              })
+          )
+          .run(request.db.connection);
+      }
+
+      return {
+        result: true,
+        message: `${updates.length} statements reordered`,
       };
     })
   )
