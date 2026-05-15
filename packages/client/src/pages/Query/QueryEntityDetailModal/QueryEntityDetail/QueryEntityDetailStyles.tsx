@@ -21,8 +21,9 @@ export const StyledDetailSection = styled.div`
 
   transition: all 300ms ease;
 
+  background-color: ${({ theme }) => theme.color["gray"][100]};
   &:hover {
-    background-color: ${({ theme }) => theme.color["gray"][100]};
+    background-color: ${({ theme }) => theme.color["gray"][200]};
   }
 `;
 
