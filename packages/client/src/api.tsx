@@ -189,7 +189,7 @@ class Api {
     ) {
       return Promise.reject(
         new AxiosError(
-          "Server returned HTML instead of JSON (service may be overloaded).",
+          "Server returned HTML instead of JSON (service may be overloaded or missing DB index).",
           AxiosError.ERR_BAD_RESPONSE,
           response.config,
           response.request,
