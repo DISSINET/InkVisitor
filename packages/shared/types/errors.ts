@@ -343,9 +343,7 @@ class RelationDoesNotExist extends CustomError {
   public static message = "Relation $1 does not exist";
 
   static forId(id: string): RelationDoesNotExist {
-    return new RelationDoesNotExist(
-      RelationDoesNotExist.message.replace("$1", id)
-    );
+    return new RelationDoesNotExist(RelationDoesNotExist.message.replace("$1", id));
   }
 }
 
@@ -380,9 +378,7 @@ class RelationAsymetricalPathExist extends CustomError {
   public static message = "Asymetrical constraint check failed";
 
   static forId(id: string): RelationAsymetricalPathExist {
-    return new RelationAsymetricalPathExist(
-      RelationAsymetricalPathExist.message.replace("$1", id)
-    );
+    return new RelationAsymetricalPathExist(RelationAsymetricalPathExist.message.replace("$1", id));
   }
 }
 
@@ -395,9 +391,7 @@ class DocumentDoesNotExist extends CustomError {
   public static message = "Document $1 does not exist";
 
   static forId(id: string): DocumentDoesNotExist {
-    return new DocumentDoesNotExist(
-      DocumentDoesNotExist.message.replace("$1", id)
-    );
+    return new DocumentDoesNotExist(DocumentDoesNotExist.message.replace("$1", id));
   }
 }
 
@@ -483,6 +477,13 @@ class NetworkError extends CustomError {
     "Please check your network connection. If the issue persists, please try again later or contact the project owner.";
 }
 
+class HtmlResponseError extends CustomError {
+  public static readonly TYPE = "HtmlResponseError";
+  public static code = 500;
+  public static title = "Server returned HTML instead of JSON";
+  public static message = "This may indicate a service overload or missing database index.";
+}
+
 const allErrors: Record<string, any> = {
   InvalidDeleteError,
   UnauthorizedError,
@@ -514,6 +515,7 @@ const allErrors: Record<string, any> = {
   RelationAsymetricalPathExist,
   DocumentDoesNotExist,
   NetworkError,
+  HtmlResponseError,
   UnsafePasswordError,
   PasswordDoesNotMatchError,
   PasswordResetHashError,
@@ -571,6 +573,7 @@ export {
   RelationAsymetricalPathExist,
   DocumentDoesNotExist,
   NetworkError,
+  HtmlResponseError,
   UnsafePasswordError,
   PasswordDoesNotMatchError,
   PasswordResetHashError,

@@ -185,8 +185,17 @@ class Api {
       ct.includes("text/html") ||
       lowerHead.startsWith("<!doctype html") ||
       lowerHead.startsWith("<html") ||
-      lowerHead.startsWith("<body")
+      lowerHead.startsWith("<body") ||
+      lowerHead.startsWith("<div")
     ) {
+      toast.error(
+        <div>
+          Server returned HTML instead of JSON
+          <p style={{ fontSize: "1rem" }}>
+            This may indicate a service overload or missing database index
+          </p>
+        </div>
+      );
       return Promise.reject(
         new AxiosError(
           "Server returned HTML instead of JSON (service may be overloaded or missing DB index).",
