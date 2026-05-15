@@ -1,6 +1,6 @@
 import { languageDict } from "@shared/dictionaries";
 import { EntityEnums } from "@shared/enums";
-import { IEntity, IProp, IResponseDetail } from "@shared/types";
+import { IEntity, IProp, IResponseDetail, Relation } from "@shared/types";
 import { Button, Input, Loader } from "components";
 import Dropdown, { EntityTag } from "components/advanced";
 import { EntityDetailProtocol } from "pages/Main/containers/EntityDetailBox/EntityDetail/EntityDetailProtocol/EntityDetailProtocol";
@@ -26,6 +26,8 @@ import {
   StyledReferenceRow,
   StyledReferenceTable,
 } from "./QueryEntityDetailStyles";
+import api from "api";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface QueryEntityDetail {
   entity?: IResponseDetail;
@@ -47,6 +49,30 @@ export const QueryEntityDetail: React.FC<QueryEntityDetail> = ({ entity, isFetch
   //   enabled: !!entity.id && api.isLoggedIn(),
   // });
 
+  const queryClient = useQueryClient();
+
+  const relationCreateMutation = useMutation({
+    mutationFn: async (newRelation: Relation.IRelation) => await api.relationCreate(newRelation),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["entity"] });
+    },
+  });
+
+  const relationUpdateMutation = useMutation({
+    mutationFn: async (relationObject: {
+      relationId: string;
+      changes: Partial<Relation.IRelation>;
+    }) => await api.relationUpdate(relationObject.relationId, relationObject.changes),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["entity"] });
+    },
+  });
+  const relationDeleteMutation = useMutation({
+    mutationFn: async (relationId: string) => await api.relationDelete(relationId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["entity"] });
+    },
+  });
   const renderFirstLevelProps = (props: IProp[], entities: Record<string, IEntity>) => {
     return (
       <div style={{ display: "grid" }}>
@@ -137,7 +163,7 @@ export const QueryEntityDetail: React.FC<QueryEntityDetail> = ({ entity, isFetch
               <Input
                 width="full"
                 value={entity?.labels ? entity?.labels[0] : ""}
-                disabled
+                // disabled
                 onChangeFn={() => {}}
               />
             </div>
@@ -236,7 +262,10 @@ export const QueryEntityDetail: React.FC<QueryEntityDetail> = ({ entity, isFetch
               <EntityDetailRelations
                 entity={entity}
                 // to switch userCanEdit={true}, mutations needs to be sent to props
-                userCanEdit={false}
+                userCanEdit={true}
+                relationCreateMutation={relationCreateMutation}
+                relationUpdateMutation={relationUpdateMutation}
+                relationDeleteMutation={relationDeleteMutation}
               />
             )}
             <Loader show={isFetching} size={40} />

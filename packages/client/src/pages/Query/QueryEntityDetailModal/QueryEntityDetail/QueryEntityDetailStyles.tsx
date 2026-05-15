@@ -22,9 +22,9 @@ export const StyledDetailSection = styled.div`
   transition: all 300ms ease;
 
   background-color: ${({ theme }) => theme.color["gray"][100]};
-  &:hover {
+  /* &:hover {
     background-color: ${({ theme }) => theme.color["gray"][200]};
-  }
+  } */
 `;
 
 /* Use grid instead of multicol — Firefox has layout bugs with column-count/inline-flex */

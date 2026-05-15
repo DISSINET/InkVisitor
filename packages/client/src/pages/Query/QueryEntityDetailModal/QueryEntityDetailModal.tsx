@@ -34,7 +34,7 @@ export const QueryEntityDetailModal: React.FC<QueryEntityDetailModal> = ({}) => 
         title="Entity Detail"
         content={
           <div style={{ display: "grid" }}>
-            {entity && <EntityTag fullWidth entity={entity} />}{" "}
+            {entity && <EntityTag fullWidth entity={entity} />}
             <Loader show={isFetching} size={20} />
           </div>
         }
