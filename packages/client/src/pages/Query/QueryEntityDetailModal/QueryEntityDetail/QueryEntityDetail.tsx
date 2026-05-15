@@ -236,7 +236,7 @@ export const QueryEntityDetail: React.FC<QueryEntityDetail> = ({ entity, isFetch
         <StyledExpRowSection>
           <StyledExpRowSectionHeader>Relations</StyledExpRowSectionHeader>
           <StyledExpRowSectionContent>
-            {entity && (
+            {entity && entity.relations && (
               <EntityDetailRelations
                 entity={entity}
                 // to switch userCanEdit={true}, mutations needs to be sent to props
@@ -293,7 +293,7 @@ export const QueryEntityDetail: React.FC<QueryEntityDetail> = ({ entity, isFetch
               {entity && (
                 <>
                   {/* usedIn props */}
-                  {!entity.isTemplate && (
+                  {!entity.isTemplate && entity.usedInMetaProps && (
                     <EntityDetailMetaPropsTable
                       title={{
                         singular: "Metaproperty",
@@ -306,7 +306,7 @@ export const QueryEntityDetail: React.FC<QueryEntityDetail> = ({ entity, isFetch
                     />
                   )}
                   {/* usedIn statements */}
-                  {!entity.isTemplate && (
+                  {!entity.isTemplate && entity.usedInStatements && (
                     <EntityDetailStatementsTable
                       title={{ singular: "Statement", plural: "Statements" }}
                       entities={entity.entities}
@@ -318,7 +318,7 @@ export const QueryEntityDetail: React.FC<QueryEntityDetail> = ({ entity, isFetch
                   )}
 
                   {/* usedIn statement props */}
-                  {!entity.isTemplate && (
+                  {!entity.isTemplate && entity.usedInStatementProps && (
                     <EntityDetailStatementPropsTable
                       title={{
                         singular: "In-statement Property",
@@ -332,7 +332,7 @@ export const QueryEntityDetail: React.FC<QueryEntityDetail> = ({ entity, isFetch
                   )}
 
                   {/* usedIn statement identification */}
-                  {!entity.isTemplate && (
+                  {!entity.isTemplate && entity.usedInStatementIdentifications && (
                     <EntityDetailIdentificationTable
                       title={{
                         singular: "In-statement Identification",
@@ -346,7 +346,7 @@ export const QueryEntityDetail: React.FC<QueryEntityDetail> = ({ entity, isFetch
                   )}
 
                   {/* usedIn statement classification */}
-                  {!entity.isTemplate && (
+                  {!entity.isTemplate && entity.usedInStatementClassifications && (
                     <EntityDetailClassificationTable
                       title={{
                         singular: "In-statement Classification",
