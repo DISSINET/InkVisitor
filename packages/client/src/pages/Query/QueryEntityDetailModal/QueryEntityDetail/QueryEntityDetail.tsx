@@ -16,13 +16,13 @@ import { FaRegCopy } from "react-icons/fa";
 import { toast } from "react-toastify";
 import {
   ColumnsContainer,
-  StyledExpandedRow,
-  StyledExpRowFormGrid,
-  StyledExpRowFormGridColumnLabel,
-  StyledExpRowFormGridColumnValueID,
-  StyledExpRowSection,
-  StyledExpRowSectionContent,
-  StyledExpRowSectionHeader,
+  StyledDetailFormGrid,
+  StyledDetailFormGridColumnLabel,
+  StyledDetailFormGridColumnValueID,
+  StyledDetailSection,
+  StyledDetailSectionContent,
+  StyledDetailSectionHeader,
+  StyledQueryEntityDetail,
   StyledReferenceRow,
   StyledReferenceTable,
 } from "./QueryEntityDetailStyles";
@@ -109,18 +109,14 @@ export const QueryEntityDetail: React.FC<QueryEntityDetail> = ({ entity, isFetch
 
   const alternativeLabels = entity?.labels.slice(1);
 
-  // useEffect(() => {
-  //   console.log("references", references);
-  // }, [references]);
-
   return (
-    <StyledExpandedRow>
+    <StyledQueryEntityDetail>
       <ColumnsContainer>
-        <StyledExpRowSection>
-          <StyledExpRowSectionHeader>Information</StyledExpRowSectionHeader>
-          <StyledExpRowFormGrid>
-            <StyledExpRowFormGridColumnLabel>ID:</StyledExpRowFormGridColumnLabel>
-            <StyledExpRowFormGridColumnValueID>
+        <StyledDetailSection>
+          <StyledDetailSectionHeader>Information</StyledDetailSectionHeader>
+          <StyledDetailFormGrid>
+            <StyledDetailFormGridColumnLabel>ID:</StyledDetailFormGridColumnLabel>
+            <StyledDetailFormGridColumnValueID>
               {entity?.id}
               {entity?.id && (
                 <Button
@@ -135,8 +131,8 @@ export const QueryEntityDetail: React.FC<QueryEntityDetail> = ({ entity, isFetch
                   }}
                 />
               )}
-            </StyledExpRowFormGridColumnValueID>
-            <StyledExpRowFormGridColumnLabel>Label:</StyledExpRowFormGridColumnLabel>
+            </StyledDetailFormGridColumnValueID>
+            <StyledDetailFormGridColumnLabel>Label:</StyledDetailFormGridColumnLabel>
             <div>
               <Input
                 width="full"
@@ -145,11 +141,11 @@ export const QueryEntityDetail: React.FC<QueryEntityDetail> = ({ entity, isFetch
                 onChangeFn={() => {}}
               />
             </div>
-            <StyledExpRowFormGridColumnLabel>Detail:</StyledExpRowFormGridColumnLabel>
+            <StyledDetailFormGridColumnLabel>Detail:</StyledDetailFormGridColumnLabel>
             <div>
               <Input width="full" value={entity?.detail} disabled onChangeFn={() => {}} />
             </div>
-            <StyledExpRowFormGridColumnLabel>Language:</StyledExpRowFormGridColumnLabel>
+            <StyledDetailFormGridColumnLabel>Language:</StyledDetailFormGridColumnLabel>
             <div>
               <Dropdown.Single.Basic
                 disabled
@@ -159,7 +155,7 @@ export const QueryEntityDetail: React.FC<QueryEntityDetail> = ({ entity, isFetch
                 onChange={(selectedOption) => {}}
               />
             </div>
-            <StyledExpRowFormGridColumnLabel>Notes:</StyledExpRowFormGridColumnLabel>
+            <StyledDetailFormGridColumnLabel>Notes:</StyledDetailFormGridColumnLabel>
             <div
               style={{
                 display: "flex",
@@ -181,18 +177,18 @@ export const QueryEntityDetail: React.FC<QueryEntityDetail> = ({ entity, isFetch
                 );
               })}
             </div>
-            <StyledExpRowFormGridColumnLabel>Alternative labels:</StyledExpRowFormGridColumnLabel>
+            <StyledDetailFormGridColumnLabel>Alternative labels:</StyledDetailFormGridColumnLabel>
             {alternativeLabels?.map((label: string, key: number) => {
               return <>{label}</>;
             })}
-          </StyledExpRowFormGrid>
-        </StyledExpRowSection>
+          </StyledDetailFormGrid>
+        </StyledDetailSection>
         {entity?.class && entity.class === EntityEnums.Class.Territory && (
           <>
             {/* Protocol */}
-            <StyledExpRowSection>
-              <StyledExpRowSectionHeader>Protocol</StyledExpRowSectionHeader>
-              <StyledExpRowSectionContent>
+            <StyledDetailSection>
+              <StyledDetailSectionHeader>Protocol</StyledDetailSectionHeader>
+              <StyledDetailSectionContent>
                 {entity && (
                   <EntityDetailProtocol
                     territory={entity}
@@ -203,13 +199,13 @@ export const QueryEntityDetail: React.FC<QueryEntityDetail> = ({ entity, isFetch
                   />
                 )}
                 <Loader show={isFetching} size={40} />
-              </StyledExpRowSectionContent>
-            </StyledExpRowSection>
+              </StyledDetailSectionContent>
+            </StyledDetailSection>
 
             {/* Validation rules */}
-            <StyledExpRowSection>
-              <StyledExpRowSectionHeader>Validation rules</StyledExpRowSectionHeader>
-              <StyledExpRowSectionContent>
+            <StyledDetailSection>
+              <StyledDetailSectionHeader>Validation rules</StyledDetailSectionHeader>
+              <StyledDetailSectionContent>
                 {/* {entity && (
                   <EntityDetailValidationSection
                     validations={
@@ -228,14 +224,14 @@ export const QueryEntityDetail: React.FC<QueryEntityDetail> = ({ entity, isFetch
                   />
                 )} */}
                 <Loader show={isFetching} size={40} />
-              </StyledExpRowSectionContent>
-            </StyledExpRowSection>
+              </StyledDetailSectionContent>
+            </StyledDetailSection>
           </>
         )}
         {/* Relations */}
-        <StyledExpRowSection>
-          <StyledExpRowSectionHeader>Relations</StyledExpRowSectionHeader>
-          <StyledExpRowSectionContent>
+        <StyledDetailSection>
+          <StyledDetailSectionHeader>Relations</StyledDetailSectionHeader>
+          <StyledDetailSectionContent>
             {entity && entity.relations && (
               <EntityDetailRelations
                 entity={entity}
@@ -244,24 +240,24 @@ export const QueryEntityDetail: React.FC<QueryEntityDetail> = ({ entity, isFetch
               />
             )}
             <Loader show={isFetching} size={40} />
-          </StyledExpRowSectionContent>
-        </StyledExpRowSection>
+          </StyledDetailSectionContent>
+        </StyledDetailSection>
 
         {/* Metaproperties */}
-        <StyledExpRowSection>
-          <StyledExpRowSectionHeader>Metaproperties</StyledExpRowSectionHeader>
-          <StyledExpRowSectionContent>
+        <StyledDetailSection>
+          <StyledDetailSectionHeader>Metaproperties</StyledDetailSectionHeader>
+          <StyledDetailSectionContent>
             {entity && renderFirstLevelProps(entity.props, entity.entities)}
 
             <Loader show={isFetching} size={40} />
-          </StyledExpRowSectionContent>
-        </StyledExpRowSection>
+          </StyledDetailSectionContent>
+        </StyledDetailSection>
 
         <>
           {/* References */}
-          <StyledExpRowSection>
-            <StyledExpRowSectionHeader>References</StyledExpRowSectionHeader>
-            <StyledExpRowSectionContent>
+          <StyledDetailSection>
+            <StyledDetailSectionHeader>References</StyledDetailSectionHeader>
+            <StyledDetailSectionContent>
               <StyledReferenceTable>
                 {entity &&
                   entity.references?.map((reference, key) => {
@@ -283,13 +279,13 @@ export const QueryEntityDetail: React.FC<QueryEntityDetail> = ({ entity, isFetch
               </StyledReferenceTable>
 
               <Loader show={isFetching} size={40} />
-            </StyledExpRowSectionContent>
-          </StyledExpRowSection>
+            </StyledDetailSectionContent>
+          </StyledDetailSection>
 
           {/* Used in */}
-          <StyledExpRowSection>
-            <StyledExpRowSectionHeader>Used In:</StyledExpRowSectionHeader>
-            <StyledExpRowSectionContent>
+          <StyledDetailSection>
+            <StyledDetailSectionHeader>Used In:</StyledDetailSectionHeader>
+            <StyledDetailSectionContent>
               {entity && (
                 <>
                   {/* usedIn props */}
@@ -362,28 +358,28 @@ export const QueryEntityDetail: React.FC<QueryEntityDetail> = ({ entity, isFetch
               )}
 
               <Loader show={isFetching} size={40} />
-            </StyledExpRowSectionContent>
-          </StyledExpRowSection>
+            </StyledDetailSectionContent>
+          </StyledDetailSection>
         </>
 
         {/* Audits */}
-        {/* <StyledExpRowSection>
-            <StyledExpRowSectionHeader>Audits</StyledExpRowSectionHeader>
-            <StyledExpRowSectionContent>
+        {/* <StyledDetailSection>
+            <StyledDetailSectionHeader>Audits</StyledDetailSectionHeader>
+            <StyledDetailSectionContent>
               {audit && <AuditTable {...audit} />}
               <Loader show={isFetchingAudit} size={40} />
-            </StyledExpRowSectionContent>
-          </StyledExpRowSection> */}
+            </StyledDetailSectionContent>
+          </StyledDetailSection> */}
 
         {/* JSON */}
-        {/* <StyledExpRowSection>
-            <StyledExpRowSectionHeader>JSON</StyledExpRowSectionHeader>
-            <StyledExpRowSectionContent>
+        {/* <StyledDetailSection>
+            <StyledDetailSectionHeader>JSON</StyledDetailSectionHeader>
+            <StyledDetailSectionContent>
               {entity && <JSONExplorer data={entity} />}
               <Loader show={isFetching} size={40} />
-            </StyledExpRowSectionContent>
-          </StyledExpRowSection> */}
+            </StyledDetailSectionContent>
+          </StyledDetailSection> */}
       </ColumnsContainer>
-    </StyledExpandedRow>
+    </StyledQueryEntityDetail>
   );
 };

@@ -1,15 +1,14 @@
 import styled from "styled-components";
 
-export const StyledExpandedRow = styled.div`
+export const StyledQueryEntityDetail = styled.div`
+  display: grid;
+  width: 100%;
   overflow: auto;
-  gap: 1rem;
   padding: 0.5rem;
   padding-left: 1rem;
   min-height: 5rem;
-  /* border-right: 1px solid ${({ theme }) => theme.color["black"]}; */
-  /* background-color: ${({ theme }) => theme.color["white"]}; */
 `;
-export const StyledExpRowSection = styled.div`
+export const StyledDetailSection = styled.div`
   position: relative;
   display: flex;
   flex-direction: column;
@@ -46,7 +45,7 @@ export const StyledColumnItem = styled.div`
   width: 100%;
 `;
 
-export const StyledExpRowFormGrid = styled.div`
+export const StyledDetailFormGrid = styled.div`
   display: grid;
   grid-template-columns: auto minmax(0, 1fr); /* minmax(0,1fr) prevents FF column blowout */
   gap: 0.5rem;
@@ -57,7 +56,7 @@ export const StyledExpRowFormGrid = styled.div`
   }
 `;
 
-export const StyledExpRowSectionHeader = styled.div`
+export const StyledDetailSectionHeader = styled.div`
   display: flex;
   align-items: center;
   font-weight: ${({ theme }) => theme.fontWeight.normal};
@@ -65,26 +64,26 @@ export const StyledExpRowSectionHeader = styled.div`
   margin-bottom: ${({ theme }) => theme.space[4]};
   color: ${({ theme }) => theme.color["primary"]};
 `;
-interface StyledExpRowSectionContent {
+interface StyledDetailSectionContent {
   $firstSection?: boolean;
 }
-export const StyledExpRowSectionContent = styled.div<StyledExpRowSectionContent>`
+export const StyledDetailSectionContent = styled.div<StyledDetailSectionContent>`
   padding-left: ${({ theme, $firstSection = false }) => ($firstSection ? "" : theme.space[4])};
   padding-top: ${({ theme, $firstSection }) => ($firstSection ? 0 : theme.space[4])};
 `;
-export const StyledExpRowFormGridColumnLabel = styled.div`
+export const StyledDetailFormGridColumnLabel = styled.div`
   display: grid;
   justify-content: end;
   margin-top: 0.5rem;
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   color: ${({ theme }) => theme.color["success"]};
 `;
-export const StyledExpRowFormGridColumnValue = styled.div`
+export const StyledDetailFormGridColumnValue = styled.div`
   display: grid;
   align-items: end;
   font-size: ${({ theme }) => theme.fontSize["xs"]};
 `;
-export const StyledExpRowFormGridColumnValueID = styled.div`
+export const StyledDetailFormGridColumnValueID = styled.div`
   color: ${({ theme }) => theme.color["primary"]};
   display: flex;
   align-items: flex-end;
