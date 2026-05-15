@@ -6,13 +6,12 @@ import { v4 as uuidv4 } from "uuid";
 import { IEntity, IProp, IReference, IResponseQuery, IResponseQueryEntity } from "@shared/types";
 import { Explore } from "@shared/types/query";
 import api from "api";
-import { Button, Loader, Modal, ModalContent, ModalFooter, ModalHeader } from "components";
+import { Loader } from "components";
 import { CMetaProp } from "constructors";
 
 import { useResizeObserver, useSearchParams, useTheme } from "hooks";
 import { ExploreAction, ExploreActionType } from "../state";
 import { ExplorerTableBatchActionModal } from "./ExplorerTableBatchActionModal/ExplorerTableBatchActionModal";
-import { ExplorerTableDetail } from "./ExplorerTableDetail/ExplorerTableDetail";
 import ExplorerTableNewColumnPanel from "./ExplorerTableNewColumnPanel/ExplorerTableNewColumnPanel";
 import { StyledBody, StyledTableWrapper } from "./ExplorerTableStyles";
 import ExploreTableControl from "./ExploreTableControl";
@@ -35,11 +34,9 @@ const OVERSCAN_ROWS = 10;
 const SCROLL_WINDOW_UPDATE_DEBOUNCE_MS = 150;
 
 // light CSS classes (avoid dynamic styled props in hot path)
-import { EntityTag } from "components/advanced/EntityTag/EntityTag";
 import { clearRowCache, useInvalidateExplorerQuery } from "pages/Query/useQueryData";
 import "../../styles.css";
 import ExplorerTableRow from "./ExplorerTableRow";
-import { findEntityInQueryItems } from "pages/Query/utils";
 
 interface ExplorerTable {
   state: Explore.IExplore;
@@ -420,11 +417,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     }
   };
 
-  // TODO: has to be IResponseEntity (detail)
-  const entityForModal = selectedDetailId
-    ? findEntityInQueryItems(items, selectedDetailId)
-    : undefined;
-
   const handleCloseDetailsModal = () => {
     clearAllDetailIds();
   };
@@ -484,27 +476,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           </div>
         </div>
       </StyledTableWrapper>
-
-      {/* DETAILS MODAL */}
-      {entityForModal && (
-        <Modal showModal width={"fat"} onClose={handleCloseDetailsModal}>
-          <ModalHeader
-            title="Entity Detail"
-            content={
-              <div style={{ display: "grid" }}>
-                <EntityTag fullWidth entity={entityForModal} />
-              </div>
-            }
-            onClose={handleCloseDetailsModal}
-          />
-          <ModalContent enableScroll noPadding>
-            <ExplorerTableDetail rowEntity={entityForModal} columns={columns} isOdd={false} />
-          </ModalContent>
-          <ModalFooter>
-            <Button label="Close" onClick={handleCloseDetailsModal} />
-          </ModalFooter>
-        </Modal>
-      )}
 
       {/* BATCH ACTION MODAL */}
       {isBatchModalOpen && (

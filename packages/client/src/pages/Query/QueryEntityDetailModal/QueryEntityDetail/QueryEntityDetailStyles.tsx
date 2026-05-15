@@ -1,21 +1,13 @@
 import styled from "styled-components";
 
-interface StyledExpandedRow {
-  $columnsSpan: number;
-  $isOdd: boolean;
-}
-export const StyledExpandedRow = styled.div<StyledExpandedRow>`
+export const StyledExpandedRow = styled.div`
   overflow: auto;
-  grid-column: ${({ $columnsSpan }) => `span ${$columnsSpan}`};
   gap: 1rem;
   padding: 0.5rem;
   padding-left: 1rem;
   min-height: 5rem;
   /* border-right: 1px solid ${({ theme }) => theme.color["black"]}; */
   /* background-color: ${({ theme }) => theme.color["white"]}; */
-
-  background-color: ${({ theme, $isOdd }) =>
-    $isOdd ? theme.color["white"] : theme.color["tableOddRow"]};
 `;
 export const StyledExpRowSection = styled.div`
   position: relative;
@@ -77,10 +69,8 @@ interface StyledExpRowSectionContent {
   $firstSection?: boolean;
 }
 export const StyledExpRowSectionContent = styled.div<StyledExpRowSectionContent>`
-  padding-left: ${({ theme, $firstSection = false }) =>
-    $firstSection ? "" : theme.space[4]};
-  padding-top: ${({ theme, $firstSection }) =>
-    $firstSection ? 0 : theme.space[4]};
+  padding-left: ${({ theme, $firstSection = false }) => ($firstSection ? "" : theme.space[4])};
+  padding-top: ${({ theme, $firstSection }) => ($firstSection ? 0 : theme.space[4])};
 `;
 export const StyledExpRowFormGridColumnLabel = styled.div`
   display: grid;

@@ -17,20 +17,16 @@ import { queryReducer, queryStateInitial } from "./Query/state";
 import { getAllEdges, getAllNodes } from "./Query/utils";
 import { QueryValidity, QueryValidityProblem } from "./types";
 import { useQueryData, clearRowCache } from "./useQueryData";
+import { QueryEntityDetailModal } from "./QueryEntityDetailModal/QueryEntityDetailModal";
+import { useSearchParams } from "hooks/useSearchParamsContext";
 
 interface QueryPage {}
 export const QueryPage: React.FC<QueryPage> = ({}) => {
-  const layoutWidth: number = useAppSelector(
-    (state) => state.layout.layoutWidth
-  );
-  const contentHeight: number = useAppSelector(
-    (state) => state.layout.contentHeight
-  );
+  const layoutWidth: number = useAppSelector((state) => state.layout.layoutWidth);
+  const contentHeight: number = useAppSelector((state) => state.layout.contentHeight);
+  const { selectedDetailId } = useSearchParams();
 
-  const [queryState, queryStateDispatch] = useReducer(
-    queryReducer,
-    queryStateInitial
-  );
+  const [queryState, queryStateDispatch] = useReducer(queryReducer, queryStateInitial);
 
   /**
    * Collects all problems with the query state
@@ -73,10 +69,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     };
   }, [queryState]);
 
-  const [exploreState, exploreStateDispatch] = useReducer(
-    exploreReducer,
-    exploreStateInitial
-  );
+  const [exploreState, exploreStateDispatch] = useReducer(exploreReducer, exploreStateInitial);
 
   const queryClient = useQueryClient();
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -99,22 +92,14 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     return buildStableSignature(queryState as any, exploreState as any);
   }, [queryState, exploreState]);
 
-  const onePercentOfContentHeight = useMemo(
-    () => contentHeight / 100,
-    [contentHeight]
-  );
+  const onePercentOfContentHeight = useMemo(() => contentHeight / 100, [contentHeight]);
 
-  const handleExport = (
-    rowIndices: number[],
-    selectedColumnIds?: string[]
-  ) => {
+  const handleExport = (rowIndices: number[], selectedColumnIds?: string[]) => {
     toast.success("Exporting data...");
     const exportExplore = selectedColumnIds
       ? {
           ...exploreState,
-          columns: exploreState.columns.filter((c) =>
-            selectedColumnIds.includes(c.id)
-          ),
+          columns: exploreState.columns.filter((c) => selectedColumnIds.includes(c.id)),
         }
       : exploreState;
     api.queryExport(queryState, exportExplore, rowIndices);
@@ -127,38 +112,26 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
       const separatorYPercentPosition = floorNumberToOneDecimal(
         xPosition / onePercentOfContentHeight
       );
-      localStorage.setItem(
-        "querySeparatorYPosition",
-        separatorYPercentPosition.toString()
-      );
+      localStorage.setItem("querySeparatorYPosition", separatorYPercentPosition.toString());
     }
   };
 
-  const localStorageSeparatorYPosition = localStorage.getItem(
-    "querySeparatorYPosition"
+  const localStorageSeparatorYPosition = localStorage.getItem("querySeparatorYPosition");
+  const [querySeparatorYPosition, setQuerySeparatorYPosition] = useState<number>(
+    localStorageSeparatorYPosition
+      ? Number(localStorageSeparatorYPosition) * onePercentOfContentHeight
+      : contentHeight / 2
   );
-  const [querySeparatorYPosition, setQuerySeparatorYPosition] =
-    useState<number>(
-      localStorageSeparatorYPosition
-        ? Number(localStorageSeparatorYPosition) * onePercentOfContentHeight
-        : contentHeight / 2
-    );
 
-  const [currentContentHeight, setCurrentContentHeight] =
-    useState(contentHeight);
+  const [currentContentHeight, setCurrentContentHeight] = useState(contentHeight);
 
   useEffect(() => {
     const onePercentOfLastContentHeight = currentContentHeight / 100;
     const separatorXPercentPosition = floorNumberToOneDecimal(
       querySeparatorYPosition / onePercentOfLastContentHeight
     );
-    setQuerySeparatorYPosition(
-      separatorXPercentPosition * onePercentOfContentHeight
-    );
-    localStorage.setItem(
-      "querySeparatorYPosition",
-      separatorXPercentPosition.toString()
-    );
+    setQuerySeparatorYPosition(separatorXPercentPosition * onePercentOfContentHeight);
+    localStorage.setItem("querySeparatorYPosition", separatorXPercentPosition.toString());
     setCurrentContentHeight(contentHeight);
   }, [contentHeight]);
 
@@ -191,19 +164,12 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
           topPositionMin={34}
           topPositionMax={contentHeight - 34}
           separatorYPosition={querySeparatorYPosition}
-          setSeparatorYPosition={(yPosition) =>
-            handleSeparatorYPositionChange(yPosition)
-          }
+          setSeparatorYPosition={(yPosition) => handleSeparatorYPositionChange(yPosition)}
         />
       )}
 
       <Panel width={layoutWidth}>
-        <Box
-          noFrame
-          borderColor="white"
-          height={querySeparatorYPosition}
-          label="Search"
-        >
+        <Box noFrame borderColor="white" height={querySeparatorYPosition} label="Search">
           <MemoizedQueryBox
             state={queryState}
             dispatch={queryStateDispatch}
@@ -238,6 +204,8 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
             stableSignature={stableSignature}
             getCachedEntity={getCachedEntity}
           />
+
+          {selectedDetailId && <QueryEntityDetailModal />}
           <Loader show={shouldShowLoader} />
         </Box>
       </Panel>

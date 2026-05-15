@@ -1,9 +1,6 @@
 import { languageDict } from "@shared/dictionaries";
 import { EntityEnums } from "@shared/enums";
 import { IEntity, IProp, IResponseDetail } from "@shared/types";
-import { Explore } from "@shared/types/query";
-import { useQuery } from "@tanstack/react-query";
-import api from "api";
 import { Button, Input, Loader } from "components";
 import Dropdown, { EntityTag } from "components/advanced";
 import { EntityDetailProtocol } from "pages/Main/containers/EntityDetailBox/EntityDetail/EntityDetailProtocol/EntityDetailProtocol";
@@ -14,7 +11,7 @@ import { EntityDetailMetaPropsTable } from "pages/Main/containers/EntityDetailBo
 import { EntityDetailStatementPropsTable } from "pages/Main/containers/EntityDetailBox/EntityDetail/EntityDetailUsedInTable/EntityDetailStatementPropsTable/EntityDetailStatementPropsTable";
 import { EntityDetailStatementsTable } from "pages/Main/containers/EntityDetailBox/EntityDetail/EntityDetailUsedInTable/EntityDetailStatementsTable/EntityDetailStatementsTable";
 import { StatementListRowExpandedPropGroup } from "pages/Main/containers/StatementsListBox/StatementListTable/StatementListRowExpanded/StatementListRowExpandedPropGroup";
-import React, { useEffect } from "react";
+import React from "react";
 import { FaRegCopy } from "react-icons/fa";
 import { toast } from "react-toastify";
 import {
@@ -28,48 +25,27 @@ import {
   StyledExpRowSectionHeader,
   StyledReferenceRow,
   StyledReferenceTable,
-} from "./ExplorerTableDetailStyles";
+} from "./QueryEntityDetailStyles";
 
-interface ExplorerTableDetail {
-  rowEntity: IEntity;
-  columns: Explore.IExploreColumn[];
-  isOdd: boolean;
+interface QueryEntityDetail {
+  entity?: IResponseDetail;
+  isFetching: boolean;
 }
-export const ExplorerTableDetail: React.FC<ExplorerTableDetail> = ({
-  rowEntity,
-  columns,
-  isOdd,
-}) => {
-  const {
-    status,
-    data: entity,
-    error: entityError,
-    isFetching,
-  } = useQuery({
-    queryKey: ["entity", rowEntity.id],
-    queryFn: async () => {
-      const res = await api.detailGet(rowEntity.id);
-      return res.data;
-    },
-    enabled: !!rowEntity.id && api.isLoggedIn(),
-  });
-
+export const QueryEntityDetail: React.FC<QueryEntityDetail> = ({ entity, isFetching }) => {
   // Audit query
-  const {
-    status: statusAudit,
-    data: audit,
-    error: auditError,
-    isFetching: isFetchingAudit,
-  } = useQuery({
-    queryKey: ["audit", rowEntity.id],
-    queryFn: async () => {
-      const res = await api.auditGet(rowEntity.id);
-      return res.data;
-    },
-    enabled: !!rowEntity.id && api.isLoggedIn(),
-  });
-
-  const { id, labels, detail, language, notes, references, props, updatedAt, data } = rowEntity;
+  // const {
+  //   status: statusAudit,
+  //   data: audit,
+  //   error: auditError,
+  //   isFetching: isFetchingAudit,
+  // } = useQuery({
+  //   queryKey: ["audit", entity.id],
+  //   queryFn: async () => {
+  //     const res = await api.auditGet(entity.id);
+  //     return res.data;
+  //   },
+  //   enabled: !!entity.id && api.isLoggedIn(),
+  // });
 
   const renderFirstLevelProps = (props: IProp[], entities: Record<string, IEntity>) => {
     return (
@@ -133,30 +109,32 @@ export const ExplorerTableDetail: React.FC<ExplorerTableDetail> = ({
 
   const alternativeLabels = entity?.labels.slice(1);
 
-  useEffect(() => {
-    console.log("references", references);
-  }, [references]);
+  // useEffect(() => {
+  //   console.log("references", references);
+  // }, [references]);
 
   return (
-    <StyledExpandedRow $columnsSpan={columns.length + 2} $isOdd={isOdd}>
+    <StyledExpandedRow>
       <ColumnsContainer>
         <StyledExpRowSection>
           <StyledExpRowSectionHeader>Information</StyledExpRowSectionHeader>
           <StyledExpRowFormGrid>
             <StyledExpRowFormGridColumnLabel>ID:</StyledExpRowFormGridColumnLabel>
             <StyledExpRowFormGridColumnValueID>
-              {id}
-              <Button
-                inverted
-                tooltipLabel="copy ID"
-                color="primary"
-                label=""
-                icon={<FaRegCopy />}
-                onClick={async () => {
-                  await navigator.clipboard.writeText(id);
-                  toast.info("ID copied to clipboard");
-                }}
-              />
+              {entity?.id}
+              {entity?.id && (
+                <Button
+                  inverted
+                  tooltipLabel="copy ID"
+                  color="primary"
+                  label=""
+                  icon={<FaRegCopy />}
+                  onClick={async () => {
+                    await navigator.clipboard.writeText(entity.id);
+                    toast.info("ID copied to clipboard");
+                  }}
+                />
+              )}
             </StyledExpRowFormGridColumnValueID>
             <StyledExpRowFormGridColumnLabel>Label:</StyledExpRowFormGridColumnLabel>
             <div>
@@ -169,7 +147,7 @@ export const ExplorerTableDetail: React.FC<ExplorerTableDetail> = ({
             </div>
             <StyledExpRowFormGridColumnLabel>Detail:</StyledExpRowFormGridColumnLabel>
             <div>
-              <Input width="full" value={detail} disabled onChangeFn={() => {}} />
+              <Input width="full" value={entity?.detail} disabled onChangeFn={() => {}} />
             </div>
             <StyledExpRowFormGridColumnLabel>Language:</StyledExpRowFormGridColumnLabel>
             <div>
@@ -177,7 +155,7 @@ export const ExplorerTableDetail: React.FC<ExplorerTableDetail> = ({
                 disabled
                 width="full"
                 options={languageDict}
-                value={language}
+                value={entity?.language ?? null}
                 onChange={(selectedOption) => {}}
               />
             </div>
@@ -189,7 +167,7 @@ export const ExplorerTableDetail: React.FC<ExplorerTableDetail> = ({
                 gap: "0.5rem",
               }}
             >
-              {notes.map((note, key) => {
+              {entity?.notes?.map((note, key) => {
                 return (
                   <span key={key}>
                     <Input
@@ -209,7 +187,7 @@ export const ExplorerTableDetail: React.FC<ExplorerTableDetail> = ({
             })}
           </StyledExpRowFormGrid>
         </StyledExpRowSection>
-        {rowEntity.class === EntityEnums.Class.Territory && (
+        {entity?.class && entity.class === EntityEnums.Class.Territory && (
           <>
             {/* Protocol */}
             <StyledExpRowSection>
@@ -286,16 +264,16 @@ export const ExplorerTableDetail: React.FC<ExplorerTableDetail> = ({
             <StyledExpRowSectionContent>
               <StyledReferenceTable>
                 {entity &&
-                  entity.references.map((reference, key) => {
+                  entity.references?.map((reference, key) => {
                     return (
                       <StyledReferenceRow key={key}>
                         <div style={{ display: "grid" }}>
-                          {reference.resource && entity.entities[reference.resource] && (
+                          {reference.resource && entity.entities?.[reference.resource] && (
                             <EntityTag fullWidth entity={entity.entities[reference.resource]} />
                           )}
                         </div>
                         <div style={{ display: "grid" }}>
-                          {reference.value && entity.entities[reference.value] && (
+                          {reference.value && entity.entities?.[reference.value] && (
                             <EntityTag fullWidth entity={entity.entities[reference.value]} />
                           )}
                         </div>
@@ -386,9 +364,10 @@ export const ExplorerTableDetail: React.FC<ExplorerTableDetail> = ({
               <Loader show={isFetching} size={40} />
             </StyledExpRowSectionContent>
           </StyledExpRowSection>
+        </>
 
-          {/* Audits */}
-          {/* <StyledExpRowSection>
+        {/* Audits */}
+        {/* <StyledExpRowSection>
             <StyledExpRowSectionHeader>Audits</StyledExpRowSectionHeader>
             <StyledExpRowSectionContent>
               {audit && <AuditTable {...audit} />}
@@ -396,15 +375,14 @@ export const ExplorerTableDetail: React.FC<ExplorerTableDetail> = ({
             </StyledExpRowSectionContent>
           </StyledExpRowSection> */}
 
-          {/* JSON */}
-          {/* <StyledExpRowSection>
+        {/* JSON */}
+        {/* <StyledExpRowSection>
             <StyledExpRowSectionHeader>JSON</StyledExpRowSectionHeader>
             <StyledExpRowSectionContent>
               {entity && <JSONExplorer data={entity} />}
               <Loader show={isFetching} size={40} />
             </StyledExpRowSectionContent>
           </StyledExpRowSection> */}
-        </>
       </ColumnsContainer>
     </StyledExpandedRow>
   );
