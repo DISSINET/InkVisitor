@@ -388,6 +388,12 @@ class Api {
     return newApi;
   }
 
+  /** Development server only: GET /dev/simulate-html-error (HTML body, not JSON). */
+  async devSimulateHtmlError(options?: IApiOptions): Promise<void> {
+    const response = await this.connection.get("/dev/simulate-html-error", options);
+    return response.data.filter((item: any) => item.name === "John");
+  }
+
   async signIn(login: string, password: string, options?: IApiOptions): Promise<any> {
     try {
       const response = await this.connection.post(

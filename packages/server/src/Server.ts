@@ -130,7 +130,7 @@ server.use(
       /api(\/[^\/]+)?\/users\/owner/,
       /api(\/[^\/]+)?\/pythondata/,
       /api(\/[^\/]+)?\/health/,
-      // /api(\/[^\/]+)?\/dev\/simulate-html-error/,
+      /api(\/[^\/]+)?\/dev\/simulate-html-error/,
     ],
   })
 );
@@ -159,11 +159,14 @@ router.get("/health", async function (req, res) {
 });
 
 // Dev-only: simulate proxy/overload HTML body for client error-handling tests (remove before release)
-// if (process.env.NODE_ENV === "development") {
-//   router.get("/dev/simulate-html-error", function (_req, res) {
-//     res.status(200).type("html").send("<p>Simulated overload (dev route)</p>");
-//   });
-// }
+if (process.env.NODE_ENV === "development") {
+  router.get("/dev/simulate-html-error", function (_req, res) {
+    res
+      .status(200)
+      .type("html")
+      .send("<html><body><p>Simulated overload (dev route)</p></body></html>");
+  });
+}
 
 // uncomment this to enable acl
 const acl = new Acl();
