@@ -69,65 +69,38 @@ export const ExplorerTableDetail: React.FC<ExplorerTableDetail> = ({
     enabled: !!rowEntity.id && api.isLoggedIn(),
   });
 
-  const {
-    id,
-    labels,
-    detail,
-    language,
-    notes,
-    references,
-    props,
-    updatedAt,
-    data,
-  } = rowEntity;
+  const { id, labels, detail, language, notes, references, props, updatedAt, data } = rowEntity;
 
-  const renderFirstLevelProps = (
-    props: IProp[],
-    entities: Record<string, IEntity>
-  ) => {
+  const renderFirstLevelProps = (props: IProp[], entities: Record<string, IEntity>) => {
     return (
       <div style={{ display: "grid" }}>
         <StatementListRowExpandedPropGroup
           level={1}
           props={props}
           entities={entities}
-          renderChildrenPropRow={(childProps) =>
-            renderSecondLevelProps(childProps, entities)
-          }
+          renderChildrenPropRow={(childProps) => renderSecondLevelProps(childProps, entities)}
         />
       </div>
     );
   };
 
-  const renderSecondLevelProps = (
-    props: IProp[],
-    entities: Record<string, IEntity>
-  ) => {
+  const renderSecondLevelProps = (props: IProp[], entities: Record<string, IEntity>) => {
     return (
       <div style={{ display: "grid" }}>
         <StatementListRowExpandedPropGroup
           level={2}
           props={props}
           entities={entities}
-          renderChildrenPropRow={(childProps) =>
-            renderThirdLevelProps(childProps, entities)
-          }
+          renderChildrenPropRow={(childProps) => renderThirdLevelProps(childProps, entities)}
         />
       </div>
     );
   };
 
-  const renderThirdLevelProps = (
-    props: IProp[],
-    entities: Record<string, IEntity>
-  ) => {
+  const renderThirdLevelProps = (props: IProp[], entities: Record<string, IEntity>) => {
     return (
       <div style={{ display: "grid" }}>
-        <StatementListRowExpandedPropGroup
-          level={3}
-          props={props}
-          entities={entities}
-        />
+        <StatementListRowExpandedPropGroup level={3} props={props} entities={entities} />
       </div>
     );
   };
@@ -170,9 +143,7 @@ export const ExplorerTableDetail: React.FC<ExplorerTableDetail> = ({
         <StyledExpRowSection>
           <StyledExpRowSectionHeader>Information</StyledExpRowSectionHeader>
           <StyledExpRowFormGrid>
-            <StyledExpRowFormGridColumnLabel>
-              ID:
-            </StyledExpRowFormGridColumnLabel>
+            <StyledExpRowFormGridColumnLabel>ID:</StyledExpRowFormGridColumnLabel>
             <StyledExpRowFormGridColumnValueID>
               {id}
               <Button
@@ -187,9 +158,7 @@ export const ExplorerTableDetail: React.FC<ExplorerTableDetail> = ({
                 }}
               />
             </StyledExpRowFormGridColumnValueID>
-            <StyledExpRowFormGridColumnLabel>
-              Label:
-            </StyledExpRowFormGridColumnLabel>
+            <StyledExpRowFormGridColumnLabel>Label:</StyledExpRowFormGridColumnLabel>
             <div>
               <Input
                 width="full"
@@ -198,20 +167,11 @@ export const ExplorerTableDetail: React.FC<ExplorerTableDetail> = ({
                 onChangeFn={() => {}}
               />
             </div>
-            <StyledExpRowFormGridColumnLabel>
-              Detail:
-            </StyledExpRowFormGridColumnLabel>
+            <StyledExpRowFormGridColumnLabel>Detail:</StyledExpRowFormGridColumnLabel>
             <div>
-              <Input
-                width="full"
-                value={detail}
-                disabled
-                onChangeFn={() => {}}
-              />
+              <Input width="full" value={detail} disabled onChangeFn={() => {}} />
             </div>
-            <StyledExpRowFormGridColumnLabel>
-              Language:
-            </StyledExpRowFormGridColumnLabel>
+            <StyledExpRowFormGridColumnLabel>Language:</StyledExpRowFormGridColumnLabel>
             <div>
               <Dropdown.Single.Basic
                 disabled
@@ -221,9 +181,7 @@ export const ExplorerTableDetail: React.FC<ExplorerTableDetail> = ({
                 onChange={(selectedOption) => {}}
               />
             </div>
-            <StyledExpRowFormGridColumnLabel>
-              Notes:
-            </StyledExpRowFormGridColumnLabel>
+            <StyledExpRowFormGridColumnLabel>Notes:</StyledExpRowFormGridColumnLabel>
             <div
               style={{
                 display: "flex",
@@ -245,9 +203,7 @@ export const ExplorerTableDetail: React.FC<ExplorerTableDetail> = ({
                 );
               })}
             </div>
-            <StyledExpRowFormGridColumnLabel>
-              Alternative labels:
-            </StyledExpRowFormGridColumnLabel>
+            <StyledExpRowFormGridColumnLabel>Alternative labels:</StyledExpRowFormGridColumnLabel>
             {alternativeLabels?.map((label: string, key: number) => {
               return <>{label}</>;
             })}
@@ -274,9 +230,7 @@ export const ExplorerTableDetail: React.FC<ExplorerTableDetail> = ({
 
             {/* Validation rules */}
             <StyledExpRowSection>
-              <StyledExpRowSectionHeader>
-                Validation rules
-              </StyledExpRowSectionHeader>
+              <StyledExpRowSectionHeader>Validation rules</StyledExpRowSectionHeader>
               <StyledExpRowSectionContent>
                 {/* {entity && (
                   <EntityDetailValidationSection
@@ -336,22 +290,14 @@ export const ExplorerTableDetail: React.FC<ExplorerTableDetail> = ({
                     return (
                       <StyledReferenceRow key={key}>
                         <div style={{ display: "grid" }}>
-                          {reference.resource &&
-                            entity.entities[reference.resource] && (
-                              <EntityTag
-                                fullWidth
-                                entity={entity.entities[reference.resource]}
-                              />
-                            )}
+                          {reference.resource && entity.entities[reference.resource] && (
+                            <EntityTag fullWidth entity={entity.entities[reference.resource]} />
+                          )}
                         </div>
                         <div style={{ display: "grid" }}>
-                          {reference.value &&
-                            entity.entities[reference.value] && (
-                              <EntityTag
-                                fullWidth
-                                entity={entity.entities[reference.value]}
-                              />
-                            )}
+                          {reference.value && entity.entities[reference.value] && (
+                            <EntityTag fullWidth entity={entity.entities[reference.value]} />
+                          )}
                         </div>
                       </StyledReferenceRow>
                     );

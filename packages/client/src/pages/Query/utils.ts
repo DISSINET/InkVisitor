@@ -2,6 +2,8 @@
 // These utilities are used by both React Query write-through and the Explorer read path.
 // They are intentionally framework-agnostic and can be used with TanStack DB collections.
 
+import { IEntity, IResponseQueryEntity } from "@shared/types";
+
 export interface WindowSlice {
   id: string;
   signature: string;
@@ -11,11 +13,7 @@ export interface WindowSlice {
   ids: string[];
 }
 
-export const buildWindowId = (
-  signature: string,
-  offset: number,
-  limit: number
-): string => {
+export const buildWindowId = (signature: string, offset: number, limit: number): string => {
   return `${signature}:${offset}:${limit}`;
 };
 
@@ -25,10 +23,7 @@ export const clampWindow = (
   limit: number
 ): { offset: number; limit: number } => {
   const safeOffset = Math.max(0, Math.min(offset, Math.max(0, total - 1)));
-  const safeLimit = Math.max(
-    1,
-    Math.min(limit, Math.max(1, total - safeOffset))
-  );
+  const safeLimit = Math.max(1, Math.min(limit, Math.max(1, total - safeOffset)));
   return { offset: safeOffset, limit: safeLimit };
 };
 
@@ -39,19 +34,9 @@ export const clampWindow = (
 // Note: This is deliberately conservative and simple. If sort/filters/columns semantics
 // evolve, revisit this to ensure the signature captures the ordering identity.
 
-type Jsonish =
-  | Record<string, unknown>
-  | unknown[]
-  | string
-  | number
-  | boolean
-  | null
-  | undefined;
+type Jsonish = Record<string, unknown> | unknown[] | string | number | boolean | null | undefined;
 
-export const buildStableSignature = (
-  queryState: Jsonish,
-  exploreState: Jsonish
-): string => {
+export const buildStableSignature = (queryState: Jsonish, exploreState: Jsonish): string => {
   const normalizedExplore = normalizeExplore(exploreState);
   // Deterministic stringify by sorting object keys
   const stableString = stableStringify({
@@ -62,11 +47,7 @@ export const buildStableSignature = (
 };
 
 const normalizeExplore = (exploreState: Jsonish): Jsonish => {
-  if (
-    !exploreState ||
-    typeof exploreState !== "object" ||
-    Array.isArray(exploreState)
-  ) {
+  if (!exploreState || typeof exploreState !== "object" || Array.isArray(exploreState)) {
     return exploreState;
   }
   const e = exploreState as Record<string, unknown>;
@@ -103,3 +84,52 @@ const hashString = (s: string): string => {
   // Convert to unsigned and base36
   return (h >>> 0).toString(36);
 };
+
+function isEntityCellValue(value: unknown): value is IEntity {
+  return (
+    value !== null &&
+    value !== undefined &&
+    typeof value === "object" &&
+    "class" in value &&
+    typeof (value as IEntity).id === "string"
+  );
+}
+
+/** Resolve an entity id from the main row entity or any column that holds IEntity / IEntity[]. */
+function findEntityInQueryRow(row: IResponseQueryEntity, entityId: string): IEntity | undefined {
+  if (row.entity?.id === entityId) {
+    return row.entity;
+  }
+  for (const cell of Object.values(row.columnData ?? {})) {
+    if (isEntityCellValue(cell)) {
+      if (cell.id === entityId) {
+        return cell;
+      }
+      continue;
+    }
+    if (Array.isArray(cell)) {
+      for (const item of cell) {
+        if (isEntityCellValue(item) && item.id === entityId) {
+          return item;
+        }
+      }
+    }
+  }
+  return undefined;
+}
+
+export function findEntityInQueryItems(
+  rows: (IResponseQueryEntity | null | undefined)[],
+  entityId: string
+): IEntity | undefined {
+  for (const row of rows) {
+    if (!row) {
+      continue;
+    }
+    const found = findEntityInQueryRow(row, entityId);
+    if (found) {
+      return found;
+    }
+  }
+  return undefined;
+}
