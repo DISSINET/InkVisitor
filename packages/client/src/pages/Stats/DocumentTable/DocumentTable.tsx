@@ -1,4 +1,4 @@
-import { IDocument } from "@shared/types";
+import { IDocument, DropdownItem } from "@shared/types";
 import { IAnchorUpdate, IAudit, IDocumentAuditAnchorChanges } from "@shared/types/audit";
 import { IResponseAudit } from "@shared/types/response-audit";
 import { IResponseEntity } from "@shared/types/response-entity";
@@ -10,7 +10,6 @@ import { UserTag } from "components/advanced/UserTag/UserTag";
 import { useResizeObserver } from "hooks";
 import { useMemo } from "react";
 import { Column } from "react-table";
-import { DropdownItem } from "types";
 import {
   StyledDocumentChangeFallback,
   StyledDocumentChangesLabel,

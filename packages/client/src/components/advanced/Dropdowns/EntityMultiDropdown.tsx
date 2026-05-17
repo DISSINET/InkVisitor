@@ -5,13 +5,8 @@ import { StyledSelect } from "components/basic/BaseDropdown/BaseDropdownStyles";
 import { useTheme } from "hooks";
 import React from "react";
 import { FaCheckSquare, FaRegSquare } from "react-icons/fa";
-import {
-  components,
-  MultiValueProps,
-  OptionProps,
-  ValueContainerProps,
-} from "react-select";
-import { DropdownItem, EntityColors } from "types";
+import { components, MultiValueProps, OptionProps, ValueContainerProps } from "react-select";
+import { EntityColors } from "types";
 import {
   StyledEntityMultiValue,
   StyledEntityOptionClass,
@@ -19,6 +14,7 @@ import {
   StyledOptionIconWrap,
   StyledOptionRow,
 } from "./DropdownStyles";
+import { DropdownItem } from "@shared/types";
 
 interface EntityMultiDropdown<T = string> {
   width?: number | "full";
@@ -78,9 +74,7 @@ export const EntityMultiDropdown = <T extends string>({
       isClearable={isClearable}
       options={[...generalValues, ...options]}
       value={(() => {
-        const allOptionsSelected = options.every((option) =>
-          value.includes(option.value as T)
-        );
+        const allOptionsSelected = options.every((option) => value.includes(option.value as T));
 
         return generalValues.concat(options).filter((o) => {
           // For "any" option, check if all options are selected
@@ -92,9 +86,7 @@ export const EntityMultiDropdown = <T extends string>({
         });
       })()}
       onChange={(selectedOptions, event) => {
-        const allClassesSelected = options.every((option) =>
-          selectedOptions.includes(option)
-        );
+        const allClassesSelected = options.every((option) => selectedOptions.includes(option));
         // (possible to add && !disableEmpty for possibility to turn off empty)
         const includesEmpty = selectedOptions.includes(empty);
         const includesAny = selectedOptions.includes(allEntities);
@@ -112,15 +104,10 @@ export const EntityMultiDropdown = <T extends string>({
             }
           }
           // when all option selected (ANY is clicked)
-          else if (
-            selectedOptions[selectedOptions.length - 1].value ===
-            allEntities.value
-          ) {
+          else if (selectedOptions[selectedOptions.length - 1].value === allEntities.value) {
             return onChange(
               getValues(
-                includesEmpty
-                  ? [empty, allEntities, ...options]
-                  : [allEntities, ...options]
+                includesEmpty ? [empty, allEntities, ...options] : [allEntities, ...options]
               )
             );
           }
@@ -128,21 +115,13 @@ export const EntityMultiDropdown = <T extends string>({
           else if (allClassesSelected && event?.action === "select-option") {
             return onChange(
               getValues(
-                includesEmpty
-                  ? [empty, allEntities, ...options]
-                  : [allEntities, ...options]
+                includesEmpty ? [empty, allEntities, ...options] : [allEntities, ...options]
               )
             );
           }
           // something was deselected from all selected (need to deselect ANY)
-          else if (
-            event?.action === "deselect-option" &&
-            includesAny &&
-            !allClassesSelected
-          ) {
-            const result = selectedOptions.filter(
-              (option) => option.value !== allEntities.value
-            );
+          else if (event?.action === "deselect-option" && includesAny && !allClassesSelected) {
+            const result = selectedOptions.filter((option) => option.value !== allEntities.value);
             return onChange(getValues(result));
           }
         }
@@ -214,11 +193,7 @@ const ValueContainer = ({
     ];
   }
 
-  return (
-    <components.ValueContainer {...props}>
-      {toBeRendered}
-    </components.ValueContainer>
-  );
+  return <components.ValueContainer {...props}>{toBeRendered}</components.ValueContainer>;
 };
 
 const MultiValue = (props: any): React.ReactElement => {
@@ -226,9 +201,7 @@ const MultiValue = (props: any): React.ReactElement => {
 
   return (
     <components.MultiValue {...props}>
-      <StyledEntityMultiValue
-        $color={EntityColors[props.data.value]?.color ?? "transparent"}
-      >
+      <StyledEntityMultiValue $color={EntityColors[props.data.value]?.color ?? "transparent"}>
         {shortLabel ? props.data.value : props.data.label}
       </StyledEntityMultiValue>
     </components.MultiValue>
@@ -243,9 +216,7 @@ const Option = ({ ...props }: OptionProps | any): React.ReactElement => {
         <StyledOptionIconWrap>
           {props.isSelected ? <FaCheckSquare /> : <FaRegSquare />}
         </StyledOptionIconWrap>
-        <StyledEntityOptionClass>
-          {isEntityClass && props.value}
-        </StyledEntityOptionClass>
+        <StyledEntityOptionClass>{isEntityClass && props.value}</StyledEntityOptionClass>
         <StyledEntityValue
           color={
             props.value === EntityEnums.Extension.Empty

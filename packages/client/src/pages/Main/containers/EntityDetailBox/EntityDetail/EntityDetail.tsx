@@ -1,33 +1,12 @@
 import { entitiesDictKeys } from "@shared/dictionaries";
 import { EntityEnums, RelationEnums, UserEnums } from "@shared/enums";
-import {
-  IEntity,
-  IProp,
-  IReference,
-  IResponseDetail,
-  Relation,
-} from "@shared/types";
-import {
-  EProtocolTieType,
-  ITerritoryValidation,
-} from "@shared/types/territory";
+import { IEntity, IProp, IReference, IResponseDetail, Relation } from "@shared/types";
+import { EProtocolTieType, ITerritoryValidation } from "@shared/types/territory";
 import { IWarningPositionSection } from "@shared/types/warning";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import {
-  Button,
-  CustomScrollbar,
-  Loader,
-  Message,
-  Submit,
-  ToastWithLink,
-} from "components";
-import {
-  ApplyTemplateModal,
-  AuditTable,
-  EntityTag,
-  JSONExplorer,
-} from "components/advanced";
+import { Button, CustomScrollbar, Loader, Message, Submit, ToastWithLink } from "components";
+import { ApplyTemplateModal, AuditTable, EntityTag, JSONExplorer } from "components/advanced";
 import { CMetaProp, DProps } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
@@ -35,12 +14,9 @@ import { FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
 import { rootTerritoryId } from "Theme/constants";
-import { DraggedPropRowCategory, DropdownItem } from "types";
-import {
-  getEntityLabel,
-  getEntityRelationRules,
-  getShortLabelByLetterCount,
-} from "utils/utils";
+import { DraggedPropRowCategory } from "types";
+import { DropdownItem } from "@shared/types";
+import { getEntityLabel, getEntityRelationRules, getShortLabelByLetterCount } from "utils/utils";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
 import { PropGroup } from "../../PropGroup/PropGroup";
 import { EntityDetailCreateTemplateModal } from "./EntityDetailCreateTemplateModal/EntityDetailCreateTemplateModal";
@@ -112,12 +88,7 @@ interface EntityDetail {
   error: Error | null;
   isFetching: boolean;
 }
-export const EntityDetail: React.FC<EntityDetail> = ({
-  detailId,
-  entity,
-  error,
-  isFetching,
-}) => {
+export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, isFetching }) => {
   const {
     statementId,
     setStatementId,
@@ -136,19 +107,13 @@ export const EntityDetail: React.FC<EntityDetail> = ({
     }
   }, [error]);
 
-  const [selectedEntityType, setSelectedEntityType] =
-    useState<EntityEnums.Class>();
-  const [createTemplateModal, setCreateTemplateModal] =
-    useState<boolean>(false);
-  const [isCleaningEntityPrompt, setIsCleaningEntityPrompt] =
-    useState<boolean>(false);
+  const [selectedEntityType, setSelectedEntityType] = useState<EntityEnums.Class>();
+  const [createTemplateModal, setCreateTemplateModal] = useState<boolean>(false);
+  const [isCleaningEntityPrompt, setIsCleaningEntityPrompt] = useState<boolean>(false);
   const [showRemoveSubmit, setShowRemoveSubmit] = useState<boolean>(false);
   const [showTypeSubmit, setShowTypeSubmit] = useState(false);
-  const [showApplyTemplateModal, setShowApplyTemplateModal] =
-    useState<boolean>(false);
-  const [templateToApply, setTemplateToApply] = useState<IEntity | false>(
-    false
-  );
+  const [showApplyTemplateModal, setShowApplyTemplateModal] = useState<boolean>(false);
+  const [templateToApply, setTemplateToApply] = useState<IEntity | false>(false);
 
   const selectedEntityTypeLabel: string = useMemo(() => {
     return selectedEntityType ? entitiesDictKeys[selectedEntityType].label : "";
@@ -169,8 +134,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
 
   const queryClient = useQueryClient();
 
-  const isClassChangeable =
-    entity && allowedEntityChangeClasses.includes(entity.class);
+  const isClassChangeable = entity && allowedEntityChangeClasses.includes(entity.class);
 
   const {
     status: templateStatus,
@@ -188,9 +152,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
 
         const templates: IEntity[] = res.data ?? [];
         templates.sort((a: IEntity, b: IEntity) =>
-          a.labels[0].toLocaleLowerCase() > b.labels[0].toLocaleLowerCase()
-            ? 1
-            : -1
+          a.labels[0].toLocaleLowerCase() > b.labels[0].toLocaleLowerCase() ? 1 : -1
         );
         return templates;
       }
@@ -247,8 +209,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
   const userCanEdit: boolean = useMemo(() => {
     return (
       !!entity &&
-      (entity.right === UserEnums.RoleMode.Admin ||
-        entity.right === UserEnums.RoleMode.Write)
+      (entity.right === UserEnums.RoleMode.Admin || entity.right === UserEnums.RoleMode.Write)
     );
   }, [entity]);
 
@@ -267,17 +228,14 @@ export const EntityDetail: React.FC<EntityDetail> = ({
   });
 
   const updateEntityMutation = useMutation({
-    mutationFn: async (changes: Partial<IEntity>) =>
-      await api.entityUpdate(detailId, changes),
+    mutationFn: async (changes: Partial<IEntity>) => await api.entityUpdate(detailId, changes),
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["entity"] });
 
       if (
         statementId &&
         (statementId === entity?.id ||
-          (statement?.entities &&
-            entity &&
-            Object.keys(statement.entities).includes(entity.id)))
+          (statement?.entities && entity && Object.keys(statement.entities).includes(entity.id)))
       ) {
         queryClient.invalidateQueries({ queryKey: ["statement"] });
       }
@@ -359,22 +317,14 @@ export const EntityDetail: React.FC<EntityDetail> = ({
       );
 
       // hide selected territory if T removed
-      if (
-        entity &&
-        entity.class == EntityEnums.Class.Territory &&
-        entity.id === territoryId
-      ) {
+      if (entity && entity.class == EntityEnums.Class.Territory && entity.id === territoryId) {
         setTerritoryId("");
       } else {
         queryClient.invalidateQueries({ queryKey: ["territory"] });
       }
 
       // hide editor box if the removed entity was also opened in the editor
-      if (
-        entity &&
-        entity.class == EntityEnums.Class.Statement &&
-        entity.id === statementId
-      ) {
+      if (entity && entity.class == EntityEnums.Class.Statement && entity.id === statementId) {
         setStatementId("");
       } else {
         queryClient.invalidateQueries({ queryKey: ["statement"] });
@@ -385,11 +335,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
       removeDetailId(entityId);
     },
     onError: async (error: any) => {
-      if (
-        error.error === "InvalidDeleteError" &&
-        error.data &&
-        error.data.length > 0
-      ) {
+      if (error.error === "InvalidDeleteError" && error.data && error.data.length > 0) {
         const { data } = error;
         toast.info("Click to open conflicting entity in detail", {
           autoClose: 6000,
@@ -412,9 +358,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
       entity.isTemplate
     );
     relationTypes.forEach((relationType: RelationEnums.Type) => {
-      entity.relations[
-        relationType as keyof Relation.IUsedRelations
-      ]?.connections.forEach(
+      entity.relations[relationType as keyof Relation.IUsedRelations]?.connections.forEach(
         (connection: Relation.IConnection<Relation.IRelation>) => {
           relationDeleteMutation.mutate(connection.id);
         }
@@ -489,21 +433,17 @@ export const EntityDetail: React.FC<EntityDetail> = ({
 
   const removeProp = (propId: string) => {
     if (entity !== undefined) {
-      const newProps = [...entity.props].filter(
-        (prop, pi) => prop.id !== propId
-      );
+      const newProps = [...entity.props].filter((prop, pi) => prop.id !== propId);
 
       // 2nd level
       newProps.forEach((prop1, pi1) => {
-        newProps[pi1].children = prop1.children.filter(
-          (child) => child.id !== propId
-        );
+        newProps[pi1].children = prop1.children.filter((child) => child.id !== propId);
 
         // 3rd level
         newProps[pi1].children.forEach((prop2, pi2) => {
-          newProps[pi1].children[pi2].children = newProps[pi1].children[
-            pi2
-          ].children.filter((child) => child.id !== propId);
+          newProps[pi1].children[pi2].children = newProps[pi1].children[pi2].children.filter(
+            (child) => child.id !== propId
+          );
         });
       });
 
@@ -511,12 +451,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
     }
   };
 
-  const changeOrder = (
-    propId: string,
-    props: IProp[],
-    oldIndex: number,
-    newIndex: number
-  ) => {
+  const changeOrder = (propId: string, props: IProp[], oldIndex: number, newIndex: number) => {
     for (let prop of props) {
       if (prop.id === propId) {
         props.splice(newIndex, 0, props.splice(oldIndex, 1)[0]);
@@ -524,20 +459,12 @@ export const EntityDetail: React.FC<EntityDetail> = ({
       }
       for (let prop1 of prop.children) {
         if (prop1.id === propId) {
-          prop.children.splice(
-            newIndex,
-            0,
-            prop.children.splice(oldIndex, 1)[0]
-          );
+          prop.children.splice(newIndex, 0, prop.children.splice(oldIndex, 1)[0]);
           return props;
         }
         for (let prop2 of prop1.children) {
           if (prop2.id === propId) {
-            prop1.children.splice(
-              newIndex,
-              0,
-              prop1.children.splice(oldIndex, 1)[0]
-            );
+            prop1.children.splice(newIndex, 0, prop1.children.splice(oldIndex, 1)[0]);
             return props;
           }
         }
@@ -546,11 +473,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
     return props;
   };
 
-  const movePropToIndex = (
-    propId: string,
-    oldIndex: number,
-    newIndex: number
-  ) => {
+  const movePropToIndex = (propId: string, oldIndex: number, newIndex: number) => {
     if (entity !== undefined) {
       const newProps = [...entity.props];
       changeOrder(propId, newProps, oldIndex, newIndex);
@@ -568,9 +491,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
   }, [error]);
 
   const mayBeRemoved = useMemo(() => {
-    return (
-      entity && entity.usedInStatements && entity.usedInStatements.length === 0
-    );
+    return entity && entity.usedInStatements && entity.usedInStatements.length === 0;
   }, [entity]);
 
   const actantMode = useMemo(() => {
@@ -616,8 +537,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
   };
 
   const relationCreateMutation = useMutation({
-    mutationFn: async (newRelation: Relation.IRelation) =>
-      await api.relationCreate(newRelation),
+    mutationFn: async (newRelation: Relation.IRelation) => await api.relationCreate(newRelation),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["entity"] });
     },
@@ -627,18 +547,13 @@ export const EntityDetail: React.FC<EntityDetail> = ({
     mutationFn: async (relationObject: {
       relationId: string;
       changes: Partial<Relation.IRelation>;
-    }) =>
-      await api.relationUpdate(
-        relationObject.relationId,
-        relationObject.changes
-      ),
+    }) => await api.relationUpdate(relationObject.relationId, relationObject.changes),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["entity"] });
     },
   });
   const relationDeleteMutation = useMutation({
-    mutationFn: async (relationId: string) =>
-      await api.relationDelete(relationId),
+    mutationFn: async (relationId: string) => await api.relationDelete(relationId),
 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["entity"] });
@@ -647,14 +562,13 @@ export const EntityDetail: React.FC<EntityDetail> = ({
 
   const isInsideTemplate = entity?.isTemplate || false;
 
-  const [showBatchRemovePropSubmit, setShowBatchRemovePropSubmit] =
-    useState(false);
+  const [showBatchRemovePropSubmit, setShowBatchRemovePropSubmit] = useState(false);
   const [loadingValidations, setLoadingValidations] = useState(false);
 
   // Single state to manage collapsed sections
-  const [collapsedSections, setCollapsedSections] = useState<
-    Set<EntityDetailSection>
-  >(new Set([EntityDetailSection.Protocol, EntityDetailSection.Validation]));
+  const [collapsedSections, setCollapsedSections] = useState<Set<EntityDetailSection>>(
+    new Set([EntityDetailSection.Protocol, EntityDetailSection.Validation])
+  );
 
   const toggleSection = (sectionId: EntityDetailSection) => {
     setCollapsedSections((prev) => {
@@ -668,18 +582,13 @@ export const EntityDetail: React.FC<EntityDetail> = ({
     });
   };
 
-  const isSectionExpanded = (sectionId: EntityDetailSection) =>
-    !collapsedSections.has(sectionId);
+  const isSectionExpanded = (sectionId: EntityDetailSection) => !collapsedSections.has(sectionId);
 
-  const contentWidth = useAppSelector(
-    (state) => state.layout.mainPage.secondPanelRealWidth
-  );
+  const contentWidth = useAppSelector((state) => state.layout.mainPage.secondPanelRealWidth);
   const widthTooNarrow = contentWidth < 516;
 
   const isRootTerritory = selectedDetailId === rootTerritoryId;
-  const isOwner =
-    (localStorage.getItem("userrole") as UserEnums.Role) ===
-    UserEnums.Role.Owner;
+  const isOwner = (localStorage.getItem("userrole") as UserEnums.Role) === UserEnums.Role.Owner;
   const disableAttributesForNonOwnersInRoot = isRootTerritory && !isOwner;
   const canEditEntity = userCanEdit && !disableAttributesForNonOwnersInRoot;
 
@@ -712,11 +621,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                   {entity.warnings && entity.warnings.length > 0 && (
                     <StyledDetailWarnings $paddingLeft={!widthTooNarrow}>
                       {entity.warnings
-                        .filter(
-                          (w) =>
-                            w.position?.section ===
-                            IWarningPositionSection.Entity
-                        )
+                        .filter((w) => w.position?.section === IWarningPositionSection.Entity)
                         .map((warning, key) => {
                           return <Message key={key} warning={warning} />;
                         })}
@@ -749,13 +654,9 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                     onClick={() => toggleSection(EntityDetailSection.Protocol)}
                   >
                     <EntityDetailExpandIcon
-                      isExpanded={isSectionExpanded(
-                        EntityDetailSection.Protocol
-                      )}
+                      isExpanded={isSectionExpanded(EntityDetailSection.Protocol)}
                     />
-                    <StyledDetailSectionHeading>
-                      Protocol
-                    </StyledDetailSectionHeading>
+                    <StyledDetailSectionHeading>Protocol</StyledDetailSectionHeading>
                   </StyledDetailSectionHeader>
                   {isSectionExpanded(EntityDetailSection.Protocol) && (
                     <StyledDetailSectionContent>
@@ -774,17 +675,9 @@ export const EntityDetail: React.FC<EntityDetail> = ({
               {entity.class === EntityEnums.Class.Territory && (
                 <StyledDetailSection>
                   <EntityDetailValidationSection
-                    isValidationExpanded={isSectionExpanded(
-                      EntityDetailSection.Validation
-                    )}
-                    setIsValidationExpanded={() =>
-                      toggleSection(EntityDetailSection.Validation)
-                    }
-                    validations={
-                      entity.data.validations as
-                        | ITerritoryValidation[]
-                        | undefined
-                    }
+                    isValidationExpanded={isSectionExpanded(EntityDetailSection.Validation)}
+                    setIsValidationExpanded={() => toggleSection(EntityDetailSection.Validation)}
+                    validations={entity.data.validations as ITerritoryValidation[] | undefined}
                     entities={entity.entities}
                     updateEntityMutation={updateEntityMutation}
                     userCanEdit={canEditEntity}
@@ -804,13 +697,9 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                     onClick={() => toggleSection(EntityDetailSection.Valency)}
                   >
                     <EntityDetailExpandIcon
-                      isExpanded={isSectionExpanded(
-                        EntityDetailSection.Valency
-                      )}
+                      isExpanded={isSectionExpanded(EntityDetailSection.Valency)}
                     />
-                    <StyledDetailSectionHeading>
-                      Valency
-                    </StyledDetailSectionHeading>
+                    <StyledDetailSectionHeading>Valency</StyledDetailSectionHeading>
                   </StyledDetailSectionHeader>
                   {isSectionExpanded(EntityDetailSection.Valency) && (
                     <>
@@ -818,9 +707,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                         {entity.warnings &&
                           entity.warnings
                             .filter(
-                              (w) =>
-                                w.position?.section ===
-                                IWarningPositionSection.Valencies
+                              (w) => w.position?.section === IWarningPositionSection.Valencies
                             )
                             .map((warning, key) => {
                               return <Message key={key} warning={warning} />;
@@ -847,24 +734,16 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                   onClick={() => toggleSection(EntityDetailSection.Relations)}
                 >
                   <EntityDetailExpandIcon
-                    isExpanded={isSectionExpanded(
-                      EntityDetailSection.Relations
-                    )}
+                    isExpanded={isSectionExpanded(EntityDetailSection.Relations)}
                   />
-                  <StyledDetailSectionHeading>
-                    Relations
-                  </StyledDetailSectionHeading>
+                  <StyledDetailSectionHeading>Relations</StyledDetailSectionHeading>
                 </StyledDetailSectionHeader>
                 {isSectionExpanded(EntityDetailSection.Relations) && (
                   <>
                     {entity.warnings && entity.warnings.length > 0 && (
                       <StyledDetailWarnings>
                         {entity.warnings
-                          .filter(
-                            (w) =>
-                              w.position?.section ===
-                              IWarningPositionSection.Relations
-                          )
+                          .filter((w) => w.position?.section === IWarningPositionSection.Relations)
                           .map((warning, key) => {
                             return <Message key={key} warning={warning} />;
                           })}
@@ -886,45 +765,35 @@ export const EntityDetail: React.FC<EntityDetail> = ({
               {/* metaprops section */}
               <StyledDetailSection $metaSection>
                 <StyledDetailSectionHeader
-                  onClick={() =>
-                    toggleSection(EntityDetailSection.Metaproperties)
-                  }
+                  onClick={() => toggleSection(EntityDetailSection.Metaproperties)}
                 >
                   <EntityDetailExpandIcon
-                    isExpanded={isSectionExpanded(
-                      EntityDetailSection.Metaproperties
-                    )}
+                    isExpanded={isSectionExpanded(EntityDetailSection.Metaproperties)}
                   />
-                  <StyledDetailSectionHeading>
-                    Metaproperties
-                  </StyledDetailSectionHeading>
-                  {canEditEntity &&
-                    isSectionExpanded(EntityDetailSection.Metaproperties) && (
-                      <EntityDetailSectionButtons
-                        entityId={entity.id}
-                        setShowSubmit={setShowBatchRemovePropSubmit}
-                        removeBtnTooltip="remove all metaproperties from entity"
-                        removeBtnDisabled={!entity.props.length}
-                        handleCopyFromEntity={(pickedEntity, replace) => {
-                          if (pickedEntity.props.length === 0) {
-                            toast.info("no metaprops");
+                  <StyledDetailSectionHeading>Metaproperties</StyledDetailSectionHeading>
+                  {canEditEntity && isSectionExpanded(EntityDetailSection.Metaproperties) && (
+                    <EntityDetailSectionButtons
+                      entityId={entity.id}
+                      setShowSubmit={setShowBatchRemovePropSubmit}
+                      removeBtnTooltip="remove all metaproperties from entity"
+                      removeBtnDisabled={!entity.props.length}
+                      handleCopyFromEntity={(pickedEntity, replace) => {
+                        if (pickedEntity.props.length === 0) {
+                          toast.info("no metaprops");
+                        } else {
+                          if (replace) {
+                            updateEntityMutation.mutate({
+                              props: DProps(pickedEntity.props),
+                            });
                           } else {
-                            if (replace) {
-                              updateEntityMutation.mutate({
-                                props: DProps(pickedEntity.props),
-                              });
-                            } else {
-                              updateEntityMutation.mutate({
-                                props: [
-                                  ...entity.props,
-                                  ...DProps(pickedEntity.props),
-                                ],
-                              });
-                            }
+                            updateEntityMutation.mutate({
+                              props: [...entity.props, ...DProps(pickedEntity.props)],
+                            });
                           }
-                        }}
-                      />
-                    )}
+                        }
+                      }}
+                    />
+                  )}
                 </StyledDetailSectionHeader>
 
                 {isSectionExpanded(EntityDetailSection.Metaproperties) && (
@@ -989,13 +858,9 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                   onClick={() => toggleSection(EntityDetailSection.References)}
                 >
                   <EntityDetailExpandIcon
-                    isExpanded={isSectionExpanded(
-                      EntityDetailSection.References
-                    )}
+                    isExpanded={isSectionExpanded(EntityDetailSection.References)}
                   />
-                  <StyledDetailSectionHeading>
-                    References
-                  </StyledDetailSectionHeading>
+                  <StyledDetailSectionHeading>References</StyledDetailSectionHeading>
                 </StyledDetailSectionHeader>
                 {isSectionExpanded(EntityDetailSection.References) && (
                   <StyledDetailSectionContent>
@@ -1022,9 +887,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                   <EntityDetailExpandIcon
                     isExpanded={isSectionExpanded(EntityDetailSection.UsedIn)}
                   />
-                  <StyledDetailSectionHeading>
-                    Used in:
-                  </StyledDetailSectionHeading>
+                  <StyledDetailSectionHeading>Used in:</StyledDetailSectionHeading>
                 </StyledDetailSectionHeader>
 
                 {isSectionExpanded(EntityDetailSection.UsedIn) && (
@@ -1041,10 +904,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                           {entity.usedAsTemplate.map((entityId) => (
                             <React.Fragment key={entityId}>
                               <div style={{ display: "inline-grid" }}>
-                                <EntityTag
-                                  entity={entity.entities[entityId]}
-                                  fullWidth
-                                />
+                                <EntityTag entity={entity.entities[entityId]} fullWidth />
                               </div>
                             </React.Fragment>
                           ))}
@@ -1142,9 +1002,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                   <EntityDetailExpandIcon
                     isExpanded={isSectionExpanded(EntityDetailSection.Audits)}
                   />
-                  <StyledDetailSectionHeading>
-                    Audits
-                  </StyledDetailSectionHeading>
+                  <StyledDetailSectionHeading>Audits</StyledDetailSectionHeading>
                 </StyledDetailSectionHeader>
                 {isSectionExpanded(EntityDetailSection.Audits) && (
                   <StyledDetailSectionContent>
@@ -1155,9 +1013,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
 
               {/* JSON */}
               <StyledDetailSection key="editor-section-json">
-                <StyledDetailSectionHeader
-                  onClick={() => toggleSection(EntityDetailSection.Json)}
-                >
+                <StyledDetailSectionHeader onClick={() => toggleSection(EntityDetailSection.Json)}>
                   <EntityDetailExpandIcon
                     isExpanded={isSectionExpanded(EntityDetailSection.Json)}
                   />
