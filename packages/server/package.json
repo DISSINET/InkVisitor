@@ -2,8 +2,8 @@
   "name": "inkvisitor-server",
   "version": "1.5.0.4",
   "engines": {
-    "node": "^22.11.0",
-    "pnpm": "^10.1.0"
+    "node": "^22.13.1",
+    "pnpm": "^11.1.2"
   },
   "scripts": {
     "lint": "tslint --project \"tsconfig.json\"",
