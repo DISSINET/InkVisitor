@@ -9,8 +9,8 @@
   },
   "scripts": {
     "start": "webpack serve --mode development --open --config webpack.development.js",
-    "build": "tsc && npm run build:types",
-    "build:types": "tsc --declaration",
+    "build": "tsgo",
+    "typecheck": "tsgo --noEmit",
     "test": "jest",
     "test:watch": "jest --watch"
   },
@@ -34,7 +34,8 @@
     "react-dom": "^18.2.0",
     "ts-jest": "^29.4.5",
     "ts-loader": "^9.5.1",
-    "typescript": "^6.0.3",
+    "@typescript/native-preview": "beta",
+    "typescript": "npm:@typescript/typescript6@^6.0.0",
     "webpack": "^5.89.0",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^5.2.1"

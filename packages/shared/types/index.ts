@@ -4,6 +4,7 @@ import {
   IDocumentAuditAnchorChanges,
   AuditScope,
 } from "./audit";
+import { DropdownItem } from "./dropdown";
 import { ILabel } from "./label";
 import { IReference } from "./reference";
 import { IValue, IValueData } from "./value";
@@ -155,4 +156,5 @@ export type {
   IWarningPosition,
   IdentificationOrder,
   PropOrder,
+  DropdownItem,
 };
