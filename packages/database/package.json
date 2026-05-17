@@ -3,8 +3,8 @@
   "version": "1.5.0.4",
   "description": "Package with gui-like app for manipulating rethinkdb",
   "engines": {
-    "node": "^22.11.0",
-    "pnpm": "^10.1.0"
+    "node": "^22.13.1",
+    "pnpm": "^11.1.2"
   },
   "scripts": {
     "start": "npx ts-node -r tsconfig-paths/register scripts/import.ts",
