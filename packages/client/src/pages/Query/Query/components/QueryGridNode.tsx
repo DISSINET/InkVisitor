@@ -49,16 +49,15 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
 
   const { entityId: paramEntityId, entityClass: paramEntityClass } = nodeParams;
 
+  const entityId = node.params.entityId;
+
   const { data: dataEntity } = useQuery({
-    queryKey: ["entity", node.params.entityId ?? ""],
+    queryKey: ["entity", entityId],
     queryFn: async () => {
-      if (node.params.entityId) {
-        const res = await api.entityGet(node.params.entityId);
-        return res.data;
-      } else {
-        return undefined;
-      }
+      const res = await api.entityGet(entityId!);
+      return res.data;
     },
+    enabled: !!entityId && api.isLoggedIn(),
   });
 
   const nodeBorder = useMemo(() => {
