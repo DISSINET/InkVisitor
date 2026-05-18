@@ -22,8 +22,8 @@ const SortableHeader: React.FC<{
   const title = !isActive
     ? `Sort by ${label}`
     : sort.direction === "asc"
-      ? `Sort ${label} descending`
-      : `Clear sort`;
+    ? `Sort ${label} descending`
+    : `Clear sort`;
 
   return (
     <StyledSortableHeaderCell
@@ -45,7 +45,7 @@ const SortableHeader: React.FC<{
 export const DocumentsTableHeader: React.FC<DocumentsTableHeaderProps> = ({ sort, onSort }) => (
   <StyledGridHeader>
     <SortableHeader field="documentName" label="Document" sort={sort} onSort={onSort} />
-    <StyledHeaderCell>Actions</StyledHeaderCell>
+    <StyledHeaderCell></StyledHeaderCell>
     <SortableHeader field="resourceLabel" label="Resource" sort={sort} onSort={onSort} />
     <SortableHeader field="anchorCount" label="Anchors" sort={sort} onSort={onSort} />
   </StyledGridHeader>

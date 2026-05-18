@@ -14,7 +14,6 @@ import {
   StyledBoxWrap,
   StyledContent,
   StyledGrid,
-  StyledGridBody,
   StyledGridScrollArea,
   StyledHeading,
   StyledInputWrap,
@@ -182,7 +181,6 @@ export const DocumentsPage: React.FC = ({}) => {
             <StyledGridScrollArea>
               <StyledGrid>
                 <DocumentsTableHeader sort={sort} onSort={handleSort} />
-                <StyledGridBody>
                 {sortedDocumentsWithResources.map((documentWithResource: DocumentWithResource) => {
                   const documentId = documentWithResource.document.id;
                   return (
@@ -200,7 +198,6 @@ export const DocumentsPage: React.FC = ({}) => {
                     />
                   );
                 })}
-                </StyledGridBody>
               </StyledGrid>
             </StyledGridScrollArea>
             <StyledInputWrap onClick={() => inputRef.current?.click()}>

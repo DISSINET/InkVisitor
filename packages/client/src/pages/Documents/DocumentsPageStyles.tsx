@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import { StyledScrollbar } from "components/basic/CustomScrollbar/CustomScrollbarStyles";
 
 /**
@@ -60,11 +60,22 @@ export const StyledGridScrollArea = styled.div`
   align-self: stretch;
 `;
 
-const documentsGridColumns = "1fr repeat(3, auto)";
+/** Shared by header + body so column tracks align in one grid */
+export const documentsGridColumns = "minmax(18rem, 1fr) auto minmax(10rem, 17.4rem) max-content";
+
+const stickyHeaderCell = css`
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: ${({ theme }) => theme.color["white"]};
+  border-bottom: 1px solid ${({ theme }) => theme.color["gray"][500]};
+  height: 2.5rem;
+`;
 
 export const StyledGrid = styled.div`
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: ${documentsGridColumns};
+  align-items: center;
   min-width: min-content;
   margin-bottom: 0.5rem;
   padding-right: 0.5rem;
@@ -72,15 +83,11 @@ export const StyledGrid = styled.div`
 `;
 
 export const StyledGridHeader = styled.div`
-  display: grid;
-  grid-template-columns: ${documentsGridColumns};
-  align-items: center;
-  flex-shrink: 0;
-  border-bottom: 1px solid ${({ theme }) => theme.color["gray"][500]};
-  background: ${({ theme }) => theme.color["gray"][100]};
-  position: sticky;
-  top: 0;
-  z-index: 1;
+  display: contents;
+`;
+
+export const StyledDocumentRow = styled.div`
+  display: contents;
 `;
 
 export const StyledHeaderCell = styled.div`
@@ -89,6 +96,7 @@ export const StyledHeaderCell = styled.div`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
   white-space: nowrap;
+  ${stickyHeaderCell}
 `;
 
 export const StyledSortableHeaderCell = styled.button<{ $active?: boolean }>`
@@ -98,15 +106,14 @@ export const StyledSortableHeaderCell = styled.button<{ $active?: boolean }>`
   margin: 0;
   padding: 0.5rem 1rem;
   border: none;
-  background: transparent;
-  color: ${({ theme, $active }) =>
-    $active ? theme.color["primary"] : theme.color["gray"][700]};
+  color: ${({ theme, $active }) => ($active ? theme.color["primary"] : theme.color["gray"][700])};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
   white-space: nowrap;
   text-align: left;
   cursor: pointer;
   font-family: inherit;
+  ${stickyHeaderCell}
 
   &:hover {
     color: ${({ theme }) => theme.color["primary"]};
@@ -123,17 +130,17 @@ export const StyledSortIndicator = styled.span`
   line-height: 1;
 `;
 
-export const StyledGridBody = styled.div`
-  display: grid;
-  grid-template-columns: ${documentsGridColumns};
+export const StyledActionsCell = styled.div`
+  display: flex;
   align-items: center;
+  padding: 0.5rem 1rem;
 `;
 
 export const StyledTitleWrap = styled.div`
-  min-width: 18rem;
+  min-width: 0;
   cursor: pointer;
   font-size: ${({ theme }) => theme.fontSize["sm"]};
-  padding: 0 1rem 0 0.8rem;
+  padding: 0.5rem 1rem;
 `;
 export const StyledTitle = styled.div`
   color: ${({ theme }) => theme.color["black"]};
@@ -147,9 +154,10 @@ export const StyledTitle = styled.div`
 `;
 export const StyledReference = styled.div`
   display: grid;
+  min-width: 0;
   max-width: 17.4rem;
   position: relative;
-  padding: 0.2rem 1rem;
+  padding: 0.5rem 1rem;
 `;
 export const StyledHeading = styled.div`
   flex-shrink: 0;
@@ -166,6 +174,7 @@ export const StyledCount = styled.div`
   display: inline-flex;
   gap: 0.5rem;
   white-space: nowrap;
+  padding: 0.5rem 1rem;
 `;
 
 export const StyledCountTag = styled.div`
