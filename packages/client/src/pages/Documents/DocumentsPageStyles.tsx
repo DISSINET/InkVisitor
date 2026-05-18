@@ -60,14 +60,73 @@ export const StyledGridScrollArea = styled.div`
   align-self: stretch;
 `;
 
+const documentsGridColumns = "1fr repeat(3, auto)";
+
 export const StyledGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr repeat(3, auto);
-  align-items: center;
+  display: flex;
+  flex-direction: column;
   min-width: min-content;
   margin-bottom: 0.5rem;
   padding-right: 0.5rem;
   overflow: auto;
+`;
+
+export const StyledGridHeader = styled.div`
+  display: grid;
+  grid-template-columns: ${documentsGridColumns};
+  align-items: center;
+  flex-shrink: 0;
+  border-bottom: 1px solid ${({ theme }) => theme.color["gray"][500]};
+  background: ${({ theme }) => theme.color["gray"][100]};
+  position: sticky;
+  top: 0;
+  z-index: 1;
+`;
+
+export const StyledHeaderCell = styled.div`
+  padding: 0.5rem 1rem;
+  color: ${({ theme }) => theme.color["gray"][700]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+  white-space: nowrap;
+`;
+
+export const StyledSortableHeaderCell = styled.button<{ $active?: boolean }>`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0.5rem 1rem;
+  border: none;
+  background: transparent;
+  color: ${({ theme, $active }) =>
+    $active ? theme.color["primary"] : theme.color["gray"][700]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+  white-space: nowrap;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+
+  &:hover {
+    color: ${({ theme }) => theme.color["primary"]};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.color["primary"]};
+    outline-offset: -2px;
+  }
+`;
+
+export const StyledSortIndicator = styled.span`
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  line-height: 1;
+`;
+
+export const StyledGridBody = styled.div`
+  display: grid;
+  grid-template-columns: ${documentsGridColumns};
+  align-items: center;
 `;
 
 export const StyledTitleWrap = styled.div`
@@ -101,28 +160,6 @@ export const StyledHeading = styled.div`
   padding-left: ${({ theme }) => theme.space[1]};
 `;
 
-export const StyledSortRow = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.75rem;
-  flex-shrink: 0;
-  margin-bottom: ${({ theme }) => theme.space[2]};
-  padding-left: ${({ theme }) => theme.space[1]};
-`;
-
-export const StyledSortLabel = styled.span`
-  color: ${({ theme }) => theme.color["black"]};
-  font-size: ${({ theme }) => theme.fontSize["sm"]};
-  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
-  white-space: nowrap;
-`;
-
-export const StyledSortControls = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-`;
 export const StyledCount = styled.div`
   color: ${({ theme }) => theme.color["black"]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};

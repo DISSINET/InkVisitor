@@ -6,3 +6,8 @@ export type DocumentWithResource = {
 };
 export type DocumentSortField = "documentName" | "resourceLabel" | "anchorCount";
 export type DocumentSortDirection = "asc" | "desc";
+
+export type DocumentSortState = {
+  field: DocumentSortField;
+  direction: DocumentSortDirection;
+} | null;

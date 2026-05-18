@@ -43,8 +43,10 @@ export const compareDocuments = (
   }
 
   const anchorDiff = getDocumentAnchorCount(a.document) - getDocumentAnchorCount(b.document);
+  // ↑ asc = highest first; ↓ desc = lowest first (inverse of text columns)
+  const anchorDirection = sortDirection === "asc" ? -1 : 1;
   if (anchorDiff !== 0) {
-    return anchorDiff * direction;
+    return anchorDiff * anchorDirection;
   }
 
   return (

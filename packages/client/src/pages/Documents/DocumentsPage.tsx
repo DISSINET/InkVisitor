@@ -2,33 +2,25 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { v4 as uuidv4 } from "uuid";
 
 import { EntityEnums } from "@shared/enums";
-import { DropdownItem, IDocument } from "@shared/types";
+import { IDocument } from "@shared/types";
 import api from "api";
-import { BaseDropdown, Button, Loader, Submit } from "components";
+import { Loader, Submit } from "components";
 import { DocumentModalEdit, DocumentModalExport } from "components/advanced";
-import React, { ChangeEvent, useMemo, useRef, useState } from "react";
-import { FaArrowDownShortWide, FaArrowUpShortWide } from "react-icons/fa6";
+import React, { ChangeEvent, useCallback, useMemo, useRef, useState } from "react";
 import { DocumentRow } from "./DocumentRow/DocumentRow";
+import { DocumentsTableHeader } from "./DocumentsTableHeader";
 import {
   StyledBackground,
   StyledBoxWrap,
   StyledContent,
   StyledGrid,
+  StyledGridBody,
   StyledGridScrollArea,
   StyledHeading,
   StyledInputWrap,
-  StyledSortControls,
-  StyledSortLabel,
-  StyledSortRow,
 } from "./DocumentsPageStyles";
 import { compareDocuments } from "./utils";
-import { DocumentSortDirection, DocumentSortField, DocumentWithResource } from "./types";
-
-const sortFieldOptions: DropdownItem[] = [
-  { value: "documentName", label: "Document name" },
-  { value: "resourceLabel", label: "Resource label" },
-  { value: "anchorCount", label: "Anchor count" },
-];
+import { DocumentSortField, DocumentSortState, DocumentWithResource } from "./types";
 
 export const DocumentsPage: React.FC = ({}) => {
   const queryClient = useQueryClient();
@@ -71,19 +63,31 @@ export const DocumentsPage: React.FC = ({}) => {
       : [];
   }, [resources, documents]);
 
-  const [sortField, setSortField] = useState<DocumentSortField>("documentName");
-  const [sortDirection, setSortDirection] = useState<DocumentSortDirection>("asc");
+  const [sort, setSort] = useState<DocumentSortState>({
+    field: "documentName",
+    direction: "asc",
+  });
 
-  const selectedSortField = useMemo(
-    () => sortFieldOptions.find((option) => option.value === sortField) ?? sortFieldOptions[0],
-    [sortField]
-  );
+  const handleSort = useCallback((field: DocumentSortField) => {
+    setSort((current) => {
+      if (!current || current.field !== field) {
+        return { field, direction: "asc" };
+      }
+      if (current.direction === "asc") {
+        return { field, direction: "desc" };
+      }
+      return null;
+    });
+  }, []);
 
   const sortedDocumentsWithResources = useMemo(() => {
+    if (!sort) {
+      return documentsWithResources;
+    }
     return [...documentsWithResources].sort((a, b) =>
-      compareDocuments(a, b, sortField, sortDirection)
+      compareDocuments(a, b, sort.field, sort.direction)
     );
-  }, [documentsWithResources, sortField, sortDirection]);
+  }, [documentsWithResources, sort]);
 
   const uploadDocumentMutation = useMutation({
     mutationFn: async (doc: IDocument) => api.documentUpload(doc),
@@ -169,44 +173,16 @@ export const DocumentsPage: React.FC = ({}) => {
   const [editDocumentId, setEditDocumentId] = useState<string | false>(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const sortDirectionTooltip = sortDirection === "asc" ? "Sort ascending" : "Sort descending";
-
   return (
     <>
       <StyledContent>
         <StyledBoxWrap>
           <StyledBackground>
             <StyledHeading>Documents</StyledHeading>
-            <StyledSortRow>
-              <StyledSortLabel>Sort by</StyledSortLabel>
-              <StyledSortControls>
-                <BaseDropdown
-                  options={sortFieldOptions}
-                  value={selectedSortField}
-                  onChange={(selected) => {
-                    const nextField = selected[0]?.value as DocumentSortField | undefined;
-                    if (nextField) {
-                      setSortField(nextField);
-                    }
-                  }}
-                  width={220}
-                />
-                <Button
-                  icon={sortDirection === "asc" ? <FaArrowUpShortWide /> : <FaArrowDownShortWide />}
-                  color="primary"
-                  inverted
-                  tooltipLabel={sortDirectionTooltip}
-                  onClick={() =>
-                    setSortDirection((current) => (current === "asc" ? "desc" : "asc"))
-                  }
-                />
-              </StyledSortControls>
-            </StyledSortRow>
             <StyledGridScrollArea>
               <StyledGrid>
-                {/* <DocumentsStyledScrollbar
-                  style={{ height: "100%", width: "100%" }}
-                > */}
+                <DocumentsTableHeader sort={sort} onSort={handleSort} />
+                <StyledGridBody>
                 {sortedDocumentsWithResources.map((documentWithResource: DocumentWithResource) => {
                   const documentId = documentWithResource.document.id;
                   return (
@@ -224,7 +200,7 @@ export const DocumentsPage: React.FC = ({}) => {
                     />
                   );
                 })}
-                {/* </DocumentsStyledScrollbar> */}
+                </StyledGridBody>
               </StyledGrid>
             </StyledGridScrollArea>
             <StyledInputWrap onClick={() => inputRef.current?.click()}>
