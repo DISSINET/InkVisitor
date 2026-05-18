@@ -9,12 +9,12 @@ import { BiRefresh } from "react-icons/bi";
 import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
 import { floorNumberToOneDecimal } from "utils/utils";
-import { buildStableSignature } from "./utils";
 import { MemoizedExplorerBox } from "./Explorer/ExplorerBox";
 import { exploreReducer, exploreStateInitial } from "./Explorer/state";
 import { MemoizedQueryBox } from "./Query/QueryBox";
 import { queryReducer, queryStateInitial } from "./Query/state";
 import { getAllEdges, getAllNodes } from "./Query/utils";
+import { MemoizedQueryEntityDetailBox } from "./QueryEntityDetailBox/QueryEntityDetailBox";
 import {
   QUERY_LEFT_PANEL_MIN_WIDTH,
   QUERY_PAGE_SEPARATOR_X_PERCENT_POSITION,
@@ -22,16 +22,14 @@ import {
   QueryValidity,
   QueryValidityProblem,
 } from "./types";
-import { useQueryData, clearRowCache } from "./useQueryData";
-import { QueryEntityDetailModal } from "./QueryEntityDetailModal/QueryEntityDetailModal";
+import { clearRowCache, useQueryData } from "./useQueryData";
+import { buildStableSignature } from "./utils";
 import { useSearchParams } from "hooks/useSearchParamsContext";
-
 interface QueryPage {}
 export const QueryPage: React.FC<QueryPage> = ({}) => {
   const layoutWidth: number = useAppSelector((state) => state.layout.layoutWidth);
   const contentHeight: number = useAppSelector((state) => state.layout.contentHeight);
-  const { selectedDetailId } = useSearchParams();
-
+  const { selectedDetailId, detailIdArray } = useSearchParams();
   const [queryState, queryStateDispatch] = useReducer(queryReducer, queryStateInitial);
 
   /**
@@ -194,11 +192,14 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
   // Show loader only when refresh button was clicked and fetching
   const shouldShowLoader = isRefreshing && queryIsFetching;
 
+  const isDetailOpen = !!(selectedDetailId || detailIdArray.length > 0);
+  const firstPanelWidth = isDetailOpen ? querySeparatorXPosition : layoutWidth;
+
   return (
     <>
       {querySeparatorYPosition > 0 && (
         <LayoutSeparatorHorizontal
-          width={querySeparatorXPosition}
+          width={firstPanelWidth}
           topPositionMin={34}
           topPositionMax={contentHeight - 34}
           separatorYPosition={querySeparatorYPosition}
@@ -206,7 +207,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
         />
       )}
 
-      {querySeparatorXPosition > 0 && (
+      {isDetailOpen && querySeparatorXPosition > 0 && (
         <LayoutSeparatorVertical
           leftSideMinWidth={QUERY_LEFT_PANEL_MIN_WIDTH}
           leftSideMaxWidth={layoutWidth - QUERY_RIGHT_PANEL_MIN_WIDTH}
@@ -215,7 +216,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
         />
       )}
 
-      <Panel width={querySeparatorXPosition}>
+      <Panel width={firstPanelWidth}>
         <Box noFrame borderColor="white" height={querySeparatorYPosition} label="Search">
           <MemoizedQueryBox
             state={queryState}
@@ -252,11 +253,14 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
             getCachedEntity={getCachedEntity}
           />
 
-          {selectedDetailId && <QueryEntityDetailModal />}
           <Loader show={shouldShowLoader} />
         </Box>
       </Panel>
-      <Panel width={layoutWidth - querySeparatorXPosition}>{null}</Panel>
+      {isDetailOpen && (
+        <Panel width={layoutWidth - querySeparatorXPosition}>
+          <MemoizedQueryEntityDetailBox />
+        </Panel>
+      )}
     </>
   );
 };
