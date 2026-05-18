@@ -2,10 +2,7 @@ import { entityStatusDict, languageDict } from "@shared/dictionaries";
 import { entitiesDict } from "@shared/dictionaries/entity";
 import { EntityEnums, SearchEnums, UserEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
-import {
-  IRequestSearch,
-  IRequestSearchRootValidity,
-} from "@shared/types/request-search";
+import { IRequestSearch, IRequestSearchRootValidity } from "@shared/types/request-search";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { wildCardChar } from "Theme/constants";
 import api from "api";
@@ -18,16 +15,12 @@ import Dropdown, {
 } from "components/advanced";
 import { useDebounce, useResizeObserver, useSearchParams } from "hooks";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  BsShieldExclamation,
-  BsShieldFillCheck,
-  BsShieldShaded,
-} from "react-icons/bs";
+import { BsShieldExclamation, BsShieldFillCheck, BsShieldShaded } from "react-icons/bs";
 import { FaPlus } from "react-icons/fa";
 import { RiCloseFill } from "react-icons/ri";
 import { setExpandedOptions } from "redux/features/entitySearch/expandedOptionsSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { DropdownItem } from "types";
+import { DropdownItem } from "@shared/types";
 import { EntitySearchAdvancedOptions } from "./EntitySearchAdvancedOptions/EntitySearchAdvancedOptions";
 import {
   StyledBoxContent,
@@ -83,8 +76,7 @@ export const EntitySearchBox: React.FC = () => {
   const [classOption, setClassOption] = useState<EntityEnums.Class>(
     defaultClassOption.value as EntityEnums.Class
   );
-  const [searchData, setSearchData] =
-    useState<IRequestSearch>(initSearchValues);
+  const [searchData, setSearchData] = useState<IRequestSearch>(initSearchValues);
   const debouncedValues = useDebounce<IRequestSearch>(searchData, debounceTime);
 
   const { ref: resultRef, height: debouncedResultsHeight = 0 } =
@@ -108,8 +100,7 @@ export const EntitySearchBox: React.FC = () => {
   // it has to work also when label is not set but some of the options is selected #2913
   const validSearch = useMemo<boolean>(() => {
     return Boolean(
-      (debouncedValues?.labelOrId?.length &&
-        debouncedValues?.labelOrId?.length > 1) ||
+      (debouncedValues?.labelOrId?.length && debouncedValues?.labelOrId?.length > 1) ||
         debouncedValues?.class ||
         debouncedValues?.territoryId ||
         debouncedValues?.cooccurrenceId ||
@@ -120,9 +111,7 @@ export const EntitySearchBox: React.FC = () => {
   }, [debouncedValues]);
 
   const dispatch = useAppDispatch();
-  const expandedOptions = useAppSelector(
-    (state) => state.entitySearch.expandedOptions
-  );
+  const expandedOptions = useAppSelector((state) => state.entitySearch.expandedOptions);
   const areUserAdvancedOptionsVisible = useMemo(
     () =>
       expandedOptions.some((option: SearchEnums.AdvancedOption) =>
@@ -170,24 +159,13 @@ export const EntitySearchBox: React.FC = () => {
     enabled: api.isLoggedIn() && validSearch,
   });
 
-  const [territoryEntity, setTerritoryEntity] = useState<IEntity | false>(
-    false
-  );
-  const [cooccurrenceEntity, setCooccurrenceEntity] = useState<IEntity | false>(
-    false
-  );
+  const [territoryEntity, setTerritoryEntity] = useState<IEntity | false>(false);
+  const [cooccurrenceEntity, setCooccurrenceEntity] = useState<IEntity | false>(false);
   const [referencedTo, setReferencedTo] = useState<IEntity | false>(false);
 
   // apply changes to search parameters
   const handleChange = (changes: {
-    [key: string]:
-      | string
-      | false
-      | true
-      | undefined
-      | DropdownItem
-      | Date
-      | string[];
+    [key: string]: string | false | true | undefined | DropdownItem | Date | string[];
   }) => {
     const newSearch = {
       ...searchData,
@@ -210,9 +188,7 @@ export const EntitySearchBox: React.FC = () => {
     if (entities) {
       const sorted = [...entities];
       sorted.sort((a: IEntity, b: IEntity) =>
-        a.labels[0].toLocaleLowerCase() > b.labels[0].toLocaleLowerCase()
-          ? 1
-          : -1
+        a.labels[0].toLocaleLowerCase() > b.labels[0].toLocaleLowerCase() ? 1 : -1
       );
       return entities;
     }
@@ -270,9 +246,7 @@ export const EntitySearchBox: React.FC = () => {
   const userRole = localStorage.getItem("userrole");
 
   const userOptions = useMemo(() => {
-    const usersOptionsOut: DropdownItem[] = [
-      { label: "any", value: "" },
-    ].concat(
+    const usersOptionsOut: DropdownItem[] = [{ label: "any", value: "" }].concat(
       users
         ?.filter((user) => user && user.id && user.name)
         .map((user) => ({
@@ -293,21 +267,20 @@ export const EntitySearchBox: React.FC = () => {
   // Map AdvancedOption enum values to IRequestSearch property names
   const getPropertyNameFromOption = useCallback(
     (option: SearchEnums.AdvancedOption): keyof IRequestSearch => {
-      const mapping: Record<SearchEnums.AdvancedOption, keyof IRequestSearch> =
-        {
-          [SearchEnums.AdvancedOption.Class]: "class",
-          [SearchEnums.AdvancedOption.Status]: "status",
-          [SearchEnums.AdvancedOption.Language]: "language",
-          [SearchEnums.AdvancedOption.Territory]: "territoryId",
-          [SearchEnums.AdvancedOption.CoOccurrence]: "cooccurrenceId",
-          [SearchEnums.AdvancedOption.ReferencedTo]: "haveReferenceTo",
-          [SearchEnums.AdvancedOption.CreatedAt]: "createdDate",
-          [SearchEnums.AdvancedOption.UpdatedAt]: "updatedDate",
-          [SearchEnums.AdvancedOption.CreatedBy]: "createdBy",
-          [SearchEnums.AdvancedOption.UpdatedBy]: "updatedBy",
-          [SearchEnums.AdvancedOption.EditedBy]: "editedBy",
-          [SearchEnums.AdvancedOption.RootValidity]: "isRootInvalid",
-        };
+      const mapping: Record<SearchEnums.AdvancedOption, keyof IRequestSearch> = {
+        [SearchEnums.AdvancedOption.Class]: "class",
+        [SearchEnums.AdvancedOption.Status]: "status",
+        [SearchEnums.AdvancedOption.Language]: "language",
+        [SearchEnums.AdvancedOption.Territory]: "territoryId",
+        [SearchEnums.AdvancedOption.CoOccurrence]: "cooccurrenceId",
+        [SearchEnums.AdvancedOption.ReferencedTo]: "haveReferenceTo",
+        [SearchEnums.AdvancedOption.CreatedAt]: "createdDate",
+        [SearchEnums.AdvancedOption.UpdatedAt]: "updatedDate",
+        [SearchEnums.AdvancedOption.CreatedBy]: "createdBy",
+        [SearchEnums.AdvancedOption.UpdatedBy]: "updatedBy",
+        [SearchEnums.AdvancedOption.EditedBy]: "editedBy",
+        [SearchEnums.AdvancedOption.RootValidity]: "isRootInvalid",
+      };
       return mapping[option];
     },
     []
@@ -323,9 +296,7 @@ export const EntitySearchBox: React.FC = () => {
             <StyledPillCloseIcon
               onClick={() => {
                 handleSetExpandedOptions(
-                  expandedOptions.filter(
-                    (o: SearchEnums.AdvancedOption) => o !== option
-                  )
+                  expandedOptions.filter((o: SearchEnums.AdvancedOption) => o !== option)
                 );
                 // Special handling for different options
                 if (option === SearchEnums.AdvancedOption.Territory) {
@@ -362,12 +333,7 @@ export const EntitySearchBox: React.FC = () => {
         </StyledPillWrap>
       );
     },
-    [
-      expandedOptions,
-      handleSetExpandedOptions,
-      getPropertyNameFromOption,
-      handleChange,
-    ]
+    [expandedOptions, handleSetExpandedOptions, getPropertyNameFromOption, handleChange]
   );
 
   // If used as template is implemented, it'll be set here
@@ -402,9 +368,7 @@ export const EntitySearchBox: React.FC = () => {
                 width="full"
                 placeholder="type to search"
                 changeOnType
-                onChangeFn={(value: string) =>
-                  handleChange({ labelOrId: value })
-                }
+                onChangeFn={(value: string) => handleChange({ labelOrId: value })}
                 clearable
               />
               {userRole !== UserEnums.Role.Viewer && (
@@ -563,9 +527,7 @@ export const EntitySearchBox: React.FC = () => {
                 />
               </StyledRow>
             )}
-            {expandedOptions.includes(
-              SearchEnums.AdvancedOption.CoOccurrence
-            ) && (
+            {expandedOptions.includes(SearchEnums.AdvancedOption.CoOccurrence) && (
               <StyledRow>
                 {renderOptionLabel(SearchEnums.AdvancedOption.CoOccurrence)}
                 {cooccurrenceEntity ? (
@@ -611,9 +573,7 @@ export const EntitySearchBox: React.FC = () => {
                 )}
               </StyledRow>
             )}
-            {expandedOptions.includes(
-              SearchEnums.AdvancedOption.ReferencedTo
-            ) && (
+            {expandedOptions.includes(SearchEnums.AdvancedOption.ReferencedTo) && (
               <StyledRow>
                 {renderOptionLabel(SearchEnums.AdvancedOption.ReferencedTo)}
                 {referencedTo ? (
@@ -651,9 +611,7 @@ export const EntitySearchBox: React.FC = () => {
                   type="date"
                   width="full"
                   value={
-                    searchData.createdDate
-                      ? searchData.createdDate.toISOString().split("T")[0]
-                      : ""
+                    searchData.createdDate ? searchData.createdDate.toISOString().split("T")[0] : ""
                   }
                   onChangeFn={(value) => {
                     const createdDate = new Date(value);
@@ -684,9 +642,7 @@ export const EntitySearchBox: React.FC = () => {
                     }
                   }}
                   value={
-                    searchData.updatedDate
-                      ? searchData.updatedDate.toISOString().split("T")[0]
-                      : ""
+                    searchData.updatedDate ? searchData.updatedDate.toISOString().split("T")[0] : ""
                   }
                   clearable
                 />
@@ -735,9 +691,7 @@ export const EntitySearchBox: React.FC = () => {
               </StyledRow>
             )}
 
-            {expandedOptions.includes(
-              SearchEnums.AdvancedOption.RootValidity
-            ) && (
+            {expandedOptions.includes(SearchEnums.AdvancedOption.RootValidity) && (
               <StyledRow>
                 {renderOptionLabel(SearchEnums.AdvancedOption.RootValidity)}
 
@@ -747,49 +701,38 @@ export const EntitySearchBox: React.FC = () => {
                     {
                       longValue: "Any",
                       shortValue: "",
-                      shortIcon: (
-                        <BsShieldShaded style={{ margin: "2px 4px" }} />
-                      ),
+                      shortIcon: <BsShieldShaded style={{ margin: "2px 4px" }} />,
                       onClick: () => {
                         handleChange({
                           isRootInvalid: IRequestSearchRootValidity.Any,
                         });
                       },
                       selected:
-                        searchData.isRootInvalid ===
-                          IRequestSearchRootValidity.Any ||
+                        searchData.isRootInvalid === IRequestSearchRootValidity.Any ||
                         searchData.isRootInvalid === undefined ||
                         searchData.isRootInvalid === null,
                     },
                     {
                       longValue: "Valid",
                       shortValue: "",
-                      shortIcon: (
-                        <BsShieldFillCheck style={{ margin: "2px 4px" }} />
-                      ),
+                      shortIcon: <BsShieldFillCheck style={{ margin: "2px 4px" }} />,
                       onClick: () => {
                         handleChange({
                           isRootInvalid: IRequestSearchRootValidity.Valid,
                         });
                       },
-                      selected:
-                        searchData.isRootInvalid ===
-                        IRequestSearchRootValidity.Valid,
+                      selected: searchData.isRootInvalid === IRequestSearchRootValidity.Valid,
                     },
                     {
                       longValue: "Invalid",
                       shortValue: "",
-                      shortIcon: (
-                        <BsShieldExclamation style={{ margin: "2px 4px" }} />
-                      ),
+                      shortIcon: <BsShieldExclamation style={{ margin: "2px 4px" }} />,
                       onClick: () => {
                         handleChange({
                           isRootInvalid: IRequestSearchRootValidity.Invalid,
                         });
                       },
-                      selected:
-                        searchData.isRootInvalid ===
-                        IRequestSearchRootValidity.Invalid,
+                      selected: searchData.isRootInvalid === IRequestSearchRootValidity.Invalid,
                     },
                   ]}
                 />
@@ -800,9 +743,7 @@ export const EntitySearchBox: React.FC = () => {
         </StyledOptions>
 
         <StyledResultsHeader>
-          {sortedEntities.length > 0 && (
-            <>{`Results (${sortedEntities.length})`}</>
-          )}
+          {sortedEntities.length > 0 && <>{`Results (${sortedEntities.length})`}</>}
           {sortedEntities.length === 0 && !isFetching && (
             <StyledNoResults>{`No results found`}</StyledNoResults>
           )}
@@ -814,10 +755,7 @@ export const EntitySearchBox: React.FC = () => {
           {/* RESULTS */}
           {sortedEntities.length > 0 && (
             <>
-              <EntitySearchResults
-                results={sortedEntities}
-                height={debouncedResultsHeight}
-              />
+              <EntitySearchResults results={sortedEntities} height={debouncedResultsHeight} />
             </>
           )}
           <Loader show={isFetching} />

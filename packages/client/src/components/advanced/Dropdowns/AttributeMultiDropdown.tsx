@@ -1,14 +1,9 @@
 import { allEntities } from "@shared/dictionaries/entity";
+import { DropdownItem } from "@shared/types";
 import { BaseDropdown } from "components";
 import { StyledSelect } from "components/basic/BaseDropdown/BaseDropdownStyles";
 import React from "react";
-import {
-  MultiValueProps,
-  OptionProps,
-  ValueContainerProps,
-  components,
-} from "react-select";
-import { DropdownItem } from "types";
+import { MultiValueProps, OptionProps, ValueContainerProps, components } from "react-select";
 
 interface AttributeMultiDropdown<T = string> {
   width?: number | "full";
@@ -51,14 +46,10 @@ export const AttributeMultiDropdown = <T extends string>({
       tooltipLabel={tooltipLabel}
       icon={icon}
       options={[allEntities, ...options]}
-      value={[allEntities]
-        .concat(options)
-        .filter((o) => value.includes(o.value as T))}
+      value={[allEntities].concat(options).filter((o) => value.includes(o.value as T))}
       onChange={(selectedOptions, event) => {
         // all options selected independently of ANY
-        const allWithoutAnySelected = options.every((option) =>
-          selectedOptions.includes(option)
-        );
+        const allWithoutAnySelected = options.every((option) => selectedOptions.includes(option));
         // when something is selected = at least one option
         if (selectedOptions !== null && selectedOptions.length > 0) {
           // deselect ANY or remove all button was clicked
@@ -69,10 +60,7 @@ export const AttributeMultiDropdown = <T extends string>({
             return onChange([]);
           }
           // when all option selected (ANY is clicked)
-          else if (
-            selectedOptions[selectedOptions.length - 1].value ===
-            allEntities.value
-          ) {
+          else if (selectedOptions[selectedOptions.length - 1].value === allEntities.value) {
             return onChange(getValues([allEntities, ...options]));
           }
           // all are selected without ANY -> highlight also ANY option (direct click on ANY is resolved earlier)
@@ -80,13 +68,8 @@ export const AttributeMultiDropdown = <T extends string>({
             return onChange(getValues([allEntities, ...options]));
           }
           // something was deselected from all selected (need to deselect ANY)
-          else if (
-            event?.action === "deselect-option" &&
-            selectedOptions.includes(allEntities)
-          ) {
-            const result = selectedOptions.filter(
-              (option) => option.value !== allEntities.value
-            );
+          else if (event?.action === "deselect-option" && selectedOptions.includes(allEntities)) {
+            const result = selectedOptions.filter((option) => option.value !== allEntities.value);
             return onChange(getValues(result));
           }
         }
@@ -118,11 +101,7 @@ const ValueContainer = ({
     toBeRendered = [children[0][0], children[1]];
   }
 
-  return (
-    <components.ValueContainer {...props}>
-      {toBeRendered}
-    </components.ValueContainer>
-  );
+  return <components.ValueContainer {...props}>{toBeRendered}</components.ValueContainer>;
 };
 
 const MultiValue = (props: MultiValueProps<any>): React.ReactElement => {

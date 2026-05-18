@@ -5,12 +5,12 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "engines": {
-    "pnpm": "^10.1.0"
+    "pnpm": "^11.1.2"
   },
   "scripts": {
     "start": "webpack serve --mode development --open --config webpack.development.js",
-    "build": "tsc && npm run build:types",
-    "build:types": "tsc --declaration",
+    "build": "tsgo",
+    "typecheck": "tsgo --noEmit",
     "test": "jest",
     "test:watch": "jest --watch"
   },
@@ -34,7 +34,8 @@
     "react-dom": "^18.2.0",
     "ts-jest": "^29.4.5",
     "ts-loader": "^9.5.1",
-    "typescript": "^5.3.2",
+    "@typescript/native-preview": "beta",
+    "typescript": "npm:@typescript/typescript6@^6.0.0",
     "webpack": "^5.89.0",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^5.2.1"
@@ -43,5 +44,5 @@
     "lorem-ipsum": "^2.0.8",
     "react": "^18.2.0"
   },
-  "packageManager": "pnpm@10.15.1+sha512.34e538c329b5553014ca8e8f4535997f96180a1d0f614339357449935350d924e22f8614682191264ec33d1462ac21561aff97f6bb18065351c162c7e8f6de67"
+  "packageManager": "pnpm@11.1.2"
 }

@@ -3,42 +3,44 @@
   "version": "1.5.0.4",
   "description": "Package with gui-like app for manipulating rethinkdb",
   "engines": {
-    "node": "^22.11.0",
-    "pnpm": "^10.1.0"
+    "node": "^22.13.1",
+    "pnpm": "^11.1.2"
   },
   "scripts": {
-    "start": "npx ts-node -r tsconfig-paths/register scripts/import.ts",
-    "upgrade-audits-datasets": "npx ts-node -r tsconfig-paths/register scripts/upgrade-audits-datasets.ts",
-    "benchmark": "npx ts-node -r tsconfig-paths/register scripts/index-benchmark.ts",
-    "fix-labels": "npx ts-node -r tsconfig-paths/register scripts/fix-labels.ts",
-    "parse-niort": "npx ts-node -r tsconfig-paths/register scripts/parse-casestudy.ts niort 36f5a334-4611-4da3-81c0-a7ec8d600a59 production tunnel"
+    "start": "npx ts-node -r ./scripts/register-paths.ts scripts/import.ts",
+    "upgrade-audits-datasets": "npx ts-node -r ./scripts/register-paths.ts scripts/upgrade-audits-datasets.ts",
+    "benchmark": "npx ts-node -r ./scripts/register-paths.ts scripts/index-benchmark.ts",
+    "fix-labels": "npx ts-node -r ./scripts/register-paths.ts scripts/fix-labels.ts",
+    "parse-niort": "npx ts-node -r ./scripts/register-paths.ts scripts/parse-casestudy.ts niort 36f5a334-4611-4da3-81c0-a7ec8d600a59 production tunnel",
+    "typecheck": "tsgo --noEmit"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@types/uuid": "^9.0.7",
+    "@types/uuid": "^9.0.8",
     "colors": "^1.4.0",
-    "dotenv": "^16.1.3",
+    "dotenv": "^16.6.1",
     "googleapis": "^118.0.0",
     "readline": "^1.3.0",
     "readline-sync": "^1.4.10",
     "rethinkdb": "^2.4.2",
-    "rethinkdb-ts": "^2.5.4",
-    "stream-json": "^1.7.5",
-    "ssh2": "^1.13.0",
-    "ts-json-schema-generator": "^1.2.0",
-    "ts-node": "^10.9.1",
-    "tslib": "^2.5.3",
-    "tunnel-ssh": "^5.0.5",
-    "typescript": "^5.1.3",
-    "uuid": "^9.0.0"
+    "rethinkdb-ts": "^2.7.0",
+    "ssh2": "^1.17.0",
+    "stream-json": "^1.9.1",
+    "ts-json-schema-generator": "^1.5.1",
+    "ts-node": "^10.9.2",
+    "tslib": "^2.8.1",
+    "tunnel-ssh": "^5.2.0",
+    "typescript": "npm:@typescript/typescript6@^6.0.1",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "@types/node": "^20.2.5",
-    "@types/ssh2": "^1.11.11",
-    "@types/tunnel-ssh": "^5.0.0",
+    "@types/node": "^20.19.41",
+    "@types/ssh2": "^1.15.5",
+    "@types/tunnel-ssh": "^5.1.0",
+    "@typescript/native-preview": "beta",
     "install": "^0.13.0",
-    "npm": "^9.6.7",
+    "npm": "^9.9.4",
     "tsconfig-paths": "^4.2.0"
   }
 }
