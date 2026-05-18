@@ -100,6 +100,29 @@ export const StyledHeading = styled.div`
   margin-bottom: ${({ theme }) => theme.space[2]};
   padding-left: ${({ theme }) => theme.space[1]};
 `;
+
+export const StyledSortRow = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+  margin-bottom: ${({ theme }) => theme.space[2]};
+  padding-left: ${({ theme }) => theme.space[1]};
+`;
+
+export const StyledSortLabel = styled.span`
+  color: ${({ theme }) => theme.color["black"]};
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+  white-space: nowrap;
+`;
+
+export const StyledSortControls = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
 export const StyledCount = styled.div`
   color: ${({ theme }) => theme.color["black"]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
