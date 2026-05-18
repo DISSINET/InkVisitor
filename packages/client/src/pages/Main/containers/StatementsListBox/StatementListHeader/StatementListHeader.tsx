@@ -33,7 +33,6 @@ import { TbHomeMove } from "react-icons/tb";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import {
-  DropdownItem,
   EntitiesDeleteErrorResponse,
   EntitiesDeleteSuccessResponse,
   RelationsCreateErrorResponse,
@@ -52,6 +51,7 @@ import {
   StyledMoveToParent,
   StyledSuggesterRow,
 } from "./StatementListHeaderStyles";
+import { DropdownItem } from "@shared/types";
 
 interface StatementListHeader {
   territory?: IResponseTerritory;
