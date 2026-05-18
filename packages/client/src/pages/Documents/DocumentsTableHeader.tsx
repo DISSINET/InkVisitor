@@ -44,9 +44,9 @@ const SortableHeader: React.FC<{
 
 export const DocumentsTableHeader: React.FC<DocumentsTableHeaderProps> = ({ sort, onSort }) => (
   <StyledGridHeader>
-    <SortableHeader field="documentName" label="Document" sort={sort} onSort={onSort} />
+    <SortableHeader field="documentName" label="Name" sort={sort} onSort={onSort} />
     <StyledHeaderCell></StyledHeaderCell>
-    <SortableHeader field="resourceLabel" label="Resource" sort={sort} onSort={onSort} />
+    <SortableHeader field="resourceLabel" label="Label" sort={sort} onSort={onSort} />
     <SortableHeader field="anchorCount" label="Anchors" sort={sort} onSort={onSort} />
   </StyledGridHeader>
 );

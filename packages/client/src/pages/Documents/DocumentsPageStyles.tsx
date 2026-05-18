@@ -69,7 +69,8 @@ const stickyHeaderCell = css`
   z-index: 1;
   background: ${({ theme }) => theme.color["white"]};
   border-bottom: 1px solid ${({ theme }) => theme.color["gray"][500]};
-  height: 2.5rem;
+  min-height: 2.5rem;
+  margin-bottom: ${({ theme }) => theme.space[2]};
 `;
 
 export const StyledGrid = styled.div`
@@ -133,14 +134,13 @@ export const StyledSortIndicator = styled.span`
 export const StyledActionsCell = styled.div`
   display: flex;
   align-items: center;
-  padding: 0.5rem 1rem;
 `;
 
 export const StyledTitleWrap = styled.div`
   min-width: 0;
   cursor: pointer;
   font-size: ${({ theme }) => theme.fontSize["sm"]};
-  padding: 0.5rem 1rem;
+  padding: 0px 1rem 0px 0.8rem;
 `;
 export const StyledTitle = styled.div`
   color: ${({ theme }) => theme.color["black"]};
@@ -157,7 +157,7 @@ export const StyledReference = styled.div`
   min-width: 0;
   max-width: 17.4rem;
   position: relative;
-  padding: 0.5rem 1rem;
+  padding: 0.2rem 1rem;
 `;
 export const StyledHeading = styled.div`
   flex-shrink: 0;
