@@ -5,7 +5,10 @@ import { Query } from "@shared/types";
 import api from "api";
 import { Box, Button, Loader, Panel } from "components";
 import { LayoutSeparatorHorizontal, LayoutSeparatorVertical } from "components/advanced";
+import { useSearchParams } from "hooks/useSearchParamsContext";
+import { MemoizedEntityDetailBox } from "pages/Main/containers/EntityDetailBox/EntityDetailBox";
 import { BiRefresh } from "react-icons/bi";
+import { VscCloseAll } from "react-icons/vsc";
 import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
 import { floorNumberToOneDecimal } from "utils/utils";
@@ -14,7 +17,6 @@ import { exploreReducer, exploreStateInitial } from "./Explorer/state";
 import { MemoizedQueryBox } from "./Query/QueryBox";
 import { queryReducer, queryStateInitial } from "./Query/state";
 import { getAllEdges, getAllNodes } from "./Query/utils";
-import { MemoizedQueryEntityDetailBox } from "./QueryEntityDetailBox/QueryEntityDetailBox";
 import {
   QUERY_LEFT_PANEL_MIN_WIDTH,
   QUERY_PAGE_SEPARATOR_X_PERCENT_POSITION,
@@ -24,12 +26,11 @@ import {
 } from "./types";
 import { clearRowCache, useQueryData } from "./useQueryData";
 import { buildStableSignature } from "./utils";
-import { useSearchParams } from "hooks/useSearchParamsContext";
 interface QueryPage {}
 export const QueryPage: React.FC<QueryPage> = ({}) => {
   const layoutWidth: number = useAppSelector((state) => state.layout.layoutWidth);
   const contentHeight: number = useAppSelector((state) => state.layout.contentHeight);
-  const { selectedDetailId, detailIdArray } = useSearchParams();
+  const { selectedDetailId, detailIdArray, clearAllDetailIds } = useSearchParams();
   const [queryState, queryStateDispatch] = useReducer(queryReducer, queryStateInitial);
 
   /**
@@ -258,7 +259,22 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
       </Panel>
       {isDetailOpen && (
         <Panel width={layoutWidth - querySeparatorXPosition}>
-          <MemoizedQueryEntityDetailBox />
+          <Box
+            label="Detail"
+            borderColor="white"
+            height={contentHeight}
+            disableScroll
+            buttons={[
+              <Button
+                inverted
+                tooltipLabel="close all tabs"
+                icon={<VscCloseAll style={{ transform: "scale(1.3)" }} />}
+                onClick={clearAllDetailIds}
+              />,
+            ]}
+          >
+            <MemoizedEntityDetailBox />
+          </Box>
         </Panel>
       )}
     </>
