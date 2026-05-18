@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useReducer, useState } from "react";
 import { Query } from "@shared/types";
 import api from "api";
 import { Box, Button, Loader, Panel } from "components";
-import { LayoutSeparatorHorizontal } from "components/advanced";
+import { LayoutSeparatorHorizontal, LayoutSeparatorVertical } from "components/advanced";
 import { BiRefresh } from "react-icons/bi";
 import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
@@ -15,7 +15,13 @@ import { exploreReducer, exploreStateInitial } from "./Explorer/state";
 import { MemoizedQueryBox } from "./Query/QueryBox";
 import { queryReducer, queryStateInitial } from "./Query/state";
 import { getAllEdges, getAllNodes } from "./Query/utils";
-import { QueryValidity, QueryValidityProblem } from "./types";
+import {
+  QUERY_LEFT_PANEL_MIN_WIDTH,
+  QUERY_PAGE_SEPARATOR_X_PERCENT_POSITION,
+  QUERY_RIGHT_PANEL_MIN_WIDTH,
+  QueryValidity,
+  QueryValidityProblem,
+} from "./types";
 import { useQueryData, clearRowCache } from "./useQueryData";
 import { QueryEntityDetailModal } from "./QueryEntityDetailModal/QueryEntityDetailModal";
 import { useSearchParams } from "hooks/useSearchParamsContext";
@@ -93,6 +99,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
   }, [queryState, exploreState]);
 
   const onePercentOfContentHeight = useMemo(() => contentHeight / 100, [contentHeight]);
+  const onePercentOfLayoutWidth = useMemo(() => layoutWidth / 100, [layoutWidth]);
 
   const handleExport = (rowIndices: number[], selectedColumnIds?: string[]) => {
     toast.success("Exporting data...");
@@ -135,6 +142,36 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     setCurrentContentHeight(contentHeight);
   }, [contentHeight]);
 
+  const handleSeparatorXPositionChange = (xPosition: number) => {
+    if (querySeparatorXPosition !== xPosition) {
+      setQuerySeparatorXPosition(xPosition);
+
+      const separatorXPercentPosition = floorNumberToOneDecimal(
+        xPosition / onePercentOfLayoutWidth
+      );
+      localStorage.setItem("querySeparatorXPosition", separatorXPercentPosition.toString());
+    }
+  };
+
+  const localStorageSeparatorXPosition = localStorage.getItem("querySeparatorXPosition");
+  const [querySeparatorXPosition, setQuerySeparatorXPosition] = useState<number>(
+    localStorageSeparatorXPosition
+      ? Number(localStorageSeparatorXPosition) * onePercentOfLayoutWidth
+      : QUERY_PAGE_SEPARATOR_X_PERCENT_POSITION * onePercentOfLayoutWidth
+  );
+
+  const [currentLayoutWidth, setCurrentLayoutWidth] = useState(layoutWidth);
+
+  useEffect(() => {
+    const onePercentOfLastLayoutWidth = currentLayoutWidth / 100;
+    const separatorXPercentPosition = floorNumberToOneDecimal(
+      querySeparatorXPosition / onePercentOfLastLayoutWidth
+    );
+    setQuerySeparatorXPosition(separatorXPercentPosition * onePercentOfLayoutWidth);
+    localStorage.setItem("querySeparatorXPosition", separatorXPercentPosition.toString());
+    setCurrentLayoutWidth(layoutWidth);
+  }, [layoutWidth]);
+
   const {
     data: queryData,
     error: queryError,
@@ -161,6 +198,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     <>
       {querySeparatorYPosition > 0 && (
         <LayoutSeparatorHorizontal
+          width={querySeparatorXPosition}
           topPositionMin={34}
           topPositionMax={contentHeight - 34}
           separatorYPosition={querySeparatorYPosition}
@@ -168,7 +206,16 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
         />
       )}
 
-      <Panel width={layoutWidth}>
+      {querySeparatorXPosition > 0 && (
+        <LayoutSeparatorVertical
+          leftSideMinWidth={QUERY_LEFT_PANEL_MIN_WIDTH}
+          leftSideMaxWidth={layoutWidth - QUERY_RIGHT_PANEL_MIN_WIDTH}
+          separatorXPosition={querySeparatorXPosition}
+          setSeparatorXPosition={(xPosition) => handleSeparatorXPositionChange(xPosition)}
+        />
+      )}
+
+      <Panel width={querySeparatorXPosition}>
         <Box noFrame borderColor="white" height={querySeparatorYPosition} label="Search">
           <MemoizedQueryBox
             state={queryState}
@@ -209,6 +256,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
           <Loader show={shouldShowLoader} />
         </Box>
       </Panel>
+      <Panel width={layoutWidth - querySeparatorXPosition}>{null}</Panel>
     </>
   );
 };
