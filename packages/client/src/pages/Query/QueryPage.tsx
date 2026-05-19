@@ -26,7 +26,7 @@ import {
   QueryValidity,
   QueryValidityProblem,
 } from "./types";
-import { clearRowCache, useQueryData } from "./useQueryData";
+import { invalidateAllExplorerQueries, useQueryData } from "./useQueryData";
 import { buildStableSignature } from "./utils";
 interface QueryPage {}
 export const QueryPage: React.FC<QueryPage> = ({}) => {
@@ -83,16 +83,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
 
   const handleInvalidateQuery = () => {
     setIsRefreshing(true);
-    // Clear the custom row cache store
-    clearRowCache();
-    // Invalidate React Query cache
-    queryClient.invalidateQueries({
-      queryKey: ["query"],
-    });
-    // Remove all query-related queries to force refetch
-    queryClient.removeQueries({
-      queryKey: ["query"],
-    });
+    invalidateAllExplorerQueries(queryClient);
   };
 
   const stableSignature = useMemo(() => {
