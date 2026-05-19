@@ -211,6 +211,20 @@ export const useQueryData = ({
 };
 
 /**
+ * Clears all explorer row caches and refetches active query observers.
+ * Call after entity updates from detail (or anywhere outside the explorer table)
+ * so embedded IEntity copies in column cells stay in sync.
+ */
+export function invalidateAllExplorerQueries(queryClient: QueryClient): void {
+  clearRowCache();
+  void queryClient.invalidateQueries({
+    queryKey: ["query"],
+    exact: false,
+    refetchType: "active",
+  });
+}
+
+/**
  * Clears row cache and forces the explorer query for this signature to refetch.
  * Use `invalidateQueries` (not `removeQueries` + `refetchQueries`): after removal,
  * there is nothing left in the cache for `refetchQueries` to run, so the table

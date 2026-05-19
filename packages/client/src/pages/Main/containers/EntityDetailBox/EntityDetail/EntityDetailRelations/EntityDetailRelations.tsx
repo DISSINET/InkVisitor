@@ -44,14 +44,15 @@ export const EntityDetailRelations: React.FC<EntityDetailRelations> = ({
   userCanEdit,
 }) => {
   const relationTypes = useMemo<RelationEnums.Type[]>(() => {
-    return getEntityRelationRules(
-      entity.class,
-      RelationEnums.EntityDetailTypes,
-      entity.isTemplate
-    );
+    return getEntityRelationRules(entity.class, RelationEnums.EntityDetailTypes, entity.isTemplate);
   }, [entity]);
 
   const { relations, entities } = entity;
+
+  // Only in case of corrupted data
+  if (relations === undefined) {
+    return <></>;
+  }
 
   return (
     <>

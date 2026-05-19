@@ -9,6 +9,7 @@ import { Button, CustomScrollbar, Loader, Message, Submit, ToastWithLink } from 
 import { ApplyTemplateModal, AuditTable, EntityTag, JSONExplorer } from "components/advanced";
 import { CMetaProp, DProps } from "constructors";
 import { useSearchParams } from "hooks";
+import { invalidateAllExplorerQueries } from "pages/Query/useQueryData";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
@@ -29,7 +30,6 @@ import { EntityDetailSectionButtons } from "./EntityDetailSectionButtons/EntityD
 import {
   StyledDetailSection,
   StyledDetailSectionContent,
-  StyledDetailSectionContentUsedIn,
   StyledDetailSectionEntityList,
   StyledDetailSectionHeader,
   StyledDetailSectionHeading,
@@ -106,6 +106,17 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
       removeDetailId(detailId);
     }
   }, [error]);
+
+  const isIncompleteEntityDetail =
+    !!entity && (entity.relations === undefined || entity.entities === undefined);
+
+  useEffect(() => {
+    if (!isIncompleteEntityDetail) return;
+    toast.error(
+      "Entity detail could not be loaded: the same query key was used for a different API response. Please contact support.",
+      { toastId: `incomplete-entity-detail-${detailId}` }
+    );
+  }, [isIncompleteEntityDetail, detailId]);
 
   const [selectedEntityType, setSelectedEntityType] = useState<EntityEnums.Class>();
   const [createTemplateModal, setCreateTemplateModal] = useState<boolean>(false);
@@ -231,6 +242,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
     mutationFn: async (changes: Partial<IEntity>) => await api.entityUpdate(detailId, changes),
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["entity"] });
+      invalidateAllExplorerQueries(queryClient);
 
       if (
         statementId &&
@@ -276,6 +288,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
     onSuccess: (data, variables) => {
       setShowTypeSubmit(false);
       queryClient.invalidateQueries({ queryKey: ["entity"] });
+      invalidateAllExplorerQueries(queryClient);
       queryClient.invalidateQueries({ queryKey: ["statement"] });
       if (variables === EntityEnums.Class.Territory) {
         queryClient.invalidateQueries({ queryKey: ["tree"] });
@@ -513,7 +526,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
   const isTerritoryWithParent = (entity: IResponseDetail): boolean => {
     return (
       entity.class === EntityEnums.Class.Territory &&
-      entity.data.parent &&
+      entity.data?.parent &&
+      !!entity.entities &&
       Object.keys(entity.entities).includes(entity.data.parent.territoryId)
     );
   };
@@ -521,16 +535,17 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
   const isStatementWithTerritory = (entity: IResponseDetail): boolean => {
     return (
       entity.class === EntityEnums.Class.Statement &&
-      entity.data.territory &&
+      entity.data?.territory &&
+      !!entity.entities &&
       Object.keys(entity.entities).includes(entity.data.territory.territoryId)
     );
   };
 
   const getTerritoryId = (entity: IResponseDetail) => {
     if (isTerritoryWithParent(entity)) {
-      return entity.entities[entity.data.parent.territoryId].id;
+      return entity.entities[entity.data.parent.territoryId]?.id;
     } else if (isStatementWithTerritory(entity)) {
-      return entity.entities[entity.data.territory.territoryId].id;
+      return entity.entities[entity.data.territory.territoryId]?.id;
     } else {
       return undefined;
     }
@@ -540,6 +555,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
     mutationFn: async (newRelation: Relation.IRelation) => await api.relationCreate(newRelation),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["entity"] });
+      invalidateAllExplorerQueries(queryClient);
     },
   });
 
@@ -550,6 +566,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
     }) => await api.relationUpdate(relationObject.relationId, relationObject.changes),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["entity"] });
+      invalidateAllExplorerQueries(queryClient);
     },
   });
   const relationDeleteMutation = useMutation({
@@ -557,6 +574,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["entity"] });
+      invalidateAllExplorerQueries(queryClient);
     },
   });
 
@@ -591,6 +609,10 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
   const isOwner = (localStorage.getItem("userrole") as UserEnums.Role) === UserEnums.Role.Owner;
   const disableAttributesForNonOwnersInRoot = isRootTerritory && !isOwner;
   const canEditEntity = userCanEdit && !disableAttributesForNonOwnersInRoot;
+
+  if (isIncompleteEntityDetail) {
+    return null;
+  }
 
   return (
     <>

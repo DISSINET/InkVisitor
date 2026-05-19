@@ -4,6 +4,7 @@ interface StyledTableWrapper {
   // $height: number;
 }
 export const StyledTableWrapper = styled.div<StyledTableWrapper>`
+  position: relative;
   margin: 0.5rem 1rem 0 1rem;
   overflow: hidden;
 `;
