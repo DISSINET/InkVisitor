@@ -12,11 +12,7 @@ import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 
 import { INodeItem, QueryValidityProblem } from "../../types";
 import { QueryAction, QueryActionType } from "../state";
-import {
-  StyledGraphNode,
-  StyledNodeContainer,
-  StyledNodeTypeSelect,
-} from "./QueryStyles";
+import { StyledGraphNode, StyledNodeContainer, StyledNodeTypeSelect } from "./QueryStyles";
 import { useTheme } from "styled-components";
 
 interface QueryGridNodeProps {
@@ -52,7 +48,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
   const entityId = node.params.entityId;
 
   const { data: dataEntity } = useQuery({
-    queryKey: ["entity", entityId],
+    queryKey: ["entity", "query-grid-node", entityId],
     queryFn: async () => {
       const res = await api.entityGet(entityId!);
       return res.data;
@@ -128,15 +124,12 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
             options={
               isRoot || paramEntityClass.allowedClasses.length === 0
                 ? entitiesDict
-                : entitiesDict.filter((ecl) =>
-                    paramEntityClass.allowedClasses.includes(ecl.value)
-                  )
+                : entitiesDict.filter((ecl) => paramEntityClass.allowedClasses.includes(ecl.value))
             }
             width={
               node.params.entityClasses && node.params.entityClasses.length > 4
                 ? 270
-                : node.params.entityClasses &&
-                  node.params.entityClasses.length > 0
+                : node.params.entityClasses && node.params.entityClasses.length > 0
                 ? node.params.entityClasses.length * 37 + 60
                 : 110
             }

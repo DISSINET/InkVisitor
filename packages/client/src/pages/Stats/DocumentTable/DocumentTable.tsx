@@ -59,7 +59,7 @@ const AuditChangesCell: React.FC<{ changes: object }> = ({ changes }) => {
 
   const entityQueries = useQueries({
     queries: anchorIds.map((entityId) => ({
-      queryKey: ["entity", entityId],
+      queryKey: ["entity", "document-table", entityId],
       queryFn: async () => {
         const res = await api.entityGet(entityId);
         return res.data;
