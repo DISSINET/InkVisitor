@@ -9,6 +9,7 @@ import { Button, CustomScrollbar, Loader, Message, Submit, ToastWithLink } from 
 import { ApplyTemplateModal, AuditTable, EntityTag, JSONExplorer } from "components/advanced";
 import { CMetaProp, DProps } from "constructors";
 import { useSearchParams } from "hooks";
+import { invalidateAllExplorerQueries } from "pages/Query/useQueryData";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
@@ -241,6 +242,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
     mutationFn: async (changes: Partial<IEntity>) => await api.entityUpdate(detailId, changes),
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["entity"] });
+      invalidateAllExplorerQueries(queryClient);
 
       if (
         statementId &&
@@ -286,6 +288,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
     onSuccess: (data, variables) => {
       setShowTypeSubmit(false);
       queryClient.invalidateQueries({ queryKey: ["entity"] });
+      invalidateAllExplorerQueries(queryClient);
       queryClient.invalidateQueries({ queryKey: ["statement"] });
       if (variables === EntityEnums.Class.Territory) {
         queryClient.invalidateQueries({ queryKey: ["tree"] });
@@ -552,6 +555,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
     mutationFn: async (newRelation: Relation.IRelation) => await api.relationCreate(newRelation),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["entity"] });
+      invalidateAllExplorerQueries(queryClient);
     },
   });
 
@@ -562,6 +566,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
     }) => await api.relationUpdate(relationObject.relationId, relationObject.changes),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["entity"] });
+      invalidateAllExplorerQueries(queryClient);
     },
   });
   const relationDeleteMutation = useMutation({
@@ -569,6 +574,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["entity"] });
+      invalidateAllExplorerQueries(queryClient);
     },
   });
 

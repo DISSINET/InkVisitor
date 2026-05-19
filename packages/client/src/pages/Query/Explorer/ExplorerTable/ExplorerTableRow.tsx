@@ -13,7 +13,7 @@ import { deleteProp, deleteRef } from "constructors";
 import { EntityEnums } from "@shared/enums";
 import { UserTagSize } from "components/advanced/UserTag/utils";
 import { useSearchParams } from "hooks";
-import { clearRowCache } from "pages/Query/useQueryData";
+import { invalidateAllExplorerQueries } from "pages/Query/useQueryData";
 import { StyledCheckboxWrapper, StyledFocusedCircle } from "./ExplorerTableStyles";
 import { WIDTH_COLUMN_DEFAULT, WIDTH_COLUMN_EUC, WIDTH_COLUMN_FIRST } from "./types";
 
@@ -56,15 +56,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
       await api.entityUpdate(variables.entityId, variables.changes),
 
     onSuccess: () => {
-      // Clear the custom row cache store
-      clearRowCache();
-      // Invalidate React Query cache
-      queryClient.invalidateQueries({
-        queryKey: ["query"],
-      });
-      queryClient.removeQueries({
-        queryKey: ["query"],
-      });
+      invalidateAllExplorerQueries(queryClient);
     },
   });
 

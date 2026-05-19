@@ -34,7 +34,10 @@ const OVERSCAN_ROWS = 10;
 const SCROLL_WINDOW_UPDATE_DEBOUNCE_MS = 150;
 
 // light CSS classes (avoid dynamic styled props in hot path)
-import { clearRowCache, useInvalidateExplorerQuery } from "pages/Query/useQueryData";
+import {
+  invalidateAllExplorerQueries,
+  useInvalidateExplorerQuery,
+} from "pages/Query/useQueryData";
 import "../../styles.css";
 import ExplorerTableRow from "./ExplorerTableRow";
 
@@ -116,23 +119,8 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     mutationFn: async (variables: { entityId: string; changes: Partial<IEntity> }) =>
       await api.entityUpdate(variables.entityId, variables.changes),
 
-    onSuccess: (_data, _variables) => {
-      if (stableSignature) {
-        queryClient.setQueriesData(
-          { queryKey: ["query", stableSignature] },
-          (old: IResponseQuery | undefined) => old
-        );
-      }
-
-      // Clear the custom row cache store
-      clearRowCache();
-      // Invalidate React Query cache
-      queryClient.invalidateQueries({
-        queryKey: ["query"],
-      });
-      queryClient.removeQueries({
-        queryKey: ["query"],
-      });
+    onSuccess: () => {
+      invalidateAllExplorerQueries(queryClient);
     },
   });
 
