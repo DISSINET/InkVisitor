@@ -12,8 +12,10 @@ import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
 import { DetailBoxState } from "types";
 
-interface EntityDetailBox {}
-export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
+interface EntityDetailBox {
+  onTabOpen?: () => void;
+}
+export const EntityDetailBox: React.FC<EntityDetailBox> = ({ onTabOpen }) => {
   const dispatch = useAppDispatch();
   const ping: number = useAppSelector((state) => state.ping);
   const detailBoxState: DetailBoxState = useAppSelector(
@@ -136,6 +138,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                   if (detailBoxMinimized) {
                     dispatch(setDetailBoxState(DetailBoxState.Normal));
                   }
+                  onTabOpen?.();
                   setSelectedDetailId(entity.id);
                 }}
                 onClose={() => handleClose(entity.id)}

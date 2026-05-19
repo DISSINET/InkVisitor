@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import React, { useEffect, useMemo, useReducer, useState } from "react";
+import React, { useEffect, useMemo, useReducer, useRef, useState } from "react";
 
 import { Query } from "@shared/types";
 import api from "api";
@@ -8,8 +8,10 @@ import { LayoutSeparatorHorizontal, LayoutSeparatorVertical } from "components/a
 import { useSearchParams } from "hooks/useSearchParamsContext";
 import { MemoizedEntityDetailBox } from "pages/Main/containers/EntityDetailBox/EntityDetailBox";
 import { BiRefresh } from "react-icons/bi";
+import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { VscCloseAll } from "react-icons/vsc";
 import { toast } from "react-toastify";
+import { COLLAPSED_PANEL_WIDTH } from "Theme/constants";
 import { useAppSelector } from "redux/hooks";
 import { floorNumberToOneDecimal } from "utils/utils";
 import { MemoizedExplorerBox } from "./Explorer/ExplorerBox";
@@ -194,7 +196,35 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
   const shouldShowLoader = isRefreshing && queryIsFetching;
 
   const isDetailOpen = !!(selectedDetailId || detailIdArray.length > 0);
-  const firstPanelWidth = isDetailOpen ? querySeparatorXPosition : layoutWidth;
+
+  const queryDetailPanelExpandedStorageKey = "queryDetailPanelExpanded";
+  const [queryDetailPanelExpanded, setQueryDetailPanelExpanded] = useState(
+    () => localStorage.getItem(queryDetailPanelExpandedStorageKey) !== "false"
+  );
+  const savedSeparatorXRef = useRef<number | null>(null);
+
+  const toggleQueryDetailPanel = () => {
+    setQueryDetailPanelExpanded((prev) => {
+      const next = !prev;
+      localStorage.setItem(queryDetailPanelExpandedStorageKey, String(next));
+      if (!next) {
+        savedSeparatorXRef.current = querySeparatorXPosition;
+      }
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    if (queryDetailPanelExpanded && savedSeparatorXRef.current !== null) {
+      setQuerySeparatorXPosition(savedSeparatorXRef.current);
+      savedSeparatorXRef.current = null;
+    }
+  }, [queryDetailPanelExpanded]);
+
+  const detailPanelWidth = queryDetailPanelExpanded
+    ? layoutWidth - querySeparatorXPosition
+    : COLLAPSED_PANEL_WIDTH;
+  const firstPanelWidth = isDetailOpen ? layoutWidth - detailPanelWidth : layoutWidth;
 
   return (
     <>
@@ -208,7 +238,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
         />
       )}
 
-      {isDetailOpen && querySeparatorXPosition > 0 && (
+      {isDetailOpen && queryDetailPanelExpanded && querySeparatorXPosition > 0 && (
         <LayoutSeparatorVertical
           leftSideMinWidth={QUERY_LEFT_PANEL_MIN_WIDTH}
           leftSideMaxWidth={layoutWidth - QUERY_RIGHT_PANEL_MIN_WIDTH}
@@ -258,22 +288,43 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
         </Box>
       </Panel>
       {isDetailOpen && (
-        <Panel width={layoutWidth - querySeparatorXPosition}>
+        <Panel width={detailPanelWidth}>
           <Box
             label="Detail"
             borderColor="white"
             height={contentHeight}
             disableScroll
+            isExpanded={queryDetailPanelExpanded}
+            onHeaderClick={toggleQueryDetailPanel}
             buttons={[
+              <>
+                {queryDetailPanelExpanded && (
+                  <Button
+                    inverted
+                    tooltipLabel="close all tabs"
+                    icon={<VscCloseAll style={{ transform: "scale(1.3)" }} />}
+                    onClick={clearAllDetailIds}
+                  />
+                )}
+              </>,
               <Button
+                key="toggle-query-detail-panel"
                 inverted
-                tooltipLabel="close all tabs"
-                icon={<VscCloseAll style={{ transform: "scale(1.3)" }} />}
-                onClick={clearAllDetailIds}
+                tooltipLabel={
+                  queryDetailPanelExpanded ? "minimize detail panel" : "expand detail panel"
+                }
+                icon={queryDetailPanelExpanded ? <RiMenuUnfoldFill /> : <RiMenuFoldFill />}
+                onClick={toggleQueryDetailPanel}
               />,
             ]}
           >
-            <MemoizedEntityDetailBox />
+            <MemoizedEntityDetailBox
+              onTabOpen={() => {
+                if (!queryDetailPanelExpanded) {
+                  toggleQueryDetailPanel();
+                }
+              }}
+            />
           </Box>
         </Panel>
       )}
