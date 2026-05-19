@@ -475,6 +475,11 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
             </StyledBody>
           </div>
         </div>
+        <ExplorerTableNewColumnPanel
+          open={isNewColumnOpen}
+          onClose={() => setIsNewColumnOpen(false)}
+          onCreateColumn={handleCreateColumn}
+        />
       </StyledTableWrapper>
 
       {/* BATCH ACTION MODAL */}
@@ -494,15 +499,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           }}
         />
       )}
-
-      {/* NEW COLUMN */}
-      <div style={{ position: "relative" }}>
-        <ExplorerTableNewColumnPanel
-          open={isNewColumnOpen}
-          onClose={() => setIsNewColumnOpen(false)}
-          onCreateColumn={handleCreateColumn}
-        />
-      </div>
     </>
   );
 };
