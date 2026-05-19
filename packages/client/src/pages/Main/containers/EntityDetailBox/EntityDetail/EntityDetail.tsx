@@ -106,6 +106,17 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
     }
   }, [error]);
 
+  const isIncompleteEntityDetail =
+    !!entity && (entity.relations === undefined || entity.entities === undefined);
+
+  useEffect(() => {
+    if (!isIncompleteEntityDetail) return;
+    toast.error(
+      "Entity detail could not be loaded: the same query key was used for a different API response. Please contact support.",
+      { toastId: `incomplete-entity-detail-${detailId}` }
+    );
+  }, [isIncompleteEntityDetail, detailId]);
+
   const [selectedEntityType, setSelectedEntityType] = useState<EntityEnums.Class>();
   const [createTemplateModal, setCreateTemplateModal] = useState<boolean>(false);
   const [isCleaningEntityPrompt, setIsCleaningEntityPrompt] = useState<boolean>(false);
@@ -512,7 +523,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
   const isTerritoryWithParent = (entity: IResponseDetail): boolean => {
     return (
       entity.class === EntityEnums.Class.Territory &&
-      entity.data.parent &&
+      entity.data?.parent &&
+      !!entity.entities &&
       Object.keys(entity.entities).includes(entity.data.parent.territoryId)
     );
   };
@@ -520,16 +532,17 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
   const isStatementWithTerritory = (entity: IResponseDetail): boolean => {
     return (
       entity.class === EntityEnums.Class.Statement &&
-      entity.data.territory &&
+      entity.data?.territory &&
+      !!entity.entities &&
       Object.keys(entity.entities).includes(entity.data.territory.territoryId)
     );
   };
 
   const getTerritoryId = (entity: IResponseDetail) => {
     if (isTerritoryWithParent(entity)) {
-      return entity.entities[entity.data.parent.territoryId].id;
+      return entity.entities[entity.data.parent.territoryId]?.id;
     } else if (isStatementWithTerritory(entity)) {
-      return entity.entities[entity.data.territory.territoryId].id;
+      return entity.entities[entity.data.territory.territoryId]?.id;
     } else {
       return undefined;
     }
@@ -590,6 +603,10 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
   const isOwner = (localStorage.getItem("userrole") as UserEnums.Role) === UserEnums.Role.Owner;
   const disableAttributesForNonOwnersInRoot = isRootTerritory && !isOwner;
   const canEditEntity = userCanEdit && !disableAttributesForNonOwnersInRoot;
+
+  if (isIncompleteEntityDetail) {
+    return null;
+  }
 
   return (
     <>

@@ -2,20 +2,12 @@ import { IEntity, IReference } from "@shared/types";
 import { Button } from "components";
 import { useTheme } from "hooks";
 import React, { useEffect, useRef } from "react";
-import {
-  DragSourceMonitor,
-  DropTargetMonitor,
-  useDrag,
-  useDrop,
-} from "react-dnd";
+import { DragSourceMonitor, DropTargetMonitor, useDrag, useDrop } from "react-dnd";
 import { FaExternalLinkAlt, FaGripVertical, FaTrashAlt } from "react-icons/fa";
 import { DragItem, Identifier, ItemTypes } from "types";
 import { dndHoverFn } from "utils/utils";
 import { EntityReferenceTableResource } from "./EntityReferenceTableResource";
-import {
-  StyledGrid,
-  StyledReferencesListButtons,
-} from "./EntityReferenceTableStyles";
+import { StyledGrid, StyledReferencesListButtons } from "./EntityReferenceTableStyles";
 import { EntityReferenceTableValue } from "./EntityReferenceTableValue";
 
 interface EntityReferenceTableRow {
@@ -24,16 +16,8 @@ interface EntityReferenceTableRow {
     [key: string]: IEntity;
   };
 
-  handleChangeValue: (
-    refId: string,
-    newValueId: string,
-    instantUpdate?: boolean
-  ) => void;
-  handleChangeResource: (
-    refId: string,
-    newReSourceId: string,
-    instantUpdate?: boolean
-  ) => void;
+  handleChangeValue: (refId: string, newValueId: string, instantUpdate?: boolean) => void;
+  handleChangeResource: (refId: string, newReSourceId: string, instantUpdate?: boolean) => void;
   handleRemove: (refId: string, instantUpdate?: boolean) => void;
   isInsideTemplate?: boolean;
   territoryParentId?: string;
@@ -86,11 +70,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
   const dropRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<HTMLTableCellElement>(null);
 
-  const [{ handlerId }, drop] = useDrop<
-    DragItem,
-    void,
-    { handlerId: Identifier | null }
-  >({
+  const [{ handlerId }, drop] = useDrop<DragItem, void, { handlerId: Identifier | null }>({
     accept: ItemTypes.REFERENCE_ROW,
     hover(item: DragItem, monitor: DropTargetMonitor) {
       dndHoverFn(item, index, monitor, dropRef, moveRow);
@@ -160,28 +140,24 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
         />
         <span>
           <StyledReferencesListButtons>
-            {resourceEntity &&
-              valueEntity &&
-              resourceEntity.data.partValueBaseURL && (
-                <Button
-                  key="url"
-                  tooltipLabel="external link"
-                  inverted
-                  icon={<FaExternalLinkAlt />}
-                  color="plain"
-                  onClick={() => {
-                    const baseUrl = resourceEntity.data.partValueBaseURL;
-                    const label = valueEntity.labels[0];
+            {resourceEntity && valueEntity && resourceEntity.data.partValueBaseURL && (
+              <Button
+                key="url"
+                tooltipLabel="external link"
+                inverted
+                icon={<FaExternalLinkAlt />}
+                color="plain"
+                onClick={() => {
+                  const baseUrl = resourceEntity.data.partValueBaseURL;
+                  const label = valueEntity.labels[0];
 
-                    const url = resourceEntity.data.partValueBaseURL.includes(
-                      "http"
-                    )
-                      ? `${baseUrl}${label}`
-                      : `//${baseUrl}${label}`;
-                    window.open(url, "_blank");
-                  }}
-                />
-              )}
+                  const url = resourceEntity.data.partValueBaseURL.includes("http")
+                    ? `${baseUrl}${label}`
+                    : `//${baseUrl}${label}`;
+                  window.open(url, "_blank");
+                }}
+              />
+            )}
             {!disabled && (
               <Button
                 key="delete"

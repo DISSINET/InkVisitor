@@ -70,9 +70,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
       }
       if (data.length < detailIdArray.length) {
         const idsFromData = data.map((d) => d.id);
-        const idsToClear = detailIdArray.filter(
-          (detailId) => !idsFromData.includes(detailId)
-        );
+        const idsToClear = detailIdArray.filter((detailId) => !idsFromData.includes(detailId));
         if (idsToClear.length) {
           idsToClear.forEach((id) => removeDetailId(id));
         }
@@ -81,9 +79,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   }, [data]);
 
   const handleClose = (entityId: string) => {
-    const newEntities: IResponseEntity[] = entities.filter(
-      (e) => e.id !== entityId
-    );
+    const newEntities: IResponseEntity[] = entities.filter((e) => e.id !== entityId);
     setEntities(newEntities);
     removeDetailId(entityId);
   };
@@ -162,11 +158,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
             isFetching={isFetching}
           />
         ) : (
-          <>
-            {(ping === -10 || ping >= 0) && !detailBoxMinimized && (
-              <Loader show />
-            )}
-          </>
+          <>{(ping === -10 || ping >= 0) && !detailBoxMinimized && <Loader show />}</>
         )}
       </>
     </>
