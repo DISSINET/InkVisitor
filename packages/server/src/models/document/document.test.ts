@@ -110,6 +110,44 @@ describe("test Document.findByEntityId", function () {
   });
 });
 
+describe("Document.findByEntityId content fallback", function () {
+  const db = new Db();
+  const statementId = "stale-index-statement-id";
+
+  const documentWithStaleEntityIds = new Document({
+    content: `intro <${statementId}>anchored statement text</${statementId}> outro`,
+    entityIds: {
+      [EntityEnums.Class.Person]: [],
+      [EntityEnums.Class.Action]: [],
+      [EntityEnums.Class.Territory]: [],
+      [EntityEnums.Class.Statement]: [],
+      [EntityEnums.Class.Resource]: [],
+      [EntityEnums.Class.Being]: [],
+      [EntityEnums.Class.Group]: [],
+      [EntityEnums.Class.Object]: [],
+      [EntityEnums.Class.Concept]: [],
+      [EntityEnums.Class.Location]: [],
+      [EntityEnums.Class.Value]: [],
+      [EntityEnums.Class.Event]: [],
+    },
+  });
+
+  beforeAll(async () => {
+    await db.initDb();
+    await documentWithStaleEntityIds.save(db.connection);
+  });
+
+  afterAll(async () => {
+    await clean(db);
+  });
+
+  test("should find document by content when entityIds index is stale", async () => {
+    const found = await Document.findByEntityId(db.connection, statementId);
+    expect(found).toHaveLength(1);
+    expect(found[0].id).toEqual(documentWithStaleEntityIds.id);
+  });
+});
+
 describe("Document.removeAnchors", () => {
   test("should remove only tags entities from document", () => {
     const document = new Document({

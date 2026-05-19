@@ -611,6 +611,7 @@ export default class Entity implements IEntity, IDbModel {
       ).map(async (docData) => {
         // construct document and tree node filled with entities data
         const doc = new Document(docData);
+        await doc.preprocess(conn);
         const resources = await rethink
           .table(Entity.table)
           .filter({

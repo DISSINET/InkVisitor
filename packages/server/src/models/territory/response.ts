@@ -80,6 +80,11 @@ export class ResponseTerritory extends Territory implements IResponseTerritory {
       this.entities = preloadedEntities as { [key: string]: IEntity };
 
       for (const responseStatement of responseStatements) {
+        responseStatement.usedInDocuments =
+          await responseStatement.findUsedInDocuments(req.db.connection);
+      }
+
+      for (const responseStatement of responseStatements) {
         responseStatement.prepareSync(
           req,
           preloadedEntities as Record<string, IEntity>

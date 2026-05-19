@@ -22,6 +22,7 @@ import { Db } from "@service/rethink";
 import Document from "@models/document/document";
 import Resource from "@models/resource/resource";
 import Territory from "@models/territory/territory";
+import { ResponseStatement } from "@models/statement/response";
 
 describe("models/entity/response", function () {
   describe("test ResponseEntityDetail.walkEntityProps", function () {
@@ -42,9 +43,7 @@ describe("models/entity/response", function () {
       it("should add to usedInMetaProps from prop.type", () => {
         const foundInType = response.usedInMetaProps.find(
           (u) =>
-            u.originId === origin &&
-            u.typeId === firstEntity.id &&
-            u.valueId === secondEntity.id
+            u.originId === origin && u.typeId === firstEntity.id && u.valueId === secondEntity.id
         );
         expect(!!foundInType).toBeTruthy();
       });
@@ -73,9 +72,7 @@ describe("models/entity/response", function () {
       it("should add to usedInMetaProps from prop.type", () => {
         const foundInType = response.usedInMetaProps.find(
           (u) =>
-            u.originId === origin &&
-            u.typeId === firstEntity.id &&
-            u.valueId === firstEntity.id
+            u.originId === origin && u.typeId === firstEntity.id && u.valueId === firstEntity.id
         );
         expect(!!foundInType).toBeTruthy();
       });
@@ -85,10 +82,7 @@ describe("models/entity/response", function () {
       });
 
       it("should add to linkedEntitiesIds map", () => {
-        expect(Object.keys(response.linkedEntitiesIds)).toEqual([
-          firstEntity.id,
-          origin,
-        ]);
+        expect(Object.keys(response.linkedEntitiesIds)).toEqual([firstEntity.id, origin]);
       });
     });
   });
@@ -105,17 +99,13 @@ describe("models/entity/response", function () {
 
       it("should add entry to usedInStatements under Action position", () => {
         const foundEntry = response.usedInStatements.find(
-          (u) =>
-            u.statement.id === st.id &&
-            u.position === EntityEnums.UsedInPosition.Action
+          (u) => u.statement.id === st.id && u.position === EntityEnums.UsedInPosition.Action
         );
         expect(!!foundEntry).toBeTruthy();
       });
 
       it("should add entry to linkedEntitiesIds map", () => {
-        expect(
-          Object.keys(response.linkedEntitiesIds).find((i) => i === st.id)
-        ).toBeTruthy();
+        expect(Object.keys(response.linkedEntitiesIds).find((i) => i === st.id)).toBeTruthy();
       });
     });
 
@@ -128,17 +118,13 @@ describe("models/entity/response", function () {
 
       it("should add entry to usedInStatements under Actant position", () => {
         const foundEntry = response.usedInStatements.find(
-          (u) =>
-            u.statement.id === st.id &&
-            u.position === EntityEnums.UsedInPosition.Actant
+          (u) => u.statement.id === st.id && u.position === EntityEnums.UsedInPosition.Actant
         );
         expect(!!foundEntry).toBeTruthy();
       });
 
       it("should add entry to linkedEntitiesIds map", () => {
-        expect(
-          Object.keys(response.linkedEntitiesIds).find((i) => i === st.id)
-        ).toBeTruthy();
+        expect(Object.keys(response.linkedEntitiesIds).find((i) => i === st.id)).toBeTruthy();
       });
     });
 
@@ -151,17 +137,13 @@ describe("models/entity/response", function () {
 
       it("should add entry to usedInStatements under Tag position", () => {
         const foundEntry = response.usedInStatements.find(
-          (u) =>
-            u.statement.id === st.id &&
-            u.position === EntityEnums.UsedInPosition.Tag
+          (u) => u.statement.id === st.id && u.position === EntityEnums.UsedInPosition.Tag
         );
         expect(!!foundEntry).toBeTruthy();
       });
 
       it("should add entry to linkedEntitiesIds map", () => {
-        expect(
-          Object.keys(response.linkedEntitiesIds).find((i) => i === st.id)
-        ).toBeTruthy();
+        expect(Object.keys(response.linkedEntitiesIds).find((i) => i === st.id)).toBeTruthy();
       });
     });
   });
@@ -177,16 +159,12 @@ describe("models/entity/response", function () {
       response.walkStatementsDataProps([st]);
 
       it("should add entry to usedInStatementProps under Value position", () => {
-        const foundEntry = response.usedInStatementProps.find(
-          (u) => u.statementId === st.id
-        );
+        const foundEntry = response.usedInStatementProps.find((u) => u.statementId === st.id);
         expect(!!foundEntry).toBeTruthy();
       });
 
       it("should add entry to linkedEntitiesIds map", () => {
-        expect(
-          Object.keys(response.linkedEntitiesIds).find((i) => i === st.id)
-        ).toBeTruthy();
+        expect(Object.keys(response.linkedEntitiesIds).find((i) => i === st.id)).toBeTruthy();
       });
     });
 
@@ -198,16 +176,12 @@ describe("models/entity/response", function () {
       response.walkStatementsDataProps([st]);
 
       it("should add entry to usedInStatementProps under Type position", () => {
-        const foundEntry = response.usedInStatementProps.find(
-          (u) => u.statementId === st.id
-        );
+        const foundEntry = response.usedInStatementProps.find((u) => u.statementId === st.id);
         expect(!!foundEntry).toBeTruthy();
       });
 
       it("should add entry to linkedEntitiesIds map", () => {
-        expect(
-          Object.keys(response.linkedEntitiesIds).find((i) => i === st.id)
-        ).toBeTruthy();
+        expect(Object.keys(response.linkedEntitiesIds).find((i) => i === st.id)).toBeTruthy();
       });
     });
 
@@ -219,9 +193,7 @@ describe("models/entity/response", function () {
       response.walkStatementsDataProps([st]);
 
       it("should add entry to usedInStatementProps under Type position", () => {
-        const foundEntry = response.usedInStatementProps.find(
-          (u) => u.statementId === st.id
-        );
+        const foundEntry = response.usedInStatementProps.find((u) => u.statementId === st.id);
         expect(!!foundEntry).toBeTruthy();
       });
 
@@ -238,15 +210,12 @@ describe("models/entity/response", function () {
     describe("linked via actions.props.children.children.type", () => {
       const [, st] = prepareStatement();
       const response = new ResponseEntityDetail(entity);
-      st.data.actions[0].props[0].children[0].children[0].type.entityId =
-        entity.id;
+      st.data.actions[0].props[0].children[0].children[0].type.entityId = entity.id;
 
       response.walkStatementsDataProps([st]);
 
       it("should add entry to usedInStatementProps under Type position", () => {
-        const foundEntry = response.usedInStatementProps.find(
-          (u) => u.statementId === st.id
-        );
+        const foundEntry = response.usedInStatementProps.find((u) => u.statementId === st.id);
         expect(!!foundEntry).toBeTruthy();
       });
 
@@ -265,33 +234,24 @@ describe("models/entity/response", function () {
       const [, st2] = prepareStatement();
 
       const response = new ResponseEntityDetail(entity);
-      st1.data.actions[0].props[0].children[0].children[0].type.entityId =
-        entity.id;
+      st1.data.actions[0].props[0].children[0].children[0].type.entityId = entity.id;
       st2.data.actions[0].props[0].value.entityId = entity.id;
 
       response.walkStatementsDataProps([st1, st2]);
 
       it("should add first entry to usedInStatementProps under Type position", () => {
-        const foundEntry = response.usedInStatementProps.find(
-          (u) => u.statementId === st1.id
-        );
+        const foundEntry = response.usedInStatementProps.find((u) => u.statementId === st1.id);
         expect(!!foundEntry).toBeTruthy();
       });
 
       it("should add second entry to usedInStatementProps under Value position", () => {
-        const foundEntry = response.usedInStatementProps.find(
-          (u) => u.statementId === st2.id
-        );
+        const foundEntry = response.usedInStatementProps.find((u) => u.statementId === st2.id);
         expect(!!foundEntry).toBeTruthy();
       });
 
       it("should add both entries to linkedEntitiesIds map", () => {
-        expect(
-          Object.keys(response.linkedEntitiesIds).find((k) => k === st1.id)
-        ).toBeTruthy();
-        expect(
-          Object.keys(response.linkedEntitiesIds).find((k) => k === st2.id)
-        ).toBeTruthy();
+        expect(Object.keys(response.linkedEntitiesIds).find((k) => k === st1.id)).toBeTruthy();
+        expect(Object.keys(response.linkedEntitiesIds).find((k) => k === st2.id)).toBeTruthy();
       });
     });
   });
@@ -365,9 +325,7 @@ describe("models/entity/response", function () {
       });
 
       it("should have 2 idems in linkedEntitiesIds map", function () {
-        expect(Object.keys(responseEmpty.linkedEntitiesIds)).toEqual([
-          statementId,
-        ]);
+        expect(Object.keys(responseEmpty.linkedEntitiesIds)).toEqual([statementId]);
       });
 
       it("should have expected classification & identification", function () {
@@ -378,9 +336,7 @@ describe("models/entity/response", function () {
           statementId: statementId,
         };
         expect(responseEmpty.usedInStatementIdentifications.length).toBe(1);
-        expect(responseEmpty.usedInStatementIdentifications[0]).toEqual(
-          wantedIdentification
-        );
+        expect(responseEmpty.usedInStatementIdentifications[0]).toEqual(wantedIdentification);
 
         const wantedClassification: IResponseUsedInStatementClassification = {
           actantEntityId: id,
@@ -390,9 +346,7 @@ describe("models/entity/response", function () {
         };
 
         expect(responseEmpty.usedInStatementClassifications.length).toBe(1);
-        expect(responseEmpty.usedInStatementClassifications[0]).toEqual(
-          wantedClassification
-        );
+        expect(responseEmpty.usedInStatementClassifications[0]).toEqual(wantedClassification);
       });
     });
 
@@ -416,9 +370,7 @@ describe("models/entity/response", function () {
           data: new StatementData({
             actants: [
               new StatementActant({
-                identifications: [
-                  { ...correctIdentification, entityId: "invalid" },
-                ],
+                identifications: [{ ...correctIdentification, entityId: "invalid" }],
               }),
             ],
           }),
@@ -443,9 +395,7 @@ describe("models/entity/response", function () {
       });
 
       it("should have filled linkedEntitiesIds map", function () {
-        expect(Object.keys(responseEmpty.linkedEntitiesIds)).toEqual([
-          statementId,
-        ]);
+        expect(Object.keys(responseEmpty.linkedEntitiesIds)).toEqual([statementId]);
       });
 
       it("should have expected classification & identification", function () {
@@ -456,9 +406,7 @@ describe("models/entity/response", function () {
           statementId: statementId,
         };
         expect(responseEmpty.usedInStatementIdentifications.length).toBe(1);
-        expect(responseEmpty.usedInStatementIdentifications[0]).toEqual(
-          wantedIdentification
-        );
+        expect(responseEmpty.usedInStatementIdentifications[0]).toEqual(wantedIdentification);
 
         const wantedClassification: IResponseUsedInStatementClassification = {
           actantEntityId: "1",
@@ -467,9 +415,7 @@ describe("models/entity/response", function () {
           statementId: statementId,
         };
         expect(responseEmpty.usedInStatementClassifications.length).toBe(1);
-        expect(responseEmpty.usedInStatementClassifications[0]).toEqual(
-          wantedClassification
-        );
+        expect(responseEmpty.usedInStatementClassifications[0]).toEqual(wantedClassification);
       });
     });
   });
@@ -558,24 +504,62 @@ describe("models/entity/response", function () {
     });
 
     it("should find both resource ids", () => {
-      expect(
-        usedInDocs.find((d) => d.resourceId === resource1.id)
-      ).toBeTruthy();
-      expect(
-        usedInDocs.find((d) => d.resourceId === resource2.id)
-      ).toBeTruthy();
+      expect(usedInDocs.find((d) => d.resourceId === resource1.id)).toBeTruthy();
+      expect(usedInDocs.find((d) => d.resourceId === resource2.id)).toBeTruthy();
     });
 
     it("test parent territory in resource 1 occurence", () => {
-      expect(
-        usedInDocs.find((d) => d.resourceId === resource1.id)?.parentTerritoryId
-      ).toBeFalsy();
+      expect(usedInDocs.find((d) => d.resourceId === resource1.id)?.parentTerritoryId).toBeFalsy();
     });
 
     it("test parent territory in resource2 occurence", () => {
-      expect(
-        usedInDocs.find((d) => d.resourceId === resource2.id)?.parentTerritoryId
-      ).toEqual(territory2.id);
+      expect(usedInDocs.find((d) => d.resourceId === resource2.id)?.parentTerritoryId).toEqual(
+        territory2.id
+      );
+    });
+  });
+
+  describe("ResponseStatement.findUsedInDocuments", function () {
+    let db: Db;
+    const [, statement] = prepareStatement();
+    const doc = new Document({
+      id: Math.random().toString(),
+      content: `text <${statement.id}>statement anchor</${statement.id}> end`,
+      entityIds: {
+        [EntityEnums.Class.Person]: [],
+        [EntityEnums.Class.Action]: [],
+        [EntityEnums.Class.Territory]: [],
+        [EntityEnums.Class.Statement]: [],
+        [EntityEnums.Class.Resource]: [],
+        [EntityEnums.Class.Being]: [],
+        [EntityEnums.Class.Group]: [],
+        [EntityEnums.Class.Object]: [],
+        [EntityEnums.Class.Concept]: [],
+        [EntityEnums.Class.Location]: [],
+        [EntityEnums.Class.Value]: [],
+        [EntityEnums.Class.Event]: [],
+      },
+    });
+    let usedInDocs: IResponseUsedInDocument[];
+
+    beforeAll(async () => {
+      db = new Db();
+      await db.initDb();
+      await statement.save(db.connection);
+      await doc.save(db.connection);
+
+      const response = new ResponseStatement(statement);
+      usedInDocs = await response.findUsedInDocuments(db.connection);
+    });
+
+    afterAll(async () => {
+      await db.close();
+    });
+
+    it("should return statement anchors even when document entityIds index is stale", () => {
+      expect(usedInDocs).toHaveLength(1);
+      expect(usedInDocs[0].anchorText).toEqual("statement anchor");
+      expect(usedInDocs[0].document.id).toEqual(doc.id);
     });
   });
 });

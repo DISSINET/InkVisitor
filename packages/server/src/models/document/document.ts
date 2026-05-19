@@ -355,6 +355,10 @@ export default class Document implements IDocument, IDbModel {
    * @param entityId
    * @returns
    */
+  static escapeEntityIdForRegex(entityId: string): string {
+    return entityId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
+
   static async findByEntityId(
     db: Connection,
     entityId: string
@@ -375,7 +379,23 @@ export default class Document implements IDocument, IDbModel {
       })
       .run(db);
 
-    return entries && entries.length ? (entries as IDocument[]) : [];
+    if (entries && entries.length) {
+      return entries as IDocument[];
+    }
+
+    // Fallback: entityIds in DB can be stale while content still has anchors
+    // (e.g. document GET runs preprocess in memory without persisting).
+    const escapedId = Document.escapeEntityIdForRegex(entityId);
+    const anchorPattern = `<\\/?${escapedId}(?:\\s[^>]*)?>`;
+
+    const byContent = await rethink
+      .table(Document.table)
+      .filter((row: RDatum) =>
+        row("content").default("").match(anchorPattern).ne(null)
+      )
+      .run(db);
+
+    return byContent && byContent.length ? (byContent as IDocument[]) : [];
   }
 
   /**
