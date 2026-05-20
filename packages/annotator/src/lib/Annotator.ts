@@ -1449,7 +1449,10 @@ export class Annotator {
     const textSegment = this.text.cursorToIndex(this.viewport, this.cursor);
 
     if (textSegment) {
-      this.cursor.xLine = textSegment.charInLineIndex;
+      const line = this.text.getLineFromPosition(textSegment);
+      if (this.cursor.xLine > line.length) {
+        this.cursor.fixOutOfBounds(this.viewport, this.text);
+      }
 
       this.cursor.draw(this.ctx, this.viewport, this.text, {
         lineHeight: this.lineHeight,

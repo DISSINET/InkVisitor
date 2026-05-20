@@ -1063,6 +1063,7 @@ export default class Keys {
             this.annotator.onTextChangeCb(this.text.value);
           }
           this.cursor.move(+1, 0);
+          this.cursor.fixOutOfBounds(this.viewport, this.text);
 
           // When typing moves the cursor outside of the current viewport,
           // keep behaviour consistent with arrow keys and scroll so that
