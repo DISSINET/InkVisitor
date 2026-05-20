@@ -61,10 +61,10 @@ const AuditChangesCell: React.FC<{ changes: object }> = ({ changes }) => {
     queries: anchorIds.map((entityId) => ({
       queryKey: ["entity", "document-table", entityId],
       queryFn: async () => {
-        const res = await api.entityGet(entityId);
+        const res = await api.entityGet(entityId, { ignoreErrorToast: true });
         return res.data;
       },
-      enabled: !!entityId,
+      enabled: !!entityId && api.isLoggedIn(),
       staleTime: 5 * 60 * 1000,
     })),
   });
