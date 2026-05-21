@@ -3,6 +3,7 @@ import { Aggregation, EventType, TimeUnit } from "@shared/types/stats";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, ButtonGroup, Input, Loader, Timestamp } from "components";
+import { AttributeButtonGroup } from "components/advanced";
 import { useDebounce, useResizeObserver } from "hooks";
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from "react";
 import { FaCalendarPlus, FaDatabase, FaSyncAlt, FaTimes } from "react-icons/fa";
@@ -14,6 +15,7 @@ import {
   StyledField,
   StyledFieldGroup,
   StyledFieldLabel,
+  StyledMaterializedStatsButton,
   StyledResultsChart,
   StyledResultsTable,
 } from "../StatsPageStyles";
@@ -21,7 +23,6 @@ import { initialState, statsReducer } from "../store";
 import { applyUserThreshold, datePickerToIso, isoToDatePicker } from "../utils";
 import { StatsChart } from "./StatsChart/StatsChart";
 import { StatsTable } from "./StatsTable/StatsTable";
-import { AttributeButtonGroup } from "components/advanced";
 
 export const EntitiesTab: React.FC = () => {
   const [state, dispatch] = useReducer(statsReducer, initialState);
@@ -170,16 +171,7 @@ export const EntitiesTab: React.FC = () => {
   return (
     <>
       {allowMaterializedStats && (
-        <span
-          style={{
-            display: "flex",
-            zIndex: 30,
-            marginRight: "4rem",
-            position: "absolute",
-            left: "1rem",
-            top: "0.5rem",
-          }}
-        >
+        <StyledMaterializedStatsButton>
           <AttributeButtonGroup
             noMargin
             options={[
@@ -209,7 +201,7 @@ export const EntitiesTab: React.FC = () => {
               },
             ]}
           />
-        </span>
+        </StyledMaterializedStatsButton>
       )}
       <StyledEntitiesLayout>
         <StyledFieldGroup $columnCount={2}>
