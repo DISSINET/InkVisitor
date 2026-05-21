@@ -30,27 +30,28 @@ const DEFAULT_AUDITS_PER_PAGE = 10;
 const HEIGHT_TABLE_ROW = 35;
 const TABLE_HEADER_HEIGHT = 60;
 
-const changeSectionConfig: Array<{ key: ChangeSectionKey; label: string }> = [
-  { key: "additions", label: "Added" },
-  { key: "changes", label: "Changed" },
-  { key: "removals", label: "Removed" },
-];
+const changeSectionConfig: Record<ChangeSectionKey, { label: string }> = {
+  additions: { label: "Added" },
+  changes: { label: "Changed" },
+  removals: { label: "Removed" },
+};
 
-const getSectionLabel = (key: ChangeSectionKey): string => {
-  return changeSectionConfig.find((section) => section.key === key)?.label ?? key;
+const changeSectionKeys = Object.keys(changeSectionConfig) as ChangeSectionKey[];
+
+const getSectionLabel = (sectionKey: ChangeSectionKey): string => {
+  return changeSectionConfig[sectionKey]?.label ?? sectionKey;
 };
 
 const getChangeSections = (
   changes: object
 ): Array<{ key: ChangeSectionKey; label: string; anchors: string[] }> => {
   const parsed = changes as Partial<IDocumentAuditAnchorChanges>;
-  return changeSectionConfig
-    .map(({ key }) => {
-      const raw = parsed[key];
+  return changeSectionKeys.map((sectionKey) => {
+      const raw = parsed[sectionKey];
       const anchors = (Array.isArray(raw) ? raw : [])
         .map((item) => (item as IAnchorUpdate)?.anchor)
         .filter((anchor): anchor is string => Boolean(anchor));
-      return { key, label: getSectionLabel(key), anchors };
+      return { key: sectionKey, label: getSectionLabel(sectionKey), anchors };
     })
     .filter((section) => section.anchors.length > 0);
 };
