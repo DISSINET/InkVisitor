@@ -29,17 +29,14 @@ export const initialState: StatsStore = {
   dateTo: new Date().toISOString(),
   timeUnit: TimeUnit.YEAR,
   aggregate: Aggregation.USER,
-  eventType: [EventType.EDIT, EventType.DELETE, EventType.CREATE],
+  eventType: [EventType.TEXT_EDIT, EventType.ANCHOR_ADD],
   useMaterialized: false, // Default to materialized for better performance
   showAggregateOptions: false, // Hidden by default
   showDateFromRangePicker: false, // Hidden by default, show "Since Forever"
   showDateToRangePicker: false, // Hidden by default, show "Until Now"
 };
 
-export const statsReducer = (
-  state: StatsStore,
-  action: StatsStoreAction
-): StatsStore => {
+export const statsReducer = (state: StatsStore, action: StatsStoreAction): StatsStore => {
   switch (action.type) {
     case "dateFromUpdate":
       return { ...state, dateFrom: action.payload };
