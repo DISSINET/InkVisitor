@@ -1,9 +1,17 @@
-import { IResponseStats } from "@shared/types";
+import { IRequestStats, IResponseStats } from "@shared/types";
 import { Aggregation, EventType } from "@shared/types/stats";
 import { schemeTableau10 } from "d3";
 import { useTheme } from "styled-components";
 
 export const OTHERS_KEY = "others";
+
+export const areStatsRequestsEqual = (a: IRequestStats, b: IRequestStats): boolean =>
+  a.fromDate === b.fromDate &&
+  a.toDate === b.toDate &&
+  a.timeUnit === b.timeUnit &&
+  a.aggregateBy === b.aggregateBy &&
+  a.eventType.length === b.eventType.length &&
+  a.eventType.every((event, index) => event === b.eventType[index]);
 
 export const getNonEmptyUsers = (
   userKeyMap: Record<string, string>,

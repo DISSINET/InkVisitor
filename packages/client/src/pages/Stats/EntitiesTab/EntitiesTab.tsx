@@ -19,22 +19,21 @@ import {
   StyledResultsChart,
   StyledResultsTable,
 } from "../StatsPageStyles";
-import { initialState, statsReducer } from "../store";
-import { applyUserThreshold, datePickerToIso, isoToDatePicker } from "../utils";
+import { createEntitiesTabState, statsReducer } from "../store";
+import {
+  applyUserThreshold,
+  areStatsRequestsEqual,
+  datePickerToIso,
+  isoToDatePicker,
+} from "../utils";
 import { StatsChart } from "./StatsChart/StatsChart";
 import { StatsTable } from "./StatsTable/StatsTable";
 
 export const EntitiesTab: React.FC = () => {
-  const [state, dispatch] = useReducer(statsReducer, initialState);
+  const [state, dispatch] = useReducer(statsReducer, undefined, createEntitiesTabState);
+  const [filterDebounceEnabled, setFilterDebounceEnabled] = useState(false);
 
   const queryClient = useQueryClient();
-  // Update timeTo to current time when navigating to this page to correctly refresh the data
-  useEffect(() => {
-    dispatch({
-      type: "dateToUpdate",
-      payload: new Date().toISOString(),
-    });
-  }, []);
 
   const fetchStats = useCallback(async (request: IRequestStats, useMaterialized: boolean) => {
     const response = useMaterialized
@@ -111,31 +110,51 @@ export const EntitiesTab: React.FC = () => {
   const debouncedStatsRequest = useDebounce(statsRequest, STATS_FILTER_DEBOUNCE_MS);
   const debouncedUseMaterialized = useDebounce(state.useMaterialized, STATS_FILTER_DEBOUNCE_MS);
 
+  const queryStatsRequest = filterDebounceEnabled ? debouncedStatsRequest : statsRequest;
+  const queryUseMaterialized = filterDebounceEnabled
+    ? debouncedUseMaterialized
+    : state.useMaterialized;
+
   const {
     data: dataStats,
     isLoading: isLoadingStats,
     isError: isErrorStats,
+    isFetched: isFetchedStats,
   } = useQuery({
-    queryKey: ["stats", debouncedStatsRequest, debouncedUseMaterialized],
-    queryFn: () => fetchStats(debouncedStatsRequest, debouncedUseMaterialized),
+    queryKey: ["stats", queryStatsRequest, queryUseMaterialized],
+    queryFn: () => fetchStats(queryStatsRequest, queryUseMaterialized),
   });
 
+  useEffect(() => {
+    if (filterDebounceEnabled) {
+      return;
+    }
+    if (!isFetchedStats) {
+      return;
+    }
+    if (
+      areStatsRequestsEqual(statsRequest, debouncedStatsRequest) &&
+      state.useMaterialized === debouncedUseMaterialized
+    ) {
+      setFilterDebounceEnabled(true);
+    }
+  }, [
+    filterDebounceEnabled,
+    isFetchedStats,
+    statsRequest,
+    debouncedStatsRequest,
+    state.useMaterialized,
+    debouncedUseMaterialized,
+  ]);
+
   const refreshStats = () => {
-    const dateTo = new Date().toISOString();
-    dispatch({ type: "dateToUpdate", payload: dateTo });
-    const request: IRequestStats = {
-      ...statsRequest,
-      toDate: new Date(dateTo).getTime(),
-    };
-    void queryClient.fetchQuery({
-      queryKey: ["stats", request, state.useMaterialized],
-      queryFn: () => fetchStats(request, state.useMaterialized),
-    });
+    setFilterDebounceEnabled(false);
+    dispatch({ type: "dateToUpdate", payload: new Date().toISOString() });
   };
 
   useEffect(() => {
     if (dataStats) {
-      if (debouncedStatsRequest.aggregateBy === Aggregation.USER && dataStats.values) {
+      if (queryStatsRequest.aggregateBy === Aggregation.USER && dataStats.values) {
         const values = applyUserThreshold(dataStats.values, usersIgnoreBelowValue);
         setData({ ...dataStats, values });
       } else {
@@ -144,7 +163,7 @@ export const EntitiesTab: React.FC = () => {
     } else if (!isLoadingStats) {
       setData(undefined);
     }
-  }, [dataStats, usersIgnoreBelowValue, debouncedStatsRequest.aggregateBy, isLoadingStats]);
+  }, [dataStats, usersIgnoreBelowValue, queryStatsRequest.aggregateBy, isLoadingStats]);
 
   const isError = isErrorStats && !isLoadingStats;
   const isNoData = !isLoadingStats && !isErrorStats && !data;
@@ -411,7 +430,7 @@ export const EntitiesTab: React.FC = () => {
                 data={data}
                 height={chartHeight ? Math.max(0, chartHeight) : 0}
                 width={chartWidth ? Math.max(0, chartWidth - 50) : 0}
-                request={debouncedStatsRequest}
+                request={queryStatsRequest}
               />
             </StyledResultsChart>
             <StyledResultsTable ref={tableRef}>
@@ -419,7 +438,7 @@ export const EntitiesTab: React.FC = () => {
                 data={data}
                 height={tableHeight ? Math.max(0, tableHeight) : 0}
                 width={tableWidth ? Math.max(0, tableWidth - 50) : 0}
-                request={debouncedStatsRequest}
+                request={queryStatsRequest}
               />
             </StyledResultsTable>
           </>

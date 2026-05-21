@@ -36,6 +36,12 @@ export const initialState: StatsStore = {
   showDateToRangePicker: false, // Hidden by default, show "Until Now"
 };
 
+/** Fresh state on each mount so dateTo is current without a post-mount dispatch. */
+export const createEntitiesTabState = (): StatsStore => ({
+  ...initialState,
+  dateTo: new Date().toISOString(),
+});
+
 export const statsReducer = (state: StatsStore, action: StatsStoreAction): StatsStore => {
   switch (action.type) {
     case "dateFromUpdate":
