@@ -21,7 +21,11 @@ export class StatsAggregator {
     aggregateBy: Aggregation
   ): Promise<IMaterializedStats[]> {
     const timeBucket = this.getTimeBucketFunction(timeUnit);
-    const fromDateTruncated = this.truncateToMidnight(fromDate);
+    // Snap the lower bound back to the start of its bucket so the whole bucket
+    // is recomputed (bulkInsert replaces rows, so a partial bucket would
+    // otherwise overwrite the full one). The upper bound stays at midnight,
+    // which excludes the current (open) day.
+    const fromDateTruncated = StatsAggregator.startOfBucket(fromDate, timeUnit);
     const toDateTruncated = this.truncateToMidnight(toDate);
 
     // Always group by event type so each materialized row holds the count for a
@@ -151,6 +155,38 @@ export class StatsAggregator {
     const truncated = new Date(date);
     truncated.setHours(0, 0, 0, 0);
     return truncated;
+  }
+
+  /**
+   * Returns the start of the time bucket that contains the given date, in UTC
+   * (matching the bucket keys, which are derived from toISO8601 in UTC).
+   *
+   * Used as the aggregation lower bound so a partial re-aggregation (e.g. the
+   * nightly incremental run starting mid-year) recomputes the *whole* current
+   * bucket. Otherwise bulkInsert's conflict:"replace" would overwrite a full
+   * year/month/week bucket with only the delta since the last run.
+   */
+  static startOfBucket(date: Date, timeUnit: TimeUnit): Date {
+    const year = date.getUTCFullYear();
+    const month = date.getUTCMonth();
+    const day = date.getUTCDate();
+
+    switch (timeUnit) {
+      case TimeUnit.DAY:
+        return new Date(Date.UTC(year, month, day));
+      case TimeUnit.WEEK: {
+        const dayStart = Date.UTC(year, month, day);
+        const dayOfWeek = new Date(dayStart).getUTCDay(); // 0=Sun..6=Sat
+        const daysFromMonday = (dayOfWeek + 6) % 7;
+        return new Date(dayStart - daysFromMonday * 24 * 60 * 60 * 1000);
+      }
+      case TimeUnit.MONTH:
+        return new Date(Date.UTC(year, month, 1));
+      case TimeUnit.YEAR:
+        return new Date(Date.UTC(year, 0, 1));
+      default:
+        throw new Error("Invalid time unit");
+    }
   }
 
   /**
