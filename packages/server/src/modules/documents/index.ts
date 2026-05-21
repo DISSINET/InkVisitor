@@ -12,7 +12,6 @@ import {
   IAnchorUpdate,
   IDocumentAuditAnchorChanges,
 } from "@shared/types";
-import { EventType } from "@shared/types/stats";
 import {
   BadParams,
   DocumentDoesNotExist,
@@ -326,6 +325,8 @@ export default Router()
       const oldOrderedList = AnchorsNode.getOrderedAnchorListFromTree(
         existingDocument.anchors
       );
+      // captured before mergeDeep below, which mutates existingDocument
+      const oldContent = existingDocument.content;
 
       const model = new Document({
         ...mergeDeep(existingDocument, documentData),
@@ -360,10 +361,19 @@ export default Router()
             (a): IAnchorUpdate => ({ anchor: a.anchor, occurrence: a.occurrence })
           ),
         };
+        const anchorTagDiff = AnchorsNode.diffAnchorTagsInContent(
+          oldContent,
+          model.content
+        );
+        const auditType = Audit.resolveDocumentAuditType({
+          anchorsAdded: anchorTagDiff.added,
+          anchorsRemoved: anchorTagDiff.removed,
+          contentChanged: oldContent !== model.content,
+        });
         await Audit.createNewForDocument(
           request,
           documentId,
-          EventType.EDIT,
+          auditType,
           auditData
         );
         return {

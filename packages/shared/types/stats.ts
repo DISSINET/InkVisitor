@@ -11,6 +11,7 @@ export enum EventType {
   CREATE = "create",
   TEXT_EDIT = "text_edit",
   ANCHOR_ADD = "anchor_add",
+  ANCHOR_REMOVE = "anchor_remove",
 }
 
 export enum Aggregation {

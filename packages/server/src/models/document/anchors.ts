@@ -1,7 +1,7 @@
 import { EntityEnums } from "@shared/enums";
 import { IAnchorsNode } from "@shared/types/document";
 import { IDocumentAuditAnchorChanges, IAnchorUpdate } from "@shared/types";
-import { createAnyTagRegex } from "@common/regex";
+import { createAnyTagRegex, createOpeningTagRegex } from "@common/regex";
 
 interface IOrderedAnchorItem {
   anchor: string;
@@ -118,6 +118,53 @@ export class AnchorsNode implements IAnchorsNode {
     }
 
     return rootNodes;
+  }
+
+  /**
+   * Counts occurrences of each anchor opening tag in raw document content.
+   * Operates on the content tags directly, independent of whether the tagged
+   * entity exists in the database yet.
+   */
+  static countAnchorTags(content: string): Map<string, number> {
+    const regex = createOpeningTagRegex();
+    const counts = new Map<string, number>();
+    let match: RegExpExecArray | null;
+    while ((match = regex.exec(content)) !== null) {
+      const tag = match[1].split(/\s+/)[0];
+      counts.set(tag, (counts.get(tag) ?? 0) + 1);
+    }
+    return counts;
+  }
+
+  /**
+   * Detects whether anchors were added and/or removed between two versions of
+   * raw document content, based on anchor opening tags. Unlike the
+   * entity-resolved anchor diff, this catches anchors whose entity does not yet
+   * exist in the database (e.g. a freshly anchored statement saved before its
+   * entity is created).
+   */
+  static diffAnchorTagsInContent(
+    oldContent: string,
+    newContent: string
+  ): { added: boolean; removed: boolean } {
+    const oldCounts = AnchorsNode.countAnchorTags(oldContent);
+    const newCounts = AnchorsNode.countAnchorTags(newContent);
+
+    let added = false;
+    let removed = false;
+    const tags = new Set([...oldCounts.keys(), ...newCounts.keys()]);
+    for (const tag of tags) {
+      const oldCount = oldCounts.get(tag) ?? 0;
+      const newCount = newCounts.get(tag) ?? 0;
+      if (newCount > oldCount) {
+        added = true;
+      }
+      if (newCount < oldCount) {
+        removed = true;
+      }
+    }
+
+    return { added, removed };
   }
 
   static getOrderedAnchorListFromTree(nodes: IAnchorsNode[]): IOrderedAnchorItem[] {

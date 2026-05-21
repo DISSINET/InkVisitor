@@ -106,6 +106,34 @@ export default class Audit implements IAudit, IDbModel {
     return entry.save(req.db.connection);
   }
 
+  /**
+   * Resolves the audit event type for a document save based on what changed.
+   * A single save produces a single typed audit, chosen by priority:
+   * anchor additions > anchor removals > text changes > generic edit.
+   *
+   * Anchor add/remove are detected from the raw content tags so that anchors
+   * whose entity does not exist yet (e.g. a freshly anchored statement saved
+   * before its entity is created) are still recognised as anchor changes.
+   * @returns EventType the resolved event type
+   */
+  static resolveDocumentAuditType(params: {
+    anchorsAdded: boolean;
+    anchorsRemoved: boolean;
+    contentChanged: boolean;
+  }): EventType {
+    const { anchorsAdded, anchorsRemoved, contentChanged } = params;
+    if (anchorsAdded) {
+      return EventType.ANCHOR_ADD;
+    }
+    if (anchorsRemoved) {
+      return EventType.ANCHOR_REMOVE;
+    }
+    if (contentChanged) {
+      return EventType.TEXT_EDIT;
+    }
+    return EventType.EDIT;
+  }
+
   static async createNewForDocument(
     req: IRequest,
     documentId: string,
