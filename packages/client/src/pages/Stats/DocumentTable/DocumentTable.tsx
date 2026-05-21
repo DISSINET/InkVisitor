@@ -1,5 +1,6 @@
 import { IDocument, DropdownItem } from "@shared/types";
 import { IAnchorUpdate, IAudit, IDocumentAuditAnchorChanges } from "@shared/types/audit";
+import { EventType } from "@shared/types/stats";
 import { IResponseAudit } from "@shared/types/response-audit";
 import { IResponseEntity } from "@shared/types/response-entity";
 import { useQueries, useQuery } from "@tanstack/react-query";
@@ -35,17 +36,21 @@ const changeSectionConfig: Array<{ key: ChangeSectionKey; label: string }> = [
   { key: "removals", label: "Removed" },
 ];
 
+const getSectionLabel = (key: ChangeSectionKey): string => {
+  return changeSectionConfig.find((section) => section.key === key)?.label ?? key;
+};
+
 const getChangeSections = (
   changes: object
 ): Array<{ key: ChangeSectionKey; label: string; anchors: string[] }> => {
   const parsed = changes as Partial<IDocumentAuditAnchorChanges>;
   return changeSectionConfig
-    .map(({ key, label }) => {
+    .map(({ key }) => {
       const raw = parsed[key];
       const anchors = (Array.isArray(raw) ? raw : [])
         .map((item) => (item as IAnchorUpdate)?.anchor)
         .filter((anchor): anchor is string => Boolean(anchor));
-      return { key, label, anchors };
+      return { key, label: getSectionLabel(key), anchors };
     })
     .filter((section) => section.anchors.length > 0);
 };
@@ -95,12 +100,15 @@ const AuditChangesCell: React.FC<{ changes: object }> = ({ changes }) => {
               const entity = entitiesById[anchor];
               if (entity) {
                 return (
-                  <EntityTag
-                    key={`${section.key}-${anchor}-${index}`}
-                    entity={entity}
-                    disableDoubleClick
-                    disableDrag
-                  />
+                  <div style={{ display: "grid" }}>
+                    <EntityTag
+                      key={`${section.key}-${anchor}-${index}`}
+                      entity={entity}
+                      disableDoubleClick
+                      disableDrag
+                      fullWidth
+                    />
+                  </div>
                 );
               }
 
@@ -177,7 +185,9 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
       {
         Header: "Anchor Changes",
         accessor: "changes",
-        Cell: ({ value }: { value: object }) => <AuditChangesCell changes={value} />,
+        Cell: ({ value, row }: { value: object; row: { original: IAudit } }) => (
+          <AuditChangesCell changes={value} />
+        ),
       },
     ],
     []
@@ -185,6 +195,7 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
 
   const auditTableData: IAudit[] = useMemo(() => {
     if (!dataAudits?.last) return [];
+    console.log("dataAudits.last", dataAudits.last);
     return dataAudits.last;
   }, [dataAudits]);
   const hasAudits = auditTableData.length > 0;
@@ -241,6 +252,7 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
                     plural: "Audit Entries",
                   }}
                   isLoading={isLoadingAudit}
+                  // fullWidthColumn={4}
                 />
               </>
             ) : (

@@ -1,6 +1,7 @@
 import { EntityEnums } from "@shared/enums";
 import { IAnchorsNode } from "@shared/types/document";
 import { IDocumentAuditAnchorChanges, IAnchorUpdate } from "@shared/types";
+import { EventType } from "@shared/types/stats";
 import { createAnyTagRegex, createOpeningTagRegex } from "@common/regex";
 
 interface IOrderedAnchorItem {
@@ -165,6 +166,137 @@ export class AnchorsNode implements IAnchorsNode {
     }
 
     return { added, removed };
+  }
+
+  /**
+   * Lists anchor tags newly opened in content (by occurrence index).
+   * Works for tags whose entity is not in the DB yet (e.g. new Statement).
+   */
+  static getAnchorTagAdditions(
+    oldContent: string,
+    newContent: string
+  ): IAnchorUpdate[] {
+    const oldCounts = AnchorsNode.countAnchorTags(oldContent);
+    const newCounts = AnchorsNode.countAnchorTags(newContent);
+    const additions: IAnchorUpdate[] = [];
+    for (const [tag, newCount] of newCounts) {
+      const oldCount = oldCounts.get(tag) ?? 0;
+      for (let occurrence = oldCount; occurrence < newCount; occurrence++) {
+        additions.push({ anchor: tag, occurrence });
+      }
+    }
+    return additions;
+  }
+
+  /**
+   * Lists anchor tags removed from content (by occurrence index).
+   */
+  static getAnchorTagRemovals(
+    oldContent: string,
+    newContent: string
+  ): IAnchorUpdate[] {
+    const oldCounts = AnchorsNode.countAnchorTags(oldContent);
+    const newCounts = AnchorsNode.countAnchorTags(newContent);
+    const removals: IAnchorUpdate[] = [];
+    for (const [tag, oldCount] of oldCounts) {
+      const newCount = newCounts.get(tag) ?? 0;
+      for (let occurrence = newCount; occurrence < oldCount; occurrence++) {
+        removals.push({ anchor: tag, occurrence });
+      }
+    }
+    return removals;
+  }
+
+  static mergeAnchorUpdates(...lists: IAnchorUpdate[][]): IAnchorUpdate[] {
+    const seen = new Set<string>();
+    const merged: IAnchorUpdate[] = [];
+    for (const list of lists) {
+      for (const item of list) {
+        const k = key(item);
+        if (!seen.has(k)) {
+          seen.add(k);
+          merged.push(item);
+        }
+      }
+    }
+    return merged;
+  }
+
+  /**
+   * Drops "changed" parent anchors whose content only shifted because a child was added.
+   */
+  static filterChangesObsoletedByAdditions(
+    changes: IAnchorUpdate[],
+    additions: IAnchorUpdate[],
+    newList: IOrderedAnchorItem[]
+  ): IAnchorUpdate[] {
+    if (additions.length === 0) {
+      return changes;
+    }
+    const newByKey = new Map(newList.map((item) => [key(item), item]));
+    const isAncestorOf = (
+      ancestor: IOrderedAnchorItem,
+      descendant: IOrderedAnchorItem
+    ) =>
+      descendant.path.length > ancestor.path.length &&
+      ancestor.path.every((v, i) => v === descendant.path[i]);
+
+    return changes.filter((change) => {
+      const changeItem = newByKey.get(key(change));
+      if (!changeItem) {
+        return true;
+      }
+      return !additions.some((addition) => {
+        const additionItem = newByKey.get(key(addition));
+        return (
+          additionItem !== undefined && isAncestorOf(changeItem, additionItem)
+        );
+      });
+    });
+  }
+
+  /**
+   * Merges tree-based anchor diff with raw-tag diff and trims misleading parent
+   * "changes" when the audit event is anchor add/remove.
+   */
+  static finalizeDocumentAuditChanges(params: {
+    auditType: EventType;
+    oldContent: string;
+    newContent: string;
+    treeDiff: IDocumentAuditAnchorChanges;
+    newOrderedList: IOrderedAnchorItem[];
+  }): IDocumentAuditAnchorChanges {
+    const { auditType, oldContent, newContent, treeDiff, newOrderedList } =
+      params;
+    const tagAdditions = AnchorsNode.getAnchorTagAdditions(
+      oldContent,
+      newContent
+    );
+    const tagRemovals = AnchorsNode.getAnchorTagRemovals(oldContent, newContent);
+
+    let additions = AnchorsNode.mergeAnchorUpdates(
+      treeDiff.additions,
+      tagAdditions
+    );
+    let removals = AnchorsNode.mergeAnchorUpdates(treeDiff.removals, tagRemovals);
+    let changes = [...treeDiff.changes];
+
+    if (auditType === EventType.ANCHOR_ADD) {
+      changes = AnchorsNode.filterChangesObsoletedByAdditions(
+        changes,
+        additions,
+        newOrderedList
+      );
+      if (tagAdditions.length > 0) {
+        changes = [];
+      }
+    } else if (auditType === EventType.ANCHOR_REMOVE) {
+      if (tagRemovals.length > 0) {
+        changes = [];
+      }
+    }
+
+    return { changes, additions, removals };
   }
 
   static getOrderedAnchorListFromTree(nodes: IAnchorsNode[]): IOrderedAnchorItem[] {
