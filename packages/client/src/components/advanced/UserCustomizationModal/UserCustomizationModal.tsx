@@ -8,6 +8,7 @@ import api from "api";
 import {
   Button,
   ButtonGroup,
+  Checkbox,
   IconWithTooltip,
   Input,
   Loader,
@@ -457,7 +458,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
               </StyledUserRightItem>
             </StyledUserRights>
 
-            {/* <StyledRightsHeading>
+            <StyledRightsHeading>
               <b>{"Statistics"}</b>
             </StyledRightsHeading>
             <ModalInputForm>
@@ -466,9 +467,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                 <div style={{ display: "flex", alignItems: "center" }}>
                   <Checkbox
                     value={data.allowMaterializedStats}
-                    onChangeFn={(value) =>
-                      handleChange("allowMaterializedStats", value)
-                    }
+                    onChangeFn={(value) => handleChange("allowMaterializedStats", value)}
                   />
                   <IconWithTooltip
                     color="success"
@@ -477,7 +476,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                   />
                 </div>
               </ModalInputWrap>
-            </ModalInputForm> */}
+            </ModalInputForm>
 
             <Loader show={passwordUpdateMutation.isPending} />
           </div>

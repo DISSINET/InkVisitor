@@ -5,7 +5,7 @@ import api from "api";
 import { Button, ButtonGroup, Input, Loader, Timestamp } from "components";
 import { useDebounce, useResizeObserver } from "hooks";
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from "react";
-import { FaCalendarPlus, FaTimes } from "react-icons/fa";
+import { FaCalendarPlus, FaDatabase, FaSyncAlt, FaTimes } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { STATS_FILTER_DEBOUNCE_MS, USER_THRESHOLD_MAX } from "../constants";
 import {
@@ -21,6 +21,7 @@ import { initialState, statsReducer } from "../store";
 import { applyUserThreshold, datePickerToIso, isoToDatePicker } from "../utils";
 import { StatsChart } from "./StatsChart/StatsChart";
 import { StatsTable } from "./StatsTable/StatsTable";
+import { AttributeButtonGroup } from "components/advanced";
 
 export const EntitiesTab: React.FC = () => {
   const [state, dispatch] = useReducer(statsReducer, initialState);
@@ -34,15 +35,12 @@ export const EntitiesTab: React.FC = () => {
     });
   }, []);
 
-  const fetchStats = useCallback(
-    async (request: IRequestStats, useMaterialized: boolean) => {
-      const response = useMaterialized
-        ? await api.statsMaterializedGet(request)
-        : await api.statsGet(request);
-      return response.data;
-    },
-    []
-  );
+  const fetchStats = useCallback(async (request: IRequestStats, useMaterialized: boolean) => {
+    const response = useMaterialized
+      ? await api.statsMaterializedGet(request)
+      : await api.statsGet(request);
+    return response.data;
+  }, []);
 
   const {
     ref: chartRef,
@@ -61,22 +59,25 @@ export const EntitiesTab: React.FC = () => {
 
   // Manual aggregation via mutation (triggered on demand)
   type StatsAggregateResponse = { message: string };
-  const { mutateAsync: aggregateMutateAsync, isPending: isAggregating } =
-    useMutation<StatsAggregateResponse, Error, void>({
-      mutationFn: async () => {
-        const response = await api.statsAggregate({
-          fromDate: new Date(state.dateFrom).getTime(),
-          toDate: new Date(state.dateTo).getTime(),
-          timeUnits: [state.timeUnit],
-          aggregateBy: [state.aggregate],
-        });
-        return response.data as StatsAggregateResponse;
-      },
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["stats"] });
-      },
-      onError: () => {},
-    });
+  const { mutateAsync: aggregateMutateAsync, isPending: isAggregating } = useMutation<
+    StatsAggregateResponse,
+    Error,
+    void
+  >({
+    mutationFn: async () => {
+      const response = await api.statsAggregate({
+        fromDate: new Date(state.dateFrom).getTime(),
+        toDate: new Date(state.dateTo).getTime(),
+        timeUnits: [state.timeUnit],
+        aggregateBy: [state.aggregate],
+      });
+      return response.data as StatsAggregateResponse;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["stats"] });
+    },
+    onError: () => {},
+  });
 
   const [usersIgnoreBelowValue, setUsersIgnoreBelowValue] = useState<number>(0);
 
@@ -106,14 +107,8 @@ export const EntitiesTab: React.FC = () => {
     };
   }, [state]);
 
-  const debouncedStatsRequest = useDebounce(
-    statsRequest,
-    STATS_FILTER_DEBOUNCE_MS
-  );
-  const debouncedUseMaterialized = useDebounce(
-    state.useMaterialized,
-    STATS_FILTER_DEBOUNCE_MS
-  );
+  const debouncedStatsRequest = useDebounce(statsRequest, STATS_FILTER_DEBOUNCE_MS);
+  const debouncedUseMaterialized = useDebounce(state.useMaterialized, STATS_FILTER_DEBOUNCE_MS);
 
   const {
     data: dataStats,
@@ -139,14 +134,8 @@ export const EntitiesTab: React.FC = () => {
 
   useEffect(() => {
     if (dataStats) {
-      if (
-        debouncedStatsRequest.aggregateBy === Aggregation.USER &&
-        dataStats.values
-      ) {
-        const values = applyUserThreshold(
-          dataStats.values,
-          usersIgnoreBelowValue
-        );
+      if (debouncedStatsRequest.aggregateBy === Aggregation.USER && dataStats.values) {
+        const values = applyUserThreshold(dataStats.values, usersIgnoreBelowValue);
         setData({ ...dataStats, values });
       } else {
         setData(dataStats);
@@ -154,12 +143,7 @@ export const EntitiesTab: React.FC = () => {
     } else if (!isLoadingStats) {
       setData(undefined);
     }
-  }, [
-    dataStats,
-    usersIgnoreBelowValue,
-    debouncedStatsRequest.aggregateBy,
-    isLoadingStats,
-  ]);
+  }, [dataStats, usersIgnoreBelowValue, debouncedStatsRequest.aggregateBy, isLoadingStats]);
 
   const isError = isErrorStats && !isLoadingStats;
   const isNoData = !isLoadingStats && !isErrorStats && !data;
@@ -185,8 +169,17 @@ export const EntitiesTab: React.FC = () => {
 
   return (
     <>
-      {/* {allowMaterializedStats && (
-        <span style={{ display: "flex", zIndex: 30, marginRight: "4rem" }}>
+      {allowMaterializedStats && (
+        <span
+          style={{
+            display: "flex",
+            zIndex: 30,
+            marginRight: "4rem",
+            position: "absolute",
+            left: "1rem",
+            top: "0.5rem",
+          }}
+        >
           <AttributeButtonGroup
             noMargin
             options={[
@@ -217,7 +210,7 @@ export const EntitiesTab: React.FC = () => {
             ]}
           />
         </span>
-      )} */}
+      )}
       <StyledEntitiesLayout>
         <StyledFieldGroup $columnCount={2}>
           {/* Date From */}
@@ -369,9 +362,7 @@ export const EntitiesTab: React.FC = () => {
                       payload: eventType,
                     });
                   }}
-                  color={
-                    state.eventType.includes(eventType) ? "primary" : "grey"
-                  }
+                  color={state.eventType.includes(eventType) ? "primary" : "grey"}
                 />
               ))}
             </ButtonGroup>
@@ -417,11 +408,7 @@ export const EntitiesTab: React.FC = () => {
             color="success"
             label={state.useMaterialized ? "Aggregate" : "Refresh"}
             disabled={isLoadingStats || isAggregating}
-            onClick={
-              state.useMaterialized
-                ? () => void aggregateMutateAsync()
-                : refreshStats
-            }
+            onClick={state.useMaterialized ? () => void aggregateMutateAsync() : refreshStats}
           />
         </StyledFieldGroup>
 
