@@ -7,6 +7,7 @@ import { IRequestStats } from "@shared/types/request-stats";
 import { MaterializedStats } from "@models/stats/materialized-stats";
 import { TimeUnit, EventType, Aggregation } from "@shared/types/stats";
 import { StatsAggregator } from "@models/stats/stats-aggregator";
+import { getLiveTailRange, mergeStatsValues } from "@models/stats/hybrid-stats";
 
 export default Router()
   .post(
@@ -58,13 +59,31 @@ export default Router()
       );
 
       // Transform materialized data to match IResponseStats format
-      const values: Record<string, Record<string, number>> = {};
-      
+      let values: Record<string, Record<string, number>> = {};
+
       for (const item of materializedData) {
         if (!values[item.date]) {
           values[item.date] = {};
         }
         values[item.date][item.aggregationKey] = item.count;
+      }
+
+      // Top up with live data for the current day. Aggregation always excludes
+      // today (its upper bound is truncated to midnight, right-exclusive), so the
+      // materialized data covers [from, todayStart) and we add [todayStart, to]
+      // live. The windows do not overlap, so per-bucket counts are summed.
+      const liveTail = getLiveTailRange(fromDate, toDate, new Date());
+      if (liveTail) {
+        const liveResp = new ResponseStats({
+          ...request.body,
+          fromDate: liveTail.fromDate,
+          toDate: liveTail.toDate,
+        });
+        await liveResp.prepare(request);
+        values = mergeStatsValues(
+          values,
+          liveResp.values as Record<string, Record<string, number>>
+        );
       }
 
       const response: IResponseStats = {
