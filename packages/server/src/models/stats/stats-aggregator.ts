@@ -24,48 +24,67 @@ export class StatsAggregator {
     const fromDateTruncated = this.truncateToMidnight(fromDate);
     const toDateTruncated = this.truncateToMidnight(toDate);
 
-    // Query audits table with the same logic as the original ResponseStats
-    const aggregatedData = (await rethink
+    // Always group by event type so each materialized row holds the count for a
+    // single event type. For USER aggregation we additionally group by the user
+    // dimension; for ACTIVITY_TYPE the event type itself is the aggregation key.
+    const baseQuery = rethink
       .table(Audit.table)
       .between(fromDateTruncated, toDateTruncated, {
         index: "date",
       })
-      .filter((doc: RDatum) =>
-        rethink.expr(eventTypes).contains(doc("type"))
-      )
-      .group(timeBucket, (doc: RDatum) =>
-        aggregateBy === Aggregation.ACTIVITY_TYPE
-          ? doc("type")
-          : doc(aggregateBy)
-      )
-      .count()
-      .run(this.db)) as unknown as {
-      group: [string, string];
+      .filter((doc: RDatum) => rethink.expr(eventTypes).contains(doc("type")));
+
+    const groupedQuery =
+      aggregateBy === Aggregation.ACTIVITY_TYPE
+        ? baseQuery.group(timeBucket, (doc: RDatum) => doc("type"))
+        : baseQuery.group(
+            timeBucket,
+            (doc: RDatum) => doc("type"),
+            (doc: RDatum) => doc(aggregateBy)
+          );
+
+    const aggregatedData = (await groupedQuery.count().run(this.db)) as unknown as {
+      group: string[];
       reduction: number;
     }[];
 
-    // Transform aggregated data into MaterializedStats format
-    const materializedStats: IMaterializedStats[] = [];
-    
-    for (const item of aggregatedData) {
-      const [dateKey, aggregationGroup] = item.group;
-      
-      // Create separate entries for each event type
-      for (const eventType of eventTypes) {
-        const stats: IMaterializedStats = {
-          id: MaterializedStats.generateId(dateKey, eventType, aggregateBy, aggregationGroup),
-          date: dateKey,
-          eventType: eventType,
-          aggregateBy: aggregateBy,
-          aggregationKey: aggregationGroup,
-          count: item.reduction,
-          lastUpdated: new Date()
-        };
-        materializedStats.push(stats);
-      }
-    }
+    return StatsAggregator.mapGroupedAuditsToStats(aggregatedData, aggregateBy);
+  }
 
-    return materializedStats;
+  /**
+   * Maps grouped audit counts into materialized stats rows.
+   * The grouping always includes the event type as the second key, so each
+   * grouped item maps to exactly one row (no fan-out across event types):
+   * - ACTIVITY_TYPE: group = [date, type], aggregationKey = type
+   * - USER (or other key): group = [date, type, key], aggregationKey = key
+   */
+  static mapGroupedAuditsToStats(
+    aggregatedData: { group: string[]; reduction: number }[],
+    aggregateBy: Aggregation
+  ): IMaterializedStats[] {
+    const lastUpdated = new Date();
+
+    return aggregatedData.map((item) => {
+      const dateKey = item.group[0];
+      const eventType = item.group[1] as EventType;
+      const aggregationKey =
+        aggregateBy === Aggregation.ACTIVITY_TYPE ? eventType : item.group[2];
+
+      return {
+        id: MaterializedStats.generateId(
+          dateKey,
+          eventType,
+          aggregateBy,
+          aggregationKey
+        ),
+        date: dateKey,
+        eventType,
+        aggregateBy,
+        aggregationKey,
+        count: item.reduction,
+        lastUpdated,
+      };
+    });
   }
 
   /**
@@ -139,7 +158,7 @@ export class StatsAggregator {
    */
   async aggregateMissingData(): Promise<void> {
     const timeUnits = [TimeUnit.DAY, TimeUnit.WEEK, TimeUnit.MONTH, TimeUnit.YEAR];
-    const eventTypes = [EventType.EDIT, EventType.DELETE, EventType.CREATE];
+    const eventTypes = Object.values(EventType);
     const aggregateByOptions = [Aggregation.USER, Aggregation.ACTIVITY_TYPE];
     
     for (const timeUnit of timeUnits) {

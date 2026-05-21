@@ -1,6 +1,7 @@
 import * as cron from "node-cron";
 import { Connection } from "rethinkdb-ts";
 import { StatsAggregator } from "@models/stats/stats-aggregator";
+import { EventType } from "@shared/types/stats";
 
 export class CronService {
   private db: Connection;
@@ -84,7 +85,7 @@ export class CronService {
       fromDate.setFullYear(fromDate.getFullYear() - 3);
       const toDate = new Date();
       
-      const eventTypes = ["edit", "delete", "create"] as any[];
+      const eventTypes = Object.values(EventType);
       const aggregateByOptions = ["user", "activityType"] as any[];
       
       for (const aggregateBy of aggregateByOptions) {
@@ -117,7 +118,7 @@ export class CronService {
     try {
       console.log(`Manual aggregation triggered from ${fromDate.toISOString()} to ${toDate.toISOString()}`);
       
-      const eventTypes = ["edit", "delete", "create"] as any[];
+      const eventTypes = Object.values(EventType);
       const targetTimeUnits = timeUnits || ["day", "week", "month", "year"];
       const targetAggregateBy = aggregateBy || ["user", "activityType"];
       

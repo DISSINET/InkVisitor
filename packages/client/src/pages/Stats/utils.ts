@@ -91,7 +91,17 @@ export const getDataCategories = (
   values: Record<string, Record<string, number>>
 ): string[] => {
   if (aggregateBy === Aggregation.ACTIVITY_TYPE) {
-    return [EventType.EDIT, EventType.CREATE, EventType.DELETE];
+    // Show every event type that actually has data, ordered by the EventType
+    // enum so colors/columns stay stable as new types are introduced.
+    const presentTypes = new Set<string>();
+    Object.values(values).forEach((bucket) => {
+      Object.entries(bucket).forEach(([type, count]) => {
+        if (count !== 0 && count !== null) {
+          presentTypes.add(type);
+        }
+      });
+    });
+    return Object.values(EventType).filter((type) => presentTypes.has(type));
   }
   if (aggregateBy === Aggregation.USER) {
     const userCategories = getNonEmptyUsers(userKeyMap, values);

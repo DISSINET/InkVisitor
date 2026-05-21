@@ -108,7 +108,7 @@ export default Router()
       // Default to all time units and aggregation types if not specified
       const targetTimeUnits = timeUnits || [TimeUnit.DAY, TimeUnit.WEEK, TimeUnit.MONTH, TimeUnit.YEAR];
       const targetAggregateBy = aggregateBy || [Aggregation.USER, Aggregation.ACTIVITY_TYPE];
-      const eventTypes = [EventType.EDIT, EventType.DELETE, EventType.CREATE];
+      const eventTypes = Object.values(EventType);
 
       const aggregator = new StatsAggregator(request.db.connection);
       let totalRecordsProcessed = 0;
