@@ -126,7 +126,7 @@ export default class Audit implements IAudit, IDbModel {
       return EventType.ANCHOR_ADD;
     }
     if (anchorsRemoved) {
-      return EventType.ANCHOR_REMOVE;
+      return EventType.ANCHOR_DELETE;
     }
     if (contentChanged) {
       return EventType.TEXT_EDIT;

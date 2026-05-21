@@ -290,7 +290,7 @@ export class AnchorsNode implements IAnchorsNode {
       if (tagAdditions.length > 0) {
         changes = [];
       }
-    } else if (auditType === EventType.ANCHOR_REMOVE) {
+    } else if (auditType === EventType.ANCHOR_DELETE) {
       if (tagRemovals.length > 0) {
         changes = [];
       }

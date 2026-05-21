@@ -65,7 +65,7 @@ describe("StatsAggregator.mapGroupedAuditsToStats", () => {
 
   test("each input group yields exactly one output row (no fan-out)", () => {
     const result = StatsAggregator.mapGroupedAuditsToStats(
-      [{ group: ["2024-01-01", EventType.ANCHOR_REMOVE, "9"], reduction: 1 }],
+      [{ group: ["2024-01-01", EventType.ANCHOR_DELETE, "9"], reduction: 1 }],
       Aggregation.USER
     );
     expect(result).toHaveLength(1);

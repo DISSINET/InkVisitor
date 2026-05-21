@@ -23,14 +23,14 @@ describe("Audit.resolveDocumentAuditType", () => {
     ).toBe(EventType.ANCHOR_ADD);
   });
 
-  test("returns anchor_remove when anchors were removed and none added", () => {
+  test("returns anchor_delete when anchors were removed and none added", () => {
     expect(
       Audit.resolveDocumentAuditType({
         anchorsAdded: false,
         anchorsRemoved: true,
         contentChanged: true,
       })
-    ).toBe(EventType.ANCHOR_REMOVE);
+    ).toBe(EventType.ANCHOR_DELETE);
   });
 
   test("anchor changes outrank text changes", () => {
@@ -40,7 +40,7 @@ describe("Audit.resolveDocumentAuditType", () => {
         anchorsRemoved: true,
         contentChanged: true,
       })
-    ).toBe(EventType.ANCHOR_REMOVE);
+    ).toBe(EventType.ANCHOR_DELETE);
   });
 
   test("returns text_edit when only content changed (no anchor add/remove)", () => {
