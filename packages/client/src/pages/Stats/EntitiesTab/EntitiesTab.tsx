@@ -3,11 +3,11 @@ import { Aggregation, EventType, TimeUnit } from "@shared/types/stats";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, ButtonGroup, Input, Loader, Timestamp } from "components";
-import { useResizeObserver } from "hooks";
-import React, { useEffect, useMemo, useReducer, useState } from "react";
+import { useDebounce, useResizeObserver } from "hooks";
+import React, { useCallback, useEffect, useMemo, useReducer, useState } from "react";
 import { FaCalendarPlus, FaTimes } from "react-icons/fa";
 import { toast } from "react-toastify";
-import { USER_THRESHOLD_MAX } from "../constants";
+import { STATS_FILTER_DEBOUNCE_MS, USER_THRESHOLD_MAX } from "../constants";
 import {
   StyledDateInputWrapper,
   StyledEntitiesLayout,
@@ -34,13 +34,15 @@ export const EntitiesTab: React.FC = () => {
     });
   }, []);
 
-  // Helper function to update timeTo to current time
-  const updateToCurrentTime = () => {
-    dispatch({
-      type: "dateToUpdate",
-      payload: new Date().toISOString(),
-    });
-  };
+  const fetchStats = useCallback(
+    async (request: IRequestStats, useMaterialized: boolean) => {
+      const response = useMaterialized
+        ? await api.statsMaterializedGet(request)
+        : await api.statsGet(request);
+      return response.data;
+    },
+    []
+  );
 
   const {
     ref: chartRef,
@@ -104,23 +106,43 @@ export const EntitiesTab: React.FC = () => {
     };
   }, [state]);
 
+  const debouncedStatsRequest = useDebounce(
+    statsRequest,
+    STATS_FILTER_DEBOUNCE_MS
+  );
+  const debouncedUseMaterialized = useDebounce(
+    state.useMaterialized,
+    STATS_FILTER_DEBOUNCE_MS
+  );
+
   const {
     data: dataStats,
     isLoading: isLoadingStats,
     isError: isErrorStats,
   } = useQuery({
-    queryKey: ["stats", statsRequest, state.useMaterialized],
-    queryFn: async () => {
-      const response = state.useMaterialized
-        ? await api.statsMaterializedGet(statsRequest)
-        : await api.statsGet(statsRequest);
-      return response.data;
-    },
+    queryKey: ["stats", debouncedStatsRequest, debouncedUseMaterialized],
+    queryFn: () => fetchStats(debouncedStatsRequest, debouncedUseMaterialized),
   });
+
+  const refreshStats = () => {
+    const dateTo = new Date().toISOString();
+    dispatch({ type: "dateToUpdate", payload: dateTo });
+    const request: IRequestStats = {
+      ...statsRequest,
+      toDate: new Date(dateTo).getTime(),
+    };
+    void queryClient.fetchQuery({
+      queryKey: ["stats", request, state.useMaterialized],
+      queryFn: () => fetchStats(request, state.useMaterialized),
+    });
+  };
 
   useEffect(() => {
     if (dataStats) {
-      if (state.aggregate === Aggregation.USER && dataStats.values) {
+      if (
+        debouncedStatsRequest.aggregateBy === Aggregation.USER &&
+        dataStats.values
+      ) {
         const values = applyUserThreshold(
           dataStats.values,
           usersIgnoreBelowValue
@@ -132,7 +154,12 @@ export const EntitiesTab: React.FC = () => {
     } else if (!isLoadingStats) {
       setData(undefined);
     }
-  }, [dataStats, usersIgnoreBelowValue, state.aggregate, isLoadingStats]);
+  }, [
+    dataStats,
+    usersIgnoreBelowValue,
+    debouncedStatsRequest.aggregateBy,
+    isLoadingStats,
+  ]);
 
   const isError = isErrorStats && !isLoadingStats;
   const isNoData = !isLoadingStats && !isErrorStats && !data;
@@ -297,7 +324,7 @@ export const EntitiesTab: React.FC = () => {
                       type: "showDateToRangePickerUpdate",
                       payload: false,
                     });
-                    updateToCurrentTime();
+                    refreshStats();
                   }}
                   color="primary"
                   inverted
@@ -393,7 +420,7 @@ export const EntitiesTab: React.FC = () => {
             onClick={
               state.useMaterialized
                 ? () => void aggregateMutateAsync()
-                : updateToCurrentTime
+                : refreshStats
             }
           />
         </StyledFieldGroup>
@@ -405,7 +432,7 @@ export const EntitiesTab: React.FC = () => {
                 data={data}
                 height={chartHeight ? Math.max(0, chartHeight) : 0}
                 width={chartWidth ? Math.max(0, chartWidth - 50) : 0}
-                request={statsRequest}
+                request={debouncedStatsRequest}
               />
             </StyledResultsChart>
             <StyledResultsTable ref={tableRef}>
@@ -413,7 +440,7 @@ export const EntitiesTab: React.FC = () => {
                 data={data}
                 height={tableHeight ? Math.max(0, tableHeight) : 0}
                 width={tableWidth ? Math.max(0, tableWidth - 50) : 0}
-                request={statsRequest}
+                request={debouncedStatsRequest}
               />
             </StyledResultsTable>
           </>
