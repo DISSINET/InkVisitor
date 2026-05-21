@@ -57,18 +57,23 @@ export class CronService {
    * Runs the stats aggregation job manually
    */
   async runStatsAggregation(): Promise<void> {
+    const runDate = new Date().toISOString().slice(0, 10);
+    const startTime = Date.now();
     try {
-      console.log("Starting stats aggregation...");
-      const startTime = Date.now();
-      
+      console.log(`[stats-cron] ${runDate}: starting stats aggregation`);
+
       await this.statsAggregator.aggregateMissingData();
-      
-      const endTime = Date.now();
-      const duration = endTime - startTime;
-      
-      console.log(`Stats aggregation completed successfully in ${duration}ms`);
+
+      const duration = Date.now() - startTime;
+      console.log(
+        `[stats-cron] ${runDate}: stats aggregation finished in ${duration}ms`
+      );
     } catch (error) {
-      console.error("Error during stats aggregation:", error);
+      const duration = Date.now() - startTime;
+      console.error(
+        `[stats-cron] ${runDate}: stats aggregation failed after ${duration}ms`,
+        error
+      );
     }
   }
 
