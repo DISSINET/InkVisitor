@@ -138,16 +138,34 @@ export class AnchorsNode implements IAnchorsNode {
   }
 
   /**
-   * Detects whether anchors were added and/or removed between two versions of
-   * raw document content, based on anchor opening tags. Unlike the
-   * entity-resolved anchor diff, this catches anchors whose entity does not yet
-   * exist in the database (e.g. a freshly anchored statement saved before its
-   * entity is created).
+   * Counts occurrences of each full anchor opening tag (tag name + attributes)
+   * in raw document content. Used to detect attribute-only changes.
+   */
+  static countAnchorTagInstances(content: string): Map<string, number> {
+    const regex = createOpeningTagRegex();
+    const counts = new Map<string, number>();
+    let match: RegExpExecArray | null;
+    while ((match = regex.exec(content)) !== null) {
+      const fullTag = match[1].trim().replace(/\s+/g, " ");
+      counts.set(fullTag, (counts.get(fullTag) ?? 0) + 1);
+    }
+    return counts;
+  }
+
+  /**
+   * Detects whether anchors were added, removed, or had their attributes
+   * changed between two versions of raw document content, based on anchor
+   * opening tags. Unlike the entity-resolved anchor diff, this catches anchors
+   * whose entity does not yet exist in the database (e.g. a freshly anchored
+   * statement saved before its entity is created).
+   *
+   * attributesChanged is reported only when no anchors were added/removed but
+   * an existing anchor's attributes (e.g. elvl) differ.
    */
   static diffAnchorTagsInContent(
     oldContent: string,
     newContent: string
-  ): { added: boolean; removed: boolean } {
+  ): { added: boolean; removed: boolean; attributesChanged: boolean } {
     const oldCounts = AnchorsNode.countAnchorTags(oldContent);
     const newCounts = AnchorsNode.countAnchorTags(newContent);
 
@@ -165,7 +183,24 @@ export class AnchorsNode implements IAnchorsNode {
       }
     }
 
-    return { added, removed };
+    let attributesChanged = false;
+    if (!added && !removed) {
+      // Same anchors present: any difference in full tags is an attribute change.
+      const oldInstances = AnchorsNode.countAnchorTagInstances(oldContent);
+      const newInstances = AnchorsNode.countAnchorTagInstances(newContent);
+      if (oldInstances.size !== newInstances.size) {
+        attributesChanged = true;
+      } else {
+        for (const [fullTag, oldCount] of oldInstances) {
+          if ((newInstances.get(fullTag) ?? 0) !== oldCount) {
+            attributesChanged = true;
+            break;
+          }
+        }
+      }
+    }
+
+    return { added, removed, attributesChanged };
   }
 
   /**

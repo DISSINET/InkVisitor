@@ -360,6 +360,7 @@ export default Router()
         const auditType = Audit.resolveDocumentAuditType({
           anchorsAdded: anchorTagDiff.added,
           anchorsRemoved: anchorTagDiff.removed,
+          anchorAttributesChanged: anchorTagDiff.attributesChanged,
           contentChanged: oldContent !== model.content,
         });
         const auditData = AnchorsNode.finalizeDocumentAuditChanges({

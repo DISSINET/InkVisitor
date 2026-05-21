@@ -8,6 +8,7 @@ describe("Audit.resolveDocumentAuditType", () => {
       Audit.resolveDocumentAuditType({
         anchorsAdded: true,
         anchorsRemoved: false,
+        anchorAttributesChanged: false,
         contentChanged: true,
       })
     ).toBe(EventType.ANCHOR_ADD);
@@ -18,6 +19,7 @@ describe("Audit.resolveDocumentAuditType", () => {
       Audit.resolveDocumentAuditType({
         anchorsAdded: true,
         anchorsRemoved: true,
+        anchorAttributesChanged: false,
         contentChanged: true,
       })
     ).toBe(EventType.ANCHOR_ADD);
@@ -28,6 +30,7 @@ describe("Audit.resolveDocumentAuditType", () => {
       Audit.resolveDocumentAuditType({
         anchorsAdded: false,
         anchorsRemoved: true,
+        anchorAttributesChanged: false,
         contentChanged: true,
       })
     ).toBe(EventType.ANCHOR_DELETE);
@@ -38,16 +41,51 @@ describe("Audit.resolveDocumentAuditType", () => {
       Audit.resolveDocumentAuditType({
         anchorsAdded: false,
         anchorsRemoved: true,
+        anchorAttributesChanged: false,
         contentChanged: true,
       })
     ).toBe(EventType.ANCHOR_DELETE);
   });
 
-  test("returns text_edit when only content changed (no anchor add/remove)", () => {
+  test("returns anchor_edit when an anchor attribute changed", () => {
     expect(
       Audit.resolveDocumentAuditType({
         anchorsAdded: false,
         anchorsRemoved: false,
+        anchorAttributesChanged: true,
+        contentChanged: true,
+      })
+    ).toBe(EventType.ANCHOR_EDIT);
+  });
+
+  test("anchor_edit outranks text_edit", () => {
+    expect(
+      Audit.resolveDocumentAuditType({
+        anchorsAdded: false,
+        anchorsRemoved: false,
+        anchorAttributesChanged: true,
+        contentChanged: true,
+      })
+    ).toBe(EventType.ANCHOR_EDIT);
+  });
+
+  test("anchor add/remove outrank an attribute change", () => {
+    expect(
+      Audit.resolveDocumentAuditType({
+        anchorsAdded: true,
+        anchorsRemoved: false,
+        anchorAttributesChanged: true,
+        contentChanged: true,
+      })
+    ).toBe(EventType.ANCHOR_ADD);
+  });
+
+  test("returns text_edit when only content changed (no anchor changes)", () => {
+    expect(
+      Audit.resolveDocumentAuditType({
+        anchorsAdded: false,
+        anchorsRemoved: false,
+        anchorAttributesChanged: false,
         contentChanged: true,
       })
     ).toBe(EventType.TEXT_EDIT);
@@ -58,6 +96,7 @@ describe("Audit.resolveDocumentAuditType", () => {
       Audit.resolveDocumentAuditType({
         anchorsAdded: false,
         anchorsRemoved: false,
+        anchorAttributesChanged: false,
         contentChanged: false,
       })
     ).toBe(EventType.EDIT);
