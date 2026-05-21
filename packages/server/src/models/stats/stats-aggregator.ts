@@ -26,7 +26,7 @@ export class StatsAggregator {
     // otherwise overwrite the full one). The upper bound stays at midnight,
     // which excludes the current (open) day.
     const fromDateTruncated = StatsAggregator.startOfBucket(fromDate, timeUnit);
-    const toDateTruncated = this.truncateToMidnight(toDate);
+    const toDateTruncated = StatsAggregator.truncateToMidnight(toDate);
 
     // Always group by event type so each materialized row holds the count for a
     // single event type. For USER aggregation we additionally group by the user
@@ -151,7 +151,7 @@ export class StatsAggregator {
   /**
    * Truncates a date to midnight (start of day)
    */
-  private truncateToMidnight(date: Date): Date {
+  static truncateToMidnight(date: Date): Date {
     const truncated = new Date(date);
     truncated.setHours(0, 0, 0, 0);
     return truncated;
@@ -219,7 +219,10 @@ export class StatsAggregator {
         }
 
         const toDate = new Date();
-        console.log(`[stats-cron] ${timeUnit}: aggregating from ${fromDate.toISOString()} to ${toDate.toISOString()}`);
+        // The window actually scanned: lower bound snapped to the bucket start,
+        // upper bound truncated to midnight (today is excluded).
+        const scanFrom = StatsAggregator.startOfBucket(fromDate, timeUnit);
+        const scanTo = StatsAggregator.truncateToMidnight(toDate);
 
         let recordsForUnit = 0;
         for (const aggregateBy of aggregateByOptions) {
@@ -238,7 +241,7 @@ export class StatsAggregator {
         }
 
         console.log(
-          `[stats-cron] ${timeUnit}: done in ${Date.now() - unitStart}ms (${recordsForUnit} records)`
+          `[stats-cron] ${timeUnit}: ${recordsForUnit} records in ${Date.now() - unitStart}ms (scanned ${scanFrom.toISOString()} → ${scanTo.toISOString()})`
         );
       } catch (error) {
         console.error(

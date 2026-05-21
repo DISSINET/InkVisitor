@@ -32,7 +32,7 @@ export class CronService {
 
     task.start();
     this.isRunning = true;
-    
+
     console.log("Cron service started - stats aggregation will run daily at midnight UTC");
   }
 
@@ -63,11 +63,6 @@ export class CronService {
       console.log(`[stats-cron] ${runDate}: starting stats aggregation`);
 
       await this.statsAggregator.aggregateMissingData();
-
-      const duration = Date.now() - startTime;
-      console.log(
-        `[stats-cron] ${runDate}: stats aggregation finished in ${duration}ms`
-      );
     } catch (error) {
       const duration = Date.now() - startTime;
       console.error(
