@@ -7,6 +7,7 @@ import { CgFileDocument } from "react-icons/cg";
 import {
   FaBars,
   FaBookOpen,
+  FaDatabase,
   FaInfo,
   FaSearchengin,
   FaRegChartBar,
@@ -72,6 +73,14 @@ export const Menu: React.FC<Menu> = ({
       href: "/documents",
       admin: true,
       icon: <CgFileDocument size={18} />,
+    },
+    {
+      id: "backups",
+      label: "Backups",
+      color: "info",
+      href: "/backups",
+      admin: true,
+      icon: <FaDatabase size={16} />,
     },
     {
       id: "query",

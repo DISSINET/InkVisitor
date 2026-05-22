@@ -12,6 +12,7 @@ import {
   AboutPage,
   AclPage,
   ActivatePage,
+  BackupsPage,
   DocumentsPage,
   LoginPage,
   MainPage,
@@ -195,6 +196,14 @@ export const App: React.FC = () => {
                       element={
                         <RequireAuth>
                           <DocumentsPage />
+                        </RequireAuth>
+                      }
+                    />
+                    <Route
+                      path="/backups"
+                      element={
+                        <RequireAuth>
+                          <BackupsPage />
                         </RequireAuth>
                       }
                     />

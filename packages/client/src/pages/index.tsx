@@ -2,6 +2,7 @@
 import { AboutPage } from "pages/About/AboutPage";
 import AclPage from "pages/Acl/AclPage";
 import ActivatePage from "pages/Activate/ActivatePage";
+import { BackupsPage } from "pages/Backups/BackupsPage";
 import { DocumentsPage } from "pages/Documents/DocumentsPage";
 import LoginPage from "pages/Login/LoginPage";
 import MainPage from "pages/Main/MainPage";
@@ -14,6 +15,7 @@ export {
   AboutPage,
   AclPage,
   ActivatePage,
+  BackupsPage,
   DocumentsPage,
   LoginPage,
   MainPage,
