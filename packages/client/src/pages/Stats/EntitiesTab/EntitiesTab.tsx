@@ -1,5 +1,5 @@
 import { IRequestStats, IResponseStats } from "@shared/types";
-import { Aggregation, EventType, TimeUnit } from "@shared/types/stats";
+import { Aggregation, TimeUnit } from "@shared/types/stats";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, ButtonGroup, Input, Loader, Timestamp } from "components";
@@ -8,7 +8,7 @@ import { useDebounce, useResizeObserver } from "hooks";
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from "react";
 import { FaCalendarPlus, FaDatabase, FaSyncAlt, FaTimes } from "react-icons/fa";
 import { toast } from "react-toastify";
-import { STATS_FILTER_DEBOUNCE_MS, USER_THRESHOLD_MAX } from "../constants";
+import { STATS_FILTER_DEBOUNCE_MS, USER_THRESHOLD_MAX, VISIBLE_EVENT_TYPES } from "../constants";
 import {
   StyledDateInputWrapper,
   StyledEntitiesLayout,
@@ -363,7 +363,7 @@ export const EntitiesTab: React.FC = () => {
           <StyledField>
             <StyledFieldLabel>Event type</StyledFieldLabel>
             <ButtonGroup $noMarginRight>
-              {Object.values(EventType).map((eventType) => (
+              {VISIBLE_EVENT_TYPES.map((eventType) => (
                 <Button
                   key={eventType}
                   label={String(eventType)}
