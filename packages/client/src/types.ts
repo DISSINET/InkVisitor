@@ -121,6 +121,7 @@ export interface IPage {
   color: "info" | "success" | "danger" | "warning";
   href: string | false;
   admin?: boolean;
+  owner?: boolean;
   icon?: React.ReactElement;
 }
 

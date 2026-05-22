@@ -49,7 +49,9 @@ describe("modules/backups", function () {
     });
   });
 
-  describe("GET /backups (authenticated)", () => {
+  // Note: backups are owner-only - supertestConfig.token must belong to an owner
+  // for the cases below to pass (a non-owner, incl. admin, gets 403).
+  describe("GET /backups (owner)", () => {
     it("lists available backup archives", async () => {
       const response = await request(app)
         .get(`${apiPath}/backups`)
@@ -66,7 +68,7 @@ describe("modules/backups", function () {
     });
   });
 
-  describe("GET /backups/download (authenticated)", () => {
+  describe("GET /backups/download (owner)", () => {
     it("streams a backup archive as an attachment", async () => {
       const response = await request(app)
         .get(`${apiPath}/backups/download?file=20240101/inkvisitor_backup.tar.gz`)

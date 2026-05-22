@@ -80,6 +80,7 @@ export const Menu: React.FC<Menu> = ({
       color: "info",
       href: "/backups",
       admin: true,
+      owner: true,
       icon: <FaDatabase size={16} />,
     },
     {
@@ -142,12 +143,18 @@ export const Menu: React.FC<Menu> = ({
         <StyledMenuGroupWrapper>
           <StyledMenuGroup>
             {pages
-              .filter(
-                (p) =>
-                  !p.admin ||
-                  userRole === UserEnums.Role.Admin ||
-                  userRole === UserEnums.Role.Owner
-              )
+              .filter((p) => {
+                if (p.owner) {
+                  return userRole === UserEnums.Role.Owner;
+                }
+                if (p.admin) {
+                  return (
+                    userRole === UserEnums.Role.Admin ||
+                    userRole === UserEnums.Role.Owner
+                  );
+                }
+                return true;
+              })
               .map((page, key) => (
                 <MenuItem
                   key={key}

@@ -1,4 +1,4 @@
-import { InterfaceEnums } from "@shared/enums";
+import { InterfaceEnums, UserEnums } from "@shared/enums";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import api from "api";
@@ -65,6 +65,14 @@ export const PublicPath = (props: any) => {
 
 export const RequireAuth = ({ children }: { children: React.ReactNode }) => {
   return api.isLoggedIn() ? children : <Navigate to="/login" />;
+};
+
+export const RequireOwner = ({ children }: { children: React.ReactNode }) => {
+  if (!api.isLoggedIn()) {
+    return <Navigate to="/login" />;
+  }
+  const isOwner = localStorage.getItem("userrole") === UserEnums.Role.Owner;
+  return isOwner ? children : <Navigate to="/" />;
 };
 
 const queryClient = new QueryClient({
@@ -202,9 +210,9 @@ export const App: React.FC = () => {
                     <Route
                       path="/backups"
                       element={
-                        <RequireAuth>
+                        <RequireOwner>
                           <BackupsPage />
-                        </RequireAuth>
+                        </RequireOwner>
                       }
                     />
                     <Route
