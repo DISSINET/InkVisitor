@@ -57,28 +57,6 @@ export const EntitiesTab: React.FC = () => {
     debounceDelay: 50,
   });
 
-  // Manual aggregation via mutation (triggered on demand)
-  type StatsAggregateResponse = { message: string };
-  const { mutateAsync: aggregateMutateAsync, isPending: isAggregating } = useMutation<
-    StatsAggregateResponse,
-    Error,
-    void
-  >({
-    mutationFn: async () => {
-      const response = await api.statsAggregate({
-        fromDate: new Date(state.dateFrom).getTime(),
-        toDate: new Date(state.dateTo).getTime(),
-        timeUnits: [state.timeUnit],
-        aggregateBy: [state.aggregate],
-      });
-      return response.data as StatsAggregateResponse;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["stats"] });
-    },
-    onError: () => {},
-  });
-
   const [usersIgnoreBelowValue, setUsersIgnoreBelowValue] = useState<number>(0);
 
   const [data, setData] = useState<IResponseStats | undefined>(undefined);
@@ -108,12 +86,8 @@ export const EntitiesTab: React.FC = () => {
   }, [state]);
 
   const debouncedStatsRequest = useDebounce(statsRequest, STATS_FILTER_DEBOUNCE_MS);
-  const debouncedUseMaterialized = useDebounce(state.useMaterialized, STATS_FILTER_DEBOUNCE_MS);
 
   const queryStatsRequest = filterDebounceEnabled ? debouncedStatsRequest : statsRequest;
-  const queryUseMaterialized = filterDebounceEnabled
-    ? debouncedUseMaterialized
-    : state.useMaterialized;
 
   const {
     data: dataStats,
@@ -121,8 +95,8 @@ export const EntitiesTab: React.FC = () => {
     isError: isErrorStats,
     isFetched: isFetchedStats,
   } = useQuery({
-    queryKey: ["stats", queryStatsRequest, queryUseMaterialized],
-    queryFn: () => fetchStats(queryStatsRequest, queryUseMaterialized),
+    queryKey: ["stats", queryStatsRequest],
+    queryFn: () => api.statsGet(queryStatsRequest),
   });
 
   useEffect(() => {
@@ -132,20 +106,10 @@ export const EntitiesTab: React.FC = () => {
     if (!isFetchedStats) {
       return;
     }
-    if (
-      areStatsRequestsEqual(statsRequest, debouncedStatsRequest) &&
-      state.useMaterialized === debouncedUseMaterialized
-    ) {
+    if (areStatsRequestsEqual(statsRequest, debouncedStatsRequest)) {
       setFilterDebounceEnabled(true);
     }
-  }, [
-    filterDebounceEnabled,
-    isFetchedStats,
-    statsRequest,
-    debouncedStatsRequest,
-    state.useMaterialized,
-    debouncedUseMaterialized,
-  ]);
+  }, [filterDebounceEnabled, isFetchedStats, statsRequest, debouncedStatsRequest]);
 
   const refreshStats = () => {
     setFilterDebounceEnabled(false);
@@ -154,11 +118,11 @@ export const EntitiesTab: React.FC = () => {
 
   useEffect(() => {
     if (dataStats) {
-      if (queryStatsRequest.aggregateBy === Aggregation.USER && dataStats.values) {
-        const values = applyUserThreshold(dataStats.values, usersIgnoreBelowValue);
-        setData({ ...dataStats, values });
+      if (queryStatsRequest.aggregateBy === Aggregation.USER && dataStats.data.values) {
+        const values = applyUserThreshold(dataStats.data.values, usersIgnoreBelowValue);
+        setData({ ...dataStats.data, values });
       } else {
-        setData(dataStats);
+        setData(dataStats.data);
       }
     } else if (!isLoadingStats) {
       setData(undefined);
@@ -185,43 +149,8 @@ export const EntitiesTab: React.FC = () => {
     enabled: !!userId && api.isLoggedIn(),
   });
 
-  const allowMaterializedStats = user?.options.allowMaterializedStats ?? false;
-
   return (
     <>
-      {allowMaterializedStats && (
-        <StyledMaterializedStatsButton>
-          <AttributeButtonGroup
-            noMargin
-            options={[
-              {
-                icon: <FaSyncAlt size={10} />,
-                longValue: "Classic (Live Data)",
-                shortValue: "Classic",
-                onClick: () => {
-                  dispatch({
-                    type: "useMaterializedUpdate",
-                    payload: false,
-                  });
-                },
-                selected: !state.useMaterialized,
-              },
-              {
-                icon: <FaDatabase />,
-                longValue: "Fast (Pre-calculated)",
-                shortValue: "Fast",
-                onClick: () => {
-                  dispatch({
-                    type: "useMaterializedUpdate",
-                    payload: true,
-                  });
-                },
-                selected: state.useMaterialized,
-              },
-            ]}
-          />
-        </StyledMaterializedStatsButton>
-      )}
       <StyledEntitiesLayout>
         <StyledFieldGroup $columnCount={2}>
           {/* Date From */}
@@ -417,9 +346,9 @@ export const EntitiesTab: React.FC = () => {
 
           <Button
             color="success"
-            label={state.useMaterialized ? "Aggregate" : "Refresh"}
-            disabled={isLoadingStats || isAggregating}
-            onClick={state.useMaterialized ? () => void aggregateMutateAsync() : refreshStats}
+            label={"Refresh"}
+            disabled={isLoadingStats}
+            onClick={refreshStats}
           />
         </StyledFieldGroup>
 
@@ -444,7 +373,7 @@ export const EntitiesTab: React.FC = () => {
           </>
         )}
 
-        <Loader show={isLoadingStats || isAggregating} />
+        <Loader show={isLoadingStats} />
       </StyledEntitiesLayout>
     </>
   );
