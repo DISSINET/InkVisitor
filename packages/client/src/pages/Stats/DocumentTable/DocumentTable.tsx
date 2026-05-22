@@ -1,6 +1,5 @@
 import { IDocument, DropdownItem } from "@shared/types";
 import { IAnchorUpdate, IAudit, IDocumentAuditAnchorChanges } from "@shared/types/audit";
-import { EventType } from "@shared/types/stats";
 import { IResponseAudit } from "@shared/types/response-audit";
 import { IResponseEntity } from "@shared/types/response-entity";
 import { useQueries, useQuery } from "@tanstack/react-query";
@@ -24,6 +23,10 @@ import {
   StyledField,
   StyledFieldLabel,
 } from "../StatsPageStyles";
+import {
+  HIDDEN_DOCUMENT_CHANGE_SECTIONS,
+  HIDDEN_EVENT_TYPES,
+} from "../constants";
 
 type ChangeSectionKey = keyof IDocumentAuditAnchorChanges;
 const DEFAULT_AUDITS_PER_PAGE = 10;
@@ -36,7 +39,10 @@ const changeSectionConfig: Record<ChangeSectionKey, { label: string }> = {
   removals: { label: "Deleted" },
 };
 
-const changeSectionKeys = Object.keys(changeSectionConfig) as ChangeSectionKey[];
+const hiddenChangeSectionKeys = new Set<string>(HIDDEN_DOCUMENT_CHANGE_SECTIONS);
+const changeSectionKeys = (Object.keys(changeSectionConfig) as ChangeSectionKey[]).filter(
+  (key) => !hiddenChangeSectionKeys.has(key)
+);
 
 const getSectionLabel = (sectionKey: ChangeSectionKey): string => {
   return changeSectionConfig[sectionKey]?.label ?? sectionKey;
@@ -197,8 +203,7 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
 
   const auditTableData: IAudit[] = useMemo(() => {
     if (!dataAudits?.last) return [];
-    console.log("dataAudits.last", dataAudits.last);
-    return dataAudits.last;
+    return dataAudits.last.filter((audit) => !HIDDEN_EVENT_TYPES.includes(audit.type));
   }, [dataAudits]);
   const hasAudits = auditTableData.length > 0;
 

@@ -1,7 +1,10 @@
 import { EventType } from "@shared/types/stats";
 
-/** Event types excluded from the Entities tab filter UI (still valid in API/audit). */
+/** Event types hidden from stats UI and document audit table rows. */
 export const HIDDEN_EVENT_TYPES: EventType[] = [EventType.DELETE, EventType.ANCHOR_DELETE];
+
+/** Anchor diff sections hidden in DocumentTable (paired with anchor_delete). */
+export const HIDDEN_DOCUMENT_CHANGE_SECTIONS = ["removals"] as const;
 
 export const VISIBLE_EVENT_TYPES = Object.values(EventType).filter(
   (type) => !HIDDEN_EVENT_TYPES.includes(type)
