@@ -7,6 +7,7 @@ import { CgFileDocument } from "react-icons/cg";
 import {
   FaBars,
   FaBookOpen,
+  FaDatabase,
   FaInfo,
   FaSearchengin,
   FaRegChartBar,
@@ -74,6 +75,15 @@ export const Menu: React.FC<Menu> = ({
       icon: <CgFileDocument size={18} />,
     },
     {
+      id: "backups",
+      label: "Backups",
+      color: "info",
+      href: "/backups",
+      admin: true,
+      owner: true,
+      icon: <FaDatabase size={16} />,
+    },
+    {
       id: "query",
       label: "Query",
       color: "info",
@@ -133,12 +143,18 @@ export const Menu: React.FC<Menu> = ({
         <StyledMenuGroupWrapper>
           <StyledMenuGroup>
             {pages
-              .filter(
-                (p) =>
-                  !p.admin ||
-                  userRole === UserEnums.Role.Admin ||
-                  userRole === UserEnums.Role.Owner
-              )
+              .filter((p) => {
+                if (p.owner) {
+                  return userRole === UserEnums.Role.Owner;
+                }
+                if (p.admin) {
+                  return (
+                    userRole === UserEnums.Role.Admin ||
+                    userRole === UserEnums.Role.Owner
+                  );
+                }
+                return true;
+              })
               .map((page, key) => (
                 <MenuItem
                   key={key}

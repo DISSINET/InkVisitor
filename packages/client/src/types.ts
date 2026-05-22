@@ -116,11 +116,12 @@ export const ExtentedEntityColors: { [key: string]: IEntityColor } = {
 export type EntityKeys = keyof typeof EntityColors;
 
 export interface IPage {
-  id: "main" | "users" | "acl" | "about" | "documents" | "customize" | "stats" | "query";
+  id: "main" | "users" | "acl" | "about" | "documents" | "backups" | "customize" | "stats" | "query";
   label: string;
   color: "info" | "success" | "danger" | "warning";
   href: string | false;
   admin?: boolean;
+  owner?: boolean;
   icon?: React.ReactElement;
 }
 
