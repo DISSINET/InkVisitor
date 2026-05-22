@@ -42,6 +42,7 @@ import {
   IResponseUsedInMetaProp,
   IResponseUsedInStatement,
 } from "./response-detail";
+import { IResponseBackup } from "./response-backup";
 import { IResponseGeneric } from "./response-generic";
 import { IResponsePermission } from "./response-permission";
 import {
@@ -123,6 +124,7 @@ export type {
   IResource,
   IResourceData,
   IResponseAudit,
+  IResponseBackup,
   IResponseBookmarkFolder,
   IResponseDetail,
   IResponseEntity,

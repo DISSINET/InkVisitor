@@ -35,6 +35,7 @@ Make sure to have appropriate `.env.<ENV_FILE>` file accessible (e.g., running `
 - `NODE_ENV` = environment - production/development (security vs logging)
 - `DOMAIN` = identify the instance - points to the domain where the ui should be accessible (used in emails)
 - `STATIC_PATH` = http relative path to client files served by the server, use '/' for files hosted in root path
+- `BACKUP_DIR` = directory containing the DB backup archives (mounted read-only from the `inkvisitor-backup` PVC in deployments); empty/unset disables the backups API
 - `PORT` = port which should be used for this app
 - `SECRET` = for signing jwt token
 - `SMTP_HOST` / `SMTP_PORT` = SMTP relay (e.g. Mailjet `in-v3.mailjet.com`, port `587`)

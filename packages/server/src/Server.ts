@@ -15,6 +15,7 @@ import StatsRouter from "@modules/stats";
 import PythonApiRouter from "@modules/pythondata";
 import SettingsRouter from "@modules/settings";
 import DocumentsRouter from "@modules/documents";
+import BackupsRouter from "@modules/backups";
 import Acl from "@middlewares/acl";
 import customizeRequest from "@middlewares/request";
 import dbMiddleware from "@middlewares/db";
@@ -190,6 +191,7 @@ router.use("/stats", StatsRouter);
 router.use("/documents", DocumentsRouter);
 router.use("/pythondata", PythonApiRouter);
 router.use("/settings", SettingsRouter);
+router.use("/backups", BackupsRouter);
 
 // unknown paths (after jwt check) should return 404
 server.all("*", catchAll);
