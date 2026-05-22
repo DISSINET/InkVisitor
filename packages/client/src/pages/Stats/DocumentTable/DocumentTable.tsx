@@ -33,7 +33,7 @@ const TABLE_HEADER_HEIGHT = 60;
 const changeSectionConfig: Record<ChangeSectionKey, { label: string }> = {
   additions: { label: "Added" },
   changes: { label: "Changed" },
-  removals: { label: "Removed" },
+  removals: { label: "Deleted" },
 };
 
 const changeSectionKeys = Object.keys(changeSectionConfig) as ChangeSectionKey[];
@@ -46,7 +46,8 @@ const getChangeSections = (
   changes: object
 ): Array<{ key: ChangeSectionKey; label: string; anchors: string[] }> => {
   const parsed = changes as Partial<IDocumentAuditAnchorChanges>;
-  return changeSectionKeys.map((sectionKey) => {
+  return changeSectionKeys
+    .map((sectionKey) => {
       const raw = parsed[sectionKey];
       const anchors = (Array.isArray(raw) ? raw : [])
         .map((item) => (item as IAnchorUpdate)?.anchor)
