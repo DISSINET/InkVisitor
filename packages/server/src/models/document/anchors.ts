@@ -1,7 +1,8 @@
 import { EntityEnums } from "@shared/enums";
 import { IAnchorsNode } from "@shared/types/document";
 import { IDocumentAuditAnchorChanges, IAnchorUpdate } from "@shared/types";
-import { createAnyTagRegex } from "@common/regex";
+import { EventType } from "@shared/types/stats";
+import { createAnyTagRegex, createOpeningTagRegex } from "@common/regex";
 
 interface IOrderedAnchorItem {
   anchor: string;
@@ -118,6 +119,219 @@ export class AnchorsNode implements IAnchorsNode {
     }
 
     return rootNodes;
+  }
+
+  /**
+   * Counts occurrences of each anchor opening tag in raw document content.
+   * Operates on the content tags directly, independent of whether the tagged
+   * entity exists in the database yet.
+   */
+  static countAnchorTags(content: string): Map<string, number> {
+    const regex = createOpeningTagRegex();
+    const counts = new Map<string, number>();
+    let match: RegExpExecArray | null;
+    while ((match = regex.exec(content)) !== null) {
+      const tag = match[1].split(/\s+/)[0];
+      counts.set(tag, (counts.get(tag) ?? 0) + 1);
+    }
+    return counts;
+  }
+
+  /**
+   * Counts occurrences of each full anchor opening tag (tag name + attributes)
+   * in raw document content. Used to detect attribute-only changes.
+   */
+  static countAnchorTagInstances(content: string): Map<string, number> {
+    const regex = createOpeningTagRegex();
+    const counts = new Map<string, number>();
+    let match: RegExpExecArray | null;
+    while ((match = regex.exec(content)) !== null) {
+      const fullTag = match[1].trim().replace(/\s+/g, " ");
+      counts.set(fullTag, (counts.get(fullTag) ?? 0) + 1);
+    }
+    return counts;
+  }
+
+  /**
+   * Detects whether anchors were added, removed, or had their attributes
+   * changed between two versions of raw document content, based on anchor
+   * opening tags. Unlike the entity-resolved anchor diff, this catches anchors
+   * whose entity does not yet exist in the database (e.g. a freshly anchored
+   * statement saved before its entity is created).
+   *
+   * attributesChanged is reported only when no anchors were added/removed but
+   * an existing anchor's attributes (e.g. elvl) differ.
+   */
+  static diffAnchorTagsInContent(
+    oldContent: string,
+    newContent: string
+  ): { added: boolean; removed: boolean; attributesChanged: boolean } {
+    const oldCounts = AnchorsNode.countAnchorTags(oldContent);
+    const newCounts = AnchorsNode.countAnchorTags(newContent);
+
+    let added = false;
+    let removed = false;
+    const tags = new Set([...oldCounts.keys(), ...newCounts.keys()]);
+    for (const tag of tags) {
+      const oldCount = oldCounts.get(tag) ?? 0;
+      const newCount = newCounts.get(tag) ?? 0;
+      if (newCount > oldCount) {
+        added = true;
+      }
+      if (newCount < oldCount) {
+        removed = true;
+      }
+    }
+
+    let attributesChanged = false;
+    if (!added && !removed) {
+      // Same anchors present: any difference in full tags is an attribute change.
+      const oldInstances = AnchorsNode.countAnchorTagInstances(oldContent);
+      const newInstances = AnchorsNode.countAnchorTagInstances(newContent);
+      if (oldInstances.size !== newInstances.size) {
+        attributesChanged = true;
+      } else {
+        for (const [fullTag, oldCount] of oldInstances) {
+          if ((newInstances.get(fullTag) ?? 0) !== oldCount) {
+            attributesChanged = true;
+            break;
+          }
+        }
+      }
+    }
+
+    return { added, removed, attributesChanged };
+  }
+
+  /**
+   * Lists anchor tags newly opened in content (by occurrence index).
+   * Works for tags whose entity is not in the DB yet (e.g. new Statement).
+   */
+  static getAnchorTagAdditions(
+    oldContent: string,
+    newContent: string
+  ): IAnchorUpdate[] {
+    const oldCounts = AnchorsNode.countAnchorTags(oldContent);
+    const newCounts = AnchorsNode.countAnchorTags(newContent);
+    const additions: IAnchorUpdate[] = [];
+    for (const [tag, newCount] of newCounts) {
+      const oldCount = oldCounts.get(tag) ?? 0;
+      for (let occurrence = oldCount; occurrence < newCount; occurrence++) {
+        additions.push({ anchor: tag, occurrence });
+      }
+    }
+    return additions;
+  }
+
+  /**
+   * Lists anchor tags removed from content (by occurrence index).
+   */
+  static getAnchorTagRemovals(
+    oldContent: string,
+    newContent: string
+  ): IAnchorUpdate[] {
+    const oldCounts = AnchorsNode.countAnchorTags(oldContent);
+    const newCounts = AnchorsNode.countAnchorTags(newContent);
+    const removals: IAnchorUpdate[] = [];
+    for (const [tag, oldCount] of oldCounts) {
+      const newCount = newCounts.get(tag) ?? 0;
+      for (let occurrence = newCount; occurrence < oldCount; occurrence++) {
+        removals.push({ anchor: tag, occurrence });
+      }
+    }
+    return removals;
+  }
+
+  static mergeAnchorUpdates(...lists: IAnchorUpdate[][]): IAnchorUpdate[] {
+    const seen = new Set<string>();
+    const merged: IAnchorUpdate[] = [];
+    for (const list of lists) {
+      for (const item of list) {
+        const k = key(item);
+        if (!seen.has(k)) {
+          seen.add(k);
+          merged.push(item);
+        }
+      }
+    }
+    return merged;
+  }
+
+  /**
+   * Drops "changed" parent anchors whose content only shifted because a child was added.
+   */
+  static filterChangesObsoletedByAdditions(
+    changes: IAnchorUpdate[],
+    additions: IAnchorUpdate[],
+    newList: IOrderedAnchorItem[]
+  ): IAnchorUpdate[] {
+    if (additions.length === 0) {
+      return changes;
+    }
+    const newByKey = new Map(newList.map((item) => [key(item), item]));
+    const isAncestorOf = (
+      ancestor: IOrderedAnchorItem,
+      descendant: IOrderedAnchorItem
+    ) =>
+      descendant.path.length > ancestor.path.length &&
+      ancestor.path.every((v, i) => v === descendant.path[i]);
+
+    return changes.filter((change) => {
+      const changeItem = newByKey.get(key(change));
+      if (!changeItem) {
+        return true;
+      }
+      return !additions.some((addition) => {
+        const additionItem = newByKey.get(key(addition));
+        return (
+          additionItem !== undefined && isAncestorOf(changeItem, additionItem)
+        );
+      });
+    });
+  }
+
+  /**
+   * Merges tree-based anchor diff with raw-tag diff and trims misleading parent
+   * "changes" when the audit event is anchor add/remove.
+   */
+  static finalizeDocumentAuditChanges(params: {
+    auditType: EventType;
+    oldContent: string;
+    newContent: string;
+    treeDiff: IDocumentAuditAnchorChanges;
+    newOrderedList: IOrderedAnchorItem[];
+  }): IDocumentAuditAnchorChanges {
+    const { auditType, oldContent, newContent, treeDiff, newOrderedList } =
+      params;
+    const tagAdditions = AnchorsNode.getAnchorTagAdditions(
+      oldContent,
+      newContent
+    );
+    const tagRemovals = AnchorsNode.getAnchorTagRemovals(oldContent, newContent);
+
+    let additions = AnchorsNode.mergeAnchorUpdates(
+      treeDiff.additions,
+      tagAdditions
+    );
+    let removals = AnchorsNode.mergeAnchorUpdates(treeDiff.removals, tagRemovals);
+    let changes = [...treeDiff.changes];
+
+    if (auditType === EventType.ANCHOR_ADD) {
+      changes = AnchorsNode.filterChangesObsoletedByAdditions(
+        changes,
+        additions,
+        newOrderedList
+      );
+      if (tagAdditions.length > 0) {
+        changes = [];
+      }
+    } else if (auditType === EventType.ANCHOR_DELETE) {
+      if (tagRemovals.length > 0) {
+        changes = [];
+      }
+    }
+
+    return { changes, additions, removals };
   }
 
   static getOrderedAnchorListFromTree(nodes: IAnchorsNode[]): IOrderedAnchorItem[] {

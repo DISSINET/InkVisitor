@@ -31,8 +31,6 @@ export interface IUserOptions {
   // the language of the source documents
   defaultStatementLanguage?: EntityEnums.Language;
   searchLanguages: EntityEnums.Language[];
-
-  allowMaterializedStats: boolean;
 }
 
 export interface IStoredTerritory {

@@ -9,10 +9,8 @@ import {
   IDocumentMeta,
   IResponseAudit,
   IResponseGeneric,
-  IAnchorUpdate,
   IDocumentAuditAnchorChanges,
 } from "@shared/types";
-import { EventType } from "@shared/types/stats";
 import {
   BadParams,
   DocumentDoesNotExist,
@@ -20,6 +18,7 @@ import {
   ModelNotValidError,
   PermissionDeniedError,
 } from "@shared/types/errors";
+import { EventType } from "@shared/types/stats";
 import { Router } from "express";
 import { IRequest } from "src/custom_typings/request";
 import { asyncRouteHandler } from "../index";
@@ -326,6 +325,8 @@ export default Router()
       const oldOrderedList = AnchorsNode.getOrderedAnchorListFromTree(
         existingDocument.anchors
       );
+      // captured before mergeDeep below, which mutates existingDocument
+      const oldContent = existingDocument.content;
 
       const model = new Document({
         ...mergeDeep(existingDocument, documentData),
@@ -345,25 +346,34 @@ export default Router()
       const result = await model.update(request.db.connection, model);
 
       if (result.replaced || result.unchanged) {
+        const newOrderedList = AnchorsNode.getOrderedAnchorListFromTree(
+          model.anchors
+        );
         const anchorDiff = AnchorsNode.diffOrderedAnchorLists(
           oldOrderedList,
-          AnchorsNode.getOrderedAnchorListFromTree(model.anchors)
+          newOrderedList
         );
-        const auditData: IDocumentAuditAnchorChanges = {
-          changes: anchorDiff.changes.map(
-            (a): IAnchorUpdate => ({ anchor: a.anchor, occurrence: a.occurrence })
-          ),
-          additions: anchorDiff.additions.map(
-            (a): IAnchorUpdate => ({ anchor: a.anchor, occurrence: a.occurrence })
-          ),
-          removals: anchorDiff.removals.map(
-            (a): IAnchorUpdate => ({ anchor: a.anchor, occurrence: a.occurrence })
-          ),
-        };
+        const anchorTagDiff = AnchorsNode.diffAnchorTagsInContent(
+          oldContent,
+          model.content
+        );
+        const auditType = Audit.resolveDocumentAuditType({
+          anchorsAdded: anchorTagDiff.added,
+          anchorsRemoved: anchorTagDiff.removed,
+          anchorAttributesChanged: anchorTagDiff.attributesChanged,
+          contentChanged: oldContent !== model.content,
+        });
+        const auditData = AnchorsNode.finalizeDocumentAuditChanges({
+          auditType,
+          oldContent,
+          newContent: model.content,
+          treeDiff: anchorDiff,
+          newOrderedList,
+        });
         await Audit.createNewForDocument(
           request,
           documentId,
-          EventType.EDIT,
+          auditType,
           auditData
         );
         return {

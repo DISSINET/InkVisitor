@@ -38,6 +38,7 @@ export const StyledStatsTab = styled.button<{ $isSelected: boolean }>`
 `;
 
 export const StyledStatsContent = styled.div`
+  position: relative;
   width: 100%;
   height: 100%;
   padding: 0.5rem 1rem;
@@ -190,4 +191,12 @@ export const StyledDocumentChangeFallback = styled.span`
   color: ${({ theme }) => theme.color.plain};
   background: ${({ theme }) => theme.color.gray[100]};
   font-size: ${({ theme }) => theme.fontSize.xxs};
+`;
+export const StyledMaterializedStatsButton = styled.div`
+  display: flex;
+  z-index: 30;
+  margin-right: 4rem;
+  position: absolute;
+  left: 0.5rem;
+  top: 0.5rem;
 `;
