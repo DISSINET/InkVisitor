@@ -458,6 +458,17 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
               <b>{"Statistics"}</b>
             </StyledRightsHeading>
 
+            {process.env.NODE_ENV === "development" && (
+              <Button
+                label="Simulate HTML API response"
+                color="warning"
+                onClick={async () => {
+                  const response = await api.devSimulateHtmlError({ ignoreErrorToast: true });
+                  console.log("response", response);
+                }}
+              />
+            )}
+
             <Loader show={passwordUpdateMutation.isPending} />
           </div>
         </ModalContent>

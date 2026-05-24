@@ -51,38 +51,27 @@ if (!!process.env.STATIC_PATH) {
         if (req.path.indexOf(".") === -1) {
           // Read and modify index.html before sending
           const fs = require("fs");
-          const indexPath = path.join(
-            __dirname,
-            "..",
-            "..",
-            "..",
-            "..",
-            "client/dist/index.html"
-          );
+          const indexPath = path.join(__dirname, "..", "..", "..", "..", "client/dist/index.html");
 
-          fs.readFile(
-            indexPath,
-            "utf8",
-            (err: NodeJS.ErrnoException | null, data: string) => {
-              if (err) {
-                return next(err);
-              }
+          fs.readFile(indexPath, "utf8", (err: NodeJS.ErrnoException | null, data: string) => {
+            if (err) {
+              return next(err);
+            }
 
-              if (process.env.ENV) {
-                data = data.replace(
-                  "</head>",
-                  `  <!-- Injected content -->
+            if (process.env.ENV) {
+              data = data.replace(
+                "</head>",
+                `  <!-- Injected content -->
                      <script>window.appConfig = { env: "${
                        process.env.ENV || "development"
                      }" };</script>
                   </head>`
-                );
-              }
-
-              res.type("html");
-              res.send(data);
+              );
             }
-          );
+
+            res.type("html");
+            res.send(data);
+          });
         } else {
           // everythink else will go here
           express.static("../client/dist")(req, res, next);
@@ -93,10 +82,7 @@ if (!!process.env.STATIC_PATH) {
       }
     });
   } else if (process.env.STATIC_PATH !== "") {
-    server.use(
-      process.env.STATIC_PATH as string,
-      express.static("../client/dist")
-    );
+    server.use(process.env.STATIC_PATH as string, express.static("../client/dist"));
   }
 }
 
@@ -122,16 +108,13 @@ if (process.env.NODE_ENV !== "development") {
       windowMs: 5 * 60 * 1000, // 5 minutes window
       max: 5, // Limit each IP to 5 requests per windowMs
       handler: (req: Request, res: Response, next: NextFunction, options) => {
-        throw new TooManyRequestsError(
-          `${TooManyRequestsError.title}: try again in 5 minutes`
-        );
+        throw new TooManyRequestsError(`${TooManyRequestsError.title}: try again in 5 minutes`);
       },
       standardHeaders: true,
       legacyHeaders: false,
     })
   );
 }
-
 
 server.use(headersProtectionMiddleware);
 server.use(profilerMiddleware);
@@ -148,6 +131,7 @@ server.use(
       /api(\/[^\/]+)?\/users\/owner/,
       /api(\/[^\/]+)?\/pythondata/,
       /api(\/[^\/]+)?\/health/,
+      /api(\/[^\/]+)?\/dev\/simulate-html-error/,
     ],
   })
 );
@@ -175,9 +159,19 @@ router.get("/health", async function (req, res) {
   });
 });
 
+// Dev-only: simulate proxy/overload HTML body for client error-handling tests (remove before release)
+if (process.env.NODE_ENV === "development") {
+  router.get("/dev/simulate-html-error", function (_req, res) {
+    res
+      .status(200)
+      .type("html")
+      .send("<html><body><p>Simulated overload (dev route)</p></body></html>");
+  });
+}
+
 // uncomment this to enable acl
- const acl = new Acl();
- router.use(acl.authorize);
+const acl = new Acl();
+router.use(acl.authorize);
 
 router.use("/acls", AclRouter);
 router.use("/users", UsersRouter);
