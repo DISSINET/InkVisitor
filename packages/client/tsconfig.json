@@ -50,6 +50,7 @@
     "types.d.ts",
     "images.d.ts",
     "fonts.d.ts",
+    "vitest.d.ts",
     "src/**/*.ts",
     "src/**/*.tsx"
   ]
