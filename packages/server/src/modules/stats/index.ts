@@ -1,11 +1,11 @@
 import { asyncRouteHandler } from "../index";
 import { Router } from "express";
-import { IResponseStats } from "@shared/types";
+import { IResponseStats } from "@inkvisitor/shared/types";
 import { ResponseStats } from "@models/stats/response";
 import { IRequest } from "src/custom_typings/request";
-import { IRequestStats } from "@shared/types/request-stats";
+import { IRequestStats } from "@inkvisitor/shared/types/request-stats";
 import { MaterializedStats } from "@models/stats/materialized-stats";
-import { TimeUnit, EventType, Aggregation } from "@shared/types/stats";
+import { TimeUnit, EventType, Aggregation } from "@inkvisitor/shared/types/stats";
 import { StatsAggregator } from "@models/stats/stats-aggregator";
 import { getLiveTailRange, mergeStatsValues } from "@models/stats/hybrid-stats";
 

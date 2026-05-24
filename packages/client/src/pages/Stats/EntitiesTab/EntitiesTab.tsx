@@ -1,5 +1,5 @@
-import { IRequestStats, IResponseStats } from "@shared/types";
-import { Aggregation, TimeUnit } from "@shared/types/stats";
+import { IRequestStats, IResponseStats } from "@inkvisitor/shared/types";
+import { Aggregation, TimeUnit } from "@inkvisitor/shared/types/stats";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, ButtonGroup, Input, Loader, Timestamp } from "components";

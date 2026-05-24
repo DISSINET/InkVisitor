@@ -27,7 +27,7 @@
     "exec": "ts-node -r ./src/register-paths.ts ./src"
   },
   "_moduleAliases": {
-    "@shared": "dist/shared",
+    "@inkvisitor/shared": "dist/shared",
     "@common": "dist/server/src/common",
     "@modules": "dist/server/src/modules",
     "@service": "dist/server/src/service",

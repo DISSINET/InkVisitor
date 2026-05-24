@@ -1,4 +1,4 @@
-import { IEntity } from "@shared/types";
+import { IEntity } from "@inkvisitor/shared/types";
 import Action from "@models/action/action";
 import Territory from "@models/territory/territory";
 import Statement from "@models/statement/statement";
@@ -11,7 +11,7 @@ import Concept from "@models/concept/concept";
 import Location from "@models/location/location";
 import Value from "@models/value/value";
 import Event from "@models/event/event";
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import { getRandomNumber } from "./utils";
 
 export default class EntitiesGenerator {

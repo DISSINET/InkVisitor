@@ -60,7 +60,7 @@ Utility script for generating new jwt tokens:
 ## Errors
 
 Server has one handler for unknown routes (wildcard - when the route does not exist) and one generic handler for other errors.
-They share common `IResponseGeneric` (@shared/types/response-generic.ts) interface which is populated by `CustomError` instance (@shared/types/errors.ts).
+They share common `IResponseGeneric` (@inkvisitor/shared/types/response-generic.ts) interface which is populated by `CustomError` instance (@inkvisitor/shared/types/errors.ts).
 
 Example of erroneous `IResponseGeneric` msg:
 

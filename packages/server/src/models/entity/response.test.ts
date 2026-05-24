@@ -7,7 +7,7 @@ import Statement, {
   StatementIdentification,
 } from "@models/statement/statement";
 import { ResponseEntityDetail } from "./response";
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import Prop, { PropSpec } from "@models/prop/prop";
 import Entity from "./entity";
 import { prepareStatement } from "@models/statement/statement.test";
@@ -15,8 +15,8 @@ import {
   IResponseUsedInDocument,
   IResponseUsedInStatementClassification,
   IResponseUsedInStatementIdentification,
-} from "@shared/types/response-detail";
-import { IStatement } from "@shared/types";
+} from "@inkvisitor/shared/types/response-detail";
+import { IStatement } from "@inkvisitor/shared/types";
 import { prepareEntity } from "./entity.test";
 import { Db } from "@service/rethink";
 import Document from "@models/document/document";

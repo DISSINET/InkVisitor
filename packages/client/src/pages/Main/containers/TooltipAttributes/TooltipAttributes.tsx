@@ -10,7 +10,7 @@ import {
   partitivityDict,
   operatorDict,
   certaintyDict,
-} from "@shared/dictionaries";
+} from "@inkvisitor/shared/dictionaries";
 import { TooltipBooleanRow } from "./TooltipBooleanRow/TooltipBooleanRow";
 
 interface TooltipAttributes {

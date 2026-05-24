@@ -1,5 +1,5 @@
 import { Connection, r } from "rethinkdb-ts";
-import { AuditScope } from "@shared/types";
+import { AuditScope } from "@inkvisitor/shared/types";
 import { IJob } from ".";
 
 const BATCH_SIZE = 500;

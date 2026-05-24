@@ -14,7 +14,7 @@
     "outDir": "./dist/",
     "paths": {
       "@dictionaries": ["./../shared/dictionaries/index.ts"],
-      "@shared/*": ["./../shared/*"],
+      "@inkvisitor/shared/*": ["./../shared/*"],
       "api": ["./src/api"],
       "app": ["./src/app"],
       "ensure-basename": ["./src/ensure-basename"],

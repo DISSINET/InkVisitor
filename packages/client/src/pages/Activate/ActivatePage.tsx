@@ -2,7 +2,7 @@ import {
   ActivationHashInvalidError,
   IErrorSignature,
   getErrorByCode,
-} from "@shared/types/errors";
+} from "@inkvisitor/shared/types/errors";
 import api from "api";
 import { Button, Modal, ModalContent } from "components";
 import { StyledButtonWrap, StyledErrorText } from "pages/AuthModalSharedStyles";

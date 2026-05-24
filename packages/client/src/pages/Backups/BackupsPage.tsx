@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { IResponseBackup } from "@shared/types";
+import { IResponseBackup } from "@inkvisitor/shared/types";
 import api from "api";
 import { Button, ButtonGroup, Loader } from "components";
 import React, { useState } from "react";

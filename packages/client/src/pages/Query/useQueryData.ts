@@ -4,8 +4,8 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import { IResponseQuery, IResponseQueryEntity } from "@shared/types";
-import { Explore, Query } from "@shared/types/query";
+import { IResponseQuery, IResponseQueryEntity } from "@inkvisitor/shared/types";
+import { Explore, Query } from "@inkvisitor/shared/types/query";
 import api from "api";
 import { QueryValidity } from "./types";
 

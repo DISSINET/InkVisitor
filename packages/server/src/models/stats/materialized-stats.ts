@@ -1,6 +1,6 @@
 import { IDbModel, fillFlatObject } from "@models/common";
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
-import { EventType, Aggregation } from "@shared/types/stats";
+import { EventType, Aggregation } from "@inkvisitor/shared/types/stats";
 
 export interface IMaterializedStats {
   id: string;

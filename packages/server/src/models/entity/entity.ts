@@ -12,7 +12,7 @@ import {
   EntityEnums,
   UserEnums,
   WarningTypeEnums,
-} from "@shared/enums";
+} from "@inkvisitor/shared/enums";
 import {
   IConcept,
   IEntity,
@@ -20,20 +20,20 @@ import {
   IReference,
   ITerritory,
   IWarning,
-} from "@shared/types";
-import { entityAllowedFields } from "@shared/types/entity";
+} from "@inkvisitor/shared/types";
+import { entityAllowedFields } from "@inkvisitor/shared/types/entity";
 import {
   EntityDoesNotExist,
   InternalServerError,
   ModelNotValidError,
-} from "@shared/types/errors";
-import { PropSpecKind } from "@shared/types/prop";
-import { IResponseUsedInDocument } from "@shared/types/response-detail";
+} from "@inkvisitor/shared/types/errors";
+import { PropSpecKind } from "@inkvisitor/shared/types/prop";
+import { IResponseUsedInDocument } from "@inkvisitor/shared/types/response-detail";
 import {
   EProtocolTieType,
   ITerritoryValidation,
-} from "@shared/types/territory";
-import { IWarningPositionSection } from "@shared/types/warning";
+} from "@inkvisitor/shared/types/territory";
+import { IWarningPositionSection } from "@inkvisitor/shared/types/warning";
 import { Connection, RDatum, WriteResult, r as rethink } from "rethinkdb-ts";
 import { IRequest } from "../../custom_typings/request";
 import Reference from "./reference";

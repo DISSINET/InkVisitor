@@ -1,10 +1,10 @@
 import { asyncRouteHandler } from "../index";
 import { NextFunction, Response, Router } from "express";
-import { UserEnums } from "@shared/enums";
-import { IResponseBackup } from "@shared/types";
+import { UserEnums } from "@inkvisitor/shared/enums";
+import { IResponseBackup } from "@inkvisitor/shared/types";
 import { IRequest } from "src/custom_typings/request";
 import { Backup } from "@models/backup/backup";
-import { BadParams, NotFound, PermissionDeniedError } from "@shared/types/errors";
+import { BadParams, NotFound, PermissionDeniedError } from "@inkvisitor/shared/types/errors";
 import * as fs from "fs";
 import * as path from "path";
 

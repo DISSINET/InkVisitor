@@ -2,7 +2,7 @@
 // These utilities are used by both React Query write-through and the Explorer read path.
 // They are intentionally framework-agnostic and can be used with TanStack DB collections.
 
-import { IEntity, IResponseQueryEntity } from "@shared/types";
+import { IEntity, IResponseQueryEntity } from "@inkvisitor/shared/types";
 
 export interface WindowSlice {
   id: string;

@@ -3,14 +3,14 @@ import {
   newMockRequest,
   testErroneousResponse,
 } from "@modules/common.test";
-import { RelationDoesNotExist } from "@shared/types/errors";
+import { RelationDoesNotExist } from "@inkvisitor/shared/types/errors";
 import { Db } from "@service/rethink";
 import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
 import { supertestConfig } from "..";
 import Relation from "@models/relation/relation";
-import { RelationEnums } from "@shared/enums";
+import { RelationEnums } from "@inkvisitor/shared/enums";
 import { pool } from "@middlewares/db";
 
 describe("Relations delete", function () {

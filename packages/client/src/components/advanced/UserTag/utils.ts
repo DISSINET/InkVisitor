@@ -1,4 +1,4 @@
-import { IResponseUser } from "@shared/types/response-user";
+import { IResponseUser } from "@inkvisitor/shared/types/response-user";
 import { ThemeType } from "Theme/theme";
 
 // ----------- VARIANTS DESCRIPTION ------------

@@ -1,6 +1,6 @@
 import { Placement } from "@popperjs/core";
-import { EntityEnums } from "@shared/enums";
-import { IEntity } from "@shared/types";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { IEntity } from "@inkvisitor/shared/types";
 import { ThemeColor } from "Theme/theme";
 import { Button, Tag } from "components";
 import { EntityTooltip } from "components/advanced";

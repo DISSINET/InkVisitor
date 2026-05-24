@@ -1,4 +1,4 @@
-import { IResponseGeneric } from "@shared/types";
+import { IResponseGeneric } from "@inkvisitor/shared/types";
 import { Router } from "express";
 import { asyncRouteHandler } from "../index";
 import { IRequest } from "src/custom_typings/request";

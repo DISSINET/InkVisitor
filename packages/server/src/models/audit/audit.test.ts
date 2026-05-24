@@ -1,6 +1,6 @@
 import "ts-jest";
 import Audit from "./audit";
-import { EventType } from "@shared/types/stats";
+import { EventType } from "@inkvisitor/shared/types/stats";
 
 describe("Audit.resolveDocumentAuditType", () => {
   test("returns anchor_add when anchors were added", () => {

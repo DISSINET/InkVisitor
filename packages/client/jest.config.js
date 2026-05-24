@@ -2,13 +2,14 @@ const tsconfig = require("./tsconfig.json");
 
 const paths = Object.keys(tsconfig.compilerOptions.paths).reduce(
   (prev, curr) => {
-    const split = curr.split("/");
+    // alias prefix without the trailing "/*" (handles multi-segment names like "@inkvisitor/shared")
+    const prefix = curr.replace(/\/\*$/, "");
     const rootDirPath = `<rootDir>/${tsconfig.compilerOptions.paths[
       curr
     ][0].replace("*", "$1")}`;
     // because in tsconfig we set ./src as baseUrl, we need to go one directory back
     const adjustedPath = rootDirPath.replace("../", "");
-    prev[`${split[0]}/(.*)`] = adjustedPath;
+    prev[`${prefix}/(.*)`] = adjustedPath;
     return prev;
   },
   {}

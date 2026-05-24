@@ -3,9 +3,9 @@ import {
   moodDict,
   partitivityDict,
   virtualityDict,
-} from "@shared/dictionaries";
-import { EntityEnums } from "@shared/enums";
-import { IEntity, IPropSpec } from "@shared/types";
+} from "@inkvisitor/shared/dictionaries";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { IEntity, IPropSpec } from "@inkvisitor/shared/types";
 import { useMutation } from "@tanstack/react-query";
 import api from "api";
 import {

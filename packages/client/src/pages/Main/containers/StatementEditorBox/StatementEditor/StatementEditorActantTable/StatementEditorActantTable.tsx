@@ -1,10 +1,10 @@
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import {
   IProp,
   IResponseStatement,
   IStatementActant,
   IStatementData,
-} from "@shared/types";
+} from "@inkvisitor/shared/types";
 import update from "immutability-helper";
 import React, { useCallback, useMemo, useState } from "react";
 import { FilteredActantObject } from "types";

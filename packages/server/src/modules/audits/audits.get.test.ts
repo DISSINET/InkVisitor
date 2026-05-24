@@ -1,5 +1,5 @@
 import { testErroneousResponse } from "@modules/common.test";
-import { DocumentDoesNotExist } from "@shared/types/errors";
+import { DocumentDoesNotExist } from "@inkvisitor/shared/types/errors";
 import request from "supertest";
 import { supertestConfig } from "..";
 import { apiPath } from "@common/constants";

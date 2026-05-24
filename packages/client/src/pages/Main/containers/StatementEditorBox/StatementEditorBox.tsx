@@ -1,5 +1,5 @@
-import { EntityEnums } from "@shared/enums";
-import { IResponseStatement, IStatement, IStatementData } from "@shared/types";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { IResponseStatement, IStatement, IStatementData } from "@inkvisitor/shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { CustomScrollbar, Loader } from "components";

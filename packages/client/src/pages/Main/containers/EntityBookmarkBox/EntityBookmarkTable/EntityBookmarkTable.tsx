@@ -1,4 +1,4 @@
-import { IEntity, IResponseBookmarkFolder } from "@shared/types";
+import { IEntity, IResponseBookmarkFolder } from "@inkvisitor/shared/types";
 import { EntityTag } from "components/advanced";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useMemo, useState } from "react";

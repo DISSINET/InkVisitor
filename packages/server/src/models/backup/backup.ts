@@ -1,4 +1,4 @@
-import { IResponseBackup } from "@shared/types";
+import { IResponseBackup } from "@inkvisitor/shared/types";
 import * as fs from "fs";
 import * as path from "path";
 

@@ -1,13 +1,13 @@
-import { IEntity } from "@shared/types";
+import { IEntity } from "@inkvisitor/shared/types";
 import {
   BadParams,
   CustomError,
   SearchEdgeTypesInvalid,
-} from "@shared/types/errors";
-import { Explore, Query } from "@shared/types/query";
+} from "@inkvisitor/shared/types/errors";
+import { Explore, Query } from "@inkvisitor/shared/types/query";
 import { Connection } from "rethinkdb-ts";
 import { Results, SearchEdge, SearchNode } from ".";
-import { IResponseQueryEntity } from "@shared/types/response-query";
+import { IResponseQueryEntity } from "@inkvisitor/shared/types/response-query";
 import Entity from "@models/entity/entity";
 
 export default class QuerySearch {

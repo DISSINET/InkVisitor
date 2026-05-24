@@ -4,9 +4,9 @@ import {
   UnauthorizedError,
   CustomError,
   NotFound,
-} from "@shared/types/errors";
+} from "@inkvisitor/shared/types/errors";
 import { UnauthorizedError as JwtUnauthorizedError } from "express-jwt";
-import { IResponseGeneric, errorTypes } from "@shared/types/response-generic";
+import { IResponseGeneric, errorTypes } from "@inkvisitor/shared/types/response-generic";
 import { red } from "cli-color";
 
 export const unauthorizedError = new UnauthorizedError("unauthorized");

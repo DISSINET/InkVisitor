@@ -3,9 +3,9 @@ import { Db } from "@service/rethink";
 import { newMockRequest } from "@modules/common.test";
 import Entity from "@models/entity/entity";
 import { IRequest } from "src/custom_typings/request";
-import { ModelNotValidError } from "@shared/types/errors";
+import { ModelNotValidError } from "@inkvisitor/shared/types/errors";
 import Identification from "./identification";
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 
 describe("test Identification.beforeSave", function () {
   const db = new Db();

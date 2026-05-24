@@ -1,4 +1,4 @@
-import { IReference } from "@shared/types";
+import { IReference } from "@inkvisitor/shared/types";
 import { randomUUID } from "crypto";
 
 export default class Reference implements IReference {

@@ -1,5 +1,5 @@
-import { IAudit, AuditScope } from "@shared/types";
-import { EventType } from "@shared/types/stats";
+import { IAudit, AuditScope } from "@inkvisitor/shared/types";
+import { EventType } from "@inkvisitor/shared/types/stats";
 import { Connection, r, RDatum } from "rethinkdb-ts";
 import { IJob } from ".";
 

@@ -1,6 +1,6 @@
-import { EntityEnums } from "@shared/enums";
-import { IEntity, IResponseDetail, IResponseGeneric } from "@shared/types";
-import { ITerritoryData, ITerritoryProtocol } from "@shared/types/territory";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { IEntity, IResponseDetail, IResponseGeneric } from "@inkvisitor/shared/types";
+import { ITerritoryData, ITerritoryProtocol } from "@inkvisitor/shared/types/territory";
 import { UseMutationResult } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import { Input } from "components";

@@ -1,11 +1,11 @@
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import {
   IEntity,
   IResponseUsedInStatement,
   IStatement,
   IStatementActant,
   IStatementAction,
-} from "@shared/types";
+} from "@inkvisitor/shared/types";
 import { Button, Table, TagGroup } from "components";
 import { EntityTag } from "components/advanced";
 import { useSearchParams } from "hooks";

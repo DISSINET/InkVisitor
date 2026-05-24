@@ -4,9 +4,9 @@ import {
   flip,
   useFloating,
 } from "@floating-ui/react";
-import { dropdownWildCard } from "@shared/dictionaries/entity";
-import { EntityEnums } from "@shared/enums";
-import { IEntity, IUserOptions } from "@shared/types";
+import { dropdownWildCard } from "@inkvisitor/shared/dictionaries/entity";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { IEntity, IUserOptions } from "@inkvisitor/shared/types";
 import { MIN_LABEL_LENGTH_MESSAGE, scrollOverscanCount } from "Theme/constants";
 import {
   Button,

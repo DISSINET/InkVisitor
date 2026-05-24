@@ -2,7 +2,7 @@ import {
   IErrorSignature,
   NetworkError,
   getErrorByCode,
-} from "@shared/types/errors";
+} from "@inkvisitor/shared/types/errors";
 import api from "api";
 import { Button, Input } from "components";
 import { StyledButtonWrap, StyledErrorText } from "pages/AuthModalSharedStyles";

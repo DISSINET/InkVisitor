@@ -1,4 +1,4 @@
-import { IAudit, IEntity, AuditScope } from "@shared/types";
+import { IAudit, IEntity, AuditScope } from "@inkvisitor/shared/types";
 import { r, Connection } from "rethinkdb-ts";
 import { IJob } from ".";
 

@@ -1,8 +1,8 @@
 import Relation from "@models/relation/relation";
-import { DbEnums, RelationEnums } from "@shared/enums";
-import { IEntity, Relation as RelationTypes } from "@shared/types";
-import { InternalServerError } from "@shared/types/errors";
-import { Query } from "@shared/types/query";
+import { DbEnums, RelationEnums } from "@inkvisitor/shared/enums";
+import { IEntity, Relation as RelationTypes } from "@inkvisitor/shared/types";
+import { InternalServerError } from "@inkvisitor/shared/types/errors";
+import { Query } from "@inkvisitor/shared/types/query";
 import { r, RDatum, RStream } from "rethinkdb-ts";
 import { SearchNode } from ".";
 

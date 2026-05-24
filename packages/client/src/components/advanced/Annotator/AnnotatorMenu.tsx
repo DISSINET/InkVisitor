@@ -2,8 +2,8 @@ import React, { useCallback, useMemo, useState } from "react";
 import { List } from "react-window";
 
 import { Tag } from "@inkvisitor/annotator/src/lib";
-import { EntityEnums } from "@shared/enums";
-import { IEntity, IResponseTerritory } from "@shared/types";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { IEntity, IResponseTerritory } from "@inkvisitor/shared/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { IconWithTooltip, Loader } from "components";
 import { Button } from "components/basic/Button/Button";

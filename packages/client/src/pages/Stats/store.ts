@@ -1,4 +1,4 @@
-import { Aggregation, EventType, TimeUnit } from "@shared/types/stats";
+import { Aggregation, EventType, TimeUnit } from "@inkvisitor/shared/types/stats";
 
 export interface StatsStore {
   dateFrom: string;

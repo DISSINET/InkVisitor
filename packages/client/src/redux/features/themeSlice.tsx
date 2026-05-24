@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { InterfaceEnums } from "@shared/enums";
+import { InterfaceEnums } from "@inkvisitor/shared/enums";
 
 const initialState: InterfaceEnums.Theme = localStorage.getItem("theme")
   ? (localStorage.getItem("theme") as InterfaceEnums.Theme)

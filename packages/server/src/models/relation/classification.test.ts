@@ -1,8 +1,8 @@
 import "ts-jest";
 import Entity from "@models/entity/entity";
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import Classification from "./classification";
-import { ModelNotValidError } from "@shared/types/errors";
+import { ModelNotValidError } from "@inkvisitor/shared/types/errors";
 
 describe("test Classification.validateEntities", function () {
   test("template -> non template", () => {

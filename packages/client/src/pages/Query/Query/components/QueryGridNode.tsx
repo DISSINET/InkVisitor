@@ -2,10 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 import React, { useMemo } from "react";
 import { FaPlus, FaTrash } from "react-icons/fa";
 
-import { entitiesDict } from "@shared/dictionaries";
-import { classesAll } from "@shared/dictionaries/entity";
-import { EntityEnums } from "@shared/enums";
-import { Query } from "@shared/types/query";
+import { entitiesDict } from "@inkvisitor/shared/dictionaries";
+import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { Query } from "@inkvisitor/shared/types/query";
 import api from "api";
 import { Button } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";

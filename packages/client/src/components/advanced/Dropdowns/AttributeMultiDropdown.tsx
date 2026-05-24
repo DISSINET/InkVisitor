@@ -1,5 +1,5 @@
-import { allEntities } from "@shared/dictionaries/entity";
-import { DropdownItem } from "@shared/types";
+import { allEntities } from "@inkvisitor/shared/dictionaries/entity";
+import { DropdownItem } from "@inkvisitor/shared/types";
 import { BaseDropdown } from "components";
 import { StyledSelect } from "components/basic/BaseDropdown/BaseDropdownStyles";
 import React from "react";

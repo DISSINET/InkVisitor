@@ -2,19 +2,19 @@ import Statement from "@models/statement/statement";
 import { ResponseTerritory } from "@models/territory/response";
 import Territory from "@models/territory/territory";
 import { findEntityById } from "@service/shorthands";
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import {
   IResponseGeneric,
   IResponseStatement,
   IResponseTerritory,
   IStatement,
   ITerritory,
-} from "@shared/types";
+} from "@inkvisitor/shared/types";
 import {
   BadParams,
   PermissionDeniedError,
   TerritoryDoesNotExits,
-} from "@shared/types/errors";
+} from "@inkvisitor/shared/types/errors";
 import { Router } from "express";
 import { IRequest } from "src/custom_typings/request";
 import { asyncRouteHandler } from "..";

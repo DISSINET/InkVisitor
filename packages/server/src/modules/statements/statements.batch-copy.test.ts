@@ -3,7 +3,7 @@ import {
   BadParams,
   StatementDoesNotExits,
   TerritoryDoesNotExits,
-} from "@shared/types/errors";
+} from "@inkvisitor/shared/types/errors";
 import request from "supertest";
 import { supertestConfig } from "..";
 import { apiPath } from "@common/constants";

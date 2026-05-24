@@ -3,8 +3,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { List } from "react-window";
 import { v4 as uuidv4 } from "uuid";
 
-import { IEntity, IProp, IReference, IResponseQuery, IResponseQueryEntity } from "@shared/types";
-import { Explore } from "@shared/types/query";
+import { IEntity, IProp, IReference, IResponseQuery, IResponseQueryEntity } from "@inkvisitor/shared/types";
+import { Explore } from "@inkvisitor/shared/types/query";
 import api from "api";
 import { Loader } from "components";
 import { CMetaProp } from "constructors";

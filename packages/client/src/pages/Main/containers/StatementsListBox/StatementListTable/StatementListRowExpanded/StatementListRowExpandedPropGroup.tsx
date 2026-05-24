@@ -1,4 +1,4 @@
-import { IEntity, IProp } from "@shared/types";
+import { IEntity, IProp } from "@inkvisitor/shared/types";
 import { EmptyEntityTag, EntityTag } from "components/advanced";
 import React from "react";
 import {

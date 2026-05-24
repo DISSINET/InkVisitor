@@ -1,8 +1,8 @@
 import { Connection } from "rethinkdb-ts";
 import { IJob } from ".";
 import * as fs from "fs";
-import { IAudit } from "@shared/types";
-import { EventType } from "@shared/types/stats";
+import { IAudit } from "@inkvisitor/shared/types";
+import { EventType } from "@inkvisitor/shared/types/stats";
 
 const addAuditTypeJob: IJob = async (db: Connection): Promise<void> => {
   const path = "./datasets/all-parsed/audits.json";

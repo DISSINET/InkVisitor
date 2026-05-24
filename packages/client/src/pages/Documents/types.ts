@@ -1,4 +1,4 @@
-import { IDocument, IResponseEntity } from "@shared/types";
+import { IDocument, IResponseEntity } from "@inkvisitor/shared/types";
 
 export type DocumentWithResource = {
   document: IDocument;

@@ -1,6 +1,6 @@
 import * as bcrypt from "bcryptjs";
 import { sign as signJwt } from "jsonwebtoken";
-import { IUser } from "@shared/types/user";
+import { IUser } from "@inkvisitor/shared/types/user";
 import { expressjwt, Request as JWTRequest } from "express-jwt";
 import { NextFunction, Request } from "express";
 import { v1 as uuid } from "uuid";

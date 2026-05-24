@@ -1,6 +1,6 @@
-import { EntityEnums } from "@shared/enums";
-import { IEntity, IStatement } from "@shared/types";
-import { IResponseUsedInStatementProps } from "@shared/types/response-detail";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { IEntity, IStatement } from "@inkvisitor/shared/types";
+import { IResponseUsedInStatementProps } from "@inkvisitor/shared/types/response-detail";
 import { Button } from "components";
 import { EntityTag } from "components/advanced";
 import { useSearchParams, useTheme } from "hooks";

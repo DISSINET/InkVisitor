@@ -1,4 +1,4 @@
-import { IEntity, IReference } from "@shared/types";
+import { IEntity, IReference } from "@inkvisitor/shared/types";
 import { Button } from "components";
 import { useTheme } from "hooks";
 import React, { useEffect, useRef } from "react";

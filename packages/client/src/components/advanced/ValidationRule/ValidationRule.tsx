@@ -1,8 +1,8 @@
-import { entitiesDict, entityStatusDict, languageDict } from "@shared/dictionaries";
-import { classesAll } from "@shared/dictionaries/entity";
-import { EntityEnums } from "@shared/enums";
-import { IEntity } from "@shared/types";
-import { EProtocolTieType, ITerritoryValidation } from "@shared/types/territory";
+import { entitiesDict, entityStatusDict, languageDict } from "@inkvisitor/shared/dictionaries";
+import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { IEntity } from "@inkvisitor/shared/types";
+import { EProtocolTieType, ITerritoryValidation } from "@inkvisitor/shared/types/territory";
 import { Button, Input } from "components";
 import Dropdown, { AttributeButtonGroup, EntitySuggester, EntityTag } from "components/advanced";
 import React, { useMemo } from "react";

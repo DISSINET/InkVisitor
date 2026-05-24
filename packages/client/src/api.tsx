@@ -1,4 +1,4 @@
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import {
   EntityTooltip,
   IAudit,
@@ -27,11 +27,11 @@ import {
   Query,
   Relation,
   RequestPermissionUpdate,
-} from "@shared/types";
-import * as errors from "@shared/types/errors";
-import { Explore } from "@shared/types/query";
-import { IRequestSearch } from "@shared/types/request-search";
-import { ISetting, ISettingGroup } from "@shared/types/settings";
+} from "@inkvisitor/shared/types";
+import * as errors from "@inkvisitor/shared/types/errors";
+import { Explore } from "@inkvisitor/shared/types/query";
+import { IRequestSearch } from "@inkvisitor/shared/types/request-search";
+import { ISetting, ISettingGroup } from "@inkvisitor/shared/types/settings";
 import { defaultPing } from "Theme/constants";
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import { toast } from "react-toastify";

@@ -1,7 +1,7 @@
 import Audit from "@models/audit/audit";
-import { IResponseStats } from "@shared/types";
-import { IRequestStats } from "@shared/types/request-stats";
-import { Aggregation, EventType, TimeUnit } from "@shared/types/stats";
+import { IResponseStats } from "@inkvisitor/shared/types";
+import { IRequestStats } from "@inkvisitor/shared/types/request-stats";
+import { Aggregation, EventType, TimeUnit } from "@inkvisitor/shared/types/stats";
 import { RDatum, r as rethink } from "rethinkdb-ts";
 import { IRequest } from "src/custom_typings/request";
 

@@ -1,4 +1,4 @@
-import { IProp } from "@shared/types";
+import { IProp } from "@inkvisitor/shared/types";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useState } from "react";
 

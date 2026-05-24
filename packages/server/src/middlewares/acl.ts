@@ -1,6 +1,6 @@
 import AclPermission from "@models/acl/acl_permission";
-import { HttpMethods, UserEnums } from "@shared/enums";
-import { CustomError, PermissionDeniedError } from "@shared/types/errors";
+import { HttpMethods, UserEnums } from "@inkvisitor/shared/enums";
+import { CustomError, PermissionDeniedError } from "@inkvisitor/shared/types/errors";
 import { Response, Request, NextFunction, Router } from "express";
 import { IRequest } from "src/custom_typings/request";
 

@@ -1,5 +1,5 @@
-import { entitiesDictKeys } from "@shared/dictionaries/entity";
-import { EntityEnums } from "@shared/enums";
+import { entitiesDictKeys } from "@inkvisitor/shared/dictionaries/entity";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import { BaseDropdown, Tooltip } from "components";
 import React, { useState } from "react";
 import { components, OptionProps } from "react-select";

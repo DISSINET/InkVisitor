@@ -2,10 +2,10 @@ import {
   actionPartOfSpeechDict,
   conceptPartOfSpeechDict,
   languageDict,
-} from "@shared/dictionaries";
-import { classesAll, entitiesDictKeys } from "@shared/dictionaries/entity";
-import { EntityEnums, UserEnums } from "@shared/enums";
-import { DropdownItem, IEntity, IResponseEntity } from "@shared/types";
+} from "@inkvisitor/shared/dictionaries";
+import { classesAll, entitiesDictKeys } from "@inkvisitor/shared/dictionaries/entity";
+import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
+import { DropdownItem, IEntity, IResponseEntity } from "@inkvisitor/shared/types";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   MIN_LABEL_LENGTH_MESSAGE,

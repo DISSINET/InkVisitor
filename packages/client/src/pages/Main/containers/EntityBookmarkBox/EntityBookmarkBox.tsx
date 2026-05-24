@@ -1,4 +1,4 @@
-import { IBookmarkFolder, IEntity, IResponseBookmarkFolder } from "@shared/types";
+import { IBookmarkFolder, IEntity, IResponseBookmarkFolder } from "@inkvisitor/shared/types";
 import api from "api";
 import {
   Button,

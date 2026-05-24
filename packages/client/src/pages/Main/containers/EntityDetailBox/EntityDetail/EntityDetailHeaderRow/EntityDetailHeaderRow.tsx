@@ -1,5 +1,5 @@
-import { EntityEnums, UserEnums } from "@shared/enums";
-import { IEntity, IResponseGeneric, IStatement } from "@shared/types";
+import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
+import { IEntity, IResponseGeneric, IStatement } from "@inkvisitor/shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, ButtonGroup } from "components";

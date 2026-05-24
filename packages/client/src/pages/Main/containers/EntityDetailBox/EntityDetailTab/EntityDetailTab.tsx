@@ -4,8 +4,8 @@ import {
   offset,
   useFloating,
 } from "@floating-ui/react";
-import { EntityEnums } from "@shared/enums";
-import { IResponseEntity } from "@shared/types";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { IResponseEntity } from "@inkvisitor/shared/types";
 import { Tooltip, TypeBar } from "components";
 import { EntityTag } from "components/advanced";
 import React, { MouseEventHandler, useRef, useState } from "react";

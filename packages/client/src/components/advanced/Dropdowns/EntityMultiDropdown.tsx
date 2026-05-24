@@ -1,5 +1,5 @@
-import { allEntities, empty } from "@shared/dictionaries/entity";
-import { EntityEnums } from "@shared/enums";
+import { allEntities, empty } from "@inkvisitor/shared/dictionaries/entity";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import { BaseDropdown } from "components";
 import { StyledSelect } from "components/basic/BaseDropdown/BaseDropdownStyles";
 import { useTheme } from "hooks";
@@ -14,7 +14,7 @@ import {
   StyledOptionIconWrap,
   StyledOptionRow,
 } from "./DropdownStyles";
-import { DropdownItem } from "@shared/types";
+import { DropdownItem } from "@inkvisitor/shared/types";
 
 interface EntityMultiDropdown<T = string> {
   width?: number | "full";

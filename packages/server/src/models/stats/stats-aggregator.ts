@@ -1,5 +1,5 @@
 import { r as rethink, Connection, RDatum } from "rethinkdb-ts";
-import { EventType, Aggregation, TimeUnit } from "@shared/types/stats";
+import { EventType, Aggregation, TimeUnit } from "@inkvisitor/shared/types/stats";
 import Audit from "@models/audit/audit";
 import { MaterializedStats, IMaterializedStats } from "./materialized-stats";
 

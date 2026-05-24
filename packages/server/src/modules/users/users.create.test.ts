@@ -1,5 +1,5 @@
 import { testErroneousResponse } from "@modules/common.test";
-import { BadParams } from "@shared/types/errors";
+import { BadParams } from "@inkvisitor/shared/types/errors";
 import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../Server";

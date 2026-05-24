@@ -1,5 +1,5 @@
-import { entitiesDictKeys } from "@shared/dictionaries";
-import { EntityEnums, RelationEnums, UserEnums } from "@shared/enums";
+import { entitiesDictKeys } from "@inkvisitor/shared/dictionaries";
+import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
 import {
   IEntity,
   IReference,
@@ -9,7 +9,7 @@ import {
   IResponseTree,
   ITerritory,
   Relation,
-} from "@shared/types";
+} from "@inkvisitor/shared/types";
 import { UseMutationResult, useQuery, useQueryClient } from "@tanstack/react-query";
 import { rootTerritoryId } from "Theme/constants";
 import api from "api";
@@ -51,7 +51,7 @@ import {
   StyledMoveToParent,
   StyledSuggesterRow,
 } from "./StatementListHeaderStyles";
-import { DropdownItem } from "@shared/types";
+import { DropdownItem } from "@inkvisitor/shared/types";
 
 interface StatementListHeader {
   territory?: IResponseTerritory;

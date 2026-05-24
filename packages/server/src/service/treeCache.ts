@@ -1,9 +1,9 @@
 import Territory from "@models/territory/territory";
 import User, { UserRight } from "@models/user/user";
 import { getEntitiesDataByClass } from "@service/shorthands";
-import { EntityEnums, UserEnums } from "@shared/enums";
-import { IResponseTree, IStatement, ITerritory } from "@shared/types";
-import { TerritoriesBrokenError } from "@shared/types/errors";
+import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
+import { IResponseTree, IStatement, ITerritory } from "@inkvisitor/shared/types";
+import { TerritoriesBrokenError } from "@inkvisitor/shared/types/errors";
 import { Connection } from "rethinkdb-ts";
 
 export class TreeCreator {

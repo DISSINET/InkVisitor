@@ -1,6 +1,6 @@
-import { classesAll } from "@shared/dictionaries/entity";
-import { UserEnums } from "@shared/enums";
-import { IBookmarkFolder, IResponseBookmarkFolder } from "@shared/types";
+import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
+import { UserEnums } from "@inkvisitor/shared/enums";
+import { IBookmarkFolder, IResponseBookmarkFolder } from "@inkvisitor/shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, ButtonGroup, Tooltip } from "components";

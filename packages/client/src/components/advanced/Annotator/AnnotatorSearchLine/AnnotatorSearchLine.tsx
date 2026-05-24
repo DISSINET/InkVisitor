@@ -1,5 +1,5 @@
 import { Annotator, EditMode } from "@inkvisitor/annotator/src/lib";
-import { IDocument, IResponseEntity } from "@shared/types";
+import { IDocument, IResponseEntity } from "@inkvisitor/shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, Checkbox, IconWithTooltip, Input, Loader } from "components";

@@ -1,5 +1,5 @@
-import { elvlDict } from "@shared/dictionaries";
-import { EntityEnums } from "@shared/enums";
+import { elvlDict } from "@inkvisitor/shared/dictionaries";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IconButtonGroup } from "components";
 import React from "react";
 import { BiLinkExternal } from "react-icons/bi";

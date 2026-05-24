@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { UserEnums } from "@shared/enums";
-import { IUser } from "@shared/types/user";
+import { UserEnums } from "@inkvisitor/shared/enums";
+import { IUser } from "@inkvisitor/shared/types/user";
 import User from "@models/user/user";
 import {
   BadCredentialsError,
@@ -16,7 +16,7 @@ import {
   UserDoesNotExits,
   UserNotActiveError,
   UserNotUnique,
-} from "@shared/types/errors";
+} from "@inkvisitor/shared/types/errors";
 import { checkPassword, generateAccessToken, hashPassword } from "@common/auth";
 import { asyncRouteHandler } from "..";
 import {
@@ -26,7 +26,7 @@ import {
   IRequestPasswordReset,
   IRequestPasswordResetData,
   IRequestActivationData,
-} from "@shared/types";
+} from "@inkvisitor/shared/types";
 import mailer, {
   accountCreatedTemplate,
   passwordAdminResetTemplate,

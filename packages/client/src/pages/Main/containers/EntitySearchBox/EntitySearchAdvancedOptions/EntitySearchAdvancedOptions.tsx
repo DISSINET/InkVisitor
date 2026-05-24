@@ -1,6 +1,6 @@
 import { autoUpdate, FloatingPortal, offset, useFloating } from "@floating-ui/react";
-import { SearchEnums } from "@shared/enums";
-import { IRequestSearch, IRequestSearchRootValidity } from "@shared/types/request-search";
+import { SearchEnums } from "@inkvisitor/shared/enums";
+import { IRequestSearch, IRequestSearchRootValidity } from "@inkvisitor/shared/types/request-search";
 import { Button, ButtonGroup } from "components";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { CgOptions, CgPlayListAdd, CgPlayListRemove } from "react-icons/cg";

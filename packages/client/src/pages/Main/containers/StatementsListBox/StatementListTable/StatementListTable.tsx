@@ -1,12 +1,12 @@
 import { Annotator } from "@inkvisitor/annotator/src/lib";
-import { UserEnums } from "@shared/enums";
+import { UserEnums } from "@inkvisitor/shared/enums";
 import {
   IDocument,
   IEntity,
   IResponseGeneric,
   IResponseStatement,
   IStatement,
-} from "@shared/types";
+} from "@inkvisitor/shared/types";
 import { UseMutationResult } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import { Button, TagGroup } from "components";

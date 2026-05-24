@@ -12,12 +12,12 @@ import {
 import { Db } from "@service/rethink";
 import { deleteEntities, findEntityById } from "@service/shorthands";
 import treeCache from "@service/treeCache";
-import { UserEnums } from "@shared/enums";
+import { UserEnums } from "@inkvisitor/shared/enums";
 import {
   IStatement,
   IStatementData,
   ROOT_TERRITORY_ID,
-} from "@shared/types/statement";
+} from "@inkvisitor/shared/types/statement";
 import "ts-jest";
 import Statement, {
   StatementActant,

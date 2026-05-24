@@ -1,10 +1,10 @@
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import {
   IEntity,
   IResponseStatement,
   IStatement,
   IStatementData,
-} from "@shared/types";
+} from "@inkvisitor/shared/types";
 import { Button, ButtonGroup } from "components";
 import { AttributeButtonGroup, EntitySuggester } from "components/advanced";
 import {

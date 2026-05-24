@@ -1,5 +1,5 @@
 import { testErroneousResponse } from "@modules/common.test";
-import { BadParams, StatementDoesNotExits } from "@shared/types/errors";
+import { BadParams, StatementDoesNotExits } from "@inkvisitor/shared/types/errors";
 import request from "supertest";
 import { supertestConfig } from "..";
 import { apiPath } from "@common/constants";
@@ -7,7 +7,7 @@ import app from "../../Server";
 import { Db } from "@service/rethink";
 import { findEntityById } from "@service/shorthands";
 import Statement from "@models/statement/statement";
-import { IReference } from "@shared/types";
+import { IReference } from "@inkvisitor/shared/types";
 import { pool } from "@middlewares/db";
 
 describe("statements/references", function () {

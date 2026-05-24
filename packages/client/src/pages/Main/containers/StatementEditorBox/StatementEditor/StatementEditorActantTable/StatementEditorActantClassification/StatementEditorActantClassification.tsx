@@ -1,10 +1,10 @@
-import { certaintyDict, moodDict } from "@shared/dictionaries";
-import { EntityEnums } from "@shared/enums";
-import { IResponseStatement } from "@shared/types";
+import { certaintyDict, moodDict } from "@inkvisitor/shared/dictionaries";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { IResponseStatement } from "@inkvisitor/shared/types";
 import {
   IStatementActant,
   IStatementClassification,
-} from "@shared/types/statement";
+} from "@inkvisitor/shared/types/statement";
 import { AttributeIcon, Button } from "components";
 import Dropdown, {
   ElvlButtonGroup,

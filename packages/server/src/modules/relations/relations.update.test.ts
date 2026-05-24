@@ -7,7 +7,7 @@ import {
   BadParams,
   RelationDoesNotExist,
   ModelNotValidError,
-} from "@shared/types/errors";
+} from "@inkvisitor/shared/types/errors";
 import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
@@ -15,7 +15,7 @@ import { supertestConfig } from "..";
 import { Db } from "@service/rethink";
 import { successfulGenericResponse } from "@modules/common.test";
 import Relation from "@models/relation/relation";
-import { RelationEnums } from "@shared/enums";
+import { RelationEnums } from "@inkvisitor/shared/enums";
 import { pool } from "@middlewares/db";
 
 describe("Relations update", function () {

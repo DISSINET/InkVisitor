@@ -1,5 +1,5 @@
 import React from "react";
-import { IEntity } from "@shared/types";
+import { IEntity } from "@inkvisitor/shared/types";
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
 import { EntityTag } from "components/advanced";

@@ -1,6 +1,6 @@
 import "ts-jest";
-import { EntityEnums } from "@shared/enums";
-import { EventType } from "@shared/types/stats";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { EventType } from "@inkvisitor/shared/types/stats";
 import { AnchorsNode } from "./anchors";
 
 function emptyEntityIds(): Record<EntityEnums.Class, string[]> {

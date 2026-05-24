@@ -1,11 +1,11 @@
-import { certaintyDict, moodDict, operatorDict } from "@shared/dictionaries";
-import { EntityEnums } from "@shared/enums";
+import { certaintyDict, moodDict, operatorDict } from "@inkvisitor/shared/dictionaries";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import {
   IProp,
   IResponseStatement,
   IStatementAction,
   IStatementData,
-} from "@shared/types";
+} from "@inkvisitor/shared/types";
 import { excludedSuggesterEntities } from "Theme/constants";
 import {
   AttributeIcon,

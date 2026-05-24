@@ -1,4 +1,4 @@
-import { InternalServerError, UserNotActiveError } from "@shared/types/errors";
+import { InternalServerError, UserNotActiveError } from "@inkvisitor/shared/types/errors";
 import { Response, Request, NextFunction } from "express";
 import User from "@models/user/user";
 

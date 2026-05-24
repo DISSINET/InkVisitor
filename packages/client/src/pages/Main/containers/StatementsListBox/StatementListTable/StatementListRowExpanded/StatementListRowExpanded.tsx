@@ -1,5 +1,5 @@
-import { actantPositionDict } from "@shared/dictionaries";
-import { EntityEnums } from "@shared/enums";
+import { actantPositionDict } from "@inkvisitor/shared/dictionaries";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import {
   IEntity,
   IProp,
@@ -7,7 +7,7 @@ import {
   IResponseStatement,
   IStatementActant,
   IStatementAction,
-} from "@shared/types";
+} from "@inkvisitor/shared/types";
 import { EmptyEntityTag, EntityTag } from "components/advanced";
 import React from "react";
 import { ColumnInstance, Row } from "react-table";

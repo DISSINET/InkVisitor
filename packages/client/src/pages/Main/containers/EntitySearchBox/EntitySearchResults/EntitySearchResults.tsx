@@ -1,6 +1,6 @@
 import { useSpring } from "@react-spring/web";
-import { EntityEnums } from "@shared/enums";
-import { IResponseEntity } from "@shared/types";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { IResponseEntity } from "@inkvisitor/shared/types";
 import { Button } from "components";
 import { EntityTag } from "components/advanced";
 import { useSearchParams } from "hooks";

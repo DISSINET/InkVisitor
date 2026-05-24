@@ -2,8 +2,8 @@ import "ts-jest";
 import { Db } from "@service/rethink";
 import { clean } from "@modules/common.test";
 import User, { BookmarkFolder, StoredTerritory } from "@models/user/user";
-import { IUser } from "@shared/types";
-import { EntityEnums, UserEnums } from "@shared/enums";
+import { IUser } from "@inkvisitor/shared/types";
+import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 
 const prepareUserData = (): IUser => {
   return {

@@ -13,6 +13,6 @@ register({
     "@models/*": ["src/models/*"],
     "@modules/*": ["src/modules/*"],
     "@service/*": ["src/service/*"],
-    "@shared/*": ["../shared/*"],
+    "@inkvisitor/shared/*": ["../shared/*"],
   },
 });

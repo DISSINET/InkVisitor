@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { createReadStream } from "fs";
 
-import { AuditScope } from "@shared/types";
+import { AuditScope } from "@inkvisitor/shared/types";
 
 const StreamArray = require("stream-json/streamers/StreamArray.js") as {
   withParser: (opts?: unknown) => NodeJS.ReadWriteStream;

@@ -1,4 +1,4 @@
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import {
   DropdownItem,
   IEntity,
@@ -6,7 +6,7 @@ import {
   IStatementActant,
   IStatementAction,
   Relation,
-} from "@shared/types";
+} from "@inkvisitor/shared/types";
 import { ThemeColor } from "Theme/theme";
 import { AxiosResponse } from "axios";
 

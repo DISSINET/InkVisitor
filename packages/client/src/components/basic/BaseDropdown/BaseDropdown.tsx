@@ -1,6 +1,6 @@
 import { AutoPlacement, BasePlacement, VariationPlacement } from "@popperjs/core";
-import { allEntities } from "@shared/dictionaries/entity";
-import { EntityEnums } from "@shared/enums";
+import { allEntities } from "@inkvisitor/shared/dictionaries/entity";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import { heightHeader } from "Theme/constants";
 import { Tooltip } from "components";
 import React, { useState } from "react";
@@ -20,7 +20,7 @@ import {
   StyledSelectWrapper,
   StyledValueIconWrap,
 } from "./BaseDropdownStyles";
-import { DropdownItem } from "@shared/types";
+import { DropdownItem } from "@inkvisitor/shared/types";
 
 interface BaseDropdown {
   options?: DropdownItem[];

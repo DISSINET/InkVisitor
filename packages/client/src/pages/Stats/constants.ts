@@ -1,4 +1,4 @@
-import { EventType } from "@shared/types/stats";
+import { EventType } from "@inkvisitor/shared/types/stats";
 
 /** Event types hidden from stats UI and document audit table rows. */
 export const HIDDEN_EVENT_TYPES: EventType[] = [EventType.DELETE, EventType.ANCHOR_DELETE];
