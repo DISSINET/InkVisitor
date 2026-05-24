@@ -13,12 +13,12 @@
     "typecheck": "tsgo --noEmit"
   },
   "exports": {
-    "./types": { "types": "./dist/types/index.d.ts", "default": "./dist/types/index.js" },
-    "./types/*": { "types": "./dist/types/*.d.ts", "default": "./dist/types/*.js" },
-    "./enums": { "types": "./dist/enums/index.d.ts", "default": "./dist/enums/index.js" },
-    "./enums/*": { "types": "./dist/enums/*.d.ts", "default": "./dist/enums/*.js" },
-    "./dictionaries": { "types": "./dist/dictionaries/index.d.ts", "default": "./dist/dictionaries/index.js" },
-    "./dictionaries/*": { "types": "./dist/dictionaries/*.d.ts", "default": "./dist/dictionaries/*.js" }
+    "./types": { "types": "./dist/types/index.d.ts", "import": "./types/index.ts", "require": "./dist/types/index.js", "default": "./dist/types/index.js" },
+    "./types/*": { "types": "./dist/types/*.d.ts", "import": "./types/*.ts", "require": "./dist/types/*.js", "default": "./dist/types/*.js" },
+    "./enums": { "types": "./dist/enums/index.d.ts", "import": "./enums/index.ts", "require": "./dist/enums/index.js", "default": "./dist/enums/index.js" },
+    "./enums/*": { "types": "./dist/enums/*.d.ts", "import": "./enums/*.ts", "require": "./dist/enums/*.js", "default": "./dist/enums/*.js" },
+    "./dictionaries": { "types": "./dist/dictionaries/index.d.ts", "import": "./dictionaries/index.ts", "require": "./dist/dictionaries/index.js", "default": "./dist/dictionaries/index.js" },
+    "./dictionaries/*": { "types": "./dist/dictionaries/*.d.ts", "import": "./dictionaries/*.ts", "require": "./dist/dictionaries/*.js", "default": "./dist/dictionaries/*.js" }
   },
   "devDependencies": {
     "@typescript/native-preview": "beta",
