@@ -20,8 +20,8 @@
   "devDependencies": {
     "@types/jest": "^30.0.0",
     "@types/node": "^20.11.25",
-    "@types/react": "^18.2.64",
-    "@types/react-dom": "^18.2.21",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
     "@typescript-eslint/eslint-plugin": "^6.7.0",
     "@typescript-eslint/parser": "^6.7.0",
     "copy-webpack-plugin": "^12.0.2",
@@ -31,7 +31,8 @@
     "jsdom": "^27.0.1",
     "prettier": "^2.8.8",
     "raw-loader": "^4.0.2",
-    "react-dom": "^18.2.0",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
     "ts-jest": "^29.4.5",
     "ts-loader": "^9.5.1",
     "@typescript/native-preview": "beta",
@@ -41,8 +42,7 @@
     "webpack-dev-server": "^5.2.1"
   },
   "dependencies": {
-    "lorem-ipsum": "^2.0.8",
-    "react": "^18.2.0"
+    "lorem-ipsum": "^2.0.8"
   },
   "packageManager": "pnpm@11.1.2"
 }
