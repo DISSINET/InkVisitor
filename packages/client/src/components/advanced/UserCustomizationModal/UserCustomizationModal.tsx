@@ -1,6 +1,6 @@
 import { languageDict, userRoleDict } from "@shared/dictionaries";
 import { EntityEnums, UserEnums } from "@shared/enums";
-import { IEntity, IResponseUser, IUser } from "@shared/types";
+import { DropdownItem, IEntity, IResponseUser, IUser } from "@shared/types";
 import { UnsafePasswordError } from "@shared/types/errors";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { SAFE_PASSWORD_DESCRIPTION } from "Theme/constants";
@@ -8,7 +8,6 @@ import api from "api";
 import {
   Button,
   ButtonGroup,
-  Checkbox,
   IconWithTooltip,
   Input,
   Loader,
@@ -23,8 +22,8 @@ import {
 import Dropdown, { AttributeButtonGroup, EntitySuggester, EntityTag } from "components/advanced";
 import { StyledDescription } from "pages/AuthModalSharedStyles";
 import React, { useEffect, useMemo, useState } from "react";
+import { FaQuestion } from "react-icons/fa";
 import { toast } from "react-toastify";
-import { DropdownItem } from "types";
 import { isSafePassword } from "utils/utils";
 import {
   StyledButtonWrap,
@@ -35,7 +34,6 @@ import {
   StyledUserRights,
 } from "./UserCustomizationModalStyles";
 import { UserRightItem } from "./UserRightItem/UserRightItem";
-import { FaQuestion } from "react-icons/fa";
 
 interface DataObject {
   name: string;
@@ -44,7 +42,6 @@ interface DataObject {
   defaultStatementLanguage: EntityEnums.Language;
   searchLanguages: EntityEnums.Language[];
   defaultTerritory?: string | null;
-  allowMaterializedStats: boolean;
 }
 interface UserCustomizationModal {
   user: IResponseUser;
@@ -79,7 +76,6 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
       defaultStatementLanguage: options.defaultStatementLanguage ?? EntityEnums.Language.Empty,
       searchLanguages: options.searchLanguages,
       defaultTerritory: options.defaultTerritory,
-      allowMaterializedStats: options.allowMaterializedStats ?? false,
     };
   }, [user]);
 
@@ -160,7 +156,6 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
           defaultStatementLanguage: data.defaultStatementLanguage,
           searchLanguages: data.searchLanguages.map((sL) => sL),
           defaultTerritory: data.defaultTerritory || "",
-          allowMaterializedStats: data.allowMaterializedStats,
         },
       });
     }
@@ -459,27 +454,9 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
               </StyledUserRightItem>
             </StyledUserRights>
 
-            {/* <StyledRightsHeading>
+            <StyledRightsHeading>
               <b>{"Statistics"}</b>
             </StyledRightsHeading>
-            <ModalInputForm>
-              <ModalInputLabel>{"allow materialized data"}</ModalInputLabel>
-              <ModalInputWrap width={165}>
-                <div style={{ display: "flex", alignItems: "center" }}>
-                  <Checkbox
-                    value={data.allowMaterializedStats}
-                    onChangeFn={(value) =>
-                      handleChange("allowMaterializedStats", value)
-                    }
-                  />
-                  <IconWithTooltip
-                    color="success"
-                    icon={<FaQuestion />}
-                    tooltipLabel="Turns on the option that allows to choose between classic and pre-calculated (materialized) data. As opposed to classic data where the data are calculated on every load, materialized data are significantly faster to load and filter. Data are recalculated daily at midnight but it's also possible to run the data recalculation manually with the refresh button."
-                  />
-                </div>
-              </ModalInputWrap>
-            </ModalInputForm> */}
 
             {process.env.NODE_ENV === "development" && (
               <Button

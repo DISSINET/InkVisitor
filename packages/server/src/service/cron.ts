@@ -1,6 +1,7 @@
 import * as cron from "node-cron";
 import { Connection } from "rethinkdb-ts";
 import { StatsAggregator } from "@models/stats/stats-aggregator";
+import { EventType } from "@shared/types/stats";
 
 export class CronService {
   private db: Connection;
@@ -31,7 +32,7 @@ export class CronService {
 
     task.start();
     this.isRunning = true;
-    
+
     console.log("Cron service started - stats aggregation will run daily at midnight UTC");
   }
 
@@ -56,18 +57,18 @@ export class CronService {
    * Runs the stats aggregation job manually
    */
   async runStatsAggregation(): Promise<void> {
+    const runDate = new Date().toISOString().slice(0, 10);
+    const startTime = Date.now();
     try {
-      console.log("Starting stats aggregation...");
-      const startTime = Date.now();
-      
+      console.log(`[stats-cron] ${runDate}: starting stats aggregation`);
+
       await this.statsAggregator.aggregateMissingData();
-      
-      const endTime = Date.now();
-      const duration = endTime - startTime;
-      
-      console.log(`Stats aggregation completed successfully in ${duration}ms`);
     } catch (error) {
-      console.error("Error during stats aggregation:", error);
+      const duration = Date.now() - startTime;
+      console.error(
+        `[stats-cron] ${runDate}: stats aggregation failed after ${duration}ms`,
+        error
+      );
     }
   }
 
@@ -84,7 +85,7 @@ export class CronService {
       fromDate.setFullYear(fromDate.getFullYear() - 3);
       const toDate = new Date();
       
-      const eventTypes = ["edit", "delete", "create"] as any[];
+      const eventTypes = Object.values(EventType);
       const aggregateByOptions = ["user", "activityType"] as any[];
       
       for (const aggregateBy of aggregateByOptions) {
@@ -117,7 +118,7 @@ export class CronService {
     try {
       console.log(`Manual aggregation triggered from ${fromDate.toISOString()} to ${toDate.toISOString()}`);
       
-      const eventTypes = ["edit", "delete", "create"] as any[];
+      const eventTypes = Object.values(EventType);
       const targetTimeUnits = timeUnits || ["day", "week", "month", "year"];
       const targetAggregateBy = aggregateBy || ["user", "activityType"];
       

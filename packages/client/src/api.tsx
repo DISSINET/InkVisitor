@@ -8,6 +8,7 @@ import {
   IRequestQuery,
   IRequestStats,
   IResponseAudit,
+  IResponseBackup,
   IResponseBookmarkFolder,
   IResponseDetail,
   IResponseEntity,
@@ -1005,6 +1006,47 @@ class Api {
     try {
       const response = await this.connection.post(`/stats/aggregate`, data, options);
       return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  /**
+   * Backups
+   * Lists all available DB backup archives (admin/owner only).
+   */
+  async backupsGet(options?: IApiOptions): Promise<AxiosResponse<IResponseBackup[]>> {
+    try {
+      const response = await this.connection.get(`/backups`, options);
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  /**
+   * Downloads a single backup archive and triggers a browser download.
+   * @param backupId relative archive id from backupsGet, e.g. "20240101/inkvisitor_backup.tar.gz"
+   * @param fileName optional override for the downloaded file name
+   */
+  async backupDownload(backupId: string, fileName?: string): Promise<void> {
+    try {
+      const response = await this.connection.get(`/backups/download`, {
+        params: { file: backupId },
+        responseType: "blob",
+      });
+
+      const url = window.URL.createObjectURL(response.data);
+      const a = document.createElement("a");
+
+      a.href = url;
+      a.download = fileName || backupId.replace(/\//g, "_");
+      document.body.appendChild(a);
+      a.click();
+
+      // Clean up
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
     } catch (err) {
       throw this.handleError(err);
     }

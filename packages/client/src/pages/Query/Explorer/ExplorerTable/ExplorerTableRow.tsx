@@ -11,12 +11,11 @@ import { EntitySuggester, EntityTag, UserTag } from "components/advanced";
 import { deleteProp, deleteRef } from "constructors";
 
 import { EntityEnums } from "@shared/enums";
-import { Button } from "components";
-import { clearRowCache } from "pages/Query/useQueryData";
-import { HiMiniDocumentMagnifyingGlass } from "react-icons/hi2";
+import { UserTagSize } from "components/advanced/UserTag/utils";
+import { useSearchParams } from "hooks";
+import { invalidateAllExplorerQueries } from "pages/Query/useQueryData";
 import { StyledCheckboxWrapper, StyledFocusedCircle } from "./ExplorerTableStyles";
 import { WIDTH_COLUMN_DEFAULT, WIDTH_COLUMN_EUC, WIDTH_COLUMN_FIRST } from "./types";
-import { UserTagSize } from "components/advanced/UserTag/utils";
 
 interface ExplorerTableRowProps {
   rowId: number;
@@ -25,7 +24,6 @@ interface ExplorerTableRowProps {
   handleEditColumn: (entity: IEntity, columnId: string, newEntity: IEntity) => void;
 
   onRowSelect: (rowId: number, isWithShift?: boolean) => void;
-  onExpand: (rowId: number) => void;
 
   isSelected?: boolean;
   isLastClicked?: boolean;
@@ -37,12 +35,12 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
   handleEditColumn,
 
   onRowSelect,
-  onExpand,
 
   isSelected = false,
   isLastClicked = false,
 }) => {
   const themeContext = useContext(ThemeContext);
+  const { appendDetailId, setSelectedDetailId } = useSearchParams();
   const handleCheckboxClick = React.useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
@@ -50,9 +48,6 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
     },
     [onRowSelect, rowId]
   );
-  const handleExpandClick = React.useCallback(() => {
-    onExpand(rowId);
-  }, [onExpand, rowId]);
 
   const queryClient = useQueryClient();
 
@@ -61,19 +56,23 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
       await api.entityUpdate(variables.entityId, variables.changes),
 
     onSuccess: () => {
-      // Clear the custom row cache store
-      clearRowCache();
-      // Invalidate React Query cache
-      queryClient.invalidateQueries({
-        queryKey: ["query"],
-      });
-      queryClient.removeQueries({
-        queryKey: ["query"],
-      });
+      invalidateAllExplorerQueries(queryClient);
     },
   });
 
   const { entity: rowEntity, columnData } = rowItem ?? {};
+
+  const handleOpenEntityInDetail = React.useCallback(
+    (entity: IEntity) => (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (entity?.id) {
+        appendDetailId(entity.id);
+        setSelectedDetailId(entity.id);
+      }
+    },
+    [appendDetailId, setSelectedDetailId]
+  );
 
   const handleUnlinkEntity = React.useCallback(
     (sourceEntity: IEntity, entityToRemove: IEntity, columnId: string) => {
@@ -131,6 +130,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
         return (
           <EntityTag
             entity={cellValue as IEntity}
+            onDoubleClick={handleOpenEntityInDetail(cellValue as IEntity)}
             unlinkButton={
               column.editable && {
                 onClick: () => {
@@ -138,7 +138,6 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
                 },
               }
             }
-            disableDoubleClick
           />
         );
       } else if (typeof (cellValue as IUser)?.email !== "undefined") {
@@ -159,7 +158,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
         );
       }
     },
-    [handleUnlinkEntity]
+    [handleUnlinkEntity, handleOpenEntityInDetail]
   );
 
   const renderCell = React.useCallback(
@@ -239,20 +238,17 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
           {isSelected ? <MdOutlineCheckBox /> : <MdOutlineCheckBoxOutlineBlank />}
         </StyledCheckboxWrapper>
 
-        <Button
-          noBackground
-          noBorder
-          icon={<HiMiniDocumentMagnifyingGlass size={20} color={themeContext?.color.primary} />}
-          onClick={handleExpandClick}
-        />
-
         <span
           style={{
             display: "inline-flex",
             overflow: "hidden",
           }}
         >
-          <EntityTag entity={rowEntity} fullWidth disableDoubleClick />
+          <EntityTag
+            entity={rowEntity}
+            fullWidth
+            onDoubleClick={rowEntity ? handleOpenEntityInDetail(rowEntity) : undefined}
+          />
         </span>
       </div>
 
@@ -303,6 +299,7 @@ function areRowsEqual(
   if (prev.isLastClicked !== next.isLastClicked) return false;
   // Re-render when columns array identity changes (e.g., add/remove)
   if (prev.columns !== next.columns) return false;
+  if (prev.rowItem !== next.rowItem) return false;
   return true;
 }
 

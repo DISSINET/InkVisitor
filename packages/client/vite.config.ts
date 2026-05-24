@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import path from "path";
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
@@ -58,9 +59,21 @@ export default defineConfig(({ mode }) => {
       chunkSizeWarningLimit: 500,
       rollupOptions: {
         output: {
-          manualChunks: {
-            vendor: ["react", "react-dom"],
-            redux: ["react-redux", "@reduxjs/toolkit", "redux"],
+          manualChunks(id) {
+            if (!id.includes("node_modules")) return;
+            if (
+              id.includes("node_modules/react-redux") ||
+              id.includes("node_modules/@reduxjs/toolkit") ||
+              id.includes("node_modules/redux/")
+            ) {
+              return "redux";
+            }
+            if (
+              id.includes("node_modules/react/") ||
+              id.includes("node_modules/react-dom/")
+            ) {
+              return "vendor";
+            }
           },
         },
       },
@@ -75,6 +88,11 @@ export default defineConfig(({ mode }) => {
       ...(mode === "latest" ? {} : {
         "window.appConfig": JSON.stringify({ env: env.ENV || mode }),
       }),
+    },
+    test: {
+      globals: true,
+      environment: "jsdom",
+      include: ["src/**/*.{test,spec}.{ts,tsx}"],
     },
   };
 });

@@ -8,6 +8,7 @@ import { Loader } from "components";
 interface EntityTagByIdProps {
   entityId: string;
   entity?: IEntity;
+  fullWidth?: boolean;
   disableTooltip?: boolean;
 }
 
@@ -17,6 +18,7 @@ interface EntityTagByIdProps {
 export const EntityTagById: React.FC<EntityTagByIdProps> = ({
   entityId,
   entity: entityProp,
+  fullWidth = false,
   disableTooltip = true,
 }) => {
   const { data, isFetching } = useQuery({
@@ -40,6 +42,7 @@ export const EntityTagById: React.FC<EntityTagByIdProps> = ({
     <EntityTag
       entity={entity}
       disableTooltip={disableTooltip}
+      fullWidth={fullWidth}
       disableDoubleClick
     />
   );

@@ -1,4 +1,4 @@
-import { IDocument } from "@shared/types";
+import { IDocument, DropdownItem } from "@shared/types";
 import { IAnchorUpdate, IAudit, IDocumentAuditAnchorChanges } from "@shared/types/audit";
 import { IResponseAudit } from "@shared/types/response-audit";
 import { IResponseEntity } from "@shared/types/response-entity";
@@ -10,7 +10,6 @@ import { UserTag } from "components/advanced/UserTag/UserTag";
 import { useResizeObserver } from "hooks";
 import { useMemo } from "react";
 import { Column } from "react-table";
-import { DropdownItem } from "types";
 import {
   StyledDocumentChangeFallback,
   StyledDocumentChangesLabel,
@@ -24,29 +23,42 @@ import {
   StyledField,
   StyledFieldLabel,
 } from "../StatsPageStyles";
+import {
+  HIDDEN_DOCUMENT_CHANGE_SECTIONS,
+  HIDDEN_EVENT_TYPES,
+} from "../constants";
 
 type ChangeSectionKey = keyof IDocumentAuditAnchorChanges;
 const DEFAULT_AUDITS_PER_PAGE = 10;
 const HEIGHT_TABLE_ROW = 35;
 const TABLE_HEADER_HEIGHT = 60;
 
-const changeSectionConfig: Array<{ key: ChangeSectionKey; label: string }> = [
-  { key: "additions", label: "Added" },
-  { key: "changes", label: "Changed" },
-  { key: "removals", label: "Removed" },
-];
+const changeSectionConfig: Record<ChangeSectionKey, { label: string }> = {
+  additions: { label: "Added" },
+  changes: { label: "Changed" },
+  removals: { label: "Deleted" },
+};
+
+const hiddenChangeSectionKeys = new Set<string>(HIDDEN_DOCUMENT_CHANGE_SECTIONS);
+const changeSectionKeys = (Object.keys(changeSectionConfig) as ChangeSectionKey[]).filter(
+  (key) => !hiddenChangeSectionKeys.has(key)
+);
+
+const getSectionLabel = (sectionKey: ChangeSectionKey): string => {
+  return changeSectionConfig[sectionKey]?.label ?? sectionKey;
+};
 
 const getChangeSections = (
   changes: object
 ): Array<{ key: ChangeSectionKey; label: string; anchors: string[] }> => {
   const parsed = changes as Partial<IDocumentAuditAnchorChanges>;
-  return changeSectionConfig
-    .map(({ key, label }) => {
-      const raw = parsed[key];
+  return changeSectionKeys
+    .map((sectionKey) => {
+      const raw = parsed[sectionKey];
       const anchors = (Array.isArray(raw) ? raw : [])
         .map((item) => (item as IAnchorUpdate)?.anchor)
         .filter((anchor): anchor is string => Boolean(anchor));
-      return { key, label, anchors };
+      return { key: sectionKey, label: getSectionLabel(sectionKey), anchors };
     })
     .filter((section) => section.anchors.length > 0);
 };
@@ -60,12 +72,12 @@ const AuditChangesCell: React.FC<{ changes: object }> = ({ changes }) => {
 
   const entityQueries = useQueries({
     queries: anchorIds.map((entityId) => ({
-      queryKey: ["entity", entityId],
+      queryKey: ["entity", "document-table", entityId],
       queryFn: async () => {
-        const res = await api.entityGet(entityId);
+        const res = await api.entityGet(entityId, { ignoreErrorToast: true });
         return res.data;
       },
-      enabled: !!entityId,
+      enabled: !!entityId && api.isLoggedIn(),
       staleTime: 5 * 60 * 1000,
     })),
   });
@@ -96,12 +108,15 @@ const AuditChangesCell: React.FC<{ changes: object }> = ({ changes }) => {
               const entity = entitiesById[anchor];
               if (entity) {
                 return (
-                  <EntityTag
-                    key={`${section.key}-${anchor}-${index}`}
-                    entity={entity}
-                    disableDoubleClick
-                    disableDrag
-                  />
+                  <div style={{ display: "grid" }}>
+                    <EntityTag
+                      key={`${section.key}-${anchor}-${index}`}
+                      entity={entity}
+                      disableDoubleClick
+                      disableDrag
+                      fullWidth
+                    />
+                  </div>
                 );
               }
 
@@ -178,7 +193,9 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
       {
         Header: "Anchor Changes",
         accessor: "changes",
-        Cell: ({ value }: { value: object }) => <AuditChangesCell changes={value} />,
+        Cell: ({ value, row }: { value: object; row: { original: IAudit } }) => (
+          <AuditChangesCell changes={value} />
+        ),
       },
     ],
     []
@@ -186,7 +203,7 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
 
   const auditTableData: IAudit[] = useMemo(() => {
     if (!dataAudits?.last) return [];
-    return dataAudits.last;
+    return dataAudits.last.filter((audit) => !HIDDEN_EVENT_TYPES.includes(audit.type));
   }, [dataAudits]);
   const hasAudits = auditTableData.length > 0;
 
@@ -242,6 +259,7 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
                     plural: "Audit Entries",
                   }}
                   isLoading={isLoadingAudit}
+                  // fullWidthColumn={4}
                 />
               </>
             ) : (

@@ -1,15 +1,15 @@
 {
   "compilerOptions": {
-    "baseUrl": "./",
     "emitDecoratorMetadata": true,
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "importHelpers": true,
     "incremental": true,
-    "module": "commonjs",
-    "moduleResolution": "node",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "outDir": "build",
     "paths": {
+      "scripts/*": ["./scripts/*"],
       "@common/*": ["./../server/src/common/*"],
       "@models/*": ["./../server/src/models/*"],
       "@service/*": ["./../server/src/service/*"],
@@ -26,9 +26,5 @@
   },
   "exclude": ["node_modules", "build"],
   "files": ["./../server/src/custom_typings/request.d.ts"],
-  "include": [
-    "./../server/src/custom_typings/**/*",
-    "./scripts/**/*.ts",
-    "./datasets/**/*.ts"
-  ]
+  "include": ["./../server/src/custom_typings/**/*", "./scripts/**/*.ts", "./datasets/**/*.ts"]
 }

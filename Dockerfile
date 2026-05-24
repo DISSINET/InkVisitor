@@ -1,7 +1,7 @@
 FROM gplane/pnpm:node22-alpine AS build-env
 
 RUN apk add tzdata openssl
-RUN npm install -g pnpm@10
+RUN npm install -g pnpm@11
 ENV TZ=Europe/Prague
 
 WORKDIR /app
@@ -22,7 +22,7 @@ RUN openssl req -x509 -newkey rsa:2048 -nodes -out ./secret/cert.pem -keyout ./s
 
 FROM gplane/pnpm:node22-alpine
 
-RUN npm install -g pnpm@10
+RUN npm install -g pnpm@11
 
 COPY --from=build-env /app /app
 

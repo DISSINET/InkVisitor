@@ -1,36 +1,39 @@
 import { useQueryClient } from "@tanstack/react-query";
-import React, { useEffect, useMemo, useReducer, useState } from "react";
+import React, { useEffect, useMemo, useReducer, useRef, useState } from "react";
 
 import { Query } from "@shared/types";
 import api from "api";
 import { Box, Button, Loader, Panel } from "components";
-import { LayoutSeparatorHorizontal } from "components/advanced";
+import { LayoutSeparatorHorizontal, LayoutSeparatorVertical } from "components/advanced";
+import { useSearchParams } from "hooks/useSearchParamsContext";
+import { MemoizedEntityDetailBox } from "pages/Main/containers/EntityDetailBox/EntityDetailBox";
 import { BiRefresh } from "react-icons/bi";
+import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
+import { VscCloseAll } from "react-icons/vsc";
 import { toast } from "react-toastify";
+import { COLLAPSED_PANEL_WIDTH } from "Theme/constants";
 import { useAppSelector } from "redux/hooks";
 import { floorNumberToOneDecimal } from "utils/utils";
-import { buildStableSignature } from "./utils";
 import { MemoizedExplorerBox } from "./Explorer/ExplorerBox";
 import { exploreReducer, exploreStateInitial } from "./Explorer/state";
 import { MemoizedQueryBox } from "./Query/QueryBox";
 import { queryReducer, queryStateInitial } from "./Query/state";
 import { getAllEdges, getAllNodes } from "./Query/utils";
-import { QueryValidity, QueryValidityProblem } from "./types";
-import { useQueryData, clearRowCache } from "./useQueryData";
-
+import {
+  QUERY_LEFT_PANEL_MIN_WIDTH,
+  QUERY_PAGE_SEPARATOR_X_PERCENT_POSITION,
+  QUERY_RIGHT_PANEL_MIN_WIDTH,
+  QueryValidity,
+  QueryValidityProblem,
+} from "./types";
+import { invalidateAllExplorerQueries, useQueryData } from "./useQueryData";
+import { buildStableSignature } from "./utils";
 interface QueryPage {}
 export const QueryPage: React.FC<QueryPage> = ({}) => {
-  const layoutWidth: number = useAppSelector(
-    (state) => state.layout.layoutWidth
-  );
-  const contentHeight: number = useAppSelector(
-    (state) => state.layout.contentHeight
-  );
-
-  const [queryState, queryStateDispatch] = useReducer(
-    queryReducer,
-    queryStateInitial
-  );
+  const layoutWidth: number = useAppSelector((state) => state.layout.layoutWidth);
+  const contentHeight: number = useAppSelector((state) => state.layout.contentHeight);
+  const { selectedDetailId, detailIdArray, clearAllDetailIds } = useSearchParams();
+  const [queryState, queryStateDispatch] = useReducer(queryReducer, queryStateInitial);
 
   /**
    * Collects all problems with the query state
@@ -73,48 +76,29 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     };
   }, [queryState]);
 
-  const [exploreState, exploreStateDispatch] = useReducer(
-    exploreReducer,
-    exploreStateInitial
-  );
+  const [exploreState, exploreStateDispatch] = useReducer(exploreReducer, exploreStateInitial);
 
   const queryClient = useQueryClient();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleInvalidateQuery = () => {
     setIsRefreshing(true);
-    // Clear the custom row cache store
-    clearRowCache();
-    // Invalidate React Query cache
-    queryClient.invalidateQueries({
-      queryKey: ["query"],
-    });
-    // Remove all query-related queries to force refetch
-    queryClient.removeQueries({
-      queryKey: ["query"],
-    });
+    invalidateAllExplorerQueries(queryClient);
   };
 
   const stableSignature = useMemo(() => {
     return buildStableSignature(queryState as any, exploreState as any);
   }, [queryState, exploreState]);
 
-  const onePercentOfContentHeight = useMemo(
-    () => contentHeight / 100,
-    [contentHeight]
-  );
+  const onePercentOfContentHeight = useMemo(() => contentHeight / 100, [contentHeight]);
+  const onePercentOfLayoutWidth = useMemo(() => layoutWidth / 100, [layoutWidth]);
 
-  const handleExport = (
-    rowIndices: number[],
-    selectedColumnIds?: string[]
-  ) => {
+  const handleExport = (rowIndices: number[], selectedColumnIds?: string[]) => {
     toast.success("Exporting data...");
     const exportExplore = selectedColumnIds
       ? {
           ...exploreState,
-          columns: exploreState.columns.filter((c) =>
-            selectedColumnIds.includes(c.id)
-          ),
+          columns: exploreState.columns.filter((c) => selectedColumnIds.includes(c.id)),
         }
       : exploreState;
     api.queryExport(queryState, exportExplore, rowIndices);
@@ -127,40 +111,58 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
       const separatorYPercentPosition = floorNumberToOneDecimal(
         xPosition / onePercentOfContentHeight
       );
-      localStorage.setItem(
-        "querySeparatorYPosition",
-        separatorYPercentPosition.toString()
-      );
+      localStorage.setItem("querySeparatorYPosition", separatorYPercentPosition.toString());
     }
   };
 
-  const localStorageSeparatorYPosition = localStorage.getItem(
-    "querySeparatorYPosition"
+  const localStorageSeparatorYPosition = localStorage.getItem("querySeparatorYPosition");
+  const [querySeparatorYPosition, setQuerySeparatorYPosition] = useState<number>(
+    localStorageSeparatorYPosition
+      ? Number(localStorageSeparatorYPosition) * onePercentOfContentHeight
+      : contentHeight / 2
   );
-  const [querySeparatorYPosition, setQuerySeparatorYPosition] =
-    useState<number>(
-      localStorageSeparatorYPosition
-        ? Number(localStorageSeparatorYPosition) * onePercentOfContentHeight
-        : contentHeight / 2
-    );
 
-  const [currentContentHeight, setCurrentContentHeight] =
-    useState(contentHeight);
+  const [currentContentHeight, setCurrentContentHeight] = useState(contentHeight);
 
   useEffect(() => {
     const onePercentOfLastContentHeight = currentContentHeight / 100;
     const separatorXPercentPosition = floorNumberToOneDecimal(
       querySeparatorYPosition / onePercentOfLastContentHeight
     );
-    setQuerySeparatorYPosition(
-      separatorXPercentPosition * onePercentOfContentHeight
-    );
-    localStorage.setItem(
-      "querySeparatorYPosition",
-      separatorXPercentPosition.toString()
-    );
+    setQuerySeparatorYPosition(separatorXPercentPosition * onePercentOfContentHeight);
+    localStorage.setItem("querySeparatorYPosition", separatorXPercentPosition.toString());
     setCurrentContentHeight(contentHeight);
   }, [contentHeight]);
+
+  const handleSeparatorXPositionChange = (xPosition: number) => {
+    if (querySeparatorXPosition !== xPosition) {
+      setQuerySeparatorXPosition(xPosition);
+
+      const separatorXPercentPosition = floorNumberToOneDecimal(
+        xPosition / onePercentOfLayoutWidth
+      );
+      localStorage.setItem("querySeparatorXPosition", separatorXPercentPosition.toString());
+    }
+  };
+
+  const localStorageSeparatorXPosition = localStorage.getItem("querySeparatorXPosition");
+  const [querySeparatorXPosition, setQuerySeparatorXPosition] = useState<number>(
+    localStorageSeparatorXPosition
+      ? Number(localStorageSeparatorXPosition) * onePercentOfLayoutWidth
+      : QUERY_PAGE_SEPARATOR_X_PERCENT_POSITION * onePercentOfLayoutWidth
+  );
+
+  const [currentLayoutWidth, setCurrentLayoutWidth] = useState(layoutWidth);
+
+  useEffect(() => {
+    const onePercentOfLastLayoutWidth = currentLayoutWidth / 100;
+    const separatorXPercentPosition = floorNumberToOneDecimal(
+      querySeparatorXPosition / onePercentOfLastLayoutWidth
+    );
+    setQuerySeparatorXPosition(separatorXPercentPosition * onePercentOfLayoutWidth);
+    localStorage.setItem("querySeparatorXPosition", separatorXPercentPosition.toString());
+    setCurrentLayoutWidth(layoutWidth);
+  }, [layoutWidth]);
 
   const {
     data: queryData,
@@ -184,26 +186,60 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
   // Show loader only when refresh button was clicked and fetching
   const shouldShowLoader = isRefreshing && queryIsFetching;
 
+  const isDetailOpen = !!(selectedDetailId || detailIdArray.length > 0);
+
+  const queryDetailPanelExpandedStorageKey = "queryDetailPanelExpanded";
+  const [queryDetailPanelExpanded, setQueryDetailPanelExpanded] = useState(
+    () => localStorage.getItem(queryDetailPanelExpandedStorageKey) !== "false"
+  );
+  const savedSeparatorXRef = useRef<number | null>(null);
+
+  const toggleQueryDetailPanel = () => {
+    setQueryDetailPanelExpanded((prev) => {
+      const next = !prev;
+      localStorage.setItem(queryDetailPanelExpandedStorageKey, String(next));
+      if (!next) {
+        savedSeparatorXRef.current = querySeparatorXPosition;
+      }
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    if (queryDetailPanelExpanded && savedSeparatorXRef.current !== null) {
+      setQuerySeparatorXPosition(savedSeparatorXRef.current);
+      savedSeparatorXRef.current = null;
+    }
+  }, [queryDetailPanelExpanded]);
+
+  const detailPanelWidth = queryDetailPanelExpanded
+    ? layoutWidth - querySeparatorXPosition
+    : COLLAPSED_PANEL_WIDTH;
+  const firstPanelWidth = isDetailOpen ? layoutWidth - detailPanelWidth : layoutWidth;
+
   return (
     <>
       {querySeparatorYPosition > 0 && (
         <LayoutSeparatorHorizontal
+          width={firstPanelWidth}
           topPositionMin={34}
           topPositionMax={contentHeight - 34}
           separatorYPosition={querySeparatorYPosition}
-          setSeparatorYPosition={(yPosition) =>
-            handleSeparatorYPositionChange(yPosition)
-          }
+          setSeparatorYPosition={(yPosition) => handleSeparatorYPositionChange(yPosition)}
         />
       )}
 
-      <Panel width={layoutWidth}>
-        <Box
-          noFrame
-          borderColor="white"
-          height={querySeparatorYPosition}
-          label="Search"
-        >
+      {isDetailOpen && queryDetailPanelExpanded && querySeparatorXPosition > 0 && (
+        <LayoutSeparatorVertical
+          leftSideMinWidth={QUERY_LEFT_PANEL_MIN_WIDTH}
+          leftSideMaxWidth={layoutWidth - QUERY_RIGHT_PANEL_MIN_WIDTH}
+          separatorXPosition={querySeparatorXPosition}
+          setSeparatorXPosition={(xPosition) => handleSeparatorXPositionChange(xPosition)}
+        />
+      )}
+
+      <Panel width={firstPanelWidth}>
+        <Box noFrame borderColor="white" height={querySeparatorYPosition} label="Search">
           <MemoizedQueryBox
             state={queryState}
             dispatch={queryStateDispatch}
@@ -238,9 +274,51 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
             stableSignature={stableSignature}
             getCachedEntity={getCachedEntity}
           />
+
           <Loader show={shouldShowLoader} />
         </Box>
       </Panel>
+      {isDetailOpen && (
+        <Panel width={detailPanelWidth}>
+          <Box
+            label="Detail"
+            borderColor="white"
+            height={contentHeight}
+            disableScroll
+            isExpanded={queryDetailPanelExpanded}
+            onHeaderClick={toggleQueryDetailPanel}
+            buttons={[
+              <>
+                {queryDetailPanelExpanded && (
+                  <Button
+                    inverted
+                    tooltipLabel="close all tabs"
+                    icon={<VscCloseAll style={{ transform: "scale(1.3)" }} />}
+                    onClick={clearAllDetailIds}
+                  />
+                )}
+              </>,
+              <Button
+                key="toggle-query-detail-panel"
+                inverted
+                tooltipLabel={
+                  queryDetailPanelExpanded ? "minimize detail panel" : "expand detail panel"
+                }
+                icon={queryDetailPanelExpanded ? <RiMenuUnfoldFill /> : <RiMenuFoldFill />}
+                onClick={toggleQueryDetailPanel}
+              />,
+            ]}
+          >
+            <MemoizedEntityDetailBox
+              onTabOpen={() => {
+                if (!queryDetailPanelExpanded) {
+                  toggleQueryDetailPanel();
+                }
+              }}
+            />
+          </Box>
+        </Panel>
+      )}
     </>
   );
 };
