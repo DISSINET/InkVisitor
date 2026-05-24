@@ -11,6 +11,6 @@
     "./src/custom_typings/request.d.ts",
     "./src/custom_typings/dotenv.d.ts"
   ],
-  "include": ["./src/**/*.ts", "../shared/**/*.ts"],
+  "include": ["./src/**/*.ts"],
   "exclude": ["./src/public/", "./src/**/*.test.ts", "node_modules", "dist"]
 }
