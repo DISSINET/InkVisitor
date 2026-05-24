@@ -26,7 +26,11 @@ RUN openssl req -x509 -newkey rsa:2048 -nodes -out /app/out/secret/cert.pem -key
 
 FROM gplane/pnpm:node22-alpine
 
-RUN npm install -g pnpm@11
+# The base image sets ENTRYPOINT ["pnpm"]; reset it so the CMD runs directly.
+# The runtime needs no pnpm — the deployed server is plain node, and pnpm would
+# otherwise try (and fail) to verify the deployed "@inkvisitor/shared": "workspace:*"
+# dependency outside of any workspace.
+ENTRYPOINT []
 
 COPY --from=build-env /app/out /app/server
 COPY --from=build-env /app/packages/client/dist /app/client/dist
@@ -39,4 +43,4 @@ RUN BUILD_TIMESTAMP=$(date +'%a %d.%m.%Y %H:%M') && \
 
 RUN echo "source /app/server/.build_env" >> /etc/profile
 
-CMD ["/bin/sh", "-c", "source /app/server/.build_env && pnpm start:dist -- \"$BUILD_TIMESTAMP\""]
+CMD ["/bin/sh", "-c", "source /app/server/.build_env && node -r module-alias/register ./dist/server/src \"$BUILD_TIMESTAMP\""]
