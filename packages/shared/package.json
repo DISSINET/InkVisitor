@@ -1,6 +1,6 @@
 {
   "name": "@inkvisitor/shared",
-  "version": "1.5.0.5",
+  "version": "1.5.0",
   "private": true,
   "engines": {
     "node": "^22.13.1",

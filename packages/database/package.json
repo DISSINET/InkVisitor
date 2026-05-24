@@ -17,6 +17,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@inkvisitor/shared": "workspace:*",
     "@types/uuid": "^9.0.8",
     "colors": "^1.4.0",
     "dotenv": "^16.6.1",

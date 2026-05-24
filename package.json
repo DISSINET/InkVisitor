@@ -14,5 +14,8 @@
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "lint": "turbo run lint"
+  },
+  "devDependencies": {
+    "turbo": "^2.9.14"
   }
 }

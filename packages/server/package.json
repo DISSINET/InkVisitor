@@ -9,6 +9,7 @@
     "lint": "tslint --project \"tsconfig.json\"",
     "test": "jest -w 1 -t",
     "start": "ENV_FILE=development nodemon",
+    "dev": "ENV_FILE=development nodemon",
     "build": "tsgo --build tsconfig.prod.json",
     "typecheck": "tsgo --noEmit",
     "start:dist": "node -r module-alias/register ./dist/server/src",
@@ -35,6 +36,7 @@
     "@middlewares": "dist/server/src/middlewares"
   },
   "dependencies": {
+    "@inkvisitor/shared": "workspace:*",
     "nodemailer": "^6.9.16",
     "@types/cli-color": "^2.0.2",
     "@types/node-cron": "^3.0.11",
