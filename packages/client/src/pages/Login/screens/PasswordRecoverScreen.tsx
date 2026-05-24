@@ -13,7 +13,7 @@ import {
   IErrorSignature,
   InvalidEmailError,
   getErrorByCode,
-} from "@shared/types/errors";
+} from "@inkvisitor/shared/types/errors";
 import {
   StyledButtonWrap,
   StyledErrorText,

@@ -4,13 +4,13 @@ import {
   InternalServerError,
   ModelNotValidError,
   NotFound,
-} from "@shared/types/errors";
+} from "@inkvisitor/shared/types/errors";
 import { asyncRouteHandler } from "..";
-import { IResponseGeneric } from "@shared/types";
+import { IResponseGeneric } from "@inkvisitor/shared/types";
 import { IRequest } from "src/custom_typings/request";
-import { ISetting, ISettingGroup, SettingsKey } from "@shared/types/settings";
+import { ISetting, ISettingGroup, SettingsKey } from "@inkvisitor/shared/types/settings";
 import { Setting } from "@models/setting/setting";
-import { SettingGroupDict } from "@shared/dictionaries/settinggroup";
+import { SettingGroupDict } from "@inkvisitor/shared/dictionaries/settinggroup";
 
 export default Router()
   .put(

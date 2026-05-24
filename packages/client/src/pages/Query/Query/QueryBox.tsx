@@ -1,4 +1,4 @@
-import { Query } from "@shared/types/query";
+import { Query } from "@inkvisitor/shared/types/query";
 import React, { useMemo } from "react";
 import { INodeItem, QUERY_GRID_HEIGHT, QUERY_GRID_WIDTH, QueryValidity } from "../types";
 import { QueryGridEdge } from "./components/QueryGridEdge";

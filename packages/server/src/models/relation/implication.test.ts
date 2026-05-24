@@ -1,6 +1,6 @@
 import "ts-jest";
 import Entity from "@models/entity/entity";
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import Implication from "./implication";
 
 describe("test Implication.validateEntities", function () {

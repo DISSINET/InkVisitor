@@ -1,5 +1,5 @@
-import { logicDict } from "@shared/dictionaries";
-import { EntityEnums } from "@shared/enums";
+import { logicDict } from "@inkvisitor/shared/dictionaries";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IconButtonGroup } from "components";
 import React from "react";
 import { BiCommentAdd, BiCommentMinus } from "react-icons/bi";

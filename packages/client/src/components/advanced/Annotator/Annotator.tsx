@@ -15,7 +15,7 @@ import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 
 import { Annotator, EditMode, editModeDisplayLabel, Tag } from "@inkvisitor/annotator/src/lib";
-import { EntityEnums, UserEnums } from "@shared/enums";
+import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import {
   IDocument,
   IEntity,
@@ -24,7 +24,7 @@ import {
   IResponseTerritory,
   IResponseUser,
   IStatement,
-} from "@shared/types";
+} from "@inkvisitor/shared/types";
 import { AxiosResponse } from "axios";
 import { Loader } from "components";
 import { Button } from "components/basic/Button/Button";

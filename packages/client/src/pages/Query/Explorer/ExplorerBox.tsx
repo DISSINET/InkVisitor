@@ -1,7 +1,7 @@
 import React from "react";
 
-import { IResponseQueryEntity } from "@shared/types";
-import { Explore } from "@shared/types/query";
+import { IResponseQueryEntity } from "@inkvisitor/shared/types";
+import { Explore } from "@inkvisitor/shared/types/query";
 import { ExplorerTable } from "./ExplorerTable/ExplorerTable";
 import { ExploreAction } from "./state";
 

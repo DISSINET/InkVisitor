@@ -1,4 +1,4 @@
-import { IRequestStats, IResponseStats } from "@shared/types";
+import { IRequestStats, IResponseStats } from "@inkvisitor/shared/types";
 import { useUsersGetMoreQuery } from "hooks/react-query/useUsersGetMoreQuery";
 import { useMemo } from "react";
 import { Column, useTable } from "react-table";

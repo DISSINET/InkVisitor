@@ -1,6 +1,6 @@
-import { entitiesDictKeys } from "@shared/dictionaries";
-import { UserEnums } from "@shared/enums";
-import { IEntity, IResponseGeneric, Relation } from "@shared/types";
+import { entitiesDictKeys } from "@inkvisitor/shared/dictionaries";
+import { UserEnums } from "@inkvisitor/shared/enums";
+import { IEntity, IResponseGeneric, Relation } from "@inkvisitor/shared/types";
 import {
   UseMutationResult,
   useQuery,

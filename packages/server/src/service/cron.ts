@@ -1,7 +1,7 @@
 import * as cron from "node-cron";
 import { Connection } from "rethinkdb-ts";
 import { StatsAggregator } from "@models/stats/stats-aggregator";
-import { EventType } from "@shared/types/stats";
+import { EventType } from "@inkvisitor/shared/types/stats";
 
 export class CronService {
   private db: Connection;

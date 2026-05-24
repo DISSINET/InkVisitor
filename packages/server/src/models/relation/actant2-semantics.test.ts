@@ -4,9 +4,9 @@ import { newMockRequest } from "@modules/common.test";
 import { prepareEntity } from "@models/entity/entity.test";
 import Entity from "@models/entity/entity";
 import { IRequest } from "src/custom_typings/request";
-import { ModelNotValidError } from "@shared/types/errors";
+import { ModelNotValidError } from "@inkvisitor/shared/types/errors";
 import Actant2Semantics from "./actant2-semantics";
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 
 describe("test Actant2Semantics.beforeSave", function () {
   const db = new Db();

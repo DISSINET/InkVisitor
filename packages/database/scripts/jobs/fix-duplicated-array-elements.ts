@@ -1,7 +1,7 @@
-import { IEntity, IProp, IStatement } from "@shared/types";
+import { IEntity, IProp, IStatement } from "@inkvisitor/shared/types";
 import { r, Connection } from "rethinkdb-ts";
 import { IJob } from ".";
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import Entity from "@models/entity/entity";
 
 function hasDuplicates(arr: any[]): boolean {

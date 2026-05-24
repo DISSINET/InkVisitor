@@ -2,7 +2,7 @@ import { nonenumerable } from "@common/decorators";
 import { UsedRelations } from "@models/relation/relations";
 import Statement from "@models/statement/statement";
 import treeCache from "@service/treeCache";
-import { EntityEnums, RelationEnums, UserEnums } from "@shared/enums";
+import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
 import {
   IEntity,
   IProp,
@@ -13,17 +13,17 @@ import {
   IStatement,
   ITerritory,
   IWarning,
-} from "@shared/types";
+} from "@inkvisitor/shared/types";
 import {
   IResponseUsedInDocument,
   IResponseUsedInStatementClassification,
   IResponseUsedInStatementIdentification,
   IResponseUsedInStatementProps,
-} from "@shared/types/response-detail";
+} from "@inkvisitor/shared/types/response-detail";
 import {
   IStatementClassification,
   IStatementIdentification,
-} from "@shared/types/statement";
+} from "@inkvisitor/shared/types/statement";
 import { Connection } from "rethinkdb-ts";
 import { IRequest } from "src/custom_typings/request";
 import Entity from "./entity";

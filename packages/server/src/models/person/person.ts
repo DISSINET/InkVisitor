@@ -1,7 +1,7 @@
 import Entity from "@models/entity/entity";
 import { fillFlatObject, IModel } from "@models/common";
-import { EntityEnums } from "@shared/enums";
-import { IPerson, IPersonData } from "@shared/types";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { IPerson, IPersonData } from "@inkvisitor/shared/types";
 
 class PersonData implements IPersonData, IModel {
   logicalType: EntityEnums.LogicalType = EntityEnums.LogicalType.Definite;

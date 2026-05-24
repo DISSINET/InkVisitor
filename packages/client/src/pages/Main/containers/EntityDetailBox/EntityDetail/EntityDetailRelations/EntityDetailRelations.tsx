@@ -1,5 +1,5 @@
-import { RelationEnums } from "@shared/enums";
-import { IResponseDetail, IResponseGeneric, Relation } from "@shared/types";
+import { RelationEnums } from "@inkvisitor/shared/enums";
+import { IResponseDetail, IResponseGeneric, Relation } from "@inkvisitor/shared/types";
 import { UseMutationResult } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import { StyledEditorEmptyState } from "pages/Main/containers/StatementEditorBox/StatementEditorBoxStyles";

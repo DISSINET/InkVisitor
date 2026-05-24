@@ -1,7 +1,7 @@
-import { languageDict, userRoleDict } from "@shared/dictionaries";
-import { EntityEnums, UserEnums } from "@shared/enums";
-import { DropdownItem, IEntity, IResponseUser, IUser } from "@shared/types";
-import { UnsafePasswordError } from "@shared/types/errors";
+import { languageDict, userRoleDict } from "@inkvisitor/shared/dictionaries";
+import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
+import { DropdownItem, IEntity, IResponseUser, IUser } from "@inkvisitor/shared/types";
+import { UnsafePasswordError } from "@inkvisitor/shared/types/errors";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { SAFE_PASSWORD_DESCRIPTION } from "Theme/constants";
 import api from "api";

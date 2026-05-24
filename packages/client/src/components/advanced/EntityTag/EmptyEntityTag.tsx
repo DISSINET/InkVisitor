@@ -1,4 +1,4 @@
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import { Tag } from "components";
 import React from "react";
 import { EntityColors } from "types";

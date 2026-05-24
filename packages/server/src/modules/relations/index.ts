@@ -1,11 +1,11 @@
-import { IResponseGeneric } from "@shared/types";
+import { IResponseGeneric } from "@inkvisitor/shared/types";
 import {
   BadParams,
   InternalServerError,
   ModelNotValidError,
   PermissionDeniedError,
   RelationDoesNotExist,
-} from "@shared/types/errors";
+} from "@inkvisitor/shared/types/errors";
 import Relation from "@models/relation/relation";
 import { Router } from "express";
 import { asyncRouteHandler } from "../index";
@@ -13,7 +13,7 @@ import { getRelationClass } from "@models/factory";
 import { mergeDeep } from "@common/functions";
 import Entity from "@models/entity/entity";
 import { IRequest } from "src/custom_typings/request";
-import { Relation as RelationTypes } from "@shared/types";
+import { Relation as RelationTypes } from "@inkvisitor/shared/types";
 
 export default Router()
   /**

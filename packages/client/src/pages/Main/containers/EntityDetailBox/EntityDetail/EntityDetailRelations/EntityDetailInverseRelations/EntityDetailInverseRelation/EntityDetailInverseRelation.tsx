@@ -2,7 +2,7 @@ import {
   IEntity,
   IResponseDetail,
   Relation
-} from "@shared/types";
+} from "@inkvisitor/shared/types";
 import { LetterIcon } from "components";
 import { EntityTag, PaginationControls } from "components/advanced";
 import { usePagination } from "hooks/usePagination";

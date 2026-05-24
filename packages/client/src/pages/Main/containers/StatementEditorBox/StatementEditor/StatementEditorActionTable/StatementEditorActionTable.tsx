@@ -3,7 +3,7 @@ import {
   IResponseStatement,
   IStatementAction,
   IStatementData,
-} from "@shared/types";
+} from "@inkvisitor/shared/types";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useState } from "react";
 import { FilteredActionObject } from "types";

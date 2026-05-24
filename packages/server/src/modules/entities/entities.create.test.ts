@@ -19,9 +19,9 @@ import {
   findEntityById,
   getEntitiesDataByClass,
 } from "@service/shorthands";
-import { EntityEnums, RelationEnums } from "@shared/enums";
-import { ITerritory } from "@shared/types";
-import { EntityDoesNotExist, ModelNotValidError } from "@shared/types/errors";
+import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
+import { ITerritory } from "@inkvisitor/shared/types";
+import { EntityDoesNotExist, ModelNotValidError } from "@inkvisitor/shared/types/errors";
 import request from "supertest";
 import "ts-jest";
 import { supertestConfig } from "..";

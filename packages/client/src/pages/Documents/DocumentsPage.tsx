@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { v4 as uuidv4 } from "uuid";
 
-import { EntityEnums } from "@shared/enums";
-import { IDocument } from "@shared/types";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { IDocument } from "@inkvisitor/shared/types";
 import api from "api";
 import { Loader, Submit } from "components";
 import { DocumentModalEdit, DocumentModalExport } from "components/advanced";

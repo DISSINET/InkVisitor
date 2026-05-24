@@ -2,7 +2,7 @@ import { Box, Panel } from "components";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAppSelector } from "redux/hooks";
-import { DropdownItem } from "@shared/types";
+import { DropdownItem } from "@inkvisitor/shared/types";
 import { DocumentTable } from "./DocumentTable/DocumentTable";
 import { EntitiesTab } from "./EntitiesTab/EntitiesTab";
 import {

@@ -1,4 +1,4 @@
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import Territory from "./territory/territory";
 import Statement from "./statement/statement";
 import Resource from "./resource/resource";
@@ -13,8 +13,8 @@ import Location from "./location/location";
 import Value from "./value/value";
 import Event from "./event/event";
 import { UnknownObject } from "./common";
-import { RelationEnums } from "@shared/enums";
-import { ModelNotValidError } from "@shared/types/errors";
+import { RelationEnums } from "@inkvisitor/shared/enums";
+import { ModelNotValidError } from "@inkvisitor/shared/types/errors";
 import Relation from "./relation/relation";
 import Identification from "./relation/identification";
 import Synonym from "./relation/synonym";

@@ -14,7 +14,7 @@ import {
   UsernameTooLongError,
   UsernameTooShortError,
   getErrorByCode,
-} from "@shared/types/errors";
+} from "@inkvisitor/shared/types/errors";
 import {
   StyledButtonWrap,
   StyledDescription,

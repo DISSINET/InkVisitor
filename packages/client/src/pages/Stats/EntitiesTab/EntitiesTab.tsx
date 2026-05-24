@@ -1,12 +1,11 @@
-import { IRequestStats, IResponseStats } from "@shared/types";
-import { Aggregation, TimeUnit } from "@shared/types/stats";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { IRequestStats, IResponseStats } from "@inkvisitor/shared/types";
+import { Aggregation, TimeUnit } from "@inkvisitor/shared/types/stats";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, ButtonGroup, Input, Loader, Timestamp } from "components";
-import { AttributeButtonGroup } from "components/advanced";
 import { useDebounce, useResizeObserver } from "hooks";
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from "react";
-import { FaCalendarPlus, FaDatabase, FaSyncAlt, FaTimes } from "react-icons/fa";
+import { FaCalendarPlus, FaTimes } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { STATS_FILTER_DEBOUNCE_MS, USER_THRESHOLD_MAX, VISIBLE_EVENT_TYPES } from "../constants";
 import {
@@ -15,7 +14,6 @@ import {
   StyledField,
   StyledFieldGroup,
   StyledFieldLabel,
-  StyledMaterializedStatsButton,
   StyledResultsChart,
   StyledResultsTable,
 } from "../StatsPageStyles";

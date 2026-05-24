@@ -1,8 +1,8 @@
-import { IUser, IUserOptions, IBookmarkFolder, IStoredTerritory, IUserRight } from "@shared/types";
+import { IUser, IUserOptions, IBookmarkFolder, IStoredTerritory, IUserRight } from "@inkvisitor/shared/types";
 import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
 import { IDbModel, fillArray, fillFlatObject } from "@models/common";
-import { EntityEnums, UserEnums } from "@shared/enums";
-import { ModelNotValidError } from "@shared/types/errors";
+import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
+import { ModelNotValidError } from "@inkvisitor/shared/types/errors";
 import { generateUuid, hashPassword } from "@common/auth";
 import { generatePassword } from "@common/functions";
 import { nonenumerable } from "@common/decorators";

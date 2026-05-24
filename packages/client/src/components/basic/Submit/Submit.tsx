@@ -1,4 +1,4 @@
-import { IEntity } from "@shared/types";
+import { IEntity } from "@inkvisitor/shared/types";
 import {
   Button,
   ButtonGroup,

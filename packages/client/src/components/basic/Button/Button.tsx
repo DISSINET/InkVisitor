@@ -3,7 +3,7 @@ import {
   BasePlacement,
   VariationPlacement,
 } from "@popperjs/core";
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import { ThemeColor } from "Theme/theme";
 import { Tooltip } from "components";
 import React, {

@@ -1,7 +1,7 @@
-import { EntityEnums } from "@shared/enums";
-import { IAnchorsNode } from "@shared/types/document";
-import { IDocumentAuditAnchorChanges, IAnchorUpdate } from "@shared/types";
-import { EventType } from "@shared/types/stats";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { IAnchorsNode } from "@inkvisitor/shared/types/document";
+import { IDocumentAuditAnchorChanges, IAnchorUpdate } from "@inkvisitor/shared/types";
+import { EventType } from "@inkvisitor/shared/types/stats";
 import { createAnyTagRegex, createOpeningTagRegex } from "@common/regex";
 
 interface IOrderedAnchorItem {

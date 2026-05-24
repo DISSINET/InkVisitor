@@ -1,5 +1,5 @@
 import { Connection } from "rethinkdb-ts";
-import { IAudit, IResponseAudit, AuditScope } from "@shared/types";
+import { IAudit, IResponseAudit, AuditScope } from "@inkvisitor/shared/types";
 import Audit from "./audit";
 
 export class ResponseAudit implements IResponseAudit {

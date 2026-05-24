@@ -1,6 +1,6 @@
-import { entitiesDict } from "@shared/dictionaries";
-import { EntityEnums, UserEnums } from "@shared/enums";
-import { IEntity } from "@shared/types";
+import { entitiesDict } from "@inkvisitor/shared/dictionaries";
+import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
+import { IEntity } from "@inkvisitor/shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import {

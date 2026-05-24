@@ -1,4 +1,4 @@
-import { IEntity, Relation } from "@shared/types";
+import { IEntity, Relation } from "@inkvisitor/shared/types";
 import React from "react";
 import { getRelationTreeDepth, getShortLabelByLetterCount } from "utils/utils";
 import {

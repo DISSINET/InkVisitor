@@ -4,9 +4,9 @@ import Document from "@models/document/document";
 import Entity from "@models/entity/entity";
 import Relation from "@models/relation/relation";
 import User from "@models/user/user";
-import { DbEnums, EntityEnums } from "@shared/enums";
-import { IEntity, IUser } from "@shared/types";
-import { ModelNotValidError } from "@shared/types/errors";
+import { DbEnums, EntityEnums } from "@inkvisitor/shared/enums";
+import { IEntity, IUser } from "@inkvisitor/shared/types";
+import { ModelNotValidError } from "@inkvisitor/shared/types/errors";
 import { Connection, RDatum, r as rethink, WriteResult } from "rethinkdb-ts";
 import { Db } from "./rethink";
 

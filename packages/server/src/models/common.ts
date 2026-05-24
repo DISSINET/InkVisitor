@@ -1,5 +1,5 @@
 import { sanitizeText } from "@common/functions";
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import { Connection, WriteResult } from "rethinkdb-ts";
 
 type GenericObject = { [key: string]: any };

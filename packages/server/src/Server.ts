@@ -28,7 +28,7 @@ import * as path from "path";
 import rateLimit from "express-rate-limit";
 import "@models/events/register";
 import { Request, Response } from "express";
-import { TooManyRequestsError } from "@shared/types/errors";
+import { TooManyRequestsError } from "@inkvisitor/shared/types/errors";
 import { r as rethink } from "rethinkdb-ts";
 import timeout from "connect-timeout";
 import { pool } from "@middlewares/db";

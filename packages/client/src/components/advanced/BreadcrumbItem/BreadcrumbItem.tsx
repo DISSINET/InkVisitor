@@ -1,5 +1,5 @@
-import { EntityEnums } from "@shared/enums";
-import { IEntity, IResponseTerritory } from "@shared/types";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { IEntity, IResponseTerritory } from "@inkvisitor/shared/types";
 import api from "api";
 import { Button, Loader } from "components";
 import { EntityTag } from "components/advanced";

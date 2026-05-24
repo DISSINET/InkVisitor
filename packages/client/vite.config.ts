@@ -31,7 +31,7 @@ export default defineConfig(({ mode }) => {
     ],
     resolve: {
       alias: {
-        "@shared": path.resolve(__dirname, "../shared/"),
+        "@inkvisitor/shared": path.resolve(__dirname, "../shared/"),
         api: path.resolve(__dirname, "./src/api"),
         components: path.resolve(__dirname, "./src/components"),
         hooks: path.resolve(__dirname, "./src/hooks"),

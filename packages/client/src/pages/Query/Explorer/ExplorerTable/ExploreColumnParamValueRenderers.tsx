@@ -1,7 +1,7 @@
 import React from "react";
-import { IEntity } from "@shared/types";
-import { Explore } from "@shared/types/query";
-import { RelationEnums } from "@shared/enums";
+import { IEntity } from "@inkvisitor/shared/types";
+import { Explore } from "@inkvisitor/shared/types/query";
+import { RelationEnums } from "@inkvisitor/shared/enums";
 import { EntityTag } from "components/advanced";
 import { EntityTagById } from "../../../../components/advanced/EntityTag/EntityTagById";
 

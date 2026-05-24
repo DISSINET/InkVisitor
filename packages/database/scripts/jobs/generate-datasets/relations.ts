@@ -1,4 +1,4 @@
-import { IEntity, Relation as RelationTypes } from "@shared/types";
+import { IEntity, Relation as RelationTypes } from "@inkvisitor/shared/types";
 import Superclass from "@models/relation/superclass"
 import SuperordinateEntity from "@models/relation/superordinate-entity"
 import Synonym from "@models/relation/synonym"
@@ -14,7 +14,7 @@ import Actant1Semantics from "@models/relation/actant1-semantics"
 import Actant2Semantics from "@models/relation/actant2-semantics"
 import Related from "@models/relation/related"
 
-import { EntityEnums, RelationEnums } from "@shared/enums";
+import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { getNextId, getRandomElements, getRandomNumber } from "./utils";
 
 export default class RelationsGenerator {

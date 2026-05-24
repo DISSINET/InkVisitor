@@ -3,7 +3,7 @@ import Relation from "@models/relation/relation";
 import Resource from "@models/resource/resource";
 import Value from "@models/value/value";
 import { Db } from "@service/rethink";
-import { DbEnums, EntityEnums, RelationEnums } from "@shared/enums";
+import { DbEnums, EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import {
   IAction,
   IConcept,
@@ -12,7 +12,7 @@ import {
   IValue,
   Relation as RelationTypes,
   AuditScope,
-} from "@shared/types";
+} from "@inkvisitor/shared/types";
 import * as path from "path";
 import { Connection, r as rethink } from "rethinkdb-ts";
 import { question } from "scripts/import/prompts";

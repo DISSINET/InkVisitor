@@ -1,7 +1,7 @@
-import { IAction, IConcept } from "@shared/types";
+import { IAction, IConcept } from "@inkvisitor/shared/types";
 import { r, Connection, } from "rethinkdb-ts";
 import { IJob } from ".";
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import Entity from "@models/entity/entity";
 
 const fixActions = async (db: Connection): Promise<void> => {

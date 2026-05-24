@@ -1,5 +1,5 @@
-import { EntityEnums, UserEnums } from "@shared/enums";
-import { IResponseTree, IUser } from "@shared/types";
+import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
+import { IResponseTree, IUser } from "@inkvisitor/shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, ButtonGroup, CustomScrollbar, Loader } from "components";

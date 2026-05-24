@@ -1,5 +1,5 @@
-import { partitivityDict, virtualityDict } from "@shared/dictionaries";
-import { IEntity, IProp } from "@shared/types";
+import { partitivityDict, virtualityDict } from "@inkvisitor/shared/dictionaries";
+import { IEntity, IProp } from "@inkvisitor/shared/types";
 import { excludedSuggesterEntities } from "Theme/constants";
 import { AttributeIcon, Button } from "components";
 import Dropdown, {

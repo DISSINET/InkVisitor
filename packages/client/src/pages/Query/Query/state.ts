@@ -1,5 +1,5 @@
-import { EntityEnums } from "@shared/enums";
-import { Query } from "@shared/types";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { Query } from "@inkvisitor/shared/types";
 import { v4 as uuidv4 } from "uuid";
 import { getAllEdges, getAllNodes } from "./utils";
 

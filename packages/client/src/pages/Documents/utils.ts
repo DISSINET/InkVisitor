@@ -1,4 +1,4 @@
-import { IDocument, IResponseEntity } from "@shared/types";
+import { IDocument, IResponseEntity } from "@inkvisitor/shared/types";
 import { getEntityLabel } from "utils/utils";
 import { DocumentSortDirection, DocumentSortField, DocumentWithResource } from "./types";
 

@@ -6,7 +6,7 @@ import {
   PermissionDeniedError,
   StatementDoesNotExits,
   TerritoryDoesNotExits,
-} from "@shared/types/errors";
+} from "@inkvisitor/shared/types/errors";
 import { asyncRouteHandler } from "..";
 import {
   IReference,
@@ -14,10 +14,10 @@ import {
   IResponseStatement,
   IStatement,
   ITerritory,
-} from "@shared/types";
+} from "@inkvisitor/shared/types";
 import Statement, { StatementTerritory } from "@models/statement/statement";
 import { ResponseStatement } from "@models/statement/response";
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IRequest } from "src/custom_typings/request";
 import Entity from "@models/entity/entity";
 import Reference from "@models/entity/reference";

@@ -4,17 +4,17 @@ import {
   IStatementActant,
   IStatementAction,
   IReference,
-} from "@shared/types";
+} from "@inkvisitor/shared/types";
 import {
   fillFlatObject,
   fillArray,
   IModel,
   determineOrder,
 } from "@models/common";
-import { EntityEnums, UserEnums, DbEnums } from "@shared/enums";
+import { EntityEnums, UserEnums, DbEnums } from "@inkvisitor/shared/enums";
 import Entity from "@models/entity/entity";
 import { r as rethink, Connection, RDatum, WriteResult } from "rethinkdb-ts";
-import { InternalServerError } from "@shared/types/errors";
+import { InternalServerError } from "@inkvisitor/shared/types/errors";
 import User from "@models/user/user";
 import treeCache from "@service/treeCache";
 import Prop from "@models/prop/prop";
@@ -23,9 +23,9 @@ import {
   IStatementDataTerritory,
   ROOT_TERRITORY_ID,
   StatementObject,
-} from "@shared/types/statement";
+} from "@inkvisitor/shared/types/statement";
 import { randomUUID } from "crypto";
-import { PropSpecKind } from "@shared/types/prop";
+import { PropSpecKind } from "@inkvisitor/shared/types/prop";
 
 export class StatementClassification implements IStatementClassification {
   id = "";

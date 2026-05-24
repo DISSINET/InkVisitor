@@ -3,22 +3,22 @@ import Audit from "@models/audit/audit";
 import { ResponseDocumentAudit } from "@models/audit/response";
 import Document from "@models/document/document";
 import { AnchorsNode } from "@models/document/anchors";
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import {
   IDocument,
   IDocumentMeta,
   IResponseAudit,
   IResponseGeneric,
   IDocumentAuditAnchorChanges,
-} from "@shared/types";
+} from "@inkvisitor/shared/types";
 import {
   BadParams,
   DocumentDoesNotExist,
   InternalServerError,
   ModelNotValidError,
   PermissionDeniedError,
-} from "@shared/types/errors";
-import { EventType } from "@shared/types/stats";
+} from "@inkvisitor/shared/types/errors";
+import { EventType } from "@inkvisitor/shared/types/stats";
 import { Router } from "express";
 import { IRequest } from "src/custom_typings/request";
 import { asyncRouteHandler } from "../index";

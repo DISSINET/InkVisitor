@@ -2,9 +2,9 @@ import Audit from "@models/audit/audit";
 import Entity from "@models/entity/entity";
 import Relation from "@models/relation/relation";
 import User from "@models/user/user";
-import { IEntity, IUser } from "@shared/types";
-import { PropSpecKind } from "@shared/types/prop";
-import { Explore } from "@shared/types/query";
+import { IEntity, IUser } from "@inkvisitor/shared/types";
+import { PropSpecKind } from "@inkvisitor/shared/types/prop";
+import { Explore } from "@inkvisitor/shared/types/query";
 import { Connection } from "rethinkdb-ts";
 
 export default class Results<T extends { id: string }> {

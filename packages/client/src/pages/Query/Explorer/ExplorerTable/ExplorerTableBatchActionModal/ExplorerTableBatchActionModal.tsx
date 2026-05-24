@@ -1,4 +1,4 @@
-import { Explore } from "@shared/types/query";
+import { Explore } from "@inkvisitor/shared/types/query";
 import React from "react";
 import { BatchAction } from "../types";
 import { BatchActionAddMetaprop } from "./BatchActionAddMetaprop";

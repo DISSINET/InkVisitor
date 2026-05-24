@@ -1,8 +1,8 @@
 import "ts-jest";
 import { Db } from "@service/rethink";
 import QuerySearch from "./search";
-import { Query } from "@shared/types/query";
-import { EntityEnums, RelationEnums } from "@shared/enums";
+import { Query } from "@inkvisitor/shared/types/query";
+import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { SearchEdge, SearchNode } from ".";
 import { deleteEntities, getEntitiesDataByClass } from "@service/shorthands";
 import { prepareEntity } from "@models/entity/entity.test";

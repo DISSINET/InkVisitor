@@ -1,6 +1,6 @@
 import "ts-jest";
 import { clean, testErroneousResponse } from "@modules/common.test";
-import { EntityDoesNotExist, ModelNotValidError } from "@shared/types/errors";
+import { EntityDoesNotExist, ModelNotValidError } from "@inkvisitor/shared/types/errors";
 import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
@@ -10,7 +10,7 @@ import { findEntityById } from "@service/shorthands";
 import { Db } from "@service/rethink";
 import { prepareEntity } from "@models/entity/entity.test";
 import { prepareRelation } from "@models/relation/relation.test";
-import { RelationEnums } from "@shared/enums";
+import { RelationEnums } from "@inkvisitor/shared/enums";
 import Relation from "@models/relation/relation";
 import { pool } from "@middlewares/db";
 

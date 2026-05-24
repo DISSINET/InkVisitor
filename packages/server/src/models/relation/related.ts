@@ -1,8 +1,8 @@
-import { EntityEnums, RelationEnums } from "@shared/enums";
+import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import Relation from "./relation";
-import { Relation as RelationTypes } from "@shared/types";
+import { Relation as RelationTypes } from "@inkvisitor/shared/types";
 import { Connection } from "rethinkdb-ts";
-import { InternalServerError, ModelNotValidError } from "@shared/types/errors";
+import { InternalServerError, ModelNotValidError } from "@inkvisitor/shared/types/errors";
 
 export default class Related
   extends Relation

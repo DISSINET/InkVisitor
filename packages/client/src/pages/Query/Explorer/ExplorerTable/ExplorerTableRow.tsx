@@ -3,14 +3,14 @@ import React, { useContext } from "react";
 import { MdOutlineCheckBox, MdOutlineCheckBoxOutlineBlank } from "react-icons/md";
 import { ThemeContext } from "styled-components";
 
-import { classesAll } from "@shared/dictionaries/entity";
-import { IEntity, IResponseQueryEntity, IUser } from "@shared/types";
-import { Explore } from "@shared/types/query";
+import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
+import { IEntity, IResponseQueryEntity, IUser } from "@inkvisitor/shared/types";
+import { Explore } from "@inkvisitor/shared/types/query";
 import api from "api";
 import { EntitySuggester, EntityTag, UserTag } from "components/advanced";
 import { deleteProp, deleteRef } from "constructors";
 
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import { UserTagSize } from "components/advanced/UserTag/utils";
 import { useSearchParams } from "hooks";
 import { invalidateAllExplorerQueries } from "pages/Query/useQueryData";

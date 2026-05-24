@@ -1,4 +1,4 @@
-import { IEntity, IResponseBookmarkFolder } from "@shared/types";
+import { IEntity, IResponseBookmarkFolder } from "@inkvisitor/shared/types";
 import { useTheme } from "hooks";
 import React, { useRef } from "react";
 import {

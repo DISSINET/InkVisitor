@@ -1,6 +1,6 @@
 import "ts-jest";
 import { createOpeningTagRegex } from "@common/regex";
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import { AnchorsNode } from "./anchors";
 
 const BASE_CONTENT = `<test>

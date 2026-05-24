@@ -1,4 +1,4 @@
-import { EntityEnums, RelationEnums, UserEnums } from "@shared/enums";
+import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
 import {
   IAction,
   IBookmarkFolder,
@@ -11,14 +11,14 @@ import {
   IStatementAction,
   ITerritory,
   Relation,
-} from "@shared/types";
-import { ITerritoryProtocol } from "@shared/types/territory";
-import { UserOptions } from "@shared/types/response-user";
+} from "@inkvisitor/shared/types";
+import { ITerritoryProtocol } from "@inkvisitor/shared/types/territory";
+import { UserOptions } from "@inkvisitor/shared/types/response-user";
 
 import {
   IStatementClassification,
   IStatementIdentification,
-} from "@shared/types/statement";
+} from "@inkvisitor/shared/types/statement";
 import api from "api";
 import { deepCopy } from "utils/utils";
 import { v4 as uuidv4 } from "uuid";

@@ -1,7 +1,7 @@
 import { fillFlatObject, IModel } from "@models/common";
 import Entity from "@models/entity/entity";
-import { EntityEnums } from "@shared/enums";
-import { IResource, IResourceData } from "@shared/types/resource";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { IResource, IResourceData } from "@inkvisitor/shared/types/resource";
 import { Connection, r as rethink } from "rethinkdb-ts";
 
 class ResourceData implements IResourceData, IModel {

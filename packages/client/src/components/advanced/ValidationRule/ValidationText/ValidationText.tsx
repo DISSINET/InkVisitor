@@ -2,13 +2,13 @@ import {
   entityStatusDict,
   entitiesDictKeys,
   languageDict,
-} from "@shared/dictionaries";
-import { EntityEnums } from "@shared/enums";
-import { IEntity } from "@shared/types";
+} from "@inkvisitor/shared/dictionaries";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { IEntity } from "@inkvisitor/shared/types";
 import {
   EProtocolTieType,
   ITerritoryValidation,
-} from "@shared/types/territory";
+} from "@inkvisitor/shared/types/territory";
 import React, { useCallback, useMemo } from "react";
 import { getEntityLabel } from "utils/utils";
 import { StyledSentence, StyledSentenceEntity } from "../ValidationRuleStyles";

@@ -1,5 +1,5 @@
 import { r, RDatum, RTable, RValue } from "rethinkdb-ts";
-import { DbEnums } from "@shared/enums";
+import { DbEnums } from "@inkvisitor/shared/enums";
 import { DbSchema } from "./common";
 
 const entitiesIndexes: ((table: RTable) => any)[] = [

@@ -1,4 +1,4 @@
-import { EntityEnums, RelationEnums, UserEnums } from "@shared/enums";
+import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
 import {
   IAction,
   IConcept,
@@ -6,23 +6,23 @@ import {
   IResponseStatement,
   IStatement,
   ITerritory,
-} from "@shared/types";
+} from "@inkvisitor/shared/types";
 import {
   IWarning,
   IWarningPosition,
   IWarningPositionSection,
-} from "@shared/types/warning";
+} from "@inkvisitor/shared/types/warning";
 
 import { ActionEntity } from "@models/action/action";
 import Relation from "@models/relation/relation";
 import Classification from "@models/relation/classification";
 import { findEntityById, getEntitiesByIds } from "@service/shorthands";
 import treeCache from "@service/treeCache";
-import { WarningTypeEnums } from "@shared/enums";
-import { InternalServerError } from "@shared/types/errors";
-import { PropSpecKind } from "@shared/types/prop";
-import { IResponseUsedInDocument } from "@shared/types/response-detail";
-import { ITerritoryValidation } from "@shared/types/territory";
+import { WarningTypeEnums } from "@inkvisitor/shared/enums";
+import { InternalServerError } from "@inkvisitor/shared/types/errors";
+import { PropSpecKind } from "@inkvisitor/shared/types/prop";
+import { IResponseUsedInDocument } from "@inkvisitor/shared/types/response-detail";
+import { ITerritoryValidation } from "@inkvisitor/shared/types/territory";
 import { Connection } from "rethinkdb-ts";
 import { IRequest } from "src/custom_typings/request";
 import Entity from "../entity/entity";

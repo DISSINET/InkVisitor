@@ -1,4 +1,4 @@
-import { IAudit, IResponseAudit } from "@shared/types";
+import { IAudit, IResponseAudit } from "@inkvisitor/shared/types";
 import api from "api";
 import React from "react";
 import { FaExchangeAlt, FaRegCalendarAlt, FaUser } from "react-icons/fa";

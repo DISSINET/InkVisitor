@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
-import { EntityEnums } from "@shared/enums";
-import { IDocument } from "@shared/types";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { IDocument } from "@inkvisitor/shared/types";
 import api from "api";
 import {
   Button,

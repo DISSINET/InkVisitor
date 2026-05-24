@@ -1,7 +1,7 @@
-import { IDocument, DropdownItem } from "@shared/types";
-import { IAnchorUpdate, IAudit, IDocumentAuditAnchorChanges } from "@shared/types/audit";
-import { IResponseAudit } from "@shared/types/response-audit";
-import { IResponseEntity } from "@shared/types/response-entity";
+import { IDocument, DropdownItem } from "@inkvisitor/shared/types";
+import { IAnchorUpdate, IAudit, IDocumentAuditAnchorChanges } from "@inkvisitor/shared/types/audit";
+import { IResponseAudit } from "@inkvisitor/shared/types/response-audit";
+import { IResponseEntity } from "@inkvisitor/shared/types/response-entity";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import api from "api";
 import { BaseDropdown, Loader, Table, Timestamp } from "components";

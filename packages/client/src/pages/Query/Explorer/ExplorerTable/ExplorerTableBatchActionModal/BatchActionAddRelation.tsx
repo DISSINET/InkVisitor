@@ -1,5 +1,5 @@
-import { EntityEnums, RelationEnums } from "@shared/enums";
-import { IEntity, Relation } from "@shared/types";
+import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
+import { IEntity, Relation } from "@inkvisitor/shared/types";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import theme from "Theme/theme";
 import api from "api";

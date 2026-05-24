@@ -11,11 +11,11 @@ import {
   deleteEntities,
   deleteRelations,
 } from "@service/shorthands";
-import { EntityEnums } from "@shared/enums";
-import { IResponseGeneric, IStatement, IStatementAction } from "@shared/types";
-import { CustomError } from "@shared/types/errors";
-import { ITerritory } from "@shared/types/index";
-import { errorTypes } from "@shared/types/response-generic";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { IResponseGeneric, IStatement, IStatementAction } from "@inkvisitor/shared/types";
+import { CustomError } from "@inkvisitor/shared/types/errors";
+import { ITerritory } from "@inkvisitor/shared/types/index";
+import { errorTypes } from "@inkvisitor/shared/types/response-generic";
 import { IRequest } from "src/custom_typings/request";
 import "ts-jest";
 

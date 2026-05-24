@@ -1,7 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import React, { useEffect, useMemo, useReducer, useRef, useState } from "react";
 
-import { Query } from "@shared/types";
+import { Query } from "@inkvisitor/shared/types";
 import api from "api";
 import { Box, Button, Loader, Panel } from "components";
 import { LayoutSeparatorHorizontal, LayoutSeparatorVertical } from "components/advanced";

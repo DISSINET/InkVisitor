@@ -1,5 +1,5 @@
 import { clean, testErroneousResponse } from "@modules/common.test";
-import { BadParams, TerritoryDoesNotExits } from "@shared/types/errors";
+import { BadParams, TerritoryDoesNotExits } from "@inkvisitor/shared/types/errors";
 import { Db } from "@service/rethink";
 import { createEntity, deleteEntities } from "@service/shorthands";
 import Territory from "@models/territory/territory";

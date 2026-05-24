@@ -1,5 +1,5 @@
-import { RelationEnums } from "@shared/enums";
-import { Relation } from "@shared/types";
+import { RelationEnums } from "@inkvisitor/shared/enums";
+import { Relation } from "@inkvisitor/shared/types";
 import { RValue, RTable } from "rethinkdb-ts";
 
 export interface DbSchema {

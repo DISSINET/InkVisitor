@@ -1,10 +1,10 @@
 import { IDbModel, fillFlatObject } from "@models/common";
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
-import { IAudit, AuditScope } from "@shared/types";
-import { InternalServerError } from "@shared/types/errors";
+import { IAudit, AuditScope } from "@inkvisitor/shared/types";
+import { InternalServerError } from "@inkvisitor/shared/types/errors";
 import { IRequest } from "../../custom_typings/request";
-import { DbEnums } from "@shared/enums";
-import { EventType } from "@shared/types/stats";
+import { DbEnums } from "@inkvisitor/shared/enums";
+import { EventType } from "@inkvisitor/shared/types/stats";
 
 export default class Audit implements IAudit, IDbModel {
   static table = "audits";

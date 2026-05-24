@@ -9,7 +9,7 @@ import { supertestConfig } from "..";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
 import Territory from "@models/territory/territory";
-import { IResponseTree, IStatement, ITerritory } from "@shared/types";
+import { IResponseTree, IStatement, ITerritory } from "@inkvisitor/shared/types";
 import { Db } from "@service/rethink";
 import { pool } from "@middlewares/db";
 

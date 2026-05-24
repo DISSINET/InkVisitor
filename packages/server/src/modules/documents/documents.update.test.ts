@@ -1,5 +1,5 @@
 import { clean, testErroneousResponse } from "@modules/common.test";
-import { BadParams, DocumentDoesNotExist } from "@shared/types/errors";
+import { BadParams, DocumentDoesNotExist } from "@inkvisitor/shared/types/errors";
 import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../Server";

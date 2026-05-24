@@ -5,7 +5,7 @@ import { Relation } from "../../shared/types/relation";
 import { confirm } from "./import/prompts";
 import { DbSchema, checkRelation, TableSchema } from "./import/common";
 import { DbSchemaIndexes } from "./import/indexes";
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import { question } from "./import/prompts";
 import { DbHelper } from "./import/db";
 import { getEnv } from "./import/common";

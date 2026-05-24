@@ -1,7 +1,7 @@
 import { createMockTree, clean } from "@modules/common.test";
 import { Db } from "@service/rethink";
 import { TreeCache } from "./treeCache";
-import { UserEnums } from "@shared/enums";
+import { UserEnums } from "@inkvisitor/shared/enums";
 import { UserRight } from "@models/user/user";
 
 describe("TreeCache", function () {

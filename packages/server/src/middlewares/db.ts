@@ -1,6 +1,6 @@
 import { Response, Request, NextFunction } from "express";
 import { Db, rethinkConfig } from "@service/rethink";
-import { InternalServerError } from "@shared/types/errors";
+import { InternalServerError } from "@inkvisitor/shared/types/errors";
 import DbPool from "@service/rethink-pool";
 
 export const pool = new DbPool(rethinkConfig);

@@ -1,7 +1,7 @@
 import "ts-jest";
 import { StatsAggregator } from "./stats-aggregator";
 import { MaterializedStats } from "./materialized-stats";
-import { Aggregation, EventType, TimeUnit } from "@shared/types/stats";
+import { Aggregation, EventType, TimeUnit } from "@inkvisitor/shared/types/stats";
 
 describe("StatsAggregator.mapGroupedAuditsToStats", () => {
   test("activity-type: one row per (date, type) keyed by the event type", () => {

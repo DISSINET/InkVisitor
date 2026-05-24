@@ -1,5 +1,5 @@
 import { ActionEntity, ActionValency } from "@models/action/action";
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import "ts-jest";
 
 describe("models/action/ActionEntity", function () {

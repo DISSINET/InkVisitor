@@ -1,5 +1,5 @@
-import { EntityEnums, UserEnums } from "@shared/enums";
-import { IEntity, IStatement, ITerritory } from "@shared/types";
+import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
+import { IEntity, IStatement, ITerritory } from "@inkvisitor/shared/types";
 import { Dropzone } from "components";
 import { InstTemplate } from "constructors";
 import React, { ReactElement, useState } from "react";

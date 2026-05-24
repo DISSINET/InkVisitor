@@ -3,7 +3,7 @@ import {
   ValidationKey,
   WarningKey,
   WarningTypeEnums,
-} from "@shared/enums/warning";
+} from "@inkvisitor/shared/enums/warning";
 import React, { useState } from "react";
 import {
   StyledGridFormLabel,

@@ -1,8 +1,8 @@
-import { entityStatusDict, languageDict } from "@shared/dictionaries";
-import { entitiesDict } from "@shared/dictionaries/entity";
-import { EntityEnums, SearchEnums, UserEnums } from "@shared/enums";
-import { IEntity } from "@shared/types";
-import { IRequestSearch, IRequestSearchRootValidity } from "@shared/types/request-search";
+import { entityStatusDict, languageDict } from "@inkvisitor/shared/dictionaries";
+import { entitiesDict } from "@inkvisitor/shared/dictionaries/entity";
+import { EntityEnums, SearchEnums, UserEnums } from "@inkvisitor/shared/enums";
+import { IEntity } from "@inkvisitor/shared/types";
+import { IRequestSearch, IRequestSearchRootValidity } from "@inkvisitor/shared/types/request-search";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { wildCardChar } from "Theme/constants";
 import api from "api";
@@ -20,7 +20,7 @@ import { FaPlus } from "react-icons/fa";
 import { RiCloseFill } from "react-icons/ri";
 import { setExpandedOptions } from "redux/features/entitySearch/expandedOptionsSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { DropdownItem } from "@shared/types";
+import { DropdownItem } from "@inkvisitor/shared/types";
 import { EntitySearchAdvancedOptions } from "./EntitySearchAdvancedOptions/EntitySearchAdvancedOptions";
 import {
   StyledBoxContent,

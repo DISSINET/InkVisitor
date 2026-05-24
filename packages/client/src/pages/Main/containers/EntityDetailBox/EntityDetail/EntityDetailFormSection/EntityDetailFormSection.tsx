@@ -5,8 +5,8 @@ import {
   entitiesDictKeys,
   entityStatusDict,
   languageDict,
-} from "@shared/dictionaries";
-import { EntityEnums, UserEnums } from "@shared/enums";
+} from "@inkvisitor/shared/dictionaries";
+import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import {
   IActionData,
   IDocument,
@@ -14,8 +14,8 @@ import {
   IResponseDetail,
   IResponseGeneric,
   ITerritory,
-} from "@shared/types";
-import { IConceptData } from "@shared/types/concept";
+} from "@inkvisitor/shared/types";
+import { IConceptData } from "@inkvisitor/shared/types/concept";
 import { useMutation, UseMutationResult, useQuery, useQueryClient } from "@tanstack/react-query";
 import { MIN_LABEL_LENGTH_MESSAGE, rootTerritoryId } from "Theme/constants";
 import api from "api";
@@ -31,7 +31,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { FaExternalLinkAlt, FaRegCopy } from "react-icons/fa";
 import { TbHomeMove } from "react-icons/tb";
 import { toast } from "react-toastify";
-import { DropdownItem } from "@shared/types";
+import { DropdownItem } from "@inkvisitor/shared/types";
 import { getEntityStatusIcon } from "utils/iconUtils";
 import {
   StyledDetailContentRow,

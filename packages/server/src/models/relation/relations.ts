@@ -1,6 +1,6 @@
 import { nonenumerable } from "@common/decorators";
-import { EntityEnums, RelationEnums } from "@shared/enums";
-import { IWarning, Relation as RelationTypes } from "@shared/types";
+import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
+import { IWarning, Relation as RelationTypes } from "@inkvisitor/shared/types";
 import { Connection } from "rethinkdb-ts";
 import { IRequest } from "src/custom_typings/request";
 import Actant1Semantics from "./actant1-semantics";

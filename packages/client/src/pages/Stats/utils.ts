@@ -1,5 +1,5 @@
-import { IRequestStats, IResponseStats } from "@shared/types";
-import { Aggregation, EventType } from "@shared/types/stats";
+import { IRequestStats, IResponseStats } from "@inkvisitor/shared/types";
+import { Aggregation, EventType } from "@inkvisitor/shared/types/stats";
 import { schemeTableau10 } from "d3";
 import { useTheme } from "styled-components";
 

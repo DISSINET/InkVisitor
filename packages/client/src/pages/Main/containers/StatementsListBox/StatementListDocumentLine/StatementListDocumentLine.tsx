@@ -1,6 +1,6 @@
-import { entitiesDict } from "@shared/dictionaries";
-import { EntityEnums } from "@shared/enums";
-import { IDocument, IEntity } from "@shared/types";
+import { entitiesDict } from "@inkvisitor/shared/dictionaries";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { IDocument, IEntity } from "@inkvisitor/shared/types";
 import { Button, IconWithTooltip, Loader } from "components";
 import Dropdown, {
   DocumentModalExport,

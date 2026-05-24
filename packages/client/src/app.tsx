@@ -1,4 +1,4 @@
-import { InterfaceEnums, UserEnums } from "@shared/enums";
+import { InterfaceEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import api from "api";

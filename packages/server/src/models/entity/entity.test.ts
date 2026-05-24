@@ -8,12 +8,12 @@ import Statement, {
 } from "@models/statement/statement";
 import { clean } from "@modules/common.test";
 import { findEntityById } from "@service/shorthands";
-import { IEvent, IReference, IStatement } from "@shared/types";
+import { IEvent, IReference, IStatement } from "@inkvisitor/shared/types";
 import Prop, { PropSpec } from "@models/prop/prop";
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import { getEntityClass } from "@models/factory";
 import Reference from "./reference";
-import { ModelNotValidError } from "@shared/types/errors";
+import { ModelNotValidError } from "@inkvisitor/shared/types/errors";
 
 export const prepareEntity = (
   classValue: EntityEnums.Class = EntityEnums.Class.Concept

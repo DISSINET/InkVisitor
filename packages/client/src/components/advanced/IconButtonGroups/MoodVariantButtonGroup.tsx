@@ -1,5 +1,5 @@
-import { moodVariantsDict } from "@shared/dictionaries";
-import { EntityEnums } from "@shared/enums";
+import { moodVariantsDict } from "@inkvisitor/shared/dictionaries";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IconButtonGroup } from "components";
 import React from "react";
 import { FaHeadSideVirus } from "react-icons/fa";

@@ -1,4 +1,4 @@
-import { IEntity, IResponseUsedInMetaProp } from "@shared/types";
+import { IEntity, IResponseUsedInMetaProp } from "@inkvisitor/shared/types";
 import { Table } from "components";
 import React, { useMemo } from "react";
 import { CellProps, Column } from "react-table";

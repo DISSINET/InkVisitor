@@ -1,11 +1,11 @@
-import { entitiesDict } from "@shared/dictionaries";
-import { EntityEnums, RelationEnums } from "@shared/enums";
+import { entitiesDict } from "@inkvisitor/shared/dictionaries";
+import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import {
   IEntity,
   IResponseDetail,
   IResponseGeneric,
   Relation,
-} from "@shared/types";
+} from "@inkvisitor/shared/types";
 import { UseMutationResult, useQuery } from "@tanstack/react-query";
 import { excludedSuggesterEntities } from "Theme/constants";
 import api from "api";

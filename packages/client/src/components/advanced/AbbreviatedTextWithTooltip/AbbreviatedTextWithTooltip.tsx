@@ -1,4 +1,4 @@
-import { IDocument } from "@shared/types";
+import { IDocument } from "@inkvisitor/shared/types";
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
 import React, { useEffect, useState } from "react";

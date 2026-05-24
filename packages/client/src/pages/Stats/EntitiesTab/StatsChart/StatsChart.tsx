@@ -1,4 +1,4 @@
-import { IRequestStats, IResponseStats } from "@shared/types";
+import { IRequestStats, IResponseStats } from "@inkvisitor/shared/types";
 import { color as d3Color } from "d3";
 import { useCallback, useMemo, useState } from "react";
 import {

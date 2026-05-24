@@ -1,6 +1,6 @@
 import { Connection, r } from "rethinkdb-ts";
-import { AuditScope } from "@shared/types";
-import { DbEnums } from "@shared/enums";
+import { AuditScope } from "@inkvisitor/shared/types";
+import { DbEnums } from "@inkvisitor/shared/enums";
 import { IJob } from ".";
 
 const BATCH_SIZE = 500;

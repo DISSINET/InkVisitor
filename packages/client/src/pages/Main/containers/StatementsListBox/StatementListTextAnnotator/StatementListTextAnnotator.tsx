@@ -1,5 +1,5 @@
 import { Annotator } from "@inkvisitor/annotator/src/lib";
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import {
   IDocument,
   IResponseEntity,
@@ -7,7 +7,7 @@ import {
   IResponseTerritory,
   IResponseUser,
   IStatement,
-} from "@shared/types";
+} from "@inkvisitor/shared/types";
 import { UseMutationResult } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import TextAnnotator from "components/advanced/Annotator/Annotator";

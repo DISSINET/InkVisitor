@@ -1,4 +1,4 @@
-import { EntityEnums, UserEnums, WarningTypeEnums } from "@shared/enums";
+import { EntityEnums, UserEnums, WarningTypeEnums } from "@inkvisitor/shared/enums";
 import {
   DropdownItem,
   IEntity,
@@ -10,7 +10,7 @@ import {
   IStatementActant,
   IStatementAction,
   IStatementData,
-} from "@shared/types";
+} from "@inkvisitor/shared/types";
 import { UseMutationResult, useQuery, useQueryClient } from "@tanstack/react-query";
 import { EDITOR_TOO_SMALL_BREAKPOINT, excludedSuggesterEntities } from "Theme/constants";
 import api from "api";

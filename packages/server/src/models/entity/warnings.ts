@@ -3,18 +3,18 @@ import Relation from "@models/relation/relation";
 import Superclass from "@models/relation/superclass";
 import { Setting } from "@models/setting/setting";
 import { findEntityById, getEntitiesByIds } from "@service/shorthands";
-import { EntityEnums, RelationEnums, WarningTypeEnums } from "@shared/enums";
+import { EntityEnums, RelationEnums, WarningTypeEnums } from "@inkvisitor/shared/enums";
 import {
   IAction,
   IConcept,
   IEntity,
   ITerritory,
   IWarning,
-} from "@shared/types";
-import { IActionValency } from "@shared/types/action";
-import { InternalServerError } from "@shared/types/errors";
-import { PropSpecKind } from "@shared/types/prop";
-import { IWarningPositionSection } from "@shared/types/warning";
+} from "@inkvisitor/shared/types";
+import { IActionValency } from "@inkvisitor/shared/types/action";
+import { InternalServerError } from "@inkvisitor/shared/types/errors";
+import { PropSpecKind } from "@inkvisitor/shared/types/prop";
+import { IWarningPositionSection } from "@inkvisitor/shared/types/warning";
 import { Connection } from "rethinkdb-ts";
 import Entity from "./entity";
 

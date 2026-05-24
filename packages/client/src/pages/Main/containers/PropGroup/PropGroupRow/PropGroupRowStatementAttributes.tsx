@@ -1,5 +1,5 @@
-import { certaintyDict, moodDict, operatorDict } from "@shared/dictionaries";
-import { IProp } from "@shared/types";
+import { certaintyDict, moodDict, operatorDict } from "@inkvisitor/shared/dictionaries";
+import { IProp } from "@inkvisitor/shared/types";
 import { AttributeIcon, BundleButtonGroup } from "components";
 import Dropdown, {
   ElvlButtonGroup,

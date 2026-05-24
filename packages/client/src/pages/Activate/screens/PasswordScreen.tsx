@@ -1,7 +1,7 @@
 import {
   PasswordDoesNotMatchError,
   UnsafePasswordError,
-} from "@shared/types/errors";
+} from "@inkvisitor/shared/types/errors";
 import { SAFE_PASSWORD_DESCRIPTION } from "Theme/constants";
 import { Button, Input, ModalInputWrap } from "components";
 import {

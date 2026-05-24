@@ -1,4 +1,4 @@
-import { InterfaceEnums, UserEnums } from "@shared/enums";
+import { InterfaceEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { useQueryClient } from "@tanstack/react-query";
 import { heightHeader } from "Theme/constants";
 import { PingColor } from "Theme/theme";

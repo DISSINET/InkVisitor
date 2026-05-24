@@ -1,5 +1,5 @@
-import { actantPositionDict } from "@shared/dictionaries";
-import { EntityEnums } from "@shared/enums";
+import { actantPositionDict } from "@inkvisitor/shared/dictionaries";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IconButtonGroup, IconFont } from "components";
 import React from "react";
 

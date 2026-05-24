@@ -1,4 +1,4 @@
-import { IResponseEntity } from "@shared/types";
+import { IResponseEntity } from "@inkvisitor/shared/types";
 import api from "api";
 import { useSearchParams } from "hooks";
 import React, { useCallback, useEffect, useState } from "react";

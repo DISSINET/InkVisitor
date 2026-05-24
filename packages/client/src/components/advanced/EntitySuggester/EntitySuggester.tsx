@@ -2,14 +2,14 @@ import {
   classesAll,
   dropdownWildCard,
   entitiesDictKeys,
-} from "@shared/dictionaries/entity";
-import { EntityEnums, UserEnums } from "@shared/enums";
+} from "@inkvisitor/shared/dictionaries/entity";
+import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import {
   IEntity,
   IResponseEntity,
   IStatement,
   ITerritory,
-} from "@shared/types";
+} from "@inkvisitor/shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { wildCardChar } from "Theme/constants";
 import api from "api";

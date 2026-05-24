@@ -1,12 +1,12 @@
 import React from "react";
 import { StyledGridValue } from "./EntityReferenceTableStyles";
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import {
   EntityDropzone,
   EntityTag,
   EntitySuggester,
 } from "components/advanced";
-import { IEntity, IReference } from "@shared/types";
+import { IEntity, IReference } from "@inkvisitor/shared/types";
 
 interface EntityReferenceTableResource {
   reference: IReference;

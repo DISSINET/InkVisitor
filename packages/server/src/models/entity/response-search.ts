@@ -6,14 +6,14 @@ import Statement from "@models/statement/statement";
 import Territory from "@models/territory/territory";
 import { getEntitiesByIds } from "@service/shorthands";
 import treeCache from "@service/treeCache";
-import { EntityEnums, RelationEnums } from "@shared/enums";
-import { IConcept, IEntity, ITerritory, RequestSearch, AuditScope } from "@shared/types";
-import { PropSpecKind } from "@shared/types/prop";
+import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
+import { IConcept, IEntity, ITerritory, RequestSearch, AuditScope } from "@inkvisitor/shared/types";
+import { PropSpecKind } from "@inkvisitor/shared/types/prop";
 import { Connection, r, RDatum, RTable } from "rethinkdb-ts";
 import { IRequest } from "src/custom_typings/request";
 import Entity from "./entity";
 import { ResponseEntity } from "./response";
-import { IRequestSearchRootValidity } from "@shared/types/request-search";
+import { IRequestSearchRootValidity } from "@inkvisitor/shared/types/request-search";
 import { Setting } from "@models/setting/setting";
 import Relation from "@models/relation/relation";
 

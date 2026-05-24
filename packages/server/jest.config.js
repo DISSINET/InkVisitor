@@ -8,8 +8,9 @@ if (dotenvResult.error) {
 
 const paths = Object.keys(tsconfig.compilerOptions.paths).reduce(
   (prev, curr) => {
-    const split = curr.split("/");
-    prev[`${split[0]}/(.*)`] = `<rootDir>/${tsconfig.compilerOptions.paths[
+    // alias prefix without the trailing "/*" (handles multi-segment names like "@inkvisitor/shared")
+    const prefix = curr.replace(/\/\*$/, "");
+    prev[`${prefix}/(.*)`] = `<rootDir>/${tsconfig.compilerOptions.paths[
       curr
     ][0].replace("*", "$1")}`;
     return prev;

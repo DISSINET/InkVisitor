@@ -1,5 +1,5 @@
-import { EntityEnums } from "@shared/enums";
-import { IDocument, IResponseEntity } from "@shared/types";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { IDocument, IResponseEntity } from "@inkvisitor/shared/types";
 import {
   UseMutationResult,
   useMutation,
