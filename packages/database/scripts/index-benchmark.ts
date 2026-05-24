@@ -1,6 +1,6 @@
 const { performance } = require("perf_hooks");
-import { IEntity } from "../../shared/types";
-import { EntityEnums, DbEnums } from "../../shared/enums";
+import { IEntity } from "@inkvisitor/shared/types";
+import { EntityEnums, DbEnums } from "@inkvisitor/shared/enums";
 const fs = require("fs");
 import { Connection, r, RDatum, WriteResult } from "rethinkdb-ts";
 
