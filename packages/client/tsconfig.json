@@ -13,8 +13,6 @@
     "noImplicitAny": true,
     "outDir": "./dist/",
     "paths": {
-      "@dictionaries": ["./../shared/dictionaries/index.ts"],
-      "@inkvisitor/shared/*": ["./../shared/*"],
       "api": ["./src/api"],
       "app": ["./src/app"],
       "ensure-basename": ["./src/ensure-basename"],
