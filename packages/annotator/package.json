@@ -1,5 +1,5 @@
 {
-  "name": "annotator",
+  "name": "@inkvisitor/annotator",
   "version": "1.1.4",
   "description": "",
   "main": "dist/index.js",
