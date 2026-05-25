@@ -3,6 +3,7 @@ import {
   startOfDay,
   getLiveTailRange,
   mergeStatsValues,
+  sumMaterializedStats,
 } from "./hybrid-stats";
 
 describe("startOfDay", () => {
@@ -72,5 +73,39 @@ describe("mergeStatsValues", () => {
     const base = { "2026": { edit: 100 } };
     mergeStatsValues(base, { "2026": { edit: 3 } });
     expect(base).toEqual({ "2026": { edit: 100 } });
+  });
+});
+
+describe("sumMaterializedStats", () => {
+  test("sums rows sharing a bucket and aggregation key (USER: many types per user)", () => {
+    const rows = [
+      { date: "2026-05-01", aggregationKey: "U-1", count: 5 },
+      { date: "2026-05-01", aggregationKey: "U-1", count: 3 },
+      { date: "2026-05-01", aggregationKey: "U-2", count: 2 },
+    ];
+    expect(sumMaterializedStats(rows)).toEqual({
+      "2026-05-01": { "U-1": 8, "U-2": 2 },
+    });
+  });
+
+  test("keeps distinct keys separate (ACTIVITY_TYPE: one row per type)", () => {
+    const rows = [
+      { date: "2026-05-01", aggregationKey: "edit", count: 4 },
+      { date: "2026-05-01", aggregationKey: "delete", count: 1 },
+    ];
+    expect(sumMaterializedStats(rows)).toEqual({
+      "2026-05-01": { edit: 4, delete: 1 },
+    });
+  });
+
+  test("separates buckets by date", () => {
+    const rows = [
+      { date: "2026-05-01", aggregationKey: "U-1", count: 1 },
+      { date: "2026-05-02", aggregationKey: "U-1", count: 9 },
+    ];
+    expect(sumMaterializedStats(rows)).toEqual({
+      "2026-05-01": { "U-1": 1 },
+      "2026-05-02": { "U-1": 9 },
+    });
   });
 });

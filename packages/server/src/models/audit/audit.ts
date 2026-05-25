@@ -157,6 +157,42 @@ export default class Audit implements IAudit, IDbModel {
   }
 
   /**
+   * Resolves the deletion event type for an audit scope. Document deletions are
+   * recorded as anchor removals (their anchors disappear with them), entity
+   * deletions as plain deletions. Both fold into the matching edit type in the
+   * stats (ANCHOR_DELETE -> ANCHOR_EDIT, DELETE -> EDIT).
+   */
+  static deletionEventType(scope: AuditScope): EventType {
+    return scope === AuditScope.Document
+      ? EventType.ANCHOR_DELETE
+      : EventType.DELETE;
+  }
+
+  /**
+   * Records the single, minimal audit written when an entity or document is
+   * deleted: a deletion marker with empty changes, typed per scope via
+   * deletionEventType.
+   * @param db rethinkdb Connection
+   * @param modelId id of the deleted entity/document
+   * @param userId id of the user performing the deletion
+   * @param scope audit scope (entity or document)
+   */
+  static async createDeletionAudit(
+    db: Connection | undefined,
+    modelId: string,
+    userId: string,
+    scope: AuditScope
+  ): Promise<void> {
+    await new Audit({
+      modelId,
+      auditScope: scope,
+      user: userId,
+      changes: {},
+      type: Audit.deletionEventType(scope),
+    }).save(db);
+  }
+
+  /**
    * Retrieves first created audit entry for entity.
    * First audit entry stands for created-at entry.
    * @param db rethinkdb Connection
