@@ -25,6 +25,11 @@ import { StyledInfoText } from "../StatementListHeader/StatementListHeaderStyles
 import { toast } from "react-toastify";
 import { SECOND_PANEL_MIN_WIDTH } from "Theme/constants";
 
+// icon + margin + gap in StyledHighlightContainer when highlight label is shown
+const HIGHLIGHT_ICON_RESERVED_WIDTH = 10;
+const HIGHLIGHT_DROPDOWN_CHROME_WIDTH = 110;
+const HIGHLIGHT_SELECTED_ITEM_WIDTH = 37;
+
 interface StatementListDocumentLine {
   selectedResource: IEntity | false;
   setSelectedResourceId: (id: string | false) => void;
@@ -68,6 +73,19 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
   const isUndersized = useMemo(() => {
     return contentWidth < SECOND_PANEL_MIN_WIDTH;
   }, [contentWidth]);
+
+  const highlightDropdownWidth = useMemo(() => {
+    const baseWidth = annotatorWidthTooNarrow ? contentWidth / 2.7 : contentWidth / 2.5;
+    return isUndersized ? baseWidth + HIGHLIGHT_ICON_RESERVED_WIDTH : baseWidth;
+  }, [contentWidth, annotatorWidthTooNarrow, isUndersized]);
+
+  const highlightDropdownLimitSelectedItems = useMemo(
+    () =>
+      Math.floor(
+        (highlightDropdownWidth - HIGHLIGHT_DROPDOWN_CHROME_WIDTH) / HIGHLIGHT_SELECTED_ITEM_WIDTH
+      ),
+    [highlightDropdownWidth]
+  );
 
   return (
     <>
@@ -211,12 +229,8 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
                   onChange={setHlEntities}
                   value={hlEntities}
                   noOptionsMessage="No entity classes to highlight"
-                  width={annotatorWidthTooNarrow ? contentWidth / 2.7 : contentWidth / 2.5}
-                  limitSelectedItems={
-                    annotatorWidthTooNarrow
-                      ? Math.floor((contentWidth / 2.7 - 110) / 37)
-                      : Math.floor((contentWidth / 2.5 - 110) / 37)
-                  }
+                  width={highlightDropdownWidth}
+                  limitSelectedItems={highlightDropdownLimitSelectedItems}
                 />
               </>
             )}
