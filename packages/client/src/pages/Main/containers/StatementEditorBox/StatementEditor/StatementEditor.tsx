@@ -716,20 +716,22 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   <StyledEditorAnchorSectionAnchor key={dai}>
                     <StyledAnchorText>{documentAnchor.anchorText}</StyledAnchorText>
                     <StyledAnchorMeta>
-                      <Button
-                        inverted
-                        noBorder
-                        noBackground
-                        tooltipLabel="locate statement anchor"
-                        icon={<FaAnchor size={16} />}
-                        onClick={() => {
-                          scrollToStatementAnchor(
-                            documentAnchor.parentTerritoryId,
-                            documentAnchor.anchorIndex
-                          );
-                        }}
-                      />
-                      <DocumentTitle title={documentAnchor.document.title} />
+                      <div style={{ display: "grid", gridTemplateColumns: "auto 1fr" }}>
+                        <Button
+                          inverted
+                          noBorder
+                          noBackground
+                          tooltipLabel="locate statement anchor"
+                          icon={<FaAnchor size={16} />}
+                          onClick={() => {
+                            scrollToStatementAnchor(
+                              documentAnchor.parentTerritoryId,
+                              documentAnchor.anchorIndex
+                            );
+                          }}
+                        />
+                        <DocumentTitle title={documentAnchor.document.title} />
+                      </div>
                       {documentAnchor.resourceId && (
                         <EntityTag entity={statement.entities[documentAnchor.resourceId]} />
                       )}
