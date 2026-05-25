@@ -56,6 +56,15 @@ describe("explore-label-filter", () => {
     expect(entityLabelMatchesFilter(labels, "John Smithson")).toBeFalsy();
   });
 
+  it("entityLabelMatchesFilter matches substrings not only from word start", () => {
+    const labels = ["John Smith", "Fruit Basket"];
+    expect(entityLabelMatchesFilter(labels, "mith")).toBeTruthy();
+    expect(entityLabelMatchesFilter(labels, "smith")).toBeTruthy();
+    expect(entityLabelMatchesFilter(labels, "asket")).toBeTruthy();
+    expect(entityLabelMatchesFilter(labels, "ohn")).toBeTruthy();
+    expect(entityLabelMatchesFilter(labels, "xyz")).toBeFalsy();
+  });
+
   it("entityMatchesRowLabelFilter matches against entity.labels attribute", () => {
     expect(entityMatchesRowLabelFilter(entity, rowLabelFilter("*fruit*"))).toBeTruthy();
     expect(entityMatchesRowLabelFilter(entity, rowLabelFilter("missing"))).toBeFalsy();

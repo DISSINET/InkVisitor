@@ -31,8 +31,8 @@ const toDiacriticPattern = (text: string): string =>
 /**
  * Builds a case-insensitive RegExp aligned with entity label search (searchWordByWord).
  * - Splits the filter on spaces so multi-word names work.
- * - Implicit trailing wildcard when none is given (prefix match on the last word).
- * - Leading/trailing * in the filter remove the respective boundary.
+ * - Implicit leading/trailing wildcards (like entity search *word* / labelOrId + "*").
+ * - Explicit * in the filter remove the respective boundary on that side.
  */
 export const labelFilterToRegExp = (label: string): RegExp => {
   let left = "^";
@@ -42,6 +42,9 @@ export const labelFilterToRegExp = (label: string): RegExp => {
   if (cleaned.startsWith("*")) {
     left = "";
     cleaned = cleaned.slice(1).trimStart();
+  } else {
+    // Substring may start in the middle of a word or after earlier label text
+    left = "";
   }
   if (cleaned.endsWith("*")) {
     right = "";
