@@ -15,6 +15,7 @@ import { ExplorerTableBatchActionModal } from "./ExplorerTableBatchActionModal/E
 import ExplorerTableNewColumnPanel from "./ExplorerTableNewColumnPanel/ExplorerTableNewColumnPanel";
 import { StyledBody, StyledTableWrapper } from "./ExplorerTableStyles";
 import ExploreTableControl from "./ExploreTableControl";
+import ExplorerTableLabelFilter from "./ExplorerTableLabelFilter";
 
 import ExploreTableHeader from "./ExploreTableHeader";
 import {
@@ -79,7 +80,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     entityIds,
   } = data ?? lastData ?? { entities: [], total: 0, entityIds: [] };
 
-  const { columns, limit, offset } = state;
+  const { columns, limit, offset, filters } = state;
 
   const [total, setTotal] = useState(0);
 
@@ -113,6 +114,11 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       setTotal(incomingTotal);
     }
   }, [incomingTotal, isQueryFetching]);
+
+  useEffect(() => {
+    setRowsSelected([]);
+    setRowLastClicked(-1);
+  }, [filters]);
 
   const queryClient = useQueryClient();
   const updateEntityMutation = useMutation({
@@ -428,6 +434,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           onAllRowsSelect={handleAllRowsSelect}
           onApplyBatchAction={handleApplyBatchAction}
         />
+        <ExplorerTableLabelFilter filters={filters} dispatch={dispatch} />
 
         <div
           style={{

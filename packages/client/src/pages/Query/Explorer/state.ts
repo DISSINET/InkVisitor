@@ -48,6 +48,7 @@ enum ExploreActionType {
   setLimit,
   setLimitAndOffset,
   sort,
+  setRowLabelFilter,
 }
 
 const exploreReducer = (
@@ -105,6 +106,30 @@ const exploreReducer = (
           sort: action.payload,
         },
       };
+
+    case ExploreActionType.setRowLabelFilter: {
+      const { label } = action.payload as { label: string };
+      const trimmedLabel = label.trim();
+      const otherFilters = state.filters.filter(
+        (f) => f.type !== Explore.EExploreFilterType.RowLabel
+      );
+      const filters: Explore.IExploreColumnFilter[] =
+        trimmedLabel.length > 0
+          ? [
+              ...otherFilters,
+              {
+                type: Explore.EExploreFilterType.RowLabel,
+                label: trimmedLabel,
+              },
+            ]
+          : otherFilters;
+
+      return {
+        ...state,
+        filters,
+        offset: 0,
+      };
+    }
 
     default:
       return state;

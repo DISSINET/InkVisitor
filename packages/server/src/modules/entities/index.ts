@@ -734,7 +734,7 @@ export default Router()
           request.body.explore
         );
 
-        const ids = await querySearch.run(request.db.connection);
+        await querySearch.run(request.db.connection);
         const results = await querySearch.getResults(request.db.connection);
 
         const entityIds = querySearch.results?.items ?? [];
@@ -744,7 +744,7 @@ export default Router()
           entityIds,
           entities: results,
           explore: querySearch.explore,
-          total: ids.length,
+          total: entityIds.length,
         };
       }
     )

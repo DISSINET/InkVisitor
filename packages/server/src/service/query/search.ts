@@ -67,6 +67,8 @@ export default class QuerySearch {
       return [];
     }
 
+    await this.results.applyExploreFilters(db, this.explore);
+
     // sort
     this.results.sort(this.explore.sort);
 

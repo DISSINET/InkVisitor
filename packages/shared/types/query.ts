@@ -951,7 +951,20 @@ export namespace Explore {
     mode: EViewMode;
   }
 
-  export interface IExploreColumnFilter {}
+  export enum EExploreFilterType {
+    RowLabel = "rowLabel",
+  }
+
+  /**
+   * Filters explorer rows when any string in the row entity's `labels` attribute
+   * matches this pattern. Supports * wildcards.
+   */
+  export interface IExploreRowLabelFilter {
+    type: EExploreFilterType.RowLabel;
+    label: string;
+  }
+
+  export type IExploreColumnFilter = IExploreRowLabelFilter;
 
   export type IExploreColumnSort = {
     columnId: string;
