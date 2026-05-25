@@ -146,7 +146,7 @@ export const StyledLabelFilter = styled.div`
   gap: 0.2rem;
   flex: 1;
   min-width: 10rem;
-  max-width: 32rem;
+  max-width: 36rem;
   margin: 0 1rem;
 `;
 
