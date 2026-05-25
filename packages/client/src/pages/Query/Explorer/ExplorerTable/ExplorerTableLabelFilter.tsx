@@ -4,10 +4,7 @@ import { useDebounce } from "hooks";
 import React, { useCallback, useEffect, useState } from "react";
 import { LuRegex } from "react-icons/lu";
 import { ExploreAction, ExploreActionType } from "../state";
-import {
-  StyledLabelFilter,
-  StyledLabelFilterCheckboxWrapper,
-} from "./ExplorerTableStyles";
+import { StyledLabelFilter, StyledLabelFilterCheckboxWrapper } from "./ExplorerTableStyles";
 
 const LABEL_FILTER_DEBOUNCE_MS = 400;
 
@@ -45,29 +42,19 @@ const ExplorerTableLabelFilter: React.FC<ExplorerTableLabelFilterProps> = ({
     [dispatch]
   );
 
+  // Label text only — debounced. Regex mode toggles immediately via the checkbox.
   useEffect(() => {
-    if (
-      debouncedLabel.trim() !== appliedLabel.trim() ||
-      useRegex !== appliedUseRegex
-    ) {
+    if (debouncedLabel.trim() !== appliedLabel.trim()) {
       dispatchFilter(debouncedLabel, useRegex);
     }
-  }, [
-    debouncedLabel,
-    appliedLabel,
-    useRegex,
-    appliedUseRegex,
-    dispatchFilter,
-  ]);
+  }, [debouncedLabel, appliedLabel, useRegex, dispatchFilter]);
 
   return (
     <StyledLabelFilter>
       <Input
         width="full"
         placeholder={
-          useRegex
-            ? "Regular expression (e.g. ^John|/Smith$/i)…"
-            : "Filter by entity label…"
+          useRegex ? "Regular expression (e.g. ^John|/Smith$/i)…" : "Filter by entity label…"
         }
         changeOnType
         value={inputValue}
