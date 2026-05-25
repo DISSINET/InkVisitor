@@ -77,16 +77,16 @@ export const Box: React.FC<Box> = ({
         }
         onClick={() => !disableHeaderClick && onHeaderClick && onHeaderClick()}
       >
-        {!hideContent && (
+        {!hideContent && isExpanded && (
           <StyledLabel style={animatedExpand}>{label}</StyledLabel>
         )}
         {headerComponent && (
-          <StyledHeaderComponentWrap>
+          <StyledHeaderComponentWrap $isExpanded={isExpanded}>
             {headerComponent}
           </StyledHeaderComponentWrap>
         )}
         {buttons && (
-          <StyledHeaderComponentWrap>
+          <StyledHeaderComponentWrap $isExpanded={isExpanded}>
             <ButtonGroup>
               {buttons.map((b, key) => (
                 <React.Fragment key={key}>{b}</React.Fragment>

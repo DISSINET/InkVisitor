@@ -1,8 +1,11 @@
 import { autoUpdate, FloatingPortal, offset, useFloating } from "@floating-ui/react";
 import { SearchEnums } from "@inkvisitor/shared/enums";
-import { IRequestSearch, IRequestSearchRootValidity } from "@inkvisitor/shared/types/request-search";
+import {
+  IRequestSearch,
+  IRequestSearchRootValidity,
+} from "@inkvisitor/shared/types/request-search";
 import { Button, ButtonGroup } from "components";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CgOptions, CgPlayListAdd, CgPlayListRemove } from "react-icons/cg";
 import { LuListTodo } from "react-icons/lu";
 import { animated, config, useSpring } from "react-spring";
@@ -18,6 +21,8 @@ import {
   StyledPillLabel,
   StyledPillsContainer,
 } from "../EntitySearchBoxStyles";
+import { FOURTH_PANEL_MIN_WIDTH } from "Theme/constants";
+import { useAppSelector } from "redux/hooks";
 
 const advancedOptions = SearchEnums.AdvancedOptions;
 interface EntitySearchAdvancedOptions {
@@ -25,12 +30,14 @@ interface EntitySearchAdvancedOptions {
   setExpandedOptions: (options: SearchEnums.AdvancedOption[]) => void;
   searchData: IRequestSearch;
   setSearchData: (data: IRequestSearch) => void;
+  isUndersized: boolean;
 }
 export const EntitySearchAdvancedOptions: React.FC<EntitySearchAdvancedOptions> = ({
   expandedOptions,
   setExpandedOptions,
   searchData,
   setSearchData,
+  isUndersized,
 }) => {
   const [showPillsMenu, setShowPillsMenu] = useState(false);
   const [portalMounted, setPortalMounted] = useState(false);
@@ -191,10 +198,12 @@ export const EntitySearchAdvancedOptions: React.FC<EntitySearchAdvancedOptions> 
         onMouseEnter={handlePillsMouseEnter}
         onMouseLeave={handlePillsMouseLeave}
       >
-        <StyledAdvancedOptionsSign>
-          <StyledAdvancedOptionsIconWrap>
-            <CgOptions size={12} />
-          </StyledAdvancedOptionsIconWrap>
+        <StyledAdvancedOptionsSign $isUndersized={isUndersized}>
+          {!isUndersized && (
+            <StyledAdvancedOptionsIconWrap>
+              <CgOptions size={12} />
+            </StyledAdvancedOptionsIconWrap>
+          )}
           <i>advanced options</i>
         </StyledAdvancedOptionsSign>
         {renderBatchButtons()}
