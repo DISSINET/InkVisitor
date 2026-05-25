@@ -7,13 +7,18 @@ const escapeRegExp = (value: string): string =>
 /** Same diacritic folding as SearchQuery.searchWordByWord in response-search.ts */
 const DIACRITIC_CHAR_MAP: Record<string, string> = {
   a: "[aàáâãäå]",
-  e: "[eèéêë]",
+  e: "[eèéêëě]",
   i: "[iìíîï]",
   o: "[oòóôõö]",
-  u: "[uùúûü]",
+  u: "[uùúûüů]",
   y: "[yýÿ]",
-  n: "[nñ]",
+  n: "[nñň]",
   c: "[cç]",
+  r: "[rř]",
+  d: "[dď]",
+  t: "[tť]",
+  s: "[sš]",
+  z: "[zž]",
 };
 
 const toDiacriticPattern = (text: string): string =>

@@ -39,11 +39,12 @@ describe("explore-label-filter", () => {
   });
 
   it("entityLabelMatchesFilter matches multi-word names", () => {
-    const labels = ["Evelín Teměř Jr.", "John Smith"];
+    const labels = ["Fruit Basket", "Evelín Teměř Jr.", "John Smith"];
     expect(entityLabelMatchesFilter(labels, "fruit basket")).toBeTruthy();
     expect(entityLabelMatchesFilter(labels, "John Smith")).toBeTruthy();
     expect(entityLabelMatchesFilter(labels, "Evelín Teměř")).toBeTruthy();
     expect(entityLabelMatchesFilter(labels, "evelin temer")).toBeTruthy();
+    expect(entityLabelMatchesFilter(labels, "Teměř Jr")).toBeTruthy();
     expect(entityLabelMatchesFilter(labels, "Smith John")).toBeFalsy();
   });
 
