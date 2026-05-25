@@ -8,7 +8,7 @@ import Dropdown, {
   EntitySuggester,
   EntityTag,
 } from "components/advanced";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { FaDownload, FaHighlighter, FaLongArrowAltRight } from "react-icons/fa";
 import { GrDocumentMissing } from "react-icons/gr";
 import { TbAnchor, TbAnchorOff } from "react-icons/tb";
@@ -23,6 +23,7 @@ import {
 } from "../StatementListBoxStyles";
 import { StyledInfoText } from "../StatementListHeader/StatementListHeaderStyles";
 import { toast } from "react-toastify";
+import { SECOND_PANEL_MIN_WIDTH } from "Theme/constants";
 
 interface StatementListDocumentLine {
   selectedResource: IEntity | false;
@@ -63,6 +64,10 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
   setHlEntities,
 }) => {
   const [showExportModal, setShowExportModal] = useState<boolean>(false);
+
+  const isUndersized = useMemo(() => {
+    return contentWidth < SECOND_PANEL_MIN_WIDTH;
+  }, [contentWidth]);
 
   return (
     <>
@@ -144,7 +149,7 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
             }}
           >
             {selectedDocument && (
-              <DocumentTitle title={selectedDocument.title} />
+              <DocumentTitle title={selectedDocument.title} width={isUndersized ? 70 : "full"} />
             )}
             <Loader show={selectedDocumentIsFetching} size={16} />
           </StyledDocumentTitleContainer>
@@ -191,12 +196,11 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
             {/* this condition helps initial render in firefox */}
             {contentWidth > 0 && (
               <>
-                <StyledInfoText style={{ textWrap: "nowrap" }}>
-                  <IconWithTooltip
-                    icon={<FaHighlighter />}
-                    tooltipLabel="Highlight"
-                  />
-                </StyledInfoText>
+                {!isUndersized && (
+                  <StyledInfoText style={{ textWrap: "nowrap" }}>
+                    <IconWithTooltip icon={<FaHighlighter />} tooltipLabel="Highlight" />
+                  </StyledInfoText>
+                )}
                 <Dropdown.Multi.Entity
                   shortLabel
                   options={entitiesDict}
@@ -207,11 +211,7 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
                   onChange={setHlEntities}
                   value={hlEntities}
                   noOptionsMessage="No entity classes to highlight"
-                  width={
-                    annotatorWidthTooNarrow
-                      ? contentWidth / 2.7
-                      : contentWidth / 2.5
-                  }
+                  width={annotatorWidthTooNarrow ? contentWidth / 2.7 : contentWidth / 2.5}
                   limitSelectedItems={
                     annotatorWidthTooNarrow
                       ? Math.floor((contentWidth / 2.7 - 110) / 37)
