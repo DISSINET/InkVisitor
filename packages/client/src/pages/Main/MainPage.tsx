@@ -36,7 +36,9 @@ import {
   FOURTH_PANEL_MIN_WIDTH,
   fourthPanelBoxesHeightThirds,
   hiddenBoxHeight,
+  EXTRA_SMALL_SCREEN_LIMIT,
   INIT_PERCENT_PANEL_WIDTHS,
+  INIT_PERCENT_PANEL_WIDTHS_EXTRA_SMALL_SCREEN,
   INIT_PERCENT_PANEL_WIDTHS_LARGE_SCREEN,
   INIT_PERCENT_PANEL_WIDTHS_SMALL_SCREEN,
   LARGE_SCREEN_LIMIT,
@@ -560,34 +562,20 @@ const MainPage: React.FC<MainPage> = ({}) => {
 
   const handleLayoutInit = () => {
     // calculate panel widths based on screen width
-    const initPanelWidthsPx =
+    const initPercentPanelWidths =
       layoutWidth > LARGE_SCREEN_LIMIT
-        ? INIT_PERCENT_PANEL_WIDTHS_LARGE_SCREEN.map((percentWidth) => {
-            return floorNumberToOneDecimal(
-              percentWidth * onePercentOfLayoutWidth
-            );
-          })
+        ? INIT_PERCENT_PANEL_WIDTHS_LARGE_SCREEN
+        : layoutWidth < EXTRA_SMALL_SCREEN_LIMIT
+        ? INIT_PERCENT_PANEL_WIDTHS_EXTRA_SMALL_SCREEN
         : layoutWidth < SMALL_SCREEN_LIMIT
-        ? INIT_PERCENT_PANEL_WIDTHS_SMALL_SCREEN.map((percentWidth) => {
-            return floorNumberToOneDecimal(
-              percentWidth * onePercentOfLayoutWidth
-            );
-          })
-        : INIT_PERCENT_PANEL_WIDTHS.map((percentWidth) => {
-            return floorNumberToOneDecimal(
-              percentWidth * onePercentOfLayoutWidth
-            );
-          });
-    dispatch(setPanelWidths(initPanelWidthsPx));
-    dispatch(
-      setPanelWidthsPercent(
-        layoutWidth > LARGE_SCREEN_LIMIT
-          ? INIT_PERCENT_PANEL_WIDTHS_LARGE_SCREEN
-          : layoutWidth < SMALL_SCREEN_LIMIT
-          ? INIT_PERCENT_PANEL_WIDTHS_SMALL_SCREEN
-          : INIT_PERCENT_PANEL_WIDTHS
-      )
+        ? INIT_PERCENT_PANEL_WIDTHS_SMALL_SCREEN
+        : INIT_PERCENT_PANEL_WIDTHS;
+
+    const initPanelWidthsPx = initPercentPanelWidths.map((percentWidth) =>
+      floorNumberToOneDecimal(percentWidth * onePercentOfLayoutWidth)
     );
+    dispatch(setPanelWidths(initPanelWidthsPx));
+    dispatch(setPanelWidthsPercent(initPercentPanelWidths));
     // set all separators to redux and local storage
     setMainPageTreeSeparatorXPosition(initPanelWidthsPx[0]);
     localStorage.setItem(
