@@ -957,11 +957,14 @@ export namespace Explore {
 
   /**
    * Filters explorer rows when any string in the row entity's `labels` attribute
-   * matches this pattern. Supports * wildcards.
+   * matches this pattern.
+   * - Default: label search with * wildcards (same family as entity search).
+   * - useRegex: JavaScript RegExp (e.g. `^John` or `/Smith$/i`).
    */
   export interface IExploreRowLabelFilter {
     type: EExploreFilterType.RowLabel;
     label: string;
+    useRegex?: boolean;
   }
 
   export type IExploreColumnFilter = IExploreRowLabelFilter;

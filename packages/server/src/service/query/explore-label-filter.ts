@@ -29,10 +29,30 @@ const toDiacriticPattern = (text: string): string =>
     .join("");
 
 /**
+ * Parses user input as a JavaScript RegExp.
+ * Supports `/pattern/flags` or a raw pattern (default flag: i).
+ */
+export const parseUserRegex = (input: string): RegExp | null => {
+  const trimmed = input.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  const literalMatch = trimmed.match(/^\/(.+)\/([gimsuy]*)$/);
+  const patternSource = literalMatch ? literalMatch[1] : trimmed;
+  const flags = literalMatch ? literalMatch[2] : "i";
+
+  try {
+    const regex = new RegExp(patternSource, flags);
+    regex.test("");
+    return regex;
+  } catch {
+    return null;
+  }
+};
+
+/**
  * Builds a case-insensitive RegExp aligned with entity label search (searchWordByWord).
- * - Splits the filter on spaces so multi-word names work.
- * - Implicit leading/trailing wildcards (like entity search *word* / labelOrId + "*").
- * - Explicit * in the filter remove the respective boundary on that side.
  */
 export const labelFilterToRegExp = (label: string): RegExp => {
   let left = "^";
@@ -43,14 +63,12 @@ export const labelFilterToRegExp = (label: string): RegExp => {
     left = "";
     cleaned = cleaned.slice(1).trimStart();
   } else {
-    // Substring may start in the middle of a word or after earlier label text
     left = "";
   }
   if (cleaned.endsWith("*")) {
     right = "";
     cleaned = cleaned.slice(0, -1).trimEnd();
   } else {
-    // Same behaviour as entity search labelOrId + "*"
     right = "";
   }
 
@@ -75,14 +93,22 @@ export const labelFilterToRegExp = (label: string): RegExp => {
 
 export const entityLabelMatchesFilter = (
   entityLabels: string[],
-  filterLabel: string
+  filter: Pick<Explore.IExploreRowLabelFilter, "label" | "useRegex">
 ): boolean => {
-  const trimmed = filterLabel.trim();
+  const trimmed = filter.label.trim();
   if (!trimmed) {
     return true;
   }
   if (!entityLabels.length) {
     return false;
+  }
+
+  if (filter.useRegex) {
+    const pattern = parseUserRegex(trimmed);
+    if (!pattern) {
+      return false;
+    }
+    return entityLabels.some((label) => pattern.test(label));
   }
 
   const pattern = labelFilterToRegExp(trimmed);
@@ -93,7 +119,7 @@ export const entityMatchesRowLabelFilter = (
   entity: IEntity,
   filter: Explore.IExploreRowLabelFilter
 ): boolean => {
-  return entityLabelMatchesFilter(entity.labels ?? [], filter.label);
+  return entityLabelMatchesFilter(entity.labels ?? [], filter);
 };
 
 export const getRowLabelFilter = (

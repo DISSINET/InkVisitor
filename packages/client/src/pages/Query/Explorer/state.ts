@@ -108,8 +108,16 @@ const exploreReducer = (
       };
 
     case ExploreActionType.setRowLabelFilter: {
-      const { label } = action.payload as { label: string };
+      const { label, useRegex } = action.payload as {
+        label: string;
+        useRegex?: boolean;
+      };
       const trimmedLabel = label.trim();
+      const existingRowLabelFilter = state.filters.find(
+        (f): f is Explore.IExploreRowLabelFilter =>
+          f.type === Explore.EExploreFilterType.RowLabel
+      );
+      const nextUseRegex = useRegex ?? existingRowLabelFilter?.useRegex ?? false;
       const otherFilters = state.filters.filter(
         (f) => f.type !== Explore.EExploreFilterType.RowLabel
       );
@@ -120,6 +128,7 @@ const exploreReducer = (
               {
                 type: Explore.EExploreFilterType.RowLabel,
                 label: trimmedLabel,
+                useRegex: nextUseRegex,
               },
             ]
           : otherFilters;
