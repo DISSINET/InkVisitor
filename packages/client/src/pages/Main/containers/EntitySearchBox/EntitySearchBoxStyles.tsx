@@ -93,14 +93,14 @@ export const StyledDateTagText = styled.div`
 
 export const StyledDateTagButton = styled(Button)``;
 
-export const StyledAdvancedOptionsSign = styled.div`
+export const StyledAdvancedOptionsSign = styled.div<{ $isUndersized?: boolean }>`
   display: flex;
   align-items: center;
   font-size: ${({ theme }) => theme.fontSize.xxs};
   white-space: nowrap;
   column-gap: 0.2rem;
   padding-right: 0.2rem;
-  padding-left: 0.3rem;
+  padding-left: ${({ $isUndersized }) => ($isUndersized ? "0" : "0.3rem")};
   padding-bottom: 0.1rem;
   color: ${({ theme }) => theme.color.primary};
   font-weight: ${({ theme }) => theme.fontWeight.medium};
