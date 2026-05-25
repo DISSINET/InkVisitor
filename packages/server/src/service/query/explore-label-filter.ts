@@ -4,9 +4,30 @@ import { Explore } from "@inkvisitor/shared/types/query";
 const escapeRegExp = (value: string): string =>
   value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
+/** Same diacritic folding as SearchQuery.searchWordByWord in response-search.ts */
+const DIACRITIC_CHAR_MAP: Record<string, string> = {
+  a: "[aàáâãäå]",
+  e: "[eèéêë]",
+  i: "[iìíîï]",
+  o: "[oòóôõö]",
+  u: "[uùúûü]",
+  y: "[yýÿ]",
+  n: "[nñ]",
+  c: "[cç]",
+};
+
+const toDiacriticPattern = (text: string): string =>
+  text
+    .toLowerCase()
+    .split("")
+    .map((char) => DIACRITIC_CHAR_MAP[char] ?? escapeRegExp(char))
+    .join("");
+
 /**
- * Builds a case-insensitive RegExp from a label filter string.
- * Leading/trailing * remove the respective word-boundary anchor.
+ * Builds a case-insensitive RegExp aligned with entity label search (searchWordByWord).
+ * - Splits the filter on spaces so multi-word names work.
+ * - Implicit trailing wildcard when none is given (prefix match on the last word).
+ * - Leading/trailing * in the filter remove the respective boundary.
  */
 export const labelFilterToRegExp = (label: string): RegExp => {
   let left = "^";
@@ -15,11 +36,14 @@ export const labelFilterToRegExp = (label: string): RegExp => {
 
   if (cleaned.startsWith("*")) {
     left = "";
-    cleaned = cleaned.slice(1);
+    cleaned = cleaned.slice(1).trimStart();
   }
   if (cleaned.endsWith("*")) {
     right = "";
-    cleaned = cleaned.slice(0, -1);
+    cleaned = cleaned.slice(0, -1).trimEnd();
+  } else {
+    // Same behaviour as entity search labelOrId + "*"
+    right = "";
   }
 
   if (left === "^") {
@@ -29,8 +53,16 @@ export const labelFilterToRegExp = (label: string): RegExp => {
     right = "($|[^a-zA-Z0-9])";
   }
 
-  const escaped = escapeRegExp(cleaned.toLowerCase());
-  return new RegExp(`${left}${escaped}${right}`, "i");
+  const words = cleaned.split(/\s+/).filter(Boolean);
+  if (!words.length) {
+    return /^/i;
+  }
+
+  const regexBody = words
+    .map((word) => toDiacriticPattern(word))
+    .join("([^a-zA-Z0-9]+[\\w]+)*[^a-zA-Z0-9]+");
+
+  return new RegExp(`${left}${regexBody}${right}`, "i");
 };
 
 export const entityLabelMatchesFilter = (

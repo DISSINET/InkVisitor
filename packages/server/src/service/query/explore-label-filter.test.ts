@@ -38,6 +38,23 @@ describe("explore-label-filter", () => {
     expect(entityLabelMatchesFilter(entity.labels, "missing")).toBeFalsy();
   });
 
+  it("entityLabelMatchesFilter matches multi-word names", () => {
+    const labels = ["Evelín Teměř Jr.", "John Smith"];
+    expect(entityLabelMatchesFilter(labels, "fruit basket")).toBeTruthy();
+    expect(entityLabelMatchesFilter(labels, "John Smith")).toBeTruthy();
+    expect(entityLabelMatchesFilter(labels, "Evelín Teměř")).toBeTruthy();
+    expect(entityLabelMatchesFilter(labels, "evelin temer")).toBeTruthy();
+    expect(entityLabelMatchesFilter(labels, "Smith John")).toBeFalsy();
+  });
+
+  it("entityLabelMatchesFilter matches when the second word is only partially typed", () => {
+    const labels = ["John Smith", "Evelín Teměř Jr."];
+    expect(entityLabelMatchesFilter(labels, "John Sm")).toBeTruthy();
+    expect(entityLabelMatchesFilter(labels, "John S")).toBeTruthy();
+    expect(entityLabelMatchesFilter(labels, "Evelín Tem")).toBeTruthy();
+    expect(entityLabelMatchesFilter(labels, "John Smithson")).toBeFalsy();
+  });
+
   it("entityMatchesRowLabelFilter matches against entity.labels attribute", () => {
     expect(entityMatchesRowLabelFilter(entity, rowLabelFilter("*fruit*"))).toBeTruthy();
     expect(entityMatchesRowLabelFilter(entity, rowLabelFilter("missing"))).toBeFalsy();
