@@ -10,8 +10,11 @@ export const StyledBoxContent = styled.div`
   overflow: auto;
 `;
 
-export const StyledOptions = styled.div`
-  margin-right: ${({ theme }) => theme.space[4]};
+interface StyledOptionsProps {
+  $isUndersized?: boolean;
+}
+export const StyledOptions = styled.div<StyledOptionsProps>`
+  margin-right: ${({ $isUndersized, theme }) => ($isUndersized ? theme.space[1] : theme.space[4])};
 `;
 export const StyledRow = styled.div`
   position: relative;

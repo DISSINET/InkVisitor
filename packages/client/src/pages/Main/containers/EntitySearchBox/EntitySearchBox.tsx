@@ -2,9 +2,12 @@ import { entityStatusDict, languageDict } from "@inkvisitor/shared/dictionaries"
 import { entitiesDict } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums, SearchEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IEntity } from "@inkvisitor/shared/types";
-import { IRequestSearch, IRequestSearchRootValidity } from "@inkvisitor/shared/types/request-search";
+import {
+  IRequestSearch,
+  IRequestSearchRootValidity,
+} from "@inkvisitor/shared/types/request-search";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { wildCardChar } from "Theme/constants";
+import { FOURTH_PANEL_MIN_WIDTH, wildCardChar } from "Theme/constants";
 import api from "api";
 import { Button, IconWithTooltip, Input, Loader, TypeBar } from "components";
 import Dropdown, {
@@ -351,10 +354,15 @@ export const EntitySearchBox: React.FC = () => {
     }
   }, [expandedOptions.includes(SearchEnums.AdvancedOption.Territory)]);
 
+  const panelWidths = useAppSelector((state) => state.layout.mainPage.panelWidths);
+  const isUndersized = useMemo(() => {
+    return panelWidths[3] < FOURTH_PANEL_MIN_WIDTH + 10;
+  }, [panelWidths]);
+
   return (
     <>
       <StyledBoxContent>
-        <StyledOptions>
+        <StyledOptions $isUndersized={isUndersized}>
           <StyledRow>
             <StyledRowHeader>label or uuid</StyledRowHeader>
             <div
@@ -386,6 +394,7 @@ export const EntitySearchBox: React.FC = () => {
             setExpandedOptions={handleSetExpandedOptions}
             searchData={searchData}
             setSearchData={setSearchData}
+            isUndersized={isUndersized}
           />
 
           {/* ADVANCED OPTIONS */}

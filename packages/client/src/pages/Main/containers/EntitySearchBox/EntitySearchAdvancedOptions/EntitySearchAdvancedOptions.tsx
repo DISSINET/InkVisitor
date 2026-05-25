@@ -30,12 +30,14 @@ interface EntitySearchAdvancedOptions {
   setExpandedOptions: (options: SearchEnums.AdvancedOption[]) => void;
   searchData: IRequestSearch;
   setSearchData: (data: IRequestSearch) => void;
+  isUndersized: boolean;
 }
 export const EntitySearchAdvancedOptions: React.FC<EntitySearchAdvancedOptions> = ({
   expandedOptions,
   setExpandedOptions,
   searchData,
   setSearchData,
+  isUndersized,
 }) => {
   const [showPillsMenu, setShowPillsMenu] = useState(false);
   const [portalMounted, setPortalMounted] = useState(false);
@@ -188,11 +190,6 @@ export const EntitySearchAdvancedOptions: React.FC<EntitySearchAdvancedOptions> 
       </ButtonGroup>
     );
   }, [expandedOptions, hasValueForOption, setExpandedOptions, setSearchData, searchData]);
-
-  const panelWidths = useAppSelector((state) => state.layout.mainPage.panelWidths);
-  const isUndersized = useMemo(() => {
-    return panelWidths[3] < FOURTH_PANEL_MIN_WIDTH + 10;
-  }, [panelWidths]);
 
   return (
     <>

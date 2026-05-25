@@ -732,7 +732,10 @@ const MainPage: React.FC<MainPage> = ({}) => {
       {/* SEARCH SEPARATOR */}
       {mainPageSearchSeparatorXPosition > 0 && fourthPanelExpanded && (
         <LayoutSeparatorVertical
-          leftSideMinWidth={mainPageCenterSeparatorXPosition + THIRD_PANEL_MIN_WIDTH}
+          leftSideMinWidth={
+            mainPageCenterSeparatorXPosition +
+            (thirdPanelExpanded ? THIRD_PANEL_MIN_WIDTH : COLLAPSED_PANEL_WIDTH)
+          }
           leftSideMaxWidth={layoutWidth - FOURTH_PANEL_MIN_WIDTH}
           separatorXPosition={mainPageSearchSeparatorXPosition}
           setSeparatorXPosition={(xPosition) => {
