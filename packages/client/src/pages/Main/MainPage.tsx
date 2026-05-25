@@ -766,7 +766,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
               ? mainPageCenterSeparatorXPosition - SECOND_PANEL_MIN_WIDTH
               : // if the editor is collapsed, calculate the min width from the right side
                 layoutWidth -
-                panelWidths[3] -
+                (fourthPanelExpanded ? panelWidths[3] : COLLAPSED_PANEL_WIDTH) -
                 COLLAPSED_PANEL_WIDTH -
                 SECOND_PANEL_MIN_WIDTH
           }
@@ -775,7 +775,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
             handleTreeSeparatorXPositionChange(xPosition);
           }}
           onMaxWidthReached={() => {
-            if (panelWidths[2] > THIRD_PANEL_MIN_WIDTH + 10) {
+            if (thirdPanelWidth > THIRD_PANEL_MIN_WIDTH + 10) {
               handleCenterSeparatorXPositionChange(
                 mainPageCenterSeparatorXPosition + 10
               );
