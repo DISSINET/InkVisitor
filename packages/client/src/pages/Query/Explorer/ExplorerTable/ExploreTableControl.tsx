@@ -9,7 +9,10 @@ import { TbColumnInsertRight } from "react-icons/tb";
 import { Button } from "components";
 import Dropdown from "components/advanced";
 
+import { Explore } from "@inkvisitor/shared/types/query";
 import { ThemeContext } from "styled-components";
+import { ExploreAction } from "../state";
+import ExplorerTableLabelFilter from "./ExplorerTableLabelFilter";
 import { StyledCounter, StyledTableControl } from "./ExplorerTableStyles";
 import { BatchAction, batchOptions } from "./types";
 
@@ -28,6 +31,9 @@ interface ExploreTableControlProps {
   setRowLastClicked: (value: number) => void;
 
   onApplyBatchAction: () => void;
+
+  filters: Explore.IExploreColumnFilter[];
+  dispatch: React.Dispatch<ExploreAction>;
 }
 
 const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
@@ -45,6 +51,9 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
   setRowLastClicked,
 
   onApplyBatchAction,
+
+  filters,
+  dispatch,
 }) => {
   const handleSelectAll = (checked: boolean) => onAllRowsSelect(checked);
 
@@ -127,6 +136,8 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
           />
         </div>
       </div>
+
+      <ExplorerTableLabelFilter filters={filters} dispatch={dispatch} />
 
       <Button
         icon={<TbColumnInsertRight size={17} />}

@@ -79,7 +79,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     entityIds,
   } = data ?? lastData ?? { entities: [], total: 0, entityIds: [] };
 
-  const { columns, limit, offset } = state;
+  const { columns, limit, offset, filters } = state;
 
   const [total, setTotal] = useState(0);
 
@@ -113,6 +113,11 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       setTotal(incomingTotal);
     }
   }, [incomingTotal, isQueryFetching]);
+
+  useEffect(() => {
+    setRowsSelected([]);
+    setRowLastClicked(-1);
+  }, [filters]);
 
   const queryClient = useQueryClient();
   const updateEntityMutation = useMutation({
@@ -427,6 +432,8 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           rowsTotal={total}
           onAllRowsSelect={handleAllRowsSelect}
           onApplyBatchAction={handleApplyBatchAction}
+          filters={filters}
+          dispatch={dispatch}
         />
 
         <div

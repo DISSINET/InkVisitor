@@ -139,3 +139,20 @@ export const StyledCounter = styled.div`
   white-space: nowrap;
   color: ${({ theme }) => theme.color["black"]};
 `;
+
+export const StyledLabelFilter = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  flex: 1;
+  min-width: 10rem;
+  max-width: 36rem;
+  margin: 0 1rem;
+`;
+
+export const StyledLabelFilterCheckboxWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  margin-left: 0.2rem;
+  gap: 0.2rem;
+`;
