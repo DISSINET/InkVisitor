@@ -144,7 +144,8 @@ export const StyledLabelFilter = styled.div`
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0 2rem 0.5rem 0;
-  margin-right: 2rem;
-  background-color: ${({ theme }) => theme.color["gray"][200]};
+  flex: 1;
+  min-width: 10rem;
+  max-width: 32rem;
+  margin: 0 1rem;
 `;

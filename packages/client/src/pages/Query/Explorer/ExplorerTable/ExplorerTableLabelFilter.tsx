@@ -17,8 +17,7 @@ const getRowLabelFilter = (
   filters: Explore.IExploreColumnFilter[]
 ): Explore.IExploreRowLabelFilter | undefined =>
   filters.find(
-    (f): f is Explore.IExploreRowLabelFilter =>
-      f.type === Explore.EExploreFilterType.RowLabel
+    (f): f is Explore.IExploreRowLabelFilter => f.type === Explore.EExploreFilterType.RowLabel
   );
 
 const ExplorerTableLabelFilter: React.FC<ExplorerTableLabelFilterProps> = ({
@@ -46,15 +45,8 @@ const ExplorerTableLabelFilter: React.FC<ExplorerTableLabelFilterProps> = ({
         changeOnType
         value={inputValue}
         onChangeFn={setInputValue}
+        clearable
       />
-      {inputValue.length > 0 && (
-        <Button
-          inverted
-          icon={<RiCloseFill />}
-          tooltipLabel="clear label filter"
-          onClick={() => setInputValue("")}
-        />
-      )}
     </StyledLabelFilter>
   );
 };

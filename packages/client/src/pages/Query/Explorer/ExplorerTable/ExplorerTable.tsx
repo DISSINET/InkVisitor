@@ -15,7 +15,6 @@ import { ExplorerTableBatchActionModal } from "./ExplorerTableBatchActionModal/E
 import ExplorerTableNewColumnPanel from "./ExplorerTableNewColumnPanel/ExplorerTableNewColumnPanel";
 import { StyledBody, StyledTableWrapper } from "./ExplorerTableStyles";
 import ExploreTableControl from "./ExploreTableControl";
-import ExplorerTableLabelFilter from "./ExplorerTableLabelFilter";
 
 import ExploreTableHeader from "./ExploreTableHeader";
 import {
@@ -433,8 +432,9 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           rowsTotal={total}
           onAllRowsSelect={handleAllRowsSelect}
           onApplyBatchAction={handleApplyBatchAction}
+          filters={filters}
+          dispatch={dispatch}
         />
-        <ExplorerTableLabelFilter filters={filters} dispatch={dispatch} />
 
         <div
           style={{
