@@ -53,6 +53,20 @@ export const StyledDownloadOverlayLabel = styled.div`
   text-align: center;
 `;
 
+export const StyledDownloadOverlayLink = styled.a`
+  color: ${({ theme }) => theme.color["primary"]};
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  font-family: monospace;
+  text-decoration: underline;
+  word-break: break-all;
+  max-width: 32rem;
+  text-align: center;
+  background-color: ${({ theme }) => theme.color["white"]};
+  border: 1px solid ${({ theme }) => theme.color["gray"][400]};
+  border-radius: ${({ theme }) => theme.borderRadius["sm"]};
+  padding: ${({ theme }) => theme.space[2]} ${({ theme }) => theme.space[3]};
+`;
+
 export const StyledHeading = styled.div`
   flex-shrink: 0;
   color: ${({ theme }) => theme.color["black"]};

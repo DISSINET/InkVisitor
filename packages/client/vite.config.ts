@@ -52,6 +52,20 @@ export default defineConfig(({ mode }) => {
       port: 8000,
       open: true,
       historyApiFallback: true,
+      // Dev-only proxy: makes API calls same-origin to the browser so file
+      // downloads (<a download>) work without the cross-origin tab-flicker.
+      // `vite build` never reads `server`, but the explicit mode check keeps
+      // the intent obvious.
+      proxy:
+        mode === "development" && env.APIURL
+          ? {
+              "/api": {
+                target: env.APIURL,
+                changeOrigin: true,
+                secure: false,
+              },
+            }
+          : undefined,
     },
     build: {
       outDir: "dist",

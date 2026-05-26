@@ -1025,28 +1025,24 @@ class Api {
   }
 
   /**
-   * Downloads a single backup archive and triggers a browser download.
+   * Asks the server for a short-lived, token-embedded URL the browser can
+   * navigate to directly. This avoids buffering the archive into a blob URL
+   * (which the browser treats as a programmatic download, so 2nd+ clicks get
+   * blocked) and lets the browser stream the file straight to disk.
    * @param backupId relative archive id from backupsGet, e.g. "20240101/inkvisitor_backup.tar.gz"
-   * @param fileName optional override for the downloaded file name
+   * @returns absolute URL pointing at the download endpoint, ready to drop into `<a href>`
    */
-  async backupDownload(backupId: string, fileName?: string): Promise<void> {
+  async backupDownloadUrl(backupId: string): Promise<string> {
     try {
-      const response = await this.connection.get(`/backups/download`, {
-        params: { file: backupId },
-        responseType: "blob",
-      });
-
-      const url = window.URL.createObjectURL(response.data);
-      const a = document.createElement("a");
-
-      a.href = url;
-      a.download = fileName || backupId.replace(/\//g, "_");
-      document.body.appendChild(a);
-      a.click();
-
-      // Clean up
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      const response = await this.connection.get<{ url: string }>(
+        `/backups/download-url`,
+        { params: { file: backupId } }
+      );
+      // Anchor the URL to window.location.origin (not this.baseUrl) so a cross-origin
+      // APIURL in dev still routes the download through the same-origin Vite proxy.
+      // Cross-origin <a download> would otherwise be ignored by the browser and the
+      // click would navigate the tab instead of saving the file.
+      return `${window.location.origin}${response.data.url}`;
     } catch (err) {
       throw this.handleError(err);
     }

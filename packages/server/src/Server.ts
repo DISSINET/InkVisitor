@@ -96,7 +96,12 @@ if (!!process.env.STATIC_PATH) {
 
 server.use(express.json({ limit: "150mb" }));
 server.use(express.urlencoded({ extended: true, limit: "150mb" }));
-server.use(timeout("20s"));
+// Backup archive streams can take minutes on slow links; the default 20s would
+// otherwise fire mid-stream and trip "headers already sent" warnings. Match by
+// exact suffix so /backups/download-url (small JSON) keeps the default budget.
+server.use((req, res, next) =>
+  timeout(req.path.endsWith("/backups/download") ? "5m" : "20s")(req, res, next)
+);
 
 // Show routes called in console during development
 if (process.env.NODE_ENV === "development") {

@@ -71,24 +71,26 @@ if (secret) {
   console.log(`SECRET set to ${secret}`);
 }
 
-/**
- * Function thats creates signed jwt token for user
- * @param user
- * @param expDays
- * @returns
- */
-export function generateAccessToken(user: IUser, expDays = 30): string {
+function signToken(user: IUser, expSeconds: number): string {
   return signJwt(
-    {
-      user,
-      exp: Math.floor(Date.now() / 1000) + 86400 * expDays,
-    },
+    { user, exp: Math.floor(Date.now() / 1000) + expSeconds },
     secret,
-    {
-      algorithm: defaultJwtAlgo,
-    }
+    { algorithm: defaultJwtAlgo }
   );
 }
+
+/**
+ * Standard session JWT used for Bearer-header auth.
+ */
+export const generateAccessToken = (user: IUser, expDays = 30): string =>
+  signToken(user, 86400 * expDays);
+
+/**
+ * Short-lived JWT intended for one-shot URL-embedded auth
+ * (e.g. file download links where the browser cannot send Bearer headers).
+ */
+export const generateShortLivedToken = (user: IUser, expSeconds: number): string =>
+  signToken(user, expSeconds);
 
 /**
  * Middleware constructor that checks provided jwt token. Token must be valid - must be decodeable/signed and not expired.

@@ -13,6 +13,7 @@ import {
   StyledContent,
   StyledDownloadOverlay,
   StyledDownloadOverlayLabel,
+  StyledDownloadOverlayLink,
   StyledDownloadOverlayPanel,
   StyledEmpty,
   StyledGrid,
@@ -22,6 +23,10 @@ import {
   StyledHeading,
   StyledRow,
 } from "./BackupsPageStyles";
+
+// How long the overlay lingers after the auto-download fires, so the user can
+// actually read the link / use it as a fallback if the auto-click is blocked.
+const OVERLAY_LINGER_MS = 4000;
 
 const formatBytes = (bytes: number): string => {
   if (!bytes) {
@@ -42,14 +47,33 @@ export const BackupsPage: React.FC = () => {
     enabled: api.isLoggedIn(),
   });
 
-  const [downloadingId, setDownloadingId] = useState<string | false>(false);
+  const [download, setDownload] = useState<{
+    backupId: string;
+    filename: string;
+    url?: string;
+  } | null>(null);
 
   const handleDownload = async (backup: IResponseBackup) => {
-    setDownloadingId(backup.id);
+    const filename = backup.id.replace(/\//g, "_");
+    setDownload({ backupId: backup.id, filename });
     try {
-      await api.backupDownload(backup.id);
-    } finally {
-      setDownloadingId(false);
+      const url = await api.backupDownloadUrl(backup.id);
+      setDownload({ backupId: backup.id, filename, url });
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      // Linger so the link is visible/usable as a fallback. Only clear if the
+      // state still belongs to this backup (user could have started another).
+      setTimeout(() => {
+        setDownload((curr) => (curr?.backupId === backup.id ? null : curr));
+      }, OVERLAY_LINGER_MS);
+    } catch {
+      setDownload(null);
     }
   };
 
@@ -78,7 +102,7 @@ export const BackupsPage: React.FC = () => {
                         label="Download"
                         color="primary"
                         inverted
-                        disabled={!!downloadingId}
+                        disabled={!!download}
                         onClick={() => handleDownload(backup)}
                       />
                     </ButtonGroup>
@@ -91,9 +115,23 @@ export const BackupsPage: React.FC = () => {
 
           <Loader show={isFetching} size={50} />
 
-          <StyledDownloadOverlay $show={!!downloadingId}>
+          <StyledDownloadOverlay
+            $show={!!download}
+            onClick={() => setDownload(null)}
+          >
             <StyledDownloadOverlayPanel>
-              <StyledDownloadOverlayLabel>Preparing download…</StyledDownloadOverlayLabel>
+              <StyledDownloadOverlayLabel>
+                {download?.url ? "Download starting…" : "Preparing download…"}
+              </StyledDownloadOverlayLabel>
+              {download?.url && (
+                <StyledDownloadOverlayLink
+                  href={download.url}
+                  download={download.filename}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {download.filename}
+                </StyledDownloadOverlayLink>
+              )}
               <BeatLoader size={10} color={useTheme().color["primary"]} />
             </StyledDownloadOverlayPanel>
           </StyledDownloadOverlay>

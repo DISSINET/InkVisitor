@@ -5,8 +5,14 @@ import { IResponseBackup } from "@inkvisitor/shared/types";
 import { IRequest } from "src/custom_typings/request";
 import { Backup } from "@models/backup/backup";
 import { BadParams, NotFound, PermissionDeniedError } from "@inkvisitor/shared/types/errors";
+import { generateShortLivedToken } from "@common/auth";
+import { apiPathOld } from "@common/constants";
 import * as fs from "fs";
 import * as path from "path";
+
+// Window during which a freshly issued download URL stays valid. Short enough
+// that a leaked URL is mostly harmless, long enough for the browser to fetch.
+const DOWNLOAD_URL_TTL_SECONDS = 60;
 
 const getBackupDir = (): string => process.env.BACKUP_DIR || "";
 
@@ -21,6 +27,26 @@ const assertOwner = (request: IRequest): void => {
   }
 };
 
+/**
+ * Validates the `?file=` param and resolves it to an existing backup archive
+ * on disk. Throws on missing param, path traversal, or non-existent file.
+ */
+const requireBackup = (request: IRequest): { file: string; resolved: string } => {
+  const file = (request.query.file as string) || "";
+  if (!file) {
+    throw new BadParams("file query param has to be set");
+  }
+  const resolved = Backup.resolvePath(getBackupDir(), file);
+  if (
+    !resolved ||
+    !fs.existsSync(resolved) ||
+    !fs.statSync(resolved).isFile()
+  ) {
+    throw new NotFound(`backup '${file}' does not exist`);
+  }
+  return { file, resolved };
+};
+
 export default Router()
   /**
    * Lists all available backup archives. Owner only.
@@ -30,6 +56,29 @@ export default Router()
     asyncRouteHandler<IResponseBackup[]>(async (request: IRequest) => {
       assertOwner(request);
       return Backup.list(getBackupDir());
+    })
+  )
+  /**
+   * Issues a short-lived signed URL the browser can use to navigate directly
+   * to the binary download endpoint. The URL embeds a JWT in its query string
+   * because <a download> navigations cannot carry Authorization headers, and
+   * sticking the long-lived session token in a URL would be a far worse leak.
+   */
+  .get(
+    "/download-url",
+    asyncRouteHandler<{ url: string }>(async (request: IRequest) => {
+      assertOwner(request);
+      const { file } = requireBackup(request);
+
+      const token = generateShortLivedToken(
+        request.getUserOrFail(),
+        DOWNLOAD_URL_TTL_SECONDS
+      );
+      const url =
+        `${apiPathOld}/backups/download` +
+        `?file=${encodeURIComponent(file)}` +
+        `&token=${encodeURIComponent(token)}`;
+      return { url };
     })
   )
   /**
@@ -45,20 +94,7 @@ export default Router()
     async (request: IRequest, res: Response, next: NextFunction) => {
       try {
         assertOwner(request);
-
-        const file = (request.query.file as string) || "";
-        if (!file) {
-          throw new BadParams("file query param has to be set");
-        }
-
-        const resolved = Backup.resolvePath(getBackupDir(), file);
-        if (
-          !resolved ||
-          !fs.existsSync(resolved) ||
-          !fs.statSync(resolved).isFile()
-        ) {
-          throw new NotFound(`backup '${file}' does not exist`);
-        }
+        const { resolved } = requireBackup(request);
 
         const stat = fs.statSync(resolved);
         res.setHeader("Content-Type", "application/gzip");
