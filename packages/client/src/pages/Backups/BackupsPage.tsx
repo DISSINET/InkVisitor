@@ -1,8 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
-import { IResponseBackup } from "@inkvisitor/shared/types";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import api from "api";
 import { Button, ButtonGroup, Loader } from "components";
-import React, { useState } from "react";
+import { useTheme } from "hooks";
+import React, { useEffect, useRef } from "react";
 import { FaDownload } from "react-icons/fa";
 import {
   StyledBackground,
@@ -10,18 +10,17 @@ import {
   StyledCell,
   StyledContent,
   StyledDownloadOverlay,
+  StyledDownloadOverlayLabel,
+  StyledDownloadOverlayPanel,
   StyledEmpty,
   StyledGrid,
   StyledGridHeader,
   StyledGridScrollArea,
   StyledHeaderCell,
   StyledHeading,
-  StyledProgressFill,
-  StyledProgressLabel,
-  StyledProgressPanel,
-  StyledProgressTrack,
   StyledRow,
 } from "./BackupsPageStyles";
+import { BeatLoader } from "react-spinners";
 
 const formatBytes = (bytes: number): string => {
   if (!bytes) {
@@ -42,51 +41,24 @@ export const BackupsPage: React.FC = () => {
     enabled: api.isLoggedIn(),
   });
 
-  const [downloadUi, setDownloadUi] = useState<{
-    backupId: string;
-    loaded: number;
-    total: number;
-    showOverlay: boolean;
-  } | null>(null);
+  const downloadAbortRef = useRef<AbortController | null>(null);
 
-  const handleDownload = async (backup: IResponseBackup) => {
-    const showDownloadOverlay = !api.supportsBackupSaveFilePicker();
+  useEffect(
+    () => () => {
+      downloadAbortRef.current?.abort();
+    },
+    []
+  );
 
-    setDownloadUi({
-      backupId: backup.id,
-      loaded: 0,
-      total: backup.sizeBytes,
-      showOverlay: showDownloadOverlay,
-    });
-
-    try {
-      await api.backupDownload(backup.id, {
-        expectedTotal: backup.sizeBytes,
-        onDownloadProgress: showDownloadOverlay
-          ? ({ loaded, total }) => {
-              setDownloadUi((current) =>
-                current
-                  ? {
-                      ...current,
-                      loaded,
-                      total: total && total > 0 ? total : current.total,
-                    }
-                  : null
-              );
-            }
-          : undefined,
-      });
-    } catch (err) {
-      api.showErrorToast(err);
-    } finally {
-      setDownloadUi(null);
-    }
-  };
-
-  const downloadPercent =
-    downloadUi && downloadUi.total > 0
-      ? Math.min(100, Math.round((downloadUi.loaded / downloadUi.total) * 100))
-      : 0;
+  const downloadMutation = useMutation({
+    mutationFn: async (backupId: string) => {
+      downloadAbortRef.current?.abort();
+      const controller = new AbortController();
+      downloadAbortRef.current = controller;
+      await api.backupDownload(backupId, { signal: controller.signal });
+    },
+    onError: (err) => api.showErrorToast(err),
+  });
 
   return (
     <StyledContent>
@@ -104,9 +76,7 @@ export const BackupsPage: React.FC = () => {
               {backups.map((backup) => (
                 <StyledRow key={backup.id}>
                   <StyledCell>{backup.id}</StyledCell>
-                  <StyledCell>
-                    {new Date(backup.createdAt).toLocaleString()}
-                  </StyledCell>
+                  <StyledCell>{new Date(backup.createdAt).toLocaleString()}</StyledCell>
                   <StyledCell>{formatBytes(backup.sizeBytes)}</StyledCell>
                   <StyledCell>
                     <ButtonGroup>
@@ -115,36 +85,24 @@ export const BackupsPage: React.FC = () => {
                         label="Download"
                         color="primary"
                         inverted
-                        disabled={!!downloadUi}
-                        onClick={() => handleDownload(backup)}
+                        disabled={downloadMutation.isPending}
+                        onClick={() => downloadMutation.mutate(backup.id)}
                       />
                     </ButtonGroup>
                   </StyledCell>
                 </StyledRow>
               ))}
             </StyledGrid>
-            {!isFetching && backups.length === 0 && (
-              <StyledEmpty>No backups found.</StyledEmpty>
-            )}
+            {!isFetching && backups.length === 0 && <StyledEmpty>No backups found.</StyledEmpty>}
           </StyledGridScrollArea>
 
           <Loader show={isFetching} size={50} />
 
-          <StyledDownloadOverlay $show={!!downloadUi?.showOverlay}>
-            <StyledProgressPanel>
-              <StyledProgressTrack>
-                <StyledProgressFill $percent={downloadPercent} />
-              </StyledProgressTrack>
-              <StyledProgressLabel>
-                Downloading… {downloadPercent}%
-                {downloadUi && downloadUi.total > 0 && (
-                  <>
-                    {" "}
-                    ({formatBytes(downloadUi.loaded)} / {formatBytes(downloadUi.total)})
-                  </>
-                )}
-              </StyledProgressLabel>
-            </StyledProgressPanel>
+          <StyledDownloadOverlay $show={downloadMutation.isPending}>
+            <StyledDownloadOverlayPanel>
+              <StyledDownloadOverlayLabel>Preparing download…</StyledDownloadOverlayLabel>
+              <BeatLoader size={10} color={useTheme().color["primary"]} />
+            </StyledDownloadOverlayPanel>
           </StyledDownloadOverlay>
         </StyledBackground>
       </StyledBoxWrap>
