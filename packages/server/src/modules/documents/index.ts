@@ -10,6 +10,7 @@ import {
   IResponseAudit,
   IResponseGeneric,
   IDocumentAuditAnchorChanges,
+  AuditScope,
 } from "@inkvisitor/shared/types";
 import {
   BadParams,
@@ -433,6 +434,12 @@ export default Router()
       const result = await existing.delete(request.db.connection);
 
       if (result.deleted === 1) {
+        await Audit.createDeletionAudit(
+          request.db.connection,
+          id,
+          request.getUserOrFail().id,
+          AuditScope.Document
+        );
         return {
           result: true,
         };

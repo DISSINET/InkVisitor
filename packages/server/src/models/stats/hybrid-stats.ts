@@ -39,6 +39,28 @@ export function getLiveTailRange(
 }
 
 /**
+ * Builds a stats value map (date bucket -> aggregation key -> count) from
+ * materialized rows, summing rows that share a bucket and aggregation key.
+ * This matters for USER aggregation, where there is one row per event type per
+ * user, so a user's edit and (folded) delete rows must be summed rather than
+ * overwrite each other. For ACTIVITY_TYPE the keys are distinct event types, so
+ * summing leaves them separate (to be folded afterwards).
+ */
+export function sumMaterializedStats(
+  rows: { date: string; aggregationKey: string; count: number }[]
+): Record<string, Record<string, number>> {
+  const values: Record<string, Record<string, number>> = {};
+  for (const row of rows) {
+    if (!values[row.date]) {
+      values[row.date] = {};
+    }
+    values[row.date][row.aggregationKey] =
+      (values[row.date][row.aggregationKey] ?? 0) + row.count;
+  }
+  return values;
+}
+
+/**
  * Merges two stats value maps (date bucket -> aggregation key -> count) by
  * summing counts. The base is not mutated.
  */

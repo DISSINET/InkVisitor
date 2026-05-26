@@ -24,6 +24,7 @@ import {
   IUser,
   Relation as RelationType,
   RequestSearch,
+  AuditScope,
 } from "@inkvisitor/shared/types";
 import {
   AuditDoesNotExist,
@@ -593,6 +594,12 @@ export default Router()
                   );
                 }
                 out.data[entityId] = true;
+                await Audit.createDeletionAudit(
+                  req.db.connection,
+                  entityId,
+                  req.getUserOrFail().id,
+                  AuditScope.Entity
+                );
                 removeDependency(entityId);
                 removedCount++;
               } catch (e) {

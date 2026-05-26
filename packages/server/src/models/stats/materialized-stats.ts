@@ -1,6 +1,7 @@
 import { IDbModel, fillFlatObject } from "@models/common";
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
 import { EventType, Aggregation } from "@inkvisitor/shared/types/stats";
+import { expandEventTypesForStats } from "./event-type-fold";
 
 export interface IMaterializedStats {
   id: string;
@@ -115,7 +116,7 @@ export class MaterializedStats implements IMaterializedStats {
       .table(tableName)
       .between(fromDateStr, toDateStr, { index: "date" })
       .filter((doc: any) =>
-        rethink.expr(eventTypes).contains(doc("eventType"))
+        rethink.expr(expandEventTypesForStats(eventTypes)).contains(doc("eventType"))
       )
       .filter((doc: any) => doc("aggregateBy").eq(aggregateBy))
       .orderBy("date")

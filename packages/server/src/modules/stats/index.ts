@@ -7,7 +7,12 @@ import { IRequestStats } from "@inkvisitor/shared/types/request-stats";
 import { MaterializedStats } from "@models/stats/materialized-stats";
 import { TimeUnit, EventType, Aggregation } from "@inkvisitor/shared/types/stats";
 import { StatsAggregator } from "@models/stats/stats-aggregator";
-import { getLiveTailRange, mergeStatsValues } from "@models/stats/hybrid-stats";
+import {
+  getLiveTailRange,
+  mergeStatsValues,
+  sumMaterializedStats,
+} from "@models/stats/hybrid-stats";
+import { foldStatsValuesByEventType } from "@models/stats/event-type-fold";
 
 export default Router()
   .post(
@@ -58,15 +63,13 @@ export default Router()
         aggregateBy
       );
 
-      // Transform materialized data to match IResponseStats format
-      let values: Record<string, Record<string, number>> = {};
-
-      for (const item of materializedData) {
-        if (!values[item.date]) {
-          values[item.date] = {};
-        }
-        values[item.date][item.aggregationKey] = item.count;
-      }
+      // Transform materialized data to match IResponseStats format. Sum rows
+      // sharing a bucket/key: for USER aggregation there is one row per event
+      // type per user, so the (filter-expanded) delete rows must add to the
+      // user's total rather than overwrite it.
+      let values: Record<string, Record<string, number>> = sumMaterializedStats(
+        materializedData
+      );
 
       // Top up with live data for the current day. Aggregation always excludes
       // today (its upper bound is truncated to midnight, right-exclusive), so the
@@ -86,13 +89,21 @@ export default Router()
         );
       }
 
+      // When aggregating by activity type the inner keys are event types, so
+      // fold deletion counts into their edit type (DELETE -> EDIT, ANCHOR_DELETE
+      // -> ANCHOR_EDIT) across both the materialized and live-tail data.
+      const foldedValues =
+        aggregateBy === Aggregation.ACTIVITY_TYPE
+          ? foldStatsValuesByEventType(values)
+          : values;
+
       const response: IResponseStats = {
         fromDate,
         toDate,
         timeUnit,
         aggregateBy,
         eventType,
-        values
+        values: foldedValues
       };
 
       return response;
