@@ -40,6 +40,7 @@ export const StyledDownloadOverlay = styled.div<{ $show: boolean }>`
   inset: 0;
   z-index: 25;
   background-color: ${({ theme }) => theme.color.gray[200]};
+  opacity: 0.9;
 `;
 
 export const StyledProgressPanel = styled.div`
