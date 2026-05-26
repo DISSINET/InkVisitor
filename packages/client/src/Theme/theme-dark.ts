@@ -58,6 +58,7 @@ const darkTheme = {
     plain: "#b5b5b5", // inverted gray 300
     primaryTransparent: "rgba(9,16,52,0.2)",
     modalBg: "rgba(9,16,52,0.5)",
+    backupDownloadOverlay: "rgba(45, 55, 72, 0.8)",
 
     tagBackground: "#f6f6ff",
     tagColor: "#060c26",
