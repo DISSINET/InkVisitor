@@ -9,12 +9,17 @@ import {
   StyledBoxWrap,
   StyledCell,
   StyledContent,
+  StyledDownloadOverlay,
   StyledEmpty,
   StyledGrid,
   StyledGridHeader,
   StyledGridScrollArea,
   StyledHeaderCell,
   StyledHeading,
+  StyledProgressFill,
+  StyledProgressLabel,
+  StyledProgressPanel,
+  StyledProgressTrack,
   StyledRow,
 } from "./BackupsPageStyles";
 
@@ -37,16 +42,49 @@ export const BackupsPage: React.FC = () => {
     enabled: api.isLoggedIn(),
   });
 
-  const [downloadingId, setDownloadingId] = useState<string | false>(false);
+  const [downloadUi, setDownloadUi] = useState<{
+    backupId: string;
+    loaded: number;
+    total: number;
+    showOverlay: boolean;
+  } | null>(null);
 
   const handleDownload = async (backup: IResponseBackup) => {
-    setDownloadingId(backup.id);
+    const showDownloadOverlay = !api.supportsBackupSaveFilePicker();
+
+    setDownloadUi({
+      backupId: backup.id,
+      loaded: 0,
+      total: backup.sizeBytes,
+      showOverlay: showDownloadOverlay,
+    });
+
     try {
-      await api.backupDownload(backup.id);
+      await api.backupDownload(backup.id, {
+        expectedTotal: backup.sizeBytes,
+        onDownloadProgress: showDownloadOverlay
+          ? ({ loaded, total }) => {
+              setDownloadUi((current) =>
+                current
+                  ? {
+                      ...current,
+                      loaded,
+                      total: total && total > 0 ? total : current.total,
+                    }
+                  : null
+              );
+            }
+          : undefined,
+      });
     } finally {
-      setDownloadingId(false);
+      setDownloadUi(null);
     }
   };
+
+  const downloadPercent =
+    downloadUi && downloadUi.total > 0
+      ? Math.min(100, Math.round((downloadUi.loaded / downloadUi.total) * 100))
+      : 0;
 
   return (
     <StyledContent>
@@ -75,7 +113,7 @@ export const BackupsPage: React.FC = () => {
                         label="Download"
                         color="primary"
                         inverted
-                        disabled={downloadingId === backup.id}
+                        disabled={!!downloadUi}
                         onClick={() => handleDownload(backup)}
                       />
                     </ButtonGroup>
@@ -89,6 +127,23 @@ export const BackupsPage: React.FC = () => {
           </StyledGridScrollArea>
 
           <Loader show={isFetching} size={50} />
+
+          <StyledDownloadOverlay $show={!!downloadUi?.showOverlay}>
+            <StyledProgressPanel>
+              <StyledProgressTrack>
+                <StyledProgressFill $percent={downloadPercent} />
+              </StyledProgressTrack>
+              <StyledProgressLabel>
+                Downloading… {downloadPercent}%
+                {downloadUi && downloadUi.total > 0 && (
+                  <>
+                    {" "}
+                    ({formatBytes(downloadUi.loaded)} / {formatBytes(downloadUi.total)})
+                  </>
+                )}
+              </StyledProgressLabel>
+            </StyledProgressPanel>
+          </StyledDownloadOverlay>
         </StyledBackground>
       </StyledBoxWrap>
     </StyledContent>

@@ -18,6 +18,7 @@ export const StyledBoxWrap = styled.div`
 `;
 
 export const StyledBackground = styled.div`
+  position: relative;
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -27,6 +28,47 @@ export const StyledBackground = styled.div`
   background-color: ${({ theme }) => theme.color["white"]};
   box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.3);
   overflow: hidden;
+`;
+
+export const StyledDownloadOverlay = styled.div<{ $show: boolean }>`
+  display: ${({ $show }) => ($show ? "flex" : "none")};
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: ${({ theme }) => theme.space[4]};
+  position: absolute;
+  inset: 0;
+  z-index: 25;
+  background-color: ${({ theme }) => theme.color["primaryTransparent"]};
+`;
+
+export const StyledProgressPanel = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.space[2]};
+  width: min(24rem, 80%);
+`;
+
+export const StyledProgressTrack = styled.div`
+  width: 100%;
+  height: 0.5rem;
+  border-radius: 0.25rem;
+  background-color: ${({ theme }) => theme.color["white"]};
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px ${({ theme }) => theme.color["gray"][400]};
+`;
+
+export const StyledProgressFill = styled.div<{ $percent: number }>`
+  height: 100%;
+  width: ${({ $percent }) => $percent}%;
+  background-color: ${({ theme }) => theme.color["primary"]};
+  transition: width 0.15s ease-out;
+`;
+
+export const StyledProgressLabel = styled.div`
+  color: ${({ theme }) => theme.color["black"]};
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  text-align: center;
 `;
 
 export const StyledHeading = styled.div`

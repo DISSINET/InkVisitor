@@ -47,6 +47,19 @@ interface IApiOptions extends AxiosRequestConfig<any> {
   ignoreErrorToast: boolean;
 }
 
+export interface IBackupDownloadProgress {
+  loaded: number;
+  total?: number;
+  percent?: number;
+}
+
+export interface IBackupDownloadOptions {
+  fileName?: string;
+  /** Known file size from backups list; used when Content-Length is unavailable. */
+  expectedTotal?: number;
+  onDownloadProgress?: (progress: IBackupDownloadProgress) => void;
+}
+
 type IFilterUsers = {
   label?: string;
 };
@@ -1024,6 +1037,66 @@ class Api {
     }
   }
 
+  private async fetchBackupBlob(
+    backupId: string,
+    options?: Pick<IBackupDownloadOptions, "onDownloadProgress" | "expectedTotal">
+  ): Promise<Blob> {
+    const url = `${this.apiUrl}/backups/download?file=${encodeURIComponent(backupId)}`;
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${this.token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const data = await response.json().catch(() => null);
+      const err = new AxiosError("Backup download failed", AxiosError.ERR_BAD_RESPONSE);
+      err.response = {
+        status: response.status,
+        statusText: response.statusText,
+        data,
+        headers: {},
+        config: { headers: {} },
+      } as AxiosResponse;
+      throw this.handleError(err);
+    }
+
+    const onDownloadProgress = options?.onDownloadProgress;
+    const contentLength = Number(response.headers.get("Content-Length"));
+    const totalBytes =
+      contentLength > 0
+        ? contentLength
+        : options?.expectedTotal && options.expectedTotal > 0
+          ? options.expectedTotal
+          : undefined;
+
+    if (!onDownloadProgress || !response.body) {
+      return response.blob();
+    }
+
+    const reader = response.body.getReader();
+    const chunks: BlobPart[] = [];
+    let loaded = 0;
+
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) {
+        break;
+      }
+      chunks.push(value);
+      loaded += value.byteLength;
+      onDownloadProgress({
+        loaded,
+        total: totalBytes,
+        percent: totalBytes
+          ? Math.min(100, Math.round((loaded / totalBytes) * 100))
+          : undefined,
+      });
+    }
+
+    return new Blob(chunks);
+  }
+
   private triggerBlobDownload(blob: Blob, downloadFileName: string): void {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -1037,15 +1110,20 @@ class Api {
     document.body.removeChild(a);
   }
 
+  supportsBackupSaveFilePicker(): boolean {
+    return typeof window.showSaveFilePicker === "function";
+  }
+
   /**
    * Downloads a single backup archive.
    * In Chromium-based browsers, opens a native "Save as" dialog first, then fetches the file.
    * Elsewhere, fetches the file then saves to the browser's default download location.
    * @param backupId relative archive id from backupsGet, e.g. "20240101/inkvisitor_backup.tar.gz"
-   * @param fileName optional override for the downloaded file name
+   * @param options optional file name override, expected size, and streaming download progress callback
    */
-  async backupDownload(backupId: string, fileName?: string): Promise<void> {
-    const downloadFileName = fileName || backupId.replace(/\//g, "_");
+  async backupDownload(backupId: string, options?: IBackupDownloadOptions): Promise<void> {
+    const downloadFileName = options?.fileName || backupId.replace(/\//g, "_");
+    const onDownloadProgress = options?.onDownloadProgress;
 
     let fileHandle: FileSystemFileHandle | undefined;
     const showSaveFilePicker = window.showSaveFilePicker;
@@ -1072,19 +1150,19 @@ class Api {
     }
 
     try {
-      const response = await this.connection.get(`/backups/download`, {
-        params: { file: backupId },
-        responseType: "blob",
+      const blob = await this.fetchBackupBlob(backupId, {
+        onDownloadProgress,
+        expectedTotal: options?.expectedTotal,
       });
 
       if (fileHandle) {
         const writable = await fileHandle.createWritable();
-        await writable.write(response.data);
+        await writable.write(blob);
         await writable.close();
         return;
       }
 
-      this.triggerBlobDownload(response.data, downloadFileName);
+      this.triggerBlobDownload(blob, downloadFileName);
     } catch (err) {
       throw this.handleError(err);
     }

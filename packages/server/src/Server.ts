@@ -38,6 +38,14 @@ const server = express();
 server.use(
   compression({
     threshold: 0,
+    filter: (req, res) => {
+      // Backup archives are already compressed; re-compressing breaks Content-Length
+      // and prevents the browser from reporting download progress.
+      if (req.path.includes("/backups/download")) {
+        return false;
+      }
+      return compression.filter(req, res);
+    },
   })
 );
 
