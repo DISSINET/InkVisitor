@@ -21,6 +21,7 @@ interface QueryGridNodeProps {
   dispatch: React.Dispatch<QueryAction>;
   problems: QueryValidityProblem[];
   isRoot: boolean;
+  onOpenEntityInDetail?: (entityId: string) => void;
 }
 
 export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
@@ -29,6 +30,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
   dispatch,
   problems,
   isRoot = false,
+  onOpenEntityInDetail,
 }) => {
   const theme = useTheme();
   const isValid = problems.length === 0;
@@ -144,6 +146,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
               (dataEntity !== undefined ? (
                 <EntityTag
                   entity={dataEntity}
+                  onDoubleClick={() => onOpenEntityInDetail?.(dataEntity.id)}
                   unlinkButton={{
                     onClick: () => {
                       dispatch({

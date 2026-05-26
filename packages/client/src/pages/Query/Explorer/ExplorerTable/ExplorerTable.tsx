@@ -51,6 +51,7 @@ interface ExplorerTable {
   onExport: (rowsSelected: number[], selectedColumnIds?: string[]) => void;
   stableSignature?: string;
   getCachedEntity?: (rowIndex: number) => IResponseQueryEntity | undefined;
+  onOpenEntityInDetail?: (entityId: string) => void;
 }
 export const ExplorerTable: React.FC<ExplorerTable> = ({
   state,
@@ -62,6 +63,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   height: heightBox,
   onExport,
   stableSignature,
+  onOpenEntityInDetail,
 }) => {
   const themeContext = useTheme();
   const { detailIdArray, clearAllDetailIds, selectedDetailId } = useSearchParams();
@@ -359,6 +361,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
               onRowSelect={handleRowSelect}
               isSelected={isSelected}
               isLastClicked={rowLastClicked === index}
+              onOpenEntityInDetail={onOpenEntityInDetail}
             />
           )}
         </div>
@@ -374,6 +377,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       handleRowSelect,
       rowLastClicked,
       getCachedEntity,
+      onOpenEntityInDetail,
     ]
   );
 

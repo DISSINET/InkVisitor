@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import React, { useEffect, useMemo, useReducer, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 
 import { Query } from "@inkvisitor/shared/types";
 import api from "api";
@@ -32,7 +32,8 @@ interface QueryPage {}
 export const QueryPage: React.FC<QueryPage> = ({}) => {
   const layoutWidth: number = useAppSelector((state) => state.layout.layoutWidth);
   const contentHeight: number = useAppSelector((state) => state.layout.contentHeight);
-  const { selectedDetailId, detailIdArray, clearAllDetailIds } = useSearchParams();
+  const { selectedDetailId, detailIdArray, clearAllDetailIds, appendDetailId, setSelectedDetailId } =
+    useSearchParams();
   const [queryState, queryStateDispatch] = useReducer(queryReducer, queryStateInitial);
 
   /**
@@ -205,6 +206,25 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     });
   };
 
+  const openEntityInDetail = useCallback(
+    (entityId: string) => {
+      setQueryDetailPanelExpanded((prev) => {
+        if (prev) {
+          return prev;
+        }
+        localStorage.setItem(queryDetailPanelExpandedStorageKey, "true");
+        return true;
+      });
+
+      if (detailIdArray.includes(entityId)) {
+        setSelectedDetailId(entityId);
+      } else {
+        appendDetailId(entityId);
+      }
+    },
+    [appendDetailId, detailIdArray, setSelectedDetailId]
+  );
+
   useEffect(() => {
     if (queryDetailPanelExpanded && savedSeparatorXRef.current !== null) {
       setQuerySeparatorXPosition(savedSeparatorXRef.current);
@@ -246,6 +266,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
             isQueryFetching={queryIsFetching}
             queryError={queryError}
             queryStateValidity={queryStateValidity}
+            onOpenEntityInDetail={openEntityInDetail}
           />
         </Box>
         <Box
@@ -273,6 +294,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
             onExport={handleExport}
             stableSignature={stableSignature}
             getCachedEntity={getCachedEntity}
+            onOpenEntityInDetail={openEntityInDetail}
           />
 
           <Loader show={shouldShowLoader} />

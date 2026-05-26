@@ -12,7 +12,6 @@ import { deleteProp, deleteRef } from "constructors";
 
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { UserTagSize } from "components/advanced/UserTag/utils";
-import { useSearchParams } from "hooks";
 import { invalidateAllExplorerQueries } from "pages/Query/useQueryData";
 import { StyledCheckboxWrapper, StyledFocusedCircle } from "./ExplorerTableStyles";
 import { WIDTH_COLUMN_DEFAULT, WIDTH_COLUMN_EUC, WIDTH_COLUMN_FIRST } from "./types";
@@ -27,6 +26,7 @@ interface ExplorerTableRowProps {
 
   isSelected?: boolean;
   isLastClicked?: boolean;
+  onOpenEntityInDetail?: (entityId: string) => void;
 }
 const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
   rowId,
@@ -38,9 +38,9 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
 
   isSelected = false,
   isLastClicked = false,
+  onOpenEntityInDetail,
 }) => {
   const themeContext = useContext(ThemeContext);
-  const { appendDetailId, setSelectedDetailId } = useSearchParams();
   const handleCheckboxClick = React.useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
@@ -67,11 +67,10 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
       e.preventDefault();
       e.stopPropagation();
       if (entity?.id) {
-        appendDetailId(entity.id);
-        setSelectedDetailId(entity.id);
+        onOpenEntityInDetail?.(entity.id);
       }
     },
-    [appendDetailId, setSelectedDetailId]
+    [onOpenEntityInDetail]
   );
 
   const handleUnlinkEntity = React.useCallback(
@@ -297,6 +296,7 @@ function areRowsEqual(
   if (prevEntityId !== nextEntityId) return false;
   if (prev.isSelected !== next.isSelected) return false;
   if (prev.isLastClicked !== next.isLastClicked) return false;
+  if (prev.onOpenEntityInDetail !== next.onOpenEntityInDetail) return false;
   // Re-render when columns array identity changes (e.g., add/remove)
   if (prev.columns !== next.columns) return false;
   if (prev.rowItem !== next.rowItem) return false;

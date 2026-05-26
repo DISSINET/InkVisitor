@@ -13,6 +13,7 @@ interface QueryBoxProps {
   isQueryFetching: boolean;
   queryError: Error | null;
   queryStateValidity: QueryValidity;
+  onOpenEntityInDetail?: (entityId: string) => void;
 }
 
 export const QueryBox: React.FC<QueryBoxProps> = ({
@@ -21,6 +22,7 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
   isQueryFetching,
   queryError,
   queryStateValidity,
+  onOpenEntityInDetail,
 }) => {
   const gridWeight = useMemo<number>(() => {
     let maxNodeDepth = 1;
@@ -88,6 +90,7 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
                   problems={queryStateValidity.problems.filter(
                     (problem) => problem.source === thisCellNode.id
                   )}
+                  onOpenEntityInDetail={onOpenEntityInDetail}
                 />
               )}
               {nextCellAssociatedEdge && (
