@@ -10,4 +10,5 @@ interface Window {
   appConfig: {
     env: string;
   };
+  showSaveFilePicker?: (options?: SaveFilePickerOptions) => Promise<FileSystemFileHandle>;
 }

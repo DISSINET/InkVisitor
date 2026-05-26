@@ -1024,29 +1024,67 @@ class Api {
     }
   }
 
+  private triggerBlobDownload(blob: Blob, downloadFileName: string): void {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+
+    a.href = url;
+    a.download = downloadFileName;
+    document.body.appendChild(a);
+    a.click();
+
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  }
+
   /**
-   * Downloads a single backup archive and triggers a browser download.
+   * Downloads a single backup archive.
+   * In Chromium-based browsers, opens a native "Save as" dialog first, then fetches the file.
+   * Elsewhere, fetches the file then saves to the browser's default download location.
    * @param backupId relative archive id from backupsGet, e.g. "20240101/inkvisitor_backup.tar.gz"
    * @param fileName optional override for the downloaded file name
    */
   async backupDownload(backupId: string, fileName?: string): Promise<void> {
+    const downloadFileName = fileName || backupId.replace(/\//g, "_");
+
+    let fileHandle: FileSystemFileHandle | undefined;
+    const showSaveFilePicker = window.showSaveFilePicker;
+    if (showSaveFilePicker) {
+      try {
+        fileHandle = await showSaveFilePicker({
+          suggestedName: downloadFileName,
+          types: [
+            {
+              description: "Backup archive",
+              accept: {
+                "application/gzip": [".gz", ".tar.gz"],
+                "application/x-gzip": [".gz", ".tar.gz"],
+              },
+            },
+          ],
+        });
+      } catch (err) {
+        if (err instanceof DOMException && err.name === "AbortError") {
+          return;
+        }
+        throw err;
+      }
+    }
+
     try {
       const response = await this.connection.get(`/backups/download`, {
         params: { file: backupId },
         responseType: "blob",
       });
 
-      const url = window.URL.createObjectURL(response.data);
-      const a = document.createElement("a");
+      if (fileHandle) {
+        const writable = await fileHandle.createWritable();
+        await writable.write(response.data);
+        await writable.close();
+        return;
+      }
 
-      a.href = url;
-      a.download = fileName || backupId.replace(/\//g, "_");
-      document.body.appendChild(a);
-      a.click();
-
-      // Clean up
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      this.triggerBlobDownload(response.data, downloadFileName);
     } catch (err) {
       throw this.handleError(err);
     }
