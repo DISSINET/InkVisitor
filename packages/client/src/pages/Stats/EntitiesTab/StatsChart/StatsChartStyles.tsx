@@ -44,6 +44,7 @@ export const StyledPayloadItem = styled.div`
 // LEGEND
 export const StyledLegendWrapper = styled.div`
   display: flex;
+  justify-content: center;
   flex-direction: row;
   column-gap: ${({ theme }) => theme.space[1]};
   row-gap: ${({ theme }) => theme.space[2]};
