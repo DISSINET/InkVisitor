@@ -8,6 +8,7 @@
 ### Bug Fixes and Improvements:
 
 - Added statistics for anchor edit, finished implementation of statistics for text edit and anchor add #2988
+- Optimized fetch time of statistics
 - Implemented download of backup archives for owners #2905
 - Implemented sorting of documents section #2647
 - Prevented app crashing by corrupted server responses #2972
