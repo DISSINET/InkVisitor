@@ -39,7 +39,7 @@ export const StyledDownloadOverlay = styled.div<{ $show: boolean }>`
   position: absolute;
   inset: 0;
   z-index: 25;
-  background-color: ${({ theme }) => theme.color["primaryTransparent"]};
+  background-color: ${({ theme }) => theme.color.gray[200]};
 `;
 
 export const StyledProgressPanel = styled.div`
@@ -47,6 +47,11 @@ export const StyledProgressPanel = styled.div`
   flex-direction: column;
   gap: ${({ theme }) => theme.space[2]};
   width: min(24rem, 80%);
+  padding: ${({ theme }) => theme.space[4]};
+  border-radius: ${({ theme }) => theme.borderRadius["sm"]};
+  background-color: ${({ theme }) => theme.color["white"]};
+  border: 1px solid ${({ theme }) => theme.color["gray"][400]};
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
 `;
 
 export const StyledProgressTrack = styled.div`

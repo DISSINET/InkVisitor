@@ -76,6 +76,8 @@ export const BackupsPage: React.FC = () => {
             }
           : undefined,
       });
+    } catch (err) {
+      api.showErrorToast(err);
     } finally {
       setDownloadUi(null);
     }
