@@ -1,9 +1,11 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { IResponseBackup } from "@inkvisitor/shared/types";
+import { useQuery } from "@tanstack/react-query";
 import api from "api";
 import { Button, ButtonGroup, Loader } from "components";
 import { useTheme } from "hooks";
-import React, { useEffect, useRef } from "react";
+import React, { useState } from "react";
 import { FaDownload } from "react-icons/fa";
+import { BeatLoader } from "react-spinners";
 import {
   StyledBackground,
   StyledBoxWrap,
@@ -20,7 +22,6 @@ import {
   StyledHeading,
   StyledRow,
 } from "./BackupsPageStyles";
-import { BeatLoader } from "react-spinners";
 
 const formatBytes = (bytes: number): string => {
   if (!bytes) {
@@ -41,24 +42,16 @@ export const BackupsPage: React.FC = () => {
     enabled: api.isLoggedIn(),
   });
 
-  const downloadAbortRef = useRef<AbortController | null>(null);
+  const [downloadingId, setDownloadingId] = useState<string | false>(false);
 
-  useEffect(
-    () => () => {
-      downloadAbortRef.current?.abort();
-    },
-    []
-  );
-
-  const downloadMutation = useMutation({
-    mutationFn: async (backupId: string) => {
-      downloadAbortRef.current?.abort();
-      const controller = new AbortController();
-      downloadAbortRef.current = controller;
-      await api.backupDownload(backupId, { signal: controller.signal });
-    },
-    onError: (err) => api.showErrorToast(err),
-  });
+  const handleDownload = async (backup: IResponseBackup) => {
+    setDownloadingId(backup.id);
+    try {
+      await api.backupDownload(backup.id);
+    } finally {
+      setDownloadingId(false);
+    }
+  };
 
   return (
     <StyledContent>
@@ -85,8 +78,8 @@ export const BackupsPage: React.FC = () => {
                         label="Download"
                         color="primary"
                         inverted
-                        disabled={downloadMutation.isPending}
-                        onClick={() => downloadMutation.mutate(backup.id)}
+                        disabled={!!downloadingId}
+                        onClick={() => handleDownload(backup)}
                       />
                     </ButtonGroup>
                   </StyledCell>
@@ -98,7 +91,7 @@ export const BackupsPage: React.FC = () => {
 
           <Loader show={isFetching} size={50} />
 
-          <StyledDownloadOverlay $show={downloadMutation.isPending}>
+          <StyledDownloadOverlay $show={!!downloadingId}>
             <StyledDownloadOverlayPanel>
               <StyledDownloadOverlayLabel>Preparing download…</StyledDownloadOverlayLabel>
               <BeatLoader size={10} color={useTheme().color["primary"]} />

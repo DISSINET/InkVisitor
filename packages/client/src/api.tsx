@@ -1025,32 +1025,29 @@ class Api {
   }
 
   /**
-   * Downloads a backup archive. Awaits the full HTTP response so callers (e.g. useMutation
-   * isPending) reflect real transfer time, then triggers a browser save via blob URL.
+   * Downloads a single backup archive and triggers a browser download.
+   * @param backupId relative archive id from backupsGet, e.g. "20240101/inkvisitor_backup.tar.gz"
+   * @param fileName optional override for the downloaded file name
    */
-  async backupDownload(backupId: string, options?: { signal?: AbortSignal }): Promise<void> {
-    const downloadFileName = backupId.replace(/\//g, "_");
-
+  async backupDownload(backupId: string, fileName?: string): Promise<void> {
     try {
-      const response = await this.connection.get("/backups/download", {
+      const response = await this.connection.get(`/backups/download`, {
         params: { file: backupId },
         responseType: "blob",
-        timeout: 0,
-        signal: options?.signal,
       });
 
-      const blobUrl = window.URL.createObjectURL(response.data);
+      const url = window.URL.createObjectURL(response.data);
       const a = document.createElement("a");
-      a.href = blobUrl;
-      a.download = downloadFileName;
+
+      a.href = url;
+      a.download = fileName || backupId.replace(/\//g, "_");
       document.body.appendChild(a);
       a.click();
+
+      // Clean up
+      window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-      window.setTimeout(() => window.URL.revokeObjectURL(blobUrl), 60_000);
     } catch (err) {
-      if (axios.isCancel(err)) {
-        return;
-      }
       throw this.handleError(err);
     }
   }
