@@ -479,6 +479,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           onClose={() => setIsNewColumnOpen(false)}
           onCreateColumn={handleCreateColumn}
         />
+        <Loader show={isQueryFetching} size={50} />
       </StyledTableWrapper>
 
       {/* BATCH ACTION MODAL */}

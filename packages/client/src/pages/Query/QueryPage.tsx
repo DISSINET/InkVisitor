@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } 
 
 import { Query } from "@inkvisitor/shared/types";
 import api from "api";
-import { Box, Button, Loader, Panel } from "components";
+import { Box, Button, Panel } from "components";
 import { LayoutSeparatorHorizontal, LayoutSeparatorVertical } from "components/advanced";
 import { useSearchParams } from "hooks/useSearchParamsContext";
 import { MemoizedEntityDetailBox } from "pages/Main/containers/EntityDetailBox/EntityDetailBox";
@@ -80,10 +80,8 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
   const [exploreState, exploreStateDispatch] = useReducer(exploreReducer, exploreStateInitial);
 
   const queryClient = useQueryClient();
-  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleInvalidateQuery = () => {
-    setIsRefreshing(true);
     invalidateAllExplorerQueries(queryClient);
   };
 
@@ -176,16 +174,6 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     stableSignature,
     queryStateValidity,
   });
-
-  // Clear refresh flag when fetch completes
-  useEffect(() => {
-    if (isRefreshing && !queryIsFetching) {
-      setIsRefreshing(false);
-    }
-  }, [isRefreshing, queryIsFetching]);
-
-  // Show loader only when refresh button was clicked and fetching
-  const shouldShowLoader = isRefreshing && queryIsFetching;
 
   const isDetailOpen = !!(selectedDetailId || detailIdArray.length > 0);
 
@@ -296,8 +284,6 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
             getCachedEntity={getCachedEntity}
             onOpenEntityInDetail={openEntityInDetail}
           />
-
-          <Loader show={shouldShowLoader} />
         </Box>
       </Panel>
       {isDetailOpen && (
