@@ -179,7 +179,6 @@ export const StyledDocumentChangesLabel = styled.span`
 `;
 export const StyledDocumentChangesTags = styled.div`
   display: flex;
-  flex-wrap: wrap;
   gap: ${({ theme }) => theme.space[1]};
 `;
 export const StyledDocumentChangeFallback = styled.span`
