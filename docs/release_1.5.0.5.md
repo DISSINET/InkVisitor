@@ -1,8 +1,12 @@
 ## 1.5.0.5 Changelog [May 25, 2026]
 
+### Explorer:
+
+- Added filter by label #2856
+- Migrated Entity detail to side panel, double click now opens the detail as on the Main page #2907
+
 ### Bug Fixes and Improvements:
 
-- Make Explorer Entity detail side panel, double click now opens the detail as on the Main page #2907
 - Added statistics for anchor edit, finished implementation of statistics for text edit and anchor add #2988
 - Implemented download of backup archives for owners #2905
 - Implemented sorting of documents section #2647
