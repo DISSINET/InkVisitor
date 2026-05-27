@@ -23,7 +23,10 @@ export default class DbPool {
       evictionRunIntervalMillis: 1000,
       numTestsPerEvictionRun: 3,
       testOnBorrow: true,
-      testOnReturn: true
+      // testOnReturn would re-ping a conn we just used successfully -
+      // a wasted round-trip per request. testOnBorrow keeps the
+      // stale-conn-in-pool safety net.
+      testOnReturn: false,
     };
 
     this.pool = createPool<Db>(factory, poolOptions);
