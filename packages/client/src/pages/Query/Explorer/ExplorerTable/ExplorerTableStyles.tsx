@@ -91,6 +91,7 @@ export const StyledSpaceBetween = styled.div`
   justify-content: space-between;
 `;
 export const StyledTableControl = styled(StyledSpaceBetween)`
+  position: relative;
   padding: ${({ theme }) => theme.space[2]};
   padding-top: 0.2rem;
   margin-right: 2rem;

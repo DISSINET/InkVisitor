@@ -21,8 +21,7 @@ export const StyledEntityMultiValue = styled.div<StyledEntityMultiValue>`
   padding-left: 0.3rem;
   border-left-style: solid;
   border-left-width: 4px;
-  border-left-color: ${({ theme, $color }) =>
-    $color ? theme.color[$color] : ""};
+  border-left-color: ${({ theme, $color }) => ($color ? theme.color[$color] : "")};
   border-radius: 0px;
   font-size: 1.2rem;
 `;
@@ -34,6 +33,10 @@ export const StyledOptionRow = styled.div`
 `;
 export const StyledOptionIconWrap = styled.div`
   margin: 0 0.2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 1.5rem;
 `;
 export const StyledEntityOptionClass = styled.div`
   display: flex;
