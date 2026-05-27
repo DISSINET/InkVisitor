@@ -6,6 +6,7 @@ import { findEntityById } from "@service/shorthands";
 import treeCache from "@service/treeCache";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IParentTerritory, ITerritory, ITerritoryData } from "@inkvisitor/shared/types";
+import { ITerritoryModel } from "./territory-model";
 import {
   InternalServerError,
   InvalidDeleteError,
@@ -134,7 +135,7 @@ export class TerritoryValidation implements ITerritoryValidation {
   }
 }
 
-class Territory extends Entity implements ITerritory {
+class Territory extends Entity implements ITerritoryModel {
   class: EntityEnums.Class.Territory;
   data: TerritoryData;
 
