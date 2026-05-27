@@ -218,6 +218,7 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
             placeholder="Select a document..."
             width={300}
             disabled={isLoadingDocuments}
+            loading={isLoadingDocuments}
           />
         </StyledField>
 
@@ -276,7 +277,7 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
         </StyledDocumentEmptyState>
       )}
 
-      <Loader show={isLoadingDocuments || isLoadingAudit} />
+      <Loader show={isLoadingAudit} />
     </StyledDocumentsLayout>
   );
 };
