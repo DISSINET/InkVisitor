@@ -72,6 +72,14 @@ describe("explore-label-filter", () => {
     expect(entityLabelMatchesFilter(labels, labelFilter("xyz"))).toBeFalsy();
   });
 
+  it("entityLabelMatchesFilter matches partial tokens inside a single word", () => {
+    const labels = ["Iohannes de Agnessone"];
+    expect(entityLabelMatchesFilter(labels, labelFilter("Ioh"))).toBeTruthy();
+    expect(entityLabelMatchesFilter(labels, labelFilter("oha"))).toBeTruthy();
+    expect(entityLabelMatchesFilter(labels, labelFilter("Agness"))).toBeTruthy();
+    expect(entityLabelMatchesFilter(labels, labelFilter("nessone"))).toBeTruthy();
+  });
+
   it("parseUserRegex supports literal and raw patterns", () => {
     expect(parseUserRegex("^John")?.test("John Smith")).toBeTruthy();
     expect(parseUserRegex("/smith$/i")?.test("John Smith")).toBeTruthy();

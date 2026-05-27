@@ -216,7 +216,7 @@ export class SearchQuery {
    * @param label
    * @returns
    */
-  prepareLabel(label: string): [string, string, string] {
+  public static prepareLabel(label: string): [string, string, string] {
     let leftWildcard = "^",
       rightWildcard = "$";
 
@@ -233,6 +233,10 @@ export class SearchQuery {
     // label = regExpEscape(label.toLowerCase());
 
     return [label, leftWildcard, rightWildcard];
+  }
+
+  prepareLabel(label: string): [string, string, string] {
+    return SearchQuery.prepareLabel(label);
   }
 
   /**

@@ -6,7 +6,7 @@ import { LuRegex } from "react-icons/lu";
 import { ExploreAction, ExploreActionType } from "../state";
 import { StyledLabelFilter, StyledLabelFilterCheckboxWrapper } from "./ExplorerTableStyles";
 
-const LABEL_FILTER_DEBOUNCE_MS = 400;
+const LABEL_FILTER_DEBOUNCE_MS = 500;
 
 interface ExplorerTableLabelFilterProps {
   filters: Explore.IExploreColumnFilter[];
