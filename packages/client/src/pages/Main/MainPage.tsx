@@ -57,6 +57,7 @@ import { MemoizedStatementListBox } from "./containers/StatementsListBox/Stateme
 import { MemoizedTemplateListBox } from "./containers/TemplateListBox/TemplateListBox";
 import { MemoizedTerritoryTreeBox } from "./containers/TerritoryTreeBox/TerritoryTreeBox";
 import { StyledListAnnotatorTab, StyledListAnnotatorTabGroup } from "./MainPageStyles";
+import { useUserQuery } from "hooks/react-query";
 
 type FourthPanelBoxes = "search" | "bookmarks" | "templates";
 
@@ -304,21 +305,8 @@ const MainPage: React.FC<MainPage> = ({}) => {
     }
   }, [addStatementAtTheEndMutation.isPending]);
 
-  // get user data
-  const userId = localStorage.getItem("userid");
-  const {
-    status: statusUser,
-    data: user,
-    error: errorUser,
-    isFetching: isFetchingUser,
-  } = useQuery({
-    queryKey: ["user", userId],
-    queryFn: async () => {
-      const res = await api.usersGet(userId as string);
-      return res.data ?? undefined;
-    },
-    enabled: !!userId && api.isLoggedIn(),
-  });
+  // user data for current user
+  const { data: user } = useUserQuery();
 
   // Admin / Owner / Editor with writer rights
   const hasWriteRightsToSelectedTerritory = useMemo(() => {

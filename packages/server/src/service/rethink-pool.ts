@@ -1,5 +1,5 @@
 import { createPool, Pool, Options } from "generic-pool";
-import { RConnectionOptions } from "rethinkdb-ts";
+import { r as rethink, RConnectionOptions } from "rethinkdb-ts";
 import { Db } from "./rethink";
 
 export default class DbPool {
@@ -44,16 +44,7 @@ export default class DbPool {
   }
 
   async release(instance: Db): Promise<void> {
-    if (instance.lockAwaiter) {
-      Db.mutex.unlock(instance.lockAwaiter);
-    }
-    //console.log(
-    //  `Releasing db connection, available=${this.pool.available}, size=${this.pool.size}`
-    //);
     await this.pool.release(instance);
-    //console.log(
-    //  `Released db connection, available=${this.pool.available}, size=${this.pool.size}`
-    //);
   }
 
   async end(): Promise<void> {
@@ -78,6 +69,17 @@ export default class DbPool {
   }
 
   async validate(instance: Db): Promise<boolean> {
-    return instance.connection.open;
+    // `connection.open` is a driver-side flag that can lag behind reality when
+    // the server has closed the socket. A cheap round-trip is the only way to
+    // confirm the conn is actually usable before handing it out.
+    if (!instance.connection.open) {
+      return false;
+    }
+    try {
+      await rethink.expr(1).run(instance.connection);
+      return true;
+    } catch {
+      return false;
+    }
   }
 }

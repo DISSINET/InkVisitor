@@ -31,6 +31,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { getEntityLabel, getShortLabelByLetterCount } from "utils/utils";
 import { StyledNote } from "./EntityCreateModalStyles";
+import { useUserQuery } from "hooks/react-query";
 
 const defaultDropdownValue = "empty";
 interface EntityCreateModal {
@@ -87,21 +88,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   );
   const [territoryEntity, setTerritoryEntity] = useState<false | IEntity>(parentTerritory || false);
 
-  const userId = localStorage.getItem("userid");
-
-  const {
-    status: statusUser,
-    data: user,
-    error: errorUser,
-    isFetching: isFetchingUser,
-  } = useQuery({
-    queryKey: ["user", userId],
-    queryFn: async () => {
-      const res = await api.usersGet(userId as string);
-      return res.data ?? undefined;
-    },
-    enabled: !!userId && api.isLoggedIn(),
-  });
+  const { data: user } = useUserQuery();
 
   useEffect(() => {
     if (user && !languageSelected) {

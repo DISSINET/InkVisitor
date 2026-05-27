@@ -2,9 +2,10 @@ import { InterfaceEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { useQueryClient } from "@tanstack/react-query";
 import { heightHeader } from "Theme/constants";
 import { PingColor } from "Theme/theme";
+import api, { IDbStats } from "api";
 import LogoInkvisitor from "assets/logos/inkvisitor.svg";
 import { Button, Loader } from "components";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { MdDarkMode, MdSunny } from "react-icons/md";
 import { PiSealCheckFill } from "react-icons/pi";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -29,6 +30,10 @@ import {
   StyledRightHeader,
   StyledSandboxText,
   StyledSpace,
+  StyledStatsHeading,
+  StyledStatsPanel,
+  StyledStatsRow,
+  StyledStatsWrap,
   StyledThemeSwitcher,
   StyledThemeSwitcherIcon,
   StyledUser,
@@ -55,6 +60,38 @@ export const LeftHeader: React.FC<LeftHeader> = React.memo(({ tempLocation }) =>
 
   const [pingColor, setPingColor] = useState<keyof PingColor>("0");
   const [waitingForServerRestart, setWaitingForServerRestart] = useState(false);
+
+  const [statsOpen, setStatsOpen] = useState(false);
+  const [dbStats, setDbStats] = useState<IDbStats | null>(api.getDbStats());
+  const statsWrapRef = useRef<HTMLDivElement | null>(null);
+
+  // Poll lightly until the first sample arrives (only privileged sockets ever
+  // receive one). Until it does, the popup trigger stays inert.
+  useEffect(() => {
+    if (dbStats) return;
+    const interval = setInterval(() => {
+      const next = api.getDbStats();
+      if (next) setDbStats(next);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [dbStats]);
+
+  useEffect(() => {
+    if (!statsOpen) return;
+    const tick = () => setDbStats(api.getDbStats());
+    tick();
+    const interval = setInterval(tick, 2000);
+    const onDocClick = (e: MouseEvent) => {
+      if (!statsWrapRef.current?.contains(e.target as Node)) {
+        setStatsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", onDocClick);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("mousedown", onDocClick);
+    };
+  }, [statsOpen]);
 
   useEffect(() => {
     if ((ping === -1 || ping === -2) && !waitingForServerRestart) {
@@ -136,7 +173,46 @@ export const LeftHeader: React.FC<LeftHeader> = React.memo(({ tempLocation }) =>
               color="white"
             />
           )}
-          {ping >= -2 && <StyledPingColor $pingColor={pingColor} />}
+          {ping >= -2 && (
+            <StyledStatsWrap ref={statsWrapRef}>
+              <StyledPingColor
+                $pingColor={pingColor}
+                $clickable={!!dbStats}
+                title={dbStats ? "Click to show DB pool / mutex stats" : ""}
+                onClick={
+                  dbStats ? () => setStatsOpen((v) => !v) : undefined
+                }
+              />
+              {statsOpen && dbStats && (
+                <StyledStatsPanel>
+                  <StyledStatsHeading>pool</StyledStatsHeading>
+                  <StyledStatsRow>
+                    <span>borrowed</span>
+                    <span>
+                      {dbStats.pool.borrowed} / {dbStats.pool.max}
+                    </span>
+                  </StyledStatsRow>
+                  <StyledStatsRow>
+                    <span>available</span>
+                    <span>{dbStats.pool.available}</span>
+                  </StyledStatsRow>
+                  <StyledStatsRow>
+                    <span>pending</span>
+                    <span>{dbStats.pool.pending}</span>
+                  </StyledStatsRow>
+                  <StyledStatsHeading>mutex</StyledStatsHeading>
+                  <StyledStatsRow>
+                    <span>locked</span>
+                    <span>{dbStats.mutex.locked ? "yes" : "no"}</span>
+                  </StyledStatsRow>
+                  <StyledStatsRow>
+                    <span>queue</span>
+                    <span>{dbStats.mutex.queue}</span>
+                  </StyledStatsRow>
+                </StyledStatsPanel>
+              )}
+            </StyledStatsWrap>
+          )}
           {ping >= 0 && <StyledPingText>{ping}ms</StyledPingText>}
         </StyledFlexRow>
       </StyledFlexColumn>

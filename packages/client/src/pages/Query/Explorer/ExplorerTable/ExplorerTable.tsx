@@ -3,7 +3,13 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { List } from "react-window";
 import { v4 as uuidv4 } from "uuid";
 
-import { IEntity, IProp, IReference, IResponseQuery, IResponseQueryEntity } from "@inkvisitor/shared/types";
+import {
+  IEntity,
+  IProp,
+  IReference,
+  IResponseQuery,
+  IResponseQueryEntity,
+} from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
 import api from "api";
 import { Loader } from "components";
@@ -34,10 +40,7 @@ const OVERSCAN_ROWS = 10;
 const SCROLL_WINDOW_UPDATE_DEBOUNCE_MS = 150;
 
 // light CSS classes (avoid dynamic styled props in hot path)
-import {
-  invalidateAllExplorerQueries,
-  useInvalidateExplorerQuery,
-} from "pages/Query/useQueryData";
+import { invalidateAllExplorerQueries, useInvalidateExplorerQuery } from "pages/Query/useQueryData";
 import "../../styles.css";
 import ExplorerTableRow from "./ExplorerTableRow";
 
@@ -427,6 +430,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
         ref={contentRef}
       >
         <ExploreTableControl
+          isQueryFetching={isQueryFetching}
           setIsNewColumnOpen={setIsNewColumnOpen}
           isNewColumnOpen={isNewColumnOpen}
           batchActionSelected={batchActionSelected}
@@ -479,7 +483,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           onClose={() => setIsNewColumnOpen(false)}
           onCreateColumn={handleCreateColumn}
         />
-        <Loader show={isQueryFetching} size={50} />
       </StyledTableWrapper>
 
       {/* BATCH ACTION MODAL */}

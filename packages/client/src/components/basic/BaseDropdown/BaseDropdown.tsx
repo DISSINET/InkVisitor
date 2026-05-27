@@ -2,7 +2,7 @@ import { AutoPlacement, BasePlacement, VariationPlacement } from "@popperjs/core
 import { allEntities } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { heightHeader } from "Theme/constants";
-import { Tooltip } from "components";
+import { Loader, Tooltip } from "components";
 import React, { useState } from "react";
 import {
   ActionMeta,
@@ -56,6 +56,7 @@ interface BaseDropdown {
   limitSelectedItems?: number;
   closeMenuOnSelect?: boolean;
   shortLabel?: boolean;
+  loading?: boolean;
 }
 export const BaseDropdown: React.FC<BaseDropdown> = ({
   options = [],
@@ -86,6 +87,7 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
   limitSelectedItems,
   closeMenuOnSelect = true,
   shortLabel = false,
+  loading = false,
 }) => {
   const isOneOptionSingleEntitySelect = options.length < 2 && !isMulti && entityDropdown;
 
@@ -169,6 +171,7 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
           limitSelectedItems={limitSelectedItems}
           shortLabel={shortLabel}
         />
+        {loading && <Loader show size={7} loaderStyle="beat" />}
       </StyledSelectWrapper>
 
       {/* Tooltip */}

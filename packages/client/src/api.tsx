@@ -47,6 +47,22 @@ interface IApiOptions extends AxiosRequestConfig<any> {
   ignoreErrorToast: boolean;
 }
 
+// Mirrors @service/dbStats.IDbStats on the server side.
+export interface IDbStats {
+  ts: number;
+  pool: {
+    size: number;
+    available: number;
+    borrowed: number;
+    pending: number;
+    max: number;
+  };
+  mutex: {
+    locked: boolean;
+    queue: number;
+  };
+}
+
 type IFilterUsers = {
   label?: string;
 };
@@ -83,6 +99,7 @@ class Api {
   private token: string;
   private ws?: Socket;
   private ping: number;
+  private dbStats: IDbStats | null = null;
 
   private lastError: any = null;
   private errorTimeout: any;
@@ -117,6 +134,9 @@ class Api {
 
     this.ws = io(url.origin, {
       path: (url.pathname + "/socket.io").replace(`//`, "/"),
+      // Pulled lazily so the current token is sent on every (re)connect.
+      // The server uses it to gate db:stats to Admin/Owner sockets.
+      auth: (cb) => cb({ token: this.token }),
     });
     this.ws.on("connect", () => {
       console.log("Socket.IO connected");
@@ -135,6 +155,9 @@ class Api {
     });
     this.ws.on("connect_timeout", () => {
       console.error("Socket connection timeout.");
+    });
+    this.ws.on("db:stats", (stats: IDbStats) => {
+      this.dbStats = stats;
     });
 
     setInterval(() => {
@@ -271,6 +294,10 @@ class Api {
     return this.ping;
   }
 
+  getDbStats(): IDbStats | null {
+    return this.dbStats;
+  }
+
   handleError = (err: any | AxiosError) => {
     if (axios.isAxiosError(err)) {
       if (err.response?.status === 503) {
@@ -385,6 +412,15 @@ class Api {
     localStorage.setItem("userid", newUserId);
     localStorage.setItem("userrole", newUserRole);
     this.token = newToken;
+    // Re-handshake so the server can re-evaluate role-gated channels (db:stats)
+    // for the new token without requiring a page refresh.
+    this.reconnectWs();
+  }
+
+  private reconnectWs() {
+    if (!this.ws) return;
+    this.ws.disconnect();
+    this.ws.connect();
   }
 
   /**
@@ -431,7 +467,8 @@ class Api {
     localStorage.setItem("username", "");
 
     this.token = "";
-    // set global
+    // Drop the privileged db:stats stream the previous token may have unlocked.
+    this.reconnectWs();
   }
 
   /**
@@ -1688,8 +1725,10 @@ class Api {
 }
 
 const apiSingleton = new Api();
-apiSingleton.initWs();
+// checkLogin first so this.token is populated before the socket handshake;
+// the server reads it to decide whether to emit db:stats to this socket.
 apiSingleton.checkLogin();
+apiSingleton.initWs();
 apiSingleton.useDefaultRequestInterceptors();
 apiSingleton.useDefaultResponseInterceptors();
 

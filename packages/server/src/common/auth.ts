@@ -1,5 +1,5 @@
 import * as bcrypt from "bcryptjs";
-import { sign as signJwt } from "jsonwebtoken";
+import { sign as signJwt, verify as verifyJwtRaw, JwtPayload } from "jsonwebtoken";
 import { IUser } from "@inkvisitor/shared/types/user";
 import { expressjwt, Request as JWTRequest } from "express-jwt";
 import { NextFunction, Request } from "express";
@@ -91,6 +91,23 @@ export const generateAccessToken = (user: IUser, expDays = 30): string =>
  */
 export const generateShortLivedToken = (user: IUser, expSeconds: number): string =>
   signToken(user, expSeconds);
+
+/**
+ * Verifies a JWT and returns the embedded user payload, or null on any failure.
+ * Used by non-Express auth surfaces (e.g. socket.io handshake) so the JWT
+ * secret stays scoped to this module.
+ */
+export function verifyJwtToken(token: string): IUser | null {
+  if (!token) return null;
+  try {
+    const decoded = verifyJwtRaw(token, secret, {
+      algorithms: [defaultJwtAlgo],
+    }) as JwtPayload & { user?: IUser };
+    return decoded?.user ?? null;
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Middleware constructor that checks provided jwt token. Token must be valid - must be decodeable/signed and not expired.

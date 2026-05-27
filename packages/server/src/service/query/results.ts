@@ -6,10 +6,8 @@ import { IEntity, IUser } from "@inkvisitor/shared/types";
 import { PropSpecKind } from "@inkvisitor/shared/types/prop";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { Connection } from "rethinkdb-ts";
-import {
-  entityMatchesRowLabelFilter,
-  getRowLabelFilter,
-} from "./explore-label-filter";
+import { filterEntityIdsByRowLabelFilter, getRowLabelFilter } from "./explore-label-filter";
+import { applyRowIdsFilter, getRowIdsFilter } from "./explore-ids-filter";
 
 export default class Results<T extends { id: string }> {
   items: string[] | null = null;
@@ -54,21 +52,24 @@ export default class Results<T extends { id: string }> {
       return;
     }
 
+    const rowIdsFilter = getRowIdsFilter(exploreData.filters);
+    if (rowIdsFilter?.ids.length) {
+      this.items = applyRowIdsFilter(this.items, rowIdsFilter);
+      if (!this.items.length) {
+        return;
+      }
+    }
+
     const rowLabelFilter = getRowLabelFilter(exploreData.filters);
     if (!rowLabelFilter?.label?.trim()) {
       return;
     }
 
-    const entities = await Entity.findEntitiesByIds(db, this.items);
-    const entityById = new Map(entities.map((entity) => [entity.id, entity]));
-
-    this.items = this.items.filter((id) => {
-      const entity = entityById.get(id);
-      if (!entity) {
-        return false;
-      }
-      return entityMatchesRowLabelFilter(entity, rowLabelFilter);
-    });
+    this.items = await filterEntityIdsByRowLabelFilter(
+      db,
+      this.items,
+      rowLabelFilter
+    );
   }
 
   sort(sortData: Explore.IExploreColumnSort | undefined): void {

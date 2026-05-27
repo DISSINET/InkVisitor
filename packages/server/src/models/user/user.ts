@@ -7,6 +7,7 @@ import { generateUuid, hashPassword } from "@common/auth";
 import { generatePassword } from "@common/functions";
 import { nonenumerable } from "@common/decorators";
 import { Db } from "@service/rethink";
+import { DbHandle } from "@service/dbHandle";
 
 export class UserRight implements IUserRight {
   territory = "";
@@ -319,7 +320,7 @@ export default class User implements IUser, IDbModel {
    * @returns
    */
   static async findUserByLogin(
-    dbInstance: Db,
+    dbInstance: Db | DbHandle,
     login: string,
     includeThrashed: boolean
   ): Promise<User | null> {

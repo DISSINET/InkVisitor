@@ -50,6 +50,7 @@ export const StyledLegendWrapper = styled.div`
   row-gap: ${({ theme }) => theme.space[2]};
   flex-wrap: wrap;
   z-index: 2;
+  margin-left: 5rem;
 `;
 
 export const StyledLegendItem = styled.div`
