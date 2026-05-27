@@ -82,6 +82,7 @@ export const StyledLoaderWrap = styled.div`
 
 interface StyledPingColor {
   $pingColor: keyof PingColor;
+  $clickable?: boolean;
 }
 export const StyledPingColor = styled.div<StyledPingColor>`
   width: 1rem;
@@ -91,7 +92,7 @@ export const StyledPingColor = styled.div<StyledPingColor>`
   background-color: ${({ theme, $pingColor }) => theme.color.ping[$pingColor]};
   margin-right: 0.3rem;
   margin-left: 0.3rem;
-  cursor: pointer;
+  cursor: ${({ $clickable }) => ($clickable ? "pointer" : "default")};
 `;
 
 export const StyledStatsWrap = styled.div`

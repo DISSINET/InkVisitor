@@ -1,4 +1,6 @@
 import { Server as SocketIO } from "socket.io";
+import { UserEnums } from "@inkvisitor/shared/enums";
+import { verifyJwtToken } from "@common/auth";
 import { pool } from "@middlewares/db";
 import { Db } from "@service/rethink";
 
@@ -15,6 +17,14 @@ export interface IDbStats {
     locked: boolean;
     queue: number;
   };
+}
+
+// Sockets whose handshake JWT identifies an Admin/Owner join this room and
+// are the only ones that receive `db:stats` events.
+const DB_STATS_ROOM = "db:stats:privileged";
+
+function isPrivilegedRole(role: UserEnums.Role | undefined): boolean {
+  return role === UserEnums.Role.Owner || role === UserEnums.Role.Admin;
 }
 
 /**
@@ -40,20 +50,30 @@ export function collectDbStats(): IDbStats {
 }
 
 /**
- * Broadcasts a `db:stats` event to all connected sockets every `intervalMs`.
- * Returns the interval handle so the caller can stop it during shutdown if
- * needed. Also pushes a single snapshot to each freshly connected client so
- * dashboards don't have to wait up to `intervalMs` for the first value.
+ * Broadcasts a `db:stats` event every `intervalMs`, but only to sockets whose
+ * handshake JWT belongs to an Admin or Owner. Non-privileged or unauthenticated
+ * sockets neither join the room nor receive an initial snapshot, so the data
+ * is not exposed to ordinary users via the websocket.
+ *
+ * Returns the interval handle so the caller can stop it during shutdown.
  */
 export function startDbStatsEmitter(
   io: SocketIO,
   intervalMs = 2000
 ): NodeJS.Timeout {
   io.on("connection", (socket) => {
+    const token =
+      (socket.handshake.auth?.token as string | undefined) ||
+      (socket.handshake.query?.token as string | undefined);
+    const user = token ? verifyJwtToken(token) : null;
+    if (!user || !isPrivilegedRole(user.role)) {
+      return;
+    }
+    socket.join(DB_STATS_ROOM);
     socket.emit("db:stats", collectDbStats());
   });
 
   return setInterval(() => {
-    io.emit("db:stats", collectDbStats());
+    io.to(DB_STATS_ROOM).emit("db:stats", collectDbStats());
   }, intervalMs);
 }

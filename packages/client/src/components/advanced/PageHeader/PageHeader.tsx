@@ -62,8 +62,19 @@ export const LeftHeader: React.FC<LeftHeader> = React.memo(({ tempLocation }) =>
   const [waitingForServerRestart, setWaitingForServerRestart] = useState(false);
 
   const [statsOpen, setStatsOpen] = useState(false);
-  const [dbStats, setDbStats] = useState<IDbStats | null>(null);
+  const [dbStats, setDbStats] = useState<IDbStats | null>(api.getDbStats());
   const statsWrapRef = useRef<HTMLDivElement | null>(null);
+
+  // Poll lightly until the first sample arrives (only privileged sockets ever
+  // receive one). Until it does, the popup trigger stays inert.
+  useEffect(() => {
+    if (dbStats) return;
+    const interval = setInterval(() => {
+      const next = api.getDbStats();
+      if (next) setDbStats(next);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [dbStats]);
 
   useEffect(() => {
     if (!statsOpen) return;
@@ -166,41 +177,38 @@ export const LeftHeader: React.FC<LeftHeader> = React.memo(({ tempLocation }) =>
             <StyledStatsWrap ref={statsWrapRef}>
               <StyledPingColor
                 $pingColor={pingColor}
-                title="Click to show DB pool / mutex stats"
-                onClick={() => setStatsOpen((v) => !v)}
+                $clickable={!!dbStats}
+                title={dbStats ? "Click to show DB pool / mutex stats" : ""}
+                onClick={
+                  dbStats ? () => setStatsOpen((v) => !v) : undefined
+                }
               />
-              {statsOpen && (
+              {statsOpen && dbStats && (
                 <StyledStatsPanel>
                   <StyledStatsHeading>pool</StyledStatsHeading>
-                  {dbStats ? (
-                    <>
-                      <StyledStatsRow>
-                        <span>borrowed</span>
-                        <span>
-                          {dbStats.pool.borrowed} / {dbStats.pool.max}
-                        </span>
-                      </StyledStatsRow>
-                      <StyledStatsRow>
-                        <span>available</span>
-                        <span>{dbStats.pool.available}</span>
-                      </StyledStatsRow>
-                      <StyledStatsRow>
-                        <span>pending</span>
-                        <span>{dbStats.pool.pending}</span>
-                      </StyledStatsRow>
-                      <StyledStatsHeading>mutex</StyledStatsHeading>
-                      <StyledStatsRow>
-                        <span>locked</span>
-                        <span>{dbStats.mutex.locked ? "yes" : "no"}</span>
-                      </StyledStatsRow>
-                      <StyledStatsRow>
-                        <span>queue</span>
-                        <span>{dbStats.mutex.queue}</span>
-                      </StyledStatsRow>
-                    </>
-                  ) : (
-                    <span>waiting for first sample…</span>
-                  )}
+                  <StyledStatsRow>
+                    <span>borrowed</span>
+                    <span>
+                      {dbStats.pool.borrowed} / {dbStats.pool.max}
+                    </span>
+                  </StyledStatsRow>
+                  <StyledStatsRow>
+                    <span>available</span>
+                    <span>{dbStats.pool.available}</span>
+                  </StyledStatsRow>
+                  <StyledStatsRow>
+                    <span>pending</span>
+                    <span>{dbStats.pool.pending}</span>
+                  </StyledStatsRow>
+                  <StyledStatsHeading>mutex</StyledStatsHeading>
+                  <StyledStatsRow>
+                    <span>locked</span>
+                    <span>{dbStats.mutex.locked ? "yes" : "no"}</span>
+                  </StyledStatsRow>
+                  <StyledStatsRow>
+                    <span>queue</span>
+                    <span>{dbStats.mutex.queue}</span>
+                  </StyledStatsRow>
                 </StyledStatsPanel>
               )}
             </StyledStatsWrap>
