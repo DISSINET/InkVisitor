@@ -13,7 +13,8 @@ import { Explore } from "@inkvisitor/shared/types/query";
 import { ThemeContext } from "styled-components";
 import { ExploreAction } from "../state";
 import ExplorerTableLabelFilter from "./ExplorerTableLabelFilter";
-import { StyledCounter, StyledTableControl } from "./ExplorerTableStyles";
+import ExplorerTableIdsFilter from "./ExplorerTableIdsFilter";
+import { StyledCounter, StyledExploreFilters, StyledTableControl } from "./ExplorerTableStyles";
 import { BatchAction, batchOptions } from "./types";
 
 interface ExploreTableControlProps {
@@ -137,7 +138,10 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
         </div>
       </div>
 
-      <ExplorerTableLabelFilter filters={filters} dispatch={dispatch} />
+      <StyledExploreFilters>
+        <ExplorerTableLabelFilter filters={filters} dispatch={dispatch} />
+        <ExplorerTableIdsFilter filters={filters} dispatch={dispatch} />
+      </StyledExploreFilters>
 
       <Button
         icon={<TbColumnInsertRight size={17} />}
