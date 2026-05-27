@@ -953,6 +953,7 @@ export namespace Explore {
 
   export enum EExploreFilterType {
     RowLabel = "rowLabel",
+    RowIds = "rowIds",
   }
 
   /**
@@ -967,7 +968,15 @@ export namespace Explore {
     useRegex?: boolean;
   }
 
-  export type IExploreColumnFilter = IExploreRowLabelFilter;
+  /**
+   * Filters explorer rows to entities whose id is in this list (AND with query results).
+   */
+  export interface IExploreRowIdsFilter {
+    type: EExploreFilterType.RowIds;
+    ids: string[];
+  }
+
+  export type IExploreColumnFilter = IExploreRowLabelFilter | IExploreRowIdsFilter;
 
   export type IExploreColumnSort = {
     columnId: string;

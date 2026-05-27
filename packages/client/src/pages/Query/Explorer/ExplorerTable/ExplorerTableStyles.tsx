@@ -144,10 +144,7 @@ export const StyledLabelFilter = styled.div`
   display: flex;
   align-items: center;
   gap: 0.2rem;
-  flex: 1;
-  min-width: 10rem;
-  max-width: 36rem;
-  margin: 0 1rem;
+  width: 100%;
 `;
 
 export const StyledLabelFilterCheckboxWrapper = styled.div`
@@ -155,4 +152,28 @@ export const StyledLabelFilterCheckboxWrapper = styled.div`
   align-items: center;
   margin-left: 0.2rem;
   gap: 0.2rem;
+`;
+
+export const StyledExploreFilters = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
+  flex: 1;
+  min-width: 10rem;
+  max-width: 60%;
+  margin: 0 3rem;
+`;
+
+export const StyledIdsFilter = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+`;
+
+export const StyledIdsFilterHint = styled.span`
+  flex-shrink: 0;
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  color: ${({ theme }) => theme.color["gray"][600]};
+  white-space: nowrap;
 `;

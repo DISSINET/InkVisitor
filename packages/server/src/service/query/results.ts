@@ -10,6 +10,7 @@ import {
   entityMatchesRowLabelFilter,
   getRowLabelFilter,
 } from "./explore-label-filter";
+import { applyRowIdsFilter, getRowIdsFilter } from "./explore-ids-filter";
 
 export default class Results<T extends { id: string }> {
   items: string[] | null = null;
@@ -52,6 +53,14 @@ export default class Results<T extends { id: string }> {
   ): Promise<void> {
     if (!this.items?.length) {
       return;
+    }
+
+    const rowIdsFilter = getRowIdsFilter(exploreData.filters);
+    if (rowIdsFilter?.ids.length) {
+      this.items = applyRowIdsFilter(this.items, rowIdsFilter);
+      if (!this.items.length) {
+        return;
+      }
     }
 
     const rowLabelFilter = getRowLabelFilter(exploreData.filters);
