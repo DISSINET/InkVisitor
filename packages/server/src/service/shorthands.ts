@@ -10,6 +10,10 @@ import { ModelNotValidError } from "@inkvisitor/shared/types/errors";
 import { Connection, RDatum, r as rethink, WriteResult } from "rethinkdb-ts";
 import { Db } from "./rethink";
 import { DbHandle } from "./dbHandle";
+import { cache } from "./ttlCache";
+
+const ENTITY_CACHE_TTL_MS = 60 * 1000;
+export const entityCacheKey = (id: string): string => `entity:byId:${id}`;
 
 export async function getEntitiesDataByClass<T>(
   db: Connection,
@@ -26,9 +30,20 @@ export async function findEntityById<T extends IEntity>(
   db: Db | DbHandle | Connection,
   id: string
 ): Promise<T> {
+  const key = entityCacheKey(id);
+  const cached = cache.get<IEntity>(key);
+  if (cached) {
+    return cached as T;
+  }
+
   const connection = "connection" in db ? db.connection : db;
   const data = await rethink.table(Entity.table).get(id).run(connection);
-  return data || null;
+  if (!data) {
+    return null as unknown as T;
+  }
+
+  cache.set(key, data as IEntity, ENTITY_CACHE_TTL_MS);
+  return data;
 }
 
 export async function getEntitiesByIds<T extends IEntity>(

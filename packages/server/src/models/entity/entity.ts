@@ -3,7 +3,8 @@ import { IDbModel, fillArray, fillFlatObject } from "@models/common";
 import Document from "@models/document/document";
 import Prop from "@models/prop/prop";
 import User from "@models/user/user";
-import { findEntityById } from "@service/shorthands";
+import { entityCacheKey, findEntityById } from "@service/shorthands";
+import { cache } from "@service/ttlCache";
 
 import { AnchorsNode } from "@models/document/anchors";
 import { Setting } from "@models/setting/setting";
@@ -128,7 +129,7 @@ export default class Entity implements IEntity, IDbModel {
     }
   }
 
-  update(
+  async update(
     db: Connection | undefined,
     updateData: Partial<IEntity>
   ): Promise<WriteResult> {
@@ -141,7 +142,9 @@ export default class Entity implements IEntity, IDbModel {
         !(key in entityAllowedFields) && delete updateData[key as keyof IEntity]
     );
 
-    return rethink.table(Entity.table).get(this.id).update(updateData).run(db);
+    const result = await rethink.table(Entity.table).get(this.id).update(updateData).run(db);
+    cache.delete(entityCacheKey(this.id));
+    return result;
   }
 
   async getUsedByEntity(db: Connection): Promise<IEntity[]> {
@@ -179,6 +182,7 @@ export default class Entity implements IEntity, IDbModel {
       .delete()
       .run(db);
 
+    cache.delete(entityCacheKey(this.id));
     return result;
   }
 
