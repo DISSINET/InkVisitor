@@ -8,6 +8,10 @@ import { generatePassword } from "@common/functions";
 import { nonenumerable } from "@common/decorators";
 import { Db } from "@service/rethink";
 import { DbHandle } from "@service/dbHandle";
+import { cache } from "@service/ttlCache";
+
+const USER_CACHE_TTL_MS = 15 * 60 * 1000;
+const userCacheKey = (id: string): string => `user:byId:${id}`;
 
 export class UserRight implements IUserRight {
   territory = "";
@@ -139,7 +143,7 @@ export default class User implements IUser, IDbModel {
     return result.inserted === 1;
   }
 
-  update(
+  async update(
     dbInstance: Connection | undefined,
     updateData: Record<string, unknown>
   ): Promise<WriteResult> {
@@ -152,7 +156,9 @@ export default class User implements IUser, IDbModel {
       throw new ModelNotValidError("model not valid");
     }
 
-    return rethink.table(User.table).get(this.id).update(updateData).run(dbInstance);
+    const result = await rethink.table(User.table).get(this.id).update(updateData).run(dbInstance);
+    cache.delete(userCacheKey(this.id));
+    return result;
   }
 
   /**
@@ -160,14 +166,16 @@ export default class User implements IUser, IDbModel {
    * @param dbInstance
    * @returns
    */
-  delete(dbInstance: Connection): Promise<WriteResult> {
-    return rethink
+  async delete(dbInstance: Connection): Promise<WriteResult> {
+    const result = await rethink
       .table(User.table)
       .get(this.id)
       .update({
         deletedAt: new Date(),
       })
       .run(dbInstance);
+    cache.delete(userCacheKey(this.id));
+    return result;
   }
 
   isValid(): boolean {
@@ -223,12 +231,19 @@ export default class User implements IUser, IDbModel {
    * @returns
    */
   static async findUserById(dbInstance: Connection | undefined, id: string): Promise<User | null> {
+    const key = userCacheKey(id);
+    const cached = cache.get<IUser>(key);
+    if (cached) {
+      return new User(cached);
+    }
+
     const data = await rethink.table(User.table).get(id).run(dbInstance);
     if (!data || (data as IUser).deletedAt) {
       return null;
     }
 
     delete data.password;
+    cache.set(key, data as IUser, USER_CACHE_TTL_MS);
     return new User(data);
   }
 
