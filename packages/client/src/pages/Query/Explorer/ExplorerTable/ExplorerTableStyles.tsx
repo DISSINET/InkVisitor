@@ -156,12 +156,12 @@ export const StyledLabelFilterCheckboxWrapper = styled.div`
 
 export const StyledExploreFilters = styled.div`
   display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
+  flex-direction: row;
+  gap: 2rem;
   flex: 1;
   min-width: 10rem;
-  max-width: 36rem;
-  margin: 0 1rem;
+  max-width: 60%;
+  margin: 0 2rem;
 `;
 
 export const StyledIdsFilter = styled.div`
