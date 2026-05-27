@@ -589,60 +589,61 @@ export class ResponseSearch {
       const rootT = treeCache.tree.getRootTerritory() as ITerritory;
       const conn = httpRequest.db.connection;
 
-      const entitiesToCheck = [...entities];
-      entities = [];
+      // Used to be a serial nested loop: N entities x 5 awaits each. Fan
+      // out the per-entity work in parallel, and inside each entity, run
+      // the 3 independent fetches concurrently before resolving the 2
+      // entity lookups that depend on their result ids.
+      const checked = await Promise.all(
+        entities.map(async (entity) => {
+          const [classificationRels, soeRels, propValueEs] = await Promise.all([
+            Classification.getClassificationForwardConnections(
+              conn,
+              entity.id,
+              entity.class,
+              1,
+              0
+            ),
+            Relation.findForEntities(
+              conn,
+              [entity.id],
+              RelationEnums.Type.SuperordinateEntity,
+              0
+            ),
+            getEntitiesByIds<IEntity>(
+              conn,
+              Entity.extractIdsFromProps(entity.props, [PropSpecKind.VALUE])
+            ),
+          ]);
 
-      for (const entity of entitiesToCheck) {
-        const classificationRels =
-          await Classification.getClassificationForwardConnections(
-            conn,
-            entity.id,
-            entity.class,
-            1,
-            0
+          const [classificationEs, soeEs] = await Promise.all([
+            getEntitiesByIds<IConcept>(
+              conn,
+              classificationRels.map((c) => c.entityIds[1])
+            ),
+            getEntitiesByIds<IEntity>(
+              conn,
+              soeRels.map((s) => s.entityIds[1])
+            ),
+          ]);
+
+          const warnings = new Entity(entity).getTBasedWarnings(
+            [rootT],
+            classificationEs,
+            soeEs,
+            propValueEs,
+            settings
           );
-        const classificationEs: IConcept[] = await getEntitiesByIds<IConcept>(
-          conn,
-          classificationRels.map((c) => c.entityIds[1])
-        );
+          return { entity, hasWarnings: warnings.length > 0 };
+        })
+      );
 
-        const soeRels = await Relation.findForEntities(
-          conn,
-          [entity.id],
-          RelationEnums.Type.SuperordinateEntity,
-          0
-        );
-        const soeEs = await getEntitiesByIds<IEntity>(
-          conn,
-          soeRels.map((s) => s.entityIds[1])
-        );
-        const propValueEs = await getEntitiesByIds<IEntity>(
-          conn,
-          Entity.extractIdsFromProps(entity.props, [PropSpecKind.VALUE])
-        );
-
-        const entityModel = new Entity(entity);
-
-        const warnings = entityModel.getTBasedWarnings(
-          [rootT],
-          classificationEs,
-          soeEs,
-          propValueEs,
-          settings
-        );
-
-        if (this.request.isRootInvalid === IRequestSearchRootValidity.Valid) {
-          if (warnings.length === 0) {
-            entities.push(entity);
-          }
-        } else if (
-          this.request.isRootInvalid === IRequestSearchRootValidity.Invalid
-        ) {
-          if (warnings.length > 0) {
-            entities.push(entity);
-          }
-        }
-      }
+      const wantInvalid =
+        this.request.isRootInvalid === IRequestSearchRootValidity.Invalid;
+      entities = checked
+        .filter(({ hasWarnings }) =>
+          wantInvalid ? hasWarnings : !hasWarnings
+        )
+        .map(({ entity }) => entity);
     }
 
     if (query.retainedIdsOrder) {
