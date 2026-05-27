@@ -40,19 +40,9 @@ export default class Document implements IDocument, IDbModel {
    * @returns Promise<void>
    */
   async preprocess(conn: Connection): Promise<void> {
-    const gatherStart = performance.now();
     const entityIds = this.gatherEntityIds();
-    const gatherTime = performance.now() - gatherStart;
-    
-    const findStart = performance.now();
     this.entityIds = await this.findReferencedEntityIds(conn, entityIds);
-    const findTime = performance.now() - findStart;
-    
-    const buildStart = performance.now();
     this.anchors = AnchorsNode.buildAnchorsTree(this.content, this.entityIds);
-    const buildTime = performance.now() - buildStart;
-    
-    console.log(`[Document preprocess] ${this.id}: gatherEntityIds took ${gatherTime.toFixed(5)}ms, findReferencedEntityIds took ${findTime.toFixed(5)}ms, buildAnchorsTree took ${buildTime.toFixed(5)}ms`);
   }
 
   /**
