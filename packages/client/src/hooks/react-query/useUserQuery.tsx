@@ -11,6 +11,6 @@ export function useUserQuery(enabled?: boolean) {
       return res.data ?? undefined;
     },
     enabled: !!userId && api.isLoggedIn() && enabled,
-    // staleTime: 5 * 60 * 1000,
+    staleTime: 5 * 60 * 1000,
   });
 }
