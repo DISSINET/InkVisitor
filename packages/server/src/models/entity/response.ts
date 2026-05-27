@@ -153,21 +153,20 @@ export class ResponseEntityDetail
       this.walkEntityProps(entity.id, entity.props);
     }
 
-    this.walkStatementsDataEntities(
-      await Statement.getLinkedEntities(conn, this.id)
-    );
+    const linkedEntities = await Statement.getLinkedEntities(conn, this.id);
+    this.walkStatementsDataEntities(linkedEntities);
 
     const statementsByPropsValueType = await Statement.findByDataPropsId(
       conn,
       this.id
     );
 
-    // this was added as a hot fix for #1528
-    const statementsByActantActions = await Statement.getLinkedEntities(
-      conn,
-      this.id
-    );
-    statementsByActantActions.forEach((s) => {
+    // The StatementDataProps index only catches entityIds referenced
+    // *inside* actant.props - not the actant.entityId itself. Pull in
+    // linked statements where this entity is an actant carrying props,
+    // so walkStatementsDataProps records `originId === this.id` matches.
+    // Reuses the linkedEntities fetch above; the walks are read-only.
+    linkedEntities.forEach((s) => {
       s.data.actants
         .filter((a) => a.entityId === this.id)
         .forEach((a) => {
