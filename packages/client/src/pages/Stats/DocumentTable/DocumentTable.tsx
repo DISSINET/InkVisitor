@@ -23,10 +23,7 @@ import {
   StyledField,
   StyledFieldLabel,
 } from "../StatsPageStyles";
-import {
-  HIDDEN_DOCUMENT_CHANGE_SECTIONS,
-  HIDDEN_EVENT_TYPES,
-} from "../constants";
+import { HIDDEN_DOCUMENT_CHANGE_SECTIONS, HIDDEN_EVENT_TYPES } from "../constants";
 
 type ChangeSectionKey = keyof IDocumentAuditAnchorChanges;
 const DEFAULT_AUDITS_PER_PAGE = 10;
@@ -166,7 +163,7 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
   const { data: dataAudits, isLoading: isLoadingAudit } = useQuery<IResponseAudit>({
     queryKey: ["auditByDocument", selectedDocument?.value],
     queryFn: async () => {
-      const res = await api.auditGetByDocument(selectedDocument!.value as string, 30);
+      const res = await api.auditGetByDocument(selectedDocument!.value as string, 1000);
       return res.data;
     },
     enabled: !!selectedDocument?.value,
