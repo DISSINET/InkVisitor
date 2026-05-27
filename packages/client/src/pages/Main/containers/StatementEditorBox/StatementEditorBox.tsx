@@ -11,31 +11,18 @@ import { StatementEditor } from "./StatementEditor/StatementEditor";
 import { StyledEditorEmptyState } from "./StatementEditorBoxStyles";
 import { useAppSelector } from "redux/hooks";
 import { computeDifferences } from "utils/utils";
+import { useUserQuery } from "hooks/react-query";
 
 export const StatementEditorBox: React.FC = () => {
   const thirdPanelExpanded: boolean = useAppSelector(
     (state) => state.layout.mainPage.thirdPanelExpanded
   );
 
-  const { statementId, setStatementId, selectedDetailId, setTerritoryId } =
-    useSearchParams();
+  const { statementId, setStatementId, selectedDetailId, setTerritoryId } = useSearchParams();
 
   const queryClient = useQueryClient();
 
-  const userId = localStorage.getItem("userid");
-  const {
-    status: statusUser,
-    data: user,
-    error: errorUser,
-    isFetching: isFetchingUser,
-  } = useQuery({
-    queryKey: ["user", userId],
-    queryFn: async () => {
-      const res = await api.usersGet(userId as string);
-      return res.data ?? undefined;
-    },
-    enabled: !!userId && api.isLoggedIn(),
-  });
+  const { data: user } = useUserQuery();
 
   // Statement query
   const {
@@ -53,10 +40,7 @@ export const StatementEditorBox: React.FC = () => {
   });
 
   useEffect(() => {
-    if (
-      statementError &&
-      (statementError as any).error === "StatementDoesNotExits"
-    ) {
+    if (statementError && (statementError as any).error === "StatementDoesNotExits") {
       setStatementId("");
     }
   }, [statementError]);
@@ -130,10 +114,7 @@ export const StatementEditorBox: React.FC = () => {
       const differencesHash = JSON.stringify(differences);
 
       // Only send if there are actual differences and we haven't sent this exact change before
-      if (
-        Object.keys(differences).length > 0 &&
-        differencesHash !== lastSentData
-      ) {
+      if (Object.keys(differences).length > 0 && differencesHash !== lastSentData) {
         updateStatementMutation.mutate(differences);
         setLastSentData(differencesHash);
         setChangesPending(false);
@@ -154,10 +135,7 @@ export const StatementEditorBox: React.FC = () => {
     return () => clearTimeout(timerId);
   }, [tempObject, changesPending]);
 
-  const updateChangesAndPendingState = (
-    newData: IResponseStatement,
-    instantUpdate?: boolean
-  ) => {
+  const updateChangesAndPendingState = (newData: IResponseStatement, instantUpdate?: boolean) => {
     if (instantUpdate) {
       sendChangesToBackend(newData);
       setChangesPending(false);
@@ -166,10 +144,7 @@ export const StatementEditorBox: React.FC = () => {
     }
   };
 
-  const handleAttributeChange = (
-    changes: Partial<IStatement>,
-    instantUpdate?: boolean
-  ) => {
+  const handleAttributeChange = (changes: Partial<IStatement>, instantUpdate?: boolean) => {
     if (tempObject) {
       queryClient.cancelQueries({
         queryKey: ["statement", statementId],
@@ -277,8 +252,7 @@ export const StatementEditorBox: React.FC = () => {
     if (newActant === undefined) {
       return changes;
     } else {
-      const actionIds =
-        statement?.data.actions.map((a) => a.actionId).filter((a) => a) ?? [];
+      const actionIds = statement?.data.actions.map((a) => a.actionId).filter((a) => a) ?? [];
 
       // do not check if there are no valid actions
       if (actionIds.length === 0) {
@@ -289,12 +263,8 @@ export const StatementEditorBox: React.FC = () => {
         entityIds: [newActant.entityId, ...actionIds],
       });
 
-      const newActantEntity = entitiesData.data.find(
-        (e) => e.id === newActant.entityId
-      );
-      const actionEntities = entitiesData.data.filter(
-        (e) => e.class === EntityEnums.Class.Action
-      );
+      const newActantEntity = entitiesData.data.find((e) => e.id === newActant.entityId);
+      const actionEntities = entitiesData.data.filter((e) => e.class === EntityEnums.Class.Action);
 
       // if actant entity is not found, do not change anything
       if (!newActantEntity) {
@@ -422,9 +392,7 @@ export const StatementEditorBox: React.FC = () => {
                 <BsInfoCircle size="23" />
               </StyledEditorEmptyState>
               <StyledEditorEmptyState>
-                {
-                  "No statement selected yet. Pick one from the statements table"
-                }
+                {"No statement selected yet. Pick one from the statements table"}
               </StyledEditorEmptyState>
             </div>
           )}

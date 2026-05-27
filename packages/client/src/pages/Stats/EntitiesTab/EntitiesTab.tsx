@@ -26,6 +26,7 @@ import {
 } from "../utils";
 import { StatsChart } from "./StatsChart/StatsChart";
 import { StatsTable } from "./StatsTable/StatsTable";
+import { useUserQuery } from "hooks/react-query";
 
 export const EntitiesTab: React.FC = () => {
   const [state, dispatch] = useReducer(statsReducer, undefined, createEntitiesTabState);
@@ -137,15 +138,7 @@ export const EntitiesTab: React.FC = () => {
   }, [isError]);
 
   // get user data
-  const userId = localStorage.getItem("userid");
-  const { data: user } = useQuery({
-    queryKey: ["user", userId],
-    queryFn: async () => {
-      const res = await api.usersGet(userId as string);
-      return res.data ?? undefined;
-    },
-    enabled: !!userId && api.isLoggedIn(),
-  });
+  // const { data: user } = useUserQuery();
 
   return (
     <>

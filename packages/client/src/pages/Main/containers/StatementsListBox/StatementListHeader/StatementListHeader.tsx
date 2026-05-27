@@ -52,6 +52,7 @@ import {
   StyledSuggesterRow,
 } from "./StatementListHeaderStyles";
 import { DropdownItem } from "@inkvisitor/shared/types";
+import { useUserQuery } from "hooks/react-query";
 
 interface StatementListHeader {
   territory?: IResponseTerritory;
@@ -252,20 +253,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   };
 
   // get user data
-  const userId = localStorage.getItem("userid");
-  const {
-    status: statusUser,
-    data: user,
-    error: errorUser,
-    isFetching: isFetchingUser,
-  } = useQuery({
-    queryKey: ["user", userId],
-    queryFn: async () => {
-      const res = await api.usersGet(userId as string);
-      return res.data ?? undefined;
-    },
-    enabled: !!userId && api.isLoggedIn(),
-  });
+  const { data: user } = useUserQuery();
 
   const treeData: IResponseTree | undefined = queryClient.getQueryData(["tree"]);
 

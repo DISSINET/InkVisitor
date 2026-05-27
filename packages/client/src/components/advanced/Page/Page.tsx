@@ -15,6 +15,7 @@ import { setUsername } from "redux/features/usernameSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { ThemeColor } from "Theme/theme";
 import { StyledPage, StyledPageContent } from "./PageStyles";
+import { useUserQuery } from "hooks/react-query";
 
 interface Page {
   children?: React.ReactNode;
@@ -39,20 +40,7 @@ export const Page: React.FC<Page> = ({ children }) => {
     location.pathname === "/activate" ||
     location.pathname === "/password_reset";
 
-  const {
-    status: statusUser,
-    data: user,
-    error: errorUser,
-    isFetching: isFetchingUser,
-    isPaused,
-  } = useQuery({
-    queryKey: ["user", userId],
-    queryFn: async () => {
-      const res = await api.usersGet(userId as string);
-      return res.data ?? undefined;
-    },
-    enabled: api.isLoggedIn() && !disableRightHeader,
-  });
+  const { data: user, isFetching: isFetchingUser, isPaused } = useUserQuery(!disableRightHeader);
 
   const toastId = React.useRef<Id | null>(null);
   const notify = () => (toastId.current = toast.dark("you're offline", { autoClose: false }));

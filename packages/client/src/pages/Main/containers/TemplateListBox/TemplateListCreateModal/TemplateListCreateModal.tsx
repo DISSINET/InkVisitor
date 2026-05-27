@@ -19,6 +19,7 @@ import {
 import Dropdown from "components/advanced";
 import { CEntity, CStatement, CTemplateEntity } from "constructors";
 import { useSearchParams } from "hooks";
+import { useUserQuery } from "hooks/react-query";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
 import { getShortLabelByLetterCount } from "utils/utils";
@@ -32,19 +33,14 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
   setShowCreateModal,
 }) => {
   const queryClient = useQueryClient();
-  const {
-    setStatementId,
-    appendDetailId,
-    selectedDetailId,
-    setSelectedDetailId,
-  } = useSearchParams();
+  const { setStatementId, appendDetailId, selectedDetailId, setSelectedDetailId } =
+    useSearchParams();
 
-  const [createModalEntityClass, setCreateModalEntityClass] =
-    useState<EntityEnums.Class>(entitiesDict[0].value);
-  const [createModalEntityLabel, setCreateModalEntityLabel] =
-    useState<string>("");
-  const [createModalEntityDetail, setCreateModalEntityDetail] =
-    useState<string>("");
+  const [createModalEntityClass, setCreateModalEntityClass] = useState<EntityEnums.Class>(
+    entitiesDict[0].value
+  );
+  const [createModalEntityLabel, setCreateModalEntityLabel] = useState<string>("");
+  const [createModalEntityDetail, setCreateModalEntityDetail] = useState<string>("");
 
   const resetCreateModal = () => {
     setCreateModalEntityLabel("");
@@ -58,15 +54,7 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
   };
 
   // get user data
-  const userId = localStorage.getItem("userid");
-  const { data: user } = useQuery({
-    queryKey: ["user", userId],
-    queryFn: async () => {
-      const res = await api.usersGet(userId as string);
-      return res.data ?? undefined;
-    },
-    enabled: !!userId && api.isLoggedIn(),
-  });
+  const { data: user } = useUserQuery();
 
   const templateCreateMutation = useMutation({
     mutationFn: async (newEntity: IEntity) => await api.entityCreate(newEntity),
@@ -172,9 +160,7 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
           <ModalInputWrap>
             <Input
               value={createModalEntityLabel}
-              onChangeFn={(newType: string) =>
-                setCreateModalEntityLabel(newType)
-              }
+              onChangeFn={(newType: string) => setCreateModalEntityLabel(newType)}
               changeOnType
               width="full"
             />
@@ -183,9 +169,7 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
           <ModalInputWrap>
             <Input
               value={createModalEntityDetail}
-              onChangeFn={(newType: string) =>
-                setCreateModalEntityDetail(newType)
-              }
+              onChangeFn={(newType: string) => setCreateModalEntityDetail(newType)}
               changeOnType
               width="full"
             />

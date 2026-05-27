@@ -4,12 +4,7 @@ import {
   entitiesDictKeys,
 } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
-import {
-  IEntity,
-  IResponseEntity,
-  IStatement,
-  ITerritory,
-} from "@inkvisitor/shared/types";
+import { IEntity, IResponseEntity, IStatement, ITerritory } from "@inkvisitor/shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { wildCardChar } from "Theme/constants";
 import api from "api";
@@ -29,14 +24,13 @@ import {
 } from "types";
 import { deepCopy } from "utils/utils";
 import { AddTerritoryModal, EntityCreateModal } from "..";
+import { useUserQuery } from "hooks/react-query";
 
 interface EntitySuggesterProps {
   categoryTypes?: EntityEnums.Class[];
   onSelected?: (id: string) => void;
   onPicked?: (entity: IEntity) => void;
-  onChangeCategory?: (
-    selectedOption: EntityEnums.Class | EntityEnums.Extension.Any
-  ) => void;
+  onChangeCategory?: (selectedOption: EntityEnums.Class | EntityEnums.Extension.Any) => void;
   onTyped?: (newType: string) => void;
   placeholder?: string;
   inputWidth?: number | "full";
@@ -169,9 +163,7 @@ const EntitySuggesterFull: React.FC<
       }
     } else {
       const firstValidCategory =
-        !disableWildCard && categoryTypes.length > 1
-          ? EntityEnums.Extension.Any
-          : categoryTypes[0];
+        !disableWildCard && categoryTypes.length > 1 ? EntityEnums.Extension.Any : categoryTypes[0];
 
       if (selectedCategory !== firstValidCategory) {
         setSelectedCategory(firstValidCategory);
@@ -182,22 +174,8 @@ const EntitySuggesterFull: React.FC<
   const { appendDetailId } = useSearchParams();
 
   // get user data
-  const userId = localStorage.getItem("userid");
   const userRole = localStorage.getItem("userrole");
-
-  const {
-    status: statusUser,
-    data: user,
-    error: errorUser,
-    isFetching: isFetchingUser,
-  } = useQuery({
-    queryKey: ["user", userId],
-    queryFn: async () => {
-      const res = await api.usersGet(userId as string);
-      return res.data ?? undefined;
-    },
-    enabled: !!userId && api.isLoggedIn(),
-  });
+  const { data: user } = useUserQuery();
 
   // Suggesions query
   const {
@@ -206,12 +184,7 @@ const EntitySuggesterFull: React.FC<
     error: errorStatement,
     isFetching: isFetchingStatement,
   } = useQuery({
-    queryKey: [
-      "suggestion",
-      debouncedTyped,
-      selectedCategory,
-      excludedEntityClasses,
-    ],
+    queryKey: ["suggestion", debouncedTyped, selectedCategory, excludedEntityClasses],
     queryFn: async () => {
       const resSuggestions = await api.entitiesSearch({
         labelOrId: debouncedTyped + wildCardChar,
@@ -219,9 +192,7 @@ const EntitySuggesterFull: React.FC<
           selectedCategory === dropdownWildCard.value
             ? undefined
             : (selectedCategory as EntityEnums.Class),
-        excluded: excludedEntityClasses.length
-          ? excludedEntityClasses
-          : undefined,
+        excluded: excludedEntityClasses.length ? excludedEntityClasses : undefined,
       });
 
       return filterSuggestions(resSuggestions.data ?? []);
@@ -229,9 +200,7 @@ const EntitySuggesterFull: React.FC<
     enabled:
       debouncedTyped.length > 1 &&
       !!selectedCategory &&
-      !excludedEntityClasses
-        .map((key) => key.valueOf())
-        .includes(selectedCategory) &&
+      !excludedEntityClasses.map((key) => key.valueOf()).includes(selectedCategory) &&
       api.isLoggedIn(),
   });
 
@@ -252,9 +221,7 @@ const EntitySuggesterFull: React.FC<
             ? s.right === UserEnums.RoleMode.Write
             : s
         )
-        .filter((s) =>
-          excludedActantIds.length ? !excludedActantIds.includes(s.id) : s
-        )
+        .filter((s) => (excludedActantIds.length ? !excludedActantIds.includes(s.id) : s))
         .filter((s) => (disableTemplatesAccept ? !s.isTemplate : s))
         // filter T or S template inside S template
         .filter(
@@ -341,9 +308,9 @@ const EntitySuggesterFull: React.FC<
   };
 
   const [showAddTerritoryModal, setShowAddTerritoryModal] = useState(false);
-  const [tempTemplateToInstantiate, setTempTemplateToInstantiate] = useState<
-    ITerritory | false
-  >(false);
+  const [tempTemplateToInstantiate, setTempTemplateToInstantiate] = useState<ITerritory | false>(
+    false
+  );
 
   const instantiateTerritory = async (
     territoryToInst: ITerritory,
@@ -381,10 +348,7 @@ const EntitySuggesterFull: React.FC<
       onSelected(newEntity.id);
       onPicked(newEntity);
       handleClean();
-      if (
-        openDetailOnCreate &&
-        templateToDuplicate.class !== EntityEnums.Class.Value
-      ) {
+      if (openDetailOnCreate && templateToDuplicate.class !== EntityEnums.Class.Value) {
         appendDetailId(newEntity.id);
       }
       if (templateToDuplicate.class === EntityEnums.Class.Territory) {
@@ -403,10 +367,7 @@ const EntitySuggesterFull: React.FC<
     }
   };
 
-  const handleDropped = (
-    newDropped: EntityDragItem,
-    instantiateTemplate?: boolean
-  ) => {
+  const handleDropped = (newDropped: EntityDragItem, instantiateTemplate?: boolean) => {
     if (!isWrongDropCategory) {
       if (instantiateTemplate && !disableTemplateInstantiation) {
         newDropped.entity && handleInstantiateTemplate(newDropped.entity);
@@ -447,9 +408,7 @@ const EntitySuggesterFull: React.FC<
   const getClassFilteredPreSuggestions = (suggestions: IEntity[]) => {
     let filteredSuggestions;
     if (selectedCategory !== dropdownWildCard.value) {
-      filteredSuggestions = suggestions.filter(
-        (s) => s.class === selectedCategory
-      );
+      filteredSuggestions = suggestions.filter((s) => s.class === selectedCategory);
     } else {
       filteredSuggestions = suggestions;
     }
@@ -469,8 +428,7 @@ const EntitySuggesterFull: React.FC<
         isFetching={isFetchingStatement}
         suggestions={suggestions || []}
         preSuggestions={
-          preSuggestions &&
-          filterSuggestions(getClassFilteredPreSuggestions(preSuggestions))
+          preSuggestions && filterSuggestions(getClassFilteredPreSuggestions(preSuggestions))
         }
         placeholder={placeholder}
         typed={typed} // input value
@@ -569,14 +527,13 @@ const EntitySuggesterFull: React.FC<
  * Wrapper that can defer mounting the heavy suggester until user interaction.
  * compactUntilHover: when true, show a small button; mount full suggester on hover/click.
  */
-export const EntitySuggester: React.FC<
-  EntitySuggesterProps & { compactUntilHover?: boolean }
-> = ({ compactUntilHover = false, ...rest }) => {
+export const EntitySuggester: React.FC<EntitySuggesterProps & { compactUntilHover?: boolean }> = ({
+  compactUntilHover = false,
+  ...rest
+}) => {
   const [isMinified, setIsMinified] = useState<boolean>(true);
   const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [pendingDropItem, setPendingDropItem] = useState<EntityDragItem | null>(
-    null
-  );
+  const [pendingDropItem, setPendingDropItem] = useState<EntityDragItem | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const isDropValid = (item: EntityDragItem): boolean => {

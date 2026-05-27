@@ -48,6 +48,7 @@ import {
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StatementListTextAnnotator } from "./StatementListTextAnnotator/StatementListTextAnnotator";
+import { useUserQuery } from "hooks/react-query";
 
 const initialData: {
   statements: IResponseStatement[];
@@ -168,23 +169,7 @@ export const StatementListBox: React.FC = () => {
   }, [territoryId]);
 
   // get user
-  const userId = localStorage.getItem("userid");
-  const {
-    status: userStatus,
-    data: userData,
-    error: userError,
-    isFetching: userIsFetching,
-  } = useQuery({
-    queryKey: ["user", userId],
-    queryFn: async () => {
-      if (userId) {
-        const res = await api.usersGet(userId);
-        return res.data ?? undefined;
-      }
-      return undefined;
-    },
-    enabled: api.isLoggedIn() && !!userId,
-  });
+  const { data: userData } = useUserQuery();
 
   const favoritedTerritoryIds = useMemo(() => {
     if (userData?.storedTerritories) {
