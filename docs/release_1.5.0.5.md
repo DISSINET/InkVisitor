@@ -1,9 +1,10 @@
-## 1.5.0.5 Changelog [May 26, 2026]
+## 1.5.0.5 Changelog [May 27, 2026]
 
 ### Explorer:
 
 - Added filter by label #2856
 - Migrated Entity detail to side panel, double click now opens the detail as on the Main page #2907
+- Implemented input for multiple UUIDs #3019
 
 ### Bug Fixes and Improvements:
 
