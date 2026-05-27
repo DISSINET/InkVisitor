@@ -161,7 +161,7 @@ export const StyledExploreFilters = styled.div`
   flex: 1;
   min-width: 10rem;
   max-width: 60%;
-  margin: 0 2rem;
+  margin: 0 3rem;
 `;
 
 export const StyledIdsFilter = styled.div`
