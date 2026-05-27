@@ -43,13 +43,13 @@ export class ResponseStatement extends Statement implements IResponseStatement {
     this.usedInDocuments = [];
   }
 
-  async prepare(req: IRequest) {
+  async prepare(req: IRequest, settings?: Setting[]) {
     this.right = this.getUserRoleMode(req.getUserOrFail());
     this.usedInDocuments = await this.findUsedInDocuments(req.db.connection);
 
     await this.prepareEntities(req.db.connection);
     if (!this.isTemplate) {
-      this.warnings = await this.getWarnings(req);
+      this.warnings = await this.getWarnings(req, settings);
     }
   }
 
@@ -221,10 +221,10 @@ export class ResponseStatement extends Statement implements IResponseStatement {
   /**
    * check all avalidation warnings for single entity
    */
-  async getTValidationWarnings(req: IRequest): Promise<IWarning[]> {
+  async getTValidationWarnings(req: IRequest, preloadedSettings?: Setting[]): Promise<IWarning[]> {
     let warnings: IWarning[] = [];
 
-    const settings = await Setting.getSettingsAll(req.db.connection);
+    const settings = preloadedSettings ?? await Setting.getSettingsAll(req.db.connection);
 
     let allEntities = [
       ...this.data.actants.map((a) => a.entityId),
@@ -427,15 +427,15 @@ export class ResponseStatement extends Statement implements IResponseStatement {
    * get a list of all warnings for actions -> actants relations
    * @returns list of warnings
    */
-  async getWarnings(req: IRequest): Promise<IWarning[]> {
-    const settings = await Setting.getSettingsAll(req.db.connection);
+  async getWarnings(req: IRequest, preloadedSettings?: Setting[]): Promise<IWarning[]> {
+    const settings = preloadedSettings ?? await Setting.getSettingsAll(req.db.connection);
 
     const isNAEnabled =
       settings.find((s) => s.id === "validation_NA")?.value === true;
 
     let warnings: IWarning[] = [];
 
-    const tbasedWarnings = await this.getTValidationWarnings(req);
+    const tbasedWarnings = await this.getTValidationWarnings(req, settings);
     warnings = warnings.concat(tbasedWarnings);
 
     if (!this.data.actions.length) {

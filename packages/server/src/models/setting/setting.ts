@@ -1,6 +1,10 @@
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
 import { IDbModel } from "@models/common";
 import { ISetting, SettingsKey } from "@inkvisitor/shared/types/settings";
+import { cache } from "@service/ttlCache";
+
+const SETTINGS_CACHE_TTL_MS = 5 * 60 * 1000;
+const SETTINGS_ALL_CACHE_KEY = "settings:all";
 
 export class Setting implements ISetting, IDbModel {
   id: string;
@@ -32,18 +36,22 @@ export class Setting implements ISetting, IDbModel {
       )
       .run(dbInstance);
 
+    cache.delete(SETTINGS_ALL_CACHE_KEY);
     return result.inserted === 1;
   }
 
-  update(
+  async update(
     dbInstance: Connection | undefined,
     updateData: { value: any }
   ): Promise<WriteResult> {
-    return rethink
+    const result = await rethink
       .table(Setting.table)
       .get(this.id)
       .replace({ ...updateData, id: this.id, public: this.public })
       .run(dbInstance);
+
+    cache.delete(SETTINGS_ALL_CACHE_KEY);
+    return result;
   }
 
   delete(dbInstance: Connection): Promise<WriteResult> {
@@ -70,7 +78,13 @@ export class Setting implements ISetting, IDbModel {
   }
 
   static async getSettingsAll(conn: Connection): Promise<Setting[]> {
+    const cached = cache.get<ISetting[]>(SETTINGS_ALL_CACHE_KEY);
+    if (cached) {
+      return cached.map((data) => new Setting(data));
+    }
+
     const results = await rethink.table(Setting.table).run(conn);
+    cache.set(SETTINGS_ALL_CACHE_KEY, results as ISetting[], SETTINGS_CACHE_TTL_MS);
     return results.map((data) => new Setting(data));
   }
 
