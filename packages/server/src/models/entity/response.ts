@@ -148,18 +148,45 @@ export class ResponseEntityDetail
 
     const conn = req.db.connection;
 
-    // find entities in which at least one props reference equals this.id
-    for (const entity of await Entity.findUsedInProps(conn, this.id)) {
+    // Warnings are skipped for templates; build the promise conditionally so
+    // it fits cleanly into the parallel batch below.
+    const entityWarnings = new EntityWarnings(this.id, this.class);
+    const warningsPromise: Promise<IWarning[]> = this.isTemplate
+      ? Promise.resolve([])
+      : Promise.all([
+          entityWarnings.getWarnings(conn),
+          entityWarnings.getTBasedWarnings(
+            conn,
+            this,
+            treeCache.tree.getRootTerritory() as ITerritory
+          ),
+        ]).then(([a, b]) => [...a, ...b]);
+
+    // None of these reads depend on the walks below or on each other - the
+    // round-trips can overlap. relations.prepare returns void; it rides
+    // along in the batch for its side-effects on this.relations.
+    const [
+      usedInPropsEntities,
+      linkedEntities,
+      statementsByPropsValueType,
+      actantsCIStatements,
+      usedInDocuments,
+      warnings,
+    ] = await Promise.all([
+      Entity.findUsedInProps(conn, this.id),
+      Statement.getLinkedEntities(conn, this.id),
+      Statement.findByDataPropsId(conn, this.id),
+      Statement.findByDataActantsCI(conn, this.id),
+      this.findUsedInDocuments(conn),
+      warningsPromise,
+      this.relations.prepare(req, RelationEnums.AllTypes),
+    ]);
+
+    for (const entity of usedInPropsEntities) {
       this.walkEntityProps(entity.id, entity.props);
     }
 
-    const linkedEntities = await Statement.getLinkedEntities(conn, this.id);
     this.walkStatementsDataEntities(linkedEntities);
-
-    const statementsByPropsValueType = await Statement.findByDataPropsId(
-      conn,
-      this.id
-    );
 
     // The StatementDataProps index only catches entityIds referenced
     // *inside* actant.props - not the actant.entityId itself. Pull in
@@ -181,36 +208,24 @@ export class ResponseEntityDetail
     this.addLinkedEntities(this.usedTemplate);
     this.addLinkedEntities(this.usedAsTemplate);
 
-    await this.populateInStatementsRelations(
-      await Statement.findByDataActantsCI(conn, this.id)
-    );
+    // populateInStatementsRelations reads this.usedInStatements, which is
+    // populated by walkStatementsDataEntities above. Order matters.
+    await this.populateInStatementsRelations(actantsCIStatements);
 
-    await this.relations.prepare(req, RelationEnums.AllTypes);
     for (const type of RelationEnums.AllTypes) {
       this.addLinkedEntities(this.relations.getEntityIdsFromType(type));
     }
 
-    // get warnings - bound to entity & from root territory
-    const entityWarnings = new EntityWarnings(this.id, this.class);
-    this.warnings = this.isTemplate
-      ? []
-      : [
-          ...(await entityWarnings.getWarnings(req.db.connection)),
-          ...(await entityWarnings.getTBasedWarnings(
-            req.db.connection,
-            this,
-            treeCache.tree.getRootTerritory() as ITerritory
-          )),
-        ];
+    this.warnings = warnings;
 
-    // get all documents data in IResponseUsedInDocument format
-    this.usedInDocuments = await this.findUsedInDocuments(conn);
+    this.usedInDocuments = usedInDocuments;
     this.usedInDocuments.forEach((ud) => {
       this.addLinkedEntities(ud.parentTerritoryId);
       this.addLinkedEntities(ud.resourceId);
     });
 
-    // fill all collected entities
+    // populateEntitiesMap depends on the fully-accumulated linkedEntitiesIds,
+    // so it must come after every addLinkedEntities call above.
     this.entities = await this.populateEntitiesMap(conn);
 
     // apply casts from templates - must be done after populateEntitiesMap
