@@ -225,37 +225,15 @@ export default class Entity implements IEntity, IDbModel {
     db: Connection | undefined,
     entityId: string
   ): Promise<IEntity[]> {
-    const entries = await rethink
+    // Uses the `props.recursive` multi-index (see
+    // packages/database/scripts/import/indexes.ts) which contains every
+    // entityId referenced from props/children up to 3 levels deep.
+    // Used to be a full-table .filter() walking the same shape - same
+    // result set, but linear in table size and several seconds on prod.
+    return await rethink
       .table(Entity.table)
-      .filter((row: RDatum) => {
-        return row("props").contains((entry: RDatum) =>
-          rethink.or(
-            entry("value")("entityId").eq(entityId),
-            entry("type")("entityId").eq(entityId),
-            entry("children").contains((ch1: RDatum) =>
-              rethink.or(
-                ch1("value")("entityId").eq(entityId),
-                ch1("type")("entityId").eq(entityId),
-                ch1("children").contains((ch2: RDatum) =>
-                  rethink.or(
-                    ch2("value")("entityId").eq(entityId),
-                    ch2("type")("entityId").eq(entityId),
-                    ch2("children").contains((ch3: RDatum) =>
-                      rethink.or(
-                        ch3("value")("entityId").eq(entityId),
-                        ch3("type")("entityId").eq(entityId)
-                      )
-                    )
-                  )
-                )
-              )
-            )
-          )
-        );
-      })
+      .getAll(entityId, { index: DbEnums.Indexes.PropsRecursive })
       .run(db);
-
-    return entries;
   }
 
   /**
