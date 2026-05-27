@@ -47,6 +47,22 @@ interface IApiOptions extends AxiosRequestConfig<any> {
   ignoreErrorToast: boolean;
 }
 
+// Mirrors @service/dbStats.IDbStats on the server side.
+export interface IDbStats {
+  ts: number;
+  pool: {
+    size: number;
+    available: number;
+    borrowed: number;
+    pending: number;
+    max: number;
+  };
+  mutex: {
+    locked: boolean;
+    queue: number;
+  };
+}
+
 type IFilterUsers = {
   label?: string;
 };
@@ -83,6 +99,7 @@ class Api {
   private token: string;
   private ws?: Socket;
   private ping: number;
+  private dbStats: IDbStats | null = null;
 
   private lastError: any = null;
   private errorTimeout: any;
@@ -135,6 +152,9 @@ class Api {
     });
     this.ws.on("connect_timeout", () => {
       console.error("Socket connection timeout.");
+    });
+    this.ws.on("db:stats", (stats: IDbStats) => {
+      this.dbStats = stats;
     });
 
     setInterval(() => {
@@ -269,6 +289,10 @@ class Api {
 
   getPing() {
     return this.ping;
+  }
+
+  getDbStats(): IDbStats | null {
+    return this.dbStats;
   }
 
   handleError = (err: any | AxiosError) => {
