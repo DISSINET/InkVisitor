@@ -88,9 +88,7 @@ const queryClient = new QueryClient({
 });
 export const App: React.FC = () => {
   const dispatch = useAppDispatch();
-  const selectedThemeId: InterfaceEnums.Theme = useAppSelector(
-    (state) => state.theme
-  );
+  const selectedThemeId: InterfaceEnums.Theme = useAppSelector((state) => state.theme);
 
   const themeConfig = useMemo(() => {
     if (selectedThemeId === "dark") {
@@ -216,7 +214,7 @@ export const App: React.FC = () => {
                       }
                     />
                     <Route
-                      path="/query"
+                      path="/explorer"
                       element={
                         <RequireAuth>
                           <QueryPage />
