@@ -35,14 +35,58 @@ export default class Document implements IDocument, IDbModel {
   }
 
   /**
-   * Preprocesses the document to find entity ids and build anchors tree
-   * @param conn Connection
-   * @returns Promise<void>
+   * Preprocesses the document to find entity ids and build anchors tree.
+   * Issues one DB round-trip to resolve referenced entities. Use
+   * `preprocessSync` when you've already resolved the classes externally
+   * (e.g. when batching a list of documents).
    */
   async preprocess(conn: Connection): Promise<void> {
-    const entityIds = this.gatherEntityIds();
-    this.entityIds = await this.findReferencedEntityIds(conn, entityIds);
+    const ids = this.gatherEntityIds();
+    this.entityIds = await this.findReferencedEntityIds(conn, ids);
     this.anchors = AnchorsNode.buildAnchorsTree(this.content, this.entityIds);
+  }
+
+  /**
+   * Same as `preprocess` but uses a pre-fetched id → class map instead
+   * of issuing its own DB query. Lets a batch caller resolve N documents'
+   * referenced entities with a single round-trip.
+   */
+  preprocessSync(
+    classById: Map<string, EntityEnums.Class>,
+    ids?: string[]
+  ): void {
+    const referenced = ids ?? this.gatherEntityIds();
+    this.entityIds = Document.bucketByClass(referenced, classById);
+    this.anchors = AnchorsNode.buildAnchorsTree(this.content, this.entityIds);
+  }
+
+  static emptyEntityIdsRecord(): Record<EntityEnums.Class, string[]> {
+    return {
+      [EntityEnums.Class.Action]: [],
+      [EntityEnums.Class.Resource]: [],
+      [EntityEnums.Class.Concept]: [],
+      [EntityEnums.Class.Person]: [],
+      [EntityEnums.Class.Location]: [],
+      [EntityEnums.Class.Event]: [],
+      [EntityEnums.Class.Object]: [],
+      [EntityEnums.Class.Territory]: [],
+      [EntityEnums.Class.Statement]: [],
+      [EntityEnums.Class.Value]: [],
+      [EntityEnums.Class.Being]: [],
+      [EntityEnums.Class.Group]: [],
+    };
+  }
+
+  static bucketByClass(
+    ids: string[],
+    classById: Map<string, EntityEnums.Class>
+  ): Record<EntityEnums.Class, string[]> {
+    const out = Document.emptyEntityIdsRecord();
+    for (const id of ids) {
+      const cls = classById.get(id);
+      if (cls) out[cls].push(id);
+    }
+    return out;
   }
 
   /**
@@ -70,34 +114,16 @@ export default class Document implements IDocument, IDbModel {
    * @param ids string[]
    * @returns Promise<Record<EntityEnums.Class, string[]>>
    */
-  async findReferencedEntityIds(conn: Connection, ids: string[]): Promise<Record<EntityEnums.Class, string[]>> {
-    const referencedEntityIds: Record<EntityEnums.Class, string[]> = {
-      [EntityEnums.Class.Action]: [],
-      [EntityEnums.Class.Resource]: [],
-      [EntityEnums.Class.Concept]: [],
-      [EntityEnums.Class.Person]: [],
-      [EntityEnums.Class.Location]: [],
-      [EntityEnums.Class.Event]: [],
-      [EntityEnums.Class.Object]: [],
-      [EntityEnums.Class.Territory]: [],
-      [EntityEnums.Class.Statement]: [],
-      [EntityEnums.Class.Value]: [],
-      [EntityEnums.Class.Being]: [],
-      [EntityEnums.Class.Group]: [],
-    };
-
+  async findReferencedEntityIds(
+    conn: Connection,
+    ids: string[]
+  ): Promise<Record<EntityEnums.Class, string[]>> {
     const entities = await Entity.findEntitiesByIds(conn, ids);
-    for (const entity of entities) {
-      const entityClass = entity.class;
-      if (entityClass) {
-        if (!referencedEntityIds[entityClass]) {
-          referencedEntityIds[entityClass] = [];
-        }
-        referencedEntityIds[entityClass].push(entity.id);
-      }
+    const classById = new Map<string, EntityEnums.Class>();
+    for (const e of entities) {
+      if (e.class) classById.set(e.id, e.class);
     }
-
-    return referencedEntityIds;
+    return Document.bucketByClass(ids, classById);
   }
 
   /**

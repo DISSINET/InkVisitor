@@ -2,6 +2,7 @@ import { mergeDeep } from "@common/functions";
 import Audit from "@models/audit/audit";
 import { ResponseDocumentAudit } from "@models/audit/response";
 import Document from "@models/document/document";
+import Entity from "@models/entity/entity";
 import { AnchorsNode } from "@models/document/anchors";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import {
@@ -55,21 +56,47 @@ export default Router()
   .get(
     "/",
     asyncRouteHandler<IDocumentMeta[]>(async (request: IRequest) => {
-      const docs = await Document.getAll(request.db.connection);
+      const conn = request.db.connection;
+      const docs = await Document.getAll(conn);
 
-      const docResponses: IDocumentMeta[] = [];
+      // Build the response list first; for docs missing anchors, collect
+      // their referenced entity ids into a single union so we can resolve
+      // every document's entity classes with ONE batched DB round-trip
+      // instead of N (one per legacy doc).
+      const documents: Document[] = [];
+      const pending: { doc: Document; ids: string[] }[] = [];
+      const allReferencedIds = new Set<string>();
+
       for (const d of docs) {
         const document = new Document(d);
+        documents.push(document);
         if (!document.anchors || document.anchors.length === 0) {
-          await document.preprocess(request.db.connection);
+          const ids = document.gatherEntityIds();
+          if (ids.length > 0) {
+            pending.push({ doc: document, ids });
+            for (const id of ids) allReferencedIds.add(id);
+          }
         }
-
-        // @ts-ignore 
-        delete document.content;
-        docResponses.push(document);
       }
 
-      return docResponses;
+      if (allReferencedIds.size > 0) {
+        const entities = await Entity.findEntitiesByIds(conn, [
+          ...allReferencedIds,
+        ]);
+        const classById = new Map<string, EntityEnums.Class>();
+        for (const e of entities) {
+          if (e.class) classById.set(e.id, e.class);
+        }
+        for (const { doc, ids } of pending) {
+          doc.preprocessSync(classById, ids);
+        }
+      }
+
+      return documents.map((document) => {
+        // @ts-ignore content is part of IDocument but trimmed from IDocumentMeta
+        delete document.content;
+        return document;
+      });
     })
   )
   .get(
