@@ -83,6 +83,13 @@ describe("TtlCache", () => {
       expect(cache.get("short")).toBeUndefined();
       expect(cache.get<number>("long")).toBe(2);
     });
+
+    it("entries set without ttlMs never expire", () => {
+      const cache = new TtlCache();
+      cache.set("forever", 42);
+      jest.setSystemTime(Number.MAX_SAFE_INTEGER);
+      expect(cache.get<number>("forever")).toBe(42);
+    });
   });
 
   describe("delete / clear", () => {

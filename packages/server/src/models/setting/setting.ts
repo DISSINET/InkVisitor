@@ -3,9 +3,9 @@ import { IDbModel } from "@models/common";
 import { ISetting, SettingsKey } from "@inkvisitor/shared/types/settings";
 import { cache } from "@service/ttlCache";
 
-// 24h is safe because every settings-table write is also invalidated via the
-// changefeed listener in service/changefeedInvalidator.ts.
-const SETTINGS_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+// No TTL: invalidation is fully owned by the changefeed listener in
+// service/changefeedInvalidator.ts plus the explicit cache.delete calls
+// in save/update below.
 export const SETTINGS_ALL_CACHE_KEY = "settings:all";
 
 export class Setting implements ISetting, IDbModel {
@@ -86,7 +86,7 @@ export class Setting implements ISetting, IDbModel {
     }
 
     const results = await rethink.table(Setting.table).run(conn);
-    cache.set(SETTINGS_ALL_CACHE_KEY, results as ISetting[], SETTINGS_CACHE_TTL_MS);
+    cache.set(SETTINGS_ALL_CACHE_KEY, results as ISetting[]);
     return results.map((data) => new Setting(data));
   }
 

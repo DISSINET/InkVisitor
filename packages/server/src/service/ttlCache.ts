@@ -28,14 +28,16 @@ export class TtlCache {
     return structuredClone(entry.value) as T;
   }
 
-  set(key: string, value: unknown, ttlMs: number): void {
+  set(key: string, value: unknown, ttlMs?: number): void {
     // Re-insertion bumps Map insertion order, useful if eviction is added later.
     this.store.delete(key);
     // Clone on write so later mutations of the caller-side reference cannot
     // reach the stored value.
+    // Omitting ttlMs stores the entry without an expiry - useful when an
+    // external mechanism (e.g. a changefeed) owns invalidation.
     this.store.set(key, {
       value: structuredClone(value),
-      expiresAt: Date.now() + ttlMs,
+      expiresAt: ttlMs === undefined ? Infinity : Date.now() + ttlMs,
     });
   }
 
