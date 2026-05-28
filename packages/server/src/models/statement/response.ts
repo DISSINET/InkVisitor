@@ -29,6 +29,7 @@ import Entity from "../entity/entity";
 import { PositionRules } from "./PositionRules";
 import Statement from "./statement";
 import { Setting } from "@models/setting/setting";
+import { ISetting } from "@inkvisitor/shared/types/settings";
 
 export class ResponseStatement extends Statement implements IResponseStatement {
   entities: { [key: string]: IEntity };
@@ -43,7 +44,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
     this.usedInDocuments = [];
   }
 
-  async prepare(req: IRequest, settings?: Setting[]) {
+  async prepare(req: IRequest, settings?: ISetting[]) {
     this.right = this.getUserRoleMode(req.getUserOrFail());
     this.usedInDocuments = await this.findUsedInDocuments(req.db.connection);
 
@@ -221,7 +222,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
   /**
    * check all avalidation warnings for single entity
    */
-  async getTValidationWarnings(req: IRequest, preloadedSettings?: Setting[]): Promise<IWarning[]> {
+  async getTValidationWarnings(req: IRequest, preloadedSettings?: ISetting[]): Promise<IWarning[]> {
     let warnings: IWarning[] = [];
 
     const settings = preloadedSettings ?? await Setting.getSettingsAll(req.db.connection);
@@ -315,7 +316,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
    */
   getWarningsForPosition(
     position: EntityEnums.Position,
-    settings: Setting[]
+    settings: ISetting[]
   ): IWarning[] {
     const warnings: IWarning[] = [];
 
@@ -427,7 +428,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
    * get a list of all warnings for actions -> actants relations
    * @returns list of warnings
    */
-  async getWarnings(req: IRequest, preloadedSettings?: Setting[]): Promise<IWarning[]> {
+  async getWarnings(req: IRequest, preloadedSettings?: ISetting[]): Promise<IWarning[]> {
     const settings = preloadedSettings ?? await Setting.getSettingsAll(req.db.connection);
 
     const isNAEnabled =

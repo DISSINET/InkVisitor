@@ -79,23 +79,26 @@ export class Setting implements ISetting, IDbModel {
     return results.map((data) => new Setting(data));
   }
 
-  static async getSettingsAll(conn: Connection): Promise<Setting[]> {
+  /**
+   * Returns the full settings list. Consumers only ever read .id and
+   * .value, so this returns plain ISetting[] - no Setting wrappers - to
+   * avoid allocating N instances per call on the hot path. The cache
+   * deep-clones on read, so callers may not mutate the result.
+   */
+  static async getSettingsAll(conn: Connection): Promise<ISetting[]> {
     // Snapshot before the DB read; trySet below refuses if a writer
     // invalidated the key meanwhile.
     const version = cache.snapshot(SETTINGS_ALL_CACHE_KEY);
     const cached = cache.get<ISetting[]>(SETTINGS_ALL_CACHE_KEY);
     if (cached) {
-      return cached.map((data) => new Setting(data));
+      return cached;
     }
 
-    const results = await rethink.table(Setting.table).run(conn);
-    cache.trySet(
-      SETTINGS_ALL_CACHE_KEY,
-      results as ISetting[],
-      undefined,
-      version
-    );
-    return results.map((data) => new Setting(data));
+    const results = (await rethink
+      .table(Setting.table)
+      .run(conn)) as ISetting[];
+    cache.trySet(SETTINGS_ALL_CACHE_KEY, results, undefined, version);
+    return results;
   }
 
   static async updateGroup(

@@ -7,7 +7,7 @@ import { entityCacheKey, findEntityById } from "@service/shorthands";
 import { cache } from "@service/ttlCache";
 
 import { AnchorsNode } from "@models/document/anchors";
-import { Setting } from "@models/setting/setting";
+import { ISetting } from "@inkvisitor/shared/types/settings";
 import {
   DbEnums,
   EntityEnums,
@@ -370,7 +370,7 @@ export default class Entity implements IEntity, IDbModel {
     classificationEs: IConcept[],
     soeEs: IEntity[],
     propValueEs: IEntity[],
-    settings: Setting[]
+    settings: ISetting[]
   ): IWarning[] {
     const warnings: IWarning[] = [];
 
