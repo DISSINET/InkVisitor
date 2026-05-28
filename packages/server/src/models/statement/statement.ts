@@ -647,10 +647,14 @@ class Statement extends Entity implements IStatement {
     territoryId: string
   ): Promise<IStatement[]> {
     // Uses the `statement_territory` secondary index (data.territory.territoryId).
-    // Only statements expose that path, so no class filter is needed.
+    // Only Statements have that path today, but we keep a defensive class
+    // filter so a future class or import script populating data.territory
+    // can't leak into the result set - the index would still surface them
+    // and the downstream sort/walks assume the Statement shape.
     const statements = await rethink
       .table(Entity.table)
       .getAll(territoryId, { index: DbEnums.Indexes.StatementTerritory })
+      .filter({ class: EntityEnums.Class.Statement })
       .run(db);
 
     return statements.sort((a, b) => {
