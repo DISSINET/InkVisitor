@@ -22,6 +22,7 @@ import {
 } from "@inkvisitor/shared/types/errors";
 import { EventType } from "@inkvisitor/shared/types/stats";
 import { Router } from "express";
+import { r as rethink } from "rethinkdb-ts";
 import { IRequest } from "src/custom_typings/request";
 import { asyncRouteHandler } from "../index";
 import { createOpeningTagRegex, closingTagRegex } from "@common/regex";
@@ -57,44 +58,75 @@ export default Router()
     "/",
     asyncRouteHandler<IDocumentMeta[]>(async (request: IRequest) => {
       const conn = request.db.connection;
-      const docs = await Document.getAll(conn);
 
-      // Build the response list first; for docs missing anchors, collect
-      // their referenced entity ids into a single union so we can resolve
-      // every document's entity classes with ONE batched DB round-trip
-      // instead of N (one per legacy doc).
+      // Metadata-only fetch. The `content` field is potentially MB-scale
+      // and unused by the list response; legacy docs missing stored
+      // anchors get their content fetched in a targeted second pass below.
+      const docs = (await rethink
+        .table(Document.table)
+        .orderBy(rethink.asc("createdAt"))
+        .without("content")
+        .run(conn)) as IDocument[];
+
       const documents: Document[] = [];
-      const pending: { doc: Document; ids: string[] }[] = [];
-      const allReferencedIds = new Set<string>();
-
+      const legacyDocs: Document[] = [];
       for (const d of docs) {
         const document = new Document(d);
         documents.push(document);
         if (!document.anchors || document.anchors.length === 0) {
-          const ids = document.gatherEntityIds();
-          if (ids.length > 0) {
-            pending.push({ doc: document, ids });
-            for (const id of ids) allReferencedIds.add(id);
-          }
+          legacyDocs.push(document);
         }
       }
 
-      if (allReferencedIds.size > 0) {
-        const entities = await Entity.findEntitiesByIds(conn, [
-          ...allReferencedIds,
-        ]);
-        const classById = new Map<string, EntityEnums.Class>();
-        for (const e of entities) {
-          if (e.class) classById.set(e.id, e.class);
+      // Only fetch content + run preprocess for docs that don't have
+      // stored anchors yet. New writes save anchors at preprocess time,
+      // so this branch is purely a fallback for legacy rows.
+      if (legacyDocs.length > 0) {
+        const legacyContents = (await rethink
+          .table(Document.table)
+          .getAll(...legacyDocs.map((d) => d.id))
+          .pluck("id", "content")
+          .run(conn)) as { id: string; content: string }[];
+        const contentById = new Map(
+          legacyContents.map((c) => [c.id, c.content])
+        );
+        for (const doc of legacyDocs) {
+          doc.content = contentById.get(doc.id) || "";
         }
-        for (const { doc, ids } of pending) {
-          doc.preprocessSync(classById, ids);
+
+        // One batched entity-class lookup for every legacy doc combined.
+        const allReferencedIds = new Set<string>();
+        const pending: { doc: Document; ids: string[] }[] = [];
+        for (const doc of legacyDocs) {
+          const ids = doc.gatherEntityIds();
+          if (ids.length > 0) {
+            pending.push({ doc, ids });
+            for (const id of ids) allReferencedIds.add(id);
+          }
+        }
+        if (allReferencedIds.size > 0) {
+          const entities = await Entity.findEntitiesByIds(conn, [
+            ...allReferencedIds,
+          ]);
+          const classById = new Map<string, EntityEnums.Class>();
+          for (const e of entities) {
+            if (e.class) classById.set(e.id, e.class);
+          }
+          for (const { doc, ids } of pending) {
+            doc.preprocessSync(classById, ids);
+          }
         }
       }
 
       return documents.map((document) => {
         // @ts-ignore content is part of IDocument but trimmed from IDocumentMeta
         delete document.content;
+        // anchors trees can be ~1MB per doc. None of the list consumers
+        // (DocumentsPage, StatementsListBox, EntityDetailFormSection)
+        // read anchors here; the full tree is loaded via GET /documents/:id
+        // when actually needed. Shipping an empty array keeps the wire
+        // payload small.
+        document.anchors = [];
         return document;
       });
     })
