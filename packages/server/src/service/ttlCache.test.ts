@@ -158,6 +158,65 @@ describe("TtlCache", () => {
     });
   });
 
+  describe("snapshot / trySet (generation counter)", () => {
+    it("snapshot returns 0 for an unseen key and is stable across reads", () => {
+      const cache = new TtlCache();
+      expect(cache.snapshot("k")).toBe(0);
+      expect(cache.snapshot("k")).toBe(0);
+    });
+
+    it("delete bumps the snapshot", () => {
+      const cache = new TtlCache();
+      const v0 = cache.snapshot("k");
+      cache.delete("k");
+      expect(cache.snapshot("k")).toBe(v0 + 1);
+    });
+
+    it("trySet succeeds when no invalidation happened", () => {
+      const cache = new TtlCache();
+      const v = cache.snapshot("k");
+      const ok = cache.trySet("k", { value: 1 }, 1000, v);
+      expect(ok).toBe(true);
+      expect(cache.get<{ value: number }>("k")).toEqual({ value: 1 });
+    });
+
+    it("trySet is rejected when an invalidation fired between snapshot and trySet", () => {
+      const cache = new TtlCache();
+      const v = cache.snapshot("k");
+      cache.delete("k"); // simulates a writer firing between read start and read end
+      const ok = cache.trySet("k", { stale: true }, 1000, v);
+      expect(ok).toBe(false);
+      expect(cache.get("k")).toBeUndefined();
+    });
+
+    it("deletePrefix bumps in-flight snapshots even if the entry was never stored", () => {
+      const cache = new TtlCache();
+      const v = cache.snapshot("user:byId:1");
+      // Snapshot was taken, but reader hasn't trySet yet. deletePrefix
+      // should still cause the next trySet to fail.
+      cache.deletePrefix("user:byId:");
+      const ok = cache.trySet("user:byId:1", { id: "1" }, undefined, v);
+      expect(ok).toBe(false);
+      expect(cache.get("user:byId:1")).toBeUndefined();
+    });
+
+    it("clear bumps every known snapshot so in-flight trySets are rejected", () => {
+      const cache = new TtlCache();
+      const v = cache.snapshot("k");
+      cache.clear();
+      const ok = cache.trySet("k", { stale: true }, 1000, v);
+      expect(ok).toBe(false);
+    });
+
+    it("trySet supports undefined ttlMs", () => {
+      const cache = new TtlCache();
+      const v = cache.snapshot("k");
+      cache.trySet("k", { x: 1 }, undefined, v);
+      jest.setSystemTime(Number.MAX_SAFE_INTEGER);
+      expect(cache.get<{ x: number }>("k")).toEqual({ x: 1 });
+    });
+  });
+
   describe("singleton export", () => {
     it("exports a shared instance", () => {
       singletonCache.clear();

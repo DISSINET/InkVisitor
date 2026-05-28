@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { r as rethink, RDatum } from "rethinkdb-ts";
-import { findEntityById } from "@service/shorthands";
+import { entityCacheKey, findEntityById } from "@service/shorthands";
+import { cache } from "@service/ttlCache";
 import {
   BadParams,
   PermissionDeniedError,
@@ -440,6 +441,12 @@ export default Router()
               })
           )
           .run(request.db.connection);
+
+        // Bulk path bypassed Entity.update, so invalidate the entity cache
+        // for each reordered row manually.
+        for (const u of updatesPayload) {
+          cache.delete(entityCacheKey(u.id));
+        }
       }
 
       return {

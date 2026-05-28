@@ -236,6 +236,9 @@ export default class User implements IUser, IDbModel {
    */
   static async findUserById(dbInstance: Connection | undefined, id: string): Promise<User | null> {
     const key = userCacheKey(id);
+    // Snapshot before the DB read; trySet below refuses if a writer
+    // invalidated the key meanwhile.
+    const version = cache.snapshot(key);
     const cached = cache.get<IUser>(key);
     if (cached) {
       return new User(cached);
@@ -247,7 +250,7 @@ export default class User implements IUser, IDbModel {
     }
 
     delete data.password;
-    cache.set(key, data as IUser);
+    cache.trySet(key, data as IUser, undefined, version);
     return new User(data);
   }
 

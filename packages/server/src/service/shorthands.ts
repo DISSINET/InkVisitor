@@ -31,6 +31,9 @@ export async function findEntityById<T extends IEntity>(
   id: string
 ): Promise<T> {
   const key = entityCacheKey(id);
+  // Snapshot before the DB read so any concurrent invalidation that fires
+  // between here and the trySet below is detected.
+  const version = cache.snapshot(key);
   const cached = cache.get<IEntity>(key);
   if (cached) {
     return cached as T;
@@ -42,7 +45,10 @@ export async function findEntityById<T extends IEntity>(
     return null as unknown as T;
   }
 
-  cache.set(key, data as IEntity, ENTITY_CACHE_TTL_MS);
+  // trySet refuses if a writer invalidated the key while our read was
+  // in flight; in that case we still return what we read, but we don't
+  // poison the cache with potentially stale data.
+  cache.trySet(key, data as IEntity, ENTITY_CACHE_TTL_MS, version);
   return data;
 }
 
