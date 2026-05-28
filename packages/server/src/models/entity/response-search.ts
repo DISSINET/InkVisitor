@@ -56,22 +56,6 @@ export class SearchQuery {
   }
 
   /**
-   * searches Statements to find all associated entities
-   * ids can be then used in whereEntityIds method
-   * @param cooccurrenceId
-   * @returns
-   */
-  async getCooccurredEntitiesIds(cooccurrenceId: string): Promise<string[]> {
-    const associatedEntityIds = await Statement.getActantsIdsFromLinkedEntities(
-      this.connection,
-      cooccurrenceId
-    );
-
-    // filter out duplicates
-    return [...new Set(associatedEntityIds)];
-  }
-
-  /**
    * searches Statements under specific territory and returns ids of all statement entity ids
    * @param territoryId
    * @returns
@@ -430,7 +414,8 @@ export class SearchQuery {
     }
 
     if (req.cooccurrenceId) {
-      const assocEntityIds = await this.getCooccurredEntitiesIds(
+      const assocEntityIds = await Statement.getCoOccurrentEntityIds(
+        this.connection,
         req.cooccurrenceId
       );
       if (!req.entityIds) {
