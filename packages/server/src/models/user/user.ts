@@ -249,7 +249,12 @@ export default class User implements IUser, IDbModel {
       return null;
     }
 
-    delete data.password;
+    // Cache the full row including the password hash, consistent with
+    // findUserByLogin / getUserByHash / getUserByEmail (none of which
+    // strip). Password is marked @nonenumerable on the User class so it
+    // does not appear in JSON serializations of returned User instances,
+    // and the cache is invalidated whenever User.update fires - which
+    // includes every password-change path.
     cache.trySet(key, data as IUser, undefined, version);
     return new User(data);
   }

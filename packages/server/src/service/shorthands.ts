@@ -3,7 +3,7 @@ import { IDbModel } from "@models/common";
 import Document from "@models/document/document";
 import Entity from "@models/entity/entity";
 import Relation from "@models/relation/relation";
-import User from "@models/user/user";
+import User, { USER_CACHE_KEY_PREFIX } from "@models/user/user";
 import { DbEnums, EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IUser } from "@inkvisitor/shared/types";
 import { ModelNotValidError } from "@inkvisitor/shared/types/errors";
@@ -13,7 +13,9 @@ import { DbHandle } from "./dbHandle";
 import { cache } from "./ttlCache";
 
 const ENTITY_CACHE_TTL_MS = 60 * 1000;
-export const entityCacheKey = (id: string): string => `entity:byId:${id}`;
+export const ENTITY_CACHE_KEY_PREFIX = "entity:byId:";
+export const entityCacheKey = (id: string): string =>
+  `${ENTITY_CACHE_KEY_PREFIX}${id}`;
 
 export async function getEntitiesDataByClass<T>(
   db: Connection,
@@ -70,7 +72,11 @@ export async function createEntity(db: Db | DbHandle, data: IDbModel): Promise<b
 }
 
 export async function deleteEntities(db: Db | DbHandle): Promise<WriteResult> {
-  return rethink.table(Entity.table).delete().run(db.connection);
+  const result = await rethink.table(Entity.table).delete().run(db.connection);
+  // Bulk wipe bypasses Entity.delete/update, so invalidate every cached
+  // entity entry. Used by test setup but safe to fire in any context.
+  cache.deletePrefix(ENTITY_CACHE_KEY_PREFIX);
+  return result;
 }
 
 export async function deleteAudits(db: Db | DbHandle): Promise<WriteResult> {
@@ -82,13 +88,18 @@ export async function deleteRelations(db: Db | DbHandle): Promise<WriteResult> {
 }
 
 export async function deleteUsers(db: Db | DbHandle): Promise<WriteResult> {
-  return rethink
+  const result = await rethink
     .table(User.table)
     .filter(function (user: RDatum<IUser>) {
       return user("name").ne("admin");
     })
     .delete()
     .run(db.connection);
+  // Bulk wipe bypasses User.delete/update; clear the user cache namespace.
+  // Admin's entry is also cleared (over-eager by one row); the next read
+  // for admin will repopulate from the DB.
+  cache.deletePrefix(USER_CACHE_KEY_PREFIX);
+  return result;
 }
 
 export async function deleteDocuments(db: Db | DbHandle): Promise<WriteResult> {
