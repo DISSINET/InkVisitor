@@ -190,9 +190,14 @@ export default class Relation implements IRelationModel {
       request.db.connection,
       this.type
     );
+    const rule = RelationTypes.RelationRules[this.type];
+    const isSymmetricNonMultiple =
+      !!rule && !rule.asymmetrical && !rule.multiple;
+
     relationByType.filter(rel => rel.id !== this.id).forEach((rel) => {
-      if (this.type === RelationEnums.Type.Synonym) {
-        // For SYN check if both arrays have the same length and contain the same elements
+      if (isSymmetricNonMultiple) {
+        // Symmetric non-multiple: order-insensitive duplicate check
+        // (A,B) and (B,A) are the same relation and must be rejected together
         if (
           this.entityIds.length === rel.entityIds.length &&
           this.entityIds.every((id) => rel.entityIds.includes(id))
