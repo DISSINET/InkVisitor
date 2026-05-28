@@ -50,7 +50,7 @@ const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({ filters
     <StyledIdsFilter>
       <Input
         width="full"
-        placeholder="Filter by entity UUIDs (space, tab, or line separated)"
+        placeholder="Filter by entity UUIDs (space-, tab-, or line-separated)"
         changeOnType
         value={inputValue}
         onChangeFn={setInputValue}
