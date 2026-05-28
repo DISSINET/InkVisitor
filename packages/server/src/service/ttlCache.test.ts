@@ -217,6 +217,51 @@ describe("TtlCache", () => {
     });
   });
 
+  describe("LRU eviction", () => {
+    it("evicts the oldest entry when size exceeds maxEntries", () => {
+      const cache = new TtlCache({ maxEntries: 2 });
+      cache.set("a", 1, 1000);
+      cache.set("b", 2, 1000);
+      cache.set("c", 3, 1000);
+      expect(cache.get("a")).toBeUndefined();
+      expect(cache.get<number>("b")).toBe(2);
+      expect(cache.get<number>("c")).toBe(3);
+      expect(cache.size).toBe(2);
+    });
+
+    it("get refreshes recency so frequently-read entries are kept", () => {
+      const cache = new TtlCache({ maxEntries: 2 });
+      cache.set("a", 1, 1000);
+      cache.set("b", 2, 1000);
+      // touch `a` - now `b` is the oldest
+      expect(cache.get<number>("a")).toBe(1);
+      cache.set("c", 3, 1000);
+      expect(cache.get<number>("a")).toBe(1); // survived
+      expect(cache.get("b")).toBeUndefined(); // evicted
+      expect(cache.get<number>("c")).toBe(3);
+    });
+
+    it("Infinity maxEntries (default) never evicts", () => {
+      const cache = new TtlCache();
+      for (let i = 0; i < 1000; i++) cache.set(`k${i}`, i, 60_000);
+      expect(cache.size).toBe(1000);
+      expect(cache.get<number>("k0")).toBe(0);
+    });
+
+    it("eviction does not bump versions (in-flight trySet still lands)", () => {
+      const cache = new TtlCache({ maxEntries: 1 });
+      const v = cache.snapshot("a");
+      cache.set("z", "filler", 1000); // evicts nothing yet (a was never set)
+      // a's snapshot is still 0; trySet should succeed even though we've
+      // never set a and z occupies the only slot.
+      const ok = cache.trySet("a", "value", 1000, v);
+      expect(ok).toBe(true);
+      // setting `a` evicted `z`
+      expect(cache.get<string>("a")).toBe("value");
+      expect(cache.get("z")).toBeUndefined();
+    });
+  });
+
   describe("singleton export", () => {
     it("exports a shared instance", () => {
       singletonCache.clear();

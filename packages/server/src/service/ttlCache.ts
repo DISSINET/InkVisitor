@@ -3,6 +3,14 @@ interface Entry {
   expiresAt: number;
 }
 
+export interface TtlCacheOptions {
+  /**
+   * Maximum entries kept in the store. When exceeded, the least-recently
+   * used (by `get`/`set` order) entries are dropped. Defaults to Infinity.
+   */
+  maxEntries?: number;
+}
+
 /**
  * Process-wide in-memory cache. Keys are strings (namespace your own:
  * `user:byId:<id>`, `tree:foo`, etc.), values are anything.
@@ -10,7 +18,10 @@ interface Entry {
  * The caller asserts the type on `get<T>()` - no runtime check.
  * TTL is per-entry, supplied on `set()` (or omitted for no expiry).
  *
- * Expiry is lazy on read (no background timer).
+ * Expiry is lazy on read (no background timer). Eviction is LRU when
+ * `maxEntries` is set: `get` re-inserts the hit entry to refresh
+ * insertion order, `set` drops the oldest entry when the bound is
+ * exceeded.
  *
  * For read-during-write race safety, use `snapshot(key)` before the DB
  * read and `trySet(key, value, ttlMs, expectedVersion)` after - any
@@ -23,7 +34,16 @@ export class TtlCache {
   // bump the version. `snapshot` registers the key with version 0 if not
   // present, so a later `deletePrefix`/`clear` can still bump in-flight
   // readers' versions before their `trySet` lands.
+  //
+  // Versions are NOT cleared on eviction or expiry: an in-flight reader's
+  // snapshot must remain comparable for the lifetime of its DB read.
+  // Growth is one number per unique key ever touched.
   private readonly versions = new Map<string, number>();
+  private readonly maxEntries: number;
+
+  constructor(options: TtlCacheOptions = {}) {
+    this.maxEntries = options.maxEntries ?? Infinity;
+  }
 
   get<T>(key: string): T | undefined {
     const entry = this.store.get(key);
@@ -34,6 +54,10 @@ export class TtlCache {
       this.store.delete(key);
       return undefined;
     }
+    // LRU refresh: re-insert so this key is now the newest in iteration
+    // order. Next eviction will start from the actually-least-recently-used.
+    this.store.delete(key);
+    this.store.set(key, entry);
     // Clone on read so caller mutations cannot reach the stored value.
     return structuredClone(entry.value) as T;
   }
@@ -57,7 +81,8 @@ export class TtlCache {
   }
 
   set(key: string, value: unknown, ttlMs?: number): void {
-    // Re-insertion bumps Map insertion order, useful if eviction is added later.
+    // Re-insertion bumps Map insertion order; combined with `evictIfOverflow`
+    // below this gives LRU semantics.
     this.store.delete(key);
     // Clone on write so later mutations of the caller-side reference cannot
     // reach the stored value.
@@ -67,6 +92,7 @@ export class TtlCache {
       value: structuredClone(value),
       expiresAt: ttlMs === undefined ? Infinity : Date.now() + ttlMs,
     });
+    this.evictIfOverflow();
   }
 
   /**
@@ -121,6 +147,24 @@ export class TtlCache {
   get size(): number {
     return this.store.size;
   }
+
+  /**
+   * Drops oldest entries until size <= maxEntries. Does not bump versions:
+   * the evicted value was still fresh, so a concurrent `trySet` for the
+   * same key may safely re-populate. A genuine invalidation goes through
+   * `delete` / `deletePrefix` / `clear`, all of which bump versions.
+   */
+  private evictIfOverflow(): void {
+    while (this.store.size > this.maxEntries) {
+      const oldest = this.store.keys().next().value;
+      if (oldest === undefined) return;
+      this.store.delete(oldest);
+    }
+  }
 }
 
-export const cache = new TtlCache();
+// Single shared instance. The 10_000-entry cap targets the entity cache;
+// users (low tens) and settings (single key) easily fit within it.
+// `get`-based LRU refresh keeps hot user/settings entries from being
+// evicted by entity churn.
+export const cache = new TtlCache({ maxEntries: 10_000 });
