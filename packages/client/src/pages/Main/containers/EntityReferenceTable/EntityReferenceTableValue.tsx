@@ -1,5 +1,5 @@
-import { EntityEnums } from "@shared/enums";
-import { IEntity, IReference } from "@shared/types";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { IEntity, IReference } from "@inkvisitor/shared/types";
 import { excludedSuggesterEntities } from "Theme/constants";
 import {
   EntityDropzone,

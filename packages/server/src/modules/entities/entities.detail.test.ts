@@ -1,5 +1,5 @@
 import { clean, testErroneousResponse } from "@modules/common.test";
-import { EntityDoesNotExist, BadParams } from "@shared/types/errors";
+import { EntityDoesNotExist, BadParams } from "@inkvisitor/shared/types/errors";
 import request from "supertest";
 import { supertestConfig } from "..";
 import { apiPath } from "@common/constants";

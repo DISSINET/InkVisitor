@@ -8,7 +8,7 @@ import {
   QUERY_GRID_WIDTH,
   QueryValidityProblem,
 } from "../../types";
-import { Query } from "@shared/types/query";
+import { Query } from "@inkvisitor/shared/types/query";
 import { useTheme } from "styled-components";
 
 interface QueryGridEdgeProps {

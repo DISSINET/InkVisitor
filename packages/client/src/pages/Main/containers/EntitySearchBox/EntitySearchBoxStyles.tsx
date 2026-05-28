@@ -10,8 +10,11 @@ export const StyledBoxContent = styled.div`
   overflow: auto;
 `;
 
-export const StyledOptions = styled.div`
-  margin-right: ${({ theme }) => theme.space[4]};
+interface StyledOptionsProps {
+  $isUndersized?: boolean;
+}
+export const StyledOptions = styled.div<StyledOptionsProps>`
+  margin-right: ${({ $isUndersized, theme }) => ($isUndersized ? theme.space[1] : theme.space[4])};
 `;
 export const StyledRow = styled.div`
   position: relative;
@@ -93,14 +96,14 @@ export const StyledDateTagText = styled.div`
 
 export const StyledDateTagButton = styled(Button)``;
 
-export const StyledAdvancedOptionsSign = styled.div`
+export const StyledAdvancedOptionsSign = styled.div<{ $isUndersized?: boolean }>`
   display: flex;
   align-items: center;
   font-size: ${({ theme }) => theme.fontSize.xxs};
   white-space: nowrap;
   column-gap: 0.2rem;
   padding-right: 0.2rem;
-  padding-left: 0.3rem;
+  padding-left: ${({ $isUndersized }) => ($isUndersized ? "0" : "0.3rem")};
   padding-bottom: 0.1rem;
   color: ${({ theme }) => theme.color.primary};
   font-weight: ${({ theme }) => theme.fontWeight.medium};
@@ -115,6 +118,7 @@ export const StyledAdvancedOptionsIconWrap = styled.div`
 `;
 
 export const StyledFloatingContainer = styled.div`
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.space[2]};
@@ -134,6 +138,12 @@ export const StyledFloatingContainerTitle = styled.div`
   display: flex;
   justify-content: center;
   color: ${({ theme }) => theme.color["black"]};
+`;
+
+export const StyledFloatingActions = styled.div`
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.8rem;
 `;
 
 export const StyledButtonsContainer = styled.div`
@@ -165,8 +175,7 @@ export const StyledPill = styled.div<{ $selected?: boolean }>`
   border-radius: 2rem;
   background-color: ${({ theme }) => theme.color["gray"][100]};
   border: 1px solid
-    ${({ theme, $selected }) =>
-      $selected ? theme.color["primary"] : theme.color["gray"][300]};
+    ${({ theme, $selected }) => ($selected ? theme.color["primary"] : theme.color["gray"][300])};
   user-select: none;
 
   &:hover {
@@ -207,4 +216,11 @@ export const StyledPillCloseIcon = styled.div`
     visibility: visible;
     pointer-events: auto;
   }
+`;
+
+export const StyledNoResults = styled.p`
+  font-style: italic;
+  font-size: 1.4rem;
+  margin: 0.5rem;
+  color: ${({ theme }) => theme.color.black};
 `;

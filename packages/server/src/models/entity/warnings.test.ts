@@ -1,5 +1,5 @@
 import "ts-jest";
-import { EntityEnums, RelationEnums } from "@shared/enums";
+import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { prepareEntity } from "./entity.test";
 import { Db } from "@service/rethink";
 import { clean } from "@modules/common.test";

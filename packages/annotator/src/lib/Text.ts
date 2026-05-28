@@ -148,6 +148,20 @@ export class Tag {
   }
 
   /**
+   * Returns absolute raw-text position of this tag in the whole document.
+   *
+   * @param segments - All text segments in order
+   * @returns Absolute raw-text index
+   */
+  getAbsoluteTagPosition(segments: Segment[]): number {
+    let absoluteIndex = this.position;
+    for (let i = 0; i < this.segmentIndex; i++) {
+      absoluteIndex += segments[i].raw.length + 1;
+    }
+    return absoluteIndex;
+  }
+
+  /**
    * Gets the base tag name without attributes.
    *
    * Extracts just the tag name from the parsed tag content.

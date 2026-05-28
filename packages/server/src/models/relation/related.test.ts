@@ -1,7 +1,7 @@
 import "ts-jest";
 import Entity from "@models/entity/entity";
-import { ModelNotValidError } from "@shared/types/errors";
-import { EntityEnums } from "@shared/enums";
+import { ModelNotValidError } from "@inkvisitor/shared/types/errors";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import Related from "./related";
 
 describe("test Related.validateEntities", function () {

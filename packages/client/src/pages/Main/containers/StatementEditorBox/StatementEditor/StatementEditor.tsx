@@ -1,5 +1,6 @@
-import { EntityEnums, UserEnums, WarningTypeEnums } from "@shared/enums";
+import { EntityEnums, UserEnums, WarningTypeEnums } from "@inkvisitor/shared/enums";
 import {
+  DropdownItem,
   IEntity,
   IProp,
   IReference,
@@ -9,16 +10,9 @@ import {
   IStatementActant,
   IStatementAction,
   IStatementData,
-} from "@shared/types";
-import {
-  UseMutationResult,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
-import {
-  EDITOR_TOO_SMALL_BREAKPOINT,
-  excludedSuggesterEntities,
-} from "Theme/constants";
+} from "@inkvisitor/shared/types";
+import { UseMutationResult, useQuery, useQueryClient } from "@tanstack/react-query";
+import { EDITOR_TOO_SMALL_BREAKPOINT, excludedSuggesterEntities } from "Theme/constants";
 import api from "api";
 import { Button, Input, Message, MultiInput, Submit } from "components";
 import Dropdown, {
@@ -40,30 +34,14 @@ import {
 import { useSearchParams, useTheme } from "hooks";
 import useAnnotator from "hooks/useAnnotator";
 import React, { useEffect, useMemo, useState } from "react";
-import {
-  AiOutlineCaretDown,
-  AiOutlineCaretRight,
-  AiOutlineCaretUp,
-  AiOutlineWarning,
-} from "react-icons/ai";
+import { AiOutlineCaretRight, AiOutlineWarning } from "react-icons/ai";
 import { FaAnchor, FaRegCopy } from "react-icons/fa";
-import { TiWarningOutline } from "react-icons/ti";
 import { toast } from "react-toastify";
 import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
 import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import {
-  DetailBoxState,
-  DropdownItem,
-  classesEditorActants,
-  classesEditorTags,
-} from "types";
-import {
-  deepCopy,
-  getEntityLabel,
-  getShortLabelByLetterCount,
-  searchTree,
-} from "utils/utils";
+import { DetailBoxState, classesEditorActants, classesEditorTags } from "types";
+import { deepCopy, getEntityLabel, getShortLabelByLetterCount, searchTree } from "utils/utils";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
 import {
   StyledAnchorEmptyState,
@@ -92,6 +70,7 @@ import {
 import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
 import { StatementEditorSectionButtons } from "./StatementEditorSectionButtons/StatementEditorSectionButtons";
+import { useUserQuery } from "hooks/react-query";
 
 const valencyErrorTypes: WarningTypeEnums[] = [
   WarningTypeEnums.MA,
@@ -103,22 +82,11 @@ const valencyErrorTypes: WarningTypeEnums[] = [
 
 interface StatementEditor {
   statement: IResponseStatement;
-  updateStatementMutation: UseMutationResult<
-    void,
-    unknown,
-    Partial<IStatement>,
-    unknown
-  >;
+  updateStatementMutation: UseMutationResult<void, unknown, Partial<IStatement>, unknown>;
   moveStatementMutation: UseMutationResult<void, unknown, string, unknown>;
 
-  handleAttributeChange: (
-    changes: Partial<IStatement>,
-    instantUpdate?: boolean
-  ) => void;
-  handleDataAttributeChange: (
-    changes: Partial<IStatementData>,
-    instantUpdate?: boolean
-  ) => void;
+  handleAttributeChange: (changes: Partial<IStatement>, instantUpdate?: boolean) => void;
+  handleDataAttributeChange: (changes: Partial<IStatementData>, instantUpdate?: boolean) => void;
 }
 export const StatementEditor: React.FC<StatementEditor> = ({
   statement,
@@ -158,20 +126,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
   // user query
   const username: string = useAppSelector((state) => state.username);
-  const userId = localStorage.getItem("userid");
-  const {
-    status: statusUser,
-    data: user,
-    error: errorUser,
-    isFetching: isFetchingUser,
-  } = useQuery({
-    queryKey: ["user", userId],
-    queryFn: async () => {
-      const res = await api.usersGet(userId as string);
-      return res.data ?? undefined;
-    },
-    enabled: !!userId && api.isLoggedIn(),
-  });
+  const { data: user } = useUserQuery();
 
   // territory query
   const {
@@ -183,9 +138,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     queryKey: ["territoryActants", statement.data.territory?.territoryId],
     queryFn: async () => {
       if (statement.data.territory?.territoryId) {
-        const res = await api.entityIdsInTerritory(
-          statement.data.territory.territoryId
-        );
+        const res = await api.entityIdsInTerritory(statement.data.territory.territoryId);
         return res.data ?? [];
       } else {
         return [];
@@ -195,11 +148,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   });
 
   // TEMPLATES
-  const [showApplyTemplateModal, setShowApplyTemplateModal] =
-    useState<boolean>(false);
-  const [templateToApply, setTemplateToApply] = useState<IEntity | false>(
-    false
-  );
+  const [showApplyTemplateModal, setShowApplyTemplateModal] = useState<boolean>(false);
+  const [templateToApply, setTemplateToApply] = useState<IEntity | false>(false);
 
   const handleAskForTemplateApply = (templateOptionToApply: string) => {
     if (templates) {
@@ -229,9 +179,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
       const templates = res.data ?? [];
       templates.sort((a: IEntity, b: IEntity) =>
-        a.labels[0].toLocaleLowerCase() > b.labels[0].toLocaleLowerCase()
-          ? 1
-          : -1
+        a.labels[0].toLocaleLowerCase() > b.labels[0].toLocaleLowerCase() ? 1 : -1
       );
       return templates;
     },
@@ -301,9 +249,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   }, [territoryData, statement.id]);
 
   // use cached tree to get all parents
-  const treeData: IResponseTree | undefined = queryClient.getQueryData([
-    "tree",
-  ]);
+  const treeData: IResponseTree | undefined = queryClient.getQueryData(["tree"]);
   const [territoryPath, setterritoryPath] = useState<string[]>([]);
 
   useEffect(() => {
@@ -324,8 +270,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
   const userCanEdit: boolean = useMemo(() => {
     return (
-      statement.right === UserEnums.RoleMode.Admin ||
-      statement.right === UserEnums.RoleMode.Write
+      statement.right === UserEnums.RoleMode.Admin || statement.right === UserEnums.RoleMode.Write
     );
   }, [statement]);
 
@@ -362,10 +307,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         // adding 2nd level prop
         actant.props.forEach((prop1, pi1) => {
           if (prop1.id == rowId) {
-            actant.props[pi1].children = [
-              ...actant.props[pi1].children,
-              newProp,
-            ];
+            actant.props[pi1].children = [...actant.props[pi1].children, newProp];
           }
 
           // adding 3rd level prop
@@ -426,12 +368,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           changes.value.entityId &&
           changes.value.elvl !== EntityEnums.Elvl.Inferential);
 
-      if (
-        languageCheck &&
-        isTypeOrValueChange &&
-        user &&
-        user.options.defaultStatementLanguage
-      ) {
+      if (languageCheck && isTypeOrValueChange && user && user.options.defaultStatementLanguage) {
         checkTypeEntityLanguage(propId, changes, instantUpdate);
       } else {
         applyPropChanges(propId, changes, instantUpdate);
@@ -440,11 +377,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   };
 
   // checking if the language is not different from user.options.defaultStatementLanguage -> in that case, switch elvl to EntityEnums.Elvl.Inferential
-  const checkTypeEntityLanguage = (
-    propId: string,
-    changes: any,
-    instantUpdate?: boolean
-  ) => {
+  const checkTypeEntityLanguage = (propId: string, changes: any, instantUpdate?: boolean) => {
     if (user) {
       const statementLanguage = user.options.defaultStatementLanguage;
       if (changes.type) {
@@ -479,11 +412,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     applyPropChanges(propId, changes);
   };
 
-  const applyPropChanges = (
-    propId: string,
-    changes: Partial<IProp>,
-    instantUpdate?: boolean
-  ) => {
+  const applyPropChanges = (propId: string, changes: Partial<IProp>, instantUpdate?: boolean) => {
     const newStatementData = deepCopy(statement.data);
     [...newStatementData.actants, ...newStatementData.actions].forEach(
       (actant: IStatementActant | IStatementAction) => {
@@ -525,9 +454,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
       [...newStatementData.actants, ...newStatementData.actions].forEach(
         (actant: IStatementActant | IStatementAction) => {
-          actant.props = actant.props.filter(
-            (actantProp) => actantProp.id !== propId
-          );
+          actant.props = actant.props.filter((actantProp) => actantProp.id !== propId);
 
           // 2nd level
           actant.props.forEach((prop1, pi1) => {
@@ -537,11 +464,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
             // 3rd level
             actant.props[pi1].children.forEach((prop2, pi2) => {
-              actant.props[pi1].children[pi2].children = actant.props[
-                pi1
-              ].children[pi2].children.filter(
-                (childProp) => childProp.id != propId
-              );
+              actant.props[pi1].children[pi2].children = actant.props[pi1].children[
+                pi2
+              ].children.filter((childProp) => childProp.id != propId);
             });
           });
         }
@@ -565,20 +490,12 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         }
         for (let prop1 of prop.children) {
           if (prop1.id === propId) {
-            prop.children.splice(
-              newIndex,
-              0,
-              prop.children.splice(oldIndex, 1)[0]
-            );
+            prop.children.splice(newIndex, 0, prop.children.splice(oldIndex, 1)[0]);
             return actants;
           }
           for (let prop2 of prop1.children) {
             if (prop2.id === propId) {
-              prop1.children.splice(
-                newIndex,
-                0,
-                prop1.children.splice(oldIndex, 1)[0]
-              );
+              prop1.children.splice(newIndex, 0, prop1.children.splice(oldIndex, 1)[0]);
               return actants;
             }
           }
@@ -588,24 +505,10 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     return actants;
   };
 
-  const movePropToIndex = (
-    propId: string,
-    oldIndex: number,
-    newIndex: number
-  ) => {
+  const movePropToIndex = (propId: string, oldIndex: number, newIndex: number) => {
     const { actions, actants, ...dataWithoutActants } = statement.data;
-    const newActions = changeOrder(
-      propId,
-      deepCopy(actions),
-      oldIndex,
-      newIndex
-    );
-    const newActants = changeOrder(
-      propId,
-      deepCopy(actants),
-      oldIndex,
-      newIndex
-    );
+    const newActions = changeOrder(propId, deepCopy(actions), oldIndex, newIndex);
+    const newActants = changeOrder(propId, deepCopy(actants), oldIndex, newIndex);
 
     const newStatementData = {
       actions: newActions,
@@ -634,18 +537,14 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     "actants" | "actions" | "references" | false
   >(false);
 
-  const showWarnings = useAppSelector(
-    (state) => state.statementEditor.showWarnings
-  );
+  const showWarnings = useAppSelector((state) => state.statementEditor.showWarnings);
   const dispatch = useAppDispatch();
 
   // display
   useEffect(() => {
     if (showWarnings) {
       // check the action valency errors
-      const valencyWarnings = statement.warnings.filter((w) =>
-        valencyErrorTypes.includes(w.type)
-      );
+      const valencyWarnings = statement.warnings.filter((w) => valencyErrorTypes.includes(w.type));
 
       const valencyWarningActions = statement.data.actions.filter((a) =>
         valencyWarnings.some((w) => w.position?.entityId === a.actionId)
@@ -664,20 +563,12 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
   const { scrollToAnchor } = useAnnotator();
 
-  const statementListOpened = useAppSelector(
-    (state) => state.layout.mainPage.statementListOpened
-  );
+  const statementListOpened = useAppSelector((state) => state.layout.mainPage.statementListOpened);
 
-  const scrollToStatementAnchor = (
-    parentTerritoryId: string,
-    anchorIndex?: number
-  ) => {
+  const scrollToStatementAnchor = (parentTerritoryId: string, anchorIndex?: number) => {
     let timeout = 0;
     // short timeout -> statement list is open and the active territory is the anchor parent territory
-    if (
-      (statementListOpened && parentTerritoryId === territoryId) ||
-      !parentTerritoryId.length
-    ) {
+    if ((statementListOpened && parentTerritoryId === territoryId) || !parentTerritoryId.length) {
       timeout = 100;
     } else {
       // long timeout -> statement list is closed or different territory is active => needs more time to initialize the annotator
@@ -693,9 +584,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     }, timeout);
   };
 
-  const editorWidth = useAppSelector(
-    (state) => state.layout.mainPage.thirdPanelRealWidth
-  );
+  const editorWidth = useAppSelector((state) => state.layout.mainPage.thirdPanelRealWidth);
 
   const editorWidthTooNarrow = editorWidth < EDITOR_TOO_SMALL_BREAKPOINT;
 
@@ -724,9 +613,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
               {userCanEdit && (
                 <div style={{ display: "flex" }}>
-                  <StyledEditorContentLabel>
-                    Change statement label:
-                  </StyledEditorContentLabel>
+                  <StyledEditorContentLabel>Change statement label:</StyledEditorContentLabel>
                   <StyledEditorHeaderInputWrap>
                     <Input
                       width={"full"}
@@ -757,9 +644,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                         <BreadcrumbItem
                           territoryId={territoryId}
                           isSelected={territoryId === statementTerritoryId}
-                          isFavorited={favoritedTerritoryIds.includes(
-                            territoryId
-                          )}
+                          isFavorited={favoritedTerritoryIds.includes(territoryId)}
                         />
                       </React.Fragment>
                     );
@@ -768,9 +653,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 {!territoryData && !isFetchingTerritory && (
                   <div style={{ display: "flex", alignItems: "flex-end" }}>
                     <AiOutlineWarning size={22} color={theme.color.warning} />
-                    <StyledMissingTerritory>
-                      {"missing territory"}
-                    </StyledMissingTerritory>
+                    <StyledMissingTerritory>{"missing territory"}</StyledMissingTerritory>
                   </div>
                 )}
               </StyledBreadcrumbWrap>
@@ -779,9 +662,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
           {userCanEdit && !statement.isTemplate && (
             <StyledEditorPreSection $inline>
-              <StyledEditorContentLabel>
-                Move to territory:
-              </StyledEditorContentLabel>
+              <StyledEditorContentLabel>Move to territory:</StyledEditorContentLabel>
               <StyledEditorContentRowValue>
                 <EntitySuggester
                   disableTemplatesAccept
@@ -799,9 +680,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
           {userCanEdit && (
             <StyledEditorPreSection $inline>
-              <StyledEditorContentLabel>
-                Apply Template
-              </StyledEditorContentLabel>
+              <StyledEditorContentLabel>Apply Template</StyledEditorContentLabel>
               <StyledEditorContentRowValue>
                 <Dropdown.Single.Basic
                   placeholder="select template.."
@@ -818,50 +697,40 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           )}
 
           <StyledEditorPreSection>
-            <StyledEditorContentLabel>
-              Document Anchors
-            </StyledEditorContentLabel>
+            <StyledEditorContentLabel>Document Anchors</StyledEditorContentLabel>
             <StyledEditorAnchorSectionContent>
               {statement.usedInDocuments.length > 0 ? (
                 statement.usedInDocuments.map((documentAnchor, dai) => (
                   <StyledEditorAnchorSectionAnchor key={dai}>
-                    <StyledAnchorText>
-                      {documentAnchor.anchorText}
-                    </StyledAnchorText>
+                    <StyledAnchorText>{documentAnchor.anchorText}</StyledAnchorText>
                     <StyledAnchorMeta>
-                      <Button
-                        inverted
-                        noBorder
-                        noBackground
-                        tooltipLabel="locate statement anchor"
-                        icon={<FaAnchor size={16} />}
-                        onClick={() => {
-                          scrollToStatementAnchor(
-                            documentAnchor.parentTerritoryId,
-                            documentAnchor.anchorIndex
-                          );
-                        }}
-                      />
-                      <DocumentTitle title={documentAnchor.document.title} />
-                      {documentAnchor.resourceId && (
-                        <EntityTag
-                          entity={statement.entities[documentAnchor.resourceId]}
+                      <div style={{ display: "grid", gridTemplateColumns: "auto 1fr" }}>
+                        <Button
+                          inverted
+                          noBorder
+                          noBackground
+                          tooltipLabel="locate statement anchor"
+                          icon={<FaAnchor size={16} />}
+                          onClick={() => {
+                            scrollToStatementAnchor(
+                              documentAnchor.parentTerritoryId,
+                              documentAnchor.anchorIndex
+                            );
+                          }}
                         />
+                        <DocumentTitle title={documentAnchor.document.title} />
+                      </div>
+                      {documentAnchor.resourceId && (
+                        <EntityTag entity={statement.entities[documentAnchor.resourceId]} />
                       )}
                       {documentAnchor.parentTerritoryId && (
-                        <EntityTag
-                          entity={
-                            statement.entities[documentAnchor.parentTerritoryId]
-                          }
-                        />
+                        <EntityTag entity={statement.entities[documentAnchor.parentTerritoryId]} />
                       )}
                     </StyledAnchorMeta>
                   </StyledEditorAnchorSectionAnchor>
                 ))
               ) : (
-                <StyledAnchorEmptyState>
-                  No document anchors found
-                </StyledAnchorEmptyState>
+                <StyledAnchorEmptyState>No document anchors found</StyledAnchorEmptyState>
               )}
             </StyledEditorAnchorSectionContent>
           </StyledEditorPreSection>
@@ -897,9 +766,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 iconRight={
                   <AiOutlineCaretRight
                     style={{
-                      transform: showWarnings
-                        ? `rotate(90deg)`
-                        : `rotate(0deg)`,
+                      transform: showWarnings ? `rotate(90deg)` : `rotate(0deg)`,
                       transition: "transform 0.2s ease",
                     }}
                   />
@@ -916,13 +783,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   statement.warnings
                     .sort((a, b) => a.type.localeCompare(b.type))
                     .map((warning, key) => {
-                      return (
-                        <Message
-                          key={key}
-                          warning={warning}
-                          entities={statement.entities}
-                        />
-                      );
+                      return <Message key={key} warning={warning} entities={statement.entities} />;
                     })}
               </StyledDetailWarnings>
             </StyledEditorSectionContent>
@@ -1036,10 +897,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         </StyledEditorSection>
 
         {/* Refs */}
-        <StyledEditorSection
-          key="editor-section-refs"
-          $widthTooNarrow={editorWidthTooNarrow}
-        >
+        <StyledEditorSection key="editor-section-refs" $widthTooNarrow={editorWidthTooNarrow}>
           <StyledEditorSectionHeader>
             <StyledEditorSectionHeading>References</StyledEditorSectionHeading>
 
@@ -1059,14 +917,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             <EntityReferenceTable
               openDetailOnCreate
               references={statement.references}
-              onChange={(
-                newReferences: IReference[],
-                instantUpdate?: boolean
-              ) => {
-                handleAttributeChange(
-                  { references: newReferences },
-                  instantUpdate
-                );
+              onChange={(newReferences: IReference[], instantUpdate?: boolean) => {
+                handleAttributeChange({ references: newReferences }, instantUpdate);
               }}
               disabled={!userCanEdit}
               isInsideTemplate={statement.isTemplate || false}
@@ -1080,10 +932,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         </StyledEditorSection>
 
         {/* Tags */}
-        <StyledEditorSection
-          key="editor-section-tags"
-          $widthTooNarrow={editorWidthTooNarrow}
-        >
+        <StyledEditorSection key="editor-section-tags" $widthTooNarrow={editorWidthTooNarrow}>
           <StyledEditorSectionHeader>
             <StyledEditorSectionHeading>Tags</StyledEditorSectionHeading>
           </StyledEditorSectionHeader>
@@ -1158,10 +1007,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         </StyledEditorSection>
 
         {/* Audits */}
-        <StyledEditorSection
-          key="editor-section-audits"
-          $widthTooNarrow={editorWidthTooNarrow}
-        >
+        <StyledEditorSection key="editor-section-audits" $widthTooNarrow={editorWidthTooNarrow}>
           <StyledEditorSectionHeader>
             <StyledEditorSectionHeading>Audits</StyledEditorSectionHeading>
           </StyledEditorSectionHeader>
@@ -1171,10 +1017,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         </StyledEditorSection>
 
         {/* JSON */}
-        <StyledEditorSection
-          key="editor-section-json"
-          $widthTooNarrow={editorWidthTooNarrow}
-        >
+        <StyledEditorSection key="editor-section-json" $widthTooNarrow={editorWidthTooNarrow}>
           <StyledEditorSectionHeader>
             <StyledEditorSectionHeading>JSON</StyledEditorSectionHeading>
           </StyledEditorSectionHeader>

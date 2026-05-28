@@ -1,15 +1,15 @@
+import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
+import { UserTagSize } from "components/advanced/UserTag/utils";
 import React from "react";
-import { EntityEnums } from "@shared/enums";
-import { UserEnums } from "@shared/enums";
 import {
-  FaClock,
   FaCheck,
-  FaTimes,
-  FaExclamationTriangle,
+  FaClock,
   FaEdit,
-  FaUserShield,
+  FaExclamationTriangle,
+  FaTimes,
   FaUserCog,
   FaUserEdit,
+  FaUserShield,
   FaUserTag,
 } from "react-icons/fa";
 
@@ -35,6 +35,21 @@ export const getEntityStatusIcon = (status: EntityEnums.Status) => {
   }
 };
 
+const getUserIconSize = (size: UserTagSize): number => {
+  switch (size) {
+    case UserTagSize.Small:
+      return 17;
+    case UserTagSize.Medium:
+      return 19;
+    case UserTagSize.Large:
+      return 22;
+    case UserTagSize.ExtraLarge:
+      return 25;
+    default:
+      return 17;
+  }
+};
+
 /**
  * Maps a user role to its corresponding icon
  * @param userRole - The user role to map
@@ -43,14 +58,14 @@ export const getEntityStatusIcon = (status: EntityEnums.Status) => {
  */
 export const getUserIcon = (
   userRole: UserEnums.Role,
-  size?: number
+  size: UserTagSize = UserTagSize.Medium
 ): React.ReactNode => {
   if (userRole === UserEnums.Role.Owner) {
-    return <FaUserShield size={size} />;
+    return <FaUserShield size={getUserIconSize(size)} />;
   } else if (userRole === UserEnums.Role.Admin) {
-    return <FaUserCog size={size} />;
+    return <FaUserCog size={getUserIconSize(size)} />;
   } else if (userRole === UserEnums.Role.Editor) {
-    return <FaUserEdit size={size} />;
+    return <FaUserEdit size={getUserIconSize(size)} />;
   }
-  return <FaUserTag size={size} />;
+  return <FaUserTag size={getUserIconSize(size)} />;
 };

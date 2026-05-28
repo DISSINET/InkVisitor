@@ -1,4 +1,4 @@
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import { Button } from "components/basic/Button/Button";
 import { Tooltip } from "components/basic/Tooltip/Tooltip";
 

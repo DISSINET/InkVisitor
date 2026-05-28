@@ -1,14 +1,19 @@
-import { IEntity } from "@shared/types";
+import { IEntity } from "@inkvisitor/shared/types";
 import {
   BadParams,
   CustomError,
   SearchEdgeTypesInvalid,
-} from "@shared/types/errors";
-import { Explore, Query } from "@shared/types/query";
+} from "@inkvisitor/shared/types/errors";
+import { Explore, Query } from "@inkvisitor/shared/types/query";
 import { Connection } from "rethinkdb-ts";
 import { Results, SearchEdge, SearchNode } from ".";
-import { IResponseQueryEntity } from "@shared/types/response-query";
+import { IResponseQueryEntity } from "@inkvisitor/shared/types/response-query";
 import Entity from "@models/entity/entity";
+import {
+  getCachedBaseIds,
+  queryCacheKey,
+  setCachedBaseIds,
+} from "./query-base-cache";
 
 export default class QuerySearch {
   static MAX_LIMIT = 100;
@@ -17,8 +22,10 @@ export default class QuerySearch {
   root: SearchNode;
   explore: Explore.IExplore;
   results: Results<IEntity> | null;
+  private readonly queryForCache: Query.INode;
 
   constructor(query: Query.INode, explore: Explore.IExplore) {
+    this.queryForCache = query;
     this.root = new SearchNode(query);
     this.explore = explore;
 
@@ -55,8 +62,18 @@ export default class QuerySearch {
       return [];
     }
 
+    const cacheKey = queryCacheKey(this.queryForCache);
+    const cachedIds = getCachedBaseIds(cacheKey);
+    if (cachedIds) {
+      this.results = new Results<IEntity>();
+      this.results.items = [...cachedIds];
+      return this.results.items;
+    }
+
     this.results = await this.root.run(db);
-    return this.results.items || [];
+    const ids = this.results.items || [];
+    setCachedBaseIds(cacheKey, ids);
+    return ids;
   }
 
   async getResults(
@@ -66,6 +83,8 @@ export default class QuerySearch {
     if (!this.results) {
       return [];
     }
+
+    await this.results.applyExploreFilters(db, this.explore);
 
     // sort
     this.results.sort(this.explore.sort);

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { TiWarningOutline } from "react-icons/ti";
 
-import { WarningTypeEnums } from "@shared/enums";
-import { IEntity, IWarning } from "@shared/types";
+import { WarningTypeEnums } from "@inkvisitor/shared/enums";
+import { IEntity, IWarning } from "@inkvisitor/shared/types";
 import api from "api";
 import { EntityTag } from "components/advanced";
 import { EntityColors } from "types";

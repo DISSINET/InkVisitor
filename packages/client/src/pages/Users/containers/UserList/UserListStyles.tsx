@@ -1,4 +1,36 @@
-import styled from "styled-components";
+import styled, { css, keyframes } from "styled-components";
+
+/** One fade after row settles; delay + duration set on StyledTr */
+const rowActivateFlash = keyframes`
+  0% {
+    box-shadow: inset 0 0 0 9999px rgba(188, 229, 255, 0);
+  }
+  42% {
+    box-shadow: inset 0 0 0 9999px rgba(188, 229, 255, 0.42);
+  }
+  100% {
+    box-shadow: inset 0 0 0 9999px rgba(188, 229, 255, 0);
+  }
+`;
+
+/** Same timing as activate; warning-toned (deactivate) */
+const rowDeactivateFlash = keyframes`
+  0% {
+    box-shadow: inset 0 0 0 9999px rgba(216, 170, 55, 0);
+  }
+  42% {
+    box-shadow: inset 0 0 0 9999px rgba(216, 170, 55, 0.38);
+  }
+  100% {
+    box-shadow: inset 0 0 0 9999px rgba(216, 170, 55, 0);
+  }
+`;
+
+export const ROW_FLASH_DELAY_MS = 200;
+export const ROW_FLASH_DURATION_MS = 1750;
+/** Clear React flash state shortly after CSS animation ends */
+export const ROW_FLASH_CLEAR_AFTER_MS =
+  ROW_FLASH_DELAY_MS + ROW_FLASH_DURATION_MS + 120;
 
 export const StyledTableWrapper = styled.div`
   position: relative;
@@ -31,11 +63,14 @@ export const StyledTh = styled.th`
   padding: ${({ theme }) => `${theme.space[2]} ${theme.space[4]}`};
 `;
 
+export type UserListRowFlash = "activate" | "deactivate" | false;
+
 interface StyledTr {
   $isOdd?: boolean;
   opacity?: number;
   $isOwner: boolean;
   $isAdmin: boolean;
+  $flash?: UserListRowFlash;
 }
 export const StyledTr = styled.tr<StyledTr>`
   background-color: ${({ theme, $isOwner, $isAdmin }) =>
@@ -48,6 +83,19 @@ export const StyledTr = styled.tr<StyledTr>`
   opacity: ${({ opacity }) => (opacity ? opacity : 1)};
   padding: ${({ theme }) => theme.space[1]};
   border: 1px solid ${({ theme }) => theme.color["gray"][400]};
+  position: relative;
+  ${({ $flash }) =>
+    $flash === "activate" &&
+    css`
+      animation: ${rowActivateFlash} ${ROW_FLASH_DURATION_MS}ms ease-out
+        ${ROW_FLASH_DELAY_MS}ms forwards;
+    `}
+  ${({ $flash }) =>
+    $flash === "deactivate" &&
+    css`
+      animation: ${rowDeactivateFlash} ${ROW_FLASH_DURATION_MS}ms ease-out
+        ${ROW_FLASH_DELAY_MS}ms forwards;
+    `}
 
   td:first-child {
     padding-left: ${({ theme }) => theme.space[2]};

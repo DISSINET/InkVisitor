@@ -1,5 +1,5 @@
-import { IEntity, IProp } from "@shared/types";
-import { EmptyTag, EntityTag } from "components/advanced";
+import { IEntity, IProp } from "@inkvisitor/shared/types";
+import { EmptyEntityTag, EntityTag } from "components/advanced";
 import React from "react";
 import {
   StyledPropGridRow,
@@ -13,9 +13,12 @@ interface StatementListRowExpandedPropGroup {
   entities: { [key: string]: IEntity };
   renderChildrenPropRow?: (props: IProp[]) => React.ReactElement;
 }
-export const StatementListRowExpandedPropGroup: React.FC<
-  StatementListRowExpandedPropGroup
-> = ({ level, props, entities, renderChildrenPropRow }) => {
+export const StatementListRowExpandedPropGroup: React.FC<StatementListRowExpandedPropGroup> = ({
+  level,
+  props,
+  entities,
+  renderChildrenPropRow,
+}) => {
   return (
     <StyledPropGroup>
       {props.map((prop, key) => {
@@ -26,28 +29,20 @@ export const StatementListRowExpandedPropGroup: React.FC<
             <StyledPropGridRow $level={level}>
               {propTypeEntity ? (
                 <StyledTagWrap $marginRight>
-                  <EntityTag
-                    fullWidth
-                    entity={propTypeEntity}
-                    tooltipPosition="bottom"
-                  />
+                  <EntityTag fullWidth entity={propTypeEntity} tooltipPosition="bottom" />
                 </StyledTagWrap>
               ) : (
                 <StyledTagWrap $marginRight>
-                  <EmptyTag label={"type"} />
+                  <EmptyEntityTag label={"type"} />
                 </StyledTagWrap>
               )}
               {propValueEntity ? (
                 <StyledTagWrap>
-                  <EntityTag
-                    fullWidth
-                    entity={propValueEntity}
-                    tooltipPosition="bottom"
-                  />
+                  <EntityTag fullWidth entity={propValueEntity} tooltipPosition="bottom" />
                 </StyledTagWrap>
               ) : (
                 <StyledTagWrap>
-                  <EmptyTag label={"value"} />
+                  <EmptyEntityTag label={"value"} />
                 </StyledTagWrap>
               )}
             </StyledPropGridRow>

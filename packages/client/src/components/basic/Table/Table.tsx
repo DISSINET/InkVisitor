@@ -1,5 +1,5 @@
 import { Button, Loader } from "components";
-import React, { ReactNode } from "react";
+import React, { ReactNode, useEffect } from "react";
 import { Column, Row, usePagination, useSortBy, useTable } from "react-table";
 import {
   StyledHeading,
@@ -63,6 +63,7 @@ export const Table: React.FC<Table<any>> = ({
     gotoPage,
     nextPage,
     previousPage,
+    setPageSize,
     state: { pageIndex, pageSize },
   } = useTable(
     {
@@ -77,6 +78,15 @@ export const Table: React.FC<Table<any>> = ({
     useSortBy,
     usePagination
   );
+
+  useEffect(() => {
+    if (pageSize === perPage) {
+      return;
+    }
+
+    setPageSize(perPage);
+    gotoPage(0);
+  }, [gotoPage, pageSize, perPage, setPageSize]);
 
   const renderPagination = (position: "top" | "bottom"): ReactNode => (
     <StyledTableHeader $position={position}>

@@ -1,5 +1,5 @@
-import { actantPositionDict } from "@shared/dictionaries";
-import { EntityEnums } from "@shared/enums";
+import { actantPositionDict } from "@inkvisitor/shared/dictionaries";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import {
   IEntity,
   IProp,
@@ -7,8 +7,8 @@ import {
   IResponseStatement,
   IStatementActant,
   IStatementAction,
-} from "@shared/types";
-import { EmptyTag, EntityTag } from "components/advanced";
+} from "@inkvisitor/shared/types";
+import { EmptyEntityTag, EntityTag } from "components/advanced";
 import React from "react";
 import { ColumnInstance, Row } from "react-table";
 import { StatementListRowExpandedPropGroup } from "./StatementListRowExpandedPropGroup";
@@ -39,11 +39,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
   visibleColumns,
   entities,
 }) => {
-  const renderReferenceRow = (
-    resourceId: string,
-    valueId: string,
-    key: number
-  ) => {
+  const renderReferenceRow = (resourceId: string, valueId: string, key: number) => {
     const resourceEntity: IEntity = entities[resourceId];
     const valueEntity: IEntity = entities[valueId];
 
@@ -51,28 +47,20 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
       <StyledReferenceRow key={key}>
         {resourceEntity ? (
           <StyledReferenceColumn $marginRight>
-            <EntityTag
-              entity={resourceEntity}
-              tooltipPosition="bottom"
-              fullWidth
-            />
+            <EntityTag entity={resourceEntity} tooltipPosition="bottom" fullWidth />
           </StyledReferenceColumn>
         ) : (
           <StyledReferenceColumn $marginRight>
-            <EmptyTag label="resource" />
+            <EmptyEntityTag label="resource" />
           </StyledReferenceColumn>
         )}
         {valueEntity ? (
           <StyledReferenceColumn>
-            <EntityTag
-              entity={valueEntity}
-              tooltipPosition="bottom"
-              fullWidth
-            />
+            <EntityTag entity={valueEntity} tooltipPosition="bottom" fullWidth />
           </StyledReferenceColumn>
         ) : (
           <StyledReferenceColumn>
-            <EmptyTag label="value" />
+            <EmptyEntityTag label="value" />
           </StyledReferenceColumn>
         )}
       </StyledReferenceRow>
@@ -83,11 +71,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
       <React.Fragment key={key}>
         {actantId && (
           <StyledActantWrap key={key}>
-            <EntityTag
-              entity={entities[actantId]}
-              tooltipPosition="bottom"
-              fullWidth
-            />
+            <EntityTag entity={entities[actantId]} tooltipPosition="bottom" fullWidth />
           </StyledActantWrap>
         )}
       </React.Fragment>
@@ -97,7 +81,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
   const renderEmptyActant = (label: string, key: number) => {
     return (
       <StyledActantWrap key={key}>
-        <EmptyTag label={label} />
+        <EmptyEntityTag label={label} />
       </StyledActantWrap>
     );
   };
@@ -110,9 +94,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
   ) => {
     return (
       <StyledActantWithPropsWrap key={key}>
-        {actant?.id
-          ? renderListActant(actant.id, key)
-          : renderEmptyActant(emptyLabel, key)}
+        {actant?.id ? renderListActant(actant.id, key) : renderEmptyActant(emptyLabel, key)}
         {renderFirstLevelProps(sActant.props)}
       </StyledActantWithPropsWrap>
     );
@@ -147,11 +129,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
   const renderThirdLevelProps = (props: IProp[]) => {
     return (
       <StyledGrid>
-        <StatementListRowExpandedPropGroup
-          level={3}
-          props={props}
-          entities={entities}
-        />
+        <StatementListRowExpandedPropGroup level={3} props={props} entities={entities} />
       </StyledGrid>
     );
   };
@@ -173,12 +151,10 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
       const { notes }: { notes: string[] } = row.original;
 
       // ACTIONS
-      const actionObjects = actions.map(
-        (sAction: IStatementAction, key: number) => {
-          const action = entities[sAction.actionId];
-          return { key, data: { sAction, action } };
-        }
-      );
+      const actionObjects = actions.map((sAction: IStatementAction, key: number) => {
+        const action = entities[sAction.actionId];
+        return { key, data: { sAction, action } };
+      });
 
       // SUBJECTS
       const subjectObjects = actants
@@ -260,11 +236,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
                   <StyledPropRow key={key}>
                     <StyledBsArrowReturnRight size="20" />
                     <StyledSpan>&nbsp;&nbsp;(reference)&nbsp;&nbsp;</StyledSpan>
-                    {renderReferenceRow(
-                      reference.resource,
-                      reference.value,
-                      key
-                    )}
+                    {renderReferenceRow(reference.resource, reference.value, key)}
                   </StyledPropRow>
                 </StyledGrid>
               ))}

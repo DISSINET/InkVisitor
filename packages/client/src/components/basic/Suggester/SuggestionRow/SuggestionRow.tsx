@@ -1,5 +1,5 @@
-import { EntityEnums } from "@shared/enums";
-import { IEntity } from "@shared/types";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { IEntity } from "@inkvisitor/shared/types";
 import { Button, ButtonGroup } from "components";
 import { EntityTag } from "components/advanced";
 import { FaLink, FaPlusSquare } from "react-icons/fa";

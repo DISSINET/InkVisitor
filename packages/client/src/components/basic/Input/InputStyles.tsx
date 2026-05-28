@@ -34,7 +34,7 @@ export const StyledWrapper = styled.div<StyledWrapper>`
   flex-grow: ${({ width }) => (width === "full" ? 1 : "")};
   min-width: ${({ $minWidth }) => ($minWidth ? `${$minWidth}px` : "")};
 `;
-export const Label = styled.span`
+export const Label = styled.span<{ $labelSpaceNoWrap: boolean }>`
   text-align: right;
   margin-right: ${space2};
   vertical-align: top;
@@ -42,23 +42,18 @@ export const Label = styled.span`
   display: flex;
   align-items: flex-end;
   font-size: ${({ theme }) => theme.fontSize["sm"]};
+  white-space: ${({ $labelSpaceNoWrap }) => ($labelSpaceNoWrap ? "nowrap" : "normal")};
 `;
 export const StyledInput = styled.input<IValueStyle>`
   /* height: ${({ theme }) => theme.space[10]}; */
-  height: ${({ $fullHeight, theme }) =>
-    $fullHeight ? "100%" : theme.space[10]};
+  height: ${({ $fullHeight, theme }) => ($fullHeight ? "100%" : theme.space[10])};
   text-align: left;
   border-style: solid;
-  color: ${({ $inverted, theme }) =>
-    $inverted ? theme.color["white"] : theme.color["primary"]};
+  color: ${({ $inverted, theme }) => ($inverted ? theme.color["white"] : theme.color["primary"])};
   background-color: ${({ $inverted, theme }) =>
     $inverted ? theme.color["primary"] : theme.color["white"]};
   border-width: ${({ theme, $inverted, $borderWidth }) =>
-    $inverted
-      ? 0
-      : $borderWidth
-      ? theme.borderWidth[$borderWidth]
-      : theme.borderWidth[1]};
+    $inverted ? 0 : $borderWidth ? theme.borderWidth[$borderWidth] : theme.borderWidth[1]};
   border-color: ${({ theme, $suggester, $borderColor }) =>
     $suggester
       ? theme.color["primary"]
@@ -76,16 +71,13 @@ export const StyledInput = styled.input<IValueStyle>`
 
   width: ${({ width }) => getWidth(width)};
   min-width: ${({ theme }) => theme.space[6]};
-  background: ${({ disabled, theme }) =>
-    disabled ? theme.background["stripes"] : ""};
+  background: ${({ disabled, theme }) => (disabled ? theme.background["stripes"] : "")};
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "")};
   resize: none;
 
   &:hover {
-    border-color: ${({ theme, disabled }) =>
-      !disabled ? theme.color["info"] : ""};
-    border-width: ${({ theme, disabled }) =>
-      !disabled ? theme.borderWidth[1] : ""};
+    border-color: ${({ theme, disabled }) => (!disabled ? theme.color["info"] : "")};
+    border-width: ${({ theme, disabled }) => (!disabled ? theme.borderWidth[1] : "")};
   }
   &:focus {
     outline: 0;
@@ -134,20 +126,17 @@ export const StyledTextArea = styled.textarea<StyledTextArea>`
   height: ${({ $fullHeightTextArea }) => ($fullHeightTextArea ? "100%" : "")};
   font-family: inherit;
   text-align: left;
-  color: ${({ $inverted, theme }) =>
-    $inverted ? theme.color["white"] : theme.color["primary"]};
+  color: ${({ $inverted, theme }) => ($inverted ? theme.color["white"] : theme.color["primary"])};
   background-color: ${({ $inverted, theme }) =>
     $inverted ? theme.color["primary"] : theme.color["white"]};
   border-color: ${({ theme, $borderColor }) =>
     $borderColor ? theme.color[$borderColor] : theme.color["gray"]["400"]};
   border-width: ${({ theme, $inverted, $noBorder }) =>
     $inverted || $noBorder ? 0 : theme.borderWidth[1]};
-  font-size: ${({ theme, $fontSizeTextArea }) =>
-    theme.fontSize[$fontSizeTextArea]};
+  font-size: ${({ theme, $fontSizeTextArea }) => theme.fontSize[$fontSizeTextArea]};
   width: ${({ width }) => getWidth(width)};
   padding: ${space1};
-  background: ${({ disabled, theme }) =>
-    disabled ? theme.background["stripes"] : ""};
+  background: ${({ disabled, theme }) => (disabled ? theme.background["stripes"] : "")};
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "default")};
   resize: none;
   line-height: 1.2;
@@ -155,12 +144,10 @@ export const StyledTextArea = styled.textarea<StyledTextArea>`
   &:focus {
     outline: 0;
     border-color: ${({ theme }) => theme.color["success"]};
-    border-width: ${({ theme, $noBorder }) =>
-      $noBorder ? 0 : theme.borderWidth[1]};
+    border-width: ${({ theme, $noBorder }) => ($noBorder ? 0 : theme.borderWidth[1])};
   }
   &:hover {
-    border-color: ${({ theme, disabled }) =>
-      !disabled ? theme.color["info"] : ""};
+    border-color: ${({ theme, disabled }) => (!disabled ? theme.color["info"] : "")};
   }
 `;
 

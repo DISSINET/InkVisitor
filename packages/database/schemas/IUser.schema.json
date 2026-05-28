@@ -18,11 +18,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "id",
-        "name",
-        "entityIds"
-      ],
+      "required": ["id", "name", "entityIds"],
       "type": "object"
     },
     "IStoredTerritory": {
@@ -32,9 +28,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "territoryId"
-      ],
+      "required": ["territoryId"],
       "type": "object"
     },
     "IUser": {
@@ -107,16 +101,9 @@
             "type": "string"
           },
           "type": "array"
-        },
-        "allowMaterializedStats": {
-          "type": "boolean"
         }
       },
-      "required": [
-        "defaultTerritory",
-        "defaultLanguage",
-        "searchLanguages"
-      ],
+      "required": ["defaultTerritory", "defaultLanguage", "searchLanguages"],
       "type": "object"
     },
     "IUserRight": {
@@ -129,26 +116,15 @@
           "type": "string"
         }
       },
-      "required": [
-        "territory",
-        "mode"
-      ],
+      "required": ["territory", "mode"],
       "type": "object"
     },
     "UserEnums.Role": {
-      "enum": [
-        "admin",
-        "editor",
-        "viewer"
-      ],
+      "enum": ["admin", "editor", "viewer"],
       "type": "string"
     },
     "UserEnums.RoleMode": {
-      "enum": [
-        "write",
-        "read",
-        "admin"
-      ],
+      "enum": ["write", "read", "admin"],
       "type": "string"
     }
   }

@@ -1,5 +1,5 @@
-import { RelationEnums } from "@shared/enums";
-import { Relation } from "@shared/types";
+import { RelationEnums } from "@inkvisitor/shared/enums";
+import { Relation } from "@inkvisitor/shared/types";
 import { Button, LetterIcon } from "components";
 import React from "react";
 import { BiNetworkChart } from "react-icons/bi";

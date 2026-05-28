@@ -4,11 +4,12 @@ import Document from "@models/document/document";
 import Entity from "@models/entity/entity";
 import Relation from "@models/relation/relation";
 import User from "@models/user/user";
-import { DbEnums, EntityEnums } from "@shared/enums";
-import { IEntity, IUser } from "@shared/types";
-import { ModelNotValidError } from "@shared/types/errors";
+import { DbEnums, EntityEnums } from "@inkvisitor/shared/enums";
+import { IEntity, IUser } from "@inkvisitor/shared/types";
+import { ModelNotValidError } from "@inkvisitor/shared/types/errors";
 import { Connection, RDatum, r as rethink, WriteResult } from "rethinkdb-ts";
 import { Db } from "./rethink";
+import { DbHandle } from "./dbHandle";
 
 export async function getEntitiesDataByClass<T>(
   db: Connection,
@@ -22,10 +23,10 @@ export async function getEntitiesDataByClass<T>(
 }
 
 export async function findEntityById<T extends IEntity>(
-  db: Db | Connection,
+  db: Db | DbHandle | Connection,
   id: string
 ): Promise<T> {
-  const connection = db instanceof Db ? db.connection : db;
+  const connection = "connection" in db ? db.connection : db;
   const data = await rethink.table(Entity.table).get(id).run(connection);
   return data || null;
 }
@@ -40,26 +41,26 @@ export async function getEntitiesByIds<T extends IEntity>(
     .run(db);
 }
 
-export async function createEntity(db: Db, data: IDbModel): Promise<boolean> {
+export async function createEntity(db: Db | DbHandle, data: IDbModel): Promise<boolean> {
   if (!data.isValid()) {
     throw new ModelNotValidError("");
   }
   return data.save(db.connection);
 }
 
-export async function deleteEntities(db: Db): Promise<WriteResult> {
+export async function deleteEntities(db: Db | DbHandle): Promise<WriteResult> {
   return rethink.table(Entity.table).delete().run(db.connection);
 }
 
-export async function deleteAudits(db: Db): Promise<WriteResult> {
+export async function deleteAudits(db: Db | DbHandle): Promise<WriteResult> {
   return rethink.table(Audit.table).delete().run(db.connection);
 }
 
-export async function deleteRelations(db: Db): Promise<WriteResult> {
+export async function deleteRelations(db: Db | DbHandle): Promise<WriteResult> {
   return rethink.table(Relation.table).delete().run(db.connection);
 }
 
-export async function deleteUsers(db: Db): Promise<WriteResult> {
+export async function deleteUsers(db: Db | DbHandle): Promise<WriteResult> {
   return rethink
     .table(User.table)
     .filter(function (user: RDatum<IUser>) {
@@ -69,6 +70,6 @@ export async function deleteUsers(db: Db): Promise<WriteResult> {
     .run(db.connection);
 }
 
-export async function deleteDocuments(db: Db): Promise<WriteResult> {
+export async function deleteDocuments(db: Db | DbHandle): Promise<WriteResult> {
   return rethink.table(Document.table).delete().run(db.connection);
 }

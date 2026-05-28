@@ -1,4 +1,4 @@
-import { IResponseDetail } from "@shared/types";
+import { IResponseDetail } from "@inkvisitor/shared/types";
 import { Handle, NodeTypes, Position } from "reactflow";
 import "reactflow/dist/style.css";
 

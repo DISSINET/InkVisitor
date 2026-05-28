@@ -1,7 +1,7 @@
 import React from "react";
 
-import { IResponseQueryEntity } from "@shared/types";
-import { Explore } from "@shared/types/query";
+import { IResponseQueryEntity } from "@inkvisitor/shared/types";
+import { Explore } from "@inkvisitor/shared/types/query";
 import { ExplorerTable } from "./ExplorerTable/ExplorerTable";
 import { ExploreAction } from "./state";
 
@@ -15,6 +15,7 @@ interface ExplorerBoxProps {
   onExport: (rowsSelected: number[], selectedColumnIds?: string[]) => void;
   stableSignature?: string;
   getCachedEntity?: (rowIndex: number) => IResponseQueryEntity | undefined;
+  onOpenEntityInDetail?: (entityId: string) => void;
 }
 export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   state,
@@ -26,6 +27,7 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   onExport,
   stableSignature,
   getCachedEntity,
+  onOpenEntityInDetail,
 }) => {
   return (
     <ExplorerTable
@@ -38,6 +40,7 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
       onExport={onExport}
       stableSignature={stableSignature}
       getCachedEntity={getCachedEntity}
+      onOpenEntityInDetail={onOpenEntityInDetail}
     />
   );
 };

@@ -2,21 +2,17 @@ import { useQuery } from "@tanstack/react-query";
 import React, { useMemo } from "react";
 import { FaPlus, FaTrash } from "react-icons/fa";
 
-import { entitiesDict } from "@shared/dictionaries";
-import { classesAll } from "@shared/dictionaries/entity";
-import { EntityEnums } from "@shared/enums";
-import { Query } from "@shared/types/query";
+import { entitiesDict } from "@inkvisitor/shared/dictionaries";
+import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { Query } from "@inkvisitor/shared/types/query";
 import api from "api";
 import { Button } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 
 import { INodeItem, QueryValidityProblem } from "../../types";
 import { QueryAction, QueryActionType } from "../state";
-import {
-  StyledGraphNode,
-  StyledNodeContainer,
-  StyledNodeTypeSelect,
-} from "./QueryStyles";
+import { StyledGraphNode, StyledNodeContainer, StyledNodeTypeSelect } from "./QueryStyles";
 import { useTheme } from "styled-components";
 
 interface QueryGridNodeProps {
@@ -25,6 +21,7 @@ interface QueryGridNodeProps {
   dispatch: React.Dispatch<QueryAction>;
   problems: QueryValidityProblem[];
   isRoot: boolean;
+  onOpenEntityInDetail?: (entityId: string) => void;
 }
 
 export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
@@ -33,6 +30,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
   dispatch,
   problems,
   isRoot = false,
+  onOpenEntityInDetail,
 }) => {
   const theme = useTheme();
   const isValid = problems.length === 0;
@@ -49,16 +47,15 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
 
   const { entityId: paramEntityId, entityClass: paramEntityClass } = nodeParams;
 
+  const entityId = node.params.entityId;
+
   const { data: dataEntity } = useQuery({
-    queryKey: ["entity", node.params.entityId ?? ""],
+    queryKey: ["entity", "query-grid-node", entityId],
     queryFn: async () => {
-      if (node.params.entityId) {
-        const res = await api.entityGet(node.params.entityId);
-        return res.data;
-      } else {
-        return undefined;
-      }
+      const res = await api.entityGet(entityId!);
+      return res.data;
     },
+    enabled: !!entityId && api.isLoggedIn(),
   });
 
   const nodeBorder = useMemo(() => {
@@ -129,15 +126,12 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
             options={
               isRoot || paramEntityClass.allowedClasses.length === 0
                 ? entitiesDict
-                : entitiesDict.filter((ecl) =>
-                    paramEntityClass.allowedClasses.includes(ecl.value)
-                  )
+                : entitiesDict.filter((ecl) => paramEntityClass.allowedClasses.includes(ecl.value))
             }
             width={
               node.params.entityClasses && node.params.entityClasses.length > 4
                 ? 270
-                : node.params.entityClasses &&
-                  node.params.entityClasses.length > 0
+                : node.params.entityClasses && node.params.entityClasses.length > 0
                 ? node.params.entityClasses.length * 37 + 60
                 : 110
             }
@@ -152,6 +146,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
               (dataEntity !== undefined ? (
                 <EntityTag
                   entity={dataEntity}
+                  onDoubleClick={() => onOpenEntityInDetail?.(dataEntity.id)}
                   unlinkButton={{
                     onClick: () => {
                       dispatch({

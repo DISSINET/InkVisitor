@@ -1,7 +1,7 @@
 import { config, useSpring } from "@react-spring/web";
-import { EntityEnums, UserEnums } from "@shared/enums";
-import { ITerritory, IUser } from "@shared/types";
-import { IParentTerritory } from "@shared/types/territory";
+import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
+import { ITerritory, IUser } from "@inkvisitor/shared/types";
+import { IParentTerritory } from "@inkvisitor/shared/types/territory";
 import {
   UseMutationResult,
   useMutation,

@@ -96,71 +96,33 @@ Package containing typescript definitions, types and enums, that should be avail
 
 Install `pnpm` version `>=10.1.0`. You can switch the `pnpm` versions by running `corepack prepare pnpm@<version> --activate`.
 Go to all three folders in `packages` (`client`, `server`, `database`) and run `pnpm i` in each of them.
-Before continuing, please ensure that you have database instance setup & running (see deploying with docker below).
-See section [Deploy by packages](#deploy-by-packages) below for running each component locally.
+Before continuing, please ensure that you have a database instance set up and running — see the [deployment tutorial](./docs/deployment-tutorial.md) for the database setup and how to run each component locally.
 
 ## Deploy
 
-To deploy the Inkvisitor instance, you can use Docker (or Podman), host it on Kubernetes cluster, or build and deploy the packages separately.
+Full deployment instructions — including environment variables, SSL/reverse-proxy setup, firewall and update workflows — live in **[docs/deployment-tutorial.md](./docs/deployment-tutorial.md)**.
 
-### Deploy with Docker
+There are three supported paths:
 
-To use docker to deploy the InkVisitor application:
-[Dockerfile](./Dockerfile) will build required apps in packages directory: `annotator`, `client` and `server`.
+- **Docker with the published image** — fastest. Pulls [`dissinet/inkvisitor`](https://hub.docker.com/r/dissinet/inkvisitor) from Docker Hub; no build step. Recommended unless you need custom client-side configuration.
+- **Docker with a locally built image** — required when you need custom client `.env` values (e.g. `APIURL`, `ROOT_URL`), since those are baked in at build time.
+- **By packages (no Docker)** — build and run client, server and database separately.
 
-1.  Install [docker](https://docs.docker.com/get-docker/), which includes [Docker Compose](https://docs.docker.com/compose/install/).
-2.  For client app - prepare `.env.<ENV>` file in [client/env](./packages/client/env) directory, that should identify the appropriate environment. See build argument `ENV` in [Makefile](./Makefile) or [docker compose](./docker-compose.yml) as it maps to build command in client package (`pnpm build:${ENV}`). See the client's [README.md](https://github.com/DISSINET/InkVisitor/blob/dev/packages/client/README.md) and [example.env](https://github.com/DISSINET/InkVisitor/blob/dev/packages/client/env/example.env) files to ensure you have included all the necessary configuration information.
-    - important: `latest` tag uses base .env (without suffix). So if you are building `dissinet/inkvisitor:latest`, provide `client/env/.env` file.
-3.  For server - prepare `.env` file for servers listed under `env_file` sections in `docker-compose.yml` file. Check the server's [README.md](https://github.com/DISSINET/InkVisitor/blob/dev/packages/server/README.md) and [example.env](https://github.com/DISSINET/InkVisitor/blob/dev/packages/server/env/example.env) files for more information. This environment file will be used as run argument during docker container startup - not during build time.
-4.  Run the database - first, prepare `.env` file according to the documentation. Then, run either as a standalone service or containerized using `docker compose up -d database`. Now, you have to create a database `inkvisitor` - one option is to navigate to `http://localhost:8080/#dataexplorer` and run query `r.dbCreate("inkvisitor")`.
-5.  The database will be now empty, so to set up the database structure and import some testing data, go to `packages/database` and run `pnpm start` (`pnpm i` might be needed as well). Following the information in the prompt - first, choose database `inkvisitor` by pressing the `L` key, then pick a dataset to import using the `D` key. We recommend to use the `empty` dataset for the first run. Then, press `X` to process the import. Navigate to `http://localhost:8080/#dataexplorer` and enter query `r.db('inkvisitor').table('entities')` to check if the import went fine.
-6.  Build app image by running `docker compose build inkvisitor` or `make build-inkvisitor` (both are using `ENV=production` build arg).
-7.  Run the containerized application with the command `docker compose up inkvisitor`.
+Quick start with the published Docker image (defaults in [docker-compose.yml](./docker-compose.yml) are ready to use — set `SECRET` in a top-level `.env` before exposing the instance):
 
-### Kubernetes
+```bash
+# 1. Start the database
+docker compose up -d database
 
-See [kube](./kube) directory for examples. Please, check your cluster's capabilities as the setup could differ.
+# 2. Import the schema (host-side CLI: decline SSH, press D to pick dataset, X to import)
+cp packages/database/env/example.env packages/database/env/.env
+cd packages/database && pnpm install && pnpm start && cd -
 
-### Deploy by packages
+# 3. Run the application (pulls the published image automatically)
+docker compose up -d inkvisitor
+```
 
-The InkVisitor codebase consists of three interconnected packages (parts) - the client application (along with annotator package), the server, and the database (set of tools/import datasets). You can deploy those packages individually if you do not want to use Docker. In each step, make sure to have the appropriate `.env.<env>` file accessible - see the `README.md` file in respective packages for more information.
-
-#### 1\. Database
-
-1. Follow tutorials on the [official page](https://rethinkdb.com/docs/install/) to install RethinkDB on your machine, or simply use `docker compose up -d database`.
-2. Use the import script to create the database structure and (optional) import some testing data by running `pnpm start` and following the information in the prompt. Use at least `empty` dataset - for bare minimum.
-
-#### 2\. Client application
-
-The client application runs on static files - html/css/js + additional assets. These files need to be moved to your HTTP server by:
-
-1.  Build the frontend app by `pnpm run build-<env>` to create/update the `dist` folder. `<env>` dictates which `.env.<env>` file will be used.
-2.  Copy contents of `dist` folder to the directory used by your HTTP server.
-
-#### 3\. Server
-
-The server is also built in Javascript, using mainly the Node + Express libraries. You need to first build the application, move the build to your server and run it from there.
-
-1.  Run `pnpm run build` to transpile the code.
-2.  Move the `dist` folder to your server that supports the Node.js environment.
-3.  Do `ENV_FILE=<env> yarn run start:dist` to run the built application with a loaded `.env.<env>` file.
-
-For quicker use, use can also run the server directly without building using `pnpm start` (this uses `nodemon` tool and `.env.development` environment file).
-
-### SSL
-
-The app does not support ssl internally, it should be handled in upper layer, ie. [nginx](https://docs.nginx.com/nginx/admin-guide/security-controls/securing-http-traffic-upstream/). Please adjust `APIURL` variable in client's `.env` file to use `https` instead of `http`.
-
-### Firewall
-
-Make sure the ports required by each application are not blocked. Required ports are listed in [docker-compose.yml](https://github.com/DISSINET/InkVisitor/blob/dev/docker-compose.yml). Examples:
-
-1.  [ufw](https://help.ubuntu.com/community/UFW): `ufw allow <port>`
-2.  [firewalld](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/security_guide/sec-using_firewalls): `firewall-cmd --zone=public --permanent --add-port=<port>/tcp`
-
-Setup for additional system specific features (reverse proxies etc) are beyond the scope of this readme.
-You should be able to allow at least the port for server api (default is 3000) and port for serving client files (if using docker image, it would be served by server api).
-You don't need to allow public access to database, however rethinkdb serves monitoring tool on port 8080.
+For Kubernetes manifests, see [kube/](./kube). The setup will likely need to be adapted to your cluster.
 
 ## ACL - access control list
 

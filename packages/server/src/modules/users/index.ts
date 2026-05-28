@@ -1,5 +1,6 @@
 import { Router } from "express";
-import { IUser } from "@shared/types/user";
+import { UserEnums } from "@inkvisitor/shared/enums";
+import { IUser } from "@inkvisitor/shared/types/user";
 import User from "@models/user/user";
 import {
   BadCredentialsError,
@@ -15,7 +16,7 @@ import {
   UserDoesNotExits,
   UserNotActiveError,
   UserNotUnique,
-} from "@shared/types/errors";
+} from "@inkvisitor/shared/types/errors";
 import { checkPassword, generateAccessToken, hashPassword } from "@common/auth";
 import { asyncRouteHandler } from "..";
 import {
@@ -25,7 +26,7 @@ import {
   IRequestPasswordReset,
   IRequestPasswordResetData,
   IRequestActivationData,
-} from "@shared/types";
+} from "@inkvisitor/shared/types";
 import mailer, {
   accountCreatedTemplate,
   passwordAdminResetTemplate,
@@ -625,6 +626,22 @@ export default Router()
           data.password = hashPassword(data.password);
         }
 
+        if (
+          data.verified !== undefined &&
+          data.verified !== existingUser.verified
+        ) {
+          const editor = req.getUserOrFail();
+          const canSetVerified = editor.hasRole([
+            UserEnums.Role.Owner,
+            UserEnums.Role.Admin,
+          ]);
+          if (!canSetVerified) {
+            delete data.verified;
+          } else if (data.verified === true && !existingUser.verified) {
+            data.hash = null;
+          }
+        }
+
         await req.db.lock();
 
         if (data.email) {
@@ -851,16 +868,15 @@ export default Router()
 
         console.log(`Password reset for ${user.email}`);
 
+        let emailSent = true;
         try {
           await mailer.sendTemplate(
             user.email,
             passwordAdminResetTemplate(user.name, rawPassword)
           );
         } catch (e) {
-          throw new EmailError(
-            "please check the logs",
-            (e as Error).toString()
-          );
+          console.error("Password reset email failed:", e);
+          emailSent = false;
         }
 
         return {

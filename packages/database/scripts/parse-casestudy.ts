@@ -2,8 +2,8 @@
  * This node script takes id of one Territory, a case study name, and source of data and prepares a dataset specifically taking the given T structure, usually for a purpose of a case study
  */
 
-import { EntityEnums, RelationEnums } from "@shared/enums";
-import { IAction, IEntity, IProp, IStatement, Relation } from "@shared/types";
+import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
+import { IAction, IEntity, IProp, IStatement, Relation } from "@inkvisitor/shared/types";
 import dotevn from "dotenv";
 import * as fs from "fs";
 import { Connection, RDatum, r as rethink } from "rethinkdb-ts";

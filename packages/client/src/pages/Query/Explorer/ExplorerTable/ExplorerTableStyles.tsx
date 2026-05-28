@@ -4,6 +4,7 @@ interface StyledTableWrapper {
   // $height: number;
 }
 export const StyledTableWrapper = styled.div<StyledTableWrapper>`
+  position: relative;
   margin: 0.5rem 1rem 0 1rem;
   overflow: hidden;
 `;
@@ -83,17 +84,6 @@ export const StyledNewColumnValue = styled.div`
   display: grid;
   align-items: center;
 `;
-export const StyledUserTag = styled.div`
-  background-color: ${({ theme }) => theme.color["tagColor"]};
-  color: ${({ theme }) => theme.color["tagBackground"]};
-  display: flex;
-  align-items: center;
-  height: 2.6rem;
-  font-size: ${({ theme }) => theme.fontSize["sm"]};
-  padding: ${({ theme }) => "0rem " + theme.space[2]};
-  gap: ${({ theme }) => theme.space[3]};
-  border-radius: ${({ theme }) => theme.borderRadius["sm"]};
-`;
 
 export const StyledSpaceBetween = styled.div`
   display: flex;
@@ -101,6 +91,7 @@ export const StyledSpaceBetween = styled.div`
   justify-content: space-between;
 `;
 export const StyledTableControl = styled(StyledSpaceBetween)`
+  position: relative;
   padding: ${({ theme }) => theme.space[2]};
   padding-top: 0.2rem;
   margin-right: 2rem;
@@ -148,4 +139,42 @@ export const StyledCheckboxWrapper = styled.div`
 export const StyledCounter = styled.div`
   white-space: nowrap;
   color: ${({ theme }) => theme.color["black"]};
+`;
+
+export const StyledLabelFilter = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  width: 100%;
+`;
+
+export const StyledLabelFilterCheckboxWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  margin-left: 0.2rem;
+  gap: 0.2rem;
+`;
+
+export const StyledExploreFilters = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
+  flex: 1;
+  min-width: 10rem;
+  max-width: 60%;
+  margin: 0 3rem;
+`;
+
+export const StyledIdsFilter = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+`;
+
+export const StyledIdsFilterHint = styled.span`
+  flex-shrink: 0;
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  color: ${({ theme }) => theme.color["gray"][600]};
+  white-space: nowrap;
 `;

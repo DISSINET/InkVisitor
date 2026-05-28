@@ -1,15 +1,21 @@
 import { domainName, hostUrl } from "@common/functions";
-import sendgrid from "@sendgrid/mail";
+import fs from "fs";
+import nodemailer from "nodemailer";
+import path from "path";
+import {
+  accountCreatedEmailTemplate,
+  passwordAdminResetEmailTemplate,
+  passwordResetRequestEmailTemplate,
+  testEmailTemplate,
+} from "./emailTemplates";
 
-// ids for sendgrid templates
 export enum TplIds {
-  AccountCreated = "d-5b941a639a544c848f11240dfc3fc565",
-  PasswordAdminReset = "d-a67dbe3a40234b6b8dc929f559553fe3",
-  PasswordResetRequest = "d-9a386304d7eb45b6beba7fe1becba08d",
-  Test = "d-382f8760c7be4ec4aba6bd8caf252eed",
+  AccountCreated = "account-created",
+  PasswordAdminReset = "password-admin-reset",
+  PasswordResetRequest = "password-reset-request",
+  Test = "test",
 }
 
-// codenames for email subjects
 export enum EmailSubject {
   Test = "Test mail",
   PasswordResetRequest = "Password reset request",
@@ -23,12 +29,39 @@ interface DynamicTplRequest {
   subject: EmailSubject;
 }
 
-/**
- * Template which should be sent to the new user email after registration
- * @param email
- * @param link
- * @returns
- */
+const INLINE_LOGO_CID = "inkvisitor-logo";
+
+function getInlineLogoPath(): string | undefined {
+  const candidates = [
+    path.resolve(process.cwd(), "../client/public/assets/logos/inkvisitor.svg"),
+    path.resolve(process.cwd(), "packages/client/public/assets/logos/inkvisitor.svg"),
+  ];
+
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) {
+      return candidate;
+    }
+  }
+
+  return undefined;
+}
+
+function buildHtml(tpl: DynamicTplRequest): string {
+  const d = tpl.data;
+  switch (tpl.id) {
+    case TplIds.AccountCreated:
+      return accountCreatedEmailTemplate(d.email, d.domain, d.link);
+    case TplIds.PasswordResetRequest:
+      return passwordResetRequestEmailTemplate(d.email, d.domain, d.link);
+    case TplIds.PasswordAdminReset:
+      return passwordAdminResetEmailTemplate(d.username, d.rawPassword, d.domain);
+    case TplIds.Test:
+      return testEmailTemplate(d.domain);
+    default:
+      return "";
+  }
+}
+
 export function accountCreatedTemplate(
   email: string,
   link: string
@@ -44,12 +77,6 @@ export function accountCreatedTemplate(
   };
 }
 
-/**
- * Template which should be sent to the email which requested new password
- * @param email
- * @param link
- * @returns
- */
 export function passwordResetRequestTemplate(
   email: string,
   link: string
@@ -65,12 +92,6 @@ export function passwordResetRequestTemplate(
   };
 }
 
-/**
- * Template which should be sent to the user for which an admin reset their password
- * @param username
- * @param rawPassword
- * @returns
- */
 export function passwordAdminResetTemplate(
   username: string,
   rawPassword: string
@@ -100,13 +121,23 @@ class Mailer {
   lastEmailSubject?: string;
   lastEmailData?: any;
   devMode = true;
+  private transporter?: nodemailer.Transporter;
 
   constructor() {
-    if (process.env.SENDGRID_API_KEY && process.env.MAILER_SENDER) {
+    const user = process.env.SMTP_USER;
+    const pass = process.env.SMTP_SECRET;
+    const from = process.env.MAILER_SENDER;
+    const host = process.env.SMTP_HOST;
+    if (user && pass && from && host) {
       this.devMode = false;
+      const port = parseInt(process.env.SMTP_PORT || "587", 10);
+      this.transporter = nodemailer.createTransport({
+        host,
+        port,
+        secure: port === 465,
+        auth: { user, pass },
+      });
     }
-
-    sendgrid.setApiKey(process.env.SENDGRID_API_KEY || "");
 
     console.log(`[Mailer]: prepared${this.devMode ? " (dev mode)" : ""}`);
   }
@@ -121,14 +152,31 @@ class Mailer {
       return;
     }
 
+    if (!this.transporter) {
+      throw new Error("Mailer transporter not configured");
+    }
+
     try {
-      sendgrid.send({
-        to: recipient,
+      const logoPath = getInlineLogoPath();
+      const wat = await this.transporter.sendMail({
         from: process.env.MAILER_SENDER || "",
+        to: recipient,
         subject: tpl.subject,
-        templateId: tpl.id,
-        dynamicTemplateData: tpl.data,
+        html: buildHtml(tpl),
+        attachments: logoPath
+          ? [
+              {
+                filename: "inkvisitor.svg",
+                path: logoPath,
+                cid: INLINE_LOGO_CID,
+              },
+            ]
+          : [],
       });
+
+      if (!logoPath) {
+        console.warn("[Mailer] Inline logo not found, sending without logo");
+      }
     } catch (e) {
       throw new Error(`Email error for template ${tpl.subject}: ${e}`);
     }

@@ -1,7 +1,7 @@
 import "ts-jest";
 import Superclass from "./superclass";
 import Path from "./path";
-import { RelationEnums } from "@shared/enums";
+import { RelationEnums } from "@inkvisitor/shared/enums";
 import { IRelationModel } from "./relation";
 import Synonym from "./synonym";
 

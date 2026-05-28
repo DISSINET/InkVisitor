@@ -1,6 +1,6 @@
 import * as bcrypt from "bcryptjs";
-import { sign as signJwt } from "jsonwebtoken";
-import { IUser } from "@shared/types/user";
+import { sign as signJwt, verify as verifyJwtRaw, JwtPayload } from "jsonwebtoken";
+import { IUser } from "@inkvisitor/shared/types/user";
 import { expressjwt, Request as JWTRequest } from "express-jwt";
 import { NextFunction, Request } from "express";
 import { v1 as uuid } from "uuid";
@@ -71,23 +71,42 @@ if (secret) {
   console.log(`SECRET set to ${secret}`);
 }
 
-/**
- * Function thats creates signed jwt token for user
- * @param user
- * @param expDays
- * @returns
- */
-export function generateAccessToken(user: IUser, expDays = 30): string {
+function signToken(user: IUser, expSeconds: number): string {
   return signJwt(
-    {
-      user,
-      exp: Math.floor(Date.now() / 1000) + 86400 * expDays,
-    },
+    { user, exp: Math.floor(Date.now() / 1000) + expSeconds },
     secret,
-    {
-      algorithm: defaultJwtAlgo,
-    }
+    { algorithm: defaultJwtAlgo }
   );
+}
+
+/**
+ * Standard session JWT used for Bearer-header auth.
+ */
+export const generateAccessToken = (user: IUser, expDays = 30): string =>
+  signToken(user, 86400 * expDays);
+
+/**
+ * Short-lived JWT intended for one-shot URL-embedded auth
+ * (e.g. file download links where the browser cannot send Bearer headers).
+ */
+export const generateShortLivedToken = (user: IUser, expSeconds: number): string =>
+  signToken(user, expSeconds);
+
+/**
+ * Verifies a JWT and returns the embedded user payload, or null on any failure.
+ * Used by non-Express auth surfaces (e.g. socket.io handshake) so the JWT
+ * secret stays scoped to this module.
+ */
+export function verifyJwtToken(token: string): IUser | null {
+  if (!token) return null;
+  try {
+    const decoded = verifyJwtRaw(token, secret, {
+      algorithms: [defaultJwtAlgo],
+    }) as JwtPayload & { user?: IUser };
+    return decoded?.user ?? null;
+  } catch {
+    return null;
+  }
 }
 
 /**

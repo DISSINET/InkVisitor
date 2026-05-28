@@ -1,7 +1,7 @@
 import { Connection } from "rethinkdb-ts";
 import { IJob } from ".";
 import * as fs from "fs";
-import { IEntity } from "@shared/types";
+import { IEntity } from "@inkvisitor/shared/types";
 
 const iterateDataset: IJob = async (db: Connection): Promise<void> => {
   const path = "./datasets/production/entities.json";

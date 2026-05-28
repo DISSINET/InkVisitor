@@ -1,5 +1,5 @@
-import { EntityEnums } from "@shared/enums";
-import { IEntity, IProp } from "@shared/types";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { IEntity, IProp } from "@inkvisitor/shared/types";
 import { AttributeIcon, Button, ButtonGroup } from "components";
 import React, { useEffect, useRef, useState } from "react";
 import {

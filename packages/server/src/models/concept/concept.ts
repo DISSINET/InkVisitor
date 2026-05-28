@@ -1,8 +1,8 @@
 import { IModel } from "@models/common";
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import Entity from "@models/entity/entity";
-import { IConcept } from "@shared/types";
-import { IConceptData } from "@shared/types/concept";
+import { IConcept } from "@inkvisitor/shared/types";
+import { IConceptData } from "@inkvisitor/shared/types/concept";
 
 class ConceptData implements IConceptData, IModel {
   pos: EntityEnums.ConceptPartOfSpeech = EntityEnums.ConceptPartOfSpeech.Empty;

@@ -1,4 +1,4 @@
-import { Aggregation, EventType, TimeUnit } from "@shared/types/stats";
+import { Aggregation, EventType, TimeUnit } from "@inkvisitor/shared/types/stats";
 
 export interface StatsStore {
   dateFrom: string;
@@ -7,7 +7,6 @@ export interface StatsStore {
   timeUnit: TimeUnit;
   aggregate: Aggregation;
   eventType: EventType[];
-  useMaterialized: boolean;
   showAggregateOptions: boolean;
   showDateFromRangePicker: boolean;
   showDateToRangePicker: boolean;
@@ -19,7 +18,6 @@ export type StatsStoreAction =
   | { type: "timeUnitUpdate"; payload: TimeUnit }
   | { type: "aggregateUpdate"; payload: Aggregation }
   | { type: "eventTypeUpdate"; payload: EventType }
-  | { type: "useMaterializedUpdate"; payload: boolean }
   | { type: "showAggregateOptionsUpdate"; payload: boolean }
   | { type: "showDateFromRangePickerUpdate"; payload: boolean }
   | { type: "showDateToRangePickerUpdate"; payload: boolean };
@@ -29,17 +27,19 @@ export const initialState: StatsStore = {
   dateTo: new Date().toISOString(),
   timeUnit: TimeUnit.YEAR,
   aggregate: Aggregation.USER,
-  eventType: [EventType.EDIT, EventType.DELETE, EventType.CREATE],
-  useMaterialized: false, // Default to materialized for better performance
+  eventType: [EventType.TEXT_EDIT, EventType.ANCHOR_ADD],
   showAggregateOptions: false, // Hidden by default
   showDateFromRangePicker: false, // Hidden by default, show "Since Forever"
   showDateToRangePicker: false, // Hidden by default, show "Until Now"
 };
 
-export const statsReducer = (
-  state: StatsStore,
-  action: StatsStoreAction
-): StatsStore => {
+/** Fresh state on each mount so dateTo is current without a post-mount dispatch. */
+export const createEntitiesTabState = (): StatsStore => ({
+  ...initialState,
+  dateTo: new Date().toISOString(),
+});
+
+export const statsReducer = (state: StatsStore, action: StatsStoreAction): StatsStore => {
   switch (action.type) {
     case "dateFromUpdate":
       return { ...state, dateFrom: action.payload };
@@ -58,8 +58,6 @@ export const statsReducer = (
         ? state.eventType.filter((type) => type !== eventTypeToHandle)
         : [...state.eventType, eventTypeToHandle];
       return { ...state, eventType: newEventTypes };
-    case "useMaterializedUpdate":
-      return { ...state, useMaterialized: action.payload };
     case "showAggregateOptionsUpdate":
       return { ...state, showAggregateOptions: action.payload };
     case "showDateFromRangePickerUpdate":

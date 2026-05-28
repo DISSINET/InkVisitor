@@ -1,14 +1,14 @@
 import { determineOrder, IDbModel } from "@models/common";
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
-import { IEntity, Relation as RelationTypes } from "@shared/types";
-import { DbEnums, EntityEnums, RelationEnums, UserEnums } from "@shared/enums";
-import { EnumValidators } from "@shared/enums";
+import { IEntity, Relation as RelationTypes } from "@inkvisitor/shared/types";
+import { DbEnums, EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
+import { EnumValidators } from "@inkvisitor/shared/enums";
 import {
   InternalServerError,
   ModelNotValidError,
   RelationAsymetricalPathExist,
   RelationPathExist,
-} from "@shared/types/errors";
+} from "@inkvisitor/shared/types/errors";
 import User from "@models/user/user";
 import { IRequest } from "../../custom_typings/request";
 import { nonenumerable } from "@common/decorators";

@@ -4,7 +4,7 @@ import { BsArrowsCollapse, BsArrowsExpand, BsClipboard } from "react-icons/bs";
 import ReactJson from "react-json-view";
 import { StyledJSONExplorerWrapper } from "./JSONExplorerStyles";
 import { useAppSelector } from "redux/hooks";
-import { InterfaceEnums } from "@shared/enums";
+import { InterfaceEnums } from "@inkvisitor/shared/enums";
 import { toast } from "react-toastify";
 
 interface IJSONDisplay {

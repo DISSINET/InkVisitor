@@ -4,20 +4,21 @@ import Entity from "@models/entity/entity";
 import User from "@models/user/user";
 import { findEntityById } from "@service/shorthands";
 import treeCache from "@service/treeCache";
-import { EntityEnums, UserEnums } from "@shared/enums";
-import { IParentTerritory, ITerritory, ITerritoryData } from "@shared/types";
+import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
+import { IParentTerritory, ITerritory, ITerritoryData } from "@inkvisitor/shared/types";
+import { ITerritoryModel } from "./territory-model";
 import {
   InternalServerError,
   InvalidDeleteError,
   ModelNotValidError,
   TerritoryDoesNotExits,
-} from "@shared/types/errors";
-import { ROOT_TERRITORY_ID } from "@shared/types/statement";
+} from "@inkvisitor/shared/types/errors";
+import { ROOT_TERRITORY_ID } from "@inkvisitor/shared/types/statement";
 import {
   EProtocolTieType,
   ITerritoryProtocol,
   ITerritoryValidation,
-} from "@shared/types/territory";
+} from "@inkvisitor/shared/types/territory";
 import { Connection, RDatum, WriteResult, r as rethink } from "rethinkdb-ts";
 
 export class TerritoryProtocol implements ITerritoryProtocol, IModel {
@@ -134,7 +135,7 @@ export class TerritoryValidation implements ITerritoryValidation {
   }
 }
 
-class Territory extends Entity implements ITerritory {
+class Territory extends Entity implements ITerritoryModel {
   class: EntityEnums.Class.Territory;
   data: TerritoryData;
 

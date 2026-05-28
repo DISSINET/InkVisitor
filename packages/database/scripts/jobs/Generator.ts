@@ -1,4 +1,4 @@
-import { IEntity, Relation as RelationTypes } from "@shared/types";
+import { IEntity, Relation as RelationTypes } from "@inkvisitor/shared/types";
 import { question } from "scripts/import/prompts";
 import EntitiesGenerator from "./generate-datasets/entities";
 import RelationsGenerator from "./generate-datasets/relations";

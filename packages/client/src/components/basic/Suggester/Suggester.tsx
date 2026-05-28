@@ -4,9 +4,9 @@ import {
   flip,
   useFloating,
 } from "@floating-ui/react";
-import { dropdownWildCard } from "@shared/dictionaries/entity";
-import { EntityEnums } from "@shared/enums";
-import { IEntity, IUserOptions } from "@shared/types";
+import { dropdownWildCard } from "@inkvisitor/shared/dictionaries/entity";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { IEntity, IUserOptions } from "@inkvisitor/shared/types";
 import { MIN_LABEL_LENGTH_MESSAGE, scrollOverscanCount } from "Theme/constants";
 import {
   Button,
@@ -88,6 +88,7 @@ interface Suggester {
   // Optional: allow parent to inject a dropped item (e.g., from a minified wrapper)
   externalDroppedItem?: EntityDragItem | null;
   onConsumeExternalDrop?: () => void;
+  onEmptyAddButtonClick?: () => void;
 }
 
 export const Suggester: React.FC<Suggester> = ({
@@ -130,6 +131,7 @@ export const Suggester: React.FC<Suggester> = ({
   isHidden = false,
   externalDroppedItem,
   onConsumeExternalDrop,
+  onEmptyAddButtonClick,
 }) => {
   const [selected, setSelected] = useState(-1);
   const [isFocused, setIsFocused] = useState(false);
@@ -278,7 +280,11 @@ export const Suggester: React.FC<Suggester> = ({
         });
       }
     } else {
-      toast.info("Fill at least 1 character");
+      if (onEmptyAddButtonClick) {
+        onEmptyAddButtonClick();
+      } else {
+        toast.info("Fill at least 1 character");
+      }
     }
     setSelected(-1);
   };

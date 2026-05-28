@@ -1,4 +1,4 @@
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import theme from "./theme";
 
 const darkTheme = {
@@ -49,6 +49,8 @@ const darkTheme = {
     greyer: "#b5b5b5",
     text: "#c7c7c7",
     primary: "#f6f6ff",
+    primaryRGBA: "rgba(246,246,255,1)",
+    primaryRGBA0: "rgba(246,246,255,0)",
     success: "#9eaad7",
     warning: "#e5d088",
     danger: "#ee8fa4",
@@ -56,6 +58,7 @@ const darkTheme = {
     plain: "#b5b5b5", // inverted gray 300
     primaryTransparent: "rgba(9,16,52,0.2)",
     modalBg: "rgba(9,16,52,0.5)",
+    backupDownloadOverlay: "rgba(45, 55, 72, 0.8)",
 
     tagBackground: "#f6f6ff",
     tagColor: "#060c26",
@@ -114,8 +117,8 @@ const darkTheme = {
       ident: "#EAE3A3",
     },
 
-    // tag status
-    tagStatus: {
+    tagBorderColor: {
+      // EntityTag status
       [EntityEnums.Status.Pending]: "#5f6c7b", // pending
       [EntityEnums.Status.Approved]: "#ddd", // approved
       [EntityEnums.Status.Discouraged]: "#7F1D1D", // discouraged
@@ -124,15 +127,13 @@ const darkTheme = {
     },
   },
   background: {
-    stripes:
-      "repeating-linear-gradient( -45deg, #4a5568, #4a5568, 1px, #060c26 1px, #060c26 12px)",
+    stripes: "repeating-linear-gradient( -45deg, #4a5568, #4a5568, 1px, #060c26 1px, #060c26 12px)",
   },
   boxShadow: {
     normal: "1px 1px 3px rgba(255, 255, 255, 0.4)",
     subtle: "0 1px 3px hsla(0,0%,100%,0.12), 0 1px 2px hsla(0,0%,100%,0.24)",
     high: "0 15px 25px hsla(0,0%,100%,0.15), 0 5px 10px hsla(0,0%,100%,0.05)",
-    inset:
-      "0 2px 0px hsl(40, 7%, 17%, 0.5), inset 0 2px 2px hsla(0, 0%, 100%, 0.1)",
+    inset: "0 2px 0px hsl(40, 7%, 17%, 0.5), inset 0 2px 2px hsla(0, 0%, 100%, 0.1)",
   },
 };
 

@@ -1,10 +1,10 @@
-import { UserEnums } from "@shared/enums";
+import { UserEnums } from "@inkvisitor/shared/enums";
 import {
   IEntity,
   IResponseStatement,
   IResponseTerritory,
   ITerritory,
-} from "@shared/types";
+} from "@inkvisitor/shared/types";
 import Territory from "./territory";
 import Statement from "@models/statement/statement";
 import { ResponseStatement } from "@models/statement/response";

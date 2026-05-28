@@ -1,4 +1,4 @@
-import { Explore } from "@shared/types/query";
+import { Explore } from "@inkvisitor/shared/types/query";
 import {
   Button,
   ButtonGroup,

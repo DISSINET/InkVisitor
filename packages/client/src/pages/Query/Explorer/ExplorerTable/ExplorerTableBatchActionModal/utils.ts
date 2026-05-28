@@ -1,5 +1,5 @@
-import { EntityEnums, RelationEnums } from "@shared/enums";
-import { Relation } from "@shared/types";
+import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
+import { Relation } from "@inkvisitor/shared/types";
 
 export const getRelationLabel = (type: RelationEnums.Type): string => {
   return Relation.RelationRules[type]?.label || type;

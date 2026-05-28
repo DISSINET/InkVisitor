@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { SearchEnums } from "@shared/enums";
+import { SearchEnums } from "@inkvisitor/shared/enums";
 
 const initialState: SearchEnums.AdvancedOption[] = [];
 

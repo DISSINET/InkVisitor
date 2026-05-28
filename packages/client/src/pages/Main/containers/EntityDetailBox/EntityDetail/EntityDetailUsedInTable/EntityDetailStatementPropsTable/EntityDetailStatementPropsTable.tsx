@@ -1,6 +1,6 @@
-import { EntityEnums } from "@shared/enums";
-import { IEntity, IStatement } from "@shared/types";
-import { IResponseUsedInStatementProps } from "@shared/types/response-detail";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { IEntity, IStatement } from "@inkvisitor/shared/types";
+import { IResponseUsedInStatementProps } from "@inkvisitor/shared/types/response-detail";
 import { Button } from "components";
 import { EntityTag } from "components/advanced";
 import { useSearchParams, useTheme } from "hooks";
@@ -40,6 +40,7 @@ const RowRenderer: React.FC<RowRendererProps> = ({ index, style, data }) => {
   const { useCases, entities, handleEditClick, separatorHeight } = data;
   const useCase = useCases[index];
 
+  // Only in case of corrupted data
   if (!useCase) return null;
 
   const statementEntity = entities[useCase.statementId];
@@ -63,15 +64,10 @@ const RowRenderer: React.FC<RowRendererProps> = ({ index, style, data }) => {
           }}
         />
       )}
-      <TreeLineContainer
-        $isLevel1={isLevel1}
-        $marginLeft={isLevel1 ? 0 : (useCase.lvl - 1) * 1.5}
-      >
+      <TreeLineContainer $isLevel1={isLevel1} $marginLeft={isLevel1 ? 0 : (useCase.lvl - 1) * 1.5}>
         <StyledTableRow $isLevel1={isLevel1} $marginLeft={0}>
           <StyledTagWrapper>
-            {statementEntity && (
-              <EntityTag key={index} entity={statementEntity} />
-            )}
+            {statementEntity && <EntityTag key={index} entity={statementEntity} />}
           </StyledTagWrapper>
           <div>{originEntity && renderEntityTag(originEntity)}</div>
           <div>{typeEntity && renderEntityTag(typeEntity)}</div>
@@ -101,9 +97,12 @@ const RowRenderer: React.FC<RowRendererProps> = ({ index, style, data }) => {
   );
 };
 
-export const EntityDetailStatementPropsTable: React.FC<
-  EntityDetailStatementPropsTable
-> = ({ title, entities, useCases, perPage = 5 }) => {
+export const EntityDetailStatementPropsTable: React.FC<EntityDetailStatementPropsTable> = ({
+  title,
+  entities,
+  useCases,
+  perPage = 5,
+}) => {
   const separatorHeight = 3;
 
   const { setStatementId, setTerritoryId } = useSearchParams();
@@ -122,7 +121,10 @@ export const EntityDetailStatementPropsTable: React.FC<
   // Calculate item sizes with separators
   const itemSizes = useMemo(() => {
     const baseRowHeight = 30; // 3rem = 30px
-
+    // Only in case of corrupted data
+    if (useCases === undefined) {
+      return [];
+    }
     return useCases.map((useCase, index) => {
       const isLevel1 = useCase.lvl === 1;
       const isFirstItem = index === 0;
@@ -133,17 +135,21 @@ export const EntityDetailStatementPropsTable: React.FC<
   }, [useCases]);
 
   const totalHeight = useMemo(() => {
+    // Only in case of corrupted data
+    if (useCases === undefined) {
+      return 0;
+    }
     const visibleItems = Math.min(perPage, useCases.length);
     let height = 0;
     for (let i = 0; i < visibleItems; i++) {
       height += itemSizes[i] || 30;
     }
     return height;
-  }, [perPage, useCases.length, itemSizes]);
+  }, [perPage, useCases?.length, itemSizes]);
 
   return (
     <>
-      {useCases.length > 0 && (
+      {useCases && useCases.length > 0 && (
         <StyledTableWrapper>
           <StyledHeading>
             {

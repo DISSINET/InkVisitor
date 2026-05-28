@@ -4,8 +4,8 @@ import Territory, { TerritoryParent } from "@models/territory/territory";
 import entities from "@modules/entities";
 import { Db } from "@service/rethink";
 import { deleteEntities } from "@service/shorthands";
-import { EntityEnums } from "@shared/enums";
-import { IEntity, RequestSearch } from "@shared/types";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { IEntity, RequestSearch } from "@inkvisitor/shared/types";
 import Entity from "./entity";
 import { prepareEntity } from "./entity.test";
 import {

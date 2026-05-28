@@ -1,8 +1,8 @@
 import { IDbModel } from "@models/common";
 import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
-import { IDocument } from "@shared/types";
-import { EntityEnums, UserEnums } from "@shared/enums";
-import { InternalServerError, ModelNotValidError } from "@shared/types/errors";
+import { IDocument } from "@inkvisitor/shared/types";
+import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
+import { InternalServerError, ModelNotValidError } from "@inkvisitor/shared/types/errors";
 import User from "@models/user/user";
 import { AnchorsNode } from "./anchors";
 import Entity from "@models/entity/entity";

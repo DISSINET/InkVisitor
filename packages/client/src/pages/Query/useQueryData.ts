@@ -4,8 +4,8 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import { IResponseQuery, IResponseQueryEntity } from "@shared/types";
-import { Explore, Query } from "@shared/types/query";
+import { IResponseQuery, IResponseQueryEntity } from "@inkvisitor/shared/types";
+import { Explore, Query } from "@inkvisitor/shared/types/query";
 import api from "api";
 import { QueryValidity } from "./types";
 
@@ -209,6 +209,20 @@ export const useQueryData = ({
     getCachedEntity,
   };
 };
+
+/**
+ * Clears all explorer row caches and refetches active query observers.
+ * Call after entity updates from detail (or anywhere outside the explorer table)
+ * so embedded IEntity copies in column cells stay in sync.
+ */
+export function invalidateAllExplorerQueries(queryClient: QueryClient): void {
+  clearRowCache();
+  void queryClient.invalidateQueries({
+    queryKey: ["query"],
+    exact: false,
+    refetchType: "active",
+  });
+}
 
 /**
  * Clears row cache and forces the explorer query for this signature to refetch.

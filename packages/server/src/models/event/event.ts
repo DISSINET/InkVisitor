@@ -1,7 +1,7 @@
 import Entity from "@models/entity/entity";
 import { fillFlatObject, IModel } from "@models/common";
-import { EntityEnums } from "@shared/enums";
-import { IEvent, IEventData } from "@shared/types";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { IEvent, IEventData } from "@inkvisitor/shared/types";
 
 class EventData implements IEventData, IModel {
   logicalType: EntityEnums.LogicalType = EntityEnums.LogicalType.Definite;

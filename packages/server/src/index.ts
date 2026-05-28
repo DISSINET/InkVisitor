@@ -9,6 +9,7 @@ import { prepareTreeCache } from "@service/treeCache";
 import "@service/mailer";
 import { Db } from "@service/rethink";
 import { CronService } from "@service/cron";
+import { startDbStatsEmitter } from "@service/dbStats";
 
 (async () => {
   const db = new Db();
@@ -48,6 +49,8 @@ import { CronService } from "@service/cron";
       callback();
     });
   });
+
+  startDbStatsEmitter(socketio);
 
   httpServer.listen(port, () => {
     console.log(

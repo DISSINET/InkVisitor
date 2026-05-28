@@ -1,4 +1,4 @@
-import { HttpMethods } from "@shared/enums";
+import { HttpMethods } from "@inkvisitor/shared/enums";
 
 export interface IResponsePermission {
   id: string;

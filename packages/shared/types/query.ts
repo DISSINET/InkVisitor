@@ -951,7 +951,32 @@ export namespace Explore {
     mode: EViewMode;
   }
 
-  export interface IExploreColumnFilter {}
+  export enum EExploreFilterType {
+    RowLabel = "rowLabel",
+    RowIds = "rowIds",
+  }
+
+  /**
+   * Filters explorer rows when any string in the row entity's `labels` attribute
+   * matches this pattern.
+   * - Default: label search with * wildcards (same family as entity search).
+   * - useRegex: JavaScript RegExp (e.g. `^John` or `/Smith$/i`).
+   */
+  export interface IExploreRowLabelFilter {
+    type: EExploreFilterType.RowLabel;
+    label: string;
+    useRegex?: boolean;
+  }
+
+  /**
+   * Filters explorer rows to entities whose id is in this list (AND with query results).
+   */
+  export interface IExploreRowIdsFilter {
+    type: EExploreFilterType.RowIds;
+    ids: string[];
+  }
+
+  export type IExploreColumnFilter = IExploreRowLabelFilter | IExploreRowIdsFilter;
 
   export type IExploreColumnSort = {
     columnId: string;

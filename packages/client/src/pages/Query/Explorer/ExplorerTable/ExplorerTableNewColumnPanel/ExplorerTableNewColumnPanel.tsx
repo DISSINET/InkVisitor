@@ -1,6 +1,6 @@
-import { EntityEnums, RelationEnums } from "@shared/enums";
-import { IEntity } from "@shared/types";
-import { Explore } from "@shared/types/query";
+import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
+import { IEntity } from "@inkvisitor/shared/types";
+import { Explore } from "@inkvisitor/shared/types/query";
 import { Button, ButtonGroup, Checkbox, Input } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";

@@ -1,5 +1,5 @@
 import { Annotator } from "@inkvisitor/annotator/src/lib";
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import {
   IDocument,
   IResponseEntity,
@@ -7,7 +7,7 @@ import {
   IResponseTerritory,
   IResponseUser,
   IStatement,
-} from "@shared/types";
+} from "@inkvisitor/shared/types";
 import { UseMutationResult } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import TextAnnotator from "components/advanced/Annotator/Annotator";
@@ -34,12 +34,9 @@ interface StatementListTextAnnotator {
     IStatement,
     unknown
   >;
-  statementListBoxRef?: React.RefObject<HTMLDivElement | null>;
 
   storedAnnotatorScrollPosition: number | null;
-  setStoredAnnotatorScrollPosition: React.Dispatch<
-    React.SetStateAction<number | null>
-  >;
+  setStoredAnnotatorScrollPosition: React.Dispatch<React.SetStateAction<number | null>>;
 
   hlEntities: EntityEnums.Class[];
   setHlEntities: React.Dispatch<React.SetStateAction<EntityEnums.Class[]>>;
@@ -63,16 +60,15 @@ interface StatementListTextAnnotator {
   showStatementList: boolean;
   userCanEdit: boolean;
   userData?: IResponseUser;
+
+  onStatementAnchorHover?: (statementId: string | null) => void;
 }
 
-export const StatementListTextAnnotator: React.FC<
-  StatementListTextAnnotator
-> = ({
+export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = ({
   territoryId,
   territory,
   statementId,
   statementCreateMutation,
-  statementListBoxRef,
 
   storedAnnotatorScrollPosition,
   setStoredAnnotatorScrollPosition,
@@ -97,15 +93,15 @@ export const StatementListTextAnnotator: React.FC<
   showStatementList,
   userCanEdit,
   userData,
+
+  onStatementAnchorHover,
 }) => {
   const annotatorHeight = useMemo<number>(() => {
     return contentHeight - 70 - ANNOTATOR_SELECTOR_HEIGHT;
   }, [contentHeight]);
 
   const annotatorWidth = useMemo<number>(() => {
-    return showStatementList
-      ? contentWidth - COLLAPSED_TABLE_WIDTH
-      : contentWidth;
+    return showStatementList ? contentWidth - COLLAPSED_TABLE_WIDTH : contentWidth;
   }, [contentWidth, showStatementList]);
 
   const annotatorWidthTooNarrow = useMemo<boolean>(() => {
@@ -134,27 +130,21 @@ export const StatementListTextAnnotator: React.FC<
       const annotatorChanged = lastScrolledAnnotatorRef.current !== annotator;
 
       // Scroll if: IDs changed OR annotator was recreated (and we haven't scrolled this annotator yet)
-      const shouldScroll =
-        territoryChanged || statementChanged || annotatorChanged;
+      const shouldScroll = territoryChanged || statementChanged || annotatorChanged;
       if (annotator && selectedDocument && shouldScroll) {
         const isStatementInDocument = Boolean(
           statementId &&
-            selectedDocument.entityIds[EntityEnums.Class.Statement]?.includes(
-              statementId
-            )
+            selectedDocument.entityIds[EntityEnums.Class.Statement]?.includes(statementId)
         );
         const isStatementInTerritory = territory?.statements?.some(
           (statement) => statement.id === statementId
         );
 
-        const scrollToStatement =
-          isStatementInDocument && isStatementInTerritory;
+        const scrollToStatement = isStatementInDocument && isStatementInTerritory;
 
         const statementIsAnchoredInText =
           scrollToStatement &&
-          collectStatementAnchors(selectedDocument.anchors).some(
-            (a) => a.anchor === statementId
-          );
+          collectStatementAnchors(selectedDocument.anchors).some((a) => a.anchor === statementId);
 
         const scrollToId = scrollToStatement ? statementId : territoryId;
 
@@ -162,8 +152,7 @@ export const StatementListTextAnnotator: React.FC<
 
         // Territory: only on first load or when territory changes — not when switching
         // unanchored statements within the same territory.
-        const shouldScrollToTerritory =
-          territoryChanged || firstTerritoryScroll;
+        const shouldScrollToTerritory = territoryChanged || firstTerritoryScroll;
 
         let performScroll = false;
         if (scrollToStatement) {
@@ -220,7 +209,7 @@ export const StatementListTextAnnotator: React.FC<
               <BsInfoCircle size="23" />
             </StyledEmptyState>
             <StyledEmptyState>
-              {"No document selected yet. Pick one from the suggester"}
+              {"No document selected yet. Pick a resource from the resource suggester"}
             </StyledEmptyState>
           </div>
         )}
@@ -241,17 +230,15 @@ export const StatementListTextAnnotator: React.FC<
               documentId={selectedDocumentId || undefined}
               statementCreateMutation={statementCreateMutation}
               storedAnnotatorScrollPosition={storedAnnotatorScrollPosition}
-              setStoredAnnotatorScrollPosition={
-                setStoredAnnotatorScrollPosition
-              }
+              setStoredAnnotatorScrollPosition={setStoredAnnotatorScrollPosition}
               territory={territory}
               dataDocument={selectedDocument ?? undefined}
               dataDocumentIsFetching={selectedDocumentIsFetching}
               dataDocumentError={selectedDocumentError}
               showStatementList={showStatementList}
               userData={userData}
-              statementListBoxRef={statementListBoxRef}
               territoryId={territoryId}
+              onStatementAnchorHover={onStatementAnchorHover}
             />
           )}
         </AnnotatorProvider>

@@ -11,7 +11,7 @@ import Relation from "@models/relation/relation";
 import { getAuditByEntityId } from "@modules/audits";
 import QuerySearch from "@service/query/search";
 import { findEntityById } from "@service/shorthands";
-import { EntityEnums, RelationEnums } from "@shared/enums";
+import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import {
   EntityTooltip,
   IEntity,
@@ -24,7 +24,8 @@ import {
   IUser,
   Relation as RelationType,
   RequestSearch,
-} from "@shared/types";
+  AuditScope,
+} from "@inkvisitor/shared/types";
 import {
   AuditDoesNotExist,
   BadParams,
@@ -34,16 +35,16 @@ import {
   InvalidDeleteError,
   ModelNotValidError,
   PermissionDeniedError,
-} from "@shared/types/errors";
+} from "@inkvisitor/shared/types/errors";
 import {
   IRequestQuery,
   IRequestQueryExport,
-} from "@shared/types/request-query";
-import { IRequestSearch } from "@shared/types/request-search";
+} from "@inkvisitor/shared/types/request-query";
+import { IRequestSearch } from "@inkvisitor/shared/types/request-search";
 import Document from "@models/document/document";
-import { IResponseQuery } from "@shared/types/response-query";
+import { IResponseQuery } from "@inkvisitor/shared/types/response-query";
 
-import { EventType } from "@shared/types/stats";
+import { EventType } from "@inkvisitor/shared/types/stats";
 import { Router } from "express";
 import { IRequest } from "src/custom_typings/request";
 import { asyncRouteHandler } from "../index";
@@ -593,6 +594,12 @@ export default Router()
                   );
                 }
                 out.data[entityId] = true;
+                await Audit.createDeletionAudit(
+                  req.db.connection,
+                  entityId,
+                  req.getUserOrFail().id,
+                  AuditScope.Entity
+                );
                 removeDependency(entityId);
                 removedCount++;
               } catch (e) {
@@ -734,7 +741,7 @@ export default Router()
           request.body.explore
         );
 
-        const ids = await querySearch.run(request.db.connection);
+        await querySearch.run(request.db.connection);
         const results = await querySearch.getResults(request.db.connection);
 
         const entityIds = querySearch.results?.items ?? [];
@@ -744,7 +751,7 @@ export default Router()
           entityIds,
           entities: results,
           explore: querySearch.explore,
-          total: ids.length,
+          total: entityIds.length,
         };
       }
     )

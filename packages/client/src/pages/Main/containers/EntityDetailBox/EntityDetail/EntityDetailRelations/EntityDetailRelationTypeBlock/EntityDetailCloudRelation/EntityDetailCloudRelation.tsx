@@ -1,4 +1,4 @@
-import { IEntity, IResponseGeneric, Relation } from "@shared/types";
+import { IEntity, IResponseGeneric, Relation } from "@inkvisitor/shared/types";
 import { AxiosResponse } from "axios";
 import { Cloud } from "components";
 import { EntityTag } from "components/advanced";

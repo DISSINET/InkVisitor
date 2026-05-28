@@ -1,7 +1,7 @@
 import Entity from "@models/entity/entity";
 import { fillFlatObject, IModel, UnknownObject } from "@models/common";
-import { EntityEnums } from "@shared/enums";
-import { IObject, IObjectData } from "@shared/types";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { IObject, IObjectData } from "@inkvisitor/shared/types";
 
 class ObjectData implements IObjectData, IModel {
   logicalType: EntityEnums.LogicalType = EntityEnums.LogicalType.Definite;

@@ -1,182 +1,61 @@
-import { EntityEnums } from "@shared/enums";
-import { IEntity } from "@shared/types";
-import { useSearchParams, useTheme } from "hooks";
-import React, { ReactNode, useEffect, useMemo, useRef, useState } from "react";
-import { FaStar } from "react-icons/fa";
-import { toast } from "react-toastify";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
-import {
-  DetailBoxState,
-  DraggedEntityReduxItem,
-  EntityColors,
-  EntityDragItem,
-} from "types";
-import { getShortLabelByLetterCount } from "utils/utils";
-import {
-  StyledButtonWrapper,
-  StyledElvlWrapper,
-  StyledEntityTag,
-  StyledLabel,
-  StyledLabelWrap,
-  StyledStarWrap,
-  StyledTagWrapper,
-} from "./TagStyles";
-import useDragDrop from "./useDragDrop";
-import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import React, { ReactNode, useMemo } from "react";
+import { StyledButtonWrapper, StyledElvlWrapper, StyledTagWrapper } from "./TagStyles";
 
 interface TagProps {
-  propId: string;
-  parentId?: string;
-  label?: string;
-  labelItalic?: boolean;
-
-  entityClass?: EntityEnums.ExtendedClass;
-  status?: EntityEnums.Status;
-  ltype?: EntityEnums.LogicalType;
-  entity?: IEntity;
-
-  borderStyle?: "solid" | "dashed" | "dotted";
-  button?: ReactNode;
+  ref?: React.RefObject<HTMLDivElement>;
+  // for cursor style
+  dragDisabled?: boolean;
+  // key in theme.color.tagBorderColor to set color of border (e.g. EntityTag status)
+  tagBorderColorKey?: EntityEnums.Status;
+  // key in theme.borderStyle to set style of left border (e.g. EntityTag logical type)
+  borderStyleKey?: EntityEnums.LogicalType;
+  // components to render inside tag
+  tagComponent?: ReactNode;
+  labelComponent?: ReactNode;
+  // TODO: elvl button group is entity specific and should be moved to EntityTag
   elvlButtonGroup?: ReactNode | false;
-  invertedLabel?: boolean;
-  showOnly?: "entity" | "label";
-  fullWidth?: boolean;
-  index?: number;
-  moveFn?: (dragIndex: number, hoverIndex: number) => void;
-  disableCopyLabel?: boolean;
-  disableDoubleClick?: boolean;
-  disableDrag?: boolean;
-  updateOrderFn?: (item: EntityDragItem) => void;
-  lvl?: number;
-  isFavorited?: boolean;
-  isTemplate?: boolean;
-  isDiscouraged?: boolean;
-  disabled?: boolean;
+  button?: ReactNode;
 
+  showOnly?: "tag" | "label";
+
+  onClick?: () => void;
+  onDoubleClick?: React.MouseEventHandler<HTMLDivElement>;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
   onButtonOver?: () => void;
   onButtonOut?: () => void;
   onBtnClick?: () => void;
 }
 
 export const Tag: React.FC<TagProps> = ({
-  propId,
-  parentId,
-  label = "",
-  labelItalic = false,
-  entityClass = EntityEnums.Extension.NoClass,
-  status = EntityEnums.Status.Approved,
-  ltype = EntityEnums.LogicalType.Definite,
-  entity,
-  borderStyle = "solid",
+  ref,
+  // TODO: consider sending border color as a prop as key of theme.color instead of tagBorderColorKey
+  // status = EntityEnums.Status.Approved,
+  tagBorderColorKey = EntityEnums.Status.Approved,
+  // ltype = EntityEnums.LogicalType.Definite,
+  borderStyleKey = EntityEnums.LogicalType.Definite,
+  dragDisabled = false,
+  tagComponent,
+  labelComponent,
   button,
   elvlButtonGroup,
-  invertedLabel = false,
   showOnly,
-  fullWidth = false,
-  index = -1,
-  moveFn,
-  disableCopyLabel = false,
-  disableDoubleClick = false,
-  disableDrag = false,
-  updateOrderFn = () => {},
-  isFavorited = false,
-  isTemplate = false,
-  isDiscouraged = false,
-  lvl,
 
+  onClick,
+  onDoubleClick,
+  onMouseEnter,
+  onMouseLeave,
   onButtonOver,
   onButtonOut,
   onBtnClick,
 }) => {
-  const theme = useTheme();
-  const { appendDetailId } = useSearchParams();
-  const dispatch = useAppDispatch();
-  const draggedEntity: DraggedEntityReduxItem = useAppSelector(
-    (state) => state.draggedEntity
-  );
-  const detailBoxState: DetailBoxState = useAppSelector(
-    (state) => state.layout.mainPage.detailBoxState
-  );
-
-  const [clickedOnce, setClickedOnce] = useState(false);
-  const ref = useRef<HTMLDivElement>(null!);
-
-  const [isDragging, canDrag, drag, drop] = useDragDrop({
-    entity,
-    isTemplate,
-    isDiscouraged,
-    propId,
-    entityClass,
-    disableDrag,
-    index,
-    lvl,
-    updateOrderFn,
-    draggedEntity,
-    dispatch,
-    moveFn,
-    ref,
-  });
-
-  useEffect(() => {
-    if (!clickedOnce) return;
-
-    const timeout = setTimeout(() => {
-      navigator.clipboard.writeText(label);
-      toast.info(
-        `label [${getShortLabelByLetterCount(label, 200)}] copied to clipboard`
-      );
-      setClickedOnce(false);
-    }, 500);
-
-    return () => clearTimeout(timeout);
-  }, [clickedOnce]);
-
   const renderTag = useMemo(() => {
-    const entityTag = (
-      <StyledEntityTag
-        $color={
-          entityClass !== EntityEnums.Extension.Invalid
-            ? EntityColors[entityClass].color
-            : "white"
-        }
-        $isTemplate={isTemplate}
-        $darkTheme={true}
-      >
-        {entityClass}
-      </StyledEntityTag>
-    );
-
-    const elvlWrapper = elvlButtonGroup && (
-      <StyledElvlWrapper>{elvlButtonGroup}</StyledElvlWrapper>
-    );
-
-    const labelWrap = (
-      <StyledLabelWrap $invertedLabel={invertedLabel}>
-        {isFavorited && (
-          <StyledStarWrap>
-            <FaStar
-              color={theme.color.warning}
-              style={{ marginBottom: "0.1rem" }}
-            />
-          </StyledStarWrap>
-        )}
-        <StyledLabel
-          $invertedLabel={invertedLabel}
-          $status={status}
-          $labelOnly={showOnly === "label"}
-          $borderStyle={borderStyle}
-          $fullWidth={fullWidth}
-          $isFavorited={isFavorited}
-          $isItalic={labelItalic}
-        >
-          {label}
-        </StyledLabel>
-      </StyledLabelWrap>
-    );
+    const elvlWrapper = elvlButtonGroup && <StyledElvlWrapper>{elvlButtonGroup}</StyledElvlWrapper>;
 
     const buttonWrap = button && (
       <StyledButtonWrapper
-        $status={status}
+        $tagBorderColorKey={tagBorderColorKey}
         onMouseEnter={onButtonOver}
         onMouseLeave={onButtonOut}
         onClick={onBtnClick}
@@ -187,30 +66,24 @@ export const Tag: React.FC<TagProps> = ({
 
     return showOnly ? (
       <>
-        {showOnly === "entity" ? entityTag : labelWrap}
+        {showOnly === "tag" ? tagComponent : labelComponent}
         {buttonWrap}
       </>
     ) : (
       <>
-        {entityTag}
-        {labelWrap}
+        {tagComponent}
+        {labelComponent}
         {elvlWrapper}
         {buttonWrap}
       </>
     );
   }, [
-    entityClass,
-    isFavorited,
-    invertedLabel,
-    label,
-    labelItalic,
+    tagComponent,
+    labelComponent,
     elvlButtonGroup,
-    borderStyle,
-    fullWidth,
     showOnly,
-    status,
+    tagBorderColorKey,
     button,
-    isTemplate,
     onButtonOver,
     onButtonOut,
     onBtnClick,
@@ -218,26 +91,21 @@ export const Tag: React.FC<TagProps> = ({
 
   return (
     <StyledTagWrapper
-      className="tag"
       ref={ref}
-      $dragDisabled={!canDrag}
-      $status={status}
-      $ltype={ltype}
-      $borderStyle={borderStyle}
+      className="tag"
+      $tagBorderColorKey={tagBorderColorKey}
+      $borderStyleKey={borderStyleKey}
+      $dragDisabled={dragDisabled}
       onClick={(e) => {
-        e.stopPropagation();
-        if (!disableCopyLabel) setClickedOnce(true);
+        e.preventDefault();
+        onClick && onClick();
       }}
       onDoubleClick={(e) => {
-        e.stopPropagation();
-        setClickedOnce(false);
-        if (!disableDoubleClick) {
-          appendDetailId(propId);
-          if (detailBoxState === DetailBoxState.Minimized) {
-            dispatch(setDetailBoxState(DetailBoxState.Normal));
-          }
-        }
+        e.preventDefault();
+        onDoubleClick?.(e);
       }}
+      onMouseEnter={onMouseEnter && onMouseEnter}
+      onMouseLeave={onMouseLeave && onMouseLeave}
     >
       {renderTag}
     </StyledTagWrapper>

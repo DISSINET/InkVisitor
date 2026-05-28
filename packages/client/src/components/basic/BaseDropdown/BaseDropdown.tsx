@@ -1,12 +1,8 @@
-import {
-  AutoPlacement,
-  BasePlacement,
-  VariationPlacement,
-} from "@popperjs/core";
-import { allEntities } from "@shared/dictionaries/entity";
-import { EntityEnums } from "@shared/enums";
+import { AutoPlacement, BasePlacement, VariationPlacement } from "@popperjs/core";
+import { allEntities } from "@inkvisitor/shared/dictionaries/entity";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import { heightHeader } from "Theme/constants";
-import { Tooltip } from "components";
+import { Loader, Tooltip } from "components";
 import React, { useState } from "react";
 import {
   ActionMeta,
@@ -18,21 +14,18 @@ import {
   ValueContainerProps,
   components,
 } from "react-select";
-import { DropdownItem } from "types";
 import {
   StyledFaChevronDown,
   StyledSelect,
   StyledSelectWrapper,
   StyledValueIconWrap,
 } from "./BaseDropdownStyles";
+import { DropdownItem } from "@inkvisitor/shared/types";
 
 interface BaseDropdown {
   options?: DropdownItem[];
   value?: DropdownItem | DropdownItem[] | null;
-  onChange: (
-    selectedOption: DropdownItem[],
-    event?: ActionMeta<unknown>
-  ) => void;
+  onChange: (selectedOption: DropdownItem[], event?: ActionMeta<unknown>) => void;
   // appearance props
   width?: number | "full";
   placeholder?: string;
@@ -63,6 +56,7 @@ interface BaseDropdown {
   limitSelectedItems?: number;
   closeMenuOnSelect?: boolean;
   shortLabel?: boolean;
+  loading?: boolean;
 }
 export const BaseDropdown: React.FC<BaseDropdown> = ({
   options = [],
@@ -93,12 +87,11 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
   limitSelectedItems,
   closeMenuOnSelect = true,
   shortLabel = false,
+  loading = false,
 }) => {
-  const isOneOptionSingleEntitySelect =
-    options.length < 2 && !isMulti && entityDropdown;
+  const isOneOptionSingleEntitySelect = options.length < 2 && !isMulti && entityDropdown;
 
-  const [referenceElement, setReferenceElement] =
-    useState<HTMLButtonElement | null>(null);
+  const [referenceElement, setReferenceElement] = useState<HTMLButtonElement | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
 
   const localCustomComponents = {
@@ -132,14 +125,10 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
           isMulti={isMulti}
           isDisabled={disabled || isOneOptionSingleEntitySelect}
           isOneOptionSingleEntitySelect={isOneOptionSingleEntitySelect}
-          isOptionDisabled={(option) =>
-            (option as DropdownItem).isDisabled ? true : false
-          }
+          isOptionDisabled={(option) => ((option as DropdownItem).isDisabled ? true : false)}
           attributeDropdown={attributeDropdown}
           entityDropdown={entityDropdown}
-          wildCardChar={
-            (value as DropdownItem)?.label === EntityEnums.Extension.Any
-          }
+          wildCardChar={(value as DropdownItem)?.label === EntityEnums.Extension.Any}
           className="react-select-container"
           classNamePrefix="react-select"
           placeholder={placeholder}
@@ -154,10 +143,7 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
           styles={{
             dropdownIndicator: () => {
               return {
-                display:
-                  noDropDownIndicator || isOneOptionSingleEntitySelect
-                    ? "none"
-                    : "",
+                display: noDropDownIndicator || isOneOptionSingleEntitySelect ? "none" : "",
               };
             },
             menuPortal: (base) => ({
@@ -170,9 +156,7 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
           menuPosition="absolute"
           menuPlacement="auto"
           onChange={(selected: unknown, event: ActionMeta<unknown>) => {
-            const selectedOptions: DropdownItem[] = Array.isArray(selected)
-              ? selected
-              : [selected];
+            const selectedOptions: DropdownItem[] = Array.isArray(selected) ? selected : [selected];
 
             if (!isMulti) {
               return onChange(selectedOptions);
@@ -187,6 +171,7 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
           limitSelectedItems={limitSelectedItems}
           shortLabel={shortLabel}
         />
+        {loading && <Loader show size={7} loaderStyle="beat" />}
       </StyledSelectWrapper>
 
       {/* Tooltip */}
@@ -204,8 +189,7 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
                           {v.value !== allEntities.value && (
                             <>
                               {v.label}
-                              {key !== (value as DropdownItem[])?.length - 1 &&
-                                ", "}
+                              {key !== (value as DropdownItem[])?.length - 1 && ", "}
                             </>
                           )}
                         </React.Fragment>
@@ -249,11 +233,7 @@ const ValueContainer = ({
   const currentValues: DropdownItem[] = [...props.getValue()];
   let toBeRendered = children;
 
-  return (
-    <components.ValueContainer {...props}>
-      {toBeRendered}
-    </components.ValueContainer>
-  );
+  return <components.ValueContainer {...props}>{toBeRendered}</components.ValueContainer>;
 };
 
 // If multiple, values are not merged into all options, this component is rendered separately for every single value
@@ -291,9 +271,7 @@ const Control = ({
   );
 };
 
-const MenuPortal: typeof components.MenuPortal = (
-  props: any & { selectProps: StyledSelect }
-) => {
+const MenuPortal: typeof components.MenuPortal = (props: any & { selectProps: StyledSelect }) => {
   const { entityDropdown } = props.selectProps;
 
   return (

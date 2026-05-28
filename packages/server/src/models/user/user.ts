@@ -1,18 +1,13 @@
-import {
-  IUser,
-  IUserOptions,
-  IBookmarkFolder,
-  IStoredTerritory,
-  IUserRight,
-} from "@shared/types";
+import { IUser, IUserOptions, IBookmarkFolder, IStoredTerritory, IUserRight } from "@inkvisitor/shared/types";
 import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
 import { IDbModel, fillArray, fillFlatObject } from "@models/common";
-import { EntityEnums, UserEnums } from "@shared/enums";
-import { ModelNotValidError } from "@shared/types/errors";
+import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
+import { ModelNotValidError } from "@inkvisitor/shared/types/errors";
 import { generateUuid, hashPassword } from "@common/auth";
 import { generatePassword } from "@common/functions";
 import { nonenumerable } from "@common/decorators";
 import { Db } from "@service/rethink";
+import { DbHandle } from "@service/dbHandle";
 
 export class UserRight implements IUserRight {
   territory = "";
@@ -34,7 +29,6 @@ export class UserOptions implements IUserOptions {
   defaultLanguage: EntityEnums.Language = EntityEnums.Language.Empty;
   searchLanguages: EntityEnums.Language[] = [];
   hideStatementElementsOrderTable?: boolean = false;
-  allowMaterializedStats: boolean = false;
 
   constructor(data: Partial<IUserOptions>) {
     fillFlatObject(this, data);
@@ -158,11 +152,7 @@ export default class User implements IUser, IDbModel {
       throw new ModelNotValidError("model not valid");
     }
 
-    return rethink
-      .table(User.table)
-      .get(this.id)
-      .update(updateData)
-      .run(dbInstance);
+    return rethink.table(User.table).get(this.id).update(updateData).run(dbInstance);
   }
 
   /**
@@ -202,10 +192,7 @@ export default class User implements IUser, IDbModel {
   }
 
   canBeEditedByUser(user: User): boolean {
-    return (
-      user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin]) ||
-      user.id == this.id
-    );
+    return user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin]) || user.id == this.id;
   }
 
   canBeDeletedByUser(user: User): boolean {
@@ -235,10 +222,7 @@ export default class User implements IUser, IDbModel {
    * @param id
    * @returns
    */
-  static async findUserById(
-    dbInstance: Connection | undefined,
-    id: string
-  ): Promise<User | null> {
+  static async findUserById(dbInstance: Connection | undefined, id: string): Promise<User | null> {
     const data = await rethink.table(User.table).get(id).run(dbInstance);
     if (!data || (data as IUser).deletedAt) {
       return null;
@@ -253,9 +237,7 @@ export default class User implements IUser, IDbModel {
    * @param dbInstance
    * @returns
    */
-  static async getOwner(
-    dbInstance: Connection | undefined
-  ): Promise<User | null> {
+  static async getOwner(dbInstance: Connection | undefined): Promise<User | null> {
     const data = await rethink
       .table(User.table)
       .filter({ role: UserEnums.Role.Owner })
@@ -318,9 +300,7 @@ export default class User implements IUser, IDbModel {
    * @param dbInstance
    * @returns
    */
-  static async findAllUsers(
-    dbInstance: Connection | undefined
-  ): Promise<User[]> {
+  static async findAllUsers(dbInstance: Connection | undefined): Promise<User[]> {
     const data = await rethink
       .table(User.table)
       .filter(function (user: any) {
@@ -340,7 +320,7 @@ export default class User implements IUser, IDbModel {
    * @returns
    */
   static async findUserByLogin(
-    dbInstance: Db,
+    dbInstance: Db | DbHandle,
     login: string,
     includeThrashed: boolean
   ): Promise<User | null> {
@@ -354,10 +334,7 @@ export default class User implements IUser, IDbModel {
 
     const data = await req
       .filter(function (user: any) {
-        return rethink.or(
-          rethink.row("name").eq(login),
-          rethink.row("email").eq(login)
-        );
+        return rethink.or(rethink.row("name").eq(login), rethink.row("email").eq(login));
       })
       .limit(1)
       .run(dbInstance.connection);
@@ -390,10 +367,7 @@ export default class User implements IUser, IDbModel {
    * @param entityId
    * @returns array of IUser interfaces
    */
-  static async findByBookmarkedEntity(
-    db: Connection,
-    entityId: string
-  ): Promise<IUser[]> {
+  static async findByBookmarkedEntity(db: Connection, entityId: string): Promise<IUser[]> {
     const users: IUser[] = await rethink
       .table(User.table)
       .filter(function (user: RDatum<IUser>) {
@@ -413,16 +387,12 @@ export default class User implements IUser, IDbModel {
    * @param territoryId
    * @returns array of IUser interfaces
    */
-  static async findByStoredTerritory(
-    db: Connection,
-    territoryId: string
-  ): Promise<IUser[]> {
+  static async findByStoredTerritory(db: Connection, territoryId: string): Promise<IUser[]> {
     const users: IUser[] = await rethink
       .table(User.table)
       .filter(function (user: RDatum<IUser>) {
-        return user("storedTerritories").contains(
-          (stored: RDatum<IStoredTerritory>) =>
-            stored("territoryId").eq(territoryId)
+        return user("storedTerritories").contains((stored: RDatum<IStoredTerritory>) =>
+          stored("territoryId").eq(territoryId)
         );
       })
       .run(db);
@@ -436,10 +406,7 @@ export default class User implements IUser, IDbModel {
    * @param db
    * @param entityId
    */
-  static async removeBookmarkedEntity(
-    db: Connection,
-    entityId: string
-  ): Promise<void> {
+  static async removeBookmarkedEntity(db: Connection, entityId: string): Promise<void> {
     const userEntries = await User.findByBookmarkedEntity(db, entityId);
     for (const userData of userEntries) {
       const userModel = new User(userData);
@@ -454,10 +421,7 @@ export default class User implements IUser, IDbModel {
    * @param db
    * @param territoryId
    */
-  static async removeStoredTerritory(
-    db: Connection,
-    territoryId: string
-  ): Promise<void> {
+  static async removeStoredTerritory(db: Connection, territoryId: string): Promise<void> {
     const userEntries = await User.findByStoredTerritory(db, territoryId);
     for (const userData of userEntries) {
       const userModel = new User(userData);

@@ -1,6 +1,6 @@
-import { EntityEnums as Entities, RelationEnums } from "@shared/enums";
+import { EntityEnums as Entities, RelationEnums } from "@inkvisitor/shared/enums";
 import Relation from "./relation";
-import { Relation as RelationTypes } from "@shared/types";
+import { Relation as RelationTypes } from "@inkvisitor/shared/types";
 import { Connection } from "rethinkdb-ts";
 
 export default class Superclass

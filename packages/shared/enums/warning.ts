@@ -1,4 +1,4 @@
-import { SettingsKey } from "@shared/types/settings";
+import { SettingsKey } from "@inkvisitor/shared/types/settings";
 
 export enum WarningTypeEnums {
   SValency = "SValency",

@@ -3,13 +3,13 @@ import {
   globalValidationsDict,
   valencyKeys,
   ValidationKey,
-} from "@shared/enums/warning";
-import { IEntity, IResponseGeneric } from "@shared/types";
-import { ISetting } from "@shared/types/settings";
+} from "@inkvisitor/shared/enums/warning";
+import { IEntity, IResponseGeneric } from "@inkvisitor/shared/types";
+import { ISetting } from "@inkvisitor/shared/types/settings";
 import {
   EProtocolTieType,
   ITerritoryValidation,
-} from "@shared/types/territory";
+} from "@inkvisitor/shared/types/territory";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import {

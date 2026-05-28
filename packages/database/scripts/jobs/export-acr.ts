@@ -3,7 +3,7 @@ import Relation from "@models/relation/relation";
 import Resource from "@models/resource/resource";
 import Value from "@models/value/value";
 import { Db } from "@service/rethink";
-import { DbEnums, EntityEnums, RelationEnums } from "@shared/enums";
+import { DbEnums, EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import {
   IAction,
   IConcept,
@@ -11,7 +11,8 @@ import {
   IResource,
   IValue,
   Relation as RelationTypes,
-} from "@shared/types";
+  AuditScope,
+} from "@inkvisitor/shared/types";
 import * as path from "path";
 import { Connection, r as rethink } from "rethinkdb-ts";
 import { question } from "scripts/import/prompts";
@@ -298,7 +299,7 @@ const exportACR: IJob = async (db: Connection): Promise<void> => {
   const auditsAll: Audit[] = await rethink.table("audits").run(db);
 
   const audits = auditsAll
-    .filter((a) => allIds.includes(a.entityId))
+    .filter((a) => a.auditScope === AuditScope.Entity && allIds.includes(a.modelId))
     .map((a) => {
       a.changes = {};
       return a;

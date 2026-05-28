@@ -49,6 +49,29 @@
       justify-content: space-between;
       align-items: center;
     }
+    .controls-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .control-section {
+      background: white;
+      border: 1px solid #999;
+      border-radius: 4px;
+      margin-bottom: 5px;
+    }
+    .section-header {
+      background: #f0f0f0;
+      padding: 8px 12px;
+      cursor: pointer;
+      user-select: none;
+      font-weight: bold;
+      border-bottom: 1px solid #999;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
     .broken-anchor-info {
       flex: 1;
     }
@@ -84,6 +107,44 @@
     }
     .unlink-btn:hover {
       background: #c82333;
+    }
+    .section-header:hover {
+      background: #e0e0e0;
+    }
+    .section-content {
+      padding: 10px;
+      display: none;
+    }
+    .section-content.open {
+      display: block;
+    }
+    .toggle-icon {
+      transition: transform 0.2s;
+    }
+    .toggle-icon.open {
+      transform: rotate(90deg);
+    }
+    #tagHoverPopup {
+      position: absolute;
+      display: none;
+      background: #222;
+      color: #fff;
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 12px;
+      pointer-events: none;
+      z-index: 1000;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      max-width: 300px;
+      word-break: break-word;
+    }
+    #tagHoverPopup .tag-name {
+      color: #ffd166;
+      font-weight: bold;
+    }
+    #tagHoverPopup .tag-attr {
+      color: #8ecae6;
     }
   </style>
   <body style="background-color: black">
@@ -135,87 +196,184 @@
           </div>
         </div>
       </div>
-      <fieldset>
-        <label>search</label>
-        <input type="text" id="search" />
-        <button id="search-trigger">go</button>
-        <button id="searchTriggerNext">next</button>
-      </fieldset>
-      <fieldset>
-        <label>mode</label>
-        <select id="mode">
-          <option value="highlight" selected>highlight</option>
-          <option value="text-edit">text edit</option>
-          <option value="XML">XML</option>
-        </select>
-      </fieldset>
-      <fieldset>
-        <label>toggle highlight</label>
-        <input type="checkbox" id="highlightToggle" />
-      </fieldset>
-      <fieldset>
-        <label>add anchor </label>
-        <input type="text" id="anchorText" placeholder="Anchor name (e.g., person, location)" />
-        <div style="margin-top: 5px;">
-          <label>Attributes (key-value pairs):</label>
-          <div id="attributeFields" style="margin-top: 5px;">
-            <div class="attribute-row" style="margin-bottom: 5px;">
-              <input type="text" placeholder="Key" class="attr-key" style="width: 100px; margin-right: 5px;" />
-              <input type="text" placeholder="Value" class="attr-value" style="width: 100px; margin-right: 5px;" />
-              <button type="button" class="remove-attr" style="background: #ff6b6b; color: white; border: none; padding: 2px 6px; cursor: pointer;">×</button>
+      <div class="controls-grid">
+        <!-- Column 1 -->
+        <div>
+          <div class="control-section">
+            <div class="section-header" onclick="toggleSection(this)">
+              <span>🔍 Search</span>
+              <span class="toggle-icon">▶</span>
+            </div>
+            <div class="section-content">
+              <label>Search text</label>
+              <input type="text" id="search" style="width: 100%; box-sizing: border-box;" />
+              <button id="search-trigger" style="margin-top: 5px;">Go</button>
+              <button id="searchTriggerNext">Next</button>
             </div>
           </div>
-          <button type="button" id="addAttribute" style="background: #4ecdc4; color: white; border: none; padding: 4px 8px; cursor: pointer; margin-top: 5px;">+ Add Attribute</button>
-        </div>
-        <button id="addAnchor" style="margin-top: 10px;">add</button>
-      </fieldset>
-      <fieldset>
-        <label>remove anchor from selection </label>
-        <input type="text" id="removeAnchorText" />
-        <button id="removeAnchor">remove</button>
-      </fieldset>
-      <fieldset>
-        <label>scroll to anchor </label>
-        <input type="text" id="scrollToAnchorText" />
-        <button id="scrollToAnchor">scroll</button>
-      </fieldset>
-      <fieldset>
-        <label>update anchor </label>
-        <input type="text" id="updateAnchorText" placeholder="Anchor name to update" />
-        <div style="margin-top: 5px;">
-          <label>New Attributes (key-value pairs):</label>
-          <div id="updateAttributeFields" style="margin-top: 5px;">
-            <div class="update-attribute-row" style="margin-bottom: 5px;">
-              <input type="text" placeholder="Key" class="update-attr-key" style="width: 100px; margin-right: 5px;" />
-              <input type="text" placeholder="Value" class="update-attr-value" style="width: 100px; margin-right: 5px;" />
-              <button type="button" class="remove-update-attr" style="background: #ff6b6b; color: white; border: none; padding: 2px 6px; cursor: pointer;">×</button>
+
+          <div class="control-section">
+            <div class="section-header" onclick="toggleSection(this)">
+              <span>⚙️ Mode & Highlight</span>
+              <span class="toggle-icon">▶</span>
+            </div>
+            <div class="section-content">
+              <div style="margin-bottom: 10px;">
+                <label>Mode:</label>
+                <select id="mode" style="width: 100%;">
+                  <option value="highlight" selected>highlight</option>
+                  <option value="text-edit">text edit</option>
+                  <option value="XML">XML</option>
+                </select>
+              </div>
+              <div>
+                <label>
+                  <input type="checkbox" id="highlightToggle" />
+                  Toggle highlight
+                </label>
+              </div>
             </div>
           </div>
-          <button type="button" id="addUpdateAttribute" style="background: #4ecdc4; color: white; border: none; padding: 4px 8px; cursor: pointer; margin-top: 5px;">+ Add Attribute</button>
+
+          <div class="control-section">
+            <div class="section-header" onclick="toggleSection(this)">
+              <span>➕ Add Anchor</span>
+              <span class="toggle-icon">▶</span>
+            </div>
+            <div class="section-content">
+              <label>Anchor name</label>
+              <input type="text" id="anchorText" placeholder="e.g., person, location" style="width: 100%; box-sizing: border-box;" />
+              <div style="margin-top: 10px;">
+                <label>Attributes (key-value pairs):</label>
+                <div id="attributeFields" style="margin-top: 5px;">
+                  <div class="attribute-row" style="margin-bottom: 5px;">
+                    <input type="text" placeholder="Key" class="attr-key" style="width: 100px; margin-right: 5px;" />
+                    <input type="text" placeholder="Value" class="attr-value" style="width: 100px; margin-right: 5px;" />
+                    <button type="button" class="remove-attr" style="background: #ff6b6b; color: white; border: none; padding: 2px 6px; cursor: pointer;">×</button>
+                  </div>
+                </div>
+                <button type="button" id="addAttribute" style="background: #4ecdc4; color: white; border: none; padding: 4px 8px; cursor: pointer; margin-top: 5px;">+ Add Attribute</button>
+              </div>
+              <button id="addAnchor" style="margin-top: 10px;">Add Anchor</button>
+            </div>
+          </div>
+
+          <div class="control-section">
+            <div class="section-header" onclick="toggleSection(this)">
+              <span>✏️ Update Anchor</span>
+              <span class="toggle-icon">▶</span>
+            </div>
+            <div class="section-content">
+              <label>Anchor name to update</label>
+              <input type="text" id="updateAnchorText" placeholder="Anchor name" style="width: 100%; box-sizing: border-box;" />
+              <div style="margin-top: 10px;">
+                <label>New Attributes:</label>
+                <div id="updateAttributeFields" style="margin-top: 5px;">
+                  <div class="update-attribute-row" style="margin-bottom: 5px;">
+                    <input type="text" placeholder="Key" class="update-attr-key" style="width: 100px; margin-right: 5px;" />
+                    <input type="text" placeholder="Value" class="update-attr-value" style="width: 100px; margin-right: 5px;" />
+                    <button type="button" class="remove-update-attr" style="background: #ff6b6b; color: white; border: none; padding: 2px 6px; cursor: pointer;">×</button>
+                  </div>
+                </div>
+                <button type="button" id="addUpdateAttribute" style="background: #4ecdc4; color: white; border: none; padding: 4px 8px; cursor: pointer; margin-top: 5px;">+ Add Attribute</button>
+              </div>
+              <button id="updateAnchor" style="margin-top: 10px;">Update Anchor</button>
+            </div>
+          </div>
+
+          <div class="control-section">
+            <div class="section-header" onclick="toggleSection(this)">
+              <span>📝 Update Text</span>
+              <span class="toggle-icon">▶</span>
+            </div>
+            <div class="section-content">
+              <textarea id="newText" cols="100" rows="10" style="width: 100%; box-sizing: border-box;"></textarea>
+              <button id="updateText" style="margin-top: 5px;">Update</button>
+            </div>
+          </div>
         </div>
-        <button id="updateAnchor" style="margin-top: 10px;">update</button>
-      </fieldset>
-      <fieldset>
-        <label>update text</label>
-        <textarea id="newText" cols="100" rows="10"></textarea>
-        <button id="updateText">Update</button>
-      </fieldset>
-      <fieldset>
-        <label>replace text</label>
-        <input type="text" id="replaceText" placeholder="Text to replace selection" />
-        <button id="replaceTextBtn">Replace</button>
-      </fieldset>
-      <fieldset>
-        <label>resize</label>
-        <button id="resizeBtn">Resize Annotator</button>
-      </fieldset>
-      <fieldset>
-        <label>viewport position</label>
-        <input type="checkbox" id="usePositionStorage" checked />
-        <label for="usePositionStorage">store & restore position</label>
-        <button id="collapseStoreBtn">Collapse & store position</button>
-        <button id="restorePositionBtn">Restore</button>
-      </fieldset>
+
+        <!-- Column 2 -->
+        <div>
+          <div class="control-section">
+            <div class="section-header" onclick="toggleSection(this)">
+              <span>🗑️ Remove Anchor</span>
+              <span class="toggle-icon">▶</span>
+            </div>
+            <div class="section-content">
+              <label>Anchor name</label>
+              <input type="text" id="removeAnchorText" style="width: 100%; box-sizing: border-box;" />
+              <button id="removeAnchor" style="margin-top: 5px;">Remove</button>
+            </div>
+          </div>
+
+          <div class="control-section">
+            <div class="section-header" onclick="toggleSection(this)">
+              <span>🎯 Scroll to Anchor</span>
+              <span class="toggle-icon">▶</span>
+            </div>
+            <div class="section-content">
+              <label>Anchor name</label>
+              <input type="text" id="scrollToAnchorText" style="width: 100%; box-sizing: border-box;" />
+              <button id="scrollToAnchor" style="margin-top: 5px;">Scroll</button>
+            </div>
+          </div>
+
+          <div class="control-section">
+            <div class="section-header" onclick="toggleSection(this)">
+              <span>🔄 Replace Text</span>
+              <span class="toggle-icon">▶</span>
+            </div>
+            <div class="section-content">
+              <label>Replacement text</label>
+              <input type="text" id="replaceText" placeholder="Text to replace selection" style="width: 100%; box-sizing: border-box;" />
+              <button id="replaceTextBtn" style="margin-top: 5px;">Replace</button>
+            </div>
+          </div>
+
+          <div class="control-section">
+            <div class="section-header" onclick="toggleSection(this)">
+              <span>📐 Resize</span>
+              <span class="toggle-icon">▶</span>
+            </div>
+            <div class="section-content">
+              <button id="resizeBtn">Resize Annotator</button>
+            </div>
+          </div>
+
+          <div class="control-section">
+            <div class="section-header" onclick="toggleSection(this)">
+              <span>📍 Viewport Position</span>
+              <span class="toggle-icon">▶</span>
+            </div>
+            <div class="section-content">
+              <label>
+                <input type="checkbox" id="usePositionStorage" checked />
+                Store & restore position
+              </label>
+              <div style="margin-top: 10px;">
+                <button id="collapseStoreBtn">Collapse & Store</button>
+                <button id="restorePositionBtn">Restore</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="control-section">
+            <div class="section-header" onclick="toggleSection(this)">
+              <span>🔍 Hover Interaction (#2835)</span>
+              <span class="toggle-icon open">▶</span>
+            </div>
+            <div class="section-content open">
+              <div id="statementList" style="margin-top: 10px; max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 5px; background: white;">
+              </div>
+              <div id="hoverInfo" style="margin-top: 10px; padding: 5px; background: #e7f3ff; border: 1px solid #2196F3; font-size: 12px; min-height: 30px;">
+                <strong>Hover Status:</strong> <span id="hoverStatus">Move mouse over statements or anchored text</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <fieldset id="asymmetricalAnchorsFieldset">
         <legend>⚠️ Asymmetrical Anchor Detection</legend>
         <button id="checkAnchorsBtn">Check for Broken Anchors</button>
@@ -226,10 +384,28 @@
       </fieldset>
     </div>
 
+    <div id="tagHoverPopup"></div>
+
     <p>Text from textfile.txt:</p>
     <pre id="text-content"></pre>
 
     <script src="bundle.js"></script>
+
+    <script>
+      // Toggle collapsible sections
+      function toggleSection(header) {
+        const content = header.nextElementSibling;
+        const icon = header.querySelector('.toggle-icon');
+        
+        if (content.classList.contains('open')) {
+          content.classList.remove('open');
+          icon.classList.remove('open');
+        } else {
+          content.classList.add('open');
+          icon.classList.add('open');
+        }
+      }
+    </script>
 
     <script type="module">
       const ratio = 2;
@@ -307,6 +483,142 @@
       annotator.onSelectText((text) => {
          console.log("onSelectText", text);
       });
+
+      // ========== Hover Interaction Test (#2835) ==========
+      
+      // Extract actual anchor tags from the loaded example.txt
+      const extractAnchorsFromText = (text) => {
+        const anchorRegex = /<([a-zA-Z0-9\-_]+)(?:\s+[^>]*)?>/g;
+        const anchors = new Set();
+        let match;
+        
+        while ((match = anchorRegex.exec(text)) !== null) {
+          const tagName = match[1];
+          // Skip closing tags and add opening tags
+          if (!text.slice(match.index, match.index + match[0].length).includes('</')) {
+            anchors.add(tagName);
+          }
+        }
+        
+        return Array.from(anchors);
+      };
+      
+      // Generate mock statements from actual anchors in the text
+      const actualAnchors = extractAnchorsFromText(exampleTxt);
+      const mockStatements = actualAnchors.slice(0, 20).map((anchor, index) => ({
+        id: `stmt-${index + 1}`,
+        label: `Statement with anchor ${anchor.slice(0, 8)}...`,
+        anchorTag: anchor,
+      }));
+
+      // Populate mock statement list
+      const statementListEl = document.getElementById('statementList');
+      const hoverStatusEl = document.getElementById('hoverStatus');
+      
+      mockStatements.forEach(stmt => {
+        const stmtDiv = document.createElement('div');
+        stmtDiv.id = stmt.id;
+        stmtDiv.className = 'statement-row';
+        stmtDiv.dataset.anchor = stmt.anchorTag;
+        stmtDiv.style.cssText = 'padding: 8px; margin: 3px 0; border: 1px solid #ddd; cursor: pointer; border-radius: 3px; transition: background-color 0.2s;';
+        stmtDiv.innerHTML = `<strong>${stmt.anchorTag}:</strong> ${stmt.label}`;
+        
+        // Part 1: Statement list → Annotator
+        // When hovering over statement, highlight anchor in annotator
+        stmtDiv.addEventListener('mouseenter', () => {
+          annotator.highlightAnchorByTag(stmt.anchorTag);
+          hoverStatusEl.textContent = `Hovering statement "${stmt.anchorTag}" → highlighting anchor in annotator`;
+          stmtDiv.style.backgroundColor = '#fff3cd';
+        });
+        
+        stmtDiv.addEventListener('mouseleave', () => {
+          annotator.clearHoverHighlight();
+          hoverStatusEl.textContent = 'Mouse left statement';
+          stmtDiv.style.backgroundColor = '';
+        });
+        
+        statementListEl.appendChild(stmtDiv);
+      });
+
+      // Part 2: Annotator → Statement list
+      // When hovering over anchored text, highlight corresponding statements
+      let currentlyHighlightedStatements = [];
+      
+      annotator.onAnchorHover((tags) => {
+        // Clear previous highlights
+        currentlyHighlightedStatements.forEach(stmtId => {
+          const stmtEl = document.getElementById(stmtId);
+          if (stmtEl) {
+            stmtEl.style.backgroundColor = '';
+            stmtEl.style.fontWeight = '';
+          }
+        });
+        currentlyHighlightedStatements = [];
+        
+        if (tags.length === 0) {
+          hoverStatusEl.textContent = 'Hovering over non-anchored text';
+          return;
+        }
+        
+        // Highlight statements that match the hovered tags
+        const tagNames = tags.map(tag => tag.getTagName());
+        hoverStatusEl.textContent = `Hovering anchored text: ${tagNames.join(', ')} → highlighting statement(s)`;
+        
+        tagNames.forEach(tagName => {
+          // Find matching statements
+          mockStatements.forEach(stmt => {
+            if (stmt.anchorTag === tagName) {
+              const stmtEl = document.getElementById(stmt.id);
+              if (stmtEl) {
+                stmtEl.style.backgroundColor = '#d1ecf1';
+                stmtEl.style.fontWeight = 'bold';
+                currentlyHighlightedStatements.push(stmt.id);
+              }
+            }
+          });
+        });
+        
+        if (currentlyHighlightedStatements.length === 0) {
+          hoverStatusEl.textContent = `Hovering anchor ${tagNames.join(', ')} (no matching statements in mock list)`;
+        }
+      });
+
+      const tagPopup = document.getElementById('tagHoverPopup');
+
+      annotator.onAnchorTagHover((tag, position) => {
+        if (tag && position) {
+          console.log('onAnchorTagHover →', tag.getTagName(), 'at', position, tag);
+
+          const attrs = tag.attributes || {};
+          const attrEntries = Object.entries(attrs);
+          const attrHtml = attrEntries.length
+            ? attrEntries
+                .map(
+                  ([k, v]) =>
+                    `<div class="tag-attr">${k}=<span>"${v}"</span></div>`
+                )
+                .join('')
+            : '<div style="opacity:0.6">(no attributes)</div>';
+
+          tagPopup.innerHTML =
+            `<div class="tag-name">&lt;${tag.getTagName()}&gt;</div>` + attrHtml;
+
+          // Offset slightly so the popup doesn't sit under the cursor
+          tagPopup.style.left = position.x + 12 + 'px';
+          tagPopup.style.top = position.y + 12 + 'px';
+          tagPopup.style.display = 'block';
+        } else {
+          console.log('onAnchorTagHover → null (left tag markup)');
+          tagPopup.style.display = 'none';
+        }
+      });
+
+      console.log('✅ Hover interaction test initialized (#2835)');
+      console.log('- Part 1: Hover over statement list → highlights anchor in annotator');
+      console.log('- Part 2: Hover over anchored text → highlights statements in list');
+      console.log('- Part 3: Hover over tag markup (<tag>/</tag>) → console logs the Tag');
+
+      // ========== End Hover Interaction Test ==========
 
       document.getElementById("highlightToggle").onclick = (e) => {
         highlightEnabled = e.target.checked;

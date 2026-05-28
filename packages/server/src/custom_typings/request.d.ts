@@ -1,10 +1,10 @@
-import { Db } from "@service/rethink";
+import { DbHandle } from "@service/dbHandle";
 import Acl from "../middlewares/acl";
 import { IUser } from "../../../shared/types";
 import User from "@models/user/user";
 
 export interface IRequest<TParams = any, TBody = any, TQuery = any> {
-  db: Db;
+  db: DbHandle;
   acl: Acl;
   user?: {
     user: IUser;

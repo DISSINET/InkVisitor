@@ -1,4 +1,4 @@
-import { IResponseGeneric, IResponseUser, IUser } from "@shared/types";
+import { IResponseGeneric, IResponseUser, IUser } from "@inkvisitor/shared/types";
 import { UseMutationResult } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import { Input } from "components";

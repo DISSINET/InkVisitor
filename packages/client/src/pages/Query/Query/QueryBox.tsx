@@ -1,11 +1,6 @@
-import { Query } from "@shared/types/query";
+import { Query } from "@inkvisitor/shared/types/query";
 import React, { useMemo } from "react";
-import {
-  INodeItem,
-  QUERY_GRID_HEIGHT,
-  QUERY_GRID_WIDTH,
-  QueryValidity,
-} from "../types";
+import { INodeItem, QUERY_GRID_HEIGHT, QUERY_GRID_WIDTH, QueryValidity } from "../types";
 import { QueryGridEdge } from "./components/QueryGridEdge";
 import { QueryGridNode } from "./components/QueryGridNode";
 import { StyledQueryBox } from "./QueryBoxStyles";
@@ -18,6 +13,7 @@ interface QueryBoxProps {
   isQueryFetching: boolean;
   queryError: Error | null;
   queryStateValidity: QueryValidity;
+  onOpenEntityInDetail?: (entityId: string) => void;
 }
 
 export const QueryBox: React.FC<QueryBoxProps> = ({
@@ -26,6 +22,7 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
   isQueryFetching,
   queryError,
   queryStateValidity,
+  onOpenEntityInDetail,
 }) => {
   const gridWeight = useMemo<number>(() => {
     let maxNodeDepth = 1;
@@ -63,22 +60,16 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
   }, [state]);
 
   return (
-    <StyledQueryBox gridWeight={gridWeight} nodeItems={nodeItems}>
+    <StyledQueryBox $gridWeight={gridWeight} $nodeItems={nodeItems}>
       {[...Array(gridWeight + 1).keys()].map((wi) => {
         return [...Array(nodeItems.length).keys()].map((hi) => {
-          const nextCellNode = nodeItems.find(
-            (node) => node.gridX === wi + 1 && node.gridY === hi
-          );
-          const thisCellNode = nodeItems.find(
-            (node) => node.gridX === wi && node.gridY === hi
-          );
+          const nextCellNode = nodeItems.find((node) => node.gridX === wi + 1 && node.gridY === hi);
+          const thisCellNode = nodeItems.find((node) => node.gridX === wi && node.gridY === hi);
           const associatedEdge =
-            thisCellNode &&
-            allEdges.find((edge) => edge.node.id === thisCellNode.id);
+            thisCellNode && allEdges.find((edge) => edge.node.id === thisCellNode.id);
 
           const nextCellAssociatedEdge =
-            nextCellNode &&
-            allEdges.find((edge) => edge.node.id === nextCellNode.id);
+            nextCellNode && allEdges.find((edge) => edge.node.id === nextCellNode.id);
 
           return (
             <div
@@ -99,6 +90,7 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
                   problems={queryStateValidity.problems.filter(
                     (problem) => problem.source === thisCellNode.id
                   )}
+                  onOpenEntityInDetail={onOpenEntityInDetail}
                 />
               )}
               {nextCellAssociatedEdge && (

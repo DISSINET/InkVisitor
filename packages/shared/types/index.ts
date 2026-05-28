@@ -1,4 +1,10 @@
-import { IAudit } from "./audit";
+import {
+  IAudit,
+  IAnchorUpdate,
+  IDocumentAuditAnchorChanges,
+  AuditScope,
+} from "./audit";
+import { DropdownItem } from "./dropdown";
 import { ILabel } from "./label";
 import { IReference } from "./reference";
 import { IValue, IValueData } from "./value";
@@ -36,6 +42,7 @@ import {
   IResponseUsedInMetaProp,
   IResponseUsedInStatement,
 } from "./response-detail";
+import { IResponseBackup } from "./response-backup";
 import { IResponseGeneric } from "./response-generic";
 import { IResponsePermission } from "./response-permission";
 import {
@@ -77,13 +84,16 @@ import { IRequestQuery } from "./request-query";
 import { IResponseQuery, IResponseQueryEntity } from "./response-query";
 
 export { Query, Relation, RequestPermissionUpdate, RequestSearch };
+export { AuditScope };
 export type {
   ClassificationOrder,
   EntityOrder,
   EntityTooltip,
   IAction,
   IActionData,
+  IAnchorUpdate,
   IAudit,
+  IDocumentAuditAnchorChanges,
   IBeing,
   IBeingData,
   IBookmarkFolder,
@@ -114,6 +124,7 @@ export type {
   IResource,
   IResourceData,
   IResponseAudit,
+  IResponseBackup,
   IResponseBookmarkFolder,
   IResponseDetail,
   IResponseEntity,
@@ -147,4 +158,5 @@ export type {
   IWarningPosition,
   IdentificationOrder,
   PropOrder,
+  DropdownItem,
 };

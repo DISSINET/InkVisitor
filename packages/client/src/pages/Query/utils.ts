@@ -2,6 +2,8 @@
 // These utilities are used by both React Query write-through and the Explorer read path.
 // They are intentionally framework-agnostic and can be used with TanStack DB collections.
 
+import { IEntity, IResponseQueryEntity } from "@inkvisitor/shared/types";
+
 export interface WindowSlice {
   id: string;
   signature: string;
@@ -11,11 +13,7 @@ export interface WindowSlice {
   ids: string[];
 }
 
-export const buildWindowId = (
-  signature: string,
-  offset: number,
-  limit: number
-): string => {
+export const buildWindowId = (signature: string, offset: number, limit: number): string => {
   return `${signature}:${offset}:${limit}`;
 };
 
@@ -25,10 +23,7 @@ export const clampWindow = (
   limit: number
 ): { offset: number; limit: number } => {
   const safeOffset = Math.max(0, Math.min(offset, Math.max(0, total - 1)));
-  const safeLimit = Math.max(
-    1,
-    Math.min(limit, Math.max(1, total - safeOffset))
-  );
+  const safeLimit = Math.max(1, Math.min(limit, Math.max(1, total - safeOffset)));
   return { offset: safeOffset, limit: safeLimit };
 };
 
@@ -39,19 +34,9 @@ export const clampWindow = (
 // Note: This is deliberately conservative and simple. If sort/filters/columns semantics
 // evolve, revisit this to ensure the signature captures the ordering identity.
 
-type Jsonish =
-  | Record<string, unknown>
-  | unknown[]
-  | string
-  | number
-  | boolean
-  | null
-  | undefined;
+type Jsonish = Record<string, unknown> | unknown[] | string | number | boolean | null | undefined;
 
-export const buildStableSignature = (
-  queryState: Jsonish,
-  exploreState: Jsonish
-): string => {
+export const buildStableSignature = (queryState: Jsonish, exploreState: Jsonish): string => {
   const normalizedExplore = normalizeExplore(exploreState);
   // Deterministic stringify by sorting object keys
   const stableString = stableStringify({
@@ -62,11 +47,7 @@ export const buildStableSignature = (
 };
 
 const normalizeExplore = (exploreState: Jsonish): Jsonish => {
-  if (
-    !exploreState ||
-    typeof exploreState !== "object" ||
-    Array.isArray(exploreState)
-  ) {
+  if (!exploreState || typeof exploreState !== "object" || Array.isArray(exploreState)) {
     return exploreState;
   }
   const e = exploreState as Record<string, unknown>;

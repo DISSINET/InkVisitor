@@ -1,5 +1,5 @@
 import { clean, testErroneousResponse } from "@modules/common.test";
-import { UserNotActiveError } from "@shared/types/errors";
+import { UserNotActiveError } from "@inkvisitor/shared/types/errors";
 import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../Server";

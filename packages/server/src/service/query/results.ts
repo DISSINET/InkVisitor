@@ -2,10 +2,12 @@ import Audit from "@models/audit/audit";
 import Entity from "@models/entity/entity";
 import Relation from "@models/relation/relation";
 import User from "@models/user/user";
-import { IEntity, IUser } from "@shared/types";
-import { PropSpecKind } from "@shared/types/prop";
-import { Explore } from "@shared/types/query";
+import { IEntity, IUser } from "@inkvisitor/shared/types";
+import { PropSpecKind } from "@inkvisitor/shared/types/prop";
+import { Explore } from "@inkvisitor/shared/types/query";
 import { Connection } from "rethinkdb-ts";
+import { filterEntityIdsByRowLabelFilter, getRowLabelFilter } from "./explore-label-filter";
+import { applyRowIdsFilter, getRowIdsFilter } from "./explore-ids-filter";
 
 export default class Results<T extends { id: string }> {
   items: string[] | null = null;
@@ -40,6 +42,34 @@ export default class Results<T extends { id: string }> {
    */
   addOr(results: string[]) {
     this.items = Array.from(new Set((this.items || []).concat(results)));
+  }
+
+  async applyExploreFilters(
+    db: Connection,
+    exploreData: Explore.IExplore
+  ): Promise<void> {
+    if (!this.items?.length) {
+      return;
+    }
+
+    const rowIdsFilter = getRowIdsFilter(exploreData.filters);
+    if (rowIdsFilter?.ids.length) {
+      this.items = applyRowIdsFilter(this.items, rowIdsFilter);
+      if (!this.items.length) {
+        return;
+      }
+    }
+
+    const rowLabelFilter = getRowLabelFilter(exploreData.filters);
+    if (!rowLabelFilter?.label?.trim()) {
+      return;
+    }
+
+    this.items = await filterEntityIdsByRowLabelFilter(
+      db,
+      this.items,
+      rowLabelFilter
+    );
   }
 
   sort(sortData: Explore.IExploreColumnSort | undefined): void {

@@ -1,4 +1,4 @@
-import { Explore } from "@shared/types/query";
+import { Explore } from "@inkvisitor/shared/types/query";
 
 const exploreStateInitial: Explore.IExplore = {
   view: { mode: Explore.EViewMode.Table },
@@ -48,6 +48,8 @@ enum ExploreActionType {
   setLimit,
   setLimitAndOffset,
   sort,
+  setRowLabelFilter,
+  setRowIdsFilter,
 }
 
 const exploreReducer = (
@@ -105,6 +107,62 @@ const exploreReducer = (
           sort: action.payload,
         },
       };
+
+    case ExploreActionType.setRowLabelFilter: {
+      const { label, useRegex } = action.payload as {
+        label: string;
+        useRegex?: boolean;
+      };
+      const trimmedLabel = label.trim();
+      const existingRowLabelFilter = state.filters.find(
+        (f): f is Explore.IExploreRowLabelFilter =>
+          f.type === Explore.EExploreFilterType.RowLabel
+      );
+      const nextUseRegex = useRegex ?? existingRowLabelFilter?.useRegex ?? false;
+      const otherFilters = state.filters.filter(
+        (f) => f.type !== Explore.EExploreFilterType.RowLabel
+      );
+      const filters: Explore.IExploreColumnFilter[] =
+        trimmedLabel.length > 0
+          ? [
+              ...otherFilters,
+              {
+                type: Explore.EExploreFilterType.RowLabel,
+                label: trimmedLabel,
+                useRegex: nextUseRegex,
+              },
+            ]
+          : otherFilters;
+
+      return {
+        ...state,
+        filters,
+        offset: 0,
+      };
+    }
+
+    case ExploreActionType.setRowIdsFilter: {
+      const { ids } = action.payload as { ids: string[] };
+      const otherFilters = state.filters.filter(
+        (f) => f.type !== Explore.EExploreFilterType.RowIds
+      );
+      const filters: Explore.IExploreColumnFilter[] =
+        ids.length > 0
+          ? [
+              ...otherFilters,
+              {
+                type: Explore.EExploreFilterType.RowIds,
+                ids,
+              },
+            ]
+          : otherFilters;
+
+      return {
+        ...state,
+        filters,
+        offset: 0,
+      };
+    }
 
     default:
       return state;

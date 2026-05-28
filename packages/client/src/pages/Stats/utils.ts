@@ -1,10 +1,17 @@
-import { IResponseStats } from "@shared/types";
-import { Aggregation, EventType } from "@shared/types/stats";
+import { IRequestStats, IResponseStats } from "@inkvisitor/shared/types";
+import { Aggregation, EventType } from "@inkvisitor/shared/types/stats";
 import { schemeTableau10 } from "d3";
 import { useTheme } from "styled-components";
-import theme from "Theme/theme";
 
 export const OTHERS_KEY = "others";
+
+export const areStatsRequestsEqual = (a: IRequestStats, b: IRequestStats): boolean =>
+  a.fromDate === b.fromDate &&
+  a.toDate === b.toDate &&
+  a.timeUnit === b.timeUnit &&
+  a.aggregateBy === b.aggregateBy &&
+  a.eventType.length === b.eventType.length &&
+  a.eventType.every((event, index) => event === b.eventType[index]);
 
 export const getNonEmptyUsers = (
   userKeyMap: Record<string, string>,
@@ -92,7 +99,17 @@ export const getDataCategories = (
   values: Record<string, Record<string, number>>
 ): string[] => {
   if (aggregateBy === Aggregation.ACTIVITY_TYPE) {
-    return [EventType.EDIT, EventType.CREATE, EventType.DELETE];
+    // Show every event type that actually has data, ordered by the EventType
+    // enum so colors/columns stay stable as new types are introduced.
+    const presentTypes = new Set<string>();
+    Object.values(values).forEach((bucket) => {
+      Object.entries(bucket).forEach(([type, count]) => {
+        if (count !== 0 && count !== null) {
+          presentTypes.add(type);
+        }
+      });
+    });
+    return Object.values(EventType).filter((type) => presentTypes.has(type));
   }
   if (aggregateBy === Aggregation.USER) {
     const userCategories = getNonEmptyUsers(userKeyMap, values);
@@ -299,4 +316,13 @@ export const transformDataForChart = (
   }
 
   return [];
+};
+
+// Helper functions for date conversion
+export const isoToDatePicker = (isoString: string): string => {
+  return new Date(isoString).toISOString().split("T")[0];
+};
+
+export const datePickerToIso = (dateString: string): string => {
+  return new Date(dateString).toISOString();
 };

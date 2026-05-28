@@ -7,32 +7,15 @@ import {
   shift,
   useFloating,
 } from "@floating-ui/react";
-import {
-  useMutation,
-  UseMutationResult,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, UseMutationResult, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import React, {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { FaPen, FaRegSave, FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 
-import {
-  Annotator,
-  EditMode,
-  editModeDisplayLabel,
-  Tag,
-} from "@inkvisitor/annotator/src/lib";
-import { EntityEnums, UserEnums } from "@shared/enums";
+import { Annotator, EditMode, editModeDisplayLabel, Tag } from "@inkvisitor/annotator/src/lib";
+import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import {
   IDocument,
   IEntity,
@@ -41,7 +24,7 @@ import {
   IResponseTerritory,
   IResponseUser,
   IStatement,
-} from "@shared/types";
+} from "@inkvisitor/shared/types";
 import { AxiosResponse } from "axios";
 import { Loader } from "components";
 import { Button } from "components/basic/Button/Button";
@@ -56,6 +39,7 @@ import {
 } from "hooks";
 import { BsFileTextFill } from "react-icons/bs";
 import { HiCodeBracket } from "react-icons/hi2";
+import { EntityTagById } from "components/advanced/EntityTag/EntityTagById";
 import { collectStatementAnchors, getStatementOrderByIndex } from "utils/utils";
 import { EntityCreateModal } from "..";
 import { useAnnotator } from "./AnnotatorContext";
@@ -73,12 +57,7 @@ import {
   StyledScrollerViewport,
 } from "./AnnotatorStyles";
 import { annotatorHighlight } from "./highlight";
-import {
-  ANNOTATOR_LEFT_MARGIN_PX,
-  RATIO,
-  TerritoryCreateModalType,
-  W_SCROLL,
-} from "./types";
+import { ANNOTATOR_LEFT_MARGIN_PX, RATIO, TerritoryCreateModalType, W_SCROLL } from "./types";
 import { AnnotatorSearchLine } from "./AnnotatorSearchLine/AnnotatorSearchLine";
 
 interface TextAnnotatorProps {
@@ -93,9 +72,7 @@ interface TextAnnotatorProps {
   forwardAnnotator?: (annotator?: Annotator) => void;
 
   storedAnnotatorScrollPosition?: number | null;
-  setStoredAnnotatorScrollPosition?: React.Dispatch<
-    React.SetStateAction<number | null>
-  >;
+  setStoredAnnotatorScrollPosition?: React.Dispatch<React.SetStateAction<number | null>>;
 
   territory?: IResponseTerritory;
   // territoryId is from URL params and is used to reset the annotator when the territory changes
@@ -114,7 +91,9 @@ interface TextAnnotatorProps {
 
   userData?: IResponseUser;
   disableCreate?: boolean;
-  statementListBoxRef?: React.RefObject<HTMLDivElement | null>;
+
+  /** When the pointer hovers anchored text, receives the innermost tag id or null (e.g. statement list sync). */
+  onStatementAnchorHover?: (statementId: string | null) => void;
 }
 
 const ANNOTATOR_MENU_PAGE_PADDING = 4;
@@ -122,7 +101,6 @@ const ANNOTATOR_MENU_PAGE_PADDING = 4;
 export const TextAnnotator = ({
   width = 400,
   annotatorWidthTooNarrow = false,
-  statementListBoxRef,
   height = 500,
   displayLineNumbers = true,
   hlEntities = Object.values(EntityEnums.Class),
@@ -143,6 +121,7 @@ export const TextAnnotator = ({
   statementCreateMutation = undefined,
   userData,
   disableCreate = false,
+  onStatementAnchorHover,
 }: TextAnnotatorProps) => {
   const queryClient = useQueryClient();
   const theme = useTheme();
@@ -151,9 +130,7 @@ export const TextAnnotator = ({
 
   const { annotator, setAnnotator } = useAnnotator();
 
-  const [annotatorMode, setAnnotatorMode] = useState<EditMode>(
-    EditMode.HIGHLIGHT
-  );
+  const [annotatorMode, setAnnotatorMode] = useState<EditMode>(EditMode.HIGHLIGHT);
   const [localTextContent, setLocalTextContent] = useState<string>("");
 
   const isChangeMade = useMemo<boolean>(() => {
@@ -170,6 +147,16 @@ export const TextAnnotator = ({
 
   /** Which document id the current Annotator instance was built for (avoids rebasing canvas onto stale props on the same doc). */
   const annotatorLoadedForDocIdRef = useRef<string | undefined>(undefined);
+
+  const onStatementAnchorHoverRef = useRef(onStatementAnchorHover);
+  useEffect(() => {
+    onStatementAnchorHoverRef.current = onStatementAnchorHover;
+  }, [onStatementAnchorHover]);
+
+  const annotatorModeRef = useRef(annotatorMode);
+  useEffect(() => {
+    annotatorModeRef.current = annotatorMode;
+  }, [annotatorMode]);
 
   const resetAnnotator = () => {
     annotatorLoadedForDocIdRef.current = undefined;
@@ -204,9 +191,8 @@ export const TextAnnotator = ({
 
   const mergeSavedDocumentIntoCache = useCallback(
     (variables: { id: string; doc: Partial<IDocument> }) => {
-      queryClient.setQueryData<IDocument | undefined>(
-        ["document", variables.id],
-        (old) => (old ? { ...old, ...variables.doc } : old)
+      queryClient.setQueryData<IDocument | undefined>(["document", variables.id], (old) =>
+        old ? { ...old, ...variables.doc } : old
       );
     },
     [queryClient]
@@ -242,10 +228,7 @@ export const TextAnnotator = ({
   });
 
   const wLineNumbers = displayLineNumbers ? 50 : 0;
-  const wTextArea = Math.max(
-    0,
-    width - wLineNumbers - W_SCROLL - ANNOTATOR_LEFT_MARGIN_PX
-  );
+  const wTextArea = Math.max(0, width - wLineNumbers - W_SCROLL - ANNOTATOR_LEFT_MARGIN_PX);
 
   const [isSelectingText, setIsSelectingText] = useState<boolean>(false);
 
@@ -265,11 +248,7 @@ export const TextAnnotator = ({
   useEffect(() => {
     if (!annotator || !setStoredAnnotatorScrollPosition) return;
     annotator.onScroll(() => saveScrollPositionOnScrollEnd());
-  }, [
-    annotator,
-    setStoredAnnotatorScrollPosition,
-    saveScrollPositionOnScrollEnd,
-  ]);
+  }, [annotator, setStoredAnnotatorScrollPosition, saveScrollPositionOnScrollEnd]);
 
   useEffect(() => {
     if (annotator) {
@@ -287,9 +266,51 @@ export const TextAnnotator = ({
   const [selectedText, setSelectedText] = useState<string>("");
   const [selectedAnchors, setSelectedAnchors] = useState<Tag[]>([]);
   const [selectionStartIndex, setSelectionStartIndex] = useState<number>(-1);
-  const [storedEntities, setStoredEntities] = useState<
-    Record<string, IEntity | false>
-  >({});
+  const [storedEntities, setStoredEntities] = useState<Record<string, IEntity | false>>({});
+
+  /** XML (RAW) mode: pointer over `<entityId>` / `</entityId>` markup → preview chip at cursor */
+  const [xmlMarkupAnchorHover, setXmlMarkupAnchorHover] = useState<{
+    entityId: string;
+    x: number;
+    y: number;
+  } | null>(null);
+
+  const xmlMarkupPreviewPointerInsideRef = useRef(false);
+  const xmlMarkupAnchorHoverClearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const documentEntityIds = useMemo(() => {
+    const ids = new Set<string>();
+    if (dataDocument?.entityIds) {
+      for (const list of Object.values(dataDocument.entityIds)) {
+        for (const id of list) {
+          ids.add(id);
+        }
+      }
+    }
+    return ids;
+  }, [dataDocument?.entityIds]);
+
+  // following 3 useEffects are related to XML markup anchor hover preview
+  // necessary to preserve the EntityTag preview when leaving the <id> markup
+  useEffect(() => {
+    return () => {
+      if (xmlMarkupAnchorHoverClearTimerRef.current !== null) {
+        clearTimeout(xmlMarkupAnchorHoverClearTimerRef.current);
+        xmlMarkupAnchorHoverClearTimerRef.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (annotatorMode !== EditMode.RAW) {
+      if (xmlMarkupAnchorHoverClearTimerRef.current !== null) {
+        clearTimeout(xmlMarkupAnchorHoverClearTimerRef.current);
+        xmlMarkupAnchorHoverClearTimerRef.current = null;
+      }
+      xmlMarkupPreviewPointerInsideRef.current = false;
+      setXmlMarkupAnchorHover(null);
+    }
+  }, [annotatorMode]);
 
   const handleCreateStatement = (
     text: string = "",
@@ -309,10 +330,7 @@ export const TextAnnotator = ({
       // filter only Statements
       const statementAnchors = Array.from(
         new Map(
-          collectStatementAnchors(dataDocument.anchors).map((anchor) => [
-            anchor.anchor,
-            anchor,
-          ])
+          collectStatementAnchors(dataDocument.anchors).map((anchor) => [anchor.anchor, anchor])
         ).values()
       );
       const territoryStatements = territory?.statements || [];
@@ -336,15 +354,11 @@ export const TextAnnotator = ({
         territoryStatements.findIndex(
           (statement) => statement.id === lastAnchorBeforeIndex?.anchor
         ) ?? -1;
-      const newOrder = getStatementOrderByIndex(
-        lastIndexBeforeHighlight + 1,
-        territoryStatements
-      );
+      const newOrder = getStatementOrderByIndex(lastIndexBeforeHighlight + 1, territoryStatements);
 
       if (userData && territory && statementCreateMutation) {
         if (entityCreateModalProps) {
-          const { label, detail, territoryId, language } =
-            entityCreateModalProps;
+          const { label, detail, territoryId, language } = entityCreateModalProps;
           const newStatement: IStatement = CStatement(
             userData.role,
             {
@@ -381,8 +395,7 @@ export const TextAnnotator = ({
   const [isSaving, setIsSaving] = useState<boolean>(false);
   // isSavingWithoutRefresh is the way to preserve the saving state while not refreshing the annotator
   // e.g. when updating an anchor elvl
-  const [isSavingWithoutRefresh, setIsSavingWithoutRefresh] =
-    useState<boolean>(false);
+  const [isSavingWithoutRefresh, setIsSavingWithoutRefresh] = useState<boolean>(false);
 
   // implementation of draggable menu
   const [menuDragOffset, setMenuDragOffset] = useState({ x: 0, y: 0 });
@@ -459,39 +472,36 @@ export const TextAnnotator = ({
     [endMenuDrag]
   );
 
-  const handleMenuDragPointerMove = useCallback(
-    (e: React.PointerEvent<HTMLDivElement>) => {
-      const session = menuDragSessionRef.current;
-      if (!session || e.pointerId !== session.pointerId) return;
-      e.preventDefault();
-      const page = document.getElementById("page");
-      const menuEl = menuDraggableRef.current;
-      let px = session.originX + (e.clientX - session.startClientX);
-      let py = session.originY + (e.clientY - session.startClientY);
+  const handleMenuDragPointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    const session = menuDragSessionRef.current;
+    if (!session || e.pointerId !== session.pointerId) return;
+    e.preventDefault();
+    const page = document.getElementById("page");
+    const menuEl = menuDraggableRef.current;
+    let px = session.originX + (e.clientX - session.startClientX);
+    let py = session.originY + (e.clientY - session.startClientY);
 
-      if (page && menuEl) {
-        const pr = page.getBoundingClientRect();
-        const pad = ANNOTATOR_MENU_PAGE_PADDING;
-        const mr = menuEl.getBoundingClientRect();
-        const cur = menuDragOffsetRef.current;
-        const innerLeft = (x: number) => mr.left + (x - cur.x);
-        const innerTop = (y: number) => mr.top + (y - cur.y);
-        for (let i = 0; i < 4; i++) {
-          const l = innerLeft(px);
-          const t = innerTop(py);
-          const r = l + mr.width;
-          const b = t + mr.height;
-          if (l < pr.left + pad) px += pr.left + pad - l;
-          if (t < pr.top + pad) py += pr.top + pad - t;
-          if (r > pr.right - pad) px -= r - (pr.right - pad);
-          if (b > pr.bottom - pad) py -= b - (pr.bottom - pad);
-        }
+    if (page && menuEl) {
+      const pr = page.getBoundingClientRect();
+      const pad = ANNOTATOR_MENU_PAGE_PADDING;
+      const mr = menuEl.getBoundingClientRect();
+      const cur = menuDragOffsetRef.current;
+      const innerLeft = (x: number) => mr.left + (x - cur.x);
+      const innerTop = (y: number) => mr.top + (y - cur.y);
+      for (let i = 0; i < 4; i++) {
+        const l = innerLeft(px);
+        const t = innerTop(py);
+        const r = l + mr.width;
+        const b = t + mr.height;
+        if (l < pr.left + pad) px += pr.left + pad - l;
+        if (t < pr.top + pad) py += pr.top + pad - t;
+        if (r > pr.right - pad) px -= r - (pr.right - pad);
+        if (b > pr.bottom - pad) py -= b - (pr.bottom - pad);
       }
+    }
 
-      setMenuDragOffset({ x: px, y: py });
-    },
-    []
-  );
+    setMenuDragOffset({ x: px, y: py });
+  }, []);
 
   const handleMenuDragPointerUp = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
@@ -500,30 +510,30 @@ export const TextAnnotator = ({
     [endMenuDrag]
   );
 
-  /** Keeps keyboard focus on the annotator canvas when using menu controls; skips inputs so EntitySuggester stays typable. */
-  const handleMenuPointerDownCapture = useCallback(
-    (e: React.PointerEvent<HTMLDivElement>) => {
-      const target = e.target as HTMLElement;
-      if (
-        target.closest(
-          "input, textarea, select, [contenteditable='true'], label"
-        )
-      ) {
-        return;
-      }
-      e.preventDefault();
-      queueMicrotask(() => {
-        mainCanvas.current?.focus({ preventScroll: true });
-      });
-    },
-    []
-  );
+  /** Keeps keyboard focus on the annotator canvas when using menu controls; skips inputs and react-select (BaseDropdown) so they stay interactive. */
+  // const handleMenuPointerDownCapture = useCallback(
+  //   (e: React.PointerEvent<HTMLDivElement>) => {
+  //     const target = e.target as HTMLElement;
+  //     if (
+  //       target.closest(
+  //         "input, textarea, select, [contenteditable='true'], label, .react-select-container"
+  //       )
+  //     ) {
+  //       return;
+  //     }
+  //     e.preventDefault();
+  //     queueMicrotask(() => {
+  //       mainCanvas.current?.focus({ preventScroll: true });
+  //     });
+  //   },
+  //   []
+  // );
 
   // quiet does not trigger a toast notification
-  const handleSaveNewContent = (
+  const handleSaveNewContent = async (
     quiet: boolean,
     skipRefresh: boolean = false
-  ) => {
+  ): Promise<void> => {
     if (annotator && documentId) {
       if (skipRefresh) {
         setIsSavingWithoutRefresh(true);
@@ -531,23 +541,15 @@ export const TextAnnotator = ({
         setIsSaving(true);
       }
 
-      if (quiet) {
-        updateDocumentMutationQuiet.mutate({
-          id: documentId,
-          doc: {
-            ...dataDocument,
-            content: annotator.text.value,
-          },
-        });
-      } else {
-        updateDocumentMutation.mutate({
-          id: documentId,
-          doc: {
-            ...dataDocument,
-            content: annotator.text.value,
-          },
-        });
-      }
+      const mutation = quiet ? updateDocumentMutationQuiet : updateDocumentMutation;
+
+      await mutation.mutateAsync({
+        id: documentId,
+        doc: {
+          ...dataDocument,
+          content: annotator.text.value,
+        },
+      });
     }
   };
 
@@ -579,9 +581,7 @@ export const TextAnnotator = ({
     queryKey: ["anchorEntities", selectedAnchors],
     queryFn: async () => {
       const uniqueAnchors = [...new Set(selectedAnchors)];
-      const entities = await api.entitiesGet(
-        uniqueAnchors.map((anchor) => anchor.getTagName())
-      );
+      const entities = await api.entitiesGet(uniqueAnchors.map((anchor) => anchor.getTagName()));
 
       const data = entities.data ?? [];
 
@@ -597,7 +597,7 @@ export const TextAnnotator = ({
     enabled: api.isLoggedIn() && selectedAnchors.length > 0,
   });
 
-  const handleAddAnchor = (entityId: string, elvl?: EntityEnums.Elvl) => {
+  const handleAddAnchor = async (entityId: string, elvl?: EntityEnums.Elvl): Promise<void> => {
     annotator?.addAnchor(
       entityId,
       elvl
@@ -606,7 +606,7 @@ export const TextAnnotator = ({
           }
         : {}
     );
-    handleSaveNewContent(true);
+    await handleSaveNewContent(true);
     handleRefreshEntityAndStatement(entityId);
     toast.info(`Anchor created ${entityId}.`);
   };
@@ -634,15 +634,79 @@ export const TextAnnotator = ({
       return;
     }
 
+    // statement anchor hover to highlight the statement in the statement list (HIGHLIGHT mode)
+    const registerAnchorHover = (a: Annotator) => {
+      a.onAnchorHover((tags: Tag[]) => {
+        const cb = onStatementAnchorHoverRef.current;
+        if (!cb) {
+          return;
+        }
+        const id = tags.length > 0 ? tags[tags.length - 1].getTagName() : null;
+        cb(id);
+      });
+    };
+
+    // XML markup anchor hover to preview the entity tag when hovering over the <id> markup (RAW mode)
+    const registerAnchorTagMarkupHover = (a: Annotator) => {
+      a.onAnchorTagHover((tag: Tag | null, position: { x: number; y: number } | null) => {
+        if (annotatorModeRef.current !== EditMode.RAW) {
+          return;
+        }
+        const clearScheduled = xmlMarkupAnchorHoverClearTimerRef;
+        const cancelClear = () => {
+          if (clearScheduled.current !== null) {
+            clearTimeout(clearScheduled.current);
+            clearScheduled.current = null;
+          }
+        };
+        const scheduleClear = () => {
+          cancelClear();
+          clearScheduled.current = setTimeout(() => {
+            clearScheduled.current = null;
+            if (!xmlMarkupPreviewPointerInsideRef.current) {
+              setXmlMarkupAnchorHover(null);
+            }
+          }, 200);
+        };
+
+        if (!tag || !position) {
+          if (xmlMarkupPreviewPointerInsideRef.current) {
+            return;
+          }
+          scheduleClear();
+          return;
+        }
+        cancelClear();
+        const entityId = tag.getTagName();
+        if (!documentEntityIds.has(entityId)) {
+          setXmlMarkupAnchorHover(null);
+          return;
+        }
+        setXmlMarkupAnchorHover({
+          entityId,
+          x: position.x,
+          y: position.y,
+        });
+      });
+    };
+
+    const applyCanvasTheme = (a: Annotator) => {
+      a.fontColor = theme.color.black;
+      a.bgColor = "transparent";
+      a.setSelectStyle("turquoise", 0.8, theme.color.black);
+      a.setHoverHighlightStyle({
+        color: theme.color.entityS,
+        opacity: 0.25,
+      });
+    };
+
     // Check if the document content has actually changed
     const currentContent = annotator?.text?.value;
     const newContent = dataDocument?.content ?? "no text";
 
     const reuseExistingInstance = (contentForLocalState: string = newContent) => {
       if (!annotator) return;
-      annotator.fontColor = theme.color.black;
-      annotator.bgColor = "transparent";
-      annotator.setSelectStyle("turquoise", 0.8, theme.color.black);
+      applyCanvasTheme(annotator);
 
       annotator.onHighlight((entityId) => {
         if (dataDocument) {
@@ -657,6 +721,9 @@ export const TextAnnotator = ({
           );
         }
       });
+
+      registerAnchorHover(annotator);
+      registerAnchorTagMarkupHover(annotator);
 
       if (localTextContent !== contentForLocalState) {
         setLocalTextContent(contentForLocalState);
@@ -680,13 +747,10 @@ export const TextAnnotator = ({
       dataDocument?.id === documentId &&
       annotatorLoadedForDocIdRef.current === documentId
     ) {
-      queryClient.setQueryData<IDocument | undefined>(
-        ["document", documentId],
-        (old) => {
-          if (!old || old.id !== documentId) return old;
-          return { ...old, content: currentContent };
-        }
-      );
+      queryClient.setQueryData<IDocument | undefined>(["document", documentId], (old) => {
+        if (!old || old.id !== documentId) return old;
+        return { ...old, content: currentContent };
+      });
       reuseExistingInstance(currentContent);
       return;
     }
@@ -699,10 +763,7 @@ export const TextAnnotator = ({
       RATIO
     );
 
-    newAnnotator.fontColor = theme.color.black;
-    newAnnotator.bgColor = "transparent";
-
-    newAnnotator.setSelectStyle("turquoise", 0.8, theme.color.black);
+    applyCanvasTheme(newAnnotator);
 
     if (scroller?.current) {
       newAnnotator.addScroller(scroller.current);
@@ -729,6 +790,9 @@ export const TextAnnotator = ({
         );
       }
     });
+
+    registerAnchorHover(newAnnotator);
+    registerAnchorTagMarkupHover(newAnnotator);
 
     newAnnotator.onTextChanged((text) => {
       setLocalTextContent(text);
@@ -760,14 +824,7 @@ export const TextAnnotator = ({
     if (!dataDocumentIsFetching && !isSaving) {
       refreshAnnotator();
     }
-  }, [
-    displayLineNumbers,
-    hlEntities ?? [],
-    dataDocumentIsFetching,
-    theme,
-    dataDocument,
-    isSaving,
-  ]);
+  }, [displayLineNumbers, hlEntities ?? [], dataDocumentIsFetching, theme, dataDocument, isSaving]);
 
   // Resize the annotator when the width or height changes
   useEffect(() => {
@@ -782,10 +839,7 @@ export const TextAnnotator = ({
     }
   }, [width]);
 
-  const onCreateTerritory = (
-    mode: TerritoryCreateModalType,
-    elvl: EntityEnums.Elvl
-  ) => {
+  const onCreateTerritory = (mode: TerritoryCreateModalType, elvl: EntityEnums.Elvl) => {
     setTerritoryCreateModalType(mode);
     setTerritoryElvl(elvl);
   };
@@ -802,7 +856,7 @@ export const TextAnnotator = ({
     return "new Territory";
   }, [territoryCreateModalType, territory]);
 
-  const onCreateStatement = (
+  const onCreateStatement = async (
     elvl: EntityEnums.Elvl,
     // following props are only for creation from EntitySuggester -> EntityCreateModal
     entityCreateModalProps?: {
@@ -811,10 +865,10 @@ export const TextAnnotator = ({
       territoryId: string;
       language: EntityEnums.Language;
     }
-  ) => {
+  ): Promise<void> => {
     if (handleCreateStatement && selectedText && selectionStartIndex !== -1) {
       const newStatementId = uuidv4();
-      handleAddAnchor(newStatementId, elvl);
+      await handleAddAnchor(newStatementId, elvl);
       // remove linebreaks from text
       const validatedText = selectedText.replace(/\n/g, " ");
       handleCreateStatement(
@@ -875,14 +929,13 @@ export const TextAnnotator = ({
     ];
   }, [isMenuDisplayed]);
 
-  const { refs: menuFloatingRefs, floatingStyles: menuFloatingStyles } =
-    useFloating({
-      open: isMenuDisplayed,
-      placement: "bottom",
-      strategy: "fixed",
-      whileElementsMounted: autoUpdate,
-      middleware: annotatorMenuMiddleware,
-    });
+  const { refs: menuFloatingRefs, floatingStyles: menuFloatingStyles } = useFloating({
+    open: isMenuDisplayed,
+    placement: "bottom",
+    strategy: "fixed",
+    whileElementsMounted: autoUpdate,
+    middleware: annotatorMenuMiddleware,
+  });
 
   useLayoutEffect(() => {
     if (!isMenuDisplayed) return;
@@ -903,23 +956,17 @@ export const TextAnnotator = ({
 
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [searchOccurences, setSearchOccurences] = useState<
-    | { segmentIndex: number; lineIndex: number; start: number; end: number }[]
-    | null
+    { segmentIndex: number; lineIndex: number; start: number; end: number }[] | null
   >(null);
   const [isRegexMode, setIsRegexMode] = useState<boolean>(false);
-  const [isCaseSensitiveMode, setIsCaseSensitiveMode] =
-    useState<boolean>(false);
-  const [isExtendToWholeWordMode, setIsExtendToWholeWordMode] =
-    useState<boolean>(false);
-  const [isWholeWordOnlyMode, setIsWholeWordOnlyMode] =
-    useState<boolean>(false);
+  const [isCaseSensitiveMode, setIsCaseSensitiveMode] = useState<boolean>(false);
+  const [isExtendToWholeWordMode, setIsExtendToWholeWordMode] = useState<boolean>(false);
+  const [isWholeWordOnlyMode, setIsWholeWordOnlyMode] = useState<boolean>(false);
   const [searchActiveOccurence, setSearchActiveOccurence] = useState<number>(0);
 
   // annotate tool
   // entity to anchor
-  const [entityToAnchor, setEntityToAnchor] = useState<IResponseEntity | null>(
-    null
-  );
+  const [entityToAnchor, setEntityToAnchor] = useState<IResponseEntity | null>(null);
   // does the pre-selected anchor exist in the current selection
   const [currentAnchorExist, setCurrentAnchorExist] = useState(false);
 
@@ -934,11 +981,7 @@ export const TextAnnotator = ({
   useEffect(() => {
     if (!entityToAnchor) {
       setCurrentAnchorExist(false);
-    } else if (
-      selectedAnchors.some(
-        (anchor) => anchor.getTagName() === entityToAnchor?.id
-      )
-    ) {
+    } else if (selectedAnchors.some((anchor) => anchor.getTagName() === entityToAnchor?.id)) {
       setCurrentAnchorExist(true);
     } else {
       setCurrentAnchorExist(false);
@@ -978,11 +1021,7 @@ export const TextAnnotator = ({
   }, [annotator, dataDocument]);
 
   if (dataDocumentError) {
-    return (
-      <StyledInfoText>
-        Error loading document: {dataDocumentError.message}
-      </StyledInfoText>
-    );
+    return <StyledInfoText>Error loading document: {dataDocumentError.message}</StyledInfoText>;
   }
 
   return (
@@ -1031,7 +1070,7 @@ export const TextAnnotator = ({
       >
         <StyledCanvasWrapper style={{ position: "relative" }}>
           {isMenuDisplayed && (
-            <FloatingPortal id="app">
+            <FloatingPortal id="page">
               <StyledAnnotatorMenu
                 ref={(node) => {
                   menuFloatingRefs.setFloating(node);
@@ -1040,7 +1079,7 @@ export const TextAnnotator = ({
               >
                 <StyledAnnotatorMenuDraggable
                   ref={menuDraggableRef}
-                  onPointerDownCapture={handleMenuPointerDownCapture}
+                  // onPointerDownCapture={handleMenuPointerDownCapture}
                   style={{
                     transform: `translate(${menuDragOffset.x}px, ${menuDragOffset.y}px)`,
                   }}
@@ -1066,30 +1105,63 @@ export const TextAnnotator = ({
                       onRemoveAnchor={onRemoveAnchor}
                       onUpdateAnchor={onUpdateAnchor}
                       isTextInsideThisT={selectedAnchors.some(
-                        (anchor) =>
-                          anchor.getTagName() === thisTerritoryEntityId
+                        (anchor) => anchor.getTagName() === thisTerritoryEntityId
                       )}
                       activeTerritoryId={thisTerritoryEntityId}
-                      onCreateActiveTAnchor={(elvl) => {
-                        handleAddAnchor(thisTerritoryEntityId ?? "", elvl);
+                      onCreateActiveTAnchor={async (elvl) => {
+                        await handleAddAnchor(thisTerritoryEntityId ?? "", elvl);
                       }}
                       canCreateActiveTAnchor={
-                        !dataDocument?.entityIds.T.includes(
-                          thisTerritoryEntityId ?? ""
-                        )
+                        !dataDocument?.entityIds.T.includes(thisTerritoryEntityId ?? "")
                       }
                       hasParentT={hasParentT}
                       territory={territory}
                       disableCreate={disableCreate}
-                      isLoading={
-                        isSaving ||
-                        isSavingWithoutRefresh ||
-                        isFetchingAnchorEntities
-                      }
+                      isLoading={isSaving || isSavingWithoutRefresh || isFetchingAnchorEntities}
                     />
                   )}
                 </StyledAnnotatorMenuDraggable>
               </StyledAnnotatorMenu>
+            </FloatingPortal>
+          )}
+
+          {xmlMarkupAnchorHover && annotatorMode === EditMode.RAW && api.isLoggedIn() && (
+            <FloatingPortal id="page">
+              <div
+                style={{
+                  position: "fixed",
+                  left: xmlMarkupAnchorHover.x - 35,
+                  top: xmlMarkupAnchorHover.y + 12,
+                  zIndex: 10050,
+                  pointerEvents: "auto",
+                  maxWidth: 340,
+                  borderRadius: 4,
+                  backgroundColor: theme.color.white,
+                  boxShadow: "0 4px 14px rgba(0,0,0,0.12)",
+                  padding: "4px 8px",
+                }}
+                onMouseEnter={() => {
+                  xmlMarkupPreviewPointerInsideRef.current = true;
+                  if (xmlMarkupAnchorHoverClearTimerRef.current !== null) {
+                    clearTimeout(xmlMarkupAnchorHoverClearTimerRef.current);
+                    xmlMarkupAnchorHoverClearTimerRef.current = null;
+                  }
+                }}
+                onMouseLeave={() => {
+                  xmlMarkupPreviewPointerInsideRef.current = false;
+                  if (xmlMarkupAnchorHoverClearTimerRef.current !== null) {
+                    clearTimeout(xmlMarkupAnchorHoverClearTimerRef.current);
+                  }
+                  xmlMarkupAnchorHoverClearTimerRef.current = setTimeout(() => {
+                    xmlMarkupAnchorHoverClearTimerRef.current = null;
+                    if (!xmlMarkupPreviewPointerInsideRef.current) {
+                      setXmlMarkupAnchorHover(null);
+                    }
+                  }, 200);
+                }}
+              >
+                <EntityTagById entityId={xmlMarkupAnchorHover.entityId} disableTooltip={false} />
+              </div>
             </FloatingPortal>
           )}
 
@@ -1139,11 +1211,7 @@ export const TextAnnotator = ({
                   <FaPen size={11} />
                 </StyledDisplayModeButtonIconWrapper>
               }
-              label={
-                !annotatorWidthTooNarrow
-                  ? editModeDisplayLabel[EditMode.HIGHLIGHT]
-                  : ""
-              }
+              label={!annotatorWidthTooNarrow ? editModeDisplayLabel[EditMode.HIGHLIGHT] : ""}
               color="success"
               inverted={annotatorMode !== EditMode.HIGHLIGHT}
               onClick={() => {
@@ -1162,11 +1230,7 @@ export const TextAnnotator = ({
                 </StyledDisplayModeButtonIconWrapper>
               }
               color="success"
-              label={
-                !annotatorWidthTooNarrow
-                  ? editModeDisplayLabel[EditMode.SEMI]
-                  : ""
-              }
+              label={!annotatorWidthTooNarrow ? editModeDisplayLabel[EditMode.SEMI] : ""}
               inverted={annotatorMode !== EditMode.SEMI}
               onClick={() => {
                 setAnnotatorMode(EditMode.SEMI);
@@ -1184,11 +1248,7 @@ export const TextAnnotator = ({
                 </StyledDisplayModeButtonIconWrapper>
               }
               color="success"
-              label={
-                !annotatorWidthTooNarrow
-                  ? editModeDisplayLabel[EditMode.RAW]
-                  : ""
-              }
+              label={!annotatorWidthTooNarrow ? editModeDisplayLabel[EditMode.RAW] : ""}
               inverted={annotatorMode !== EditMode.RAW}
               onClick={() => {
                 setAnnotatorMode(EditMode.RAW);
@@ -1205,10 +1265,7 @@ export const TextAnnotator = ({
               inverted
               icon={<FaTrash />}
               disabled={
-                !isChangeMade ||
-                isSaving ||
-                isSavingWithoutRefresh ||
-                dataDocumentIsFetching
+                !isChangeMade || isSaving || isSavingWithoutRefresh || dataDocumentIsFetching
               }
               onClick={() => {
                 if (dataDocument?.content) {
@@ -1223,10 +1280,7 @@ export const TextAnnotator = ({
                 color="info"
                 icon={<FaRegSave size={14} />}
                 disabled={
-                  !isChangeMade ||
-                  isSaving ||
-                  isSavingWithoutRefresh ||
-                  dataDocumentIsFetching
+                  !isChangeMade || isSaving || isSavingWithoutRefresh || dataDocumentIsFetching
                 }
                 onClick={() => {
                   handleSaveNewContent(false);
@@ -1247,12 +1301,10 @@ export const TextAnnotator = ({
           allowedEntityClasses={[EntityEnums.Class.Territory]}
           labelTyped={newTerritoryName}
           parentTerritory={
-            territoryCreateModalType === "sibling-T"
-              ? dataParentTerritory
-              : territory
+            territoryCreateModalType === "sibling-T" ? dataParentTerritory : territory
           }
-          onMutationSuccess={(entity) => {
-            handleAddAnchor(entity.id, territoryElvl);
+          onMutationSuccess={async (entity) => {
+            await handleAddAnchor(entity.id, territoryElvl);
             setTerritoryCreateModalType(false);
             setTerritoryElvl(EntityEnums.Elvl.Textual);
             toast.info(`${newTerritoryName} created!`);

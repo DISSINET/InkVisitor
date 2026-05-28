@@ -3,6 +3,10 @@ import { getEnv, TableSchema } from "./common";
 import colors from "colors/safe";
 import * as fs from "fs";
 import * as path from "path";
+import { createReadStream } from "fs";
+const StreamArray = require("stream-json/streamers/StreamArray.js") as {
+  withParser: (opts?: unknown) => NodeJS.ReadWriteStream;
+};
 
 export interface IDbConfig {
   name: string;
@@ -216,74 +220,64 @@ export class DbHelper {
     const stats = fs.statSync(dataFilePath);
     const fileSizeMB = stats.size / (1024 * 1024);
     console.log(colors.cyan(`Importing ${table.tableName} (${fileSizeMB.toFixed(2)} MB)...`));
+    console.log(colors.gray(`  Streaming JSON (no full load)...`));
 
-    // First pass: count total entries by loading and parsing the file
-    console.log(colors.gray(`  Counting total entries...`));
-    const totalEntries = await this.countJsonEntries(dataFilePath);
-    console.log(colors.gray(`  Found ${totalEntries} entries to import`));
-
-    // For large files, we'll load the data in chunks to avoid memory issues
-    // but still use proper JSON parsing for accuracy
-    const batchSize = 1000; // Larger batch size since we're parsing properly
+    const BATCH_SIZE = 1000;
     const startTime = Date.now();
     let imported = 0;
-    let skipped = 0;
+    let batch: any[] = [];
+    let pendingFlush: Promise<void> = Promise.resolve();
 
-    try {
-      // Load the entire file and parse it
-      console.log(colors.gray(`  Loading and parsing JSON file...`));
-      const fileContent = fs.readFileSync(dataFilePath, 'utf8');
-      const data = JSON.parse(fileContent);
-      
-      if (!Array.isArray(data)) {
-        throw new Error('Expected JSON array format');
+    const flushBatch = async (): Promise<void> => {
+      if (batch.length === 0) return;
+      let toInsert = batch;
+      batch = [];
+      if (table.transform && typeof table.transform === "function") {
+        const tempTable = { ...table, data: toInsert };
+        tempTable.transform!();
+        toInsert = tempTable.data;
       }
+      try {
+        await r.table(table.tableName).insert(toInsert).run(this.conn);
+        imported += toInsert.length;
+        const elapsed = (Date.now() - startTime) / 1000;
+        const rate = elapsed > 0 ? (imported / elapsed).toFixed(0) : "0";
+        process.stdout.write(`\r  Imported ${imported} records - ${rate} records/sec...`);
+      } catch (error) {
+        await this.importBatchIndividually(toInsert, table.tableName);
+        imported += toInsert.length;
+      }
+    };
 
-      console.log(colors.gray(`  Starting batch import...`));
-      
-      // Process data in batches
-      for (let start = 0; start < data.length; start += batchSize) {
-        const end = Math.min(start + batchSize, data.length);
-        const batch = data.slice(start, end);
-        
-        // Apply transformations if needed
-        if (table.transform && typeof table.transform === 'function') {
-          const tempTable = { ...table, data: batch };
-          if (tempTable.transform) {
-            tempTable.transform();
-          }
-          batch.splice(0, batch.length, ...tempTable.data);
+    return new Promise((resolve, reject) => {
+      const pipeline = createReadStream(dataFilePath).pipe(StreamArray.withParser());
+      pipeline.on("data", ({ value }: { value: any }) => {
+        batch.push(value);
+        if (batch.length >= BATCH_SIZE) {
+          pipeline.pause();
+          pendingFlush = pendingFlush
+            .then(() => flushBatch())
+            .then(() => {
+              pipeline.resume();
+            })
+            .catch((err) => {
+              pipeline.emit("error", err);
+            });
         }
-        
-        try {
-          await r.table(table.tableName).insert(batch).run(this.conn);
-          imported += batch.length;
-          skipped += (batch.length - batch.length);
-          
-          const elapsed = (Date.now() - startTime) / 1000;
-          const recordsPerSecond = (imported / elapsed).toFixed(0);
-          const percentage = ((imported / totalEntries) * 100).toFixed(1);
-          process.stdout.write(`\r  Imported ${imported}/${totalEntries} records (${percentage}%) - ${recordsPerSecond} records/sec...`);
-        } catch (error) {
-          console.error(colors.red(`\nError importing batch ${start}-${end}:`), error instanceof Error ? error.message : String(error));
-          // Try importing records one by one to identify problematic ones
-          await this.importBatchIndividually(batch, table.tableName);
-          imported += batch.length;
-          skipped += (batch.length - batch.length);
-        }
-      }
-      
-      const totalTime = (Date.now() - startTime) / 1000;
-      const avgRecordsPerSecond = (imported / totalTime).toFixed(0);
-      console.log(`\n  Successfully imported ${imported}/${totalEntries} records to table ${table.tableName} in ${totalTime.toFixed(1)}s (avg: ${avgRecordsPerSecond} records/sec)`);
-      if (skipped > 0) {
-        console.log(colors.yellow(`  Skipped ${skipped} records due to circular references or other issues`));
-      }
-      
-    } catch (error) {
-      console.error(colors.red(`Error importing large data file ${dataFilePath}:`), error);
-      throw error;
-    }
+      });
+      pipeline.on("end", () => {
+        pendingFlush
+          .then(() => flushBatch())
+          .then(() => {
+            const totalTime = (Date.now() - startTime) / 1000;
+            const avgRate = totalTime > 0 ? (imported / totalTime).toFixed(0) : "0";
+            console.log(`\n  Imported ${imported} records to ${table.tableName} in ${totalTime.toFixed(1)}s (avg: ${avgRate} records/sec)`);
+            resolve();
+          })
+          .catch(reject);
+      });
+      pipeline.on("error", reject);
+    });
   }
 
   /**

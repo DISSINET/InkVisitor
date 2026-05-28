@@ -1,11 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { List } from "react-window";
 import { v4 as uuidv4 } from "uuid";
 
@@ -15,23 +9,15 @@ import {
   IReference,
   IResponseQuery,
   IResponseQueryEntity,
-} from "@shared/types";
-import { Explore } from "@shared/types/query";
+} from "@inkvisitor/shared/types";
+import { Explore } from "@inkvisitor/shared/types/query";
 import api from "api";
-import {
-  Button,
-  Loader,
-  Modal,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-} from "components";
+import { Loader } from "components";
 import { CMetaProp } from "constructors";
 
-import { useResizeObserver, useTheme } from "hooks";
+import { useResizeObserver, useSearchParams, useTheme } from "hooks";
 import { ExploreAction, ExploreActionType } from "../state";
 import { ExplorerTableBatchActionModal } from "./ExplorerTableBatchActionModal/ExplorerTableBatchActionModal";
-import { ExplorerTableDetail } from "./ExplorerTableDetail/ExplorerTableDetail";
 import ExplorerTableNewColumnPanel from "./ExplorerTableNewColumnPanel/ExplorerTableNewColumnPanel";
 import { StyledBody, StyledTableWrapper } from "./ExplorerTableStyles";
 import ExploreTableControl from "./ExploreTableControl";
@@ -54,11 +40,7 @@ const OVERSCAN_ROWS = 10;
 const SCROLL_WINDOW_UPDATE_DEBOUNCE_MS = 150;
 
 // light CSS classes (avoid dynamic styled props in hot path)
-import { EntityTag } from "components/advanced/EntityTag/EntityTag";
-import {
-  clearRowCache,
-  useInvalidateExplorerQuery,
-} from "pages/Query/useQueryData";
+import { invalidateAllExplorerQueries, useInvalidateExplorerQuery } from "pages/Query/useQueryData";
 import "../../styles.css";
 import ExplorerTableRow from "./ExplorerTableRow";
 
@@ -72,6 +54,7 @@ interface ExplorerTable {
   onExport: (rowsSelected: number[], selectedColumnIds?: string[]) => void;
   stableSignature?: string;
   getCachedEntity?: (rowIndex: number) => IResponseQueryEntity | undefined;
+  onOpenEntityInDetail?: (entityId: string) => void;
 }
 export const ExplorerTable: React.FC<ExplorerTable> = ({
   state,
@@ -83,11 +66,11 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   height: heightBox,
   onExport,
   stableSignature,
+  onOpenEntityInDetail,
 }) => {
   const themeContext = useTheme();
-  const [lastData, setLastData] = useState<IResponseQuery | undefined>(
-    undefined
-  );
+  const { detailIdArray, clearAllDetailIds, selectedDetailId } = useSearchParams();
+  const [lastData, setLastData] = useState<IResponseQuery | undefined>(undefined);
   useEffect(() => {
     if (data && typeof data.total === "number") {
       setLastData(data);
@@ -101,7 +84,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     entityIds,
   } = data ?? lastData ?? { entities: [], total: 0, entityIds: [] };
 
-  const { columns, limit, offset } = state;
+  const { columns, limit, offset, filters } = state;
 
   const [total, setTotal] = useState(0);
 
@@ -123,14 +106,12 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
 
   // Compute the offset that matches the CURRENT data source (data or lastData)
   // This fixes the lag where renderWindow.offset is stale during the render cycle
-  const dataSourceOffset =
-    data && data.entities?.length > 0 ? offset : renderWindow.offset;
+  const dataSourceOffset = data && data.entities?.length > 0 ? offset : renderWindow.offset;
 
   const [batchActionSelected, setBatchActionSelected] = useState<BatchAction>(
     batchOptions[0].value
   );
   const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
-  const [detailsRowIndex, setDetailsRowIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (!isQueryFetching) {
@@ -138,30 +119,18 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     }
   }, [incomingTotal, isQueryFetching]);
 
+  useEffect(() => {
+    setRowsSelected([]);
+    setRowLastClicked(-1);
+  }, [filters]);
+
   const queryClient = useQueryClient();
   const updateEntityMutation = useMutation({
-    mutationFn: async (variables: {
-      entityId: string;
-      changes: Partial<IEntity>;
-    }) => await api.entityUpdate(variables.entityId, variables.changes),
+    mutationFn: async (variables: { entityId: string; changes: Partial<IEntity> }) =>
+      await api.entityUpdate(variables.entityId, variables.changes),
 
-    onSuccess: (_data, _variables) => {
-      if (stableSignature) {
-        queryClient.setQueriesData(
-          { queryKey: ["query", stableSignature] },
-          (old: IResponseQuery | undefined) => old
-        );
-      }
-
-      // Clear the custom row cache store
-      clearRowCache();
-      // Invalidate React Query cache
-      queryClient.invalidateQueries({
-        queryKey: ["query"],
-      });
-      queryClient.removeQueries({
-        queryKey: ["query"],
-      });
+    onSuccess: () => {
+      invalidateAllExplorerQueries(queryClient);
     },
   });
 
@@ -240,10 +209,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     [columns]
   );
 
-  const handleRowExpand = useCallback((rowId: number) => {
-    setDetailsRowIndex(rowId);
-  }, []);
-
   const {
     ref: contentRef,
     width: contentWidth,
@@ -253,35 +218,28 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   const headerHeight = 100;
   const heightTableBody = heightBox - headerHeight;
 
-  const handleRowSelect = useCallback(
-    (rowId: number, isWithShift: boolean = false) => {
-      setRowLastClicked(rowId);
+  const handleRowSelect = useCallback((rowId: number, isWithShift: boolean = false) => {
+    setRowLastClicked(rowId);
 
-      setRowsSelected((prev) => {
-        const isRowAlreadySelected = prev.includes(rowId);
+    setRowsSelected((prev) => {
+      const isRowAlreadySelected = prev.includes(rowId);
 
-        let newSelection = isRowAlreadySelected ? [] : [rowId];
+      let newSelection = isRowAlreadySelected ? [] : [rowId];
 
-        if (
-          isWithShift &&
-          rowLastClickedRef.current !== -1 &&
-          rowLastClickedRef.current !== rowId
-        ) {
-          const start = Math.min(rowLastClickedRef.current, rowId);
-          const end = Math.max(rowLastClickedRef.current, rowId);
-          const rangeSize = end - start + 1;
-          newSelection = Array.from({ length: rangeSize }, (_, i) => start + i);
-        }
+      if (isWithShift && rowLastClickedRef.current !== -1 && rowLastClickedRef.current !== rowId) {
+        const start = Math.min(rowLastClickedRef.current, rowId);
+        const end = Math.max(rowLastClickedRef.current, rowId);
+        const rangeSize = end - start + 1;
+        newSelection = Array.from({ length: rangeSize }, (_, i) => start + i);
+      }
 
-        if (isRowAlreadySelected) {
-          return prev.filter((selectedRow) => selectedRow !== rowId);
-        } else {
-          return [...new Set([...prev, ...newSelection])];
-        }
-      });
-    },
-    []
-  );
+      if (isRowAlreadySelected) {
+        return prev.filter((selectedRow) => selectedRow !== rowId);
+      } else {
+        return [...new Set([...prev, ...newSelection])];
+      }
+    });
+  }, []);
 
   const handleAllRowsSelect = (isSelected: boolean) => {
     if (isSelected) {
@@ -314,27 +272,21 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     return (
       columns.length * WIDTH_COLUMN_DEFAULT +
       WIDTH_COLUMN_FIRST -
-      columns.filter((column) => column.type === Explore.EExploreColumnType.EUC)
-        .length *
+      columns.filter((column) => column.type === Explore.EExploreColumnType.EUC).length *
         (WIDTH_COLUMN_DEFAULT - WIDTH_COLUMN_EUC)
     );
   }, [columns]);
 
-  const windowUpdateTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null
-  );
+  const windowUpdateTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Fixed row height - no dynamic measuring
 
   // Use server rows
-  const items: Array<IResponseQueryEntity | null> =
-    (entities as IResponseQueryEntity[]) || [];
+  const items: Array<IResponseQueryEntity | null> = (entities as IResponseQueryEntity[]) || [];
 
   const selectedEntityIds = useMemo(() => {
     const ids = entityIds ?? [];
-    return rowsSelected
-      .map((rowIndex) => ids[rowIndex])
-      .filter((id): id is string => Boolean(id));
+    return rowsSelected.map((rowIndex) => ids[rowIndex]).filter((id): id is string => Boolean(id));
   }, [rowsSelected, entityIds]);
 
   const stableEmptyRowProps = useMemo(() => ({}), []);
@@ -374,9 +326,9 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
             minWidth: "100%",
             height: HEIGHT_ROW_DEFAULT,
           }}
-          className={`qt-row ${isOdd ? " qt-row-odd" : ""}${
-            isSelected ? " qt-row-selected" : ""
-          }${isPlaceholder ? " qt-placeholder" : ""}`}
+          className={`qt-row ${isOdd ? " qt-row-odd" : ""}${isSelected ? " qt-row-selected" : ""}${
+            isPlaceholder ? " qt-placeholder" : ""
+          }`}
         >
           {isPlaceholder ? (
             <div
@@ -398,13 +350,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                   width: "4rem",
                 }}
               >
-                <Loader
-                  size={5}
-                  color={"primary"}
-                  show
-                  loaderStyle="beat"
-                  noBackground
-                />
+                <Loader size={5} color={"primary"} show loaderStyle="beat" noBackground />
               </div>
               <div>loading row</div>
               <div style={{ fontWeight: "bold" }}>{placeholderLabel}</div>
@@ -416,9 +362,9 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
               columns={columns}
               handleEditColumn={handleEditColumn}
               onRowSelect={handleRowSelect}
-              onExpand={handleRowExpand}
               isSelected={isSelected}
               isLastClicked={rowLastClicked === index}
+              onOpenEntityInDetail={onOpenEntityInDetail}
             />
           )}
         </div>
@@ -432,9 +378,9 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       columns,
       handleEditColumn,
       handleRowSelect,
-      handleRowExpand,
       rowLastClicked,
       getCachedEntity,
+      onOpenEntityInDetail,
     ]
   );
 
@@ -456,8 +402,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     const extendsBelow = targetEnd > currEnd + minDelta;
     const offsetChanged = Math.abs(targetStart - offset) >= minDelta;
     const limitChanged = Math.abs(cappedLimit - limit) >= minDelta;
-    const shouldUpdate =
-      extendsAbove || extendsBelow || offsetChanged || limitChanged;
+    const shouldUpdate = extendsAbove || extendsBelow || offsetChanged || limitChanged;
 
     if (windowUpdateTimeoutRef.current) {
       clearTimeout(windowUpdateTimeoutRef.current);
@@ -472,6 +417,10 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     }
   };
 
+  const handleCloseDetailsModal = () => {
+    clearAllDetailIds();
+  };
+
   return (
     <>
       <StyledTableWrapper
@@ -481,6 +430,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
         ref={contentRef}
       >
         <ExploreTableControl
+          isQueryFetching={isQueryFetching}
           setIsNewColumnOpen={setIsNewColumnOpen}
           isNewColumnOpen={isNewColumnOpen}
           batchActionSelected={batchActionSelected}
@@ -490,6 +440,8 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           rowsTotal={total}
           onAllRowsSelect={handleAllRowsSelect}
           onApplyBatchAction={handleApplyBatchAction}
+          filters={filters}
+          dispatch={dispatch}
         />
 
         <div
@@ -504,10 +456,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           {/* HEADER (sticky at top of vertical area, shared horizontal scroll) */}
           <div style={{ width: widthTable, minWidth: "100%" }}>
             {/* Alternatively, use the memoized header component below to minimize re-renders */}
-            <ExploreTableHeader
-              columns={columns}
-              onRemoveColumn={handleRemoveColumn}
-            />
+            <ExploreTableHeader columns={columns} onRemoveColumn={handleRemoveColumn} />
 
             {/* BODY (List handles Y; shares X with header via parent Scrollbar) */}
             <StyledBody
@@ -529,57 +478,12 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
             </StyledBody>
           </div>
         </div>
-
-        {/* {renderTableFooter()} */}
+        <ExplorerTableNewColumnPanel
+          open={isNewColumnOpen}
+          onClose={() => setIsNewColumnOpen(false)}
+          onCreateColumn={handleCreateColumn}
+        />
       </StyledTableWrapper>
-
-      {/* DETAILS MODAL */}
-      {detailsRowIndex !== null &&
-        items[detailsRowIndex - renderWindow.offset] && (
-          <Modal
-            showModal={
-              detailsRowIndex !== null &&
-              items[detailsRowIndex - renderWindow.offset] !== null
-            }
-            width={"fat"}
-            onClose={() => setDetailsRowIndex(null)}
-          >
-            <ModalHeader
-              title="Entity Detail"
-              content={
-                <div style={{ display: "grid" }}>
-                  <EntityTag
-                    fullWidth
-                    entity={
-                      (
-                        items[
-                          detailsRowIndex - renderWindow.offset
-                        ] as IResponseQueryEntity
-                      )?.entity
-                    }
-                  />
-                </div>
-              }
-              onClose={() => setDetailsRowIndex(null)}
-            />
-            <ModalContent enableScroll noPadding>
-              <ExplorerTableDetail
-                rowEntity={
-                  (
-                    items[
-                      detailsRowIndex - renderWindow.offset
-                    ] as IResponseQueryEntity
-                  ).entity
-                }
-                columns={columns}
-                isOdd={false}
-              />
-            </ModalContent>
-            <ModalFooter>
-              <Button label="Close" onClick={() => setDetailsRowIndex(null)} />
-            </ModalFooter>
-          </Modal>
-        )}
 
       {/* BATCH ACTION MODAL */}
       {isBatchModalOpen && (
@@ -598,15 +502,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           }}
         />
       )}
-
-      {/* NEW COLUMN */}
-      <div style={{ position: "relative" }}>
-        <ExplorerTableNewColumnPanel
-          open={isNewColumnOpen}
-          onClose={() => setIsNewColumnOpen(false)}
-          onCreateColumn={handleCreateColumn}
-        />
-      </div>
     </>
   );
 };

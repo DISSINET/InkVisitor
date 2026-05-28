@@ -1,6 +1,6 @@
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
 import { IDbModel } from "@models/common";
-import { ISetting, SettingsKey } from "@shared/types/settings";
+import { ISetting, SettingsKey } from "@inkvisitor/shared/types/settings";
 
 export class Setting implements ISetting, IDbModel {
   id: string;

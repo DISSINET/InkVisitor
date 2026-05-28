@@ -14,7 +14,7 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "paths": {
-      "@shared/*": ["./../shared/*"]
+      "@inkvisitor/shared/*": ["./../shared/*"]
     },
     "types": ["node"],
     "typeRoots": ["node_modules/@types"]

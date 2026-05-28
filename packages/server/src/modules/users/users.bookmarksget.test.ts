@@ -1,5 +1,5 @@
 import { testErroneousResponse } from "@modules/common.test";
-import { UserDoesNotExits } from "@shared/types/errors";
+import { UserDoesNotExits } from "@inkvisitor/shared/types/errors";
 import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
@@ -11,7 +11,7 @@ import Statement, {
 } from "@models/statement/statement";
 import { supertestConfig } from "..";
 import User from "@models/user/user";
-import { IBookmarkFolder } from "@shared/types";
+import { IBookmarkFolder } from "@inkvisitor/shared/types";
 import { pool } from "@middlewares/db";
 
 describe("Users bookmarksGet", function () {

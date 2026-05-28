@@ -1,4 +1,4 @@
-import { ValidationKey } from "@shared/enums/warning";
+import { ValidationKey } from "@inkvisitor/shared/enums/warning";
 
 export interface ISetting {
   id: SettingsKey;

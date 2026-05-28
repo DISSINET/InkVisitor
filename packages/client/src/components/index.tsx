@@ -32,6 +32,7 @@ import { Table } from "./basic/Table/Table";
 import { Tag } from "./basic/Tag/Tag";
 import { TagGroup } from "./basic/TagGroup/TagGroup";
 import { TemplateActionModal } from "./basic/TemplateActionModal/TemplateActionModal";
+import { Timestamp } from "./basic/Timestamp/Timestamp";
 import { Toast } from "./basic/Toast/Toast";
 import ToastWithLink from "./basic/Toast/ToastWithLink";
 import { Tooltip } from "./basic/Tooltip/Tooltip";
@@ -79,6 +80,7 @@ export {
   Tag,
   TagGroup,
   TemplateActionModal,
+  Timestamp,
   Toast,
   ToastWithLink,
   Tooltip,

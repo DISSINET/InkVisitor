@@ -1,5 +1,5 @@
-import { IResponseGeneric } from "@shared/types";
-import { getErrorByCode, IErrorSignature } from "@shared/types/errors";
+import { IResponseGeneric } from "@inkvisitor/shared/types";
+import { getErrorByCode, IErrorSignature } from "@inkvisitor/shared/types/errors";
 import { Response, Request, NextFunction } from "express";
 import { IRequest } from "src/custom_typings/request";
 

@@ -1,7 +1,7 @@
-import { IResponsePermission } from "@shared/types";
+import { IResponsePermission } from "@inkvisitor/shared/types";
 import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
 import { IDbModel } from "@models/common";
-import { HttpMethods, UserEnums } from "@shared/enums";
+import { HttpMethods, UserEnums } from "@inkvisitor/shared/enums";
 
 export default class AclPermission implements IDbModel, IResponsePermission {
   static table = "acl_permissions";

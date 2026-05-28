@@ -1,6 +1,6 @@
-import { EntityEnums } from "@shared/enums";
-import { IProp } from "@shared/types";
-import { IPropSpec } from "@shared/types";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { IProp } from "@inkvisitor/shared/types";
+import { IPropSpec } from "@inkvisitor/shared/types";
 import { fillArray, fillFlatObject, IModel } from "@models/common";
 import { randomUUID } from "crypto";
 

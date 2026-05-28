@@ -1,16 +1,17 @@
 import { IDbModel, fillFlatObject } from "@models/common";
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
-import { IAudit } from "@shared/types";
-import { InternalServerError } from "@shared/types/errors";
+import { IAudit, AuditScope } from "@inkvisitor/shared/types";
+import { InternalServerError } from "@inkvisitor/shared/types/errors";
 import { IRequest } from "../../custom_typings/request";
-import { DbEnums } from "@shared/enums";
-import { EventType } from "@shared/types/stats";
+import { DbEnums } from "@inkvisitor/shared/enums";
+import { EventType } from "@inkvisitor/shared/types/stats";
 
 export default class Audit implements IAudit, IDbModel {
   static table = "audits";
 
   id = "";
-  entityId = "";
+  modelId = "";
+  auditScope: AuditScope = AuditScope.Entity;
   user = "";
   date: Date = new Date();
   changes: object = {};
@@ -23,6 +24,14 @@ export default class Audit implements IAudit, IDbModel {
 
     fillFlatObject(this, { ...data });
     this.changes = data.changes as object;
+    const d = data as Record<string, unknown>;
+    if (!this.modelId && d.entityId != null) {
+      this.modelId = String(d.entityId);
+      this.auditScope = AuditScope.Entity;
+    } else if (!this.modelId && d.documentId != null) {
+      this.modelId = String(d.documentId);
+      this.auditScope = AuditScope.Document;
+    }
   }
 
   /**
@@ -88,12 +97,99 @@ export default class Audit implements IAudit, IDbModel {
     type: EventType
   ): Promise<boolean> {
     const entry = new Audit({
-      entityId,
+      modelId: entityId,
+      auditScope: AuditScope.Entity,
       user: req.getUserOrFail().id,
       changes: updateData,
       type: type,
     });
     return entry.save(req.db.connection);
+  }
+
+  /**
+   * Resolves the audit event type for a document save based on what changed.
+   * A single save produces a single typed audit, chosen by priority:
+   * anchor additions > anchor removals > anchor attribute edits > text changes
+   * > generic edit.
+   *
+   * Anchor changes are detected from the raw content tags so that anchors whose
+   * entity does not exist yet (e.g. a freshly anchored statement saved before
+   * its entity is created) are still recognised as anchor changes.
+   * @returns EventType the resolved event type
+   */
+  static resolveDocumentAuditType(params: {
+    anchorsAdded: boolean;
+    anchorsRemoved: boolean;
+    anchorAttributesChanged: boolean;
+    contentChanged: boolean;
+  }): EventType {
+    const { anchorsAdded, anchorsRemoved, anchorAttributesChanged, contentChanged } =
+      params;
+    if (anchorsAdded) {
+      return EventType.ANCHOR_ADD;
+    }
+    if (anchorsRemoved) {
+      return EventType.ANCHOR_DELETE;
+    }
+    if (anchorAttributesChanged) {
+      return EventType.ANCHOR_EDIT;
+    }
+    if (contentChanged) {
+      return EventType.TEXT_EDIT;
+    }
+    return EventType.EDIT;
+  }
+
+  static async createNewForDocument(
+    req: IRequest,
+    documentId: string,
+    type: EventType,
+    changes: object
+  ): Promise<boolean> {
+    const entry = new Audit({
+      modelId: documentId,
+      auditScope: AuditScope.Document,
+      user: req.getUserOrFail().id,
+      changes,
+      type,
+    });
+    return entry.save(req.db.connection);
+  }
+
+  /**
+   * Resolves the deletion event type for an audit scope. Document deletions are
+   * recorded as anchor removals (their anchors disappear with them), entity
+   * deletions as plain deletions. Both fold into the matching edit type in the
+   * stats (ANCHOR_DELETE -> ANCHOR_EDIT, DELETE -> EDIT).
+   */
+  static deletionEventType(scope: AuditScope): EventType {
+    return scope === AuditScope.Document
+      ? EventType.ANCHOR_DELETE
+      : EventType.DELETE;
+  }
+
+  /**
+   * Records the single, minimal audit written when an entity or document is
+   * deleted: a deletion marker with empty changes, typed per scope via
+   * deletionEventType.
+   * @param db rethinkdb Connection
+   * @param modelId id of the deleted entity/document
+   * @param userId id of the user performing the deletion
+   * @param scope audit scope (entity or document)
+   */
+  static async createDeletionAudit(
+    db: Connection | undefined,
+    modelId: string,
+    userId: string,
+    scope: AuditScope
+  ): Promise<void> {
+    await new Audit({
+      modelId,
+      auditScope: scope,
+      user: userId,
+      changes: {},
+      type: Audit.deletionEventType(scope),
+    }).save(db);
   }
 
   /**
@@ -109,7 +205,9 @@ export default class Audit implements IAudit, IDbModel {
   ): Promise<Audit | null> {
     const result = await rethink
       .table(Audit.table)
-      .getAll(entityId, { index: DbEnums.Indexes.AuditEntityId })
+      .getAll([AuditScope.Entity, entityId], {
+        index: DbEnums.Indexes.AuditScopeModelId,
+      })
       .orderBy(rethink.asc("date"))
       .limit(1)
       .run(db);
@@ -149,7 +247,9 @@ export default class Audit implements IAudit, IDbModel {
   ): Promise<Audit | null> {
     const result = await rethink
       .table(Audit.table)
-      .getAll(entityId, { index: DbEnums.Indexes.AuditEntityId })
+      .getAll([AuditScope.Entity, entityId], {
+        index: DbEnums.Indexes.AuditScopeModelId,
+      })
       .orderBy(rethink.desc("date"))
       .limit(1)
       .run(db);
@@ -171,12 +271,47 @@ export default class Audit implements IAudit, IDbModel {
   ): Promise<Audit[]> {
     const result = await rethink
       .table(Audit.table)
-      .getAll(entityId, { index: DbEnums.Indexes.AuditEntityId })
+      .getAll([AuditScope.Entity, entityId], {
+        index: DbEnums.Indexes.AuditScopeModelId,
+      })
       .orderBy(rethink.desc("date"))
       .limit(n)
       .run(dbConn);
 
     return result.map((r) => new Audit(r));
+  }
+
+  static async getLastNForDocument(
+    dbConn: Connection,
+    documentId: string,
+    n = 10
+  ): Promise<Audit[]> {
+    const result = await rethink
+      .table(Audit.table)
+      .getAll([AuditScope.Document, documentId], {
+        index: DbEnums.Indexes.AuditScopeModelId,
+      })
+      .orderBy(rethink.desc("date"))
+      .limit(n)
+      .run(dbConn);
+
+    return result.map((r) => new Audit(r));
+  }
+
+  static async getFirstForDocument(
+    db: Connection,
+    documentId: string
+  ): Promise<Audit | null> {
+    const result = await rethink
+      .table(Audit.table)
+      .getAll([AuditScope.Document, documentId], {
+        index: DbEnums.Indexes.AuditScopeModelId,
+      })
+      .orderBy(rethink.asc("date"))
+      .limit(1)
+      .run(db);
+
+    return result && result.length ? new Audit(result[0]) : null;
   }
 
   /**
@@ -193,10 +328,12 @@ export default class Audit implements IAudit, IDbModel {
       .run(db);
 
     const audits = result.map((data) => new Audit(data)) as Audit[];
+    const entityAudits = audits.filter((a) => a.auditScope === AuditScope.Entity);
     const byEntity = Object.values(
-      audits.reduce((acc, curr) => {
-        if (!acc[curr.entityId] || acc[curr.entityId].date > curr.date) {
-          acc[curr.entityId] = curr;
+      entityAudits.reduce((acc, curr) => {
+        if (!curr.modelId) return acc;
+        if (!acc[curr.modelId] || acc[curr.modelId].date > curr.date) {
+          acc[curr.modelId] = curr;
         }
         return acc;
       }, {} as Record<string, Audit>)
@@ -204,7 +341,8 @@ export default class Audit implements IAudit, IDbModel {
 
     const withValidDate: Audit[] = [];
     for (const audit of byEntity) {
-      const firstAudit = await Audit.getFirstForEntity(db, audit.entityId);
+      if (!audit.modelId) continue;
+      const firstAudit = await Audit.getFirstForEntity(db, audit.modelId);
       if (
         firstAudit &&
         firstAudit.date.toISOString().split("T")[0] ===
@@ -231,10 +369,12 @@ export default class Audit implements IAudit, IDbModel {
       .run(db);
 
     const audits = result.map((data) => new Audit(data)) as Audit[];
+    const entityAudits = audits.filter((a) => a.auditScope === AuditScope.Entity);
     const byEntity = Object.values(
-      audits.reduce((acc, curr) => {
-        if (!acc[curr.entityId] || acc[curr.entityId].date > curr.date) {
-          acc[curr.entityId] = curr;
+      entityAudits.reduce((acc, curr) => {
+        if (!curr.modelId) return acc;
+        if (!acc[curr.modelId] || acc[curr.modelId].date > curr.date) {
+          acc[curr.modelId] = curr;
         }
         return acc;
       }, {} as Record<string, Audit>)
@@ -242,7 +382,8 @@ export default class Audit implements IAudit, IDbModel {
 
     const withValidDate: Audit[] = [];
     for (const audit of byEntity) {
-      const firstAudit = await Audit.getLastForEntity(db, audit.entityId);
+      if (!audit.modelId) continue;
+      const firstAudit = await Audit.getLastForEntity(db, audit.modelId);
       if (
         firstAudit &&
         firstAudit.date.toISOString().split("T")[0] ===

@@ -6,11 +6,15 @@ import {
 } from "react-icons/md";
 import { TbColumnInsertRight } from "react-icons/tb";
 
-import { Button } from "components";
+import { Button, Loader } from "components";
 import Dropdown from "components/advanced";
 
+import { Explore } from "@inkvisitor/shared/types/query";
 import { ThemeContext } from "styled-components";
-import { StyledCounter, StyledTableControl } from "./ExplorerTableStyles";
+import { ExploreAction } from "../state";
+import ExplorerTableLabelFilter from "./ExplorerTableLabelFilter";
+import ExplorerTableIdsFilter from "./ExplorerTableIdsFilter";
+import { StyledCounter, StyledExploreFilters, StyledTableControl } from "./ExplorerTableStyles";
 import { BatchAction, batchOptions } from "./types";
 
 interface ExploreTableControlProps {
@@ -28,6 +32,10 @@ interface ExploreTableControlProps {
   setRowLastClicked: (value: number) => void;
 
   onApplyBatchAction: () => void;
+
+  filters: Explore.IExploreColumnFilter[];
+  dispatch: React.Dispatch<ExploreAction>;
+  isQueryFetching: boolean;
 }
 
 const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
@@ -45,6 +53,10 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
   setRowLastClicked,
 
   onApplyBatchAction,
+
+  filters,
+  dispatch,
+  isQueryFetching,
 }) => {
   const handleSelectAll = (checked: boolean) => onAllRowsSelect(checked);
 
@@ -108,9 +120,7 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
             disabled={rowsSelected.length === 0}
             value={batchActionSelected}
             onChange={(selectedOption) => {
-              const newSelectedAction = batchOptions.find(
-                (o) => o.value === selectedOption
-              )?.value;
+              const newSelectedAction = batchOptions.find((o) => o.value === selectedOption)?.value;
 
               if (newSelectedAction) {
                 setBatchActionSelected(newSelectedAction);
@@ -128,6 +138,11 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
         </div>
       </div>
 
+      <StyledExploreFilters>
+        <ExplorerTableLabelFilter filters={filters} dispatch={dispatch} />
+        <ExplorerTableIdsFilter filters={filters} dispatch={dispatch} />
+      </StyledExploreFilters>
+
       <Button
         icon={<TbColumnInsertRight size={17} />}
         label="new column"
@@ -135,6 +150,7 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
         inverted={!isNewColumnOpen}
         onClick={() => setIsNewColumnOpen(!isNewColumnOpen)}
       />
+      <Loader loaderStyle="beat" show={isQueryFetching} size={7} />
     </StyledTableControl>
   );
 };

@@ -1,12 +1,12 @@
 import { Annotator } from "@inkvisitor/annotator/src/lib";
-import { UserEnums } from "@shared/enums";
+import { UserEnums } from "@inkvisitor/shared/enums";
 import {
   IDocument,
   IEntity,
   IResponseGeneric,
   IResponseStatement,
   IStatement,
-} from "@shared/types";
+} from "@inkvisitor/shared/types";
 import { UseMutationResult } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import { Button, TagGroup } from "components";
@@ -99,6 +99,7 @@ interface StatementListTable {
   displayMode: StatementListDisplayMode;
   annotator?: Annotator;
   isLoading: boolean;
+  annotatorHoveredStatementId?: string | null;
 }
 export const StatementListTable: React.FC<StatementListTable> = ({
   statements,
@@ -117,6 +118,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   displayMode,
   annotator,
   isLoading,
+  annotatorHoveredStatementId = null,
 }) => {
   const dispatch = useAppDispatch();
   const { territoryId, statementId, setStatementId } = useSearchParams();
@@ -256,7 +258,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         Header: "",
         Cell: ({ row }: CellType) => {
           const statement = row.original;
-          return <EntityTag entity={statement} showOnly="entity" />;
+          return <EntityTag entity={statement} showOnly="tag" />;
         },
       },
       {
@@ -584,6 +586,10 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                 entities={entities}
                 isSelected={selectedRows.includes(row.original.id)}
                 displayMode={displayMode}
+                isAnnotatorHovered={
+                  annotatorHoveredStatementId === row.original.id
+                }
+                annotator={annotator}
               />
             );
           })}

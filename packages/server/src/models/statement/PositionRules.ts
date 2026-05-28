@@ -1,6 +1,6 @@
 import { ActionEntity } from "@models/action/action";
-import { EntityEnums } from "@shared/enums";
-import { IAction } from "@shared/types";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { IAction } from "@inkvisitor/shared/types";
 
 export class PositionRules {
   classes: EntityEnums.ExtendedClass[] = [];

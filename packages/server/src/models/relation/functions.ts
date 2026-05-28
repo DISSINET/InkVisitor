@@ -1,10 +1,10 @@
 import { getRelationClass } from "@models/factory";
-import { EntityEnums, RelationEnums } from "@shared/enums";
+import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { IRequest } from "src/custom_typings/request";
-import { Relation as RelationTypes } from "@shared/types";
+import { Relation as RelationTypes } from "@inkvisitor/shared/types";
 import Relation from "./relation";
 import { Connection } from "rethinkdb-ts";
-import { EntityTooltip } from "@shared/types";
+import { EntityTooltip } from "@inkvisitor/shared/types";
 
 const MAX_NEST_LVL = 3;
 

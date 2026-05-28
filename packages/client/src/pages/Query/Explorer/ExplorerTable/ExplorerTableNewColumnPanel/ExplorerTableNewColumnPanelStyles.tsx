@@ -2,11 +2,13 @@ import styled from "styled-components";
 
 /* New column panel */
 export const StyledPanel = styled.div`
-  position: fixed;
-  right: 3rem;
-  bottom: 3rem;
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
   width: 36rem;
-  background: #ccc5b9;
+  max-width: calc(100% - 2rem);
+  max-height: calc(100% - 2rem);
+  overflow: auto;
   border-radius: 8px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
   padding: 1rem;

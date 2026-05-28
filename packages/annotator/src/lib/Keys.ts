@@ -287,62 +287,86 @@ export default class Keys {
     }
   }
 
-  onKeyPgUp({ ctrlKey, shiftKey }: { ctrlKey?: boolean; shiftKey?: boolean }) {
-    const originalViewport = this.viewport.lineStart;
-    this.viewport.scrollUp(this.viewport.noLines);
+  onKeyPgUp({ shiftKey }: { ctrlKey?: boolean; shiftKey?: boolean }) {
+    const originalXLine = this.cursor.xLine;
+    const originalAbsYLine = this.cursor.yLine;
+    const pageStep = this.viewport.noLines;
 
-    if (originalViewport === this.viewport.lineStart) {
-      this.cursor.yLine = 0;
+    this.cursor.yLine = Math.max(0, this.cursor.yLine - pageStep);
+    if (this.cursor.yLine === 0) {
       this.cursor.xLine = 0;
     }
 
-    if (shiftKey) {
-      this.cursor.selectEnd = {
-        xLine: this.cursor.xLine,
-        yLine: this.cursor.yLine,
-      };
-    } else {
-      this.cursor.selectStart = undefined;
-      this.cursor.selectEnd = undefined;
-    }
-
-    this.cursor.setTrueSelectionDirection();
-  }
-
-  onKeyPgDown({
-    ctrlKey,
-    shiftKey,
-  }: {
-    ctrlKey?: boolean;
-    shiftKey?: boolean;
-  }) {
-    const originalViewport = this.viewport.lineStart;
-    this.viewport.scrollDown(
-      this.viewport.noLines,
-      this.annotator.scrollExtentLineCount()
-    );
-
-    if (originalViewport === this.viewport.lineStart) {
-      this.cursor.yLine = Math.min(
-        this.text.noLines - 1,
-        this.viewport.lineEnd - 1
-      );
-    }
     const line = this.text.getCurrentLine(this.viewport, this.cursor) || "";
     if (line.length < this.cursor.xLine) {
       this.cursor.xLine = line.length;
     }
 
     if (shiftKey) {
-      this.cursor.selectEnd = {
-        xLine: this.cursor.xLine,
-        yLine: this.cursor.yLine,
-      };
+      if (!this.cursor.selectStart || !this.cursor.selectEnd) {
+        this.cursor.selectStart = {
+          xLine: originalXLine,
+          yLine: originalAbsYLine,
+        };
+        this.cursor.selectEnd = {
+          xLine: this.cursor.xLine,
+          yLine: this.cursor.yLine,
+        };
+      } else {
+        this.extendShiftSelectionToCaret({
+          xLine: originalXLine,
+          yLine: originalAbsYLine,
+        });
+      }
     } else {
       this.cursor.selectStart = undefined;
       this.cursor.selectEnd = undefined;
     }
 
+    this.scrollCursorIntoView();
+    this.cursor.setTrueSelectionDirection();
+  }
+
+  onKeyPgDown({
+    shiftKey,
+  }: {
+    ctrlKey?: boolean;
+    shiftKey?: boolean;
+  }) {
+    const originalXLine = this.cursor.xLine;
+    const originalAbsYLine = this.cursor.yLine;
+    const pageStep = this.viewport.noLines;
+    const maxLine = Math.max(0, this.text.noLines - 1);
+
+    this.cursor.yLine = Math.min(maxLine, this.cursor.yLine + pageStep);
+
+    const line = this.text.getCurrentLine(this.viewport, this.cursor) || "";
+    if (line.length < this.cursor.xLine) {
+      this.cursor.xLine = line.length;
+    }
+
+    if (shiftKey) {
+      if (!this.cursor.selectStart || !this.cursor.selectEnd) {
+        this.cursor.selectStart = {
+          xLine: originalXLine,
+          yLine: originalAbsYLine,
+        };
+        this.cursor.selectEnd = {
+          xLine: this.cursor.xLine,
+          yLine: this.cursor.yLine,
+        };
+      } else {
+        this.extendShiftSelectionToCaret({
+          xLine: originalXLine,
+          yLine: originalAbsYLine,
+        });
+      }
+    } else {
+      this.cursor.selectStart = undefined;
+      this.cursor.selectEnd = undefined;
+    }
+
+    this.scrollCursorIntoView();
     this.cursor.setTrueSelectionDirection();
   }
 
@@ -1063,6 +1087,7 @@ export default class Keys {
             this.annotator.onTextChangeCb(this.text.value);
           }
           this.cursor.move(+1, 0);
+          this.cursor.fixOutOfBounds(this.viewport, this.text);
 
           // When typing moves the cursor outside of the current viewport,
           // keep behaviour consistent with arrow keys and scroll so that

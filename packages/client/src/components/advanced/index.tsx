@@ -9,7 +9,7 @@ import { AttributeMultiDropdown } from "./Dropdowns/AttributeMultiDropdown";
 import { BasicDropdown } from "./Dropdowns/BasicDropdown";
 import { EntityMultiDropdown } from "./Dropdowns/EntityMultiDropdown";
 import { EntitySingleDropdown } from "./Dropdowns/EntitySingleDropdown";
-import { EmptyTag } from "./EmptyTag/EmptyTag";
+import { EmptyEntityTag } from "./EntityTag/EmptyEntityTag";
 import { EntityCreateModal } from "./EntityCreateModal/EntityCreateModal";
 import { EntityDropzone } from "./EntityDropzone/EntityDropzone";
 import { EntitySuggester } from "./EntitySuggester/EntitySuggester";
@@ -24,6 +24,7 @@ import { Menu } from "./Menu/Menu";
 import { Page } from "./Page/Page";
 import { LeftHeader, RightHeader } from "./PageHeader/PageHeader";
 import { TerritoryActionModal } from "./TerritoryActionModal/TerritoryActionModal";
+import { UserTag } from "./UserTag/UserTag";
 import { UserCustomizationModal } from "./UserCustomizationModal/UserCustomizationModal";
 import { ValidationRule } from "./ValidationRule/ValidationRule";
 import { AbbreviatedTextWithTooltip } from "./AbbreviatedTextWithTooltip/AbbreviatedTextWithTooltip";
@@ -32,6 +33,7 @@ import { LayoutSeparatorVertical } from "./PanelSeparator/LayoutSeparatorVertica
 import { LayoutSeparatorHorizontal } from "./PanelSeparator/LayoutSeparatorHorizontal";
 import { PaginationControls } from "./PaginationControls/PaginationControls";
 import { GlobalValidationsModal } from "./GlobalValidationsModal/GlobalValidationsModal";
+import { EntityTagById } from "./EntityTag/EntityTagById";
 
 const Dropdown = {
   Single: {
@@ -56,11 +58,12 @@ export {
   DocumentModalEdit,
   DocumentModalExport,
   ElvlButtonGroup,
-  EmptyTag,
+  EmptyEntityTag,
   EntityCreateModal,
   EntityDropzone,
   EntitySuggester,
   EntityTag,
+  EntityTagById,
   EntityTooltip,
   JSONExplorer,
   LayoutSeparatorVertical,
@@ -73,6 +76,7 @@ export {
   PositionButtonGroup,
   RightHeader,
   TerritoryActionModal,
+  UserTag,
   UserCustomizationModal,
   ValidationRule,
   PaginationControls,

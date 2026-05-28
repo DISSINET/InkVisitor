@@ -14,6 +14,7 @@ interface StyledSelectWrapper {
   ref?: React.Dispatch<React.SetStateAction<HTMLButtonElement | null>>;
 }
 export const StyledSelectWrapper = styled.div<StyledSelectWrapper>`
+  position: relative;
   display: inline-flex;
   vertical-align: bottom;
   max-width: 100%;
@@ -54,9 +55,7 @@ export const StyledSelect = styled(Select)<StyledSelect>`
     border-right: ${({ suggester }) => (suggester ? "none" : "")};
     border-radius: 0;
     background-color: ${({ theme, entityDropdown, suggester }) =>
-      entityDropdown && suggester
-        ? theme.color["gray"][200]
-        : theme.color["white"]};
+      entityDropdown && suggester ? theme.color["gray"][200] : theme.color["white"]};
     &:hover {
       border-color: ${({ theme }) => theme.color["info"]};
       border-width: 1px;
@@ -91,9 +90,7 @@ export const StyledSelect = styled(Select)<StyledSelect>`
   }
   .react-select__multi-value {
     background-color: ${({ theme, entityDropdown }) =>
-      entityDropdown
-        ? theme.color["white"]
-        : theme.color["invertedBg"]["primary"]};
+      entityDropdown ? theme.color["white"] : theme.color["invertedBg"]["primary"]};
     color: ${({ theme }) => theme.color["gray"][700]};
     border: 1px solid ${({ theme }) => theme.color["blue"][300]};
   }

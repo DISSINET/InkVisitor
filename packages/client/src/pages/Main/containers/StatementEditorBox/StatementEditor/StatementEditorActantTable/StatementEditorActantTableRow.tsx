@@ -2,15 +2,15 @@ import {
   operatorDict,
   partitivityDict,
   virtualityDict,
-} from "@shared/dictionaries";
-import { EntityEnums } from "@shared/enums";
+} from "@inkvisitor/shared/dictionaries";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import {
   IEntity,
   IProp,
   IResponseStatement,
   IStatementActant,
   IStatementData,
-} from "@shared/types";
+} from "@inkvisitor/shared/types";
 import { excludedSuggesterEntities } from "Theme/constants";
 import {
   AttributeIcon,
