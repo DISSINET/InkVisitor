@@ -24,13 +24,19 @@ export class TtlCache {
       this.store.delete(key);
       return undefined;
     }
-    return entry.value as T;
+    // Clone on read so caller mutations cannot reach the stored value.
+    return structuredClone(entry.value) as T;
   }
 
   set(key: string, value: unknown, ttlMs: number): void {
     // Re-insertion bumps Map insertion order, useful if eviction is added later.
     this.store.delete(key);
-    this.store.set(key, { value, expiresAt: Date.now() + ttlMs });
+    // Clone on write so later mutations of the caller-side reference cannot
+    // reach the stored value.
+    this.store.set(key, {
+      value: structuredClone(value),
+      expiresAt: Date.now() + ttlMs,
+    });
   }
 
   delete(key: string): void {

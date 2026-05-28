@@ -106,6 +106,40 @@ describe("TtlCache", () => {
     });
   });
 
+  describe("isolation from caller mutations", () => {
+    it("mutating the input after set does not affect later get", () => {
+      const cache = new TtlCache();
+      const input = { id: "x", nested: { value: 1 } };
+      cache.set("k", input, 1000);
+      input.id = "y";
+      input.nested.value = 99;
+      expect(cache.get<typeof input>("k")).toEqual({
+        id: "x",
+        nested: { value: 1 },
+      });
+    });
+
+    it("mutating a returned value does not affect later get", () => {
+      const cache = new TtlCache();
+      cache.set("k", { id: "x", tags: ["a"] }, 1000);
+      const first = cache.get<{ id: string; tags: string[] }>("k")!;
+      first.id = "y";
+      first.tags.push("b");
+      expect(cache.get<{ id: string; tags: string[] }>("k")).toEqual({
+        id: "x",
+        tags: ["a"],
+      });
+    });
+
+    it("preserves Date values across set/get", () => {
+      const cache = new TtlCache();
+      const d = new Date("2025-01-01T00:00:00Z");
+      cache.set("k", { when: d }, 1000);
+      const out = cache.get<{ when: Date }>("k")!;
+      expect(out.when.toISOString()).toBe(d.toISOString());
+    });
+  });
+
   describe("singleton export", () => {
     it("exports a shared instance", () => {
       singletonCache.clear();
