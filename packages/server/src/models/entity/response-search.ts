@@ -272,20 +272,17 @@ export class SearchQuery {
     const [label, leftWildcard, rightWildcard] = this.prepareLabel(labelOrId);
     this.usedLabel = label;
 
-    // replace regexp chars
-    let escapedLabelOrId = labelOrId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const escapedLabel = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-    // frontend adds one final asterisk for labelOrId - we need to retain it there
-    const hasEscapedAsteriskAtEnd = escapedLabelOrId.endsWith("\\*");
-    if (hasEscapedAsteriskAtEnd) {
-      escapedLabelOrId = escapedLabelOrId.slice(0, -2) + "*";
-    }
+    // id is matched as a prefix of the literal input — strip the trailing
+    // wildcard the client appends, then escape regex chars and anchor at start
+    const idPrefix = labelOrId.replace(/\*$/, "");
+    const escapedIdPrefix = idPrefix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
     // search 3 times:
     // 1. search for exact word match with some normalization
     // 2. search for exact word match without normalization
-    // 3. search for id match
+    // 3. search for id prefix match
     this.query = this.query.filter(function (row: RDatum) {
       return r.or(
         SearchQuery.searchWordByWord(
@@ -301,7 +298,7 @@ export class SearchQuery {
           rightWildcard,
           false
         ),
-        row("id").match(escapedLabelOrId).ne(null)
+        row("id").match("^" + escapedIdPrefix).ne(null)
       );
     });
 
