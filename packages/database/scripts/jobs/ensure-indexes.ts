@@ -10,14 +10,18 @@ import { DbSchema } from "../import/common";
  * left alone. Safe to run repeatedly against any environment that pre-dates
  * a particular index addition.
  *
- * Note: the index definitions are anonymous functions in indexes.ts, so we
- * can only match by index name - not by content. If an index definition
- * changes, drop the old one manually before running this job.
+ * Each entry in DbSchemaIndexes carries its name as data (see IndexDef in
+ * common.ts), so we can compare against `indexList()` without having to
+ * run the factory just to recover the name.
+ *
+ * Note: indexes are matched by name only. If an index *definition* changes
+ * while the name stays the same, drop the old one manually before running
+ * this job.
  */
 const ensureIndexesJob: IJob = async (db: Connection): Promise<void> => {
   const tableList = await r.tableList().run(db);
 
-  for (const [tableName, indexFactories] of Object.entries(DbSchemaIndexes)) {
+  for (const [tableName, indexDefs] of Object.entries(DbSchemaIndexes)) {
     const tablePhysicalName = tableNameFor(tableName as keyof DbSchema);
     if (!tableList.includes(tablePhysicalName)) {
       console.log(
@@ -25,35 +29,25 @@ const ensureIndexesJob: IJob = async (db: Connection): Promise<void> => {
       );
       continue;
     }
-    if (indexFactories.length === 0) {
+    if (indexDefs.length === 0) {
       continue;
     }
 
     const table = r.table(tablePhysicalName);
     const existing = (await table.indexList().run(db)) as string[];
 
-    for (const factory of indexFactories) {
-      // The factory invokes table.indexCreate(name, ...) - we need the name
-      // to compare against existing. Run it against a stub table object so
-      // we can intercept the call without touching the DB.
-      const name = pluckIndexName(factory);
-      if (!name) {
-        console.log(
-          colors.yellow(
-            `Could not detect index name for ${tablePhysicalName} - skipping`
-          )
-        );
-        continue;
-      }
-      if (existing.includes(name)) {
+    for (const def of indexDefs) {
+      if (existing.includes(def.name)) {
         continue;
       }
       console.log(
-        colors.cyan(`Creating index ${tablePhysicalName}.${name} ...`)
+        colors.cyan(`Creating index ${tablePhysicalName}.${def.name} ...`)
       );
-      await factory(table).run(db);
-      await table.indexWait(name).run(db);
-      console.log(colors.green(`Index ${tablePhysicalName}.${name} ready`));
+      await def.build(table).run(db);
+      await table.indexWait(def.name).run(db);
+      console.log(
+        colors.green(`Index ${tablePhysicalName}.${def.name} ready`)
+      );
     }
   }
 };
@@ -78,28 +72,5 @@ const TABLE_PHYSICAL_NAMES: Record<keyof DbSchema, string> = {
 
 const tableNameFor = (key: keyof DbSchema): string =>
   TABLE_PHYSICAL_NAMES[key];
-
-/**
- * Inspects a factory `(table) => table.indexCreate(name, ...)` by invoking
- * it against a stub `table` whose `indexCreate(name)` records the first arg.
- * Avoids relying on stringification of the factory body.
- */
-const pluckIndexName = (factory: (table: any) => any): string | null => {
-  let captured: string | null = null;
-  const stub: any = {
-    indexCreate: (name: string) => {
-      captured = name;
-      // Return a chainable no-op so the factory body can keep building.
-      return new Proxy(() => stub, { get: () => stub.indexCreate });
-    },
-  };
-  try {
-    factory(stub);
-  } catch {
-    // some factory shapes may throw mid-build with the stub; that's fine
-    // as long as captured was set before the throw.
-  }
-  return captured;
-};
 
 export default ensureIndexesJob;

@@ -1,48 +1,77 @@
 import { r, RDatum, RTable, RValue } from "rethinkdb-ts";
 import { DbEnums } from "@inkvisitor/shared/enums";
-import { DbSchema } from "./common";
+import { DbSchema, IndexDef } from "./common";
 
-const entitiesIndexes: ((table: RTable) => any)[] = [
+/**
+ * Pairs an index name with its build function. `build` invokes
+ * `table.indexCreate(name, ...args)` so the args list mirrors RethinkDB's
+ * `indexCreate` signature (datum/function and optional `{ multi: true }`).
+ */
+const def = (name: string, ...args: unknown[]): IndexDef => ({
+  name,
+  build: (table: RTable) => (table.indexCreate as any)(name, ...args),
+});
+
+const entitiesIndexes: IndexDef[] = [
   // if the prop object is missing value/type/children attrs, this wont work! model should handle this
-  (table: RTable) =>
-    table.indexCreate(
-      DbEnums.Indexes.PropsRecursive,
-      r
-        .row("props")
-        .concatMap((prop: RDatum) =>
-          r
-            .expr([prop("value")("entityId"), prop("type")("entityId")])
+  def(
+    DbEnums.Indexes.PropsRecursive,
+    r
+      .row("props")
+      .concatMap((prop: RDatum) =>
+        r
+          .expr([prop("value")("entityId"), prop("type")("entityId")])
+          .add(
+            prop("children").concatMap((ch1: RDatum) =>
+              r
+                .expr([ch1("value")("entityId"), ch1("type")("entityId")])
+                .add(
+                  ch1("children").concatMap((ch2: RDatum) =>
+                    r
+                      .expr([
+                        ch2("value")("entityId"),
+                        ch2("type")("entityId"),
+                      ])
+                      .add(
+                        ch2("children").concatMap((ch3: RDatum) => [
+                          ch3("value")("entityId"),
+                          ch3("type")("entityId"),
+                        ]) as RValue
+                      )
+                  ) as RValue
+                )
+            ) as RValue
+          )
+      )
+      .distinct(),
+    { multi: true }
+  ),
+  def(
+    DbEnums.Indexes.StatementDataProps,
+    function (row: RDatum) {
+      return (row("data")("actions").concatMap((action: RDatum) => {
+        return action("props").concatMap((ch1: RDatum) => {
+          return r
+            .expr([ch1("value")("entityId"), ch1("type")("entityId")])
             .add(
-              prop("children").concatMap((ch1: RDatum) =>
+              ch1("children").concatMap((ch2: RDatum) =>
                 r
-                  .expr([ch1("value")("entityId"), ch1("type")("entityId")])
+                  .expr([
+                    ch2("value")("entityId"),
+                    ch2("type")("entityId"),
+                  ])
                   .add(
-                    ch1("children").concatMap((ch2: RDatum) =>
-                      r
-                        .expr([
-                          ch2("value")("entityId"),
-                          ch2("type")("entityId"),
-                        ])
-                        .add(
-                          ch2("children").concatMap((ch3: RDatum) => [
-                            ch3("value")("entityId"),
-                            ch3("type")("entityId"),
-                          ]) as RValue
-                        )
-                    ) as RValue
+                    ch2("children").concatMap((ch3: RDatum) => [
+                      ch3("value")("entityId"),
+                      ch3("type")("entityId"),
+                    ]) as RValue
                   )
               ) as RValue
-            )
-        )
-        .distinct(),
-      { multi: true }
-    ),
-  (table: RTable) =>
-    table.indexCreate(
-      DbEnums.Indexes.StatementDataProps,
-      function (row: RDatum) {
-        return (row("data")("actions").concatMap((action: RDatum) => {
-          return action("props").concatMap((ch1: RDatum) => {
+            );
+        });
+      }).add(
+        row("data")("actants").concatMap((actant: RDatum) => {
+          return actant("props").concatMap((ch1: RDatum) => {
             return r
               .expr([ch1("value")("entityId"), ch1("type")("entityId")])
               .add(
@@ -61,107 +90,82 @@ const entitiesIndexes: ((table: RTable) => any)[] = [
                 ) as RValue
               );
           });
-        }).add(
-          row("data")("actants").concatMap((actant: RDatum) => {
-            return actant("props").concatMap((ch1: RDatum) => {
-              return r
-                .expr([ch1("value")("entityId"), ch1("type")("entityId")])
-                .add(
-                  ch1("children").concatMap((ch2: RDatum) =>
-                    r
-                      .expr([
-                        ch2("value")("entityId"),
-                        ch2("type")("entityId"),
-                      ])
-                      .add(
-                        ch2("children").concatMap((ch3: RDatum) => [
-                          ch3("value")("entityId"),
-                          ch3("type")("entityId"),
-                        ]) as RValue
-                      )
-                  ) as RValue
-                );
-            });
-          }) as any
+        }) as any
+      ) as any).distinct();
+    },
+    { multi: true }
+  ),
+  def(DbEnums.Indexes.Class),
+  def(
+    DbEnums.Indexes.StatementTerritory,
+    r.row("data")("territory")("territoryId")
+  ),
+  def(
+    DbEnums.Indexes.StatementEntities,
+    function (row: RDatum) {
+      return (row("data")("actions")
+        .map(function (a: RDatum) {
+          return a("actionId");
+        })
+        .add(
+          row("data")("actants").map(function (a: RDatum) {
+            return a("entityId");
+          }) as any,
+          row("data")("tags").map(function (t: RDatum) {
+            return t;
+          }) as any,
+          r.branch(row("data").hasFields("territory"), [row("data")("territory")("territoryId")], []) as any
         ) as any).distinct();
-      },
-      { multi: true }
-    ),
-  (table: RTable) => table.indexCreate(DbEnums.Indexes.Class),
-  (table: RTable) =>
-    table.indexCreate(
-      DbEnums.Indexes.StatementTerritory,
-      r.row("data")("territory")("territoryId")
-    ),
-  (table: RTable) =>
-    table.indexCreate(
-      DbEnums.Indexes.StatementEntities,
-      function (row: RDatum) {
-        return (row("data")("actions")
-          .map(function (a: RDatum) {
-            return a("actionId");
-          })
-          .add(
-            row("data")("actants").map(function (a: RDatum) {
-              return a("entityId");
-            }) as any,
-            row("data")("tags").map(function (t: RDatum) {
-              return t;
-            }) as any,
-            r.branch(row("data").hasFields("territory"), [row("data")("territory")("territoryId")], []) as any
-          ) as any).distinct();
-      },
-      {
-        multi: true,
-      }
-    ),
-  (table: RTable) => table.indexCreate(DbEnums.Indexes.EntityUsedTemplate),
-  (table: RTable) =>
-    table.indexCreate(
-      DbEnums.Indexes.StatementActantsCI,
-      function (row: RDatum) {
-        return row("data")("actants").concatMap(function (a: RDatum) {
-          return r.branch(a.hasFields("classifications"), a("classifications").map(function (cRow: RDatum) {
-            return cRow("entityId");
-          }), []).add(
-            r.branch(a.hasFields("identifications"), a("identifications").map(function (iRow: RDatum) {
-              return iRow("entityId");
-            }), []) as any
-          );
-        }).distinct();
-      },
-      {
-        multi: true,
-      }
-    ),
+    },
+    { multi: true }
+  ),
+  def(DbEnums.Indexes.EntityUsedTemplate),
+  def(
+    DbEnums.Indexes.StatementActantsCI,
+    function (row: RDatum) {
+      return row("data")("actants").concatMap(function (a: RDatum) {
+        return r.branch(a.hasFields("classifications"), a("classifications").map(function (cRow: RDatum) {
+          return cRow("entityId");
+        }), []).add(
+          r.branch(a.hasFields("identifications"), a("identifications").map(function (iRow: RDatum) {
+            return iRow("entityId");
+          }), []) as any
+        );
+      }).distinct();
+    },
+    { multi: true }
+  ),
 ];
 
-const auditsIndexes: ((table: RTable) => any)[] = [
-  (table: RTable) =>
-    table.indexCreate(DbEnums.Indexes.AuditScopeModelId, [
-      r.row("auditScope"),
-      r.row("modelId"),
-    ]),
-  (table: RTable) => table.indexCreate(DbEnums.Indexes.AuditDate),
-  (table: RTable) => table.indexCreate(DbEnums.Indexes.AuditDateTypeUser, [
+const auditsIndexes: IndexDef[] = [
+  def(DbEnums.Indexes.AuditScopeModelId, [
+    r.row("auditScope"),
+    r.row("modelId"),
+  ]),
+  def(DbEnums.Indexes.AuditDate),
+  def(DbEnums.Indexes.AuditDateTypeUser, [
     r.row("date"),
     r.row("type"),
     r.row("user"),
   ]),
 ];
 
-const relationsIndexes: ((table: RTable) => any)[] = [
-  (table: RTable) => table.indexCreate(DbEnums.Indexes.RelationsEntityIds, { multi: true }),
+const relationsIndexes: IndexDef[] = [
+  def(DbEnums.Indexes.RelationsEntityIds, { multi: true }),
 ];
 
 // Materialized stats indexes for each time unit
-const materializedStatsIndexes: ((table: RTable) => any)[] = [
-  (table: RTable) => table.indexCreate("date"),
-  (table: RTable) => table.indexCreate("lastUpdated"),
-  (table: RTable) => table.indexCreate("date_eventType_aggregateBy", [r.row("date"), r.row("eventType"), r.row("aggregateBy")]),
+const materializedStatsIndexes: IndexDef[] = [
+  def("date"),
+  def("lastUpdated"),
+  def("date_eventType_aggregateBy", [
+    r.row("date"),
+    r.row("eventType"),
+    r.row("aggregateBy"),
+  ]),
 ];
 
-export const DbSchemaIndexes: { [key in keyof DbSchema]: ((table: RTable) => any)[] } = {
+export const DbSchemaIndexes: { [key in keyof DbSchema]: IndexDef[] } = {
   entities: entitiesIndexes,
   audits: auditsIndexes,
   relations: relationsIndexes,
