@@ -11,10 +11,16 @@ import { Db } from "@service/rethink";
 import { CronService } from "@service/cron";
 import { startDbStatsEmitter } from "@service/dbStats";
 import { startCacheInvalidators } from "@service/changefeedInvalidator";
+import { assertRequiredIndexes } from "@service/assertRequiredIndexes";
 
 (async () => {
   const db = new Db();
   await db.initDb();
+
+  // Fail-fast if a required secondary index is missing rather than 500ing
+  // on the first entity-detail / territory-statements request.
+  await assertRequiredIndexes(db.connection);
+
   await prepareTreeCache(db.connection);
 
   // Background listeners that invalidate the users/settings TtlCache entries

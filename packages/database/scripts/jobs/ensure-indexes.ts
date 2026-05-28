@@ -58,16 +58,26 @@ const ensureIndexesJob: IJob = async (db: Connection): Promise<void> => {
   }
 };
 
-const tableNameFor = (key: keyof DbSchema): string => {
-  // The schema keys are camelCase; physical table names match for most of
-  // them but acl_permissions uses snake_case.
-  switch (key) {
-    case "aclPermissions":
-      return "acl_permissions";
-    default:
-      return key;
-  }
+// Schema keys are camelCase; physical RethinkDB table names diverge for
+// the ACL and stats tables (see import.ts where the TableSchema literals
+// declare each tableName). The Record type forces exhaustiveness: adding
+// a new key to DbSchema is a compile error here until it's mapped.
+const TABLE_PHYSICAL_NAMES: Record<keyof DbSchema, string> = {
+  users: "users",
+  aclPermissions: "acl_permissions",
+  entities: "entities",
+  audits: "audits",
+  relations: "relations",
+  documents: "documents",
+  settings: "settings",
+  statsMaterializedDay: "stats_materialized_day",
+  statsMaterializedWeek: "stats_materialized_week",
+  statsMaterializedMonth: "stats_materialized_month",
+  statsMaterializedYear: "stats_materialized_year",
 };
+
+const tableNameFor = (key: keyof DbSchema): string =>
+  TABLE_PHYSICAL_NAMES[key];
 
 /**
  * Inspects a factory `(table) => table.indexCreate(name, ...)` by invoking
