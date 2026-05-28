@@ -1,8 +1,5 @@
 import { Explore } from "@inkvisitor/shared/types/query";
-import {
-  entityIdsEqual,
-  parseEntityIdsFromText,
-} from "@inkvisitor/shared/utils/parse-entity-ids";
+import { entityIdsEqual, parseEntityIdsFromText } from "@inkvisitor/shared/utils/parse-entity-ids";
 import { Input } from "components";
 import { useDebounce } from "hooks";
 import React, { useCallback, useEffect, useState } from "react";
@@ -23,10 +20,7 @@ const getRowIdsFilter = (
     (f): f is Explore.IExploreRowIdsFilter => f.type === Explore.EExploreFilterType.RowIds
   );
 
-const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({
-  filters,
-  dispatch,
-}) => {
+const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({ filters, dispatch }) => {
   const rowIdsFilter = getRowIdsFilter(filters);
   const appliedIds = rowIdsFilter?.ids ?? [];
 
@@ -56,14 +50,16 @@ const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({
     <StyledIdsFilter>
       <Input
         width="full"
-        placeholder="Filter by entity UUIDs (space, tab, or line separated)…"
+        placeholder="Filter by entity UUIDs (space, tab, or line separated)"
         changeOnType
         value={inputValue}
         onChangeFn={setInputValue}
         clearable
       />
       {parsedCount > 0 && (
-        <StyledIdsFilterHint>{`${parsedCount} UUID${parsedCount === 1 ? "" : "s"}`}</StyledIdsFilterHint>
+        <StyledIdsFilterHint>{`${parsedCount} UUID${
+          parsedCount === 1 ? "" : "s"
+        }`}</StyledIdsFilterHint>
       )}
     </StyledIdsFilter>
   );

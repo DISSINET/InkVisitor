@@ -54,7 +54,7 @@ const ExplorerTableLabelFilter: React.FC<ExplorerTableLabelFilterProps> = ({
       <Input
         width="full"
         placeholder={
-          useRegex ? "Regular expression (e.g. ^John|/Smith$/i)…" : "Filter by entity label…"
+          useRegex ? "Regular expression (e.g. ^John|/Smith$/i)" : "Filter by entity label"
         }
         changeOnType
         value={inputValue}
