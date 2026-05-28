@@ -10,9 +10,9 @@ import { Db } from "@service/rethink";
 import { DbHandle } from "@service/dbHandle";
 import { cache } from "@service/ttlCache";
 
-// 24h is safe because every users-table write is also invalidated via the
-// changefeed listener in service/changefeedInvalidator.ts.
-const USER_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+// No TTL: invalidation is fully owned by the changefeed listener in
+// service/changefeedInvalidator.ts plus the explicit cache.delete calls
+// in User.update / User.delete.
 export const USER_CACHE_KEY_PREFIX = "user:byId:";
 export const userCacheKey = (id: string): string =>
   `${USER_CACHE_KEY_PREFIX}${id}`;
@@ -247,7 +247,7 @@ export default class User implements IUser, IDbModel {
     }
 
     delete data.password;
-    cache.set(key, data as IUser, USER_CACHE_TTL_MS);
+    cache.set(key, data as IUser);
     return new User(data);
   }
 
