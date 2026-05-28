@@ -104,6 +104,17 @@ describe("TtlCache", () => {
       expect(cache.get("a")).toBeUndefined();
       expect(cache.get("b")).toBeUndefined();
     });
+
+    it("deletePrefix removes only matching keys", () => {
+      const cache = new TtlCache();
+      cache.set("user:byId:1", { id: "1" }, 1000);
+      cache.set("user:byId:2", { id: "2" }, 1000);
+      cache.set("entity:byId:1", { id: "1" }, 1000);
+      cache.deletePrefix("user:byId:");
+      expect(cache.get("user:byId:1")).toBeUndefined();
+      expect(cache.get("user:byId:2")).toBeUndefined();
+      expect(cache.get<{ id: string }>("entity:byId:1")).toEqual({ id: "1" });
+    });
   });
 
   describe("isolation from caller mutations", () => {

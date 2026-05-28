@@ -3,8 +3,10 @@ import { IDbModel } from "@models/common";
 import { ISetting, SettingsKey } from "@inkvisitor/shared/types/settings";
 import { cache } from "@service/ttlCache";
 
-const SETTINGS_CACHE_TTL_MS = 5 * 60 * 1000;
-const SETTINGS_ALL_CACHE_KEY = "settings:all";
+// 24h is safe because every settings-table write is also invalidated via the
+// changefeed listener in service/changefeedInvalidator.ts.
+const SETTINGS_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+export const SETTINGS_ALL_CACHE_KEY = "settings:all";
 
 export class Setting implements ISetting, IDbModel {
   id: string;

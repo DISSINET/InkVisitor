@@ -43,6 +43,14 @@ export class TtlCache {
     this.store.delete(key);
   }
 
+  deletePrefix(prefix: string): void {
+    for (const key of this.store.keys()) {
+      if (key.startsWith(prefix)) {
+        this.store.delete(key);
+      }
+    }
+  }
+
   clear(): void {
     this.store.clear();
   }
