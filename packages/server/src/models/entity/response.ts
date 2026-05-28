@@ -163,8 +163,22 @@ export class ResponseEntityDetail
         ]).then(([a, b]) => [...a, ...b]);
 
     // None of these reads depend on the walks below or on each other - the
-    // round-trips can overlap. relations.prepare returns void; it rides
-    // along in the batch for its side-effects on this.relations.
+    // round-trips can overlap. relations.prepare returns void (mutates
+    // this.relations as a side-effect); pairing it with the data batch
+    // inside an outer Promise.all observes its rejection without
+    // polluting the data destructure with an unused positional slot.
+    const [data] = await Promise.all([
+      Promise.all([
+        Entity.findUsedInProps(conn, this.id),
+        Statement.getLinkedEntities(conn, this.id),
+        Statement.findByDataPropsId(conn, this.id),
+        Statement.findByDataActantsCI(conn, this.id),
+        this.findUsedInDocuments(conn),
+        warningsPromise,
+      ]),
+      this.relations.prepare(req, RelationEnums.AllTypes),
+    ]);
+
     const [
       usedInPropsEntities,
       linkedEntities,
@@ -172,15 +186,7 @@ export class ResponseEntityDetail
       actantsCIStatements,
       usedInDocuments,
       warnings,
-    ] = await Promise.all([
-      Entity.findUsedInProps(conn, this.id),
-      Statement.getLinkedEntities(conn, this.id),
-      Statement.findByDataPropsId(conn, this.id),
-      Statement.findByDataActantsCI(conn, this.id),
-      this.findUsedInDocuments(conn),
-      warningsPromise,
-      this.relations.prepare(req, RelationEnums.AllTypes),
-    ]);
+    ] = data;
 
     for (const entity of usedInPropsEntities) {
       this.walkEntityProps(entity.id, entity.props);
