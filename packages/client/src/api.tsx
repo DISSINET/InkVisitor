@@ -300,6 +300,9 @@ class Api {
 
   handleError = (err: any | AxiosError) => {
     if (axios.isAxiosError(err)) {
+      if (err.code === AxiosError.ECONNABORTED || err.code === AxiosError.ETIMEDOUT) {
+        return new errors.TimeoutError();
+      }
       if (err.response?.status === 503) {
         return new errors.NetworkError();
       }
@@ -335,6 +338,10 @@ class Api {
 
     if (responseData instanceof AxiosError) {
       const ax = responseData;
+      if (ax.code === AxiosError.ECONNABORTED || ax.code === AxiosError.ETIMEDOUT) {
+        out.error = errors.TimeoutError.TYPE;
+        return out;
+      }
       if (ax.code === AxiosError.ERR_NETWORK || ax.code === AxiosError.ERR_BAD_RESPONSE) {
         out.error = errors.NetworkError.TYPE;
         return out;
