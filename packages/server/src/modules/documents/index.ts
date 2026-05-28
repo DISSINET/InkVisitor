@@ -2,7 +2,6 @@ import { mergeDeep } from "@common/functions";
 import Audit from "@models/audit/audit";
 import { ResponseDocumentAudit } from "@models/audit/response";
 import Document from "@models/document/document";
-import Entity from "@models/entity/entity";
 import { AnchorsNode } from "@models/document/anchors";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import {
@@ -57,75 +56,26 @@ export default Router()
   .get(
     "/",
     asyncRouteHandler<IDocumentMeta[]>(async (request: IRequest) => {
-      const conn = request.db.connection;
-
-      // Metadata-only fetch. The `content` field is potentially MB-scale
-      // and unused by the list response; legacy docs missing stored
-      // anchors get their content fetched in a targeted second pass below.
+      // Metadata-only fetch. `content` and `anchors` are dropped at the
+      // DB so they never cross the wire to Node (anchors trees can run
+      // into MBs per doc); the list consumers only use id / title /
+      // entityIds / dates. Full content and anchor tree are served by
+      // GET /documents/:id when actually needed.
+      //
+      // Every write path runs Document.preprocess before saving, so
+      // anchors and entityIds are persisted on each row. We don't
+      // recompute them on read - documents pre-dating preprocess must
+      // be re-saved (any edit triggers it) to populate the fields.
       const docs = (await rethink
         .table(Document.table)
         .orderBy(rethink.asc("createdAt"))
-        .without("content")
-        .run(conn)) as IDocument[];
+        .without("content", "anchors")
+        .run(request.db.connection)) as IDocument[];
 
-      const documents: Document[] = [];
-      const legacyDocs: Document[] = [];
-      for (const d of docs) {
+      return docs.map((d) => {
         const document = new Document(d);
-        documents.push(document);
-        if (!document.anchors || document.anchors.length === 0) {
-          legacyDocs.push(document);
-        }
-      }
-
-      // Only fetch content + run preprocess for docs that don't have
-      // stored anchors yet. New writes save anchors at preprocess time,
-      // so this branch is purely a fallback for legacy rows.
-      if (legacyDocs.length > 0) {
-        const legacyContents = (await rethink
-          .table(Document.table)
-          .getAll(...legacyDocs.map((d) => d.id))
-          .pluck("id", "content")
-          .run(conn)) as { id: string; content: string }[];
-        const contentById = new Map(
-          legacyContents.map((c) => [c.id, c.content])
-        );
-        for (const doc of legacyDocs) {
-          doc.content = contentById.get(doc.id) || "";
-        }
-
-        // One batched entity-class lookup for every legacy doc combined.
-        const allReferencedIds = new Set<string>();
-        const pending: { doc: Document; ids: string[] }[] = [];
-        for (const doc of legacyDocs) {
-          const ids = doc.gatherEntityIds();
-          if (ids.length > 0) {
-            pending.push({ doc, ids });
-            for (const id of ids) allReferencedIds.add(id);
-          }
-        }
-        if (allReferencedIds.size > 0) {
-          const entities = await Entity.findEntitiesByIds(conn, [
-            ...allReferencedIds,
-          ]);
-          const classById = new Map<string, EntityEnums.Class>();
-          for (const e of entities) {
-            if (e.class) classById.set(e.id, e.class);
-          }
-          for (const { doc, ids } of pending) {
-            doc.preprocessSync(classById, ids);
-          }
-        }
-      }
-
-      return documents.map((document) => {
-        // @ts-ignore content is part of IDocument but trimmed from IDocumentMeta
+        // @ts-ignore content/anchors are part of IDocument but trimmed from the list response
         delete document.content;
-        // anchors trees can be ~1MB per doc. None of the list consumers
-        // (DocumentsPage, StatementsListBox, EntityDetailFormSection)
-        // read anchors here; the full tree is loaded via GET /documents/:id
-        // when actually needed. Shipping an empty array keeps the wire
-        // payload small.
         document.anchors = [];
         return document;
       });

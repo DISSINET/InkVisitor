@@ -36,27 +36,12 @@ export default class Document implements IDocument, IDbModel {
 
   /**
    * Preprocesses the document to find entity ids and build anchors tree.
-   * Issues one DB round-trip to resolve referenced entities. Use
-   * `preprocessSync` when you've already resolved the classes externally
-   * (e.g. when batching a list of documents).
+   * Issues one DB round-trip to resolve referenced entities. Called by
+   * every write path so the derived fields are persisted alongside content.
    */
   async preprocess(conn: Connection): Promise<void> {
     const ids = this.gatherEntityIds();
     this.entityIds = await this.findReferencedEntityIds(conn, ids);
-    this.anchors = AnchorsNode.buildAnchorsTree(this.content, this.entityIds);
-  }
-
-  /**
-   * Same as `preprocess` but uses a pre-fetched id → class map instead
-   * of issuing its own DB query. Lets a batch caller resolve N documents'
-   * referenced entities with a single round-trip.
-   */
-  preprocessSync(
-    classById: Map<string, EntityEnums.Class>,
-    ids?: string[]
-  ): void {
-    const referenced = ids ?? this.gatherEntityIds();
-    this.entityIds = Document.bucketByClass(referenced, classById);
     this.anchors = AnchorsNode.buildAnchorsTree(this.content, this.entityIds);
   }
 
