@@ -119,16 +119,10 @@ export const CMetaProp = (variables?: {
   },
 });
 
-export const InstProps: any = async (
-  oldProps: IProp[],
-  userRole: UserEnums.Role
-) => {
+export const InstProps: any = async (oldProps: IProp[], userRole: UserEnums.Role) => {
   const newProps = [...oldProps];
 
-  const validateInstProp: any = async (
-    prop: IProp,
-    userRole: UserEnums.Role
-  ) => {
+  const validateInstProp: any = async (prop: IProp, userRole: UserEnums.Role) => {
     // type
     if (prop.type.entityId) {
       const typeEntityReq = await api.entityGet(prop.type.entityId);
@@ -173,10 +167,7 @@ export const InstProps: any = async (
   return newProps;
 };
 
-export const InstActant = async (
-  actant: IStatementActant,
-  userRole: UserEnums.Role
-) => {
+export const InstActant = async (actant: IStatementActant, userRole: UserEnums.Role) => {
   actant.props = await InstProps(actant.props, userRole);
 
   if (actant?.entityId) {
@@ -195,10 +186,7 @@ export const InstActant = async (
   return actant;
 };
 
-export const InstAction: any = async (
-  action: IStatementAction,
-  userRole: UserEnums.Role
-) => {
+export const InstAction: any = async (action: IStatementAction, userRole: UserEnums.Role) => {
   action.props = await InstProps(action.props, userRole);
 
   if (action?.actionId) {
@@ -235,15 +223,8 @@ export const InstTemplate = async (
       for (const [ai, actant] of iEntity.data.actants.entries()) {
         iEntity.data.actants[ai] = await InstActant(actant, userRole);
       }
-    } else if (
-      templateEntity.class === EntityEnums.Class.Territory &&
-      territoryParentId
-    ) {
-      iEntity = DTerritory(
-        { ...(templateEntity as ITerritory) },
-        territoryParentId,
-        userRole
-      );
+    } else if (templateEntity.class === EntityEnums.Class.Territory && territoryParentId) {
+      iEntity = DTerritory({ ...(templateEntity as ITerritory) }, territoryParentId, userRole);
     } else {
       // entity is not a statement
       iEntity = DEntity({ ...templateEntity }, userRole);
@@ -321,10 +302,7 @@ export const applyTemplate = async (
       newEntity.usedTemplate = templateEntity.id;
       const instantiatedTemplateProps = await InstProps(templateEntity.props);
       newEntity.props = [...entity.props, ...instantiatedTemplateProps];
-      newEntity.references = [
-        ...entity.references,
-        ...DReferences(templateEntity.references),
-      ];
+      newEntity.references = [...entity.references, ...DReferences(templateEntity.references)];
       newEntity.isTemplate = false;
     }
 
@@ -342,42 +320,35 @@ export const InstRelations = (
 ) => {
   const newRelations: Relation.IRelation[] = [];
   // Iterate through each relation type in IUsedRelations
-  Object.entries(templateRelations).forEach(
-    ([relationType, relationDetail]) => {
-      if (relationDetail && relationDetail.connections) {
-        // Process each connection in the relation detail
-        relationDetail.connections.forEach(
-          (connection: Relation.IConnection<Relation.IRelation>) => {
-            // Create a new relation object for each connection
-            const newRelation: Relation.IRelation = {
-              id: uuidv4(),
-              type: relationType as RelationEnums.Type,
-              entityIds:
-                relationType === RelationEnums.Type.Synonym
-                  ? [...connection.entityIds, entityId] // For SYN type, add the entity ID to the cloud
-                  : connection.entityIds.map(
-                      (
-                        id: string // For other types, replace template ID
-                      ) => (id === templateId ? entityId : id)
-                    ),
-              order: connection.order,
-            };
+  Object.entries(templateRelations).forEach(([relationType, relationDetail]) => {
+    if (relationDetail && relationDetail.connections) {
+      // Process each connection in the relation detail
+      relationDetail.connections.forEach((connection: Relation.IConnection<Relation.IRelation>) => {
+        // Create a new relation object for each connection
+        const newRelation: Relation.IRelation = {
+          id: uuidv4(),
+          type: relationType as RelationEnums.Type,
+          entityIds:
+            relationType === RelationEnums.Type.Synonym
+              ? [...connection.entityIds, entityId] // For SYN type, add the entity ID to the cloud
+              : connection.entityIds.map(
+                  (
+                    id: string // For other types, replace template ID
+                  ) => (id === templateId ? entityId : id)
+                ),
+          order: connection.order,
+        };
 
-            newRelations.push(newRelation);
-          }
-        );
-      }
+        newRelations.push(newRelation);
+      });
     }
-  );
+  });
 
   return newRelations;
 };
 
 // duplicate statement
-export const DStatement = (
-  statement: IStatement,
-  userRole: UserEnums.Role
-): IStatement => {
+export const DStatement = (statement: IStatement, userRole: UserEnums.Role): IStatement => {
   const duplicatedStatement: IStatement = {
     id: uuidv4(),
     class: EntityEnums.Class.Statement,
@@ -423,9 +394,7 @@ export const DStatement = (
   return duplicatedStatement;
 };
 
-export const DStatementActions = (
-  actionsToDuplicate: IStatementAction[]
-): IStatementAction[] => {
+export const DStatementActions = (actionsToDuplicate: IStatementAction[]): IStatementAction[] => {
   return actionsToDuplicate.map((action) => {
     return {
       ...action,
@@ -456,9 +425,7 @@ export const DStatementIdentifications = (
   });
 };
 
-export const DStatementActants = (
-  actantsToDuplicate: IStatementActant[]
-): IStatementActant[] => {
+export const DStatementActants = (actantsToDuplicate: IStatementActant[]): IStatementActant[] => {
   return actantsToDuplicate.map((actant) => {
     return {
       ...actant,
@@ -470,9 +437,7 @@ export const DStatementActants = (
   });
 };
 
-export const DReferences = (
-  referenceToDuplicate: IReference[]
-): IReference[] => {
+export const DReferences = (referenceToDuplicate: IReference[]): IReference[] => {
   return referenceToDuplicate.map((r) => {
     return { ...r, id: uuidv4() };
   });
@@ -601,10 +566,7 @@ export const CStatement = (
       tags: [],
     },
     props: [],
-    status:
-      userRole === UserEnums.Role.Admin || userRole === UserEnums.Role.Owner
-        ? EntityEnums.Status.Approved
-        : EntityEnums.Status.Pending,
+    status: EntityEnums.Status.Pending,
     references: [],
     isTemplate: false,
   };
@@ -636,10 +598,7 @@ export const CTerritory = (
     parent: { territoryId: parentId, order: parentOrder },
     protocol: CEmptyProtocol(),
   },
-  status:
-    userRole === UserEnums.Role.Admin || userRole === UserEnums.Role.Owner
-      ? EntityEnums.Status.Approved
-      : EntityEnums.Status.Pending,
+  status: EntityEnums.Status.Pending,
 
   props: [],
   references: [],
@@ -658,11 +617,7 @@ export const CEntity = (
     labels: [label],
     detail: detail ? detail : "",
     data: {},
-    status:
-      entityClass === EntityEnums.Class.Action ||
-      entityClass === EntityEnums.Class.Concept
-        ? EntityEnums.Status.Pending
-        : EntityEnums.Status.Approved,
+    status: EntityEnums.Status.Pending,
     language: userOptions.defaultLanguage,
     notes: [],
     props: [],
@@ -717,10 +672,7 @@ export const CConcept = (
   };
 };
 
-export const CReference = (
-  resourceId: string = "",
-  valueId: string = ""
-): IReference => ({
+export const CReference = (resourceId: string = "", valueId: string = ""): IReference => ({
   id: uuidv4(),
   resource: resourceId,
   value: valueId,
@@ -794,15 +746,13 @@ export const deleteProp = (
 
   // 2nd level
   newProps.forEach((prop1, pi1) => {
-    newProps[pi1].children = prop1.children.filter((child) =>
-      shouldDelete(child) ? null : child
-    );
+    newProps[pi1].children = prop1.children.filter((child) => (shouldDelete(child) ? null : child));
 
     // 3rd level
     newProps[pi1].children.forEach((prop2, pi2) => {
-      newProps[pi1].children[pi2].children = newProps[pi1].children[
-        pi2
-      ].children.filter((child) => (shouldDelete(child) ? null : child));
+      newProps[pi1].children[pi2].children = newProps[pi1].children[pi2].children.filter((child) =>
+        shouldDelete(child) ? null : child
+      );
     });
   });
 
