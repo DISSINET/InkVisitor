@@ -1,128 +1,129 @@
 /**
+ * Discriminator for the kinds of warnings the annotator can emit.
+ * Add new variants here when introducing additional detection checks.
+ */
+export enum WarningType {
+  AsymmetricalAnchor = "asymmetrical-anchor",
+}
+
+/**
  * Represents an asymmetrical (broken) anchor in the text
  */
 export interface AsymmetricalAnchor {
   tagName: string;
-  type: 'orphaned-opening' | 'orphaned-closing';
+  type: "orphaned-opening" | "orphaned-closing";
   segmentIndex: number;
   position: number;
   attributes?: Record<string, string>;
 }
 
-export interface WarningData {
-  type: 'asymmetrical-anchor';
+export interface AsymmetricalAnchorWarning {
+  type: WarningType.AsymmetricalAnchor;
   anchors: AsymmetricalAnchor[];
 }
 
+export type WarningData = AsymmetricalAnchorWarning;
+
 /**
- * Warnings system for the Annotator
- * Handles warning messages and notifications for various annotator operations
+ * Warnings system for the Annotator. Acts as a notification bus: detection
+ * logic lives in `Annotator.runWarningChecks`, which calls `emit*` methods
+ * here. Subscribers can listen via `onWarning` (string summary, e.g. for a
+ * toaster) and/or `onWarningData` (structured payload for richer UI).
  */
 export class Warnings {
   private enabled: boolean = true;
-  private onWarningCb?: (message: string) => void;
+  private onWarningCb?: (message: string, type: WarningType) => void;
   private onWarningDataCb?: (data: WarningData) => void;
   private currentWarnings: WarningData | null = null;
+  private lastEmittedKey: string | null = null;
 
   constructor(enabled: boolean = true) {
     this.enabled = enabled;
   }
 
-  /**
-   * Enable warnings system
-   */
   enable(): void {
     this.enabled = true;
   }
 
-  /**
-   * Disable warnings system
-   */
   disable(): void {
     this.enabled = false;
   }
 
-  /**
-   * Check if warnings are enabled
-   */
   isEnabled(): boolean {
     return this.enabled;
   }
 
-  /**
-   * Set callback for warning events
-   */
-  onWarning(cb: (message: string) => void): void {
+  onWarning(cb: (message: string, type: WarningType) => void): void {
     this.onWarningCb = cb;
   }
 
-  /**
-   * Set callback for structured warning data
-   */
   onWarningData(cb: (data: WarningData) => void): void {
     this.onWarningDataCb = cb;
   }
 
-  /**
-   * Trigger a warning
-   */
-  warn(message: string): void {
-    if (!this.enabled || !this.onWarningCb) {
-      return;
-    }
-    
-    this.onWarningCb(message);
-  }
-
-  /**
-   * Emit asymmetrical anchor warnings
-   */
   emitAsymmetricalAnchors(anchors: AsymmetricalAnchor[]): void {
-    if (!this.enabled || !this.onWarningDataCb) {
-      return;
-    }
-
-    this.currentWarnings = {
-      type: 'asymmetrical-anchor',
-      anchors,
-    };
-
-    this.onWarningDataCb(this.currentWarnings);
-  }
-
-  /**
-   * Get current warnings without triggering callback
-   */
-  getCurrentWarnings(): WarningData | null {
-    return this.currentWarnings;
-  }
-
-  /**
-   * Clear current warnings
-   */
-  clearWarnings(): void {
-    this.currentWarnings = null;
-  }
-
-  /**
-   * Called when text changes in the annotator
-   * Performs various checks on the text content
-   */
-  onTextChanged(text: string): void {
     if (!this.enabled) {
       return;
     }
 
-    this.checkOverlappingXmlTags(text);
+    const key = anchorsKey(anchors);
+    if (key === this.lastEmittedKey) {
+      return;
+    }
+    this.lastEmittedKey = key;
+
+    this.currentWarnings =
+      anchors.length > 0
+        ? { type: WarningType.AsymmetricalAnchor, anchors }
+        : null;
+
+    this.onWarningDataCb?.({
+      type: WarningType.AsymmetricalAnchor,
+      anchors,
+    });
+
+    if (this.onWarningCb && anchors.length > 0) {
+      this.onWarningCb(
+        formatAsymmetricalAnchorMessage(anchors),
+        WarningType.AsymmetricalAnchor
+      );
+    }
   }
 
-  /**
-   * Internal method to check for overlapping XML tag issues
-   * TODO: Implement logic to detect overlapping XML tags
-   */
-  private checkOverlappingXmlTags(text: string): void {
-    // TODO: Implement overlapping XML tag detection logic
-    // This method should analyze the text for XML tag overlapping issues
-    // and call this.warn() with appropriate warning messages
+  getCurrentWarnings(): WarningData | null {
+    return this.currentWarnings;
   }
+
+  clearWarnings(): void {
+    this.currentWarnings = null;
+    this.lastEmittedKey = null;
+  }
+}
+
+function anchorsKey(anchors: AsymmetricalAnchor[]): string {
+  return anchors
+    .map(
+      (a) => `${a.tagName}|${a.type}|${a.segmentIndex}|${a.position}`
+    )
+    .sort()
+    .join(",");
+}
+
+function formatAsymmetricalAnchorMessage(
+  anchors: AsymmetricalAnchor[]
+): string {
+  const opening = anchors.filter((a) => a.type === "orphaned-opening").length;
+  const closing = anchors.filter((a) => a.type === "orphaned-closing").length;
+  const parts: string[] = [];
+  if (opening > 0) {
+    parts.push(
+      `${opening} orphaned opening tag${opening === 1 ? "" : "s"}`
+    );
+  }
+  if (closing > 0) {
+    parts.push(
+      `${closing} orphaned closing tag${closing === 1 ? "" : "s"}`
+    );
+  }
+  return `Asymmetrical anchor${anchors.length === 1 ? "" : "s"} detected: ${parts.join(", ")}`;
 }

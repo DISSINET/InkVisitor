@@ -798,6 +798,10 @@ export const TextAnnotator = ({
       setLocalTextContent(text);
     });
 
+    newAnnotator.onWarning((message) => {
+      toast.warning(message);
+    });
+
     // Set initial text content
     const initialContent = dataDocument?.content ?? "no text";
     setLocalTextContent(initialContent);

@@ -5,7 +5,7 @@ import { Lines } from "./Lines";
 import Scroller from "./Scroller";
 import Text, { Tag, SegmentPosition } from "./Text";
 import Viewport from "./Viewport";
-import { Warnings } from "./warnings";
+import { Warnings, WarningType } from "./warnings";
 import {
   DEFAULT_FONT,
   DEFAULT_FONT_SIZE,
@@ -210,6 +210,7 @@ export class Annotator {
 
     setTimeout(() => {
       this.resize();
+      this.runWarningChecks();
     });
   }
 
@@ -387,7 +388,7 @@ export class Annotator {
       }
     }
 
-    this.warnings.onTextChanged(this.text.value);
+    this.runWarningChecks();
     this.draw();
   }
 
@@ -1755,7 +1756,7 @@ export class Annotator {
         this.cursor.reset();
       }
 
-      this.warnings.onTextChanged(this.text.value);
+      this.runWarningChecks();
       this.draw();
     }
   }
@@ -1807,7 +1808,7 @@ export class Annotator {
     this.text.calculateLines();
 
     // Trigger callbacks and redraw
-    this.warnings.onTextChanged(this.text.value);
+    this.runWarningChecks();
     this.draw();
   }
 
@@ -1893,7 +1894,7 @@ export class Annotator {
     this.text.value = newText;
     this.text.prepareSegments();
     this.text.calculateLines();
-    this.warnings.onTextChanged(this.text.value);
+    this.runWarningChecks();
 
     // Preserve fluent scroll offset (deltaY) so updating text (e.g. discard)
     // doesn't snap the viewport to the top of a line.
@@ -2060,7 +2061,7 @@ export class Annotator {
         this.cursor.move(clipText.length, 0);
         this.cursor.fixOutOfBounds(this.viewport, this.text);
 
-        this.warnings.onTextChanged(this.text.value);
+        this.runWarningChecks();
         this.draw();
       })
       .catch((err) => {
@@ -2079,7 +2080,7 @@ export class Annotator {
     this.cursor.move(text.length, 0);
     this.cursor.fixOutOfBounds(this.viewport, this.text);
 
-    this.warnings.onTextChanged(this.text.value);
+    this.runWarningChecks();
     this.draw();
   }
 
@@ -2628,7 +2629,7 @@ export class Annotator {
     ) => void
   ): void {
     this.warnings.onWarningData((data) => {
-      if (data.type === "asymmetrical-anchor") {
+      if (data.type === WarningType.AsymmetricalAnchor) {
         callback(data.anchors);
       }
     });
@@ -2699,5 +2700,13 @@ export class Annotator {
       this.warnings.clearWarnings();
       this.warnings.emitAsymmetricalAnchors([]);
     }
+  }
+
+  /**
+   * Run all warning detection checks. Invoked on every text mutation.
+   * Add new check calls here when introducing additional warning types.
+   */
+  private runWarningChecks(): void {
+    this.checkAnchors();
   }
 }
