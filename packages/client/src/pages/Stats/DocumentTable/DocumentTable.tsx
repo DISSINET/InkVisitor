@@ -5,7 +5,7 @@ import { IResponseEntity } from "@inkvisitor/shared/types/response-entity";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import api from "api";
 import { BaseDropdown, Loader, Table, Timestamp } from "components";
-import { EntityTag } from "components/advanced";
+import { EmptyEntityTag, EntityTag } from "components/advanced";
 import { UserTag } from "components/advanced/UserTag/UserTag";
 import { useResizeObserver } from "hooks";
 import { useMemo } from "react";
@@ -18,9 +18,11 @@ import {
   StyledDocumentChangesTags,
   StyledDocumentEmptyState,
   StyledDocumentInfoText,
+  StyledDocumentResourceWrap,
   StyledDocumentRow,
   StyledDocumentsLayout,
   StyledField,
+  StyledFieldInput,
   StyledFieldLabel,
 } from "../StatsPageStyles";
 import { HIDDEN_DOCUMENT_CHANGE_SECTIONS, HIDDEN_EVENT_TYPES } from "../constants";
@@ -152,6 +154,26 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
     },
   });
 
+  const { data: resources, isLoading: isLoadingResources } = useQuery({
+    queryKey: ["resourcesWithDocuments"],
+    queryFn: async () => {
+      const res = await api.entitiesSearch({
+        resourceHasDocument: true,
+      });
+      return res.data ?? [];
+    },
+    enabled: api.isLoggedIn(),
+  });
+
+  const selectedResource = useMemo(() => {
+    if (!selectedDocument?.value || !resources) {
+      return undefined;
+    }
+    return resources.find(
+      (resource) => resource.data.documentId === selectedDocument.value
+    );
+  }, [resources, selectedDocument?.value]);
+
   const documentOptions: DropdownItem[] = useMemo(() => {
     if (!dataDocuments) return [];
     return dataDocuments.map((doc: IDocument) => ({
@@ -209,17 +231,33 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
       <StyledDocumentRow>
         <StyledField>
           <StyledFieldLabel>Select Document</StyledFieldLabel>
-          <BaseDropdown
-            options={documentOptions}
-            value={selectedDocument}
-            onChange={(selected) => {
-              setSelectedDocument(selected[0] || null);
-            }}
-            placeholder="Select a document..."
-            width={300}
-            disabled={isLoadingDocuments}
-            loading={isLoadingDocuments}
-          />
+          <StyledFieldInput>
+            <BaseDropdown
+              options={documentOptions}
+              value={selectedDocument}
+              onChange={(selected) => {
+                setSelectedDocument(selected[0] || null);
+              }}
+              placeholder="Select a document..."
+              width={300}
+              disabled={isLoadingDocuments}
+              loading={isLoadingDocuments}
+            />
+            {selectedDocument && (
+              <StyledDocumentResourceWrap>
+                {selectedResource ? (
+                  <EntityTag
+                    entity={selectedResource}
+                    disableDoubleClick
+                    disableDrag
+                    fullWidth
+                  />
+                ) : (
+                  !isLoadingResources && <EmptyEntityTag label="resource" />
+                )}
+              </StyledDocumentResourceWrap>
+            )}
+          </StyledFieldInput>
         </StyledField>
 
         {selectedDocument && (
