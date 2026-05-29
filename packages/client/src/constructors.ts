@@ -363,10 +363,7 @@ export const DStatement = (statement: IStatement, userRole: UserEnums.Role): ISt
     notes: statement.notes,
     props: DProps(statement.props),
     references: statement.references,
-    status:
-      userRole === UserEnums.Role.Admin || userRole === UserEnums.Role.Owner
-        ? EntityEnums.Status.Approved
-        : EntityEnums.Status.Pending,
+    status: EntityEnums.Status.Pending,
     isTemplate: statement.isTemplate,
     usedTemplate: statement.usedTemplate,
   };
@@ -455,10 +452,7 @@ export const DEntity = (entity: IEntity, userRole: UserEnums.Role): IEntity => {
     notes: entity.notes,
     props: DProps(entity.props),
     references: DReferences(entity.references),
-    status:
-      userRole === UserEnums.Role.Admin || userRole === UserEnums.Role.Owner
-        ? EntityEnums.Status.Approved
-        : EntityEnums.Status.Pending,
+    status: EntityEnums.Status.Pending,
     isTemplate: entity.isTemplate,
     usedTemplate: entity.usedTemplate,
   };
@@ -488,10 +482,7 @@ export const DTerritory = (
     notes: entity.notes,
     props: DProps(entity.props),
     references: DReferences(entity.references),
-    status:
-      userRole === UserEnums.Role.Admin || userRole === UserEnums.Role.Owner
-        ? EntityEnums.Status.Approved
-        : EntityEnums.Status.Pending,
+    status: EntityEnums.Status.Pending,
     isTemplate: entity.isTemplate,
     usedTemplate: entity.usedTemplate,
   };
