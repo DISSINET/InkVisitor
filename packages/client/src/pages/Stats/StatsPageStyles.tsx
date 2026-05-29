@@ -101,9 +101,15 @@ export const StyledFieldLabel = styled.div`
   white-space: nowrap;
 `;
 export const StyledFieldInput = styled.div`
-  display: grid;
-  justify-content: start;
+  display: flex;
   align-items: center;
+  gap: 0.5rem;
+`;
+
+export const StyledDocumentResourceWrap = styled.div`
+  min-width: 0;
+  max-width: 17.4rem;
+  flex: 1;
 `;
 export const StyledDateInputWrapper = styled.div`
   display: flex;
