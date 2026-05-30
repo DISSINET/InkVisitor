@@ -98,13 +98,15 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
             options={statusOptions}
             value={statusOptionSelected}
             onChange={(selectedOption) => {
+              const status =
+                selectedOption === defaultStatusOption.value ? undefined : selectedOption;
               handleChange({
-                status: selectedOption || undefined,
+                status,
               });
               dispatch({
                 type: ExploreActionType.setStatusFilter,
                 payload: {
-                  status: selectedOption || undefined,
+                  status,
                 },
               });
             }}

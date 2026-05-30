@@ -164,21 +164,29 @@ const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Exp
     }
 
     case ExploreActionType.setStatusFilter: {
-      const { status } = action.payload as { status: EntityEnums.Status };
+      const { status } = action.payload as { status?: EntityEnums.Status };
       const otherFilters = state.filters.filter((f) => f.type !== Explore.SearchOption.Status);
+      const filters: Explore.IExploreSearchFilter[] =
+        status !== undefined
+          ? [...otherFilters, { type: Explore.SearchOption.Status, status }]
+          : otherFilters;
       return {
         ...state,
-        filters: [...otherFilters, { type: Explore.SearchOption.Status, status }],
+        filters,
         offset: 0,
       };
     }
 
     case ExploreActionType.setLanguageFilter: {
-      const { language } = action.payload as { language: EntityEnums.Language };
+      const { language } = action.payload as { language?: EntityEnums.Language };
       const otherFilters = state.filters.filter((f) => f.type !== Explore.SearchOption.Language);
+      const filters: Explore.IExploreSearchFilter[] =
+        language !== undefined
+          ? [...otherFilters, { type: Explore.SearchOption.Language, language }]
+          : otherFilters;
       return {
         ...state,
-        filters: [...otherFilters, { type: Explore.SearchOption.Language, language }],
+        filters,
         offset: 0,
       };
     }
