@@ -87,12 +87,25 @@ export default class SearchNode implements Query.INode {
   }
 
   /**
-   * Combines a list of edges over a base stream into a single id set.
-   * AND -> intersection of every edge's contribution, OR -> union.
-   * A Positive edge contributes the ids matching its condition; a Negative
-   * edge contributes the base ids that do NOT match it (base minus matches).
-   * @param baseIdsKnown optional precomputed base ids (avoids a round-trip
-   * when the caller already materialised the stream's ids)
+   * Combines a list of edges over a base stream into a single id set,
+   * preserving the node operator: AND -> intersection, OR -> union. A Positive
+   * edge contributes the ids matching its condition; a Negative edge
+   * contributes the ids that do NOT match it.
+   *
+   * AND is evaluated as a narrowing pipeline: every edge after the first runs
+   * only over the survivors so far (`getAll` of the running accumulator), so
+   * the working set shrinks monotonically and later edges never re-scan the
+   * full base. Because each edge is a per-entity predicate (the "subset
+   * invariant" negation already relies on), restricting the input to the
+   * survivors yields exactly the same set as intersecting full-base matches.
+   *
+   * The full base id list is materialised lazily and only when actually needed
+   * - a Negative edge before any positive has seeded the set, or an OR node
+   * that contains a negative edge. AND negations are taken against the running
+   * accumulator, so the common (positive-seeded) case never fetches it.
+   *
+   * @param baseIdsKnown optional precomputed base ids (the caller already
+   * materialised the stream's ids, e.g. nested edges reusing the parent match)
    */
   private async evaluateEdges(
     db: Connection,
@@ -101,32 +114,70 @@ export default class SearchNode implements Query.INode {
     operator: Query.NodeOperator,
     baseIdsKnown?: string[]
   ): Promise<string[]> {
-    const baseIds =
-      baseIdsKnown ?? (await baseStream.getField("id").distinct().run(db));
-    const isAnd = operator === Query.NodeOperator.And;
+    let baseIdsCache: string[] | null = baseIdsKnown ?? null;
+    const getBaseIds = async (): Promise<string[]> => {
+      if (baseIdsCache === null) {
+        baseIdsCache = (await baseStream
+          .getField("id")
+          .distinct()
+          .run(db)) as string[];
+      }
+      return baseIdsCache;
+    };
 
-    let acc: Set<string> = isAnd ? new Set(baseIds) : new Set<string>();
-
-    for (const edge of edges) {
-      const matchIds = await this.resolveEdgeMatch(db, baseStream, edge);
-      const matchSet = new Set<string>(matchIds);
-
-      const contributing =
-        edge.logic === Query.EdgeLogic.Negative
-          ? baseIds.filter((id: string) => !matchSet.has(id))
-          : matchIds;
-
-      if (isAnd) {
-        const contributingSet = new Set<string>(contributing);
-        acc = new Set([...acc].filter((id: string) => contributingSet.has(id)));
-      } else {
-        for (const id of contributing) {
-          acc.add(id);
+    if (operator !== Query.NodeOperator.And) {
+      // OR: each edge is evaluated independently over the base, then unioned
+      const baseIds = edges.some(
+        (e) => e.logic === Query.EdgeLogic.Negative
+      )
+        ? await getBaseIds()
+        : [];
+      const acc = new Set<string>();
+      for (const edge of edges) {
+        const matchIds = await this.resolveEdgeMatch(db, baseStream, edge);
+        if (edge.logic === Query.EdgeLogic.Negative) {
+          const matchSet = new Set<string>(matchIds);
+          for (const id of baseIds) {
+            if (!matchSet.has(id)) {
+              acc.add(id);
+            }
+          }
+        } else {
+          for (const id of matchIds) {
+            acc.add(id);
+          }
         }
+      }
+      return Array.from(acc);
+    }
+
+    // AND: narrowing pipeline. `acc === null` means "universe" (no edge applied
+    // yet) so the first edge runs over the full base stream.
+    let acc: Set<string> | null = null;
+    for (const edge of edges) {
+      const inputStream =
+        acc === null
+          ? baseStream
+          : r.table(Entity.table).getAll(r.args(Array.from(acc)));
+
+      const matchIds = await this.resolveEdgeMatch(db, inputStream, edge);
+
+      if (edge.logic === Query.EdgeLogic.Negative) {
+        const matchSet = new Set<string>(matchIds);
+        const universe: string[] =
+          acc === null ? await getBaseIds() : Array.from(acc);
+        acc = new Set(universe.filter((id: string) => !matchSet.has(id)));
+      } else {
+        // positive: matchIds is already restricted to the current survivors
+        acc = new Set<string>(matchIds);
+      }
+
+      if (acc.size === 0) {
+        break; // an empty intersection stays empty - skip the remaining edges
       }
     }
 
-    return Array.from(acc);
+    return acc === null ? await getBaseIds() : Array.from(acc);
   }
 
   /**
