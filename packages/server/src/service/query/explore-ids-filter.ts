@@ -4,7 +4,7 @@ export const getRowIdsFilter = (
   filters: Explore.IExploreColumnFilter[]
 ): Explore.IExploreRowIdsFilter | undefined => {
   return filters.find(
-    (f): f is Explore.IExploreRowIdsFilter => f.type === Explore.EExploreFilterType.RowIds
+    (f): f is Explore.IExploreRowIdsFilter => f.type === Explore.SearchOption.UUIDs
   );
 };
 

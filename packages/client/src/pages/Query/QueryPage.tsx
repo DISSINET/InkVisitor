@@ -341,7 +341,11 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
           </Box>
         </Panel>
       )}
-      <FloatingSearchContainer rightInset={floatingSearchRightInset} />
+      <FloatingSearchContainer
+        rightInset={floatingSearchRightInset}
+        filters={exploreState.filters}
+        exploreDispatch={exploreStateDispatch}
+      />
     </>
   );
 };

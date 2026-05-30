@@ -16,9 +16,7 @@ interface ExplorerTableIdsFilterProps {
 const getRowIdsFilter = (
   filters: Explore.IExploreColumnFilter[],
 ): Explore.IExploreRowIdsFilter | undefined =>
-  filters.find(
-    (f): f is Explore.IExploreRowIdsFilter => f.type === Explore.EExploreFilterType.RowIds,
-  );
+  filters.find((f): f is Explore.IExploreRowIdsFilter => f.type === Explore.SearchOption.UUIDs);
 
 const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({ filters, dispatch }) => {
   const rowIdsFilter = getRowIdsFilter(filters);

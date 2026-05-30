@@ -138,7 +138,7 @@ export const getRowLabelFilter = (
   filters: Explore.IExploreColumnFilter[]
 ): Explore.IExploreRowLabelFilter | undefined => {
   return filters.find(
-    (f): f is Explore.IExploreRowLabelFilter => f.type === Explore.EExploreFilterType.RowLabel
+    (f): f is Explore.IExploreRowLabelFilter => f.type === Explore.SearchOption.Label
   );
 };
 

@@ -1,4 +1,5 @@
 import { EntityEnums, RelationEnums } from "../enums";
+import { IRequestSearchRootValidity } from "./request-search";
 
 export namespace Query {
   export interface INode {
@@ -870,9 +871,17 @@ export namespace Explore {
     mode: EViewMode;
   }
 
-  export enum EExploreFilterType {
-    RowLabel = "rowLabel",
-    RowIds = "rowIds",
+  export enum SearchOption {
+    Label = "label",
+    UUIDs = "uuids",
+    Status = "status",
+    Language = "language",
+    CreatedAt = "created at",
+    UpdatedAt = "updated at",
+    CreatedBy = "created by",
+    UpdatedBy = "updated by",
+    EditedBy = "edited by",
+    RootValidity = "root validity",
   }
 
   /**
@@ -882,7 +891,7 @@ export namespace Explore {
    * - useRegex: JavaScript RegExp (e.g. `^John` or `/Smith$/i`).
    */
   export interface IExploreRowLabelFilter {
-    type: EExploreFilterType.RowLabel;
+    type: SearchOption.Label;
     label: string;
     useRegex?: boolean;
   }
@@ -891,11 +900,54 @@ export namespace Explore {
    * Filters explorer rows to entities whose id is in this list (AND with query results).
    */
   export interface IExploreRowIdsFilter {
-    type: EExploreFilterType.RowIds;
+    type: SearchOption.UUIDs;
     ids: string[];
   }
 
-  export type IExploreColumnFilter = IExploreRowLabelFilter | IExploreRowIdsFilter;
+  export type IExploreColumnFilter =
+    | IExploreRowLabelFilter
+    | IExploreRowIdsFilter
+    | IExploreRowStatusFilter
+    | IExploreRowLanguageFilter
+    | IExploreRowCreatedAtFilter
+    | IExploreRowUpdatedAtFilter
+    | IExploreRowCreatedByFilter
+    | IExploreRowUpdatedByFilter
+    | IExploreRowEditedByFilter
+    | IExploreRowRootValidityFilter;
+
+  interface IExploreRowStatusFilter {
+    type: SearchOption.Status;
+    status: EntityEnums.Status;
+  }
+  interface IExploreRowLanguageFilter {
+    type: SearchOption.Language;
+    language: EntityEnums.Language;
+  }
+  interface IExploreRowCreatedAtFilter {
+    type: SearchOption.CreatedAt;
+    createdAt: string;
+  }
+  interface IExploreRowUpdatedAtFilter {
+    type: SearchOption.UpdatedAt;
+    updatedAt: string;
+  }
+  interface IExploreRowCreatedByFilter {
+    type: SearchOption.CreatedBy;
+    createdBy: string;
+  }
+  interface IExploreRowUpdatedByFilter {
+    type: SearchOption.UpdatedBy;
+    updatedBy: string;
+  }
+  interface IExploreRowEditedByFilter {
+    type: SearchOption.EditedBy;
+    editedBy: string;
+  }
+  interface IExploreRowRootValidityFilter {
+    type: SearchOption.RootValidity;
+    rootValidity: IRequestSearchRootValidity;
+  }
 
   export type IExploreColumnSort = {
     columnId: string;

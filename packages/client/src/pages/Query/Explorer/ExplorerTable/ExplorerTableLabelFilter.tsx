@@ -16,9 +16,7 @@ interface ExplorerTableLabelFilterProps {
 const getRowLabelFilter = (
   filters: Explore.IExploreColumnFilter[],
 ): Explore.IExploreRowLabelFilter | undefined =>
-  filters.find(
-    (f): f is Explore.IExploreRowLabelFilter => f.type === Explore.EExploreFilterType.RowLabel,
-  );
+  filters.find((f): f is Explore.IExploreRowLabelFilter => f.type === Explore.SearchOption.Label);
 
 const ExplorerTableLabelFilter: React.FC<ExplorerTableLabelFilterProps> = ({
   filters,

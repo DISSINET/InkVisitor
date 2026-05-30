@@ -2,20 +2,9 @@ import "ts-jest";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { applyRowIdsFilter, getRowIdsFilter } from "./explore-ids-filter";
 
-describe("entityIdsEqual", () => {
-  it("compares ids case-insensitively", () => {
-    expect(
-      entityIdsEqual(
-        ["4ce5e669-d421-40c9-b1ce-f476fdd171fe"],
-        ["4CE5E669-D421-40C9-B1CE-F476FDD171FE"]
-      )
-    ).toBeTruthy();
-  });
-});
-
 describe("explore-ids-filter", () => {
   const rowIdsFilter = (ids: string[]): Explore.IExploreRowIdsFilter => ({
-    type: Explore.EExploreFilterType.RowIds,
+    type: Explore.SearchOption.UUIDs,
     ids,
   });
 

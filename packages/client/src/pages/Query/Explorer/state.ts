@@ -1,3 +1,5 @@
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { ExplorerSearchEnums } from "@inkvisitor/shared/enums/explorer-search";
 import { Explore } from "@inkvisitor/shared/types/query";
 
 const exploreStateInitial: Explore.IExplore = {
@@ -50,6 +52,14 @@ enum ExploreActionType {
   sort,
   setLabelFilter,
   setUuidsFilter,
+  setStatusFilter,
+  setLanguageFilter,
+  setCreatedAtFilter,
+  setUpdatedAtFilter,
+  setCreatedByFilter,
+  setUpdatedByFilter,
+  setEditedByFilter,
+  setRootValidityFilter,
 }
 
 const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Explore.IExplore => {
@@ -110,18 +120,16 @@ const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Exp
       };
       const trimmedLabel = label.trim();
       const existingLabelFilter = state.filters.find(
-        (f): f is Explore.IExploreRowLabelFilter => f.type === Explore.EExploreFilterType.RowLabel,
+        (f): f is Explore.IExploreRowLabelFilter => f.type === Explore.SearchOption.Label,
       );
       const nextUseRegex = useRegex ?? existingLabelFilter?.useRegex ?? false;
-      const otherFilters = state.filters.filter(
-        (f) => f.type !== Explore.EExploreFilterType.RowLabel,
-      );
+      const otherFilters = state.filters.filter((f) => f.type !== Explore.SearchOption.Label);
       const filters: Explore.IExploreColumnFilter[] =
         trimmedLabel.length > 0
           ? [
               ...otherFilters,
               {
-                type: Explore.EExploreFilterType.RowLabel,
+                type: Explore.SearchOption.Label,
                 label: trimmedLabel,
                 useRegex: nextUseRegex,
               },
@@ -137,15 +145,13 @@ const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Exp
 
     case ExploreActionType.setUuidsFilter: {
       const { ids } = action.payload as { ids: string[] };
-      const otherFilters = state.filters.filter(
-        (f) => f.type !== Explore.EExploreFilterType.RowIds,
-      );
+      const otherFilters = state.filters.filter((f) => f.type !== Explore.SearchOption.UUIDs);
       const filters: Explore.IExploreColumnFilter[] =
         ids.length > 0
           ? [
               ...otherFilters,
               {
-                type: Explore.EExploreFilterType.RowIds,
+                type: Explore.SearchOption.UUIDs,
                 ids,
               },
             ]
@@ -155,6 +161,15 @@ const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Exp
         ...state,
         filters,
         offset: 0,
+      };
+    }
+
+    case ExploreActionType.setStatusFilter: {
+      const { status } = action.payload as { status: EntityEnums.Status };
+      const otherFilters = state.filters.filter((f) => f.type !== Explore.SearchOption.Status);
+      return {
+        ...state,
+        filters: [...otherFilters, { type: ExplorerSearchEnums.SearchOption.Status, status }],
       };
     }
 
