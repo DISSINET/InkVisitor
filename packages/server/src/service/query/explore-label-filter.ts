@@ -14,8 +14,7 @@ const chunkArray = <T>(arr: T[], size: number): T[][] => {
   return chunks;
 };
 
-const escapeRegExp = (value: string): string =>
-  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 /** Same diacritic folding as SearchQuery.searchWordByWord in response-search.ts */
 const DIACRITIC_CHAR_MAP: Record<string, string> = {
@@ -139,16 +138,11 @@ export const getRowLabelFilter = (
   filters: Explore.IExploreColumnFilter[]
 ): Explore.IExploreRowLabelFilter | undefined => {
   return filters.find(
-    (f): f is Explore.IExploreRowLabelFilter =>
-      f.type === Explore.EExploreFilterType.RowLabel
+    (f): f is Explore.IExploreRowLabelFilter => f.type === Explore.EExploreFilterType.RowLabel
   );
 };
 
-const exploreLabelWildcards = (
-  label: string,
-  left: string,
-  right: string
-): [string, string] => {
+const exploreLabelWildcards = (label: string, left: string, right: string): [string, string] => {
   // prepareLabel defaults to ^/$ (whole-word). Explorer row filter uses substring
   // matching (same as labelFilterToRegExp) unless the user typed explicit * wildcards.
   const trimmed = label.trim();
@@ -166,8 +160,7 @@ const findMatchingIdsWithDbSearch = async (
   ids: string[],
   label: string
 ): Promise<Set<string>> => {
-  const [preparedLabel, leftFromPrepare, rightFromPrepare] =
-    SearchQuery.prepareLabel(label);
+  const [preparedLabel, leftFromPrepare, rightFromPrepare] = SearchQuery.prepareLabel(label);
   const [leftWildcard, rightWildcard] = exploreLabelWildcards(
     label,
     leftFromPrepare,
@@ -181,12 +174,7 @@ const findMatchingIdsWithDbSearch = async (
         .table(Entity.table)
         .getAll(rethink.args(chunk))
         .filter(function (row: RDatum) {
-          return SearchQuery.searchWordByWord(
-            row,
-            preparedLabel,
-            leftWildcard,
-            rightWildcard
-          );
+          return SearchQuery.searchWordByWord(row, preparedLabel, leftWildcard, rightWildcard);
         })("id")
         .run(db)) as string[];
 

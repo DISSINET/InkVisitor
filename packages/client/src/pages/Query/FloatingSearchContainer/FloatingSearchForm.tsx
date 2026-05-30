@@ -1,4 +1,4 @@
-import { languageDict } from "@inkvisitor/shared/dictionaries";
+import { entityStatusDict, languageDict } from "@inkvisitor/shared/dictionaries";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { ExplorerSearchEnums } from "@inkvisitor/shared/enums/explorer-search";
 import {
@@ -17,6 +17,12 @@ import {
   StyledRowHeader,
 } from "./FloatingSearchFormStyles";
 
+const defaultStatusOption = {
+  label: "any",
+  value: "" as EntityEnums.Status,
+};
+const statusOptions = [defaultStatusOption].concat(entityStatusDict);
+
 const defaultLanguageOption = {
   label: "any",
   value: "" as EntityEnums.Language,
@@ -34,6 +40,13 @@ export const FloatingSearchForm: React.FC = () => {
   const [searchData, setSearchData] = useState<IRequestSearch>(initSearchValues);
 
   const { data: users } = useUsersGetMoreQuery({ enabled: true });
+
+  const statusOptionSelected: EntityEnums.Status = useMemo(() => {
+    if (!!searchData.status) {
+      return searchData.status || defaultStatusOption.value;
+    }
+    return defaultStatusOption.value;
+  }, [searchData.status]);
 
   const languageOptionSelected: EntityEnums.Language = useMemo(() => {
     if (searchData.language) {
@@ -70,6 +83,23 @@ export const FloatingSearchForm: React.FC = () => {
 
   return (
     <StyledForm>
+      <StyledRow>
+        <StyledRowHeader>{ExplorerSearchEnums.SearchOption.Status}</StyledRowHeader>
+        <StyledRowControl>
+          <Dropdown.Single.Basic
+            placeholder=""
+            width="full"
+            options={statusOptions}
+            value={statusOptionSelected}
+            onChange={(selectedOption) => {
+              handleChange({
+                status: selectedOption || undefined,
+              });
+            }}
+          />
+          <TypeBar entityLetter={defaultClassForTypeBar} />
+        </StyledRowControl>
+      </StyledRow>
       <StyledRow>
         <StyledRowHeader>{ExplorerSearchEnums.SearchOption.Language}</StyledRowHeader>
         <StyledRowControl>

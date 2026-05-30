@@ -4,6 +4,8 @@ import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from
 import { BiSearch } from "react-icons/bi";
 import { GrClose } from "react-icons/gr";
 import { floorNumberToOneDecimal } from "utils/utils";
+import { ExploreAction } from "../Explorer/state";
+import { Explore } from "@inkvisitor/shared/types/query";
 import { FloatingSearchForm } from "./FloatingSearchForm";
 import {
   FLOATING_SEARCH_COLLAPSED_SIZE,
@@ -34,6 +36,8 @@ interface ViewportPosition {
 interface FloatingSearchContainerProps {
   /** Width of the right-side panel to keep the container out of (detail panel). */
   rightInset?: number;
+  filters: Explore.IExploreColumnFilter[];
+  exploreDispatch: React.Dispatch<ExploreAction>;
 }
 
 const getPageContentRect = (): DOMRect => {
@@ -136,6 +140,8 @@ const positionToStorage = (
 
 export const FloatingSearchContainer: React.FC<FloatingSearchContainerProps> = ({
   rightInset = 0,
+  filters,
+  exploreDispatch,
 }) => {
   const rightInsetRef = useRef(rightInset);
   rightInsetRef.current = rightInset;
@@ -199,12 +205,7 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainerProps> = (
       }
 
       setExpandedPosition(
-        getDefaultPosition(
-          FLOATING_SEARCH_EXPANDED_WIDTH,
-          height,
-          rightInsetRef.current,
-          pageRect,
-        ),
+        getDefaultPosition(FLOATING_SEARCH_EXPANDED_WIDTH, height, rightInsetRef.current, pageRect),
       );
     },
     [getExpandedPanelHeight],

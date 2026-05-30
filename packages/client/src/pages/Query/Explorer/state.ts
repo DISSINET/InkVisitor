@@ -52,7 +52,7 @@ enum ExploreActionType {
   setUuidsFilter,
 }
 
-const exploreReducer = (state: Explore.IExplore, action: ExploreAction): Explore.IExplore => {
+const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Explore.IExplore => {
   switch (action.type) {
     case ExploreActionType.addColumn:
       const newColumn: Explore.IExploreColumn = action.payload;
@@ -109,10 +109,10 @@ const exploreReducer = (state: Explore.IExplore, action: ExploreAction): Explore
         useRegex?: boolean;
       };
       const trimmedLabel = label.trim();
-      const existingRowLabelFilter = state.filters.find(
+      const existingLabelFilter = state.filters.find(
         (f): f is Explore.IExploreRowLabelFilter => f.type === Explore.EExploreFilterType.RowLabel,
       );
-      const nextUseRegex = useRegex ?? existingRowLabelFilter?.useRegex ?? false;
+      const nextUseRegex = useRegex ?? existingLabelFilter?.useRegex ?? false;
       const otherFilters = state.filters.filter(
         (f) => f.type !== Explore.EExploreFilterType.RowLabel,
       );
@@ -161,6 +161,20 @@ const exploreReducer = (state: Explore.IExplore, action: ExploreAction): Explore
     default:
       return state;
   }
+};
+
+const exploreReducer = (state: Explore.IExplore, action: ExploreAction): Explore.IExplore => {
+  const nextState = exploreReducerBase(state, action);
+
+  if (nextState !== state) {
+    console.log("[exploreState]", {
+      action: ExploreActionType[action.type],
+      payload: action.payload,
+      state: nextState,
+    });
+  }
+
+  return nextState;
 };
 
 // TODO: implement a deep comparison
