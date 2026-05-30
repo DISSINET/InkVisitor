@@ -36,7 +36,7 @@ interface ViewportPosition {
 interface FloatingSearchContainerProps {
   /** Width of the right-side panel to keep the container out of (detail panel). */
   rightInset?: number;
-  filters: Explore.IExploreColumnFilter[];
+  filters: Explore.IExploreSearchFilter[];
   exploreDispatch: React.Dispatch<ExploreAction>;
 }
 

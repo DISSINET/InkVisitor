@@ -3,7 +3,7 @@ import { Explore } from "@inkvisitor/shared/types/query";
 import { applyRowIdsFilter, getRowIdsFilter } from "./explore-ids-filter";
 
 describe("explore-ids-filter", () => {
-  const rowIdsFilter = (ids: string[]): Explore.IExploreRowIdsFilter => ({
+  const rowIdsFilter = (ids: string[]): Explore.IExploreUuidsFilter => ({
     type: Explore.SearchOption.UUIDs,
     ids,
   });

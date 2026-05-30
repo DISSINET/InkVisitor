@@ -9,14 +9,14 @@ import { StyledLabelFilter, StyledLabelFilterCheckboxWrapper } from "./ExplorerT
 const LABEL_FILTER_DEBOUNCE_MS = 500;
 
 interface ExplorerTableLabelFilterProps {
-  filters: Explore.IExploreColumnFilter[];
+  filters: Explore.IExploreSearchFilter[];
   dispatch: React.Dispatch<ExploreAction>;
 }
 
 const getRowLabelFilter = (
-  filters: Explore.IExploreColumnFilter[],
-): Explore.IExploreRowLabelFilter | undefined =>
-  filters.find((f): f is Explore.IExploreRowLabelFilter => f.type === Explore.SearchOption.Label);
+  filters: Explore.IExploreSearchFilter[],
+): Explore.IExploreLabelFilter | undefined =>
+  filters.find((f): f is Explore.IExploreLabelFilter => f.type === Explore.SearchOption.Label);
 
 const ExplorerTableLabelFilter: React.FC<ExplorerTableLabelFilterProps> = ({
   filters,

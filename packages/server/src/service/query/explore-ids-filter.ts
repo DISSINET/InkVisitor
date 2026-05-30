@@ -1,16 +1,16 @@
 import { Explore } from "@inkvisitor/shared/types/query";
 
 export const getRowIdsFilter = (
-  filters: Explore.IExploreColumnFilter[]
-): Explore.IExploreRowIdsFilter | undefined => {
+  filters: Explore.IExploreSearchFilter[]
+): Explore.IExploreUuidsFilter | undefined => {
   return filters.find(
-    (f): f is Explore.IExploreRowIdsFilter => f.type === Explore.SearchOption.UUIDs
+    (f): f is Explore.IExploreUuidsFilter => f.type === Explore.SearchOption.UUIDs
   );
 };
 
 export const applyRowIdsFilter = (
   items: string[],
-  filter: Explore.IExploreRowIdsFilter
+  filter: Explore.IExploreUuidsFilter
 ): string[] => {
   if (!filter.ids.length) {
     return items;

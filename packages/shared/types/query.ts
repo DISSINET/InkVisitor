@@ -857,7 +857,7 @@ export namespace Explore {
   export interface IExplore {
     view: IView; // information about the presentation form
     columns: IExploreColumn[];
-    filters: IExploreColumnFilter[];
+    filters: IExploreSearchFilter[];
     sort: IExploreColumnSort | undefined;
     limit: number;
     offset: number;
@@ -884,67 +884,57 @@ export namespace Explore {
     RootValidity = "root validity",
   }
 
-  /**
-   * Filters explorer rows when any string in the row entity's `labels` attribute
-   * matches this pattern.
-   * - Default: label search with * wildcards (same family as entity search).
-   * - useRegex: JavaScript RegExp (e.g. `^John` or `/Smith$/i`).
-   */
-  export interface IExploreRowLabelFilter {
+  export type IExploreSearchFilter =
+    | IExploreLabelFilter
+    | IExploreUuidsFilter
+    | IExploreStatusFilter
+    | IExploreLanguageFilter
+    | IExploreCreatedAtFilter
+    | IExploreUpdatedAtFilter
+    | IExploreCreatedByFilter
+    | IExploreUpdatedByFilter
+    | IExploreEditedByFilter
+    | IExploreRootValidityFilter;
+
+  export interface IExploreLabelFilter {
     type: SearchOption.Label;
     label: string;
     useRegex?: boolean;
   }
 
-  /**
-   * Filters explorer rows to entities whose id is in this list (AND with query results).
-   */
-  export interface IExploreRowIdsFilter {
+  export interface IExploreUuidsFilter {
     type: SearchOption.UUIDs;
     ids: string[];
   }
-
-  export type IExploreColumnFilter =
-    | IExploreRowLabelFilter
-    | IExploreRowIdsFilter
-    | IExploreRowStatusFilter
-    | IExploreRowLanguageFilter
-    | IExploreRowCreatedAtFilter
-    | IExploreRowUpdatedAtFilter
-    | IExploreRowCreatedByFilter
-    | IExploreRowUpdatedByFilter
-    | IExploreRowEditedByFilter
-    | IExploreRowRootValidityFilter;
-
-  interface IExploreRowStatusFilter {
+  interface IExploreStatusFilter {
     type: SearchOption.Status;
     status: EntityEnums.Status;
   }
-  interface IExploreRowLanguageFilter {
+  interface IExploreLanguageFilter {
     type: SearchOption.Language;
     language: EntityEnums.Language;
   }
-  interface IExploreRowCreatedAtFilter {
+  interface IExploreCreatedAtFilter {
     type: SearchOption.CreatedAt;
     createdAt: string;
   }
-  interface IExploreRowUpdatedAtFilter {
+  interface IExploreUpdatedAtFilter {
     type: SearchOption.UpdatedAt;
     updatedAt: string;
   }
-  interface IExploreRowCreatedByFilter {
+  interface IExploreCreatedByFilter {
     type: SearchOption.CreatedBy;
     createdBy: string;
   }
-  interface IExploreRowUpdatedByFilter {
+  interface IExploreUpdatedByFilter {
     type: SearchOption.UpdatedBy;
     updatedBy: string;
   }
-  interface IExploreRowEditedByFilter {
+  interface IExploreEditedByFilter {
     type: SearchOption.EditedBy;
     editedBy: string;
   }
-  interface IExploreRowRootValidityFilter {
+  interface IExploreRootValidityFilter {
     type: SearchOption.RootValidity;
     rootValidity: IRequestSearchRootValidity;
   }

@@ -23,7 +23,7 @@ describe("explore-label-filter", () => {
     status: EntityEnums.Status.Approved,
   };
 
-  const rowLabelFilter = (label: string, useRegex?: boolean): Explore.IExploreRowLabelFilter => ({
+  const rowLabelFilter = (label: string, useRegex?: boolean): Explore.IExploreLabelFilter => ({
     type: Explore.SearchOption.Label,
     label,
     useRegex,

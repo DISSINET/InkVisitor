@@ -119,11 +119,11 @@ const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Exp
       };
       const trimmedLabel = label.trim();
       const existingLabelFilter = state.filters.find(
-        (f): f is Explore.IExploreRowLabelFilter => f.type === Explore.SearchOption.Label,
+        (f): f is Explore.IExploreLabelFilter => f.type === Explore.SearchOption.Label,
       );
       const nextUseRegex = useRegex ?? existingLabelFilter?.useRegex ?? false;
       const otherFilters = state.filters.filter((f) => f.type !== Explore.SearchOption.Label);
-      const filters: Explore.IExploreColumnFilter[] =
+      const filters: Explore.IExploreSearchFilter[] =
         trimmedLabel.length > 0
           ? [
               ...otherFilters,
@@ -145,7 +145,7 @@ const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Exp
     case ExploreActionType.setUuidsFilter: {
       const { ids } = action.payload as { ids: string[] };
       const otherFilters = state.filters.filter((f) => f.type !== Explore.SearchOption.UUIDs);
-      const filters: Explore.IExploreColumnFilter[] =
+      const filters: Explore.IExploreSearchFilter[] =
         ids.length > 0
           ? [
               ...otherFilters,

@@ -105,7 +105,7 @@ export const labelFilterToRegExp = (label: string): RegExp => {
 
 export const entityLabelMatchesFilter = (
   entityLabels: string[],
-  filter: Pick<Explore.IExploreRowLabelFilter, "label" | "useRegex">
+  filter: Pick<Explore.IExploreLabelFilter, "label" | "useRegex">
 ): boolean => {
   const trimmed = filter.label.trim();
   if (!trimmed) {
@@ -129,16 +129,16 @@ export const entityLabelMatchesFilter = (
 
 export const entityMatchesRowLabelFilter = (
   entity: IEntity,
-  filter: Explore.IExploreRowLabelFilter
+  filter: Explore.IExploreLabelFilter
 ): boolean => {
   return entityLabelMatchesFilter(entity.labels ?? [], filter);
 };
 
 export const getRowLabelFilter = (
-  filters: Explore.IExploreColumnFilter[]
-): Explore.IExploreRowLabelFilter | undefined => {
+  filters: Explore.IExploreSearchFilter[]
+): Explore.IExploreLabelFilter | undefined => {
   return filters.find(
-    (f): f is Explore.IExploreRowLabelFilter => f.type === Explore.SearchOption.Label
+    (f): f is Explore.IExploreLabelFilter => f.type === Explore.SearchOption.Label
   );
 };
 
@@ -188,7 +188,7 @@ const findMatchingIdsWithDbSearch = async (
 const findMatchingIdsWithRegex = async (
   db: Connection,
   ids: string[],
-  filter: Explore.IExploreRowLabelFilter
+  filter: Explore.IExploreLabelFilter
 ): Promise<Set<string>> => {
   const matching = new Set<string>();
 
@@ -218,7 +218,7 @@ const findMatchingIdsWithRegex = async (
 export const filterEntityIdsByRowLabelFilter = async (
   db: Connection,
   ids: string[],
-  filter: Explore.IExploreRowLabelFilter
+  filter: Explore.IExploreLabelFilter
 ): Promise<string[]> => {
   const trimmed = filter.label?.trim();
   if (!trimmed || !ids.length) {

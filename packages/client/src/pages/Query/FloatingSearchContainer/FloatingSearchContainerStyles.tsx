@@ -50,6 +50,7 @@ export const StyledExpandedHeader = styled.div`
   justify-content: space-between;
   gap: ${({ theme }) => theme.space[2]};
   padding: ${({ theme }) => theme.space[2]};
+  margin-left: 0.5rem;
   border-bottom: 1px solid ${({ theme }) => theme.color.blue[150]};
   color: ${({ theme }) => theme.color.primary};
 `;
