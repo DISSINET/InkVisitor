@@ -288,12 +288,47 @@ export class EdgeStatementHasPropValue extends SearchEdge {
   }
 }
 
+export class EdgeHasReferenceResource extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["HR:R"];
+  }
+
+  run(q: RStream): RStream {
+    const resourceId = this.node.params.entityId;
+    return q
+      .filter(function (e: RDatum<IEntity>) {
+        // a few legacy entities (e.g. the root territory) store references as
+        // "" instead of an array - treat any non-array as "no references"
+        return r
+          .branch(
+            e("references").typeOf().eq("ARRAY"),
+            e("references"),
+            r.expr([] as any[])
+          )
+          .filter(function (ref: RDatum) {
+            if (resourceId) {
+              return ref("resource").eq(resourceId);
+            }
+            return true;
+          })
+          .count()
+          .gt(0);
+      })
+      .map(function (e) {
+        return e("id");
+      });
+  }
+}
+
 export function getEdgeInstance(data: Partial<Query.IEdge>): SearchEdge {
   switch (data.type) {
     case Query.EdgeType["EP:T"]:
       return new EdgeHasPropType(data);
     case Query.EdgeType["HP:V"]:
       return new EdgeHasPropValue(data);
+    case Query.EdgeType["HR:R"]:
+      return new EdgeHasReferenceResource(data);
     case Query.EdgeType["SP:T"]:
       return new EdgeStatementHasPropType(data);
     case Query.EdgeType["SP:V"]:

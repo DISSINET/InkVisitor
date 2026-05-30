@@ -144,7 +144,9 @@ export namespace Query {
     "I_SUT:D": {},
     "SUT:C": {},
     "I_SUT:C": {},
-    "HR:R": {},
+    "HR:R": {
+      entityId: { allowedClasses: [EntityEnums.Class.Resource] },
+    },
     "I_HR:R": {},
     "HR:V": {},
     "CT:": {},
