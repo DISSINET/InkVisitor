@@ -122,6 +122,12 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
               handleChange({
                 language: selectedOption || undefined,
               });
+              dispatch({
+                type: ExploreActionType.setLanguageFilter,
+                payload: {
+                  language: selectedOption || undefined,
+                },
+              });
             }}
           />
           <TypeBar entityLetter={defaultClassForTypeBar} />
@@ -139,8 +145,20 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
               const createdDate = new Date(value);
               if (createdDate && !isNaN(createdDate.getTime())) {
                 handleChange({ createdDate });
+                dispatch({
+                  type: ExploreActionType.setCreatedAtFilter,
+                  payload: {
+                    createdDate: createdDate,
+                  },
+                });
               } else {
                 handleChange({ createdDate: undefined });
+                dispatch({
+                  type: ExploreActionType.setCreatedAtFilter,
+                  payload: {
+                    createdDate: undefined,
+                  },
+                });
               }
             }}
             clearable
@@ -159,8 +177,20 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
               const updatedDate = new Date(value);
               if (updatedDate && !isNaN(updatedDate.getTime())) {
                 handleChange({ updatedDate });
+                dispatch({
+                  type: ExploreActionType.setUpdatedAtFilter,
+                  payload: {
+                    updatedDate: updatedDate,
+                  },
+                });
               } else {
                 handleChange({ updatedDate: undefined });
+                dispatch({
+                  type: ExploreActionType.setUpdatedAtFilter,
+                  payload: {
+                    updatedDate: undefined,
+                  },
+                });
               }
             }}
             clearable
@@ -177,6 +207,12 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
             value={searchData.createdBy ?? ""}
             onChange={(value) => {
               handleChange({ createdBy: value || undefined });
+              dispatch({
+                type: ExploreActionType.setCreatedByFilter,
+                payload: {
+                  createdBy: value || undefined,
+                },
+              });
             }}
           />
         </StyledRowControl>
@@ -191,6 +227,12 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
             value={searchData.updatedBy ?? ""}
             onChange={(value) => {
               handleChange({ updatedBy: value || undefined });
+              dispatch({
+                type: ExploreActionType.setUpdatedByFilter,
+                payload: {
+                  updatedBy: value || undefined,
+                },
+              });
             }}
           />
         </StyledRowControl>
@@ -205,6 +247,12 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
             value={searchData.editedBy ?? ""}
             onChange={(value) => {
               handleChange({ editedBy: value || undefined });
+              dispatch({
+                type: ExploreActionType.setEditedByFilter,
+                payload: {
+                  editedBy: value || undefined,
+                },
+              });
             }}
           />
         </StyledRowControl>
@@ -224,6 +272,12 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
                   handleChange({
                     isRootInvalid: IRequestSearchRootValidity.Any,
                   });
+                  dispatch({
+                    type: ExploreActionType.setRootValidityFilter,
+                    payload: {
+                      rootValidity: IRequestSearchRootValidity.Any,
+                    },
+                  });
                 },
                 selected:
                   searchData.isRootInvalid === IRequestSearchRootValidity.Any ||
@@ -238,6 +292,12 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
                   handleChange({
                     isRootInvalid: IRequestSearchRootValidity.Valid,
                   });
+                  dispatch({
+                    type: ExploreActionType.setRootValidityFilter,
+                    payload: {
+                      rootValidity: IRequestSearchRootValidity.Valid,
+                    },
+                  });
                 },
                 selected: searchData.isRootInvalid === IRequestSearchRootValidity.Valid,
               },
@@ -248,6 +308,12 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
                 onClick: () => {
                   handleChange({
                     isRootInvalid: IRequestSearchRootValidity.Invalid,
+                  });
+                  dispatch({
+                    type: ExploreActionType.setRootValidityFilter,
+                    payload: {
+                      rootValidity: IRequestSearchRootValidity.Invalid,
+                    },
                   });
                 },
                 selected: searchData.isRootInvalid === IRequestSearchRootValidity.Invalid,

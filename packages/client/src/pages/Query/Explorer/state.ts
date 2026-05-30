@@ -173,6 +173,62 @@ const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Exp
       };
     }
 
+    case ExploreActionType.setLanguageFilter: {
+      const { language } = action.payload as { language: EntityEnums.Language };
+      const otherFilters = state.filters.filter((f) => f.type !== Explore.SearchOption.Language);
+      return {
+        ...state,
+        filters: [...otherFilters, { type: Explore.SearchOption.Language, language }],
+        offset: 0,
+      };
+    }
+
+    case ExploreActionType.setCreatedAtFilter: {
+      const { createdAt } = action.payload as { createdAt: Date };
+      const otherFilters = state.filters.filter((f) => f.type !== Explore.SearchOption.CreatedAt);
+      return {
+        ...state,
+        filters: [
+          ...otherFilters,
+          { type: Explore.SearchOption.CreatedAt, createdAt: createdAt.toISOString() },
+        ],
+        offset: 0,
+      };
+    }
+
+    case ExploreActionType.setUpdatedAtFilter: {
+      const { updatedAt } = action.payload as { updatedAt: Date };
+      const otherFilters = state.filters.filter((f) => f.type !== Explore.SearchOption.UpdatedAt);
+      return {
+        ...state,
+        filters: [
+          ...otherFilters,
+          { type: Explore.SearchOption.UpdatedAt, updatedAt: updatedAt.toISOString() },
+        ],
+        offset: 0,
+      };
+    }
+
+    case ExploreActionType.setCreatedByFilter: {
+      const { createdBy } = action.payload as { createdBy: string };
+      const otherFilters = state.filters.filter((f) => f.type !== Explore.SearchOption.CreatedBy);
+      return {
+        ...state,
+        filters: [...otherFilters, { type: Explore.SearchOption.CreatedBy, createdBy }],
+        offset: 0,
+      };
+    }
+
+    case ExploreActionType.setUpdatedByFilter: {
+      const { updatedBy } = action.payload as { updatedBy: string };
+      const otherFilters = state.filters.filter((f) => f.type !== Explore.SearchOption.UpdatedBy);
+      return {
+        ...state,
+        filters: [...otherFilters, { type: Explore.SearchOption.UpdatedBy, updatedBy }],
+        offset: 0,
+      };
+    }
+
     default:
       return state;
   }
