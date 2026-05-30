@@ -170,7 +170,8 @@ const exploreReducer = (state: Explore.IExplore, action: ExploreAction): Explore
     console.log("[exploreState]", {
       action: ExploreActionType[action.type],
       payload: action.payload,
-      state: nextState,
+      previous: state,
+      next: nextState,
     });
   }
 
