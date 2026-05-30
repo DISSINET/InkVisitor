@@ -14,6 +14,7 @@ import { toast } from "react-toastify";
 import { COLLAPSED_PANEL_WIDTH } from "Theme/constants";
 import { useAppSelector } from "redux/hooks";
 import { floorNumberToOneDecimal } from "utils/utils";
+import { FloatingSearchContainer } from "./FloatingSearchContainer/FloatingSearchContainer";
 import { MemoizedExplorerBox } from "./Explorer/ExplorerBox";
 import { exploreReducer, exploreStateInitial } from "./Explorer/state";
 import { MemoizedQueryBox } from "./Query/QueryBox";
@@ -225,6 +226,12 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     : COLLAPSED_PANEL_WIDTH;
   const firstPanelWidth = isDetailOpen ? layoutWidth - detailPanelWidth : layoutWidth;
 
+  const floatingSearchRightInset = isDetailOpen
+    ? queryDetailPanelExpanded
+      ? layoutWidth - querySeparatorXPosition
+      : COLLAPSED_PANEL_WIDTH
+    : 0;
+
   return (
     <>
       {querySeparatorYPosition > 0 && (
@@ -327,6 +334,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
           </Box>
         </Panel>
       )}
+      <FloatingSearchContainer rightInset={floatingSearchRightInset} />
     </>
   );
 };
