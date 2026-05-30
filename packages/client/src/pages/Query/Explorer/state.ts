@@ -1,5 +1,4 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
-import { ExplorerSearchEnums } from "@inkvisitor/shared/enums/explorer-search";
 import { Explore } from "@inkvisitor/shared/types/query";
 
 const exploreStateInitial: Explore.IExplore = {
@@ -169,7 +168,7 @@ const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Exp
       const otherFilters = state.filters.filter((f) => f.type !== Explore.SearchOption.Status);
       return {
         ...state,
-        filters: [...otherFilters, { type: ExplorerSearchEnums.SearchOption.Status, status }],
+        filters: [...otherFilters, { type: Explore.SearchOption.Status, status }],
       };
     }
 
