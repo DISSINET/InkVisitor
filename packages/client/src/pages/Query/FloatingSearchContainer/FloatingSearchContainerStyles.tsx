@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 export const FLOATING_SEARCH_COLLAPSED_SIZE = 48;
-export const FLOATING_SEARCH_EXPANDED_WIDTH = 320;
+export const FLOATING_SEARCH_EXPANDED_WIDTH = 220;
 export const FLOATING_SEARCH_PAGE_PADDING = 16;
 
 export const StyledFloatingRoot = styled.div<{ $left: number; $top: number }>`
@@ -23,7 +23,9 @@ export const StyledCollapsedButton = styled.button`
   color: ${({ theme }) => theme.color.primary};
   background-color: ${({ theme }) => theme.color.blue[100]};
   box-shadow: ${({ theme }) => theme.boxShadow.high};
-  transition: background-color 0.2s, box-shadow 0.2s;
+  transition:
+    background-color 0.2s,
+    box-shadow 0.2s;
 
   &:hover {
     background-color: ${({ theme }) => theme.color.blue[150]};
@@ -72,6 +74,8 @@ export const StyledDragHandle = styled.div`
 export const StyledExpandedContent = styled.div`
   padding: ${({ theme }) => theme.space[3]};
   min-height: 6rem;
+  max-height: min(70vh, 28rem);
+  overflow-y: auto;
 `;
 
 export const StyledCloseButtonWrap = styled.span`

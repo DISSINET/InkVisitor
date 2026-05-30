@@ -18,13 +18,12 @@ import Dropdown, {
 } from "components/advanced";
 import { useDebounce, useResizeObserver, useSearchParams } from "hooks";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { BsShieldExclamation, BsShieldFillCheck, BsShieldShaded } from "react-icons/bs";
 import { FaPlus } from "react-icons/fa";
 import { RiCloseFill } from "react-icons/ri";
 import { setExpandedOptions } from "redux/features/entitySearch/expandedOptionsSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { DropdownItem } from "@inkvisitor/shared/types";
-import { EntitySearchAdvancedOptions } from "./EntitySearchAdvancedOptions/EntitySearchAdvancedOptions";
+import { EntitySearchAdvancedOptions, mainPageAdvancedSearchOptions } from "./EntitySearchAdvancedOptions/EntitySearchAdvancedOptions";
 import {
   StyledBoxContent,
   StyledNoResults,
@@ -39,7 +38,6 @@ import {
   StyledRowHeader,
 } from "./EntitySearchBoxStyles";
 import { EntitySearchResults } from "./EntitySearchResults/EntitySearchResults";
-import { useUsersGetMoreQuery } from "hooks/react-query/useUsersGetMoreQuery";
 
 const initSearchValues: IRequestSearch = {
   labelOrId: "",
@@ -107,31 +105,12 @@ export const EntitySearchBox: React.FC = () => {
         debouncedValues?.class ||
         debouncedValues?.territoryId ||
         debouncedValues?.cooccurrenceId ||
-        debouncedValues?.haveReferenceTo ||
-        debouncedValues?.createdDate !== undefined ||
-        debouncedValues?.updatedDate !== undefined
+        debouncedValues?.haveReferenceTo
     );
   }, [debouncedValues]);
 
   const dispatch = useAppDispatch();
   const expandedOptions = useAppSelector((state) => state.entitySearch.expandedOptions);
-  const areUserAdvancedOptionsVisible = useMemo(
-    () =>
-      expandedOptions.some((option: SearchEnums.AdvancedOption) =>
-        [
-          SearchEnums.AdvancedOption.CreatedBy,
-          SearchEnums.AdvancedOption.UpdatedBy,
-          SearchEnums.AdvancedOption.EditedBy,
-        ].includes(option)
-      ),
-    [expandedOptions]
-  );
-
-  const {
-    data: users,
-    isFetching: isFetchingUsers,
-    error: usersError,
-  } = useUsersGetMoreQuery({ enabled: areUserAdvancedOptionsVisible });
 
   const {
     status,
@@ -248,18 +227,6 @@ export const EntitySearchBox: React.FC = () => {
 
   const userRole = localStorage.getItem("userrole");
 
-  const userOptions = useMemo(() => {
-    const usersOptionsOut: DropdownItem[] = [{ label: "any", value: "" }].concat(
-      users
-        ?.filter((user) => user && user.id && user.name)
-        .map((user) => ({
-          label: user.name,
-          value: user.id,
-        })) ?? []
-    );
-    return usersOptionsOut;
-  }, [users]);
-
   const handleSetExpandedOptions = useCallback(
     (options: SearchEnums.AdvancedOption[]) => {
       dispatch(setExpandedOptions(options));
@@ -270,21 +237,15 @@ export const EntitySearchBox: React.FC = () => {
   // Map AdvancedOption enum values to IRequestSearch property names
   const getPropertyNameFromOption = useCallback(
     (option: SearchEnums.AdvancedOption): keyof IRequestSearch => {
-      const mapping: Record<SearchEnums.AdvancedOption, keyof IRequestSearch> = {
+      const mapping: Partial<Record<SearchEnums.AdvancedOption, keyof IRequestSearch>> = {
         [SearchEnums.AdvancedOption.Class]: "class",
         [SearchEnums.AdvancedOption.Status]: "status",
         [SearchEnums.AdvancedOption.Language]: "language",
         [SearchEnums.AdvancedOption.Territory]: "territoryId",
         [SearchEnums.AdvancedOption.CoOccurrence]: "cooccurrenceId",
         [SearchEnums.AdvancedOption.ReferencedTo]: "haveReferenceTo",
-        [SearchEnums.AdvancedOption.CreatedAt]: "createdDate",
-        [SearchEnums.AdvancedOption.UpdatedAt]: "updatedDate",
-        [SearchEnums.AdvancedOption.CreatedBy]: "createdBy",
-        [SearchEnums.AdvancedOption.UpdatedBy]: "updatedBy",
-        [SearchEnums.AdvancedOption.EditedBy]: "editedBy",
-        [SearchEnums.AdvancedOption.RootValidity]: "isRootInvalid",
       };
-      return mapping[option];
+      return mapping[option] as keyof IRequestSearch;
     },
     []
   );
@@ -347,6 +308,15 @@ export const EntitySearchBox: React.FC = () => {
       setClassOption(defaultClassOption.value as EntityEnums.Class);
     }
   }, [searchData.class]);
+
+  useEffect(() => {
+    const filtered = expandedOptions.filter((option: SearchEnums.AdvancedOption) =>
+      mainPageAdvancedSearchOptions.includes(option)
+    );
+    if (filtered.length !== expandedOptions.length) {
+      dispatch(setExpandedOptions(filtered));
+    }
+  }, [dispatch, expandedOptions]);
 
   useEffect(() => {
     if (!expandedOptions.includes(SearchEnums.AdvancedOption.Territory)) {
@@ -438,6 +408,7 @@ export const EntitySearchBox: React.FC = () => {
                 </div>
               </StyledRow>
             )}
+
             {expandedOptions.includes(SearchEnums.AdvancedOption.Language) && (
               <StyledRow>
                 {renderOptionLabel(SearchEnums.AdvancedOption.Language)}
@@ -457,6 +428,7 @@ export const EntitySearchBox: React.FC = () => {
                 </div>
               </StyledRow>
             )}
+
             {/* NOT USED NOW */}
             {/* <StyledRow>
               <StyledRowHeader>template</StyledRowHeader>
@@ -610,141 +582,6 @@ export const EntitySearchBox: React.FC = () => {
                     placeholder="resource"
                   />
                 )}
-              </StyledRow>
-            )}
-            {expandedOptions.includes(SearchEnums.AdvancedOption.CreatedAt) && (
-              <StyledRow>
-                {renderOptionLabel(SearchEnums.AdvancedOption.CreatedAt)}
-
-                <Input
-                  type="date"
-                  width="full"
-                  value={
-                    searchData.createdDate ? searchData.createdDate.toISOString().split("T")[0] : ""
-                  }
-                  onChangeFn={(value) => {
-                    const createdDate = new Date(value);
-                    if (createdDate && !isNaN(createdDate.getTime())) {
-                      handleChange({ createdDate });
-                    } else {
-                      handleChange({ createdDate: undefined });
-                    }
-                  }}
-                  clearable
-                />
-              </StyledRow>
-            )}
-            {expandedOptions.includes(SearchEnums.AdvancedOption.UpdatedAt) && (
-              <StyledRow>
-                {renderOptionLabel(SearchEnums.AdvancedOption.UpdatedAt)}
-
-                <Input
-                  type="date"
-                  width="full"
-                  onChangeFn={(value) => {
-                    const updatedDate = new Date(value);
-
-                    if (updatedDate && !isNaN(updatedDate.getTime())) {
-                      handleChange({ updatedDate });
-                    } else {
-                      handleChange({ updatedDate: undefined });
-                    }
-                  }}
-                  value={
-                    searchData.updatedDate ? searchData.updatedDate.toISOString().split("T")[0] : ""
-                  }
-                  clearable
-                />
-              </StyledRow>
-            )}
-
-            {expandedOptions.includes(SearchEnums.AdvancedOption.CreatedBy) && (
-              <StyledRow>
-                {renderOptionLabel(SearchEnums.AdvancedOption.CreatedBy)}
-                <Dropdown.Single.Basic
-                  width="full"
-                  options={userOptions}
-                  value={searchData.createdBy ?? ""}
-                  onChange={(value) => {
-                    handleChange({ createdBy: value });
-                  }}
-                />
-              </StyledRow>
-            )}
-
-            {expandedOptions.includes(SearchEnums.AdvancedOption.UpdatedBy) && (
-              <StyledRow>
-                {renderOptionLabel(SearchEnums.AdvancedOption.UpdatedBy)}
-                <Dropdown.Single.Basic
-                  width="full"
-                  options={userOptions}
-                  value={searchData.updatedBy ?? ""}
-                  onChange={(value) => {
-                    handleChange({ updatedBy: value });
-                  }}
-                />
-              </StyledRow>
-            )}
-
-            {expandedOptions.includes(SearchEnums.AdvancedOption.EditedBy) && (
-              <StyledRow>
-                {renderOptionLabel(SearchEnums.AdvancedOption.EditedBy)}
-                <Dropdown.Single.Basic
-                  width="full"
-                  options={userOptions}
-                  value={searchData.editedBy ?? ""}
-                  onChange={(value) => {
-                    handleChange({ editedBy: value });
-                  }}
-                />
-              </StyledRow>
-            )}
-
-            {expandedOptions.includes(SearchEnums.AdvancedOption.RootValidity) && (
-              <StyledRow>
-                {renderOptionLabel(SearchEnums.AdvancedOption.RootValidity)}
-
-                <AttributeButtonGroup
-                  noMargin
-                  options={[
-                    {
-                      longValue: "Any",
-                      shortValue: "",
-                      shortIcon: <BsShieldShaded style={{ margin: "2px 4px" }} />,
-                      onClick: () => {
-                        handleChange({
-                          isRootInvalid: IRequestSearchRootValidity.Any,
-                        });
-                      },
-                      selected:
-                        searchData.isRootInvalid === IRequestSearchRootValidity.Any ||
-                        searchData.isRootInvalid === undefined ||
-                        searchData.isRootInvalid === null,
-                    },
-                    {
-                      longValue: "Valid",
-                      shortValue: "",
-                      shortIcon: <BsShieldFillCheck style={{ margin: "2px 4px" }} />,
-                      onClick: () => {
-                        handleChange({
-                          isRootInvalid: IRequestSearchRootValidity.Valid,
-                        });
-                      },
-                      selected: searchData.isRootInvalid === IRequestSearchRootValidity.Valid,
-                    },
-                    {
-                      longValue: "Invalid",
-                      shortValue: "",
-                      shortIcon: <BsShieldExclamation style={{ margin: "2px 4px" }} />,
-                      onClick: () => {
-                        handleChange({
-                          isRootInvalid: IRequestSearchRootValidity.Invalid,
-                        });
-                      },
-                      selected: searchData.isRootInvalid === IRequestSearchRootValidity.Invalid,
-                    },
-                  ]}
-                />
               </StyledRow>
             )}
           </>

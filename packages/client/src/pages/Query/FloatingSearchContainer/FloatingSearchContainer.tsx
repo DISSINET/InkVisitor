@@ -5,6 +5,7 @@ import { BiSearch } from "react-icons/bi";
 import { FiMove } from "react-icons/fi";
 import { GrClose } from "react-icons/gr";
 import { floorNumberToOneDecimal } from "utils/utils";
+import { FloatingSearchForm } from "./FloatingSearchForm";
 import {
   FLOATING_SEARCH_COLLAPSED_SIZE,
   FLOATING_SEARCH_EXPANDED_WIDTH,
@@ -32,7 +33,6 @@ interface ViewportPosition {
 }
 
 interface FloatingSearchContainerProps {
-  children?: React.ReactNode;
   /** Width of the right-side panel to keep the container out of (detail panel). */
   rightInset?: number;
 }
@@ -75,14 +75,13 @@ const clampPosition = (
   panelWidth: number,
   panelHeight: number,
   rightInset: number,
-  pageRect = getPageContentRect()
+  pageRect = getPageContentRect(),
 ): ViewportPosition => {
   const availableWidth = pageRect.width - rightInset;
   const minX = pageRect.left + FLOATING_SEARCH_PAGE_PADDING;
   const maxX = pageRect.left + availableWidth - panelWidth - FLOATING_SEARCH_PAGE_PADDING;
   const minY = pageRect.top + FLOATING_SEARCH_PAGE_PADDING;
-  const maxY =
-    pageRect.top + pageRect.height - panelHeight - FLOATING_SEARCH_PAGE_PADDING;
+  const maxY = pageRect.top + pageRect.height - panelHeight - FLOATING_SEARCH_PAGE_PADDING;
 
   return {
     x: Math.min(Math.max(minX, x), Math.max(minX, maxX)),
@@ -94,7 +93,7 @@ const getDefaultPosition = (
   panelWidth: number,
   panelHeight: number,
   rightInset: number,
-  pageRect = getPageContentRect()
+  pageRect = getPageContentRect(),
 ): ViewportPosition => {
   const availableWidth = pageRect.width - rightInset;
   return clampPosition(
@@ -103,7 +102,7 @@ const getDefaultPosition = (
     panelWidth,
     panelHeight,
     rightInset,
-    pageRect
+    pageRect,
   );
 };
 
@@ -112,7 +111,7 @@ const positionFromStorage = (
   panelWidth: number,
   panelHeight: number,
   rightInset: number,
-  pageRect = getPageContentRect()
+  pageRect = getPageContentRect(),
 ): ViewportPosition => {
   const availableWidth = pageRect.width - rightInset;
   const x = pageRect.left + stored.xPercent * (availableWidth / 100);
@@ -124,7 +123,7 @@ const positionToStorage = (
   x: number,
   y: number,
   rightInset: number,
-  pageRect = getPageContentRect()
+  pageRect = getPageContentRect(),
 ): StoredPosition => {
   const availableWidth = pageRect.width - rightInset;
   const relativeX = x - pageRect.left;
@@ -137,7 +136,6 @@ const positionToStorage = (
 };
 
 export const FloatingSearchContainer: React.FC<FloatingSearchContainerProps> = ({
-  children,
   rightInset = 0,
 }) => {
   const rightInsetRef = useRef(rightInset);
@@ -162,9 +160,7 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainerProps> = (
 
   const dragWindowListenersRef = useRef<AbortController | null>(null);
 
-  const panelWidth = isExpanded
-    ? FLOATING_SEARCH_EXPANDED_WIDTH
-    : FLOATING_SEARCH_COLLAPSED_SIZE;
+  const panelWidth = isExpanded ? FLOATING_SEARCH_EXPANDED_WIDTH : FLOATING_SEARCH_COLLAPSED_SIZE;
   const panelHeightRef = useRef(FLOATING_SEARCH_COLLAPSED_SIZE);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -185,17 +181,15 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainerProps> = (
         const stored = loadStoredPosition();
         if (stored) {
           setPosition(
-            positionFromStorage(stored, panelWidth, height, rightInsetRef.current, pageRect)
+            positionFromStorage(stored, panelWidth, height, rightInsetRef.current, pageRect),
           );
           return;
         }
       }
 
-      setPosition(
-        getDefaultPosition(panelWidth, height, rightInsetRef.current, pageRect)
-      );
+      setPosition(getDefaultPosition(panelWidth, height, rightInsetRef.current, pageRect));
     },
-    [getPanelHeight, panelWidth]
+    [getPanelHeight, panelWidth],
   );
 
   useLayoutEffect(() => {
@@ -221,7 +215,7 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainerProps> = (
       }
       return clamped;
     },
-    [persistPosition]
+    [persistPosition],
   );
 
   useEffect(() => {
@@ -303,7 +297,7 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainerProps> = (
       window.addEventListener("pointercancel", onWindowPointerEnd, opts);
       window.addEventListener("blur", () => endDrag(), opts);
     },
-    [applyPosition, endDrag, getPanelHeight, panelWidth]
+    [applyPosition, endDrag, getPanelHeight, panelWidth],
   );
 
   useEffect(() => {
@@ -322,7 +316,7 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainerProps> = (
                 onPointerDown={handleDragPointerDown}
                 aria-label="Drag search panel"
               >
-                <FiMove size={14} />
+                {/* <FiMove size={14} /> */}
                 <span>Search</span>
               </StyledDragHandle>
               <StyledCloseButtonWrap>
@@ -337,7 +331,9 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainerProps> = (
                 />
               </StyledCloseButtonWrap>
             </StyledExpandedHeader>
-            <StyledExpandedContent>{children}</StyledExpandedContent>
+            <StyledExpandedContent>
+              <FloatingSearchForm />
+            </StyledExpandedContent>
           </StyledExpandedPanel>
         ) : (
           <StyledCollapsedButton
