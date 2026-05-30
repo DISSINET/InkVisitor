@@ -1,10 +1,10 @@
 import { Explore } from "@inkvisitor/shared/types/query";
-import { entityIdsEqual, parseEntityIdsFromText } from "@inkvisitor/shared/utils/parse-entity-ids";
 import { Input } from "components";
 import { useDebounce } from "hooks";
 import React, { useCallback, useEffect, useState } from "react";
 import { ExploreAction, ExploreActionType } from "../state";
 import { StyledIdsFilter, StyledIdsFilterHint } from "./ExplorerTableStyles";
+import { entityIdsEqual, parseEntityIdsFromText } from "pages/Query/utils";
 
 const IDS_FILTER_DEBOUNCE_MS = 400;
 
@@ -14,10 +14,10 @@ interface ExplorerTableIdsFilterProps {
 }
 
 const getRowIdsFilter = (
-  filters: Explore.IExploreColumnFilter[]
+  filters: Explore.IExploreColumnFilter[],
 ): Explore.IExploreRowIdsFilter | undefined =>
   filters.find(
-    (f): f is Explore.IExploreRowIdsFilter => f.type === Explore.EExploreFilterType.RowIds
+    (f): f is Explore.IExploreRowIdsFilter => f.type === Explore.EExploreFilterType.RowIds,
   );
 
 const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({ filters, dispatch }) => {
@@ -34,7 +34,7 @@ const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({ filters
         payload: { ids },
       });
     },
-    [dispatch]
+    [dispatch],
   );
 
   useEffect(() => {

@@ -20,7 +20,7 @@ export const buildWindowId = (signature: string, offset: number, limit: number):
 export const clampWindow = (
   total: number,
   offset: number,
-  limit: number
+  limit: number,
 ): { offset: number; limit: number } => {
   const safeOffset = Math.max(0, Math.min(offset, Math.max(0, total - 1)));
   const safeLimit = Math.max(1, Math.min(limit, Math.max(1, total - safeOffset)));
@@ -83,4 +83,38 @@ const hashString = (s: string): string => {
   }
   // Convert to unsigned and base36
   return (h >>> 0).toString(36);
+};
+
+/**
+ * Parses space-, tab-, line-break-, or comma-separated entity UUIDs from pasted text.
+ * Invalid tokens are ignored; duplicates are removed (first occurrence order preserved).
+ */
+const ENTITY_ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+export const parseEntityIdsFromText = (text: string): string[] => {
+  const seen = new Set<string>();
+  const ids: string[] = [];
+
+  for (const token of text.split(/[\s,\t\n\r]+/)) {
+    const trimmed = token.trim();
+    if (!trimmed || !ENTITY_ID_RE.test(trimmed)) {
+      continue;
+    }
+    const normalized = trimmed.toLowerCase();
+    if (seen.has(normalized)) {
+      continue;
+    }
+    seen.add(normalized);
+    ids.push(trimmed);
+  }
+
+  return ids;
+};
+
+export const entityIdsEqual = (a: string[], b: string[]): boolean => {
+  if (a.length !== b.length) {
+    return false;
+  }
+  const setB = new Set(b.map((id) => id.toLowerCase()));
+  return a.every((id) => setB.has(id.toLowerCase()));
 };
