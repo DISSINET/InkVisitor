@@ -1,9 +1,9 @@
 import Relation from "@models/relation/relation";
-import { DbEnums, RelationEnums } from "@inkvisitor/shared/enums";
+import { DbEnums, EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { IEntity, Relation as RelationTypes } from "@inkvisitor/shared/types";
 import { InternalServerError } from "@inkvisitor/shared/types/errors";
 import { Query } from "@inkvisitor/shared/types/query";
-import { r, RDatum, RStream } from "rethinkdb-ts";
+import { r, RDatum, RStream, RValue } from "rethinkdb-ts";
 import { SearchNode } from ".";
 
 export default class SearchEdge implements Query.IEdge {
@@ -206,12 +206,98 @@ export class EdgeHasPropValue extends SearchEdge {
   }
 }
 
+/**
+ * Collects entityId of prop[kind] across an in-statement props array, recursing
+ * into children to lvl3 - mirrors the StatementDataProps index definition.
+ */
+function collectStatementPropIds(
+  propsExpr: RDatum,
+  kind: "type" | "value"
+): RDatum {
+  return propsExpr.concatMap(function (ch1: RDatum) {
+    return r.expr([ch1(kind)("entityId")]).add(
+      ch1("children").concatMap(function (ch2: RDatum) {
+        return r.expr([ch2(kind)("entityId")]).add(
+          ch2("children").concatMap(function (ch3: RDatum) {
+            return [ch3(kind)("entityId")];
+          }) as RValue
+        );
+      }) as RValue
+    );
+  });
+}
+
+/**
+ * Shared run for the in-statement prop edges (SP:T / SP:V). Keeps only
+ * statements and matches those whose data.actions[].props or
+ * data.actants[].props (incl. children) reference the target by `kind`.
+ * Maps to the statement's own id, preserving the subset invariant negation needs.
+ */
+function runStatementPropEdge(
+  q: RStream,
+  targetId: string | undefined,
+  kind: "type" | "value"
+): RStream {
+  return q
+    .filter(function (e: RDatum<IEntity>) {
+      return e("class").eq(EntityEnums.Class.Statement);
+    })
+    .filter(function (e: RDatum<IEntity>) {
+      const ids = collectStatementPropIds(
+        e("data")("actions").concatMap(function (a: RDatum) {
+          return a("props");
+        }),
+        kind
+      ).add(
+        collectStatementPropIds(
+          e("data")("actants").concatMap(function (a: RDatum) {
+            return a("props");
+          }),
+          kind
+        ) as RValue
+      );
+      if (targetId) {
+        return ids.contains(targetId);
+      }
+      return ids.count().gt(0);
+    })
+    .map(function (e) {
+      return e("id");
+    });
+}
+
+export class EdgeStatementHasPropType extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["SP:T"];
+  }
+
+  run(q: RStream): RStream {
+    return runStatementPropEdge(q, this.node.params.entityId, "type");
+  }
+}
+
+export class EdgeStatementHasPropValue extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["SP:V"];
+  }
+
+  run(q: RStream): RStream {
+    return runStatementPropEdge(q, this.node.params.entityId, "value");
+  }
+}
+
 export function getEdgeInstance(data: Partial<Query.IEdge>): SearchEdge {
   switch (data.type) {
     case Query.EdgeType["EP:T"]:
       return new EdgeHasPropType(data);
     case Query.EdgeType["HP:V"]:
       return new EdgeHasPropValue(data);
+    case Query.EdgeType["SP:T"]:
+      return new EdgeStatementHasPropType(data);
+    case Query.EdgeType["SP:V"]:
+      return new EdgeStatementHasPropValue(data);
     case Query.EdgeType["R:"]:
       return new EdgeHasRelation(data);
     case Query.EdgeType["R:CLA"]:
