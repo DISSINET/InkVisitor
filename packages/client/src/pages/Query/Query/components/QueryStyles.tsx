@@ -2,8 +2,8 @@ import styled from "styled-components";
 
 export const StyledNodeContainer = styled.div<{ $column?: boolean }>`
   display: flex;
-  flex-direction: ${({ $column }) => ($column ? "column" : "row")};
-  align-items: ${({ $column }) => ($column ? "flex-start" : "center")};
+  flex-direction: row;
+  align-items: flex-start;
   gap: 0.5rem;
   width: 100%;
   height: 100%;
@@ -18,7 +18,7 @@ export const StyledNodeMainRow = styled.div`
 
 export const StyledParallelOperator = styled.div`
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: ${({ theme }) => theme.space[4]};
   padding-left: ${({ theme }) => theme.space[2]};
 `;
