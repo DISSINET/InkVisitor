@@ -45,6 +45,7 @@ enum QueryActionType {
   addNode,
   removeEdge,
   updateEdgeType,
+  updateEdgeLogic,
   updateNodeType,
   updateNodeClass,
   updateNodeEntityId,
@@ -63,6 +64,10 @@ type QueryAction =
   | {
       type: QueryActionType.updateEdgeType;
       payload: { edgeId: string; newType: Query.EdgeType };
+    }
+  | {
+      type: QueryActionType.updateEdgeLogic;
+      payload: { edgeId: string; newLogic: Query.EdgeLogic };
     }
   | {
       type: QueryActionType.updateNodeType;
@@ -122,6 +127,21 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
       }
       edgeToUpdate.type = newType;
       return updatedStateUpdate;
+
+    case QueryActionType.updateEdgeLogic:
+      const edgeIdLogic = action.payload.edgeId;
+      const newLogic = action.payload.newLogic;
+
+      const updatedStateLogic = { ...state };
+
+      const edgeToUpdateLogic = getAllEdges(updatedStateLogic).find(
+        (edge) => edge.id === edgeIdLogic
+      );
+      if (!edgeToUpdateLogic) {
+        return updatedStateLogic;
+      }
+      edgeToUpdateLogic.logic = newLogic;
+      return updatedStateLogic;
 
     case QueryActionType.updateNodeType:
       return updateNodeType(

@@ -118,7 +118,6 @@ export namespace Query {
   > = {
     "HP:V": {
       entityId: { allowedClasses: [] },
-      entityClass: { allowedClasses: [] },
     },
     "I_HP:V": {},
     "EP:T": {
@@ -145,7 +144,9 @@ export namespace Query {
     "I_SUT:D": {},
     "SUT:C": {},
     "I_SUT:C": {},
-    "HR:R": {},
+    "HR:R": {
+      entityId: { allowedClasses: [EntityEnums.Class.Resource] },
+    },
     "I_HR:R": {},
     "HR:V": {},
     "CT:": {},
@@ -154,9 +155,13 @@ export namespace Query {
     "I_CT:D": {},
     "CT:G": {},
     "I_CT:G": {},
-    "SP:T": {},
+    "SP:T": {
+      entityId: { allowedClasses: [EntityEnums.Class.Concept] },
+    },
     "I_SP:T": {},
-    "SP:V": {},
+    "SP:V": {
+      entityId: { allowedClasses: [] },
+    },
     "I_SP:V": {},
     SI: {},
     I_SI: {},
@@ -202,10 +207,7 @@ export namespace Query {
 
   export const EdgeTypeNodeRules: Record<EdgeType, [EdgeRule, EdgeRule]> = {
     "HP:V": [
-      {
-        nodeType: NodeType.E,
-        params: { entityClass: [EntityEnums.Class.Concept] },
-      },
+      { nodeType: NodeType.E, params: { entityClass: [] } },
       { nodeType: NodeType.E, params: {} },
     ],
     "I_HP:V": [
@@ -454,7 +456,10 @@ export namespace Query {
       },
     ],
     "SP:T": [
-      { nodeType: NodeType.E, params: { entityClass: [] } },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Statement] },
+      },
       {
         nodeType: NodeType.E,
         params: { entityClass: [EntityEnums.Class.Concept] },
@@ -465,7 +470,10 @@ export namespace Query {
       { nodeType: NodeType.E, params: { entityClass: [] } },
     ],
     "SP:V": [
-      { nodeType: NodeType.E, params: { entityClass: [] } },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Statement] },
+      },
       { nodeType: NodeType.E, params: { entityClass: [] } },
     ],
     "I_SP:V": [
