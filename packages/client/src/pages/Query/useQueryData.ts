@@ -1,7 +1,7 @@
 import { QueryClient, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { IResponseQuery, IResponseQueryEntity } from "@inkvisitor/shared/types";
-import { Query } from "@inkvisitor/shared/types/query";
+import { Explore, Query } from "@inkvisitor/shared/types/query";
 import api from "api";
 import { QueryValidity } from "./types";
 
@@ -85,9 +85,9 @@ export const useQueryData = ({
       }
     }
 
-    console.log(
-      `✅ Cache hit: rows [${targetOffset}-${targetEnd}] (${rowCache.rows.size} total cached)`,
-    );
+    // console.log(
+    //   `✅ Cache hit: rows [${targetOffset}-${targetEnd}] (${rowCache.rows.size} total cached)`,
+    // );
 
     return {
       query: queryState,
@@ -138,9 +138,9 @@ export const useQueryData = ({
         return cachedData;
       }
 
-      console.log(
-        `🔄 Fetching rows [${exploreState.offset}-${exploreState.offset + exploreState.limit - 1}]`,
-      );
+      // console.log(
+      //   `🔄 Fetching rows [${exploreState.offset}-${exploreState.offset + exploreState.limit - 1}]`,
+      // );
 
       if (!queryStateValidity.isValid || !api.isLoggedIn()) return;
       const res = await api.query({
@@ -155,11 +155,11 @@ export const useQueryData = ({
           res.data.total,
           res.data.entityIds ?? [],
         );
-        console.log(
-          `📦 Stored ${res.data.entities.length} rows [${exploreState.offset}-${
-            exploreState.offset + res.data.entities.length - 1
-          }]`,
-        );
+        // console.log(
+        //   `📦 Stored ${res.data.entities.length} rows [${exploreState.offset}-${
+        //     exploreState.offset + res.data.entities.length - 1
+        //   }]`,
+        // );
       }
 
       return res.data;

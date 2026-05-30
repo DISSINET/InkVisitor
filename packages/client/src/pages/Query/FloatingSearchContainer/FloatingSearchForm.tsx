@@ -1,6 +1,6 @@
 import { languageDict } from "@inkvisitor/shared/dictionaries";
-import { EntityEnums, SearchEnums } from "@inkvisitor/shared/enums";
-import { DropdownItem } from "@inkvisitor/shared/types";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { ExplorerSearchEnums } from "@inkvisitor/shared/enums/explorer-search";
 import {
   IRequestSearch,
   IRequestSearchRootValidity,
@@ -49,14 +49,12 @@ export const FloatingSearchForm: React.FC = () => {
         .map((user) => ({
           label: user.name,
           value: user.id,
-        })) ?? []
+        })) ?? [],
     );
   }, [users]);
 
   const handleChange = useCallback(
-    (changes: {
-      [key: string]: string | undefined | Date | IRequestSearchRootValidity;
-    }) => {
+    (changes: { [key: string]: string | undefined | Date | IRequestSearchRootValidity }) => {
       const newSearch = { ...searchData, ...changes };
 
       Object.keys(changes).forEach((changeKey) => {
@@ -67,13 +65,13 @@ export const FloatingSearchForm: React.FC = () => {
 
       setSearchData(newSearch);
     },
-    [searchData]
+    [searchData],
   );
 
   return (
     <StyledForm>
       <StyledRow>
-        <StyledRowHeader>{SearchEnums.AdvancedOption.Language}</StyledRowHeader>
+        <StyledRowHeader>{ExplorerSearchEnums.SearchOption.Language}</StyledRowHeader>
         <StyledRowControl>
           <Dropdown.Single.Basic
             placeholder=""
@@ -91,16 +89,12 @@ export const FloatingSearchForm: React.FC = () => {
       </StyledRow>
 
       <StyledRow>
-        <StyledRowHeader>{SearchEnums.AdvancedOption.CreatedAt}</StyledRowHeader>
+        <StyledRowHeader>{ExplorerSearchEnums.SearchOption.CreatedAt}</StyledRowHeader>
         <StyledRowControl>
           <Input
             type="date"
             width="full"
-            value={
-              searchData.createdDate
-                ? searchData.createdDate.toISOString().split("T")[0]
-                : ""
-            }
+            value={searchData.createdDate ? searchData.createdDate.toISOString().split("T")[0] : ""}
             onChangeFn={(value) => {
               const createdDate = new Date(value);
               if (createdDate && !isNaN(createdDate.getTime())) {
@@ -115,16 +109,12 @@ export const FloatingSearchForm: React.FC = () => {
       </StyledRow>
 
       <StyledRow>
-        <StyledRowHeader>{SearchEnums.AdvancedOption.UpdatedAt}</StyledRowHeader>
+        <StyledRowHeader>{ExplorerSearchEnums.SearchOption.UpdatedAt}</StyledRowHeader>
         <StyledRowControl>
           <Input
             type="date"
             width="full"
-            value={
-              searchData.updatedDate
-                ? searchData.updatedDate.toISOString().split("T")[0]
-                : ""
-            }
+            value={searchData.updatedDate ? searchData.updatedDate.toISOString().split("T")[0] : ""}
             onChangeFn={(value) => {
               const updatedDate = new Date(value);
               if (updatedDate && !isNaN(updatedDate.getTime())) {
@@ -139,7 +129,7 @@ export const FloatingSearchForm: React.FC = () => {
       </StyledRow>
 
       <StyledRow>
-        <StyledRowHeader>{SearchEnums.AdvancedOption.CreatedBy}</StyledRowHeader>
+        <StyledRowHeader>{ExplorerSearchEnums.SearchOption.CreatedBy}</StyledRowHeader>
         <StyledRowControl>
           <Dropdown.Single.Basic
             width="full"
@@ -153,7 +143,7 @@ export const FloatingSearchForm: React.FC = () => {
       </StyledRow>
 
       <StyledRow>
-        <StyledRowHeader>{SearchEnums.AdvancedOption.UpdatedBy}</StyledRowHeader>
+        <StyledRowHeader>{ExplorerSearchEnums.SearchOption.UpdatedBy}</StyledRowHeader>
         <StyledRowControl>
           <Dropdown.Single.Basic
             width="full"
@@ -167,7 +157,7 @@ export const FloatingSearchForm: React.FC = () => {
       </StyledRow>
 
       <StyledRow>
-        <StyledRowHeader>{SearchEnums.AdvancedOption.EditedBy}</StyledRowHeader>
+        <StyledRowHeader>{ExplorerSearchEnums.SearchOption.EditedBy}</StyledRowHeader>
         <StyledRowControl>
           <Dropdown.Single.Basic
             width="full"
@@ -181,7 +171,7 @@ export const FloatingSearchForm: React.FC = () => {
       </StyledRow>
 
       <StyledRow>
-        <StyledRowHeader>{SearchEnums.AdvancedOption.RootValidity}</StyledRowHeader>
+        <StyledRowHeader>{ExplorerSearchEnums.SearchOption.RootValidity}</StyledRowHeader>
         <StyledRowControl>
           <AttributeButtonGroup
             noMargin
@@ -209,8 +199,7 @@ export const FloatingSearchForm: React.FC = () => {
                     isRootInvalid: IRequestSearchRootValidity.Valid,
                   });
                 },
-                selected:
-                  searchData.isRootInvalid === IRequestSearchRootValidity.Valid,
+                selected: searchData.isRootInvalid === IRequestSearchRootValidity.Valid,
               },
               {
                 longValue: "Invalid",
@@ -221,8 +210,7 @@ export const FloatingSearchForm: React.FC = () => {
                     isRootInvalid: IRequestSearchRootValidity.Invalid,
                   });
                 },
-                selected:
-                  searchData.isRootInvalid === IRequestSearchRootValidity.Invalid,
+                selected: searchData.isRootInvalid === IRequestSearchRootValidity.Invalid,
               },
             ]}
           />

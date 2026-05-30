@@ -1,6 +1,6 @@
 export namespace ExplorerSearchEnums {
   export enum SearchOption {
-    Label = "rowLabel",
+    Label = "label",
     UUIDs = "uuids",
     Status = "status",
     Language = "language",
