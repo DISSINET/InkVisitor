@@ -202,10 +202,7 @@ export namespace Query {
 
   export const EdgeTypeNodeRules: Record<EdgeType, [EdgeRule, EdgeRule]> = {
     "HP:V": [
-      {
-        nodeType: NodeType.E,
-        params: { entityClass: [EntityEnums.Class.Concept] },
-      },
+      { nodeType: NodeType.E, params: { entityClass: [] } },
       { nodeType: NodeType.E, params: {} },
     ],
     "I_HP:V": [

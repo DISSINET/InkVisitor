@@ -178,10 +178,40 @@ export class EdgeHasPropType extends SearchEdge {
   }
 }
 
+export class EdgeHasPropValue extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["HP:V"];
+  }
+
+  run(q: RStream): RStream {
+    const valueId = this.node.params.entityId;
+    return q
+      .filter(function (e: RDatum<IEntity>) {
+        // some of the e.[props].value.entityId is entity.id
+        return e("props")
+          .filter(function (prop) {
+            if (valueId) {
+              return prop("value")("entityId").eq(valueId);
+            } else {
+              return prop("value");
+            }
+          })
+          .count()
+          .gt(0);
+      })
+      .map(function (e) {
+        return e("id");
+      });
+  }
+}
+
 export function getEdgeInstance(data: Partial<Query.IEdge>): SearchEdge {
   switch (data.type) {
     case Query.EdgeType["EP:T"]:
       return new EdgeHasPropType(data);
+    case Query.EdgeType["HP:V"]:
+      return new EdgeHasPropValue(data);
     case Query.EdgeType["R:"]:
       return new EdgeHasRelation(data);
     case Query.EdgeType["R:CLA"]:
