@@ -64,16 +64,19 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
     enabled: !!entityId && api.isLoggedIn(),
   });
 
+  // a node reached through a negative ("NOT") edge gets a red border to match
+  // that edge; scoped to this node only - deeper nodes have their own edges
+  const isNegativeEdge = edge?.logic === Query.EdgeLogic.Negative;
+
   const nodeBorder = useMemo(() => {
-    if (isValid) {
-      if (isRoot) {
-        return theme.color.query2;
-      } else {
-        return theme.color.query2;
-      }
+    if (!isValid) {
+      return "none";
     }
-    return "none";
-  }, [theme, isValid, isRoot]);
+    if (isNegativeEdge) {
+      return theme.color.entityA;
+    }
+    return theme.color.query2;
+  }, [theme, isValid, isNegativeEdge]);
 
   const nodeColor = useMemo(() => {
     if (isValid) {
