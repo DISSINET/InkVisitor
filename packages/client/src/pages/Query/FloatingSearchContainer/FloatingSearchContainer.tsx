@@ -2,7 +2,6 @@ import { FloatingPortal } from "@floating-ui/react";
 import { Button } from "components";
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { BiSearch } from "react-icons/bi";
-import { FiMove } from "react-icons/fi";
 import { GrClose } from "react-icons/gr";
 import { floorNumberToOneDecimal } from "utils/utils";
 import { FloatingSearchForm } from "./FloatingSearchForm";
@@ -19,7 +18,7 @@ import {
   StyledFloatingRoot,
 } from "./FloatingSearchContainerStyles";
 
-const POSITION_STORAGE_KEY = "queryFloatingSearchPositionV2";
+const EXPANDED_POSITION_STORAGE_KEY = "queryFloatingSearchExpandedPositionV2";
 
 interface StoredPosition {
   xPercent: number;
@@ -45,8 +44,8 @@ const getPageContentRect = (): DOMRect => {
   return new DOMRect(0, 0, window.innerWidth, window.innerHeight);
 };
 
-const loadStoredPosition = (): StoredPosition | null => {
-  const raw = localStorage.getItem(POSITION_STORAGE_KEY);
+const loadStoredExpandedPosition = (): StoredPosition | null => {
+  const raw = localStorage.getItem(EXPANDED_POSITION_STORAGE_KEY);
   if (!raw) {
     return null;
   }
@@ -65,8 +64,8 @@ const loadStoredPosition = (): StoredPosition | null => {
   return null;
 };
 
-const saveStoredPosition = (position: StoredPosition) => {
-  localStorage.setItem(POSITION_STORAGE_KEY, JSON.stringify(position));
+const saveStoredExpandedPosition = (position: StoredPosition) => {
+  localStorage.setItem(EXPANDED_POSITION_STORAGE_KEY, JSON.stringify(position));
 };
 
 const clampPosition = (
@@ -141,12 +140,16 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainerProps> = (
   const rightInsetRef = useRef(rightInset);
   rightInsetRef.current = rightInset;
 
-  const hasCustomPositionRef = useRef(loadStoredPosition() !== null);
+  const hasCustomExpandedPositionRef = useRef(loadStoredExpandedPosition() !== null);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [position, setPosition] = useState<ViewportPosition>({ x: 0, y: 0 });
+  const [collapsedPosition, setCollapsedPosition] = useState<ViewportPosition>({ x: 0, y: 0 });
+  const [expandedPosition, setExpandedPosition] = useState<ViewportPosition>({ x: 0, y: 0 });
 
-  const positionRef = useRef(position);
-  positionRef.current = position;
+  const expandedPositionRef = useRef(expandedPosition);
+  expandedPositionRef.current = expandedPosition;
+
+  const isExpandedRef = useRef(isExpanded);
+  isExpandedRef.current = isExpanded;
 
   const dragSessionRef = useRef<{
     pointerId: number;
@@ -154,78 +157,107 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainerProps> = (
     startClientY: number;
     originX: number;
     originY: number;
-    panelWidth: number;
     panelHeight: number;
   } | null>(null);
 
   const dragWindowListenersRef = useRef<AbortController | null>(null);
+  const expandedPanelRef = useRef<HTMLDivElement>(null);
 
-  const panelWidth = isExpanded ? FLOATING_SEARCH_EXPANDED_WIDTH : FLOATING_SEARCH_COLLAPSED_SIZE;
-  const panelHeightRef = useRef(FLOATING_SEARCH_COLLAPSED_SIZE);
-  const rootRef = useRef<HTMLDivElement>(null);
+  const getExpandedPanelHeight = useCallback(() => {
+    return expandedPanelRef.current?.getBoundingClientRect().height ?? 120;
+  }, []);
 
-  const getPanelHeight = useCallback(() => {
-    return (
-      rootRef.current?.getBoundingClientRect().height ??
-      (isExpanded ? 120 : FLOATING_SEARCH_COLLAPSED_SIZE)
+  const syncCollapsedPosition = useCallback(() => {
+    setCollapsedPosition(
+      getDefaultPosition(
+        FLOATING_SEARCH_COLLAPSED_SIZE,
+        FLOATING_SEARCH_COLLAPSED_SIZE,
+        rightInsetRef.current,
+      ),
     );
-  }, [isExpanded]);
+  }, []);
 
-  const syncPosition = useCallback(
+  const syncExpandedPosition = useCallback(
     (useCustom: boolean) => {
       const pageRect = getPageContentRect();
-      const height = getPanelHeight();
-      panelHeightRef.current = height;
+      const height = getExpandedPanelHeight();
 
       if (useCustom) {
-        const stored = loadStoredPosition();
+        const stored = loadStoredExpandedPosition();
         if (stored) {
-          setPosition(
-            positionFromStorage(stored, panelWidth, height, rightInsetRef.current, pageRect),
+          setExpandedPosition(
+            positionFromStorage(
+              stored,
+              FLOATING_SEARCH_EXPANDED_WIDTH,
+              height,
+              rightInsetRef.current,
+              pageRect,
+            ),
           );
           return;
         }
       }
 
-      setPosition(getDefaultPosition(panelWidth, height, rightInsetRef.current, pageRect));
+      setExpandedPosition(
+        getDefaultPosition(
+          FLOATING_SEARCH_EXPANDED_WIDTH,
+          height,
+          rightInsetRef.current,
+          pageRect,
+        ),
+      );
     },
-    [getPanelHeight, panelWidth],
+    [getExpandedPanelHeight],
   );
 
-  useLayoutEffect(() => {
-    syncPosition(hasCustomPositionRef.current);
-  }, [syncPosition, rightInset]);
+  const syncLayoutPositions = useCallback(() => {
+    syncCollapsedPosition();
+    if (isExpandedRef.current) {
+      syncExpandedPosition(hasCustomExpandedPositionRef.current);
+    }
+  }, [syncCollapsedPosition, syncExpandedPosition]);
 
   useLayoutEffect(() => {
-    panelHeightRef.current = getPanelHeight();
-    syncPosition(hasCustomPositionRef.current);
-  }, [isExpanded, panelWidth, getPanelHeight, syncPosition]);
+    syncCollapsedPosition();
+  }, [syncCollapsedPosition, rightInset]);
 
-  const persistPosition = useCallback((x: number, y: number) => {
-    saveStoredPosition(positionToStorage(x, y, rightInsetRef.current));
+  useLayoutEffect(() => {
+    if (isExpanded) {
+      syncExpandedPosition(hasCustomExpandedPositionRef.current);
+    }
+  }, [isExpanded, syncExpandedPosition, rightInset]);
+
+  const persistExpandedPosition = useCallback((x: number, y: number) => {
+    saveStoredExpandedPosition(positionToStorage(x, y, rightInsetRef.current));
   }, []);
 
-  const applyPosition = useCallback(
-    (x: number, y: number, width: number, height: number, persist = false) => {
-      const clamped = clampPosition(x, y, width, height, rightInsetRef.current);
-      setPosition(clamped);
+  const applyExpandedPosition = useCallback(
+    (x: number, y: number, height: number, persist = false) => {
+      const clamped = clampPosition(
+        x,
+        y,
+        FLOATING_SEARCH_EXPANDED_WIDTH,
+        height,
+        rightInsetRef.current,
+      );
+      setExpandedPosition(clamped);
       if (persist) {
-        hasCustomPositionRef.current = true;
-        persistPosition(clamped.x, clamped.y);
+        hasCustomExpandedPositionRef.current = true;
+        persistExpandedPosition(clamped.x, clamped.y);
       }
       return clamped;
     },
-    [persistPosition],
+    [persistExpandedPosition],
   );
 
   useEffect(() => {
     const handleResize = () => {
-      syncPosition(hasCustomPositionRef.current);
+      syncLayoutPositions();
     };
 
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, [syncPosition]);
+  }, [syncLayoutPositions]);
 
   const endDrag = useCallback((ev?: { pointerId: number }) => {
     const session = dragSessionRef.current;
@@ -254,15 +286,14 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainerProps> = (
       dragWindowListenersRef.current = ac;
       const signal = ac.signal;
       const pointerId = e.pointerId;
-      const panelHeight = getPanelHeight();
+      const panelHeight = getExpandedPanelHeight();
 
       dragSessionRef.current = {
         pointerId,
         startClientX: e.clientX,
         startClientY: e.clientY,
-        originX: positionRef.current.x,
-        originY: positionRef.current.y,
-        panelWidth,
+        originX: expandedPositionRef.current.x,
+        originY: expandedPositionRef.current.y,
         panelHeight,
       };
 
@@ -275,7 +306,7 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainerProps> = (
         }
         const nextX = session.originX + (wev.clientX - session.startClientX);
         const nextY = session.originY + (wev.clientY - session.startClientY);
-        applyPosition(nextX, nextY, session.panelWidth, session.panelHeight);
+        applyExpandedPosition(nextX, nextY, session.panelHeight);
       };
 
       const onWindowPointerEnd = (wev: PointerEvent) => {
@@ -286,7 +317,7 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainerProps> = (
         if (session) {
           const nextX = session.originX + (wev.clientX - session.startClientX);
           const nextY = session.originY + (wev.clientY - session.startClientY);
-          applyPosition(nextX, nextY, session.panelWidth, session.panelHeight, true);
+          applyExpandedPosition(nextX, nextY, session.panelHeight, true);
         }
         endDrag(wev);
       };
@@ -297,8 +328,13 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainerProps> = (
       window.addEventListener("pointercancel", onWindowPointerEnd, opts);
       window.addEventListener("blur", () => endDrag(), opts);
     },
-    [applyPosition, endDrag, getPanelHeight, panelWidth],
+    [applyExpandedPosition, endDrag, getExpandedPanelHeight],
   );
+
+  const handleExpand = () => {
+    syncExpandedPosition(hasCustomExpandedPositionRef.current);
+    setIsExpanded(true);
+  };
 
   useEffect(() => {
     return () => {
@@ -306,17 +342,18 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainerProps> = (
     };
   }, []);
 
+  const displayPosition = isExpanded ? expandedPosition : collapsedPosition;
+
   return (
     <FloatingPortal id="page-content">
-      <StyledFloatingRoot ref={rootRef} $left={position.x} $top={position.y}>
+      <StyledFloatingRoot $left={displayPosition.x} $top={displayPosition.y}>
         {isExpanded ? (
-          <StyledExpandedPanel>
+          <StyledExpandedPanel ref={expandedPanelRef}>
             <StyledExpandedHeader>
               <StyledDragHandle
                 onPointerDown={handleDragPointerDown}
                 aria-label="Drag search panel"
               >
-                {/* <FiMove size={14} /> */}
                 <span>Search</span>
               </StyledDragHandle>
               <StyledCloseButtonWrap>
@@ -338,7 +375,7 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainerProps> = (
         ) : (
           <StyledCollapsedButton
             type="button"
-            onClick={() => setIsExpanded(true)}
+            onClick={handleExpand}
             aria-label="Open search panel"
             aria-expanded={false}
           >
