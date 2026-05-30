@@ -36,65 +36,129 @@ export default class SearchNode implements Query.INode {
   }
 
   /**
-   * Builds & executes the query for this node + joined edges
-   * @param db Connection
-   * @returns Promise<any>
+   * Builds the base entity stream for this node from its own params
+   * (entityClasses / entityId / label). Nested child-node params are NOT
+   * applied here - they describe the target of the parent edge and are
+   * consumed by that edge, not used to filter the entity stream.
    */
-  async run(db: Connection): Promise<Results<IEntity>> {
-    if (!this.edges.length) {
-      await this.runSingleBatch(db, this);
-    } else {
-      for (const edge of this.edges) {
-        await this.runSingleBatch(db, this, edge);
-      }
-    }
-
-    return this.results;
-  }
-
-  async runSingleBatch(
-    db: Connection,
-    node: SearchNode,
-    edge?: SearchEdge
-  ): Promise<void> {
+  private baseStream(): RStream {
     let q: RStream = r.table(Entity.table);
-    if (node.params.entityClasses?.length) {
+    if (this.params.entityClasses?.length) {
+      const classes = this.params.entityClasses;
       q = q.filter(function (row: RDatum) {
-        return r.expr(node.params.entityClasses).contains(row("class"));
+        return r.expr(classes).contains(row("class"));
       });
     }
-
     if (this.params.entityId) {
       q = q.filter({ id: this.params.entityId });
     }
     if (this.params.label) {
       q = q.filter({ label: this.params.label });
     }
+    return q;
+  }
 
-    // with an edge: run the edge condition, optionally negating it;
-    // without an edge: the matching set is just entities passing node params
-    let results: string[];
-    if (edge) {
-      const matchIds = await edge.run(q).distinct().run(db);
+  /**
+   * Builds & executes the query for this node + joined edges.
+   * Each edge produces a result set (subset of the base set); the sets bubble
+   * up and are combined per the node operator (AND = intersection,
+   * OR = union). Edges whose target node carries its own edges are resolved
+   * recursively, so nesting of arbitrary depth is supported.
+   * @param db Connection
+   * @returns Promise<Results<IEntity>>
+   */
+  async run(db: Connection): Promise<Results<IEntity>> {
+    const baseStream = this.baseStream();
 
-      if (edge.logic === Query.EdgeLogic.Negative) {
-        // negation: keep entities that pass the node params but do NOT
-        // satisfy the edge condition (base set minus matching set)
-        const baseIds = await q.getField("id").distinct().run(db);
-        const matchSet = new Set<string>(matchIds);
-        results = baseIds.filter((id: string) => !matchSet.has(id));
+    let ids: string[];
+    if (!this.edges.length) {
+      ids = await baseStream.getField("id").distinct().run(db);
+    } else {
+      ids = await this.evaluateEdges(
+        db,
+        baseStream,
+        this.edges,
+        this.operator
+      );
+    }
+
+    this.results.items = ids;
+    return this.results;
+  }
+
+  /**
+   * Combines a list of edges over a base stream into a single id set.
+   * AND -> intersection of every edge's contribution, OR -> union.
+   * A Positive edge contributes the ids matching its condition; a Negative
+   * edge contributes the base ids that do NOT match it (base minus matches).
+   * @param baseIdsKnown optional precomputed base ids (avoids a round-trip
+   * when the caller already materialised the stream's ids)
+   */
+  private async evaluateEdges(
+    db: Connection,
+    baseStream: RStream,
+    edges: Edge[],
+    operator: Query.NodeOperator,
+    baseIdsKnown?: string[]
+  ): Promise<string[]> {
+    const baseIds =
+      baseIdsKnown ?? (await baseStream.getField("id").distinct().run(db));
+    const isAnd = operator === Query.NodeOperator.And;
+
+    let acc: Set<string> = isAnd ? new Set(baseIds) : new Set<string>();
+
+    for (const edge of edges) {
+      const matchIds = await this.resolveEdgeMatch(db, baseStream, edge);
+      const matchSet = new Set<string>(matchIds);
+
+      const contributing =
+        edge.logic === Query.EdgeLogic.Negative
+          ? baseIds.filter((id: string) => !matchSet.has(id))
+          : matchIds;
+
+      if (isAnd) {
+        const contributingSet = new Set<string>(contributing);
+        acc = new Set([...acc].filter((id: string) => contributingSet.has(id)));
       } else {
-        results = matchIds;
+        for (const id of contributing) {
+          acc.add(id);
+        }
       }
-    } else {
-      results = await q.getField("id").distinct().run(db);
     }
 
-    if (this.operator === Query.NodeOperator.And) {
-      this.results.addAnd(results);
-    } else {
-      this.results.addOr(results);
+    return Array.from(acc);
+  }
+
+  /**
+   * Resolves the ids (subset of baseStream) that satisfy a single edge,
+   * including any conditions nested under the edge's target node. The edge's
+   * own condition is matched first; if the target node has its own edges, they
+   * are evaluated recursively over just the matched entities, so nested
+   * constraints further narrow (or widen, via OR) the result.
+   */
+  private async resolveEdgeMatch(
+    db: Connection,
+    baseStream: RStream,
+    edge: SearchEdge
+  ): Promise<string[]> {
+    const directIds = await edge.run(baseStream).distinct().run(db);
+
+    const childNode = edge.node;
+    if (!childNode.edges.length || directIds.length === 0) {
+      return directIds;
     }
+
+    // restrict the recursion to entities that matched this edge, then apply the
+    // child node's own edges (the child node params themselves were already
+    // consumed by this edge, so they are not re-applied as a filter)
+    const childStream = r.table(Entity.table).getAll(r.args(directIds));
+    return childNode.evaluateEdges(
+      db,
+      childStream,
+      childNode.edges,
+      childNode.operator,
+      directIds
+    );
   }
 
   // TODO: checking only edge validity
