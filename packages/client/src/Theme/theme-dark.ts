@@ -60,10 +60,10 @@ const darkTheme = {
     modalBg: "rgba(9,16,52,0.5)",
     backupDownloadOverlay: "rgba(45, 55, 72, 0.8)",
 
-    tagBackground: "#f6f6ff",
-    tagColor: "#060c26",
-    tagSelectedBackground: "#060c26",
-    tagSelectedColor: "#f6f6ff",
+    tagBackground: "#091034",
+    tagColor: "#EBF0FA",
+    tagSelectedBackground: "#f6f6ff",
+    tagSelectedColor: "#091034",
     tagItalic: "#3b3b3b",
 
     treeNodeRead: "#718096",
