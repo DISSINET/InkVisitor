@@ -14,10 +14,10 @@ interface ExplorerTableLabelFilterProps {
 }
 
 const getRowLabelFilter = (
-  filters: Explore.IExploreColumnFilter[]
+  filters: Explore.IExploreColumnFilter[],
 ): Explore.IExploreRowLabelFilter | undefined =>
   filters.find(
-    (f): f is Explore.IExploreRowLabelFilter => f.type === Explore.EExploreFilterType.RowLabel
+    (f): f is Explore.IExploreRowLabelFilter => f.type === Explore.EExploreFilterType.RowLabel,
   );
 
 const ExplorerTableLabelFilter: React.FC<ExplorerTableLabelFilterProps> = ({
@@ -35,11 +35,11 @@ const ExplorerTableLabelFilter: React.FC<ExplorerTableLabelFilterProps> = ({
   const dispatchFilter = useCallback(
     (label: string, regexMode: boolean) => {
       dispatch({
-        type: ExploreActionType.setRowLabelFilter,
+        type: ExploreActionType.setLabelFilter,
         payload: { label, useRegex: regexMode },
       });
     },
-    [dispatch]
+    [dispatch],
   );
 
   // Label text only — debounced. Regex mode toggles immediately via the checkbox.

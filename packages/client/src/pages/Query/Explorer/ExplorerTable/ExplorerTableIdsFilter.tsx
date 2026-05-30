@@ -30,7 +30,7 @@ const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({ filters
   const dispatchFilter = useCallback(
     (ids: string[]) => {
       dispatch({
-        type: ExploreActionType.setRowIdsFilter,
+        type: ExploreActionType.setUuidsFilter,
         payload: { ids },
       });
     },

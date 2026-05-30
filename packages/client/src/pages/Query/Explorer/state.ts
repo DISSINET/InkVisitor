@@ -48,14 +48,11 @@ enum ExploreActionType {
   setLimit,
   setLimitAndOffset,
   sort,
-  setRowLabelFilter,
-  setRowIdsFilter,
+  setLabelFilter,
+  setUuidsFilter,
 }
 
-const exploreReducer = (
-  state: Explore.IExplore,
-  action: ExploreAction
-): Explore.IExplore => {
+const exploreReducer = (state: Explore.IExplore, action: ExploreAction): Explore.IExplore => {
   switch (action.type) {
     case ExploreActionType.addColumn:
       const newColumn: Explore.IExploreColumn = action.payload;
@@ -69,9 +66,7 @@ const exploreReducer = (
       return {
         ...state,
         ...{
-          columns: state.columns.filter(
-            (column) => column.id !== removedColumnId
-          ),
+          columns: state.columns.filter((column) => column.id !== removedColumnId),
         },
       };
 
@@ -108,19 +103,18 @@ const exploreReducer = (
         },
       };
 
-    case ExploreActionType.setRowLabelFilter: {
+    case ExploreActionType.setLabelFilter: {
       const { label, useRegex } = action.payload as {
         label: string;
         useRegex?: boolean;
       };
       const trimmedLabel = label.trim();
       const existingRowLabelFilter = state.filters.find(
-        (f): f is Explore.IExploreRowLabelFilter =>
-          f.type === Explore.EExploreFilterType.RowLabel
+        (f): f is Explore.IExploreRowLabelFilter => f.type === Explore.EExploreFilterType.RowLabel,
       );
       const nextUseRegex = useRegex ?? existingRowLabelFilter?.useRegex ?? false;
       const otherFilters = state.filters.filter(
-        (f) => f.type !== Explore.EExploreFilterType.RowLabel
+        (f) => f.type !== Explore.EExploreFilterType.RowLabel,
       );
       const filters: Explore.IExploreColumnFilter[] =
         trimmedLabel.length > 0
@@ -141,10 +135,10 @@ const exploreReducer = (
       };
     }
 
-    case ExploreActionType.setRowIdsFilter: {
+    case ExploreActionType.setUuidsFilter: {
       const { ids } = action.payload as { ids: string[] };
       const otherFilters = state.filters.filter(
-        (f) => f.type !== Explore.EExploreFilterType.RowIds
+        (f) => f.type !== Explore.EExploreFilterType.RowIds,
       );
       const filters: Explore.IExploreColumnFilter[] =
         ids.length > 0
@@ -170,17 +164,8 @@ const exploreReducer = (
 };
 
 // TODO: implement a deep comparison
-const exploreDiff = (
-  state1: Explore.IExplore,
-  state2: Explore.IExplore
-): boolean => {
+const exploreDiff = (state1: Explore.IExplore, state2: Explore.IExplore): boolean => {
   return JSON.stringify(state1) === JSON.stringify(state2);
 };
 
-export {
-  ExploreAction,
-  ExploreActionType,
-  exploreDiff,
-  exploreReducer,
-  exploreStateInitial,
-};
+export { ExploreAction, ExploreActionType, exploreDiff, exploreReducer, exploreStateInitial };
