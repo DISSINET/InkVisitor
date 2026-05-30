@@ -1,3 +1,4 @@
+import Entity from "@models/entity/entity";
 import Relation from "@models/relation/relation";
 import { DbEnums, EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { IEntity, Relation as RelationTypes } from "@inkvisitor/shared/types";
@@ -288,6 +289,153 @@ export class EdgeStatementHasPropValue extends SearchEdge {
   }
 }
 
+/**
+ * Inverse of SP:T / SP:V. Where SP:* answer "which statements contain an
+ * in-statement prop referencing X" (and emit the statement), the inverse
+ * answers "which entities are characterised by an in-statement prop
+ * referencing X" and emit the ENTITY (the actant that carries the prop).
+ *
+ * Each actant's own props are evaluated independently (not flattened across the
+ * whole statement, as runStatementPropEdge does), so the actant<->prop linkage
+ * is preserved: only actants that themselves carry the matching prop are
+ * emitted. Candidate statements come from the StatementDataProps index keyed by
+ * the target; that index conflates type & value, so `kind` is re-checked per
+ * actant for correctness. The result is intersected back with the incoming
+ * stream, keeping the subset invariant that positive matching and negation rely
+ * on. With no target the edge falls back to a full statement scan.
+ */
+/**
+ * Candidate statements that reference `targetId` via the given multi index
+ * (StatementDataProps / StatementActantsCI). With no target the index cannot be
+ * used, so fall back to scanning every statement.
+ */
+function candidateStatements(
+  targetId: string | undefined,
+  index: DbEnums.Indexes
+): RStream {
+  if (targetId) {
+    return r
+      .table(Entity.table)
+      .getAll(targetId, { index }) as unknown as RStream;
+  }
+  return r.table(Entity.table).filter(function (e: RDatum<IEntity>) {
+    return e("class").eq(EntityEnums.Class.Statement);
+  }) as unknown as RStream;
+}
+
+/**
+ * Shared tail for the inverse in-statement edges. Over a candidate-statement
+ * stream it keeps statements, selects the actants that individually satisfy
+ * `actantMatches` (evaluated per actant, so the actant<->prop linkage is kept),
+ * emits those actants' entityIds, and intersects them back with the incoming
+ * stream `q`. The intersection enforces the subset invariant: the edge only
+ * ever returns ids already present in `q`, which positive matching and negation
+ * both rely on.
+ */
+function emitMatchingActants(
+  q: RStream,
+  statements: RStream,
+  actantMatches: (actant: RDatum) => RValue<boolean>
+): RStream {
+  const characterised = (
+    statements
+      .filter(function (e: RDatum<IEntity>) {
+        return e("class").eq(EntityEnums.Class.Statement);
+      })
+      .concatMap(function (stmt: RDatum) {
+        return stmt("data")("actants")
+          .filter(function (a: RDatum) {
+            return actantMatches(a);
+          })
+          .map(function (a: RDatum) {
+            return a("entityId");
+          });
+      })
+      .distinct() as unknown as RDatum
+  ).coerceTo("array");
+
+  return characterised.do(function (ids: RDatum) {
+    return q
+      .filter(function (e: RDatum<IEntity>) {
+        return ids.contains(e("id"));
+      })
+      .map(function (e: RDatum<IEntity>) {
+        return e("id");
+      });
+  }) as unknown as RStream;
+}
+
+function runInverseStatementPropEdge(
+  q: RStream,
+  targetId: string | undefined,
+  kind: "type" | "value"
+): RStream {
+  return emitMatchingActants(
+    q,
+    candidateStatements(targetId, DbEnums.Indexes.StatementDataProps),
+    function (a: RDatum) {
+      const ids = collectStatementPropIds(a("props"), kind);
+      return targetId ? ids.contains(targetId) : ids.count().gt(0);
+    }
+  );
+}
+
+/**
+ * Inverse statement-classification edge (I_SC): emit the entities characterised
+ * by an in-statement classification referencing the target concept. Mirrors
+ * runInverseStatementPropEdge but reads actant.classifications[] and uses the
+ * StatementActantsCI index (which also covers identifications - those are not
+ * matched here).
+ */
+function runInverseStatementClassificationEdge(
+  q: RStream,
+  targetId: string | undefined
+): RStream {
+  return emitMatchingActants(
+    q,
+    candidateStatements(targetId, DbEnums.Indexes.StatementActantsCI),
+    function (a: RDatum) {
+      const ids = a("classifications").map(function (c: RDatum) {
+        return c("entityId");
+      });
+      return targetId ? ids.contains(targetId) : ids.count().gt(0);
+    }
+  );
+}
+
+export class EdgeIsStatementPropType extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["I_SP:T"];
+  }
+
+  run(q: RStream): RStream {
+    return runInverseStatementPropEdge(q, this.node.params.entityId, "type");
+  }
+}
+
+export class EdgeIsStatementPropValue extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["I_SP:V"];
+  }
+
+  run(q: RStream): RStream {
+    return runInverseStatementPropEdge(q, this.node.params.entityId, "value");
+  }
+}
+
+export class EdgeIsStatementClassification extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["I_SC"];
+  }
+
+  run(q: RStream): RStream {
+    return runInverseStatementClassificationEdge(q, this.node.params.entityId);
+  }
+}
+
 export class EdgeHasReferenceResource extends SearchEdge {
   constructor(data: Partial<Query.IEdge>) {
     super(data);
@@ -333,6 +481,12 @@ export function getEdgeInstance(data: Partial<Query.IEdge>): SearchEdge {
       return new EdgeStatementHasPropType(data);
     case Query.EdgeType["SP:V"]:
       return new EdgeStatementHasPropValue(data);
+    case Query.EdgeType["I_SP:T"]:
+      return new EdgeIsStatementPropType(data);
+    case Query.EdgeType["I_SP:V"]:
+      return new EdgeIsStatementPropValue(data);
+    case Query.EdgeType["I_SC"]:
+      return new EdgeIsStatementClassification(data);
     case Query.EdgeType["R:"]:
       return new EdgeHasRelation(data);
     case Query.EdgeType["R:CLA"]:
