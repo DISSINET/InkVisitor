@@ -71,14 +71,24 @@ export default class SearchNode implements Query.INode {
       q = q.filter({ label: this.params.label });
     }
 
-    // processing could be done solely on params
+    // with an edge: run the edge condition, optionally negating it;
+    // without an edge: the matching set is just entities passing node params
+    let results: string[];
     if (edge) {
-      q = edge.run(q);
-    } else {
-      q = q.getField("id");
-    }
+      const matchIds = await edge.run(q).distinct().run(db);
 
-    const results = await q.distinct().run(db);
+      if (edge.logic === Query.EdgeLogic.Negative) {
+        // negation: keep entities that pass the node params but do NOT
+        // satisfy the edge condition (base set minus matching set)
+        const baseIds = await q.getField("id").distinct().run(db);
+        const matchSet = new Set<string>(matchIds);
+        results = baseIds.filter((id: string) => !matchSet.has(id));
+      } else {
+        results = matchIds;
+      }
+    } else {
+      results = await q.getField("id").distinct().run(db);
+    }
 
     if (this.operator === Query.NodeOperator.And) {
       this.results.addAnd(results);

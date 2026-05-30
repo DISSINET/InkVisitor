@@ -103,8 +103,12 @@ export class EdgeHasRelation extends SearchEdge {
             }
             return true;
           })
-          .map(function (relation) {
-            return relation("entityIds").nth(0);
+          // emit the iterated entity itself (it participates in a qualifying
+          // relation) instead of the relation's first member - this keeps the
+          // result a subset of the input stream, which positive matching and
+          // negation (base set minus matches) both rely on
+          .map(function () {
+            return entity("id");
           })
       );
     });

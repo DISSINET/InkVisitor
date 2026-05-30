@@ -1,3 +1,4 @@
+import { Checkbox } from "components";
 import Dropdown from "components/advanced";
 import React from "react";
 import { QueryAction, QueryActionType } from "../state";
@@ -37,6 +38,8 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
 
   const color = isValid ? theme.color.query2 : theme.color.queryInvalid;
 
+  const isNegative = edge.logic === Query.EdgeLogic.Negative;
+
   edgeTypeOptions.sort((a, b) => {
     if (a.isDisabled && !b.isDisabled) {
       return 1;
@@ -58,9 +61,13 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
       <svg
         width={QUERY_GRID_WIDTH}
         height={QUERY_GRID_HEIGHT}
-        style={{ position: "absolute", top: 0, left: 0 }}
+        // decorative connector - must never intercept clicks on the controls
+        style={{ position: "absolute", top: 0, left: 0, pointerEvents: "none" }}
       >
-        <g style={{ stroke: color, strokeWidth: 3 }}>
+        <g
+          style={{ stroke: color, strokeWidth: 3 }}
+          strokeDasharray={isNegative ? "6 4" : undefined}
+        >
           <line
             x1={20}
             x2={20}
@@ -89,6 +96,10 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
       >
         <div
           style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "5px",
             backgroundColor: color,
             padding: theme.space[1],
             marginTop: 10,
@@ -112,6 +123,28 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
                 payload: {
                   nodeId: node.id,
                   newEntityId: undefined,
+                },
+              });
+            }}
+          />
+          <Checkbox
+            key={`${edge.id}-not-${edge.logic}`}
+            label="NOT"
+            value={isNegative}
+            tooltipLabel="negate this condition (find entities that do NOT match)"
+            onChangeFn={(checked) => {
+              const newLogic = checked
+                ? Query.EdgeLogic.Negative
+                : Query.EdgeLogic.Positive;
+              // skip the redundant dispatch fired on (re)mount
+              if (newLogic === edge.logic) {
+                return;
+              }
+              dispatch({
+                type: QueryActionType.updateEdgeLogic,
+                payload: {
+                  edgeId: edge.id,
+                  newLogic,
                 },
               });
             }}
