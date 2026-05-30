@@ -71,6 +71,10 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
           const nextCellAssociatedEdge =
             nextCellNode && allEdges.find((edge) => edge.node.id === nextCellNode.id);
 
+          const isRootCell = wi === 0 && hi === 0;
+          const rootHasParallelEdges =
+            isRootCell && thisCellNode !== undefined && thisCellNode.edges.length > 1;
+
           return (
             <div
               key={`${wi}-${hi}`}
@@ -78,7 +82,8 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
                 gridColumn: wi + 1,
                 gridRow: hi + 1,
                 width: QUERY_GRID_WIDTH,
-                height: QUERY_GRID_HEIGHT,
+                height: rootHasParallelEdges ? QUERY_GRID_HEIGHT + 28 : QUERY_GRID_HEIGHT,
+                overflow: rootHasParallelEdges ? "visible" : undefined,
               }}
             >
               {thisCellNode && (
