@@ -13,6 +13,5 @@ register({
     "@models/*": ["src/models/*"],
     "@modules/*": ["src/modules/*"],
     "@service/*": ["src/service/*"],
-    "@inkvisitor/shared/*": ["../shared/*"],
   },
 });

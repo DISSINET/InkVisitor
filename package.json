@@ -1,0 +1,21 @@
+{
+  "name": "inkvisitor-monorepo",
+  "private": true,
+  "version": "1.5.0.5",
+  "packageManager": "pnpm@11.1.2",
+  "engines": {
+    "node": "^22.13.1",
+    "pnpm": "^11.1.2"
+  },
+  "scripts": {
+    "preinstall": "npx only-allow pnpm",
+    "dev": "turbo run build --filter=@inkvisitor/shared && turbo run dev",
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "lint": "turbo run lint"
+  },
+  "devDependencies": {
+    "turbo": "^2.9.14"
+  }
+}

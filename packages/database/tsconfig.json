@@ -12,8 +12,7 @@
       "scripts/*": ["./scripts/*"],
       "@common/*": ["./../server/src/common/*"],
       "@models/*": ["./../server/src/models/*"],
-      "@service/*": ["./../server/src/service/*"],
-      "@inkvisitor/shared/*": ["./../shared/*"]
+      "@service/*": ["./../server/src/service/*"]
     },
     "removeComments": true,
     "resolveJsonModule": true,

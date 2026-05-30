@@ -10,6 +10,5 @@ register({
     "@common/*": ["../server/src/common/*"],
     "@models/*": ["../server/src/models/*"],
     "@service/*": ["../server/src/service/*"],
-    "@inkvisitor/shared/*": ["../shared/*"],
   },
 });
