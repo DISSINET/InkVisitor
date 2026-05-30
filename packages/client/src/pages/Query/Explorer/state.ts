@@ -1,3 +1,4 @@
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import { Explore } from "@inkvisitor/shared/types/query";
 
 const exploreStateInitial: Explore.IExplore = {
@@ -48,14 +49,19 @@ enum ExploreActionType {
   setLimit,
   setLimitAndOffset,
   sort,
-  setRowLabelFilter,
-  setRowIdsFilter,
+  setLabelFilter,
+  setUuidsFilter,
+  setStatusFilter,
+  setLanguageFilter,
+  setCreatedAtFilter,
+  setUpdatedAtFilter,
+  setCreatedByFilter,
+  setUpdatedByFilter,
+  setEditedByFilter,
+  setRootValidityFilter,
 }
 
-const exploreReducer = (
-  state: Explore.IExplore,
-  action: ExploreAction
-): Explore.IExplore => {
+const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Explore.IExplore => {
   switch (action.type) {
     case ExploreActionType.addColumn:
       const newColumn: Explore.IExploreColumn = action.payload;
@@ -69,9 +75,7 @@ const exploreReducer = (
       return {
         ...state,
         ...{
-          columns: state.columns.filter(
-            (column) => column.id !== removedColumnId
-          ),
+          columns: state.columns.filter((column) => column.id !== removedColumnId),
         },
       };
 
@@ -108,26 +112,23 @@ const exploreReducer = (
         },
       };
 
-    case ExploreActionType.setRowLabelFilter: {
+    case ExploreActionType.setLabelFilter: {
       const { label, useRegex } = action.payload as {
         label: string;
         useRegex?: boolean;
       };
       const trimmedLabel = label.trim();
-      const existingRowLabelFilter = state.filters.find(
-        (f): f is Explore.IExploreRowLabelFilter =>
-          f.type === Explore.EExploreFilterType.RowLabel
+      const existingLabelFilter = state.filters.find(
+        (f): f is Explore.IExploreLabelFilter => f.type === Explore.SearchOption.Label,
       );
-      const nextUseRegex = useRegex ?? existingRowLabelFilter?.useRegex ?? false;
-      const otherFilters = state.filters.filter(
-        (f) => f.type !== Explore.EExploreFilterType.RowLabel
-      );
-      const filters: Explore.IExploreColumnFilter[] =
+      const nextUseRegex = useRegex ?? existingLabelFilter?.useRegex ?? false;
+      const otherFilters = state.filters.filter((f) => f.type !== Explore.SearchOption.Label);
+      const filters: Explore.IExploreSearchFilter[] =
         trimmedLabel.length > 0
           ? [
               ...otherFilters,
               {
-                type: Explore.EExploreFilterType.RowLabel,
+                type: Explore.SearchOption.Label,
                 label: trimmedLabel,
                 useRegex: nextUseRegex,
               },
@@ -141,17 +142,15 @@ const exploreReducer = (
       };
     }
 
-    case ExploreActionType.setRowIdsFilter: {
+    case ExploreActionType.setUuidsFilter: {
       const { ids } = action.payload as { ids: string[] };
-      const otherFilters = state.filters.filter(
-        (f) => f.type !== Explore.EExploreFilterType.RowIds
-      );
-      const filters: Explore.IExploreColumnFilter[] =
+      const otherFilters = state.filters.filter((f) => f.type !== Explore.SearchOption.UUIDs);
+      const filters: Explore.IExploreSearchFilter[] =
         ids.length > 0
           ? [
               ...otherFilters,
               {
-                type: Explore.EExploreFilterType.RowIds,
+                type: Explore.SearchOption.UUIDs,
                 ids,
               },
             ]
@@ -164,23 +163,95 @@ const exploreReducer = (
       };
     }
 
+    case ExploreActionType.setStatusFilter: {
+      const { status } = action.payload as { status: EntityEnums.Status };
+      const otherFilters = state.filters.filter((f) => f.type !== Explore.SearchOption.Status);
+      return {
+        ...state,
+        filters: [...otherFilters, { type: Explore.SearchOption.Status, status }],
+        offset: 0,
+      };
+    }
+
+    case ExploreActionType.setLanguageFilter: {
+      const { language } = action.payload as { language: EntityEnums.Language };
+      const otherFilters = state.filters.filter((f) => f.type !== Explore.SearchOption.Language);
+      return {
+        ...state,
+        filters: [...otherFilters, { type: Explore.SearchOption.Language, language }],
+        offset: 0,
+      };
+    }
+
+    case ExploreActionType.setCreatedAtFilter: {
+      const { createdAt } = action.payload as { createdAt: Date };
+      const otherFilters = state.filters.filter((f) => f.type !== Explore.SearchOption.CreatedAt);
+      return {
+        ...state,
+        filters: [
+          ...otherFilters,
+          { type: Explore.SearchOption.CreatedAt, createdAt: createdAt.toISOString() },
+        ],
+        offset: 0,
+      };
+    }
+
+    case ExploreActionType.setUpdatedAtFilter: {
+      const { updatedAt } = action.payload as { updatedAt: Date };
+      const otherFilters = state.filters.filter((f) => f.type !== Explore.SearchOption.UpdatedAt);
+      return {
+        ...state,
+        filters: [
+          ...otherFilters,
+          { type: Explore.SearchOption.UpdatedAt, updatedAt: updatedAt.toISOString() },
+        ],
+        offset: 0,
+      };
+    }
+
+    case ExploreActionType.setCreatedByFilter: {
+      const { createdBy } = action.payload as { createdBy: string };
+      const otherFilters = state.filters.filter((f) => f.type !== Explore.SearchOption.CreatedBy);
+      return {
+        ...state,
+        filters: [...otherFilters, { type: Explore.SearchOption.CreatedBy, createdBy }],
+        offset: 0,
+      };
+    }
+
+    case ExploreActionType.setUpdatedByFilter: {
+      const { updatedBy } = action.payload as { updatedBy: string };
+      const otherFilters = state.filters.filter((f) => f.type !== Explore.SearchOption.UpdatedBy);
+      return {
+        ...state,
+        filters: [...otherFilters, { type: Explore.SearchOption.UpdatedBy, updatedBy }],
+        offset: 0,
+      };
+    }
+
     default:
       return state;
   }
 };
 
+const exploreReducer = (state: Explore.IExplore, action: ExploreAction): Explore.IExplore => {
+  const nextState = exploreReducerBase(state, action);
+
+  if (nextState !== state) {
+    console.log("[exploreState]", {
+      action: ExploreActionType[action.type],
+      payload: action.payload,
+      previous: state,
+      next: nextState,
+    });
+  }
+
+  return nextState;
+};
+
 // TODO: implement a deep comparison
-const exploreDiff = (
-  state1: Explore.IExplore,
-  state2: Explore.IExplore
-): boolean => {
+const exploreDiff = (state1: Explore.IExplore, state2: Explore.IExplore): boolean => {
   return JSON.stringify(state1) === JSON.stringify(state2);
 };
 
-export {
-  ExploreAction,
-  ExploreActionType,
-  exploreDiff,
-  exploreReducer,
-  exploreStateInitial,
-};
+export { ExploreAction, ExploreActionType, exploreDiff, exploreReducer, exploreStateInitial };

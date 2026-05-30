@@ -33,7 +33,7 @@ interface ExploreTableControlProps {
 
   onApplyBatchAction: () => void;
 
-  filters: Explore.IExploreColumnFilter[];
+  filters: Explore.IExploreSearchFilter[];
   dispatch: React.Dispatch<ExploreAction>;
   isQueryFetching: boolean;
 }

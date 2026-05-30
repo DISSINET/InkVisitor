@@ -9,16 +9,14 @@ import { entityIdsEqual, parseEntityIdsFromText } from "pages/Query/utils";
 const IDS_FILTER_DEBOUNCE_MS = 400;
 
 interface ExplorerTableIdsFilterProps {
-  filters: Explore.IExploreColumnFilter[];
+  filters: Explore.IExploreSearchFilter[];
   dispatch: React.Dispatch<ExploreAction>;
 }
 
 const getRowIdsFilter = (
-  filters: Explore.IExploreColumnFilter[],
-): Explore.IExploreRowIdsFilter | undefined =>
-  filters.find(
-    (f): f is Explore.IExploreRowIdsFilter => f.type === Explore.EExploreFilterType.RowIds,
-  );
+  filters: Explore.IExploreSearchFilter[],
+): Explore.IExploreUuidsFilter | undefined =>
+  filters.find((f): f is Explore.IExploreUuidsFilter => f.type === Explore.SearchOption.UUIDs);
 
 const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({ filters, dispatch }) => {
   const rowIdsFilter = getRowIdsFilter(filters);
@@ -30,7 +28,7 @@ const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({ filters
   const dispatchFilter = useCallback(
     (ids: string[]) => {
       dispatch({
-        type: ExploreActionType.setRowIdsFilter,
+        type: ExploreActionType.setUuidsFilter,
         payload: { ids },
       });
     },

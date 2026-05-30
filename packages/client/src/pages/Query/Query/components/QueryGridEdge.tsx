@@ -11,6 +11,7 @@ import {
 } from "../../types";
 import { Query } from "@inkvisitor/shared/types/query";
 import { useTheme } from "styled-components";
+import { findValidEdgeTypesForSourceNode } from "pages/Query/utils";
 
 interface QueryGridEdgeProps {
   node: INodeItem;
@@ -34,7 +35,7 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
   extendNegative = false,
 }) => {
   const theme = useTheme();
-  const validEdgesTypes = Query.findValidEdgeTypesForSourceNode(node);
+  const validEdgesTypes = findValidEdgeTypesForSourceNode(node);
 
   const edgeTypeOptions = validEdgesTypes.map((type) => ({
     value: type,
@@ -79,17 +80,8 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
         <g style={{ strokeWidth: 3 }}>
           {/* this edge's own branch: upper spine (junction) + horizontal to the
               node, in this edge's colour - red/dashed when negative */}
-          <g
-            style={{ stroke: lineColor }}
-            strokeDasharray={isNegative ? "6 4" : undefined}
-          >
-            <line
-              x1={20}
-              x2={20}
-              y1={0}
-              y2={QUERY_GRID_HEIGHT / 2}
-              strokeLinecap="round"
-            />
+          <g style={{ stroke: lineColor }} strokeDasharray={isNegative ? "6 4" : undefined}>
+            <line x1={20} x2={20} y1={0} y2={QUERY_GRID_HEIGHT / 2} strokeLinecap="round" />
             <line
               x1={20}
               x2={QUERY_GRID_WIDTH}
@@ -103,9 +95,7 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
           {extendVertical && (
             <g
               style={{
-                stroke: extendNegative
-                  ? theme.color.entityA
-                  : theme.color.query2,
+                stroke: extendNegative ? theme.color.entityA : theme.color.query2,
               }}
               strokeDasharray={extendNegative ? "6 4" : undefined}
             >
@@ -153,9 +143,7 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
             value={isNegative}
             tooltipLabel="negate this condition (find entities that do NOT match)"
             onChangeFn={(checked) => {
-              const newLogic = checked
-                ? Query.EdgeLogic.Negative
-                : Query.EdgeLogic.Positive;
+              const newLogic = checked ? Query.EdgeLogic.Negative : Query.EdgeLogic.Positive;
               // skip the redundant dispatch fired on (re)mount
               if (newLogic === edge.logic) {
                 return;
