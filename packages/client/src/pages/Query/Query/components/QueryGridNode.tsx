@@ -88,7 +88,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
           border: `3px solid ${nodeBorder}`,
         }}
       >
-        <StyledNodeTypeSelect>
+        {/* <StyledNodeTypeSelect>
           <Dropdown.Single.Basic
             options={nodeTypeOptions}
             value={node.type}
@@ -107,7 +107,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
               });
             }}
           />
-        </StyledNodeTypeSelect>
+        </StyledNodeTypeSelect> */}
         {(paramEntityClass || isRoot) && (
           <Dropdown.Multi.Entity
             shortLabel
