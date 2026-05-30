@@ -10,6 +10,7 @@ import {
 } from "../../types";
 import { Query } from "@inkvisitor/shared/types/query";
 import { useTheme } from "styled-components";
+import { findValidEdgeTypesForSourceNode } from "pages/Query/utils";
 
 interface QueryGridEdgeProps {
   node: INodeItem;
@@ -18,14 +19,9 @@ interface QueryGridEdgeProps {
   problems: QueryValidityProblem[];
 }
 
-export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
-  node,
-  edge,
-  dispatch,
-  problems,
-}) => {
+export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({ node, edge, dispatch, problems }) => {
   const theme = useTheme();
-  const validEdgesTypes = Query.findValidEdgeTypesForSourceNode(node);
+  const validEdgesTypes = findValidEdgeTypesForSourceNode(node);
 
   const edgeTypeOptions = validEdgesTypes.map((type) => ({
     value: type,
@@ -61,13 +57,7 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
         style={{ position: "absolute", top: 0, left: 0 }}
       >
         <g style={{ stroke: color, strokeWidth: 3 }}>
-          <line
-            x1={20}
-            x2={20}
-            y1={0}
-            y2={QUERY_GRID_HEIGHT / 2}
-            strokeLinecap="round"
-          />
+          <line x1={20} x2={20} y1={0} y2={QUERY_GRID_HEIGHT / 2} strokeLinecap="round" />
           <line
             x1={20}
             x2={QUERY_GRID_WIDTH}

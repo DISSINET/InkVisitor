@@ -1,7 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 
-import { Query } from "@inkvisitor/shared/types";
+import { Explore } from "@inkvisitor/shared/types/query";
 import api from "api";
 import { Box, Button, Panel } from "components";
 import { LayoutSeparatorHorizontal, LayoutSeparatorVertical } from "components/advanced";
@@ -11,12 +11,12 @@ import { BiRefresh } from "react-icons/bi";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { VscCloseAll } from "react-icons/vsc";
 import { toast } from "react-toastify";
-import { COLLAPSED_PANEL_WIDTH } from "Theme/constants";
 import { useAppSelector } from "redux/hooks";
+import { COLLAPSED_PANEL_WIDTH } from "Theme/constants";
 import { floorNumberToOneDecimal } from "utils/utils";
-import { FloatingSearchContainer } from "./FloatingSearchContainer/FloatingSearchContainer";
 import { MemoizedExplorerBox } from "./Explorer/ExplorerBox";
 import { exploreReducer, exploreStateInitial } from "./Explorer/state";
+import { FloatingSearchContainer } from "./FloatingSearchContainer/FloatingSearchContainer";
 import { MemoizedQueryBox } from "./Query/QueryBox";
 import { queryReducer, queryStateInitial } from "./Query/state";
 import { getAllEdges, getAllNodes } from "./Query/utils";
@@ -28,13 +28,18 @@ import {
   QueryValidityProblem,
 } from "./types";
 import { invalidateAllExplorerQueries, useQueryData } from "./useQueryData";
-import { buildStableSignature } from "./utils";
+import { buildStableSignature, isEdgeValid } from "./utils";
 interface QueryPage {}
 export const QueryPage: React.FC<QueryPage> = ({}) => {
   const layoutWidth: number = useAppSelector((state) => state.layout.layoutWidth);
   const contentHeight: number = useAppSelector((state) => state.layout.contentHeight);
-  const { selectedDetailId, detailIdArray, clearAllDetailIds, appendDetailId, setSelectedDetailId } =
-    useSearchParams();
+  const {
+    selectedDetailId,
+    detailIdArray,
+    clearAllDetailIds,
+    appendDetailId,
+    setSelectedDetailId,
+  } = useSearchParams();
   const [queryState, queryStateDispatch] = useReducer(queryReducer, queryStateInitial);
 
   /**
@@ -51,7 +56,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     allNodes.forEach((node) => {
       // if edge is invalid for the source node
       node.edges.forEach((edge) => {
-        if (!Query.isEdgeValidity(node, edge)) {
+        if (!isEdgeValid(node, edge)) {
           isValid = false;
           problems.push({
             source: edge.id,
@@ -98,7 +103,9 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     const exportExplore = selectedColumnIds
       ? {
           ...exploreState,
-          columns: exploreState.columns.filter((c) => selectedColumnIds.includes(c.id)),
+          columns: exploreState.columns.filter((c: Explore.IExploreColumn) =>
+            selectedColumnIds.includes(c.id),
+          ),
         }
       : exploreState;
     api.queryExport(queryState, exportExplore, rowIndices);
@@ -109,7 +116,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
       setQuerySeparatorYPosition(xPosition);
 
       const separatorYPercentPosition = floorNumberToOneDecimal(
-        xPosition / onePercentOfContentHeight
+        xPosition / onePercentOfContentHeight,
       );
       localStorage.setItem("querySeparatorYPosition", separatorYPercentPosition.toString());
     }
@@ -119,7 +126,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
   const [querySeparatorYPosition, setQuerySeparatorYPosition] = useState<number>(
     localStorageSeparatorYPosition
       ? Number(localStorageSeparatorYPosition) * onePercentOfContentHeight
-      : contentHeight / 2
+      : contentHeight / 2,
   );
 
   const [currentContentHeight, setCurrentContentHeight] = useState(contentHeight);
@@ -127,7 +134,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
   useEffect(() => {
     const onePercentOfLastContentHeight = currentContentHeight / 100;
     const separatorXPercentPosition = floorNumberToOneDecimal(
-      querySeparatorYPosition / onePercentOfLastContentHeight
+      querySeparatorYPosition / onePercentOfLastContentHeight,
     );
     setQuerySeparatorYPosition(separatorXPercentPosition * onePercentOfContentHeight);
     localStorage.setItem("querySeparatorYPosition", separatorXPercentPosition.toString());
@@ -139,7 +146,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
       setQuerySeparatorXPosition(xPosition);
 
       const separatorXPercentPosition = floorNumberToOneDecimal(
-        xPosition / onePercentOfLayoutWidth
+        xPosition / onePercentOfLayoutWidth,
       );
       localStorage.setItem("querySeparatorXPosition", separatorXPercentPosition.toString());
     }
@@ -149,7 +156,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
   const [querySeparatorXPosition, setQuerySeparatorXPosition] = useState<number>(
     localStorageSeparatorXPosition
       ? Number(localStorageSeparatorXPosition) * onePercentOfLayoutWidth
-      : QUERY_PAGE_SEPARATOR_X_PERCENT_POSITION * onePercentOfLayoutWidth
+      : QUERY_PAGE_SEPARATOR_X_PERCENT_POSITION * onePercentOfLayoutWidth,
   );
 
   const [currentLayoutWidth, setCurrentLayoutWidth] = useState(layoutWidth);
@@ -157,7 +164,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
   useEffect(() => {
     const onePercentOfLastLayoutWidth = currentLayoutWidth / 100;
     const separatorXPercentPosition = floorNumberToOneDecimal(
-      querySeparatorXPosition / onePercentOfLastLayoutWidth
+      querySeparatorXPosition / onePercentOfLastLayoutWidth,
     );
     setQuerySeparatorXPosition(separatorXPercentPosition * onePercentOfLayoutWidth);
     localStorage.setItem("querySeparatorXPosition", separatorXPercentPosition.toString());
@@ -180,7 +187,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
 
   const queryDetailPanelExpandedStorageKey = "queryDetailPanelExpanded";
   const [queryDetailPanelExpanded, setQueryDetailPanelExpanded] = useState(
-    () => localStorage.getItem(queryDetailPanelExpandedStorageKey) !== "false"
+    () => localStorage.getItem(queryDetailPanelExpandedStorageKey) !== "false",
   );
   const savedSeparatorXRef = useRef<number | null>(null);
 
@@ -211,7 +218,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
         appendDetailId(entityId);
       }
     },
-    [appendDetailId, detailIdArray, setSelectedDetailId]
+    [appendDetailId, detailIdArray, setSelectedDetailId],
   );
 
   useEffect(() => {

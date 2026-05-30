@@ -112,10 +112,7 @@ export namespace Query {
     params: { entityClass?: EntityEnums.Class[] };
   };
 
-  export const EdgeTypeTargetNodeParams: Record<
-    EdgeType,
-    Record<string, any>
-  > = {
+  export const EdgeTypeTargetNodeParams: Record<EdgeType, Record<string, any>> = {
     "HP:V": {
       entityId: { allowedClasses: [] },
       entityClass: { allowedClasses: [] },
@@ -844,36 +841,6 @@ export namespace Query {
     "I_R:REL": "is related to: as Related",
   };
 
-  export const findValidEdgeTypesForSourceNode = (node: INode): EdgeType[] => {
-    const validEdges = Object.entries(EdgeTypeNodeRules)
-      .filter(([, [ruleFrom, ruleTo]]) => {
-        const validType = ruleFrom.nodeType === node.type;
-        const validClass =
-          node.params?.entityClasses?.length &&
-          ruleFrom.params.entityClass?.length
-            ? node.params.entityClasses.some((cl) =>
-                ruleFrom.params.entityClass?.includes(cl)
-              )
-            : true;
-        return validType && validClass;
-      })
-      .map(([type]) => type as EdgeType);
-    return validEdges;
-  };
-
-  export const findValidEdgeTypesForTargetNode = (node: INode): EdgeType[] => {
-    const validEdges = Object.entries(EdgeTypeNodeRules)
-      .filter(([, [from, to]]) => {
-        // TODO
-        return (
-          node.type === to.nodeType &&
-          to.params.entityClass?.includes(node.params.entityClasses![0])
-        );
-      })
-      .map(([type]) => type as EdgeType);
-    return validEdges;
-  };
-
   export enum EdgeProblemSource {
     Source = "source",
     Target = "target",
@@ -882,54 +849,6 @@ export namespace Query {
   export type EdgeValidity = {
     valid: boolean;
     problems: EdgeProblemSource[];
-  };
-
-  export const isEdgeValidity = (
-    sourceNode: INode,
-    edge: IEdge
-  ): EdgeValidity => {
-    const targetNode = edge.node;
-    const edgeRule = EdgeTypeNodeRules[edge.type];
-    const [ruleFrom, ruleTo] = edgeRule;
-
-    const sourceValid = isNodeValid(sourceNode, ruleFrom);
-    const targetValid = isNodeValid(targetNode, ruleTo);
-    const edgeValid = sourceValid && targetValid;
-
-    const problems: EdgeProblemSource[] = [];
-    if (!sourceValid) {
-      problems.push(EdgeProblemSource.Source);
-    }
-    if (!targetValid) {
-      problems.push(EdgeProblemSource.Target);
-    }
-
-    return {
-      valid: edgeValid,
-      problems,
-    };
-  };
-
-  export const isNodeValid = (node: INode, rule: EdgeRule): boolean => {
-    if (node.type !== rule.nodeType) {
-      return false;
-    }
-    if (
-      rule.params.entityClass === undefined ||
-      rule.params.entityClass.length === 0
-    ) {
-      return true;
-    }
-    if (
-      node.params.entityClasses === undefined ||
-      node.params.entityClasses.length === 0
-    ) {
-      return false;
-    }
-
-    return node.params.entityClasses.every((nodeClass) => {
-      return rule.params.entityClass?.includes(nodeClass) || false;
-    });
   };
 }
 
@@ -1149,7 +1068,6 @@ export namespace Explore {
     [K in EExploreColumnType]: IEExploreColumnTypeConfig[K]["params"];
   };
 
-  export type IExploreColumnParams<
-    T extends EExploreColumnType = EExploreColumnType
-  > = ExploreColumnParamsMap[T];
+  export type IExploreColumnParams<T extends EExploreColumnType = EExploreColumnType> =
+    ExploreColumnParamsMap[T];
 }
