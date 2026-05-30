@@ -48,6 +48,7 @@ enum QueryActionType {
   updateNodeType,
   updateNodeClass,
   updateNodeEntityId,
+  updateNodeOperator,
 }
 
 type QueryAction =
@@ -74,6 +75,10 @@ type QueryAction =
   | {
       type: QueryActionType.updateNodeEntityId;
       payload: { nodeId: string; newEntityId: string | undefined };
+    }
+  | {
+      type: QueryActionType.updateNodeOperator;
+      payload: { nodeId: string; newOperator: Query.NodeOperator };
     };
 
 const queryReducer = (state: Query.INode, action: QueryAction) => {
@@ -139,6 +144,13 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
         action.payload.newEntityId
       );
 
+    case QueryActionType.updateNodeOperator:
+      return updateNodeOperator(
+        state,
+        action.payload.nodeId,
+        action.payload.newOperator
+      );
+
     default:
       return state;
   }
@@ -181,6 +193,22 @@ const updateNodeEntityId = (
     nodeToUpdate.params.entityId = newEntityId;
     nodeToUpdate.params.entityClasses = [];
   }
+
+  return updatedState;
+};
+
+const updateNodeOperator = (
+  state: Query.INode,
+  nodeId: string,
+  newOperator: Query.NodeOperator
+): Query.INode => {
+  const updatedState = { ...state };
+
+  const nodeToUpdate = getAllNodes(updatedState).find((node) => node.id === nodeId);
+  if (!nodeToUpdate) {
+    return updatedState;
+  }
+  nodeToUpdate.operator = newOperator;
 
   return updatedState;
 };

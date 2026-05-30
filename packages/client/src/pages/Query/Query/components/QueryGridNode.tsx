@@ -7,12 +7,18 @@ import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { Query } from "@inkvisitor/shared/types/query";
 import api from "api";
-import { Button } from "components";
+import { Button, Checkbox } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 
 import { INodeItem, QueryValidityProblem } from "../../types";
 import { QueryAction, QueryActionType } from "../state";
-import { StyledGraphNode, StyledNodeContainer, StyledNodeTypeSelect } from "./QueryStyles";
+import {
+  StyledGraphNode,
+  StyledNodeContainer,
+  StyledNodeMainRow,
+  StyledNodeTypeSelect,
+  StyledParallelOperator,
+} from "./QueryStyles";
 import { useTheme } from "styled-components";
 
 interface QueryGridNodeProps {
@@ -80,15 +86,56 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
     }
   }, [theme, isValid, isRoot]);
 
+  const hasParallelEdges = isRoot && node.edges.length > 1;
+
   return (
     <StyledNodeContainer>
-      <StyledGraphNode
-        style={{
-          backgroundColor: nodeColor,
-          border: `3px solid ${nodeBorder}`,
-        }}
-      >
-        <StyledNodeTypeSelect>
+      {hasParallelEdges && (
+        <StyledParallelOperator>
+          <Checkbox
+            key={`${node.id}-and-${node.operator}`}
+            label="AND"
+            value={node.operator === Query.NodeOperator.And}
+            tooltipLabel="match all parallel branches"
+            onChangeFn={(checked) => {
+              if (checked) {
+                dispatch({
+                  type: QueryActionType.updateNodeOperator,
+                  payload: {
+                    nodeId: node.id,
+                    newOperator: Query.NodeOperator.And,
+                  },
+                });
+              }
+            }}
+          />
+          <Checkbox
+            key={`${node.id}-or-${node.operator}`}
+            label="OR"
+            value={node.operator === Query.NodeOperator.Or}
+            tooltipLabel="match any parallel branch"
+            onChangeFn={(checked) => {
+              if (checked) {
+                dispatch({
+                  type: QueryActionType.updateNodeOperator,
+                  payload: {
+                    nodeId: node.id,
+                    newOperator: Query.NodeOperator.Or,
+                  },
+                });
+              }
+            }}
+          />
+        </StyledParallelOperator>
+      )}
+      <StyledNodeMainRow>
+        <StyledGraphNode
+          style={{
+            backgroundColor: nodeColor,
+            border: `3px solid ${nodeBorder}`,
+          }}
+        >
+          {/* <StyledNodeTypeSelect>
           <Dropdown.Single.Basic
             options={nodeTypeOptions}
             value={node.type}
@@ -107,120 +154,123 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
               });
             }}
           />
-        </StyledNodeTypeSelect>
-        {(paramEntityClass || isRoot) && (
-          <Dropdown.Multi.Entity
-            shortLabel
-            closeMenuOnSelect={false}
-            value={node.params.entityClasses ?? []}
-            disableEmpty
-            onChange={(newValue) => {
-              dispatch({
-                type: QueryActionType.updateNodeClass,
-                payload: {
-                  nodeId: node.id,
-                  newEntityClasses: newValue,
-                },
-              });
-            }}
-            options={
-              isRoot || paramEntityClass.allowedClasses.length === 0
-                ? entitiesDict
-                : entitiesDict.filter((ecl) => paramEntityClass.allowedClasses.includes(ecl.value))
-            }
-            width={
-              node.params.entityClasses && node.params.entityClasses.length > 4
-                ? 270
-                : node.params.entityClasses && node.params.entityClasses.length > 0
-                ? node.params.entityClasses.length * 37 + 60
-                : 110
-            }
-            noOptionsMessage="entity class"
-            disabled={node.params.entityId !== undefined}
-            limitSelectedItems={Math.floor((270 - 110) / 37)}
-          />
-        )}
-        {paramEntityId && (
-          <div>
-            {isRoot === false &&
-              (dataEntity !== undefined ? (
-                <EntityTag
-                  entity={dataEntity}
-                  onDoubleClick={() => onOpenEntityInDetail?.(dataEntity.id)}
-                  unlinkButton={{
-                    onClick: () => {
+        </StyledNodeTypeSelect> */}
+          {(paramEntityClass || isRoot) && (
+            <Dropdown.Multi.Entity
+              shortLabel
+              closeMenuOnSelect={false}
+              value={node.params.entityClasses ?? []}
+              disableEmpty
+              onChange={(newValue) => {
+                dispatch({
+                  type: QueryActionType.updateNodeClass,
+                  payload: {
+                    nodeId: node.id,
+                    newEntityClasses: newValue,
+                  },
+                });
+              }}
+              options={
+                isRoot || paramEntityClass.allowedClasses.length === 0
+                  ? entitiesDict
+                  : entitiesDict.filter((ecl) =>
+                      paramEntityClass.allowedClasses.includes(ecl.value)
+                    )
+              }
+              width={
+                node.params.entityClasses && node.params.entityClasses.length > 4
+                  ? 270
+                  : node.params.entityClasses && node.params.entityClasses.length > 0
+                  ? node.params.entityClasses.length * 37 + 60
+                  : 110
+              }
+              noOptionsMessage="entity class"
+              disabled={node.params.entityId !== undefined}
+              limitSelectedItems={Math.floor((270 - 110) / 37)}
+            />
+          )}
+          {paramEntityId && (
+            <div>
+              {isRoot === false &&
+                (dataEntity !== undefined ? (
+                  <EntityTag
+                    entity={dataEntity}
+                    onDoubleClick={() => onOpenEntityInDetail?.(dataEntity.id)}
+                    unlinkButton={{
+                      onClick: () => {
+                        dispatch({
+                          type: QueryActionType.updateNodeEntityId,
+                          payload: {
+                            nodeId: node.id,
+                            newEntityId: undefined,
+                          },
+                        });
+                      },
+                    }}
+                  />
+                ) : (
+                  <EntitySuggester
+                    inputWidth={100}
+                    categoryTypes={
+                      paramEntityId.allowedClasses.length === 0
+                        ? classesAll
+                        : paramEntityId.allowedClasses
+                    }
+                    placeholder="entity"
+                    disableCreate
+                    initCategory={
+                      node.params.entityClasses?.[0] ??
+                      paramEntityId.allowedClasses[0] ??
+                      EntityEnums.Class.Concept
+                    }
+                    onSelected={(entityId: string) => {
                       dispatch({
                         type: QueryActionType.updateNodeEntityId,
                         payload: {
                           nodeId: node.id,
-                          newEntityId: undefined,
+                          newEntityId: entityId,
                         },
                       });
-                    },
-                  }}
-                />
-              ) : (
-                <EntitySuggester
-                  inputWidth={100}
-                  categoryTypes={
-                    paramEntityId.allowedClasses.length === 0
-                      ? classesAll
-                      : paramEntityId.allowedClasses
-                  }
-                  placeholder="entity"
-                  disableCreate
-                  initCategory={
-                    node.params.entityClasses?.[0] ??
-                    paramEntityId.allowedClasses[0] ??
-                    EntityEnums.Class.Concept
-                  }
-                  onSelected={(entityId: string) => {
-                    dispatch({
-                      type: QueryActionType.updateNodeEntityId,
-                      payload: {
-                        nodeId: node.id,
-                        newEntityId: entityId,
-                      },
-                    });
-                  }}
-                />
-              ))}
-          </div>
-        )}
-      </StyledGraphNode>
+                    }}
+                  />
+                ))}
+            </div>
+          )}
+        </StyledGraphNode>
 
-      <div>
-        <Button
-          icon={<FaPlus style={{ fontSize: "16px", padding: "2px" }} />}
-          tooltipLabel="add new edge"
-          color="primary"
-          onClick={() => {
-            dispatch({
-              type: QueryActionType.addNode,
-              payload: {
-                parentId: node.id,
-              },
-            });
-          }}
-        />
-      </div>
-      {node.gridX !== 0 && node.gridY !== 0 && edge && (
         <div>
           <Button
-            icon={<FaTrash style={{ fontSize: "16px", padding: "2px" }} />}
-            tooltipLabel="remove this node"
-            color="warning"
+            icon={<FaPlus style={{ fontSize: "16px", padding: "2px" }} />}
+            tooltipLabel="add new edge"
+            color="primary"
             onClick={() => {
               dispatch({
-                type: QueryActionType.removeEdge,
+                type: QueryActionType.addNode,
                 payload: {
-                  edgeId: edge.id,
+                  parentId: node.id,
                 },
               });
             }}
           />
         </div>
-      )}
+        {node.gridX !== 0 && node.gridY !== 0 && edge && (
+          <div>
+            <Button
+              icon={<FaTrash style={{ fontSize: "16px", padding: "2px" }} />}
+              tooltipLabel="remove this node"
+              color="warning"
+              onClick={() => {
+                dispatch({
+                  type: QueryActionType.removeEdge,
+                  payload: {
+                    edgeId: edge.id,
+                  },
+                });
+              }}
+            />
+          </div>
+        )}
+      </StyledNodeMainRow>
     </StyledNodeContainer>
   );
 };
