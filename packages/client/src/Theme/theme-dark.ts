@@ -64,7 +64,7 @@ const darkTheme = {
     tagColor: "#EBF0FA",
     tagSelectedBackground: "#f6f6ff",
     tagSelectedColor: "#091034",
-    tagItalic: "#3b3b3b",
+    tagItalic: "#D1DAEF",
 
     treeNodeRead: "#718096",
     treeNodeWrite: "#f7fafc",
