@@ -370,7 +370,7 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainerProps> = (
               </StyledCloseButtonWrap>
             </StyledExpandedHeader>
             <StyledExpandedContent>
-              <FloatingSearchForm />
+              <FloatingSearchForm dispatch={exploreDispatch} />
             </StyledExpandedContent>
           </StyledExpandedPanel>
         ) : (

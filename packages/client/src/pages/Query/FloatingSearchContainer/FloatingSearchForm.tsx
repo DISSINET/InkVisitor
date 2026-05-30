@@ -16,6 +16,7 @@ import {
   StyledRowHeader,
 } from "./FloatingSearchFormStyles";
 import { Explore } from "@inkvisitor/shared/types/query";
+import { ExploreAction, ExploreActionType } from "../Explorer/state";
 
 const defaultStatusOption = {
   label: "any",
@@ -36,7 +37,10 @@ const initSearchValues: IRequestSearch = {
   isRootInvalid: IRequestSearchRootValidity.Any,
 };
 
-export const FloatingSearchForm: React.FC = () => {
+interface FloatingSearchFormProps {
+  dispatch: React.Dispatch<ExploreAction>;
+}
+export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch }) => {
   const [searchData, setSearchData] = useState<IRequestSearch>(initSearchValues);
 
   const { data: users } = useUsersGetMoreQuery({ enabled: true });
@@ -94,6 +98,12 @@ export const FloatingSearchForm: React.FC = () => {
             onChange={(selectedOption) => {
               handleChange({
                 status: selectedOption || undefined,
+              });
+              dispatch({
+                type: ExploreActionType.setStatusFilter,
+                payload: {
+                  status: selectedOption || undefined,
+                },
               });
             }}
           />

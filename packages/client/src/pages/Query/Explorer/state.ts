@@ -169,6 +169,7 @@ const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Exp
       return {
         ...state,
         filters: [...otherFilters, { type: Explore.SearchOption.Status, status }],
+        offset: 0,
       };
     }
 
