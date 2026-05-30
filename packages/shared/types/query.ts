@@ -118,7 +118,6 @@ export namespace Query {
   > = {
     "HP:V": {
       entityId: { allowedClasses: [] },
-      entityClass: { allowedClasses: [] },
     },
     "I_HP:V": {},
     "EP:T": {
