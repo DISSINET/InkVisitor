@@ -15,6 +15,7 @@ import {
   StyledRowControl,
   StyledRowHeader,
 } from "./FloatingSearchFormStyles";
+import { DropdownItem } from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { ExploreAction, ExploreActionType } from "../Explorer/state";
 
@@ -24,11 +25,12 @@ const defaultStatusOption = {
 };
 const statusOptions = [defaultStatusOption].concat(entityStatusDict);
 
+const languageFilterAny = "*";
 const defaultLanguageOption = {
   label: "any",
-  value: "" as EntityEnums.Language,
+  value: languageFilterAny as EntityEnums.Language,
 };
-const languageOptions = [defaultLanguageOption].concat(languageDict);
+const languageOptions: DropdownItem[] = [defaultLanguageOption].concat(languageDict);
 
 const defaultClassForTypeBar = "" as EntityEnums.Class;
 
@@ -52,8 +54,8 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
     return defaultStatusOption.value;
   }, [searchData.status]);
 
-  const languageOptionSelected: EntityEnums.Language = useMemo(() => {
-    if (searchData.language) {
+  const languageOptionSelected = useMemo(() => {
+    if (searchData.language !== undefined) {
       return searchData.language;
     }
     return defaultLanguageOption.value;
@@ -119,13 +121,17 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
             options={languageOptions}
             value={languageOptionSelected}
             onChange={(selectedOption) => {
+              const language =
+                selectedOption === defaultLanguageOption.value
+                  ? undefined
+                  : selectedOption;
               handleChange({
-                language: selectedOption || undefined,
+                language,
               });
               dispatch({
                 type: ExploreActionType.setLanguageFilter,
                 payload: {
-                  language: selectedOption || undefined,
+                  language,
                 },
               });
             }}

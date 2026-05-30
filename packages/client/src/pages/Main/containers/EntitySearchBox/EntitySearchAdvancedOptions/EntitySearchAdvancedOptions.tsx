@@ -126,7 +126,7 @@ export const EntitySearchAdvancedOptions: React.FC<EntitySearchAdvancedOptions> 
         case SearchEnums.AdvancedOption.Status:
           return Boolean(searchData.status);
         case SearchEnums.AdvancedOption.Language:
-          return Boolean(searchData.language);
+          return searchData.language !== undefined;
         case SearchEnums.AdvancedOption.Territory:
           return Boolean(searchData.territoryId);
         case SearchEnums.AdvancedOption.CoOccurrence:

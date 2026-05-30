@@ -23,7 +23,10 @@ import { RiCloseFill } from "react-icons/ri";
 import { setExpandedOptions } from "redux/features/entitySearch/expandedOptionsSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { DropdownItem } from "@inkvisitor/shared/types";
-import { EntitySearchAdvancedOptions, mainPageAdvancedSearchOptions } from "./EntitySearchAdvancedOptions/EntitySearchAdvancedOptions";
+import {
+  EntitySearchAdvancedOptions,
+  mainPageAdvancedSearchOptions,
+} from "./EntitySearchAdvancedOptions/EntitySearchAdvancedOptions";
 import {
   StyledBoxContent,
   StyledNoResults,
@@ -56,11 +59,12 @@ const defaultStatusOption = {
 };
 const statusOptions = [defaultStatusOption].concat(entityStatusDict);
 
+const languageFilterAny = "*";
 const defaultLanguageOption = {
   label: "any",
-  value: "" as EntityEnums.Language,
+  value: languageFilterAny as EntityEnums.Language,
 };
-const languageOptions = [defaultLanguageOption].concat(languageDict);
+const languageOptions: DropdownItem[] = [defaultLanguageOption].concat(languageDict);
 
 const anyTemplate: DropdownItem = {
   value: "Any",
@@ -75,7 +79,7 @@ export const EntitySearchBox: React.FC = () => {
   const { appendDetailId } = useSearchParams();
 
   const [classOption, setClassOption] = useState<EntityEnums.Class>(
-    defaultClassOption.value as EntityEnums.Class
+    defaultClassOption.value as EntityEnums.Class,
   );
   const [searchData, setSearchData] = useState<IRequestSearch>(initSearchValues);
   const debouncedValues = useDebounce<IRequestSearch>(searchData, debounceTime);
@@ -90,9 +94,9 @@ export const EntitySearchBox: React.FC = () => {
     return defaultStatusOption.value;
   }, [searchData.status]);
 
-  const languageOptionSelected: EntityEnums.Language = useMemo(() => {
-    if (!!searchData.language) {
-      return searchData.language || defaultLanguageOption.value;
+  const languageOptionSelected = useMemo(() => {
+    if (searchData.language !== undefined) {
+      return searchData.language;
     }
     return defaultLanguageOption.value;
   }, [searchData.language]);
@@ -102,10 +106,10 @@ export const EntitySearchBox: React.FC = () => {
   const validSearch = useMemo<boolean>(() => {
     return Boolean(
       (debouncedValues?.labelOrId?.length && debouncedValues?.labelOrId?.length > 1) ||
-        debouncedValues?.class ||
-        debouncedValues?.territoryId ||
-        debouncedValues?.cooccurrenceId ||
-        debouncedValues?.haveReferenceTo
+      debouncedValues?.class ||
+      debouncedValues?.territoryId ||
+      debouncedValues?.cooccurrenceId ||
+      debouncedValues?.haveReferenceTo,
     );
   }, [debouncedValues]);
 
@@ -170,7 +174,7 @@ export const EntitySearchBox: React.FC = () => {
     if (entities) {
       const sorted = [...entities];
       sorted.sort((a: IEntity, b: IEntity) =>
-        a.labels[0].toLocaleLowerCase() > b.labels[0].toLocaleLowerCase() ? 1 : -1
+        a.labels[0].toLocaleLowerCase() > b.labels[0].toLocaleLowerCase() ? 1 : -1,
       );
       return entities;
     }
@@ -231,7 +235,7 @@ export const EntitySearchBox: React.FC = () => {
     (options: SearchEnums.AdvancedOption[]) => {
       dispatch(setExpandedOptions(options));
     },
-    [dispatch]
+    [dispatch],
   );
 
   // Map AdvancedOption enum values to IRequestSearch property names
@@ -247,7 +251,7 @@ export const EntitySearchBox: React.FC = () => {
       };
       return mapping[option] as keyof IRequestSearch;
     },
-    []
+    [],
   );
 
   const renderOptionLabel = useCallback(
@@ -260,7 +264,7 @@ export const EntitySearchBox: React.FC = () => {
             <StyledPillCloseIcon
               onClick={() => {
                 handleSetExpandedOptions(
-                  expandedOptions.filter((o: SearchEnums.AdvancedOption) => o !== option)
+                  expandedOptions.filter((o: SearchEnums.AdvancedOption) => o !== option),
                 );
                 // Special handling for different options
                 if (option === SearchEnums.AdvancedOption.Territory) {
@@ -297,7 +301,7 @@ export const EntitySearchBox: React.FC = () => {
         </StyledPillWrap>
       );
     },
-    [expandedOptions, handleSetExpandedOptions, getPropertyNameFromOption, handleChange]
+    [expandedOptions, handleSetExpandedOptions, getPropertyNameFromOption, handleChange],
   );
 
   // If used as template is implemented, it'll be set here
@@ -311,7 +315,7 @@ export const EntitySearchBox: React.FC = () => {
 
   useEffect(() => {
     const filtered = expandedOptions.filter((option: SearchEnums.AdvancedOption) =>
-      mainPageAdvancedSearchOptions.includes(option)
+      mainPageAdvancedSearchOptions.includes(option),
     );
     if (filtered.length !== expandedOptions.length) {
       dispatch(setExpandedOptions(filtered));
@@ -420,7 +424,10 @@ export const EntitySearchBox: React.FC = () => {
                     value={languageOptionSelected}
                     onChange={(selectedOption) => {
                       handleChange({
-                        language: selectedOption,
+                        language:
+                          selectedOption === defaultLanguageOption.value
+                            ? undefined
+                            : selectedOption,
                       });
                     }}
                   />
