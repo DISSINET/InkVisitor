@@ -1,9 +1,4 @@
-import {
-  IAudit,
-  IAnchorUpdate,
-  IDocumentAuditAnchorChanges,
-  AuditScope,
-} from "./audit";
+import { IAudit, IAnchorUpdate, IDocumentAuditAnchorChanges, AuditScope } from "./audit";
 import { DropdownItem } from "./dropdown";
 import { ILabel } from "./label";
 import { IReference } from "./reference";
@@ -53,33 +48,18 @@ import {
   PropOrder,
 } from "./response-statement";
 import { IResponseTerritory } from "./response-territory";
-import {
-  IResponseTree,
-  IResponseTreeTerritoryComponent,
-} from "./response-tree";
+import { IResponseTree, IResponseTreeTerritoryComponent } from "./response-tree";
 import { IResponseStoredTerritory, IResponseUser } from "./response-user";
 
-import {
-  IDocument,
-  IDocumentMeta,
-} from "./document";
+import { IDocument, IDocumentMeta } from "./document";
 import { IRequestStats } from "./request-stats";
 import { IResponseEntity } from "./response-entity";
 import { IResponseStats } from "./response-stats";
-import {
-  IBookmarkFolder,
-  IStoredTerritory,
-  IUser,
-  IUserOptions,
-  IUserRight,
-} from "./user";
+import { IBookmarkFolder, IStoredTerritory, IUser, IUserOptions, IUserRight } from "./user";
 
 import { Query } from "./query";
 import { IRequestActivationData } from "./request-activation";
-import {
-  IRequestPasswordReset,
-  IRequestPasswordResetData,
-} from "./request-password-reset";
+import { IRequestPasswordReset, IRequestPasswordResetData } from "./request-password-reset";
 import { IRequestQuery } from "./request-query";
 import { IResponseQuery, IResponseQueryEntity } from "./response-query";
 

@@ -10,7 +10,7 @@ import api from "api";
 import { EntitySuggester, EntityTag, UserTag } from "components/advanced";
 import { deleteProp, deleteRef } from "constructors";
 
-import { EntityEnums } from "@inkvisitor/shared/enums";
+import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { UserTagSize } from "components/advanced/UserTag/utils";
 import { invalidateAllExplorerQueries } from "pages/Query/useQueryData";
 import { StyledCheckboxWrapper, StyledFocusedCircle } from "./ExplorerTableStyles";
@@ -46,7 +46,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
       e.stopPropagation();
       onRowSelect(rowId, (e as React.MouseEvent).shiftKey);
     },
-    [onRowSelect, rowId]
+    [onRowSelect, rowId],
   );
 
   const queryClient = useQueryClient();
@@ -70,8 +70,17 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
         onOpenEntityInDetail?.(entity.id);
       }
     },
-    [onOpenEntityInDetail]
+    [onOpenEntityInDetail],
   );
+
+  const relationDeleteMutation = useMutation({
+    mutationFn: async (relationId: string) => await api.relationDelete(relationId),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["entity"] });
+      invalidateAllExplorerQueries(queryClient);
+    },
+  });
 
   const handleUnlinkEntity = React.useCallback(
     (sourceEntity: IEntity, entityToRemove: IEntity, columnId: string) => {
@@ -115,15 +124,22 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
           },
         });
       }
+
+      if (column?.type === Explore.EExploreColumnType.ER) {
+        const params = column.params as Explore.IExploreColumnParamsER;
+        // TODO: get relationId!
+        // api.relationGet(params.relationType, sourceEntity.id);
+        // relationDeleteMutation.mutate(entityToRemove.id);
+      }
     },
-    [columns, updateEntityMutation]
+    [columns, updateEntityMutation],
   );
 
   const renderCellValue = React.useCallback(
     (
       cellValue: IEntity | number | string | IUser,
       recordEntity: IEntity,
-      column: Explore.IExploreColumn
+      column: Explore.IExploreColumn,
     ): React.ReactElement => {
       if (typeof (cellValue as IEntity)?.class !== "undefined") {
         return (
@@ -157,14 +173,14 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
         );
       }
     },
-    [handleUnlinkEntity, handleOpenEntityInDetail]
+    [handleUnlinkEntity, handleOpenEntityInDetail],
   );
 
   const renderCell = React.useCallback(
     (
       recordEntity: IEntity,
       cellData: IEntity | IEntity[] | number | number[] | string | string[] | IUser | IUser[],
-      column: Explore.IExploreColumn
+      column: Explore.IExploreColumn,
     ): React.ReactElement => {
       if (Array.isArray(cellData)) {
         return (
@@ -188,7 +204,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
         return renderCellValue(cellData, recordEntity, column);
       }
     },
-    [renderCellValue]
+    [renderCellValue],
   );
 
   const renderEditSection = React.useCallback(
@@ -216,10 +232,21 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
             />
           );
         }
+        if (column.type === Explore.EExploreColumnType.ER) {
+          return (
+            <EntitySuggester
+              categoryTypes={[EntityEnums.Class.Concept]}
+              onPicked={(newEntity) => {
+                handleEditColumn(rowEntity, column.id, newEntity);
+              }}
+              compactUntilHover
+            />
+          );
+        }
       }
       return null;
     },
-    [handleEditColumn]
+    [handleEditColumn],
   );
 
   return (
@@ -288,7 +315,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
 
 function areRowsEqual(
   prev: Readonly<React.ComponentProps<typeof ExplorerTableRow>>,
-  next: Readonly<React.ComponentProps<typeof ExplorerTableRow>>
+  next: Readonly<React.ComponentProps<typeof ExplorerTableRow>>,
 ) {
   if (prev.rowId !== next.rowId) return false;
   const prevEntityId = prev.rowItem?.entity.id;

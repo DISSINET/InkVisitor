@@ -9,6 +9,7 @@ import {
   IReference,
   IResponseQuery,
   IResponseQueryEntity,
+  Relation,
 } from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
 import api from "api";
@@ -109,7 +110,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   const dataSourceOffset = data && data.entities?.length > 0 ? offset : renderWindow.offset;
 
   const [batchActionSelected, setBatchActionSelected] = useState<BatchAction>(
-    batchOptions[0].value
+    batchOptions[0].value,
   );
   const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
 
@@ -145,6 +146,14 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     });
     setIsNewColumnOpen(false);
   };
+
+  const relationCreateMutation = useMutation({
+    mutationFn: async (newRelation: Relation.IRelation) => await api.relationCreate(newRelation),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["entity"] });
+      invalidateAllExplorerQueries(queryClient);
+    },
+  });
 
   const handleEditColumn = useCallback(
     (rowEntity: IEntity, columnId: string, newEntity: IEntity) => {
@@ -203,10 +212,24 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
             });
             break;
           }
+
+          case Explore.EExploreColumnType.ER: {
+            const params =
+              column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.ER>;
+
+            // TODO: check all relation types!!!
+            const newRelation: Relation.IRelation = {
+              id: uuidv4(),
+              type: params.relationType,
+              entityIds: [rowEntity.id, newEntity.id],
+            };
+
+            relationCreateMutation.mutate(newRelation);
+          }
         }
       }
     },
-    [columns]
+    [columns],
   );
 
   const {
@@ -264,7 +287,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
         payload: { id },
       });
     },
-    [dispatch]
+    [dispatch],
   );
 
   // created by columns are smaller than the default columns, subtract the difference
@@ -381,7 +404,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       rowLastClicked,
       getCachedEntity,
       onOpenEntityInDetail,
-    ]
+    ],
   );
 
   const handleRowsRendered = ({ startIndex, stopIndex }: any) => {

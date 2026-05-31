@@ -44,10 +44,7 @@ export default class Results<T extends { id: string }> {
     this.items = Array.from(new Set((this.items || []).concat(results)));
   }
 
-  async applyExploreFilters(
-    db: Connection,
-    exploreData: Explore.IExplore
-  ): Promise<void> {
+  async applyExploreFilters(db: Connection, exploreData: Explore.IExplore): Promise<void> {
     if (!this.items?.length) {
       return;
     }
@@ -65,11 +62,7 @@ export default class Results<T extends { id: string }> {
       return;
     }
 
-    this.items = await filterEntityIdsByRowLabelFilter(
-      db,
-      this.items,
-      rowLabelFilter
-    );
+    this.items = await filterEntityIdsByRowLabelFilter(db, this.items, rowLabelFilter);
   }
 
   sort(sortData: Explore.IExploreColumnSort | undefined): void {
@@ -98,10 +91,7 @@ export default class Results<T extends { id: string }> {
     // return all items if limit is 0
     if (exploreData.limit === 0) return this.items;
 
-    const endIndex = Math.min(
-      exploreData.offset + exploreData.limit,
-      this.items.length
-    );
+    const endIndex = Math.min(exploreData.offset + exploreData.limit, this.items.length);
 
     return this.items.slice(exploreData.offset, endIndex);
   }
@@ -111,28 +101,11 @@ export default class Results<T extends { id: string }> {
     entity: IEntity,
     columnsData: Explore.IExploreColumn[]
   ): Promise<
-    Record<
-      string,
-      | IEntity
-      | IEntity[]
-      | number
-      | number[]
-      | string
-      | string[]
-      | IUser
-      | IUser[]
-    >
+    Record<string, IEntity | IEntity[] | number | number[] | string | string[] | IUser | IUser[]>
   > {
     const out: Record<
       string,
-      | IEntity
-      | IEntity[]
-      | number
-      | number[]
-      | string
-      | string[]
-      | IUser
-      | IUser[]
+      IEntity | IEntity[] | number | number[] | string | string[] | IUser | IUser[]
     > = {};
     for (const column of columnsData) {
       switch (column.type) {
@@ -152,10 +125,7 @@ export default class Results<T extends { id: string }> {
               }
             });
 
-          out[column.id] = await Entity.findEntitiesByIds(
-            db,
-            Object.keys(entityIds)
-          );
+          out[column.id] = await Entity.findEntitiesByIds(db, Object.keys(entityIds));
           break;
         }
         // Created by
@@ -172,13 +142,10 @@ export default class Results<T extends { id: string }> {
         }
         // Entity Reference Resources
         case Explore.EExploreColumnType.ERR: {
-          const referenceIds = entity.references.reduce<string[]>(
-            (acc, curr) => {
-              acc.push(curr.resource);
-              return acc;
-            },
-            []
-          );
+          const referenceIds = entity.references.reduce<string[]>((acc, curr) => {
+            acc.push(curr.resource);
+            return acc;
+          }, []);
           const resources = await Entity.findEntitiesByIds(db, referenceIds);
           out[column.id] = resources;
           break;

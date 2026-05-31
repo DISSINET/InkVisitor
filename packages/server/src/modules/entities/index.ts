@@ -36,10 +36,7 @@ import {
   ModelNotValidError,
   PermissionDeniedError,
 } from "@inkvisitor/shared/types/errors";
-import {
-  IRequestQuery,
-  IRequestQueryExport,
-} from "@inkvisitor/shared/types/request-query";
+import { IRequestQuery, IRequestQueryExport } from "@inkvisitor/shared/types/request-query";
 import { IRequestSearch } from "@inkvisitor/shared/types/request-search";
 import Document from "@models/document/document";
 import { IResponseQuery } from "@inkvisitor/shared/types/response-query";
@@ -76,34 +73,26 @@ export default Router()
    */
   .get(
     "/:entityId",
-    asyncRouteHandler<IResponseEntity>(
-      async (request: IRequest<{ entityId: string }>) => {
-        const entityId = request.params.entityId;
+    asyncRouteHandler<IResponseEntity>(async (request: IRequest<{ entityId: string }>) => {
+      const entityId = request.params.entityId;
 
-        if (!entityId) {
-          throw new BadParams("entityId has to be set");
-        }
-
-        const entityData = await findEntityById<IEntity>(
-          request.db,
-          entityId as string
-        );
-
-        if (!entityData) {
-          throw new EntityDoesNotExist(
-            `entity ${entityId} was not found`,
-            entityId
-          );
-        }
-        const entity = getEntityClass({ ...entityData });
-
-        const response = new ResponseEntity(entity);
-
-        await response.prepare(request);
-
-        return response;
+      if (!entityId) {
+        throw new BadParams("entityId has to be set");
       }
-    )
+
+      const entityData = await findEntityById<IEntity>(request.db, entityId as string);
+
+      if (!entityData) {
+        throw new EntityDoesNotExist(`entity ${entityId} was not found`, entityId);
+      }
+      const entity = getEntityClass({ ...entityData });
+
+      const response = new ResponseEntity(entity);
+
+      await response.prepare(request);
+
+      return response;
+    })
   )
   /**
    * @openapi
@@ -261,10 +250,7 @@ export default Router()
         const originalId = request.params.entityId as string;
         const original = await findEntityById(request.db, originalId);
         if (!original) {
-          throw new EntityDoesNotExist(
-            "cannot copy entity - does not exist",
-            originalId
-          );
+          throw new EntityDoesNotExist("cannot copy entity - does not exist", originalId);
         }
 
         // clone the entry without id and with recreated ids - should be created anew
@@ -292,24 +278,19 @@ export default Router()
 
         await Audit.createNew(request, clone.id, clone, EventType.CREATE);
 
-        const rels = (
-          await Relation.findForEntities(request.db.connection, [originalId])
-        ).filter((rel) => {
-          const relType = RelationType.RelationRules[rel.type];
-          if (!relType?.asymmetrical) {
-            return true;
-          } else {
-            return rel.entityIds.indexOf(originalId) === 0;
+        const rels = (await Relation.findForEntities(request.db.connection, [originalId])).filter(
+          (rel) => {
+            const relType = RelationType.RelationRules[rel.type];
+            if (!relType?.asymmetrical) {
+              return true;
+            } else {
+              return rel.entityIds.indexOf(originalId) === 0;
+            }
           }
-        });
+        );
 
         const relsWithClas = rels.map((r) => getRelationClass(r));
-        const relsCopied = await Relation.copyMany(
-          request,
-          relsWithClas,
-          originalId,
-          clone.id
-        );
+        const relsCopied = await Relation.copyMany(request, relsWithClas, originalId, clone.id);
 
         return {
           result: true,
@@ -327,15 +308,9 @@ export default Router()
     asyncRouteHandler<IResponseGeneric<object>>(
       async (request: IRequest<{ entityId?: string }, {}, {}>) => {
         const entityId = request.params.entityId || "";
-        const audit = await Audit.getLastForEntity(
-          request.db.connection,
-          entityId
-        );
+        const audit = await Audit.getLastForEntity(request.db.connection, entityId);
         if (!audit) {
-          throw new AuditDoesNotExist(
-            "cannot restore entity - audit does not exist",
-            entityId
-          );
+          throw new AuditDoesNotExist("cannot restore entity - audit does not exist", entityId);
         }
 
         const restoration = getEntityClass({
@@ -395,59 +370,54 @@ export default Router()
    */
   .put(
     "/:entityId",
-    asyncRouteHandler<IResponseGeneric>(
-      async (request: IRequest<{ entityId: string }>) => {
-        const entityId = request.params.entityId;
-        const entityData = request.body as Record<string, unknown>;
+    asyncRouteHandler<IResponseGeneric>(async (request: IRequest<{ entityId: string }>) => {
+      const entityId = request.params.entityId;
+      const entityData = request.body as Record<string, unknown>;
 
-        // not validation, just required data for this operation
-        if (!entityId || !entityData || Object.keys(entityData).length === 0) {
-          throw new BadParams("entity id and data have to be set");
-        }
-
-        await request.db.lock();
-
-        // entityId must be already in the db
-        const existingEntity = await findEntityById(request.db, entityId);
-        if (!existingEntity) {
-          throw new EntityDoesNotExist(
-            `entity with id ${entityId} does not exist`,
-            entityId
-          );
-        }
-
-        // get correct IDbModel implementation
-        const model = getEntityClass({
-          ...mergeDeep(existingEntity, entityData),
-          class: existingEntity.class,
-          id: entityId,
-        });
-
-        // checking the validity of the final model (already has updated data)
-        if (!model.isValid()) {
-          throw new ModelNotValidError("");
-        }
-
-        if (!model.canBeEditedByUser(request.getUserOrFail())) {
-          throw new PermissionDeniedError("entity cannot be saved");
-        }
-
-        await model.beforeSave(request.db.connection);
-
-        // update only the required fields
-        const result = await model.update(request.db.connection, entityData);
-
-        if (result.replaced || result.unchanged) {
-          await Audit.createNew(request, entityId, entityData, EventType.EDIT);
-
-          return {
-            result: true,
-          };
-        } else {
-          throw new InternalServerError(`cannot update entity ${entityId}`);
-        }
+      // not validation, just required data for this operation
+      if (!entityId || !entityData || Object.keys(entityData).length === 0) {
+        throw new BadParams("entity id and data have to be set");
       }
-    )
+
+      await request.db.lock();
+
+      // entityId must be already in the db
+      const existingEntity = await findEntityById(request.db, entityId);
+      if (!existingEntity) {
+        throw new EntityDoesNotExist(`entity with id ${entityId} does not exist`, entityId);
+      }
+
+      // get correct IDbModel implementation
+      const model = getEntityClass({
+        ...mergeDeep(existingEntity, entityData),
+        class: existingEntity.class,
+        id: entityId,
+      });
+
+      // checking the validity of the final model (already has updated data)
+      if (!model.isValid()) {
+        throw new ModelNotValidError("");
+      }
+
+      if (!model.canBeEditedByUser(request.getUserOrFail())) {
+        throw new PermissionDeniedError("entity cannot be saved");
+      }
+
+      await model.beforeSave(request.db.connection);
+
+      // update only the required fields
+      const result = await model.update(request.db.connection, entityData);
+
+      if (result.replaced || result.unchanged) {
+        await Audit.createNew(request, entityId, entityData, EventType.EDIT);
+
+        return {
+          result: true,
+        };
+      } else {
+        throw new InternalServerError(`cannot update entity ${entityId}`);
+      }
+    })
   )
   /**
    * @openapi
@@ -474,9 +444,7 @@ export default Router()
   .delete(
     "/:entityId?",
     asyncRouteHandler<IResponseGeneric<Record<string, CustomError | true>>>(
-      async (
-        req: IRequest<{ entityId?: string }, { entityIds?: string[] }>
-      ) => {
+      async (req: IRequest<{ entityId?: string }, { entityIds?: string[] }>) => {
         let ids: string[] | undefined;
         if (req.params.entityId) {
           ids = [req.params.entityId];
@@ -524,33 +492,25 @@ export default Router()
         // check for any blocking reasons for not deleting the entity + construct dependency map
         for (const entity of existing) {
           // if relations are linked to this entity, the delete should not be allowed
-          const [linkIds, relIds] = await Relation.getLinkedForEntities(
-            req.db.connection,
-            [entity.id]
-          );
+          const [linkIds, relIds] = await Relation.getLinkedForEntities(req.db.connection, [
+            entity.id,
+          ]);
           if (relIds.length) {
             out.result = false;
             out.data[entity.id] = new InvalidDeleteError(
               `Cannot be deleted while linked to relations (${
-                relIds[0] +
-                (relIds.length > 1
-                  ? " + " + (relIds.length - 1) + " others"
-                  : "")
+                relIds[0] + (relIds.length > 1 ? " + " + (relIds.length - 1) + " others" : "")
               })`
             ).withData(linkIds);
             continue;
           }
 
-          const docs = await Document.findByEntityId(
-            req.db.connection,
-            entity.id
-          );
+          const docs = await Document.findByEntityId(req.db.connection, entity.id);
           if (docs.length) {
             out.result = false;
             out.data[entity.id] = new InvalidDeleteError(
               `Cannot be deleted while anchored to documents (${
-                docs[0].id +
-                (docs.length > 1 ? " + " + (docs.length - 1) + " others" : "")
+                docs[0].id + (docs.length > 1 ? " + " + (docs.length - 1) + " others" : "")
               })`
             ).withData(docs.map((d) => d.id));
             continue;
@@ -571,9 +531,9 @@ export default Router()
           const usedBy = await model.getUsedByEntity(req.db.connection);
           if (usedBy.length) {
             out.result = false;
-            out.data[entity.id] = new InvalidDeleteError(
-              `Referenced by other entities`
-            ).withData(usedBy.map((e) => e.id));
+            out.data[entity.id] = new InvalidDeleteError(`Referenced by other entities`).withData(
+              usedBy.map((e) => e.id)
+            );
             dependencyMap[entity.id] = usedBy.map((e) => e.id);
             continue;
           }
@@ -585,13 +545,9 @@ export default Router()
           for (const entityId of Object.keys(dependencyMap)) {
             if (dependencyMap[entityId].length === 0) {
               try {
-                const model = getEntityClass(
-                  existing.find((e) => e.id === entityId)
-                );
+                const model = getEntityClass(existing.find((e) => e.id === entityId));
                 if ((await model.delete(req.db.connection)).deleted !== 1) {
-                  throw new InternalServerError(
-                    `cannot delete entity ${entityId}`
-                  );
+                  throw new InternalServerError(`cannot delete entity ${entityId}`);
                 }
                 out.data[entityId] = true;
                 await Audit.createDeletionAudit(
@@ -650,35 +606,30 @@ export default Router()
    */
   .get(
     "/:entityId/detail",
-    asyncRouteHandler<IResponseDetail>(
-      async (request: IRequest<{ entityId: string }>) => {
-        const entityId = request.params.entityId;
+    asyncRouteHandler<IResponseDetail>(async (request: IRequest<{ entityId: string }>) => {
+      const entityId = request.params.entityId;
 
-        if (!entityId) {
-          throw new BadParams("entity id has to be set");
-        }
-
-        const entityData = await findEntityById(request.db, entityId);
-        if (!entityData) {
-          throw new EntityDoesNotExist(
-            `entity ${entityId} was not found`,
-            entityId
-          );
-        }
-
-        const entity = getEntityClass({ ...entityData });
-
-        if (!entity.canBeViewedByUser(request.getUserOrFail())) {
-          throw new PermissionDeniedError(`cannot view entity ${entityId}`);
-        }
-
-        const response = new ResponseEntityDetail(entity);
-
-        await response.prepare(request);
-
-        return response;
+      if (!entityId) {
+        throw new BadParams("entity id has to be set");
       }
-    )
+
+      const entityData = await findEntityById(request.db, entityId);
+      if (!entityData) {
+        throw new EntityDoesNotExist(`entity ${entityId} was not found`, entityId);
+      }
+
+      const entity = getEntityClass({ ...entityData });
+
+      if (!entity.canBeViewedByUser(request.getUserOrFail())) {
+        throw new PermissionDeniedError(`cannot view entity ${entityId}`);
+      }
+
+      const response = new ResponseEntityDetail(entity);
+
+      await response.prepare(request);
+
+      return response;
+    })
   )
   /**
    * @openapi
@@ -713,10 +664,7 @@ export default Router()
 
       const entityData = await findEntityById(request.db, entityId);
       if (!entityData) {
-        throw new EntityDoesNotExist(
-          `entity ${entityId} was not found`,
-          entityId
-        );
+        throw new EntityDoesNotExist(`entity ${entityId} was not found`, entityId);
       }
 
       const entity = getEntityClass({ ...entityData });
@@ -734,73 +682,60 @@ export default Router()
   )
   .post(
     "/query",
-    asyncRouteHandler<IResponseQuery>(
-      async (request: IRequest<undefined, IRequestQuery>) => {
-        const querySearch = new QuerySearch(
-          request.body.query,
-          request.body.explore
-        );
+    asyncRouteHandler<IResponseQuery>(async (request: IRequest<undefined, IRequestQuery>) => {
+      const querySearch = new QuerySearch(request.body.query, request.body.explore);
 
-        await querySearch.run(request.db.connection);
-        const results = await querySearch.getResults(request.db.connection);
+      await querySearch.run(request.db.connection);
+      const results = await querySearch.getResults(request.db.connection);
 
-        const entityIds = querySearch.results?.items ?? [];
+      const entityIds = querySearch.results?.items ?? [];
 
-        return {
-          query: request.body.query,
-          entityIds,
-          entities: results,
-          explore: querySearch.explore,
-          total: entityIds.length,
-        };
-      }
-    )
+      return {
+        query: request.body.query,
+        entityIds,
+        entities: results,
+        explore: querySearch.explore,
+        total: entityIds.length,
+      };
+    })
   )
 
   .post(
     "/query-export",
-    asyncRouteHandler<any>(
-      async (request: IRequest<undefined, IRequestQueryExport>) => {
-        const { query, explore, rowIndices } = request.body;
+    asyncRouteHandler<any>(async (request: IRequest<undefined, IRequestQueryExport>) => {
+      const { query, explore, rowIndices } = request.body;
 
-        const exportExplore = { ...explore, ...{ limit: 0 } };
+      const exportExplore = { ...explore, ...{ limit: 0 } };
 
-        const querySearch = new QuerySearch(query, exportExplore);
+      const querySearch = new QuerySearch(query, exportExplore);
 
-        const ids = await querySearch.run(request.db.connection);
+      const ids = await querySearch.run(request.db.connection);
 
-        const results = await querySearch.getResults(
-          request.db.connection,
-          rowIndices
-        );
+      const results = await querySearch.getResults(request.db.connection, rowIndices);
 
-        // create csv text
-        const tsvBodyRows = results
-          .map((result) => {
-            const rEntity = result.entity;
-            const rowColValues: string[] = [parseColumnValue(rEntity)];
+      // create csv text
+      const tsvBodyRows = results
+        .map((result) => {
+          const rEntity = result.entity;
+          const rowColValues: string[] = [parseColumnValue(rEntity)];
 
-            Object.values(result.columnData).forEach((columnValue) => {
-              if (columnValue instanceof Array) {
-                rowColValues.push(
-                  columnValue
-                    .map((columnValuePart) => parseColumnValue(columnValuePart))
-                    .join(",")
-                );
-              } else {
-                rowColValues.push(parseColumnValue(columnValue));
-              }
-            });
-            return rowColValues.join("\t");
-          })
-          .join("\n");
+          Object.values(result.columnData).forEach((columnValue) => {
+            if (columnValue instanceof Array) {
+              rowColValues.push(
+                columnValue.map((columnValuePart) => parseColumnValue(columnValuePart)).join(",")
+              );
+            } else {
+              rowColValues.push(parseColumnValue(columnValue));
+            }
+          });
+          return rowColValues.join("\t");
+        })
+        .join("\n");
 
-        const tsvHeader =
-          "result \t" + explore.columns.map((c) => c.name).join("\t");
+      const tsvHeader = "result \t" + explore.columns.map((c) => c.name).join("\t");
 
-        return { tsvText: tsvHeader + "\n" + tsvBodyRows };
-      }
-    )
+      return { tsvText: tsvHeader + "\n" + tsvBodyRows };
+    })
   )
 
   .post(
@@ -830,23 +765,15 @@ export default Router()
           entityIds.length === 0 ||
           !propData?.type?.entityId
         ) {
-          throw new BadParams(
-            "entityIds array and propData.type.entityId must be provided"
-          );
+          throw new BadParams("entityIds array and propData.type.entityId must be provided");
         }
 
         await request.db.lock();
 
-        const entities = await Entity.findEntitiesByIds(
-          request.db.connection,
-          entityIds
-        );
+        const entities = await Entity.findEntitiesByIds(request.db.connection, entityIds);
 
         if (entities.length === 0) {
-          throw new EntityDoesNotExist(
-            "none of the provided entities were found",
-            entityIds[0]
-          );
+          throw new EntityDoesNotExist("none of the provided entities were found", entityIds[0]);
         }
 
         const user = request.getUserOrFail();
@@ -860,7 +787,8 @@ export default Router()
             certainty: (propData.certainty as EntityEnums.Certainty) || EntityEnums.Certainty.Empty,
             logic: (propData.logic as EntityEnums.Logic) || EntityEnums.Logic.Positive,
             mood: (propData.mood as EntityEnums.Mood[]) || [EntityEnums.Mood.Indication],
-            moodvariant: (propData.moodvariant as EntityEnums.MoodVariant) || EntityEnums.MoodVariant.Realis,
+            moodvariant:
+              (propData.moodvariant as EntityEnums.MoodVariant) || EntityEnums.MoodVariant.Realis,
             bundleOperator: EntityEnums.Operator.And,
             bundleStart: false,
             bundleEnd: false,
@@ -869,15 +797,23 @@ export default Router()
               entityId: propData.type.entityId,
               elvl: (propData.type.elvl as EntityEnums.Elvl) || EntityEnums.Elvl.Inferential,
               logic: (propData.type.logic as EntityEnums.Logic) || EntityEnums.Logic.Positive,
-              virtuality: (propData.type.virtuality as EntityEnums.Virtuality) || EntityEnums.Virtuality.Reality,
-              partitivity: (propData.type.partitivity as EntityEnums.Partitivity) || EntityEnums.Partitivity.Unison,
+              virtuality:
+                (propData.type.virtuality as EntityEnums.Virtuality) ||
+                EntityEnums.Virtuality.Reality,
+              partitivity:
+                (propData.type.partitivity as EntityEnums.Partitivity) ||
+                EntityEnums.Partitivity.Unison,
             },
             value: {
               entityId: propData.value?.entityId || "",
               elvl: (propData.value?.elvl as EntityEnums.Elvl) || EntityEnums.Elvl.Inferential,
               logic: (propData.value?.logic as EntityEnums.Logic) || EntityEnums.Logic.Positive,
-              virtuality: (propData.value?.virtuality as EntityEnums.Virtuality) || EntityEnums.Virtuality.Reality,
-              partitivity: (propData.value?.partitivity as EntityEnums.Partitivity) || EntityEnums.Partitivity.Unison,
+              virtuality:
+                (propData.value?.virtuality as EntityEnums.Virtuality) ||
+                EntityEnums.Virtuality.Reality,
+              partitivity:
+                (propData.value?.partitivity as EntityEnums.Partitivity) ||
+                EntityEnums.Partitivity.Unison,
             },
           };
 
@@ -904,12 +840,7 @@ export default Router()
           const result = await model.update(request.db.connection, updateData);
 
           if (result.replaced || result.unchanged) {
-            await Audit.createNew(
-              request,
-              entityData.id,
-              updateData,
-              EventType.EDIT
-            );
+            await Audit.createNew(request, entityData.id, updateData, EventType.EDIT);
             updated++;
           } else {
             errors[entityData.id] = "update failed";
@@ -919,9 +850,7 @@ export default Router()
         return {
           result: updated > 0,
           message: `Updated ${updated}/${entities.length} entities${
-            Object.keys(errors).length
-              ? `. Errors: ${JSON.stringify(errors)}`
-              : ""
+            Object.keys(errors).length ? `. Errors: ${JSON.stringify(errors)}` : ""
           }`,
         };
       }
@@ -949,23 +878,15 @@ export default Router()
           entityIds.length === 0 ||
           !resourceEntityId
         ) {
-          throw new BadParams(
-            "entityIds array and resourceEntityId must be provided"
-          );
+          throw new BadParams("entityIds array and resourceEntityId must be provided");
         }
 
         await request.db.lock();
 
-        const entities = await Entity.findEntitiesByIds(
-          request.db.connection,
-          entityIds
-        );
+        const entities = await Entity.findEntitiesByIds(request.db.connection, entityIds);
 
         if (entities.length === 0) {
-          throw new EntityDoesNotExist(
-            "none of the provided entities were found",
-            entityIds[0]
-          );
+          throw new EntityDoesNotExist("none of the provided entities were found", entityIds[0]);
         }
 
         const user = request.getUserOrFail();
@@ -1002,12 +923,7 @@ export default Router()
           const result = await model.update(request.db.connection, updateData);
 
           if (result.replaced || result.unchanged) {
-            await Audit.createNew(
-              request,
-              entityData.id,
-              updateData,
-              EventType.EDIT
-            );
+            await Audit.createNew(request, entityData.id, updateData, EventType.EDIT);
             updated++;
           } else {
             errors[entityData.id] = "update failed";
@@ -1017,9 +933,7 @@ export default Router()
         return {
           result: updated > 0,
           message: `Updated ${updated}/${entities.length} entities${
-            Object.keys(errors).length
-              ? `. Errors: ${JSON.stringify(errors)}`
-              : ""
+            Object.keys(errors).length ? `. Errors: ${JSON.stringify(errors)}` : ""
           }`,
         };
       }
@@ -1048,34 +962,20 @@ export default Router()
           !relationType ||
           !targetEntityId
         ) {
-          throw new BadParams(
-            "entityIds, relationType and targetEntityId must be provided"
-          );
+          throw new BadParams("entityIds, relationType and targetEntityId must be provided");
         }
 
         await request.db.lock();
 
-        const entities = await Entity.findEntitiesByIds(
-          request.db.connection,
-          entityIds
-        );
+        const entities = await Entity.findEntitiesByIds(request.db.connection, entityIds);
 
         if (entities.length === 0) {
-          throw new EntityDoesNotExist(
-            "none of the provided entities were found",
-            entityIds[0]
-          );
+          throw new EntityDoesNotExist("none of the provided entities were found", entityIds[0]);
         }
 
-        const targetEntity = await findEntityById(
-          request.db,
-          targetEntityId
-        );
+        const targetEntity = await findEntityById(request.db, targetEntityId);
         if (!targetEntity) {
-          throw new EntityDoesNotExist(
-            "target entity was not found",
-            targetEntityId
-          );
+          throw new EntityDoesNotExist("target entity was not found", targetEntityId);
         }
 
         const user = request.getUserOrFail();
@@ -1094,10 +994,7 @@ export default Router()
               continue;
             }
 
-            model.entities = await Entity.findEntitiesByIds(
-              request.db.connection,
-              model.entityIds
-            );
+            model.entities = await Entity.findEntitiesByIds(request.db.connection, model.entityIds);
             if (model.entities.length !== model.entityIds.length) {
               errors[entityData.id] = "entity not found for relation";
               continue;
@@ -1118,17 +1015,14 @@ export default Router()
             await model.afterSave(request);
             created++;
           } catch (e) {
-            errors[entityData.id] =
-              e instanceof Error ? e.message : "unknown error";
+            errors[entityData.id] = e instanceof Error ? e.message : "unknown error";
           }
         }
 
         return {
           result: created > 0,
           message: `Created ${created}/${entities.length} relations${
-            Object.keys(errors).length
-              ? `. Errors: ${JSON.stringify(errors)}`
-              : ""
+            Object.keys(errors).length ? `. Errors: ${JSON.stringify(errors)}` : ""
           }`,
         };
       }
@@ -1165,40 +1059,33 @@ export default Router()
    */
   .post(
     "/batch",
-    asyncRouteHandler<IResponseEntity[]>(
-      async (request: IRequest<any, { ids: string[] }>) => {
-        const { ids } = request.body;
+    asyncRouteHandler<IResponseEntity[]>(async (request: IRequest<any, { ids: string[] }>) => {
+      const { ids } = request.body;
 
-        if (!ids || !Array.isArray(ids) || ids.length === 0) {
-          throw new BadParams("ids array must be provided");
-        }
-
-        const entities = await Entity.findEntitiesByIds(
-          request.db.connection,
-          ids
-        );
-
-        if (!entities || entities.length === 0) {
-          return [];
-        }
-
-        const responses = await Promise.all(
-          entities.map(async (entityData) => {
-            const entity = getEntityClass({ ...entityData });
-            const response = new ResponseEntity(entity);
-            await response.prepare(request);
-            return response;
-          })
-        );
-
-        return responses;
+      if (!ids || !Array.isArray(ids) || ids.length === 0) {
+        throw new BadParams("ids array must be provided");
       }
-    )
+
+      const entities = await Entity.findEntitiesByIds(request.db.connection, ids);
+
+      if (!entities || entities.length === 0) {
+        return [];
+      }
+
+      const responses = await Promise.all(
+        entities.map(async (entityData) => {
+          const entity = getEntityClass({ ...entityData });
+          const response = new ResponseEntity(entity);
+          await response.prepare(request);
+          return response;
+        })
+      );
+
+      return responses;
+    })
   );
 
-const parseColumnValue = (
-  columnValue: string | IEntity | number | string | IUser
-) => {
+const parseColumnValue = (columnValue: string | IEntity | number | string | IUser) => {
   if (typeof columnValue === "string") {
     return columnValue;
   }
