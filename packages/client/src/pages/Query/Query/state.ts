@@ -11,7 +11,7 @@ const queryStateInitial: Query.INode = {
     // only show in development mode
     process.env.NODE_ENV === "development"
       ? {
-          entityClasses: [EntityEnums.Class.Concept],
+          entityClasses: [EntityEnums.Class.Action],
         }
       : {
           entityClasses: classesAll,

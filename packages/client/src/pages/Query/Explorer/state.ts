@@ -18,22 +18,22 @@ const exploreStateInitial: Explore.IExplore = {
           // },
           {
             id: "2",
-            name: "CLA",
+            name: "SYN",
             params: {
-              relationType: RelationEnums.Type.Classification,
+              relationType: RelationEnums.Type.Synonym,
             },
             editable: true,
             type: Explore.EExploreColumnType.ER,
           },
-          {
-            id: "3",
-            name: "SCL",
-            params: {
-              relationType: RelationEnums.Type.Superclass,
-            },
-            editable: true,
-            type: Explore.EExploreColumnType.ER,
-          },
+          // {
+          //   id: "3",
+          //   name: "SCL",
+          //   params: {
+          //     relationType: RelationEnums.Type.Superclass,
+          //   },
+          //   editable: true,
+          //   type: Explore.EExploreColumnType.ER,
+          // },
         ]
       : [],
   sort: undefined,
