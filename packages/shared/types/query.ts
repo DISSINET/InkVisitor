@@ -200,7 +200,19 @@ export namespace Query {
     "R:IMP": {},
     "I_R:IMP": {},
     "R:SOE": {
-      entityId: { allowedClasses: [] },
+      entityId: {
+        allowedClasses: [
+          EntityEnums.Class.Location,
+          EntityEnums.Class.Object,
+          EntityEnums.Class.Event,
+          EntityEnums.Class.Group,
+          EntityEnums.Class.Statement,
+          EntityEnums.Class.Value,
+          EntityEnums.Class.Resource,
+          EntityEnums.Class.Person,
+          EntityEnums.Class.Being,
+        ],
+      },
     },
     "I_R:SOE": {},
     "R:SUS": {},

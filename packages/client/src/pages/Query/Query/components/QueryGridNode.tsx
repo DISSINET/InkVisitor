@@ -10,7 +10,7 @@ import api from "api";
 import { Button, Checkbox } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 
-import { getSuperclassAllowedClasses } from "../../utils";
+import { getRelationConstrainedCategoryTypes } from "../../utils";
 import { INodeItem, QueryValidityProblem } from "../../types";
 import { QueryAction, QueryActionType } from "../state";
 import {
@@ -56,30 +56,26 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
 
   const { entityId: paramEntityId, entityClass: paramEntityClass } = nodeParams;
 
-  const isSuperclassEdge =
-    edgeType === Query.EdgeType["R:SCL"] || edgeType === Query.EdgeType["I_R:SCL"];
-
-  const superclassAllowedClasses = useMemo(() => {
-    if (!isSuperclassEdge) {
-      return null;
-    }
-    return getSuperclassAllowedClasses(rootNode.params.entityClasses);
-  }, [isSuperclassEdge, rootNode.params.entityClasses]);
+  const relationConstrainedCategoryTypes = useMemo(
+    () => getRelationConstrainedCategoryTypes(edgeType, rootNode.params.entityClasses),
+    [edgeType, rootNode.params.entityClasses]
+  );
 
   const entityIdCategoryTypes = useMemo(() => {
     if (!paramEntityId) {
       return classesAll;
     }
-    if (superclassAllowedClasses !== null) {
-      return superclassAllowedClasses;
+    if (relationConstrainedCategoryTypes !== null) {
+      return relationConstrainedCategoryTypes;
     }
     return paramEntityId.allowedClasses.length === 0
       ? classesAll
       : paramEntityId.allowedClasses;
-  }, [paramEntityId, superclassAllowedClasses]);
+  }, [paramEntityId, relationConstrainedCategoryTypes]);
 
-  const isSuperclassEntityPickerDisabled =
-    superclassAllowedClasses !== null && superclassAllowedClasses.length === 0;
+  const isRelationEntityPickerDisabled =
+    relationConstrainedCategoryTypes !== null &&
+    relationConstrainedCategoryTypes.length === 0;
 
   const entityId = node.params.entityId;
 
@@ -245,7 +241,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                     categoryTypes={entityIdCategoryTypes}
                     placeholder="entity"
                     disableCreate
-                    disabled={isSuperclassEntityPickerDisabled}
+                    disabled={isRelationEntityPickerDisabled}
                     initCategory={
                       node.params.entityClasses?.[0] ??
                       entityIdCategoryTypes[0] ??

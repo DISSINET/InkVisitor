@@ -1,5 +1,5 @@
-import { EntityEnums } from "@inkvisitor/shared/enums";
-import { Query } from "@inkvisitor/shared/types";
+import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
+import { Query, Relation } from "@inkvisitor/shared/types";
 
 export const SUPERCLASS_ENTITY_CLASSES = [
   EntityEnums.Class.Action,
@@ -12,6 +12,40 @@ export const getSuperclassAllowedClasses = (
 ): EntityEnums.Class[] => {
   const rootClasses = rootEntityClasses ?? [];
   return SUPERCLASS_ENTITY_CLASSES.filter((c) => rootClasses.includes(c));
+};
+
+/** Target classes allowed for a Superordinate Entity picker given root entity classes. */
+export const getSuperordinateEntityAllowedClasses = (
+  rootEntityClasses: EntityEnums.Class[] | undefined
+): EntityEnums.Class[] => {
+  const pattern =
+    Relation.RelationRules[RelationEnums.Type.SuperordinateEntity]
+      ?.allowedEntitiesPattern ?? [];
+  const rootClasses = rootEntityClasses ?? [];
+  const allowed = new Set<EntityEnums.Class>();
+
+  for (const rootClass of rootClasses) {
+    for (const [sourceClass, targetClass] of pattern) {
+      if (sourceClass === rootClass) {
+        allowed.add(targetClass);
+      }
+    }
+  }
+
+  return [...allowed];
+};
+
+export const getRelationConstrainedCategoryTypes = (
+  edgeType: Query.EdgeType | undefined,
+  rootEntityClasses: EntityEnums.Class[] | undefined
+): EntityEnums.Class[] | null => {
+  if (edgeType === Query.EdgeType["R:SCL"] || edgeType === Query.EdgeType["I_R:SCL"]) {
+    return getSuperclassAllowedClasses(rootEntityClasses);
+  }
+  if (edgeType === Query.EdgeType["R:SOE"] || edgeType === Query.EdgeType["I_R:SOE"]) {
+    return getSuperordinateEntityAllowedClasses(rootEntityClasses);
+  }
+  return null;
 };
 
 export const findValidEdgeTypesForSourceNode = (node: Query.INode): Query.EdgeType[] => {
