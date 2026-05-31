@@ -1,14 +1,12 @@
+import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { Query, Relation } from "@inkvisitor/shared/types";
 
-export const SUPERCLASS_ENTITY_CLASSES = [
-  EntityEnums.Class.Action,
-  EntityEnums.Class.Concept,
-];
+export const SUPERCLASS_ENTITY_CLASSES = [EntityEnums.Class.Action, EntityEnums.Class.Concept];
 
 /** Superclass relations only allow Action↔Action or Concept↔Concept pairs. */
 export const getSuperclassAllowedClasses = (
-  rootEntityClasses: EntityEnums.Class[] | undefined
+  rootEntityClasses: EntityEnums.Class[] | undefined,
 ): EntityEnums.Class[] => {
   const rootClasses = rootEntityClasses ?? [];
   return SUPERCLASS_ENTITY_CLASSES.filter((c) => rootClasses.includes(c));
@@ -16,11 +14,10 @@ export const getSuperclassAllowedClasses = (
 
 /** Target classes allowed for a Superordinate Entity picker given root entity classes. */
 export const getSuperordinateEntityAllowedClasses = (
-  rootEntityClasses: EntityEnums.Class[] | undefined
+  rootEntityClasses: EntityEnums.Class[] | undefined,
 ): EntityEnums.Class[] => {
   const pattern =
-    Relation.RelationRules[RelationEnums.Type.SuperordinateEntity]
-      ?.allowedEntitiesPattern ?? [];
+    Relation.RelationRules[RelationEnums.Type.SuperordinateEntity]?.allowedEntitiesPattern ?? [];
   const rootClasses = rootEntityClasses ?? [];
   const allowed = new Set<EntityEnums.Class>();
 
@@ -37,7 +34,7 @@ export const getSuperordinateEntityAllowedClasses = (
 
 export const getRelationConstrainedCategoryTypes = (
   edgeType: Query.EdgeType | undefined,
-  rootEntityClasses: EntityEnums.Class[] | undefined
+  rootEntityClasses: EntityEnums.Class[] | undefined,
 ): EntityEnums.Class[] | null => {
   if (edgeType === Query.EdgeType["R:SCL"] || edgeType === Query.EdgeType["I_R:SCL"]) {
     return getSuperclassAllowedClasses(rootEntityClasses);
@@ -46,6 +43,62 @@ export const getRelationConstrainedCategoryTypes = (
     return getSuperordinateEntityAllowedClasses(rootEntityClasses);
   }
   return null;
+};
+
+export interface IRelationSuggesterConfig {
+  showSuggester: boolean;
+  categoryTypes: EntityEnums.Class[];
+}
+
+/** Target entity classes allowed in a relation suggester for a given source entity. */
+export const getSuggesterCategoryTypes = (
+  rule: Relation.RelationRule,
+  sourceEntityClass: EntityEnums.Class,
+  allEntityClasses: EntityEnums.Class[] = classesAll,
+): EntityEnums.Class[] => {
+  const { allowedEntitiesPattern, cloudType, disabledEntities } = rule;
+
+  if (allowedEntitiesPattern.length > 0) {
+    if (cloudType) {
+      const sourceAllowed = allowedEntitiesPattern.some(
+        (pattern) => pattern[0] === sourceEntityClass,
+      );
+      return sourceAllowed ? [sourceEntityClass] : [];
+    }
+
+    const targets = allowedEntitiesPattern
+      .filter((pattern) => pattern[0] === sourceEntityClass)
+      .map((pattern) => pattern[1]);
+    return [...new Set(targets)];
+  }
+
+  if (disabledEntities?.includes(sourceEntityClass)) {
+    return [];
+  }
+
+  if (disabledEntities?.length) {
+    return allEntityClasses.filter((c) => !disabledEntities.includes(c));
+  }
+
+  return [...allEntityClasses];
+};
+
+export const getRelationSuggesterConfig = (
+  relationType: RelationEnums.Type,
+  sourceEntityClass: EntityEnums.Class,
+  allEntityClasses: EntityEnums.Class[] = classesAll,
+): IRelationSuggesterConfig => {
+  const rule = Relation.RelationRules[relationType];
+  if (!rule) {
+    return { showSuggester: false, categoryTypes: [] };
+  }
+
+  const categoryTypes = getSuggesterCategoryTypes(rule, sourceEntityClass, allEntityClasses);
+
+  return {
+    showSuggester: categoryTypes.length > 0,
+    categoryTypes,
+  };
 };
 
 export const findValidEdgeTypesForSourceNode = (node: Query.INode): Query.EdgeType[] => {

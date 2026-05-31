@@ -10,9 +10,10 @@ import api from "api";
 import { EntitySuggester, EntityTag, UserTag } from "components/advanced";
 import { deleteProp, deleteRef } from "constructors";
 
-import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import { UserTagSize } from "components/advanced/UserTag/utils";
 import { invalidateAllExplorerQueries } from "pages/Query/useQueryData";
+import { getRelationSuggesterConfig } from "pages/Query/utils";
 import { StyledCheckboxWrapper, StyledFocusedCircle } from "./ExplorerTableStyles";
 import { WIDTH_COLUMN_DEFAULT, WIDTH_COLUMN_EUC, WIDTH_COLUMN_FIRST } from "./types";
 
@@ -126,6 +127,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
       }
 
       if (column?.type === Explore.EExploreColumnType.ER) {
+        // TODO: check all relation types!!!
         const params = column.params as Explore.IExploreColumnParamsER;
         const relations = await api.relationsGet(sourceEntity.id, {
           relationType: params.relationType,
@@ -240,9 +242,17 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
           );
         }
         if (column.type === Explore.EExploreColumnType.ER) {
+          const params = column.params as Explore.IExploreColumnParamsER;
+          const { showSuggester, categoryTypes } = getRelationSuggesterConfig(
+            params.relationType,
+            rowEntity.class,
+          );
+          if (!showSuggester) {
+            return null;
+          }
           return (
             <EntitySuggester
-              categoryTypes={[EntityEnums.Class.Concept]}
+              categoryTypes={categoryTypes}
               onPicked={(newEntity) => {
                 handleEditColumn(rowEntity, column.id, newEntity);
               }}
