@@ -23,11 +23,8 @@ describe("explore-label-filter", () => {
     status: EntityEnums.Status.Approved,
   };
 
-  const rowLabelFilter = (
-    label: string,
-    useRegex?: boolean
-  ): Explore.IExploreRowLabelFilter => ({
-    type: Explore.EExploreFilterType.RowLabel,
+  const rowLabelFilter = (label: string, useRegex?: boolean): Explore.IExploreLabelFilter => ({
+    type: Explore.SearchOption.Label,
     label,
     useRegex,
   });
@@ -88,29 +85,17 @@ describe("explore-label-filter", () => {
 
   it("entityLabelMatchesFilter supports regex mode", () => {
     const labels = ["John Smith", "Fruit Basket", "Alt label"];
-    expect(
-      entityLabelMatchesFilter(labels, { label: "^John", useRegex: true })
-    ).toBeTruthy();
-    expect(
-      entityLabelMatchesFilter(labels, { label: "Basket$", useRegex: true })
-    ).toBeTruthy();
-    expect(
-      entityLabelMatchesFilter(labels, { label: "/^Alt/", useRegex: true })
-    ).toBeTruthy();
-    expect(
-      entityLabelMatchesFilter(labels, { label: "^Smith", useRegex: true })
-    ).toBeFalsy();
-    expect(
-      entityLabelMatchesFilter(labels, { label: "(unclosed", useRegex: true })
-    ).toBeFalsy();
+    expect(entityLabelMatchesFilter(labels, { label: "^John", useRegex: true })).toBeTruthy();
+    expect(entityLabelMatchesFilter(labels, { label: "Basket$", useRegex: true })).toBeTruthy();
+    expect(entityLabelMatchesFilter(labels, { label: "/^Alt/", useRegex: true })).toBeTruthy();
+    expect(entityLabelMatchesFilter(labels, { label: "^Smith", useRegex: true })).toBeFalsy();
+    expect(entityLabelMatchesFilter(labels, { label: "(unclosed", useRegex: true })).toBeFalsy();
   });
 
   it("entityMatchesRowLabelFilter matches against entity.labels attribute", () => {
     expect(entityMatchesRowLabelFilter(entity, rowLabelFilter("*fruit*"))).toBeTruthy();
     expect(entityMatchesRowLabelFilter(entity, rowLabelFilter("missing"))).toBeFalsy();
     expect(entityMatchesRowLabelFilter(entity, rowLabelFilter(""))).toBeTruthy();
-    expect(
-      entityMatchesRowLabelFilter(entity, rowLabelFilter("^Fruit", true))
-    ).toBeTruthy();
+    expect(entityMatchesRowLabelFilter(entity, rowLabelFilter("^Fruit", true))).toBeTruthy();
   });
 });

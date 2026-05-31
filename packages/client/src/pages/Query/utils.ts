@@ -1,9 +1,73 @@
+import { Query } from "@inkvisitor/shared/types";
+
+export const findValidEdgeTypesForSourceNode = (node: Query.INode): Query.EdgeType[] => {
+  const validEdges = Object.entries(Query.EdgeTypeNodeRules)
+    .filter(([, [ruleFrom, ruleTo]]) => {
+      const validType = ruleFrom.nodeType === node.type;
+      const validClass =
+        node.params?.entityClasses?.length && ruleFrom.params.entityClass?.length
+          ? node.params.entityClasses.some((cl) => ruleFrom.params.entityClass?.includes(cl))
+          : true;
+      return validType && validClass;
+    })
+    .map(([type]) => type as Query.EdgeType);
+  return validEdges;
+};
+
+export const findValidEdgeTypesForTargetNode = (node: Query.INode): Query.EdgeType[] => {
+  const validEdges = Object.entries(Query.EdgeTypeNodeRules)
+    .filter(([, [from, to]]) => {
+      // TODO
+      return (
+        node.type === to.nodeType && to.params.entityClass?.includes(node.params.entityClasses![0])
+      );
+    })
+    .map(([type]) => type as Query.EdgeType);
+  return validEdges;
+};
+
+export const isEdgeValid = (sourceNode: Query.INode, edge: Query.IEdge): Query.EdgeValidity => {
+  const targetNode = edge.node;
+  const edgeRule = Query.EdgeTypeNodeRules[edge.type];
+  const [ruleFrom, ruleTo] = edgeRule;
+
+  const sourceValid = isNodeValid(sourceNode, ruleFrom);
+  const targetValid = isNodeValid(targetNode, ruleTo);
+  const edgeValid = sourceValid && targetValid;
+
+  const problems: Query.EdgeProblemSource[] = [];
+  if (!sourceValid) {
+    problems.push(Query.EdgeProblemSource.Source);
+  }
+  if (!targetValid) {
+    problems.push(Query.EdgeProblemSource.Target);
+  }
+
+  return {
+    valid: edgeValid,
+    problems,
+  };
+};
+
+export const isNodeValid = (node: Query.INode, rule: Query.EdgeRule): boolean => {
+  if (node.type !== rule.nodeType) {
+    return false;
+  }
+  if (rule.params.entityClass === undefined || rule.params.entityClass.length === 0) {
+    return true;
+  }
+  if (node.params.entityClasses === undefined || node.params.entityClasses.length === 0) {
+    return false;
+  }
+
+  return node.params.entityClasses.every((nodeClass) => {
+    return rule.params.entityClass?.includes(nodeClass) || false;
+  });
+};
+
 // Lightweight helpers for windowed caching and signature-based IDs.
 // These utilities are used by both React Query write-through and the Explorer read path.
 // They are intentionally framework-agnostic and can be used with TanStack DB collections.
-
-import { IEntity, IResponseQueryEntity } from "@inkvisitor/shared/types";
-
 export interface WindowSlice {
   id: string;
   signature: string;

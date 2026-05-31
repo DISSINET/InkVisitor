@@ -1,4 +1,5 @@
 import { EntityEnums, RelationEnums } from "../enums";
+import { IRequestSearchRootValidity } from "./request-search";
 
 export namespace Query {
   export interface INode {
@@ -112,10 +113,7 @@ export namespace Query {
     params: { entityClass?: EntityEnums.Class[] };
   };
 
-  export const EdgeTypeTargetNodeParams: Record<
-    EdgeType,
-    Record<string, any>
-  > = {
+  export const EdgeTypeTargetNodeParams: Record<EdgeType, Record<string, any>> = {
     "HP:V": {
       entityId: { allowedClasses: [] },
     },
@@ -869,36 +867,6 @@ export namespace Query {
     "I_R:REL": "is related to: as Related",
   };
 
-  export const findValidEdgeTypesForSourceNode = (node: INode): EdgeType[] => {
-    const validEdges = Object.entries(EdgeTypeNodeRules)
-      .filter(([, [ruleFrom, ruleTo]]) => {
-        const validType = ruleFrom.nodeType === node.type;
-        const validClass =
-          node.params?.entityClasses?.length &&
-          ruleFrom.params.entityClass?.length
-            ? node.params.entityClasses.some((cl) =>
-                ruleFrom.params.entityClass?.includes(cl)
-              )
-            : true;
-        return validType && validClass;
-      })
-      .map(([type]) => type as EdgeType);
-    return validEdges;
-  };
-
-  export const findValidEdgeTypesForTargetNode = (node: INode): EdgeType[] => {
-    const validEdges = Object.entries(EdgeTypeNodeRules)
-      .filter(([, [from, to]]) => {
-        // TODO
-        return (
-          node.type === to.nodeType &&
-          to.params.entityClass?.includes(node.params.entityClasses![0])
-        );
-      })
-      .map(([type]) => type as EdgeType);
-    return validEdges;
-  };
-
   export enum EdgeProblemSource {
     Source = "source",
     Target = "target",
@@ -908,61 +876,13 @@ export namespace Query {
     valid: boolean;
     problems: EdgeProblemSource[];
   };
-
-  export const isEdgeValidity = (
-    sourceNode: INode,
-    edge: IEdge
-  ): EdgeValidity => {
-    const targetNode = edge.node;
-    const edgeRule = EdgeTypeNodeRules[edge.type];
-    const [ruleFrom, ruleTo] = edgeRule;
-
-    const sourceValid = isNodeValid(sourceNode, ruleFrom);
-    const targetValid = isNodeValid(targetNode, ruleTo);
-    const edgeValid = sourceValid && targetValid;
-
-    const problems: EdgeProblemSource[] = [];
-    if (!sourceValid) {
-      problems.push(EdgeProblemSource.Source);
-    }
-    if (!targetValid) {
-      problems.push(EdgeProblemSource.Target);
-    }
-
-    return {
-      valid: edgeValid,
-      problems,
-    };
-  };
-
-  export const isNodeValid = (node: INode, rule: EdgeRule): boolean => {
-    if (node.type !== rule.nodeType) {
-      return false;
-    }
-    if (
-      rule.params.entityClass === undefined ||
-      rule.params.entityClass.length === 0
-    ) {
-      return true;
-    }
-    if (
-      node.params.entityClasses === undefined ||
-      node.params.entityClasses.length === 0
-    ) {
-      return false;
-    }
-
-    return node.params.entityClasses.every((nodeClass) => {
-      return rule.params.entityClass?.includes(nodeClass) || false;
-    });
-  };
 }
 
 export namespace Explore {
   export interface IExplore {
     view: IView; // information about the presentation form
     columns: IExploreColumn[];
-    filters: IExploreColumnFilter[];
+    filters: IExploreSearchFilter[];
     sort: IExploreColumnSort | undefined;
     limit: number;
     offset: number;
@@ -976,32 +896,73 @@ export namespace Explore {
     mode: EViewMode;
   }
 
-  export enum EExploreFilterType {
-    RowLabel = "rowLabel",
-    RowIds = "rowIds",
+  export enum SearchOption {
+    Label = "label",
+    UUIDs = "uuids",
+    Status = "status",
+    Language = "language",
+    CreatedAt = "created at",
+    UpdatedAt = "updated at",
+    CreatedBy = "created by",
+    UpdatedBy = "updated by",
+    EditedBy = "edited by",
+    RootValidity = "root validity",
   }
 
-  /**
-   * Filters explorer rows when any string in the row entity's `labels` attribute
-   * matches this pattern.
-   * - Default: label search with * wildcards (same family as entity search).
-   * - useRegex: JavaScript RegExp (e.g. `^John` or `/Smith$/i`).
-   */
-  export interface IExploreRowLabelFilter {
-    type: EExploreFilterType.RowLabel;
+  export type IExploreSearchFilter =
+    | IExploreLabelFilter
+    | IExploreUuidsFilter
+    | IExploreStatusFilter
+    | IExploreLanguageFilter
+    | IExploreCreatedAtFilter
+    | IExploreUpdatedAtFilter
+    | IExploreCreatedByFilter
+    | IExploreUpdatedByFilter
+    | IExploreEditedByFilter
+    | IExploreRootValidityFilter;
+
+  export interface IExploreLabelFilter {
+    type: SearchOption.Label;
     label: string;
     useRegex?: boolean;
   }
 
-  /**
-   * Filters explorer rows to entities whose id is in this list (AND with query results).
-   */
-  export interface IExploreRowIdsFilter {
-    type: EExploreFilterType.RowIds;
+  export interface IExploreUuidsFilter {
+    type: SearchOption.UUIDs;
     ids: string[];
   }
-
-  export type IExploreColumnFilter = IExploreRowLabelFilter | IExploreRowIdsFilter;
+  interface IExploreStatusFilter {
+    type: SearchOption.Status;
+    status: EntityEnums.Status;
+  }
+  interface IExploreLanguageFilter {
+    type: SearchOption.Language;
+    language: EntityEnums.Language;
+  }
+  interface IExploreCreatedAtFilter {
+    type: SearchOption.CreatedAt;
+    createdAt: string;
+  }
+  interface IExploreUpdatedAtFilter {
+    type: SearchOption.UpdatedAt;
+    updatedAt: string;
+  }
+  interface IExploreCreatedByFilter {
+    type: SearchOption.CreatedBy;
+    createdBy: string;
+  }
+  interface IExploreUpdatedByFilter {
+    type: SearchOption.UpdatedBy;
+    updatedBy: string;
+  }
+  interface IExploreEditedByFilter {
+    type: SearchOption.EditedBy;
+    editedBy: string;
+  }
+  interface IExploreRootValidityFilter {
+    type: SearchOption.RootValidity;
+    rootValidity: IRequestSearchRootValidity;
+  }
 
   export type IExploreColumnSort = {
     columnId: string;
@@ -1174,7 +1135,6 @@ export namespace Explore {
     [K in EExploreColumnType]: IEExploreColumnTypeConfig[K]["params"];
   };
 
-  export type IExploreColumnParams<
-    T extends EExploreColumnType = EExploreColumnType
-  > = ExploreColumnParamsMap[T];
+  export type IExploreColumnParams<T extends EExploreColumnType = EExploreColumnType> =
+    ExploreColumnParamsMap[T];
 }

@@ -525,7 +525,7 @@ export class SearchQuery {
       this.whereUsedTemplate(req.usedTemplate);
     }
 
-    if (req.language) {
+    if (req.language !== undefined) {
       this.whereLanguage(req.language);
     }
 
