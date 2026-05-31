@@ -25,7 +25,7 @@ import { EntityDoesNotExist, ModelNotValidError } from "@inkvisitor/shared/types
 import request from "supertest";
 import "ts-jest";
 import { supertestConfig } from "..";
-import app from "../../Server";
+import app from "../../server";
 
 describe("Entities create", function () {
   afterAll(async () => {
