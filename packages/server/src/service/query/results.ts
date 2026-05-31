@@ -163,18 +163,25 @@ export default class Results<T extends { id: string }> {
         case Explore.EExploreColumnType.ER: {
           const params =
             column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.ER>;
-          // first - retrieve all entity ids that are in some relation with entity.id
-          const [entityIds] = await Relation.getLinkedForEntities(
+          // first - retrieve forward relations only (for asymmetrical types the
+          // entity must be the subject at entityIds[0])
+          const relations = await Relation.findForwardForEntity(
             db,
-            [entity.id],
+            entity.id,
             params.relationType
           );
 
-          // second - get repsective entities from db - omit entity.id
-          const entities = await Entity.findEntitiesByIds(
-            db,
-            entityIds.filter((e) => e !== entity.id)
-          );
+          // second - collect linked entity ids (omit entity.id) and load them
+          const entityIds = Array.from(
+            new Set(
+              relations.reduce<string[]>(
+                (acc, relation) => acc.concat(relation.entityIds),
+                []
+              )
+            )
+          ).filter((e) => e !== entity.id);
+
+          const entities = await Entity.findEntitiesByIds(db, entityIds);
           out[column.id] = entities;
           break;
         }

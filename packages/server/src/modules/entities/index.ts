@@ -635,7 +635,7 @@ export default Router()
    * @openapi
    * /entities/{entityId}/relations:
    *   get:
-   *     description: Retrieves relations linked to the entity, optionally filtered by relation type
+   *     description: Retrieves forward relations linked to the entity, optionally filtered by relation type. For asymmetrical relations only those where the entity is the subject (entityIds[0]) are returned.
    *     tags:
    *       - entities
    *     parameters:
@@ -678,11 +678,14 @@ export default Router()
 
         const relationType = request.query.filters?.relationType;
 
-        const relations = await Relation.findForEntities<RelationType.IRelation>(
-          request.db.connection,
-          [entityId],
-          relationType
-        );
+        // forward-only: for asymmetrical relations the entity must be the subject
+        // (entityIds[0]) - mirrors the Explorer ER column display in results.ts
+        const relations =
+          await Relation.findForwardForEntity<RelationType.IRelation>(
+            request.db.connection,
+            entityId,
+            relationType
+          );
 
         return relations;
       }
