@@ -1,4 +1,18 @@
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import { Query } from "@inkvisitor/shared/types";
+
+export const SUPERCLASS_ENTITY_CLASSES = [
+  EntityEnums.Class.Action,
+  EntityEnums.Class.Concept,
+];
+
+/** Superclass relations only allow Action↔Action or Concept↔Concept pairs. */
+export const getSuperclassAllowedClasses = (
+  rootEntityClasses: EntityEnums.Class[] | undefined
+): EntityEnums.Class[] => {
+  const rootClasses = rootEntityClasses ?? [];
+  return SUPERCLASS_ENTITY_CLASSES.filter((c) => rootClasses.includes(c));
+};
 
 export const findValidEdgeTypesForSourceNode = (node: Query.INode): Query.EdgeType[] => {
   const validEdges = Object.entries(Query.EdgeTypeNodeRules)

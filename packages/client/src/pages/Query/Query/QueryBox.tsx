@@ -172,6 +172,7 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
               {thisCellNode && (
                 <QueryGridNode
                   node={thisCellNode}
+                  rootNode={state}
                   isRoot={wi === 0}
                   dispatch={dispatch}
                   edge={associatedEdge}
