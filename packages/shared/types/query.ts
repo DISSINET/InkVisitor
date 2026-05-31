@@ -156,15 +156,21 @@ export namespace Query {
     "SP:T": {
       entityId: { allowedClasses: [EntityEnums.Class.Concept] },
     },
-    "I_SP:T": {},
+    "I_SP:T": {
+      entityId: { allowedClasses: [EntityEnums.Class.Concept] },
+    },
     "SP:V": {
       entityId: { allowedClasses: [] },
     },
-    "I_SP:V": {},
+    "I_SP:V": {
+      entityId: { allowedClasses: [] },
+    },
     SI: {},
     I_SI: {},
     SC: {},
-    I_SC: {},
+    I_SC: {
+      entityId: { allowedClasses: [EntityEnums.Class.Concept] },
+    },
     "R:": {
       entityId: { allowedClasses: [] },
     },
@@ -193,7 +199,21 @@ export namespace Query {
     "I_R:IDE": {},
     "R:IMP": {},
     "I_R:IMP": {},
-    "R:SOE": {},
+    "R:SOE": {
+      entityId: {
+        allowedClasses: [
+          EntityEnums.Class.Location,
+          EntityEnums.Class.Object,
+          EntityEnums.Class.Event,
+          EntityEnums.Class.Group,
+          EntityEnums.Class.Statement,
+          EntityEnums.Class.Value,
+          EntityEnums.Class.Resource,
+          EntityEnums.Class.Person,
+          EntityEnums.Class.Being,
+        ],
+      },
+    },
     "I_R:SOE": {},
     "R:SUS": {},
     "I_R:SUS": {},
@@ -466,8 +486,13 @@ export namespace Query {
       },
     ],
     "I_SP:T": [
+      // source: the entity characterised by the in-statement prop (any class)
       { nodeType: NodeType.E, params: { entityClass: [] } },
-      { nodeType: NodeType.E, params: { entityClass: [] } },
+      // target: the prop type concept
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Concept] },
+      },
     ],
     "SP:V": [
       {
@@ -477,7 +502,9 @@ export namespace Query {
       { nodeType: NodeType.E, params: { entityClass: [] } },
     ],
     "I_SP:V": [
+      // source: the entity characterised by the in-statement prop (any class)
       { nodeType: NodeType.E, params: { entityClass: [] } },
+      // target: the prop value (any class)
       { nodeType: NodeType.E, params: { entityClass: [] } },
     ],
     SI: [
@@ -496,11 +523,13 @@ export namespace Query {
       },
     ],
     I_SC: [
+      // source: the entity characterised by the in-statement classification
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+      // target: the classification concept
       {
         nodeType: NodeType.E,
         params: { entityClass: [EntityEnums.Class.Concept] },
       },
-      { nodeType: NodeType.E, params: { entityClass: [] } },
     ],
     "R:": [
       { nodeType: NodeType.E, params: { entityClass: [] } },
