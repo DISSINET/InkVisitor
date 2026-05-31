@@ -633,6 +633,63 @@ export default Router()
   )
   /**
    * @openapi
+   * /entities/{entityId}/relations:
+   *   get:
+   *     description: Retrieves relations linked to the entity, optionally filtered by relation type
+   *     tags:
+   *       - entities
+   *     parameters:
+   *       - in: path
+   *         name: entityId
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: ID of the entity entry
+   *       - in: query
+   *         name: filters[relationType]
+   *         schema:
+   *           type: string
+   *         description: type of relations to return
+   *     responses:
+   *       200:
+   *         description: Returns array with relation entries
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 $ref: "#/components/schemas/RelationIModel"
+   */
+  .get(
+    "/:entityId/relations",
+    asyncRouteHandler<RelationType.IRelation[]>(
+      async (
+        request: IRequest<
+          { entityId: string },
+          unknown,
+          { filters?: { relationType?: RelationEnums.Type } }
+        >
+      ) => {
+        const entityId = request.params.entityId;
+
+        if (!entityId) {
+          throw new BadParams("entity id has to be set");
+        }
+
+        const relationType = request.query.filters?.relationType;
+
+        const relations = await Relation.findForEntities<RelationType.IRelation>(
+          request.db.connection,
+          [entityId],
+          relationType
+        );
+
+        return relations;
+      }
+    )
+  )
+  /**
+   * @openapi
    * /entities/{entityId}/tooltip:
    *   get:
    *     description: Returns tooltip detail for entity entry
