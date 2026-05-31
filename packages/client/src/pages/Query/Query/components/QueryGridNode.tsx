@@ -10,6 +10,7 @@ import api from "api";
 import { Button, Checkbox } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 
+import { getSuperclassAllowedClasses } from "../../utils";
 import { INodeItem, QueryValidityProblem } from "../../types";
 import { QueryAction, QueryActionType } from "../state";
 import {
@@ -24,6 +25,7 @@ import { useTheme } from "styled-components";
 interface QueryGridNodeProps {
   node: INodeItem;
   edge: Query.IEdge | undefined;
+  rootNode: Query.INode;
   dispatch: React.Dispatch<QueryAction>;
   problems: QueryValidityProblem[];
   isRoot: boolean;
@@ -33,6 +35,7 @@ interface QueryGridNodeProps {
 export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
   node,
   edge,
+  rootNode,
   dispatch,
   problems,
   isRoot = false,
@@ -52,6 +55,31 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
   const nodeParams = edgeType ? Query.EdgeTypeTargetNodeParams[edgeType] : {};
 
   const { entityId: paramEntityId, entityClass: paramEntityClass } = nodeParams;
+
+  const isSuperclassEdge =
+    edgeType === Query.EdgeType["R:SCL"] || edgeType === Query.EdgeType["I_R:SCL"];
+
+  const superclassAllowedClasses = useMemo(() => {
+    if (!isSuperclassEdge) {
+      return null;
+    }
+    return getSuperclassAllowedClasses(rootNode.params.entityClasses);
+  }, [isSuperclassEdge, rootNode.params.entityClasses]);
+
+  const entityIdCategoryTypes = useMemo(() => {
+    if (!paramEntityId) {
+      return classesAll;
+    }
+    if (superclassAllowedClasses !== null) {
+      return superclassAllowedClasses;
+    }
+    return paramEntityId.allowedClasses.length === 0
+      ? classesAll
+      : paramEntityId.allowedClasses;
+  }, [paramEntityId, superclassAllowedClasses]);
+
+  const isSuperclassEntityPickerDisabled =
+    superclassAllowedClasses !== null && superclassAllowedClasses.length === 0;
 
   const entityId = node.params.entityId;
 
@@ -214,16 +242,13 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                 ) : (
                   <EntitySuggester
                     inputWidth={100}
-                    categoryTypes={
-                      paramEntityId.allowedClasses.length === 0
-                        ? classesAll
-                        : paramEntityId.allowedClasses
-                    }
+                    categoryTypes={entityIdCategoryTypes}
                     placeholder="entity"
                     disableCreate
+                    disabled={isSuperclassEntityPickerDisabled}
                     initCategory={
                       node.params.entityClasses?.[0] ??
-                      paramEntityId.allowedClasses[0] ??
+                      entityIdCategoryTypes[0] ??
                       EntityEnums.Class.Concept
                     }
                     onSelected={(entityId: string) => {

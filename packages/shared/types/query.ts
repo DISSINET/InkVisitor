@@ -175,7 +175,9 @@ export namespace Query {
       entityId: { allowedClasses: [] },
     },
     "R:SCL": {
-      entityId: { allowedClasses: [EntityEnums.Class.Concept] },
+      entityId: {
+        allowedClasses: [EntityEnums.Class.Action, EntityEnums.Class.Concept],
+      },
     },
     "I_R:SCL": {},
     "R:SYN": {},
