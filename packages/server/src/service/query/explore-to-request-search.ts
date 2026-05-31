@@ -1,6 +1,8 @@
+import { SearchQuery } from "@models/entity/response-search";
 import { RequestSearch } from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { IRequestSearch } from "@inkvisitor/shared/types/request-search";
+import { Connection } from "rethinkdb-ts";
 
 /**
  * Translates Explorer row filters into a RequestSearch for reuse by the existing
@@ -59,4 +61,30 @@ export const exploreFiltersToRequestSearch = (
   }
 
   return hasAny ? new RequestSearch(data) : null;
+};
+
+/**
+ * Narrows candidate entity ids by the Explorer filters that map onto the existing
+ * search backend (status, language, created/updated dates, created/updated/edited by).
+ * Returns the input ids unchanged when no such filter is present.
+ * Order of the input ids is preserved.
+ */
+export const applyRequestSearchFilters = async (
+  db: Connection,
+  ids: string[],
+  filters: Explore.IExploreSearchFilter[]
+): Promise<string[]> => {
+  const req = exploreFiltersToRequestSearch(filters);
+  if (!req || !ids.length) {
+    return ids;
+  }
+
+  req.entityIds = [...ids];
+
+  const query = new SearchQuery(db);
+  await query.fromRequest(req);
+  const entities = await query.do();
+
+  const matched = new Set(entities.map((e) => e.id));
+  return ids.filter((id) => matched.has(id));
 };
