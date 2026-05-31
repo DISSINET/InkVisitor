@@ -1,5 +1,6 @@
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { Explore } from "@inkvisitor/shared/types/query";
+import { IRequestSearchRootValidity } from "@inkvisitor/shared/types/request-search";
 
 const exploreStateInitial: Explore.IExplore = {
   view: { mode: Explore.EViewMode.Table },
@@ -63,7 +64,19 @@ enum ExploreActionType {
   setUpdatedByFilter,
   setEditedByFilter,
   setRootValidityFilter,
+  clearFloatingSearchFilters,
 }
+
+const floatingSearchFilterTypes = new Set<Explore.SearchOption>([
+  Explore.SearchOption.Status,
+  Explore.SearchOption.Language,
+  Explore.SearchOption.CreatedAt,
+  Explore.SearchOption.UpdatedAt,
+  Explore.SearchOption.CreatedBy,
+  Explore.SearchOption.UpdatedBy,
+  Explore.SearchOption.EditedBy,
+  Explore.SearchOption.RootValidity,
+]);
 
 const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Explore.IExplore => {
   switch (action.type) {
@@ -196,47 +209,111 @@ const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Exp
     }
 
     case ExploreActionType.setCreatedAtFilter: {
-      const { createdAt } = action.payload as { createdAt: Date };
-      const otherFilters = state.filters.filter((f) => f.type !== Explore.SearchOption.CreatedAt);
+      const { createdDate } = action.payload as { createdDate?: Date };
+      const otherFilters = state.filters.filter(
+        (f) => f.type !== Explore.SearchOption.CreatedAt,
+      );
       return {
         ...state,
-        filters: [
-          ...otherFilters,
-          { type: Explore.SearchOption.CreatedAt, createdAt: createdAt.toISOString() },
-        ],
+        filters: createdDate
+          ? [
+              ...otherFilters,
+              {
+                type: Explore.SearchOption.CreatedAt,
+                createdAt: createdDate.toISOString(),
+              },
+            ]
+          : otherFilters,
         offset: 0,
       };
     }
 
     case ExploreActionType.setUpdatedAtFilter: {
-      const { updatedAt } = action.payload as { updatedAt: Date };
-      const otherFilters = state.filters.filter((f) => f.type !== Explore.SearchOption.UpdatedAt);
+      const { updatedDate } = action.payload as { updatedDate?: Date };
+      const otherFilters = state.filters.filter(
+        (f) => f.type !== Explore.SearchOption.UpdatedAt,
+      );
       return {
         ...state,
-        filters: [
-          ...otherFilters,
-          { type: Explore.SearchOption.UpdatedAt, updatedAt: updatedAt.toISOString() },
-        ],
+        filters: updatedDate
+          ? [
+              ...otherFilters,
+              {
+                type: Explore.SearchOption.UpdatedAt,
+                updatedAt: updatedDate.toISOString(),
+              },
+            ]
+          : otherFilters,
         offset: 0,
       };
     }
 
     case ExploreActionType.setCreatedByFilter: {
-      const { createdBy } = action.payload as { createdBy: string };
+      const { createdBy } = action.payload as { createdBy?: string };
       const otherFilters = state.filters.filter((f) => f.type !== Explore.SearchOption.CreatedBy);
       return {
         ...state,
-        filters: [...otherFilters, { type: Explore.SearchOption.CreatedBy, createdBy }],
+        filters: createdBy
+          ? [...otherFilters, { type: Explore.SearchOption.CreatedBy, createdBy }]
+          : otherFilters,
         offset: 0,
       };
     }
 
     case ExploreActionType.setUpdatedByFilter: {
-      const { updatedBy } = action.payload as { updatedBy: string };
+      const { updatedBy } = action.payload as { updatedBy?: string };
       const otherFilters = state.filters.filter((f) => f.type !== Explore.SearchOption.UpdatedBy);
       return {
         ...state,
-        filters: [...otherFilters, { type: Explore.SearchOption.UpdatedBy, updatedBy }],
+        filters: updatedBy
+          ? [...otherFilters, { type: Explore.SearchOption.UpdatedBy, updatedBy }]
+          : otherFilters,
+        offset: 0,
+      };
+    }
+
+    case ExploreActionType.setEditedByFilter: {
+      const { editedBy } = action.payload as { editedBy?: string };
+      const otherFilters = state.filters.filter(
+        (f) => f.type !== Explore.SearchOption.EditedBy,
+      );
+      return {
+        ...state,
+        filters: editedBy
+          ? [...otherFilters, { type: Explore.SearchOption.EditedBy, editedBy }]
+          : otherFilters,
+        offset: 0,
+      };
+    }
+
+    case ExploreActionType.setRootValidityFilter: {
+      const { rootValidity } = action.payload as {
+        rootValidity?: IRequestSearchRootValidity;
+      };
+      const otherFilters = state.filters.filter(
+        (f) => f.type !== Explore.SearchOption.RootValidity,
+      );
+      return {
+        ...state,
+        filters:
+          rootValidity && rootValidity !== IRequestSearchRootValidity.Any
+            ? [
+                ...otherFilters,
+                { type: Explore.SearchOption.RootValidity, rootValidity },
+              ]
+            : otherFilters,
+        offset: 0,
+      };
+    }
+
+    case ExploreActionType.clearFloatingSearchFilters: {
+      const filters = state.filters.filter((f) => !floatingSearchFilterTypes.has(f.type));
+      if (filters.length === state.filters.length) {
+        return state;
+      }
+      return {
+        ...state,
+        filters,
         offset: 0,
       };
     }

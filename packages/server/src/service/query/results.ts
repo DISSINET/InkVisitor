@@ -8,6 +8,11 @@ import { Explore } from "@inkvisitor/shared/types/query";
 import { Connection } from "rethinkdb-ts";
 import { filterEntityIdsByRowLabelFilter, getRowLabelFilter } from "./explore-label-filter";
 import { applyRowIdsFilter, getRowIdsFilter } from "./explore-ids-filter";
+import { applyRequestSearchFilters } from "./explore-to-request-search";
+import {
+  applyRootValidityFilter,
+  getRootValidityFilter,
+} from "./explore-root-validity-filter";
 
 export default class Results<T extends { id: string }> {
   items: string[] | null = null;
@@ -52,6 +57,7 @@ export default class Results<T extends { id: string }> {
       return;
     }
 
+    // 1. UUIDs (in-memory)
     const rowIdsFilter = getRowIdsFilter(exploreData.filters);
     if (rowIdsFilter?.ids.length) {
       this.items = applyRowIdsFilter(this.items, rowIdsFilter);
@@ -60,16 +66,40 @@ export default class Results<T extends { id: string }> {
       }
     }
 
+    // 2. Label (db regex / wildcard)
     const rowLabelFilter = getRowLabelFilter(exploreData.filters);
-    if (!rowLabelFilter?.label?.trim()) {
+    if (rowLabelFilter?.label?.trim()) {
+      this.items = await filterEntityIdsByRowLabelFilter(
+        db,
+        this.items,
+        rowLabelFilter
+      );
+      if (!this.items.length) {
+        return;
+      }
+    }
+
+    // 3. Search-box filters (status, language, dates, created/updated/edited by)
+    //    reused via the existing SearchQuery backend.
+    this.items = await applyRequestSearchFilters(
+      db,
+      this.items,
+      exploreData.filters
+    );
+    if (!this.items.length) {
       return;
     }
 
-    this.items = await filterEntityIdsByRowLabelFilter(
-      db,
-      this.items,
-      rowLabelFilter
-    );
+    // 4. Root validity (most expensive: per-entity relation queries) - run last
+    //    on the smallest candidate set.
+    const rootValidityFilter = getRootValidityFilter(exploreData.filters);
+    if (rootValidityFilter) {
+      this.items = await applyRootValidityFilter(
+        db,
+        this.items,
+        rootValidityFilter
+      );
+    }
   }
 
   sort(sortData: Explore.IExploreColumnSort | undefined): void {
