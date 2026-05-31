@@ -2,6 +2,7 @@ import { EntityEnums } from "@inkvisitor/shared/enums";
 import { Query } from "@inkvisitor/shared/types";
 import { v4 as uuidv4 } from "uuid";
 import { getAllEdges, getAllNodes } from "./utils";
+import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 
 const queryStateInitial: Query.INode = {
   type: Query.NodeType.E,
@@ -10,10 +11,10 @@ const queryStateInitial: Query.INode = {
     // only show in development mode
     process.env.NODE_ENV === "development"
       ? {
-          entityClasses: [EntityEnums.Class.Person],
+          entityClasses: classesAll,
         }
       : {
-          entityClasses: [EntityEnums.Class.Concept],
+          entityClasses: classesAll,
         },
   operator: Query.NodeOperator.And,
   edges:
@@ -95,21 +96,17 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
       const edgeToRemove = action.payload.edgeId;
       const updatedStateRemove = { ...state };
 
-      const edge = getAllEdges(updatedStateRemove).find(
-        (edge) => edge.id === edgeToRemove
-      );
+      const edge = getAllEdges(updatedStateRemove).find((edge) => edge.id === edgeToRemove);
       if (!edge) {
         return updatedStateRemove;
       }
       const parentNode2 = getAllNodes(updatedStateRemove).find((node) =>
-        node.edges.some((e) => e.id === edgeToRemove)
+        node.edges.some((e) => e.id === edgeToRemove),
       );
       if (!parentNode2) {
         return updatedStateRemove;
       }
-      parentNode2.edges = parentNode2.edges.filter(
-        (e) => e.id !== edgeToRemove
-      );
+      parentNode2.edges = parentNode2.edges.filter((e) => e.id !== edgeToRemove);
 
       return updatedStateRemove;
 
@@ -119,9 +116,7 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
 
       const updatedStateUpdate = { ...state };
 
-      const edgeToUpdate = getAllEdges(updatedStateUpdate).find(
-        (edge) => edge.id === edgeId
-      );
+      const edgeToUpdate = getAllEdges(updatedStateUpdate).find((edge) => edge.id === edgeId);
       if (!edgeToUpdate) {
         return updatedStateUpdate;
       }
@@ -135,7 +130,7 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
       const updatedStateLogic = { ...state };
 
       const edgeToUpdateLogic = getAllEdges(updatedStateLogic).find(
-        (edge) => edge.id === edgeIdLogic
+        (edge) => edge.id === edgeIdLogic,
       );
       if (!edgeToUpdateLogic) {
         return updatedStateLogic;
@@ -144,32 +139,16 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
       return updatedStateLogic;
 
     case QueryActionType.updateNodeType:
-      return updateNodeType(
-        state,
-        action.payload.nodeId,
-        action.payload.newType
-      );
+      return updateNodeType(state, action.payload.nodeId, action.payload.newType);
 
     case QueryActionType.updateNodeClass:
-      return updateNodeClass(
-        state,
-        action.payload.nodeId,
-        action.payload.newEntityClasses
-      );
+      return updateNodeClass(state, action.payload.nodeId, action.payload.newEntityClasses);
 
     case QueryActionType.updateNodeEntityId:
-      return updateNodeEntityId(
-        state,
-        action.payload.nodeId,
-        action.payload.newEntityId
-      );
+      return updateNodeEntityId(state, action.payload.nodeId, action.payload.newEntityId);
 
     case QueryActionType.updateNodeOperator:
-      return updateNodeOperator(
-        state,
-        action.payload.nodeId,
-        action.payload.newOperator
-      );
+      return updateNodeOperator(state, action.payload.nodeId, action.payload.newOperator);
 
     default:
       return state;
@@ -179,13 +158,11 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
 const updateNodeClass = (
   state: Query.INode,
   nodeId: string,
-  newEntityClasses: EntityEnums.Class[]
+  newEntityClasses: EntityEnums.Class[],
 ): Query.INode => {
   const updatedState = { ...state };
 
-  const nodeToUpdate = getAllNodes(updatedState).find(
-    (node) => node.id === nodeId
-  );
+  const nodeToUpdate = getAllNodes(updatedState).find((node) => node.id === nodeId);
   if (!nodeToUpdate) {
     return updatedState;
   }
@@ -197,13 +174,11 @@ const updateNodeClass = (
 const updateNodeEntityId = (
   state: Query.INode,
   nodeId: string,
-  newEntityId: string | undefined
+  newEntityId: string | undefined,
 ): Query.INode => {
   const updatedState = { ...state };
 
-  const nodeToUpdate = getAllNodes(updatedState).find(
-    (node) => node.id === nodeId
-  );
+  const nodeToUpdate = getAllNodes(updatedState).find((node) => node.id === nodeId);
   if (!nodeToUpdate) {
     return updatedState;
   }
@@ -220,7 +195,7 @@ const updateNodeEntityId = (
 const updateNodeOperator = (
   state: Query.INode,
   nodeId: string,
-  newOperator: Query.NodeOperator
+  newOperator: Query.NodeOperator,
 ): Query.INode => {
   const updatedState = { ...state };
 
@@ -236,13 +211,11 @@ const updateNodeOperator = (
 const updateNodeType = (
   state: Query.INode,
   nodeId: string,
-  newType: Query.NodeType
+  newType: Query.NodeType,
 ): Query.INode => {
   const updatedState = { ...state };
 
-  const nodeToUpdate = getAllNodes(updatedState).find(
-    (node) => node.id === nodeId
-  );
+  const nodeToUpdate = getAllNodes(updatedState).find((node) => node.id === nodeId);
   if (!nodeToUpdate) {
     return updatedState;
   }
@@ -295,10 +268,4 @@ const queryDiff = (state1: Query.INode, state2: Query.INode) => {
   return false;
 };
 
-export {
-  QueryAction,
-  QueryActionType,
-  queryDiff,
-  queryReducer,
-  queryStateInitial,
-};
+export { QueryAction, QueryActionType, queryDiff, queryReducer, queryStateInitial };

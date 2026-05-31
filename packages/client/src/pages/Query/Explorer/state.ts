@@ -1,4 +1,4 @@
-import { EntityEnums } from "@inkvisitor/shared/enums";
+import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { Explore } from "@inkvisitor/shared/types/query";
 
 const exploreStateInitial: Explore.IExplore = {
@@ -7,28 +7,32 @@ const exploreStateInitial: Explore.IExplore = {
     // only show in development mode
     process.env.NODE_ENV === "development"
       ? [
-          {
-            id: "1",
-            name: "Sex",
-            type: Explore.EExploreColumnType.EPV,
-            editable: true,
-            params: {
-              propertyType: "4ce5e669-d421-40c9-b1ce-f476fdd171fe",
-            },
-          },
+          // {
+          //   id: "1",
+          //   name: "Sex",
+          //   type: Explore.EExploreColumnType.EPV,
+          //   editable: true,
+          //   params: {
+          //     propertyType: "4ce5e669-d421-40c9-b1ce-f476fdd171fe",
+          //   },
+          // },
           {
             id: "2",
-            name: "Creator",
-            type: Explore.EExploreColumnType.EUC,
-            editable: false,
-            params: {},
+            name: "CLA",
+            params: {
+              relationType: RelationEnums.Type.Classification,
+            },
+            editable: true,
+            type: Explore.EExploreColumnType.ER,
           },
           {
             id: "3",
-            name: "Types",
-            type: Explore.EExploreColumnType.EPT,
+            name: "SCL",
+            params: {
+              relationType: RelationEnums.Type.Superclass,
+            },
             editable: true,
-            params: {},
+            type: Explore.EExploreColumnType.ER,
           },
         ]
       : [],
