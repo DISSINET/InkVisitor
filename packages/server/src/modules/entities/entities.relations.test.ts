@@ -54,7 +54,7 @@ describe("Entities relations get method", function () {
         });
     });
 
-    it("should NOT return the asymmetrical relation for the target (inverse) entity", async () => {
+    it("should NOT return the asymmetrical relation for the target (inverse) entity by default", async () => {
       await request(app)
         .get(`${apiPath}/entities/${parentConcept.id}/relations`)
         .query(`filters[relationType]=${RelationEnums.Type.Superclass}`)
@@ -64,6 +64,20 @@ describe("Entities relations get method", function () {
         .expect((res) => {
           expect(Array.isArray(res.body)).toEqual(true);
           expect(res.body.length).toEqual(0);
+        });
+    });
+
+    it("should return the inverse asymmetrical relation when forward=false", async () => {
+      await request(app)
+        .get(`${apiPath}/entities/${parentConcept.id}/relations`)
+        .query(`filters[relationType]=${RelationEnums.Type.Superclass}&forward=false`)
+        .set("authorization", "Bearer " + supertestConfig.token)
+        .expect("Content-Type", /json/)
+        .expect(200)
+        .expect((res) => {
+          expect(Array.isArray(res.body)).toEqual(true);
+          expect(res.body.length).toEqual(1);
+          expect(res.body[0].id).toEqual(superclassRelation.id);
         });
     });
 

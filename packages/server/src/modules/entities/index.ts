@@ -635,7 +635,7 @@ export default Router()
    * @openapi
    * /entities/{entityId}/relations:
    *   get:
-   *     description: Retrieves forward relations linked to the entity, optionally filtered by relation type. For asymmetrical relations only those where the entity is the subject (entityIds[0]) are returned.
+   *     description: Retrieves relations linked to the entity, optionally filtered by relation type. By default (forward=true) only forward relations are returned - for asymmetrical relations those where the entity is the subject (entityIds[0]). Pass forward=false to return relations in both directions.
    *     tags:
    *       - entities
    *     parameters:
@@ -650,6 +650,11 @@ export default Router()
    *         schema:
    *           type: string
    *         description: type of relations to return
+   *       - in: query
+   *         name: forward
+   *         schema:
+   *           type: boolean
+   *         description: when true (default) returns forward relations only; when false returns both directions
    *     responses:
    *       200:
    *         description: Returns array with relation entries
@@ -667,7 +672,7 @@ export default Router()
         request: IRequest<
           { entityId: string },
           unknown,
-          { filters?: { relationType?: RelationEnums.Type } }
+          { filters?: { relationType?: RelationEnums.Type }; forward?: string }
         >
       ) => {
         const entityId = request.params.entityId;
@@ -677,15 +682,22 @@ export default Router()
         }
 
         const relationType = request.query.filters?.relationType;
+        // default true - only "false" opts into bidirectional results
+        const forward = request.query.forward !== "false";
 
-        // forward-only: for asymmetrical relations the entity must be the subject
-        // (entityIds[0]) - mirrors the Explorer ER column display in results.ts
-        const relations =
-          await Relation.findForwardForEntity<RelationType.IRelation>(
-            request.db.connection,
-            entityId,
-            relationType
-          );
+        // forward-only keeps, for asymmetrical relations, those where the entity
+        // is the subject (entityIds[0]) - mirrors the Explorer ER column display
+        const relations = forward
+          ? await Relation.findForwardForEntity<RelationType.IRelation>(
+              request.db.connection,
+              entityId,
+              relationType
+            )
+          : await Relation.findForEntities<RelationType.IRelation>(
+              request.db.connection,
+              [entityId],
+              relationType
+            );
 
         return relations;
       }
