@@ -42,3 +42,16 @@ describe("query builder offers the inverse in-statement edges", () => {
     }
   });
 });
+
+describe("query builder offers the superordinate (R:SOE) edge", () => {
+  it("a Location source node can select R:SOE", () => {
+    const selectable = selectableEdgeTypes(
+      sourceNode([EntityEnums.Class.Location])
+    );
+    expect(selectable).toContain(Query.EdgeType["R:SOE"]);
+  });
+
+  it("R:SOE exposes a target entity param so 'Lombardy' can be picked by entity", () => {
+    expect(Query.EdgeTypeTargetNodeParams[Query.EdgeType["R:SOE"]].entityId).toBeTruthy();
+  });
+});

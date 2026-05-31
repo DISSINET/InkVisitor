@@ -199,7 +199,9 @@ export namespace Query {
     "I_R:IDE": {},
     "R:IMP": {},
     "I_R:IMP": {},
-    "R:SOE": {},
+    "R:SOE": {
+      entityId: { allowedClasses: [] },
+    },
     "I_R:SOE": {},
     "R:SUS": {},
     "I_R:SUS": {},

@@ -151,6 +151,45 @@ export class EdgeCHasSuperclass extends SearchEdge {
   }
 }
 
+export class EdgeHasSuperordinate extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["R:SOE"];
+  }
+
+  run(q: RStream): RStream {
+    const soeEntityId = this.node.params.entityId;
+    return q.concatMap(function (entity: RDatum<IEntity>) {
+      return (
+        r
+          .table(Relation.table)
+          .getAll(entity("id"), { index: DbEnums.Indexes.RelationsEntityIds })
+          .filter({
+            type: RelationEnums.Type.SuperordinateEntity,
+          })
+          // the entity is the subordinate side (entityIds[0]); its superordinate
+          // is entityIds[1] (mirrors SuperordinateEntity.getSuperordinate...
+          // ForwardConnections, which recurses on entityIds[1])
+          .filter(function (relation: RDatum<RelationTypes.IRelation>) {
+            return relation("entityIds").nth(0).eq(entity("id"));
+          })
+          // check if the target entity is the desired superordinate
+          .filter(function (relation: RDatum<RelationTypes.IRelation>) {
+            if (soeEntityId) {
+              return relation("entityIds").nth(1).eq(soeEntityId);
+            }
+            return true;
+          })
+          // emit the iterated entity itself (the subordinate), keeping the
+          // subset invariant positive matching and negation rely on
+          .map(function (relation) {
+            return relation("entityIds").nth(0);
+          })
+      );
+    });
+  }
+}
+
 export class EdgeHasPropType extends SearchEdge {
   constructor(data: Partial<Query.IEdge>) {
     super(data);
@@ -493,6 +532,8 @@ export function getEdgeInstance(data: Partial<Query.IEdge>): SearchEdge {
       return new EdgeHasClassification(data);
     case Query.EdgeType["R:SCL"]:
       return new EdgeCHasSuperclass(data);
+    case Query.EdgeType["R:SOE"]:
+      return new EdgeHasSuperordinate(data);
     case Query.EdgeType["SUT:"]:
       return new EdgeSUnderT(data);
     default:
