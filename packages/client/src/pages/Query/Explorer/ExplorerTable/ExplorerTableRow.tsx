@@ -83,7 +83,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
   });
 
   const handleUnlinkEntity = React.useCallback(
-    (sourceEntity: IEntity, entityToRemove: IEntity, columnId: string) => {
+    async (sourceEntity: IEntity, entityToRemove: IEntity, columnId: string) => {
       const column = columns.find((column) => column.id === columnId);
 
       if (column?.type === Explore.EExploreColumnType.EPT) {
@@ -127,9 +127,16 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
 
       if (column?.type === Explore.EExploreColumnType.ER) {
         const params = column.params as Explore.IExploreColumnParamsER;
-        // TODO: get relationId!
-        // api.relationGet(params.relationType, sourceEntity.id);
-        // relationDeleteMutation.mutate(entityToRemove.id);
+        const relations = await api.relationsGet(sourceEntity.id, {
+          relationType: params.relationType,
+        });
+        const relation = relations.data.find((relation) =>
+          relation.entityIds.includes(entityToRemove.id),
+        );
+        const relationId = relation?.id;
+        if (relationId) {
+          relationDeleteMutation.mutate(relationId);
+        }
       }
     },
     [columns, updateEntityMutation],

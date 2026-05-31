@@ -1359,7 +1359,7 @@ class Api {
 
   async relationsGet(
     entityId: string,
-    filters: { relationType: RelationEnums.Type },
+    filters: { relationType?: RelationEnums.Type },
     options?: IApiOptions,
   ): Promise<AxiosResponse<Relation.IRelation[]>> {
     try {
