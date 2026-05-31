@@ -1363,7 +1363,7 @@ class Api {
     options?: IApiOptions,
   ): Promise<AxiosResponse<Relation.IRelation[]>> {
     try {
-      const response = await this.connection.get(`entity/${entityId}/relations`, {
+      const response = await this.connection.get(`entities/${entityId}/relations`, {
         ...options,
         params: {
           filters,
