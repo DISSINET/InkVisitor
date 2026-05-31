@@ -9,7 +9,7 @@ import { prepareEntity } from "@models/entity/entity.test";
 import request, { Response } from "supertest";
 import "ts-jest";
 import { supertestConfig } from "..";
-import app from "../../Server";
+import app from "../../server";
 import { prepareStatement } from "@models/statement/statement.test";
 import { pool } from "@middlewares/db";
 

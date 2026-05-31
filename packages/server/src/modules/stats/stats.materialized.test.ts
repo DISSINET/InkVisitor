@@ -1,5 +1,5 @@
 import request from "supertest";
-import app from "../../Server";
+import app from "../../server";
 import { Db } from "@service/rethink";
 import { pool } from "@middlewares/db";
 import { apiPath } from "@common/constants";
