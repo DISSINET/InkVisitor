@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from
 import { BiSearch } from "react-icons/bi";
 import { GrClose } from "react-icons/gr";
 import { floorNumberToOneDecimal } from "utils/utils";
-import { ExploreAction } from "../Explorer/state";
+import { ExploreAction, ExploreActionType } from "../Explorer/state";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { FloatingSearchForm } from "./FloatingSearchForm";
 import {
@@ -337,6 +337,11 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainerProps> = (
     setIsExpanded(true);
   };
 
+  const handleClose = () => {
+    exploreDispatch({ type: ExploreActionType.clearFloatingSearchFilters });
+    setIsExpanded(false);
+  };
+
   useEffect(() => {
     return () => {
       dragWindowListenersRef.current?.abort();
@@ -360,7 +365,7 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainerProps> = (
               <StyledCloseButtonWrap>
                 <Button
                   icon={<GrClose size={14} />}
-                  onClick={() => setIsExpanded(false)}
+                  onClick={handleClose}
                   noBorder
                   color="black"
                   noBackground

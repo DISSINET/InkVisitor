@@ -64,7 +64,19 @@ enum ExploreActionType {
   setUpdatedByFilter,
   setEditedByFilter,
   setRootValidityFilter,
+  clearFloatingSearchFilters,
 }
+
+const floatingSearchFilterTypes = new Set<Explore.SearchOption>([
+  Explore.SearchOption.Status,
+  Explore.SearchOption.Language,
+  Explore.SearchOption.CreatedAt,
+  Explore.SearchOption.UpdatedAt,
+  Explore.SearchOption.CreatedBy,
+  Explore.SearchOption.UpdatedBy,
+  Explore.SearchOption.EditedBy,
+  Explore.SearchOption.RootValidity,
+]);
 
 const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Explore.IExplore => {
   switch (action.type) {
@@ -290,6 +302,18 @@ const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Exp
                 { type: Explore.SearchOption.RootValidity, rootValidity },
               ]
             : otherFilters,
+        offset: 0,
+      };
+    }
+
+    case ExploreActionType.clearFloatingSearchFilters: {
+      const filters = state.filters.filter((f) => !floatingSearchFilterTypes.has(f.type));
+      if (filters.length === state.filters.length) {
+        return state;
+      }
+      return {
+        ...state,
+        filters,
         offset: 0,
       };
     }
