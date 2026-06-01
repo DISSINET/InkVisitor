@@ -58,7 +58,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
 
   const relationConstrainedCategoryTypes = useMemo(
     () => getRelationConstrainedCategoryTypes(edgeType, rootNode.params.entityClasses),
-    [edgeType, rootNode.params.entityClasses]
+    [edgeType, rootNode.params.entityClasses],
   );
 
   const entityIdCategoryTypes = useMemo(() => {
@@ -68,14 +68,11 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
     if (relationConstrainedCategoryTypes !== null) {
       return relationConstrainedCategoryTypes;
     }
-    return paramEntityId.allowedClasses.length === 0
-      ? classesAll
-      : paramEntityId.allowedClasses;
+    return paramEntityId.allowedClasses.length === 0 ? classesAll : paramEntityId.allowedClasses;
   }, [paramEntityId, relationConstrainedCategoryTypes]);
 
   const isRelationEntityPickerDisabled =
-    relationConstrainedCategoryTypes !== null &&
-    relationConstrainedCategoryTypes.length === 0;
+    relationConstrainedCategoryTypes !== null && relationConstrainedCategoryTypes.length === 0;
 
   const entityId = node.params.entityId;
 
@@ -201,17 +198,18 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                 isRoot || paramEntityClass.allowedClasses.length === 0
                   ? entitiesDict
                   : entitiesDict.filter((ecl) =>
-                      paramEntityClass.allowedClasses.includes(ecl.value)
+                      paramEntityClass.allowedClasses.includes(ecl.value),
                     )
               }
               width={
                 node.params.entityClasses && node.params.entityClasses.length > 4
                   ? 270
                   : node.params.entityClasses && node.params.entityClasses.length > 0
-                  ? node.params.entityClasses.length * 37 + 60
-                  : 110
+                    ? node.params.entityClasses.length * 37 + 60
+                    : 110
               }
               noOptionsMessage="entity class"
+              placeholder="all classes"
               disabled={node.params.entityId !== undefined}
               limitSelectedItems={Math.floor((270 - 110) / 37)}
             />

@@ -156,7 +156,12 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
           menuPosition="absolute"
           menuPlacement="auto"
           onChange={(selected: unknown, event: ActionMeta<unknown>) => {
-            const selectedOptions: DropdownItem[] = Array.isArray(selected) ? selected : [selected];
+            const selectedOptions: DropdownItem[] =
+              selected == null
+                ? []
+                : Array.isArray(selected)
+                  ? selected
+                  : [selected as DropdownItem];
 
             if (!isMulti) {
               return onChange(selectedOptions);
@@ -238,7 +243,7 @@ const ValueContainer = ({
 
 // If multiple, values are not merged into all options, this component is rendered separately for every single value
 const MultiValue = (
-  props: MultiValueProps<any> & { selectProps: StyledSelect }
+  props: MultiValueProps<any> & { selectProps: StyledSelect },
 ): React.ReactElement => {
   let labelToBeDisplayed = `${props.data.label}`;
 
