@@ -9,7 +9,6 @@ export const StyledOverflowTooltipContent = styled.div`
   align-content: flex-start;
   align-self: flex-start;
   flex-shrink: 0;
-  padding-left: 0.5rem;
 
   > * {
     flex-shrink: 0;
