@@ -370,7 +370,6 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainerProps> = (
                   color="black"
                   noBackground
                   inverted
-                  tooltipLabel="close search panel"
                 />
               </StyledCloseButtonWrap>
             </StyledExpandedHeader>

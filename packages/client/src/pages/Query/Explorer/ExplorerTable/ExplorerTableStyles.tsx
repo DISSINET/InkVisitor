@@ -26,8 +26,8 @@ export const StyledRow = styled.div<StyledRow>`
     $isSelected
       ? theme.color["tableOpened"]
       : $isOdd
-      ? theme.color["white"]
-      : theme.color["tableOddRow"]};
+        ? theme.color["white"]
+        : theme.color["tableOddRow"]};
   &:hover {
     background-color: ${({ theme }) => theme.color["gray"][100]};
   }
@@ -129,6 +129,7 @@ export const StyledCheckboxWrapper = styled.div`
   justify-content: center;
   align-items: center;
   color: ${({ theme }) => theme.color["black"]};
+  margin-right: 0.1rem;
   cursor: pointer;
   z-index: 2;
   svg {

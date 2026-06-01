@@ -61,7 +61,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
     (e: React.MouseEvent) => {
       const target = e.target as HTMLElement;
       if (
-        target.closest("button, a, input, textarea, select, [role='button'], [data-no-row-click]")
+        target.closest("button, a, input, textarea, select, [role='button'],  [data-no-row-click]")
       ) {
         return;
       }
