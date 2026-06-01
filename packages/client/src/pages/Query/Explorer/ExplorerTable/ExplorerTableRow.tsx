@@ -328,7 +328,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
     <div
       className="qt-row-inner"
       onClick={handleRowClick}
-      style={{ display: "flex", width: "100%", minHeight: "100%", cursor: "pointer" }}
+      style={{ display: "flex", width: "100%", minHeight: "100%" }}
     >
       <div
         className="qt-col"
