@@ -122,6 +122,14 @@ const positionFromStorage = (
   return clampPosition(x, y, panelWidth, panelHeight, rightInset, pageRect);
 };
 
+const viewportToPageRelative = (
+  { x, y }: ViewportPosition,
+  pageRect = getPageContentRect(),
+): ViewportPosition => ({
+  x: x - pageRect.left,
+  y: y - pageRect.top,
+});
+
 const positionToStorage = (
   x: number,
   y: number,
@@ -333,7 +341,6 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainer> = ({
   );
 
   const handleExpand = () => {
-    syncExpandedPosition(hasCustomExpandedPositionRef.current);
     setIsExpanded(true);
   };
 
@@ -349,6 +356,7 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainer> = ({
   }, []);
 
   const displayPosition = isExpanded ? expandedPosition : collapsedPosition;
+  const expandedPagePosition = viewportToPageRelative(displayPosition);
 
   return (
     <>
@@ -364,7 +372,10 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainer> = ({
       )}
       {isExpanded && (
         <FloatingPortal id="page-content">
-          <StyledFloatingRoot $left={displayPosition.x} $bottom={displayPosition.y}>
+          <StyledFloatingRoot
+            $left={expandedPagePosition.x}
+            $top={expandedPagePosition.y}
+          >
             <StyledExpandedPanel ref={expandedPanelRef}>
               <StyledExpandedHeader>
                 <StyledDragHandle

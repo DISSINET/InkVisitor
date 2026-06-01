@@ -6,12 +6,12 @@ export const FLOATING_SEARCH_PAGE_PADDING = 16;
 
 interface StyledFloatingRootProps {
   $left: number;
-  $bottom: number;
+  $top: number;
 }
 export const StyledFloatingRoot = styled.div<StyledFloatingRootProps>`
   position: absolute;
   left: ${({ $left }) => $left}px;
-  bottom: ${({ $bottom }) => $bottom}px;
+  top: ${({ $top }) => $top}px;
   z-index: 160;
 `;
 
