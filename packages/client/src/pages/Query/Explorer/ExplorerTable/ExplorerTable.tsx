@@ -91,6 +91,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   const [total, setTotal] = useState(0);
 
   const [rowLastClicked, setRowLastClicked] = useState<number>(-1);
+  const [rowFocused, setRowFocused] = useState<number>(-1);
   const [rowsSelected, setRowsSelected] = useState<number[]>([]);
   const rowsSelectedSet = useMemo(() => new Set(rowsSelected), [rowsSelected]);
   const rowLastClickedRef = useRef<number>(-1);
@@ -124,6 +125,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   useEffect(() => {
     setRowsSelected([]);
     setRowLastClicked(-1);
+    setRowFocused(-1);
   }, [filters]);
 
   const queryClient = useQueryClient();
@@ -253,7 +255,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   const heightTableBody = heightBox - headerHeight;
 
   const handleRowClick = useCallback((rowId: number) => {
-    setRowLastClicked((current) => (current === rowId ? -1 : rowId));
+    setRowFocused((current) => (current === rowId ? -1 : rowId));
   }, []);
 
   const handleRowSelect = useCallback((rowId: number, isWithShift: boolean = false) => {
@@ -365,7 +367,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
             height: HEIGHT_ROW_DEFAULT,
           }}
           className={`qt-row ${isOdd ? " qt-row-odd" : ""}${isSelected ? " qt-row-selected" : ""}${
-            rowLastClicked === index ? " qt-row-focused" : ""
+            rowFocused === index ? " qt-row-focused" : ""
           }${isPlaceholder ? " qt-placeholder" : ""}`}
         >
           {isPlaceholder ? (
@@ -419,6 +421,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       handleRowSelect,
       handleRowClick,
       rowLastClicked,
+      rowFocused,
       getCachedEntity,
       onOpenEntityInDetail,
     ],
