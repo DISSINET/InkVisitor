@@ -44,6 +44,7 @@ const SCROLL_WINDOW_UPDATE_DEBOUNCE_MS = 150;
 import { invalidateAllExplorerQueries, useInvalidateExplorerQuery } from "pages/Query/useQueryData";
 import "../../styles.css";
 import ExplorerTableRow from "./ExplorerTableRow";
+import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 
 interface ExplorerTable {
   state: Explore.IExplore;
@@ -217,14 +218,24 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
             const params =
               column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.ER>;
 
-            // TODO: check all relation types!!!
-            const newRelation: Relation.IRelation = {
-              id: uuidv4(),
-              type: params.relationType,
-              entityIds: [rowEntity.id, newEntity.id],
-            };
+            if (params.relationType === RelationEnums.Type.Identification) {
+              const newRelation: Relation.IIdentification = {
+                id: uuidv4(),
+                type: params.relationType,
+                entityIds: [rowEntity.id, newEntity.id],
+                certainty: EntityEnums.Certainty.Certain,
+              };
 
-            relationCreateMutation.mutate(newRelation);
+              relationCreateMutation.mutate(newRelation);
+            } else {
+              const newRelation: Relation.IRelation = {
+                id: uuidv4(),
+                type: params.relationType,
+                entityIds: [rowEntity.id, newEntity.id],
+              };
+
+              relationCreateMutation.mutate(newRelation);
+            }
           }
         }
       }

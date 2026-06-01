@@ -83,11 +83,18 @@ export const getSuggesterCategoryTypes = (
   return [...allEntityClasses];
 };
 
+export interface IRelationSuggesterConfigOptions {
+  /** When true, non-cloud relations with `multiple: false` hide the suggester. */
+  hasExistingRelation?: boolean;
+  allEntityClasses?: EntityEnums.Class[];
+}
+
 export const getRelationSuggesterConfig = (
   relationType: RelationEnums.Type,
   sourceEntityClass: EntityEnums.Class,
-  allEntityClasses: EntityEnums.Class[] = classesAll,
+  options: IRelationSuggesterConfigOptions = {},
 ): IRelationSuggesterConfig => {
+  const { hasExistingRelation = false, allEntityClasses = classesAll } = options;
   const rule = Relation.RelationRules[relationType];
   if (!rule) {
     return { showSuggester: false, categoryTypes: [] };
@@ -95,8 +102,11 @@ export const getRelationSuggesterConfig = (
 
   const categoryTypes = getSuggesterCategoryTypes(rule, sourceEntityClass, allEntityClasses);
 
+  const blockedBySingleRelation =
+    hasExistingRelation && !rule.cloudType && !rule.multiple;
+
   return {
-    showSuggester: categoryTypes.length > 0,
+    showSuggester: categoryTypes.length > 0 && !blockedBySingleRelation,
     categoryTypes,
   };
 };

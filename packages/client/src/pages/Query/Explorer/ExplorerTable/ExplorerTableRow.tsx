@@ -21,7 +21,12 @@ interface ExplorerTableRowProps {
   rowId: number;
   rowItem: IResponseQueryEntity;
   columns: Explore.IExploreColumn[];
-  handleEditColumn: (entity: IEntity, columnId: string, newEntity: IEntity) => void;
+  handleEditColumn: (
+    entity: IEntity,
+    columnId: string,
+    newEntity: IEntity,
+    relationType?: RelationEnums.Type,
+  ) => void;
 
   onRowSelect: (rowId: number, isWithShift?: boolean) => void;
 
@@ -271,9 +276,14 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
         }
         if (column.type === Explore.EExploreColumnType.ER) {
           const params = column.params as Explore.IExploreColumnParamsER;
+          const cellData = columnData[column.id];
+          const hasExistingRelation = Array.isArray(cellData)
+            ? cellData.length > 0
+            : typeof (cellData as IEntity)?.class !== "undefined";
           const { showSuggester, categoryTypes } = getRelationSuggesterConfig(
             params.relationType,
             rowEntity.class,
+            { hasExistingRelation },
           );
           if (!showSuggester) {
             return null;
@@ -282,7 +292,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
             <EntitySuggester
               categoryTypes={categoryTypes}
               onPicked={(newEntity) => {
-                handleEditColumn(rowEntity, column.id, newEntity);
+                handleEditColumn(rowEntity, column.id, newEntity, params.relationType);
               }}
               compactUntilHover
             />
@@ -291,7 +301,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
       }
       return null;
     },
-    [handleEditColumn],
+    [columnData, handleEditColumn],
   );
 
   return (
