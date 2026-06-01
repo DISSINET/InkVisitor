@@ -4,13 +4,13 @@ import { MdOutlineCheckBox, MdOutlineCheckBoxOutlineBlank } from "react-icons/md
 import { ThemeContext } from "styled-components";
 
 import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
-import { IEntity, IResponseQueryEntity, IUser } from "@inkvisitor/shared/types";
+import { IEntity, IResponseQueryEntity, IUser, Relation } from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
 import api from "api";
 import { EntitySuggester, EntityTag, UserTag } from "components/advanced";
 import { deleteProp, deleteRef } from "constructors";
 
-import { EntityEnums } from "@inkvisitor/shared/enums";
+import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { UserTagSize } from "components/advanced/UserTag/utils";
 import { invalidateAllExplorerQueries } from "pages/Query/useQueryData";
 import { getRelationSuggesterConfig } from "pages/Query/utils";
@@ -74,6 +74,16 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
     [onOpenEntityInDetail],
   );
 
+  const relationUpdateMutation = useMutation({
+    mutationFn: async (variables: { relationId: string; changes: Partial<Relation.IRelation> }) =>
+      await api.relationUpdate(variables.relationId, variables.changes),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["entity"] });
+      invalidateAllExplorerQueries(queryClient);
+    },
+  });
+
   const relationDeleteMutation = useMutation({
     mutationFn: async (relationId: string) => await api.relationDelete(relationId),
 
@@ -82,6 +92,18 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
       invalidateAllExplorerQueries(queryClient);
     },
   });
+
+  const handleRemoveFromCloud = (synonymCloud: Relation.IRelation, entityToRemove: string) => {
+    if (synonymCloud.entityIds?.length > 2) {
+      const newEntityIds = synonymCloud.entityIds.filter((eId) => eId !== entityToRemove);
+      relationUpdateMutation?.mutate({
+        relationId: synonymCloud.id,
+        changes: { entityIds: newEntityIds },
+      });
+    } else {
+      relationDeleteMutation?.mutate(synonymCloud.id);
+    }
+  };
 
   const handleUnlinkEntity = React.useCallback(
     async (sourceEntity: IEntity, entityToRemove: IEntity, columnId: string) => {
@@ -127,17 +149,23 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
       }
 
       if (column?.type === Explore.EExploreColumnType.ER) {
-        // TODO: check all relation types!!!
         const params = column.params as Explore.IExploreColumnParamsER;
         const relations = await api.relationsGet(sourceEntity.id, {
           relationType: params.relationType,
         });
-        const relation = relations.data.find((relation) =>
-          relation.entityIds.includes(entityToRemove.id),
-        );
-        const relationId = relation?.id;
-        if (relationId) {
-          relationDeleteMutation.mutate(relationId);
+        if (params.relationType === RelationEnums.Type.Synonym) {
+          // SYNONYM CLOUD
+          const synonymCloud = relations.data[0];
+          handleRemoveFromCloud(synonymCloud, entityToRemove.id);
+        } else {
+          // OTHER RELATIONS
+          const relation = relations.data.find((relation) =>
+            relation.entityIds.includes(entityToRemove.id),
+          );
+          const relationId = relation?.id;
+          if (relationId) {
+            relationDeleteMutation.mutate(relationId);
+          }
         }
       }
     },

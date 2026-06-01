@@ -249,14 +249,14 @@ const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Exp
 const exploreReducer = (state: Explore.IExplore, action: ExploreAction): Explore.IExplore => {
   const nextState = exploreReducerBase(state, action);
 
-  if (nextState !== state) {
-    console.log("[exploreState]", {
-      action: ExploreActionType[action.type],
-      payload: action.payload,
-      previous: state,
-      next: nextState,
-    });
-  }
+  // if (nextState !== state) {
+  //   console.log("[exploreState]", {
+  //     action: ExploreActionType[action.type],
+  //     payload: action.payload,
+  //     previous: state,
+  //     next: nextState,
+  //   });
+  // }
 
   return nextState;
 };
