@@ -245,8 +245,8 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
         return (
           <div style={{ display: "flex", flexWrap: "wrap", gap: "0.25rem" }}>
             {cellData
-              // todo: this limits the number of entities displayed in the cell
-              .filter((_, i) => i < 3)
+              // TODO: this limits the number of entities displayed in the cell
+              .filter((_, i) => i < 2)
               .map((cellEntity, key) => {
                 return (
                   <React.Fragment
@@ -256,7 +256,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
                   </React.Fragment>
                 );
               })}
-            {cellData.length > 3 && <span style={{ color: themeContext?.color.primary }}>...</span>}
+            {cellData.length > 2 && <span style={{ color: themeContext?.color.primary }}>...</span>}
           </div>
         );
       } else {
@@ -272,6 +272,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
         if (column.type === Explore.EExploreColumnType.EPV) {
           return (
             <EntitySuggester
+              inputWidth={75}
               categoryTypes={classesAll}
               onPicked={(newEntity) => {
                 handleEditColumn(rowEntity, column.id, newEntity);
@@ -283,6 +284,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
         if (column.type === Explore.EExploreColumnType.ERR) {
           return (
             <EntitySuggester
+              inputWidth={75}
               categoryTypes={[EntityEnums.Class.Resource]}
               onPicked={(newEntity) => {
                 handleEditColumn(rowEntity, column.id, newEntity);
@@ -307,7 +309,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
           }
           return (
             <EntitySuggester
-              inputWidth={80}
+              inputWidth={75}
               categoryTypes={categoryTypes}
               onPicked={(newEntity) => {
                 handleEditColumn(rowEntity, column.id, newEntity, params.relationType);
