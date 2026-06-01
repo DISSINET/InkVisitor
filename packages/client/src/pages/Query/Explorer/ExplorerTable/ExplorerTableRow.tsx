@@ -307,6 +307,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
           }
           return (
             <EntitySuggester
+              inputWidth={80}
               categoryTypes={categoryTypes}
               onPicked={(newEntity) => {
                 handleEditColumn(rowEntity, column.id, newEntity, params.relationType);
