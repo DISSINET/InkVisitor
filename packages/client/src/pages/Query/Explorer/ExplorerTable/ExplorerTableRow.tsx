@@ -61,9 +61,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
     (e: React.MouseEvent) => {
       const target = e.target as HTMLElement;
       if (
-        target.closest(
-          "button, a, input, textarea, select, [role='button'], [data-no-row-click]",
-        )
+        target.closest("button, a, input, textarea, select, [role='button'], [data-no-row-click]")
       ) {
         return;
       }
@@ -202,17 +200,19 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
     ): React.ReactElement => {
       if (typeof (cellValue as IEntity)?.class !== "undefined") {
         return (
-          <EntityTag
-            entity={cellValue as IEntity}
-            onDoubleClick={handleOpenEntityInDetail(cellValue as IEntity)}
-            unlinkButton={
-              column.editable && {
-                onClick: () => {
-                  handleUnlinkEntity(recordEntity, cellValue as IEntity, column.id);
-                },
+          <span data-no-row-click="true">
+            <EntityTag
+              entity={cellValue as IEntity}
+              onDoubleClick={handleOpenEntityInDetail(cellValue as IEntity)}
+              unlinkButton={
+                column.editable && {
+                  onClick: () => {
+                    handleUnlinkEntity(recordEntity, cellValue as IEntity, column.id);
+                  },
+                }
               }
-            }
-          />
+            />
+          </span>
         );
       } else if (typeof (cellValue as IUser)?.email !== "undefined") {
         // is type IUser[]
@@ -341,6 +341,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
         </StyledCheckboxWrapper>
 
         <span
+          data-no-row-click="true"
           style={{
             display: "inline-flex",
             overflow: "hidden",
