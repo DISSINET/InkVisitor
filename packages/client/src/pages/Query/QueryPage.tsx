@@ -17,7 +17,6 @@ import { COLLAPSED_PANEL_WIDTH } from "Theme/constants";
 import { floorNumberToOneDecimal } from "utils/utils";
 import { MemoizedExplorerBox } from "./Explorer/ExplorerBox";
 import { exploreReducer, exploreStateInitial } from "./Explorer/state";
-import { FloatingSearchContainer } from "./FloatingSearchContainer/FloatingSearchContainer";
 import { MemoizedQueryBox } from "./Query/QueryBox";
 import { queryReducer, queryStateInitial } from "./Query/state";
 import { getAllEdges, getAllNodes } from "./Query/utils";
@@ -285,12 +284,6 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     : COLLAPSED_PANEL_WIDTH;
   const firstPanelWidth = isDetailOpen ? layoutWidth - detailPanelWidth : layoutWidth;
 
-  const floatingSearchRightInset = isDetailOpen
-    ? queryDetailPanelExpanded
-      ? layoutWidth - querySeparatorXPosition
-      : COLLAPSED_PANEL_WIDTH
-    : 0;
-
   return (
     <>
       {querySeparatorYPosition > 0 && (
@@ -364,6 +357,10 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
             stableSignature={stableSignature}
             getCachedEntity={getCachedEntity}
             onOpenEntityInDetail={openEntityInDetail}
+            isDetailOpen={isDetailOpen}
+            queryDetailPanelExpanded={queryDetailPanelExpanded}
+            querySeparatorXPosition={querySeparatorXPosition}
+            layoutWidth={layoutWidth}
           />
         </Box>
       </Panel>
@@ -408,11 +405,6 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
           </Box>
         </Panel>
       )}
-      <FloatingSearchContainer
-        rightInset={floatingSearchRightInset}
-        filters={exploreState.filters}
-        exploreDispatch={exploreStateDispatch}
-      />
     </>
   );
 };

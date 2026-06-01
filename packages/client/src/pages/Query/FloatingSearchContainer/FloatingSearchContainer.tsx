@@ -33,7 +33,7 @@ interface ViewportPosition {
   y: number;
 }
 
-interface FloatingSearchContainerProps {
+interface FloatingSearchContainer {
   /** Width of the right-side panel to keep the container out of (detail panel). */
   rightInset?: number;
   filters: Explore.IExploreSearchFilter[];
@@ -138,7 +138,7 @@ const positionToStorage = (
   };
 };
 
-export const FloatingSearchContainer: React.FC<FloatingSearchContainerProps> = ({
+export const FloatingSearchContainer: React.FC<FloatingSearchContainer> = ({
   rightInset = 0,
   filters,
   exploreDispatch,
@@ -351,34 +351,8 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainerProps> = (
   const displayPosition = isExpanded ? expandedPosition : collapsedPosition;
 
   return (
-    <FloatingPortal id="page-content">
-      {isExpanded ? (
-        <StyledFloatingRoot $left={displayPosition.x} $bottom={displayPosition.y}>
-          <StyledExpandedPanel ref={expandedPanelRef}>
-            <StyledExpandedHeader>
-              <StyledDragHandle
-                onPointerDown={handleDragPointerDown}
-                aria-label="Drag search panel"
-              >
-                <span>Search</span>
-              </StyledDragHandle>
-              <StyledCloseButtonWrap>
-                <Button
-                  icon={<GrClose size={14} />}
-                  onClick={handleClose}
-                  noBorder
-                  color="black"
-                  noBackground
-                  inverted
-                />
-              </StyledCloseButtonWrap>
-            </StyledExpandedHeader>
-            <StyledExpandedContent>
-              <FloatingSearchForm dispatch={exploreDispatch} />
-            </StyledExpandedContent>
-          </StyledExpandedPanel>
-        </StyledFloatingRoot>
-      ) : (
+    <>
+      {!isExpanded && (
         <StyledCollapsedButton
           type="button"
           onClick={handleExpand}
@@ -388,6 +362,35 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainerProps> = (
           <BiSearch size={22} />
         </StyledCollapsedButton>
       )}
-    </FloatingPortal>
+      {isExpanded && (
+        <FloatingPortal id="page-content">
+          <StyledFloatingRoot $left={displayPosition.x} $bottom={displayPosition.y}>
+            <StyledExpandedPanel ref={expandedPanelRef}>
+              <StyledExpandedHeader>
+                <StyledDragHandle
+                  onPointerDown={handleDragPointerDown}
+                  aria-label="Drag search panel"
+                >
+                  <span>Search</span>
+                </StyledDragHandle>
+                <StyledCloseButtonWrap>
+                  <Button
+                    icon={<GrClose size={14} />}
+                    onClick={handleClose}
+                    noBorder
+                    color="black"
+                    noBackground
+                    inverted
+                  />
+                </StyledCloseButtonWrap>
+              </StyledExpandedHeader>
+              <StyledExpandedContent>
+                <FloatingSearchForm dispatch={exploreDispatch} />
+              </StyledExpandedContent>
+            </StyledExpandedPanel>
+          </StyledFloatingRoot>
+        </FloatingPortal>
+      )}
+    </>
   );
 };
