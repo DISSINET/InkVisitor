@@ -253,7 +253,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   const heightTableBody = heightBox - headerHeight;
 
   const handleRowClick = useCallback((rowId: number) => {
-    setRowLastClicked(rowId);
+    setRowLastClicked((current) => (current === rowId ? -1 : rowId));
   }, []);
 
   const handleRowSelect = useCallback((rowId: number, isWithShift: boolean = false) => {
