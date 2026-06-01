@@ -1,7 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import React, { useContext } from "react";
+import React from "react";
 import { MdOutlineCheckBox, MdOutlineCheckBoxOutlineBlank } from "react-icons/md";
-import { ThemeContext } from "styled-components";
 
 import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 import { IEntity, IResponseQueryEntity, IUser, Relation } from "@inkvisitor/shared/types";
@@ -14,6 +13,7 @@ import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { UserTagSize } from "components/advanced/UserTag/utils";
 import { invalidateAllExplorerQueries } from "pages/Query/useQueryData";
 import { getRelationSuggesterConfig } from "pages/Query/utils";
+import { CELL_DISPLAY_LIMIT, ExplorerCellOverflow } from "./ExplorerCellOverflow";
 import { StyledCheckboxWrapper, StyledFocusedCircle } from "./ExplorerTableStyles";
 import { WIDTH_COLUMN_DEFAULT, WIDTH_COLUMN_EUC, WIDTH_COLUMN_FIRST } from "./types";
 
@@ -48,7 +48,6 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
   isLastClicked = false,
   onOpenEntityInDetail,
 }) => {
-  const themeContext = useContext(ThemeContext);
   const handleCheckboxClick = React.useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
@@ -245,8 +244,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
         return (
           <div style={{ display: "flex", flexWrap: "wrap", gap: "0.25rem" }}>
             {cellData
-              // TODO: this limits the number of entities displayed in the cell
-              .filter((_, i) => i < 2)
+              .filter((_, i) => i < CELL_DISPLAY_LIMIT)
               .map((cellEntity, key) => {
                 return (
                   <React.Fragment
@@ -256,7 +254,9 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
                   </React.Fragment>
                 );
               })}
-            {cellData.length > 2 && <span style={{ color: themeContext?.color.primary }}>...</span>}
+            {cellData.length > CELL_DISPLAY_LIMIT && (
+              <ExplorerCellOverflow hiddenItems={cellData.slice(CELL_DISPLAY_LIMIT)} />
+            )}
           </div>
         );
       } else {
@@ -272,7 +272,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
         if (column.type === Explore.EExploreColumnType.EPV) {
           return (
             <EntitySuggester
-              inputWidth={75}
+              inputWidth={74}
               categoryTypes={classesAll}
               onPicked={(newEntity) => {
                 handleEditColumn(rowEntity, column.id, newEntity);
@@ -284,7 +284,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
         if (column.type === Explore.EExploreColumnType.ERR) {
           return (
             <EntitySuggester
-              inputWidth={75}
+              inputWidth={74}
               categoryTypes={[EntityEnums.Class.Resource]}
               onPicked={(newEntity) => {
                 handleEditColumn(rowEntity, column.id, newEntity);
@@ -309,7 +309,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
           }
           return (
             <EntitySuggester
-              inputWidth={75}
+              inputWidth={74}
               categoryTypes={categoryTypes}
               onPicked={(newEntity) => {
                 handleEditColumn(rowEntity, column.id, newEntity, params.relationType);
