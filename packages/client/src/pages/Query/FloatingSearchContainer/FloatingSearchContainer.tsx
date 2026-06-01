@@ -352,8 +352,8 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainerProps> = (
 
   return (
     <FloatingPortal id="page-content">
-      <StyledFloatingRoot $left={displayPosition.x} $top={displayPosition.y}>
-        {isExpanded ? (
+      {isExpanded ? (
+        <StyledFloatingRoot $left={displayPosition.x} $bottom={displayPosition.y}>
           <StyledExpandedPanel ref={expandedPanelRef}>
             <StyledExpandedHeader>
               <StyledDragHandle
@@ -377,17 +377,17 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainerProps> = (
               <FloatingSearchForm dispatch={exploreDispatch} />
             </StyledExpandedContent>
           </StyledExpandedPanel>
-        ) : (
-          <StyledCollapsedButton
-            type="button"
-            onClick={handleExpand}
-            aria-label="Open search panel"
-            aria-expanded={false}
-          >
-            <BiSearch size={22} />
-          </StyledCollapsedButton>
-        )}
-      </StyledFloatingRoot>
+        </StyledFloatingRoot>
+      ) : (
+        <StyledCollapsedButton
+          type="button"
+          onClick={handleExpand}
+          aria-label="Open search panel"
+          aria-expanded={false}
+        >
+          <BiSearch size={22} />
+        </StyledCollapsedButton>
+      )}
     </FloatingPortal>
   );
 };

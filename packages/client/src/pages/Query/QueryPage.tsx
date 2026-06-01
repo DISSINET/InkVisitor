@@ -8,6 +8,7 @@ import { LayoutSeparatorHorizontal, LayoutSeparatorVertical } from "components/a
 import { useSearchParams } from "hooks/useSearchParamsContext";
 import { MemoizedEntityDetailBox } from "pages/Main/containers/EntityDetailBox/EntityDetailBox";
 import { BiRefresh } from "react-icons/bi";
+import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { VscCloseAll } from "react-icons/vsc";
 import { toast } from "react-toastify";
@@ -24,6 +25,7 @@ import {
   QUERY_LEFT_PANEL_MIN_WIDTH,
   QUERY_PAGE_SEPARATOR_X_PERCENT_POSITION,
   QUERY_RIGHT_PANEL_MIN_WIDTH,
+  QUERY_SEARCH_PANEL_MIN_HEIGHT,
   QueryValidity,
   QueryValidityProblem,
 } from "./types";
@@ -111,27 +113,59 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     api.queryExport(queryState, exportExplore, rowIndices);
   };
 
-  const handleSeparatorYPositionChange = (xPosition: number) => {
-    if (querySeparatorYPosition !== xPosition) {
-      setQuerySeparatorYPosition(xPosition);
+  const explorerBoxMaximizedStorageKey = "queryExplorerBoxMaximized";
 
-      const separatorYPercentPosition = floorNumberToOneDecimal(
-        xPosition / onePercentOfContentHeight,
-      );
-      localStorage.setItem("querySeparatorYPosition", separatorYPercentPosition.toString());
+  const persistSeparatorYPercent = (yPosition: number) => {
+    const separatorYPercentPosition = floorNumberToOneDecimal(
+      yPosition / onePercentOfContentHeight,
+    );
+    localStorage.setItem("querySeparatorYPosition", separatorYPercentPosition.toString());
+  };
+
+  const [explorerBoxMaximized, setExplorerBoxMaximized] = useState(
+    () => localStorage.getItem(explorerBoxMaximizedStorageKey) === "true",
+  );
+
+  const getDefaultSeparatorYPosition = () => contentHeight / 2;
+
+  const handleSeparatorYPositionChange = (yPosition: number) => {
+    if (querySeparatorYPosition !== yPosition) {
+      if (explorerBoxMaximized && yPosition > QUERY_SEARCH_PANEL_MIN_HEIGHT) {
+        setExplorerBoxMaximized(false);
+        localStorage.setItem(explorerBoxMaximizedStorageKey, "false");
+      } else if (
+        !explorerBoxMaximized &&
+        yPosition === QUERY_SEARCH_PANEL_MIN_HEIGHT &&
+        querySeparatorYPosition !== QUERY_SEARCH_PANEL_MIN_HEIGHT
+      ) {
+        setExplorerBoxMaximized(true);
+        localStorage.setItem(explorerBoxMaximizedStorageKey, "true");
+      }
+
+      setQuerySeparatorYPosition(yPosition);
+      persistSeparatorYPercent(yPosition);
     }
   };
 
   const localStorageSeparatorYPosition = localStorage.getItem("querySeparatorYPosition");
-  const [querySeparatorYPosition, setQuerySeparatorYPosition] = useState<number>(
-    localStorageSeparatorYPosition
-      ? Number(localStorageSeparatorYPosition) * onePercentOfContentHeight
-      : contentHeight / 2,
-  );
+  const [querySeparatorYPosition, setQuerySeparatorYPosition] = useState<number>(() => {
+    if (localStorage.getItem(explorerBoxMaximizedStorageKey) === "true") {
+      return QUERY_SEARCH_PANEL_MIN_HEIGHT;
+    }
+    return localStorageSeparatorYPosition
+      ? Number(localStorageSeparatorYPosition) * (contentHeight / 100)
+      : contentHeight / 2;
+  });
 
   const [currentContentHeight, setCurrentContentHeight] = useState(contentHeight);
 
   useEffect(() => {
+    if (explorerBoxMaximized) {
+      setQuerySeparatorYPosition(QUERY_SEARCH_PANEL_MIN_HEIGHT);
+      setCurrentContentHeight(contentHeight);
+      return;
+    }
+
     const onePercentOfLastContentHeight = currentContentHeight / 100;
     const separatorXPercentPosition = floorNumberToOneDecimal(
       querySeparatorYPosition / onePercentOfLastContentHeight,
@@ -139,7 +173,25 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     setQuerySeparatorYPosition(separatorXPercentPosition * onePercentOfContentHeight);
     localStorage.setItem("querySeparatorYPosition", separatorXPercentPosition.toString());
     setCurrentContentHeight(contentHeight);
-  }, [contentHeight]);
+  }, [contentHeight, explorerBoxMaximized]);
+
+  const isExplorerAtMaxHeight = querySeparatorYPosition === QUERY_SEARCH_PANEL_MIN_HEIGHT;
+
+  const toggleExplorerBoxMaximized = () => {
+    if (isExplorerAtMaxHeight) {
+      const halfHeight = getDefaultSeparatorYPosition();
+      setExplorerBoxMaximized(false);
+      localStorage.setItem(explorerBoxMaximizedStorageKey, "false");
+      setQuerySeparatorYPosition(halfHeight);
+      persistSeparatorYPercent(halfHeight);
+      return;
+    }
+
+    setExplorerBoxMaximized(true);
+    localStorage.setItem(explorerBoxMaximizedStorageKey, "true");
+    setQuerySeparatorYPosition(QUERY_SEARCH_PANEL_MIN_HEIGHT);
+    persistSeparatorYPercent(QUERY_SEARCH_PANEL_MIN_HEIGHT);
+  };
 
   const handleSeparatorXPositionChange = (xPosition: number) => {
     if (querySeparatorXPosition !== xPosition) {
@@ -244,8 +296,8 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
       {querySeparatorYPosition > 0 && (
         <LayoutSeparatorHorizontal
           width={firstPanelWidth}
-          topPositionMin={34}
-          topPositionMax={contentHeight - 34}
+          topPositionMin={QUERY_SEARCH_PANEL_MIN_HEIGHT}
+          topPositionMax={contentHeight - QUERY_SEARCH_PANEL_MIN_HEIGHT}
           separatorYPosition={querySeparatorYPosition}
           setSeparatorYPosition={(yPosition) => handleSeparatorYPositionChange(yPosition)}
         />
@@ -276,7 +328,22 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
           borderColor="white"
           height={contentHeight - querySeparatorYPosition}
           label="Explorer"
+          onHeaderClick={toggleExplorerBoxMaximized}
           buttons={[
+            <Button
+              key="maximize-explorer-box"
+              dataTestId="maximize-explorer-box"
+              inverted
+              tooltipLabel={isExplorerAtMaxHeight ? "restore half height" : "maximize explorer box"}
+              icon={
+                isExplorerAtMaxHeight ? (
+                  <BsSquareHalf style={{ transform: "rotate(270deg)" }} />
+                ) : (
+                  <BsSquareFill />
+                )
+              }
+              onClick={toggleExplorerBoxMaximized}
+            />,
             <Button
               key="refresh queries"
               tooltipLabel="refresh data"

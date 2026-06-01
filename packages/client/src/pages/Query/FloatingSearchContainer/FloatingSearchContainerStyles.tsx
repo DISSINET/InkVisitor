@@ -4,14 +4,21 @@ export const FLOATING_SEARCH_COLLAPSED_SIZE = 48;
 export const FLOATING_SEARCH_EXPANDED_WIDTH = 220;
 export const FLOATING_SEARCH_PAGE_PADDING = 16;
 
-export const StyledFloatingRoot = styled.div<{ $left: number; $top: number }>`
-  position: fixed;
+interface StyledFloatingRootProps {
+  $left: number;
+  $bottom: number;
+}
+export const StyledFloatingRoot = styled.div<StyledFloatingRootProps>`
+  position: absolute;
   left: ${({ $left }) => $left}px;
-  top: ${({ $top }) => $top}px;
+  bottom: ${({ $bottom }) => $bottom}px;
   z-index: 160;
 `;
 
 export const StyledCollapsedButton = styled.button`
+  position: absolute;
+  right: 2rem;
+  bottom: 2rem;
   display: flex;
   align-items: center;
   justify-content: center;
