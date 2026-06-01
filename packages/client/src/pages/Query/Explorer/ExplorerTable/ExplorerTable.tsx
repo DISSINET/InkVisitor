@@ -252,6 +252,10 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   const headerHeight = 100;
   const heightTableBody = heightBox - headerHeight;
 
+  const handleRowClick = useCallback((rowId: number) => {
+    setRowLastClicked(rowId);
+  }, []);
+
   const handleRowSelect = useCallback((rowId: number, isWithShift: boolean = false) => {
     setRowLastClicked(rowId);
 
@@ -361,8 +365,8 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
             height: HEIGHT_ROW_DEFAULT,
           }}
           className={`qt-row ${isOdd ? " qt-row-odd" : ""}${isSelected ? " qt-row-selected" : ""}${
-            isPlaceholder ? " qt-placeholder" : ""
-          }`}
+            rowLastClicked === index ? " qt-row-focused" : ""
+          }${isPlaceholder ? " qt-placeholder" : ""}`}
         >
           {isPlaceholder ? (
             <div
@@ -396,6 +400,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
               columns={columns}
               handleEditColumn={handleEditColumn}
               onRowSelect={handleRowSelect}
+              onRowClick={handleRowClick}
               isSelected={isSelected}
               isLastClicked={rowLastClicked === index}
               onOpenEntityInDetail={onOpenEntityInDetail}
@@ -412,6 +417,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       columns,
       handleEditColumn,
       handleRowSelect,
+      handleRowClick,
       rowLastClicked,
       getCachedEntity,
       onOpenEntityInDetail,

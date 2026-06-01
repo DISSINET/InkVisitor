@@ -29,6 +29,7 @@ interface ExplorerTableRowProps {
   ) => void;
 
   onRowSelect: (rowId: number, isWithShift?: boolean) => void;
+  onRowClick: (rowId: number) => void;
 
   isSelected?: boolean;
   isLastClicked?: boolean;
@@ -41,6 +42,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
   handleEditColumn,
 
   onRowSelect,
+  onRowClick,
 
   isSelected = false,
   isLastClicked = false,
@@ -53,6 +55,21 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
       onRowSelect(rowId, (e as React.MouseEvent).shiftKey);
     },
     [onRowSelect, rowId],
+  );
+
+  const handleRowClick = React.useCallback(
+    (e: React.MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (
+        target.closest(
+          "button, a, input, textarea, select, [role='button'], [data-no-row-click]",
+        )
+      ) {
+        return;
+      }
+      onRowClick(rowId);
+    },
+    [onRowClick, rowId],
   );
 
   const queryClient = useQueryClient();
@@ -305,7 +322,11 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
   );
 
   return (
-    <React.Fragment>
+    <div
+      className="qt-row-inner"
+      onClick={handleRowClick}
+      style={{ display: "flex", width: "100%", minHeight: "100%", cursor: "pointer" }}
+    >
       <div
         className="qt-col"
         style={{
@@ -364,7 +385,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
           </div>
         );
       })}
-    </React.Fragment>
+    </div>
   );
 };
 
@@ -379,6 +400,7 @@ function areRowsEqual(
   if (prev.isSelected !== next.isSelected) return false;
   if (prev.isLastClicked !== next.isLastClicked) return false;
   if (prev.onOpenEntityInDetail !== next.onOpenEntityInDetail) return false;
+  if (prev.onRowClick !== next.onRowClick) return false;
   // Re-render when columns array identity changes (e.g., add/remove)
   if (prev.columns !== next.columns) return false;
   if (prev.rowItem !== next.rowItem) return false;
