@@ -9,6 +9,7 @@ import {
   IReference,
   IResponseQuery,
   IResponseQueryEntity,
+  Relation,
 } from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
 import api from "api";
@@ -43,6 +44,7 @@ const SCROLL_WINDOW_UPDATE_DEBOUNCE_MS = 150;
 import { invalidateAllExplorerQueries, useInvalidateExplorerQuery } from "pages/Query/useQueryData";
 import "../../styles.css";
 import ExplorerTableRow from "./ExplorerTableRow";
+import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 
 interface ExplorerTable {
   state: Explore.IExplore;
@@ -89,6 +91,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   const [total, setTotal] = useState(0);
 
   const [rowLastClicked, setRowLastClicked] = useState<number>(-1);
+  const [rowFocused, setRowFocused] = useState<number>(-1);
   const [rowsSelected, setRowsSelected] = useState<number[]>([]);
   const rowsSelectedSet = useMemo(() => new Set(rowsSelected), [rowsSelected]);
   const rowLastClickedRef = useRef<number>(-1);
@@ -109,7 +112,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   const dataSourceOffset = data && data.entities?.length > 0 ? offset : renderWindow.offset;
 
   const [batchActionSelected, setBatchActionSelected] = useState<BatchAction>(
-    batchOptions[0].value
+    batchOptions[0].value,
   );
   const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
 
@@ -122,6 +125,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   useEffect(() => {
     setRowsSelected([]);
     setRowLastClicked(-1);
+    setRowFocused(-1);
   }, [filters]);
 
   const queryClient = useQueryClient();
@@ -145,6 +149,14 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     });
     setIsNewColumnOpen(false);
   };
+
+  const relationCreateMutation = useMutation({
+    mutationFn: async (newRelation: Relation.IRelation) => await api.relationCreate(newRelation),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["entity"] });
+      invalidateAllExplorerQueries(queryClient);
+    },
+  });
 
   const handleEditColumn = useCallback(
     (rowEntity: IEntity, columnId: string, newEntity: IEntity) => {
@@ -203,10 +215,34 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
             });
             break;
           }
+
+          case Explore.EExploreColumnType.ER: {
+            const params =
+              column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.ER>;
+
+            if (params.relationType === RelationEnums.Type.Identification) {
+              const newRelation: Relation.IIdentification = {
+                id: uuidv4(),
+                type: params.relationType,
+                entityIds: [rowEntity.id, newEntity.id],
+                certainty: EntityEnums.Certainty.Certain,
+              };
+
+              relationCreateMutation.mutate(newRelation);
+            } else {
+              const newRelation: Relation.IRelation = {
+                id: uuidv4(),
+                type: params.relationType,
+                entityIds: [rowEntity.id, newEntity.id],
+              };
+
+              relationCreateMutation.mutate(newRelation);
+            }
+          }
         }
       }
     },
-    [columns]
+    [columns],
   );
 
   const {
@@ -217,6 +253,10 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
 
   const headerHeight = 100;
   const heightTableBody = heightBox - headerHeight;
+
+  const handleRowClick = useCallback((rowId: number) => {
+    setRowFocused((current) => (current === rowId ? -1 : rowId));
+  }, []);
 
   const handleRowSelect = useCallback((rowId: number, isWithShift: boolean = false) => {
     setRowLastClicked(rowId);
@@ -264,7 +304,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
         payload: { id },
       });
     },
-    [dispatch]
+    [dispatch],
   );
 
   // created by columns are smaller than the default columns, subtract the difference
@@ -327,8 +367,8 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
             height: HEIGHT_ROW_DEFAULT,
           }}
           className={`qt-row ${isOdd ? " qt-row-odd" : ""}${isSelected ? " qt-row-selected" : ""}${
-            isPlaceholder ? " qt-placeholder" : ""
-          }`}
+            rowFocused === index ? " qt-row-focused" : ""
+          }${isPlaceholder ? " qt-placeholder" : ""}`}
         >
           {isPlaceholder ? (
             <div
@@ -362,6 +402,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
               columns={columns}
               handleEditColumn={handleEditColumn}
               onRowSelect={handleRowSelect}
+              onRowClick={handleRowClick}
               isSelected={isSelected}
               isLastClicked={rowLastClicked === index}
               onOpenEntityInDetail={onOpenEntityInDetail}
@@ -378,10 +419,12 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       columns,
       handleEditColumn,
       handleRowSelect,
+      handleRowClick,
       rowLastClicked,
+      rowFocused,
       getCachedEntity,
       onOpenEntityInDetail,
-    ]
+    ],
   );
 
   const handleRowsRendered = ({ startIndex, stopIndex }: any) => {

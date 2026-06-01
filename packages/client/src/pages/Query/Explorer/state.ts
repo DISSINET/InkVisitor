@@ -17,24 +17,13 @@ const exploreStateInitial: Explore.IExplore = {
           //     propertyType: "4ce5e669-d421-40c9-b1ce-f476fdd171fe",
           //   },
           // },
-          {
-            id: "2",
-            name: "CLA",
-            params: {
-              relationType: RelationEnums.Type.Classification,
-            },
+          ...RelationEnums.AllTypes.map((relationType, index) => ({
+            id: String(index + 2),
+            name: relationType,
+            params: { relationType },
             editable: true,
             type: Explore.EExploreColumnType.ER,
-          },
-          {
-            id: "3",
-            name: "SCL",
-            params: {
-              relationType: RelationEnums.Type.Superclass,
-            },
-            editable: true,
-            type: Explore.EExploreColumnType.ER,
-          },
+          })),
         ]
       : [],
   sort: undefined,
@@ -326,14 +315,14 @@ const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Exp
 const exploreReducer = (state: Explore.IExplore, action: ExploreAction): Explore.IExplore => {
   const nextState = exploreReducerBase(state, action);
 
-  if (nextState !== state) {
-    console.log("[exploreState]", {
-      action: ExploreActionType[action.type],
-      payload: action.payload,
-      previous: state,
-      next: nextState,
-    });
-  }
+  // if (nextState !== state) {
+  //   console.log("[exploreState]", {
+  //     action: ExploreActionType[action.type],
+  //     payload: action.payload,
+  //     previous: state,
+  //     next: nextState,
+  //   });
+  // }
 
   return nextState;
 };

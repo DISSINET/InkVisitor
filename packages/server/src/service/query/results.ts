@@ -9,10 +9,7 @@ import { Connection } from "rethinkdb-ts";
 import { filterEntityIdsByRowLabelFilter, getRowLabelFilter } from "./explore-label-filter";
 import { applyRowIdsFilter, getRowIdsFilter } from "./explore-ids-filter";
 import { applyRequestSearchFilters } from "./explore-to-request-search";
-import {
-  applyRootValidityFilter,
-  getRootValidityFilter,
-} from "./explore-root-validity-filter";
+import { applyRootValidityFilter, getRootValidityFilter } from "./explore-root-validity-filter";
 
 export default class Results<T extends { id: string }> {
   items: string[] | null = null;
@@ -49,10 +46,7 @@ export default class Results<T extends { id: string }> {
     this.items = Array.from(new Set((this.items || []).concat(results)));
   }
 
-  async applyExploreFilters(
-    db: Connection,
-    exploreData: Explore.IExplore
-  ): Promise<void> {
+  async applyExploreFilters(db: Connection, exploreData: Explore.IExplore): Promise<void> {
     if (!this.items?.length) {
       return;
     }
@@ -69,11 +63,7 @@ export default class Results<T extends { id: string }> {
     // 2. Label (db regex / wildcard)
     const rowLabelFilter = getRowLabelFilter(exploreData.filters);
     if (rowLabelFilter?.label?.trim()) {
-      this.items = await filterEntityIdsByRowLabelFilter(
-        db,
-        this.items,
-        rowLabelFilter
-      );
+      this.items = await filterEntityIdsByRowLabelFilter(db, this.items, rowLabelFilter);
       if (!this.items.length) {
         return;
       }
@@ -81,11 +71,7 @@ export default class Results<T extends { id: string }> {
 
     // 3. Search-box filters (status, language, dates, created/updated/edited by)
     //    reused via the existing SearchQuery backend.
-    this.items = await applyRequestSearchFilters(
-      db,
-      this.items,
-      exploreData.filters
-    );
+    this.items = await applyRequestSearchFilters(db, this.items, exploreData.filters);
     if (!this.items.length) {
       return;
     }
@@ -94,11 +80,7 @@ export default class Results<T extends { id: string }> {
     //    on the smallest candidate set.
     const rootValidityFilter = getRootValidityFilter(exploreData.filters);
     if (rootValidityFilter) {
-      this.items = await applyRootValidityFilter(
-        db,
-        this.items,
-        rootValidityFilter
-      );
+      this.items = await applyRootValidityFilter(db, this.items, rootValidityFilter);
     }
   }
 
@@ -128,10 +110,7 @@ export default class Results<T extends { id: string }> {
     // return all items if limit is 0
     if (exploreData.limit === 0) return this.items;
 
-    const endIndex = Math.min(
-      exploreData.offset + exploreData.limit,
-      this.items.length
-    );
+    const endIndex = Math.min(exploreData.offset + exploreData.limit, this.items.length);
 
     return this.items.slice(exploreData.offset, endIndex);
   }
@@ -141,28 +120,11 @@ export default class Results<T extends { id: string }> {
     entity: IEntity,
     columnsData: Explore.IExploreColumn[]
   ): Promise<
-    Record<
-      string,
-      | IEntity
-      | IEntity[]
-      | number
-      | number[]
-      | string
-      | string[]
-      | IUser
-      | IUser[]
-    >
+    Record<string, IEntity | IEntity[] | number | number[] | string | string[] | IUser | IUser[]>
   > {
     const out: Record<
       string,
-      | IEntity
-      | IEntity[]
-      | number
-      | number[]
-      | string
-      | string[]
-      | IUser
-      | IUser[]
+      IEntity | IEntity[] | number | number[] | string | string[] | IUser | IUser[]
     > = {};
     for (const column of columnsData) {
       switch (column.type) {
@@ -182,10 +144,7 @@ export default class Results<T extends { id: string }> {
               }
             });
 
-          out[column.id] = await Entity.findEntitiesByIds(
-            db,
-            Object.keys(entityIds)
-          );
+          out[column.id] = await Entity.findEntitiesByIds(db, Object.keys(entityIds));
           break;
         }
         // Created by
@@ -202,13 +161,10 @@ export default class Results<T extends { id: string }> {
         }
         // Entity Reference Resources
         case Explore.EExploreColumnType.ERR: {
-          const referenceIds = entity.references.reduce<string[]>(
-            (acc, curr) => {
-              acc.push(curr.resource);
-              return acc;
-            },
-            []
-          );
+          const referenceIds = entity.references.reduce<string[]>((acc, curr) => {
+            acc.push(curr.resource);
+            return acc;
+          }, []);
           const resources = await Entity.findEntitiesByIds(db, referenceIds);
           out[column.id] = resources;
           break;
@@ -226,18 +182,18 @@ export default class Results<T extends { id: string }> {
         case Explore.EExploreColumnType.ER: {
           const params =
             column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.ER>;
-          // first - retrieve all entity ids that are in some relation with entity.id
-          const [entityIds] = await Relation.getLinkedForEntities(
-            db,
-            [entity.id],
-            params.relationType
-          );
+          // first - retrieve forward relations only (for asymmetrical types the
+          // entity must be the subject at entityIds[0])
+          const relations = await Relation.findForwardForEntity(db, entity.id, params.relationType);
 
-          // second - get repsective entities from db - omit entity.id
-          const entities = await Entity.findEntitiesByIds(
-            db,
-            entityIds.filter((e) => e !== entity.id)
-          );
+          // second - collect linked entity ids (omit entity.id) and load them
+          const entityIds = Array.from(
+            new Set(
+              relations.reduce<string[]>((acc, relation) => acc.concat(relation.entityIds), [])
+            )
+          ).filter((e) => e !== entity.id);
+
+          const entities = await Entity.findEntitiesByIds(db, entityIds);
           out[column.id] = entities;
           break;
         }
