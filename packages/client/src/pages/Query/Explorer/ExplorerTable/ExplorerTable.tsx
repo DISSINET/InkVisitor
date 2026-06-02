@@ -17,6 +17,7 @@ import { Loader } from "components";
 import { CMetaProp } from "constructors";
 
 import { useResizeObserver, useSearchParams, useTheme } from "hooks";
+import { toast } from "react-toastify";
 import { ExploreAction, ExploreActionType } from "../state";
 import { ExplorerTableBatchActionModal } from "./ExplorerTableBatchActionModal/ExplorerTableBatchActionModal";
 import ExplorerTableNewColumnPanel from "./ExplorerTableNewColumnPanel/ExplorerTableNewColumnPanel";
@@ -293,7 +294,20 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     onExport(rowsSelected, selectedColumnIds);
   };
 
-  const handleApplyBatchAction = () => {
+  const selectedEntityIds = useMemo(() => {
+    const ids = entityIds ?? [];
+    return rowsSelected.map((rowIndex) => ids[rowIndex]).filter((id): id is string => Boolean(id));
+  }, [rowsSelected, entityIds]);
+
+  const handleApplyBatchAction = async () => {
+    if (batchActionSelected === BatchAction.copy_uuids) {
+      if (selectedEntityIds.length === 0) {
+        return;
+      }
+      await navigator.clipboard.writeText(selectedEntityIds.join(" "));
+      toast.info("UUIDs copied to clipboard");
+      return;
+    }
     setIsBatchModalOpen(true);
   };
 
@@ -323,11 +337,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
 
   // Use server rows
   const items: Array<IResponseQueryEntity | null> = (entities as IResponseQueryEntity[]) || [];
-
-  const selectedEntityIds = useMemo(() => {
-    const ids = entityIds ?? [];
-    return rowsSelected.map((rowIndex) => ids[rowIndex]).filter((id): id is string => Boolean(id));
-  }, [rowsSelected, entityIds]);
 
   const stableEmptyRowProps = useMemo(() => ({}), []);
 
