@@ -41,8 +41,8 @@ interface SearchParamsContext {
   detailIdArray: string[];
   selectedDetailId: string;
   setSelectedDetailId: (id: string) => void;
-  appendDetailId: (id: string) => void;
-  appendMultipleDetailIds: (ids: string[]) => void;
+  appendDetailId: (id: string, maxCount?: number) => void;
+  appendMultipleDetailIds: (ids: string[], maxCount?: number) => void;
   replaceDetailIds: (ids: string[]) => void;
   removeDetailId: (id: string) => void;
   clearAllDetailIds: () => void;
@@ -133,11 +133,11 @@ export const SearchParamsProvider = ({
     enabled: api.isLoggedIn() && getDetailIdArray().length > 9,
   });
 
-  const appendDetailId = (id: string) => {
+  const appendDetailId = (id: string, maxCount: number = maxTabCount) => {
     const detailIdArray = getDetailIdArray();
     if (!detailIdArray.includes(id)) {
       const newDetailIdArray = [];
-      if (detailIdArray.length < maxTabCount) {
+      if (detailIdArray.length < maxCount) {
         newDetailIdArray.push([...detailIdArray, id]);
       } else {
         newDetailIdArray.push([
@@ -155,16 +155,16 @@ export const SearchParamsProvider = ({
     setTimeout(() => setSelectedDetailId(id), 100);
   };
 
-  const appendMultipleDetailIds = (ids: string[]) => {
+  const appendMultipleDetailIds = (ids: string[], maxCount: number = maxTabCount) => {
     const detailIdArray = getDetailIdArray();
     let newDetailIdArray: string[] = [];
 
-    if (ids.length === 10) {
+    if (ids.length === maxCount) {
       // use as it is
       newDetailIdArray = ids;
-    } else if (ids.length > 10) {
-      // cut and use the first 10
-      newDetailIdArray = ids.slice(0, maxTabCount);
+    } else if (ids.length > maxCount) {
+      // cut and use the first maxCount
+      newDetailIdArray = ids.slice(0, maxCount);
     } else {
       // merge with existing
       // remove already added ids and add them at the end
@@ -172,9 +172,9 @@ export const SearchParamsProvider = ({
         (id) => !ids.includes(id)
       );
       newDetailIdArray = filteredArray.concat(ids);
-      if (newDetailIdArray.length > maxTabCount) {
+      if (newDetailIdArray.length > maxCount) {
         newDetailIdArray = newDetailIdArray.slice(
-          newDetailIdArray.length - maxTabCount
+          newDetailIdArray.length - maxCount
         );
       }
     }
