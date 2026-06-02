@@ -5,7 +5,6 @@ import { Explore } from "@inkvisitor/shared/types/query";
 import { ExplorerTable } from "./ExplorerTable/ExplorerTable";
 import { ExploreAction } from "./state";
 import { FloatingSearchContainer } from "../FloatingSearchContainer/FloatingSearchContainer";
-import { COLLAPSED_PANEL_WIDTH } from "Theme/constants";
 
 interface ExplorerBoxProps {
   state: Explore.IExplore;
@@ -20,9 +19,7 @@ interface ExplorerBoxProps {
   onOpenEntityInDetail?: (entityId: string) => void;
 
   isDetailOpen: boolean;
-  queryDetailPanelExpanded: boolean;
-  querySeparatorXPosition: number;
-  layoutWidth: number;
+  detailPanelWidth: number;
 }
 export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   state,
@@ -36,15 +33,9 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   getCachedEntity,
   onOpenEntityInDetail,
   isDetailOpen,
-  queryDetailPanelExpanded,
-  querySeparatorXPosition,
-  layoutWidth,
+  detailPanelWidth,
 }) => {
-  const floatingSearchRightInset = isDetailOpen
-    ? queryDetailPanelExpanded
-      ? layoutWidth - querySeparatorXPosition
-      : COLLAPSED_PANEL_WIDTH
-    : 0;
+  const floatingSearchRightInset = isDetailOpen ? detailPanelWidth : 0;
 
   return (
     <>

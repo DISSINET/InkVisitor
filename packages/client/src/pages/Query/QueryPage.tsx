@@ -236,11 +236,32 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
 
   const isDetailOpen = !!(selectedDetailId || detailIdArray.length > 0);
 
+  const queryLeftPanelExpandedStorageKey = "queryLeftPanelExpanded";
+  const [queryLeftPanelExpanded, setQueryLeftPanelExpanded] = useState(
+    () => localStorage.getItem(queryLeftPanelExpandedStorageKey) !== "false",
+  );
+  const savedLeftPanelSeparatorXRef = useRef<number | null>(null);
+
   const queryDetailPanelExpandedStorageKey = "queryDetailPanelExpanded";
   const [queryDetailPanelExpanded, setQueryDetailPanelExpanded] = useState(
     () => localStorage.getItem(queryDetailPanelExpandedStorageKey) !== "false",
   );
   const savedSeparatorXRef = useRef<number | null>(null);
+
+  const toggleQueryLeftPanel = () => {
+    setQueryLeftPanelExpanded((prev) => {
+      const next = !prev;
+      localStorage.setItem(queryLeftPanelExpandedStorageKey, String(next));
+      if (prev) {
+        savedLeftPanelSeparatorXRef.current = querySeparatorXPosition;
+        if (isDetailOpen && !queryDetailPanelExpanded) {
+          setQueryDetailPanelExpanded(true);
+          localStorage.setItem(queryDetailPanelExpandedStorageKey, "true");
+        }
+      }
+      return next;
+    });
+  };
 
   const toggleQueryDetailPanel = () => {
     setQueryDetailPanelExpanded((prev) => {
@@ -273,22 +294,47 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
   );
 
   useEffect(() => {
+    if (queryLeftPanelExpanded && savedLeftPanelSeparatorXRef.current !== null) {
+      setQuerySeparatorXPosition(savedLeftPanelSeparatorXRef.current);
+      savedLeftPanelSeparatorXRef.current = null;
+    }
+  }, [queryLeftPanelExpanded]);
+
+  useEffect(() => {
     if (queryDetailPanelExpanded && savedSeparatorXRef.current !== null) {
       setQuerySeparatorXPosition(savedSeparatorXRef.current);
       savedSeparatorXRef.current = null;
     }
   }, [queryDetailPanelExpanded]);
 
-  const detailPanelWidth = queryDetailPanelExpanded
-    ? layoutWidth - querySeparatorXPosition
-    : COLLAPSED_PANEL_WIDTH;
-  const firstPanelWidth = isDetailOpen ? layoutWidth - detailPanelWidth : layoutWidth;
+  const detailPanelWidth = useMemo(() => {
+    if (!isDetailOpen) {
+      return 0;
+    }
+    if (!queryDetailPanelExpanded) {
+      return COLLAPSED_PANEL_WIDTH;
+    }
+    return layoutWidth - (queryLeftPanelExpanded ? querySeparatorXPosition : COLLAPSED_PANEL_WIDTH);
+  }, [
+    isDetailOpen,
+    queryDetailPanelExpanded,
+    queryLeftPanelExpanded,
+    layoutWidth,
+    querySeparatorXPosition,
+  ]);
+
+  const leftPanelWidth = useMemo(() => {
+    if (!queryLeftPanelExpanded) {
+      return COLLAPSED_PANEL_WIDTH;
+    }
+    return isDetailOpen ? layoutWidth - detailPanelWidth : layoutWidth;
+  }, [queryLeftPanelExpanded, isDetailOpen, layoutWidth, detailPanelWidth]);
 
   return (
     <>
-      {querySeparatorYPosition > 0 && (
+      {queryLeftPanelExpanded && querySeparatorYPosition > 0 && (
         <LayoutSeparatorHorizontal
-          width={firstPanelWidth}
+          width={leftPanelWidth}
           topPositionMin={QUERY_SEARCH_PANEL_MIN_HEIGHT}
           topPositionMax={contentHeight - QUERY_SEARCH_PANEL_MIN_HEIGHT}
           separatorYPosition={querySeparatorYPosition}
@@ -296,73 +342,119 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
         />
       )}
 
-      {isDetailOpen && queryDetailPanelExpanded && querySeparatorXPosition > 0 && (
-        <LayoutSeparatorVertical
-          leftSideMinWidth={QUERY_LEFT_PANEL_MIN_WIDTH}
-          leftSideMaxWidth={layoutWidth - QUERY_RIGHT_PANEL_MIN_WIDTH}
-          separatorXPosition={querySeparatorXPosition}
-          setSeparatorXPosition={(xPosition) => handleSeparatorXPositionChange(xPosition)}
-        />
-      )}
+      {isDetailOpen &&
+        queryLeftPanelExpanded &&
+        queryDetailPanelExpanded &&
+        querySeparatorXPosition > 0 && (
+          <LayoutSeparatorVertical
+            leftSideMinWidth={QUERY_LEFT_PANEL_MIN_WIDTH}
+            leftSideMaxWidth={layoutWidth - QUERY_RIGHT_PANEL_MIN_WIDTH}
+            separatorXPosition={querySeparatorXPosition}
+            setSeparatorXPosition={(xPosition) => handleSeparatorXPositionChange(xPosition)}
+          />
+        )}
 
-      <Panel width={firstPanelWidth}>
-        <Box noFrame borderColor="white" height={querySeparatorYPosition} label="Search">
-          <MemoizedQueryBox
-            state={queryState}
-            dispatch={queryStateDispatch}
-            isQueryFetching={queryIsFetching}
-            queryError={queryError}
-            queryStateValidity={queryStateValidity}
-            onOpenEntityInDetail={openEntityInDetail}
+      <Panel width={leftPanelWidth}>
+        {queryLeftPanelExpanded ? (
+          <>
+            <Box
+              noFrame
+              borderColor="white"
+              height={querySeparatorYPosition}
+              label="Search"
+              buttons={[
+                <Button
+                  key="toggle-query-left-panel"
+                  inverted
+                  tooltipLabel="collapse query panel"
+                  icon={<RiMenuFoldFill />}
+                  onClick={toggleQueryLeftPanel}
+                />,
+              ]}
+            >
+              <MemoizedQueryBox
+                state={queryState}
+                dispatch={queryStateDispatch}
+                isQueryFetching={queryIsFetching}
+                queryError={queryError}
+                queryStateValidity={queryStateValidity}
+                onOpenEntityInDetail={openEntityInDetail}
+              />
+            </Box>
+            <Box
+              noFrame
+              borderColor="white"
+              height={contentHeight - querySeparatorYPosition}
+              label="Explorer"
+              onHeaderClick={toggleExplorerBoxMaximized}
+              buttons={[
+                <Button
+                  key="toggle-query-left-panel"
+                  inverted
+                  tooltipLabel="collapse query panel"
+                  icon={<RiMenuFoldFill />}
+                  onClick={toggleQueryLeftPanel}
+                />,
+                <Button
+                  key="maximize-explorer-box"
+                  dataTestId="maximize-explorer-box"
+                  inverted
+                  tooltipLabel={
+                    isExplorerAtMaxHeight ? "restore half height" : "maximize explorer box"
+                  }
+                  icon={
+                    isExplorerAtMaxHeight ? (
+                      <BsSquareHalf style={{ transform: "rotate(270deg)" }} />
+                    ) : (
+                      <BsSquareFill />
+                    )
+                  }
+                  onClick={toggleExplorerBoxMaximized}
+                />,
+                <Button
+                  key="refresh queries"
+                  tooltipLabel="refresh data"
+                  inverted
+                  icon={<BiRefresh />}
+                  onClick={handleInvalidateQuery}
+                />,
+              ]}
+            >
+              <MemoizedExplorerBox
+                state={exploreState}
+                height={contentHeight - querySeparatorYPosition}
+                dispatch={exploreStateDispatch}
+                data={queryData}
+                isQueryFetching={queryIsFetching}
+                queryError={queryError}
+                onExport={handleExport}
+                stableSignature={stableSignature}
+                getCachedEntity={getCachedEntity}
+                onOpenEntityInDetail={openEntityInDetail}
+                isDetailOpen={isDetailOpen}
+                detailPanelWidth={detailPanelWidth}
+              />
+            </Box>
+          </>
+        ) : (
+          <Box
+            noFrame
+            borderColor="white"
+            height={contentHeight}
+            label="Query"
+            isExpanded={false}
+            onHeaderClick={toggleQueryLeftPanel}
+            buttons={[
+              <Button
+                key="toggle-query-left-panel"
+                inverted
+                tooltipLabel="expand query panel"
+                icon={<RiMenuUnfoldFill />}
+                onClick={toggleQueryLeftPanel}
+              />,
+            ]}
           />
-        </Box>
-        <Box
-          noFrame
-          borderColor="white"
-          height={contentHeight - querySeparatorYPosition}
-          label="Explorer"
-          onHeaderClick={toggleExplorerBoxMaximized}
-          buttons={[
-            <Button
-              key="maximize-explorer-box"
-              dataTestId="maximize-explorer-box"
-              inverted
-              tooltipLabel={isExplorerAtMaxHeight ? "restore half height" : "maximize explorer box"}
-              icon={
-                isExplorerAtMaxHeight ? (
-                  <BsSquareHalf style={{ transform: "rotate(270deg)" }} />
-                ) : (
-                  <BsSquareFill />
-                )
-              }
-              onClick={toggleExplorerBoxMaximized}
-            />,
-            <Button
-              key="refresh queries"
-              tooltipLabel="refresh data"
-              inverted
-              icon={<BiRefresh />}
-              onClick={handleInvalidateQuery}
-            />,
-          ]}
-        >
-          <MemoizedExplorerBox
-            state={exploreState}
-            height={contentHeight - querySeparatorYPosition}
-            dispatch={exploreStateDispatch}
-            data={queryData}
-            isQueryFetching={queryIsFetching}
-            queryError={queryError}
-            onExport={handleExport}
-            stableSignature={stableSignature}
-            getCachedEntity={getCachedEntity}
-            onOpenEntityInDetail={openEntityInDetail}
-            isDetailOpen={isDetailOpen}
-            queryDetailPanelExpanded={queryDetailPanelExpanded}
-            querySeparatorXPosition={querySeparatorXPosition}
-            layoutWidth={layoutWidth}
-          />
-        </Box>
+        )}
       </Panel>
       {isDetailOpen && (
         <Panel width={detailPanelWidth}>
