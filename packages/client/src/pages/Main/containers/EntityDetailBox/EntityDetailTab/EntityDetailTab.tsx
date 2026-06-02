@@ -1,29 +1,14 @@
-import {
-  FloatingPortal,
-  autoUpdate,
-  offset,
-  useFloating,
-} from "@floating-ui/react";
+import { FloatingPortal, autoUpdate, offset, useFloating } from "@floating-ui/react";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IResponseEntity } from "@inkvisitor/shared/types";
 import { Tooltip, TypeBar } from "components";
 import { EntityTag } from "components/advanced";
 import React, { MouseEventHandler, useRef, useState } from "react";
-import {
-  DragSourceMonitor,
-  DropTargetMonitor,
-  useDrag,
-  useDrop,
-} from "react-dnd";
+import { DragSourceMonitor, DropTargetMonitor, useDrag, useDrop } from "react-dnd";
 import { FiMove } from "react-icons/fi";
 import { DragItem, ItemTypes } from "types";
 import { dndHoverFnHorizontal, getEntityLabel } from "utils/utils";
-import {
-  StyledCgClose,
-  StyledIconWrap,
-  StyledLabel,
-  StyledTab,
-} from "./EntityDetailTabStyles";
+import { StyledCgClose, StyledIconWrap, StyledLabel, StyledTab } from "./EntityDetailTabStyles";
 
 interface EntityDetailTab {
   entity: IResponseEntity;
@@ -43,8 +28,7 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
   moveRow,
   onDragEnd,
 }) => {
-  const [referenceElement, setReferenceElement] =
-    useState<HTMLDivElement | null>(null);
+  const [referenceElement, setReferenceElement] = useState<HTMLDivElement | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [showTag, setShowTag] = useState(false);
@@ -95,9 +79,7 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
         <StyledLabel
           ref={setReferenceElement}
           $isSelected={isSelected}
-          $isItalic={
-            entity?.class === EntityEnums.Class.Statement && !entity?.labels[0]
-          }
+          $isItalic={entity?.class === EntityEnums.Class.Statement && !entity?.labels[0]}
           onClick={onClick}
         >
           {entity?.class && (
@@ -128,6 +110,7 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
             <div
               ref={refs.setFloating}
               style={{
+                zIndex: 200,
                 ...floatingStyles,
               }}
             >
