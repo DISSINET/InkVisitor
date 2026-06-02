@@ -53,14 +53,6 @@ export default class QuerySearch {
     if (!this.root.isValid()) {
       throw new SearchEdgeTypesInvalid();
     }
-    if (
-      !this.root.edges.length &&
-      !(this.root.params.entityClasses || []).length &&
-      !this.root.params.entityId &&
-      !this.root.params.label
-    ) {
-      return [];
-    }
 
     const cacheKey = queryCacheKey(this.queryForCache);
     const cachedIds = getCachedBaseIds(cacheKey);
