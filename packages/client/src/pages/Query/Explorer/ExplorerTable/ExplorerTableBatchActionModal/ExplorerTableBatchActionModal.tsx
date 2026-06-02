@@ -60,6 +60,8 @@ export const ExplorerTableBatchActionModal: React.FC<
             onApply={onApplyAction}
           />
         );
+      case BatchAction.copy_uuids:
+        return null;
     }
   };
 

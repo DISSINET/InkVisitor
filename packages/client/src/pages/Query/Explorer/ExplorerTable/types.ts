@@ -1,5 +1,6 @@
 export enum BatchAction {
   export_csv = "export_csv",
+  copy_uuids = "copy_uuids",
   add_metaprop = "add_metaprop",
   add_reference = "add_reference",
   add_relation = "add_relation",
@@ -12,6 +13,7 @@ export type BatchOption = {
 
 export const batchOptions: BatchOption[] = [
   { value: BatchAction.export_csv, label: "export as csv" },
+  { value: BatchAction.copy_uuids, label: "copy UUIDs to clipboard" },
   { value: BatchAction.add_metaprop, label: "add metaprop" },
   { value: BatchAction.add_reference, label: "add reference" },
   { value: BatchAction.add_relation, label: "add relation" },
