@@ -43,6 +43,7 @@ const SCROLL_WINDOW_UPDATE_DEBOUNCE_MS = 150;
 
 // light CSS classes (avoid dynamic styled props in hot path)
 import { invalidateAllExplorerQueries, useInvalidateExplorerQuery } from "pages/Query/useQueryData";
+import { computeWindowUpdate } from "pages/Query/utils";
 import "../../styles.css";
 import ExplorerTableRow from "./ExplorerTableRow";
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
@@ -476,22 +477,23 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   const handleRowsRendered = ({ startIndex, stopIndex }: any) => {
     const visibleStart = startIndex ?? 0;
     const visibleEnd = stopIndex ?? visibleStart;
-    const targetStart = Math.max(0, visibleStart - OVERSCAN_ROWS);
-    const targetEnd = Math.min(total - 1, visibleEnd + OVERSCAN_ROWS);
-    const targetLimit = Math.max(1, targetEnd - targetStart + 1);
 
-    const approxVisible = Math.ceil(heightTableBody / HEIGHT_ROW_DEFAULT);
-    const maxFetch = Math.max(approxVisible + 2 * OVERSCAN_ROWS, 30);
-    const cappedLimit = Math.min(targetLimit, maxFetch, total);
-
-    const currStart = renderWindow.offset;
-    const currEnd = renderWindow.offset + items.length - 1;
-    const minDelta = 5;
-    const extendsAbove = targetStart < currStart - minDelta;
-    const extendsBelow = targetEnd > currEnd + minDelta;
-    const offsetChanged = Math.abs(targetStart - offset) >= minDelta;
-    const limitChanged = Math.abs(cappedLimit - limit) >= minDelta;
-    const shouldUpdate = extendsAbove || extendsBelow || offsetChanged || limitChanged;
+    const {
+      shouldUpdate,
+      offset: targetOffset,
+      limit: targetLimit,
+    } = computeWindowUpdate({
+      visibleStart,
+      visibleEnd,
+      total,
+      currentOffset: offset,
+      currentLimit: limit,
+      loadedOffset: renderWindow.offset,
+      loadedCount: items.length,
+      viewportHeight: heightTableBody,
+      rowHeight: HEIGHT_ROW_DEFAULT,
+      overscan: OVERSCAN_ROWS,
+    });
 
     if (windowUpdateTimeoutRef.current) {
       clearTimeout(windowUpdateTimeoutRef.current);
@@ -500,7 +502,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       windowUpdateTimeoutRef.current = setTimeout(() => {
         dispatch({
           type: ExploreActionType.setLimitAndOffset,
-          payload: { offset: targetStart, limit: cappedLimit },
+          payload: { offset: targetOffset, limit: targetLimit },
         });
       }, SCROLL_WINDOW_UPDATE_DEBOUNCE_MS);
     }
