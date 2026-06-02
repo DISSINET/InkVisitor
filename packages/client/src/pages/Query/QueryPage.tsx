@@ -124,6 +124,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
   const [explorerBoxMaximized, setExplorerBoxMaximized] = useState(
     () => localStorage.getItem(explorerBoxMaximizedStorageKey) === "true",
   );
+  const savedExplorerSeparatorYRef = useRef<number | null>(null);
 
   const getDefaultSeparatorYPosition = () => contentHeight / 2;
 
@@ -132,11 +133,13 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
       if (explorerBoxMaximized && yPosition > QUERY_SEARCH_PANEL_MIN_HEIGHT) {
         setExplorerBoxMaximized(false);
         localStorage.setItem(explorerBoxMaximizedStorageKey, "false");
+        savedExplorerSeparatorYRef.current = null;
       } else if (
         !explorerBoxMaximized &&
         yPosition === QUERY_SEARCH_PANEL_MIN_HEIGHT &&
         querySeparatorYPosition !== QUERY_SEARCH_PANEL_MIN_HEIGHT
       ) {
+        savedExplorerSeparatorYRef.current = querySeparatorYPosition;
         setExplorerBoxMaximized(true);
         localStorage.setItem(explorerBoxMaximizedStorageKey, "true");
       }
@@ -178,14 +181,20 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
 
   const toggleExplorerBoxMaximized = () => {
     if (isExplorerAtMaxHeight) {
-      const halfHeight = getDefaultSeparatorYPosition();
+      const restoredHeight =
+        savedExplorerSeparatorYRef.current !== null &&
+        savedExplorerSeparatorYRef.current !== QUERY_SEARCH_PANEL_MIN_HEIGHT
+          ? savedExplorerSeparatorYRef.current
+          : getDefaultSeparatorYPosition();
       setExplorerBoxMaximized(false);
       localStorage.setItem(explorerBoxMaximizedStorageKey, "false");
-      setQuerySeparatorYPosition(halfHeight);
-      persistSeparatorYPercent(halfHeight);
+      savedExplorerSeparatorYRef.current = null;
+      setQuerySeparatorYPosition(restoredHeight);
+      persistSeparatorYPercent(restoredHeight);
       return;
     }
 
+    savedExplorerSeparatorYRef.current = querySeparatorYPosition;
     setExplorerBoxMaximized(true);
     localStorage.setItem(explorerBoxMaximizedStorageKey, "true");
     setQuerySeparatorYPosition(QUERY_SEARCH_PANEL_MIN_HEIGHT);
