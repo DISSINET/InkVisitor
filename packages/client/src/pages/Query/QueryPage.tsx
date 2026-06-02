@@ -40,7 +40,10 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     clearAllDetailIds,
     appendDetailId,
     setSelectedDetailId,
+    replaceDetailIds,
   } = useSearchParams();
+
+  const QUERY_DETAIL_MAX_TABS = 15;
   const [queryState, queryStateDispatch] = useReducer(queryReducer, queryStateInitial);
 
   /**
@@ -287,23 +290,55 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     });
   };
 
+  const expandQueryDetailPanel = useCallback(() => {
+    setQueryDetailPanelExpanded((prev) => {
+      if (prev) {
+        return prev;
+      }
+      localStorage.setItem(queryDetailPanelExpandedStorageKey, "true");
+      return true;
+    });
+  }, []);
+
   const openEntityInDetail = useCallback(
     (entityId: string) => {
-      setQueryDetailPanelExpanded((prev) => {
-        if (prev) {
-          return prev;
-        }
-        localStorage.setItem(queryDetailPanelExpandedStorageKey, "true");
-        return true;
-      });
+      expandQueryDetailPanel();
 
       if (detailIdArray.includes(entityId)) {
         setSelectedDetailId(entityId);
       } else {
-        appendDetailId(entityId);
+        appendDetailId(entityId, QUERY_DETAIL_MAX_TABS);
       }
     },
-    [appendDetailId, detailIdArray, setSelectedDetailId],
+    [appendDetailId, detailIdArray, expandQueryDetailPanel, setSelectedDetailId],
+  );
+
+  const openEntitiesInDetail = useCallback(
+    (entityIds: string[]) => {
+      if (entityIds.length === 0) {
+        return;
+      }
+
+      expandQueryDetailPanel();
+
+      let idsToAdd = entityIds;
+      if (entityIds.length > QUERY_DETAIL_MAX_TABS) {
+        toast.info("Maximum number of tabs reached, only the first 15 displayed.");
+        idsToAdd = entityIds.slice(0, QUERY_DETAIL_MAX_TABS);
+      }
+
+      const filteredArray = detailIdArray.filter((id) => !idsToAdd.includes(id));
+      let newDetailIdArray = filteredArray.concat(idsToAdd);
+      if (newDetailIdArray.length > QUERY_DETAIL_MAX_TABS) {
+        newDetailIdArray = newDetailIdArray.slice(
+          newDetailIdArray.length - QUERY_DETAIL_MAX_TABS,
+        );
+      }
+
+      replaceDetailIds(newDetailIdArray);
+      setSelectedDetailId(idsToAdd[idsToAdd.length - 1]);
+    },
+    [detailIdArray, expandQueryDetailPanel, replaceDetailIds, setSelectedDetailId],
   );
 
   useEffect(() => {
@@ -444,6 +479,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
                 stableSignature={stableSignature}
                 getCachedEntity={getCachedEntity}
                 onOpenEntityInDetail={openEntityInDetail}
+                onOpenEntitiesInDetail={openEntitiesInDetail}
                 isDetailOpen={isDetailOpen}
                 detailPanelWidth={detailPanelWidth}
               />
@@ -501,6 +537,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
             ]}
           >
             <MemoizedEntityDetailBox
+              maxTabs={QUERY_DETAIL_MAX_TABS}
               onTabOpen={() => {
                 if (!queryDetailPanelExpanded) {
                   toggleQueryDetailPanel();

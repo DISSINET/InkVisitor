@@ -14,8 +14,9 @@ import { DetailBoxState } from "types";
 
 interface EntityDetailBox {
   onTabOpen?: () => void;
+  maxTabs?: number;
 }
-export const EntityDetailBox: React.FC<EntityDetailBox> = ({ onTabOpen }) => {
+export const EntityDetailBox: React.FC<EntityDetailBox> = ({ onTabOpen, maxTabs = 10 }) => {
   const dispatch = useAppDispatch();
   const ping: number = useAppSelector((state) => state.ping);
   const detailBoxState: DetailBoxState = useAppSelector(
@@ -37,9 +38,9 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({ onTabOpen }) => {
     if (!selectedDetailId && detailIdArray.length) {
       setSelectedDetailId(detailIdArray[0]);
     } else if (selectedDetailId && !detailIdArray.includes(selectedDetailId)) {
-      appendDetailId(selectedDetailId);
+      appendDetailId(selectedDetailId, maxTabs);
     }
-  }, [selectedDetailId, detailIdArray]);
+  }, [selectedDetailId, detailIdArray, maxTabs]);
 
   const [entities, setEntities] = useState<IResponseEntity[]>([]);
 

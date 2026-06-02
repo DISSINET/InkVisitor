@@ -17,6 +17,7 @@ interface ExplorerBoxProps {
   stableSignature?: string;
   getCachedEntity?: (rowIndex: number) => IResponseQueryEntity | undefined;
   onOpenEntityInDetail?: (entityId: string) => void;
+  onOpenEntitiesInDetail?: (entityIds: string[]) => void;
 
   isDetailOpen: boolean;
   detailPanelWidth: number;
@@ -32,6 +33,7 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   stableSignature,
   getCachedEntity,
   onOpenEntityInDetail,
+  onOpenEntitiesInDetail,
   isDetailOpen,
   detailPanelWidth,
 }) => {
@@ -50,6 +52,7 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
         stableSignature={stableSignature}
         getCachedEntity={getCachedEntity}
         onOpenEntityInDetail={onOpenEntityInDetail}
+        onOpenEntitiesInDetail={onOpenEntitiesInDetail}
       />
       <FloatingSearchContainer
         rightInset={floatingSearchRightInset}

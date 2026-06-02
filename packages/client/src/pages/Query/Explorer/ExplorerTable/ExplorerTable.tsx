@@ -58,6 +58,7 @@ interface ExplorerTable {
   stableSignature?: string;
   getCachedEntity?: (rowIndex: number) => IResponseQueryEntity | undefined;
   onOpenEntityInDetail?: (entityId: string) => void;
+  onOpenEntitiesInDetail?: (entityIds: string[]) => void;
 }
 export const ExplorerTable: React.FC<ExplorerTable> = ({
   state,
@@ -70,6 +71,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   onExport,
   stableSignature,
   onOpenEntityInDetail,
+  onOpenEntitiesInDetail,
 }) => {
   const themeContext = useTheme();
   const { detailIdArray, clearAllDetailIds, selectedDetailId } = useSearchParams();
@@ -300,6 +302,13 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   }, [rowsSelected, entityIds]);
 
   const handleApplyBatchAction = async () => {
+    if (batchActionSelected === BatchAction.open_in_detail) {
+      if (selectedEntityIds.length === 0) {
+        return;
+      }
+      onOpenEntitiesInDetail?.(selectedEntityIds);
+      return;
+    }
     if (batchActionSelected === BatchAction.copy_uuids) {
       if (selectedEntityIds.length === 0) {
         return;
