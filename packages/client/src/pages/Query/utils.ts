@@ -105,6 +105,78 @@ export const clampWindow = (
   return { offset: safeOffset, limit: safeLimit };
 };
 
+export interface WindowUpdateInput {
+  /** First/last row index currently rendered by the virtual list. */
+  visibleStart: number;
+  visibleEnd: number;
+  total: number;
+  /** Offset/limit currently in the explore state (the last requested window). */
+  currentOffset: number;
+  currentLimit: number;
+  /** Offset and row count of the data actually loaded/rendered right now. */
+  loadedOffset: number;
+  loadedCount: number;
+  viewportHeight: number;
+  rowHeight: number;
+  overscan: number;
+  /** Minimum offset/limit delta that, on its own, justifies a refetch. */
+  minDelta?: number;
+}
+
+export interface WindowUpdate {
+  shouldUpdate: boolean;
+  offset: number;
+  limit: number;
+}
+
+// Decides whether the windowed query needs to refetch a new (offset, limit) slice
+// for the rows currently in view (plus overscan).
+//
+// Crucially, it refetches whenever the visible range is NOT fully covered by the
+// loaded window — independent of `minDelta`. The old logic only refetched when the
+// change exceeded `minDelta`, so small result sets (e.g. limit:1, total:2) could
+// never grow past the initial window and the extra rows would never load.
+export const computeWindowUpdate = (input: WindowUpdateInput): WindowUpdate => {
+  const {
+    visibleStart,
+    visibleEnd,
+    total,
+    currentOffset,
+    currentLimit,
+    loadedOffset,
+    loadedCount,
+    viewportHeight,
+    rowHeight,
+    overscan,
+  } = input;
+  const minDelta = input.minDelta ?? 5;
+
+  if (total <= 0) {
+    return { shouldUpdate: false, offset: currentOffset, limit: currentLimit };
+  }
+
+  const targetStart = Math.max(0, visibleStart - overscan);
+  const targetEnd = Math.min(total - 1, visibleEnd + overscan);
+  const targetLimit = Math.max(1, targetEnd - targetStart + 1);
+
+  const approxVisible = Math.ceil(viewportHeight / rowHeight);
+  const maxFetch = Math.max(approxVisible + 2 * overscan, 30);
+  const cappedLimit = Math.min(targetLimit, maxFetch, total);
+
+  const loadedStart = loadedOffset;
+  const loadedEnd = loadedOffset + loadedCount - 1;
+
+  // Visible+overscan range not yet loaded -> must fetch (fixes small result sets).
+  const notCovered = targetStart < loadedStart || targetEnd > loadedEnd;
+  // Significant re-centering/resizing of the window during scroll.
+  const offsetChanged = Math.abs(targetStart - currentOffset) >= minDelta;
+  const limitChanged = Math.abs(cappedLimit - currentLimit) >= minDelta;
+
+  const shouldUpdate = notCovered || offsetChanged || limitChanged;
+
+  return { shouldUpdate, offset: targetStart, limit: cappedLimit };
+};
+
 // Builds a deterministic signature for the current query + explore configuration
 // that affects identity and ordering of results. Explicitly excludes the window
 // controls (offset, limit) so different windows share the same stable signature.
