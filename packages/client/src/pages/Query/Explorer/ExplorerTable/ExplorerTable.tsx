@@ -489,12 +489,13 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
 
         <div
           style={{
+            "--qt-row-focused-bg": themeContext.color.tableOpened,
             width: contentWidth,
             minWidth: "100%",
             height: heightBox - 70,
             overflowX: "auto",
             overflowY: "hidden",
-          }}
+          } as React.CSSProperties}
         >
           {/* HEADER (sticky at top of vertical area, shared horizontal scroll) */}
           <div style={{ width: widthTable, minWidth: "100%" }}>
