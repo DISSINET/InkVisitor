@@ -43,7 +43,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     replaceDetailIds,
   } = useSearchParams();
 
-  const QUERY_DETAIL_MAX_TABS = 15;
+  const QUERY_DETAIL_MAX_TABS = 14;
   const [queryState, queryStateDispatch] = useReducer(queryReducer, queryStateInitial);
 
   /**
@@ -323,16 +323,16 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
 
       let idsToAdd = entityIds;
       if (entityIds.length > QUERY_DETAIL_MAX_TABS) {
-        toast.info("Maximum number of tabs reached, only the first 15 displayed.");
+        toast.info(
+          `Maximum number of tabs reached, only the first ${QUERY_DETAIL_MAX_TABS} displayed.`,
+        );
         idsToAdd = entityIds.slice(0, QUERY_DETAIL_MAX_TABS);
       }
 
       const filteredArray = detailIdArray.filter((id) => !idsToAdd.includes(id));
       let newDetailIdArray = filteredArray.concat(idsToAdd);
       if (newDetailIdArray.length > QUERY_DETAIL_MAX_TABS) {
-        newDetailIdArray = newDetailIdArray.slice(
-          newDetailIdArray.length - QUERY_DETAIL_MAX_TABS,
-        );
+        newDetailIdArray = newDetailIdArray.slice(newDetailIdArray.length - QUERY_DETAIL_MAX_TABS);
       }
 
       replaceDetailIds(newDetailIdArray);

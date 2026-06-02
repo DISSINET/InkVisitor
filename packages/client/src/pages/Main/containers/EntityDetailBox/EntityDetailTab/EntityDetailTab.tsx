@@ -3,12 +3,15 @@ import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IResponseEntity } from "@inkvisitor/shared/types";
 import { Tooltip, TypeBar } from "components";
 import { EntityTag } from "components/advanced";
-import React, { MouseEventHandler, useRef, useState } from "react";
+import React, { MouseEventHandler, useLayoutEffect, useRef, useState } from "react";
 import { DragSourceMonitor, DropTargetMonitor, useDrag, useDrop } from "react-dnd";
 import { FiMove } from "react-icons/fi";
 import { DragItem, ItemTypes } from "types";
 import { dndHoverFnHorizontal, getEntityLabel } from "utils/utils";
 import { StyledCgClose, StyledIconWrap, StyledLabel, StyledTab } from "./EntityDetailTabStyles";
+
+/** Minimum tab width (px) to show the drag handle without crowding the close button. */
+const MIN_TAB_WIDTH_FOR_MOVE_ICON = 40;
 
 interface EntityDetailTab {
   entity: IResponseEntity;
@@ -40,6 +43,25 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
   });
 
   const ref = useRef<HTMLDivElement>(null);
+  const [tabWidth, setTabWidth] = useState(0);
+
+  useLayoutEffect(() => {
+    const element = ref.current;
+    if (!element) {
+      return;
+    }
+
+    const updateWidth = () => {
+      setTabWidth(Math.round(element.getBoundingClientRect().width));
+    };
+
+    updateWidth();
+    const resizeObserver = new ResizeObserver(updateWidth);
+    resizeObserver.observe(element);
+    return () => resizeObserver.disconnect();
+  }, []);
+
+  const showMoveIcon = isHovered && tabWidth >= MIN_TAB_WIDTH_FOR_MOVE_ICON;
 
   const [, drop] = useDrop<DragItem>({
     accept: ItemTypes.DETAIL_TAB,
@@ -93,7 +115,7 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
           {!entity ? "..." : getEntityLabel(entity)}
         </StyledLabel>
 
-        {isHovered && (
+        {showMoveIcon && (
           <StyledIconWrap
             onMouseDown={() => {
               setShowTag(true);
