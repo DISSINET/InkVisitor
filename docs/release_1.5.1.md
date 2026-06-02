@@ -10,6 +10,7 @@
 - Added fold of Search box and left side of Explorer page #3031
 - Batch copy of UUIDs of selected entities to clipboard #3024
 - Batch open in detail for selected UUIDs #3046
+- Pasted UUIDs are now sorted by their input order #3041
 
 ### Bug Fixes and Improvements:
 
