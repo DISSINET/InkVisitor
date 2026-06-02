@@ -493,7 +493,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
                 key="toggle-query-detail-panel"
                 inverted
                 tooltipLabel={
-                  queryDetailPanelExpanded ? "collapse detail box" : "expand detail panel"
+                  queryDetailPanelExpanded ? "collapse detail box" : "expand detail box"
                 }
                 icon={queryDetailPanelExpanded ? <RiMenuUnfoldFill /> : <RiMenuFoldFill />}
                 onClick={toggleQueryDetailPanel}
