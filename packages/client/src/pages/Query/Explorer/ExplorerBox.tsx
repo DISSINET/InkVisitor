@@ -4,6 +4,7 @@ import { IResponseQueryEntity } from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { ExplorerTable } from "./ExplorerTable/ExplorerTable";
 import { ExploreAction } from "./state";
+import { FloatingSearchContainer } from "../FloatingSearchContainer/FloatingSearchContainer";
 
 interface ExplorerBoxProps {
   state: Explore.IExplore;
@@ -16,6 +17,9 @@ interface ExplorerBoxProps {
   stableSignature?: string;
   getCachedEntity?: (rowIndex: number) => IResponseQueryEntity | undefined;
   onOpenEntityInDetail?: (entityId: string) => void;
+
+  isDetailOpen: boolean;
+  detailPanelWidth: number;
 }
 export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   state,
@@ -28,20 +32,31 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   stableSignature,
   getCachedEntity,
   onOpenEntityInDetail,
+  isDetailOpen,
+  detailPanelWidth,
 }) => {
+  const floatingSearchRightInset = isDetailOpen ? detailPanelWidth : 0;
+
   return (
-    <ExplorerTable
-      state={state}
-      dispatch={dispatch}
-      data={data}
-      isQueryFetching={isQueryFetching}
-      queryError={queryError}
-      height={height}
-      onExport={onExport}
-      stableSignature={stableSignature}
-      getCachedEntity={getCachedEntity}
-      onOpenEntityInDetail={onOpenEntityInDetail}
-    />
+    <>
+      <ExplorerTable
+        state={state}
+        dispatch={dispatch}
+        data={data}
+        isQueryFetching={isQueryFetching}
+        queryError={queryError}
+        height={height}
+        onExport={onExport}
+        stableSignature={stableSignature}
+        getCachedEntity={getCachedEntity}
+        onOpenEntityInDetail={onOpenEntityInDetail}
+      />
+      <FloatingSearchContainer
+        rightInset={floatingSearchRightInset}
+        filters={state.filters}
+        exploreDispatch={dispatch}
+      />
+    </>
   );
 };
 

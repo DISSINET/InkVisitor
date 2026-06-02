@@ -8,6 +8,7 @@ import { LayoutSeparatorHorizontal, LayoutSeparatorVertical } from "components/a
 import { useSearchParams } from "hooks/useSearchParamsContext";
 import { MemoizedEntityDetailBox } from "pages/Main/containers/EntityDetailBox/EntityDetailBox";
 import { BiRefresh } from "react-icons/bi";
+import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { VscCloseAll } from "react-icons/vsc";
 import { toast } from "react-toastify";
@@ -16,7 +17,6 @@ import { COLLAPSED_PANEL_WIDTH } from "Theme/constants";
 import { floorNumberToOneDecimal } from "utils/utils";
 import { MemoizedExplorerBox } from "./Explorer/ExplorerBox";
 import { exploreReducer, exploreStateInitial } from "./Explorer/state";
-import { FloatingSearchContainer } from "./FloatingSearchContainer/FloatingSearchContainer";
 import { MemoizedQueryBox } from "./Query/QueryBox";
 import { queryReducer, queryStateInitial } from "./Query/state";
 import { getAllEdges, getAllNodes } from "./Query/utils";
@@ -24,6 +24,7 @@ import {
   QUERY_LEFT_PANEL_MIN_WIDTH,
   QUERY_PAGE_SEPARATOR_X_PERCENT_POSITION,
   QUERY_RIGHT_PANEL_MIN_WIDTH,
+  QUERY_SEARCH_PANEL_MIN_HEIGHT,
   QueryValidity,
   QueryValidityProblem,
 } from "./types";
@@ -111,27 +112,62 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     api.queryExport(queryState, exportExplore, rowIndices);
   };
 
-  const handleSeparatorYPositionChange = (xPosition: number) => {
-    if (querySeparatorYPosition !== xPosition) {
-      setQuerySeparatorYPosition(xPosition);
+  const explorerBoxMaximizedStorageKey = "queryExplorerBoxMaximized";
 
-      const separatorYPercentPosition = floorNumberToOneDecimal(
-        xPosition / onePercentOfContentHeight,
-      );
-      localStorage.setItem("querySeparatorYPosition", separatorYPercentPosition.toString());
+  const persistSeparatorYPercent = (yPosition: number) => {
+    const separatorYPercentPosition = floorNumberToOneDecimal(
+      yPosition / onePercentOfContentHeight,
+    );
+    localStorage.setItem("querySeparatorYPosition", separatorYPercentPosition.toString());
+  };
+
+  const [explorerBoxMaximized, setExplorerBoxMaximized] = useState(
+    () => localStorage.getItem(explorerBoxMaximizedStorageKey) === "true",
+  );
+  const savedExplorerSeparatorYRef = useRef<number | null>(null);
+
+  const getDefaultSeparatorYPosition = () => contentHeight / 2;
+
+  const handleSeparatorYPositionChange = (yPosition: number) => {
+    if (querySeparatorYPosition !== yPosition) {
+      if (explorerBoxMaximized && yPosition > QUERY_SEARCH_PANEL_MIN_HEIGHT) {
+        setExplorerBoxMaximized(false);
+        localStorage.setItem(explorerBoxMaximizedStorageKey, "false");
+        savedExplorerSeparatorYRef.current = null;
+      } else if (
+        !explorerBoxMaximized &&
+        yPosition === QUERY_SEARCH_PANEL_MIN_HEIGHT &&
+        querySeparatorYPosition !== QUERY_SEARCH_PANEL_MIN_HEIGHT
+      ) {
+        savedExplorerSeparatorYRef.current = querySeparatorYPosition;
+        setExplorerBoxMaximized(true);
+        localStorage.setItem(explorerBoxMaximizedStorageKey, "true");
+      }
+
+      setQuerySeparatorYPosition(yPosition);
+      persistSeparatorYPercent(yPosition);
     }
   };
 
   const localStorageSeparatorYPosition = localStorage.getItem("querySeparatorYPosition");
-  const [querySeparatorYPosition, setQuerySeparatorYPosition] = useState<number>(
-    localStorageSeparatorYPosition
-      ? Number(localStorageSeparatorYPosition) * onePercentOfContentHeight
-      : contentHeight / 2,
-  );
+  const [querySeparatorYPosition, setQuerySeparatorYPosition] = useState<number>(() => {
+    if (localStorage.getItem(explorerBoxMaximizedStorageKey) === "true") {
+      return QUERY_SEARCH_PANEL_MIN_HEIGHT;
+    }
+    return localStorageSeparatorYPosition
+      ? Number(localStorageSeparatorYPosition) * (contentHeight / 100)
+      : contentHeight / 2;
+  });
 
   const [currentContentHeight, setCurrentContentHeight] = useState(contentHeight);
 
   useEffect(() => {
+    if (explorerBoxMaximized) {
+      setQuerySeparatorYPosition(QUERY_SEARCH_PANEL_MIN_HEIGHT);
+      setCurrentContentHeight(contentHeight);
+      return;
+    }
+
     const onePercentOfLastContentHeight = currentContentHeight / 100;
     const separatorXPercentPosition = floorNumberToOneDecimal(
       querySeparatorYPosition / onePercentOfLastContentHeight,
@@ -139,7 +175,31 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     setQuerySeparatorYPosition(separatorXPercentPosition * onePercentOfContentHeight);
     localStorage.setItem("querySeparatorYPosition", separatorXPercentPosition.toString());
     setCurrentContentHeight(contentHeight);
-  }, [contentHeight]);
+  }, [contentHeight, explorerBoxMaximized]);
+
+  const isExplorerAtMaxHeight = querySeparatorYPosition === QUERY_SEARCH_PANEL_MIN_HEIGHT;
+
+  const toggleExplorerBoxMaximized = () => {
+    if (isExplorerAtMaxHeight) {
+      const restoredHeight =
+        savedExplorerSeparatorYRef.current !== null &&
+        savedExplorerSeparatorYRef.current !== QUERY_SEARCH_PANEL_MIN_HEIGHT
+          ? savedExplorerSeparatorYRef.current
+          : getDefaultSeparatorYPosition();
+      setExplorerBoxMaximized(false);
+      localStorage.setItem(explorerBoxMaximizedStorageKey, "false");
+      savedExplorerSeparatorYRef.current = null;
+      setQuerySeparatorYPosition(restoredHeight);
+      persistSeparatorYPercent(restoredHeight);
+      return;
+    }
+
+    savedExplorerSeparatorYRef.current = querySeparatorYPosition;
+    setExplorerBoxMaximized(true);
+    localStorage.setItem(explorerBoxMaximizedStorageKey, "true");
+    setQuerySeparatorYPosition(QUERY_SEARCH_PANEL_MIN_HEIGHT);
+    persistSeparatorYPercent(QUERY_SEARCH_PANEL_MIN_HEIGHT);
+  };
 
   const handleSeparatorXPositionChange = (xPosition: number) => {
     if (querySeparatorXPosition !== xPosition) {
@@ -185,17 +245,42 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
 
   const isDetailOpen = !!(selectedDetailId || detailIdArray.length > 0);
 
+  const queryLeftPanelExpandedStorageKey = "queryLeftPanelExpanded";
+  const [queryLeftPanelExpanded, setQueryLeftPanelExpanded] = useState(
+    () => localStorage.getItem(queryLeftPanelExpandedStorageKey) !== "false",
+  );
+  const savedLeftPanelSeparatorXRef = useRef<number | null>(null);
+
   const queryDetailPanelExpandedStorageKey = "queryDetailPanelExpanded";
   const [queryDetailPanelExpanded, setQueryDetailPanelExpanded] = useState(
     () => localStorage.getItem(queryDetailPanelExpandedStorageKey) !== "false",
   );
   const savedSeparatorXRef = useRef<number | null>(null);
 
+  const toggleQueryLeftPanel = () => {
+    setQueryLeftPanelExpanded((prev) => {
+      const next = !prev;
+      localStorage.setItem(queryLeftPanelExpandedStorageKey, String(next));
+      if (prev) {
+        savedLeftPanelSeparatorXRef.current = querySeparatorXPosition;
+        if (isDetailOpen && !queryDetailPanelExpanded) {
+          setQueryDetailPanelExpanded(true);
+          localStorage.setItem(queryDetailPanelExpandedStorageKey, "true");
+        }
+      }
+      return next;
+    });
+  };
+
   const toggleQueryDetailPanel = () => {
     setQueryDetailPanelExpanded((prev) => {
       const next = !prev;
       localStorage.setItem(queryDetailPanelExpandedStorageKey, String(next));
       if (!next) {
+        if (!queryLeftPanelExpanded) {
+          setQueryLeftPanelExpanded(true);
+          localStorage.setItem(queryLeftPanelExpandedStorageKey, "true");
+        }
         savedSeparatorXRef.current = querySeparatorXPosition;
       }
       return next;
@@ -222,83 +307,167 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
   );
 
   useEffect(() => {
+    if (queryLeftPanelExpanded && savedLeftPanelSeparatorXRef.current !== null) {
+      setQuerySeparatorXPosition(savedLeftPanelSeparatorXRef.current);
+      savedLeftPanelSeparatorXRef.current = null;
+    }
+  }, [queryLeftPanelExpanded]);
+
+  useEffect(() => {
     if (queryDetailPanelExpanded && savedSeparatorXRef.current !== null) {
       setQuerySeparatorXPosition(savedSeparatorXRef.current);
       savedSeparatorXRef.current = null;
     }
   }, [queryDetailPanelExpanded]);
 
-  const detailPanelWidth = queryDetailPanelExpanded
-    ? layoutWidth - querySeparatorXPosition
-    : COLLAPSED_PANEL_WIDTH;
-  const firstPanelWidth = isDetailOpen ? layoutWidth - detailPanelWidth : layoutWidth;
+  const detailPanelWidth = useMemo(() => {
+    if (!isDetailOpen) {
+      return 0;
+    }
+    if (!queryDetailPanelExpanded) {
+      return COLLAPSED_PANEL_WIDTH;
+    }
+    return layoutWidth - (queryLeftPanelExpanded ? querySeparatorXPosition : COLLAPSED_PANEL_WIDTH);
+  }, [
+    isDetailOpen,
+    queryDetailPanelExpanded,
+    queryLeftPanelExpanded,
+    layoutWidth,
+    querySeparatorXPosition,
+  ]);
 
-  const floatingSearchRightInset = isDetailOpen
-    ? queryDetailPanelExpanded
-      ? layoutWidth - querySeparatorXPosition
-      : COLLAPSED_PANEL_WIDTH
-    : 0;
+  const leftPanelWidth = useMemo(() => {
+    if (!queryLeftPanelExpanded) {
+      return COLLAPSED_PANEL_WIDTH;
+    }
+    return isDetailOpen ? layoutWidth - detailPanelWidth : layoutWidth;
+  }, [queryLeftPanelExpanded, isDetailOpen, layoutWidth, detailPanelWidth]);
 
   return (
     <>
-      {querySeparatorYPosition > 0 && (
+      {queryLeftPanelExpanded && querySeparatorYPosition > 0 && (
         <LayoutSeparatorHorizontal
-          width={firstPanelWidth}
-          topPositionMin={34}
-          topPositionMax={contentHeight - 34}
+          width={leftPanelWidth}
+          topPositionMin={QUERY_SEARCH_PANEL_MIN_HEIGHT}
+          topPositionMax={contentHeight - QUERY_SEARCH_PANEL_MIN_HEIGHT}
           separatorYPosition={querySeparatorYPosition}
           setSeparatorYPosition={(yPosition) => handleSeparatorYPositionChange(yPosition)}
         />
       )}
 
-      {isDetailOpen && queryDetailPanelExpanded && querySeparatorXPosition > 0 && (
-        <LayoutSeparatorVertical
-          leftSideMinWidth={QUERY_LEFT_PANEL_MIN_WIDTH}
-          leftSideMaxWidth={layoutWidth - QUERY_RIGHT_PANEL_MIN_WIDTH}
-          separatorXPosition={querySeparatorXPosition}
-          setSeparatorXPosition={(xPosition) => handleSeparatorXPositionChange(xPosition)}
-        />
-      )}
+      {isDetailOpen &&
+        queryLeftPanelExpanded &&
+        queryDetailPanelExpanded &&
+        querySeparatorXPosition > 0 && (
+          <LayoutSeparatorVertical
+            leftSideMinWidth={QUERY_LEFT_PANEL_MIN_WIDTH}
+            leftSideMaxWidth={layoutWidth - QUERY_RIGHT_PANEL_MIN_WIDTH}
+            separatorXPosition={querySeparatorXPosition}
+            setSeparatorXPosition={(xPosition) => handleSeparatorXPositionChange(xPosition)}
+          />
+        )}
 
-      <Panel width={firstPanelWidth}>
-        <Box noFrame borderColor="white" height={querySeparatorYPosition} label="Search">
-          <MemoizedQueryBox
-            state={queryState}
-            dispatch={queryStateDispatch}
-            isQueryFetching={queryIsFetching}
-            queryError={queryError}
-            queryStateValidity={queryStateValidity}
-            onOpenEntityInDetail={openEntityInDetail}
+      <Panel width={leftPanelWidth}>
+        {queryLeftPanelExpanded ? (
+          <>
+            <Box
+              noFrame
+              borderColor="white"
+              height={querySeparatorYPosition}
+              label="Search"
+              buttons={[
+                <Button
+                  key="toggle-query-left-panel"
+                  inverted
+                  tooltipLabel="collapse left panel"
+                  icon={<RiMenuFoldFill />}
+                  onClick={toggleQueryLeftPanel}
+                />,
+              ]}
+            >
+              <MemoizedQueryBox
+                state={queryState}
+                dispatch={queryStateDispatch}
+                isQueryFetching={queryIsFetching}
+                queryError={queryError}
+                queryStateValidity={queryStateValidity}
+                onOpenEntityInDetail={openEntityInDetail}
+              />
+            </Box>
+            <Box
+              noFrame
+              borderColor="white"
+              height={contentHeight - querySeparatorYPosition}
+              label="Explorer"
+              onHeaderClick={toggleExplorerBoxMaximized}
+              buttons={[
+                <Button
+                  key="refresh queries"
+                  tooltipLabel="refresh data"
+                  inverted
+                  icon={<BiRefresh />}
+                  onClick={handleInvalidateQuery}
+                />,
+                <Button
+                  key="maximize-explorer-box"
+                  dataTestId="maximize-explorer-box"
+                  inverted
+                  tooltipLabel={
+                    isExplorerAtMaxHeight ? "restore half height" : "maximize explorer box"
+                  }
+                  icon={
+                    isExplorerAtMaxHeight ? (
+                      <BsSquareHalf style={{ transform: "rotate(270deg)" }} />
+                    ) : (
+                      <BsSquareFill />
+                    )
+                  }
+                  onClick={toggleExplorerBoxMaximized}
+                />,
+                <Button
+                  key="toggle-query-left-panel"
+                  inverted
+                  tooltipLabel="collapse left panel"
+                  icon={<RiMenuFoldFill />}
+                  onClick={toggleQueryLeftPanel}
+                />,
+              ]}
+            >
+              <MemoizedExplorerBox
+                state={exploreState}
+                height={contentHeight - querySeparatorYPosition}
+                dispatch={exploreStateDispatch}
+                data={queryData}
+                isQueryFetching={queryIsFetching}
+                queryError={queryError}
+                onExport={handleExport}
+                stableSignature={stableSignature}
+                getCachedEntity={getCachedEntity}
+                onOpenEntityInDetail={openEntityInDetail}
+                isDetailOpen={isDetailOpen}
+                detailPanelWidth={detailPanelWidth}
+              />
+            </Box>
+          </>
+        ) : (
+          <Box
+            noFrame
+            borderColor="white"
+            height={contentHeight}
+            label="Query"
+            isExpanded={false}
+            onHeaderClick={toggleQueryLeftPanel}
+            buttons={[
+              <Button
+                key="toggle-query-left-panel"
+                inverted
+                tooltipLabel="expand query panel"
+                icon={<RiMenuUnfoldFill />}
+                onClick={toggleQueryLeftPanel}
+              />,
+            ]}
           />
-        </Box>
-        <Box
-          noFrame
-          borderColor="white"
-          height={contentHeight - querySeparatorYPosition}
-          label="Explorer"
-          buttons={[
-            <Button
-              key="refresh queries"
-              tooltipLabel="refresh data"
-              inverted
-              icon={<BiRefresh />}
-              onClick={handleInvalidateQuery}
-            />,
-          ]}
-        >
-          <MemoizedExplorerBox
-            state={exploreState}
-            height={contentHeight - querySeparatorYPosition}
-            dispatch={exploreStateDispatch}
-            data={queryData}
-            isQueryFetching={queryIsFetching}
-            queryError={queryError}
-            onExport={handleExport}
-            stableSignature={stableSignature}
-            getCachedEntity={getCachedEntity}
-            onOpenEntityInDetail={openEntityInDetail}
-          />
-        </Box>
+        )}
       </Panel>
       {isDetailOpen && (
         <Panel width={detailPanelWidth}>
@@ -324,7 +493,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
                 key="toggle-query-detail-panel"
                 inverted
                 tooltipLabel={
-                  queryDetailPanelExpanded ? "minimize detail panel" : "expand detail panel"
+                  queryDetailPanelExpanded ? "collapse detail box" : "expand detail panel"
                 }
                 icon={queryDetailPanelExpanded ? <RiMenuUnfoldFill /> : <RiMenuFoldFill />}
                 onClick={toggleQueryDetailPanel}
@@ -341,11 +510,6 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
           </Box>
         </Panel>
       )}
-      <FloatingSearchContainer
-        rightInset={floatingSearchRightInset}
-        filters={exploreState.filters}
-        exploreDispatch={exploreStateDispatch}
-      />
     </>
   );
 };

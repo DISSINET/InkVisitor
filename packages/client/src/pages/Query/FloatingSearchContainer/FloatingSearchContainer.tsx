@@ -33,7 +33,7 @@ interface ViewportPosition {
   y: number;
 }
 
-interface FloatingSearchContainerProps {
+interface FloatingSearchContainer {
   /** Width of the right-side panel to keep the container out of (detail panel). */
   rightInset?: number;
   filters: Explore.IExploreSearchFilter[];
@@ -122,6 +122,14 @@ const positionFromStorage = (
   return clampPosition(x, y, panelWidth, panelHeight, rightInset, pageRect);
 };
 
+const viewportToPageRelative = (
+  { x, y }: ViewportPosition,
+  pageRect = getPageContentRect(),
+): ViewportPosition => ({
+  x: x - pageRect.left,
+  y: y - pageRect.top,
+});
+
 const positionToStorage = (
   x: number,
   y: number,
@@ -138,7 +146,7 @@ const positionToStorage = (
   };
 };
 
-export const FloatingSearchContainer: React.FC<FloatingSearchContainerProps> = ({
+export const FloatingSearchContainer: React.FC<FloatingSearchContainer> = ({
   rightInset = 0,
   filters,
   exploreDispatch,
@@ -333,7 +341,6 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainerProps> = (
   );
 
   const handleExpand = () => {
-    syncExpandedPosition(hasCustomExpandedPositionRef.current);
     setIsExpanded(true);
   };
 
@@ -349,45 +356,52 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainerProps> = (
   }, []);
 
   const displayPosition = isExpanded ? expandedPosition : collapsedPosition;
+  const expandedPagePosition = viewportToPageRelative(displayPosition);
 
   return (
-    <FloatingPortal id="page-content">
-      <StyledFloatingRoot $left={displayPosition.x} $top={displayPosition.y}>
-        {isExpanded ? (
-          <StyledExpandedPanel ref={expandedPanelRef}>
-            <StyledExpandedHeader>
-              <StyledDragHandle
-                onPointerDown={handleDragPointerDown}
-                aria-label="Drag search panel"
-              >
-                <span>Search</span>
-              </StyledDragHandle>
-              <StyledCloseButtonWrap>
-                <Button
-                  icon={<GrClose size={14} />}
-                  onClick={handleClose}
-                  noBorder
-                  color="black"
-                  noBackground
-                  inverted
-                />
-              </StyledCloseButtonWrap>
-            </StyledExpandedHeader>
-            <StyledExpandedContent>
-              <FloatingSearchForm dispatch={exploreDispatch} />
-            </StyledExpandedContent>
-          </StyledExpandedPanel>
-        ) : (
-          <StyledCollapsedButton
-            type="button"
-            onClick={handleExpand}
-            aria-label="Open search panel"
-            aria-expanded={false}
+    <>
+      {!isExpanded && (
+        <StyledCollapsedButton
+          type="button"
+          onClick={handleExpand}
+          aria-label="Open search panel"
+          aria-expanded={false}
+        >
+          <BiSearch size={22} />
+        </StyledCollapsedButton>
+      )}
+      {isExpanded && (
+        <FloatingPortal id="page-content">
+          <StyledFloatingRoot
+            $left={expandedPagePosition.x}
+            $top={expandedPagePosition.y}
           >
-            <BiSearch size={22} />
-          </StyledCollapsedButton>
-        )}
-      </StyledFloatingRoot>
-    </FloatingPortal>
+            <StyledExpandedPanel ref={expandedPanelRef}>
+              <StyledExpandedHeader>
+                <StyledDragHandle
+                  onPointerDown={handleDragPointerDown}
+                  aria-label="Drag search panel"
+                >
+                  <span>Search</span>
+                </StyledDragHandle>
+                <StyledCloseButtonWrap>
+                  <Button
+                    icon={<GrClose size={14} />}
+                    onClick={handleClose}
+                    noBorder
+                    color="black"
+                    noBackground
+                    inverted
+                  />
+                </StyledCloseButtonWrap>
+              </StyledExpandedHeader>
+              <StyledExpandedContent>
+                <FloatingSearchForm dispatch={exploreDispatch} />
+              </StyledExpandedContent>
+            </StyledExpandedPanel>
+          </StyledFloatingRoot>
+        </FloatingPortal>
+      )}
+    </>
   );
 };

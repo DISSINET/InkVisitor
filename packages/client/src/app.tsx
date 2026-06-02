@@ -42,7 +42,7 @@ const clockPerformance = (
   actualTime: any,
   baseTime: any,
   startTime: any,
-  commitTime: any
+  commitTime: any,
 ) => {
   console.log({
     profilerId,
@@ -124,7 +124,7 @@ export const App: React.FC = () => {
         <QueryClientProvider client={queryClient}>
           <div style={{ fontSize: "16px" }}>
             {/* fontSize zooms query devtools to normal size */}
-            <ReactQueryDevtools initialIsOpen={false} />
+            <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />
           </div>
           <DndProvider backend={HTML5Backend}>
             <BrowserRouter basename={process.env.ROOT_URL}>
