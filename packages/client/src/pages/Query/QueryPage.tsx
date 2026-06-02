@@ -268,6 +268,10 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
       const next = !prev;
       localStorage.setItem(queryDetailPanelExpandedStorageKey, String(next));
       if (!next) {
+        if (!queryLeftPanelExpanded) {
+          setQueryLeftPanelExpanded(true);
+          localStorage.setItem(queryLeftPanelExpandedStorageKey, "true");
+        }
         savedSeparatorXRef.current = querySeparatorXPosition;
       }
       return next;
@@ -366,7 +370,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
                 <Button
                   key="toggle-query-left-panel"
                   inverted
-                  tooltipLabel="collapse query panel"
+                  tooltipLabel="collapse left panel"
                   icon={<RiMenuFoldFill />}
                   onClick={toggleQueryLeftPanel}
                 />,
@@ -389,11 +393,11 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
               onHeaderClick={toggleExplorerBoxMaximized}
               buttons={[
                 <Button
-                  key="toggle-query-left-panel"
+                  key="refresh queries"
+                  tooltipLabel="refresh data"
                   inverted
-                  tooltipLabel="collapse query panel"
-                  icon={<RiMenuFoldFill />}
-                  onClick={toggleQueryLeftPanel}
+                  icon={<BiRefresh />}
+                  onClick={handleInvalidateQuery}
                 />,
                 <Button
                   key="maximize-explorer-box"
@@ -412,11 +416,11 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
                   onClick={toggleExplorerBoxMaximized}
                 />,
                 <Button
-                  key="refresh queries"
-                  tooltipLabel="refresh data"
+                  key="toggle-query-left-panel"
                   inverted
-                  icon={<BiRefresh />}
-                  onClick={handleInvalidateQuery}
+                  tooltipLabel="collapse left panel"
+                  icon={<RiMenuFoldFill />}
+                  onClick={toggleQueryLeftPanel}
                 />,
               ]}
             >
@@ -480,7 +484,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
                 key="toggle-query-detail-panel"
                 inverted
                 tooltipLabel={
-                  queryDetailPanelExpanded ? "minimize detail panel" : "expand detail panel"
+                  queryDetailPanelExpanded ? "collapse detail box" : "expand detail panel"
                 }
                 icon={queryDetailPanelExpanded ? <RiMenuUnfoldFill /> : <RiMenuFoldFill />}
                 onClick={toggleQueryDetailPanel}
