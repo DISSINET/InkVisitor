@@ -72,6 +72,49 @@ export default class Results<T extends { id: string }> {
     );
   }
 
+  /**
+   * Order items to follow the order of the provided ids (the order the user typed
+   * them into the Explore UUIDs filter). Matching is case-insensitive; item casing
+   * is preserved. Ids not present in items are skipped, and any items not present in
+   * the id list are appended last in their original relative order (defensive: after
+   * the UUIDs intersection there should be none).
+   */
+  orderByIds(ids: string[]): void {
+    if (!this.items || !this.items.length) {
+      return;
+    }
+
+    const itemByLowerId = new Map<string, string>();
+    for (const item of this.items) {
+      const key = item.toLowerCase();
+      if (!itemByLowerId.has(key)) {
+        itemByLowerId.set(key, item);
+      }
+    }
+
+    const ordered: string[] = [];
+    const usedKeys = new Set<string>();
+
+    for (const id of ids) {
+      const key = id.toLowerCase();
+      const item = itemByLowerId.get(key);
+      if (item !== undefined && !usedKeys.has(key)) {
+        ordered.push(item);
+        usedKeys.add(key);
+      }
+    }
+
+    for (const item of this.items) {
+      const key = item.toLowerCase();
+      if (!usedKeys.has(key)) {
+        ordered.push(item);
+        usedKeys.add(key);
+      }
+    }
+
+    this.items = ordered;
+  }
+
   sort(sortData: Explore.IExploreColumnSort | undefined): void {
     if (!this.items || !this.items.length) {
       return;

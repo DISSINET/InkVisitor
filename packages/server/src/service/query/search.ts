@@ -14,6 +14,7 @@ import {
   queryCacheKey,
   setCachedBaseIds,
 } from "./query-base-cache";
+import { getRowIdsFilter } from "./explore-ids-filter";
 
 export default class QuerySearch {
   static MAX_LIMIT = 100;
@@ -86,8 +87,15 @@ export default class QuerySearch {
 
     await this.results.applyExploreFilters(db, this.explore);
 
-    // sort
-    this.results.sort(this.explore.sort);
+    // When the UUIDs filter is active, order rows by the order the ids were typed
+    // into the filter (column sort is ignored while ids are present); otherwise use
+    // the regular sort.
+    const rowIdsFilter = getRowIdsFilter(this.explore.filters);
+    if (rowIdsFilter?.ids.length) {
+      this.results.orderByIds(rowIdsFilter.ids);
+    } else {
+      this.results.sort(this.explore.sort);
+    }
 
     const filteredIds = this.results.filter(this.explore);
     const filtered = await Entity.findEntitiesByIds(db, filteredIds);

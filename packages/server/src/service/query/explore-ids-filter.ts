@@ -16,6 +16,8 @@ export const applyRowIdsFilter = (
     return items;
   }
 
-  const allowed = new Set(filter.ids);
-  return items.filter((id) => allowed.has(id));
+  // DB ids are lowercase, but user-pasted filter ids may be mixed/upper case.
+  // Match case-insensitively so the intersection isn't silently emptied.
+  const allowed = new Set(filter.ids.map((id) => id.toLowerCase()));
+  return items.filter((id) => allowed.has(id.toLowerCase()));
 };
