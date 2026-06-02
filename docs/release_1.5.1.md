@@ -2,14 +2,14 @@
 
 ### Explorer:
 
-- Implemented AND / OR logic when more than one edge assigned to root node #3026
+- Implemented AND / OR logic when more than one edge is assigned to root node #3026
 - Added negative conditions for edges #2968
-- Implemented filters from Entity search #3034
+- Added filters from Entity search #3034
 - Implemented use cases for Metaprops, In-Statement props and Relations #1479
-- Allowed editing Relations in Explorer columns #3052
-- Added fold to Search and to left side of Explorer page #3031
-- Implemented batch copy of UUIDs of selected entities to clipboard #3024
-- Allowed batch open in detail for selected UUIDs #3046
+- Implemented editing relations in Explorer columns #3052
+- Added fold of Search box and left side of Explorer page #3031
+- Batch copy of UUIDs of selected entities to clipboard #3024
+- Batch open in detail for selected UUIDs #3046
 
 ### Bug Fixes and Improvements:
 
