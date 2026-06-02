@@ -87,7 +87,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     entities,
     total: incomingTotal,
     entityIds,
-  } = data ?? lastData ?? { entities: [], total: 0, entityIds: [] };
+  } = data ?? lastData ?? { entities: [], total: 0, entityIds: [] as string[] };
 
   const { columns, limit, offset, filters } = state;
 
@@ -95,8 +95,8 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
 
   const [rowLastClicked, setRowLastClicked] = useState<number>(-1);
   const [rowFocused, setRowFocused] = useState<number>(-1);
-  const [rowsSelected, setRowsSelected] = useState<number[]>([]);
-  const rowsSelectedSet = useMemo(() => new Set(rowsSelected), [rowsSelected]);
+  const [selectedEntityIds, setSelectedEntityIds] = useState<string[]>([]);
+  const selectedEntityIdsSet = useMemo(() => new Set(selectedEntityIds), [selectedEntityIds]);
   const rowLastClickedRef = useRef<number>(-1);
   useEffect(() => {
     rowLastClickedRef.current = rowLastClicked;
@@ -124,12 +124,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       setTotal(incomingTotal);
     }
   }, [incomingTotal, isQueryFetching]);
-
-  useEffect(() => {
-    setRowsSelected([]);
-    setRowLastClicked(-1);
-    setRowFocused(-1);
-  }, [filters]);
 
   const queryClient = useQueryClient();
   const updateEntityMutation = useMutation({
@@ -257,49 +251,81 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   const headerHeight = 100;
   const heightTableBody = heightBox - headerHeight;
 
+  const getEntityIdAtRow = useCallback(
+    (rowIndex: number): string | undefined => {
+      const ids = entityIds ?? [];
+      if (rowIndex >= 0 && rowIndex < ids.length) {
+        return ids[rowIndex];
+      }
+      const cachedEntity = getCachedEntity?.(rowIndex);
+      return cachedEntity?.entity?.id;
+    },
+    [entityIds, getCachedEntity],
+  );
+
   const handleRowClick = useCallback((rowId: number) => {
     setRowFocused((current) => (current === rowId ? -1 : rowId));
   }, []);
 
-  const handleRowSelect = useCallback((rowId: number, isWithShift: boolean = false) => {
-    setRowLastClicked(rowId);
-
-    setRowsSelected((prev) => {
-      const isRowAlreadySelected = prev.includes(rowId);
-
-      let newSelection = isRowAlreadySelected ? [] : [rowId];
-
-      if (isWithShift && rowLastClickedRef.current !== -1 && rowLastClickedRef.current !== rowId) {
-        const start = Math.min(rowLastClickedRef.current, rowId);
-        const end = Math.max(rowLastClickedRef.current, rowId);
-        const rangeSize = end - start + 1;
-        newSelection = Array.from({ length: rangeSize }, (_, i) => start + i);
+  const handleRowSelect = useCallback(
+    (rowId: number, isWithShift: boolean = false) => {
+      const entityId = getEntityIdAtRow(rowId);
+      if (!entityId) {
+        return;
       }
 
-      if (isRowAlreadySelected) {
-        return prev.filter((selectedRow) => selectedRow !== rowId);
-      } else {
-        return [...new Set([...prev, ...newSelection])];
-      }
-    });
-  }, []);
+      setRowLastClicked(rowId);
+
+      setSelectedEntityIds((prev) => {
+        const isAlreadySelected = prev.includes(entityId);
+
+        if (isAlreadySelected) {
+          return prev.filter((id) => id !== entityId);
+        }
+
+        let idsToAdd = [entityId];
+        if (
+          isWithShift &&
+          rowLastClickedRef.current !== -1 &&
+          rowLastClickedRef.current !== rowId
+        ) {
+          const start = Math.min(rowLastClickedRef.current, rowId);
+          const end = Math.max(rowLastClickedRef.current, rowId);
+          idsToAdd = Array.from({ length: end - start + 1 }, (_, i) =>
+            getEntityIdAtRow(start + i),
+          ).filter((id): id is string => Boolean(id));
+        }
+
+        return [...new Set([...prev, ...idsToAdd])];
+      });
+    },
+    [getEntityIdAtRow],
+  );
 
   const handleAllRowsSelect = (isSelected: boolean) => {
     if (isSelected) {
-      setRowsSelected(Array.from({ length: total }).map((_, i) => i));
+      const allIds = entityIds ?? [];
+      setSelectedEntityIds((prev) => [...new Set([...prev, ...allIds])]);
     } else {
-      setRowsSelected([]);
+      setSelectedEntityIds([]);
     }
   };
 
   const handleExport = (selectedColumnIds?: string[]) => {
-    onExport(rowsSelected, selectedColumnIds);
+    const ids = entityIds ?? [];
+    const rowIndices = selectedEntityIds
+      .map((entityId) => ids.indexOf(entityId))
+      .filter((index) => index >= 0);
+    onExport(rowIndices, selectedColumnIds);
   };
 
-  const selectedEntityIds = useMemo(() => {
-    const ids = entityIds ?? [];
-    return rowsSelected.map((rowIndex) => ids[rowIndex]).filter((id): id is string => Boolean(id));
-  }, [rowsSelected, entityIds]);
+  const currentEntityIds = entityIds ?? [];
+  const selectedInCurrentCount = useMemo(
+    () => currentEntityIds.filter((id) => selectedEntityIdsSet.has(id)).length,
+    [currentEntityIds, selectedEntityIdsSet],
+  );
+  const isAllCurrentSelected = total > 0 && selectedInCurrentCount === total;
+  const hasPartialSelection = selectedInCurrentCount > 0 && !isAllCurrentSelected;
 
   const handleApplyBatchAction = async () => {
     if (batchActionSelected === BatchAction.open_in_detail) {
@@ -356,7 +382,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       const { index, style } = props;
       const isOdd = Boolean(index % 2 === 0);
 
-      const isSelected = rowsSelectedSet.has(index);
       const dataOffset = dataSourceOffset;
       const itemIndex = index - dataOffset;
 
@@ -374,6 +399,8 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       }
 
       const isPlaceholder = !rowItem;
+      const rowEntityId = rowItem?.entity?.id ?? getEntityIdAtRow(index);
+      const isSelected = rowEntityId ? selectedEntityIdsSet.has(rowEntityId) : false;
       const placeholderLabel = rowItem?.entity?.labels?.[0] ?? index;
 
       return (
@@ -430,7 +457,8 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       );
     },
     [
-      rowsSelectedSet,
+      selectedEntityIdsSet,
+      getEntityIdAtRow,
       dataSourceOffset,
       items,
       widthTable,
@@ -496,7 +524,9 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           isNewColumnOpen={isNewColumnOpen}
           batchActionSelected={batchActionSelected}
           setBatchActionSelected={setBatchActionSelected}
-          rowsSelected={rowsSelected}
+          selectedCount={selectedEntityIds.length}
+          isAllCurrentSelected={isAllCurrentSelected}
+          hasPartialSelection={hasPartialSelection}
           setRowLastClicked={setRowLastClicked}
           rowsTotal={total}
           onAllRowsSelect={handleAllRowsSelect}
@@ -506,14 +536,16 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
         />
 
         <div
-          style={{
-            "--qt-row-focused-bg": themeContext.color.tableOpened,
-            width: contentWidth,
-            minWidth: "100%",
-            height: heightBox - 70,
-            overflowX: "auto",
-            overflowY: "hidden",
-          } as React.CSSProperties}
+          style={
+            {
+              "--qt-row-focused-bg": themeContext.color.tableOpened,
+              width: contentWidth,
+              minWidth: "100%",
+              height: heightBox - 70,
+              overflowX: "auto",
+              overflowY: "hidden",
+            } as React.CSSProperties
+          }
         >
           {/* HEADER (sticky at top of vertical area, shared horizontal scroll) */}
           <div style={{ width: widthTable, minWidth: "100%" }}>
