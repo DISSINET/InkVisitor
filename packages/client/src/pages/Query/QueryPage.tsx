@@ -375,6 +375,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
               borderColor="white"
               height={querySeparatorYPosition}
               label="Search"
+              onHeaderClick={toggleExplorerBoxMaximized}
               buttons={[
                 <Button
                   key="toggle-query-left-panel"
@@ -399,7 +400,6 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
               borderColor="white"
               height={contentHeight - querySeparatorYPosition}
               label="Explorer"
-              onHeaderClick={toggleExplorerBoxMaximized}
               buttons={[
                 <Button
                   key="refresh queries"
