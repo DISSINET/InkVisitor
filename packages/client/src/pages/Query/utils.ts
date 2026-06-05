@@ -401,3 +401,34 @@ export const applyPasteToDraft = (
   selectionEnd: number,
   pasted: string,
 ): string => draft.slice(0, selectionStart) + pasted + draft.slice(selectionEnd);
+
+// UUID slot template: x = hex, V = version [1-5], R = variant [89ab], - = literal.
+const UUID_TEMPLATE = "xxxxxxxx-xxxx-Vxxx-Rxxx-xxxxxxxxxxxx";
+
+/**
+ * True when `text` could still become a valid entity UUID by typing more chars
+ * (i.e. it matches the UUID template up to its length). Empty text is viable;
+ * anything that breaks the pattern (bad char, wrong version/variant, too long,
+ * or contains spaces) is not. Used to flag clearly-invalid draft input.
+ */
+export const isViableUuidPrefix = (text: string): boolean => {
+  if (text.length > UUID_TEMPLATE.length) {
+    return false;
+  }
+  for (let i = 0; i < text.length; i++) {
+    const slot = UUID_TEMPLATE[i];
+    const ch = text[i];
+    const ok =
+      slot === "-"
+        ? ch === "-"
+        : slot === "V"
+          ? /[1-5]/.test(ch)
+          : slot === "R"
+            ? /[89ab]/i.test(ch)
+            : /[0-9a-f]/i.test(ch);
+    if (!ok) {
+      return false;
+    }
+  }
+  return true;
+};

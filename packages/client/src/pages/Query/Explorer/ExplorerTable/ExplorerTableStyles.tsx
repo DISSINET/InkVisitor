@@ -159,11 +159,11 @@ export const StyledLabelFilterCheckboxWrapper = styled.div`
 export const StyledExploreFilters = styled.div`
   display: flex;
   flex-direction: row;
-  gap: 2rem;
+  gap: 1rem;
   flex: 1;
   min-width: 10rem;
-  max-width: 60%;
-  margin: 0 3rem;
+  max-width: 75%;
+  margin: 0 1.5rem;
 `;
 
 export const StyledIdsFilter = styled.div`
@@ -231,7 +231,7 @@ export const StyledUuidChipRemove = styled.button`
   }
 `;
 
-export const StyledChipTextInput = styled.input`
+export const StyledChipTextInput = styled.input<{ $invalid?: boolean }>`
   flex: 1;
   min-width: 8rem;
   border: none;
@@ -239,9 +239,17 @@ export const StyledChipTextInput = styled.input`
   background: transparent;
   padding: 0.2rem;
   font-size: ${({ theme }) => theme.fontSize["xs"]};
-  color: ${({ theme }) => theme.color["primary"]};
+  font-weight: ${({ $invalid }) => ($invalid ? 700 : "inherit")};
+  color: ${({ theme, $invalid }) =>
+    $invalid ? theme.color["danger"] : theme.color["primary"]};
+  text-decoration: ${({ $invalid }) => ($invalid ? "underline wavy" : "none")};
+  text-decoration-color: ${({ theme, $invalid }) =>
+    $invalid ? theme.color["danger"] : "transparent"};
+  text-decoration-skip-ink: none;
   &::placeholder {
     color: ${({ theme }) => theme.color["gray"][500]};
+    font-weight: inherit;
+    text-decoration: none;
   }
 `;
 

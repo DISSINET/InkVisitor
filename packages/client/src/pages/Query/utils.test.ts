@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   applyPasteToDraft,
   computeWindowUpdate,
+  isViableUuidPrefix,
   mergeTokensIntoIds,
   unparsedRemainder,
 } from "./utils";
@@ -150,5 +151,44 @@ describe("applyPasteToDraft", () => {
 
   it("replaces only the selected range", () => {
     expect(applyPasteToDraft("hello world", 0, 5, "bye")).toBe("bye world");
+  });
+});
+
+describe("isViableUuidPrefix", () => {
+  const FULL = "000033c5-472f-49a8-8d75-d82f955cce0b";
+
+  it("treats empty string as viable (nothing typed yet)", () => {
+    expect(isViableUuidPrefix("")).toBe(true);
+  });
+
+  it("accepts a partially-typed prefix of a valid uuid", () => {
+    expect(isViableUuidPrefix("000033c5")).toBe(true);
+    expect(isViableUuidPrefix("000033c5-472f")).toBe(true);
+    expect(isViableUuidPrefix("000033c5-472f-49a8-8d75")).toBe(true);
+  });
+
+  it("accepts a complete valid uuid", () => {
+    expect(isViableUuidPrefix(FULL)).toBe(true);
+  });
+
+  it("rejects a non-hex character", () => {
+    expect(isViableUuidPrefix("d2e3232sdsd")).toBe(false);
+    expect(isViableUuidPrefix("g0003")).toBe(false);
+  });
+
+  it("rejects an invalid version nibble (must be 1-5)", () => {
+    expect(isViableUuidPrefix("000033c5-472f-69a8")).toBe(false);
+  });
+
+  it("rejects an invalid variant nibble (must be 8/9/a/b)", () => {
+    expect(isViableUuidPrefix("000033c5-472f-49a8-0d75")).toBe(false);
+  });
+
+  it("rejects text with spaces (leftover junk)", () => {
+    expect(isViableUuidPrefix("foo bar")).toBe(false);
+  });
+
+  it("rejects anything longer than a uuid", () => {
+    expect(isViableUuidPrefix(`${FULL}0`)).toBe(false);
   });
 });

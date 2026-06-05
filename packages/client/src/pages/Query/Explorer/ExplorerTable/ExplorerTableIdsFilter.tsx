@@ -2,6 +2,7 @@ import { Explore } from "@inkvisitor/shared/types/query";
 import {
   applyPasteToDraft,
   entityIdsEqual,
+  isViableUuidPrefix,
   mergeTokensIntoIds,
   unparsedRemainder,
 } from "pages/Query/utils";
@@ -85,6 +86,10 @@ const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({ filters
     );
   };
 
+  // The draft is flagged invalid only once it can no longer become a valid UUID,
+  // so a half-typed UUID stays neutral while junk (e.g. "foo bar") is emphasized.
+  const draftInvalid = draft.trim() !== "" && !isViableUuidPrefix(draft.trim());
+
   return (
     <StyledIdsFilter>
       <StyledChipInputBox onClick={() => inputRef.current?.focus()}>
@@ -107,6 +112,8 @@ const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({ filters
         <StyledChipTextInput
           ref={inputRef}
           value={draft}
+          $invalid={draftInvalid}
+          title={draftInvalid ? "Not a valid UUID — only complete UUIDs are allowed" : undefined}
           placeholder={appliedIds.length === 0 ? "Add entity UUIDs (paste or type)…" : "Add UUID…"}
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={handleKeyDown}
