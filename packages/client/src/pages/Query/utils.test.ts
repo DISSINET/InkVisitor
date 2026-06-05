@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { computeWindowUpdate } from "./utils";
+import {
+  applyPasteToDraft,
+  computeWindowUpdate,
+  mergeTokensIntoIds,
+  unparsedRemainder,
+} from "./utils";
 
 describe("computeWindowUpdate", () => {
   const base = {
@@ -68,5 +73,82 @@ describe("computeWindowUpdate", () => {
       loadedCount: 0,
     });
     expect(r.shouldUpdate).toBe(false);
+  });
+});
+
+describe("mergeTokensIntoIds", () => {
+  const ID1 = "000033c5-472f-49a8-8d75-d82f955cce0b";
+  const ID2 = "a1b2c3d4-5678-41a8-9d75-d82f955cce0b";
+  const ID3 = "ffffffff-1111-2222-8888-cccccccccccc";
+
+  it("adds a single valid uuid to an empty list", () => {
+    expect(mergeTokensIntoIds([], ID1)).toEqual([ID1]);
+  });
+
+  it("returns the existing ids unchanged when the text has no valid uuid", () => {
+    expect(mergeTokensIntoIds([ID1], "foo bar not-a-uuid")).toEqual([ID1]);
+  });
+
+  it("appends several pasted uuids preserving paste order after existing ids", () => {
+    expect(mergeTokensIntoIds([ID1], `${ID2}, ${ID3}`)).toEqual([ID1, ID2, ID3]);
+  });
+
+  it("ignores a uuid already present, case-insensitively", () => {
+    expect(mergeTokensIntoIds([ID1], ID1.toUpperCase())).toEqual([ID1]);
+  });
+
+  it("dedups repeated uuids within the same pasted text", () => {
+    expect(mergeTokensIntoIds([], `${ID2} ${ID2}`)).toEqual([ID2]);
+  });
+
+  it("drops invalid tokens but keeps the valid ones from the same paste", () => {
+    expect(mergeTokensIntoIds([], `foo ${ID1} 12345 ${ID2}`)).toEqual([ID1, ID2]);
+  });
+});
+
+describe("unparsedRemainder", () => {
+  const ID1 = "000033c5-472f-49a8-8d75-d82f955cce0b";
+  const ID2 = "a1b2c3d4-5678-41a8-9d75-d82f955cce0b";
+
+  it("returns empty string for empty or whitespace-only input", () => {
+    expect(unparsedRemainder("")).toBe("");
+    expect(unparsedRemainder("   ")).toBe("");
+  });
+
+  it("returns empty string when the text is exactly one valid uuid", () => {
+    expect(unparsedRemainder(ID1)).toBe("");
+  });
+
+  it("returns empty string when every token is a valid uuid", () => {
+    expect(unparsedRemainder(`${ID1} ${ID2}`)).toBe("");
+  });
+
+  it("keeps a partially-typed (invalid) uuid", () => {
+    expect(unparsedRemainder("000033c5-472f")).toBe("000033c5-472f");
+  });
+
+  it("keeps non-uuid words and drops the extracted valid uuid", () => {
+    expect(unparsedRemainder(`foo ${ID1} bar`)).toBe("foo bar");
+  });
+
+  it("keeps the leftover junk after extracting a pasted uuid", () => {
+    expect(unparsedRemainder(`${ID1}, garbage`)).toBe("garbage");
+  });
+});
+
+describe("applyPasteToDraft", () => {
+  const UUID = "000033c5-472f-49a8-8d75-d82f955cce0b";
+
+  it("replaces the whole draft when everything is selected", () => {
+    // Bug: select-all + paste must replace, not append. "d2e3232sdsd" is 11 chars.
+    expect(applyPasteToDraft("d2e3232sdsd", 0, 11, UUID)).toBe(UUID);
+  });
+
+  it("inserts at the cursor when nothing is selected", () => {
+    expect(applyPasteToDraft("abc", 3, 3, "X")).toBe("abcX");
+  });
+
+  it("replaces only the selected range", () => {
+    expect(applyPasteToDraft("hello world", 0, 5, "bye")).toBe("bye world");
   });
 });

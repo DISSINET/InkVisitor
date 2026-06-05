@@ -365,3 +365,39 @@ export const entityIdsEqual = (a: string[], b: string[]): boolean => {
   const setB = new Set(b.map((id) => id.toLowerCase()));
   return a.every((id) => setB.has(id.toLowerCase()));
 };
+
+/**
+ * Merges valid UUIDs parsed from `rawText` into `existingIds`, appending any not
+ * already present (case-insensitive) in their parsed order. Existing order is
+ * preserved; invalid tokens and duplicates are dropped. Returns the same array
+ * reference when nothing new is added.
+ */
+export const mergeTokensIntoIds = (existingIds: string[], rawText: string): string[] => {
+  const present = new Set(existingIds.map((id) => id.toLowerCase()));
+  const toAdd = parseEntityIdsFromText(rawText).filter((id) => !present.has(id.toLowerCase()));
+  return toAdd.length > 0 ? [...existingIds, ...toAdd] : existingIds;
+};
+
+/**
+ * Returns the text left over after removing every valid-UUID token, space-joined.
+ * Used to keep a half-typed / non-UUID draft in the input instead of clearing it
+ * once the complete UUIDs have been extracted into chips.
+ */
+export const unparsedRemainder = (text: string): string =>
+  text
+    .split(/[\s,\t\n\r]+/)
+    .map((token) => token.trim())
+    .filter((token) => token !== "" && !ENTITY_ID_RE.test(token))
+    .join(" ");
+
+/**
+ * Applies a paste to `draft` the way a normal text input would: the text between
+ * `selectionStart` and `selectionEnd` is replaced by `pasted` (so select-all then
+ * paste replaces everything, and an empty selection inserts at the cursor).
+ */
+export const applyPasteToDraft = (
+  draft: string,
+  selectionStart: number,
+  selectionEnd: number,
+  pasted: string,
+): string => draft.slice(0, selectionStart) + pasted + draft.slice(selectionEnd);

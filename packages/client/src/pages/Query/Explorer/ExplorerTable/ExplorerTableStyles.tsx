@@ -179,3 +179,85 @@ export const StyledIdsFilterHint = styled.span`
   color: ${({ theme }) => theme.color["gray"][600]};
   white-space: nowrap;
 `;
+
+export const StyledChipInputBox = styled.div`
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: ${({ theme }) => theme.space[10]};
+  max-height: 8rem;
+  overflow-y: auto;
+  padding: 0.3rem 0.5rem;
+  cursor: text;
+  background-color: ${({ theme }) => theme.color["white"]};
+  border-width: ${({ theme }) => theme.borderWidth[1]};
+  border-style: solid;
+  border-color: ${({ theme }) => theme.color["gray"][400]};
+  border-radius: ${({ theme }) => theme.borderRadius["xs"]};
+  &:focus-within {
+    border-color: ${({ theme }) => theme.color["info"]};
+  }
+`;
+
+export const StyledUuidChip = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  max-width: 100%;
+  padding: 0.1rem 0.2rem 0.1rem 0.5rem;
+  font-family: monospace;
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  color: ${({ theme }) => theme.color["primary"]};
+  background-color: ${({ theme }) => theme.color["gray"][200]};
+  border-width: ${({ theme }) => theme.borderWidth[1]};
+  border-style: solid;
+  border-color: ${({ theme }) => theme.color["gray"][400]};
+  border-radius: ${({ theme }) => theme.borderRadius["xs"]};
+  white-space: nowrap;
+`;
+
+export const StyledUuidChipRemove = styled.button`
+  display: inline-flex;
+  align-items: center;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: ${({ theme }) => theme.color["gray"][600]};
+  cursor: pointer;
+  &:hover {
+    color: ${({ theme }) => theme.color["danger"]};
+  }
+`;
+
+export const StyledChipTextInput = styled.input`
+  flex: 1;
+  min-width: 8rem;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 0.2rem;
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  color: ${({ theme }) => theme.color["primary"]};
+  &::placeholder {
+    color: ${({ theme }) => theme.color["gray"][500]};
+  }
+`;
+
+export const StyledClearAllButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  flex-shrink: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  color: ${({ theme }) => theme.color["gray"][600]};
+  cursor: pointer;
+  white-space: nowrap;
+  &:hover {
+    color: ${({ theme }) => theme.color["danger"]};
+  }
+`;
