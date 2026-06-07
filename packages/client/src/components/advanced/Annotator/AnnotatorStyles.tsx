@@ -209,3 +209,61 @@ export const StyledAnnotatorButtons = styled.div`
   justify-content: space-between;
   padding-left: ${({ theme }) => theme.space[1]};
 `;
+
+export const StyledWarningsPanel = styled.div`
+  display: flex;
+  flex-direction: column;
+  border: 1px solid ${({ theme }) => theme.color.warningBorder};
+  border-radius: ${({ theme }) => theme.borderRadius["default"]};
+  background-color: ${({ theme }) => theme.color.warningMessage};
+  overflow: hidden;
+`;
+
+export const StyledWarningsHeader = styled.button`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+  width: 100%;
+  padding: ${({ theme }) => theme.space[2]} ${({ theme }) => theme.space[3]};
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  color: ${({ theme }) => theme.color.warningText};
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+  font-variant-caps: small-caps;
+`;
+
+export const StyledWarningsHeaderSpacer = styled.div`
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+`;
+
+export const StyledWarningsList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.space[2]};
+  max-height: 13rem;
+  overflow-y: auto;
+  padding: ${({ theme }) => theme.space[2]} ${({ theme }) => theme.space[3]}
+    ${({ theme }) => theme.space[3]};
+  background-color: ${({ theme }) => theme.color.white};
+`;
+
+export const StyledWarningRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+`;
+
+export const StyledWarningKind = styled.div`
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[1]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  font-variant-caps: small-caps;
+  color: ${({ theme }) => theme.color.warningText};
+  white-space: nowrap;
+`;

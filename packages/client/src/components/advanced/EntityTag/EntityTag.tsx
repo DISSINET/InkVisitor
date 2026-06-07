@@ -27,7 +27,7 @@ import {
 } from "./EntityTagStyles";
 import useDragDrop from "./useDragDrop";
 
-interface UnlinkButton {
+export interface UnlinkButton {
   onClick: () => void;
   color?: keyof ThemeColor;
   tooltipLabel?: string;

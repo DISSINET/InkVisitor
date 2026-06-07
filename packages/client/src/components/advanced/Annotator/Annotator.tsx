@@ -14,7 +14,7 @@ import { FaPen, FaRegSave, FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 
-import { Annotator, EditMode, editModeDisplayLabel, Tag } from "@inkvisitor/annotator/src/lib";
+import { Annotator, AsymmetricalAnchor, EditMode, editModeDisplayLabel, Tag } from "@inkvisitor/annotator/src/lib";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import {
   IDocument,
@@ -44,6 +44,7 @@ import { collectStatementAnchors, getStatementOrderByIndex } from "utils/utils";
 import { EntityCreateModal } from "..";
 import { useAnnotator } from "./AnnotatorContext";
 import TextAnnotatorMenu from "./AnnotatorMenu";
+import { AnnotatorWarningsPanel } from "./AnnotatorWarningsPanel";
 import {
   StyledAnnotatorButtons,
   StyledAnnotatorMenu,
@@ -235,6 +236,7 @@ export const TextAnnotator = ({
   const mainCanvas = useRef<HTMLCanvasElement>(null);
   const scroller = useRef<HTMLDivElement>(null);
   const lines = useRef<HTMLCanvasElement>(null);
+  const warningsPanelRef = useRef<HTMLDivElement>(null);
   const annotatorRef = useRef<Annotator | null>(null);
   annotatorRef.current = annotator;
 
@@ -267,6 +269,11 @@ export const TextAnnotator = ({
   const [selectedAnchors, setSelectedAnchors] = useState<Tag[]>([]);
   const [selectionStartIndex, setSelectionStartIndex] = useState<number>(-1);
   const [storedEntities, setStoredEntities] = useState<Record<string, IEntity | false>>({});
+  const [asymmetricalAnchors, setAsymmetricalAnchors] = useState<AsymmetricalAnchor[]>([]);
+  // Rendered height of the warnings panel (incl. its bottom gap). The canvas has
+  // a fixed pixel height fed by the parent, so the panel's height must be
+  // subtracted from it to keep the bottom controls visible (#2601).
+  const [warningsPanelHeight, setWarningsPanelHeight] = useState<number>(0);
 
   /** XML (RAW) mode: pointer over `<entityId>` / `</entityId>` markup → preview chip at cursor */
   const [xmlMarkupAnchorHover, setXmlMarkupAnchorHover] = useState<{
@@ -796,11 +803,23 @@ export const TextAnnotator = ({
 
     newAnnotator.onTextChanged((text) => {
       setLocalTextContent(text);
+      // Keyboard edits (typing/backspace) mutate the text without running the
+      // lib's warning checks (only paste/replace/anchor ops do). Re-validate
+      // here so broken anchors surface immediately while editing (#2601).
+      newAnnotator.checkAnchors();
     });
 
     newAnnotator.onWarning((message) => {
       toast.warning(message);
     });
+
+    // Structured asymmetrical-anchor warnings drive the warnings panel (#2601).
+    newAnnotator.onAsymmetricalAnchors((anchors) => {
+      setAsymmetricalAnchors(anchors);
+    });
+    // Seed the panel immediately for breakage already present on load, so we
+    // don't wait for the constructor's deferred first check to emit.
+    setAsymmetricalAnchors(newAnnotator.validateAnchors());
 
     // Set initial text content
     const initialContent = dataDocument?.content ?? "no text";
@@ -830,12 +849,28 @@ export const TextAnnotator = ({
     }
   }, [displayLineNumbers, hlEntities ?? [], dataDocumentIsFetching, theme, dataDocument, isSaving]);
 
-  // Resize the annotator when the width or height changes
+  // Measure the warnings panel so the canvas can give up exactly its height.
+  useEffect(() => {
+    const el = warningsPanelRef.current;
+    if (!el) {
+      return;
+    }
+    const update = () => setWarningsPanelHeight(el.offsetHeight);
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  // The canvas keeps its fixed pixel height minus whatever the panel occupies.
+  const canvasHeight = Math.max(0, height - warningsPanelHeight);
+
+  // Resize the annotator when the width or available canvas height changes
   useEffect(() => {
     if (annotator && mainCanvas.current) {
       annotator?.resize();
     }
-  }, [width, height]);
+  }, [width, canvasHeight]);
 
   useEffect(() => {
     if (storedAnnotatorScrollPosition !== null) {
@@ -900,6 +935,17 @@ export const TextAnnotator = ({
   const onUpdateAnchor = (anchor: Tag, elvl: EntityEnums.Elvl) => {
     annotator?.updateAnchor(anchor, { elvl });
     handleSaveNewContent(true, true);
+  };
+
+  // Unlink a broken (asymmetrical) anchor from the warnings panel (#2601).
+  // removeAsymmetricalAnchor re-parses, redraws and re-runs the warning checks,
+  // so the panel updates itself via the onAsymmetricalAnchors subscription.
+  const onRemoveAsymmetricalAnchor = (tagName: string, position: number) => {
+    const removed = annotator?.removeAsymmetricalAnchor(tagName, position);
+    if (removed) {
+      handleSaveNewContent(true, true);
+      handleRefreshEntityAndStatement(tagName);
+    }
   };
 
   const isMenuDisplayed = useMemo<boolean>(() => {
@@ -1060,6 +1106,19 @@ export const TextAnnotator = ({
       />
 
       <div
+        ref={warningsPanelRef}
+        style={{
+          paddingBottom: asymmetricalAnchors.length > 0 ? "0.5rem" : 0,
+        }}
+      >
+        <AnnotatorWarningsPanel
+          anchors={asymmetricalAnchors}
+          onUnlink={onRemoveAsymmetricalAnchor}
+          isLoading={isSaving || isSavingWithoutRefresh}
+        />
+      </div>
+
+      <div
         style={{
           width,
           position: "relative",
@@ -1175,7 +1234,7 @@ export const TextAnnotator = ({
               style={{
                 outline: "none",
                 width: wLineNumbers,
-                height,
+                height: canvasHeight,
                 backgroundColor: theme?.color.white,
                 color: theme?.color.gray[450],
                 borderRadius: "4px 0px 0px 4px",
@@ -1190,7 +1249,7 @@ export const TextAnnotator = ({
             ref={mainCanvas}
             id="statement-list-annotator-mainCanvas"
             style={{
-              height: height,
+              height: canvasHeight,
               width: wTextArea,
               backgroundColor: theme.color.white,
               color: theme.color.text,
