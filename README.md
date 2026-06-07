@@ -94,8 +94,20 @@ Package containing typescript definitions, types and enums, that should be avail
 
 ### Install
 
-Install `pnpm` version `>=10.1.0`. You can switch the `pnpm` versions by running `corepack prepare pnpm@<version> --activate`.
-Go to all three folders in `packages` (`client`, `server`, `database`) and run `pnpm i` in each of them.
+This is a pnpm + Turborepo monorepo. Use node `22` (`.nvmrc`) and pnpm `11`.
+
+From the repository root:
+
+```bash
+pnpm install        # installs all workspace packages
+pnpm dev            # runs client + server (with @inkvisitor/shared rebuilt/watched)
+pnpm build          # builds all packages
+pnpm typecheck      # typechecks all packages
+pnpm test           # runs all test suites
+```
+
+Internal packages are referenced as `@inkvisitor/shared` and `@inkvisitor/annotator` via `workspace:*`.
+
 Before continuing, please ensure that you have a database instance set up and running — see the [deployment tutorial](./docs/deployment-tutorial.md) for the database setup and how to run each component locally.
 
 ## Deploy

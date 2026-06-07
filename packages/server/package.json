@@ -1,6 +1,6 @@
 {
   "name": "inkvisitor-server",
-  "version": "1.5.0.5",
+  "version": "1.5.1",
   "engines": {
     "node": "^22.13.1",
     "pnpm": "^11.1.2"
@@ -9,6 +9,7 @@
     "lint": "tslint --project \"tsconfig.json\"",
     "test": "jest -w 1 -t",
     "start": "ENV_FILE=development nodemon",
+    "dev": "ENV_FILE=development nodemon",
     "build": "tsgo --build tsconfig.prod.json",
     "typecheck": "tsgo --noEmit",
     "start:dist": "node -r module-alias/register ./dist/server/src",
@@ -18,7 +19,7 @@
   "nodemonConfig": {
     "watch": [
       "src",
-      "../shared"
+      "../shared/dist"
     ],
     "ext": "ts, html",
     "ignore": [
@@ -27,7 +28,6 @@
     "exec": "ts-node -r ./src/register-paths.ts ./src"
   },
   "_moduleAliases": {
-    "@inkvisitor/shared": "dist/shared",
     "@common": "dist/server/src/common",
     "@modules": "dist/server/src/modules",
     "@service": "dist/server/src/service",
@@ -35,6 +35,7 @@
     "@middlewares": "dist/server/src/middlewares"
   },
   "dependencies": {
+    "@inkvisitor/shared": "workspace:*",
     "nodemailer": "^6.9.16",
     "@types/cli-color": "^2.0.2",
     "@types/node-cron": "^3.0.11",

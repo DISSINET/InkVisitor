@@ -1,0 +1,59 @@
+{
+  "name": "@inkvisitor/shared",
+  "version": "1.5.0",
+  "private": true,
+  "engines": {
+    "node": "^22.13.1",
+    "pnpm": "^11.1.2"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsgo",
+    "dev": "tsgo --watch",
+    "typecheck": "tsgo --noEmit"
+  },
+  "exports": {
+    "./types": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./types/index.ts",
+      "require": "./dist/types/index.js",
+      "default": "./dist/types/index.js"
+    },
+    "./types/*": {
+      "types": "./dist/types/*.d.ts",
+      "import": "./types/*.ts",
+      "require": "./dist/types/*.js",
+      "default": "./dist/types/*.js"
+    },
+    "./enums": {
+      "types": "./dist/enums/index.d.ts",
+      "import": "./enums/index.ts",
+      "require": "./dist/enums/index.js",
+      "default": "./dist/enums/index.js"
+    },
+    "./enums/*": {
+      "types": "./dist/enums/*.d.ts",
+      "import": "./enums/*.ts",
+      "require": "./dist/enums/*.js",
+      "default": "./dist/enums/*.js"
+    },
+    "./dictionaries": {
+      "types": "./dist/dictionaries/index.d.ts",
+      "import": "./dictionaries/index.ts",
+      "require": "./dist/dictionaries/index.js",
+      "default": "./dist/dictionaries/index.js"
+    },
+    "./dictionaries/*": {
+      "types": "./dist/dictionaries/*.d.ts",
+      "import": "./dictionaries/*.ts",
+      "require": "./dist/dictionaries/*.js",
+      "default": "./dist/dictionaries/*.js"
+    }
+  },
+  "devDependencies": {
+    "@typescript/native-preview": "beta",
+    "typescript": "npm:@typescript/typescript6@^6.0.0"
+  }
+}

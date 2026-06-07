@@ -512,6 +512,32 @@ export default class Relation implements IRelationModel {
   }
 
   /**
+   * Searches for relations linked to a single entity in the forward direction only.
+   * For asymmetrical relations "forward" means the entity occupies entityIds[0]
+   * (the subject/source side) - inverse relations, where the entity is the target
+   * (entityIds[1], e.g. the superclass/category), are excluded. Symmetrical
+   * relations have no fixed direction and are always returned regardless of position.
+   * @param db
+   * @param entityId
+   * @param relType optional relation type filter
+   * @returns array of relation interfaces
+   */
+  static async findForwardForEntity<T extends RelationTypes.IRelation>(
+    db: Connection,
+    entityId: string,
+    relType?: RelationEnums.Type
+  ): Promise<T[]> {
+    const relations = await Relation.findForEntities<T>(db, [entityId], relType);
+
+    return relations.filter((relation) => {
+      if (!RelationTypes.RelationRules[relation.type]?.asymmetrical) {
+        return true;
+      }
+      return relation.entityIds.indexOf(entityId) === 0;
+    });
+  }
+
+  /**
    * Retrieves all relation entries filtered by basic parameters like type
    * @param db
    * @param relType

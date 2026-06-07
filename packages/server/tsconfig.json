@@ -14,8 +14,7 @@
       "@middlewares/*": ["./src/middlewares/*"],
       "@models/*": ["./src/models/*"],
       "@modules/*": ["./src/modules/*"],
-      "@service/*": ["./src/service/*"],
-      "@inkvisitor/shared/*": ["./../shared/*"]
+      "@service/*": ["./src/service/*"]
     },
     "removeComments": true,
     "resolveJsonModule": true,

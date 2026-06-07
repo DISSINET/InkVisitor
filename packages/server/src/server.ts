@@ -22,9 +22,9 @@ import dbMiddleware from "@middlewares/db";
 import profilerMiddleware from "@middlewares/profiler";
 import headersProtectionMiddleware from "@middlewares/headers-protection";
 import errorsMiddleware, { catchAll } from "@middlewares/errors";
+import serveClientApp from "@middlewares/static-client";
 import { validateJwt } from "@common/auth";
 import compression from "compression";
-import * as path from "path";
 import rateLimit from "express-rate-limit";
 import "@models/events/register";
 import { Request, Response } from "express";
@@ -51,47 +51,11 @@ server.use(
 
 server.use(cors());
 
-if (!!process.env.STATIC_PATH) {
-  if (process.env.STATIC_PATH === "/") {
-    server.use((req, res, next) => {
-      // allow all requests not starting with /api
-      if (!req.path.startsWith("/api")) {
-        if (req.path.indexOf(".") === -1) {
-          // Read and modify index.html before sending
-          const fs = require("fs");
-          const indexPath = path.join(__dirname, "..", "..", "..", "..", "client/dist/index.html");
-
-          fs.readFile(indexPath, "utf8", (err: NodeJS.ErrnoException | null, data: string) => {
-            if (err) {
-              return next(err);
-            }
-
-            if (process.env.ENV) {
-              data = data.replace(
-                "</head>",
-                `  <!-- Injected content -->
-                     <script>window.appConfig = { env: "${
-                       process.env.ENV || "development"
-                     }" };</script>
-                  </head>`
-              );
-            }
-
-            res.type("html");
-            res.send(data);
-          });
-        } else {
-          // everythink else will go here
-          express.static("../client/dist")(req, res, next);
-        }
-      } else {
-        // fallback to handlers below
-        next();
-      }
-    });
-  } else if (process.env.STATIC_PATH !== "") {
-    server.use(process.env.STATIC_PATH as string, express.static("../client/dist"));
-  }
+const staticPath = process.env.STATIC_PATH;
+if (staticPath === "/") {
+  server.use(serveClientApp);
+} else if (staticPath) {
+  server.use(staticPath, express.static("../client/dist"));
 }
 
 server.use(express.json({ limit: "150mb" }));

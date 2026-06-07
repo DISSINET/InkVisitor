@@ -2,7 +2,6 @@ import { autoUpdate, FloatingPortal, offset, useFloating } from "@floating-ui/re
 import { SearchEnums } from "@inkvisitor/shared/enums";
 import {
   IRequestSearch,
-  IRequestSearchRootValidity,
 } from "@inkvisitor/shared/types/request-search";
 import { Button, ButtonGroup } from "components";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -24,7 +23,22 @@ import {
 import { FOURTH_PANEL_MIN_WIDTH } from "Theme/constants";
 import { useAppSelector } from "redux/hooks";
 
-const advancedOptions = SearchEnums.AdvancedOptions;
+/** Shown on Query page floating panel — excluded from Main search advanced-options picker. */
+const queryPageOnlyAdvancedOptions: SearchEnums.AdvancedOption[] = [
+  SearchEnums.AdvancedOption.CreatedAt,
+  SearchEnums.AdvancedOption.UpdatedAt,
+  SearchEnums.AdvancedOption.CreatedBy,
+  SearchEnums.AdvancedOption.UpdatedBy,
+  SearchEnums.AdvancedOption.EditedBy,
+  SearchEnums.AdvancedOption.RootValidity,
+];
+
+export const mainPageAdvancedSearchOptions: SearchEnums.AdvancedOption[] =
+  SearchEnums.AdvancedOptions.filter(
+    (option) => !queryPageOnlyAdvancedOptions.includes(option)
+  );
+
+const advancedOptions = mainPageAdvancedSearchOptions;
 interface EntitySearchAdvancedOptions {
   expandedOptions: SearchEnums.AdvancedOption[];
   setExpandedOptions: (options: SearchEnums.AdvancedOption[]) => void;
@@ -112,29 +126,13 @@ export const EntitySearchAdvancedOptions: React.FC<EntitySearchAdvancedOptions> 
         case SearchEnums.AdvancedOption.Status:
           return Boolean(searchData.status);
         case SearchEnums.AdvancedOption.Language:
-          return Boolean(searchData.language);
+          return searchData.language !== undefined;
         case SearchEnums.AdvancedOption.Territory:
           return Boolean(searchData.territoryId);
         case SearchEnums.AdvancedOption.CoOccurrence:
           return Boolean(searchData.cooccurrenceId);
         case SearchEnums.AdvancedOption.ReferencedTo:
           return Boolean(searchData.haveReferenceTo);
-        case SearchEnums.AdvancedOption.CreatedAt:
-          return searchData.createdDate !== undefined;
-        case SearchEnums.AdvancedOption.UpdatedAt:
-          return searchData.updatedDate !== undefined;
-        case SearchEnums.AdvancedOption.CreatedBy:
-          return Boolean(searchData.createdBy);
-        case SearchEnums.AdvancedOption.UpdatedBy:
-          return Boolean(searchData.updatedBy);
-        case SearchEnums.AdvancedOption.EditedBy:
-          return Boolean(searchData.editedBy);
-        case SearchEnums.AdvancedOption.RootValidity:
-          return (
-            searchData.isRootInvalid !== undefined &&
-            searchData.isRootInvalid !== null &&
-            searchData.isRootInvalid !== IRequestSearchRootValidity.Any
-          );
         default:
           return false;
       }
