@@ -17,17 +17,12 @@ import { Loader } from "components";
 import { CMetaProp } from "constructors";
 
 import { useResizeObserver, useSearchParams, useTheme } from "hooks";
-import { toast } from "react-toastify";
 import { ExploreAction, ExploreActionType } from "../state";
-import { ExplorerTableBatchActionModal } from "./ExplorerTableBatchActionModal/ExplorerTableBatchActionModal";
 import ExplorerTableNewColumnPanel from "./ExplorerTableNewColumnPanel/ExplorerTableNewColumnPanel";
 import { StyledBody, StyledTableWrapper } from "./ExplorerTableStyles";
-import ExploreTableControl from "./ExploreTableControl";
 
 import ExploreTableHeader from "./ExploreTableHeader";
 import {
-  BatchAction,
-  batchOptions,
   HEIGHT_ROW_DEFAULT,
   WIDTH_COLUMN_DEFAULT,
   WIDTH_COLUMN_EUC,
@@ -42,7 +37,7 @@ const OVERSCAN_ROWS = 10;
 const SCROLL_WINDOW_UPDATE_DEBOUNCE_MS = 150;
 
 // light CSS classes (avoid dynamic styled props in hot path)
-import { invalidateAllExplorerQueries, useInvalidateExplorerQuery } from "pages/Query/useQueryData";
+import { invalidateAllExplorerQueries } from "pages/Query/useQueryData";
 import { computeWindowUpdate } from "pages/Query/utils";
 import "../../styles.css";
 import ExplorerTableRow from "./ExplorerTableRow";
@@ -55,24 +50,32 @@ interface ExplorerTable {
   isQueryFetching: boolean;
   queryError: Error | null;
   height: number;
-  onExport: (rowsSelected: number[], selectedColumnIds?: string[]) => void;
-  stableSignature?: string;
   getCachedEntity?: (rowIndex: number) => IResponseQueryEntity | undefined;
   onOpenEntityInDetail?: (entityId: string) => void;
-  onOpenEntitiesInDetail?: (entityIds: string[]) => void;
+
+  // Row selection + new-column state is owned above (ExplorerBox) so the shared
+  // control bar can drive it; the table consumes it as controlled props.
+  selectedEntityIdsSet: Set<string>;
+  rowLastClicked: number;
+  getEntityIdAtRow: (rowIndex: number) => string | undefined;
+  onRowSelect: (rowId: number, isWithShift?: boolean) => void;
+  isNewColumnOpen: boolean;
+  setIsNewColumnOpen: (value: boolean) => void;
 }
 export const ExplorerTable: React.FC<ExplorerTable> = ({
   state,
   dispatch,
   data,
   isQueryFetching,
-  queryError,
   getCachedEntity,
   height: heightBox,
-  onExport,
-  stableSignature,
   onOpenEntityInDetail,
-  onOpenEntitiesInDetail,
+  selectedEntityIdsSet,
+  rowLastClicked,
+  getEntityIdAtRow,
+  onRowSelect,
+  isNewColumnOpen,
+  setIsNewColumnOpen,
 }) => {
   const themeContext = useTheme();
   const { detailIdArray, clearAllDetailIds, selectedDetailId } = useSearchParams();
@@ -90,20 +93,13 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     entityIds,
   } = data ?? lastData ?? { entities: [], total: 0, entityIds: [] as string[] };
 
-  const { limit, offset, filters } = state;
+  const { limit, offset } = state;
   const columns =
     state.view.mode === Explore.EViewMode.Table ? state.view.columns : [];
 
   const [total, setTotal] = useState(0);
 
-  const [rowLastClicked, setRowLastClicked] = useState<number>(-1);
   const [rowFocused, setRowFocused] = useState<number>(-1);
-  const [selectedEntityIds, setSelectedEntityIds] = useState<string[]>([]);
-  const selectedEntityIdsSet = useMemo(() => new Set(selectedEntityIds), [selectedEntityIds]);
-  const rowLastClickedRef = useRef<number>(-1);
-  useEffect(() => {
-    rowLastClickedRef.current = rowLastClicked;
-  }, [rowLastClicked]);
   // Keep offset/limit for the data currently rendered to avoid flashing incorrect rows
   const [renderWindow, setRenderWindow] = useState<{
     offset: number;
@@ -116,11 +112,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   // Compute the offset that matches the CURRENT data source (data or lastData)
   // This fixes the lag where renderWindow.offset is stale during the render cycle
   const dataSourceOffset = data && data.entities?.length > 0 ? offset : renderWindow.offset;
-
-  const [batchActionSelected, setBatchActionSelected] = useState<BatchAction>(
-    batchOptions[0].value,
-  );
-  const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
 
   useEffect(() => {
     if (!isQueryFetching) {
@@ -137,10 +128,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       invalidateAllExplorerQueries(queryClient);
     },
   });
-
-  const [isNewColumnOpen, setIsNewColumnOpen] = useState(false);
-
-  const invalidateExplorerQuery = useInvalidateExplorerQuery(stableSignature);
 
   const handleCreateColumn = (column: Explore.IExploreColumn) => {
     dispatch({
@@ -251,103 +238,12 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     height: contentHeight,
   } = useResizeObserver<HTMLDivElement>();
 
-  const headerHeight = 100;
+  const headerHeight = 50;
   const heightTableBody = heightBox - headerHeight;
-
-  const getEntityIdAtRow = useCallback(
-    (rowIndex: number): string | undefined => {
-      const ids = entityIds ?? [];
-      if (rowIndex >= 0 && rowIndex < ids.length) {
-        return ids[rowIndex];
-      }
-      const cachedEntity = getCachedEntity?.(rowIndex);
-      return cachedEntity?.entity?.id;
-    },
-    [entityIds, getCachedEntity],
-  );
 
   const handleRowClick = useCallback((rowId: number) => {
     setRowFocused((current) => (current === rowId ? -1 : rowId));
   }, []);
-
-  const handleRowSelect = useCallback(
-    (rowId: number, isWithShift: boolean = false) => {
-      const entityId = getEntityIdAtRow(rowId);
-      if (!entityId) {
-        return;
-      }
-
-      setRowLastClicked(rowId);
-
-      setSelectedEntityIds((prev) => {
-        const isAlreadySelected = prev.includes(entityId);
-
-        if (isAlreadySelected) {
-          return prev.filter((id) => id !== entityId);
-        }
-
-        let idsToAdd = [entityId];
-        if (
-          isWithShift &&
-          rowLastClickedRef.current !== -1 &&
-          rowLastClickedRef.current !== rowId
-        ) {
-          const start = Math.min(rowLastClickedRef.current, rowId);
-          const end = Math.max(rowLastClickedRef.current, rowId);
-          idsToAdd = Array.from({ length: end - start + 1 }, (_, i) =>
-            getEntityIdAtRow(start + i),
-          ).filter((id): id is string => Boolean(id));
-        }
-
-        return [...new Set([...prev, ...idsToAdd])];
-      });
-    },
-    [getEntityIdAtRow],
-  );
-
-  const handleAllRowsSelect = (isSelected: boolean) => {
-    if (isSelected) {
-      const allIds = entityIds ?? [];
-      setSelectedEntityIds((prev) => [...new Set([...prev, ...allIds])]);
-    } else {
-      setSelectedEntityIds([]);
-    }
-  };
-
-  const handleExport = (selectedColumnIds?: string[]) => {
-    const ids = entityIds ?? [];
-    const rowIndices = selectedEntityIds
-      .map((entityId) => ids.indexOf(entityId))
-      .filter((index) => index >= 0);
-    onExport(rowIndices, selectedColumnIds);
-  };
-
-  const currentEntityIds = entityIds ?? [];
-  const selectedInCurrentCount = useMemo(
-    () => currentEntityIds.filter((id) => selectedEntityIdsSet.has(id)).length,
-    [currentEntityIds, selectedEntityIdsSet],
-  );
-  const isAllCurrentSelected = total > 0 && selectedInCurrentCount === total;
-  const hasPartialSelection = selectedInCurrentCount > 0 && !isAllCurrentSelected;
-
-  const handleApplyBatchAction = async () => {
-    if (batchActionSelected === BatchAction.open_in_detail) {
-      if (selectedEntityIds.length === 0) {
-        return;
-      }
-      onOpenEntitiesInDetail?.(selectedEntityIds);
-      return;
-    }
-    if (batchActionSelected === BatchAction.copy_uuids) {
-      if (selectedEntityIds.length === 0) {
-        return;
-      }
-      await navigator.clipboard.writeText(selectedEntityIds.join(" "));
-      toast.info("UUIDs copied to clipboard");
-      return;
-    }
-    setIsBatchModalOpen(true);
-  };
 
   const handleRemoveColumn = useCallback(
     (id: string) => {
@@ -449,7 +345,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
               rowItem={rowItem!}
               columns={columns}
               handleEditColumn={handleEditColumn}
-              onRowSelect={handleRowSelect}
+              onRowSelect={onRowSelect}
               onRowClick={handleRowClick}
               isSelected={isSelected}
               isLastClicked={rowLastClicked === index}
@@ -467,7 +363,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       widthTable,
       columns,
       handleEditColumn,
-      handleRowSelect,
+      onRowSelect,
       handleRowClick,
       rowLastClicked,
       rowFocused,
@@ -515,91 +411,54 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   };
 
   return (
-    <>
-      <StyledTableWrapper
-        style={{
-          height: heightBox - 20,
-        }}
-        ref={contentRef}
+    <StyledTableWrapper
+      style={{
+        height: heightBox - 20,
+      }}
+      ref={contentRef}
+    >
+      <div
+        style={
+          {
+            "--qt-row-focused-bg": themeContext.color.tableOpened,
+            width: contentWidth,
+            minWidth: "100%",
+            height: heightBox - 20,
+            overflowX: "auto",
+            overflowY: "hidden",
+          } as React.CSSProperties
+        }
       >
-        <ExploreTableControl
-          isQueryFetching={isQueryFetching}
-          setIsNewColumnOpen={setIsNewColumnOpen}
-          isNewColumnOpen={isNewColumnOpen}
-          batchActionSelected={batchActionSelected}
-          setBatchActionSelected={setBatchActionSelected}
-          selectedCount={selectedEntityIds.length}
-          isAllCurrentSelected={isAllCurrentSelected}
-          hasPartialSelection={hasPartialSelection}
-          setRowLastClicked={setRowLastClicked}
-          rowsTotal={total}
-          onAllRowsSelect={handleAllRowsSelect}
-          onApplyBatchAction={handleApplyBatchAction}
-          filters={filters}
-          dispatch={dispatch}
-        />
+        {/* HEADER (sticky at top of vertical area, shared horizontal scroll) */}
+        <div style={{ width: widthTable, minWidth: "100%" }}>
+          {/* Alternatively, use the memoized header component below to minimize re-renders */}
+          <ExploreTableHeader columns={columns} onRemoveColumn={handleRemoveColumn} />
 
-        <div
-          style={
-            {
-              "--qt-row-focused-bg": themeContext.color.tableOpened,
-              width: contentWidth,
-              minWidth: "100%",
-              height: heightBox - 70,
-              overflowX: "auto",
-              overflowY: "hidden",
-            } as React.CSSProperties
-          }
-        >
-          {/* HEADER (sticky at top of vertical area, shared horizontal scroll) */}
-          <div style={{ width: widthTable, minWidth: "100%" }}>
-            {/* Alternatively, use the memoized header component below to minimize re-renders */}
-            <ExploreTableHeader columns={columns} onRemoveColumn={handleRemoveColumn} />
-
-            {/* BODY (List handles Y; shares X with header via parent Scrollbar) */}
-            <StyledBody
+          {/* BODY (List handles Y; shares X with header via parent Scrollbar) */}
+          <StyledBody
+            style={{
+              height: heightTableBody,
+            }}
+          >
+            <List
               style={{
-                height: heightTableBody,
+                overflowX: "hidden",
               }}
-            >
-              <List
-                style={{
-                  overflowX: "hidden",
-                }}
-                rowCount={total}
-                rowHeight={getRowHeight}
-                overscanCount={OVERSCAN_ROWS}
-                onRowsRendered={handleRowsRendered}
-                rowProps={stableEmptyRowProps}
-                rowComponent={renderRow}
-              />
-            </StyledBody>
-          </div>
+              rowCount={total}
+              rowHeight={getRowHeight}
+              overscanCount={OVERSCAN_ROWS}
+              onRowsRendered={handleRowsRendered}
+              rowProps={stableEmptyRowProps}
+              rowComponent={renderRow}
+            />
+          </StyledBody>
         </div>
-        <ExplorerTableNewColumnPanel
-          open={isNewColumnOpen}
-          onClose={() => setIsNewColumnOpen(false)}
-          onCreateColumn={handleCreateColumn}
-        />
-      </StyledTableWrapper>
-
-      {/* BATCH ACTION MODAL */}
-      {isBatchModalOpen && (
-        <ExplorerTableBatchActionModal
-          batchAction={batchActionSelected}
-          selectedEntityIds={selectedEntityIds}
-          columns={columns}
-          onClose={() => setIsBatchModalOpen(false)}
-          onExport={(selectedColumnIds) => {
-            handleExport(selectedColumnIds);
-            setIsBatchModalOpen(false);
-          }}
-          onApplyAction={() => {
-            setIsBatchModalOpen(false);
-            invalidateExplorerQuery();
-          }}
-        />
-      )}
-    </>
+      </div>
+      <ExplorerTableNewColumnPanel
+        open={isNewColumnOpen}
+        onClose={() => setIsNewColumnOpen(false)}
+        onCreateColumn={handleCreateColumn}
+      />
+    </StyledTableWrapper>
   );
 };

@@ -7,8 +7,8 @@ import { Aggregation, EventType, TimeUnit } from "@inkvisitor/shared/types/stats
 export const defaultExploreStatsParams: Explore.IExploreStatsParams = {
   fromDate: new Date("2000-01-01").getTime(),
   toDate: new Date().getTime(),
-  timeUnit: TimeUnit.YEAR,
-  eventType: [EventType.TEXT_EDIT, EventType.ANCHOR_ADD],
+  timeUnit: TimeUnit.MONTH,
+  eventType: [EventType.CREATE, EventType.EDIT, EventType.DELETE],
   aggregateBy: Aggregation.USER,
 };
 
@@ -19,23 +19,23 @@ const exploreStateInitial: Explore.IExplore = {
       // only show in development mode
       process.env.NODE_ENV === "development"
         ? [
-            // {
-            //   id: "1",
-            //   name: "Sex",
-            //   type: Explore.EExploreColumnType.EPV,
-            //   editable: true,
-            //   params: {
-            //     propertyType: "4ce5e669-d421-40c9-b1ce-f476fdd171fe",
-            //   },
-            // },
-            ...RelationEnums.AllTypes.map((relationType, index) => ({
-              id: String(index + 2),
-              name: relationType,
-              params: { relationType },
-              editable: true,
-              type: Explore.EExploreColumnType.ER,
-            })),
-          ]
+          // {
+          //   id: "1",
+          //   name: "Sex",
+          //   type: Explore.EExploreColumnType.EPV,
+          //   editable: true,
+          //   params: {
+          //     propertyType: "4ce5e669-d421-40c9-b1ce-f476fdd171fe",
+          //   },
+          // },
+          ...RelationEnums.AllTypes.map((relationType, index) => ({
+            id: String(index + 2),
+            name: relationType,
+            params: { relationType },
+            editable: true,
+            type: Explore.EExploreColumnType.ER,
+          })),
+        ]
         : [],
   },
   sort: undefined,
@@ -187,13 +187,13 @@ const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Exp
       const filters: Explore.IExploreSearchFilter[] =
         trimmedLabel.length > 0
           ? [
-              ...otherFilters,
-              {
-                type: Explore.SearchOption.Label,
-                label: trimmedLabel,
-                useRegex: nextUseRegex,
-              },
-            ]
+            ...otherFilters,
+            {
+              type: Explore.SearchOption.Label,
+              label: trimmedLabel,
+              useRegex: nextUseRegex,
+            },
+          ]
           : otherFilters;
 
       return {
@@ -209,12 +209,12 @@ const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Exp
       const filters: Explore.IExploreSearchFilter[] =
         ids.length > 0
           ? [
-              ...otherFilters,
-              {
-                type: Explore.SearchOption.UUIDs,
-                ids,
-              },
-            ]
+            ...otherFilters,
+            {
+              type: Explore.SearchOption.UUIDs,
+              ids,
+            },
+          ]
           : otherFilters;
 
       return {
@@ -261,12 +261,12 @@ const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Exp
         ...state,
         filters: createdDate
           ? [
-              ...otherFilters,
-              {
-                type: Explore.SearchOption.CreatedAt,
-                createdAt: createdDate.toISOString(),
-              },
-            ]
+            ...otherFilters,
+            {
+              type: Explore.SearchOption.CreatedAt,
+              createdAt: createdDate.toISOString(),
+            },
+          ]
           : otherFilters,
         offset: 0,
       };
@@ -281,12 +281,12 @@ const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Exp
         ...state,
         filters: updatedDate
           ? [
-              ...otherFilters,
-              {
-                type: Explore.SearchOption.UpdatedAt,
-                updatedAt: updatedDate.toISOString(),
-              },
-            ]
+            ...otherFilters,
+            {
+              type: Explore.SearchOption.UpdatedAt,
+              updatedAt: updatedDate.toISOString(),
+            },
+          ]
           : otherFilters,
         offset: 0,
       };
@@ -342,9 +342,9 @@ const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Exp
         filters:
           rootValidity && rootValidity !== IRequestSearchRootValidity.Any
             ? [
-                ...otherFilters,
-                { type: Explore.SearchOption.RootValidity, rootValidity },
-              ]
+              ...otherFilters,
+              { type: Explore.SearchOption.RootValidity, rootValidity },
+            ]
             : otherFilters,
         offset: 0,
       };

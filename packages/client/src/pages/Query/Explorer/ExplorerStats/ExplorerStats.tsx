@@ -18,8 +18,7 @@ import {
 
 /** Event types hidden from the stats config (paired deletion markers). */
 const HIDDEN_EVENT_TYPES: EventType[] = [
-  EventType.DELETE,
-  EventType.ANCHOR_DELETE,
+  EventType.ANCHOR_ADD, EventType.ANCHOR_DELETE, EventType.ANCHOR_EDIT, EventType.TEXT_EDIT
 ];
 const VISIBLE_EVENT_TYPES = Object.values(EventType).filter(
   (type) => !HIDDEN_EVENT_TYPES.includes(type)

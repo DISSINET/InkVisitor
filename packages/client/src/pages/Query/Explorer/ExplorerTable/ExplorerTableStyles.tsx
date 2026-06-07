@@ -98,6 +98,14 @@ export const StyledTableControl = styled(StyledSpaceBetween)`
   background-color: ${({ theme }) => theme.color["gray"][200]};
   z-index: 20;
 `;
+
+export const StyledControlGroup = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+  flex-shrink: 0;
+`;
 export const StyledTableFooter = styled(StyledSpaceBetween)`
   padding: ${({ theme }) => theme.space[2]};
   padding-bottom: 0.2rem;
