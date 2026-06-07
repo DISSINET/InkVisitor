@@ -948,6 +948,19 @@ export const TextAnnotator = ({
     }
   };
 
+  // Jump to a broken anchor in the text. Broken tag markup is only visible in
+  // RAW mode, and line positions there match the raw text, so switch first.
+  const onScrollToAsymmetricalAnchor = (tagName: string, position: number) => {
+    if (!annotator) {
+      return;
+    }
+    if (annotatorMode !== EditMode.RAW) {
+      setAnnotatorMode(EditMode.RAW);
+      annotator.setMode(EditMode.RAW);
+    }
+    annotator.scrollToAsymmetricalAnchor(tagName, position);
+  };
+
   const isMenuDisplayed = useMemo<boolean>(() => {
     return (
       annotatorMode === EditMode.HIGHLIGHT &&
@@ -1114,6 +1127,7 @@ export const TextAnnotator = ({
         <AnnotatorWarningsPanel
           anchors={asymmetricalAnchors}
           onUnlink={onRemoveAsymmetricalAnchor}
+          onScrollTo={onScrollToAsymmetricalAnchor}
           isLoading={isSaving || isSavingWithoutRefresh}
         />
       </div>

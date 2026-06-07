@@ -2669,6 +2669,56 @@ export class Annotator {
   }
 
   /**
+   * Scroll the viewport to an asymmetrical (broken) anchor's tag. Works for
+   * both orphaned opening and orphaned closing tags. Intended to be used in RAW
+   * mode, where the tag markup is visible and line positions match raw text.
+   */
+  scrollToAsymmetricalAnchor(tagName: string, position: number): void {
+    const issues = this.validateAnchors();
+    const issue = issues.find(
+      (i) => i.tagName === tagName && i.position === position
+    );
+    if (!issue) {
+      return;
+    }
+
+    const segment = this.text.segments[issue.segmentIndex];
+    if (!segment) {
+      return;
+    }
+
+    const tag =
+      issue.type === "orphaned-opening"
+        ? segment.openingTags.find(
+            (t) => t.getTagName() === tagName && t.position === issue.position
+          )
+        : segment.closingTags.find(
+            (t) => t.getTagName() === tagName && t.position === issue.position
+          );
+    if (!tag) {
+      return;
+    }
+
+    const absRaw = tag.getAbsoluteTagPosition(this.text.segments);
+    const segPos = this.text.getSegmentFromAbsTextIndex(absRaw);
+    if (!segPos) {
+      return;
+    }
+    const targetSegment = this.text.segments[segPos.segmentIndex];
+    if (!targetSegment) {
+      return;
+    }
+
+    const absYLine = targetSegment.lineStart + segPos.lineIndex;
+    this.viewport.scrollTo(absYLine, this.scrollExtentLineCount());
+    this.cursor.xLine = segPos.charInLineIndex;
+    this.cursor.yLine = absYLine;
+    this.cursor.resetHighlight();
+    this.draw();
+    this.element.focus({ preventScroll: true });
+  }
+
+  /**
    * Check anchors and emit warnings if issues found
    */
   checkAnchors(): void {

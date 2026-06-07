@@ -1,12 +1,15 @@
 import { AsymmetricalAnchor } from "@inkvisitor/annotator/src/lib";
 import { Loader } from "components";
+import { Button } from "components/basic/Button/Button";
 import { EntityTagById } from "components/advanced/EntityTag/EntityTagById";
 import React, { useState } from "react";
 import {
   FaChevronDown,
   FaChevronUp,
+  FaCrosshairs,
   FaExclamationTriangle,
 } from "react-icons/fa";
+import { ButtonSize } from "types";
 import {
   StyledWarningRow,
   StyledWarningsHeader,
@@ -19,6 +22,7 @@ import {
 interface AnnotatorWarningsPanelProps {
   anchors: AsymmetricalAnchor[];
   onUnlink: (tagName: string, position: number) => void;
+  onScrollTo: (tagName: string, position: number) => void;
   isLoading?: boolean;
 }
 
@@ -33,6 +37,7 @@ const kindLabel = (type: AsymmetricalAnchor["type"]): string =>
 export const AnnotatorWarningsPanel: React.FC<AnnotatorWarningsPanelProps> = ({
   anchors,
   onUnlink,
+  onScrollTo,
   isLoading = false,
 }) => {
   const [collapsed, setCollapsed] = useState(false);
@@ -62,6 +67,14 @@ export const AnnotatorWarningsPanel: React.FC<AnnotatorWarningsPanelProps> = ({
               key={`${anchor.tagName}-${anchor.segmentIndex}-${anchor.position}-${index}`}
             >
               <StyledWarningKind>{kindLabel(anchor.type)}</StyledWarningKind>
+              <Button
+                icon={<FaCrosshairs />}
+                size={ButtonSize.Small}
+                color="warning"
+                inverted
+                tooltipLabel="scroll to anchor in text (RAW mode)"
+                onClick={() => onScrollTo(anchor.tagName, anchor.position)}
+              />
               <EntityTagById
                 entityId={anchor.tagName}
                 fullWidth
