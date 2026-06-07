@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-interface StyledMessage {}
+interface StyledMessage { }
 export const StyledMessage = styled.div<StyledMessage>`
   display: flex;
   align-items: center;
@@ -18,6 +18,20 @@ export const StyledMessage = styled.div<StyledMessage>`
 
 export const StyledMessageTValidationContent = styled.div`
   display: inline;
+`;
+
+export const StyledMessageDetailList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.space[1]};
+  margin-top: ${({ theme }) => theme.space[1]};
+`;
+
+export const StyledMessageDetailRow = styled.div`
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: ${({ theme }) => theme.space[1]};
 `;
 
 export const StyledMessageOrigin = styled.div`

@@ -244,47 +244,44 @@ export default class EntityWarnings {
       }
     }
 
-    // Separate concepts with and without SCL
-    const conceptsWithSCL = conceptIds.filter(
-      (id) => sclTargetsByConcept[id].length > 0
-    );
-    const conceptsWithoutSCL = conceptIds.filter(
-      (id) => sclTargetsByConcept[id].length === 0
-    );
-
-    // If some have SCL and others don't → WARNING
-    if (conceptsWithSCL.length > 0 && conceptsWithoutSCL.length > 0) {
-      return this.newWarning(
-        WarningTypeEnums.ISYNC,
-        IWarningPositionSection.Relations
-      );
+    // Parity target: the union of all SCL targets across the synonym cloud.
+    // To clear the warning, every concept has to point to all of these.
+    const allSclTargetsSet: Set<string> = new Set();
+    for (const targets of Object.values(sclTargetsByConcept)) {
+      for (const target of targets) {
+        allSclTargetsSet.add(target);
+      }
     }
+    const allSclTargets: string[] = Array.from(allSclTargetsSet);
 
-    // If none have SCL → OK
-    if (conceptsWithSCL.length === 0) {
+    // If no concept has any SCL → OK
+    if (allSclTargets.length === 0) {
       return null;
     }
 
-    // All have SCL - every concept must point to the same set of superclasses.
-    // The superclasses themselves do NOT need to be synonyms; only the sets
-    // of SCL targets per concept have to match.
-    const sclSignatures = conceptsWithSCL.map((id) =>
-      [...sclTargetsByConcept[id]].sort().join(",")
-    );
+    // For each concept, list which SCL targets it is missing to reach parity.
+    // The superclasses themselves do NOT need to be synonyms; the sets of SCL
+    // targets per concept just have to match.
+    const details = conceptIds
+      .map((conceptId) => ({
+        entityId: conceptId,
+        relatedEntityIds: allSclTargets.filter(
+          (target) => !sclTargetsByConcept[conceptId].includes(target)
+        ),
+      }))
+      .filter((detail) => detail.relatedEntityIds.length > 0);
 
-    const allSameSuperclasses = sclSignatures.every(
-      (signature) => signature === sclSignatures[0]
-    );
-
-    // If concepts have different superclass sets → WARNING
-    if (!allSameSuperclasses) {
-      return this.newWarning(
-        WarningTypeEnums.ISYNC,
-        IWarningPositionSection.Relations
-      );
+    // Every concept already points to every SCL target → consistent → OK
+    if (details.length === 0) {
+      return null;
     }
 
-    return null;
+    const warning = this.newWarning(
+      WarningTypeEnums.ISYNC,
+      IWarningPositionSection.Relations
+    );
+    warning.details = details;
+    return warning;
   }
 
   /**

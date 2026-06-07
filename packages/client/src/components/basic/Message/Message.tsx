@@ -12,6 +12,8 @@ import {
   StyledMessageOrigin,
   StyledWarningIconWrap,
   StyledMessageContent,
+  StyledMessageDetailList,
+  StyledMessageDetailRow,
 } from "./MessageStyles";
 import { isWarningTBased } from "utils/utils";
 import { wildCardChar } from "Theme/constants";
@@ -68,6 +70,14 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
       if (eid && !isInEntities(eid)) {
         newEntityIds.push(eid);
       }
+    });
+
+    warning?.details?.forEach((detail) => {
+      [detail.entityId, ...(detail.relatedEntityIds ?? [])].forEach((eid) => {
+        if (eid && !isInEntities(eid) && !newEntityIds.includes(eid)) {
+          newEntityIds.push(eid);
+        }
+      });
     });
 
     if (newEntityIds.length > 0) {
@@ -235,7 +245,22 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
       case WarningTypeEnums.SCLM:
         return <b>Superclass missing</b>;
       case WarningTypeEnums.ISYNC:
-        return <b>Inconsistent superclasses in the synonym cloud</b>;
+        return (
+          <div>
+            <b>Inconsistent superclasses in the synonym cloud</b>
+            {warning.details && warning.details.length > 0 && (
+              <StyledMessageDetailList>
+                {warning.details.map((detail) => (
+                  <StyledMessageDetailRow key={detail.entityId}>
+                    {renderEntityTags([detail.entityId])}
+                    <span>is missing SCL to</span>
+                    {renderEntityTags(detail.relatedEntityIds ?? [])}
+                  </StyledMessageDetailRow>
+                ))}
+              </StyledMessageDetailList>
+            )}
+          </div>
+        );
       case WarningTypeEnums.ISYNCAEE:
         return <b>Inconsistent action-event equivalents in the synonym cloud</b>;
       case WarningTypeEnums.MVAL:

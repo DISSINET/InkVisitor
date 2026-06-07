@@ -3,7 +3,7 @@ import { DropdownItem } from "./dropdown";
 import { ILabel } from "./label";
 import { IReference } from "./reference";
 import { IValue, IValueData } from "./value";
-import { IWarning, IWarningPosition } from "./warning";
+import { IWarning, IWarningPosition, IWarningDetail } from "./warning";
 
 import { IAction, IActionData } from "./action";
 import { IBeing, IBeingData } from "./being";
@@ -136,6 +136,7 @@ export type {
   IValueData,
   IWarning,
   IWarningPosition,
+  IWarningDetail,
   IdentificationOrder,
   PropOrder,
   DropdownItem,
