@@ -1,5 +1,4 @@
-import MuniArial from "assets/fonts/academicons.woff2";
-import MuniFont from "assets/fonts/muni-bold-webfont.woff2";
+import MuniFont from "assets/fonts/muni-bold-webfont.woff2?inline";
 import { createGlobalStyle } from "styled-components";
 import { ThemeType } from "./theme";
 
@@ -7,6 +6,11 @@ interface GlobalStyle {
   theme: ThemeType;
 }
 const GlobalStyle = createGlobalStyle<GlobalStyle>`
+  @font-face {
+    font-family: "Muni";
+    src: url("${MuniFont}") format("woff2");
+    font-display: swap;
+  }
   html {
     font-size: 62.5%;
   }
@@ -14,14 +18,6 @@ const GlobalStyle = createGlobalStyle<GlobalStyle>`
     font-family: "Roboto", sans-serif;
     letter-spacing: .2px;
     line-height: 1.3;
-    @font-face {
-      font-family: "Muni";
-      src: url("${MuniFont}") format("woff2");
-    }
-    @font-face {
-      font-family: "MuniArial";
-      src: url("${MuniArial}") format("woff2");
-    }
   }
   *, *::after, *::before {
     margin: 0;

@@ -2,6 +2,7 @@ import { EntityEnums } from "@inkvisitor/shared/enums";
 import { Query } from "@inkvisitor/shared/types";
 import { v4 as uuidv4 } from "uuid";
 import { getAllEdges, getAllNodes } from "./utils";
+import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 
 const queryStateInitial: Query.INode = {
   type: Query.NodeType.E,
@@ -10,33 +11,33 @@ const queryStateInitial: Query.INode = {
     // only show in development mode
     process.env.NODE_ENV === "development"
       ? {
-          entityClasses: [EntityEnums.Class.Person],
+          entityClasses: classesAll,
         }
       : {
-          entityClasses: [EntityEnums.Class.Concept],
+          entityClasses: classesAll,
         },
   operator: Query.NodeOperator.And,
   edges:
     // only show in development mode
     process.env.NODE_ENV === "development"
       ? [
-          {
-            type: Query.EdgeType["EP:T"],
-            params: {},
-            logic: Query.EdgeLogic.Positive,
-            id: "e1",
-            node: {
-              id: "n1",
-              type: Query.NodeType.E,
-              params: {
-                entityId: "4ce5e669-d421-40c9-b1ce-f476fdd171fe", //sex
-                entityClasses: [],
-                label: "",
-              },
-              operator: Query.NodeOperator.And,
-              edges: [],
-            },
-          },
+          // {
+          //   type: Query.EdgeType["EP:T"],
+          //   params: {},
+          //   logic: Query.EdgeLogic.Positive,
+          //   id: "e1",
+          //   node: {
+          //     id: "n1",
+          //     type: Query.NodeType.E,
+          //     params: {
+          //       entityId: "4ce5e669-d421-40c9-b1ce-f476fdd171fe", //sex
+          //       entityClasses: [],
+          //       label: "",
+          //     },
+          //     operator: Query.NodeOperator.And,
+          //     edges: [],
+          //   },
+          // },
         ]
       : [],
 };
@@ -45,9 +46,11 @@ enum QueryActionType {
   addNode,
   removeEdge,
   updateEdgeType,
+  updateEdgeLogic,
   updateNodeType,
   updateNodeClass,
   updateNodeEntityId,
+  updateNodeOperator,
 }
 
 type QueryAction =
@@ -64,6 +67,10 @@ type QueryAction =
       payload: { edgeId: string; newType: Query.EdgeType };
     }
   | {
+      type: QueryActionType.updateEdgeLogic;
+      payload: { edgeId: string; newLogic: Query.EdgeLogic };
+    }
+  | {
       type: QueryActionType.updateNodeType;
       payload: { nodeId: string; newType: Query.NodeType };
     }
@@ -74,6 +81,10 @@ type QueryAction =
   | {
       type: QueryActionType.updateNodeEntityId;
       payload: { nodeId: string; newEntityId: string | undefined };
+    }
+  | {
+      type: QueryActionType.updateNodeOperator;
+      payload: { nodeId: string; newOperator: Query.NodeOperator };
     };
 
 const queryReducer = (state: Query.INode, action: QueryAction) => {
@@ -85,21 +96,17 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
       const edgeToRemove = action.payload.edgeId;
       const updatedStateRemove = { ...state };
 
-      const edge = getAllEdges(updatedStateRemove).find(
-        (edge) => edge.id === edgeToRemove
-      );
+      const edge = getAllEdges(updatedStateRemove).find((edge) => edge.id === edgeToRemove);
       if (!edge) {
         return updatedStateRemove;
       }
       const parentNode2 = getAllNodes(updatedStateRemove).find((node) =>
-        node.edges.some((e) => e.id === edgeToRemove)
+        node.edges.some((e) => e.id === edgeToRemove),
       );
       if (!parentNode2) {
         return updatedStateRemove;
       }
-      parentNode2.edges = parentNode2.edges.filter(
-        (e) => e.id !== edgeToRemove
-      );
+      parentNode2.edges = parentNode2.edges.filter((e) => e.id !== edgeToRemove);
 
       return updatedStateRemove;
 
@@ -109,35 +116,39 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
 
       const updatedStateUpdate = { ...state };
 
-      const edgeToUpdate = getAllEdges(updatedStateUpdate).find(
-        (edge) => edge.id === edgeId
-      );
+      const edgeToUpdate = getAllEdges(updatedStateUpdate).find((edge) => edge.id === edgeId);
       if (!edgeToUpdate) {
         return updatedStateUpdate;
       }
       edgeToUpdate.type = newType;
       return updatedStateUpdate;
 
-    case QueryActionType.updateNodeType:
-      return updateNodeType(
-        state,
-        action.payload.nodeId,
-        action.payload.newType
+    case QueryActionType.updateEdgeLogic:
+      const edgeIdLogic = action.payload.edgeId;
+      const newLogic = action.payload.newLogic;
+
+      const updatedStateLogic = { ...state };
+
+      const edgeToUpdateLogic = getAllEdges(updatedStateLogic).find(
+        (edge) => edge.id === edgeIdLogic,
       );
+      if (!edgeToUpdateLogic) {
+        return updatedStateLogic;
+      }
+      edgeToUpdateLogic.logic = newLogic;
+      return updatedStateLogic;
+
+    case QueryActionType.updateNodeType:
+      return updateNodeType(state, action.payload.nodeId, action.payload.newType);
 
     case QueryActionType.updateNodeClass:
-      return updateNodeClass(
-        state,
-        action.payload.nodeId,
-        action.payload.newEntityClasses
-      );
+      return updateNodeClass(state, action.payload.nodeId, action.payload.newEntityClasses);
 
     case QueryActionType.updateNodeEntityId:
-      return updateNodeEntityId(
-        state,
-        action.payload.nodeId,
-        action.payload.newEntityId
-      );
+      return updateNodeEntityId(state, action.payload.nodeId, action.payload.newEntityId);
+
+    case QueryActionType.updateNodeOperator:
+      return updateNodeOperator(state, action.payload.nodeId, action.payload.newOperator);
 
     default:
       return state;
@@ -147,13 +158,11 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
 const updateNodeClass = (
   state: Query.INode,
   nodeId: string,
-  newEntityClasses: EntityEnums.Class[]
+  newEntityClasses: EntityEnums.Class[],
 ): Query.INode => {
   const updatedState = { ...state };
 
-  const nodeToUpdate = getAllNodes(updatedState).find(
-    (node) => node.id === nodeId
-  );
+  const nodeToUpdate = getAllNodes(updatedState).find((node) => node.id === nodeId);
   if (!nodeToUpdate) {
     return updatedState;
   }
@@ -165,13 +174,11 @@ const updateNodeClass = (
 const updateNodeEntityId = (
   state: Query.INode,
   nodeId: string,
-  newEntityId: string | undefined
+  newEntityId: string | undefined,
 ): Query.INode => {
   const updatedState = { ...state };
 
-  const nodeToUpdate = getAllNodes(updatedState).find(
-    (node) => node.id === nodeId
-  );
+  const nodeToUpdate = getAllNodes(updatedState).find((node) => node.id === nodeId);
   if (!nodeToUpdate) {
     return updatedState;
   }
@@ -185,16 +192,30 @@ const updateNodeEntityId = (
   return updatedState;
 };
 
-const updateNodeType = (
+const updateNodeOperator = (
   state: Query.INode,
   nodeId: string,
-  newType: Query.NodeType
+  newOperator: Query.NodeOperator,
 ): Query.INode => {
   const updatedState = { ...state };
 
-  const nodeToUpdate = getAllNodes(updatedState).find(
-    (node) => node.id === nodeId
-  );
+  const nodeToUpdate = getAllNodes(updatedState).find((node) => node.id === nodeId);
+  if (!nodeToUpdate) {
+    return updatedState;
+  }
+  nodeToUpdate.operator = newOperator;
+
+  return updatedState;
+};
+
+const updateNodeType = (
+  state: Query.INode,
+  nodeId: string,
+  newType: Query.NodeType,
+): Query.INode => {
+  const updatedState = { ...state };
+
+  const nodeToUpdate = getAllNodes(updatedState).find((node) => node.id === nodeId);
   if (!nodeToUpdate) {
     return updatedState;
   }
@@ -247,10 +268,4 @@ const queryDiff = (state1: Query.INode, state2: Query.INode) => {
   return false;
 };
 
-export {
-  QueryAction,
-  QueryActionType,
-  queryDiff,
-  queryReducer,
-  queryStateInitial,
-};
+export { QueryAction, QueryActionType, queryDiff, queryReducer, queryStateInitial };

@@ -58,6 +58,22 @@ export const EntityMultiDropdown = <T extends string>({
 }: EntityMultiDropdown<T>) => {
   const getValues = (items: DropdownItem[]) => items.map((i) => i.value as T);
 
+  const getAnyEquivalentValues = (): T[] => {
+    const items: DropdownItem[] = [];
+    if (!disableEmpty) {
+      items.push(empty);
+    }
+    if (!disableAny) {
+      items.push(allEntities);
+    }
+    items.push(...options);
+    return getValues(items);
+  };
+
+  const applyChange = (nextValues: T[]) => {
+    onChange(nextValues);
+  };
+
   const generalValues = [];
   if (!disableEmpty) {
     generalValues.push(empty);
@@ -86,46 +102,39 @@ export const EntityMultiDropdown = <T extends string>({
         });
       })()}
       onChange={(selectedOptions, event) => {
-        const allClassesSelected = options.every((option) => selectedOptions.includes(option));
+        const selected = selectedOptions ?? [];
+        const allClassesSelected = options.every((option) => selected.includes(option));
         // (possible to add && !disableEmpty for possibility to turn off empty)
-        const includesEmpty = selectedOptions.includes(empty);
-        const includesAny = selectedOptions.includes(allEntities);
+        const includesEmpty = selected.includes(empty);
+        const includesAny = selected.includes(allEntities);
 
         // when something is selected = at least one option
-        if (selectedOptions !== null && selectedOptions.length > 0) {
+        if (selected.length > 0) {
           if (allClassesSelected && event?.action === "deselect-option") {
             // empty was deselected
             if (includesAny) {
-              return onChange(getValues(selectedOptions));
+              return applyChange(getValues(selected));
             }
             // ANY was deselected
             else {
-              return onChange(includesEmpty ? [empty.value as T] : []);
+              return applyChange(includesEmpty ? [empty.value as T] : []);
             }
           }
           // when all option selected (ANY is clicked)
-          else if (selectedOptions[selectedOptions.length - 1].value === allEntities.value) {
-            return onChange(
-              getValues(
-                includesEmpty ? [empty, allEntities, ...options] : [allEntities, ...options]
-              )
-            );
+          else if (selected[selected.length - 1].value === allEntities.value) {
+            return applyChange(getAnyEquivalentValues());
           }
           // all are selected without ANY -> highlight also ANY option (direct click on ANY is resolved earlier)
           else if (allClassesSelected && event?.action === "select-option") {
-            return onChange(
-              getValues(
-                includesEmpty ? [empty, allEntities, ...options] : [allEntities, ...options]
-              )
-            );
+            return applyChange(getAnyEquivalentValues());
           }
           // something was deselected from all selected (need to deselect ANY)
           else if (event?.action === "deselect-option" && includesAny && !allClassesSelected) {
-            const result = selectedOptions.filter((option) => option.value !== allEntities.value);
-            return onChange(getValues(result));
+            const result = selected.filter((option) => option.value !== allEntities.value);
+            return applyChange(getValues(result));
           }
         }
-        return onChange(getValues(selectedOptions));
+        return applyChange(getValues(selected));
       }}
       placeholder={placeholder}
       noOptionsMessage={noOptionsMessage}
@@ -158,7 +167,7 @@ const ValueContainer = ({
   if (currentValues.length > 0) {
     // filter ANY out of the values array
     const filteredChildren = children[0].filter(
-      (ch: any) => ch.key !== `${allEntities.label}-${allEntities.value}`
+      (ch: any) => ch.key !== `${allEntities.label}-${allEntities.value}`,
     );
 
     const limit = props.selectProps.limitSelectedItems;
@@ -221,7 +230,7 @@ const Option = ({ ...props }: OptionProps | any): React.ReactElement => {
           color={
             props.value === EntityEnums.Extension.Empty
               ? "transparent"
-              : EntityColors[props.value]?.color ?? "transparent"
+              : (EntityColors[props.value]?.color ?? "transparent")
           }
         >
           {isEntityClass ? props.label : <i>{props.label}</i>}

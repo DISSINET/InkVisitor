@@ -10,7 +10,13 @@
   background: rgba(255, 255, 255, 0.2);
 }
 .qt-row-selected {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(188, 229, 255, 0.4);
+}
+.qt-row-focused {
+  background: var(--qt-row-focused-bg, rgba(242, 235, 254, 0.8));
+}
+.qt-row-focused.qt-row-odd {
+  background: var(--qt-row-focused-bg, rgba(242, 235, 254, 0.8));
 }
 .qt-placeholder {
   color: #999;

@@ -525,7 +525,7 @@ export class SearchQuery {
       this.whereUsedTemplate(req.usedTemplate);
     }
 
-    if (req.language) {
+    if (req.language !== undefined) {
       this.whereLanguage(req.language);
     }
 
@@ -576,6 +576,89 @@ export class ResponseSearch {
   }
 
   /**
+   * Pure decision: does an entity pass the root-validity filter?
+   * Valid -> no warnings; Invalid -> has warnings; anything else -> pass.
+   */
+  static passesRootValidity(
+    hasWarnings: boolean,
+    validity: IRequestSearchRootValidity
+  ): boolean {
+    if (validity === IRequestSearchRootValidity.Valid) {
+      return !hasWarnings;
+    }
+    if (validity === IRequestSearchRootValidity.Invalid) {
+      return hasWarnings;
+    }
+    return true;
+  }
+
+  /**
+   * Narrows a list of entities by their root-territory validity (T-based warnings).
+   * Returns the input unchanged unless validity is Valid or Invalid.
+   * Shared by the Search box (ResponseSearch.prepare) and the Explorer filter.
+   */
+  static async filterEntitiesByRootValidity(
+    conn: Connection,
+    entities: IEntity[],
+    validity: IRequestSearchRootValidity,
+    settings: Setting[]
+  ): Promise<IEntity[]> {
+    if (
+      validity !== IRequestSearchRootValidity.Valid &&
+      validity !== IRequestSearchRootValidity.Invalid
+    ) {
+      return entities;
+    }
+
+    const rootT = treeCache.tree.getRootTerritory() as ITerritory;
+    const out: IEntity[] = [];
+
+    for (const entity of entities) {
+      const classificationRels =
+        await Classification.getClassificationForwardConnections(
+          conn,
+          entity.id,
+          entity.class,
+          1,
+          0
+        );
+      const classificationEs: IConcept[] = await getEntitiesByIds<IConcept>(
+        conn,
+        classificationRels.map((c) => c.entityIds[1])
+      );
+
+      const soeRels = await Relation.findForEntities(
+        conn,
+        [entity.id],
+        RelationEnums.Type.SuperordinateEntity,
+        0
+      );
+      const soeEs = await getEntitiesByIds<IEntity>(
+        conn,
+        soeRels.map((s) => s.entityIds[1])
+      );
+      const propValueEs = await getEntitiesByIds<IEntity>(
+        conn,
+        Entity.extractIdsFromProps(entity.props, [PropSpecKind.VALUE])
+      );
+
+      const warnings = new Entity(entity).getTBasedWarnings(
+        [rootT],
+        classificationEs,
+        soeEs,
+        propValueEs,
+        settings
+      );
+
+      if (ResponseSearch.passesRootValidity(warnings.length > 0, validity)) {
+        out.push(entity);
+      }
+    }
+
+    return out;
+  }
+
+  /**
    * Prepares asynchronously results data
    * @param db
    */
@@ -585,69 +668,12 @@ export class ResponseSearch {
     await query.fromRequest(this.request);
     let entities = await query.do();
 
-    // Handling this search condition here while it is reusing the entity method
-    if (
-      this.request.isRootInvalid === IRequestSearchRootValidity.Valid ||
-      this.request.isRootInvalid === IRequestSearchRootValidity.Invalid
-    ) {
-      const rootT = treeCache.tree.getRootTerritory() as ITerritory;
-      const conn = httpRequest.db.connection;
-
-      const entitiesToCheck = [...entities];
-      entities = [];
-
-      for (const entity of entitiesToCheck) {
-        const classificationRels =
-          await Classification.getClassificationForwardConnections(
-            conn,
-            entity.id,
-            entity.class,
-            1,
-            0
-          );
-        const classificationEs: IConcept[] = await getEntitiesByIds<IConcept>(
-          conn,
-          classificationRels.map((c) => c.entityIds[1])
-        );
-
-        const soeRels = await Relation.findForEntities(
-          conn,
-          [entity.id],
-          RelationEnums.Type.SuperordinateEntity,
-          0
-        );
-        const soeEs = await getEntitiesByIds<IEntity>(
-          conn,
-          soeRels.map((s) => s.entityIds[1])
-        );
-        const propValueEs = await getEntitiesByIds<IEntity>(
-          conn,
-          Entity.extractIdsFromProps(entity.props, [PropSpecKind.VALUE])
-        );
-
-        const entityModel = new Entity(entity);
-
-        const warnings = entityModel.getTBasedWarnings(
-          [rootT],
-          classificationEs,
-          soeEs,
-          propValueEs,
-          settings
-        );
-
-        if (this.request.isRootInvalid === IRequestSearchRootValidity.Valid) {
-          if (warnings.length === 0) {
-            entities.push(entity);
-          }
-        } else if (
-          this.request.isRootInvalid === IRequestSearchRootValidity.Invalid
-        ) {
-          if (warnings.length > 0) {
-            entities.push(entity);
-          }
-        }
-      }
-    }
+    entities = await ResponseSearch.filterEntitiesByRootValidity(
+      httpRequest.db.connection,
+      entities,
+      this.request.isRootInvalid ?? IRequestSearchRootValidity.Any,
+      settings
+    );
 
     if (query.retainedIdsOrder) {
       entities = sortByRequiredOrder(entities, query.retainedIdsOrder);

@@ -477,6 +477,14 @@ class NetworkError extends CustomError {
     "Please check your network connection. If the issue persists, please try again later or contact the project owner.";
 }
 
+class TimeoutError extends CustomError {
+  public static readonly TYPE = "TimeoutError";
+  public static code = 504;
+  public static title = "Request timed out";
+  public static message =
+    "The server took too long to respond. Please try again, or contact the project owner if the problem persists.";
+}
+
 class HtmlResponseError extends CustomError {
   public static readonly TYPE = "HtmlResponseError";
   public static code = 500;
@@ -515,6 +523,7 @@ const allErrors: Record<string, any> = {
   RelationAsymetricalPathExist,
   DocumentDoesNotExist,
   NetworkError,
+  TimeoutError,
   HtmlResponseError,
   UnsafePasswordError,
   PasswordDoesNotMatchError,
@@ -573,6 +582,7 @@ export {
   RelationAsymetricalPathExist,
   DocumentDoesNotExist,
   NetworkError,
+  TimeoutError,
   HtmlResponseError,
   UnsafePasswordError,
   PasswordDoesNotMatchError,

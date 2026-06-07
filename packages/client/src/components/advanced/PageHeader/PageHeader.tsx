@@ -47,7 +47,7 @@ interface LeftHeader {
 export const LeftHeader: React.FC<LeftHeader> = React.memo(({ tempLocation }) => {
   const env = window.appConfig.env || "";
 
-  const versionText = `v. ${packageJson.version}${env ? ` | ${env}` : ``} | built: ${
+  const versionText = `v. ${packageJson.version}${env ? ` | ${env}` : ``} | build: ${
     process.env.BUILD_TIMESTAMP
   }`;
 
@@ -179,9 +179,7 @@ export const LeftHeader: React.FC<LeftHeader> = React.memo(({ tempLocation }) =>
                 $pingColor={pingColor}
                 $clickable={!!dbStats}
                 title={dbStats ? "Click to show DB pool / mutex stats" : ""}
-                onClick={
-                  dbStats ? () => setStatsOpen((v) => !v) : undefined
-                }
+                onClick={dbStats ? () => setStatsOpen((v) => !v) : undefined}
               />
               {statsOpen && dbStats && (
                 <StyledStatsPanel>
