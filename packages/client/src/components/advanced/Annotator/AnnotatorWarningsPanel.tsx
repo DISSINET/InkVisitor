@@ -21,8 +21,12 @@ import {
 
 interface AnnotatorWarningsPanelProps {
   anchors: AsymmetricalAnchor[];
-  onUnlink: (tagName: string, position: number) => void;
-  onScrollTo: (tagName: string, position: number) => void;
+  onUnlink: (tagName: string, position: number, segmentIndex: number) => void;
+  onScrollTo: (
+    tagName: string,
+    position: number,
+    segmentIndex: number
+  ) => void;
   isLoading?: boolean;
 }
 
@@ -73,7 +77,13 @@ export const AnnotatorWarningsPanel: React.FC<AnnotatorWarningsPanelProps> = ({
                 color="warning"
                 inverted
                 tooltipLabel="scroll to anchor in text (RAW mode)"
-                onClick={() => onScrollTo(anchor.tagName, anchor.position)}
+                onClick={() =>
+                  onScrollTo(
+                    anchor.tagName,
+                    anchor.position,
+                    anchor.segmentIndex
+                  )
+                }
               />
               <EntityTagById
                 entityId={anchor.tagName}
@@ -81,7 +91,12 @@ export const AnnotatorWarningsPanel: React.FC<AnnotatorWarningsPanelProps> = ({
                 disableTooltip={false}
                 unlinkButton={{
                   tooltipLabel: "unlink broken anchor",
-                  onClick: () => onUnlink(anchor.tagName, anchor.position),
+                  onClick: () =>
+                    onUnlink(
+                      anchor.tagName,
+                      anchor.position,
+                      anchor.segmentIndex
+                    ),
                 }}
               />
             </StyledWarningRow>

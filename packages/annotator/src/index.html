@@ -926,7 +926,7 @@
         },
 
         removeAnchor(anchor) {
-          const success = annotator.removeAsymmetricalAnchor(anchor.tagName, anchor.position);
+          const success = annotator.removeAsymmetricalAnchor(anchor.tagName, anchor.position, anchor.segmentIndex);
           if (success) {
             console.log(`Removed asymmetrical anchor: ${anchor.tagName} at position ${anchor.position}`);
           } else {

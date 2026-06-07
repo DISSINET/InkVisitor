@@ -5,7 +5,7 @@ import { Lines } from "./Lines";
 import Scroller from "./Scroller";
 import Text, { Tag, SegmentPosition } from "./Text";
 import Viewport from "./Viewport";
-import { Warnings, WarningData } from "./warnings";
+import { AsymmetricalAnchor, Warnings, WarningData } from "./warnings";
 import {
   DEFAULT_FONT,
   DEFAULT_FONT_SIZE,
@@ -1838,27 +1838,11 @@ export class Annotator {
       return;
     }
 
-    const contentStartAbsRaw =
+    // Scroll to where the anchored content starts (just past the opening tag).
+    this.scrollCaretToRawIndex(
       openingTag.getAbsoluteTagPosition(this.text.segments) +
-      openingTag.getTagLength();
-    const segPos = this.text.getSegmentFromAbsTextIndex(contentStartAbsRaw);
-    if (!segPos) {
-      return;
-    }
-
-    const segment = this.text.segments[segPos.segmentIndex];
-    if (!segment) {
-      return;
-    }
-
-    const absYLine = segment.lineStart + segPos.lineIndex;
-
-    this.viewport.scrollTo(absYLine, this.scrollExtentLineCount());
-    this.cursor.xLine = segPos.charInLineIndex;
-    this.cursor.yLine = absYLine;
-    this.cursor.resetHighlight();
-    this.draw();
-    this.element.focus({ preventScroll: true });
+        openingTag.getTagLength()
+    );
   }
 
   scrollToLine(absLine: number) {
@@ -2615,35 +2599,83 @@ export class Annotator {
   }
 
   /**
-   * Remove an asymmetrical anchor by tag name
-   * Returns true if successfully removed
+   * Resolve a validated asymmetrical-anchor issue back to its concrete Tag.
+   * Identity is (tagName, position, segmentIndex): `position` is a per-segment
+   * raw offset and is NOT unique across segments, so segmentIndex is required
+   * to avoid resolving the wrong orphan when the same entity is broken at the
+   * same offset in different segments.
    */
-  removeAsymmetricalAnchor(tagName: string, position: number): boolean {
-    const issues = this.validateAnchors();
-    const issue = issues.find(
-      (i) => i.tagName === tagName && i.position === position
+  private findAsymmetricalTag(
+    tagName: string,
+    position: number,
+    segmentIndex: number
+  ): { tag: Tag; issue: AsymmetricalAnchor } | undefined {
+    const issue = this.validateAnchors().find(
+      (i) =>
+        i.tagName === tagName &&
+        i.position === position &&
+        i.segmentIndex === segmentIndex
     );
-
     if (!issue) {
-      return false;
+      return undefined;
     }
 
     const segment = this.text.segments[issue.segmentIndex];
     if (!segment) {
+      return undefined;
+    }
+
+    const tags =
+      issue.type === "orphaned-opening"
+        ? segment.openingTags
+        : segment.closingTags;
+    const tag = tags.find(
+      (t) => t.getTagName() === tagName && t.position === issue.position
+    );
+
+    return tag ? { tag, issue } : undefined;
+  }
+
+  /**
+   * Shared scroll tail: place the caret at the given absolute raw-text index,
+   * scroll it into view, redraw and focus the canvas.
+   */
+  private scrollCaretToRawIndex(absRaw: number): void {
+    const segPos = this.text.getSegmentFromAbsTextIndex(absRaw);
+    if (!segPos) {
+      return;
+    }
+    const targetSegment = this.text.segments[segPos.segmentIndex];
+    if (!targetSegment) {
+      return;
+    }
+
+    const absYLine = targetSegment.lineStart + segPos.lineIndex;
+    this.viewport.scrollTo(absYLine, this.scrollExtentLineCount());
+    this.cursor.xLine = segPos.charInLineIndex;
+    this.cursor.yLine = absYLine;
+    this.cursor.resetHighlight();
+    this.draw();
+    this.element.focus({ preventScroll: true });
+  }
+
+  /**
+   * Remove an asymmetrical (broken) anchor identified by tag name, per-segment
+   * position and segment index. Returns true if successfully removed.
+   */
+  removeAsymmetricalAnchor(
+    tagName: string,
+    position: number,
+    segmentIndex: number
+  ): boolean {
+    const found = this.findAsymmetricalTag(tagName, position, segmentIndex);
+    if (!found) {
       return false;
     }
 
-    // Find the tag to remove
-    const tagToRemove =
-      issue.type === "orphaned-opening"
-        ? segment.openingTags.find(
-            (t) => t.getTagName() === tagName && t.position === issue.position
-          )
-        : segment.closingTags.find(
-            (t) => t.getTagName() === tagName && t.position === issue.position
-          );
-
-    if (!tagToRemove) {
+    const { tag: tagToRemove, issue } = found;
+    const segment = this.text.segments[issue.segmentIndex];
+    if (!segment) {
       return false;
     }
 
@@ -2673,49 +2705,18 @@ export class Annotator {
    * both orphaned opening and orphaned closing tags. Intended to be used in RAW
    * mode, where the tag markup is visible and line positions match raw text.
    */
-  scrollToAsymmetricalAnchor(tagName: string, position: number): void {
-    const issues = this.validateAnchors();
-    const issue = issues.find(
-      (i) => i.tagName === tagName && i.position === position
+  scrollToAsymmetricalAnchor(
+    tagName: string,
+    position: number,
+    segmentIndex: number
+  ): void {
+    const found = this.findAsymmetricalTag(tagName, position, segmentIndex);
+    if (!found) {
+      return;
+    }
+    this.scrollCaretToRawIndex(
+      found.tag.getAbsoluteTagPosition(this.text.segments)
     );
-    if (!issue) {
-      return;
-    }
-
-    const segment = this.text.segments[issue.segmentIndex];
-    if (!segment) {
-      return;
-    }
-
-    const tag =
-      issue.type === "orphaned-opening"
-        ? segment.openingTags.find(
-            (t) => t.getTagName() === tagName && t.position === issue.position
-          )
-        : segment.closingTags.find(
-            (t) => t.getTagName() === tagName && t.position === issue.position
-          );
-    if (!tag) {
-      return;
-    }
-
-    const absRaw = tag.getAbsoluteTagPosition(this.text.segments);
-    const segPos = this.text.getSegmentFromAbsTextIndex(absRaw);
-    if (!segPos) {
-      return;
-    }
-    const targetSegment = this.text.segments[segPos.segmentIndex];
-    if (!targetSegment) {
-      return;
-    }
-
-    const absYLine = targetSegment.lineStart + segPos.lineIndex;
-    this.viewport.scrollTo(absYLine, this.scrollExtentLineCount());
-    this.cursor.xLine = segPos.charInLineIndex;
-    this.cursor.yLine = absYLine;
-    this.cursor.resetHighlight();
-    this.draw();
-    this.element.focus({ preventScroll: true });
   }
 
   /**

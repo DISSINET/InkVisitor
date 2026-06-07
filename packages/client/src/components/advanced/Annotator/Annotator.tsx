@@ -940,8 +940,16 @@ export const TextAnnotator = ({
   // Unlink a broken (asymmetrical) anchor from the warnings panel (#2601).
   // removeAsymmetricalAnchor re-parses, redraws and re-runs the warning checks,
   // so the panel updates itself via the onWarning subscription.
-  const onRemoveAsymmetricalAnchor = (tagName: string, position: number) => {
-    const removed = annotator?.removeAsymmetricalAnchor(tagName, position);
+  const onRemoveAsymmetricalAnchor = (
+    tagName: string,
+    position: number,
+    segmentIndex: number
+  ) => {
+    const removed = annotator?.removeAsymmetricalAnchor(
+      tagName,
+      position,
+      segmentIndex
+    );
     if (removed) {
       handleSaveNewContent(true, true);
       handleRefreshEntityAndStatement(tagName);
@@ -950,15 +958,22 @@ export const TextAnnotator = ({
 
   // Jump to a broken anchor in the text. Broken tag markup is only visible in
   // RAW mode, and line positions there match the raw text, so switch first.
-  const onScrollToAsymmetricalAnchor = (tagName: string, position: number) => {
+  const onScrollToAsymmetricalAnchor = (
+    tagName: string,
+    position: number,
+    segmentIndex: number
+  ) => {
     if (!annotator) {
       return;
     }
     if (annotatorMode !== EditMode.RAW) {
       setAnnotatorMode(EditMode.RAW);
+      // Direct setMode is required: it recalculates segments synchronously so
+      // the scroll below computes line positions against RAW-mode segments.
+      // The annotatorMode effect re-runs setMode next render (harmless no-op).
       annotator.setMode(EditMode.RAW);
     }
-    annotator.scrollToAsymmetricalAnchor(tagName, position);
+    annotator.scrollToAsymmetricalAnchor(tagName, position, segmentIndex);
   };
 
   const isMenuDisplayed = useMemo<boolean>(() => {
