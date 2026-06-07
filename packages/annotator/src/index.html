@@ -867,7 +867,7 @@
         },
 
         init() {
-          annotator.onAsymmetricalAnchors(this.display.bind(this));
+          annotator.onWarning(this.display.bind(this));
           this.elements.checkBtn.onclick = this.check.bind(this);
           setTimeout(() => this.check(), 500);
         },
@@ -878,7 +878,8 @@
           console.log(`Found ${issues.length} asymmetrical anchor(s)`, issues);
         },
 
-        display(anchors) {
+        display(warning) {
+          const anchors = (warning && warning.anchors) || [];
           this.elements.list.innerHTML = "";
           this.elements.noIssuesMsg.style.display = anchors.length === 0 ? "block" : "none";
 

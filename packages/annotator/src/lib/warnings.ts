@@ -19,21 +19,27 @@ export interface AsymmetricalAnchor {
 
 export interface AsymmetricalAnchorWarning {
   type: WarningType.AsymmetricalAnchor;
+  /** Human-readable summary (empty when the warning is cleared). */
+  message: string;
   anchors: AsymmetricalAnchor[];
 }
 
+/**
+ * Discriminated union of every warning the annotator can emit. Each variant
+ * carries its `type`, a `message` summary, and its own typed metadata.
+ */
 export type WarningData = AsymmetricalAnchorWarning;
 
 /**
  * Warnings system for the Annotator. Acts as a notification bus: detection
  * logic lives in `Annotator.runWarningChecks`, which calls `emit*` methods
- * here. Subscribers can listen via `onWarning` (string summary, e.g. for a
- * toaster) and/or `onWarningData` (structured payload for richer UI).
+ * here. Subscribers listen via a single `onWarning` hook that receives the
+ * full `WarningData` (type + message + metadata) on every change, including
+ * the cleared state (metadata becomes empty), so UIs can react and reset.
  */
 export class Warnings {
   private enabled: boolean = true;
-  private onWarningCb?: (message: string, type: WarningType) => void;
-  private onWarningDataCb?: (data: WarningData) => void;
+  private onWarningCb?: (warning: WarningData) => void;
   private currentWarnings: WarningData | null = null;
   private lastEmittedKey: string | null = null;
 
@@ -53,12 +59,8 @@ export class Warnings {
     return this.enabled;
   }
 
-  onWarning(cb: (message: string, type: WarningType) => void): void {
+  onWarning(cb: (warning: WarningData) => void): void {
     this.onWarningCb = cb;
-  }
-
-  onWarningData(cb: (data: WarningData) => void): void {
-    this.onWarningDataCb = cb;
   }
 
   emitAsymmetricalAnchors(anchors: AsymmetricalAnchor[]): void {
@@ -72,22 +74,16 @@ export class Warnings {
     }
     this.lastEmittedKey = key;
 
-    this.currentWarnings =
-      anchors.length > 0
-        ? { type: WarningType.AsymmetricalAnchor, anchors }
-        : null;
-
-    this.onWarningDataCb?.({
+    const warning: AsymmetricalAnchorWarning = {
       type: WarningType.AsymmetricalAnchor,
+      message:
+        anchors.length > 0 ? formatAsymmetricalAnchorMessage(anchors) : "",
       anchors,
-    });
+    };
 
-    if (this.onWarningCb && anchors.length > 0) {
-      this.onWarningCb(
-        formatAsymmetricalAnchorMessage(anchors),
-        WarningType.AsymmetricalAnchor
-      );
-    }
+    this.currentWarnings = anchors.length > 0 ? warning : null;
+
+    this.onWarningCb?.(warning);
   }
 
   getCurrentWarnings(): WarningData | null {

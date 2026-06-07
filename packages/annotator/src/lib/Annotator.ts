@@ -5,7 +5,7 @@ import { Lines } from "./Lines";
 import Scroller from "./Scroller";
 import Text, { Tag, SegmentPosition } from "./Text";
 import Viewport from "./Viewport";
-import { Warnings, WarningType } from "./warnings";
+import { Warnings, WarningData } from "./warnings";
 import {
   DEFAULT_FONT,
   DEFAULT_FONT_SIZE,
@@ -751,7 +751,7 @@ export class Annotator {
     this.onTextChangeCb = cb;
   }
 
-  onWarning(cb: (message: string) => void): void {
+  onWarning(cb: (warning: WarningData) => void): void {
     this.warnings.onWarning(cb);
   }
 
@@ -2612,27 +2612,6 @@ export class Annotator {
    */
   validateAnchors() {
     return this.text.validateAnchors();
-  }
-
-  /**
-   * Subscribe to asymmetrical anchor warnings
-   */
-  onAsymmetricalAnchors(
-    callback: (
-      anchors: Array<{
-        tagName: string;
-        type: "orphaned-opening" | "orphaned-closing";
-        segmentIndex: number;
-        position: number;
-        attributes?: Record<string, string>;
-      }>
-    ) => void
-  ): void {
-    this.warnings.onWarningData((data) => {
-      if (data.type === WarningType.AsymmetricalAnchor) {
-        callback(data.anchors);
-      }
-    });
   }
 
   /**

@@ -14,7 +14,7 @@ import { FaPen, FaRegSave, FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 
-import { Annotator, AsymmetricalAnchor, EditMode, editModeDisplayLabel, Tag } from "@inkvisitor/annotator/src/lib";
+import { Annotator, AsymmetricalAnchor, EditMode, editModeDisplayLabel, Tag, WarningType } from "@inkvisitor/annotator/src/lib";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import {
   IDocument,
@@ -809,13 +809,13 @@ export const TextAnnotator = ({
       newAnnotator.checkAnchors();
     });
 
-    newAnnotator.onWarning((message) => {
-      toast.warning(message);
-    });
-
-    // Structured asymmetrical-anchor warnings drive the warnings panel (#2601).
-    newAnnotator.onAsymmetricalAnchors((anchors) => {
-      setAsymmetricalAnchors(anchors);
+    // Structured warnings drive the warnings panel (#2601). onWarning carries
+    // the full payload (type + metadata) and fires on every change, including
+    // the cleared state, so the panel updates and resets itself.
+    newAnnotator.onWarning((warning) => {
+      if (warning.type === WarningType.AsymmetricalAnchor) {
+        setAsymmetricalAnchors(warning.anchors);
+      }
     });
     // Seed the panel immediately for breakage already present on load, so we
     // don't wait for the constructor's deferred first check to emit.
@@ -939,7 +939,7 @@ export const TextAnnotator = ({
 
   // Unlink a broken (asymmetrical) anchor from the warnings panel (#2601).
   // removeAsymmetricalAnchor re-parses, redraws and re-runs the warning checks,
-  // so the panel updates itself via the onAsymmetricalAnchors subscription.
+  // so the panel updates itself via the onWarning subscription.
   const onRemoveAsymmetricalAnchor = (tagName: string, position: number) => {
     const removed = annotator?.removeAsymmetricalAnchor(tagName, position);
     if (removed) {
