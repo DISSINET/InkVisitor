@@ -210,7 +210,7 @@ export const InstTemplate = async (
   templateEntity: IEntity | IStatement | ITerritory,
   userRole: UserEnums.Role,
   territoryParentId?: string,
-  label?: string
+  label?: string,
 ): Promise<IEntity | false> => {
   if (templateEntity.isTemplate) {
     let iEntity: false | IEntity = false;
@@ -264,7 +264,7 @@ export const InstTemplate = async (
 export const applyTemplate = async (
   templateEntity: IEntity | IStatement,
   entity: IEntity | IStatement,
-  userRole: UserEnums.Role
+  userRole: UserEnums.Role,
 ): Promise<IEntity> => {
   if (templateEntity.isTemplate && templateEntity.class === entity.class) {
     // get labels from entity and props from entity + template, rest from template
@@ -316,7 +316,7 @@ export const applyTemplate = async (
 export const InstRelations = (
   templateRelations: Relation.IUsedRelations,
   templateId: string,
-  entityId: string
+  entityId: string,
 ) => {
   const newRelations: Relation.IRelation[] = [];
   // Iterate through each relation type in IUsedRelations
@@ -333,8 +333,8 @@ export const InstRelations = (
               ? [...connection.entityIds, entityId] // For SYN type, add the entity ID to the cloud
               : connection.entityIds.map(
                   (
-                    id: string // For other types, replace template ID
-                  ) => (id === templateId ? entityId : id)
+                    id: string, // For other types, replace template ID
+                  ) => (id === templateId ? entityId : id),
                 ),
           order: connection.order,
         };
@@ -402,7 +402,7 @@ export const DStatementActions = (actionsToDuplicate: IStatementAction[]): IStat
 };
 
 export const DStatementClassifications = (
-  classifications: IStatementClassification[]
+  classifications: IStatementClassification[],
 ): IStatementClassification[] => {
   return classifications.map((c) => {
     return {
@@ -412,7 +412,7 @@ export const DStatementClassifications = (
   });
 };
 export const DStatementIdentifications = (
-  identifications: IStatementIdentification[]
+  identifications: IStatementIdentification[],
 ): IStatementIdentification[] => {
   return identifications.map((i) => {
     return {
@@ -452,7 +452,10 @@ export const DEntity = (entity: IEntity, userRole: UserEnums.Role): IEntity => {
     notes: entity.notes,
     props: DProps(entity.props),
     references: DReferences(entity.references),
-    status: EntityEnums.Status.Pending,
+    status:
+      entity.class !== EntityEnums.Class.Value
+        ? EntityEnums.Status.Pending
+        : EntityEnums.Status.Approved,
     isTemplate: entity.isTemplate,
     usedTemplate: entity.usedTemplate,
   };
@@ -464,7 +467,7 @@ export const DEntity = (entity: IEntity, userRole: UserEnums.Role): IEntity => {
 export const DTerritory = (
   entity: ITerritory,
   territoryParentId: string,
-  userRole: UserEnums.Role
+  userRole: UserEnums.Role,
 ): ITerritory => {
   const duplicatedTerritory: ITerritory = {
     id: uuidv4(),
@@ -541,7 +544,7 @@ export const CStatement = (
   detail?: string,
   territoryId: string | undefined = undefined,
   id: string | undefined = undefined,
-  order: number = EntityEnums.Order.Last
+  order: number = EntityEnums.Order.Last,
 ): IStatement => {
   const newStatement: IStatement = {
     id: id ?? uuidv4(),
@@ -577,7 +580,7 @@ export const CTerritory = (
   detail: string,
   parentId: string,
   parentOrder: number,
-  id?: string
+  id?: string,
 ): ITerritory => ({
   id: id ?? uuidv4(),
   class: EntityEnums.Class.Territory,
@@ -600,7 +603,7 @@ export const CEntity = (
   userOptions: UserOptions,
   entityClass: EntityEnums.Class,
   label: string,
-  detail?: string
+  detail?: string,
 ): IEntity => {
   return {
     id: uuidv4(),
@@ -608,7 +611,10 @@ export const CEntity = (
     labels: [label],
     detail: detail ? detail : "",
     data: {},
-    status: EntityEnums.Status.Pending,
+    status:
+      entityClass !== EntityEnums.Class.Value
+        ? EntityEnums.Status.Pending
+        : EntityEnums.Status.Approved,
     language: userOptions.defaultLanguage,
     notes: [],
     props: [],
@@ -621,7 +627,7 @@ export const CAction = (
   userOptions: UserOptions,
   label: string,
   partOfSpeech: EntityEnums.ActionPartOfSpeech,
-  detail?: string
+  detail?: string,
 ): IAction => {
   return {
     id: uuidv4(),
@@ -646,7 +652,7 @@ export const CConcept = (
   userOptions: UserOptions,
   label: string,
   partOfSpeech: EntityEnums.ConceptPartOfSpeech,
-  detail?: string
+  detail?: string,
 ): IConcept => {
   return {
     id: uuidv4(),
@@ -671,7 +677,7 @@ export const CReference = (resourceId: string = "", valueId: string = ""): IRefe
 
 export const CRelationIdentity = (
   entity1: string = "",
-  entity2: string = ""
+  entity2: string = "",
 ): Relation.IIdentification => ({
   id: uuidv4(),
   entityIds: [entity1, entity2],
@@ -684,7 +690,7 @@ export const CTemplateEntity = (
   userRole: UserEnums.Role,
   entity: IEntity,
   templateLabel: string,
-  templateDetail?: string
+  templateDetail?: string,
 ): IEntity => {
   const templateEntity =
     entity.class === EntityEnums.Class.Statement
@@ -716,7 +722,7 @@ export const deleteProp = (
     propId?: string;
     typeEntityId?: string;
     valueEntityId?: string;
-  }
+  },
 ): IEntity => {
   const shouldDelete = (prop: IProp) => {
     if (toRemove.propId) {
@@ -742,7 +748,7 @@ export const deleteProp = (
     // 3rd level
     newProps[pi1].children.forEach((prop2, pi2) => {
       newProps[pi1].children[pi2].children = newProps[pi1].children[pi2].children.filter((child) =>
-        shouldDelete(child) ? null : child
+        shouldDelete(child) ? null : child,
       );
     });
   });
@@ -756,7 +762,7 @@ export const deleteRef = (
     refId?: string;
     resourceId?: string;
     valueId?: string;
-  }
+  },
 ): IEntity => {
   const shouldDelete = (ref: IReference) => {
     if (toRemove.refId) {
