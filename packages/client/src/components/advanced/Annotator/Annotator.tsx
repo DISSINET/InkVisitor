@@ -95,6 +95,14 @@ interface TextAnnotatorProps {
 
   /** When the pointer hovers anchored text, receives the innermost tag id or null (e.g. statement list sync). */
   onStatementAnchorHover?: (statementId: string | null) => void;
+
+  // Asymmetrical-anchor warnings (#2601). When the chip is rendered elsewhere
+  // (e.g. next to the document title), the parent controls the modal open state
+  // and hides the inline chip; otherwise the annotator owns both.
+  hideWarningChip?: boolean;
+  warningsModalOpen?: boolean;
+  onWarningsModalOpenChange?: (open: boolean) => void;
+  onAsymmetricalAnchorCountChange?: (count: number) => void;
 }
 
 const ANNOTATOR_MENU_PAGE_PADDING = 4;
@@ -123,6 +131,11 @@ export const TextAnnotator = ({
   userData,
   disableCreate = false,
   onStatementAnchorHover,
+
+  hideWarningChip = false,
+  warningsModalOpen,
+  onWarningsModalOpenChange,
+  onAsymmetricalAnchorCountChange,
 }: TextAnnotatorProps) => {
   const queryClient = useQueryClient();
   const theme = useTheme();
@@ -270,8 +283,26 @@ export const TextAnnotator = ({
   const [selectionStartIndex, setSelectionStartIndex] = useState<number>(-1);
   const [storedEntities, setStoredEntities] = useState<Record<string, IEntity | false>>({});
   const [asymmetricalAnchors, setAsymmetricalAnchors] = useState<AsymmetricalAnchor[]>([]);
-  // Rendered height of the warnings panel (incl. its bottom gap). The canvas has
-  // a fixed pixel height fed by the parent, so the panel's height must be
+
+  // The warnings modal open state is controllable: when the parent renders the
+  // chip elsewhere (next to the document title) it owns the open state; otherwise
+  // the annotator owns it. The inline chip is shown only in the uncontrolled case.
+  const [internalWarningsOpen, setInternalWarningsOpen] = useState(false);
+  const warningsOpen = warningsModalOpen ?? internalWarningsOpen;
+  const setWarningsOpen = onWarningsModalOpenChange ?? setInternalWarningsOpen;
+
+  // Report the broken-anchor count to the parent (drives the title-line chip),
+  // and close the modal once everything is fixed.
+  useEffect(() => {
+    onAsymmetricalAnchorCountChange?.(asymmetricalAnchors.length);
+    if (asymmetricalAnchors.length === 0) {
+      setWarningsOpen(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [asymmetricalAnchors.length]);
+
+  // Rendered height of the warnings chip (incl. its bottom gap). The canvas has
+  // a fixed pixel height fed by the parent, so the chip's height must be
   // subtracted from it to keep the bottom controls visible (#2601).
   const [warningsPanelHeight, setWarningsPanelHeight] = useState<number>(0);
 
@@ -1136,13 +1167,17 @@ export const TextAnnotator = ({
       <div
         ref={warningsPanelRef}
         style={{
-          paddingBottom: asymmetricalAnchors.length > 0 ? "0.5rem" : 0,
+          paddingBottom:
+            !hideWarningChip && asymmetricalAnchors.length > 0 ? "0.5rem" : 0,
         }}
       >
         <AnnotatorWarningsPanel
           anchors={asymmetricalAnchors}
           onUnlink={onRemoveAsymmetricalAnchor}
           onScrollTo={onScrollToAsymmetricalAnchor}
+          open={warningsOpen}
+          onOpenChange={setWarningsOpen}
+          showChip={!hideWarningChip}
           isLoading={isSaving || isSavingWithoutRefresh}
         />
       </div>

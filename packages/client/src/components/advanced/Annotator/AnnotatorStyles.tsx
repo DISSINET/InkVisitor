@@ -210,45 +210,31 @@ export const StyledAnnotatorButtons = styled.div`
   padding-left: ${({ theme }) => theme.space[1]};
 `;
 
-export const StyledWarningsPanel = styled.div`
-  display: flex;
-  flex-direction: column;
+// Compact warning trigger shown in the annotator header: a small icon + count.
+// Clicking it opens the warnings modal with the full description (#2601).
+export const StyledWarningsChip = styled.button`
+  display: inline-flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[1]};
+  padding: ${({ theme }) => theme.space[1]} ${({ theme }) => theme.space[2]};
   border: 1px solid ${({ theme }) => theme.color.warningBorder};
   border-radius: ${({ theme }) => theme.borderRadius["default"]};
   background-color: ${({ theme }) => theme.color.warningMessage};
-  overflow: hidden;
-`;
-
-export const StyledWarningsHeader = styled.button`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.space[2]};
-  width: 100%;
-  padding: ${({ theme }) => theme.space[2]} ${({ theme }) => theme.space[3]};
-  border: none;
-  background-color: transparent;
-  cursor: pointer;
   color: ${({ theme }) => theme.color.warningText};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
-  font-variant-caps: small-caps;
-`;
+  cursor: pointer;
 
-export const StyledWarningsHeaderSpacer = styled.div`
-  margin-left: auto;
-  display: flex;
-  align-items: center;
+  &:hover {
+    filter: brightness(0.97);
+  }
 `;
 
 export const StyledWarningsList = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.space[2]};
-  max-height: 13rem;
-  overflow-y: auto;
-  padding: ${({ theme }) => theme.space[2]} ${({ theme }) => theme.space[3]}
-    ${({ theme }) => theme.space[3]};
-  background-color: ${({ theme }) => theme.color.white};
+  width: 100%;
 `;
 
 export const StyledWarningRow = styled.div`
