@@ -90,7 +90,9 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     entityIds,
   } = data ?? lastData ?? { entities: [], total: 0, entityIds: [] as string[] };
 
-  const { columns, limit, offset, filters } = state;
+  const { limit, offset, filters } = state;
+  const columns =
+    state.view.mode === Explore.EViewMode.Table ? state.view.columns : [];
 
   const [total, setTotal] = useState(0);
 

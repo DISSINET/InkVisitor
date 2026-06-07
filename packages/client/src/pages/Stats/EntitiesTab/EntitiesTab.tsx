@@ -24,8 +24,7 @@ import {
   datePickerToIso,
   isoToDatePicker,
 } from "../utils";
-import { StatsChart } from "./StatsChart/StatsChart";
-import { StatsTable } from "./StatsTable/StatsTable";
+import { StatsChart, StatsTable } from "components/advanced";
 import { useUserQuery } from "hooks/react-query";
 
 export const EntitiesTab: React.FC = () => {
@@ -350,7 +349,6 @@ export const EntitiesTab: React.FC = () => {
                 data={data}
                 height={chartHeight ? Math.max(0, chartHeight) : 0}
                 width={chartWidth ? Math.max(0, chartWidth - 50) : 0}
-                request={queryStatsRequest}
               />
             </StyledResultsChart>
             <StyledResultsTable ref={tableRef}>
@@ -358,7 +356,6 @@ export const EntitiesTab: React.FC = () => {
                 data={data}
                 height={tableHeight ? Math.max(0, tableHeight) : 0}
                 width={tableWidth ? Math.max(0, tableWidth - 50) : 0}
-                request={queryStatsRequest}
               />
             </StyledResultsTable>
           </>

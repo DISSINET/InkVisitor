@@ -13,6 +13,16 @@ export const StyledTableContainer = styled.div<StyledTableContainer>`
   border-radius: ${({ theme }) => theme.borderRadius.md};
 `;
 
+export const StyledEmptyState = styled.div<StyledTableContainer>`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: ${({ $width }) => $width}px;
+  height: ${({ $height }) => $height}px;
+  color: ${({ theme }) => theme.color.gray[500]};
+  font-size: ${({ theme }) => theme.fontSize.base};
+`;
+
 interface StyledTable {
   $width: number;
 }

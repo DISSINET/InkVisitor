@@ -3,6 +3,7 @@ import React from "react";
 import { IResponseQueryEntity } from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { ExplorerTable } from "./ExplorerTable/ExplorerTable";
+import { ExplorerStats } from "./ExplorerStats/ExplorerStats";
 import { ExploreAction } from "./state";
 import { FloatingSearchContainer } from "../FloatingSearchContainer/FloatingSearchContainer";
 
@@ -39,21 +40,33 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
 }) => {
   const floatingSearchRightInset = isDetailOpen ? detailPanelWidth : 0;
 
+  // The Table <-> Stats mode toggle lives in the QueryPage Box header buttons.
   return (
     <>
-      <ExplorerTable
-        state={state}
-        dispatch={dispatch}
-        data={data}
-        isQueryFetching={isQueryFetching}
-        queryError={queryError}
-        height={height}
-        onExport={onExport}
-        stableSignature={stableSignature}
-        getCachedEntity={getCachedEntity}
-        onOpenEntityInDetail={onOpenEntityInDetail}
-        onOpenEntitiesInDetail={onOpenEntitiesInDetail}
-      />
+      {state.view.mode === Explore.EViewMode.Stats ? (
+        <ExplorerStats
+          stats={state.view.stats}
+          dispatch={dispatch}
+          values={data?.stats}
+          total={data?.total}
+          isFetching={isQueryFetching}
+          height={height}
+        />
+      ) : (
+        <ExplorerTable
+          state={state}
+          dispatch={dispatch}
+          data={data}
+          isQueryFetching={isQueryFetching}
+          queryError={queryError}
+          height={height}
+          onExport={onExport}
+          stableSignature={stableSignature}
+          getCachedEntity={getCachedEntity}
+          onOpenEntityInDetail={onOpenEntityInDetail}
+          onOpenEntitiesInDetail={onOpenEntitiesInDetail}
+        />
+      )}
       <FloatingSearchContainer
         rightInset={floatingSearchRightInset}
         filters={state.filters}
