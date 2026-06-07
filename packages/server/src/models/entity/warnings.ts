@@ -188,13 +188,13 @@ export default class EntityWarnings {
    * ISYNC warning should pop when concepts in the synonym cloud have inconsistent superclass relations.
    *
    * Warning IS raised when (for synonyms c1 and c2):
-   * - c1 has SCL cs1 and c2 has SCL cs2 but cs1 and cs2 are NOT synonyms
-   * - c1 has SCL cs1 but c2 has no SCL (asymmetric SCL)
+   * - c1 has SCL cs1 and c2 has SCL cs2
+   * - c1 has SCL and c2 has none
+   * - c1 has SCL to cs1 and cs2 and c2 has no SCL relations
    *
    * Warning is NOT raised when:
-   * - c1 has SCL cs1 and c2 has SCL cs2 and cs1 and cs2 are synonyms
+   * - c1 and c2 have the same set of superclasses
    * - Both c1 and c2 have no SCL
-   * - Both c1 and c2 have SCL relation to the same entity
    *
    * @param conn
    * @returns
@@ -265,46 +265,23 @@ export default class EntityWarnings {
       return null;
     }
 
-    // All have SCL - collect all unique SCL targets
-    const allSclTargetsSet: Set<string> = new Set();
-    for (const targets of Object.values(sclTargetsByConcept)) {
-      for (const target of targets) {
-        allSclTargetsSet.add(target);
-      }
-    }
-    const allSclTargets: string[] = Array.from(allSclTargetsSet);
-
-    // If only one unique target → OK (all point to the same superclass)
-    if (allSclTargets.length === 1) {
-      return null;
-    }
-
-    // Check if all SCL targets are synonyms of each other
-    const targetSynonymRelations = await Relation.findForEntities(
-      conn,
-      allSclTargets,
-      RelationEnums.Type.Synonym
+    // All have SCL - every concept must point to the same set of superclasses.
+    // The superclasses themselves do NOT need to be synonyms; only the sets
+    // of SCL targets per concept have to match.
+    const sclSignatures = conceptsWithSCL.map((id) =>
+      [...sclTargetsByConcept[id]].sort().join(",")
     );
 
-    // For each pair of SCL targets, verify they're synonyms
-    for (let i = 0; i < allSclTargets.length; i++) {
-      for (let j = i + 1; j < allSclTargets.length; j++) {
-        const target1 = allSclTargets[i];
-        const target2 = allSclTargets[j];
+    const allSameSuperclasses = sclSignatures.every(
+      (signature) => signature === sclSignatures[0]
+    );
 
-        // Check if they're in the same synonym relation
-        const areSynonyms = targetSynonymRelations.some(
-          (rel) =>
-            rel.entityIds.includes(target1) && rel.entityIds.includes(target2)
-        );
-
-        if (!areSynonyms) {
-          return this.newWarning(
-            WarningTypeEnums.ISYNC,
-            IWarningPositionSection.Relations
-          );
-        }
-      }
+    // If concepts have different superclass sets → WARNING
+    if (!allSameSuperclasses) {
+      return this.newWarning(
+        WarningTypeEnums.ISYNC,
+        IWarningPositionSection.Relations
+      );
     }
 
     return null;
