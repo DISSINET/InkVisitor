@@ -176,6 +176,61 @@ describe("models/response-search", function () {
     });
   });
 
+  describe("search by labelOrId", function () {
+    let db: Db;
+
+    // id only *contains* "de" in the middle; neither id nor label starts with "dea"
+    const [, idSubstringEntity] = prepareEntity();
+    idSubstringEntity.labels = ["touch"];
+    idSubstringEntity.id = "c0de1111-2222-3333-4444-555566667777";
+
+    // id starts with "dea"
+    const [, idPrefixEntity] = prepareEntity();
+    idPrefixEntity.labels = ["unrelated"];
+    idPrefixEntity.id = "dea99999-2222-3333-4444-555566667777";
+
+    // label starts with "dea", id does not
+    const [, labelPrefixEntity] = prepareEntity();
+    labelPrefixEntity.labels = ["dealer"];
+    labelPrefixEntity.id = "99999999-2222-3333-4444-555566667777";
+
+    beforeAll(async () => {
+      db = new Db();
+      await db.initDb();
+      await deleteEntities(db);
+
+      await idSubstringEntity.save(db.connection);
+      await idPrefixEntity.save(db.connection);
+      await labelPrefixEntity.save(db.connection);
+    });
+
+    afterAll(async () => {
+      await deleteEntities(db);
+      await db.close();
+    });
+
+    it("should NOT match an entity whose id merely contains the search term", async () => {
+      const ids = (
+        await new SearchQuery(db.connection).whereLabelOrId("dea*").do()
+      ).map((e) => e.id);
+      expect(ids).not.toContain(idSubstringEntity.id);
+    });
+
+    it("should match an entity whose id starts with the search term", async () => {
+      const ids = (
+        await new SearchQuery(db.connection).whereLabelOrId("dea*").do()
+      ).map((e) => e.id);
+      expect(ids).toContain(idPrefixEntity.id);
+    });
+
+    it("should still match an entity by label prefix", async () => {
+      const ids = (
+        await new SearchQuery(db.connection).whereLabelOrId("dea*").do()
+      ).map((e) => e.id);
+      expect(ids).toContain(labelPrefixEntity.id);
+    });
+  });
+
   describe("test sorting", function () {
     const entitites: IEntity[] = [
       new Entity({ id: "1", labels: ["one"] }),
