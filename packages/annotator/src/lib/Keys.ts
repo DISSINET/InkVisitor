@@ -905,8 +905,13 @@ export default class Keys {
       let backupYLine = this.cursor.yLine;
 
       if (line.length < this.cursor.xLine) {
-        this.cursor.xLine = 0;
-        this.cursor.yLine++;
+        if (this.cursor.yLine >= this.text.noLines - 1) {
+          // Already on the last visual line: clamp to EOL, never wrap past EOF.
+          this.cursor.xLine = line.length;
+        } else {
+          this.cursor.xLine = 0;
+          this.cursor.yLine++;
+        }
       }
 
       if (!this.text.cursorToIndex(this.viewport, this.cursor)) {
