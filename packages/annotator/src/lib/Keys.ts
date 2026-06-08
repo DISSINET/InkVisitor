@@ -216,9 +216,6 @@ export default class Keys {
       const start = { xLine: 0, yLine: end.yLine };
       this.text.deleteRangeText(start, end);
       this.cursor.setPosition(0, end.yLine);
-      if (this.annotator.onTextChangeCb) {
-        this.annotator.onTextChangeCb(this.text.value);
-      }
     } else {
       // Delete word-wise: Ctrl / Alt / ⌥+⌘ + ←  or Ctrl+Alt + ← on Windows
       const before = this.cursor.getAbsolutePosition();
@@ -231,10 +228,6 @@ export default class Keys {
       const after = this.cursor.getAbsolutePosition();
 
       this.text.deleteRangeText(before, after);
-
-      if (this.annotator.onTextChangeCb) {
-        this.annotator.onTextChangeCb(this.text.value);
-      }
     }
   }
 
@@ -264,9 +257,6 @@ export default class Keys {
       const end = { xLine: line.length, yLine: before.yLine };
       this.text.deleteRangeText(before, end);
       this.cursor.setPosition(before.xLine, before.yLine);
-      if (this.annotator.onTextChangeCb) {
-        this.annotator.onTextChangeCb(this.text.value);
-      }
     } else {
       const before = this.cursor.getAbsolutePosition();
       this.onArrowRight({
@@ -280,10 +270,6 @@ export default class Keys {
       this.text.deleteRangeText(before, after);
       this.cursor.xLine = before.xLine;
       this.cursor.yLine = before.yLine;
-
-      if (this.annotator.onTextChangeCb) {
-        this.annotator.onTextChangeCb(this.text.value);
-      }
     }
   }
 
@@ -1000,6 +986,8 @@ export default class Keys {
 
     e.preventDefault();
     let key: Key = e.key as Key;
+    // Snapshot to fire onTextChangeCb only when the document actually changes.
+    const valueBefore = this.text.value;
 
     // Any key other than vertical movement drops the goal column; ArrowUp/Down
     // manage it themselves so the desired column survives short lines.
@@ -1114,9 +1102,6 @@ export default class Keys {
           }
 
           this.text.insertText(this.viewport, this.cursor, key);
-          if (this.annotator.onTextChangeCb) {
-            this.annotator.onTextChangeCb(this.text.value);
-          }
           this.cursor.move(+1, 0);
           this.cursor.fixOutOfBounds(this.viewport, this.text);
 
@@ -1129,7 +1114,8 @@ export default class Keys {
 
     if (
       this.text.mode !== EditMode.HIGHLIGHT &&
-      this.annotator.onTextChangeCb
+      this.annotator.onTextChangeCb &&
+      this.text.value !== valueBefore
     ) {
       this.annotator.onTextChangeCb(this.text.value);
     }

@@ -51,6 +51,19 @@ describe("scroll caret into view after programmatic insert", () => {
   });
 });
 
+describe("onTextChangeCb", () => {
+  test("fires on edits but not on pure cursor movement", () => {
+    const a = mk("abc");
+    let calls = 0;
+    a.onTextChangeCb = () => calls++;
+    a.cursor.setPosition(0, 0);
+    key(a, "x"); // edit -> 1
+    key(a, "ArrowRight"); // movement -> no change
+    key(a, "ArrowLeft"); // movement -> no change
+    expect(calls).toBe(1);
+  });
+});
+
 describe("Tab", () => {
   test("inserts a tab character at the caret", () => {
     const a = mk("ab");
