@@ -20,7 +20,9 @@ module.exports = {
   ],
   globals: {
     'ts-jest': {
-      tsconfig: 'tsconfig.json'
+      // Dedicated test tsconfig: pulls in jest type globals (expect/test/...)
+      // and the *.test.ts files, which the build tsconfig deliberately omits.
+      tsconfig: 'tsconfig.jest.json'
     }
   }
 };
