@@ -21,6 +21,36 @@ const key = (a: Annotator, k: string, mods: Partial<KeyboardEvent> = {}) =>
     ...mods,
   } as KeyboardEvent);
 
+describe("scroll caret into view after programmatic insert", () => {
+  const manyLines = Array.from({ length: 60 }, (_, i) => `line ${i}`).join("\n");
+
+  test("onReplaceText scrolls a caret that is below the viewport into view", () => {
+    const a = mk(manyLines); // 60 document lines
+    a.viewport.lineStart = 0; // viewport at the top
+    a.cursor.setPosition(0, 50); // caret far below the visible window
+    a.onReplaceText(""); // a no-op edit must still reveal the caret
+
+    expect(a.cursor.yLine).toBe(50);
+    expect(a.viewport.lineStart).toBeLessThanOrEqual(50);
+    expect(50).toBeLessThan(a.viewport.lineEnd);
+  });
+
+  test("onPasteText scrolls a caret that is below the viewport into view", async () => {
+    const a = mk(manyLines);
+    a.viewport.lineStart = 0;
+    a.cursor.setPosition(0, 50);
+    (window.navigator as unknown as { clipboard: { readText: () => Promise<string> } }).clipboard = {
+      readText: () => Promise.resolve(""),
+    };
+
+    a.onPasteText();
+    await new Promise((r) => setTimeout(r, 0)); // flush the clipboard promise
+
+    expect(a.viewport.lineStart).toBeLessThanOrEqual(50);
+    expect(50).toBeLessThan(a.viewport.lineEnd);
+  });
+});
+
 describe("select-all", () => {
   test("Ctrl+A selects to the last valid line index (inclusive)", () => {
     const a = mk("line1\nline2");
