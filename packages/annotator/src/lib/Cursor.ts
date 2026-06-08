@@ -27,6 +27,15 @@ export default class Cursor
   /** Desired column for vertical movement; null = follow xLine. Reset on any horizontal move/edit/click. */
   goalColumn: number | null = null;
 
+  /**
+   * Phase 3 offset model (additive; not yet wired into navigation). Canonical
+   * caret/selection state as raw document offsets (indices into `Text.value`):
+   * `head` is the moving caret, `anchor` the fixed selection end. Collapsed
+   * selection ⇔ `anchor === head`. `xLine`/`yLine` are derived from these.
+   */
+  anchor: number = 0;
+  head: number = 0;
+
   selectDirection?: DIRECTION;
 
   // highlighted area must use absolute coordinates - highlighted area stays in position while scrolling
@@ -78,6 +87,54 @@ export default class Cursor
     this.xLine = lineX;
     this.yLine = lineY;
     this.goalColumn = null;
+  }
+
+  /**
+   * Phase 3 offset model — derive the cached visual caret (`xLine`/`yLine`) and
+   * the selection's visual endpoints from the canonical `head`/`anchor` offsets.
+   * Selection is collapsed (start/end cleared) when `anchor === head`. The draw
+   * pipeline keeps reading `xLine`/`yLine`, so this is the bridge that keeps the
+   * visual state in sync after any offset mutation.
+   */
+  syncVisualFromOffset(text: Text) {
+    const headVisual = text.visualFromOffset(this.head);
+    if (headVisual) {
+      this.xLine = headVisual.xLine;
+      this.yLine = headVisual.yLine;
+    }
+
+    if (this.anchor === this.head) {
+      this.selectStart = undefined;
+      this.selectEnd = undefined;
+    } else {
+      const anchorVisual = text.visualFromOffset(this.anchor);
+      if (anchorVisual && headVisual) {
+        this.selectStart = {
+          xLine: anchorVisual.xLine,
+          yLine: anchorVisual.yLine,
+        };
+        this.selectEnd = { xLine: headVisual.xLine, yLine: headVisual.yLine };
+      }
+    }
+
+    this.setTrueSelectionDirection();
+  }
+
+  /**
+   * Phase 3 offset model — derive `head` (and `anchor` unless `keepAnchor`) from
+   * the current visual caret. Used at the boundary while navigation still
+   * mutates `xLine`/`yLine` directly (before Tasks 3.2–3.5 migrate them).
+   * Out-of-bounds visual coords leave the offsets unchanged.
+   */
+  syncOffsetFromVisual(text: Text, keepAnchor: boolean = false) {
+    const offset = text.offsetFromVisual(this.xLine, this.yLine);
+    if (offset < 0) {
+      return;
+    }
+    this.head = offset;
+    if (!keepAnchor) {
+      this.anchor = offset;
+    }
   }
 
   /**

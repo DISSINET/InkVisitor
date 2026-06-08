@@ -791,6 +791,44 @@ class Text {
   }
 
   /**
+   * Phase 3 offset model — raw document offset (index into {@link value}) to
+   * ABSOLUTE visual coordinates (`yLine` is an absolute line index, not
+   * viewport-relative). The offset is clamped into `[0, value.length]`. The
+   * returned `xLine` is the visual column in the current edit mode (tags are
+   * stripped in HIGHLIGHT/SEMI). Returns `null` only for an empty document.
+   */
+  visualFromOffset(
+    offset: number
+  ): { xLine: number; yLine: number } | null {
+    const clamped = Math.max(0, Math.min(offset, this.value.length));
+    const pos = this.getSegmentFromAbsTextIndex(clamped);
+    if (!pos) {
+      return null;
+    }
+    const segment = this.segments[pos.segmentIndex];
+    if (!segment) {
+      return null;
+    }
+    // An offset that lands inside hidden tag markup (HIGHLIGHT/SEMI) can yield a
+    // negative parsed column; snap it to the line start so the caret never sits
+    // at a negative column.
+    return {
+      xLine: Math.max(0, pos.charInLineIndex),
+      yLine: segment.lineStart + pos.lineIndex,
+    };
+  }
+
+  /**
+   * Phase 3 offset model — ABSOLUTE visual coordinates to a raw document offset.
+   * Returns `-1` when the line index is out of bounds (uses the non-clamping
+   * {@link getSegmentPositionOrNull}). Inverse of {@link visualFromOffset}.
+   */
+  offsetFromVisual(xLine: number, yLine: number): number {
+    const pos = this.getSegmentPositionOrNull(yLine, xLine);
+    return pos ? this.getAbsTextIndexFromPosition(pos) : -1;
+  }
+
+  /**
    * Non-clamping variant of {@link getSegmentPosition}: returns `null` when
    * `absLineIndex` falls outside `[0, noLines - 1]` instead of clamping it into
    * range. Use this when a `null` return is meant to signal "invalid position"
