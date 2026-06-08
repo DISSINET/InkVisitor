@@ -2064,6 +2064,7 @@ export class Annotator {
         this.text.insertText(this.viewport, this.cursor, clipText);
         this.cursor.move(clipText.length, 0);
         this.cursor.fixOutOfBounds(this.viewport, this.text);
+        this.cursor.goalColumn = null;
         this.keys.scrollCursorIntoView();
 
         this.warnings.onTextChanged(this.text.value);
@@ -2084,6 +2085,7 @@ export class Annotator {
     this.text.insertText(this.viewport, this.cursor, text);
     this.cursor.move(text.length, 0);
     this.cursor.fixOutOfBounds(this.viewport, this.text);
+    this.cursor.goalColumn = null;
     this.keys.scrollCursorIntoView();
 
     this.warnings.onTextChanged(this.text.value);

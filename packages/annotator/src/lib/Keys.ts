@@ -384,6 +384,11 @@ export default class Keys {
     const originalXLine = this.cursor.xLine;
     const originalAbsYline = this.cursor.yLine;
 
+    if (metaKey) {
+      // Cmd+Up/Down jump to document bounds — not a column-preserving move.
+      this.cursor.goalColumn = null;
+    }
+
     if (metaKey && shiftKey) {
       const [hStart, hEnd] = this.cursor.getAbsBounds();
       const hasRange =
@@ -475,6 +480,11 @@ export default class Keys {
   }) {
     const originalXLine = this.cursor.xLine;
     const originalAbsYline = this.cursor.yLine;
+
+    if (metaKey) {
+      // Cmd+Up/Down jump to document bounds — not a column-preserving move.
+      this.cursor.goalColumn = null;
+    }
 
     if (metaKey && shiftKey) {
       const lastLineIndex = this.text.noLines > 0 ? this.text.noLines - 1 : 0;

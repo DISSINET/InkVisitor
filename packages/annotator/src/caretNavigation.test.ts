@@ -55,4 +55,21 @@ describe("goal column", () => {
     key(a, "ArrowDown"); // onto long line -> stays near 4, NOT 15
     expect(a.cursor.xLine).toBe(4);
   });
+
+  test("Cmd+Up (jump to document start) resets the goal column", () => {
+    const a = mk("0123456789ABCDEF\nshort\n0123456789ABCDEF");
+    a.cursor.setPosition(15, 0);
+    key(a, "ArrowDown"); // goalColumn=15, x=5 on "short"
+    key(a, "ArrowUp", { metaKey: true }); // jump to (0,0); must drop the goal
+    key(a, "ArrowDown"); // onto "short" -> column should be 0, NOT restored 15
+    expect(a.cursor.xLine).toBe(0);
+  });
+
+  test("onReplaceText resets the goal column", () => {
+    const a = mk("0123456789ABCDEF\nshort\n0123456789ABCDEF");
+    a.cursor.setPosition(15, 0);
+    key(a, "ArrowDown"); // goalColumn=15
+    a.onReplaceText(""); // programmatic edit -> goal must reset
+    expect(a.cursor.goalColumn).toBeNull();
+  });
 });
