@@ -431,12 +431,26 @@ class Text {
 
       const regex: RegExp = /(<[^>]+>)|([\w']+)/g;
       const tokens = text.split(regex).filter((t) => !!t);
+      // A wrapped line must never start with punctuation (issue #2780): when a
+      // word fills the line, its trailing punctuation token (e.g. ", ", ". ")
+      // would otherwise be pushed to the head of the next line. Such a token
+      // starts with a character that is neither whitespace, a word char, nor a
+      // tag opener ("<"). We forbid breaking before it and keep it on the
+      // current line instead, letting the trailing punctuation overflow
+      // harmlessly. Whitespace-led tokens may still wrap so that typing a space
+      // at the end of a full line continues onto the next line as before.
+      const startsWithPunctuation = (t: string): boolean =>
+        /^[^\s\w'<]/.test(t);
       let currentLine: string[] = [];
       let currentLineLength = 0;
       for (let iToken = 0; iToken < tokens.length; iToken++) {
         const token = tokens[iToken];
         const tokenLength = token.length;
-        if (currentLineLength + tokenLength > this.charsAtLine) {
+        if (
+          currentLineLength + tokenLength > this.charsAtLine &&
+          currentLine.length > 0 &&
+          !startsWithPunctuation(token)
+        ) {
           // Join the current line into a string and push it to lines
           segment.lines.push(currentLine.join(""));
           currentLine = [token]; // Start a new line with the current word
