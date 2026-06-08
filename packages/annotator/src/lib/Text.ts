@@ -787,6 +787,37 @@ class Text {
   }
 
   /**
+   * Non-clamping variant of {@link getSegmentPosition}: returns `null` when
+   * `absLineIndex` falls outside `[0, noLines - 1]` instead of clamping it into
+   * range. Use this when a `null` return is meant to signal "invalid position"
+   * (the offset-model code in Phase 3 relies on this); the clamping variant
+   * stays for existing callers that depend on the old behavior.
+   *
+   * @param absLineIndex - The absolute line index
+   * @param charInLineIndex - Character position within the line (default: 0)
+   * @param ignoreLastClosingTag - Whether to ignore the last closing tag (default: false)
+   * @returns Segment position, or `null` if the line index is out of bounds
+   */
+  getSegmentPositionOrNull(
+    absLineIndex: number,
+    charInLineIndex: number = 0,
+    ignoreLastClosingTag: boolean = false
+  ): SegmentPosition | null {
+    if (
+      this.noLines <= 0 ||
+      absLineIndex < 0 ||
+      absLineIndex >= this.noLines
+    ) {
+      return null;
+    }
+    return this.getSegmentPosition(
+      absLineIndex,
+      charInLineIndex,
+      ignoreLastClosingTag
+    );
+  }
+
+  /**
    * Converts absolute line index to segment position.
    *
    * This method finds the segment containing the given line and calculates
