@@ -16,9 +16,9 @@ export const batchOptions: BatchOption[] = [
   { value: BatchAction.open_in_detail, label: "open in detail" },
   { value: BatchAction.copy_uuids, label: "copy UUIDs to clipboard" },
   { value: BatchAction.export_csv, label: "export as csv" },
-  { value: BatchAction.add_metaprop, label: "add metaprop" },
-  { value: BatchAction.add_reference, label: "add reference" },
-  { value: BatchAction.add_relation, label: "add relation" },
+  { value: BatchAction.add_metaprop, label: "add new metaproperty" },
+  { value: BatchAction.add_reference, label: "add new reference" },
+  { value: BatchAction.add_relation, label: "add new relation" },
 ];
 
 export const WIDTH_COLUMN_FIRST = 280;
