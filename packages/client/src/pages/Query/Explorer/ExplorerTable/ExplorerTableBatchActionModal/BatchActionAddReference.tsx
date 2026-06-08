@@ -14,6 +14,10 @@ import { EntitySuggester, EntityTag } from "components/advanced";
 import React, { useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import {
+  BatchActionApplyConfirm,
+  needsBatchActionConfirm,
+} from "./BatchActionApplyConfirm";
+import {
   StyledBatchMessage,
   StyledBatchSection,
   StyledBatchSectionLabel,
@@ -50,9 +54,19 @@ export const BatchActionAddReference: React.FC<
     },
   });
 
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const executeApply = () => {
+    batchMutation.mutate();
+  };
+
   const handleApply = () => {
     if (!resourceEntity) return;
-    batchMutation.mutate();
+    if (needsBatchActionConfirm(selectedEntityIds.length)) {
+      setShowConfirm(true);
+      return;
+    }
+    executeApply();
   };
 
   const message = useMemo<string>(() => {
@@ -70,6 +84,7 @@ export const BatchActionAddReference: React.FC<
   }, [resourceEntity, valueEntity, selectedEntityIds.length]);
 
   return (
+    <>
     <Modal
       showModal
       onClose={onClose}
@@ -133,5 +148,17 @@ export const BatchActionAddReference: React.FC<
         </ButtonGroup>
       </ModalFooter>
     </Modal>
+    <BatchActionApplyConfirm
+      kind="reference"
+      entityCount={selectedEntityIds.length}
+      show={showConfirm}
+      loading={batchMutation.isPending}
+      onConfirm={() => {
+        setShowConfirm(false);
+        executeApply();
+      }}
+      onCancel={() => setShowConfirm(false)}
+    />
+    </>
   );
 };

@@ -462,7 +462,15 @@ export class SearchQuery {
       );
     }
 
-    if (req.updatedDate) {
+    if (req.updatedAfter || req.updatedBefore) {
+      await this._updateEntityIdsFromAudits(req, () =>
+        Audit.getByUpdatedInRange(
+          this.connection,
+          req.updatedAfter as Date | undefined,
+          req.updatedBefore as Date | undefined,
+        )
+      );
+    } else if (req.updatedDate) {
       await this._updateEntityIdsFromAudits(req, () =>
         Audit.getByUpdatedDate(this.connection, req.updatedDate as Date)
       );

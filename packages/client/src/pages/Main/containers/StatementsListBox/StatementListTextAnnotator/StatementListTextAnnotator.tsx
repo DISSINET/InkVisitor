@@ -12,7 +12,7 @@ import { UseMutationResult } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import TextAnnotator from "components/advanced/Annotator/Annotator";
 import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import {
   ANNOTATOR_SELECTOR_HEIGHT,
@@ -108,6 +108,12 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
     return annotatorWidth < ANNOTATOR_TOO_SMALL_BREAKPOINT;
   }, [annotatorWidth]);
 
+  // Asymmetrical-anchor warnings (#2601): the chip lives next to the document
+  // title, but the modal + unlink/scroll handlers stay inside the annotator, so
+  // the open state and broken-anchor count are owned here and shared with both.
+  const [warningsModalOpen, setWarningsModalOpen] = useState(false);
+  const [warningAnchorCount, setWarningAnchorCount] = useState(0);
+
   const activeTHasAnchor = useMemo<boolean>(() => {
     if (selectedDocument) {
       return selectedDocument?.entityIds.T.includes(territoryId);
@@ -193,6 +199,8 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
           contentWidth={contentWidth}
           setHlEntities={setHlEntities}
           hlEntities={hlEntities}
+          warningCount={warningAnchorCount}
+          onOpenWarnings={() => setWarningsModalOpen(true)}
         />
 
         {!selectedDocumentId && (
@@ -239,6 +247,10 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
               userData={userData}
               territoryId={territoryId}
               onStatementAnchorHover={onStatementAnchorHover}
+              hideWarningChip
+              warningsModalOpen={warningsModalOpen}
+              onWarningsModalOpenChange={setWarningsModalOpen}
+              onAsymmetricalAnchorCountChange={setWarningAnchorCount}
             />
           )}
         </AnnotatorProvider>

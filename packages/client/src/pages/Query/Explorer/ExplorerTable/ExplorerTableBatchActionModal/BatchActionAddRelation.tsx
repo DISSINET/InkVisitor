@@ -15,6 +15,10 @@ import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 import React, { useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import {
+  BatchActionApplyConfirm,
+  needsBatchActionConfirm,
+} from "./BatchActionApplyConfirm";
+import {
   StyledBatchMessage,
   StyledBatchSection,
   StyledBatchSectionLabel,
@@ -158,9 +162,19 @@ export const BatchActionAddRelation: React.FC<BatchActionAddRelationProps> = ({
     },
   });
 
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const executeApply = () => {
+    batchMutation.mutate();
+  };
+
   const handleApply = () => {
     if (!activeType || !targetEntity || validEntityIds.length === 0) return;
-    batchMutation.mutate();
+    if (needsBatchActionConfirm(validEntityIds.length)) {
+      setShowConfirm(true);
+      return;
+    }
+    executeApply();
   };
 
   const relationOptions = useMemo(() => {
@@ -221,6 +235,7 @@ export const BatchActionAddRelation: React.FC<BatchActionAddRelationProps> = ({
     (!isLoadingEntities && !isEntitiesFetchError && fetchedEntities);
 
   return (
+    <>
     <Modal
       showModal
       onClose={onClose}
@@ -370,5 +385,17 @@ export const BatchActionAddRelation: React.FC<BatchActionAddRelationProps> = ({
         </ButtonGroup>
       </ModalFooter>
     </Modal>
+    <BatchActionApplyConfirm
+      kind="relation"
+      entityCount={validEntityIds.length}
+      show={showConfirm}
+      loading={batchMutation.isPending}
+      onConfirm={() => {
+        setShowConfirm(false);
+        executeApply();
+      }}
+      onCancel={() => setShowConfirm(false)}
+    />
+    </>
   );
 };
