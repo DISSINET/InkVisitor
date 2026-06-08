@@ -47,3 +47,28 @@ describe("Text.getSegmentPositionOrNull", () => {
     expect(t.getSegmentPositionOrNull(1, 0)).toBeNull();
   });
 });
+
+describe("Segment.lineEndExclusive", () => {
+  test("is exclusive: equals lineStart + number of visual lines", () => {
+    const t = new Text("abcde\nfghij\nklmno", 100); // 3 unwrapped segments
+    expect(t.segments).toHaveLength(3);
+    t.segments.forEach((s) => {
+      expect(s.lineEndExclusive).toBe(s.lineStart + s.lines.length);
+    });
+    // contiguous: each segment starts where the previous one ended.
+    expect(t.segments[0].lineStart).toBe(0);
+    expect(t.segments[0].lineEndExclusive).toBe(1);
+    expect(t.segments[1].lineStart).toBe(1);
+    expect(t.segments[2].lineEndExclusive).toBe(3);
+    // last exclusive end equals the total line count.
+    expect(t.segments[t.segments.length - 1].lineEndExclusive).toBe(t.noLines);
+  });
+
+  test("accounts for wrapped (multi-visual-line) segments", () => {
+    const t = new Text("supercalifragilistic", 10); // 1 segment, 2 visual lines
+    expect(t.segments).toHaveLength(1);
+    expect(t.segments[0].lines).toHaveLength(2);
+    expect(t.segments[0].lineStart).toBe(0);
+    expect(t.segments[0].lineEndExclusive).toBe(2);
+  });
+});

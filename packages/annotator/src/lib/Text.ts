@@ -200,8 +200,9 @@ export class Tag {
  * A segment is a portion of text that gets processed and displayed as lines.
  */
 export class Segment {
-  lineStart: number = -1; // incl.
-  lineEnd: number = -1; // incl.
+  lineStart: number = -1; // inclusive — first visual line index of this segment
+  /** Exclusive — one past the last visual line index of this segment (`lineStart + lines.length`). */
+  lineEndExclusive: number = -1;
   raw: string;
   parsed: string = "";
   openingTags: Tag[] = [];
@@ -341,7 +342,7 @@ class Text {
   getLine(lineIndex: number): string {
     // Find the segment that contains the line
     const segmentIndex = this.segments.findIndex(
-      (s) => s.lineStart <= lineIndex && s.lineEnd > lineIndex
+      (s) => s.lineStart <= lineIndex && s.lineEndExclusive > lineIndex
     );
 
     if (segmentIndex === -1) {
@@ -422,7 +423,9 @@ class Text {
       }
 */
       segment.lineStart =
-        segmentIndex === 0 ? 0 : this.segments[segmentIndex - 1].lineEnd;
+        segmentIndex === 0
+          ? 0
+          : this.segments[segmentIndex - 1].lineEndExclusive;
       segment.lines = [];
 
       let text = segment.raw;
@@ -538,7 +541,8 @@ class Text {
       }
       if (currentLine.length > 0) pushLine();
 
-      segment.lineEnd = segment.lineStart + (segment.lines.length || 1);
+      segment.lineEndExclusive =
+        segment.lineStart + (segment.lines.length || 1);
 
       if (!segment.lines.length) {
         segment.lines = [""];
@@ -845,7 +849,7 @@ class Text {
     }
 
     const segmentIndex = this.segments.findLastIndex(
-      (s) => s.lineStart <= absLineIndex && s.lineEnd > absLineIndex
+      (s) => s.lineStart <= absLineIndex && s.lineEndExclusive > absLineIndex
     );
 
     if (segmentIndex === -1) {
@@ -931,7 +935,10 @@ class Text {
       const segment = this.segments[i];
 
       // Skip segments that don't contain any of the requested lines
-      if (segment.lineEnd <= startLine || segment.lineStart >= endLine) {
+      if (
+        segment.lineEndExclusive <= startLine ||
+        segment.lineStart >= endLine
+      ) {
         continue;
       }
 
