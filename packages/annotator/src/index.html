@@ -12,6 +12,43 @@
     .annotator-element {
       border: 1px solid black;
     }
+    #asymmetricalAnchorsFieldset {
+      background-color: #fff3cd;
+      border: 2px solid #ffc107;
+      padding: 15px;
+    }
+    #asymmetricalAnchorsFieldset legend {
+      font-weight: bold;
+      color: #856404;
+    }
+    #checkAnchorsBtn {
+      background: #ffc107;
+      color: #000;
+      border: none;
+      padding: 8px 16px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    #checkAnchorsBtn:hover {
+      background: #e0a800;
+    }
+    #noIssuesMessage {
+      color: #28a745;
+      display: none;
+      font-weight: bold;
+    }
+    .broken-anchor-item {
+      background: white;
+      border: 1px solid #dc3545;
+      border-left: 4px solid #dc3545;
+      padding: 10px;
+      margin-bottom: 8px;
+      border-radius: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
     .controls-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -34,6 +71,42 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+    }
+    .broken-anchor-info {
+      flex: 1;
+    }
+    .broken-anchor-type {
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+    .broken-anchor-type.orphaned-opening {
+      color: #dc3545;
+    }
+    .broken-anchor-type.orphaned-closing {
+      color: #fd7e14;
+    }
+    .broken-anchor-tag {
+      font-family: monospace;
+      font-size: 12px;
+      color: #333;
+    }
+    .broken-anchor-details {
+      font-size: 11px;
+      color: #666;
+      margin-top: 4px;
+    }
+    .unlink-btn {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      cursor: pointer;
+      border-radius: 4px;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+    .unlink-btn:hover {
+      background: #c82333;
     }
     .section-header:hover {
       background: #e0e0e0;
@@ -73,7 +146,7 @@
     #tagHoverPopup .tag-attr {
       color: #8ecae6;
     }
-</style>
+  </style>
   <body style="background-color: black">
     <div style="padding: 20px; background-color: #ccc">
       <div style="display: flex; flex-direction: row">
@@ -300,6 +373,15 @@
           </div>
         </div>
       </div>
+
+      <fieldset id="asymmetricalAnchorsFieldset">
+        <legend>⚠️ Asymmetrical Anchor Detection</legend>
+        <button id="checkAnchorsBtn">Check for Broken Anchors</button>
+        <div id="brokenAnchorsContainer">
+          <p id="noIssuesMessage">✓ No broken anchors found!</p>
+          <div id="brokenAnchorsList"></div>
+        </div>
+      </fieldset>
     </div>
 
     <div id="tagHoverPopup"></div>
@@ -775,6 +857,85 @@
       }
 
       resizeAnnotator();
+
+      // Asymmetrical anchor detection
+      const AsymmetricalAnchorDetector = {
+        elements: {
+          list: document.getElementById("brokenAnchorsList"),
+          noIssuesMsg: document.getElementById("noIssuesMessage"),
+          checkBtn: document.getElementById("checkAnchorsBtn")
+        },
+
+        init() {
+          annotator.onWarning(this.display.bind(this));
+          this.elements.checkBtn.onclick = this.check.bind(this);
+          setTimeout(() => this.check(), 500);
+        },
+
+        check() {
+          annotator.checkAnchors();
+          const issues = annotator.validateAnchors();
+          console.log(`Found ${issues.length} asymmetrical anchor(s)`, issues);
+        },
+
+        display(warning) {
+          const anchors = (warning && warning.anchors) || [];
+          this.elements.list.innerHTML = "";
+          this.elements.noIssuesMsg.style.display = anchors.length === 0 ? "block" : "none";
+
+          anchors.forEach(anchor => {
+            this.elements.list.appendChild(this.createAnchorItem(anchor));
+          });
+        },
+
+        createAnchorItem(anchor) {
+          const item = document.createElement("div");
+          item.className = "broken-anchor-item";
+
+          const info = document.createElement("div");
+          info.className = "broken-anchor-info";
+
+          const typeClass = anchor.type === "orphaned-opening" ? "orphaned-opening" : "orphaned-closing";
+          const typeLabel = anchor.type === "orphaned-opening" ? "Orphaned Opening Tag" : "Orphaned Closing Tag";
+          const truncatedTag = anchor.tagName.length > 40 
+            ? anchor.tagName.substring(0, 40) + "..." 
+            : anchor.tagName;
+
+          info.innerHTML = `
+            <div class="broken-anchor-type ${typeClass}">${typeLabel}</div>
+            <div class="broken-anchor-tag">Tag: <strong>${truncatedTag}</strong></div>
+            <div class="broken-anchor-details">
+              Segment: ${anchor.segmentIndex} | Position: ${anchor.position}
+              ${this.formatAttributes(anchor.attributes)}
+            </div>
+          `;
+
+          const unlinkBtn = document.createElement("button");
+          unlinkBtn.className = "unlink-btn";
+          unlinkBtn.textContent = "Unlink";
+          unlinkBtn.onclick = () => this.removeAnchor(anchor);
+
+          item.appendChild(info);
+          item.appendChild(unlinkBtn);
+          return item;
+        },
+
+        formatAttributes(attributes) {
+          if (!attributes || Object.keys(attributes).length === 0) return "";
+          return ` | Attributes: ${JSON.stringify(attributes)}`;
+        },
+
+        removeAnchor(anchor) {
+          const success = annotator.removeAsymmetricalAnchor(anchor.tagName, anchor.position, anchor.segmentIndex);
+          if (success) {
+            console.log(`Removed asymmetrical anchor: ${anchor.tagName} at position ${anchor.position}`);
+          } else {
+            alert("Failed to remove anchor. Please try again.");
+          }
+        }
+      };
+
+      AsymmetricalAnchorDetector.init();
     </script>
   </body>
 </html>
