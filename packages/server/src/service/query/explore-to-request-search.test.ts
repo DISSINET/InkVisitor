@@ -30,10 +30,15 @@ describe("exploreFiltersToRequestSearch", () => {
     const iso = "2024-01-15T00:00:00.000Z";
     const req = exploreFiltersToRequestSearch([
       { type: Explore.SearchOption.CreatedAt, createdAt: iso },
-      { type: Explore.SearchOption.UpdatedAt, updatedAt: iso },
+      {
+        type: Explore.SearchOption.UpdatedAt,
+        updatedAfter: iso,
+        updatedBefore: "2024-01-16T00:00:00.000Z",
+      },
     ]);
     expect(req!.createdDate).toEqual(new Date(iso));
-    expect(req!.updatedDate).toEqual(new Date(iso));
+    expect(req!.updatedAfter).toEqual(new Date(iso));
+    expect(req!.updatedBefore).toEqual(new Date("2024-01-16T00:00:00.000Z"));
   });
 
   it("maps created/updated/edited by", () => {

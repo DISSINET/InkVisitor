@@ -33,8 +33,12 @@ export const exploreFiltersToRequestSearch = (
         }
         break;
       case Explore.SearchOption.UpdatedAt:
-        if (filter.updatedAt) {
-          data.updatedDate = new Date(filter.updatedAt);
+        if (filter.updatedAfter) {
+          data.updatedAfter = new Date(filter.updatedAfter);
+          hasAny = true;
+        }
+        if (filter.updatedBefore) {
+          data.updatedBefore = new Date(filter.updatedBefore);
           hasAny = true;
         }
         break;

@@ -10,6 +10,9 @@ import { useUsersGetMoreQuery } from "hooks/react-query/useUsersGetMoreQuery";
 import React, { useCallback, useMemo, useState } from "react";
 import { BsShieldExclamation, BsShieldFillCheck, BsShieldShaded } from "react-icons/bs";
 import {
+  StyledDateRange,
+  StyledDateRangeField,
+  StyledDateRangeLabel,
   StyledForm,
   StyledRow,
   StyledRowControl,
@@ -37,6 +40,19 @@ const defaultClassForTypeBar = "" as EntityEnums.Class;
 const initSearchValues: IRequestSearch = {
   labelOrId: "",
   isRootInvalid: IRequestSearchRootValidity.Any,
+};
+
+const dateToDatetimeLocal = (date: Date): string => {
+  const pad = (value: number) => String(value).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+};
+
+const datetimeLocalToDate = (value: string): Date | undefined => {
+  if (!value) {
+    return undefined;
+  }
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? undefined : parsed;
 };
 
 interface FloatingSearchFormProps {
@@ -177,32 +193,54 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
       <StyledRow>
         <StyledRowHeader>{Explore.SearchOption.UpdatedAt}</StyledRowHeader>
         <StyledRowControl>
-          <Input
-            type="date"
-            width="full"
-            value={searchData.updatedDate ? searchData.updatedDate.toISOString().split("T")[0] : ""}
-            onChangeFn={(value) => {
-              const updatedDate = new Date(value);
-              if (updatedDate && !isNaN(updatedDate.getTime())) {
-                handleChange({ updatedDate });
-                dispatch({
-                  type: ExploreActionType.setUpdatedAtFilter,
-                  payload: {
-                    updatedDate: updatedDate,
-                  },
-                });
-              } else {
-                handleChange({ updatedDate: undefined });
-                dispatch({
-                  type: ExploreActionType.setUpdatedAtFilter,
-                  payload: {
-                    updatedDate: undefined,
-                  },
-                });
-              }
-            }}
-            clearable
-          />
+          <StyledDateRange>
+            <StyledDateRangeField>
+              <StyledDateRangeLabel>after</StyledDateRangeLabel>
+              <Input
+                type="datetime-local"
+                width="full"
+                value={
+                  searchData.updatedAfter ? dateToDatetimeLocal(searchData.updatedAfter) : ""
+                }
+                onChangeFn={(value) => {
+                  const updatedAfter = datetimeLocalToDate(value);
+                  const updatedBefore = searchData.updatedBefore;
+                  handleChange({ updatedAfter, updatedDate: undefined });
+                  dispatch({
+                    type: ExploreActionType.setUpdatedAtFilter,
+                    payload: {
+                      updatedAfter,
+                      updatedBefore,
+                    },
+                  });
+                }}
+                clearable
+              />
+            </StyledDateRangeField>
+            <StyledDateRangeField>
+              <StyledDateRangeLabel>before</StyledDateRangeLabel>
+              <Input
+                type="datetime-local"
+                width="full"
+                value={
+                  searchData.updatedBefore ? dateToDatetimeLocal(searchData.updatedBefore) : ""
+                }
+                onChangeFn={(value) => {
+                  const updatedBefore = datetimeLocalToDate(value);
+                  const updatedAfter = searchData.updatedAfter;
+                  handleChange({ updatedBefore, updatedDate: undefined });
+                  dispatch({
+                    type: ExploreActionType.setUpdatedAtFilter,
+                    payload: {
+                      updatedAfter,
+                      updatedBefore,
+                    },
+                  });
+                }}
+                clearable
+              />
+            </StyledDateRangeField>
+          </StyledDateRange>
         </StyledRowControl>
       </StyledRow>
 
