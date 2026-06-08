@@ -33,6 +33,7 @@ export const StyledDateRange = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.space[1]};
+  margin-bottom: ${({ theme }) => theme.space[2]};
 `;
 
 export const StyledDateRangeField = styled.div`
@@ -43,6 +44,6 @@ export const StyledDateRangeField = styled.div`
 
 export const StyledDateRangeLabel = styled.span`
   color: ${({ theme }) => theme.color.gray[600]};
-  font-size: ${({ theme }) => theme.fontSize.xxxs};
+  font-size: ${({ theme }) => theme.fontSize.xxs};
   text-transform: lowercase;
 `;

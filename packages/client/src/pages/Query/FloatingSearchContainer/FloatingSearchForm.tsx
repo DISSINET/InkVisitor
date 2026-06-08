@@ -140,9 +140,7 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
             value={languageOptionSelected}
             onChange={(selectedOption) => {
               const language =
-                selectedOption === defaultLanguageOption.value
-                  ? undefined
-                  : selectedOption;
+                selectedOption === defaultLanguageOption.value ? undefined : selectedOption;
               handleChange({
                 language,
               });
@@ -199,9 +197,7 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
               <Input
                 type="datetime-local"
                 width="full"
-                value={
-                  searchData.updatedAfter ? dateToDatetimeLocal(searchData.updatedAfter) : ""
-                }
+                value={searchData.updatedAfter ? dateToDatetimeLocal(searchData.updatedAfter) : ""}
                 onChangeFn={(value) => {
                   const updatedAfter = datetimeLocalToDate(value);
                   const updatedBefore = searchData.updatedBefore;
