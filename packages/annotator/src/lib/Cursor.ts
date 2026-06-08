@@ -4,7 +4,7 @@ import Highlighter, {
   IAbsCoordinates,
   IRelativeCoordinates,
 } from "./Highlighter";
-import Text from "./Text";
+import Text, { CaretAffinity } from "./Text";
 import Viewport from "./Viewport";
 import { HighlightMode } from "./constants";
 
@@ -35,6 +35,9 @@ export default class Cursor
    */
   anchor: number = 0;
   head: number = 0;
+  /** Affinity for `head`/`anchor` at a soft-wrap boundary (see {@link CaretAffinity}). */
+  headAffinity: CaretAffinity = CaretAffinity.DOWNSTREAM;
+  anchorAffinity: CaretAffinity = CaretAffinity.DOWNSTREAM;
 
   selectDirection?: DIRECTION;
 
@@ -97,7 +100,7 @@ export default class Cursor
    * visual state in sync after any offset mutation.
    */
   syncVisualFromOffset(text: Text) {
-    const headVisual = text.visualFromOffset(this.head);
+    const headVisual = text.visualFromOffset(this.head, this.headAffinity);
     if (headVisual) {
       this.xLine = headVisual.xLine;
       this.yLine = headVisual.yLine;
@@ -107,7 +110,10 @@ export default class Cursor
       this.selectStart = undefined;
       this.selectEnd = undefined;
     } else {
-      const anchorVisual = text.visualFromOffset(this.anchor);
+      const anchorVisual = text.visualFromOffset(
+        this.anchor,
+        this.anchorAffinity
+      );
       if (anchorVisual && headVisual) {
         this.selectStart = {
           xLine: anchorVisual.xLine,
@@ -127,13 +133,18 @@ export default class Cursor
    * Out-of-bounds visual coords leave the offsets unchanged.
    */
   syncOffsetFromVisual(text: Text, keepAnchor: boolean = false) {
-    const offset = text.offsetFromVisual(this.xLine, this.yLine);
+    const { offset, affinity } = text.offsetWithAffinityFromVisual(
+      this.xLine,
+      this.yLine
+    );
     if (offset < 0) {
       return;
     }
     this.head = offset;
+    this.headAffinity = affinity;
     if (!keepAnchor) {
       this.anchor = offset;
+      this.anchorAffinity = affinity;
     }
   }
 
