@@ -959,7 +959,8 @@ export namespace Explore {
   }
   interface IExploreUpdatedAtFilter {
     type: SearchOption.UpdatedAt;
-    updatedAt: string;
+    updatedAfter?: string;
+    updatedBefore?: string;
   }
   interface IExploreCreatedByFilter {
     type: SearchOption.CreatedBy;

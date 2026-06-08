@@ -397,6 +397,57 @@ export default class Audit implements IAudit, IDbModel {
   }
 
   /**
+   * Retrieved Audit entries that are last entries for respective entity, where the last
+   * update falls within the optional [after, before] datetime range (inclusive).
+   */
+  static async getByUpdatedInRange(
+    db: Connection,
+    after?: Date,
+    before?: Date,
+  ): Promise<Audit[]> {
+    let query = rethink
+      .table(Audit.table)
+      .filter(rethink.row("auditScope").eq(AuditScope.Entity));
+
+    if (after) {
+      query = query.filter(rethink.row("date").ge(after));
+    }
+    if (before) {
+      query = query.filter(rethink.row("date").le(before));
+    }
+
+    const result = await query.run(db);
+    const audits = result.map((data) => new Audit(data)) as Audit[];
+    const entityIds = [
+      ...new Set(
+        audits
+          .map((audit) => audit.modelId)
+          .filter((modelId): modelId is string => Boolean(modelId)),
+      ),
+    ];
+
+    const withValidDate: Audit[] = [];
+    for (const entityId of entityIds) {
+      const lastAudit = await Audit.getLastForEntity(db, entityId);
+      if (!lastAudit) {
+        continue;
+      }
+
+      const lastDate = lastAudit.date;
+      if (after && lastDate < after) {
+        continue;
+      }
+      if (before && lastDate > before) {
+        continue;
+      }
+
+      withValidDate.push(lastAudit);
+    }
+
+    return withValidDate;
+  }
+
+  /**
    * Retrieves Audit entries that are created by specific user
    * @param db rethinkdb Connection
    * @param createdBy string
