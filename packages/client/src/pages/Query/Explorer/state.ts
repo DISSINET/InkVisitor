@@ -218,21 +218,28 @@ const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Exp
     }
 
     case ExploreActionType.setUpdatedAtFilter: {
-      const { updatedDate } = action.payload as { updatedDate?: Date };
+      const { updatedAfter, updatedBefore } = action.payload as {
+        updatedAfter?: Date;
+        updatedBefore?: Date;
+      };
       const otherFilters = state.filters.filter(
         (f) => f.type !== Explore.SearchOption.UpdatedAt,
       );
+      if (!updatedAfter && !updatedBefore) {
+        return {
+          ...state,
+          filters: otherFilters,
+          offset: 0,
+        };
+      }
+      const updatedAtFilter: Explore.IExploreSearchFilter = {
+        type: Explore.SearchOption.UpdatedAt,
+        ...(updatedAfter ? { updatedAfter: updatedAfter.toISOString() } : {}),
+        ...(updatedBefore ? { updatedBefore: updatedBefore.toISOString() } : {}),
+      };
       return {
         ...state,
-        filters: updatedDate
-          ? [
-              ...otherFilters,
-              {
-                type: Explore.SearchOption.UpdatedAt,
-                updatedAt: updatedDate.toISOString(),
-              },
-            ]
-          : otherFilters,
+        filters: [...otherFilters, updatedAtFilter],
         offset: 0,
       };
     }

@@ -17,6 +17,8 @@ export interface IRequestSearch {
   status?: EntityEnums.Status;
   createdDate?: Date;
   updatedDate?: Date;
+  updatedAfter?: Date;
+  updatedBefore?: Date;
   createdBy?: string;
   updatedBy?: string;
   resourceHasDocument?: boolean;
@@ -46,6 +48,8 @@ export class RequestSearch {
   status?: EntityEnums.Status;
   createdDate?: Date;
   updatedDate?: Date;
+  updatedAfter?: Date;
+  updatedBefore?: Date;
   createdBy?: string;
   updatedBy?: string;
   resourceHasDocument?: boolean;
@@ -65,6 +69,14 @@ export class RequestSearch {
 
     if (requestData.updatedDate) {
       this.updatedDate = new Date(requestData.updatedDate || "");
+    }
+
+    if (requestData.updatedAfter) {
+      this.updatedAfter = new Date(requestData.updatedAfter || "");
+    }
+
+    if (requestData.updatedBefore) {
+      this.updatedBefore = new Date(requestData.updatedBefore || "");
     }
 
     this.cooccurrenceId =
@@ -144,6 +156,18 @@ export class RequestSearch {
     ) {
       return new BadParams("updatedDate needs to be a date");
     }
+    if (
+      this.updatedAfter !== undefined &&
+      this.updatedAfter.constructor.name !== "Date"
+    ) {
+      return new BadParams("updatedAfter needs to be a date");
+    }
+    if (
+      this.updatedBefore !== undefined &&
+      this.updatedBefore.constructor.name !== "Date"
+    ) {
+      return new BadParams("updatedBefore needs to be a date");
+    }
 
     if (this.subTerritorySearch && !this.territoryId) {
       return new BadParams(
@@ -166,6 +190,8 @@ export class RequestSearch {
       !this.language &&
       !this.createdDate &&
       !this.updatedDate &&
+      !this.updatedAfter &&
+      !this.updatedBefore &&
       (this.entityIds === undefined || !this.entityIds.length) &&
       !this.haveReferenceTo
     ) {

@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 export const FLOATING_SEARCH_COLLAPSED_SIZE = 48;
-export const FLOATING_SEARCH_EXPANDED_WIDTH = 220;
+export const FLOATING_SEARCH_EXPANDED_WIDTH = 270;
 export const FLOATING_SEARCH_PAGE_PADDING = 16;
 
 interface StyledFloatingRootProps {
@@ -82,7 +82,6 @@ export const StyledDragHandle = styled.div`
 export const StyledExpandedContent = styled.div`
   padding: ${({ theme }) => theme.space[3]};
   min-height: 6rem;
-  max-height: min(70vh, 28rem);
   overflow-y: auto;
 `;
 
