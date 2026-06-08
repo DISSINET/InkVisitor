@@ -9,6 +9,18 @@ import {
 } from "./Annotator";
 
 /**
+ * Caret affinity at a soft-wrap boundary, where a single document offset maps to
+ * two visual positions (Phase 3 offset model):
+ * - `UPSTREAM`   — render at the END of the wrapped visual line.
+ * - `DOWNSTREAM` — render at the START of the following visual line.
+ * Irrelevant for any offset that is not a soft-wrap boundary.
+ */
+export enum CaretAffinity {
+  UPSTREAM = "UPSTREAM",
+  DOWNSTREAM = "DOWNSTREAM",
+}
+
+/**
  * Represents an XML-like tag within a text segment.
  * Tags can be opening or closing tags and may contain attributes.
  */
@@ -798,7 +810,8 @@ class Text {
    * stripped in HIGHLIGHT/SEMI). Returns `null` only for an empty document.
    */
   visualFromOffset(
-    offset: number
+    offset: number,
+    affinity: CaretAffinity = CaretAffinity.DOWNSTREAM
   ): { xLine: number; yLine: number } | null {
     const clamped = Math.max(0, Math.min(offset, this.value.length));
     const pos = this.getSegmentFromAbsTextIndex(clamped);
@@ -809,12 +822,24 @@ class Text {
     if (!segment) {
       return null;
     }
+    let lineIndex = pos.lineIndex;
     // An offset that lands inside hidden tag markup (HIGHLIGHT/SEMI) can yield a
     // negative parsed column; snap it to the line start so the caret never sits
     // at a negative column.
+    let charInLineIndex = Math.max(0, pos.charInLineIndex);
+    // At a soft-wrap boundary (start of a continuation line) UPSTREAM affinity
+    // renders the caret at the end of the previous visual line instead.
+    if (
+      affinity === CaretAffinity.UPSTREAM &&
+      lineIndex > 0 &&
+      charInLineIndex === 0
+    ) {
+      lineIndex -= 1;
+      charInLineIndex = segment.lines[lineIndex].length;
+    }
     return {
-      xLine: Math.max(0, pos.charInLineIndex),
-      yLine: segment.lineStart + pos.lineIndex,
+      xLine: charInLineIndex,
+      yLine: segment.lineStart + lineIndex,
     };
   }
 
@@ -826,6 +851,48 @@ class Text {
   offsetFromVisual(xLine: number, yLine: number): number {
     const pos = this.getSegmentPositionOrNull(yLine, xLine);
     return pos ? this.getAbsTextIndexFromPosition(pos) : -1;
+  }
+
+  /**
+   * Phase 3 offset model — is `offset` a soft-wrap boundary, i.e. the start of a
+   * continuation visual line WITHIN a segment (not a hard `\n` boundary, which
+   * begins a new segment at lineIndex 0)? Such offsets have two visual caret
+   * positions distinguished by {@link CaretAffinity}.
+   */
+  isWrapBoundary(offset: number): boolean {
+    const clamped = Math.max(0, Math.min(offset, this.value.length));
+    const pos = this.getSegmentFromAbsTextIndex(clamped);
+    if (!pos) {
+      return false;
+    }
+    return pos.lineIndex > 0 && pos.charInLineIndex === 0;
+  }
+
+  /**
+   * Phase 3 offset model — ABSOLUTE visual coordinates to a document offset PLUS
+   * the affinity that visual position implies: the end of a wrapped (non-last)
+   * visual line is UPSTREAM, everything else DOWNSTREAM. Inverse companion of
+   * {@link visualFromOffset} that recovers the affinity bit lost by a bare offset.
+   */
+  offsetWithAffinityFromVisual(
+    xLine: number,
+    yLine: number
+  ): { offset: number; affinity: CaretAffinity } {
+    const offset = this.offsetFromVisual(xLine, yLine);
+    if (offset < 0) {
+      return { offset, affinity: CaretAffinity.DOWNSTREAM };
+    }
+    const pos = this.getSegmentPositionOrNull(yLine, xLine);
+    if (pos) {
+      const segment = this.segments[pos.segmentIndex];
+      const lineLen = segment?.lines[pos.lineIndex]?.length ?? 0;
+      const isLastVisualLineOfSegment =
+        !segment || pos.lineIndex >= segment.lines.length - 1;
+      if (xLine >= lineLen && !isLastVisualLineOfSegment) {
+        return { offset, affinity: CaretAffinity.UPSTREAM };
+      }
+    }
+    return { offset, affinity: CaretAffinity.DOWNSTREAM };
   }
 
   /**
