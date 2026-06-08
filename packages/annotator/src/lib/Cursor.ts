@@ -24,6 +24,8 @@ export default class Cursor
   xLine: number;
   /** Absolute line index in the document (0-based). */
   yLine: number;
+  /** Desired column for vertical movement; null = follow xLine. Reset on any horizontal move/edit/click. */
+  goalColumn: number | null = null;
 
   selectDirection?: DIRECTION;
 
@@ -75,6 +77,7 @@ export default class Cursor
   setPosition(lineX: number, lineY: number) {
     this.xLine = lineX;
     this.yLine = lineY;
+    this.goalColumn = null;
   }
 
   /**
@@ -115,6 +118,7 @@ export default class Cursor
       Math.floor((offsetY * this.ratio + scrollOffsetY) / lineHeight)
     );
     this.yLine = viewportLineStart + relY;
+    this.goalColumn = null;
   }
 
   /**

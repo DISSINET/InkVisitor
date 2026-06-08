@@ -445,11 +445,13 @@ export default class Keys {
       }
     }
 
-    // cursor should not go being line bounds (right side)
-    const line = this.text.getCurrentLine(this.viewport, this.cursor) || "";
-    if (line.length < this.cursor.xLine) {
-      this.cursor.xLine = line.length;
+    // Preserve the desired column across vertical moves (goal column): clamp to
+    // this line for the move, but remember the original column to restore later.
+    if (this.cursor.goalColumn === null) {
+      this.cursor.goalColumn = originalXLine;
     }
+    const line = this.text.getCurrentLine(this.viewport, this.cursor) || "";
+    this.cursor.xLine = Math.min(this.cursor.goalColumn, line.length);
 
     if (shiftKey) {
       if (!this.cursor.selectStart || !this.cursor.selectEnd) {
@@ -537,17 +539,21 @@ export default class Keys {
       return;
     }
 
+    // Preserve the desired column across vertical moves (goal column).
+    if (this.cursor.goalColumn === null) {
+      this.cursor.goalColumn = originalXLine;
+    }
+
     this.cursor.move(0, 1);
 
     const line = this.text.getCurrentLine(this.viewport, this.cursor) || "";
 
     if (this.cursor.yLine >= this.text.noLines) {
+      // Past the last line: stay on the last line, at its end.
       this.cursor.yLine = Math.max(0, this.text.noLines - 1);
       this.cursor.xLine = line.length;
-    }
-
-    if (line.length < this.cursor.xLine) {
-      this.cursor.xLine = line.length;
+    } else {
+      this.cursor.xLine = Math.min(this.cursor.goalColumn, line.length);
     }
 
     if (shiftKey) {
@@ -994,6 +1000,12 @@ export default class Keys {
 
     e.preventDefault();
     let key: Key = e.key as Key;
+
+    // Any key other than vertical movement drops the goal column; ArrowUp/Down
+    // manage it themselves so the desired column survives short lines.
+    if (e.key !== Key.ArrowUp && e.key !== Key.ArrowDown) {
+      this.cursor.goalColumn = null;
+    }
 
     switch (e.key) {
       case Key.Enter:

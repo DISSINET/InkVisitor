@@ -36,3 +36,23 @@ describe("ArrowRight at boundaries", () => {
     expect({ x: a.cursor.xLine, y: a.cursor.yLine }).toEqual({ x: 0, y: 1 });
   });
 });
+
+describe("goal column", () => {
+  test("returns to the original column after crossing a short line", () => {
+    const a = mk("0123456789ABCDEF\nshort\n0123456789ABCDEF");
+    a.cursor.setPosition(15, 0); // long line, column 15
+    key(a, "ArrowDown"); // onto "short" (len 5) -> clamps to 5
+    expect(a.cursor.xLine).toBe(5);
+    key(a, "ArrowDown"); // back onto a long line -> should restore 15
+    expect(a.cursor.xLine).toBe(15);
+  });
+
+  test("a horizontal move resets the goal column", () => {
+    const a = mk("0123456789ABCDEF\nshort\n0123456789ABCDEF");
+    a.cursor.setPosition(15, 0);
+    key(a, "ArrowDown"); // x=5 on "short"
+    key(a, "ArrowLeft"); // x=4, goal reset
+    key(a, "ArrowDown"); // onto long line -> stays near 4, NOT 15
+    expect(a.cursor.xLine).toBe(4);
+  });
+});
