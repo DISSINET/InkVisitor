@@ -5,6 +5,7 @@ import {
   closingTagRegex,
   createOpeningTagRegex,
   tagRemovalRegex,
+  wrapTokenRegex,
 } from "./Annotator";
 
 /**
@@ -429,44 +430,114 @@ class Text {
         text = segment.parsed;
       }
 
-      const regex: RegExp = /(<[^>]+>)|([\w']+)/g;
-      const tokens = text.split(regex).filter((t) => !!t);
-      // A wrapped line must never start with punctuation (issue #2780): when a
-      // word fills the line, its trailing punctuation token (e.g. ", ", ". ")
-      // would otherwise be pushed to the head of the next line. Such a token
-      // starts with a character that is neither whitespace, a word char, nor a
-      // tag opener ("<"). We forbid breaking before it and keep it on the
-      // current line instead, letting the trailing punctuation overflow
-      // harmlessly. Whitespace-led tokens may still wrap so that typing a space
-      // at the end of a full line continues onto the next line as before.
-      const startsWithPunctuation = (t: string): boolean =>
-        /^[^\s\w'<]/.test(t);
+      // Word wrapping like a normal text editor (issues #2780 / follow-up).
+      //
+      // The annotator has no horizontal scroll, so wrapping is the only thing
+      // keeping content (and the cursor) inside the visible width. A line break
+      // is only allowed next to whitespace; a word together with the
+      // punctuation glued to it ("ds.") is therefore one unbreakable unit that
+      // wraps to the next line as a whole rather than letting the punctuation
+      // (and the caret after it) spill past charsAtLine. A unit longer than the
+      // whole line is broken character-wise so nothing ever exceeds the width.
+      const maxLen = Math.max(1, this.charsAtLine);
+
+      // Atomic tokens: tags (<...>) must never be split; word, punctuation and
+      // whitespace runs are kept separate so we can find break opportunities.
+      type Tok = { text: string; space: boolean; atomic: boolean };
+      const toks: Tok[] = [];
+      wrapTokenRegex.lastIndex = 0;
+      let m: RegExpExecArray | null;
+      while ((m = wrapTokenRegex.exec(text)) !== null) {
+        if (m[1] !== undefined)
+          toks.push({ text: m[1], space: false, atomic: true });
+        else if (m[2] !== undefined)
+          toks.push({ text: m[2], space: true, atomic: false });
+        else if (m[3] !== undefined)
+          toks.push({ text: m[3], space: false, atomic: false });
+        else toks.push({ text: m[4], space: false, atomic: false });
+      }
+
+      // Merge adjacent non-space tokens into unbreakable units; whitespace runs
+      // are their own cells (the only place a break may occur).
+      type Cell = { text: string; space: boolean; parts: Tok[] };
+      const cells: Cell[] = [];
+      for (const t of toks) {
+        const last = cells[cells.length - 1];
+        if (!t.space && last && !last.space) {
+          last.text += t.text;
+          last.parts.push(t);
+        } else {
+          cells.push({ text: t.text, space: t.space, parts: [t] });
+        }
+      }
+      // Index of the last content cell: a whitespace run before it stays
+      // trailing on the current line; trailing whitespace after it gets its own
+      // line so the caret typed at a full line end remains visible.
+      let lastContentIdx = -1;
+      for (let i = 0; i < cells.length; i++) {
+        if (!cells[i].space) lastContentIdx = i;
+      }
+
       let currentLine: string[] = [];
       let currentLineLength = 0;
-      for (let iToken = 0; iToken < tokens.length; iToken++) {
-        const token = tokens[iToken];
-        const tokenLength = token.length;
-        if (
-          currentLineLength + tokenLength > this.charsAtLine &&
-          currentLine.length > 0 &&
-          !startsWithPunctuation(token)
-        ) {
-          // Join the current line into a string and push it to lines
-          segment.lines.push(currentLine.join(""));
-          currentLine = [token]; // Start a new line with the current word
-          currentLineLength = tokenLength; // Reset the length (+1 for the space)
-        } else {
-          currentLine.push(token);
-          currentLineLength += tokenLength; // +1 for the space
+      const pushLine = () => {
+        segment.lines.push(currentLine.join(""));
+        currentLine = [];
+        currentLineLength = 0;
+      };
+      const appendStr = (s: string) => {
+        currentLine.push(s);
+        currentLineLength += s.length;
+      };
+
+      for (let ci = 0; ci < cells.length; ci++) {
+        const cell = cells[ci];
+
+        if (currentLineLength + cell.text.length <= maxLen) {
+          appendStr(cell.text);
+          continue;
         }
 
-        if (iToken + 1 === tokens.length) {
-          // Add the last line if it's not empty
-          if (currentLine.length > 0) {
-            segment.lines.push(currentLine.join(""));
+        if (cell.space) {
+          // Keep an inter-word space trailing on the current line (the next
+          // content breaks to the margin); a trailing space at the very end
+          // gets its own line so the caret after it stays on screen.
+          if (ci >= lastContentIdx && currentLineLength > 0) pushLine();
+          appendStr(cell.text);
+          continue;
+        }
+
+        if (cell.text.length <= maxLen) {
+          // Move the whole unit down to a fresh line.
+          if (currentLineLength > 0) pushLine();
+          appendStr(cell.text);
+          continue;
+        }
+
+        // Unit longer than a whole line: break it. A tag is kept whole when it
+        // fits on a line, but a tag longer than the line is still broken — with
+        // no horizontal scroll, an unsplit over-long tag would run off the edge.
+        for (const part of cell.parts) {
+          if (part.atomic && part.text.length <= maxLen) {
+            if (currentLineLength > 0 && currentLineLength + part.text.length > maxLen)
+              pushLine();
+            appendStr(part.text);
+          } else {
+            let s = part.text;
+            while (currentLineLength + s.length > maxLen) {
+              const take = maxLen - currentLineLength;
+              if (take > 0) {
+                appendStr(s.slice(0, take));
+                s = s.slice(take);
+              }
+              pushLine();
+            }
+            if (s.length) appendStr(s);
           }
         }
       }
+      if (currentLine.length > 0) pushLine();
+
       segment.lineEnd = segment.lineStart + (segment.lines.length || 1);
 
       if (!segment.lines.length) {

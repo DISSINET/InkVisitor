@@ -30,6 +30,11 @@ export const tagRemovalRegex = /<\/?[^<>]+?>/g;
 export const createOpeningTagRegex = () =>
   new RegExp(openingTagRegex.source, openingTagRegex.flags);
 
+// Line-wrap tokenizer (Text.calculateLines): splits text into atomic tags
+// (<...>), whitespace runs, word runs, and punctuation runs (or a stray "<").
+// Stateful global regex — callers must reset lastIndex before each exec loop.
+export const wrapTokenRegex = /(<[^>]+>)|(\s+)|([\w']+)|([^\s\w'<]+|<)/g;
+
 // Opening tag with specific name and optional attributes: <tagname attr="value"> or <tagname>
 export const createSpecificOpeningTagRegex = (tagName: string) =>
   new RegExp(`<${tagName}(?:\\s+[^>]*)?>`, "g");
