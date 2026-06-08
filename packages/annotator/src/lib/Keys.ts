@@ -1065,11 +1065,10 @@ export default class Keys {
               xLine: 0,
             };
 
-            const lastSegment =
-              this.text.segments[this.text.segments.length - 1];
+            const lastLine = Math.max(0, this.text.noLines - 1);
             this.cursor.selectEnd = {
-              xLine: lastSegment.lines[lastSegment.lines.length - 1].length,
-              yLine: lastSegment.lineEnd,
+              xLine: (this.text.getLine(lastLine) ?? "").length,
+              yLine: lastLine,
             };
           }
           break;
