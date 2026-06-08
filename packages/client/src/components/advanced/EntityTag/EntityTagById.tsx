@@ -12,6 +12,7 @@ interface EntityTagByIdProps {
   fullWidth?: boolean;
   disableTooltip?: boolean;
   unlinkButton?: UnlinkButton | false;
+  disableToast?: boolean;
 }
 
 /**
@@ -23,11 +24,14 @@ export const EntityTagById: React.FC<EntityTagByIdProps> = ({
   fullWidth = false,
   disableTooltip = true,
   unlinkButton,
+  disableToast = false,
 }) => {
   const { data, isFetching } = useQuery({
     queryKey: ["entity", entityId],
     queryFn: async () => {
-      const res = await api.entityGet(entityId);
+      const res = await api.entityGet(entityId, {
+        ignoreErrorToast: disableToast,
+      });
       return res.data;
     },
     enabled: !!entityId && !entityProp && api.isLoggedIn(),

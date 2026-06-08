@@ -33,11 +33,7 @@ export const WarningsChip: React.FC<{ count: number; onClick: () => void }> = ({
 interface AnnotatorWarningsPanelProps {
   anchors: AsymmetricalAnchor[];
   onUnlink: (tagName: string, position: number, segmentIndex: number) => void;
-  onScrollTo: (
-    tagName: string,
-    position: number,
-    segmentIndex: number
-  ) => void;
+  onScrollTo: (tagName: string, position: number, segmentIndex: number) => void;
   /** Controlled open state of the description modal. */
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -70,18 +66,9 @@ export const AnnotatorWarningsPanel: React.FC<AnnotatorWarningsPanelProps> = ({
 
   return (
     <>
-      {showChip && (
-        <WarningsChip
-          count={anchors.length}
-          onClick={() => onOpenChange(true)}
-        />
-      )}
+      {showChip && <WarningsChip count={anchors.length} onClick={() => onOpenChange(true)} />}
 
-      <Modal
-        showModal={open}
-        onClose={() => onOpenChange(false)}
-        width="normal"
-      >
+      <Modal showModal={open} onClose={() => onOpenChange(false)} width="normal">
         <ModalHeader
           title={warningsTitle(anchors.length)}
           icon={<FaExclamationTriangle />}
@@ -97,31 +84,23 @@ export const AnnotatorWarningsPanel: React.FC<AnnotatorWarningsPanelProps> = ({
                 <Button
                   icon={<FaCrosshairs />}
                   size={ButtonSize.Small}
-                  color="warning"
+                  color="success"
                   inverted
                   tooltipLabel="scroll to anchor in text (RAW mode)"
                   onClick={() => {
-                    onScrollTo(
-                      anchor.tagName,
-                      anchor.position,
-                      anchor.segmentIndex
-                    );
+                    onScrollTo(anchor.tagName, anchor.position, anchor.segmentIndex);
                     // Close so the (now RAW-mode, scrolled) text is visible.
                     onOpenChange(false);
                   }}
                 />
                 <EntityTagById
                   entityId={anchor.tagName}
+                  disableToast
                   fullWidth
                   disableTooltip={false}
                   unlinkButton={{
                     tooltipLabel: "unlink broken anchor",
-                    onClick: () =>
-                      onUnlink(
-                        anchor.tagName,
-                        anchor.position,
-                        anchor.segmentIndex
-                      ),
+                    onClick: () => onUnlink(anchor.tagName, anchor.position, anchor.segmentIndex),
                   }}
                 />
               </StyledWarningRow>
@@ -129,12 +108,7 @@ export const AnnotatorWarningsPanel: React.FC<AnnotatorWarningsPanelProps> = ({
           </StyledWarningsList>
         </ModalContent>
         <ModalFooter>
-          <Button
-            label="close"
-            color="primary"
-            inverted
-            onClick={() => onOpenChange(false)}
-          />
+          <Button label="close" color="primary" inverted onClick={() => onOpenChange(false)} />
         </ModalFooter>
       </Modal>
     </>
