@@ -51,6 +51,16 @@ describe("scroll caret into view after programmatic insert", () => {
   });
 });
 
+describe("Tab", () => {
+  test("inserts a tab character at the caret", () => {
+    const a = mk("ab");
+    a.cursor.setPosition(1, 0); // between a and b
+    key(a, "Tab");
+    expect(a.text.value).toBe("a\tb");
+    expect(a.cursor.xLine).toBe(2);
+  });
+});
+
 describe("select-all", () => {
   test("Ctrl+A selects to the last valid line index (inclusive)", () => {
     const a = mk("line1\nline2");

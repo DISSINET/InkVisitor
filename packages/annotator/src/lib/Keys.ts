@@ -1052,6 +1052,21 @@ export default class Keys {
         this.onKeyHome(e);
         break;
 
+      case Key.Tab:
+        if (this.text.mode !== EditMode.HIGHLIGHT) {
+          const sel = this.cursor.getSelectedArea();
+          if (sel) {
+            this.text.deleteRangeText(sel[0], sel[1]);
+            this.cursor.reset();
+            this.cursor.setPosition(sel[0].xLine, sel[0].yLine);
+          }
+          this.text.insertText(this.viewport, this.cursor, "\t");
+          this.cursor.move(+1, 0);
+          this.cursor.fixOutOfBounds(this.viewport, this.text);
+          this.scrollCursorIntoView();
+        }
+        break;
+
       default:
         if (e.ctrlKey || e.metaKey) {
           if (e.key === "c") {
