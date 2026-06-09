@@ -353,14 +353,6 @@ export default class Cursor
   }
 
   /**
-   * move the cursor to start of the next line
-   */
-  moveToNewline() {
-    this.xLine = 0;
-    this.yLine += 1;
-  }
-
-  /**
    * draw places cursor and optionally highlighted area into the canvas
    * @param ctx
    * @param viewport

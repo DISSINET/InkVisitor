@@ -285,11 +285,8 @@ export default class Keys {
       this.cursor.yLine
     );
     this.text.insertNewline(this.viewport, this.cursor);
-    if (insertOffset >= 0) {
-      this.cursor.moveToOffset(this.text, insertOffset + 1);
-    } else {
-      this.cursor.moveToNewline();
-    }
+    const newlineAt = insertOffset >= 0 ? insertOffset : this.cursor.head;
+    this.cursor.moveToOffset(this.text, newlineAt + 1);
     this.scrollCursorIntoView();
   }
 
