@@ -1153,6 +1153,16 @@ export default class Keys {
     ) {
       this.annotator.onTextChangeCb(this.text.value);
     }
+
+    // Keep the canonical document offset (head/anchor) in sync with the final
+    // visual caret after ANY key. Edits set head exactly via moveToOffset and
+    // re-deriving from the visual is idempotent; pure-visual navigation
+    // (vertical, Home/End, word-jump, page, mouse-independent) is captured here.
+    // keepAnchor while a selection is active so the fixed end is preserved.
+    if (this.cursor.xLine >= 0 && this.cursor.yLine >= 0) {
+      this.cursor.syncOffsetFromVisual(this.text, this.cursor.isSelected());
+    }
+
     this.annotator.draw();
   }
 }

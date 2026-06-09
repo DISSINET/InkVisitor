@@ -121,6 +121,15 @@ describe("caret stays in bounds under fuzzed key sequences", () => {
               `${ctx} selEnd`
             );
           }
+          // Canonical-offset invariant: head tracks the visual caret after any key.
+          const expectedHead = a.text.offsetFromVisual(
+            a.cursor.xLine,
+            a.cursor.yLine
+          );
+          expect({ ctx, head: a.cursor.head }).toEqual({
+            ctx,
+            head: expectedHead,
+          });
         }
       });
     }
