@@ -14,6 +14,7 @@ import { Input } from "./basic/Input/Input";
 import { LetterIcon } from "./basic/LetterIcon/LetterIcon";
 import { Loader } from "./basic/Loader/Loader";
 import { Message } from "./basic/Message/Message";
+import { WarningIcon } from "./basic/Message/WarningIcon";
 import {
   Modal,
   ModalCard,
@@ -82,6 +83,7 @@ export {
   TemplateActionModal,
   Timestamp,
   Toast,
+  WarningIcon,
   ToastWithLink,
   Tooltip,
   TypeBar,

@@ -10,7 +10,7 @@ import {
   StyledToggleWrap,
 } from "./GlobalValidationsModalStyles";
 import { FaToggleOn, FaToggleOff } from "react-icons/fa";
-import { Tooltip } from "components";
+import { Tooltip, WarningIcon } from "components";
 
 interface GlobalValidationsSettingsRow {
   validation: ValidationKey;
@@ -33,6 +33,10 @@ export const GlobalValidationsSettingsRow: React.FC<
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
       >
+        <WarningIcon
+          type={validation.replace("validation_", "") as WarningTypeEnums}
+          size={16}
+        />
         {globalValidationsDict[validation].label}
       </StyledGridFormLabel>
       <div>

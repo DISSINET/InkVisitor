@@ -19,9 +19,10 @@ interface StyledGridFormLabel {
   ref: React.Dispatch<React.SetStateAction<HTMLButtonElement | null>>;
 }
 export const StyledGridFormLabel = styled.div<StyledGridFormLabel>`
-  display: grid;
+  display: flex;
   justify-content: end;
   align-items: center;
+  gap: 0.4rem;
 `;
 export const StyledValidationList = styled.div`
   display: flex;
