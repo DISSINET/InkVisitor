@@ -1237,12 +1237,19 @@ class Text {
       textToInsert +
       this.value.slice(indexPosition);
 
-    segment.raw =
-      segment.raw.slice(0, segmentPosition.rawTextIndex) +
-      textToInsert +
-      segment.raw.slice(segmentPosition.rawTextIndex);
-
-    segment.parseText();
+    if (textToInsert.includes("\n")) {
+      // Multi-line insert (e.g. pasting text with newlines): re-split the whole
+      // document from the updated value so the newlines become real segment
+      // boundaries — a targeted single-segment splice would leave a stray "\n"
+      // embedded in one segment's raw.
+      this.prepareSegments();
+    } else {
+      segment.raw =
+        segment.raw.slice(0, segmentPosition.rawTextIndex) +
+        textToInsert +
+        segment.raw.slice(segmentPosition.rawTextIndex);
+      segment.parseText();
+    }
     this.calculateLines();
   }
 
