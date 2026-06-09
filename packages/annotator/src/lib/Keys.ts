@@ -944,12 +944,8 @@ export default class Keys {
             this.cursor.yLine
           );
           this.text.insertText(this.viewport, this.cursor, "\t");
-          if (tabOffset >= 0) {
-            this.cursor.moveToOffset(this.text, tabOffset + 1);
-          } else {
-            this.cursor.move(+1, 0);
-            this.cursor.fixOutOfBounds(this.viewport, this.text);
-          }
+          const tabAt = tabOffset >= 0 ? tabOffset : this.cursor.head;
+          this.cursor.moveToOffset(this.text, tabAt + 1);
           this.scrollCursorIntoView();
         }
         break;
@@ -1009,12 +1005,9 @@ export default class Keys {
             this.cursor.yLine
           );
           this.text.insertText(this.viewport, this.cursor, key);
-          if (insertOffset >= 0) {
-            this.cursor.moveToOffset(this.text, insertOffset + key.length);
-          } else {
-            this.cursor.move(+1, 0);
-            this.cursor.fixOutOfBounds(this.viewport, this.text);
-          }
+          const insertAt =
+            insertOffset >= 0 ? insertOffset : this.cursor.head;
+          this.cursor.moveToOffset(this.text, insertAt + key.length);
 
           // When typing moves the cursor outside of the current viewport,
           // keep behaviour consistent with arrow keys and scroll so that

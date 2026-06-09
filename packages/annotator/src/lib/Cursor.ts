@@ -353,27 +353,6 @@ export default class Cursor
   }
 
   /**
-   * fixOutOfBounds moves the cursor to the next line if the current line is too short
-   * @param viewport
-   * @param text
-   */
-  fixOutOfBounds(viewport: Viewport, text: Text) {
-    let line = undefined;
-    do {
-      line = text.getCurrentLine(viewport, this);
-      if (line === null) {
-        this.reset();
-        return;
-      }
-
-      if (line.length < this.xLine) {
-        this.yLine++;
-        this.xLine = this.xLine - line.length;
-      }
-    } while (!line || line.length < this.xLine);
-  }
-
-  /**
    * move the cursor to start of the next line
    */
   moveToNewline() {

@@ -1470,7 +1470,10 @@ export class Annotator {
     if (textSegment) {
       const line = this.text.getLineFromPosition(textSegment);
       if (this.cursor.xLine > line.length) {
-        this.cursor.fixOutOfBounds(this.viewport, this.text);
+        // Offset-model navigation/editing keeps the caret in bounds; this is a
+        // defensive clamp for a caret set visually (setPosition) without a sync,
+        // replacing the legacy fixOutOfBounds line-flow repair.
+        this.cursor.xLine = line.length;
       }
 
       this.cursor.draw(this.ctx, this.viewport, this.text, {
@@ -2067,13 +2070,8 @@ export class Annotator {
           this.cursor.yLine
         );
         this.text.insertText(this.viewport, this.cursor, clipText);
-        if (insertOffset >= 0) {
-          this.cursor.moveToOffset(this.text, insertOffset + clipText.length);
-        } else {
-          this.cursor.move(clipText.length, 0);
-          this.cursor.fixOutOfBounds(this.viewport, this.text);
-          this.cursor.goalColumn = null;
-        }
+        const pasteAt = insertOffset >= 0 ? insertOffset : this.cursor.head;
+        this.cursor.moveToOffset(this.text, pasteAt + clipText.length);
         this.keys.scrollCursorIntoView();
 
         this.runWarningChecks();
@@ -2097,13 +2095,8 @@ export class Annotator {
       this.cursor.yLine
     );
     this.text.insertText(this.viewport, this.cursor, text);
-    if (insertOffset >= 0) {
-      this.cursor.moveToOffset(this.text, insertOffset + text.length);
-    } else {
-      this.cursor.move(text.length, 0);
-      this.cursor.fixOutOfBounds(this.viewport, this.text);
-      this.cursor.goalColumn = null;
-    }
+    const insertAt = insertOffset >= 0 ? insertOffset : this.cursor.head;
+    this.cursor.moveToOffset(this.text, insertAt + text.length);
     this.keys.scrollCursorIntoView();
 
     this.runWarningChecks();
