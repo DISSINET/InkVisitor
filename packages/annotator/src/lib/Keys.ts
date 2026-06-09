@@ -1,5 +1,6 @@
 import { EditMode } from "./constants";
 import Cursor from "./Cursor";
+import { HistorySnapshot } from "./History";
 import Text from "./Text";
 import Viewport from "./Viewport";
 
@@ -44,6 +45,11 @@ export interface AnnotatorCallbacks {
   text: Text;
   element: HTMLCanvasElement;
   scrollExtentLineCount(): number;
+  // Phase 4 (#3086) — undo/redo
+  captureSnapshot(): HistorySnapshot;
+  recordHistory(before: HistorySnapshot, coalesce: boolean): void;
+  undo(): void;
+  redo(): void;
 }
 
 export default class Keys {
@@ -877,6 +883,12 @@ export default class Keys {
     // setMode) without updating the offsets.
     this.cursor.reconcileOffsetsFromVisual(this.text);
 
+    // Undo/redo: capture the pre-edit state, and whether this key is a
+    // coalescable single-character typing insert (a contiguous typing run is one
+    // undo step). Recorded at the very end iff the document actually changed.
+    const historyBefore = this.annotator.captureSnapshot();
+    const coalesceEdit = key.length === 1 && !e.ctrlKey && !e.metaKey;
+
     // Any key other than vertical movement drops the goal column; ArrowUp/Down
     // manage it themselves so the desired column survives short lines.
     if (e.key !== Key.ArrowUp && e.key !== Key.ArrowDown) {
@@ -977,6 +989,20 @@ export default class Keys {
               xLine: (this.text.getLine(lastLine) ?? "").length,
               yLine: lastLine,
             };
+          } else if ((e.key === "z" || e.key === "Z") && !e.shiftKey) {
+            // Undo (Ctrl/Cmd+Z). Self-contained: it restores + scrolls + fires
+            // the change callback + draws, so return before the generic
+            // end-of-key recorder runs (it must not record the undo as an edit).
+            this.annotator.undo();
+            return;
+          } else if (
+            ((e.key === "z" || e.key === "Z") && e.shiftKey) ||
+            e.key === "y" ||
+            e.key === "Y"
+          ) {
+            // Redo (Ctrl/Cmd+Shift+Z, or Ctrl+Y on Windows).
+            this.annotator.redo();
+            return;
           }
           break;
         }
@@ -1028,6 +1054,12 @@ export default class Keys {
     // keepAnchor while a selection is active so the fixed end is preserved.
     if (this.cursor.xLine >= 0 && this.cursor.yLine >= 0) {
       this.cursor.syncOffsetFromVisual(this.text, this.cursor.isSelected());
+    }
+
+    // Record the pre-edit state for undo when the document actually changed.
+    // Undo/redo keypresses returned earlier, so they are never recorded here.
+    if (this.text.value !== valueBefore) {
+      this.annotator.recordHistory(historyBefore, coalesceEdit);
     }
 
     this.annotator.draw();

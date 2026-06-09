@@ -1,9 +1,10 @@
 import Cursor, { DIRECTION } from "./Cursor";
 import Highlighter, { IAbsCoordinates, CursorStyle } from "./Highlighter";
+import History, { HistorySnapshot } from "./History";
 import Keys from "./Keys";
 import { Lines } from "./Lines";
 import Scroller from "./Scroller";
-import Text, { Tag, SegmentPosition } from "./Text";
+import Text, { Tag, SegmentPosition, CaretAffinity } from "./Text";
 import Viewport from "./Viewport";
 import { AsymmetricalAnchor, Warnings, WarningData } from "./warnings";
 import {
@@ -104,6 +105,9 @@ export class Annotator {
   lines?: Lines;
   keys: Keys;
   warnings: Warnings;
+
+  /** Phase 4 (#3086) — bounded undo/redo stack of document snapshots. */
+  history: History = new History();
 
   annotatedPosition: SegmentPosition | null = null;
 
@@ -1625,6 +1629,9 @@ export class Annotator {
    * @param mode
    */
   setMode(mode: EditMode) {
+    // A mode switch ends any in-progress typing run for undo coalescing.
+    this.history.endCoalescing();
+
     let absIndex: number | null = null;
     if (this.cursor.xLine >= 0 && this.cursor.yLine >= 0) {
       const segPos = this.text.cursorToIndex(this.viewport, this.cursor);
@@ -2048,6 +2055,86 @@ export class Annotator {
     }
   }
 
+  // ===== Phase 4 (#3086): undo/redo =====
+
+  /** Capture the live editor state (raw value + canonical caret/selection offsets). */
+  captureSnapshot(): HistorySnapshot {
+    return {
+      value: this.text.value,
+      anchor: this.cursor.anchor,
+      head: this.cursor.head,
+      anchorAffinity: this.cursor.anchorAffinity,
+      headAffinity: this.cursor.headAffinity,
+    };
+  }
+
+  /**
+   * Restore a snapshot: reload the document string, reparse/rewrap, set the
+   * caret/selection offsets and derive the visual caret, scroll it into view,
+   * fire onTextChangeCb (when the value changed and editing is allowed) and draw.
+   */
+  private restoreSnapshot(snap: HistorySnapshot): void {
+    const changed = this.text.value !== snap.value;
+
+    this.text.value = snap.value;
+    this.text.prepareSegments();
+    this.text.calculateLines();
+
+    this.cursor.anchor = snap.anchor;
+    this.cursor.head = snap.head;
+    this.cursor.anchorAffinity = snap.anchorAffinity;
+    this.cursor.headAffinity = snap.headAffinity;
+    this.cursor.syncVisualFromOffset(this.text);
+
+    this.keys.scrollCursorIntoView();
+    this.runWarningChecks();
+
+    if (
+      changed &&
+      this.text.mode !== EditMode.HIGHLIGHT &&
+      this.onTextChangeCb
+    ) {
+      this.onTextChangeCb(this.text.value);
+    }
+    this.draw();
+  }
+
+  /**
+   * Record the pre-mutation state on the undo stack. `coalesce` is true only for
+   * a single-character typing insert, so a contiguous typing run becomes one
+   * undo step; every other op is discrete. The post-edit caret offset is read
+   * from the (already-updated) cursor for contiguity tracking.
+   */
+  recordHistory(before: HistorySnapshot, coalesce: boolean): void {
+    this.history.record(before, coalesce, this.cursor.head);
+  }
+
+  canUndo(): boolean {
+    return this.history.canUndo();
+  }
+
+  canRedo(): boolean {
+    return this.history.canRedo();
+  }
+
+  /** Restore the previous document state, if any. */
+  undo(): void {
+    const target = this.history.undo(this.captureSnapshot());
+    if (target === null) {
+      return;
+    }
+    this.restoreSnapshot(target);
+  }
+
+  /** Re-apply the most recently undone document state, if any. */
+  redo(): void {
+    const target = this.history.redo(this.captureSnapshot());
+    if (target === null) {
+      return;
+    }
+    this.restoreSnapshot(target);
+  }
+
   onCopyText() {
     window.navigator.clipboard.writeText(this.lastSelectedText?.text || "");
   }
@@ -2056,6 +2143,9 @@ export class Annotator {
     window.navigator.clipboard
       .readText()
       .then((clipText: string) => {
+        // Snapshot the pre-paste state for undo (a paste is one discrete step).
+        this.cursor.reconcileOffsetsFromVisual(this.text);
+        const before = this.captureSnapshot();
         const area = this.cursor.getSelectedArea();
         if (area) {
           this.text.deleteRangeText(area[0], area[1]);
@@ -2072,6 +2162,9 @@ export class Annotator {
         this.text.insertText(this.viewport, this.cursor, clipText);
         const pasteAt = insertOffset >= 0 ? insertOffset : this.cursor.head;
         this.cursor.moveToOffset(this.text, pasteAt + clipText.length);
+        if (this.text.value !== before.value) {
+          this.recordHistory(before, false);
+        }
         this.keys.scrollCursorIntoView();
 
         this.runWarningChecks();
@@ -2083,6 +2176,9 @@ export class Annotator {
   }
 
   onReplaceText(text: string) {
+    // Snapshot the pre-replace state for undo (replace is one discrete step).
+    this.cursor.reconcileOffsetsFromVisual(this.text);
+    const before = this.captureSnapshot();
     const area = this.cursor.getSelectedArea();
     if (area) {
       this.text.deleteRangeText(area[0], area[1]);
@@ -2097,6 +2193,9 @@ export class Annotator {
     this.text.insertText(this.viewport, this.cursor, text);
     const insertAt = insertOffset >= 0 ? insertOffset : this.cursor.head;
     this.cursor.moveToOffset(this.text, insertAt + text.length);
+    if (this.text.value !== before.value) {
+      this.recordHistory(before, false);
+    }
     this.keys.scrollCursorIntoView();
 
     this.runWarningChecks();
