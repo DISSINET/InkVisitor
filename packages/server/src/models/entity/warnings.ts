@@ -58,54 +58,72 @@ export default class EntityWarnings {
 
     const warnings: IWarning[] = [];
 
-    if (settings.find((s) => s.id === "validation_SCLM")?.value === true) {
+    // a validation runs only when its stored setting is explicitly true;
+    // defaults live in the seeded settings (datasets/*/settings.json)
+    const isActive = (warningType: WarningTypeEnums): boolean =>
+      settings.find((s) => s.id === `validation_${warningType}`)?.value === true;
+
+    if (isActive(WarningTypeEnums.SCLM)) {
       const sclmWarning = await this.hasSCLM(conn);
       if (sclmWarning) {
         warnings.push(sclmWarning);
       }
     }
 
-    if (settings.find((s) => s.id === "validation_MAEE")?.value === true) {
+    if (isActive(WarningTypeEnums.MAEE)) {
       const maeeWarning = await this.hasMAEE(conn);
       if (maeeWarning) {
         warnings.push(maeeWarning);
       }
     }
 
-    // these rules cannot be disabled
-    const isyncWarning = await this.hasISYNC(conn);
-    if (isyncWarning) {
-      warnings.push(isyncWarning);
+    if (isActive(WarningTypeEnums.ISYNC)) {
+      const isyncWarning = await this.hasISYNC(conn);
+      if (isyncWarning) {
+        warnings.push(isyncWarning);
+      }
     }
 
-    const isyncaeeWarning = await this.hasISYNCAEE(conn);
-    if (isyncaeeWarning) {
-      warnings.push(isyncaeeWarning);
+    if (isActive(WarningTypeEnums.ISYNCAEE)) {
+      const isyncaeeWarning = await this.hasISYNCAEE(conn);
+      if (isyncaeeWarning) {
+        warnings.push(isyncaeeWarning);
+      }
     }
 
-    const avalWarnings = await this.hasAVAL(conn);
-    if (avalWarnings) {
-      avalWarnings.forEach((w) => warnings.push(w));
+    if (isActive(WarningTypeEnums.AVAL)) {
+      const avalWarnings = await this.hasAVAL(conn);
+      if (avalWarnings) {
+        avalWarnings.forEach((w) => warnings.push(w));
+      }
     }
 
-    const mvalWarning = await this.hasMVAL(conn);
-    if (mvalWarning) {
-      warnings.push(mvalWarning);
+    if (isActive(WarningTypeEnums.MVAL)) {
+      const mvalWarning = await this.hasMVAL(conn);
+      if (mvalWarning) {
+        warnings.push(mvalWarning);
+      }
     }
 
-    const psmWarning = await this.hasPSM(conn);
-    if (psmWarning) {
-      warnings.push(psmWarning);
+    if (isActive(WarningTypeEnums.PSM)) {
+      const psmWarning = await this.hasPSM(conn);
+      if (psmWarning) {
+        warnings.push(psmWarning);
+      }
     }
 
-    const lmWarning = await this.hasLM(conn);
-    if (lmWarning) {
-      warnings.push(lmWarning);
+    if (isActive(WarningTypeEnums.LM)) {
+      const lmWarning = await this.hasLM(conn);
+      if (lmWarning) {
+        warnings.push(lmWarning);
+      }
     }
 
-    const vetmWarnings = await this.hasVETM(conn);
-    if (vetmWarnings) {
-      vetmWarnings.forEach((w) => warnings.push(w));
+    if (isActive(WarningTypeEnums.VETM)) {
+      const vetmWarnings = await this.hasVETM(conn);
+      if (vetmWarnings) {
+        vetmWarnings.forEach((w) => warnings.push(w));
+      }
     }
 
     return warnings;

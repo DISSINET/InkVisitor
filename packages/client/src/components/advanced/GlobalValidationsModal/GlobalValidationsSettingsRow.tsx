@@ -26,23 +26,17 @@ export const GlobalValidationsSettingsRow: React.FC<
   const tooltipLabel = globalValidationsDict[validation].label;
   const tooltipContent = globalValidationsDict[validation].description;
 
-  const isDisabled = !globalValidationsDict[validation].editAllowed;
   return (
     <>
       <StyledGridFormLabel
         ref={setReferenceElement}
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
-        $disabled={isDisabled}
       >
         {globalValidationsDict[validation].label}
       </StyledGridFormLabel>
       <div>
-        <StyledToggleWrap
-          $active={active}
-          $disabled={isDisabled}
-          onClick={() => !isDisabled && toggleRule()}
-        >
+        <StyledToggleWrap $active={active} onClick={() => toggleRule()}>
           {active ? (
             <>
               <FaToggleOn size={22} /> active

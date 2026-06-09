@@ -16,14 +16,12 @@ export const StyledGridSectionHeading = styled.div`
   margin-top: 1rem;
 `;
 interface StyledGridFormLabel {
-  $disabled: boolean;
   ref: React.Dispatch<React.SetStateAction<HTMLButtonElement | null>>;
 }
 export const StyledGridFormLabel = styled.div<StyledGridFormLabel>`
   display: grid;
   justify-content: end;
   align-items: center;
-  color: ${({ theme, $disabled }) => ($disabled ? theme.color["grey"] : "")};
 `;
 export const StyledValidationList = styled.div`
   display: flex;
@@ -37,19 +35,14 @@ export const StyledBlockSeparator = styled.div`
 `;
 interface StyledToggleWrap {
   $active: boolean;
-  $disabled: boolean;
 }
 export const StyledToggleWrap = styled.div<StyledToggleWrap>`
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  color: ${({ theme, $active, $disabled }) =>
-    $disabled
-      ? theme.color["grey"]
-      : $active
-      ? theme.color["info"]
-      : theme.color["danger"]};
-  cursor: ${({ $disabled }) => ($disabled ? "not-allowed" : "pointer")};
+  color: ${({ theme, $active }) =>
+    $active ? theme.color["info"] : theme.color["danger"]};
+  cursor: pointer;
 `;
 
 export const StyledSectionHeader = styled.div`
