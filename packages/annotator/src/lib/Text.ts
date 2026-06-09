@@ -667,18 +667,34 @@ class Text {
       if (absTextIndex < currentIndex + segmentLength) {
         const rawTextIndex = absTextIndex - currentIndex;
 
-        // Calculate parsed text index by accounting for tags
+        // Calculate parsed text index by counting the characters that tag
+        // removal strips from the raw text up to this index. We derive this
+        // from `tagRemovalRegex` — the exact pattern used to build `parsed`
+        // (`raw.replace(tagRemovalRegex, "")`) — so the two stay consistent
+        // even for malformed tags. A closing tag carrying attributes
+        // (`</first elvl="1">`) is stripped from `parsed` by tagRemovalRegex
+        // but matches neither the strict opening nor closing regex, so it
+        // never lands in `openingTags`/`closingTags`; reconstructing the
+        // removed length from those lists both misses such tags and uses the
+        // canonical (attribute-stripped) tag length, drifting the caret.
         let parsedTextIndex = rawTextIndex;
         if (this.mode !== EditMode.RAW) {
-          const tags = segment.openingTags
-            .concat(segment.closingTags)
-            .sort((a, b) => a.position - b.position);
-
-          for (const tag of tags) {
-            if (tag.position <= rawTextIndex) {
-              parsedTextIndex -= tag.getTag().length;
+          const removalRegex = new RegExp(
+            tagRemovalRegex.source,
+            tagRemovalRegex.flags
+          );
+          let removalMatch: RegExpExecArray | null;
+          while ((removalMatch = removalRegex.exec(segment.raw)) !== null) {
+            if (removalMatch.index > rawTextIndex) {
+              break;
             }
+            parsedTextIndex -= removalMatch[0].length;
           }
+          // Note: parsedTextIndex may go negative when rawTextIndex sits on a
+          // leading tag (the `<= rawTextIndex` boundary subtracts a tag that
+          // starts exactly there); the return value clamps it, matching the
+          // previous tracked-tag computation. Only the malformed-tag accounting
+          // differs from before.
         }
 
         // Find line index and character position within the line
