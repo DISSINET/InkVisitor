@@ -127,6 +127,26 @@ export default class Cursor
   }
 
   /**
+   * Phase 3 offset model — place a COLLAPSED caret at a raw document offset and
+   * derive the visual position. Clears any selection (anchor === head) and the
+   * goal column. The canonical way to position the caret after an edit: the
+   * post-edit offset is known exactly, and deriving the visual from it is always
+   * in bounds (replaces `move()` + `fixOutOfBounds`).
+   */
+  moveToOffset(
+    text: Text,
+    offset: number,
+    affinity: CaretAffinity = CaretAffinity.DOWNSTREAM
+  ) {
+    this.head = offset;
+    this.anchor = offset;
+    this.headAffinity = affinity;
+    this.anchorAffinity = affinity;
+    this.goalColumn = null;
+    this.syncVisualFromOffset(text);
+  }
+
+  /**
    * Phase 3 offset model — derive `head` (and `anchor` unless `keepAnchor`) from
    * the current visual caret. Used at the boundary while navigation still
    * mutates `xLine`/`yLine` directly (before Tasks 3.2–3.5 migrate them).

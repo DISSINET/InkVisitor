@@ -415,9 +415,21 @@ export default class Keys {
       this.cursor.reset();
       this.cursor.setPosition(area[0].xLine, area[0].yLine);
     }
-    this.text.insertNewline(this.viewport, this.cursor);
 
-    this.cursor.moveToNewline();
+    // The newline is inserted at the caret's raw offset; the caret follows it to
+    // offset+1. Deriving the visual position from that offset is always in
+    // bounds — unlike the old blind `moveToNewline` (yLine += 1), which
+    // overshoots when the split re-wraps the prefix into fewer visual lines.
+    const insertOffset = this.text.offsetFromVisual(
+      this.cursor.xLine,
+      this.cursor.yLine
+    );
+    this.text.insertNewline(this.viewport, this.cursor);
+    if (insertOffset >= 0) {
+      this.cursor.moveToOffset(this.text, insertOffset + 1);
+    } else {
+      this.cursor.moveToNewline();
+    }
     this.scrollCursorIntoView();
   }
 
@@ -1147,9 +1159,17 @@ export default class Keys {
             this.cursor.reset();
             this.cursor.setPosition(sel[0].xLine, sel[0].yLine);
           }
+          const tabOffset = this.text.offsetFromVisual(
+            this.cursor.xLine,
+            this.cursor.yLine
+          );
           this.text.insertText(this.viewport, this.cursor, "\t");
-          this.cursor.move(+1, 0);
-          this.cursor.fixOutOfBounds(this.viewport, this.text);
+          if (tabOffset >= 0) {
+            this.cursor.moveToOffset(this.text, tabOffset + 1);
+          } else {
+            this.cursor.move(+1, 0);
+            this.cursor.fixOutOfBounds(this.viewport, this.text);
+          }
           this.scrollCursorIntoView();
         }
         break;
@@ -1200,9 +1220,21 @@ export default class Keys {
             this.cursor.setPosition(area[0].xLine, area[0].yLine);
           }
 
+          // Insert at the caret's raw offset and move to offset + length via the
+          // offset model. This keeps the caret in bounds after a re-wrap and
+          // clears any stale (collapsed) selection — replacing move() +
+          // fixOutOfBounds, which left both to drift.
+          const insertOffset = this.text.offsetFromVisual(
+            this.cursor.xLine,
+            this.cursor.yLine
+          );
           this.text.insertText(this.viewport, this.cursor, key);
-          this.cursor.move(+1, 0);
-          this.cursor.fixOutOfBounds(this.viewport, this.text);
+          if (insertOffset >= 0) {
+            this.cursor.moveToOffset(this.text, insertOffset + key.length);
+          } else {
+            this.cursor.move(+1, 0);
+            this.cursor.fixOutOfBounds(this.viewport, this.text);
+          }
 
           // When typing moves the cursor outside of the current viewport,
           // keep behaviour consistent with arrow keys and scroll so that
