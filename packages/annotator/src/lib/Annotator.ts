@@ -878,7 +878,11 @@ export class Annotator {
       }
     }
 
+    // First pointer event starts a (collapsed) selection → set both offsets;
+    // subsequent drag events move only head (keep the click anchor fixed).
+    const wasSelecting = this.cursor.isSelecting();
     this.cursor.selectArea();
+    this.cursor.syncOffsetFromVisual(this.text, wasSelecting);
   }
 
   private cancelSelectionEdgeScroll() {
@@ -1077,6 +1081,15 @@ export class Annotator {
     };
     this.cursor.xLine = this.cursor.selectEnd.xLine;
     this.cursor.selectDirection = DIRECTION.FORWARD;
+    // Canonical offsets: anchor = word start, head = word end (caret).
+    this.cursor.anchor = this.text.offsetFromVisual(
+      this.cursor.selectStart.xLine,
+      this.cursor.selectStart.yLine
+    );
+    this.cursor.head = this.text.offsetFromVisual(
+      this.cursor.selectEnd.xLine,
+      this.cursor.selectEnd.yLine
+    );
     this.draw();
   }
 
