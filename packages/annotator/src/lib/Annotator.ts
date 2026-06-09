@@ -1,6 +1,8 @@
 import Cursor, { DIRECTION } from "./Cursor";
 import Highlighter, { IAbsCoordinates, CursorStyle } from "./Highlighter";
 import History, { HistorySnapshot } from "./History";
+import { ContextMenu, ContextMenuItem } from "./ContextMenu";
+import { SettingsOverlay } from "./SettingsOverlay";
 import Keys from "./Keys";
 import { Lines } from "./Lines";
 import Scroller from "./Scroller";
@@ -56,12 +58,22 @@ export interface HighlightSchema {
   };
 }
 
+/** localStorage key for persisted user settings (caret width, colors, FPS). */
+const SETTINGS_STORAGE_KEY = "inkvisitor.annotator.settings";
+
+interface PersistedSettings {
+  caretWidth?: number;
+  highlightColor?: string;
+  showFps?: boolean;
+}
+
 // DrawingOptions bundles required sizes shared by multiple components while drawing into canvas
 export interface DrawingOptions {
   charWidth: number;
   lineHeight: number;
   charsAtLine: number;
   color?: string; // override
+  caretWidth?: number; // collapsed-caret width in device px (defaults to 1)
 }
 
 export interface Selected {
@@ -105,6 +117,8 @@ export class Annotator {
   lines?: Lines;
   keys: Keys;
   warnings: Warnings;
+  contextMenu: ContextMenu = new ContextMenu();
+  settingsOverlay: SettingsOverlay = new SettingsOverlay();
 
   /** Phase 4 (#3086) — bounded undo/redo stack of document snapshots. */
   history: History = new History();
@@ -120,6 +134,20 @@ export class Annotator {
   private lastSelectPointer: { cx: number; cy: number } | null = null;
 
   private selectionScrollRaf: number = 0;
+
+  /** Collapsed-caret width in CSS px (scaled by ratio at draw time). */
+  private caretWidth = 1;
+
+  /**
+   * User-chosen selection highlight color (`#rrggbb`), or undefined to defer to
+   * the host theme set via setSelectStyle. When set it wins over the theme.
+   */
+  private highlightColor: string | undefined = undefined;
+
+  /** Debug FPS counter — smoothed frames-per-second of draw() calls. */
+  private showFps = false;
+  private lastFrameTime = 0;
+  private fps = 0;
 
   // callbacks
   onSelectTextCb?: (text: Selected) => void;
@@ -137,6 +165,9 @@ export class Annotator {
   hoverDebounceTimeout?: NodeJS.Timeout; // For debouncing mousemove events
 
   private readonly boundOnMouseMove = (e: MouseEvent) => this.onMouseMove(e);
+
+  private readonly boundOnContextMenu = (e: MouseEvent) =>
+    this.onContextMenu(e);
 
   private readonly boundOnCanvasMouseLeave = () => {
     if (this.hoverDebounceTimeout) {
@@ -210,10 +241,13 @@ export class Annotator {
     );
     this.element.addEventListener("mousemove", this.boundOnMouseMove);
     this.element.addEventListener("mouseleave", this.boundOnCanvasMouseLeave);
+    this.element.addEventListener("contextmenu", this.boundOnContextMenu);
 
     this.clickCount = 0;
 
     this.previousRenderViewportLineStart = 0;
+
+    this.loadSettings();
 
     this.draw();
 
@@ -236,6 +270,14 @@ export class Annotator {
       opacity: this.selectOpacity,
       selectorColor: selectorColor,
     } as CursorStyle;
+
+    // A user-chosen highlight color (persisted) takes precedence over the theme.
+    if (this.highlightColor !== undefined) {
+      this.cursor.style = {
+        ...this.cursor.style,
+        color: this.highlightColor,
+      };
+    }
   }
 
   /**
@@ -1098,6 +1140,64 @@ export class Annotator {
   }
 
   /**
+   * onContextMenu opens the right-click context menu at the pointer.
+   * TODO (#3086): wire real actions / let the host supply items via a callback.
+   * For now these are placeholder entries.
+   * @param e
+   */
+  onContextMenu(e: MouseEvent) {
+    e.preventDefault();
+    this.contextMenu.open(e.clientX, e.clientY, this.buildContextMenuItems());
+  }
+
+  /** Context-menu entries. For now just a toggle for the debug FPS counter. */
+  private buildContextMenuItems(): ContextMenuItem[] {
+    return [
+      {
+        label: `${this.showFps ? "✓ " : ""}Show FPS counter`,
+        onClick: () => this.setShowFps(!this.showFps),
+      },
+      { separator: true },
+      { label: "Options…", onClick: () => this.openSettings() },
+    ];
+  }
+
+  /** Open the settings overlay with the current options. */
+  private openSettings(): void {
+    this.settingsOverlay.open(
+      [
+        {
+          type: "segmented",
+          label: "Cursor size",
+          options: [
+            { label: "1px", value: 1 },
+            { label: "2px", value: 2 },
+            { label: "3px", value: 3 },
+          ],
+          value: this.caretWidth,
+          onChange: (px) => this.setCaretWidth(px),
+        },
+        {
+          type: "color",
+          label: "Highlight color",
+          value: this.getHighlightColor(),
+          onChange: (hex) => this.setHighlightColor(hex),
+        },
+      ],
+      this.element,
+      [
+        {
+          label: "Reset to defaults",
+          onClick: () => {
+            this.resetSettings();
+            this.openSettings(); // re-render so controls show the defaults
+          },
+        },
+      ]
+    );
+  }
+
+  /**
    * onWheel is handler for mouse-wheel-event. Uses fluent scroll: accumulates deltaY
    * so text and line numbers scroll smoothly together.
    * @param e
@@ -1446,6 +1546,10 @@ export class Annotator {
    * TODO - this should be done in conjunction with requestAnimationFrame
    */
   draw() {
+    if (this.showFps) {
+      this.updateFps();
+    }
+
     this.syncLineNumbersCanvasToMain();
 
     this.ctx.reset();
@@ -1484,6 +1588,7 @@ export class Annotator {
         lineHeight: this.lineHeight,
         charWidth: this.charWidth,
         charsAtLine: this.text.charsAtLine,
+        caretWidth: this.caretWidth * this.ratio,
       });
     }
 
@@ -1622,6 +1727,182 @@ export class Annotator {
       this.onScrollCb?.(thisRenderVieportLineStart);
       this.previousRenderViewportLineStart = thisRenderVieportLineStart;
     }
+
+    if (this.showFps) {
+      this.drawFpsCounter();
+    }
+  }
+
+  /** Current collapsed-caret width in CSS px. */
+  getCaretWidth(): number {
+    return this.caretWidth;
+  }
+
+  /** Set the collapsed-caret width in CSS px (e.g. 1, 2, 3) and redraw. */
+  setCaretWidth(px: number): void {
+    this.caretWidth = Math.max(1, px);
+    this.saveSettings();
+    this.draw();
+  }
+
+  /**
+   * Load persisted settings from localStorage and apply them to the fields
+   * (without redrawing — the constructor draws once afterwards). Safe to call
+   * when storage is unavailable or holds malformed data.
+   */
+  private loadSettings(): void {
+    let parsed: PersistedSettings | null = null;
+    try {
+      const raw =
+        typeof localStorage !== "undefined" &&
+        localStorage.getItem(SETTINGS_STORAGE_KEY);
+      if (raw) {
+        parsed = JSON.parse(raw) as PersistedSettings;
+      }
+    } catch {
+      return; // storage blocked or corrupt — fall back to defaults
+    }
+    if (!parsed) {
+      return;
+    }
+
+    if (typeof parsed.caretWidth === "number") {
+      this.caretWidth = Math.max(1, parsed.caretWidth);
+    }
+    if (typeof parsed.highlightColor === "string") {
+      this.highlightColor = parsed.highlightColor;
+      this.cursor.style = { ...this.cursor.style, color: this.highlightColor };
+    }
+    if (typeof parsed.showFps === "boolean") {
+      this.showFps = parsed.showFps;
+    }
+  }
+
+  /** Reset all persisted settings to their defaults, clear storage, and redraw. */
+  resetSettings(): void {
+    this.caretWidth = 1;
+    this.highlightColor = undefined;
+    // Revert the highlight color to the host theme color (last setSelectStyle).
+    this.cursor.style = { ...this.cursor.style, color: this.selectColor };
+    this.showFps = false;
+    this.lastFrameTime = 0;
+    this.fps = 0;
+
+    try {
+      if (typeof localStorage !== "undefined") {
+        localStorage.removeItem(SETTINGS_STORAGE_KEY);
+      }
+    } catch {
+      // ignore storage errors
+    }
+
+    this.draw();
+  }
+
+  /** Persist the current settings to localStorage (best-effort). */
+  private saveSettings(): void {
+    try {
+      if (typeof localStorage === "undefined") {
+        return;
+      }
+      const data: PersistedSettings = {
+        caretWidth: this.caretWidth,
+        highlightColor: this.highlightColor,
+        showFps: this.showFps,
+      };
+      localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(data));
+    } catch {
+      // storage full or blocked — settings just won't persist this session
+    }
+  }
+
+  /**
+   * Current selection highlight color as a `#rrggbb` hex string. When the user
+   * hasn't picked one, this reflects the effective (theme) color so the picker
+   * shows the real default rather than black.
+   */
+  getHighlightColor(): string {
+    return (
+      this.highlightColor ??
+      this.cssColorToHex(this.cursor.style.color as string)
+    );
+  }
+
+  /**
+   * Normalize any CSS color (named/rgb/hex) to `#rrggbb` using the canvas, which
+   * a native color input requires. Falls back to black for non-opaque colors.
+   */
+  private cssColorToHex(color: string): string {
+    try {
+      const prev = this.ctx.fillStyle;
+      this.ctx.fillStyle = color;
+      const normalized = this.ctx.fillStyle;
+      this.ctx.fillStyle = prev;
+      if (typeof normalized === "string" && normalized.startsWith("#")) {
+        return normalized;
+      }
+    } catch {
+      // ignore and fall through to default
+    }
+    return "#000000";
+  }
+
+  /** Set the selection highlight color (`#rrggbb`) and redraw. */
+  setHighlightColor(hex: string): void {
+    this.highlightColor = hex;
+    this.cursor.style = { ...this.cursor.style, color: hex };
+    this.saveSettings();
+    this.draw();
+  }
+
+  /**
+   * Toggle the debug FPS counter in the top-left corner. Disabled by default.
+   */
+  setShowFps(show: boolean): void {
+    this.showFps = show;
+    this.lastFrameTime = 0;
+    this.fps = 0;
+    this.saveSettings();
+    this.draw();
+  }
+
+  /**
+   * Update the smoothed FPS from the interval between draw() calls. This is an
+   * on-demand renderer (no rAF loop), so the value reflects redraw frequency
+   * during activity and dips after idle gaps.
+   */
+  private updateFps() {
+    const now =
+      typeof performance !== "undefined" ? performance.now() : Date.now();
+    if (this.lastFrameTime > 0) {
+      const dt = now - this.lastFrameTime;
+      if (dt > 0) {
+        const instantaneous = 1000 / dt;
+        // Exponential moving average smooths jitter between on-demand redraws.
+        this.fps =
+          this.fps === 0
+            ? instantaneous
+            : this.fps * 0.8 + instantaneous * 0.2;
+      }
+    }
+    this.lastFrameTime = now;
+  }
+
+  /** Draw the debug FPS counter in the top-left corner (screen space). */
+  private drawFpsCounter() {
+    const text = `${Math.round(this.fps)} FPS`;
+    const pad = 4 * this.ratio;
+    const fontSize = 11 * this.ratio;
+
+    this.ctx.save();
+    this.ctx.font = `${fontSize}px ${DEFAULT_FONT}`;
+    this.ctx.textBaseline = "top";
+    const textW = this.ctx.measureText(text).width;
+    this.ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+    this.ctx.fillRect(0, 0, textW + pad * 2, fontSize + pad * 2);
+    this.ctx.fillStyle = "#0f0";
+    this.ctx.fillText(text, pad, pad);
+    this.ctx.restore();
   }
 
   /**
