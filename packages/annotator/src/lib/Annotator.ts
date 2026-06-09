@@ -1663,14 +1663,14 @@ export class Annotator {
       if (segPos !== null) {
         const coords = this.text.positionToCursor(this.viewport, segPos);
         if (coords !== null) {
+          // Re-derive the caret's visual position in the new mode so its
+          // document position is preserved across the switch. Deliberately do
+          // NOT scroll the viewport to the caret here: switching edit modes
+          // keeps the reader on the same content (the viewport was just
+          // restored above, per #2904). Snapping to an off-screen caret —
+          // one the user had scrolled away from — would defeat that.
           const absY = this.viewport.lineStart + coords.yLine;
           this.cursor.setPosition(coords.xLine, absY);
-          if (
-            absY < this.viewport.lineStart ||
-            absY > this.viewport.lineEnd - 1
-          ) {
-            this.viewport.scrollTo(absY, this.scrollExtentLineCount());
-          }
         }
       }
     }
