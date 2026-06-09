@@ -2046,10 +2046,21 @@ export class Annotator {
           this.cursor.reset();
           this.cursor.setPosition(area[0].xLine, area[0].yLine);
         }
+        // Place the caret at insert-offset + length via the offset model. Unlike
+        // move(len, 0) — which only shifts xLine and mishandles pasted newlines —
+        // this lands correctly for multi-line text and stays in bounds.
+        const insertOffset = this.text.offsetFromVisual(
+          this.cursor.xLine,
+          this.cursor.yLine
+        );
         this.text.insertText(this.viewport, this.cursor, clipText);
-        this.cursor.move(clipText.length, 0);
-        this.cursor.fixOutOfBounds(this.viewport, this.text);
-        this.cursor.goalColumn = null;
+        if (insertOffset >= 0) {
+          this.cursor.moveToOffset(this.text, insertOffset + clipText.length);
+        } else {
+          this.cursor.move(clipText.length, 0);
+          this.cursor.fixOutOfBounds(this.viewport, this.text);
+          this.cursor.goalColumn = null;
+        }
         this.keys.scrollCursorIntoView();
 
         this.runWarningChecks();
@@ -2067,10 +2078,19 @@ export class Annotator {
       this.cursor.reset();
       this.cursor.setPosition(area[0].xLine, area[0].yLine);
     }
+    // See onPasteText: offset-based caret placement handles multi-line text.
+    const insertOffset = this.text.offsetFromVisual(
+      this.cursor.xLine,
+      this.cursor.yLine
+    );
     this.text.insertText(this.viewport, this.cursor, text);
-    this.cursor.move(text.length, 0);
-    this.cursor.fixOutOfBounds(this.viewport, this.text);
-    this.cursor.goalColumn = null;
+    if (insertOffset >= 0) {
+      this.cursor.moveToOffset(this.text, insertOffset + text.length);
+    } else {
+      this.cursor.move(text.length, 0);
+      this.cursor.fixOutOfBounds(this.viewport, this.text);
+      this.cursor.goalColumn = null;
+    }
     this.keys.scrollCursorIntoView();
 
     this.runWarningChecks();

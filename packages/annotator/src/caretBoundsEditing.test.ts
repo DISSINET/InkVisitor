@@ -105,3 +105,29 @@ describe("offset positioning preserves normal typing behavior", () => {
     expect({ x: a.cursor.xLine, y: a.cursor.yLine }).toEqual({ x: 0, y: 1 });
   });
 });
+
+describe("multi-line insert places the caret at the end of the inserted text", () => {
+  test("onReplaceText with embedded newlines lands the caret after it", () => {
+    const a = mk("abc", EditMode.RAW, 100);
+    a.cursor.setPosition(1, 0); // between a and b -> raw offset 1
+    a.onReplaceText("X\nY");
+    expect(a.text.value).toBe("aX\nYbc");
+    // caret = offset 1 + 3 = 4 -> after "Y" on line 1
+    expect({ x: a.cursor.xLine, y: a.cursor.yLine }).toEqual({ x: 1, y: 1 });
+    expectCaretInBounds(a);
+  });
+
+  test("paste with embedded newlines lands the caret after it", async () => {
+    const a = mk("abc", EditMode.RAW, 100);
+    a.cursor.setPosition(1, 0);
+    (window.navigator.clipboard as any) = {
+      readText: () => Promise.resolve("X\nY"),
+      writeText: () => Promise.resolve(),
+    };
+    a.onPasteText();
+    await new Promise((r) => setTimeout(r, 0));
+    expect(a.text.value).toBe("aX\nYbc");
+    expect({ x: a.cursor.xLine, y: a.cursor.yLine }).toEqual({ x: 1, y: 1 });
+    expectCaretInBounds(a);
+  });
+});
