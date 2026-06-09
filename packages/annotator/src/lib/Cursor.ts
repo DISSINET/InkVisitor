@@ -147,6 +147,42 @@ export default class Cursor
   }
 
   /**
+   * Phase 3 offset model — reconcile the canonical `head`/`anchor` offsets with
+   * the current VISUAL caret + selection. Needed because `setPosition`,
+   * `setMode` and mouse handlers set `xLine`/`yLine` (and `selectStart`/`End`)
+   * without touching the offsets, so they can be stale at the start of a key.
+   * `head` follows the caret; `anchor` follows the non-caret selection end (or
+   * collapses to `head` when there is no active selection).
+   */
+  reconcileOffsetsFromVisual(text: Text) {
+    if (this.xLine < 0 || this.yLine < 0) {
+      return;
+    }
+    const headInfo = text.offsetWithAffinityFromVisual(this.xLine, this.yLine);
+    if (headInfo.offset < 0) {
+      return;
+    }
+    this.head = headInfo.offset;
+    this.headAffinity = headInfo.affinity;
+
+    if (this.selectStart && this.selectEnd && this.isSelected()) {
+      const caretAtStart =
+        this.xLine === this.selectStart.xLine &&
+        this.yLine === this.selectStart.yLine;
+      const anchorPt = caretAtStart ? this.selectEnd : this.selectStart;
+      const anchorInfo = text.offsetWithAffinityFromVisual(
+        anchorPt.xLine,
+        anchorPt.yLine
+      );
+      this.anchor = anchorInfo.offset;
+      this.anchorAffinity = anchorInfo.affinity;
+    } else {
+      this.anchor = this.head;
+      this.anchorAffinity = this.headAffinity;
+    }
+  }
+
+  /**
    * Phase 3 offset model — derive `head` (and `anchor` unless `keepAnchor`) from
    * the current visual caret. Used at the boundary while navigation still
    * mutates `xLine`/`yLine` directly (before Tasks 3.2–3.5 migrate them).

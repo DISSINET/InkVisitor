@@ -720,17 +720,33 @@ export default class Keys {
         }
       }
     } else if (!ctrlHandled) {
-      // Single visible column left, in any mode (see onArrowRight): step in
-      // visual space, then store the canonical raw offset.
-      const next = this.text.stepVisualLeft(originalXLine, absY);
-      this.cursor.xLine = next.xLine;
-      this.cursor.yLine = next.yLine;
-      const { offset, affinity } = this.text.offsetWithAffinityFromVisual(
-        next.xLine,
-        next.yLine
-      );
-      this.cursor.head = offset;
-      this.cursor.headAffinity = affinity;
+      // Single visible column left via the anchor/head offset model (any mode).
+      const hadSelection = this.cursor.anchor !== this.cursor.head;
+      if (!shiftKey && hadSelection) {
+        // Collapse to the left edge of the selection (no further move).
+        this.cursor.moveToOffset(
+          this.text,
+          Math.min(this.cursor.anchor, this.cursor.head)
+        );
+      } else {
+        const next = this.text.stepVisualLeft(
+          this.cursor.xLine,
+          this.cursor.yLine
+        );
+        const { offset, affinity } = this.text.offsetWithAffinityFromVisual(
+          next.xLine,
+          next.yLine
+        );
+        this.cursor.head = offset;
+        this.cursor.headAffinity = affinity;
+        if (!shiftKey) {
+          this.cursor.anchor = offset;
+          this.cursor.anchorAffinity = affinity;
+        }
+        this.cursor.syncVisualFromOffset(this.text);
+      }
+      this.scrollCursorIntoView();
+      return;
     }
 
     if (shiftKey) {
@@ -912,18 +928,36 @@ export default class Keys {
         }
       }
     } else if (!ctrlKey && !ctrlRightHandled) {
-      // Single visible column right, in any mode: step in visual space (crosses
-      // line boundaries, honours the soft-wrap affinity, clamps at EOF) then
-      // store the canonical raw offset (which skips hidden markup in HIGHLIGHT).
-      const next = this.text.stepVisualRight(originalXLine, absY);
-      this.cursor.xLine = next.xLine;
-      this.cursor.yLine = next.yLine;
-      const { offset, affinity } = this.text.offsetWithAffinityFromVisual(
-        next.xLine,
-        next.yLine
-      );
-      this.cursor.head = offset;
-      this.cursor.headAffinity = affinity;
+      // Single visible column right via the anchor/head offset model (any mode).
+      const hadSelection = this.cursor.anchor !== this.cursor.head;
+      if (!shiftKey && hadSelection) {
+        // Collapse to the right edge of the selection (no further move).
+        this.cursor.moveToOffset(
+          this.text,
+          Math.max(this.cursor.anchor, this.cursor.head)
+        );
+      } else {
+        // Step one visible column right (crosses line boundaries, honours the
+        // soft-wrap affinity, clamps at EOF), then store the canonical offset.
+        const next = this.text.stepVisualRight(
+          this.cursor.xLine,
+          this.cursor.yLine
+        );
+        const { offset, affinity } = this.text.offsetWithAffinityFromVisual(
+          next.xLine,
+          next.yLine
+        );
+        this.cursor.head = offset;
+        this.cursor.headAffinity = affinity;
+        if (!shiftKey) {
+          this.cursor.anchor = offset;
+          this.cursor.anchorAffinity = affinity;
+        }
+        // Derive caret + selectStart/selectEnd from anchor/head.
+        this.cursor.syncVisualFromOffset(this.text);
+      }
+      this.scrollCursorIntoView();
+      return;
     }
 
     // Clamp cursor to document bounds.
@@ -1002,6 +1036,11 @@ export default class Keys {
     let key: Key = e.key as Key;
     // Snapshot to fire onTextChangeCb only when the document actually changes.
     const valueBefore = this.text.value;
+
+    // Make the canonical head/anchor offsets authoritative before handling the
+    // key — the caret/selection may have been set visually (setPosition, mouse,
+    // setMode) without updating the offsets.
+    this.cursor.reconcileOffsetsFromVisual(this.text);
 
     // Any key other than vertical movement drops the goal column; ArrowUp/Down
     // manage it themselves so the desired column survives short lines.
