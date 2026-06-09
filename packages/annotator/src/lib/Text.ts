@@ -854,6 +854,46 @@ class Text {
   }
 
   /**
+   * Phase 3 offset model — one VISIBLE column to the right of an absolute visual
+   * position, crossing visual line boundaries. Works in every mode (a "visible
+   * column" is a parsed column in HIGHLIGHT/SEMI, a raw column in RAW); the
+   * caller converts the result back to a raw offset, which skips hidden markup.
+   * At end-of-document the position is unchanged.
+   */
+  stepVisualRight(
+    xLine: number,
+    yLine: number
+  ): { xLine: number; yLine: number } {
+    const lineLen = (this.getLine(yLine) ?? "").length;
+    if (xLine < lineLen) {
+      return { xLine: xLine + 1, yLine };
+    }
+    // At end of the visual line: drop to the start of the next one, or stay at EOF.
+    if (yLine >= this.noLines - 1) {
+      return { xLine: lineLen, yLine };
+    }
+    return { xLine: 0, yLine: yLine + 1 };
+  }
+
+  /**
+   * Phase 3 offset model — one VISIBLE column to the left of an absolute visual
+   * position, crossing visual line boundaries. At document start it is unchanged.
+   */
+  stepVisualLeft(
+    xLine: number,
+    yLine: number
+  ): { xLine: number; yLine: number } {
+    if (xLine > 0) {
+      return { xLine: xLine - 1, yLine };
+    }
+    if (yLine <= 0) {
+      return { xLine: 0, yLine: 0 };
+    }
+    const prevLen = (this.getLine(yLine - 1) ?? "").length;
+    return { xLine: prevLen, yLine: yLine - 1 };
+  }
+
+  /**
    * Phase 3 offset model — is `offset` a soft-wrap boundary, i.e. the start of a
    * continuation visual line WITHIN a segment (not a hard `\n` boundary, which
    * begins a new segment at lineIndex 0)? Such offsets have two visual caret

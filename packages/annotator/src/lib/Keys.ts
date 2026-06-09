@@ -1,6 +1,6 @@
 import { EditMode } from "./constants";
 import Cursor, { DIRECTION } from "./Cursor";
-import Text, { CaretAffinity } from "./Text";
+import Text from "./Text";
 import Viewport from "./Viewport";
 
 /** Snapshot of caret before an arrow-key nudge (absolute line / column). */
@@ -100,55 +100,6 @@ export default class Keys {
   private compareDocPoints(a: CaretPoint, b: CaretPoint): number {
     if (a.yLine !== b.yLine) return a.yLine - b.yLine;
     return a.xLine - b.xLine;
-  }
-
-  /**
-   * Phase 3.2 — one document position to the RIGHT of `(offset, affinity)`,
-   * preserving soft-wrap caret affinity. At an UPSTREAM boundary the caret first
-   * steps DOWNSTREAM (same offset, start of the next visual line); otherwise it
-   * advances one offset, taking UPSTREAM affinity if it lands on a boundary.
-   */
-  private stepRightOffset(
-    offset: number,
-    affinity: CaretAffinity
-  ): { offset: number; affinity: CaretAffinity } {
-    if (
-      this.text.isWrapBoundary(offset) &&
-      affinity === CaretAffinity.UPSTREAM
-    ) {
-      return { offset, affinity: CaretAffinity.DOWNSTREAM };
-    }
-    if (offset >= this.text.value.length) {
-      return { offset, affinity };
-    }
-    const next = offset + 1;
-    return {
-      offset: next,
-      affinity: this.text.isWrapBoundary(next)
-        ? CaretAffinity.UPSTREAM
-        : CaretAffinity.DOWNSTREAM,
-    };
-  }
-
-  /**
-   * Phase 3.2 — one document position to the LEFT of `(offset, affinity)`. At a
-   * DOWNSTREAM boundary the caret first steps UPSTREAM (same offset, end of the
-   * previous visual line); otherwise it retreats one offset (DOWNSTREAM).
-   */
-  private stepLeftOffset(
-    offset: number,
-    affinity: CaretAffinity
-  ): { offset: number; affinity: CaretAffinity } {
-    if (
-      this.text.isWrapBoundary(offset) &&
-      affinity === CaretAffinity.DOWNSTREAM
-    ) {
-      return { offset, affinity: CaretAffinity.UPSTREAM };
-    }
-    if (offset <= 0) {
-      return { offset, affinity };
-    }
-    return { offset: offset - 1, affinity: CaretAffinity.DOWNSTREAM };
   }
 
   private docCaretMin(a: CaretPoint, b: CaretPoint): CaretPoint {
@@ -769,34 +720,17 @@ export default class Keys {
         }
       }
     } else if (!ctrlHandled) {
-      if (this.text.mode === EditMode.RAW) {
-        // RAW single-character left via the document-offset model (Phase 3.2).
-        const { offset, affinity } = this.text.offsetWithAffinityFromVisual(
-          originalXLine,
-          absY
-        );
-        if (offset >= 0) {
-          const prev = this.stepLeftOffset(offset, affinity);
-          const v = this.text.visualFromOffset(prev.offset, prev.affinity);
-          if (v) {
-            this.cursor.xLine = v.xLine;
-            this.cursor.yLine = v.yLine;
-            this.cursor.head = prev.offset;
-            this.cursor.headAffinity = prev.affinity;
-          }
-        }
-      } else {
-        // non-RAW: move by visual (parsed) column (skips hidden tag markup).
-        if (this.cursor.xLine <= 0) {
-          if (this.cursor.yLine > 0) {
-            this.cursor.yLine = Math.max(0, this.cursor.yLine - 1);
-            const line = this.text.getCurrentLine(this.viewport, this.cursor);
-            this.cursor.xLine = line?.length || 0;
-          }
-        } else {
-          this.cursor.move(offsetLeft, 0);
-        }
-      }
+      // Single visible column left, in any mode (see onArrowRight): step in
+      // visual space, then store the canonical raw offset.
+      const next = this.text.stepVisualLeft(originalXLine, absY);
+      this.cursor.xLine = next.xLine;
+      this.cursor.yLine = next.yLine;
+      const { offset, affinity } = this.text.offsetWithAffinityFromVisual(
+        next.xLine,
+        next.yLine
+      );
+      this.cursor.head = offset;
+      this.cursor.headAffinity = affinity;
     }
 
     if (shiftKey) {
@@ -978,49 +912,18 @@ export default class Keys {
         }
       }
     } else if (!ctrlKey && !ctrlRightHandled) {
-      if (this.text.mode === EditMode.RAW) {
-        // RAW single-character right via the document-offset model (Phase 3.2):
-        // advancing one offset naturally handles EOL->next-line, the soft-wrap
-        // affinity boundary, and the EOF clamp — replacing the old
-        // move/wrap/backtrack/clamp dance.
-        const { offset, affinity } = this.text.offsetWithAffinityFromVisual(
-          originalXLine,
-          absY
-        );
-        if (offset >= 0) {
-          const next = this.stepRightOffset(offset, affinity);
-          const v = this.text.visualFromOffset(next.offset, next.affinity);
-          if (v) {
-            this.cursor.xLine = v.xLine;
-            this.cursor.yLine = v.yLine;
-            this.cursor.head = next.offset;
-            this.cursor.headAffinity = next.affinity;
-          }
-        }
-      } else {
-        // non-RAW: move by visual (parsed) column so the caret skips hidden tag
-        // markup instead of stepping into it.
-        this.cursor.move(offsetRight, 0);
-
-        const line = this.text.getCurrentLine(this.viewport, this.cursor) || "";
-        let backupXLine = this.cursor.xLine;
-        let backupYLine = this.cursor.yLine;
-
-        if (line.length < this.cursor.xLine) {
-          if (this.cursor.yLine >= this.text.noLines - 1) {
-            // Already on the last visual line: clamp to EOL, never wrap past EOF.
-            this.cursor.xLine = line.length;
-          } else {
-            this.cursor.xLine = 0;
-            this.cursor.yLine++;
-          }
-        }
-
-        if (!this.text.cursorToIndex(this.viewport, this.cursor)) {
-          this.cursor.xLine = backupXLine - 1;
-          this.cursor.yLine = backupYLine;
-        }
-      }
+      // Single visible column right, in any mode: step in visual space (crosses
+      // line boundaries, honours the soft-wrap affinity, clamps at EOF) then
+      // store the canonical raw offset (which skips hidden markup in HIGHLIGHT).
+      const next = this.text.stepVisualRight(originalXLine, absY);
+      this.cursor.xLine = next.xLine;
+      this.cursor.yLine = next.yLine;
+      const { offset, affinity } = this.text.offsetWithAffinityFromVisual(
+        next.xLine,
+        next.yLine
+      );
+      this.cursor.head = offset;
+      this.cursor.headAffinity = affinity;
     }
 
     // Clamp cursor to document bounds.
