@@ -24,6 +24,7 @@ export const edgeTypesImplemented: Query.EdgeType[] = [
   Query.EdgeType["I_SP:V"],
   Query.EdgeType["I_SC"],
   Query.EdgeType["HR:R"],
+  Query.EdgeType["HR:V"],
   Query.EdgeType["R:"],
   Query.EdgeType["R:CLA"],
   Query.EdgeType["R:SCL"],

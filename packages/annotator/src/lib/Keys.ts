@@ -216,9 +216,6 @@ export default class Keys {
       const start = { xLine: 0, yLine: end.yLine };
       this.text.deleteRangeText(start, end);
       this.cursor.setPosition(0, end.yLine);
-      if (this.annotator.onTextChangeCb) {
-        this.annotator.onTextChangeCb(this.text.value);
-      }
     } else {
       // Delete word-wise: Ctrl / Alt / ⌥+⌘ + ←  or Ctrl+Alt + ← on Windows
       const before = this.cursor.getAbsolutePosition();
@@ -231,10 +228,6 @@ export default class Keys {
       const after = this.cursor.getAbsolutePosition();
 
       this.text.deleteRangeText(before, after);
-
-      if (this.annotator.onTextChangeCb) {
-        this.annotator.onTextChangeCb(this.text.value);
-      }
     }
   }
 
@@ -264,9 +257,6 @@ export default class Keys {
       const end = { xLine: line.length, yLine: before.yLine };
       this.text.deleteRangeText(before, end);
       this.cursor.setPosition(before.xLine, before.yLine);
-      if (this.annotator.onTextChangeCb) {
-        this.annotator.onTextChangeCb(this.text.value);
-      }
     } else {
       const before = this.cursor.getAbsolutePosition();
       this.onArrowRight({
@@ -280,10 +270,6 @@ export default class Keys {
       this.text.deleteRangeText(before, after);
       this.cursor.xLine = before.xLine;
       this.cursor.yLine = before.yLine;
-
-      if (this.annotator.onTextChangeCb) {
-        this.annotator.onTextChangeCb(this.text.value);
-      }
     }
   }
 
@@ -398,6 +384,11 @@ export default class Keys {
     const originalXLine = this.cursor.xLine;
     const originalAbsYline = this.cursor.yLine;
 
+    if (metaKey) {
+      // Cmd+Up/Down jump to document bounds — not a column-preserving move.
+      this.cursor.goalColumn = null;
+    }
+
     if (metaKey && shiftKey) {
       const [hStart, hEnd] = this.cursor.getAbsBounds();
       const hasRange =
@@ -445,11 +436,13 @@ export default class Keys {
       }
     }
 
-    // cursor should not go being line bounds (right side)
-    const line = this.text.getCurrentLine(this.viewport, this.cursor) || "";
-    if (line.length < this.cursor.xLine) {
-      this.cursor.xLine = line.length;
+    // Preserve the desired column across vertical moves (goal column): clamp to
+    // this line for the move, but remember the original column to restore later.
+    if (this.cursor.goalColumn === null) {
+      this.cursor.goalColumn = originalXLine;
     }
+    const line = this.text.getCurrentLine(this.viewport, this.cursor) || "";
+    this.cursor.xLine = Math.min(this.cursor.goalColumn, line.length);
 
     if (shiftKey) {
       if (!this.cursor.selectStart || !this.cursor.selectEnd) {
@@ -487,6 +480,11 @@ export default class Keys {
   }) {
     const originalXLine = this.cursor.xLine;
     const originalAbsYline = this.cursor.yLine;
+
+    if (metaKey) {
+      // Cmd+Up/Down jump to document bounds — not a column-preserving move.
+      this.cursor.goalColumn = null;
+    }
 
     if (metaKey && shiftKey) {
       const lastLineIndex = this.text.noLines > 0 ? this.text.noLines - 1 : 0;
@@ -537,17 +535,21 @@ export default class Keys {
       return;
     }
 
+    // Preserve the desired column across vertical moves (goal column).
+    if (this.cursor.goalColumn === null) {
+      this.cursor.goalColumn = originalXLine;
+    }
+
     this.cursor.move(0, 1);
 
     const line = this.text.getCurrentLine(this.viewport, this.cursor) || "";
 
     if (this.cursor.yLine >= this.text.noLines) {
+      // Past the last line: stay on the last line, at its end.
       this.cursor.yLine = Math.max(0, this.text.noLines - 1);
       this.cursor.xLine = line.length;
-    }
-
-    if (line.length < this.cursor.xLine) {
-      this.cursor.xLine = line.length;
+    } else {
+      this.cursor.xLine = Math.min(this.cursor.goalColumn, line.length);
     }
 
     if (shiftKey) {
@@ -905,8 +907,13 @@ export default class Keys {
       let backupYLine = this.cursor.yLine;
 
       if (line.length < this.cursor.xLine) {
-        this.cursor.xLine = 0;
-        this.cursor.yLine++;
+        if (this.cursor.yLine >= this.text.noLines - 1) {
+          // Already on the last visual line: clamp to EOL, never wrap past EOF.
+          this.cursor.xLine = line.length;
+        } else {
+          this.cursor.xLine = 0;
+          this.cursor.yLine++;
+        }
       }
 
       if (!this.text.cursorToIndex(this.viewport, this.cursor)) {
@@ -989,6 +996,14 @@ export default class Keys {
 
     e.preventDefault();
     let key: Key = e.key as Key;
+    // Snapshot to fire onTextChangeCb only when the document actually changes.
+    const valueBefore = this.text.value;
+
+    // Any key other than vertical movement drops the goal column; ArrowUp/Down
+    // manage it themselves so the desired column survives short lines.
+    if (e.key !== Key.ArrowUp && e.key !== Key.ArrowDown) {
+      this.cursor.goalColumn = null;
+    }
 
     switch (e.key) {
       case Key.Enter:
@@ -1035,6 +1050,21 @@ export default class Keys {
         this.onKeyHome(e);
         break;
 
+      case Key.Tab:
+        if (this.text.mode !== EditMode.HIGHLIGHT) {
+          const sel = this.cursor.getSelectedArea();
+          if (sel) {
+            this.text.deleteRangeText(sel[0], sel[1]);
+            this.cursor.reset();
+            this.cursor.setPosition(sel[0].xLine, sel[0].yLine);
+          }
+          this.text.insertText(this.viewport, this.cursor, "\t");
+          this.cursor.move(+1, 0);
+          this.cursor.fixOutOfBounds(this.viewport, this.text);
+          this.scrollCursorIntoView();
+        }
+        break;
+
       default:
         if (e.ctrlKey || e.metaKey) {
           if (e.key === "c") {
@@ -1060,11 +1090,10 @@ export default class Keys {
               xLine: 0,
             };
 
-            const lastSegment =
-              this.text.segments[this.text.segments.length - 1];
+            const lastLine = Math.max(0, this.text.noLines - 1);
             this.cursor.selectEnd = {
-              xLine: lastSegment.lines[lastSegment.lines.length - 1].length,
-              yLine: lastSegment.lineEnd,
+              xLine: (this.text.getLine(lastLine) ?? "").length,
+              yLine: lastLine,
             };
           }
           break;
@@ -1083,9 +1112,6 @@ export default class Keys {
           }
 
           this.text.insertText(this.viewport, this.cursor, key);
-          if (this.annotator.onTextChangeCb) {
-            this.annotator.onTextChangeCb(this.text.value);
-          }
           this.cursor.move(+1, 0);
           this.cursor.fixOutOfBounds(this.viewport, this.text);
 
@@ -1098,7 +1124,8 @@ export default class Keys {
 
     if (
       this.text.mode !== EditMode.HIGHLIGHT &&
-      this.annotator.onTextChangeCb
+      this.annotator.onTextChangeCb &&
+      this.text.value !== valueBefore
     ) {
       this.annotator.onTextChangeCb(this.text.value);
     }

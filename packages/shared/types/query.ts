@@ -24,7 +24,7 @@ export namespace Query {
     label?: string;
     entityId?: string;
   }
-  export interface IEdgeParams {}
+  export interface IEdgeParams { }
 
   export enum NodeType {
     E = "Entity",
@@ -147,7 +147,9 @@ export namespace Query {
       entityId: { allowedClasses: [EntityEnums.Class.Resource] },
     },
     "I_HR:R": {},
-    "HR:V": {},
+    "HR:V": {
+      entityId: { allowedClasses: [EntityEnums.Class.Value] },
+    },
     "CT:": {},
     "I_CT:": {},
     "CT:D": {},
@@ -835,7 +837,7 @@ export namespace Query {
     "I_SUT:C": "T has S: children",
     "HR:R": "has reference: resource",
     "I_HR:R": "R references",
-    "HR:V": "Has reference: value",
+    "HR:V": "has reference: value",
     "CT:": "T has child T: any",
     "I_CT:": "T has parent T: any",
     "CT:D": "T has child T: direct child",
@@ -979,7 +981,8 @@ export namespace Explore {
   }
   interface IExploreUpdatedAtFilter {
     type: SearchOption.UpdatedAt;
-    updatedAt: string;
+    updatedAfter?: string;
+    updatedBefore?: string;
   }
   interface IExploreCreatedByFilter {
     type: SearchOption.CreatedBy;

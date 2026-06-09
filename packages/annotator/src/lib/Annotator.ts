@@ -5,7 +5,7 @@ import { Lines } from "./Lines";
 import Scroller from "./Scroller";
 import Text, { Tag, SegmentPosition } from "./Text";
 import Viewport from "./Viewport";
-import { Warnings } from "./warnings";
+import { AsymmetricalAnchor, Warnings, WarningData } from "./warnings";
 import {
   DEFAULT_FONT,
   DEFAULT_FONT_SIZE,
@@ -29,6 +29,11 @@ export const tagRemovalRegex = /<\/?[^<>]+?>/g;
 // Creates a new regex instance for opening tags (no shared state)
 export const createOpeningTagRegex = () =>
   new RegExp(openingTagRegex.source, openingTagRegex.flags);
+
+// Line-wrap tokenizer (Text.calculateLines): splits text into atomic tags
+// (<...>), whitespace runs, word runs, and punctuation runs (or a stray "<").
+// Stateful global regex — callers must reset lastIndex before each exec loop.
+export const wrapTokenRegex = /(<[^>]+>)|(\s+)|([\w']+)|([^\s\w'<]+|<)/g;
 
 // Opening tag with specific name and optional attributes: <tagname attr="value"> or <tagname>
 export const createSpecificOpeningTagRegex = (tagName: string) =>
@@ -210,6 +215,7 @@ export class Annotator {
 
     setTimeout(() => {
       this.resize();
+      this.runWarningChecks();
     });
   }
 
@@ -387,7 +393,7 @@ export class Annotator {
       }
     }
 
-    this.warnings.onTextChanged(this.text.value);
+    this.runWarningChecks();
     this.draw();
   }
 
@@ -750,7 +756,7 @@ export class Annotator {
     this.onTextChangeCb = cb;
   }
 
-  onWarning(cb: (message: string) => void): void {
+  onWarning(cb: (warning: WarningData) => void): void {
     this.warnings.onWarning(cb);
   }
 
@@ -1755,7 +1761,7 @@ export class Annotator {
         this.cursor.reset();
       }
 
-      this.warnings.onTextChanged(this.text.value);
+      this.runWarningChecks();
       this.draw();
     }
   }
@@ -1807,7 +1813,7 @@ export class Annotator {
     this.text.calculateLines();
 
     // Trigger callbacks and redraw
-    this.warnings.onTextChanged(this.text.value);
+    this.runWarningChecks();
     this.draw();
   }
 
@@ -1837,27 +1843,11 @@ export class Annotator {
       return;
     }
 
-    const contentStartAbsRaw =
+    // Scroll to where the anchored content starts (just past the opening tag).
+    this.scrollCaretToRawIndex(
       openingTag.getAbsoluteTagPosition(this.text.segments) +
-      openingTag.getTagLength();
-    const segPos = this.text.getSegmentFromAbsTextIndex(contentStartAbsRaw);
-    if (!segPos) {
-      return;
-    }
-
-    const segment = this.text.segments[segPos.segmentIndex];
-    if (!segment) {
-      return;
-    }
-
-    const absYLine = segment.lineStart + segPos.lineIndex;
-
-    this.viewport.scrollTo(absYLine, this.scrollExtentLineCount());
-    this.cursor.xLine = segPos.charInLineIndex;
-    this.cursor.yLine = absYLine;
-    this.cursor.resetHighlight();
-    this.draw();
-    this.element.focus({ preventScroll: true });
+        openingTag.getTagLength()
+    );
   }
 
   scrollToLine(absLine: number) {
@@ -1893,7 +1883,7 @@ export class Annotator {
     this.text.value = newText;
     this.text.prepareSegments();
     this.text.calculateLines();
-    this.warnings.onTextChanged(this.text.value);
+    this.runWarningChecks();
 
     // Preserve fluent scroll offset (deltaY) so updating text (e.g. discard)
     // doesn't snap the viewport to the top of a line.
@@ -2059,8 +2049,10 @@ export class Annotator {
         this.text.insertText(this.viewport, this.cursor, clipText);
         this.cursor.move(clipText.length, 0);
         this.cursor.fixOutOfBounds(this.viewport, this.text);
+        this.cursor.goalColumn = null;
+        this.keys.scrollCursorIntoView();
 
-        this.warnings.onTextChanged(this.text.value);
+        this.runWarningChecks();
         this.draw();
       })
       .catch((err) => {
@@ -2078,8 +2070,10 @@ export class Annotator {
     this.text.insertText(this.viewport, this.cursor, text);
     this.cursor.move(text.length, 0);
     this.cursor.fixOutOfBounds(this.viewport, this.text);
+    this.cursor.goalColumn = null;
+    this.keys.scrollCursorIntoView();
 
-    this.warnings.onTextChanged(this.text.value);
+    this.runWarningChecks();
     this.draw();
   }
 
@@ -2604,5 +2598,154 @@ export class Annotator {
     }
 
     return [clamp(newStart), clamp(newEnd)];
+  }
+
+  /**
+   * Validate anchors and return asymmetrical (broken) anchors
+   */
+  validateAnchors() {
+    return this.text.validateAnchors();
+  }
+
+  /**
+   * Resolve a validated asymmetrical-anchor issue back to its concrete Tag.
+   * Identity is (tagName, position, segmentIndex): `position` is a per-segment
+   * raw offset and is NOT unique across segments, so segmentIndex is required
+   * to avoid resolving the wrong orphan when the same entity is broken at the
+   * same offset in different segments.
+   */
+  private findAsymmetricalTag(
+    tagName: string,
+    position: number,
+    segmentIndex: number
+  ): { tag: Tag; issue: AsymmetricalAnchor } | undefined {
+    const issue = this.validateAnchors().find(
+      (i) =>
+        i.tagName === tagName &&
+        i.position === position &&
+        i.segmentIndex === segmentIndex
+    );
+    if (!issue) {
+      return undefined;
+    }
+
+    const segment = this.text.segments[issue.segmentIndex];
+    if (!segment) {
+      return undefined;
+    }
+
+    const tags =
+      issue.type === "orphaned-opening"
+        ? segment.openingTags
+        : segment.closingTags;
+    const tag = tags.find(
+      (t) => t.getTagName() === tagName && t.position === issue.position
+    );
+
+    return tag ? { tag, issue } : undefined;
+  }
+
+  /**
+   * Shared scroll tail: place the caret at the given absolute raw-text index,
+   * scroll it into view, redraw and focus the canvas.
+   */
+  private scrollCaretToRawIndex(absRaw: number): void {
+    const segPos = this.text.getSegmentFromAbsTextIndex(absRaw);
+    if (!segPos) {
+      return;
+    }
+    const targetSegment = this.text.segments[segPos.segmentIndex];
+    if (!targetSegment) {
+      return;
+    }
+
+    const absYLine = targetSegment.lineStart + segPos.lineIndex;
+    this.viewport.scrollTo(absYLine, this.scrollExtentLineCount());
+    this.cursor.xLine = segPos.charInLineIndex;
+    this.cursor.yLine = absYLine;
+    this.cursor.resetHighlight();
+    this.draw();
+    this.element.focus({ preventScroll: true });
+  }
+
+  /**
+   * Remove an asymmetrical (broken) anchor identified by tag name, per-segment
+   * position and segment index. Returns true if successfully removed.
+   */
+  removeAsymmetricalAnchor(
+    tagName: string,
+    position: number,
+    segmentIndex: number
+  ): boolean {
+    const found = this.findAsymmetricalTag(tagName, position, segmentIndex);
+    if (!found) {
+      return false;
+    }
+
+    const { tag: tagToRemove, issue } = found;
+    const segment = this.text.segments[issue.segmentIndex];
+    if (!segment) {
+      return false;
+    }
+
+    // Remove from raw text
+    const tagLength = tagToRemove.getTagLength();
+    const before = segment.raw.substring(0, tagToRemove.position);
+    const after = segment.raw.substring(tagToRemove.position + tagLength);
+    segment.raw = before + after;
+
+    // Re-parse the segment
+    segment.parseText();
+
+    // Update text value and recalculate
+    this.text.assignValueFromSegments();
+
+    // Redraw
+    this.draw();
+
+    // Re-check anchors
+    this.checkAnchors();
+
+    return true;
+  }
+
+  /**
+   * Scroll the viewport to an asymmetrical (broken) anchor's tag. Works for
+   * both orphaned opening and orphaned closing tags. Intended to be used in RAW
+   * mode, where the tag markup is visible and line positions match raw text.
+   */
+  scrollToAsymmetricalAnchor(
+    tagName: string,
+    position: number,
+    segmentIndex: number
+  ): void {
+    const found = this.findAsymmetricalTag(tagName, position, segmentIndex);
+    if (!found) {
+      return;
+    }
+    this.scrollCaretToRawIndex(
+      found.tag.getAbsoluteTagPosition(this.text.segments)
+    );
+  }
+
+  /**
+   * Check anchors and emit warnings if issues found
+   */
+  checkAnchors(): void {
+    const issues = this.validateAnchors();
+    if (issues.length > 0) {
+      this.warnings.emitAsymmetricalAnchors(issues);
+    } else {
+      this.warnings.clearWarnings();
+      this.warnings.emitAsymmetricalAnchors([]);
+    }
+  }
+
+  /**
+   * Run all warning detection checks. Invoked on every text mutation.
+   * Add new check calls here when introducing additional warning types.
+   */
+  private runWarningChecks(): void {
+    this.checkAnchors();
   }
 }

@@ -14,7 +14,7 @@ import { FaPen, FaRegSave, FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 
-import { Annotator, EditMode, editModeDisplayLabel, Tag } from "@inkvisitor/annotator/src/lib";
+import { Annotator, AsymmetricalAnchor, EditMode, editModeDisplayLabel, Tag, WarningType } from "@inkvisitor/annotator/src/lib";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import {
   IDocument,
@@ -44,6 +44,7 @@ import { collectStatementAnchors, getStatementOrderByIndex } from "utils/utils";
 import { EntityCreateModal } from "..";
 import { useAnnotator } from "./AnnotatorContext";
 import TextAnnotatorMenu from "./AnnotatorMenu";
+import { AnnotatorWarningsPanel } from "./AnnotatorWarningsPanel";
 import {
   StyledAnnotatorButtons,
   StyledAnnotatorMenu,
@@ -94,6 +95,14 @@ interface TextAnnotatorProps {
 
   /** When the pointer hovers anchored text, receives the innermost tag id or null (e.g. statement list sync). */
   onStatementAnchorHover?: (statementId: string | null) => void;
+
+  // Asymmetrical-anchor warnings (#2601). When the chip is rendered elsewhere
+  // (e.g. next to the document title), the parent controls the modal open state
+  // and hides the inline chip; otherwise the annotator owns both.
+  hideWarningChip?: boolean;
+  warningsModalOpen?: boolean;
+  onWarningsModalOpenChange?: (open: boolean) => void;
+  onAsymmetricalAnchorCountChange?: (count: number) => void;
 }
 
 const ANNOTATOR_MENU_PAGE_PADDING = 4;
@@ -122,6 +131,11 @@ export const TextAnnotator = ({
   userData,
   disableCreate = false,
   onStatementAnchorHover,
+
+  hideWarningChip = false,
+  warningsModalOpen,
+  onWarningsModalOpenChange,
+  onAsymmetricalAnchorCountChange,
 }: TextAnnotatorProps) => {
   const queryClient = useQueryClient();
   const theme = useTheme();
@@ -235,6 +249,7 @@ export const TextAnnotator = ({
   const mainCanvas = useRef<HTMLCanvasElement>(null);
   const scroller = useRef<HTMLDivElement>(null);
   const lines = useRef<HTMLCanvasElement>(null);
+  const warningsPanelRef = useRef<HTMLDivElement>(null);
   const annotatorRef = useRef<Annotator | null>(null);
   annotatorRef.current = annotator;
 
@@ -267,6 +282,29 @@ export const TextAnnotator = ({
   const [selectedAnchors, setSelectedAnchors] = useState<Tag[]>([]);
   const [selectionStartIndex, setSelectionStartIndex] = useState<number>(-1);
   const [storedEntities, setStoredEntities] = useState<Record<string, IEntity | false>>({});
+  const [asymmetricalAnchors, setAsymmetricalAnchors] = useState<AsymmetricalAnchor[]>([]);
+
+  // The warnings modal open state is controllable: when the parent renders the
+  // chip elsewhere (next to the document title) it owns the open state; otherwise
+  // the annotator owns it. The inline chip is shown only in the uncontrolled case.
+  const [internalWarningsOpen, setInternalWarningsOpen] = useState(false);
+  const warningsOpen = warningsModalOpen ?? internalWarningsOpen;
+  const setWarningsOpen = onWarningsModalOpenChange ?? setInternalWarningsOpen;
+
+  // Report the broken-anchor count to the parent (drives the title-line chip),
+  // and close the modal once everything is fixed.
+  useEffect(() => {
+    onAsymmetricalAnchorCountChange?.(asymmetricalAnchors.length);
+    if (asymmetricalAnchors.length === 0) {
+      setWarningsOpen(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [asymmetricalAnchors.length]);
+
+  // Rendered height of the warnings chip (incl. its bottom gap). The canvas has
+  // a fixed pixel height fed by the parent, so the chip's height must be
+  // subtracted from it to keep the bottom controls visible (#2601).
+  const [warningsPanelHeight, setWarningsPanelHeight] = useState<number>(0);
 
   /** XML (RAW) mode: pointer over `<entityId>` / `</entityId>` markup → preview chip at cursor */
   const [xmlMarkupAnchorHover, setXmlMarkupAnchorHover] = useState<{
@@ -796,7 +834,23 @@ export const TextAnnotator = ({
 
     newAnnotator.onTextChanged((text) => {
       setLocalTextContent(text);
+      // Keyboard edits (typing/backspace) mutate the text without running the
+      // lib's warning checks (only paste/replace/anchor ops do). Re-validate
+      // here so broken anchors surface immediately while editing (#2601).
+      newAnnotator.checkAnchors();
     });
+
+    // Structured warnings drive the warnings panel (#2601). onWarning carries
+    // the full payload (type + metadata) and fires on every change, including
+    // the cleared state, so the panel updates and resets itself.
+    newAnnotator.onWarning((warning) => {
+      if (warning.type === WarningType.AsymmetricalAnchor) {
+        setAsymmetricalAnchors(warning.anchors);
+      }
+    });
+    // Seed the panel immediately for breakage already present on load, so we
+    // don't wait for the constructor's deferred first check to emit.
+    setAsymmetricalAnchors(newAnnotator.validateAnchors());
 
     // Set initial text content
     const initialContent = dataDocument?.content ?? "no text";
@@ -826,12 +880,28 @@ export const TextAnnotator = ({
     }
   }, [displayLineNumbers, hlEntities ?? [], dataDocumentIsFetching, theme, dataDocument, isSaving]);
 
-  // Resize the annotator when the width or height changes
+  // Measure the warnings panel so the canvas can give up exactly its height.
+  useEffect(() => {
+    const el = warningsPanelRef.current;
+    if (!el) {
+      return;
+    }
+    const update = () => setWarningsPanelHeight(el.offsetHeight);
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  // The canvas keeps its fixed pixel height minus whatever the panel occupies.
+  const canvasHeight = Math.max(0, height - warningsPanelHeight);
+
+  // Resize the annotator when the width or available canvas height changes
   useEffect(() => {
     if (annotator && mainCanvas.current) {
       annotator?.resize();
     }
-  }, [width, height]);
+  }, [width, canvasHeight]);
 
   useEffect(() => {
     if (storedAnnotatorScrollPosition !== null) {
@@ -896,6 +966,45 @@ export const TextAnnotator = ({
   const onUpdateAnchor = (anchor: Tag, elvl: EntityEnums.Elvl) => {
     annotator?.updateAnchor(anchor, { elvl });
     handleSaveNewContent(true, true);
+  };
+
+  // Unlink a broken (asymmetrical) anchor from the warnings panel (#2601).
+  // removeAsymmetricalAnchor re-parses, redraws and re-runs the warning checks,
+  // so the panel updates itself via the onWarning subscription.
+  const onRemoveAsymmetricalAnchor = (
+    tagName: string,
+    position: number,
+    segmentIndex: number
+  ) => {
+    const removed = annotator?.removeAsymmetricalAnchor(
+      tagName,
+      position,
+      segmentIndex
+    );
+    if (removed) {
+      handleSaveNewContent(true, true);
+      handleRefreshEntityAndStatement(tagName);
+    }
+  };
+
+  // Jump to a broken anchor in the text. Broken tag markup is only visible in
+  // RAW mode, and line positions there match the raw text, so switch first.
+  const onScrollToAsymmetricalAnchor = (
+    tagName: string,
+    position: number,
+    segmentIndex: number
+  ) => {
+    if (!annotator) {
+      return;
+    }
+    if (annotatorMode !== EditMode.RAW) {
+      setAnnotatorMode(EditMode.RAW);
+      // Direct setMode is required: it recalculates segments synchronously so
+      // the scroll below computes line positions against RAW-mode segments.
+      // The annotatorMode effect re-runs setMode next render (harmless no-op).
+      annotator.setMode(EditMode.RAW);
+    }
+    annotator.scrollToAsymmetricalAnchor(tagName, position, segmentIndex);
   };
 
   const isMenuDisplayed = useMemo<boolean>(() => {
@@ -1056,6 +1165,24 @@ export const TextAnnotator = ({
       />
 
       <div
+        ref={warningsPanelRef}
+        style={{
+          paddingBottom:
+            !hideWarningChip && asymmetricalAnchors.length > 0 ? "0.5rem" : 0,
+        }}
+      >
+        <AnnotatorWarningsPanel
+          anchors={asymmetricalAnchors}
+          onUnlink={onRemoveAsymmetricalAnchor}
+          onScrollTo={onScrollToAsymmetricalAnchor}
+          open={warningsOpen}
+          onOpenChange={setWarningsOpen}
+          showChip={!hideWarningChip}
+          isLoading={isSaving || isSavingWithoutRefresh}
+        />
+      </div>
+
+      <div
         style={{
           width,
           position: "relative",
@@ -1171,7 +1298,7 @@ export const TextAnnotator = ({
               style={{
                 outline: "none",
                 width: wLineNumbers,
-                height,
+                height: canvasHeight,
                 backgroundColor: theme?.color.white,
                 color: theme?.color.gray[450],
                 borderRadius: "4px 0px 0px 4px",
@@ -1186,7 +1313,7 @@ export const TextAnnotator = ({
             ref={mainCanvas}
             id="statement-list-annotator-mainCanvas"
             style={{
-              height: height,
+              height: canvasHeight,
               width: wTextArea,
               backgroundColor: theme.color.white,
               color: theme.color.text,

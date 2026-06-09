@@ -24,6 +24,7 @@ import {
 import { StyledInfoText } from "../StatementListHeader/StatementListHeaderStyles";
 import { toast } from "react-toastify";
 import { SECOND_PANEL_MIN_WIDTH } from "Theme/constants";
+import { WarningsChip } from "components/advanced/Annotator/AnnotatorWarningsPanel";
 
 // icon + margin + gap in StyledHighlightContainer when highlight label is shown
 const HIGHLIGHT_ICON_RESERVED_WIDTH = 10;
@@ -48,6 +49,10 @@ interface StatementListDocumentLine {
   contentWidth: number;
   hlEntities: EntityEnums.Class[];
   setHlEntities: React.Dispatch<React.SetStateAction<EntityEnums.Class[]>>;
+
+  // asymmetrical-anchor warnings (#2601)
+  warningCount?: number;
+  onOpenWarnings?: () => void;
 }
 
 const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
@@ -67,6 +72,9 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
 
   hlEntities,
   setHlEntities,
+
+  warningCount = 0,
+  onOpenWarnings,
 }) => {
   const [showExportModal, setShowExportModal] = useState<boolean>(false);
 
@@ -171,6 +179,20 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
             )}
             <Loader show={selectedDocumentIsFetching} size={16} />
           </StyledDocumentTitleContainer>
+
+          {warningCount > 0 && onOpenWarnings && (
+            <span
+              style={{
+                display: "inline-flex",
+                flexShrink: 0,
+                // Left gap comes from DocumentTitle's own 0.6rem right margin;
+                // match it on the right so the chip is evenly spaced.
+                marginRight: "0.6rem",
+              }}
+            >
+              <WarningsChip count={warningCount} onClick={onOpenWarnings} />
+            </span>
+          )}
 
           {!selectedDocumentIsFetching &&
             selectedResource !== false &&
