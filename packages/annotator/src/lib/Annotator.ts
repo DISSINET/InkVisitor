@@ -2119,6 +2119,12 @@ export class Annotator {
 
   /** Restore the previous document state, if any. */
   undo(): void {
+    // Editing is disabled in HIGHLIGHT mode; undo would mutate the document
+    // while restoreSnapshot suppresses onTextChangeCb, silently desyncing the
+    // editor from the host app. Leave the stack untouched.
+    if (this.text.mode === EditMode.HIGHLIGHT) {
+      return;
+    }
     const target = this.history.undo(this.captureSnapshot());
     if (target === null) {
       return;
@@ -2128,6 +2134,9 @@ export class Annotator {
 
   /** Re-apply the most recently undone document state, if any. */
   redo(): void {
+    if (this.text.mode === EditMode.HIGHLIGHT) {
+      return;
+    }
     const target = this.history.redo(this.captureSnapshot());
     if (target === null) {
       return;

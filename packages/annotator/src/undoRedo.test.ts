@@ -160,4 +160,26 @@ describe("undo/redo: edges", () => {
     key(a, "End");
     expect(a.canUndo()).toBe(false);
   });
+
+  test("undo/redo are no-ops in HIGHLIGHT mode (editing is disabled)", () => {
+    // History built in RAW survives a mode switch (setMode keeps the stack).
+    const a = mk("", EditMode.RAW);
+    type(a, "abc");
+    expect(a.text.value).toBe("abc");
+
+    a.setMode(EditMode.HIGHLIGHT);
+
+    // HIGHLIGHT disables all editing; undo/redo must not mutate the document.
+    // Otherwise text.value would change while onTextChangeCb is suppressed,
+    // silently desyncing the editor from the host app.
+    key(a, "z", { ctrlKey: true });
+    expect(a.text.value).toBe("abc");
+    expect(a.canUndo()).toBe(true); // stack left untouched
+
+    a.undo(); // public API is gated too
+    expect(a.text.value).toBe("abc");
+
+    a.redo();
+    expect(a.text.value).toBe("abc");
+  });
 });
