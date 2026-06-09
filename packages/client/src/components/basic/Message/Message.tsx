@@ -288,6 +288,9 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
       case WarningTypeEnums.PSM:
         return <b>Missing part of speech attribute</b>;
 
+      case WarningTypeEnums.DM:
+        return <b>Missing entity detail</b>;
+
       // T-based validations
       case WarningTypeEnums.TVEP:
         return (

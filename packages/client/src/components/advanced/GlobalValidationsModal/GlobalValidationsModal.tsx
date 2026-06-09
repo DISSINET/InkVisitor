@@ -36,6 +36,7 @@ import {
   StyledValidationCount,
   StyledValidationList,
 } from "./GlobalValidationsModalStyles";
+import { GlobalValidationsDetailRow } from "./GlobalValidationsDetailRow";
 import { GlobalValidationsSettingsRow } from "./GlobalValidationsSettingsRow";
 
 const initialRulesState: Record<ValidationKey, boolean> = Object.keys(
@@ -208,6 +209,14 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
     // setRules((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
+  // raw setting value (not cast to boolean) - used for non-boolean settings
+  const settingRawVal = (key: ValidationKey) =>
+    settings?.find((setting: ISetting) => setting.id === key)?.value;
+
+  const updateRule = (key: ValidationKey, value: unknown) => {
+    updateSettingsMutation.mutate([{ id: key, value }]);
+  };
+
   // useEffect(() => {
   // const newSettings: Omit<ISetting, "public">[] = Object.entries(rules).map(
   //   ([id, value]) => ({ id, value })
@@ -248,14 +257,22 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
                 Entity validations
               </StyledGridSectionHeading>
               <div />
-              {entityKeys.map((val, key) => (
-                <GlobalValidationsSettingsRow
-                  key={key}
-                  validation={val}
-                  active={settingsKeyVal(val)}
-                  toggleRule={() => toggleRule(val)}
-                />
-              ))}
+              {entityKeys.map((val, key) =>
+                val === "validation_DM" ? (
+                  <GlobalValidationsDetailRow
+                    key={key}
+                    value={settingRawVal(val)}
+                    update={(value) => updateRule(val, value)}
+                  />
+                ) : (
+                  <GlobalValidationsSettingsRow
+                    key={key}
+                    validation={val}
+                    active={settingsKeyVal(val)}
+                    toggleRule={() => toggleRule(val)}
+                  />
+                )
+              )}
 
               {/* <StyledGridSectionHeading>
                 Territory validations

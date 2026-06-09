@@ -23,6 +23,7 @@ export enum WarningTypeEnums {
   PSM = "PSM", // Part of speech is empty
   LM = "LM", // Language is missing
   VETM = "VETM", // Empty valency for Action
+  DM = "DM", // Missing entity detail
 
   // T-based validations
   TVEP = "TVEP", // Property missing
@@ -159,6 +160,12 @@ export const globalValidationsDict: IWarningWithDescription = {
   validation_LM: {
     label: "Missing label language attribute",
     description: "Language attribute is empty.",
+    section: "entity",
+  },
+  validation_DM: {
+    label: "Missing entity detail",
+    description:
+      "Entity has an empty detail. Applies only to the chosen entity classes.",
     section: "entity",
   },
   // T-based validations

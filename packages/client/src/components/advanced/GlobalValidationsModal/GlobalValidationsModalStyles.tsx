@@ -46,6 +46,13 @@ export const StyledToggleWrap = styled.div<StyledToggleWrap>`
   cursor: pointer;
 `;
 
+export const StyledDetailRowControls = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: ${({ theme }) => theme.space[2]};
+`;
+
 export const StyledSectionHeader = styled.div`
   display: flex;
   align-items: center;

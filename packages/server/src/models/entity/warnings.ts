@@ -4,6 +4,7 @@ import Superclass from "@models/relation/superclass";
 import { Setting } from "@models/setting/setting";
 import { findEntityById, getEntitiesByIds } from "@service/shorthands";
 import { EntityEnums, RelationEnums, WarningTypeEnums } from "@inkvisitor/shared/enums";
+import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 import {
   IAction,
   IConcept,
@@ -126,7 +127,44 @@ export default class EntityWarnings {
       }
     }
 
+    // validation_DM is conditional on entity class. Its value may be:
+    //   true        -> applies to all classes
+    //   string[]     -> applies to the listed classes
+    //   false/empty  -> off (default)
+    const dmValue = settings.find((s) => s.id === "validation_DM")?.value;
+    const dmClasses: EntityEnums.Class[] =
+      dmValue === true
+        ? classesAll
+        : Array.isArray(dmValue)
+        ? (dmValue as EntityEnums.Class[])
+        : [];
+    if (dmClasses.includes(this.class)) {
+      const dmWarning = await this.hasDM(conn);
+      if (dmWarning) {
+        warnings.push(dmWarning);
+      }
+    }
+
     return warnings;
+  }
+
+  /**
+   * Tests if there is DM warning and returns it
+   * DM warning should pop when the entity's detail field is empty
+   * @param conn
+   * @returns
+   */
+  async hasDM(conn: Connection): Promise<IWarning | null> {
+    const entity = await findEntityById(conn, this.entityId);
+
+    if (!entity || !entity.detail || entity.detail.trim().length === 0) {
+      return this.newWarning(
+        WarningTypeEnums.DM,
+        IWarningPositionSection.Entity
+      );
+    }
+
+    return null;
   }
 
   async getTBasedWarnings(
