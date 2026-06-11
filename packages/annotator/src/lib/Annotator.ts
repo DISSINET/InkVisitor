@@ -1043,6 +1043,15 @@ export class Annotator {
    * @param e
    */
   onMouseDown(e: MouseEvent) {
+    // Only the primary (left) button drives text selection. A non-primary
+    // mousedown — notably the right button, which fires just before the
+    // `contextmenu` event — must leave the current selection untouched so the
+    // context menu opens over the existing highlight instead of collapsing it
+    // (#3092).
+    if (e.button !== 0) {
+      return;
+    }
+
     this.lastSelectPointer = { cx: e.clientX, cy: e.clientY };
     this.applyPointerToCursor(e.clientX, e.clientY);
 
@@ -1141,8 +1150,6 @@ export class Annotator {
 
   /**
    * onContextMenu opens the right-click context menu at the pointer.
-   * TODO (#3086): wire real actions / let the host supply items via a callback.
-   * For now these are placeholder entries.
    * @param e
    */
   onContextMenu(e: MouseEvent) {
