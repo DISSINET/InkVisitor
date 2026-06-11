@@ -350,7 +350,7 @@ export const TextAnnotator = ({
     }
   }, [annotatorMode]);
 
-  const handleCreateStatement = (
+  const handleCreateStatement = async (
     text: string = "",
     statementId: string,
     // start index of selected text
@@ -362,7 +362,7 @@ export const TextAnnotator = ({
       territoryId: string;
       language: EntityEnums.Language;
     }
-  ) => {
+  ): Promise<void> => {
     if (dataDocument && statementCreateMutation) {
       // take order from the anchors in the document
       // filter only Statements
@@ -409,7 +409,7 @@ export const TextAnnotator = ({
             statementId,
             newOrder
           );
-          statementCreateMutation?.mutate(newStatement);
+          await statementCreateMutation?.mutateAsync(newStatement);
         } else {
           const newStatement: IStatement = CStatement(
             localStorage.getItem("userrole") as UserEnums.Role,
@@ -420,7 +420,7 @@ export const TextAnnotator = ({
             statementId,
             newOrder
           );
-          statementCreateMutation?.mutate(newStatement);
+          await statementCreateMutation?.mutateAsync(newStatement);
         }
       }
     }
@@ -938,10 +938,15 @@ export const TextAnnotator = ({
   ): Promise<void> => {
     if (handleCreateStatement && selectedText && selectionStartIndex !== -1) {
       const newStatementId = uuidv4();
-      await handleAddAnchor(newStatementId, elvl);
       // remove linebreaks from text
       const validatedText = selectedText.replace(/\n/g, " ");
-      handleCreateStatement(
+      // Create the statement entity BEFORE saving the document with its anchor.
+      // The document's preprocess only indexes anchors whose entity already
+      // exists in the DB (findReferencedEntityIds / buildAnchorsTree). If the
+      // document is saved first, the new statement's id is dropped from the
+      // document's entityIds/anchors tree and the anchor stays invisible (in
+      // usedInDocuments) until the document is preprocessed again.
+      await handleCreateStatement(
         validatedText,
         newStatementId,
         selectionStartIndex,
@@ -954,6 +959,7 @@ export const TextAnnotator = ({
             }
           : undefined
       );
+      await handleAddAnchor(newStatementId, elvl);
     }
   };
 
