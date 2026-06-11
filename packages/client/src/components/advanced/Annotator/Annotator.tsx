@@ -785,26 +785,29 @@ export const TextAnnotator = ({
       annotator.draw();
     };
 
-    // Same text as props — keep instance, refresh styling / callbacks only.
-    if (annotator && currentContent === newContent) {
-      reuseExistingInstance();
-      return;
-    }
-
-    // Props lag behind the live canvas (e.g. after anchor + save before cache/refetch catches up).
-    // Do not rebuild from stale dataDocument — sync cache from annotator and keep the instance.
-    if (
-      annotator &&
-      currentContent !== undefined &&
-      documentId &&
-      dataDocument?.id === documentId &&
-      annotatorLoadedForDocIdRef.current === documentId
-    ) {
-      queryClient.setQueryData<IDocument | undefined>(["document", documentId], (old) => {
-        if (!old || old.id !== documentId) return old;
-        return { ...old, content: currentContent };
-      });
-      reuseExistingInstance(currentContent);
+    // The Annotator is rebuilt ONLY when the document it was created for changes.
+    // Theme, line-number toggles, highlight-entity changes, and props catching up
+    // to live canvas edits all update the existing instance in place — never a
+    // rebuild — so the constructor runs once per document instead of on every
+    // render (which recreated the canvas and snapped scroll back to the top) (#3092).
+    if (annotator && annotatorLoadedForDocIdRef.current === documentId) {
+      // Props lag behind the live canvas (e.g. after anchor + save before the
+      // refetch lands): keep the live instance and sync the query cache instead
+      // of rebuilding from the stale dataDocument.
+      if (
+        currentContent !== undefined &&
+        currentContent !== newContent &&
+        documentId &&
+        dataDocument?.id === documentId
+      ) {
+        queryClient.setQueryData<IDocument | undefined>(["document", documentId], (old) => {
+          if (!old || old.id !== documentId) return old;
+          return { ...old, content: currentContent };
+        });
+        reuseExistingInstance(currentContent);
+      } else {
+        reuseExistingInstance();
+      }
       return;
     }
 
@@ -884,9 +887,9 @@ export const TextAnnotator = ({
 
     setAnnotator(newAnnotator);
     forwardAnnotator(newAnnotator);
-    if (documentId) {
-      annotatorLoadedForDocIdRef.current = documentId;
-    }
+    // Record the document this instance was built for (including `undefined` for
+    // the no-document placeholder) so the reuse gate above never rebuilds it.
+    annotatorLoadedForDocIdRef.current = documentId;
   };
 
   useEffect(() => {
