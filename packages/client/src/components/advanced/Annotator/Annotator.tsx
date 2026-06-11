@@ -228,6 +228,7 @@ export const TextAnnotator = ({
       queryClient.invalidateQueries({ queryKey: ["documents"] });
       toast.info("Document content saved");
       queryClient.invalidateQueries({ queryKey: ["statement"] });
+      queryClient.invalidateQueries({ queryKey: ["entity"] });
     },
     onSettled: () => {
       setIsSaving(false);
@@ -243,6 +244,7 @@ export const TextAnnotator = ({
       queryClient.invalidateQueries({ queryKey: ["document"] });
       queryClient.invalidateQueries({ queryKey: ["documents"] });
       queryClient.invalidateQueries({ queryKey: ["statement"] });
+      queryClient.invalidateQueries({ queryKey: ["entity"] });
     },
     onSettled: () => {
       setIsSaving(false);
