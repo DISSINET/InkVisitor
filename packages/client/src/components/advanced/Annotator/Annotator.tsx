@@ -14,7 +14,14 @@ import { FaPen, FaRegSave, FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 
-import { Annotator, AsymmetricalAnchor, EditMode, editModeDisplayLabel, Tag, WarningType } from "@inkvisitor/annotator/src/lib";
+import {
+  Annotator,
+  AsymmetricalAnchor,
+  EditMode,
+  editModeDisplayLabel,
+  Tag,
+  WarningType,
+} from "@inkvisitor/annotator/src/lib";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import {
   IDocument,
@@ -206,10 +213,10 @@ export const TextAnnotator = ({
   const mergeSavedDocumentIntoCache = useCallback(
     (variables: { id: string; doc: Partial<IDocument> }) => {
       queryClient.setQueryData<IDocument | undefined>(["document", variables.id], (old) =>
-        old ? { ...old, ...variables.doc } : old
+        old ? { ...old, ...variables.doc } : old,
       );
     },
-    [queryClient]
+    [queryClient],
   );
 
   const updateDocumentMutation = useMutation({
@@ -220,6 +227,7 @@ export const TextAnnotator = ({
       queryClient.invalidateQueries({ queryKey: ["document"] });
       queryClient.invalidateQueries({ queryKey: ["documents"] });
       toast.info("Document content saved");
+      queryClient.invalidateQueries({ queryKey: ["statement"] });
     },
     onSettled: () => {
       setIsSaving(false);
@@ -234,6 +242,7 @@ export const TextAnnotator = ({
       mergeSavedDocumentIntoCache(variables);
       queryClient.invalidateQueries({ queryKey: ["document"] });
       queryClient.invalidateQueries({ queryKey: ["documents"] });
+      queryClient.invalidateQueries({ queryKey: ["statement"] });
     },
     onSettled: () => {
       setIsSaving(false);
@@ -361,22 +370,22 @@ export const TextAnnotator = ({
       detail: string;
       territoryId: string;
       language: EntityEnums.Language;
-    }
+    },
   ): Promise<void> => {
     if (dataDocument && statementCreateMutation) {
       // take order from the anchors in the document
       // filter only Statements
       const statementAnchors = Array.from(
         new Map(
-          collectStatementAnchors(dataDocument.anchors).map((anchor) => [anchor.anchor, anchor])
-        ).values()
+          collectStatementAnchors(dataDocument.anchors).map((anchor) => [anchor.anchor, anchor]),
+        ).values(),
       );
       const territoryStatements = territory?.statements || [];
 
       const statementIds = new Set(territoryStatements.map((s) => s.id));
       // filter only anchors that are in the statement list
       const statementAnchorsInList = statementAnchors.filter((anchor) =>
-        statementIds.has(anchor.anchor)
+        statementIds.has(anchor.anchor),
       );
 
       // Find the last statement anchor with start index before the given startIndex
@@ -390,7 +399,7 @@ export const TextAnnotator = ({
       // see the order of the previous start index statement in the statement list and put the new statement after it
       const lastIndexBeforeHighlight =
         territoryStatements.findIndex(
-          (statement) => statement.id === lastAnchorBeforeIndex?.anchor
+          (statement) => statement.id === lastAnchorBeforeIndex?.anchor,
         ) ?? -1;
       const newOrder = getStatementOrderByIndex(lastIndexBeforeHighlight + 1, territoryStatements);
 
@@ -407,7 +416,7 @@ export const TextAnnotator = ({
             detail,
             territoryId,
             statementId,
-            newOrder
+            newOrder,
           );
           await statementCreateMutation?.mutateAsync(newStatement);
         } else {
@@ -418,7 +427,7 @@ export const TextAnnotator = ({
             "",
             territory.id,
             statementId,
-            newOrder
+            newOrder,
           );
           await statementCreateMutation?.mutateAsync(newStatement);
         }
@@ -504,10 +513,10 @@ export const TextAnnotator = ({
         () => {
           if (document.visibilityState === "hidden") endMenuDrag();
         },
-        opts
+        opts,
       );
     },
-    [endMenuDrag]
+    [endMenuDrag],
   );
 
   const handleMenuDragPointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
@@ -545,7 +554,7 @@ export const TextAnnotator = ({
     (e: React.PointerEvent<HTMLDivElement>) => {
       endMenuDrag(e.nativeEvent);
     },
-    [endMenuDrag]
+    [endMenuDrag],
   );
 
   /** Keeps keyboard focus on the annotator canvas when using menu controls; skips inputs and react-select (BaseDropdown) so they stay interactive. */
@@ -570,7 +579,7 @@ export const TextAnnotator = ({
   // quiet does not trigger a toast notification
   const handleSaveNewContent = async (
     quiet: boolean,
-    skipRefresh: boolean = false
+    skipRefresh: boolean = false,
   ): Promise<void> => {
     if (annotator && documentId) {
       if (skipRefresh) {
@@ -624,10 +633,13 @@ export const TextAnnotator = ({
       const data = entities.data ?? [];
 
       setStoredEntities(
-        data.reduce((acc, entity) => {
-          acc[entity.id] = entity;
-          return acc;
-        }, {} as Record<string, IEntity>)
+        data.reduce(
+          (acc, entity) => {
+            acc[entity.id] = entity;
+            return acc;
+          },
+          {} as Record<string, IEntity>,
+        ),
       );
 
       return data;
@@ -642,7 +654,7 @@ export const TextAnnotator = ({
         ? {
             elvl: elvl,
           }
-        : {}
+        : {},
     );
     await handleSaveNewContent(true);
     handleRefreshEntityAndStatement(entityId);
@@ -755,7 +767,7 @@ export const TextAnnotator = ({
               dataDocument,
             },
             hlEntities,
-            theme
+            theme,
           );
         }
       });
@@ -798,7 +810,7 @@ export const TextAnnotator = ({
     const newAnnotator = new Annotator(
       mainCanvas?.current,
       dataDocument?.content ?? "no text",
-      RATIO
+      RATIO,
     );
 
     applyCanvasTheme(newAnnotator);
@@ -824,7 +836,7 @@ export const TextAnnotator = ({
             dataDocument,
           },
           hlEntities,
-          theme
+          theme,
         );
       }
     });
@@ -934,7 +946,7 @@ export const TextAnnotator = ({
       detail: string;
       territoryId: string;
       language: EntityEnums.Language;
-    }
+    },
   ): Promise<void> => {
     if (handleCreateStatement && selectedText && selectionStartIndex !== -1) {
       const newStatementId = uuidv4();
@@ -957,7 +969,7 @@ export const TextAnnotator = ({
               territoryId: entityCreateModalProps.territoryId,
               language: entityCreateModalProps.language,
             }
-          : undefined
+          : undefined,
       );
       await handleAddAnchor(newStatementId, elvl);
     }
@@ -977,16 +989,8 @@ export const TextAnnotator = ({
   // Unlink a broken (asymmetrical) anchor from the warnings panel (#2601).
   // removeAsymmetricalAnchor re-parses, redraws and re-runs the warning checks,
   // so the panel updates itself via the onWarning subscription.
-  const onRemoveAsymmetricalAnchor = (
-    tagName: string,
-    position: number,
-    segmentIndex: number
-  ) => {
-    const removed = annotator?.removeAsymmetricalAnchor(
-      tagName,
-      position,
-      segmentIndex
-    );
+  const onRemoveAsymmetricalAnchor = (tagName: string, position: number, segmentIndex: number) => {
+    const removed = annotator?.removeAsymmetricalAnchor(tagName, position, segmentIndex);
     if (removed) {
       handleSaveNewContent(true, true);
       handleRefreshEntityAndStatement(tagName);
@@ -998,7 +1002,7 @@ export const TextAnnotator = ({
   const onScrollToAsymmetricalAnchor = (
     tagName: string,
     position: number,
-    segmentIndex: number
+    segmentIndex: number,
   ) => {
     if (!annotator) {
       return;
@@ -1173,8 +1177,7 @@ export const TextAnnotator = ({
       <div
         ref={warningsPanelRef}
         style={{
-          paddingBottom:
-            !hideWarningChip && asymmetricalAnchors.length > 0 ? "0.5rem" : 0,
+          paddingBottom: !hideWarningChip && asymmetricalAnchors.length > 0 ? "0.5rem" : 0,
         }}
       >
         <AnnotatorWarningsPanel
@@ -1238,7 +1241,7 @@ export const TextAnnotator = ({
                       onRemoveAnchor={onRemoveAnchor}
                       onUpdateAnchor={onUpdateAnchor}
                       isTextInsideThisT={selectedAnchors.some(
-                        (anchor) => anchor.getTagName() === thisTerritoryEntityId
+                        (anchor) => anchor.getTagName() === thisTerritoryEntityId,
                       )}
                       activeTerritoryId={thisTerritoryEntityId}
                       onCreateActiveTAnchor={async (elvl) => {
