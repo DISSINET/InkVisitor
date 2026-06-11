@@ -15,10 +15,7 @@ export namespace EntityEnums {
   };
 
   // Predicate for testing if input value is one of accepted class values
-  export const IsClass = function (
-    input: unknown,
-    ...accepted: Class[]
-  ): boolean {
+  export const IsClass = function (input: unknown, ...accepted: Class[]): boolean {
     return accepted.indexOf(input as Class) !== -1;
   };
 
@@ -174,6 +171,8 @@ export namespace EntityEnums {
     Semblance = "13",
     Rectitude = "14",
     Expectation = "15",
+    Exhortation = "16",
+    Advice = "17",
   }
 
   export enum MoodVariant {
