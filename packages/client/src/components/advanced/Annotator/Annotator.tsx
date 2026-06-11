@@ -180,6 +180,7 @@ export const TextAnnotator = ({
   }, [annotatorMode]);
 
   const resetAnnotator = () => {
+    annotatorRef.current?.destroy();
     annotatorLoadedForDocIdRef.current = undefined;
     setAnnotator(null);
     forwardAnnotator(undefined);
@@ -893,6 +894,14 @@ export const TextAnnotator = ({
       refreshAnnotator();
     }
   }, [displayLineNumbers, hlEntities ?? [], dataDocumentIsFetching, theme, dataDocument, isSaving]);
+
+  // Tear down an annotator instance when it is replaced or on unmount, so its
+  // caret-blink interval and document listeners don't leak (#3092).
+  useEffect(() => {
+    return () => {
+      annotator?.destroy();
+    };
+  }, [annotator]);
 
   // Measure the warnings panel so the canvas can give up exactly its height.
   useEffect(() => {
