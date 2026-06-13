@@ -1355,7 +1355,7 @@ export const TextAnnotator = ({
               onClick={() => {
                 setAnnotatorMode(EditMode.HIGHLIGHT);
               }}
-              tooltipLabel="highlight (activate syntax highlighting mode)"
+              tooltipLabel="anchor entities"
               tooltipPosition="top"
             />
             <Button
@@ -1373,7 +1373,7 @@ export const TextAnnotator = ({
               onClick={() => {
                 setAnnotatorMode(EditMode.SEMI);
               }}
-              tooltipLabel="text edit (activate semi mode)"
+              tooltipLabel="edit plain text"
               tooltipPosition="top"
             />
             <Button
@@ -1391,7 +1391,7 @@ export const TextAnnotator = ({
               onClick={() => {
                 setAnnotatorMode(EditMode.RAW);
               }}
-              tooltipLabel="XML (activate edit mode)"
+              tooltipLabel="display and edit XML"
               tooltipPosition="top"
             />
           </ButtonGroup>
