@@ -730,6 +730,42 @@ class Statement extends Entity implements IStatement {
   }
 
   /**
+   * Returns ids that co-occur with entityId in any statement.
+   * Mirrors the StatementEntities index (actants, actions, tags, direct
+   * territory) plus the statement id itself, so every returned id would
+   * also find these statements if used as the co-occurrence input.
+   * Excludes territory ancestor lineage and nested prop/reference ids,
+   * which made co-occurrence search return many unrelated entities.
+   */
+  static async getCoOccurrentEntityIds(
+    db: Connection | undefined,
+    entityId: string
+  ): Promise<string[]> {
+    const statements = await Statement.getLinkedEntities(db, entityId);
+
+    const ids = new Set<string>();
+    for (const s of statements) {
+      ids.add(s.id);
+      const territoryId = s.data.territory?.territoryId;
+      if (territoryId) {
+        ids.add(territoryId);
+      }
+      s.data.actions?.forEach((a) => {
+        if (a.actionId) ids.add(a.actionId);
+      });
+      s.data.actants?.forEach((a) => {
+        if (a.entityId) ids.add(a.entityId);
+      });
+      s.data.tags?.forEach((t) => {
+        if (t) ids.add(t);
+      });
+    }
+    ids.delete(entityId);
+
+    return [...ids];
+  }
+
+  /**
    * finds statements which are linked to entity using
    * statement.data.actions[].props or statement.data.actants[].props
    * searches also in props.children to lvl3

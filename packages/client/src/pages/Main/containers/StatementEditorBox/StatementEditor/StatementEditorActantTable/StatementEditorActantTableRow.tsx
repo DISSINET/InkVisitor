@@ -1,8 +1,4 @@
-import {
-  operatorDict,
-  partitivityDict,
-  virtualityDict,
-} from "@inkvisitor/shared/dictionaries";
+import { operatorDict, partitivityDict, virtualityDict } from "@inkvisitor/shared/dictionaries";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import {
   IEntity,
@@ -12,12 +8,7 @@ import {
   IStatementData,
 } from "@inkvisitor/shared/types";
 import { excludedSuggesterEntities } from "Theme/constants";
-import {
-  AttributeIcon,
-  BundleButtonGroup,
-  Button,
-  ButtonGroup,
-} from "components";
+import { AttributeIcon, BundleButtonGroup, Button, ButtonGroup } from "components";
 import Dropdown, {
   ElvlButtonGroup,
   EntityDropzone,
@@ -29,18 +20,8 @@ import Dropdown, {
 import { useSearchParams, useTheme } from "hooks";
 import { TooltipAttributes } from "pages/Main/containers";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import {
-  DragSourceMonitor,
-  DropTargetMonitor,
-  useDrag,
-  useDrop,
-} from "react-dnd";
-import {
-  FaCaretDown,
-  FaGripVertical,
-  FaPlus,
-  FaTrashAlt,
-} from "react-icons/fa";
+import { DragSourceMonitor, DropTargetMonitor, useDrag, useDrop } from "react-dnd";
+import { FaCaretDown, FaGripVertical, FaPlus, FaTrashAlt } from "react-icons/fa";
 import { setDraggedActantRow } from "redux/features/rowDnd/draggedActantRowSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import {
@@ -85,15 +66,10 @@ interface StatementEditorActantTableRow {
   territoryActants?: string[];
   hasOrder?: boolean;
 
-  handleDataAttributeChange: (
-    changes: Partial<IStatementData>,
-    instantUpdate?: boolean
-  ) => void;
+  handleDataAttributeChange: (changes: Partial<IStatementData>, instantUpdate?: boolean) => void;
 }
 
-export const StatementEditorActantTableRow: React.FC<
-  StatementEditorActantTableRow
-> = ({
+export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableRow> = ({
   filteredActant,
   index,
   moveRow,
@@ -127,7 +103,7 @@ export const StatementEditorActantTableRow: React.FC<
   } = filteredActant.data;
 
   const draggedActantRow: DraggedActantRowItem = useAppSelector(
-    (state) => state.rowDnd.draggedActantRow
+    (state) => state.rowDnd.draggedActantRow,
   );
 
   const dropRef = useRef<HTMLTableRowElement>(null);
@@ -161,9 +137,7 @@ export const StatementEditorActantTableRow: React.FC<
 
   useEffect(() => {
     if (isDragging) {
-      dispatch(
-        setDraggedActantRow({ category: DraggedPropRowCategory.ACTANT })
-      );
+      dispatch(setDraggedActantRow({ category: DraggedPropRowCategory.ACTANT }));
       const boxContentEditor = document.getElementById(`box-content-editor`);
       const actantTable = document.getElementById(`actant-section`);
       if (boxContentEditor) {
@@ -180,11 +154,11 @@ export const StatementEditorActantTableRow: React.FC<
   const updateActant = (
     statementActantId: string,
     changes: Partial<IStatementActant>,
-    instantUpdate?: boolean
+    instantUpdate?: boolean,
   ) => {
     if (statement && statementActantId) {
       const updatedActants = statement.data.actants.map((a) =>
-        a.id === statementActantId ? { ...a, ...changes } : a
+        a.id === statementActantId ? { ...a, ...changes } : a,
       );
       handleDataAttributeChange({ actants: updatedActants }, instantUpdate);
     }
@@ -192,9 +166,7 @@ export const StatementEditorActantTableRow: React.FC<
 
   const removeActant = (statementActantId: string, instantUpdate?: boolean) => {
     if (statement) {
-      const updatedActants = statement.data.actants.filter(
-        (a) => a.id !== statementActantId
-      );
+      const updatedActants = statement.data.actants.filter((a) => a.id !== statementActantId);
       handleDataAttributeChange({ actants: updatedActants }, instantUpdate);
     }
   };
@@ -209,7 +181,7 @@ export const StatementEditorActantTableRow: React.FC<
               {
                 entityId: newSelectedId,
               },
-              true
+              true,
             );
           }}
           categoryTypes={classEntitiesActant}
@@ -254,7 +226,7 @@ export const StatementEditorActantTableRow: React.FC<
               {
                 entityId: newSelectedId,
               },
-              true
+              true,
             );
           }}
           categoryTypes={classEntitiesActant}
@@ -369,44 +341,35 @@ export const StatementEditorActantTableRow: React.FC<
             isInsideTemplate={isInsideTemplate}
             territoryParentId={territoryParentId}
             disableSpareRow
+            alwaysShowCreateModal
           />
         );
       }
     },
-    [statement]
+    [statement],
   );
 
   const isDraggingActant =
-    draggedActantRow.category &&
-    draggedActantRow.category === DraggedPropRowCategory.ACTANT;
+    draggedActantRow.category && draggedActantRow.category === DraggedPropRowCategory.ACTANT;
 
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
   const { classifications, identifications } = filteredActant.data.sActant;
 
   return (
-    <StyledRow
-      key={index}
-      $marginBottom={classifications.length > 0 || identifications.length > 0}
-    >
+    <StyledRow key={index} $marginBottom={classifications.length > 0 || identifications.length > 0}>
       <StyledFlexStart ref={dropRef}>
         {/* Order */}
         {userCanEdit && hasOrder ? (
           <StyledGridColumn ref={dragRef} style={{ cursor: "move" }}>
-            <FaGripVertical
-              style={{ marginTop: "0.3rem" }}
-              color={theme.color.black}
-            />
+            <FaGripVertical style={{ marginTop: "0.3rem" }} color={theme.color.black} />
           </StyledGridColumn>
         ) : (
           <StyledGridColumn />
         )}
 
         <StyledBorderLeft $borderColor="actant" $marginBottom>
-          <StyledGrid
-            style={{ opacity }}
-            $hasActant={!!filteredActant.data.actant}
-          >
+          <StyledGrid style={{ opacity }} $hasActant={!!filteredActant.data.actant}>
             <StyledGridColumn>{renderActantCell()}</StyledGridColumn>
             <StyledGridColumn>
               {
@@ -547,7 +510,7 @@ export const StatementEditorActantTableRow: React.FC<
         renderPropGroup(
           filteredActant.data.sActant.entityId,
           filteredActant.data.sActant.props,
-          DraggedPropRowCategory.ACTANT
+          DraggedPropRowCategory.ACTANT,
         )}
 
       {/* CI */}

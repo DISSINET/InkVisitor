@@ -4,12 +4,15 @@ import { useQuery } from "@tanstack/react-query";
 import api from "api";
 import { EntityTag } from "components/advanced";
 import { Loader } from "components";
+import { UnlinkButton } from "./EntityTag";
 
 interface EntityTagByIdProps {
   entityId: string;
   entity?: IEntity;
   fullWidth?: boolean;
   disableTooltip?: boolean;
+  unlinkButton?: UnlinkButton | false;
+  disableToast?: boolean;
 }
 
 /**
@@ -20,11 +23,15 @@ export const EntityTagById: React.FC<EntityTagByIdProps> = ({
   entity: entityProp,
   fullWidth = false,
   disableTooltip = true,
+  unlinkButton,
+  disableToast = false,
 }) => {
   const { data, isFetching } = useQuery({
     queryKey: ["entity", entityId],
     queryFn: async () => {
-      const res = await api.entityGet(entityId);
+      const res = await api.entityGet(entityId, {
+        ignoreErrorToast: disableToast,
+      });
       return res.data;
     },
     enabled: !!entityId && !entityProp && api.isLoggedIn(),
@@ -43,6 +50,7 @@ export const EntityTagById: React.FC<EntityTagByIdProps> = ({
       entity={entity}
       disableTooltip={disableTooltip}
       fullWidth={fullWidth}
+      unlinkButton={unlinkButton}
       disableDoubleClick
     />
   );

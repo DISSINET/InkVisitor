@@ -1,0 +1,9 @@
+packages:
+  - "packages/*"
+
+allowBuilds:
+  esbuild: true
+  es5-ext: true
+  cpu-features: true
+  ssh2: true
+  unrs-resolver: true

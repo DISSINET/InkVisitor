@@ -13,9 +13,7 @@
     "target": "es6",
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "paths": {
-      "@inkvisitor/shared/*": ["./../shared/*"]
-    },
+    "paths": {},
     "types": ["node"],
     "typeRoots": ["node_modules/@types"]
   },

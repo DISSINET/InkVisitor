@@ -91,22 +91,14 @@ export namespace Relation {
 
   export interface IUsedRelations {
     [RelationEnums.Type.Superclass]?: IDetailType<ISuperclass>;
-    [RelationEnums.Type
-      .SuperordinateEntity]?: IDetailType<ISuperordinateEntity>;
+    [RelationEnums.Type.SuperordinateEntity]?: IDetailType<ISuperordinateEntity>;
     [RelationEnums.Type.Synonym]?: IDetailType<ISynonym>;
     [RelationEnums.Type.Antonym]?: IDetailType<IAntonym>;
     [RelationEnums.Type.Holonym]?: IDetailType<IHolonym>;
     [RelationEnums.Type.PropertyReciprocal]?: IDetailType<IPropertyReciprocal>;
-    [RelationEnums.Type
-      .SubjectActant1Reciprocal]?: IDetailType<ISubjectActant1Reciprocal>;
-    [RelationEnums.Type.ActionEventEquivalent]?: IDetailType<
-      IActionEventEquivalent,
-      ISuperclass
-    >;
-    [RelationEnums.Type.Classification]?: IDetailType<
-      IClassification,
-      ISuperclass
-    >;
+    [RelationEnums.Type.SubjectActant1Reciprocal]?: IDetailType<ISubjectActant1Reciprocal>;
+    [RelationEnums.Type.ActionEventEquivalent]?: IDetailType<IActionEventEquivalent, ISuperclass>;
+    [RelationEnums.Type.Classification]?: IDetailType<IClassification, ISuperclass>;
     [RelationEnums.Type.Identification]?: IDetailType<IIdentification>;
     [RelationEnums.Type.Implication]?: IDetailType<IImplication>;
     [RelationEnums.Type.SubjectSemantics]?: IDetailType<ISubjectSemantics>;
@@ -134,8 +126,7 @@ export namespace Relation {
     graph?: boolean;
   };
 
-  export const RelationRules: { [key in RelationEnums.Type]?: RelationRule } =
-    {};
+  export const RelationRules: { [key in RelationEnums.Type]?: RelationRule } = {};
 
   // Order of objects equals order of relations in detail
   RelationRules[RelationEnums.Type.Superclass] = {
@@ -182,10 +173,7 @@ export namespace Relation {
   RelationRules[RelationEnums.Type.Synonym] = {
     label: "Synonym",
     inverseLabel: false,
-    allowedEntitiesPattern: [
-      [EntityEnums.Class.Action],
-      [EntityEnums.Class.Concept],
-    ],
+    allowedEntitiesPattern: [[EntityEnums.Class.Action], [EntityEnums.Class.Concept]],
     asymmetrical: false,
     multiple: false,
     cloudType: true,
@@ -212,9 +200,7 @@ export namespace Relation {
   RelationRules[RelationEnums.Type.Holonym] = {
     label: "Holonym",
     inverseLabel: "Meronyms",
-    allowedEntitiesPattern: [
-      [EntityEnums.Class.Concept, EntityEnums.Class.Concept],
-    ],
+    allowedEntitiesPattern: [[EntityEnums.Class.Concept, EntityEnums.Class.Concept]],
     asymmetrical: true,
     multiple: true,
     cloudType: false,
@@ -227,9 +213,7 @@ export namespace Relation {
   RelationRules[RelationEnums.Type.PropertyReciprocal] = {
     label: "Property Reciprocal",
     inverseLabel: false,
-    allowedEntitiesPattern: [
-      [EntityEnums.Class.Concept, EntityEnums.Class.Concept],
-    ],
+    allowedEntitiesPattern: [[EntityEnums.Class.Concept, EntityEnums.Class.Concept]],
     asymmetrical: false,
     multiple: false,
     cloudType: false,
@@ -241,9 +225,7 @@ export namespace Relation {
   RelationRules[RelationEnums.Type.SubjectActant1Reciprocal] = {
     label: "Subject/Actant1 Reciprocal",
     inverseLabel: false,
-    allowedEntitiesPattern: [
-      [EntityEnums.Class.Action, EntityEnums.Class.Action],
-    ],
+    allowedEntitiesPattern: [[EntityEnums.Class.Action, EntityEnums.Class.Action]],
     asymmetrical: false,
     multiple: false,
     cloudType: false,
@@ -255,9 +237,7 @@ export namespace Relation {
   RelationRules[RelationEnums.Type.ActionEventEquivalent] = {
     label: "Action/Event Equivalent",
     inverseLabel: "Action equivalent",
-    allowedEntitiesPattern: [
-      [EntityEnums.Class.Action, EntityEnums.Class.Concept],
-    ],
+    allowedEntitiesPattern: [[EntityEnums.Class.Action, EntityEnums.Class.Concept]],
     asymmetrical: true,
     multiple: false,
     cloudType: false,
@@ -308,9 +288,7 @@ export namespace Relation {
   RelationRules[RelationEnums.Type.Implication] = {
     label: "Implication",
     inverseLabel: "Used as Implication",
-    allowedEntitiesPattern: [
-      [EntityEnums.Class.Action, EntityEnums.Class.Action],
-    ],
+    allowedEntitiesPattern: [[EntityEnums.Class.Action, EntityEnums.Class.Action]],
     asymmetrical: true,
     multiple: true,
     cloudType: false,
@@ -323,9 +301,7 @@ export namespace Relation {
   RelationRules[RelationEnums.Type.SubjectSemantics] = {
     label: "Subject Semantics",
     inverseLabel: "Used as Subject semantics",
-    allowedEntitiesPattern: [
-      [EntityEnums.Class.Action, EntityEnums.Class.Concept],
-    ],
+    allowedEntitiesPattern: [[EntityEnums.Class.Action, EntityEnums.Class.Concept]],
     asymmetrical: true,
     multiple: true,
     cloudType: false,
@@ -337,9 +313,7 @@ export namespace Relation {
   RelationRules[RelationEnums.Type.Actant1Semantics] = {
     label: "Actant1 Semantics",
     inverseLabel: "Used as Actant1 semantics",
-    allowedEntitiesPattern: [
-      [EntityEnums.Class.Action, EntityEnums.Class.Concept],
-    ],
+    allowedEntitiesPattern: [[EntityEnums.Class.Action, EntityEnums.Class.Concept]],
     asymmetrical: true,
     multiple: true,
     cloudType: false,
@@ -351,9 +325,7 @@ export namespace Relation {
   RelationRules[RelationEnums.Type.Actant2Semantics] = {
     label: "Actant2 Semantics",
     inverseLabel: "Used as Actant2 semantics",
-    allowedEntitiesPattern: [
-      [EntityEnums.Class.Action, EntityEnums.Class.Concept],
-    ],
+    allowedEntitiesPattern: [[EntityEnums.Class.Action, EntityEnums.Class.Concept]],
     asymmetrical: true,
     multiple: true,
     cloudType: false,

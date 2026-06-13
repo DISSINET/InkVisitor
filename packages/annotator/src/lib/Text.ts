@@ -5,7 +5,20 @@ import {
   closingTagRegex,
   createOpeningTagRegex,
   tagRemovalRegex,
+  wrapTokenRegex,
 } from "./Annotator";
+
+/**
+ * Caret affinity at a soft-wrap boundary, where a single document offset maps to
+ * two visual positions (Phase 3 offset model):
+ * - `UPSTREAM`   — render at the END of the wrapped visual line.
+ * - `DOWNSTREAM` — render at the START of the following visual line.
+ * Irrelevant for any offset that is not a soft-wrap boundary.
+ */
+export enum CaretAffinity {
+  UPSTREAM = "UPSTREAM",
+  DOWNSTREAM = "DOWNSTREAM",
+}
 
 /**
  * Represents an XML-like tag within a text segment.
@@ -199,8 +212,9 @@ export class Tag {
  * A segment is a portion of text that gets processed and displayed as lines.
  */
 export class Segment {
-  lineStart: number = -1; // incl.
-  lineEnd: number = -1; // incl.
+  lineStart: number = -1; // inclusive — first visual line index of this segment
+  /** Exclusive — one past the last visual line index of this segment (`lineStart + lines.length`). */
+  lineEndExclusive: number = -1;
   raw: string;
   parsed: string = "";
   openingTags: Tag[] = [];
@@ -340,7 +354,7 @@ class Text {
   getLine(lineIndex: number): string {
     // Find the segment that contains the line
     const segmentIndex = this.segments.findIndex(
-      (s) => s.lineStart <= lineIndex && s.lineEnd > lineIndex
+      (s) => s.lineStart <= lineIndex && s.lineEndExclusive > lineIndex
     );
 
     if (segmentIndex === -1) {
@@ -421,7 +435,9 @@ class Text {
       }
 */
       segment.lineStart =
-        segmentIndex === 0 ? 0 : this.segments[segmentIndex - 1].lineEnd;
+        segmentIndex === 0
+          ? 0
+          : this.segments[segmentIndex - 1].lineEndExclusive;
       segment.lines = [];
 
       let text = segment.raw;
@@ -429,31 +445,116 @@ class Text {
         text = segment.parsed;
       }
 
-      const regex: RegExp = /(<[^>]+>)|([\w']+)/g;
-      const tokens = text.split(regex).filter((t) => !!t);
+      // Word wrapping like a normal text editor (issues #2780 / follow-up).
+      //
+      // The annotator has no horizontal scroll, so wrapping is the only thing
+      // keeping content (and the cursor) inside the visible width. A line break
+      // is only allowed next to whitespace; a word together with the
+      // punctuation glued to it ("ds.") is therefore one unbreakable unit that
+      // wraps to the next line as a whole rather than letting the punctuation
+      // (and the caret after it) spill past charsAtLine. A unit longer than the
+      // whole line is broken character-wise so nothing ever exceeds the width.
+      const maxLen = Math.max(1, this.charsAtLine);
+
+      // Atomic tokens: tags (<...>) must never be split; word, punctuation and
+      // whitespace runs are kept separate so we can find break opportunities.
+      type Tok = { text: string; space: boolean; atomic: boolean };
+      const toks: Tok[] = [];
+      wrapTokenRegex.lastIndex = 0;
+      let m: RegExpExecArray | null;
+      while ((m = wrapTokenRegex.exec(text)) !== null) {
+        if (m[1] !== undefined)
+          toks.push({ text: m[1], space: false, atomic: true });
+        else if (m[2] !== undefined)
+          toks.push({ text: m[2], space: true, atomic: false });
+        else if (m[3] !== undefined)
+          toks.push({ text: m[3], space: false, atomic: false });
+        else toks.push({ text: m[4], space: false, atomic: false });
+      }
+
+      // Merge adjacent non-space tokens into unbreakable units; whitespace runs
+      // are their own cells (the only place a break may occur).
+      type Cell = { text: string; space: boolean; parts: Tok[] };
+      const cells: Cell[] = [];
+      for (const t of toks) {
+        const last = cells[cells.length - 1];
+        if (!t.space && last && !last.space) {
+          last.text += t.text;
+          last.parts.push(t);
+        } else {
+          cells.push({ text: t.text, space: t.space, parts: [t] });
+        }
+      }
+      // Index of the last content cell: a whitespace run before it stays
+      // trailing on the current line; trailing whitespace after it gets its own
+      // line so the caret typed at a full line end remains visible.
+      let lastContentIdx = -1;
+      for (let i = 0; i < cells.length; i++) {
+        if (!cells[i].space) lastContentIdx = i;
+      }
+
       let currentLine: string[] = [];
       let currentLineLength = 0;
-      for (let iToken = 0; iToken < tokens.length; iToken++) {
-        const token = tokens[iToken];
-        const tokenLength = token.length;
-        if (currentLineLength + tokenLength > this.charsAtLine) {
-          // Join the current line into a string and push it to lines
-          segment.lines.push(currentLine.join(""));
-          currentLine = [token]; // Start a new line with the current word
-          currentLineLength = tokenLength; // Reset the length (+1 for the space)
-        } else {
-          currentLine.push(token);
-          currentLineLength += tokenLength; // +1 for the space
+      const pushLine = () => {
+        segment.lines.push(currentLine.join(""));
+        currentLine = [];
+        currentLineLength = 0;
+      };
+      const appendStr = (s: string) => {
+        currentLine.push(s);
+        currentLineLength += s.length;
+      };
+
+      for (let ci = 0; ci < cells.length; ci++) {
+        const cell = cells[ci];
+
+        if (currentLineLength + cell.text.length <= maxLen) {
+          appendStr(cell.text);
+          continue;
         }
 
-        if (iToken + 1 === tokens.length) {
-          // Add the last line if it's not empty
-          if (currentLine.length > 0) {
-            segment.lines.push(currentLine.join(""));
+        if (cell.space) {
+          // Keep an inter-word space trailing on the current line (the next
+          // content breaks to the margin); a trailing space at the very end
+          // gets its own line so the caret after it stays on screen.
+          if (ci >= lastContentIdx && currentLineLength > 0) pushLine();
+          appendStr(cell.text);
+          continue;
+        }
+
+        if (cell.text.length <= maxLen) {
+          // Move the whole unit down to a fresh line.
+          if (currentLineLength > 0) pushLine();
+          appendStr(cell.text);
+          continue;
+        }
+
+        // Unit longer than a whole line: break it. A tag is kept whole when it
+        // fits on a line, but a tag longer than the line is still broken — with
+        // no horizontal scroll, an unsplit over-long tag would run off the edge.
+        for (const part of cell.parts) {
+          if (part.atomic && part.text.length <= maxLen) {
+            if (currentLineLength > 0 && currentLineLength + part.text.length > maxLen)
+              pushLine();
+            appendStr(part.text);
+          } else {
+            let s = part.text;
+            while (currentLineLength + s.length > maxLen) {
+              const take = maxLen - currentLineLength;
+              if (take > 0) {
+                appendStr(s.slice(0, take));
+                s = s.slice(take);
+              }
+              pushLine();
+            }
+            if (s.length) appendStr(s);
           }
         }
       }
-      segment.lineEnd = segment.lineStart + (segment.lines.length || 1);
+      if (currentLine.length > 0) pushLine();
+
+      segment.lineEndExclusive =
+        segment.lineStart + (segment.lines.length || 1);
 
       if (!segment.lines.length) {
         segment.lines = [""];
@@ -566,18 +667,34 @@ class Text {
       if (absTextIndex < currentIndex + segmentLength) {
         const rawTextIndex = absTextIndex - currentIndex;
 
-        // Calculate parsed text index by accounting for tags
+        // Calculate parsed text index by counting the characters that tag
+        // removal strips from the raw text up to this index. We derive this
+        // from `tagRemovalRegex` — the exact pattern used to build `parsed`
+        // (`raw.replace(tagRemovalRegex, "")`) — so the two stay consistent
+        // even for malformed tags. A closing tag carrying attributes
+        // (`</first elvl="1">`) is stripped from `parsed` by tagRemovalRegex
+        // but matches neither the strict opening nor closing regex, so it
+        // never lands in `openingTags`/`closingTags`; reconstructing the
+        // removed length from those lists both misses such tags and uses the
+        // canonical (attribute-stripped) tag length, drifting the caret.
         let parsedTextIndex = rawTextIndex;
         if (this.mode !== EditMode.RAW) {
-          const tags = segment.openingTags
-            .concat(segment.closingTags)
-            .sort((a, b) => a.position - b.position);
-
-          for (const tag of tags) {
-            if (tag.position <= rawTextIndex) {
-              parsedTextIndex -= tag.getTag().length;
+          const removalRegex = new RegExp(
+            tagRemovalRegex.source,
+            tagRemovalRegex.flags
+          );
+          let removalMatch: RegExpExecArray | null;
+          while ((removalMatch = removalRegex.exec(segment.raw)) !== null) {
+            if (removalMatch.index > rawTextIndex) {
+              break;
             }
+            parsedTextIndex -= removalMatch[0].length;
           }
+          // Note: parsedTextIndex may go negative when rawTextIndex sits on a
+          // leading tag (the `<= rawTextIndex` boundary subtracts a tag that
+          // starts exactly there); the return value clamps it, matching the
+          // previous tracked-tag computation. Only the malformed-tag accounting
+          // differs from before.
         }
 
         // Find line index and character position within the line
@@ -702,6 +819,170 @@ class Text {
   }
 
   /**
+   * Phase 3 offset model — raw document offset (index into {@link value}) to
+   * ABSOLUTE visual coordinates (`yLine` is an absolute line index, not
+   * viewport-relative). The offset is clamped into `[0, value.length]`. The
+   * returned `xLine` is the visual column in the current edit mode (tags are
+   * stripped in HIGHLIGHT/SEMI). Returns `null` only for an empty document.
+   */
+  visualFromOffset(
+    offset: number,
+    affinity: CaretAffinity = CaretAffinity.DOWNSTREAM
+  ): { xLine: number; yLine: number } | null {
+    const clamped = Math.max(0, Math.min(offset, this.value.length));
+    const pos = this.getSegmentFromAbsTextIndex(clamped);
+    if (!pos) {
+      return null;
+    }
+    const segment = this.segments[pos.segmentIndex];
+    if (!segment) {
+      return null;
+    }
+    let lineIndex = pos.lineIndex;
+    // An offset that lands inside hidden tag markup (HIGHLIGHT/SEMI) can yield a
+    // negative parsed column; snap it to the line start so the caret never sits
+    // at a negative column.
+    let charInLineIndex = Math.max(0, pos.charInLineIndex);
+    // At a soft-wrap boundary (start of a continuation line) UPSTREAM affinity
+    // renders the caret at the end of the previous visual line instead.
+    if (
+      affinity === CaretAffinity.UPSTREAM &&
+      lineIndex > 0 &&
+      charInLineIndex === 0
+    ) {
+      lineIndex -= 1;
+      charInLineIndex = segment.lines[lineIndex].length;
+    }
+    return {
+      xLine: charInLineIndex,
+      yLine: segment.lineStart + lineIndex,
+    };
+  }
+
+  /**
+   * Phase 3 offset model — ABSOLUTE visual coordinates to a raw document offset.
+   * Returns `-1` when the line index is out of bounds (uses the non-clamping
+   * {@link getSegmentPositionOrNull}). Inverse of {@link visualFromOffset}.
+   */
+  offsetFromVisual(xLine: number, yLine: number): number {
+    const pos = this.getSegmentPositionOrNull(yLine, xLine);
+    return pos ? this.getAbsTextIndexFromPosition(pos) : -1;
+  }
+
+  /**
+   * Phase 3 offset model — one VISIBLE column to the right of an absolute visual
+   * position, crossing visual line boundaries. Works in every mode (a "visible
+   * column" is a parsed column in HIGHLIGHT/SEMI, a raw column in RAW); the
+   * caller converts the result back to a raw offset, which skips hidden markup.
+   * At end-of-document the position is unchanged.
+   */
+  stepVisualRight(
+    xLine: number,
+    yLine: number
+  ): { xLine: number; yLine: number } {
+    const lineLen = (this.getLine(yLine) ?? "").length;
+    if (xLine < lineLen) {
+      return { xLine: xLine + 1, yLine };
+    }
+    // At end of the visual line: drop to the start of the next one, or stay at EOF.
+    if (yLine >= this.noLines - 1) {
+      return { xLine: lineLen, yLine };
+    }
+    return { xLine: 0, yLine: yLine + 1 };
+  }
+
+  /**
+   * Phase 3 offset model — one VISIBLE column to the left of an absolute visual
+   * position, crossing visual line boundaries. At document start it is unchanged.
+   */
+  stepVisualLeft(
+    xLine: number,
+    yLine: number
+  ): { xLine: number; yLine: number } {
+    if (xLine > 0) {
+      return { xLine: xLine - 1, yLine };
+    }
+    if (yLine <= 0) {
+      return { xLine: 0, yLine: 0 };
+    }
+    const prevLen = (this.getLine(yLine - 1) ?? "").length;
+    return { xLine: prevLen, yLine: yLine - 1 };
+  }
+
+  /**
+   * Phase 3 offset model — is `offset` a soft-wrap boundary, i.e. the start of a
+   * continuation visual line WITHIN a segment (not a hard `\n` boundary, which
+   * begins a new segment at lineIndex 0)? Such offsets have two visual caret
+   * positions distinguished by {@link CaretAffinity}.
+   */
+  isWrapBoundary(offset: number): boolean {
+    const clamped = Math.max(0, Math.min(offset, this.value.length));
+    const pos = this.getSegmentFromAbsTextIndex(clamped);
+    if (!pos) {
+      return false;
+    }
+    return pos.lineIndex > 0 && pos.charInLineIndex === 0;
+  }
+
+  /**
+   * Phase 3 offset model — ABSOLUTE visual coordinates to a document offset PLUS
+   * the affinity that visual position implies: the end of a wrapped (non-last)
+   * visual line is UPSTREAM, everything else DOWNSTREAM. Inverse companion of
+   * {@link visualFromOffset} that recovers the affinity bit lost by a bare offset.
+   */
+  offsetWithAffinityFromVisual(
+    xLine: number,
+    yLine: number
+  ): { offset: number; affinity: CaretAffinity } {
+    const offset = this.offsetFromVisual(xLine, yLine);
+    if (offset < 0) {
+      return { offset, affinity: CaretAffinity.DOWNSTREAM };
+    }
+    const pos = this.getSegmentPositionOrNull(yLine, xLine);
+    if (pos) {
+      const segment = this.segments[pos.segmentIndex];
+      const lineLen = segment?.lines[pos.lineIndex]?.length ?? 0;
+      const isLastVisualLineOfSegment =
+        !segment || pos.lineIndex >= segment.lines.length - 1;
+      if (xLine >= lineLen && !isLastVisualLineOfSegment) {
+        return { offset, affinity: CaretAffinity.UPSTREAM };
+      }
+    }
+    return { offset, affinity: CaretAffinity.DOWNSTREAM };
+  }
+
+  /**
+   * Non-clamping variant of {@link getSegmentPosition}: returns `null` when
+   * `absLineIndex` falls outside `[0, noLines - 1]` instead of clamping it into
+   * range. Use this when a `null` return is meant to signal "invalid position"
+   * (the offset-model code in Phase 3 relies on this); the clamping variant
+   * stays for existing callers that depend on the old behavior.
+   *
+   * @param absLineIndex - The absolute line index
+   * @param charInLineIndex - Character position within the line (default: 0)
+   * @param ignoreLastClosingTag - Whether to ignore the last closing tag (default: false)
+   * @returns Segment position, or `null` if the line index is out of bounds
+   */
+  getSegmentPositionOrNull(
+    absLineIndex: number,
+    charInLineIndex: number = 0,
+    ignoreLastClosingTag: boolean = false
+  ): SegmentPosition | null {
+    if (
+      this.noLines <= 0 ||
+      absLineIndex < 0 ||
+      absLineIndex >= this.noLines
+    ) {
+      return null;
+    }
+    return this.getSegmentPosition(
+      absLineIndex,
+      charInLineIndex,
+      ignoreLastClosingTag
+    );
+  }
+
+  /**
    * Converts absolute line index to segment position.
    *
    * This method finds the segment containing the given line and calculates
@@ -729,7 +1010,7 @@ class Text {
     }
 
     const segmentIndex = this.segments.findLastIndex(
-      (s) => s.lineStart <= absLineIndex && s.lineEnd > absLineIndex
+      (s) => s.lineStart <= absLineIndex && s.lineEndExclusive > absLineIndex
     );
 
     if (segmentIndex === -1) {
@@ -815,7 +1096,10 @@ class Text {
       const segment = this.segments[i];
 
       // Skip segments that don't contain any of the requested lines
-      if (segment.lineEnd <= startLine || segment.lineStart >= endLine) {
+      if (
+        segment.lineEndExclusive <= startLine ||
+        segment.lineStart >= endLine
+      ) {
         continue;
       }
 
@@ -1009,12 +1293,19 @@ class Text {
       textToInsert +
       this.value.slice(indexPosition);
 
-    segment.raw =
-      segment.raw.slice(0, segmentPosition.rawTextIndex) +
-      textToInsert +
-      segment.raw.slice(segmentPosition.rawTextIndex);
-
-    segment.parseText();
+    if (textToInsert.includes("\n")) {
+      // Multi-line insert (e.g. pasting text with newlines): re-split the whole
+      // document from the updated value so the newlines become real segment
+      // boundaries — a targeted single-segment splice would leave a stray "\n"
+      // embedded in one segment's raw.
+      this.prepareSegments();
+    } else {
+      segment.raw =
+        segment.raw.slice(0, segmentPosition.rawTextIndex) +
+        textToInsert +
+        segment.raw.slice(segmentPosition.rawTextIndex);
+      segment.parseText();
+    }
     this.calculateLines();
   }
 
@@ -1219,6 +1510,86 @@ class Text {
       { xLine: start.x, yLine: start.y },
       { xLine: end.x, yLine: end.y },
     ];
+  }
+
+  /**
+   * Validate anchors and return asymmetrical (broken) anchors
+   * Detects orphaned opening tags and orphaned closing tags
+   */
+  validateAnchors(): Array<{
+    tagName: string;
+    type: 'orphaned-opening' | 'orphaned-closing';
+    segmentIndex: number;
+    position: number;
+    attributes?: Record<string, string>;
+  }> {
+    const issues: Array<{
+      tagName: string;
+      type: 'orphaned-opening' | 'orphaned-closing';
+      segmentIndex: number;
+      position: number;
+      attributes?: Record<string, string>;
+    }> = [];
+
+    const openingTagsByName = new Map<string, Tag[]>();
+    const closingTagsByName = new Map<string, Tag[]>();
+
+    // Collect all opening and closing tags
+    for (const segment of this.segments) {
+      for (const tag of segment.openingTags) {
+        const name = tag.getTagName();
+        if (!openingTagsByName.has(name)) {
+          openingTagsByName.set(name, []);
+        }
+        openingTagsByName.get(name)!.push(tag);
+      }
+
+      for (const tag of segment.closingTags) {
+        const name = tag.getTagName();
+        if (!closingTagsByName.has(name)) {
+          closingTagsByName.set(name, []);
+        }
+        closingTagsByName.get(name)!.push(tag);
+      }
+    }
+
+    // Find orphaned opening tags
+    for (const [tagName, openings] of openingTagsByName) {
+      const closings = closingTagsByName.get(tagName) || [];
+      if (openings.length > closings.length) {
+        // More openings than closings - last ones are orphaned
+        for (let i = closings.length; i < openings.length; i++) {
+          const orphan = openings[i];
+          issues.push({
+            tagName,
+            type: 'orphaned-opening',
+            segmentIndex: orphan.segmentIndex,
+            position: orphan.position,
+            attributes: orphan.attributes,
+          });
+        }
+      }
+    }
+
+    // Find orphaned closing tags
+    for (const [tagName, closings] of closingTagsByName) {
+      const openings = openingTagsByName.get(tagName) || [];
+      if (closings.length > openings.length) {
+        // More closings than openings - first ones are orphaned
+        for (let i = openings.length; i < closings.length; i++) {
+          const orphan = closings[i];
+          issues.push({
+            tagName,
+            type: 'orphaned-closing',
+            segmentIndex: orphan.segmentIndex,
+            position: orphan.position,
+            attributes: orphan.attributes,
+          });
+        }
+      }
+    }
+
+    return issues;
   }
 }
 

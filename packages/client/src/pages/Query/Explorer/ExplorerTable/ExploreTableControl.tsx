@@ -21,7 +21,9 @@ interface ExploreTableControlProps {
   isNewColumnOpen: boolean;
   setIsNewColumnOpen: (value: boolean) => void;
 
-  rowsSelected: number[];
+  selectedCount: number;
+  isAllCurrentSelected: boolean;
+  hasPartialSelection: boolean;
   onAllRowsSelect: (checked: boolean) => void;
 
   rowsTotal: number;
@@ -33,7 +35,7 @@ interface ExploreTableControlProps {
 
   onApplyBatchAction: () => void;
 
-  filters: Explore.IExploreColumnFilter[];
+  filters: Explore.IExploreSearchFilter[];
   dispatch: React.Dispatch<ExploreAction>;
   isQueryFetching: boolean;
 }
@@ -42,7 +44,9 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
   isNewColumnOpen,
   setIsNewColumnOpen,
 
-  rowsSelected,
+  selectedCount,
+  isAllCurrentSelected,
+  hasPartialSelection,
   onAllRowsSelect,
 
   rowsTotal,
@@ -64,9 +68,7 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
 
   const renderHeaderCheckBox = () => {
     const size = 18;
-    const isAllSelected = rowsTotal > 0 && rowsTotal === rowsSelected.length;
-
-    if (isAllSelected) {
+    if (isAllCurrentSelected) {
       return (
         <MdOutlineCheckBox
           color={themeContext?.color.primary}
@@ -77,7 +79,7 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
           }}
         />
       );
-    } else if (rowsSelected.length > 0) {
+    } else if (hasPartialSelection || selectedCount > 0) {
       // some rows selected
       return (
         <MdOutlineIndeterminateCheckBox
@@ -114,10 +116,10 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
           >
             {renderHeaderCheckBox()}
           </div>
-          <StyledCounter>{`${rowsSelected.length}/${rowsTotal}`}</StyledCounter>
+          <StyledCounter>{`${selectedCount}/${rowsTotal}`}</StyledCounter>
           <Dropdown.Single.Basic
             width={140}
-            disabled={rowsSelected.length === 0}
+            disabled={selectedCount === 0}
             value={batchActionSelected}
             onChange={(selectedOption) => {
               const newSelectedAction = batchOptions.find((o) => o.value === selectedOption)?.value;
@@ -133,7 +135,7 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
             color="primary"
             inverted
             onClick={onApplyBatchAction}
-            disabled={rowsSelected.length === 0}
+            disabled={selectedCount === 0}
           />
         </div>
       </div>

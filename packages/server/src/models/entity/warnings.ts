@@ -188,13 +188,13 @@ export default class EntityWarnings {
    * ISYNC warning should pop when concepts in the synonym cloud have inconsistent superclass relations.
    *
    * Warning IS raised when (for synonyms c1 and c2):
-   * - c1 has SCL cs1 and c2 has SCL cs2 but cs1 and cs2 are NOT synonyms
-   * - c1 has SCL cs1 but c2 has no SCL (asymmetric SCL)
+   * - c1 has SCL cs1 and c2 has SCL cs2
+   * - c1 has SCL and c2 has none
+   * - c1 has SCL to cs1 and cs2 and c2 has no SCL relations
    *
    * Warning is NOT raised when:
-   * - c1 has SCL cs1 and c2 has SCL cs2 and cs1 and cs2 are synonyms
+   * - c1 and c2 have the same set of superclasses
    * - Both c1 and c2 have no SCL
-   * - Both c1 and c2 have SCL relation to the same entity
    *
    * @param conn
    * @returns
@@ -244,28 +244,8 @@ export default class EntityWarnings {
       }
     }
 
-    // Separate concepts with and without SCL
-    const conceptsWithSCL = conceptIds.filter(
-      (id) => sclTargetsByConcept[id].length > 0
-    );
-    const conceptsWithoutSCL = conceptIds.filter(
-      (id) => sclTargetsByConcept[id].length === 0
-    );
-
-    // If some have SCL and others don't → WARNING
-    if (conceptsWithSCL.length > 0 && conceptsWithoutSCL.length > 0) {
-      return this.newWarning(
-        WarningTypeEnums.ISYNC,
-        IWarningPositionSection.Relations
-      );
-    }
-
-    // If none have SCL → OK
-    if (conceptsWithSCL.length === 0) {
-      return null;
-    }
-
-    // All have SCL - collect all unique SCL targets
+    // Parity target: the union of all SCL targets across the synonym cloud.
+    // To clear the warning, every concept has to point to all of these.
     const allSclTargetsSet: Set<string> = new Set();
     for (const targets of Object.values(sclTargetsByConcept)) {
       for (const target of targets) {
@@ -274,40 +254,34 @@ export default class EntityWarnings {
     }
     const allSclTargets: string[] = Array.from(allSclTargetsSet);
 
-    // If only one unique target → OK (all point to the same superclass)
-    if (allSclTargets.length === 1) {
+    // If no concept has any SCL → OK
+    if (allSclTargets.length === 0) {
       return null;
     }
 
-    // Check if all SCL targets are synonyms of each other
-    const targetSynonymRelations = await Relation.findForEntities(
-      conn,
-      allSclTargets,
-      RelationEnums.Type.Synonym
-    );
+    // For each concept, list which SCL targets it is missing to reach parity.
+    // The superclasses themselves do NOT need to be synonyms; the sets of SCL
+    // targets per concept just have to match.
+    const details = conceptIds
+      .map((conceptId) => ({
+        entityId: conceptId,
+        relatedEntityIds: allSclTargets.filter(
+          (target) => !sclTargetsByConcept[conceptId].includes(target)
+        ),
+      }))
+      .filter((detail) => detail.relatedEntityIds.length > 0);
 
-    // For each pair of SCL targets, verify they're synonyms
-    for (let i = 0; i < allSclTargets.length; i++) {
-      for (let j = i + 1; j < allSclTargets.length; j++) {
-        const target1 = allSclTargets[i];
-        const target2 = allSclTargets[j];
-
-        // Check if they're in the same synonym relation
-        const areSynonyms = targetSynonymRelations.some(
-          (rel) =>
-            rel.entityIds.includes(target1) && rel.entityIds.includes(target2)
-        );
-
-        if (!areSynonyms) {
-          return this.newWarning(
-            WarningTypeEnums.ISYNC,
-            IWarningPositionSection.Relations
-          );
-        }
-      }
+    // Every concept already points to every SCL target → consistent → OK
+    if (details.length === 0) {
+      return null;
     }
 
-    return null;
+    const warning = this.newWarning(
+      WarningTypeEnums.ISYNC,
+      IWarningPositionSection.Relations
+    );
+    warning.details = details;
+    return warning;
   }
 
   /**

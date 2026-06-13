@@ -1,6 +1,9 @@
 # dependencies
 node_modules
 
+# turborepo cache
+.turbo
+
 # RethinkDB docker folder
 data
 

@@ -27,7 +27,7 @@ import {
 } from "./EntityTagStyles";
 import useDragDrop from "./useDragDrop";
 
-interface UnlinkButton {
+export interface UnlinkButton {
   onClick: () => void;
   color?: keyof ThemeColor;
   tooltipLabel?: string;
@@ -85,7 +85,7 @@ const EntityTagComponent: React.FC<EntityTag> = ({
   const { appendDetailId } = useSearchParams();
   const dispatch = useAppDispatch();
   const detailBoxState: DetailBoxState = useAppSelector(
-    (state) => state.layout.mainPage.detailBoxState
+    (state) => state.layout.mainPage.detailBoxState,
   );
   const [buttonHovered, setButtonHovered] = useState(false);
   const [elvlHovered, setElvlHovered] = useState(false);
@@ -287,7 +287,7 @@ const EntityTagComponent: React.FC<EntityTag> = ({
 
 function areEntityTagsEqual(
   prev: Readonly<React.ComponentProps<typeof EntityTagComponent>>,
-  next: Readonly<React.ComponentProps<typeof EntityTagComponent>>
+  next: Readonly<React.ComponentProps<typeof EntityTagComponent>>,
 ) {
   // Compare minimal fields that affect rendering
   if (prev.isSelected !== next.isSelected) return false;

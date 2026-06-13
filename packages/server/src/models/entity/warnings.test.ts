@@ -87,7 +87,9 @@ describe("models/entity/warnings", function () {
     const [, sc3] = prepareRelation(RelationEnums.Type.Superclass);
     sc3.entityIds = [entityInequalSCSyn1.id, equalSc2];
 
-    // Concepts with different SCL targets that are synonyms of each other (should NOT trigger warning)
+    // Concepts with different SCL targets that are synonyms of each other.
+    // The superclasses being synonyms is irrelevant now - different SCL targets
+    // still trigger the warning.
     const [, entitySynSCTarget1] = prepareEntity(EntityEnums.Class.Concept);
     entitySynSCTarget1.id = "entitySynSCTarget1";
     const [, entitySynSCTarget2] = prepareEntity(EntityEnums.Class.Concept);
@@ -215,18 +217,18 @@ describe("models/entity/warnings", function () {
       expect(isync2).toBeTruthy();
     });
 
-    it("should not find ISYNC warning for synonyms with different SC targets that are synonyms", async () => {
+    it("should find ISYNC warning for synonyms with different SC targets even if those targets are synonyms", async () => {
       const isync1 = await new EntityWarnings(
         entitySynSCTarget1.id,
         entitySynSCTarget1.class
       ).hasISYNC(db.connection);
-      expect(isync1).toBeFalsy();
+      expect(isync1).toBeTruthy();
 
       const isync2 = await new EntityWarnings(
         entitySynSCTarget2.id,
         entitySynSCTarget2.class
       ).hasISYNC(db.connection);
-      expect(isync2).toBeFalsy();
+      expect(isync2).toBeTruthy();
     });
 
     it("should find ISYNC warning for synonyms with different SC targets that are NOT synonyms", async () => {

@@ -84,10 +84,10 @@ export const Menu: React.FC<Menu> = ({
       icon: <FaDatabase size={16} />,
     },
     {
-      id: "query",
-      label: "Query",
+      id: "explorer",
+      label: "Explorer",
       color: "info",
-      href: "/query",
+      href: "/explorer",
       admin: true,
       icon: <FaSearchengin />,
     },
@@ -148,10 +148,7 @@ export const Menu: React.FC<Menu> = ({
                   return userRole === UserEnums.Role.Owner;
                 }
                 if (p.admin) {
-                  return (
-                    userRole === UserEnums.Role.Admin ||
-                    userRole === UserEnums.Role.Owner
-                  );
+                  return userRole === UserEnums.Role.Admin || userRole === UserEnums.Role.Owner;
                 }
                 return true;
               })

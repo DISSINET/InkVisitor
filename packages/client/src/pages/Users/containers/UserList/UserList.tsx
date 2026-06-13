@@ -137,6 +137,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
       toast.info(message, {
         autoClose: 6000,
         closeOnClick: false,
+        style: { cursor: "copy" },
         onClick: () => {
           if (password) {
             navigator.clipboard.writeText(password);

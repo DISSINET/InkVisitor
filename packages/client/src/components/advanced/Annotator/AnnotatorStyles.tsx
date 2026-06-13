@@ -209,3 +209,47 @@ export const StyledAnnotatorButtons = styled.div`
   justify-content: space-between;
   padding-left: ${({ theme }) => theme.space[1]};
 `;
+
+// Compact warning trigger shown in the annotator header: a small icon + count.
+// Clicking it opens the warnings modal with the full description (#2601).
+export const StyledWarningsChip = styled.button`
+  display: inline-flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[1]};
+  padding: ${({ theme }) => theme.space[1]} ${({ theme }) => theme.space[2]};
+  border: 1px solid ${({ theme }) => theme.color.warningBorder};
+  border-radius: ${({ theme }) => theme.borderRadius["default"]};
+  background-color: ${({ theme }) => theme.color.warningMessage};
+  color: ${({ theme }) => theme.color.warningText};
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+  cursor: pointer;
+
+  &:hover {
+    filter: brightness(0.97);
+  }
+`;
+
+export const StyledWarningsList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.space[2]};
+  width: 100%;
+`;
+
+export const StyledWarningRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+`;
+
+export const StyledWarningKind = styled.div`
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[1]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  font-variant-caps: small-caps;
+  color: ${({ theme }) => theme.color.warningText};
+  white-space: nowrap;
+`;

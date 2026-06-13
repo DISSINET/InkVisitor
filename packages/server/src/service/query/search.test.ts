@@ -1,3 +1,11 @@
+// @ts-nocheck
+// STALE: this suite targets a removed query model (Query.NodeType.A/X/C,
+// EdgeType.XHasPropType, params.classes, ...) and no longer type-checks. It is
+// skipped so it neither breaks compilation nor runs - and crucially its
+// beforeAll calls deleteEntities, while .env.test points at the live
+// `inkvisitor` database, so running it would wipe real data. Rewrite against
+// the current Query.* model (see nesting.test.ts for a DB-free example) before
+// re-enabling, and point .env.test at a throwaway DB first.
 import "ts-jest";
 import { Db } from "@service/rethink";
 import QuerySearch from "./search";
@@ -28,7 +36,7 @@ const mockSearch = (rootType: Query.NodeType): QuerySearch => {
   );
 };
 
-describe("test QuerySearch", () => {
+describe.skip("test QuerySearch", () => {
   let db: Db;
 
   beforeAll(async () => {

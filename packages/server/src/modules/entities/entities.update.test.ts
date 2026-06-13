@@ -15,7 +15,7 @@ import { IEntity } from "@inkvisitor/shared/types";
 import { BadParams, EntityDoesNotExist } from "@inkvisitor/shared/types/errors";
 import request from "supertest";
 import { supertestConfig } from "..";
-import app from "../../Server";
+import app from "../../server";
 
 describe("Entities update", function () {
   afterAll(async () => {

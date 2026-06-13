@@ -1,6 +1,6 @@
 {
   "name": "database",
-  "version": "1.5.0.5",
+  "version": "1.5.1.1",
   "description": "Package with gui-like app for manipulating rethinkdb",
   "engines": {
     "node": "^22.13.1",
@@ -17,6 +17,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@inkvisitor/shared": "workspace:*",
     "@types/uuid": "^9.0.8",
     "colors": "^1.4.0",
     "dotenv": "^16.6.1",
