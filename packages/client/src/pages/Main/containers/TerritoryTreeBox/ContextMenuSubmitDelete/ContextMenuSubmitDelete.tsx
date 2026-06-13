@@ -7,6 +7,7 @@ import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { getShortLabelByLetterCount } from "utils/utils";
 import { handleDeleteEntityError } from "utils/deleteEntityConflict";
+import { openRestoredEntity } from "utils/openRestoredEntity";
 
 interface ContextMenuSubmitDelete {
   territoryActant: IEntity;
@@ -26,6 +27,7 @@ export const ContextMenuSubmitDelete: React.FC<ContextMenuSubmitDelete> = ({
   const {
     territoryId,
     setTerritoryId,
+    setStatementId,
     detailIdArray,
     removeDetailId,
     appendDetailId,
@@ -44,6 +46,11 @@ export const ContextMenuSubmitDelete: React.FC<ContextMenuSubmitDelete> = ({
           onLinkClick={async () => {
             const response = await api.entityRestore(territoryActant.id);
             toast.info("Entity restored");
+            openRestoredEntity(response.data.data as IEntity, {
+              setTerritoryId,
+              setStatementId,
+              appendDetailId,
+            });
             queryClient.invalidateQueries({ queryKey: ["tree"] });
             queryClient.invalidateQueries({
               queryKey: ["detail-tab-entities"],

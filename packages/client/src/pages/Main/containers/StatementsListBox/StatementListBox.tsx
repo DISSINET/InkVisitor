@@ -38,6 +38,7 @@ import {
 } from "types";
 import { collectStatementAnchors, getStatementOrderByIndex, searchTree } from "utils/utils";
 import { handleDeleteEntityError } from "utils/deleteEntityConflict";
+import { openRestoredEntity } from "utils/openRestoredEntity";
 import {
   StyledContentWrapper,
   StyledEmptyState,
@@ -371,6 +372,11 @@ export const StatementListBox: React.FC = () => {
           onLinkClick={async () => {
             const response = await api.entityRestore(sId);
             toast.info("Statement restored");
+            openRestoredEntity(response.data.data as IEntity, {
+              setTerritoryId,
+              setStatementId,
+              appendDetailId,
+            });
             queryClient.invalidateQueries({
               queryKey: ["detail-tab-entities"],
             });

@@ -169,25 +169,28 @@ export default class Audit implements IAudit, IDbModel {
   }
 
   /**
-   * Records the single, minimal audit written when an entity or document is
-   * deleted: a deletion marker with empty changes, typed per scope via
-   * deletionEventType.
+   * Records the single audit written when an entity or document is deleted,
+   * typed per scope via deletionEventType. The optional snapshot holds the full
+   * data of the deleted model so it can later be restored (see the entity
+   * restore route); when omitted it defaults to empty changes.
    * @param db rethinkdb Connection
    * @param modelId id of the deleted entity/document
    * @param userId id of the user performing the deletion
    * @param scope audit scope (entity or document)
+   * @param snapshot full snapshot of the deleted model (used for restore)
    */
   static async createDeletionAudit(
     db: Connection | undefined,
     modelId: string,
     userId: string,
-    scope: AuditScope
+    scope: AuditScope,
+    snapshot: object = {}
   ): Promise<void> {
     await new Audit({
       modelId,
       auditScope: scope,
       user: userId,
-      changes: {},
+      changes: snapshot,
       type: Audit.deletionEventType(scope),
     }).save(db);
   }

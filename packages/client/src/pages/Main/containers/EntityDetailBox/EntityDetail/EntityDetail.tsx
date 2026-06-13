@@ -19,6 +19,7 @@ import { DraggedPropRowCategory } from "types";
 import { DropdownItem } from "@inkvisitor/shared/types";
 import { getEntityLabel, getEntityRelationRules, getShortLabelByLetterCount } from "utils/utils";
 import { handleDeleteEntityError } from "utils/deleteEntityConflict";
+import { openRestoredEntity } from "utils/openRestoredEntity";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
 import { PropGroup } from "../../PropGroup/PropGroup";
 import { EntityDetailCreateTemplateModal } from "./EntityDetailCreateTemplateModal/EntityDetailCreateTemplateModal";
@@ -312,7 +313,11 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
           onLinkClick={async () => {
             const response = await api.entityRestore(entityId);
             toast.info("Entity restored");
-            appendDetailId(entityId);
+            openRestoredEntity(response.data.data as IEntity, {
+              setTerritoryId,
+              setStatementId,
+              appendDetailId,
+            });
             queryClient.invalidateQueries({ queryKey: ["entity"] });
             queryClient.invalidateQueries({ queryKey: ["statement"] });
             if (entity?.class === EntityEnums.Class.Territory) {

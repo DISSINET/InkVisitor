@@ -314,8 +314,28 @@ export default Router()
           throw new AuditDoesNotExist("cannot restore entity - audit does not exist", entityId);
         }
 
+        // The deletion audit carries the full snapshot of the deleted entity.
+        // Entities deleted before snapshots were stored have empty changes, so
+        // fall back to the create audit, whose changes always hold the full
+        // entity (create requests submit the whole entity).
+        let snapshot = audit.changes as Partial<IEntity>;
+        if (!snapshot || !snapshot.class) {
+          const createAudit = await Audit.getFirstForEntity(
+            request.db.connection,
+            entityId
+          );
+          if (createAudit && (createAudit.changes as Partial<IEntity>)?.class) {
+            snapshot = createAudit.changes as Partial<IEntity>;
+          }
+        }
+        if (!snapshot || !snapshot.class) {
+          throw new ModelNotValidError(
+            "cannot restore entity - no snapshot available to restore from"
+          );
+        }
+
         const restoration = getEntityClass({
-          ...audit.changes,
+          ...snapshot,
         } as Partial<IEntity>);
         if (!restoration.isValid()) {
           throw new ModelNotValidError("");
@@ -335,7 +355,7 @@ export default Router()
         return {
           result: true,
           message: "Entity restored",
-          data: audit.changes,
+          data: snapshot,
         };
       }
     )
@@ -552,7 +572,8 @@ export default Router()
           for (const entityId of Object.keys(dependencyMap)) {
             if (dependencyMap[entityId].length === 0) {
               try {
-                const model = getEntityClass(existing.find((e) => e.id === entityId));
+                const deletedEntity = existing.find((e) => e.id === entityId);
+                const model = getEntityClass(deletedEntity);
                 if ((await model.delete(req.db.connection)).deleted !== 1) {
                   throw new InternalServerError(`cannot delete entity ${entityId}`);
                 }
@@ -561,7 +582,9 @@ export default Router()
                   req.db.connection,
                   entityId,
                   req.getUserOrFail().id,
-                  AuditScope.Entity
+                  AuditScope.Entity,
+                  // store the full entity snapshot so it can be restored later
+                  deletedEntity ? { ...deletedEntity } : {}
                 );
                 removeDependency(entityId);
                 removedCount++;
