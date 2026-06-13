@@ -31,6 +31,7 @@ import {
   BadParams,
   CustomError,
   EntityDoesNotExist,
+  IInvalidDeleteErrorData,
   InternalServerError,
   InvalidDeleteError,
   ModelNotValidError,
@@ -501,7 +502,7 @@ export default Router()
               `Cannot be deleted while linked to relations (${
                 relIds[0] + (relIds.length > 1 ? " + " + (relIds.length - 1) + " others" : "")
               })`
-            ).withData(linkIds);
+            ).withData<IInvalidDeleteErrorData>({ type: "entity", ids: linkIds });
             continue;
           }
 
@@ -512,7 +513,10 @@ export default Router()
               `Cannot be deleted while anchored to documents (${
                 docs[0].id + (docs.length > 1 ? " + " + (docs.length - 1) + " others" : "")
               })`
-            ).withData(docs.map((d) => d.id));
+            ).withData<IInvalidDeleteErrorData>({
+              type: "document",
+              ids: docs.map((d) => d.id),
+            });
             continue;
           }
 
@@ -531,9 +535,12 @@ export default Router()
           const usedBy = await model.getUsedByEntity(req.db.connection);
           if (usedBy.length) {
             out.result = false;
-            out.data[entity.id] = new InvalidDeleteError(`Referenced by other entities`).withData(
-              usedBy.map((e) => e.id)
-            );
+            out.data[entity.id] = new InvalidDeleteError(
+              `Referenced by other entities`
+            ).withData<IInvalidDeleteErrorData>({
+              type: "entity",
+              ids: usedBy.map((e) => e.id),
+            });
             dependencyMap[entity.id] = usedBy.map((e) => e.id);
             continue;
           }

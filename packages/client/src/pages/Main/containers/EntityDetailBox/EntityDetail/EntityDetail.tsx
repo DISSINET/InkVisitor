@@ -18,6 +18,7 @@ import { rootTerritoryId } from "Theme/constants";
 import { DraggedPropRowCategory } from "types";
 import { DropdownItem } from "@inkvisitor/shared/types";
 import { getEntityLabel, getEntityRelationRules, getShortLabelByLetterCount } from "utils/utils";
+import { handleDeleteEntityError } from "utils/deleteEntityConflict";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
 import { PropGroup } from "../../PropGroup/PropGroup";
 import { EntityDetailCreateTemplateModal } from "./EntityDetailCreateTemplateModal/EntityDetailCreateTemplateModal";
@@ -347,16 +348,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
 
       removeDetailId(entityId);
     },
-    onError: async (error: any) => {
-      if (error.error === "InvalidDeleteError" && error.data && error.data.length > 0) {
-        const { data } = error;
-        toast.info("Click to open conflicting entity in detail", {
-          autoClose: 6000,
-          onClick: () => {
-            appendDetailId(data[0]);
-          },
-        });
-      }
+    onError: (error, entityId) => {
+      handleDeleteEntityError(error, entityId, appendDetailId);
     },
   });
 

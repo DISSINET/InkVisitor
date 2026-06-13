@@ -37,6 +37,7 @@ import {
   StatementOrderCorrection,
 } from "types";
 import { collectStatementAnchors, getStatementOrderByIndex, searchTree } from "utils/utils";
+import { handleDeleteEntityError } from "utils/deleteEntityConflict";
 import {
   StyledContentWrapper,
   StyledEmptyState,
@@ -393,23 +394,8 @@ export const StatementListBox: React.FC = () => {
       });
       setSelectedRows(selectedRows.filter((r) => r !== sId));
     },
-    onError: (error) => {
-      if (
-        (error as any).error === "InvalidDeleteError" &&
-        (error as any).data &&
-        (error as any).data.length > 0
-      ) {
-        const { data } = error as any;
-        toast.warning(
-          "Statement cannot be deleted, click to open the conflicting entity in detail",
-          {
-            autoClose: 6000,
-            onClick: () => {
-              appendDetailId(data[0]);
-            },
-          }
-        );
-      } else {
+    onError: (error, sId) => {
+      if (!handleDeleteEntityError(error, sId, appendDetailId, "warning")) {
         toast.error((error as any).message);
       }
     },
