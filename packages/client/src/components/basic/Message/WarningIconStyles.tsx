@@ -11,6 +11,7 @@ export const StyledWarningIcon = styled.div`
   background-color: ${({ theme }) => theme.color["warningText"]}14;
   border: 1px solid ${({ theme }) => theme.color["warningText"]}33;
   white-space: nowrap;
+  cursor: default;
 `;
 
 export const StyledWarningCode = styled.span`

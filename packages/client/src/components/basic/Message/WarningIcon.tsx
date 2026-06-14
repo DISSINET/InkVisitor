@@ -11,11 +11,15 @@ interface WarningIcon {
   // when true, renders the warning type code (e.g. "PSM") next to the icon
   // so the same warning can be matched across views
   showCode?: boolean;
+  // when false, the icon won't render its own tooltip (e.g. when a parent
+  // element already provides one for the whole row)
+  showTooltip?: boolean;
 }
 export const WarningIcon: React.FC<WarningIcon> = ({
   type,
   size = 20,
   showCode = true,
+  showTooltip: enableTooltip = true,
 }) => {
   const [referenceElement, setReferenceElement] =
     useState<HTMLDivElement | null>(null);
@@ -35,7 +39,7 @@ export const WarningIcon: React.FC<WarningIcon> = ({
         {showCode && type && <StyledWarningCode>{type}</StyledWarningCode>}
       </StyledWarningIcon>
 
-      {description && (
+      {enableTooltip && description && (
         <Tooltip
           label={dictEntry?.label}
           content={<p>{description}</p>}

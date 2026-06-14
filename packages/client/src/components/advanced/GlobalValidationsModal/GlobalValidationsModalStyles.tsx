@@ -15,12 +15,15 @@ export const StyledGridSectionHeading = styled.div`
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
   margin-top: 1rem;
 `;
-interface StyledGridFormLabel {
-  ref: React.Dispatch<React.SetStateAction<HTMLButtonElement | null>>;
-}
-export const StyledGridFormLabel = styled.div<StyledGridFormLabel>`
+
+export const StyledGridFormLabel = styled.div`
   display: flex;
   justify-content: end;
+  align-items: center;
+  gap: 0.4rem;
+`;
+export const StyledGridFormLabelContent = styled.span`
+  display: inline-flex;
   align-items: center;
   gap: 0.4rem;
 `;
@@ -41,8 +44,7 @@ export const StyledToggleWrap = styled.div<StyledToggleWrap>`
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  color: ${({ theme, $active }) =>
-    $active ? theme.color["info"] : theme.color["danger"]};
+  color: ${({ theme, $active }) => ($active ? theme.color["info"] : theme.color["danger"])};
   cursor: pointer;
 `;
 
