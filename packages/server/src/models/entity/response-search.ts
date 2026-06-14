@@ -15,6 +15,7 @@ import Entity from "./entity";
 import { ResponseEntity } from "./response";
 import { IRequestSearchRootValidity } from "@inkvisitor/shared/types/request-search";
 import { Setting } from "@models/setting/setting";
+import { ISetting } from "@inkvisitor/shared/types/settings";
 import Relation from "@models/relation/relation";
 
 /**
@@ -591,7 +592,7 @@ export class ResponseSearch {
     conn: Connection,
     entities: IEntity[],
     validity: IRequestSearchRootValidity,
-    settings: Setting[]
+    settings: ISetting[]
   ): Promise<IEntity[]> {
     if (
       validity !== IRequestSearchRootValidity.Valid &&
