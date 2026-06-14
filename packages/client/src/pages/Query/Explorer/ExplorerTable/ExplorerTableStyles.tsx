@@ -189,7 +189,7 @@ export const StyledChipInputBox = styled.div`
   gap: 0.4rem;
   // grow with content, then scroll within the (height-bounded) panel
   flex: 1 1 auto;
-  min-height: ${({ theme }) => theme.space[28]};
+  min-height: 6rem;
   overflow-y: auto;
   padding: 0.3rem 0.5rem;
   cursor: text;

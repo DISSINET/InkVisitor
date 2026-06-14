@@ -6,13 +6,7 @@ import {
   mergeTokensIntoIds,
   unparsedRemainder,
 } from "pages/Query/utils";
-import React, {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { BiSearch } from "react-icons/bi";
 import { MdClose } from "react-icons/md";
 import { ExploreAction, ExploreActionType } from "../state";
@@ -328,9 +322,7 @@ const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({ filters
         >
           {appliedIds.length > 0 ? <BiSearch size={18} /> : "+ "}
           UUIDs
-          {appliedIds.length > 0 && (
-            <StyledIdsCountBadge>{appliedIds.length}</StyledIdsCountBadge>
-          )}
+          {appliedIds.length > 0 && <StyledIdsCountBadge>{appliedIds.length}</StyledIdsCountBadge>}
         </StyledIdsToggleButton>
         {appliedIds.length > 0 && (
           <StyledIdsToggleClear
