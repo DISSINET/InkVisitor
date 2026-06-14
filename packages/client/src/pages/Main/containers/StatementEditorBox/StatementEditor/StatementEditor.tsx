@@ -697,7 +697,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           )}
 
           <StyledEditorPreSection>
-            <StyledEditorContentLabel>Document Anchors</StyledEditorContentLabel>
+            <StyledEditorContentLabel>Statement Anchors</StyledEditorContentLabel>
             <StyledEditorAnchorSectionContent>
               {statement.usedInDocuments.length > 0 ? (
                 statement.usedInDocuments.map((documentAnchor, dai) => (
