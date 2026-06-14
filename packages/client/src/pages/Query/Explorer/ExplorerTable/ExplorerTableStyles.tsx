@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { FLOATING_SEARCH_COLLAPSED_SIZE } from "../../FloatingSearchContainer/FloatingSearchContainerStyles";
 
 interface StyledTableWrapper {
   // $height: number;
@@ -163,7 +164,7 @@ export const StyledExploreFilters = styled.div`
   flex: 1;
   min-width: 10rem;
   max-width: 75%;
-  margin: 0 1.5rem;
+  margin: 0 3rem;
 `;
 
 export const StyledIdsFilter = styled.div`
@@ -181,13 +182,14 @@ export const StyledIdsFilterHint = styled.span`
 `;
 
 export const StyledChipInputBox = styled.div`
-  flex: 1;
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-start;
+  align-content: flex-start;
   gap: 0.4rem;
+  // grow with content, then scroll within the (height-bounded) panel
+  flex: 1 1 auto;
   min-height: ${({ theme }) => theme.space[10]};
-  max-height: 8rem;
   overflow-y: auto;
   padding: 0.3rem 0.5rem;
   cursor: text;
@@ -201,7 +203,89 @@ export const StyledChipInputBox = styled.div`
   }
 `;
 
-export const StyledUuidChip = styled.span`
+export const StyledIdsFloatingRoot = styled.div`
+  position: absolute;
+  right: 2rem;
+  bottom: calc(2rem + ${FLOATING_SEARCH_COLLAPSED_SIZE}px + 0.75rem);
+  z-index: 161;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+`;
+
+export const StyledIdsToggleButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: ${({ theme }) => theme.borderRadius.full};
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  font-weight: ${({ theme }) => theme.fontWeight.bold};
+  color: ${({ theme }) => theme.color["info"]};
+  background-color: ${({ theme }) => theme.color.invertedBg["info"]};
+  box-shadow: ${({ theme }) => theme.boxShadow.high};
+  transition:
+    background-color 0.2s,
+    box-shadow 0.2s;
+  &:hover {
+    box-shadow: ${({ theme }) => theme.boxShadow.normal};
+  }
+`;
+
+export const StyledIdsCountBadge = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.6rem;
+  height: 1.6rem;
+  padding: 0 0.4rem;
+  border-radius: ${({ theme }) => theme.borderRadius.full};
+  background-color: ${({ theme }) => theme.color["info"]};
+  color: ${({ theme }) => theme.color["white"]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+`;
+
+export const StyledIdsPanel = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 32rem;
+  max-width: calc(100vw - 4rem);
+  min-height: 0;
+  padding: 0.75rem;
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  background-color: ${({ theme }) => theme.color["white"]};
+  box-shadow: ${({ theme }) => theme.boxShadow.high};
+  overflow: hidden;
+`;
+
+export const StyledIdsPanelHeader = styled.div`
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+`;
+
+export const StyledIdsPanelTitle = styled.span`
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  font-weight: ${({ theme }) => theme.fontWeight.bold};
+  color: ${({ theme }) => theme.color["primary"]};
+`;
+
+export const StyledIdsPanelFooter = styled.div`
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+`;
+
+export const StyledUuidChip = styled.span<{ $selected?: boolean }>`
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
@@ -209,11 +293,13 @@ export const StyledUuidChip = styled.span`
   padding: 0.1rem 0.2rem 0.1rem 0.5rem;
   font-family: monospace;
   font-size: ${({ theme }) => theme.fontSize["xs"]};
-  color: ${({ theme }) => theme.color["primary"]};
-  background-color: ${({ theme }) => theme.color["gray"][200]};
+  color: ${({ theme, $selected }) => ($selected ? theme.color["white"] : theme.color["primary"])};
+  background-color: ${({ theme, $selected }) =>
+    $selected ? theme.color["info"] : theme.color["gray"][200]};
   border-width: ${({ theme }) => theme.borderWidth[1]};
   border-style: solid;
-  border-color: ${({ theme }) => theme.color["gray"][400]};
+  border-color: ${({ theme, $selected }) =>
+    $selected ? theme.color["info"] : theme.color["gray"][400]};
   border-radius: ${({ theme }) => theme.borderRadius["xs"]};
   white-space: nowrap;
 `;

@@ -3,6 +3,7 @@ import React from "react";
 import { IResponseQueryEntity } from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { ExplorerTable } from "./ExplorerTable/ExplorerTable";
+import ExplorerTableIdsFilter from "./ExplorerTable/ExplorerTableIdsFilter";
 import { ExploreAction } from "./state";
 import { FloatingSearchContainer } from "../FloatingSearchContainer/FloatingSearchContainer";
 
@@ -54,6 +55,7 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
         onOpenEntityInDetail={onOpenEntityInDetail}
         onOpenEntitiesInDetail={onOpenEntitiesInDetail}
       />
+      <ExplorerTableIdsFilter filters={state.filters} dispatch={dispatch} />
       <FloatingSearchContainer
         rightInset={floatingSearchRightInset}
         filters={state.filters}
