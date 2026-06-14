@@ -82,7 +82,12 @@ const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({ filters
     const { selectionStart, selectionEnd } = e.currentTarget;
     const pasted = e.clipboardData.getData("text");
     commit(
-      applyPasteToDraft(draft, selectionStart ?? draft.length, selectionEnd ?? draft.length, pasted),
+      applyPasteToDraft(
+        draft,
+        selectionStart ?? draft.length,
+        selectionEnd ?? draft.length,
+        pasted,
+      ),
     );
   };
 
@@ -114,7 +119,7 @@ const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({ filters
           value={draft}
           $invalid={draftInvalid}
           title={draftInvalid ? "Not a valid UUID — only complete UUIDs are allowed" : undefined}
-          placeholder={appliedIds.length === 0 ? "Add entity UUIDs (paste or type)…" : "Add UUID…"}
+          placeholder={appliedIds.length === 0 ? "Add entity UUIDs (paste or type)" : "Add UUID…"}
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={handleKeyDown}
           onPaste={handlePaste}

@@ -240,8 +240,7 @@ export const StyledChipTextInput = styled.input<{ $invalid?: boolean }>`
   padding: 0.2rem;
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   font-weight: ${({ $invalid }) => ($invalid ? 700 : "inherit")};
-  color: ${({ theme, $invalid }) =>
-    $invalid ? theme.color["danger"] : theme.color["primary"]};
+  color: ${({ theme, $invalid }) => ($invalid ? theme.color["danger"] : theme.color["primary"])};
   text-decoration: ${({ $invalid }) => ($invalid ? "underline wavy" : "none")};
   text-decoration-color: ${({ theme, $invalid }) =>
     $invalid ? theme.color["danger"] : "transparent"};
