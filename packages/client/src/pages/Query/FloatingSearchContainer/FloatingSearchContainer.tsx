@@ -340,8 +340,8 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainer> = ({
     [applyExpandedPosition, endDrag, getExpandedPanelHeight],
   );
 
-  const handleExpand = () => {
-    setIsExpanded(true);
+  const handleToggle = () => {
+    setIsExpanded((expanded) => !expanded);
   };
 
   const handleClose = () => {
@@ -355,21 +355,19 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainer> = ({
     };
   }, []);
 
-  const displayPosition = isExpanded ? expandedPosition : collapsedPosition;
-  const expandedPagePosition = viewportToPageRelative(displayPosition);
+  const expandedPagePosition = viewportToPageRelative(expandedPosition);
 
   return (
     <>
-      {!isExpanded && (
-        <StyledCollapsedButton
-          type="button"
-          onClick={handleExpand}
-          aria-label="Open search panel"
-          aria-expanded={false}
-        >
-          <BiSearch size={22} />
-        </StyledCollapsedButton>
-      )}
+      <StyledCollapsedButton
+        type="button"
+        $isActive={isExpanded}
+        onClick={handleToggle}
+        aria-label={isExpanded ? "Close search panel" : "Open search panel"}
+        aria-expanded={isExpanded}
+      >
+        <BiSearch size={22} />
+      </StyledCollapsedButton>
       {isExpanded && (
         <FloatingPortal id="page-content">
           <StyledFloatingRoot

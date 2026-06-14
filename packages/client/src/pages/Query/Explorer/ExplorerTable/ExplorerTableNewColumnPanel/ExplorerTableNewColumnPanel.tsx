@@ -3,6 +3,7 @@ import { IEntity } from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { Button, ButtonGroup, Checkbox, Input } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
+import useKeypress from "hooks/useKeyPress";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { GrClose } from "react-icons/gr";
 import { MdOutlineEdit } from "react-icons/md";
@@ -64,7 +65,15 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
     return true;
   }, [name, paramsDef, paramValues]);
 
-  const handleCreate = () => {
+  const handleClose = useCallback(() => {
+    setName("");
+    setType(Explore.EExploreColumnType.EPV);
+    setEditable(false);
+    setParamValues({});
+    onClose();
+  }, [onClose]);
+
+  const handleCreate = useCallback(() => {
     const params =
       paramsDef.length > 0
         ? Object.fromEntries(
@@ -87,15 +96,14 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
     };
     onCreateColumn(col);
     handleClose();
-  };
+  }, [name, type, editable, paramValues, paramsDef, onCreateColumn, handleClose]);
 
-  const handleClose = useCallback(() => {
-    setName("");
-    setType(Explore.EExploreColumnType.EPV);
-    setEditable(false);
-    setParamValues({});
-    onClose();
-  }, [onClose]);
+  const tryCreate = useCallback(() => {
+    if (!open || !canCreate) return;
+    handleCreate();
+  }, [open, canCreate, handleCreate]);
+
+  useKeypress("Enter", tryCreate, [open, canCreate], true);
 
   const renderParamField = (def: Explore.IExploreColumnParamDef) => {
     switch (def.type) {

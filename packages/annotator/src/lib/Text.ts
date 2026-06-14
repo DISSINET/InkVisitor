@@ -9,6 +9,18 @@ import {
 } from "./Annotator";
 
 /**
+ * Caret affinity at a soft-wrap boundary, where a single document offset maps to
+ * two visual positions (Phase 3 offset model):
+ * - `UPSTREAM`   — render at the END of the wrapped visual line.
+ * - `DOWNSTREAM` — render at the START of the following visual line.
+ * Irrelevant for any offset that is not a soft-wrap boundary.
+ */
+export enum CaretAffinity {
+  UPSTREAM = "UPSTREAM",
+  DOWNSTREAM = "DOWNSTREAM",
+}
+
+/**
  * Represents an XML-like tag within a text segment.
  * Tags can be opening or closing tags and may contain attributes.
  */
@@ -200,8 +212,9 @@ export class Tag {
  * A segment is a portion of text that gets processed and displayed as lines.
  */
 export class Segment {
-  lineStart: number = -1; // incl.
-  lineEnd: number = -1; // incl.
+  lineStart: number = -1; // inclusive — first visual line index of this segment
+  /** Exclusive — one past the last visual line index of this segment (`lineStart + lines.length`). */
+  lineEndExclusive: number = -1;
   raw: string;
   parsed: string = "";
   openingTags: Tag[] = [];
@@ -341,7 +354,7 @@ class Text {
   getLine(lineIndex: number): string {
     // Find the segment that contains the line
     const segmentIndex = this.segments.findIndex(
-      (s) => s.lineStart <= lineIndex && s.lineEnd > lineIndex
+      (s) => s.lineStart <= lineIndex && s.lineEndExclusive > lineIndex
     );
 
     if (segmentIndex === -1) {
@@ -422,7 +435,9 @@ class Text {
       }
 */
       segment.lineStart =
-        segmentIndex === 0 ? 0 : this.segments[segmentIndex - 1].lineEnd;
+        segmentIndex === 0
+          ? 0
+          : this.segments[segmentIndex - 1].lineEndExclusive;
       segment.lines = [];
 
       let text = segment.raw;
@@ -538,7 +553,8 @@ class Text {
       }
       if (currentLine.length > 0) pushLine();
 
-      segment.lineEnd = segment.lineStart + (segment.lines.length || 1);
+      segment.lineEndExclusive =
+        segment.lineStart + (segment.lines.length || 1);
 
       if (!segment.lines.length) {
         segment.lines = [""];
@@ -651,18 +667,34 @@ class Text {
       if (absTextIndex < currentIndex + segmentLength) {
         const rawTextIndex = absTextIndex - currentIndex;
 
-        // Calculate parsed text index by accounting for tags
+        // Calculate parsed text index by counting the characters that tag
+        // removal strips from the raw text up to this index. We derive this
+        // from `tagRemovalRegex` — the exact pattern used to build `parsed`
+        // (`raw.replace(tagRemovalRegex, "")`) — so the two stay consistent
+        // even for malformed tags. A closing tag carrying attributes
+        // (`</first elvl="1">`) is stripped from `parsed` by tagRemovalRegex
+        // but matches neither the strict opening nor closing regex, so it
+        // never lands in `openingTags`/`closingTags`; reconstructing the
+        // removed length from those lists both misses such tags and uses the
+        // canonical (attribute-stripped) tag length, drifting the caret.
         let parsedTextIndex = rawTextIndex;
         if (this.mode !== EditMode.RAW) {
-          const tags = segment.openingTags
-            .concat(segment.closingTags)
-            .sort((a, b) => a.position - b.position);
-
-          for (const tag of tags) {
-            if (tag.position <= rawTextIndex) {
-              parsedTextIndex -= tag.getTag().length;
+          const removalRegex = new RegExp(
+            tagRemovalRegex.source,
+            tagRemovalRegex.flags
+          );
+          let removalMatch: RegExpExecArray | null;
+          while ((removalMatch = removalRegex.exec(segment.raw)) !== null) {
+            if (removalMatch.index > rawTextIndex) {
+              break;
             }
+            parsedTextIndex -= removalMatch[0].length;
           }
+          // Note: parsedTextIndex may go negative when rawTextIndex sits on a
+          // leading tag (the `<= rawTextIndex` boundary subtracts a tag that
+          // starts exactly there); the return value clamps it, matching the
+          // previous tracked-tag computation. Only the malformed-tag accounting
+          // differs from before.
         }
 
         // Find line index and character position within the line
@@ -787,6 +819,170 @@ class Text {
   }
 
   /**
+   * Phase 3 offset model — raw document offset (index into {@link value}) to
+   * ABSOLUTE visual coordinates (`yLine` is an absolute line index, not
+   * viewport-relative). The offset is clamped into `[0, value.length]`. The
+   * returned `xLine` is the visual column in the current edit mode (tags are
+   * stripped in HIGHLIGHT/SEMI). Returns `null` only for an empty document.
+   */
+  visualFromOffset(
+    offset: number,
+    affinity: CaretAffinity = CaretAffinity.DOWNSTREAM
+  ): { xLine: number; yLine: number } | null {
+    const clamped = Math.max(0, Math.min(offset, this.value.length));
+    const pos = this.getSegmentFromAbsTextIndex(clamped);
+    if (!pos) {
+      return null;
+    }
+    const segment = this.segments[pos.segmentIndex];
+    if (!segment) {
+      return null;
+    }
+    let lineIndex = pos.lineIndex;
+    // An offset that lands inside hidden tag markup (HIGHLIGHT/SEMI) can yield a
+    // negative parsed column; snap it to the line start so the caret never sits
+    // at a negative column.
+    let charInLineIndex = Math.max(0, pos.charInLineIndex);
+    // At a soft-wrap boundary (start of a continuation line) UPSTREAM affinity
+    // renders the caret at the end of the previous visual line instead.
+    if (
+      affinity === CaretAffinity.UPSTREAM &&
+      lineIndex > 0 &&
+      charInLineIndex === 0
+    ) {
+      lineIndex -= 1;
+      charInLineIndex = segment.lines[lineIndex].length;
+    }
+    return {
+      xLine: charInLineIndex,
+      yLine: segment.lineStart + lineIndex,
+    };
+  }
+
+  /**
+   * Phase 3 offset model — ABSOLUTE visual coordinates to a raw document offset.
+   * Returns `-1` when the line index is out of bounds (uses the non-clamping
+   * {@link getSegmentPositionOrNull}). Inverse of {@link visualFromOffset}.
+   */
+  offsetFromVisual(xLine: number, yLine: number): number {
+    const pos = this.getSegmentPositionOrNull(yLine, xLine);
+    return pos ? this.getAbsTextIndexFromPosition(pos) : -1;
+  }
+
+  /**
+   * Phase 3 offset model — one VISIBLE column to the right of an absolute visual
+   * position, crossing visual line boundaries. Works in every mode (a "visible
+   * column" is a parsed column in HIGHLIGHT/SEMI, a raw column in RAW); the
+   * caller converts the result back to a raw offset, which skips hidden markup.
+   * At end-of-document the position is unchanged.
+   */
+  stepVisualRight(
+    xLine: number,
+    yLine: number
+  ): { xLine: number; yLine: number } {
+    const lineLen = (this.getLine(yLine) ?? "").length;
+    if (xLine < lineLen) {
+      return { xLine: xLine + 1, yLine };
+    }
+    // At end of the visual line: drop to the start of the next one, or stay at EOF.
+    if (yLine >= this.noLines - 1) {
+      return { xLine: lineLen, yLine };
+    }
+    return { xLine: 0, yLine: yLine + 1 };
+  }
+
+  /**
+   * Phase 3 offset model — one VISIBLE column to the left of an absolute visual
+   * position, crossing visual line boundaries. At document start it is unchanged.
+   */
+  stepVisualLeft(
+    xLine: number,
+    yLine: number
+  ): { xLine: number; yLine: number } {
+    if (xLine > 0) {
+      return { xLine: xLine - 1, yLine };
+    }
+    if (yLine <= 0) {
+      return { xLine: 0, yLine: 0 };
+    }
+    const prevLen = (this.getLine(yLine - 1) ?? "").length;
+    return { xLine: prevLen, yLine: yLine - 1 };
+  }
+
+  /**
+   * Phase 3 offset model — is `offset` a soft-wrap boundary, i.e. the start of a
+   * continuation visual line WITHIN a segment (not a hard `\n` boundary, which
+   * begins a new segment at lineIndex 0)? Such offsets have two visual caret
+   * positions distinguished by {@link CaretAffinity}.
+   */
+  isWrapBoundary(offset: number): boolean {
+    const clamped = Math.max(0, Math.min(offset, this.value.length));
+    const pos = this.getSegmentFromAbsTextIndex(clamped);
+    if (!pos) {
+      return false;
+    }
+    return pos.lineIndex > 0 && pos.charInLineIndex === 0;
+  }
+
+  /**
+   * Phase 3 offset model — ABSOLUTE visual coordinates to a document offset PLUS
+   * the affinity that visual position implies: the end of a wrapped (non-last)
+   * visual line is UPSTREAM, everything else DOWNSTREAM. Inverse companion of
+   * {@link visualFromOffset} that recovers the affinity bit lost by a bare offset.
+   */
+  offsetWithAffinityFromVisual(
+    xLine: number,
+    yLine: number
+  ): { offset: number; affinity: CaretAffinity } {
+    const offset = this.offsetFromVisual(xLine, yLine);
+    if (offset < 0) {
+      return { offset, affinity: CaretAffinity.DOWNSTREAM };
+    }
+    const pos = this.getSegmentPositionOrNull(yLine, xLine);
+    if (pos) {
+      const segment = this.segments[pos.segmentIndex];
+      const lineLen = segment?.lines[pos.lineIndex]?.length ?? 0;
+      const isLastVisualLineOfSegment =
+        !segment || pos.lineIndex >= segment.lines.length - 1;
+      if (xLine >= lineLen && !isLastVisualLineOfSegment) {
+        return { offset, affinity: CaretAffinity.UPSTREAM };
+      }
+    }
+    return { offset, affinity: CaretAffinity.DOWNSTREAM };
+  }
+
+  /**
+   * Non-clamping variant of {@link getSegmentPosition}: returns `null` when
+   * `absLineIndex` falls outside `[0, noLines - 1]` instead of clamping it into
+   * range. Use this when a `null` return is meant to signal "invalid position"
+   * (the offset-model code in Phase 3 relies on this); the clamping variant
+   * stays for existing callers that depend on the old behavior.
+   *
+   * @param absLineIndex - The absolute line index
+   * @param charInLineIndex - Character position within the line (default: 0)
+   * @param ignoreLastClosingTag - Whether to ignore the last closing tag (default: false)
+   * @returns Segment position, or `null` if the line index is out of bounds
+   */
+  getSegmentPositionOrNull(
+    absLineIndex: number,
+    charInLineIndex: number = 0,
+    ignoreLastClosingTag: boolean = false
+  ): SegmentPosition | null {
+    if (
+      this.noLines <= 0 ||
+      absLineIndex < 0 ||
+      absLineIndex >= this.noLines
+    ) {
+      return null;
+    }
+    return this.getSegmentPosition(
+      absLineIndex,
+      charInLineIndex,
+      ignoreLastClosingTag
+    );
+  }
+
+  /**
    * Converts absolute line index to segment position.
    *
    * This method finds the segment containing the given line and calculates
@@ -814,7 +1010,7 @@ class Text {
     }
 
     const segmentIndex = this.segments.findLastIndex(
-      (s) => s.lineStart <= absLineIndex && s.lineEnd > absLineIndex
+      (s) => s.lineStart <= absLineIndex && s.lineEndExclusive > absLineIndex
     );
 
     if (segmentIndex === -1) {
@@ -900,7 +1096,10 @@ class Text {
       const segment = this.segments[i];
 
       // Skip segments that don't contain any of the requested lines
-      if (segment.lineEnd <= startLine || segment.lineStart >= endLine) {
+      if (
+        segment.lineEndExclusive <= startLine ||
+        segment.lineStart >= endLine
+      ) {
         continue;
       }
 
@@ -1094,12 +1293,19 @@ class Text {
       textToInsert +
       this.value.slice(indexPosition);
 
-    segment.raw =
-      segment.raw.slice(0, segmentPosition.rawTextIndex) +
-      textToInsert +
-      segment.raw.slice(segmentPosition.rawTextIndex);
-
-    segment.parseText();
+    if (textToInsert.includes("\n")) {
+      // Multi-line insert (e.g. pasting text with newlines): re-split the whole
+      // document from the updated value so the newlines become real segment
+      // boundaries — a targeted single-segment splice would leave a stray "\n"
+      // embedded in one segment's raw.
+      this.prepareSegments();
+    } else {
+      segment.raw =
+        segment.raw.slice(0, segmentPosition.rawTextIndex) +
+        textToInsert +
+        segment.raw.slice(segmentPosition.rawTextIndex);
+      segment.parseText();
+    }
     this.calculateLines();
   }
 

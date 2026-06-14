@@ -33,6 +33,8 @@ export interface StyledSelect {
   loggerId?: string;
   limitSelectedItems?: number;
   shortLabel?: boolean;
+  controlBackgroundColor?: string;
+  color?: string;
 }
 export const StyledSelect = styled(Select)<StyledSelect>`
   display: inline-flex;
@@ -48,17 +50,24 @@ export const StyledSelect = styled(Select)<StyledSelect>`
     min-height: ${({ theme }) => theme.space[10]};
     // only for one row multi entity dropdown to avoid glitches during resizing
     height: ${({ limitSelectedItems }) => (limitSelectedItems ? "27px" : "")};
-    border-width: 1px;
+    border-width: ${({ controlBackgroundColor }) => (controlBackgroundColor ? 0 : "1px")};
     border-style: solid;
-    border-color: ${({ theme, suggester }) =>
-      suggester ? theme.color["black"] : theme.color["gray"]["400"]};
-    border-right: ${({ suggester }) => (suggester ? "none" : "")};
+    border-color: ${({ theme, suggester, controlBackgroundColor }) =>
+      controlBackgroundColor
+        ? "transparent"
+        : suggester
+          ? theme.color["black"]
+          : theme.color["gray"]["400"]};
+    border-right: ${({ suggester, controlBackgroundColor }) =>
+      suggester && !controlBackgroundColor ? "none" : ""};
     border-radius: 0;
-    background-color: ${({ theme, entityDropdown, suggester }) =>
-      entityDropdown && suggester ? theme.color["gray"][200] : theme.color["white"]};
+    background-color: ${({ theme, entityDropdown, suggester, controlBackgroundColor }) =>
+      controlBackgroundColor ??
+      (entityDropdown && suggester ? theme.color["gray"][200] : theme.color["white"])};
     &:hover {
-      border-color: ${({ theme }) => theme.color["info"]};
-      border-width: 1px;
+      border-color: ${({ theme, controlBackgroundColor }) =>
+        controlBackgroundColor ? "transparent" : theme.color["info"]};
+      border-width: ${({ controlBackgroundColor }) => (controlBackgroundColor ? 0 : "1px")};
     }
   }
   .react-select__control--is-disabled {
@@ -69,8 +78,9 @@ export const StyledSelect = styled(Select)<StyledSelect>`
     box-shadow: none;
 
     outline: 0;
-    border-color: ${({ theme }) => theme.color["info"]};
-    border-width: 1px;
+    border-color: ${({ theme, controlBackgroundColor }) =>
+      controlBackgroundColor ? "transparent" : theme.color["info"]};
+    border-width: ${({ controlBackgroundColor }) => (controlBackgroundColor ? 0 : "1px")};
   }
   .react-select__value-container {
     height: 100%;
@@ -85,8 +95,11 @@ export const StyledSelect = styled(Select)<StyledSelect>`
       entityDropdown && !wildCardChar ? theme.space[3] : theme.space[2]};
     margin-top: 1px;
 
-    color: ${({ theme }) => theme.color["primary"]};
+    color: ${({ theme, color }) => color ?? theme.color["primary"]};
     vertical-align: middle;
+  }
+  .react-select__placeholder {
+    color: ${({ theme, color }) => color ?? theme.color["gray"][500]};
   }
   .react-select__multi-value {
     background-color: ${({ theme, entityDropdown }) =>
@@ -95,13 +108,14 @@ export const StyledSelect = styled(Select)<StyledSelect>`
     border: 1px solid ${({ theme }) => theme.color["blue"][300]};
   }
   .react-select__indicator {
-    color: ${({ theme }) => theme.color["primary"]};
+    color: ${({ theme, color }) => color ?? theme.color["primary"]};
     svg {
       height: 18;
     }
   }
   .react-select__clear-indicator {
     padding: 0.2rem;
+    color: ${({ theme, color }) => color ?? theme.color["primary"]};
   }
   .react-select__indicator-separator {
     display: none;
@@ -117,7 +131,7 @@ export const StyledSelect = styled(Select)<StyledSelect>`
     padding-right: ${({ entityDropdown }) => (entityDropdown ? "0.2rem" : "")};
   }
   .react-select__input-container {
-    color: ${({ theme }) => theme.color["black"]};
+    color: ${({ theme, color }) => color ?? theme.color["black"]};
   }
   // portal menu style is in global stylesheet
 `;

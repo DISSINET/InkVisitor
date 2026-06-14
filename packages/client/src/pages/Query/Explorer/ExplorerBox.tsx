@@ -10,6 +10,7 @@ import { ExploreAction } from "./state";
 import { useExplorerControls } from "./useExplorerControls";
 import { FloatingSearchContainer } from "../FloatingSearchContainer/FloatingSearchContainer";
 import { useInvalidateExplorerQuery } from "../useQueryData";
+import ExplorerTableIdsFilter from "./ExplorerTable/ExplorerTableIdsFilter";
 
 /** Height reserved for the shared control bar above the view content. */
 const CONTROL_BAR_HEIGHT = 50;
@@ -48,8 +49,7 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   const floatingSearchRightInset = isDetailOpen ? detailPanelWidth : 0;
 
   const isStats = state.view.mode === Explore.EViewMode.Stats;
-  const columns =
-    state.view.mode === Explore.EViewMode.Table ? state.view.columns : [];
+  const columns = state.view.mode === Explore.EViewMode.Table ? state.view.columns : [];
 
   const controls = useExplorerControls({
     data,
@@ -124,6 +124,8 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
           )}
         </div>
       </div>
+
+      <ExplorerTableIdsFilter filters={state.filters} dispatch={dispatch} />
 
       <FloatingSearchContainer
         rightInset={floatingSearchRightInset}

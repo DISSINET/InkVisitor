@@ -212,6 +212,8 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
               placeholder="all classes"
               disabled={node.params.entityId !== undefined}
               limitSelectedItems={Math.floor((270 - 110) / 37)}
+              controlBackgroundColor={isRoot ? nodeColor : undefined}
+              color={isRoot ? theme.color.white : undefined}
             />
           )}
           {paramEntityId && (

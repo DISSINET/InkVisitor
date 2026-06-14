@@ -7,12 +7,7 @@ import {
   IStatementData,
 } from "@inkvisitor/shared/types";
 import { excludedSuggesterEntities } from "Theme/constants";
-import {
-  AttributeIcon,
-  BundleButtonGroup,
-  Button,
-  ButtonGroup,
-} from "components";
+import { AttributeIcon, BundleButtonGroup, Button, ButtonGroup } from "components";
 import Dropdown, {
   ElvlButtonGroup,
   EntityDropzone,
@@ -25,12 +20,7 @@ import { useSearchParams, useTheme } from "hooks";
 import { TooltipAttributes } from "pages/Main/containers";
 import { PropGroup } from "pages/Main/containers/PropGroup/PropGroup";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import {
-  DragSourceMonitor,
-  DropTargetMonitor,
-  useDrag,
-  useDrop,
-} from "react-dnd";
+import { DragSourceMonitor, DropTargetMonitor, useDrag, useDrop } from "react-dnd";
 import { FaGripVertical, FaPlus, FaTrashAlt } from "react-icons/fa";
 import { TbSettingsAutomation, TbSettingsFilled } from "react-icons/tb";
 import { setDraggedActantRow } from "redux/features/rowDnd/draggedActantRowSlice";
@@ -68,15 +58,10 @@ interface StatementEditorActionTableRow {
   territoryActants?: string[];
   hasOrder?: boolean;
 
-  handleDataAttributeChange: (
-    changes: Partial<IStatementData>,
-    instantUpdate?: boolean
-  ) => void;
+  handleDataAttributeChange: (changes: Partial<IStatementData>, instantUpdate?: boolean) => void;
 }
 
-export const StatementEditorActionTableRow: React.FC<
-  StatementEditorActionTableRow
-> = ({
+export const StatementEditorActionTableRow: React.FC<StatementEditorActionTableRow> = ({
   filteredAction,
   index,
   moveRow,
@@ -103,20 +88,18 @@ export const StatementEditorActionTableRow: React.FC<
   const updateAction = (
     statementActionId: string,
     changes: Partial<IStatementAction>,
-    instantUpdate?: boolean
+    instantUpdate?: boolean,
   ) => {
     if (statement && statementActionId) {
       const updatedActions = statement.data.actions.map((a) =>
-        a.id === statementActionId ? { ...a, ...changes } : a
+        a.id === statementActionId ? { ...a, ...changes } : a,
       );
       handleDataAttributeChange({ actions: updatedActions }, instantUpdate);
     }
   };
   const removeAction = (statementActionId: string, instantUpdate?: boolean) => {
     if (statement) {
-      const updatedActions = statement.data.actions.filter(
-        (a) => a.id !== statementActionId
-      );
+      const updatedActions = statement.data.actions.filter((a) => a.id !== statementActionId);
       handleDataAttributeChange({ actions: updatedActions }, instantUpdate);
     }
   };
@@ -156,7 +139,7 @@ export const StatementEditorActionTableRow: React.FC<
             {
               actionId: newSelectedId,
             },
-            true
+            true,
           );
         }}
         isInsideTemplate={isInsideTemplate}
@@ -200,7 +183,7 @@ export const StatementEditorActionTableRow: React.FC<
               {
                 actionId: newSelectedId,
               },
-              true
+              true,
             );
           }}
           onPicked={(entity) => console.log("entity to temp use", entity)}
@@ -252,14 +235,12 @@ export const StatementEditorActionTableRow: React.FC<
 
   const dispatch = useAppDispatch();
   const draggedActantRow: DraggedActantRowItem = useAppSelector(
-    (state) => state.rowDnd.draggedActantRow
+    (state) => state.rowDnd.draggedActantRow,
   );
 
   useEffect(() => {
     if (isDragging) {
-      dispatch(
-        setDraggedActantRow({ category: DraggedPropRowCategory.ACTION })
-      );
+      dispatch(setDraggedActantRow({ category: DraggedPropRowCategory.ACTION }));
       const boxContentEditor = document.getElementById(`box-content-editor`);
       const actionTable = document.getElementById(`action-section`);
       if (boxContentEditor) {
@@ -295,16 +276,16 @@ export const StatementEditorActionTableRow: React.FC<
             isInsideTemplate={isInsideTemplate}
             territoryParentId={territoryParentId}
             disableSpareRow
+            alwaysShowCreateModal
           />
         );
       }
     },
-    [statement]
+    [statement],
   );
 
   const isDraggingAction =
-    draggedActantRow.category &&
-    draggedActantRow.category === DraggedPropRowCategory.ACTION;
+    draggedActantRow.category && draggedActantRow.category === DraggedPropRowCategory.ACTION;
 
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -315,10 +296,7 @@ export const StatementEditorActionTableRow: React.FC<
       <StyledFlexStart ref={dropRef}>
         {userCanEdit && hasOrder ? (
           <StyledGridColumn ref={dragRef} style={{ cursor: "move" }}>
-            <FaGripVertical
-              style={{ marginTop: "0.3rem" }}
-              color={theme.color.black}
-            />
+            <FaGripVertical style={{ marginTop: "0.3rem" }} color={theme.color.black} />
           </StyledGridColumn>
         ) : (
           <StyledGridColumn />
@@ -332,9 +310,7 @@ export const StatementEditorActionTableRow: React.FC<
                 <LogicButtonGroup
                   border
                   value={sAction.logic}
-                  onChange={(logic) =>
-                    updateAction(sAction.id, { logic: logic })
-                  }
+                  onChange={(logic) => updateAction(sAction.id, { logic: logic })}
                   disabled={!userCanEdit}
                 />
               }
@@ -473,11 +449,7 @@ export const StatementEditorActionTableRow: React.FC<
 
       {/* Prop groups */}
       {!isDraggingAction &&
-        renderPropGroup(
-          sAction.actionId,
-          sAction.props,
-          DraggedPropRowCategory.ACTION
-        )}
+        renderPropGroup(sAction.actionId, sAction.props, DraggedPropRowCategory.ACTION)}
     </React.Fragment>
   );
 };
