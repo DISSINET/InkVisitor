@@ -35,6 +35,33 @@ export interface DeleteEntityConflict {
   message: string;
 }
 
+/** CustomScrollbar wrapper id of the entity detail (`scrollerId`). */
+export const ENTITY_DETAIL_SCROLLBAR_ID = "entity-detail-scrollbar";
+/** Scrollable entity-detail container id (CustomScrollbar `elementId`). */
+export const ENTITY_DETAIL_SCROLL_CONTAINER_ID = "entity-detail-box-content";
+/** Id of an entity's "Used in" section — per entity so a scroll waits for the right detail. */
+export const usedInSectionId = (entityId: string) =>
+  `entity-detail-used-in-section-${entityId}`;
+
+/**
+ * Scrolls the entity detail to `entityId`'s "Used in" section. Opening the detail
+ * is asynchronous, so this polls (up to ~3s) until that entity's section is
+ * rendered, then scrolls its container into view. No-op if it never appears.
+ */
+export const scrollToUsedInSection = (entityId: string): void => {
+  let attempts = 0;
+  const tick = () => {
+    const container = document.getElementById(ENTITY_DETAIL_SCROLL_CONTAINER_ID);
+    const section = document.getElementById(usedInSectionId(entityId));
+    if (container && section) {
+      container.scrollTo({ behavior: "smooth", top: section.offsetTop });
+    } else if (attempts++ < 30) {
+      setTimeout(tick, 100);
+    }
+  };
+  tick();
+};
+
 /**
  * Decides what to surface when an entity delete is blocked by an
  * InvalidDeleteError:
@@ -65,9 +92,10 @@ export const resolveDeleteEntityConflict = (
 
 /**
  * Shows the appropriate toast for a blocked entity deletion and wires its click
- * to open the right id in entity detail. Returns true when the error was a
- * handled InvalidDeleteError, false otherwise (so callers can fall back to a
- * generic error toast).
+ * to open the right entity in detail and scroll it to its "Used in" section
+ * (where the blocking anchors/references can be removed). Returns true when the
+ * error was a handled InvalidDeleteError, false otherwise (so callers can fall
+ * back to a generic error toast).
  */
 export const handleDeleteEntityError = (
   error: unknown,
@@ -82,7 +110,10 @@ export const handleDeleteEntityError = (
   const { targetId, message } = resolveDeleteEntityConflict(data, deletedEntityId);
   const options: ToastOptions = {
     autoClose: 6000,
-    onClick: () => appendDetailId(targetId),
+    onClick: () => {
+      appendDetailId(targetId);
+      scrollToUsedInSection(targetId);
+    },
   };
   if (variant === "warning") {
     toast.warning(message, options);

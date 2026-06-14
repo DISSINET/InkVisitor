@@ -1,8 +1,33 @@
 import { IInvalidDeleteErrorData } from "@inkvisitor/shared/types/errors";
+
+vi.mock("react-toastify", () => ({
+  toast: { info: vi.fn(), warning: vi.fn() },
+}));
+
+import { toast } from "react-toastify";
 import {
+  ENTITY_DETAIL_SCROLL_CONTAINER_ID,
   getInvalidDeleteErrorData,
+  handleDeleteEntityError,
   resolveDeleteEntityConflict,
+  scrollToUsedInSection,
+  usedInSectionId,
 } from "./deleteEntityConflict";
+
+const addScrollContainer = () => {
+  const container = document.createElement("div");
+  container.id = ENTITY_DETAIL_SCROLL_CONTAINER_ID;
+  const scrollTo = vi.fn();
+  (container as unknown as { scrollTo: typeof scrollTo }).scrollTo = scrollTo;
+  document.body.append(container);
+  return scrollTo;
+};
+
+const addUsedInSection = (entityId: string) => {
+  const section = document.createElement("div");
+  section.id = usedInSectionId(entityId);
+  document.body.append(section);
+};
 
 const deletedEntityId = "entity-being-deleted";
 
@@ -77,5 +102,105 @@ describe("resolveDeleteEntityConflict", () => {
       deletedEntityId
     );
     expect(result.message).toContain("3 documents");
+  });
+});
+
+describe("usedInSectionId", () => {
+  it("builds a per-entity section id", () => {
+    expect(usedInSectionId("abc")).toBe("entity-detail-used-in-section-abc");
+  });
+});
+
+describe("scrollToUsedInSection", () => {
+  // fake timers so the poll's recursive setTimeout can be discarded after each test
+  beforeEach(() => {
+    vi.useFakeTimers();
+    document.body.innerHTML = "";
+  });
+  afterEach(() => {
+    vi.clearAllTimers();
+    vi.useRealTimers();
+  });
+
+  it("scrolls the container once the entity's section is present", () => {
+    const scrollTo = addScrollContainer();
+    addUsedInSection("e1");
+    scrollToUsedInSection("e1");
+    // jsdom reports offsetTop as 0; asserting the scroll happened is the point
+    expect(scrollTo).toHaveBeenCalledWith({ behavior: "smooth", top: 0 });
+  });
+
+  it("does not scroll while a different entity's section is shown", () => {
+    const scrollTo = addScrollContainer();
+    addUsedInSection("other");
+    scrollToUsedInSection("e1");
+    vi.runAllTimers(); // drain the poll; e1 never appears
+    expect(scrollTo).not.toHaveBeenCalled();
+  });
+
+  it("does not throw when nothing is rendered", () => {
+    expect(() => {
+      scrollToUsedInSection("e1");
+      vi.runAllTimers();
+    }).not.toThrow();
+  });
+});
+
+describe("handleDeleteEntityError", () => {
+  const documentError = {
+    error: "InvalidDeleteError",
+    data: { type: "document", ids: ["doc-1"] } as IInvalidDeleteErrorData,
+  };
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    (toast.info as ReturnType<typeof vi.fn>).mockClear();
+    (toast.warning as ReturnType<typeof vi.fn>).mockClear();
+    document.body.innerHTML = "";
+  });
+  afterEach(() => {
+    vi.clearAllTimers();
+    vi.useRealTimers();
+  });
+
+  const getOnClick = (toastFn: typeof toast.info) =>
+    (toastFn as ReturnType<typeof vi.fn>).mock.calls[0][1].onClick as () => void;
+
+  it("returns false and shows no toast for a non-delete error", () => {
+    expect(handleDeleteEntityError({ error: "Other" }, "e1", vi.fn())).toBe(false);
+    expect(toast.info).not.toHaveBeenCalled();
+    expect(toast.warning).not.toHaveBeenCalled();
+  });
+
+  it("on click opens the entity being deleted and scrolls it to used-in for a document conflict", () => {
+    const scrollTo = addScrollContainer();
+    addUsedInSection("entity-1");
+    const appendDetailId = vi.fn();
+
+    const handled = handleDeleteEntityError(documentError, "entity-1", appendDetailId);
+    expect(handled).toBe(true);
+    expect(toast.info).toHaveBeenCalledTimes(1);
+    expect(appendDetailId).not.toHaveBeenCalled(); // nothing until clicked
+
+    getOnClick(toast.info)();
+
+    // document conflict opens the entity being deleted, not the document id
+    expect(appendDetailId).toHaveBeenCalledWith("entity-1");
+    expect(scrollTo).toHaveBeenCalled();
+  });
+
+  it("on click opens the first conflicting entity for an entity conflict (warning variant)", () => {
+    addScrollContainer();
+    const appendDetailId = vi.fn();
+    handleDeleteEntityError(
+      { error: "InvalidDeleteError", data: { type: "entity", ids: ["e2", "e3"] } },
+      "entity-1",
+      appendDetailId,
+      "warning"
+    );
+
+    expect(toast.warning).toHaveBeenCalledTimes(1);
+    expect(() => getOnClick(toast.warning)()).not.toThrow();
+    expect(appendDetailId).toHaveBeenCalledWith("e2");
   });
 });

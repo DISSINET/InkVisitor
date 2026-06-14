@@ -18,7 +18,12 @@ import { rootTerritoryId } from "Theme/constants";
 import { DraggedPropRowCategory } from "types";
 import { DropdownItem } from "@inkvisitor/shared/types";
 import { getEntityLabel, getEntityRelationRules, getShortLabelByLetterCount } from "utils/utils";
-import { handleDeleteEntityError } from "utils/deleteEntityConflict";
+import {
+  ENTITY_DETAIL_SCROLLBAR_ID,
+  ENTITY_DETAIL_SCROLL_CONTAINER_ID,
+  handleDeleteEntityError,
+  usedInSectionId,
+} from "utils/deleteEntityConflict";
 import { openRestoredEntity } from "utils/openRestoredEntity";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
 import { PropGroup } from "../../PropGroup/PropGroup";
@@ -616,6 +621,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
     <>
       {entity && (
         <CustomScrollbar
+          scrollerId={ENTITY_DETAIL_SCROLLBAR_ID}
+          elementId={ENTITY_DETAIL_SCROLL_CONTAINER_ID}
           customStyle={{
             // necessary to scroll until the bottom of the page
             height: "calc(100% - 2.5rem)",
@@ -900,7 +907,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
                 )}
               </StyledDetailSection>
 
-              <StyledDetailSection>
+              <StyledDetailSection id={usedInSectionId(entity.id)}>
                 <StyledDetailSectionHeader
                   onClick={() => toggleSection(EntityDetailSection.UsedIn)}
                 >
