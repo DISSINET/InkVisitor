@@ -1,4 +1,4 @@
-import { IRequestStats, IResponseStats } from "@inkvisitor/shared/types";
+import { IResponseStats } from "@inkvisitor/shared/types";
 import { color as d3Color } from "d3";
 import { useCallback, useMemo, useState } from "react";
 import {
@@ -20,9 +20,10 @@ import {
   getDataCategories,
   OTHERS_KEY,
   transformDataForChart,
-} from "../../utils";
+} from "./statsViz.utils";
 import {
   StyledChartWrapper,
+  StyledEmptyState,
   StyledCustomTooltip,
   StyledLabel,
   StyledLegendColorBox,
@@ -38,19 +39,13 @@ interface StatsChartProps {
   data: IResponseStats;
   height: number;
   width: number;
-  request: IRequestStats;
 }
 
-export const StatsChart = ({
-  data,
-  height,
-  width,
-  request,
-}: StatsChartProps) => {
+export const StatsChart = ({ data, height, width }: StatsChartProps) => {
   const theme = useTheme();
   const values = data.values;
   const [hoveringDataKey, setHoveringDataKey] = useState<string | null>(null);
-  const { aggregateBy, eventType } = request;
+  const { aggregateBy } = data;
 
   const hasOthers = useMemo<boolean>(() => {
     return values && Object.keys(values).some((key) => key === OTHERS_KEY);
@@ -189,6 +184,16 @@ export const StatsChart = ({
       </StyledCustomTooltip>
     );
   };
+
+  const isEmpty = dataChart.length === 0 || dataCategories.length === 0;
+
+  if (isEmpty) {
+    return (
+      <StyledEmptyState $width={width} $height={height}>
+        No data for the selected filters
+      </StyledEmptyState>
+    );
+  }
 
   return (
     <StyledChartWrapper>
