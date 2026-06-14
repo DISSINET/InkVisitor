@@ -19,7 +19,6 @@ export class ResponseUser implements IResponseUser {
   id: string;
   email: string;
   name: string;
-  password?: string;
   role: UserEnums.Role;
   options: IUserOptions;
   rights: IUserRight[];
@@ -39,7 +38,6 @@ export class ResponseUser implements IResponseUser {
     this.id = user.id;
     this.email = user.email;
     this.name = user.name;
-    this.password = user.password;
     this.role = user.role;
     this.options = user.options;
     this.rights = user.rights;
