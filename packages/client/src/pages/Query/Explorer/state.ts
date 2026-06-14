@@ -1,13 +1,24 @@
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { IRequestSearchRootValidity } from "@inkvisitor/shared/types/request-search";
+import { Aggregation, EventType, TimeUnit } from "@inkvisitor/shared/types/stats";
+
+/** Default stats config when the Explorer is switched to the Stats view mode. */
+export const defaultExploreStatsParams: Explore.IExploreStatsParams = {
+  fromDate: new Date("2000-01-01").getTime(),
+  toDate: new Date().getTime(),
+  timeUnit: TimeUnit.MONTH,
+  eventType: [EventType.CREATE, EventType.EDIT, EventType.DELETE],
+  aggregateBy: Aggregation.USER,
+};
 
 const exploreStateInitial: Explore.IExplore = {
-  view: { mode: Explore.EViewMode.Table },
-  columns:
-    // only show in development mode
-    process.env.NODE_ENV === "development"
-      ? [
+  view: {
+    mode: Explore.EViewMode.Table,
+    columns:
+      // only show in development mode
+      process.env.NODE_ENV === "development"
+        ? [
           // {
           //   id: "1",
           //   name: "Sex",
@@ -25,7 +36,8 @@ const exploreStateInitial: Explore.IExplore = {
             type: Explore.EExploreColumnType.ER,
           })),
         ]
-      : [],
+        : [],
+  },
   sort: undefined,
   filters: [],
   limit: 1,
@@ -39,6 +51,8 @@ interface ExploreAction {
 enum ExploreActionType {
   addColumn,
   removeColumn,
+  setViewMode,
+  setStatsParams,
   setOffset,
   setLimit,
   setLimitAndOffset,
@@ -69,21 +83,62 @@ const floatingSearchFilterTypes = new Set<Explore.SearchOption>([
 
 const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Explore.IExplore => {
   switch (action.type) {
-    case ExploreActionType.addColumn:
+    case ExploreActionType.addColumn: {
+      if (state.view.mode !== Explore.EViewMode.Table) {
+        return state;
+      }
       const newColumn: Explore.IExploreColumn = action.payload;
       return {
         ...state,
-        ...{ columns: [...state.columns, newColumn] },
+        view: { ...state.view, columns: [...state.view.columns, newColumn] },
       };
+    }
 
-    case ExploreActionType.removeColumn:
+    case ExploreActionType.removeColumn: {
+      if (state.view.mode !== Explore.EViewMode.Table) {
+        return state;
+      }
       const removedColumnId = action.payload.id;
       return {
         ...state,
-        ...{
-          columns: state.columns.filter((column) => column.id !== removedColumnId),
+        view: {
+          ...state.view,
+          columns: state.view.columns.filter(
+            (column) => column.id !== removedColumnId,
+          ),
         },
       };
+    }
+
+    case ExploreActionType.setViewMode: {
+      // Payload is the fully constructed next view (the caller preserves the
+      // inactive mode's config - columns / stats - so toggling does not lose it).
+      const nextView = action.payload as Explore.IView;
+      if (nextView.mode === state.view.mode) {
+        return state;
+      }
+      return {
+        ...state,
+        view: nextView,
+        offset: 0,
+      };
+    }
+
+    case ExploreActionType.setStatsParams: {
+      if (state.view.mode !== Explore.EViewMode.Stats) {
+        return state;
+      }
+      return {
+        ...state,
+        view: {
+          mode: Explore.EViewMode.Stats,
+          stats: {
+            ...state.view.stats,
+            ...(action.payload as Partial<Explore.IExploreStatsParams>),
+          },
+        },
+      };
+    }
 
     case ExploreActionType.setOffset:
       return {
@@ -132,13 +187,13 @@ const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Exp
       const filters: Explore.IExploreSearchFilter[] =
         trimmedLabel.length > 0
           ? [
-              ...otherFilters,
-              {
-                type: Explore.SearchOption.Label,
-                label: trimmedLabel,
-                useRegex: nextUseRegex,
-              },
-            ]
+            ...otherFilters,
+            {
+              type: Explore.SearchOption.Label,
+              label: trimmedLabel,
+              useRegex: nextUseRegex,
+            },
+          ]
           : otherFilters;
 
       return {
@@ -154,12 +209,12 @@ const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Exp
       const filters: Explore.IExploreSearchFilter[] =
         ids.length > 0
           ? [
-              ...otherFilters,
-              {
-                type: Explore.SearchOption.UUIDs,
-                ids,
-              },
-            ]
+            ...otherFilters,
+            {
+              type: Explore.SearchOption.UUIDs,
+              ids,
+            },
+          ]
           : otherFilters;
 
       return {
@@ -206,12 +261,12 @@ const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Exp
         ...state,
         filters: createdDate
           ? [
-              ...otherFilters,
-              {
-                type: Explore.SearchOption.CreatedAt,
-                createdAt: createdDate.toISOString(),
-              },
-            ]
+            ...otherFilters,
+            {
+              type: Explore.SearchOption.CreatedAt,
+              createdAt: createdDate.toISOString(),
+            },
+          ]
           : otherFilters,
         offset: 0,
       };
@@ -294,9 +349,9 @@ const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Exp
         filters:
           rootValidity && rootValidity !== IRequestSearchRootValidity.Any
             ? [
-                ...otherFilters,
-                { type: Explore.SearchOption.RootValidity, rootValidity },
-              ]
+              ...otherFilters,
+              { type: Explore.SearchOption.RootValidity, rootValidity },
+            ]
             : otherFilters,
         offset: 0,
       };

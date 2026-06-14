@@ -365,3 +365,70 @@ export const entityIdsEqual = (a: string[], b: string[]): boolean => {
   const setB = new Set(b.map((id) => id.toLowerCase()));
   return a.every((id) => setB.has(id.toLowerCase()));
 };
+
+/**
+ * Merges valid UUIDs parsed from `rawText` into `existingIds`, appending any not
+ * already present (case-insensitive) in their parsed order. Existing order is
+ * preserved; invalid tokens and duplicates are dropped. Returns the same array
+ * reference when nothing new is added.
+ */
+export const mergeTokensIntoIds = (existingIds: string[], rawText: string): string[] => {
+  const present = new Set(existingIds.map((id) => id.toLowerCase()));
+  const toAdd = parseEntityIdsFromText(rawText).filter((id) => !present.has(id.toLowerCase()));
+  return toAdd.length > 0 ? [...existingIds, ...toAdd] : existingIds;
+};
+
+/**
+ * Returns the text left over after removing every valid-UUID token, space-joined.
+ * Used to keep a half-typed / non-UUID draft in the input instead of clearing it
+ * once the complete UUIDs have been extracted into chips.
+ */
+export const unparsedRemainder = (text: string): string =>
+  text
+    .split(/[\s,\t\n\r]+/)
+    .map((token) => token.trim())
+    .filter((token) => token !== "" && !ENTITY_ID_RE.test(token))
+    .join(" ");
+
+/**
+ * Applies a paste to `draft` the way a normal text input would: the text between
+ * `selectionStart` and `selectionEnd` is replaced by `pasted` (so select-all then
+ * paste replaces everything, and an empty selection inserts at the cursor).
+ */
+export const applyPasteToDraft = (
+  draft: string,
+  selectionStart: number,
+  selectionEnd: number,
+  pasted: string,
+): string => draft.slice(0, selectionStart) + pasted + draft.slice(selectionEnd);
+
+// UUID slot template: x = hex, V = version [1-5], R = variant [89ab], - = literal.
+const UUID_TEMPLATE = "xxxxxxxx-xxxx-Vxxx-Rxxx-xxxxxxxxxxxx";
+
+/**
+ * True when `text` could still become a valid entity UUID by typing more chars
+ * (i.e. it matches the UUID template up to its length). Empty text is viable;
+ * anything that breaks the pattern (bad char, wrong version/variant, too long,
+ * or contains spaces) is not. Used to flag clearly-invalid draft input.
+ */
+export const isViableUuidPrefix = (text: string): boolean => {
+  if (text.length > UUID_TEMPLATE.length) {
+    return false;
+  }
+  for (let i = 0; i < text.length; i++) {
+    const slot = UUID_TEMPLATE[i];
+    const ch = text[i];
+    const ok =
+      slot === "-"
+        ? ch === "-"
+        : slot === "V"
+          ? /[1-5]/.test(ch)
+          : slot === "R"
+            ? /[89ab]/i.test(ch)
+            : /[0-9a-f]/i.test(ch);
+    if (!ok) {
+      return false;
+    }
+  }
+  return true;
+};
