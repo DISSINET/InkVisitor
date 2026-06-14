@@ -77,6 +77,13 @@ export default Router()
         // @ts-ignore content/anchors are part of IDocument but trimmed from the list response
         delete document.content;
         document.anchors = [];
+        // Legacy compatibility: rows not re-saved since preprocess-on-write
+        // (#2643) may store entityIds in an old shape (flat string[] or an
+        // object missing class keys such as `T`). Dev masked this by
+        // re-running preprocess on every read; we instead normalize the
+        // shape here so the client never reads entityIds.T as undefined and
+        // crashes. No-op for current rows; re-saving a legacy doc fixes it.
+        document.entityIds = Document.normalizeEntityIds(document.entityIds);
         return document;
       });
     })

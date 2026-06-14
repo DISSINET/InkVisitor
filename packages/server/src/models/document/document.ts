@@ -75,6 +75,36 @@ export default class Document implements IDocument, IDbModel {
   }
 
   /**
+   * Coerces a possibly-legacy `entityIds` value into the canonical
+   * Record<Class, string[]> shape that consumers (client annotator, badge
+   * counts, anchor-count sort) assume - notably guaranteeing a `T` key that
+   * is always an array.
+   *
+   * LEGACY ONLY: rows re-saved since preprocess-on-write (#2643) already
+   * store the canonical shape, so this is a no-op for them. Rows that
+   * predate it may hold a flat string[] or an object missing some class
+   * keys; without this the client reads `entityIds.T` as undefined and
+   * throws on `.includes`. A flat array can't be re-bucketed without each
+   * id's class, so it degrades to an empty (but valid) record - re-saving
+   * such a document repopulates it.
+   */
+  static normalizeEntityIds(
+    raw: unknown
+  ): Record<EntityEnums.Class, string[]> {
+    const out = Document.emptyEntityIdsRecord();
+    if (!raw || Array.isArray(raw) || typeof raw !== "object") {
+      return out;
+    }
+    for (const cls of Object.keys(out) as EntityEnums.Class[]) {
+      const ids = (raw as Record<string, unknown>)[cls];
+      if (Array.isArray(ids)) {
+        out[cls] = ids.filter((id): id is string => typeof id === "string");
+      }
+    }
+    return out;
+  }
+
+  /**
    * Parses the raw content and gathers tags - entity ids
    * @returns unique list of entity IDs
    */
