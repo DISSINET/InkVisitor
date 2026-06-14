@@ -18,6 +18,11 @@ import { Setting, SETTINGS_ALL_CACHE_KEY } from "@models/setting/setting";
 
 const RECONNECT_INITIAL_MS = 1000;
 const RECONNECT_MAX_MS = 30000;
+// After this many consecutive failed connect/subscribe attempts, escalate the
+// log to an alertable error so a permanently-wedged feed (which silently
+// degrades freshness to the in-process cache only) is noticed rather than
+// scrolling past as routine reconnects.
+const ALERT_AFTER_FAILURES = 5;
 
 interface Feed {
   name: string;
@@ -46,6 +51,7 @@ const feeds: Feed[] = [
 
 async function runFeed(feed: Feed): Promise<void> {
   let backoff = RECONNECT_INITIAL_MS;
+  let consecutiveFailures = 0;
 
   // Loop forever: each iteration is one connect+subscribe attempt.
   // eslint-disable-next-line no-constant-condition
@@ -64,6 +70,7 @@ async function runFeed(feed: Feed): Promise<void> {
 
       console.log(`[changefeed:${feed.name}] subscribed to ${feed.table}`);
       backoff = RECONNECT_INITIAL_MS;
+      consecutiveFailures = 0;
 
       for await (const change of cursor as AsyncIterable<{
         new_val?: { id?: string } | null;
@@ -74,10 +81,18 @@ async function runFeed(feed: Feed): Promise<void> {
 
       console.log(`[changefeed:${feed.name}] cursor ended; reconnecting`);
     } catch (err) {
-      console.error(
-        `[changefeed:${feed.name}] error; reconnecting in ${backoff}ms`,
-        err
-      );
+      consecutiveFailures++;
+      const detail = `[changefeed:${feed.name}] error on attempt ${consecutiveFailures}; reconnecting in ${backoff}ms`;
+      if (consecutiveFailures >= ALERT_AFTER_FAILURES) {
+        // Sustained outage: this feed has been down long enough that
+        // users/settings freshness now depends solely on in-process writes.
+        console.error(
+          `${detail} - feed DOWN for ${consecutiveFailures} consecutive attempts`,
+          err
+        );
+      } else {
+        console.error(detail, err);
+      }
     } finally {
       if (conn) {
         try {
