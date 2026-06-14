@@ -1,5 +1,6 @@
 import { EditMode } from "./constants";
-import Cursor, { DIRECTION } from "./Cursor";
+import Cursor from "./Cursor";
+import { HistorySnapshot } from "./History";
 import Text from "./Text";
 import Viewport from "./Viewport";
 
@@ -44,6 +45,11 @@ export interface AnnotatorCallbacks {
   text: Text;
   element: HTMLCanvasElement;
   scrollExtentLineCount(): number;
+  // Phase 4 (#3086) — undo/redo
+  captureSnapshot(): HistorySnapshot;
+  recordHistory(before: HistorySnapshot, coalesce: boolean): void;
+  undo(): void;
+  redo(): void;
 }
 
 export default class Keys {
@@ -63,37 +69,28 @@ export default class Keys {
   }
 
   /**
-   * After shift+arrow, only the selection endpoint that was at the caret should
-   * move. Cmd+Shift+Left leaves the caret at line start while selectDirection is
-   * FORWARD (start before end on the same line), so updating selectEnd would drop
-   * the line-end anchor — match the pre-move caret to start or end instead.
+   * Phase 3 — after a navigation handler has moved the visual caret, make the
+   * canonical `head` offset follow it and either EXTEND the selection (shift:
+   * `anchor` stays fixed, selectStart/End are derived from anchor/head) or
+   * COLLAPSE it (anchor = head, selection cleared). Replaces the visual-anchor
+   * juggling of `extendShiftSelectionToCaret` — a stable anchor offset makes the
+   * anchor-crossing cases fall out for free.
    */
-  private extendShiftSelectionToCaret(prev: CaretPoint): void {
-    const s = this.cursor.selectStart;
-    const e = this.cursor.selectEnd;
-    if (!s || !e) {
-      return;
-    }
-
-    const next: CaretPoint = {
-      xLine: this.cursor.xLine,
-      yLine: this.cursor.yLine,
-    };
-
-    const atStart = prev.xLine === s.xLine && prev.yLine === s.yLine;
-    const atEnd = prev.xLine === e.xLine && prev.yLine === e.yLine;
-
-    if (atStart && !atEnd) {
-      this.cursor.selectStart = { ...next };
-    } else if (atEnd && !atStart) {
-      this.cursor.selectEnd = { ...next };
-    } else if (atStart && atEnd) {
-      this.cursor.selectStart = { xLine: prev.xLine, yLine: prev.yLine };
-      this.cursor.selectEnd = { ...next };
-    } else if (this.cursor.selectDirection === DIRECTION.BACKWARD) {
-      this.cursor.selectStart = { ...next };
+  private finishCaretMove(extendSelection: boolean): void {
+    const { offset, affinity } = this.text.offsetWithAffinityFromVisual(
+      this.cursor.xLine,
+      this.cursor.yLine
+    );
+    this.cursor.head = offset;
+    this.cursor.headAffinity = affinity;
+    if (extendSelection) {
+      this.cursor.syncVisualFromOffset(this.text);
     } else {
-      this.cursor.selectEnd = { ...next };
+      this.cursor.anchor = offset;
+      this.cursor.anchorAffinity = affinity;
+      this.cursor.selectStart = undefined;
+      this.cursor.selectEnd = undefined;
+      this.cursor.setTrueSelectionDirection();
     }
   }
 
@@ -128,9 +125,6 @@ export default class Keys {
   }
 
   onKeyHome({ ctrlKey, shiftKey }: { ctrlKey?: boolean; shiftKey?: boolean }) {
-    const originalXLine = this.cursor.xLine;
-    const originalAbsYLine = this.cursor.yLine;
-
     this.cursor.xLine = 0;
 
     if (ctrlKey) {
@@ -138,29 +132,10 @@ export default class Keys {
       this.viewport.lineStart = 0;
     }
 
-    if (shiftKey) {
-      if (this.cursor.selectDirection === undefined) {
-        this.cursor.selectStart = {
-          xLine: originalXLine,
-          yLine: originalAbsYLine,
-        };
-      }
-      this.cursor.selectEnd = {
-        xLine: 0,
-        yLine: this.cursor.yLine,
-      };
-    } else {
-      this.cursor.selectStart = undefined;
-      this.cursor.selectEnd = undefined;
-    }
-
-    this.cursor.setTrueSelectionDirection();
+    this.finishCaretMove(!!shiftKey);
   }
 
   onKeyEnd({ ctrlKey, shiftKey }: { ctrlKey?: boolean; shiftKey?: boolean }) {
-    const originalXLine = this.cursor.xLine;
-    const originalAbsYLine = this.cursor.yLine;
-
     if (ctrlKey) {
       const lastLine = this.text.noLines > 0 ? this.text.noLines - 1 : 0;
       this.cursor.yLine = lastLine;
@@ -171,23 +146,7 @@ export default class Keys {
     const line = this.text.getCurrentLine(this.viewport, this.cursor) || "";
     this.cursor.xLine = line.length;
 
-    if (shiftKey) {
-      if (this.cursor.selectDirection === undefined) {
-        this.cursor.selectStart = {
-          xLine: originalXLine,
-          yLine: originalAbsYLine,
-        };
-      }
-      this.cursor.selectEnd = {
-        xLine: this.cursor.xLine,
-        yLine: this.cursor.yLine,
-      };
-    } else {
-      this.cursor.selectStart = undefined;
-      this.cursor.selectEnd = undefined;
-    }
-
-    this.cursor.setTrueSelectionDirection();
+    this.finishCaretMove(!!shiftKey);
   }
 
   onKeyBackspace({
@@ -274,8 +233,7 @@ export default class Keys {
   }
 
   onKeyPgUp({ shiftKey }: { ctrlKey?: boolean; shiftKey?: boolean }) {
-    const originalXLine = this.cursor.xLine;
-    const originalAbsYLine = this.cursor.yLine;
+    this.cursor.reconcileOffsetsFromVisual(this.text);
     const pageStep = this.viewport.noLines;
 
     this.cursor.yLine = Math.max(0, this.cursor.yLine - pageStep);
@@ -288,29 +246,8 @@ export default class Keys {
       this.cursor.xLine = line.length;
     }
 
-    if (shiftKey) {
-      if (!this.cursor.selectStart || !this.cursor.selectEnd) {
-        this.cursor.selectStart = {
-          xLine: originalXLine,
-          yLine: originalAbsYLine,
-        };
-        this.cursor.selectEnd = {
-          xLine: this.cursor.xLine,
-          yLine: this.cursor.yLine,
-        };
-      } else {
-        this.extendShiftSelectionToCaret({
-          xLine: originalXLine,
-          yLine: originalAbsYLine,
-        });
-      }
-    } else {
-      this.cursor.selectStart = undefined;
-      this.cursor.selectEnd = undefined;
-    }
-
+    this.finishCaretMove(!!shiftKey);
     this.scrollCursorIntoView();
-    this.cursor.setTrueSelectionDirection();
   }
 
   onKeyPgDown({
@@ -319,8 +256,7 @@ export default class Keys {
     ctrlKey?: boolean;
     shiftKey?: boolean;
   }) {
-    const originalXLine = this.cursor.xLine;
-    const originalAbsYLine = this.cursor.yLine;
+    this.cursor.reconcileOffsetsFromVisual(this.text);
     const pageStep = this.viewport.noLines;
     const maxLine = Math.max(0, this.text.noLines - 1);
 
@@ -331,29 +267,8 @@ export default class Keys {
       this.cursor.xLine = line.length;
     }
 
-    if (shiftKey) {
-      if (!this.cursor.selectStart || !this.cursor.selectEnd) {
-        this.cursor.selectStart = {
-          xLine: originalXLine,
-          yLine: originalAbsYLine,
-        };
-        this.cursor.selectEnd = {
-          xLine: this.cursor.xLine,
-          yLine: this.cursor.yLine,
-        };
-      } else {
-        this.extendShiftSelectionToCaret({
-          xLine: originalXLine,
-          yLine: originalAbsYLine,
-        });
-      }
-    } else {
-      this.cursor.selectStart = undefined;
-      this.cursor.selectEnd = undefined;
-    }
-
+    this.finishCaretMove(!!shiftKey);
     this.scrollCursorIntoView();
-    this.cursor.setTrueSelectionDirection();
   }
 
   onKeyEnter() {
@@ -366,9 +281,18 @@ export default class Keys {
       this.cursor.reset();
       this.cursor.setPosition(area[0].xLine, area[0].yLine);
     }
-    this.text.insertNewline(this.viewport, this.cursor);
 
-    this.cursor.moveToNewline();
+    // The newline is inserted at the caret's raw offset; the caret follows it to
+    // offset+1. Deriving the visual position from that offset is always in
+    // bounds — unlike the old blind `moveToNewline` (yLine += 1), which
+    // overshoots when the split re-wraps the prefix into fewer visual lines.
+    const insertOffset = this.text.offsetFromVisual(
+      this.cursor.xLine,
+      this.cursor.yLine
+    );
+    this.text.insertNewline(this.viewport, this.cursor);
+    const newlineAt = insertOffset >= 0 ? insertOffset : this.cursor.head;
+    this.cursor.moveToOffset(this.text, newlineAt + 1);
     this.scrollCursorIntoView();
   }
 
@@ -444,29 +368,8 @@ export default class Keys {
     const line = this.text.getCurrentLine(this.viewport, this.cursor) || "";
     this.cursor.xLine = Math.min(this.cursor.goalColumn, line.length);
 
-    if (shiftKey) {
-      if (!this.cursor.selectStart || !this.cursor.selectEnd) {
-        this.cursor.selectStart = {
-          xLine: originalXLine,
-          yLine: originalAbsYline,
-        };
-        this.cursor.selectEnd = {
-          xLine: this.cursor.xLine,
-          yLine: this.cursor.yLine,
-        };
-      } else {
-        this.extendShiftSelectionToCaret({
-          xLine: originalXLine,
-          yLine: originalAbsYline,
-        });
-      }
-    } else {
-      this.cursor.selectStart = undefined;
-      this.cursor.selectEnd = undefined;
-    }
-
+    this.finishCaretMove(!!shiftKey);
     this.scrollCursorIntoView();
-    this.cursor.setTrueSelectionDirection();
   }
 
   onArrowDown({
@@ -552,29 +455,8 @@ export default class Keys {
       this.cursor.xLine = Math.min(this.cursor.goalColumn, line.length);
     }
 
-    if (shiftKey) {
-      if (!this.cursor.selectStart || !this.cursor.selectEnd) {
-        this.cursor.selectStart = {
-          xLine: originalXLine,
-          yLine: originalAbsYline,
-        };
-        this.cursor.selectEnd = {
-          xLine: this.cursor.xLine,
-          yLine: this.cursor.yLine,
-        };
-      } else {
-        this.extendShiftSelectionToCaret({
-          xLine: originalXLine,
-          yLine: originalAbsYline,
-        });
-      }
-    } else {
-      this.cursor.selectStart = undefined;
-      this.cursor.selectEnd = undefined;
-    }
-
+    this.finishCaretMove(!!shiftKey);
     this.scrollCursorIntoView();
-    this.cursor.setTrueSelectionDirection();
   }
 
   /**
@@ -595,6 +477,9 @@ export default class Keys {
     shiftKey?: boolean;
     metaKey?: boolean;
   }) {
+    // Offsets may be stale when called directly (tests, onKeyBackspace) rather
+    // than via onKeyDown — reconcile so anchor/head reflect the current caret.
+    this.cursor.reconcileOffsetsFromVisual(this.text);
     const absY = this.cursor.yLine;
     if (metaKey && shiftKey) {
       const [hStart, hEnd] = this.cursor.getAbsBounds();
@@ -708,50 +593,50 @@ export default class Keys {
         }
       }
     } else if (!ctrlHandled) {
-      // Single-character left movement (no ctrl/alt)
-      if (this.cursor.xLine <= 0) {
-        if (this.cursor.yLine > 0) {
-          this.cursor.yLine = Math.max(0, this.cursor.yLine - 1);
-          const line = this.text.getCurrentLine(this.viewport, this.cursor);
-          this.cursor.xLine = line?.length || 0;
-        }
+      // Single visible column left via the anchor/head offset model (any mode).
+      const hadSelection = this.cursor.anchor !== this.cursor.head;
+      if (!shiftKey && hadSelection) {
+        // Collapse to the left edge of the selection (no further move).
+        this.cursor.moveToOffset(
+          this.text,
+          Math.min(this.cursor.anchor, this.cursor.head)
+        );
       } else {
-        this.cursor.move(offsetLeft, 0);
+        const next = this.text.stepVisualLeft(
+          this.cursor.xLine,
+          this.cursor.yLine
+        );
+        const { offset, affinity } = this.text.offsetWithAffinityFromVisual(
+          next.xLine,
+          next.yLine
+        );
+        this.cursor.head = offset;
+        this.cursor.headAffinity = affinity;
+        if (!shiftKey) {
+          this.cursor.anchor = offset;
+          this.cursor.anchorAffinity = affinity;
+        }
+        this.cursor.syncVisualFromOffset(this.text);
       }
+      this.scrollCursorIntoView();
+      return;
     }
 
     if (shiftKey) {
-      if (!this.cursor.selectStart || !this.cursor.selectEnd) {
-        this.cursor.selectStart = {
-          xLine: originalXLine,
-          yLine: absY,
-        };
-        this.cursor.selectEnd = {
-          xLine: this.cursor.xLine,
-          yLine: this.cursor.yLine,
-        };
-      } else {
-        this.extendShiftSelectionToCaret({
-          xLine: originalXLine,
-          yLine: absY,
-        });
-      }
+      this.finishCaretMove(true);
     } else {
+      // Non-shift word-jump with an active selection collapses to its left edge.
       if (this.cursor.isSelected()) {
         const [docStart] = this.cursor.getAbsBounds();
         if (docStart) {
           this.cursor.xLine = docStart.xLine;
           this.cursor.yLine = docStart.yLine;
         }
-        offsetLeft = 0;
       }
-
-      this.cursor.selectStart = undefined;
-      this.cursor.selectEnd = undefined;
+      this.finishCaretMove(false);
     }
 
     this.scrollCursorIntoView();
-    this.cursor.setTrueSelectionDirection();
   }
 
   /**
@@ -772,6 +657,8 @@ export default class Keys {
     shiftKey?: boolean;
     metaKey?: boolean;
   }) {
+    // See onArrowLeft: reconcile offsets for direct (non-onKeyDown) callers.
+    this.cursor.reconcileOffsetsFromVisual(this.text);
     const absY = this.cursor.yLine;
     const line = this.text.getLine(absY) ?? "";
     if (metaKey && shiftKey) {
@@ -899,27 +786,36 @@ export default class Keys {
         }
       }
     } else if (!ctrlKey && !ctrlRightHandled) {
-      // Single-character right movement (no ctrl/alt)
-      this.cursor.move(offsetRight, 0);
-
-      const line = this.text.getCurrentLine(this.viewport, this.cursor) || "";
-      let backupXLine = this.cursor.xLine;
-      let backupYLine = this.cursor.yLine;
-
-      if (line.length < this.cursor.xLine) {
-        if (this.cursor.yLine >= this.text.noLines - 1) {
-          // Already on the last visual line: clamp to EOL, never wrap past EOF.
-          this.cursor.xLine = line.length;
-        } else {
-          this.cursor.xLine = 0;
-          this.cursor.yLine++;
+      // Single visible column right via the anchor/head offset model (any mode).
+      const hadSelection = this.cursor.anchor !== this.cursor.head;
+      if (!shiftKey && hadSelection) {
+        // Collapse to the right edge of the selection (no further move).
+        this.cursor.moveToOffset(
+          this.text,
+          Math.max(this.cursor.anchor, this.cursor.head)
+        );
+      } else {
+        // Step one visible column right (crosses line boundaries, honours the
+        // soft-wrap affinity, clamps at EOF), then store the canonical offset.
+        const next = this.text.stepVisualRight(
+          this.cursor.xLine,
+          this.cursor.yLine
+        );
+        const { offset, affinity } = this.text.offsetWithAffinityFromVisual(
+          next.xLine,
+          next.yLine
+        );
+        this.cursor.head = offset;
+        this.cursor.headAffinity = affinity;
+        if (!shiftKey) {
+          this.cursor.anchor = offset;
+          this.cursor.anchorAffinity = affinity;
         }
+        // Derive caret + selectStart/selectEnd from anchor/head.
+        this.cursor.syncVisualFromOffset(this.text);
       }
-
-      if (!this.text.cursorToIndex(this.viewport, this.cursor)) {
-        this.cursor.xLine = backupXLine - 1;
-        this.cursor.yLine = backupYLine;
-      }
+      this.scrollCursorIntoView();
+      return;
     }
 
     // Clamp cursor to document bounds.
@@ -934,37 +830,20 @@ export default class Keys {
     );
 
     if (shiftKey) {
-      if (!this.cursor.selectStart || !this.cursor.selectEnd) {
-        this.cursor.selectStart = {
-          xLine: originalXLine,
-          yLine: absY,
-        };
-        this.cursor.selectEnd = {
-          xLine: this.cursor.xLine,
-          yLine: this.cursor.yLine,
-        };
-      } else {
-        this.extendShiftSelectionToCaret({
-          xLine: originalXLine,
-          yLine: absY,
-        });
-      }
+      this.finishCaretMove(true);
     } else {
+      // Non-shift word-jump with an active selection collapses to its right edge.
       if (this.cursor.isSelected()) {
         const [, docEnd] = this.cursor.getAbsBounds();
         if (docEnd) {
           this.cursor.xLine = docEnd.xLine;
           this.cursor.yLine = docEnd.yLine;
         }
-        offsetRight = 0;
       }
-
-      this.cursor.selectStart = undefined;
-      this.cursor.selectEnd = undefined;
+      this.finishCaretMove(false);
     }
 
     this.scrollCursorIntoView();
-    this.cursor.setTrueSelectionDirection();
   }
 
   onKeyDown(e: KeyboardEvent) {
@@ -998,6 +877,17 @@ export default class Keys {
     let key: Key = e.key as Key;
     // Snapshot to fire onTextChangeCb only when the document actually changes.
     const valueBefore = this.text.value;
+
+    // Make the canonical head/anchor offsets authoritative before handling the
+    // key — the caret/selection may have been set visually (setPosition, mouse,
+    // setMode) without updating the offsets.
+    this.cursor.reconcileOffsetsFromVisual(this.text);
+
+    // Undo/redo: capture the pre-edit state, and whether this key is a
+    // coalescable single-character typing insert (a contiguous typing run is one
+    // undo step). Recorded at the very end iff the document actually changed.
+    const historyBefore = this.annotator.captureSnapshot();
+    const coalesceEdit = key.length === 1 && !e.ctrlKey && !e.metaKey;
 
     // Any key other than vertical movement drops the goal column; ArrowUp/Down
     // manage it themselves so the desired column survives short lines.
@@ -1058,9 +948,13 @@ export default class Keys {
             this.cursor.reset();
             this.cursor.setPosition(sel[0].xLine, sel[0].yLine);
           }
+          const tabOffset = this.text.offsetFromVisual(
+            this.cursor.xLine,
+            this.cursor.yLine
+          );
           this.text.insertText(this.viewport, this.cursor, "\t");
-          this.cursor.move(+1, 0);
-          this.cursor.fixOutOfBounds(this.viewport, this.text);
+          const tabAt = tabOffset >= 0 ? tabOffset : this.cursor.head;
+          this.cursor.moveToOffset(this.text, tabAt + 1);
           this.scrollCursorIntoView();
         }
         break;
@@ -1095,6 +989,20 @@ export default class Keys {
               xLine: (this.text.getLine(lastLine) ?? "").length,
               yLine: lastLine,
             };
+          } else if ((e.key === "z" || e.key === "Z") && !e.shiftKey) {
+            // Undo (Ctrl/Cmd+Z). Self-contained: it restores + scrolls + fires
+            // the change callback + draws, so return before the generic
+            // end-of-key recorder runs (it must not record the undo as an edit).
+            this.annotator.undo();
+            return;
+          } else if (
+            ((e.key === "z" || e.key === "Z") && e.shiftKey) ||
+            e.key === "y" ||
+            e.key === "Y"
+          ) {
+            // Redo (Ctrl/Cmd+Shift+Z, or Ctrl+Y on Windows).
+            this.annotator.redo();
+            return;
           }
           break;
         }
@@ -1111,9 +1019,18 @@ export default class Keys {
             this.cursor.setPosition(area[0].xLine, area[0].yLine);
           }
 
+          // Insert at the caret's raw offset and move to offset + length via the
+          // offset model. This keeps the caret in bounds after a re-wrap and
+          // clears any stale (collapsed) selection — replacing move() +
+          // fixOutOfBounds, which left both to drift.
+          const insertOffset = this.text.offsetFromVisual(
+            this.cursor.xLine,
+            this.cursor.yLine
+          );
           this.text.insertText(this.viewport, this.cursor, key);
-          this.cursor.move(+1, 0);
-          this.cursor.fixOutOfBounds(this.viewport, this.text);
+          const insertAt =
+            insertOffset >= 0 ? insertOffset : this.cursor.head;
+          this.cursor.moveToOffset(this.text, insertAt + key.length);
 
           // When typing moves the cursor outside of the current viewport,
           // keep behaviour consistent with arrow keys and scroll so that
@@ -1129,6 +1046,22 @@ export default class Keys {
     ) {
       this.annotator.onTextChangeCb(this.text.value);
     }
+
+    // Keep the canonical document offset (head/anchor) in sync with the final
+    // visual caret after ANY key. Edits set head exactly via moveToOffset and
+    // re-deriving from the visual is idempotent; pure-visual navigation
+    // (vertical, Home/End, word-jump, page, mouse-independent) is captured here.
+    // keepAnchor while a selection is active so the fixed end is preserved.
+    if (this.cursor.xLine >= 0 && this.cursor.yLine >= 0) {
+      this.cursor.syncOffsetFromVisual(this.text, this.cursor.isSelected());
+    }
+
+    // Record the pre-edit state for undo when the document actually changed.
+    // Undo/redo keypresses returned earlier, so they are never recorded here.
+    if (this.text.value !== valueBefore) {
+      this.annotator.recordHistory(historyBefore, coalesceEdit);
+    }
+
     this.annotator.draw();
   }
 }

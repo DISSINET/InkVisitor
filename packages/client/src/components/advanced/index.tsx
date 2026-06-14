@@ -34,6 +34,8 @@ import { LayoutSeparatorHorizontal } from "./PanelSeparator/LayoutSeparatorHoriz
 import { PaginationControls } from "./PaginationControls/PaginationControls";
 import { GlobalValidationsModal } from "./GlobalValidationsModal/GlobalValidationsModal";
 import { EntityTagById } from "./EntityTag/EntityTagById";
+import { StatsChart } from "./Stats/StatsChart";
+import { StatsTable } from "./Stats/StatsTable";
 
 const Dropdown = {
   Single: {
@@ -81,4 +83,6 @@ export {
   ValidationRule,
   PaginationControls,
   GlobalValidationsModal,
+  StatsChart,
+  StatsTable,
 };

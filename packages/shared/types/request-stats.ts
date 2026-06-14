@@ -1,13 +1,8 @@
 import { EntityEnums, RelationEnums } from "../enums";
 
-import { TimeUnit, Aggregation, EventType } from "./stats";
+import { IStatsAggregationParams } from "./stats";
 
-export interface IRequestStats {
-  fromDate: number;
-  toDate: number;
-  timeUnit: TimeUnit;
-  eventType: EventType[];
-  aggregateBy: Aggregation;
+export interface IRequestStats extends IStatsAggregationParams {
   filter: {
     userIds: string[] | "all";
     editActivities: {

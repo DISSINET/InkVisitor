@@ -9,7 +9,7 @@
 import "ts-jest";
 import { Db } from "@service/rethink";
 import QuerySearch from "./search";
-import { Query } from "@inkvisitor/shared/types/query";
+import { Explore, Query } from "@inkvisitor/shared/types/query";
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { SearchEdge, SearchNode } from ".";
 import { deleteEntities, getEntitiesDataByClass } from "@service/shorthands";
@@ -26,8 +26,7 @@ const mockSearch = (rootType: Query.NodeType): QuerySearch => {
       id: "root",
     },
     {
-      view: {},
-      columns: [],
+      view: { mode: Explore.EViewMode.Table, columns: [] },
       filters: [],
       sort: undefined,
       limit: 0,
@@ -73,8 +72,7 @@ describe.skip("test QuerySearch", () => {
         ],
       },
       {
-        view: {},
-        columns: [],
+        view: { mode: Explore.EViewMode.Table, columns: [] },
         filters: [],
         sort: undefined,
         limit: 0,

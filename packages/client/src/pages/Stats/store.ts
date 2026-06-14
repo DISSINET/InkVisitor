@@ -1,4 +1,5 @@
 import { Aggregation, EventType, TimeUnit } from "@inkvisitor/shared/types/stats";
+import { VISIBLE_EVENT_TYPES } from "./constants";
 
 export interface StatsStore {
   dateFrom: string;
@@ -27,7 +28,7 @@ export const initialState: StatsStore = {
   dateTo: new Date().toISOString(),
   timeUnit: TimeUnit.YEAR,
   aggregate: Aggregation.USER,
-  eventType: [EventType.TEXT_EDIT, EventType.ANCHOR_ADD],
+  eventType: [...VISIBLE_EVENT_TYPES],
   showAggregateOptions: false, // Hidden by default
   showDateFromRangePicker: false, // Hidden by default, show "Since Forever"
   showDateToRangePicker: false, // Hidden by default, show "Until Now"

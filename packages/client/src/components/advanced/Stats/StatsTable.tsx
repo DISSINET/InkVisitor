@@ -1,10 +1,14 @@
-import { IRequestStats, IResponseStats } from "@inkvisitor/shared/types";
+import { IResponseStats } from "@inkvisitor/shared/types";
 import { useUsersGetMoreQuery } from "hooks/react-query/useUsersGetMoreQuery";
 import { useMemo } from "react";
 import { Column, useTable } from "react-table";
-import { TABLE_PADDING } from "../../constants";
-import { getDataCategories, transformDataForTable } from "../../utils";
 import {
+  TABLE_PADDING,
+  getDataCategories,
+  transformDataForTable,
+} from "./statsViz.utils";
+import {
+  StyledEmptyState,
   StyledTable,
   StyledTableContainer,
   StyledTd,
@@ -15,7 +19,6 @@ interface StatsTableProps {
   data: IResponseStats;
   height: number;
   width: number;
-  request: IRequestStats;
 }
 
 interface TableRow {
@@ -23,14 +26,8 @@ interface TableRow {
   [key: string]: string | number;
 }
 
-export const StatsTable = ({
-  data,
-  height,
-  request,
-  width,
-}: StatsTableProps) => {
-  const { values } = data;
-  const { aggregateBy } = request;
+export const StatsTable = ({ data, height, width }: StatsTableProps) => {
+  const { values, aggregateBy } = data;
 
   const { data: dataUsers } = useUsersGetMoreQuery();
 
@@ -78,6 +75,14 @@ export const StatsTable = ({
       columns,
       data: tableData,
     });
+
+  if (dataCategories.length === 0) {
+    return (
+      <StyledEmptyState $height={height} $width={width}>
+        No data for the selected filters
+      </StyledEmptyState>
+    );
+  }
 
   return (
     <StyledTableContainer $height={height} $width={width}>

@@ -37,6 +37,7 @@ import {
   PermissionDeniedError,
 } from "@inkvisitor/shared/types/errors";
 import { IRequestQuery, IRequestQueryExport } from "@inkvisitor/shared/types/request-query";
+import { Explore } from "@inkvisitor/shared/types/query";
 import { IRequestSearch } from "@inkvisitor/shared/types/request-search";
 import Document from "@models/document/document";
 import { IResponseQuery } from "@inkvisitor/shared/types/response-query";
@@ -758,6 +759,23 @@ export default Router()
       const querySearch = new QuerySearch(request.body.query, request.body.explore);
 
       await querySearch.run(request.db.connection);
+
+      // Stats view: aggregate audit stats over the whole filtered subset and
+      // skip the per-row column computation / pagination entirely.
+      if (request.body.explore.view.mode === Explore.EViewMode.Stats) {
+        const stats = await querySearch.getStats(request.db.connection);
+        const entityIds = querySearch.results?.items ?? [];
+
+        return {
+          query: request.body.query,
+          entityIds,
+          entities: [],
+          explore: querySearch.explore,
+          total: entityIds.length,
+          stats,
+        };
+      }
+
       const results = await querySearch.getResults(request.db.connection);
 
       const entityIds = querySearch.results?.items ?? [];
@@ -804,7 +822,10 @@ export default Router()
         })
         .join("\n");
 
-      const tsvHeader = "result \t" + explore.columns.map((c) => c.name).join("\t");
+      const exportColumns =
+        explore.view.mode === Explore.EViewMode.Table ? explore.view.columns : [];
+      const tsvHeader =
+        "result \t" + exportColumns.map((c) => c.name).join("\t");
 
       return { tsvText: tsvHeader + "\n" + tsvBodyRows };
     })

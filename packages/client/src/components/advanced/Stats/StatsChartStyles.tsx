@@ -6,6 +6,16 @@ export const StyledChartWrapper = styled.div`
   }
 `;
 
+export const StyledEmptyState = styled.div<{ $width: number; $height: number }>`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: ${({ $width }) => $width}px;
+  height: ${({ $height }) => $height}px;
+  color: ${({ theme }) => theme.color.gray[500]};
+  font-size: ${({ theme }) => theme.fontSize.base};
+`;
+
 export const StyledCustomTooltip = styled.div`
   visibility: visible;
   display: flex;

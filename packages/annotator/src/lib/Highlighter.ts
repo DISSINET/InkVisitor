@@ -138,7 +138,8 @@ export default class Highlighter {
     } else if (this.hlMode === "select") {
       ctx.globalCompositeOperation = "color";
       ctx.globalAlpha = 1;
-      ctx.fillRect(xStart * charWidth, y, width || 1, height);
+      // width === 0 means a collapsed caret; honor the configured caret width.
+      ctx.fillRect(xStart * charWidth, y, width || options.caretWidth || 1, height);
     }
   }
 
