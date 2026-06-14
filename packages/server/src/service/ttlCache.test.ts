@@ -262,6 +262,43 @@ describe("TtlCache", () => {
     });
   });
 
+  describe("versions map bounding (maxVersions)", () => {
+    it("drops oldest version entries once maxVersions is exceeded", () => {
+      const cache = new TtlCache({ maxVersions: 1 });
+      cache.delete("a");
+      cache.delete("a");
+      expect(cache.snapshot("a")).toBe(2); // still the only tracked key
+      cache.delete("b"); // evicts the now-oldest "a"
+      expect(cache.snapshot("a")).toBe(0); // a's counter was dropped, re-seen fresh
+    });
+
+    it("default maxVersions (maxEntries * 4) keeps the working set tracked", () => {
+      const cache = new TtlCache({ maxEntries: 2 }); // maxVersions = 8
+      for (let i = 0; i < 8; i++) cache.snapshot(`k${i}`);
+      cache.delete("k7");
+      expect(cache.snapshot("k7")).toBe(1); // well within the window, not evicted
+    });
+
+    it("eviction never lets a stale value land via the delete path", () => {
+      // A delete during the read must still reject the in-flight trySet, even
+      // after unrelated churn evicts other version entries.
+      const cache = new TtlCache({ maxVersions: 2 });
+      const v = cache.snapshot("hot");
+      cache.snapshot("x"); // churn
+      cache.delete("hot"); // invalidation during the read
+      cache.snapshot("y"); // more churn -> evicts the oldest (x)
+      expect(cache.trySet("hot", { stale: true }, 1000, v)).toBe(false);
+      expect(cache.get("hot")).toBeUndefined();
+    });
+
+    it("Infinity maxVersions (default when maxEntries unset) never evicts versions", () => {
+      const cache = new TtlCache();
+      for (let i = 0; i < 1000; i++) cache.snapshot(`k${i}`);
+      cache.delete("k0");
+      expect(cache.snapshot("k0")).toBe(1); // retained
+    });
+  });
+
   describe("singleton export", () => {
     it("exports a shared instance", () => {
       singletonCache.clear();

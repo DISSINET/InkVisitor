@@ -9,6 +9,14 @@ export interface TtlCacheOptions {
    * used (by `get`/`set` order) entries are dropped. Defaults to Infinity.
    */
   maxEntries?: number;
+  /**
+   * How many version counters to keep around. We add one every time we read a
+   * key, so without a limit this map would slowly grow forever. Once the limit
+   * is reached we drop the oldest counters - that's safe: the worst that can
+   * happen is a cache write skips itself and we re-read next time, never stale
+   * data. Defaults to four times `maxEntries`.
+   */
+  maxVersions?: number;
 }
 
 /**
@@ -36,13 +44,16 @@ export class TtlCache {
   // readers' versions before their `trySet` lands.
   //
   // Versions are NOT cleared on eviction or expiry: an in-flight reader's
-  // snapshot must remain comparable for the lifetime of its DB read.
-  // Growth is one number per unique key ever touched.
+  // snapshot must remain comparable for the lifetime of its DB read. The map
+  // is instead bounded by `maxVersions` (see evictVersionsIfOverflow) so it
+  // can't grow one entry per distinct key ever read for the process lifetime.
   private readonly versions = new Map<string, number>();
   private readonly maxEntries: number;
+  private readonly maxVersions: number;
 
   constructor(options: TtlCacheOptions = {}) {
     this.maxEntries = options.maxEntries ?? Infinity;
+    this.maxVersions = options.maxVersions ?? this.maxEntries * 4;
   }
 
   get<T>(key: string): T | undefined {
@@ -77,6 +88,7 @@ export class TtlCache {
       return existing;
     }
     this.versions.set(key, 0);
+    this.evictVersionsIfOverflow();
     return 0;
   }
 
@@ -117,7 +129,13 @@ export class TtlCache {
 
   delete(key: string): void {
     this.store.delete(key);
-    this.versions.set(key, (this.versions.get(key) ?? 0) + 1);
+    // Re-insert (delete+set) so the just-invalidated key moves to the newest
+    // insertion position, keeping insertion order aligned with recency so
+    // version eviction only ever drops long-untouched keys.
+    const next = (this.versions.get(key) ?? 0) + 1;
+    this.versions.delete(key);
+    this.versions.set(key, next);
+    this.evictVersionsIfOverflow();
   }
 
   deletePrefix(prefix: string): void {
@@ -159,6 +177,21 @@ export class TtlCache {
       const oldest = this.store.keys().next().value;
       if (oldest === undefined) return;
       this.store.delete(oldest);
+    }
+  }
+
+  /**
+   * Drops oldest-by-insertion `versions` entries until size <= maxVersions.
+   * Safe because a freshly snapshotted/invalidated key is the newest entry,
+   * so only keys untouched long enough for their read to have finished get
+   * dropped; an absent version makes `trySet` conservatively refuse (re-read
+   * next time) - it can never cause a stale value to be cached.
+   */
+  private evictVersionsIfOverflow(): void {
+    while (this.versions.size > this.maxVersions) {
+      const oldest = this.versions.keys().next().value;
+      if (oldest === undefined) return;
+      this.versions.delete(oldest);
     }
   }
 }
