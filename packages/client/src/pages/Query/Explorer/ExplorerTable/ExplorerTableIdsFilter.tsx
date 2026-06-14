@@ -13,6 +13,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { BiSearch } from "react-icons/bi";
 import { MdClose } from "react-icons/md";
 import { ExploreAction, ExploreActionType } from "../state";
 import {
@@ -27,6 +28,8 @@ import {
   StyledIdsPanelHeader,
   StyledIdsPanelTitle,
   StyledIdsToggleButton,
+  StyledIdsToggleClear,
+  StyledIdsToggleWrapper,
   StyledUuidChip,
   StyledUuidChipRemove,
 } from "./ExplorerTableStyles";
@@ -48,7 +51,7 @@ const shortenUuid = (id: string): string =>
 // positioned ancestor (the explorer area) so it never spills out of the page.
 const PANEL_BOTTOM_GAP = 8;
 const PANEL_TOP_MARGIN = 16;
-const PANEL_MIN_HEIGHT = 140;
+const PANEL_MIN_HEIGHT = 200;
 
 const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({ filters, dispatch }) => {
   const rowIdsFilter = getRowIdsFilter(filters);
@@ -59,10 +62,16 @@ const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({ filters
   const [allSelected, setAllSelected] = useState(false);
   const [maxPanelHeight, setMaxPanelHeight] = useState<number | undefined>(undefined);
   const inputRef = useRef<HTMLInputElement>(null);
+  const chipBoxRef = useRef<HTMLDivElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
+  const buttonRef = useRef<HTMLDivElement>(null);
+  const scrollToBottomPendingRef = useRef(false);
 
   const showSelected = allSelected && appliedIds.length > 0;
+
+  const requestScrollToBottom = () => {
+    scrollToBottomPendingRef.current = true;
+  };
 
   const dispatchFilter = useCallback(
     (ids: string[]) => {
@@ -99,6 +108,12 @@ const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({ filters
     },
     [appliedIds, dispatchFilter],
   );
+
+  const clearAllIds = () => {
+    setAllSelected(false);
+    dispatchFilter([]);
+    setDraft("");
+  };
 
   const removeId = (id: string) => {
     setAllSelected(false);
@@ -153,6 +168,7 @@ const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({ filters
     if (showSelected) {
       replaceWith(pasted);
       setAllSelected(false);
+      requestScrollToBottom();
       return;
     }
 
@@ -165,6 +181,7 @@ const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({ filters
         pasted,
       ),
     );
+    requestScrollToBottom();
   };
 
   // The draft is flagged invalid only once it can no longer become a valid UUID,
@@ -180,6 +197,18 @@ const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({ filters
     const id = window.setTimeout(() => inputRef.current?.focus(), 0);
     return () => window.clearTimeout(id);
   }, [isOpen]);
+
+  // After paste, chips render on the next frame — scroll the box to the bottom then.
+  useLayoutEffect(() => {
+    if (!isOpen || !scrollToBottomPendingRef.current) {
+      return;
+    }
+    scrollToBottomPendingRef.current = false;
+    const el = chipBoxRef.current;
+    if (el) {
+      el.scrollTop = el.scrollHeight;
+    }
+  }, [appliedIds, draft, isOpen]);
 
   // Bound the panel height to the floating container's positioned ancestor (the
   // explorer area), so a long list of UUIDs scrolls inside the page instead of
@@ -234,7 +263,7 @@ const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({ filters
             </StyledUuidChipRemove>
           </StyledIdsPanelHeader>
 
-          <StyledChipInputBox onClick={() => inputRef.current?.focus()}>
+          <StyledChipInputBox ref={chipBoxRef} onClick={() => inputRef.current?.focus()}>
             {appliedIds.map((id) => (
               <StyledUuidChip key={id} title={id} $selected={showSelected}>
                 {shortenUuid(id)}
@@ -281,11 +310,7 @@ const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({ filters
               <StyledClearAllButton
                 type="button"
                 onMouseDown={(e) => e.preventDefault()}
-                onClick={() => {
-                  setAllSelected(false);
-                  dispatchFilter([]);
-                  setDraft("");
-                }}
+                onClick={clearAllIds}
               >
                 <MdClose size={13} />
                 Clear all
@@ -295,17 +320,29 @@ const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({ filters
         </StyledIdsPanel>
       )}
 
-      <StyledIdsToggleButton
-        ref={buttonRef}
-        type="button"
-        aria-expanded={isOpen}
-        onClick={() => setIsOpen((open) => !open)}
-      >
-        + UUIDs
+      <StyledIdsToggleWrapper ref={buttonRef}>
+        <StyledIdsToggleButton
+          type="button"
+          aria-expanded={isOpen}
+          onClick={() => setIsOpen((open) => !open)}
+        >
+          {appliedIds.length > 0 ? <BiSearch size={18} /> : "+ "}
+          UUIDs
+          {appliedIds.length > 0 && (
+            <StyledIdsCountBadge>{appliedIds.length}</StyledIdsCountBadge>
+          )}
+        </StyledIdsToggleButton>
         {appliedIds.length > 0 && (
-          <StyledIdsCountBadge>{appliedIds.length}</StyledIdsCountBadge>
+          <StyledIdsToggleClear
+            type="button"
+            aria-label="Clear all UUIDs"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={clearAllIds}
+          >
+            <MdClose size={16} />
+          </StyledIdsToggleClear>
         )}
-      </StyledIdsToggleButton>
+      </StyledIdsToggleWrapper>
     </StyledIdsFloatingRoot>
   );
 };

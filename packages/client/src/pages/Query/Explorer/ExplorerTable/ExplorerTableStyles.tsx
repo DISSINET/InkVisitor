@@ -189,7 +189,7 @@ export const StyledChipInputBox = styled.div`
   gap: 0.4rem;
   // grow with content, then scroll within the (height-bounded) panel
   flex: 1 1 auto;
-  min-height: ${({ theme }) => theme.space[10]};
+  min-height: ${({ theme }) => theme.space[28]};
   overflow-y: auto;
   padding: 0.3rem 0.5rem;
   cursor: text;
@@ -206,7 +206,7 @@ export const StyledChipInputBox = styled.div`
 export const StyledIdsFloatingRoot = styled.div`
   position: absolute;
   right: 2rem;
-  bottom: calc(2rem + ${FLOATING_SEARCH_COLLAPSED_SIZE}px + 0.75rem);
+  bottom: calc(2rem + ${FLOATING_SEARCH_COLLAPSED_SIZE}px + 1.5rem);
   z-index: 161;
   display: flex;
   flex-direction: column;
@@ -214,25 +214,45 @@ export const StyledIdsFloatingRoot = styled.div`
   gap: 0.5rem;
 `;
 
+export const StyledIdsToggleWrapper = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: ${({ theme }) => theme.borderRadius.full};
+  background-color: ${({ theme }) => theme.color.invertedBg["info"]};
+  box-shadow: ${({ theme }) => theme.boxShadow.high};
+  transition: box-shadow 0.2s;
+  &:hover {
+    box-shadow: ${({ theme }) => theme.boxShadow.normal};
+  }
+`;
+
 export const StyledIdsToggleButton = styled.button`
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.6rem 1.2rem;
+  padding: 0;
   border: none;
-  border-radius: ${({ theme }) => theme.borderRadius.full};
   cursor: pointer;
   white-space: nowrap;
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   font-weight: ${({ theme }) => theme.fontWeight.bold};
   color: ${({ theme }) => theme.color["info"]};
-  background-color: ${({ theme }) => theme.color.invertedBg["info"]};
-  box-shadow: ${({ theme }) => theme.boxShadow.high};
-  transition:
-    background-color 0.2s,
-    box-shadow 0.2s;
+  background: transparent;
+`;
+
+export const StyledIdsToggleClear = styled.button`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: ${({ theme }) => theme.color["info"]};
+  cursor: pointer;
   &:hover {
-    box-shadow: ${({ theme }) => theme.boxShadow.normal};
+    color: ${({ theme }) => theme.color["danger"]};
   }
 `;
 
@@ -253,7 +273,7 @@ export const StyledIdsPanel = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  width: 32rem;
+  width: 30rem;
   max-width: calc(100vw - 4rem);
   min-height: 0;
   padding: 0.75rem;
