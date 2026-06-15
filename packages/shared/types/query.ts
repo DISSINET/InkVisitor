@@ -977,7 +977,8 @@ export namespace Explore {
   }
   interface IExploreCreatedAtFilter {
     type: SearchOption.CreatedAt;
-    createdAt: string;
+    createdAfter?: string;
+    createdBefore?: string;
   }
   interface IExploreUpdatedAtFilter {
     type: SearchOption.UpdatedAt;
