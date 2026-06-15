@@ -4,6 +4,7 @@ import Superclass from "@models/relation/superclass";
 import { Setting } from "@models/setting/setting";
 import { findEntityById, getEntitiesByIds } from "@service/shorthands";
 import { EntityEnums, RelationEnums, WarningTypeEnums } from "@inkvisitor/shared/enums";
+import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 import {
   IAction,
   IConcept,
@@ -58,57 +59,113 @@ export default class EntityWarnings {
 
     const warnings: IWarning[] = [];
 
-    if (settings.find((s) => s.id === "validation_SCLM")?.value === true) {
+    // a validation runs only when its stored setting is explicitly true;
+    // defaults live in the seeded settings (datasets/*/settings.json)
+    const isActive = (warningType: WarningTypeEnums): boolean =>
+      settings.find((s) => s.id === `validation_${warningType}`)?.value === true;
+
+    if (isActive(WarningTypeEnums.SCLM)) {
       const sclmWarning = await this.hasSCLM(conn);
       if (sclmWarning) {
         warnings.push(sclmWarning);
       }
     }
 
-    if (settings.find((s) => s.id === "validation_MAEE")?.value === true) {
+    if (isActive(WarningTypeEnums.MAEE)) {
       const maeeWarning = await this.hasMAEE(conn);
       if (maeeWarning) {
         warnings.push(maeeWarning);
       }
     }
 
-    // these rules cannot be disabled
-    const isyncWarning = await this.hasISYNC(conn);
-    if (isyncWarning) {
-      warnings.push(isyncWarning);
+    if (isActive(WarningTypeEnums.ISYNC)) {
+      const isyncWarning = await this.hasISYNC(conn);
+      if (isyncWarning) {
+        warnings.push(isyncWarning);
+      }
     }
 
-    const isyncaeeWarning = await this.hasISYNCAEE(conn);
-    if (isyncaeeWarning) {
-      warnings.push(isyncaeeWarning);
+    if (isActive(WarningTypeEnums.ISYNCAEE)) {
+      const isyncaeeWarning = await this.hasISYNCAEE(conn);
+      if (isyncaeeWarning) {
+        warnings.push(isyncaeeWarning);
+      }
     }
 
-    const avalWarnings = await this.hasAVAL(conn);
-    if (avalWarnings) {
-      avalWarnings.forEach((w) => warnings.push(w));
+    if (isActive(WarningTypeEnums.AVAL)) {
+      const avalWarnings = await this.hasAVAL(conn);
+      if (avalWarnings) {
+        avalWarnings.forEach((w) => warnings.push(w));
+      }
     }
 
-    const mvalWarning = await this.hasMVAL(conn);
-    if (mvalWarning) {
-      warnings.push(mvalWarning);
+    if (isActive(WarningTypeEnums.MVAL)) {
+      const mvalWarning = await this.hasMVAL(conn);
+      if (mvalWarning) {
+        warnings.push(mvalWarning);
+      }
     }
 
-    const psmWarning = await this.hasPSM(conn);
-    if (psmWarning) {
-      warnings.push(psmWarning);
+    if (isActive(WarningTypeEnums.PSM)) {
+      const psmWarning = await this.hasPSM(conn);
+      if (psmWarning) {
+        warnings.push(psmWarning);
+      }
     }
 
-    const lmWarning = await this.hasLM(conn);
-    if (lmWarning) {
-      warnings.push(lmWarning);
+    if (isActive(WarningTypeEnums.LM)) {
+      const lmWarning = await this.hasLM(conn);
+      if (lmWarning) {
+        warnings.push(lmWarning);
+      }
     }
 
-    const vetmWarnings = await this.hasVETM(conn);
-    if (vetmWarnings) {
-      vetmWarnings.forEach((w) => warnings.push(w));
+    if (isActive(WarningTypeEnums.VETM)) {
+      const vetmWarnings = await this.hasVETM(conn);
+      if (vetmWarnings) {
+        vetmWarnings.forEach((w) => warnings.push(w));
+      }
+    }
+
+    // validation_DM is conditional on entity class. Its value may be:
+    //   true        -> applies to all classes (default when unset)
+    //   string[]     -> applies to the listed classes
+    //   false/empty  -> off
+    const dmValue =
+      settings.find((s) => s.id === "validation_DM")?.value ?? true;
+    const dmClasses: EntityEnums.Class[] =
+      dmValue === true
+        ? classesAll
+        : Array.isArray(dmValue)
+        ? (dmValue as EntityEnums.Class[])
+        : [];
+    if (dmClasses.includes(this.class)) {
+      const dmWarning = await this.hasDM(conn);
+      if (dmWarning) {
+        warnings.push(dmWarning);
+      }
     }
 
     return warnings;
+  }
+
+  /**
+   * Tests if there is DM warning and returns it
+   * DM warning should pop when the entity's detail field is empty
+   * @param conn
+   * @returns
+   */
+  async hasDM(conn: Connection): Promise<IWarning | null> {
+    const entity = await findEntityById(conn, this.entityId);
+
+    if (!entity || !entity.detail || entity.detail.trim().length === 0) {
+      return this.newWarning(
+        WarningTypeEnums.DM,
+        IWarningPositionSection.Entity
+      );
+    }
+
+    return null;
   }
 
   async getTBasedWarnings(

@@ -1,16 +1,16 @@
 import {
   globalValidationsDict,
   ValidationKey,
-  WarningKey,
   WarningTypeEnums,
 } from "@inkvisitor/shared/enums/warning";
 import React, { useState } from "react";
 import {
   StyledGridFormLabel,
+  StyledGridFormLabelContent,
   StyledToggleWrap,
 } from "./GlobalValidationsModalStyles";
 import { FaToggleOn, FaToggleOff } from "react-icons/fa";
-import { Tooltip } from "components";
+import { Tooltip, WarningIcon } from "components";
 
 interface GlobalValidationsSettingsRow {
   validation: ValidationKey;
@@ -21,28 +21,29 @@ export const GlobalValidationsSettingsRow: React.FC<
   GlobalValidationsSettingsRow
 > = ({ validation, active, toggleRule }) => {
   const [referenceElement, setReferenceElement] =
-    useState<HTMLButtonElement | null>(null);
+    useState<HTMLSpanElement | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
   const tooltipLabel = globalValidationsDict[validation].label;
   const tooltipContent = globalValidationsDict[validation].description;
 
-  const isDisabled = !globalValidationsDict[validation].editAllowed;
   return (
     <>
-      <StyledGridFormLabel
-        ref={setReferenceElement}
-        onMouseEnter={() => setShowTooltip(true)}
-        onMouseLeave={() => setShowTooltip(false)}
-        $disabled={isDisabled}
-      >
-        {globalValidationsDict[validation].label}
+      <StyledGridFormLabel>
+        <StyledGridFormLabelContent
+          ref={setReferenceElement}
+          onMouseEnter={() => setShowTooltip(true)}
+          onMouseLeave={() => setShowTooltip(false)}
+        >
+          <WarningIcon
+            type={validation.replace("validation_", "") as WarningTypeEnums}
+            size={16}
+            showTooltip={false}
+          />
+          {globalValidationsDict[validation].label}
+        </StyledGridFormLabelContent>
       </StyledGridFormLabel>
       <div>
-        <StyledToggleWrap
-          $active={active}
-          $disabled={isDisabled}
-          onClick={() => !isDisabled && toggleRule()}
-        >
+        <StyledToggleWrap $active={active} onClick={() => toggleRule()}>
           {active ? (
             <>
               <FaToggleOn size={22} /> active
@@ -61,7 +62,6 @@ export const GlobalValidationsSettingsRow: React.FC<
           content={<p>{tooltipContent}</p>}
           visible={showTooltip}
           referenceElement={referenceElement}
-          // position={tooltipPosition}
         />
       )}
     </>
