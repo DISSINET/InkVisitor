@@ -128,10 +128,11 @@ export default class EntityWarnings {
     }
 
     // validation_DM is conditional on entity class. Its value may be:
-    //   true        -> applies to all classes
+    //   true        -> applies to all classes (default when unset)
     //   string[]     -> applies to the listed classes
-    //   false/empty  -> off (default)
-    const dmValue = settings.find((s) => s.id === "validation_DM")?.value;
+    //   false/empty  -> off
+    const dmValue =
+      settings.find((s) => s.id === "validation_DM")?.value ?? true;
     const dmClasses: EntityEnums.Class[] =
       dmValue === true
         ? classesAll
