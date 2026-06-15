@@ -11,6 +11,7 @@ import {
   StyledActionButton,
 } from "./InputStyles";
 import { IconWithTooltip } from "components";
+import { DatePicker } from "../DatePicker/DatePicker";
 
 interface Input {
   label?: string;
@@ -254,90 +255,23 @@ export const Input: React.FC<Input> = ({
         />
       )}
       {(type === "datetime-local" || type === "date") && (
-        <div
-          style={{
-            position: "relative",
-            width: "100%",
-            minWidth: "10.2rem",
-            display: "grid",
+        <DatePicker
+          type={type}
+          value={displayValue}
+          width={width}
+          disabled={disabled}
+          clearable={clearable}
+          inverted={inverted}
+          noBorder={noBorder}
+          borderColor={borderColor}
+          placeholder={placeholder}
+          onChange={(newValue) => {
+            setDisplayValue(newValue);
+            onChangeFn(newValue);
           }}
-        >
-          <StyledInput
-            type={type}
-            value={displayValue}
-            width={width}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              setDisplayValue(e.currentTarget.value);
-              if (changeOnType) {
-                onChangeFn(e.currentTarget.value);
-              }
-            }}
-            $noBorder={noBorder}
-            $borderColor={borderColor}
-            disabled={disabled}
-            onFocus={(event: React.FocusEvent<HTMLInputElement>) => onFocus(event)}
-            onBlur={() => {
-              if (displayValue !== value && !changeOnType) {
-                onChangeFn(displayValue);
-              }
-              onBlur();
-            }}
-            $iconCount={clearable && displayValue.length > 0 ? 1 : showSaveExitIcons ? 2 : 0}
-          />
-          {displayValue.length > 0 && clearable && (
-            <StyledClearableInputButton>
-              <MdCancel
-                size={15}
-                onClick={() => {
-                  setDisplayValue("");
-                  onChangeFn("");
-                }}
-              />
-            </StyledClearableInputButton>
-          )}
-
-          {showSaveExitIcons && (
-            <StyledActionButtonGroup>
-              {onEnterPressFn && (
-                <StyledActionButton
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (displayValue !== value && !changeOnType) {
-                      onChangeFn(displayValue);
-                    }
-                    onEnterPressFn();
-                  }}
-                >
-                  <IconWithTooltip
-                    icon={<MdCheck size={15} />}
-                    tooltipLabel="Save changes (Enter)"
-                  />
-                </StyledActionButton>
-              )}
-              {onEscapePressFn && (
-                <StyledActionButton
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onEscapePressFn();
-                  }}
-                >
-                  <IconWithTooltip
-                    icon={<MdClose size={15} />}
-                    tooltipLabel="Cancel changes (Esc)"
-                  />
-                </StyledActionButton>
-              )}
-            </StyledActionButtonGroup>
-          )}
-        </div>
+          onFocus={() => onFocus({} as React.FocusEvent<HTMLInputElement>)}
+          onBlur={onBlur}
+        />
       )}
       {type === "number" && (
         <StyledInput
