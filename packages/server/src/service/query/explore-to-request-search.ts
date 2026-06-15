@@ -27,8 +27,12 @@ export const exploreFiltersToRequestSearch = (
         hasAny = true;
         break;
       case Explore.SearchOption.CreatedAt:
-        if (filter.createdAt) {
-          data.createdDate = new Date(filter.createdAt);
+        if (filter.createdAfter) {
+          data.createdAfter = new Date(filter.createdAfter);
+          hasAny = true;
+        }
+        if (filter.createdBefore) {
+          data.createdBefore = new Date(filter.createdBefore);
           hasAny = true;
         }
         break;

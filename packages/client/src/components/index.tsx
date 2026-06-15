@@ -4,6 +4,7 @@ import { Button } from "./basic/Button/Button";
 import { ButtonGroup, ButtonGroups } from "./basic/ButtonGroup/ButtonGroup";
 import { Checkbox } from "./basic/Checkbox/Checkbox";
 import { Cloud } from "./basic/Cloud/Cloud";
+import { DatePicker } from "./basic/DatePicker/DatePicker";
 import { BaseDropdown } from "./basic/BaseDropdown/BaseDropdown";
 import { Dropzone } from "./basic/Dropzone/Dropzone";
 import { Header } from "./basic/Header/Header";
@@ -55,6 +56,7 @@ export {
   ContactOwnerFooting,
   Cloud,
   CustomScrollbar,
+  DatePicker,
   Dropzone,
   ErrorBoundary,
   Header,

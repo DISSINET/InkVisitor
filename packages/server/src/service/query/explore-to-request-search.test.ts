@@ -29,14 +29,19 @@ describe("exploreFiltersToRequestSearch", () => {
   it("maps created/updated dates from ISO strings to Date", () => {
     const iso = "2024-01-15T00:00:00.000Z";
     const req = exploreFiltersToRequestSearch([
-      { type: Explore.SearchOption.CreatedAt, createdAt: iso },
+      {
+        type: Explore.SearchOption.CreatedAt,
+        createdAfter: iso,
+        createdBefore: "2024-01-16T00:00:00.000Z",
+      },
       {
         type: Explore.SearchOption.UpdatedAt,
         updatedAfter: iso,
         updatedBefore: "2024-01-16T00:00:00.000Z",
       },
     ]);
-    expect(req!.createdDate).toEqual(new Date(iso));
+    expect(req!.createdAfter).toEqual(new Date(iso));
+    expect(req!.createdBefore).toEqual(new Date("2024-01-16T00:00:00.000Z"));
     expect(req!.updatedAfter).toEqual(new Date(iso));
     expect(req!.updatedBefore).toEqual(new Date("2024-01-16T00:00:00.000Z"));
   });
@@ -56,7 +61,7 @@ describe("exploreFiltersToRequestSearch", () => {
     expect(
       exploreFiltersToRequestSearch([
         { type: Explore.SearchOption.CreatedBy, createdBy: "" },
-        { type: Explore.SearchOption.CreatedAt, createdAt: "" },
+        { type: Explore.SearchOption.CreatedAt, createdAfter: "", createdBefore: "" },
       ])
     ).toBeNull();
   });

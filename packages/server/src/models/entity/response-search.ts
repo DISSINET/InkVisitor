@@ -457,7 +457,15 @@ export class SearchQuery {
       this.whereStatus(req.status);
     }
 
-    if (req.createdDate) {
+    if (req.createdAfter || req.createdBefore) {
+      await this._updateEntityIdsFromAudits(req, () =>
+        Audit.getByCreatedInRange(
+          this.connection,
+          req.createdAfter as Date | undefined,
+          req.createdBefore as Date | undefined,
+        )
+      );
+    } else if (req.createdDate) {
       await this._updateEntityIdsFromAudits(req, () =>
         Audit.getByCreatedDate(this.connection, req.createdDate as Date)
       );
