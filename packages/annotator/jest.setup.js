@@ -23,6 +23,9 @@ HTMLCanvasElement.prototype.getContext = jest.fn(() => ({
   beginPath: jest.fn(),
   moveTo: jest.fn(),
   lineTo: jest.fn(),
+  closePath: jest.fn(),
+  arc: jest.fn(),
+  fill: jest.fn(),
   stroke: jest.fn(),
   rect: jest.fn(),
   clip: jest.fn(),
@@ -31,6 +34,7 @@ HTMLCanvasElement.prototype.getContext = jest.fn(() => ({
   strokeStyle: '',
   lineWidth: 1,
   globalAlpha: 1,
+  globalCompositeOperation: 'source-over',
   reset: jest.fn(),
 }));
 
