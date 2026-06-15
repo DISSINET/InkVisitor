@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 export const FLOATING_SEARCH_COLLAPSED_SIZE = 48;
-export const FLOATING_SEARCH_EXPANDED_WIDTH = 270;
+export const FLOATING_SEARCH_EXPANDED_WIDTH = 255;
 export const FLOATING_SEARCH_PAGE_PADDING = 16;
 
 interface StyledFloatingRootProps {
