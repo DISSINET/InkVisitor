@@ -31,6 +31,7 @@ import {
   BadParams,
   CustomError,
   EntityDoesNotExist,
+  IInvalidDeleteErrorData,
   InternalServerError,
   InvalidDeleteError,
   ModelNotValidError,
@@ -314,8 +315,28 @@ export default Router()
           throw new AuditDoesNotExist("cannot restore entity - audit does not exist", entityId);
         }
 
+        // The deletion audit carries the full snapshot of the deleted entity.
+        // Entities deleted before snapshots were stored have empty changes, so
+        // fall back to the create audit, whose changes always hold the full
+        // entity (create requests submit the whole entity).
+        let snapshot = audit.changes as Partial<IEntity>;
+        if (!snapshot || !snapshot.class) {
+          const createAudit = await Audit.getFirstForEntity(
+            request.db.connection,
+            entityId
+          );
+          if (createAudit && (createAudit.changes as Partial<IEntity>)?.class) {
+            snapshot = createAudit.changes as Partial<IEntity>;
+          }
+        }
+        if (!snapshot || !snapshot.class) {
+          throw new ModelNotValidError(
+            "cannot restore entity - no snapshot available to restore from"
+          );
+        }
+
         const restoration = getEntityClass({
-          ...audit.changes,
+          ...snapshot,
         } as Partial<IEntity>);
         if (!restoration.isValid()) {
           throw new ModelNotValidError("");
@@ -335,7 +356,7 @@ export default Router()
         return {
           result: true,
           message: "Entity restored",
-          data: audit.changes,
+          data: snapshot,
         };
       }
     )
@@ -502,7 +523,7 @@ export default Router()
               `Cannot be deleted while linked to relations (${
                 relIds[0] + (relIds.length > 1 ? " + " + (relIds.length - 1) + " others" : "")
               })`
-            ).withData(linkIds);
+            ).withData<IInvalidDeleteErrorData>({ type: "entity", ids: linkIds });
             continue;
           }
 
@@ -513,7 +534,10 @@ export default Router()
               `Cannot be deleted while anchored to documents (${
                 docs[0].id + (docs.length > 1 ? " + " + (docs.length - 1) + " others" : "")
               })`
-            ).withData(docs.map((d) => d.id));
+            ).withData<IInvalidDeleteErrorData>({
+              type: "document",
+              ids: docs.map((d) => d.id),
+            });
             continue;
           }
 
@@ -532,9 +556,12 @@ export default Router()
           const usedBy = await model.getUsedByEntity(req.db.connection);
           if (usedBy.length) {
             out.result = false;
-            out.data[entity.id] = new InvalidDeleteError(`Referenced by other entities`).withData(
-              usedBy.map((e) => e.id)
-            );
+            out.data[entity.id] = new InvalidDeleteError(
+              `Referenced by other entities`
+            ).withData<IInvalidDeleteErrorData>({
+              type: "entity",
+              ids: usedBy.map((e) => e.id),
+            });
             dependencyMap[entity.id] = usedBy.map((e) => e.id);
             continue;
           }
@@ -546,7 +573,8 @@ export default Router()
           for (const entityId of Object.keys(dependencyMap)) {
             if (dependencyMap[entityId].length === 0) {
               try {
-                const model = getEntityClass(existing.find((e) => e.id === entityId));
+                const deletedEntity = existing.find((e) => e.id === entityId);
+                const model = getEntityClass(deletedEntity);
                 if ((await model.delete(req.db.connection)).deleted !== 1) {
                   throw new InternalServerError(`cannot delete entity ${entityId}`);
                 }
@@ -555,7 +583,9 @@ export default Router()
                   req.db.connection,
                   entityId,
                   req.getUserOrFail().id,
-                  AuditScope.Entity
+                  AuditScope.Entity,
+                  // store the full entity snapshot so it can be restored later
+                  deletedEntity ? { ...deletedEntity } : {}
                 );
                 removeDependency(entityId);
                 removedCount++;
