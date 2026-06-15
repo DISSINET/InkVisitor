@@ -2,8 +2,9 @@ import { nonenumerable } from "@common/decorators";
 import { IModel, determineOrder } from "@models/common";
 import Entity from "@models/entity/entity";
 import User from "@models/user/user";
-import { findEntityById } from "@service/shorthands";
+import { entityCacheKey, findEntityById } from "@service/shorthands";
 import treeCache from "@service/treeCache";
+import { cache } from "@service/ttlCache";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IParentTerritory, ITerritory, ITerritoryData } from "@inkvisitor/shared/types";
 import { ITerritoryModel } from "./territory-model";
@@ -257,6 +258,7 @@ class Territory extends Entity implements ITerritoryModel {
       .update(updateData)
       .run(db);
 
+    cache.delete(entityCacheKey(this.id));
     await treeCache.initialize();
 
     return result;

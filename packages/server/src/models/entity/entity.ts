@@ -3,10 +3,11 @@ import { IDbModel, fillArray, fillFlatObject } from "@models/common";
 import Document from "@models/document/document";
 import Prop from "@models/prop/prop";
 import User from "@models/user/user";
-import { findEntityById } from "@service/shorthands";
+import { entityCacheKey, findEntityById } from "@service/shorthands";
+import { cache } from "@service/ttlCache";
 
 import { AnchorsNode } from "@models/document/anchors";
-import { Setting } from "@models/setting/setting";
+import { ISetting } from "@inkvisitor/shared/types/settings";
 import {
   DbEnums,
   EntityEnums,
@@ -128,7 +129,7 @@ export default class Entity implements IEntity, IDbModel {
     }
   }
 
-  update(
+  async update(
     db: Connection | undefined,
     updateData: Partial<IEntity>
   ): Promise<WriteResult> {
@@ -141,7 +142,9 @@ export default class Entity implements IEntity, IDbModel {
         !(key in entityAllowedFields) && delete updateData[key as keyof IEntity]
     );
 
-    return rethink.table(Entity.table).get(this.id).update(updateData).run(db);
+    const result = await rethink.table(Entity.table).get(this.id).update(updateData).run(db);
+    cache.delete(entityCacheKey(this.id));
+    return result;
   }
 
   async getUsedByEntity(db: Connection): Promise<IEntity[]> {
@@ -179,6 +182,7 @@ export default class Entity implements IEntity, IDbModel {
       .delete()
       .run(db);
 
+    cache.delete(entityCacheKey(this.id));
     return result;
   }
 
@@ -225,37 +229,15 @@ export default class Entity implements IEntity, IDbModel {
     db: Connection | undefined,
     entityId: string
   ): Promise<IEntity[]> {
-    const entries = await rethink
+    // Uses the `props.recursive` multi-index (see
+    // packages/database/scripts/import/indexes.ts) which contains every
+    // entityId referenced from props/children up to 3 levels deep.
+    // Used to be a full-table .filter() walking the same shape - same
+    // result set, but linear in table size and several seconds on prod.
+    return await rethink
       .table(Entity.table)
-      .filter((row: RDatum) => {
-        return row("props").contains((entry: RDatum) =>
-          rethink.or(
-            entry("value")("entityId").eq(entityId),
-            entry("type")("entityId").eq(entityId),
-            entry("children").contains((ch1: RDatum) =>
-              rethink.or(
-                ch1("value")("entityId").eq(entityId),
-                ch1("type")("entityId").eq(entityId),
-                ch1("children").contains((ch2: RDatum) =>
-                  rethink.or(
-                    ch2("value")("entityId").eq(entityId),
-                    ch2("type")("entityId").eq(entityId),
-                    ch2("children").contains((ch3: RDatum) =>
-                      rethink.or(
-                        ch3("value")("entityId").eq(entityId),
-                        ch3("type")("entityId").eq(entityId)
-                      )
-                    )
-                  )
-                )
-              )
-            )
-          )
-        );
-      })
+      .getAll(entityId, { index: DbEnums.Indexes.PropsRecursive })
       .run(db);
-
-    return entries;
   }
 
   /**
@@ -388,7 +370,7 @@ export default class Entity implements IEntity, IDbModel {
     classificationEs: IConcept[],
     soeEs: IEntity[],
     propValueEs: IEntity[],
-    settings: Setting[]
+    settings: ISetting[]
   ): IWarning[] {
     const warnings: IWarning[] = [];
 

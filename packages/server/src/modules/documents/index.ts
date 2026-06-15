@@ -21,6 +21,7 @@ import {
 } from "@inkvisitor/shared/types/errors";
 import { EventType } from "@inkvisitor/shared/types/stats";
 import { Router } from "express";
+import { r as rethink } from "rethinkdb-ts";
 import { IRequest } from "src/custom_typings/request";
 import { asyncRouteHandler } from "../index";
 import { createOpeningTagRegex, closingTagRegex } from "@common/regex";
@@ -55,21 +56,36 @@ export default Router()
   .get(
     "/",
     asyncRouteHandler<IDocumentMeta[]>(async (request: IRequest) => {
-      const docs = await Document.getAll(request.db.connection);
+      // Metadata-only fetch. `content` and `anchors` are dropped at the
+      // DB so they never cross the wire to Node (anchors trees can run
+      // into MBs per doc); the list consumers only use id / title /
+      // entityIds / dates. Full content and anchor tree are served by
+      // GET /documents/:id when actually needed.
+      //
+      // Every write path runs Document.preprocess before saving, so
+      // anchors and entityIds are persisted on each row. We don't
+      // recompute them on read - documents pre-dating preprocess must
+      // be re-saved (any edit triggers it) to populate the fields.
+      const docs = (await rethink
+        .table(Document.table)
+        .orderBy(rethink.asc("createdAt"))
+        .without("content", "anchors")
+        .run(request.db.connection)) as IDocument[];
 
-      const docResponses: IDocumentMeta[] = [];
-      for (const d of docs) {
+      return docs.map((d) => {
         const document = new Document(d);
-        if (!document.anchors || document.anchors.length === 0) {
-          await document.preprocess(request.db.connection);
-        }
-
-        // @ts-ignore 
+        // @ts-ignore content/anchors are part of IDocument but trimmed from the list response
         delete document.content;
-        docResponses.push(document);
-      }
-
-      return docResponses;
+        document.anchors = [];
+        // Legacy compatibility: rows not re-saved since preprocess-on-write
+        // (#2643) may store entityIds in an old shape (flat string[] or an
+        // object missing class keys such as `T`). Dev masked this by
+        // re-running preprocess on every read; we instead normalize the
+        // shape here so the client never reads entityIds.T as undefined and
+        // crashes. No-op for current rows; re-saving a legacy doc fixes it.
+        document.entityIds = Document.normalizeEntityIds(document.entityIds);
+        return document;
+      });
     })
   )
   .get(

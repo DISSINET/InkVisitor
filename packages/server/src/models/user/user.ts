@@ -8,6 +8,14 @@ import { generatePassword } from "@common/functions";
 import { nonenumerable } from "@common/decorators";
 import { Db } from "@service/rethink";
 import { DbHandle } from "@service/dbHandle";
+import { cache } from "@service/ttlCache";
+
+// No TTL: invalidation is fully owned by the changefeed listener in
+// service/changefeedInvalidator.ts plus the explicit cache.delete calls
+// in User.update / User.delete.
+export const USER_CACHE_KEY_PREFIX = "user:byId:";
+export const userCacheKey = (id: string): string =>
+  `${USER_CACHE_KEY_PREFIX}${id}`;
 
 export class UserRight implements IUserRight {
   territory = "";
@@ -139,7 +147,7 @@ export default class User implements IUser, IDbModel {
     return result.inserted === 1;
   }
 
-  update(
+  async update(
     dbInstance: Connection | undefined,
     updateData: Record<string, unknown>
   ): Promise<WriteResult> {
@@ -152,7 +160,9 @@ export default class User implements IUser, IDbModel {
       throw new ModelNotValidError("model not valid");
     }
 
-    return rethink.table(User.table).get(this.id).update(updateData).run(dbInstance);
+    const result = await rethink.table(User.table).get(this.id).update(updateData).run(dbInstance);
+    cache.delete(userCacheKey(this.id));
+    return result;
   }
 
   /**
@@ -160,14 +170,16 @@ export default class User implements IUser, IDbModel {
    * @param dbInstance
    * @returns
    */
-  delete(dbInstance: Connection): Promise<WriteResult> {
-    return rethink
+  async delete(dbInstance: Connection): Promise<WriteResult> {
+    const result = await rethink
       .table(User.table)
       .get(this.id)
       .update({
         deletedAt: new Date(),
       })
       .run(dbInstance);
+    cache.delete(userCacheKey(this.id));
+    return result;
   }
 
   isValid(): boolean {
@@ -223,12 +235,27 @@ export default class User implements IUser, IDbModel {
    * @returns
    */
   static async findUserById(dbInstance: Connection | undefined, id: string): Promise<User | null> {
+    const key = userCacheKey(id);
+    // Snapshot before the DB read; trySet below refuses if a writer
+    // invalidated the key meanwhile.
+    const version = cache.snapshot(key);
+    const cached = cache.get<IUser>(key);
+    if (cached) {
+      return new User(cached);
+    }
+
     const data = await rethink.table(User.table).get(id).run(dbInstance);
     if (!data || (data as IUser).deletedAt) {
       return null;
     }
 
-    delete data.password;
+    // Cache the full row including the password hash, consistent with
+    // findUserByLogin / getUserByHash / getUserByEmail (none of which
+    // strip). Password is marked @nonenumerable on the User class so it
+    // does not appear in JSON serializations of returned User instances,
+    // and the cache is invalidated whenever User.update fires - which
+    // includes every password-change path.
+    cache.trySet(key, data as IUser, undefined, version);
     return new User(data);
   }
 
