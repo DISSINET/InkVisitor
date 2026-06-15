@@ -68,9 +68,14 @@ export const applyUserThreshold = (
   return next;
 };
 
-// Helper functions for date conversion
-export const isoToDatePicker = (isoString: string): string => {
-  return new Date(isoString).toISOString().split("T")[0];
+// Formats an ISO string into the local "YYYY-MM-DDTHH:mm" value expected by a
+// datetime picker, so the displayed time matches the user's timezone.
+export const isoToDatetimePicker = (isoString: string): string => {
+  const date = new Date(isoString);
+  const pad = (value: number) => String(value).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
+    date.getDate()
+  )}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 };
 
 export const datePickerToIso = (dateString: string): string => {

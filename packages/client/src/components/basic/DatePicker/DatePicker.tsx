@@ -370,6 +370,22 @@ export const DatePicker: React.FC<DatePickerProps> = ({
     }
   };
 
+  // Footer shortcut: "Today" (date) jumps to today; "Now" (datetime) also
+  // sets the current time.
+  const goToNow = () => {
+    const now = new Date();
+    setViewDate(now);
+    setView("days");
+    if (type === "datetime-local") {
+      setHourStr(pad(now.getHours()));
+      setMinuteStr(pad(now.getMinutes()));
+    }
+    onChange(formatValue(now, type));
+    if (type === "date") {
+      setOpen(false);
+    }
+  };
+
   const handleClear = (e: React.MouseEvent) => {
     e.stopPropagation();
     onChange("");
@@ -687,16 +703,8 @@ export const DatePicker: React.FC<DatePickerProps> = ({
               )}
 
               <StyledFooter>
-                <StyledFooterButton
-                  type="button"
-                  onClick={() => {
-                    const now = new Date();
-                    setViewDate(now);
-                    setView("days");
-                    commitDate(now);
-                  }}
-                >
-                  Today
+                <StyledFooterButton type="button" onClick={goToNow}>
+                  {type === "datetime-local" ? "Now" : "Today"}
                 </StyledFooterButton>
                 {clearable && selectedDate && (
                   <StyledFooterButton

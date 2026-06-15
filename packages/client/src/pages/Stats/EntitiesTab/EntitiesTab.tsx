@@ -22,7 +22,7 @@ import {
   applyUserThreshold,
   areStatsRequestsEqual,
   datePickerToIso,
-  isoToDatePicker,
+  isoToDatetimePicker,
 } from "../utils";
 import { StatsChart, StatsTable } from "components/advanced";
 import { useUserQuery } from "hooks/react-query";
@@ -173,8 +173,8 @@ export const EntitiesTab: React.FC = () => {
             ) : (
               <StyledDateInputWrapper>
                 <Input
-                  type="date"
-                  value={isoToDatePicker(state.dateFrom)}
+                  type="datetime-local"
+                  value={isoToDatetimePicker(state.dateFrom)}
                   onChangeFn={(value) =>
                     dispatch({
                       type: "dateFromUpdate",
@@ -231,8 +231,8 @@ export const EntitiesTab: React.FC = () => {
             ) : (
               <StyledDateInputWrapper>
                 <Input
-                  type="date"
-                  value={isoToDatePicker(state.dateTo)}
+                  type="datetime-local"
+                  value={isoToDatetimePicker(state.dateTo)}
                   onChangeFn={(value) =>
                     dispatch({
                       type: "dateToUpdate",
