@@ -257,6 +257,16 @@ export const TextAnnotator = ({
 
   const [isSelectingText, setIsSelectingText] = useState<boolean>(false);
 
+  // Issue #3108 — a selection drag (including dragging a highlight handle) can end
+  // with the pointer released OUTSIDE the canvas, where the canvas onMouseUp never
+  // fires and isSelectingText would stay stuck true (keeping the anchor menu hidden
+  // and the pending selection uncommitted). Reset it on any document mouseup.
+  useEffect(() => {
+    const onDocumentMouseUp = () => setIsSelectingText(false);
+    document.addEventListener("mouseup", onDocumentMouseUp);
+    return () => document.removeEventListener("mouseup", onDocumentMouseUp);
+  }, []);
+
   const mainCanvas = useRef<HTMLCanvasElement>(null);
   const scroller = useRef<HTMLDivElement>(null);
   const lines = useRef<HTMLCanvasElement>(null);
