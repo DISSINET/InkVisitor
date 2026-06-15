@@ -371,6 +371,35 @@ export const StyledTimeValueInput = styled.input`
   }
 `;
 
+export const StyledTimeStepper = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin-left: ${({ theme }) => theme.space["px"]};
+`;
+
+export const StyledStepButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: ${({ theme }) => theme.space[6]};
+  height: ${({ theme }) => theme.space[4]};
+  border: none;
+  background: transparent;
+  border-radius: ${({ theme }) => theme.borderRadius["xs"]};
+  color: ${({ theme }) => theme.color["gray"][600]};
+  cursor: pointer;
+  transition: background-color 0.12s ease, color 0.12s ease;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.color["gray"][200]};
+    color: ${({ theme }) => theme.color["info"]};
+  }
+  &:focus-visible {
+    outline: 0;
+    color: ${({ theme }) => theme.color["info"]};
+  }
+`;
+
 export const StyledTimeColon = styled.span`
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};

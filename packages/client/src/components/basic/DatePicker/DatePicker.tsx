@@ -15,10 +15,12 @@ import { ThemeColor } from "Theme/theme";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { MdCancel } from "react-icons/md";
 import {
+  RiArrowDownSLine,
   RiArrowLeftDoubleLine,
   RiArrowLeftSLine,
   RiArrowRightDoubleLine,
   RiArrowRightSLine,
+  RiArrowUpSLine,
   RiCalendar2Line,
   RiTimeLine,
 } from "react-icons/ri";
@@ -37,6 +39,7 @@ import {
   StyledNavButton,
   StyledScrollColumn,
   StyledScrollItem,
+  StyledStepButton,
   StyledTimeColon,
   StyledTimeControl,
   StyledTimeControlWrap,
@@ -45,6 +48,7 @@ import {
   StyledTimeRow,
   StyledTimeScroller,
   StyledTimeSegment,
+  StyledTimeStepper,
   StyledTimeValueInput,
   StyledTrigger,
   StyledTriggerIcons,
@@ -547,6 +551,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
                           value={hourStr}
                           onChange={(e) => handleHourChange(e.currentTarget.value)}
                           onFocus={(e) => e.currentTarget.select()}
+                          onClick={(e) => e.currentTarget.select()}
                           onBlur={(e) =>
                             commitTime(parseClamp(e.currentTarget.value, 23), currentMinute())
                           }
@@ -563,6 +568,26 @@ export const DatePicker: React.FC<DatePickerProps> = ({
                             }
                           }}
                         />
+                        <StyledTimeStepper>
+                          <StyledStepButton
+                            type="button"
+                            tabIndex={-1}
+                            aria-label="Increase hours"
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={() => stepHour(1)}
+                          >
+                            <RiArrowUpSLine size={12} />
+                          </StyledStepButton>
+                          <StyledStepButton
+                            type="button"
+                            tabIndex={-1}
+                            aria-label="Decrease hours"
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={() => stepHour(-1)}
+                          >
+                            <RiArrowDownSLine size={12} />
+                          </StyledStepButton>
+                        </StyledTimeStepper>
                       </StyledTimeSegment>
 
                       <StyledTimeColon>:</StyledTimeColon>
@@ -577,6 +602,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
                           value={minuteStr}
                           onChange={(e) => handleMinuteChange(e.currentTarget.value)}
                           onFocus={(e) => e.currentTarget.select()}
+                          onClick={(e) => e.currentTarget.select()}
                           onBlur={(e) =>
                             commitTime(currentHour(), parseClamp(e.currentTarget.value, 59))
                           }
@@ -593,6 +619,26 @@ export const DatePicker: React.FC<DatePickerProps> = ({
                             }
                           }}
                         />
+                        <StyledTimeStepper>
+                          <StyledStepButton
+                            type="button"
+                            tabIndex={-1}
+                            aria-label="Increase minutes"
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={() => stepMinute(1)}
+                          >
+                            <RiArrowUpSLine size={12} />
+                          </StyledStepButton>
+                          <StyledStepButton
+                            type="button"
+                            tabIndex={-1}
+                            aria-label="Decrease minutes"
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={() => stepMinute(-1)}
+                          >
+                            <RiArrowDownSLine size={12} />
+                          </StyledStepButton>
+                        </StyledTimeStepper>
                       </StyledTimeSegment>
 
                       <StyledTimeIconButton
@@ -644,8 +690,10 @@ export const DatePicker: React.FC<DatePickerProps> = ({
                 <StyledFooterButton
                   type="button"
                   onClick={() => {
+                    const now = new Date();
+                    setViewDate(now);
                     setView("days");
-                    commitDate(new Date());
+                    commitDate(now);
                   }}
                 >
                   Today
