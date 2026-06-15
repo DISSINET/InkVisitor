@@ -1,4 +1,4 @@
-import { IResponseEntity } from "@shared/types";
+import { IResponseEntity } from "@inkvisitor/shared/types";
 import api from "api";
 import { useSearchParams } from "hooks";
 import React, { useCallback, useEffect, useState } from "react";
@@ -12,8 +12,11 @@ import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
 import { DetailBoxState } from "types";
 
-interface EntityDetailBox {}
-export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
+interface EntityDetailBox {
+  onTabOpen?: () => void;
+  maxTabs?: number;
+}
+export const EntityDetailBox: React.FC<EntityDetailBox> = ({ onTabOpen, maxTabs = 10 }) => {
   const dispatch = useAppDispatch();
   const ping: number = useAppSelector((state) => state.ping);
   const detailBoxState: DetailBoxState = useAppSelector(
@@ -35,9 +38,9 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     if (!selectedDetailId && detailIdArray.length) {
       setSelectedDetailId(detailIdArray[0]);
     } else if (selectedDetailId && !detailIdArray.includes(selectedDetailId)) {
-      appendDetailId(selectedDetailId);
+      appendDetailId(selectedDetailId, maxTabs);
     }
-  }, [selectedDetailId, detailIdArray]);
+  }, [selectedDetailId, detailIdArray, maxTabs]);
 
   const [entities, setEntities] = useState<IResponseEntity[]>([]);
 
@@ -70,9 +73,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
       }
       if (data.length < detailIdArray.length) {
         const idsFromData = data.map((d) => d.id);
-        const idsToClear = detailIdArray.filter(
-          (detailId) => !idsFromData.includes(detailId)
-        );
+        const idsToClear = detailIdArray.filter((detailId) => !idsFromData.includes(detailId));
         if (idsToClear.length) {
           idsToClear.forEach((id) => removeDetailId(id));
         }
@@ -81,9 +82,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   }, [data]);
 
   const handleClose = (entityId: string) => {
-    const newEntities: IResponseEntity[] = entities.filter(
-      (e) => e.id !== entityId
-    );
+    const newEntities: IResponseEntity[] = entities.filter((e) => e.id !== entityId);
     setEntities(newEntities);
     removeDetailId(entityId);
   };
@@ -140,6 +139,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                   if (detailBoxMinimized) {
                     dispatch(setDetailBoxState(DetailBoxState.Normal));
                   }
+                  onTabOpen?.();
                   setSelectedDetailId(entity.id);
                 }}
                 onClose={() => handleClose(entity.id)}
@@ -162,11 +162,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
             isFetching={isFetching}
           />
         ) : (
-          <>
-            {(ping === -10 || ping >= 0) && !detailBoxMinimized && (
-              <Loader show />
-            )}
-          </>
+          <>{(ping === -10 || ping >= 0) && !detailBoxMinimized && <Loader show />}</>
         )}
       </>
     </>

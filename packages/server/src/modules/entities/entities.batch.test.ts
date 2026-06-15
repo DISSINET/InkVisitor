@@ -1,16 +1,16 @@
 import { clean, testErroneousResponse } from "@modules/common.test";
-import { BadParams } from "@shared/types/errors";
+import { BadParams } from "@inkvisitor/shared/types/errors";
 import request from "supertest";
 import { supertestConfig } from "..";
 import { apiPath } from "@common/constants";
-import app from "../../Server";
+import app from "../../server";
 import Statement, {
   StatementData,
   StatementTerritory,
 } from "@models/statement/statement";
 import { Db } from "@service/rethink";
 import { pool } from "@middlewares/db";
-import { IResponseEntity } from "@shared/types";
+import { IResponseEntity } from "@inkvisitor/shared/types";
 
 describe("Entities batch method", function () {
   afterAll(async () => {

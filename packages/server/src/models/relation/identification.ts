@@ -1,5 +1,5 @@
-import { EntityEnums, EnumValidators, RelationEnums } from "@shared/enums";
-import { Relation as RelationTypes } from "@shared/types";
+import { EntityEnums, EnumValidators, RelationEnums } from "@inkvisitor/shared/enums";
+import { Relation as RelationTypes } from "@inkvisitor/shared/types";
 import { Connection } from "rethinkdb-ts";
 import Relation from "./relation";
 

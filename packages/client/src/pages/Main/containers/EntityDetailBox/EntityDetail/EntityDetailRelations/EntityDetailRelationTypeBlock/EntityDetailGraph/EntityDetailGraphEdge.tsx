@@ -1,4 +1,4 @@
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import {
   EdgeLabelRenderer,
   EdgeProps,
@@ -7,12 +7,12 @@ import {
 } from "reactflow";
 import "reactflow/dist/style.css";
 
-import { certaintyDict } from "@shared/dictionaries";
+import { certaintyDict } from "@inkvisitor/shared/dictionaries";
 import { LetterIcon, Tooltip } from "components";
 import React, { useMemo, useState } from "react";
 
-import { RelationEnums } from "@shared/enums";
-import { Relation } from "@shared/types/relation";
+import { RelationEnums } from "@inkvisitor/shared/enums";
+import { Relation } from "@inkvisitor/shared/types/relation";
 import { useTheme } from "styled-components";
 
 const certaintyStyles: Record<

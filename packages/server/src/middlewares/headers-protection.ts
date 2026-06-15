@@ -33,12 +33,14 @@ export default function headersProtectionMiddleware(
   };
   
   res.end = function(data?: any, encoding?: any, cb?: any) {
-    if (!res.headersSent) {
-      return originalEnd.call(this, data, encoding, cb);
-    } else {
-      console.error("Attempted to end response after headers were sent");
+    // Streaming responses (e.g. file pipes) flush headers mid-response, so
+    // headersSent is true *during* normal end-of-stream. The right guard is
+    // writableEnded, which only flips after end() has actually finished.
+    if (res.writableEnded) {
+      console.error("Attempted to end response after it was already ended");
       return this;
     }
+    return originalEnd.call(this, data, encoding, cb);
   };
   
   next();

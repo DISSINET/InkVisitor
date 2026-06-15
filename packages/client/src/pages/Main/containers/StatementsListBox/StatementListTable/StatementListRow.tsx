@@ -1,5 +1,5 @@
 import { Annotator } from "@inkvisitor/annotator/src/lib";
-import { IEntity, IResponseStatement, IStatement } from "@shared/types";
+import { IEntity, IResponseStatement, IStatement } from "@inkvisitor/shared/types";
 import { useSearchParams, useTheme } from "hooks";
 import React, { useEffect, useRef } from "react";
 import {

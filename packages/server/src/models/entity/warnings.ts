@@ -3,18 +3,19 @@ import Relation from "@models/relation/relation";
 import Superclass from "@models/relation/superclass";
 import { Setting } from "@models/setting/setting";
 import { findEntityById, getEntitiesByIds } from "@service/shorthands";
-import { EntityEnums, RelationEnums, WarningTypeEnums } from "@shared/enums";
+import { EntityEnums, RelationEnums, WarningTypeEnums } from "@inkvisitor/shared/enums";
+import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 import {
   IAction,
   IConcept,
   IEntity,
   ITerritory,
   IWarning,
-} from "@shared/types";
-import { IActionValency } from "@shared/types/action";
-import { InternalServerError } from "@shared/types/errors";
-import { PropSpecKind } from "@shared/types/prop";
-import { IWarningPositionSection } from "@shared/types/warning";
+} from "@inkvisitor/shared/types";
+import { IActionValency } from "@inkvisitor/shared/types/action";
+import { InternalServerError } from "@inkvisitor/shared/types/errors";
+import { PropSpecKind } from "@inkvisitor/shared/types/prop";
+import { IWarningPositionSection } from "@inkvisitor/shared/types/warning";
 import { Connection } from "rethinkdb-ts";
 import Entity from "./entity";
 
@@ -58,57 +59,113 @@ export default class EntityWarnings {
 
     const warnings: IWarning[] = [];
 
-    if (settings.find((s) => s.id === "validation_SCLM")?.value === true) {
+    // a validation runs only when its stored setting is explicitly true;
+    // defaults live in the seeded settings (datasets/*/settings.json)
+    const isActive = (warningType: WarningTypeEnums): boolean =>
+      settings.find((s) => s.id === `validation_${warningType}`)?.value === true;
+
+    if (isActive(WarningTypeEnums.SCLM)) {
       const sclmWarning = await this.hasSCLM(conn);
       if (sclmWarning) {
         warnings.push(sclmWarning);
       }
     }
 
-    if (settings.find((s) => s.id === "validation_MAEE")?.value === true) {
+    if (isActive(WarningTypeEnums.MAEE)) {
       const maeeWarning = await this.hasMAEE(conn);
       if (maeeWarning) {
         warnings.push(maeeWarning);
       }
     }
 
-    // these rules cannot be disabled
-    const isyncWarning = await this.hasISYNC(conn);
-    if (isyncWarning) {
-      warnings.push(isyncWarning);
+    if (isActive(WarningTypeEnums.ISYNC)) {
+      const isyncWarning = await this.hasISYNC(conn);
+      if (isyncWarning) {
+        warnings.push(isyncWarning);
+      }
     }
 
-    const isyncaeeWarning = await this.hasISYNCAEE(conn);
-    if (isyncaeeWarning) {
-      warnings.push(isyncaeeWarning);
+    if (isActive(WarningTypeEnums.ISYNCAEE)) {
+      const isyncaeeWarning = await this.hasISYNCAEE(conn);
+      if (isyncaeeWarning) {
+        warnings.push(isyncaeeWarning);
+      }
     }
 
-    const avalWarnings = await this.hasAVAL(conn);
-    if (avalWarnings) {
-      avalWarnings.forEach((w) => warnings.push(w));
+    if (isActive(WarningTypeEnums.AVAL)) {
+      const avalWarnings = await this.hasAVAL(conn);
+      if (avalWarnings) {
+        avalWarnings.forEach((w) => warnings.push(w));
+      }
     }
 
-    const mvalWarning = await this.hasMVAL(conn);
-    if (mvalWarning) {
-      warnings.push(mvalWarning);
+    if (isActive(WarningTypeEnums.MVAL)) {
+      const mvalWarning = await this.hasMVAL(conn);
+      if (mvalWarning) {
+        warnings.push(mvalWarning);
+      }
     }
 
-    const psmWarning = await this.hasPSM(conn);
-    if (psmWarning) {
-      warnings.push(psmWarning);
+    if (isActive(WarningTypeEnums.PSM)) {
+      const psmWarning = await this.hasPSM(conn);
+      if (psmWarning) {
+        warnings.push(psmWarning);
+      }
     }
 
-    const lmWarning = await this.hasLM(conn);
-    if (lmWarning) {
-      warnings.push(lmWarning);
+    if (isActive(WarningTypeEnums.LM)) {
+      const lmWarning = await this.hasLM(conn);
+      if (lmWarning) {
+        warnings.push(lmWarning);
+      }
     }
 
-    const vetmWarnings = await this.hasVETM(conn);
-    if (vetmWarnings) {
-      vetmWarnings.forEach((w) => warnings.push(w));
+    if (isActive(WarningTypeEnums.VETM)) {
+      const vetmWarnings = await this.hasVETM(conn);
+      if (vetmWarnings) {
+        vetmWarnings.forEach((w) => warnings.push(w));
+      }
+    }
+
+    // validation_DM is conditional on entity class. Its value may be:
+    //   true        -> applies to all classes (default when unset)
+    //   string[]     -> applies to the listed classes
+    //   false/empty  -> off
+    const dmValue =
+      settings.find((s) => s.id === "validation_DM")?.value ?? true;
+    const dmClasses: EntityEnums.Class[] =
+      dmValue === true
+        ? classesAll
+        : Array.isArray(dmValue)
+        ? (dmValue as EntityEnums.Class[])
+        : [];
+    if (dmClasses.includes(this.class)) {
+      const dmWarning = await this.hasDM(conn);
+      if (dmWarning) {
+        warnings.push(dmWarning);
+      }
     }
 
     return warnings;
+  }
+
+  /**
+   * Tests if there is DM warning and returns it
+   * DM warning should pop when the entity's detail field is empty
+   * @param conn
+   * @returns
+   */
+  async hasDM(conn: Connection): Promise<IWarning | null> {
+    const entity = await findEntityById(conn, this.entityId);
+
+    if (!entity || !entity.detail || entity.detail.trim().length === 0) {
+      return this.newWarning(
+        WarningTypeEnums.DM,
+        IWarningPositionSection.Entity
+      );
+    }
+
+    return null;
   }
 
   async getTBasedWarnings(
@@ -188,13 +245,13 @@ export default class EntityWarnings {
    * ISYNC warning should pop when concepts in the synonym cloud have inconsistent superclass relations.
    *
    * Warning IS raised when (for synonyms c1 and c2):
-   * - c1 has SCL cs1 and c2 has SCL cs2 but cs1 and cs2 are NOT synonyms
-   * - c1 has SCL cs1 but c2 has no SCL (asymmetric SCL)
+   * - c1 has SCL cs1 and c2 has SCL cs2
+   * - c1 has SCL and c2 has none
+   * - c1 has SCL to cs1 and cs2 and c2 has no SCL relations
    *
    * Warning is NOT raised when:
-   * - c1 has SCL cs1 and c2 has SCL cs2 and cs1 and cs2 are synonyms
+   * - c1 and c2 have the same set of superclasses
    * - Both c1 and c2 have no SCL
-   * - Both c1 and c2 have SCL relation to the same entity
    *
    * @param conn
    * @returns
@@ -244,28 +301,8 @@ export default class EntityWarnings {
       }
     }
 
-    // Separate concepts with and without SCL
-    const conceptsWithSCL = conceptIds.filter(
-      (id) => sclTargetsByConcept[id].length > 0
-    );
-    const conceptsWithoutSCL = conceptIds.filter(
-      (id) => sclTargetsByConcept[id].length === 0
-    );
-
-    // If some have SCL and others don't → WARNING
-    if (conceptsWithSCL.length > 0 && conceptsWithoutSCL.length > 0) {
-      return this.newWarning(
-        WarningTypeEnums.ISYNC,
-        IWarningPositionSection.Relations
-      );
-    }
-
-    // If none have SCL → OK
-    if (conceptsWithSCL.length === 0) {
-      return null;
-    }
-
-    // All have SCL - collect all unique SCL targets
+    // Parity target: the union of all SCL targets across the synonym cloud.
+    // To clear the warning, every concept has to point to all of these.
     const allSclTargetsSet: Set<string> = new Set();
     for (const targets of Object.values(sclTargetsByConcept)) {
       for (const target of targets) {
@@ -274,40 +311,34 @@ export default class EntityWarnings {
     }
     const allSclTargets: string[] = Array.from(allSclTargetsSet);
 
-    // If only one unique target → OK (all point to the same superclass)
-    if (allSclTargets.length === 1) {
+    // If no concept has any SCL → OK
+    if (allSclTargets.length === 0) {
       return null;
     }
 
-    // Check if all SCL targets are synonyms of each other
-    const targetSynonymRelations = await Relation.findForEntities(
-      conn,
-      allSclTargets,
-      RelationEnums.Type.Synonym
-    );
+    // For each concept, list which SCL targets it is missing to reach parity.
+    // The superclasses themselves do NOT need to be synonyms; the sets of SCL
+    // targets per concept just have to match.
+    const details = conceptIds
+      .map((conceptId) => ({
+        entityId: conceptId,
+        relatedEntityIds: allSclTargets.filter(
+          (target) => !sclTargetsByConcept[conceptId].includes(target)
+        ),
+      }))
+      .filter((detail) => detail.relatedEntityIds.length > 0);
 
-    // For each pair of SCL targets, verify they're synonyms
-    for (let i = 0; i < allSclTargets.length; i++) {
-      for (let j = i + 1; j < allSclTargets.length; j++) {
-        const target1 = allSclTargets[i];
-        const target2 = allSclTargets[j];
-
-        // Check if they're in the same synonym relation
-        const areSynonyms = targetSynonymRelations.some(
-          (rel) =>
-            rel.entityIds.includes(target1) && rel.entityIds.includes(target2)
-        );
-
-        if (!areSynonyms) {
-          return this.newWarning(
-            WarningTypeEnums.ISYNC,
-            IWarningPositionSection.Relations
-          );
-        }
-      }
+    // Every concept already points to every SCL target → consistent → OK
+    if (details.length === 0) {
+      return null;
     }
 
-    return null;
+    const warning = this.newWarning(
+      WarningTypeEnums.ISYNC,
+      IWarningPositionSection.Relations
+    );
+    warning.details = details;
+    return warning;
   }
 
   /**

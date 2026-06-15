@@ -1,9 +1,9 @@
 import "@modules/common.test";
-import { BadParams, UserDoesNotExits } from "@shared/types/errors";
+import { BadParams, UserDoesNotExits } from "@inkvisitor/shared/types/errors";
 import { Db } from "@service/rethink";
 import request from "supertest";
 import { apiPath } from "@common/constants";
-import app from "../../Server";
+import app from "../../server";
 import {
   successfulGenericResponse,
   testErroneousResponse,

@@ -1,13 +1,13 @@
 import { testErroneousResponse } from "@modules/common.test";
-import { BadParams } from "@shared/types/errors";
+import { BadParams } from "@inkvisitor/shared/types/errors";
 import request from "supertest";
 import { apiPath } from "@common/constants";
-import app from "../../Server";
+import app from "../../server";
 import { supertestConfig } from "..";
 import { pool } from "@middlewares/db";
 import { Db } from "@service/rethink";
 import User from "@models/user/user";
-import { IUser } from "@shared/types";
+import { IUser } from "@inkvisitor/shared/types";
 
 describe("Users getMore", function () {
   let allUsers: User[];

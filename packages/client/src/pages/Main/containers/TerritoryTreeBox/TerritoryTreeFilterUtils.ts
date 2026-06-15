@@ -1,5 +1,5 @@
-import { UserEnums } from "@shared/enums";
-import { IResponseTree } from "@shared/types";
+import { UserEnums } from "@inkvisitor/shared/enums";
+import { IResponseTree } from "@inkvisitor/shared/types";
 import { IExtendedResponseTree, ITerritoryFilter } from "types";
 
 // Filter WITH STATEMENTS

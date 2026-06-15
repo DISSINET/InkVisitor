@@ -1,13 +1,9 @@
-import {
-  IAudit,
-  IAnchorUpdate,
-  IDocumentAuditAnchorChanges,
-  AuditScope,
-} from "./audit";
+import { IAudit, IAnchorUpdate, IDocumentAuditAnchorChanges, AuditScope } from "./audit";
+import { DropdownItem } from "./dropdown";
 import { ILabel } from "./label";
 import { IReference } from "./reference";
 import { IValue, IValueData } from "./value";
-import { IWarning, IWarningPosition } from "./warning";
+import { IWarning, IWarningPosition, IWarningDetail } from "./warning";
 
 import { IAction, IActionData } from "./action";
 import { IBeing, IBeingData } from "./being";
@@ -41,6 +37,7 @@ import {
   IResponseUsedInMetaProp,
   IResponseUsedInStatement,
 } from "./response-detail";
+import { IResponseBackup } from "./response-backup";
 import { IResponseGeneric } from "./response-generic";
 import { IResponsePermission } from "./response-permission";
 import {
@@ -51,37 +48,18 @@ import {
   PropOrder,
 } from "./response-statement";
 import { IResponseTerritory } from "./response-territory";
-import {
-  IResponseTree,
-  IResponseTreeTerritoryComponent,
-} from "./response-tree";
-import {
-  IResponseStoredTerritory,
-  IResponseUser,
-  IResponseUserBasic,
-} from "./response-user";
+import { IResponseTree, IResponseTreeTerritoryComponent } from "./response-tree";
+import { IResponseStoredTerritory, IResponseUser, IResponseUserBasic } from "./response-user";
 
-import {
-  IDocument,
-  IDocumentMeta,
-} from "./document";
+import { IDocument, IDocumentMeta } from "./document";
 import { IRequestStats } from "./request-stats";
 import { IResponseEntity } from "./response-entity";
 import { IResponseStats } from "./response-stats";
-import {
-  IBookmarkFolder,
-  IStoredTerritory,
-  IUser,
-  IUserOptions,
-  IUserRight,
-} from "./user";
+import { IBookmarkFolder, IStoredTerritory, IUser, IUserOptions, IUserRight } from "./user";
 
 import { Query } from "./query";
 import { IRequestActivationData } from "./request-activation";
-import {
-  IRequestPasswordReset,
-  IRequestPasswordResetData,
-} from "./request-password-reset";
+import { IRequestPasswordReset, IRequestPasswordResetData } from "./request-password-reset";
 import { IRequestQuery } from "./request-query";
 import { IResponseQuery, IResponseQueryEntity } from "./response-query";
 
@@ -126,6 +104,7 @@ export type {
   IResource,
   IResourceData,
   IResponseAudit,
+  IResponseBackup,
   IResponseBookmarkFolder,
   IResponseDetail,
   IResponseEntity,
@@ -158,6 +137,8 @@ export type {
   IValueData,
   IWarning,
   IWarningPosition,
+  IWarningDetail,
   IdentificationOrder,
   PropOrder,
+  DropdownItem,
 };

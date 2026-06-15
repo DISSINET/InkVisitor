@@ -1,4 +1,4 @@
-import { IEntity, IProp } from "@shared/types";
+import { IEntity, IProp } from "@inkvisitor/shared/types";
 import React, { useEffect } from "react";
 import { DraggedPropRowCategory, ItemTypes, PropAttributeFilter } from "types";
 import { PropGroupRow } from "../PropGroupRow/PropGroupRow";

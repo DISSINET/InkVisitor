@@ -5,8 +5,8 @@ import {
   ModelNotValidError,
   InternalServerError,
   PermissionDoesNotExits,
-} from "@shared/types/errors";
-import { IResponseGeneric, IResponsePermission } from "@shared/types";
+} from "@inkvisitor/shared/types/errors";
+import { IResponseGeneric, IResponsePermission } from "@inkvisitor/shared/types";
 import AclPermission from "@models/acl/acl_permission";
 import { IRequest } from "src/custom_typings/request";
 

@@ -1,4 +1,4 @@
-import { EntityEnums, UserEnums } from "@shared/enums";
+import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 
 export interface IUser {
   id: string;
@@ -31,8 +31,6 @@ export interface IUserOptions {
   // the language of the source documents
   defaultStatementLanguage?: EntityEnums.Language;
   searchLanguages: EntityEnums.Language[];
-
-  allowMaterializedStats: boolean;
 }
 
 export interface IStoredTerritory {

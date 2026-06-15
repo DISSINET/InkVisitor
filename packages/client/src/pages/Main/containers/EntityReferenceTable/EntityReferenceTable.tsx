@@ -1,5 +1,5 @@
-import { EntityEnums } from "@shared/enums";
-import { IEntity, IReference } from "@shared/types";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { IEntity, IReference } from "@inkvisitor/shared/types";
 import { excludedSuggesterEntities } from "Theme/constants";
 import { Button } from "components";
 import { EntitySuggester } from "components/advanced";
@@ -46,9 +46,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
   // this states are part of the spare row functionality
   const [tempResourceTyped, setTempResourceTyped] = useState("");
   const [tempValueTyped, setTempValueTyped] = useState("");
-  const [fieldToUpdate, setFieldToUpdate] = useState<
-    false | "resource" | "value"
-  >(false);
+  const [fieldToUpdate, setFieldToUpdate] = useState<false | "resource" | "value">(false);
   const [initResourceTyped, setInitResourceTyped] = useState("");
   const [initValueTyped, setInitValueTyped] = useState("");
 
@@ -69,11 +67,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
     }
   }, [references]);
 
-  const handleChangeResource = (
-    refId: string,
-    newReSourceId: string,
-    instantUpdate?: boolean
-  ) => {
+  const handleChangeResource = (refId: string, newReSourceId: string, instantUpdate?: boolean) => {
     const newReferences = deepCopy(references);
     newReferences.forEach((ref: IReference) => {
       if (ref.id === refId) {
@@ -83,11 +77,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
     onChange(newReferences, instantUpdate);
   };
 
-  const handleChangeValue = (
-    refId: string,
-    newValueId: string,
-    instantUpdate?: boolean
-  ) => {
+  const handleChangeValue = (refId: string, newValueId: string, instantUpdate?: boolean) => {
     const newReferences = deepCopy(references);
     newReferences.forEach((ref: IReference) => {
       if (ref.id === refId) {
@@ -98,9 +88,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
   };
 
   const handleRemove = (refId: string, instantUpdate?: boolean) => {
-    const newReferences = deepCopy(references).filter(
-      (ref: IReference) => ref.id !== refId
-    );
+    const newReferences = deepCopy(references).filter((ref: IReference) => ref.id !== refId);
     onChange(newReferences, instantUpdate);
   };
 
@@ -117,7 +105,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
           [dragIndex, 1],
           [hoverIndex, 0, prevLocalReferences[dragIndex]],
         ],
-      })
+      }),
     );
   }, []);
 
@@ -142,12 +130,8 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
             disabled={disabled}
             openDetailOnCreate={openDetailOnCreate}
             territoryParentId={territoryParentId}
-            initResourceTyped={
-              localReferences.length === key + 1 ? initResourceTyped : undefined
-            }
-            initValueTyped={
-              localReferences.length === key + 1 ? initValueTyped : undefined
-            }
+            initResourceTyped={localReferences.length === key + 1 ? initResourceTyped : undefined}
+            initValueTyped={localReferences.length === key + 1 ? initValueTyped : undefined}
             onClearAfterInitTyped={() => {
               setInitResourceTyped("");
               setInitValueTyped("");
@@ -167,13 +151,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
             openDetailOnCreate={openDetailOnCreate}
             territoryActants={[]}
             onSelected={(newSelectedId) => {
-              onChange(
-                [
-                  ...references,
-                  { id: uuidv4(), resource: newSelectedId, value: "" },
-                ],
-                true
-              );
+              onChange([...references, { id: uuidv4(), resource: newSelectedId, value: "" }], true);
               if (tempValueTyped.length) {
                 setFieldToUpdate("value");
               }
@@ -194,13 +172,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
             openDetailOnCreate={openDetailOnCreate}
             territoryActants={[]}
             onSelected={(newSelectedId: string) => {
-              onChange(
-                [
-                  ...references,
-                  { id: uuidv4(), resource: "", value: newSelectedId },
-                ],
-                true
-              );
+              onChange([...references, { id: uuidv4(), resource: "", value: newSelectedId }], true);
               if (tempResourceTyped.length) {
                 setFieldToUpdate("resource");
               }
@@ -217,11 +189,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
 
       <div style={{ marginTop: "1.5rem" }}>
         {!disabled && (
-          <Button
-            icon={<FaPlus />}
-            label={"new reference"}
-            onClick={() => handleAdd()}
-          />
+          <Button icon={<FaPlus />} label={"new reference"} onClick={() => handleAdd()} />
         )}
       </div>
     </React.Fragment>

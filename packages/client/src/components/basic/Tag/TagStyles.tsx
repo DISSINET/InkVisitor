@@ -1,4 +1,4 @@
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import styled from "styled-components";
 
 interface StyledTagWrapper {

@@ -1,9 +1,9 @@
 import request from "supertest";
 import { supertestConfig } from "./modules";
 import { apiPath } from "@common/constants";
-import app from "./Server";
+import app from "./server";
 import { unknownRouteError, unauthorizedError } from "@middlewares/errors";
-import { IResponseGeneric, errorTypes } from "@shared/types/response-generic";
+import { IResponseGeneric, errorTypes } from "@inkvisitor/shared/types/response-generic";
 import "ts-jest";
 import { pool } from "@middlewares/db";
 import { testErroneousResponse } from "@modules/common.test";

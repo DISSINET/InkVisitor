@@ -1,7 +1,8 @@
 import { Response, Request, NextFunction } from "express";
-import { Db, rethinkConfig } from "@service/rethink";
-import { InternalServerError } from "@shared/types/errors";
+import { rethinkConfig } from "@service/rethink";
+import { InternalServerError } from "@inkvisitor/shared/types/errors";
 import DbPool from "@service/rethink-pool";
+import { DbHandle } from "@service/dbHandle";
 
 export const pool = new DbPool(rethinkConfig);
 
@@ -10,46 +11,31 @@ export default async function dbMiddleware(
   res: Response,
   next: NextFunction
 ): Promise<void> {
-  let db: Db | undefined = undefined;
+  const handle = new DbHandle(pool);
 
-  // Acquire the database connection and store reference for later 
   try {
-    db = await pool.acquire();
-    req.db = db;
+    await handle.acquire();
+    req.db = handle;
   } catch (e) {
     next(new InternalServerError("database timeout"));
     return;
   }
 
-  // Cleanup function - runs on client disconnect, response finish, or any error
+  let released = false;
   const cleanup = async () => {
-    if (db) {
-      let localDb = db;
-      db = undefined;
-      try {
-        if (localDb.lockAwaiter) {
-          localDb.lockAwaiter.onError(new Error("client closed the connection"));
-        }
-        
-        await pool.release(localDb);
-        clearTimeout(safetyTimeout);
-      } catch (error) {
-        console.error("Failed to release database connection:", error);
-        db = localDb; // let the timeout to scrape the connection
-      }
+    if (released) return;
+    released = true;
+    clearTimeout(safetyTimeout);
+    try {
+      await handle.release();
+    } catch (error) {
+      console.error("Failed to release database connection:", error);
     }
   };
 
-  // Safety timeout to ensure connection is released even if close handler doesn't fire
-  const safetyTimeout = setTimeout(cleanup, 30000); // 30 second safety timeout
-
-  // Cleanup on client disconnect
+  const safetyTimeout = setTimeout(cleanup, 30000);
   res.on("close", cleanup);
-
-  // Cleanup on response finish (successful completion)
   res.on("finish", cleanup);
-
-  // Cleanup on any error
   res.on("error", cleanup);
 
   next();

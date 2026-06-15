@@ -1,8 +1,8 @@
 import { testErroneousResponse } from "@modules/common.test";
-import { BadParams, NotFound, UserDoesNotExits } from "@shared/types/errors";
+import { BadParams, NotFound, UserDoesNotExits } from "@inkvisitor/shared/types/errors";
 import request from "supertest";
 import { apiPath } from "@common/constants";
-import app from "../../Server";
+import app from "../../server";
 import { createEntity } from "@service/shorthands";
 import { Db } from "@service/rethink";
 import Statement, {
@@ -11,10 +11,10 @@ import Statement, {
 } from "@models/statement/statement";
 import { supertestConfig } from "..";
 import User from "@models/user/user";
-import { IBookmarkFolder } from "@shared/types";
+import { IBookmarkFolder } from "@inkvisitor/shared/types";
 import { pool } from "@middlewares/db";
-import { SettingGroupDict } from "@shared/dictionaries/settinggroup";
-import { globalValidationsDict } from "@shared/enums/warning";
+import { SettingGroupDict } from "@inkvisitor/shared/dictionaries/settinggroup";
+import { globalValidationsDict } from "@inkvisitor/shared/enums/warning";
 import { Setting } from "@models/setting/setting";
 
 describe("Settings updateGroup", function () {

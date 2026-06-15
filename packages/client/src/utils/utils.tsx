@@ -1,10 +1,10 @@
-import { classesAll } from "@shared/dictionaries/entity";
+import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 import {
   EntityEnums,
   RelationEnums,
   UserEnums,
   WarningTypeEnums,
-} from "@shared/enums";
+} from "@inkvisitor/shared/enums";
 import {
   EntityTooltip,
   IEntity,
@@ -15,8 +15,8 @@ import {
   IStatementDataTerritory,
   IWarning,
   Relation,
-} from "@shared/types";
-import { IAnchorsNode } from "@shared/types/document";
+} from "@inkvisitor/shared/types";
+import { IAnchorsNode } from "@inkvisitor/shared/types/document";
 import React from "react";
 import { DropTargetMonitor, XYCoord } from "react-dnd";
 import { FaUserEdit } from "react-icons/fa";

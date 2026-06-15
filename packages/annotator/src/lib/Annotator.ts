@@ -1,11 +1,14 @@
 import Cursor, { DIRECTION } from "./Cursor";
 import Highlighter, { IAbsCoordinates, CursorStyle } from "./Highlighter";
+import History, { HistorySnapshot } from "./History";
+import { ContextMenu, ContextMenuItem } from "./ContextMenu";
+import { SettingsOverlay } from "./SettingsOverlay";
 import Keys from "./Keys";
 import { Lines } from "./Lines";
 import Scroller from "./Scroller";
-import Text, { Tag, SegmentPosition } from "./Text";
+import Text, { Tag, SegmentPosition, CaretAffinity } from "./Text";
 import Viewport from "./Viewport";
-import { Warnings } from "./warnings";
+import { AsymmetricalAnchor, Warnings, WarningData } from "./warnings";
 import {
   DEFAULT_FONT,
   DEFAULT_FONT_SIZE,
@@ -30,6 +33,11 @@ export const tagRemovalRegex = /<\/?[^<>]+?>/g;
 export const createOpeningTagRegex = () =>
   new RegExp(openingTagRegex.source, openingTagRegex.flags);
 
+// Line-wrap tokenizer (Text.calculateLines): splits text into atomic tags
+// (<...>), whitespace runs, word runs, and punctuation runs (or a stray "<").
+// Stateful global regex — callers must reset lastIndex before each exec loop.
+export const wrapTokenRegex = /(<[^>]+>)|(\s+)|([\w']+)|([^\s\w'<]+|<)/g;
+
 // Opening tag with specific name and optional attributes: <tagname attr="value"> or <tagname>
 export const createSpecificOpeningTagRegex = (tagName: string) =>
   new RegExp(`<${tagName}(?:\\s+[^>]*)?>`, "g");
@@ -50,12 +58,22 @@ export interface HighlightSchema {
   };
 }
 
+/** localStorage key for persisted user settings (caret width, colors, FPS). */
+const SETTINGS_STORAGE_KEY = "inkvisitor.annotator.settings";
+
+interface PersistedSettings {
+  caretWidth?: number;
+  highlightColor?: string;
+  showFps?: boolean;
+}
+
 // DrawingOptions bundles required sizes shared by multiple components while drawing into canvas
 export interface DrawingOptions {
   charWidth: number;
   lineHeight: number;
   charsAtLine: number;
   color?: string; // override
+  caretWidth?: number; // collapsed-caret width in device px (defaults to 1)
 }
 
 export interface Selected {
@@ -99,6 +117,11 @@ export class Annotator {
   lines?: Lines;
   keys: Keys;
   warnings: Warnings;
+  contextMenu: ContextMenu = new ContextMenu();
+  settingsOverlay: SettingsOverlay = new SettingsOverlay();
+
+  /** Phase 4 (#3086) — bounded undo/redo stack of document snapshots. */
+  history: History = new History();
 
   annotatedPosition: SegmentPosition | null = null;
 
@@ -111,6 +134,20 @@ export class Annotator {
   private lastSelectPointer: { cx: number; cy: number } | null = null;
 
   private selectionScrollRaf: number = 0;
+
+  /** Collapsed-caret width in CSS px (scaled by ratio at draw time). */
+  private caretWidth = 1;
+
+  /**
+   * User-chosen selection highlight color (`#rrggbb`), or undefined to defer to
+   * the host theme set via setSelectStyle. When set it wins over the theme.
+   */
+  private highlightColor: string | undefined = undefined;
+
+  /** Debug FPS counter — smoothed frames-per-second of draw() calls. */
+  private showFps = false;
+  private lastFrameTime = 0;
+  private fps = 0;
 
   // callbacks
   onSelectTextCb?: (text: Selected) => void;
@@ -128,6 +165,9 @@ export class Annotator {
   hoverDebounceTimeout?: NodeJS.Timeout; // For debouncing mousemove events
 
   private readonly boundOnMouseMove = (e: MouseEvent) => this.onMouseMove(e);
+
+  private readonly boundOnContextMenu = (e: MouseEvent) =>
+    this.onContextMenu(e);
 
   private readonly boundOnCanvasMouseLeave = () => {
     if (this.hoverDebounceTimeout) {
@@ -201,15 +241,19 @@ export class Annotator {
     );
     this.element.addEventListener("mousemove", this.boundOnMouseMove);
     this.element.addEventListener("mouseleave", this.boundOnCanvasMouseLeave);
+    this.element.addEventListener("contextmenu", this.boundOnContextMenu);
 
     this.clickCount = 0;
 
     this.previousRenderViewportLineStart = 0;
 
+    this.loadSettings();
+
     this.draw();
 
     setTimeout(() => {
       this.resize();
+      this.runWarningChecks();
     });
   }
 
@@ -226,6 +270,14 @@ export class Annotator {
       opacity: this.selectOpacity,
       selectorColor: selectorColor,
     } as CursorStyle;
+
+    // A user-chosen highlight color (persisted) takes precedence over the theme.
+    if (this.highlightColor !== undefined) {
+      this.cursor.style = {
+        ...this.cursor.style,
+        color: this.highlightColor,
+      };
+    }
   }
 
   /**
@@ -387,7 +439,7 @@ export class Annotator {
       }
     }
 
-    this.warnings.onTextChanged(this.text.value);
+    this.runWarningChecks();
     this.draw();
   }
 
@@ -750,7 +802,7 @@ export class Annotator {
     this.onTextChangeCb = cb;
   }
 
-  onWarning(cb: (message: string) => void): void {
+  onWarning(cb: (warning: WarningData) => void): void {
     this.warnings.onWarning(cb);
   }
 
@@ -872,7 +924,11 @@ export class Annotator {
       }
     }
 
+    // First pointer event starts a (collapsed) selection → set both offsets;
+    // subsequent drag events move only head (keep the click anchor fixed).
+    const wasSelecting = this.cursor.isSelecting();
     this.cursor.selectArea();
+    this.cursor.syncOffsetFromVisual(this.text, wasSelecting);
   }
 
   private cancelSelectionEdgeScroll() {
@@ -1071,7 +1127,74 @@ export class Annotator {
     };
     this.cursor.xLine = this.cursor.selectEnd.xLine;
     this.cursor.selectDirection = DIRECTION.FORWARD;
+    // Canonical offsets: anchor = word start, head = word end (caret).
+    this.cursor.anchor = this.text.offsetFromVisual(
+      this.cursor.selectStart.xLine,
+      this.cursor.selectStart.yLine
+    );
+    this.cursor.head = this.text.offsetFromVisual(
+      this.cursor.selectEnd.xLine,
+      this.cursor.selectEnd.yLine
+    );
     this.draw();
+  }
+
+  /**
+   * onContextMenu opens the right-click context menu at the pointer.
+   * TODO (#3086): wire real actions / let the host supply items via a callback.
+   * For now these are placeholder entries.
+   * @param e
+   */
+  onContextMenu(e: MouseEvent) {
+    e.preventDefault();
+    this.contextMenu.open(e.clientX, e.clientY, this.buildContextMenuItems());
+  }
+
+  /** Context-menu entries. For now just a toggle for the debug FPS counter. */
+  private buildContextMenuItems(): ContextMenuItem[] {
+    return [
+      {
+        label: `${this.showFps ? "✓ " : ""}Show FPS counter`,
+        onClick: () => this.setShowFps(!this.showFps),
+      },
+      { separator: true },
+      { label: "Options…", onClick: () => this.openSettings() },
+    ];
+  }
+
+  /** Open the settings overlay with the current options. */
+  private openSettings(): void {
+    this.settingsOverlay.open(
+      [
+        {
+          type: "segmented",
+          label: "Cursor size",
+          options: [
+            { label: "1px", value: 1 },
+            { label: "2px", value: 2 },
+            { label: "3px", value: 3 },
+          ],
+          value: this.caretWidth,
+          onChange: (px) => this.setCaretWidth(px),
+        },
+        {
+          type: "color",
+          label: "Highlight color",
+          value: this.getHighlightColor(),
+          onChange: (hex) => this.setHighlightColor(hex),
+        },
+      ],
+      this.element,
+      [
+        {
+          label: "Reset to defaults",
+          onClick: () => {
+            this.resetSettings();
+            this.openSettings(); // re-render so controls show the defaults
+          },
+        },
+      ]
+    );
   }
 
   /**
@@ -1423,6 +1546,10 @@ export class Annotator {
    * TODO - this should be done in conjunction with requestAnimationFrame
    */
   draw() {
+    if (this.showFps) {
+      this.updateFps();
+    }
+
     this.syncLineNumbersCanvasToMain();
 
     this.ctx.reset();
@@ -1449,12 +1576,19 @@ export class Annotator {
     const textSegment = this.text.cursorToIndex(this.viewport, this.cursor);
 
     if (textSegment) {
-      this.cursor.xLine = textSegment.charInLineIndex;
+      const line = this.text.getLineFromPosition(textSegment);
+      if (this.cursor.xLine > line.length) {
+        // Offset-model navigation/editing keeps the caret in bounds; this is a
+        // defensive clamp for a caret set visually (setPosition) without a sync,
+        // replacing the legacy fixOutOfBounds line-flow repair.
+        this.cursor.xLine = line.length;
+      }
 
       this.cursor.draw(this.ctx, this.viewport, this.text, {
         lineHeight: this.lineHeight,
         charWidth: this.charWidth,
         charsAtLine: this.text.charsAtLine,
+        caretWidth: this.caretWidth * this.ratio,
       });
     }
 
@@ -1593,6 +1727,182 @@ export class Annotator {
       this.onScrollCb?.(thisRenderVieportLineStart);
       this.previousRenderViewportLineStart = thisRenderVieportLineStart;
     }
+
+    if (this.showFps) {
+      this.drawFpsCounter();
+    }
+  }
+
+  /** Current collapsed-caret width in CSS px. */
+  getCaretWidth(): number {
+    return this.caretWidth;
+  }
+
+  /** Set the collapsed-caret width in CSS px (e.g. 1, 2, 3) and redraw. */
+  setCaretWidth(px: number): void {
+    this.caretWidth = Math.max(1, px);
+    this.saveSettings();
+    this.draw();
+  }
+
+  /**
+   * Load persisted settings from localStorage and apply them to the fields
+   * (without redrawing — the constructor draws once afterwards). Safe to call
+   * when storage is unavailable or holds malformed data.
+   */
+  private loadSettings(): void {
+    let parsed: PersistedSettings | null = null;
+    try {
+      const raw =
+        typeof localStorage !== "undefined" &&
+        localStorage.getItem(SETTINGS_STORAGE_KEY);
+      if (raw) {
+        parsed = JSON.parse(raw) as PersistedSettings;
+      }
+    } catch {
+      return; // storage blocked or corrupt — fall back to defaults
+    }
+    if (!parsed) {
+      return;
+    }
+
+    if (typeof parsed.caretWidth === "number") {
+      this.caretWidth = Math.max(1, parsed.caretWidth);
+    }
+    if (typeof parsed.highlightColor === "string") {
+      this.highlightColor = parsed.highlightColor;
+      this.cursor.style = { ...this.cursor.style, color: this.highlightColor };
+    }
+    if (typeof parsed.showFps === "boolean") {
+      this.showFps = parsed.showFps;
+    }
+  }
+
+  /** Reset all persisted settings to their defaults, clear storage, and redraw. */
+  resetSettings(): void {
+    this.caretWidth = 1;
+    this.highlightColor = undefined;
+    // Revert the highlight color to the host theme color (last setSelectStyle).
+    this.cursor.style = { ...this.cursor.style, color: this.selectColor };
+    this.showFps = false;
+    this.lastFrameTime = 0;
+    this.fps = 0;
+
+    try {
+      if (typeof localStorage !== "undefined") {
+        localStorage.removeItem(SETTINGS_STORAGE_KEY);
+      }
+    } catch {
+      // ignore storage errors
+    }
+
+    this.draw();
+  }
+
+  /** Persist the current settings to localStorage (best-effort). */
+  private saveSettings(): void {
+    try {
+      if (typeof localStorage === "undefined") {
+        return;
+      }
+      const data: PersistedSettings = {
+        caretWidth: this.caretWidth,
+        highlightColor: this.highlightColor,
+        showFps: this.showFps,
+      };
+      localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(data));
+    } catch {
+      // storage full or blocked — settings just won't persist this session
+    }
+  }
+
+  /**
+   * Current selection highlight color as a `#rrggbb` hex string. When the user
+   * hasn't picked one, this reflects the effective (theme) color so the picker
+   * shows the real default rather than black.
+   */
+  getHighlightColor(): string {
+    return (
+      this.highlightColor ??
+      this.cssColorToHex(this.cursor.style.color as string)
+    );
+  }
+
+  /**
+   * Normalize any CSS color (named/rgb/hex) to `#rrggbb` using the canvas, which
+   * a native color input requires. Falls back to black for non-opaque colors.
+   */
+  private cssColorToHex(color: string): string {
+    try {
+      const prev = this.ctx.fillStyle;
+      this.ctx.fillStyle = color;
+      const normalized = this.ctx.fillStyle;
+      this.ctx.fillStyle = prev;
+      if (typeof normalized === "string" && normalized.startsWith("#")) {
+        return normalized;
+      }
+    } catch {
+      // ignore and fall through to default
+    }
+    return "#000000";
+  }
+
+  /** Set the selection highlight color (`#rrggbb`) and redraw. */
+  setHighlightColor(hex: string): void {
+    this.highlightColor = hex;
+    this.cursor.style = { ...this.cursor.style, color: hex };
+    this.saveSettings();
+    this.draw();
+  }
+
+  /**
+   * Toggle the debug FPS counter in the top-left corner. Disabled by default.
+   */
+  setShowFps(show: boolean): void {
+    this.showFps = show;
+    this.lastFrameTime = 0;
+    this.fps = 0;
+    this.saveSettings();
+    this.draw();
+  }
+
+  /**
+   * Update the smoothed FPS from the interval between draw() calls. This is an
+   * on-demand renderer (no rAF loop), so the value reflects redraw frequency
+   * during activity and dips after idle gaps.
+   */
+  private updateFps() {
+    const now =
+      typeof performance !== "undefined" ? performance.now() : Date.now();
+    if (this.lastFrameTime > 0) {
+      const dt = now - this.lastFrameTime;
+      if (dt > 0) {
+        const instantaneous = 1000 / dt;
+        // Exponential moving average smooths jitter between on-demand redraws.
+        this.fps =
+          this.fps === 0
+            ? instantaneous
+            : this.fps * 0.8 + instantaneous * 0.2;
+      }
+    }
+    this.lastFrameTime = now;
+  }
+
+  /** Draw the debug FPS counter in the top-left corner (screen space). */
+  private drawFpsCounter() {
+    const text = `${Math.round(this.fps)} FPS`;
+    const pad = 4 * this.ratio;
+    const fontSize = 11 * this.ratio;
+
+    this.ctx.save();
+    this.ctx.font = `${fontSize}px ${DEFAULT_FONT}`;
+    this.ctx.textBaseline = "top";
+    const textW = this.ctx.measureText(text).width;
+    this.ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+    this.ctx.fillRect(0, 0, textW + pad * 2, fontSize + pad * 2);
+    this.ctx.fillStyle = "#0f0";
+    this.ctx.fillText(text, pad, pad);
+    this.ctx.restore();
   }
 
   /**
@@ -1600,6 +1910,9 @@ export class Annotator {
    * @param mode
    */
   setMode(mode: EditMode) {
+    // A mode switch ends any in-progress typing run for undo coalescing.
+    this.history.endCoalescing();
+
     let absIndex: number | null = null;
     if (this.cursor.xLine >= 0 && this.cursor.yLine >= 0) {
       const segPos = this.text.cursorToIndex(this.viewport, this.cursor);
@@ -1638,14 +1951,14 @@ export class Annotator {
       if (segPos !== null) {
         const coords = this.text.positionToCursor(this.viewport, segPos);
         if (coords !== null) {
+          // Re-derive the caret's visual position in the new mode so its
+          // document position is preserved across the switch. Deliberately do
+          // NOT scroll the viewport to the caret here: switching edit modes
+          // keeps the reader on the same content (the viewport was just
+          // restored above, per #2904). Snapping to an off-screen caret —
+          // one the user had scrolled away from — would defeat that.
           const absY = this.viewport.lineStart + coords.yLine;
           this.cursor.setPosition(coords.xLine, absY);
-          if (
-            absY < this.viewport.lineStart ||
-            absY > this.viewport.lineEnd - 1
-          ) {
-            this.viewport.scrollTo(absY, this.scrollExtentLineCount());
-          }
         }
       }
     }
@@ -1752,7 +2065,7 @@ export class Annotator {
         this.cursor.reset();
       }
 
-      this.warnings.onTextChanged(this.text.value);
+      this.runWarningChecks();
       this.draw();
     }
   }
@@ -1804,7 +2117,7 @@ export class Annotator {
     this.text.calculateLines();
 
     // Trigger callbacks and redraw
-    this.warnings.onTextChanged(this.text.value);
+    this.runWarningChecks();
     this.draw();
   }
 
@@ -1834,27 +2147,11 @@ export class Annotator {
       return;
     }
 
-    const contentStartAbsRaw =
+    // Scroll to where the anchored content starts (just past the opening tag).
+    this.scrollCaretToRawIndex(
       openingTag.getAbsoluteTagPosition(this.text.segments) +
-      openingTag.getTagLength();
-    const segPos = this.text.getSegmentFromAbsTextIndex(contentStartAbsRaw);
-    if (!segPos) {
-      return;
-    }
-
-    const segment = this.text.segments[segPos.segmentIndex];
-    if (!segment) {
-      return;
-    }
-
-    const absYLine = segment.lineStart + segPos.lineIndex;
-
-    this.viewport.scrollTo(absYLine, this.scrollExtentLineCount());
-    this.cursor.xLine = segPos.charInLineIndex;
-    this.cursor.yLine = absYLine;
-    this.cursor.resetHighlight();
-    this.draw();
-    this.element.focus({ preventScroll: true });
+        openingTag.getTagLength()
+    );
   }
 
   scrollToLine(absLine: number) {
@@ -1890,7 +2187,7 @@ export class Annotator {
     this.text.value = newText;
     this.text.prepareSegments();
     this.text.calculateLines();
-    this.warnings.onTextChanged(this.text.value);
+    this.runWarningChecks();
 
     // Preserve fluent scroll offset (deltaY) so updating text (e.g. discard)
     // doesn't snap the viewport to the top of a line.
@@ -2039,6 +2336,95 @@ export class Annotator {
     }
   }
 
+  // ===== Phase 4 (#3086): undo/redo =====
+
+  /** Capture the live editor state (raw value + canonical caret/selection offsets). */
+  captureSnapshot(): HistorySnapshot {
+    return {
+      value: this.text.value,
+      anchor: this.cursor.anchor,
+      head: this.cursor.head,
+      anchorAffinity: this.cursor.anchorAffinity,
+      headAffinity: this.cursor.headAffinity,
+    };
+  }
+
+  /**
+   * Restore a snapshot: reload the document string, reparse/rewrap, set the
+   * caret/selection offsets and derive the visual caret, scroll it into view,
+   * fire onTextChangeCb (when the value changed and editing is allowed) and draw.
+   */
+  private restoreSnapshot(snap: HistorySnapshot): void {
+    const changed = this.text.value !== snap.value;
+
+    this.text.value = snap.value;
+    this.text.prepareSegments();
+    this.text.calculateLines();
+
+    this.cursor.anchor = snap.anchor;
+    this.cursor.head = snap.head;
+    this.cursor.anchorAffinity = snap.anchorAffinity;
+    this.cursor.headAffinity = snap.headAffinity;
+    this.cursor.syncVisualFromOffset(this.text);
+
+    this.keys.scrollCursorIntoView();
+    this.runWarningChecks();
+
+    if (
+      changed &&
+      this.text.mode !== EditMode.HIGHLIGHT &&
+      this.onTextChangeCb
+    ) {
+      this.onTextChangeCb(this.text.value);
+    }
+    this.draw();
+  }
+
+  /**
+   * Record the pre-mutation state on the undo stack. `coalesce` is true only for
+   * a single-character typing insert, so a contiguous typing run becomes one
+   * undo step; every other op is discrete. The post-edit caret offset is read
+   * from the (already-updated) cursor for contiguity tracking.
+   */
+  recordHistory(before: HistorySnapshot, coalesce: boolean): void {
+    this.history.record(before, coalesce, this.cursor.head);
+  }
+
+  canUndo(): boolean {
+    return this.history.canUndo();
+  }
+
+  canRedo(): boolean {
+    return this.history.canRedo();
+  }
+
+  /** Restore the previous document state, if any. */
+  undo(): void {
+    // Editing is disabled in HIGHLIGHT mode; undo would mutate the document
+    // while restoreSnapshot suppresses onTextChangeCb, silently desyncing the
+    // editor from the host app. Leave the stack untouched.
+    if (this.text.mode === EditMode.HIGHLIGHT) {
+      return;
+    }
+    const target = this.history.undo(this.captureSnapshot());
+    if (target === null) {
+      return;
+    }
+    this.restoreSnapshot(target);
+  }
+
+  /** Re-apply the most recently undone document state, if any. */
+  redo(): void {
+    if (this.text.mode === EditMode.HIGHLIGHT) {
+      return;
+    }
+    const target = this.history.redo(this.captureSnapshot());
+    if (target === null) {
+      return;
+    }
+    this.restoreSnapshot(target);
+  }
+
   onCopyText() {
     window.navigator.clipboard.writeText(this.lastSelectedText?.text || "");
   }
@@ -2047,17 +2433,31 @@ export class Annotator {
     window.navigator.clipboard
       .readText()
       .then((clipText: string) => {
+        // Snapshot the pre-paste state for undo (a paste is one discrete step).
+        this.cursor.reconcileOffsetsFromVisual(this.text);
+        const before = this.captureSnapshot();
         const area = this.cursor.getSelectedArea();
         if (area) {
           this.text.deleteRangeText(area[0], area[1]);
           this.cursor.reset();
           this.cursor.setPosition(area[0].xLine, area[0].yLine);
         }
+        // Place the caret at insert-offset + length via the offset model. Unlike
+        // move(len, 0) — which only shifts xLine and mishandles pasted newlines —
+        // this lands correctly for multi-line text and stays in bounds.
+        const insertOffset = this.text.offsetFromVisual(
+          this.cursor.xLine,
+          this.cursor.yLine
+        );
         this.text.insertText(this.viewport, this.cursor, clipText);
-        this.cursor.move(clipText.length, 0);
-        this.cursor.fixOutOfBounds(this.viewport, this.text);
+        const pasteAt = insertOffset >= 0 ? insertOffset : this.cursor.head;
+        this.cursor.moveToOffset(this.text, pasteAt + clipText.length);
+        if (this.text.value !== before.value) {
+          this.recordHistory(before, false);
+        }
+        this.keys.scrollCursorIntoView();
 
-        this.warnings.onTextChanged(this.text.value);
+        this.runWarningChecks();
         this.draw();
       })
       .catch((err) => {
@@ -2066,17 +2466,29 @@ export class Annotator {
   }
 
   onReplaceText(text: string) {
+    // Snapshot the pre-replace state for undo (replace is one discrete step).
+    this.cursor.reconcileOffsetsFromVisual(this.text);
+    const before = this.captureSnapshot();
     const area = this.cursor.getSelectedArea();
     if (area) {
       this.text.deleteRangeText(area[0], area[1]);
       this.cursor.reset();
       this.cursor.setPosition(area[0].xLine, area[0].yLine);
     }
+    // See onPasteText: offset-based caret placement handles multi-line text.
+    const insertOffset = this.text.offsetFromVisual(
+      this.cursor.xLine,
+      this.cursor.yLine
+    );
     this.text.insertText(this.viewport, this.cursor, text);
-    this.cursor.move(text.length, 0);
-    this.cursor.fixOutOfBounds(this.viewport, this.text);
+    const insertAt = insertOffset >= 0 ? insertOffset : this.cursor.head;
+    this.cursor.moveToOffset(this.text, insertAt + text.length);
+    if (this.text.value !== before.value) {
+      this.recordHistory(before, false);
+    }
+    this.keys.scrollCursorIntoView();
 
-    this.warnings.onTextChanged(this.text.value);
+    this.runWarningChecks();
     this.draw();
   }
 
@@ -2601,5 +3013,154 @@ export class Annotator {
     }
 
     return [clamp(newStart), clamp(newEnd)];
+  }
+
+  /**
+   * Validate anchors and return asymmetrical (broken) anchors
+   */
+  validateAnchors() {
+    return this.text.validateAnchors();
+  }
+
+  /**
+   * Resolve a validated asymmetrical-anchor issue back to its concrete Tag.
+   * Identity is (tagName, position, segmentIndex): `position` is a per-segment
+   * raw offset and is NOT unique across segments, so segmentIndex is required
+   * to avoid resolving the wrong orphan when the same entity is broken at the
+   * same offset in different segments.
+   */
+  private findAsymmetricalTag(
+    tagName: string,
+    position: number,
+    segmentIndex: number
+  ): { tag: Tag; issue: AsymmetricalAnchor } | undefined {
+    const issue = this.validateAnchors().find(
+      (i) =>
+        i.tagName === tagName &&
+        i.position === position &&
+        i.segmentIndex === segmentIndex
+    );
+    if (!issue) {
+      return undefined;
+    }
+
+    const segment = this.text.segments[issue.segmentIndex];
+    if (!segment) {
+      return undefined;
+    }
+
+    const tags =
+      issue.type === "orphaned-opening"
+        ? segment.openingTags
+        : segment.closingTags;
+    const tag = tags.find(
+      (t) => t.getTagName() === tagName && t.position === issue.position
+    );
+
+    return tag ? { tag, issue } : undefined;
+  }
+
+  /**
+   * Shared scroll tail: place the caret at the given absolute raw-text index,
+   * scroll it into view, redraw and focus the canvas.
+   */
+  private scrollCaretToRawIndex(absRaw: number): void {
+    const segPos = this.text.getSegmentFromAbsTextIndex(absRaw);
+    if (!segPos) {
+      return;
+    }
+    const targetSegment = this.text.segments[segPos.segmentIndex];
+    if (!targetSegment) {
+      return;
+    }
+
+    const absYLine = targetSegment.lineStart + segPos.lineIndex;
+    this.viewport.scrollTo(absYLine, this.scrollExtentLineCount());
+    this.cursor.xLine = segPos.charInLineIndex;
+    this.cursor.yLine = absYLine;
+    this.cursor.resetHighlight();
+    this.draw();
+    this.element.focus({ preventScroll: true });
+  }
+
+  /**
+   * Remove an asymmetrical (broken) anchor identified by tag name, per-segment
+   * position and segment index. Returns true if successfully removed.
+   */
+  removeAsymmetricalAnchor(
+    tagName: string,
+    position: number,
+    segmentIndex: number
+  ): boolean {
+    const found = this.findAsymmetricalTag(tagName, position, segmentIndex);
+    if (!found) {
+      return false;
+    }
+
+    const { tag: tagToRemove, issue } = found;
+    const segment = this.text.segments[issue.segmentIndex];
+    if (!segment) {
+      return false;
+    }
+
+    // Remove from raw text
+    const tagLength = tagToRemove.getTagLength();
+    const before = segment.raw.substring(0, tagToRemove.position);
+    const after = segment.raw.substring(tagToRemove.position + tagLength);
+    segment.raw = before + after;
+
+    // Re-parse the segment
+    segment.parseText();
+
+    // Update text value and recalculate
+    this.text.assignValueFromSegments();
+
+    // Redraw
+    this.draw();
+
+    // Re-check anchors
+    this.checkAnchors();
+
+    return true;
+  }
+
+  /**
+   * Scroll the viewport to an asymmetrical (broken) anchor's tag. Works for
+   * both orphaned opening and orphaned closing tags. Intended to be used in RAW
+   * mode, where the tag markup is visible and line positions match raw text.
+   */
+  scrollToAsymmetricalAnchor(
+    tagName: string,
+    position: number,
+    segmentIndex: number
+  ): void {
+    const found = this.findAsymmetricalTag(tagName, position, segmentIndex);
+    if (!found) {
+      return;
+    }
+    this.scrollCaretToRawIndex(
+      found.tag.getAbsoluteTagPosition(this.text.segments)
+    );
+  }
+
+  /**
+   * Check anchors and emit warnings if issues found
+   */
+  checkAnchors(): void {
+    const issues = this.validateAnchors();
+    if (issues.length > 0) {
+      this.warnings.emitAsymmetricalAnchors(issues);
+    } else {
+      this.warnings.clearWarnings();
+      this.warnings.emitAsymmetricalAnchors([]);
+    }
+  }
+
+  /**
+   * Run all warning detection checks. Invoked on every text mutation.
+   * Add new check calls here when introducing additional warning types.
+   */
+  private runWarningChecks(): void {
+    this.checkAnchors();
   }
 }

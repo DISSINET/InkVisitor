@@ -6,7 +6,7 @@ import { FaPlus } from "react-icons/fa";
 import api from "api";
 import { Button, ButtonGroup, Input } from "components";
 import { StyledUserEditorForm, StyledUtils } from "./UserListStyles";
-import { IResponseUser } from "@shared/types";
+import { IResponseUser } from "@inkvisitor/shared/types";
 
 interface UsersUtils {
   users: IResponseUser[];

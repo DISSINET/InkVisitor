@@ -1,29 +1,17 @@
-import {
-  FloatingPortal,
-  autoUpdate,
-  offset,
-  useFloating,
-} from "@floating-ui/react";
-import { EntityEnums } from "@shared/enums";
-import { IResponseEntity } from "@shared/types";
+import { FloatingPortal, autoUpdate, offset, useFloating } from "@floating-ui/react";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { IResponseEntity } from "@inkvisitor/shared/types";
 import { Tooltip, TypeBar } from "components";
 import { EntityTag } from "components/advanced";
-import React, { MouseEventHandler, useRef, useState } from "react";
-import {
-  DragSourceMonitor,
-  DropTargetMonitor,
-  useDrag,
-  useDrop,
-} from "react-dnd";
+import React, { MouseEventHandler, useLayoutEffect, useRef, useState } from "react";
+import { DragSourceMonitor, DropTargetMonitor, useDrag, useDrop } from "react-dnd";
 import { FiMove } from "react-icons/fi";
 import { DragItem, ItemTypes } from "types";
 import { dndHoverFnHorizontal, getEntityLabel } from "utils/utils";
-import {
-  StyledCgClose,
-  StyledIconWrap,
-  StyledLabel,
-  StyledTab,
-} from "./EntityDetailTabStyles";
+import { StyledCgClose, StyledIconWrap, StyledLabel, StyledTab } from "./EntityDetailTabStyles";
+
+/** Minimum tab width (px) to show the drag handle without crowding the close button. */
+const MIN_TAB_WIDTH_FOR_MOVE_ICON = 40;
 
 interface EntityDetailTab {
   entity: IResponseEntity;
@@ -43,8 +31,7 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
   moveRow,
   onDragEnd,
 }) => {
-  const [referenceElement, setReferenceElement] =
-    useState<HTMLDivElement | null>(null);
+  const [referenceElement, setReferenceElement] = useState<HTMLDivElement | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [showTag, setShowTag] = useState(false);
@@ -56,6 +43,25 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
   });
 
   const ref = useRef<HTMLDivElement>(null);
+  const [tabWidth, setTabWidth] = useState(0);
+
+  useLayoutEffect(() => {
+    const element = ref.current;
+    if (!element) {
+      return;
+    }
+
+    const updateWidth = () => {
+      setTabWidth(Math.round(element.getBoundingClientRect().width));
+    };
+
+    updateWidth();
+    const resizeObserver = new ResizeObserver(updateWidth);
+    resizeObserver.observe(element);
+    return () => resizeObserver.disconnect();
+  }, []);
+
+  const showMoveIcon = isHovered && tabWidth >= MIN_TAB_WIDTH_FOR_MOVE_ICON;
 
   const [, drop] = useDrop<DragItem>({
     accept: ItemTypes.DETAIL_TAB,
@@ -95,9 +101,7 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
         <StyledLabel
           ref={setReferenceElement}
           $isSelected={isSelected}
-          $isItalic={
-            entity?.class === EntityEnums.Class.Statement && !entity?.labels[0]
-          }
+          $isItalic={entity?.class === EntityEnums.Class.Statement && !entity?.labels[0]}
           onClick={onClick}
         >
           {entity?.class && (
@@ -111,7 +115,7 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
           {!entity ? "..." : getEntityLabel(entity)}
         </StyledLabel>
 
-        {isHovered && (
+        {showMoveIcon && (
           <StyledIconWrap
             onMouseDown={() => {
               setShowTag(true);
@@ -128,6 +132,7 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
             <div
               ref={refs.setFloating}
               style={{
+                zIndex: 200,
                 ...floatingStyles,
               }}
             >

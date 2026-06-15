@@ -1,8 +1,8 @@
 import { HighlightMode, HighlightSchema } from "@inkvisitor/annotator/src/lib";
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import { DefaultTheme } from "styled-components";
 import { EntityColors } from "types";
-import { IDocument } from "@shared/types";
+import { IDocument } from "@inkvisitor/shared/types";
 interface annotatorHighlightData {
   thisTerritoryEntityId: string | undefined;
   dataDocument: IDocument;

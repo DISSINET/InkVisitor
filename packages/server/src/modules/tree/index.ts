@@ -5,12 +5,12 @@ import {
   PermissionDeniedError,
   TerritoryDoesNotExits,
   TerrytoryInvalidMove,
-} from "@shared/types/errors";
+} from "@inkvisitor/shared/types/errors";
 import { asyncRouteHandler } from "..";
-import { IResponseGeneric, IResponseTree, ITerritory } from "@shared/types";
+import { IResponseGeneric, IResponseTree, ITerritory } from "@inkvisitor/shared/types";
 import Territory from "@models/territory/territory";
-import { IParentTerritory } from "@shared/types/territory";
-import { EntityEnums } from "@shared/enums";
+import { IParentTerritory } from "@inkvisitor/shared/types/territory";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import treeCache, { TreeCreator } from "@service/treeCache";
 import { IRequest } from "src/custom_typings/request";
 

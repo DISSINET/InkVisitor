@@ -4,7 +4,7 @@ import { clean, newMockRequest } from "@modules/common.test";
 import { prepareEntity } from "@models/entity/entity.test";
 import Entity from "@models/entity/entity";
 import { IRequest } from "src/custom_typings/request";
-import { EntityEnums, RelationEnums } from "@shared/enums";
+import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { prepareRelation } from "@models/relation/relation.test";
 import { ResponseTooltip } from "./response-tooltip";
 

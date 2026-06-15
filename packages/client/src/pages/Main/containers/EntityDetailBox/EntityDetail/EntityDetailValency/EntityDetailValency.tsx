@@ -1,10 +1,10 @@
-import { RelationEnums } from "@shared/enums";
+import { RelationEnums } from "@inkvisitor/shared/enums";
 import {
   IEntity,
   IResponseDetail,
   IResponseGeneric,
   Relation,
-} from "@shared/types";
+} from "@inkvisitor/shared/types";
 import { UseMutationResult } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import React from "react";

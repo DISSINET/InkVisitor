@@ -1,4 +1,4 @@
-import { Query } from "@shared/types";
+import { Query } from "@inkvisitor/shared/types";
 
 export const getAllEdges = (node: Query.INode): Query.IEdge[] => {
   const edges: Query.IEdge[] = [];

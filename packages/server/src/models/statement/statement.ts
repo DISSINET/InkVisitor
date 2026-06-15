@@ -4,17 +4,17 @@ import {
   IStatementActant,
   IStatementAction,
   IReference,
-} from "@shared/types";
+} from "@inkvisitor/shared/types";
 import {
   fillFlatObject,
   fillArray,
   IModel,
   determineOrder,
 } from "@models/common";
-import { EntityEnums, UserEnums, DbEnums } from "@shared/enums";
+import { EntityEnums, UserEnums, DbEnums } from "@inkvisitor/shared/enums";
 import Entity from "@models/entity/entity";
 import { r as rethink, Connection, RDatum, WriteResult } from "rethinkdb-ts";
-import { InternalServerError } from "@shared/types/errors";
+import { InternalServerError } from "@inkvisitor/shared/types/errors";
 import User from "@models/user/user";
 import treeCache from "@service/treeCache";
 import Prop from "@models/prop/prop";
@@ -23,9 +23,9 @@ import {
   IStatementDataTerritory,
   ROOT_TERRITORY_ID,
   StatementObject,
-} from "@shared/types/statement";
+} from "@inkvisitor/shared/types/statement";
 import { randomUUID } from "crypto";
-import { PropSpecKind } from "@shared/types/prop";
+import { PropSpecKind } from "@inkvisitor/shared/types/prop";
 
 export class StatementClassification implements IStatementClassification {
   id = "";
@@ -646,14 +646,15 @@ class Statement extends Entity implements IStatement {
     db: Connection | undefined,
     territoryId: string
   ): Promise<IStatement[]> {
+    // Uses the `statement_territory` secondary index (data.territory.territoryId).
+    // Only Statements have that path today, but we keep a defensive class
+    // filter so a future class or import script populating data.territory
+    // can't leak into the result set - the index would still surface them
+    // and the downstream sort/walks assume the Statement shape.
     const statements = await rethink
       .table(Entity.table)
-      .filter({
-        class: EntityEnums.Class.Statement,
-      })
-      .filter((row: RDatum) => {
-        return row("data")("territory")("territoryId").eq(territoryId);
-      })
+      .getAll(territoryId, { index: DbEnums.Indexes.StatementTerritory })
+      .filter({ class: EntityEnums.Class.Statement })
       .run(db);
 
     return statements.sort((a, b) => {
@@ -726,6 +727,42 @@ class Statement extends Entity implements IStatement {
     });
 
     return entityIds;
+  }
+
+  /**
+   * Returns ids that co-occur with entityId in any statement.
+   * Mirrors the StatementEntities index (actants, actions, tags, direct
+   * territory) plus the statement id itself, so every returned id would
+   * also find these statements if used as the co-occurrence input.
+   * Excludes territory ancestor lineage and nested prop/reference ids,
+   * which made co-occurrence search return many unrelated entities.
+   */
+  static async getCoOccurrentEntityIds(
+    db: Connection | undefined,
+    entityId: string
+  ): Promise<string[]> {
+    const statements = await Statement.getLinkedEntities(db, entityId);
+
+    const ids = new Set<string>();
+    for (const s of statements) {
+      ids.add(s.id);
+      const territoryId = s.data.territory?.territoryId;
+      if (territoryId) {
+        ids.add(territoryId);
+      }
+      s.data.actions?.forEach((a) => {
+        if (a.actionId) ids.add(a.actionId);
+      });
+      s.data.actants?.forEach((a) => {
+        if (a.entityId) ids.add(a.entityId);
+      });
+      s.data.tags?.forEach((t) => {
+        if (t) ids.add(t);
+      });
+    }
+    ids.delete(entityId);
+
+    return [...ids];
   }
 
   /**

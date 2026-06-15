@@ -1,7 +1,7 @@
 import { FloatingPortal, autoUpdate, useFloating } from "@floating-ui/react";
 import { config, useSpring } from "@react-spring/web";
-import { EntityEnums, UserEnums } from "@shared/enums";
-import { IEntity, IUser } from "@shared/types";
+import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
+import { IEntity, IUser } from "@inkvisitor/shared/types";
 import { UseMutationResult, useQueryClient } from "@tanstack/react-query";
 import { rootTerritoryId } from "Theme/constants";
 import { Button } from "components";

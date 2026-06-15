@@ -1,14 +1,18 @@
 import React from "react";
-import { IEntity } from "@shared/types";
+import { IEntity } from "@inkvisitor/shared/types";
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
 import { EntityTag } from "components/advanced";
 import { Loader } from "components";
+import { UnlinkButton } from "./EntityTag";
 
 interface EntityTagByIdProps {
   entityId: string;
   entity?: IEntity;
+  fullWidth?: boolean;
   disableTooltip?: boolean;
+  unlinkButton?: UnlinkButton | false;
+  disableToast?: boolean;
 }
 
 /**
@@ -17,12 +21,17 @@ interface EntityTagByIdProps {
 export const EntityTagById: React.FC<EntityTagByIdProps> = ({
   entityId,
   entity: entityProp,
+  fullWidth = false,
   disableTooltip = true,
+  unlinkButton,
+  disableToast = false,
 }) => {
   const { data, isFetching } = useQuery({
     queryKey: ["entity", entityId],
     queryFn: async () => {
-      const res = await api.entityGet(entityId);
+      const res = await api.entityGet(entityId, {
+        ignoreErrorToast: disableToast,
+      });
       return res.data;
     },
     enabled: !!entityId && !entityProp && api.isLoggedIn(),
@@ -40,6 +49,8 @@ export const EntityTagById: React.FC<EntityTagByIdProps> = ({
     <EntityTag
       entity={entity}
       disableTooltip={disableTooltip}
+      fullWidth={fullWidth}
+      unlinkButton={unlinkButton}
       disableDoubleClick
     />
   );

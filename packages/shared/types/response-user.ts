@@ -2,7 +2,7 @@
  * type of the /users endpoint response
  */
 
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IResponseEntity, IUser, IResponseBookmarkFolder } from "./";
 
 export interface IResponseUser

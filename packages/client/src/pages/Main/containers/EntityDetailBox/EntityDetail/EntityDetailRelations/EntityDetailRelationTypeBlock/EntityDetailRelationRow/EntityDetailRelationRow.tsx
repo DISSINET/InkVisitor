@@ -1,6 +1,6 @@
-import { certaintyDict } from "@shared/dictionaries";
-import { RelationEnums } from "@shared/enums";
-import { IEntity, IResponseGeneric, Relation } from "@shared/types";
+import { certaintyDict } from "@inkvisitor/shared/dictionaries";
+import { RelationEnums } from "@inkvisitor/shared/enums";
+import { IEntity, IResponseGeneric, Relation } from "@inkvisitor/shared/types";
 import { UseMutationResult } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import React, { useContext, useRef } from "react";

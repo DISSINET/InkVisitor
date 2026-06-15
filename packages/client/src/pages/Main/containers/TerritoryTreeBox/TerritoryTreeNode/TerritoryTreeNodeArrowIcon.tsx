@@ -6,7 +6,7 @@ import {
   BsCaretRightFill,
 } from "react-icons/bs";
 
-import { InterfaceEnums, UserEnums } from "@shared/enums";
+import { InterfaceEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { useTheme } from "hooks";
 import { useAppSelector } from "redux/hooks";
 import { StyledFaCircle, StyledFaDotCircle } from "./TerritoryTreeNodeStyles";

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
 import { Modal, ModalContent, ModalHeader } from "components";

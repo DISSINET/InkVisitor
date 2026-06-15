@@ -2,7 +2,7 @@ import { Box, Panel } from "components";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAppSelector } from "redux/hooks";
-import { DropdownItem } from "types";
+import { DropdownItem } from "@inkvisitor/shared/types";
 import { DocumentTable } from "./DocumentTable/DocumentTable";
 import { EntitiesTab } from "./EntitiesTab/EntitiesTab";
 import {
@@ -20,12 +20,8 @@ const parseStatsTab = (tab: string | null): StatsTab =>
 export const StatsPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const layoutWidth: number = useAppSelector(
-    (state) => state.layout.layoutWidth
-  );
-  const contentHeight: number = useAppSelector(
-    (state) => state.layout.contentHeight
-  );
+  const layoutWidth: number = useAppSelector((state) => state.layout.layoutWidth);
+  const contentHeight: number = useAppSelector((state) => state.layout.contentHeight);
 
   // URL hash of tabs handling
   const hashParams = new URLSearchParams(location.hash.substring(1));
@@ -61,9 +57,7 @@ export const StatsPage = () => {
 
   // selected document for document table
   // state is here to preserve the selected document on tab switches
-  const [selectedDocument, setSelectedDocument] = useState<DropdownItem | null>(
-    null
-  );
+  const [selectedDocument, setSelectedDocument] = useState<DropdownItem | null>(null);
   return (
     <Panel width={layoutWidth}>
       <Box

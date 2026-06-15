@@ -1,4 +1,4 @@
-import { UserEnums } from "@shared/enums";
+import { UserEnums } from "@inkvisitor/shared/enums";
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
 import { Tag } from "components/basic/Tag/Tag";
@@ -28,6 +28,7 @@ export const UserTag: React.FC<UserTagProps> = ({
   const theme = useTheme();
   const currentUserId = localStorage.getItem("userid");
   const color = currentUserId === userId ? "primary" : "info";
+
   const { data: dataUser } = useQuery({
     queryKey: ["user-tag", userId],
     queryFn: async () => {

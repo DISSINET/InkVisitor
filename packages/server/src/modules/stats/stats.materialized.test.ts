@@ -1,10 +1,10 @@
 import request from "supertest";
-import app from "../../Server";
+import app from "../../server";
 import { Db } from "@service/rethink";
 import { pool } from "@middlewares/db";
 import { apiPath } from "@common/constants";
 import { MaterializedStats } from "@models/stats/materialized-stats";
-import { EventType, Aggregation, TimeUnit } from "@shared/types/stats";
+import { EventType, Aggregation, TimeUnit } from "@inkvisitor/shared/types/stats";
 
 describe("modules/stats materialized endpoint", function () {
   const db = new Db();

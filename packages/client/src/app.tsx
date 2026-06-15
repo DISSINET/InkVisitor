@@ -1,4 +1,4 @@
-import { InterfaceEnums } from "@shared/enums";
+import { InterfaceEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import api from "api";
@@ -12,6 +12,7 @@ import {
   AboutPage,
   AclPage,
   ActivatePage,
+  BackupsPage,
   DocumentsPage,
   LoginPage,
   MainPage,
@@ -41,7 +42,7 @@ const clockPerformance = (
   actualTime: any,
   baseTime: any,
   startTime: any,
-  commitTime: any
+  commitTime: any,
 ) => {
   console.log({
     profilerId,
@@ -66,6 +67,14 @@ export const RequireAuth = ({ children }: { children: React.ReactNode }) => {
   return api.isLoggedIn() ? children : <Navigate to="/login" />;
 };
 
+export const RequireOwner = ({ children }: { children: React.ReactNode }) => {
+  if (!api.isLoggedIn()) {
+    return <Navigate to="/login" />;
+  }
+  const isOwner = localStorage.getItem("userrole") === UserEnums.Role.Owner;
+  return isOwner ? children : <Navigate to="/" />;
+};
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -79,9 +88,7 @@ const queryClient = new QueryClient({
 });
 export const App: React.FC = () => {
   const dispatch = useAppDispatch();
-  const selectedThemeId: InterfaceEnums.Theme = useAppSelector(
-    (state) => state.theme
-  );
+  const selectedThemeId: InterfaceEnums.Theme = useAppSelector((state) => state.theme);
 
   const themeConfig = useMemo(() => {
     if (selectedThemeId === "dark") {
@@ -117,7 +124,7 @@ export const App: React.FC = () => {
         <QueryClientProvider client={queryClient}>
           <div style={{ fontSize: "16px" }}>
             {/* fontSize zooms query devtools to normal size */}
-            <ReactQueryDevtools initialIsOpen={false} />
+            <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />
           </div>
           <DndProvider backend={HTML5Backend}>
             <BrowserRouter basename={process.env.ROOT_URL}>
@@ -199,7 +206,15 @@ export const App: React.FC = () => {
                       }
                     />
                     <Route
-                      path="/query"
+                      path="/backups"
+                      element={
+                        <RequireOwner>
+                          <BackupsPage />
+                        </RequireOwner>
+                      }
+                    />
+                    <Route
+                      path="/explorer"
                       element={
                         <RequireAuth>
                           <QueryPage />

@@ -1,14 +1,13 @@
-import { languageDict, userRoleDict } from "@shared/dictionaries";
-import { EntityEnums, UserEnums } from "@shared/enums";
-import { IEntity, IResponseUser, IUser } from "@shared/types";
-import { UnsafePasswordError } from "@shared/types/errors";
+import { languageDict, userRoleDict } from "@inkvisitor/shared/dictionaries";
+import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
+import { DropdownItem, IEntity, IResponseUser, IUser } from "@inkvisitor/shared/types";
+import { UnsafePasswordError } from "@inkvisitor/shared/types/errors";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { SAFE_PASSWORD_DESCRIPTION } from "Theme/constants";
 import api from "api";
 import {
   Button,
   ButtonGroup,
-  Checkbox,
   IconWithTooltip,
   Input,
   Loader,
@@ -20,15 +19,11 @@ import {
   ModalInputLabel,
   ModalInputWrap,
 } from "components";
-import Dropdown, {
-  AttributeButtonGroup,
-  EntitySuggester,
-  EntityTag,
-} from "components/advanced";
+import Dropdown, { AttributeButtonGroup, EntitySuggester, EntityTag } from "components/advanced";
 import { StyledDescription } from "pages/AuthModalSharedStyles";
 import React, { useEffect, useMemo, useState } from "react";
+import { FaQuestion } from "react-icons/fa";
 import { toast } from "react-toastify";
-import { DropdownItem } from "types";
 import { isSafePassword } from "utils/utils";
 import {
   StyledButtonWrap,
@@ -39,7 +34,6 @@ import {
   StyledUserRights,
 } from "./UserCustomizationModalStyles";
 import { UserRightItem } from "./UserRightItem/UserRightItem";
-import { FaQuestion } from "react-icons/fa";
 
 interface DataObject {
   name: string;
@@ -48,7 +42,6 @@ interface DataObject {
   defaultStatementLanguage: EntityEnums.Language;
   searchLanguages: EntityEnums.Language[];
   defaultTerritory?: string | null;
-  allowMaterializedStats: boolean;
 }
 interface UserCustomizationModal {
   user: IResponseUser;
@@ -80,18 +73,14 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
       name: name,
       email: email,
       defaultLanguage: options.defaultLanguage ?? EntityEnums.Language.Empty,
-      defaultStatementLanguage:
-        options.defaultStatementLanguage ?? EntityEnums.Language.Empty,
+      defaultStatementLanguage: options.defaultStatementLanguage ?? EntityEnums.Language.Empty,
       searchLanguages: options.searchLanguages,
       defaultTerritory: options.defaultTerritory,
-      allowMaterializedStats: options.allowMaterializedStats ?? false,
     };
   }, [user]);
 
   const [data, setData] = useState<DataObject>(initialValues);
-  const [defaultTerritory, setDefaultTerritory] = useState<IEntity | null>(
-    null
-  );
+  const [defaultTerritory, setDefaultTerritory] = useState<IEntity | null>(null);
 
   useEffect(() => {
     setData(initialValues);
@@ -109,10 +98,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
     }
   }, [defaultTerritory]);
 
-  const handleChange = (
-    key: string,
-    value: string | true | false | DropdownItem
-  ) => {
+  const handleChange = (key: string, value: string | true | false | DropdownItem) => {
     setData({
       ...data,
       [key]: value,
@@ -137,8 +123,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
       // defaultTerritory is set but is not loaded in local state
       if (
         data.defaultTerritory &&
-        (defaultTerritory === null ||
-          defaultTerritory?.id !== data.defaultTerritory)
+        (defaultTerritory === null || defaultTerritory?.id !== data.defaultTerritory)
       ) {
         const res = await api.entityGet(data.defaultTerritory);
         setDefaultTerritory(res.data ?? null);
@@ -150,8 +135,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
   const queryClient = useQueryClient();
 
   const updateUserMutation = useMutation({
-    mutationFn: async (changes: Partial<IUser>) =>
-      await api.usersUpdate(user.id, changes),
+    mutationFn: async (changes: Partial<IUser>) => await api.usersUpdate(user.id, changes),
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["user"] });
       toast.info("User updated!");
@@ -172,7 +156,6 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
           defaultStatementLanguage: data.defaultStatementLanguage,
           searchLanguages: data.searchLanguages.map((sL) => sL),
           defaultTerritory: data.defaultTerritory || "",
-          allowMaterializedStats: data.allowMaterializedStats,
         },
       });
     }
@@ -279,9 +262,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                 </ModalInputForm>
 
                 <div style={{ maxWidth: "31rem" }}>
-                  <StyledDescription>
-                    {SAFE_PASSWORD_DESCRIPTION}
-                  </StyledDescription>
+                  <StyledDescription>{SAFE_PASSWORD_DESCRIPTION}</StyledDescription>
                 </div>
 
                 <StyledButtonWrap>
@@ -301,10 +282,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                       label="Submit"
                       inverted
                       onClick={() => {
-                        if (
-                          newPassword.length > 0 &&
-                          !isSafePassword(newPassword)
-                        ) {
+                        if (newPassword.length > 0 && !isSafePassword(newPassword)) {
                           toast.warning(UnsafePasswordError.message);
                         } else {
                           if (newPassword === repeatPassword) {
@@ -340,9 +318,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                   <Dropdown.Single.Basic
                     width="full"
                     value={defaultLanguage}
-                    onChange={(newValue) =>
-                      handleChange("defaultLanguage", newValue)
-                    }
+                    onChange={(newValue) => handleChange("defaultLanguage", newValue)}
                     options={languageDict}
                   />
                   <IconWithTooltip
@@ -364,9 +340,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                   <Dropdown.Single.Basic
                     width="full"
                     value={defaultStatementLanguage}
-                    onChange={(newValue) =>
-                      handleChange("defaultStatementLanguage", newValue)
-                    }
+                    onChange={(newValue) => handleChange("defaultStatementLanguage", newValue)}
                     options={languageDict}
                   />
                   <IconWithTooltip
@@ -461,13 +435,9 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
               <StyledUserRightHeading>{"read"}</StyledUserRightHeading>
               <StyledUserRightItem>
                 <StyledRightsWrap>
-                  {role !== UserEnums.Role.Admin &&
-                  role !== UserEnums.Role.Owner
+                  {role !== UserEnums.Role.Admin && role !== UserEnums.Role.Owner
                     ? readRights.map((right, key) => (
-                        <UserRightItem
-                          key={key}
-                          territoryId={right.territory}
-                        />
+                        <UserRightItem key={key} territoryId={right.territory} />
                       ))
                     : "all"}
                 </StyledRightsWrap>
@@ -475,40 +445,25 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
               <StyledUserRightHeading>{"write"}</StyledUserRightHeading>
               <StyledUserRightItem>
                 <StyledRightsWrap>
-                  {role !== UserEnums.Role.Admin &&
-                  role !== UserEnums.Role.Owner
+                  {role !== UserEnums.Role.Admin && role !== UserEnums.Role.Owner
                     ? writeRights.map((right, key) => (
-                        <UserRightItem
-                          key={key}
-                          territoryId={right.territory}
-                        />
+                        <UserRightItem key={key} territoryId={right.territory} />
                       ))
                     : "all"}
                 </StyledRightsWrap>
               </StyledUserRightItem>
             </StyledUserRights>
 
-            {/* <StyledRightsHeading>
-              <b>{"Statistics"}</b>
-            </StyledRightsHeading>
-            <ModalInputForm>
-              <ModalInputLabel>{"allow materialized data"}</ModalInputLabel>
-              <ModalInputWrap width={165}>
-                <div style={{ display: "flex", alignItems: "center" }}>
-                  <Checkbox
-                    value={data.allowMaterializedStats}
-                    onChangeFn={(value) =>
-                      handleChange("allowMaterializedStats", value)
-                    }
-                  />
-                  <IconWithTooltip
-                    color="success"
-                    icon={<FaQuestion />}
-                    tooltipLabel="Turns on the option that allows to choose between classic and pre-calculated (materialized) data. As opposed to classic data where the data are calculated on every load, materialized data are significantly faster to load and filter. Data are recalculated daily at midnight but it's also possible to run the data recalculation manually with the refresh button."
-                  />
-                </div>
-              </ModalInputWrap>
-            </ModalInputForm> */}
+            {process.env.NODE_ENV === "development" && (
+              <Button
+                label="Simulate HTML API response"
+                color="warning"
+                onClick={async () => {
+                  const response = await api.devSimulateHtmlError({ ignoreErrorToast: true });
+                  console.log("response", response);
+                }}
+              />
+            )}
 
             <Loader show={passwordUpdateMutation.isPending} />
           </div>
@@ -525,12 +480,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                 onClick={() => handleResetPassword()}
               />
             )} */}
-            <Button
-              key="cancel"
-              label="Cancel"
-              color="warning"
-              onClick={onClose}
-            />
+            <Button key="cancel" label="Cancel" color="warning" onClick={onClose} />
             <Button
               disabled={JSON.stringify(data) === JSON.stringify(initialValues)}
               key="submit"

@@ -1,6 +1,6 @@
 import { Placement } from "@popperjs/core";
-import { EntityEnums } from "@shared/enums";
-import { IEntity } from "@shared/types";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { IEntity } from "@inkvisitor/shared/types";
 import { ThemeColor } from "Theme/theme";
 import { Button, Tag } from "components";
 import { EntityTooltip } from "components/advanced";
@@ -27,7 +27,7 @@ import {
 } from "./EntityTagStyles";
 import useDragDrop from "./useDragDrop";
 
-interface UnlinkButton {
+export interface UnlinkButton {
   onClick: () => void;
   color?: keyof ThemeColor;
   tooltipLabel?: string;
@@ -54,6 +54,8 @@ interface EntityTag {
 
   unlinkButton?: UnlinkButton | false;
   customTooltipAttributes?: { partLabel?: string; childCount?: number };
+  /** When set, replaces the default double-click behavior (open in detail). */
+  onDoubleClick?: React.MouseEventHandler<HTMLDivElement>;
 }
 
 const EntityTagComponent: React.FC<EntityTag> = ({
@@ -78,11 +80,12 @@ const EntityTagComponent: React.FC<EntityTag> = ({
 
   unlinkButton,
   customTooltipAttributes,
+  onDoubleClick: onDoubleClickOverride,
 }) => {
   const { appendDetailId } = useSearchParams();
   const dispatch = useAppDispatch();
   const detailBoxState: DetailBoxState = useAppSelector(
-    (state) => state.layout.mainPage.detailBoxState
+    (state) => state.layout.mainPage.detailBoxState,
   );
   const [buttonHovered, setButtonHovered] = useState(false);
   const [elvlHovered, setElvlHovered] = useState(false);
@@ -250,8 +253,12 @@ const EntityTagComponent: React.FC<EntityTag> = ({
           </>
         }
         onClick={() => setClickedOnce(true)}
-        onDoubleClick={() => {
+        onDoubleClick={(e) => {
           setClickedOnce(false);
+          if (onDoubleClickOverride) {
+            onDoubleClickOverride(e);
+            return;
+          }
           if (!disableDoubleClick) {
             appendDetailId(entity.id);
             if (detailBoxState === DetailBoxState.Minimized) {
@@ -280,7 +287,7 @@ const EntityTagComponent: React.FC<EntityTag> = ({
 
 function areEntityTagsEqual(
   prev: Readonly<React.ComponentProps<typeof EntityTagComponent>>,
-  next: Readonly<React.ComponentProps<typeof EntityTagComponent>>
+  next: Readonly<React.ComponentProps<typeof EntityTagComponent>>,
 ) {
   // Compare minimal fields that affect rendering
   if (prev.isSelected !== next.isSelected) return false;
@@ -289,6 +296,7 @@ function areEntityTagsEqual(
   if (prev.fullWidth !== next.fullWidth) return false;
   if (prev.disableTooltip !== next.disableTooltip) return false;
   if (prev.disableDoubleClick !== next.disableDoubleClick) return false;
+  if (prev.onDoubleClick !== next.onDoubleClick) return false;
   if (prev.statementsCount !== next.statementsCount) return false;
   if (Boolean(prev.button) !== Boolean(next.button)) return false;
   if (Boolean(prev.unlinkButton) !== Boolean(next.unlinkButton)) return false;

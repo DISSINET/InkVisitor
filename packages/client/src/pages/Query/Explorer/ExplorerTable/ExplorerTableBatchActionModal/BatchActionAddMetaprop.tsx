@@ -3,9 +3,9 @@ import {
   moodDict,
   partitivityDict,
   virtualityDict,
-} from "@shared/dictionaries";
-import { EntityEnums } from "@shared/enums";
-import { IEntity, IPropSpec } from "@shared/types";
+} from "@inkvisitor/shared/dictionaries";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { IEntity, IPropSpec } from "@inkvisitor/shared/types";
 import { useMutation } from "@tanstack/react-query";
 import api from "api";
 import {
@@ -26,6 +26,10 @@ import Dropdown, {
 } from "components/advanced";
 import React, { useMemo, useState } from "react";
 import { toast } from "react-toastify";
+import {
+  BatchActionApplyConfirm,
+  needsBatchActionConfirm,
+} from "./BatchActionApplyConfirm";
 import {
   StyledBatchAttrRow,
   StyledBatchMessage,
@@ -107,9 +111,19 @@ export const BatchActionAddMetaprop: React.FC<BatchActionAddMetapropProps> = ({
     },
   });
 
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const executeApply = () => {
+    batchMutation.mutate();
+  };
+
   const handleApply = () => {
     if (!typeEntity) return;
-    batchMutation.mutate();
+    if (needsBatchActionConfirm(selectedEntityIds.length)) {
+      setShowConfirm(true);
+      return;
+    }
+    executeApply();
   };
 
   const message = useMemo<string>(() => {
@@ -127,6 +141,7 @@ export const BatchActionAddMetaprop: React.FC<BatchActionAddMetapropProps> = ({
   }, [typeEntity, valueEntity, selectedEntityIds.length]);
 
   return (
+    <>
     <Modal
       showModal
       onClose={onClose}
@@ -295,5 +310,17 @@ export const BatchActionAddMetaprop: React.FC<BatchActionAddMetapropProps> = ({
         </ButtonGroup>
       </ModalFooter>
     </Modal>
+    <BatchActionApplyConfirm
+      kind="metaproperty"
+      entityCount={selectedEntityIds.length}
+      show={showConfirm}
+      loading={batchMutation.isPending}
+      onConfirm={() => {
+        setShowConfirm(false);
+        executeApply();
+      }}
+      onCancel={() => setShowConfirm(false)}
+    />
+    </>
   );
 };

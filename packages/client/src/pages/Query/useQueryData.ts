@@ -1,11 +1,7 @@
-import {
-  QueryClient,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { QueryClient, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import { IResponseQuery, IResponseQueryEntity } from "@shared/types";
-import { Explore, Query } from "@shared/types/query";
+import { IResponseQuery, IResponseQueryEntity } from "@inkvisitor/shared/types";
+import { Explore, Query } from "@inkvisitor/shared/types/query";
 import api from "api";
 import { QueryValidity } from "./types";
 
@@ -67,15 +63,14 @@ export const useQueryData = ({
 
   const checkAndSeedCache = (
     targetOffset: number,
-    targetLimit: number
+    targetLimit: number,
   ): IResponseQuery | undefined => {
     const rowCache = getRowCache();
     const targetEnd = targetOffset + targetLimit - 1;
 
-    const allRowsCached = Array.from(
-      { length: targetLimit },
-      (_, i) => targetOffset + i
-    ).every((rowIndex) => rowCache.rows.has(rowIndex));
+    const allRowsCached = Array.from({ length: targetLimit }, (_, i) => targetOffset + i).every(
+      (rowIndex) => rowCache.rows.has(rowIndex),
+    );
 
     if (!allRowsCached) {
       return undefined;
@@ -90,9 +85,9 @@ export const useQueryData = ({
       }
     }
 
-    console.log(
-      `✅ Cache hit: rows [${targetOffset}-${targetEnd}] (${rowCache.rows.size} total cached)`
-    );
+    // console.log(
+    //   `✅ Cache hit: rows [${targetOffset}-${targetEnd}] (${rowCache.rows.size} total cached)`,
+    // );
 
     return {
       query: queryState,
@@ -107,7 +102,7 @@ export const useQueryData = ({
     offset: number,
     entities: IResponseQueryEntity[],
     total: number,
-    entityIds: string[]
+    entityIds: string[],
   ) => {
     const rowCache = getRowCache();
 
@@ -123,12 +118,8 @@ export const useQueryData = ({
   };
 
   const queryKey = useMemo(
-    () => [
-      "query",
-      stableSignature,
-      { offset: exploreState.offset, limit: exploreState.limit },
-    ],
-    [stableSignature, exploreState.offset, exploreState.limit]
+    () => ["query", stableSignature, { offset: exploreState.offset, limit: exploreState.limit }],
+    [stableSignature, exploreState.offset, exploreState.limit],
   );
 
   const getInitialData = (): IResponseQuery | undefined => {
@@ -142,18 +133,14 @@ export const useQueryData = ({
   } = useQuery({
     queryKey,
     queryFn: async () => {
-      const cachedData = checkAndSeedCache(
-        exploreState.offset,
-        exploreState.limit
-      );
+      const cachedData = checkAndSeedCache(exploreState.offset, exploreState.limit);
       if (cachedData) {
         return cachedData;
       }
 
-      console.log(
-        `🔄 Fetching rows [${exploreState.offset}-${exploreState.offset + exploreState.limit - 1
-        }]`
-      );
+      // console.log(
+      //   `🔄 Fetching rows [${exploreState.offset}-${exploreState.offset + exploreState.limit - 1}]`,
+      // );
 
       if (!queryStateValidity.isValid || !api.isLoggedIn()) return;
       const res = await api.query({
@@ -166,12 +153,13 @@ export const useQueryData = ({
           exploreState.offset,
           res.data.entities,
           res.data.total,
-          res.data.entityIds ?? []
+          res.data.entityIds ?? [],
         );
-        console.log(
-          `📦 Stored ${res.data.entities.length} rows [${exploreState.offset}-${exploreState.offset + res.data.entities.length - 1
-          }]`
-        );
+        // console.log(
+        //   `📦 Stored ${res.data.entities.length} rows [${exploreState.offset}-${
+        //     exploreState.offset + res.data.entities.length - 1
+        //   }]`,
+        // );
       }
 
       return res.data;
@@ -199,7 +187,7 @@ export const useQueryData = ({
       const rowCache = rowCacheStore.get(stableSignature);
       return rowCache?.rows.get(rowIndex);
     },
-    [stableSignature]
+    [stableSignature],
   );
 
   return {
@@ -211,6 +199,20 @@ export const useQueryData = ({
 };
 
 /**
+ * Clears all explorer row caches and refetches active query observers.
+ * Call after entity updates from detail (or anywhere outside the explorer table)
+ * so embedded IEntity copies in column cells stay in sync.
+ */
+export function invalidateAllExplorerQueries(queryClient: QueryClient): void {
+  clearRowCache();
+  void queryClient.invalidateQueries({
+    queryKey: ["query"],
+    exact: false,
+    refetchType: "active",
+  });
+}
+
+/**
  * Clears row cache and forces the explorer query for this signature to refetch.
  * Use `invalidateQueries` (not `removeQueries` + `refetchQueries`): after removal,
  * there is nothing left in the cache for `refetchQueries` to run, so the table
@@ -218,7 +220,7 @@ export const useQueryData = ({
  */
 export function invalidateExplorerQueryForSignature(
   queryClient: QueryClient,
-  stableSignature: string
+  stableSignature: string,
 ): void {
   clearRowCache(stableSignature);
   void queryClient.invalidateQueries({
@@ -228,9 +230,7 @@ export function invalidateExplorerQueryForSignature(
   });
 }
 
-export function useInvalidateExplorerQuery(
-  stableSignature: string | undefined
-): () => void {
+export function useInvalidateExplorerQuery(stableSignature: string | undefined): () => void {
   const queryClient = useQueryClient();
   return useCallback(() => {
     if (!stableSignature) return;

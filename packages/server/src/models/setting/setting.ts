@@ -1,6 +1,12 @@
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
 import { IDbModel } from "@models/common";
-import { ISetting, SettingsKey } from "@shared/types/settings";
+import { ISetting, SettingsKey } from "@inkvisitor/shared/types/settings";
+import { cache } from "@service/ttlCache";
+
+// No TTL: invalidation is fully owned by the changefeed listener in
+// service/changefeedInvalidator.ts plus the explicit cache.delete calls
+// in save/update below.
+export const SETTINGS_ALL_CACHE_KEY = "settings:all";
 
 export class Setting implements ISetting, IDbModel {
   id: string;
@@ -32,18 +38,22 @@ export class Setting implements ISetting, IDbModel {
       )
       .run(dbInstance);
 
+    cache.delete(SETTINGS_ALL_CACHE_KEY);
     return result.inserted === 1;
   }
 
-  update(
+  async update(
     dbInstance: Connection | undefined,
     updateData: { value: any }
   ): Promise<WriteResult> {
-    return rethink
+    const result = await rethink
       .table(Setting.table)
       .get(this.id)
       .replace({ ...updateData, id: this.id, public: this.public })
       .run(dbInstance);
+
+    cache.delete(SETTINGS_ALL_CACHE_KEY);
+    return result;
   }
 
   delete(dbInstance: Connection): Promise<WriteResult> {
@@ -69,9 +79,26 @@ export class Setting implements ISetting, IDbModel {
     return results.map((data) => new Setting(data));
   }
 
-  static async getSettingsAll(conn: Connection): Promise<Setting[]> {
-    const results = await rethink.table(Setting.table).run(conn);
-    return results.map((data) => new Setting(data));
+  /**
+   * Returns the full settings list. Consumers only ever read .id and
+   * .value, so this returns plain ISetting[] - no Setting wrappers - to
+   * avoid allocating N instances per call on the hot path. The cache
+   * deep-clones on read, so callers may not mutate the result.
+   */
+  static async getSettingsAll(conn: Connection): Promise<ISetting[]> {
+    // Snapshot before the DB read; trySet below refuses if a writer
+    // invalidated the key meanwhile.
+    const version = cache.snapshot(SETTINGS_ALL_CACHE_KEY);
+    const cached = cache.get<ISetting[]>(SETTINGS_ALL_CACHE_KEY);
+    if (cached) {
+      return cached;
+    }
+
+    const results = (await rethink
+      .table(Setting.table)
+      .run(conn)) as ISetting[];
+    cache.trySet(SETTINGS_ALL_CACHE_KEY, results, undefined, version);
+    return results;
   }
 
   static async updateGroup(

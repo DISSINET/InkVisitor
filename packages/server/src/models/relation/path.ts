@@ -1,4 +1,4 @@
-import { RelationEnums } from "@shared/enums";
+import { RelationEnums } from "@inkvisitor/shared/enums";
 import { IRelationModel } from "./relation";
 
 interface PathTree {

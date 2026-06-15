@@ -4,14 +4,14 @@ import {
   certaintyDict,
   conceptPartOfSpeechDict,
   languageDict,
-} from "@shared/dictionaries";
-import { EntityEnums, RelationEnums } from "@shared/enums";
+} from "@inkvisitor/shared/dictionaries";
+import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import {
   EntityTooltip as EntityTooltipNamespace,
   IEntity,
   Relation,
-} from "@shared/types";
-import { IResponseUsedInDocument } from "@shared/types/response-detail";
+} from "@inkvisitor/shared/types";
+import { IResponseUsedInDocument } from "@inkvisitor/shared/types/response-detail";
 import { useQuery } from "@tanstack/react-query";
 import {
   maxTooltipMultiRelations,

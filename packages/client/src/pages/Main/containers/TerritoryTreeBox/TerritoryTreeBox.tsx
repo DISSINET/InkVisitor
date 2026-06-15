@@ -1,5 +1,5 @@
-import { EntityEnums, UserEnums } from "@shared/enums";
-import { IResponseTree, IUser } from "@shared/types";
+import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
+import { IResponseTree, IUser } from "@inkvisitor/shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, ButtonGroup, CustomScrollbar, Loader } from "components";
@@ -28,6 +28,7 @@ import {
 } from "./TerritoryTreeFilterUtils";
 import { MemoizedTerritoryTreeNode } from "./TerritoryTreeNode/TerritoryTreeNode";
 import { useTreeQuery } from "hooks/react-query/useTreeQuery";
+import { useUserQuery } from "hooks/react-query";
 
 const initFilterSettings: ITerritoryFilter = {
   starred: false,
@@ -45,28 +46,15 @@ export const TerritoryTreeBox: React.FC = () => {
   const queryClient = useQueryClient();
 
   const { data: treeData, isFetching } = useTreeQuery();
-  const userId = localStorage.getItem("userid");
 
-  const {
-    status: userStatus,
-    data: userData,
-    error: userError,
-    isFetching: userIsFetching,
-  } = useQuery({
-    queryKey: ["user", userId],
-    queryFn: async () => {
-      const res = await api.usersGet(userId as string);
-      return res.data ?? undefined;
-    },
-    enabled: api.isLoggedIn() && !!userId,
-  });
+  const { data: userData } = useUserQuery();
 
   const storedTerritoryIds = useMemo(
-    () =>
-      userData?.storedTerritories?.map((territory) => territory.territory.id) ??
-      [],
+    () => userData?.storedTerritories?.map((territory) => territory.territory.id) ?? [],
     [userData]
   );
+
+  const userId = localStorage.getItem("userid");
 
   const updateUserMutation = useMutation({
     mutationFn: async (changes: Partial<IUser>) => {
@@ -91,16 +79,12 @@ export const TerritoryTreeBox: React.FC = () => {
     (state) => state.territoryTree.selectedTerritoryPath
   );
 
-  const [filterSettings, setFilterSettings] =
-    useState<ITerritoryFilter>(initFilterSettings);
-  const [filteredTreeData, setFilteredTreeData] =
-    useState<IResponseTree | null>();
+  const [filterSettings, setFilterSettings] = useState<ITerritoryFilter>(initFilterSettings);
+  const [filteredTreeData, setFilteredTreeData] = useState<IResponseTree | null>();
 
   useEffect(() => {
     if (treeData) {
-      if (
-        JSON.stringify(filterSettings) === JSON.stringify(initFilterSettings)
-      ) {
+      if (JSON.stringify(filterSettings) === JSON.stringify(initFilterSettings)) {
         setFilteredTreeData(treeData);
       } else {
         // use filter - fn that returns new object with filtered tree and set to state
@@ -109,10 +93,8 @@ export const TerritoryTreeBox: React.FC = () => {
     }
   }, [treeData, filterSettings, userData]);
 
-  const handleFilterChange = (
-    key: keyof ITerritoryFilter,
-    value: boolean | string
-  ) => setFilterSettings({ ...filterSettings, [key]: value });
+  const handleFilterChange = (key: keyof ITerritoryFilter, value: boolean | string) =>
+    setFilterSettings({ ...filterSettings, [key]: value });
 
   const getFilteredTreeData = () => {
     if (treeData) {
@@ -150,22 +132,16 @@ export const TerritoryTreeBox: React.FC = () => {
 
         if (filterSettings.withStatements) {
           const withStatementsTreeData = filterTreeWithStatements(treeData);
-          if (withStatementsTreeData)
-            filteredResults.push(withStatementsTreeData);
+          if (withStatementsTreeData) filteredResults.push(withStatementsTreeData);
         }
 
         if (filterSettings.withSubterritories) {
-          const withSubterritoriesTreeData =
-            filterTreeWithSubterritories(treeData);
-          if (withSubterritoriesTreeData)
-            filteredResults.push(withSubterritoriesTreeData);
+          const withSubterritoriesTreeData = filterTreeWithSubterritories(treeData);
+          if (withSubterritoriesTreeData) filteredResults.push(withSubterritoriesTreeData);
         }
 
         if (filterSettings.filter.length > 0) {
-          const labelFilterTreeData = filterTreeByLabel(
-            treeData,
-            filterSettings.filter
-          );
+          const labelFilterTreeData = filterTreeByLabel(treeData, filterSettings.filter);
           if (labelFilterTreeData) filteredResults.push(labelFilterTreeData);
         }
 
@@ -183,25 +159,19 @@ export const TerritoryTreeBox: React.FC = () => {
           newFilteredTreeData = starredTreeData;
         }
         if (filterSettings.editorRights) {
-          const editorRightsTreeData =
-            filterTreeWithWriteRights(newFilteredTreeData);
+          const editorRightsTreeData = filterTreeWithWriteRights(newFilteredTreeData);
           newFilteredTreeData = editorRightsTreeData;
         }
         if (filterSettings.withStatements) {
-          const withStatementsTreeData =
-            filterTreeWithStatements(newFilteredTreeData);
+          const withStatementsTreeData = filterTreeWithStatements(newFilteredTreeData);
           newFilteredTreeData = withStatementsTreeData;
         }
         if (filterSettings.withSubterritories) {
-          const withSubterritoriesTreeData =
-            filterTreeWithSubterritories(newFilteredTreeData);
+          const withSubterritoriesTreeData = filterTreeWithSubterritories(newFilteredTreeData);
           newFilteredTreeData = withSubterritoriesTreeData;
         }
         if (filterSettings.filter.length > 0) {
-          const labelFilterTreeData = filterTreeByLabel(
-            newFilteredTreeData,
-            filterSettings.filter
-          );
+          const labelFilterTreeData = filterTreeByLabel(newFilteredTreeData, filterSettings.filter);
           newFilteredTreeData = labelFilterTreeData;
         }
       }
@@ -229,9 +199,7 @@ export const TerritoryTreeBox: React.FC = () => {
     }
   }, [filteredTreeData, territoryId]);
 
-  const treeFilterOpen: boolean = useAppSelector(
-    (state) => state.territoryTree.filterOpen
-  );
+  const treeFilterOpen: boolean = useAppSelector((state) => state.territoryTree.filterOpen);
 
   const treeWidth = useDebounce(useSelector(selectPanelWidth(0)), 200);
 
@@ -255,8 +223,7 @@ export const TerritoryTreeBox: React.FC = () => {
       {showTerritoryTree && (
         <>
           <ButtonGroup>
-            {(userRole === UserEnums.Role.Admin ||
-              userRole === UserEnums.Role.Owner) && (
+            {(userRole === UserEnums.Role.Admin || userRole === UserEnums.Role.Owner) && (
               <Button
                 label={!treeWidthTooNarrow ? "new" : ""}
                 iconRight={<span style={{ marginLeft: 5 }}>{"\u0054"}</span>}
@@ -266,9 +233,7 @@ export const TerritoryTreeBox: React.FC = () => {
                 tooltipLabel={treeWidthTooNarrow ? "create new territory" : ""}
               />
             )}
-            <div
-              style={{ display: "flex", alignItems: "center", width: "100%" }}
-            >
+            <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
               <Button
                 label={!treeWidthTooNarrow ? "filter" : ""}
                 onClick={() => {
@@ -294,18 +259,13 @@ export const TerritoryTreeBox: React.FC = () => {
           {treeFilterOpen && (
             <TerritoryTreeFilter
               filterData={filterSettings}
-              handleFilterChange={(key, value) =>
-                handleFilterChange(key, value)
-              }
+              handleFilterChange={(key, value) => handleFilterChange(key, value)}
               userRole={userRole}
             />
           )}
 
           {firstPanelExpanded && (
-            <CustomScrollbar
-              scrollerId="Territories"
-              elementId="Territories-box-content"
-            >
+            <CustomScrollbar scrollerId="Territories" elementId="Territories-box-content">
               <StyledTreeWrapper
               // id="Territories-box-content"
               >
@@ -335,18 +295,14 @@ export const TerritoryTreeBox: React.FC = () => {
             <EntityCreateModal
               closeModal={() => setShowCreate(false)}
               allowedEntityClasses={[EntityEnums.Class.Territory]}
-              onMutationSuccess={() =>
-                queryClient.invalidateQueries({ queryKey: ["tree"] })
-              }
+              onMutationSuccess={() => queryClient.invalidateQueries({ queryKey: ["tree"] })}
             />
           )}
         </>
       )}
       <Loader
         show={
-          isFetching ||
-          updateUserMutation.isPending ||
-          (firstPanelExpanded && !showTerritoryTree)
+          isFetching || updateUserMutation.isPending || (firstPanelExpanded && !showTerritoryTree)
         }
       />
     </>

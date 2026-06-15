@@ -1,4 +1,4 @@
-import { IEntity } from "@shared/types";
+import { IEntity } from "@inkvisitor/shared/types";
 import { Tooltip } from "components";
 import { EntityTag } from "components/advanced";
 import { StyledDots } from "pages/Main/containers/StatementsListBox/StatementListBoxStyles";

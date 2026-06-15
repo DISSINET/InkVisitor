@@ -3,13 +3,13 @@ import { StatementActant, StatementAction } from "@models/statement/statement";
 import { testErroneousResponse } from "@modules/common.test";
 import { Db } from "@service/rethink";
 import { deleteEntities } from "@service/shorthands";
-import { EntityEnums } from "@shared/enums";
-import { BadParams } from "@shared/types/errors";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { BadParams } from "@inkvisitor/shared/types/errors";
 import { prepareEntity } from "@models/entity/entity.test";
 import request, { Response } from "supertest";
 import "ts-jest";
 import { supertestConfig } from "..";
-import app from "../../Server";
+import app from "../../server";
 import { prepareStatement } from "@models/statement/statement.test";
 import { pool } from "@middlewares/db";
 

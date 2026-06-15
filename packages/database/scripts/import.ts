@@ -1,11 +1,11 @@
-import { IUser } from "../../shared/types/user";
+import { IUser } from "@inkvisitor/shared/types/user";
 import { hashPassword } from "../../server/src/common/auth";
-import { IAudit, IEntity } from "../../shared/types";
-import { Relation } from "../../shared/types/relation";
+import { IAudit, IEntity } from "@inkvisitor/shared/types";
+import { Relation } from "@inkvisitor/shared/types/relation";
 import { confirm } from "./import/prompts";
 import { DbSchema, checkRelation, TableSchema } from "./import/common";
 import { DbSchemaIndexes } from "./import/indexes";
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import { question } from "./import/prompts";
 import { DbHelper } from "./import/db";
 import { getEnv } from "./import/common";

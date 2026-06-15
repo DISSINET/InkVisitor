@@ -1,4 +1,4 @@
-import { EntityEnums, RelationEnums } from "@shared/enums";
+import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import "ts-jest";
 import { getRelationClass } from "./factory";
 import { getEntityClass } from "./factory";

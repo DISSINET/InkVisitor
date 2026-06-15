@@ -1,6 +1,6 @@
-import { userRoleDict } from "@shared/dictionaries";
-import { HttpMethods, UserEnums } from "@shared/enums";
-import { IResponsePermission, RequestPermissionUpdate } from "@shared/types";
+import { userRoleDict } from "@inkvisitor/shared/dictionaries";
+import { HttpMethods, UserEnums } from "@inkvisitor/shared/enums";
+import { IResponsePermission, RequestPermissionUpdate } from "@inkvisitor/shared/types";
 import api from "api";
 import { Box } from "components";
 import { Page } from "components/advanced";

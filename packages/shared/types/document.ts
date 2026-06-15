@@ -1,4 +1,4 @@
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 
 // just meta information + title...without content
 export type IDocumentMeta = Omit<IDocument, "content">;

@@ -1,5 +1,5 @@
-import { RelationEnums } from "@shared/enums";
-import { Relation } from "@shared/types";
+import { RelationEnums } from "@inkvisitor/shared/enums";
+import { Relation } from "@inkvisitor/shared/types";
 import { RValue, RTable } from "rethinkdb-ts";
 
 export interface DbSchema {
@@ -20,10 +20,19 @@ export interface TableSchema {
   data?: any;
   dataFilePath?: string;
   transform?: () => void;
-  indexes?: IndexBuilder[];
+  indexes?: IndexDef[];
 }
 
-export type IndexBuilder = (table: RTable) => any;
+/**
+ * An index definition carries its name as data and a `build` function that
+ * runs `table.indexCreate(name, ...)` against a given table. Keeping the
+ * name as data lets ensure-indexes.ts compare against `indexList()` without
+ * having to run the factory just to recover the name.
+ */
+export interface IndexDef {
+  name: string;
+  build: (table: RTable) => any;
+}
 
 export function parseArgs(): [datasetId: string, env: string] {
   const datasetId: string = process.argv[2];

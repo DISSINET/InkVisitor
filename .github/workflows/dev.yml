@@ -4,259 +4,63 @@ on:
     branches:
       - dev
 
-jobs: 
-  preinstall-client:
-    runs-on: ubuntu-20.04
-    strategy:
-      matrix:
-        node-version: [18]
+jobs:
+  build-staging:
+    name: Build the staging docker image
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v3
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 9
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
-          cache-dependency-path: packages/client/pnpm-lock.yaml
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-      - uses: actions/cache@v3
-        name: Setup pnpm cache
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('packages/client/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-      - name: Install dependencies
-        run: |
-          cd packages/client
-          ls 
-          pnpm install --no-frozen-lockfile
-          
-  build-client-staging:
-    needs: [preinstall-client]
-    runs-on: ubuntu-20.04
-    strategy:
-      matrix:
-        node-version: [18]
-    steps:
-      - uses: actions/checkout@v3
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 9
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
-          cache-dependency-path: packages/client/pnpm-lock.yaml
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-      - uses: actions/cache@v3
-        name: Setup pnpm cache
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('packages/client/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-      - name: Install dependencies
-        run: |
-          cd packages/client
-          pnpm install --frozen-lockfile         
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
       - name: Create env file for client
         run: |
           touch packages/client/env/.env.staging
           echo "$CLIENT_ENV" >> packages/client/env/.env.staging
         env:
           CLIENT_ENV: ${{secrets.CLIENT_ENV}}
-      - name: Set current date as env variable
-        run: echo "BUILD_TIMESTAMP=$(date +'%Y-%m-%dT%H:%M:%S')" >> $GITHUB_ENV                        
-      - name: Build
-        run: |
-          cd packages/client
-          pnpm build:staging
-      - uses: actions/cache@v3
-        with:
-          path: packages/client/dist
-          key: client-staging-${{ github.sha }}
-          
-  build-client-data-import:
-    needs: [preinstall-client]
-    runs-on: ubuntu-20.04
-    strategy:
-      matrix:
-        node-version: [18]
+
+      - name: Run docker build task
+        run: docker build -f Dockerfile --build-arg ENV=staging -t inkvisitor:staging .
+
+  build-data-import:
+    name: Build the data-import docker image
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v3
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 9
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
-          cache-dependency-path: packages/client/pnpm-lock.yaml
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-      - uses: actions/cache@v3
-        name: Setup pnpm cache
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('packages/client/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-      - name: Install dependencies
-        run: |
-          cd packages/client
-          pnpm install --frozen-lockfile         
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
       - name: Create env file for client
         run: |
           touch packages/client/env/.env.data-import
           echo "$CLIENT_ENV" >> packages/client/env/.env.data-import
         env:
           CLIENT_ENV: ${{secrets.CLIENT_ENV_DATAIMPORT}}
-      - name: Set current date as env variable
-        run: echo "BUILD_TIMESTAMP=$(date +'%Y-%m-%dT%H:%M:%S')" >> $GITHUB_ENV          
-      - name: Build
-        run: |
-          cd packages/client
-          pnpm build:data-import
-      - uses: actions/cache@v3
-        with:
-          path: packages/client/dist
-          key: client-data-import-${{ github.sha }}
-          
-  build-client-sandbox:
-    needs: [preinstall-client]
-    runs-on: ubuntu-20.04
-    strategy:
-      matrix:
-        node-version: [18]
+
+      - name: Run docker build task
+        run: docker build -f Dockerfile --build-arg ENV=data-import -t inkvisitor:data-import .
+
+  build-sandbox:
+    name: Build the sandbox docker image
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v3
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 9
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
-          cache-dependency-path: packages/client/pnpm-lock.yaml
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-      - uses: actions/cache@v3
-        name: Setup pnpm cache
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('packages/client/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-      - name: Install dependencies
-        run: |
-          cd packages/client
-          pnpm install --frozen-lockfile         
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
       - name: Create env file for client
         run: |
           touch packages/client/env/.env.sandbox
           echo "$CLIENT_ENV" >> packages/client/env/.env.sandbox
         env:
           CLIENT_ENV: ${{secrets.CLIENT_ENV_SANDBOX}}
-      - name: Set current date as env variable
-        run: echo "BUILD_TIMESTAMP=$(date +'%Y-%m-%dT%H:%M:%S')" >> $GITHUB_ENV                   
-      - name: Build
-        run: |
-          cd packages/client
-          pnpm build:sandbox
-      - uses: actions/cache@v3
-        with:
-          path: packages/client/dist
-          key: client-sandbox-${{ github.sha }}     
-                    
-  build-staging:
-    needs: [build-client-staging]
-    name: Build the staging docker image
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-        
-      - uses: actions/cache@v3
-        with:
-          path: packages/client/dist
-          key: client-staging-${{ github.sha }}
-          
-      - name: Generate certificates
-        run: |
-          mkdir -p ./packages/server/secret
-          openssl req -x509 -newkey rsa:2048 -nodes -out ./packages/server/secret/cert.pem -keyout ./packages/server/secret/key.pem -days 365 -subj "/C=FR/O=krkr/OU=Domain Control Validated/CN=*"
-      
-      - name: Run docker build task
-        run: docker build -f Dockerfile.cached -t inkvisitor:staging .
 
-  build-data-import:
-    needs: [build-client-data-import]
-    name: Build the data-import docker image
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-        
-      - uses: actions/cache@v3
-        with:
-          path: packages/client/dist
-          key: client-data-import-${{ github.sha }}
-          
-      - name: Generate certificates
-        run: |
-          mkdir -p ./packages/server/secret
-          openssl req -x509 -newkey rsa:2048 -nodes -out ./packages/server/secret/cert.pem -keyout ./packages/server/secret/key.pem -days 365 -subj "/C=FR/O=krkr/OU=Domain Control Validated/CN=*"
-      
       - name: Run docker build task
-        run: docker build -f Dockerfile.cached -t inkvisitor:data-import .
-          
-  build-sandbox:
-    needs: [build-client-sandbox]
-    name: Build the sandbox docker image
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-        
-      - uses: actions/cache@v3
-        with:
-          path: packages/client/dist
-          key: client-sandbox-${{ github.sha }}
-          
-      - name: Generate certificates
-        run: |
-          mkdir -p ./packages/server/secret
-          openssl req -x509 -newkey rsa:2048 -nodes -out ./packages/server/secret/cert.pem -keyout ./packages/server/secret/key.pem -days 365 -subj "/C=FR/O=krkr/OU=Domain Control Validated/CN=*"
-      
-      - name: Run docker build task
-        run: docker build -f Dockerfile.cached -t inkvisitor:sandbox .
+        run: docker build -f Dockerfile --build-arg ENV=sandbox -t inkvisitor:sandbox .

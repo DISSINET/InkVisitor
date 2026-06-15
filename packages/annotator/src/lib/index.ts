@@ -3,6 +3,8 @@ export * from "./Highlighter";
 export * from "./Viewport";
 export * from "./Text";
 export * from "./Annotator";
+export * from "./ContextMenu";
+export * from "./SettingsOverlay";
 export * from "./warnings";
 
 import { LoremIpsum } from "lorem-ipsum";

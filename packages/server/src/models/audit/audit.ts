@@ -1,10 +1,10 @@
 import { IDbModel, fillFlatObject } from "@models/common";
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
-import { IAudit, AuditScope } from "@shared/types";
-import { InternalServerError } from "@shared/types/errors";
+import { IAudit, AuditScope } from "@inkvisitor/shared/types";
+import { InternalServerError } from "@inkvisitor/shared/types/errors";
 import { IRequest } from "../../custom_typings/request";
-import { DbEnums } from "@shared/enums";
-import { EventType } from "@shared/types/stats";
+import { DbEnums } from "@inkvisitor/shared/enums";
+import { EventType } from "@inkvisitor/shared/types/stats";
 
 export default class Audit implements IAudit, IDbModel {
   static table = "audits";
@@ -106,6 +106,40 @@ export default class Audit implements IAudit, IDbModel {
     return entry.save(req.db.connection);
   }
 
+  /**
+   * Resolves the audit event type for a document save based on what changed.
+   * A single save produces a single typed audit, chosen by priority:
+   * anchor additions > anchor removals > anchor attribute edits > text changes
+   * > generic edit.
+   *
+   * Anchor changes are detected from the raw content tags so that anchors whose
+   * entity does not exist yet (e.g. a freshly anchored statement saved before
+   * its entity is created) are still recognised as anchor changes.
+   * @returns EventType the resolved event type
+   */
+  static resolveDocumentAuditType(params: {
+    anchorsAdded: boolean;
+    anchorsRemoved: boolean;
+    anchorAttributesChanged: boolean;
+    contentChanged: boolean;
+  }): EventType {
+    const { anchorsAdded, anchorsRemoved, anchorAttributesChanged, contentChanged } =
+      params;
+    if (anchorsAdded) {
+      return EventType.ANCHOR_ADD;
+    }
+    if (anchorsRemoved) {
+      return EventType.ANCHOR_DELETE;
+    }
+    if (anchorAttributesChanged) {
+      return EventType.ANCHOR_EDIT;
+    }
+    if (contentChanged) {
+      return EventType.TEXT_EDIT;
+    }
+    return EventType.EDIT;
+  }
+
   static async createNewForDocument(
     req: IRequest,
     documentId: string,
@@ -120,6 +154,45 @@ export default class Audit implements IAudit, IDbModel {
       type,
     });
     return entry.save(req.db.connection);
+  }
+
+  /**
+   * Resolves the deletion event type for an audit scope. Document deletions are
+   * recorded as anchor removals (their anchors disappear with them), entity
+   * deletions as plain deletions. Both fold into the matching edit type in the
+   * stats (ANCHOR_DELETE -> ANCHOR_EDIT, DELETE -> EDIT).
+   */
+  static deletionEventType(scope: AuditScope): EventType {
+    return scope === AuditScope.Document
+      ? EventType.ANCHOR_DELETE
+      : EventType.DELETE;
+  }
+
+  /**
+   * Records the single audit written when an entity or document is deleted,
+   * typed per scope via deletionEventType. The optional snapshot holds the full
+   * data of the deleted model so it can later be restored (see the entity
+   * restore route); when omitted it defaults to empty changes.
+   * @param db rethinkdb Connection
+   * @param modelId id of the deleted entity/document
+   * @param userId id of the user performing the deletion
+   * @param scope audit scope (entity or document)
+   * @param snapshot full snapshot of the deleted model (used for restore)
+   */
+  static async createDeletionAudit(
+    db: Connection | undefined,
+    modelId: string,
+    userId: string,
+    scope: AuditScope,
+    snapshot: object = {}
+  ): Promise<void> {
+    await new Audit({
+      modelId,
+      auditScope: scope,
+      user: userId,
+      changes: snapshot,
+      type: Audit.deletionEventType(scope),
+    }).save(db);
   }
 
   /**
@@ -321,6 +394,57 @@ export default class Audit implements IAudit, IDbModel {
       ) {
         withValidDate.push(firstAudit);
       }
+    }
+
+    return withValidDate;
+  }
+
+  /**
+   * Retrieved Audit entries that are last entries for respective entity, where the last
+   * update falls within the optional [after, before] datetime range (inclusive).
+   */
+  static async getByUpdatedInRange(
+    db: Connection,
+    after?: Date,
+    before?: Date,
+  ): Promise<Audit[]> {
+    let query = rethink
+      .table(Audit.table)
+      .filter(rethink.row("auditScope").eq(AuditScope.Entity));
+
+    if (after) {
+      query = query.filter(rethink.row("date").ge(after));
+    }
+    if (before) {
+      query = query.filter(rethink.row("date").le(before));
+    }
+
+    const result = await query.run(db);
+    const audits = result.map((data) => new Audit(data)) as Audit[];
+    const entityIds = [
+      ...new Set(
+        audits
+          .map((audit) => audit.modelId)
+          .filter((modelId): modelId is string => Boolean(modelId)),
+      ),
+    ];
+
+    const withValidDate: Audit[] = [];
+    for (const entityId of entityIds) {
+      const lastAudit = await Audit.getLastForEntity(db, entityId);
+      if (!lastAudit) {
+        continue;
+      }
+
+      const lastDate = lastAudit.date;
+      if (after && lastDate < after) {
+        continue;
+      }
+      if (before && lastDate > before) {
+        continue;
+      }
+
+      withValidDate.push(lastAudit);
     }
 
     return withValidDate;

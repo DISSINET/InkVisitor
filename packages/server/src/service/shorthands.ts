@@ -3,12 +3,19 @@ import { IDbModel } from "@models/common";
 import Document from "@models/document/document";
 import Entity from "@models/entity/entity";
 import Relation from "@models/relation/relation";
-import User from "@models/user/user";
-import { DbEnums, EntityEnums } from "@shared/enums";
-import { IEntity, IUser } from "@shared/types";
-import { ModelNotValidError } from "@shared/types/errors";
+import User, { USER_CACHE_KEY_PREFIX } from "@models/user/user";
+import { DbEnums, EntityEnums } from "@inkvisitor/shared/enums";
+import { IEntity, IUser } from "@inkvisitor/shared/types";
+import { ModelNotValidError } from "@inkvisitor/shared/types/errors";
 import { Connection, RDatum, r as rethink, WriteResult } from "rethinkdb-ts";
 import { Db } from "./rethink";
+import { DbHandle } from "./dbHandle";
+import { cache } from "./ttlCache";
+
+const ENTITY_CACHE_TTL_MS = 60 * 1000;
+export const ENTITY_CACHE_KEY_PREFIX = "entity:byId:";
+export const entityCacheKey = (id: string): string =>
+  `${ENTITY_CACHE_KEY_PREFIX}${id}`;
 
 export async function getEntitiesDataByClass<T>(
   db: Connection,
@@ -22,12 +29,29 @@ export async function getEntitiesDataByClass<T>(
 }
 
 export async function findEntityById<T extends IEntity>(
-  db: Db | Connection,
+  db: Db | DbHandle | Connection,
   id: string
 ): Promise<T> {
-  const connection = db instanceof Db ? db.connection : db;
+  const key = entityCacheKey(id);
+  // Snapshot before the DB read so any concurrent invalidation that fires
+  // between here and the trySet below is detected.
+  const version = cache.snapshot(key);
+  const cached = cache.get<IEntity>(key);
+  if (cached) {
+    return cached as T;
+  }
+
+  const connection = "connection" in db ? db.connection : db;
   const data = await rethink.table(Entity.table).get(id).run(connection);
-  return data || null;
+  if (!data) {
+    return null as unknown as T;
+  }
+
+  // trySet refuses if a writer invalidated the key while our read was
+  // in flight; in that case we still return what we read, but we don't
+  // poison the cache with potentially stale data.
+  cache.trySet(key, data as IEntity, ENTITY_CACHE_TTL_MS, version);
+  return data;
 }
 
 export async function getEntitiesByIds<T extends IEntity>(
@@ -40,35 +64,44 @@ export async function getEntitiesByIds<T extends IEntity>(
     .run(db);
 }
 
-export async function createEntity(db: Db, data: IDbModel): Promise<boolean> {
+export async function createEntity(db: Db | DbHandle, data: IDbModel): Promise<boolean> {
   if (!data.isValid()) {
     throw new ModelNotValidError("");
   }
   return data.save(db.connection);
 }
 
-export async function deleteEntities(db: Db): Promise<WriteResult> {
-  return rethink.table(Entity.table).delete().run(db.connection);
+export async function deleteEntities(db: Db | DbHandle): Promise<WriteResult> {
+  const result = await rethink.table(Entity.table).delete().run(db.connection);
+  // Bulk wipe bypasses Entity.delete/update, so invalidate every cached
+  // entity entry. Used by test setup but safe to fire in any context.
+  cache.deletePrefix(ENTITY_CACHE_KEY_PREFIX);
+  return result;
 }
 
-export async function deleteAudits(db: Db): Promise<WriteResult> {
+export async function deleteAudits(db: Db | DbHandle): Promise<WriteResult> {
   return rethink.table(Audit.table).delete().run(db.connection);
 }
 
-export async function deleteRelations(db: Db): Promise<WriteResult> {
+export async function deleteRelations(db: Db | DbHandle): Promise<WriteResult> {
   return rethink.table(Relation.table).delete().run(db.connection);
 }
 
-export async function deleteUsers(db: Db): Promise<WriteResult> {
-  return rethink
+export async function deleteUsers(db: Db | DbHandle): Promise<WriteResult> {
+  const result = await rethink
     .table(User.table)
     .filter(function (user: RDatum<IUser>) {
       return user("name").ne("admin");
     })
     .delete()
     .run(db.connection);
+  // Bulk wipe bypasses User.delete/update; clear the user cache namespace.
+  // Admin's entry is also cleared (over-eager by one row); the next read
+  // for admin will repopulate from the DB.
+  cache.deletePrefix(USER_CACHE_KEY_PREFIX);
+  return result;
 }
 
-export async function deleteDocuments(db: Db): Promise<WriteResult> {
+export async function deleteDocuments(db: Db | DbHandle): Promise<WriteResult> {
   return rethink.table(Document.table).delete().run(db.connection);
 }

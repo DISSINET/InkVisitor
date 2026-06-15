@@ -1,4 +1,4 @@
-import { UserEnums } from "@shared/enums";
+import { UserEnums } from "@inkvisitor/shared/enums";
 
 export class RequestPermissionUpdate {
   controller?: string;

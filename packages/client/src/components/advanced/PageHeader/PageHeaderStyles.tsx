@@ -82,6 +82,7 @@ export const StyledLoaderWrap = styled.div`
 
 interface StyledPingColor {
   $pingColor: keyof PingColor;
+  $clickable?: boolean;
 }
 export const StyledPingColor = styled.div<StyledPingColor>`
   width: 1rem;
@@ -91,6 +92,47 @@ export const StyledPingColor = styled.div<StyledPingColor>`
   background-color: ${({ theme, $pingColor }) => theme.color.ping[$pingColor]};
   margin-right: 0.3rem;
   margin-left: 0.3rem;
+  cursor: ${({ $clickable }) => ($clickable ? "pointer" : "default")};
+`;
+
+export const StyledStatsWrap = styled.div`
+  position: relative;
+  display: inline-block;
+`;
+
+export const StyledStatsPanel = styled.div`
+  position: absolute;
+  top: 1.6rem;
+  left: 0;
+  z-index: 100;
+  min-width: 13rem;
+  padding: 0.5rem 0.75rem;
+  background-color: ${({ theme }) => theme.color["white"]};
+  color: ${({ theme }) => theme.color["black"]};
+  border: 1px solid ${({ theme }) => theme.color["gray"][400]};
+  border-radius: 0.25rem;
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.25);
+  font-size: 0.75rem;
+  font-family: monospace;
+  line-height: 1.35;
+  white-space: nowrap;
+`;
+
+export const StyledStatsHeading = styled.div`
+  font-weight: bold;
+  margin-top: 0.25rem;
+  &:first-child {
+    margin-top: 0;
+  }
+`;
+
+export const StyledStatsRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  & > span:last-child {
+    opacity: 0.85;
+  }
 `;
 export const StyledPingText = styled.p`
   font-size: 1rem;

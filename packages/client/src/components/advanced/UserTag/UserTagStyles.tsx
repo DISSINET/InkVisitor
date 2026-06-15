@@ -51,6 +51,7 @@ export const StyledUserLabel = styled.div<StyledUserLabelProps>`
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  white-space: nowrap;
   padding: 0 ${({ theme }) => theme.space[2]};
   background-color: ${({ $backgroundColor }) => $backgroundColor};
   color: ${({ $textColor }) => $textColor};

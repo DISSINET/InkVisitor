@@ -1,4 +1,4 @@
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import theme from "./theme";
 
 const darkTheme = {
@@ -58,12 +58,13 @@ const darkTheme = {
     plain: "#b5b5b5", // inverted gray 300
     primaryTransparent: "rgba(9,16,52,0.2)",
     modalBg: "rgba(9,16,52,0.5)",
+    backupDownloadOverlay: "rgba(45, 55, 72, 0.8)",
 
-    tagBackground: "#f6f6ff",
-    tagColor: "#060c26",
-    tagSelectedBackground: "#060c26",
-    tagSelectedColor: "#f6f6ff",
-    tagItalic: "#3b3b3b",
+    tagBackground: "#091034",
+    tagColor: "#EBF0FA",
+    tagSelectedBackground: "#f6f6ff",
+    tagSelectedColor: "#091034",
+    tagItalic: "#D1DAEF",
 
     treeNodeRead: "#718096",
     treeNodeWrite: "#f7fafc",
@@ -128,12 +129,12 @@ const darkTheme = {
   background: {
     stripes: "repeating-linear-gradient( -45deg, #4a5568, #4a5568, 1px, #060c26 1px, #060c26 12px)",
   },
-  boxShadow: {
-    normal: "1px 1px 3px rgba(255, 255, 255, 0.4)",
-    subtle: "0 1px 3px hsla(0,0%,100%,0.12), 0 1px 2px hsla(0,0%,100%,0.24)",
-    high: "0 15px 25px hsla(0,0%,100%,0.15), 0 5px 10px hsla(0,0%,100%,0.05)",
-    inset: "0 2px 0px hsl(40, 7%, 17%, 0.5), inset 0 2px 2px hsla(0, 0%, 100%, 0.1)",
-  },
+  // boxShadow: {
+  //   normal: "1px 1px 3px rgba(255, 255, 255, 0.4)",
+  //   subtle: "0 1px 3px hsla(0,0%,100%,0.12), 0 1px 2px hsla(0,0%,100%,0.24)",
+  //   high: "0 15px 25px hsla(0,0%,100%,0.15), 0 5px 10px hsla(0,0%,100%,0.05)",
+  //   inset: "0 2px 0px hsl(40, 7%, 17%, 0.5), inset 0 2px 2px hsla(0, 0%, 100%, 0.1)",
+  // },
 };
 
 export { darkTheme };

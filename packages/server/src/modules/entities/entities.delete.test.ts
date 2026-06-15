@@ -1,12 +1,12 @@
 import { clean, testErroneousResponse } from "@modules/common.test";
-import { EntityDoesNotExist, InvalidDeleteError } from "@shared/types/errors";
+import { EntityDoesNotExist, InvalidDeleteError } from "@inkvisitor/shared/types/errors";
 import { Db } from "@service/rethink";
 import request from "supertest";
 import { apiPath } from "@common/constants";
-import app from "../../Server";
+import app from "../../server";
 import { findEntityById } from "@service/shorthands";
 import { supertestConfig } from "..";
-import { IEntity } from "@shared/types";
+import { IEntity } from "@inkvisitor/shared/types";
 import Territory from "@models/territory/territory";
 import Classification from "@models/relation/classification";
 import Person from "@models/person/person";

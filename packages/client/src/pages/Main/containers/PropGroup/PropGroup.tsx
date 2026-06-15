@@ -1,10 +1,10 @@
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import {
   IEntity,
   IProp,
   IResponseDetail,
   IResponseStatement,
-} from "@shared/types";
+} from "@inkvisitor/shared/types";
 import { useQuery } from "@tanstack/react-query";
 import { excludedSuggesterEntities } from "Theme/constants";
 import api from "api";
@@ -17,7 +17,7 @@ import { StyledSpareRow } from "./PropGroupStyles";
 import { SecondLevelPropGroup } from "./SecondLevelPropGroup/SecondLevelPropGroup";
 import { ThirdLevelPropGroup } from "./ThirdLevelPropGroup/ThirdLevelPropGroup";
 import { FirstLevelPropGroupRow } from "./FirstLevelPropGroupRow/FirstLevelPropGroupRow";
-import { classesAll } from "@shared/dictionaries/entity";
+import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 
 interface PropGroup {
   originId: string;

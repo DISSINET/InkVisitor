@@ -1,5 +1,5 @@
 import { animated, config, useSpring } from "@react-spring/web";
-import { UserEnums } from "@shared/enums";
+import { UserEnums } from "@inkvisitor/shared/enums";
 import { Button } from "components/basic/Button/Button";
 import React, { useState } from "react";
 import { BiLogOut } from "react-icons/bi";
@@ -7,6 +7,7 @@ import { CgFileDocument } from "react-icons/cg";
 import {
   FaBars,
   FaBookOpen,
+  FaDatabase,
   FaInfo,
   FaSearchengin,
   FaRegChartBar,
@@ -74,10 +75,19 @@ export const Menu: React.FC<Menu> = ({
       icon: <CgFileDocument size={18} />,
     },
     {
-      id: "query",
-      label: "Query",
+      id: "backups",
+      label: "Backups",
       color: "info",
-      href: "/query",
+      href: "/backups",
+      admin: true,
+      owner: true,
+      icon: <FaDatabase size={16} />,
+    },
+    {
+      id: "explorer",
+      label: "Explorer",
+      color: "info",
+      href: "/explorer",
       admin: true,
       icon: <FaSearchengin />,
     },
@@ -133,12 +143,15 @@ export const Menu: React.FC<Menu> = ({
         <StyledMenuGroupWrapper>
           <StyledMenuGroup>
             {pages
-              .filter(
-                (p) =>
-                  !p.admin ||
-                  userRole === UserEnums.Role.Admin ||
-                  userRole === UserEnums.Role.Owner
-              )
+              .filter((p) => {
+                if (p.owner) {
+                  return userRole === UserEnums.Role.Owner;
+                }
+                if (p.admin) {
+                  return userRole === UserEnums.Role.Admin || userRole === UserEnums.Role.Owner;
+                }
+                return true;
+              })
               .map((page, key) => (
                 <MenuItem
                   key={key}

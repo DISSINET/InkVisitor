@@ -1,6 +1,6 @@
 import Entity from "@models/entity/entity";
 import { findEntityById } from "@service/shorthands";
-import { UserEnums } from "@shared/enums";
+import { UserEnums } from "@inkvisitor/shared/enums";
 import {
   IBookmarkFolder,
   IResponseBookmarkFolder,
@@ -10,16 +10,15 @@ import {
   IUser,
   IUserOptions,
   IUserRight,
-} from "@shared/types";
+} from "@inkvisitor/shared/types";
 import { nonenumerable } from "@common/decorators";
 import { IRequest } from "src/custom_typings/request";
-import { InternalServerError } from "@shared/types/errors";
+import { InternalServerError } from "@inkvisitor/shared/types/errors";
 
 export class ResponseUser implements IResponseUser {
   id: string;
   email: string;
   name: string;
-  password?: string;
   role: UserEnums.Role;
   options: IUserOptions;
   rights: IUserRight[];
@@ -39,7 +38,6 @@ export class ResponseUser implements IResponseUser {
     this.id = user.id;
     this.email = user.email;
     this.name = user.name;
-    this.password = user.password;
     this.role = user.role;
     this.options = user.options;
     this.rights = user.rights;

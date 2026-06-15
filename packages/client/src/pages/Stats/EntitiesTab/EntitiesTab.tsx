@@ -1,13 +1,13 @@
-import { IRequestStats, IResponseStats } from "@shared/types";
-import { Aggregation, EventType, TimeUnit } from "@shared/types/stats";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { IRequestStats, IResponseStats } from "@inkvisitor/shared/types";
+import { Aggregation, TimeUnit } from "@inkvisitor/shared/types/stats";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, ButtonGroup, Input, Loader, Timestamp } from "components";
-import { useResizeObserver } from "hooks";
-import React, { useEffect, useMemo, useReducer, useState } from "react";
+import { useDebounce, useResizeObserver } from "hooks";
+import React, { useCallback, useEffect, useMemo, useReducer, useState } from "react";
 import { FaCalendarPlus, FaTimes } from "react-icons/fa";
 import { toast } from "react-toastify";
-import { USER_THRESHOLD_MAX } from "../constants";
+import { STATS_FILTER_DEBOUNCE_MS, USER_THRESHOLD_MAX, VISIBLE_EVENT_TYPES } from "../constants";
 import {
   StyledDateInputWrapper,
   StyledEntitiesLayout,
@@ -17,30 +17,28 @@ import {
   StyledResultsChart,
   StyledResultsTable,
 } from "../StatsPageStyles";
-import { initialState, statsReducer } from "../store";
-import { applyUserThreshold, datePickerToIso, isoToDatePicker } from "../utils";
-import { StatsChart } from "./StatsChart/StatsChart";
-import { StatsTable } from "./StatsTable/StatsTable";
+import { createEntitiesTabState, statsReducer } from "../store";
+import {
+  applyUserThreshold,
+  areStatsRequestsEqual,
+  datePickerToIso,
+  isoToDatePicker,
+} from "../utils";
+import { StatsChart, StatsTable } from "components/advanced";
+import { useUserQuery } from "hooks/react-query";
 
 export const EntitiesTab: React.FC = () => {
-  const [state, dispatch] = useReducer(statsReducer, initialState);
+  const [state, dispatch] = useReducer(statsReducer, undefined, createEntitiesTabState);
+  const [filterDebounceEnabled, setFilterDebounceEnabled] = useState(false);
 
   const queryClient = useQueryClient();
-  // Update timeTo to current time when navigating to this page to correctly refresh the data
-  useEffect(() => {
-    dispatch({
-      type: "dateToUpdate",
-      payload: new Date().toISOString(),
-    });
-  }, []);
 
-  // Helper function to update timeTo to current time
-  const updateToCurrentTime = () => {
-    dispatch({
-      type: "dateToUpdate",
-      payload: new Date().toISOString(),
-    });
-  };
+  const fetchStats = useCallback(async (request: IRequestStats, useMaterialized: boolean) => {
+    const response = useMaterialized
+      ? await api.statsMaterializedGet(request)
+      : await api.statsGet(request);
+    return response.data;
+  }, []);
 
   const {
     ref: chartRef,
@@ -56,25 +54,6 @@ export const EntitiesTab: React.FC = () => {
   } = useResizeObserver<HTMLDivElement>({
     debounceDelay: 50,
   });
-
-  // Manual aggregation via mutation (triggered on demand)
-  type StatsAggregateResponse = { message: string };
-  const { mutateAsync: aggregateMutateAsync, isPending: isAggregating } =
-    useMutation<StatsAggregateResponse, Error, void>({
-      mutationFn: async () => {
-        const response = await api.statsAggregate({
-          fromDate: new Date(state.dateFrom).getTime(),
-          toDate: new Date(state.dateTo).getTime(),
-          timeUnits: [state.timeUnit],
-          aggregateBy: [state.aggregate],
-        });
-        return response.data as StatsAggregateResponse;
-      },
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["stats"] });
-      },
-      onError: () => {},
-    });
 
   const [usersIgnoreBelowValue, setUsersIgnoreBelowValue] = useState<number>(0);
 
@@ -104,35 +83,49 @@ export const EntitiesTab: React.FC = () => {
     };
   }, [state]);
 
+  const debouncedStatsRequest = useDebounce(statsRequest, STATS_FILTER_DEBOUNCE_MS);
+
+  const queryStatsRequest = filterDebounceEnabled ? debouncedStatsRequest : statsRequest;
+
   const {
     data: dataStats,
     isLoading: isLoadingStats,
     isError: isErrorStats,
+    isFetched: isFetchedStats,
   } = useQuery({
-    queryKey: ["stats", statsRequest, state.useMaterialized],
-    queryFn: async () => {
-      const response = state.useMaterialized
-        ? await api.statsMaterializedGet(statsRequest)
-        : await api.statsGet(statsRequest);
-      return response.data;
-    },
+    queryKey: ["stats", queryStatsRequest],
+    queryFn: () => api.statsGet(queryStatsRequest),
   });
 
   useEffect(() => {
+    if (filterDebounceEnabled) {
+      return;
+    }
+    if (!isFetchedStats) {
+      return;
+    }
+    if (areStatsRequestsEqual(statsRequest, debouncedStatsRequest)) {
+      setFilterDebounceEnabled(true);
+    }
+  }, [filterDebounceEnabled, isFetchedStats, statsRequest, debouncedStatsRequest]);
+
+  const refreshStats = () => {
+    setFilterDebounceEnabled(false);
+    dispatch({ type: "dateToUpdate", payload: new Date().toISOString() });
+  };
+
+  useEffect(() => {
     if (dataStats) {
-      if (state.aggregate === Aggregation.USER && dataStats.values) {
-        const values = applyUserThreshold(
-          dataStats.values,
-          usersIgnoreBelowValue
-        );
-        setData({ ...dataStats, values });
+      if (queryStatsRequest.aggregateBy === Aggregation.USER && dataStats.data.values) {
+        const values = applyUserThreshold(dataStats.data.values, usersIgnoreBelowValue);
+        setData({ ...dataStats.data, values });
       } else {
-        setData(dataStats);
+        setData(dataStats.data);
       }
     } else if (!isLoadingStats) {
       setData(undefined);
     }
-  }, [dataStats, usersIgnoreBelowValue, state.aggregate, isLoadingStats]);
+  }, [dataStats, usersIgnoreBelowValue, queryStatsRequest.aggregateBy, isLoadingStats]);
 
   const isError = isErrorStats && !isLoadingStats;
   const isNoData = !isLoadingStats && !isErrorStats && !data;
@@ -144,53 +137,10 @@ export const EntitiesTab: React.FC = () => {
   }, [isError]);
 
   // get user data
-  const userId = localStorage.getItem("userid");
-  const { data: user } = useQuery({
-    queryKey: ["user", userId],
-    queryFn: async () => {
-      const res = await api.usersGet(userId as string);
-      return res.data ?? undefined;
-    },
-    enabled: !!userId && api.isLoggedIn(),
-  });
-
-  const allowMaterializedStats = user?.options.allowMaterializedStats ?? false;
+  // const { data: user } = useUserQuery();
 
   return (
     <>
-      {/* {allowMaterializedStats && (
-        <span style={{ display: "flex", zIndex: 30, marginRight: "4rem" }}>
-          <AttributeButtonGroup
-            noMargin
-            options={[
-              {
-                icon: <FaSyncAlt size={10} />,
-                longValue: "Classic (Live Data)",
-                shortValue: "Classic",
-                onClick: () => {
-                  dispatch({
-                    type: "useMaterializedUpdate",
-                    payload: false,
-                  });
-                },
-                selected: !state.useMaterialized,
-              },
-              {
-                icon: <FaDatabase />,
-                longValue: "Fast (Pre-calculated)",
-                shortValue: "Fast",
-                onClick: () => {
-                  dispatch({
-                    type: "useMaterializedUpdate",
-                    payload: true,
-                  });
-                },
-                selected: state.useMaterialized,
-              },
-            ]}
-          />
-        </span>
-      )} */}
       <StyledEntitiesLayout>
         <StyledFieldGroup $columnCount={2}>
           {/* Date From */}
@@ -297,7 +247,7 @@ export const EntitiesTab: React.FC = () => {
                       type: "showDateToRangePickerUpdate",
                       payload: false,
                     });
-                    updateToCurrentTime();
+                    refreshStats();
                   }}
                   color="primary"
                   inverted
@@ -332,7 +282,7 @@ export const EntitiesTab: React.FC = () => {
           <StyledField>
             <StyledFieldLabel>Event type</StyledFieldLabel>
             <ButtonGroup $noMarginRight>
-              {Object.values(EventType).map((eventType) => (
+              {VISIBLE_EVENT_TYPES.map((eventType) => (
                 <Button
                   key={eventType}
                   label={String(eventType)}
@@ -342,9 +292,7 @@ export const EntitiesTab: React.FC = () => {
                       payload: eventType,
                     });
                   }}
-                  color={
-                    state.eventType.includes(eventType) ? "primary" : "grey"
-                  }
+                  color={state.eventType.includes(eventType) ? "primary" : "grey"}
                 />
               ))}
             </ButtonGroup>
@@ -388,13 +336,9 @@ export const EntitiesTab: React.FC = () => {
 
           <Button
             color="success"
-            label={state.useMaterialized ? "Aggregate" : "Refresh"}
-            disabled={isLoadingStats || isAggregating}
-            onClick={
-              state.useMaterialized
-                ? () => void aggregateMutateAsync()
-                : updateToCurrentTime
-            }
+            label={"Refresh"}
+            disabled={isLoadingStats}
+            onClick={refreshStats}
           />
         </StyledFieldGroup>
 
@@ -405,7 +349,6 @@ export const EntitiesTab: React.FC = () => {
                 data={data}
                 height={chartHeight ? Math.max(0, chartHeight) : 0}
                 width={chartWidth ? Math.max(0, chartWidth - 50) : 0}
-                request={statsRequest}
               />
             </StyledResultsChart>
             <StyledResultsTable ref={tableRef}>
@@ -413,13 +356,12 @@ export const EntitiesTab: React.FC = () => {
                 data={data}
                 height={tableHeight ? Math.max(0, tableHeight) : 0}
                 width={tableWidth ? Math.max(0, tableWidth - 50) : 0}
-                request={statsRequest}
               />
             </StyledResultsTable>
           </>
         )}
 
-        <Loader show={isLoadingStats || isAggregating} />
+        <Loader show={isLoadingStats} />
       </StyledEntitiesLayout>
     </>
   );

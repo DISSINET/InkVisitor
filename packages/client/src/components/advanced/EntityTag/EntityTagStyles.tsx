@@ -1,4 +1,4 @@
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import { FaStar } from "react-icons/fa";
 import styled from "styled-components";
 import { ThemeColor } from "Theme/theme";

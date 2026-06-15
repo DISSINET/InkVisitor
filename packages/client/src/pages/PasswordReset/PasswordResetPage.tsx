@@ -4,7 +4,7 @@ import {
   PasswordResetHashError,
   UnsafePasswordError,
   getErrorByCode,
-} from "@shared/types/errors";
+} from "@inkvisitor/shared/types/errors";
 import { SAFE_PASSWORD_DESCRIPTION } from "Theme/constants";
 import api from "api";
 import {

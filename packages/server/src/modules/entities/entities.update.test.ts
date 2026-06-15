@@ -11,11 +11,11 @@ import {
 } from "@modules/common.test";
 import { Db } from "@service/rethink";
 import { findEntityById } from "@service/shorthands";
-import { IEntity } from "@shared/types";
-import { BadParams, EntityDoesNotExist } from "@shared/types/errors";
+import { IEntity } from "@inkvisitor/shared/types";
+import { BadParams, EntityDoesNotExist } from "@inkvisitor/shared/types/errors";
 import request from "supertest";
 import { supertestConfig } from "..";
-import app from "../../Server";
+import app from "../../server";
 
 describe("Entities update", function () {
   afterAll(async () => {

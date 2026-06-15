@@ -7,14 +7,7 @@ export interface IResponseQueryEntity {
   entity: IEntity; // the actual passing entity model
   columnData: Record<
     string,
-    | IEntity
-    | IEntity[]
-    | number
-    | number[]
-    | string
-    | string[]
-    | IUser
-    | IUser[]
+    IEntity | IEntity[] | number | number[] | string | string[] | IUser | IUser[]
   >;
 }
 
@@ -25,4 +18,10 @@ export interface IResponseQuery {
   entityIds: string[];
   entities: IResponseQueryEntity[];
   total: number;
+  /**
+   * Audit stats aggregated over the whole filtered result set, present only when
+   * the explore view mode is Stats. Shape mirrors IResponseStats.values:
+   * dateBucket -> aggregationKey -> count.
+   */
+  stats?: Record<string, Record<string, number>>;
 }

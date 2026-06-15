@@ -2,7 +2,7 @@ import { Button } from "components";
 import React, { ReactElement } from "react";
 import { FaUnlink } from "react-icons/fa";
 import { StyledButtonWrap, StyledCloud, StyledCloudWrap } from "./CloudStyles";
-import { IEntity } from "@shared/types";
+import { IEntity } from "@inkvisitor/shared/types";
 
 interface Cloud {
   children: ReactElement;

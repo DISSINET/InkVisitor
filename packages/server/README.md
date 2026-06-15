@@ -35,6 +35,7 @@ Make sure to have appropriate `.env.<ENV_FILE>` file accessible (e.g., running `
 - `NODE_ENV` = environment - production/development (security vs logging)
 - `DOMAIN` = identify the instance - points to the domain where the ui should be accessible (used in emails)
 - `STATIC_PATH` = http relative path to client files served by the server, use '/' for files hosted in root path
+- `BACKUP_DIR` = directory containing the DB backup archives (mounted read-only from the `inkvisitor-backup` PVC in deployments); empty/unset disables the backups API
 - `PORT` = port which should be used for this app
 - `SECRET` = for signing jwt token
 - `SMTP_HOST` / `SMTP_PORT` = SMTP relay (e.g. Mailjet `in-v3.mailjet.com`, port `587`)
@@ -59,7 +60,7 @@ Utility script for generating new jwt tokens:
 ## Errors
 
 Server has one handler for unknown routes (wildcard - when the route does not exist) and one generic handler for other errors.
-They share common `IResponseGeneric` (@shared/types/response-generic.ts) interface which is populated by `CustomError` instance (@shared/types/errors.ts).
+They share common `IResponseGeneric` (@inkvisitor/shared/types/response-generic.ts) interface which is populated by `CustomError` instance (@inkvisitor/shared/types/errors.ts).
 
 Example of erroneous `IResponseGeneric` msg:
 

@@ -2,10 +2,10 @@ import {
   actionPartOfSpeechDict,
   conceptPartOfSpeechDict,
   languageDict,
-} from "@shared/dictionaries";
-import { classesAll, entitiesDictKeys } from "@shared/dictionaries/entity";
-import { EntityEnums, UserEnums } from "@shared/enums";
-import { IEntity, IResponseEntity } from "@shared/types";
+} from "@inkvisitor/shared/dictionaries";
+import { classesAll, entitiesDictKeys } from "@inkvisitor/shared/dictionaries/entity";
+import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
+import { DropdownItem, IEntity, IResponseEntity } from "@inkvisitor/shared/types";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   MIN_LABEL_LENGTH_MESSAGE,
@@ -26,19 +26,12 @@ import {
   ModalInputWrap,
 } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
-import {
-  CAction,
-  CConcept,
-  CEntity,
-  CStatement,
-  CTerritory,
-  InstTemplate,
-} from "constructors";
+import { CAction, CConcept, CEntity, CStatement, CTerritory, InstTemplate } from "constructors";
 import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
-import { DropdownItem } from "types";
 import { getEntityLabel, getShortLabelByLetterCount } from "utils/utils";
 import { StyledNote } from "./EntityCreateModalStyles";
+import { useUserQuery } from "hooks/react-query";
 
 const defaultDropdownValue = "empty";
 interface EntityCreateModal {
@@ -72,9 +65,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   entityCreateStatementOrder,
   allowedEntityClasses,
 }) => {
-  const entityClasses = allowedEntityClasses
-    ? allowedEntityClasses
-    : classesAll;
+  const entityClasses = allowedEntityClasses ? allowedEntityClasses : classesAll;
 
   const [showModal, setShowModal] = useState(false);
   useEffect(() => {
@@ -86,35 +77,18 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   const [selectedCategory, setSelectedCategory] = useState<EntityEnums.Class>(
     categorySelected || entityClasses[0]
   );
-  const [selectedLanguage, setSelectedLanguage] =
-    useState<EntityEnums.Language>(
-      languageSelected || EntityEnums.Language.Empty
-    );
+  const [selectedLanguage, setSelectedLanguage] = useState<EntityEnums.Language>(
+    languageSelected || EntityEnums.Language.Empty
+  );
   const [actionPos, setActionPos] = useState<EntityEnums.ActionPartOfSpeech>(
     EntityEnums.ActionPartOfSpeech.Verb
   );
   const [conceptPos, setConceptPos] = useState<EntityEnums.ConceptPartOfSpeech>(
     EntityEnums.ConceptPartOfSpeech.Empty
   );
-  const [territoryEntity, setTerritoryEntity] = useState<false | IEntity>(
-    parentTerritory || false
-  );
+  const [territoryEntity, setTerritoryEntity] = useState<false | IEntity>(parentTerritory || false);
 
-  const userId = localStorage.getItem("userid");
-
-  const {
-    status: statusUser,
-    data: user,
-    error: errorUser,
-    isFetching: isFetchingUser,
-  } = useQuery({
-    queryKey: ["user", userId],
-    queryFn: async () => {
-      const res = await api.usersGet(userId as string);
-      return res.data ?? undefined;
-    },
-    enabled: !!userId && api.isLoggedIn(),
-  });
+  const { data: user } = useUserQuery();
 
   useEffect(() => {
     if (user && !languageSelected) {
@@ -140,10 +114,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
     } else if (!skipLabelCheck && label.length < 1) {
       toast.info(MIN_LABEL_LENGTH_MESSAGE);
       return false;
-    } else if (
-      selectedCategory === EntityEnums.Class.Statement &&
-      !territoryEntity
-    ) {
+    } else if (selectedCategory === EntityEnums.Class.Statement && !territoryEntity) {
       toast.warning("Territory is required!");
       return false;
     } else if (
@@ -165,9 +136,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
       detail?: string;
       language: EntityEnums.Language | null;
       territoryId?: string;
-      partOfSpeech?:
-        | EntityEnums.ActionPartOfSpeech
-        | EntityEnums.ActionPartOfSpeech;
+      partOfSpeech?: EntityEnums.ActionPartOfSpeech | EntityEnums.ActionPartOfSpeech;
     } = {
       label: label.trim(),
       entityClass: selectedCategory,
@@ -177,10 +146,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
     };
 
     if (user) {
-      if (
-        newCreated.entityClass === EntityEnums.Class.Statement &&
-        newCreated.territoryId
-      ) {
+      if (newCreated.entityClass === EntityEnums.Class.Statement && newCreated.territoryId) {
         if (onCreateStatement) {
           onCreateStatement({
             label: newCreated.label,
@@ -197,8 +163,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
             userRole,
             {
               ...user.options,
-              defaultLanguage:
-                newCreated.language || user.options.defaultLanguage,
+              defaultLanguage: newCreated.language || user.options.defaultLanguage,
             },
             newCreated.label,
             newCreated.detail,
@@ -213,8 +178,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
           userRole,
           {
             ...user.options,
-            defaultLanguage:
-              newCreated.language || user.options.defaultLanguage,
+            defaultLanguage: newCreated.language || user.options.defaultLanguage,
           },
           newCreated.label,
           newCreated.detail || "",
@@ -226,8 +190,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
         const newAction = CAction(
           {
             ...user.options,
-            defaultLanguage:
-              newCreated.language || user.options.defaultLanguage,
+            defaultLanguage: newCreated.language || user.options.defaultLanguage,
           },
           newCreated.label,
           actionPos,
@@ -238,8 +201,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
         const newConcept = CConcept(
           {
             ...user.options,
-            defaultLanguage:
-              newCreated.language || user.options.defaultLanguage,
+            defaultLanguage: newCreated.language || user.options.defaultLanguage,
           },
           newCreated.label,
           conceptPos,
@@ -250,8 +212,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
         const newEntity = CEntity(
           {
             ...user.options,
-            defaultLanguage:
-              newCreated.language || user.options.defaultLanguage,
+            defaultLanguage: newCreated.language || user.options.defaultLanguage,
           },
           newCreated.entityClass,
           newCreated.label,
@@ -279,9 +240,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
 
         const templates = res.data ?? [];
         templates.sort((a: IEntity, b: IEntity) =>
-          a.labels[0].toLocaleLowerCase() > b.labels[0].toLocaleLowerCase()
-            ? 1
-            : -1
+          a.labels[0].toLocaleLowerCase() > b.labels[0].toLocaleLowerCase() ? 1 : -1
         );
         return templates;
       }
@@ -289,18 +248,17 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
     enabled: !!selectedCategory && api.isLoggedIn(),
   });
 
-  const templateOptions: DropdownItem[] & { template: IEntity }[] =
-    useMemo(() => {
-      const options = templates
-        ? templates.map((template) => ({
-            value: template.id,
-            label: getShortLabelByLetterCount(getEntityLabel(template), 200),
-            template: template,
-          }))
-        : [];
+  const templateOptions: DropdownItem[] & { template: IEntity }[] = useMemo(() => {
+    const options = templates
+      ? templates.map((template) => ({
+          value: template.id,
+          label: getShortLabelByLetterCount(getEntityLabel(template), 200),
+          template: template,
+        }))
+      : [];
 
-      return options;
-    }, [templates]);
+    return options;
+  }, [templates]);
 
   const handleAskForTemplateApply = (templateId: string) => {
     setShowApplyTemplateModal(true);
@@ -311,9 +269,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   };
 
   const [showApplyTemplateModal, setShowApplyTemplateModal] = useState(false);
-  const [templateToApply, setTemplateToApply] = useState<
-    IResponseEntity | false
-  >(false);
+  const [templateToApply, setTemplateToApply] = useState<IResponseEntity | false>(false);
 
   const createEntityFromTemplate = async (templateToApply: IEntity) => {
     let newEntity: IEntity | false;
@@ -326,12 +282,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
         label
       );
     } else {
-      newEntity = await InstTemplate(
-        templateToApply,
-        userRole,
-        undefined,
-        label
-      );
+      newEntity = await InstTemplate(templateToApply, userRole, undefined, label);
     }
     if (newEntity) {
       onMutationSuccess(newEntity);
@@ -341,8 +292,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
     }
   };
 
-  const [selectedTemplate, setSelectedTemplate] =
-    useState<string>(defaultDropdownValue);
+  const [selectedTemplate, setSelectedTemplate] = useState<string>(defaultDropdownValue);
   useEffect(() => {
     setSelectedTemplate(defaultDropdownValue);
   }, [selectedCategory]);
@@ -358,9 +308,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
       >
         <ModalHeader
           title={`Create ${
-            entityClasses.length === 1
-              ? entitiesDictKeys[selectedCategory].label
-              : "entity"
+            entityClasses.length === 1 ? entitiesDictKeys[selectedCategory].label : "entity"
           }`}
         />
         <ModalContent column>
@@ -506,11 +454,9 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
               </>
             )}
           </ModalInputForm>
-          {(userRole === UserEnums.Role.Admin ||
-            userRole === UserEnums.Role.Owner) && (
+          {(userRole === UserEnums.Role.Admin || userRole === UserEnums.Role.Owner) && (
             <>
-              {selectedCategory === EntityEnums.Class.Territory &&
-              !territoryEntity ? (
+              {selectedCategory === EntityEnums.Class.Territory && !territoryEntity ? (
                 <StyledNote>
                   {"Territory will be added under root"}
                   <br />
@@ -524,19 +470,8 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
         </ModalContent>
         <ModalFooter>
           <ButtonGroup>
-            <Button
-              key="cancel"
-              label="Cancel"
-              color="greyer"
-              inverted
-              onClick={closeModal}
-            />
-            <Button
-              key="submit"
-              label="Create"
-              color="info"
-              onClick={handleSubmit}
-            />
+            <Button key="cancel" label="Cancel" color="greyer" inverted onClick={closeModal} />
+            <Button key="submit" label="Create" color="info" onClick={handleSubmit} />
           </ButtonGroup>
         </ModalFooter>
       </Modal>

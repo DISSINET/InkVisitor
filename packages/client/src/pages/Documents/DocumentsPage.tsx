@@ -1,15 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { v4 as uuidv4 } from "uuid";
 
-import { IDocument, IResponseEntity } from "@shared/types";
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { IDocument } from "@inkvisitor/shared/types";
 import api from "api";
 import { Loader, Submit } from "components";
-import React, { ChangeEvent, useMemo, useRef, useState } from "react";
 import { DocumentModalEdit, DocumentModalExport } from "components/advanced";
+import React, { ChangeEvent, useCallback, useMemo, useRef, useState } from "react";
 import { DocumentRow } from "./DocumentRow/DocumentRow";
+import { DocumentsTableHeader } from "./DocumentsTableHeader";
 import {
-  DocumentsStyledScrollbar,
   StyledBackground,
   StyledBoxWrap,
   StyledContent,
@@ -18,11 +18,8 @@ import {
   StyledHeading,
   StyledInputWrap,
 } from "./DocumentsPageStyles";
-
-type DocumentWithResource = {
-  document: IDocument;
-  resource: false | IResponseEntity;
-};
+import { compareDocuments } from "./utils";
+import { DocumentSortField, DocumentSortState, DocumentWithResource } from "./types";
 
 export const DocumentsPage: React.FC = ({}) => {
   const queryClient = useQueryClient();
@@ -59,14 +56,37 @@ export const DocumentsPage: React.FC = ({}) => {
     return documents
       ? documents.map((document) => {
           const resource =
-            resources &&
-            resources.find(
-              (resource) => resource.data.documentId === document.id
-            );
+            resources && resources.find((resource) => resource.data.documentId === document.id);
           return { document, resource: resource ?? false };
         })
       : [];
   }, [resources, documents]);
+
+  const [sort, setSort] = useState<DocumentSortState>({
+    field: "documentName",
+    direction: "asc",
+  });
+
+  const handleSort = useCallback((field: DocumentSortField) => {
+    setSort((current) => {
+      if (!current || current.field !== field) {
+        return { field, direction: "asc" };
+      }
+      if (current.direction === "asc") {
+        return { field, direction: "desc" };
+      }
+      return null;
+    });
+  }, []);
+
+  const sortedDocumentsWithResources = useMemo(() => {
+    if (!sort) {
+      return documentsWithResources;
+    }
+    return [...documentsWithResources].sort((a, b) =>
+      compareDocuments(a, b, sort.field, sort.direction)
+    );
+  }, [documentsWithResources, sort]);
 
   const uploadDocumentMutation = useMutation({
     mutationFn: async (doc: IDocument) => api.documentUpload(doc),
@@ -79,7 +99,7 @@ export const DocumentsPage: React.FC = ({}) => {
     mutationFn: async (data: { id: string; doc: Partial<IDocument> }) =>
       api.documentUpdate(data.id, data.doc),
     onSuccess: (variables, data) => {
-      setEditMode(false);
+      setEditDocumentId(false);
       queryClient.invalidateQueries({ queryKey: ["documents"] });
     },
   });
@@ -123,16 +143,10 @@ export const DocumentsPage: React.FC = ({}) => {
     if (inputRef.current) inputRef.current.value = "";
   };
 
-  const [exportedDocumentId, setExportedDocumentId] = useState<string | false>(
-    false
-  );
-  const exportedDocument = documents?.find(
-    (doc) => doc.id === exportedDocumentId
-  );
+  const [exportedDocumentId, setExportedDocumentId] = useState<string | false>(false);
+  const exportedDocument = documents?.find((doc) => doc.id === exportedDocumentId);
 
-  const [editedDocumentId, setEditedDocumentId] = useState<string | false>(
-    false
-  );
+  const [editedDocumentId, setEditedDocumentId] = useState<string | false>(false);
 
   const handleDocumentEdit = (id: string) => {
     setEditedDocumentId(id);
@@ -155,7 +169,7 @@ export const DocumentsPage: React.FC = ({}) => {
   });
 
   const [docToDelete, setDocToDelete] = useState<string | false>(false);
-  const [editMode, setEditMode] = useState<false | number>(false);
+  const [editDocumentId, setEditDocumentId] = useState<string | false>(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   return (
@@ -166,28 +180,24 @@ export const DocumentsPage: React.FC = ({}) => {
             <StyledHeading>Documents</StyledHeading>
             <StyledGridScrollArea>
               <StyledGrid>
-                {/* <DocumentsStyledScrollbar
-                  style={{ height: "100%", width: "100%" }}
-                > */}
-                {documentsWithResources.map(
-                  (documentWithResource: DocumentWithResource, key: number) => {
-                    return (
-                      <DocumentRow
-                        key={key}
-                        document={documentWithResource.document}
-                        resource={documentWithResource.resource}
-                        handleDocumentEdit={handleDocumentEdit}
-                        handleDocumentExport={handleDocumentExport}
-                        setDocToDelete={setDocToDelete}
-                        updateDocumentMutation={updateDocumentMutation}
-                        editMode={editMode === key}
-                        setEditMode={() => setEditMode(key)}
-                        cancelEditMode={() => setEditMode(false)}
-                      />
-                    );
-                  }
-                )}
-                {/* </DocumentsStyledScrollbar> */}
+                <DocumentsTableHeader sort={sort} onSort={handleSort} />
+                {sortedDocumentsWithResources.map((documentWithResource: DocumentWithResource) => {
+                  const documentId = documentWithResource.document.id;
+                  return (
+                    <DocumentRow
+                      key={documentId}
+                      document={documentWithResource.document}
+                      resource={documentWithResource.resource}
+                      handleDocumentEdit={handleDocumentEdit}
+                      handleDocumentExport={handleDocumentExport}
+                      setDocToDelete={setDocToDelete}
+                      updateDocumentMutation={updateDocumentMutation}
+                      editMode={editDocumentId === documentId}
+                      setEditMode={() => setEditDocumentId(documentId)}
+                      cancelEditMode={() => setEditDocumentId(false)}
+                    />
+                  );
+                })}
               </StyledGrid>
             </StyledGridScrollArea>
             <StyledInputWrap onClick={() => inputRef.current?.click()}>
@@ -208,25 +218,17 @@ export const DocumentsPage: React.FC = ({}) => {
       </StyledContent>
 
       {editedDocumentId && (
-        <DocumentModalEdit
-          documentId={editedDocumentId}
-          onClose={handleModalClose}
-        />
+        <DocumentModalEdit documentId={editedDocumentId} onClose={handleModalClose} />
       )}
       {exportedDocumentId && exportedDocument && (
-        <DocumentModalExport
-          document={exportedDocument}
-          onClose={handleModalClose}
-        />
+        <DocumentModalExport document={exportedDocument} onClose={handleModalClose} />
       )}
 
       <Submit
         title="Delete document"
         text="Do you really want to delete this document?"
         show={docToDelete !== false}
-        onSubmit={() =>
-          docToDelete && documentDeleteMutation.mutate(docToDelete)
-        }
+        onSubmit={() => docToDelete && documentDeleteMutation.mutate(docToDelete)}
         onCancel={() => setDocToDelete(false)}
       />
     </>

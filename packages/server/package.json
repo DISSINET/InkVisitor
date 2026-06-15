@@ -1,32 +1,33 @@
 {
   "name": "inkvisitor-server",
-  "version": "1.5.0.4",
+  "version": "1.5.1.1",
   "engines": {
-    "node": "^22.11.0",
-    "pnpm": "^10.1.0"
+    "node": "^22.13.1",
+    "pnpm": "^11.1.2"
   },
   "scripts": {
     "lint": "tslint --project \"tsconfig.json\"",
     "test": "jest -w 1 -t",
     "start": "ENV_FILE=development nodemon",
-    "build": "tsc --build tsconfig.prod.json",
+    "dev": "ENV_FILE=development nodemon",
+    "build": "tsgo --build tsconfig.prod.json",
+    "typecheck": "tsgo --noEmit",
     "start:dist": "node -r module-alias/register ./dist/server/src",
-    "jwt": "ENV_FILE=test ts-node -r tsconfig-paths/register ./src/scripts/jwt.ts",
-    "hashpassword": "ENV_FILE=test ts-node -r tsconfig-paths/register ./src/scripts/hashpassword.ts"
+    "jwt": "ENV_FILE=test ts-node -r ./src/register-paths.ts ./src/scripts/jwt.ts",
+    "hashpassword": "ENV_FILE=test ts-node -r ./src/register-paths.ts ./src/scripts/hashpassword.ts"
   },
   "nodemonConfig": {
     "watch": [
       "src",
-      "../shared"
+      "../shared/dist"
     ],
     "ext": "ts, html",
     "ignore": [
       "src/public"
     ],
-    "exec": "ts-node -r tsconfig-paths/register ./src"
+    "exec": "ts-node -r ./src/register-paths.ts ./src"
   },
   "_moduleAliases": {
-    "@shared": "dist/shared",
     "@common": "dist/server/src/common",
     "@modules": "dist/server/src/modules",
     "@service": "dist/server/src/service",
@@ -34,6 +35,7 @@
     "@middlewares": "dist/server/src/middlewares"
   },
   "dependencies": {
+    "@inkvisitor/shared": "workspace:*",
     "nodemailer": "^6.9.16",
     "@types/cli-color": "^2.0.2",
     "@types/node-cron": "^3.0.11",
@@ -72,6 +74,7 @@
     "@types/compression": "^1.7.2",
     "@types/connect-timeout": "^0.0.39",
     "@types/cors": "^2.8.6",
+    "@types/dotenv": "^8.2.3",
     "@types/email-templates": "^8.0.4",
     "@types/express": "^4.17.6",
     "@types/helmet": "0.0.47",
@@ -94,6 +97,7 @@
     "ts-jest": "29.1.5",
     "tslint": "^6.1.2",
     "tslint-lines-between-class-members": "^1.3.6",
-    "typescript": "^5.1.3"
+    "@typescript/native-preview": "beta",
+    "typescript": "npm:@typescript/typescript6@^6.0.0"
   }
 }

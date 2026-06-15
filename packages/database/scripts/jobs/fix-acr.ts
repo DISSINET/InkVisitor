@@ -2,11 +2,11 @@ import { r, Connection, RDatum } from "rethinkdb-ts";
 import { IJob } from ".";
 import Dataset from "./Dataset";
 import { question } from "../import/prompts";
-import { IEntity } from "@shared/types";
-import { EntityEnums } from "@shared/enums";
+import { IEntity } from "@inkvisitor/shared/types";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import Value from "@models/value/value";
 import Entity from "@models/entity/entity";
-import { ModelNotValidError } from "@shared/types/errors";
+import { ModelNotValidError } from "@inkvisitor/shared/types/errors";
 
 const save = async (
   db: Connection | undefined,

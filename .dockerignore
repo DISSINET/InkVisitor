@@ -7,7 +7,6 @@ docs
 logo
 
 **/node_modules
-packages/database
 **/README.md
 **/Dockerfile*
 *.tar

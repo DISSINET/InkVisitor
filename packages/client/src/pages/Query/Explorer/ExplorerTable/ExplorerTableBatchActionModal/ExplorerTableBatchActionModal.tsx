@@ -1,4 +1,4 @@
-import { Explore } from "@shared/types/query";
+import { Explore } from "@inkvisitor/shared/types/query";
 import React from "react";
 import { BatchAction } from "../types";
 import { BatchActionAddMetaprop } from "./BatchActionAddMetaprop";
@@ -60,6 +60,9 @@ export const ExplorerTableBatchActionModal: React.FC<
             onApply={onApplyAction}
           />
         );
+      case BatchAction.copy_uuids:
+      case BatchAction.open_in_detail:
+        return null;
     }
   };
 

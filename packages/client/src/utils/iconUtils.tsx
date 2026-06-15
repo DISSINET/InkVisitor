@@ -1,4 +1,4 @@
-import { EntityEnums, UserEnums } from "@shared/enums";
+import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { UserTagSize } from "components/advanced/UserTag/utils";
 import React from "react";
 import {

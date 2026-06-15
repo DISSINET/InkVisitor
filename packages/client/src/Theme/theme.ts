@@ -1,4 +1,4 @@
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 
 const theme = {
   color: {
@@ -55,6 +55,7 @@ const theme = {
     plain: "#4a5568", // gray 700
     primaryTransparent: "rgba(9,16,52,0.2)",
     modalBg: "rgba(9,16,52,0.3)",
+    backupDownloadOverlay: "rgba(237, 242, 247, 0.8)",
 
     tagBackground: "#fff",
     tagColor: "#091034",
@@ -241,7 +242,7 @@ const theme = {
     stripes: "repeating-linear-gradient( -45deg, #cbd5e0, #cbd5e0, 1px, #fff 1px, #fff 12px)",
   },
   boxShadow: {
-    normal: "1px 1px 3px rgba(0, 0, 0, 0.4)",
+    normal: "0px 5px 10px hsla(0,0%,0%,0.15)",
     subtle: "0 1px 3px hsla(0,0%,0%,0.12), 0 1px 2px hsla(0,0%,0%,0.24)",
     high: "0 15px 25px hsla(0,0%,0%,0.15), 0 5px 10px hsla(0,0%,0%,0.05)",
     inset: "0 2px 0px hsl(220, 7%, 83%, 0.5), inset 0 2px 2px hsla(0, 0%, 0%, 0.1)",

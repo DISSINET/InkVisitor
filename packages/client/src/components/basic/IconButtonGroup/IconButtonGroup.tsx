@@ -1,4 +1,4 @@
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import { Button } from "components";
 import React from "react";
 import { StyledBold, StyledWrapper } from "./IconButtonGroupStyles";

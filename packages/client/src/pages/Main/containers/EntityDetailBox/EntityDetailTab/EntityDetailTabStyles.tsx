@@ -8,6 +8,7 @@ export const StyledTab = styled.div<StyledTab>`
   display: inline-flex;
   justify-content: space-between;
   align-items: center;
+  min-width: 0;
   cursor: pointer;
   background-color: ${({ theme, $isSelected }) =>
     $isSelected ? "transparent" : theme.color["gray"][100]};
@@ -37,13 +38,15 @@ export const StyledLabel = styled.div<StyledLabel>`
   vertical-align: middle;
   white-space: nowrap;
   text-overflow: ellipsis;
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   height: 100%;
   font-style: ${({ $isItalic }) => ($isItalic ? "italic" : "")};
 `;
 
 export const StyledIconWrap = styled.span`
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   height: 100%;
   margin-right: 0.2rem;

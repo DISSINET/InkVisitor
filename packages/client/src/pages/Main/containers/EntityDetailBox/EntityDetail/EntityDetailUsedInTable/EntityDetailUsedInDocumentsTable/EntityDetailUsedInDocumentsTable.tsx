@@ -1,7 +1,7 @@
 import {
   IResponseDetail,
   IResponseUsedInDocument,
-} from "@shared/types/response-detail";
+} from "@inkvisitor/shared/types/response-detail";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, IconWithTooltip, Table } from "components";
@@ -20,7 +20,7 @@ import { useSearchParams } from "hooks";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
 import { DetailBoxState } from "types";
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import useAnnotator from "hooks/useAnnotator";
 import { setStatementListOpened } from "redux/features/layout/mainPage/statementListOpenedSlice";
 import { TbAnchorOff } from "react-icons/tb";

@@ -3,13 +3,14 @@
   "compilerOptions": {
     "sourceMap": false,
     "outDir": "dist",
-    "baseUrl": "./",
-    "experimentalDecorators": true,
-    "skipLibCheck": true
+    "rootDir": "..",
+    "skipLibCheck": true,
+    "incremental": true
   },
-  "ts-node": {
-    "files": true
-  },
-  "files": ["./src/custom_typings/request.d.ts"],
-  "exclude": ["src/**/*.test.ts"]
+  "files": [
+    "./src/custom_typings/request.d.ts",
+    "./src/custom_typings/dotenv.d.ts"
+  ],
+  "include": ["./src/**/*.ts"],
+  "exclude": ["./src/public/", "./src/**/*.test.ts", "node_modules", "dist"]
 }

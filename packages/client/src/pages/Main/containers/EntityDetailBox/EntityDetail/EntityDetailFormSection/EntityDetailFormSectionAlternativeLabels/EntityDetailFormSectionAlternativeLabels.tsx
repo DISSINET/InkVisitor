@@ -16,7 +16,7 @@ import {
   StyledDangerOnHoverButton,
   StyledAddLabel,
 } from "../EntityDetailFormSectionStyles";
-import { IResponseGeneric, IEntity, IResponseDetail } from "@shared/types";
+import { IResponseGeneric, IEntity, IResponseDetail } from "@inkvisitor/shared/types";
 import { UseMutationResult } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 

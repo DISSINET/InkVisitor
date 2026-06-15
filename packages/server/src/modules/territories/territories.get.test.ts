@@ -1,11 +1,11 @@
 import { clean, testErroneousResponse } from "@modules/common.test";
-import { BadParams, TerritoryDoesNotExits } from "@shared/types/errors";
+import { BadParams, TerritoryDoesNotExits } from "@inkvisitor/shared/types/errors";
 import { Db } from "@service/rethink";
 import { createEntity, deleteEntities } from "@service/shorthands";
 import Territory from "@models/territory/territory";
 import request from "supertest";
 import { apiPath } from "@common/constants";
-import app from "../../Server";
+import app from "../../server";
 import Statement, { StatementData } from "@models/statement/statement";
 import { supertestConfig } from "..";
 import { pool } from "@middlewares/db";

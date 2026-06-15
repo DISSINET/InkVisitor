@@ -1,4 +1,7 @@
-version: "3.6"
+# Basic setup runs out of the box with `docker compose up -d`.
+# Override any value below via a top-level `.env` file or shell environment
+# (e.g. `SECRET=... DOMAIN=... docker compose up -d`).
+# Before exposing the instance publicly, at minimum set a strong SECRET.
 
 x-logging: &logging
   logging:
@@ -12,28 +15,44 @@ services:
     container_name: "inkvisitor-database"
     restart: always
     <<: *logging
-    volumes:
-      - ./database_data:/data
     networks:
       - inkvisitor
     ports:
-      - "8080:8080" # db port - required only for public access
-      - "28015:28015" # dashboard - required only for public access
+      - "8080:8080" # dashboard - required only for public access
+      - "28015:28015" # driver port - required only for public access
 
   inkvisitor:
     build:
       context: .
       dockerfile: Dockerfile
       args:
-        ENV: latest # make sure the file for client packages/client/env/.env is present during build
-    image: dissinet/inkvisitor:latest
+        ENV: latest # client `.env` baked into the image; only used when building locally
+    image: dissinet/inkvisitor:${IMAGE_TAG:-latest}
     container_name: inkvisitor
     restart: always
     <<: *logging
-    env_file:
-      - ./packages/server/env/.env # make sure the file is present, fill from example
     environment:
-      - DB_HOST=database
+      NODE_ENV: ${NODE_ENV:-production}
+      # Identifier injected into index.html as window.appConfig.env
+      # (required — the client reads it; without ENV set the page fails to load)
+      ENV: ${ENV:-production}
+      DOMAIN: ${DOMAIN:-localhost}
+      STATIC_PATH: ${STATIC_PATH:-/}
+      PORT: ${PORT:-3000}
+      # Database (DB_HOST is fixed to the compose service name)
+      DB_HOST: database
+      DB_PORT: ${DB_PORT:-28015}
+      DB_NAME: ${DB_NAME:-inkvisitor}
+      DB_AUTH: ${DB_AUTH:-}
+      DB_POOL_CONNECTIONS: ${DB_POOL_CONNECTIONS:-10}
+      # JWT signing secret — CHANGE THIS before exposing the instance
+      SECRET: ${SECRET:-change-me-before-deploying}
+      # SMTP (leave empty to disable outgoing mail)
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_SECRET: ${SMTP_SECRET:-}
+      MAILER_SENDER: ${MAILER_SENDER:-}
     ports:
       - "3000:3000"
     networks:

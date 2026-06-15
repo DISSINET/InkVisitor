@@ -1,13 +1,8 @@
 import { AttributeIcon } from "components";
 import React, { useMemo } from "react";
-import { DropdownItem } from "types";
-import {
-  StyledIconWrap,
-  StyledRow,
-  StyledValue,
-  StyledValues,
-} from "./TooltipAttributeRowStyles";
+import { StyledIconWrap, StyledRow, StyledValue, StyledValues } from "./TooltipAttributeRowStyles";
 import { attributeIconsKeys } from "components/basic/AttributeIcon/AttributeIcon";
+import { DropdownItem } from "@inkvisitor/shared/types";
 
 interface TooltipAttributeRow {
   attributeName: keyof typeof attributeIconsKeys;

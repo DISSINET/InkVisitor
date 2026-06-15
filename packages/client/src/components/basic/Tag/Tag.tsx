@@ -1,4 +1,4 @@
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import React, { ReactNode, useMemo } from "react";
 import { StyledButtonWrapper, StyledElvlWrapper, StyledTagWrapper } from "./TagStyles";
 
@@ -20,7 +20,7 @@ interface TagProps {
   showOnly?: "tag" | "label";
 
   onClick?: () => void;
-  onDoubleClick?: () => void;
+  onDoubleClick?: React.MouseEventHandler<HTMLDivElement>;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
   onButtonOver?: () => void;
@@ -102,7 +102,7 @@ export const Tag: React.FC<TagProps> = ({
       }}
       onDoubleClick={(e) => {
         e.preventDefault();
-        onDoubleClick && onDoubleClick();
+        onDoubleClick?.(e);
       }}
       onMouseEnter={onMouseEnter && onMouseEnter}
       onMouseLeave={onMouseLeave && onMouseLeave}

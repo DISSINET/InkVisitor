@@ -1,4 +1,4 @@
-import { IEntity } from "@shared/types";
+import { IEntity } from "@inkvisitor/shared/types";
 import * as fs from "fs";
 import * as path from "path";
 

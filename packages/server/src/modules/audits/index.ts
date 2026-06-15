@@ -5,8 +5,8 @@ import {
   BadParams,
   AuditsDoNotExist,
   AuditDoesNotExist,
-} from "@shared/types/errors";
-import { IAudit, IResponseAudit, IResponseGeneric } from "@shared/types";
+} from "@inkvisitor/shared/types/errors";
+import { IAudit, IResponseAudit, IResponseGeneric } from "@inkvisitor/shared/types";
 import { ResponseAudit } from "@models/audit/response";
 import { IRequest } from "src/custom_typings/request";
 import Audit from "@models/audit/audit";

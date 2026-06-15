@@ -1,4 +1,6 @@
 import { EntityEnums, RelationEnums } from "../enums";
+import { IRequestSearchRootValidity } from "./request-search";
+import { IStatsAggregationParams } from "./stats";
 
 export namespace Query {
   export interface INode {
@@ -22,7 +24,7 @@ export namespace Query {
     label?: string;
     entityId?: string;
   }
-  export interface IEdgeParams {}
+  export interface IEdgeParams { }
 
   export enum NodeType {
     E = "Entity",
@@ -112,13 +114,9 @@ export namespace Query {
     params: { entityClass?: EntityEnums.Class[] };
   };
 
-  export const EdgeTypeTargetNodeParams: Record<
-    EdgeType,
-    Record<string, any>
-  > = {
+  export const EdgeTypeTargetNodeParams: Record<EdgeType, Record<string, any>> = {
     "HP:V": {
       entityId: { allowedClasses: [] },
-      entityClass: { allowedClasses: [] },
     },
     "I_HP:V": {},
     "EP:T": {
@@ -145,28 +143,44 @@ export namespace Query {
     "I_SUT:D": {},
     "SUT:C": {},
     "I_SUT:C": {},
-    "HR:R": {},
+    "HR:R": {
+      entityId: { allowedClasses: [EntityEnums.Class.Resource] },
+    },
     "I_HR:R": {},
-    "HR:V": {},
+    "HR:V": {
+      entityId: { allowedClasses: [EntityEnums.Class.Value] },
+    },
     "CT:": {},
     "I_CT:": {},
     "CT:D": {},
     "I_CT:D": {},
     "CT:G": {},
     "I_CT:G": {},
-    "SP:T": {},
-    "I_SP:T": {},
-    "SP:V": {},
-    "I_SP:V": {},
+    "SP:T": {
+      entityId: { allowedClasses: [EntityEnums.Class.Concept] },
+    },
+    "I_SP:T": {
+      entityId: { allowedClasses: [EntityEnums.Class.Concept] },
+    },
+    "SP:V": {
+      entityId: { allowedClasses: [] },
+    },
+    "I_SP:V": {
+      entityId: { allowedClasses: [] },
+    },
     SI: {},
     I_SI: {},
     SC: {},
-    I_SC: {},
+    I_SC: {
+      entityId: { allowedClasses: [EntityEnums.Class.Concept] },
+    },
     "R:": {
       entityId: { allowedClasses: [] },
     },
     "R:SCL": {
-      entityId: { allowedClasses: [EntityEnums.Class.Concept] },
+      entityId: {
+        allowedClasses: [EntityEnums.Class.Action, EntityEnums.Class.Concept],
+      },
     },
     "I_R:SCL": {},
     "R:SYN": {},
@@ -188,7 +202,21 @@ export namespace Query {
     "I_R:IDE": {},
     "R:IMP": {},
     "I_R:IMP": {},
-    "R:SOE": {},
+    "R:SOE": {
+      entityId: {
+        allowedClasses: [
+          EntityEnums.Class.Location,
+          EntityEnums.Class.Object,
+          EntityEnums.Class.Event,
+          EntityEnums.Class.Group,
+          EntityEnums.Class.Statement,
+          EntityEnums.Class.Value,
+          EntityEnums.Class.Resource,
+          EntityEnums.Class.Person,
+          EntityEnums.Class.Being,
+        ],
+      },
+    },
     "I_R:SOE": {},
     "R:SUS": {},
     "I_R:SUS": {},
@@ -202,10 +230,7 @@ export namespace Query {
 
   export const EdgeTypeNodeRules: Record<EdgeType, [EdgeRule, EdgeRule]> = {
     "HP:V": [
-      {
-        nodeType: NodeType.E,
-        params: { entityClass: [EntityEnums.Class.Concept] },
-      },
+      { nodeType: NodeType.E, params: { entityClass: [] } },
       { nodeType: NodeType.E, params: {} },
     ],
     "I_HP:V": [
@@ -454,22 +479,35 @@ export namespace Query {
       },
     ],
     "SP:T": [
-      { nodeType: NodeType.E, params: { entityClass: [] } },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Statement] },
+      },
       {
         nodeType: NodeType.E,
         params: { entityClass: [EntityEnums.Class.Concept] },
       },
     ],
     "I_SP:T": [
+      // source: the entity characterised by the in-statement prop (any class)
       { nodeType: NodeType.E, params: { entityClass: [] } },
-      { nodeType: NodeType.E, params: { entityClass: [] } },
+      // target: the prop type concept
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Concept] },
+      },
     ],
     "SP:V": [
-      { nodeType: NodeType.E, params: { entityClass: [] } },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Statement] },
+      },
       { nodeType: NodeType.E, params: { entityClass: [] } },
     ],
     "I_SP:V": [
+      // source: the entity characterised by the in-statement prop (any class)
       { nodeType: NodeType.E, params: { entityClass: [] } },
+      // target: the prop value (any class)
       { nodeType: NodeType.E, params: { entityClass: [] } },
     ],
     SI: [
@@ -488,11 +526,13 @@ export namespace Query {
       },
     ],
     I_SC: [
+      // source: the entity characterised by the in-statement classification
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+      // target: the classification concept
       {
         nodeType: NodeType.E,
         params: { entityClass: [EntityEnums.Class.Concept] },
       },
-      { nodeType: NodeType.E, params: { entityClass: [] } },
     ],
     "R:": [
       { nodeType: NodeType.E, params: { entityClass: [] } },
@@ -797,7 +837,7 @@ export namespace Query {
     "I_SUT:C": "T has S: children",
     "HR:R": "has reference: resource",
     "I_HR:R": "R references",
-    "HR:V": "Has reference: value",
+    "HR:V": "has reference: value",
     "CT:": "T has child T: any",
     "I_CT:": "T has parent T: any",
     "CT:D": "T has child T: direct child",
@@ -844,36 +884,6 @@ export namespace Query {
     "I_R:REL": "is related to: as Related",
   };
 
-  export const findValidEdgeTypesForSourceNode = (node: INode): EdgeType[] => {
-    const validEdges = Object.entries(EdgeTypeNodeRules)
-      .filter(([, [ruleFrom, ruleTo]]) => {
-        const validType = ruleFrom.nodeType === node.type;
-        const validClass =
-          node.params?.entityClasses?.length &&
-          ruleFrom.params.entityClass?.length
-            ? node.params.entityClasses.some((cl) =>
-                ruleFrom.params.entityClass?.includes(cl)
-              )
-            : true;
-        return validType && validClass;
-      })
-      .map(([type]) => type as EdgeType);
-    return validEdges;
-  };
-
-  export const findValidEdgeTypesForTargetNode = (node: INode): EdgeType[] => {
-    const validEdges = Object.entries(EdgeTypeNodeRules)
-      .filter(([, [from, to]]) => {
-        // TODO
-        return (
-          node.type === to.nodeType &&
-          to.params.entityClass?.includes(node.params.entityClasses![0])
-        );
-      })
-      .map(([type]) => type as EdgeType);
-    return validEdges;
-  };
-
   export enum EdgeProblemSource {
     Source = "source",
     Target = "target",
@@ -883,75 +893,113 @@ export namespace Query {
     valid: boolean;
     problems: EdgeProblemSource[];
   };
-
-  export const isEdgeValidity = (
-    sourceNode: INode,
-    edge: IEdge
-  ): EdgeValidity => {
-    const targetNode = edge.node;
-    const edgeRule = EdgeTypeNodeRules[edge.type];
-    const [ruleFrom, ruleTo] = edgeRule;
-
-    const sourceValid = isNodeValid(sourceNode, ruleFrom);
-    const targetValid = isNodeValid(targetNode, ruleTo);
-    const edgeValid = sourceValid && targetValid;
-
-    const problems: EdgeProblemSource[] = [];
-    if (!sourceValid) {
-      problems.push(EdgeProblemSource.Source);
-    }
-    if (!targetValid) {
-      problems.push(EdgeProblemSource.Target);
-    }
-
-    return {
-      valid: edgeValid,
-      problems,
-    };
-  };
-
-  export const isNodeValid = (node: INode, rule: EdgeRule): boolean => {
-    if (node.type !== rule.nodeType) {
-      return false;
-    }
-    if (
-      rule.params.entityClass === undefined ||
-      rule.params.entityClass.length === 0
-    ) {
-      return true;
-    }
-    if (
-      node.params.entityClasses === undefined ||
-      node.params.entityClasses.length === 0
-    ) {
-      return false;
-    }
-
-    return node.params.entityClasses.every((nodeClass) => {
-      return rule.params.entityClass?.includes(nodeClass) || false;
-    });
-  };
 }
 
 export namespace Explore {
   export interface IExplore {
-    view: IView; // information about the presentation form
-    columns: IExploreColumn[];
-    filters: IExploreColumnFilter[];
+    view: IView; // presentation form + its mode-specific config (columns / stats)
+    filters: IExploreSearchFilter[];
     sort: IExploreColumnSort | undefined;
     limit: number;
     offset: number;
   }
 
+  // IView is a discriminated union on `mode`: each presentation mode carries its
+  // own config (Table -> columns, Stats -> stats params). Add new modes (e.g.
+  // Graph) as further arms.
+  export type IView = IExploreTableView | IExploreStatsView;
+
+  export interface IExploreTableView {
+    mode: EViewMode.Table;
+    columns: IExploreColumn[];
+  }
+
+  export interface IExploreStatsView {
+    mode: EViewMode.Stats;
+    stats: IExploreStatsParams;
+  }
+
+  /**
+   * Stats config for the Explorer stats view. Aliases the shared aggregation
+   * params so it stays in sync with the global stats request (IRequestStats);
+   * the audit subset is already determined by the query + filters, so the
+   * IRequestStats `filter` block is intentionally not part of this.
+   */
+  export type IExploreStatsParams = IStatsAggregationParams;
+
   export enum EViewMode {
     Table = "table",
+    Stats = "stats",
   }
 
-  export interface IView {
-    mode: EViewMode;
+  export enum SearchOption {
+    Label = "label",
+    UUIDs = "uuids",
+    Status = "status",
+    Language = "language",
+    CreatedAt = "created at",
+    UpdatedAt = "updated at",
+    CreatedBy = "created by",
+    UpdatedBy = "updated by",
+    EditedBy = "edited by",
+    RootValidity = "root validity",
   }
 
-  export interface IExploreColumnFilter {}
+  export type IExploreSearchFilter =
+    | IExploreLabelFilter
+    | IExploreUuidsFilter
+    | IExploreStatusFilter
+    | IExploreLanguageFilter
+    | IExploreCreatedAtFilter
+    | IExploreUpdatedAtFilter
+    | IExploreCreatedByFilter
+    | IExploreUpdatedByFilter
+    | IExploreEditedByFilter
+    | IExploreRootValidityFilter;
+
+  export interface IExploreLabelFilter {
+    type: SearchOption.Label;
+    label: string;
+    useRegex?: boolean;
+  }
+
+  export interface IExploreUuidsFilter {
+    type: SearchOption.UUIDs;
+    ids: string[];
+  }
+  interface IExploreStatusFilter {
+    type: SearchOption.Status;
+    status: EntityEnums.Status;
+  }
+  interface IExploreLanguageFilter {
+    type: SearchOption.Language;
+    language: EntityEnums.Language;
+  }
+  interface IExploreCreatedAtFilter {
+    type: SearchOption.CreatedAt;
+    createdAt: string;
+  }
+  interface IExploreUpdatedAtFilter {
+    type: SearchOption.UpdatedAt;
+    updatedAfter?: string;
+    updatedBefore?: string;
+  }
+  interface IExploreCreatedByFilter {
+    type: SearchOption.CreatedBy;
+    createdBy: string;
+  }
+  interface IExploreUpdatedByFilter {
+    type: SearchOption.UpdatedBy;
+    updatedBy: string;
+  }
+  interface IExploreEditedByFilter {
+    type: SearchOption.EditedBy;
+    editedBy: string;
+  }
+  interface IExploreRootValidityFilter {
+    type: SearchOption.RootValidity;
+    rootValidity: IRequestSearchRootValidity;
+  }
 
   export type IExploreColumnSort = {
     columnId: string;
@@ -1124,7 +1172,6 @@ export namespace Explore {
     [K in EExploreColumnType]: IEExploreColumnTypeConfig[K]["params"];
   };
 
-  export type IExploreColumnParams<
-    T extends EExploreColumnType = EExploreColumnType
-  > = ExploreColumnParamsMap[T];
+  export type IExploreColumnParams<T extends EExploreColumnType = EExploreColumnType> =
+    ExploreColumnParamsMap[T];
 }

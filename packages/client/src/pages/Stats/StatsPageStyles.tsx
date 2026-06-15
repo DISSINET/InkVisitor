@@ -38,6 +38,7 @@ export const StyledStatsTab = styled.button<{ $isSelected: boolean }>`
 `;
 
 export const StyledStatsContent = styled.div`
+  position: relative;
   width: 100%;
   height: 100%;
   padding: 0.5rem 1rem;
@@ -100,9 +101,15 @@ export const StyledFieldLabel = styled.div`
   white-space: nowrap;
 `;
 export const StyledFieldInput = styled.div`
-  display: grid;
-  justify-content: start;
+  display: flex;
   align-items: center;
+  gap: 0.5rem;
+`;
+
+export const StyledDocumentResourceWrap = styled.div`
+  min-width: 0;
+  max-width: 17.4rem;
+  flex: 1;
 `;
 export const StyledDateInputWrapper = styled.div`
   display: flex;
@@ -178,7 +185,6 @@ export const StyledDocumentChangesLabel = styled.span`
 `;
 export const StyledDocumentChangesTags = styled.div`
   display: flex;
-  flex-wrap: wrap;
   gap: ${({ theme }) => theme.space[1]};
 `;
 export const StyledDocumentChangeFallback = styled.span`

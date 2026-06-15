@@ -14,5 +14,6 @@ export function useUsersGetMoreQuery(options?: UseUsersGetMoreQueryOptions) {
       return res.data ?? [];
     },
     enabled: api.isLoggedIn() && (options?.enabled ?? true),
+    staleTime: 5 * 60 * 1000,
   });
 }

@@ -1,14 +1,14 @@
 import { determineOrder, IDbModel } from "@models/common";
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
-import { IEntity, Relation as RelationTypes } from "@shared/types";
-import { DbEnums, EntityEnums, RelationEnums, UserEnums } from "@shared/enums";
-import { EnumValidators } from "@shared/enums";
+import { IEntity, Relation as RelationTypes } from "@inkvisitor/shared/types";
+import { DbEnums, EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
+import { EnumValidators } from "@inkvisitor/shared/enums";
 import {
   InternalServerError,
   ModelNotValidError,
   RelationAsymetricalPathExist,
   RelationPathExist,
-} from "@shared/types/errors";
+} from "@inkvisitor/shared/types/errors";
 import User from "@models/user/user";
 import { IRequest } from "../../custom_typings/request";
 import { nonenumerable } from "@common/decorators";
@@ -509,6 +509,32 @@ export default class Relation implements IRelationModel {
       );
     }
     return items;
+  }
+
+  /**
+   * Searches for relations linked to a single entity in the forward direction only.
+   * For asymmetrical relations "forward" means the entity occupies entityIds[0]
+   * (the subject/source side) - inverse relations, where the entity is the target
+   * (entityIds[1], e.g. the superclass/category), are excluded. Symmetrical
+   * relations have no fixed direction and are always returned regardless of position.
+   * @param db
+   * @param entityId
+   * @param relType optional relation type filter
+   * @returns array of relation interfaces
+   */
+  static async findForwardForEntity<T extends RelationTypes.IRelation>(
+    db: Connection,
+    entityId: string,
+    relType?: RelationEnums.Type
+  ): Promise<T[]> {
+    const relations = await Relation.findForEntities<T>(db, [entityId], relType);
+
+    return relations.filter((relation) => {
+      if (!RelationTypes.RelationRules[relation.type]?.asymmetrical) {
+        return true;
+      }
+      return relation.entityIds.indexOf(entityId) === 0;
+    });
   }
 
   /**

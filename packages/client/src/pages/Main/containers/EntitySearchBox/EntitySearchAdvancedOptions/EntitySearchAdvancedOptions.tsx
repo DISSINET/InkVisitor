@@ -1,8 +1,10 @@
 import { autoUpdate, FloatingPortal, offset, useFloating } from "@floating-ui/react";
-import { SearchEnums } from "@shared/enums";
-import { IRequestSearch, IRequestSearchRootValidity } from "@shared/types/request-search";
+import { SearchEnums } from "@inkvisitor/shared/enums";
+import {
+  IRequestSearch,
+} from "@inkvisitor/shared/types/request-search";
 import { Button, ButtonGroup } from "components";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CgOptions, CgPlayListAdd, CgPlayListRemove } from "react-icons/cg";
 import { LuListTodo } from "react-icons/lu";
 import { animated, config, useSpring } from "react-spring";
@@ -18,19 +20,38 @@ import {
   StyledPillLabel,
   StyledPillsContainer,
 } from "../EntitySearchBoxStyles";
+import { FOURTH_PANEL_MIN_WIDTH } from "Theme/constants";
+import { useAppSelector } from "redux/hooks";
 
-const advancedOptions = SearchEnums.AdvancedOptions;
+/** Shown on Query page floating panel — excluded from Main search advanced-options picker. */
+const queryPageOnlyAdvancedOptions: SearchEnums.AdvancedOption[] = [
+  SearchEnums.AdvancedOption.CreatedAt,
+  SearchEnums.AdvancedOption.UpdatedAt,
+  SearchEnums.AdvancedOption.CreatedBy,
+  SearchEnums.AdvancedOption.UpdatedBy,
+  SearchEnums.AdvancedOption.EditedBy,
+  SearchEnums.AdvancedOption.RootValidity,
+];
+
+export const mainPageAdvancedSearchOptions: SearchEnums.AdvancedOption[] =
+  SearchEnums.AdvancedOptions.filter(
+    (option) => !queryPageOnlyAdvancedOptions.includes(option)
+  );
+
+const advancedOptions = mainPageAdvancedSearchOptions;
 interface EntitySearchAdvancedOptions {
   expandedOptions: SearchEnums.AdvancedOption[];
   setExpandedOptions: (options: SearchEnums.AdvancedOption[]) => void;
   searchData: IRequestSearch;
   setSearchData: (data: IRequestSearch) => void;
+  isUndersized: boolean;
 }
 export const EntitySearchAdvancedOptions: React.FC<EntitySearchAdvancedOptions> = ({
   expandedOptions,
   setExpandedOptions,
   searchData,
   setSearchData,
+  isUndersized,
 }) => {
   const [showPillsMenu, setShowPillsMenu] = useState(false);
   const [portalMounted, setPortalMounted] = useState(false);
@@ -105,29 +126,13 @@ export const EntitySearchAdvancedOptions: React.FC<EntitySearchAdvancedOptions> 
         case SearchEnums.AdvancedOption.Status:
           return Boolean(searchData.status);
         case SearchEnums.AdvancedOption.Language:
-          return Boolean(searchData.language);
+          return searchData.language !== undefined;
         case SearchEnums.AdvancedOption.Territory:
           return Boolean(searchData.territoryId);
         case SearchEnums.AdvancedOption.CoOccurrence:
           return Boolean(searchData.cooccurrenceId);
         case SearchEnums.AdvancedOption.ReferencedTo:
           return Boolean(searchData.haveReferenceTo);
-        case SearchEnums.AdvancedOption.CreatedAt:
-          return searchData.createdDate !== undefined;
-        case SearchEnums.AdvancedOption.UpdatedAt:
-          return searchData.updatedDate !== undefined;
-        case SearchEnums.AdvancedOption.CreatedBy:
-          return Boolean(searchData.createdBy);
-        case SearchEnums.AdvancedOption.UpdatedBy:
-          return Boolean(searchData.updatedBy);
-        case SearchEnums.AdvancedOption.EditedBy:
-          return Boolean(searchData.editedBy);
-        case SearchEnums.AdvancedOption.RootValidity:
-          return (
-            searchData.isRootInvalid !== undefined &&
-            searchData.isRootInvalid !== null &&
-            searchData.isRootInvalid !== IRequestSearchRootValidity.Any
-          );
         default:
           return false;
       }
@@ -191,10 +196,12 @@ export const EntitySearchAdvancedOptions: React.FC<EntitySearchAdvancedOptions> 
         onMouseEnter={handlePillsMouseEnter}
         onMouseLeave={handlePillsMouseLeave}
       >
-        <StyledAdvancedOptionsSign>
-          <StyledAdvancedOptionsIconWrap>
-            <CgOptions size={12} />
-          </StyledAdvancedOptionsIconWrap>
+        <StyledAdvancedOptionsSign $isUndersized={isUndersized}>
+          {!isUndersized && (
+            <StyledAdvancedOptionsIconWrap>
+              <CgOptions size={12} />
+            </StyledAdvancedOptionsIconWrap>
+          )}
           <i>advanced options</i>
         </StyledAdvancedOptionsSign>
         {renderBatchButtons()}

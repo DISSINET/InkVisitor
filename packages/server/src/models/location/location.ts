@@ -1,7 +1,7 @@
 import Entity from "@models/entity/entity";
 import { fillFlatObject, IModel, UnknownObject } from "@models/common";
-import { EntityEnums } from "@shared/enums";
-import { ILocation, ILocationData } from "@shared/types";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { ILocation, ILocationData } from "@inkvisitor/shared/types";
 
 class LocationData implements ILocationData, IModel {
   logicalType: EntityEnums.LogicalType = EntityEnums.LogicalType.Definite;

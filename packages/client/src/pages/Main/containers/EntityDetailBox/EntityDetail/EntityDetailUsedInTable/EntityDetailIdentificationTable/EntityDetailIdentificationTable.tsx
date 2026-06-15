@@ -1,5 +1,5 @@
-import { IEntity } from "@shared/types";
-import { IResponseUsedInStatementIdentification } from "@shared/types/response-detail";
+import { IEntity } from "@inkvisitor/shared/types";
+import { IResponseUsedInStatementIdentification } from "@inkvisitor/shared/types/response-detail";
 import { Table } from "components";
 import { EntityTag } from "components/advanced";
 import React, { useMemo } from "react";

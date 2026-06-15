@@ -110,16 +110,9 @@ interface StyledDetailSectionContent {
   $firstSection?: boolean;
 }
 export const StyledDetailSectionContent = styled.div<StyledDetailSectionContent>`
-  padding-left: ${({ theme, $firstSection = false }) =>
-    $firstSection ? "" : theme.space[4]};
-  padding-top: ${({ theme, $firstSection }) =>
-    $firstSection ? 0 : theme.space[6]};
+  padding-left: ${({ theme, $firstSection = false }) => ($firstSection ? "" : theme.space[4])};
+  padding-top: ${({ theme, $firstSection }) => ($firstSection ? 0 : theme.space[6])};
 `;
-
-// usedIn section
-export const StyledDetailSectionContentUsedIn = styled(
-  StyledDetailSectionContent
-)``;
 
 export const StyledDetailSectionMetaTable = styled.div`
   display: grid;

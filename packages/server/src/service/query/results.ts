@@ -2,10 +2,14 @@ import Audit from "@models/audit/audit";
 import Entity from "@models/entity/entity";
 import Relation from "@models/relation/relation";
 import User from "@models/user/user";
-import { IEntity, IUser } from "@shared/types";
-import { PropSpecKind } from "@shared/types/prop";
-import { Explore } from "@shared/types/query";
+import { IEntity, IUser } from "@inkvisitor/shared/types";
+import { PropSpecKind } from "@inkvisitor/shared/types/prop";
+import { Explore } from "@inkvisitor/shared/types/query";
 import { Connection } from "rethinkdb-ts";
+import { filterEntityIdsByRowLabelFilter, getRowLabelFilter } from "./explore-label-filter";
+import { applyRowIdsFilter, getRowIdsFilter } from "./explore-ids-filter";
+import { applyRequestSearchFilters } from "./explore-to-request-search";
+import { applyRootValidityFilter, getRootValidityFilter } from "./explore-root-validity-filter";
 
 export default class Results<T extends { id: string }> {
   items: string[] | null = null;
@@ -42,6 +46,87 @@ export default class Results<T extends { id: string }> {
     this.items = Array.from(new Set((this.items || []).concat(results)));
   }
 
+  async applyExploreFilters(db: Connection, exploreData: Explore.IExplore): Promise<void> {
+    if (!this.items?.length) {
+      return;
+    }
+
+    // 1. UUIDs (in-memory)
+    const rowIdsFilter = getRowIdsFilter(exploreData.filters);
+    if (rowIdsFilter?.ids.length) {
+      this.items = applyRowIdsFilter(this.items, rowIdsFilter);
+      if (!this.items.length) {
+        return;
+      }
+    }
+
+    // 2. Label (db regex / wildcard)
+    const rowLabelFilter = getRowLabelFilter(exploreData.filters);
+    if (rowLabelFilter?.label?.trim()) {
+      this.items = await filterEntityIdsByRowLabelFilter(db, this.items, rowLabelFilter);
+      if (!this.items.length) {
+        return;
+      }
+    }
+
+    // 3. Search-box filters (status, language, dates, created/updated/edited by)
+    //    reused via the existing SearchQuery backend.
+    this.items = await applyRequestSearchFilters(db, this.items, exploreData.filters);
+    if (!this.items.length) {
+      return;
+    }
+
+    // 4. Root validity (most expensive: per-entity relation queries) - run last
+    //    on the smallest candidate set.
+    const rootValidityFilter = getRootValidityFilter(exploreData.filters);
+    if (rootValidityFilter) {
+      this.items = await applyRootValidityFilter(db, this.items, rootValidityFilter);
+    }
+  }
+
+  /**
+   * Order items to follow the order of the provided ids (the order the user typed
+   * them into the Explore UUIDs filter). Matching is case-insensitive; item casing
+   * is preserved. Ids not present in items are skipped, and any items not present in
+   * the id list are appended last in their original relative order (defensive: after
+   * the UUIDs intersection there should be none).
+   */
+  orderByIds(ids: string[]): void {
+    if (!this.items || !this.items.length) {
+      return;
+    }
+
+    const itemByLowerId = new Map<string, string>();
+    for (const item of this.items) {
+      const key = item.toLowerCase();
+      if (!itemByLowerId.has(key)) {
+        itemByLowerId.set(key, item);
+      }
+    }
+
+    const ordered: string[] = [];
+    const usedKeys = new Set<string>();
+
+    for (const id of ids) {
+      const key = id.toLowerCase();
+      const item = itemByLowerId.get(key);
+      if (item !== undefined && !usedKeys.has(key)) {
+        ordered.push(item);
+        usedKeys.add(key);
+      }
+    }
+
+    for (const item of this.items) {
+      const key = item.toLowerCase();
+      if (!usedKeys.has(key)) {
+        ordered.push(item);
+        usedKeys.add(key);
+      }
+    }
+
+    this.items = ordered;
+  }
+
   sort(sortData: Explore.IExploreColumnSort | undefined): void {
     if (!this.items || !this.items.length) {
       return;
@@ -68,10 +153,7 @@ export default class Results<T extends { id: string }> {
     // return all items if limit is 0
     if (exploreData.limit === 0) return this.items;
 
-    const endIndex = Math.min(
-      exploreData.offset + exploreData.limit,
-      this.items.length
-    );
+    const endIndex = Math.min(exploreData.offset + exploreData.limit, this.items.length);
 
     return this.items.slice(exploreData.offset, endIndex);
   }
@@ -81,28 +163,11 @@ export default class Results<T extends { id: string }> {
     entity: IEntity,
     columnsData: Explore.IExploreColumn[]
   ): Promise<
-    Record<
-      string,
-      | IEntity
-      | IEntity[]
-      | number
-      | number[]
-      | string
-      | string[]
-      | IUser
-      | IUser[]
-    >
+    Record<string, IEntity | IEntity[] | number | number[] | string | string[] | IUser | IUser[]>
   > {
     const out: Record<
       string,
-      | IEntity
-      | IEntity[]
-      | number
-      | number[]
-      | string
-      | string[]
-      | IUser
-      | IUser[]
+      IEntity | IEntity[] | number | number[] | string | string[] | IUser | IUser[]
     > = {};
     for (const column of columnsData) {
       switch (column.type) {
@@ -122,10 +187,7 @@ export default class Results<T extends { id: string }> {
               }
             });
 
-          out[column.id] = await Entity.findEntitiesByIds(
-            db,
-            Object.keys(entityIds)
-          );
+          out[column.id] = await Entity.findEntitiesByIds(db, Object.keys(entityIds));
           break;
         }
         // Created by
@@ -142,13 +204,10 @@ export default class Results<T extends { id: string }> {
         }
         // Entity Reference Resources
         case Explore.EExploreColumnType.ERR: {
-          const referenceIds = entity.references.reduce<string[]>(
-            (acc, curr) => {
-              acc.push(curr.resource);
-              return acc;
-            },
-            []
-          );
+          const referenceIds = entity.references.reduce<string[]>((acc, curr) => {
+            acc.push(curr.resource);
+            return acc;
+          }, []);
           const resources = await Entity.findEntitiesByIds(db, referenceIds);
           out[column.id] = resources;
           break;
@@ -166,18 +225,18 @@ export default class Results<T extends { id: string }> {
         case Explore.EExploreColumnType.ER: {
           const params =
             column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.ER>;
-          // first - retrieve all entity ids that are in some relation with entity.id
-          const [entityIds] = await Relation.getLinkedForEntities(
-            db,
-            [entity.id],
-            params.relationType
-          );
+          // first - retrieve forward relations only (for asymmetrical types the
+          // entity must be the subject at entityIds[0])
+          const relations = await Relation.findForwardForEntity(db, entity.id, params.relationType);
 
-          // second - get repsective entities from db - omit entity.id
-          const entities = await Entity.findEntitiesByIds(
-            db,
-            entityIds.filter((e) => e !== entity.id)
-          );
+          // second - collect linked entity ids (omit entity.id) and load them
+          const entityIds = Array.from(
+            new Set(
+              relations.reduce<string[]>((acc, relation) => acc.concat(relation.entityIds), [])
+            )
+          ).filter((e) => e !== entity.id);
+
+          const entities = await Entity.findEntitiesByIds(db, entityIds);
           out[column.id] = entities;
           break;
         }

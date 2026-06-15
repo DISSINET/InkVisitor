@@ -34,7 +34,7 @@ export class CustomError extends Error {
     return this.loggable;
   }
 
-  withData(data: any): CustomError {
+  withData<T = any>(data: T): CustomError {
     this.data = data;
     return this;
   }
@@ -320,6 +320,23 @@ class InvalidDeleteError extends CustomError {
 }
 
 /**
+ * Discriminates what kind of resource blocks an entity deletion, so the client
+ * can tell whether the ids carried in InvalidDeleteError.data point to entities
+ * or to documents (which are not entities and cannot be opened in entity detail).
+ */
+export type InvalidDeleteConflictType = "entity" | "document";
+
+/**
+ * Shape carried by InvalidDeleteError.withData() when an entity cannot be
+ * deleted because it is still referenced. `ids` are entity ids when
+ * type === "entity" and document ids when type === "document".
+ */
+export interface IInvalidDeleteErrorData {
+  type: InvalidDeleteConflictType;
+  ids: string[];
+}
+
+/**
  * EmailError will be thrown in case of error occured in mail module
  */
 class EmailError extends CustomError {
@@ -343,9 +360,7 @@ class RelationDoesNotExist extends CustomError {
   public static message = "Relation $1 does not exist";
 
   static forId(id: string): RelationDoesNotExist {
-    return new RelationDoesNotExist(
-      RelationDoesNotExist.message.replace("$1", id)
-    );
+    return new RelationDoesNotExist(RelationDoesNotExist.message.replace("$1", id));
   }
 }
 
@@ -380,9 +395,7 @@ class RelationAsymetricalPathExist extends CustomError {
   public static message = "Asymetrical constraint check failed";
 
   static forId(id: string): RelationAsymetricalPathExist {
-    return new RelationAsymetricalPathExist(
-      RelationAsymetricalPathExist.message.replace("$1", id)
-    );
+    return new RelationAsymetricalPathExist(RelationAsymetricalPathExist.message.replace("$1", id));
   }
 }
 
@@ -395,9 +408,7 @@ class DocumentDoesNotExist extends CustomError {
   public static message = "Document $1 does not exist";
 
   static forId(id: string): DocumentDoesNotExist {
-    return new DocumentDoesNotExist(
-      DocumentDoesNotExist.message.replace("$1", id)
-    );
+    return new DocumentDoesNotExist(DocumentDoesNotExist.message.replace("$1", id));
   }
 }
 
@@ -483,6 +494,21 @@ class NetworkError extends CustomError {
     "Please check your network connection. If the issue persists, please try again later or contact the project owner.";
 }
 
+class TimeoutError extends CustomError {
+  public static readonly TYPE = "TimeoutError";
+  public static code = 504;
+  public static title = "Request timed out";
+  public static message =
+    "The server took too long to respond. Please try again, or contact the project owner if the problem persists.";
+}
+
+class HtmlResponseError extends CustomError {
+  public static readonly TYPE = "HtmlResponseError";
+  public static code = 500;
+  public static title = "Server returned HTML instead of JSON";
+  public static message = "This may indicate a service overload or missing database index.";
+}
+
 const allErrors: Record<string, any> = {
   InvalidDeleteError,
   UnauthorizedError,
@@ -514,6 +540,8 @@ const allErrors: Record<string, any> = {
   RelationAsymetricalPathExist,
   DocumentDoesNotExist,
   NetworkError,
+  TimeoutError,
+  HtmlResponseError,
   UnsafePasswordError,
   PasswordDoesNotMatchError,
   PasswordResetHashError,
@@ -571,6 +599,8 @@ export {
   RelationAsymetricalPathExist,
   DocumentDoesNotExist,
   NetworkError,
+  TimeoutError,
+  HtmlResponseError,
   UnsafePasswordError,
   PasswordDoesNotMatchError,
   PasswordResetHashError,

@@ -1,5 +1,5 @@
-import { EntityEnums } from "@shared/enums";
-import { IEntity } from "@shared/types";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { IEntity } from "@inkvisitor/shared/types";
 import React from "react";
 import { EntityTag } from "../EntityTag/EntityTag";
 import { ElvlButtonGroup } from "../IconButtonGroups/ElvlButtonGroup";

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { IEntity } from "@shared/types";
-import { Explore } from "@shared/types/query";
+import { IEntity } from "@inkvisitor/shared/types";
+import { Explore } from "@inkvisitor/shared/types/query";
 import { Tooltip } from "components";
 import { renderExploreColumnParamValue } from "./ExploreColumnParamValueRenderers";
 import {

@@ -6,15 +6,16 @@ import Statement from "@models/statement/statement";
 import Territory from "@models/territory/territory";
 import { getEntitiesByIds } from "@service/shorthands";
 import treeCache from "@service/treeCache";
-import { EntityEnums, RelationEnums } from "@shared/enums";
-import { IConcept, IEntity, ITerritory, RequestSearch, AuditScope } from "@shared/types";
-import { PropSpecKind } from "@shared/types/prop";
+import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
+import { IConcept, IEntity, ITerritory, RequestSearch, AuditScope } from "@inkvisitor/shared/types";
+import { PropSpecKind } from "@inkvisitor/shared/types/prop";
 import { Connection, r, RDatum, RTable } from "rethinkdb-ts";
 import { IRequest } from "src/custom_typings/request";
 import Entity from "./entity";
 import { ResponseEntity } from "./response";
-import { IRequestSearchRootValidity } from "@shared/types/request-search";
+import { IRequestSearchRootValidity } from "@inkvisitor/shared/types/request-search";
 import { Setting } from "@models/setting/setting";
+import { ISetting } from "@inkvisitor/shared/types/settings";
 import Relation from "@models/relation/relation";
 
 /**
@@ -53,22 +54,6 @@ export class SearchQuery {
   constructor(conn: Connection) {
     this.connection = conn;
     this.query = r.table(Entity.table);
-  }
-
-  /**
-   * searches Statements to find all associated entities
-   * ids can be then used in whereEntityIds method
-   * @param cooccurrenceId
-   * @returns
-   */
-  async getCooccurredEntitiesIds(cooccurrenceId: string): Promise<string[]> {
-    const associatedEntityIds = await Statement.getActantsIdsFromLinkedEntities(
-      this.connection,
-      cooccurrenceId
-    );
-
-    // filter out duplicates
-    return [...new Set(associatedEntityIds)];
   }
 
   /**
@@ -216,7 +201,7 @@ export class SearchQuery {
    * @param label
    * @returns
    */
-  prepareLabel(label: string): [string, string, string] {
+  public static prepareLabel(label: string): [string, string, string] {
     let leftWildcard = "^",
       rightWildcard = "$";
 
@@ -233,6 +218,10 @@ export class SearchQuery {
     // label = regExpEscape(label.toLowerCase());
 
     return [label, leftWildcard, rightWildcard];
+  }
+
+  prepareLabel(label: string): [string, string, string] {
+    return SearchQuery.prepareLabel(label);
   }
 
   /**
@@ -268,20 +257,17 @@ export class SearchQuery {
     const [label, leftWildcard, rightWildcard] = this.prepareLabel(labelOrId);
     this.usedLabel = label;
 
-    // replace regexp chars
-    let escapedLabelOrId = labelOrId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const escapedLabel = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-    // frontend adds one final asterisk for labelOrId - we need to retain it there
-    const hasEscapedAsteriskAtEnd = escapedLabelOrId.endsWith("\\*");
-    if (hasEscapedAsteriskAtEnd) {
-      escapedLabelOrId = escapedLabelOrId.slice(0, -2) + "*";
-    }
+    // id is matched as a prefix of the literal input — strip the trailing
+    // wildcard the client appends, then escape regex chars and anchor at start
+    const idPrefix = labelOrId.replace(/\*$/, "");
+    const escapedIdPrefix = idPrefix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
     // search 3 times:
     // 1. search for exact word match with some normalization
     // 2. search for exact word match without normalization
-    // 3. search for id match
+    // 3. search for id prefix match
     this.query = this.query.filter(function (row: RDatum) {
       return r.or(
         SearchQuery.searchWordByWord(
@@ -297,7 +283,7 @@ export class SearchQuery {
           rightWildcard,
           false
         ),
-        row("id").match(escapedLabelOrId).ne(null)
+        row("id").match("^" + escapedIdPrefix).ne(null)
       );
     });
 
@@ -429,7 +415,8 @@ export class SearchQuery {
     }
 
     if (req.cooccurrenceId) {
-      const assocEntityIds = await this.getCooccurredEntitiesIds(
+      const assocEntityIds = await Statement.getCoOccurrentEntityIds(
+        this.connection,
         req.cooccurrenceId
       );
       if (!req.entityIds) {
@@ -476,7 +463,15 @@ export class SearchQuery {
       );
     }
 
-    if (req.updatedDate) {
+    if (req.updatedAfter || req.updatedBefore) {
+      await this._updateEntityIdsFromAudits(req, () =>
+        Audit.getByUpdatedInRange(
+          this.connection,
+          req.updatedAfter as Date | undefined,
+          req.updatedBefore as Date | undefined,
+        )
+      );
+    } else if (req.updatedDate) {
       await this._updateEntityIdsFromAudits(req, () =>
         Audit.getByUpdatedDate(this.connection, req.updatedDate as Date)
       );
@@ -521,7 +516,7 @@ export class SearchQuery {
       this.whereUsedTemplate(req.usedTemplate);
     }
 
-    if (req.language) {
+    if (req.language !== undefined) {
       this.whereLanguage(req.language);
     }
 
@@ -572,6 +567,99 @@ export class ResponseSearch {
   }
 
   /**
+   * Pure decision: does an entity pass the root-validity filter?
+   * Valid -> no warnings; Invalid -> has warnings; anything else -> pass.
+   */
+  static passesRootValidity(
+    hasWarnings: boolean,
+    validity: IRequestSearchRootValidity
+  ): boolean {
+    if (validity === IRequestSearchRootValidity.Valid) {
+      return !hasWarnings;
+    }
+    if (validity === IRequestSearchRootValidity.Invalid) {
+      return hasWarnings;
+    }
+    return true;
+  }
+
+  /**
+   * Narrows a list of entities by their root-territory validity (T-based warnings).
+   * Returns the input unchanged unless validity is Valid or Invalid.
+   * Shared by the Search box (ResponseSearch.prepare) and the Explorer filter.
+   */
+  static async filterEntitiesByRootValidity(
+    conn: Connection,
+    entities: IEntity[],
+    validity: IRequestSearchRootValidity,
+    settings: ISetting[]
+  ): Promise<IEntity[]> {
+    if (
+      validity !== IRequestSearchRootValidity.Valid &&
+      validity !== IRequestSearchRootValidity.Invalid
+    ) {
+      return entities;
+    }
+
+    const rootT = treeCache.tree.getRootTerritory() as ITerritory;
+
+    // Used to be a serial nested loop: N entities x 5 awaits each. Fan
+    // out the per-entity work in parallel, and inside each entity, run
+    // the 3 independent fetches concurrently before resolving the 2
+    // entity lookups that depend on their result ids. Promise.all keeps
+    // the original order, which callers (e.g. the Explorer filter) rely on.
+    const checked = await Promise.all(
+      entities.map(async (entity) => {
+        const [classificationRels, soeRels, propValueEs] = await Promise.all([
+          Classification.getClassificationForwardConnections(
+            conn,
+            entity.id,
+            entity.class,
+            1,
+            0
+          ),
+          Relation.findForEntities(
+            conn,
+            [entity.id],
+            RelationEnums.Type.SuperordinateEntity,
+            0
+          ),
+          getEntitiesByIds<IEntity>(
+            conn,
+            Entity.extractIdsFromProps(entity.props, [PropSpecKind.VALUE])
+          ),
+        ]);
+
+        const [classificationEs, soeEs] = await Promise.all([
+          getEntitiesByIds<IConcept>(
+            conn,
+            classificationRels.map((c) => c.entityIds[1])
+          ),
+          getEntitiesByIds<IEntity>(
+            conn,
+            soeRels.map((s) => s.entityIds[1])
+          ),
+        ]);
+
+        const warnings = new Entity(entity).getTBasedWarnings(
+          [rootT],
+          classificationEs,
+          soeEs,
+          propValueEs,
+          settings
+        );
+        return { entity, hasWarnings: warnings.length > 0 };
+      })
+    );
+
+    return checked
+      .filter(({ hasWarnings }) =>
+        ResponseSearch.passesRootValidity(hasWarnings, validity)
+      )
+      .map(({ entity }) => entity);
+  }
+
+  /**
    * Prepares asynchronously results data
    * @param db
    */
@@ -581,69 +669,12 @@ export class ResponseSearch {
     await query.fromRequest(this.request);
     let entities = await query.do();
 
-    // Handling this search condition here while it is reusing the entity method
-    if (
-      this.request.isRootInvalid === IRequestSearchRootValidity.Valid ||
-      this.request.isRootInvalid === IRequestSearchRootValidity.Invalid
-    ) {
-      const rootT = treeCache.tree.getRootTerritory() as ITerritory;
-      const conn = httpRequest.db.connection;
-
-      const entitiesToCheck = [...entities];
-      entities = [];
-
-      for (const entity of entitiesToCheck) {
-        const classificationRels =
-          await Classification.getClassificationForwardConnections(
-            conn,
-            entity.id,
-            entity.class,
-            1,
-            0
-          );
-        const classificationEs: IConcept[] = await getEntitiesByIds<IConcept>(
-          conn,
-          classificationRels.map((c) => c.entityIds[1])
-        );
-
-        const soeRels = await Relation.findForEntities(
-          conn,
-          [entity.id],
-          RelationEnums.Type.SuperordinateEntity,
-          0
-        );
-        const soeEs = await getEntitiesByIds<IEntity>(
-          conn,
-          soeRels.map((s) => s.entityIds[1])
-        );
-        const propValueEs = await getEntitiesByIds<IEntity>(
-          conn,
-          Entity.extractIdsFromProps(entity.props, [PropSpecKind.VALUE])
-        );
-
-        const entityModel = new Entity(entity);
-
-        const warnings = entityModel.getTBasedWarnings(
-          [rootT],
-          classificationEs,
-          soeEs,
-          propValueEs,
-          settings
-        );
-
-        if (this.request.isRootInvalid === IRequestSearchRootValidity.Valid) {
-          if (warnings.length === 0) {
-            entities.push(entity);
-          }
-        } else if (
-          this.request.isRootInvalid === IRequestSearchRootValidity.Invalid
-        ) {
-          if (warnings.length > 0) {
-            entities.push(entity);
-          }
-        }
-      }
-    }
+    entities = await ResponseSearch.filterEntitiesByRootValidity(
+      httpRequest.db.connection,
+      entities,
+      this.request.isRootInvalid ?? IRequestSearchRootValidity.Any,
+      settings
+    );
 
     if (query.retainedIdsOrder) {
       entities = sortByRequiredOrder(entities, query.retainedIdsOrder);

@@ -127,8 +127,8 @@ export class DbHelper {
   async createTable(table: TableSchema): Promise<void> {
     await r.tableCreate(table.tableName).run(this.conn);
     if (table.indexes) {
-      for (const i in table.indexes) {
-        await table.indexes[i](r.table(table.tableName)).run(this.conn);
+      for (const def of table.indexes) {
+        await def.build(r.table(table.tableName)).run(this.conn);
       }
     }
 

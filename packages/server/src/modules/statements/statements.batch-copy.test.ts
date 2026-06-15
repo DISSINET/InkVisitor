@@ -3,11 +3,11 @@ import {
   BadParams,
   StatementDoesNotExits,
   TerritoryDoesNotExits,
-} from "@shared/types/errors";
+} from "@inkvisitor/shared/types/errors";
 import request from "supertest";
 import { supertestConfig } from "..";
 import { apiPath } from "@common/constants";
-import app from "../../Server";
+import app from "../../server";
 import { Db } from "@service/rethink";
 import { findEntityById } from "@service/shorthands";
 import Statement, { StatementTerritory } from "@models/statement/statement";

@@ -5,8 +5,8 @@ import {
   entitiesDictKeys,
   entityStatusDict,
   languageDict,
-} from "@shared/dictionaries";
-import { EntityEnums, UserEnums } from "@shared/enums";
+} from "@inkvisitor/shared/dictionaries";
+import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import {
   IActionData,
   IDocument,
@@ -14,14 +14,9 @@ import {
   IResponseDetail,
   IResponseGeneric,
   ITerritory,
-} from "@shared/types";
-import { IConceptData } from "@shared/types/concept";
-import {
-  useMutation,
-  UseMutationResult,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+} from "@inkvisitor/shared/types";
+import { IConceptData } from "@inkvisitor/shared/types/concept";
+import { useMutation, UseMutationResult, useQuery, useQueryClient } from "@tanstack/react-query";
 import { MIN_LABEL_LENGTH_MESSAGE, rootTerritoryId } from "Theme/constants";
 import api from "api";
 import { AxiosResponse } from "axios";
@@ -36,7 +31,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { FaExternalLinkAlt, FaRegCopy } from "react-icons/fa";
 import { TbHomeMove } from "react-icons/tb";
 import { toast } from "react-toastify";
-import { DropdownItem } from "types";
+import { DropdownItem } from "@inkvisitor/shared/types";
 import { getEntityStatusIcon } from "utils/iconUtils";
 import {
   StyledDetailContentRow,
@@ -64,9 +59,7 @@ interface EntityDetailFormSection {
   isClassChangeable: boolean;
   allowedEntityChangeClasses: EntityEnums.Class[];
   templateOptions: DropdownItem[];
-  setSelectedEntityType: (
-    value: React.SetStateAction<EntityEnums.Class | undefined>
-  ) => void;
+  setSelectedEntityType: (value: React.SetStateAction<EntityEnums.Class | undefined>) => void;
   setShowTypeSubmit: (value: React.SetStateAction<boolean>) => void;
   handleAskForTemplateApply: (templateIdToApply: string) => void;
   isTerritoryWithParent: (entity: IResponseDetail) => boolean;
@@ -130,14 +123,10 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
     setNewLabel(entity.labels[0]);
   }, [entity.labels[0]]);
 
-  const isOwner =
-    (localStorage.getItem("userrole") as UserEnums.Role) ===
-    UserEnums.Role.Owner;
+  const isOwner = (localStorage.getItem("userrole") as UserEnums.Role) === UserEnums.Role.Owner;
 
   const [showTActionModal, setShowTActionModal] = useState(false);
-  const [moveToParentEntity, setMoveToParentEntity] = useState<IEntity | false>(
-    false
-  );
+  const [moveToParentEntity, setMoveToParentEntity] = useState<IEntity | false>(false);
   const excludedMoveTerritories = useMemo(
     () =>
       entity.class === EntityEnums.Class.Territory
@@ -151,10 +140,8 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
   const queryClient = useQueryClient();
 
   const updateTerritoryMutation = useMutation({
-    mutationFn: async (tObject: {
-      territoryId: string;
-      changes: Partial<ITerritory>;
-    }) => await api.entityUpdate(tObject?.territoryId, tObject?.changes),
+    mutationFn: async (tObject: { territoryId: string; changes: Partial<ITerritory> }) =>
+      await api.entityUpdate(tObject?.territoryId, tObject?.changes),
     onSuccess: () =>
       // data: IResponseGeneric,
       // variables: { territoryId: string; changes: Partial<ITerritory> }
@@ -202,16 +189,12 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
           {/* Entity type */}
           {isClassChangeable && (
             <StyledDetailContentRow>
-              <StyledDetailContentRowLabel>
-                Entity Type
-              </StyledDetailContentRowLabel>
+              <StyledDetailContentRowLabel>Entity Type</StyledDetailContentRowLabel>
               <StyledDetailContentRowValue>
                 <StyledRelativePosition>
                   <Dropdown.Single.Entity
                     value={entity.class}
-                    options={allowedEntityChangeClasses.map(
-                      (c) => entitiesDictKeys[c]
-                    )}
+                    options={allowedEntityChangeClasses.map((c) => entitiesDictKeys[c])}
                     onChange={(selectedOption) => {
                       setSelectedEntityType(selectedOption);
                       setShowTypeSubmit(true);
@@ -227,9 +210,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
 
           {/* templates */}
           <StyledDetailContentRow>
-            <StyledDetailContentRowLabel>
-              Apply Template
-            </StyledDetailContentRowLabel>
+            <StyledDetailContentRowLabel>Apply Template</StyledDetailContentRowLabel>
             <StyledDetailContentRowValue>
               <Dropdown.Single.Basic
                 key={"template-dropdown-" + entity.id}
@@ -245,9 +226,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
 
           {templateApplied && (
             <StyledDetailContentRow>
-              <StyledDetailContentRowLabel>
-                Applied Template
-              </StyledDetailContentRowLabel>
+              <StyledDetailContentRowLabel>Applied Template</StyledDetailContentRowLabel>
               <StyledDetailContentRowValue>
                 <StyledTagWrap>
                   <EntityTag entity={templateApplied} fullWidth />
@@ -259,9 +238,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
           {/* #2589 */}
           {entity.legacyId && process.env.SHOW_LEGACY_ID === "true" && (
             <StyledDetailContentRow>
-              <StyledDetailContentRowLabel>
-                Legacy ID
-              </StyledDetailContentRowLabel>
+              <StyledDetailContentRowLabel>Legacy ID</StyledDetailContentRowLabel>
               <StyledDetailContentRowValue>
                 <StyledDetailContentRowValueID>
                   {entity.legacyId}
@@ -294,10 +271,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                 value={newLabel}
                 onChangeFn={(newLabel: string) => setNewLabel(newLabel)}
                 onBlur={() => {
-                  if (
-                    entity.class !== EntityEnums.Class.Statement &&
-                    newLabel.length < 1
-                  ) {
+                  if (entity.class !== EntityEnums.Class.Statement && newLabel.length < 1) {
                     toast.info(MIN_LABEL_LENGTH_MESSAGE);
                     setNewLabel(entity.labels[0]);
                   } else {
@@ -320,8 +294,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                 type="textarea"
                 value={entity.detail}
                 onChangeFn={async (newValue: string) => {
-                  if (newValue !== entity.detail)
-                    updateEntityMutation.mutate({ detail: newValue });
+                  if (newValue !== entity.detail) updateEntityMutation.mutate({ detail: newValue });
                 }}
               />
             </StyledDetailContentRowValue>
@@ -330,23 +303,15 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
           {/* territory parent */}
           {isTerritoryWithParent(entity) && (
             <StyledDetailContentRow>
-              <StyledDetailContentRowLabel>
-                Parent Territory
-              </StyledDetailContentRowLabel>
+              <StyledDetailContentRowLabel>Parent Territory</StyledDetailContentRowLabel>
               <StyledDetailContentRowValue>
                 <StyledTagWrap>
                   <EntityTag
                     fullWidth
                     entity={entity.entities[entity.data.parent?.territoryId]}
-                    disableDoubleClick={
-                      entity.data.parent?.territoryId === rootTerritoryId
-                    }
-                    disableDrag={
-                      entity.data.parent?.territoryId === rootTerritoryId
-                    }
-                    disableTooltip={
-                      entity.data.parent?.territoryId === rootTerritoryId
-                    }
+                    disableDoubleClick={entity.data.parent?.territoryId === rootTerritoryId}
+                    disableDrag={entity.data.parent?.territoryId === rootTerritoryId}
+                    disableTooltip={entity.data.parent?.territoryId === rootTerritoryId}
                   />
                 </StyledTagWrap>
                 {/* move to different parent territory */}
@@ -385,13 +350,9 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
           {/* statement terriroty */}
           {isStatementWithTerritory(entity) && (
             <StyledDetailContentRow>
-              <StyledDetailContentRowLabel>
-                Territory
-              </StyledDetailContentRowLabel>
+              <StyledDetailContentRowLabel>Territory</StyledDetailContentRowLabel>
               <StyledDetailContentRowValue>
-                <EntityTag
-                  entity={entity.entities[entity.data.territory?.territoryId]}
-                />
+                <EntityTag entity={entity.entities[entity.data.territory?.territoryId]} />
               </StyledDetailContentRowValue>
             </StyledDetailContentRow>
           )}
@@ -401,9 +362,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
               <AttributeButtonGroup
                 noMargin
                 iconsOnly={widthTooNarrow}
-                disabled={
-                  !userCanAdmin || (entity.id === rootTerritoryId && !isOwner)
-                }
+                disabled={!userCanAdmin || (entity.id === rootTerritoryId && !isOwner)}
                 options={entityStatusDict.map((entityStatusOption) => {
                   const icon = getEntityStatusIcon(entityStatusOption["value"]);
 
@@ -424,9 +383,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
           </StyledDetailContentRow>
 
           <StyledDetailContentRow>
-            <StyledDetailContentRowLabel>
-              Label language
-            </StyledDetailContentRowLabel>
+            <StyledDetailContentRowLabel>Label language</StyledDetailContentRowLabel>
             <StyledDetailContentRowValue>
               <Dropdown.Single.Basic
                 disabled={!userCanEdit}
@@ -446,9 +403,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
 
           {entity.class === EntityEnums.Class.Action && (
             <StyledDetailContentRow>
-              <StyledDetailContentRowLabel>
-                Part of Speech
-              </StyledDetailContentRowLabel>
+              <StyledDetailContentRowLabel>Part of Speech</StyledDetailContentRowLabel>
               <StyledDetailContentRowValue>
                 <Dropdown.Single.Basic
                   disabled={!userCanEdit}
@@ -472,9 +427,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
           )}
           {entity.class === EntityEnums.Class.Concept && (
             <StyledDetailContentRow>
-              <StyledDetailContentRowLabel>
-                Part of Speech
-              </StyledDetailContentRowLabel>
+              <StyledDetailContentRowLabel>Part of Speech</StyledDetailContentRowLabel>
               <StyledDetailContentRowValue>
                 <Dropdown.Single.Basic
                   disabled={!userCanEdit}
@@ -499,9 +452,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
 
           {actantMode === "entity" && entity.data?.logicalType && (
             <StyledDetailContentRow>
-              <StyledDetailContentRowLabel>
-                Logical Type
-              </StyledDetailContentRowLabel>
+              <StyledDetailContentRowLabel>Logical Type</StyledDetailContentRowLabel>
               <StyledDetailContentRowValue>
                 <AttributeButtonGroup
                   noMargin
@@ -517,9 +468,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                           },
                         });
                       },
-                      selected:
-                        actantLogicalTypeDict[0]["value"] ===
-                        entity.data.logicalType,
+                      selected: actantLogicalTypeDict[0]["value"] === entity.data.logicalType,
                     },
                     {
                       longValue: actantLogicalTypeDict[1]["label"],
@@ -531,9 +480,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                           },
                         });
                       },
-                      selected:
-                        actantLogicalTypeDict[1]["value"] ===
-                        entity.data.logicalType,
+                      selected: actantLogicalTypeDict[1]["value"] === entity.data.logicalType,
                     },
                     {
                       longValue: actantLogicalTypeDict[2]["label"],
@@ -545,9 +492,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                           },
                         });
                       },
-                      selected:
-                        actantLogicalTypeDict[2]["value"] ===
-                        entity.data.logicalType,
+                      selected: actantLogicalTypeDict[2]["value"] === entity.data.logicalType,
                     },
                     {
                       longValue: actantLogicalTypeDict[3]["label"],
@@ -559,9 +504,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                           },
                         });
                       },
-                      selected:
-                        actantLogicalTypeDict[3]["value"] ===
-                        entity.data.logicalType,
+                      selected: actantLogicalTypeDict[3]["value"] === entity.data.logicalType,
                     },
                   ]}
                 />
@@ -612,9 +555,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
               </StyledDetailContentRow>
 
               <StyledDetailContentRow>
-                <StyledDetailContentRowLabel>
-                  Base URL
-                </StyledDetailContentRowLabel>
+                <StyledDetailContentRowLabel>Base URL</StyledDetailContentRowLabel>
                 <StyledDetailContentRowValue>
                   <Input
                     disabled={!userCanEdit}
@@ -636,9 +577,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
               </StyledDetailContentRow>
 
               <StyledDetailContentRow>
-                <StyledDetailContentRowLabel>
-                  Part Label
-                </StyledDetailContentRowLabel>
+                <StyledDetailContentRowLabel>Part Label</StyledDetailContentRowLabel>
                 <StyledDetailContentRowValue>
                   <Input
                     disabled={!userCanEdit}
@@ -661,9 +600,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
 
               {/* document id */}
               <StyledDetailContentRow>
-                <StyledDetailContentRowLabel>
-                  Linked Document
-                </StyledDetailContentRowLabel>
+                <StyledDetailContentRowLabel>Linked Document</StyledDetailContentRowLabel>
                 <StyledDetailContentRowValue>
                   <Dropdown.Single.Basic
                     disabled={!userCanEdit}
@@ -711,9 +648,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
 
           {entity.class !== EntityEnums.Class.Statement && (
             <StyledDetailContentRow>
-              <StyledDetailContentRowLabel>
-                Alternative labels
-              </StyledDetailContentRowLabel>
+              <StyledDetailContentRowLabel>Alternative labels</StyledDetailContentRowLabel>
               <StyledDetailContentRowValue>
                 <EntityDetailFormSectionAlternativeLabels
                   entity={entity}

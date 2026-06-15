@@ -1,12 +1,12 @@
 import { IModel } from "@models/common";
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import Entity from "@models/entity/entity";
-import { IAction } from "@shared/types";
+import { IAction } from "@inkvisitor/shared/types";
 import {
   IActionEntity,
   IActionValency,
   IActionData,
-} from "@shared/types/action";
+} from "@inkvisitor/shared/types/action";
 
 export class ActionValency implements IActionValency, IModel {
   a1: string;

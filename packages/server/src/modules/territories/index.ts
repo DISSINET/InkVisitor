@@ -2,19 +2,19 @@ import Statement from "@models/statement/statement";
 import { ResponseTerritory } from "@models/territory/response";
 import Territory from "@models/territory/territory";
 import { findEntityById } from "@service/shorthands";
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import {
   IResponseGeneric,
   IResponseStatement,
   IResponseTerritory,
   IStatement,
   ITerritory,
-} from "@shared/types";
+} from "@inkvisitor/shared/types";
 import {
   BadParams,
   PermissionDeniedError,
   TerritoryDoesNotExits,
-} from "@shared/types/errors";
+} from "@inkvisitor/shared/types/errors";
 import { Router } from "express";
 import { IRequest } from "src/custom_typings/request";
 import { asyncRouteHandler } from "..";
@@ -46,8 +46,6 @@ export default Router()
   .get(
     "/:territoryId",
     asyncRouteHandler<IResponseTerritory>(async (request: IRequest<{territoryId: string}, any, {preload: string, warnings: string}>) => {
-      const startTime = performance.now();
-      
       const territoryId = request.params.territoryId;
       if (!territoryId) {
         throw new BadParams("territoryId has to be set");
@@ -75,17 +73,12 @@ export default Router()
       const response = new ResponseTerritory(territory);
       await response.prepare(request, request.query.preload === "1", request.query.warnings === "1");
 
-      const endTime = performance.now();
-      console.log(`Territory GET /:territoryId execution time: ${endTime - startTime}ms`);
-
       return response;
     })
   )
   .get(
     "/:territoryId/statements",
     asyncRouteHandler<IResponseStatement[]>(async (request: IRequest<{territoryId: string}>) => {
-      const startTime = performance.now();
-      
       const territoryId = request.params.territoryId;
       if (!territoryId) {
         throw new BadParams("territoryId has to be set");
@@ -112,9 +105,6 @@ export default Router()
  
       const response = new ResponseTerritory(territory);
       const statements = await response.prepareStatements(request, true, true);
-
-      const endTime = performance.now();
-      console.log(`Territory GET /:territoryId/statements execution time: ${endTime - startTime}ms`);
 
       return statements;
     })

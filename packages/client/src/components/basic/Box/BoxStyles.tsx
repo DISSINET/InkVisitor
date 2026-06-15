@@ -54,12 +54,15 @@ export const StyledLabel = styled(animated.div)`
   overflow: hidden !important;
   text-overflow: ellipsis;
 `;
-interface StyledHeaderComponentWrap {}
+interface StyledHeaderComponentWrap {
+  $isExpanded: boolean;
+}
 export const StyledHeaderComponentWrap = styled.div<StyledHeaderComponentWrap>`
   flex: 1 1 auto;
   display: flex;
-  justify-content: flex-end;
+  justify-content: ${({ $isExpanded }) => ($isExpanded ? "flex-end" : "center")};
   align-items: center;
+  width: ${({ $isExpanded }) => ($isExpanded ? "auto" : "100%")};
 `;
 interface StyledContent {
   $noFrame: boolean;

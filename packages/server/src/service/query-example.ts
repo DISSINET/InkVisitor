@@ -1,5 +1,5 @@
-import { EntityEnums } from "@shared/enums";
-import { Query } from "@shared/types";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { Query } from "@inkvisitor/shared/types";
 
 const exampleQuery: Query.INode = {
   type: Query.NodeType.E,

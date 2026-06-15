@@ -1,6 +1,6 @@
-import { userRoleDict } from "@shared/dictionaries";
-import { EntityEnums, UserEnums } from "@shared/enums";
-import { IResponseUser, IUser, IUserRight } from "@shared/types";
+import { userRoleDict } from "@inkvisitor/shared/dictionaries";
+import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
+import { IResponseUser, IUser, IUserRight } from "@inkvisitor/shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, ButtonGroup, Loader, Submit } from "components";
@@ -140,6 +140,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
       toast.info(message, {
         autoClose: 6000,
         closeOnClick: false,
+        style: { cursor: "copy" },
         onClick: () => {
           if (password) {
             navigator.clipboard.writeText(password);

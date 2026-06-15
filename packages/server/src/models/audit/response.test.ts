@@ -1,7 +1,7 @@
 import "ts-jest";
 import { Db } from "@service/rethink";
 import { clean } from "@modules/common.test";
-import { AuditScope } from "@shared/types";
+import { AuditScope } from "@inkvisitor/shared/types";
 import Audit from "./audit";
 
 function prepareAudit(forEntityId: string, date: Date): [string, Audit] {

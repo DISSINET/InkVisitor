@@ -1,5 +1,5 @@
 import { Annotator } from "@inkvisitor/annotator/src/lib";
-import { EntityEnums, UserEnums } from "@shared/enums";
+import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import {
   IDocument,
   IEntity,
@@ -13,7 +13,7 @@ import {
   IStatementDataTerritory,
   ITerritory,
   Relation,
-} from "@shared/types";
+} from "@inkvisitor/shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import api from "api";
@@ -37,6 +37,8 @@ import {
   StatementOrderCorrection,
 } from "types";
 import { collectStatementAnchors, getStatementOrderByIndex, searchTree } from "utils/utils";
+import { handleDeleteEntityError } from "utils/deleteEntityConflict";
+import { openRestoredEntity } from "utils/openRestoredEntity";
 import {
   StyledContentWrapper,
   StyledEmptyState,
@@ -48,6 +50,7 @@ import {
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StatementListTextAnnotator } from "./StatementListTextAnnotator/StatementListTextAnnotator";
+import { useUserQuery } from "hooks/react-query";
 
 const initialData: {
   statements: IResponseStatement[];
@@ -168,23 +171,7 @@ export const StatementListBox: React.FC = () => {
   }, [territoryId]);
 
   // get user
-  const userId = localStorage.getItem("userid");
-  const {
-    status: userStatus,
-    data: userData,
-    error: userError,
-    isFetching: userIsFetching,
-  } = useQuery({
-    queryKey: ["user", userId],
-    queryFn: async () => {
-      if (userId) {
-        const res = await api.usersGet(userId);
-        return res.data ?? undefined;
-      }
-      return undefined;
-    },
-    enabled: api.isLoggedIn() && !!userId,
-  });
+  const { data: userData } = useUserQuery();
 
   const favoritedTerritoryIds = useMemo(() => {
     if (userData?.storedTerritories) {
@@ -385,6 +372,11 @@ export const StatementListBox: React.FC = () => {
           onLinkClick={async () => {
             const response = await api.entityRestore(sId);
             toast.info("Statement restored");
+            openRestoredEntity(response.data.data as IEntity, {
+              setTerritoryId,
+              setStatementId,
+              appendDetailId,
+            });
             queryClient.invalidateQueries({
               queryKey: ["detail-tab-entities"],
             });
@@ -408,23 +400,8 @@ export const StatementListBox: React.FC = () => {
       });
       setSelectedRows(selectedRows.filter((r) => r !== sId));
     },
-    onError: (error) => {
-      if (
-        (error as any).error === "InvalidDeleteError" &&
-        (error as any).data &&
-        (error as any).data.length > 0
-      ) {
-        const { data } = error as any;
-        toast.warning(
-          "Statement cannot be deleted, click to open the conflicting entity in detail",
-          {
-            autoClose: 6000,
-            onClick: () => {
-              appendDetailId(data[0]);
-            },
-          }
-        );
-      } else {
+    onError: (error, sId) => {
+      if (!handleDeleteEntityError(error, sId, appendDetailId, "warning")) {
         toast.error((error as any).message);
       }
     },
@@ -774,21 +751,20 @@ export const StatementListBox: React.FC = () => {
         }
       });
 
-      // Update each statement's order
-      const updates = finalOrder.map((statement, index) => {
-        const order = index * 100; // Use increments of 100 to leave room for future insertions
-        return api.entityUpdate(statement.id, {
-          data: {
-            ...statement.data,
-            territory: {
-              ...statement.data.territory,
-              order,
-            },
-          },
-        });
-      });
+      const currentOrderMap = new Map(
+        statements.map((statement) => [statement.id, statement.data.territory?.order])
+      );
 
-      await Promise.all(updates);
+      const updates = finalOrder
+        .map((statement, index) => ({
+          id: statement.id,
+          order: index + 1,
+        }))
+        .filter(({ id, order }) => currentOrderMap.get(id) !== order);
+
+      if (updates.length) {
+        await api.statementsBatchReorder(updates);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["territory"] });

@@ -1,14 +1,14 @@
 import { testErroneousResponse } from "@modules/common.test";
-import { UserDoesNotExits } from "@shared/types/errors";
+import { UserDoesNotExits } from "@inkvisitor/shared/types/errors";
 import request, { Response } from "supertest";
 import { apiPath } from "@common/constants";
-import app from "../../Server";
+import app from "../../server";
 import { supertestConfig } from "..";
 import mailer, { EmailSubject } from "@service/mailer";
 import { Db } from "@service/rethink";
 import User from "@models/user/user";
 import { checkPassword } from "@common/auth";
-import { IResponseGeneric } from "@shared/types";
+import { IResponseGeneric } from "@inkvisitor/shared/types";
 import { pool } from "@middlewares/db";
 
 describe("Users password", function () {

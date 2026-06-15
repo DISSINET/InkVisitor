@@ -1,4 +1,4 @@
-import { UserEnums } from "@shared/enums";
+import { UserEnums } from "@inkvisitor/shared/enums";
 import { Checkbox, Input } from "components";
 import { AttributeButtonGroup } from "components/advanced";
 import { useTheme } from "hooks";

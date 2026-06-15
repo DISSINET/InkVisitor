@@ -1,8 +1,8 @@
-import { IResponseUser } from "@shared/types";
+import { IResponseUser } from "@inkvisitor/shared/types";
 import React from "react";
 import { Row } from "react-table";
 import { StyledTd, StyledTr, UserListRowFlash } from "../UserListStyles";
-import { UserEnums } from "@shared/enums";
+import { UserEnums } from "@inkvisitor/shared/enums";
 
 interface UserListTableRow {
   row: Row<IResponseUser>;

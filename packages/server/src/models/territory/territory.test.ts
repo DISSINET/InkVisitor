@@ -3,9 +3,9 @@ import Territory, { TerritoryParent } from "./territory";
 import { Db } from "@service/rethink";
 import { clean, getITerritoryMock } from "@modules/common.test";
 import { findEntityById, deleteEntities } from "@service/shorthands";
-import { IParentTerritory, ITerritory } from "@shared/types";
-import { EntityEnums } from "@shared/enums";
-import { ECASTEMOVariant } from "@shared/types/territory";
+import { IParentTerritory, ITerritory } from "@inkvisitor/shared/types";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { ECASTEMOVariant } from "@inkvisitor/shared/types/territory";
 import { randomUUID } from "crypto";
 
 describe("models/territory", function () {

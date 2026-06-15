@@ -6,16 +6,16 @@ import {
   AuditDoesNotExist,
   BadParams,
   EntityDoesExist,
-} from "@shared/types/errors";
+} from "@inkvisitor/shared/types/errors";
 import request from "supertest";
 import { apiPath } from "@common/constants";
-import app from "../../Server";
+import app from "../../server";
 import { supertestConfig } from "..";
 import { findEntityById } from "@service/shorthands";
 import { Db } from "@service/rethink";
 import "ts-jest";
 import { prepareEntity } from "@models/entity/entity.test";
-import { AuditScope } from "@shared/types";
+import { AuditScope } from "@inkvisitor/shared/types";
 import Audit from "@models/audit/audit";
 import { pool } from "@middlewares/db";
 

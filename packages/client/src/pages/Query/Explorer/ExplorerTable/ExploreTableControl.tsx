@@ -6,18 +6,23 @@ import {
 } from "react-icons/md";
 import { TbColumnInsertRight } from "react-icons/tb";
 
-import { Button } from "components";
+import { Button, Loader } from "components";
 import Dropdown from "components/advanced";
 
+import { Explore } from "@inkvisitor/shared/types/query";
 import { ThemeContext } from "styled-components";
-import { StyledCounter, StyledTableControl } from "./ExplorerTableStyles";
+import { ExploreAction } from "../state";
+import ExplorerTableLabelFilter from "./ExplorerTableLabelFilter";
+import { StyledCounter, StyledExploreFilters, StyledTableControl } from "./ExplorerTableStyles";
 import { BatchAction, batchOptions } from "./types";
 
 interface ExploreTableControlProps {
   isNewColumnOpen: boolean;
   setIsNewColumnOpen: (value: boolean) => void;
 
-  rowsSelected: number[];
+  selectedCount: number;
+  isAllCurrentSelected: boolean;
+  hasPartialSelection: boolean;
   onAllRowsSelect: (checked: boolean) => void;
 
   rowsTotal: number;
@@ -28,13 +33,19 @@ interface ExploreTableControlProps {
   setRowLastClicked: (value: number) => void;
 
   onApplyBatchAction: () => void;
+
+  filters: Explore.IExploreSearchFilter[];
+  dispatch: React.Dispatch<ExploreAction>;
+  isQueryFetching: boolean;
 }
 
 const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
   isNewColumnOpen,
   setIsNewColumnOpen,
 
-  rowsSelected,
+  selectedCount,
+  isAllCurrentSelected,
+  hasPartialSelection,
   onAllRowsSelect,
 
   rowsTotal,
@@ -45,6 +56,10 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
   setRowLastClicked,
 
   onApplyBatchAction,
+
+  filters,
+  dispatch,
+  isQueryFetching,
 }) => {
   const handleSelectAll = (checked: boolean) => onAllRowsSelect(checked);
 
@@ -52,9 +67,7 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
 
   const renderHeaderCheckBox = () => {
     const size = 18;
-    const isAllSelected = rowsTotal > 0 && rowsTotal === rowsSelected.length;
-
-    if (isAllSelected) {
+    if (isAllCurrentSelected) {
       return (
         <MdOutlineCheckBox
           color={themeContext?.color.primary}
@@ -65,7 +78,7 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
           }}
         />
       );
-    } else if (rowsSelected.length > 0) {
+    } else if (hasPartialSelection || selectedCount > 0) {
       // some rows selected
       return (
         <MdOutlineIndeterminateCheckBox
@@ -102,15 +115,13 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
           >
             {renderHeaderCheckBox()}
           </div>
-          <StyledCounter>{`${rowsSelected.length}/${rowsTotal}`}</StyledCounter>
+          <StyledCounter>{`${selectedCount}/${rowsTotal}`}</StyledCounter>
           <Dropdown.Single.Basic
             width={140}
-            disabled={rowsSelected.length === 0}
+            disabled={selectedCount === 0}
             value={batchActionSelected}
             onChange={(selectedOption) => {
-              const newSelectedAction = batchOptions.find(
-                (o) => o.value === selectedOption
-              )?.value;
+              const newSelectedAction = batchOptions.find((o) => o.value === selectedOption)?.value;
 
               if (newSelectedAction) {
                 setBatchActionSelected(newSelectedAction);
@@ -123,10 +134,14 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
             color="primary"
             inverted
             onClick={onApplyBatchAction}
-            disabled={rowsSelected.length === 0}
+            disabled={selectedCount === 0}
           />
         </div>
       </div>
+
+      <StyledExploreFilters>
+        <ExplorerTableLabelFilter filters={filters} dispatch={dispatch} />
+      </StyledExploreFilters>
 
       <Button
         icon={<TbColumnInsertRight size={17} />}
@@ -135,6 +150,7 @@ const ExploreTableControl: React.FC<ExploreTableControlProps> = ({
         inverted={!isNewColumnOpen}
         onClick={() => setIsNewColumnOpen(!isNewColumnOpen)}
       />
+      <Loader loaderStyle="beat" show={isQueryFetching} size={7} />
     </StyledTableControl>
   );
 };

@@ -1,6 +1,6 @@
 import { Connection, r as rethink } from "rethinkdb-ts";
 import { Response } from "express";
-import { Mutex, Awaiter } from "./mutex";
+import { Mutex } from "./mutex";
 
 export const rethinkConfig = {
   db: process.env.DB_NAME,
@@ -13,13 +13,9 @@ export const rethinkConfig = {
 };
 
 export class Db {
-  // context for locks
+  // Global write mutex; owned here so DbHandle (per-request wrapper) can use it.
   static mutex = new Mutex();
 
-  // assigned lock for db connection
-  lockAwaiter?: Awaiter;
-
-  // wrapped db sonnection
   connection: Connection = {} as Connection;
 
   constructor() {
@@ -28,32 +24,14 @@ export class Db {
     }
   }
 
-  /**
-   * Creates the db connection
-   */
   async initDb(): Promise<void> {
     this.connection = await rethink.connect({
       ...rethinkConfig,
-      timeout: 30, // important -  close will wait for this seconds
+      timeout: 30, // important - close will wait for this seconds
     });
   }
 
-  /**
-   * Creates awaiter instance and uses it to lock the mutex - if the queue allows it to
-   */
-  async lock(): Promise<void> {
-    this.lockAwaiter = new Awaiter();
-    await Db.mutex.lock(this.lockAwaiter);
-  }
-
-  /**
-   * Clears the mutex lock and closes the db connection
-   */
   async close() {
-    if (this.lockAwaiter) {
-      Db.mutex.unlock(this.lockAwaiter);
-    }
-
     if (this.connection) {
       await this.connection.close({ noreplyWait: true });
     }

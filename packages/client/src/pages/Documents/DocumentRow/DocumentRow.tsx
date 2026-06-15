@@ -1,5 +1,5 @@
-import { EntityEnums } from "@shared/enums";
-import { IDocument, IResponseEntity } from "@shared/types";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { IDocument, IResponseEntity } from "@inkvisitor/shared/types";
 import {
   UseMutationResult,
   useMutation,
@@ -21,8 +21,10 @@ import { FaDownload, FaTrash } from "react-icons/fa";
 import { RiFileEditFill } from "react-icons/ri";
 import { EntityColors } from "types";
 import {
+  StyledActionsCell,
   StyledCount,
   StyledCountTag,
+  StyledDocumentRow,
   StyledReference,
   StyledTitle,
   StyledTitleWrap,
@@ -115,7 +117,7 @@ export const DocumentRow: React.FC<DocumentRow> = ({
     useResizeObserver<HTMLDivElement>();
 
   return (
-    <>
+    <StyledDocumentRow>
       <StyledTitleWrap ref={titleRef} onClick={setEditMode}>
         {editMode ? (
           <Input
@@ -130,29 +132,31 @@ export const DocumentRow: React.FC<DocumentRow> = ({
           <StyledTitle>{localTitle}</StyledTitle>
         )}
       </StyledTitleWrap>
-      <ButtonGroup>
-        <Button
-          icon={<FaDownload />}
-          color="primary"
-          inverted
-          tooltipLabel="export document"
-          onClick={() => handleDocumentExport(document.id)}
-        />
-        <Button
-          icon={<RiFileEditFill />}
-          color="warning"
-          inverted
-          onClick={() => handleDocumentEdit(document.id)}
-          tooltipLabel="edit document"
-        />
-        <Button
-          icon={<FaTrash />}
-          color="danger"
-          inverted
-          onClick={() => setDocToDelete(document.id)}
-          tooltipLabel="remove document"
-        />
-      </ButtonGroup>
+      <StyledActionsCell>
+        <ButtonGroup>
+          <Button
+            icon={<FaDownload />}
+            color="primary"
+            inverted
+            tooltipLabel="export document"
+            onClick={() => handleDocumentExport(document.id)}
+          />
+          <Button
+            icon={<RiFileEditFill />}
+            color="warning"
+            inverted
+            onClick={() => handleDocumentEdit(document.id)}
+            tooltipLabel="edit document"
+          />
+          <Button
+            icon={<FaTrash />}
+            color="danger"
+            inverted
+            onClick={() => setDocToDelete(document.id)}
+            tooltipLabel="remove document"
+          />
+        </ButtonGroup>
+      </StyledActionsCell>
       {/* reference / suggester */}
       <StyledReference>
         {resource ? (
@@ -204,6 +208,6 @@ export const DocumentRow: React.FC<DocumentRow> = ({
             );
           })}
       </StyledCount>
-    </>
+    </StyledDocumentRow>
   );
 };

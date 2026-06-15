@@ -3,24 +3,25 @@ import Audit from "@models/audit/audit";
 import { ResponseDocumentAudit } from "@models/audit/response";
 import Document from "@models/document/document";
 import { AnchorsNode } from "@models/document/anchors";
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import {
   IDocument,
   IDocumentMeta,
   IResponseAudit,
   IResponseGeneric,
-  IAnchorUpdate,
   IDocumentAuditAnchorChanges,
-} from "@shared/types";
-import { EventType } from "@shared/types/stats";
+  AuditScope,
+} from "@inkvisitor/shared/types";
 import {
   BadParams,
   DocumentDoesNotExist,
   InternalServerError,
   ModelNotValidError,
   PermissionDeniedError,
-} from "@shared/types/errors";
+} from "@inkvisitor/shared/types/errors";
+import { EventType } from "@inkvisitor/shared/types/stats";
 import { Router } from "express";
+import { r as rethink } from "rethinkdb-ts";
 import { IRequest } from "src/custom_typings/request";
 import { asyncRouteHandler } from "../index";
 import { createOpeningTagRegex, closingTagRegex } from "@common/regex";
@@ -55,21 +56,36 @@ export default Router()
   .get(
     "/",
     asyncRouteHandler<IDocumentMeta[]>(async (request: IRequest) => {
-      const docs = await Document.getAll(request.db.connection);
+      // Metadata-only fetch. `content` and `anchors` are dropped at the
+      // DB so they never cross the wire to Node (anchors trees can run
+      // into MBs per doc); the list consumers only use id / title /
+      // entityIds / dates. Full content and anchor tree are served by
+      // GET /documents/:id when actually needed.
+      //
+      // Every write path runs Document.preprocess before saving, so
+      // anchors and entityIds are persisted on each row. We don't
+      // recompute them on read - documents pre-dating preprocess must
+      // be re-saved (any edit triggers it) to populate the fields.
+      const docs = (await rethink
+        .table(Document.table)
+        .orderBy(rethink.asc("createdAt"))
+        .without("content", "anchors")
+        .run(request.db.connection)) as IDocument[];
 
-      const docResponses: IDocumentMeta[] = [];
-      for (const d of docs) {
+      return docs.map((d) => {
         const document = new Document(d);
-        if (!document.anchors || document.anchors.length === 0) {
-          await document.preprocess(request.db.connection);
-        }
-
-        // @ts-ignore 
+        // @ts-ignore content/anchors are part of IDocument but trimmed from the list response
         delete document.content;
-        docResponses.push(document);
-      }
-
-      return docResponses;
+        document.anchors = [];
+        // Legacy compatibility: rows not re-saved since preprocess-on-write
+        // (#2643) may store entityIds in an old shape (flat string[] or an
+        // object missing class keys such as `T`). Dev masked this by
+        // re-running preprocess on every read; we instead normalize the
+        // shape here so the client never reads entityIds.T as undefined and
+        // crashes. No-op for current rows; re-saving a legacy doc fixes it.
+        document.entityIds = Document.normalizeEntityIds(document.entityIds);
+        return document;
+      });
     })
   )
   .get(
@@ -326,6 +342,8 @@ export default Router()
       const oldOrderedList = AnchorsNode.getOrderedAnchorListFromTree(
         existingDocument.anchors
       );
+      // captured before mergeDeep below, which mutates existingDocument
+      const oldContent = existingDocument.content;
 
       const model = new Document({
         ...mergeDeep(existingDocument, documentData),
@@ -345,25 +363,34 @@ export default Router()
       const result = await model.update(request.db.connection, model);
 
       if (result.replaced || result.unchanged) {
+        const newOrderedList = AnchorsNode.getOrderedAnchorListFromTree(
+          model.anchors
+        );
         const anchorDiff = AnchorsNode.diffOrderedAnchorLists(
           oldOrderedList,
-          AnchorsNode.getOrderedAnchorListFromTree(model.anchors)
+          newOrderedList
         );
-        const auditData: IDocumentAuditAnchorChanges = {
-          changes: anchorDiff.changes.map(
-            (a): IAnchorUpdate => ({ anchor: a.anchor, occurrence: a.occurrence })
-          ),
-          additions: anchorDiff.additions.map(
-            (a): IAnchorUpdate => ({ anchor: a.anchor, occurrence: a.occurrence })
-          ),
-          removals: anchorDiff.removals.map(
-            (a): IAnchorUpdate => ({ anchor: a.anchor, occurrence: a.occurrence })
-          ),
-        };
+        const anchorTagDiff = AnchorsNode.diffAnchorTagsInContent(
+          oldContent,
+          model.content
+        );
+        const auditType = Audit.resolveDocumentAuditType({
+          anchorsAdded: anchorTagDiff.added,
+          anchorsRemoved: anchorTagDiff.removed,
+          anchorAttributesChanged: anchorTagDiff.attributesChanged,
+          contentChanged: oldContent !== model.content,
+        });
+        const auditData = AnchorsNode.finalizeDocumentAuditChanges({
+          auditType,
+          oldContent,
+          newContent: model.content,
+          treeDiff: anchorDiff,
+          newOrderedList,
+        });
         await Audit.createNewForDocument(
           request,
           documentId,
-          EventType.EDIT,
+          auditType,
           auditData
         );
         return {
@@ -423,6 +450,12 @@ export default Router()
       const result = await existing.delete(request.db.connection);
 
       if (result.deleted === 1) {
+        await Audit.createDeletionAudit(
+          request.db.connection,
+          id,
+          request.getUserOrFail().id,
+          AuditScope.Document
+        );
         return {
           result: true,
         };
