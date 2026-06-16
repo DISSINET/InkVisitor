@@ -24,7 +24,7 @@ import {
 import { StyledInfoText } from "../StatementListHeader/StatementListHeaderStyles";
 import { toast } from "react-toastify";
 import { SECOND_PANEL_MIN_WIDTH } from "Theme/constants";
-import { WarningsChip } from "components/advanced/Annotator/AnnotatorWarningsPanel";
+import { WarningsChip } from "components/advanced/Annotator/AnnotatorWarningsModal";
 
 // icon + margin + gap in StyledHighlightContainer when highlight label is shown
 const HIGHLIGHT_ICON_RESERVED_WIDTH = 10;

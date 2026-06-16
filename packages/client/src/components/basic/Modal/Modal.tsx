@@ -13,6 +13,7 @@ import {
   StyledCardTitle,
   StyledCloseIconWrap,
   StyledFooter,
+  StyledFooterNote,
   StyledIoClose,
   StyledModalInputForm,
   StyledModalInputLabel,
@@ -179,14 +180,18 @@ interface ModalFooter {
   children?: ReactNode;
   column?: boolean;
   spaceBetween?: boolean;
+  /** Optional gray text shown on the left side, vertically centered. */
+  note?: ReactNode;
 }
 export const ModalFooter: FC<ModalFooter> = ({
   children,
   column = false,
   spaceBetween = false,
+  note,
 }) => {
   return (
     <StyledFooter $column={column} $spaceBetween={spaceBetween}>
+      {note && <StyledFooterNote>{note}</StyledFooterNote>}
       {children}
     </StyledFooter>
   );

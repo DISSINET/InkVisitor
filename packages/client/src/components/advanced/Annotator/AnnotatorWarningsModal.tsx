@@ -30,7 +30,7 @@ export const WarningsChip: React.FC<{ count: number; onClick: () => void }> = ({
   </StyledWarningsChip>
 );
 
-interface AnnotatorWarningsPanelProps {
+interface AnnotatorWarningsModalProps {
   anchors: AsymmetricalAnchor[];
   onUnlink: (tagName: string, position: number, segmentIndex: number) => void;
   onScrollTo: (tagName: string, position: number, segmentIndex: number) => void;
@@ -51,7 +51,7 @@ const kindLabel = (type: AsymmetricalAnchor["type"]): string =>
  * modal; the always-visible footprint is just the WarningsChip. Renders nothing
  * when there are no issues.
  */
-export const AnnotatorWarningsPanel: React.FC<AnnotatorWarningsPanelProps> = ({
+export const AnnotatorWarningsModal: React.FC<AnnotatorWarningsModalProps> = ({
   anchors,
   onUnlink,
   onScrollTo,
@@ -108,7 +108,7 @@ export const AnnotatorWarningsPanel: React.FC<AnnotatorWarningsPanelProps> = ({
             ))}
           </StyledWarningsList>
         </ModalContent>
-        <ModalFooter>
+        <ModalFooter note="Anchors must have matching opening and closing tags">
           <Button label="close" color="primary" inverted onClick={() => onOpenChange(false)} />
         </ModalFooter>
       </Modal>
@@ -116,4 +116,4 @@ export const AnnotatorWarningsPanel: React.FC<AnnotatorWarningsPanelProps> = ({
   );
 };
 
-export default AnnotatorWarningsPanel;
+export default AnnotatorWarningsModal;

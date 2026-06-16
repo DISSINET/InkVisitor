@@ -137,6 +137,14 @@ export const StyledFooter = styled.div<StyledFooter>`
   padding: ${({ theme }) => theme.space[4]};
 `;
 
+export const StyledFooterNote = styled.div`
+  margin-right: auto;
+  align-self: center;
+  text-align: left;
+  color: ${({ theme }) => theme.color["gray"][500]};
+  font-size: 1.1rem;
+`;
+
 interface StyledModalInputForm {
   $alignLeft: boolean;
 }

@@ -51,7 +51,7 @@ import { collectStatementAnchors, getStatementOrderByIndex } from "utils/utils";
 import { EntityCreateModal } from "..";
 import { useAnnotator } from "./AnnotatorContext";
 import TextAnnotatorMenu from "./AnnotatorMenu";
-import { AnnotatorWarningsPanel } from "./AnnotatorWarningsPanel";
+import { AnnotatorWarningsModal } from "./AnnotatorWarningsModal";
 import {
   StyledAnnotatorButtons,
   StyledAnnotatorMenu,
@@ -1204,7 +1204,7 @@ export const TextAnnotator = ({
           paddingBottom: !hideWarningChip && asymmetricalAnchors.length > 0 ? "0.5rem" : 0,
         }}
       >
-        <AnnotatorWarningsPanel
+        <AnnotatorWarningsModal
           anchors={asymmetricalAnchors}
           onUnlink={onRemoveAsymmetricalAnchor}
           onScrollTo={onScrollToAsymmetricalAnchor}
