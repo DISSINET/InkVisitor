@@ -1259,16 +1259,38 @@ export class Annotator {
     this.contextMenu.open(e.clientX, e.clientY, this.buildContextMenuItems());
   }
 
+  /** Whether a non-empty text highlight/selection is active. */
+  isHighlighting(): boolean {
+    return this.cursor.isSelected();
+  }
+
   /** Context-menu entries. For now just a toggle for the debug FPS counter. */
   private buildContextMenuItems(): ContextMenuItem[] {
-    return [
+    const items: ContextMenuItem[] = [];
+
+    if (this.isHighlighting()) {
+      items.push({
+        label: "Copy",
+        onClick: () => this.onCopyText(),
+      });
+    }
+
+    items.push({
+      label: "Paste",
+      onClick: () => this.onPasteText(),
+    });
+
+    items.push({ separator: true });
+    items.push(
       {
         label: `${this.showFps ? "✓ " : ""}Show FPS counter`,
         onClick: () => this.setShowFps(!this.showFps),
       },
       { separator: true },
-      { label: "Options…", onClick: () => this.openSettings() },
-    ];
+      { label: "Options…", onClick: () => this.openSettings() }
+    );
+
+    return items;
   }
 
   /** Open the settings overlay with the current options. */
@@ -2559,7 +2581,11 @@ export class Annotator {
   }
 
   onCopyText() {
-    window.navigator.clipboard.writeText(this.lastSelectedText?.text || "");
+    const area = this.cursor.getSelectedArea();
+    const text = area
+      ? this.text.getRangeText(area[0], area[1])
+      : this.lastSelectedText?.text || "";
+    window.navigator.clipboard.writeText(text);
   }
 
   onPasteText() {
