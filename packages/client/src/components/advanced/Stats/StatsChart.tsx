@@ -71,12 +71,7 @@ export const StatsChart = ({ data, height, width }: StatsChartProps) => {
   const categoryColors = getCategoryMap(dataCategories);
 
   const dataChart = useMemo<ChartDataPoint[]>(() => {
-    return transformDataForChart(
-      values,
-      dataCategories,
-      aggregateBy,
-      userKeyMap
-    );
+    return transformDataForChart(values, dataCategories, aggregateBy, userKeyMap);
   }, [values, dataCategories, aggregateBy, userKeyMap]);
 
   const handleMouseEnter = useCallback((payload: LegendPayload) => {
@@ -98,7 +93,7 @@ export const StatsChart = ({ data, height, width }: StatsChartProps) => {
 
       return isActive ? d3Color(catColor)?.formatHex() : theme.color.gray[500];
     },
-    [hoveringDataKey, categoryColors]
+    [hoveringDataKey, categoryColors],
   );
 
   const BarEls = useMemo<React.ReactNode[]>(() => {
@@ -131,11 +126,7 @@ export const StatsChart = ({ data, height, width }: StatsChartProps) => {
     return <CartesianGrid strokeDasharray="3 3" />;
   }, [values]);
 
-  const TooltipEl = ({
-    payload,
-    label,
-    active,
-  }: TooltipContentProps<number, string>): React.ReactNode => {
+  const TooltipEl = ({ payload, label, active }: TooltipContentProps): React.ReactNode => {
     if (!active) {
       return null;
     }
@@ -240,9 +231,7 @@ export const StatsChart = ({ data, height, width }: StatsChartProps) => {
                     }}
                   >
                     <StyledLegendColorBox $color={color} />
-                    <StyledLegendText $color={color}>
-                      {category}
-                    </StyledLegendText>
+                    <StyledLegendText $color={color}>{category}</StyledLegendText>
                   </StyledLegendItem>
                 );
               })}
