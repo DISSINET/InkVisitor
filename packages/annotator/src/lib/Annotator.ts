@@ -18,6 +18,9 @@ import {
   HOVER_DEBOUNCE_MS,
   LINE_HEIGHT,
   SELECTION_EDGE_SCROLL_SPEED,
+  SELECTION_HANDLE_BAR_WIDTH_PX,
+  SELECTION_HANDLE_GRAB_CHAR_FACTOR,
+  SELECTION_HANDLE_KNOB_RADIUS_PX,
   VIEWPORT_END_BUFFER_ROWS,
 } from "./constants";
 
@@ -151,6 +154,28 @@ export class Annotator {
 
   private selectionScrollRaf: number = 0;
 
+  /**
+   * Reusable scratch cursor for pointerToVisual, which runs in the mousemove /
+   * edge-scroll hot path. Avoids a per-event Cursor allocation. Never read for
+   * its selection state — only xLine/yLine after setPositionFromCanvasOffsets.
+   */
+  private readonly scratchCursor: Cursor = new Cursor(this.ratio, 0, 0);
+
+  /**
+   * Issue #3108 — active selection-handle drag. `start`/`end` resize one boundary
+   * (keeping the other fixed, min 1 char, no crossing); `span` slides the whole
+   * highlight (preserving its length). `null` when no handle drag is in progress.
+   */
+  private dragHandle: "start" | "end" | "span" | null = null;
+  /** Whether the pointer actually moved during the current handle drag. */
+  private handleDragMoved = false;
+  /** Captured offsets at the start of a whole-span drag (raw indices into Text.value). */
+  private spanDragState: {
+    startOff: number;
+    endOff: number;
+    grabOff: number;
+  } | null = null;
+
   /** Collapsed-caret width in CSS px (scaled by ratio at draw time). */
   private caretWidth = 1;
 
@@ -195,6 +220,28 @@ export class Annotator {
     }
     this.onAnchorHoverCb?.([]);
     this.onAnchorTagHoverCb?.(null, null);
+    // Don't strand a resize/move cursor when leaving the canvas (#3108). Keep it
+    // while a drag is in progress (the pointer is allowed to leave the canvas).
+    if (!this.dragHandle) {
+      this.element.style.cursor = "";
+    }
+  };
+
+  /** Issue #3108 — document-level move while dragging a selection handle. */
+  private readonly onDocumentHandleMove = (e: MouseEvent) => {
+    if (!this.dragHandle) {
+      return;
+    }
+    this.handleDragMoved = true;
+    this.lastSelectPointer = { cx: e.clientX, cy: e.clientY };
+    this.applyHandleDrag(e.clientX, e.clientY);
+    this.draw();
+    this.ensureSelectionEdgeScrollRunning();
+  };
+
+  /** Issue #3108 — document-level release that finalizes a selection-handle drag. */
+  private readonly onDocumentHandleUp = (e: MouseEvent) => {
+    this.endHandleDrag(e);
   };
 
   constructor(
@@ -552,6 +599,7 @@ export class Annotator {
       const startLine = startSeg.lineStart + startSegPos.lineIndex;
       const startChar = startSegPos.charInLineIndex;
       const endLine = lastSeg.lineStart + lastSegPos.lineIndex;
+      // Highlighter uses exclusive end xLine on the last line (see Highlighter.draw).
       const endExclusiveChar = lastSegPos.charInLineIndex + 1;
 
       regions.push({
@@ -971,6 +1019,302 @@ export class Annotator {
     this.cursor.syncOffsetFromVisual(this.text, wasSelecting);
   }
 
+  // ───────────────────────────────────────────────────────────────────────────
+  // Issue #3108 — drag the highlight span via start/end handles or by its middle.
+  // ───────────────────────────────────────────────────────────────────────────
+
+  /**
+   * Selection drag handles are only meaningful in HIGHLIGHT mode (where the host
+   * uses the selection to anchor entities) and only when there is a real (≥1 char)
+   * selection.
+   */
+  private selectionHandlesActive(): boolean {
+    return (
+      this.text.mode === EditMode.HIGHLIGHT && this.cursor.isSelected()
+    );
+  }
+
+  /**
+   * The two absolute visual boundary points (document-ordered start, end) where
+   * the handles sit, or null when handles should not be shown.
+   */
+  private selectionHandlePoints():
+    | { start: IAbsCoordinates; end: IAbsCoordinates }
+    | null {
+    if (!this.selectionHandlesActive()) {
+      return null;
+    }
+    const [start, end] = this.cursor.getAbsBounds();
+    if (!start || !end) {
+      return null;
+    }
+    return { start, end };
+  }
+
+  /**
+   * Maps client coordinates to an absolute visual position WITHOUT mutating the
+   * cursor (unlike applyPointerToCursor). Clamps into the document like a normal
+   * click would.
+   */
+  private pointerToVisual(
+    clientX: number,
+    clientY: number
+  ): IAbsCoordinates {
+    const rect = this.element.getBoundingClientRect();
+    const { ox, oy } = this.clientCoordsToCanvasOffsets(clientX, clientY, rect);
+    const tmp = this.scratchCursor;
+    tmp.ratio = this.ratio; // ratio can change at runtime (DPR / zoom)
+    tmp.setPositionFromCanvasOffsets(
+      ox,
+      oy,
+      this.lineHeight,
+      this.charWidth,
+      this.viewport.scrollOffsetY,
+      this.viewport.lineStart
+    );
+    return this.text.clampVisual(tmp.xLine, tmp.yLine);
+  }
+
+  /**
+   * Hit-test the pointer against the selection handles. Returns the boundary the
+   * pointer is grabbing ("start"/"end"), "span" when inside the highlight (move
+   * the whole span), or null when neither. Works in canvas backing-store (device)
+   * pixels so it lines up with the drawn handles regardless of devicePixelRatio.
+   */
+  private hitTestSelectionHandle(
+    clientX: number,
+    clientY: number
+  ): "start" | "end" | "span" | null {
+    const points = this.selectionHandlePoints();
+    if (!points) {
+      return null;
+    }
+
+    const rect = this.element.getBoundingClientRect();
+    const bufX = (clientX - rect.left) * this.ratio;
+    const bufY = (clientY - rect.top) * this.ratio;
+
+    const tolX = this.charWidth * SELECTION_HANDLE_GRAB_CHAR_FACTOR;
+    const knob = SELECTION_HANDLE_KNOB_RADIUS_PX * this.ratio;
+
+    const boundaries: ["start" | "end", IAbsCoordinates][] = [
+      ["start", points.start],
+      ["end", points.end],
+    ];
+    for (const [which, pt] of boundaries) {
+      const relLine = pt.yLine - this.viewport.lineStart;
+      const cx = pt.xLine * this.charWidth;
+      // Screen (untranslated) band for this line: content is drawn translated by
+      // -scrollOffsetY, so subtract it here to match the pointer's buffer Y.
+      const cyTop = relLine * this.lineHeight - this.viewport.scrollOffsetY;
+      const cyBottom = cyTop + this.lineHeight;
+      if (
+        bufX >= cx - tolX &&
+        bufX <= cx + tolX &&
+        bufY >= cyTop - knob &&
+        bufY <= cyBottom + knob
+      ) {
+        return which;
+      }
+    }
+
+    // Not on a handle — is the pointer inside the highlighted span? (move it)
+    if (this.isPointerInsideSelection(clientX, clientY)) {
+      return "span";
+    }
+    return null;
+  }
+
+  /** True when the pointer maps to a position strictly inside the selection. */
+  private isPointerInsideSelection(clientX: number, clientY: number): boolean {
+    const points = this.selectionHandlePoints();
+    if (!points) {
+      return false;
+    }
+    const startOff = this.text.offsetFromVisual(
+      points.start.xLine,
+      points.start.yLine
+    );
+    const endOff = this.text.offsetFromVisual(
+      points.end.xLine,
+      points.end.yLine
+    );
+    if (startOff < 0 || endOff < 0) {
+      return false;
+    }
+    const pt = this.pointerToVisual(clientX, clientY);
+    const off = this.text.offsetFromVisual(pt.xLine, pt.yLine);
+    return off > startOff && off < endOff;
+  }
+
+  /**
+   * Begin a selection-handle drag (start/end boundary resize, or whole-span move).
+   * Bypasses the normal selection path entirely so the existing selection is not
+   * collapsed before we move it.
+   */
+  private startHandleDrag(
+    mode: "start" | "end" | "span",
+    e: MouseEvent
+  ): void {
+    this.dragHandle = mode;
+    this.handleDragMoved = false;
+    this.lastSelectPointer = { cx: e.clientX, cy: e.clientY };
+
+    if (mode === "span") {
+      const points = this.selectionHandlePoints();
+      const pt = this.pointerToVisual(e.clientX, e.clientY);
+      const grabOff = this.text.offsetFromVisual(pt.xLine, pt.yLine);
+      if (points && grabOff >= 0) {
+        const startOff = this.text.offsetFromVisual(
+          points.start.xLine,
+          points.start.yLine
+        );
+        const endOff = this.text.offsetFromVisual(
+          points.end.xLine,
+          points.end.yLine
+        );
+        this.spanDragState = { startOff, endOff, grabOff };
+      } else {
+        this.spanDragState = null;
+      }
+    } else {
+      this.spanDragState = null;
+    }
+
+    document.addEventListener("mousemove", this.onDocumentHandleMove);
+    document.addEventListener("mouseup", this.onDocumentHandleUp);
+  }
+
+  /** Apply the current pointer to the in-progress handle drag. */
+  private applyHandleDrag(clientX: number, clientY: number): void {
+    if (!this.dragHandle) {
+      return;
+    }
+    const pt = this.pointerToVisual(clientX, clientY);
+
+    if (this.dragHandle === "span") {
+      if (!this.spanDragState) {
+        return;
+      }
+      const curOff = this.text.offsetFromVisual(pt.xLine, pt.yLine);
+      if (curOff < 0) {
+        return;
+      }
+      const { startOff, endOff, grabOff } = this.spanDragState;
+      const len = endOff - startOff;
+      const maxStart = Math.max(0, this.text.value.length - len);
+      let newStart = startOff + (curOff - grabOff);
+      newStart = Math.max(0, Math.min(newStart, maxStart));
+      this.cursor.setSpanByOffsets(this.text, newStart, newStart + len);
+    } else {
+      this.cursor.dragBoundary(this.text, this.dragHandle, pt.xLine, pt.yLine);
+    }
+  }
+
+  /** Finalize a selection-handle drag and tear down its listeners. */
+  private endHandleDrag(e: MouseEvent): void {
+    if (!this.dragHandle) {
+      return;
+    }
+    const mode = this.dragHandle;
+    const moved = this.handleDragMoved;
+
+    // Apply the final pointer BEFORE clearing dragHandle (applyHandleDrag early-
+    // returns once dragHandle is null), so a gap between the last move and the
+    // release isn't dropped.
+    if (moved) {
+      this.applyHandleDrag(e.clientX, e.clientY);
+    } else if (mode === "span") {
+      // A click (no drag) inside the highlight behaves like a normal click:
+      // collapse the selection to a caret at that point.
+      this.applyPointerToCursor(e.clientX, e.clientY);
+      this.cursor.endSelection();
+    }
+    // A stationary click directly on a boundary handle leaves the selection as-is.
+
+    document.removeEventListener("mousemove", this.onDocumentHandleMove);
+    document.removeEventListener("mouseup", this.onDocumentHandleUp);
+    this.cancelSelectionEdgeScroll();
+    this.lastSelectPointer = null;
+    this.dragHandle = null;
+    this.spanDragState = null;
+    this.handleDragMoved = false;
+
+    this.draw();
+  }
+
+  /** Issue #3108 — reflect handle hover with a resize/move cursor. */
+  private updateHandleHoverCursor(e: MouseEvent): void {
+    if (this.cursor.isSelecting()) {
+      // A normal drag-select owns the cursor; don't fight it.
+      return;
+    }
+    let next = "";
+    if (this.selectionHandlesActive()) {
+      const hit = this.hitTestSelectionHandle(e.clientX, e.clientY);
+      if (hit === "start" || hit === "end") {
+        next = "ew-resize";
+      } else if (hit === "span") {
+        next = "move";
+      }
+    }
+    if (this.element.style.cursor !== next) {
+      this.element.style.cursor = next;
+    }
+  }
+
+  /**
+   * Issue #3108 — draw the two selection handles (a vertical bar plus a round knob
+   * at the start/end boundary) in the same color as the highlight. Called from
+   * inside draw()'s translated context, so Y uses viewport-relative line coords
+   * (the ctx is already translated by -scrollOffsetY).
+   */
+  private drawSelectionHandles(): void {
+    const points = this.selectionHandlePoints();
+    if (!points) {
+      return;
+    }
+
+    const color = this.cursor.style.color || "black";
+    const barW = Math.max(SELECTION_HANDLE_BAR_WIDTH_PX * this.ratio, 1);
+    const knob = Math.max(SELECTION_HANDLE_KNOB_RADIUS_PX * this.ratio, 2);
+    const maxRelLine = this.viewport.noLines;
+
+    this.ctx.save();
+    // SELECT-mode drawLine leaves a non-default composite op / alpha; reset so the
+    // handle paints at full opacity in its true color.
+    this.ctx.globalCompositeOperation = "source-over";
+    this.ctx.globalAlpha = 1;
+    this.ctx.fillStyle = color;
+
+    const boundaries: ["start" | "end", IAbsCoordinates][] = [
+      ["start", points.start],
+      ["end", points.end],
+    ];
+    for (const [which, pt] of boundaries) {
+      const relLine = pt.yLine - this.viewport.lineStart;
+      if (relLine < 0 || relLine > maxRelLine) {
+        // Boundary scrolled out of view — skip so the knob doesn't paint over the
+        // gutter or partial rows.
+        continue;
+      }
+      const x = pt.xLine * this.charWidth;
+      const yTop = relLine * this.lineHeight;
+      const yBottom = yTop + this.lineHeight;
+
+      this.ctx.fillRect(x - barW / 2, yTop, barW, this.lineHeight);
+
+      // Knob at the top for the start handle, bottom for the end handle — the
+      // familiar "pinch" look and avoids the two knobs colliding on short spans.
+      const knobY = which === "start" ? yTop : yBottom;
+      this.ctx.beginPath();
+      this.ctx.arc(x, knobY, knob, 0, Math.PI * 2);
+      this.ctx.fill();
+    }
+
+    this.ctx.restore();
+  }
+
   private cancelSelectionEdgeScroll() {
     if (this.selectionScrollRaf) {
       cancelAnimationFrame(this.selectionScrollRaf);
@@ -980,7 +1324,10 @@ export class Annotator {
 
   private readonly tickSelectionEdgeScroll = () => {
     this.selectionScrollRaf = 0;
-    if (!this.cursor.isSelecting() || !this.lastSelectPointer) {
+    if (
+      (!this.cursor.isSelecting() && !this.dragHandle) ||
+      !this.lastSelectPointer
+    ) {
       return;
     }
 
@@ -1016,16 +1363,24 @@ export class Annotator {
       this.viewport.scrollOffsetY !== scrollOffBefore;
 
     if (scrolled) {
-      this.applyPointerToCursor(
-        this.lastSelectPointer.cx,
-        this.lastSelectPointer.cy
-      );
+      if (this.dragHandle) {
+        this.handleDragMoved = true;
+        this.applyHandleDrag(
+          this.lastSelectPointer.cx,
+          this.lastSelectPointer.cy
+        );
+      } else {
+        this.applyPointerToCursor(
+          this.lastSelectPointer.cx,
+          this.lastSelectPointer.cy
+        );
+      }
       this.draw();
     }
 
     const inZone = inTopZone || inBottomZone;
     if (
-      this.cursor.isSelecting() &&
+      (this.cursor.isSelecting() || this.dragHandle) &&
       this.lastSelectPointer &&
       inZone &&
       scrolled
@@ -1037,7 +1392,10 @@ export class Annotator {
   };
 
   private ensureSelectionEdgeScrollRunning() {
-    if (!this.lastSelectPointer || !this.cursor.isSelecting()) {
+    if (
+      !this.lastSelectPointer ||
+      (!this.cursor.isSelecting() && !this.dragHandle)
+    ) {
       return;
     }
     if (this.selectionScrollRaf) {
@@ -1090,6 +1448,17 @@ export class Annotator {
     // (#3092).
     if (e.button !== 0) {
       return;
+    }
+
+    // Issue #3108 — if the press lands on a selection handle (or inside the
+    // highlight), drag that instead of starting a brand-new selection. Done
+    // before applyPointerToCursor, which would otherwise collapse the selection.
+    if (this.selectionHandlesActive()) {
+      const hit = this.hitTestSelectionHandle(e.clientX, e.clientY);
+      if (hit) {
+        this.startHandleDrag(hit, e);
+        return;
+      }
     }
 
     this.caretBlink.reset(); // solid caret immediately on click (#3092)
@@ -1185,10 +1554,17 @@ export class Annotator {
       this.onDocumentSelectMove(e);
     }
 
+    // Issue #3108 — resize/move cursor feedback over selection handles. Done
+    // synchronously (not in the hover debounce below) so it never feels laggy.
+    if (!this.dragHandle) {
+      this.updateHandleHoverCursor(e);
+    }
+
     // Part 2 of #2835: Detect anchors at hover position
     if (
       (this.onAnchorHoverCb || this.onAnchorTagHoverCb) &&
-      !this.cursor.isSelecting()
+      !this.cursor.isSelecting() &&
+      !this.dragHandle
     ) {
       // Clear existing debounce timeout
       if (this.hoverDebounceTimeout) {
@@ -1753,6 +2129,10 @@ export class Annotator {
         charsAtLine: this.text.charsAtLine,
       });
     }
+    // Clear the per-region bounds so the highlighter isn't left holding the last
+    // region's selectStart/selectEnd between draws (style is preserved). reset()
+    // only nulls the bounds, not the configured style.
+    this.hoverHighlighter.reset();
 
     // if (this.onSelectTextCb && this.cursor.isSelected()) {
     if (this.onSelectTextCb) {
@@ -1859,6 +2239,10 @@ export class Annotator {
         });
       }
     }
+
+    // Issue #3108 — draw the draggable handles on top of the selection. Inside
+    // the translated context (so use viewport-relative line coords, no scroll term).
+    this.drawSelectionHandles();
 
     this.ctx.restore();
 

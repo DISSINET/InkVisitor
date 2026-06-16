@@ -205,6 +205,104 @@ export default class Cursor
   }
 
   /**
+   * Issue #3108 — compare two absolute visual positions in document order.
+   * Returns <0 if `a` is before `b`, 0 if equal, >0 if `a` is after `b`.
+   */
+  private static compareVisual(
+    a: IAbsCoordinates,
+    b: IAbsCoordinates
+  ): number {
+    if (a.yLine !== b.yLine) {
+      return a.yLine - b.yLine;
+    }
+    return a.xLine - b.xLine;
+  }
+
+  /**
+   * Issue #3108 — move ONE selection boundary (the start or end drag handle) to a
+   * new visual position while keeping the other boundary fixed. Enforces a minimum
+   * of one VISIBLE character selected and prevents the dragged boundary from
+   * crossing (reversing past) the fixed one. `which` refers to the document-ordered
+   * start or end of the current selection. The canonical offset model is kept in
+   * sync with `head` tracking the moving boundary and `anchor` the fixed one.
+   *
+   * The min-1-char clamp is computed in VISIBLE-column space (stepVisualLeft/Right)
+   * so it holds across soft-wrap boundaries and skips hidden tag markup in
+   * HIGHLIGHT/SEMI mode, where adjacent visible columns map to non-adjacent offsets.
+   */
+  dragBoundary(
+    text: Text,
+    which: "start" | "end",
+    xLine: number,
+    yLine: number
+  ): void {
+    const [start, end] = this.getAbsBounds();
+    if (!start || !end) {
+      return;
+    }
+
+    const requested = text.clampVisual(xLine, yLine);
+
+    let movingPt: IAbsCoordinates;
+    let fixedPt: IAbsCoordinates;
+
+    if (which === "start") {
+      fixedPt = end;
+      // Max start = one visible column left of the end → keeps >= 1 char selected.
+      const maxStart = text.stepVisualLeft(end.xLine, end.yLine);
+      movingPt =
+        Cursor.compareVisual(requested, maxStart) <= 0 ? requested : maxStart;
+      this.selectStart = movingPt;
+      this.selectEnd = fixedPt;
+    } else {
+      fixedPt = start;
+      // Min end = one visible column right of the start → keeps >= 1 char selected.
+      const minEnd = text.stepVisualRight(start.xLine, start.yLine);
+      movingPt =
+        Cursor.compareVisual(requested, minEnd) >= 0 ? requested : minEnd;
+      this.selectStart = fixedPt;
+      this.selectEnd = movingPt;
+    }
+
+    this.xLine = movingPt.xLine;
+    this.yLine = movingPt.yLine;
+
+    const headInfo = text.offsetWithAffinityFromVisual(
+      movingPt.xLine,
+      movingPt.yLine
+    );
+    const anchorInfo = text.offsetWithAffinityFromVisual(
+      fixedPt.xLine,
+      fixedPt.yLine
+    );
+    this.head = headInfo.offset;
+    this.headAffinity = headInfo.affinity;
+    this.anchor = anchorInfo.offset;
+    this.anchorAffinity = anchorInfo.affinity;
+    this.goalColumn = null;
+
+    this.setTrueSelectionDirection();
+  }
+
+  /**
+   * Issue #3108 — set the selection to an explicit raw-offset span (used while
+   * dragging the whole highlight). Offsets are clamped into the document and the
+   * span is oriented forward (anchor = start, head = end); the visual endpoints
+   * are derived via {@link syncVisualFromOffset}.
+   */
+  setSpanByOffsets(text: Text, startOffset: number, endOffset: number): void {
+    const max = text.value.length;
+    const s = Math.max(0, Math.min(startOffset, max));
+    const e = Math.max(0, Math.min(endOffset, max));
+    this.anchor = Math.min(s, e);
+    this.head = Math.max(s, e);
+    this.anchorAffinity = CaretAffinity.DOWNSTREAM;
+    this.headAffinity = CaretAffinity.DOWNSTREAM;
+    this.goalColumn = null;
+    this.syncVisualFromOffset(text);
+  }
+
+  /**
    * Sets cursor position from a mouse event. Stores absolute document coordinates.
    * @param viewportLineStart - Absolute line index of the first visible line (used to convert click to absolute yLine).
    */
