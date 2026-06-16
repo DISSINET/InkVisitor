@@ -1,5 +1,5 @@
 import { AsymmetricalAnchor } from "@inkvisitor/annotator/src/lib";
-import { Modal, ModalContent, ModalFooter, ModalHeader } from "components";
+import { ButtonGroup, Modal, ModalContent, ModalFooter, ModalHeader } from "components";
 import { Button } from "components/basic/Button/Button";
 import { EntityTagById } from "components/advanced/EntityTag/EntityTagById";
 import React from "react";
@@ -76,7 +76,7 @@ export const AnnotatorWarningsModal: React.FC<AnnotatorWarningsModalProps> = ({
 
       <Modal width="auto" showModal={open} onClose={() => onOpenChange(false)}>
         <ModalHeader
-          title={warningsTitle(anchors.length)}
+          title={"Asymmetrical anchors"}
           icon={<FaExclamationTriangle />}
           iconColor="warning"
           onClose={() => onOpenChange(false)}
@@ -93,6 +93,9 @@ export const AnnotatorWarningsModal: React.FC<AnnotatorWarningsModalProps> = ({
                   size={ButtonSize.Large}
                   color="success"
                   inverted
+                  noBorder
+                  radiusLeft
+                  radiusRight
                   tooltipLabel="scroll to anchor in text (RAW mode)"
                   onClick={() => {
                     onScrollTo(anchor.tagName, anchor.position, anchor.segmentIndex);
@@ -109,14 +112,27 @@ export const AnnotatorWarningsModal: React.FC<AnnotatorWarningsModalProps> = ({
                     disableTooltip={false}
                   />
                 </StyledWarningInfo>
-                <Button
-                  icon={<FaScissors />}
-                  label="remove"
-                  color="success"
-                  // inverted
-                  tooltipLabel="unlink broken anchor"
-                  onClick={() => onUnlink(anchor.tagName, anchor.position, anchor.segmentIndex)}
-                />
+                <ButtonGroup>
+                  {/* <Button
+                    icon={<TbAnchor />}
+                    label="locate anchor"
+                    color="info"
+                    // inverted
+                    tooltipLabel="locate anchor in text (RAW mode)"
+                    onClick={() => {
+                      onScrollTo(anchor.tagName, anchor.position, anchor.segmentIndex);
+                      onOpenChange(false);
+                    }}
+                  /> */}
+                  <Button
+                    icon={<FaScissors />}
+                    label="remove"
+                    color="success"
+                    // inverted
+                    tooltipLabel="unlink broken anchor"
+                    onClick={() => onUnlink(anchor.tagName, anchor.position, anchor.segmentIndex)}
+                  />
+                </ButtonGroup>
               </StyledWarningRow>
             ))}
           </StyledWarningsList>

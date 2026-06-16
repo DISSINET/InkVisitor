@@ -143,6 +143,7 @@ export const StyledFooterNote = styled.div`
   text-align: left;
   color: ${({ theme }) => theme.color["gray"][500]};
   font-size: 1.1rem;
+  margin-right: ${({ theme }) => theme.space[4]};
 `;
 
 interface StyledModalInputForm {

@@ -239,15 +239,16 @@ export const StyledWarningsList = styled.div`
 `;
 
 export const StyledWarningsListHeader = styled.div`
-  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
-  color: ${({ theme }) => theme.color["black"]};
+  color: ${({ theme }) => theme.color.blue[400]};
+  margin-bottom: ${({ theme }) => theme.space[3]};
 `;
 
 export const StyledWarningRow = styled.div`
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => theme.space[6]};
+  gap: ${({ theme }) => theme.space[5]};
   padding: ${({ theme }) => theme.space[2]} ${({ theme }) => theme.space[3]};
   border-radius: ${({ theme }) => theme.borderRadius["default"]};
   background-color: ${({ theme }) => theme.color["invertedBg"]["primary"]};
