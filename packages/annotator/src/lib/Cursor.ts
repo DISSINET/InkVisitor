@@ -380,6 +380,15 @@ export default class Cursor
   }
 
   /**
+   * Whether a collapsed caret is currently shown: the cursor is placed (not the
+   * initial -1/-1 sentinel) and there is no active selection. Used to gate the
+   * blink timer so it stays idle when there is nothing to blink (#3092).
+   */
+  hasCaret(): boolean {
+    return !this.isSelected() && !(this.xLine === -1 && this.yLine === -1);
+  }
+
+  /**
    * getSelectedArea return null if area is empty (no char selected)
    * @returns
    */
@@ -488,9 +497,14 @@ export default class Cursor
     const rowsToDraw: { rowI: number; start: number; end: number }[] = [];
 
     if (!this.isSelected()) {
-      // Draw caret at viewport-relative row (cursor stores absolute position)
+      // Draw caret at viewport-relative row (cursor stores absolute position),
+      // unless the blink is in its hidden phase (#3092).
       const relY = this.yLine - viewport.lineStart;
-      if (relY >= 0 && relY <= viewport.noLines) {
+      if (
+        drawingOptions.caretVisible !== false &&
+        relY >= 0 &&
+        relY <= viewport.noLines
+      ) {
         this.drawLine(ctx, relY, this.xLine, this.xLine, {
           ...drawingOptions,
           color: this.style.selectorColor,

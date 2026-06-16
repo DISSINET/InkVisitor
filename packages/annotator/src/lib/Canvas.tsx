@@ -21,6 +21,9 @@ export const Canvas = () => {
       ).innerHTML = text.text;
     });
     customWrapper.draw();
+
+    // Stop the caret-blink timer (and other listeners) when unmounting (#3092).
+    return () => customWrapper.destroy();
   }, []);
 
   return (
