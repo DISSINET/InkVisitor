@@ -81,7 +81,9 @@ export const StyledAnnotatorMenuDraggable = styled.div`
   &:hover {
     opacity: 1;
   }
-  transition: opacity 0.5s, box-shadow 0.3s;
+  transition:
+    opacity 0.5s,
+    box-shadow 0.3s;
 `;
 
 export const StyledAnnotatorMenuDragHandle = styled.div`
@@ -200,8 +202,7 @@ export const StyledDisplayModeButtonIconWrapper = styled.div<StyledDisplayModeBu
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: ${({ $annotatorWidthTooNarrow }) =>
-    $annotatorWidthTooNarrow ? "0 0.5rem" : ""};
+  padding: ${({ $annotatorWidthTooNarrow }) => ($annotatorWidthTooNarrow ? "0 0.5rem" : "")};
 `;
 
 export const StyledAnnotatorButtons = styled.div`
@@ -237,10 +238,28 @@ export const StyledWarningsList = styled.div`
   width: 100%;
 `;
 
+export const StyledWarningsListHeader = styled.div`
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+  color: ${({ theme }) => theme.color["black"]};
+`;
+
 export const StyledWarningRow = styled.div`
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => theme.space[2]};
+  gap: ${({ theme }) => theme.space[6]};
+  padding: ${({ theme }) => theme.space[2]} ${({ theme }) => theme.space[3]};
+  border-radius: ${({ theme }) => theme.borderRadius["default"]};
+  background-color: ${({ theme }) => theme.color["invertedBg"]["primary"]};
+`;
+
+export const StyledWarningInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: ${({ theme }) => theme.space[1]};
+  flex: 1;
+  min-width: 0;
 `;
 
 export const StyledWarningKind = styled.div`

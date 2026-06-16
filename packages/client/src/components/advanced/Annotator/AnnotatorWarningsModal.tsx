@@ -3,17 +3,23 @@ import { Modal, ModalContent, ModalFooter, ModalHeader } from "components";
 import { Button } from "components/basic/Button/Button";
 import { EntityTagById } from "components/advanced/EntityTag/EntityTagById";
 import React from "react";
-import { FaCrosshairs, FaExclamationTriangle } from "react-icons/fa";
+import { FaExclamationTriangle } from "react-icons/fa";
+import { FaScissors } from "react-icons/fa6";
+import { TbAnchor } from "react-icons/tb";
 import { ButtonSize } from "types";
 import {
+  StyledWarningInfo,
   StyledWarningKind,
   StyledWarningRow,
   StyledWarningsChip,
   StyledWarningsList,
+  StyledWarningsListHeader,
 } from "./AnnotatorStyles";
 
-const warningsTitle = (count: number): string =>
-  `${count} asymmetrical anchor${count === 1 ? "" : "s"}`;
+const warningsTitle = (count: number): string => `asymmetrical anchor${count === 1 ? "" : "s"}`;
+
+const issuesFoundLabel = (count: number): string =>
+  `${count} issue${count === 1 ? "" : "s"} found in the document`;
 
 /**
  * Compact, always-visible trigger: a small warning icon + count. Clicking it
@@ -68,7 +74,7 @@ export const AnnotatorWarningsModal: React.FC<AnnotatorWarningsModalProps> = ({
     <>
       {showChip && <WarningsChip count={anchors.length} onClick={() => onOpenChange(true)} />}
 
-      <Modal showModal={open} onClose={() => onOpenChange(false)} width="normal">
+      <Modal width="auto" showModal={open} onClose={() => onOpenChange(false)}>
         <ModalHeader
           title={warningsTitle(anchors.length)}
           icon={<FaExclamationTriangle />}
@@ -76,15 +82,15 @@ export const AnnotatorWarningsModal: React.FC<AnnotatorWarningsModalProps> = ({
           onClose={() => onOpenChange(false)}
         />
         <ModalContent column enableScroll isLoading={isLoading}>
+          <StyledWarningsListHeader>{issuesFoundLabel(anchors.length)}</StyledWarningsListHeader>
           <StyledWarningsList>
             {anchors.map((anchor, index) => (
               <StyledWarningRow
                 key={`${anchor.tagName}-${anchor.segmentIndex}-${anchor.position}-${index}`}
               >
-                <StyledWarningKind>{kindLabel(anchor.type)}</StyledWarningKind>
                 <Button
-                  icon={<FaCrosshairs />}
-                  size={ButtonSize.Small}
+                  icon={<TbAnchor />}
+                  size={ButtonSize.Large}
                   color="success"
                   inverted
                   tooltipLabel="scroll to anchor in text (RAW mode)"
@@ -94,15 +100,22 @@ export const AnnotatorWarningsModal: React.FC<AnnotatorWarningsModalProps> = ({
                     onOpenChange(false);
                   }}
                 />
-                <EntityTagById
-                  entityId={anchor.tagName}
-                  disableToast
-                  fullWidth
-                  disableTooltip={false}
-                  unlinkButton={{
-                    tooltipLabel: "unlink broken anchor",
-                    onClick: () => onUnlink(anchor.tagName, anchor.position, anchor.segmentIndex),
-                  }}
+                <StyledWarningInfo>
+                  <StyledWarningKind>{kindLabel(anchor.type)}</StyledWarningKind>
+                  <EntityTagById
+                    entityId={anchor.tagName}
+                    disableToast
+                    fullWidth
+                    disableTooltip={false}
+                  />
+                </StyledWarningInfo>
+                <Button
+                  icon={<FaScissors />}
+                  label="remove"
+                  color="success"
+                  // inverted
+                  tooltipLabel="unlink broken anchor"
+                  onClick={() => onUnlink(anchor.tagName, anchor.position, anchor.segmentIndex)}
                 />
               </StyledWarningRow>
             ))}
