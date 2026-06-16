@@ -64,6 +64,8 @@ interface IButtonStyle {
   $textRegular?: boolean;
   $inverted: boolean;
   $color: keyof ThemeColor;
+  $textColor?: keyof ThemeColor;
+  $borderColor?: keyof ThemeColor;
   $disabled?: boolean;
   $radiusLeft?: boolean;
   $radiusRight?: boolean;
@@ -121,15 +123,20 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
           $size,
           $iconButton
         )}`};
-  border-color: ${({ theme, $disabled, $color }) =>
-    $disabled ? theme.color["gray"][400] : theme.color[$color]};
+  border-color: ${({ theme, $disabled, $color, $borderColor }) =>
+    $disabled
+      ? theme.color["gray"][400]
+      : theme.color[$borderColor ?? $color]};
   border-width: ${({ $noBorder }) => ($noBorder ? 0 : "thin")};
   border-style: solid;
   border-radius: ${({ $radiusLeft, $radiusRight, $shape }) =>
     getRadius($radiusLeft, $radiusRight, $shape)};
-  color: ${({ theme, $disabled, $color, $inverted }) => {
+  color: ${({ theme, $disabled, $color, $inverted, $textColor }) => {
     if ($disabled) {
       return theme.color["gray"][500];
+    }
+    if ($textColor) {
+      return theme.color[$textColor];
     }
     if ($inverted) {
       return theme.color[$color];

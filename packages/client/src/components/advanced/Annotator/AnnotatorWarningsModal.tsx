@@ -11,12 +11,12 @@ import {
   StyledWarningInfo,
   StyledWarningKind,
   StyledWarningRow,
-  StyledWarningsChip,
   StyledWarningsList,
   StyledWarningsListHeader,
 } from "./AnnotatorStyles";
 
-const warningsTitle = (count: number): string => `asymmetrical anchor${count === 1 ? "" : "s"}`;
+const warningsTitle = (count: number): string =>
+  `${count} asymmetrical anchor${count === 1 ? "" : "s"}`;
 
 const issuesFoundLabel = (count: number): string =>
   `${count} issue${count === 1 ? "" : "s"} found in the document`;
@@ -30,10 +30,17 @@ export const WarningsChip: React.FC<{ count: number; onClick: () => void }> = ({
   count,
   onClick,
 }) => (
-  <StyledWarningsChip type="button" onClick={onClick} title={warningsTitle(count)}>
-    <FaExclamationTriangle size={13} />
-    {count}
-  </StyledWarningsChip>
+  <Button
+    icon={<FaExclamationTriangle size={13} />}
+    label={String(count)}
+    textColor="warningText"
+    color="warningMessage"
+    borderColor="warningBorder"
+    radiusLeft
+    radiusRight
+    tooltipLabel={warningsTitle(count)}
+    onClick={onClick}
+  />
 );
 
 interface AnnotatorWarningsModalProps {
@@ -90,9 +97,10 @@ export const AnnotatorWarningsModal: React.FC<AnnotatorWarningsModalProps> = ({
               >
                 <Button
                   icon={<TbAnchor />}
-                  size={ButtonSize.ExtraLarge}
+                  size={ButtonSize.Large}
                   color="success"
                   inverted
+                  noBorder
                   radiusLeft
                   radiusRight
                   tooltipLabel="scroll to anchor in text (RAW mode)"
