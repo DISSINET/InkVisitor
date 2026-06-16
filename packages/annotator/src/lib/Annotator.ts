@@ -119,6 +119,7 @@ export class Annotator {
   viewport: Viewport;
   cursor: Cursor;
   hoverHighlighter: Highlighter; // For statement list hover interaction
+  hoverRegions: { start: IAbsCoordinates; end: IAbsCoordinates }[] = [];
   text: Text;
   scroller?: Scroller;
   lines?: Lines;
@@ -498,12 +499,12 @@ export class Annotator {
       return;
     }
 
-    // For each opening tag, pair with the correct closing tag (depth-aware), same as
-    // detectAndEmitAnchorHover. Raw content span: [openEnd, closeStart) — see Tag docs in Text.
-    let minStartLine = Infinity;
-    let minStartChar = Infinity;
-    let maxEndLine = -Infinity;
-    let maxEndExclusiveChar = -Infinity;
+    // Collect one highlight region per anchor occurrence. Merging them into a
+    // single min→max bounding span would visually connect anchors of the same
+    // statement that are not adjacent (#3017). Pair each opening tag with the
+    // correct closing tag (depth-aware), same as detectAndEmitAnchorHover. Raw
+    // content span: [openEnd, closeStart) — see Tag docs in Text.
+    const regions: { start: IAbsCoordinates; end: IAbsCoordinates }[] = [];
 
     for (const openTag of matchingTags) {
       const match = this.findMatchingClosingTag(openTag);
@@ -537,38 +538,21 @@ export class Annotator {
       const startLine = startSeg.lineStart + startSegPos.lineIndex;
       const startChar = startSegPos.charInLineIndex;
       const endLine = lastSeg.lineStart + lastSegPos.lineIndex;
+      // Highlighter uses exclusive end xLine on the last line (see Highlighter.draw).
       const endExclusiveChar = lastSegPos.charInLineIndex + 1;
 
-      if (
-        startLine < minStartLine ||
-        (startLine === minStartLine && startChar < minStartChar)
-      ) {
-        minStartLine = startLine;
-        minStartChar = startChar;
-      }
-      if (
-        endLine > maxEndLine ||
-        (endLine === maxEndLine && endExclusiveChar > maxEndExclusiveChar)
-      ) {
-        maxEndLine = endLine;
-        maxEndExclusiveChar = endExclusiveChar;
-      }
+      regions.push({
+        start: { xLine: startChar, yLine: startLine },
+        end: { xLine: endExclusiveChar, yLine: endLine },
+      });
     }
 
-    // Highlighter uses exclusive end xLine on the last line (see Highlighter.draw).
-    if (minStartLine === Infinity || maxEndLine === -Infinity) {
+    if (regions.length === 0) {
       this.clearHoverHighlight();
       return;
     }
 
-    this.hoverHighlighter.selectStart = {
-      xLine: minStartChar,
-      yLine: minStartLine,
-    };
-    this.hoverHighlighter.selectEnd = {
-      xLine: maxEndExclusiveChar,
-      yLine: maxEndLine,
-    };
+    this.hoverRegions = regions;
     this.draw();
   }
 
@@ -576,6 +560,7 @@ export class Annotator {
    * Clears the hover highlight (for statement list hover interaction).
    */
   clearHoverHighlight() {
+    this.hoverRegions = [];
     this.hoverHighlighter.reset();
     this.draw();
   }
@@ -1707,12 +1692,19 @@ export class Annotator {
       });
     }
 
-    // Draw hover highlight for statement list interaction (#2835)
-    this.hoverHighlighter.draw(this.ctx, this.viewport, this.text, {
-      lineHeight: this.lineHeight,
-      charWidth: this.charWidth,
-      charsAtLine: this.text.charsAtLine,
-    });
+    // Draw hover highlights for statement list interaction (#2835). Each anchor
+    // occurrence is drawn as its own region so multiple anchors of the same
+    // statement are not connected into one continuous span (#3017). The single
+    // hoverHighlighter is reused so its configured style is preserved.
+    for (const region of this.hoverRegions) {
+      this.hoverHighlighter.selectStart = region.start;
+      this.hoverHighlighter.selectEnd = region.end;
+      this.hoverHighlighter.draw(this.ctx, this.viewport, this.text, {
+        lineHeight: this.lineHeight,
+        charWidth: this.charWidth,
+        charsAtLine: this.text.charsAtLine,
+      });
+    }
 
     // if (this.onSelectTextCb && this.cursor.isSelected()) {
     if (this.onSelectTextCb) {

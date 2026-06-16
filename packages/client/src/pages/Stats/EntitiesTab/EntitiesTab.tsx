@@ -22,7 +22,7 @@ import {
   applyUserThreshold,
   areStatsRequestsEqual,
   datePickerToIso,
-  isoToDatePicker,
+  isoToDatetimePicker,
 } from "../utils";
 import { StatsChart, StatsTable } from "components/advanced";
 import { useUserQuery } from "hooks/react-query";
@@ -159,7 +159,7 @@ export const EntitiesTab: React.FC = () => {
                     dispatch({
                       type: "dateFromUpdate",
                       payload: new Date(
-                        new Date().setFullYear(new Date().getFullYear() - 5)
+                        new Date().setFullYear(new Date().getFullYear() - 5),
                       ).toISOString(),
                     });
                   }}
@@ -173,12 +173,15 @@ export const EntitiesTab: React.FC = () => {
             ) : (
               <StyledDateInputWrapper>
                 <Input
-                  type="date"
-                  value={isoToDatePicker(state.dateFrom)}
+                  type="datetime-local"
+                  width={150}
+                  value={isoToDatetimePicker(state.dateFrom)}
                   onChangeFn={(value) =>
                     dispatch({
                       type: "dateFromUpdate",
-                      payload: datePickerToIso(value),
+                      payload: value
+                        ? datePickerToIso(value)
+                        : new Date("2000-01-01").toISOString(),
                     })
                   }
                 />
@@ -231,12 +234,13 @@ export const EntitiesTab: React.FC = () => {
             ) : (
               <StyledDateInputWrapper>
                 <Input
-                  type="date"
-                  value={isoToDatePicker(state.dateTo)}
+                  type="datetime-local"
+                  width={150}
+                  value={isoToDatetimePicker(state.dateTo)}
                   onChangeFn={(value) =>
                     dispatch({
                       type: "dateToUpdate",
-                      payload: datePickerToIso(value),
+                      payload: value ? datePickerToIso(value) : new Date().toISOString(),
                     })
                   }
                 />
@@ -323,7 +327,7 @@ export const EntitiesTab: React.FC = () => {
                   const num = Number(value);
                   const safe = Math.min(
                     USER_THRESHOLD_MAX,
-                    Math.max(0, Number.isFinite(num) ? num : 0)
+                    Math.max(0, Number.isFinite(num) ? num : 0),
                   );
                   setUsersIgnoreBelowValue(safe);
                 }}

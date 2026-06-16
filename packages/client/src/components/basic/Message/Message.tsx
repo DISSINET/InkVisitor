@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { TiWarningOutline } from "react-icons/ti";
 
 import { WarningTypeEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IWarning } from "@inkvisitor/shared/types";
+import { WarningIcon } from "./WarningIcon";
 import api from "api";
 import { EntityTag } from "components/advanced";
 import { EntityColors } from "types";
@@ -288,6 +288,9 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
       case WarningTypeEnums.PSM:
         return <b>Missing part of speech attribute</b>;
 
+      case WarningTypeEnums.DM:
+        return <b>Missing entity detail</b>;
+
       // T-based validations
       case WarningTypeEnums.TVEP:
         return (
@@ -372,7 +375,7 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
   return (
     <StyledMessage>
       <StyledWarningIconWrap>
-        <TiWarningOutline size={20} />
+        <WarningIcon type={warning.type} />
       </StyledWarningIconWrap>
       <StyledMessageContent>
         {getWarningMessage()}

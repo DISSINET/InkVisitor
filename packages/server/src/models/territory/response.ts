@@ -11,6 +11,7 @@ import { ResponseStatement } from "@models/statement/response";
 import Entity from "@models/entity/entity";
 import { IRequest } from "src/custom_typings/request";
 import { findEntityById } from "@service/shorthands";
+import { Setting } from "@models/setting/setting";
 
 export class ResponseTerritory extends Territory implements IResponseTerritory {
   statements: IResponseStatement[];
@@ -46,6 +47,14 @@ export class ResponseTerritory extends Territory implements IResponseTerritory {
       req.db.connection,
       this.id
     );
+
+    // Settings drive the warnings paths below - fetch once per request so
+    // every per-statement getWarnings call reuses the same array instead of
+    // re-hitting the cache (or the DB on a cache miss) N times.
+    const needsSettings = useWarnings || !usePreload;
+    const settings = needsSettings
+      ? await Setting.getSettingsAll(req.db.connection)
+      : undefined;
 
     const responseStatements: ResponseStatement[] = [];
 
@@ -85,7 +94,7 @@ export class ResponseTerritory extends Territory implements IResponseTerritory {
           preloadedEntities as Record<string, IEntity>
         );
         if (useWarnings && !this.isTemplate) {
-          responseStatement.warnings = await responseStatement.getWarnings(req);
+          responseStatement.warnings = await responseStatement.getWarnings(req, settings);
         }
       }
     } else {
@@ -104,7 +113,7 @@ export class ResponseTerritory extends Territory implements IResponseTerritory {
         const responseStatement = new ResponseStatement(
           new Statement(statement)
         );
-        await responseStatement.prepare(req);
+        await responseStatement.prepare(req, settings);
 
         for (const entityId of Object.keys(responseStatement.entities)) {
           this.entities[entityId] = responseStatement.entities[entityId];

@@ -2,13 +2,7 @@ import { animated } from "@react-spring/web";
 import { IoClose } from "react-icons/io5";
 import styled from "styled-components";
 import { ThemeColor } from "Theme/theme";
-import {
-  space2,
-  space4,
-  space5,
-  space6,
-  space7,
-} from "Theme/theme-space-shortcut";
+import { space2, space4, space5, space6, space7 } from "Theme/theme-space-shortcut";
 
 interface ModalWrap {
   $lowerZIndex: boolean;
@@ -24,7 +18,7 @@ export const StyledModalWrap = styled.div<ModalWrap>`
   left: 0;
   right: 0;
   top: 0;
-  z-index: ${({ $lowerZIndex }) => ($lowerZIndex ? "90" : "150")};
+  z-index: ${({ $lowerZIndex }) => ($lowerZIndex ? "90" : "500")};
 `;
 export const StyledBackground = styled(animated.div)`
   position: absolute;
@@ -81,8 +75,7 @@ export const StyledCardHeader = styled.header<StyledCardHeader>`
   flex-shrink: 0;
   gap: 0.5rem;
   padding: ${space4} ${space6} ${space2} ${space6};
-  background-color: ${({ theme, $color }) =>
-    $color ? theme.color[$color] : "transparent"};
+  background-color: ${({ theme, $color }) => ($color ? theme.color[$color] : "transparent")};
   border-top-left-radius: ${({ theme }) => theme.borderRadius["sm"]};
   border-top-right-radius: ${({ theme }) => theme.borderRadius["sm"]};
 
@@ -138,8 +131,7 @@ export const StyledFooter = styled.div<StyledFooter>`
 
   display: flex;
   flex-shrink: 0;
-  justify-content: ${({ $spaceBetween }) =>
-    $spaceBetween ? "space-between" : "flex-end"};
+  justify-content: ${({ $spaceBetween }) => ($spaceBetween ? "space-between" : "flex-end")};
   flex-direction: ${({ $column }) => ($column ? "column" : "row")};
   padding: ${({ theme }) => theme.space[4]};
 `;
@@ -149,8 +141,7 @@ interface StyledModalInputForm {
 }
 export const StyledModalInputForm = styled.div<StyledModalInputForm>`
   display: grid;
-  grid-template-columns: ${({ $alignLeft }) =>
-    $alignLeft ? "auto 1fr" : "auto auto"};
+  grid-template-columns: ${({ $alignLeft }) => ($alignLeft ? "auto 1fr" : "auto auto")};
   grid-row-gap: ${({ theme }) => theme.space[1]};
   width: 100%;
 `;

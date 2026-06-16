@@ -253,21 +253,28 @@ const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Exp
     }
 
     case ExploreActionType.setCreatedAtFilter: {
-      const { createdDate } = action.payload as { createdDate?: Date };
+      const { createdAfter, createdBefore } = action.payload as {
+        createdAfter?: Date;
+        createdBefore?: Date;
+      };
       const otherFilters = state.filters.filter(
         (f) => f.type !== Explore.SearchOption.CreatedAt,
       );
+      if (!createdAfter && !createdBefore) {
+        return {
+          ...state,
+          filters: otherFilters,
+          offset: 0,
+        };
+      }
+      const createdAtFilter: Explore.IExploreSearchFilter = {
+        type: Explore.SearchOption.CreatedAt,
+        ...(createdAfter ? { createdAfter: createdAfter.toISOString() } : {}),
+        ...(createdBefore ? { createdBefore: createdBefore.toISOString() } : {}),
+      };
       return {
         ...state,
-        filters: createdDate
-          ? [
-            ...otherFilters,
-            {
-              type: Explore.SearchOption.CreatedAt,
-              createdAt: createdDate.toISOString(),
-            },
-          ]
-          : otherFilters,
+        filters: [...otherFilters, createdAtFilter],
         offset: 0,
       };
     }

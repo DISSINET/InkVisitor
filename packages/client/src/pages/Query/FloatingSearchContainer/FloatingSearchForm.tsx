@@ -159,32 +159,52 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
       <StyledRow>
         <StyledRowHeader>{Explore.SearchOption.CreatedAt}</StyledRowHeader>
         <StyledRowControl>
-          <Input
-            type="date"
-            width="full"
-            value={searchData.createdDate ? searchData.createdDate.toISOString().split("T")[0] : ""}
-            onChangeFn={(value) => {
-              const createdDate = new Date(value);
-              if (createdDate && !isNaN(createdDate.getTime())) {
-                handleChange({ createdDate });
-                dispatch({
-                  type: ExploreActionType.setCreatedAtFilter,
-                  payload: {
-                    createdDate: createdDate,
-                  },
-                });
-              } else {
-                handleChange({ createdDate: undefined });
-                dispatch({
-                  type: ExploreActionType.setCreatedAtFilter,
-                  payload: {
-                    createdDate: undefined,
-                  },
-                });
-              }
-            }}
-            clearable
-          />
+          <StyledDateRange>
+            <StyledDateRangeField>
+              <StyledDateRangeLabel>after</StyledDateRangeLabel>
+              <Input
+                type="datetime-local"
+                width="full"
+                value={searchData.createdAfter ? dateToDatetimeLocal(searchData.createdAfter) : ""}
+                onChangeFn={(value) => {
+                  const createdAfter = datetimeLocalToDate(value);
+                  const createdBefore = searchData.createdBefore;
+                  handleChange({ createdAfter });
+                  dispatch({
+                    type: ExploreActionType.setCreatedAtFilter,
+                    payload: {
+                      createdAfter,
+                      createdBefore,
+                    },
+                  });
+                }}
+                clearable
+              />
+            </StyledDateRangeField>
+            <StyledDateRangeField>
+              <StyledDateRangeLabel>before</StyledDateRangeLabel>
+              <Input
+                type="datetime-local"
+                width="full"
+                value={
+                  searchData.createdBefore ? dateToDatetimeLocal(searchData.createdBefore) : ""
+                }
+                onChangeFn={(value) => {
+                  const createdBefore = datetimeLocalToDate(value);
+                  const createdAfter = searchData.createdAfter;
+                  handleChange({ createdBefore });
+                  dispatch({
+                    type: ExploreActionType.setCreatedAtFilter,
+                    payload: {
+                      createdAfter,
+                      createdBefore,
+                    },
+                  });
+                }}
+                clearable
+              />
+            </StyledDateRangeField>
+          </StyledDateRange>
         </StyledRowControl>
       </StyledRow>
 

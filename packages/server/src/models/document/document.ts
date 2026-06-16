@@ -35,24 +35,73 @@ export default class Document implements IDocument, IDbModel {
   }
 
   /**
-   * Preprocesses the document to find entity ids and build anchors tree
-   * @param conn Connection
-   * @returns Promise<void>
+   * Preprocesses the document to find entity ids and build anchors tree.
+   * Issues one DB round-trip to resolve referenced entities. Called by
+   * every write path so the derived fields are persisted alongside content.
    */
   async preprocess(conn: Connection): Promise<void> {
-    const gatherStart = performance.now();
-    const entityIds = this.gatherEntityIds();
-    const gatherTime = performance.now() - gatherStart;
-    
-    const findStart = performance.now();
-    this.entityIds = await this.findReferencedEntityIds(conn, entityIds);
-    const findTime = performance.now() - findStart;
-    
-    const buildStart = performance.now();
+    const ids = this.gatherEntityIds();
+    this.entityIds = await this.findReferencedEntityIds(conn, ids);
     this.anchors = AnchorsNode.buildAnchorsTree(this.content, this.entityIds);
-    const buildTime = performance.now() - buildStart;
-    
-    console.log(`[Document preprocess] ${this.id}: gatherEntityIds took ${gatherTime.toFixed(5)}ms, findReferencedEntityIds took ${findTime.toFixed(5)}ms, buildAnchorsTree took ${buildTime.toFixed(5)}ms`);
+  }
+
+  static emptyEntityIdsRecord(): Record<EntityEnums.Class, string[]> {
+    return {
+      [EntityEnums.Class.Action]: [],
+      [EntityEnums.Class.Resource]: [],
+      [EntityEnums.Class.Concept]: [],
+      [EntityEnums.Class.Person]: [],
+      [EntityEnums.Class.Location]: [],
+      [EntityEnums.Class.Event]: [],
+      [EntityEnums.Class.Object]: [],
+      [EntityEnums.Class.Territory]: [],
+      [EntityEnums.Class.Statement]: [],
+      [EntityEnums.Class.Value]: [],
+      [EntityEnums.Class.Being]: [],
+      [EntityEnums.Class.Group]: [],
+    };
+  }
+
+  static bucketByClass(
+    ids: string[],
+    classById: Map<string, EntityEnums.Class>
+  ): Record<EntityEnums.Class, string[]> {
+    const out = Document.emptyEntityIdsRecord();
+    for (const id of ids) {
+      const cls = classById.get(id);
+      if (cls) out[cls].push(id);
+    }
+    return out;
+  }
+
+  /**
+   * Coerces a possibly-legacy `entityIds` value into the canonical
+   * Record<Class, string[]> shape that consumers (client annotator, badge
+   * counts, anchor-count sort) assume - notably guaranteeing a `T` key that
+   * is always an array.
+   *
+   * LEGACY ONLY: rows re-saved since preprocess-on-write (#2643) already
+   * store the canonical shape, so this is a no-op for them. Rows that
+   * predate it may hold a flat string[] or an object missing some class
+   * keys; without this the client reads `entityIds.T` as undefined and
+   * throws on `.includes`. A flat array can't be re-bucketed without each
+   * id's class, so it degrades to an empty (but valid) record - re-saving
+   * such a document repopulates it.
+   */
+  static normalizeEntityIds(
+    raw: unknown
+  ): Record<EntityEnums.Class, string[]> {
+    const out = Document.emptyEntityIdsRecord();
+    if (!raw || Array.isArray(raw) || typeof raw !== "object") {
+      return out;
+    }
+    for (const cls of Object.keys(out) as EntityEnums.Class[]) {
+      const ids = (raw as Record<string, unknown>)[cls];
+      if (Array.isArray(ids)) {
+        out[cls] = ids.filter((id): id is string => typeof id === "string");
+      }
+    }
+    return out;
   }
 
   /**
@@ -80,34 +129,16 @@ export default class Document implements IDocument, IDbModel {
    * @param ids string[]
    * @returns Promise<Record<EntityEnums.Class, string[]>>
    */
-  async findReferencedEntityIds(conn: Connection, ids: string[]): Promise<Record<EntityEnums.Class, string[]>> {
-    const referencedEntityIds: Record<EntityEnums.Class, string[]> = {
-      [EntityEnums.Class.Action]: [],
-      [EntityEnums.Class.Resource]: [],
-      [EntityEnums.Class.Concept]: [],
-      [EntityEnums.Class.Person]: [],
-      [EntityEnums.Class.Location]: [],
-      [EntityEnums.Class.Event]: [],
-      [EntityEnums.Class.Object]: [],
-      [EntityEnums.Class.Territory]: [],
-      [EntityEnums.Class.Statement]: [],
-      [EntityEnums.Class.Value]: [],
-      [EntityEnums.Class.Being]: [],
-      [EntityEnums.Class.Group]: [],
-    };
-
+  async findReferencedEntityIds(
+    conn: Connection,
+    ids: string[]
+  ): Promise<Record<EntityEnums.Class, string[]>> {
     const entities = await Entity.findEntitiesByIds(conn, ids);
-    for (const entity of entities) {
-      const entityClass = entity.class;
-      if (entityClass) {
-        if (!referencedEntityIds[entityClass]) {
-          referencedEntityIds[entityClass] = [];
-        }
-        referencedEntityIds[entityClass].push(entity.id);
-      }
+    const classById = new Map<string, EntityEnums.Class>();
+    for (const e of entities) {
+      if (e.class) classById.set(e.id, e.class);
     }
-
-    return referencedEntityIds;
+    return Document.bucketByClass(ids, classById);
   }
 
   /**

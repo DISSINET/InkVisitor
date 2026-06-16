@@ -18,6 +18,13 @@ import { rootTerritoryId } from "Theme/constants";
 import { DraggedPropRowCategory } from "types";
 import { DropdownItem } from "@inkvisitor/shared/types";
 import { getEntityLabel, getEntityRelationRules, getShortLabelByLetterCount } from "utils/utils";
+import {
+  ENTITY_DETAIL_SCROLLBAR_ID,
+  ENTITY_DETAIL_SCROLL_CONTAINER_ID,
+  handleDeleteEntityError,
+  usedInSectionId,
+} from "utils/deleteEntityConflict";
+import { openRestoredEntity } from "utils/openRestoredEntity";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
 import { PropGroup } from "../../PropGroup/PropGroup";
 import { EntityDetailCreateTemplateModal } from "./EntityDetailCreateTemplateModal/EntityDetailCreateTemplateModal";
@@ -311,7 +318,11 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
           onLinkClick={async () => {
             const response = await api.entityRestore(entityId);
             toast.info("Entity restored");
-            appendDetailId(entityId);
+            openRestoredEntity(response.data.data as IEntity, {
+              setTerritoryId,
+              setStatementId,
+              appendDetailId,
+            });
             queryClient.invalidateQueries({ queryKey: ["entity"] });
             queryClient.invalidateQueries({ queryKey: ["statement"] });
             if (entity?.class === EntityEnums.Class.Territory) {
@@ -347,16 +358,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
 
       removeDetailId(entityId);
     },
-    onError: async (error: any) => {
-      if (error.error === "InvalidDeleteError" && error.data && error.data.length > 0) {
-        const { data } = error;
-        toast.info("Click to open conflicting entity in detail", {
-          autoClose: 6000,
-          onClick: () => {
-            appendDetailId(data[0]);
-          },
-        });
-      }
+    onError: (error, entityId) => {
+      handleDeleteEntityError(error, entityId, appendDetailId);
     },
   });
 
@@ -618,6 +621,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
     <>
       {entity && (
         <CustomScrollbar
+          scrollerId={ENTITY_DETAIL_SCROLLBAR_ID}
+          elementId={ENTITY_DETAIL_SCROLL_CONTAINER_ID}
           customStyle={{
             // necessary to scroll until the bottom of the page
             height: "calc(100% - 2.5rem)",
@@ -902,7 +907,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
                 )}
               </StyledDetailSection>
 
-              <StyledDetailSection>
+              <StyledDetailSection id={usedInSectionId(entity.id)}>
                 <StyledDetailSectionHeader
                   onClick={() => toggleSection(EntityDetailSection.UsedIn)}
                 >
