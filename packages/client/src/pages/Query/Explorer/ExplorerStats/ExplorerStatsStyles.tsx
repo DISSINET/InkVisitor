@@ -33,6 +33,13 @@ export const StyledField = styled.div`
   gap: ${({ theme }) => theme.space[1]};
 `;
 
+export const StyledDateInputWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[1]};
+`;
+
 export const StyledFieldLabel = styled.div`
   font-size: ${({ theme }) => theme.fontSize.xs};
   font-weight: ${({ theme }) => theme.fontWeight.bold};
