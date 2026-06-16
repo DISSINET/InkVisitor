@@ -155,6 +155,13 @@ export class Annotator {
   private selectionScrollRaf: number = 0;
 
   /**
+   * Reusable scratch cursor for pointerToVisual, which runs in the mousemove /
+   * edge-scroll hot path. Avoids a per-event Cursor allocation. Never read for
+   * its selection state — only xLine/yLine after setPositionFromCanvasOffsets.
+   */
+  private readonly scratchCursor: Cursor = new Cursor(this.ratio, 0, 0);
+
+  /**
    * Issue #3108 — active selection-handle drag. `start`/`end` resize one boundary
    * (keeping the other fixed, min 1 char, no crossing); `span` slides the whole
    * highlight (preserving its length). `null` when no handle drag is in progress.
@@ -1055,7 +1062,8 @@ export class Annotator {
   ): IAbsCoordinates {
     const rect = this.element.getBoundingClientRect();
     const { ox, oy } = this.clientCoordsToCanvasOffsets(clientX, clientY, rect);
-    const tmp = new Cursor(this.ratio, 0, 0);
+    const tmp = this.scratchCursor;
+    tmp.ratio = this.ratio; // ratio can change at runtime (DPR / zoom)
     tmp.setPositionFromCanvasOffsets(
       ox,
       oy,
