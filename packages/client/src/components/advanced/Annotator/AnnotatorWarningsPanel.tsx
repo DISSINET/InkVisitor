@@ -72,6 +72,7 @@ export const AnnotatorWarningsPanel: React.FC<AnnotatorWarningsPanelProps> = ({
         <ModalHeader
           title={warningsTitle(anchors.length)}
           icon={<FaExclamationTriangle />}
+          iconColor="warning"
           onClose={() => onOpenChange(false)}
         />
         <ModalContent column enableScroll isLoading={isLoading}>

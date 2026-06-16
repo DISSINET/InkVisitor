@@ -84,11 +84,12 @@ export const StyledCardHeader = styled.header<StyledCardHeader>`
   border-bottom-color: ${({ theme }) => theme.color["gray"][400]};
   min-height: ${({ theme }) => theme.space[12]};
 `;
-export const StyledCardIcon = styled.div`
+export const StyledCardIcon = styled.div<{ $color?: keyof ThemeColor }>`
   display: flex;
   flex-shrink: 0;
-  font-size: 2.4rem;
+  font-size: 1.7rem;
   margin-right: 0.5rem;
+  color: ${({ theme, $color }) => ($color ? theme.color[$color] : "inherit")};
 `;
 interface StyledCardTitle {
   $boldTitle?: boolean;
@@ -97,7 +98,7 @@ export const StyledCardTitle = styled.h2<StyledCardTitle>`
   white-space: nowrap;
   font-weight: ${({ theme, $boldTitle }) =>
     $boldTitle ? theme.fontWeight["bold"] : theme.fontWeight["medium"]};
-  font-size: ${({ theme }) => theme.fontSize["xl"]};
+  font-size: 1.7rem;
 `;
 export const StyledCardContent = styled.div`
   display: flex;

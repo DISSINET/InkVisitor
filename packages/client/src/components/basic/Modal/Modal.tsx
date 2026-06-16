@@ -116,6 +116,7 @@ interface ModalHeader {
   title?: string | React.ReactElement;
   color?: keyof ThemeColor;
   icon?: React.ReactNode;
+  iconColor?: keyof ThemeColor;
   onClose?: () => void;
   boldTitle?: boolean;
   content?: React.ReactNode;
@@ -124,6 +125,7 @@ export const ModalHeader: FC<ModalHeader> = ({
   title,
   color,
   icon,
+  iconColor,
   onClose,
   boldTitle,
   content,
@@ -131,7 +133,7 @@ export const ModalHeader: FC<ModalHeader> = ({
   return (
     <>
       <StyledCardHeader $color={color}>
-        {icon && <StyledCardIcon>{icon}</StyledCardIcon>}
+        {icon && <StyledCardIcon $color={iconColor}>{icon}</StyledCardIcon>}
         <StyledCardTitle $boldTitle={boldTitle}>{title}</StyledCardTitle>
         {content && <StyledCardContent>{content}</StyledCardContent>}
         {onClose && (
