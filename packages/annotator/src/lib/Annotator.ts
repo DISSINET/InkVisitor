@@ -120,6 +120,7 @@ export class Annotator {
   cursor: Cursor;
   hoverHighlighter: Highlighter; // For statement list hover interaction
   hoverRegions: { start: IAbsCoordinates; end: IAbsCoordinates }[] = [];
+  hoverTagName: string | null = null; // Tag name last passed to highlightAnchorByTag; recomputed on resize.
   text: Text;
   scroller?: Scroller;
   lines?: Lines;
@@ -485,6 +486,20 @@ export class Annotator {
       return;
     }
 
+    this.hoverTagName = tagName;
+    if (!this.refreshHoverHighlightRegions()) {
+      this.clearHoverHighlight();
+      return;
+    }
+    this.draw();
+  }
+
+  private refreshHoverHighlightRegions(): boolean {
+    const tagName = this.hoverTagName;
+    if (!tagName) {
+      return false;
+    }
+
     // Find all opening tags with this tag name across all segments
     const matchingTags: Tag[] = [];
     for (const segment of this.text.segments) {
@@ -495,8 +510,7 @@ export class Annotator {
     }
 
     if (matchingTags.length === 0) {
-      this.clearHoverHighlight();
-      return;
+      return false;
     }
 
     // Collect one highlight region per anchor occurrence. Merging them into a
@@ -538,7 +552,6 @@ export class Annotator {
       const startLine = startSeg.lineStart + startSegPos.lineIndex;
       const startChar = startSegPos.charInLineIndex;
       const endLine = lastSeg.lineStart + lastSegPos.lineIndex;
-      // Highlighter uses exclusive end xLine on the last line (see Highlighter.draw).
       const endExclusiveChar = lastSegPos.charInLineIndex + 1;
 
       regions.push({
@@ -548,18 +561,18 @@ export class Annotator {
     }
 
     if (regions.length === 0) {
-      this.clearHoverHighlight();
-      return;
+      return false;
     }
 
     this.hoverRegions = regions;
-    this.draw();
+    return true;
   }
 
   /**
    * Clears the hover highlight (for statement list hover interaction).
    */
   clearHoverHighlight() {
+    this.hoverTagName = null;
     this.hoverRegions = [];
     this.hoverHighlighter.reset();
     this.draw();
@@ -773,6 +786,9 @@ export class Annotator {
 
     this.setCharWidth("abcdefghijklmnopqrstuvwxyz0123456789");
 
+    // Line reflow changes visual line/char indices; capture canonical offsets first.
+    this.cursor.reconcileOffsetsFromVisual(this.text);
+
     const noLinesViewport = this.viewportFullRowCount() + 1;
     const charsAtLine = Math.floor(this.width / this.charWidth);
 
@@ -782,6 +798,12 @@ export class Annotator {
 
     this.viewport.updateLineEnd(noLinesViewport);
     this.text.updateCharsAtLine(charsAtLine);
+
+    this.cursor.syncVisualFromOffset(this.text);
+
+    if (this.hoverTagName) {
+      this.refreshHoverHighlightRegions();
+    }
 
     // this function tries to keep the same relative position of the text even its not perfect
     // FIXME: Ideally we should find the exact text at the top of the viewport and try to keep it on top after the resize
@@ -800,6 +822,10 @@ export class Annotator {
         (this.viewport.noLines / this.scrollExtentLineCount()) * 100
       )
     );
+
+    if (this.settingsOverlay.isOpen) {
+      this.settingsOverlay.reposition(this.element);
+    }
 
     this.draw();
   }
