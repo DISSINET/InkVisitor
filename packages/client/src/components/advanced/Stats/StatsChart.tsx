@@ -210,7 +210,11 @@ export const StatsChart = ({ data, height, width }: StatsChartProps) => {
         {gridEl}
         {xAxisEl}
         {yAxisEl}
-        <Tooltip wrapperStyle={{ zIndex: 200 }} content={TooltipEl} />
+        <Tooltip
+          wrapperStyle={{ zIndex: 200 }}
+          cursor={{ fill: theme.color.statsChartCursor }}
+          content={TooltipEl}
+        />
         <Legend
           content={() => (
             <StyledLegendWrapper>
