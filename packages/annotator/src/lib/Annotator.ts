@@ -1155,17 +1155,15 @@ export class Annotator {
 
   /** Finalize a selection-handle drag and tear down its listeners. */
   private endHandleDrag(e: MouseEvent): void {
+    if (!this.dragHandle) {
+      return;
+    }
     const mode = this.dragHandle;
     const moved = this.handleDragMoved;
 
-    document.removeEventListener("mousemove", this.onDocumentHandleMove);
-    document.removeEventListener("mouseup", this.onDocumentHandleUp);
-    this.cancelSelectionEdgeScroll();
-    this.lastSelectPointer = null;
-    this.dragHandle = null;
-    this.spanDragState = null;
-    this.handleDragMoved = false;
-
+    // Apply the final pointer BEFORE clearing dragHandle (applyHandleDrag early-
+    // returns once dragHandle is null), so a gap between the last move and the
+    // release isn't dropped.
     if (moved) {
       this.applyHandleDrag(e.clientX, e.clientY);
     } else if (mode === "span") {
@@ -1175,6 +1173,14 @@ export class Annotator {
       this.cursor.endSelection();
     }
     // A stationary click directly on a boundary handle leaves the selection as-is.
+
+    document.removeEventListener("mousemove", this.onDocumentHandleMove);
+    document.removeEventListener("mouseup", this.onDocumentHandleUp);
+    this.cancelSelectionEdgeScroll();
+    this.lastSelectPointer = null;
+    this.dragHandle = null;
+    this.spanDragState = null;
+    this.handleDragMoved = false;
 
     this.draw();
   }
