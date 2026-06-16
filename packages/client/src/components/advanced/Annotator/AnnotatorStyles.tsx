@@ -231,7 +231,7 @@ export const StyledWarningRow = styled.div`
   gap: ${({ theme }) => theme.space[4]};
   padding: ${({ theme }) => theme.space[2]} ${({ theme }) => theme.space[3]};
   border-radius: ${({ theme }) => theme.borderRadius["default"]};
-  background-color: ${({ theme }) => theme.color["invertedBg"]["primary"]};
+  background-color: ${({ theme }) => theme.color.blue[50]};
 `;
 
 export const StyledWarningInfo = styled.div`
