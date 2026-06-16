@@ -90,10 +90,9 @@ export const AnnotatorWarningsModal: React.FC<AnnotatorWarningsModalProps> = ({
               >
                 <Button
                   icon={<TbAnchor />}
-                  size={ButtonSize.Large}
+                  size={ButtonSize.ExtraLarge}
                   color="success"
                   inverted
-                  noBorder
                   radiusLeft
                   radiusRight
                   tooltipLabel="scroll to anchor in text (RAW mode)"
@@ -113,22 +112,10 @@ export const AnnotatorWarningsModal: React.FC<AnnotatorWarningsModalProps> = ({
                   />
                 </StyledWarningInfo>
                 <ButtonGroup>
-                  {/* <Button
-                    icon={<TbAnchor />}
-                    label="locate anchor"
-                    color="info"
-                    // inverted
-                    tooltipLabel="locate anchor in text (RAW mode)"
-                    onClick={() => {
-                      onScrollTo(anchor.tagName, anchor.position, anchor.segmentIndex);
-                      onOpenChange(false);
-                    }}
-                  /> */}
                   <Button
                     icon={<FaScissors />}
                     label="remove"
                     color="success"
-                    // inverted
                     tooltipLabel="unlink broken anchor"
                     onClick={() => onUnlink(anchor.tagName, anchor.position, anchor.segmentIndex)}
                   />

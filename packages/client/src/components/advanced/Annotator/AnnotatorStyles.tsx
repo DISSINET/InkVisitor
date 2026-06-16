@@ -248,7 +248,7 @@ export const StyledWarningsListHeader = styled.div`
 export const StyledWarningRow = styled.div`
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => theme.space[5]};
+  gap: ${({ theme }) => theme.space[4]};
   padding: ${({ theme }) => theme.space[2]} ${({ theme }) => theme.space[3]};
   border-radius: ${({ theme }) => theme.borderRadius["default"]};
   background-color: ${({ theme }) => theme.color["invertedBg"]["primary"]};
