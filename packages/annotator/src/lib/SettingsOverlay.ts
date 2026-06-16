@@ -142,6 +142,22 @@ export class SettingsOverlay {
     document.removeEventListener("keydown", this.onKeyDown, true);
   }
 
+  /**
+   *  Re-anchor the backdrop to the canvas after a resize. No-op when closed.
+   */
+  reposition(anchor: HTMLElement): void {
+    if (!this.backdrop) {
+      return;
+    }
+    const rect = anchor.getBoundingClientRect();
+    Object.assign(this.backdrop.style, {
+      left: `${rect.left}px`,
+      top: `${rect.top}px`,
+      width: `${rect.width}px`,
+      height: `${rect.height}px`,
+    } as Partial<CSSStyleDeclaration>);
+  }
+
   private buildHeader(): HTMLDivElement {
     const header = document.createElement("div");
     Object.assign(header.style, {

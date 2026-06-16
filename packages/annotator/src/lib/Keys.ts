@@ -38,6 +38,7 @@ export interface AnnotatorCallbacks {
   onCopyText(): void;
   onPasteText(): void;
   draw(): void;
+  resetCaretBlink(): void;
   width: number;
   charWidth: number;
   cursor: Cursor;
@@ -874,6 +875,10 @@ export default class Keys {
     }
 
     e.preventDefault();
+
+    // Any real key activity makes the caret solid immediately (#3092).
+    this.annotator.resetCaretBlink();
+
     let key: Key = e.key as Key;
     // Snapshot to fire onTextChangeCb only when the document actually changes.
     const valueBefore = this.text.value;

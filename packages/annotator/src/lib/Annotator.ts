@@ -2,6 +2,7 @@ import Cursor, { DIRECTION } from "./Cursor";
 import Highlighter, { IAbsCoordinates, CursorStyle } from "./Highlighter";
 import History, { HistorySnapshot } from "./History";
 import { ContextMenu, ContextMenuItem } from "./ContextMenu";
+import { CaretBlink } from "./CaretBlink";
 import { SettingsOverlay } from "./SettingsOverlay";
 import Keys from "./Keys";
 import { Lines } from "./Lines";
@@ -42,6 +43,11 @@ export const wrapTokenRegex = /(<[^>]+>)|(\s+)|([\w']+)|([^\s\w'<]+|<)/g;
 export const createSpecificOpeningTagRegex = (tagName: string) =>
   new RegExp(`<${tagName}(?:\\s+[^>]*)?>`, "g");
 
+/** One live annotator per host element — a new constructor tears down the previous (#3092). */
+const canvasHosts = new WeakMap<HTMLCanvasElement, Annotator>();
+const scrollerHosts = new WeakMap<HTMLDivElement, Annotator>();
+const linesHosts = new WeakMap<HTMLCanvasElement, Annotator>();
+
 // Occurrence holds exact position of a point in text
 export interface Occurrence {
   segmentIndex: number;
@@ -74,6 +80,7 @@ export interface DrawingOptions {
   charsAtLine: number;
   color?: string; // override
   caretWidth?: number; // collapsed-caret width in device px (defaults to 1)
+  caretVisible?: boolean; // blink phase: skip painting the collapsed caret when false (#3092)
 }
 
 export interface Selected {
@@ -113,6 +120,7 @@ export class Annotator {
   cursor: Cursor;
   hoverHighlighter: Highlighter; // For statement list hover interaction
   hoverRegions: { start: IAbsCoordinates; end: IAbsCoordinates }[] = [];
+  hoverTagName: string | null = null; // Tag name last passed to highlightAnchorByTag; recomputed on resize.
   text: Text;
   scroller?: Scroller;
   lines?: Lines;
@@ -120,6 +128,13 @@ export class Annotator {
   warnings: Warnings;
   contextMenu: ContextMenu = new ContextMenu();
   settingsOverlay: SettingsOverlay = new SettingsOverlay();
+
+  /** Blinks the collapsed text caret at 1Hz; repaints via draw() (#3092). */
+  private readonly caretBlink: CaretBlink;
+
+  private deferredInitTimeout?: ReturnType<typeof setTimeout>;
+
+  private destroyed = false;
 
   /** Phase 4 (#3086) — bounded undo/redo stack of document snapshots. */
   history: History = new History();
@@ -170,6 +185,9 @@ export class Annotator {
   private readonly boundOnContextMenu = (e: MouseEvent) =>
     this.onContextMenu(e);
 
+  private readonly boundOnMouseDoubleClick = (e: MouseEvent) =>
+    this.onMouseDoubleClick(e);
+
   private readonly boundOnCanvasMouseLeave = () => {
     if (this.hoverDebounceTimeout) {
       clearTimeout(this.hoverDebounceTimeout);
@@ -184,7 +202,16 @@ export class Annotator {
     inputText: string,
     ratio: number = 1
   ) {
+    canvasHosts.get(element)?.destroy();
+
     this.element = element;
+
+    this.caretBlink = new CaretBlink(() => {
+      if (!this.destroyed) {
+        this.draw();
+      }
+    });
+
     const ctx = this.element.getContext("2d");
     if (!ctx) {
       throw new Error("Cannot get 2d context");
@@ -236,10 +263,7 @@ export class Annotator {
 
     this.element.onwheel = this.onWheel.bind(this);
     this.element.onmousedown = this.onMouseDown.bind(this);
-    this.element.addEventListener(
-      "dblclick",
-      this.onMouseDoubleClick.bind(this)
-    );
+    this.element.addEventListener("dblclick", this.boundOnMouseDoubleClick);
     this.element.addEventListener("mousemove", this.boundOnMouseMove);
     this.element.addEventListener("mouseleave", this.boundOnCanvasMouseLeave);
     this.element.addEventListener("contextmenu", this.boundOnContextMenu);
@@ -248,11 +272,17 @@ export class Annotator {
 
     this.previousRenderViewportLineStart = 0;
 
+    canvasHosts.set(element, this);
+
     this.loadSettings();
 
     this.draw();
 
-    setTimeout(() => {
+    this.deferredInitTimeout = setTimeout(() => {
+      this.deferredInitTimeout = undefined;
+      if (this.destroyed) {
+        return;
+      }
       this.resize();
       this.runWarningChecks();
     });
@@ -456,6 +486,20 @@ export class Annotator {
       return;
     }
 
+    this.hoverTagName = tagName;
+    if (!this.refreshHoverHighlightRegions()) {
+      this.clearHoverHighlight();
+      return;
+    }
+    this.draw();
+  }
+
+  private refreshHoverHighlightRegions(): boolean {
+    const tagName = this.hoverTagName;
+    if (!tagName) {
+      return false;
+    }
+
     // Find all opening tags with this tag name across all segments
     const matchingTags: Tag[] = [];
     for (const segment of this.text.segments) {
@@ -466,8 +510,7 @@ export class Annotator {
     }
 
     if (matchingTags.length === 0) {
-      this.clearHoverHighlight();
-      return;
+      return false;
     }
 
     // Collect one highlight region per anchor occurrence. Merging them into a
@@ -509,7 +552,6 @@ export class Annotator {
       const startLine = startSeg.lineStart + startSegPos.lineIndex;
       const startChar = startSegPos.charInLineIndex;
       const endLine = lastSeg.lineStart + lastSegPos.lineIndex;
-      // Highlighter uses exclusive end xLine on the last line (see Highlighter.draw).
       const endExclusiveChar = lastSegPos.charInLineIndex + 1;
 
       regions.push({
@@ -519,18 +561,18 @@ export class Annotator {
     }
 
     if (regions.length === 0) {
-      this.clearHoverHighlight();
-      return;
+      return false;
     }
 
     this.hoverRegions = regions;
-    this.draw();
+    return true;
   }
 
   /**
    * Clears the hover highlight (for statement list hover interaction).
    */
   clearHoverHighlight() {
+    this.hoverTagName = null;
     this.hoverRegions = [];
     this.hoverHighlighter.reset();
     this.draw();
@@ -744,6 +786,9 @@ export class Annotator {
 
     this.setCharWidth("abcdefghijklmnopqrstuvwxyz0123456789");
 
+    // Line reflow changes visual line/char indices; capture canonical offsets first.
+    this.cursor.reconcileOffsetsFromVisual(this.text);
+
     const noLinesViewport = this.viewportFullRowCount() + 1;
     const charsAtLine = Math.floor(this.width / this.charWidth);
 
@@ -753,6 +798,12 @@ export class Annotator {
 
     this.viewport.updateLineEnd(noLinesViewport);
     this.text.updateCharsAtLine(charsAtLine);
+
+    this.cursor.syncVisualFromOffset(this.text);
+
+    if (this.hoverTagName) {
+      this.refreshHoverHighlightRegions();
+    }
 
     // this function tries to keep the same relative position of the text even its not perfect
     // FIXME: Ideally we should find the exact text at the top of the viewport and try to keep it on top after the resize
@@ -771,6 +822,10 @@ export class Annotator {
         (this.viewport.noLines / this.scrollExtentLineCount()) * 100
       )
     );
+
+    if (this.settingsOverlay.isOpen) {
+      this.settingsOverlay.reposition(this.element);
+    }
 
     this.draw();
   }
@@ -1028,6 +1083,16 @@ export class Annotator {
    * @param e
    */
   onMouseDown(e: MouseEvent) {
+    // Only the primary (left) button drives text selection. A non-primary
+    // mousedown — notably the right button, which fires just before the
+    // `contextmenu` event — must leave the current selection untouched so the
+    // context menu opens over the existing highlight instead of collapsing it
+    // (#3092).
+    if (e.button !== 0) {
+      return;
+    }
+
+    this.caretBlink.reset(); // solid caret immediately on click (#3092)
     this.lastSelectPointer = { cx: e.clientX, cy: e.clientY };
     this.applyPointerToCursor(e.clientX, e.clientY);
 
@@ -1049,6 +1114,66 @@ export class Annotator {
    */
   onMouseUp(e: MouseEvent) {
     this.endSelectInteraction(e);
+  }
+
+  /** Whether the blinking caret is currently in its visible phase (#3092). */
+  isCaretVisible(): boolean {
+    return this.caretBlink.isVisible();
+  }
+
+  /**
+   * Force the caret solid and restart its blink phase. Called on user activity
+   * (clicks, keystrokes) so the caret never lands mid-"off" right as it moves.
+   */
+  resetCaretBlink(): void {
+    this.caretBlink.reset();
+  }
+
+  /**
+   * Tear down timers and document-level listeners. Hosts must call this when the
+   * annotator is unmounted, otherwise the caret-blink interval keeps repainting
+   * a detached canvas (#3092).
+   */
+  destroy(): void {
+    if (this.destroyed) {
+      return;
+    }
+    this.destroyed = true;
+
+    if (canvasHosts.get(this.element) === this) {
+      canvasHosts.delete(this.element);
+    }
+    if (this.scroller && scrollerHosts.get(this.scroller.element) === this) {
+      scrollerHosts.delete(this.scroller.element);
+    }
+    if (this.lines && linesHosts.get(this.lines.element) === this) {
+      linesHosts.delete(this.lines.element);
+    }
+
+    this.caretBlink.destroy();
+    if (this.deferredInitTimeout !== undefined) {
+      clearTimeout(this.deferredInitTimeout);
+      this.deferredInitTimeout = undefined;
+    }
+    this.cancelSelectionEdgeScroll();
+    if (this.hoverDebounceTimeout) {
+      clearTimeout(this.hoverDebounceTimeout);
+      this.hoverDebounceTimeout = undefined;
+    }
+    document.removeEventListener("mousemove", this.onDocumentSelectMove);
+    document.removeEventListener("mouseup", this.onDocumentSelectUp);
+
+    this.element.onwheel = null;
+    this.element.onmousedown = null;
+    this.element.onkeydown = null;
+    this.element.removeEventListener("dblclick", this.boundOnMouseDoubleClick);
+    this.element.removeEventListener("mousemove", this.boundOnMouseMove);
+    this.element.removeEventListener("mouseleave", this.boundOnCanvasMouseLeave);
+    this.element.removeEventListener("contextmenu", this.boundOnContextMenu);
+
+    this.onScrollCb = undefined;
+    this.scroller = undefined;
+    this.lines = undefined;
   }
 
   /**
@@ -1079,6 +1204,7 @@ export class Annotator {
   }
 
   onMouseDoubleClick(e: MouseEvent) {
+    this.caretBlink.reset(); // solid caret immediately on double-click (#3092)
     this.cursor.setPositionFromEvent(
       e,
       this.lineHeight,
@@ -1126,8 +1252,6 @@ export class Annotator {
 
   /**
    * onContextMenu opens the right-click context menu at the pointer.
-   * TODO (#3086): wire real actions / let the host supply items via a callback.
-   * For now these are placeholder entries.
    * @param e
    */
   onContextMenu(e: MouseEvent) {
@@ -1135,16 +1259,38 @@ export class Annotator {
     this.contextMenu.open(e.clientX, e.clientY, this.buildContextMenuItems());
   }
 
+  /** Whether a non-empty text highlight/selection is active. */
+  isHighlighting(): boolean {
+    return this.cursor.isSelected();
+  }
+
   /** Context-menu entries. For now just a toggle for the debug FPS counter. */
   private buildContextMenuItems(): ContextMenuItem[] {
-    return [
+    const items: ContextMenuItem[] = [];
+
+    if (this.isHighlighting()) {
+      items.push({
+        label: "Copy",
+        onClick: () => this.onCopyText(),
+      });
+    }
+
+    items.push({
+      label: "Paste",
+      onClick: () => this.onPasteText(),
+    });
+
+    items.push({ separator: true });
+    items.push(
       {
         label: `${this.showFps ? "✓ " : ""}Show FPS counter`,
         onClick: () => this.setShowFps(!this.showFps),
       },
       { separator: true },
-      { label: "Options…", onClick: () => this.openSettings() },
-    ];
+      { label: "Options…", onClick: () => this.openSettings() }
+    );
+
+    return items;
   }
 
   /** Open the settings overlay with the current options. */
@@ -1200,12 +1346,17 @@ export class Annotator {
   }
 
   addLines(canvasElement: HTMLCanvasElement): void {
+    const prev = linesHosts.get(canvasElement);
+    if (prev && prev !== this) {
+      prev.destroy();
+    }
     this.lines = new Lines(
       canvasElement,
       this.ratio,
       this.lineHeight,
       this.charWidth
     );
+    linesHosts.set(canvasElement, this);
   }
 
   getAnnotations(
@@ -1449,6 +1600,10 @@ export class Annotator {
    * @param e
    */
   addScroller(scrollerDiv: HTMLDivElement) {
+    const prev = scrollerHosts.get(scrollerDiv);
+    if (prev && prev !== this) {
+      prev.destroy();
+    }
     this.scroller = new Scroller(scrollerDiv);
     this.scroller.setFocusTarget(this.element);
     this.scroller.onChange((percentage: number) => {
@@ -1475,6 +1630,7 @@ export class Annotator {
 
     const viewportSize = this.viewport.noLines / this.scrollExtentLineCount();
     this.scroller?.setViewportSize(Math.min(100, viewportSize * 100));
+    scrollerHosts.set(scrollerDiv, this);
   }
 
   /**
@@ -1531,6 +1687,9 @@ export class Annotator {
    * TODO - this should be done in conjunction with requestAnimationFrame
    */
   draw() {
+    if (this.destroyed) {
+      return;
+    }
     if (this.showFps) {
       this.updateFps();
     }
@@ -1560,6 +1719,9 @@ export class Annotator {
 
     const textSegment = this.text.cursorToIndex(this.viewport, this.cursor);
 
+    // Blink only while a collapsed caret is actually shown; idle otherwise (#3092).
+    this.caretBlink.sync(this.cursor.hasCaret());
+
     if (textSegment) {
       const line = this.text.getLineFromPosition(textSegment);
       if (this.cursor.xLine > line.length) {
@@ -1574,6 +1736,7 @@ export class Annotator {
         charWidth: this.charWidth,
         charsAtLine: this.text.charsAtLine,
         caretWidth: this.caretWidth * this.ratio,
+        caretVisible: this.caretBlink.isVisible(),
       });
     }
 
@@ -2418,7 +2581,11 @@ export class Annotator {
   }
 
   onCopyText() {
-    window.navigator.clipboard.writeText(this.lastSelectedText?.text || "");
+    const area = this.cursor.getSelectedArea();
+    const text = area
+      ? this.text.getRangeText(area[0], area[1])
+      : this.lastSelectedText?.text || "";
+    window.navigator.clipboard.writeText(text);
   }
 
   onPasteText() {
