@@ -2121,6 +2121,10 @@ export class Annotator {
         charsAtLine: this.text.charsAtLine,
       });
     }
+    // Clear the per-region bounds so the highlighter isn't left holding the last
+    // region's selectStart/selectEnd between draws (style is preserved). reset()
+    // only nulls the bounds, not the configured style.
+    this.hoverHighlighter.reset();
 
     // if (this.onSelectTextCb && this.cursor.isSelected()) {
     if (this.onSelectTextCb) {
