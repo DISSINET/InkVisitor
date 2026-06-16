@@ -219,21 +219,6 @@ export default class Cursor
   }
 
   /**
-   * Issue #3108 — clamp a raw visual position into the document: `yLine` into
-   * `[0, noLines-1]` and `xLine` into `[0, lineLength]`.
-   */
-  private clampVisualToDoc(
-    text: Text,
-    xLine: number,
-    yLine: number
-  ): IAbsCoordinates {
-    const y = Math.max(0, Math.min(yLine, Math.max(0, text.noLines - 1)));
-    const lineLen = (text.getLine(y) ?? "").length;
-    const x = Math.max(0, Math.min(xLine, lineLen));
-    return { xLine: x, yLine: y };
-  }
-
-  /**
    * Issue #3108 — move ONE selection boundary (the start or end drag handle) to a
    * new visual position while keeping the other boundary fixed. Enforces a minimum
    * of one VISIBLE character selected and prevents the dragged boundary from
@@ -256,7 +241,7 @@ export default class Cursor
       return;
     }
 
-    const requested = this.clampVisualToDoc(text, xLine, yLine);
+    const requested = text.clampVisual(xLine, yLine);
 
     let movingPt: IAbsCoordinates;
     let fixedPt: IAbsCoordinates;

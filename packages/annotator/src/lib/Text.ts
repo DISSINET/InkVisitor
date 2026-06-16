@@ -370,6 +370,17 @@ class Text {
   }
 
   /**
+   * Clamps a raw visual position into the document: `yLine` into `[0, noLines-1]`
+   * and `xLine` into `[0, lineLength]` of the resolved line (#3108).
+   */
+  clampVisual(xLine: number, yLine: number): IAbsCoordinates {
+    const y = Math.max(0, Math.min(yLine, Math.max(0, this.noLines - 1)));
+    const lineLen = (this.getLine(y) ?? "").length;
+    const x = Math.max(0, Math.min(xLine, lineLen));
+    return { xLine: x, yLine: y };
+  }
+
+  /**
    * Updates the maximum characters per line and recalculates line breaks.
    *
    * @param charsAtLine - New maximum characters per line

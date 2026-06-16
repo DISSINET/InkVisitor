@@ -1064,13 +1064,7 @@ export class Annotator {
       this.viewport.scrollOffsetY,
       this.viewport.lineStart
     );
-    const yLine = Math.max(
-      0,
-      Math.min(tmp.yLine, Math.max(0, this.text.noLines - 1))
-    );
-    const lineLen = (this.text.getLine(yLine) ?? "").length;
-    const xLine = Math.max(0, Math.min(tmp.xLine, lineLen));
-    return { xLine, yLine };
+    return this.text.clampVisual(tmp.xLine, tmp.yLine);
   }
 
   /**
