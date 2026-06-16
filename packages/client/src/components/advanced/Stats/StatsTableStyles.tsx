@@ -11,6 +11,7 @@ export const StyledTableContainer = styled.div<StyledTableContainer>`
   overflow: auto;
   border: 1px solid ${({ theme }) => theme.color.gray[200]};
   border-radius: ${({ theme }) => theme.borderRadius.md};
+  color: ${({ theme }) => theme.color.gray[900]};
 `;
 
 export const StyledEmptyState = styled.div<StyledTableContainer>`
