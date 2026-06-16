@@ -30,7 +30,15 @@ const VISIBLE_EVENT_TYPES = Object.values(EventType).filter(
   (type) => !HIDDEN_EVENT_TYPES.includes(type),
 );
 
-const toDateInput = (ms: number): string => new Date(ms).toISOString().split("T")[0];
+// Formats a timestamp into the local "YYYY-MM-DDTHH:mm" value expected by a
+// datetime picker, so the displayed time matches the user's timezone.
+const toDateTimeInput = (ms: number): string => {
+  const date = new Date(ms);
+  const pad = (value: number) => String(value).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
+    date.getDate(),
+  )}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+};
 
 const areExploreStatsParamsEqual = (
   a: Explore.IExploreStatsParams,
@@ -117,8 +125,9 @@ export const ExplorerStats: React.FC<ExplorerStatsProps> = ({
           <StyledFieldLabel>From</StyledFieldLabel>
           <StyledDateInputWrapper>
             <Input
-              type="date"
-              value={toDateInput(localStats.fromDate)}
+              type="datetime-local"
+              width={150}
+              value={toDateTimeInput(localStats.fromDate)}
               onChangeFn={(value) => value && setParams({ fromDate: new Date(value).getTime() })}
             />
             <Button
@@ -137,8 +146,9 @@ export const ExplorerStats: React.FC<ExplorerStatsProps> = ({
           <StyledFieldLabel>To</StyledFieldLabel>
           <StyledDateInputWrapper>
             <Input
-              type="date"
-              value={toDateInput(localStats.toDate)}
+              type="datetime-local"
+              width={150}
+              value={toDateTimeInput(localStats.toDate)}
               onChangeFn={(value) => value && setParams({ toDate: new Date(value).getTime() })}
             />
             <Button
