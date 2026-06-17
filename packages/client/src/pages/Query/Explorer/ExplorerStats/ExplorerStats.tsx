@@ -5,11 +5,13 @@ import { StatsChart, StatsTable } from "components/advanced";
 import { Button, ButtonGroup, Input, Loader } from "components";
 import { useDebounce, useResizeObserver } from "hooks";
 import React, { useEffect, useState } from "react";
+import { FaUndo } from "react-icons/fa";
 import { STATS_FILTER_DEBOUNCE_MS } from "pages/Stats/constants";
-import { ExploreAction, ExploreActionType } from "../state";
+import { defaultExploreStatsParams, ExploreAction, ExploreActionType } from "../state";
 import {
   StyledChartWrapper,
   StyledConfigStrip,
+  StyledDateInputWrapper,
   StyledField,
   StyledFieldLabel,
   StyledStatsHeader,
@@ -19,14 +21,24 @@ import {
 
 /** Event types hidden from the stats config (paired deletion markers). */
 const HIDDEN_EVENT_TYPES: EventType[] = [
-  EventType.ANCHOR_ADD, EventType.ANCHOR_DELETE, EventType.ANCHOR_EDIT, EventType.TEXT_EDIT
+  EventType.ANCHOR_ADD,
+  EventType.ANCHOR_DELETE,
+  EventType.ANCHOR_EDIT,
+  EventType.TEXT_EDIT,
 ];
 const VISIBLE_EVENT_TYPES = Object.values(EventType).filter(
-  (type) => !HIDDEN_EVENT_TYPES.includes(type)
+  (type) => !HIDDEN_EVENT_TYPES.includes(type),
 );
 
-const toDateInput = (ms: number): string =>
-  new Date(ms).toISOString().split("T")[0];
+// Formats a timestamp into the local "YYYY-MM-DDTHH:mm" value expected by a
+// datetime picker, so the displayed time matches the user's timezone.
+const toDateTimeInput = (ms: number): string => {
+  const date = new Date(ms);
+  const pad = (value: number) => String(value).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
+    date.getDate(),
+  )}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+};
 
 const areExploreStatsParamsEqual = (
   a: Explore.IExploreStatsParams,
@@ -111,24 +123,43 @@ export const ExplorerStats: React.FC<ExplorerStatsProps> = ({
       <StyledConfigStrip>
         <StyledField>
           <StyledFieldLabel>From</StyledFieldLabel>
-          <Input
-            type="date"
-            value={toDateInput(localStats.fromDate)}
-            onChangeFn={(value) =>
-              setParams({ fromDate: new Date(value).getTime() })
-            }
-          />
+          <StyledDateInputWrapper>
+            <Input
+              type="datetime-local"
+              width={150}
+              value={toDateTimeInput(localStats.fromDate)}
+              onChangeFn={(value) => value && setParams({ fromDate: new Date(value).getTime() })}
+            />
+            <Button
+              icon={<FaUndo />}
+              onClick={() => setParams({ fromDate: defaultExploreStatsParams.fromDate })}
+              color="primary"
+              inverted
+              noBackground
+              tooltipLabel="Reset to since forever"
+              disabled={localStats.fromDate === defaultExploreStatsParams.fromDate}
+            />
+          </StyledDateInputWrapper>
         </StyledField>
 
         <StyledField>
           <StyledFieldLabel>To</StyledFieldLabel>
-          <Input
-            type="date"
-            value={toDateInput(localStats.toDate)}
-            onChangeFn={(value) =>
-              setParams({ toDate: new Date(value).getTime() })
-            }
-          />
+          <StyledDateInputWrapper>
+            <Input
+              type="datetime-local"
+              width={150}
+              value={toDateTimeInput(localStats.toDate)}
+              onChangeFn={(value) => value && setParams({ toDate: new Date(value).getTime() })}
+            />
+            <Button
+              icon={<FaUndo />}
+              onClick={() => setParams({ toDate: new Date().getTime() })}
+              color="primary"
+              inverted
+              noBackground
+              tooltipLabel="Reset to until now"
+            />
+          </StyledDateInputWrapper>
         </StyledField>
 
         <StyledField>

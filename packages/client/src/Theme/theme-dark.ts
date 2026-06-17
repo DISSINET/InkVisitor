@@ -83,6 +83,8 @@ const darkTheme = {
     focusedCheckbox: "rgba(246,246,255,0.1)",
     uploadDocumentBg: "#22315a",
 
+    statsChartCursor: "rgba(246, 246, 255, 0.08)", // gentle primary tint for hovered column
+
     closeBtnBackground: "rgba(200, 200, 200, 0.1)",
 
     staging: "#911111",

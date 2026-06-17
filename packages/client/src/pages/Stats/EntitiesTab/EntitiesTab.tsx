@@ -5,7 +5,7 @@ import api from "api";
 import { Button, ButtonGroup, Input, Loader, Timestamp } from "components";
 import { useDebounce, useResizeObserver } from "hooks";
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from "react";
-import { FaCalendarPlus, FaTimes } from "react-icons/fa";
+import { FaCalendarPlus, FaTimes, FaUndo } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { STATS_FILTER_DEBOUNCE_MS, USER_THRESHOLD_MAX, VISIBLE_EVENT_TYPES } from "../constants";
 import {
@@ -186,7 +186,7 @@ export const EntitiesTab: React.FC = () => {
                   }
                 />
                 <Button
-                  icon={<FaTimes />}
+                  icon={<FaUndo />}
                   onClick={() => {
                     dispatch({
                       type: "showDateFromRangePickerUpdate",
@@ -245,7 +245,7 @@ export const EntitiesTab: React.FC = () => {
                   }
                 />
                 <Button
-                  icon={<FaTimes />}
+                  icon={<FaUndo />}
                   onClick={() => {
                     dispatch({
                       type: "showDateToRangePickerUpdate",

@@ -219,7 +219,7 @@ export const StyledIdsFloatingRoot = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 0.5rem;
+  gap: 1rem;
 `;
 
 export const StyledIdsToggleWrapper = styled.div`
@@ -286,7 +286,7 @@ export const StyledIdsPanel = styled.div`
   min-height: 0;
   padding: 0.75rem;
   border-radius: ${({ theme }) => theme.borderRadius.md};
-  background-color: ${({ theme }) => theme.color["white"]};
+  background-color: ${({ theme }) => theme.color["invertedBg"]["info"]};
   box-shadow: ${({ theme }) => theme.boxShadow.high};
   overflow: hidden;
 `;

@@ -23,10 +23,7 @@ import { RiCloseFill } from "react-icons/ri";
 import { setExpandedOptions } from "redux/features/entitySearch/expandedOptionsSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { DropdownItem } from "@inkvisitor/shared/types";
-import {
-  EntitySearchAdvancedOptions,
-  mainPageAdvancedSearchOptions,
-} from "./EntitySearchAdvancedOptions/EntitySearchAdvancedOptions";
+import { EntitySearchAdvancedOptions } from "./EntitySearchAdvancedOptions/EntitySearchAdvancedOptions";
 import {
   StyledBoxContent,
   StyledNoResults,
@@ -315,7 +312,7 @@ export const EntitySearchBox: React.FC = () => {
 
   useEffect(() => {
     const filtered = expandedOptions.filter((option: SearchEnums.AdvancedOption) =>
-      mainPageAdvancedSearchOptions.includes(option),
+      SearchEnums.AdvancedOptions.includes(option),
     );
     if (filtered.length !== expandedOptions.length) {
       dispatch(setExpandedOptions(filtered));

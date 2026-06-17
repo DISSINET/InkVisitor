@@ -1,19 +1,25 @@
 import { AsymmetricalAnchor } from "@inkvisitor/annotator/src/lib";
-import { Modal, ModalContent, ModalFooter, ModalHeader } from "components";
+import { ButtonGroup, Modal, ModalContent, ModalFooter, ModalHeader } from "components";
 import { Button } from "components/basic/Button/Button";
 import { EntityTagById } from "components/advanced/EntityTag/EntityTagById";
 import React from "react";
-import { FaCrosshairs, FaExclamationTriangle } from "react-icons/fa";
+import { FaExclamationTriangle } from "react-icons/fa";
+import { FaScissors } from "react-icons/fa6";
+import { TbAnchor } from "react-icons/tb";
 import { ButtonSize } from "types";
 import {
+  StyledWarningInfo,
   StyledWarningKind,
   StyledWarningRow,
-  StyledWarningsChip,
   StyledWarningsList,
+  StyledWarningsListHeader,
 } from "./AnnotatorStyles";
 
 const warningsTitle = (count: number): string =>
   `${count} asymmetrical anchor${count === 1 ? "" : "s"}`;
+
+const issuesFoundLabel = (count: number): string =>
+  `${count} issue${count === 1 ? "" : "s"} found in the document`;
 
 /**
  * Compact, always-visible trigger: a small warning icon + count. Clicking it
@@ -24,13 +30,20 @@ export const WarningsChip: React.FC<{ count: number; onClick: () => void }> = ({
   count,
   onClick,
 }) => (
-  <StyledWarningsChip type="button" onClick={onClick} title={warningsTitle(count)}>
-    <FaExclamationTriangle size={13} />
-    {count}
-  </StyledWarningsChip>
+  <Button
+    icon={<FaExclamationTriangle size={13} />}
+    label={String(count)}
+    textColor="warningText"
+    color="warningMessage"
+    borderColor="warningBorder"
+    radiusLeft
+    radiusRight
+    tooltipLabel={warningsTitle(count)}
+    onClick={onClick}
+  />
 );
 
-interface AnnotatorWarningsPanelProps {
+interface AnnotatorWarningsModalProps {
   anchors: AsymmetricalAnchor[];
   onUnlink: (tagName: string, position: number, segmentIndex: number) => void;
   onScrollTo: (tagName: string, position: number, segmentIndex: number) => void;
@@ -43,7 +56,7 @@ interface AnnotatorWarningsPanelProps {
 }
 
 const kindLabel = (type: AsymmetricalAnchor["type"]): string =>
-  type === "orphaned-opening" ? "orphaned opening" : "orphaned closing";
+  type === "orphaned-opening" ? "orphaned opening < >" : "orphaned closing < / >";
 
 /**
  * Surfaces asymmetrical (broken) anchors detected by the annotator (#2601).
@@ -51,7 +64,7 @@ const kindLabel = (type: AsymmetricalAnchor["type"]): string =>
  * modal; the always-visible footprint is just the WarningsChip. Renders nothing
  * when there are no issues.
  */
-export const AnnotatorWarningsPanel: React.FC<AnnotatorWarningsPanelProps> = ({
+export const AnnotatorWarningsModal: React.FC<AnnotatorWarningsModalProps> = ({
   anchors,
   onUnlink,
   onScrollTo,
@@ -68,24 +81,28 @@ export const AnnotatorWarningsPanel: React.FC<AnnotatorWarningsPanelProps> = ({
     <>
       {showChip && <WarningsChip count={anchors.length} onClick={() => onOpenChange(true)} />}
 
-      <Modal showModal={open} onClose={() => onOpenChange(false)} width="normal">
+      <Modal width="auto" showModal={open} onClose={() => onOpenChange(false)}>
         <ModalHeader
-          title={warningsTitle(anchors.length)}
+          title={"Asymmetrical anchors"}
           icon={<FaExclamationTriangle />}
+          iconColor="warning"
           onClose={() => onOpenChange(false)}
         />
         <ModalContent column enableScroll isLoading={isLoading}>
+          <StyledWarningsListHeader>{issuesFoundLabel(anchors.length)}</StyledWarningsListHeader>
           <StyledWarningsList>
             {anchors.map((anchor, index) => (
               <StyledWarningRow
                 key={`${anchor.tagName}-${anchor.segmentIndex}-${anchor.position}-${index}`}
               >
-                <StyledWarningKind>{kindLabel(anchor.type)}</StyledWarningKind>
                 <Button
-                  icon={<FaCrosshairs />}
-                  size={ButtonSize.Small}
+                  icon={<TbAnchor />}
+                  size={ButtonSize.Large}
                   color="success"
                   inverted
+                  noBorder
+                  radiusLeft
+                  radiusRight
                   tooltipLabel="scroll to anchor in text (RAW mode)"
                   onClick={() => {
                     onScrollTo(anchor.tagName, anchor.position, anchor.segmentIndex);
@@ -93,21 +110,30 @@ export const AnnotatorWarningsPanel: React.FC<AnnotatorWarningsPanelProps> = ({
                     onOpenChange(false);
                   }}
                 />
-                <EntityTagById
-                  entityId={anchor.tagName}
-                  disableToast
-                  fullWidth
-                  disableTooltip={false}
-                  unlinkButton={{
-                    tooltipLabel: "unlink broken anchor",
-                    onClick: () => onUnlink(anchor.tagName, anchor.position, anchor.segmentIndex),
-                  }}
-                />
+                <StyledWarningInfo>
+                  <StyledWarningKind>{kindLabel(anchor.type)}</StyledWarningKind>
+                  <EntityTagById
+                    entityId={anchor.tagName}
+                    disableToast
+                    fullWidth
+                    disableTooltip={false}
+                    disableDoubleClick={false}
+                  />
+                </StyledWarningInfo>
+                <ButtonGroup>
+                  <Button
+                    icon={<FaScissors />}
+                    label="remove"
+                    color="success"
+                    tooltipLabel="unlink broken anchor"
+                    onClick={() => onUnlink(anchor.tagName, anchor.position, anchor.segmentIndex)}
+                  />
+                </ButtonGroup>
               </StyledWarningRow>
             ))}
           </StyledWarningsList>
         </ModalContent>
-        <ModalFooter>
+        <ModalFooter note="Anchors must have matching opening and closing tags">
           <Button label="close" color="primary" inverted onClick={() => onOpenChange(false)} />
         </ModalFooter>
       </Modal>
@@ -115,4 +141,4 @@ export const AnnotatorWarningsPanel: React.FC<AnnotatorWarningsPanelProps> = ({
   );
 };
 
-export default AnnotatorWarningsPanel;
+export default AnnotatorWarningsModal;

@@ -24,7 +24,7 @@ import {
 import { StyledInfoText } from "../StatementListHeader/StatementListHeaderStyles";
 import { toast } from "react-toastify";
 import { SECOND_PANEL_MIN_WIDTH } from "Theme/constants";
-import { WarningsChip } from "components/advanced/Annotator/AnnotatorWarningsPanel";
+import { WarningsChip } from "components/advanced/Annotator/AnnotatorWarningsModal";
 
 // icon + margin + gap in StyledHighlightContainer when highlight label is shown
 const HIGHLIGHT_ICON_RESERVED_WIDTH = 10;
@@ -83,16 +83,16 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
   }, [contentWidth]);
 
   const highlightDropdownWidth = useMemo(() => {
-    const baseWidth = annotatorWidthTooNarrow ? contentWidth / 2.7 : contentWidth / 2.5;
+    const baseWidth = annotatorWidthTooNarrow ? contentWidth / 2.9 : contentWidth / 2.6;
     return isUndersized ? baseWidth + HIGHLIGHT_ICON_RESERVED_WIDTH : baseWidth;
   }, [contentWidth, annotatorWidthTooNarrow, isUndersized]);
 
   const highlightDropdownLimitSelectedItems = useMemo(
     () =>
       Math.floor(
-        (highlightDropdownWidth - HIGHLIGHT_DROPDOWN_CHROME_WIDTH) / HIGHLIGHT_SELECTED_ITEM_WIDTH
+        (highlightDropdownWidth - HIGHLIGHT_DROPDOWN_CHROME_WIDTH) / HIGHLIGHT_SELECTED_ITEM_WIDTH,
       ),
-    [highlightDropdownWidth]
+    [highlightDropdownWidth],
   );
 
   return (
@@ -124,7 +124,7 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
               <div
                 style={{
                   display: "flex",
-                  maxWidth: annotatorWidthTooNarrow ? "10rem" : "15.5rem",
+                  maxWidth: annotatorWidthTooNarrow ? "10rem" : "13.5rem",
                 }}
               >
                 <EntityTag
@@ -170,7 +170,7 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
 
           <StyledDocumentTitleContainer
             style={{
-              maxWidth: annotatorWidthTooNarrow ? "9.5rem" : "14.5rem",
+              maxWidth: annotatorWidthTooNarrow ? "8rem" : "12.5rem",
               minWidth: "2rem",
             }}
           >

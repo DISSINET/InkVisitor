@@ -24,6 +24,7 @@ export const StyledDocumentTag = styled.div<{
       : theme.fontSize["sm"]};
   align-items: center;
   min-width: 0;
+  cursor: default;
   max-width: ${({ $width }) =>
     $width === "full" ? "100%" : `${$width / 10}rem`};
   overflow: hidden !important;
