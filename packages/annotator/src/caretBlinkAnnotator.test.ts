@@ -50,14 +50,15 @@ describe("annotator caret blink (#3092)", () => {
     expect(a.isCaretVisible()).toBe(true);
   });
 
-  test("caret does not blink while the canvas is not focused", () => {
+  test("caret is hidden while the canvas is not focused", () => {
     const a = mk("foo bar baz");
     a.cursor.setPosition(0, 0);
+    const drawLineSpy = jest.spyOn(a.cursor, "drawLine");
     a.draw();
 
-    expect(a.isCaretVisible()).toBe(true);
+    expect(drawLineSpy).not.toHaveBeenCalled();
     jest.advanceTimersByTime(2000);
-    expect(a.isCaretVisible()).toBe(true);
+    expect(drawLineSpy).not.toHaveBeenCalled();
   });
 
   test("caret does not blink while a selection is active", () => {

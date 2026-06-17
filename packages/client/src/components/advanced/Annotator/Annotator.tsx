@@ -285,6 +285,11 @@ export const TextAnnotator = ({
   const annotatorRef = useRef<Annotator | null>(null);
   annotatorRef.current = annotator;
 
+  const handleAnnotatorModeClick = useCallback((mode: EditMode) => {
+    setAnnotatorMode(mode);
+    mainCanvas.current?.focus({ preventScroll: true });
+  }, []);
+
   const saveScrollPositionOnScrollEnd = useDebouncedCallback(() => {
     const a = annotatorRef.current;
     if (a && setStoredAnnotatorScrollPosition) {
@@ -1409,9 +1414,7 @@ export const TextAnnotator = ({
               label={!annotatorWidthTooNarrow ? editModeDisplayLabel[EditMode.HIGHLIGHT] : ""}
               color="success"
               inverted={annotatorMode !== EditMode.HIGHLIGHT}
-              onClick={() => {
-                setAnnotatorMode(EditMode.HIGHLIGHT);
-              }}
+              onClick={() => handleAnnotatorModeClick(EditMode.HIGHLIGHT)}
               tooltipLabel="anchor entities"
               tooltipPosition="top"
             />
@@ -1427,9 +1430,7 @@ export const TextAnnotator = ({
               color="success"
               label={!annotatorWidthTooNarrow ? editModeDisplayLabel[EditMode.SEMI] : ""}
               inverted={annotatorMode !== EditMode.SEMI}
-              onClick={() => {
-                setAnnotatorMode(EditMode.SEMI);
-              }}
+              onClick={() => handleAnnotatorModeClick(EditMode.SEMI)}
               tooltipLabel={canEditDocument ? "edit plain text" : "view plain text"}
               tooltipPosition="top"
             />
@@ -1445,9 +1446,7 @@ export const TextAnnotator = ({
               color="success"
               label={!annotatorWidthTooNarrow ? editModeDisplayLabel[EditMode.RAW] : ""}
               inverted={annotatorMode !== EditMode.RAW}
-              onClick={() => {
-                setAnnotatorMode(EditMode.RAW);
-              }}
+              onClick={() => handleAnnotatorModeClick(EditMode.RAW)}
               tooltipLabel={canEditDocument ? "display and edit XML" : "display XML"}
               tooltipPosition="top"
             />

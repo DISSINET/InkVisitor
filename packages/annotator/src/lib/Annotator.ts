@@ -2130,7 +2130,7 @@ export class Annotator {
         charWidth: this.charWidth,
         charsAtLine: this.text.charsAtLine,
         caretWidth: this.caretWidth * this.ratio,
-        caretVisible: this.caretBlink.isVisible(),
+        caretVisible: this.canvasFocused && this.caretBlink.isVisible(),
       });
     }
 
