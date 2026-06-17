@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { TiDocumentText } from "react-icons/ti";
+import { toast } from "react-toastify";
 import { Tooltip } from "../../basic/Tooltip/Tooltip";
 import { StyledDocumentTag, StyledDocumentTitle } from "./DocumentTitleStyles";
 
@@ -25,6 +26,10 @@ export const DocumentTitle: React.FC<DocumentTitle> = ({
         ref={setReferenceElement}
         onMouseEnter={() => setIsTooltipOpen(true)}
         onMouseLeave={() => setIsTooltipOpen(false)}
+        onClick={() => {
+          navigator.clipboard.writeText(title);
+          toast.info(`document title [${title}] copied to clipboard`);
+        }}
       >
         <TiDocumentText
           size={16}
