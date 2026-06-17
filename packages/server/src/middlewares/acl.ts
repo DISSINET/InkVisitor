@@ -107,6 +107,22 @@ class Acl {
       return null;
     }
 
+    // The simplified user list (GET /users/simplified) returns only {id, name}
+    // and is needed by any logged-in user for stats charts and explorer filters.
+    if (
+      controller === "users" &&
+      route === "simplified" &&
+      method === HttpMethods.Get
+    ) {
+      return null;
+    }
+
+    // Stats queries (POST /stats, POST /stats/materialized) are read-only
+    // aggregations that any logged-in user may access.
+    if (controller === "stats") {
+      return null;
+    }
+
     // Documents are governed by the route handlers, not the ACL table: any
     // logged-in user may GET (view) any document, while update/delete/export/
     // removeAnchor are gated per-resource inside the handlers

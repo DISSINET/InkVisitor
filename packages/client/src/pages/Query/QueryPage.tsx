@@ -138,22 +138,6 @@ export const QueryPage: React.FC<QueryPage> = ({ }) => {
   const onePercentOfContentHeight = useMemo(() => contentHeight / 100, [contentHeight]);
   const onePercentOfLayoutWidth = useMemo(() => layoutWidth / 100, [layoutWidth]);
 
-  const handleExport = (rowIndices: number[], selectedColumnIds?: string[]) => {
-    toast.success("Exporting data...");
-    const exportExplore =
-      selectedColumnIds && exploreState.view.mode === Explore.EViewMode.Table
-        ? {
-          ...exploreState,
-          view: {
-            ...exploreState.view,
-            columns: exploreState.view.columns.filter(
-              (c: Explore.IExploreColumn) => selectedColumnIds.includes(c.id),
-            ),
-          },
-        }
-        : exploreState;
-    api.queryExport(queryState, exportExplore, rowIndices);
-  };
 
   const explorerBoxMaximizedStorageKey = "queryExplorerBoxMaximized";
 
@@ -531,7 +515,6 @@ export const QueryPage: React.FC<QueryPage> = ({ }) => {
                 data={queryData}
                 isQueryFetching={queryIsFetching}
                 queryError={queryError}
-                onExport={handleExport}
                 stableSignature={stableSignature}
                 getCachedEntity={getCachedEntity}
                 onOpenEntityInDetail={openEntityInDetail}
