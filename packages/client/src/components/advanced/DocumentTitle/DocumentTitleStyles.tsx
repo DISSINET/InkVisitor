@@ -12,21 +12,20 @@ export const StyledDocumentTag = styled.div<{
     $size === "sm"
       ? theme.space[1] + " " + theme.space[2]
       : $size === "md"
-      ? theme.space[1] + " " + theme.space[3]
-      : theme.space[1] + " " + theme.space[4]};
+        ? theme.space[1] + " " + theme.space[3]
+        : theme.space[1] + " " + theme.space[4]};
   border-radius: ${({ theme }) => theme.borderRadius["md"]};
   color: white;
   font-size: ${({ theme, $size }) =>
     $size === "sm"
       ? theme.fontSize["xxs"]
       : $size === "md"
-      ? theme.fontSize["xs"]
-      : theme.fontSize["sm"]};
+        ? theme.fontSize["xs"]
+        : theme.fontSize["sm"]};
   align-items: center;
   min-width: 0;
-  cursor: default;
-  max-width: ${({ $width }) =>
-    $width === "full" ? "100%" : `${$width / 10}rem`};
+  cursor: copy;
+  max-width: ${({ $width }) => ($width === "full" ? "100%" : `${$width / 10}rem`)};
   overflow: hidden !important;
 `;
 
