@@ -89,12 +89,11 @@ export const UserList: React.FC<UserList> = React.memo(() => {
     queryKey: ["users"],
     queryFn: async () => {
       const res = await api.usersGetMore({});
-      return (res.data ?? []).sort((a, b) => (a.id > b.id ? 1 : -1));
+      return res.data ?? [];
     },
     enabled: api.isLoggedIn(),
+    select: (data) => [...data].sort((a, b) => (a.id > b.id ? 1 : -1)),
   });
-
-  const [localUsers, setLocalUsers] = useState<IResponseUser[]>([]);
 
   const userComparator = (a: IResponseUser, b: IResponseUser): number => {
     // First, compare by role priority
@@ -106,10 +105,11 @@ export const UserList: React.FC<UserList> = React.memo(() => {
     return b.active ? 1 : -1;
   };
 
-  useEffect(() => {
-    if (users) {
-      setLocalUsers(users.sort(userComparator));
+  const localUsers = useMemo(() => {
+    if (!users) {
+      return [];
     }
+    return [...users].sort(userComparator);
   }, [users]);
 
   const removingUser = useMemo(() => {
