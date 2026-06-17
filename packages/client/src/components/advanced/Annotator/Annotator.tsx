@@ -189,13 +189,6 @@ export const TextAnnotator = ({
     annotatorModeRef.current = annotatorMode;
   }, [annotatorMode]);
 
-  // Read-only documents are locked to HIGHLIGHT mode, where the annotator lib
-  // disables text editing. SEMI/RAW (editing) modes are not selectable.
-  useEffect(() => {
-    if (!canEditDocument && annotatorMode !== EditMode.HIGHLIGHT) {
-      setAnnotatorMode(EditMode.HIGHLIGHT);
-    }
-  }, [canEditDocument, annotatorMode]);
 
   const resetAnnotator = () => {
     annotatorRef.current?.destroy();
@@ -1245,6 +1238,25 @@ export const TextAnnotator = ({
           position: "relative",
           paddingLeft: ANNOTATOR_LEFT_MARGIN_PX,
         }}
+        onKeyDownCapture={(e) => {
+          // Block editing keys in RAW/SEMI view-only mode (non-editable documents).
+          // Intercept in capture phase so the canvas's own onkeydown never fires.
+          if (!canEditDocument && annotatorMode !== EditMode.HIGHLIGHT) {
+            const isEditingKey =
+              (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) ||
+              e.key === "Backspace" ||
+              e.key === "Delete" ||
+              e.key === "Enter" ||
+              e.key === "Tab" ||
+              ((e.ctrlKey || e.metaKey) &&
+                ["v", "x", "z", "Z", "y", "Y"].includes(e.key));
+            if (isEditingKey) {
+              e.stopPropagation();
+              e.preventDefault();
+              return;
+            }
+          }
+        }}
         onKeyDown={(e) => {
           if (e.key === "Escape") {
             setSelectedText("");
@@ -1417,15 +1429,10 @@ export const TextAnnotator = ({
               color="success"
               label={!annotatorWidthTooNarrow ? editModeDisplayLabel[EditMode.SEMI] : ""}
               inverted={annotatorMode !== EditMode.SEMI}
-              disabled={!canEditDocument}
               onClick={() => {
                 setAnnotatorMode(EditMode.SEMI);
               }}
-              tooltipLabel={
-                canEditDocument
-                  ? "edit plain text"
-                  : "you are not assigned to this resource"
-              }
+              tooltipLabel={canEditDocument ? "edit plain text" : "view plain text"}
               tooltipPosition="top"
             />
             <Button
@@ -1440,15 +1447,10 @@ export const TextAnnotator = ({
               color="success"
               label={!annotatorWidthTooNarrow ? editModeDisplayLabel[EditMode.RAW] : ""}
               inverted={annotatorMode !== EditMode.RAW}
-              disabled={!canEditDocument}
               onClick={() => {
                 setAnnotatorMode(EditMode.RAW);
               }}
-              tooltipLabel={
-                canEditDocument
-                  ? "display and edit XML"
-                  : "you are not assigned to this resource"
-              }
+              tooltipLabel={canEditDocument ? "display and edit XML" : "display XML"}
               tooltipPosition="top"
             />
           </ButtonGroup>
