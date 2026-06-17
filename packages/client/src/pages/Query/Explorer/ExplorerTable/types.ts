@@ -22,7 +22,7 @@ export const batchOptions: BatchOption[] = [
 ];
 
 /** Batch actions restricted to Admin and Owner roles. */
-export const editingBatchActions = new Set<BatchAction>([
+export const restrictedBatchActions = new Set<BatchAction>([
   BatchAction.export_csv,
   BatchAction.add_metaprop,
   BatchAction.add_reference,

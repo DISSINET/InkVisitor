@@ -189,7 +189,6 @@ export const TextAnnotator = ({
     annotatorModeRef.current = annotatorMode;
   }, [annotatorMode]);
 
-
   const resetAnnotator = () => {
     annotatorRef.current?.destroy();
     annotatorLoadedForDocIdRef.current = undefined;
@@ -1248,8 +1247,7 @@ export const TextAnnotator = ({
               e.key === "Delete" ||
               e.key === "Enter" ||
               e.key === "Tab" ||
-              ((e.ctrlKey || e.metaKey) &&
-                ["v", "x", "z", "Z", "y", "Y"].includes(e.key));
+              ((e.ctrlKey || e.metaKey) && ["v", "x", "z", "Z", "y", "Y"].includes(e.key));
             if (isEditingKey) {
               e.stopPropagation();
               e.preventDefault();
