@@ -5,14 +5,9 @@ import { IResponseBackup } from "@inkvisitor/shared/types";
 import { IRequest } from "src/custom_typings/request";
 import { Backup } from "@models/backup/backup";
 import { BadParams, NotFound, PermissionDeniedError } from "@inkvisitor/shared/types/errors";
-import { generateShortLivedToken } from "@common/auth";
 import { apiPathOld } from "@common/constants";
 import * as fs from "fs";
 import * as path from "path";
-
-// Window during which a freshly issued download URL stays valid. Short enough
-// that a leaked URL is mostly harmless, long enough for the browser to fetch.
-const DOWNLOAD_URL_TTL_SECONDS = 60;
 
 const getBackupDir = (): string => process.env.BACKUP_DIR || "";
 
@@ -59,10 +54,11 @@ export default Router()
     })
   )
   /**
-   * Issues a short-lived signed URL the browser can use to navigate directly
-   * to the binary download endpoint. The URL embeds a JWT in its query string
-   * because <a download> navigations cannot carry Authorization headers, and
-   * sticking the long-lived session token in a URL would be a far worse leak.
+   * Returns the relative URL the browser navigates to in order to download a
+   * backup archive. Auth happens on /download via the HttpOnly session cookie -
+   * a same-origin <a download> navigation carries it - so no token is embedded
+   * in the URL. This endpoint still validates owner + file existence up front so
+   * a bad request surfaces as a clean error instead of a broken navigation.
    */
   .get(
     "/download-url",
@@ -70,21 +66,16 @@ export default Router()
       assertOwner(request);
       const { file } = requireBackup(request);
 
-      const token = generateShortLivedToken(
-        request.getUserOrFail(),
-        DOWNLOAD_URL_TTL_SECONDS
-      );
-      const url =
-        `${apiPathOld}/backups/download` +
-        `?file=${encodeURIComponent(file)}` +
-        `&token=${encodeURIComponent(token)}`;
+      const url = `${apiPathOld}/backups/download?file=${encodeURIComponent(
+        file
+      )}`;
       return { url };
     })
   )
   /**
    * Streams a single backup archive as an attachment. Owner only.
-   * The file is piped through the api (behind jwt) - it is never exposed as a
-   * public/static link.
+   * The file is piped through the api (behind the session cookie) - it is never
+   * exposed as a public/static link.
    *
    * This is a raw handler (binary stream) so it does not go through
    * asyncRouteHandler - the owner check is therefore enforced explicitly below.

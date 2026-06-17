@@ -1,4 +1,3 @@
-import { verifyDownloadToken } from "@common/auth";
 import { unauthorizedError } from "@middlewares/errors";
 import { NextFunction, Request, Response } from "express";
 
@@ -27,18 +26,6 @@ export function authenticateRequest(
   res: Response,
   next: NextFunction
 ): void {
-  const queryToken =
-    typeof req.query?.token === "string" ? req.query.token : undefined;
-
-  if (queryToken) {
-    const user = verifyDownloadToken(queryToken);
-    if (user) {
-      setRequestUser(req, user.id);
-      next();
-      return;
-    }
-  }
-
   const userId = req.session?.userId;
   if (userId) {
     setRequestUser(req, userId);

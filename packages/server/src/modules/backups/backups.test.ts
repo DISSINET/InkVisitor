@@ -36,14 +36,14 @@ describe("modules/backups", function () {
   });
 
   describe("auth - backups are not publicly accessible", () => {
-    it("rejects listing without a token", async () => {
+    it("rejects listing without authentication", async () => {
       await request(app)
         .get(`${apiPath}/backups`)
         .expect(401)
         .expect(testErroneousResponse.bind(undefined, new UnauthorizedError("")));
     });
 
-    it("rejects download without a token", async () => {
+    it("rejects download without authentication", async () => {
       await request(app)
         .get(`${apiPath}/backups/download?file=20240101/inkvisitor_backup.tar.gz`)
         .expect(401)

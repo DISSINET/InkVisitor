@@ -1,6 +1,4 @@
 import * as bcrypt from "bcryptjs";
-import { sign as signJwt, verify as verifyJwtRaw, JwtPayload } from "jsonwebtoken";
-import { IUser } from "@inkvisitor/shared/types/user";
 import { Request } from "express";
 import { v1 as uuid } from "uuid";
 
@@ -26,48 +24,6 @@ export function checkPassword(
     return bcrypt.compareSync(rawPassword, storedHash);
   } else {
     return rawPassword === storedHash;
-  }
-}
-
-const defaultJwtAlgo = "HS256";
-
-let secret = (process.env.SECRET as string) || "";
-if (process.env.NODE_ENV !== "test") {
-  if (process.argv.length > 3) {
-    secret += process.argv[3];
-  } else if (process.env.BUILD_TIMESTAMP) {
-    secret += process.env.BUILD_TIMESTAMP;
-  }
-}
-
-if (secret) {
-  console.log(`SECRET set to ${secret}`);
-}
-
-function signDownloadToken(userId: string, expSeconds: number): string {
-  return signJwt(
-    { userId, exp: Math.floor(Date.now() / 1000) + expSeconds },
-    secret,
-    { algorithm: defaultJwtAlgo }
-  );
-}
-
-export const generateShortLivedToken = (user: IUser, expSeconds: number): string =>
-  signDownloadToken(user.id, expSeconds);
-
-export function verifyDownloadToken(token: string): { id: string } | null {
-  if (!token) return null;
-  try {
-    const decoded = verifyJwtRaw(token, secret, {
-      algorithms: [defaultJwtAlgo],
-    }) as JwtPayload & { userId?: string };
-    // Only accept the new short-lived { userId } download-token shape. Legacy
-    // long-lived JWTs ({ user: { id } }) issued before the cookie migration are
-    // no longer honored - cookie sessions are the only general auth now.
-    const userId = decoded?.userId;
-    return userId ? { id: userId } : null;
-  } catch {
-    return null;
   }
 }
 

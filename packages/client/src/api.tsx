@@ -1043,10 +1043,12 @@ class Api {
   }
 
   /**
-   * Asks the server for a short-lived, token-embedded URL the browser can
-   * navigate to directly. This avoids buffering the archive into a blob URL
-   * (which the browser treats as a programmatic download, so 2nd+ clicks get
-   * blocked) and lets the browser stream the file straight to disk.
+   * Asks the server for the URL the browser can navigate to directly to download
+   * a backup. The download is authenticated by the HttpOnly session cookie that
+   * rides the same-origin <a download> navigation - no token in the URL. This
+   * avoids buffering the archive into a blob URL (which the browser treats as a
+   * programmatic download, so 2nd+ clicks get blocked) and lets the browser
+   * stream the file straight to disk.
    * @param backupId relative archive id from backupsGet, e.g. "20240101/inkvisitor_backup.tar.gz"
    * @returns absolute URL pointing at the download endpoint, ready to drop into `<a href>`
    */
@@ -1055,10 +1057,10 @@ class Api {
       const response = await this.connection.get<{ url: string }>(`/backups/download-url`, {
         params: { file: backupId },
       });
-      // Anchor the URL to window.location.origin (not this.baseUrl) so a cross-origin
-      // APIURL in dev still routes the download through the same-origin Vite proxy.
-      // Cross-origin <a download> would otherwise be ignored by the browser and the
-      // click would navigate the tab instead of saving the file.
+      // Anchor the URL to window.location.origin (not this.baseUrl) so it is
+      // same-origin to the browser: this both lets <a download> work (browsers
+      // ignore the attribute cross-origin) and ensures the session cookie is
+      // sent. In dev a cross-origin APIURL is routed through the Vite proxy.
       return `${window.location.origin}${response.data.url}`;
     } catch (err) {
       throw this.handleError(err);
