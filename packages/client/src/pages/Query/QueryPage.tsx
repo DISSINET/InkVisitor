@@ -12,6 +12,8 @@ import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { VscCloseAll } from "react-icons/vsc";
 import { toast } from "react-toastify";
+import { useUserQuery } from "hooks/react-query";
+import { UserEnums } from "@inkvisitor/shared/enums";
 import { useAppSelector } from "redux/hooks";
 import { COLLAPSED_PANEL_WIDTH } from "Theme/constants";
 import { floorNumberToOneDecimal } from "utils/utils";
@@ -39,6 +41,11 @@ interface QueryPage { }
 export const QueryPage: React.FC<QueryPage> = ({ }) => {
   const layoutWidth: number = useAppSelector((state) => state.layout.layoutWidth);
   const contentHeight: number = useAppSelector((state) => state.layout.contentHeight);
+
+  const { data: userData } = useUserQuery(true);
+  const canBatchEdit =
+    userData?.role === UserEnums.Role.Owner ||
+    userData?.role === UserEnums.Role.Admin;
   const {
     selectedDetailId,
     detailIdArray,
@@ -531,6 +538,7 @@ export const QueryPage: React.FC<QueryPage> = ({ }) => {
                 onOpenEntitiesInDetail={openEntitiesInDetail}
                 isDetailOpen={isDetailOpen}
                 detailPanelWidth={detailPanelWidth}
+                canBatchEdit={canBatchEdit}
               />
             </Box>
           </>

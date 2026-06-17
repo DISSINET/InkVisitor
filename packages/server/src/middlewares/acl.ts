@@ -129,6 +129,17 @@ class Acl {
       return null;
     }
 
+    // The Explorer / Query page query endpoints have no seeded ACL entry either.
+    // Any logged-in user may execute read-only entity queries; mutations are
+    // still governed by the individual entity endpoints.
+    if (
+      controller === "entities" &&
+      (route === "query" || route === "query-export") &&
+      method === HttpMethods.Post
+    ) {
+      return null;
+    }
+
     // allow admin/owner for any route
     if (
       req.getUserOrFail().hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin])

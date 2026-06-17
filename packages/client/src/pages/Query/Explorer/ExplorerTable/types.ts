@@ -21,6 +21,13 @@ export const batchOptions: BatchOption[] = [
   { value: BatchAction.add_relation, label: "add new relation" },
 ];
 
+/** Batch actions that mutate data — restricted to Admin and Owner roles. */
+export const editingBatchActions = new Set<BatchAction>([
+  BatchAction.add_metaprop,
+  BatchAction.add_reference,
+  BatchAction.add_relation,
+]);
+
 export const WIDTH_COLUMN_FIRST = 280;
 export const WIDTH_COLUMN_DEFAULT = 400;
 export const WIDTH_COLUMN_EUC = 210;

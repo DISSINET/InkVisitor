@@ -47,7 +47,7 @@ export const Menu: React.FC<Menu> = ({
       label: "Explorer",
       color: "info",
       href: "/explorer",
-      admin: true,
+      admin: false,
       icon: <FaSearchengin />,
     },
     {
@@ -55,7 +55,7 @@ export const Menu: React.FC<Menu> = ({
       label: "Statistics",
       color: "info",
       href: "/stats",
-      admin: true,
+      admin: false,
       icon: <FaRegChartBar size={18} />,
     },
     // {
