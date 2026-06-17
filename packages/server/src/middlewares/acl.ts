@@ -94,14 +94,26 @@ class Acl {
       return permissionDeniedErr;
     }
 
-    // allow editors with assigned rights to fetch users for filters (editedBy/updatedBy)
+    // allow editors with assigned territory rights to fetch users for filters
+    // (editedBy/updatedBy). Resource-annotate rights don't count here.
     if (
       controller === "users" &&
       route === "" &&
       method === HttpMethods.Get &&
       user?.role === UserEnums.Role.Editor &&
-      (user.rights?.length || 0) > 0
+      (user.rights?.filter((r) => r.mode !== UserEnums.RoleMode.Annotate)
+        .length || 0) > 0
     ) {
+      return null;
+    }
+
+    // Documents are governed by the route handlers, not the ACL table: any
+    // logged-in user may GET (view) any document, while update/delete/export/
+    // removeAnchor are gated per-resource inside the handlers
+    // (userCanManageDocument: Owner/Admin, or Editor assigned to the linked
+    // Resource). This also avoids the auto-created roles:[] permission that the
+    // ACL layer persists for routes lacking an explicit entry.
+    if (controller === "documents") {
       return null;
     }
 

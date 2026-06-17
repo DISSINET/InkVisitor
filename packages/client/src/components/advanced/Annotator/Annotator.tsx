@@ -100,6 +100,15 @@ interface TextAnnotatorProps {
   userData?: IResponseUser;
   disableCreate?: boolean;
 
+  /**
+   * When false the document is read-only: text editing, adding/removing
+   * anchors, batch replace and the annotate menu are disabled (search,
+   * highlight and navigation stay). Editors get this when the loaded Resource
+   * is not assigned to them. Defaults to true (callers that don't gate are
+   * already restricted upstream). The server still enforces the same rule.
+   */
+  canEditDocument?: boolean;
+
   /** When the pointer hovers anchored text, receives the innermost tag id or null (e.g. statement list sync). */
   onStatementAnchorHover?: (statementId: string | null) => void;
 
@@ -137,6 +146,7 @@ export const TextAnnotator = ({
   statementCreateMutation = undefined,
   userData,
   disableCreate = false,
+  canEditDocument = true,
   onStatementAnchorHover,
 
   hideWarningChip = false,
@@ -178,6 +188,14 @@ export const TextAnnotator = ({
   useEffect(() => {
     annotatorModeRef.current = annotatorMode;
   }, [annotatorMode]);
+
+  // Read-only documents are locked to HIGHLIGHT mode, where the annotator lib
+  // disables text editing. SEMI/RAW (editing) modes are not selectable.
+  useEffect(() => {
+    if (!canEditDocument && annotatorMode !== EditMode.HIGHLIGHT) {
+      setAnnotatorMode(EditMode.HIGHLIGHT);
+    }
+  }, [canEditDocument, annotatorMode]);
 
   const resetAnnotator = () => {
     annotatorRef.current?.destroy();
@@ -1043,12 +1061,13 @@ export const TextAnnotator = ({
 
   const isMenuDisplayed = useMemo<boolean>(() => {
     return (
+      canEditDocument &&
       annotatorMode === EditMode.HIGHLIGHT &&
       selectedText !== "" &&
       !isSelectingText &&
       dataDocument !== undefined
     );
-  }, [annotatorMode, selectedText, isSelectingText, dataDocument]);
+  }, [canEditDocument, annotatorMode, selectedText, isSelectingText, dataDocument]);
 
   const annotatorMenuMiddleware = useMemo(() => {
     if (typeof document === "undefined") return [];
@@ -1196,6 +1215,7 @@ export const TextAnnotator = ({
         setIsWholeWordOnlyMode={setIsWholeWordOnlyMode}
         isCaseSensitiveMode={isCaseSensitiveMode}
         setIsCaseSensitiveMode={setIsCaseSensitiveMode}
+        canEdit={canEditDocument}
       />
 
       <div
@@ -1392,10 +1412,15 @@ export const TextAnnotator = ({
               color="success"
               label={!annotatorWidthTooNarrow ? editModeDisplayLabel[EditMode.SEMI] : ""}
               inverted={annotatorMode !== EditMode.SEMI}
+              disabled={!canEditDocument}
               onClick={() => {
                 setAnnotatorMode(EditMode.SEMI);
               }}
-              tooltipLabel="edit plain text"
+              tooltipLabel={
+                canEditDocument
+                  ? "edit plain text"
+                  : "you are not assigned to this resource"
+              }
               tooltipPosition="top"
             />
             <Button
@@ -1410,45 +1435,52 @@ export const TextAnnotator = ({
               color="success"
               label={!annotatorWidthTooNarrow ? editModeDisplayLabel[EditMode.RAW] : ""}
               inverted={annotatorMode !== EditMode.RAW}
+              disabled={!canEditDocument}
               onClick={() => {
                 setAnnotatorMode(EditMode.RAW);
               }}
-              tooltipLabel="display and edit XML"
+              tooltipLabel={
+                canEditDocument
+                  ? "display and edit XML"
+                  : "you are not assigned to this resource"
+              }
               tooltipPosition="top"
             />
           </ButtonGroup>
 
-          <ButtonGroup $marginTop style={{ marginLeft: "0.5rem" }}>
-            <Button
-              label="discard"
-              color="greyer"
-              inverted
-              icon={<FaTrash />}
-              disabled={
-                !isChangeMade || isSaving || isSavingWithoutRefresh || dataDocumentIsFetching
-              }
-              onClick={() => {
-                if (dataDocument?.content) {
-                  annotator?.updateText(dataDocument?.content);
-                  setLocalTextContent(dataDocument.content);
-                }
-              }}
-            />
-            <span style={{ display: "flex", position: "relative" }}>
+          {canEditDocument && (
+            <ButtonGroup $marginTop style={{ marginLeft: "0.5rem" }}>
               <Button
-                label="save"
-                color="info"
-                icon={<FaRegSave size={14} />}
+                label="discard"
+                color="greyer"
+                inverted
+                icon={<FaTrash />}
                 disabled={
                   !isChangeMade || isSaving || isSavingWithoutRefresh || dataDocumentIsFetching
                 }
                 onClick={() => {
-                  handleSaveNewContent(false);
+                  if (dataDocument?.content) {
+                    annotator?.updateText(dataDocument?.content);
+                    setLocalTextContent(dataDocument.content);
+                  }
                 }}
               />
-              <Loader show={isSaving || isSavingWithoutRefresh} size={14} />
-            </span>
-          </ButtonGroup>
+              <span style={{ display: "flex", position: "relative" }}>
+                <Button
+                  label="save"
+                  color="info"
+                  icon={<FaRegSave size={14} />}
+                  disabled={
+                    !isChangeMade || isSaving || isSavingWithoutRefresh || dataDocumentIsFetching
+                  }
+                  onClick={() => {
+                    handleSaveNewContent(false);
+                  }}
+                />
+                <Loader show={isSaving || isSavingWithoutRefresh} size={14} />
+              </span>
+            </ButtonGroup>
+          )}
         </StyledAnnotatorButtons>
       </div>
 

@@ -10,5 +10,11 @@ export namespace UserEnums {
     Write = "write",
     Read = "read",
     Admin = "admin",
+    // Resource-assignment right (reuses IUser.rights). For entries with this
+    // mode the `territory` field carries the assigned Resource entity id, not
+    // a territory id. Lets an Editor annotate/edit/export/delete that Resource
+    // and its linked document. Ignored by territory/tree right lookups (a
+    // resource id never matches a territory id in the tree).
+    Annotate = "annotate",
   }
 }

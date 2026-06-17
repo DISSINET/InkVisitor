@@ -42,7 +42,10 @@ interface StatementListDocumentLine {
   resources: IEntity[];
   // is list non empty
   showStatementList: boolean;
-  userCanEdit: boolean;
+  // Editor/admin/owner may load any Resource (show the resource suggester).
+  canSelectResource: boolean;
+  // Whether the loaded document may be edited/exported by this user.
+  canEditDocument: boolean;
   annotatorWidthTooNarrow: boolean;
 
   // highlight
@@ -65,7 +68,8 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
   territoryId,
   resources,
   showStatementList,
-  userCanEdit,
+  canSelectResource,
+  canEditDocument,
   annotatorWidthTooNarrow,
 
   contentWidth,
@@ -117,7 +121,7 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
                     toast.warning("Resource does not have a document");
                   }
                 }}
-                isHidden={!userCanEdit}
+                isHidden={!canSelectResource}
               />
             )}
             {selectedResource && (
@@ -131,7 +135,7 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
                   fullWidth
                   entity={selectedResource}
                   button={
-                    selectedDocument && (
+                    selectedDocument && canEditDocument ? (
                       <Button
                         inverted
                         color="info"
@@ -142,7 +146,7 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
                         tooltipLabel="export document"
                         tooltipPosition="top"
                       />
-                    )
+                    ) : undefined
                   }
                   unlinkButton={{
                     onClick: () => {

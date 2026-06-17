@@ -81,6 +81,9 @@ interface AnnotatorSearchLine {
   setIsWholeWordOnlyMode: React.Dispatch<React.SetStateAction<boolean>>;
   isCaseSensitiveMode: boolean;
   setIsCaseSensitiveMode: React.Dispatch<React.SetStateAction<boolean>>;
+  // When false, find/navigate stay available but the editing actions
+  // (annotate + replace/replace-all) are hidden (read-only document).
+  canEdit?: boolean;
 }
 export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
   searchTerm,
@@ -110,6 +113,7 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
   setIsWholeWordOnlyMode,
   isCaseSensitiveMode,
   setIsCaseSensitiveMode,
+  canEdit = true,
 }) => {
   const theme = useTheme();
   const searchInputRef = useRef<HTMLInputElement | null>(null);
@@ -465,6 +469,8 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
             )}
           </StyledSearchContainer>
 
+          {canEdit && (
+            <>
           {annotatorWidthTooNarrow ? (
             searchOccurences === null ? (
               <div style={{ width: "1rem" }} />
@@ -598,6 +604,8 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
                 />
                 <Loader show={isReplacingAll} size={12} noBackground />
               </div>
+            </>
+          )}
             </>
           )}
         </>

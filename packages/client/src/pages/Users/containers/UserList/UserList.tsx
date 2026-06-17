@@ -178,6 +178,33 @@ export const UserList: React.FC<UserList> = React.memo(() => {
     userMutation.mutate({ id: user.id, rights: newRights });
   };
 
+  // Resource (annotate) assignments reuse the rights array with mode === Annotate,
+  // where the `territory` field carries the Resource entity id.
+  const isAnnotateRight = (right: IUserRight, resourceId?: string) =>
+    right.mode === UserEnums.RoleMode.Annotate &&
+    (resourceId === undefined || right.territory === resourceId);
+
+  const addResourceRightToUser = (user: IResponseUser, resourceId: string) => {
+    const newRights: IUserRight[] = [
+      ...user.rights.filter((right) => !isAnnotateRight(right, resourceId)),
+    ];
+    newRights.push({
+      territory: resourceId,
+      mode: UserEnums.RoleMode.Annotate,
+    });
+    userMutation.mutate({ id: user.id, rights: newRights });
+  };
+
+  const removeResourceRightFromUser = (
+    user: IResponseUser,
+    resourceId: string
+  ) => {
+    const newRights: IUserRight[] = [
+      ...user.rights.filter((right) => !isAnnotateRight(right, resourceId)),
+    ];
+    userMutation.mutate({ id: user.id, rights: newRights });
+  };
+
   const getRowId = useCallback((row: IResponseUser) => {
     return row.id;
   }, []);
@@ -447,6 +474,88 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                                 noBorder
                                 onClick={() => {
                                   removeRightFromUser(row.original, right.territory);
+                                }}
+                              />
+                            </StyledTerritoryListItemMissing>
+                          );
+                        })
+                      ) : (
+                        <div />
+                      )}
+                    </StyledTerritoryList>
+                  </React.Fragment>
+                ) : (
+                  <StyledTerritoryColumnAllLabel>-</StyledTerritoryColumnAllLabel>
+                )
+              ) : (
+                <StyledTerritoryColumnAllLabel>all</StyledTerritoryColumnAllLabel>
+              )}
+            </StyledTerritoryColumn>
+          );
+        },
+      },
+      {
+        Header: "Annotate documents",
+        id: "resources-annotate",
+        Cell: ({ row }: CellType) => {
+          const { rights, resourceRights, role: userRole } = row.original;
+
+          const annotateRights = rights.filter((r: IUserRight) =>
+            isAnnotateRight(r)
+          );
+
+          return (
+            <StyledTerritoryColumn>
+              {userRole !== UserEnums.Role.Admin && userRole !== UserEnums.Role.Owner ? (
+                userRole === UserEnums.Role.Editor ? (
+                  <React.Fragment>
+                    <EntitySuggester
+                      disableTemplatesAccept
+                      disableCreate
+                      onSelected={(newSelectedId: string) => {
+                        addResourceRightToUser(row.original, newSelectedId);
+                      }}
+                      categoryTypes={[EntityEnums.Class.Resource]}
+                      placeholder={"assign a resource"}
+                      excludedActantIds={annotateRights.map((r) => r.territory)}
+                    />
+                    <StyledTerritoryList>
+                      {annotateRights.length && resourceRights ? (
+                        annotateRights.map((right: IUserRight) => {
+                          const resourceActant = resourceRights.find(
+                            (r) => r.resource.id === right.territory
+                          );
+
+                          return resourceActant && resourceActant.resource ? (
+                            <StyledTerritoryListItem key={right.territory}>
+                              <EntityTag
+                                entity={resourceActant.resource}
+                                unlinkButton={{
+                                  onClick: () => {
+                                    removeResourceRightFromUser(
+                                      row.original,
+                                      right.territory
+                                    );
+                                  },
+                                  tooltipLabel: "remove resource from rights",
+                                }}
+                                disableDoubleClick
+                              />
+                            </StyledTerritoryListItem>
+                          ) : (
+                            <StyledTerritoryListItemMissing key={right.territory}>
+                              <div>invalid R {right.territory}</div>
+                              <Button
+                                key="d"
+                                tooltipLabel="remove invalid resource"
+                                icon={<FaTrashAlt />}
+                                color="danger"
+                                noBorder
+                                onClick={() => {
+                                  removeResourceRightFromUser(
+                                    row.original,
+                                    right.territory
+                                  );
                                 }}
                               />
                             </StyledTerritoryListItemMissing>

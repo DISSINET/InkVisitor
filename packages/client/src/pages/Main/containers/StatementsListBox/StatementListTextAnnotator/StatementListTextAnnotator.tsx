@@ -58,7 +58,10 @@ interface StatementListTextAnnotator {
   selectedDocumentError: Error | null;
 
   showStatementList: boolean;
-  userCanEdit: boolean;
+  // Editor/admin/owner may load any Resource to view + search.
+  canSelectResource: boolean;
+  // Whether the loaded document may be edited (anchors/text/replace/annotate).
+  canEditDocument: boolean;
   userData?: IResponseUser;
 
   onStatementAnchorHover?: (statementId: string | null) => void;
@@ -91,7 +94,8 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
   selectedDocumentIsFetching,
   selectedDocumentError,
   showStatementList,
-  userCanEdit,
+  canSelectResource,
+  canEditDocument,
   userData,
 
   onStatementAnchorHover,
@@ -194,7 +198,8 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
           territoryId={territoryId}
           resources={resources || []}
           showStatementList={showStatementList}
-          userCanEdit={userCanEdit}
+          canSelectResource={canSelectResource}
+          canEditDocument={canEditDocument}
           annotatorWidthTooNarrow={annotatorWidthTooNarrow}
           contentWidth={contentWidth}
           setHlEntities={setHlEntities}
@@ -245,6 +250,7 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
               dataDocumentError={selectedDocumentError}
               showStatementList={showStatementList}
               userData={userData}
+              canEditDocument={canEditDocument}
               territoryId={territoryId}
               onStatementAnchorHover={onStatementAnchorHover}
               hideWarningChip
