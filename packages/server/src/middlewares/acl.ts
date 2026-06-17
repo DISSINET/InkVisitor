@@ -117,6 +117,18 @@ class Acl {
       return null;
     }
 
+    // The entities batch read (POST /entities/batch) is the bulk equivalent of
+    // the public GET /entities/:entityId; it backs e.g. fetching the entities
+    // behind a document's anchors. Allow it for any logged-in user (it has no
+    // seeded ACL entry, so it would otherwise be auto-denied to non-admins).
+    if (
+      controller === "entities" &&
+      route === "batch" &&
+      method === HttpMethods.Post
+    ) {
+      return null;
+    }
+
     // allow admin/owner for any route
     if (
       req.getUserOrFail().hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin])
