@@ -6,6 +6,7 @@ import { BatchAction, batchOptions } from "./ExplorerTable/types";
 interface UseExplorerControlsParams {
   data: IResponseQuery | undefined;
   getCachedEntity?: (rowIndex: number) => IResponseQueryEntity | undefined;
+  onExport: (rowsSelected: number[], selectedColumnIds?: string[]) => void;
   onOpenEntitiesInDetail?: (entityIds: string[]) => void;
 }
 
@@ -20,6 +21,7 @@ interface UseExplorerControlsParams {
 export const useExplorerControls = ({
   data,
   getCachedEntity,
+  onExport,
   onOpenEntitiesInDetail,
 }: UseExplorerControlsParams) => {
   const entityIds = data?.entityIds ?? [];
@@ -105,6 +107,16 @@ export const useExplorerControls = ({
   const isAllCurrentSelected = total > 0 && selectedInCurrentCount === total;
   const hasPartialSelection = selectedInCurrentCount > 0 && !isAllCurrentSelected;
 
+  const handleExport = useCallback(
+    (selectedColumnIds?: string[]) => {
+      const rowIndices = selectedEntityIds
+        .map((entityId) => entityIds.indexOf(entityId))
+        .filter((index) => index >= 0);
+      onExport(rowIndices, selectedColumnIds);
+    },
+    [selectedEntityIds, entityIds, onExport],
+  );
+
   const handleApplyBatchAction = useCallback(async () => {
     if (batchActionSelected === BatchAction.open_in_detail) {
       if (selectedEntityIds.length === 0) {
@@ -143,6 +155,7 @@ export const useExplorerControls = ({
     handleRowSelect,
     handleAllRowsSelect,
     handleApplyBatchAction,
+    handleExport,
   };
 };
 

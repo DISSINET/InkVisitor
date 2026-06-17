@@ -22,6 +22,7 @@ interface ExplorerBoxProps {
   isQueryFetching: boolean;
   queryError: Error | null;
   height: number;
+  onExport: (rowsSelected: number[], selectedColumnIds?: string[]) => void;
   stableSignature?: string;
   getCachedEntity?: (rowIndex: number) => IResponseQueryEntity | undefined;
   onOpenEntityInDetail?: (entityId: string) => void;
@@ -40,6 +41,7 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   isQueryFetching,
   queryError,
   height,
+  onExport,
   stableSignature,
   getCachedEntity,
   onOpenEntityInDetail,
@@ -56,6 +58,7 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   const controls = useExplorerControls({
     data,
     getCachedEntity,
+    onExport,
     onOpenEntitiesInDetail,
   });
   const invalidateExplorerQuery = useInvalidateExplorerQuery(stableSignature);
@@ -141,6 +144,10 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
           selectedEntityIds={controls.selectedEntityIds}
           columns={columns}
           onClose={() => controls.setIsBatchModalOpen(false)}
+          onExport={(selectedColumnIds) => {
+            controls.handleExport(selectedColumnIds);
+            controls.setIsBatchModalOpen(false);
+          }}
           onApplyAction={() => {
             controls.setIsBatchModalOpen(false);
             invalidateExplorerQuery();
