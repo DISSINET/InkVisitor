@@ -34,6 +34,23 @@ export async function invalidateUserSessions(
     .run(conn);
 }
 
+/**
+ * Deletes every session whose expiry has already passed. The store also removes
+ * expired rows lazily on get(), but a session that is never accessed again would
+ * otherwise linger forever - this sweep reclaims those. Uses the expiresAt index
+ * so it is a bounded range delete rather than a full table scan (expiresAt is an
+ * epoch-ms timestamp, so 0 is a safe lower bound).
+ * @returns number of rows removed
+ */
+export async function reapExpiredSessions(conn: Connection): Promise<number> {
+  const result = await r
+    .table(SESSIONS_TABLE)
+    .between(0, Date.now(), { index: "expiresAt", rightBound: "closed" })
+    .delete()
+    .run(conn);
+  return result.deleted ?? 0;
+}
+
 export class RethinkSessionStore extends session.Store {
   private pool: DbPool;
   private ready: Promise<void> | null = null;
