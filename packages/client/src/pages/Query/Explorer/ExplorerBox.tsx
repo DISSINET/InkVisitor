@@ -30,6 +30,9 @@ interface ExplorerBoxProps {
 
   isDetailOpen: boolean;
   detailPanelWidth: number;
+
+  /** When false only read-only batch actions (open, copy, export) are offered. */
+  canBatchEdit?: boolean;
 }
 export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   state,
@@ -45,6 +48,7 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   onOpenEntitiesInDetail,
   isDetailOpen,
   detailPanelWidth,
+  canBatchEdit = false,
 }) => {
   const floatingSearchRightInset = isDetailOpen ? detailPanelWidth : 0;
 
@@ -82,6 +86,7 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
                   batchActionSelected: controls.batchActionSelected,
                   setBatchActionSelected: controls.setBatchActionSelected,
                   onApplyBatchAction: controls.handleApplyBatchAction,
+                  canBatchEdit,
                 }
           }
           newColumn={

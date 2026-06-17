@@ -554,6 +554,17 @@ class Api {
     }
   }
 
+  async usersGetSimplified(
+    options?: IApiOptions,
+  ): Promise<AxiosResponse<{ id: string; name: string }[]>> {
+    try {
+      const response = await this.connection.get(`/users/simplified`, options);
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
   async usersCreate(
     userData: {
       email: string;

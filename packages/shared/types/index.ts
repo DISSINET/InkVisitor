@@ -49,7 +49,11 @@ import {
 } from "./response-statement";
 import { IResponseTerritory } from "./response-territory";
 import { IResponseTree, IResponseTreeTerritoryComponent } from "./response-tree";
-import { IResponseStoredTerritory, IResponseUser } from "./response-user";
+import {
+  IResponseStoredTerritory,
+  IResponseUser,
+  IResponseUserResourceRight,
+} from "./response-user";
 
 import { IDocument, IDocumentMeta } from "./document";
 import { IRequestStats } from "./request-stats";
@@ -115,6 +119,7 @@ export type {
   IResponseStatement,
   IResponseStats,
   IResponseStoredTerritory,
+  IResponseUserResourceRight,
   IResponseTerritory,
   IResponseTree,
   IResponseTreeTerritoryComponent,

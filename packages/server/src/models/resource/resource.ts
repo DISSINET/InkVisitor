@@ -1,6 +1,7 @@
 import { fillFlatObject, IModel } from "@models/common";
 import Entity from "@models/entity/entity";
-import { EntityEnums } from "@inkvisitor/shared/enums";
+import User from "@models/user/user";
+import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IResource, IResourceData } from "@inkvisitor/shared/types/resource";
 import { Connection, r as rethink } from "rethinkdb-ts";
 
@@ -37,6 +38,34 @@ class Resource extends Entity implements IResource {
     }
 
     return super.isValid() && this.data.isValid();
+  }
+
+  /**
+   * Editors may edit a Resource only when it is assigned to them in Manage
+   * Users (annotate right). Owner/Admin always can; Viewer never.
+   */
+  canBeEditedByUser(user: User): boolean {
+    if (user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin])) {
+      return true;
+    }
+    if (user.role !== UserEnums.Role.Editor) {
+      return false;
+    }
+    return user.hasAnnotateRightForResource(this.id);
+  }
+
+  /**
+   * Editors may delete a Resource only when it is assigned to them in Manage
+   * Users (annotate right). Owner/Admin always can; Viewer never.
+   */
+  canBeDeletedByUser(user: User): boolean {
+    if (user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin])) {
+      return true;
+    }
+    if (user.role !== UserEnums.Role.Editor) {
+      return false;
+    }
+    return user.hasAnnotateRightForResource(this.id);
   }
 
   /**

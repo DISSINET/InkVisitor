@@ -33,7 +33,7 @@ import {
   StyledPayload,
   StyledPayloadItem,
 } from "./StatsChartStyles";
-import { useUsersGetMoreQuery } from "hooks/react-query/useUsersGetMoreQuery";
+import { useUsersSimplifiedQuery } from "hooks/react-query/useUsersSimplifiedQuery";
 
 interface StatsChartProps {
   data: IResponseStats;
@@ -51,7 +51,7 @@ export const StatsChart = ({ data, height, width }: StatsChartProps) => {
     return values && Object.keys(values).some((key) => key === OTHERS_KEY);
   }, [values]);
 
-  const { data: dataUsers } = useUsersGetMoreQuery();
+  const { data: dataUsers } = useUsersSimplifiedQuery();
 
   const userKeyMap = useMemo<Record<string, string>>(() => {
     const mapNames: Record<string, string> = {};

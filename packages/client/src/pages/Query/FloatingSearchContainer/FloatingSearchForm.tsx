@@ -6,7 +6,7 @@ import {
 } from "@inkvisitor/shared/types/request-search";
 import { Input, TypeBar } from "components";
 import Dropdown, { AttributeButtonGroup } from "components/advanced";
-import { useUsersGetMoreQuery } from "hooks/react-query/useUsersGetMoreQuery";
+import { useUsersSimplifiedQuery } from "hooks/react-query/useUsersSimplifiedQuery";
 import React, { useCallback, useMemo, useState } from "react";
 import { BsShieldExclamation, BsShieldFillCheck, BsShieldShaded } from "react-icons/bs";
 import {
@@ -61,7 +61,7 @@ interface FloatingSearchFormProps {
 export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch }) => {
   const [searchData, setSearchData] = useState<IRequestSearch>(initSearchValues);
 
-  const { data: users } = useUsersGetMoreQuery({ enabled: true });
+  const { data: users } = useUsersSimplifiedQuery();
 
   const statusOptionSelected: EntityEnums.Status = useMemo(() => {
     if (!!searchData.status) {

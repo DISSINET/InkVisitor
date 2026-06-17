@@ -73,6 +73,9 @@ interface TextAnnotatorMenuProps {
   disableCreate?: boolean;
   onUpdateAnchor?: (anchor: Tag, elvl: EntityEnums.Elvl) => void;
 
+  /** View-only menu: hides anchor unlink/elvl controls (e.g. unassigned documents). */
+  readonly?: boolean;
+
   isLoading: boolean;
 
   /** Pointer handlers for the top drag handle (menu repositioning). */
@@ -96,6 +99,7 @@ export const TextAnnotatorMenu = ({
   territory,
   onEscapePressed,
   disableCreate,
+  readonly = false,
 
   isLoading = false,
 
@@ -156,8 +160,9 @@ export const TextAnnotatorMenu = ({
       entities,
       onRemoveAnchor,
       onUpdateAnchor,
+      readonly,
     }),
-    [resolvedAnchors, entities, onRemoveAnchor, onUpdateAnchor]
+    [resolvedAnchors, entities, onRemoveAnchor, onUpdateAnchor, readonly]
   );
 
   return (

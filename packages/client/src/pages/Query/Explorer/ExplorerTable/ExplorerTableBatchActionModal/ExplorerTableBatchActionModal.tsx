@@ -62,6 +62,7 @@ export const ExplorerTableBatchActionModal: React.FC<
         );
       case BatchAction.copy_uuids:
       case BatchAction.open_in_detail:
+      default:
         return null;
     }
   };

@@ -1,5 +1,5 @@
 import { IResponseStats } from "@inkvisitor/shared/types";
-import { useUsersGetMoreQuery } from "hooks/react-query/useUsersGetMoreQuery";
+import { useUsersSimplifiedQuery } from "hooks/react-query/useUsersSimplifiedQuery";
 import { useMemo } from "react";
 import { Column, useTable } from "react-table";
 import {
@@ -29,7 +29,7 @@ interface TableRow {
 export const StatsTable = ({ data, height, width }: StatsTableProps) => {
   const { values, aggregateBy } = data;
 
-  const { data: dataUsers } = useUsersGetMoreQuery();
+  const { data: dataUsers } = useUsersSimplifiedQuery();
 
   const userKeyMap = useMemo<Record<string, string>>(() => {
     const mapNames: Record<string, string> = {};
