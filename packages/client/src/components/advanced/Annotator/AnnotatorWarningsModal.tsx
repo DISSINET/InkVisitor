@@ -117,6 +117,7 @@ export const AnnotatorWarningsModal: React.FC<AnnotatorWarningsModalProps> = ({
                     disableToast
                     fullWidth
                     disableTooltip={false}
+                    disableDoubleClick={false}
                   />
                 </StyledWarningInfo>
                 <ButtonGroup>

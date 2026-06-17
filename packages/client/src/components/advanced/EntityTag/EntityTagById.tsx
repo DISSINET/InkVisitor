@@ -13,6 +13,7 @@ interface EntityTagByIdProps {
   disableTooltip?: boolean;
   unlinkButton?: UnlinkButton | false;
   disableToast?: boolean;
+  disableDoubleClick?: boolean;
 }
 
 /**
@@ -25,9 +26,10 @@ export const EntityTagById: React.FC<EntityTagByIdProps> = ({
   disableTooltip = true,
   unlinkButton,
   disableToast = false,
+  disableDoubleClick = true,
 }) => {
   const { data, isFetching } = useQuery({
-    queryKey: ["entity", entityId],
+    queryKey: ["entity", "entity-tag-by-id", entityId],
     queryFn: async () => {
       const res = await api.entityGet(entityId, {
         ignoreErrorToast: disableToast,
@@ -51,7 +53,7 @@ export const EntityTagById: React.FC<EntityTagByIdProps> = ({
       disableTooltip={disableTooltip}
       fullWidth={fullWidth}
       unlinkButton={unlinkButton}
-      disableDoubleClick
+      disableDoubleClick={disableDoubleClick}
     />
   );
 };

@@ -230,15 +230,15 @@ export const StyledWarningRow = styled.div`
   align-items: center;
   gap: ${({ theme }) => theme.space[4]};
   padding: 0.5rem 1rem;
-  padding-right: 1.5rem;
+  padding-right: 1.25rem;
   border-radius: ${({ theme }) => theme.borderRadius["default"]};
   background-color: ${({ theme }) => theme.color.blue[50]};
+  box-shadow: ${({ theme }) => theme.boxShadow.inset};
 `;
 
 export const StyledWarningInfo = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
   gap: ${({ theme }) => theme.space[1]};
   flex: 1;
   min-width: 0;
