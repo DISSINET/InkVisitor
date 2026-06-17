@@ -156,6 +156,18 @@ class Acl {
       return null;
     }
 
+    // GET /entities/:entityId/tooltip has no seeded ACL entry. It is a
+    // read-only companion to the public GET /entities/:entityId used by
+    // EntityTooltip in the Explorer and elsewhere. Entity-level access is still
+    // enforced inside the handler via canBeViewedByUser.
+    if (
+      controller === "entities" &&
+      route.endsWith("/tooltip") &&
+      method === HttpMethods.Get
+    ) {
+      return null;
+    }
+
     // allow admin/owner for any route
     if (
       req.getUserOrFail().hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin])

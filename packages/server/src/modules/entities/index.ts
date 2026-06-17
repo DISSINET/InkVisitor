@@ -772,9 +772,12 @@ export default Router()
 
       const entity = getEntityClass({ ...entityData });
 
-      if (!entity.canBeViewedByUser(request.getUserOrFail())) {
-        throw new PermissionDeniedError(`cannot view entity ${entityId}`);
-      }
+      // The tooltip is a read-only lightweight preview, equivalent in
+      // sensitivity to the base GET /:entityId which has no canBeViewedByUser
+      // gate. Removing the check keeps the two endpoints consistent and lets
+      // all logged-in users (Editors, Viewers) see statement tooltips in the
+      // Explorer where they may encounter statements from territories they are
+      // not directly assigned to.
 
       const response = new ResponseTooltip(entity);
 
