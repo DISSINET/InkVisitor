@@ -12,7 +12,7 @@ describe("TreeCache", function () {
     beforeAll(async () => {
         await db.initDb();
         await createMockTree(db, randSuffix);
-        cache.tree = await cache.createTree(db);
+        cache.tree = await cache.createTree();
     });
 
     afterEach(async () => {

@@ -5,7 +5,7 @@ import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../server";
 import { findEntityById } from "@service/shorthands";
-import { supertestConfig } from "..";
+import { getAuthenticatedAgent } from "@modules/testAuth";
 import { IEntity } from "@inkvisitor/shared/types";
 import Territory from "@models/territory/territory";
 import Classification from "@models/relation/classification";
@@ -16,15 +16,20 @@ import Statement, { StatementActant } from "@models/statement/statement";
 import { link } from "fs";
 
 describe("Entities delete - single entity", function () {
+  let authAgent: Awaited<ReturnType<typeof getAuthenticatedAgent>>;
+
+  beforeAll(async () => {
+    authAgent = await getAuthenticatedAgent();
+  });
+
   afterAll(async () => {
     await pool.end();
   });
 
   describe("faulty data", () => {
     it("should return a EntityDoesNotExist error wrapped in IResponseGeneric", async () => {
-      await request(app)
+      await authAgent
         .delete(`${apiPath}/entities/randomid12345`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(
           testErroneousResponse.bind(undefined, new EntityDoesNotExist("", ""))
@@ -61,9 +66,8 @@ describe("Entities delete - single entity", function () {
     afterAll(async () => await clean(db));
 
     test("should return a 200 code with successful response + entity should not be retrievable", async () => {
-      await request(app)
+      await authAgent
         .delete(`${apiPath}/entities/${deletableTerritory.id}`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(200);
 
@@ -73,9 +77,8 @@ describe("Entities delete - single entity", function () {
 
     describe("territory with childs", () => {
       it("should return an InvalidDeleteError error wrapped in IResponseGeneric", async () => {
-        await request(app)
+        await authAgent
           .delete(`${apiPath}/entities/${rootTerritory.id}`)
-          .set("authorization", "Bearer " + supertestConfig.token)
           .expect("Content-Type", /json/)
           .expect(
             testErroneousResponse.bind(undefined, new InvalidDeleteError(""))
@@ -85,9 +88,8 @@ describe("Entities delete - single entity", function () {
 
     describe("entity with relations", () => {
       it("should return an InvalidDeleteError error wrapped in IResponseGeneric", async () => {
-        await request(app)
+        await authAgent
           .delete(`${apiPath}/entities/${personEntity.id}`)
-          .set("authorization", "Bearer " + supertestConfig.token)
           .expect("Content-Type", /json/)
           .expect(
             testErroneousResponse.bind(undefined, new InvalidDeleteError(""))
@@ -98,6 +100,12 @@ describe("Entities delete - single entity", function () {
 });
 
 describe("Entities delete - batch", function () {
+  let authAgent: Awaited<ReturnType<typeof getAuthenticatedAgent>>;
+
+  beforeAll(async () => {
+    authAgent = await getAuthenticatedAgent();
+  });
+
   afterAll(async () => {
     await pool.end();
   });
@@ -138,10 +146,9 @@ describe("Entities delete - batch", function () {
     afterAll(async () => await clean(db));
 
     test("should return a 200 code with successful response", async () => {
-      await request(app)
+      await authAgent
         .delete(`${apiPath}/entities/`)
         .send({ entityIds: [personEntity.id, conceptEntity.id]})
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(200);
 
@@ -153,10 +160,9 @@ describe("Entities delete - batch", function () {
     });
 
     test("should return a 200 code with successful response when deleting 2 self-dependent entities", async () => {
-      await request(app)
+      await authAgent
         .delete(`${apiPath}/entities/`)
         .send({ entityIds: [dependentUponEntity1.id, linkedStatement1.id]})
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(200);
 
@@ -168,10 +174,9 @@ describe("Entities delete - batch", function () {
     });
 
     test("should return a 200 code with successful response when deleting 2 self-dependent entities, with one entity linked to persisting entity", async () => {
-      const data = await request(app)
+      const data = await authAgent
         .delete(`${apiPath}/entities/`)
         .send({ entityIds: [dependentUponEntity2.id, linkedStatement2.id]})
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(200);
 

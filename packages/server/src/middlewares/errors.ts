@@ -5,7 +5,6 @@ import {
   CustomError,
   NotFound,
 } from "@inkvisitor/shared/types/errors";
-import { UnauthorizedError as JwtUnauthorizedError } from "express-jwt";
 import { IResponseGeneric, errorTypes } from "@inkvisitor/shared/types/response-generic";
 import { red } from "cli-color";
 
@@ -21,27 +20,17 @@ export default function errorsMiddleware(
   res: Response,
   next: NextFunction
 ): void {
-  // in any case, the error should be wrapper in IResponseGeneric
   const genericResponse: IResponseGeneric = {
     result: false,
     error: err.constructor.name as errorTypes,
     message: err.message,
   };
 
-  // should expect customized errors, unknown unhandled errors, or errors thrown from some lib
   const isCustomError = typeof (err as CustomError).statusCode === "function";
   if (!isCustomError) {
-    if (err instanceof JwtUnauthorizedError) {
-      // customized unauthorized error
-      err = unauthorizedError;
-    } else {
-      // unknown unhandled error - should log the message
-      console.error(red(`[Unhandled error] ${err.message}`));
-      console.error(err);
-
-      // hide details for client
-      err = internalServerError;
-    }
+    console.error(red(`[Unhandled error] ${err.message}`));
+    console.error(err);
+    err = internalServerError;
   } else if ((err as CustomError).shouldLog()) {
     console.error(
       red(`[Error] ${(err as CustomError).name}: ${(err as CustomError).log}`)

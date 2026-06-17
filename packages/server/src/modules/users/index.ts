@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { Request } from "express";
 import { UserEnums } from "@inkvisitor/shared/enums";
 import { IUser } from "@inkvisitor/shared/types/user";
 import User from "@models/user/user";
@@ -17,7 +18,7 @@ import {
   UserNotActiveError,
   UserNotUnique,
 } from "@inkvisitor/shared/types/errors";
-import { checkPassword, generateAccessToken, hashPassword } from "@common/auth";
+import { checkPassword, createSessionUserId, destroySession, hashPassword } from "@common/auth";
 import { asyncRouteHandler } from "..";
 import {
   IResponseBookmarkFolder,
@@ -34,6 +35,7 @@ import mailer, {
   testTemplate,
 } from "@service/mailer";
 import { ResponseUser } from "@models/user/response";
+import { invalidateUserSessions } from "@service/rethinkSessionStore";
 import { IRequest } from "src/custom_typings/request";
 
 export default Router()
@@ -265,6 +267,7 @@ export default Router()
 
         user.setPassword(password);
         await user.update(request.db.connection, { password: user.password });
+        await invalidateUserSessions(request.db.connection, user.id);
 
         return {
           result: true,
@@ -342,12 +345,16 @@ export default Router()
    *             schema:
    *               type: object
    *               properties:
-   *                 token:
+   *                 id:
+   *                   type: string
+   *                 email:
+   *                   type: string
+   *                 name:
    *                   type: string
    */
   .post(
     "/signin",
-    asyncRouteHandler<unknown>(async (request: IRequest) => {
+    asyncRouteHandler<IResponseUser>(async (request: IRequest) => {
       const login = request.body.login;
       const rawPassword = request.body.password;
 
@@ -375,9 +382,33 @@ export default Router()
         throw new BadCredentialsError("wrong password");
       }
 
-      return {
-        token: generateAccessToken(user),
-      };
+      await createSessionUserId(request as Request, user.id);
+
+      const response = new ResponseUser(user);
+      await response.unwindAll(request);
+      return response;
+    })
+  )
+  /**
+   * @openapi
+   * /users/signout:
+   *   post:
+   *     description: Destroys the current session
+   *     tags:
+   *       - users
+   *     responses:
+   *       200:
+   *         description: Returns generic response
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/IResponseGeneric"
+   */
+  .post(
+    "/signout",
+    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
+      await destroySession(request as Request);
+      return { result: true };
     })
   )
   /**
@@ -624,6 +655,11 @@ export default Router()
 
         if (data.password) {
           data.password = hashPassword(data.password);
+          await invalidateUserSessions(req.db.connection, existingUser.id);
+        }
+
+        if (data.active === false && existingUser.active) {
+          await invalidateUserSessions(req.db.connection, existingUser.id);
         }
 
         if (
@@ -754,6 +790,8 @@ export default Router()
         if (!result.replaced) {
           throw new InternalServerError(`user ${userId} could not be deleted`);
         }
+
+        await invalidateUserSessions(request.db.connection, userId);
 
         return {
           result: true,

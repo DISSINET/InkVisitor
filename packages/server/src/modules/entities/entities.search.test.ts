@@ -8,41 +8,44 @@ import { BadParams } from "@inkvisitor/shared/types/errors";
 import { prepareEntity } from "@models/entity/entity.test";
 import request, { Response } from "supertest";
 import "ts-jest";
-import { supertestConfig } from "..";
+import { getAuthenticatedAgent } from "@modules/testAuth";
 import app from "../../server";
 import { prepareStatement } from "@models/statement/statement.test";
 import { pool } from "@middlewares/db";
 
 describe("Entities search (requests)", function () {
+  let authAgent: Awaited<ReturnType<typeof getAuthenticatedAgent>>;
+
+  beforeAll(async () => {
+    authAgent = await getAuthenticatedAgent();
+  });
+
   afterAll(async () => {
     await pool.end();
   });
 
   describe("empty data", () => {
     it("should return a BadParams error wrapped in IResponseGeneric", async () => {
-      await request(app)
+      await authAgent
         .post(`${apiPath}/entities/search`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
   });
   describe("invalid request data(only class)", () => {
     it("should return a BadParams error wrapped in IResponseGeneric", async () => {
-      await request(app)
+      await authAgent
         .post(`${apiPath}/entities/search`)
         .send({ class: EntityEnums.Class.Concept })
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
   });
   describe("invalid class data", () => {
     it("should return a BadParams error wrapped in IResponseGeneric", async () => {
-      await request(app)
+      await authAgent
         .post(`${apiPath}/entities/search`)
         .send({ class: "something", label: "mnop" })
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
@@ -50,6 +53,12 @@ describe("Entities search (requests)", function () {
 });
 
 describe("Entities search (params)", function () {
+  let authAgent: Awaited<ReturnType<typeof getAuthenticatedAgent>>;
+
+  beforeAll(async () => {
+    authAgent = await getAuthenticatedAgent();
+  });
+
   afterAll(async () => {
     await pool.end();
   });
@@ -101,10 +110,9 @@ describe("Entities search (params)", function () {
 
     describe("search only class + by existing label", () => {
       it("should return a 200 code with successful response", async () => {
-        await request(app)
+        await authAgent
           .post(`${apiPath}/entities/search`)
           .send({ class: entity.class, label: entity.labels[0] })
-          .set("authorization", "Bearer " + supertestConfig.token)
           .expect("Content-Type", /json/)
           .expect(200)
           .expect((res: Response) => {
@@ -115,10 +123,9 @@ describe("Entities search (params)", function () {
 
     describe("search only by non-existing label", () => {
       it("should return a 400 code with successful response for invalid label", async () => {
-        await request(app)
+        await authAgent
           .post(`${apiPath}/entities/search`)
           .send({ label: entity.labels[0] + "xxxx" })
-          .set("authorization", "Bearer " + supertestConfig.token)
           .expect("Content-Type", /json/)
           .expect(200)
           .expect((res: Response) => {
@@ -129,13 +136,12 @@ describe("Entities search (params)", function () {
 
     describe("search only by class + existing entity in statement", () => {
       it("should return a 200 code with successful response", async () => {
-        await request(app)
+        await authAgent
           .post(`${apiPath}/entities/search`)
           .send({
             class: linkedEntity.class,
             entityId: entity.id,
           })
-          .set("authorization", "Bearer " + supertestConfig.token)
           .expect("Content-Type", /json/)
           .expect(200)
           .expect((res: Response) => {
@@ -147,12 +153,11 @@ describe("Entities search (params)", function () {
 
     describe("search only by non-existing entity in statement", () => {
       it("should return a 200 code with successful response", async () => {
-        await request(app)
+        await authAgent
           .post(`${apiPath}/entities/search`)
           .send({
             entityId: entity.id + "xxx", // does not exist
           })
-          .set("authorization", "Bearer " + supertestConfig.token)
           .expect("Content-Type", /json/)
           .expect(200)
           .expect((res: Response) => {
@@ -163,13 +168,12 @@ describe("Entities search (params)", function () {
 
     describe("search only by class + existing action in statement", () => {
       it("should return a 200 code with successful response", async () => {
-        await request(app)
+        await authAgent
           .post(`${apiPath}/entities/search`)
           .send({
             class: linkedEntity.class,
             entityId: action.id,
           })
-          .set("authorization", "Bearer " + supertestConfig.token)
           .expect("Content-Type", /json/)
           .expect(200)
           .expect((res: Response) => {
@@ -181,12 +185,11 @@ describe("Entities search (params)", function () {
 
     describe("search only by non-existing action in statement", () => {
       it("should return a 200 code with empty response", async () => {
-        await request(app)
+        await authAgent
           .post(`${apiPath}/entities/search`)
           .send({
             entityId: action.id + "xxx", // does not exist
           })
-          .set("authorization", "Bearer " + supertestConfig.token)
           .expect("Content-Type", /json/)
           .expect(200)
           .expect((res: Response) => {
@@ -198,14 +201,13 @@ describe("Entities search (params)", function () {
     describe("search by all params", () => {
       describe("using entity id", () => {
         it("should return a 200 code with successful response", async () => {
-          await request(app)
+          await authAgent
             .post(`${apiPath}/entities/search`)
             .send({
               class: linkedEntity.class,
               entityId: entity.id,
               label: linkedEntity.labels[0],
             })
-            .set("authorization", "Bearer " + supertestConfig.token)
             .expect("Content-Type", /json/)
             .expect(200)
             .expect((res: Response) => {
@@ -216,14 +218,13 @@ describe("Entities search (params)", function () {
 
       describe("using action id", () => {
         it("should return a 200 code with successful response", async () => {
-          await request(app)
+          await authAgent
             .post(`${apiPath}/entities/search`)
             .send({
               class: linkedEntity.class,
               entityId: action.id,
               label: linkedEntity.labels[0],
             })
-            .set("authorization", "Bearer " + supertestConfig.token)
             .expect("Content-Type", /json/)
             .expect(200)
             .expect((res: Response) => {
@@ -236,14 +237,13 @@ describe("Entities search (params)", function () {
     describe("search by all params + misused label", () => {
       describe("using entity id", () => {
         it("should return a 200 code with empty response", async () => {
-          await request(app)
+          await authAgent
             .post(`${apiPath}/entities/search`)
             .send({
               class: linkedEntity.class,
               entityId: action.id,
               label: linkedEntity.labels[0] + "xxxx",
             })
-            .set("authorization", "Bearer " + supertestConfig.token)
             .expect("Content-Type", /json/)
             .expect(200)
             .expect((res: Response) => {
@@ -254,14 +254,13 @@ describe("Entities search (params)", function () {
 
       describe("using action id", () => {
         it("should return a 200 code with empty response", async () => {
-          await request(app)
+          await authAgent
             .post(`${apiPath}/entities/search`)
             .send({
               class: linkedEntity.class,
               entityId: action.id,
               label: linkedEntity.labels[0] + "xxxx", // does not exist
             })
-            .set("authorization", "Bearer " + supertestConfig.token)
             .expect("Content-Type", /json/)
             .expect(200)
             .expect((res: Response) => {

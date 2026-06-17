@@ -1,7 +1,7 @@
 import { testErroneousResponse } from "@modules/common.test";
 import { BadParams, StatementDoesNotExits } from "@inkvisitor/shared/types/errors";
 import request from "supertest";
-import { supertestConfig } from "..";
+import { getAuthenticatedAgent } from "@modules/testAuth";
 import { apiPath } from "@common/constants";
 import app from "../../server";
 import { Db } from "@service/rethink";
@@ -11,38 +11,40 @@ import { IReference } from "@inkvisitor/shared/types";
 import { pool } from "@middlewares/db";
 
 describe("statements/references", function () {
+  let authAgent: Awaited<ReturnType<typeof getAuthenticatedAgent>>;
+
+  beforeAll(async () => {
+    authAgent = await getAuthenticatedAgent();
+  });
+
   afterAll(async () => {
     await pool.end();
   });
 
   describe("Empty/Invalid params", () => {
     it("should return a BadParams error wrapped in IResponseGeneric for empty params", async () => {
-      await request(app)
+      await authAgent
         .put(`${apiPath}/statements/references`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
 
     it("should return a BadParams error wrapped in IResponseGeneric for missing json data", async () => {
-      await request(app)
+      await authAgent
         .put(`${apiPath}/statements/references?ids=1,2,3`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
 
     it("should return a BadParams error wrapped in IResponseGeneric for missing ids", async () => {
-      await request(app)
+      await authAgent
         .put(`${apiPath}/statements/references`)
         .send([{ id: "1", resource: "res", value: "val" } as IReference])
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
 
     it("should return a BadParams error wrapped in IResponseGeneric for bad reference data", async () => {
-      await request(app)
+      await authAgent
         .put(`${apiPath}/statements/references?ids=1,2,3`)
         .send([{ id: "", resource: "res", value: "val" } as IReference]) // empty id
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
   });
@@ -60,12 +62,11 @@ describe("statements/references", function () {
     });
 
     it("should return a StatementDoesNotExits error wrapped in IResponseGeneric for invalid statements", async () => {
-      await request(app)
+      await authAgent
         .put(
           `${apiPath}/statements/references?ids=shouldnotexist&action=replace`
         )
         .send([{ id: "1", resource: "res", value: "val" } as IReference])
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect(
           testErroneousResponse.bind(
             undefined,
@@ -89,12 +90,11 @@ describe("statements/references", function () {
       expect(statement1Before.references).toHaveLength(1);
       expect(statement2Before.references).toHaveLength(1);
 
-      const response = await request(app)
+      const response = await authAgent
         .put(
           `${apiPath}/statements/references?ids=${statement1.id},${statement2.id}&replace=true`
         )
-        .send([])
-        .set("authorization", "Bearer " + supertestConfig.token);
+        .send([]);
 
       expect(response.body.result).toBeTruthy();
 
@@ -119,12 +119,11 @@ describe("statements/references", function () {
       expect(statement1Before.references).toHaveLength(1);
       expect(statement2Before.references).toHaveLength(1);
 
-      const response = await request(app)
+      const response = await authAgent
         .put(
           `${apiPath}/statements/references?ids=${statement1.id},${statement2.id}&replace=true`
         )
-        .send([{ id: "3", resource: "res", value: "val" }])
-        .set("authorization", "Bearer " + supertestConfig.token);
+        .send([{ id: "3", resource: "res", value: "val" }]);
 
       expect(response.body.result).toBeTruthy();
 
@@ -152,12 +151,11 @@ describe("statements/references", function () {
       expect(statement1Before.references).toHaveLength(1);
       expect(statement2Before.references).toHaveLength(1);
 
-      const response = await request(app)
+      const response = await authAgent
         .put(
           `${apiPath}/statements/references?ids=${statement1.id},${statement2.id}`
         )
-        .send([])
-        .set("authorization", "Bearer " + supertestConfig.token);
+        .send([]);
 
       expect(response.body.result).toBeTruthy();
 
@@ -182,12 +180,11 @@ describe("statements/references", function () {
       expect(statement1Before.references).toHaveLength(1);
       expect(statement2Before.references).toHaveLength(1);
 
-      const response = await request(app)
+      const response = await authAgent
         .put(
           `${apiPath}/statements/references?ids=${statement1.id},${statement2.id}`
         )
-        .send([{ id: "3", resource: "res", value: "val" }])
-        .set("authorization", "Bearer " + supertestConfig.token);
+        .send([{ id: "3", resource: "res", value: "val" }]);
 
       expect(response.body.result).toBeTruthy();
 

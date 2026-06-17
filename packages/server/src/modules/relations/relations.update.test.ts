@@ -11,7 +11,7 @@ import {
 import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../server";
-import { supertestConfig } from "..";
+import { getAuthenticatedAgent } from "@modules/testAuth";
 import { Db } from "@service/rethink";
 import { successfulGenericResponse } from "@modules/common.test";
 import Relation from "@models/relation/relation";
@@ -19,25 +19,29 @@ import { RelationEnums } from "@inkvisitor/shared/enums";
 import { pool } from "@middlewares/db";
 
 describe("Relations update", function () {
+  let authAgent: Awaited<ReturnType<typeof getAuthenticatedAgent>>;
+
+  beforeAll(async () => {
+    authAgent = await getAuthenticatedAgent();
+  });
+
   afterAll(async () => {
     await pool.end();
   });
 
   describe("empty data", () => {
     it("should return a BadParams error wrapped in IResponseGeneric", async () => {
-      await request(app)
+      await authAgent
         .put(`${apiPath}/relations/1`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
   });
   describe("bad id", () => {
     it("should return an RelationDoesNotExist error wrapped in IResponseGeneric", async () => {
-      await request(app)
+      await authAgent
         .put(`${apiPath}/relations/___`)
         .send({ test: "" })
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(
           testErroneousResponse.bind(undefined, new RelationDoesNotExist(""))
@@ -46,10 +50,9 @@ describe("Relations update", function () {
   });
   describe("faulty data", () => {
     it("should return an BadParams error wrapped in IResponseGeneric", async () => {
-      await request(app)
+      await authAgent
         .put(`${apiPath}/relations/___`)
         .send({})
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
@@ -62,10 +65,9 @@ describe("Relations update", function () {
       const relationEntry = new Relation({});
       await relationEntry.save(db.connection);
 
-      await request(app)
+      await authAgent
         .put(`${apiPath}/relations/${relationEntry.id}`)
         .send({ type: "" })
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(
           testErroneousResponse.bind(undefined, new ModelNotValidError(""))
@@ -87,10 +89,9 @@ describe("Relations update", function () {
 
       await relationEntry.save(db.connection);
 
-      await request(app)
+      await authAgent
         .put(`${apiPath}/relations/${relationEntry.id}`)
         .send({ type: changeTypeTo })
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(200)
         .expect(successfulGenericResponse)

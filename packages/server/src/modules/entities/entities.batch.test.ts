@@ -1,7 +1,7 @@
 import { clean, testErroneousResponse } from "@modules/common.test";
 import { BadParams } from "@inkvisitor/shared/types/errors";
 import request from "supertest";
-import { supertestConfig } from "..";
+import { getAuthenticatedAgent } from "@modules/testAuth";
 import { apiPath } from "@common/constants";
 import app from "../../server";
 import Statement, {
@@ -13,15 +13,20 @@ import { pool } from "@middlewares/db";
 import { IResponseEntity } from "@inkvisitor/shared/types";
 
 describe("Entities batch method", function () {
+  let authAgent: Awaited<ReturnType<typeof getAuthenticatedAgent>>;
+
+  beforeAll(async () => {
+    authAgent = await getAuthenticatedAgent();
+  });
+
   afterAll(async () => {
     await pool.end();
   });
 
   describe("Missing IDs array", () => {
     it("should return a BadParams error wrapped in IResponseGeneric", async () => {
-      await request(app)
+      await authAgent
         .post(`${apiPath}/entities/batch`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .send({})
         .expect(testErroneousResponse.bind(undefined, new BadParams("ids array must be provided")));
     });
@@ -29,9 +34,8 @@ describe("Entities batch method", function () {
 
   describe("Empty IDs array", () => {
     it("should return a BadParams error wrapped in IResponseGeneric", async () => {
-      await request(app)
+      await authAgent
         .post(`${apiPath}/entities/batch`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .send({ ids: [] })
         .expect(testErroneousResponse.bind(undefined, new BadParams("ids array must be provided")));
     });
@@ -39,9 +43,8 @@ describe("Entities batch method", function () {
 
   describe("Non-existent IDs", () => {
     it("should return an empty array", async () => {
-      await request(app)
+      await authAgent
         .post(`${apiPath}/entities/batch`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .send({ ids: ["non-existent-id"] })
         .expect(200)
         .expect((res) => {
@@ -82,9 +85,8 @@ describe("Entities batch method", function () {
       await entity2.save(db.connection);
 
       // Test batch endpoint
-      await request(app)
+      await authAgent
         .post(`${apiPath}/entities/batch`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .send({ ids: [statementId1, statementId2] })
         .expect(200)
         .expect((res) => {

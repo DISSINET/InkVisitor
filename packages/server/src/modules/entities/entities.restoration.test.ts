@@ -10,7 +10,7 @@ import {
 import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../server";
-import { supertestConfig } from "..";
+import { getAuthenticatedAgent } from "@modules/testAuth";
 import { findEntityById } from "@service/shorthands";
 import { Db } from "@service/rethink";
 import "ts-jest";
@@ -20,24 +20,28 @@ import Audit from "@models/audit/audit";
 import { pool } from "@middlewares/db";
 
 describe("Entities restoration", function () {
+  let authAgent: Awaited<ReturnType<typeof getAuthenticatedAgent>>;
+
+  beforeAll(async () => {
+    authAgent = await getAuthenticatedAgent();
+  });
+
   afterAll(async () => {
     await pool.end();
   });
 
   describe("empty fromAuditId", () => {
     it("should return a BadParams error wrapped in IResponseGeneric", async () => {
-      await request(app)
+      await authAgent
         .post(`${apiPath}/entities/1/restoration?fromAuditId=`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
   });
   describe("non existing entities", () => {
     it("should return a AuditDoesNotExist error wrapped in IResponseGeneric", async () => {
-      await request(app)
+      await authAgent
         .post(`${apiPath}/entities/random/restoration?fromAuditId=random`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(
           testErroneousResponse.bind(undefined, new AuditDoesNotExist(""))
@@ -75,31 +79,28 @@ describe("Entities restoration", function () {
     });
 
     it("should return a BadParams error wrapped in IResponseGeneric if audit is not for entity", async () => {
-      await request(app)
+      await authAgent
         .post(
           `${apiPath}/entities/${differentEntity.id}/restoration?fromAuditId=${audit.id}`
         )
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
 
     it("should return a EntityDoesExist error wrapped in IResponseGeneric", async () => {
-      await request(app)
+      await authAgent
         .post(
           `${apiPath}/entities/${entity.id}/restoration?fromAuditId=${audit.id}`
         )
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(testErroneousResponse.bind(undefined, new EntityDoesExist("")));
     });
 
     it("should restore the entity from valid audit and return successful IResponseGeneric", async () => {
-      await request(app)
+      await authAgent
         .post(
           `${apiPath}/entities/${validAudit.modelId}/restoration?fromAuditId=${validAudit.id}`
         )
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
         .expect("Content-Type", /json/)
         .expect(successfulGenericResponse);

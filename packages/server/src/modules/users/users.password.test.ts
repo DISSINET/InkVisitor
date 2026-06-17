@@ -3,7 +3,7 @@ import { UserDoesNotExits } from "@inkvisitor/shared/types/errors";
 import request, { Response } from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../server";
-import { supertestConfig } from "..";
+import { getAuthenticatedAgent, testCredentials } from "@modules/testAuth";
 import mailer, { EmailSubject } from "@service/mailer";
 import { Db } from "@service/rethink";
 import User from "@models/user/user";
@@ -12,6 +12,12 @@ import { IResponseGeneric } from "@inkvisitor/shared/types";
 import { pool } from "@middlewares/db";
 
 describe("Users password", function () {
+  let authAgent: Awaited<ReturnType<typeof getAuthenticatedAgent>>;
+
+  beforeAll(async () => {
+    authAgent = await getAuthenticatedAgent();
+  });
+
   const db = new Db();
 
   beforeAll(async () => {
@@ -25,9 +31,8 @@ describe("Users password", function () {
 
   describe("invalid user", () => {
     it("should return a UserDoesNotExits error wrapped in IResponseGeneric", async () => {
-      await request(app)
+      await authAgent
         .patch(`${apiPath}/users/random/password`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(
           testErroneousResponse.bind(
@@ -40,14 +45,13 @@ describe("Users password", function () {
 
   describe("me", () => {
     it("should return a UserDoesNotExits error wrapped in IResponseGeneric", async () => {
-      await request(app)
+      await authAgent
         .patch(`${apiPath}/users/me/password`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(200)
         .then(async () => {
           expect(mailer.lastEmailSubject).toBe(EmailSubject.PasswordReset);
-          const user = await User.findUserByLogin(db, supertestConfig.username);
+          const user = await User.findUserByLogin(db, testCredentials.login, false);
           expect(user).not.toBeNull();
           if (user) {
             expect(
@@ -67,9 +71,8 @@ describe("Users password", function () {
       const user = new User({ name: newUsername });
       await user.save(db.connection);
 
-      await request(app)
+      await authAgent
         .patch(`${apiPath}/users/me/password`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(200)
         .then(async (response: Response) => {
@@ -77,7 +80,7 @@ describe("Users password", function () {
 
           expect(mailer.lastEmailSubject).toBe(EmailSubject.PasswordReset);
 
-          const user = await User.findUserByLogin(db, supertestConfig.username);
+          const user = await User.findUserByLogin(db, testCredentials.login, false);
           expect(user).not.toBeNull();
           if (user) {
             expect(

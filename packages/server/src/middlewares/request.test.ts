@@ -1,11 +1,9 @@
 import { clean, testErroneousResponse } from "@modules/common.test";
 import { UserNotActiveError } from "@inkvisitor/shared/types/errors";
-import request from "supertest";
 import { apiPath } from "@common/constants";
-import app from "../server";
 import { Db } from "@service/rethink";
 import User from "@models/user/user";
-import { generateAccessToken } from "@common/auth";
+import { createAgentWithUserId } from "@modules/testAuth";
 import { pool } from "./db";
 
 describe("Test valid/invalid user", function () {
@@ -14,21 +12,19 @@ describe("Test valid/invalid user", function () {
     email: "active@active.com",
     name: "active",
     active: true,
+    verified: true,
   });
   const inactiveUser = new User({
     email: "inactive@inactive.com",
     name: "inactive",
     active: false,
+    verified: true,
   });
-  let activeUserToken: string;
-  let inactiveUserToken: string;
 
   beforeAll(async () => {
     await db.initDb();
     await activeUser.save(db.connection);
     await inactiveUser.save(db.connection);
-    activeUserToken = generateAccessToken(activeUser);
-    inactiveUserToken = generateAccessToken(inactiveUser);
   });
 
   afterAll(async () => {
@@ -39,16 +35,14 @@ describe("Test valid/invalid user", function () {
   });
 
   it("should return a 200 response for active user", async () => {
-    await request(app)
-      .get(`${apiPath}/users/me`)
-      .set("authorization", "Bearer " + activeUserToken)
-      .expect(200);
+    const agent = await createAgentWithUserId(activeUser.id);
+    await agent.get(`${apiPath}/users/me`).expect(200);
   });
 
   it("should return a UserNotActiveError error wrapped in IResponseGeneric for inactive user", async () => {
-    await request(app)
+    const agent = await createAgentWithUserId(inactiveUser.id);
+    await agent
       .get(`${apiPath}/users/me`)
-      .set("authorization", "Bearer " + inactiveUserToken)
       .expect(
         testErroneousResponse.bind(undefined, new UserNotActiveError("", ""))
       );

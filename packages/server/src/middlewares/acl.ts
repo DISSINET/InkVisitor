@@ -76,7 +76,6 @@ class Acl {
    */
   public async validate(req: IRequest): Promise<CustomError | null> {
     const permissions = await this.getPermissions(req);
-    const user = req.user?.user;
     const controller = req.baseUrl.split("/").pop() || "";
     const route = req.route.path
       .split("/")
@@ -89,31 +88,40 @@ class Acl {
       return null;
     }
 
+    // allow signout without an authenticated session
+    if (
+      controller === "users" &&
+      route === "signout" &&
+      method === HttpMethods.Post
+    ) {
+      return null;
+    }
+
     // block not logged visitors
     if (!req.user) {
       return permissionDeniedErr;
     }
+
+    const user = req.getUserOrFail();
 
     // allow editors with assigned rights to fetch users for filters (editedBy/updatedBy)
     if (
       controller === "users" &&
       route === "" &&
       method === HttpMethods.Get &&
-      user?.role === UserEnums.Role.Editor &&
+      user.role === UserEnums.Role.Editor &&
       (user.rights?.length || 0) > 0
     ) {
       return null;
     }
 
     // allow admin/owner for any route
-    if (
-      req.getUserOrFail().hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin])
-    ) {
+    if (user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin])) {
       return null;
     }
 
     // allow if current role is in permissions
-    if (permissions.find((p) => p.isRoleAllowed(req.getUserOrFail().role))) {
+    if (permissions.find((p) => p.isRoleAllowed(user.role))) {
       return null;
     }
 

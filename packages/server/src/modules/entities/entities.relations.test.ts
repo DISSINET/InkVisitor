@@ -1,8 +1,8 @@
 import { clean } from "@modules/common.test";
 import request from "supertest";
-import { supertestConfig } from "..";
+import { getAuthenticatedAgent } from "@modules/testAuth";
 import { apiPath } from "@common/constants";
-import app from "../../Server";
+import app from "../../server";
 import { Db } from "@service/rethink";
 import { pool } from "@middlewares/db";
 import Concept from "@models/concept/concept";
@@ -11,6 +11,12 @@ import Synonym from "@models/relation/synonym";
 import { RelationEnums } from "@inkvisitor/shared/enums";
 
 describe("Entities relations get method", function () {
+  let authAgent: Awaited<ReturnType<typeof getAuthenticatedAgent>>;
+
+  beforeAll(async () => {
+    authAgent = await getAuthenticatedAgent();
+  });
+
   afterAll(async () => {
     await pool.end();
   });
@@ -40,10 +46,9 @@ describe("Entities relations get method", function () {
     afterAll(async () => await clean(db));
 
     it("should return the asymmetrical relation for the subject (forward) entity", async () => {
-      await request(app)
+      await authAgent
         .get(`${apiPath}/entities/${childConcept.id}/relations`)
         .query(`filters[relationType]=${RelationEnums.Type.Superclass}`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(200)
         .expect((res) => {
@@ -55,10 +60,9 @@ describe("Entities relations get method", function () {
     });
 
     it("should NOT return the asymmetrical relation for the target (inverse) entity by default", async () => {
-      await request(app)
+      await authAgent
         .get(`${apiPath}/entities/${parentConcept.id}/relations`)
         .query(`filters[relationType]=${RelationEnums.Type.Superclass}`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(200)
         .expect((res) => {
@@ -68,10 +72,9 @@ describe("Entities relations get method", function () {
     });
 
     it("should return the inverse asymmetrical relation when forward=false", async () => {
-      await request(app)
+      await authAgent
         .get(`${apiPath}/entities/${parentConcept.id}/relations`)
         .query(`filters[relationType]=${RelationEnums.Type.Superclass}&forward=false`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(200)
         .expect((res) => {
@@ -83,10 +86,9 @@ describe("Entities relations get method", function () {
 
     it("should return a symmetrical relation regardless of position", async () => {
       // childConcept is at entityIds[0]
-      await request(app)
+      await authAgent
         .get(`${apiPath}/entities/${childConcept.id}/relations`)
         .query(`filters[relationType]=${RelationEnums.Type.Synonym}`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
         .expect((res) => {
           expect(res.body.length).toEqual(1);
@@ -94,10 +96,9 @@ describe("Entities relations get method", function () {
         });
 
       // parentConcept is at entityIds[1] - still returned for symmetrical types
-      await request(app)
+      await authAgent
         .get(`${apiPath}/entities/${parentConcept.id}/relations`)
         .query(`filters[relationType]=${RelationEnums.Type.Synonym}`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
         .expect((res) => {
           expect(res.body.length).toEqual(1);

@@ -1,6 +1,6 @@
 import "ts-jest";
 import request from "supertest";
-import { supertestConfig } from "..";
+import { getAuthenticatedAgent } from "@modules/testAuth";
 import { apiPath } from "@common/constants";
 import app from "../../server";
 import { IStatement } from "@inkvisitor/shared/types";
@@ -12,6 +12,12 @@ import { IRequest } from "src/custom_typings/request";
 import { pool } from "@middlewares/db";
 
 describe("Territories getEntityIds", () => {
+  let authAgent: Awaited<ReturnType<typeof getAuthenticatedAgent>>;
+
+  beforeAll(async () => {
+    authAgent = await getAuthenticatedAgent();
+  });
+
   let db: Db;
   const baseStatementData = new Statement({});
   beforeAll(async () => {
@@ -50,9 +56,8 @@ describe("Territories getEntityIds", () => {
       const statement2 = new Statement({ ...statementData2 });
       await statement2.save(db.connection);
 
-      await request(app)
+      await authAgent
         .get(`${apiPath}/territories/${territory.id}/entities`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
         .expect((res: IRequest) => {
           expect(res.body).not.toBeNull();

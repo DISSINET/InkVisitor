@@ -1,6 +1,6 @@
 import { createMockTree, clean } from "@modules/common.test";
 import request from "supertest";
-import { supertestConfig } from "..";
+import { getAuthenticatedAgent } from "@modules/testAuth";
 import { apiPath } from "@common/constants";
 import app from "../../server";
 import { ITerritory } from "@inkvisitor/shared/types";
@@ -15,6 +15,12 @@ import { EntityEnums } from "@inkvisitor/shared/enums";
 import { pool } from "@middlewares/db";
 
 describe("Tree moveTerritory", function () {
+  let authAgent: Awaited<ReturnType<typeof getAuthenticatedAgent>>;
+
+  beforeAll(async () => {
+    authAgent = await getAuthenticatedAgent();
+  });
+
   const db = new Db();
 
   beforeAll(async () => {
@@ -45,13 +51,12 @@ describe("Tree moveTerritory", function () {
     });
 
     it("should return a 200 code with IResponseGeneric success response", async () => {
-      await request(app)
+      await authAgent
         .patch(`${apiPath}/tree/${t1.id}/position`)
         .send({
           parentId: `root-${randSuffix}`,
           newIndex: EntityEnums.Order.Last,
         })
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
         .expect({ result: true });
 
@@ -97,13 +102,12 @@ describe("Tree moveTerritory", function () {
     });
 
     it("should return a 200 code with IResponseGeneric success response", async () => {
-      await request(app)
+      await authAgent
         .patch(`${apiPath}/tree/${t1_1.id}/position`)
         .send({
           parentId: t2.id,
           newIndex: 0, // doesnt matter, should be pushed to the end
         })
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
         .expect({ result: true });
 

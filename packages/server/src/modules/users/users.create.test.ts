@@ -4,31 +4,35 @@ import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../server";
 import { successfulGenericResponse } from "@modules/common.test";
-import { supertestConfig } from "..";
+import { getAuthenticatedAgent } from "@modules/testAuth";
 import { Db } from "@service/rethink";
 import User from "@models/user/user";
 import { deleteUsers } from "@service/shorthands";
 import { pool } from "@middlewares/db";
 
 describe("Users create", function () {
+  let authAgent: Awaited<ReturnType<typeof getAuthenticatedAgent>>;
+
+  beforeAll(async () => {
+    authAgent = await getAuthenticatedAgent();
+  });
+
   afterAll(async () => {
     await pool.end();
   });
 
   describe("empty data", () => {
     it("should return a BadParams error wrapped in IResponseGeneric", async () => {
-      await request(app)
+      await authAgent
         .post(`${apiPath}/users`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
   });
   describe("faulty data ", () => {
     it("should return a BadParams error wrapped in IResponseGeneric", async () => {
-      await request(app)
+      await authAgent
         .post(`${apiPath}/users`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .send({ test: "" })
         .expect("Content-Type", /json/)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")));
@@ -48,15 +52,14 @@ describe("Users create", function () {
 
     it("should return a 200 code with successful response", async () => {
       const email = `${Math.random()}@dissinet.cz`;
-      await request(app)
+      await authAgent
         .post(`${apiPath}/users`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .send({ name: "tester", email: email, password: "pass" })
         .expect("Content-Type", /json/)
         .expect(successfulGenericResponse)
         .expect(200);
 
-      const createdUser = await User.findUserByLogin(db, email);
+      const createdUser = await User.findUserByLogin(db, email, false);
       expect(createdUser).toBeTruthy();
       expect(createdUser?.active).toEqual(true);
     });

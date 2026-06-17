@@ -8,21 +8,26 @@ import { Db } from "@service/rethink";
 import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../server";
-import { supertestConfig } from "..";
+import { getAuthenticatedAgent } from "@modules/testAuth";
 import Relation from "@models/relation/relation";
 import { RelationEnums } from "@inkvisitor/shared/enums";
 import { pool } from "@middlewares/db";
 
 describe("Relations delete", function () {
+  let authAgent: Awaited<ReturnType<typeof getAuthenticatedAgent>>;
+
+  beforeAll(async () => {
+    authAgent = await getAuthenticatedAgent();
+  });
+
   afterAll(async () => {
     await pool.end();
   });
 
   describe("bad id", () => {
     it("should return a RelationDoesNotExist error wrapped in IResponseGeneric", async () => {
-      await request(app)
+      await authAgent
         .delete(`${apiPath}/relations/randomid12345`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(
           testErroneousResponse.bind(undefined, new RelationDoesNotExist(""))
@@ -39,9 +44,8 @@ describe("Relations delete", function () {
       });
       await relationEntry.save(db.connection);
 
-      await request(app)
+      await authAgent
         .delete(`${apiPath}/relations/${relationEntry.id}`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(200)
         .expect(async () => {

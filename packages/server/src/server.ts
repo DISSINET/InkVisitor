@@ -23,7 +23,11 @@ import profilerMiddleware from "@middlewares/profiler";
 import headersProtectionMiddleware from "@middlewares/headers-protection";
 import errorsMiddleware, { catchAll } from "@middlewares/errors";
 import serveClientApp from "@middlewares/static-client";
-import { validateJwt } from "@common/auth";
+import { authenticateRequest } from "@middlewares/auth";
+import {
+  cookieParserMiddleware,
+  sessionMiddleware,
+} from "@middlewares/session";
 import compression from "compression";
 import rateLimit from "express-rate-limit";
 import "@models/events/register";
@@ -39,8 +43,6 @@ server.use(
   compression({
     threshold: 0,
     filter: (req, res) => {
-      // Backup archives are already compressed; re-compressing breaks Content-Length
-      // and prevents the browser from reporting download progress.
       if (req.path.includes("/backups/download")) {
         return false;
       }
@@ -49,7 +51,7 @@ server.use(
   })
 );
 
-server.use(cors());
+server.use(cors({ origin: true, credentials: true }));
 
 const staticPath = process.env.STATIC_PATH;
 if (staticPath === "/") {
@@ -60,30 +62,24 @@ if (staticPath === "/") {
 
 server.use(express.json({ limit: "150mb" }));
 server.use(express.urlencoded({ extended: true, limit: "150mb" }));
-// Backup archive streams can take minutes on slow links; the default 20s would
-// otherwise fire mid-stream and trip "headers already sent" warnings. Match by
-// exact suffix so /backups/download-url (small JSON) keeps the default budget.
 server.use((req, res, next) =>
   timeout(req.path.endsWith("/backups/download") ? "5m" : "20s")(req, res, next)
 );
 
-// Show routes called in console during development
 if (process.env.NODE_ENV === "development") {
   server.use(morgan("dev"));
 }
 
-// Securing
 if (process.env.NODE_ENV === "production") {
   server.use(helmet());
 }
 
-// Rate limited for signin (disabled in development)
 if (process.env.NODE_ENV !== "development") {
   server.use(
     `${apiPath}/users/signin`,
     rateLimit({
-      windowMs: 5 * 60 * 1000, // 5 minutes window
-      max: 5, // Limit each IP to 5 requests per windowMs
+      windowMs: 5 * 60 * 1000,
+      max: 5,
       handler: (req: Request, res: Response, next: NextFunction, options) => {
         throw new TooManyRequestsError(`${TooManyRequestsError.title}: try again in 5 minutes`);
       },
@@ -95,31 +91,17 @@ if (process.env.NODE_ENV !== "development") {
 
 server.use(headersProtectionMiddleware);
 server.use(profilerMiddleware);
+server.use(cookieParserMiddleware);
+server.use(sessionMiddleware);
 server.use(apiPath, dbMiddleware);
 
-// uncomment this to enable auth
-server.use(
-  validateJwt().unless({
-    path: [
-      /api(\/[^\/]+)?\/users\/password_reset/,
-      /api(\/[^\/]+)?\/users\/signin/,
-      /api(\/[^\/]+)?\/users\/activation/,
-      /api(\/[^\/]+)?\/users\/password/,
-      /api(\/[^\/]+)?\/users\/owner/,
-      /api(\/[^\/]+)?\/pythondata/,
-      /api(\/[^\/]+)?\/health/,
-      /api(\/[^\/]+)?\/dev\/simulate-html-error/,
-    ],
-  })
-);
+server.use(authenticateRequest);
 server.use(customizeRequest);
 
-// Routing
 const router = Router();
 server.use(apiPath, router);
-server.use(apiPathOld, router); // DEPRECATED , legacy reasons
+server.use(apiPathOld, router);
 
-// Health route
 router.get("/health", async function (req, res) {
   await rethink.tableList().run(req.db.connection);
   res.json({
@@ -136,7 +118,6 @@ router.get("/health", async function (req, res) {
   });
 });
 
-// Dev-only: simulate proxy/overload HTML body for client error-handling tests (remove before release)
 if (process.env.NODE_ENV === "development") {
   router.get("/dev/simulate-html-error", function (_req, res) {
     res
@@ -146,7 +127,6 @@ if (process.env.NODE_ENV === "development") {
   });
 }
 
-// uncomment this to enable acl
 const acl = new Acl();
 router.use(acl.authorize);
 
@@ -164,10 +144,8 @@ router.use("/pythondata", PythonApiRouter);
 router.use("/settings", SettingsRouter);
 router.use("/backups", BackupsRouter);
 
-// unknown paths (after jwt check) should return 404
 server.all("*", catchAll);
 
-// Errors
 server.use(errorsMiddleware);
 
 acl.assignRoutes(router);

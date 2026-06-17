@@ -1,5 +1,5 @@
 import request from "supertest";
-import { supertestConfig } from "./modules";
+import { getAuthenticatedAgent } from "@modules/testAuth";
 import { apiPath } from "@common/constants";
 import app from "./server";
 import { unknownRouteError, unauthorizedError } from "@middlewares/errors";
@@ -9,14 +9,15 @@ import { pool } from "@middlewares/db";
 import { testErroneousResponse } from "@modules/common.test";
 
 describe("Test unknown route", function () {
-  afterAll(async () => {
-    await pool.end();
+  let authAgent: Awaited<ReturnType<typeof getAuthenticatedAgent>>;
+
+  beforeAll(async () => {
+    authAgent = await getAuthenticatedAgent();
   });
 
   it("should return an unknownRouteError wrapped in IResponeGeneric response", async () => {
-    await request(app)
+    await authAgent
       .get(`${apiPath}/random/get`)
-      .set("authorization", "Bearer " + supertestConfig.token)
       .expect(unknownRouteError.statusCode())
       .expect({
         result: false,
@@ -27,14 +28,14 @@ describe("Test unknown route", function () {
 });
 
 describe("Test unauthorized request", function () {
-  afterAll(async () => {
-    await pool.end();
-  });
-
   it("should return an unauthorizedError wrapped in IResponeGeneric response", async () => {
     await request(app)
       .get(`${apiPath}/users/122322`)
       .expect(unauthorizedError.statusCode())
       .expect(testErroneousResponse.bind(undefined, unauthorizedError));
   });
+});
+
+afterAll(async () => {
+  await pool.end();
 });

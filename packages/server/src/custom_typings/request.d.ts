@@ -7,7 +7,7 @@ export interface IRequest<TParams = any, TBody = any, TQuery = any> {
   db: DbHandle;
   acl: Acl;
   user?: {
-    user: IUser;
+    user: Pick<IUser, "id">;
   };
   getUserOrFail(): User;
   baseUrl: string;

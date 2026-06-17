@@ -7,27 +7,31 @@ import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../server";
 import Statement, { StatementData } from "@models/statement/statement";
-import { supertestConfig } from "..";
+import { getAuthenticatedAgent } from "@modules/testAuth";
 import { pool } from "@middlewares/db";
 
 describe("Territories get query", function () {
+  let authAgent: Awaited<ReturnType<typeof getAuthenticatedAgent>>;
+
+  beforeAll(async () => {
+    authAgent = await getAuthenticatedAgent();
+  });
+
   afterAll(async () => {
     await pool.end();
   });
 
   describe("Empty param", () => {
     it("should return a BadParams error wrapped in IResponseGeneric", async () => {
-      await request(app)
+      await authAgent
         .get(`${apiPath}/territories`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
   });
   describe("Wrong param", () => {
     it("should return a TerritoryDoesNotExits error wrapped in IResponseGeneric", async () => {
-      await request(app)
+      await authAgent
         .get(`${apiPath}/territories/123`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect(
           testErroneousResponse.bind(
             undefined,
@@ -71,9 +75,8 @@ describe("Territories get query", function () {
       });
       await createEntity(db, statement2);
 
-      await request(app)
+      await authAgent
         .get(`${apiPath}/territories/${testTerritoryId}`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
         .expect((res) => {
           expect(res.body).toBeTruthy();
