@@ -229,7 +229,8 @@ export const StyledWarningRow = styled.div`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.space[4]};
-  padding: ${({ theme }) => theme.space[2]} ${({ theme }) => theme.space[3]};
+  padding: 0.5rem 1rem;
+  padding-right: 1.5rem;
   border-radius: ${({ theme }) => theme.borderRadius["default"]};
   background-color: ${({ theme }) => theme.color.blue[50]};
 `;

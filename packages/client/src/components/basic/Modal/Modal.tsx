@@ -79,7 +79,7 @@ export const Modal: FC<Modal> = ({
                 {children}
               </ModalCard>
             </StyledModalWrap>,
-            document.body
+            document.body,
           )}
           <ModalKeyPress
             onEnter={onEnterPress}
@@ -108,7 +108,7 @@ export const ModalCard: FC<ModalCard> = ({
   return (
     <StyledCard style={animatedMount} width={width} $fullHeight={fullHeight}>
       {children}
-      <Loader show={isLoading} />
+      <Loader show={isLoading} size={36} />
     </StyledCard>
   );
 };
@@ -171,7 +171,7 @@ export const ModalContent: FC<ModalContent> = ({
       centered={centered}
     >
       {children}
-      <Loader show={isLoading} />
+      <Loader show={isLoading} size={36} />
     </StyledCardBody>
   );
 };
@@ -202,15 +202,8 @@ interface ModalInputForm {
   children?: React.ReactNode;
   alignLeft?: boolean; // centered by default
 }
-export const ModalInputForm: React.FC<ModalInputForm> = ({
-  children,
-  alignLeft = false,
-}) => {
-  return (
-    <StyledModalInputForm $alignLeft={alignLeft}>
-      {children}
-    </StyledModalInputForm>
-  );
+export const ModalInputForm: React.FC<ModalInputForm> = ({ children, alignLeft = false }) => {
+  return <StyledModalInputForm $alignLeft={alignLeft}>{children}</StyledModalInputForm>;
 };
 interface ModalInputLabel {
   children?: React.ReactNode;
@@ -222,9 +215,6 @@ interface ModalInputWrap {
   width?: number;
   children?: React.ReactNode;
 }
-export const ModalInputWrap: React.FC<ModalInputWrap> = ({
-  width,
-  children,
-}) => {
+export const ModalInputWrap: React.FC<ModalInputWrap> = ({ width, children }) => {
   return <StyledModalInputWrap width={width}>{children}</StyledModalInputWrap>;
 };
