@@ -904,6 +904,11 @@ export default Router()
           throw new InternalServerError(`cannot update user ${userId}`);
         }
 
+        // Password changed - drop all of this user's sessions so sessions tied
+        // to the old password can't keep authenticating (matches PUT /:userId
+        // and PUT /password_reset).
+        await invalidateUserSessions(request.db.connection, user.id);
+
         console.log(`Password reset for ${user.email}`);
 
         let emailSent = true;

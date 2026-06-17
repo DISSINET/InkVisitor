@@ -60,8 +60,11 @@ export function verifyDownloadToken(token: string): { id: string } | null {
   try {
     const decoded = verifyJwtRaw(token, secret, {
       algorithms: [defaultJwtAlgo],
-    }) as JwtPayload & { userId?: string; user?: IUser };
-    const userId = decoded?.userId ?? decoded?.user?.id;
+    }) as JwtPayload & { userId?: string };
+    // Only accept the new short-lived { userId } download-token shape. Legacy
+    // long-lived JWTs ({ user: { id } }) issued before the cookie migration are
+    // no longer honored - cookie sessions are the only general auth now.
+    const userId = decoded?.userId;
     return userId ? { id: userId } : null;
   } catch {
     return null;
