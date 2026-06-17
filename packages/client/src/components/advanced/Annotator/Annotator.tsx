@@ -1059,15 +1059,19 @@ export const TextAnnotator = ({
     annotator.scrollToAsymmetricalAnchor(tagName, position, segmentIndex);
   };
 
+  // When the document is read-only (e.g. an Editor viewing an unassigned
+  // document) the selection menu still appears, but only as a minimal,
+  // view-only variant: clipboard + anchors in selection, no create/edit.
+  const isMenuReadOnly = !canEditDocument;
+
   const isMenuDisplayed = useMemo<boolean>(() => {
     return (
-      canEditDocument &&
       annotatorMode === EditMode.HIGHLIGHT &&
       selectedText !== "" &&
       !isSelectingText &&
       dataDocument !== undefined
     );
-  }, [canEditDocument, annotatorMode, selectedText, isSelectingText, dataDocument]);
+  }, [annotatorMode, selectedText, isSelectingText, dataDocument]);
 
   const annotatorMenuMiddleware = useMemo(() => {
     if (typeof document === "undefined") return [];
@@ -1282,8 +1286,9 @@ export const TextAnnotator = ({
                       onAnchorAdd={handleAddAnchor}
                       onCreateTerritory={onCreateTerritory}
                       onCreateStatement={onCreateStatement}
-                      onRemoveAnchor={onRemoveAnchor}
-                      onUpdateAnchor={onUpdateAnchor}
+                      onRemoveAnchor={isMenuReadOnly ? undefined : onRemoveAnchor}
+                      onUpdateAnchor={isMenuReadOnly ? undefined : onUpdateAnchor}
+                      readonly={isMenuReadOnly}
                       isTextInsideThisT={selectedAnchors.some(
                         (anchor) => anchor.getTagName() === thisTerritoryEntityId,
                       )}
@@ -1296,7 +1301,7 @@ export const TextAnnotator = ({
                       }
                       hasParentT={hasParentT}
                       territory={territory}
-                      disableCreate={disableCreate}
+                      disableCreate={disableCreate || isMenuReadOnly}
                       isLoading={isSaving || isSavingWithoutRefresh || isFetchingAnchorEntities}
                     />
                   )}
