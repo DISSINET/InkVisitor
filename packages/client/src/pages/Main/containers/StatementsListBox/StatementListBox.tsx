@@ -1042,6 +1042,7 @@ export const StatementListBox: React.FC = () => {
                   resources={resources}
                   setSelectedResourceId={setSelectedResourceId}
                   showStatementList={isListNonEmpty || statementListTableIsLoading}
+                  userCanEdit={userCanEdit}
                   canSelectResource={canSelectResource}
                   canEditDocument={canEditDocument}
                   userData={userData}
