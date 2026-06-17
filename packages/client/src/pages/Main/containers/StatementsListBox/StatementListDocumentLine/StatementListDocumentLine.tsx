@@ -184,19 +184,26 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
             <Loader show={selectedDocumentIsFetching} size={16} />
           </StyledDocumentTitleContainer>
 
-          {warningCount > 0 && onOpenWarnings && (
-            <span
-              style={{
-                display: "inline-flex",
-                flexShrink: 0,
-                // Left gap comes from DocumentTitle's own 0.6rem right margin;
-                // match it on the right so the chip is evenly spaced.
-                marginRight: "0.6rem",
-              }}
-            >
-              <WarningsChip count={warningCount} onClick={onOpenWarnings} />
-            </span>
-          )}
+          {/* Orphaned-anchor warnings are only actionable by someone who may
+              edit the document, so the chip only shows for an assigned
+              resource's loaded document that actually has warnings. */}
+          {warningCount > 0 &&
+            onOpenWarnings &&
+            canEditDocument &&
+            selectedResource !== false &&
+            selectedResource?.data?.documentId && (
+              <span
+                style={{
+                  display: "inline-flex",
+                  flexShrink: 0,
+                  // Left gap comes from DocumentTitle's own 0.6rem right margin;
+                  // match it on the right so the chip is evenly spaced.
+                  marginRight: "0.6rem",
+                }}
+              >
+                <WarningsChip count={warningCount} onClick={onOpenWarnings} />
+              </span>
+            )}
 
           {!selectedDocumentIsFetching &&
             selectedResource !== false &&
