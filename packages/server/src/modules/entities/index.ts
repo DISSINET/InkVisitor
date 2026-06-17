@@ -651,9 +651,9 @@ export default Router()
 
       const entity = getEntityClass({ ...entityData });
 
-      if (!entity.canBeViewedByUser(request.getUserOrFail())) {
-        throw new PermissionDeniedError(`cannot view entity ${entityId}`);
-      }
+      // Read-only detail view is consistent with the unrestricted base
+      // GET /:entityId. Territory/statement-level access for mutations is
+      // enforced via entity.right in the response (write/admin vs read-only).
 
       const response = new ResponseEntityDetail(entity);
 

@@ -74,9 +74,10 @@ export default Router()
 
       const statementModel = new Statement({ ...statementData });
 
-      if (!statementModel.canBeViewedByUser(request.getUserOrFail())) {
-        throw new PermissionDeniedError("statement cannot be accessed");
-      }
+      // canBeViewedByUser is intentionally not enforced here: the Explorer
+      // surfaces statements from all territories and the detail box must be
+      // able to read them. Mutation rights are still controlled via
+      // statement.right in the response (write/admin vs read-only).
 
       const response = new ResponseStatement(statementData);
       await response.prepare(request);
