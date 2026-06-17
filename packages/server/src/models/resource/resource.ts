@@ -41,6 +41,20 @@ class Resource extends Entity implements IResource {
   }
 
   /**
+   * Editors may edit a Resource only when it is assigned to them in Manage
+   * Users (annotate right). Owner/Admin always can; Viewer never.
+   */
+  canBeEditedByUser(user: User): boolean {
+    if (user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin])) {
+      return true;
+    }
+    if (user.role !== UserEnums.Role.Editor) {
+      return false;
+    }
+    return user.hasAnnotateRightForResource(this.id);
+  }
+
+  /**
    * Editors may delete a Resource only when it is assigned to them in Manage
    * Users (annotate right). Owner/Admin always can; Viewer never.
    */
