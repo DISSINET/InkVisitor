@@ -139,6 +139,9 @@ export class Annotator {
 
   private destroyed = false;
 
+  /** Whether the main canvas currently has keyboard focus. */
+  private canvasFocused = false;
+
   /** Phase 4 (#3086) — bounded undo/redo stack of document snapshots. */
   history: History = new History();
 
@@ -225,6 +228,17 @@ export class Annotator {
     if (!this.dragHandle) {
       this.element.style.cursor = "";
     }
+  };
+
+  private readonly boundOnCanvasFocus = () => {
+    this.canvasFocused = true;
+    this.caretBlink.reset();
+    this.draw();
+  };
+
+  private readonly boundOnCanvasBlur = () => {
+    this.canvasFocused = false;
+    this.draw();
   };
 
   /** Issue #3108 — document-level move while dragging a selection handle. */
@@ -314,6 +328,8 @@ export class Annotator {
     this.element.addEventListener("mousemove", this.boundOnMouseMove);
     this.element.addEventListener("mouseleave", this.boundOnCanvasMouseLeave);
     this.element.addEventListener("contextmenu", this.boundOnContextMenu);
+    this.element.addEventListener("focus", this.boundOnCanvasFocus);
+    this.element.addEventListener("blur", this.boundOnCanvasBlur);
 
     this.clickCount = 0;
 
@@ -1539,6 +1555,8 @@ export class Annotator {
     this.element.removeEventListener("mousemove", this.boundOnMouseMove);
     this.element.removeEventListener("mouseleave", this.boundOnCanvasMouseLeave);
     this.element.removeEventListener("contextmenu", this.boundOnContextMenu);
+    this.element.removeEventListener("focus", this.boundOnCanvasFocus);
+    this.element.removeEventListener("blur", this.boundOnCanvasBlur);
 
     this.onScrollCb = undefined;
     this.scroller = undefined;
@@ -2095,8 +2113,8 @@ export class Annotator {
 
     const textSegment = this.text.cursorToIndex(this.viewport, this.cursor);
 
-    // Blink only while a collapsed caret is actually shown; idle otherwise (#3092).
-    this.caretBlink.sync(this.cursor.hasCaret());
+    // Blink only while a collapsed caret is shown and the canvas is focused.
+    this.caretBlink.sync(this.cursor.hasCaret() && this.canvasFocused);
 
     if (textSegment) {
       const line = this.text.getLineFromPosition(textSegment);
