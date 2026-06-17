@@ -71,32 +71,11 @@ type IFilterDocuments = {
   documentIds?: string[];
 };
 
-const parseJwt = (token: string) => {
-  var base64Url = token.split(".")[1];
-  var base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-  var jsonPayload = decodeURIComponent(
-    atob(base64)
-      .split("")
-      .map(function (c) {
-        return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
-      })
-      .join(""),
-  );
-  try {
-    return JSON.parse(jsonPayload);
-  } catch {
-    return false;
-  }
-};
-
 class Api {
   private baseUrl: string;
   private apiUrl: string;
   private headers: object;
   private connection: AxiosInstance;
-  // unique token key for each environment
-  private tokenKey: string;
-  private token: string;
   private ws?: Socket;
   private ping: number;
   private dbStats: IDbStats | null = null;
@@ -120,10 +99,10 @@ class Api {
       timeout: 15000,
       responseType: "json",
       headers: this.headers,
+      // Send the HttpOnly session cookie on every request so the server can
+      // authenticate us. Replaces the previous Authorization: Bearer JWT.
+      withCredentials: true,
     });
-
-    this.tokenKey = `${window.appConfig.env}-token`;
-    this.token = "";
   }
 
   /**
@@ -134,9 +113,9 @@ class Api {
 
     this.ws = io(url.origin, {
       path: (url.pathname + "/socket.io").replace(`//`, "/"),
-      // Pulled lazily so the current token is sent on every (re)connect.
-      // The server uses it to gate db:stats to Admin/Owner sockets.
-      auth: (cb) => cb({ token: this.token }),
+      // Send the session cookie on the WS handshake so the server can gate
+      // db:stats to Admin/Owner sockets based on the live DB role.
+      withCredentials: true,
     });
     this.ws.on("connect", () => {
       console.log("Socket.IO connected");
@@ -172,17 +151,6 @@ class Api {
         }
       });
     }, 5000);
-  }
-
-  /**
-   * Uses default request interceptors - mainly adding jwt token for requests
-   */
-  useDefaultRequestInterceptors() {
-    // each request to api will be by default authorized
-    this.connection.interceptors.request.use((config) => {
-      config.headers.Authorization = `Bearer ${this.token}`;
-      return config;
-    });
   }
 
   /**
@@ -259,6 +227,9 @@ class Api {
           const isSignInRequest = requestUrl.includes("/users/signin");
 
           if (!isSignInRequest) {
+            // Session is no longer valid - drop stale local user state so route
+            // guards (isLoggedIn) reflect reality, then bounce to login.
+            this.clearStoredUser();
             // if handled by react router, then the toast could be visible
             window.location.pathname = (process.env.ROOT_URL || "") + "/login";
           }
@@ -386,41 +357,29 @@ class Api {
     }, 50);
   }
 
+  // Cookie-session auth: the HttpOnly session cookie is the source of truth and
+  // is not readable from JS. These localStorage values are non-sensitive display
+  // metadata only (used for UI/role gating); the server always re-authorizes from
+  // the DB-loaded user. A stale value just means the next request 401s and the
+  // response interceptor clears it and redirects to login.
   isLoggedIn = () => {
-    let storedToken = localStorage.getItem(this.tokenKey);
-    let storedUsername = localStorage.getItem("username");
-    return storedToken && storedUsername ? true : false;
+    const storedUserId = localStorage.getItem("userid");
+    const storedUsername = localStorage.getItem("username");
+    return storedUserId && storedUsername ? true : false;
   };
 
-  /**
-   * Authentication
-   */
-  checkLogin() {
-    let storedToken = localStorage.getItem(this.tokenKey);
-    let storedUsername = localStorage.getItem("username");
-    let storedUserId = localStorage.getItem("userid");
-
-    if (!!storedToken && !!storedUsername && !!storedUserId) {
-      const parsedToken = parseJwt(storedToken);
-
-      if (parsedToken && Date.now() < parsedToken.exp * 1000) {
-        const username = parsedToken.user.name;
-        const userrole = parsedToken.user.role;
-        this.saveLogin(storedToken, username, storedUserId, userrole);
-      } else {
-        this.signOut();
-      }
-    }
+  private clearStoredUser() {
+    localStorage.removeItem("username");
+    localStorage.removeItem("userid");
+    localStorage.removeItem("userrole");
   }
 
-  saveLogin(newToken: string, newUserName: string, newUserId: string, newUserRole: string) {
-    localStorage.setItem(this.tokenKey, newToken);
+  saveLogin(newUserName: string, newUserId: string, newUserRole: string) {
     localStorage.setItem("username", newUserName);
     localStorage.setItem("userid", newUserId);
     localStorage.setItem("userrole", newUserRole);
-    this.token = newToken;
     // Re-handshake so the server can re-evaluate role-gated channels (db:stats)
-    // for the new token without requiring a page refresh.
+    // for the new cookie session without requiring a page refresh.
     this.reconnectWs();
   }
 
@@ -435,9 +394,9 @@ class Api {
    * @returns Api
    */
   withoutToaster() {
+    // The clone's own axios instance already sends the session cookie
+    // (withCredentials), so it is authenticated just like the original.
     const newApi = new Api();
-    newApi.token = this.token;
-    newApi.useDefaultRequestInterceptors(); // required for login
     return newApi;
   }
 
@@ -459,8 +418,10 @@ class Api {
       );
 
       if (response.status === 200) {
-        const parsed = parseJwt(response.data.token);
-        this.saveLogin(response.data.token, parsed.user.name, parsed.user.id, parsed.user.role);
+        // The server set the HttpOnly session cookie on this response; the body
+        // is the IResponseUser. Persist only display metadata - no token.
+        const user = response.data;
+        this.saveLogin(user.name, user.id, user.role);
         toast.success("Logged in");
       }
       return { ...response.data };
@@ -470,11 +431,24 @@ class Api {
   }
 
   async signOut() {
-    localStorage.setItem(this.tokenKey, "");
-    localStorage.setItem("username", "");
+    const wasLoggedIn = this.isLoggedIn();
+    this.clearStoredUser();
 
-    this.token = "";
-    // Drop the privileged db:stats stream the previous token may have unlocked.
+    // Tell the server to destroy the session (clears the cookie). Best-effort:
+    // local state is already gone, and the endpoint is public so a dead session
+    // is harmless. Skip the call when we were not logged in to avoid spurious
+    // requests (e.g. PublicPath re-signing-out on the login page).
+    if (wasLoggedIn) {
+      try {
+        await this.connection.post("/users/signout", undefined, {
+          ignoreErrorToast: true,
+        } as IApiOptions);
+      } catch {
+        // ignore - session is being torn down anyway
+      }
+    }
+
+    // Drop the privileged db:stats stream the previous session may have unlocked.
     this.reconnectWs();
   }
 
@@ -1751,11 +1725,9 @@ class Api {
 }
 
 const apiSingleton = new Api();
-// checkLogin first so this.token is populated before the socket handshake;
-// the server reads it to decide whether to emit db:stats to this socket.
-apiSingleton.checkLogin();
+// The session cookie (if any) rides the socket handshake automatically via
+// withCredentials; the server reads it to decide whether to emit db:stats.
 apiSingleton.initWs();
-apiSingleton.useDefaultRequestInterceptors();
 apiSingleton.useDefaultResponseInterceptors();
 
 export default apiSingleton;

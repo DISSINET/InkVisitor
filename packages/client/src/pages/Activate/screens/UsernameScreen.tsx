@@ -64,13 +64,14 @@ export const UsernameScreen: React.FC<UsernameScreen> = ({
     }
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     try {
-      api.signIn(username, password).then((res) => {
+      const res = await api.signIn(username, password);
+      if (res?.id) {
         navigate("/");
-      });
+      }
     } catch (err) {
-      console.log(err);
+      setError(getErrorByCode(err as IErrorSignature).message);
     }
   };
 
