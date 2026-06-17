@@ -233,7 +233,7 @@ export const StyledWarningRow = styled.div`
   padding-right: 1.25rem;
   border-radius: ${({ theme }) => theme.borderRadius["default"]};
   background-color: ${({ theme }) => theme.color.blue[50]};
-  box-shadow: ${({ theme }) => theme.boxShadow.inset};
+  /* box-shadow: ${({ theme }) => theme.boxShadow.inset}; */
 `;
 
 export const StyledWarningInfo = styled.div`

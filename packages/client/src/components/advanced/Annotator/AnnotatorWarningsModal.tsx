@@ -56,7 +56,7 @@ interface AnnotatorWarningsModalProps {
 }
 
 const kindLabel = (type: AsymmetricalAnchor["type"]): string =>
-  type === "orphaned-opening" ? "orphaned opening" : "orphaned closing";
+  type === "orphaned-opening" ? "orphaned opening < >" : "orphaned closing < / >";
 
 /**
  * Surfaces asymmetrical (broken) anchors detected by the annotator (#2601).
