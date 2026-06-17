@@ -173,6 +173,16 @@ export const DocumentsPage: React.FC = ({}) => {
 
   const [editedDocumentId, setEditedDocumentId] = useState<string | false>(false);
 
+  const editedDocumentCanEdit = useMemo(() => {
+    if (!editedDocumentId) {
+      return false;
+    }
+    const editedResource = documentsWithResources.find(
+      (d) => d.document.id === editedDocumentId
+    )?.resource;
+    return canManageDocument(editedResource ? editedResource.id : false);
+  }, [editedDocumentId, documentsWithResources, canManageDocument]);
+
   const handleDocumentEdit = (id: string) => {
     setEditedDocumentId(id);
   };
@@ -248,12 +258,7 @@ export const DocumentsPage: React.FC = ({}) => {
       {editedDocumentId && (
         <DocumentModalEdit
           documentId={editedDocumentId}
-          canEdit={(() => {
-            const editedResource = documentsWithResources.find(
-              (d) => d.document.id === editedDocumentId
-            )?.resource;
-            return canManageDocument(editedResource ? editedResource.id : false);
-          })()}
+          canEdit={editedDocumentCanEdit}
           onClose={handleModalClose}
         />
       )}
