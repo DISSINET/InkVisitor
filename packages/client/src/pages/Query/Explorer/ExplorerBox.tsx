@@ -22,6 +22,8 @@ interface ExplorerBoxProps {
   isQueryFetching: boolean;
   /** True when no search criteria are set, so no query is fired. */
   isRequestEmpty?: boolean;
+  /** True when criteria are set but the search has not been run yet. */
+  isSearchPending?: boolean;
   queryError: Error | null;
   height: number;
   onExport: (rowsSelected: number[], selectedColumnIds?: string[]) => void;
@@ -42,6 +44,7 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   data,
   isQueryFetching,
   isRequestEmpty = false,
+  isSearchPending = false,
   queryError,
   height,
   onExport,
@@ -116,6 +119,7 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
               total={data?.total}
               statsEntityLimit={data?.statsEntityLimit}
               isRequestEmpty={isRequestEmpty}
+              isSearchPending={isSearchPending}
               isFetching={isQueryFetching}
               height={isStatsEmpty ? height : contentHeight}
             />
@@ -126,6 +130,7 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
               data={data}
               isQueryFetching={isQueryFetching}
               isRequestEmpty={isRequestEmpty}
+              isSearchPending={isSearchPending}
               queryError={queryError}
               height={contentHeight}
               getCachedEntity={getCachedEntity}

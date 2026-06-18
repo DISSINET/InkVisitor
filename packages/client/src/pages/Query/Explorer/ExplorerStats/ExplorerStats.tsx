@@ -66,6 +66,8 @@ interface ExplorerStatsProps {
   statsEntityLimit: number | undefined;
   /** True when no search criteria are set, so no query is fired. */
   isRequestEmpty: boolean;
+  /** True when criteria are set but the search has not been run yet. */
+  isSearchPending?: boolean;
   isFetching: boolean;
   height: number;
 }
@@ -77,6 +79,7 @@ export const ExplorerStats: React.FC<ExplorerStatsProps> = ({
   total,
   statsEntityLimit,
   isRequestEmpty,
+  isSearchPending = false,
   isFetching,
   height,
 }) => {
@@ -134,18 +137,23 @@ export const ExplorerStats: React.FC<ExplorerStatsProps> = ({
   };
 
   const limitReached =
-    typeof total === "number" &&
-    typeof statsEntityLimit === "number" &&
-    total > statsEntityLimit;
+    typeof total === "number" && typeof statsEntityLimit === "number" && total > statsEntityLimit;
 
-  // No query / filters yet -> nothing is fetched, so prompt the user instead of
-  // rendering an empty chart and table.
   if (isRequestEmpty) {
     return (
       <StyledStatsLayout $height={height}>
         <StyledEmptyMessage>
-          Create a query or add a search filter first to see statistics for the
-          matching entities.
+          Create a query or add a search filter first to see statistics for the matching entities.
+        </StyledEmptyMessage>
+      </StyledStatsLayout>
+    );
+  }
+
+  if (isSearchPending) {
+    return (
+      <StyledStatsLayout $height={height}>
+        <StyledEmptyMessage>
+          Run the search to see statistics for the matching entities.
         </StyledEmptyMessage>
       </StyledStatsLayout>
     );
@@ -156,9 +164,7 @@ export const ExplorerStats: React.FC<ExplorerStatsProps> = ({
       <StyledStatsHeader>
         Statistics for current search results
         {typeof total === "number" ? ` — ${total} entities` : ""}
-        {limitReached
-          ? ` (showing stats for the first ${statsEntityLimit})`
-          : ""}
+        {limitReached ? ` (showing stats for the first ${statsEntityLimit})` : ""}
       </StyledStatsHeader>
 
       <StyledConfigStrip>
