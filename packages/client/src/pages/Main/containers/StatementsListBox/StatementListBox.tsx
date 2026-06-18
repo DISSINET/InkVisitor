@@ -858,6 +858,31 @@ export const StatementListBox: React.FC = () => {
 
   const userCanEdit = useMemo(() => territory?.right !== UserEnums.RoleMode.Read, [territory]);
 
+  // Editors (and admin/owner) may load any Resource into the annotator to view
+  // and search; viewers cannot. (#4)
+  const canSelectResource = useMemo(
+    () => userCanEdit || userData?.role === UserEnums.Role.Editor,
+    [userCanEdit, userData?.role]
+  );
+
+  // Whether the currently loaded document may be edited (anchors / text /
+  // batch replace / annotate). Owner/Admin always; Editor only when the loaded
+  // Resource is assigned to them; viewers never. (#4)
+  const canEditDocument = useMemo(() => {
+    if (
+      userData?.role === UserEnums.Role.Owner ||
+      userData?.role === UserEnums.Role.Admin
+    ) {
+      return true;
+    }
+    if (userData?.role !== UserEnums.Role.Editor || !selectedResource) {
+      return false;
+    }
+    const assignedResourceIds =
+      userData.resourceRights?.map((r) => r.resource.id) ?? [];
+    return assignedResourceIds.includes(selectedResource.id);
+  }, [userData, selectedResource]);
+
   const isListNonEmpty = statements.length > 0;
 
   // Check if there are statements to determine if the list is loading
@@ -1018,6 +1043,8 @@ export const StatementListBox: React.FC = () => {
                   setSelectedResourceId={setSelectedResourceId}
                   showStatementList={isListNonEmpty || statementListTableIsLoading}
                   userCanEdit={userCanEdit}
+                  canSelectResource={canSelectResource}
+                  canEditDocument={canEditDocument}
                   userData={userData}
                   onStatementAnchorHover={handleStatementAnchorHover}
                 />

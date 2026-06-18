@@ -44,6 +44,11 @@ export const ANNOTATOR_TOO_SMALL_BREAKPOINT = 560;
 export const EDITOR_TOO_SMALL_BREAKPOINT = 480;
 // height of class selector for highlight in annotator
 export const ANNOTATOR_SELECTOR_HEIGHT = 27;
+// vertical footprint of the suggester row in the statement list header
+// (StyledSuggesterRow: 2.5rem height + 0.6rem margin-bottom, 1rem = 10px).
+// Only rendered for users with territory write rights; when absent the
+// annotator reclaims this space.
+export const SUGGESTER_ROW_HEIGHT = 31;
 
 // BOXES
 export const hiddenBoxHeight = 33;

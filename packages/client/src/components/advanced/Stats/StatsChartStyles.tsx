@@ -1,7 +1,10 @@
 import styled from "styled-components";
 
 export const StyledChartWrapper = styled.div`
-  svg:focus {
+  &:focus,
+  &:focus-visible,
+  *:focus,
+  *:focus-visible {
     outline: none;
   }
 `;

@@ -55,3 +55,6 @@ database_data
 **/*.tar.gz
 
 .pnpm-store
+
+# Claude Code project instructions (local only)
+CLAUDE.md

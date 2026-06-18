@@ -175,6 +175,16 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   const parent = data.parent as IParentTerritory;
   const isFavorited = storedTerritories?.includes(id);
 
+  // Index of the child that leads to (or is) the selected territory, so
+  // pagination can land on the page that actually renders it. initExpandedNodes
+  // is the path of ancestors to the selected territory; territoryId is the
+  // selected territory itself (when it is a direct child here).
+  const targetChildIndex = childTerritories.findIndex(
+    (child) =>
+      child.territory.id === territoryId ||
+      initExpandedNodes.includes(child.territory.id)
+  );
+
   // Pagination hook
   const {
     currentPage,
@@ -188,6 +198,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     items: childTerritories,
     itemsPerPage: 10,
     level: lvl,
+    targetIndex: targetChildIndex,
   });
 
   // Use all children when pagination is disabled (level 0), otherwise use paginated children

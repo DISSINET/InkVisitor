@@ -464,4 +464,22 @@ export default class User implements IUser, IDbModel {
   hasRole(allowed: UserEnums.Role[]): boolean {
     return allowed.indexOf(this.role) !== -1;
   }
+
+  /**
+   * Resource entity ids the user is assigned to annotate. Stored as rights
+   * entries with mode === Annotate, where the `territory` field reuses to
+   * carry the Resource id (see UserEnums.RoleMode.Annotate).
+   */
+  getAnnotateResourceIds(): string[] {
+    return this.rights
+      .filter((r) => r.mode === UserEnums.RoleMode.Annotate)
+      .map((r) => r.territory);
+  }
+
+  /**
+   * Whether the user is assigned to annotate/edit the given Resource entity.
+   */
+  hasAnnotateRightForResource(resourceId: string): boolean {
+    return this.getAnnotateResourceIds().includes(resourceId);
+  }
 }

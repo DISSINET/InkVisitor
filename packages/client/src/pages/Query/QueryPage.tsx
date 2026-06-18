@@ -7,11 +7,13 @@ import { Box, Button, ButtonGroup, Panel } from "components";
 import { LayoutSeparatorHorizontal, LayoutSeparatorVertical } from "components/advanced";
 import { useSearchParams } from "hooks/useSearchParamsContext";
 import { MemoizedEntityDetailBox } from "pages/Main/containers/EntityDetailBox/EntityDetailBox";
-import { BiBarChartAlt2, BiRefresh, BiTable } from "react-icons/bi";
+import { BiBarChartAlt2, BiRefresh, BiSearch, BiTable } from "react-icons/bi";
 import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { VscCloseAll } from "react-icons/vsc";
 import { toast } from "react-toastify";
+import { useUserQuery } from "hooks/react-query";
+import { UserEnums } from "@inkvisitor/shared/enums";
 import { useAppSelector } from "redux/hooks";
 import { COLLAPSED_PANEL_WIDTH } from "Theme/constants";
 import { floorNumberToOneDecimal } from "utils/utils";
@@ -24,7 +26,7 @@ import {
 } from "./Explorer/state";
 import { MemoizedQueryBox } from "./Query/QueryBox";
 import { queryReducer, queryStateInitial } from "./Query/state";
-import { getAllEdges, getAllNodes } from "./Query/utils";
+import { getAllEdges, getAllNodes, isQueryRequestEmpty } from "./Query/utils";
 import {
   QUERY_LEFT_PANEL_MIN_WIDTH,
   QUERY_PAGE_SEPARATOR_X_PERCENT_POSITION,
@@ -35,10 +37,14 @@ import {
 } from "./types";
 import { invalidateAllExplorerQueries, useQueryData } from "./useQueryData";
 import { buildStableSignature, isEdgeValid } from "./utils";
-interface QueryPage { }
-export const QueryPage: React.FC<QueryPage> = ({ }) => {
+interface QueryPage {}
+export const QueryPage: React.FC<QueryPage> = ({}) => {
   const layoutWidth: number = useAppSelector((state) => state.layout.layoutWidth);
   const contentHeight: number = useAppSelector((state) => state.layout.contentHeight);
+
+  const { data: userData } = useUserQuery(true);
+  const canBatchEdit =
+    userData?.role === UserEnums.Role.Owner || userData?.role === UserEnums.Role.Admin;
   const {
     selectedDetailId,
     detailIdArray,
@@ -128,6 +134,41 @@ export const QueryPage: React.FC<QueryPage> = ({ }) => {
     return buildStableSignature(queryState as any, exploreState as any);
   }, [queryState, exploreState]);
 
+  // No search criteria yet -> the query is not fired (see useQueryData); the
+  // explorer views use this to prompt the user instead of showing empty results.
+  const isRequestEmpty = useMemo(
+    () => isQueryRequestEmpty(queryState, exploreState),
+    [queryState, exploreState],
+  );
+
+  // Only fire the API query when the user explicitly submits via Run Search or Enter.
+  const [committedSignature, setCommittedSignature] = useState<string | null>(null);
+
+  const handleRunSearch = useCallback(() => {
+    setCommittedSignature(stableSignature);
+  }, [stableSignature]);
+
+  // Global Enter shortcut: run search unless focus is in a text input, textarea,
+  // or select — except when that input lives inside a container marked with
+  // [data-run-on-enter] (floating search panel, UUID filter panel), where Enter
+  // should also trigger the search alongside any local handler on the input.
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Enter") return;
+      const tag = (document.activeElement?.tagName ?? "").toLowerCase();
+      if (tag === "input" || tag === "textarea" || tag === "select") {
+        if (!document.activeElement?.closest("[data-run-on-enter]")) return;
+      }
+      handleRunSearch();
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [handleRunSearch]);
+
+  // True when the user has criteria set but hasn't run the search yet (or has
+  // changed the query since the last run).
+  const isSearchPending = !isRequestEmpty && committedSignature !== stableSignature;
+
   const onePercentOfContentHeight = useMemo(() => contentHeight / 100, [contentHeight]);
   const onePercentOfLayoutWidth = useMemo(() => layoutWidth / 100, [layoutWidth]);
 
@@ -136,14 +177,14 @@ export const QueryPage: React.FC<QueryPage> = ({ }) => {
     const exportExplore =
       selectedColumnIds && exploreState.view.mode === Explore.EViewMode.Table
         ? {
-          ...exploreState,
-          view: {
-            ...exploreState.view,
-            columns: exploreState.view.columns.filter(
-              (c: Explore.IExploreColumn) => selectedColumnIds.includes(c.id),
-            ),
-          },
-        }
+            ...exploreState,
+            view: {
+              ...exploreState.view,
+              columns: exploreState.view.columns.filter((c: Explore.IExploreColumn) =>
+                selectedColumnIds.includes(c.id),
+              ),
+            },
+          }
         : exploreState;
     api.queryExport(queryState, exportExplore, rowIndices);
   };
@@ -219,7 +260,7 @@ export const QueryPage: React.FC<QueryPage> = ({ }) => {
     if (isExplorerAtMaxHeight) {
       const restoredHeight =
         savedExplorerSeparatorYRef.current !== null &&
-          savedExplorerSeparatorYRef.current !== QUERY_SEARCH_PANEL_MIN_HEIGHT
+        savedExplorerSeparatorYRef.current !== QUERY_SEARCH_PANEL_MIN_HEIGHT
           ? savedExplorerSeparatorYRef.current
           : getDefaultSeparatorYPosition();
       setExplorerBoxMaximized(false);
@@ -277,6 +318,7 @@ export const QueryPage: React.FC<QueryPage> = ({ }) => {
     exploreState,
     stableSignature,
     queryStateValidity,
+    committedSignature,
   });
 
   const isDetailOpen = !!(selectedDetailId || detailIdArray.length > 0);
@@ -442,9 +484,17 @@ export const QueryPage: React.FC<QueryPage> = ({ }) => {
               noFrame
               borderColor="white"
               height={querySeparatorYPosition}
-              label="Search"
+              label="Query Builder"
               onHeaderClick={toggleExplorerBoxMaximized}
               buttons={[
+                <Button
+                  key="run-search"
+                  tooltipLabel="run search (Enter)"
+                  label="run search"
+                  icon={<BiSearch />}
+                  disabled={!isSearchPending}
+                  onClick={handleRunSearch}
+                />,
                 <Button
                   key="toggle-query-left-panel"
                   inverted
@@ -469,7 +519,11 @@ export const QueryPage: React.FC<QueryPage> = ({ }) => {
               height={contentHeight - querySeparatorYPosition}
               label="Explorer"
               buttons={[
-                <ButtonGroup key="explorer-view-mode" $noMarginRight style={{ marginRight: "0.6rem" }}>
+                <ButtonGroup
+                  key="explorer-view-mode"
+                  $noMarginRight
+                  style={{ marginRight: "0.6rem" }}
+                >
                   <Button
                     tooltipLabel="table view"
                     label="table"
@@ -523,6 +577,8 @@ export const QueryPage: React.FC<QueryPage> = ({ }) => {
                 dispatch={exploreStateDispatch}
                 data={queryData}
                 isQueryFetching={queryIsFetching}
+                isRequestEmpty={isRequestEmpty}
+                isSearchPending={isSearchPending}
                 queryError={queryError}
                 onExport={handleExport}
                 stableSignature={stableSignature}
@@ -531,6 +587,7 @@ export const QueryPage: React.FC<QueryPage> = ({ }) => {
                 onOpenEntitiesInDetail={openEntitiesInDetail}
                 isDetailOpen={isDetailOpen}
                 detailPanelWidth={detailPanelWidth}
+                canBatchEdit={canBatchEdit}
               />
             </Box>
           </>

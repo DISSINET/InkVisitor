@@ -31,6 +31,10 @@ interface ButtonProps {
   radiusRight?: boolean;
   disabled?: boolean;
   color?: keyof ThemeColor;
+  /** Overrides only the text/icon color, leaving background and border to other props. */
+  textColor?: keyof ThemeColor;
+  /** Overrides only the border color, leaving text and background to other props. */
+  borderColor?: keyof ThemeColor;
   onClick?: MouseEventHandler<HTMLElement>;
   fullWidth?: boolean;
   // to control the height from parent
@@ -59,6 +63,8 @@ export const Button: React.FC<ButtonProps> = ({
   textRegular = false,
   disabled = false,
   color = "primary",
+  textColor,
+  borderColor,
   onClick = () => {
     // do nothing
   },
@@ -88,6 +94,8 @@ export const Button: React.FC<ButtonProps> = ({
         $size={size}
         $iconButton={icon !== undefined && label?.length === 0}
         $color={color}
+        $textColor={textColor}
+        $borderColor={borderColor}
         $inverted={inverted}
         $textRegular={textRegular}
         $noBorder={noBorder}

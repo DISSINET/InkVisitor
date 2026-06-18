@@ -46,6 +46,13 @@ export const StyledHeader = styled.div`
 
 export const StyledBody = styled.div``;
 
+export const StyledEmptyMessage = styled.div`
+  padding: ${({ theme }) => theme.space[6]};
+  text-align: left;
+  font-size: ${({ theme }) => theme.fontSize.sm};
+  color: ${({ theme }) => theme.color.plain};
+`;
+
 // StyledColumn removed in favor of lightweight classes in styles.css
 
 export const StyledNewColumn = styled.div`
@@ -219,7 +226,7 @@ export const StyledIdsFloatingRoot = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 0.5rem;
+  gap: 1rem;
 `;
 
 export const StyledIdsToggleWrapper = styled.div`
@@ -286,7 +293,7 @@ export const StyledIdsPanel = styled.div`
   min-height: 0;
   padding: 0.75rem;
   border-radius: ${({ theme }) => theme.borderRadius.md};
-  background-color: ${({ theme }) => theme.color["white"]};
+  background-color: ${({ theme }) => theme.color["invertedBg"]["info"]};
   box-shadow: ${({ theme }) => theme.boxShadow.high};
   overflow: hidden;
 `;

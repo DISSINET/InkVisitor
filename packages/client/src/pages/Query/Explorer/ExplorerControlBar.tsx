@@ -20,7 +20,7 @@ import {
   StyledExploreFilters,
   StyledTableControl,
 } from "./ExplorerTable/ExplorerTableStyles";
-import { BatchAction, batchOptions } from "./ExplorerTable/types";
+import { BatchAction, batchOptions, restrictedBatchActions } from "./ExplorerTable/types";
 
 /** Row-selection + batch-action controls. Only meaningful for the table view
  * (the stats view has no row selection), so this block is optional. */
@@ -34,6 +34,8 @@ export interface ExplorerSelectionControls {
   batchActionSelected: BatchAction;
   setBatchActionSelected: (value: BatchAction) => void;
   onApplyBatchAction: () => void;
+  /** When false, data-mutating batch actions (add metaprop / reference / relation) are hidden. */
+  canBatchEdit?: boolean;
 }
 
 /** New-column toggle. Table view only (the stats view has no columns). */
@@ -122,7 +124,9 @@ const ExplorerControlBar: React.FC<ExplorerControlBarProps> = ({
                 selection.setBatchActionSelected(newSelectedAction);
               }
             }}
-            options={batchOptions}
+            options={batchOptions.filter(
+              (o) => selection.canBatchEdit || !restrictedBatchActions.has(o.value),
+            )}
           />
           <Button
             label="apply"

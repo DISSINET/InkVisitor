@@ -3,26 +3,13 @@ import { IDocument, IResponseEntity } from "@inkvisitor/shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, Checkbox, IconWithTooltip, Input, Loader } from "components";
-import {
-  AttributeButtonGroup,
-  EntitySuggester,
-  EntityTag,
-} from "components/advanced";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { AttributeButtonGroup, EntitySuggester, EntityTag } from "components/advanced";
+import useKeypress from "hooks/useKeyPress";
+import React, { useMemo, useRef, useState } from "react";
 import { BiSearch } from "react-icons/bi";
-import {
-  FaAnchor,
-  FaRegArrowAltCircleDown,
-  FaRegArrowAltCircleUp,
-} from "react-icons/fa";
+import { FaAnchor, FaRegArrowAltCircleDown, FaRegArrowAltCircleUp } from "react-icons/fa";
 import { FaAnchorCircleCheck, FaExpand } from "react-icons/fa6";
-import {
-  LuCaseSensitive,
-  LuRegex,
-  LuReplace,
-  LuReplaceAll,
-  LuWholeWord,
-} from "react-icons/lu";
+import { LuCaseSensitive, LuRegex, LuReplace, LuReplaceAll, LuWholeWord } from "react-icons/lu";
 import { TbReplace } from "react-icons/tb";
 import { toast } from "react-toastify";
 import { useTheme } from "styled-components";
@@ -32,7 +19,6 @@ import {
   StyledSearchLine,
   StyledSearchResults,
 } from "../../../../pages/Main/containers/StatementsListBox/StatementListBoxStyles";
-import useKeypress from "hooks/useKeyPress";
 import { StyledCheckboxWrapper } from "./AnnotatorSearchLineStyles";
 
 interface AnnotatorSearchLine {
@@ -55,9 +41,7 @@ interface AnnotatorSearchLine {
   documentId?: string;
   dataDocument?: IDocument;
   currentAnchorExist: boolean;
-  setEntityToAnchor: React.Dispatch<
-    React.SetStateAction<IResponseEntity | null>
-  >;
+  setEntityToAnchor: React.Dispatch<React.SetStateAction<IResponseEntity | null>>;
   entityToAnchor: IResponseEntity | null;
   annotatorMode: EditMode;
   selectedText: string;
@@ -81,6 +65,9 @@ interface AnnotatorSearchLine {
   setIsWholeWordOnlyMode: React.Dispatch<React.SetStateAction<boolean>>;
   isCaseSensitiveMode: boolean;
   setIsCaseSensitiveMode: React.Dispatch<React.SetStateAction<boolean>>;
+  // When false, find/navigate stay available but the editing actions
+  // (annotate + replace/replace-all) are hidden (read-only document).
+  canEdit?: boolean;
 }
 export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
   searchTerm,
@@ -110,6 +97,7 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
   setIsWholeWordOnlyMode,
   isCaseSensitiveMode,
   setIsCaseSensitiveMode,
+  canEdit = true,
 }) => {
   const theme = useTheme();
   const searchInputRef = useRef<HTMLInputElement | null>(null);
@@ -125,7 +113,7 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
     },
     [isSearchAllowed],
     // ctrlKeyCombo is true to allow the focus to work on any page
-    true
+    true,
   );
 
   // F3 goes to the next occurrence
@@ -136,7 +124,7 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
         goToNextOccurence();
       }
     },
-    [isSearchAllowed]
+    [isSearchAllowed],
   );
 
   // Shift + F3 goes to the previous occurrence
@@ -151,7 +139,7 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
     // ctrl
     false,
     // shift
-    true
+    true,
   );
 
   const [isReplacingOne, setIsReplacingOne] = useState<boolean>(false);
@@ -165,11 +153,8 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
   const queryClient = useQueryClient();
 
   const updateDocumentMutation = useMutation({
-    mutationFn: async (data: {
-      id: string;
-      doc: Partial<IDocument>;
-      successMessage?: string;
-    }) => api.documentUpdate(data.id, data.doc),
+    mutationFn: async (data: { id: string; doc: Partial<IDocument>; successMessage?: string }) =>
+      api.documentUpdate(data.id, data.doc),
     onSuccess: (variables, data) => {
       queryClient.invalidateQueries({ queryKey: ["document"] });
       queryClient.invalidateQueries({ queryKey: ["documents"] });
@@ -205,8 +190,7 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
   const goToPreviousOccurence = () => {
     if (searchOccurences === null) return;
     const previousOccurence =
-      (searchActiveOccurence - 1 + searchOccurences.length) %
-      searchOccurences.length;
+      (searchActiveOccurence - 1 + searchOccurences.length) % searchOccurences.length;
     setSearchActiveOccurence(previousOccurence);
   };
 
@@ -224,9 +208,7 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
       setIsReplacingOne(false);
       return;
     }
-    const newOccurrences = searchOccurences.filter(
-      (_, index) => index !== searchActiveOccurence
-    );
+    const newOccurrences = searchOccurences.filter((_, index) => index !== searchActiveOccurence);
 
     // Calculate the new active occurrence index
     let newActiveOccurence = currentSearchActiveOccurence;
@@ -273,20 +255,12 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
           const absLineEnd = absLineStart;
 
           // Get segment positions for start and end
-          const startSegment = annotator.text.getSegmentPosition(
-            absLineStart,
-            occurrence.start
-          );
-          const endSegment = annotator.text.getSegmentPosition(
-            absLineEnd,
-            occurrence.end
-          );
+          const startSegment = annotator.text.getSegmentPosition(absLineStart, occurrence.start);
+          const endSegment = annotator.text.getSegmentPosition(absLineEnd, occurrence.end);
 
           if (startSegment && endSegment) {
-            const startIndex =
-              annotator.text.getAbsTextIndexFromPosition(startSegment);
-            const endIndex =
-              annotator.text.getAbsTextIndexFromPosition(endSegment);
+            const startIndex = annotator.text.getAbsTextIndexFromPosition(startSegment);
+            const endIndex = annotator.text.getAbsTextIndexFromPosition(endSegment);
 
             if (startIndex >= 0 && endIndex >= 0) {
               replacements.push({ startIndex, endIndex });
@@ -300,15 +274,8 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
         // Apply all replacements to the text string
         let newText = currentText;
         for (const { startIndex, endIndex } of replacements) {
-          if (
-            startIndex >= 0 &&
-            endIndex >= startIndex &&
-            endIndex <= newText.length
-          ) {
-            newText =
-              newText.slice(0, startIndex) +
-              replaceWith +
-              newText.slice(endIndex);
+          if (startIndex >= 0 && endIndex >= startIndex && endIndex <= newText.length) {
+            newText = newText.slice(0, startIndex) + replaceWith + newText.slice(endIndex);
           }
         }
 
@@ -421,9 +388,7 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
             </StyledCheckboxWrapper>
 
             {searchOccurences !== null && (
-              <StyledSearchResults
-                $annotatorWidthTooNarrow={annotatorWidthTooNarrow}
-              >
+              <StyledSearchResults $annotatorWidthTooNarrow={annotatorWidthTooNarrow}>
                 {searchOccurences.length === 0 ? (
                   <div style={{ marginLeft: "0.2rem" }}>no results</div>
                 ) : (
@@ -465,139 +430,139 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
             )}
           </StyledSearchContainer>
 
-          {annotatorWidthTooNarrow ? (
-            searchOccurences === null ? (
-              <div style={{ width: "1rem" }} />
-            ) : (
-              <></>
-            )
-          ) : (
-            <AttributeButtonGroup
-              disabled
-              options={[
-                {
-                  longValue: "replace",
-                  shortValue: "",
-                  onClick: () => {},
-                  selected: replaceSection,
-                  icon: <TbReplace />,
-                },
-                {
-                  longValue: "annotate",
-                  shortValue: "",
-                  onClick: () => {},
-                  selected: !replaceSection,
-                  icon: <FaAnchor />,
-                },
-              ]}
-            />
-          )}
+          {canEdit && (
+            <>
+              {annotatorWidthTooNarrow ? (
+                searchOccurences === null ? (
+                  <div style={{ width: "1rem" }} />
+                ) : (
+                  <></>
+                )
+              ) : (
+                <AttributeButtonGroup
+                  disabled
+                  options={[
+                    {
+                      longValue: "replace",
+                      shortValue: "",
+                      onClick: () => {},
+                      selected: replaceSection,
+                      icon: <TbReplace />,
+                    },
+                    {
+                      longValue: "annotate",
+                      shortValue: "",
+                      onClick: () => {},
+                      selected: !replaceSection,
+                      icon: <FaAnchor />,
+                    },
+                  ]}
+                />
+              )}
 
-          {!replaceSection ? (
-            <>
-              {currentAnchorExist ? (
-                <IconWithTooltip
-                  icon={
-                    <FaAnchorCircleCheck size={16} color={theme.color.info} />
-                  }
-                  tooltipLabel="anchor exists"
-                />
+              {!replaceSection ? (
+                <>
+                  {currentAnchorExist ? (
+                    <IconWithTooltip
+                      icon={<FaAnchorCircleCheck size={16} color={theme.color.info} />}
+                      tooltipLabel="anchor exists"
+                    />
+                  ) : (
+                    <Button
+                      tooltipLabel="wrap selection with anchor of a given entity and go to the next one"
+                      icon={<FaAnchor />}
+                      label="+"
+                      color="success"
+                      onClick={() => {
+                        if (entityToAnchor) {
+                          annotator?.addAnchor(entityToAnchor.id);
+                          handleSaveNewContent("Anchor saved");
+                          goToNextOccurence();
+                        }
+                      }}
+                      disabled={!hasResults || !entityToAnchor || selectedText.length === 0}
+                    />
+                  )}
+                  {!entityToAnchor ? (
+                    <EntitySuggester
+                      placeholder="select entity"
+                      onPicked={(entity) => {
+                        setEntityToAnchor(entity);
+                      }}
+                      inputWidth={annotatorWidthTooNarrow ? 70 : 100}
+                    />
+                  ) : (
+                    <EntityTag
+                      entity={entityToAnchor}
+                      unlinkButton={{
+                        onClick: () => setEntityToAnchor(null),
+                      }}
+                    />
+                  )}
+                </>
               ) : (
-                <Button
-                  tooltipLabel="wrap selection with anchor of a given entity and go to the next one"
-                  icon={<FaAnchor />}
-                  label="+"
-                  color="success"
-                  onClick={() => {
-                    if (entityToAnchor) {
-                      annotator?.addAnchor(entityToAnchor.id);
-                      handleSaveNewContent("Anchor saved");
-                      goToNextOccurence();
-                    }
-                  }}
-                  disabled={
-                    !hasResults || !entityToAnchor || selectedText.length === 0
-                  }
-                />
+                <>
+                  <Input
+                    placeholder="replace with"
+                    changeOnType
+                    value={replaceWith}
+                    onChangeFn={(value: string) => {
+                      setReplaceWith(value);
+                    }}
+                    width={annotatorWidthTooNarrow ? 100 : 130}
+                    minWidth={50}
+                    clearable
+                  />
+                  <div
+                    style={{
+                      position: "relative",
+                    }}
+                  >
+                    <Button
+                      shape="circle"
+                      color="info"
+                      inverted
+                      tooltipLabel="replace one occurence"
+                      noBackground
+                      icon={<LuReplace size={12} />}
+                      onClick={replaceOccurence}
+                      disabled={
+                        searchOccurences === null ||
+                        searchOccurences.length === 0 ||
+                        replaceWith.length === 0 ||
+                        isReplacingOne ||
+                        isReplacingAll ||
+                        dataDocumentIsFetching
+                      }
+                    />
+                    <Loader show={isReplacingOne} size={12} noBackground />
+                  </div>
+                  <div
+                    style={{
+                      position: "relative",
+                    }}
+                  >
+                    <Button
+                      shape="circle"
+                      color="info"
+                      inverted
+                      tooltipLabel="replace all occurences"
+                      noBackground
+                      icon={<LuReplaceAll size={12} />}
+                      onClick={replaceAllOccurences}
+                      disabled={
+                        searchOccurences === null ||
+                        searchOccurences.length === 0 ||
+                        replaceWith.length === 0 ||
+                        isReplacingOne ||
+                        isReplacingAll ||
+                        dataDocumentIsFetching
+                      }
+                    />
+                    <Loader show={isReplacingAll} size={12} noBackground />
+                  </div>
+                </>
               )}
-              {!entityToAnchor ? (
-                <EntitySuggester
-                  placeholder="select entity"
-                  onPicked={(entity) => {
-                    setEntityToAnchor(entity);
-                  }}
-                  inputWidth={annotatorWidthTooNarrow ? 70 : 100}
-                />
-              ) : (
-                <EntityTag
-                  entity={entityToAnchor}
-                  unlinkButton={{
-                    onClick: () => setEntityToAnchor(null),
-                  }}
-                />
-              )}
-            </>
-          ) : (
-            <>
-              <Input
-                placeholder="replace with"
-                changeOnType
-                value={replaceWith}
-                onChangeFn={(value: string) => {
-                  setReplaceWith(value);
-                }}
-                width={annotatorWidthTooNarrow ? 100 : 130}
-                minWidth={50}
-                clearable
-              />
-              <div
-                style={{
-                  position: "relative",
-                }}
-              >
-                <Button
-                  shape="circle"
-                  color="info"
-                  inverted
-                  tooltipLabel="replace one occurence"
-                  noBackground
-                  icon={<LuReplace size={12} />}
-                  onClick={replaceOccurence}
-                  disabled={
-                    searchOccurences === null ||
-                    searchOccurences.length === 0 ||
-                    replaceWith.length === 0 ||
-                    isReplacingOne ||
-                    isReplacingAll ||
-                    dataDocumentIsFetching
-                  }
-                />
-                <Loader show={isReplacingOne} size={12} noBackground />
-              </div>
-              <div
-                style={{
-                  position: "relative",
-                }}
-              >
-                <Button
-                  shape="circle"
-                  color="info"
-                  inverted
-                  tooltipLabel="replace all occurences"
-                  noBackground
-                  icon={<LuReplaceAll size={12} />}
-                  onClick={replaceAllOccurences}
-                  disabled={
-                    searchOccurences === null ||
-                    searchOccurences.length === 0 ||
-                    replaceWith.length === 0 ||
-                    isReplacingOne ||
-                    isReplacingAll ||
-                    dataDocumentIsFetching
-                  }
-                />
-                <Loader show={isReplacingAll} size={12} noBackground />
-              </div>
             </>
           )}
         </>

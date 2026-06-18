@@ -3,7 +3,9 @@ import Audit from "@models/audit/audit";
 import { ResponseDocumentAudit } from "@models/audit/response";
 import Document from "@models/document/document";
 import { AnchorsNode } from "@models/document/anchors";
-import { EntityEnums } from "@inkvisitor/shared/enums";
+import Resource from "@models/resource/resource";
+import User from "@models/user/user";
+import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import {
   IDocument,
   IDocumentMeta,
@@ -21,10 +23,30 @@ import {
 } from "@inkvisitor/shared/types/errors";
 import { EventType } from "@inkvisitor/shared/types/stats";
 import { Router } from "express";
-import { r as rethink } from "rethinkdb-ts";
+import { Connection, r as rethink } from "rethinkdb-ts";
 import { IRequest } from "src/custom_typings/request";
 import { asyncRouteHandler } from "../index";
 import { createOpeningTagRegex, closingTagRegex } from "@common/regex";
+
+/**
+ * Whether the user may edit/delete/export the given document. Owner/Admin
+ * always can; Viewer never. An Editor may manage a document only when assigned
+ * (in Manage Users) the Resource that links to it via data.documentId.
+ */
+async function userCanManageDocument(
+  conn: Connection,
+  documentId: string,
+  user: User
+): Promise<boolean> {
+  if (user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin])) {
+    return true;
+  }
+  if (user.role !== UserEnums.Role.Editor) {
+    return false;
+  }
+  const resource = await Resource.findByDocumentId(conn, documentId);
+  return !!resource && user.hasAnnotateRightForResource(resource.id);
+}
 
 export default Router()
   /**
@@ -153,6 +175,16 @@ export default Router()
 
     if (!document) {
       throw DocumentDoesNotExist.forId(id);
+    }
+
+    if (
+      !(await userCanManageDocument(
+        request.db.connection,
+        id,
+        request.getUserOrFail()
+      ))
+    ) {
+      throw new PermissionDeniedError("document cannot be exported");
     }
 
     const openingTagRegex = createOpeningTagRegex();
@@ -356,7 +388,13 @@ export default Router()
         throw new ModelNotValidError("");
       }
 
-      if (!model.canBeEditedByUser(request.getUserOrFail())) {
+      if (
+        !(await userCanManageDocument(
+          request.db.connection,
+          documentId,
+          request.getUserOrFail()
+        ))
+      ) {
         throw new PermissionDeniedError("document cannot be saved");
       }
 
@@ -441,7 +479,13 @@ export default Router()
         throw DocumentDoesNotExist.forId(id);
       }
 
-      if (!existing.canBeDeletedByUser(request.getUserOrFail())) {
+      if (
+        !(await userCanManageDocument(
+          request.db.connection,
+          id,
+          request.getUserOrFail()
+        ))
+      ) {
         throw new PermissionDeniedError(
           "document cannot be deleted by current user"
         );
@@ -489,6 +533,16 @@ export default Router()
           throw DocumentDoesNotExist.forId(id);
         }
 
+        if (
+          !(await userCanManageDocument(
+            request.db.connection,
+            id,
+            request.getUserOrFail()
+          ))
+        ) {
+          throw new PermissionDeniedError("document cannot be edited");
+        }
+
         const entityIds: string[] | string = request.query.entityIds;
         existing.removeAnchors(
           typeof entityIds === "object" ? entityIds : [entityIds]
@@ -532,6 +586,16 @@ export default Router()
         );
         if (!existing) {
           throw DocumentDoesNotExist.forId(id);
+        }
+
+        if (
+          !(await userCanManageDocument(
+            request.db.connection,
+            id,
+            request.getUserOrFail()
+          ))
+        ) {
+          throw new PermissionDeniedError("document cannot be edited");
         }
 
         existing.removeAnchor(entityId, anchorIndex);

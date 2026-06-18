@@ -1,7 +1,7 @@
 export enum BatchAction {
   open_in_detail = "open_in_detail",
-  export_csv = "export_csv",
   copy_uuids = "copy_uuids",
+  export_csv = "export_csv",
   add_metaprop = "add_metaprop",
   add_reference = "add_reference",
   add_relation = "add_relation",
@@ -20,6 +20,14 @@ export const batchOptions: BatchOption[] = [
   { value: BatchAction.add_reference, label: "add new reference" },
   { value: BatchAction.add_relation, label: "add new relation" },
 ];
+
+/** Batch actions restricted to Admin and Owner roles. */
+export const restrictedBatchActions = new Set<BatchAction>([
+  BatchAction.export_csv,
+  BatchAction.add_metaprop,
+  BatchAction.add_reference,
+  BatchAction.add_relation,
+]);
 
 export const WIDTH_COLUMN_FIRST = 280;
 export const WIDTH_COLUMN_DEFAULT = 400;

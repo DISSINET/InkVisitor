@@ -1,7 +1,7 @@
 import { IDbModel } from "@models/common";
-import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
-import { IDocument } from "@inkvisitor/shared/types";
-import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
+import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
+import { IDocument, IDocumentMeta } from "@inkvisitor/shared/types";
+import { DbEnums, EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { InternalServerError, ModelNotValidError } from "@inkvisitor/shared/types/errors";
 import User from "@models/user/user";
 import { AnchorsNode } from "./anchors";
@@ -389,24 +389,29 @@ export default class Document implements IDocument, IDbModel {
   static async findByEntityId(
     db: Connection,
     entityId: string
-  ): Promise<IDocument[]> {
+  ): Promise<IDocumentMeta[]> {
+    // No caller needs the (potentially large) content blob - consumers want
+    // the document meta + anchors or just the ids - so content is dropped
+    // from the read (return type IDocumentMeta enforces that).
+    //
+    // The documents.entityIds multi-index flattens both the legacy string[]
+    // and the canonical Record<Class, string[]> shapes, so getAll touches
+    // only the matching documents instead of scanning the whole table. The
+    // index is a required boot dependency (see assertRequiredIndexes).
     const entries = await rethink
       .table(Document.table)
-      .filter(function (row: RDatum) {
-        const entityIds = row("entityIds");
-
-        return rethink.branch(
-          entityIds.typeOf().eq("ARRAY"),
-          // Case: entityIds is string[] (old format)
-          entityIds.contains(entityId),
-
-          // Else assume object: Record<string, string[]> (new format)
-          entityIds.values().concatMap(arr => arr).contains(entityId)
-        );
-      })
+      .getAll(entityId, { index: DbEnums.Indexes.DocumentEntityIds })
+      .without("content")
+      // getAll on a multi-index yields one row per matching index key, so a
+      // document that lists the same id more than once (a legacy flat array
+      // with duplicates, or an id bucketed under multiple classes) would come
+      // back multiple times. distinct() restores the single-occurrence
+      // semantics of the previous contains() filter (same approach as
+      // Relation.findForEntities).
+      .distinct()
       .run(db);
 
-    return entries && entries.length ? (entries as IDocument[]) : [];
+    return entries && entries.length ? (entries as IDocumentMeta[]) : [];
   }
 
   /**

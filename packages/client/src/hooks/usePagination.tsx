@@ -4,6 +4,10 @@ interface UsePaginationProps<T> {
   items: T[];
   itemsPerPage: number;
   level?: number; // Add level parameter to detect first level
+  // Index of an item that must remain visible (e.g. the selected territory or
+  // an ancestor on its path). When >= 0, pagination jumps to its page so the
+  // node actually renders and can be expanded / scrolled to.
+  targetIndex?: number;
 }
 
 interface UsePaginationReturn<T> {
@@ -21,6 +25,7 @@ export const usePagination = <T,>({
   items,
   itemsPerPage,
   level = 0,
+  targetIndex = -1,
 }: UsePaginationProps<T>): UsePaginationReturn<T> => {
   const [currentPage, setCurrentPage] = useState(1);
   const previousItemsLength = useRef(items.length);
@@ -29,12 +34,22 @@ export const usePagination = <T,>({
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const showPagination = totalItems > itemsPerPage && level >= 1;
 
+  const hasTarget = targetIndex >= 0 && targetIndex < totalItems;
+
   // Auto-adjust current page when items change
   useEffect(() => {
     const currentItemsLength = items.length;
     const prevItemsLength = previousItemsLength.current;
 
     if (currentItemsLength !== prevItemsLength) {
+      previousItemsLength.current = currentItemsLength;
+
+      // A specific item must stay visible (e.g. the selected territory or an
+      // ancestor on its path) - the targetIndex effect owns the page here.
+      if (hasTarget) {
+        return;
+      }
+
       // If items were removed and current page is now beyond total pages, go to last page
       if (
         currentItemsLength < prevItemsLength &&
@@ -58,10 +73,17 @@ export const usePagination = <T,>({
       else if (prevItemsLength === 0 && currentItemsLength > 0) {
         setCurrentPage(1);
       }
-
-      previousItemsLength.current = currentItemsLength;
     }
-  }, [items.length, currentPage, totalPages, itemsPerPage, level]);
+  }, [items.length, currentPage, totalPages, itemsPerPage, level, hasTarget]);
+
+  // Jump to the page holding the target item. Runs both on initial load (when
+  // the target first appears) and on later navigation while the list length is
+  // unchanged (e.g. "open territory in tree" after the tree is already built).
+  useEffect(() => {
+    if (hasTarget) {
+      setCurrentPage(Math.floor(targetIndex / itemsPerPage) + 1);
+    }
+  }, [hasTarget, targetIndex, itemsPerPage]);
 
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;

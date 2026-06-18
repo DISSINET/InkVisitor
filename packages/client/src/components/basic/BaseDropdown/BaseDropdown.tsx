@@ -57,8 +57,6 @@ interface BaseDropdown {
   closeMenuOnSelect?: boolean;
   shortLabel?: boolean;
   loading?: boolean;
-  controlBackgroundColor?: string;
-  color?: string;
 }
 export const BaseDropdown: React.FC<BaseDropdown> = ({
   options = [],
@@ -90,8 +88,6 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
   closeMenuOnSelect = true,
   shortLabel = false,
   loading = false,
-  controlBackgroundColor,
-  color,
 }) => {
   const isOneOptionSingleEntitySelect = options.length < 2 && !isMulti && entityDropdown;
 
@@ -179,8 +175,6 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
           loggerId={loggerId}
           limitSelectedItems={limitSelectedItems}
           shortLabel={shortLabel}
-          controlBackgroundColor={controlBackgroundColor}
-          color={color}
         />
         {loading && <Loader show size={7} loaderStyle="beat" />}
       </StyledSelectWrapper>

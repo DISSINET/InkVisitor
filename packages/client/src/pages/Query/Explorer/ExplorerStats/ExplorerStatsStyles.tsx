@@ -10,13 +10,28 @@ export const StyledStatsLayout = styled.div<{ $height?: number }>`
 `;
 
 export const StyledStatsHeader = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
   font-size: ${({ theme }) => theme.fontSize.sm};
   color: ${({ theme }) => theme.color.primary};
   font-weight: ${({ theme }) => theme.fontWeight.bold};
 `;
 
+export const StyledEmptyMessage = styled.div`
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: ${({ theme }) => theme.space[6]};
+  font-size: ${({ theme }) => theme.fontSize.sm};
+  color: ${({ theme }) => theme.color.plain};
+`;
+
 export const StyledConfigStrip = styled.div`
   display: flex;
+  justify-content: center;
   flex-direction: row;
   flex-wrap: wrap;
   align-items: flex-end;
@@ -26,6 +41,14 @@ export const StyledConfigStrip = styled.div`
 export const StyledField = styled.div`
   display: flex;
   flex-direction: column;
+  gap: ${({ theme }) => theme.space[1]};
+`;
+
+// Used by the parked time filter in ExplorerStats.tsx (re-enable later).
+export const StyledDateInputWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
   gap: ${({ theme }) => theme.space[1]};
 `;
 

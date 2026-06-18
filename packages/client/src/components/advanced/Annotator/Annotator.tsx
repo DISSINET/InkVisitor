@@ -51,7 +51,7 @@ import { collectStatementAnchors, getStatementOrderByIndex } from "utils/utils";
 import { EntityCreateModal } from "..";
 import { useAnnotator } from "./AnnotatorContext";
 import TextAnnotatorMenu from "./AnnotatorMenu";
-import { AnnotatorWarningsPanel } from "./AnnotatorWarningsPanel";
+import { AnnotatorWarningsModal } from "./AnnotatorWarningsModal";
 import {
   StyledAnnotatorButtons,
   StyledAnnotatorMenu,
@@ -100,6 +100,15 @@ interface TextAnnotatorProps {
   userData?: IResponseUser;
   disableCreate?: boolean;
 
+  /**
+   * When false the document is read-only: text editing, adding/removing
+   * anchors, batch replace and the annotate menu are disabled (search,
+   * highlight and navigation stay). Editors get this when the loaded Resource
+   * is not assigned to them. Defaults to true (callers that don't gate are
+   * already restricted upstream). The server still enforces the same rule.
+   */
+  canEditDocument?: boolean;
+
   /** When the pointer hovers anchored text, receives the innermost tag id or null (e.g. statement list sync). */
   onStatementAnchorHover?: (statementId: string | null) => void;
 
@@ -137,6 +146,7 @@ export const TextAnnotator = ({
   statementCreateMutation = undefined,
   userData,
   disableCreate = false,
+  canEditDocument = true,
   onStatementAnchorHover,
 
   hideWarningChip = false,
@@ -274,6 +284,11 @@ export const TextAnnotator = ({
   const warningsPanelRef = useRef<HTMLDivElement>(null);
   const annotatorRef = useRef<Annotator | null>(null);
   annotatorRef.current = annotator;
+
+  const handleAnnotatorModeClick = useCallback((mode: EditMode) => {
+    setAnnotatorMode(mode);
+    mainCanvas.current?.focus({ preventScroll: true });
+  }, []);
 
   const saveScrollPositionOnScrollEnd = useDebouncedCallback(() => {
     const a = annotatorRef.current;
@@ -1041,6 +1056,11 @@ export const TextAnnotator = ({
     annotator.scrollToAsymmetricalAnchor(tagName, position, segmentIndex);
   };
 
+  // When the document is read-only (e.g. an Editor viewing an unassigned
+  // document) the selection menu still appears, but only as a minimal,
+  // view-only variant: clipboard + anchors in selection, no create/edit.
+  const isMenuReadOnly = !canEditDocument;
+
   const isMenuDisplayed = useMemo<boolean>(() => {
     return (
       annotatorMode === EditMode.HIGHLIGHT &&
@@ -1196,6 +1216,7 @@ export const TextAnnotator = ({
         setIsWholeWordOnlyMode={setIsWholeWordOnlyMode}
         isCaseSensitiveMode={isCaseSensitiveMode}
         setIsCaseSensitiveMode={setIsCaseSensitiveMode}
+        canEdit={canEditDocument}
       />
 
       <div
@@ -1204,7 +1225,7 @@ export const TextAnnotator = ({
           paddingBottom: !hideWarningChip && asymmetricalAnchors.length > 0 ? "0.5rem" : 0,
         }}
       >
-        <AnnotatorWarningsPanel
+        <AnnotatorWarningsModal
           anchors={asymmetricalAnchors}
           onUnlink={onRemoveAsymmetricalAnchor}
           onScrollTo={onScrollToAsymmetricalAnchor}
@@ -1220,6 +1241,24 @@ export const TextAnnotator = ({
           width,
           position: "relative",
           paddingLeft: ANNOTATOR_LEFT_MARGIN_PX,
+        }}
+        onKeyDownCapture={(e) => {
+          // Block editing keys in RAW/SEMI view-only mode (non-editable documents).
+          // Intercept in capture phase so the canvas's own onkeydown never fires.
+          if (!canEditDocument && annotatorMode !== EditMode.HIGHLIGHT) {
+            const isEditingKey =
+              (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) ||
+              e.key === "Backspace" ||
+              e.key === "Delete" ||
+              e.key === "Enter" ||
+              e.key === "Tab" ||
+              ((e.ctrlKey || e.metaKey) && ["v", "x", "z", "Z", "y", "Y"].includes(e.key));
+            if (isEditingKey) {
+              e.stopPropagation();
+              e.preventDefault();
+              return;
+            }
+          }
         }}
         onKeyDown={(e) => {
           if (e.key === "Escape") {
@@ -1262,8 +1301,9 @@ export const TextAnnotator = ({
                       onAnchorAdd={handleAddAnchor}
                       onCreateTerritory={onCreateTerritory}
                       onCreateStatement={onCreateStatement}
-                      onRemoveAnchor={onRemoveAnchor}
-                      onUpdateAnchor={onUpdateAnchor}
+                      onRemoveAnchor={isMenuReadOnly ? undefined : onRemoveAnchor}
+                      onUpdateAnchor={isMenuReadOnly ? undefined : onUpdateAnchor}
+                      readonly={isMenuReadOnly}
                       isTextInsideThisT={selectedAnchors.some(
                         (anchor) => anchor.getTagName() === thisTerritoryEntityId,
                       )}
@@ -1276,7 +1316,7 @@ export const TextAnnotator = ({
                       }
                       hasParentT={hasParentT}
                       territory={territory}
-                      disableCreate={disableCreate}
+                      disableCreate={disableCreate || isMenuReadOnly}
                       isLoading={isSaving || isSavingWithoutRefresh || isFetchingAnchorEntities}
                     />
                   )}
@@ -1374,9 +1414,7 @@ export const TextAnnotator = ({
               label={!annotatorWidthTooNarrow ? editModeDisplayLabel[EditMode.HIGHLIGHT] : ""}
               color="success"
               inverted={annotatorMode !== EditMode.HIGHLIGHT}
-              onClick={() => {
-                setAnnotatorMode(EditMode.HIGHLIGHT);
-              }}
+              onClick={() => handleAnnotatorModeClick(EditMode.HIGHLIGHT)}
               tooltipLabel="anchor entities"
               tooltipPosition="top"
             />
@@ -1392,10 +1430,8 @@ export const TextAnnotator = ({
               color="success"
               label={!annotatorWidthTooNarrow ? editModeDisplayLabel[EditMode.SEMI] : ""}
               inverted={annotatorMode !== EditMode.SEMI}
-              onClick={() => {
-                setAnnotatorMode(EditMode.SEMI);
-              }}
-              tooltipLabel="edit plain text"
+              onClick={() => handleAnnotatorModeClick(EditMode.SEMI)}
+              tooltipLabel={canEditDocument ? "edit plain text" : "view plain text"}
               tooltipPosition="top"
             />
             <Button
@@ -1410,45 +1446,45 @@ export const TextAnnotator = ({
               color="success"
               label={!annotatorWidthTooNarrow ? editModeDisplayLabel[EditMode.RAW] : ""}
               inverted={annotatorMode !== EditMode.RAW}
-              onClick={() => {
-                setAnnotatorMode(EditMode.RAW);
-              }}
-              tooltipLabel="display and edit XML"
+              onClick={() => handleAnnotatorModeClick(EditMode.RAW)}
+              tooltipLabel={canEditDocument ? "display and edit XML" : "display XML"}
               tooltipPosition="top"
             />
           </ButtonGroup>
 
-          <ButtonGroup $marginTop style={{ marginLeft: "0.5rem" }}>
-            <Button
-              label="discard"
-              color="greyer"
-              inverted
-              icon={<FaTrash />}
-              disabled={
-                !isChangeMade || isSaving || isSavingWithoutRefresh || dataDocumentIsFetching
-              }
-              onClick={() => {
-                if (dataDocument?.content) {
-                  annotator?.updateText(dataDocument?.content);
-                  setLocalTextContent(dataDocument.content);
-                }
-              }}
-            />
-            <span style={{ display: "flex", position: "relative" }}>
+          {canEditDocument && (
+            <ButtonGroup $marginTop style={{ marginLeft: "0.5rem" }}>
               <Button
-                label="save"
-                color="info"
-                icon={<FaRegSave size={14} />}
+                label="discard"
+                color="greyer"
+                inverted
+                icon={<FaTrash />}
                 disabled={
                   !isChangeMade || isSaving || isSavingWithoutRefresh || dataDocumentIsFetching
                 }
                 onClick={() => {
-                  handleSaveNewContent(false);
+                  if (dataDocument?.content) {
+                    annotator?.updateText(dataDocument?.content);
+                    setLocalTextContent(dataDocument.content);
+                  }
                 }}
               />
-              <Loader show={isSaving || isSavingWithoutRefresh} size={14} />
-            </span>
-          </ButtonGroup>
+              <span style={{ display: "flex", position: "relative" }}>
+                <Button
+                  label="save"
+                  color="info"
+                  icon={<FaRegSave size={14} />}
+                  disabled={
+                    !isChangeMade || isSaving || isSavingWithoutRefresh || dataDocumentIsFetching
+                  }
+                  onClick={() => {
+                    handleSaveNewContent(false);
+                  }}
+                />
+                <Loader show={isSaving || isSavingWithoutRefresh} size={14} />
+              </span>
+            </ButtonGroup>
+          )}
         </StyledAnnotatorButtons>
       </div>
 

@@ -13,11 +13,15 @@ interface DocumentModalEdit {
   documentId: string;
   onClose: () => void;
   anchor?: { entityId: string; occurence?: number };
+  // When false the annotator opens read-only (view/search only). Editors get
+  // this for documents whose Resource is not assigned to them.
+  canEdit?: boolean;
 }
 const DocumentModalEdit: React.FC<DocumentModalEdit> = ({
   documentId,
   onClose,
   anchor,
+  canEdit = true,
 }) => {
   const [show, setShow] = useState(false);
   useEffect(() => {
@@ -79,6 +83,7 @@ const DocumentModalEdit: React.FC<DocumentModalEdit> = ({
                   );
               }}
               thisTerritoryEntityId={anchor?.entityId}
+              canEditDocument={canEdit}
               disableCreate
             />
           </AnnotatorProvider>

@@ -35,8 +35,6 @@ interface EntityMultiDropdown<T = string> {
   loggerId?: string;
   closeMenuOnSelect?: boolean;
   shortLabel?: boolean;
-  controlBackgroundColor?: string;
-  color?: string;
 }
 export const EntityMultiDropdown = <T extends string>({
   width,
@@ -57,8 +55,6 @@ export const EntityMultiDropdown = <T extends string>({
   loggerId,
   closeMenuOnSelect = true,
   shortLabel = false,
-  controlBackgroundColor,
-  color,
 }: EntityMultiDropdown<T>) => {
   const getValues = (items: DropdownItem[]) => items.map((i) => i.value as T);
 
@@ -153,8 +149,6 @@ export const EntityMultiDropdown = <T extends string>({
       limitSelectedItems={limitSelectedItems}
       closeMenuOnSelect={closeMenuOnSelect}
       shortLabel={shortLabel}
-      controlBackgroundColor={controlBackgroundColor}
-      color={color}
     />
   );
 };
@@ -185,7 +179,6 @@ const ValueContainer = ({
     const visibleChildren = limit
       ? filteredChildren.slice(0, remainingCount === 1 ? limit + 1 : limit)
       : filteredChildren;
-    const controlColor = props.selectProps.color;
     const displayRemainingCount = remainingCount > 1 ? remainingCount : 0;
 
     toBeRendered = [
@@ -197,7 +190,7 @@ const ValueContainer = ({
                 key="ellipsis"
                 style={{
                   padding: "0.2rem 0.2rem 0.2rem 0.3rem",
-                  color: controlColor ?? theme.color.primary,
+                  color: theme.color.primary,
                 }}
               >
                 +{displayRemainingCount} more

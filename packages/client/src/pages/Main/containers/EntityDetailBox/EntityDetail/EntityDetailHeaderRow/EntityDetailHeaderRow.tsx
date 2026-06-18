@@ -12,6 +12,8 @@ import { CgListTree } from "react-icons/cg";
 import { FaClone, FaEdit, FaTrashAlt } from "react-icons/fa";
 import { MdCleaningServices } from "react-icons/md";
 import { toast } from "react-toastify";
+import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
+import { useAppDispatch } from "redux/hooks";
 import { StyledActantHeaderRow, StyledGrClone, StyledTagWrap } from "./EntityDetailHeaderRowStyles";
 import { ButtonSize } from "types";
 
@@ -38,6 +40,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
   hasWarnings,
 }) => {
   const queryClient = useQueryClient();
+  const dispatch = useAppDispatch();
 
   const { setStatementId, setTerritoryId, appendDetailId, setSelectedDetailId } = useSearchParams();
 
@@ -216,6 +219,9 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
               inverted
               color="primary"
               onClick={() => {
+                // Reset so the tree re-runs its path expansion (and pagination
+                // page selection) for the newly selected territory.
+                dispatch(setTreeInitialized(false));
                 setTerritoryId(entity.id);
               }}
               disabled={entity.isTemplate}

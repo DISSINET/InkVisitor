@@ -20,6 +20,10 @@ interface ExplorerBoxProps {
   dispatch: React.Dispatch<ExploreAction>;
   data: any | undefined;
   isQueryFetching: boolean;
+  /** True when no search criteria are set, so no query is fired. */
+  isRequestEmpty?: boolean;
+  /** True when criteria are set but the search has not been run yet. */
+  isSearchPending?: boolean;
   queryError: Error | null;
   height: number;
   onExport: (rowsSelected: number[], selectedColumnIds?: string[]) => void;
@@ -30,12 +34,17 @@ interface ExplorerBoxProps {
 
   isDetailOpen: boolean;
   detailPanelWidth: number;
+
+  /** When false only read-only batch actions (open, copy, export) are offered. */
+  canBatchEdit?: boolean;
 }
 export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   state,
   dispatch,
   data,
   isQueryFetching,
+  isRequestEmpty = false,
+  isSearchPending = false,
   queryError,
   height,
   onExport,
@@ -45,10 +54,14 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   onOpenEntitiesInDetail,
   isDetailOpen,
   detailPanelWidth,
+  canBatchEdit = false,
 }) => {
   const floatingSearchRightInset = isDetailOpen ? detailPanelWidth : 0;
 
   const isStats = state.view.mode === Explore.EViewMode.Stats;
+  // Stats view with no search criteria: show only the prompt, hiding the control
+  // bar (label / uuid filters) so nothing competes with the message.
+  const isStatsEmpty = isStats && isRequestEmpty;
   const columns = state.view.mode === Explore.EViewMode.Table ? state.view.columns : [];
 
   const controls = useExplorerControls({
@@ -64,6 +77,7 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   return (
     <>
       <div style={{ display: "flex", flexDirection: "column", height }}>
+        {!isStatsEmpty && (
         <ExplorerControlBar
           mode={state.view.mode}
           filters={state.filters}
@@ -82,6 +96,7 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
                   batchActionSelected: controls.batchActionSelected,
                   setBatchActionSelected: controls.setBatchActionSelected,
                   onApplyBatchAction: controls.handleApplyBatchAction,
+                  canBatchEdit,
                 }
           }
           newColumn={
@@ -93,6 +108,7 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
                 }
           }
         />
+        )}
 
         <div style={{ flex: 1, minHeight: 0 }}>
           {state.view.mode === Explore.EViewMode.Stats ? (
@@ -101,8 +117,11 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
               dispatch={dispatch}
               values={data?.stats}
               total={data?.total}
+              statsEntityLimit={data?.statsEntityLimit}
+              isRequestEmpty={isRequestEmpty}
+              isSearchPending={isSearchPending}
               isFetching={isQueryFetching}
-              height={contentHeight}
+              height={isStatsEmpty ? height : contentHeight}
             />
           ) : (
             <ExplorerTable
@@ -110,6 +129,8 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
               dispatch={dispatch}
               data={data}
               isQueryFetching={isQueryFetching}
+              isRequestEmpty={isRequestEmpty}
+              isSearchPending={isSearchPending}
               queryError={queryError}
               height={contentHeight}
               getCachedEntity={getCachedEntity}

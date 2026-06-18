@@ -4,12 +4,15 @@ import { IResponseQuery, IResponseQueryEntity } from "@inkvisitor/shared/types";
 import { Explore, Query } from "@inkvisitor/shared/types/query";
 import api from "api";
 import { QueryValidity } from "./types";
+import { isQueryRequestEmpty } from "./Query/utils";
 
 interface UseQueryDataParams {
   queryState: Query.INode;
   exploreState: Explore.IExplore;
   stableSignature: string;
   queryStateValidity: QueryValidity;
+  /** Only fire when this matches stableSignature (i.e. user explicitly ran the search). */
+  committedSignature: string | null;
 }
 
 interface UseQueryDataReturn {
@@ -46,6 +49,7 @@ export const useQueryData = ({
   exploreState,
   stableSignature,
   queryStateValidity,
+  committedSignature,
 }: UseQueryDataParams): UseQueryDataReturn => {
   const queryClient = useQueryClient();
 
@@ -117,6 +121,14 @@ export const useQueryData = ({
     }
   };
 
+  // Skip firing the query when nothing constrains the search - an empty request
+  // would scan the whole database (and, in stats mode, aggregate audits over
+  // everything). This guards the auto-fire on page load with the default root.
+  const isRequestEmpty = useMemo(
+    () => isQueryRequestEmpty(queryState, exploreState),
+    [queryState, exploreState],
+  );
+
   const queryKey = useMemo(
     () => ["query", stableSignature, { offset: exploreState.offset, limit: exploreState.limit }],
     [stableSignature, exploreState.offset, exploreState.limit],
@@ -142,7 +154,8 @@ export const useQueryData = ({
       //   `🔄 Fetching rows [${exploreState.offset}-${exploreState.offset + exploreState.limit - 1}]`,
       // );
 
-      if (!queryStateValidity.isValid || !api.isLoggedIn()) return;
+      if (!queryStateValidity.isValid || !api.isLoggedIn() || isRequestEmpty)
+        return;
       const res = await api.query({
         query: queryState,
         explore: exploreState,
@@ -167,7 +180,11 @@ export const useQueryData = ({
     initialData: getInitialData,
     staleTime: Infinity,
     gcTime: 1000 * 60 * 30,
-    enabled: queryStateValidity.isValid && api.isLoggedIn(),
+    enabled:
+      queryStateValidity.isValid &&
+      api.isLoggedIn() &&
+      !isRequestEmpty &&
+      committedSignature === stableSignature,
   });
 
   const prevSignatureRef = useRef(stableSignature);

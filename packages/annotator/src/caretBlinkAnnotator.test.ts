@@ -11,13 +11,20 @@ const mk = (text: string): Annotator => {
   const c = document.createElement("canvas");
   c.style.width = "800px";
   c.style.height = "600px";
+  c.tabIndex = 0;
   document.body.appendChild(c);
   const a = new Annotator(c, text);
   a.setMode(EditMode.RAW);
   return a;
 };
 
+const focusCanvas = (a: Annotator) => {
+  a.element.focus();
+  a.element.dispatchEvent(new FocusEvent("focus"));
+};
+
 const placeCaret = (a: Annotator) => {
+  focusCanvas(a);
   a.cursor.setPosition(0, 0);
   a.draw(); // starts the blink timer for the now-visible caret
 };
@@ -41,6 +48,17 @@ describe("annotator caret blink (#3092)", () => {
     expect(a.isCaretVisible()).toBe(false);
     jest.advanceTimersByTime(500);
     expect(a.isCaretVisible()).toBe(true);
+  });
+
+  test("caret is hidden while the canvas is not focused", () => {
+    const a = mk("foo bar baz");
+    a.cursor.setPosition(0, 0);
+    const drawLineSpy = jest.spyOn(a.cursor, "drawLine");
+    a.draw();
+
+    expect(drawLineSpy).not.toHaveBeenCalled();
+    jest.advanceTimersByTime(2000);
+    expect(drawLineSpy).not.toHaveBeenCalled();
   });
 
   test("caret does not blink while a selection is active", () => {
@@ -111,6 +129,7 @@ describe("annotator caret blink (#3092)", () => {
   test("blink repaints do not fire the host selection callback", () => {
     const a = mk("foo bar baz");
     jest.runOnlyPendingTimers(); // flush the constructor's deferred resize()/draw()
+    focusCanvas(a);
     a.cursor.setPosition(0, 0);
 
     const onSelect = jest.fn();

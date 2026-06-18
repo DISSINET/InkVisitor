@@ -43,7 +43,10 @@ import { IRequestSearch } from "@inkvisitor/shared/types/request-search";
 import Document from "@models/document/document";
 import { IResponseQuery } from "@inkvisitor/shared/types/response-query";
 
-import { EventType } from "@inkvisitor/shared/types/stats";
+import {
+  EventType,
+  EXPLORE_STATS_ENTITY_LIMIT,
+} from "@inkvisitor/shared/types/stats";
 import { Router } from "express";
 import { IRequest } from "src/custom_typings/request";
 import { asyncRouteHandler } from "../index";
@@ -651,9 +654,9 @@ export default Router()
 
       const entity = getEntityClass({ ...entityData });
 
-      if (!entity.canBeViewedByUser(request.getUserOrFail())) {
-        throw new PermissionDeniedError(`cannot view entity ${entityId}`);
-      }
+      // Read-only detail view is consistent with the unrestricted base
+      // GET /:entityId. Territory/statement-level access for mutations is
+      // enforced via entity.right in the response (write/admin vs read-only).
 
       const response = new ResponseEntityDetail(entity);
 
@@ -772,9 +775,12 @@ export default Router()
 
       const entity = getEntityClass({ ...entityData });
 
-      if (!entity.canBeViewedByUser(request.getUserOrFail())) {
-        throw new PermissionDeniedError(`cannot view entity ${entityId}`);
-      }
+      // The tooltip is a read-only lightweight preview, equivalent in
+      // sensitivity to the base GET /:entityId which has no canBeViewedByUser
+      // gate. Removing the check keeps the two endpoints consistent and lets
+      // all logged-in users (Editors, Viewers) see statement tooltips in the
+      // Explorer where they may encounter statements from territories they are
+      // not directly assigned to.
 
       const response = new ResponseTooltip(entity);
 
@@ -803,6 +809,7 @@ export default Router()
           explore: querySearch.explore,
           total: entityIds.length,
           stats,
+          statsEntityLimit: EXPLORE_STATS_ENTITY_LIMIT,
         };
       }
 
