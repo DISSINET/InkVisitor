@@ -26,7 +26,7 @@ import {
 } from "./Explorer/state";
 import { MemoizedQueryBox } from "./Query/QueryBox";
 import { queryReducer, queryStateInitial } from "./Query/state";
-import { getAllEdges, getAllNodes } from "./Query/utils";
+import { getAllEdges, getAllNodes, isQueryRequestEmpty } from "./Query/utils";
 import {
   QUERY_LEFT_PANEL_MIN_WIDTH,
   QUERY_PAGE_SEPARATOR_X_PERCENT_POSITION,
@@ -134,6 +134,13 @@ export const QueryPage: React.FC<QueryPage> = ({ }) => {
   const stableSignature = useMemo(() => {
     return buildStableSignature(queryState as any, exploreState as any);
   }, [queryState, exploreState]);
+
+  // No search criteria yet -> the query is not fired (see useQueryData); the
+  // explorer views use this to prompt the user instead of showing empty results.
+  const isRequestEmpty = useMemo(
+    () => isQueryRequestEmpty(queryState, exploreState),
+    [queryState, exploreState],
+  );
 
   const onePercentOfContentHeight = useMemo(() => contentHeight / 100, [contentHeight]);
   const onePercentOfLayoutWidth = useMemo(() => layoutWidth / 100, [layoutWidth]);
@@ -530,6 +537,7 @@ export const QueryPage: React.FC<QueryPage> = ({ }) => {
                 dispatch={exploreStateDispatch}
                 data={queryData}
                 isQueryFetching={queryIsFetching}
+                isRequestEmpty={isRequestEmpty}
                 queryError={queryError}
                 onExport={handleExport}
                 stableSignature={stableSignature}

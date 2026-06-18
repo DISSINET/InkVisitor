@@ -20,6 +20,8 @@ interface ExplorerBoxProps {
   dispatch: React.Dispatch<ExploreAction>;
   data: any | undefined;
   isQueryFetching: boolean;
+  /** True when no search criteria are set, so no query is fired. */
+  isRequestEmpty?: boolean;
   queryError: Error | null;
   height: number;
   onExport: (rowsSelected: number[], selectedColumnIds?: string[]) => void;
@@ -39,6 +41,7 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   dispatch,
   data,
   isQueryFetching,
+  isRequestEmpty = false,
   queryError,
   height,
   onExport,
@@ -53,6 +56,9 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   const floatingSearchRightInset = isDetailOpen ? detailPanelWidth : 0;
 
   const isStats = state.view.mode === Explore.EViewMode.Stats;
+  // Stats view with no search criteria: show only the prompt, hiding the control
+  // bar (label / uuid filters) so nothing competes with the message.
+  const isStatsEmpty = isStats && isRequestEmpty;
   const columns = state.view.mode === Explore.EViewMode.Table ? state.view.columns : [];
 
   const controls = useExplorerControls({
@@ -68,6 +74,7 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   return (
     <>
       <div style={{ display: "flex", flexDirection: "column", height }}>
+        {!isStatsEmpty && (
         <ExplorerControlBar
           mode={state.view.mode}
           filters={state.filters}
@@ -98,6 +105,7 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
                 }
           }
         />
+        )}
 
         <div style={{ flex: 1, minHeight: 0 }}>
           {state.view.mode === Explore.EViewMode.Stats ? (
@@ -107,8 +115,9 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
               values={data?.stats}
               total={data?.total}
               statsEntityLimit={data?.statsEntityLimit}
+              isRequestEmpty={isRequestEmpty}
               isFetching={isQueryFetching}
-              height={contentHeight}
+              height={isStatsEmpty ? height : contentHeight}
             />
           ) : (
             <ExplorerTable

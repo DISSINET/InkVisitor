@@ -18,6 +18,17 @@ export const StyledStatsHeader = styled.div`
   font-weight: ${({ theme }) => theme.fontWeight.bold};
 `;
 
+export const StyledEmptyMessage = styled.div`
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: ${({ theme }) => theme.space[6]};
+  font-size: ${({ theme }) => theme.fontSize.sm};
+  color: ${({ theme }) => theme.color.plain};
+`;
+
 export const StyledConfigStrip = styled.div`
   display: flex;
   justify-content: center;

@@ -14,6 +14,7 @@ import { ExploreAction, ExploreActionType } from "../state";
 import {
   StyledChartWrapper,
   StyledConfigStrip,
+  StyledEmptyMessage,
   StyledField,
   StyledFieldLabel,
   StyledStatsHeader,
@@ -63,6 +64,8 @@ interface ExplorerStatsProps {
   total: number | undefined;
   /** Server cap on how many entities the stats are actually computed over. */
   statsEntityLimit: number | undefined;
+  /** True when no search criteria are set, so no query is fired. */
+  isRequestEmpty: boolean;
   isFetching: boolean;
   height: number;
 }
@@ -73,6 +76,7 @@ export const ExplorerStats: React.FC<ExplorerStatsProps> = ({
   values,
   total,
   statsEntityLimit,
+  isRequestEmpty,
   isFetching,
   height,
 }) => {
@@ -133,6 +137,19 @@ export const ExplorerStats: React.FC<ExplorerStatsProps> = ({
     typeof total === "number" &&
     typeof statsEntityLimit === "number" &&
     total > statsEntityLimit;
+
+  // No query / filters yet -> nothing is fetched, so prompt the user instead of
+  // rendering an empty chart and table.
+  if (isRequestEmpty) {
+    return (
+      <StyledStatsLayout $height={height}>
+        <StyledEmptyMessage>
+          Create a query or add a search filter first to see statistics for the
+          matching entities.
+        </StyledEmptyMessage>
+      </StyledStatsLayout>
+    );
+  }
 
   return (
     <StyledStatsLayout $height={height}>
