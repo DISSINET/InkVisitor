@@ -31,6 +31,11 @@ const REQUIRED: RequiredIndex[] = [
     index: DbEnums.Indexes.StatementTerritory,
     usedBy: "Statement.findStatementsInTerritory (territory statements list)",
   },
+  {
+    table: "documents",
+    index: DbEnums.Indexes.DocumentEntityIds,
+    usedBy: "Document.findByEntityId (entity tooltip/detail usedInDocuments, delete check)",
+  },
 ];
 
 /**

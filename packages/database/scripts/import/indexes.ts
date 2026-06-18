@@ -154,6 +154,31 @@ const relationsIndexes: IndexDef[] = [
   def(DbEnums.Indexes.RelationsEntityIds, { multi: true }),
 ];
 
+const documentsIndexes: IndexDef[] = [
+  // Multi-index over every entity id referenced by a document. Backs
+  // Document.findByEntityId so it can getAll the matching documents instead
+  // of scanning the whole table (and deserializing each document's full
+  // content) on every call. The function flattens both the legacy flat
+  // string[] shape and the canonical Record<Class, string[]> shape, matching
+  // the dual-format branch the old filter handled.
+  def(
+    DbEnums.Indexes.DocumentEntityIds,
+    function (row: RDatum) {
+      return r.branch(
+        // a malformed/legacy row without entityIds contributes no keys
+        row.hasFields("entityIds").not(),
+        [] as unknown as RValue,
+        // legacy flat string[] shape
+        row("entityIds").typeOf().eq("ARRAY"),
+        row("entityIds"),
+        // canonical Record<Class, string[]> shape
+        row("entityIds").values().concatMap((arr: RDatum) => arr)
+      );
+    },
+    { multi: true }
+  ),
+];
+
 // Materialized stats indexes for each time unit
 const materializedStatsIndexes: IndexDef[] = [
   def("date"),
@@ -169,7 +194,7 @@ export const DbSchemaIndexes: { [key in keyof DbSchema]: IndexDef[] } = {
   entities: entitiesIndexes,
   audits: auditsIndexes,
   relations: relationsIndexes,
-  documents: [],
+  documents: documentsIndexes,
   settings: [],
   users: [],
   aclPermissions: [],
