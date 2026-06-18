@@ -1,6 +1,6 @@
 import cookieParser from "cookie-parser";
 import session from "express-session";
-import { pool } from "./db";
+import { sessionPool } from "./db";
 import { RethinkSessionStore } from "@service/rethinkSessionStore";
 
 const SESSION_MAX_AGE_MS =
@@ -13,7 +13,7 @@ export { sessionSecret };
 
 export const sessionCookieName = "inkvisitor.sid";
 
-export const sessionStore = new RethinkSessionStore(pool);
+export const sessionStore = new RethinkSessionStore(sessionPool);
 
 export const sessionMiddleware = session({
   name: sessionCookieName,

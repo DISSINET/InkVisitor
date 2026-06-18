@@ -18,7 +18,8 @@ import {
   UserNotActiveError,
   UserNotUnique,
 } from "@inkvisitor/shared/types/errors";
-import { checkPassword, createSessionUserId, destroySession, hashPassword } from "@common/auth";
+import { checkPassword, hashPassword } from "@common/auth";
+import { createSessionUserId, destroySession } from "@common/session";
 import { asyncRouteHandler } from "..";
 import {
   IResponseBookmarkFolder,

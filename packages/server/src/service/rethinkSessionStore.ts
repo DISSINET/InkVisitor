@@ -62,7 +62,15 @@ export class RethinkSessionStore extends session.Store {
 
   private ensureReady(): Promise<void> {
     if (!this.ready) {
-      this.ready = this.withConn((conn) => ensureSessionsTable(conn));
+      // Don't cache a rejected promise: if this first check fails (e.g. a
+      // transient pool/DB hiccup) we must be able to retry on the next call
+      // rather than poisoning every future session op until restart.
+      this.ready = this.withConn((conn) => ensureSessionsTable(conn)).catch(
+        (err) => {
+          this.ready = null;
+          throw err;
+        }
+      );
     }
     return this.ready;
   }
