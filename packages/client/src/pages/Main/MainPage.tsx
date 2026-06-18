@@ -442,7 +442,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
       return "open editor box";
     }
     return editorBoxState === EditorBoxState.FullHeight
-      ? "restore editor box"
+      ? "shrink editor box"
       : "maximize editor box";
   };
 

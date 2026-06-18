@@ -30,11 +30,9 @@ export const AnnotatorBox: React.FC<AnnotatorBoxProps> = ({ height, width }) => 
   const { data: userData } = useUserQuery();
 
   const selectedTerritoryPath: string[] = useAppSelector(
-    (state) => state.territoryTree.selectedTerritoryPath
+    (state) => state.territoryTree.selectedTerritoryPath,
   );
-  const selectedResourceId = useAppSelector(
-    (state) => state.statementAnnotator.selectedResourceId
-  );
+  const selectedResourceId = useAppSelector((state) => state.statementAnnotator.selectedResourceId);
 
   const [hlEntities, setHlEntities] = useState<EntityEnums.Class[]>([
     EntityEnums.Class.Action,
@@ -51,11 +49,10 @@ export const AnnotatorBox: React.FC<AnnotatorBoxProps> = ({ height, width }) => 
     EntityEnums.Class.Territory,
   ]);
 
-  const [annotator, setAnnotatorState] = useState<Annotator | undefined>(
-    undefined
+  const [annotator, setAnnotatorState] = useState<Annotator | undefined>(undefined);
+  const [storedAnnotatorScrollPosition, setStoredAnnotatorScrollPosition] = useState<number | null>(
+    null,
   );
-  const [storedAnnotatorScrollPosition, setStoredAnnotatorScrollPosition] =
-    useState<number | null>(null);
 
   const { setAnnotator: setSingletonAnnotator } = useAnnotator();
   useEffect(() => {
@@ -69,7 +66,7 @@ export const AnnotatorBox: React.FC<AnnotatorBoxProps> = ({ height, width }) => 
 
   // Territory entity (same query key as StatementListBox — shared cache)
   const statementListOpened: boolean = useAppSelector(
-    (state) => state.layout.mainPage.statementListOpened
+    (state) => state.layout.mainPage.statementListOpened,
   );
   const { data: territory } = useQuery({
     queryKey: ["territory", "statement-list", territoryId, statementListOpened],
@@ -100,6 +97,51 @@ export const AnnotatorBox: React.FC<AnnotatorBoxProps> = ({ height, width }) => 
 
   // Auto-load the resource whose document anchors this territory (or an ancestor).
   const [isInitialized, setIsInitialized] = useState(false);
+
+  const loadDefaultResource = () => {
+    if (resources && documents && !isInitialized) {
+      // First try to find resource with document containing territoryId
+      let resourceWithAnchor = resources.find((resource) => {
+        if (resource.data.documentId) {
+          const document = documents.find((d) => d.id === resource.data.documentId);
+          if (document) {
+            return document.entityIds.T.includes(territoryId);
+          }
+        }
+        return false;
+      });
+
+      // If not found, try each territory in the path in reverse order
+      if (!resourceWithAnchor) {
+        for (let i = selectedTerritoryPath.length - 1; i > 0; i--) {
+          const territoryInPath = selectedTerritoryPath[i];
+          resourceWithAnchor = resources.find((resource) => {
+            if (resource.data.documentId) {
+              const document = documents.find((d) => d.id === resource.data.documentId);
+              if (document) {
+                return document.entityIds.T.includes(territoryInPath);
+              }
+            }
+            return false;
+          });
+          if (resourceWithAnchor) break;
+        }
+      }
+
+      if (resourceWithAnchor) {
+        setSelectedResourceId(resourceWithAnchor.id);
+      } else {
+        setSelectedResourceId(false);
+      }
+
+      setIsInitialized(true);
+    }
+  };
+
+  useEffect(() => {
+    loadDefaultResource();
+  }, [resources, documents, isInitialized, territoryId]);
+
   useEffect(() => {
     setIsInitialized(false);
   }, [territoryId]);
@@ -108,9 +150,7 @@ export const AnnotatorBox: React.FC<AnnotatorBoxProps> = ({ height, width }) => 
     if (resources && documents && !isInitialized) {
       let resourceWithAnchor = resources.find((resource) => {
         if (resource.data.documentId) {
-          const document = documents.find(
-            (d) => d.id === resource.data.documentId
-          );
+          const document = documents.find((d) => d.id === resource.data.documentId);
           if (document) {
             return document.entityIds.T.includes(territoryId);
           }
@@ -123,9 +163,7 @@ export const AnnotatorBox: React.FC<AnnotatorBoxProps> = ({ height, width }) => 
           const territoryInPath = selectedTerritoryPath[i];
           resourceWithAnchor = resources.find((resource) => {
             if (resource.data.documentId) {
-              const document = documents.find(
-                (d) => d.id === resource.data.documentId
-              );
+              const document = documents.find((d) => d.id === resource.data.documentId);
               if (document) {
                 return document.entityIds.T.includes(territoryInPath);
               }
@@ -169,8 +207,7 @@ export const AnnotatorBox: React.FC<AnnotatorBoxProps> = ({ height, width }) => 
   });
 
   const statementCreateMutation = useMutation({
-    mutationFn: async (newStatement: IStatement) =>
-      await api.entityCreate(newStatement),
+    mutationFn: async (newStatement: IStatement) => await api.entityCreate(newStatement),
     onMutate: async (newStatement: IStatement) => {
       await queryClient.cancelQueries({
         queryKey: ["territory", "statement-list", territoryId],
@@ -199,19 +236,18 @@ export const AnnotatorBox: React.FC<AnnotatorBoxProps> = ({ height, width }) => 
         const updatedStatements = [...previousTerritory.statements];
         const order = newStatement.data.territory.order;
         const insertIndex = updatedStatements.findIndex(
-          (s) => (s.data.territory?.order ?? 0) > order
+          (s) => (s.data.territory?.order ?? 0) > order,
         );
         if (insertIndex === -1) updatedStatements.push(optimisticStatement);
         else updatedStatements.splice(insertIndex, 0, optimisticStatement);
         queryClient.setQueryData<IResponseTerritory>(
           ["territory", "statement-list", territoryId, statementListOpened],
-          { ...previousTerritory, statements: updatedStatements }
+          { ...previousTerritory, statements: updatedStatements },
         );
       }
       if (previousDocument && selectedDocumentId) {
         const sId = newStatement.id;
-        const currentStatementIds =
-          previousDocument.entityIds[EntityEnums.Class.Statement] || [];
+        const currentStatementIds = previousDocument.entityIds[EntityEnums.Class.Statement] || [];
         if (!currentStatementIds.includes(sId)) {
           queryClient.setQueryData<IDocument>(["document", selectedDocumentId], {
             ...previousDocument,
@@ -228,13 +264,13 @@ export const AnnotatorBox: React.FC<AnnotatorBoxProps> = ({ height, width }) => 
       if (context?.previousTerritory) {
         queryClient.setQueryData<IResponseTerritory>(
           ["territory", "statement-list", territoryId, statementListOpened],
-          context.previousTerritory
+          context.previousTerritory,
         );
       }
       if (context?.previousDocument) {
         queryClient.setQueryData<IDocument | undefined>(
           ["document", selectedDocumentId],
-          context.previousDocument
+          context.previousDocument,
         );
       }
     },
@@ -253,26 +289,19 @@ export const AnnotatorBox: React.FC<AnnotatorBoxProps> = ({ height, width }) => 
   });
 
   // permission gating (mirrors the old StatementListBox computation)
-  const userCanEdit = useMemo(
-    () => territory?.right !== UserEnums.RoleMode.Read,
-    [territory]
-  );
+  const userCanEdit = useMemo(() => territory?.right !== UserEnums.RoleMode.Read, [territory]);
   const canSelectResource = useMemo(
     () => userCanEdit || userData?.role === UserEnums.Role.Editor,
-    [userCanEdit, userData?.role]
+    [userCanEdit, userData?.role],
   );
   const canEditDocument = useMemo(() => {
-    if (
-      userData?.role === UserEnums.Role.Owner ||
-      userData?.role === UserEnums.Role.Admin
-    ) {
+    if (userData?.role === UserEnums.Role.Owner || userData?.role === UserEnums.Role.Admin) {
       return true;
     }
     if (userData?.role !== UserEnums.Role.Editor || !selectedResource) {
       return false;
     }
-    const assignedResourceIds =
-      userData.resourceRights?.map((r) => r.resource.id) ?? [];
+    const assignedResourceIds = userData.resourceRights?.map((r) => r.resource.id) ?? [];
     return assignedResourceIds.includes(selectedResource.id);
   }, [userData, selectedResource]);
 
