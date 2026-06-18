@@ -149,14 +149,15 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
   }, [stableSignature]);
 
   // Global Enter shortcut: run search unless focus is in a text input, textarea,
-  // or select — except when that input lives inside the floating search panel,
-  // where Enter should also trigger the search (filter dropdowns, not suggesters).
+  // or select — except when that input lives inside a container marked with
+  // [data-run-on-enter] (floating search panel, UUID filter panel), where Enter
+  // should also trigger the search alongside any local handler on the input.
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key !== "Enter") return;
       const tag = (document.activeElement?.tagName ?? "").toLowerCase();
       if (tag === "input" || tag === "textarea" || tag === "select") {
-        if (!document.activeElement?.closest("[data-floating-search]")) return;
+        if (!document.activeElement?.closest("[data-run-on-enter]")) return;
       }
       handleRunSearch();
     };

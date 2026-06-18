@@ -245,7 +245,7 @@ const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({ filters
   return (
     <StyledIdsFloatingRoot ref={rootRef}>
       {isOpen && (
-        <StyledIdsPanel style={maxPanelHeight ? { maxHeight: maxPanelHeight } : undefined}>
+        <StyledIdsPanel style={maxPanelHeight ? { maxHeight: maxPanelHeight } : undefined} data-run-on-enter="true">
           <StyledIdsPanelHeader>
             <StyledIdsPanelTitle>Entity UUIDs</StyledIdsPanelTitle>
             <StyledUuidChipRemove
