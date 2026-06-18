@@ -20,8 +20,8 @@ import {
   StyledNoDocumentMessage,
   StyledSearchNavigation,
   StyledDocumentLine,
-} from "../StatementListBoxStyles";
-import { StyledInfoText } from "../StatementListHeader/StatementListHeaderStyles";
+} from "../StatementsListBox/StatementListBoxStyles";
+import { StyledInfoText } from "../StatementsListBox/StatementListHeader/StatementListHeaderStyles";
 import { toast } from "react-toastify";
 import { SECOND_PANEL_MIN_WIDTH } from "Theme/constants";
 import { WarningsChip } from "components/advanced/Annotator/AnnotatorWarningsModal";

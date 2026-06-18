@@ -21,8 +21,8 @@ import {
   SUGGESTER_ROW_HEIGHT,
 } from "Theme/constants";
 import { collectStatementAnchors } from "utils/utils";
-import { StyledEmptyState } from "../StatementListBoxStyles";
-import StatementListDocumentLine from "../StatementListDocumentLine/StatementListDocumentLine";
+import { StyledEmptyState } from "../StatementsListBox/StatementListBoxStyles";
+import StatementListDocumentLine from "./AnnotatorDocumentLine";
 
 interface StatementListTextAnnotator {
   // it's faster than the territory entity so it's better to pass territoryId separately
@@ -51,7 +51,7 @@ interface StatementListTextAnnotator {
   selectedDocument?: IDocument;
   selectedResource: IResponseEntity | false;
   resources?: IResponseEntity[];
-  setSelectedResourceId: React.Dispatch<React.SetStateAction<string | false>>;
+  setSelectedResourceId: (id: string | false) => void;
 
   // useQuery for selectedDocument
   selectedDocumentId?: string;

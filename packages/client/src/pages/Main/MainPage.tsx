@@ -10,7 +10,7 @@ import ScrollHandler from "hooks/ScrollHandler";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { BiHide, BiRefresh, BiShow } from "react-icons/bi";
 import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
-import { FaHighlighter, FaList, FaPlus } from "react-icons/fa";
+import { FaPlus } from "react-icons/fa";
 import { FaDiagramNext } from "react-icons/fa6";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { toast } from "react-toastify";
@@ -25,6 +25,7 @@ import { setSecondPanelRealWidth } from "redux/features/layout/mainPage/secondPa
 import { setStatementListOpened } from "redux/features/layout/mainPage/statementListOpenedSlice";
 import { setThirdPanelExpanded } from "redux/features/layout/mainPage/thirdPanelExpandedSlice";
 import { setThirdPanelRealWidth } from "redux/features/layout/mainPage/thirdPanelRealWidthSlice";
+import { setAnnotatorBoxState } from "redux/features/layout/mainPage/annotatorBoxStateSlice";
 import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 import { setIsLoading } from "redux/features/statementList/isLoadingSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
@@ -47,16 +48,16 @@ import {
   SMALL_SCREEN_LIMIT,
   THIRD_PANEL_MIN_WIDTH,
 } from "Theme/constants";
-import { DetailBoxState } from "types";
+import { AnnotatorBoxState, DetailBoxState } from "types";
 import { floorNumberToOneDecimal, searchTree } from "utils/utils";
 import { MemoizedEntityBookmarkBox } from "./containers/EntityBookmarkBox/EntityBookmarkBox";
 import { MemoizedEntityDetailBox } from "./containers/EntityDetailBox/EntityDetailBox";
 import { MemoizedEntitySearchBox } from "./containers/EntitySearchBox/EntitySearchBox";
 import { MemoizedStatementEditorBox } from "./containers/StatementEditorBox/StatementEditorBox";
 import { MemoizedStatementListBox } from "./containers/StatementsListBox/StatementListBox";
+import { MemoizedAnnotatorBox } from "./containers/AnnotatorBox/AnnotatorBox";
 import { MemoizedTemplateListBox } from "./containers/TemplateListBox/TemplateListBox";
 import { MemoizedTerritoryTreeBox } from "./containers/TerritoryTreeBox/TerritoryTreeBox";
-import { StyledListAnnotatorTab, StyledListAnnotatorTabGroup } from "./MainPageStyles";
 import { useUserQuery } from "hooks/react-query";
 
 type FourthPanelBoxes = "search" | "bookmarks" | "templates";
@@ -100,6 +101,12 @@ const MainPage: React.FC<MainPage> = ({}) => {
   );
   const detailBoxState: DetailBoxState = useAppSelector(
     (state) => state.layout.mainPage.detailBoxState
+  );
+  const annotatorBoxState: AnnotatorBoxState = useAppSelector(
+    (state) => state.layout.mainPage.annotatorBoxState
+  );
+  const thirdPanelRealWidth: number = useAppSelector(
+    (state) => state.layout.mainPage.thirdPanelRealWidth
   );
   const [lastState, setLastState] = useState(DetailBoxState.Normal);
 
@@ -385,6 +392,46 @@ const MainPage: React.FC<MainPage> = ({}) => {
         return "maximize detail box";
       case DetailBoxState.Minimized:
         return "open detail box";
+    }
+  };
+
+  // THIRD PANEL: Annotator box (top) shares the panel with the Editor box
+  // (bottom). The Editor is the primary box; the Annotator is the
+  // collapsible/maximizable one. "Expanded" is driven by the annotatorOpened
+  // URL flag; the box state sizes it (mirrors the second panel's pattern).
+  const getEditorBoxHeight = () => {
+    if (!annotatorOpened) {
+      return contentHeight;
+    }
+    switch (annotatorBoxState) {
+      case AnnotatorBoxState.FullHeight:
+        return hiddenBoxHeight;
+      case AnnotatorBoxState.Normal:
+        return contentHeight / 2 + 20;
+      case AnnotatorBoxState.Minimized:
+        return contentHeight - hiddenBoxHeight;
+    }
+  };
+
+  const getAnnotatorBoxHeight = () => {
+    if (!annotatorOpened) {
+      return hiddenBoxHeight;
+    }
+    switch (annotatorBoxState) {
+      case AnnotatorBoxState.FullHeight:
+        return contentHeight - hiddenBoxHeight;
+      case AnnotatorBoxState.Normal:
+        return contentHeight / 2 + 20;
+      case AnnotatorBoxState.Minimized:
+        return hiddenBoxHeight;
+    }
+  };
+
+  const handleMaximizeAnnotatorBox = () => {
+    if (annotatorBoxState === AnnotatorBoxState.Normal) {
+      dispatch(setAnnotatorBoxState(AnnotatorBoxState.FullHeight));
+    } else {
+      dispatch(setAnnotatorBoxState(AnnotatorBoxState.Normal));
     }
   };
 
@@ -795,32 +842,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
                   />
                 </ButtonGroup>
               )}
-              {territoryId && (
-                <StyledListAnnotatorTabGroup>
-                  <StyledListAnnotatorTab
-                    type="button"
-                    $isSelected={!annotatorOpened}
-                    onClick={() => {
-                      setAnnotatorOpened(false);
-                      dispatch(setDetailBoxState(DetailBoxState.Normal));
-                    }}
-                  >
-                    <FaList />
-                    list
-                  </StyledListAnnotatorTab>
-                  <StyledListAnnotatorTab
-                    type="button"
-                    $isSelected={!!annotatorOpened}
-                    onClick={() => {
-                      setAnnotatorOpened(true);
-                      dispatch(setDetailBoxState(DetailBoxState.Normal));
-                    }}
-                  >
-                    <FaHighlighter />
-                    annotator
-                  </StyledListAnnotatorTab>
-                </StyledListAnnotatorTabGroup>
-              )}
               {/* Admin / Owner / Editor with writer rights */}
               {hasWriteRightsToSelectedTerritory && territoryId && (
                 <ButtonGroup style={{ marginLeft: "0.5rem", marginRight: "0.5rem" }}>
@@ -926,9 +947,55 @@ const MainPage: React.FC<MainPage> = ({}) => {
 
       {/* THIRD PANEL */}
       <Panel width={thirdPanelWidth}>
+        {territoryId && (
+          <Box
+            borderColor="white"
+            height={getAnnotatorBoxHeight()}
+            label="Annotator"
+            isExpanded={thirdPanelExpanded}
+            onHeaderClick={() => {
+              if (!annotatorOpened) {
+                setAnnotatorOpened(true);
+              }
+            }}
+            buttons={[
+              <Button
+                key="maximize-annotator"
+                inverted
+                tooltipLabel={
+                  annotatorBoxState === AnnotatorBoxState.FullHeight
+                    ? "restore annotator box"
+                    : "maximize annotator box"
+                }
+                icon={
+                  annotatorBoxState === AnnotatorBoxState.FullHeight ? (
+                    <BsSquareHalf style={{ transform: "rotate(270deg)" }} />
+                  ) : (
+                    <BsSquareFill />
+                  )
+                }
+                onClick={handleMaximizeAnnotatorBox}
+              />,
+              <Button
+                key="hide-annotator"
+                inverted
+                tooltipLabel={annotatorOpened ? "hide annotator" : "show annotator"}
+                icon={annotatorOpened ? <BiHide /> : <BiShow />}
+                onClick={() => setAnnotatorOpened(!annotatorOpened)}
+              />,
+            ]}
+          >
+            {annotatorOpened && (
+              <MemoizedAnnotatorBox
+                height={getAnnotatorBoxHeight() ?? 0}
+                width={thirdPanelRealWidth || thirdPanelWidth}
+              />
+            )}
+          </Box>
+        )}
         <Box
           borderColor="white"
-          height={contentHeight}
+          height={getEditorBoxHeight()}
           label="Editor"
           buttons={[thirdPanelButton()]}
           isExpanded={thirdPanelExpanded}

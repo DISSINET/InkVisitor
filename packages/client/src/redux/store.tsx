@@ -29,6 +29,9 @@ import detailBoxStateSlice from "./features/layout/mainPage/detailBoxStateSlice"
 import panelWidthsSlice from "./features/layout/mainPage/panelWidthsSlice";
 import thirdPanelExpandedSlice from "./features/layout/mainPage/thirdPanelExpandedSlice";
 import expandedOptionsSlice from "./features/entitySearch/expandedOptionsSlice";
+import selectedResourceIdSlice from "./features/statementAnnotator/selectedResourceIdSlice";
+import hoveredStatementIdSlice from "./features/statementAnnotator/hoveredStatementIdSlice";
+import annotatorBoxStateSlice from "./features/layout/mainPage/annotatorBoxStateSlice";
 
 const store: Store = configureStore({
   reducer: {
@@ -52,6 +55,10 @@ const store: Store = configureStore({
       disableStatementListScroll: disableStatementListScrollSlice,
       isLoading: isLoadingSlice,
     }),
+    statementAnnotator: combineReducers({
+      selectedResourceId: selectedResourceIdSlice,
+      hoveredStatementId: hoveredStatementIdSlice,
+    }),
     statementEditor: combineReducers({
       showWarnings: showWarningsSlice,
     }),
@@ -74,6 +81,7 @@ const store: Store = configureStore({
         secondPanelRealWidth: secondPanelRealWidthSlice,
         thirdPanelRealWidth: thirdPanelRealWidthSlice,
         detailBoxState: detailBoxStateSlice,
+        annotatorBoxState: annotatorBoxStateSlice,
       }),
     }),
   },

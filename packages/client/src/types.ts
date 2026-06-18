@@ -438,6 +438,12 @@ export enum DetailBoxState {
   FullHeight = "fullHeight",
 }
 
+export enum AnnotatorBoxState {
+  Minimized = "minimized",
+  Normal = "normal",
+  FullHeight = "fullHeight",
+}
+
 export type StatementOrderCorrection = {
   currentPosition: number;
   correctPosition: number;
