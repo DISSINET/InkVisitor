@@ -129,9 +129,9 @@ export const AnnotatorBox: React.FC<AnnotatorBoxProps> = ({ height, width }) => 
       }
 
       if (resourceWithAnchor) {
-        setSelectedResourceId(resourceWithAnchor.id);
+        dispatch(setSelectedResourceId(resourceWithAnchor.id));
       } else {
-        setSelectedResourceId(false);
+        dispatch(setSelectedResourceId(false));
       }
 
       setIsInitialized(true);
