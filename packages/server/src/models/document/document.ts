@@ -402,6 +402,13 @@ export default class Document implements IDocument, IDbModel {
       .table(Document.table)
       .getAll(entityId, { index: DbEnums.Indexes.DocumentEntityIds })
       .without("content")
+      // getAll on a multi-index yields one row per matching index key, so a
+      // document that lists the same id more than once (a legacy flat array
+      // with duplicates, or an id bucketed under multiple classes) would come
+      // back multiple times. distinct() restores the single-occurrence
+      // semantics of the previous contains() filter (same approach as
+      // Relation.findForEntities).
+      .distinct()
       .run(db);
 
     return entries && entries.length ? (entries as IDocumentMeta[]) : [];
