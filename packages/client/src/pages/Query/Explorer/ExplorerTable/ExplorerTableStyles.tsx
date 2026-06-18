@@ -47,11 +47,8 @@ export const StyledHeader = styled.div`
 export const StyledBody = styled.div``;
 
 export const StyledEmptyMessage = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
   padding: ${({ theme }) => theme.space[6]};
+  text-align: left;
   font-size: ${({ theme }) => theme.fontSize.sm};
   color: ${({ theme }) => theme.color.plain};
 `;
